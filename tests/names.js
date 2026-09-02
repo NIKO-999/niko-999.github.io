@@ -422,5 +422,57 @@ for (const app of APPS.concat([['shell.js']])) {
   ok('every var() points at a token something defines', bad.length === 0, bad.join('; '));
 }
 
+/* ── A CSS COMMENT CANNOT QUOTE A CLOSE-COMMENT MARKER, AND A `/*`
+      INSIDE ONE DOES NOT OPEN A SECOND ──
+   Comments do not nest. A comment that loses its terminator runs on
+   until the NEXT one closes, so everything between them — including
+   whole rules — is silently thrown away, and the file still parses.
+
+   This has now bitten four times in schedule/app.css, every one of
+   them in a comment written to explain the rule underneath it: the
+   `.ic` rule vanished and an unsized <svg> filled its parent at
+   300x150; `.wk-turn[hidden]` was scoped to a face that is never in
+   that state; `.wk-sh b.m/.a/.e` went, so every session tag drew with
+   no --tg at all; and the note about there being no flip swallowed
+   the one under it.
+
+   It is decidable from the text, which is the whole argument for it
+   being here rather than in a browser: an unterminated comment and a
+   nested opener are both visible without running anything, and the
+   browser test that would catch the consequence is four minutes and a
+   screenshot away. */
+{
+  const CSSFILES = ['shell.css', 'schedule/app.css'];
+  const HTMLFILES = ['trading/index.html', 'days/index.html',
+                     'jade/index.html', 'orrery/index.html'];
+  const faults = [];
+  const scan = (f, s, base) => {
+    let i = 0, ln = base, open = 0, inC = false;
+    while (i < s.length - 1) {
+      if (s[i] === '\n') ln++;
+      if (!inC && s[i] === '/' && s[i + 1] === '*') { inC = true; open = ln; i += 2; continue; }
+      if (inC && s[i] === '*' && s[i + 1] === '/') { inC = false; i += 2; continue; }
+      /* The tell. Reached only inside a comment, so it is either a
+         comment quoting the opener — which is harmless to read and
+         fatal to write — or the comment above it never closed. */
+      if (inC && s[i] === '/' && s[i + 1] === '*') {
+        faults.push(`${f}:${ln} a /* inside the comment opened at line ${open}`);
+        i += 2; continue;
+      }
+      i++;
+    }
+    if (inC) faults.push(`${f}:${open} a comment that is never closed`);
+  };
+  for (const f of CSSFILES) scan(f, read(f), 1);
+  for (const f of HTMLFILES) {
+    const t = read(f);
+    for (const m of t.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)) {
+      scan(f, m[1], t.slice(0, m.index).split('\n').length);
+    }
+  }
+  ok('no CSS comment swallows the one after it', faults.length === 0,
+    faults.join('; '));
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

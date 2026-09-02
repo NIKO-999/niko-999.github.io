@@ -145,7 +145,12 @@
      It was the other way round in a dozen places and the symptom was
      one form answering two questions in two colours: WHAT and DAY in
      the accent over white day chips over a coloured Save. */
-  --red:     #c8fa42;
+  /* THE ACCENT IS THE INK. There is no wheel and no hue: every tick,
+     every filled control, the progress line and today's own name are
+     white on this face and near-black on the other. The token keeps
+     its name because it has always meant THE ACCENT rather than the
+     colour red — it is simply neutral now, and colour lives in tags. */
+  --red:     #ffffff;
 
   /* The ground, as three stops rather than one flat fill. On the
      shipped palette the near wash is the accent at a fifth strength
@@ -195,7 +200,7 @@
      — measured at worst 5.8:1 all the way round. Tinted 4% with the
      hue rather than flat, so it is the accent's own dark rather than
      the page's. */
-  --on-red: #0e1009;
+  --on-red: #0C0C0E;
 
   /* Danger, which is NOT the accent. The two used to be the same red,
      which is exactly why they came apart hard the day a palette moved
@@ -234,9 +239,14 @@
   --card:   rgba(255,255,255,.06);
   --card-edge: rgba(255,255,255,.10);
   --card-shadow: 0 12px 28px -18px rgba(0,0,0,.9);
-  --s-m-bg: #F2B950; --s-m-fg: #2A1A00;
-  --s-a-bg: #5FA8FF; --s-a-fg: #061C3A;
-  --s-e-bg: #B98BFF; --s-e-fg: #23084A;
+  /* ── ONE HEX A TAG, AND THE TAG DRAWS ITSELF FROM IT ──
+     It was a background and a foreground per session, which is two
+     numbers to keep in step for a filled chip. An outlined tag needs
+     the colour once: the ring is a fraction of it and the label is the
+     colour lifted toward the page. */
+  --s-m: #F2B950; --s-a: #5FA8FF; --s-e: #B98BFF;
+  --t-train: #E0574B; --t-walk: #4FBE87; --t-read: #5FA8FF;
+  --t-steps: #F2B950; --t-fuel: #E0C15A; --t-water: #48C3CC;
   --done-bg: rgba(255,255,255,.10);
   --pad:   18px;   /* the page's left edge — everything aligns to it */
   /* The open card's width, named because TWO rules need it: the card
@@ -289,9 +299,15 @@
   --card:   rgba(255,255,255,.92);
   --card-edge: #ffffff;
   --card-shadow: 0 10px 26px -16px rgba(15,15,25,.40);
-  --s-m-bg: #FFE3B3; --s-m-fg: #6A3E00;
-  --s-a-bg: #CFE6FF; --s-a-fg: #0F3E7A;
-  --s-e-bg: #E6D6FF; --s-e-fg: #4A2A8A;
+  /* The light face needs its own pair for the FIRST PAINT: without
+     them the dark block's white accent leaks through for a frame, and
+     a white tick on paper is a tick nobody can see. app.js writes the
+     same two on every paint after that. */
+  --red:    #1A1A1F;
+  --on-red: #F7F7F9;
+  --s-m: #8A5000; --s-a: #1668C7; --s-e: #6B3FC4;
+  --t-train: #B3382E; --t-walk: #1C7A4E; --t-read: #1668C7;
+  --t-steps: #8A5000; --t-fuel: #7A6200; --t-water: #0E6E76;
   --done-bg: rgba(60,40,100,.07);
 }
 
@@ -839,6 +855,34 @@ body {
   border-radius: 14px;
   padding: 11px 12px 12px;
 }
+/* ── THE TAG, AND IT IS THE ONLY COLOUR ON THIS SCREEN ──
+   An outlined rounded rectangle in the item's own colour, naming the
+   item. A ring and a label rather than a fill: with the accent gone a
+   filled chip in a bright hue would be the only loud thing left on a
+   page whose whole job is the figures, and WHICH does not need to
+   shout.
+
+   `is-off` is the flat neutral, and that is the rule this screen has
+   kept since it was a strip of pips — a colour never says whether. A
+   thing you have not done today wears the same tag in grey. */
+.ty-card .tg {
+  grid-column: 1 / -1; grid-row: 2;
+  justify-self: start;
+  margin: 5px 0 2px;
+  padding: 1px 7px;
+  border-radius: 5px;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: nowrap;
+  border: 1px solid color-mix(in srgb, var(--tg) 72%, transparent);
+  color: color-mix(in srgb, var(--tg) 62%, var(--ink));
+}
+.ty-card .tg.is-off {
+  border-color: var(--tick-off);
+  color: var(--spent);
+}
+
 /* ── THE FIGURE IS THE TILE ──
    It was a chip the same size as every other chip, so what you
    actually did today was drawn as quietly as the word "logged". It is
@@ -903,7 +947,11 @@ body {
   height: 100%;
 }
 .ty-card .props {
-  grid-column: 1 / -1; grid-row: 2;
+  /* Row 3, not 2: the tag sits on the line between the name and the
+     figure. Declared HERE rather than overridden below — one selector
+     carrying one property twice is a file with two values in it and
+     only one of them live, whichever order they are written in. */
+  grid-column: 1 / -1; grid-row: 3;
   flex-wrap: wrap; gap: 2px 8px;
   align-items: flex-end; align-self: end;
 }
@@ -1083,7 +1131,7 @@ body {
    running row's sweep and the turn control's foil rim both came
    through the back on iOS, mirrored, and were reported twice. A sheet
    has none of that: it is the surface every other secondary screen in
-   this app already opens, and it draws in two dimensions.
+   this app already opens, and it draws in two dimensions. */
 /* Motion is the whole subject here, so this is a real setting rather
    than a formality: with it on, the card is simply the size it is. */
 @media (prefers-reduced-motion: reduce) {
@@ -1597,21 +1645,54 @@ body {
   padding: 14px 2px 8px;
 }
 .wk-sh:first-child { padding-top: 2px; }
-/* A PILL IN THE SESSION'S OWN COLOUR — amber morning, blue afternoon,
-   purple evening. The colour says WHICH, the way the workout hues do,
-   so it is the same pair in every accent and both modes have their
-   own. The count sits after it in --dim. */
+/* ── AN OUTLINED TAG IN THE SESSION'S OWN COLOUR ──
+   Amber morning, blue afternoon, purple evening. The colour says
+   WHICH, the way the workout hues do, so it is the same hue in every
+   mode and both faces have their own. The count sits after it in
+   --dim.
+
+   IT WAS A FILLED PILL.
+   A filled chip in a bright hue is the loudest object on a page whose
+   whole job is the words, and with the accent gone it would be the
+   ONLY loud object. A ring and a label is the same claim at a fraction
+   of the ink: what a tag says is WHICH, and which does not need to
+   shout.
+
+   The ring is a fraction of the colour so it reads as an edge rather
+   than as a border drawn in a highlighter; the label is it lifted 38%
+   toward the page's own ink, which is what keeps a dark hue legible on
+   a dark ground and a light one on a light one without a second token
+   per face.
+
+   72, AND IT TOOK TWO MEASUREMENTS TO GET THERE. At 46 the violet
+   Evening ring composited to 2.44:1 against the dark page — under the
+   3:1 a graphic needs, while the amber beside it cleared at 3.11,
+   which is the shape of a failure a check on one hue would miss. 58
+   fixed the dark face and the LIGHT one then measured 2.58: a dark hue
+   at 58% over white composites to something too pale, so the same
+   number fails in the opposite direction. 72 clears both, worst about
+   3.5 either way.
+
+   The light face was only looked at because a check was written for
+   it in the same pass. Nine hexes a face is eighteen colours, and the
+   face nobody is developing on is the one that breaks. */
 .wk-sh b {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0;
   text-transform: none;
-  padding: 3px 10px;
-  border-radius: 999px;
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--tg) 72%, transparent);
+  color: color-mix(in srgb, var(--tg) 62%, var(--ink));
+  padding: 2px 9px;
+  /* 6px, not 999: a pill is a filled shape's silhouette. An outlined
+     tag with a rounded-rectangle edge reads as a property rather than
+     as a highlight, which is the whole difference being drawn here. */
+  border-radius: 6px;
 }
-.wk-sh b.m { background: var(--s-m-bg); color: var(--s-m-fg); }
-.wk-sh b.a { background: var(--s-a-bg); color: var(--s-a-fg); }
-.wk-sh b.e { background: var(--s-e-bg); color: var(--s-e-fg); }
+.wk-sh b.m { --tg: var(--s-m); }
+.wk-sh b.a { --tg: var(--s-a); }
+.wk-sh b.e { --tg: var(--s-e); }
 .wk-sh .c { margin-left: 8px; font-size: 11.5px; color: var(--dim); font-variant-numeric: tabular-nums; }
 /* THE LIVE SESSION IS NOT RINGED, and that reverses the note that
    stood here. The argument was that the session you are in is the

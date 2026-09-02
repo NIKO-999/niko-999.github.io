@@ -1873,145 +1873,26 @@
 
 
 
-  /* ═══════════════════════════════════════════════════════════
-     THE ACCENT
+  /* ── THE WHEEL IS GONE, AND SO IS THE ARITHMETIC UNDER IT ──
+     A hundred and ten lines stood here: Ottosson's OKLCH transform
+     written out, a bisection for the most chroma sRGB holds at a
+     given lightness and hue, a chroma cap taken off the default, a
+     6:1 floor, a cache per face, and the two grounds it all solved
+     against. It turned one number — an angle — into an accent that
+     was readable on either page at any hue.
 
-     Thirteen complete palettes came out of this file in one pass, and
-     what replaced them is ONE ground and a wheel. Every one of the
-     thirteen moved --paper, --ink and both greys together, so each was
-     a page to solve and a page to measure — and twelve of them were
-     the shipped page with a different hue washed over it. The ground
-     is the Lime page's now, always; the only thing you choose is the
-     colour on it.
+     Every line of it was correct and none of it is reachable. There
+     is no angle to turn: the accent is the ink, and what sits on it
+     is the page. Colour lives in the tags, which are literal hexes
+     because a colour that says WHICH has to be the same colour every
+     time you see it — which is the one thing a solver cannot promise.
 
-     WHICH MAKES THE HUE THE WHOLE SETTING, and that is the argument
-     for a wheel rather than a list. A list of thirteen names is a list
-     somebody else wrote, and there was never a reason yours had to be
-     on it.
+     Kept in the history rather than in the file. Dead code that still
+     parses is this repo's own lesson about a dead rule that still
+     cascades, one language over: it reads as a mechanism somebody
+     might edit, and the first thing they would find is that nothing
+     calls it. */
 
-     THE WHEEL PICKS A HUE AND THE APP OWNS THE LIGHTNESS. A free
-     colour picker lets you choose #101010 for type on a near-black
-     page, and "you chose it" is not an answer to a screen you cannot
-     read. So every point on the wheel is SOLVED rather than taken: the
-     hue at its fullest — the lightness at which sRGB holds the most of
-     that colour — lifted until it clears 6:1 on this ground. 4.5 is
-     the bar and this repo has now twice shipped 4.74 believing that
-     was a margin; 6 is a margin. Measured at every one of the 360
-     degrees, the worst point on the wheel is exactly 6.00:1 and the
-     default is 17:1.
-
-     The lightness therefore VARIES round the wheel, and it has to: a
-     yellow at a blue's lightness is mud, and a blue at a yellow's is
-     white. Holding one lightness for every hue was built and looked
-     at — the greens survive it and everything from cyan round to red
-     comes out pastel, which is a wheel of one colour and eleven
-     tints.
-     ═══════════════════════════════════════════════════════════ */
-
-  /* OKLCH is the whole reason this can be one rule instead of thirteen
-     hand-mixed sets: it is the one space where holding a number fixed
-     and turning the hue gives colours that look like each other. The
-     arithmetic is Björn Ottosson's, written out rather than fetched —
-     the apps have no dependencies and this is twenty lines. */
-  function scOkRGB(L, C, h) {
-    var t = h * Math.PI / 180, a = C * Math.cos(t), b = C * Math.sin(t);
-    var l = L + 0.3963377774 * a + 0.2158037573 * b;
-    var m = L - 0.1055613458 * a - 0.0638541728 * b;
-    var s = L - 0.0894841775 * a - 1.2914855480 * b;
-    l = l * l * l; m = m * m * m; s = s * s * s;
-    return [4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
-            -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
-            -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s];
-  }
-  function scEnc(c) {
-    c = c < 0 ? 0 : c > 1 ? 1 : c;
-    return Math.round(255 * (c <= 0.0031308 ? 12.92 * c
-      : 1.055 * Math.pow(c, 1 / 2.4) - 0.055));
-  }
-  /* The ground, once. Everything on the wheel is measured against this
-     and nothing else, which is only true because there is one ground
-     now — and is the whole reason the wheel can be SOLVED rather than
-     sampled.
-
-     scLum and scRatio are the friends board's, four hundred lines
-     down, and this went in with a second pair of its own under the
-     same two names. A duplicate declaration does not throw, it
-     REPLACES, and the crown that reads them is on a screen you have to
-     add somebody to reach: the first symptom would have been a
-     friend's colour coming out wrong weeks later. It is the file's
-     oldest bug and tests/names.js could not see it, because the whole
-     app is inside an IIFE and that check read column zero. */
-  var GROUND = [12, 12, 14];
-  /* The most chroma sRGB holds at this lightness and hue. Bisection
-     rather than the analytic boundary: the boundary is six plane
-     intersections and this is four lines that cannot be got wrong. */
-  function scOkFit(L, h) {
-    var lo = 0, hi = 0.45, i, m, v;
-    for (i = 0; i < 22; i++) {
-      m = (lo + hi) / 2; v = scOkRGB(L, m, h);
-      if (v[0] >= -1e-4 && v[0] <= 1.0001 && v[1] >= -1e-4 && v[1] <= 1.0001
-        && v[2] >= -1e-4 && v[2] <= 1.0001) lo = m; else hi = m;
-    }
-    return lo;
-  }
-
-  /* Lime's own chroma, which is the cap. Uncapped, the cyans and
-     magentas sit hard on the sRGB boundary with a channel at 0 and
-     another at 255, and read as fluorescent beside a default that does
-     not. A cap is one number and it is the default's own. */
-  var A_C = 0.2073;
-  /* 6:1, and the margin is the point — see above. */
-  var A_MIN = 6;
-
-  var scHueCache = {};
-  /* The hue at its fullest, lifted until it is readable. Two steps,
-     and the order matters: the cusp first, because that is the most of
-     the colour there is, and the lift second, because a colour that
-     cannot be read is not an accent whatever else it is. */
-  /* ── LIGHT AND DARK ──
-     Craft comes in two faces, so the wheel has two grounds to solve
-     against. On the dark one the fullest colour is lifted until it
-     clears the floor; on the light one it is LOWERED, because a hue at
-     its fullest sits far above the white it has to read on. Same
-     search, opposite direction, one cache per ground — a blue solved
-     for black is a pale sky on white, and it had to not be shared. */
-  var LIGHT_GROUND = [247, 247, 249];
-  var scHueCacheL = {};
-  function scAccentRGB(h) {
-    h = ((Math.round(h) % 360) + 360) % 360;
-    var light = scModeLive() === 'light';
-    var cache = light ? scHueCacheL : scHueCache;
-    if (cache[h]) return cache[h];
-    var L = 0.5, best = -1, x, c, v;
-    for (x = 0.05; x <= 0.995; x += 0.01) {
-      c = scOkFit(x, h);
-      if (c > best) { best = c; L = x; }
-    }
-    var ground = light ? LIGHT_GROUND : GROUND, step = light ? -0.0025 : 0.0025;
-    for (x = 0; x < 400; x++) {
-      c = Math.min(A_C, scOkFit(L, h));
-      v = scOkRGB(L, c, h).map(scEnc);
-      if (scRatio(v, ground) >= A_MIN || L >= 0.999 || L <= 0.05) break;
-      L += step;
-    }
-    cache[h] = v;
-    return v;
-  }
-  function scHex(v) {
-    return '#' + v.map(function (c) {
-      return (c < 16 ? '0' : '') + c.toString(16);
-    }).join('');
-  }
-  function scMixed(v, a) {
-    return scHex([Math.round(v[0] * a + 6 * (1 - a)),
-                  Math.round(v[1] * a + 6 * (1 - a)),
-                  Math.round(v[2] * a + 7 * (1 - a))]);
-  }
-
-  /* The ground, spelled out once. It is the Lime palette's, and it is
-     also what app.css carries at :root so the first paint is right
-     before this file runs — the one thing in this app written down
-     twice, and tests/schedule.js holds the two in step. */
   /* Two complete sets, one per face. Both are also written in app.css
      — the dark one on :root for the first paint, the light one under
      [data-mode="light"] — and tests/schedule.js holds each pair in
@@ -2024,9 +1905,9 @@
     '--ground': '#0C0C0E',
     '--card': 'rgba(255,255,255,.06)', '--card-edge': 'rgba(255,255,255,.10)',
     '--card-shadow': '0 12px 28px -18px rgba(0,0,0,.9)',
-    '--s-m-bg': '#F2B950', '--s-m-fg': '#2A1A00',
-    '--s-a-bg': '#5FA8FF', '--s-a-fg': '#061C3A',
-    '--s-e-bg': '#B98BFF', '--s-e-fg': '#23084A',
+    '--s-m': '#F2B950', '--s-a': '#5FA8FF', '--s-e': '#B98BFF',
+    '--t-train': '#E0574B', '--t-walk': '#4FBE87', '--t-read': '#5FA8FF',
+    '--t-steps': '#F2B950', '--t-fuel': '#E0C15A', '--t-water': '#48C3CC',
     '--done-bg': 'rgba(255,255,255,.10)' };
   var LIGHT_SET = { '--paper': '#F7F7F9', '--ink': '#1A1A1F',
     '--dim': '#5C5C66', '--spent': '#797984',
@@ -2035,26 +1916,41 @@
     '--ground': '#F7F7F9',
     '--card': 'rgba(255,255,255,.92)', '--card-edge': '#ffffff',
     '--card-shadow': '0 10px 26px -16px rgba(15,15,25,.40)',
-    '--s-m-bg': '#FFE3B3', '--s-m-fg': '#6A3E00',
-    '--s-a-bg': '#CFE6FF', '--s-a-fg': '#0F3E7A',
-    '--s-e-bg': '#E6D6FF', '--s-e-fg': '#4A2A8A',
+    '--s-m': '#8A5000', '--s-a': '#1668C7', '--s-e': '#6B3FC4',
+    '--t-train': '#B3382E', '--t-walk': '#1C7A4E', '--t-read': '#1668C7',
+    '--t-steps': '#8A5000', '--t-fuel': '#7A6200', '--t-water': '#0E6E76',
     '--done-bg': 'rgba(60,40,100,.07)' };
-  function scAccent(h) {
-    var v = scAccentRGB(h);
+  /* ── THERE IS NO ACCENT ──
+     Every tick, every filled control, the progress line, today's own
+     name and the streak figure were a hue you turned on a wheel. They
+     are the INK now, and the wheel is gone with them.
+
+     What the accent was doing was making one claim — this happened, or
+     is happening — and a claim does not need a colour to be legible on
+     a page that is otherwise black, grey and white. What DOES need one
+     is a thing that has to be told from another thing, and that is a
+     TAG: the three sessions, the six items on Showing up, the nine
+     workout hues. Colour says WHICH, and nothing else.
+
+     `--red` keeps its name rather than being renamed across five
+     thousand lines: it has always meant THE ACCENT rather than the
+     colour red, and it still names the one mark the app spends on
+     itself. It is simply neutral now. */
+  function scAccent() {
     var light = scModeLive() === 'light';
     var t = {}, base = light ? LIGHT_SET : DARK_SET;
     for (var k in base) if (base.hasOwnProperty(k)) t[k] = base[k];
-    t['--red'] = scHex(v);
-    /* The wash IS the accent, at a fifth, on the dark face. The light
-       face has its own sky and takes none. */
-    /* NO WASH ON EITHER FACE. The ground is flat and neutral, so the
-       accent appears where it means something and nowhere else. */
+    t['--red'] = base['--ink'];
+    /* NO WASH ON EITHER FACE. The near stop of the ground used to be
+       the accent at a fifth strength — a colour nobody chose sitting
+       behind everything that was chosen. With the accent neutral it
+       would be the ink washed over the ink, which is nothing. */
     t['--g1'] = 'transparent';
-    /* Ink ON the accent. Dark face: the floor puts every accent at a
-       luminance of at least .26, so a near-black clears 6:1 on all of
-       them. Light face: the accent was lowered until it clears 6:1 on
-       white, which is the same arithmetic saying white reads on it. */
-    t['--on-red'] = light ? '#ffffff' : scMixed(v, 0.04);
+    /* What sits ON the accent is the page. It used to be solved — a
+       near-black mixed off the hue, floored so it cleared 6:1 all the
+       way round the wheel. With the accent at the ink, the pair is
+       the page's own two ends and there is nothing left to compute. */
+    t['--on-red'] = base['--paper'];
     return t;
   }
 
@@ -2095,43 +1991,25 @@
   function scSetMode(m) {
     mode = m === 'light' || m === 'dark' ? m : 'auto';
     try { localStorage.setItem(MODE_KEY, mode); } catch (e) {}
-    scPaint(hue, false);
+    scPaint(false);
     scRender();
   }
   if (window.matchMedia) {
     try {
       window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function () {
-        if (mode === 'auto') { scPaint(hue, false); scRender(); }
+        if (mode === 'auto') { scPaint(false); scRender(); }
       });
     } catch (e) {}
   }
 
   var ACCENT_KEY = 'sched.accent.v1';
   var THEME_KEY = 'sched.theme.v1';
-  /* Lime, to the nearest degree. The default is a HUE now rather than
-     a set of hexes, so there is one place a colour comes from. */
-  var HUE0 = 284;   /* Craft's violet, to the nearest degree */
-  var hue = HUE0;
+  /* HUE0, `hue` and the thirteen-name table went with the wheel. A
+     palette was once a choice somebody made and the half of it this
+     app kept was the hue; there is no hue to keep now, so both stored
+     keys are swept at boot rather than resolved. */
 
-  /* ── THE THIRTEEN NAMES SURVIVE AS THIRTEEN ANGLES ──
-     A palette is a choice somebody made, and the half of it this app
-     still has is the hue. Dropping everyone onto lime because the
-     ground changed would throw that away for nothing; read once and
-     the old key is spent, because a name that resolves to a number is
-     not something to keep resolving. Same shape as Easy → Light: the
-     word moved and the record did not. */
-  var WAS = { lime: 124, nebula: 304, ember: 42, aurora: 164, solar: 75,
-    ice: 230, plum: 359, crimson: 24, cobalt: 264, sepia: 68,
-    fuchsia: 340, verdant: 93, iris: 285,
-    /* The seven light ones went a year before the wheel did. Their
-       accents were the same hues under different grounds. */
-    paper: 124, blush: 340, slate: 230, linen: 42, mist: 230,
-    bloom: 304, sand: 68 };
 
-  function scHueOf(v) {
-    v = Math.round(+v);
-    return v >= 0 && v < 360 ? v : HUE0;
-  }
 
   /* Written as inline custom properties on the root, which is the one
      place that beats the stylesheet's :root without !important and
@@ -2142,12 +2020,13 @@
                 '--tick-off', '--on-red', '--bad',
                 '--g0', '--g1', '--g2', '--g3',
                 '--ground', '--card', '--card-edge', '--card-shadow',
-                '--s-m-bg', '--s-m-fg', '--s-a-bg', '--s-a-fg', '--s-e-bg', '--s-e-fg',
+                '--s-m', '--s-a', '--s-e',
+                '--t-train', '--t-walk', '--t-read',
+                '--t-steps', '--t-fuel', '--t-water',
                 '--done-bg'];
 
-  function scPaint(h, save) {
-    hue = scHueOf(h);
-    var t = scAccent(hue);
+  function scPaint(save) {
+    var t = scAccent();
     var r = document.documentElement.style;
     /* Cleared before the new set is written. A token one set names and
        another does not would otherwise be inherited from whatever was
@@ -2173,7 +2052,6 @@
        to be told to read the tokens again. The rail is pure CSS and has
        already changed by the time this line runs. */
     if (typeof scPaintTabFace === 'function') scPaintTabFace();
-    if (save) { try { localStorage.setItem(ACCENT_KEY, String(hue)); } catch (e) {} }
     /* Your face and your crown are drawn on your friends' screens out
        of the two hexes in your record, so an accent they never see
        still has to reach them. Debounced with everything else — the
@@ -2247,6 +2125,21 @@
     s: BLOCK_ICON.sleep
   };
 
+  /* One hue a tag, keyed by the item rather than by its position: an
+     index would move the day anybody reorders the list, and a colour
+     that means WHICH cannot move. */
+  /* One hue a tag, keyed by the item rather than by its position: an
+     index would move the day anybody reorders the list, and a colour
+     that means WHICH cannot move.
+
+     And the tag says the UNIT rather than the name — the name is
+     already the tile's heading two lines above it, and a tag repeating
+     it is the same word twice on a 145px card. What the tag adds is
+     what the figure under it is counted in. */
+  var TAG_HUE = { t: 'train', m: 'walk', p: 'steps',
+                  f: 'fuel', w: 'water', s: 'read' };
+  var TAG_WORD = { t: 'this week', m: 'this week', p: 'steps',
+                   f: 'kcal', w: 'litres', s: 'hours' };
   var TALLY = [
     { id: 't', n: 'Train', s: 'Gym, a run, a session', k: 'do',  from: ['Train'] },
     { id: 'm', n: 'Mind',  s: 'Walk, read, listen',    k: 'do',  from: ['Walk', 'Read'] },
@@ -2622,6 +2515,24 @@
       props.appendChild(scEl('span',
         'pill' + (late ? ' is-late' : '') + (it.k === 'num' && on ? ' val' : ''),
         word));
+      /* ── THE TAG IS THE ONLY COLOUR ON THIS SCREEN ──
+         It names the thing — Train, Steps, Water — so its colour says
+         WHICH, which is the one job colour has anywhere in this app
+         now that the accent is gone.
+
+         AND IT IS DRAWN ONLY OVER A VALUE. `not yet` and `missed` are
+         states, and a state wearing an item's colour would make a
+         colour say WHETHER, which is the rule this screen has kept
+         since it was a strip of pips: nothing is ever coloured to say
+         you failed. A day with nothing logged carries the flat neutral
+         tag instead. */
+      var tg = scEl('span', 'tg' + (on ? '' : ' is-off'), TAG_WORD[it.id] || it.n);
+      if (on) tg.style.setProperty('--tg', 'var(--t-' + TAG_HUE[it.id] + ')');
+      /* appendChild, not insertBefore(props): `props` is built above
+         but is not in `body` until the line below, so inserting before
+         it throws NotFoundError and takes the whole grid down — the
+         screen renders as a heading and nothing else. */
+      body.appendChild(tg);
       /* Days on now, for a TICK and only a tick — a run on a number
          counts the days you remembered to type one in, which is a fact
          about your logging. Drawn from two, because "1 day" under a
@@ -7310,96 +7221,18 @@
       });
       body.appendChild(mrow);
 
-      var lab = scEl('span', 'label', 'Accent');
-      lab.style.marginTop = '14px';
-      body.appendChild(lab);
+      /* ── THERE IS NO WHEEL ──
+         It set the one hue the app spent on itself, and the app does
+         not spend one any more: every tick, every filled control, the
+         progress line and today's own name are the ink. A control that
+         sets a colour nothing draws is a setting you can get wrong and
+         never see, so it goes with the thing it set — and the stored
+         hue goes with it rather than sitting in localStorage deciding
+         nothing.
 
-      var wrap = scEl('div', 'cw-wrap');
-      var wheel = scEl('div', 'cw');
-      var stops = [];
-      for (var wi = 0; wi <= 36; wi++) {
-        stops.push(scHex(scAccentRGB(wi * 10)) + ' ' + (wi * 10) + 'deg');
-      }
-      /* from -90deg? No: a conic gradient already starts at twelve
-         o'clock, which is where hue 0 goes, and runs clockwise, which
-         is the direction the knob's own arithmetic runs. Turning it
-         would put two conventions in one control. */
-      wheel.style.background = 'conic-gradient(' + stops.join(',') + ')';
-      var mid = scEl('i', 'cw-mid');
-      var knob = scEl('i', 'cw-k');
-      knob.setAttribute('aria-hidden', 'true');
-      wheel.appendChild(mid);
-      wheel.appendChild(knob);
-      wheel.tabIndex = 0;
-      wheel.setAttribute('role', 'slider');
-      wheel.setAttribute('aria-label', 'Accent colour');
-      wheel.setAttribute('aria-valuemin', '0');
-      wheel.setAttribute('aria-valuemax', '359');
-
-      var hint = scEl('p', 'hint');
-      hint.style.marginTop = '2px';
-
-      /* The hex and its measured contrast, because those are the two
-         things about this choice the picture cannot show you. The old
-         hint named the palette and the worst type on it; with one
-         ground the worst type never moves, so the number worth
-         printing is the accent's own. */
-      var say = function () {
-        var v = scAccentRGB(hue);
-        wheel.setAttribute('aria-valuenow', String(hue));
-        wheel.setAttribute('aria-valuetext', scHex(v)
-          + (hue === HUE0 ? ', the one it ships with' : ''));
-        knob.style.transform = 'rotate(' + hue + 'deg) translateY(-72px)';
-        hint.textContent = scHex(v) + ' · '
-          + (Math.round(scRatio(v, scModeLive() === 'light' ? LIGHT_GROUND : GROUND) * 10) / 10)
-          + ':1 against the page'
-          + (hue === HUE0 ? ' · the one it ships with' : '');
-      };
-      /* Painted on every move and SAVED on the way up. A drag across
-         the whole circle is three hundred pointermoves, and a write
-         and a push on each of them is a write and a push you did not
-         ask for — the colour you meant is the one your thumb stopped
-         on. */
-      var set = function (h, save) { scPaint(h, save); say(); };
-
-      var at = function (e) {
-        var r = wheel.getBoundingClientRect();
-        var dx = e.clientX - (r.left + r.width / 2);
-        var dy = e.clientY - (r.top + r.height / 2);
-        return (Math.atan2(dx, -dy) * 180 / Math.PI + 360) % 360;
-      };
-      var drag = false;
-      wheel.addEventListener('pointerdown', function (e) {
-        drag = true;
-        wheel.setPointerCapture(e.pointerId);
-        set(at(e), false);
-        e.preventDefault();
-      });
-      wheel.addEventListener('pointermove', function (e) {
-        if (drag) set(at(e), false);
-      });
-      var up = function () { if (drag) { drag = false; set(hue, true); } };
-      wheel.addEventListener('pointerup', up);
-      wheel.addEventListener('pointercancel', up);
-      /* A step of one degree is a step nobody can see, and 360 presses
-         to cross the wheel is not a keyboard route — it is the
-         appearance of one. Five, and fifteen with Page. */
-      wheel.addEventListener('keydown', function (e) {
-        var k = e.key, d = 0;
-        if (k === 'ArrowRight' || k === 'ArrowUp') d = 5;
-        else if (k === 'ArrowLeft' || k === 'ArrowDown') d = -5;
-        else if (k === 'PageUp') d = 15;
-        else if (k === 'PageDown') d = -15;
-        else if (k === 'Home') { set(HUE0, true); e.preventDefault(); return; }
-        if (!d) return;
-        e.preventDefault();
-        set((hue + d + 360) % 360, true);
-      });
-
-      wrap.appendChild(wheel);
-      body.appendChild(wrap);
-      say();
-      body.appendChild(hint);
+         What is coloured now is a TAG, and a tag's colour says which
+         thing it is: the three sessions, the six items on Showing up,
+         the nine workouts. None of those is a preference. */
 
       var rule = scEl('div', 'menu-rule');
       body.appendChild(rule);
@@ -7567,25 +7400,20 @@
      stored id that no longer exists — it is a preference and there is
      nothing in it worth repairing. */
   try {
-    var saved = localStorage.getItem(ACCENT_KEY);
-    if (saved === null) {
-      /* Once, and the old key is spent: a palette name resolves to an
-         angle, and an angle is not something to keep resolving. Saved
-         under the new key immediately, so this runs on exactly one
-         boot per browser rather than on every one of them. */
-      var old = localStorage.getItem(THEME_KEY);
-      if (old && WAS[old] !== undefined) saved = String(WAS[old]);
-      if (old) localStorage.removeItem(THEME_KEY);
-      if (saved !== null) localStorage.setItem(ACCENT_KEY, saved);
-    }
+    /* BOTH OLD KEYS ARE SWEPT, not read. The palette name went to an
+       angle and the angle went to nothing: there is no accent to set,
+       so a stored one is a record of a control that no longer exists.
+       Removed rather than ignored, the way the two view keys were. */
+    localStorage.removeItem(ACCENT_KEY);
+    localStorage.removeItem(THEME_KEY);
     /* The mode before the paint, and the paint ALWAYS: with two faces
        the stylesheet's :root can only carry one of them, and a page
        that opens on the other has to be written inline before the
        first render or the light face flashes dark. */
     var sm = localStorage.getItem(MODE_KEY);
     mode = sm === 'light' || sm === 'dark' ? sm : 'auto';
-    scPaint(saved !== null ? saved : HUE0, false);
-  } catch (e) { scPaint(HUE0, false); }
+    scPaint(false);
+  } catch (e) { scPaint(false); }
 
   scRender();
   scSetView(view, false);

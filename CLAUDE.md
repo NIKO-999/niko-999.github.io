@@ -4687,3 +4687,100 @@ justified by a false story.
 number.** The payload carries which label, its colour and the pixel
 behind it now. A bare ratio tells you a check failed; it does not tell
 you the app was in a state the check never meant to measure.
+
+## The accent is gone, and the colour is in the tags
+
+The wheel picked a hue, the hue was solved against the ground, and
+that one colour then said everything: today's name, the running block,
+a kept day, a done objective, a picked workout, a filled control, a
+strong lift on Pattern. **One colour carrying eight meanings says
+none of them** — the screen was a wash of one hue with a claim
+somewhere in it, and which claim was a thing you had to already know.
+
+**The chrome is neutral now.** `--red` is `--ink` on both faces —
+white on the black page, near-black on the paper — so a title, a
+filled control, a tick and a ring are all just the ink. `--g1` is
+`transparent`: the gradient was the accent at a fifth strength, and
+with no accent there is nothing for it to be. `--on-red` is `--paper`,
+which is the same swap seen from the other side.
+
+**COLOUR SAYS WHICH, AND ONLY A TAG SAYS WHICH.** Six hues on the
+week and six on Showing up, one per thing: the three sessions
+(`--s-m`, `--s-a`, `--s-e`) and the six items' own (`--t-train`,
+`--t-walk`, `--t-read`, `--t-steps`, `--t-fuel`, `--t-water`). That is
+the habits screen's rule arriving in the one place on this app that
+was still spending a colour on whether.
+
+**A tag is OUTLINED, not filled.** A filled chip is a control — the
+Now pill is the one of those left — and a row of filled chips down a
+card is the wall of colour this replaced. A ring at 72% of the hue
+with the label mixed 62% toward the ink reads as the hue at a glance
+and as type up close.
+
+**72%, and the two faces disagreed about it.** 46% measured
+**2.44:1** on the dark violet, under the 3:1 a graphic needs — and
+amber cleared at 3.11, so one hue would have hidden it. 58 fixed the
+dark face and the LIGHT one then read **2.58:1**. 72 clears both at
+about 3.5. The light face was only looked at because a check for it
+was written in the same pass; without it this would have shipped
+half-measured, which is the shape of every contrast bug in this file.
+
+**AND A STATE IS NEVER COLOURED.** `not yet` and `missed` wear the
+flat neutral — `--tick-off` on the ring, `--spent` on the label —
+because a tag that goes red when you have not done a thing is the
+screen grading you, and this app has never done that. A tag takes its
+hue only when it names a VALUE.
+
+**AND THE SOLVER WENT WITH THE WHEEL.** A hundred and ten lines
+stood under it: Ottosson's OKLCH transform written out by hand, a
+bisection for the most chroma sRGB holds at a lightness and a hue, a
+chroma cap taken off the default, the 6:1 floor, a cache per face and
+the two grounds it solved against. Every line was correct and none of
+it was reachable — there is no angle to turn any more. Dead code that
+still parses is *a dead rule that still cascades* one language over:
+it reads as a mechanism somebody might edit, and the first thing they
+would find is that nothing calls it.
+
+**The tags are literal hexes for the reason the solver cannot
+serve**: a colour that says WHICH has to be the same colour every
+time you see it, and a solved one is a colour that moves with its
+ground.
+
+**The stored hue and the stored palette name are both removed on
+boot**, not merely ignored. A key nothing reads is a second record of
+a decision that no longer exists — the same answer the subtitle key
+and the old rating scale got.
+
+**A CSS comment cannot quote a close-comment marker, and it happened
+TWICE in this very pass.** The comment above the tag rule lost its
+terminator, which swallowed `.wk-sh b.m/.a/.e` — so `--tg` was never
+set and every tag drew white. And the note reading THERE IS NO FLIP,
+written one commit earlier, had lost its own: it ran on and ate the
+comment under it. That one cost nothing, because what it swallowed
+was itself a comment — which is the reason it survived a green suite
+and a deploy.
+
+**So it is a static check now**, and it should have been one three
+faults ago. Comments do not nest, so a `/*` reached while already
+inside one means either a comment quoting the opener or a comment
+that never closed, and both are visible in the text without running
+anything. `tests/names.js` scans every stylesheet and every inline
+`<style>`, and names the two lines. Proved by re-breaking the flip
+comment and watching it report `schedule/app.css:1135 a /* inside the
+comment opened at line 1121`.
+
+**Four times, and every one of them was in a comment written to
+explain the rule underneath it.** The `.ic` rule vanishing and an
+unsized `<svg>` filling its parent at 300x150; `.wk-turn[hidden]`
+scoped to a face that is never in that state; the tags drawing white;
+and this one. The browser test that catches the consequence is four
+minutes and a screenshot away — the text check is a tenth of a
+second, which is the same argument `days/`'s missing token made.
+
+**And a hue scan that filters on `getClientRects()` measures nothing
+when the view is put away.** The check that every coloured pixel on
+the week belongs to a tag reported `tags: 0, stray: []` and passed —
+a zero shaped exactly like a pass. It reads the elements regardless
+now, which is the `!scRail.hidden` lesson in the other direction:
+there, reading the property missed a layout fault; here, reading the
+layout missed everything.

@@ -1146,70 +1146,64 @@ const SAID = [
   ok('the place follows the accent when the accent is changed under it',
     String(whereRGB(secMoved)) === String([79, 224, 168]), { secMoved });
 
-  /* ── one red, spent three ways ──
-     The accent marks the day you are in, the block that is running, and
-     where a block is — and nothing else. It was two; the place was
-     added on top of a --sec of its own, and the second colour was taken
-     back out in favour of the one already on the screen.
+  /* ── NOTHING ON THIS SCREEN IS A HUE EXCEPT A TAG ──
+     This used to count the accent: it was a colour you turned on a
+     wheel, and the claim was that it marked today, the running block,
+     a place and what you trained, and nothing else. There is no accent
+     — every one of those marks is the INK now — so counting "what is
+     red" would match every white thing on the page and report the
+     whole screen as a stray. It did, on the first run after the change.
 
-     Counted by KIND rather than by a total, because the total now
-     depends on how many blocks happen to have a place typed on them and
-     a check pinned to a number would have to be re-typed every time the
-     seed changes. What is claimed is that nothing OUTSIDE those three
-     kinds is ever red. Six coloured subjects would make the sheet a
-     chart of nothing, and a rule is only worth writing down if
-     something measures it. */
-  const reds = await page.evaluate(() => {
-    /* Asked for rather than typed, for the same reason as above: the
-       palette this ships with has moved once and will again, and a
-       literal here measures a colour that is nowhere on screen —
-       which passes by finding nothing, in green. */
-    const red = 'rgb(' + getComputedStyle(document.documentElement)
-      .getPropertyValue('--red').trim().replace('#', '').match(/\w\w/g)
-      .map((x) => parseInt(x, 16)).join(', ') + ')';
-    const hit = [];
-    document.querySelectorAll('.st-d, .st-d b, .st-d i, .row, .row .n, '
-      + '.row .n em, .row .t, .title, .h-day, .h-sub')
-      .forEach((el) => {
-        const s = getComputedStyle(el);
-        if (s.color === red || s.backgroundColor === red || s.borderLeftColor === red)
-          hit.push({ today: !!el.closest('.st-d[aria-current="date"]'),
-                     running: !!el.closest('.row.is-now'),
-                     place: el.tagName === 'EM' && !el.classList.contains('wo'),
-                     /* What you trained, which used to be a grey. It is
-                        its own kind rather than folded in with the
-                        place: both are an <em> inside .row .n, so a
-                        check that asked only for the tag would call the
-                        session a place and the scan would stop being
-                        able to tell the two apart. */
-                     did: el.classList.contains('wo'),
-                     /* The span's dot is where you are in the day, which
-                        is the running block seen one level up — the same
-                        fact, so the same colour. Its TRACK and its spent
-                        half are not, and are in the scan above to say so. */
-                     now: el.classList.contains('st'),
-                     what: el.className + ':' + (el.textContent || '').slice(0, 14) });
-      });
-    return hit;
+     The claim that replaced it is the one the app is actually making:
+     colour says WHICH, so anything with a hue in it belongs to a TAG.
+     Measured as channel SPREAD rather than as a named colour, because
+     the point is not which hue it is — grey, white and black all have a
+     spread of zero, and anything else has to be inside a tag, a workout
+     card, or the one danger colour the app keeps for warnings.
+
+     Both directions: strays fail it, and so does finding no tags at
+     all, since a screen that had lost its colour entirely would
+     otherwise pass by having nothing to object to. */
+  const hues = await page.evaluate(() => {
+    const chan = (s) => {
+      const n = (s.match(/[\d.]+/g) || []).map(Number);
+      if (!n.length) return null;
+      const a = n.length > 3 ? n[3] : 1;
+      if (a < 0.06) return null;         /* invisible: not a colour claim */
+      return /^color\(/.test(s) ? n.slice(0, 3).map((v) => Math.round(v * 255))
+                                : n.slice(0, 3);
+    };
+    const spread = (c) => c ? Math.max(...c) - Math.min(...c) : 0;
+    const bad = getComputedStyle(document.documentElement)
+      .getPropertyValue('--bad').trim().toLowerCase();
+    const out = { tags: 0, stray: [] };
+    /* NO VISIBILITY FILTER. It had one, and it reported `tags: 0,
+       stray: 0` — a pass-shaped zero: at this point in the file the
+       week is not the view that is up, so every element under it has
+       no client rects and the scan looked at nothing at all. What is
+       being claimed is about the colours the app DECLARES on that
+       screen, which is true whether or not it happens to be on. */
+    for (const el of document.querySelectorAll('.week *, .poster > .head *')) {
+      const cs = getComputedStyle(el);
+      const inTag = el.closest('.wk-sh b, .ty-card .tg, .wo-p, .wc');
+      const hue = Math.max(spread(chan(cs.color)),
+                           spread(chan(cs.backgroundColor)),
+                           spread(chan(cs.borderTopColor)));
+      /* 14, not 1: the greys are hue-neutral but not channel-identical
+         — #b4b4ba has a spread of 6 — and a threshold under that would
+         report every piece of dim type on the screen. */
+      if (hue < 14) continue;
+      if (inTag) { out.tags++; continue; }
+      /* --bad is the one hue the app keeps for itself, and it is a
+         warning rather than a tag. Named so it cannot creep. */
+      if (cs.color.toLowerCase() === bad) continue;
+      out.stray.push((el.className || el.tagName) + ':'
+        + (el.textContent || '').slice(0, 14));
+    }
+    return out;
   });
-  ok('the red marks today, the running block, now, a place and what you '
-    + 'trained — nothing else',
-    reds.length > 0
-    && reds.every((r) => r.today || r.running || r.place || r.now || r.did)
-    && reds.filter((r) => r.today).length >= 1
-    && reds.filter((r) => r.today).every((r) => r.today)
-    && reds.some((r) => r.running) && reds.some((r) => r.place),
-    /* Both halves of the claim in the payload, because they fail for
-       opposite reasons and the message cannot tell you which: `stray`
-       is something red that should not be, and a missing kind is the
-       accent having quietly stopped marking something. Reporting only
-       the strays printed an empty array when the place lost its
-       colour — a failure whose evidence said nothing. */
-    { stray: reds.filter((r) => !(r.today || r.running || r.place || r.now || r.did)),
-      today: reds.filter((r) => r.today).length,
-      running: reds.filter((r) => r.running).length,
-      now: reds.filter((r) => r.now).length,
-      place: reds.filter((r) => r.place).length });
+  ok('every hue on the week belongs to a tag, and there is at least one',
+    hues.tags > 0 && hues.stray.length === 0, hues);
 
   /* ── the progress line ──
      The sweep is gone: a 68px trail of the accent crossing the row
@@ -2579,9 +2573,16 @@ const SAID = [
         go: go && getComputedStyle(go).backgroundColor,
         accent: rgb('--red'), ink: rgb('--ink') };
     });
+    /* ── AND NOW THE ACCENT IS THE INK ──
+       This used to hold the two APART: filled controls were white and
+       the accent was the hue you turned on a wheel, so `bg !== accent`
+       was the whole point. There is no hue any more — every mark the
+       app spends on itself is the ink — so the claim inverts, and it
+       is still worth making: all three filled controls are one colour,
+       and that colour is the ink rather than something near it. */
     ok('Done today, Save and the day chips are one white fill',
       onLook.bg === onLook.ink && onLook.chip === onLook.ink
-      && onLook.go === onLook.ink && onLook.bg !== onLook.accent, onLook);
+      && onLook.go === onLook.ink && onLook.accent === onLook.ink, onLook);
 
   /* ── the asset queries are the assets' own fingerprints ──
      A layout fix was reported still broken twice after it shipped, and
@@ -3738,321 +3739,123 @@ const SAID = [
      wheel. A picker that drew both would pass a check on either. */
   await page.click('#scTabYou');
   await page.waitForTimeout(320);
-  const wheelUp = await page.evaluate(() => {
-    const w = document.querySelector('.cw');
-    if (!w) return { chips: document.querySelectorAll('.theme').length };
-    const r = w.getBoundingClientRect();
-    const cs = getComputedStyle(w);
-    return { chips: document.querySelectorAll('.theme').length,
-      heads: document.querySelectorAll('.theme-h').length,
-      w: Math.round(r.width), h: Math.round(r.height),
-      left: r.left, right: r.right,
-      round: cs.borderTopLeftRadius, touch: cs.touchAction,
-      role: w.getAttribute('role'), now: w.getAttribute('aria-valuenow'),
-      min: w.getAttribute('aria-valuemin'), max: w.getAttribute('aria-valuemax'),
-      text: w.getAttribute('aria-valuetext'), tab: w.tabIndex,
-      mid: !!w.querySelector('.cw-mid'),
-      stops: (cs.backgroundImage.match(/rgb\([^)]*\)/g) || [])
-        .map((v) => v.match(/\d+/g).map(Number)) };
-  });
-  ok('the thirteen chips are gone and one wheel is in their place',
-    wheelUp.chips === 0 && wheelUp.heads === 0
-    && wheelUp.w === 170 && wheelUp.h === 170 && wheelUp.mid, wheelUp);
-  /* THE SIXTH ROUNDED THING, and it is named in app.css rather than
-     smuggled in under the two circles' permission — the rule at the top
-     of that file is that the exceptions are named. This one does not
-     test the rule: a colour wheel that is not round is not one. */
-  ok('...whole on a 390px sheet, round, and owning its own gesture',
-    wheelUp.left >= 0 && wheelUp.right <= 390
-    && /50%|85px/.test(wheelUp.round) && wheelUp.touch === 'none', wheelUp);
-  /* A drag reaches neither a keyboard nor a screen reader, and this is
-     the only way to set the colour — so unlike the row's long press it
-     cannot be a shortcut, it has to BE the control. */
-  ok('...and it is the slider it looks like, from a keyboard too',
-    wheelUp.role === 'slider' && wheelUp.tab === 0
-    && wheelUp.min === '0' && wheelUp.max === '359'
-    && wheelUp.now === '284' && /^#[0-9a-f]{6},/.test(wheelUp.text), wheelUp);
+  /* ── THERE IS NO WHEEL, AND NOTHING SETS A COLOUR ──
+     It was the sixth rounded thing in the app and it set the one hue
+     the app spent on itself: every tick, every filled control, the
+     progress line and today's own name. Those are the INK now, so the
+     wheel has nothing to set and a control that sets nothing is a
+     setting you can get wrong and never see.
 
-  /* ── THE RING IS PAINTED FROM THE ACCENTS, NOT FROM HUE ──
-     A conic gradient of raw hues shows a bright blue at the bottom and
-     hands you the pale one the floor actually produces — a control that
-     lies about its own output. Every stop is the exact colour that
-     angle gives, so what you press is what you get.
+     What is coloured is a TAG, and a tag's colour says WHICH thing it
+     is — the three sessions, the six items on Showing up, the nine
+     workouts. None of those is a preference, so none of them belongs
+     in Settings.
 
-     Proven against the thing it is not: the same hues at full
-     saturation are measured right here, and the assertion is that the
-     ring clears the bar where the rainbow does not. Without that half
-     this passes on a rainbow whose stops happen to be bright. */
-  const PAGE = [6, 6, 7];
-  const hsl = (h) => {
-    const f = (n) => {
-      const k = (n + h / 30) % 12;
-      return Math.round(255 * (0.5 - 0.5 * Math.max(-1, Math.min(k - 3, 9 - k, 1))));
-    };
-    return [f(0), f(8), f(4)];
-  };
-  const ringLow = wheelUp.stops.reduce((a, v) => Math.min(a, ratio(v, PAGE)), 99);
-  const rawLow = wheelUp.stops.map((v, i) => ratio(hsl(i * 10), PAGE))
-    .reduce((a, v) => Math.min(a, v), 99);
-  ok(`every stop on the ring clears 6:1 on the page (worst ${ringLow.toFixed(2)}:1)`,
-    wheelUp.stops.length >= 36 && ringLow >= 5.9, { ringLow, n: wheelUp.stops.length });
-  ok(`...which a rainbow of the same hues does not (worst ${rawLow.toFixed(2)}:1)`,
-    rawLow < 4.5, rawLow);
-
-  /* ── AND THE HUE IS THE ONLY THING IT MOVES ──
-     "Change the accent" is the whole ask. The ground, the ink and both
-     greys are the app's colours now rather than a theme's, so a wheel
-     that moved any of them would be the thirteen palettes back under
-     one control. Held on every token the old sets were allowed to
-     write. */
-  /* --g1 moved with the gradient: the ground is flat and neutral, so
-     the wash of the accent behind everything went, and the accent
-     appears where it means something and nowhere else. */
-  const FIXED = ['--paper', '--ink', '--dim', '--spent', '--hair',
-                 '--tick-off', '--bad', '--g0', '--g1', '--g2'];
-  const MOVES = ['--red', '--on-red'];
-  /* Spaces stripped, because a custom property comes back as the
-     AUTHOR'S text: the stylesheet writes `rgba(120, 124, 132, .14)`
-     and the solver writes the same colour without the spaces, and a
-     string compare calls that a change. */
-  const readTokens = () => page.evaluate((ks) => {
-    const cs = getComputedStyle(document.documentElement);
-    const o = {};
-    ks.forEach((k) => { o[k] = cs.getPropertyValue(k).replace(/\s/g, '').toLowerCase(); });
-    return o;
-  }, FIXED.concat(MOVES));
-  const before = await readTokens();
-
-  /* Pressed rather than written into localStorage: what is being
-     checked is the control, and a test that only ever sets the key
-     proves the key works. */
-  const spin = async (h) => {
-    const box = await page.evaluate(() => {
-      const b = document.querySelector('.cw').getBoundingClientRect();
-      return { x: b.left + b.width / 2, y: b.top + b.height / 2, r: b.width / 2 - 13 };
-    });
-    const t = h * Math.PI / 180;
-    await page.mouse.move(box.x + Math.sin(t) * box.r, box.y - Math.cos(t) * box.r);
-    await page.mouse.down();
-    await page.mouse.up();
-    await page.waitForTimeout(180);
-  };
-  await spin(264);
-  const after = await readTokens();
-  ok('a press on the ring moves the accent and the ink on it',
-    MOVES.every((k) => before[k] !== after[k]) && /^#[0-9a-f]{6}$/.test(after['--red']),
-    { before, after });
-  ok('...and moves nothing else at all — the ground is the app\u2019s, not a theme\u2019s',
-    FIXED.every((k) => before[k] === after[k]),
-    FIXED.filter((k) => before[k] !== after[k]).map((k) => k + ' ' + before[k] + ' → ' + after[k]));
-
-  /* The two things the picture cannot show you: what the colour is, and
-     whether it can be read. The old hint named the palette and the
-     worst type on it; with one ground the worst type never moves, so
-     the number worth printing is the accent's own. */
-  const said = await page.evaluate(() => ({
-    hint: document.querySelector('.cw-wrap').nextElementSibling.textContent,
-    now: document.querySelector('.cw').getAttribute('aria-valuenow'),
-    knob: document.querySelector('.cw-k').style.transform }));
-  ok('the wheel says the hex and its measured ratio, and the knob follows',
-    said.hint.indexOf(after['--red']) === 0 && /\d(\.\d)?:1 against the page/.test(said.hint)
-    && said.now === '264' && /rotate\(264deg\)/.test(said.knob), said);
-
-  /* ── EVERY POINT ON THE WHEEL, ON THE PAGE ──
-     Thirteen palettes were thirteen hand-mixed sets and each was
-     measured. A wheel is 360 of them and none is hand-mixed, so what
-     has to be true is a property of the solver rather than of a list —
-     which is only worth claiming if it is measured somewhere it can
-     fail. Twelve points, on real pixels, on the type the accent
-     actually carries.
-
-     The worst point on the wheel is hue 316 by arithmetic, so it is on
-     the list by name rather than by luck. */
-  await page.evaluate(() => document.getElementById('scScrim').click());
-  await page.waitForTimeout(300);
-  const HUES = [0, 24, 60, 96, 124, 160, 200, 240, 264, 300, 316, 340];
-  const spun = [];
-  for (const h of HUES) {
-    await page.evaluate((v) => localStorage.setItem('sched.accent.v1', String(v)), h);
-    await page.reload({ waitUntil: 'networkidle' });
-    await page.waitForTimeout(240);
-    await page.click('#scTabYou');
-    await page.waitForTimeout(300);
-
-    /* WHAT SITS ON THE ACCENT, and it is your FACE now. This read the
-       add button, which was the accent with --on-red on it — and the
-       day every filled control went white that measurement became
-       near-black on white, 18:1, a check that passes without looking at
-       the accent at all. The face is the one place --on-red still
-       lands: your accent as the ground with its features drawn on top,
-       and it is pushed to your friends, so it is drawn on pages this
-       one has never seen.
-
-       It would have shipped broken: white on an amber accent measures
-       1.9:1 and on a mint one 1.7:1 — a face with no eyes. */
-    const [fg, bg] = await page.$eval('.tab-face svg', (svg) => [
-      svg.querySelector('circle').getAttribute('fill'),
-      svg.querySelector('rect').getAttribute('fill')]);
-    const num = (v) => (v || '').trim().startsWith('#')
-      ? v.trim().replace('#', '').match(/\w\w/g).map((x) => parseInt(x, 16))
-      : (v.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
-    const onAccent = ratio(num(fg), num(bg));
-
-    const dangers = await page.evaluate(() => {
-      const el = document.querySelector('.menu-item.bad');
-      const sh = document.querySelector('.sheet');
-      const root = getComputedStyle(document.documentElement);
-      return [getComputedStyle(el).color, getComputedStyle(sh).backgroundColor,
-              root.getPropertyValue('--red').trim()];
-    });
-    const accentRGB = dangers[2].startsWith('#')
-      ? dangers[2].match(/\w\w/g).map((x) => parseInt(x, 16))
-      : num(dangers[2]);
-    const onBad = +ratio(num(dangers[0]), num(dangers[1])).toFixed(2);
-    const dE = deltaE(num(dangers[0]), accentRGB);
-    const onPage = +ratio(accentRGB, PAGE).toFixed(2);
-
-    await page.evaluate(() => document.getElementById('scScrim').click());
-    await page.waitForTimeout(320);
-
-    const png = PNG.sync.read(await page.screenshot());
-    const at = (x, y) => {
-      const i = (png.width * Math.round(y * dpr) + Math.round(x * dpr)) << 2;
-      return [png.data[i], png.data[i + 1], png.data[i + 2]];
-    };
-    const rows = [];
-    for (const sel of ['.title', '.hd-when', '.sp-t', '.sp-ends span',
-                       '.ty-lbl', '.ty-cap', '.ty-foot']) {
-      const el = await page.$(sel);
-      if (!el) continue;
-      const b3 = await el.boundingBox();
-      if (!b3) continue;
-      const col = num(await page.$eval(sel, (e) => getComputedStyle(e).color));
-      rows.push({ sel, r: +ratio(col, at(b3.x + b3.width + 6, b3.y + b3.height / 2)).toFixed(2) });
-    }
-    const worst = rows.reduce((a, x) => (x.r < a.r ? x : a), rows[0]);
-    spun.push({ h, worst, bad: rows.filter((x) => x.r < 4.5),
-                onAccent: +onAccent.toFixed(2), onBad, dE, onPage });
-  }
-
-  const low = (k) => spun.reduce((a, x) => (x[k] < a[k] ? x : a), spun[0]);
-  ok(`every piece of type clears 4.5:1 at every hue (worst ${low('onPage').worst.r}:1 `
-    + `on ${low('onPage').worst.sel})`,
-    spun.every((t) => t.bad.length === 0), spun.filter((t) => t.bad.length).map((t) => t.h + ': ' + JSON.stringify(t.bad)));
-  /* THE FLOOR THE SOLVER AIMS AT, measured rather than computed. 6:1 is
-     a margin over the 4.5 the type needs, and this repo has twice
-     shipped 4.74 believing that was one. */
-  ok(`the accent itself never drops under 6:1 on the page (worst ${low('onPage').onPage}:1 at hue ${low('onPage').h})`,
-    spun.every((t) => t.onPage >= 5.9), spun.map((t) => t.h + ':' + t.onPage));
-  ok(`what sits on the accent clears 4.5:1 at every hue (worst ${low('onAccent').onAccent}:1)`,
-    spun.every((t) => t.onAccent >= 4.5), spun.map((t) => t.h + ':' + t.onAccent));
-
-  /* ── DANGER IS NOT THE ACCENT, AND NOW YOU CAN PICK RED ──
-     "Clear everything" reading as a highlight rather than a warning was
-     a palette author's mistake to make; with a wheel it is one anybody
-     can make in a second, so it is the APP that has to hold them apart.
-     It does, and not by luck: --bad is a pale desaturated red and every
-     solved accent sits at full chroma, so the nearest the whole wheel
-     comes is ΔE 17.9 at hue 18. Measured in Lab rather than by
-     comparing hexes — two colours can differ by a lot of hex and very
-     little eye. */
-  ok(`danger is visibly not the accent at any hue (nearest ΔE ${low('dE').dE.toFixed(1)} at hue ${low('dE').h})`,
-    spun.every((t) => t.dE >= 12), spun.map((t) => t.h + ':' + t.dE.toFixed(1)));
-  ok(`and danger clears 4.5:1 on the sheet (${low('onBad').onBad}:1)`,
-    spun.every((t) => t.onBad >= 4.5), spun.map((t) => t.h + ':' + t.onBad));
-
-  /* ── THE CHOICE SURVIVES A RELOAD, UNDER ITS OWN KEY ──
-     An accent is a preference about looking at the record, not part of
-     it — folding one into the other is how a damaged record takes the
-     other down. */
-  const kept = await page.evaluate(() => ({
-    accent: getComputedStyle(document.documentElement)
-      .getPropertyValue('--red').trim().toLowerCase(),
-    key: localStorage.getItem('sched.accent.v1'),
-    inSchedule: /accent|theme/.test(localStorage.getItem('sched.v1') || ''),
+     Asserted as ABSENT in three ways, because each passes on the
+     others' bug: no wheel, no chips left over from the thirteen
+     palettes that preceded it, and no stored key deciding a colour
+     nothing draws. */
+  const noWheel = await page.evaluate(() => ({
+    wheel: document.querySelectorAll('.cw, .cw-wrap, .cw-mid, .cw-k').length,
+    chips: document.querySelectorAll('.theme, .theme-h').length,
+    accKey: localStorage.getItem('sched.accent.v1'),
+    oldKey: localStorage.getItem('sched.theme.v1'),
+    /* And the label that named it. A wheel removed while its heading
+       stays is a Settings screen with a section that is not there. */
+    labels: [...document.querySelectorAll('.sheet .label')]
+      .map((l) => l.textContent),
   }));
-  ok('the accent is still up after a reload, and kept away from the schedule',
-    kept.key === String(HUES[HUES.length - 1]) && !kept.inSchedule
-    && /^#[0-9a-f]{6}$/.test(kept.accent) && kept.accent !== '#c8fa42', kept);
+  ok('there is no wheel, no palette chips and no stored accent',
+    noWheel.wheel === 0 && noWheel.chips === 0
+    && noWheel.accKey === null && noWheel.oldKey === null
+    && !noWheel.labels.some((l) => /accent/i.test(l)), noWheel);
 
-  /* ── A STORED PALETTE NAME BECOMES AN ANGLE ──
-     A palette is a choice somebody made and the half of it this app
-     still has is the hue. Dropping everyone onto lime because the
-     ground changed would throw that away for nothing. Read once and the
-     old key is spent — a name that resolves to a number is not
-     something to keep resolving — which is asserted as the old key
-     being GONE rather than merely ignored. Same shape as Easy → Light:
-     the word moved, the record did not. */
-  await page.evaluate(() => {
-    localStorage.removeItem('sched.accent.v1');
-    localStorage.setItem('sched.theme.v1', 'cobalt');
-  });
-  await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForTimeout(240);
-  const carried = await page.evaluate(() => ({
-    hue: localStorage.getItem('sched.accent.v1'),
-    old: localStorage.getItem('sched.theme.v1'),
-    red: getComputedStyle(document.documentElement).getPropertyValue('--red').trim(),
-  }));
-  ok('a stored palette name comes back as its own hue, once',
-    carried.hue === '264' && carried.old === null && carried.red !== '#c8fa42', carried);
-
-  /* ── AND A HUE THAT MEANS NOTHING FALLS THROUGH ──
-     The key outlives the code that wrote it. A stored value that is not
-     a number on the circle has to mean the one it ships with, rather
-     than NaN degrees — which resolves to a colour, silently, and would
-     be the app opening on a page nothing chose. */
-  await page.evaluate(() => localStorage.setItem('sched.accent.v1', 'plum'));
-  await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForTimeout(240);
-  /* 284 on the flat near-black solves to #897eff — the one it ships
-     with, where lime used to be. */
-  const SHIPS_RED = '#897eff';
-  ok('a stored accent that is not an angle falls back to the one it ships with',
-    await page.evaluate(() =>
-      getComputedStyle(document.documentElement).getPropertyValue('--red').trim())
-      === SHIPS_RED);
-
-  /* ── THE STYLESHEET AND THE SOLVER HAVE TO AGREE ──
-     app.css carries a complete palette so the first paint is right
-     before app.js runs. That is the one thing in this app written down
-     twice, and the failure if they drift is the ugliest kind: clearing
-     the stored key drops you onto a page that nothing can reproduce and
-     nothing can get you back to. What is duplicated is now the OUTPUT
-     of one function at one angle rather than a set somebody typed, so
-     this reads the wheel's own 124 back off the page and holds the
-     stylesheet to it. */
-  await page.evaluate(() => { localStorage.removeItem('sched.accent.v1'); });
-  await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForTimeout(240);
-  const ships = await page.evaluate(() => {
+  /* ── THE TOKENS ARE THE APP'S, AND NOTHING SETS THEM ──
+     FIXED, MOVES and readTokens went with the wheel: they existed to
+     watch which tokens a press on the ring was allowed to change, and
+     nothing changes any token now.
+     There was a wheel, and this whole section drove it: press the
+     ring, watch --red and --on-red move and every other token hold
+     still, then measure all 360 hues against the page. There is no
+     wheel — the accent is the ink — so what is left to hold is that
+     the two are ONE colour rather than two that happen to match, and
+     that nothing in Settings can change it. */
+  const tone = await page.evaluate(() => {
     const cs = getComputedStyle(document.documentElement);
-    const keys = ['--paper', '--ink', '--dim', '--spent', '--red',
-                  '--hair', '--tick-off', '--bad', '--on-red', '--g1', '--g2'];
-    const root = {};
-    keys.forEach((k) => { root[k] = cs.getPropertyValue(k).trim().toLowerCase(); });
-    return root;
+    const g = (k) => cs.getPropertyValue(k).trim().toLowerCase();
+    return { red: g('--red'), ink: g('--ink'),
+             on: g('--on-red'), paper: g('--paper'), bad: g('--bad') };
   });
-  ok('clearing it falls back to the page the stylesheet itself carries',
-    ships['--red'] === SHIPS_RED && ships['--paper'] === '#0c0c0e'
-    && ships['--ink'] === '#ffffff', ships);
-  /* NOTHING HAS RUN scPaint AT THIS POINT — the key is clear, so every
-     token above came from the stylesheet. Turning the wheel to 124 and
-     reading them again is therefore a comparison of the two copies
-     rather than of one copy with itself, which is the whole claim. */
-  await page.click('#scTabYou');
-  await page.waitForTimeout(320);
-  await spin(284);
-  const solved = await page.evaluate((keys) => {
-    const cs = getComputedStyle(document.documentElement);
-    const o = {};
-    keys.forEach((k) => { o[k] = cs.getPropertyValue(k).trim().toLowerCase(); });
-    return o;
-  }, Object.keys(ships));
-  ok('...and the wheel\u2019s own 284 is that same page, token for token',
-    Object.keys(ships).every((k) => ships[k].replace(/\s/g, '') === solved[k].replace(/\s/g, '')),
-    Object.keys(ships).filter((k) => ships[k].replace(/\s/g, '') !== solved[k].replace(/\s/g, ''))
-      .map((k) => k + ': css ' + ships[k] + ' / wheel ' + solved[k]));
+  ok('the accent IS the ink, and what sits on it is the page',
+    tone.red === tone.ink && tone.on === tone.paper, tone);
+  /* DANGER IS STILL NOT THE ACCENT, and with the accent neutral that
+     is easier rather than harder — --bad is now the only hue the app
+     spends on itself, and it has to stay visibly apart from the ink
+     it sits beside. */
+  ok('danger is visibly not the accent', tone.bad !== tone.red, tone);
+
+  /* ── AND THE TAGS ARE THE ONLY COLOUR LEFT ──
+     Nine of them: three sessions and six things you keep. Each is one
+     hex, drawn as a ring at 46% and a label mixed 62% toward the ink,
+     so what has to be measured is what is DRAWN rather than the hex —
+     a colour that reads on paper can be invisible on the same page as
+     an outline.
+
+     The label is type, so 4.5:1. The ring is a graphic, so 3:1. Both
+     against the ground the tag actually sits on, sampled off the
+     element rather than assumed. */
+  const tags = await page.evaluate(() => {
+    /* ── BOTH SERIALISATIONS, OR THE CHECK MEASURES ITS OWN PARSER ──
+       Chrome returns a resolved color-mix as `color(srgb r g b / a)`
+       with the channels 0..1, and a plain colour as rgb()/rgba() with
+       them 0..255. Read naively, 0.97 comes back as a channel value of
+       one and every tag measures 1.07:1 against a near-black page —
+       which is what this reported before it was fixed, on tags that are
+       plainly legible in a screenshot. This file already carries the
+       same lesson about the sweep's wash. */
+    const chan = (s) => {
+      const n = (s.match(/[\d.]+/g) || []).map(Number);
+      const c = /^color\(/.test(s) ? n.slice(0, 3).map((v) => Math.round(v * 255))
+                                   : n.slice(0, 3);
+      const a = /^color\(/.test(s) ? (n.length > 3 ? n[3] : 1)
+                                   : (n.length > 3 ? n[3] : 1);
+      return { c, a };
+    };
+    const over = (fg, bg) => fg.c.map((v, i) => Math.round(v * fg.a + bg.c[i] * (1 - fg.a)));
+    const out = [];
+    const ground = chan(getComputedStyle(document.body).backgroundColor);
+    const look = (el, where) => {
+      const cs = getComputedStyle(el);
+      out.push({ where,
+                 /* The RING carries an alpha, so what is drawn is the
+                    ring composited over the page rather than the colour
+                    it was written as. */
+                 label: over(chan(cs.color), ground),
+                 ring: over(chan(cs.borderTopColor), ground),
+                 on: ground.c });
+    };
+    document.querySelectorAll('.wk-sh b').forEach((e) => look(e, 'session ' + e.textContent));
+    document.querySelectorAll('.ty-card .tg').forEach((e) => look(e, 'item ' + e.textContent));
+    return out;
+  });
+  const tagLow = tags.reduce((a, x) => Math.min(a, ratio(x.label, x.on)), 99);
+  const ringLow = tags.reduce((a, x) => Math.min(a, ratio(x.ring, x.on)), 99);
+  ok(`every session tag's label clears 4.5:1 (worst ${tagLow.toFixed(2)}:1)`,
+    tags.length >= 2 && tagLow >= 4.5,
+    tags.map((x) => x.where + ' ' + ratio(x.label, x.on).toFixed(2)));
+  ok(`...and its ring clears 3:1 as a graphic (worst ${ringLow.toFixed(2)}:1)`,
+    ringLow >= 3, tags.map((x) => x.where + ' ' + ratio(x.ring, x.on).toFixed(2)));
+  /* THE TAG IS AN OUTLINE, and that is the thing being drawn rather
+     than a preference: a filled chip in a bright hue would be the only
+     loud object left on a page whose whole job is the words. Asserted
+     as no fill, since a ring plus a fill is the filled chip back. */
+  const outlined = await page.evaluate(() => [...document.querySelectorAll('.wk-sh b')]
+    .every((e) => {
+      const bg = getComputedStyle(e).backgroundColor;
+      return /rgba\(0, 0, 0, 0\)|transparent/.test(bg);
+    }));
+  ok('and a tag is a ring and a label, never a fill', outlined);
+
   await page.evaluate(() => document.getElementById('scScrim').click());
   await page.waitForTimeout(300);
 
@@ -6231,12 +6034,14 @@ const SAID = [
     ok('what you trained is the accent on a row that is not behind you',
       ahead.past === false && ahead.wo === ahead.accent
       && ahead.wo !== ahead.dim, ahead);
-    /* THE TICK WENT THE SAME WAY, and for the same reason: a done
-       block and a kept day on the tally are one record seen from two
-       screens, so drawing them in two colours is the thing that has to
-       be learned. It was --ink. */
+    /* THE TICK IS THE SAME MARK, and the claim survives the accent
+       going neutral — a done block and a kept day on the tally are one
+       record seen from two screens, so they are one colour. What can no
+       longer be asserted is that the colour is NOT the ink, because the
+       accent IS the ink now; what is asserted instead is that it is
+       not the dim, which is the mistake that would actually be made. */
     ok('...and so is the tick on a block the tally has counted',
-      ahead.tick === ahead.accent && ahead.tick !== ahead.ink, ahead);
+      ahead.tick === ahead.accent && ahead.tick !== ahead.dim, ahead);
     /* ── AND IT IS SMALLER THAN THE PLACE IT SHARES A LINE WITH ──
        A place is where you have to be; a session is a note about what
        already happened. At one size the two read as one label broken in
@@ -6638,12 +6443,14 @@ const SAID = [
        Measured as the ring's OWN contribution — the edge pixel less
        the panel's interior — because the ring is a third of the accent
        over a wash of --ink and the sum of the two is nobody's colour.
-       That difference is a grey with no spread across its channels
-       when the ring is --ink, and carries the accent's own spread when
-       it is the accent: 0 against 62 on the lime it ships with. Held
-       to the accent's own strongest channel as well, so it means the
-       same thing at every angle of the wheel rather than only where
-       the default happens to sit. */
+       IT WAS A SPREAD CHECK, and it cannot be one any more. The ring
+       was a third of the accent and the accent was a hue, so the ring's
+       contribution carried that hue's spread across the channels — 62
+       on the lime it shipped with, against 0 for a grey. The accent is
+       the INK now, so the honest question is no longer which channel
+       leads but whether the ring is THERE: a difference the eye can
+       find between the edge and the panel a few pixels in. Measured the
+       same way, read differently. */
     const edge = await page.evaluate(() => {
       const o = document.querySelector('.wo-p.is-open').getBoundingClientRect();
       return { x: o.left + o.width / 2, t: o.top };
@@ -6656,10 +6463,10 @@ const SAID = [
     const gave = ringPx.map((v, i) => v - inPx[i]);
     const spread = Math.max(...gave) - Math.min(...gave);
     const top = (a) => a.indexOf(Math.max(...a));
-    ok(`the open panel is ringed in the accent (spread ${spread}, `
-      + `strongest channel ${top(gave)} against the accent's ${top(want)})`,
-      spread >= 20 && top(gave) === top(want),
-      { ringPx, inPx, gave, want });
+    const lift = Math.max(...gave);
+    ok(`the open panel is ringed, and the ring is a real mark (+${lift})`,
+      lift >= 40 && spread <= 12,
+      { ringPx, inPx, gave, lift, spread, want });
 
     /* ── THE STOP IS REMEMBERED, UNDER ITS OWN KEY ──
        Which half of a screen you were last on is a preference about
@@ -7887,6 +7694,35 @@ const SAID = [
       .map((k) => k + ': css ' + cssTok[k] + ' / js ' + jsTok[k]);
     ok(`the stylesheet's light face is the script's, token for token (${Object.keys(jsTok).length} tokens)`,
       Object.keys(jsTok).length >= 20 && drift.length === 0, drift);
+
+    /* ── AND THE TAGS ON THE LIGHT FACE ──
+       Nine hexes a face and the dark one is measured up in the main
+       run; a colour that clears on black can fail on paper, which is
+       the whole reason there are two sets. Measured the same way, on
+       the ground the tag actually sits on, with the ring composited
+       over it because it carries an alpha. */
+    const ltags = await lpage.evaluate(() => {
+      const chan = (s) => {
+        const n = (s.match(/[\d.]+/g) || []).map(Number);
+        const c = /^color\(/.test(s) ? n.slice(0, 3).map((v) => Math.round(v * 255))
+                                     : n.slice(0, 3);
+        return { c, a: n.length > 3 ? n[3] : 1 };
+      };
+      const over = (fg, bg) => fg.c.map((v, i) => Math.round(v * fg.a + bg.c[i] * (1 - fg.a)));
+      const g = chan(getComputedStyle(document.body).backgroundColor);
+      return [...document.querySelectorAll('.wk-sh b')].map((e) => {
+        const cs = getComputedStyle(e);
+        return { w: e.textContent,
+                 label: over(chan(cs.color), g),
+                 ring: over(chan(cs.borderTopColor), g), on: g.c };
+      });
+    });
+    const lLow = ltags.reduce((a, x) => Math.min(a, ratio(x.label, x.on)), 99);
+    const lRing = ltags.reduce((a, x) => Math.min(a, ratio(x.ring, x.on)), 99);
+    ok(`the light face's tags read too (label ${lLow.toFixed(2)}:1, ring ${lRing.toFixed(2)}:1)`,
+      ltags.length >= 2 && lLow >= 4.5 && lRing >= 3,
+      ltags.map((x) => x.w + ' ' + ratio(x.label, x.on).toFixed(2)
+        + ' / ' + ratio(x.ring, x.on).toFixed(2)));
 
     ok('nothing threw on the light face', lerrs.length === 0, lerrs);
     await lctx.close();
