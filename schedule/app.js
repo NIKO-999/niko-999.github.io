@@ -1037,14 +1037,13 @@
          own grids, so the argument against wrapping them went with the
          column the time used to sit in — and the box is what the board
          lays out as a column. */
-      var sess = null, sKey = '';
+      var sess = null;
       card.classList.toggle('is-board', wkView === 'board');
       rows.forEach(function (it) {
         if (head3[it.id]) {
           var g = head3[it.id];
           sess = scEl('div', 'wk-sess');
           card.appendChild(sess);
-          sKey = { Morning: 'm', Afternoon: 'a', Evening: 'e' }[g.s.k] || '';
           var sh = scEl('div', 'wk-sh'
             + (d === today && scNowMin() >= g.s.a && scNowMin() < g.s.b
                ? ' is-live' : ''));
@@ -1061,11 +1060,7 @@
           sh.setAttribute('aria-hidden', 'true');
           sess.appendChild(sh);
         }
-        /* WHICH SESSION, on the row itself. The list says it in a
-           heading; the board has no headings — the tile's colour is
-           the grouping — so the key has to be somewhere a tile can
-           read it. */
-        var row = scEl('button', 'row' + (sKey ? ' s-' + sKey : ''));
+        var row = scEl('button', 'row');
         row.dataset.id = it.id;
         row.dataset.s = it.s;
         row.dataset.e = it.e;
@@ -1995,7 +1990,6 @@
     '--ground': '#0C0C0E',
     '--card': 'rgba(255,255,255,.06)', '--card-edge': 'rgba(255,255,255,.10)',
     '--card-shadow': '0 12px 28px -18px rgba(0,0,0,.9)',
-    '--s-m': '#F2B950', '--s-a': '#5FA8FF', '--s-e': '#B98BFF',
     '--s-m-bg': '#F2B950', '--s-m-fg': '#2A1A00',
     '--s-a-bg': '#5FA8FF', '--s-a-fg': '#061C3A',
     '--s-e-bg': '#B98BFF', '--s-e-fg': '#23084A',
@@ -2007,28 +2001,15 @@
     '--ground': '#F7F7F9',
     '--card': 'rgba(255,255,255,.92)', '--card-edge': '#ffffff',
     '--card-shadow': '0 10px 26px -16px rgba(15,15,25,.40)',
-    '--s-m': '#A86400', '--s-a': '#1668C7', '--s-e': '#6B3FC4',
     '--s-m-bg': '#FFE3B3', '--s-m-fg': '#6A3E00',
     '--s-a-bg': '#CFE6FF', '--s-a-fg': '#0F3E7A',
     '--s-e-bg': '#E6D6FF', '--s-e-fg': '#4A2A8A',
     '--done-bg': 'rgba(60,40,100,.07)' };
   function scAccent(h) {
+    var v = scAccentRGB(h);
     var light = scModeLive() === 'light';
     var t = {}, base = light ? LIGHT_SET : DARK_SET;
     for (var k in base) if (base.hasOwnProperty(k)) t[k] = base[k];
-    /* ── NEUTRAL TAKES THE INK'S OWN END OF THE PAGE ──
-       Not a grey mixed toward the middle: the accent's whole job is
-       to be the thing you look at, so on the black page it is the
-       near-white the words already are and on the paper it is the
-       near-black. It is the loudest thing on the screen without
-       being a colour, which is the ask. */
-    if (h === NEUTRAL) {
-      t['--red'] = light ? '#1a1a1f' : '#ececef';
-      t['--g1'] = 'transparent';
-      t['--on-red'] = light ? '#ffffff' : '#101013';
-      return t;
-    }
-    var v = scAccentRGB(h);
     t['--red'] = scHex(v);
     /* The wash IS the accent, at a fifth, on the dark face. The light
        face has its own sky and takes none. */
@@ -2102,16 +2083,7 @@
   var THEME_KEY = 'sched.theme.v1';
   /* Lime, to the nearest degree. The default is a HUE now rather than
      a set of hexes, so there is one place a colour comes from. */
-  /* ── NEUTRAL IS THE DEFAULT, AND IT IS NOT AN ANGLE ──
-     The wheel solves an accent out of a hue, and every angle on it is
-     a colour. What ships is no colour at all: near-white on the black
-     page, near-black on the paper, so the app is a monochrome and the
-     wheel is there for somebody who wants one. NEUTRAL is the stored
-     value for it — a sentinel rather than a degree, because a hue that
-     resolved to grey would be a lie about what the wheel does. */
-  var NEUTRAL = 'n';
-  var HUE0 = NEUTRAL;
-  var HUE_ON = 284;   /* where the wheel opens when you turn it on */
+  var HUE0 = 284;   /* Craft's violet, to the nearest degree */
   var hue = HUE0;
 
   /* ── THE THIRTEEN NAMES SURVIVE AS THIRTEEN ANGLES ──
@@ -2130,9 +2102,8 @@
     bloom: 304, sand: 68 };
 
   function scHueOf(v) {
-    if (v === NEUTRAL) return NEUTRAL;
-    var n = Math.round(+v);
-    return n >= 0 && n < 360 ? n : HUE0;
+    v = Math.round(+v);
+    return v >= 0 && v < 360 ? v : HUE0;
   }
 
   /* Written as inline custom properties on the root, which is the one
@@ -2144,7 +2115,6 @@
                 '--tick-off', '--on-red', '--bad',
                 '--g0', '--g1', '--g2', '--g3',
                 '--ground', '--card', '--card-edge', '--card-shadow',
-                '--s-m', '--s-a', '--s-e',
                 '--s-m-bg', '--s-m-fg', '--s-a-bg', '--s-a-fg', '--s-e-bg', '--s-e-fg',
                 '--done-bg'];
 
@@ -7328,34 +7298,17 @@
          hint named the palette and the worst type on it; with one
          ground the worst type never moves, so the number worth
          printing is the accent's own. */
-      /* NEUTRAL IS A STOP ON THIS CONTROL, not a hidden default.
-         The wheel cannot show it — every angle on it is a colour — so
-         it is a chip beside the wheel, and it is where the app opens. */
-      var off = scEl('button', 'lg-c', 'Neutral');
-      off.type = 'button';
       var say = function () {
-        var neutral = hue === NEUTRAL;
-        off.classList.toggle('on', neutral);
-        off.setAttribute('aria-pressed', neutral ? 'true' : 'false');
-        wheel.setAttribute('aria-valuenow', neutral ? '0' : String(hue));
-        var live = getComputedStyle(document.documentElement)
-          .getPropertyValue('--red').trim();
-        if (neutral) {
-          wheel.setAttribute('aria-valuetext', 'Neutral, the one it ships with');
-          knob.style.transform = 'rotate(0deg) translateY(-72px)';
-          knob.style.opacity = '.25';
-          hint.textContent = live + ' · no colour · the one it ships with';
-          return;
-        }
         var v = scAccentRGB(hue);
-        knob.style.opacity = '';
-        wheel.setAttribute('aria-valuetext', scHex(v));
+        wheel.setAttribute('aria-valuenow', String(hue));
+        wheel.setAttribute('aria-valuetext', scHex(v)
+          + (hue === HUE0 ? ', the one it ships with' : ''));
         knob.style.transform = 'rotate(' + hue + 'deg) translateY(-72px)';
         hint.textContent = scHex(v) + ' · '
           + (Math.round(scRatio(v, scModeLive() === 'light' ? LIGHT_GROUND : GROUND) * 10) / 10)
-          + ':1 against the page';
+          + ':1 against the page'
+          + (hue === HUE0 ? ' · the one it ships with' : '');
       };
-      off.addEventListener('click', function () { set(NEUTRAL, true); });
       /* Painted on every move and SAVED on the way up. A drag across
          the whole circle is three hundred pointermoves, and a write
          and a push on each of them is a write and a push you did not
@@ -7394,18 +7347,11 @@
         else if (k === 'Home') { set(HUE0, true); e.preventDefault(); return; }
         if (!d) return;
         e.preventDefault();
-        /* Off the neutral, the wheel opens where Craft's own violet is
-           rather than at zero — a keyboard should land somewhere
-           somebody chose. */
-        set(hue === NEUTRAL ? HUE_ON : (hue + d + 360) % 360, true);
+        set((hue + d + 360) % 360, true);
       });
 
       wrap.appendChild(wheel);
       body.appendChild(wrap);
-      var offRow = scEl('div', 'lg-row');
-      offRow.style.justifyContent = 'center';
-      offRow.appendChild(off);
-      body.appendChild(offRow);
       say();
       body.appendChild(hint);
 

@@ -145,7 +145,7 @@
      It was the other way round in a dozen places and the symptom was
      one form answering two questions in two colours: WHAT and DAY in
      the accent over white day chips over a coloured Save. */
-  --red:     #ececef;
+  --red:     #c8fa42;
 
   /* The ground, as three stops rather than one flat fill. On the
      shipped palette the near wash is the accent at a fifth strength
@@ -195,7 +195,7 @@
      — measured at worst 5.8:1 all the way round. Tinted 4% with the
      hue rather than flat, so it is the accent's own dark rather than
      the page's. */
-  --on-red: #101013;
+  --on-red: #0e1009;
 
   /* Danger, which is NOT the accent. The two used to be the same red,
      which is exactly why they came apart hard the day a palette moved
@@ -234,12 +234,6 @@
   --card:   rgba(255,255,255,.06);
   --card-edge: rgba(255,255,255,.10);
   --card-shadow: 0 12px 28px -18px rgba(0,0,0,.9);
-/* ── THE SESSION COLOUR IS A MID-TONE NOW ──
-     It was a chip colour: a ground with its own ink on it. The
-     heading gave the chip up and the board's tiles took the colour,
-     where it has to work as BOTH — a wash behind a tile and the type
-     on it — so each session owns one value per face. */
-  --s-m: #F2B950; --s-a: #5FA8FF; --s-e: #B98BFF;
   --s-m-bg: #F2B950; --s-m-fg: #2A1A00;
   --s-a-bg: #5FA8FF; --s-a-fg: #061C3A;
   --s-e-bg: #B98BFF; --s-e-fg: #23084A;
@@ -283,10 +277,6 @@
   color-scheme: light;
   --paper: #F7F7F9;
   --ink:   #1A1A1F;
-  /* The accent's light twin. Neutral is the ink's own end of the
-     page either way round, so on paper it is the near-black. */
-  --red:   #1a1a1f;
-  --on-red: #ffffff;
   --dim:   #5C5C66;
   --spent: #797984;
   --hair:  rgba(0,0,0,.10);
@@ -299,7 +289,6 @@
   --card:   rgba(255,255,255,.92);
   --card-edge: #ffffff;
   --card-shadow: 0 10px 26px -16px rgba(15,15,25,.40);
-  --s-m: #A86400; --s-a: #1668C7; --s-e: #6B3FC4;
   --s-m-bg: #FFE3B3; --s-m-fg: #6A3E00;
   --s-a-bg: #CFE6FF; --s-a-fg: #0F3E7A;
   --s-e-bg: #E6D6FF; --s-e-fg: #4A2A8A;
@@ -571,8 +560,11 @@ body {
 .fr-link:active { opacity: .6; }
 .fr-link:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
-.fr-list { list-style: none; margin-top: 8px; }
-.fr-row { display: flex; align-items: center; gap: 13px; padding: 12px 2px; }
+.fr-list { list-style: none; margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+.fr-row { display: flex; align-items: center; gap: 13px;
+  padding: 12px; border-radius: 14px;
+  background: var(--card);
+  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow); }
 .fr-rank { font-size: 12px; font-weight: 700; color: var(--dim); width: 12px;
   font-variant-numeric: tabular-nums; }
 .fr-row.is-me .fr-rank { color: var(--ink); font-weight: 800; }
@@ -649,8 +641,9 @@ body {
    only has to be a boundary. The radius nests inside the image's own —
    16 outside, 12 in — because two rounded rectangles at the same
    radius, one inside the other, read as a mistake. */
-.po { margin-top: 12px; padding: 14px 2px 16px;
-  border-bottom: 1px solid var(--hair); }
+.po { margin-top: 12px; padding: 12px 12px 13px;
+  border-radius: 16px; background: var(--card);
+  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow); }
 /* Inside the friend's sheet the frame is the sheet, and a card in a
    card is the frame-inside-a-frame this project keeps taking out. */
 .po.is-bare { background: none; box-shadow: none; padding: 0; margin-top: 18px; }
@@ -820,7 +813,11 @@ body {
   grid-template-columns: minmax(0, 1fr) 92px;
   align-items: stretch;
   gap: 12px;
-  padding: 12px 2px 12px 34px;
+  margin-bottom: 8px;
+  padding: 9px 12px 9px 44px;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow);
 }
 .ty-card {
   display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 3px 10px;
@@ -1373,9 +1370,12 @@ body {
   gap: 10px;
   width: 100%;
   min-height: 44px;
-  padding: 12px 2px;
+  margin-bottom: 8px;
+  padding: 10px 12px;
   border: 0;
-  background: none;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow);
   color: inherit;
   font: inherit;
   text-align: left;
@@ -1639,32 +1639,24 @@ body {
    purple evening. The colour says WHICH, the way the workout hues do,
    so it is the same pair in every accent and both modes have their
    own. The count sits after it in --dim. */
-/* ── AND THE HEADING IS TYPE, NOT A CHIP ──
-   A coloured pill at the top of every session was three filled
-   objects down a screen whose whole job is the words, and the colour
-   had nothing to do once the rows stopped being cards. It says which
-   session in the same small caps every other heading in this app
-   uses; the colour went to the board, where it is the whole point. */
 .wk-sh b {
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: .17em;
-  text-transform: uppercase;
-  color: var(--dim);
-  padding: 0;
-  background: none;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 3px 10px;
+  border-radius: 999px;
 }
-/* The colour is on the BOARD's tiles now; in a list the session is a
-   word. Kept as classes because that is how the board finds them. */
+.wk-sh b.m { background: var(--s-m-bg); color: var(--s-m-fg); }
+.wk-sh b.a { background: var(--s-a-bg); color: var(--s-a-fg); }
+.wk-sh b.e { background: var(--s-e-bg); color: var(--s-e-fg); }
 .wk-sh .c { margin-left: 8px; font-size: 11.5px; color: var(--dim); font-variant-numeric: tabular-nums; }
 /* The session you are IN keeps the accent, and it is the one heading
    that does: it is not a title saying what the section is, it is the
    same fact as the running block seen one level up. A heading that
    names a section is white; a heading that says YOU ARE HERE is a
    record mark that happens to be a heading. */
-/* The session you are IN is at full strength rather than ringed: a
-   heading that is a word takes its state in weight, not in a box. */
-.wk-sh.is-live b { color: var(--ink); }
+.wk-sh.is-live b { box-shadow: 0 0 0 1.5px var(--red); }
 
 /* ── a day you are not reading ──
    Bars, never names: at 76px a name is a clipped fragment, and a
@@ -1709,16 +1701,9 @@ body {
    sheet. The CHECK is a sibling of the row, not a child, because a
    button inside a button is invalid and collapses to one press while
    looking exactly right; .rowwrap holds the two side by side. */
-/* ── THE ROWS ARE NOT CARDS ──
-   Every row was a rounded surface with its own shadow, and a list of
-   nine of them is nine objects on a screen whose whole job is the
-   words. They are lines on the page now, told apart by space alone:
-   a rule between every two items is what makes a list a table, and a
-   table is a thing you scan for a value rather than a list of things
-   you are going to do. */
-.rowwrap { position: relative; }
+.rowwrap { position: relative; margin-bottom: 8px; }
 .chk {
-  position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
   z-index: 2;
   width: 22px; height: 22px; border-radius: 50%;
   border: 1.5px solid var(--spent);
@@ -1741,6 +1726,9 @@ body {
   grid-template-columns: 22px minmax(0, 1fr);
   grid-template-rows: auto auto;
   gap: 3px 10px;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow);
   overflow: hidden;
   /* CENTRE, because a finished row loses its time and the grid's first
      track collapses with it — a glyph aligned to the top of a row with
@@ -1752,13 +1740,8 @@ body {
      a list where every line opens an editor. The sheet is taller for
      it and that is the correct trade: a target you miss costs more
      than a scroll you did not need. */
-  padding: 13px 2px 13px 34px;
+  padding: 9px 12px 9px 44px;
   border: 0;
-  /* SAID OUT LOUD. A .row is a <button>, and with no background
-     declared the UA paints `buttonface` — mid grey on a dark page,
-     near-white on a light one. It read as a panel behind each
-     session and nothing in this file was drawing it. */
-  background: none;
   /* NO RULE BETWEEN ROWS. There was a hairline under every one of them,
      and a line between every two items in a list is what makes it a
      table — a thing you scan for a value, rather than a list of things
@@ -2068,23 +2051,24 @@ body {
    match. It is the only place on the page the red is spent besides
    today's own name. */
 .row.is-now {
-  /* ── NOTHING IS DRAWN ROUND THE RUNNING BLOCK ──
-     It was a ring on the card's own edge, and before that a rule down
-     the margin that had to grow by 13px rather than slide. With no
-     card there is no edge to take a state, and none is needed: the
-     NAME takes the accent and the row says "Now" in a word beside its
-     length. Two marks on the one row that is happening, and neither
-     of them is a box. */
+  /* A RING, not a rule down the margin. The 4px rule reached 13px
+     left of the row and had to grow by the same amount rather than
+     slide — arithmetic that was one character from breaking the
+     column at any time. A card that is its own object takes its
+     state on its own edge: the same hairline ring the session
+     heading wears, and the Now pill under the name says it in a
+     word. The sweep still runs. */
+  box-shadow:
+    inset 0 1px 0 var(--card-edge),
+    var(--card-shadow),
+    0 0 0 1.5px var(--red);
   overflow: hidden;   /* the clip the sweep runs inside */
 }
-/* The one running block: its name at full weight and the word Now
-   beside its length. Nothing is drawn around it. */
-.row.is-now .n { font-weight: 800; }
-
+.row.is-now .n { font-weight: 700; }
 /* The sweep decides colours on this row, for the fourth time: --dim
    over the trail's 13% wash measures under 4.5:1, so the pills on the
    running row take --ink. */
-
+.row.is-now .t, .row.is-now .dur { color: var(--ink); }
 
 /* ── the sweep ──
    A hairline that crosses the running block and keeps crossing it, so
@@ -2110,20 +2094,40 @@ body {
 
    · The trail is 68px and the line is 2px. The line alone reads as a
      glitch; the trail alone reads as a wash with no direction. */
-/* ── AND THE SWEEP WENT WITH THE COLOUR ──
-   A trail of the accent crossing the running row, which was the one
-   thing on the screen that moved while you were not doing anything.
-   With the accent neutral it is a grey wash sliding over the words —
-   a smudge rather than a mark — and the row already says Now. */
-
+.row.is-now::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-right: 2px solid var(--red);
+  /* color-mix off --red rather than a second token holding the same
+     colour as channels. On a browser without it the whole declaration
+     drops and the sweep is its 2px leading edge alone — which still
+     reads, and which is a better failure than a wash in a colour the
+     page stopped using. */
+  background: linear-gradient(90deg, transparent calc(100% - 68px),
+                                     color-mix(in srgb, var(--red) 13%, transparent));
+  transform: translateX(-100%);
+  animation: sc-sweep 2.8s linear infinite;
+}
+@keyframes sc-sweep {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
 
 /* The row's own content, lifted over the wash. */
-
+.row.is-now .ic,
+.row.is-now .tick,
+.row.is-now .n,
+.row.is-now .props { position: relative; z-index: 1; }
 
 /* The row keeps its rule and its weight either way — an effect that
    degrades to nothing has not been disabled, it has removed the mark.
    Not built rather than paused: a paused sweep is a red line frozen
    somewhere across the row, which reads as a bug. */
+@media (prefers-reduced-motion: reduce) {
+  .row.is-now::after { display: none; }
+}
 
 .row.is-free {
   display: block;
@@ -3593,20 +3597,24 @@ body {
 .week[hidden] .views { display: none; }
 .day-card { padding-bottom: 4px; }
 .vw svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-/* ── THE BOARD GOES DOWN, NOT SIDEWAYS ──
-   It was columns in a horizontal scroller with a peek of the next,
-   which is what a board is on a desk and not what one is on a phone:
-   a thumb scrolls down, and a column you have to swipe to is a column
-   you forget is there. The sessions stack, each headed, each its own
-   block of the page. */
 .day-card.is-board, .ty-grid.is-board {
-  display: flex; flex-direction: column; align-items: stretch; gap: 22px;
-  overflow-x: visible;
+  display: flex; align-items: flex-start; gap: 10px;
+  overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
 }
-.ty-grid.is-board { margin: 0; padding: 4px 0 8px; }
+.ty-grid.is-board { margin: 0 calc(var(--pad) * -1); padding: 4px var(--pad) 8px; }
+.ty-grid.is-board::-webkit-scrollbar { display: none; }
 .wk-sess { min-width: 0; }
-.day-card.is-board .wk-sess, .ty-grid.is-board .wk-sess { width: 100%; }
+.day-card.is-board .wk-sess, .ty-grid.is-board .wk-sess {
+  flex: none; width: 212px; max-height: 100%;
+  overflow-y: auto; scrollbar-width: none;
+  scroll-snap-align: start;
+}
+.day-card.is-board .wk-sess::-webkit-scrollbar { display: none; }
 .day-card.is-board .wk-sh { padding-top: 2px; }
+.day-card.is-board > .rt-ask { flex: none; width: 212px; scroll-snap-align: start; }
+.day-card.is-board.has-more { -webkit-mask-image: none; mask-image: none; }
 .ty-grid.is-board .ty-row { grid-template-columns: minmax(0, 1fr); }
 .ty-grid.is-board .ty-hist { display: none; }
 .ty-grid.is-board .grp-h { padding-top: 2px; }
@@ -3776,7 +3784,7 @@ body {
   --pat-n: 40px;                   /* the figure's column */
   --pat-t: 104px;                  /* the track */
   --pat-g: 10px;                   /* the gap between tracks */
-  --pat-p: 2px;                    /* the row's own padding */
+  --pat-p: 12px;                   /* the card's own padding */
   /* 50%, not 35: the rows are cards a step up from the page, and
      the axis is read against THEM. 35% measured 2.36:1 on the card. */
   --pat-ax: color-mix(in srgb, var(--ink) 50%, var(--paper));
@@ -3806,7 +3814,10 @@ body {
   align-items: center;
   gap: var(--pat-g);
   min-height: 44px;
-  padding: 11px var(--pat-p);
+  padding: 9px var(--pat-p);
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow);
 }
 .pat-row .ic {
   display: block; width: 20px; height: 20px;
