@@ -4293,7 +4293,9 @@
       var im = document.createElement('img');
       im.src = it.me && p.local ? p.local : scImgURL(p.img);
       im.alt = p.cap || '';
-      im.loading = 'lazy';
+      /* No loading="lazy" — this can render inside a `.sheet` via
+         scPostSheet, and a `.sheet` rests off-screen by transform
+         until it opens. scMindArt carries the full reasoning. */
       wrap.appendChild(im);
       card.appendChild(wrap);
     }
@@ -4702,7 +4704,9 @@
             var im = document.createElement('img');
             im.src = scImgURL(q.img);
             im.alt = '';
-            im.loading = 'lazy';
+            /* No loading="lazy" — scFriendSheet builds this wall
+               inside a `.sheet`, which rests off-screen by transform
+               until it opens. scMindArt carries the full reasoning. */
             t.appendChild(im);
           } else {
             t.appendChild(scEl('span', null, q.cap || ''));
@@ -6173,11 +6177,22 @@
     if (hit && hit.c) {
       var img = document.createElement('img');
       img.alt = '';
-      img.loading = 'lazy';
       /* The drawn cover is UNDERNEATH rather than swapped in on an
          error, so a broken or blocked image degrades to a real cover
          instead of to a hole. Nothing to time, nothing to fail. */
       img.addEventListener('error', function () { img.remove(); });
+      /* ── NO loading="lazy" ──
+         This image is built inside a `.sheet`, which rests at
+         `transform: translateY(100%)` — fully below the viewport —
+         until `.is-open` animates it up. WebKit's lazy-load decides
+         whether an image is "near the viewport" from where it sits
+         at the moment it is evaluated, and an element translated
+         off-screen can be judged not-near and never fetched at all,
+         even once the sheet has visibly slid up over it. Chromium is
+         the only browser on this machine and does not reproduce it —
+         which is why this is reasoned rather than measured here, the
+         same as every other iOS-only bug this file has shipped. Small
+         thumbnails a screen or two tall cost nothing to load eagerly. */
       img.src = hit.c;
       a.appendChild(img);
     }

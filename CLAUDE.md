@@ -5695,3 +5695,51 @@ writes 10 through 120 — and calling `scMindDur` on it would divide by
 that is supposed to prove you gave 45 minutes to something. Split into
 `scMindFmtMin`, which both now call, so the unit the wrong call would
 silently swap is not a unit either of them has to reason about again.
+
+## A cover is drawn inside a sheet, and the sheet starts off the screen
+
+Reported as "titles not showing," and the screenshot showed titles —
+every one of them, correctly, in the Popular list. What did not show
+was the artwork: real covers never arrived, not even for books
+everybody has heard of, while the drawn fallback covers (initials on
+a hue) worked every time. That split is the tell — the network call
+that finds a book was fine, and something after it, specific to an
+actual image, was not.
+
+**`loading="lazy"` INSIDE A `.sheet` IS THE BUG, AND IT WAS IN THREE
+PLACES.** Every image this app builds — a Mind cover, a friend's post,
+a profile wall's tile — is built inside `.sheet`, and `.sheet` rests
+at `transform: translateY(100%)` — fully below the viewport — until
+`.is-open` animates it up. WebKit decides whether an image is "near
+the viewport" from where it sits at the moment it is evaluated, and an
+element sitting off-screen by TRANSFORM can be judged not-near and
+never fetched at all, even once the sheet has visibly slid up over it.
+It was never one mistake; the same `img.loading = 'lazy'` line had
+been written at all three of this app's image call sites, because it
+reads as the obviously-correct thing to do on a small thumbnail.
+
+**CHROMIUM DOES NOT REPRODUCE IT, PROBED RATHER THAN ASSUMED.** A
+minimal page — one `<img loading="lazy">` inside a box resting at
+`translateY(100%)`, served locally so the network is not a confound —
+loaded the image before the transform ever ran, on this browser,
+regardless of the attribute. That is the same shape as the edit
+sheet's time-field overflow: the only browser on this machine cannot
+show the bug, so the fix is reasoned from the mechanism rather than
+proven here, and the proof has to come from the device that has it.
+
+**THE STATIC CHECK ALMOST FLAGGED ITS OWN EXPLANATION.** The first
+version matched `loading\s*=\s*['"]lazy['"]`, which is exactly as
+happy to match the PROSE in the comment explaining the fix — `NO
+loading="lazy"` — as it is to match a real `img.loading = 'lazy'`
+assignment. Tightened to `\.loading\s*=\s*'lazy'`, the property
+assignment this file's own convention always writes, which the
+comment's double-quoted mention does not contain. A check that flags
+its own explanation is worse than none, and this repo has shipped
+that exact shape of bug before, in a CSS comment quoting its own
+closing marker.
+
+**THE CHECK IS A GUARD AGAINST REINTRODUCING THE MISTAKE, NOT PROOF
+THE FIX WORKS** — said so in the comment beside it, because the two
+are different claims and this repo has conflated them before. Proven
+to bite by putting the line back and watching it fail, then taking it
+out again.

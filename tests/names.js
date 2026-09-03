@@ -474,5 +474,31 @@ for (const app of APPS.concat([['shell.js']])) {
     faults.join('; '));
 }
 
+/* ── NO IMAGE IN schedule/ IS loading="lazy" ──
+   Every image this app builds — a cover, a friend's post, a profile
+   wall's tile — is built inside `.sheet`, which rests at
+   `transform: translateY(100%)` until it opens. WebKit's lazy-load
+   decides an image is or is not "near the viewport" from where it
+   sits at the moment it is evaluated, and an off-screen-by-transform
+   element can be judged not-near and never fetched — even once the
+   sheet has visibly slid up over it. It shipped once as three
+   separate mistakes and was reported as "titles not showing" when it
+   was covers, not titles, that never arrived.
+
+   Chromium does not reproduce it — probed directly: an image inside a
+   translateY(100%) box loaded before the transform ever ran, on this
+   browser, regardless of the attribute. So this is a STATIC guard
+   against reintroducing the mistake, not proof the fix works; that
+   proof can only come from the device that has the bug. */
+{
+  /* The property assignment only — `.loading = 'lazy'`, always
+     single-quoted in this file's own convention — never the loose
+     `loading\s*=\s*['"]lazy['"]`, which matches this very comment's
+     own prose ("NO loading=\"lazy\"") as readily as it matches code.
+     A check that flags its own explanation is worse than none. */
+  const lazy = read('schedule/app.js').match(/\.loading\s*=\s*'lazy'/g) || [];
+  ok('no image in schedule/app.js is loading="lazy"', lazy.length === 0, lazy);
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
