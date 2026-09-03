@@ -1694,10 +1694,28 @@ week with a shape rather than an empty frame with instructions in it.
 `HOME` in `schedule/app.js` carries the `.workers.dev` address, so
 nobody is handed a URL to type and mistype. What used to be checked —
 friends is off until you turn it on — has become something stricter and
-truer: **the week, the ring and the tally reach nothing at all**, and a
-single request off origin before the Friends tab is opened fails the
-suite. Arriving at that tab claims a code; drawing it still only draws,
-which is the same split that stopped the first version recursing.
+truer: **the week, the ring and the tally reach nothing that says
+anything about you**, and a single request off origin before the
+Friends tab is opened fails the suite. Arriving at that tab claims a
+code; drawing it still only draws, which is the same split that stopped
+the first version recursing.
+
+**That sentence read "reach nothing at all" and it had to be narrowed
+once, on the day Mind's Popular list got real jackets.** The honest
+version of the claim was never the COUNT of requests — it is that
+nothing leaving carries your day: not the schedule, not a tick, not a
+date, not a note, and above all not what you typed. Six public book
+covers are the same six from every phone, chosen before anybody opened
+the app.
+
+**So the allowance is two exact URL SHAPES and never a host**, written
+once at the top of `tests/schedule.js` and read by every off-origin
+check in the file: `/b/isbn/<digits>-M.jpg?default=false` and
+`lookup?id=<digits and commas>`. `openlibrary.org` serves the SEARCH
+and `covers.openlibrary.org` serves the jackets, so allowing the host
+would wave through the one request these checks exist to catch, and an
+id list of digits cannot smuggle a title. **Widening it back to a host
+is how the leak gets in.**
 
 **The sentence about what leaves has to live where nobody presses
 through it.** It was on the turn-on sheet, on the argument that a
@@ -5743,3 +5761,54 @@ THE FIX WORKS** — said so in the comment beside it, because the two
 are different claims and this repo has conflated them before. Proven
 to bite by putting the line back and watching it fail, then taking it
 out again.
+
+## Popular wears real jackets, and the promise was re-stated rather than relaxed
+
+Reported twice — *titles not showing*, then *still only showing this
+no real covers* — and both screenshots were the **Popular list**,
+which had no real covers by design. Six lines written into the app
+with no id to ask a search with, so every one drew its initials on a
+hue. That was a correct reading of *the API makes a record prettier
+and is never what makes it possible*, and it was still the wrong
+answer: the whole point of showing something before you have typed is
+that it looks like the thing you are about to find.
+
+**AN ISBN AND A SHOW ID ARE PART OF THE LIST, NOT A LOOKUP.** A book
+carries its ISBN, so its jacket is a URL this repo can write out —
+`?default=false`, so a wrong number 404s and the drawn cover shows
+through, which is the same trap that cost the search a round. A
+podcast carries a numeric show id, and artwork is not derivable from
+one, so the six are fetched in **ONE batched lookup** rather than six:
+`itunes.apple.com/lookup?id=a,b,c`, cached in `popArt` for the life of
+the page, with `paint()` called back only if nothing has been typed in
+the meantime. Written into the app either way — what is fetched is the
+picture, never WHICH six.
+
+**AND IT BROKE THE APP'S OLDEST PROMISE, WHICH IS THE DANGEROUS
+PART.** *The week and the tally reach nothing at all* is the line the
+whole friends split exists to keep — and pressing Mind on Today now
+opens the picker, so the tally reached six jackets. That is not a test
+to relax quietly: it was put to the person who owns the app, with the
+alternative spelled out (jackets only once you tap the field, which
+keeps the line byte for byte and means anybody picking straight off
+the list never sees one). The covers were chosen and the line was
+rewritten to say what it now guarantees. **The allowance lives at the
+top of `tests/schedule.js` and every off-origin check in the file
+reads it**, so there is one place to widen and one place to argue
+about.
+
+**A NARROWED CHECK NEEDS A POSITIVE HALF OR IT IS A HOLE.** Six drawn
+rectangles pass *nothing leaked* perfectly, which is exactly the build
+that was reported. The count of `<img>` in the Popular list is
+asserted beside it, so the two halves together say what was actually
+asked for: real jackets, and still no search.
+
+**A BLOCKED IMAGE IS A FACT ABOUT THE SANDBOX, NOT THE APP.** Egress
+here is denied outright, so the six jackets logged six
+`ERR_TUNNEL_CONNECTION_FAILED` console errors and took four *nothing
+threw* assertions down with them. They are stubbed with a 1x1 gif in
+every context that opens Mind — which does NOT hide them from the
+off-origin checks, because `page.on('request')` fires whether or not a
+route answers. Relaxing the *nothing threw* checks instead would have
+been the mistake: those are what catch a real fault.
+

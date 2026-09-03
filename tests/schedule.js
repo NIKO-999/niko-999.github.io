@@ -99,6 +99,33 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   colorScheme: 'dark',
   isMobile: true, hasTouch: true, locale: 'en-GB' };
 
+/* ── A FIXED JACKET IS NOT A REQUEST ABOUT YOU ──
+   Mind's Popular list is six lines written into the app: the same six
+   on every phone, chosen before anybody opened it. Its covers
+   therefore carry nothing — an ISBN typed into this repo, and a list
+   of numeric show ids — where a SEARCH carries the one thing that is
+   yours, which is what you typed.
+
+   So every off-origin check in this file allows these two exact
+   SHAPES and nothing else. Never a HOST: openlibrary.org serves the
+   search and covers.openlibrary.org serves the jackets, so "it went
+   to Open Library" would wave through the request those checks exist
+   to catch. An id list of digits and commas cannot smuggle a title. */
+const ART = [
+  /^https:\/\/covers\.openlibrary\.org\/b\/isbn\/[0-9Xx]{10,13}-M\.jpg\?default=false$/,
+  /^https:\/\/itunes\.apple\.com\/lookup\?id=[0-9,]+$/,
+];
+const isArt = (u) => ART.some((r) => r.test(u));
+
+/* A 1x1 gif, so a jacket that loads logs no console error. The egress
+   here is blocked outright, and a blocked image is a fact about this
+   sandbox rather than about the app — page.on('request') still records
+   the URL, so the off-origin checks see it either way. */
+const GIF = Buffer.from(
+  'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
+const jackets = (pg) => pg.route('https://covers.openlibrary.org/**',
+  (r) => r.fulfill({ status: 200, contentType: 'image/gif', body: GIF }));
+
 /* Sentence in, day out. Every row here is something you would actually
    say at a phone about your own day; the awkward ones are the point —
    no meridiem at all, a spelled-out time, several days at once, a
@@ -138,6 +165,7 @@ const SAID = [
 
 (async () => {
   const { browser, page, errs } = await open(PHONE);
+  await jackets(page);
 
   /* Speech is a browser service that headless Chromium cannot run, and
      leaving it defined means the sheet opens listening and errors half
@@ -4725,6 +4753,7 @@ const SAID = [
     const ferrs = [];
     fp.on('pageerror', (e) => ferrs.push(String(e)));
     fp.on('console', (m) => { if (m.type() === 'error') ferrs.push(m.text()); });
+    await jackets(fp);
     const paths = [];
     await fp.route(HOST + '/**', async (route) => {
       const r = route.request();
@@ -4846,8 +4875,9 @@ const SAID = [
        single request off this origin before the Friends tab is opened
        fails, and that is the line the app must not cross. */
     ok('the week and the tally have asked for nothing off origin',
-      fetched.every((u) => u.startsWith(BASE) || u.startsWith('data:') || u.startsWith('blob:')),
-      fetched.filter((u) => !u.startsWith(BASE)));
+      fetched.every((u) => u.startsWith(BASE) || u.startsWith('data:')
+        || u.startsWith('blob:') || isArt(u)),
+      fetched.filter((u) => !u.startsWith(BASE) && !isArt(u)));
     ok('and nothing has been claimed yet',
       await fp.evaluate(() => {
         const n = JSON.parse(localStorage.getItem('sched.net.v1') || 'null');
@@ -7360,6 +7390,7 @@ const SAID = [
     const perrs = [];
     ppage.on('pageerror', (e) => perrs.push(String(e)));
     ppage.on('console', (m) => { if (m.type() === 'error') perrs.push(m.text()); });
+    await jackets(ppage);
     const pAsked = [];
     ppage.on('request', (r) => pAsked.push(r.url()));
 
@@ -7952,8 +7983,9 @@ const SAID = [
        this origin except the one stub it was pointed at on purpose. */
     ok('and Pattern asked for nothing off origin',
       pAsked.every((u) => u.startsWith(BASE) || u.startsWith(HOSTX)
-        || u.startsWith('data:') || u.startsWith('blob:')),
-      pAsked.filter((u) => !u.startsWith(BASE) && !u.startsWith(HOSTX)));
+        || u.startsWith('data:') || u.startsWith('blob:') || isArt(u)),
+      pAsked.filter((u) => !u.startsWith(BASE) && !u.startsWith(HOSTX)
+        && !isArt(u)));
     await pctx.close();
   }
 
@@ -8940,6 +8972,10 @@ const SAID = [
     const offOrigin = () => mAsked.filter((u) => !u.startsWith(BASE)
       && !u.startsWith('data:') && !u.startsWith('blob:'));
 
+    /* The two jacket shapes are the file's own, at the top: a fixed
+       public cover is not a request about you, and a SEARCH is. */
+    const leaks = () => offOrigin().filter((u) => !isArt(u));
+
     /* ── THE TILE IS THE DOOR, AND IT IS THE ONLY ONE ──
        It hung off the tick of a Read or a Walk BLOCK, and that was
        wrong twice: it put a question about your day on a line in a
@@ -9002,6 +9038,10 @@ const SAID = [
          as waiting. */
       popular: [...document.querySelectorAll('.mn-res .mn-hit b')].map((b) => b.textContent),
       popLabel: (document.querySelector('.mn-res').previousElementSibling || {}).textContent,
+      /* Real jackets, not six drawn rectangles: what was reported was
+         "still only showing this no real covers", and the Popular
+         list was the one place that had none. */
+      popImg: document.querySelectorAll('.mn-res .mn-hit .mn-art img').length,
     }));
     ok('pressing Mind on Today asks what you put in your head',
       sheet.title === 'Mind'
@@ -9012,11 +9052,21 @@ const SAID = [
     ok('...and something is there to press before you have typed anything',
       sheet.popular.length === 6 && sheet.popLabel === 'Popular'
       && sheet.popular.includes('Eat That Frog!'), sheet);
-    /* Reaching nothing off origin to draw six suggestions is the
-       whole point of them being written into the app rather than
-       fetched — checked here, before a single character is typed. */
-    ok('...and drawing them has asked for nothing off origin',
-      offOrigin().length === 0, offOrigin());
+    /* ── AND THEY WEAR REAL JACKETS ──
+       Every one of the six is a book somebody would recognise by its
+       cover, and a wall of drawn initials is what "no real covers"
+       was reporting. Asserted as the COUNT, because the drawn cover
+       sits underneath either way — a build that fetched none of them
+       still draws six perfectly good rectangles. */
+    ok('...and every one of them wears its own jacket',
+      sheet.popImg === 6, sheet);
+    /* The list itself is written into the app rather than fetched, so
+       nothing about WHICH six is asked of anybody. What the jackets
+       cost is the two shapes ART names — and a search, which is the
+       only request here carrying something you typed, must not have
+       happened. Checked before a single character is typed. */
+    ok('...and drawing them has searched for nothing',
+      leaks().length === 0, leaks());
 
     /* ── TYPING REPLACES THE SUGGESTIONS, NOT THE OTHER WAY ROUND ──
        Once you start putting something in, that is what the list
@@ -9038,9 +9088,13 @@ const SAID = [
        Mind adds one more door and it must stay SHUT until you
        actually search: not on boot, not on a render, and not on
        OPENING the sheet. Measured after the sheet is up and before a
-       single key is typed. */
-    ok('opening the sheet has asked for nothing off origin',
-      offOrigin().length === 0, offOrigin());
+       single key is typed.
+
+       Popular's jackets are the one thing that leaves on open, and
+       they are not that door: a fixed public list is the same request
+       from every phone, and ART is what holds it to exactly that. */
+    ok('opening the sheet has searched for nothing',
+      leaks().length === 0, leaks());
 
     /* ── AND ONLY WHAT YOU TYPED LEAVES ──
        Not the block, not the date, not the tick, not the note. The
@@ -9254,7 +9308,7 @@ const SAID = [
       leaked.length === 0, leaked);
     ok('...and nothing has been pushed at all outside the two searches',
       offOrigin().every((u) => u.startsWith('https://openlibrary.org/')
-        || u.startsWith('https://covers.openlibrary.org/')),
+        || u.startsWith('https://covers.openlibrary.org/') || isArt(u)),
       offOrigin());
 
     /* ══════════════════════════════════════════════════════

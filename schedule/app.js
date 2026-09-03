@@ -6102,24 +6102,79 @@
      because there is no id here to ask a search for a real jacket
      with. Typing over it replaces it with the real search, which is
      the one place artwork comes from. */
+  /* ── AND THEY CARRY REAL ARTWORK ──
+     They went in with none, on the argument that there is no id here
+     to ask a search for a jacket with — so all six drew as initials
+     on a hue, and it was reported twice as "no real covers", which is
+     exactly what it was. The argument was wrong about books: a cover
+     does not need a search, only an ISBN, and an ISBN is a constant.
+
+     `?default=false` is what makes a WRONG one degrade rather than
+     lie: without it this endpoint answers an id it has no artwork for
+     with a blank placeholder and a 200, so a bad ISBN would paint an
+     empty white box over the drawn cover instead of falling back to
+     it. With it a miss is a real 404, the image removes itself, and
+     what shows through is the cover the app drew.
+
+     A podcast has no equivalent constant — Apple's artwork lives at a
+     path nothing can derive — so those carry the show's numeric id
+     and one lookup fills all six at once. */
   var MIND_POPULAR = {
     book: [
-      { t: 'Atomic Habits', a: 'James Clear' },
-      { t: 'Eat That Frog!', a: 'Brian Tracy' },
-      { t: 'Deep Work', a: 'Cal Newport' },
-      { t: 'The 7 Habits of Highly Effective People', a: 'Stephen Covey' },
-      { t: 'The Power of Now', a: 'Eckhart Tolle' },
-      { t: 'Can’t Hurt Me', a: 'David Goggins' }
+      { t: 'Atomic Habits', a: 'James Clear', isbn: '9780735211292' },
+      { t: 'Eat That Frog!', a: 'Brian Tracy', isbn: '9781626569416' },
+      { t: 'Deep Work', a: 'Cal Newport', isbn: '9781455586691' },
+      { t: 'The 7 Habits of Highly Effective People', a: 'Stephen Covey',
+        isbn: '9780743269513' },
+      { t: 'The Power of Now', a: 'Eckhart Tolle', isbn: '9781577314806' },
+      { t: 'Can’t Hurt Me', a: 'David Goggins', isbn: '9781544512273' }
     ],
     podcast: [
-      { t: 'The Daily Stoic', a: 'Ryan Holiday' },
-      { t: 'Huberman Lab', a: 'Andrew Huberman' },
-      { t: 'The Tim Ferriss Show', a: 'Tim Ferriss' },
-      { t: 'Deep Questions', a: 'Cal Newport' },
-      { t: 'The Diary Of A CEO', a: 'Steven Bartlett' },
-      { t: 'On Purpose', a: 'Jay Shetty' }
+      { t: 'The Daily Stoic', a: 'Ryan Holiday', id: '1200361736' },
+      { t: 'Huberman Lab', a: 'Andrew Huberman', id: '1545953110' },
+      { t: 'The Tim Ferriss Show', a: 'Tim Ferriss', id: '863897795' },
+      { t: 'Deep Questions', a: 'Cal Newport', id: '1515786216' },
+      { t: 'The Diary Of A CEO', a: 'Steven Bartlett', id: '1291423644' },
+      { t: 'On Purpose', a: 'Jay Shetty', id: '1450994021' }
     ]
   };
+  /* Built once and cached for the session: the list is a constant, so
+     a second visit to the sheet asks for nothing. */
+  var popArt = null;
+  function scMindPopular(ask, cb) {
+    var list = MIND_POPULAR[ask] || [];
+    if (ask === 'book') {
+      return list.map(function (h) {
+        return { t: h.t, a: h.a,
+          c: 'https://covers.openlibrary.org/b/isbn/' + h.isbn + '-M.jpg?default=false' };
+      });
+    }
+    if (ask !== 'podcast') return list;
+    var out = list.map(function (h) {
+      return { t: h.t, a: h.a, c: (popArt && popArt[h.id]) || '' };
+    });
+    /* One request for all six, and only the first time. A show whose
+       id has moved simply keeps its drawn cover — the list is still
+       six things you can press either way. */
+    if (!popArt && cb) {
+      popArt = {};
+      var ids = list.map(function (h) { return h.id; }).join(',');
+      fetch('https://itunes.apple.com/lookup?id=' + ids).then(function (r) {
+        return r.ok ? r.json() : null;
+      }).then(function (j) {
+        var rs = (j && j.results) || [];
+        for (var i = 0; i < rs.length; i++) {
+          var r2 = rs[i] || {};
+          if (r2.collectionId) {
+            popArt[String(r2.collectionId)] =
+              String(r2.artworkUrl600 || r2.artworkUrl100 || '');
+          }
+        }
+        cb();
+      }).catch(function () { cb(); });
+    }
+    return out;
+  }
 
   /* ── A COVER THE APP DRAWS ITSELF ──
      For a title with no artwork, and for every title at all when the
@@ -6450,7 +6505,11 @@
            same generated cover a typed title with no artwork gets. */
         if (!typed.trim() && !hits.length && !state) {
           var kk0 = scMindKind(cur);
-          var pop = MIND_POPULAR[kk0.ask] || [];
+          /* The callback repaints when a podcast lookup lands; a book
+             list is a constant and never asks for one. */
+          var pop = scMindPopular(kk0.ask, function () {
+            if (!typed.trim() && !hits.length && !state) paint();
+          });
           if (pop.length) {
             resBox.appendChild(scEl('span', 'label', 'Popular'));
             var pl = scEl('div', 'mn-res');
