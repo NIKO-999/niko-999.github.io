@@ -5278,3 +5278,124 @@ Three things came out of it, and the third is the one worth keeping:
   -- schedule/app.js`, re-apply the edits in one scripted pass, and
   confirm the file hashes to the fingerprint `index.html` was already
   carrying.
+
+## What you put in your head
+
+Mind was the one tick on that screen with nothing behind it. Train
+asks what you trained; Mind was satisfied by a Walk or a Read block
+going green and then had no more to say — so a month of Mind ticks
+recorded that you had done SOMETHING thirty times and could not tell
+you what.
+
+It is the workout deck's question for a different subject: **four
+kinds, and the foot of the sheet names what it is about to file.**
+Read and Podcast take a title, because those are the two where WHICH
+thing matters. Walk takes nothing — an outdoor walk is the same walk
+every time and asking which one is a form standing between you and a
+tick. Journal takes only the words, because that IS the thing.
+
+**What counts as Mind is the keyword table's answer**, not a second
+list kept in step with it by hand. That is `scIsTrain`'s rule, and it
+is why adding a word in one place makes the sheet appear here too.
+
+**IT IS DELIBERATELY NOT THE WORKOUT DECK'S MACHINERY.** No deal, no
+peel, no two cards fanned behind the front one. That is right for
+choosing between twenty-two sessions and it would be a performance in
+front of a text field. This was asked for as something small and
+seamless, and four chips over a field is what that is.
+
+**THE KIND CARD WAS BUILT AND CUT.** Each kind had a hue, a glyph and
+a sentence, drawn as a tinted card under the chips. Rendered and
+looked at, it said the kind's name directly under a chip that had just
+said it, over a placeholder saying it a third time — **the same words
+three ways in eighty pixels**, which is the duplication this project
+keeps having to take back out. The four hue tokens went with it rather
+than being left declared: the chips are the only place a kind appears
+and a filled control in this app is white, so a colour there had no
+WHICH left to say.
+
+### The one place this app reaches off origin, besides friends
+
+Covers come from Open Library (books) and the iTunes Search API
+(podcasts) — both free, both keyless. **What leaves is the words you
+type into the search box and nothing else**: not the block, not the
+date, not the tick, not your notes. `scMindFind` is the only function
+outside the friends half that builds a request, and it is called from
+one place.
+
+**AND NOTHING HAPPENS UNTIL YOU SEARCH.** Not on boot, not on a
+render, not on OPENING the sheet — measured with the sheet up and
+before a key is typed. That keeps the assertion that has guarded the
+week and the tally since the friends half landed exactly as it was:
+the strict page never types in that field, so it still sees zero.
+
+**The debounce is a promise rather than a polish.** Every keystroke
+would be a request off the device; 400ms and a two-character floor
+make a typed title cost one or two rather than fifteen.
+
+**THE TYPED TITLE IS THE BASE, NOT THE FALLBACK.** Every one of these
+is somebody else's server: it can be down, slow, blocked, or simply
+unreachable on a phone with no signal, and its response shape is not
+something this repo controls. So *use what you typed* is offered above
+the results and whatever the search did, and a failure says what still
+works rather than that something broke. **The API makes a record
+prettier and is never what makes it possible.**
+
+**The drawn cover is UNDERNEATH the image, not swapped in on an
+error.** A blocked or broken jacket degrades to a real cover instead
+of to a hole, with nothing to time and nothing to fail. Its hue comes
+off the title's own characters, so one book is the same colour every
+time you see it — which is most of what a cover does at 44px.
+
+**Read defensively at every field.** The mapper checks rather than
+assumes, and the suite feeds it an entry missing the field it keys on:
+a third-party shape changing must cost the covers, never the screen.
+
+**A late reply is dropped.** `scMindFind` hands back its own sequence
+number so the caller can record which search is live. Reading it off
+`mindSeq` afterwards was the first version and it was off by one in
+the only direction that matters — every reply then compared as older
+than the request that produced it, so the field sat on *Looking…* for
+ever while the fetch had already answered.
+
+**I could not verify either API from the session this was built in.**
+The egress proxy denies all general outbound traffic, so the response
+shapes and the cover URL patterns come from knowledge rather than from
+a measurement, and the suite stubs both. That is the probe lesson
+arriving as an absence: **when you cannot measure the real thing,
+build so that being wrong about it costs a picture rather than the
+feature** — which is exactly what the typed-title base is for.
+
+### And it is a tag on the row
+
+A record you can only see by opening a sheet is a record you stop
+keeping — the objectives' own argument, one feature along. The book or
+the show by name, the kind's word where there is no title, never both.
+
+**NOT `--t-walk`, WHICH IS MIND'S OWN HUE, and that was measured.**
+The obvious pick is the colour the Mind tile already wears, and it is
+wrong for the one reason a tile cannot see: this tag sits directly
+beside the STATE tag, and Completed is `--st-ok`. In Lab, `--t-walk`
+against `--st-ok` is **dE 12.7 on the dark face and 5.7 on the light**
+— under the dE >= 12 floor this app already holds two colours on one
+screen to, so a finished row wore two greens a shade apart and read as
+one smeared tag. `--t-read` is **dE 93** from it on both faces, and it
+is the honest colour anyway: this record is a book, a show or a page.
+Asserted on composited pixels rather than by token name, so it holds
+whatever either one is changed to.
+
+**AND THE REPAIR IS WRITTEN BACK — the third time this hole shipped.**
+`scMindLoad` normalised a damaged day and an unknown kind in memory
+and never saved, so the repair was redone every boot and lost the
+moment anything else wrote the key. `scClean` did it with block ids
+and `scTrainLoad` did it with the summed estimate; this one was caught
+by the check written for it rather than by a symptom, which is the
+only reason it is a footnote instead of a section. Written back only
+when something actually CHANGED, so an intact record costs no write
+on every open.
+
+**A note token has to be one no search term can contain.** The check
+that the note never leaves looked for the word "indexed" — which is a
+word in the query the test itself types into the search box, so it
+matched the app working exactly as designed and reported a leak.
+A filter that can match correct behaviour is worse than no filter.

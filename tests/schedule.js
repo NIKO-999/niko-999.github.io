@@ -8831,6 +8831,288 @@ const SAID = [
     await octx.close();
   }
 
+  /* ═══ what you put in your head ═══
+     Mind was the one tick on this screen with nothing behind it: a
+     Walk or a Read block going green, and then no way to say what you
+     read. It is the workout deck's question for a different subject.
+
+     IN ITS OWN CONTEXT, and that is not tidiness. This section is the
+     only one in the app that lets a request leave the origin, so it
+     counts every request it makes — and it opens sheets and writes a
+     record, which is exactly the kind of check that breaks the next
+     one if it runs in the middle of the file. */
+  {
+    console.log('\n── what you put in your head ──');
+    const mctx = await browser.newContext({ ...PHONE });
+    const mpage = await mctx.newPage();
+    const merrs = [];
+    mpage.on('pageerror', (e) => merrs.push(String(e)));
+
+    /* ── BOTH THIRD PARTIES ARE STUBBED, AND THAT IS DELIBERATE ──
+       A test that hit Open Library would be slow, flaky, and would
+       fail on a machine with no network — and it would be measuring
+       somebody else's uptime rather than this app. What is asserted
+       is the app's half of the contract: WHEN it asks, WHAT it sends,
+       and that it still works when the answer never comes. */
+    const sent = [];
+    await mpage.route('https://openlibrary.org/**', (r) => {
+      sent.push(r.request().url());
+      return r.fulfill({ status: 200, contentType: 'application/json',
+        body: JSON.stringify({ docs: [
+          { title: 'Eat That Frog!', author_name: ['Brian Tracy'], cover_i: 1 },
+          /* one with NO artwork, so the drawn cover is exercised */
+          { title: 'No Excuses!', author_name: ['Brian Tracy'] },
+          /* and one missing the field the mapper keys on, which a
+             third-party shape is free to do and must not throw */
+          { author_name: ['Nobody'] } ] }) });
+    });
+    /* A 1x1 gif, so a cover that loads logs no console error and the
+       image path is genuinely exercised. */
+    await mpage.route('https://covers.openlibrary.org/**', (r) => r.fulfill({
+      status: 200, contentType: 'image/gif',
+      body: Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64') }));
+    await mpage.route('https://itunes.apple.com/**', (r) => {
+      sent.push(r.request().url());
+      return r.fulfill({ status: 200, contentType: 'application/json',
+        body: JSON.stringify({ results: [
+          { collectionName: 'The Daily Stoic', artistName: 'Ryan Holiday',
+            artworkUrl600: 'https://covers.openlibrary.org/x.jpg' } ] }) });
+    });
+
+    const mAsked = [];
+    mpage.on('request', (r) => mAsked.push(r.url()));
+    await mpage.addInitScript(() => {
+      localStorage.setItem('sched.net.v1', JSON.stringify({ on: false, url: '', code: '' }));
+      localStorage.setItem('sched.tour.v1', '1');
+      localStorage.setItem('sched.hint2.v1', '1');
+      localStorage.setItem('sched.hintw.v1', '1');
+    });
+    await mpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await mpage.waitForTimeout(500);
+
+    const offOrigin = () => mAsked.filter((u) => !u.startsWith(BASE)
+      && !u.startsWith('data:') && !u.startsWith('blob:'));
+
+    /* Ticking a Read block is one of the three doors — and the sheet
+       hangs off the press that says it HAPPENED, so a row already
+       ticked has to be unticked first or the same press takes the
+       tick back and opens nothing. Written idempotently rather than
+       counting presses, because which state the row is in depends on
+       what the assertions above this one did. */
+    const readRow = () => mpage.evaluate(() => {
+      const r = [...document.querySelectorAll('.row')].find((x) => {
+        const n = x.querySelector('.n');
+        return n && /^read$/i.test(n.textContent.trim());
+      });
+      if (!r) throw new Error('no Read row on the day');
+      const was = r.classList.contains('is-done');
+      r.click();
+      return was;
+    });
+    const openMind = async () => {
+      if (await readRow()) {        /* it was done: that press untedid it */
+        await mpage.waitForTimeout(420);
+        await readRow();            /* and this one ticks it again */
+      }
+      await mpage.waitForTimeout(620);
+    };
+    await openMind();
+
+    const sheet = await mpage.evaluate(() => ({
+      title: (document.getElementById('scSheetTitle') || {}).textContent,
+      kinds: [...document.querySelectorAll('.wc-chips .wc-chip')].map((c) => c.textContent),
+      seg: !!document.querySelector('.wc-chips.is-seg'),
+      note: document.querySelectorAll('.sheet textarea').length,
+    }));
+    ok('ticking a mind block asks what you put in your head',
+      /mind/i.test(sheet.title || '')
+      && sheet.kinds.join('|') === 'Read|Podcast|Walk|Journal'
+      && sheet.seg && sheet.note === 1, sheet);
+
+    /* ── THE PROMISE, AND IT IS THE WHOLE POINT OF THE SECTION ──
+       This app reaches nothing off origin except the friends half.
+       Mind adds one more door and it must stay SHUT until you
+       actually search: not on boot, not on a render, and not on
+       OPENING the sheet. Measured after the sheet is up and before a
+       single key is typed. */
+    ok('opening the sheet has asked for nothing off origin',
+      offOrigin().length === 0, offOrigin());
+
+    /* ── AND ONLY WHAT YOU TYPED LEAVES ──
+       Not the block, not the date, not the tick, not the note. The
+       whole request is checked rather than just its host, because
+       "it went to Open Library" is true of a request carrying
+       anything at all. */
+    await mpage.fill('.sheet input[type=text]', 'brian tracy');
+    await mpage.waitForTimeout(1300);
+    const url = sent[0] || '';
+    const qs = new URL(url).searchParams;
+    ok('typing searches, and the request carries the query and nothing else',
+      sent.length === 1 && url.startsWith('https://openlibrary.org/search.json')
+      && qs.get('q') === 'brian tracy'
+      && [...qs.keys()].sort().join(',') === 'fields,limit,q', { sent, url });
+
+    const hits = await mpage.evaluate(() => ({
+      rows: [...document.querySelectorAll('.mn-res .mn-hit')].map((b) => ({
+        t: b.querySelector('b').textContent,
+        img: b.querySelectorAll('.mn-art img').length,
+        init: b.querySelector('.mn-art i').textContent,
+      })),
+      own: document.querySelectorAll('.mn-hit.is-own').length,
+    }));
+    /* The malformed third entry is dropped rather than drawn or
+       thrown on — a shape this repo does not control changing must
+       cost covers, never the screen. */
+    ok('the results are drawn, and a malformed one is dropped rather than thrown on',
+      hits.rows.length === 2 && hits.rows[0].t === 'Eat That Frog!', hits);
+    /* ── THE DRAWN COVER IS UNDERNEATH, NOT A FALLBACK ──
+       Every card has initials whether or not artwork loaded, so a
+       blocked or broken image degrades to a real cover instead of a
+       hole. */
+    ok('a title with no artwork still gets a cover, drawn from its own initials',
+      hits.rows[1].img === 0 && hits.rows[1].init === 'NE'
+      && hits.rows[0].img === 1 && hits.rows[0].init === 'EF', hits.rows);
+    ok('...and what you typed is offered whatever the search did',
+      hits.own === 1, hits);
+
+    /* Pick it, write a note, file it. */
+    await mpage.click('.mn-res .mn-hit >> nth=0');
+    await mpage.waitForTimeout(260);
+    await mpage.fill('.sheet textarea', 'Bullet one. Bullet two. NOTEONLYZQX');
+    const foot = await mpage.$eval('.sheet .btn.go', (b) => b.textContent);
+    ok('the foot names what it is about to file',
+      foot === 'Log Eat That Frog!', { foot });
+    await mpage.click('.sheet .btn.go');
+    await mpage.waitForTimeout(620);
+
+    const rec = await mpage.evaluate(() => {
+      const o = JSON.parse(localStorage.getItem('sched.mind.v1') || '{}');
+      const day = Object.keys(o)[0];
+      const id = day && Object.keys(o[day])[0];
+      return { day, r: id ? o[day][id] : null };
+    });
+    ok('the record is filed under the date, with the kind, the title and the note',
+      !!rec.r && rec.r.k === 'read' && rec.r.t === 'Eat That Frog!'
+      && rec.r.a === 'Brian Tracy' && rec.r.b === 'Bullet one. Bullet two. NOTEONLYZQX'
+      && /^\d{4}-\d{2}-\d{2}$/.test(rec.day), rec);
+
+    /* ── AND IT IS ON THE ROW ──
+       A record you can only see by opening a sheet is a record you
+       stop keeping — the objectives' own argument, one feature along. */
+    const tags = await mpage.evaluate(() => {
+      const w = [...document.querySelectorAll('.row .wo')]
+        .find((x) => x.textContent === 'Eat That Frog!');
+      if (!w) return { found: false };
+      const row = w.closest('.row');
+      const st = row.querySelector('.st');
+      return { found: true, tag: getComputedStyle(w).color,
+               state: st ? getComputedStyle(st).color : null,
+               word: st ? st.textContent : null };
+    });
+    /* ── AND ITS HUE CLEARS THE STATE TAG BESIDE IT ──
+       Mind's own --t-walk was the obvious pick and measured dE 5.7
+       from --st-ok on the light face, so a finished row wore two
+       greens a shade apart and read as one smeared tag. Measured
+       here as COMPOSITED colour rather than as a token name, so it
+       holds whatever either one is changed to. */
+    const px = (c) => (c.match(/[\d.]+/g) || []).map(Number).slice(0, 3)
+      .map((v) => (v <= 1 && c.indexOf('srgb') >= 0 ? v * 255 : v));
+    ok('what you put in your head is a tag on the row, told apart from its state',
+      tags.found && deltaE(px(tags.tag), px(tags.state)) >= 12,
+      { ...tags, dE: tags.found ? deltaE(px(tags.tag), px(tags.state)).toFixed(1) : null });
+
+    /* ── A SEARCH THAT FAILS IS NOT AN ERROR STATE ──
+       Every one of these is somebody else's server: it can be down,
+       slow, blocked, or simply unreachable on a phone with no signal.
+       The typed title is the base the feature stands on, so a failure
+       has to leave you able to log — asserted by making the search
+       fail outright. */
+    await mpage.unroute('https://openlibrary.org/**');
+    await mpage.route('https://openlibrary.org/**', (r) => r.abort());
+    await openMind();
+    /* The block already carries a record, so the sheet opens on the
+       PICK rather than on the field — which is the state somebody is
+       in whenever they come back to change what they logged. Change
+       is how the field comes back, so pressing it is both the way to
+       reach the search and a check that the control works. */
+    await mpage.click('.mn-pick .btn.off');
+    await mpage.waitForTimeout(300);
+    await mpage.fill('.sheet input[type=text]', 'something nobody indexed');
+    await mpage.waitForTimeout(1400);
+    const dead = await mpage.evaluate(() => ({
+      say: (document.querySelector('.mn-say') || {}).textContent || '',
+      own: document.querySelectorAll('.mn-hit.is-own').length,
+      res: document.querySelectorAll('.mn-res .mn-hit').length,
+      foot: (document.querySelector('.sheet .btn.go') || {}).textContent,
+    }));
+    ok('a search that cannot be reached still lets you log what you typed',
+      dead.own === 1 && dead.res === 0 && /still logs/.test(dead.say), dead);
+    await mpage.click('.mn-hit.is-own');
+    await mpage.waitForTimeout(260);
+    await mpage.click('.sheet .btn.go');
+    await mpage.waitForTimeout(560);
+    ok('...and that record is filed like any other',
+      await mpage.evaluate(() => {
+        const o = JSON.parse(localStorage.getItem('sched.mind.v1') || '{}');
+        const day = Object.keys(o)[0];
+        const id = day && Object.keys(o[day])[0];
+        return !!id && o[day][id].t === 'something nobody indexed';
+      }));
+
+    /* ── HOW IT WENT AND WHAT YOU WROTE NEVER LEAVE ──
+       The note is the same claim the day's rating makes: a count says
+       you showed up and a sentence says what your day IS, and the
+       second is the thing this app exists not to send. Both halves,
+       because each passes on the other's bug — nothing may be sent
+       when you write one, and a push that happens for some other
+       reason must not be carrying it. */
+    /* The token has to be one no SEARCH TERM can contain, or the
+       filter matches the app working correctly: the first version
+       looked for "indexed", which is a word in the query the test
+       itself types into the box. */
+    const leaked = offOrigin().filter((u) => /NOTEONLYZQX|Bullet/i.test(
+      decodeURIComponent(u)));
+    ok('the note never leaves, on any request the app has made',
+      leaked.length === 0, leaked);
+    ok('...and nothing has been pushed at all outside the two searches',
+      offOrigin().every((u) => u.startsWith('https://openlibrary.org/')
+        || u.startsWith('https://covers.openlibrary.org/')),
+      offOrigin());
+
+    /* ── A STORED KIND THIS BUILD NO LONGER HAS FALLS THROUGH ──
+       The key outlives the code that wrote it, which is the rule
+       sched.view.v1 and sched.ty.v1 already keep. And a damaged DAY
+       is dropped while the record survives — asserted as the good day
+       SURVIVING, because rejecting the whole object passes any check
+       written the other way round. */
+    const fell = await mpage.evaluate(() => {
+      const o = JSON.parse(localStorage.getItem('sched.mind.v1') || '{}');
+      const day = Object.keys(o)[0];
+      const id = Object.keys(o[day])[0];
+      o[day][id] = { k: 'seance', t: 'Kept', a: '', c: '', b: '' };
+      o['not-a-date'] = { x: 1 };
+      localStorage.setItem('sched.mind.v1', JSON.stringify(o));
+      return true;
+    });
+    await mpage.reload({ waitUntil: 'networkidle' });
+    await mpage.waitForTimeout(420);
+    const after = await mpage.evaluate(() => {
+      const o = JSON.parse(localStorage.getItem('sched.mind.v1') || '{}');
+      const day = Object.keys(o).find((k) => /^\d{4}/.test(k));
+      const id = day && Object.keys(o[day])[0];
+      return { kinds: id ? o[day][id].k : null, kept: id ? o[day][id].t : null,
+               junk: Object.keys(o).filter((k) => !/^\d{4}/.test(k)).length,
+               drawn: [...document.querySelectorAll('.row .wo')]
+                 .some((w) => w.textContent === 'Kept') };
+    });
+    ok('a kind this build does not have falls through, and the record survives',
+      fell && after.kept === 'Kept' && after.kinds === 'read'
+      && after.junk === 0 && after.drawn, after);
+
+    ok('nothing threw through any of it', merrs.length === 0, merrs);
+    await mctx.close();
+  }
+
   ok('no page errors through any of it', errs.length === 0, errs);
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
