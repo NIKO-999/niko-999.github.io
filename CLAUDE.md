@@ -5453,3 +5453,39 @@ grid cannot do that. The rungs start at 10 rather than the workout's
 15, because ten minutes with a notebook is the ordinary case here, and
 every kind's estimate is already one of them so the splice never fires
 and a lone rung on a third row cannot happen.
+
+### The covers landed, and one of them was a blank box
+
+Reported working from the phone, which is the only place either API
+could be measured — the session this was built in has an egress proxy
+that denies all general outbound traffic, so every claim about Open
+Library and iTunes up to that point was reasoning rather than
+evidence.
+
+**`default=false` IS THE WHOLE OF WHY A MISSING COVER WORKS.**
+`covers.openlibrary.org` answers an id it has no artwork for with a
+**blank placeholder image and a 200**, not a 404. So `onerror` never
+fires, the `<img>` stays, and an empty white box is painted over the
+cover this app drew — which reads as the artwork having FAILED rather
+than as there being none. With the parameter a missing cover is a
+genuine 404, the image removes itself, and the drawn cover shows
+through as designed.
+
+That is the whole "degrades to a real cover instead of a hole"
+argument depending on a query parameter nobody would think to check,
+and it is the shape of every third-party integration bug: the failure
+case answered 200.
+
+**AND THE ONES WITH ARTWORK COME FIRST.** Relevance order alone buries
+them — Open Library returns a lot of editions and only some carry a
+cover, so a search for a book you own could come back as six coloured
+rectangles. Twenty are asked for, the covered ones are kept ahead of
+the bare ones with **order preserved inside each half**, and twelve
+are drawn. The top of the list is still the most relevant answers; it
+is the most relevant answers THAT HAVE A COVER. Nothing is dropped —
+a book the index has no artwork for is still there, below them.
+
+**The service worker was ruled out rather than assumed.** Its fetch
+handler returns early on any request whose origin is not its own, so
+cross-origin calls pass straight through untouched and none of this
+was ever a caching question.

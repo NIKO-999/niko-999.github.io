@@ -5891,8 +5891,11 @@
      prettier and is never what makes it possible. */
   var MIND_SRC = {
     book: {
+      /* Twenty asked for and twelve kept, because the ones with
+         artwork are picked out of the answer below and relevance
+         alone returns a lot of editions with no cover at all. */
       url: function (q) {
-        return 'https://openlibrary.org/search.json?limit=12'
+        return 'https://openlibrary.org/search.json?limit=20'
           + '&fields=title,author_name,cover_i&q=' + encodeURIComponent(q);
       },
       /* Read defensively on purpose. This is a third-party shape that
@@ -5900,18 +5903,38 @@
          rather than assumed — a response that changes should lose the
          covers, never throw inside a render. */
       map: function (j) {
-        var out = [];
+        var got = [], none = [];
         var docs = (j && j.docs) || [];
-        for (var i = 0; i < docs.length && out.length < 12; i++) {
+        for (var i = 0; i < docs.length; i++) {
           var d = docs[i] || {};
           if (!d.title) continue;
-          out.push({
+          var hit = {
             t: String(d.title),
             a: (d.author_name && d.author_name[0]) ? String(d.author_name[0]) : '',
-            c: d.cover_i ? 'https://covers.openlibrary.org/b/id/' + d.cover_i + '-M.jpg' : ''
-          });
+            /* ── `default=false` IS THE WHOLE OF WHY COVERS WORKED ──
+               Without it this endpoint answers a MISSING cover with a
+               blank placeholder image and a 200, so `onerror` never
+               fires and an empty white box is painted over the drawn
+               cover — which reads as the artwork having failed rather
+               than as there being none. With it a missing cover is a
+               404, the img removes itself, and what shows through is
+               the cover this app drew. */
+            c: d.cover_i
+              ? 'https://covers.openlibrary.org/b/id/' + d.cover_i + '-M.jpg?default=false'
+              : ''
+          };
+          (hit.c ? got : none).push(hit);
         }
-        return out;
+        /* ── THE ONES WITH ARTWORK COME FIRST ──
+           Relevance order alone buries the covers: Open Library
+           returns a lot of editions and only some carry one, so a
+           search for a book you own could come back as six coloured
+           rectangles. Order is preserved WITHIN each half, so the top
+           of the list is still the most relevant answers — it is the
+           most relevant answers THAT HAVE A COVER. Nothing is
+           dropped: a book the index has no artwork for is still
+           there, below them. */
+        return got.concat(none).slice(0, 12);
       }
     },
     podcast: {
