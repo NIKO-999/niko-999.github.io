@@ -1241,31 +1241,6 @@
           else wtag.classList.add('is-off');
           props.appendChild(wtag);
         }
-        /* ── AND WHAT YOU PUT IN YOUR HEAD, THE SAME WAY ──
-           The workout tag's argument, one item along: a record you can
-           only see by opening a sheet is a record you stop keeping.
-           The book or the show by name, the kind's own word where
-           there is no title — never both, because "Read · Eat That
-           Frog" says the word the title already says.
-
-           ── AND NOT MIND'S OWN --t-walk, WHICH WAS MEASURED ──
-           The obvious pick is the hue the Mind tile already wears, and
-           it is wrong for the one reason a tile cannot see: this tag
-           sits directly beside the STATE tag, and Completed is
-           --st-ok. Measured in Lab, --t-walk against --st-ok is
-           dE 12.7 on the dark face and **5.7 on the light** — under
-           the dE >= 12 floor this app already holds two colours on one
-           screen to, so a finished row wore two greens a shade apart
-           and read as one smeared tag. --t-read is dE 93 from it on
-           both faces, and it is the honest colour for the thing
-           anyway: this record is a book, a show or a page. */
-        var mr = scMindOf(bd, it.id);
-        var mn = scMindName(mr);
-        if (mn) {
-          var mtag = scEl('span', 'wo', mn);
-          mtag.style.setProperty('--tg', 'var(--t-read)');
-          props.appendChild(mtag);
-        }
         props.appendChild(scEl('span', 'st'));
         row.appendChild(props);
         /* ── HOW MUCH OF IT IS LEFT ──
@@ -1316,7 +1291,6 @@
                is the sentence and the picture this project keeps
                having to take back out. */
             if (!was && scIsTrain(it)) { scTrainAsk(it, d, bd); return; }
-            if (!was && scIsMind(it)) { scMindAsk(it, d, bd); return; }
             scToast(was ? it.n + ' unticked' : it.n + ' done', false);
         };
         /* ── A TAP TICKS, TWO TAPS EDIT ──
@@ -2808,6 +2782,19 @@
         })[0];
         if (b) via = 'from ' + b.n;
       }
+      /* ── MIND SAYS WHAT IT WAS ──
+         It carries a record of its own now, and the book or the show
+         is a better answer than which block happened to feed the
+         tick. Not `val`: that size is for a FIGURE, and a title drawn
+         at 22px would be the loudest thing on a screen of six tiles.
+         The row tag this replaces went with the block-keyed record —
+         a record you can only see by opening a sheet is one you stop
+         keeping, so it had to land somewhere, and the tile you press
+         is where it belongs. */
+      if (on && it.id === 'm') {
+        var mrec = scMindOf(day);
+        if (mrec) via = scMindName(mrec);
+      }
       var props = scEl('span', 'props');
       var word = it.k === 'num' && on ? String(got[it.id]) + (it.unit || '')
           : (via || (on ? 'logged' : (late ? 'missed' : 'not yet')));
@@ -3389,6 +3376,9 @@
          must not outlive the session being marked done. */
       var fed = item.from ? scBlocksFor(item, new Date(day + 'T12:00:00').getDay()) : [];
       if (!on) fed.forEach(function (b) { scTrainSet(day, b.id, ''); });
+      /* Same claim, same rule: a record about what you put in your
+         head must not outlive the tick it hangs off. */
+      if (!on && item.id === 'm') scMindSet(day, null);
       scPaintTally();
       if (view === 'list') scRender();
       /* ── the deck's third door, and the most literal one ──
@@ -3404,12 +3394,15 @@
          the question has an answer. */
       var only = fed.filter(scIsTrain);
       if (on && only.length === 1) { scTrainAsk(only[0], only[0].d, day); return; }
-      /* The same question for the same reason, one item along. ONE
-         BLOCK ONLY here too: this tick marks every block of that name
-         on the day, so two Walks on a Tuesday have two records and no
-         way to say which the answer is about. */
-      var mOnly = fed.filter(scIsMind);
-      if (on && mOnly.length === 1) scMindAsk(mOnly[0], mOnly[0].d, day);
+      /* ── AND MIND ASKS FROM HERE, WITH NO SUCH CONDITION ──
+         Train's record is per BLOCK, so it needs one block to be
+         about and refuses when the day has two. Mind's is per DAY —
+         it is one of the five things on this screen rather than a
+         property of a line in the timetable — so there is nothing to
+         be ambiguous about and the question is always askable. That
+         gate is exactly what stopped it opening at all: the seeded
+         week feeds Mind from a Walk AND a Read. */
+      if (on && item.id === 'm') scMindAsk(day);
       return;
     }
     scNumSheet(item, day);
@@ -5721,10 +5714,15 @@
      the table already sends this way, and they are exactly the blocks
      the Mind item was already fed by.
      ═══════════════════════════════════════════════════════════ */
-  var MIND_ICONS = { read: 1, walk: 1, meditate: 1 };
-  function scIsMind(item) {
-    return !!item && MIND_ICONS[scIconFor(item.n)] === 1;
-  }
+  /* ── AND THERE IS NO scIsMind ANY MORE ──
+     It answered "does this BLOCK open the Mind sheet", which was the
+     question when the record was keyed by block. The record is per
+     DAY now and the tile is the only door, so nothing asks it —
+     deleted rather than left, because a thing that still parses reads
+     as a mechanism somebody might edit and the first thing they would
+     find is that nothing calls it.
+     What blocks FEED the Mind tick is unchanged and still lives where
+     it always did: the `from` list on the TALLY item. */
 
   /* ── A LITERAL HUE EACH, and that is the workout card's rule ──
      A colour that says WHICH thing this is has to be the same colour
@@ -5748,12 +5746,29 @@
      A colour here would have had no WHICH left to say: the chips are
      the only place a kind appears, and a filled control in this app is
      white. */
+  /* `t` is where the length ladder STARTS, never what it records: the
+     workout card's own rule, which is that the minutes suggest an
+     answer and a press is what makes it one. Nobody reads for 47
+     minutes, they read for about half an hour. */
   var MIND_KINDS = [
-    { k: 'read', n: 'Read',    ask: 'book' },
-    { k: 'pod',  n: 'Podcast', ask: 'podcast' },
-    { k: 'walk', n: 'Walk',    ask: '' },
-    { k: 'jrnl', n: 'Journal', ask: '' }
+    { k: 'read', n: 'Read',    ask: 'book',    t: 30 },
+    { k: 'pod',  n: 'Podcast', ask: 'podcast', t: 30 },
+    { k: 'walk', n: 'Walk',    ask: '',        t: 30 },
+    { k: 'jrnl', n: 'Journal', ask: '',        t: 10 }
   ];
+  /* ── MIND'S OWN RUNGS, and it is not tidiness ──
+     The workout ladder starts at 15 because nothing shorter is a
+     session; ten minutes with a notebook is the ordinary case here.
+     Eight rungs, and every kind's own estimate is already one of
+     them, so the splice never fires and the ladder is always exactly
+     two rows of four — a lone rung on a third row reads as a
+     mistake, which is what nine did. */
+  var MIND_MINS = [10, 15, 20, 30, 45, 60, 90, 120];
+  function scMindLadder(e) {
+    var out = MIND_MINS.slice();
+    if (out.indexOf(e) < 0) out.push(e);
+    return out.sort(function (a, b) { return a - b; });
+  }
   function scMindKind(k) {
     for (var i = 0; i < MIND_KINDS.length; i++) {
       if (MIND_KINDS[i].k === k) return MIND_KINDS[i];
@@ -5778,68 +5793,68 @@
              t: String(v.t || '').slice(0, 120),
              a: String(v.a || '').slice(0, 120),
              c: String(v.c || '').slice(0, 400),
-             b: String(v.b || '').slice(0, 1000) };
+             b: String(v.b || '').slice(0, 1000),
+             m: +v.m || 0 };
   }
+  /* ── ONE RECORD A DAY, NOT ONE A BLOCK ──
+     It went in keyed by block: tick the Read block and say what you
+     read. That was wrong about where this lives. Mind is not a
+     property of a block on the schedule — it is one of the five
+     things you either did or did not do today, and the tile on Today
+     is where you press it. Keyed by block it could not even be
+     REACHED from that tile, because the tile's own door refuses when
+     more than one block feeds the item, and a week with a Walk and a
+     Read has two.
+
+     Records written the other way are `date -> blockId -> rec`.
+     Repaired on the way in, not migrated: this browser owns the
+     record and overwrites it the next time you touch the day, and the
+     first block's answer is the only sensible one to keep. */
   function scMindLoad() {
-    var raw = scReadJSON(MIND_KEY, {});
-    mindLog = raw;
-    if (!mindLog || typeof mindLog !== 'object' || Array.isArray(mindLog)) mindLog = {};
-    /* A damaged DAY is dropped and the record is not — the days are
-       independent and throwing the object away would take a year of
-       them with it. Same window as the tally's own, because this is a
-       record per block per date and nothing here is worth keeping for
-       longer than the ticks it hangs off. */
+    mindLog = scReadJSON(MIND_KEY, {});
+    var fixed = false;
+    if (!mindLog || typeof mindLog !== 'object' || Array.isArray(mindLog)) {
+      mindLog = {}; fixed = true;
+    }
     var cut = new Date();
     cut.setDate(cut.getDate() - 400);
     var floor = scDay(cut);
-    var fixed = mindLog !== raw;
     Object.keys(mindLog).forEach(function (day) {
-      var rec = mindLog[day];
+      var v = mindLog[day];
       if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || day < floor
-          || !rec || typeof rec !== 'object' || Array.isArray(rec)) {
-        delete mindLog[day];
-        fixed = true;
+          || !v || typeof v !== 'object' || Array.isArray(v)) {
+        delete mindLog[day]; fixed = true; return;
+      }
+      /* The old shape has no `k` of its own and holds records under
+         block ids. Anything else is already a record. */
+      if (typeof v.k !== 'string') {
+        var first = null;
+        Object.keys(v).forEach(function (id) {
+          if (!first) first = scMindRec(v[id]);
+        });
+        if (!first) { delete mindLog[day]; fixed = true; return; }
+        mindLog[day] = first; fixed = true;
         return;
       }
-      Object.keys(rec).forEach(function (id) {
-        var r = scMindRec(rec[id]);
-        if (!r) { delete rec[id]; fixed = true; return; }
-        /* A kind this build no longer has resolves to the first one,
-           and that IS a change to the record even though the day and
-           the title survive it. */
-        if (!r.k || r.k !== String((rec[id] || {}).k || '')) fixed = true;
-        rec[id] = r;
-      });
-      if (!Object.keys(rec).length) { delete mindLog[day]; fixed = true; }
+      var r = scMindRec(v);
+      if (!r) { delete mindLog[day]; fixed = true; return; }
+      if (r.k !== v.k || r.m !== v.m) fixed = true;
+      mindLog[day] = r;
     });
     /* ── THE REPAIR IS WRITTEN BACK ──
        A repair held only in memory is redone every boot and lost the
        moment anything else writes the key, which is how "repaired,
        not discarded" quietly becomes "discarded on the next write".
-       scClean and scTrainLoad each shipped this exact hole; the third
-       one is written down rather than rediscovered. Only when
-       something actually changed, so an intact record costs no write
-       on every open. */
+       scClean and scTrainLoad each shipped this exact hole. Only when
+       something CHANGED, so an intact record costs no write. */
     if (fixed) scMindSave();
   }
   function scMindSave() { scWriteJSON(MIND_KEY, mindLog); }
-  function scMindOf(day, id) {
-    return (mindLog[day] && scMindRec(mindLog[day][id])) || null;
-  }
-  function scMindSet(day, id, rec) {
-    if (rec) {
-      if (!mindLog[day]) mindLog[day] = {};
-      mindLog[day][id] = rec;
-    } else if (mindLog[day]) {
-      delete mindLog[day][id];
-      if (!Object.keys(mindLog[day]).length) delete mindLog[day];
-    }
+  function scMindOf(day) { return scMindRec(mindLog[day]) || null; }
+  function scMindSet(day, rec) {
+    if (rec) mindLog[day] = rec; else delete mindLog[day];
     scMindSave();
   }
-  /* What the record is called on a row and in a toast. The title where
-     there is one, the kind's own name where there is not — never both,
-     because "Read · Eat That Frog" says the word the cover already
-     says. */
   function scMindName(rec) {
     if (!rec) return '';
     var kk = scMindKind(rec.k);
@@ -6007,44 +6022,66 @@
     return a;
   }
 
-  /* ── WHAT YOU PUT IN YOUR HEAD, ASKED ON THE PRESS THAT SAYS IT
-     HAPPENED ──
-     The same three doors the workout deck hangs off: the tally's Mind
-     card, the tick on the row, and the editor's Done today. The
-     editor is not the convenience one — it is the only door a
-     keyboard or a screen reader can reach.
+  /* ── ASKED FROM THE MIND TILE, AND ONLY FROM THERE ──
+     It hung off the tick of a Read or a Walk BLOCK, which put a
+     question about your day on an object that is a line in a
+     timetable. Mind is one of the five things on Today; the tile is
+     where somebody presses it, and "press Mind and it asks what you
+     put in your head" is the whole feature said in one sentence.
 
-     Deliberately NOT the workout deck's machinery. That sheet deals a
-     hand, peels it, cascades it and fans two cards behind the front
-     one, all of which is right for a screen you are choosing between
-     twenty-two things on. This is four kinds and a sentence, and it
-     was asked for as something small and seamless — a deck here would
-     be a performance in front of a text field. */
-  function scMindAsk(item, dow, day) {
-    var rec = scMindOf(day, item.id);
+     Deliberately NOT the workout deck's machinery: no deal, no peel,
+     no two cards fanned behind the front one. That is right for
+     choosing between twenty-two sessions and would be a performance
+     in front of a text field.
+
+     ── AND THE BODY IS NOT REBUILT WHILE YOU TYPE ──
+     The first version called draw() on every keystroke, and draw()
+     replaced the whole sheet — so the input was destroyed and made
+     again between one character and the next, taking the caret and
+     the focus with it. It reported as "it cancels out my writing, I
+     can only type one thing at a time", which is exactly what it was.
+
+     The field is built ONCE per pass and only the parts that actually
+     change are redrawn: the results, and the word on the foot. That
+     is why this function holds references to its own boxes rather
+     than rebuilding from the top — a container you can repaint is the
+     whole difference between a search field that works and one that
+     fights you. */
+  function scMindAsk(day) {
+    var rec = scMindOf(day);
     var cur = rec ? rec.k : MIND_KINDS[0].k;
-    /* The pick and the note survive a change of kind on purpose:
-       typing a title, realising it was a podcast rather than a book
-       and losing the words is the form throwing your work away for a
-       press you meant. */
+    /* The pick, the note and the length survive a change of kind on
+       purpose: typing a title, realising it was a podcast rather than
+       a book and losing the words is the form throwing your work away
+       for a press you meant. */
     var pick = rec && rec.t ? { t: rec.t, a: rec.a, c: rec.c } : null;
     var note = rec ? rec.b : '';
+    var mins = rec ? rec.m : 0;
+    var saidMin = !!mins;
     var hits = [];
     var state = '';      /* '', 'go', 'off', 'slow', 'none' */
     var want = 0;        /* the sequence number of the search in flight */
     var typed = '';
     var timer = null;
+    var resBox = null, footBox = null;
 
-    scSheet('Mind · ' + item.n, function (body) {
+    function est() { var k = scMindKind(cur); return saidMin ? mins : (k ? k.t : 30); }
+    function named() { return scMindName({ k: cur, t: pick ? pick.t : '' }); }
+
+    scSheet('Mind', function (body) {
       function commit() {
-        scMindSet(day, item.id, { k: cur, t: pick ? pick.t : '',
-          a: pick ? pick.a : '', c: pick ? pick.c : '', b: note });
+        scMindSet(day, { k: cur, t: pick ? pick.t : '', a: pick ? pick.a : '',
+          c: pick ? pick.c : '', b: note, m: est() });
+        /* The tile's tick and this record are one claim, so pressing
+           Log is enough on its own — you can reach this sheet from a
+           tile you have not ticked yet. */
+        scSetTick(day, 'm', 1);
         scClose();
         if (view === 'tally') scPaintTally(); else scRender();
-        scToast(scMindName({ k: cur, t: pick ? pick.t : '' }) + ' logged', false);
+        scToast(named() + ' logged', false);
       }
       function drop() {
-        scMindSet(day, item.id, null);
+        scMindSet(day, null);
         scClose();
         if (view === 'tally') scPaintTally(); else scRender();
         scToast('Taken off', false);
@@ -6055,15 +6092,16 @@
         if (timer) clearTimeout(timer);
         var kk = scMindKind(cur);
         if (!kk || !kk.ask || q.trim().length < 2) {
-          hits = []; state = ''; want = 0; draw();
+          hits = []; state = ''; want = 0; paint();
           return;
         }
         state = 'go';
-        draw();
+        paint();
         /* ── DEBOUNCED, AND THAT IS A PROMISE RATHER THAN A POLISH ──
-           Every keystroke is a request off this device. 400ms means a
-           typed title costs one or two rather than fifteen, and the
-           two characters mean the field cannot fire on a stray key. */
+           Every keystroke would be a request off this device. 400ms
+           means a typed title costs one or two rather than fifteen,
+           and the two characters mean the field cannot fire on a
+           stray key. */
         timer = setTimeout(function () {
           want = scMindFind(kk.ask, q.trim(), function (seq, err, out) {
             /* A late answer to an earlier query is dropped: without
@@ -6072,13 +6110,77 @@
             if (seq < want) return;
             hits = out;
             state = err ? err : (out.length ? '' : 'none');
-            draw();
+            paint();
           });
         }, 400);
       }
 
+      /* Only the two things a keystroke can change. The field is not
+         in here, which is the whole point. */
+      function paint() {
+        if (footBox) footBox.textContent = 'Log ' + named();
+        if (!resBox) return;
+        resBox.textContent = '';
+
+        /* ── THE TYPED TITLE ALWAYS WORKS ──
+           Offered whenever there is something in the box, above the
+           results and regardless of whether the search reached
+           anything. It is not an error path: reading a book the index
+           has never heard of is the ordinary case, not the broken
+           one. */
+        if (typed.trim()) {
+          var own = scEl('button', 'mn-hit is-own');
+          own.type = 'button';
+          own.appendChild(scMindArt({ t: typed.trim() }));
+          var ot = scEl('span', 'mn-ht2');
+          ot.appendChild(scEl('b', null, typed.trim()));
+          ot.appendChild(scEl('span', null, 'Use what you typed'));
+          own.appendChild(ot);
+          own.addEventListener('click', function () {
+            pick = { t: typed.trim(), a: '', c: '' };
+            draw();
+          });
+          resBox.appendChild(own);
+        }
+
+        if (state === 'go') {
+          resBox.appendChild(scEl('p', 'mn-say', 'Looking…'));
+        } else if (state === 'off' || state === 'slow') {
+          /* Says what happened and what still works, never just that
+             something failed. */
+          resBox.appendChild(scEl('p', 'mn-say',
+            'No covers right now — what you typed still logs.'));
+        } else if (state === 'none') {
+          resBox.appendChild(scEl('p', 'mn-say',
+            'Nothing found — what you typed still logs.'));
+        }
+
+        if (hits.length) {
+          var res = scEl('div', 'mn-res');
+          hits.forEach(function (h) {
+            var b = scEl('button', 'mn-hit');
+            b.type = 'button';
+            b.appendChild(scMindArt(h));
+            var ht = scEl('span', 'mn-ht2');
+            ht.appendChild(scEl('b', null, h.t));
+            if (h.a) ht.appendChild(scEl('span', null, h.a));
+            b.appendChild(ht);
+            b.setAttribute('aria-label', h.t + (h.a ? ', ' + h.a : ''));
+            b.addEventListener('click', function () {
+              pick = { t: h.t, a: h.a, c: h.c };
+              draw();
+            });
+            res.appendChild(b);
+          });
+          resBox.appendChild(res);
+        }
+      }
+
+      /* The full pass. Runs when the KIND changes or a pick lands —
+         never on a keystroke. */
       function draw() {
         body.textContent = '';
+        resBox = null;
         var kk = scMindKind(cur);
 
         /* FOUR IS A SEGMENTED CONTROL — the workout sheet's own rule,
@@ -6103,9 +6205,9 @@
 
         if (kk.ask) {
           /* ── THE PICK, WHEN THERE IS ONE ──
-             Shown before the field rather than after it, because once
-             you have chosen the thing the search box is the part you
-             are done with. */
+             Shown instead of the field rather than under it, because
+             once you have chosen the thing the search box is the part
+             you are done with. */
           if (pick) {
             var got = scEl('div', 'mn-pick');
             got.appendChild(scMindArt(pick, 'is-big'));
@@ -6128,61 +6230,37 @@
             f.maxLength = 80;
             f.addEventListener('input', function () { search(f.value); });
             body.appendChild(f);
-
-            /* ── THE TYPED TITLE ALWAYS WORKS ──
-               Offered whenever there is something in the box, above
-               the results and regardless of whether the search
-               reached anything. It is not an error path: somebody
-               reading a book the index has never heard of is the
-               ordinary case, not the broken one. */
-            if (typed.trim()) {
-              var own = scEl('button', 'mn-hit is-own');
-              own.type = 'button';
-              own.appendChild(scMindArt({ t: typed.trim() }));
-              var ot = scEl('span', 'mn-ht2');
-              ot.appendChild(scEl('b', null, typed.trim()));
-              ot.appendChild(scEl('span', null, 'Use what you typed'));
-              own.appendChild(ot);
-              own.addEventListener('click', function () {
-                pick = { t: typed.trim(), a: '', c: '' };
-                draw();
-              });
-              body.appendChild(own);
-            }
-
-            if (state === 'go') {
-              body.appendChild(scEl('p', 'mn-say', 'Looking…'));
-            } else if (state === 'off' || state === 'slow') {
-              /* Says what happened and what still works, never just
-                 that something failed. */
-              body.appendChild(scEl('p', 'mn-say',
-                'No covers right now — what you typed still logs.'));
-            } else if (state === 'none') {
-              body.appendChild(scEl('p', 'mn-say',
-                'Nothing found — what you typed still logs.'));
-            }
-
-            if (hits.length) {
-              var res = scEl('div', 'mn-res');
-              hits.forEach(function (h) {
-                var b = scEl('button', 'mn-hit');
-                b.type = 'button';
-                b.appendChild(scMindArt(h));
-                var ht = scEl('span', 'mn-ht2');
-                ht.appendChild(scEl('b', null, h.t));
-                if (h.a) ht.appendChild(scEl('span', null, h.a));
-                b.appendChild(ht);
-                b.setAttribute('aria-label', h.t + (h.a ? ', ' + h.a : ''));
-                b.addEventListener('click', function () {
-                  pick = { t: h.t, a: h.a, c: h.c };
-                  draw();
-                });
-                res.appendChild(b);
-              });
-              body.appendChild(res);
-            }
+            resBox = scEl('div', 'mn-box');
+            body.appendChild(resBox);
           }
         }
+
+        /* ── AND HOW LONG ──
+           A ladder rather than a field, which is the workout sheet's
+           own answer: nobody reads for 47 minutes, they read for
+           about half an hour, and a keyboard for a number everybody
+           rounds anyway is a keyboard for nothing. The kind's own
+           estimate is spliced into the rungs where it is not already
+           one, so the suggestion is always reachable in one press. */
+        var mlab = scEl('span', 'wc-eff-l', 'How long, in minutes?');
+        mlab.id = 'scMinMLab';
+        body.appendChild(mlab);
+        var mrow = scEl('div', 'wc-eff-r wc-mins mn-mins');
+        mrow.setAttribute('role', 'group');
+        mrow.setAttribute('aria-labelledby', 'scMinMLab');
+        scMindLadder(est()).forEach(function (n2) {
+          var b = scEl('button', 'wc-chip wc-min', String(n2));
+          b.type = 'button';
+          b.setAttribute('aria-pressed', n2 === est() ? 'true' : 'false');
+          b.setAttribute('aria-label', n2 + ' minutes');
+          b.addEventListener('click', function () {
+            mins = n2;
+            saidMin = true;
+            draw();
+          });
+          mrow.appendChild(b);
+        });
+        body.appendChild(mrow);
 
         /* ── THE NOTE IS OPTIONAL AND IT RIDES EVERY KIND ──
            Bullets on a chapter, a line about the walk, the whole of a
@@ -6207,9 +6285,11 @@
         /* THE FOOT NAMES WHAT IT IS ABOUT TO FILE, which is the
            workout sheet's own answer to a screen where the thing you
            picked is above the fold and the button is below it. */
-        acts.appendChild(scBtn('go', 'Log ' + scMindName({ k: cur,
-          t: pick ? pick.t : '' }), commit));
+        footBox = scBtn('go', 'Log ' + named(), commit);
+        acts.appendChild(footBox);
         body.appendChild(acts);
+
+        paint();
       }
 
       draw();
@@ -8009,7 +8089,6 @@
             scClose();
             if (view === 'tally') scPaintTally(); else scRender();
             if (!done && scIsTrain(item)) { scTrainAsk(item, day, bDay); return; }
-            if (!done && scIsMind(item)) { scMindAsk(item, day, bDay); return; }
             /* Only name what it fed when it fed something. Dropping the
                gate without this leaves "Counted toward " with nothing
                after it on every block that feeds nothing. */
@@ -8072,25 +8151,6 @@
           });
           body.appendChild(scEl('span', 'label', 'Trained'));
           body.appendChild(wob);
-        }
-        /* ── AND THE SAME ROW FOR MIND ──
-           The keyboard's and the screen reader's only route to this
-           record, which is why it is a standing control rather than
-           something that only appears on the press that ticks. */
-        if (canDone && scIsMind(item)) {
-          var mr = scMindOf(bDay, item.id);
-          var mgot = mr && scMindName(mr);
-          var mob = scEl('button', 'mark' + (mgot ? ' is-on' : ''));
-          mob.type = 'button';
-          mob.appendChild(document.createTextNode(mgot || 'Say what it was'));
-          mob.insertAdjacentHTML('beforeend',
-            '<svg viewBox="0 0 24 24" aria-hidden="true">'
-            + '<path d="M9 5.5l6.5 6.5L9 18.5"/></svg>');
-          mob.addEventListener('click', function () {
-            scMindAsk(item, day, bDay);
-          });
-          body.appendChild(scEl('span', 'label', 'Mind'));
-          body.appendChild(mob);
         }
       }
 

@@ -6888,20 +6888,35 @@ const SAID = [
     ok('unticking the block takes the workout off with it, and asks nothing',
       gone.train === 0 && !gone.open, gone);
 
-    /* ── AND IT IS ONLY ASKED ABOUT TRAINING ──
-       What counts is the keyword table's answer rather than a second
-       list of words kept in step with it by hand. Mind is fed by Walk
-       and Read, which reach the walk and read glyphs, so ticking it
-       must draw no deck at all. */
+    /* ── AND IT IS NEVER ASKED ABOUT AS TRAINING ──
+       What counts as training is the keyword table's answer rather
+       than a second list of words kept in step with it by hand. Mind
+       is fed by Walk and Read, which reach the walk and read glyphs,
+       so the WORKOUT deck must not appear here whatever else does.
+
+       It used to assert that no sheet opened at all, which was true
+       for exactly as long as Mind had nothing behind it. Mind has its
+       own question now and its own sheet, so the claim narrows to the
+       half that was always the point: a deck of workout cards is the
+       wrong answer to "what did you put in your head". */
     await page.click('.ty-card[data-item="m"]');
-    await page.waitForTimeout(420);
+    await page.waitForTimeout(560);
     const mind = await page.evaluate(() => ({
       open: !document.getElementById('scSheet').hidden,
+      title: (document.getElementById('scSheetTitle') || {}).textContent,
+      deck: document.querySelectorAll('.sheet .wc').length,
       ticked: /"m"/.test(localStorage.getItem('sched.tick.v1') || ''),
     }));
-    ok('a block that is not training is ticked without being asked about',
-      mind.ticked && !mind.open, mind);
+    ok('Mind is ticked and asked about as MIND, never as training',
+      mind.ticked && mind.open && mind.title === 'Mind' && mind.deck === 0, mind);
+    /* AND PUT AWAY AGAIN. A section that leaves a sheet open hands the
+       next one a screen with the sheet's own text behind the tab bar,
+       which is how the bar's contrast sweep once came back at 1.62:1
+       against a bar that had not changed. */
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(360);
     await page.evaluate(() => {
+      localStorage.removeItem('sched.mind.v1');
       localStorage.removeItem('sched.tick.v1');
       localStorage.removeItem('sched.log.v1');
       localStorage.removeItem('sched.train.v1');
@@ -8893,28 +8908,32 @@ const SAID = [
     const offOrigin = () => mAsked.filter((u) => !u.startsWith(BASE)
       && !u.startsWith('data:') && !u.startsWith('blob:'));
 
-    /* Ticking a Read block is one of the three doors — and the sheet
-       hangs off the press that says it HAPPENED, so a row already
-       ticked has to be unticked first or the same press takes the
-       tick back and opens nothing. Written idempotently rather than
-       counting presses, because which state the row is in depends on
-       what the assertions above this one did. */
-    const readRow = () => mpage.evaluate(() => {
-      const r = [...document.querySelectorAll('.row')].find((x) => {
-        const n = x.querySelector('.n');
-        return n && /^read$/i.test(n.textContent.trim());
-      });
-      if (!r) throw new Error('no Read row on the day');
-      const was = r.classList.contains('is-done');
-      r.click();
+    /* ── THE TILE IS THE DOOR, AND IT IS THE ONLY ONE ──
+       It hung off the tick of a Read or a Walk BLOCK, and that was
+       wrong twice: it put a question about your day on a line in a
+       timetable, and it could not be reached from the tile at all,
+       because the tile's own door refuses when more than one block
+       feeds the item and the seeded week feeds Mind from a Walk AND a
+       Read. The sheet hangs off the press that says it HAPPENED, so a
+       tile already ticked has to be unticked first — written
+       idempotently, because which state it is in depends on what the
+       assertions above did. */
+    const mindTile = () => mpage.evaluate(() => {
+      const c = document.querySelector('.ty-card[data-item="m"]');
+      if (!c) throw new Error('no Mind tile on Today');
+      const was = !!c.querySelector('.chk.is-on, .chk[data-on="1"]')
+        || /logged|Frog|indexed|Kept/.test(c.textContent);
+      c.click();
       return was;
     });
     const openMind = async () => {
-      if (await readRow()) {        /* it was done: that press untedid it */
-        await mpage.waitForTimeout(420);
-        await readRow();            /* and this one ticks it again */
+      await mpage.click('.tab[data-view="tally"]');
+      await mpage.waitForTimeout(460);
+      if (await mindTile()) {       /* it was on: that press took it off */
+        await mpage.waitForTimeout(460);
+        await mindTile();           /* and this one puts it back */
       }
-      await mpage.waitForTimeout(620);
+      await mpage.waitForTimeout(640);
     };
     await openMind();
 
@@ -8923,11 +8942,22 @@ const SAID = [
       kinds: [...document.querySelectorAll('.wc-chips .wc-chip')].map((c) => c.textContent),
       seg: !!document.querySelector('.wc-chips.is-seg'),
       note: document.querySelectorAll('.sheet textarea').length,
+      /* ── AND HOW LONG ──
+         A ladder rather than a field: nobody reads for 47 minutes.
+         Exactly eight rungs, four across and two rows — every kind's
+         estimate is already one of them, so the splice never fires
+         and a lone rung on a third row cannot happen. */
+      rungs: [...document.querySelectorAll('.wc-min')].map((c) => c.textContent),
+      cols: (() => { const m = document.querySelector('.mn-mins');
+        return m ? getComputedStyle(m).gridTemplateColumns.split(' ').length : 0; })(),
+      on: (document.querySelector('.wc-min[aria-pressed="true"]') || {}).textContent,
     }));
-    ok('ticking a mind block asks what you put in your head',
-      /mind/i.test(sheet.title || '')
+    ok('pressing Mind on Today asks what you put in your head',
+      sheet.title === 'Mind'
       && sheet.kinds.join('|') === 'Read|Podcast|Walk|Journal'
       && sheet.seg && sheet.note === 1, sheet);
+    ok('...and it asks how long, as a ladder of four across',
+      sheet.rungs.length === 8 && sheet.cols === 4 && sheet.on === '30', sheet);
 
     /* ── THE PROMISE, AND IT IS THE WHOLE POINT OF THE SECTION ──
        This app reaches nothing off origin except the friends half.
@@ -8943,8 +8973,27 @@ const SAID = [
        whole request is checked rather than just its host, because
        "it went to Open Library" is true of a request carrying
        anything at all. */
-    await mpage.fill('.sheet input[type=text]', 'brian tracy');
+    /* ── TYPED A CHARACTER AT A TIME, WHICH IS THE BUG ──
+       The first version called the sheet's full redraw on every
+       keystroke, so the input was destroyed and rebuilt between one
+       character and the next — the caret and the focus went with it
+       and only the last letter survived. It reported as "it cancels
+       out my writing, I can only type one thing at a time".
+
+       `fill` sets the value in one go and would have passed on the
+       broken build. This types, and then asserts the FIELD still
+       holds what was typed, still has focus, and still has the caret
+       at the end — the three things a rebuild takes away. */
+    await mpage.click('.sheet input[type=text]');
+    await mpage.type('.sheet input[type=text]', 'brian tracy', { delay: 40 });
     await mpage.waitForTimeout(1300);
+    const typing = await mpage.evaluate(() => {
+      const f = document.querySelector('.sheet input[type=text]');
+      return { v: f ? f.value : null, focused: document.activeElement === f,
+               caret: f ? f.selectionStart : null };
+    });
+    ok('typing a title survives itself: the field is not rebuilt under the caret',
+      typing.v === 'brian tracy' && typing.focused && typing.caret === 11, typing);
     const url = sent[0] || '';
     const qs = new URL(url).searchParams;
     ok('typing searches, and the request carries the query and nothing else',
@@ -8977,7 +9026,25 @@ const SAID = [
 
     /* Pick it, write a note, file it. */
     await mpage.click('.mn-res .mn-hit >> nth=0');
-    await mpage.waitForTimeout(260);
+    await mpage.waitForTimeout(300);
+    /* ── THE PICK REPLACES THE FIELD, AND CHANGE GIVES IT BACK ──
+       Shown instead of the search box rather than under it: once you
+       have chosen the thing, the box is the part you are done with.
+       Both directions, because "the pick is drawn" passes on a sheet
+       that draws it beside a field you can still type in. */
+    const picked = await mpage.evaluate(() => ({
+      t: (document.querySelector('.mn-pick b') || {}).textContent,
+      field: document.querySelectorAll('.sheet input[type=text]').length,
+    }));
+    ok('picking one replaces the field with what you picked',
+      picked.t === 'Eat That Frog!' && picked.field === 0, picked);
+    await mpage.click('.mn-pick .btn.off');
+    await mpage.waitForTimeout(320);
+    ok('...and Change gives the field back, with the results still under it',
+      await mpage.evaluate(() => document.querySelectorAll('.sheet input[type=text]').length === 1
+        && document.querySelectorAll('.mn-res .mn-hit').length === 2));
+    await mpage.click('.mn-res .mn-hit >> nth=0');
+    await mpage.waitForTimeout(300);
     await mpage.fill('.sheet textarea', 'Bullet one. Bullet two. NOTEONLYZQX');
     const foot = await mpage.$eval('.sheet .btn.go', (b) => b.textContent);
     ok('the foot names what it is about to file',
@@ -8988,38 +9055,34 @@ const SAID = [
     const rec = await mpage.evaluate(() => {
       const o = JSON.parse(localStorage.getItem('sched.mind.v1') || '{}');
       const day = Object.keys(o)[0];
-      const id = day && Object.keys(o[day])[0];
-      return { day, r: id ? o[day][id] : null };
+      return { day, r: day ? o[day] : null };
     });
-    ok('the record is filed under the date, with the kind, the title and the note',
+    /* ── ONE RECORD A DAY, NOT ONE A BLOCK ──
+       Mind is one of the five things on Today rather than a property
+       of a line in the timetable, so the record is keyed by DATE and
+       nothing about a block appears in it. */
+    ok('the record is filed under the date alone, with the kind, title, length and note',
       !!rec.r && rec.r.k === 'read' && rec.r.t === 'Eat That Frog!'
       && rec.r.a === 'Brian Tracy' && rec.r.b === 'Bullet one. Bullet two. NOTEONLYZQX'
-      && /^\d{4}-\d{2}-\d{2}$/.test(rec.day), rec);
+      && rec.r.m === 30 && /^\d{4}-\d{2}-\d{2}$/.test(rec.day), rec);
 
-    /* ── AND IT IS ON THE ROW ──
+    /* ── AND THE TILE SAYS WHAT IT WAS ──
        A record you can only see by opening a sheet is a record you
-       stop keeping — the objectives' own argument, one feature along. */
-    const tags = await mpage.evaluate(() => {
-      const w = [...document.querySelectorAll('.row .wo')]
-        .find((x) => x.textContent === 'Eat That Frog!');
-      if (!w) return { found: false };
-      const row = w.closest('.row');
-      const st = row.querySelector('.st');
-      return { found: true, tag: getComputedStyle(w).color,
-               state: st ? getComputedStyle(st).color : null,
-               word: st ? st.textContent : null };
+       stop keeping — the objectives' own argument, one feature along.
+       The row tag this replaces went with the block-keyed record: it
+       would have drawn the same book on the Walk row and the Read
+       row, since neither is the thing the record is about. The tile
+       you press is where it belongs.
+
+       NOT at the figure's size: that is for a number, and a title at
+       22px would be the loudest thing on a screen of six tiles. */
+    const tile = await mpage.evaluate(() => {
+      const c = document.querySelector('.ty-card[data-item="m"]');
+      return { says: c ? c.textContent : '',
+               val: c ? c.querySelectorAll('.pill.val').length : -1 };
     });
-    /* ── AND ITS HUE CLEARS THE STATE TAG BESIDE IT ──
-       Mind's own --t-walk was the obvious pick and measured dE 5.7
-       from --st-ok on the light face, so a finished row wore two
-       greens a shade apart and read as one smeared tag. Measured
-       here as COMPOSITED colour rather than as a token name, so it
-       holds whatever either one is changed to. */
-    const px = (c) => (c.match(/[\d.]+/g) || []).map(Number).slice(0, 3)
-      .map((v) => (v <= 1 && c.indexOf('srgb') >= 0 ? v * 255 : v));
-    ok('what you put in your head is a tag on the row, told apart from its state',
-      tags.found && deltaE(px(tags.tag), px(tags.state)) >= 12,
-      { ...tags, dE: tags.found ? deltaE(px(tags.tag), px(tags.state)).toFixed(1) : null });
+    ok('the Mind tile says what it was, at a label\u2019s size and not a figure\u2019s',
+      /Eat That Frog!/.test(tile.says) && tile.val === 0, tile);
 
     /* ── A SEARCH THAT FAILS IS NOT AN ERROR STATE ──
        Every one of these is somebody else's server: it can be down,
@@ -9029,14 +9092,20 @@ const SAID = [
        fail outright. */
     await mpage.unroute('https://openlibrary.org/**');
     await mpage.route('https://openlibrary.org/**', (r) => r.abort());
+    /* ── AND UNTICKING TAKES THE RECORD WITH IT ──
+       A record about what you put in your head must not outlive the
+       tick it hangs off, which is the rule unticking Train already
+       keeps. openMind unticks before it ticks, so reaching the sheet
+       again is itself the check: the day comes back EMPTY and the
+       sheet opens on the field rather than on the pick. */
     await openMind();
-    /* The block already carries a record, so the sheet opens on the
-       PICK rather than on the field — which is the state somebody is
-       in whenever they come back to change what they logged. Change
-       is how the field comes back, so pressing it is both the way to
-       reach the search and a check that the control works. */
-    await mpage.click('.mn-pick .btn.off');
-    await mpage.waitForTimeout(300);
+    const cleared = await mpage.evaluate(() => ({
+      rec: localStorage.getItem('sched.mind.v1'),
+      field: document.querySelectorAll('.sheet input[type=text]').length,
+      pick: document.querySelectorAll('.mn-pick').length,
+    }));
+    ok('unticking Mind takes the record with it, so the sheet opens empty',
+      cleared.rec === '{}' && cleared.field === 1 && cleared.pick === 0, cleared);
     await mpage.fill('.sheet input[type=text]', 'something nobody indexed');
     await mpage.waitForTimeout(1400);
     const dead = await mpage.evaluate(() => ({
@@ -9055,8 +9124,7 @@ const SAID = [
       await mpage.evaluate(() => {
         const o = JSON.parse(localStorage.getItem('sched.mind.v1') || '{}');
         const day = Object.keys(o)[0];
-        const id = day && Object.keys(o[day])[0];
-        return !!id && o[day][id].t === 'something nobody indexed';
+        return !!day && o[day].t === 'something nobody indexed';
       }));
 
     /* ── HOW IT WENT AND WHAT YOU WROTE NEVER LEAVE ──
@@ -9088,26 +9156,40 @@ const SAID = [
     const fell = await mpage.evaluate(() => {
       const o = JSON.parse(localStorage.getItem('sched.mind.v1') || '{}');
       const day = Object.keys(o)[0];
-      const id = Object.keys(o[day])[0];
-      o[day][id] = { k: 'seance', t: 'Kept', a: '', c: '', b: '' };
+      /* Three damaged things at once, and the record has to survive
+         all three: a kind this build no longer has, a day that is not
+         a date, and — the one that matters — a record written in the
+         BLOCK-KEYED shape this feature shipped with first. */
+      o[day] = { k: 'seance', t: 'Kept', a: '', c: '', b: '', m: 30 };
       o['not-a-date'] = { x: 1 };
+      o['2026-01-02'] = { blockid7: { k: 'pod', t: 'Old shape', a: '', c: '', b: '' } };
       localStorage.setItem('sched.mind.v1', JSON.stringify(o));
       return true;
     });
     await mpage.reload({ waitUntil: 'networkidle' });
     await mpage.waitForTimeout(420);
+    await mpage.click('.tab[data-view="tally"]');
+    await mpage.waitForTimeout(460);
     const after = await mpage.evaluate(() => {
       const o = JSON.parse(localStorage.getItem('sched.mind.v1') || '{}');
-      const day = Object.keys(o).find((k) => /^\d{4}/.test(k));
-      const id = day && Object.keys(o[day])[0];
-      return { kinds: id ? o[day][id].k : null, kept: id ? o[day][id].t : null,
+      const day = Object.keys(o).find((k) => /^\d{4}/.test(k) && k !== '2026-01-02');
+      const c = document.querySelector('.ty-card[data-item="m"]');
+      return { kind: day ? o[day].k : null, kept: day ? o[day].t : null,
                junk: Object.keys(o).filter((k) => !/^\d{4}/.test(k)).length,
-               drawn: [...document.querySelectorAll('.row .wo')]
-                 .some((w) => w.textContent === 'Kept') };
+               old: o['2026-01-02'] ? o['2026-01-02'].t : null,
+               drawn: c ? /Kept/.test(c.textContent) : false };
     });
     ok('a kind this build does not have falls through, and the record survives',
-      fell && after.kept === 'Kept' && after.kinds === 'read'
+      fell && after.kept === 'Kept' && after.kind === 'read'
       && after.junk === 0 && after.drawn, after);
+    /* ── AND THE BLOCK-KEYED SHAPE IS REPAIRED, NOT DISCARDED ──
+       Written back rather than held in memory: a repair kept only in
+       RAM is redone every boot and lost the moment anything else
+       writes the key, which is how "repaired, not discarded" quietly
+       becomes "discarded on the next write". Asserted by reading the
+       STORED value after a reload. */
+    ok('...and a record written keyed by block is repaired into the day\u2019s own',
+      after.old === 'Old shape', after);
 
     ok('nothing threw through any of it', merrs.length === 0, merrs);
     await mctx.close();

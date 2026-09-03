@@ -4850,3 +4850,15 @@ body {
 .mn-say { margin: 8px 2px 0; font-size: 12.5px; color: var(--spent); }
 
 .mn-note { min-height: 64px; resize: vertical; line-height: 1.45; }
+
+/* ── MIND'S LADDER IS FOUR ACROSS, ALWAYS ──
+   `.wc-min` is `flex: 1 1 auto`, so a row that does not divide evenly
+   lets its last rung GROW to fill the line: eight rungs came out as
+   seven and a full-width 120, which reads as a mistake rather than as
+   a ladder. A grid cannot do that — every rung is a quarter of the
+   row whether or not the last one has company. */
+.mn-mins {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.mn-mins .wc-min { flex: none; padding: 0 4px; }

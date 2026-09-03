@@ -5399,3 +5399,57 @@ that the note never leaves looked for the word "indexed" — which is a
 word in the query the test itself types into the search box, so it
 matched the app working exactly as designed and reported a leak.
 A filter that can match correct behaviour is worse than no filter.
+
+### Two corrections, and both were about where the thing lives
+
+**IT ASKED FROM THE WRONG PLACE.** The sheet hung off the tick of a
+Read or a Walk BLOCK, and the record was keyed by block id. That was
+wrong twice over. A question about your day does not belong on a line
+in a timetable — Mind is one of the five things on Today, and *press
+Mind and it asks what you put in your head* is the whole feature in
+one sentence. And it could not be reached from that tile at all: the
+tile's door refuses when more than one block feeds the item, because
+Train's record is per block and a day with two sessions has no way to
+say which one the answer is about. **The seeded week feeds Mind from a
+Walk AND a Read**, so the gate that is right for Train silently closed
+the only door that mattered here.
+
+Mind's record is per DATE now, so there is nothing to be ambiguous
+about and the question is always askable. The block doors, the
+editor's standing row and `scIsMind` all went with it. **What blocks
+FEED the tick is unchanged** and still lives where it always did — the
+`from` list on the tally item.
+
+**The row tag went too, and had to land somewhere.** Keyed by date it
+would have drawn the same book on the Walk row and the Read row, since
+neither is what the record is about. The tile carries it instead, at a
+label's size rather than a figure's: 22px is for a number, and a title
+at that size would be the loudest thing on a screen of six tiles.
+
+**AND THE SEARCH FIELD WAS REBUILT UNDER THE CARET.** Every keystroke
+called the sheet's full redraw, which replaced the whole body — so the
+input was destroyed and made again between one character and the next,
+taking the focus and the caret with it. It reported as **"it cancels
+out my writing, I can only type one thing at a time"**, which is
+exactly what it was.
+
+The field is built ONCE per pass now and only what a keystroke can
+actually change is repainted: the results, and the word on the foot.
+That is why the sheet holds references to its own boxes instead of
+rebuilding from the top — **a container you can repaint is the whole
+difference between a search field that works and one that fights
+you.**
+
+**And `fill` would have passed on the broken build**, because it sets
+the value in one go. The check types character by character and then
+asserts the three things a rebuild takes away: the field still holds
+what was typed, it still has focus, and the caret is still at the end.
+
+**The ladder is Mind's own, and four across.** `.wc-min` is
+`flex: 1 1 auto`, so a row that does not divide evenly lets its last
+rung GROW to fill the line — eight rungs came out as seven and a
+full-width 120, which reads as a mistake rather than as a ladder. A
+grid cannot do that. The rungs start at 10 rather than the workout's
+15, because ten minutes with a notebook is the ordinary case here, and
+every kind's estimate is already one of them so the splice never fires
+and a lone rung on a third row cannot happen.
