@@ -4568,6 +4568,29 @@ width when there is width to spare, and at 145px there is not — so in
 a board the start joins the length on the second line and the name has
 the whole row.
 
+**AND THERE IS EXACTLY ONE EXCEPTION, GRANTED ON PURPOSE.** The
+objectives row is a sideways scroller. It was built wrapped first,
+looked at, and rejected by the person who owns the screen — *I think
+scroll would look better just in this case, so I can approve it just
+for this case.* That is the shape an exception to a measured rule has
+to have: raised, argued, and then decided by somebody, rather than
+quietly slipping past.
+
+What makes it affordable there and nowhere else is that **there is
+nothing to LOSE off the edge**. A board column held rows you had to
+read; the objectives row holds at most five cards and having two or
+three is the whole point of the feature, so a card off the side is one
+you have already decided about. The add control is the case that would
+have broken it, and it is pinned FIRST for exactly that reason —
+written at the end it measured **131px off the right edge with two
+objectives on the day**, which is the one control you need sitting
+behind a swipe.
+
+**The exception is NAMED, never a relaxed check.** `tests/schedule.js`
+excludes `#scObjStrip` by id and holds every other element in the app
+to the rule. Widening the check to "scrollers are allowed" is what
+would let the board back in.
+
 **Asserted as a SCROLLER, never as a clip.** The first cut flagged any
 element whose content was wider than its box, and every ellipsised
 name in the app came back with it: `text-overflow: ellipsis` is
@@ -5142,3 +5165,116 @@ a zero shaped exactly like a pass. It reads the elements regardless
 now, which is the `!scRail.hidden` lesson in the other direction:
 there, reading the property missed a layout fault; here, reading the
 layout missed everything.
+
+## The objectives are on the day, and the row is the way in
+
+They were behind a 19px mark in the head's top-right corner. **A glyph
+in a corner names nothing** — you had to be told the feature was
+there, and it took a card of the intro to say so, which is the same
+argument that killed the flip one round earlier. The corner was the
+flip's replacement and it inherited the flip's real problem: the
+objectives were invisible until you pressed something you had no
+reason to press.
+
+They are cards ON the day now, a row under the week strip, and the row
+is the whole of the access. `scHeadTurn`, `#scHdTurn` and the
+checklist-and-target glyph are gone — the mark was reduced five times
+to read at 19px and there is nothing left for it to label, so it went
+rather than being left to read as a mechanism somebody might edit.
+
+**THE ROW SCROLLS SIDEWAYS, AND THAT IS AN APPROVED EXCEPTION.** It is
+written up beside the rule it reverses. What matters here is that the
+WRAPPED version was built and rendered first: at 390px every card
+takes most of the width, so wrapping produces a COLUMN of cards — the
+objectives becoming a second list above the schedule, three registers
+tall before the day has started. That is what was looked at and
+rejected.
+
+**The bleed is not a detail.** The row runs past the poster's padding
+so a cut card is cut by the SCREEN, which reads as *there is more*
+rather than as a card that has been clipped. A peek that stops short
+of the edge reads as a small card — the deck's own lesson, kept after
+the deck went.
+
+**THE PLUS IS PINNED FIRST, AND THAT IS MEASURED.** Written at the end
+of the row, which is where a trailing control belongs in a list that
+does not move, it sat **131px off the right edge with only two
+objectives on the day**: the one control you need, behind a swipe. A
+scroller has no end you can rely on being visible, so anything that
+must be reachable goes at the start.
+
+**THE EMPTY DAY IS A GHOST CARD, and three were rendered.** Drawing
+NOTHING is silent — the row vanishes and there is no way in, which is
+exactly the hole the corner glyph was filling. A bare `+ Objective`
+chip says add something without saying what for. The ghost is a real
+card's box with a dashed edge and a greyed tag reading *What matters
+today*: the SHAPE of the missing thing, so it teaches the feature by
+being it, and pressing it opens the sheet with the field already on
+it. **On an empty day the ghost IS the add control**, so the plus is
+not drawn beside it — two targets for one action on one row is the
+arrangement Showing up removed once already.
+
+**Its tag is the flat neutral, because a state is never coloured.** A
+ghost names no objective, so there is no WHICH for a colour to carry.
+Asserted as a grey with no channel standing out, which is the whole of
+what stops this screen having an opinion.
+
+**Tap ticks, double tap opens the sheet.** The week row's own gesture
+and Showing up's own gesture, so there is nothing here to learn — and
+`scDoubleTap` was already built, so this cost no mechanism. The sheet
+is still where you add, re-rank and remove; only the door moved.
+`touch-action: manipulation` is not optional on the card: this page
+sets no maximum-scale, so a double tap is a ZOOM gesture on iOS by
+default and the app would answer the second tap of its own gesture by
+magnifying the screen.
+
+**The row is OUTSIDE the day card.** The card is a scroller, so a row
+inside it scrolls away on a long day and takes the only add control
+with it. The objectives are the day's frame, not one of its items.
+
+**`[hidden]` HAS TO BE SAID ONCE A THING TAKES A DISPLAY, and this is
+the sixth time.** The row is a flex row, so without the rule it stays
+drawn over Today and Friends, where there is no day for it to be
+about. Measured as the BOX on every view, because reading the property
+is what missed it each of the five previous times.
+
+**The hue needed its own light-face twin**, for the reason the workout
+hues did: read as a 22% wash under a 72% label, the dark face's pink
+measures **3.75:1** on the light page. Same hue taken down until it
+clears with margin rather than by a rounding error — **5.18:1**
+against 5.75 on the dark. This repo has now shipped 4.74 twice
+believing that was a margin, so the solver's floor is 5.15.
+
+**A replace with two anchors put `scObjStrip(d)` where there is no
+`d`.** `scDate(); scHeadTurn();` appeared in `scRender` AND in
+`scSetView`, and only the first has a day in scope. It threw a
+`ReferenceError` on every view change while the strip still drew
+correctly from the render path — which is why it was caught by a
+harness that COLLECTS pageerror rather than by looking at the
+screenshot, and the screenshots looked perfect. **Assert the anchor
+count, not just that the old name is gone.**
+
+**AND A BACKUP FILE ATE THE WHOLE EDIT.** A probe meant to prove the
+tick check bites did `cp schedule/app.js /tmp/app.js.bak`, broke the
+file, ran, and copied the backup back. The shell's working directory
+had been reset between the commands, so the FIRST copy failed with
+*cannot stat* — and `/tmp/app.js.bak` already existed from a session
+the day before. The restore then wrote a day-old file over an hour of
+work, and reported success while doing it.
+
+Three things came out of it, and the third is the one worth keeping:
+
+- **A relative path in a multi-command line is a bug waiting for the
+  cwd to move.** Absolute paths, or nothing.
+- **A `cp` you do not check is not a backup.** The failure was printed
+  and scrolled past, and the only signal anything was wrong was a sha1
+  that did not match the fingerprint written minutes earlier.
+- **DO NOT BACK A FILE UP TO BREAK IT. SCRIPT THE BREAK AND ITS
+  INVERSE.** The bite test was redone as two exact string replacements
+  — the second undoing the first — with **the sha1 checked back against
+  the known-good value afterwards**. That has no backup file to go
+  stale, no copy to fail silently, and it PROVES the restore instead
+  of assuming it. Recovery was the same discipline: `git checkout HEAD
+  -- schedule/app.js`, re-apply the edits in one scripted pass, and
+  confirm the file hashes to the fingerprint `index.html` was already
+  carrying.

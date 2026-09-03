@@ -47,7 +47,7 @@
   } catch (e) {}
 }());
 </script>
-<link rel="stylesheet" href="app.css?v=9b000e23" />
+<link rel="stylesheet" href="app.css?v=2697f2dc" />
 </head>
 <body>
 
@@ -67,7 +67,6 @@
         <h2 class="h-day" id="scHdDay"></h2>
         <p class="h-sub" id="scHdDate"></p>
       </div>
-      <button class="wk-turn" id="scHdTurn" aria-label="Objectives"></button>
       <button class="head-you" id="scTabYou" aria-label="You and settings">
         <span class="tab-face" id="scTabFace"></span>
       </button>
@@ -152,6 +151,15 @@
        back — the flip is on the panel now rather than on a card. -->
   <section class="week" id="scWeek">
     <div class="strip" id="scDayStrip" role="group" aria-label="The week"></div>
+    <!-- ── THE DAY'S OBJECTIVES, ON THE DAY ──
+         A row of cards under the week strip, in place of the glyph
+         that used to sit in the head's top-right corner. It is
+         OUTSIDE the day card rather than the first thing in it: the
+         card is a scroller, so an objectives row inside it scrolls
+         away on a long day and takes the only add control with it.
+         The objectives are the day's frame, not one of its items. -->
+    <div class="obs" id="scObjStrip" role="group"
+         aria-label="Objectives" hidden></div>
     <div class="day-card" id="scDayCard"></div>
     <p class="empty" id="scEmpty" hidden>
       Nothing here yet. Press the microphone and say something like
@@ -234,6 +242,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=1bd92d67"></script>
+<script src="app.js?v=2a0b5cb2"></script>
 </body>
 </html>

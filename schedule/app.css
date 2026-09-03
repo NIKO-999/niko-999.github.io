@@ -253,6 +253,7 @@
   --s-m: #F2B950; --s-a: #5FA8FF; --s-e: #B98BFF;
   --t-train: #E0574B; --t-walk: #4FBE87; --t-read: #5FA8FF;
   --t-steps: #F2B950; --t-fuel: #E0C15A; --t-water: #48C3CC;
+  --t-obj: #E571A3;
   /* Completed. Fixed rather than chosen: a state tag says WHICH state,
      and which has to be the same colour every time you see it. In
      progress is the one exception, because it is the mark the whole
@@ -330,6 +331,7 @@
   --s-m: #8A5000; --s-a: #1668C7; --s-e: #6B3FC4;
   --t-train: #B3382E; --t-walk: #1C7A4E; --t-read: #1668C7;
   --t-steps: #8A5000; --t-fuel: #7A6200; --t-water: #0E6E76;
+  --t-obj: #d32771;
   --st-ok: #19733F;
   --gold: #8A6100;
   --w-red: #d83d2c; --w-blue: #2c76d6; --w-teal: #108383;
@@ -1494,116 +1496,145 @@ body {
    The ground is mixed from the palette exactly as the back's is —
    the wheel moves --red through every hue there is, and a gradient in
    hex would be somebody else's card on twelve of them. */
-/* Put away on a shut card rather than not built: at 76px there is no
-   room for it beside the day's abbreviation, and the press target over
-   a shut card is the card itself. Same pattern as `.wk-face`, which is
-   display:none on the OPEN one. */
-/* ── AND IT GOES AWAY WHEN THE CARD IS TURNED ──
-   `backface-visibility: hidden` on the two faces is what stops the
-   schedule reading through the objectives, and it held for everything
-   on the front EXCEPT this: the foil's turning square is an animated
-   transform, so it is promoted to its own compositor layer, and a
-   composited descendant of a backface-hidden ancestor is not reliably
-   culled with it. On iOS the pill drew straight through the back —
-   MIRRORED, because the back is a 180-degree rotation, so a control
-   11px from the front's right edge lands on top of the day name on
-   the left. It reported as "the objective icon inside the title".
+/* ══════════════════════════════════════════════════════
+   THE OBJECTIVES ROW
 
-   Chromium does not reproduce it, which is the whole reason this is a
-   rule about the ELEMENT rather than a fix aimed at the bug: a face
-   turned away has no control to press, so there is nothing to draw
-   whether or not the engine would have culled it. */
-/* `[hidden]` HAS TO BE SAID ONCE A THING TAKES A DISPLAY, and this is
-   the fifth time in this app: the rail, the page dots, the toast and
-   the intro each had the attribute set correctly while an author
-   display outranked the browser's own rule. Here it leaves the
-   objectives control drawn on Today and on Friends, where there is no
-   day it could be about.
+   The top-right control is gone — a glyph in a corner names nothing,
+   so the feature behind it had to be explained by a card of the
+   intro. The day's objectives are cards on the day now, under the
+   week strip, and the row is the whole of the way in.
 
-   AND IT WAS NOT WORKING. The line above this one ended in a comment
-   that swallowed its own selector, so the rule read
-   `.wk-flip.is-flipped .wk-front .wk-turn[hidden]` — scoped to a face
-   that was turned away, which is the one state the button was never
-   in. It is what this file warns about two hundred lines up: a CSS
-   comment cannot be trusted to end where it looks like it ends, and a
-   selector joined to the one above it fails silently. */
-.wk-turn[hidden] { display: none; }
-/* ONE BOX, TWO SKINS. The two faces' controls have to land on the same
-   pixel — you press one place to turn the card and the same place to
-   come back — so the box is shared and only the surface differs. It
-   was two boxes with two sets of margins and they came out 1px apart
-   across and 3px down, which the corner check caught. */
-.wk-turn {
-  flex: none;
-  width: 38px; height: 38px;
-  padding: 0;
+   ── IT SCROLLS SIDEWAYS, AND THAT IS AN APPROVED EXCEPTION ──
+   "Nothing in this app scrolls sideways" was written after a 212px
+   board column put a session off the side of the phone and clipped
+   "Morning" to "ng". That rule is right and it holds everywhere else;
+   this is the one element allowed past it, and `tests/schedule.js`
+   names it by id so the check stays live rather than being relaxed.
+
+   It is affordable HERE and nowhere else because there is nothing to
+   lose off the edge: at most five cards, and having two or three is
+   the point of the feature. A card off the side is one you have
+   already decided about.
+
+   THE BLEED IS NOT A DETAIL. The row runs past the poster's padding
+   so a cut card is cut by the SCREEN — a peek that stops short of the
+   edge reads as a small card rather than a row that continues, which
+   is the deck's own lesson. Hence the negative margin and the padding
+   put back inside it.
+
+   The wrapped version was built and rendered first: at 390px every
+   card takes most of the width, so wrapping produces a COLUMN of
+   cards — the objectives becoming a second list above the schedule,
+   three registers tall before the day has started. */
+/* `[hidden]` HAS TO BE SAID ONCE A THING TAKES A DISPLAY. This is a
+   flex row, so without it the strip stays on screen over Today and
+   Friends, where there is no day for it to be about. The rail, the
+   page dots, the toast and the intro each shipped exactly this bug
+   with the attribute being set correctly the whole time. */
+.obs[hidden] { display: none; }
+.obs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px var(--pad) 12px;
+  margin: 0 calc(-1 * var(--pad));
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.obs::-webkit-scrollbar { display: none; }
+
+/* A card, the same material every other card in this app is made of —
+   an object on the page rather than a region of it. */
+.obs-c {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 9px 13px 9px 9px;
   border: 0;
-  background: none;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-}
-.wk-turn svg {
-  width: 19px; height: 19px;
-  /* ── THE COLOUR IS SAID, NOT INHERITED ──
-     The target's centre is the one filled part of this mark and it is
-     `currentColor`. Nothing here set a colour, and the `*` reset does
-     not carry `color: inherit`, so it fell through to the UA's own
-     default for a BUTTON: white in Chromium, and on iOS the system
-     BLUE. It shipped as a blue dot in the middle of a grey glyph, and
-     it could not be seen on the machine this is built on — the edit
-     sheet's time fields all over again, in one declaration.
-
-     Set beside the stroke rather than as a literal, so the fill and
-     the strokes are the same colour by construction wherever this
-     mark is drawn. */
-  color: var(--ink);
-  fill: none; stroke: var(--ink); stroke-width: 1.9;
-  stroke-linecap: round; stroke-linejoin: round;
-}
-
-/* ── THE TURN CONTROL IS A TILE ──
-   It wore the objectives face's own sheen with a foil rim that
-   travelled, on the argument that the thing you press should look
-   like the thing it turns to. That argument went with the face: the
-   back draws nothing now, so a sheen chip with a moving light in it
-   was the one ornamented object left in the app and it matched
-   nothing. It is the head's own glyph tile, mirrored on the other
-   side of the line. */
-#scHdTurn {
-  position: relative;
-  border-radius: 12px;
+  border-radius: 14px;
   background: var(--card);
   box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow);
+  color: inherit;
+  text-align: left;
+  /* The page sets no maximum-scale, so a double tap is a ZOOM gesture
+     on iOS by default — without this the app answers the second tap of
+     its own gesture by magnifying the screen. Nothing here reproduces
+     it, which is why it is written beside the code that needs it. */
+  touch-action: manipulation;
 }
+.obs-c:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
-
-/* ── THE TURN CONTROL WEARS WHAT IT OPENS ──
-   In the head now rather than in a card's corner, and the surface is
-   the reason it can be: the objectives face's own sheen, mixed from
-   the palette exactly as the back's is, with a rim that travels. The
-   thing you press looks like the thing it turns to. */
-.wk-turn svg { position: relative; z-index: 1; }
-.wk-turn:active svg { stroke: var(--red); }
-.wk-turn:focus-visible { outline: 2px solid var(--red); outline-offset: 1px; }
-
-/* The card's foil, at pill scale and by the same mechanism: an outer
-   box masked to its own border width, and a SQUARE turning inside it.
-   Square matters — a 200%-by-200% box is not, and at 45 degrees a
-   non-square leaves the pill's ends unlit for part of every turn,
-   which reads as a fault rather than as a highlight. Sized off the
-   pill's HEIGHT, which is the smaller dimension, so 340% clears the
-   diagonal of a box three times as wide as it is tall. */
-/* IT TURNS WHILE THE SCHEDULE IS FACING YOU and stops once you are
-   on the face it opens: a conic gradient turning in its own masked
-   layer costs a compositor pass a frame to draw what is no longer
-   telling you anything. */
+/* The tag, in the objectives' own hue and by the app's one tag rule:
+   a 22% wash under a 72% label. It says WHICH kind of thing this card
+   is, which is the only thing a colour is ever spent on here. */
+.obs-t {
+  --tg: var(--t-obj);
+  font-style: normal;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  padding: 2px 6px;
+  border-radius: 5px;
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--tg) 22%, transparent);
+  color: color-mix(in srgb, var(--tg) 72%, var(--ink));
 }
-/* Still, not gone — the rim is the thing that was asked for, and a
-   pill that loses its edge under reduced motion loses the half that
-   says it is a control. */
-@media (prefers-reduced-motion: reduce) {
+.obs-n {
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
 }
+/* Done is --spent and a strike, which is the row's own treatment for
+   the same claim. The tag keeps its hue: what KIND of thing this is
+   did not change when you finished it. */
+.obs-c.is-done .obs-n { color: var(--spent); text-decoration: line-through; }
+
+/* ── THE GHOST IS A CARD'S BOX, NOT A PLUS ──
+   The empty day, chosen from three rendered over the real app. Drawing
+   nothing is silent and leaves no way in — the hole the corner glyph
+   was filling. A bare plus chip says add something without saying what
+   for. This is the SHAPE of the missing thing, so it teaches the
+   feature by being it. */
+.obs-c.is-ghost {
+  background: none;
+  box-shadow: none;
+  border: 1px dashed var(--hair);
+  padding: 8px 12px 8px 8px;
+}
+/* A STATE IS NEVER COLOURED. The ghost has no objective on it, so its
+   tag makes no claim about which kind of thing this is and takes the
+   flat neutral — the same rule "not yet" and "missed" keep. */
+.obs-c.is-ghost .obs-t {
+  background: color-mix(in srgb, var(--ink) 9%, transparent);
+  color: var(--spent);
+}
+.obs-c.is-ghost .obs-n { color: var(--spent); font-weight: 500; }
+
+/* ── PINNED FIRST, AND THAT IS MEASURED ──
+   Written at the END of the row, where a trailing control belongs in a
+   list that does not move, it sat 131px off the right edge with only
+   two objectives on the day — the one control you need, behind a
+   swipe. First, it cannot scroll away whatever is on the day. */
+.obs-add {
+  flex: 0 0 auto;
+  width: 42px;
+  align-self: stretch;
+  border: 1px dashed var(--hair);
+  border-radius: 14px;
+  background: none;
+  display: grid;
+  place-items: center;
+  touch-action: manipulation;
+}
+.obs-add svg {
+  width: 18px; height: 18px;
+  fill: none; stroke: var(--spent); stroke-width: 1.9;
+  stroke-linecap: round;
+}
+.obs-add:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
 /* ── MAIN OBJECTIVES ──
    The face names itself. It is the sessions' treatment from the front —

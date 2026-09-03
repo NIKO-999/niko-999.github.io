@@ -1043,7 +1043,7 @@
     $('scWeek').classList.toggle('is-today', d === today);
     $('scWeek').dataset.d = d;
     scDate();
-    scHeadTurn();
+    scObjStrip(d);
 
     /* ── the week is a strip ──
        Monday first, for the reason the deck had: a rail that began on
@@ -1460,48 +1460,15 @@
      decision, and re-ranking is a press.
      ═══════════════════════════════════════════════════════════ */
 
-  /* ── a checklist and a target ──
-     Reduced, and the reduction is the whole job: the reference has four
-     ticked rows and a target with an arrow through it, which at the
-     19px this is drawn at is a smudge with a hole in it. Two ticked
-     rows, one ring and a centre — the fewest marks that still read as
-     BOTH objects.
-
-     The sheet's outline BREAKS where the target crosses it. Drawn
-     through, the two shapes merge into one blob at this size; a gap of
-     about a unit and a half is what makes them read as a disc in front
-     of a page.
-
-     The ring is r5 around a centre dot at r1.2, which leaves 3.8 units
-     of the 24 box between them — above the 3.4 this repo measured as
-     the floor before a closed shape fills in at row size. Two rings, as
-     the reference has, would leave 3 and close up. */
-  var OBJ_MARK = '<svg viewBox="0 0 24 24" aria-hidden="true">'
-    /* the page, broken at the lower right where the target sits */
-    + '<path d="M14.2 10.2V4.9a1.4 1.4 0 00-1.4-1.4H4.4A1.4 1.4 0 003 4.9v13.7'
-    + 'a1.4 1.4 0 001.4 1.4h4.3"/>'
-    /* two rows, each a tick and a rule */
-    + '<path d="M5.2 8.1l1.2 1.2 2.2-2.4M10.8 8.3h2.2"/>'
-    + '<path d="M5.2 13.2l1.2 1.2 2.2-2.4M10.8 13.4h1.5"/>'
-    /* ── the target, and an arrow still coming ──
-       IN FLIGHT, not landed. Which changes the drawing: an arrow buried
-       in the bullseye can be a bare shaft, because where it is going is
-       obvious — one that has not arrived has to SAY which way it is
-       pointing, so the head moves to the leading end and the fletching
-       goes.
-
-       And it needs somewhere to be. The target moved down and left to
-       clear the top-right corner: at 19px the gap between an arrowhead
-       and a ring is about a pixel and a half, and there is no room for
-       it while the target sits in the corner the arrow comes from.
-
-       The ring is a whole circle again — nothing crosses it now, so the
-       break that stopped the two merging has nothing to do. */
-    + '<circle cx="15.4" cy="17.4" r="4.4"/>'
-    + '<circle cx="15.4" cy="17.4" r="1.15" fill="currentColor" stroke="none"/>'
-    + '<path d="M23 9L19.2 12.8"/>'
-    + '<path d="M19.2 12.8l.24-1.99M19.2 12.8l1.99-.24"/>'
-    + '</svg>';
+  /* ── THE CHECKLIST-AND-TARGET MARK IS GONE ──
+     It was the glyph on the top-right control, drawn at 19px: a page
+     with two ticked rows and a target with an arrow still in flight,
+     reduced five times to read at that size. The control it lived on
+     is gone — the objectives are cards on the day now and the row is
+     the way in — so the mark had nothing left to label. Deleted
+     rather than left: this file's oldest lesson is that a thing which
+     still parses reads as a mechanism somebody might edit, and the
+     first thing they would find is that nothing calls it. */
 
   var OBJ_KEY = 'sched.obj.v1';
   var objLog = {};   /* date -> [{ id, n, tgt, done }] */
@@ -1788,25 +1755,113 @@
      both: scSheet replaces the body when one is up and opens one when
      it is not. */
   function scObjRedraw(d) { scObjOpen(d); }
-  /* ── THE CONTROL IN THE HEAD OPENS THE SHEET ──
-     It used to turn the panel over and change its own glyph to say
-     which way round you were. There is nothing to be the wrong way
-     round now: it is one button that opens one sheet, so it keeps one
-     glyph and says what it opens. */
-  function scHeadTurn() {
-    var b = $('scHdTurn');
-    if (!b) return;
-    b.hidden = view !== 'list';
-    b.setAttribute('aria-haspopup', 'dialog');
-    b.setAttribute('aria-label', 'Objectives for ' + FULL[scOpenDay()]);
-    if (!b.dataset.wired) {
-      b.dataset.wired = '1';
-      var g = document.createElement('span');
-      g.className = 'tn-g';
-      g.innerHTML = OBJ_MARK;
-      b.appendChild(g);
-      b.addEventListener('click', function () { scObjOpen(scOpenDay()); });
+  /* ══════════════════════════════════════════════════════
+     THE OBJECTIVES ARE ON THE DAY, AND THE ROW IS THE WAY IN
+
+     They were behind a glyph in the top-right corner, which is a
+     control that names nothing: you had to be told it was there, and
+     what it opened was invisible until you pressed it. The day's
+     objectives are now drawn ON the day, as cards under the week
+     strip, and the row itself is the whole of the access.
+
+     ── IT SCROLLS SIDEWAYS, AND THAT REVERSES A RULE ──
+     "Nothing in this app scrolls sideways" was written after a board
+     of 212px columns put a session off the side of the phone and
+     clipped "Morning" to "ng" at the left edge. The rule is right and
+     it stands everywhere else; this row is a deliberate, approved
+     exception, and it is the one place where it costs nothing:
+
+       - There is nothing to LOSE off the side. A board column held
+         rows you had to read; this holds at most five cards, and the
+         count is already the point — you are meant to have two or
+         three. A card off the edge is one you have already decided.
+       - It BLEEDS to the screen edge, so a cut card reads as "there
+         is more" rather than as a card that has been clipped. That is
+         the deck's own lesson, and it is why the strip carries a
+         negative margin rather than stopping inside the padding.
+       - The wrapped version was built and looked at first. At 390px
+         every card takes most of the width, so wrapping gives a
+         COLUMN of cards — which is the objectives becoming a second
+         list above the schedule, three registers tall before the day
+         has started.
+
+     `tests/schedule.js` names this element as the single exception
+     and holds every other scroller to the rule, so the check stays
+     live rather than being relaxed.
+
+     ── THE PRESS TARGETS ──
+     Tap ticks it off; double tap opens the sheet. That is the week
+     row's own gesture and Showing up's own gesture, so there is
+     nothing here to learn — and the sheet is still where you add,
+     re-rank and remove, reached from the row rather than from a
+     corner of the head. */
+  function scObjStrip(d) {
+    var wrap = $('scObjStrip');
+    if (!wrap) return;
+    wrap.textContent = '';
+    /* Drawn on the week and nowhere else. `[hidden]` HAS TO BE SAID
+       ONCE A THING TAKES A DISPLAY and this element is a flex row —
+       the rail, the page dots, the toast and the intro each shipped
+       that bug with the attribute set correctly throughout, so the
+       rule is in the stylesheet beside the display. */
+    wrap.hidden = view !== 'list';
+    if (wrap.hidden) return;
+    var day = scObjDay(d);
+    var all = scObjFor(day);
+
+    /* ── A GHOST CARD, NOT A PLUS AND NOT NOTHING ──
+       Three empty states were rendered over the real app. Nothing at
+       all is silent: the row vanishes and there is no way in, which
+       is the hole the top-right glyph was filling. A bare "+ Objective"
+       chip says add something without saying what it is for. The
+       ghost is a real card's box with a dashed edge and the greyed
+       tag — the SHAPE of the missing thing, which teaches the feature
+       by being it, and pressing it adds the first one. */
+    if (!all.length) {
+      var g = scEl('button', 'obs-c is-ghost');
+      g.type = 'button';
+      g.appendChild(scEl('em', 'obs-t', 'Objective'));
+      g.appendChild(scEl('span', 'obs-n', 'What matters today'));
+      g.setAttribute('aria-label', 'No objectives for ' + FULL[d]
+        + '. Add one.');
+      g.addEventListener('click', function () { scObjSheet(d, day); });
+      wrap.appendChild(g);
+      return;
     }
+
+    /* ── THE ADD CONTROL IS PINNED FIRST, and that is measured ──
+       Written at the END of the row — which is where a trailing
+       control belongs in a list that does not move — it sat 131px off
+       the right edge with only TWO objectives on the day. The one
+       control you need to reach was behind a swipe. First, it cannot
+       scroll away whatever is on the day. */
+    if (all.length < OBJ_MAX) {
+      var add = scEl('button', 'obs-add');
+      add.type = 'button';
+      add.setAttribute('aria-label', 'Add an objective for ' + FULL[d]);
+      add.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+        + '<path d="M12 5v14M5 12h14"/></svg>';
+      add.addEventListener('click', function () { scObjSheet(d, day); });
+      wrap.appendChild(add);
+    }
+
+    all.forEach(function (o, i) {
+      var b = scEl('button', 'obs-c' + (o.done ? ' is-done' : ''));
+      b.type = 'button';
+      b.dataset.id = o.id;
+      b.appendChild(scEl('em', 'obs-t', 'Objective'));
+      b.appendChild(scEl('span', 'obs-n', o.n));
+      b.setAttribute('aria-label', (i + 1) + '. ' + o.n
+        + (i === 0 ? ', the main one' : '') + '. '
+        + (o.done ? 'Done' : 'Not done')
+        + '. Tap to mark, double tap to edit.');
+      b.setAttribute('aria-pressed', o.done ? 'true' : 'false');
+      scDoubleTap(b, function () {
+        scObjToggle(day, o.id);
+        scRender();
+      }, function () { scObjSheet(d, day); });
+      wrap.appendChild(b);
+    });
   }
 
   /* ── which day it is, and what time ──
@@ -2008,6 +2063,7 @@
     '--s-m': '#F2B950', '--s-a': '#5FA8FF', '--s-e': '#B98BFF',
     '--t-train': '#E0574B', '--t-walk': '#4FBE87', '--t-read': '#5FA8FF',
     '--t-steps': '#F2B950', '--t-fuel': '#E0C15A', '--t-water': '#48C3CC',
+    '--t-obj': '#E571A3',
     '--st-ok': '#43B96C', '--gold': '#FFC83D',
     '--w-red': '#e6412f', '--w-blue': '#2f7fe6', '--w-teal': '#14a2a2',
     '--w-green': '#17a06b', '--w-violet': '#8a4fe0',
@@ -2023,6 +2079,12 @@
     '--s-m': '#8A5000', '--s-a': '#1668C7', '--s-e': '#6B3FC4',
     '--t-train': '#B3382E', '--t-walk': '#1C7A4E', '--t-read': '#1668C7',
     '--t-steps': '#8A5000', '--t-fuel': '#7A6200', '--t-water': '#0E6E76',
+    /* The objectives hue needs its own twin for the same reason the
+       workout hues do: read as a 22% wash under a 72% label, the dark
+       face's pink measures 3.75:1 on the light page. Same hue taken
+       down until it clears with margin rather than by a rounding
+       error — 5.18:1 measured, against 5.75 on the dark. */
+    '--t-obj': '#d32771',
     '--st-ok': '#19733F', '--gold': '#8A6100',
     /* ── THE WORKOUT HUES, SOLVED FOR A LIGHT PAGE ──
        The card's own nine are grounds for one fixed dark card and the
@@ -2230,7 +2292,7 @@
                 '--ground', '--card', '--card-edge', '--card-shadow',
                 '--s-m', '--s-a', '--s-e',
                 '--t-train', '--t-walk', '--t-read',
-                '--t-steps', '--t-fuel', '--t-water',
+                '--t-steps', '--t-fuel', '--t-water', '--t-obj',
                 '--done-bg', '--me', '--live', '--st-ok', '--gold',
                 '--w-red', '--w-blue', '--w-teal', '--w-green',
                 '--w-violet', '--w-orange', '--w-amber'];
@@ -4815,9 +4877,11 @@
     $('scWeek').hidden = tal || fr;
     $('scEmpty').hidden = tal || fr || state.items.length > 0;
     /* The head is the day's on the week and the screen's elsewhere,
-       and the turn control belongs to the week alone. */
+       and the objectives row belongs to the week alone — it takes the
+       open day rather than a local, because there is no day in scope
+       here and the row is about whichever one the week is showing. */
     scDate();
-    scHeadTurn();
+    scObjStrip(scOpenDay());
 
     /* The tab you are on, lit. The old single button had to draw the
        NEXT view rather than the current one — a control that shows its
