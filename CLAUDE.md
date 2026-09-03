@@ -5585,3 +5585,45 @@ That is the same trap as a palette name nothing matches and a workout
 key nothing resolves: **an identifier in a fixture is a reference
 nothing type-checks, and the failure mode is always green until it is
 not.** A tick is a record. Ask the record.
+
+## The sheet, cleaned up on report
+
+Reported as messy from a real screenshot: the length ladder sitting
+above the note on every visit, "Which book" over a field reading "Eat
+That Frog…" as if that were an instruction, and nothing to press
+before you had typed a character. Three changes, none of them a
+redraw of what was there.
+
+**THE LADDER IS A STATE OF THE FOOT, NOT A ROW ON THE SCREEN.** It sat
+between the pick and the note on every open, which is one control too
+many on something meant to be a tap and a sentence. `Log` asks now:
+the first press replaces itself with the ladder in the SAME place —
+`asking`, a var on the foot rather than a second screen — and a rung
+both answers the question and files the record. Skipped entirely once
+a length is already known, which is every second time you log the
+same kind of thing, because the record from last time is what set
+`saidMin` on the way in.
+
+**AND A WAY BACK, WHICH THE FIRST CUT DID NOT HAVE.** With no `Not
+now` and no `Take it off` while asking, the length step was a dead
+end — Escape or a swipe would abandon the pick and the note along with
+the question, which is the whole record thrown away for changing your
+mind about one figure. The same back arrow the episode level already
+uses, this time beside its own label rather than a row of its own.
+
+**SEARCH, THE SAME WORD FOR EVERY KIND.** The label and the
+placeholder used to name the kind — "Which book" over "Eat That
+Frog…" — and one example sitting alone in a field reads as an
+instruction to type THAT rather than as a placeholder. Both say
+"Search" now, on every kind that has one.
+
+**AND SOMETHING TO PRESS BEFORE YOU HAVE TYPED.** An empty field over
+an empty list reads as broken rather than as waiting. `MIND_POPULAR`
+is six lines of the app, one book and one podcast list, written in the
+same way `MIND_KINDS` is — not fetched, not ranked by anything, just
+there. Tapping one picks it outright with a drawn cover, the same
+trade the typed title already makes: there is no id here to ask a
+search for a real jacket with, and typing over the list is what
+reaches the real one. **Costs no network to show** — checked the same
+way the sheet opening does, before a character is typed — and typing
+replaces it; clearing the field back to empty brings it back.

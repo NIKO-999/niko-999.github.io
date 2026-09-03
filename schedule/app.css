@@ -4872,3 +4872,10 @@ body {
    own: a control that needs a row to itself reads as a second thing
    to decide. */
 .mn-pick .wc-back { flex: none; margin-left: -4px; }
+
+/* The length step's own back arrow, beside its label rather than a
+   row of its own — the show's own arrangement, at the foot instead
+   of the head. */
+.mn-mlab { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; }
+.mn-mlab .wc-back { flex: none; margin-left: -6px; }
+.mn-mlab .wc-eff-l { margin: 0; }

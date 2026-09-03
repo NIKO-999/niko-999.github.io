@@ -6065,6 +6065,35 @@
                    : m + ' m';
   }
 
+  /* ── SOMETHING TO SHOW BEFORE YOU HAVE TYPED ANYTHING ──
+     An empty field with an empty list under it reads as broken, not
+     as waiting — so the field opens on a handful of well-known titles
+     rather than on nothing. This is NOT a request: it is six lines
+     written into the app, the same way the workout kinds are, and it
+     costs no network to show. Tapping one picks it outright, with a
+     drawn cover — the same trade the typed title already makes,
+     because there is no id here to ask a search for a real jacket
+     with. Typing over it replaces it with the real search, which is
+     the one place artwork comes from. */
+  var MIND_POPULAR = {
+    book: [
+      { t: 'Atomic Habits', a: 'James Clear' },
+      { t: 'Eat That Frog!', a: 'Brian Tracy' },
+      { t: 'Deep Work', a: 'Cal Newport' },
+      { t: 'The 7 Habits of Highly Effective People', a: 'Stephen Covey' },
+      { t: 'The Power of Now', a: 'Eckhart Tolle' },
+      { t: 'Can’t Hurt Me', a: 'David Goggins' }
+    ],
+    podcast: [
+      { t: 'The Daily Stoic', a: 'Ryan Holiday' },
+      { t: 'Huberman Lab', a: 'Andrew Huberman' },
+      { t: 'The Tim Ferriss Show', a: 'Tim Ferriss' },
+      { t: 'Deep Questions', a: 'Cal Newport' },
+      { t: 'The Diary Of A CEO', a: 'Steven Bartlett' },
+      { t: 'On Purpose', a: 'Jay Shetty' }
+    ]
+  };
+
   /* ── A COVER THE APP DRAWS ITSELF ──
      For a title with no artwork, and for every title at all when the
      search cannot be reached. Not a placeholder: the hue is taken from
@@ -6157,6 +6186,11 @@
     var note = rec ? rec.b : '';
     var mins = rec ? rec.m : 0;
     var saidMin = !!mins;
+    /* Whether the sheet is on its length step, which replaces the
+       usual foot. A state of the FOOT rather than a separate screen,
+       because the rest of the sheet — the pick, the note — is still
+       exactly what it was; only the question at the bottom changed. */
+    var asking = false;
     var hits = [];
     var state = '';      /* '', 'go', 'off', 'slow', 'none' */
     var want = 0;        /* the sequence number of the search in flight */
@@ -6233,6 +6267,38 @@
         if (footBox) footBox.textContent = 'Log ' + named();
         if (!resBox) return;
         resBox.textContent = '';
+
+        /* ── AND BEFORE YOU HAVE TYPED, A FEW WELL-KNOWN ONES ──
+           The empty state of a search field is not "nothing here" —
+           it opens on MIND_POPULAR, and typing anything replaces it
+           with the real search below. Nothing has been asked off
+           origin to draw this: every one of these is initials, the
+           same generated cover a typed title with no artwork gets. */
+        if (!typed.trim() && !hits.length && !state) {
+          var kk0 = scMindKind(cur);
+          var pop = MIND_POPULAR[kk0.ask] || [];
+          if (pop.length) {
+            resBox.appendChild(scEl('span', 'label', 'Popular'));
+            var pl = scEl('div', 'mn-res');
+            pop.forEach(function (h) {
+              var pb = scEl('button', 'mn-hit');
+              pb.type = 'button';
+              pb.appendChild(scMindArt(h));
+              var pt2 = scEl('span', 'mn-ht2');
+              pt2.appendChild(scEl('b', null, h.t));
+              pt2.appendChild(scEl('span', null, h.a));
+              pb.appendChild(pt2);
+              pb.setAttribute('aria-label', h.t + ', ' + h.a);
+              pb.addEventListener('click', function () {
+                pick = { t: h.t, a: h.a, c: '' };
+                draw();
+              });
+              pl.appendChild(pb);
+            });
+            resBox.appendChild(pl);
+          }
+          return;
+        }
 
         /* ── THE TYPED TITLE ALWAYS WORKS ──
            Offered whenever there is something in the box, above the
@@ -6314,6 +6380,7 @@
             cur = x.k;
             hits = []; state = ''; want = 0;
             show = null; eps = []; epState = ''; epWant = 0;
+            asking = false;
             if (timer) clearTimeout(timer);
             draw();
           });
@@ -6338,7 +6405,7 @@
                  the search otherwise. Clearing the show as well would
                  make "a different episode of this" cost a fresh
                  search, which is the level you were already past. */
-              pick = null; draw();
+              pick = null; asking = false; draw();
             }));
             body.appendChild(got);
           } else if (show) {
@@ -6428,13 +6495,18 @@
               body.appendChild(el);
             }
           } else {
-            body.appendChild(scEl('span', 'label',
-              kk.ask === 'book' ? 'Which book' : 'Which show'));
+            /* ── SEARCH, NOT "WHICH BOOK" — AND THE SAME WORD FOR EVERY KIND ──
+               The label and the placeholder used to name the kind:
+               "Which book" over a field reading "Eat That Frog…". One
+               example standing in a field read as an instruction to
+               type THAT, and a label that changes with the chip is one
+               more thing to read on a screen this is meant to be quiet
+               on. Both kinds say the same word now. */
+            body.appendChild(scEl('span', 'label', 'Search'));
             var f = scEl('input', 'field');
             f.type = 'text';
             f.value = typed;
-            f.placeholder = kk.ask === 'book'
-              ? 'Eat That Frog…' : 'The show’s name…';
+            f.placeholder = 'Search…';
             f.maxLength = 80;
             f.addEventListener('input', function () { search(f.value); });
             body.appendChild(f);
@@ -6442,33 +6514,6 @@
             body.appendChild(resBox);
           }
         }
-
-        /* ── AND HOW LONG ──
-           A ladder rather than a field, which is the workout sheet's
-           own answer: nobody reads for 47 minutes, they read for
-           about half an hour, and a keyboard for a number everybody
-           rounds anyway is a keyboard for nothing. The kind's own
-           estimate is spliced into the rungs where it is not already
-           one, so the suggestion is always reachable in one press. */
-        var mlab = scEl('span', 'wc-eff-l', 'How long, in minutes?');
-        mlab.id = 'scMinMLab';
-        body.appendChild(mlab);
-        var mrow = scEl('div', 'wc-eff-r wc-mins mn-mins');
-        mrow.setAttribute('role', 'group');
-        mrow.setAttribute('aria-labelledby', 'scMinMLab');
-        scMindLadder(est()).forEach(function (n2) {
-          var b = scEl('button', 'wc-chip wc-min', String(n2));
-          b.type = 'button';
-          b.setAttribute('aria-pressed', n2 === est() ? 'true' : 'false');
-          b.setAttribute('aria-label', n2 + ' minutes');
-          b.addEventListener('click', function () {
-            mins = n2;
-            saidMin = true;
-            draw();
-          });
-          mrow.appendChild(b);
-        });
-        body.appendChild(mrow);
 
         /* ── THE NOTE IS OPTIONAL AND IT RIDES EVERY KIND ──
            Bullets on a chapter, a line about the walk, the whole of a
@@ -6488,13 +6533,67 @@
         body.appendChild(n);
 
         var acts = scEl('div', 'acts');
-        if (rec) acts.appendChild(scBtn('bad', 'Take it off', drop));
-        else acts.appendChild(scBtn('off', 'Not now', scClose));
-        /* THE FOOT NAMES WHAT IT IS ABOUT TO FILE, which is the
-           workout sheet's own answer to a screen where the thing you
-           picked is above the fold and the button is below it. */
-        footBox = scBtn('go', 'Log ' + named(), commit);
-        acts.appendChild(footBox);
+        /* ── ASKING IS A STATE OF THE FOOT, NOT A FIELD ON THE SCREEN ──
+           The ladder used to sit above the note on every visit, and
+           it read as one control too many on a screen that is meant
+           to be a tap and a sentence. It is asked FOR now, on the
+           press that means it: Log, once, replaces itself with the
+           ladder rather than filing, and a rung both answers the
+           question and finishes the record — one tap to ask, one to
+           answer, the workout card's own two-step in fewer pixels.
+           Skipped entirely once a length is already known, which is
+           every second time you log the same kind of thing. */
+        if (asking) {
+          /* ── A WAY BACK OUT OF THE QUESTION, NOT JUST AN ANSWER TO IT ──
+             With no Not now and no Take it off in this state, the
+             length step is otherwise a dead end: Escape or a swipe
+             would abandon the pick and the note rather than just the
+             question, which is the whole record thrown away for
+             changing your mind about one figure. The same back arrow
+             the episode level already uses. */
+          var mhead = scEl('div', 'mn-mlab');
+          var mback = scEl('button', 'wc-back');
+          mback.type = 'button';
+          mback.setAttribute('aria-label', 'Back');
+          mback.insertAdjacentHTML('beforeend',
+            '<svg viewBox="0 0 24 24" aria-hidden="true">'
+            + '<path d="M15 4.5L7.5 12l7.5 7.5"/></svg>');
+          mback.addEventListener('click', function () { asking = false; draw(); });
+          mhead.appendChild(mback);
+          var mlab = scEl('span', 'wc-eff-l', 'How long, in minutes?');
+          mlab.id = 'scMinMLab';
+          mhead.appendChild(mlab);
+          acts.appendChild(mhead);
+          var mrow = scEl('div', 'wc-eff-r wc-mins mn-mins');
+          mrow.setAttribute('role', 'group');
+          mrow.setAttribute('aria-labelledby', 'scMinMLab');
+          scMindLadder(est()).forEach(function (n2) {
+            var mb = scEl('button', 'wc-chip wc-min', String(n2));
+            mb.type = 'button';
+            mb.setAttribute('aria-pressed', n2 === est() ? 'true' : 'false');
+            mb.setAttribute('aria-label', n2 + ' minutes');
+            mb.addEventListener('click', function () {
+              mins = n2;
+              saidMin = true;
+              asking = false;
+              commit();
+            });
+            mrow.appendChild(mb);
+          });
+          acts.appendChild(mrow);
+        } else {
+          if (rec) acts.appendChild(scBtn('bad', 'Take it off', drop));
+          else acts.appendChild(scBtn('off', 'Not now', scClose));
+          /* THE FOOT NAMES WHAT IT IS ABOUT TO FILE, which is the
+             workout sheet's own answer to a screen where the thing
+             you picked is above the fold and the button is below
+             it. */
+          footBox = scBtn('go', 'Log ' + named(), function () {
+            if (!saidMin) { asking = true; draw(); return; }
+            commit();
+          });
+          acts.appendChild(footBox);
+        }
         body.appendChild(acts);
 
         paint();

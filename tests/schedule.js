@@ -8958,22 +8958,52 @@ const SAID = [
       kinds: [...document.querySelectorAll('.wc-chips .wc-chip')].map((c) => c.textContent),
       seg: !!document.querySelector('.wc-chips.is-seg'),
       note: document.querySelectorAll('.sheet textarea').length,
-      /* ── AND HOW LONG ──
-         A ladder rather than a field: nobody reads for 47 minutes.
-         Exactly eight rungs, four across and two rows — every kind's
-         estimate is already one of them, so the splice never fires
-         and a lone rung on a third row cannot happen. */
-      rungs: [...document.querySelectorAll('.wc-min')].map((c) => c.textContent),
-      cols: (() => { const m = document.querySelector('.mn-mins');
-        return m ? getComputedStyle(m).gridTemplateColumns.split(' ').length : 0; })(),
-      on: (document.querySelector('.wc-min[aria-pressed="true"]') || {}).textContent,
+      /* ── THE LADDER IS NOT SHOWN YET ──
+         It used to sit above the note on every visit, which read as
+         one control too many on a screen meant to be a tap and a
+         sentence. It is asked for now, on the press that means it. */
+      rungs: document.querySelectorAll('.wc-min').length,
+      /* ── SEARCH, THE SAME WORD FOR EVERY KIND ──
+         The label and the placeholder used to name the kind: "Which
+         book" over a field reading "Eat That Frog…". Both read as an
+         instruction rather than an invitation. */
+      label: (document.querySelector('.sheet .label') || {}).textContent,
+      placeholder: (document.querySelector('.sheet input[type=text]') || {}).placeholder,
+      /* ── AND SOMETHING TO PRESS BEFORE YOU HAVE TYPED ──
+         An empty field over an empty list reads as broken rather than
+         as waiting. */
+      popular: [...document.querySelectorAll('.mn-res .mn-hit b')].map((b) => b.textContent),
+      popLabel: (document.querySelector('.mn-res').previousElementSibling || {}).textContent,
     }));
     ok('pressing Mind on Today asks what you put in your head',
       sheet.title === 'Mind'
       && sheet.kinds.join('|') === 'Read|Podcast|Walk|Journal'
-      && sheet.seg && sheet.note === 1, sheet);
-    ok('...and it asks how long, as a ladder of four across',
-      sheet.rungs.length === 8 && sheet.cols === 4 && sheet.on === '30', sheet);
+      && sheet.seg && sheet.note === 1 && sheet.rungs === 0, sheet);
+    ok('...and the field says SEARCH, not the name of a book',
+      sheet.label === 'Search' && sheet.placeholder === 'Search…', sheet);
+    ok('...and something is there to press before you have typed anything',
+      sheet.popular.length === 6 && sheet.popLabel === 'Popular'
+      && sheet.popular.includes('Eat That Frog!'), sheet);
+    /* Reaching nothing off origin to draw six suggestions is the
+       whole point of them being written into the app rather than
+       fetched — checked here, before a single character is typed. */
+    ok('...and drawing them has asked for nothing off origin',
+      offOrigin().length === 0, offOrigin());
+
+    /* ── TYPING REPLACES THE SUGGESTIONS, NOT THE OTHER WAY ROUND ──
+       Once you start putting something in, that is what the list
+       should be about. */
+    await mpage.click('.sheet input[type=text]');
+    await mpage.type('.sheet input[type=text]', 'e', { delay: 40 });
+    await mpage.waitForTimeout(200);
+    ok('one character clears the suggestions before the real search lands',
+      await mpage.evaluate(() => document.querySelectorAll('.mn-res').length === 0
+        || !document.querySelector('.mn-res .mn-hit b').textContent.includes('Atomic')));
+    await mpage.fill('.sheet input[type=text]', '');
+    await mpage.waitForTimeout(200);
+    ok('and clearing the field back to empty brings them back',
+      await mpage.evaluate(() =>
+        [...document.querySelectorAll('.mn-res .mn-hit b')].some((b) => b.textContent === 'Atomic Habits')));
 
     /* ── THE PROMISE, AND IT IS THE WHOLE POINT OF THE SECTION ──
        This app reaches nothing off origin except the friends half.
@@ -9065,7 +9095,41 @@ const SAID = [
     const foot = await mpage.$eval('.sheet .btn.go', (b) => b.textContent);
     ok('the foot names what it is about to file',
       foot === 'Log Eat That Frog!', { foot });
+
+    /* ── LOG ASKS FIRST, RATHER THAN SHOWING THE LADDER ALL ALONG ──
+       Pressing it the first time does not file the record — it asks
+       how long, in the ladder's own place at the foot, and a second
+       press of a RUNG is what actually commits. */
     await mpage.click('.sheet .btn.go');
+    await mpage.waitForTimeout(360);
+    const asking = await mpage.evaluate(() => ({
+      rungs: [...document.querySelectorAll('.wc-min')].map((c) => c.textContent),
+      cols: (() => { const m = document.querySelector('.mn-mins');
+        return m ? getComputedStyle(m).gridTemplateColumns.split(' ').length : 0; })(),
+      on: (document.querySelector('.wc-min[aria-pressed="true"]') || {}).textContent,
+      go: document.querySelectorAll('.sheet .btn.go').length,
+      back: document.querySelectorAll('.acts .wc-back').length,
+    }));
+    ok('...and the ladder is exactly eight rungs, four across, with the estimate lit',
+      asking.rungs.length === 8 && asking.cols === 4 && asking.on === '30'
+      && asking.go === 0 && asking.back === 1, asking);
+
+    /* ── AND THE BACK ARROW LEAVES WITHOUT FILING ──
+       No Not now and no Take it off in this state, so the length
+       question would otherwise be a dead end — pressing back has to
+       return the normal foot with nothing recorded yet. */
+    await mpage.click('.acts .wc-back');
+    await mpage.waitForTimeout(320);
+    ok('the way back leaves the question unanswered rather than filing anything',
+      await mpage.evaluate(() =>
+        document.querySelectorAll('.sheet .btn.go').length === 1
+        && document.querySelectorAll('.wc-min').length === 0
+        && !(localStorage.getItem('sched.mind.v1') || '').includes('Eat That Frog')));
+
+    /* Ask again, and this time answer it. */
+    await mpage.click('.sheet .btn.go');
+    await mpage.waitForTimeout(360);
+    await mpage.click('.wc-min >> nth=3');
     await mpage.waitForTimeout(620);
 
     const rec = await mpage.evaluate(() => {
@@ -9134,7 +9198,9 @@ const SAID = [
       dead.own === 1 && dead.res === 0 && /still logs/.test(dead.say), dead);
     await mpage.click('.mn-hit.is-own');
     await mpage.waitForTimeout(260);
-    await mpage.click('.sheet .btn.go');
+    await mpage.click('.sheet .btn.go');   /* asks; the record has no length yet */
+    await mpage.waitForTimeout(360);
+    await mpage.click('.wc-min >> nth=3');
     await mpage.waitForTimeout(560);
     ok('...and that record is filed like any other',
       await mpage.evaluate(() => {
@@ -9240,7 +9306,9 @@ const SAID = [
     ok('the foot names the episode, not the show',
       (await mpage.$eval('.sheet .btn.go', (b) => b.textContent))
         === 'Log The Obstacle Is The Way');
-    await mpage.click('.sheet .btn.go');
+    await mpage.click('.sheet .btn.go');   /* asks first */
+    await mpage.waitForTimeout(360);
+    await mpage.click('.wc-min >> nth=3');
     await mpage.waitForTimeout(620);
     const ep = await mpage.evaluate(() => {
       const o = JSON.parse(localStorage.getItem('sched.mind.v1') || '{}');
@@ -9289,7 +9357,9 @@ const SAID = [
       dead2.just === 1 && dead2.eps === 0 && /still logs/.test(dead2.say), dead2);
     await mpage.click('.mn-hit.is-own');
     await mpage.waitForTimeout(320);
-    await mpage.click('.sheet .btn.go');
+    await mpage.click('.sheet .btn.go');   /* asks first */
+    await mpage.waitForTimeout(360);
+    await mpage.click('.wc-min >> nth=3');
     await mpage.waitForTimeout(620);
     ok('...and the show files like any other record',
       await mpage.evaluate(() => {
