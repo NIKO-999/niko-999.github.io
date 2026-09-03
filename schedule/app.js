@@ -717,6 +717,72 @@
     return el;
   }
 
+  /* ── A LONG PRESS, WRITTEN ONCE ──
+     550ms, cancelled by any movement over 10px, and both numbers are
+     tuned rather than picked. Without the move guard every scroll that
+     BEGINS on the element fires it, because the finger is on it for
+     the whole gesture and the gesture is a scroll. `moved` is read
+     rather than pointercancel, because a scroll inside a scroller does
+     not reliably cancel the pointer on the child it started in.
+
+     ── THE CLICK THAT ENDS THE GESTURE IS SWALLOWED BY A FLAG ──
+     and by an EXPLICIT one rather than by inferring from the timer:
+     `held` is null after an ordinary tap too, so a check on it would
+     swallow every click.
+
+     IT IS BELT AND BRACES IN THIS BROWSER, and that is written down
+     rather than left to be rediscovered. A click's target is the
+     nearest common ancestor of the elements the pointer went down and
+     up on — so when a hold opens the history over the top, the finger
+     lifts on the veil, the click lands on <body>, and it reaches
+     neither the card nor the veil. Measured both ways here: with the
+     guard and without it, the veil is up and the item is unlogged,
+     identically.
+
+     The guard is kept because that is a Chromium measurement of a rule
+     engines do not all apply the same way: where a click is retargeted
+     to the element the press STARTED on, the flag is the only thing
+     between a hold and the tap's job being done as well. This repo has
+     shipped one bug already that reproduced on a phone and on nothing
+     here, and the cost of the flag is a boolean.
+
+     Two screens hold this gesture now, a row on the week and a tile on
+     Showing up, so it is one function. Written twice, the 550 and the
+     10 are two numbers to keep in step and the one that drifts is on
+     whichever screen nobody happened to be looking at.
+
+     The acknowledgement is the CALLER'S. A long press with nothing to
+     show for it is indistinguishable from one that did not register,
+     but what to show differs — the week vibrates on a tick it also
+     reaches from a plain button, and a sheet coming up is its own
+     answer. */
+  function scHold(el, onHold) {
+    var held = null, hx = 0, hy = 0, moved = false, fired = false;
+    var drop = function () { if (held) { clearTimeout(held); held = null; } };
+    el.addEventListener('pointerdown', function (ev) {
+      hx = ev.clientX; hy = ev.clientY; moved = false; fired = false;
+      drop();
+      held = setTimeout(function () {
+        held = null;
+        if (moved) return;
+        fired = true;
+        onHold();
+      }, 550);
+    });
+    el.addEventListener('pointermove', function (ev) {
+      if (Math.abs(ev.clientX - hx) > 10 || Math.abs(ev.clientY - hy) > 10) {
+        moved = true;
+        drop();
+      }
+    });
+    el.addEventListener('pointerup', drop);
+    el.addEventListener('pointercancel', function () { moved = true; drop(); });
+    return function () {
+      if (fired) { fired = false; return true; }
+      return false;
+    };
+  }
+
   /* ═══════════════════════════════════════════════════════════
      WHAT KIND OF THING A BLOCK IS
 
@@ -1182,16 +1248,9 @@
            reachable from the row it is about, for the mornings when
            the block in front of you is the one you just finished.
 
-           550ms, and it cancels on any movement over 10px. Without the
-           move guard every scroll of the deck that starts on a row
-           fires it — the finger is on a row for the whole gesture, and
-           the gesture is a scroll. `moved` is checked rather than
-           pointercancel because a scroll inside .day-card does not
-           always cancel the pointer on the row it began in. */
-        var held = null, hx = 0, hy = 0, moved = false, fired = false;
-        var drop = function () {
-          if (held) { clearTimeout(held); held = null; }
-        };
+           The gesture itself is scHold: 550ms with a 10px move guard,
+           and it is one function because Showing up's tile holds the
+           same press now. */
         /* ONE tick, reached two ways: the check beside the row, and a
            long press on the row itself. The check is the one a keyboard
            and a screen reader can use; the long press is the shortcut
@@ -1223,31 +1282,9 @@
             if (!was && scIsTrain(it)) { scTrainAsk(it, d, bd); return; }
             scToast(was ? it.n + ' unticked' : it.n + ' done', false);
         };
-        row.addEventListener('pointerdown', function (ev) {
-          hx = ev.clientX; hy = ev.clientY; moved = false; fired = false;
-          drop();
-          held = setTimeout(function () {
-            held = null;
-            if (moved) return;
-            fired = true;
-            tick();
-          }, 550);
-        });
-        row.addEventListener('pointermove', function (ev) {
-          if (Math.abs(ev.clientX - hx) > 10 || Math.abs(ev.clientY - hy) > 10) {
-            moved = true;
-            drop();
-          }
-        });
-        row.addEventListener('pointerup', drop);
-        row.addEventListener('pointercancel', function () { moved = true; drop(); });
+        var heldRow = scHold(row, tick);
         row.addEventListener('click', function () {
-          /* A long press has already done its work; without this the
-             finger lifting then opens the editor on top of the tick.
-             An explicit flag rather than an inference from the timer:
-             `held` is null after an ordinary tap too, so a check on it
-             would swallow every click. */
-          if (fired) { fired = false; return; }
+          if (heldRow()) return;
           scEditSheet(it, d);
         });
         /* A long press reaches neither a keyboard nor a screen reader,
@@ -2556,17 +2593,21 @@
       var on = !!got[it.id], late = !on && scLate(it);
       var row = scEl('div', 'ty-row' + (on ? ' is-on' : '') + (late ? ' late' : ''));
       row.dataset.item = it.id;
-      /* ── THE CHECK, then the card, then the record ──
-         Three press targets and all three are siblings: a button
-         inside a button is invalid and collapses to one press while
-         looking exactly right. The check and the card log; the strip
-         opens the history. */
-      var chk = scEl('button', 'chk');
-      chk.type = 'button';
-      chk.setAttribute('aria-label', (on ? 'Unlog ' : 'Log ') + it.n);
-      chk.setAttribute('aria-pressed', on ? 'true' : 'false');
+      /* ── ONE CONTROL A TILE: TAP LOGS, HOLD OPENS THE RECORD ──
+         The card opened the history on a plain press and the check
+         beside it logged, which had the rare thing on the big target
+         and the daily one on a 30px circle. It is the other way round
+         now: the whole tile logs, and the twenty-six weeks are behind
+         a hold.
+
+         So the circle is DRAWN rather than pressed. It was a sibling
+         button, and with the card logging too it would have been two
+         targets for one action on a 145px tile — the arrangement this
+         screen already removed once. A span inside the button is
+         valid where a second button would not be. */
+      var chk = scEl('span', 'chk');
+      chk.setAttribute('aria-hidden', 'true');
       chk.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.8l5.2 5.2L19.5 6"/></svg>';
-      chk.addEventListener('click', function () { scTallyTap(it, day); });
       row.appendChild(chk);
       var c = scEl('button', 'ty-card');
       c.type = 'button';
@@ -2634,11 +2675,41 @@
          did the same thing and a third that did the other one was the
          arrangement a full-width row could afford and a 145px tile
          cannot. Still siblings, never nested. */
-      c.setAttribute('aria-label', it.n + ', ' + (on ? 'logged' : 'not yet')
+      /* The card IS the toggle now, so it carries the state a screen
+         reader is told and the name says what a press does. The
+         figure the tile draws is still spoken, because "logged" alone
+         throws away the one thing you came to read. */
+      c.setAttribute('aria-pressed', on ? 'true' : 'false');
+      c.setAttribute('aria-label', (on ? 'Unlog ' : 'Log ') + it.n + ', '
+        + (on ? 'logged' : 'not yet')
         + (on && it.k === 'num' ? ', ' + got[it.id] + (it.unit || '') : '')
-        + (late ? ', missed its window' : '') + '. Open 26 weeks of history.');
-      c.addEventListener('click', function () { scOpenHist(it); });
+        + (late ? ', missed its window' : ''));
+      var heldCard = scHold(c, function () {
+        /* Haptic where there is one: a hold that opens a sheet a frame
+           later, with nothing in between, is indistinguishable from a
+           press that did not register. */
+        if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+        scOpenHist(it);
+      });
+      c.addEventListener('click', function () {
+        if (heldCard()) return;
+        scTallyTap(it, day);
+      });
       row.appendChild(c);
+      /* ── AND THE HOLD IS NEVER THE ONLY WAY IN ──
+         A long press reaches neither a keyboard nor a screen reader.
+         That is why the week's own long press is a shortcut to
+         something the tally already does with a plain press — and
+         here there is nothing else, so the route has to be built. It
+         is a real button, focusable and named, drawn off screen
+         rather than `display: none`, which would take it out of the
+         accessibility tree and leave the history reachable by exactly
+         one gesture that half the people using this app cannot make. */
+      var hist = scEl('button', 'ty-hist', 'History');
+      hist.type = 'button';
+      hist.setAttribute('aria-label', it.n + ', 26 weeks of history');
+      hist.addEventListener('click', function () { scOpenHist(it); });
+      row.appendChild(hist);
       grid.appendChild(row);
     });
     var best = scBest();

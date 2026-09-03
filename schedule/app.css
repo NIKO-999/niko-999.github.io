@@ -911,11 +911,50 @@ body {
    the LEFT for the schedule rows, so setting `right` alone leaves both
    edges anchored and the check draws over the glyph. Seen on the real
    app with a purple tick sitting on top of the dumbbell. */
+/* ── DRAWN, NOT PRESSED ──
+   The tile is one control now: a tap logs and a hold opens the record.
+   The circle was a sibling button that also logged, and with the card
+   logging too that is two targets for one action on a 145px tile —
+   the arrangement this screen removed once already. `pointer-events:
+   none` matters as much as the markup: a span still swallows the
+   press that lands on it, and the press that lands on it is the one
+   aimed at the mark that says what it will do. */
 .ty-row > .chk {
   top: 11px; right: 10px; left: auto; transform: none;
   width: 20px; height: 20px;
+  pointer-events: none;
+  cursor: default;
 }
 .ty-row > .chk svg { width: 11px; height: 11px; }
+
+/* ── THE WAY IN A HOLD CANNOT OFFER ──
+   A long press reaches neither a keyboard nor a screen reader, so the
+   history needs a real control. Off screen rather than `display:
+   none`, which would take it out of the accessibility tree and leave
+   twenty-six weeks of record behind a gesture half the people using
+   this app cannot make. It comes back on focus, because a keyboard
+   user who has tabbed to it has to be able to see where they are. */
+.ty-hist {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  background: none; color: inherit; font: inherit;
+}
+.ty-hist:focus-visible {
+  position: static;
+  width: auto; height: auto;
+  margin: 6px 0 0;
+  clip-path: none;
+  display: block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11.5px; font-weight: 600;
+  color: var(--ink);
+  outline: 2px solid var(--ink); outline-offset: 2px;
+}
 .ty-card {
   display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 6px 8px;
   align-items: center;

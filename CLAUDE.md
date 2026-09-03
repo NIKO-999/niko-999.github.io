@@ -4600,13 +4600,69 @@ about. Reported as *it's just looking like too much*. `sched.tyview.v1`
 is removed rather than ignored, the way the old palette name and the
 subtitle key were.
 
-**THE CHECK LOGS AND THE CARD OPENS THE RECORD.** Both used to log,
-with the strip beside them opening the history — and the strip is what
-went, so the way in had to move rather than disappear. Two controls
-that did the same thing and a third that did the other one is an
-arrangement a full-width row can afford and a 145px tile cannot. Still
-siblings, never nested. Both carry a written label, because on a tile
-they are a circle and a rectangle with no words between them.
+**ONE CONTROL A TILE: A TAP LOGS AND A HOLD OPENS THE RECORD.** It was
+the other way round — the card opened the history on a plain press and
+a check beside it logged — which put the rare thing on the big target
+and the daily one on a 20px circle.
+
+**So the circle is DRAWN, not pressed.** With the whole tile logging, a
+check that also logged would be two targets for one action on a 145px
+card, which is the arrangement this screen removed once already. It is
+a `<span>` inside the button now, where a second button would be
+invalid, and it carries `pointer-events: none` — a span still swallows
+the press that lands on it, and the press that lands on it is the one
+aimed at the mark saying what it will do.
+
+**AND THE HOLD IS NEVER THE ONLY WAY IN.** A long press reaches neither
+a keyboard nor a screen reader. On the week that is affordable because
+the tally does the same tick with a plain press; here there was nothing
+else, so the route had to be built: a real button per tile, focusable
+and named, drawn off screen rather than `display: none` — which would
+take it out of the accessibility tree and leave twenty-six weeks of
+record behind one gesture. It comes back on focus, because somebody who
+has tabbed to it has to see where they are.
+
+### The gesture is one function now
+
+`scHold` — 550ms with a 10px move guard, and both numbers are tuned
+rather than picked. Two screens hold a press now, so writing it twice
+would be two numbers to keep in step and the one that drifts is on
+whichever screen nobody was looking at.
+
+**The click that ends the gesture is swallowed by an explicit flag**,
+never by inferring from the timer: `held` is null after an ordinary tap
+too, so a check on it swallows every click.
+
+**It is belt and braces in this browser, and that is written down
+rather than left to be rediscovered.** A click's target is the nearest
+common ancestor of the elements the pointer went down and up on — so
+when a hold opens the history over the top, the finger lifts on the
+veil, the click lands on the poster, and it reaches neither the card
+nor the veil. Measured both ways: with the guard and without it, the
+veil is up and the item unlogged, identically. The guard is kept
+because that is a Chromium measurement of a rule engines do not all
+apply the same way, and this repo has already shipped one bug that
+reproduced on a phone and on nothing here. **A fix kept for a reason
+is not the same as a fix kept because it looked necessary** — the
+first version of this ate the click at the document, on a diagnosis
+that turned out to be wrong.
+
+### Two probes lied before either of them was right
+
+**The first looked for the wrong element.** The history is a veil and a
+glass panel, not a `.sheet`, so a probe asking for `.sheet:not([hidden])`
+reported the hold doing nothing three times running — on a hold that
+was working the whole time. It produced a plausible answer to a
+question nobody had asked.
+
+**The second put its own pointer on a scrim.** Tapping a NUMBER opens
+the sheet that asks for one, and Escape left that sheet up longer than
+the 240ms the check allowed — so the hold that followed landed its
+`pointerdown` on the scrim and its `pointerup` on the card, and
+reported as the hold not working. It waits for the sheet to be gone
+now rather than sleeping past it. **A check that leaves a surface over
+the screen is a check that breaks the next one**, which is the bar
+contrast sweep's lesson in a second place.
 
 **What it costs is the strip, and that was the argument against it.**
 26 marks in 120px is four pixels a week, and a record you cannot read

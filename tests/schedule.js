@@ -1763,6 +1763,23 @@ const SAID = [
      turns up. A test that counts presses has to be re-counted every
      time a stop is added, and the one time it is not, it silently
      measures the wrong screen. */
+  /* ── A HOLD ON A SHOWING UP TILE ──
+     The tile is one control now: a tap logs and a hold opens the
+     twenty-six weeks. Driven as real pointer events rather than by
+     calling the function behind it, because the handler is what has to
+     open the panel. 700ms clears the 550 the gesture waits for. */
+  const holdCard = async (id) => {
+    const b = await page.$eval(`.ty-card[data-item="${id}"]`, (e) => {
+      const r = e.getBoundingClientRect();
+      return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+    });
+    await page.mouse.move(b.x, b.y);
+    await page.mouse.down();
+    await page.waitForTimeout(700);
+    await page.mouse.up();
+    await page.waitForTimeout(260);
+  };
+
   const show = async (v) => {
     for (let i = 0; i < 3; i++) {
       const at = await page.evaluate(() => ({
@@ -2397,10 +2414,14 @@ const SAID = [
     marks.every((m) => m.fits[0] >= 0 && m.fits[1] >= 0
       && m.fits[2] <= 24 && m.fits[3] <= 24),
     marks.map((m) => m.item + ':' + m.fits.join()).join(' '));
-  ok('and every card still SAYS its name',
+  /* The card is the toggle now, so its name leads with what a press
+     DOES and the item's own name follows it. Asserted as that exact
+     shape rather than as "the name appears somewhere", which passes on
+     a label that has stopped saying what the control is for. */
+  ok('and every card still SAYS its name, after what pressing it does',
     ['Train', 'Mind', 'Steps', 'Fuel', 'Water']
-      .every((n, i) => marks[i].label.indexOf(n) === 0),
-    marks.map((m) => m.label.slice(0, 12)).join(' | '));
+      .every((n, i) => new RegExp('^(Log|Unlog) ' + n + '\\b').test(marks[i].label)),
+    marks.map((m) => m.label.slice(0, 18)).join(' | '));
 
   /* ── the figure under the ring ──
      A ring says WHETHER and nothing else, so on its own it swallowed
@@ -2503,7 +2524,7 @@ const SAID = [
      with the strip beside them opening the history; the strip went with
      the tile, so the two remaining controls each took one job. */
   const stored = await page.evaluate(() => {
-    document.querySelector('.ty-row:has(.ty-card[data-item="t"]) > .chk').click();
+    document.querySelector('.ty-card[data-item="t"]').click();
     return localStorage.getItem('sched.tick.v1');
   });
   /* Ticking Train opens the workout deck over this screen. Nothing
@@ -2817,43 +2838,125 @@ const SAID = [
   /* ── two targets, and neither inside the other ──
      A <button> inside a <button> is invalid and collapses to one press,
      which would silently make one of them unreachable while looking
-     exactly right. The tile's two controls are SIBLINGS: the check
-     logs, and the card under it opens the record.
+     exactly right.
 
-     The strip that used to be the second target went with the tile —
-     26 marks in 120px is four pixels a week — so the way into the
-     history moved onto the card rather than disappearing with it. */
+     ── ONE CONTROL A TILE: TAP LOGS, HOLD OPENS THE RECORD ──
+     It was the other way round: the card opened the history on a plain
+     press and a check beside it logged, which put the rare thing on
+     the big target and the daily one on a 20px circle. So the whole
+     tile logs now and the twenty-six weeks are behind a hold, and the
+     circle is DRAWN rather than pressed — with the card logging too it
+     would have been two targets for one action on a 145px tile, which
+     is the arrangement this screen removed once already.
+
+     `pointer-events: none` is asserted beside the markup, because a
+     span still swallows the press that lands on it and the press that
+     lands on it is the one aimed at the mark saying what it will do. */
   const rows = await page.evaluate(() => {
     const r = [...document.querySelectorAll('.ty-row')];
     return {
       n: r.length,
       nested: r.some((x) => x.querySelector('button button')),
-      pairs: r.every((x) => x.querySelector(':scope > .ty-card')
-                         && x.querySelector(':scope > .chk')),
-      strip: !!document.querySelector('.ty-hist'),
+      cards: r.every((x) => !!x.querySelector(':scope > .ty-card')),
+      chkTag: [...new Set(r.map((x) => x.querySelector('.chk').tagName))],
+      chkDead: r.every((x) =>
+        getComputedStyle(x.querySelector('.chk')).pointerEvents === 'none'),
       taps: r.map((x) => {
         const a = x.querySelector('.ty-card').getBoundingClientRect();
         return Math.round(Math.min(a.width, a.height));
       }),
       labels: r.map((x) => x.querySelector('.ty-card').getAttribute('aria-label')),
-      logs: r.map((x) => x.querySelector('.chk').getAttribute('aria-label')),
+      pressed: r.map((x) => x.querySelector('.ty-card').getAttribute('aria-pressed')),
+      hist: r.map((x) => {
+        const h = x.querySelector('.ty-hist');
+        return h ? h.getAttribute('aria-label') : null;
+      }),
     };
   });
-  ok('six tiles, each a check and a card', rows.n === 6 && rows.pairs, rows);
-  ok('and the check is a SIBLING of the card, never nested inside it',
-    !rows.nested, rows);
-  ok('the strip is gone rather than hidden', !rows.strip, rows);
+  ok('six tiles, each one card', rows.n === 6 && rows.cards, rows);
+  ok('and nothing on a tile is a button inside a button', !rows.nested, rows);
+  ok('the circle is drawn rather than pressed',
+    rows.chkTag.join('') === 'SPAN' && rows.chkDead, rows);
   ok('the card clears 44px for a thumb', rows.taps.every((a) => a >= 44), rows.taps);
-  /* Both controls have to SAY which one they are: on a tile they are a
-     circle and a rectangle with no words between them. */
-  ok('the card says it opens the record and the check says it logs',
-    rows.labels.every((l) => /history/.test(l || ''))
-    && rows.logs.every((l) => /^(Log|Unlog) /.test(l || '')), rows.labels);
+  /* The card IS the toggle, so it says what a press does and carries
+     the state — and it still speaks the figure, because "logged" alone
+     throws away the one thing you came to the screen to read. */
+  ok('the card says it logs, and says where it stands',
+    rows.labels.every((l) => /^(Log|Unlog) /.test(l || ''))
+    && rows.pressed.every((p) => p === 'true' || p === 'false'), rows.labels);
 
-  /* Pressed the way a thumb presses it — the handler is what has to
-     open the panel, not a call to the function behind it. */
-  await page.click('.ty-row:has(.ty-card[data-item="p"]) .ty-card');
-  await page.waitForTimeout(220);
+  /* ── AND THE HOLD IS NEVER THE ONLY WAY IN ──
+     A long press reaches neither a keyboard nor a screen reader. On
+     the week that is affordable because the tally does the same tick
+     with a plain press; here there is nothing else, so the route has
+     to exist as a real control. Asserted as focusable and NAMED, not
+     merely present: a button with no accessible name is a button a
+     screen reader announces as nothing. */
+  ok('every tile carries a real history control for a keyboard',
+    rows.hist.length === 6
+    && rows.hist.every((l) => /26 weeks of history/.test(l || '')), rows.hist);
+  const reach = await page.evaluate(() => {
+    const h = document.querySelector('.ty-hist');
+    h.focus();
+    const r = h.getBoundingClientRect();
+    return { focused: document.activeElement === h,
+             w: Math.round(r.width), h: Math.round(r.height) };
+  });
+  ok('...and it is reachable and drawn once focused, never display:none',
+    reach.focused && reach.w > 20 && reach.h > 10, reach);
+  await page.evaluate(() => document.activeElement.blur());
+
+  /* ── PRESSED THE WAY A THUMB PRESSES IT ──
+     A hold, driven as real pointer events, because the handler is what
+     has to open the panel rather than a call to the function behind
+     it. 700ms clears the 550 the gesture waits for. */
+  /* ── THE TWO GESTURES, EACH ASSERTED NOT TO DO THE OTHER'S JOB ──
+     Both halves, because each passes on the other's bug: a build where
+     the tap still opened the history passes "a hold opens it", and one
+     where the hold does nothing passes "a tap logs". Steps is used
+     because it is a NUMBER — tapping it opens the sheet that asks for
+     one, so the tap has a visible answer that is not the history. */
+  const gest = await page.evaluate(() => ({
+    veil: !document.getElementById('scTyVeil').hidden,
+    logged: !!document.querySelector('.ty-row[data-item="p"].is-on'),
+  }));
+  await page.click('.ty-card[data-item="p"]');
+  await page.waitForTimeout(260);
+  const tapped = await page.evaluate(() => ({
+    veil: !document.getElementById('scTyVeil').hidden,
+    sheet: !document.getElementById('scSheet').hidden,
+  }));
+  ok('a tap on a tile logs it and does NOT open the record',
+    !tapped.veil && tapped.sheet, { gest, tapped });
+
+  /* ── AND THE SHEET HAS TO BE GONE BEFORE THE NEXT GESTURE ──
+     Waited for rather than slept past. Escape left the number sheet up
+     for longer than the 240ms this first allowed, so the hold that
+     followed put its pointerdown on the SCRIM and its pointerup on the
+     card — which reported as the hold not working, on an app where it
+     works. A check that leaves a surface over the screen is a check
+     that breaks the next one. */
+  await page.evaluate(() => document.getElementById('scScrim').click());
+  await page.waitForFunction(() =>
+    document.getElementById('scSheet').hidden
+    && document.getElementById('scScrim').hidden, null, { timeout: 4000 });
+  await page.waitForTimeout(200);
+
+  await holdCard('p');
+  const holdRes = await page.evaluate(() => ({
+    veil: !document.getElementById('scTyVeil').hidden,
+    cells: document.querySelectorAll('.ty-cal rect').length,
+    sheet: !document.getElementById('scSheet').hidden,
+  }));
+  /* AND THE HOLD MUST NOT ALSO DO THE TAP'S JOB. The click that ends
+     the gesture is swallowed by an explicit flag; without it the
+     finger lifting logs the thing you were only looking at. */
+  ok('a hold opens the record and does NOT log it',
+    holdRes.veil && holdRes.cells > 100 && !holdRes.sheet, holdRes);
+  await page.evaluate(() => document.getElementById('scTyVeil').click());
+  await page.waitForTimeout(240);
+
+  await holdCard('p');
 
   /* ── ONE FILTER, NOT ONE HUNDRED AND EIGHTY-TWO ──
      The whole argument for drawing the glow this way is that every lit
@@ -2996,7 +3099,7 @@ const SAID = [
       shape.join(',') === '1,3,5', shape);
     await page.reload({ waitUntil: 'networkidle' });
     await page.waitForTimeout(300);
-    await page.click('.ty-row:has(.ty-card[data-item="t"]) .ty-card');
+    await holdCard('t');
     await page.waitForTimeout(300);
 
     const read = () => page.evaluate(() => {
@@ -3071,7 +3174,7 @@ const SAID = [
     });
     await page.reload({ waitUntil: 'networkidle' });
     await page.waitForTimeout(300);
-    await page.click('.ty-row:has(.ty-card[data-item="t"]) .ty-card');
+    await holdCard('t');
     await page.waitForTimeout(300);
     const one = await read();
     ok(`one block off for one date moves one cell (${three.skip} → ${one.skip})`,
@@ -3259,7 +3362,7 @@ const SAID = [
   for (const id of ['p', 'f', 'w', 't', 'm']) {
     await page.keyboard.press('Escape');
     await page.waitForTimeout(120);
-    await page.click('.ty-row:has(.ty-card[data-item="' + id + '"]) .ty-card');
+    await holdCard(id);
     await page.waitForTimeout(200);
     figs[id] = await page.evaluate(() => ({
       title: document.querySelector('.ty-title').textContent,
@@ -3336,7 +3439,7 @@ const SAID = [
     for (const id of ['t', 'p', 'f']) {
       await page.keyboard.press('Escape');
       await page.waitForTimeout(120);
-      await page.click('.ty-row:has(.ty-card[data-item="' + id + '"]) .ty-card');
+      await holdCard(id);
       await page.waitForTimeout(200);
       (await page.evaluate(() => [...document.querySelectorAll('.ty-stats span')]
         .map((s) => [s.textContent.trim(),
@@ -3430,7 +3533,7 @@ const SAID = [
   await page.keyboard.press('Escape');
   await page.waitForTimeout(160);
   const shutEsc = await page.evaluate(() => document.getElementById('scTyVeil').hidden);
-  await page.click('.ty-row:has(.ty-card[data-item="t"]) .ty-card');
+  await holdCard('t');
   await page.waitForTimeout(180);
   await page.click('.ty-veil', { position: { x: 6, y: 6 } });
   await page.waitForTimeout(160);
@@ -3510,7 +3613,7 @@ const SAID = [
       }, theme);
       await page.reload({ waitUntil: 'networkidle' });
       await page.waitForTimeout(240);
-      await page.click('.ty-row:has(.ty-card[data-item="f"]) .ty-card');
+      await holdCard('f');
       await page.waitForTimeout(220);
       const png = PNG4.sync.read(await page.screenshot());
       for (const [sel, want] of WANT) {
@@ -4252,7 +4355,7 @@ const SAID = [
        logs and the strip beside it opens the history — so `#scTally
        button >> nth=1` is Train's STRIP rather than Mind's card, and
        the panel it opens then swallows every click after it. */
-    await fp.click('.ty-row:has(.ty-card[data-item="t"]) > .chk');
+    await fp.click('.ty-card[data-item="t"]');
     await fp.waitForTimeout(500);
     /* Train now asks what you trained, so the deck is up over the
        tally and its scrim takes every press after it. Dismissed
@@ -4260,13 +4363,13 @@ const SAID = [
        figures, and the answer is not one of them. */
     await fp.keyboard.press('Escape');
     await fp.waitForTimeout(360);
-    await fp.click('.ty-row:has(.ty-card[data-item="m"]) > .chk');
+    await fp.click('.ty-card[data-item="m"]');
     await fp.waitForTimeout(220);
     /* A number nothing else in the app could produce, typed into
        Steps. The tick means YOU LOGGED IT and never what it was, and
        the only way to hold that claim is to go looking for the figure
        afterwards. */
-    await fp.click('.ty-row:has(.ty-card[data-item="p"]) > .chk');
+    await fp.click('.ty-card[data-item="p"]');
     await fp.waitForTimeout(400);
     await fp.fill('.sheet input[type=text]', '18437');
     await fp.click('.sheet .btn.go');
@@ -5185,7 +5288,7 @@ const SAID = [
       }, theme);
       await page.reload({ waitUntil: 'networkidle' });
       await page.waitForTimeout(320);
-      await page.click('.ty-row:has(.ty-card[data-item="t"]) > .chk');
+      await page.click('.ty-card[data-item="t"]');
       await page.waitForTimeout(560);
     };
     const face = () => page.evaluate(() => ({
@@ -6278,7 +6381,7 @@ const SAID = [
     await page.evaluate(() => localStorage.setItem('sched.view.v1', 'tally'));
     await page.reload({ waitUntil: 'networkidle' });
     await page.waitForTimeout(360);
-    await page.click('.ty-row:has(.ty-card[data-item="t"]) > .chk');
+    await page.click('.ty-card[data-item="t"]');
     await page.waitForTimeout(420);
     const gone = await page.evaluate(() => ({
       /* The KEYS, not the string: scTrainSet deletes the day once its
@@ -6295,7 +6398,7 @@ const SAID = [
        list of words kept in step with it by hand. Mind is fed by Walk
        and Read, which reach the walk and read glyphs, so ticking it
        must draw no deck at all. */
-    await page.click('.ty-row:has(.ty-card[data-item="m"]) > .chk');
+    await page.click('.ty-card[data-item="m"]');
     await page.waitForTimeout(420);
     const mind = await page.evaluate(() => ({
       open: !document.getElementById('scSheet').hidden,
@@ -7058,7 +7161,7 @@ const SAID = [
     await ppage.evaluate(() => document.getElementById('scTyUp').click());
     await ppage.waitForTimeout(200);
     await ppage.evaluate(() =>
-      document.querySelector('.ty-row:has(.ty-card[data-item="m"]) > .chk').click());
+      document.querySelector('.ty-card[data-item="m"]').click());
     await ppage.waitForTimeout(2400);
     const rated = await ppage.evaluate(() => localStorage.getItem('sched.rate.v2'));
     ok('and a push that does happen carries no rating in it',
