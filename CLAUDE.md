@@ -5627,3 +5627,71 @@ search for a real jacket with, and typing over the list is what
 reaches the real one. **Costs no network to show** — checked the same
 way the sheet opening does, before a character is typed — and typing
 replaces it; clearing the field back to empty brings it back.
+
+## The Now colour is fixed, and Mind has a wall
+
+Two requests, and both take something specific away or add it back in
+a shape the rest of the app already has.
+
+**THE NOW SWATCH ROW IS GONE.** It was the second row under Settings,
+"the mark the whole screen orients around is worth making yours the
+way your own face is." Taken away on request: one row of swatches now,
+"Your colour" alone, and the running row is Amber wherever it is, on
+both faces — `scPickDflt` is `scPickHex` with no key to read, resolved
+to the DEFAULT swatch rather than to whatever a phone might still have
+stored. The old key is swept on boot rather than left: a preference
+for a control that no longer exists is a second record of a decision
+nothing can act on.
+
+## Mind's history is a wall, not a heat map
+
+Every other item on Showing up opens the same 26-week calendar —
+ticks, kept against missed, which is the right picture for a thing
+you either did or did not do. Mind is not that: what you read has a
+COVER, and a heat map of dots would throw away the one thing this
+record has that the others do not.
+
+**THE FRIENDS BOARD ALREADY SOLVED THIS, FOR A DIFFERENT WALL.** "A
+profile is a WALL, not a second feed... three across, square, and the
+photograph fills its tile." Reused rather than redrawn — `.mn-hist-t`
+is `.fp-t`'s own shape, and the reasoning is the same one level up:
+a profile wants the SHAPE of what somebody has done, and the words
+are one press in.
+
+**THE DOOR IS THE ONE EVERY TILE ALREADY HAS.** No new gesture: the
+double tap that opens the 26-week map for the other five opens the
+wall for Mind. `scOpenHist` branches on the item id and nothing about
+the press changes — only what is on the far end of it.
+
+**TWO FIGURES, AND NEITHER IS A STREAK.** "A streak is a tick's
+figure, and only a tick's" — it counts days you RECORDED something,
+which for Mind would be a fact about your logging rather than about
+what you read. What the record actually carries instead: how long you
+gave to it, and how many entries carry a note.
+
+**A TILE IS A WAY IN, NOT A SECOND READ-ONLY PICTURE.** Tapping one
+opens the same editor a fresh log does, handed a PAST date instead of
+today's — it already reads whatever is on that day and writes back to
+it, so a second, read-only sheet would only drift from the one that
+can change the record. `scMindAsk(day)` was already general over any
+date; the wall is the first thing to actually call it with one.
+
+**AND A REAL RENDER CAUGHT A BUG BEFORE ANY TEST DID.** Walk and
+Journal have no title — asking a search for one would be a form
+standing between you and a tick, which is why those two kinds have no
+`ask`. Drawing a cover off an EMPTY title gave both the same lone dot
+(`scMindInit('')`) on the same fixed hue (`scMindHue('')`), so a walk
+and a journal entry were indistinguishable tiles on the wall. Screenshotted,
+not reasoned about — the two red squares with a period in them were
+the tell. Fixed by keying titleless entries on the KIND instead: its
+own glyph stands in for the initials, and its own hue for the hash,
+so Walk and Journal are as easy to tell apart as any two books are.
+
+**THE STAT LENGTH FORMATTER WAS TWO FUNCTIONS PRETENDING TO BE ONE.**
+`scMindDur` takes SECONDS, off a podcast feed's own duration field.
+The history wall's total is already in MINUTES — the ladder only ever
+writes 10 through 120 — and calling `scMindDur` on it would divide by
+60 a second time: 45 minutes logged would read as "0 m" on the wall
+that is supposed to prove you gave 45 minutes to something. Split into
+`scMindFmtMin`, which both now call, so the unit the wrong call would
+silently swap is not a unit either of them has to reason about again.

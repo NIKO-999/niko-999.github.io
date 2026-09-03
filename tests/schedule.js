@@ -3106,9 +3106,13 @@ const SAID = [
      already taken. So the route has to exist as a real control.
      Asserted as focusable and NAMED, not merely present: a button with
      no accessible name is one a screen reader announces as nothing. */
-  ok('every tile carries a real history control for a keyboard',
+  /* Named rather than worded alike: Mind opens a wall rather than the
+     26-week map the other five share, and its own control says so
+     rather than claiming a span it does not draw. */
+  ok('every tile carries a real history control for a keyboard, and it is named',
     rows.hist.length === 6
-    && rows.hist.every((l) => /26 weeks of history/.test(l || '')), rows.hist);
+    && rows.hist.every((l) => /26 weeks of history/.test(l || '') || /Mind/.test(l || '')),
+    rows.hist);
   const reach = await page.evaluate(() => {
     const h = document.querySelector('.ty-hist');
     h.focus();
@@ -3615,7 +3619,10 @@ const SAID = [
      of, so calling its biggest day "your best" would be praise for the
      wrong thing. */
   const figs = {};
-  for (const id of ['p', 'f', 'w', 't', 'm']) {
+  /* Mind is not in this loop any more: it opens a wall of covers
+     rather than the tick/number heat map every other item shares, and
+     its own shape is tested where it is built. */
+  for (const id of ['p', 'f', 'w', 't']) {
     await page.keyboard.press('Escape');
     await page.waitForTimeout(120);
     await holdCard(id);
@@ -3635,12 +3642,11 @@ const SAID = [
      it better as "121 of 182 days". Asserted as ABSENT from every
      number, because putting it back is one line. */
   ok('a streak is a tick’s figure and no number carries one',
-    ['t', 'm'].every((k) => figs[k].caps.includes('longest streak'))
+    figs.t.caps.includes('longest streak')
     && ['p', 'f', 'w'].every((k) => !figs[k].caps.includes('longest streak')),
     Object.fromEntries(Object.entries(figs).map(([k, f]) => [k, f.caps])));
   ok('a tick gets shape rather than an average it cannot have',
-    figs.t.caps.join('|') === 'longest streak|days on now|days a week'
-    && figs.m.caps.indexOf('average a day') < 0, [figs.t.caps, figs.m.caps]);
+    figs.t.caps.join('|') === 'longest streak|days on now|days a week', figs.t.caps);
   /* THE MIDDLE, THE TOP AND THE BOTTOM OF ONE DISTRIBUTION — three
      readings of the same quantity, which is what the ticks' three are
      of a shape. And all three carry the unit, or 2,631 and 2.7 are
@@ -3659,6 +3665,15 @@ const SAID = [
     { f: figs.f.units, w: figs.w.units, t: figs.t.units });
   ok('and the span is the same 26 weeks on every one of them',
     Object.values(figs).every((f) => / of 182 days/.test(f.hint)), figs.w.hint);
+
+  /* The glyph check below reads whatever is currently open, and the
+     loop above leaves Water's — a NUMBER's three, which is the shape
+     this check is about. Reopened explicitly so it does not depend on
+     which item the loop happened to visit last. */
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(120);
+  await holdCard('w');
+  await page.waitForTimeout(200);
 
   /* ── a glyph per figure ──
      Drawn at 12px beside a 10.5px caption, which is half the size the
@@ -4231,16 +4246,26 @@ const SAID = [
   ok('...and your face in the one set for that',
     drawnIn.face !== null && drawnIn.face === drawnIn.wantFace, drawnIn);
 
-  /* ── PRESSING ONE MOVES ONE ──
-     The claim a shared token would break, asserted in both directions
-     because each passes on the other's bug: a build where both rows
-     write the same key changes both, and a build where the second row
-     is wired to nothing changes neither. */
+  /* ── THE NOW SWATCH ROW IS GONE ──
+     It was the second row of eight, on the argument that the mark the
+     whole screen orients around is worth making yours the way your
+     own face is. Taken away on request: one row of swatches now,
+     under "Your colour" alone, and Now is Amber wherever the running
+     row is — fixed, not a setting. */
   await page.evaluate(() => document.getElementById('scTabYou').click());
   await page.waitForTimeout(360);
   const pkRows = await page.evaluate(() =>
     [...document.querySelectorAll('.pk-row')].length);
-  ok('Settings carries a row of swatches for each', pkRows === 2, { pkRows });
+  ok('Settings carries exactly one row of swatches, for your own colour',
+    pkRows === 1, { pkRows });
+  ok('...and nothing on the sheet is labelled Now',
+    await page.evaluate(() =>
+      ![...document.querySelectorAll('.sheet .label')].some((l) => l.textContent === 'Now')));
+
+  /* ── AND PRESSING THE ONE ROW THAT IS LEFT MOVES ONLY YOUR OWN ──
+     Asserted in both directions, because each passes on the other's
+     bug: a build that still writes the old key would move --live too,
+     and a build with the row wired to nothing would move neither. */
   const swap = await page.evaluate(async () => {
     const cs = () => {
       const c = getComputedStyle(document.documentElement);
@@ -4248,17 +4273,16 @@ const SAID = [
                live: c.getPropertyValue('--live').trim() };
     };
     const before = cs();
-    const row = document.querySelectorAll('.pk-row')[1];
-    /* Any swatch that is not the one already on, so the check cannot
-       pass by pressing what was pressed. */
+    const row = document.querySelector('.pk-row');
     const other = [...row.children].find((b) => !b.classList.contains('on'));
     other.click();
     await new Promise((r) => setTimeout(r, 60));
     return { before, after: cs(), pressed: other.dataset.pk };
   });
-  ok('pressing a swatch under Now moves that colour',
-    swap.after.live !== swap.before.live, swap);
-  ok('...and leaves your own alone', swap.after.me === swap.before.me, swap);
+  ok('pressing a swatch moves your own colour',
+    swap.after.me !== swap.before.me, swap);
+  ok('...and Now is untouched, because there is nothing left to press for it',
+    swap.after.live === swap.before.live, swap);
 
   /* ── EVERY SWATCH READS, ON THE FACE IT IS FOR ──
      Sixteen hexes, and one set for both faces was built first and half
@@ -4303,23 +4327,27 @@ const SAID = [
      that resolves to nothing is a blank chip and an invisible face. */
   await page.evaluate(() => {
     localStorage.setItem('sched.me.v1', 'chartreuse');
-    localStorage.setItem('sched.live.v1', 'chartreuse');
   });
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(420);
   const fell = await page.evaluate(() => {
     const c = getComputedStyle(document.documentElement);
-    return { me: c.getPropertyValue('--me').trim(),
-             live: c.getPropertyValue('--live').trim() };
+    return { me: c.getPropertyValue('--me').trim() };
   });
   ok('a stored colour this build does not have falls through to a real one',
-    /^#[0-9a-f]{6}$/i.test(fell.me) && /^#[0-9a-f]{6}$/i.test(fell.live), fell);
-  await page.evaluate(() => {
-    localStorage.removeItem('sched.me.v1');
-    localStorage.removeItem('sched.live.v1');
-  });
+    /^#[0-9a-f]{6}$/i.test(fell.me), fell);
+  await page.evaluate(() => { localStorage.removeItem('sched.me.v1'); });
+
+  /* ── A KEY NOTHING READS ANY MORE IS SWEPT, NOT LEFT ──
+     The same rule the old palette name and the stored theme key keep:
+     a stored preference for a control that no longer exists is a
+     second record of a decision nothing can act on, so it is removed
+     on boot rather than merely ignored. */
+  await page.evaluate(() => { localStorage.setItem('sched.live.v1', 'blue'); });
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(420);
+  ok('the old Now key is swept on boot, not just ignored',
+    await page.evaluate(() => localStorage.getItem('sched.live.v1') === null));
 
   /* ── AND THE TAGS ARE THE ONLY COLOUR LEFT ──
      Nine of them: three sessions and six things you keep. Each is one
@@ -9411,6 +9439,121 @@ const SAID = [
        STORED value after a reload. */
     ok('...and a record written keyed by block is repaired into the day\u2019s own',
       after.old === 'Old shape', after);
+
+    /* ══════════════════════════════════════════════════════
+       THE HISTORY IS A WALL
+
+       Every other item on Showing up opens the same 26-week heat map;
+       Mind opens a grid of covers instead, because a heat map of dots
+       would throw away the one thing this record has that the others
+       do not. Seeded directly into storage rather than logged through
+       the sheet, because this is a check on how a RECORD renders, not
+       on how one more gets made — that is every earlier assertion in
+       this section. */
+    const seeded = {
+      '2026-09-03': { k: 'read', t: 'Eat That Frog!', a: 'Brian Tracy',
+        c: 'https://covers.openlibrary.org/b/id/1-M.jpg', b: 'Chapter 3.', m: 45 },
+      '2026-09-02': { k: 'pod', t: 'The Obstacle Is The Way', a: 'The Daily Stoic',
+        c: '', b: '', m: 60 },
+      /* Walk and Journal carry no title at all — there is nothing to
+         search for, so nothing to draw an initial from. */
+      '2026-09-01': { k: 'walk', t: '', a: '', c: '', b: 'Nice loop round the park.', m: 30 },
+      '2026-08-30': { k: 'jrnl', t: '', a: '', c: '', b: '', m: 10 },
+    };
+    await mpage.evaluate((rec) => {
+      localStorage.setItem('sched.mind.v1', JSON.stringify(rec));
+    }, seeded);
+    await mpage.reload({ waitUntil: 'networkidle' });
+    await mpage.waitForTimeout(500);
+    await mpage.click('.tab[data-view="tally"]');
+    await mpage.waitForTimeout(420);
+    /* The double tap the tile already carries for every other item —
+       Mind gets no new gesture, only a different sheet on the far end
+       of the same one. */
+    await mpage.evaluate(() => {
+      const c = document.querySelector('.ty-card[data-item="m"]');
+      c.click(); c.click();
+    });
+    await mpage.waitForTimeout(500);
+
+    const wall = await mpage.evaluate(() => ({
+      open: !document.getElementById('scTyVeil').hidden,
+      title: (document.getElementById('scTyTitle') || {}).textContent,
+      count: (document.querySelector('.ty-span') || {}).textContent,
+      tiles: document.querySelectorAll('.mn-hist-t').length,
+      notes: document.querySelectorAll('.mn-hist-note').length,
+      stats: [...document.querySelectorAll('.ty-stats b')].map((b) => b.textContent),
+      dots: document.querySelectorAll('.ty-cal, .cal-cell').length,
+    }));
+    ok('double tapping Mind opens a wall, not the heat map',
+      wall.open && wall.title === 'Mind' && wall.count === '4 entries'
+      && wall.tiles === 4 && wall.dots === 0, wall);
+    ok('...with the two entries that carry a note marked, and neither figure a streak',
+      wall.notes === 2 && wall.stats.join('|') === '2 h 25 m|2', wall);
+
+    /* ── EVERY TITLED ENTRY HAS ITS OWN COVER, EVERY TITLELESS ONE
+       HAS THE KIND'S GLYPH ── */
+    const tiles = await mpage.evaluate(() => [...document.querySelectorAll('.mn-hist-t')]
+      .map((t) => ({
+        init: (t.querySelector('.mn-art i') || {}).textContent || null,
+        img: t.querySelectorAll('.mn-art img').length,
+        glyph: t.querySelectorAll('.mn-art-ic').length,
+        len: (t.querySelector('.mn-hist-ov span') || {}).textContent || '',
+        label: t.getAttribute('aria-label'),
+      })));
+    ok('a titled entry draws its own cover, image or initials',
+      tiles[0].init === 'EF' && tiles[0].img === 1 && tiles[0].glyph === 0
+      && tiles[0].len === '45 m', tiles[0]);
+    ok('...and a book with no artwork still has initials, not a blank tile',
+      tiles[1].init === 'TW' && tiles[1].img === 0, tiles[1]);
+    /* ── THE BUG A REAL RENDER CAUGHT ──
+       scMindInit('') is a lone dot and scMindHue('') is one fixed
+       value, so a Walk and a Journal entry — both titleless — drew
+       the SAME blank dot on the SAME colour and were indistinguishable
+       tiles. Keyed on the KIND for these two instead, with the kind's
+       own glyph standing in for an initial. */
+    ok('a titleless entry draws the KIND’s glyph, never a bare dot',
+      tiles[2].init === null && tiles[2].glyph === 1
+      && tiles[3].init === null && tiles[3].glyph === 1, [tiles[2], tiles[3]]);
+    ok('...and the note is on the label whether or not it is on the cover',
+      /with a note attached/.test(tiles[0].label)
+      && !/with a note/.test(tiles[1].label)
+      && /with a note attached/.test(tiles[2].label), tiles.map((t) => t.label));
+
+    /* ── A TILE IS A WAY IN, NOT A SECOND READ-ONLY PICTURE ──
+       The same editor a fresh log opens, given a past date. Reused
+       rather than duplicated: a second sheet that only shows what a
+       day holds would drift from the one that can change it. */
+    await mpage.click('.mn-hist-t >> nth=2');   /* the walk, which has a note */
+    await mpage.waitForTimeout(500);
+    const opened = await mpage.evaluate(() => ({
+      veilGone: document.getElementById('scTyVeil').hidden,
+      sheetTitle: (document.getElementById('scSheetTitle') || {}).textContent,
+      kind: (document.querySelector('.wc-chip.on') || {}).textContent,
+      note: (document.querySelector('.sheet textarea') || {}).value,
+    }));
+    ok('tapping a tile closes the wall and opens that day in the editor',
+      opened.veilGone && opened.sheetTitle === 'Mind' && opened.kind === 'Walk'
+      && opened.note === 'Nice loop round the park.', opened);
+    await mpage.keyboard.press('Escape');
+    await mpage.waitForTimeout(360);
+
+    /* ── AND AN EMPTY RECORD SAYS SO, RATHER THAN SHOWING AN EMPTY GRID ── */
+    await mpage.evaluate(() => { localStorage.setItem('sched.mind.v1', '{}'); });
+    await mpage.reload({ waitUntil: 'networkidle' });
+    await mpage.waitForTimeout(500);
+    await mpage.click('.tab[data-view="tally"]');
+    await mpage.waitForTimeout(420);
+    await mpage.evaluate(() => {
+      const c = document.querySelector('.ty-card[data-item="m"]');
+      c.click(); c.click();
+    });
+    await mpage.waitForTimeout(420);
+    ok('nothing logged reads as a sentence, not as an empty grid',
+      await mpage.evaluate(() => document.querySelectorAll('.mn-hist-t').length === 0
+        && /Nothing logged yet/.test(document.querySelector('.ty-hint').textContent)));
+    await mpage.keyboard.press('Escape');
+    await mpage.waitForTimeout(360);
 
     ok('nothing threw through any of it', merrs.length === 0, merrs);
     await mctx.close();

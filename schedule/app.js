@@ -2163,11 +2163,9 @@
      the bright chip, white on the deep one. Worst measured is 5.54:1
      for the label and 5.09:1 against the page. */
   var ME_KEY = 'sched.me.v1';
-  var LIVE_KEY = 'sched.live.v1';
   /* Violet was the app's own hue before the wheel went. Amber is what
      a running block wears everywhere else that has one, so it is what
-     In progress starts as — still a setting, because the row of
-     swatches under "Now" is what makes it yours rather than ours. */
+     In progress starts as. */
   var ME0 = 'violet', LIVE0 = 'amber';
   function scPickOf(key, dflt) {
     var v;
@@ -2179,6 +2177,20 @@
   function scPickHex(key, dflt, light) {
     var p = scPickOf(key, dflt);
     return light ? p.l : p.d;
+  }
+  /* ── THE NOW COLOUR IS FIXED, NOT CHOSEN ──
+     It was the second row of swatches, on the argument that the mark
+     the whole screen orients around is worth making yours the way
+     your own face is. Taken away on request: what is left is Amber
+     wherever the running row is, on both faces, and nothing under
+     Settings for it. `scPickDflt` is `scPickHex` with no key to read —
+     the same lookup, resolved to the DEFAULT swatch rather than to
+     whatever a phone might still have stored. */
+  function scPickDflt(dflt, light) {
+    for (var i = 0; i < PICKS.length; i++) {
+      if (PICKS[i].k === dflt) return light ? PICKS[i].l : PICKS[i].d;
+    }
+    return light ? PICKS[0].l : PICKS[0].d;
   }
 
   /* ── THERE IS NO ACCENT ──
@@ -2216,7 +2228,7 @@
        the stylesheet because a swatch is a per-face pair and only this
        function knows which face is up. */
     t['--me'] = scPickHex(ME_KEY, ME0, light);
-    t['--live'] = scPickHex(LIVE_KEY, LIVE0, light);
+    t['--live'] = scPickDflt(LIVE0, light);
     return t;
   }
   function scSetPick(key, k) {
@@ -2872,7 +2884,8 @@
          one gesture that half the people using this app cannot make. */
       var hist = scEl('button', 'ty-hist', 'History');
       hist.type = 'button';
-      hist.setAttribute('aria-label', it.n + ', 26 weeks of history');
+      hist.setAttribute('aria-label',
+        it.id === 'm' ? 'Mind, everything logged' : it.n + ', 26 weeks of history');
       hist.addEventListener('click', function () { scOpenHist(it); });
       row.appendChild(hist);
       grid.appendChild(row);
@@ -3231,6 +3244,9 @@
     /* A peak rather than an up arrow: an arrow says MORE, and the
        figure beside this one is the top rather than a direction. */
     peak: '<path d="M2.6 19.4l6.6-9.4 4 4.6 3.6-6 4.6 10.8z"/>',
+    /* The same pencil the row glyph draws, for the one figure on the
+       Mind wall that is about writing rather than reading. */
+    note: '<path d="M4 20l1-4.2L16 4.8l3.2 3.2L8.2 19zM14 6.8l3.2 3.2M4 20l4.2-1"/>',
     /* The peak mirrored, which is the one case this file's rule about
        two glyphs sharing a silhouette does not apply to: these two sit
        side by side and are the top and the bottom of the same figure,
@@ -3315,6 +3331,7 @@
   var histBack = null;    /* what to hand focus back to on close */
 
   function scOpenHist(item) {
+    if (item.id === 'm') { scOpenMindHist(); return; }
     var d = scHist(item.id), st = scHistStats(item, d);
     var p = $('scTyPanel');
     p.textContent = '';
@@ -6058,12 +6075,18 @@
 
   /* "1 h 2 m", "45 m", and nothing at all where the feed did not say.
      A duration nobody published is not zero minutes. */
-  function scMindDur(n) {
-    var m = Math.round((+n || 0) / 60);
+  /* "1 h 2 m", "45 m", nothing where there is no figure at all. Shared
+     by the episode reader, which has SECONDS off a feed, and the
+     history grid, which has the MINUTES a record already stores —
+     dividing a minutes figure by 60 a second time is the bug this
+     split exists to make impossible to write by accident. */
+  function scMindFmtMin(m) {
+    m = Math.round(+m || 0);
     if (!m) return '';
     return m >= 60 ? Math.floor(m / 60) + ' h' + (m % 60 ? ' ' + (m % 60) + ' m' : '')
                    : m + ' m';
   }
+  function scMindDur(secs) { return scMindFmtMin((+secs || 0) / 60); }
 
   /* ── SOMETHING TO SHOW BEFORE YOU HAVE TYPED ANYTHING ──
      An empty field with an empty list under it reads as broken, not
@@ -6116,6 +6139,17 @@
     return (w[0][0] + w[w.length - 1][0]).toUpperCase();
   }
 
+  /* Walk and Journal have no title at all — asking a search for one
+     would be a form standing between you and a tick, which is the
+     whole reason those two kinds have no `ask`. A cover keyed on an
+     EMPTY string has nothing to draw: scMindInit('') is a lone dot,
+     and scMindHue('') is one fixed hue, so every titleless entry
+     drew the same blank dot on the same colour whichever kind it was
+     — a walk and a journal entry were indistinguishable tiles. Keyed
+     on the KIND instead for these two, with the kind's own glyph in
+     place of initials, so the wall still tells them apart. */
+  var MIND_ICON = { walk: 'walk', jrnl: 'write' };
+
   /* One drawing of a cover, used by the results, by the pick and by
      the row — three copies of this would be three things to keep in
      step, and the generated one is the case that has to look
@@ -6123,8 +6157,19 @@
   function scMindArt(hit, cls) {
     var a = scEl('span', 'mn-art' + (cls ? ' ' + cls : ''));
     var t = (hit && hit.t) || '';
-    a.style.setProperty('--mh', String(scMindHue(t)));
-    a.appendChild(scEl('i', null, scMindInit(t)));
+    var glyph = !t && hit && MIND_ICON[hit.k];
+    if (glyph) {
+      a.style.setProperty('--mh', String(scMindHue(hit.k)));
+      var ic = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      ic.setAttribute('class', 'mn-art-ic');
+      ic.setAttribute('viewBox', '0 0 24 24');
+      ic.setAttribute('aria-hidden', 'true');
+      ic.innerHTML = BLOCK_ICON[glyph];
+      a.appendChild(ic);
+    } else {
+      a.style.setProperty('--mh', String(scMindHue(t)));
+      a.appendChild(scEl('i', null, scMindInit(t)));
+    }
     if (hit && hit.c) {
       var img = document.createElement('img');
       img.alt = '';
@@ -6137,6 +6182,120 @@
       a.appendChild(img);
     }
     return a;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     THE HISTORY IS A WALL, NOT A CALENDAR
+
+     Every other item on Showing up opens the same 26-week heat map —
+     ticks, kept against missed, which is the right picture for a
+     thing you either did or did not do. Mind is not that: what you
+     read has a COVER, and a heat map of dots would throw away the one
+     thing this record has that the others do not. The friends board
+     already solved this exact problem for a different wall — "three
+     across, square, and the photograph fills its tile" — and this is
+     that pattern again, for the same reason it was built the first
+     time: a profile wants the SHAPE of what somebody has done, and
+     the words are one press in. */
+  function scMindEntries() {
+    var out = [];
+    Object.keys(mindLog).forEach(function (day) {
+      var r = scMindRec(mindLog[day]);
+      if (r && (r.t || scMindKind(r.k))) out.push({ day: day, r: r });
+    });
+    /* Newest first: a wall you scroll down into your history rather
+       than up out of it. */
+    out.sort(function (a, b) { return a.day < b.day ? 1 : a.day > b.day ? -1 : 0; });
+    return out;
+  }
+
+  function scOpenMindHist() {
+    var entries = scMindEntries();
+    var p = $('scTyPanel');
+    p.textContent = '';
+
+    var head = scEl('div', 'ty-head');
+    var t = scEl('span', 'ty-title', 'Mind');
+    t.id = 'scTyTitle';
+    head.appendChild(t);
+    head.appendChild(scEl('span', 'ty-span',
+      entries.length + (entries.length === 1 ? ' entry' : ' entries')));
+    p.appendChild(head);
+
+    if (!entries.length) {
+      p.appendChild(scEl('p', 'ty-hint', 'Nothing logged yet · tap anywhere to close'));
+    } else {
+      /* ── THE TWO FIGURES, AND NEITHER IS A STREAK ──
+         A streak is a tick's figure, and only a tick's — it counts
+         days you RECORDED something rather than anything about what
+         you read, and this record already carries better ones: how
+         much of it you gave time to, and how much of it you wrote
+         about. */
+      var mins = 0, withNotes = 0;
+      entries.forEach(function (e) {
+        mins += e.r.m || 0;
+        if (e.r.b) withNotes++;
+      });
+      var stats = scEl('div', 'ty-stats');
+      [
+        { v: scMindFmtMin(mins) || '0 m', cap: 'given to it', ic: 'avg' },
+        { v: String(withNotes),
+          cap: withNotes === 1 ? 'entry with a note' : 'entries with a note',
+          ic: 'note' }
+      ].forEach(function (r) {
+        var cell = scEl('div');
+        cell.appendChild(scEl('b', null, r.v));
+        var cap = scEl('span');
+        cap.insertAdjacentHTML('beforeend',
+          '<svg viewBox="0 0 24 24" aria-hidden="true">' + STAT_ICON[r.ic] + '</svg>');
+        cap.appendChild(document.createTextNode(r.cap));
+        cell.appendChild(cap);
+        stats.appendChild(cell);
+      });
+      p.appendChild(stats);
+    }
+
+    var grid = scEl('div', 'mn-hist-grid');
+    entries.forEach(function (e) {
+      var b = scEl('button', 'mn-hist-t');
+      b.type = 'button';
+      b.appendChild(scMindArt(e.r, 'is-tile'));
+      var when = new Date(e.day + 'T12:00:00');
+      var dur = scMindFmtMin(e.r.m);
+      var ov = scEl('span', 'mn-hist-ov');
+      ov.appendChild(scEl('b', null, when.getDate() + ' ' + MON[when.getMonth()]));
+      if (dur) ov.appendChild(scEl('span', null, dur));
+      b.appendChild(ov);
+      /* ── AND WHETHER A JOURNAL IS ATTACHED ──
+         The one fact a cover cannot show on its own: a mark rather
+         than the words themselves, because a wall is the shape of
+         what you did, not a second feed of what you wrote. */
+      if (e.r.b) {
+        var note = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        note.setAttribute('class', 'mn-hist-note');
+        note.setAttribute('viewBox', '0 0 24 24');
+        note.setAttribute('aria-hidden', 'true');
+        note.innerHTML = STAT_ICON.note;
+        b.appendChild(note);
+      }
+      b.setAttribute('aria-label', scMindName(e.r)
+        + ', ' + when.getDate() + ' ' + MON[when.getMonth()]
+        + (dur ? ', ' + dur : '') + (e.r.b ? ', with a note attached' : ''));
+      b.addEventListener('click', function () {
+        /* The same editor a fresh log opens, given a PAST date rather
+           than today. It already reads whatever is on that day and
+           writes back to it, so a tile is a way IN to the record
+           rather than a second, read-only picture of it. */
+        scCloseHist();
+        scMindAsk(e.day);
+      });
+      grid.appendChild(b);
+    });
+    p.appendChild(grid);
+
+    histBack = document.activeElement;
+    $('scTyVeil').hidden = false;
+    p.focus();
   }
 
   /* ── ASKED FROM THE MIND TILE, AND ONLY FROM THERE ──
@@ -8815,7 +8974,6 @@
            version recursing. */
         scPaintFriends();
       });
-      pickRow('Now', LIVE_KEY, LIVE0, function () {});
 
       var rule = scEl('div', 'menu-rule');
       body.appendChild(rule);
@@ -8990,6 +9148,10 @@
        Removed rather than ignored, the way the two view keys were. */
     localStorage.removeItem(ACCENT_KEY);
     localStorage.removeItem(THEME_KEY);
+    /* The Now colour is fixed rather than chosen, and the row that let
+       you pick one is gone with it — a key nothing reads any more is a
+       second record of a decision that no longer exists. */
+    localStorage.removeItem('sched.live.v1');
     /* The mode before the paint, and the paint ALWAYS: with two faces
        the stylesheet's :root can only carry one of them, and a page
        that opens on the other has to be written inline before the

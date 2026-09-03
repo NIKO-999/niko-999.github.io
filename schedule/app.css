@@ -4879,3 +4879,90 @@ body {
 .mn-mlab { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; }
 .mn-mlab .wc-back { flex: none; margin-left: -6px; }
 .mn-mlab .wc-eff-l { margin: 0; }
+
+/* ══════════════════════════════════════════════════════
+   THE MIND WALL
+
+   The friend profile's own grid, reused rather than redrawn: three
+   across, square, the cover filling its tile. */
+.mn-hist-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+.mn-hist-t {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 0;
+  padding: 0;
+  background: var(--tick-off);
+  cursor: pointer;
+  display: block;
+}
+.mn-hist-t:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+/* The tile fills the button; the outer radius and clip do the work
+   the drawn cover's own corner normally does, so the inner art draws
+   square and flat. */
+.mn-hist-t .mn-art.is-tile {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  box-shadow: none;
+}
+.mn-hist-t .mn-art.is-tile i { font-size: 22px; }
+
+/* ── THE DATE AND THE LENGTH, OVER A SCRIM ──
+   A fixed dark gradient and white text, deliberately outside the
+   token system: this sits on a PHOTOGRAPH whose colours the app does
+   not choose, the way a poster's own caption does, not on the app's
+   flat ground — the contrast argument the tokens exist for does not
+   apply to text laid over an image nobody picked. */
+.mn-hist-ov {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 16px 7px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: linear-gradient(to top, rgba(0, 0, 0, .72), transparent);
+  pointer-events: none;
+}
+.mn-hist-ov b {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+.mn-hist-ov span {
+  font-size: 9.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, .8);
+  font-variant-numeric: tabular-nums;
+}
+/* Whether a journal is attached, the one fact the cover cannot show
+   on its own — a mark rather than the words, because the wall is the
+   shape of what you did, not a second feed of what you wrote. */
+.mn-hist-note {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 16px; height: 16px;
+  padding: 3px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .55);
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  box-sizing: content-box;
+}
+
+/* The kind's own glyph, drawn where an initial would sit, for a
+   titleless entry — Walk and Journal, which have nothing to search
+   for and so nothing to draw initials from. */
+.mn-art-ic { width: 44%; height: 44%; fill: none; stroke: #fff;
+  stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+  opacity: .92; }
