@@ -253,6 +253,20 @@
   --s-m: #F2B950; --s-a: #5FA8FF; --s-e: #B98BFF;
   --t-train: #E0574B; --t-walk: #4FBE87; --t-read: #5FA8FF;
   --t-steps: #F2B950; --t-fuel: #E0C15A; --t-water: #48C3CC;
+  /* Completed. Fixed rather than chosen: a state tag says WHICH state,
+     and which has to be the same colour every time you see it. In
+     progress is the one exception, because it is the mark the whole
+     screen is oriented around and it is already a setting. */
+  --st-ok: #43B96C;
+  /* First place, and the same on every board — see app.js for why the
+     crown stopped being the leader's own colour. */
+  --gold: #FFC83D;
+  /* The seven hues a workout tag can be. The CARD keeps its own
+     literal hex and does not follow the theme; a tag does, so it needs
+     a token per face — see app.js for the light face's numbers. */
+  --w-red: #e6412f; --w-blue: #2f7fe6; --w-teal: #14a2a2;
+  --w-green: #17a06b; --w-violet: #8a4fe0;
+  --w-orange: #e0761a; --w-amber: #e08a12;
   --done-bg: rgba(255,255,255,.10);
   --pad:   18px;   /* the page's left edge — everything aligns to it */
   /* The open card's width, named because TWO rules need it: the card
@@ -316,6 +330,11 @@
   --s-m: #8A5000; --s-a: #1668C7; --s-e: #6B3FC4;
   --t-train: #B3382E; --t-walk: #1C7A4E; --t-read: #1668C7;
   --t-steps: #8A5000; --t-fuel: #7A6200; --t-water: #0E6E76;
+  --st-ok: #19733F;
+  --gold: #8A6100;
+  --w-red: #d83d2c; --w-blue: #2c76d6; --w-teal: #108383;
+  --w-green: #14885b; --w-violet: #8a4fe0;
+  --w-orange: #b56015; --w-amber: #a8670d;
   --done-bg: rgba(60,40,100,.07);
 }
 
@@ -615,10 +634,10 @@ body {
 .fr-crown::before { content: ''; position: absolute; inset: -7px;
   border-radius: 50%; pointer-events: none;
   background: radial-gradient(circle,
-    color-mix(in srgb, var(--crown, var(--red)) 70%, transparent) 0%,
-    color-mix(in srgb, var(--crown, var(--red)) 22%, transparent) 45%, transparent 72%); }
+    color-mix(in srgb, var(--gold) 70%, transparent) 0%,
+    color-mix(in srgb, var(--gold) 22%, transparent) 45%, transparent 72%); }
 .fr-crown svg { position: relative; width: 17px; height: 14px; display: block;
-  fill: var(--crown, var(--red)); }
+  fill: var(--gold); }
 
 .fr-note { margin-top: 12px; font-size: 12.5px; line-height: 1.55; color: var(--dim); }
 
@@ -1070,8 +1089,53 @@ body {
 }
 .gh-r1 { animation: gh-r1 2.6s cubic-bezier(.22, 1, .36, 1) infinite; }
 .gh-r2 { animation: gh-r2 2.6s cubic-bezier(.22, 1, .36, 1) infinite; }
+
+/* ── AND THE WEEK'S SCENE IS A DIFFERENT ONE ──
+   The tile's card draws the GESTURE, because what it teaches is a
+   press. This one draws what the press PRODUCES: a sheet coming up
+   over the rows. Two cards running one animation would be the app
+   saying the same thing twice and meaning two different things.
+
+   It holds at the top for most of the loop, because what you are
+   meant to read is where it ENDS rather than the travel — the intro's
+   own sheet scene, and its own reason. */
+@keyframes gh-sheet {
+  0%       { transform: translateY(12px); }
+  30%, 88% { transform: translateY(0); }
+  100%     { transform: translateY(12px); }
+}
+.gh-sheet { animation: gh-sheet 2.8s cubic-bezier(.22, 1, .36, 1) infinite; }
 @media (prefers-reduced-motion: reduce) {
   .gh-ic * { animation: none !important; }
+}
+
+/* The row's own keyboard route to the editor, drawn the way the
+   tile's history control is and for the same reason: a double tap
+   reaches a pointer and nothing else. */
+.row-ed {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  background: none; color: inherit; font: inherit;
+}
+.row-ed:focus {
+  /* `:focus`, not `:focus-visible`. The control is clipped to a pixel,
+     so a pointer can never land on it and every focus it gets is a
+     keyboard's — and the heuristic behind :focus-visible does not
+     always agree, which had it staying 1x1 while genuinely focused. */
+  position: static;
+  width: auto; height: auto;
+  margin: 0 0 6px 52px;
+  clip-path: none;
+  display: block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11.5px; font-weight: 600;
+  color: var(--ink);
+  outline: 2px solid var(--ink); outline-offset: 2px;
 }
 
 /* ── THE WAY IN A HOLD CANNOT OFFER ──
@@ -1090,7 +1154,11 @@ body {
   white-space: nowrap;
   background: none; color: inherit; font: inherit;
 }
-.ty-hist:focus-visible {
+.ty-hist:focus {
+  /* `:focus`, not `:focus-visible`. The control is clipped to a pixel,
+     so a pointer can never land on it and every focus it gets is a
+     keyboard's — and the heuristic behind :focus-visible does not
+     always agree, which had it staying 1x1 while genuinely focused. */
   position: static;
   width: auto; height: auto;
   margin: 6px 0 0;
@@ -1874,7 +1942,7 @@ body {
    colour and cannot go stale when one moves. */
 .wk-sh b,
 .ty-card .tg,
-.row .st.is-now,
+.row .st,
 .pill.is-now {
   border: none;
   background: color-mix(in srgb, var(--tg) 22%, transparent);
@@ -1990,6 +2058,12 @@ body {
 .rowwrap > .chk { left: auto; right: 3px; }
 .chk:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 .row {
+  /* Not optional: this page sets no maximum-scale, so a double tap is
+     a ZOOM gesture on iOS by default and the app would answer the
+     second tap of its own gesture by magnifying the screen. The tile
+     on Showing up carries the same line for the same reason, and
+     nothing here reproduces it. */
+  touch-action: manipulation;
   display: grid;
   /* Two tracks and two lines: the glyph, then the name over its
      pills. The pills were a third column beside the name for one
@@ -2255,13 +2329,45 @@ body {
    now. Those keep a fill. Every figure — a time, a length, an
    average, a share, how long ago — is quiet tabular type with a
    middle dot between, which is how a sentence separates two facts. */
-.row .dur, .row .st, .pill {
+.row .dur, .pill {
   font-size: 11.5px;
   font-weight: 500;
   color: var(--dim);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   line-height: 1.4;
+}
+/* OUT of the group above, not overriding one property from it: one
+   selector carrying one property twice is a file with two values in it
+   and only one of them live, whichever order they are written in.
+   tests/names.js caught this the moment the state tag needed its own
+   colour, which is the third time that check has earned itself. */
+/* ── THE SMALLEST TYPE IN THE APP, AND THAT IS THE FLOOR ──
+   A state tag sits on every row, so at 11.5px it was six chips down a
+   card competing with the names they belong to — the thing this row
+   has taken out twice before, once as a measure bar and once as a set
+   of hairlines. 9.5px is the size the workout card's own label runs
+   at and is as small as anything here goes: below about 5 CSS pixels
+   antialiasing alone caps what contrast is reachable, and this repo
+   has the rim's measurements to prove it.
+
+   SMALLER DOES NOT RELAX THE RATIO. WCAG's larger-text allowance
+   starts at 18.66px bold, so 9.5px is held to the same 4.5:1 as
+   everything else — which the 22% wash under a 72% label already
+   clears at 5.13:1 worst.
+
+   Its own rule rather than shared with .pill.is-now: sharing a rule
+   and then overriding one property from it is the duplicate, not a
+   way around it. */
+.row .st {
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  padding: 1px 5px;
+  border-radius: 5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  line-height: 1.5;
 }
 /* THE TIME IS THE GUTTER, and it spans both lines so it centres
    against the pair rather than sitting on the name's baseline.
@@ -2309,6 +2415,16 @@ body {
      dot drawn in it is a dot nobody can see. */
   color: var(--spent);
 }
+/* ── A CHIP NEEDS NO SEPARATOR ──
+   The dot is punctuation between two FIGURES; a tag is its own object
+   with its own ground, and the dot then draws inside that ground and
+   reads as part of the word. It was `· Not yet` on every row the
+   moment the state tag became a chip on all of them, which is what
+   the render showed. `.st` is named here rather than `.is-now` alone,
+   because all three states are chips now and only one of them used to
+   be. */
+.props > * + .wo::before,
+.props > * + .st::before,
 .props > * + .is-now::before,
 .props > * + .is-run::before { content: none; }
 /* The dot that used to guard the length is gone with the sibling it
@@ -2331,8 +2447,7 @@ body {
    THE ROW'S OWN RING AND ITS PROGRESS LINE STAY THE INK. Three marks
    in a chosen colour on one row is the row wearing a highlight rather
    than carrying a state, and the chip is the one that says the word. */
-.row .st.is-now, .pill.is-now {
-  --tg: var(--live);
+.pill.is-now {
   padding: 2px 9px;
   /* 6px, with the other two. It was a 999px pill, which is a filled
      shape's silhouette — right while it was the one solid chip and
@@ -2340,6 +2455,41 @@ body {
      rather than as the same one saying a different word. */
   border-radius: 6px;
   font-weight: 600;
+}
+/* ── THREE STATES, AND ONLY TWO OF THEM ARE COLOURED ──
+   Completed is green and In progress is the colour set under "Now" —
+   amber by default, and its OWN amber rather than the Morning tag's,
+   which the two of them measured ΔE 4 apart on the light face before
+   it was moved. 24.9 apart on the dark face now and 17.0 on the light.
+
+   NOT YET IS THE FLAT NEUTRAL, and that is the half of the rule that
+   survives: a tag takes a hue when it names something that HAPPENED,
+   and a thing you have not got to yet has not happened. Colouring it
+   would be the screen counting down at you.
+
+   All three are just a --tg, so the wash and the label come from the
+   one rule every tag in this app shares and nothing here restates
+   them. */
+.row .st.is-now, .pill.is-now { --tg: var(--live); }
+.row .st.is-ok { --tg: var(--st-ok); }
+/* MISSED, and it is the one tag in this app that is red. The rule it
+   reverses said a colour never says WHETHER — written about a wash of
+   red across a week you had not kept, which is a judgement. An hour
+   that has been and gone without a tick is a fact about the day, and
+   it is the state you would most want to catch without reading. --bad
+   is the app's own red and is already solved: 7.12:1 as a tag on the
+   dark face and 5.11 on the light. */
+.row .st.is-bad { --tg: var(--bad); }
+/* ── AND NOT YET IS NOT A HUE AT ALL ──
+   Written as a --tg of --tick-off it would take the shared rule's own
+   arithmetic, and that arithmetic is for a COLOUR: 22% of a near-grey
+   over the page is almost the page, and 72% of it toward the ink is
+   almost the ink. Measured on the light face it came to about 2.2:1.
+   It carries the neutral pair the Showing up tag already uses for the
+   same state, which is a wash of the ink under --spent. */
+.row .st.is-todo {
+  background: color-mix(in srgb, var(--ink) 9%, transparent);
+  color: var(--spent);
 }
 /* A run of days is the accent as a COLOUR, not as a ground: it is a
    figure about you rather than a state of the screen. */
@@ -3879,15 +4029,26 @@ body {
    session is a note about what already happened. One step down and a
    tighter track is the whole difference — at the same size the two
    read as one label broken in half. */
-.row .n em.wo {
-  color: var(--red);
-  font-size: 9px;
-  letter-spacing: .06em;
-  margin-left: 6px;
+/* What you trained, as a tag beside the state and at the state's own
+   size. It hung off the name as a small italic and was the one loose
+   piece of type on the row. Its --tg is the workout's own hue, set on
+   the element; `is-off` is the fallback for a colour this build does
+   not know. */
+.row .wo {
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  padding: 1px 5px;
+  border-radius: 5px;
+  white-space: nowrap;
+  line-height: 1.5;
+  background: color-mix(in srgb, var(--tg) 22%, transparent);
+  color: color-mix(in srgb, var(--tg) 72%, var(--ink));
 }
-/* Behind you it goes quiet with the rest of its row: the accent is
-   for what is left of the day. */
-.row.is-past .n em.wo { color: var(--spent); }
+.row .wo.is-off {
+  background: color-mix(in srgb, var(--ink) 9%, transparent);
+  color: var(--spent);
+}
 
 /* A row: the way back, the answer, and the undo. Stacked they were
    three sentences under a card, which reads as a paragraph rather than

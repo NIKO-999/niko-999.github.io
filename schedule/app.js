@@ -717,71 +717,18 @@
     return el;
   }
 
-  /* ── A LONG PRESS, WRITTEN ONCE ──
-     550ms, cancelled by any movement over 10px, and both numbers are
-     tuned rather than picked. Without the move guard every scroll that
-     BEGINS on the element fires it, because the finger is on it for
-     the whole gesture and the gesture is a scroll. `moved` is read
-     rather than pointercancel, because a scroll inside a scroller does
-     not reliably cancel the pointer on the child it started in.
+  /* ── THE LONG PRESS IS GONE ──
+     scHold lived here: 550ms with a 10px move guard, one function for
+     the two screens that held a press. Both went to a double tap —
+     the week's row and Showing up's tile — because a hold is a gesture
+     nothing on screen can describe, and the moment each needed a card
+     to teach it, the card could as easily teach the press people
+     already try.
 
-     ── THE CLICK THAT ENDS THE GESTURE IS SWALLOWED BY A FLAG ──
-     and by an EXPLICIT one rather than by inferring from the timer:
-     `held` is null after an ordinary tap too, so a check on it would
-     swallow every click.
-
-     IT IS BELT AND BRACES IN THIS BROWSER, and that is written down
-     rather than left to be rediscovered. A click's target is the
-     nearest common ancestor of the elements the pointer went down and
-     up on — so when a hold opens the history over the top, the finger
-     lifts on the veil, the click lands on <body>, and it reaches
-     neither the card nor the veil. Measured both ways here: with the
-     guard and without it, the veil is up and the item is unlogged,
-     identically.
-
-     The guard is kept because that is a Chromium measurement of a rule
-     engines do not all apply the same way: where a click is retargeted
-     to the element the press STARTED on, the flag is the only thing
-     between a hold and the tap's job being done as well. This repo has
-     shipped one bug already that reproduced on a phone and on nothing
-     here, and the cost of the flag is a boolean.
-
-     Two screens hold this gesture now, a row on the week and a tile on
-     Showing up, so it is one function. Written twice, the 550 and the
-     10 are two numbers to keep in step and the one that drifts is on
-     whichever screen nobody happened to be looking at.
-
-     The acknowledgement is the CALLER'S. A long press with nothing to
-     show for it is indistinguishable from one that did not register,
-     but what to show differs — the week vibrates on a tick it also
-     reaches from a plain button, and a sheet coming up is its own
-     answer. */
-  function scHold(el, onHold) {
-    var held = null, hx = 0, hy = 0, moved = false, fired = false;
-    var drop = function () { if (held) { clearTimeout(held); held = null; } };
-    el.addEventListener('pointerdown', function (ev) {
-      hx = ev.clientX; hy = ev.clientY; moved = false; fired = false;
-      drop();
-      held = setTimeout(function () {
-        held = null;
-        if (moved) return;
-        fired = true;
-        onHold();
-      }, 550);
-    });
-    el.addEventListener('pointermove', function (ev) {
-      if (Math.abs(ev.clientX - hx) > 10 || Math.abs(ev.clientY - hy) > 10) {
-        moved = true;
-        drop();
-      }
-    });
-    el.addEventListener('pointerup', drop);
-    el.addEventListener('pointercancel', function () { moved = true; drop(); });
-    return function () {
-      if (fired) { fired = false; return true; }
-      return false;
-    };
-  }
+     Cut rather than kept beside the new one. Two gestures for one
+     action is a control answering the same question twice, and a
+     mechanism nothing calls reads as one somebody might edit — the
+     accent solver's own lesson, one screen over. */
 
   /* ── A DOUBLE TAP, AND WHY THE FIRST ONE HAS TO WAIT ──
      One control, two meanings: a tap logs a tile and two open its
@@ -1251,7 +1198,6 @@
            it is the third column the time was moved out of. */
         var wr = scTrainOf(bd, it.id);
         var wk = wr && scWorkName(wr.k);
-        if (wk) n.appendChild(scEl('em', 'wo', wk));
         row.appendChild(n);
         /* ── the properties, as pills ──
            The range, the length, and a status word only when there is
@@ -1266,6 +1212,35 @@
         row.insertBefore(tEl, row.firstChild);
         var props = scEl('span', 'props');
         props.appendChild(scEl('span', 'dur', scDurShort(it.e - it.s)));
+        /* ── WHAT YOU TRAINED IS A TAG, AND IT COMES FIRST ──
+           It hung off the NAME as a small italic — the one loose piece
+           of type on a row otherwise made of a name and two figures.
+           It is a tag beside the state now, at the state's own size,
+           and it sits BEFORE it: what you did is closer to the block
+           it belongs to, and whether you have finished reads last.
+
+           NEUTRAL, not the workout's own hue. The nine colours are
+           card grounds solved for one fixed dark card, and measured as
+           a 22% tag wash they come to 3.36:1 on the light face — the
+           amber worst. The state tag beside it is already carrying a
+           colour, and two on one row is a row wearing a highlight. */
+        if (wk) {
+          var wtag = scEl('span', 'wo', wk);
+          /* ── AND IT WEARS THE WORKOUT'S OWN COLOUR ──
+             Which session this was is the purest WHICH there is, so it
+             is exactly what a tag's colour is for. Taken from the
+             FIRST component, because that is the one that names the
+             session: Pull + Abs is a Pull.
+
+             Through a TOKEN rather than the card's literal hex, so it
+             follows the face — the card is the one surface in this app
+             that does not, and a tag is not a card. */
+          var w0 = scWorkoutsOf(wr.k)[0];
+          var tone = w0 && WO_TONE[String(w0.c).toLowerCase()];
+          if (tone) wtag.style.setProperty('--tg', 'var(--w-' + tone + ')');
+          else wtag.classList.add('is-off');
+          props.appendChild(wtag);
+        }
         props.appendChild(scEl('span', 'st'));
         row.appendChild(props);
         /* ── HOW MUCH OF IT IS LEFT ──
@@ -1280,21 +1255,17 @@
         row.appendChild(pr);
         row.setAttribute('aria-label',
           it.n + ', ' + FULL[d] + ' ' + scRangeLong(it.s, it.e)
-          + (it.r ? ', ' + it.r : '') + (wk ? ', ' + wk : '') + '. Edit.');
-        /* ── tap edits, a long press ticks ──
-           The week is where you CHANGE the schedule, so the tap keeps
-           doing what it always did. Marking a block done is the tally's
-           job and it stays the tally's job; this is the same act
-           reachable from the row it is about, for the mornings when
-           the block in front of you is the one you just finished.
+          + (it.r ? ', ' + it.r : '') + (wk ? ', ' + wk : '')
+          + (row.classList.contains('is-done') ? '. Untick.' : '. Tick off.'));
+        /* ── A TAP TICKS AND TWO TAPS EDIT ──
+           The week used to be where you CHANGE the schedule, so a tap
+           opened the editor and a long press ticked. That had the rare
+           thing on the easy gesture: you edit a block a few times ever
+           and you tick one most mornings.
 
-           The gesture itself is scHold: 550ms with a 10px move guard,
-           and it is one function because Showing up's tile holds the
-           same press now. */
-        /* ONE tick, reached two ways: the check beside the row, and a
-           long press on the row itself. The check is the one a keyboard
-           and a screen reader can use; the long press is the shortcut
-           it always was. */
+           ONE tick, reached three ways: the check beside the row, a
+           tap on the row itself, and the tally's own card. The check
+           is the one a keyboard and a screen reader can use. */
         var tick = function () {
             var bd = scDay(scDateOfDow(d));
             var was = !!(blockLog[bd] && blockLog[bd][it.id]);
@@ -1322,11 +1293,18 @@
             if (!was && scIsTrain(it)) { scTrainAsk(it, d, bd); return; }
             scToast(was ? it.n + ' unticked' : it.n + ' done', false);
         };
-        var heldRow = scHold(row, tick);
-        row.addEventListener('click', function () {
-          if (heldRow()) return;
-          scEditSheet(it, d);
-        });
+        /* ── A TAP TICKS, TWO TAPS EDIT ──
+           It was the other way round, with a long press to tick. The
+           tap does the thing you do every morning now and the editor
+           is behind the second press, which is the same trade Showing
+           up made: the daily action on the whole row, the rare one a
+           gesture away.
+
+           The long press went with it rather than being kept beside
+           the double tap. Two gestures for one action is a control
+           answering the same question twice, and the one that had to
+           go is the one nothing on screen can describe. */
+        scDoubleTap(row, tick, function () { scEditSheet(it, d); });
         /* A long press reaches neither a keyboard nor a screen reader,
            and it is deliberately NOT the only way to tick a block: the
            tally does the same thing with a plain press and always did.
@@ -1348,6 +1326,18 @@
         chk.addEventListener('click', function (ev) { ev.stopPropagation(); tick(); });
         wrap.appendChild(chk);
         wrap.appendChild(row);
+        /* ── THE WAY IN A GESTURE CANNOT OFFER ──
+           A double tap reaches a pointer and nothing else: a keyboard
+           sends one activation per press. The check beside the row is
+           the keyboard's tick; this is its edit. Off screen rather
+           than `display: none`, which would take it out of the
+           accessibility tree, and drawn again on focus so somebody who
+           has tabbed to it can see where they are. */
+        var ed = scEl('button', 'row-ed', 'Edit');
+        ed.type = 'button';
+        ed.setAttribute('aria-label', 'Edit ' + it.n);
+        ed.addEventListener('click', function () { scEditSheet(it, d); });
+        wrap.appendChild(ed);
         (sess || card).appendChild(wrap);
       });
 
@@ -1917,9 +1907,42 @@
       el.classList.toggle('is-past', !skip && e <= now);
       var on = !skip && s <= now && now < e;
       el.classList.toggle('is-now', on);
-      /* The status pill says it in a word, and only while it is true. */
+      /* ── EVERY ROW SAYS WHERE IT STANDS ──
+         It was one word on one row — "Now" while a block was running
+         and nothing on any other — so a row you had ticked and a row
+         still ahead of you were told apart by a circle at the far end
+         and a weight of type. Three states, three words, and the tag
+         is the same object every other tag on this app is.
+
+         `is-off` keeps its strike and takes no word: a day off is not
+         a state of DOING the block, it is the block not applying, and
+         a tag saying so would be a fourth claim in a row of three. */
       var st = el.querySelector('.st');
-      if (st) { st.textContent = on ? 'Now' : ''; st.classList.toggle('is-now', on); }
+      if (st) {
+        var done = el.classList.contains('is-done');
+        /* ── FOUR STATES, AND MISSED IS THE ONE THAT REVERSES A RULE ──
+           This file said a tag never goes red for a thing you have not
+           done, because that is the screen grading you. Asked for
+           anyway, and it is a narrower claim than the rule was written
+           against: a block whose hour has been and gone without a tick
+           is a FACT about the day rather than a verdict on you, and it
+           is the one state you would want to catch at a glance.
+
+           `gone` is read off is-past, which scLive sets on TODAY's
+           rows alone — so a block on another day is "Not yet" whatever
+           the hour, and the week does not tell you it only runs
+           forwards. */
+        var gone = !done && !on && !skip && el.classList.contains('is-past');
+        var word = skip ? ''
+          : done ? 'Completed'
+          : on ? 'In progress'
+          : gone ? 'Missed' : 'Not yet';
+        st.textContent = word;
+        st.classList.toggle('is-now', on && !done);
+        st.classList.toggle('is-ok', done);
+        st.classList.toggle('is-bad', gone);
+        st.classList.toggle('is-todo', !done && !on && !skip && !gone);
+      }
       /* And the track says how much of it has gone. Set on THIS pass
          rather than animated: the width steps once a half-minute, so a
          screen nobody is touching is a screen that is still. A block
@@ -1985,6 +2008,10 @@
     '--s-m': '#F2B950', '--s-a': '#5FA8FF', '--s-e': '#B98BFF',
     '--t-train': '#E0574B', '--t-walk': '#4FBE87', '--t-read': '#5FA8FF',
     '--t-steps': '#F2B950', '--t-fuel': '#E0C15A', '--t-water': '#48C3CC',
+    '--st-ok': '#43B96C', '--gold': '#FFC83D',
+    '--w-red': '#e6412f', '--w-blue': '#2f7fe6', '--w-teal': '#14a2a2',
+    '--w-green': '#17a06b', '--w-violet': '#8a4fe0',
+    '--w-orange': '#e0761a', '--w-amber': '#e08a12',
     '--done-bg': 'rgba(255,255,255,.10)' };
   var LIGHT_SET = { '--paper': '#F7F7F9', '--ink': '#1A1A1F',
     '--dim': '#5C5C66', '--spent': '#797984',
@@ -1996,6 +2023,17 @@
     '--s-m': '#8A5000', '--s-a': '#1668C7', '--s-e': '#6B3FC4',
     '--t-train': '#B3382E', '--t-walk': '#1C7A4E', '--t-read': '#1668C7',
     '--t-steps': '#8A5000', '--t-fuel': '#7A6200', '--t-water': '#0E6E76',
+    '--st-ok': '#19733F', '--gold': '#8A6100',
+    /* ── THE WORKOUT HUES, SOLVED FOR A LIGHT PAGE ──
+       The card's own nine are grounds for one fixed dark card and the
+       card does not follow the theme, deliberately. A TAG does: it is
+       a 22% wash under a 72% label on whatever page is up, and read
+       that way the card colours came to 3.36:1 on white — the amber
+       worst. Each is the same hue taken down until the tag clears
+       4.5:1 with margin; worst measured 4.70. */
+    '--w-red': '#d83d2c', '--w-blue': '#2c76d6', '--w-teal': '#108383',
+    '--w-green': '#14885b', '--w-violet': '#8a4fe0',
+    '--w-orange': '#b56015', '--w-amber': '#a8670d',
     '--done-bg': 'rgba(60,40,100,.07)' };
   /* ══════════════════════════════════════════════════════
      THE TWO THINGS YOU CHOOSE A COLOUR FOR
@@ -2035,7 +2073,20 @@
     { k: 'blue',   n: 'Blue',   d: '#4C90F7', l: '#1A5FD4' },
     { k: 'teal',   n: 'Teal',   d: '#2BB3BD', l: '#0A757E' },
     { k: 'green',  n: 'Green',  d: '#43B96C', l: '#19733F' },
-    { k: 'amber',  n: 'Amber',  d: '#E8B04A', l: '#7E5200' },
+    /* ── ITS OWN AMBER, APART FROM THE MORNING TAG'S ──
+       This is the default for the running block, and a Morning row
+       that is running draws both: at #E8B04A the two were ΔE 4 apart
+       on the light face and read as one colour repeated. Measured in
+       Lab against --s-m on each face: 24.9 on the dark, 14.1 on the
+       light.
+
+       AND THE LIGHT ONE WAS SOLVED AGAINST --paper, NOT WHITE. At
+       #B35A00 it measured 4.80 against pure white and shipped as
+       4.48:1 against the page, which is under the bar by a rounding
+       error — the same lesson --spent taught twice. What sits on a
+       swatch is --paper, so --paper is what it has to be measured
+       against. */
+    { k: 'amber',  n: 'Amber',  d: '#FF9F0A', l: '#A85200' },
     { k: 'red',    n: 'Red',    d: '#EC6B5E', l: '#AE3226' },
     { k: 'pink',   n: 'Pink',   d: '#E571A3', l: '#A33465' },
     { k: 'slate',  n: 'Slate',  d: '#9A9AA6', l: '#55555F' }
@@ -2051,9 +2102,11 @@
      for the label and 5.09:1 against the page. */
   var ME_KEY = 'sched.me.v1';
   var LIVE_KEY = 'sched.live.v1';
-  /* Violet was the app's own hue before the wheel went, and green is
-     the one word this chip is for. */
-  var ME0 = 'violet', LIVE0 = 'green';
+  /* Violet was the app's own hue before the wheel went. Amber is what
+     a running block wears everywhere else that has one, so it is what
+     In progress starts as — still a setting, because the row of
+     swatches under "Now" is what makes it yours rather than ours. */
+  var ME0 = 'violet', LIVE0 = 'amber';
   function scPickOf(key, dflt) {
     var v;
     try { v = localStorage.getItem(key); } catch (e) { v = null; }
@@ -2178,7 +2231,9 @@
                 '--s-m', '--s-a', '--s-e',
                 '--t-train', '--t-walk', '--t-read',
                 '--t-steps', '--t-fuel', '--t-water',
-                '--done-bg', '--me', '--live'];
+                '--done-bg', '--me', '--live', '--st-ok', '--gold',
+                '--w-red', '--w-blue', '--w-teal', '--w-green',
+                '--w-violet', '--w-orange', '--w-amber'];
 
   function scPaint(save) {
     var t = scAccent();
@@ -2727,7 +2782,7 @@
       scDoubleTap(c, function () { scTallyTap(it, day); }, function () {
         /* Using the gesture is the best possible sign that it has been
            learned, so the card that teaches it stops appearing. */
-        scHintSaw();
+        scHintSaw('ty');
         scOpenHist(it);
       });
       row.appendChild(c);
@@ -2779,21 +2834,77 @@
      opened a record by double tapping has learned it more thoroughly
      than any button press could say, so scOpenHist marks it seen. A
      hint that outlives its own lesson is furniture. */
-  var HINT_KEY = 'sched.hint2.v1';
-  var hintShut = false;      /* closed for this visit, not for ever */
+  /* ── TWO SCREENS, TWO CARDS, ONE MECHANISM ──
+     Both went to a double tap and neither gesture can announce itself,
+     so each gets a card. They are one function with a table rather
+     than two copies: the shape, the exits and the rule about what
+     retires them are the same, and only the scene and the sentence
+     differ.
 
-  function scHintSeen() {
-    try { return localStorage.getItem(HINT_KEY) === '1'; } catch (e) { return true; }
+     A KEY EACH, because they are two lessons. Learning that two taps
+     open a tile's stats does not teach you that two taps edit a block,
+     and a single key would have the second card never appear for
+     anybody who met the first. */
+  var HINTS = {
+    ty: {
+      key: 'sched.hint2.v1',
+      t: 'Two taps',
+      s: 'Double tap a tile to open its stats.',
+      /* A ripple: a dot with two rings going out of it, twice. */
+      ic: '<circle class="gh-r1" cx="12" cy="12" r="4.6" opacity=".8"/>'
+        + '<circle class="gh-r2" cx="12" cy="12" r="8.4" opacity=".32"/>'
+        + '<circle cx="12" cy="12" r="2.3" fill="currentColor" stroke="none"/>'
+    },
+    wk: {
+      key: 'sched.hintw.v1',
+      t: 'Two taps to edit',
+      s: 'Tap to tick off, double tap to edit.',
+      /* ── A DIFFERENT SCENE, AND THAT IS THE POINT ──
+         The tile's card draws the GESTURE because what it teaches is
+         a press. This one draws what the press PRODUCES: a sheet
+         coming up over the rows. Two cards with one animation would
+         be the app saying the same thing twice and meaning two
+         different things.
+
+         Clipped to the page, so the sheet rises out of the page's own
+         bottom edge rather than sliding over the outside of it. */
+      ic: '<clipPath id="scGhWk">'
+        + '<rect x="3.4" y="2.4" width="17.2" height="19.2" rx="2.6"/>'
+        + '</clipPath>'
+        + '<rect x="3.4" y="2.4" width="17.2" height="19.2" rx="2.6"'
+        + ' opacity=".4"/>'
+        + '<g fill="currentColor" stroke="none" opacity=".35">'
+        + '<rect x="6" y="5.6" width="9.4" height="1.6" rx=".8"/>'
+        + '<rect x="6" y="9" width="7" height="1.6" rx=".8"/>'
+        + '</g>'
+        + '<g clip-path="url(#scGhWk)"><g class="gh-sheet">'
+        + '<rect x="4.9" y="12.4" width="14.2" height="11" rx="2.4"'
+        + ' fill="var(--ground)" stroke="currentColor" stroke-width="1.5"/>'
+        + '<rect x="9.7" y="14" width="4.6" height="1.2" rx=".6"'
+        + ' fill="currentColor" stroke="none" opacity=".45"/>'
+        + '<rect x="7.4" y="17.4" width="9.2" height="2.2" rx="1.1"'
+        + ' fill="currentColor" stroke="none"/>'
+        + '</g></g>'
+    }
+  };
+  var hintShut = {};         /* closed for this visit, not for ever */
+
+  function scHintSeen(w) {
+    try { return localStorage.getItem(HINTS[w].key) === '1'; } catch (e) { return true; }
   }
-  function scHintSaw() {
-    try { localStorage.setItem(HINT_KEY, '1'); } catch (e) {}
+  function scHintSaw(w) {
+    try { localStorage.setItem(HINTS[w].key, '1'); } catch (e) {}
   }
 
   var hintBack = null;   /* where the focus was before this took it */
 
+  var hintUp = null;         /* which card is on screen, if any */
+
   function scHintClose(forGood) {
-    if (forGood) scHintSaw();
-    hintShut = true;
+    if (!hintUp) { $('scHint').hidden = true; return; }
+    if (forGood) scHintSaw(hintUp);
+    hintShut[hintUp] = true;
+    hintUp = null;
     var el = $('scHint');
     el.hidden = true;
     el.textContent = '';
@@ -2812,9 +2923,13 @@
      Built into a container that lives OUTSIDE the tally section, so
      leaving the view cannot strand it over another screen; the history
      veil is next to it for the same reason. */
-  function scHintCard() {
+  function scHintCard(w) {
     var el = $('scHint');
-    if (hintShut || scHintSeen()) { el.hidden = true; el.textContent = ''; return; }
+    var h = HINTS[w];
+    if (!h || hintShut[w] || scHintSeen(w)) {
+      el.hidden = true; el.textContent = ''; return;
+    }
+    hintUp = w;
     hintBack = document.activeElement;
     el.textContent = '';
     var box = scEl('div', 'gh-card');
@@ -2827,27 +2942,14 @@
        resting one, which is what lets reduced motion switch it off and
        leave a picture rather than a frame with a piece missing. */
     ic.insertAdjacentHTML('beforeend',
-      '<svg viewBox="0 0 24 24" aria-hidden="true">'
-      /* ── NO SURROUND, AND THAT IS WHAT STOPS IT BEING A CAMERA ──
-         It went in as two rings and a dot inside a rounded rectangle,
-         standing for the tile. Concentric rings around a dot in a
-         rounded box is an APERTURE at any size, and moving the marks
-         off centre only made it a badly centred one. The rectangle was
-         carrying nothing the six tiles directly above it do not
-         already say, so it goes: a dot with two rings leaving it is a
-         ripple, which is the mark this is. */
-      + '<circle class="gh-r1" cx="12" cy="12" r="4.6" opacity=".8"/>'
-      + '<circle class="gh-r2" cx="12" cy="12" r="8.4" opacity=".32"/>'
-      + '<circle cx="12" cy="12" r="2.3" fill="currentColor" stroke="none"/>'
-      + '</svg>');
+      '<svg viewBox="0 0 24 24" aria-hidden="true">' + h.ic + '</svg>');
     box.appendChild(ic);
 
     var tx = scEl('div', 'gh-tx');
-    var h = scEl('b', null, 'Two taps');
-    h.id = 'scHintTitle';
-    tx.appendChild(h);
-    tx.appendChild(scEl('p', null,
-      'Double tap a tile to open its stats.'));
+    var hd = scEl('b', null, h.t);
+    hd.id = 'scHintTitle';
+    tx.appendChild(hd);
+    tx.appendChild(scEl('p', null, h.s));
     box.appendChild(tx);
 
     var row = scEl('div', 'gh-row');
@@ -3812,7 +3914,17 @@
          somebody else arrives. */
       if (i === 0) {
         var c = scEl('span', 'fr-crown');
-        if (!p.me && p.acc) c.style.setProperty('--crown', scCrown(p.acc));
+        /* ── THE CROWN IS GOLD, WHOEVER IS WEARING IT ──
+           It used to be the leader's OWN colour, run through scCrown
+           to clear 3:1 on your page. That was a lot of arithmetic for
+           a mark whose whole job is to say FIRST — and a crown in
+           somebody's chosen violet says which person rather than which
+           place, which the name beside it already says. Gold is what a
+           first place is, and it is the same gold on every board.
+
+           scCrown stays: the week of discs under a friend's name is
+           still drawn in THEIR colour, and that is where a colour
+           saying which person belongs. */
         c.innerHTML = '<svg viewBox="0 0 24 20" aria-hidden="true">'
           + '<path d="M2 6l4.6 3.6L12 2l5.4 7.6L22 6l-1.8 11H3.8L2 6z"/></svg>';
         var w = scEl('span', 'fr-nw');
@@ -4671,17 +4783,22 @@
     var from = view;
     view = VIEWS.indexOf(v) >= 0 ? v : 'list';
     var tal = view === 'tally', fr = view === 'friends';
-    /* Coming BACK to Today is a new visit, so a card closed with "Got
-       it" is offered once more. Guarded on the view actually changing:
-       scSetView is called with the view it is already on in a few
-       places, and resetting there would put a card you just dismissed
-       straight back on the screen. */
-    if (tal && from !== 'tally') hintShut = false;
-    /* And the card cannot outlive the screen it is about. It lives
-       outside the tally section — like the history veil, and for the
-       same reason — so hiding that section would leave it up over
+    /* ── ARRIVING IS WHAT OFFERS A CARD, AND LEAVING TAKES IT ──
+       Coming BACK to a screen is a new visit, so a card closed with
+       "Got it" is offered once more. Guarded on the view actually
+       CHANGING: scSetView is called with the view it is already on in
+       a few places, and resetting there would put a card you just
+       dismissed straight back on the screen.
+
+       And a card cannot outlive the screen it is about. It lives
+       outside both sections — like the history veil, and for the same
+       reason — so hiding a section would otherwise leave it up over
        whatever you switched to. */
-    if (!tal) scHintClose(false);
+    if (view !== from) {
+      if (tal) hintShut.ty = false;
+      if (view === 'list') hintShut.wk = false;
+      scHintClose(false);
+    }
 
     /* The history sits OUTSIDE the tally section, so hiding the section
        would leave it up over whatever you switched to. */
@@ -4721,6 +4838,20 @@
        it ran, which is a bug this file has already had once. */
     else if (fr) { scPaintFriends(); scFrStop(frStop, false); scArriveFriends(); }
     else scLive();
+
+    /* ── AFTER THE CHAIN, NEVER INSIDE IT ──
+       Written as another `else if` between the branches above, this
+       took scLive() off the week: an arm added to an if/else chain
+       swallows the arm under it, and the symptom is a screen that
+       stops updating rather than anything that throws. That is this
+       file's own bug from the day the ring view was deleted, and it
+       cost four hundred lines of chasing then.
+
+       The week's card belongs on the week, and it goes up on arriving
+       rather than on painting — a repaint happens on every tick and
+       every half minute, and a card that came back on one of those is
+       a thing you dismissed reappearing while you were looking at it. */
+    if (view === 'list') scHintCard('wk');
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -5362,6 +5493,22 @@
 
      ORDER IS PRESS ORDER, so "Pull + Abs" reads the way you chose it
      rather than the way the list happens to be sorted. */
+  /* ── THE SEVEN HUES A WORKOUT CAN BE, BY NAME ──
+     The cards carry a literal hex each and always have; a tag needs a
+     token, because a token has a value per face and a hex does not.
+     Seven entries rather than one per workout: twenty-two workouts
+     share seven colours, and a table keyed by what is actually
+     different is a table that cannot drift out of step with itself.
+
+     A colour this build does not know falls through to the neutral
+     tag rather than to no tag at all — the same rule a stored view or
+     a stored swatch keeps. */
+  var WO_TONE = {
+    '#e6412f': 'red', '#2f7fe6': 'blue', '#14a2a2': 'teal',
+    '#17a06b': 'green', '#8a4fe0': 'violet',
+    '#e0761a': 'orange', '#e08a12': 'amber'
+  };
+
   function scWorkoutsOf(k) {
     return String(k || '').split('+').map(scWorkout).filter(Boolean);
   }
@@ -7082,7 +7229,7 @@
        visit, so the card comes back — until either the gesture is used
        or it is dismissed for good, which are the two answers that mean
        it has done its job. */
-    if (v === 'up' && tyStop !== 'up') hintShut = false;
+    if (v === 'up' && tyStop !== 'up') hintShut.ty = false;
     else if (v !== 'up') scHintClose(false);
     tyStop = TYSTOPS.indexOf(v) < 0 ? 'up' : v;
     $('scTyPane').hidden = tyStop !== 'up';
@@ -7099,7 +7246,7 @@
        the screen: a repaint happens on every tick and every half
        minute, and a card that came back on one of those would be a
        thing you dismissed reappearing while you were looking at it. */
-    if (tyStop === 'up') scHintCard();
+    if (tyStop === 'up') scHintCard('ty');
     if (save) { try { localStorage.setItem(TYSTOP_KEY, tyStop); } catch (e) {} }
   }
 

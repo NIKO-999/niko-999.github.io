@@ -4622,6 +4622,88 @@ take it out of the accessibility tree and leave twenty-six weeks of
 record behind one gesture. It comes back on focus, because somebody who
 has tabbed to it has to see where they are.
 
+## The week is two taps too
+
+**A TAP TICKS AND TWO TAPS EDIT**, which is the way round it should
+always have been: you edit a block a few times ever and tick one most
+mornings, and the old arrangement put the rare thing on the easy
+gesture and the daily one behind a long press.
+
+**The long press went rather than being kept beside it.** Two gestures
+for one action is a control answering the same question twice, and the
+one to lose is the one nothing on screen can describe. `scHold` was
+cut with it — a mechanism nothing calls reads as one somebody might
+edit, which is the accent solver's lesson one screen over.
+
+**A keyboard gets a real control**, off screen and drawn again on
+focus: a double tap reaches a pointer and nothing else. The check
+beside the row is the keyboard's tick; `.row-ed` is its edit. Both use
+`:focus` rather than `:focus-visible` — the control is clipped to a
+pixel, so a pointer can never land on it and every focus it gets is a
+keyboard's, which the `:focus-visible` heuristic does not always agree
+with.
+
+### Every row says where it stands
+
+Four states, four words, and the tag is the same object every other
+tag in this app is: **Completed** green, **In progress** the colour set
+under Now, **Missed** red, **Not yet** the flat neutral.
+
+**MISSED REVERSES A RULE, and that is written down rather than
+smuggled.** This file said a tag never goes red for a thing you have
+not done, because that is the screen grading you. The rule was written
+against a wash of red across a week you had not kept, which is a
+judgement; an hour that has been and gone without a tick is a fact
+about the day, and it is the state you would most want to catch
+without reading. It is the only red tag in the app.
+
+**Not yet stays neutral**, which is the half of the rule that
+survives: a tag takes a hue when it names something that HAPPENED, and
+a thing you have not got to has not happened.
+
+**Missed is read off `is-past`, which scLive sets on TODAY's rows
+alone** — so a block on another day is "Not yet" whatever the hour, and
+the week does not start claiming it only runs forwards.
+
+**9.5px, which is the floor.** A state tag sits on every row, so at
+11.5 it was six chips down a card competing with the names they belong
+to. 9.5 is what the workout card's own label runs at and is as small as
+anything here goes. Smaller does not relax the ratio: WCAG's
+larger-text allowance starts at 18.66px bold, so it is held to the same
+4.5:1.
+
+### What you trained is a tag, and it comes first
+
+It hung off the name as a small italic — the one loose piece of type on
+a row otherwise made of a name and two figures. It is a tag beside the
+state now, at the state's own size, and it sits BEFORE it: what you did
+is closer to the block it belongs to, and whether you have finished
+reads last.
+
+**IN THE WORKOUT'S OWN COLOUR, THROUGH A TOKEN.** Which session this
+was is the purest WHICH there is, so it is exactly what a tag's colour
+is for — taken from the FIRST component, because that is what names the
+session: Pull + Abs is a Pull.
+
+**The card's own hex could not serve.** The nine are grounds for one
+fixed dark card, and the card deliberately does not follow the theme; a
+tag does. Read as a 22% wash under a 72% label they came to **3.36:1**
+on the light page, the amber worst. Each hue has a light-face twin now,
+solved by taking the same hue down until the tag clears with margin —
+worst measured **4.70:1**. Seven pairs rather than twenty-two, because
+seven is what is actually different.
+
+### The crown is gold
+
+It was the leader's own colour, run through `scCrown` to clear 3:1 on
+your page. That is a lot of arithmetic for a mark whose whole job is to
+say FIRST — and a crown in somebody's chosen violet says which PERSON,
+which the name beside it already says. Gold says which PLACE.
+
+`scCrown` stays: the month of bars under a friend's name is still drawn
+in THEIR colour, and that is where a colour saying which person
+belongs.
+
 ### It is a double tap now, and a card teaches it
 
 The hold worked and was invisible. **Nothing on a tile can say "hold

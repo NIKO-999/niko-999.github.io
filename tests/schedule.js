@@ -210,6 +210,7 @@ const SAID = [
          rather than a tile. The section that is about it clears the
          key and reloads. */
       localStorage.setItem('sched.hint2.v1', '1');
+      localStorage.setItem('sched.hintw.v1', '1');
     }
   }, [WEEK, `${BASE}/schedule/nofriends`]);
   /* Answered here rather than left to the static server, and answered
@@ -1198,7 +1199,7 @@ const SAID = [
          only one you set yourself. It is named rather than waved
          through by its hue, so a second coloured object cannot arrive
          beside it unnoticed. */
-      const inTag = el.closest('.wk-sh b, .ty-card .tg, .wo-p, .wc, .is-now');
+      const inTag = el.closest('.wk-sh b, .ty-card .tg, .wo-p, .wc, .is-now, .row .st, .row .wo');
       const hue = Math.max(spread(chan(cs.color)),
                            spread(chan(cs.backgroundColor)),
                            spread(chan(cs.borderTopColor)));
@@ -1781,6 +1782,15 @@ const SAID = [
      first tap is deferred by. */
   const holdCard = async (id) => {
     await page.dblclick(`.ty-card[data-item="${id}"]`);
+    await page.waitForTimeout(420);
+  };
+
+  /* ── TWO TAPS ON A WEEK ROW ──
+     A tap ticks a block off and two open the editor. Driven through
+     the real handler, and the wait clears the 260ms the first tap is
+     deferred by. */
+  const dblRow = async (sel) => {
+    await page.dblclick(sel);
     await page.waitForTimeout(420);
   };
 
@@ -2568,6 +2578,9 @@ const SAID = [
   await page.evaluate(() => {
     [...document.querySelectorAll('.week.is-today .row[data-id]')]
       .find((r) => r.querySelector('.n').textContent.startsWith('Walk')).click();
+      /* TWICE: the editor is behind a double tap now. */
+      [...document.querySelectorAll('.week.is-today .row[data-id]')]
+      .find((r) => r.querySelector('.n').textContent.startsWith('Walk')).click();
   });
   await page.waitForTimeout(360);
   const hasToggle = await page.evaluate(() => {
@@ -2707,6 +2720,9 @@ const SAID = [
   await page.evaluate(() => {
     [...document.querySelectorAll('.week.is-today .row[data-id]')]
       .find((r) => r.querySelector('.n').textContent.startsWith('Trading')).click();
+      /* TWICE: the editor is behind a double tap now. */
+      [...document.querySelectorAll('.week.is-today .row[data-id]')]
+      .find((r) => r.querySelector('.n').textContent.startsWith('Trading')).click();
   });
   await page.waitForTimeout(360);
   const feedsNothing = await page.evaluate(() => {
@@ -2738,6 +2754,9 @@ const SAID = [
   /* Put it back, so the rows below this see the week they expect. */
   await page.evaluate(() => {
     [...document.querySelectorAll('.week.is-today .row[data-id]')]
+      .find((r) => r.querySelector('.n').textContent.startsWith('Trading')).click();
+      /* TWICE: the editor is behind a double tap now. */
+      [...document.querySelectorAll('.week.is-today .row[data-id]')]
       .find((r) => r.querySelector('.n').textContent.startsWith('Trading')).click();
   });
   await page.waitForTimeout(360);
@@ -3357,6 +3376,9 @@ const SAID = [
       await page.evaluate((n) => {
         [...document.querySelectorAll('.week.is-today .row[data-id]')]
           .find((r) => r.querySelector('.n').textContent.startsWith(n)).click();
+      /* TWICE: the editor is behind a double tap now. */
+      [...document.querySelectorAll('.week.is-today .row[data-id]')]
+          .find((r) => r.querySelector('.n').textContent.startsWith(n)).click();
       }, name);
       await page.waitForTimeout(420);
     };
@@ -3434,8 +3456,12 @@ const SAID = [
       return w;
     });
     await page.waitForTimeout(520);
+    /* Two clicks, because the row's editor is behind a double tap now.
+       Dispatched back to back rather than through page.dblclick, since
+       this section is driving a day that is not today. */
     await page.evaluate(() => {
-      document.querySelector('.row[data-id]').click();
+      const r = document.querySelector('.row[data-id]');
+      r.click(); r.click();
     });
     await page.waitForTimeout(440);
     const far = await page.evaluate(() => ({
@@ -4312,9 +4338,166 @@ const SAID = [
      open reads the bar and the rows and calls it done — the day picker
      and the sheet's buttons are never looked at, and the seven chips
      were in fact under the floor when this was first written. */
+  /* ══════════════════════════════════════════════════════
+     A TAP TICKS, TWO TAPS EDIT, AND EVERY ROW SAYS WHERE IT STANDS
+
+     The week had it the wrong way round: a tap opened the editor and a
+     long press ticked, which put the rare thing on the easy gesture.
+     You edit a block a few times ever and tick one most mornings.
+
+     Both directions, because each passes on the other's bug: a build
+     that still opened the editor on one tap passes "two taps edit",
+     and one where the second press did nothing passes "a tap ticks". */
+  /* ── AND THE WEEK HAS ITS OWN CARD, WITH ITS OWN SCENE ──
+     Two screens went to a double tap and neither gesture can announce
+     itself, so each gets a card. A KEY EACH, because they are two
+     lessons: learning that two taps open a tile's stats does not teach
+     you that two taps edit a block.
+
+     THE SCENES MUST DIFFER. The tile's draws the gesture, because what
+     it teaches is a press; this one draws what the press produces, a
+     sheet coming up. Two cards running one animation would be the app
+     saying the same thing twice and meaning two different things. */
+  console.log('\n── the card that teaches the week ──');
+  await page.evaluate(() => localStorage.removeItem('sched.hintw.v1'));
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(420);
+  await show('list');
+  await page.waitForTimeout(300);
+  const wkHint = await page.evaluate(() => {
+    const surf = document.getElementById('scHint');
+    const c = document.querySelector('.gh-card');
+    if (!c || surf.hidden) return { up: false };
+    const sr = surf.getBoundingClientRect();
+    const anim = [];
+    c.querySelectorAll('.gh-ic svg *').forEach((e) =>
+      e.getAnimations().forEach((a) => anim.push(a.animationName)));
+    return { up: sr.width > 300 && sr.height > 300,
+             says: /double tap/i.test(c.textContent),
+             tick: /tick/i.test(c.textContent),
+             anim: [...new Set(anim)],
+             ok: !!c.querySelector('.gh-ok'),
+             never: !!c.querySelector('.gh-never') };
+  });
+  ok('a card comes up over the week and names both gestures',
+    wkHint.up && wkHint.says && wkHint.tick, wkHint);
+  ok('...with its own scene, not the tile card\u2019s ripple',
+    wkHint.anim.length > 0 && wkHint.anim.every((n) => !/gh-r[12]/.test(n)),
+    wkHint);
+  ok('...and both ways out', wkHint.ok && wkHint.never, wkHint);
+  /* Its own key: dismissing this one for good must not silence the
+     other, and the tile's key is untouched here. */
+  await page.evaluate(() => document.querySelector('.gh-never').click());
+  await page.waitForFunction(() => document.getElementById('scHint').hidden,
+    null, { timeout: 4000 });
+  const keys = await page.evaluate(() => ({
+    wk: localStorage.getItem('sched.hintw.v1'),
+    ty: localStorage.getItem('sched.hint2.v1') }));
+  ok('“Don’t show again” marks THIS card seen and leaves the other alone',
+    keys.wk === '1' && keys.ty === '1', keys);
+  await page.waitForTimeout(160);
+
+  console.log('\n── two taps on the week ──');
+  await show('list');
+  await page.waitForTimeout(220);
+  await page.evaluate(() => {
+    const b = [...document.querySelectorAll('.st-d')]
+      .find((x) => x.dataset.d === String(new Date().getDay()));
+    if (b) b.click();
+  });
+  await page.waitForTimeout(260);
+
+  const tapRow = async () => {
+    await page.click('.week.is-today .row[data-id]');
+    await page.waitForTimeout(440);
+  };
+  const rowState = () => page.evaluate(() => {
+    const r = document.querySelector('.week.is-today .row[data-id]');
+    return { done: r.classList.contains('is-done'),
+             word: (r.querySelector('.st') || {}).textContent,
+             sheet: !document.getElementById('scSheet').hidden };
+  });
+  const before = await rowState();
+  await tapRow();
+  const afterTap = await rowState();
+  ok('a tap on a week row ticks it and does NOT open the editor',
+    afterTap.done !== before.done && !afterTap.sheet, { before, afterTap });
+  ok('...and the row then says Completed',
+    afterTap.done ? afterTap.word === 'Completed' : true, afterTap);
+  await tapRow();                                  /* back where it was */
+  await page.waitForTimeout(120);
+
+  await dblRow('.week.is-today .row[data-id]');
+  ok('two taps open the editor',
+    await page.evaluate(() => !document.getElementById('scSheet').hidden));
+  await page.evaluate(() => document.getElementById('scScrim').click());
+  await page.waitForFunction(() => document.getElementById('scSheet').hidden,
+    null, { timeout: 4000 });
+  await page.waitForTimeout(160);
+
+  /* ── AND A GESTURE IS NEVER THE ONLY WAY IN ──
+     A double tap reaches a pointer and nothing else. The check beside
+     the row is the keyboard's tick; this is its edit. */
+  const rowEd = await page.evaluate(() => {
+    const e = document.querySelector('.week.is-today .rowwrap .row-ed');
+    if (!e) return null;
+    e.focus();
+    const r = e.getBoundingClientRect();
+    return { label: e.getAttribute('aria-label'),
+             focused: document.activeElement === e,
+             w: Math.round(r.width), h: Math.round(r.height) };
+  });
+  ok('every row carries a real edit control for a keyboard',
+    rowEd && /^Edit /.test(rowEd.label) && rowEd.focused
+    && rowEd.w > 20 && rowEd.h > 10, rowEd);
+  await page.evaluate(() => document.activeElement.blur());
+
+  /* ── FOUR STATES, AND THE COLOUR MAPPING IS ASKED OF THE PAGE ──
+     Planted rather than waited for: In progress needs a block running
+     and Missed needs one behind you, so a check that waited for the
+     clock would only run at certain hours — which this file has been
+     bitten by three times. The WORDS come from the app on a real tick
+     above; this is the CSS that dresses them.
+
+     Not yet is the one that must stay neutral. A tag takes a hue when
+     it names something that happened, and a thing you have not got to
+     has not happened; Missed is the reversal that was asked for, and
+     it is the only red tag in the app. */
+  const dress = await page.evaluate(() => {
+    const r = document.querySelector('.week.is-today .row[data-id]');
+    const t = r.querySelector('.st');
+    const cs = getComputedStyle(document.documentElement);
+    const paint = (h) => { const d = document.createElement('div');
+      d.style.color = h; document.body.appendChild(d);
+      const c = getComputedStyle(d).color; d.remove(); return c; };
+    const num = (c) => { const n = (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+      return /^color\(/.test(c) ? n.map((x) => x * 255) : n; };
+    const spread = (c) => { const v = num(c);
+      return v.length === 3 ? Math.max(...v) - Math.min(...v) : 0; };
+    const lead = (c) => { const v = num(c); return v.indexOf(Math.max(...v)); };
+    const was = t.className;
+    const out = {};
+    ['is-ok', 'is-now', 'is-bad', 'is-todo'].forEach((k) => {
+      t.className = 'st ' + k;
+      const g = getComputedStyle(t);
+      out[k] = { spread: Math.round(spread(g.color)), lead: lead(g.color) };
+    });
+    t.className = was;
+    out.badLead = lead(paint(cs.getPropertyValue('--bad').trim()));
+    out.okLead = lead(paint(cs.getPropertyValue('--st-ok').trim()));
+    return out;
+  });
+  ok('Not yet is a grey with no channel standing out',
+    dress['is-todo'].spread <= 12, dress);
+  ok('Completed is green, and Missed is the app\u2019s own red',
+    dress['is-ok'].spread >= 14 && dress['is-ok'].lead === dress.okLead
+    && dress['is-bad'].spread >= 14 && dress['is-bad'].lead === dress.badLead
+    && dress['is-bad'].lead !== dress['is-ok'].lead, dress);
+  ok('...and In progress is a colour of its own too',
+    dress['is-now'].spread >= 14, dress);
+
   console.log('\n── the thumb ──');
-  await page.click('.week.is-today .row[data-id]');
-  await page.waitForTimeout(360);
+  await dblRow('.week.is-today .row[data-id]');
   ok('the edit sheet is up to be measured',
     await page.$$eval('.pick', (p) => p.length) === 7);
   /* `.theme` is in this list because a hardcoded list of what to
@@ -4441,6 +4624,8 @@ const SAID = [
       if (!localStorage.getItem('sched.tour.v1')) {
         localStorage.setItem('sched.tour.v1', '1');
         localStorage.setItem('sched.hint2.v1', '1');
+        localStorage.setItem('sched.hintw.v1', '1');
+      localStorage.setItem('sched.hintw.v1', '1');
       /* AND THE GESTURE CARD, for the intro's own reason: it comes up
          over Showing up on a first visit, dims the whole app behind it
          and takes every press. Left unset, half this file would be
@@ -4448,6 +4633,7 @@ const SAID = [
          rather than a tile. The section that is about it clears the
          key and reloads. */
       localStorage.setItem('sched.hint2.v1', '1');
+      localStorage.setItem('sched.hintw.v1', '1');
       }
       /* Pointed at the worker running in THIS process, not the live one
          the app ships with. Everything below is a real round trip
@@ -4796,13 +4982,28 @@ const SAID = [
     await fp.keyboard.press('Escape');
     await fp.waitForTimeout(420);
 
-    /* ── their colours, not yours ── */
-    const crown = await fp.$eval('.fr-crown', (e) => ({
-      set: e.style.getPropertyValue('--crown'),
-      fill: getComputedStyle(e.querySelector('svg')).fill,
-    }));
-    ok('the crown goes to the leader and takes THEIR accent',
-      crown.set !== '' && crown.fill !== 'rgb(226, 35, 26)', JSON.stringify(crown));
+    /* ── THE CROWN IS GOLD, WHOEVER IS WEARING IT ──
+       It used to be the leader's OWN colour, solved through scCrown to
+       clear 3:1 on your page. A crown in somebody's chosen violet says
+       which PERSON, which the name beside it already says; gold says
+       which PLACE, which is the only thing a crown is for.
+
+       Asked of the page rather than written as a hex, and asserted as
+       NOT the leader's colour as well — a build that had simply kept
+       the old behaviour would pass "it is a colour" on its own. */
+    const crown = await fp.$eval('.fr-crown', (e) => {
+      const cs = getComputedStyle(document.documentElement);
+      const paint = (h) => { const d = document.createElement('div');
+        d.style.color = h; document.body.appendChild(d);
+        const c = getComputedStyle(d).color; d.remove(); return c; };
+      return { set: e.style.getPropertyValue('--crown'),
+               fill: getComputedStyle(e.querySelector('svg')).fill,
+               gold: paint(cs.getPropertyValue('--gold').trim()),
+               theirs: paint('#0F6E6A') };
+    });
+    ok('the crown is gold, not the leader\u2019s own colour',
+      crown.fill === crown.gold && crown.fill !== crown.theirs
+      && crown.set === '', JSON.stringify(crown));
     const faceFill = await fp.$eval('.fr-row .pic svg rect', (e) => e.getAttribute('fill'));
     ok('and so does their face', faceFill === '#0F6E6A', faceFill);
 
@@ -5248,6 +5449,8 @@ const SAID = [
       await gp.addInitScript(() => {
         localStorage.setItem('sched.tour.v1', '1');
         localStorage.setItem('sched.hint2.v1', '1');
+        localStorage.setItem('sched.hintw.v1', '1');
+      localStorage.setItem('sched.hintw.v1', '1');
       /* AND THE GESTURE CARD, for the intro's own reason: it comes up
          over Showing up on a first visit, dims the whole app behind it
          and takes every press. Left unset, half this file would be
@@ -5255,6 +5458,7 @@ const SAID = [
          rather than a tile. The section that is about it clears the
          key and reloads. */
       localStorage.setItem('sched.hint2.v1', '1');
+      localStorage.setItem('sched.hintw.v1', '1');
         const F = new Date('2026-09-01T09:30:00').getTime(), R = Date;
         window.Date = class extends R {
           constructor(...a) { super(...(a.length ? a : [F])); }
@@ -5383,6 +5587,7 @@ const SAID = [
          rather than a tile. The section that is about it clears the
          key and reloads. */
       localStorage.setItem('sched.hint2.v1', '1');
+      localStorage.setItem('sched.hintw.v1', '1');
       localStorage.setItem('sched.net.v1', JSON.stringify({
         url: 'about:blank', code: '', key: '', name: '', pic: '', on: false }));
       const R = Date;
@@ -5408,8 +5613,9 @@ const SAID = [
       withMer.length === twelve.row.length && twelve.row.length > 1
       && twelve.row.every((t) => (t.match(/[AP]M/g) || []).length === 1
         && /[AP]M$/.test(t)), twelve.row);
-    await up.click('.row[data-id]');
-    await up.waitForTimeout(240);
+    /* Twice: the editor is behind a double tap now. */
+    await up.dblclick('.row[data-id]');
+    await up.waitForTimeout(440);
     const fields = await up.$$eval('#scSheetBody input[type="time"]',
       (i) => i.map((x) => x.value));
     ok('...while the edit fields stay strict 24-hour, which is all they take',
@@ -6400,31 +6606,56 @@ const SAID = [
     const row = await page.evaluate(() => {
       const r = [...document.querySelectorAll('.week.is-today .row[data-id]')]
         .find((x) => /Train/.test(x.querySelector('.n').firstChild.textContent));
-      const em = r.querySelector('.n em.wo');
-      /* Every grey asked for rather than typed. The palette moved
-         once already and a literal here measures a colour that is
-         nowhere on the page. */
+      /* A TAG IN THE PROPS, not an em hanging off the name. It was
+         the one loose piece of type on a row otherwise made of a name
+         and two figures. */
+      const em = r.querySelector('.props .wo');
       const cs = getComputedStyle(document.documentElement);
       const rgb = (k) => 'rgb(' + cs.getPropertyValue(k).trim().replace('#', '')
         .match(/\w\w/g).map((x) => parseInt(x, 16)).join(', ') + ')';
+      const st = r.querySelector('.props .st');
       return { mark: em && em.textContent, label: r.getAttribute('aria-label'),
+        /* ORDER: what you did, then whether you have finished. The
+           workout sits closer to the block it belongs to. */
+        order: em && st ? (em.compareDocumentPosition(st)
+          & Node.DOCUMENT_POSITION_FOLLOWING) > 0 : null,
         colour: em && getComputedStyle(em).color,
+        bg: em && getComputedStyle(em).backgroundColor,
         dim: rgb('--dim'), spent: rgb('--spent'), accent: rgb('--red') };
     });
     ok('and the row it happened on says what it was, through a reload',
       row.mark === 'Legs' && / Legs\.? /.test(row.label + ' '), row);
-    /* THE ACCENT, or --spent once the block is behind you — and this
-       fixture's Train is a 06:30, so which one it is depends on the
-       hour the suite runs. Asserted as "the accent, or the grey a past
-       row fades to" rather than as one hex for exactly that reason;
-       what it must never be is --dim, which is what it was.
+    ok('...as a tag before the state, not after it', row.order === true, row);
+    /* ── AND IN THE WORKOUT'S OWN COLOUR ──
+       It was the accent, then the ink when the accent went neutral.
+       Which session this was is the purest WHICH there is, so it is
+       what a tag's colour is for — and the tag is a wash under a
+       label, so what is asserted is that neither is a grey: a hue has
+       a spread across its channels and a neutral does not.
 
-       It went from a grey on the argument that a fifth use would stop
-       the red meaning anything. Counting uses was the wrong question:
-       the accent makes one claim on this app — this happened — and
-       what you trained is that sentence. */
-    ok('...in the accent, or the grey a row behind you fades to',
-      [row.accent, row.spent].indexOf(row.colour) >= 0
+       Through a TOKEN per face rather than the card's literal hex. The
+       card is the one surface here that does not follow the theme; a
+       tag does, and read as a 22% wash the card colours came to
+       3.36:1 on the light page. */
+    /* ── BOTH SERIALISATIONS, OR IT MEASURES ITS OWN PARSER ──
+       Chromium returns a resolved color-mix as `color(srgb r g b)`
+       with the channels 0..1 and a plain colour as rgb() with them
+       0..255. Read naively, a green at .34/.73/.58 has a "spread" of
+       0.39 and reports as a grey — which is what this said, about a
+       tag that is plainly green in a screenshot. This file already
+       carries the same lesson twice. */
+    const spread = (c) => {
+      const n = (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+      if (n.length !== 3) return 0;
+      const v = /^color\(/.test(c) ? n.map((x) => x * 255) : n;
+      return Math.max(...v) - Math.min(...v);
+    };
+    ok(`...in the workout's own colour, never a grey (${row.colour})`,
+      row.colour !== null && spread(row.colour) >= 14
+      && spread(row.bg) >= 4
+      && [row.dim, row.spent, row.accent].indexOf(row.colour) < 0, row);
+    ok('...and the old assertion cannot pass by accident',
+      [row.accent, row.spent].indexOf(row.colour) < 0
       && row.colour !== row.dim, row);
 
     /* ── AND MEASURED ON A ROW THAT CANNOT BE BEHIND YOU ──
@@ -6476,7 +6707,7 @@ const SAID = [
       const rgb = (k) => 'rgb(' + cs.getPropertyValue(k).trim().replace('#', '')
         .match(/\w\w/g).map((x) => parseInt(x, 16)).join(', ') + ')';
       const r = document.querySelector('.week:not(.is-today) .row[data-id]');
-      const em = r && r.querySelector('.n em.wo');
+      const em = r && r.querySelector('.props .wo');
       /* The tick is the circle check beside the row now, filled on a
          done block; it is a sibling, so it is found through the wrap. */
       const tk = r && r.parentElement.querySelector('.chk');
@@ -6490,13 +6721,23 @@ const SAID = [
       return { past: r && r.classList.contains('is-past'),
         wo: em && getComputedStyle(em).color,
         size: em && parseFloat(getComputedStyle(em).fontSize),
+        stSize: (() => { const t = r && r.querySelector('.props .st');
+          return t ? parseFloat(getComputedStyle(t).fontSize) : null; })(),
         placeSize: place && parseFloat(getComputedStyle(place).fontSize),
         tick: tk && getComputedStyle(tk).backgroundColor,
         accent: rgb('--red'), ink: rgb('--ink'), dim: rgb('--dim') };
     });
-    ok('what you trained is the accent on a row that is not behind you',
-      ahead.past === false && ahead.wo === ahead.accent
-      && ahead.wo !== ahead.dim, ahead);
+    /* Its own hue rather than the accent, which is the ink now. A tag
+       says WHICH, and which session this was is exactly that. */
+    const spread2 = (c) => {
+      const n = (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+      if (n.length !== 3) return 0;
+      const v = /^color\(/.test(c) ? n.map((x) => x * 255) : n;
+      return Math.max(...v) - Math.min(...v);
+    };
+    ok('what you trained wears its own colour on a row that is not behind you',
+      ahead.past === false && ahead.wo !== null && spread2(ahead.wo) >= 14
+      && ahead.wo !== ahead.dim && ahead.wo !== ahead.accent, ahead);
     /* THE TICK IS THE SAME MARK, and the claim survives the accent
        going neutral — a done block and a kept day on the tally are one
        record seen from two screens, so they are one colour. What can no
@@ -6505,14 +6746,15 @@ const SAID = [
        not the dim, which is the mistake that would actually be made. */
     ok('...and so is the tick on a block the tally has counted',
       ahead.tick === ahead.accent && ahead.tick !== ahead.dim, ahead);
-    /* ── AND IT IS SMALLER THAN THE PLACE IT SHARES A LINE WITH ──
-       A place is where you have to be; a session is a note about what
-       already happened. At one size the two read as one label broken in
-       half. Asserted as a RELATIONSHIP rather than a pixel count, so a
-       change to the type scale moves both and this still means what it
-       says. */
-    ok(`what you trained is a step smaller than a place (${ahead.size} against ${ahead.placeSize})`,
-      ahead.size > 0 && ahead.placeSize > 0 && ahead.size < ahead.placeSize, ahead);
+    /* ── AND IT IS THE STATE TAG'S SIZE, NOT THE NAME'S ──
+       It used to be a note beside the name and a step down from it.
+       It is a tag in the properties now, so what it has to match is
+       the tag it sits beside — asked of the state tag rather than
+       written as a number, so the two move together or this fails. */
+    ok(`what you trained is the state tag's own size (${ahead.size} against ${ahead.stSize})`,
+      ahead.size > 0 && ahead.stSize > 0 && ahead.size === ahead.stSize, ahead);
+    ok('...and both are smaller than the row\u2019s name',
+      ahead.size < ahead.placeSize, ahead);
 
     /* PUT BACK WHAT THE FORTNIGHT WROTE. The section below unticks
        today's Train and requires the whole train key to empty, which
@@ -7007,6 +7249,8 @@ const SAID = [
           JSON.stringify({ on: false, url: '', code: '' }));
         localStorage.setItem('sched.tour.v1', '1');
         localStorage.setItem('sched.hint2.v1', '1');
+        localStorage.setItem('sched.hintw.v1', '1');
+      localStorage.setItem('sched.hintw.v1', '1');
       /* AND THE GESTURE CARD, for the intro's own reason: it comes up
          over Showing up on a first visit, dims the whole app behind it
          and takes every press. Left unset, half this file would be
@@ -7014,6 +7258,7 @@ const SAID = [
          rather than a tile. The section that is about it clears the
          key and reloads. */
       localStorage.setItem('sched.hint2.v1', '1');
+      localStorage.setItem('sched.hintw.v1', '1');
       }, spec);
       await ppage.reload({ waitUntil: 'networkidle' });
       await ppage.waitForTimeout(320);
@@ -7920,6 +8165,7 @@ const SAID = [
          rather than a tile. The section that is about it clears the
          key and reloads. */
       localStorage.setItem('sched.hint2.v1', '1');
+      localStorage.setItem('sched.hintw.v1', '1');
       localStorage.setItem('sched.view.v1', 'list');
       localStorage.setItem('sched.net.v1',
         JSON.stringify({ on: false, url: '', code: '' }));
@@ -8162,6 +8408,8 @@ const SAID = [
       if (!localStorage.getItem('sched.tour.v1')) {
         localStorage.setItem('sched.tour.v1', '1');
         localStorage.setItem('sched.hint2.v1', '1');
+        localStorage.setItem('sched.hintw.v1', '1');
+      localStorage.setItem('sched.hintw.v1', '1');
       /* AND THE GESTURE CARD, for the intro's own reason: it comes up
          over Showing up on a first visit, dims the whole app behind it
          and takes every press. Left unset, half this file would be
@@ -8169,6 +8417,7 @@ const SAID = [
          rather than a tile. The section that is about it clears the
          key and reloads. */
       localStorage.setItem('sched.hint2.v1', '1');
+      localStorage.setItem('sched.hintw.v1', '1');
       }
     }, [WEEK, `${BASE}/schedule/nofriends`]);
     await lpage.route(`${BASE}/schedule/nofriends/**`, (route) => route.fulfill({
@@ -8411,6 +8660,7 @@ const SAID = [
       }
       if (!localStorage.getItem('sched.tour.v1')) localStorage.setItem('sched.tour.v1', '1');
       if (!localStorage.getItem('sched.hint2.v1')) localStorage.setItem('sched.hint2.v1', '1');
+      if (!localStorage.getItem('sched.hintw.v1')) localStorage.setItem('sched.hintw.v1', '1');
     }, [WEEK, `${BASE}/schedule/nofriends`]);
     await opage.route(`${BASE}/schedule/nofriends/**`, (route) => route.fulfill({
       status: 200, contentType: 'application/json', body: '{"ok":true}' }));
