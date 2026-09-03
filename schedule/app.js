@@ -5951,7 +5951,12 @@
           out.push({
             t: String(r.collectionName),
             a: r.artistName ? String(r.artistName) : '',
-            c: String(r.artworkUrl600 || r.artworkUrl100 || '')
+            c: String(r.artworkUrl600 || r.artworkUrl100 || ''),
+            /* The show's own id, carried so the episodes can be asked
+               for. It is a NUMBER and it never becomes part of the
+               record — it exists between choosing a show and choosing
+               an episode, and nothing else reads it. */
+            id: /^\d{1,12}$/.test(String(r.collectionId || '')) ? String(r.collectionId) : ''
           });
         }
         return out;
@@ -5998,6 +6003,66 @@
       cb(mine, 'off', []);
     });
     return mine;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     WHICH EPISODE
+
+     The search names a SHOW. Which episode is in the show's RSS feed,
+     and a feed is XML served by whoever hosts the podcast, almost
+     never with a CORS header — so a browser cannot read it. This is
+     the one thing in the app that has to go through the worker, and
+     the worker is careful about it for reasons written up there.
+
+     What goes out is a NUMERIC ID and nothing else: not the day, not
+     the tick, not the note, not your code. The worker does not know
+     who asked, because there is nothing in the request that says.
+
+     ── AND IT IS AN ENRICHMENT, NEVER A REQUIREMENT ──
+     The show is already a complete answer. If this is slow, refused,
+     or the feed is unreadable, the sheet still has a podcast picked
+     and Log still files it. That is the covers' rule one level down,
+     and it is why the failure path says what still works rather than
+     that something broke. */
+  var mindEpSeq = 0;
+  function scMindEps(id, cb) {
+    var mine = ++mindEpSeq;
+    if (!/^\d{1,12}$/.test(String(id || ''))) { cb(mine, 'off', null); return mine; }
+    /* The server you are ON if you have joined one, and the build's
+       own otherwise. A feed lookup is not personal, but there is no
+       reason to talk to a second machine when you are already talking
+       to one. */
+    var base = (net && net.url) || HOME;
+    var done = false;
+    var bail = setTimeout(function () {
+      if (done) return;
+      done = true;
+      cb(mine, 'slow', null);
+    }, 12000);
+    fetch(base + '/v1/pod/' + id).then(function (r) {
+      if (!r.ok) throw new Error(String(r.status));
+      return r.json();
+    }).then(function (j) {
+      if (done) return;
+      done = true;
+      clearTimeout(bail);
+      cb(mine, null, j && Array.isArray(j.items) ? j : null);
+    }).catch(function () {
+      if (done) return;
+      done = true;
+      clearTimeout(bail);
+      cb(mine, 'off', null);
+    });
+    return mine;
+  }
+
+  /* "1 h 2 m", "45 m", and nothing at all where the feed did not say.
+     A duration nobody published is not zero minutes. */
+  function scMindDur(n) {
+    var m = Math.round((+n || 0) / 60);
+    if (!m) return '';
+    return m >= 60 ? Math.floor(m / 60) + ' h' + (m % 60 ? ' ' + (m % 60) + ' m' : '')
+                   : m + ' m';
   }
 
   /* ── A COVER THE APP DRAWS ITSELF ──
@@ -6078,6 +6143,17 @@
        a book and losing the words is the form throwing your work away
        for a press you meant. */
     var pick = rec && rec.t ? { t: rec.t, a: rec.a, c: rec.c } : null;
+    /* ── THE SHOW, WHILE YOU ARE CHOOSING AN EPISODE ──
+       A second level, and the deck's own rule for one: `pick` is the
+       ANSWER and `show` is where you are. They are separate because
+       Change has to mean "a different episode of this show" rather
+       than "start the search again" — with one variable it can only
+       mean the second, and re-picking an episode would cost a fresh
+       search every time. */
+    var show = null;
+    var eps = [];
+    var epState = '';    /* '', 'go', 'off', 'slow', 'none' */
+    var epWant = 0;
     var note = rec ? rec.b : '';
     var mins = rec ? rec.m : 0;
     var saidMin = !!mins;
@@ -6138,6 +6214,19 @@
         }, 400);
       }
 
+      function openShow(h) {
+        show = h;
+        eps = [];
+        epState = 'go';
+        draw();
+        epWant = scMindEps(h.id, function (seq, err, out) {
+          if (seq < epWant) return;
+          eps = out && out.items ? out.items : [];
+          epState = err ? err : (eps.length ? '' : 'none');
+          draw();
+        });
+      }
+
       /* Only the two things a keystroke can change. The field is not
          in here, which is the whole point. */
       function paint() {
@@ -6190,6 +6279,11 @@
             b.appendChild(ht);
             b.setAttribute('aria-label', h.t + (h.a ? ', ' + h.a : ''));
             b.addEventListener('click', function () {
+              /* A book is chosen and done. A SHOW is a place you have
+                 arrived at: the thing you actually did is one episode
+                 of it, so choosing one opens the second level rather
+                 than answering the question. */
+              if (cur === 'pod' && h.id) { openShow(h); return; }
               pick = { t: h.t, a: h.a, c: h.c };
               draw();
             });
@@ -6219,6 +6313,7 @@
             if (cur === x.k) return;
             cur = x.k;
             hits = []; state = ''; want = 0;
+            show = null; eps = []; epState = ''; epWant = 0;
             if (timer) clearTimeout(timer);
             draw();
           });
@@ -6239,9 +6334,99 @@
             if (pick.a) pt.appendChild(scEl('span', null, pick.a));
             got.appendChild(pt);
             got.appendChild(scBtn('off', 'Change', function () {
+              /* Back to the episode list where there is one, and to
+                 the search otherwise. Clearing the show as well would
+                 make "a different episode of this" cost a fresh
+                 search, which is the level you were already past. */
               pick = null; draw();
             }));
             body.appendChild(got);
+          } else if (show) {
+            /* ── THE SHOW YOU ARE IN, AND A WAY BACK OUT ──
+               A back arrow rather than the words "all shows": a back
+               control is the one thing on a screen that never needs
+               naming, which is the workout deck's own conclusion
+               after it shipped an underlined sentence beside a
+               delete. */
+            var sh = scEl('div', 'mn-pick');
+            var bk = scEl('button', 'wc-back');
+            bk.type = 'button';
+            bk.setAttribute('aria-label', 'All shows');
+            bk.insertAdjacentHTML('beforeend',
+              '<svg viewBox="0 0 24 24" aria-hidden="true">'
+              + '<path d="M15 4.5L7.5 12l7.5 7.5"/></svg>');
+            bk.addEventListener('click', function () {
+              show = null; eps = []; epState = ''; epWant = 0; draw();
+            });
+            sh.appendChild(bk);
+            sh.appendChild(scMindArt(show, 'is-big'));
+            var st2 = scEl('div', 'mn-pt');
+            st2.appendChild(scEl('b', null, show.t));
+            if (show.a) st2.appendChild(scEl('span', null, show.a));
+            sh.appendChild(st2);
+            body.appendChild(sh);
+
+            /* ── THE SHOW IS ALREADY A COMPLETE ANSWER ──
+               Offered above the episodes and whatever the feed did,
+               which is the typed title's rule one level down: the
+               episode list is an enrichment and must never be the
+               thing standing between you and a record. */
+            var justShow = scEl('button', 'mn-hit is-own');
+            justShow.type = 'button';
+            var jt = scEl('span', 'mn-ht2');
+            jt.appendChild(scEl('b', null, 'Just the show'));
+            jt.appendChild(scEl('span', null, 'Without naming an episode'));
+            justShow.appendChild(jt);
+            justShow.addEventListener('click', function () {
+              pick = { t: show.t, a: show.a, c: show.c };
+              draw();
+            });
+            body.appendChild(justShow);
+
+            if (epState === 'go') {
+              body.appendChild(scEl('p', 'mn-say', 'Reading the feed…'));
+            } else if (epState === 'off' || epState === 'slow') {
+              body.appendChild(scEl('p', 'mn-say',
+                'Could not read the episodes — the show still logs.'));
+            } else if (epState === 'none') {
+              body.appendChild(scEl('p', 'mn-say',
+                'No episodes listed — the show still logs.'));
+            }
+            if (eps.length) {
+              body.appendChild(scEl('span', 'label', 'Which episode'));
+              var el = scEl('div', 'mn-res');
+              eps.forEach(function (ep) {
+                var eb = scEl('button', 'mn-hit is-ep');
+                eb.type = 'button';
+                var et = scEl('span', 'mn-ht2');
+                et.appendChild(scEl('b', null, ep.t));
+                /* The date and the length, as the app's own quiet
+                   figures with a dot between — never a chip. A chip
+                   is for something categorical, and both of these are
+                   facts about one episode. */
+                var when = ep.d ? new Date(ep.d) : null;
+                var bits = [];
+                if (when && !isNaN(when)) {
+                  bits.push(when.getDate() + ' ' + MON[when.getMonth()]);
+                }
+                var dur = scMindDur(ep.s);
+                if (dur) bits.push(dur);
+                if (bits.length) et.appendChild(scEl('span', null, bits.join(' \u00b7 ')));
+                eb.appendChild(et);
+                eb.setAttribute('aria-label', ep.t + (dur ? ', ' + dur : ''));
+                eb.addEventListener('click', function () {
+                  /* The EPISODE is what you listened to and the show
+                     is what it belongs to, so they land the way the
+                     record already reads them: `t` is the thing and
+                     `a` is what it is by. The tile then names the
+                     episode, which is the answer to what you did. */
+                  pick = { t: ep.t, a: show.t, c: show.c };
+                  draw();
+                });
+                el.appendChild(eb);
+              });
+              body.appendChild(el);
+            }
           } else {
             body.appendChild(scEl('span', 'label',
               kk.ask === 'book' ? 'Which book' : 'Which show'));

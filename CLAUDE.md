@@ -5489,3 +5489,99 @@ a book the index has no artwork for is still there, below them.
 handler returns early on any request whose origin is not its own, so
 cross-origin calls pass straight through untouched and none of this
 was ever a caching question.
+
+## Which episode, and the first thing that needed the worker
+
+The search names a SHOW. Which EPISODE is in the show's RSS feed, and
+a feed is XML served by whoever hosts the podcast, almost never with a
+CORS header — so a browser cannot read one. That is the whole reason
+this route exists, and it is the only thing in the app besides friends
+that the worker does at all.
+
+**THE CALLER NEVER SUPPLIES A URL, AND THAT IS THE DESIGN.** The
+obvious shape is `/feed?url=…` and it is an open proxy: anything on
+the internet, fetched by your worker, reflected to whoever asked.
+Point it at a metadata address and it is an SSRF; point it at anything
+large and it is somebody else's bandwidth on your account.
+
+So the request is a **numeric id and nothing else**, and the feed
+address comes from Apple's own lookup rather than from the caller.
+That does not make the URL trusted — anyone can submit a podcast whose
+feed points anywhere — so it is still checked: https only, and no
+loopback, private or link-local host. **Two gates, and the first one
+removes the whole class rather than filtering it.**
+
+**And nothing is reflected.** The body is never passed through; what
+comes back is a handful of parsed fields, each truncated. An open
+proxy that can only ever return thirty short strings is not one.
+
+**PARSED BY HAND, AND NOT WITH HTMLRewriter.** That is the idiomatic
+Cloudflare answer and it is exactly the wrong one here: it does not
+exist in Node, and `tests/worker.js` runs the real worker file in
+Node against a Map. Reaching for it would trade every automated check
+on the worker for a nicer parser.
+
+**A SCAN, NOT A REGEX.** `<item>([\s\S]*?)</item>` global is the
+obvious line and it is the one that goes quadratic on a feed with an
+unclosed tag — this is somebody else's file and it is allowed to be
+broken. `indexOf` cannot backtrack. The body is read with a hard
+ceiling rather than by calling `.text()` and hoping, because a feed
+that streams for ever would otherwise hold the request open until the
+platform kills it.
+
+**Cached six hours.** A feed is a file somebody publishes twice a week
+and this is asked for every time you open a show; the second ask
+reaches nothing, which takes the repeat cost off both the worker and
+whoever hosts the podcast.
+
+### Two levels, and `pick` is not `show`
+
+A book is chosen and done. A show is a place you have ARRIVED at — the
+thing you actually did is one episode of it — so choosing one opens a
+second level rather than answering the question.
+
+They are separate variables because **Change has to mean "a different
+episode of this show"** rather than "start the search again". With one
+variable it can only mean the second, and re-picking would cost a
+fresh search every time. The way back out is an ARROW, which is the
+workout deck's own conclusion after it shipped an underlined sentence
+beside a delete.
+
+**THE SHOW IS ALREADY A COMPLETE ANSWER**, offered above the episodes
+and whatever the feed did. That is the typed title's rule one level
+down: the episode list is an enrichment and must never be the thing
+standing between you and a record. A show the search gave no id for is
+picked outright rather than opening a level that could never fill.
+
+**The episode is the thing and the show is what it is by**, so they
+land the way the record already reads: `t` is the thing and `a` is
+what it is by. The tile then names the episode, which is the answer to
+what you did.
+
+**An absent fact is drawn as absent.** An episode the feed gave no
+duration for draws no figure rather than "0 m" — a duration nobody
+published is not zero minutes.
+
+### The assertion that was wrong about its own subject
+
+The SSRF checks included `/v1/pod/1200361736?url=http://169.254.169.254/`
+and required a 404. That is not an attack that fails, it is **a
+parameter that does not exist**: the route reads the path and nothing
+else. Written that way it would have forced the route to start caring
+about query strings in order to reject them — the right assertion is
+that the answer is unchanged and the address in the query is never
+fetched.
+
+**AND A HELPER READ THE WORDS ON THE TILE INSTEAD OF THE RECORD.**
+`openMind` has to untick before it ticks, so it needs to know whether
+the tile is already on — and it asked whether the tile's text matched
+any of "logged", "Frog", "indexed" or "Kept", which is a list of the
+titles the assertions above it happened to log. The moment one filed
+an episode called something else, the helper decided the tile was off,
+pressed once, turned it OFF, and the sheet never opened. Forty
+assertions died on a fixture detail.
+
+That is the same trap as a palette name nothing matches and a workout
+key nothing resolves: **an identifier in a fixture is a reference
+nothing type-checks, and the failure mode is always green until it is
+not.** A tick is a record. Ask the record.

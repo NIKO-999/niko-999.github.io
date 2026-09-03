@@ -8891,7 +8891,11 @@ const SAID = [
       return r.fulfill({ status: 200, contentType: 'application/json',
         body: JSON.stringify({ results: [
           { collectionName: 'The Daily Stoic', artistName: 'Ryan Holiday',
-            artworkUrl600: 'https://covers.openlibrary.org/x.jpg' } ] }) });
+            collectionId: 1200361736,
+            artworkUrl600: 'https://covers.openlibrary.org/x.jpg' },
+          /* one with NO id, which is the case that has to fall back to
+             logging the show itself rather than opening an empty level */
+          { collectionName: 'No Id Here', artistName: 'Nobody' } ] }) });
     });
 
     const mAsked = [];
@@ -8921,8 +8925,20 @@ const SAID = [
     const mindTile = () => mpage.evaluate(() => {
       const c = document.querySelector('.ty-card[data-item="m"]');
       if (!c) throw new Error('no Mind tile on Today');
-      const was = !!c.querySelector('.chk.is-on, .chk[data-on="1"]')
-        || /logged|Frog|indexed|Kept/.test(c.textContent);
+      /* ── READ THE RECORD, NEVER THE WORDS ON THE TILE ──
+         This asked whether the tile's text matched any of "logged",
+         "Frog", "indexed" or "Kept" — a list of the titles the
+         assertions above happened to log. The moment one of them
+         filed an episode called something else the helper decided the
+         tile was off, pressed once, turned it off, and the sheet
+         never opened. An identifier in a fixture is a reference
+         nothing type-checks, and the failure is always green until it
+         is not. The tick is a record; ask the record. */
+      const t = JSON.parse(localStorage.getItem('sched.tick.v1') || '{}');
+      const d = new Date();
+      const k = [d.getFullYear(), String(d.getMonth() + 1).padStart(2, '0'),
+                 String(d.getDate()).padStart(2, '0')].join('-');
+      const was = !!(t[k] && t[k].m);
       c.click();
       return was;
     });
@@ -9146,6 +9162,141 @@ const SAID = [
       offOrigin().every((u) => u.startsWith('https://openlibrary.org/')
         || u.startsWith('https://covers.openlibrary.org/')),
       offOrigin());
+
+    /* ══════════════════════════════════════════════════════
+       WHICH EPISODE
+
+       The search names a SHOW; which episode is in the show's RSS,
+       and a feed is XML from whoever hosts the podcast, almost never
+       with a CORS header. This is the one thing in the app that has
+       to go through the worker. */
+    const pods = [];
+    await mpage.route('**/v1/pod/**', (r) => {
+      pods.push(r.request());
+      return r.fulfill({ status: 200, contentType: 'application/json',
+        body: JSON.stringify({ show: 'The Daily Stoic', art: '', items: [
+          { t: 'The Obstacle Is The Way', d: 'Tue, 02 Sep 2026 06:00:00 GMT', s: 3723 },
+          { t: 'On Anger', d: 'Mon, 01 Sep 2026 06:00:00 GMT', s: 2700 },
+          /* one the feed gave no date or duration for: an absent fact
+             is drawn as absent, never as "0 m" */
+          { t: 'A short one', d: '', s: 0 } ] }) });
+    });
+
+    await openMind();
+    await mpage.click('.wc-chip >> nth=1');            /* Podcast */
+    await mpage.waitForTimeout(320);
+    const beforeShow = pods.length;
+    await mpage.click('.sheet input[type=text]');
+    await mpage.type('.sheet input[type=text]', 'daily stoic', { delay: 30 });
+    await mpage.waitForTimeout(1300);
+    ok('searching for a show reaches the worker not at all',
+      pods.length === beforeShow && beforeShow === 0, pods.length);
+
+    await mpage.click('.mn-res .mn-hit >> nth=0');
+    await mpage.waitForTimeout(900);
+
+    /* ── AND WHAT LEAVES IS A NUMBER ──
+       Not the day, not the tick, not the note, not your code, and no
+       Authorization header — the worker cannot tell who asked because
+       nothing in the request says. Checked as the whole URL and the
+       headers rather than just the host: "it went to the worker" is
+       true of a request carrying anything at all. */
+    const asked = pods[0];
+    ok('choosing a show asks the worker for episodes, by numeric id alone',
+      pods.length === 1 && /\/v1\/pod\/1200361736$/.test(asked.url())
+      && !asked.headers().authorization, asked ? asked.url() : null);
+
+    const level = await mpage.evaluate(() => ({
+      eps: [...document.querySelectorAll('.mn-hit.is-ep b')].map((x) => x.textContent),
+      meta: [...document.querySelectorAll('.mn-hit.is-ep .mn-ht2 span')]
+        .map((x) => x.textContent),
+      just: document.querySelectorAll('.mn-hit.is-own').length,
+      back: document.querySelectorAll('.mn-pick .wc-back').length,
+      field: document.querySelectorAll('.sheet input[type=text]').length,
+    }));
+    ok('the episodes are drawn, with a way back and the show still loggable',
+      level.eps.length === 3 && level.eps[0] === 'The Obstacle Is The Way'
+      && level.just === 1 && level.back === 1 && level.field === 0, level);
+    /* "1:02:03" is an hour and two minutes, and an episode the feed
+       gave no duration for draws no figure rather than "0 m". */
+    ok('...and a duration is read, while an absent one is simply absent',
+      level.meta.length === 2 && /1 h 2 m/.test(level.meta[0])
+      && /45 m/.test(level.meta[1]), level.meta);
+
+    /* ── THE BACK ARROW IS A LEVEL, NOT A CLOSE ── */
+    await mpage.click('.mn-pick .wc-back');
+    await mpage.waitForTimeout(320);
+    ok('the way back returns to the shows rather than closing the sheet',
+      await mpage.evaluate(() =>
+        document.querySelectorAll('.sheet input[type=text]').length === 1
+        && document.querySelectorAll('.mn-hit.is-ep').length === 0
+        && !document.getElementById('scSheet').hidden));
+
+    /* ── AN EPISODE IS THE THING, THE SHOW IS WHAT IT IS BY ── */
+    await mpage.click('.mn-res .mn-hit >> nth=0');
+    await mpage.waitForTimeout(800);
+    await mpage.click('.mn-hit.is-ep >> nth=0');
+    await mpage.waitForTimeout(360);
+    ok('the foot names the episode, not the show',
+      (await mpage.$eval('.sheet .btn.go', (b) => b.textContent))
+        === 'Log The Obstacle Is The Way');
+    await mpage.click('.sheet .btn.go');
+    await mpage.waitForTimeout(620);
+    const ep = await mpage.evaluate(() => {
+      const o = JSON.parse(localStorage.getItem('sched.mind.v1') || '{}');
+      const day = Object.keys(o)[0];
+      const c = document.querySelector('.ty-card[data-item="m"]');
+      return { r: day ? o[day] : null, tile: c ? c.textContent : '' };
+    });
+    ok('the episode is filed as the thing and the show as what it is by',
+      ep.r && ep.r.k === 'pod' && ep.r.t === 'The Obstacle Is The Way'
+      && ep.r.a === 'The Daily Stoic'
+      && /The Obstacle Is The Way/.test(ep.tile), ep);
+
+    /* ── A SHOW WITH NO ID IS STILL AN ANSWER ──
+       The second level needs a numeric id to ask for; without one the
+       show is chosen directly rather than opening a level that could
+       never fill. */
+    await openMind();
+    await mpage.click('.wc-chip >> nth=1');
+    await mpage.waitForTimeout(320);
+    await mpage.click('.sheet input[type=text]');
+    await mpage.type('.sheet input[type=text]', 'daily stoic', { delay: 30 });
+    await mpage.waitForTimeout(1300);
+    await mpage.click('.mn-res .mn-hit >> nth=1');     /* the one with no id */
+    await mpage.waitForTimeout(420);
+    ok('a show the search gave no id for is picked outright',
+      await mpage.evaluate(() =>
+        (document.querySelector('.mn-pick b') || {}).textContent === 'No Id Here'
+        && document.querySelectorAll('.mn-hit.is-ep').length === 0));
+
+    /* ── AND THE FEED FAILING IS NOT A DEAD END ──
+       The show is already a complete answer, so a worker that cannot
+       be reached has to leave you able to log — the covers' rule one
+       level down. */
+    await mpage.unroute('**/v1/pod/**');
+    await mpage.route('**/v1/pod/**', (r) => r.abort());
+    await mpage.click('.mn-pick .btn.off');
+    await mpage.waitForTimeout(320);
+    await mpage.click('.mn-res .mn-hit >> nth=0');
+    await mpage.waitForTimeout(1000);
+    const dead2 = await mpage.evaluate(() => ({
+      say: (document.querySelector('.mn-say') || {}).textContent || '',
+      just: document.querySelectorAll('.mn-hit.is-own').length,
+      eps: document.querySelectorAll('.mn-hit.is-ep').length,
+    }));
+    ok('a feed that cannot be read still leaves the show loggable',
+      dead2.just === 1 && dead2.eps === 0 && /still logs/.test(dead2.say), dead2);
+    await mpage.click('.mn-hit.is-own');
+    await mpage.waitForTimeout(320);
+    await mpage.click('.sheet .btn.go');
+    await mpage.waitForTimeout(620);
+    ok('...and the show files like any other record',
+      await mpage.evaluate(() => {
+        const o = JSON.parse(localStorage.getItem('sched.mind.v1') || '{}');
+        const day = Object.keys(o)[0];
+        return !!day && o[day].t === 'The Daily Stoic' && o[day].k === 'pod';
+      }));
 
     /* ── A STORED KIND THIS BUILD NO LONGER HAS FALLS THROUGH ──
        The key outlives the code that wrote it, which is the rule

@@ -140,6 +140,148 @@ function trim(rec) {
   return rec;
 }
 
+
+/* ══════════════════════════════════════════════════════
+   READING A PODCAST FEED
+
+   Everything below is deliberately dependency-free and runs unchanged
+   in Node, because the suite executes this file there. */
+
+const FEED_BYTES = 1024 * 1024;   /* a feed is text; a megabyte is hundreds of episodes */
+const FEED_MS = 8000;
+const EPISODES = 30;
+
+/* Loopback, private and link-local, by name and by literal. Cloudflare
+   will not route most of these anyway — this is the belt to that
+   braces, and it is cheap. */
+const PRIVATE = /^(localhost$|127\.|10\.|192\.168\.|169\.254\.|::1$|\[::1\]$|172\.(1[6-9]|2\d|3[01])\.|.*\.local$|.*\.internal$)/i;
+
+function feedOk(u) {
+  let x;
+  try { x = new URL(u); } catch (e) { return null; }
+  if (x.protocol !== 'https:') return null;
+  if (PRIVATE.test(x.hostname)) return null;
+  return x.toString();
+}
+
+/* Read a body with a hard ceiling rather than calling .text() and
+   hoping. A feed that streams for ever would otherwise hold a request
+   open until the platform kills it. */
+async function readCapped(res, cap) {
+  if (!res.body || !res.body.getReader) {
+    const t = await res.text();
+    return t.slice(0, cap);
+  }
+  const reader = res.body.getReader();
+  const parts = [];
+  let n = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    n += value.length;
+    parts.push(value);
+    if (n >= cap) { try { await reader.cancel(); } catch (e) {} break; }
+  }
+  let all = new Uint8Array(n);
+  let at = 0;
+  for (const part of parts) { all.set(part, at); at += part.length; }
+  return new TextDecoder('utf-8', { fatal: false }).decode(all.slice(0, cap));
+}
+
+function withTimeout(u, ms) {
+  const c = new AbortController();
+  const t = setTimeout(() => c.abort(), ms);
+  return fetch(u, { signal: c.signal, headers: { 'User-Agent': 'schedule/1.0' } })
+    .finally(() => clearTimeout(t));
+}
+
+/* The few entities a feed title actually contains, and CDATA. Not a
+   general XML unescaper: this text is put in a JSON string and then
+   into textContent by the client, so it is never parsed as markup
+   anywhere and the only job here is that it READS correctly. */
+function unxml(t) {
+  return String(t || '')
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&apos;/g, "'")
+    .replace(/&#(\d+);/g, (m, d) => String.fromCharCode(+d))
+    .replace(/&amp;/g, '&')
+    .replace(/<[^>]*>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function tagOf(block, name) {
+  const open = block.indexOf('<' + name);
+  if (open < 0) return '';
+  const gt = block.indexOf('>', open);
+  if (gt < 0) return '';
+  const close = block.indexOf('</' + name, gt);
+  if (close < 0) return '';
+  return unxml(block.slice(gt + 1, close));
+}
+
+/* "3723", "1:02:03" and "45:00" are all in the wild. */
+function secs(t) {
+  const v = String(t || '').trim();
+  if (!v) return 0;
+  if (/^\d+$/.test(v)) return Math.min(+v, 86400);
+  const bits = v.split(':').map((x) => +x);
+  if (bits.some((x) => !isFinite(x))) return 0;
+  let n = 0;
+  for (const b of bits) n = n * 60 + b;
+  return Math.min(n, 86400);
+}
+
+/* A SCAN, not a regex over the whole document. `<item>([\s\S]*?)</item>`
+   global is the obvious line and it is the one that goes quadratic on
+   a malformed feed with an unclosed tag — this is somebody else's file
+   and it is allowed to be broken. indexOf cannot backtrack. */
+async function episodes(id) {
+  let look;
+  try {
+    look = await withTimeout(
+      'https://itunes.apple.com/lookup?entity=podcast&id=' + encodeURIComponent(id),
+      FEED_MS);
+  } catch (e) { return null; }
+  if (!look.ok) return null;
+  const meta = await look.json().catch(() => null);
+  const show = meta && meta.results && meta.results[0];
+  if (!show) return null;
+
+  const feed = feedOk(show.feedUrl || '');
+  const head = {
+    show: String(show.collectionName || '').slice(0, 200),
+    art: String(show.artworkUrl600 || show.artworkUrl100 || '').slice(0, 400),
+    items: [],
+  };
+  if (!feed) return head;      /* the show is still an answer */
+
+  let res;
+  try { res = await withTimeout(feed, FEED_MS); } catch (e) { return head; }
+  if (!res.ok) return head;
+  let xml;
+  try { xml = await readCapped(res, FEED_BYTES); } catch (e) { return head; }
+
+  let at = 0;
+  while (head.items.length < EPISODES) {
+    const open = xml.indexOf('<item', at);
+    if (open < 0) break;
+    let close = xml.indexOf('</item>', open);
+    if (close < 0) close = xml.length;       /* truncated by the cap */
+    const block = xml.slice(open, close);
+    at = close + 7;
+    const t = tagOf(block, 'title');
+    if (!t) continue;
+    head.items.push({
+      t: t.slice(0, 200),
+      d: tagOf(block, 'pubDate').slice(0, 40),
+      s: secs(tagOf(block, 'itunes:duration') || tagOf(block, 'duration')),
+    });
+  }
+  return head;
+}
+
 export default {
   async fetch(req, env) {
     if (req.method === 'OPTIONS') return new Response(null, { headers: cors(req) });
@@ -236,6 +378,61 @@ export default {
         headers: { 'Content-Type': 'image/jpeg',
                    'Cache-Control': 'public, max-age=86400', ...cors(req) },
       });
+    }
+
+    /* ══════════════════════════════════════════════════════
+       EPISODES
+
+       The one route here that is not about a person. The app can
+       already name a podcast SHOW — the iTunes search gives that
+       straight to the client — but which EPISODE is in the show's RSS
+       feed, and a feed is XML served by whoever hosts the podcast,
+       almost never with a CORS header. A browser cannot read it. That
+       is the whole reason this endpoint exists.
+
+       ── THE CALLER NEVER SUPPLIES A URL, AND THAT IS THE DESIGN ──
+       The obvious shape is `/feed?url=…`, and it is an open proxy:
+       anything on the internet, fetched by this worker, reflected to
+       whoever asked. Point it at a metadata address or an internal
+       host and it is an SSRF; point it at anything large and it is
+       somebody else's bandwidth bill on your account.
+
+       So the caller sends a NUMERIC ID and nothing else. The feed
+       address comes from Apple's own lookup, not from the request.
+       That does not make the URL trusted — anyone can submit a
+       podcast with a feed pointing anywhere — so it is still checked:
+       https only, and no loopback, private or link-local host. Two
+       gates, and the first one removes the whole class.
+
+       ── AND NOTHING IS REFLECTED ──
+       The body is never passed through. What comes back is a handful
+       of parsed fields, each truncated, so this cannot be used to
+       fetch arbitrary content and read it back out. An open proxy
+       that only ever returns thirty short strings is not one.
+
+       ── PARSED BY HAND, AND NOT WITH HTMLRewriter ──
+       HTMLRewriter is the idiomatic Cloudflare answer and it is
+       exactly the wrong one here: it does not exist in Node, and
+       `tests/worker.js` runs THIS FILE in Node against a Map. Reaching
+       for it would trade every automated check on the worker for a
+       nicer parser. A bounded scan works identically in both. */
+    const pod = p.match(/^\/v1\/pod\/(\d{1,12})$/);
+    if (pod && req.method === 'GET') {
+      const id = pod[1];
+
+      /* A feed is a file somebody publishes a few times a week and
+         this app asks for it every time you open a show. Cached for
+         six hours, which is far inside "the newest episode is there"
+         and takes the repeat cost off both this worker and whoever
+         hosts the podcast. */
+      const ck = 'pod:' + id;
+      const hit = await env.SCHED.get(ck);
+      if (hit) return json(req, JSON.parse(hit));
+
+      const out = await episodes(id);
+      if (!out) return json(req, { error: 'no such show' }, 404);
+      await env.SCHED.put(ck, JSON.stringify(out), { expirationTtl: 21600 });
+      return json(req, out);
     }
 
     /* ── leaving ──

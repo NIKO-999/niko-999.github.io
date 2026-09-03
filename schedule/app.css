@@ -4862,3 +4862,13 @@ body {
   grid-template-columns: repeat(4, 1fr);
 }
 .mn-mins .wc-min { flex: none; padding: 0 4px; }
+
+/* An episode row has no artwork of its own — feeds almost never carry
+   one per item, and thirty copies of the show's cover down a list is
+   the same picture thirty times. The words are what tell them apart. */
+.mn-hit.is-ep { padding-left: 10px; }
+.mn-hit.is-ep .mn-ht2 b { white-space: normal; }
+/* The back arrow sits with the show it leaves, not on a line of its
+   own: a control that needs a row to itself reads as a second thing
+   to decide. */
+.mn-pick .wc-back { flex: none; margin-left: -4px; }
