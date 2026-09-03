@@ -2847,7 +2847,7 @@
     h.id = 'scHintTitle';
     tx.appendChild(h);
     tx.appendChild(scEl('p', null,
-      'Double tap a tile to open its heat map.'));
+      'Double tap a tile to open its stats.'));
     box.appendChild(tx);
 
     var row = scEl('div', 'gh-row');

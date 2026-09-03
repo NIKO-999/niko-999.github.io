@@ -4647,9 +4647,18 @@ is written beside the code that needs it.
 was a note at the foot of the grid, which put a thing ABOUT the screen
 into the screen: one more object under six tiles, competing with what
 it described, and still there on the second visit as furniture. It is
-the intro's shape now — a surface over the app, one card rising from
-the foot, two ways out — which is also what makes it obviously
-temporary.
+the intro's shape now — a surface over the app, one card, two ways out
+— which is also what makes it obviously temporary.
+
+**IN THE MIDDLE, NOT AT THE FOOT.** It was bottom-anchored first,
+which is this app's idiom for a SHEET: something you pulled up, with
+the page continuing behind it. This is not that. It arrived on its own
+and it is asking for a moment, and the middle is where a thing that
+interrupts you belongs — which also took it off the tab bar, where it
+had been showing a control through a surface that had just disabled
+it. The entrance went with the position: 16px of rise is a sheet
+coming from somewhere, and a centred card has nowhere to come from, so
+what is left is the scale.
 
 **Three exits, and the third is the best one.** "Got it" is for this
 visit, "Don't show again" is final, and USING THE GESTURE retires it:

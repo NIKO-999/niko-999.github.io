@@ -951,15 +951,16 @@ body {
   inset: 0;
   z-index: 68;
   display: flex;
-  align-items: flex-end;
+  /* ── THE MIDDLE, NOT THE FOOT ──
+     It went in bottom-anchored, which is this app's idiom for a SHEET
+     — something you pulled up, that the page continues behind. This is
+     not that: it is an interruption that arrived on its own, and the
+     middle is where a thing that interrupts you belongs. It also
+     stopped the card sitting on the tab bar, which was showing a
+     control through a surface that had just disabled it. */
+  align-items: center;
   justify-content: center;
-  /* Clear of the bar. At 20px the card sat ON the tab pill and the add
-     button drew through underneath it — the bar is behind a scrim and
-     unpressable, so what was left was a control showing through a
-     surface that had disabled it. The bar's own box is about 76px plus
-     its margin, so the card stops above it and the screen reads as one
-     thing in front of another rather than two overlapping. */
-  padding: 20px 16px calc(106px + env(safe-area-inset-bottom));
+  padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
   /* A wash rather than a blur: this comes up over six tiles the card
      is ABOUT, and they should still be legible behind it — the point
      of the card is the thing underneath. */
@@ -969,12 +970,14 @@ body {
 .gh:focus { outline: none; }
 @keyframes gh-in { from { opacity: 0; } to { opacity: 1; } }
 
-/* ── IT RISES ──
-   From the foot, which is where a thumb is and where every sheet in
-   this app comes from. Short, because it is an interruption and a slow
-   one reads as a thing you have to wait for. */
+/* ── IT ARRIVES RATHER THAN RISING ──
+   The travel was 16px from the foot, which is a sheet's entrance and
+   reads as something you pulled up. Centred, the same movement has
+   nothing to come from, so what is left is the scale: the card comes
+   forward. Short, because it is an interruption and a slow one reads
+   as a thing you have to wait for. */
 @keyframes gh-up {
-  from { transform: translateY(16px) scale(.97); opacity: 0; }
+  from { transform: translateY(6px) scale(.94); opacity: 0; }
   to   { transform: translateY(0) scale(1); opacity: 1; }
 }
 .gh-card {
