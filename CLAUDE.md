@@ -4622,12 +4622,62 @@ take it out of the accessibility tree and leave twenty-six weeks of
 record behind one gesture. It comes back on focus, because somebody who
 has tabbed to it has to see where they are.
 
+### It is a double tap now, and a card teaches it
+
+The hold worked and was invisible. **Nothing on a tile can say "hold
+me"**, and the moment a gesture needs teaching, the thing that teaches
+it could as easily teach either one — so the gesture became the one
+people already try.
+
+**THE FIRST TAP IS DEFERRED, and that is the cost, said out loud.** A
+second press cannot be recognised without waiting for it, so logging
+lands 260ms after your finger leaves rather than on the frame. The
+alternative was to act immediately and undo on the second tap, which
+is worse in exactly the case that matters: four of the six items open
+a sheet asking for a number, and the second tap of a double would land
+on that sheet rather than on the tile.
+
+**`touch-action: manipulation` is not optional.** This page sets no
+maximum-scale, so a double tap is a ZOOM gesture on iOS by default —
+the app would answer the second tap of its own gesture by magnifying
+the screen. Nothing here reproduces it, which is the whole reason it
+is written beside the code that needs it.
+
+**The card comes UP rather than lying in the page.** The first version
+was a note at the foot of the grid, which put a thing ABOUT the screen
+into the screen: one more object under six tiles, competing with what
+it described, and still there on the second visit as furniture. It is
+the intro's shape now — a surface over the app, one card rising from
+the foot, two ways out — which is also what makes it obviously
+temporary.
+
+**Three exits, and the third is the best one.** "Got it" is for this
+visit, "Don't show again" is final, and USING THE GESTURE retires it:
+somebody who has just opened a record by double tapping has learned it
+more thoroughly than any button press could say. That is not the
+hidden third state the intro refuses — what it refuses is a way out
+that quietly means "ask me tomorrow" while nothing on screen says so.
+
+**AND EVERY OTHER SECTION OF THE SUITE HAS TO MARK IT SEEN**, which is
+the intro's rule arriving a second time and for a sharper reason: this
+card dims the whole app behind it, so a context that has not seeded the
+key is measuring every pixel through a 62% wash and clicking a surface
+rather than a tile. It cost a run of `no summary` and a workout glyph
+reading 2.14:1 on a card nothing had touched.
+
+**`.gh`, not `.hint` — and the class collision was mine.** There were
+already ten `<p class="hint">` in this app, and a full-screen fixed
+rule dropped on that name turned every one of them into an overlay
+that swallowed the clicks meant for the sheet behind it. The rule about
+grepping a name before taking it is the oldest one in this file and it
+still has to be followed on the day you are busy.
+
 ### The gesture is one function now
 
 `scHold` — 550ms with a 10px move guard, and both numbers are tuned
-rather than picked. Two screens hold a press now, so writing it twice
-would be two numbers to keep in step and the one that drifts is on
-whichever screen nobody was looking at.
+rather than picked. **The week still holds it**; Showing up went to a
+double tap, and the helper stayed because one screen using a mechanism
+is not a reason to inline it again.
 
 **The click that ends the gesture is swallowed by an explicit flag**,
 never by inferring from the timer: `held` is null after an ordinary tap

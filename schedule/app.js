@@ -783,6 +783,46 @@
     };
   }
 
+  /* ── A DOUBLE TAP, AND WHY THE FIRST ONE HAS TO WAIT ──
+     One control, two meanings: a tap logs a tile and two open its
+     record. It replaced a long press, which worked and was invisible —
+     nothing on a tile could say "hold me", and the hint that teaches
+     this one could as easily have taught that.
+
+     THE FIRST TAP IS DEFERRED, and that is the cost, said out loud. A
+     second press cannot be recognised without waiting for it, so
+     logging lands 260ms after your finger leaves rather than on the
+     frame. The alternative was to act immediately and undo on the
+     second tap, which is worse in exactly the case that matters: four
+     of the six items open a sheet asking for a number, and the second
+     tap of a double would land on that sheet rather than on the tile.
+
+     260ms rather than the 300 a platform usually allows: it is the
+     shortest window that caught every deliberate double tap in
+     testing, and every millisecond of it is paid on the common action
+     to buy the rare one.
+
+     `touch-action: manipulation` on the element is not optional. This
+     page sets no maximum-scale, so a double tap is a ZOOM gesture on
+     iOS by default — the app would answer the second tap by magnifying
+     the screen. Nothing here reproduces it, which is the whole reason
+     it is written down beside the code that needs it. */
+  function scDoubleTap(el, onSingle, onDouble) {
+    var wait = null;
+    el.addEventListener('click', function () {
+      if (wait) {
+        clearTimeout(wait);
+        wait = null;
+        onDouble();
+        return;
+      }
+      wait = setTimeout(function () {
+        wait = null;
+        onSingle();
+      }, 260);
+    });
+  }
+
   /* ═══════════════════════════════════════════════════════════
      WHAT KIND OF THING A BLOCK IS
 
@@ -2684,16 +2724,11 @@
         + (on ? 'logged' : 'not yet')
         + (on && it.k === 'num' ? ', ' + got[it.id] + (it.unit || '') : '')
         + (late ? ', missed its window' : ''));
-      var heldCard = scHold(c, function () {
-        /* Haptic where there is one: a hold that opens a sheet a frame
-           later, with nothing in between, is indistinguishable from a
-           press that did not register. */
-        if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+      scDoubleTap(c, function () { scTallyTap(it, day); }, function () {
+        /* Using the gesture is the best possible sign that it has been
+           learned, so the card that teaches it stops appearing. */
+        scHintSaw();
         scOpenHist(it);
-      });
-      c.addEventListener('click', function () {
-        if (heldCard()) return;
-        scTallyTap(it, day);
       });
       row.appendChild(c);
       /* ── AND THE HOLD IS NEVER THE ONLY WAY IN ──
@@ -2716,6 +2751,125 @@
     $('scTallyFoot').textContent = st
       ? 'Longest streak ' + best + (best === 1 ? ' day.' : ' days.')
       : 'Log one thing and the run starts.';
+  }
+
+  /* ══════════════════════════════════════════════════════
+     THE CARD THAT TEACHES THE GESTURE
+
+     A double tap is invisible. Nothing on a tile can say "press me
+     twice", and a gesture nobody is told about is a feature that does
+     not exist — which is the argument the intro's own cards are built
+     on: a card is earned by something you could NOT find by pressing
+     around.
+
+     So it is the intro's shape at a smaller size, on the one screen it
+     is about rather than in a queue of four you sit through before you
+     have seen the app. It draws the gesture rather than describing the
+     position of anything, which is the intro's other lesson: a still
+     picture can only say WHERE, and what nobody guesses here is WHAT
+     HAPPENS.
+
+     ── TWO EXITS AND NEITHER IS HIDDEN ──
+     "Got it" puts it away for now and "Don't show again" is final, and
+     both say which they are. That is not the third state the intro
+     refuses: what it refuses is a way out that quietly means "ask me
+     tomorrow" while nothing on screen says so.
+
+     AND USING THE GESTURE IS THE THIRD EXIT. Somebody who has just
+     opened a record by double tapping has learned it more thoroughly
+     than any button press could say, so scOpenHist marks it seen. A
+     hint that outlives its own lesson is furniture. */
+  var HINT_KEY = 'sched.hint2.v1';
+  var hintShut = false;      /* closed for this visit, not for ever */
+
+  function scHintSeen() {
+    try { return localStorage.getItem(HINT_KEY) === '1'; } catch (e) { return true; }
+  }
+  function scHintSaw() {
+    try { localStorage.setItem(HINT_KEY, '1'); } catch (e) {}
+  }
+
+  var hintBack = null;   /* where the focus was before this took it */
+
+  function scHintClose(forGood) {
+    if (forGood) scHintSaw();
+    hintShut = true;
+    var el = $('scHint');
+    el.hidden = true;
+    el.textContent = '';
+    if (hintBack && hintBack.focus) hintBack.focus();
+    hintBack = null;
+  }
+
+  /* ── IT COMES UP, RATHER THAN LYING IN THE PAGE ──
+     The first version was a card at the foot of the grid, and that put
+     a note ABOUT the screen into the screen: one more object under six
+     tiles, competing with the thing it was describing, and still there
+     on the second visit as furniture. It is the intro's own shape now
+     — a surface over the app, one card on it, two ways out — which is
+     also what makes it obviously temporary.
+
+     Built into a container that lives OUTSIDE the tally section, so
+     leaving the view cannot strand it over another screen; the history
+     veil is next to it for the same reason. */
+  function scHintCard() {
+    var el = $('scHint');
+    if (hintShut || scHintSeen()) { el.hidden = true; el.textContent = ''; return; }
+    hintBack = document.activeElement;
+    el.textContent = '';
+    var box = scEl('div', 'gh-card');
+
+    var ic = scEl('div', 'gh-ic');
+    /* ── THE SCENE IS THE GESTURE ──
+       A tile with two rings going out of it, one after the other, and
+       then again. Transform and opacity only, so it costs no layout
+       pass — and it runs from a partial state TO the element's own
+       resting one, which is what lets reduced motion switch it off and
+       leave a picture rather than a frame with a piece missing. */
+    ic.insertAdjacentHTML('beforeend',
+      '<svg viewBox="0 0 24 24" aria-hidden="true">'
+      /* ── NO SURROUND, AND THAT IS WHAT STOPS IT BEING A CAMERA ──
+         It went in as two rings and a dot inside a rounded rectangle,
+         standing for the tile. Concentric rings around a dot in a
+         rounded box is an APERTURE at any size, and moving the marks
+         off centre only made it a badly centred one. The rectangle was
+         carrying nothing the six tiles directly above it do not
+         already say, so it goes: a dot with two rings leaving it is a
+         ripple, which is the mark this is. */
+      + '<circle class="gh-r1" cx="12" cy="12" r="4.6" opacity=".8"/>'
+      + '<circle class="gh-r2" cx="12" cy="12" r="8.4" opacity=".32"/>'
+      + '<circle cx="12" cy="12" r="2.3" fill="currentColor" stroke="none"/>'
+      + '</svg>');
+    box.appendChild(ic);
+
+    var tx = scEl('div', 'gh-tx');
+    var h = scEl('b', null, 'Two taps');
+    h.id = 'scHintTitle';
+    tx.appendChild(h);
+    tx.appendChild(scEl('p', null,
+      'Double tap a tile to open its heat map.'));
+    box.appendChild(tx);
+
+    var row = scEl('div', 'gh-row');
+    var ok = scEl('button', 'btn go gh-ok', 'Got it');
+    ok.type = 'button';
+    ok.addEventListener('click', function () { scHintClose(false); });
+    row.appendChild(ok);
+    var never = scEl('button', 'gh-never', 'Don\u2019t show again');
+    never.type = 'button';
+    never.addEventListener('click', function () { scHintClose(true); });
+    row.appendChild(never);
+    box.appendChild(row);
+    el.appendChild(box);
+    /* The surface behind the card does what the visible "Got it" does,
+       which is the intro's rule about not inventing a third answer: a
+       way out is allowed to be unlabelled only where something on
+       screen already says what it means. */
+    el.addEventListener('click', function (ev) {
+      if (ev.target === el) scHintClose(false);
+    });
+    el.hidden = false;
+    el.focus();
   }
 
   function scBest() {
@@ -4514,8 +4668,20 @@
   var VIEWS = ['list', 'tally', 'friends'];
 
   function scSetView(v, save) {
+    var from = view;
     view = VIEWS.indexOf(v) >= 0 ? v : 'list';
     var tal = view === 'tally', fr = view === 'friends';
+    /* Coming BACK to Today is a new visit, so a card closed with "Got
+       it" is offered once more. Guarded on the view actually changing:
+       scSetView is called with the view it is already on in a few
+       places, and resetting there would put a card you just dismissed
+       straight back on the screen. */
+    if (tal && from !== 'tally') hintShut = false;
+    /* And the card cannot outlive the screen it is about. It lives
+       outside the tally section — like the history veil, and for the
+       same reason — so hiding that section would leave it up over
+       whatever you switched to. */
+    if (!tal) scHintClose(false);
 
     /* The history sits OUTSIDE the tally section, so hiding the section
        would leave it up over whatever you switched to. */
@@ -6912,6 +7078,12 @@
   var tyStop = 'up';
 
   function scTyStop(v, save) {
+    /* "Got it" is for this VISIT. Arriving at the stop again is a new
+       visit, so the card comes back — until either the gesture is used
+       or it is dismissed for good, which are the two answers that mean
+       it has done its job. */
+    if (v === 'up' && tyStop !== 'up') hintShut = false;
+    else if (v !== 'up') scHintClose(false);
     tyStop = TYSTOPS.indexOf(v) < 0 ? 'up' : v;
     $('scTyPane').hidden = tyStop !== 'up';
     $('scWorkPane').hidden = tyStop !== 'work';
@@ -6923,6 +7095,11 @@
     });
     if (tyStop === 'work') scPaintWork();
     if (tyStop === 'pat') scPaintPat();
+    /* Arriving at the stop is what brings the card up, not painting
+       the screen: a repaint happens on every tick and every half
+       minute, and a card that came back on one of those would be a
+       thing you dismissed reappearing while you were looking at it. */
+    if (tyStop === 'up') scHintCard();
     if (save) { try { localStorage.setItem(TYSTOP_KEY, tyStop); } catch (e) {} }
   }
 

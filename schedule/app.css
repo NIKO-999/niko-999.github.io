@@ -927,6 +927,150 @@ body {
 }
 .ty-row > .chk svg { width: 11px; height: 11px; }
 
+/* ══════════════════════════════════════════════════════
+   THE CARD THAT TEACHES THE GESTURE
+
+   A double tap is invisible: nothing on a tile can say "press me
+   twice". This is the intro's own object at a smaller size — a tile
+   with a scene in it, two or three words, one plain sentence — sitting
+   on the one screen it is about rather than in a queue of four you sit
+   through before you have seen the app.
+
+   It is a CARD, not a scrim: the tiles it names have to stay visible
+   and pressable while it is up, because the way to make it go away for
+   good is to do the thing it describes. */
+/* `[hidden]` HAS TO BE SAID ONCE A THING TAKES A DISPLAY, and this is
+   the sixth time in this file. The rail, the page dots, the toast, the
+   intro and the objectives control each had the attribute set
+   correctly while an author `display` outranked the browser's own
+   rule. Here the failure would be a full-screen surface at z-index 68
+   taking every press on the app behind it, invisibly. */
+.gh[hidden] { display: none; }
+.gh {
+  position: fixed;
+  inset: 0;
+  z-index: 68;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  /* Clear of the bar. At 20px the card sat ON the tab pill and the add
+     button drew through underneath it — the bar is behind a scrim and
+     unpressable, so what was left was a control showing through a
+     surface that had disabled it. The bar's own box is about 76px plus
+     its margin, so the card stops above it and the screen reads as one
+     thing in front of another rather than two overlapping. */
+  padding: 20px 16px calc(106px + env(safe-area-inset-bottom));
+  /* A wash rather than a blur: this comes up over six tiles the card
+     is ABOUT, and they should still be legible behind it — the point
+     of the card is the thing underneath. */
+  background: color-mix(in srgb, var(--paper) 62%, transparent);
+  animation: gh-in .22s ease-out both;
+}
+.gh:focus { outline: none; }
+@keyframes gh-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── IT RISES ──
+   From the foot, which is where a thumb is and where every sheet in
+   this app comes from. Short, because it is an interruption and a slow
+   one reads as a thing you have to wait for. */
+@keyframes gh-up {
+  from { transform: translateY(16px) scale(.97); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+.gh-card {
+  width: 100%;
+  max-width: 420px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 4px 12px;
+  align-items: center;
+  padding: 14px 16px 14px 14px;
+  border-radius: 16px;
+  background: var(--ground);
+  box-shadow: inset 0 1px 0 var(--card-edge), 0 18px 40px -20px rgba(0,0,0,.7);
+  animation: gh-up .26s cubic-bezier(.22, 1, .36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gh, .gh-card { animation: none; }
+}
+.gh-ic {
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+}
+.gh-ic svg {
+  width: 26px; height: 26px;
+  color: var(--ink);
+  fill: none; stroke: var(--ink); stroke-width: 1.6;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.gh-tx b { display: block; font-size: 14px; font-weight: 700; }
+.gh-tx p {
+  margin: 1px 0 0;
+  font-size: 12.5px; line-height: 1.45; color: var(--dim);
+}
+.gh-row {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 10px;
+}
+/* The filled one is the one that puts it away for now; the quiet one
+   is final. Both SAY which they are, which is what keeps this from
+   being the hidden third state the intro refuses. */
+/* ── `.hint .gh-ok`, NOT `.gh-ok`, AND THAT IS THE SIXTH TIME ──
+   `.btn` is defined four hundred lines FURTHER DOWN this file and sets
+   flex, padding and a `font` shorthand. At equal specificity the later
+   rule is the live one, so every declaration here was being thrown
+   away while looking exactly right in the file: the button drew full
+   width at 15px, which is what the screenshot showed.
+
+   NOT flex: 1. Stretched across the card it was the largest filled
+   object on a screen whose subject is the six tiles above it — a note
+   about the app shouting louder than the app. */
+.gh .gh-ok {
+  flex: none;
+  min-height: 38px;
+  padding: 9px 18px;
+  font-size: 13.5px;
+  border-radius: 10px;
+}
+.gh-never {
+  flex: none;
+  min-height: 38px; padding: 8px 10px;
+  border: 0; background: none;
+  font: inherit; font-size: 12.5px; font-weight: 600;
+  color: var(--spent);
+  cursor: pointer;
+}
+.gh-never:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* ── THE RINGS GO OUT TWICE ──
+   Two presses, drawn: the inner ring leaves, then the outer one after
+   it, then the pair again. Both run FROM a partial state TO the
+   element's own resting one, so switching them off leaves a tile with
+   two rings on it rather than a frame with something missing — the
+   intro's rule, and the ambient trickle's before that. */
+@keyframes gh-r1 {
+  0%, 8%   { transform: scale(.35); opacity: 0; }
+  22%, 46% { transform: scale(1); opacity: .8; }
+  60%, 100% { transform: scale(1); opacity: .8; }
+}
+@keyframes gh-r2 {
+  0%, 30%  { transform: scale(.35); opacity: 0; }
+  48%, 74% { transform: scale(1); opacity: .32; }
+  86%, 100% { transform: scale(1); opacity: .32; }
+}
+.gh-r1, .gh-r2 {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+.gh-r1 { animation: gh-r1 2.6s cubic-bezier(.22, 1, .36, 1) infinite; }
+.gh-r2 { animation: gh-r2 2.6s cubic-bezier(.22, 1, .36, 1) infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .gh-ic * { animation: none !important; }
+}
+
 /* ── THE WAY IN A HOLD CANNOT OFFER ──
    A long press reaches neither a keyboard nor a screen reader, so the
    history needs a real control. Off screen rather than `display:
@@ -956,6 +1100,15 @@ body {
   outline: 2px solid var(--ink); outline-offset: 2px;
 }
 .ty-card {
+  /* ── NOT OPTIONAL, AND IT BITES ON NOTHING HERE ──
+     This page sets no maximum-scale, so a double tap is a ZOOM gesture
+     on iOS by default: the app would answer the second tap of its own
+     gesture by magnifying the screen. `manipulation` drops the
+     double-tap-to-zoom delay and the gesture with it, and keeps
+     scrolling and pinch. Chromium on a desktop reproduces none of
+     this, which is why it is written down rather than left to be
+     found on a phone. */
+  touch-action: manipulation;
   display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 6px 8px;
   align-items: center;
   width: 100%;

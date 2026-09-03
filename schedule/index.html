@@ -47,7 +47,7 @@
   } catch (e) {}
 }());
 </script>
-<link rel="stylesheet" href="app.css?v=64b41524" />
+<link rel="stylesheet" href="app.css?v=51491017" />
 </head>
 <body>
 
@@ -222,8 +222,18 @@
 <div class="tour" id="scTour" role="dialog" aria-modal="true"
      aria-labelledby="scTourTitle" tabindex="-1" hidden></div>
 
+<!-- ── the card that teaches the gesture ──
+     A double tap is invisible: nothing on a tile can say "press me
+     twice". This comes UP rather than sitting in the page, the way the
+     intro does, because a note lying in the body under six tiles is
+     one more thing on a screen rather than something that interrupts
+     you once and goes. Empty until scHintCard fills it, and outside
+     the tally section so leaving the view cannot strand it. -->
+<div class="gh" id="scHint" role="dialog" aria-modal="true"
+     aria-labelledby="scHintTitle" tabindex="-1" hidden></div>
+
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=fb324808"></script>
+<script src="app.js?v=207b7d39"></script>
 </body>
 </html>

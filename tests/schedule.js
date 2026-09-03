@@ -203,6 +203,13 @@ const SAID = [
        chasing once already. */
     if (!localStorage.getItem('sched.tour.v1')) {
       localStorage.setItem('sched.tour.v1', '1');
+      /* AND THE GESTURE CARD, for the intro's own reason: it comes up
+         over Showing up on a first visit, dims the whole app behind it
+         and takes every press. Left unset, half this file would be
+         measuring pixels through a 62% wash and clicking a surface
+         rather than a tile. The section that is about it clears the
+         key and reloads. */
+      localStorage.setItem('sched.hint2.v1', '1');
     }
   }, [WEEK, `${BASE}/schedule/nofriends`]);
   /* Answered here rather than left to the static server, and answered
@@ -1763,21 +1770,18 @@ const SAID = [
      turns up. A test that counts presses has to be re-counted every
      time a stop is added, and the one time it is not, it silently
      measures the wrong screen. */
-  /* ── A HOLD ON A SHOWING UP TILE ──
-     The tile is one control now: a tap logs and a hold opens the
-     twenty-six weeks. Driven as real pointer events rather than by
-     calling the function behind it, because the handler is what has to
-     open the panel. 700ms clears the 550 the gesture waits for. */
+  /* ── TWO TAPS ON A SHOWING UP TILE ──
+     The tile is one control: a tap logs and two open the twenty-six
+     weeks. It was a long press, and the reason it is not is that a
+     hold is invisible — nothing on a tile can say "hold me", and the
+     card that had to be built to teach it could teach either gesture.
+
+     Driven through the real handler rather than by calling the
+     function behind it, and the wait afterwards clears the 260ms the
+     first tap is deferred by. */
   const holdCard = async (id) => {
-    const b = await page.$eval(`.ty-card[data-item="${id}"]`, (e) => {
-      const r = e.getBoundingClientRect();
-      return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
-    });
-    await page.mouse.move(b.x, b.y);
-    await page.mouse.down();
-    await page.waitForTimeout(700);
-    await page.mouse.up();
-    await page.waitForTimeout(260);
+    await page.dblclick(`.ty-card[data-item="${id}"]`);
+    await page.waitForTimeout(420);
   };
 
   const show = async (v) => {
@@ -2523,8 +2527,13 @@ const SAID = [
   /* THE CHECK LOGS AND THE CARD OPENS THE RECORD. Both used to log,
      with the strip beside them opening the history; the strip went with
      the tile, so the two remaining controls each took one job. */
-  const stored = await page.evaluate(() => {
+  /* AWAITED, because the first tap of a possible double is deferred:
+     a press does not log on the frame it lands, it logs 260ms later
+     once nothing has followed it. Read synchronously this came back
+     null, on a tap that worked. */
+  const stored = await page.evaluate(async () => {
     document.querySelector('.ty-card[data-item="t"]').click();
+    await new Promise((r) => setTimeout(r, 420));
     return localStorage.getItem('sched.tick.v1');
   });
   /* Ticking Train opens the workout deck over this screen. Nothing
@@ -2835,6 +2844,95 @@ const SAID = [
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(300);
 
+  /* ══════════════════════════════════════════════════════
+     THE CARD THAT TEACHES THE GESTURE
+
+     A double tap is invisible: nothing on a tile can say "press me
+     twice", and a gesture nobody is told about is a feature that does
+     not exist. So there is a card, and it has to be checked for the
+     three things that make it one rather than furniture.
+
+     ── AND USING THE GESTURE IS AN EXIT ──
+     Somebody who has just opened a record by double tapping has
+     learned it more thoroughly than any button press could say. That
+     is asserted where it happens, below, because a hint that outlives
+     its own lesson is exactly the furniture this app keeps removing. */
+  /* ── CLEARED AND RELOADED, BECAUSE EVERY CONTEXT SEEDS IT SEEN ──
+     The card dims the whole app and takes every press, so the init
+     script marks it seen for the same reason it marks the intro seen.
+     This is the one section that wants it, so it is the one section
+     that asks for it back. */
+  await page.evaluate(() => localStorage.removeItem('sched.hint2.v1'));
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(400);
+  await show('tally');
+  await page.waitForTimeout(300);
+
+  const hint = await page.evaluate(() => {
+    /* Measured as a BOX, never as the hidden property. A full-screen
+       surface at z-index 68 whose author `display` outranks the
+       browser's own [hidden] rule takes every press on the app behind
+       it, invisibly — the rail, the dots, the toast and the intro have
+       each been through exactly that. */
+    const s = document.getElementById('scHint');
+    const h = document.querySelector('.gh-card');
+    if (!h || s.hidden) return { up: false };
+    const sr = s.getBoundingClientRect();
+    const r = h.getBoundingClientRect();
+    const anim = [];
+    h.querySelectorAll('.gh-ic svg *').forEach((e) =>
+      e.getAnimations().forEach((a) => anim.push(a.playState)));
+    return {
+      up: sr.width > 300 && sr.height > 300,
+      w: Math.round(r.width),
+      says: /double tap/i.test(h.textContent),
+      /* Two exits and BOTH say which they are. That is not the hidden
+         third state the intro refuses: what it refuses is a way out
+         that quietly means "ask me tomorrow" while nothing says so. */
+      ok: !!h.querySelector('.gh-ok'),
+      never: !!h.querySelector('.gh-never'),
+      anim: anim.length,
+      running: anim.filter((x) => x === 'running').length,
+    };
+  });
+  ok('a card comes UP over Showing up and says the gesture is two taps',
+    hint.up && hint.says && hint.w > 200, hint);
+  ok('...and it moves, because a still picture cannot show a gesture',
+    hint.anim > 0 && hint.running === hint.anim, hint);
+  ok('...and it offers both a close and a never again, each named',
+    hint.ok && hint.never, hint);
+
+  /* ── "GOT IT" IS FOR THIS VISIT AND THE OTHER ONE IS FINAL ──
+     Both halves, because each passes on the other's bug: a build where
+     "Got it" wrote the key would never show it again, and one where
+     "Don't show again" did not write it would show it for ever. */
+  await page.evaluate(() => document.querySelector('.gh-ok').click());
+  await page.waitForTimeout(220);
+  const shutNow = await page.evaluate(() => ({
+    gone: document.getElementById('scHint').hidden
+      && document.getElementById('scHint').getBoundingClientRect().width < 2,
+    key: localStorage.getItem('sched.hint2.v1'),
+  }));
+  ok('“Got it” puts the card away without marking it seen for ever',
+    shutNow.gone && shutNow.key === null, shutNow);
+  /* Leaving the stop and coming back is a new visit, which is what
+     "for now" has to mean if it is to mean anything. */
+  await page.evaluate(() => document.getElementById('scTyPat').click());
+  await page.waitForTimeout(240);
+  await page.evaluate(() => document.getElementById('scTyUp').click());
+  await page.waitForTimeout(280);
+  ok('...and it is back on the next visit',
+    await page.evaluate(() => !!document.querySelector('.gh-card')));
+  /* Put away again, and WAITED for: it is a modal, so everything below
+     presses tiles that are behind it until it has gone. A check that
+     leaves a surface over the screen is a check that breaks the next
+     one, which this file has now paid for twice. */
+  await page.evaluate(() => document.querySelector('.gh-ok').click());
+  await page.waitForFunction(() => document.getElementById('scHint').hidden,
+    null, { timeout: 4000 });
+  await page.waitForTimeout(160);
+
+
   /* ── two targets, and neither inside the other ──
      A <button> inside a <button> is invalid and collapses to one press,
      which would silently make one of them unreachable while looking
@@ -2885,13 +2983,12 @@ const SAID = [
     rows.labels.every((l) => /^(Log|Unlog) /.test(l || ''))
     && rows.pressed.every((p) => p === 'true' || p === 'false'), rows.labels);
 
-  /* ── AND THE HOLD IS NEVER THE ONLY WAY IN ──
-     A long press reaches neither a keyboard nor a screen reader. On
-     the week that is affordable because the tally does the same tick
-     with a plain press; here there is nothing else, so the route has
-     to exist as a real control. Asserted as focusable and NAMED, not
-     merely present: a button with no accessible name is a button a
-     screen reader announces as nothing. */
+  /* ── AND THE GESTURE IS NEVER THE ONLY WAY IN ──
+     A double tap reaches a pointer and nothing else: a keyboard sends
+     one activation per press and a screen reader's own gestures are
+     already taken. So the route has to exist as a real control.
+     Asserted as focusable and NAMED, not merely present: a button with
+     no accessible name is one a screen reader announces as nothing. */
   ok('every tile carries a real history control for a keyboard',
     rows.hist.length === 6
     && rows.hist.every((l) => /26 weeks of history/.test(l || '')), rows.hist);
@@ -2928,6 +3025,33 @@ const SAID = [
   }));
   ok('a tap on a tile logs it and does NOT open the record',
     !tapped.veil && tapped.sheet, { gest, tapped });
+  /* The tap above left a sheet up; it has to be gone before anything
+     else is measured, or the next check reads THAT one. */
+  await page.evaluate(() => document.getElementById('scScrim').click());
+  await page.waitForFunction(() => document.getElementById('scSheet').hidden,
+    null, { timeout: 4000 });
+  await page.waitForTimeout(160);
+
+  /* ── AND THE FIRST TAP WAITS ──
+     A second press cannot be recognised without waiting for it, so a
+     log lands 260ms after the finger leaves rather than on the frame.
+     That is the cost of the gesture and it is asserted, not assumed: a
+     build that acted immediately would open the number sheet on the
+     first tap of a double and the second would land on the sheet. */
+  const deferred = await page.evaluate(async () => {
+    const was = !document.getElementById('scSheet').hidden;
+    document.querySelector('.ty-card[data-item="f"]').click();
+    const at0 = !document.getElementById('scSheet').hidden;
+    await new Promise((r) => setTimeout(r, 420));
+    return { was, at0, after: !document.getElementById('scSheet').hidden };
+  });
+  ok('...and the first tap waits for a possible second',
+    deferred.was === false && deferred.at0 === false
+    && deferred.after === true, deferred);
+  await page.evaluate(() => document.getElementById('scScrim').click());
+  await page.waitForFunction(() => document.getElementById('scSheet').hidden,
+    null, { timeout: 4000 });
+  await page.waitForTimeout(160);
 
   /* ── AND THE SHEET HAS TO BE GONE BEFORE THE NEXT GESTURE ──
      Waited for rather than slept past. Escape left the number sheet up
@@ -2951,8 +3075,16 @@ const SAID = [
   /* AND THE HOLD MUST NOT ALSO DO THE TAP'S JOB. The click that ends
      the gesture is swallowed by an explicit flag; without it the
      finger lifting logs the thing you were only looking at. */
-  ok('a hold opens the record and does NOT log it',
+  ok('two taps open the record and do NOT log it',
     holdRes.veil && holdRes.cells > 100 && !holdRes.sheet, holdRes);
+  /* USING IT IS THE THIRD EXIT, and the best one: the card exists to
+     teach a gesture, and the gesture has just been used. */
+  ok('...and using the gesture retires the card that taught it',
+    await page.evaluate(() => localStorage.getItem('sched.hint2.v1')) === '1');
+  /* Using it wrote the key, so the screen is clear for what follows —
+     but said out loud rather than relied on, because the assertion
+     above is what makes it true and an assertion is not a fixture. */
+  await page.evaluate(() => localStorage.setItem('sched.hint2.v1', '1'));
   await page.evaluate(() => document.getElementById('scTyVeil').click());
   await page.waitForTimeout(240);
 
@@ -4308,6 +4440,14 @@ const SAID = [
          surface on a first visit and this page presses things. */
       if (!localStorage.getItem('sched.tour.v1')) {
         localStorage.setItem('sched.tour.v1', '1');
+        localStorage.setItem('sched.hint2.v1', '1');
+      /* AND THE GESTURE CARD, for the intro's own reason: it comes up
+         over Showing up on a first visit, dims the whole app behind it
+         and takes every press. Left unset, half this file would be
+         measuring pixels through a 62% wash and clicking a surface
+         rather than a tile. The section that is about it clears the
+         key and reloads. */
+      localStorage.setItem('sched.hint2.v1', '1');
       }
       /* Pointed at the worker running in THIS process, not the live one
          the app ships with. Everything below is a real round trip
@@ -5107,6 +5247,14 @@ const SAID = [
          seen the same way every other page here marks it. */
       await gp.addInitScript(() => {
         localStorage.setItem('sched.tour.v1', '1');
+        localStorage.setItem('sched.hint2.v1', '1');
+      /* AND THE GESTURE CARD, for the intro's own reason: it comes up
+         over Showing up on a first visit, dims the whole app behind it
+         and takes every press. Left unset, half this file would be
+         measuring pixels through a 62% wash and clicking a surface
+         rather than a tile. The section that is about it clears the
+         key and reloads. */
+      localStorage.setItem('sched.hint2.v1', '1');
         const F = new Date('2026-09-01T09:30:00').getTime(), R = Date;
         window.Date = class extends R {
           constructor(...a) { super(...(a.length ? a : [F])); }
@@ -5228,6 +5376,13 @@ const SAID = [
       localStorage.setItem('sched.v1', JSON.stringify(w));
       localStorage.setItem('sched.view.v1', 'list');
       localStorage.setItem('sched.tour.v1', '1');
+      /* AND THE GESTURE CARD, for the intro's own reason: it comes up
+         over Showing up on a first visit, dims the whole app behind it
+         and takes every press. Left unset, half this file would be
+         measuring pixels through a 62% wash and clicking a surface
+         rather than a tile. The section that is about it clears the
+         key and reloads. */
+      localStorage.setItem('sched.hint2.v1', '1');
       localStorage.setItem('sched.net.v1', JSON.stringify({
         url: 'about:blank', code: '', key: '', name: '', pic: '', on: false }));
       const R = Date;
@@ -6851,6 +7006,14 @@ const SAID = [
         localStorage.setItem('sched.net.v1',
           JSON.stringify({ on: false, url: '', code: '' }));
         localStorage.setItem('sched.tour.v1', '1');
+        localStorage.setItem('sched.hint2.v1', '1');
+      /* AND THE GESTURE CARD, for the intro's own reason: it comes up
+         over Showing up on a first visit, dims the whole app behind it
+         and takes every press. Left unset, half this file would be
+         measuring pixels through a 62% wash and clicking a surface
+         rather than a tile. The section that is about it clears the
+         key and reloads. */
+      localStorage.setItem('sched.hint2.v1', '1');
       }, spec);
       await ppage.reload({ waitUntil: 'networkidle' });
       await ppage.waitForTimeout(320);
@@ -7750,6 +7913,13 @@ const SAID = [
 
     const heavy = (n) => spage.addInitScript((rows) => {
       localStorage.setItem('sched.tour.v1', '1');
+      /* AND THE GESTURE CARD, for the intro's own reason: it comes up
+         over Showing up on a first visit, dims the whole app behind it
+         and takes every press. Left unset, half this file would be
+         measuring pixels through a 62% wash and clicking a surface
+         rather than a tile. The section that is about it clears the
+         key and reloads. */
+      localStorage.setItem('sched.hint2.v1', '1');
       localStorage.setItem('sched.view.v1', 'list');
       localStorage.setItem('sched.net.v1',
         JSON.stringify({ on: false, url: '', code: '' }));
@@ -7991,6 +8161,14 @@ const SAID = [
       }
       if (!localStorage.getItem('sched.tour.v1')) {
         localStorage.setItem('sched.tour.v1', '1');
+        localStorage.setItem('sched.hint2.v1', '1');
+      /* AND THE GESTURE CARD, for the intro's own reason: it comes up
+         over Showing up on a first visit, dims the whole app behind it
+         and takes every press. Left unset, half this file would be
+         measuring pixels through a 62% wash and clicking a surface
+         rather than a tile. The section that is about it clears the
+         key and reloads. */
+      localStorage.setItem('sched.hint2.v1', '1');
       }
     }, [WEEK, `${BASE}/schedule/nofriends`]);
     await lpage.route(`${BASE}/schedule/nofriends/**`, (route) => route.fulfill({
@@ -8232,6 +8410,7 @@ const SAID = [
           url: nowhere, code: '', key: '', name: '', pic: '', on: false }));
       }
       if (!localStorage.getItem('sched.tour.v1')) localStorage.setItem('sched.tour.v1', '1');
+      if (!localStorage.getItem('sched.hint2.v1')) localStorage.setItem('sched.hint2.v1', '1');
     }, [WEEK, `${BASE}/schedule/nofriends`]);
     await opage.route(`${BASE}/schedule/nofriends/**`, (route) => route.fulfill({
       status: 200, contentType: 'application/json', body: '{"ok":true}' }));
