@@ -859,6 +859,18 @@
     sleep: '<path d="M20 14.8A8.2 8.2 0 019.4 4.2 8.2 8.2 0 1020 14.8z"/>',
     wake: '<path d="M3.4 18.6h17.2M7.2 18.6a4.8 4.8 0 019.6 0M12 3.6v2.8'
         + 'M5.4 8.2l1.9 1.9M18.6 8.2l-1.9 1.9"/>',
+    /* ── A THERMOMETER READING LOW, NOT A SNOWFLAKE ──
+       The workout deck rejected a six-barbed flake for the cold plunge
+       for the reason it rejected the ramp beside it: both were
+       legible and both were the one in every icon set there has ever
+       been. A tube with a bulb and the level DOWN says cold and says
+       it as a measurement, which is what this is. */
+    cold: '<path d="M10 5.4a2 2 0 014 0v8.2a4 4 0 11-4 0z"/>'
+        + '<path d="M12 12v4.6"/>',
+    /* A capsule with its seam. Distinct at 22px from everything else
+       on this sheet, which is the only bar a glyph has to clear. */
+    pill: '<rect x="3.4" y="9" width="17.2" height="6" rx="3"/>'
+        + '<path d="M12 9v6"/>',
     sun: '<circle cx="12" cy="12" r="4.4"/>'
        + '<path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6'
        + 'M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6"/>',
@@ -967,16 +979,25 @@
     ['walk', ['walk', 'walking', 'stroll', 'hike', 'hiking', 'steps']],
     ['cycle', ['cycle', 'cycling', 'bike', 'ride', 'spin']],
     ['swim', ['swim', 'swimming', 'pool', 'laps']],
+    /* Habits people add, which a schedule of BLOCKS had no reason to
+       know: a cold plunge is not a thing you put an hour aside for.
+       The long forms come first, which is this table's own rule --
+       every pair where one phrase contains another is listed the long
+       way round or the short one swallows it. */
+    ['cold', ['cold plunge', 'ice bath', 'cold shower', 'plunge', 'ice', 'cryo']],
+    ['pill', ['supplements', 'supplement', 'vitamins', 'vitamin', 'creatine',
+      'medication', 'meds', 'pills']],
     ['stretch', ['stretch', 'stretching', 'yoga', 'mobility', 'warm up', 'warmup', 'pilates']],
-    ['meditate', ['meditate', 'meditation', 'breathe', 'breathwork', 'mindful',
+    ['meditate', ['meditate', 'meditating', 'meditation', 'breathe', 'breathwork', 'mindful',
                   'pray', 'prayer', 'stillness']],
     ['photo', ['edit photos', 'photos', 'photo', 'camera', 'shoot', 'photography']],
     ['read', ['read', 'reading', 'book', 'chapter']],
     ['study', ['study', 'revise', 'revision', 'course', 'class', 'lecture', 'lesson',
                'learn', 'school', 'uni', 'homework']],
-    ['write', ['write', 'writing', 'journal', 'diary', 'blog', 'essay', 'notes', 'note']],
+    ['write', ['write', 'writing', 'journaling', 'journal', 'diary', 'blog', 'essay',
+      'notes', 'note']],
     ['code', ['code', 'coding', 'dev', 'program', 'debug', 'repo', 'build', 'ship']],
-    ['trading', ['trading', 'trade', 'trades', 'market', 'markets', 'charts', 'chart',
+    ['trading', ['trading', 'charting', 'trade', 'trades', 'market', 'markets', 'charts', 'chart',
                  'invest', 'stocks']],
     ['money', ['money', 'budget', 'bank', 'bills', 'invoice', 'accounts', 'finance', 'tax']],
     ['plan', ['plan', 'planning', 'review', 'checklist', 'to-do', 'todo', 'prep',
@@ -2453,6 +2474,110 @@
     s: BLOCK_ICON.sleep
   };
 
+  /* ═══════════════════════════════════════════════════════════
+     HABITS OF YOUR OWN
+
+     The six above are CODE and stay code: each has a made thing behind
+     it — Train asks what you trained, Mind asks what you read and goes
+     and fetches the cover — and none of that can be generated from a
+     name somebody typed. What this adds is a seventh KIND of row: one
+     you name, that keeps a tick or a number, and that everything
+     already built reads without knowing it is yours.
+
+     NO PRESET LIST, and that was decided rather than skipped. A grid
+     of ready habits is the fastest way in and it tells you what to
+     care about — which is the opposite of how the six were chosen.
+     You type a word instead, and the app works out the rest.
+
+     THE KIND COMES FROM THE NAME, the way a block's glyph already
+     does. It is a CONFIRMATION rather than a question: right most of
+     the time, and one tap to correct when it is not. Anything the
+     table does not know falls to a tick, which is the safe end — a
+     tick can become a number later and no day is lost either way. */
+  var HABIT_KEY = 'sched.habit.v1';
+  var habits = [];
+  /* Words that mean a LENGTH and words that mean a COUNT. First hit
+     wins and the pairs are ordered the long way round, which is the
+     block table's own rule: every place one phrase contains another
+     was a real collision before it was a line. */
+  var HABIT_MIN = ['journal', 'journaling', 'meditate', 'meditation', 'stretch',
+    'yoga', 'read', 'reading', 'study', 'practice', 'piano', 'guitar',
+    'breathwork', 'sauna', 'nap', 'sunlight', 'walk'];
+  var HABIT_NUM = ['steps', 'trades', 'trade', 'charting', 'pages', 'calls',
+    'call', 'weight', 'spend', 'spent', 'saved', 'words', 'reps', 'pushups',
+    'push ups', 'miles', 'km', 'calories'];
+  function scHabitKind(name) {
+    var w = String(name || '').toLowerCase();
+    var hit = function (list) {
+      for (var i = 0; i < list.length; i++) {
+        if (new RegExp('\\b' + list[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+          + '\\b').test(w)) return true;
+      }
+      return false;
+    };
+    /* Minutes before number: "reading" is a length and "pages" is a
+       count, and a name carrying both is far likelier to be the thing
+       you spend time on. */
+    if (hit(HABIT_MIN)) return 'min';
+    if (hit(HABIT_NUM)) return 'num';
+    return 'do';
+  }
+  /* ── THE COLOURS ARE BORROWED, NOT INVENTED ──
+     The six tally hues are solved to sit ΔE >= 12 from each other AND
+     from the four session colours, so a seventh would have to be
+     solved rather than chosen — and a tenth may not exist at a
+     comfortable distance. These seven are the workout hues: already
+     literals, already measured as a 22% wash under a 72% label, and
+     already used as a tag on the week's rows. Assigned by POSITION in
+     your own list and stored, so a habit keeps its colour when you
+     remove the one above it. */
+  var HABIT_HUE = ['--w-blue', '--w-teal', '--w-violet', '--w-orange',
+    '--w-green', '--w-amber', '--w-red'];
+
+  function scHabitLoad() {
+    var v = scReadJSON(HABIT_KEY, []);
+    habits = (Array.isArray(v) ? v : []).map(function (h) {
+      var k = h && h.k;
+      return {
+        id: String((h && h.id) || ''),
+        n: String((h && h.n) || '').slice(0, 24),
+        k: (k === 'num' || k === 'min' || k === 'do') ? k : 'do',
+        unit: String((h && h.unit) || '').slice(0, 8),
+        hue: String((h && h.hue) || HABIT_HUE[0]),
+        /* A number that can sit below the line — a losing day on a
+           charting habit is a real figure, not a missing one. */
+        neg: (h && h.neg) ? 1 : 0,
+        aim: Math.max(0, Math.min(7, Math.floor(Number(h && h.aim) || 0))),
+        /* Part of "3 of 8 today". The default is YES and the count
+           says how many you have rather than a constant, which is what
+           keeps it honest when you add one. */
+        cnt: (h && h.cnt === 0) ? 0 : 1,
+        own: 1
+      };
+    }).filter(function (h) { return h.id && h.n; });
+  }
+  function scHabitSave() { scWriteJSON(HABIT_KEY, habits); }
+
+  /* ── ONE LIST, SO NOTHING HAS TO KNOW ──
+     Everything that reads the tally reads THIS: the grid, the count,
+     Pattern's factors, the friends push, the history. A custom habit
+     is a row of the same shape, so none of them needed a branch —
+     which is the whole reason this was affordable. */
+  function scItems() { return TALLY.concat(habits); }
+  function scItemOf(id) {
+    var all = scItems();
+    for (var i = 0; i < all.length; i++) if (all[i].id === id) return all[i];
+    return null;
+  }
+  /* An id nothing else can mint. `x` prefixed so it can never collide
+     with the six, whose ids are single letters. */
+  function scHabitId() {
+    var n = 1, used = {};
+    habits.forEach(function (h) { used[h.id] = 1; });
+    while (used['x' + n]) n++;
+    return 'x' + n;
+  }
+
   /* One hue a tag, keyed by the item rather than by its position: an
      index would move the day anybody reorders the list, and a colour
      that means WHICH cannot move. */
@@ -2464,10 +2589,37 @@
      already the tile's heading two lines above it, and a tag repeating
      it is the same word twice on a 145px card. What the tag adds is
      what the figure under it is counted in. */
+  /* A custom habit's glyph comes from its NAME, through the block
+     table — the same trick a row on the week already uses, so
+     "Journaling" finds the notebook and "Cold plunge" the water with
+     nothing to pick. */
+  function scItemIcon(it) {
+    if (TALLY_ICON[it.id]) return TALLY_ICON[it.id];
+    return BLOCK_ICON[scIconFor(it.n)] || BLOCK_ICON.dot || '';
+  }
+
   var TAG_HUE = { t: 'train', m: 'walk', p: 'steps',
                   f: 'fuel', w: 'water', s: 'read' };
   var TAG_WORD = { t: 'this week', m: 'this week', p: 'steps',
                    f: 'kcal', w: 'litres', s: 'hours' };
+  /* Yours carry their hue on the record rather than in a table keyed
+     by id, because the table is code and the list is not. */
+  /* Wrapped HERE rather than stored wrapped: the record keeps the
+     token's name, which is the thing that means something, and the
+     stylesheet syntax is the drawing's business. */
+  function scTagHue(it) {
+    return it.own ? ('var(' + it.hue + ')') : ('var(--t-' + TAG_HUE[it.id] + ')');
+  }
+  /* The tag says what the figure is counted in, never the name — the
+     name is the heading two lines above it. A tick has no unit, so it
+     says how often you meant to instead, and a habit with no aim has
+     nothing to put there and draws no tag at all. */
+  function scTagWord(it) {
+    if (!it.own) return TAG_WORD[it.id];
+    if (it.k === 'min') return 'minutes';
+    if (it.k === 'num') return it.unit || '';
+    return it.aim ? (it.aim === 7 ? 'every day' : it.aim + ' a week') : '';
+  }
   var TALLY = [
     { id: 't', n: 'Train', s: 'Gym, a run, a session', k: 'do',  from: ['Train'] },
     { id: 'm', n: 'Mind',  s: 'Walk, read, listen',    k: 'do',  from: ['Walk', 'Read'] },
@@ -2690,7 +2842,7 @@
      trained and the week still showed the block undone. Whichever end
      you touch, both ends move. */
   function scItemsFor(name) {
-    return TALLY.filter(function (it) {
+    return scItems().filter(function (it) {
       return it.from && it.from.indexOf(name) >= 0;
     });
   }
@@ -2708,7 +2860,7 @@
     /* Carry it back to the week, but only for a day whose weekday we
        can resolve — the schedule is a weekly template, so a tickLog on a
        past date still maps onto that date's own day of the week. */
-    var item = TALLY.filter(function (x) { return x.id === id; })[0];
+    var item = scItemOf(id);
     if (item && item.from) {
       var dow = new Date(day + 'T12:00:00').getDay();
       if (!blockLog[day]) blockLog[day] = {};
@@ -2766,13 +2918,16 @@
   function scPaintTally() {
     var day = scDay();
     var got = tickLog[day] || {};
-    var n = TALLY.filter(function (it) { return got[it.id]; }).length;
+    /* Only the ones that COUNT — a habit can opt out of the day's
+       figure without leaving the screen. */
+    var all = scItems().filter(function (it) { return it.cnt !== 0; });
+    var n = all.filter(function (it) { return got[it.id]; }).length;
 
     var st = scStreak();
     $('scStreakNum').textContent = '';
     $('scStreakNum').appendChild(document.createTextNode(String(st)));
     $('scStreakNum').appendChild(scEl('i', null, st === 1 ? 'day' : 'days'));
-    $('scTallyCap').textContent = n + ' of ' + TALLY.length + ' today \u00b7 '
+    $('scTallyCap').textContent = n + ' of ' + all.length + ' today \u00b7 '
       + st + (st === 1 ? ' day streak' : ' day streak');
     var grid = $('scTallyGrid');
     grid.textContent = '';
@@ -2802,7 +2957,7 @@
        No headings: whether a thing is kept is already said by its own
        tick, and a heading saying it again splits seven items into two
        lists that both have to be read. */
-    TALLY.forEach(function (it, i) {
+    scItems().forEach(function (it, i) {
       var on = !!got[it.id], late = !on && scLate(it);
       var row = scEl('div', 'ty-row' + (on ? ' is-on' : '') + (late ? ' late' : ''));
       row.dataset.item = it.id;
@@ -2827,7 +2982,7 @@
       c.dataset.item = it.id;
       c.insertAdjacentHTML('beforeend',
         '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">'
-        + TALLY_ICON[it.id] + '</svg>');
+        + scItemIcon(it) + '</svg>');
       var body = scEl('span', 'ty-body');
       c.appendChild(body);
       body.appendChild(scEl('span', 'ty-nm', it.n));
@@ -2871,13 +3026,17 @@
          since it was a strip of pips: nothing is ever coloured to say
          you failed. A day with nothing logged carries the flat neutral
          tag instead. */
-      var tg = scEl('span', 'tg' + (on ? '' : ' is-off'), TAG_WORD[it.id] || it.n);
-      if (on) tg.style.setProperty('--tg', 'var(--t-' + TAG_HUE[it.id] + ')');
+      /* A habit of yours with no unit and no aim has nothing for a
+         tag to say, and an empty one is a grey stub — so it draws
+         none rather than repeating the name above it. */
+      var word = scTagWord(it);
+      var tg = word ? scEl('span', 'tg' + (on ? '' : ' is-off'), word) : null;
+      if (tg && on) tg.style.setProperty('--tg', scTagHue(it));
       /* appendChild, not insertBefore(props): `props` is built above
          but is not in `body` until the line below, so inserting before
          it throws NotFoundError and takes the whole grid down — the
          screen renders as a heading and nothing else. */
-      body.appendChild(tg);
+      if (tg) body.appendChild(tg);
       /* Days on now, for a TICK and only a tick — a run on a number
          counts the days you remembered to type one in, which is a fact
          about your logging. Drawn from two, because "1 day" under a
@@ -2932,8 +3091,41 @@
         it.id === 'm' ? 'Mind, everything logged' : it.n + ', 26 weeks of history');
       hist.addEventListener('click', function () { scOpenHist(it); });
       row.appendChild(hist);
+      /* ── AND ONE OF YOURS CAN BE CHANGED ──
+         The six cannot: each has a made thing behind it and nothing
+         about them is a setting. Yours get a second off-screen
+         control, for the reason the first one exists — a route that
+         only a long press can reach is a route half the people using
+         this app do not have.
+
+         NO NEW GESTURE. A tap logs and two taps open the record, and
+         a third would be a long press — which this app deleted, on
+         the grounds that two gestures for one screen is a control
+         answering the same question twice. So the pointer route to
+         these settings is inside the habit's own history, which the
+         double tap already opens. */
+      if (it.own) {
+        var ed = scEl('button', 'ty-hist', 'Settings');
+        ed.type = 'button';
+        ed.setAttribute('aria-label', it.n + ', settings');
+        ed.addEventListener('click', function () { scHabitEdit(it); });
+        row.appendChild(ed);
+      }
       grid.appendChild(row);
     });
+    /* ── THE WAY IN, AND IT IS THE LAST THING ON THE GRID ──
+       Under the tiles rather than in the bar: the bar holds three tabs
+       and an add button at 390px, and a fourth would be the control
+       that made the row too tight to press. A quiet line, because
+       making a habit is something you do a handful of times ever and
+       the tiles are what you came for. */
+    var add = scEl('button', 'ty-add');
+    add.type = 'button';
+    add.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+      + '<path d="M12 5v14M5 12h14"/></svg>';
+    add.appendChild(document.createTextNode('Add a habit'));
+    add.addEventListener('click', scHabitSheet);
+    grid.appendChild(add);
     var best = scBest();
     $('scTallyFoot').textContent = st
       ? 'Longest streak ' + best + (best === 1 ? ' day.' : ' days.')
@@ -3130,7 +3322,7 @@
   var HIST = 182;                    /* 26 weeks, and the strip fits it */
 
   function scHist(id) {
-    var item = TALLY.filter(function (x) { return x.id === id; })[0];
+    var item = scItemOf(id);
     var out = [], d = new Date();
     d.setDate(d.getDate() - (HIST - 1));
     for (var i = 0; i < HIST; i++) {
@@ -3376,6 +3568,9 @@
 
   function scOpenHist(item) {
     if (item.id === 'm') { scOpenMindHist(); return; }
+    scOpenHistIn(item);
+  }
+  function scOpenHistIn(item) {
     var d = scHist(item.id), st = scHistStats(item, d);
     var p = $('scTyPanel');
     p.textContent = '';
@@ -3411,6 +3606,26 @@
        session is a fraction of a number nobody was ever aiming at. */
     p.appendChild(scEl('p', 'ty-hint',
       st.kept + ' of ' + st.live + ' days · tap anywhere to close'));
+    /* ── AND A HABIT OF YOURS CAN BE CHANGED FROM HERE ──
+       The six cannot: each has a made thing behind it and nothing
+       about them is a setting. This is the pointer route to a
+       habit's settings — no new gesture, on the screen the double
+       tap already opens.
+
+       stopPropagation, because the panel closes on a tap anywhere:
+       without it the press that opens the settings also shuts the
+       thing it opened from, and the sheet comes up behind a veil
+       that is on its way out. */
+    if (item.own) {
+      var ed = scEl('button', 'ty-edit', 'Settings');
+      ed.type = 'button';
+      ed.addEventListener('click', function (e) {
+        e.stopPropagation();
+        scCloseHist();
+        scHabitEdit(item);
+      });
+      p.appendChild(ed);
+    }
 
     histBack = document.activeElement;
     $('scTyVeil').hidden = false;
@@ -3467,6 +3682,179 @@
       return;
     }
     scNumSheet(item, day);
+  }
+
+  /* ── MAKING ONE: A WORD, AND A CONFIRMATION ──
+     One field and nothing else. The kind is worked out from the name
+     and shown as a SENTENCE rather than asked as a question — it is
+     right most of the time, and a row of three under it costs one tap
+     when it is not.
+
+     THE LINE REPAINTS, THE FIELD DOES NOT. Rebuilding the body on a
+     keystroke destroys the input between one character and the next
+     and takes the caret with it, which is exactly what was reported
+     on the Mind search — "it cancels out my writing". Only the guess
+     is redrawn. */
+  function scHabitSheet() {
+    scSheet('New habit', function (body) {
+      var kind = '', typed = '', touched = 0;
+      body.appendChild(scEl('span', 'label', 'Name'));
+      var f = scEl('input', 'field');
+      f.type = 'text';
+      f.placeholder = 'Cold plunge, charting, journaling\u2026';
+      f.maxLength = 24;
+      body.appendChild(f);
+
+      var guess = scEl('div', 'hb-guess');
+      body.appendChild(guess);
+      var seg = scEl('div', 'hb-seg');
+      body.appendChild(seg);
+      var foot = scEl('div', 'acts');
+      body.appendChild(foot);
+
+      var KINDS = [['do', 'A tick'], ['num', 'A number'], ['min', 'Minutes']];
+      var SAY = { do: 'A tick \u2014 you did it or you did not',
+                  num: 'A number \u2014 it has a size',
+                  min: 'Minutes \u2014 how long you gave it' };
+      var paint = function () {
+        var name = typed.trim();
+        guess.textContent = '';
+        if (name) {
+          var ic = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          ic.setAttribute('viewBox', '0 0 24 24');
+          ic.setAttribute('class', 'ic');
+          ic.setAttribute('aria-hidden', 'true');
+          ic.innerHTML = scItemIcon({ id: '', n: name, own: 1 });
+          guess.appendChild(ic);
+          var t = scEl('span');
+          t.appendChild(scEl('b', null, SAY[kind]));
+          t.appendChild(scEl('span', null, touched
+            ? 'Its glyph comes from the name.'
+            : 'Worked out from the name. Change it below if it is wrong.'));
+          guess.appendChild(t);
+        }
+        guess.hidden = !name;
+        seg.hidden = !name;
+        [].forEach.call(seg.children, function (b) {
+          var on = b.dataset.k === kind;
+          b.classList.toggle('on', on);
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+        foot.textContent = '';
+        foot.appendChild(scBtn('off', 'Not now', scClose));
+        var go = scBtn('go', name ? 'Add ' + name : 'Add', function () {
+          if (!typed.trim()) return;
+          var h = {
+            id: scHabitId(), n: typed.trim().slice(0, 24), k: kind, unit: '',
+            hue: HABIT_HUE[habits.length % HABIT_HUE.length],
+            neg: 0, aim: 0, cnt: 1, own: 1
+          };
+          habits.push(h);
+          scHabitSave();
+          scClose();
+          scPaintTally();
+          scToast(h.n + ' added', false);
+        });
+        if (!name) go.disabled = true;
+        foot.appendChild(go);
+      };
+      KINDS.forEach(function (k) {
+        var b = scEl('button', 'hb-k', k[1]);
+        b.type = 'button';
+        b.dataset.k = k[0];
+        b.addEventListener('click', function () {
+          kind = k[0]; touched = 1; paint();
+        });
+        seg.appendChild(b);
+      });
+      f.addEventListener('input', function () {
+        typed = f.value;
+        /* The guess only moves while you have not corrected it — once
+           you have said what it is, typing on must not undo you. */
+        if (!touched) kind = scHabitKind(typed);
+        paint();
+      });
+      kind = 'do';
+      paint();
+      setTimeout(function () { f.focus(); }, 60);
+    });
+  }
+
+  /* ── AND EVERYTHING ELSE IS LATER ──
+     Nothing here is asked when you make one. A habit works from the
+     moment it exists; this is where you come back if the guess was
+     wrong or you want to say how often you meant to. */
+  function scHabitEdit(h) {
+    scSheet(h.n, function (body) {
+      var seg = function (label, items, get, set) {
+        body.appendChild(scEl('span', 'label', label));
+        var row = scEl('div', 'hb-seg');
+        items.forEach(function (x) {
+          var b = scEl('button', 'hb-k' + (get() === x[0] ? ' on' : ''), x[1]);
+          b.type = 'button';
+          b.setAttribute('aria-pressed', get() === x[0] ? 'true' : 'false');
+          b.addEventListener('click', function () {
+            set(x[0]);
+            [].forEach.call(row.children, function (c) {
+              var on = c.textContent === x[1];
+              c.classList.toggle('on', on);
+              c.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
+            scHabitSave();
+            scPaintTally();
+          });
+          row.appendChild(b);
+        });
+        body.appendChild(row);
+      };
+      seg('What kind', [['do', 'A tick'], ['num', 'A number'], ['min', 'Minutes']],
+        function () { return h.k; }, function (v) { h.k = v; });
+      seg('You mean to, on', [[0, 'Any day'], [3, '3 a week'], [5, '5 a week'], [7, 'Every day']],
+        function () { return h.aim; }, function (v) { h.aim = v; });
+
+      var sw = function (name, sub, get, set) {
+        var b = scEl('button', 'pv-row');
+        b.type = 'button';
+        b.setAttribute('role', 'switch');
+        var t = scEl('span', 'pv-t');
+        t.appendChild(scEl('b', null, name));
+        t.appendChild(scEl('span', null, sub));
+        b.appendChild(t);
+        var s2 = scEl('span', 'pv-sw');
+        s2.appendChild(scEl('i'));
+        b.appendChild(s2);
+        var paint = function () {
+          b.setAttribute('aria-checked', get() ? 'true' : 'false');
+          b.classList.toggle('is-on', !!get());
+        };
+        paint();
+        b.addEventListener('click', function () {
+          set(get() ? 0 : 1); paint(); scHabitSave(); scPaintTally();
+        });
+        body.appendChild(b);
+      };
+      body.appendChild(scEl('span', 'label', 'And'));
+      sw('Counts toward today', 'Part of the figure at the top of this screen',
+        function () { return h.cnt; }, function (v) { h.cnt = v; });
+      if (h.k !== 'do') {
+        sw('Can be negative', 'A day below the line is a real figure',
+          function () { return h.neg; }, function (v) { h.neg = v; });
+      }
+
+      body.appendChild(scEl('div', 'menu-rule'));
+      var rm = scEl('button', 'menu-item bad');
+      rm.appendChild(document.createTextNode('Take it off'));
+      rm.appendChild(scEl('span', 'sub-note',
+        'The habit goes. Every day you logged on it stays where it is.'));
+      rm.addEventListener('click', function () {
+        habits = habits.filter(function (x) { return x.id !== h.id; });
+        scHabitSave();
+        scClose();
+        scPaintTally();
+        scToast(h.n + ' taken off', false);
+      });
+      body.appendChild(rm);
+    });
   }
 
   function scNumSheet(item, day) {
@@ -4466,7 +4854,7 @@
     head.appendChild(scPicOf(26, it));
     var who = scEl('span');
     who.appendChild(scEl('span', 'po-n', it.who));
-    var it2 = TALLY.filter(function (x) { return x.id === p.item; })[0];
+    var it2 = scItemOf(p.item);
     who.appendChild(scEl('span', 'po-s',
       (it2 ? it2.n + ' · ' : '') + scAgo(p.at)));
     head.appendChild(who);
@@ -5218,7 +5606,7 @@
 
       body.appendChild(scEl('span', 'label', 'About'));
       var row = scEl('div', 'lg-row');
-      TALLY.forEach(function (t) {
+      scItems().forEach(function (t) {
         var b = scEl('button', 'lg-c');
         b.type = 'button';
         b.textContent = t.n;
@@ -8228,7 +8616,7 @@
      to say anything. */
   function scPatMids() {
     var mid = {}, floor = scDayBack(PAT - 1);
-    TALLY.forEach(function (it) {
+    scItems().forEach(function (it) {
       if (it.k !== 'num') return;
       var vals = [];
       Object.keys(tickLog).forEach(function (day) {
@@ -8310,7 +8698,7 @@
     });
 
     var facts = [];
-    TALLY.forEach(function (it) {
+    scItems().forEach(function (it) {
       facts.push({
         key: 'i:' + it.id, item: it,
         /* "Steps over 8,400", never "Steps 8,400+": the suffix hangs
@@ -9643,6 +10031,7 @@
      the tally can be the view you left it on, and it opening empty and
      filling in a frame later reads as having lost the day. */
   scTickLoad();
+  scHabitLoad();
   scObjLoad();
   scTrainLoad();
   scMindLoad();

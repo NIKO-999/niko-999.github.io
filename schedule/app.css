@@ -837,6 +837,64 @@ body {
 /* No border and no paragraph. Removing somebody takes them off a list;
    it is not the kind of delete that needs warning about, and the sheet
    says so by not saying anything. */
+/* -- HABITS OF YOUR OWN --
+   The way in sits at the foot of the grid rather than in the bar: the
+   bar holds three tabs and an add button at 390px, and a fourth would
+   be the control that made the row too tight to press. Quiet, because
+   making a habit is something you do a handful of times ever. */
+.ty-add {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; gap: 9px;
+  margin-top: 4px; padding: 12px 2px;
+  background: none; border: 0; color: var(--dim);
+  font: inherit; font-size: 14px; text-align: left;
+  touch-action: manipulation;
+}
+.ty-add svg {
+  width: 17px; height: 17px; flex: 0 0 auto;
+  fill: none; stroke: var(--dim); stroke-width: 1.9; stroke-linecap: round;
+}
+.ty-add:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+/* The guess, and it is a statement rather than a question: right most
+   of the time, and one tap below to correct it when it is not. */
+.hb-guess {
+  display: flex; align-items: flex-start; gap: 11px;
+  margin: 14px 0 4px; padding: 12px 14px;
+  background: var(--card); border: 1px solid var(--card-edge);
+  border-radius: 14px;
+}
+.hb-guess svg {
+  width: 22px; height: 22px; flex: 0 0 auto; margin-top: 1px;
+  fill: none; stroke: var(--ink); stroke-width: 1.7;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.hb-guess b { display: block; font-size: 14px; font-weight: 600; }
+.hb-guess span span {
+  display: block; font-size: 11.5px; color: var(--spent);
+  margin-top: 2px; line-height: 1.35;
+}
+.hb-seg {
+  display: flex; gap: 3px; margin: 12px 0 0;
+  background: var(--card); border: 1px solid var(--card-edge);
+  border-radius: 12px; padding: 3px;
+}
+.hb-k {
+  flex: 1; text-align: center; font: inherit; font-size: 12.5px;
+  font-weight: 600; padding: 9px 0; border: 0; border-radius: 9px;
+  background: none; color: var(--spent); touch-action: manipulation;
+}
+.hb-k.on { background: rgba(255, 255, 255, .10); color: var(--ink); }
+:root[data-mode="light"] .hb-k.on { background: rgba(0, 0, 0, .07); }
+.hb-k:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+/* On the history panel, which is where a habit of yours is changed
+   from -- no new gesture, on the screen the double tap already opens. */
+.ty-edit {
+  display: block; width: 100%; margin-top: 12px; padding: 11px 0;
+  background: none; border: 0; border-top: 1px solid var(--hair);
+  color: var(--dim); font: inherit; font-size: 13.5px; font-weight: 600;
+  touch-action: manipulation;
+}
+
 /* -- THE FRIEND PROFILE: AN ALMANAC --
    Chosen from ten treatments rendered over the real app at 390x844
    and read at 1:1, never as a grid of cells: this repo has twice

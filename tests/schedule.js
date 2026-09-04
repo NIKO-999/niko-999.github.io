@@ -436,7 +436,17 @@ const SAID = [
      that a row wearing one draws no length, so the honest measurement
      is to put the class on, read the box, and take it off again —
      inside one evaluate, so nothing is left on the page. */
-  const durGone = await page.$eval('.row[data-id]', (r) => {
+  /* A row that is NEITHER done nor past, because the check plants
+     those classes itself and needs a row whose length is drawn to
+     begin with. It took the FIRST row, which at some hours is already
+     behind you — so `before` came back false and the check failed on
+     the CLOCK rather than on the rule. That is the fifth time this
+     file has recorded that shape, and the answer is the same one
+     every time: measure a row the hour cannot reach. */
+  const durGone = await page.$$eval('.row[data-id]', (rows) => {
+    const r = rows.find((x) => !x.classList.contains('is-done')
+      && !x.classList.contains('is-past'));
+    if (!r) throw new Error('no row still ahead to read a length off');
     const d = r.querySelector('.dur');
     const box = () => d.getClientRects().length > 0;
     const out = { before: box() };
@@ -9466,6 +9476,226 @@ const SAID = [
 
     ok('nothing threw on the light face', lerrs.length === 0, lerrs);
     await lctx.close();
+  }
+
+  /* ══════════════════════════════════════════════════════
+     HABITS OF YOUR OWN
+
+     IN ITS OWN CONTEXT, because it writes a list that every other
+     assertion about the tally counts against — a seventh tile would
+     turn "0 of 6 today" into "0 of 7" four hundred lines above. */
+  {
+    console.log('\n── habits of your own ──');
+    const hctx = await browser.newContext({ ...PHONE });
+    const hp = await hctx.newPage();
+    const herrs = [];
+    hp.on('pageerror', (e) => herrs.push(String(e)));
+    await hp.addInitScript(() => {
+      ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+        .forEach((k) => localStorage.setItem(k, '1'));
+      localStorage.setItem('sched.view.v1', 'tally');
+      localStorage.setItem('sched.ty.v1', 'up');
+      localStorage.setItem('sched.net.v1',
+        JSON.stringify({ on: false, url: '', code: '' }));
+    });
+    await hp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await hp.waitForTimeout(500);
+
+    /* ── THE WAY IN IS ON THE GRID, NOT IN THE BAR ──
+       The bar holds three tabs and an add button at 390px, and a
+       fourth would be the control that made the row too tight to
+       press. */
+    ok('the way in is the last thing on the grid',
+      await hp.evaluate(() => {
+        const a = document.querySelector('.ty-add');
+        const g = document.querySelector('.ty-grid');
+        return !!a && a === g.lastElementChild && /Add a habit/.test(a.textContent);
+      }));
+
+    await hp.click('.ty-add');
+    await hp.waitForTimeout(500);
+    /* ── ONE FIELD, AND NOTHING ELSE IS ASKED ──
+       No preset list, which was decided rather than skipped: a grid of
+       ready habits is the fastest way in and it tells you what to care
+       about, which is the opposite of how the six were chosen. */
+    const made = await hp.evaluate(() => ({
+      title: (document.getElementById('scSheetTitle') || {}).textContent,
+      fields: document.querySelectorAll('.sheet input[type=text]').length,
+      other: document.querySelectorAll('.sheet input:not([type=text]), .sheet textarea').length,
+    }));
+    ok('making one is a single field and no other question',
+      made.title === 'New habit' && made.fields === 1 && made.other === 0, made);
+
+    /* ── THE KIND COMES FROM THE NAME ──
+       The same read a block's glyph already comes from, so
+       "Journaling" is minutes and "Charting" is a number with nothing
+       to pick. Three names and three different answers, because two
+       that agreed would pass on a build that always says the same
+       thing. */
+    const guessed = [];
+    for (const w of ['Journaling', 'Charting', 'Cold plunge']) {
+      await hp.fill('.sheet input[type=text]', '');
+      await hp.type('.sheet input[type=text]', w, { delay: 12 });
+      await hp.waitForTimeout(220);
+      guessed.push(await hp.evaluate(() => ({
+        on: (document.querySelector('.hb-k.on') || {}).textContent,
+        go: (document.querySelector('.sheet .btn.go') || {}).textContent,
+      })));
+    }
+    ok('the kind is worked out from the name, and it is not one answer for all',
+      guessed[0].on === 'Minutes' && guessed[1].on === 'A number'
+      && guessed[2].on === 'A tick'
+      && guessed[2].go === 'Add Cold plunge', guessed);
+
+    /* ── AND CORRECTING IT STICKS ──
+       The guess only moves while you have not said otherwise: once you
+       have, typing on must not undo you. */
+    await hp.click('.hb-k >> nth=1');
+    await hp.waitForTimeout(150);
+    await hp.type('.sheet input[type=text]', ' daily', { delay: 15 });
+    await hp.waitForTimeout(220);
+    ok('...and correcting it survives typing on',
+      await hp.evaluate(() =>
+        (document.querySelector('.hb-k.on') || {}).textContent === 'A number'));
+
+    await hp.fill('.sheet input[type=text]', 'Cold plunge');
+    await hp.waitForTimeout(200);
+    await hp.click('.hb-k >> nth=0');
+    await hp.waitForTimeout(150);
+    await hp.click('.sheet .btn.go');
+    await hp.waitForTimeout(700);
+    const added = await hp.evaluate(() => ({
+      stored: JSON.parse(localStorage.getItem('sched.habit.v1') || '[]'),
+      names: [...document.querySelectorAll('.ty-card .ty-nm')].map((x) => x.textContent),
+      cap: document.getElementById('scTallyCap').textContent,
+    }));
+    /* THE COUNT SAYS HOW MANY YOU HAVE, not a constant. Adding one
+       makes today harder, and a figure that still said "of 6" would be
+       the screen lying about what it is counting. */
+    ok('adding one puts it on the grid and in the count',
+      added.stored.length === 1 && added.stored[0].n === 'Cold plunge'
+      && added.stored[0].k === 'do' && /^x/.test(added.stored[0].id)
+      && added.names[6] === 'Cold plunge' && /of 7 today/.test(added.cap), added);
+
+    /* ── AND IT LOGS LIKE ANY OTHER ──
+       A tick ticks on one tap; a number opens the sheet that asks for
+       one. Neither needed a branch — a habit of yours is a row of the
+       same shape, which is the whole reason this was affordable. */
+    await hp.click('.ty-card[data-item="x1"]');
+    await hp.waitForTimeout(700);
+    const ticked = await hp.evaluate(() => {
+      const d = new Date();
+      const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+        + '-' + String(d.getDate()).padStart(2, '0');
+      return { rec: (JSON.parse(localStorage.getItem('sched.tick.v1') || '{}')[k] || {}).x1,
+               sheet: !document.getElementById('scSheet').hidden,
+               cap: document.getElementById('scTallyCap').textContent };
+    });
+    ok('a tick of yours ticks on one tap, and opens nothing',
+      ticked.rec === 1 && !ticked.sheet && /^1 of 7/.test(ticked.cap), ticked);
+
+    /* A second one, a number, to prove the kind decides the door. */
+    await hp.evaluate(() => {
+      const h = JSON.parse(localStorage.getItem('sched.habit.v1'));
+      h.push({ id: 'x2', n: 'Charting', k: 'num', unit: 'R',
+               hue: '--w-teal', neg: 1, aim: 0, cnt: 1 });
+      localStorage.setItem('sched.habit.v1', JSON.stringify(h));
+    });
+    await hp.reload({ waitUntil: 'networkidle' });
+    await hp.waitForTimeout(600);
+    await hp.click('.ty-card[data-item="x2"]');
+    await hp.waitForTimeout(700);
+    ok('...and a number of yours opens the sheet that asks for one',
+      await hp.evaluate(() => !document.getElementById('scSheet').hidden
+        && (document.getElementById('scSheetTitle') || {}).textContent === 'Charting'));
+    await hp.keyboard.press('Escape');
+    await hp.waitForTimeout(420);
+
+    /* ── NO TWO HABITS SHARE A SILHOUETTE ──
+       "Two glyphs with one silhouette is worse than a glyph missing,
+       because the row is then confidently wrong" — and the first cut
+       drew Cold plunge and Charting with the same mark, because the
+       keyword table knew `chart` and the name was `charting`. */
+    const glyphs = await hp.evaluate(() =>
+      [...document.querySelectorAll('.ty-card .ic')].map((x) => x.innerHTML));
+    ok('no two tiles on the grid draw the same glyph',
+      glyphs.length === 8 && new Set(glyphs).size === 8,
+      { n: glyphs.length, distinct: new Set(glyphs).size });
+
+    /* ── EVERYTHING ELSE IS LATER, AND ONLY FOR YOURS ──
+       The six cannot be edited: each has a made thing behind it and
+       nothing about them is a setting. Both directions, because "there
+       is a way in" passes on a build that offers it everywhere. */
+    await hp.evaluate(() => document.querySelector('.ty-hist[aria-label*="Cold plunge"]').click());
+    await hp.waitForTimeout(600);
+    ok('a habit of yours can be changed from its own record',
+      await hp.evaluate(() => !!document.querySelector('.ty-edit')));
+    await hp.keyboard.press('Escape');
+    await hp.waitForTimeout(420);
+    await hp.evaluate(() => document.querySelector('.ty-hist[aria-label*="Steps"]').click());
+    await hp.waitForTimeout(600);
+    ok('...and one of the six cannot, because none of it is a setting',
+      await hp.evaluate(() => document.querySelectorAll('.ty-edit').length === 0));
+    await hp.keyboard.press('Escape');
+    await hp.waitForTimeout(420);
+
+    /* ── TAKING ONE OFF KEEPS THE DAYS ──
+       The habit goes; every day you logged on it stays where it is.
+       That is this app's oldest rule about a record — the days are
+       what you cannot get back — and it costs nothing here, because
+       the tick log is keyed by id and simply stops being read. */
+    await hp.evaluate(() => document.querySelector('.ty-hist[aria-label*="Cold plunge"]').click());
+    await hp.waitForTimeout(600);
+    await hp.click('.ty-edit');
+    await hp.waitForTimeout(600);
+    await hp.click('.sheet .menu-item.bad');
+    await hp.waitForTimeout(700);
+    const gone = await hp.evaluate(() => {
+      const d = new Date();
+      const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+        + '-' + String(d.getDate()).padStart(2, '0');
+      return {
+        left: JSON.parse(localStorage.getItem('sched.habit.v1') || '[]').map((h) => h.n),
+        days: (JSON.parse(localStorage.getItem('sched.tick.v1') || '{}')[k] || {}).x1,
+        names: [...document.querySelectorAll('.ty-card .ty-nm')].map((x) => x.textContent),
+      };
+    });
+    ok('taking one off removes the habit and keeps every day you logged',
+      gone.left.join() === 'Charting' && gone.days === 1
+      && gone.names.indexOf('Cold plunge') < 0, gone);
+
+    /* ── A DAMAGED ONE IS DROPPED AND THE REST SURVIVE ──
+       Asserted as the good one SURVIVING rather than the bad one being
+       refused: rejecting the whole list passes any check written the
+       other way round, and the list is a year of somebody's habits. */
+    await hp.evaluate(() => {
+      localStorage.setItem('sched.habit.v1', JSON.stringify([
+        { id: 'x2', n: 'Charting', k: 'num', unit: 'R', hue: '--w-teal' },
+        { id: '', n: 'No id' }, { id: 'x9' }, 'not an object',
+        { id: 'x8', n: 'Odd kind', k: 'seance' }]));
+    });
+    await hp.reload({ waitUntil: 'networkidle' });
+    await hp.waitForTimeout(600);
+    ok('a damaged habit is dropped and the record is not',
+      await hp.evaluate(() => {
+        const n = [...document.querySelectorAll('.ty-card .ty-nm')]
+          .map((x) => x.textContent);
+        const h = JSON.parse(localStorage.getItem('sched.habit.v1') || '[]');
+        return n.indexOf('Charting') >= 0 && n.indexOf('Odd kind') >= 0
+          && n.length === 8 && h.length === 5;
+      }));
+    /* An unknown kind falls to a TICK, which is the safe end: a tick
+       can become a number later and no day is lost either way. */
+    ok('...and a kind this build does not have falls through to a tick',
+      await hp.evaluate(() => {
+        const c = document.querySelector('.ty-card[data-item="x8"]');
+        c.click();
+        return true;
+      }) && await (async () => { await hp.waitForTimeout(700);
+        return hp.evaluate(() => document.getElementById('scSheet').hidden); })());
+
+    ok('nothing threw through any of it', herrs.length === 0, herrs);
+    await hctx.close();
   }
 
   /* ── NOTHING IN THIS APP SCROLLS SIDEWAYS ──

@@ -6209,3 +6209,83 @@ control that exists and refuses is worse than one that is not there.
 
 **And the way back is a LEVEL, not a close.** Shutting it would land
 you on the board with the switches two presses away again.
+
+## Habits of your own
+
+The six are CODE and stay code: each has a made thing behind it —
+Train asks what you trained, Mind asks what you read and goes and
+fetches the cover — and none of that can be generated from a name
+somebody typed. What this adds is a seventh KIND of row: one you name,
+that keeps a tick or a number, and that everything already built reads
+without knowing it is yours.
+
+**NO PRESET LIST, and that was decided rather than skipped.** A grid
+of ready habits was built and rendered first, and it is the fastest
+way in: tap one and it exists, no typing at all. It was rejected for
+the reason it works — *a list tells you what to care about*, which is
+the opposite of how the six were chosen. You type a word instead.
+
+**THE KIND COMES FROM THE NAME**, the way a block's glyph already
+does. It is a CONFIRMATION rather than a question — a sentence saying
+what it worked out, with one row of three under it to correct — and
+the guess only moves while you have not corrected it, because typing
+on must not undo you. Anything the table does not know falls to a
+TICK, which is the safe end: a tick can become a number later and no
+day is lost either way.
+
+**ONE LIST, SO NOTHING HAD TO KNOW.** `scItems()` is the six plus
+yours, and the grid, the count, Pattern's factors, the friends push
+and the history all read it. A habit of yours is a row of the same
+shape `TALLY` already had — `{ id, n, k, unit }` — which is the whole
+reason this was affordable rather than a parallel system with its own
+everything.
+
+**THE COUNT SAYS HOW MANY YOU HAVE.** "1 of 7 today", never "of 6".
+Adding a habit makes today harder and the figure has to say so; a
+constant there would be the screen lying about what it is counting. A
+habit can opt out with a switch, which is the exception rather than
+the default.
+
+**THE COLOURS ARE BORROWED, NOT INVENTED.** The six tally hues are
+solved to sit ΔE ≥ 12 from each other AND from the four session
+colours, so a seventh would have to be solved and a tenth may not
+exist at a comfortable distance. Yours take the seven WORKOUT hues:
+already literals, already measured as a 22% wash under a 72% label,
+already used as a tag on the week's rows. Stored on the record rather
+than keyed by position, so a habit keeps its colour when you remove
+the one above it.
+
+**NO NEW GESTURE.** A tap logs and two taps open the record; a third
+would be a long press, which this app deleted on the grounds that two
+gestures for one screen is a control answering the same question
+twice. So the pointer route to a habit's settings is inside its own
+history — and both routes have an off-screen button beside them,
+because a route only a gesture can reach is a route half the people
+using this app do not have.
+
+**THE HISTORY IS THE ONE THE SIX ALREADY HAVE**, and bars were shown
+and not built. The 26-week calendar already serves the built-in
+NUMBERS — Steps, Fuel and Sleep all open it — so giving a custom
+number bars would make yours behave differently from Steps. Bars are
+worth having; they are a change to every number, which is a different
+decision from this one.
+
+**AND TWO HABITS DREW THE SAME GLYPH.** Cold plunge and Charting both
+came out as the generic mark: the keyword table knew `chart` and the
+name was `charting`, which a word boundary does not match, and it had
+never heard of a plunge. *Two glyphs with one silhouette is worse than
+a glyph missing, because the row is then confidently wrong* — and this
+was worse still, being the SAME glyph twice. The habit-shaped words
+went in and two glyphs with them: a thermometer reading LOW rather
+than a snowflake, because the workout deck already rejected a
+six-barbed flake as the one in every icon set there has ever been.
+`tests/schedule.js` holds every tile on the grid to a distinct
+silhouette.
+
+**And a check that grabbed the FIRST row failed on the clock.** It
+asserted a row's length is drawn before planting `is-done` itself, and
+at some hours the first row is already behind you — so `before` came
+back false against a rule that was working. Fifth time this file has
+recorded that shape; it reads a row that is neither done nor past now,
+and throws with a sentence naming what it wanted rather than handing
+false to the next line.
