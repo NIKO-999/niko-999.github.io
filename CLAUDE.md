@@ -6139,3 +6139,73 @@ full error, which named the selector in one go — worth fixing in the
 runner, and not fixed here. Twice in the same stretch a monitor
 watched the shell wrapper's pid rather than node's, which makes a
 still-running suite look finished.
+
+## Nobody has a face until they set one
+
+The avatar was a coloured disc with two eyes and an offset mouth,
+generated from a colour you picked out of eight swatches. It is the
+grey silhouette every other app uses now, and there is no colour to
+choose.
+
+**A PICTURE OF NOBODY IS WHAT AN EMPTY AVATAR SHOULD BE.** A generated
+face is a small claim about somebody who has not made one — and it was
+a different face per person, which made it look like a decision they
+had taken. Two marks: a head and a pair of shoulders.
+
+**THE SHOULDERS RUN OFF THE BOTTOM EDGE**, which is the whole of what
+makes it a person rather than a lollipop: the picture is clipped to a
+circle, so a figure ending inside the box reads as two separate
+shapes. Asserted on the path, so a later tidy-up cannot tuck it in.
+
+**The flat neutral, and the pair is measured.** `--tick-off` under
+`--spent` — the two this app already uses for a mark on a neutral
+surface — at **3.38:1 on the dark face and 3.33:1 on the light**,
+against the 3:1 a graphic needs. Asserted as NOT `--me` as well, since
+"it is grey" passes on a build where the chosen colour happens to be.
+
+**A FRIEND'S FACE IS THE SAME SILHOUETTE, which it was not.** Theirs
+was drawn in the colour they chose, and that was the whole reason
+`acc` travels with a record. Their colour has not stopped travelling —
+it is still what the almanac's lit days are drawn in — but an avatar
+nobody chose says nothing, so it says it in the neutral.
+
+**And the swatch checks went with the swatches.** Sixteen hexes were
+measured, eight a face, each held to 4.5:1 for its label and 3:1
+against the page. Both are checks on a control that does not exist,
+and sixteen assertions about nothing are worse than none. What the
+light-face half was FOR survives: that is where the one-set-for-both
+mistake was caught, so the light context measures the SILHOUETTE now —
+the one drawing that changed.
+
+**The stored key is removed on boot, not ignored.** A preference for a
+control that no longer exists is a second record of a decision nothing
+can act on: the same answer the old palette name, the subtitle key and
+the Now colour all got.
+
+## Seeing your own profile the way a friend does
+
+A row of switches says what you have agreed to. It does not say what
+somebody SEES, and those are different questions — which is the whole
+reason this exists.
+
+**ONE DRAWING, TWO CALLERS.** `scProfileBody` is the friend sheet's
+body, and the preview goes through it. Written as a second rendering
+the two drift, and a preview that has drifted is worse than none,
+because the entire point of one is being true.
+
+**IT IS THE PAYLOAD, NOT THE RECORD.** Built from the same builders
+`scPushNow` uses, gated by the same switches — so a section you have
+turned off is absent here too. Asserted as the switches DECIDING it:
+two on and two off, and the two that are off have to be missing.
+
+**It reads `share` rather than the last thing pushed**, because the
+push may not have happened yet: you flick a switch and look, and a
+preview waiting on the network would be answering the previous
+question.
+
+**No Remove on it**, which is the one control a preview must not have
+— removing yourself from your own preview cannot mean anything, and a
+control that exists and refuses is worse than one that is not there.
+
+**And the way back is a LEVEL, not a close.** Shutting it would land
+you on the board with the switches two presses away again.

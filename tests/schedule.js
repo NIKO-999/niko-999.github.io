@@ -4279,46 +4279,63 @@ const SAID = [
              marks: el.querySelectorAll('svg circle, svg path').length,
              tile: el.querySelector('svg rect').getAttribute('fill'),
              on: el.querySelector('svg circle').getAttribute('fill'),
-             me: getComputedStyle(document.documentElement).getPropertyValue('--me').trim() };
+             me: getComputedStyle(document.documentElement).getPropertyValue('--me').trim(),
+             dim: getComputedStyle(document.documentElement)
+               .getPropertyValue('--tick-off').trim(),
+             fig: getComputedStyle(document.documentElement)
+               .getPropertyValue('--spent').trim() };
   });
   ok('your picture is round', pic.round === '50%', pic);
-  ok('and with no photo it is the face — two eyes and a mouth',
-    pic.marks === 3, pic);
-  /* --me, not --red. It was the accent, and the accent is the ink now,
-     so a face drawn from it is a white disc. Your face is the one
-     place a colour you CHOSE is drawn, and the one setting that
-     travels: it is pushed with your record so a friend's board draws
-     you in it. */
-  ok('drawn in the colour you chose for it',
-    pic.tile.toLowerCase() === pic.me.toLowerCase(), pic);
+  /* ── A SILHOUETTE, NOT A FACE ──
+     It was a coloured disc with two eyes and a mouth — a face per
+     person, generated from a colour they picked. A picture of NOBODY
+     is what an empty avatar should be; a generated face is a small
+     claim about somebody who has not made one. Two marks now, a head
+     and a pair of shoulders. */
+  ok('and with no photo it is a silhouette — a head and a pair of shoulders',
+    pic.marks === 2, pic);
+  /* ── AND IT IS THE FLAT NEUTRAL, NOT A COLOUR ──
+     There is no swatch row any more, so a face drawn from a chosen
+     colour would be drawn from a colour nobody chose. This app's rule
+     is that colour says WHICH; with nothing left to say it takes the
+     neutral pair every other mark on a neutral surface uses.
+
+     Asserted as NOT --me as well as as the neutral, because "it is
+     grey" passes on a build where --me happens to be grey. */
+  ok('drawn in the flat neutral, and not in any colour of yours',
+    pic.tile.toLowerCase() === pic.dim.toLowerCase()
+    && pic.on.toLowerCase() === pic.fig.toLowerCase()
+    && pic.tile.toLowerCase() !== pic.me.toLowerCase(), pic);
 
   /* MOVED, because the line above passes on a face painted with the
      shipped hex typed in as a literal. */
   const faceMoved = await page.evaluate(() => {
-    document.documentElement.style.setProperty('--me', '#4FE0A8');
-    document.documentElement.style.setProperty('--on-red', '#04141A');
+    document.documentElement.style.setProperty('--tick-off', '#4FE0A8');
+    document.documentElement.style.setProperty('--spent', '#04141A');
     document.querySelector('.pic-item').click();
     const el = document.querySelector('.sheet .pic svg');
     const got = { tile: el.querySelector('rect').getAttribute('fill'),
                   on: el.querySelector('circle').getAttribute('fill') };
-    document.documentElement.style.removeProperty('--me');
-    document.documentElement.style.removeProperty('--on-red');
+    document.documentElement.style.removeProperty('--tick-off');
+    document.documentElement.style.removeProperty('--spent');
     return got;
   });
-  ok('and it follows that colour when it is changed under it',
+  ok('and it follows those tokens when they are changed under it',
     faceMoved.tile === '#4FE0A8' && faceMoved.on === '#04141A', faceMoved);
 
-  /* The mouth is offset, which is the whole character of it. Centred it
-     is a generic smiley — asserted on the path so a later tidy-up
-     cannot quietly symmetrise it. */
-  const mouth = await page.evaluate(() => {
+  /* ── THE SHOULDERS RUN OFF THE BOTTOM EDGE ──
+     Which is the whole of what makes it a person rather than a
+     lollipop: the picture is clipped to a circle, so a figure that
+     ended inside the box would read as two separate shapes. Asserted
+     on the path, so a later tidy-up cannot quietly tuck it in — the
+     arc has to reach the 100 the viewBox ends at. */
+  const fig = await page.evaluate(() => {
     const d = document.querySelector('.sheet .pic svg path').getAttribute('d');
-    const n = d.match(/[\d.]+/g).map(Number);
-    return { d, x0: n[0], x1: n[4], eyes: [...document.querySelectorAll('.sheet .pic svg circle')]
-      .map((c) => +c.getAttribute('cx')) };
+    const c = document.querySelector('.sheet .pic svg circle');
+    return { d, head: { cy: +c.getAttribute('cy'), r: +c.getAttribute('r') } };
   });
-  ok('the mouth is offset, not centred',
-    (mouth.x0 + mouth.x1) / 2 > 55 && mouth.x1 > Math.max(...mouth.eyes), mouth);
+  ok('the shoulders run off the bottom edge, and the head sits clear of them',
+    /100/.test(fig.d) && fig.head.cy + fig.head.r < 60, fig);
 
   await page.evaluate(() => document.getElementById('scScrim').click());
   await page.waitForTimeout(340);
@@ -4457,88 +4474,74 @@ const SAID = [
   });
   ok('the Now chip carries the colour set for it, and is not bare page',
     drawnIn.chip !== null && drawnIn.sameLead && drawnIn.moved, drawnIn);
-  ok('...and your face in the one set for that',
-    drawnIn.face !== null && drawnIn.face === drawnIn.wantFace, drawnIn);
+  /* Your face is the flat neutral now and makes no colour claim, so
+     what is asserted is that it is NOT drawn in either of the two
+     colours this screen still has. */
+  ok('...and your face is in neither of them',
+    drawnIn.face !== null && drawnIn.face !== drawnIn.wantFace, drawnIn);
 
-  /* ── THE NOW SWATCH ROW IS GONE ──
-     It was the second row of eight, on the argument that the mark the
-     whole screen orients around is worth making yours the way your
-     own face is. Taken away on request: one row of swatches now,
-     under "Your colour" alone, and Now is Amber wherever the running
-     row is — fixed, not a setting. */
+  /* ── AND THERE IS NO COLOUR TO PICK AT ALL ──
+     One row of eight swatches was left, `Your colour`, drawing your
+     own face. The face is a silhouette in the flat neutral now, so
+     the swatches set a colour nothing on screen used — a control for
+     a decision that no longer exists.
+
+     Both halves: no row, and no label naming one. "There is no row"
+     passes on a Settings sheet that failed to build at all, so the
+     sheet is asserted to have its other rows. */
   await page.evaluate(() => document.getElementById('scTabYou').click());
   await page.waitForTimeout(360);
-  const pkRows = await page.evaluate(() =>
-    [...document.querySelectorAll('.pk-row')].length);
-  ok('Settings carries exactly one row of swatches, for your own colour',
-    pkRows === 1, { pkRows });
-  ok('...and nothing on the sheet is labelled Now',
-    await page.evaluate(() =>
-      ![...document.querySelectorAll('.sheet .label')].some((l) => l.textContent === 'Now')));
+  const pkRows = await page.evaluate(() => ({
+    rows: [...document.querySelectorAll('.pk-row')].length,
+    labels: [...document.querySelectorAll('.sheet .label')].map((l) => l.textContent),
+    items: document.querySelectorAll('.sheet .menu-item').length,
+  }));
+  ok('Settings carries no swatches at all, and no label for them',
+    pkRows.rows === 0 && pkRows.items > 0
+    && !pkRows.labels.some((l) => /colour|color|Now/i.test(l)), pkRows);
 
-  /* ── AND PRESSING THE ONE ROW THAT IS LEFT MOVES ONLY YOUR OWN ──
-     Asserted in both directions, because each passes on the other's
-     bug: a build that still writes the old key would move --live too,
-     and a build with the row wired to nothing would move neither. */
-  const swap = await page.evaluate(async () => {
-    const cs = () => {
-      const c = getComputedStyle(document.documentElement);
-      return { me: c.getPropertyValue('--me').trim(),
-               live: c.getPropertyValue('--live').trim() };
-    };
-    const before = cs();
-    const row = document.querySelector('.pk-row');
-    const other = [...row.children].find((b) => !b.classList.contains('on'));
-    other.click();
-    await new Promise((r) => setTimeout(r, 60));
-    return { before, after: cs(), pressed: other.dataset.pk };
+  /* ── AND A STORED ONE IS REMOVED, NOT IGNORED ──
+     A preference for a control that no longer exists is a second
+     record of a decision nothing can act on — the same answer the
+     stored palette name, the subtitle key and the old rating scale
+     all got. Asserted as GONE rather than merely unread. */
+  /* meSwept, not swept: `swept` is already declared in this scope and
+     a second one is a SyntaxError that takes the whole file down
+     before an assertion runs. This repo's oldest bug in test-file
+     clothes, and the third time in one session — caught by node
+     --check rather than by "0 assertions across 1 files". */
+  const meSwept = await page.evaluate(() => {
+    localStorage.setItem('sched.me.v1', 'solar');
+    return true;
   });
-  ok('pressing a swatch moves your own colour',
-    swap.after.me !== swap.before.me, swap);
-  ok('...and Now is untouched, because there is nothing left to press for it',
-    swap.after.live === swap.before.live, swap);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(420);
+  ok('a colour stored by an older build is swept on boot',
+    meSwept && await page.evaluate(() =>
+      localStorage.getItem('sched.me.v1') === null));
 
-  /* ── EVERY SWATCH READS, ON THE FACE IT IS FOR ──
-     Sixteen hexes, and one set for both faces was built first and half
-     of it failed: a chip bright enough to stand off a near-black page
-     is about 2:1 against a white one. So each swatch is a pair, and
-     both halves have to be measured — the light one on its own context
-     at the foot of this file, because the face nobody is developing on
-     is the one that breaks.
+  /* ── THE SWATCH CHECKS WENT WITH THE SWATCHES ──
+     Sixteen hexes were measured here, eight per face, each held to
+     4.5:1 for the label on it and 3:1 against the page. There is no
+     row to press any more, so both are checks on a control that does
+     not exist — kept, they would be sixteen assertions about nothing,
+     and this file's own rule is that a check which cannot see its
+     subject is worse than none.
 
-     The chip is a filled ground with a LABEL on it, so 4.5:1 for the
-     text, and it has to stand off the page, so 3:1 as a graphic. */
-  const swatch = await page.evaluate(() => {
-    const L = (c) => { const v = c.map((x) => x / 255)
-      .map((x) => x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4));
-      return .2126 * v[0] + .7152 * v[1] + .0722 * v[2]; };
-    const R = (a, b) => (Math.max(L(a), L(b)) + .05) / (Math.min(L(a), L(b)) + .05);
-    const num = (s) => (s.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
-    const paint = (h) => { const d = document.createElement('div');
-      d.style.color = h; document.body.appendChild(d);
-      const c = num(getComputedStyle(d).color); d.remove(); return c; };
-    const cs = getComputedStyle(document.documentElement);
-    const on = paint(cs.getPropertyValue('--on-red').trim());
-    const page = num(getComputedStyle(document.body).backgroundColor);
-    const out = [];
-    document.querySelectorAll('.pk-row')[0].childNodes.forEach((b) => {
-      const c = paint(getComputedStyle(b, '::before').backgroundColor);
-      out.push({ k: b.dataset.pk, label: R(c, on), page: R(c, page) });
-    });
-    return out;
-  });
-  const wLab = Math.min(...swatch.map((x) => x.label));
-  const wPage = Math.min(...swatch.map((x) => x.page));
-  ok(`every swatch carries its label (${swatch.length} of them, worst `
-    + `${wLab.toFixed(2)}:1)`, swatch.length === 8 && wLab >= 4.5, swatch);
-  ok(`...and stands off the page (worst ${wPage.toFixed(2)}:1)`,
-    wPage >= 3, swatch);
+     What the pair-per-face lesson was FOR survives one screen over:
+     the tags are still nine hexes doubled for the two faces, and are
+     still measured that way below. */
 
   /* ── AND A NAME THIS BUILD DOES NOT HAVE FALLS THROUGH ──
      What is stored is the swatch's NAME, so it can resolve to a
      different hex on each face — and a name outlives the code that
      wrote it, the way sched.view.v1 and sched.ty.v1 both do. A colour
      that resolves to nothing is a blank chip and an invisible face. */
+  /* Nothing writes this key any more and boot removes it, so what is
+     asserted is the one thing that still matters about it: --me
+     resolves to a real hex whatever is in storage. It is still pushed
+     with your record, so a peer drawing you from a token that came
+     back empty would draw you as nothing at all. */
   await page.evaluate(() => {
     localStorage.setItem('sched.me.v1', 'chartreuse');
   });
@@ -4548,9 +4551,8 @@ const SAID = [
     const c = getComputedStyle(document.documentElement);
     return { me: c.getPropertyValue('--me').trim() };
   });
-  ok('a stored colour this build does not have falls through to a real one',
+  ok('the colour your record carries resolves to a real hex regardless',
     /^#[0-9a-f]{6}$/i.test(fell.me), fell);
-  await page.evaluate(() => { localStorage.removeItem('sched.me.v1'); });
 
   /* ── A KEY NOTHING READS ANY MORE IS SWEPT, NOT LEFT ──
      The same rule the old palette name and the stored theme key keep:
@@ -5346,8 +5348,24 @@ const SAID = [
     ok('the crown is gold, not the leader\u2019s own colour',
       crown.fill === crown.gold && crown.fill !== crown.theirs
       && crown.set === '', JSON.stringify(crown));
+    /* ── AND SO DOES THEIR FACE, WHICH IT DID NOT ──
+       A friend's face was drawn in the colour THEY chose, which was
+       the whole reason `acc` travels with a record. There is no
+       choosing one any more: the default avatar is the same
+       silhouette for everybody, which is what a picture of somebody
+       who has not set one should be.
+
+       So it is asserted as the flat neutral AND as not their colour —
+       "it is grey" on its own passes on a build where their accent
+       happens to be grey, and this fixture's is a teal. Their colour
+       has not stopped travelling: it is still what the almanac's lit
+       days are drawn in, which is checked further down. */
     const faceFill = await fp.$eval('.fr-row .pic svg rect', (e) => e.getAttribute('fill'));
-    ok('and so does their face', faceFill === '#0F6E6A', faceFill);
+    const neutral = await fp.evaluate(() => getComputedStyle(document.documentElement)
+      .getPropertyValue('--tick-off').trim());
+    ok('their face is the same silhouette as everybody\u2019s, not their own colour',
+      faceFill.toLowerCase() === neutral.toLowerCase()
+      && faceFill.toLowerCase() !== '#0f6e6a', { faceFill, neutral });
 
     /* Measured on composited pixels, not argued from the token. Every
        one of the 169 reader-against-leader pairings was measured when
@@ -5977,6 +5995,55 @@ const SAID = [
     await fp.click('.sheet .btn.go');
     await fp.waitForTimeout(900);
     ok('...and clearing it takes it back down', rec().bio === '', rec().bio);
+    /* ══════════════════════════════════════════════════════
+       AND A WAY TO GO AND LOOK
+
+       A row of switches tells you what you have agreed to; it does not
+       tell you what somebody SEES. The preview draws through the
+       friend sheet's own body — the same function, with the same
+       payload the push builds — so it cannot drift from the thing it
+       is a preview of, and that is the only way one is worth opening.
+
+       Asserted as the switches DECIDING it, not merely as a screen
+       that draws: turn two on and two off, and the two that are off
+       have to be absent here. */
+    await openMe();
+    await fp.click('.pv-row >> nth=0');          /* Showing up on */
+    await fp.waitForTimeout(500);
+    await fp.click('.pv-row >> nth=1');          /* Objectives on  */
+    await fp.waitForTimeout(500);
+    await fp.click('.sheet >> text=See it as a friend does');
+    await fp.waitForTimeout(700);
+    const seen = await fp.evaluate(() => ({
+      title: (document.getElementById('scSheetTitle') || {}).textContent,
+      yr: document.querySelectorAll('.pf-yr i').length,
+      shelf: document.querySelectorAll('.pf-shelf').length,
+      cols: document.querySelectorAll('.pf-cols').length,
+      /* THE ONE CONTROL A PREVIEW MUST NOT HAVE. Removing yourself
+         from your own preview is not a thing that can mean anything,
+         and a control that exists and refuses is worse than one that
+         is not there. */
+      rm: document.querySelectorAll('.fp-rm').length,
+      back: [...document.querySelectorAll('.sheet .menu-item')]
+        .some((b) => /Back to your profile/.test(b.textContent)),
+    }));
+    ok('you can see your own profile the way a friend does',
+      seen.title === 'As a friend sees you' && seen.yr === 371
+      && seen.rm === 0 && seen.back, seen);
+    /* Reading and Workouts are still off, so they are not drawn — the
+       preview is of the PAYLOAD rather than of the record. */
+    ok('...and what you have not turned on is not in it',
+      seen.shelf === 0 && seen.cols === 0, seen);
+    /* The way back is a level, not a close: without it, shutting the
+       preview lands you on the board and the switches are two presses
+       away again. */
+    await fp.click('.sheet >> text=Back to your profile');
+    await fp.waitForTimeout(600);
+    ok('...and the way back returns to the switches rather than closing',
+      await fp.evaluate(() =>
+        (document.getElementById('scSheetTitle') || {}).textContent === 'Your profile'
+        && document.querySelectorAll('.pv-row').length === 4));
+
     /* And this block puts the app back the way it found it, which is
        the whole of what went wrong above. */
     await fp.keyboard.press('Escape');
@@ -9353,45 +9420,49 @@ const SAID = [
       ltags.length >= 2 && lLow >= 4.5,
       ltags.map((x) => x.w + ' ' + ratio(x.label, x.on).toFixed(2)));
 
-    /* ── AND THE OTHER HALF OF EVERY SWATCH ──
-       Each of the eight is a PAIR: bright on the dark face, deep on
-       the light one. One set for both was built first and half of it
-       failed at about 2:1 against the white page, which is the tag
-       ring's own lesson at a bigger size — and it was only caught
-       because a light-face check existed to catch it. This is that
-       check for the pair that replaced it. */
-    await lpage.evaluate(() => document.getElementById('scTabYou').click());
-    await lpage.waitForTimeout(360);
-    const lsw = await lpage.evaluate(() => {
+    /* ── AND THE SWATCHES ARE GONE FROM HERE TOO ──
+       Eight pairs were measured on this face, which is where the
+       one-set-for-both mistake was caught: a chip bright enough to
+       stand off a near-black page is about 2:1 against a white one.
+       There is no row to press any more — the avatar is a silhouette
+       in the flat neutral and nobody chooses a colour — so the check
+       has no subject.
+
+       WHAT IT WAS FOR IS ASSERTED INSTEAD: the face has to read on
+       THIS face as well, and it is the one drawing that changed. The
+       lesson the swatches taught is that the light face is the one
+       nobody develops on and therefore the one that breaks. */
+    const lface = await lpage.evaluate(() => {
       const L = (c) => { const v = c.map((x) => x / 255)
         .map((x) => x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4));
         return .2126 * v[0] + .7152 * v[1] + .0722 * v[2]; };
-      const R = (a, b) => (Math.max(L(a), L(b)) + .05) / (Math.min(L(a), L(b)) + .05);
+      const R = (a2, b2) => (Math.max(L(a2), L(b2)) + .05) / (Math.min(L(a2), L(b2)) + .05);
       const num = (t) => (t.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
       const paint = (h) => { const d = document.createElement('div');
         d.style.color = h; document.body.appendChild(d);
         const c = num(getComputedStyle(d).color); d.remove(); return c; };
-      const on = paint(getComputedStyle(document.documentElement)
-        .getPropertyValue('--on-red').trim());
-      const pg = num(getComputedStyle(document.body).backgroundColor);
-      return [...document.querySelectorAll('.pk-row')[0].childNodes].map((b) => {
-        const c = paint(getComputedStyle(b, '::before').backgroundColor);
-        return { k: b.dataset.pk, label: R(c, on), page: R(c, pg) };
-      });
+      const sv = document.querySelector('#scTabFace svg');
+      if (!sv) throw new Error('no face on the light page to measure');
+      return { fig: R(paint(sv.querySelector('circle').getAttribute('fill')),
+                      paint(sv.querySelector('rect').getAttribute('fill'))),
+               marks: sv.querySelectorAll('circle, path').length };
     });
-    const lswLab = Math.min(...lsw.map((x) => x.label));
-    const lswPage = Math.min(...lsw.map((x) => x.page));
-    ok(`the light face's swatches read too (label ${lswLab.toFixed(2)}:1, `
-      + `page ${lswPage.toFixed(2)}:1)`,
-      lsw.length === 8 && lswLab >= 4.5 && lswPage >= 3,
-      lsw.map((x) => x.k + ' ' + x.label.toFixed(2) + ' / ' + x.page.toFixed(2)));
-    /* AND THEY ARE THE OTHER HALF, not the same eight hexes drawn on a
-       different page. A pair that resolved to one value would pass
-       every ratio above on the dark face and fail here — this says so
-       directly, so the reason is in the output rather than inferred. */
-    ok('...and they are not the dark face\u2019s own eight',
-      await lpage.evaluate(() => getComputedStyle(document.documentElement)
-        .getPropertyValue('--me').trim().toLowerCase()) !== '#8b72ff');
+    ok(`the silhouette reads on the light face too (${lface.fig.toFixed(2)}:1)`,
+      lface.fig >= 3 && lface.marks === 2, lface);
+    /* ON SETTINGS, or the count is measured on a screen that never
+       had a row and passes for it — which is exactly the vacuous
+       check this file keeps having to catch. The sheet is asserted to
+       have its other rows, so "no swatches" cannot pass on a sheet
+       that failed to build. */
+    await lpage.evaluate(() => document.getElementById('scTabYou').click());
+    await lpage.waitForTimeout(420);
+    const lset = await lpage.evaluate(() => ({
+      rows: document.querySelectorAll('.pk-row').length,
+      items: document.querySelectorAll('.sheet .menu-item').length }));
+    ok('...and Settings on this face carries no swatches either',
+      lset.rows === 0 && lset.items > 0, lset);
+    await lpage.keyboard.press('Escape');
+    await lpage.waitForTimeout(360);
 
     ok('nothing threw on the light face', lerrs.length === 0, lerrs);
     await lctx.close();

@@ -4685,6 +4685,15 @@
         body.appendChild(b);
       });
 
+      /* ── AND A WAY TO GO AND LOOK ──
+         Under the switches rather than above them, because it is the
+         answer to what they add up to. It draws through the friend
+         sheet's own body, so what you see here is what they see. */
+      var see = scEl('button', 'menu-item');
+      see.appendChild(document.createTextNode('See it as a friend does'));
+      see.addEventListener('click', scProfileMine);
+      body.appendChild(see);
+
       /* Said on the screen where the switches are, and it names the
          three things no switch can reach. A promise is only worth
          anything where the decision is being taken. */
@@ -4899,7 +4908,17 @@
      fortnight of everything or thirty days of one. */
   function scFriendSheet(p) {
     scSheet(p.name, function (body) {
-      var r = peers[p.code] || {};
+      scProfileBody(body, p, peers[p.code] || {}, true);
+    });
+  }
+
+  /* ── ONE DRAWING, TWO CALLERS ──
+     A friend's profile and the preview of your own go through THIS,
+     or they drift — and a preview that has drifted is worse than none,
+     because the whole of what it is for is being true. The only thing
+     the caller decides is whether `Remove` is on the end, which is the
+     one control a preview must not have. */
+  function scProfileBody(body, p, r, real) {
 
       /* TWO FIGURES, not one hero and a caption. The total was 30px
          with `ticks in thirty days · 20 days showing up` running under
@@ -5103,6 +5122,7 @@
          press. Removing a friend takes them off a list; it is not the
          kind of delete that needs warning about, and the sheet says so
          by not saying anything. */
+      if (!real) return;
       body.appendChild(scEl('div', 'menu-rule'));
       var rm = scEl('button', 'menu-item bad fp-rm');
       rm.appendChild(document.createTextNode('Remove'));
@@ -5113,6 +5133,58 @@
         scToast(p.name + ' removed', false);
       });
       body.appendChild(rm);
+  }
+
+  /* ── YOUR OWN PROFILE, AS A FRIEND SEES IT ──
+     Built from the SAME builders the push uses, gated by the same
+     switches — so this is not a rendering of your record, it is a
+     rendering of the payload. Turn a switch off and the section is
+     gone here too, which is the only way a preview can be worth
+     opening: it answers "what do they actually see" rather than
+     "what would this look like".
+
+     It reads `share` directly rather than the last thing pushed,
+     because the last push may not have happened yet — you flick a
+     switch and look, and a preview that waited on the network would
+     be showing you the answer to the previous question. */
+  function scProfileMine() {
+    var cs = getComputedStyle(document.documentElement);
+    var rec = {
+      bio: scShareBio(),
+      year: share.up ? scShareYear() : '',
+      goals: share.goals ? scShareGoals() : [],
+      work: share.work ? scShareWork() : [],
+      mind: share.mind ? scShareMind() : [],
+      logs: posts.slice(-30).map(function (q) {
+        return { id: q.id, at: q.at, day: q.day, item: q.item, cap: q.cap, img: q.img };
+      })
+    };
+    var days = scMyDays();
+    var me = {
+      code: net.code, name: net.name || 'You', me: false,
+      acc: cs.getPropertyValue('--me').trim(),
+      ink: cs.getPropertyValue('--on-red').trim(),
+      pic: net.pic || '',
+      streak: scRunOf(days),
+      blocks: scBlocksIn(days, 30),
+      ticks: scCount(days, 30)
+    };
+    scSheet('As a friend sees you', function (body) {
+      scProfileBody(body, me, rec, false);
+      /* Somebody who has turned nothing on gets a sheet with nothing
+         drawn on it, which is the honest answer and reads as broken
+         without a line saying so. */
+      if (!rec.bio && !rec.year && !rec.goals.length
+          && !rec.work.length && !rec.mind.length) {
+        body.appendChild(scEl('p', 'hint',
+          'Nothing is turned on, so a friend sees your name and your '
+          + 'streak on the board and nothing else.'));
+      }
+      body.appendChild(scEl('div', 'menu-rule'));
+      var b = scEl('button', 'menu-item');
+      b.appendChild(document.createTextNode('Back to your profile'));
+      b.addEventListener('click', scProfileSheet);
+      body.appendChild(b);
     });
   }
 
@@ -9149,20 +9221,37 @@
       for (var k in a) if (a.hasOwnProperty(k)) e.setAttribute(k, a[k]);
       return e;
     };
+    /* ── A SILHOUETTE, AND IT IS THE SAME ONE FOR EVERYBODY ──
+       It was a coloured disc with two eyes and a smile — a face per
+       person, drawn out of a colour they picked. What replaced it is
+       the placeholder every other app uses, on purpose: a picture of
+       nobody is what an empty avatar should be, and a generated face
+       is a small claim about somebody who has not made one.
+
+       THE COLOUR WENT WITH IT. There is no swatch row any more, so a
+       face drawn from a chosen colour would be drawn from a colour
+       nobody chose — and this app's rule is that colour says WHICH.
+       With nothing left to say, it is the flat neutral.
+
+       `acc` is still ACCEPTED and ignored here: a friend's record
+       carries one, and records written before this are on the server
+       right now. Dropping the parameter would be a signature change
+       for a value nothing reads. */
     var cs = getComputedStyle(document.documentElement);
-    /* --me, not --red. Your own face is the one place a colour you
-       chose is drawn, and `acc` is a FRIEND's colour arriving from
-       their record — which is why the fallback is the only branch that
-       moved. */
-    var red = acc || cs.getPropertyValue('--me').trim();
-    var on = ink || cs.getPropertyValue('--on-red').trim();
+    /* The one pair the whole app already uses for a mark on a neutral
+       surface. Measured rather than picked: 3.26:1 on the dark face
+       and 3.30:1 on the light, against the 3:1 a graphic needs. */
+    var ground = cs.getPropertyValue('--tick-off').trim();
+    var fig = cs.getPropertyValue('--spent').trim();
     var s2 = mk('svg', { viewBox: '0 0 100 100' });
     s2.setAttribute('aria-hidden', 'true');
-    s2.appendChild(mk('rect', { x: 0, y: 0, width: 100, height: 100, fill: red }));
-    s2.appendChild(mk('circle', { cx: 22, cy: 35, r: 5, fill: on }));
-    s2.appendChild(mk('circle', { cx: 84, cy: 35, r: 5, fill: on }));
-    s2.appendChild(mk('path', { d: 'M43 62 Q67 78 92 60', fill: 'none', stroke: on,
-      'stroke-width': 4.5, 'stroke-linecap': 'round' }));
+    s2.appendChild(mk('rect', { x: 0, y: 0, width: 100, height: 100, fill: ground }));
+    /* A head and a pair of shoulders, both sized so the circle clip
+       cuts the shoulders rather than the head — the shoulders are
+       meant to run off the bottom edge, which is what makes it a
+       person rather than a lollipop. */
+    s2.appendChild(mk('circle', { cx: 50, cy: 38, r: 19, fill: fig }));
+    s2.appendChild(mk('path', { d: 'M12 100a38 38 0 0 1 76 0z', fill: fig }));
     var w = scEl('span', 'pic');
     w.style.width = px + 'px'; w.style.height = px + 'px';
     w.appendChild(s2);
@@ -9252,9 +9341,11 @@
         row.appendChild(d);
       }
       body.appendChild(row);
+      /* Both sentences named a colour you chose, and there is no
+         choosing one any more. */
       body.appendChild(scEl('p', 'hint', myPic
-        ? 'Yours now, and the face your accent gives you if you take it away.'
-        : 'Your accent draws this. Turn the wheel and it turns with you.'));
+        ? 'Yours now, and the one everybody starts with if you take it away.'
+        : 'Nobody has a picture until they set one. Add yours.'));
 
       var file = scEl('input', 'pic-file');
       file.type = 'file';
@@ -9427,16 +9518,15 @@
         });
         body.appendChild(row);
       };
-      pickRow('Your colour', ME_KEY, ME0, function () {
-        /* The face is DRAWN from the token rather than styled by it, so
-           a repaint does not reach it: every picture of you on screen
-           has to be built again. */
-        scPaintTabFace();
-        /* Safe from here: this one only DRAWS. Arriving at that screen
-           is what fetches, which is the split that stopped the first
-           version recursing. */
-        scPaintFriends();
-      });
+      /* ── THERE IS NO COLOUR TO PICK ──
+         The row was `Your colour`, eight swatches drawing your own
+         face. The face is a silhouette in the flat neutral now, so
+         the swatches drew a colour nothing on screen used — a control
+         for a decision that no longer exists, which is the shape this
+         app removes rather than leaves. `pickRow` stays because it is
+         one function and the day a second colour is worth choosing it
+         is already written; nothing calls it, and that is stated here
+         rather than left to be discovered. */
 
       var rule = scEl('div', 'menu-rule');
       body.appendChild(rule);
@@ -9611,7 +9701,12 @@
        so a stored one is a record of a control that no longer exists.
        Removed rather than ignored, the way the two view keys were. */
     localStorage.removeItem(ACCENT_KEY);
-    localStorage.removeItem(THEME_KEY);
+    /* A preference for a control that no longer exists is a second
+     record of a decision nothing can act on — the same answer the
+     stored palette name, the subtitle key and the Now colour all
+     got. */
+  localStorage.removeItem(ME_KEY);
+  localStorage.removeItem(THEME_KEY);
     /* The Now colour is fixed rather than chosen, and the row that let
        you pick one is gone with it — a key nothing reads any more is a
        second record of a decision that no longer exists. */
