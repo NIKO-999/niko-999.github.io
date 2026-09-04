@@ -6997,7 +6997,21 @@ const SAID = [
   {
     const { PNG: PNG5 } = require('pngjs');
     const dpr5 = 2;
-    const d0 = new Date();
+    /* ── BOTH CLOCKS HAVE TO BE FROZEN TOGETHER ──
+       This was `new Date()` — NODE's clock — while the page has been
+       frozen at 2026-09-01 09:30 since line 1124. The two agreed on
+       exactly one real day of the year, the day the fixture happened
+       to be written: on any later one, back(2) lands AFTER the page's
+       today, scWorkAll walks backwards from that today and never
+       visits it, and one Chest silently disappears. It read 7 of 8,
+       14 sessions of 15, and a 47-minute mean where 45 is the whole
+       point of the fixture — and it failed on the CLOCK, at midnight,
+       four hundred assertions from anything that had changed.
+
+       The app was correct throughout; measured against a page told
+       the same date, it draws 8. Read the page's own now, so the
+       fixture cannot drift from the clock it is measured against. */
+    const d0 = new Date(await page.evaluate(() => Date.now()));
     const back = (n) => {
       const x = new Date(d0); x.setDate(x.getDate() - n);
       return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0')
@@ -9068,6 +9082,26 @@ const SAID = [
     ok('...and drawing them has searched for nothing',
       leaks().length === 0, leaks());
 
+    /* ── AND PICKING ONE KEEPS THE JACKET IT WAS SHOWING ──
+       The Popular hit built its pick BY HAND with an empty cover,
+       which was right for exactly as long as Popular had none — and
+       on the day the jackets landed it was the one line that threw
+       them away. The drawn cover underneath is what made it look
+       deliberate rather than broken: reported as "the cover isn't
+       showing once I click it". A hit that behaves differently
+       depending on which list it came off is two objects wearing one
+       shape, so this is now the search hit's own two lines. */
+    await mpage.click('.mn-res .mn-hit >> nth=0');
+    await mpage.waitForTimeout(360);
+    ok('...and picking one keeps the jacket it was showing',
+      await mpage.evaluate(() => {
+        const p = document.querySelector('.mn-pick');
+        return !!p && p.querySelectorAll('.mn-art img').length === 1
+          && p.querySelector('b').textContent === 'Atomic Habits';
+      }));
+    await mpage.click('.mn-pick .btn.off');
+    await mpage.waitForTimeout(360);
+
     /* ── TYPING REPLACES THE SUGGESTIONS, NOT THE OTHER WAY ROUND ──
        Once you start putting something in, that is what the list
        should be about. */
@@ -9448,6 +9482,57 @@ const SAID = [
         const o = JSON.parse(localStorage.getItem('sched.mind.v1') || '{}');
         const day = Object.keys(o)[0];
         return !!day && o[day].t === 'The Daily Stoic' && o[day].k === 'pod';
+      }));
+
+    /* ── A POPULAR SHOW OPENS ITS EPISODES TOO ──
+       The same line that dropped the jacket dropped the ID, so a show
+       pressed off Popular logged the show while the identical show
+       pressed off the search opened its episodes. One object, two
+       behaviours, decided by which list you happened to reach it
+       from. Measured as the worker being asked for that show's own
+       number, which is the only thing that could carry it. */
+    await mpage.unroute('**/v1/pod/**');
+    await mpage.route('**/v1/pod/**', (r) => {
+      pods.push(r.request());
+      return r.fulfill({ status: 200, contentType: 'application/json',
+        body: JSON.stringify({ show: 'Huberman Lab', art: '', items: [
+          { t: 'Sleep Toolkit', d: 'Mon, 01 Sep 2026 06:00:00 GMT', s: 3600 } ] }) });
+    });
+    await openMind();
+    await mpage.click('.wc-chip >> nth=1');
+    await mpage.waitForTimeout(400);
+    const popPods = pods.length;
+    await mpage.click('.mn-res .mn-hit >> nth=1');    /* Huberman Lab */
+    await mpage.waitForTimeout(900);
+    const popShow = await mpage.evaluate(() => ({
+      eps: [...document.querySelectorAll('.mn-hit.is-ep b')].map((x) => x.textContent),
+      back: document.querySelectorAll('.mn-pick .wc-back').length,
+    }));
+    ok('a show pressed off Popular opens its episodes, like a searched one',
+      pods.length === popPods + 1
+      && /\/v1\/pod\/1545953110$/.test(pods[pods.length - 1].url())
+      && popShow.eps.length === 1 && popShow.back === 1, { popShow,
+        url: pods.length ? pods[pods.length - 1].url() : null });
+    /* ── AND IT PUTS THE RECORD BACK ──
+       This opened the episode level and stopped, which left the day
+       with no record at all — and the section below reads
+       Object.keys(o)[0] to find a day to damage, so it wrote a key
+       literally named "undefined" that the loader then dropped, and
+       failed four assertions about a fall-through that was working
+       perfectly. A check that changes the state of the app is a check
+       that has to put it back. */
+    await mpage.click('.mn-hit.is-ep >> nth=0');
+    await mpage.waitForTimeout(360);
+    await mpage.click('.sheet .btn.go');
+    await mpage.waitForTimeout(360);
+    await mpage.click('.wc-min >> nth=3');
+    await mpage.waitForTimeout(620);
+    ok('...and filing it leaves the day with a record again',
+      await mpage.evaluate(() => {
+        const o = JSON.parse(localStorage.getItem('sched.mind.v1') || '{}');
+        const day = Object.keys(o)[0];
+        return !!day && /^\d{4}-\d{2}-\d{2}$/.test(day)
+          && o[day].t === 'Sleep Toolkit' && o[day].a === 'Huberman Lab';
       }));
 
     /* ── A STORED KIND THIS BUILD NO LONGER HAS FALLS THROUGH ──

@@ -6150,8 +6150,12 @@
       });
     }
     if (ask !== 'podcast') return list;
+    /* The id rides along, so a Popular show opens its episodes the
+       same way a searched one does — a hit that behaves differently
+       depending on which list it came off is two objects wearing one
+       shape. */
     var out = list.map(function (h) {
-      return { t: h.t, a: h.a, c: (popArt && popArt[h.id]) || '' };
+      return { t: h.t, a: h.a, id: h.id, c: (popArt && popArt[h.id]) || '' };
     });
     /* One request for all six, and only the first time. A show whose
        id has moved simply keeps its drawn cover — the list is still
@@ -6500,9 +6504,9 @@
         /* ── AND BEFORE YOU HAVE TYPED, A FEW WELL-KNOWN ONES ──
            The empty state of a search field is not "nothing here" —
            it opens on MIND_POPULAR, and typing anything replaces it
-           with the real search below. Nothing has been asked off
-           origin to draw this: every one of these is initials, the
-           same generated cover a typed title with no artwork gets. */
+           with the real search below. WHICH six is written into the
+           app; only the jackets are asked for, and they are the same
+           six from every phone. */
         if (!typed.trim() && !hits.length && !state) {
           var kk0 = scMindKind(cur);
           /* The callback repaints when a podcast lookup lands; a book
@@ -6523,7 +6527,15 @@
               pb.appendChild(pt2);
               pb.setAttribute('aria-label', h.t + ', ' + h.a);
               pb.addEventListener('click', function () {
-                pick = { t: h.t, a: h.a, c: '' };
+                /* ── A POPULAR HIT IS A HIT ──
+                   This built the pick by hand with an empty cover,
+                   which was correct for exactly as long as Popular
+                   had none: the day the jackets landed it was the one
+                   line that threw them away, and the drawn cover
+                   underneath made it look deliberate. It is the
+                   search hit's own two lines now, id and all. */
+                if (cur === 'pod' && h.id) { openShow(h); return; }
+                pick = { t: h.t, a: h.a, c: h.c || '' };
                 draw();
               });
               pl.appendChild(pb);

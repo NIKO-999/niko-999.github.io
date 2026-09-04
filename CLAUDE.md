@@ -5812,3 +5812,54 @@ off-origin checks, because `page.on('request')` fires whether or not a
 route answers. Relaxing the *nothing threw* checks instead would have
 been the mistake: those are what catch a real fault.
 
+
+### A popular hit is a hit, and it was two objects wearing one shape
+
+Reported as *the cover isn't showing once I click it now* — the
+jackets drew in the list and vanished the moment one was pressed.
+Nothing was wrong with the covers.
+
+**THE POPULAR HIT BUILT ITS PICK BY HAND**, with `c: ''` written into
+it, and that was correct for exactly as long as Popular had no
+artwork. The day the jackets landed it became the one line that threw
+them away — and the drawn cover underneath is what made it read as
+deliberate rather than broken, which is the same thing that hid the
+Open Library placeholder for a round.
+
+**The same line dropped the ID, which was the quieter half.** A show
+pressed off Popular logged the show; the identical show pressed off
+the SEARCH opened its episodes. One object, two behaviours, decided
+by which list you happened to reach it from. It is the search hit's
+own two lines now — `openShow` on a podcast with an id, otherwise the
+pick with `h.c` — so there is no second place for the two to drift
+apart.
+
+**A CHECK THAT CHANGES THE STATE OF THE APP HAS TO PUT IT BACK**, and
+the new block did not. It opened the episode level and stopped, so
+the day ended with no record — and the section under it reads
+`Object.keys(o)[0]` to find a day to damage, wrote a key literally
+named `undefined`, and failed four assertions about a fall-through
+that was working perfectly. It files the episode now.
+
+### The Workouts fixture read the wrong clock, and it passed on one day a year
+
+Six assertions went red at midnight, four hundred lines from anything
+that had changed, on a screen the edit could not reach. Proven not to
+be the change by running clean HEAD after the rollover and watching
+the same six fall over.
+
+**`d0` was NODE's clock and the page has been frozen at 2026-09-01
+since line 1124.** The two agree on exactly one real date — the one
+the fixture was written on — and on any later one `back(2)` lands
+AFTER the page's today. `scWorkAll` walks backwards from that today,
+so it never visits the day, and one Chest disappears: **7 of 8, 14
+sessions of 15, and a 47-minute mean where 45 is the entire point of
+the fixture** (four at 30 and four at 60 average to a figure in
+neither input; three and four average to 47).
+
+**The app was right the whole time**, which is what a probe settled in
+thirty seconds: told the same date, it draws 8 and lights 8. This is
+*both clocks have to be frozen together* in the other direction, and
+it is the fourth time this file has recorded a check that only passes
+at certain hours. The fixture reads the page's own `Date.now()` now,
+so it cannot drift from the clock it is measured against.
