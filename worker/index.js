@@ -137,6 +137,33 @@ function trim(rec) {
   }
   rec.days = keep;
   if (Array.isArray(rec.logs)) rec.logs = rec.logs.slice(-60);
+
+  /* ── WHAT A PROFILE IS ALLOWED TO BE ──
+     The 96KB ceiling already stops a record being enormous, and that
+     is not the same as these fields having a shape. A cap here is
+     what makes "a bio is a line" and "a shelf is twelve books" facts
+     about the server rather than promises the client happens to keep
+     — and the client is the one thing here that anybody can replace.
+
+     Every one is CLAMPED rather than rejected: a record arriving a
+     little too long is somebody on an old build, and dropping their
+     whole day for it would be the harshest possible reading of a
+     field this server does not need to be exact about. */
+  const str = (v, n) => (typeof v === 'string' ? v.slice(0, n) : '');
+  rec.bio = str(rec.bio, 140);
+  /* A year and no more, because the almanac is a year. A digit a day
+     is what keeps this 371 bytes rather than nine kilobytes. */
+  rec.year = str(rec.year, 371).replace(/[^0-9]/g, '');
+  rec.goals = Array.isArray(rec.goals)
+    ? rec.goals.slice(0, 6).map((g) => str(g, 40)).filter(Boolean) : [];
+  rec.work = Array.isArray(rec.work) ? rec.work.slice(0, 6).map((w) => ({
+    n: str(w && w.n, 40), c: str(w && w.c, 24),
+    v: Math.max(0, Math.min(9999, Math.floor(Number(w && w.v) || 0))),
+  })).filter((w) => w.n) : [];
+  rec.mind = Array.isArray(rec.mind) ? rec.mind.slice(0, 12).map((m) => ({
+    t: str(m && m.t, 60), a: str(m && m.a, 40),
+    c: str(m && m.c, 300), k: str(m && m.k, 8),
+  })).filter((m) => m.t) : [];
   return rec;
 }
 

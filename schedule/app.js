@@ -3682,6 +3682,143 @@
      seconds is one write rather than five, which is the difference
      between a free tier that lasts and one that does not. */
   var pushT = null;
+  /* ═══════════════════════════════════════════════════════════
+     WHAT YOU SHARE
+
+     THIS REVERSES THE OLDEST RULE IN THIS APP, and it is written down
+     as a reversal rather than slipped in. The line was that a COUNT
+     may leave and a LIST never may — "a count says you showed up and
+     a list says what your day is, and the second is the thing this
+     app exists not to send". Books, sessions and objectives are all
+     lists, so a profile worth opening cannot be built under it.
+
+     What replaces it is narrower than "anything goes" and wider than
+     what it replaces: NOTHING LEAVES UNLESS YOU TURNED IT ON. One
+     switch per thing, every switch OFF until you touch it, and all of
+     them on one screen — so what you are sharing is something you can
+     read in one go rather than infer from four places.
+
+     AND THREE THINGS STILL HAVE NO SWITCH, because a switch would
+     imply they are on the table. The WEEK never leaves: it is the
+     shape of your life and it is the one record this app has never
+     sent. How a day FELT never leaves (`sched.rate.v1`), which was
+     already its own rule. And the NOTE on a Mind entry never leaves —
+     the title is what you read, the note is what you thought, and
+     only the first of those is a fact about a book. */
+  var SHARE_KEY = 'sched.share.v1';
+  /* Every one OFF. A default that shares is a default nobody chose,
+     and the whole of what makes this a decision is that it starts at
+     nothing. */
+  var SHARE_DEF = { bio: '', up: 0, goals: 0, work: 0, mind: 0 };
+  var share = {};
+  /* The switches, and the sentence under each says what LEAVES rather
+     than what the section is called — "Workouts" is the name of a
+     screen, and what you are agreeing to is the list of sessions. */
+  var SHARE_ROWS = [
+    ['up', 'Showing up', 'A year of days you kept something, and your streak.'],
+    ['goals', 'Objectives', 'The sentences you wrote. Never whether you did them.'],
+    ['work', 'Workouts', 'Which sessions you do and how many of each.'],
+    ['mind', 'Reading', 'Books and shows by name. Never your notes on them.']
+  ];
+  /* 53 weeks, so the almanac's grid is full columns of seven with no
+     ragged end. */
+  var YEAR_DAYS = 371;
+
+  function scShareLoad() {
+    var v = scReadJSON(SHARE_KEY, null);
+    share = {};
+    Object.keys(SHARE_DEF).forEach(function (k) {
+      share[k] = (v && v[k] != null) ? v[k] : SHARE_DEF[k];
+    });
+    share.bio = String(share.bio || '').slice(0, 140);
+  }
+  function scShareSave() { scWriteJSON(SHARE_KEY, share); }
+
+  /* ── A YEAR AS A STRING OF DIGITS, NOT A MAP OF OBJECTS ──
+     371 days written as `{ "2026-09-04": { t: 3, b: 5 } }` is about
+     nine kilobytes of JSON for a picture that needs one number a day;
+     as one character each it is 371 bytes, and the record has a 96KB
+     ceiling it shares with thirty logs. Oldest first, so the grid
+     reads left to right the way it is drawn. Capped at 9 because a
+     day has to be one character, and nobody keeps ten things. */
+  function scShareYear() {
+    var s = '';
+    for (var i = YEAR_DAYS - 1; i >= 0; i--) {
+      var d = scDayBack(i);
+      var t = tickLog[d] ? Object.keys(tickLog[d]).length : 0;
+      var b = blockLog[d] ? Object.keys(blockLog[d]).length : 0;
+      s += String(Math.min(9, t + b));
+    }
+    return s;
+  }
+
+  /* ── THE SENTENCES, AND NEVER THE TICK ──
+     Whether you did an objective is the same claim as a rating: it is
+     about how the day went, and that is the one thing on this record
+     with no switch at all. Deduped and newest first, because the same
+     objective written on twelve days is one thing you are working on
+     rather than twelve. */
+  function scShareGoals() {
+    var seen = {}, out = [];
+    for (var i = 0; i < 90 && out.length < 6; i++) {
+      var list = objLog[scDayBack(i)] || [];
+      for (var j = 0; j < list.length && out.length < 6; j++) {
+        var n = String((list[j] && list[j].n) || '').trim().slice(0, 40);
+        if (!n || seen[n.toLowerCase()]) continue;
+        seen[n.toLowerCase()] = 1;
+        out.push(n);
+      }
+    }
+    return out;
+  }
+
+  /* Which sessions and how many, over the same 91 days the Workouts
+     screen counts — so a friend sees the panel you see rather than a
+     second arithmetic that can disagree with it.
+
+     THE COLOUR TRAVELS WITH IT, for the reason the accent already
+     does: a hue that says WHICH has to be the same hue on their phone
+     as on yours, and these nine are literals precisely because they
+     do not follow a theme. */
+  function scShareWork() {
+    var by = {};
+    scWorkAll().forEach(function (h) {
+      var k = scWorkSig(h);
+      if (!by[k]) {
+        var w0 = scWorkoutsOf(k)[0];
+        by[k] = { n: scWorkName(k), c: String((w0 && w0.c) || ''), v: 0 };
+      }
+      by[k].v++;
+    });
+    return Object.keys(by).map(function (k) { return by[k]; })
+      .sort(function (a, b) { return b.v - a.v; }).slice(0, 6);
+  }
+
+  /* Title, who it is by, the jacket's address and the kind — never
+     the note. The cover is a public URL on somebody else's server,
+     the same one from every phone, so it says nothing about you that
+     the title has not already said.
+
+     AN ENTRY WITH NO TITLE IS SKIPPED. A walk and a journal have none
+     by design, and a shelf with blank spines in it is a worse picture
+     than a shorter shelf. */
+  function scShareMind() {
+    return scMindEntries().filter(function (e) { return e.r && e.r.t; })
+      .slice(0, 12).map(function (e) {
+        return { t: String(e.r.t).slice(0, 60),
+                 a: String(e.r.a || '').slice(0, 40),
+                 c: String(e.r.c || '').slice(0, 300),
+                 k: String(e.r.k || '').slice(0, 8) };
+      });
+  }
+
+  /* THE BIO HAS NO SWITCH, and that is the one place a switch would
+     be furniture: it is a sentence that exists only to be read by
+     somebody else, so writing one IS the decision and clearing it is
+     how you take it back. A field that does nothing until you also
+     find a toggle is two controls for one intention. */
+  function scShareBio() { return String(share.bio || '').slice(0, 140); }
+
   function scPush() {
     if (!net.on || !net.code) return;
     clearTimeout(pushT);
@@ -3704,6 +3841,16 @@
         ink: cs.getPropertyValue('--on-red').trim(),
         pic: net.pic || '',
         days: scMyDays(),
+        /* Each one gated by its own switch, and an OFF switch sends
+           the empty shape rather than omitting the key — a reader
+           cannot tell a field somebody turned off from a field this
+           build did not have yet, and the first of those has to
+           overwrite what was there before. */
+        bio: scShareBio(),
+        year: share.up ? scShareYear() : '',
+        goals: share.goals ? scShareGoals() : [],
+        work: share.work ? scShareWork() : [],
+        mind: share.mind ? scShareMind() : [],
         /* `local` is stripped HERE, and the first version did not do
            it. A post carries the full data URL of its own photograph so
            your own feed draws instantly and still draws with no signal
@@ -4095,7 +4242,11 @@
         li.classList.add('is-tap');
         li.setAttribute('role', 'button');
         li.tabIndex = 0;
-        var open = p.me ? scNetSheet : function () { scFriendSheet(p); };
+        /* Your own row opens your PROFILE now rather than the code
+           sheet: what somebody presses their own name to change is
+           what a friend can see, and the code is a thing you show
+           once. Turning it off still lives behind Your code. */
+        var open = p.me ? scProfileSheet : function () { scFriendSheet(p); };
         li.addEventListener('click', open);
         li.addEventListener('keydown', function (e) {
           if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
@@ -4332,8 +4483,26 @@
       head.appendChild(rm);
     }
     card.appendChild(head);
+    /* ── THE CAPTION LEADS ──
+       It sat under the photograph, which is where a caption goes on a
+       printed page and the wrong way round here: the picture is a
+       square, so on a phone the words were most of a screen below the
+       name that owns them and you read the image with nothing to read
+       it AGAINST. Above, it is a sentence somebody said and then the
+       thing they said it about. */
+    if (p.cap) card.appendChild(scEl('p', 'po-c', p.cap));
     if (p.img) {
-      var wrap = scEl('div', 'po-img');
+      /* ── AND THE PICTURE OPENS ──
+         The card crops to a square, so a tall photograph is mostly
+         not on the screen — which is what makes this a real control
+         rather than a flourish. A BUTTON, not a listener on the
+         wrapper: it is focusable, it is named, and it is reachable
+         from a keyboard, and the post's own delete is a sibling
+         rather than an ancestor so nothing nests. */
+      var wrap = scEl('button', 'po-img');
+      wrap.type = 'button';
+      wrap.setAttribute('aria-label',
+        p.cap ? 'See the full picture: ' + p.cap : 'See the full picture');
       var im = document.createElement('img');
       im.src = it.me && p.local ? p.local : scImgURL(p.img);
       im.alt = p.cap || '';
@@ -4341,10 +4510,51 @@
          scPostSheet, and a `.sheet` rests off-screen by transform
          until it opens. scMindArt carries the full reasoning. */
       wrap.appendChild(im);
+      wrap.addEventListener('click', function () {
+        scPhoto(im.src, p.cap || '');
+      });
       card.appendChild(wrap);
     }
-    if (p.cap) card.appendChild(scEl('p', 'po-c', p.cap));
     return card;
+  }
+
+  /* ── THE WHOLE PICTURE ──
+     Built and REMOVED rather than hidden, which is this file's
+     `[hidden]` trap answered by not having the trap: a surface that
+     takes a `display` and is put away with the attribute has broken
+     six times in this app, most of them invisibly. An element that is
+     not in the document cannot be a full-screen press target sitting
+     over the app.
+
+     `contain`, not `cover`: the card crops to a square and this is
+     the screen that does not, which is the whole reason to open it. */
+  var photoOn = null;
+  function scPhoto(src, cap) {
+    scPhotoClose();
+    var v = scEl('div', 'ph');
+    v.setAttribute('role', 'dialog');
+    v.setAttribute('aria-modal', 'true');
+    v.setAttribute('aria-label', cap || 'Full picture');
+    v.tabIndex = -1;
+    var im = document.createElement('img');
+    im.src = src;
+    im.alt = cap || '';
+    v.appendChild(im);
+    if (cap) v.appendChild(scEl('p', 'ph-c', cap));
+    /* Tap anywhere closes, the picture included — a photograph you
+       have finished looking at is one you want gone rather than one
+       you want to hunt a cross on, which is the history veil's own
+       rule and the reason it has no cross either. */
+    v.addEventListener('click', scPhotoClose);
+    document.body.appendChild(v);
+    photoOn = v;
+    requestAnimationFrame(function () { v.classList.add('is-open'); v.focus(); });
+  }
+  function scPhotoClose() {
+    if (!photoOn) return;
+    var v = photoOn;
+    photoOn = null;
+    v.remove();
   }
 
   /* ── one post, on its own ──
@@ -4423,6 +4633,79 @@
      One place, because there are two ways in: this settings sheet, and
      the board itself before you have set one. Two copies of a field
      that writes the same key is two places for it to drift. */
+  /* ── YOUR OWN PROFILE ──
+     The bio and the four switches, on one screen, because what you
+     are sharing has to be readable in one go. It is reached from your
+     own row on the board, which is where somebody looking to fix what
+     a friend can see would go first. */
+  function scProfileSheet() {
+    scSheet('Your profile', function (body) {
+      body.appendChild(scEl('span', 'label', 'Name'));
+      var nm = scEl('button', 'menu-item');
+      nm.appendChild(document.createTextNode(net.name || 'Set a name'));
+      nm.addEventListener('click', scNameSheet);
+      body.appendChild(nm);
+
+      /* THE BIO IS ITS OWN SWITCH. A sentence that exists only to be
+         read by somebody else is shared by being written, and taken
+         back by being cleared — a field that does nothing until you
+         also find a toggle is two controls for one intention. */
+      body.appendChild(scEl('span', 'label', 'Bio'));
+      var bio = scEl('textarea', 'field');
+      bio.rows = 2;
+      bio.maxLength = 140;
+      bio.placeholder = 'A line about you. Leave it empty to share nothing.';
+      bio.value = share.bio || '';
+      body.appendChild(bio);
+
+      body.appendChild(scEl('span', 'label', 'What friends can see'));
+      SHARE_ROWS.forEach(function (row) {
+        var k = row[0];
+        var b = scEl('button', 'pv-row');
+        b.type = 'button';
+        b.setAttribute('role', 'switch');
+        var t = scEl('span', 'pv-t');
+        t.appendChild(scEl('b', null, row[1]));
+        t.appendChild(scEl('span', null, row[2]));
+        b.appendChild(t);
+        var sw = scEl('span', 'pv-sw');
+        sw.appendChild(scEl('i'));
+        b.appendChild(sw);
+        var paint = function () {
+          b.setAttribute('aria-checked', share[k] ? 'true' : 'false');
+          b.classList.toggle('is-on', !!share[k]);
+        };
+        paint();
+        b.addEventListener('click', function () {
+          share[k] = share[k] ? 0 : 1;
+          paint();
+          scShareSave();
+          scPushNow();
+        });
+        body.appendChild(b);
+      });
+
+      /* Said on the screen where the switches are, and it names the
+         three things no switch can reach. A promise is only worth
+         anything where the decision is being taken. */
+      body.appendChild(scEl('p', 'hint',
+        'Your week never leaves this phone, and neither does how a day felt '
+        + 'or anything you wrote in a note. Everything above is off until you '
+        + 'turn it on.'));
+
+      var acts = scEl('div', 'acts');
+      acts.appendChild(scBtn('off', 'Not now', scClose));
+      acts.appendChild(scBtn('go', 'Save', function () {
+        share.bio = String(bio.value || '').trim().slice(0, 140);
+        scShareSave();
+        scPushNow();
+        scClose();
+        scToast('Profile saved', false);
+      }));
+      body.appendChild(acts);
+    });
+  }
+
   function scNameSheet() {
     scTextSheet('Your name', 'Name', net.name, function (v) {
       net.name = (v || '').slice(0, 24);
@@ -4628,99 +4911,149 @@
          The face went with it. The sheet's own title is their name, so
          a 60px portrait under it was the third time in six inches that
          the screen said who this is. */
-      var pair = scEl('div', 'fp-pair');
-      var fig = function (n, cap) {
-        var d = scEl('div');
-        d.appendChild(scEl('b', '', String(n)));
-        d.appendChild(scEl('span', '', cap));
-        pair.appendChild(d);
-      };
-      fig(p.ticks, 'ticks · 30 days');
-      fig(p.streak, p.streak === 1 ? 'day showing up' : 'days showing up');
-      body.appendChild(pair);
+      /* ── THE ALMANAC ──
+         Chosen from ten treatments rendered over the real app at
+         390x844 and read at 1:1. What settled it is that a YEAR of
+         days answers "are they actually doing this" in a way no
+         figure can: two people with the same streak look nothing
+         alike over twelve months, and the shape is the thing you came
+         to read.
 
-      /* THIRTY, not seven. The record already holds thirty days and
-         the two figures above are both about thirty, so a seven-day
-         strip under them was answering a question nobody had asked and
-         hiding three quarters of what is there.
-
-         Two things had to change with the count, and both are the same
-         arithmetic. The day letters went, because at thirty across a
-         phone each cell is nine pixels and two characters do not go in
-         nine — and they were telling a Tuesday from a Thursday, which
-         is a question about a WEEK. And the mark went from a disc back
-         to a BAR: a disc's diameter is bounded by the cell's width, so
-         at thirty the smallest one is about four pixels and
-         antialiasing alone took it to 1.18:1 on the white page. The
-         suite caught that, not the eye.
-
-         A bar's height is free of the count, so it holds its colour at
-         any width — and the note that says a chart of seven numbers
-         between 0 and 5 is more apparatus than the numbers deserve was
-         written about SEVEN. Thirty days of them is a shape, and a
-         shape is the thing you came to read. */
-      /* ── THE STRIP IS THE BLOCKS ──
-         It was the tally's five, which is what the record used to
-         carry — and the two figures above are already about those
-         five. The question you open somebody's profile with is
-         whether they are doing the thing, and the thing is the
-         blocks. The count rides the heading rather than taking a
-         third figure: three at 26px do not go across a phone, and
-         this one is about the picture under it. */
-      var kh = scEl('div', 'fp-kh');
-      kh.appendChild(scEl('span', 'label fp-k', 'Blocks kept'));
-      kh.appendChild(scEl('em', null, String(p.blocks || 0)));
-      body.appendChild(kh);
-      var strip = scEl('div', 'fp-week is-month');
-      var top = 0;
-      for (var k = 0; k < 30; k++) {
-        top = Math.max(top, scDayOf(r.days && r.days[scDayBack(k)]).b);
+         TIME FIRST, and everything else hangs under it. The two 26px
+         figures that used to open this sheet are one line now — they
+         are a summary of the picture directly below them, and a
+         summary above the thing it summarises is the duplication this
+         project keeps taking back out. */
+      if (r.bio) {
+        var bio = scEl('p', 'pf-bio', String(r.bio).slice(0, 140));
+        body.appendChild(bio);
       }
-      for (var i = 29; i >= 0; i--) {
-        var day = scDayBack(i);
-        var n = scDayOf(r.days && r.days[day]).b;
-        var cell = scEl('span', 'fp-d' + (n ? ' on' : ''));
-        /* A disc per day, and its SIZE says how many of the five. A day
-           with none is a flat neutral at the smallest size — never a
-           red one. That is the habits screen's rule and its reason: a
-           wash of red across a week somebody missed is a judgement
-           about them, and a smaller mark is a fact.
 
-           It was seven bars of different heights, which is a chart, and
-           a chart of seven numbers between 0 and 5 is more apparatus
-           than the numbers deserve. A row of discs is read at a glance
-           and measured by nobody.
+      var year = typeof r.year === 'string' ? r.year : '';
+      if (year) {
+        var sline = scEl('div', 'pf-sub');
+        sline.appendChild(scEl('span', null,
+          p.streak + (p.streak === 1 ? ' day streak' : ' day streak')));
+        sline.appendChild(scEl('span', null, p.blocks + ' blocks kept'));
+        body.appendChild(sline);
 
-           SIZE RATHER THAN OPACITY, and that is not a taste call. The
-           first cut varied the alpha of their accent from .42 to 1 and
-           was measured across every theme against a spread of peer
-           accents: solar's amber at .42 came out at 1.30:1 on the white
-           page. Opacity could never have fixed it either — that amber
-           at FULL strength is about 1.9:1 on white, so the accent
-           itself is the problem and diluting it only made a bad number
-           worse. Size costs no contrast at all: every disc is drawn at
-           the one strength scCrown has already solved to clear 3:1 on
-           your page, and the count moves the diameter instead. */
-        var bar = scEl('i');
-        if (n && p.acc) bar.style.background = scCrown(p.acc);
-        /* A floor rather than a share: a day with nothing still has to
-           be a mark, because a gap in the strip would be a day that is
-           not there rather than a day with none on it. */
-        /* Scaled against the busiest day in the window rather than a
-           constant: five was the tally's ceiling and a day has as many
-           blocks as it has. A floor, so a day with none is still a
-           mark — a gap would be a day that is not there. */
-        bar.style.height = (n ? 26 + (n / Math.max(1, top)) * 74 : 16) + '%';
-        var hold = scEl('span', 'fp-hold');
-        hold.appendChild(bar);
-        cell.appendChild(hold);
-        /* Two letters, not one. One gives W T F S S M T across a week,
-           where two of the T's are different days and so are both S's —
-           a strip whose whole job is telling you which day is which. */
-        cell.title = day + ' · ' + n + (n === 1 ? ' tick' : ' ticks');
-        strip.appendChild(cell);
+        /* Twelve labels for 53 columns: the grid is not months and
+           cannot be, so these are markers rather than headings — the
+           point is that the sweep is a year, not that column 14 is
+           November. */
+        var mrow = scEl('div', 'pf-mn');
+        var now = new Date();
+        for (var m = 11; m >= 0; m--) {
+          var d0 = new Date(now.getFullYear(), now.getMonth() - m, 1);
+          mrow.appendChild(scEl('span', null, MON[d0.getMonth()]));
+        }
+        body.appendChild(mrow);
+
+        var grid = scEl('div', 'pf-yr');
+        grid.setAttribute('role', 'img');
+        var lit = 0;
+        for (var y = 0; y < year.length; y++) if (year.charAt(y) !== '0') lit++;
+        grid.setAttribute('aria-label',
+          lit + ' of the last ' + year.length + ' days had something on them.');
+        for (var q = 0; q < year.length; q++) {
+          var v = +year.charAt(q) || 0;
+          var cell = scEl('i');
+          /* ── LIT OR NOT, AND NO RAMP ──
+             This drew the count as OPACITY first, which is precisely
+             the mistake the month strip's own note was written
+             against: size was chosen over opacity there because a
+             diluted accent measured 1.30:1, and "diluting a colour
+             that already fails only makes the number worse".
+
+             The strip could answer that by varying SIZE. A year grid
+             cannot — every cell is the same box, and at four pixels
+             a five-step ramp is invisible anyway. So the mark is
+             binary and every lit day is drawn at the one strength
+             scCrown has already solved to clear 3:1 on YOUR page.
+
+             What that costs is real: the grid says whether, not how
+             much. Over a year that is the question anyway — the
+             figures above it carry how much. */
+          if (v && p.acc) cell.style.background = scCrown(p.acc);
+          grid.appendChild(cell);
+        }
+        body.appendChild(grid);
       }
-      body.appendChild(strip);
+
+      /* ── THEIR OBJECTIVES, AS THE TAGS THEY ALREADY ARE ──
+         The same object the day's own strip draws, so an objective
+         reads the same whoever is looking at it. The flat neutral
+         rather than a hue per goal: on your own day a colour says
+         WHICH of yours this is, and on somebody else's list there is
+         no which — they are all theirs. */
+      var goals = Array.isArray(r.goals) ? r.goals.slice(0, 6) : [];
+      if (goals.length) {
+        var gw = scEl('div', 'pf-goals');
+        goals.forEach(function (g) {
+          gw.appendChild(scEl('span', 'obs-t pf-gt', String(g).slice(0, 40)));
+        });
+        body.appendChild(gw);
+      }
+
+      /* ── THE SHELF ──
+         Real jackets, at a size you can recognise one. A cover that
+         fails to load falls through to the drawn one underneath,
+         which is scMindArt's own rule and the reason a blocked image
+         costs a picture rather than a hole.
+
+         SIX ACROSS AND NO MORE, and it does not scroll: nothing in
+         this app moves sideways except one approved exception, and a
+         shelf whose end is off the screen is a shelf you have to go
+         looking for. The count beside the heading says the real
+         total. */
+      var mind = Array.isArray(r.mind) ? r.mind : [];
+      if (mind.length) {
+        var mh = scEl('div', 'fp-kh');
+        mh.appendChild(scEl('span', 'label fp-k', 'Reading'));
+        mh.appendChild(scEl('em', null, String(mind.length)));
+        body.appendChild(mh);
+        var shelf = scEl('div', 'pf-shelf');
+        mind.slice(0, 6).forEach(function (m) {
+          var j = scMindArt({ t: m.t, c: m.c, k: m.k }, 'pf-jk');
+          j.title = m.t + (m.a ? ' · ' + m.a : '');
+          shelf.appendChild(j);
+        });
+        body.appendChild(shelf);
+      }
+
+      /* ── TRAINING AND LISTENING, AS TWO COLUMNS ──
+         Side by side because they are the same kind of thing — a list
+         of names with a count — and one under the other would make
+         the page a third register taller for no reading it buys. */
+      var work = Array.isArray(r.work) ? r.work.slice(0, 5) : [];
+      var pods = mind.filter(function (m) { return m.k === 'pod'; }).slice(0, 4);
+      if (work.length || pods.length) {
+        var cols = scEl('div', 'pf-cols');
+        var col = function (label, rows) {
+          var c = scEl('div', 'pf-col');
+          c.appendChild(scEl('span', 'label fp-k', label));
+          rows.forEach(function (x) {
+            var rr = scEl('div', 'pf-lrow');
+            var sw = scEl('i');
+            if (x.c) sw.style.background = x.c;
+            else if (x.h != null) sw.style.setProperty('--mh', String(x.h));
+            rr.appendChild(sw);
+            rr.appendChild(scEl('b', null, x.n));
+            if (x.v != null) rr.appendChild(scEl('em', null, String(x.v)));
+            c.appendChild(rr);
+          });
+          cols.appendChild(c);
+        };
+        if (work.length) col('Training', work);
+        /* The swatch takes the same hue the cover is drawn from, so
+           a show is the same colour on the shelf and in this column
+           — scMindHue rather than a second table, which is how the
+           two would drift. */
+        if (pods.length) col('Listening', pods.map(function (m) {
+          return { n: m.t, h: scMindHue(m.t) };
+        }));
+        body.appendChild(cols);
+      }
 
       /* ── WHAT THEY HAVE POSTED, AS A WALL ──
          It was every log drawn out in full, one under another, which
@@ -9236,6 +9569,7 @@
      no request — with no URL stored, scApi returns before it builds
      one — so an app nobody has turned this on for behaves exactly as
      it did before any of this existed. */
+  scShareLoad();
   scNetLoad();
 
   /* ── the link somebody was sent ──
@@ -9347,6 +9681,11 @@
      the wrong one every time. */
   document.addEventListener('keydown', function (ev) {
     if (ev.key !== 'Escape') return;
+    /* The picture is on top of everything, so it takes Escape first —
+       closing the sheet underneath while a full-screen photograph
+       stays up is the wrong one every time, which is the rule the
+       history already keeps one layer down. */
+    if (photoOn) { ev.preventDefault(); scPhotoClose(); return; }
     if (!$('scTyVeil').hidden) { ev.preventDefault(); scCloseHist(); return; }
     if (sheetOpen) { ev.preventDefault(); scClose(); }
   });

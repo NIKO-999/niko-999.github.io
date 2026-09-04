@@ -5977,3 +5977,165 @@ exactly like a blind check; `.obs-add` does not exist on an empty day.
 Planted on `.row` the same scan found five instantly. Chasing a proof
 that failed for the wrong reason is what turned up the vacuity hole —
 which was real, and was not what the proof was about.
+
+## A profile, and the oldest rule reversed
+
+Asked for as a friend's page worth opening: their picture, a bio,
+their goals as the tags they already are, their workout stats "just
+like how we have our own", and what they have read — "obviously, if
+you wanna share it, you just toggle it... everything should be able to
+be hideable. And if this goes against any rules, change those rules."
+
+**IT DOES GO AGAINST THE OLDEST ONE.** The line was that a COUNT may
+leave and a LIST never may — *a count says you showed up and a list
+says what your day is, and the second is the thing this app exists not
+to send.* Books, sessions and objectives are all lists, so a profile
+cannot be built under it. What replaces it is narrower than "anything
+goes" and wider than what it replaces: **NOTHING LEAVES UNLESS YOU
+TURNED IT ON.** One switch per thing, every switch OFF until you touch
+it, and all four on one screen so what you are sharing is something
+you can read in one go rather than infer from four places.
+
+**AND THREE THINGS STILL HAVE NO SWITCH**, because a switch would
+imply they are on the table. The WEEK never leaves: it is the shape of
+your life and it is the one record this app has never sent. How a day
+FELT never leaves, which was already its own rule. And the NOTE on a
+Mind entry never leaves — the title is what you read, the note is what
+you thought, and only the first is a fact about a book. Asserted
+against the WHOLE record rather than a field, with tokens no title can
+contain: the note check's first version looked for "indexed", which is
+a word the test itself types into a search box.
+
+**The bio is its own switch**, and that is the one place a switch
+would be furniture: a sentence that exists only to be read by somebody
+else is shared by being written and taken back by being cleared. A
+field that does nothing until you also find a toggle is two controls
+for one intention.
+
+**ONE SWITCH SENDS ONE THING**, asserted per switch rather than by
+turning them all on — "everything arrives" passes on a build where any
+switch sends everything, which is the bug the screen exists to make
+impossible. And an OFF switch sends the EMPTY SHAPE rather than
+omitting the key: a reader cannot tell a field somebody turned off
+from a field this build did not have, and the first has to overwrite
+what is already on the server.
+
+### The almanac
+
+Chosen from ten treatments rendered over the real app at 390x844 and
+read at 1:1. The first five were one idea five ways — a head, then
+stacked sections — which is one mind converging, and the second round
+came from deliberately distant structures: the app's own stops, a
+passport, a year grid, a typographic ledger, and their column against
+yours.
+
+**TIME FIRST.** A year of days answers *are they actually doing this*
+in a way no figure can — two people with the same streak look nothing
+alike over twelve months — so the grid is the page and everything else
+hangs under it. The two 26px figures that used to open the sheet are
+one line now: they summarise the picture directly below them, and a
+summary above the thing it summarises is the duplication this project
+keeps taking back out.
+
+**A YEAR IS 371 BYTES, NOT NINE KILOBYTES.** Written as
+`{ "2026-09-04": { t: 3, b: 5 } }` a year is about 9KB of a record
+that shares a 96KB ceiling with thirty logs; as one digit a day it is
+371 characters. Oldest first, so the grid reads the way it is drawn.
+
+**LIT OR NOT, AND NO RAMP — which was got wrong first.** The count
+went in as OPACITY, which is precisely the mistake the month strip's
+own note was written against: size was chosen over opacity there
+because a diluted accent measured 1.30:1, and *diluting a colour that
+already fails only makes the number worse*. A strip can answer that by
+varying height; a year grid cannot, because every cell is the same box
+— and at four pixels a five-step ramp is invisible anyway. So the mark
+is binary and every lit day is drawn at the one strength `scCrown` has
+already solved to clear 3:1 on YOUR page. What it costs is real: the
+grid says whether, not how much, and the figures above carry how much.
+
+**The check moved rather than went.** It measured a lit bar of the
+thirty-day strip; the claim is identical and only the drawing changed,
+so it reads a lit cell of the almanac now. Three other checks moved
+the same way — a year of cells where there were thirty, one flat
+colour where there was a size ramp, and every heading rather than a
+count of two, since sections come and go with what somebody shared.
+
+**AND IT MEASURED THE WRONG PIXEL.** The ground sample was 14px above
+the cell, which on this sheet lands on the MONTH LABELS: it read
+`[140,140,148]`, which is `--spent`, and reported **1.28:1 on a mark
+drawn at the full accent**. The 2.5px gap between two cells is the
+sheet's own ground and is five device pixels wide, so its centre is
+clean — 7.5:1 to 10.7:1 across four accents. A check can be wrong
+about WHERE it looks as easily as about what it looks for, and the two
+are indistinguishable from the output. The Pattern axis made this
+exact mistake once already.
+
+**The worker CLAMPS every new field rather than trusting the client.**
+The 96KB ceiling stops a record being enormous, which is not the same
+as these fields having a shape — and the client is the one part of
+this anybody can replace. A bio to 140, a year to 371 digits with
+non-digits stripped, six goals, six sessions, twelve books. Clamped,
+never rejected: a record a little too long is somebody on an old
+build, and dropping their whole day over it is the harshest possible
+reading.
+
+**`.sheet .pf-gt`, NOT `.pf-gt` — the fifth time.** `.obs-t` sets its
+own `--tg` further up the file, so at equal specificity the later rule
+wins however this one is written. It shipped one render with the new
+class sitting on the element doing nothing and every goal tag drawing
+pink. A screenshot caught it; the cascade did not.
+
+## The caption leads, and the picture opens
+
+Reported from the feed: the caption belongs "up top underneath your
+name", and the image should open full.
+
+**The caption sat UNDER the photograph**, which is where one goes on a
+printed page and the wrong way round here: the card crops to a square,
+so on a phone the words were most of a screen below the name that owns
+them and you read the picture with nothing to read it against.
+Asserted as BOXES rather than source order — a rule that reordered
+them visually would pass any check on the DOM, and an element moved in
+the source and pushed back by CSS is the same bug from the other side.
+
+**The picture is a BUTTON**, focusable, named, and a sibling of the
+post's delete rather than its descendant, because a button inside a
+button is invalid and collapses to one press. `background: none` is
+load-bearing on it for the reason `.row` already records.
+
+**CONTAIN, NOT COVER.** The card crops to a square and the viewer is
+the screen that does not, which is the entire reason to press it — a
+viewer that cropped the same way would show you nothing new.
+
+**BUILT AND REMOVED, NEVER HIDDEN.** A full-screen surface put away
+with the `hidden` attribute has broken six times in this app — the
+rail, the page dots, the toast, the intro, the objectives row — every
+one of them invisibly, because an author `display` outranks the
+browser's own rule while the attribute goes on being set correctly. An
+element that is not in the document cannot swallow a press. Asserted
+as the node being GONE rather than not drawn. It takes Escape before
+the sheet underneath, which is the history veil's rule one layer up.
+
+### Three runs failed for reasons that were not the code
+
+**A check that changes the state of the app has to put it back, and it
+caught me a third time.** Pressing a switch does not close the profile
+— it is a setting, not an answer — so the sheet was still up when the
+next step reached for the row underneath it. Playwright named it
+exactly: *the sheet's subtree intercepts pointer events*. Every open
+goes through one idempotent helper now.
+
+**A friend planted in the list but not on the SERVER is a friend the
+app goes and fetches.** Two plants across two reloads asked the stub
+worker for records it did not have, and three 404s reached the console
+check that guards this whole section. Seeding both is the more honest
+fixture anyway: it exercises the real pull rather than only the copy
+kept for painting offline.
+
+**AND `tests/run.js` PRINTS `name: 'TimeoutError'` AND DROPS THE
+STACK.** Three runs reported nothing usable. Running `tests/
+schedule.js` directly against a standalone server keeps Playwright's
+full error, which named the selector in one go — worth fixing in the
+runner, and not fixed here. Twice in the same stretch a monitor
+watched the shell wrapper's pid rather than node's, which makes a
+still-running suite look finished.

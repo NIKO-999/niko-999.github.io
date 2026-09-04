@@ -5458,9 +5458,14 @@ const SAID = [
         const seeded = JSON.parse(store.get('rec:JADE2K7P'));
         seeded.acc = acc;
         /* Every day exactly ONE tick, so what is measured is the
-           smallest disc the strip can draw. */
+           faintest mark this profile can draw. */
         seeded.days = {};
         for (let i = 0; i < 7; i++) seeded.days[day(i)] = { t: 1, b: 1 };
+        /* A YEAR, because the profile is the almanac now and the
+           check reads a cell of it. Every day lit at ONE, which is
+           the faintest a lit day gets — and it is the same colour as
+           a day with five on it, because the grid is binary. */
+        seeded.year = '1'.repeat(371);
         store.set('rec:JADE2K7P', JSON.stringify(seeded));
         await fp.evaluate((t) => {
           localStorage.setItem('sched.accent.v1', String(t));
@@ -5494,33 +5499,47 @@ const SAID = [
 
         await fp.click('.fr-row.is-tap');
         await fp.waitForTimeout(540);
-        /* The smallest LIT bar, not the first one in the strip. An
-           unlit day is deliberately the flat neutral — "a day with
-           none is never a red one" — so it makes no colour claim and
-           holding it to 3:1 measures the wrong mark. Over thirty days
-           the first cell is usually empty, which is how this started
-           reporting 1.18:1 against a rule it was not breaking. */
-        const db = await fp.$$eval('.fp-d i', (all) => {
-          const lit = all.filter((e) => e.style.background);
-          const e = lit.sort((a, b) =>
-            a.getBoundingClientRect().height - b.getBoundingClientRect().height)[0];
+        /* A LIT cell of the almanac, not any cell. An unlit day is
+           deliberately the flat neutral — "a day with none is never a
+           red one" — so it makes no colour claim, and holding it to
+           3:1 measures a mark that is not breaking the rule. That is
+           how this once reported 1.18:1 against a design that was
+           correct.
+
+           It measured the thirty-day strip until the profile became a
+           year; the claim is unchanged and the drawing moved, so the
+           check moved with it rather than being deleted. The cells
+           are about four pixels, so the sample is the centre. */
+        const db = await fp.$$eval('.pf-yr i', (all) => {
+          const e = all.filter((x) => x.style.background)[0];
           if (!e) return null;
           const r = e.getBoundingClientRect();
           return { x: r.x, y: r.y, w: r.width, h: r.height };
         });
-        if (!db) throw new Error('no lit bar in the strip to measure');
+        if (!db) throw new Error('no lit day in the almanac to measure');
         const png = PNG.sync.read(await fp.screenshot());
         const at = (x, y) => {
           const i = (png.width * Math.round(y * 2) + Math.round(x * 2)) << 2;
           return [png.data[i], png.data[i + 1], png.data[i + 2]];
         };
+        /* ── THE GROUND IS THE GAP, NOT THE ROW ABOVE ──
+           This sampled 14px above the cell, which on this sheet lands
+           on the MONTH LABELS — it read [140,140,148], which is
+           --spent, so it measured the mark against a text colour and
+           reported 1.28:1 on a mark drawn at the full accent. A check
+           can be wrong about WHERE it looks as easily as about what it
+           looks for, and the two are indistinguishable from the
+           output; the Pattern axis made this exact mistake once
+           already. The 2.5px gap between two cells is the sheet's own
+           ground showing through and is five device pixels wide, so
+           its centre is clean. */
         const rd = +ratio(at(db.x + db.w / 2, db.y + db.h / 2),
-                          at(db.x + db.w / 2, db.y - 11)).toFixed(2);
+                          at(db.x + db.w + 1.25, db.y + db.h / 2)).toFixed(2);
         if (rd < lowD.r) lowD = { r: rd, reader, acc };
         await fp.keyboard.press('Escape');
         await fp.waitForTimeout(380);
       }
-      ok('the smallest disc clears 3:1 on your page, measured on pixels',
+      ok('a lit day of the almanac clears 3:1 on your page, measured on pixels',
         lowD.r >= 3, JSON.stringify(lowD));
       ok('and the stop you are NOT on is still readable type',
         lowS.r >= 4.5, JSON.stringify(lowS));
@@ -5544,8 +5563,13 @@ const SAID = [
     /* ── their page ── */
     await fp.click('.fr-row.is-tap');
     await fp.waitForTimeout(520);
-    ok('their page shows seven days',
-      await fp.$$eval('.fp-d', (d) => d.length) === 30);
+    /* A YEAR, where this was thirty days and before that seven. The
+       claim is unchanged — their page draws their record — and only
+       the drawing moved, so the check moved with it rather than being
+       deleted. 371 is 53 weeks, which is what makes the grid full
+       columns of seven with no ragged end. */
+    ok('their page shows a year of days',
+      await fp.$$eval('.pf-yr i', (d) => d.length) === 371);
     /* Height says how many of the five and colour never says whether —
        the habits screen's rule. A day with nothing is the same shape,
        only shorter. */
@@ -5587,13 +5611,32 @@ const SAID = [
        four pixels — the smallest one measured 1.18:1 on the white page
        with nothing wrong but antialiasing. A bar's height is free of
        the count, so it can hold its colour at any width. */
-    const discs = await fp.$$eval('.fp-d i', (b) => b.map((x) => ({
-      w: x.style.height, o: getComputedStyle(x).opacity })));
-    ok('the strip says how many by SIZE, never by a colour for missing',
-      new Set(discs.map((d) => d.w)).size > 1
-      && discs.every((d) => parseFloat(d.w) >= 16), JSON.stringify(discs));
-    ok('and no disc is diluted to say it — opacity cannot rescue a light accent',
-      discs.every((d) => d.o === '1'), JSON.stringify(discs.map((d) => d.o)));
+    /* ── LIT OR NOT, AND NO RAMP ──
+       The strip could say HOW MANY by height, because a bar's height
+       is free of the count. A year grid cannot: every cell is the same
+       box, and at four pixels across a phone a five-step ramp is
+       invisible.
+
+       It went in as an opacity ramp — which is exactly the mistake the
+       paragraph above was written against, arriving again in the one
+       drawing that cannot use the lever that replaced it. So the mark
+       is binary: every lit day at the one strength scCrown solved to
+       clear 3:1 on YOUR page, and an unlit one the flat neutral.
+
+       Both halves, because "every cell is the same colour" is
+       vacuously true of a grid with nothing lit in it. */
+    const cells = await fp.$$eval('.pf-yr i', (b) => b.map((x) => ({
+      bg: getComputedStyle(x).backgroundColor,
+      o: getComputedStyle(x).opacity,
+      lit: !!x.style.background })));
+    const litSet = new Set(cells.filter((c) => c.lit).map((c) => c.bg));
+    const dimSet = new Set(cells.filter((c) => !c.lit).map((c) => c.bg));
+    ok('every lit day is the same colour at full strength, never a ramp',
+      litSet.size === 1 && cells.every((c) => c.o === '1')
+      && cells.filter((c) => c.lit).length > 30,
+      { lit: [...litSet], op: [...new Set(cells.map((c) => c.o))] });
+    ok('...and a day with nothing on it is one flat neutral, never a colour',
+      dimSet.size <= 1, [...dimSet]);
     /* The day letters are GONE and the strip is thirty days. Two
        characters do not go in the nine pixels a month leaves per cell,
        and they were answering "which day is this" — a question about a
@@ -5662,8 +5705,15 @@ const SAID = [
       const cs = getComputedStyle(x);
       return { t: cs.textTransform, ls: cs.letterSpacing, size: cs.fontSize };
     }));
+    /* EVERY heading on the sheet rather than a count of two. It was
+       pinned to the two the old body happened to draw, and the
+       profile has sections now that come and go with what somebody
+       shared — a number here would have to be edited every time one
+       is added, which is a check that tracks the code rather than the
+       claim. At least one, because "none are letterspaced" is
+       vacuously true of a sheet with no headings. */
     ok('the sheet\u2019s headings are not letterspaced capitals',
-      heads.length === 2 && heads.every((h) => h.t === 'none'
+      heads.length >= 1 && heads.every((h) => h.t === 'none'
         && parseFloat(h.ls) <= 0 && parseFloat(h.size) >= 11), JSON.stringify(heads));
     ok('and Remove carries no hairline and no paragraph',
       await fp.$eval('.fp-rm', (e) => getComputedStyle(e).borderBottomWidth === '0px'
@@ -5715,6 +5765,354 @@ const SAID = [
     ok('both logs are in the feed, newest first',
       await fp.$$eval('#scFeed .po .po-n', (n) => n.map((x) => x.textContent).join())
         === 'Niko,Rae');
+
+    /* ── THE CAPTION LEADS, AND THE PICTURE OPENS ──
+       The caption sat UNDER the photograph, which is where one goes on
+       a printed page and the wrong way round here: the card crops to a
+       square, so on a phone the words were most of a screen below the
+       name that owns them and you read the picture with nothing to
+       read it against.
+
+       Measured as BOXES rather than source order, because a rule that
+       reordered them visually would pass any check on the DOM — and
+       the reverse, an element moved in the source and then pushed back
+       by CSS, is the same bug from the other side. */
+    const lead = await fp.evaluate(() => {
+      const c = [...document.querySelectorAll('#scFeed .po')]
+        .find((x) => x.querySelector('.po-img') && x.querySelector('.po-c'));
+      if (!c) throw new Error('no feed post with both a caption and a picture');
+      const cap = c.querySelector('.po-c').getBoundingClientRect();
+      const img = c.querySelector('.po-img').getBoundingClientRect();
+      const head = c.querySelector('.po-h').getBoundingClientRect();
+      return { cap: cap.top, img: img.top, head: head.bottom,
+               tag: c.querySelector('.po-img').tagName,
+               named: !!c.querySelector('.po-img').getAttribute('aria-label') };
+    });
+    ok('the caption sits under the name and above the picture',
+      lead.cap > lead.head && lead.cap < lead.img, lead);
+    /* A real BUTTON, not a listener on the wrapper: focusable, named,
+       and reachable from a keyboard. The post's delete is a sibling
+       rather than an ancestor, so nothing nests — a button inside a
+       button is invalid and collapses to one press. */
+    ok('...and the picture is a real control, named for what it does',
+      lead.tag === 'BUTTON' && lead.named, lead);
+
+    await fp.click('#scFeed .po .po-img');
+    await fp.waitForTimeout(420);
+    const shown = await fp.evaluate(() => {
+      const v = document.querySelector('.ph');
+      if (!v) return null;
+      const r = v.getBoundingClientRect();
+      const im = v.querySelector('img');
+      return { w: Math.round(r.width), h: Math.round(r.height),
+               z: +getComputedStyle(v).zIndex,
+               fit: getComputedStyle(im).objectFit,
+               role: v.getAttribute('role'), modal: v.getAttribute('aria-modal'),
+               cap: !!v.querySelector('.ph-c') };
+    });
+    /* CONTAIN, not cover. The card crops to a square and this is the
+       screen that does not, which is the entire reason to press it —
+       a viewer that crops the same way shows you nothing new. */
+    ok('pressing it opens the whole picture, over everything, uncropped',
+      shown && shown.w === 390 && shown.h === 844 && shown.fit === 'contain'
+      && shown.z > 60 && shown.role === 'dialog' && shown.modal === 'true'
+      && shown.cap, shown);
+
+    /* ── AND IT IS REMOVED, NOT HIDDEN ──
+       A full-screen surface put away with the `hidden` attribute has
+       broken six times in this app — the rail, the dots, the toast,
+       the intro, the objectives row — every one of them invisibly,
+       because an author `display` outranks the browser's own rule and
+       the attribute goes on being set correctly the whole time. An
+       element that is not in the document cannot swallow a press.
+       Asserted as the node being GONE rather than not drawn. */
+    await fp.keyboard.press('Escape');
+    await fp.waitForTimeout(360);
+    ok('Escape takes the picture away, and takes it out of the document',
+      await fp.evaluate(() => document.querySelectorAll('.ph').length === 0));
+    /* Escape reached the picture and NOT the sheet under it, which is
+       the history veil's own rule one layer up. */
+    await fp.click('#scFeed .po .po-img');
+    await fp.waitForTimeout(420);
+    await fp.click('.ph');
+    await fp.waitForTimeout(360);
+    ok('...and so does a tap anywhere on it',
+      await fp.evaluate(() => document.querySelectorAll('.ph').length === 0));
+
+    /* ══════════════════════════════════════════════════════
+       WHAT YOU SHARE
+
+       This is the reversal of the app's oldest rule, so it is the
+       part of the suite worth the most: the old line was that a COUNT
+       may leave and a LIST never may, and books, sessions and
+       objectives are all lists. What replaces it is NOTHING LEAVES
+       UNLESS YOU TURNED IT ON — which is only a promise if every
+       switch starts off and an off switch genuinely sends nothing. */
+    await stop('board');
+    /* ── A SHEET LEFT OPEN EATS THE NEXT PRESS ──
+       Pressing a switch does NOT close the profile — it is a setting,
+       not an answer — so the sheet is still up when the next step
+       reaches for the row underneath it, and Playwright reports it as
+       exactly that: the sheet's subtree intercepts pointer events.
+       This file has already recorded the rule twice (the bar's
+       contrast sweep, the Popular episode block) and it caught me a
+       third time. Idempotent, so it is safe wherever it is called. */
+    const openMe = async () => {
+      await fp.keyboard.press('Escape');
+      await fp.waitForTimeout(360);
+      await fp.click('.fr-row.is-me');
+      await fp.waitForTimeout(520);
+    };
+    await openMe();
+    const pv = await fp.evaluate(() => ({
+      title: (document.getElementById('scSheetTitle') || {}).textContent,
+      rows: [...document.querySelectorAll('.pv-row')].map((b) => ({
+        on: b.getAttribute('aria-checked'),
+        role: b.getAttribute('role'),
+        name: (b.querySelector('.pv-t b') || {}).textContent,
+      })),
+      bio: document.querySelectorAll('.sheet textarea').length,
+      stored: localStorage.getItem('sched.share.v1'),
+    }));
+    /* ── YOUR OWN ROW OPENS YOUR PROFILE ──
+       It opened the code sheet. What somebody presses their own name
+       to change is what a friend can SEE; the code is a thing you
+       show once, and it is still behind Your code. */
+    ok('your own row opens your profile, with a switch for each thing',
+      pv.title === 'Your profile' && pv.rows.length === 4
+      && pv.bio === 1
+      && pv.rows.map((r) => r.name).join('|')
+         === 'Showing up|Objectives|Workouts|Reading', pv);
+    /* A real role="switch" with aria-checked, not a styled div: a
+       control whose whole job is to say on or off has to say it to a
+       screen reader too. */
+    ok('...and every one of them is a switch, and every one starts OFF',
+      pv.rows.every((r) => r.role === 'switch' && r.on === 'false'), pv.rows);
+
+    /* Push with everything still off, and read what actually left. */
+    await fp.click('.sheet .btn.go');
+    await fp.waitForTimeout(900);
+    const bare = rec();
+    ok('with every switch off, a push carries none of it',
+      bare.year === '' && Array.isArray(bare.goals) && bare.goals.length === 0
+      && Array.isArray(bare.work) && bare.work.length === 0
+      && Array.isArray(bare.mind) && bare.mind.length === 0,
+      { year: bare.year, goals: bare.goals, work: bare.work, mind: bare.mind });
+    /* AND THE COUNTS STILL GO, which is the half that would pass on a
+       build where the push had simply broken. */
+    ok('...while the board still gets what it always got',
+      !!bare.days && Object.keys(bare.days).length > 0
+      && typeof bare.name === 'string', Object.keys(bare.days || {}).length);
+
+    /* ── ONE SWITCH SENDS ONE THING ──
+       Asserted per switch rather than by turning them all on, because
+       "everything arrives" passes on a build where any switch sends
+       everything — which is the bug this whole screen exists to make
+       impossible. */
+    await openMe();
+    await fp.click('.pv-row >> nth=0');          /* Showing up */
+    await fp.waitForTimeout(800);
+    const one = rec();
+    ok('turning ONE on sends that one and still nothing else',
+      typeof one.year === 'string' && one.year.length === 371
+      && one.goals.length === 0 && one.work.length === 0
+      && one.mind.length === 0,
+      { len: (one.year || '').length, goals: one.goals.length,
+        work: one.work.length, mind: one.mind.length });
+    /* A year as one digit a day: 371 days written as a map of objects
+       is about nine kilobytes of a record that shares a 96KB ceiling
+       with thirty logs. */
+    ok('...and the year is one digit a day, not a map of objects',
+      /^[0-9]{371}$/.test(one.year || ''), (one.year || '').slice(0, 24));
+
+    await fp.click('.pv-row >> nth=3');          /* Reading */
+    await fp.waitForTimeout(800);
+    const two = rec();
+    ok('a second switch adds only its own',
+      two.year.length === 371 && Array.isArray(two.mind)
+      && two.goals.length === 0 && two.work.length === 0,
+      { mind: two.mind.length, goals: two.goals.length, work: two.work.length });
+
+    /* ── AND SWITCHING ONE BACK OFF TAKES IT DOWN ──
+       An off switch has to send the EMPTY shape rather than omit the
+       key: a reader cannot tell a field somebody turned off from a
+       field this build did not have, and the first has to overwrite
+       what is already on the server. Asserted on the stored record,
+       because that is the copy a friend reads. */
+    await fp.click('.pv-row >> nth=0');
+    await fp.waitForTimeout(800);
+    ok('switching one back off takes it off the server, not just off your screen',
+      rec().year === '', rec().year);
+
+    /* ── THE THREE THINGS WITH NO SWITCH ──
+       The week, how a day felt, and the note on a Mind entry. A
+       switch for these would imply they are on the table. Checked
+       against the WHOLE record rather than a field, because "the key
+       is absent" passes on a build that smuggles them somewhere else.
+
+       The tokens are ones no title or name can contain, which is the
+       lesson the note check already learned: its first version looked
+       for the word "indexed", which is a word the test itself types
+       into a search box, so it matched the app working correctly. */
+    await fp.click('.pv-row >> nth=1');
+    await fp.click('.pv-row >> nth=2');
+    await fp.waitForTimeout(900);
+    const all = JSON.stringify(rec());
+    ok('the week, the rating and your notes never leave — with everything on',
+      !/WEEKONLYZQX|RATEONLYZQX|NOTEONLYZQX/.test(all)
+      && !/"items"/.test(all) && !/sched\.rate/.test(all), all.slice(0, 200));
+
+    /* ── THE BIO IS ITS OWN SWITCH ──
+       A sentence that exists only to be read by somebody else is
+       shared by being written and taken back by being cleared. Both
+       directions, because "a bio arrives" passes on a build with no
+       way to remove one. */
+    await openMe();
+    await fp.fill('.sheet textarea', 'Chasing a 5k PB.');
+    await fp.click('.sheet .btn.go');
+    await fp.waitForTimeout(900);
+    ok('writing a bio shares it', rec().bio === 'Chasing a 5k PB.', rec().bio);
+    await openMe();
+    await fp.fill('.sheet textarea', '');
+    await fp.click('.sheet .btn.go');
+    await fp.waitForTimeout(900);
+    ok('...and clearing it takes it back down', rec().bio === '', rec().bio);
+    /* And this block puts the app back the way it found it, which is
+       the whole of what went wrong above. */
+    await fp.keyboard.press('Escape');
+    await fp.waitForTimeout(360);
+
+    /* ══════════════════════════════════════════════════════
+       READING ONE: THE ALMANAC
+
+       The other half, and each passes on the other's bug — a profile
+       that draws everything passes any check about what is sent, and
+       a push that sends everything passes any check about what is
+       drawn. This plants a peer record directly, because what is
+       asserted here is the DRAWING rather than the round trip, and
+       the round trip is what the section above is for. */
+    const FULL = {
+      code: 'ZZPROF01', name: 'Sam Okafor', acc: '#5FA8FF', ink: '#0C0C0E',
+      bio: 'Training for a half in April.', logs: [], at: Date.now(),
+      year: '5'.repeat(200) + '0'.repeat(100) + '3'.repeat(71),
+      goals: ['20k steps a day', 'Read 12 books', 'Sub-90 half'],
+      work: [{ n: 'Push', c: '#e6412f', v: 14 }, { n: 'Pull', c: '#2f7fe6', v: 12 }],
+      mind: [{ t: 'Atomic Habits', a: 'James Clear', c: '', k: 'read' },
+             { t: 'Deep Work', a: 'Cal Newport', c: '', k: 'read' },
+             { t: 'The Daily Stoic', a: 'Ryan Holiday', c: '', k: 'pod' }],
+      days: {},
+    };
+    const plant = async (peer) => {
+      /* ── INTO THE SERVER TOO, NOT JUST THE CACHE ──
+         A friend on the list whose record is not on the stub is a
+         friend the app then GOES AND FETCHES — and the worker answers
+         404, which Chromium logs as a console error and the last
+         assertion in this section counts. Three of them, from two
+         plants across two reloads.
+
+         Seeding both is also the more honest fixture: it exercises
+         the real pull rather than only the copy kept for painting
+         offline. */
+      store.set('rec:' + peer.code, JSON.stringify(peer));
+      await fp.evaluate((pr) => {
+        const f = JSON.parse(localStorage.getItem('sched.friends.v1') || '[]')
+          .filter((x) => x.code !== pr.code);
+        f.push({ code: pr.code, name: pr.name });
+        localStorage.setItem('sched.friends.v1', JSON.stringify(f));
+        const ps = JSON.parse(localStorage.getItem('sched.peer.v1') || '{}');
+        ps[pr.code] = pr;
+        localStorage.setItem('sched.peer.v1', JSON.stringify(ps));
+      }, peer);
+      await fp.reload({ waitUntil: 'networkidle' });
+      await fp.waitForTimeout(600);
+      await stop('board');
+      await fp.evaluate((c) => {
+        const r = [...document.querySelectorAll('.fr-row')]
+          .find((x) => (x.textContent || '').includes(c));
+        if (!r) throw new Error('no row for ' + c);
+        r.click();
+      }, peer.name);
+      await fp.waitForTimeout(600);
+    };
+    await plant(FULL);
+    const prof = await fp.evaluate(() => {
+      const cell = [...document.querySelectorAll('.pf-yr i')];
+      const cs = cell.length ? getComputedStyle(cell[0]) : null;
+      const grid = document.querySelector('.pf-yr');
+      return {
+        title: (document.getElementById('scSheetTitle') || {}).textContent,
+        bio: (document.querySelector('.pf-bio') || {}).textContent,
+        cells: cell.length,
+        /* Laid down the column and across, which is what makes a row
+           one weekday and a column one week. Written as a plain grid
+           it fills across and a year reads as noise. */
+        flow: grid ? getComputedStyle(grid).gridAutoFlow : null,
+        rows: grid ? getComputedStyle(grid).gridTemplateRows.split(' ').length : 0,
+        label: grid ? grid.getAttribute('aria-label') : null,
+        role: grid ? grid.getAttribute('role') : null,
+        goals: [...document.querySelectorAll('.pf-gt')].map((g) => g.textContent),
+        shelf: document.querySelectorAll('.pf-shelf .mn-art').length,
+        cols: [...document.querySelectorAll('.pf-col .fp-k')].map((k) => k.textContent),
+        train: [...document.querySelectorAll('.pf-col')][0]
+          ? [...document.querySelectorAll('.pf-col')][0]
+              .querySelectorAll('.pf-lrow').length : 0,
+      };
+    });
+    ok('a friend’s profile is a year of days, their goals, a shelf and two columns',
+      prof.title === 'Sam Okafor'
+      && prof.bio === 'Training for a half in April.'
+      && prof.cells === 371 && prof.flow === 'column' && prof.rows === 7
+      && prof.goals.length === 3 && prof.shelf === 3
+      && prof.cols.join('|') === 'Training|Listening' && prof.train === 2, prof);
+    /* role="img" with a written label: the grid is the only fact up
+       there that nothing else repeats, so hiding it from a screen
+       reader throws it away. */
+    ok('...and the year is spoken as one picture rather than 371 marks',
+      prof.role === 'img' && /\d+ of the last 371 days/.test(prof.label || ''),
+      prof.label);
+
+    /* ── A DAY WITH NOTHING ON IT IS NEVER A RED ONE ──
+       The habits screen's rule and its reason: a wash of colour
+       across a month somebody missed is a judgement about them. The
+       COUNT moves the strength; the hue never moves at all. Measured
+       on composited pixels, and the unlit cell is held to being a
+       grey with no channel standing out. */
+    const yr = await fp.evaluate(() => {
+      const c = [...document.querySelectorAll('.pf-yr i')];
+      const px = (e) => getComputedStyle(e).backgroundColor;
+      return { lit: px(c[0]), unlit: px(c[210]),
+               litOp: getComputedStyle(c[0]).opacity };
+    });
+    const chan = (s) => (s.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+    const spread = (s) => { const n = chan(s); return Math.max(...n) - Math.min(...n); };
+    ok('a day with nothing on it is a flat grey, never a colour',
+      spread(yr.unlit) < 12 && spread(yr.lit) > 20, yr);
+
+    /* ── AND A SECTION THEY DID NOT SHARE IS NOT DRAWN ──
+       Not drawn empty, not drawn as a heading over nothing. Both
+       directions in one pass, because "it draws what is there"
+       passes on a build that draws every section always. */
+    await fp.keyboard.press('Escape');
+    await fp.waitForTimeout(400);
+    await plant({ code: 'ZZPROF02', name: 'Quiet Pat', acc: '#8B72FF',
+      ink: '#0C0C0E', bio: '', year: '', goals: [], work: [], mind: [],
+      logs: [], days: {}, at: Date.now() });
+    const quiet = await fp.evaluate(() => ({
+      title: (document.getElementById('scSheetTitle') || {}).textContent,
+      bio: document.querySelectorAll('.pf-bio').length,
+      yr: document.querySelectorAll('.pf-yr').length,
+      goals: document.querySelectorAll('.pf-gt').length,
+      shelf: document.querySelectorAll('.pf-shelf').length,
+      cols: document.querySelectorAll('.pf-cols').length,
+      /* The sheet is still a sheet: their name and the way out. */
+      rm: document.querySelectorAll('.fp-rm').length,
+    }));
+    ok('somebody who shares nothing draws nothing, and the sheet still works',
+      quiet.title === 'Quiet Pat' && quiet.bio === 0 && quiet.yr === 0
+      && quiet.goals === 0 && quiet.shelf === 0 && quiet.cols === 0
+      && quiet.rm === 1, quiet);
+    await fp.keyboard.press('Escape');
+    await fp.waitForTimeout(400);
 
     /* ── leaving ── */
     await stop('board');

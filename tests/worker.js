@@ -158,6 +158,56 @@ const day = (off) => {
   ok('the day past the window is dropped', saved.days[day(-30)] === undefined);
   ok('and so is one long past it', saved.days[day(-40)] === undefined);
 
+  /* ── WHAT A PROFILE IS ALLOWED TO BE ──
+     The 96KB ceiling stops a record being enormous, which is not the
+     same as these fields having a shape. A cap here is what makes "a
+     bio is a line" and "a shelf is twelve books" facts about the
+     server rather than promises the client happens to keep — and the
+     client is the one part of this anybody can replace.
+
+     CLAMPED, never rejected: a record a little too long is somebody
+     on an old build, and dropping their whole day over a field this
+     server does not need to be exact about is the harshest possible
+     reading of it. */
+  await hit('PUT', '/v1/rec/NIKO4821', {
+    key: KEY,
+    body: {
+      bio: 'x'.repeat(400),
+      year: '5'.repeat(900),
+      goals: Array.from({ length: 20 }, (_, i) => 'goal ' + i + ' ' + 'y'.repeat(80)),
+      work: Array.from({ length: 20 }, (_, i) => ({ n: 'W' + i, c: '#fff', v: 1e9 })),
+      mind: Array.from({ length: 40 }, (_, i) => ({ t: 'B' + i, a: 'A', c: 'z'.repeat(600), k: 'read' })),
+    },
+  });
+  saved = JSON.parse(env.SCHED.m.get('rec:NIKO4821'));
+  ok('a bio is clamped to a line', saved.bio.length === 140, saved.bio.length);
+  ok('a year is a year and no more', saved.year.length === 371, saved.year.length);
+  ok('six goals, each a sentence', saved.goals.length === 6
+    && saved.goals.every((g) => g.length <= 40), saved.goals.length);
+  ok('six sessions, and a count that is a count',
+    saved.work.length === 6 && saved.work.every((w) => w.v <= 9999), saved.work);
+  ok('twelve books, and a cover url that cannot be a payload',
+    saved.mind.length === 12 && saved.mind.every((m) => m.c.length <= 300),
+    saved.mind.length);
+  /* A YEAR IS DIGITS. Anything else in that field is a string the
+     client did not write, and the almanac reads it a character at a
+     time — so it is stripped rather than trusted. */
+  await hit('PUT', '/v1/rec/NIKO4821', {
+    key: KEY, body: { year: '12<script>34' },
+  });
+  saved = JSON.parse(env.SCHED.m.get('rec:NIKO4821'));
+  ok('and a year that is not digits has the rest taken out',
+    saved.year === '1234', saved.year);
+  /* A record with none of it is not a broken record: somebody who
+     shares nothing gets the empty shape rather than a missing key,
+     because a reader cannot tell "turned off" from "old build". */
+  await hit('PUT', '/v1/rec/NIKO4821', { key: KEY, body: { name: 'Niko' } });
+  saved = JSON.parse(env.SCHED.m.get('rec:NIKO4821'));
+  ok('sharing nothing stores the empty shape, not a missing key',
+    saved.bio === '' && saved.year === '' && Array.isArray(saved.goals)
+    && saved.goals.length === 0 && Array.isArray(saved.mind)
+    && saved.mind.length === 0, saved);
+
   await hit('PUT', '/v1/rec/NIKO4821', {
     key: KEY,
     body: { logs: Array.from({ length: 90 }, (_, i) => ({ i })) },

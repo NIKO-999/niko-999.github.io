@@ -704,10 +704,46 @@ body {
   stroke-width: 2; stroke-linecap: round; }
 .po-x:active svg { stroke: var(--red); }
 .po-x:focus-visible { outline: 2px solid var(--red); outline-offset: -6px; }
-.po-img { margin-top: 9px; border-radius: 12px; overflow: hidden;
-  background: var(--tick-off); aspect-ratio: 1; }
+/* A BUTTON now, so it needs the reset a button does not get for
+   free: `background: none` is load-bearing here for the reason .row
+   already records -- a button with no background declared is painted
+   in the UA's own buttonface, a mid-grey slab on the dark face. */
+.po-img {
+  display: block; width: 100%; padding: 0;
+  margin-top: 9px; border: 0; border-radius: 12px; overflow: hidden;
+  background: var(--tick-off); aspect-ratio: 1;
+  touch-action: manipulation;
+}
 .po-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.po-c { margin-top: 8px; font-size: 13.5px; line-height: 1.5; }
+.po-img:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+/* THE CAPTION LEADS, so its margin is under the head rather than
+   under the picture. */
+.po-c { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; }
+.po-c + .po-img { margin-top: 9px; }
+
+/* -- the whole picture --
+   Above the sheet (50) and the toast (60), because it is opened from
+   inside a sheet and a photograph under the thing it was opened from
+   is not open. `contain` rather than `cover`: the card crops to a
+   square and this is the screen that does not, which is the entire
+   reason to press it. */
+.ph {
+  position: fixed; inset: 0; z-index: 80;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 14px;
+  padding: 24px 18px calc(24px + env(safe-area-inset-bottom));
+  background: rgba(0, 0, 0, .92);
+  opacity: 0; transition: opacity .18s ease;
+}
+.ph.is-open { opacity: 1; }
+.ph img {
+  display: block; max-width: 100%; max-height: 82%;
+  object-fit: contain; border-radius: 10px;
+}
+.ph-c {
+  margin: 0; font-size: 13.5px; line-height: 1.45; color: var(--dim);
+  text-align: center; max-width: 34em;
+}
 
 /* ── a friend ──
    Two figures of the same kind, so they get the same size and sit on
@@ -801,6 +837,137 @@ body {
 /* No border and no paragraph. Removing somebody takes them off a list;
    it is not the kind of delete that needs warning about, and the sheet
    says so by not saying anything. */
+/* -- THE FRIEND PROFILE: AN ALMANAC --
+   Chosen from ten treatments rendered over the real app at 390x844
+   and read at 1:1, never as a grid of cells: this repo has twice
+   judged a treatment on an enlargement and been wrong about it.
+
+   TIME FIRST. A year of days answers "are they actually doing this"
+   in a way no figure can -- two people with the same streak look
+   nothing alike over twelve months -- so the grid is the page and
+   everything else hangs under it. */
+.pf-bio {
+  font-size: 13px; color: var(--dim); line-height: 1.45;
+  margin: 0 0 12px;
+}
+/* One line where two 26px figures used to be. They summarise the
+   picture directly below them, and a summary above the thing it
+   summarises is the duplication this project keeps taking out. */
+.pf-sub {
+  display: flex; gap: 14px; margin-bottom: 12px;
+  font-size: 12px; color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
+.pf-sub span + span::before {
+  content: '\00b7'; margin-right: 8px; color: var(--spent);
+}
+.pf-mn {
+  display: flex; justify-content: space-between;
+  font-size: 9.5px; color: var(--spent); margin-bottom: 5px;
+}
+/* 53 columns of seven, laid down the column and across -- which is
+   what makes a row one weekday and a column one week. grid-auto-flow
+   is the whole mechanism; written as a plain grid it fills across and
+   the year reads as noise. */
+.pf-yr {
+  display: grid; grid-auto-flow: column;
+  grid-template-rows: repeat(7, 1fr);
+  gap: 2.5px; margin-bottom: 16px;
+}
+.pf-yr i {
+  display: block; aspect-ratio: 1; border-radius: 1.5px;
+  /* A day with nothing on it is the flat neutral and never a red one.
+     That is the habits screen's rule and its reason: a wash of red
+     across a month somebody missed is a judgement about them. */
+  background: var(--tick-off);
+}
+.pf-goals {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px;
+}
+/* The day strip's own tag, in the flat neutral: on your own day a
+   colour says WHICH of yours this is, and on somebody else's list
+   there is no which -- they are all theirs.
+
+   `.sheet .pf-gt`, NOT `.pf-gt`, and this is the fifth time this file
+   has recorded it. .obs-t sets its own --tg further up, so at equal
+   specificity the later rule wins however this one is written -- it
+   shipped once with the new class sitting on the element doing
+   nothing and the tags drawing pink, which a screenshot caught and
+   the cascade did not. */
+.sheet .pf-gt {
+  --tg: var(--ink);
+  background: color-mix(in srgb, var(--ink) 9%, transparent);
+  color: var(--dim);
+}
+/* SIX ACROSS AND IT DOES NOT SCROLL. Nothing in this app moves
+   sideways but one approved exception, and a shelf whose end is off
+   the screen is a shelf you have to go looking for. The count beside
+   the heading carries the real total. */
+.pf-shelf {
+  display: flex; gap: 8px; align-items: flex-end;
+  margin-bottom: 16px;
+}
+.pf-shelf .pf-jk {
+  flex: 1 1 0; min-width: 0; width: auto;
+  aspect-ratio: 2 / 3; height: auto;
+  border-radius: 4px;
+}
+.pf-shelf .pf-jk img { border-radius: 4px; }
+.pf-cols {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 22px;
+  margin-bottom: 4px;
+}
+.pf-col .fp-k { display: block; margin-bottom: 9px; }
+.pf-lrow {
+  display: flex; align-items: center; gap: 8px; padding: 3.5px 0;
+}
+.pf-lrow i {
+  width: 11px; height: 11px; border-radius: 3px; flex: 0 0 auto;
+  background: hsl(var(--mh, 0) 42% 34%);
+}
+.pf-lrow b {
+  font-size: 12.5px; font-weight: 500; flex: 1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pf-lrow em {
+  font-style: normal; font-size: 12.5px; font-weight: 600;
+  color: var(--dim); font-variant-numeric: tabular-nums;
+}
+
+/* -- THE SWITCHES --
+   One per thing, every one off until it is pressed. A real
+   role="switch" rather than a styled checkbox, so a screen reader is
+   told what it is and what state it is in. */
+.pv-row {
+  display: flex; align-items: center; gap: 14px; width: 100%;
+  padding: 12px 0; background: none; border: 0;
+  border-top: 1px solid var(--hair); text-align: left;
+  color: var(--ink); font: inherit; touch-action: manipulation;
+}
+.pv-t { flex: 1; min-width: 0; }
+.pv-t b { display: block; font-size: 14.5px; font-weight: 600; }
+.pv-t span {
+  display: block; font-size: 11.5px; color: var(--spent);
+  line-height: 1.35; margin-top: 2px;
+}
+.pv-sw {
+  flex: 0 0 auto; width: 44px; height: 26px; border-radius: 13px;
+  background: var(--tick-off); position: relative;
+  transition: background .16s ease;
+}
+.pv-sw i {
+  position: absolute; top: 3px; left: 3px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--paper);
+  transition: transform .16s ease;
+}
+/* The ink rather than a hue: a filled control in this app is white,
+   and a switch that is on is chrome saying so rather than a mark on
+   the record. */
+.pv-row.is-on .pv-sw { background: var(--ink); }
+.pv-row.is-on .pv-sw i { transform: translateX(18px); }
+.pv-row:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
 .sheet .fp-rm { border-bottom: 0; padding: 16px 0 0;
   font-size: 13px; font-weight: 600; }
 
