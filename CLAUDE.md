@@ -5863,3 +5863,117 @@ thirty seconds: told the same date, it draws 8 and lights 8. This is
 it is the fourth time this file has recorded a check that only passes
 at certain hours. The fixture reads the page's own `Date.now()` now,
 so it cannot drift from the clock it is measured against.
+
+## The running row counts down, and a finished one has no length
+
+Reported as doubt rather than as a bug: *is this actually moving with
+the time? I swear I've just seen it at halfway and we're not even
+halfway in yet.* Measured two ways before anything was changed —
+reloaded at eight points across a block, and stepped through the app's
+own half-minute pass with no reload — and the fill was **exact at every
+one of them**: 11.7, 25, 38.3, 50, 75, 86.7, 98.3 against truth,
+including the hand-off to the next block. The screenshot agreed with
+itself: 9:23 into a 9:00–10:00 block is 38.3%, and the bar measured 38.
+
+**SO THE BAR WAS RIGHT AND NOBODY COULD TELL, WHICH IS ITS OWN
+FAULT.** There was no figure anywhere on the row — the length, and
+nothing else — so the bar was the only statement of the fact with
+nothing to check it against, and a fill between a third and a half is
+genuinely hard to read. The note in this file claiming the line was
+"the same fact as the *3h 18m left* beside the length" described a
+figure that had never been built.
+
+**IT REPLACES THE LENGTH RATHER THAN JOINING IT.** Two figures about
+one block, one of which you can do nothing with, is the duplication
+this project keeps taking back out — and on the row that is running,
+the length is the one you cannot act on.
+
+**`e - scNowMin()` IS ALREADY THE CEILING**, which is what stops it
+ever reading "0 min left" on a block still going: the clock floors to
+its own minute and every block ends on one, so at 9:23:45 of a block
+ending at 10:00 it is 37 with 36.25 genuinely left, and the row stops
+being live on the same tick the figure would reach zero.
+
+**NOT `scDurShort`.** That reads a length and prints "1.5 h", which is
+right for a figure you plan against and unreadable as a countdown —
+nobody says an hour and a half is one point five hours left. A
+countdown is spoken in the two units it has.
+
+**And it is written on EVERY pass, not when the state turns over.** A
+block that has just finished has to get its length back, and keying
+the restore off the class change would put it on whichever row
+happened to change.
+
+### A block behind you has no length
+
+Done or missed, the figure carries nothing and the tag beside it is
+the whole of what the row still has to say.
+
+**THIS DOES NOT REVERSE THE RULE THAT PUT THE START BACK, AND THE
+DIFFERENCE IS THE COLUMN.** The start lives in a gutter, so hiding it
+leaves a hole and three holes down a morning read as missing data. The
+length is a property inline with the tags, so taking it out closes up
+and leaves no gap at all.
+
+**In CSS, not in `scLive`.** `is-done` is set at RENDER and on every
+day of the week, while the live pass walks today's rows alone — a rule
+there never visits the block you ticked on Thursday.
+
+**The check that guarded the length was reading the STRING.** A
+`display: none` element still returns its textContent, so "every block
+prints its length" passed on a build where not one of them was drawn.
+It measures the box now.
+
+**And it planted the two states rather than waiting for them.**
+Written as a filter over whatever was on screen it read `gone: []` and
+failed: `is-past` is set on TODAY's rows alone and the day open there
+need not be today, so it only had something to be true of at certain
+hours on certain days. That is the shape this file has now recorded
+four times. WHEN the app sets those classes is asserted elsewhere at
+length; the claim here is only that a row wearing one draws no length,
+so the class goes on, the box is read, and the class comes off inside
+one evaluate — with the length asserted BACK afterwards, so a rule
+that hid it permanently fails too.
+
+## No edge in this app is broken
+
+The ghost objective and the plus beside it were dashed, on the usual
+reading that a broken edge draws a thing that is not there yet.
+Reported from the phone as *those split lines... can we just have a
+complete border*, which is exactly what it is: at 14px of radius the
+dashes break across the corners, so the box never closes, and a row of
+short marks is the loudest thing about a card whose whole job is to
+sit quietly behind the schedule.
+
+**What still says the card is empty is that it has no GROUND** — no
+fill and no shadow, where every other card in this app has both —
+which is read without reading an outline at all.
+
+**Both edges changed, and that is one decision rather than two.** They
+sit side by side, so a dashed edge against a solid one reads as a
+mistake in the drawing rather than as two states.
+
+**Asserted over EVERY element on every view, not as two selectors.**
+That is this file's own conic-gradient rule: a treatment comes back one
+element at a time, and a check naming the two boxes that have it today
+walks straight past the third. All four sides, because a
+`border-bottom` is as dashed as a `border-top`.
+
+**NOT over the friends board.** The first version swept it and would
+have claimed a code and made the first request this page is allowed to
+make — breaking the assertion the whole file is built around. A check
+that has to break the app's central promise in order to run is a check
+that has to be narrower.
+
+**AND IT HAS TO HAVE SEEN AN OUTLINED BOX.** "No edge is broken" is
+vacuously true of a screen with no drawn borders at all. The two
+outlined boxes are the ghost and the plus and exactly ONE is on screen
+at a time — the ghost IS the add control on an empty day — so what is
+counted is drawn borders rather than either selector.
+
+**The bite proof failed first, and the probe was what was wrong.**
+Planting a dashed edge on `.obs-add` reported nothing, which looked
+exactly like a blind check; `.obs-add` does not exist on an empty day.
+Planted on `.row` the same scan found five instantly. Chasing a proof
+that failed for the wrong reason is what turned up the vacuity hole —
+which was real, and was not what the proof was about.

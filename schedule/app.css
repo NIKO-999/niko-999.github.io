@@ -1601,7 +1601,20 @@ body {
 .obs-c.is-ghost {
   background: none;
   box-shadow: none;
-  border: 1px dashed var(--hair);
+  /* -- SOLID, NOT DASHED --
+     It went in dashed on the usual reading, that a broken edge is how
+     you draw a thing that is not there yet. Looked at on the phone it
+     is a row of short marks rather than an edge: the dashes are the
+     loudest thing about a card whose whole job is to be quiet, and at
+     14px of radius they break across the corners so the box does not
+     close. What says this card is empty is that it has no GROUND --
+     no fill and no shadow where every other card here has both --
+     which is a difference you read without reading an outline.
+
+     Both edges in this row are solid, and that is one decision rather
+     than two: the ghost and the plus sit side by side, and a dashed
+     edge against a solid one reads as a mistake in the drawing. */
+  border: 1px solid var(--hair);
   padding: 8px 12px 8px 8px;
 }
 /* A STATE IS NEVER COLOURED. The ghost has no objective on it, so its
@@ -1622,7 +1635,10 @@ body {
   flex: 0 0 auto;
   width: 42px;
   align-self: stretch;
-  border: 1px dashed var(--hair);
+  /* Solid, with the ghost beside it: see the note on .obs-c.is-ghost.
+     These two are the only outlined boxes in the app, so they have to
+     agree with each other or the row reads as two treatments. */
+  border: 1px solid var(--hair);
   border-radius: 14px;
   background: none;
   display: grid;
@@ -2607,6 +2623,24 @@ body {
    were decided by what was drawn across it, and the first time the
    answer is that nothing is. */
 .row.is-now .t, .row.is-now .dur { color: var(--ink); }
+/* -- A BLOCK BEHIND YOU HAS NO LENGTH --
+   The same argument as the countdown that replaces it while the block
+   runs: a length is what you PLAN against, and there is nothing left
+   to plan about a morning that has happened. Done or missed, the
+   figure is carrying nothing and the state tag beside it is the whole
+   of what the row still has to say.
+
+   This is the reverse of the rule that put the START back on a
+   finished row, and the difference is the COLUMN. The start lives in
+   a gutter, so hiding it leaves a hole and three holes down a morning
+   read as missing data. The length is a property inline with the
+   tags, so taking it out closes up and leaves no gap at all.
+
+   In CSS rather than in scLive, because is-done is set at RENDER and
+   on every day of the week, while scLive walks today's rows alone --
+   a rule here covers the row you ticked on Thursday, which a live
+   pass never visits. */
+.row.is-done .dur, .row.is-past .dur { display: none; }
 .row-prog {
   grid-column: 3; grid-row: 3;
   height: 3px; margin-top: 7px;

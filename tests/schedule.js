@@ -379,19 +379,76 @@ const SAID = [
      statement as start-to-end, and it is what these hold — the old
      assertions were replaced rather than deleted, because what they
      protect is that a row still says how long the block is. */
-  const spans = await page.$$eval('.row[data-id]', (rows) => rows.map((r) => ({
-    n: r.querySelector('.n').firstChild.textContent,
-    s: +r.dataset.s, e: +r.dataset.e,
-    t: r.querySelector('.t').textContent,
-    d: r.querySelector('.dur') ? r.querySelector('.dur').textContent : null,
-  })));
+  const spans = await page.$$eval('.row[data-id]', (rows) => rows.map((r) => {
+    const d = r.querySelector('.dur');
+    return {
+      n: r.querySelector('.n').firstChild.textContent,
+      s: +r.dataset.s, e: +r.dataset.e,
+      t: r.querySelector('.t').textContent,
+      d: d ? d.textContent : null,
+      /* THE BOX, NOT THE STRING. A length hidden by CSS still returns
+         its textContent, so a check reading the text alone passes on a
+         build where not one of them is drawn — which is exactly the
+         build the rule below creates on half the rows. */
+      dv: !!d && d.getClientRects().length > 0,
+      done: r.classList.contains('is-done'),
+      past: r.classList.contains('is-past'),
+      now: r.classList.contains('is-now'),
+    };
+  }));
   const hhmm = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':'
     + String(m % 60).padStart(2, '0');
+  /* durAhead / durGone, not ahead / behind: `behind` is already
+     declared in this scope eight hundred lines down, and a second one
+     is a SyntaxError that takes the whole file before an assertion
+     runs. This repo's oldest bug in test-file clothes, caught by
+     node --check rather than by "0 assertions across 1 files". */
+  const durAhead = spans.filter((s) => !s.done && !s.past);
   ok('every block prints its start in the gutter and its length below',
-    spans.length > 4
+    spans.length > 4 && durAhead.length > 1
     && spans.every((s) => /^\d\d:\d\d$/.test(s.t))
-    && spans.every((s) => s.d && /\d/.test(s.d)),
+    && durAhead.every((s) => s.dv && /\d/.test(s.d)),
     spans.slice(0, 3));
+
+  /* ── AND A BLOCK BEHIND YOU HAS NO LENGTH ──
+     A length is what you PLAN against, and there is nothing left to
+     plan about a morning that has happened: done or missed, the figure
+     carries nothing and the tag beside it is the whole of what the row
+     still has to say.
+
+     This does NOT reverse the rule that put the start back on a
+     finished row, and the difference is the COLUMN. The start lives in
+     a gutter, so hiding it leaves a hole and three holes down a
+     morning read as missing data. The length is a property inline with
+     the tags, so taking it out closes up.
+
+     Both directions, and both are needed: "nothing behind you draws
+     one" passes on a build that draws no lengths at all, and the half
+     above passes on one that draws every last one.
+
+     IT PLANTS THE TWO STATES RATHER THAN WAITING FOR THEM. Written as
+     a filter over whatever happened to be on screen it read `gone: []`
+     and failed — is-past is set on TODAY's rows alone, and the day
+     open here need not be today, so the check only had something to be
+     true of at certain hours on certain days. That is the shape this
+     file has now recorded four times. WHEN the app sets those classes
+     is asserted elsewhere and at length; what is claimed here is only
+     that a row wearing one draws no length, so the honest measurement
+     is to put the class on, read the box, and take it off again —
+     inside one evaluate, so nothing is left on the page. */
+  const durGone = await page.$eval('.row[data-id]', (r) => {
+    const d = r.querySelector('.dur');
+    const box = () => d.getClientRects().length > 0;
+    const out = { before: box() };
+    r.classList.add('is-done'); out.done = box(); r.classList.remove('is-done');
+    r.classList.add('is-past'); out.past = box(); r.classList.remove('is-past');
+    out.after = box();
+    return out;
+  });
+  ok('and a block already done or gone by draws no length at all',
+    durGone.before && !durGone.done && !durGone.past && durGone.after
+    && durAhead.every((s) => s.dv),
+    { durGone, ahead: durAhead.map((s) => [s.n, s.d, s.dv]) });
   /* Present is not enough — a constant string is also present, which is
      the shape of the failure the measure's own check was written for.
      So both halves have to be the block's REAL figures, and both have
@@ -1316,6 +1373,65 @@ const SAID = [
   ok('nothing on it animates or transitions',
     prog && prog.anim === 'none' && parseFloat(prog.dur) === 0, prog);
 
+  /* ── AND THE LENGTH BECOMES A COUNTDOWN WHILE IT RUNS ──
+     The bar was accurate and nobody could tell, which is what was
+     reported: "I swear I've just seen it at halfway" about a fill
+     measuring 38.3% that was exactly right. With no figure anywhere on
+     the row there was nothing to check it against, and a bar between a
+     third and a half is genuinely hard to read.
+
+     It REPLACES the length rather than joining it: on the row that is
+     running, the length is the one figure you can do nothing with.
+
+     Asserted against the CLOCK rather than as a pattern, because
+     "37 min left" is a string any constant could satisfy — and
+     against the fill beside it, since the two are one fact drawn
+     twice and the bug worth catching is them disagreeing. */
+  const cd = await page.evaluate(() => {
+    const row = document.querySelector('.week.is-today .row.is-now');
+    if (!row) throw new Error('no running row on today to read a countdown off');
+    const d = row.querySelector('.dur');
+    const f = row.querySelector('.row-prog > i');
+    const t = new Date();
+    return { txt: d ? d.textContent : null,
+             drawn: !!d && d.getClientRects().length > 0,
+             s: +row.dataset.s, e: +row.dataset.e,
+             now: t.getHours() * 60 + t.getMinutes(),
+             pct: parseFloat(f.style.width) };
+  });
+  const mins = (txt) => {
+    const h = /(\d+)\s*h/.exec(txt), m = /(\d+)\s*min/.exec(txt);
+    return (h ? +h[1] * 60 : 0) + (m ? +m[1] : 0);
+  };
+  ok('the running row counts down instead of printing its length',
+    cd.drawn && / left$/.test(cd.txt)
+    && mins(cd.txt) === cd.e - cd.now
+    && mins(cd.txt) !== cd.e - cd.s, cd);
+  /* One fact, two drawings: what is left plus what has gone is the
+     whole block, so the figure and the fill have to agree. */
+  ok('...and it agrees with the fill beside it',
+    Math.abs((1 - mins(cd.txt) / (cd.e - cd.s)) * 100 - cd.pct) < 2,
+    { left: mins(cd.txt), span: cd.e - cd.s, pct: cd.pct });
+
+  /* ── IT TICKS ──
+     A figure that is right once is a constant. Moved and moved BACK,
+     because every assertion below this point was written under the
+     Tuesday 09:30 freeze — and read against each frozen clock's own
+     arithmetic rather than by subtracting ten, so it holds whichever
+     block the second time lands in. */
+  await freeze('2026-09-01T09:40:00');
+  const cd2 = await page.evaluate(() => {
+    const row = document.querySelector('.week.is-today .row.is-now');
+    if (!row) return null;
+    const t = new Date();
+    return { txt: (row.querySelector('.dur') || {}).textContent,
+             e: +row.dataset.e, now: t.getHours() * 60 + t.getMinutes() };
+  });
+  await freeze('2026-09-01T09:30:00');
+  ok('...and it moves with the clock rather than being written once',
+    cd2 && / left$/.test(cd2.txt) && mins(cd2.txt) === cd2.e - cd2.now
+    && cd2.txt !== cd.txt, { at930: cd.txt, at940: cd2 });
+
   /* A row that has not started draws no track: a bar on a block you
      have not reached is a claim that you have. Both directions, since
      "no other row has one" passes on a build with no tracks at all. */
@@ -1434,7 +1550,7 @@ const SAID = [
     const t = getComputedStyle(g.querySelector('.obs-t'));
     return {
       drawn: r.width > 60 && r.height > 28,
-      dashed: cs.borderTopStyle,
+      edge: cs.borderTopStyle,
       says: g.querySelector('.obs-n').textContent,
       /* A STATE IS NEVER COLOURED: the ghost names no objective, so
          its tag makes no claim about which kind of thing this is and
@@ -1450,8 +1566,18 @@ const SAID = [
       .map((v) => (v <= 1 ? v * 255 : v));
     return Math.max(...n) - Math.min(...n);
   };
-  ok('an empty day draws one ghost card, dashed, saying what it is for',
-    ghost.drawn && ghost.dashed === 'dashed'
+  /* ── A CLOSED EDGE, NOT A ROW OF MARKS ──
+     It was dashed on the usual reading, that a broken edge draws a
+     thing that is not there yet. On the phone it is a row of short
+     marks rather than an edge — the loudest thing about a card whose
+     job is to be quiet — and at 14px of radius the dashes break across
+     the corners, so the box does not close. Reported as exactly that.
+
+     What still says the card is empty is that it has no GROUND: no
+     fill and no shadow where every other card in this app has both,
+     which is read without reading an outline at all. */
+  ok('an empty day draws one ghost card, closed, saying what it is for',
+    ghost.drawn && ghost.edge === 'solid'
     && /what matters/i.test(ghost.says) && ghost.cards === 1, ghost);
   ok('...and its tag is a grey, because a state is never coloured',
     spread3(ghost.tag) < 12, { tag: ghost.tag, spread: spread3(ghost.tag) });
@@ -1460,6 +1586,66 @@ const SAID = [
      Showing up removed once already. */
   ok('...and the plus is not drawn beside it, because the ghost is it',
     ghost.add === 0, ghost);
+
+  /* ── AND NO EDGE IN THE APP IS BROKEN ──
+     The ghost and the plus are the only outlined boxes here and they
+     sit side by side, so a dashed one against a solid one reads as a
+     mistake in the drawing rather than as two states. Stated over
+     EVERY element on every view rather than as two selectors, which is
+     the rule this file already keeps about conic gradients: a
+     treatment comes back one element at a time, and a check naming the
+     two that have it now walks straight past the third.
+
+     Every side, because a border-bottom is as dashed as a border-top
+     and a check reading one of the four is three quarters blind. */
+  /* ── AND IT HAS TO HAVE SEEN AN OUTLINED BOX ──
+     "No edge is broken" is vacuously true of a screen with no drawn
+     borders at all, which is the shape of the check that finds nothing
+     and passes for it. The two outlined boxes are the ghost and the
+     plus, and exactly one is on screen at a time — the ghost IS the
+     add control on an empty day — so what is counted is drawn borders
+     rather than either selector. Proved by planting a dashed edge and
+     watching the scan report it; the first attempt aimed at .obs-add
+     on an empty day, found nothing, and looked exactly like a blind
+     check. */
+  const brokenEdge = [];
+  let outlined = 0;
+  /* NOT 'friends': arriving at that board claims a code and makes the
+     first request this page is allowed to make, and the assertion this
+     whole file is built around is that the week and the tally reach
+     nothing. A check that has to break the app's central promise to
+     run is a check that has to be narrower. */
+  for (const v of ['week', 'tally']) {
+    await page.evaluate((vv) => {
+      localStorage.setItem('sched.view.v1', vv);
+    }, v);
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(360);
+    const seen = await page.evaluate((vv) => {
+      const out = []; let solid = 0;
+      for (const e of document.querySelectorAll('*')) {
+        if (e.getClientRects().length === 0) continue;
+        const c = getComputedStyle(e);
+        for (const side of ['Top', 'Right', 'Bottom', 'Left']) {
+          const st = c['border' + side + 'Style'];
+          if (st === 'dashed' || st === 'dotted') {
+            out.push(vv + ' ' + (e.getAttribute('class') || e.tagName)
+              + ' border-' + side.toLowerCase() + ': ' + st);
+          } else if (st === 'solid'
+            && parseFloat(c['border' + side + 'Width']) > 0) solid++;
+        }
+      }
+      return { out: out, solid: solid };
+    }, v);
+    brokenEdge.push(...seen.out);
+    outlined += seen.solid;
+  }
+  await page.evaluate(() => { localStorage.setItem('sched.view.v1', 'week'); });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(360);
+  await openDow(4);
+  ok('no edge anywhere in the app is broken, and some were looked at',
+    brokenEdge.length === 0 && outlined > 0, { brokenEdge, outlined });
 
   /* ── THE ROW IS THE ONE THING IN THIS APP THAT SCROLLS SIDEWAYS ──
      "Nothing in this app scrolls sideways" was written after a 212px

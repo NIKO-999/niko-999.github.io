@@ -1428,6 +1428,30 @@
     return (h % 1 ? h.toFixed(1) : String(h)) + ' h';
   }
 
+  /* ── WHAT IS LEFT OF THE ONE THAT IS RUNNING ──
+     A COUNT DOWN, not a length: on the block happening now the length
+     is the one figure you cannot act on, and how much of it is left is
+     the only thing you would look at the row to find out.
+
+     NOT scDurShort, and that is the whole reason this exists. That one
+     reads a length and prints "1.5 h", which is right for a figure you
+     are planning against and unreadable as a countdown — nobody says
+     an hour and a half is one point five hours left. A countdown is
+     spoken in the two units it actually has.
+
+     Whole minutes, and `e - scNowMin()` is already the CEILING rather
+     than a rounding to be added: scNowMin floors the clock to its own
+     minute and every block ends on one, so at 9:23:45 of a block
+     ending at 10:00 this is 37 with 36.25 genuinely left. That is what
+     stops it ever reading "0 min left" on a block that is still going
+     — the row stops being live on the same tick the figure would
+     reach zero. */
+  function scLeftShort(m) {
+    if (m < 60) return m + ' min left';
+    var h = Math.floor(m / 60), r = m % 60;
+    return h + ' h' + (r ? ' ' + r + ' min' : '') + ' left';
+  }
+
   function scSessions(rows) {
     return SESSION.map(function (s) {
       return { s: s, rows: rows.filter(function (it) {
@@ -2009,6 +2033,26 @@
         var pct = Math.min(100, Math.max(0, (now - s) / span * 100));
         pr.style.width = pct.toFixed(1) + '%';
       }
+      /* ── AND THE LENGTH BECOMES THE COUNTDOWN WHILE IT RUNS ──
+         The same fact as the track under it, in figures — which is
+         what the track never had. A bar between a third and a half is
+         genuinely hard to read, and with no number anywhere on the row
+         there was nothing to check it against: reported as "I swear
+         I've just seen it at halfway" about a bar that measured 38.3%
+         and was exactly right.
+
+         It REPLACES the length rather than sitting beside it. Two
+         figures about the same block, one of which you can do nothing
+         with, is the duplication this project keeps taking back out —
+         and on the row that is running, the length is the one you
+         cannot act on.
+
+         Written on every pass rather than only when the state turns
+         over: a block that has just finished has to get its length
+         back, and reading the class would put the restore on whichever
+         row happened to change. */
+      var du = el.querySelector('.dur');
+      if (du) du.textContent = on ? scLeftShort(e - now) : scDurShort(e - s);
       if (on) live = el;
     }
 
