@@ -1612,7 +1612,28 @@
         chk.setAttribute('aria-label', (row.classList.contains('is-done') ? 'Untick ' : 'Tick ') + it.n);
         chk.setAttribute('aria-pressed', row.classList.contains('is-done') ? 'true' : 'false');
         chk.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.8l5.2 5.2L19.5 6"/></svg>';
-        chk.addEventListener('click', function (ev) { ev.stopPropagation(); tick(); });
+        /* ── THE CHECK ANSWERS THE SAME TWO GESTURES THE ROW DOES ──
+           It was a plain click that ticked, and that is what was
+           reported as *double clicking it and it's not letting me
+           edit*. The check is a 44px target laid over the END of the
+           row, which is a perfectly ordinary place for a thumb to
+           land on a row you are aiming at — and there a double tap
+           ticked twice and opened nothing, at any speed. Measured:
+           the name and the gutter opened the editor at 150, 250 and
+           350ms between taps; the check opened it at NONE of them.
+
+           Nobody distinguishes "the row" from "the check on the row",
+           so one press means one thing across the whole of it. The
+           single tap still ticks, which is why this is scDoubleTap
+           rather than a second handler: the check keeps its own job
+           and gains the row's.
+
+           stopPropagation stays on its own listener. The two are
+           siblings under .rowwrap rather than nested, so this is
+           belt and braces — but the ripple reads pointerdown in
+           CAPTURE, so nothing about it depends on this bubbling. */
+        chk.addEventListener('click', function (ev) { ev.stopPropagation(); });
+        scDoubleTap(chk, tick, function () { scEditSheet(it, d); });
         wrap.appendChild(chk);
         wrap.appendChild(row);
         /* ── THE WAY IN A GESTURE CANNOT OFFER ──

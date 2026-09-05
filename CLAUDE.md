@@ -6948,6 +6948,44 @@ already the race the comment beside one of them warns about, one step
 worse, because a wait level with the deferral is decided by whichever
 of the two wins the frame.
 
+### And the window was only half of it
+
+Reported again after the widening: *when I'm double clicking it and
+it's not letting me edit it.* It read as a timing fault a second time
+and was not one.
+
+**THE CHECK CARRIED A PLAIN CLICK.** It is a 44px target laid over the
+END of the row — a sibling of it, so the row's own double tap never
+sees a press that lands there — and it ticked and nothing else. Two
+taps on it ticked twice and opened nothing **at any speed**. Measured
+on real touch at three places along one row: the name and the gutter
+opened the editor at 150, 250 and 350ms between taps, and the check
+opened it at none of them.
+
+The row is wide, the name is at the left and the check is the one
+drawn mark on the right, so aiming at "the row" and landing on the
+check is not a mis-tap — it is where a thumb goes. **Nobody
+distinguishes the row from the check on the row**, so one press means
+one thing across the whole of it: `scDoubleTap` on the check too, with
+the single tap still ticking.
+
+Both halves are asserted because they fail apart — a build that simply
+moved the editor onto the check passes the second and breaks the
+first, and the single tap there is the only tick a keyboard can reach.
+
+**The dots are the one thing on a row that stays different**, and that
+is the exception already argued for: they are their own control, so
+two taps there open and shut the children rather than the editor.
+
+**Three probes were needed and the first two lied by omission.** One
+pressed only the middle of the row and reported the gesture working;
+one drove it through `page.dblclick`, which lands both clicks in a
+single task and is recognised at any window at all. What found it was
+pressing the SAME row at three fractions of its width — 0.07, 0.55 and
+0.94 — with real touch events at four gaps. **A gesture check that
+presses one point on a control has measured one point, not the
+control.**
+
 ## A time can be another block, and no day means today
 
 Two asks in one sentence: *if I write train from seven thirty to eight

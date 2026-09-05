@@ -4954,6 +4954,58 @@ const SAID = [
     null, { timeout: 4000 });
   await page.waitForTimeout(160);
 
+  /* ── AND THE CHECK ANSWERS THE SAME TWO GESTURES ──
+     Reported as *double clicking it and it's not letting me edit*,
+     which read as a timing fault and was not one. The check is a 44px
+     target laid over the END of the row — a perfectly ordinary place
+     for a thumb to land on a row you are aiming at — and it carried a
+     plain click that ticked, so two taps there ticked twice and
+     opened nothing AT ANY SPEED. Measured on real touch: the name and
+     the gutter opened the editor at 150, 250 and 350ms between taps;
+     the check opened it at none of them.
+
+     Nobody distinguishes "the row" from "the check on the row", so
+     one press means one thing across the whole of it.
+
+     BOTH HALVES, because they fail apart: a single tap there still has
+     to tick — that is the check's own job and the only one a keyboard
+     can reach — and two have to edit. A build that simply moved the
+     editor onto the check would pass the second and break the first. */
+  /* ── READ THE ROW BACK BY ID, NOT OFF THE ELEMENT ──
+     The tick calls scRender, which rebuilds every row — so an element
+     captured before the press is DETACHED by the time the wait is
+     over, and it keeps the classes it had. Read that way this
+     reported `was: false, now: false` on a tick that worked
+     perfectly. It is the double tap's own mechanism seen from the
+     test's side: the thing you were holding is not the thing on
+     screen any more. */
+  const chkTick = await page.evaluate(async () => {
+    const c = document.querySelector('.week.is-today .rowwrap .chk');
+    if (!c) throw new Error('no check beside a row on today');
+    const id = c.parentElement.querySelector('.row[data-id]').dataset.id;
+    const at = () => {
+      const r = document.querySelector('.week.is-today .row[data-id="' + id + '"]');
+      return !!r && r.classList.contains('is-done');
+    };
+    const was = at();
+    c.click();
+    await new Promise((r) => setTimeout(r, 620));
+    return { id, was, now: at(),
+             sheet: !document.getElementById('scSheet').hidden };
+  });
+  ok('one tap on the check still ticks the row, and opens nothing',
+    chkTick.now !== chkTick.was && !chkTick.sheet, chkTick);
+  await page.evaluate(() => document.querySelector('.week.is-today .rowwrap .chk').click());
+  await page.waitForTimeout(700);                  /* back where it was */
+
+  await dblRow('.week.is-today .rowwrap .chk');
+  ok('...and two taps on it open the editor, like anywhere else on the row',
+    await page.evaluate(() => !document.getElementById('scSheet').hidden));
+  await page.evaluate(() => document.getElementById('scScrim').click());
+  await page.waitForFunction(() => document.getElementById('scSheet').hidden,
+    null, { timeout: 4000 });
+  await page.waitForTimeout(160);
+
   /* ── AND A GESTURE IS NEVER THE ONLY WAY IN ──
      A double tap reaches a pointer and nothing else. The check beside
      the row is the keyboard's tick; this is its edit. */
