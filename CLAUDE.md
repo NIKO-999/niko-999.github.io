@@ -6474,3 +6474,70 @@ default run PRINTS what it is skipping every time. The file is
 untouched and still runs when it is asked for by name, because the
 argument path checks the disk rather than SUITE. The day it is wanted
 back it moves one line up.
+
+## The number sheet is a dial, and it adds
+
+Reported as decision fatigue, and named exactly: *it comes out with the
+text you have to re-enter it*. The path was measured rather than
+guessed, and the worst line in it is not a press.
+
+`scNumSheet` opened a text field **pre-filled with the day's running
+total** and focused it. So adding a 620 lunch to 2,000 already logged
+cost a tap, four presses of backspace on a caret that had landed in the
+middle of the digits, four more to type the new figure, a tap on Save —
+and, before any of it, **working out 2,000 + 620 yourself**. Ten
+interactions and a sum in your head to record a sandwich, and the sum
+is the half a computer is better at.
+
+**THREE THINGS CHANGED AND THEY ARE ONE CHANGE.** It starts at ZERO, so
+there is nothing to clear — the running total moved out of the field
+and into a readout above it, where it can be seen while you work rather
+than being the thing you are deleting. It ADDS, so what you set is what
+you just did and the app owns the arithmetic; every number here is
+something you accumulate, and a field asking for the total was asking
+you to keep a running sum in your head between visits. And it is
+DRAGGED, which on a phone is the whole interaction rather than a
+detail: the system keyboard covers the sheet, and with the total now
+above the field it covers the exact thing you are adding to.
+
+**THE BOUND IS ON ONE DRAG, NEVER ON THE DAY.** Steps 50,000, Fuel
+10,000, Water 5 L, Sleep 12 h — four different ceilings, because one
+shared figure would put every real glass of water inside the first two
+pixels of the track. What the bound buys is RESOLUTION, and it is only
+affordable because the way past it is on screen at the moment you reach
+it: the top of the track says *that is the most one drag adds — add it
+and open again for more*, and a day reaching 12,620 through two drags
+on a 10,000 cap is asserted.
+
+**THE GRAIN IS PART OF THE BOUND.** 100 steps, 10 kcal, 0.1 L, 15
+minutes. Fuel went in at 25 and a 620 lunch landed on 625 — a figure
+nobody typed, from a control nobody could aim. A fixture had to move
+with it: the friends check filed 18,437 steps, which is not a value the
+track can produce, so it files 18,400. **A test whose fixture the
+control cannot reach is testing a number nobody could enter.**
+
+**AND IT IS AN `input[type=range]`, NEVER A DIV WITH A POINTER
+HANDLER.** A drag reaches neither a keyboard nor a screen reader, and
+this app's own rule is that a route only a gesture can reach is a route
+half the people using it do not have. A range is arrows, Home, End and
+a spoken value for free. It is also the exact opposite case to the edit
+sheet's time fields: those needed `appearance: none` because Safari
+kept its own metrics over the author's, and here the native box and its
+drag behaviour are precisely what is wanted — so only the paint is
+dropped. Both halves are asserted, because driving it with synthetic
+`input` events alone would pass on a div.
+
+**A `Clear`, because there is no keyboard to retype into.** A wrong
+figure needs a way back to nought, and it is offered only when there is
+something to clear — otherwise that button is Cancel, since a Clear
+that clears nothing is a control that does nothing. Asserted in both
+directions.
+
+**A habit of yours is bounded by what you aimed at**, twice it and
+rounded up, because a constant would be wrong for every unit at once —
+and a round default when no aim is set, since a track from nought to
+nought is not one.
+
+**Sleep was not asked about and had to get something.** It is the
+fourth number on the same sheet, so leaving it alone would have left
+one item with a control the other three no longer have.

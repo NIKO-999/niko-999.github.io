@@ -5362,3 +5362,78 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .rp { display: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   THE NUMBER SHEET IS A DIAL
+
+   See the note above `scNumSheet`. What is drawn here is a readout of
+   what the day will come to, a track you drag, and the two ends of it
+   written out — because a slider with no numbers on it is a control
+   you have to discover the range of by moving it.
+   ═══════════════════════════════════════════════════════════════ */
+
+.nm-read { display: flex; align-items: baseline; gap: 8px; margin-top: 2px; }
+.nm-read b {
+  font-size: 40px; font-weight: 800; letter-spacing: -.035em;
+  font-variant-numeric: tabular-nums; line-height: 1.05;
+}
+.nm-sub { font-size: 12.5px; color: var(--spent); margin-top: 3px; min-height: 17px; }
+
+/* ── THE NATIVE BOX IS WANTED HERE, AND ONLY THE PAINT IS NOT ──
+   The edit sheet's time fields had to have `appearance: none` because
+   Safari kept its own metrics and overflowed a track that was sized
+   correctly. This is the opposite case: a range's own hit area and its
+   drag behaviour are exactly what is being kept — a div with a pointer
+   handler reaches no keyboard and no screen reader — so the appearance
+   is dropped for the drawing alone. */
+.nm-dial {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 44px;              /* the press target everything else holds */
+  margin: 14px 0 0;
+  padding: 0;
+  background: none;
+  cursor: ew-resize;
+  touch-action: pan-y;       /* the drag is the browser's, the scroll is the sheet's */
+}
+.nm-dial:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 12px; }
+
+/* One declaration per engine, because a selector an engine does not
+   know invalidates the whole rule — so these cannot be a group. */
+.nm-dial::-webkit-slider-runnable-track {
+  height: 14px; border-radius: 7px;
+  background:
+    linear-gradient(var(--ink), var(--ink)) 0 / var(--fill, 0%) 100% no-repeat,
+    var(--tick-off);
+}
+.nm-dial::-moz-range-track {
+  height: 14px; border-radius: 7px; background: var(--tick-off);
+}
+.nm-dial::-moz-range-progress { height: 14px; border-radius: 7px; background: var(--ink); }
+
+.nm-dial::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 30px; height: 30px; border-radius: 50%;
+  margin-top: -8px;          /* centred on a 14px track */
+  background: var(--ink);
+  border: 3px solid var(--paper);
+  box-shadow: var(--card-shadow);
+}
+.nm-dial::-moz-range-thumb {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--ink);
+  border: 3px solid var(--paper);
+  box-shadow: var(--card-shadow);
+}
+
+.nm-ends {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--spent);
+  font-variant-numeric: tabular-nums;
+  margin-top: -2px;
+}
+
+/* A press that would do nothing must not look like one that would. */
+.acts .btn:disabled { opacity: .38; cursor: default; }

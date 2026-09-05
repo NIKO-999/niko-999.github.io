@@ -2623,13 +2623,22 @@
   var TALLY = [
     { id: 't', n: 'Train', s: 'Gym, a run, a session', k: 'do',  from: ['Train'] },
     { id: 'm', n: 'Mind',  s: 'Walk, read, listen',    k: 'do',  from: ['Walk', 'Read'] },
-    { id: 'p', n: 'Steps', s: 'Log the number',        k: 'num', unit: '', dp: 0 },
+    /* ── `max` AND `step` ARE THE DIAL'S, AND THEY BOUND ONE DRAG ──
+       Not a ceiling on the day: the dial ADDS, so a bigger figure is
+       reached by opening it again. What the bound actually buys is
+       resolution — a track that ran to a plausible worst case would
+       spend most of its width on numbers nobody has, and put every
+       real value in the first inch of it. */
+    { id: 'p', n: 'Steps', s: 'Log the number',        k: 'num', unit: '', dp: 0,
+      max: 50000, step: 100 },
     /* `neu` — a number you do NOT want more of. Every other figure on
        this screen gets called "your best"; doing that to a calorie count
        calls your biggest day a win, which is the opposite of what the
        number is for. Same figure, named without the praise. */
-    { id: 'f', n: 'Fuel',  s: 'Log what you ate',      k: 'num', unit: ' kcal', dp: 0, neu: 1 },
-    { id: 'w', n: 'Water', s: 'Log what you drank',    k: 'num', unit: ' L', dp: 1 },
+    { id: 'f', n: 'Fuel',  s: 'Log what you ate',      k: 'num', unit: ' kcal', dp: 0, neu: 1,
+      max: 10000, step: 10 },
+    { id: 'w', n: 'Water', s: 'Log what you drank',    k: 'num', unit: ' L', dp: 1,
+      max: 5, step: 0.1 },
     /* ── THE SIXTH, AND THE ONE YOU DID NOT DO ──
        Every other item here is something you went and did; this is what
        happened while you were not deciding anything, and it is the
@@ -2638,7 +2647,8 @@
        Not `neu`. Fuel is the one figure on this screen where more is
        not better; a long night is a good night. Six rows fit a 390x844
        phone with 37px to spare, measured before it was written. */
-    { id: 's', n: 'Sleep', s: 'Hours last night',      k: 'num', unit: ' h', dp: 1 }
+    { id: 's', n: 'Sleep', s: 'Hours last night',      k: 'num', unit: ' h', dp: 1,
+      max: 12, step: 0.25 }
   ];
 
   /* Two records, not one, and they are different KINDS of thing: which
@@ -3857,31 +3867,146 @@
     });
   }
 
+  /* ── A HABIT OF YOURS HAS NO BOUNDS WRITTEN DOWN ──
+     The six above carry their own. A number you named gets twice what
+     you are aiming at, rounded up, so the dial is built around the
+     figure you told the app you cared about — and a round default when
+     you set no aim, because a track from nought to nought is not one. */
+  function scNumRange(item) {
+    if (item.max) return { max: item.max, step: item.step || 1 };
+    var aim = +item.aim || 0;
+    var max = aim ? Math.max(10, Math.ceil((aim * 2) / 10) * 10) : 100;
+    return { max: max, step: Math.max(1, Math.round(max / 100)) };
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     THE NUMBER SHEET IS A DIAL, AND IT ADDS
+
+     It was a text field pre-filled with the day's running total and
+     focused, with Save under it. Adding a 620 lunch to 2,000 already
+     logged therefore cost: a tap, four presses of backspace on a caret
+     that had landed in the middle of the digits, four more to type the
+     new figure, a tap on Save — and, before any of it, working out
+     2,000 + 620 YOURSELF. Ten interactions and a sum in your head to
+     record a sandwich, and the sum is the part a computer is better at.
+
+     THREE THINGS CHANGED AND THEY ARE ONE CHANGE:
+
+     IT STARTS AT ZERO. Nothing to clear, because there is nothing in
+     it — the running total moved out of the field and into a readout
+     above, where it can be seen while you work rather than being the
+     thing you are deleting.
+
+     IT ADDS. What you set is what you just did, not what the day now
+     comes to, so the app owns the arithmetic. Every one of these
+     numbers is something you accumulate — meals, glasses, steps — and
+     a field asking for the total was asking you to keep a running sum
+     in your head between visits.
+
+     AND IT IS DRAGGED, NOT TYPED. No keyboard at all, which on a phone
+     is the whole interaction rather than a detail: the system keyboard
+     covers the sheet and, with the total now sitting above the field,
+     covers the exact thing you are adding to.
+
+     ── A RANGE INPUT, NEVER A DIV WITH A POINTER HANDLER ──
+     A drag reaches neither a keyboard nor a screen reader, and this
+     app's own rule is that a route only a gesture can reach is a route
+     half the people using it do not have. `input[type=range]` is
+     arrows, Home, End and a spoken value for free, and it is the one
+     native control here whose own metrics are wanted — so unlike the
+     time fields it keeps its box and only loses its paint.
+     ═══════════════════════════════════════════════════════════ */
   function scNumSheet(item, day) {
+    var R = scNumRange(item);
+    var dp = item.dp || 0;
     scSheet(item.n, function (body) {
-      var f = scEl('input', 'field');
-      f.type = 'text';
-      f.inputMode = 'decimal';
-      f.placeholder = item.s;
-      f.value = (tickLog[day] && tickLog[day][item.id]) || '';
-      body.appendChild(f);
+      var have = +((tickLog[day] || {})[item.id]) || 0;
+      var add = 0;
+
+      var read = scEl('div', 'nm-read');
+      var big = scEl('b');
+      read.appendChild(big);
+      body.appendChild(read);
+      var sub = scEl('div', 'nm-sub');
+      body.appendChild(sub);
+
+      var dial = scEl('input', 'nm-dial');
+      dial.type = 'range';
+      dial.min = 0;
+      dial.max = R.max;
+      dial.step = R.step;
+      dial.value = 0;
+      dial.setAttribute('aria-label', 'How much to add to ' + item.n);
+      body.appendChild(dial);
+
+      var ends = scEl('div', 'nm-ends');
+      ends.appendChild(scEl('span', null, '0'));
+      ends.appendChild(scEl('span', null, scPatMid(item, R.max)));
+      body.appendChild(ends);
+
       body.appendChild(scEl('p', 'hint',
         'The number stays on this phone. Only whether you logged it is '
         + 'ever shared.'));
-      /* scBtn and scClose, which are what the other four sheets use.
-         This was written as a bare `go` class and a `scCloseSheet` that
-         does not exist — the class would have rendered an unstyled
-         button and the call would have thrown on the one path nobody
-         looks at twice, which is the press that saves your number. */
+
       var acts = scEl('div', 'acts');
-      acts.appendChild(scBtn('off', 'Cancel', scClose));
-      acts.appendChild(scBtn('go', 'Save', function () {
-        scSetTick(day, item.id, f.value.trim() || 0);
+      /* Two buttons whichever state it is in, and the left one is
+         whichever makes sense: there is nothing to clear on a day with
+         nothing on it, and a Cancel beside a figure you are trying to
+         correct is the wrong offer. */
+      var left = have
+        ? scBtn('off', 'Clear', function () {
+            scSetTick(day, item.id, 0);
+            have = 0; add = 0; dial.value = 0;
+            scPaintTally();
+            paint();
+            /* The button itself becomes the other one, rather than the
+               sheet being rebuilt under the finger that pressed it. */
+            left.textContent = 'Cancel';
+            left.onclick = scClose;
+          })
+        : scBtn('off', 'Cancel', scClose);
+      var go = scBtn('go', 'Add', function () {
+        if (!add) return;
+        scSetTick(day, item.id, String(+(have + add).toFixed(dp)));
         scClose();
         scPaintTally();
-      }));
+      });
+      acts.appendChild(left);
+      acts.appendChild(go);
       body.appendChild(acts);
-      setTimeout(function () { f.focus(); }, 260);
+
+      function paint() {
+        var now = have + add;
+        big.textContent = scPatMid(item, +now.toFixed(dp));
+        /* The fill is written on the element because a range's track
+           cannot be painted to a value in CSS alone. */
+        dial.style.setProperty('--fill', (R.max ? (add / R.max) * 100 : 0) + '%');
+        dial.setAttribute('aria-valuetext',
+          scPatMid(item, +add.toFixed(dp)) + ' added, '
+          + scPatMid(item, +now.toFixed(dp)) + ' today');
+        go.disabled = !add;
+        go.textContent = add ? 'Add ' + scPatMid(item, +add.toFixed(dp)) : 'Add';
+        if (!add) {
+          sub.textContent = have
+            ? scPatMid(item, have) + ' today · drag to add more'
+            : 'drag to set';
+        } else if (add >= R.max) {
+          /* SAID AT THE TOP OF THE TRACK, because the bound is only
+             defensible if the way past it is on screen at the moment
+             you reach it. */
+          sub.textContent = scPatMid(item, have) + ' now · that is the most one drag adds'
+            + ' — add it and open again for more';
+        } else {
+          sub.textContent = (have ? scPatMid(item, have) + ' now · ' : '')
+            + 'adding ' + scPatMid(item, +add.toFixed(dp));
+        }
+      }
+
+      dial.addEventListener('input', function () {
+        add = +dial.value;
+        paint();
+      });
+      paint();
     });
   }
 

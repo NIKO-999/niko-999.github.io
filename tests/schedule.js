@@ -5059,13 +5059,20 @@ const SAID = [
     await fp.waitForTimeout(500);
     await fp.keyboard.press('Escape');
     await fp.waitForTimeout(360);
-    /* A number nothing else in the app could produce, typed into
-       Steps. The tick means YOU LOGGED IT and never what it was, and
+    /* A number nothing else in the app could produce, DRAGGED into
+       Steps — the sheet is a dial now and there is no field to type
+       into. The tick means YOU LOGGED IT and never what it was, and
        the only way to hold that claim is to go looking for the figure
-       afterwards. */
+       afterwards. 18,400 rather than 18,437 because the track's grain
+       is a hundred steps: a fixture has to be a value the control can
+       actually produce, or it is testing a number nobody could enter. */
     await fp.click('.ty-card[data-item="p"]');
     await fp.waitForTimeout(400);
-    await fp.fill('.sheet input[type=text]', '18437');
+    await fp.evaluate(() => {
+      const d = document.querySelector('.nm-dial');
+      d.value = 18400;
+      d.dispatchEvent(new Event('input', { bubbles: true }));
+    });
     await fp.click('.sheet .btn.go');
     await fp.waitForTimeout(400);
 
@@ -5247,13 +5254,13 @@ const SAID = [
       typeof rec().days[day(0)].b === 'number'
       && !/\bWake\b|\bTrading\b/.test(store.get('rec:' + mine.code)),
       JSON.stringify(rec().days[day(0)]));
-    /* The tally holds Steps, Fuel and Water as numbers you typed. The
+    /* The tally holds Steps, Fuel and Water as numbers you set. The
        tick means you logged it and never what it was, which is what
        keeps the quantities off the wire. */
     ok('the Steps figure is on this phone and nowhere in the record',
       (await fp.evaluate((d) => (JSON.parse(localStorage.getItem('sched.tick.v1'))
-        || {})[d].p, day(0))) === '18437'
-      && !JSON.stringify(rec()).includes('18437'), JSON.stringify(rec()));
+        || {})[d].p, day(0))) === '18400'
+      && !JSON.stringify(rec()).includes('18400'), JSON.stringify(rec()));
     /* TWO NUMBERS AND NOTHING ELSE. It was one number, and the claim
        was that a day is a count rather than a shape — which still
        holds, it is just two counts now. Written as "every value is a
@@ -10919,6 +10926,200 @@ const SAID = [
 
     ok('nothing threw through any of it', perrs.length === 0, perrs);
     await pctx.close();
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     THE NUMBER SHEET IS A DIAL, AND IT ADDS
+
+     It was a text field pre-filled with the day's running total and
+     focused. Adding a 620 lunch to 2,000 cost a tap, four backspaces
+     on a caret that had landed inside the digits, four keys to retype,
+     a tap on Save — and the sum done in your head first.
+
+     ITS OWN CONTEXT, because every assertion here presses a tile and
+     writes a figure, and a check that changes the state of the app is
+     a check that has to be alone.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    console.log('\n── the number sheet is a dial ──');
+    const dctx = await browser.newContext({ ...PHONE });
+    const dp = await dctx.newPage();
+    const derrs = [];
+    dp.on('pageerror', (e) => derrs.push(String(e)));
+    await dp.addInitScript(() => {
+      ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+        .forEach((k) => localStorage.setItem(k, '1'));
+      localStorage.setItem('sched.view.v1', 'tally');
+      localStorage.setItem('sched.ty.v1', 'up');
+      localStorage.setItem('sched.net.v1',
+        JSON.stringify({ on: false, url: '', code: '' }));
+    });
+    await dp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await dp.waitForTimeout(500);
+
+    const open = async (id) => {
+      await dp.evaluate((i) => {
+        const c = document.querySelector('.ty-card[data-item="' + i + '"]');
+        if (!c) throw new Error('no tile for ' + i);
+        c.click();
+      }, id);
+      await dp.waitForTimeout(620);
+    };
+    const dial = () => dp.evaluate(() => {
+      const d = document.querySelector('.nm-dial');
+      if (!d) return null;
+      const go = document.querySelector('.acts .btn.go');
+      return { max: +d.max, step: +d.step, val: +d.value, type: d.type,
+        big: document.querySelector('.nm-read b').textContent,
+        sub: document.querySelector('.nm-sub').textContent,
+        go: go.textContent, goOff: go.disabled,
+        left: document.querySelector('.acts .btn.off').textContent,
+        typed: document.querySelectorAll('.sheet input[type=text],.sheet textarea').length,
+        named: !!d.getAttribute('aria-label') };
+    });
+    const drag = (v) => dp.evaluate((n) => {
+      const d = document.querySelector('.nm-dial');
+      d.value = n;
+      d.dispatchEvent(new Event('input', { bubbles: true }));
+    }, v);
+    const esc = async () => { await dp.keyboard.press('Escape'); await dp.waitForTimeout(420); };
+
+    /* ── EACH NUMBER IS BOUNDED, AND THEY ARE NOT THE SAME BOUND ──
+       Asserted as the exact four, because "there is a max" passes on
+       one shared ceiling — and a track running to 50,000 would put
+       every real glass of water inside its first two pixels. */
+    const bounds = {};
+    for (const id of ['p', 'f', 'w', 's']) {
+      await open(id);
+      bounds[id] = await dial();
+      await esc();
+    }
+    ok('every number opens a dial rather than a field',
+      ['p', 'f', 'w', 's'].every((k) => bounds[k] && bounds[k].type === 'range'
+        && bounds[k].typed === 0), bounds);
+    ok('...bounded to its own figure, not one ceiling for all four',
+      bounds.p.max === 50000 && bounds.f.max === 10000
+      && bounds.w.max === 5 && bounds.s.max === 12,
+      { steps: bounds.p.max, fuel: bounds.f.max, water: bounds.w.max, sleep: bounds.s.max });
+    ok('...with a grain fine enough to land on a real figure',
+      bounds.p.step === 100 && bounds.f.step === 10
+      && bounds.w.step === 0.1 && bounds.s.step === 0.25,
+      { steps: bounds.p.step, fuel: bounds.f.step, water: bounds.w.step, sleep: bounds.s.step });
+
+    /* ── IT STARTS AT ZERO ON A DAY THAT ALREADY HAS A FIGURE ──
+       This is the bug, and it is the whole of it: the field opened
+       holding the running total with the caret inside it, so every
+       second entry of the day began by deleting four digits. */
+    await open('f');
+    await drag(2000);
+    await dp.click('.acts .btn.go');
+    await dp.waitForTimeout(520);
+    await open('f');
+    const second = await dial();
+    ok('opening it a second time starts at nought, not at your total',
+      second.val === 0 && second.goOff, second);
+    ok('...and the total it will reach is on screen instead of in the field',
+      /2,000 kcal/.test(second.sub), second);
+
+    /* ── AND IT ADDS ──
+       620 onto 2,000 is 2,620 and the app does the sum. Asserted on
+       the RECORD as well as the readout: a display that adds over a
+       write that replaces is the same bug wearing the fix's clothes. */
+    await drag(620);
+    const adding = await dial();
+    ok('what you set is added to what is there, and it says so before you commit',
+      adding.big === '2,620 kcal' && /Add 620 kcal/.test(adding.go), adding);
+    await dp.click('.acts .btn.go');
+    await dp.waitForTimeout(520);
+    const stored = await dp.evaluate(() => {
+      const t = JSON.parse(localStorage.getItem('sched.tick.v1') || '{}');
+      const k = Object.keys(t).sort().pop();
+      return t[k] && t[k].f;
+    });
+    ok('...and the record holds the sum, not the last thing you set',
+      String(stored) === '2620', { stored });
+
+    /* ── ADD ON, WHICH IS WHAT MAKES THE BOUND AFFORDABLE ──
+       One drag is capped so the track has usable resolution. Going
+       past the cap is opening it again — so the cap is a limit on a
+       gesture and never on the day. */
+    await open('f');
+    await drag(10000);
+    const top = await dial();
+    ok('at the top of the track it says how to go further',
+      /open again/.test(top.sub) && top.big === '12,620 kcal', top);
+    await dp.click('.acts .btn.go');
+    await dp.waitForTimeout(520);
+    const past = await dp.evaluate(() => {
+      const t = JSON.parse(localStorage.getItem('sched.tick.v1') || '{}');
+      const k = Object.keys(t).sort().pop();
+      return t[k] && t[k].f;
+    });
+    ok('...and a day can hold more than one drag can add',
+      +past === 12620 && +past > 10000, { past });
+
+    /* ── CLEAR IS THE WAY BACK, AND IT IS ONLY OFFERED WHEN THERE IS
+           SOMETHING TO CLEAR ──
+       With no keyboard there is no correcting a figure by retyping it,
+       so a wrong number needs a way to nought. Both directions: a day
+       with nothing on it offers Cancel instead, because a Clear that
+       clears nothing is a control that does nothing. */
+    await open('f');
+    const before = await dial();
+    await dp.click('.acts .btn.off');
+    await dp.waitForTimeout(420);
+    const cleared = await dial();
+    ok('a figure can be taken back to nought without a keyboard',
+      before.left === 'Clear' && cleared.val === 0 && cleared.big === '0 kcal',
+      { before: before.left, cleared });
+    ok('...and the offer is Cancel on a day with nothing to clear',
+      cleared.left === 'Cancel', cleared);
+    await esc();
+
+    /* ── AND A DRAG IS NEVER THE ONLY WAY IN ──
+       It reaches neither a keyboard nor a screen reader, which is why
+       this is a range input rather than a div with a pointer handler:
+       arrows, Home and End come free, and so does a spoken value. A
+       check that only drove it with events would pass on either. */
+    await open('w');
+    const kb = await dp.evaluate(async () => {
+      const d = document.querySelector('.nm-dial');
+      d.focus();
+      return { focused: document.activeElement === d, before: +d.value };
+    });
+    await dp.keyboard.press('ArrowRight');
+    await dp.keyboard.press('ArrowRight');
+    await dp.waitForTimeout(220);
+    const after = await dp.evaluate(() => ({
+      val: +document.querySelector('.nm-dial').value,
+      spoken: document.querySelector('.nm-dial').getAttribute('aria-valuetext'),
+      read: document.querySelector('.nm-read b').textContent }));
+    ok('the dial is reachable from a keyboard and moves by its own grain',
+      kb.focused && Math.abs(after.val - 0.2) < 1e-9, { kb, after });
+    ok('...and says its value in words, not just in pixels',
+      /0\.2 L/.test(after.spoken || '') && after.read === '0.2 L', after);
+    await esc();
+
+    /* ── A HABIT OF YOURS IS BOUNDED BY WHAT YOU AIMED AT ──
+       The six carry their own figures; a number you named has none, so
+       the dial is built around the aim you set rather than a constant
+       that would be wrong for every unit at once. */
+    await dp.evaluate(() => {
+      const h = JSON.parse(localStorage.getItem('sched.habit.v1') || '[]');
+      h.push({ id: 'x9', n: 'Pages', k: 'num', unit: ' pp', hue: '--w-teal',
+        neg: 0, aim: 30, cnt: 1, own: 1 });
+      localStorage.setItem('sched.habit.v1', JSON.stringify(h));
+    });
+    await dp.reload({ waitUntil: 'networkidle' });
+    await dp.waitForTimeout(560);
+    await open('x9');
+    const mine = await dial();
+    ok('a number of your own is bounded by twice the aim you set',
+      mine && mine.max === 60, mine);
+    await esc();
+
+    ok('nothing threw through any of it', derrs.length === 0, derrs);
+    await dctx.close();
   }
 
   ok('no page errors through any of it', errs.length === 0, errs);
