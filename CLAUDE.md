@@ -6678,3 +6678,27 @@ come from the same frame** — which is the spring sampled at a fixed
 wall-clock moment in different units, and the dangerous kind, because a
 contrast number that looks wrong invites somebody to change a colour
 that was never wrong.
+
+**AND A COMPUTED COLOUR IS NOT ALWAYS `rgb()`.** Chromium serialises a
+`color-mix` result as `color(srgb 1 0.79 0.79)` — three floats in 0..1,
+not three bytes — so pulling the numbers out with a bare digit match
+reads a near-WHITE label as near-black. That is how the warmer tag,
+which measures **6.98:1**, was reported at **2.04** twice running, and
+it very nearly had a colour changed that was never wrong. A probe
+printing the actual pixels settled it in one go: fill `[99,51,52]`,
+label `[255,202,202]`, exactly what the arithmetic predicted. There is
+an `rgbOf` at the top of the file now that handles both forms.
+
+This repo has met the same serialisation once before, on a box-shadow
+whose value a string check against a hex could not see. **Twice is a
+pattern: read a colour through a parser, never through a digit match.**
+
+**And a chained edit whose failure nobody reads is an edit that did not
+happen.** The fix above was applied by a script that threw on its own
+assertion — correctly, because three separate `const ratio` definitions
+in that file meant the anchor was not unique. It was chained ahead of
+`node --check` inside one backgrounded command, so the traceback went to
+a task file while the check ran happily against the UNMODIFIED file and
+the suite re-ran the old code to the same failure. The assertion did its
+job; nothing was reading it. **Run the edit in the foreground and look
+at what it printed before running anything on the result.**

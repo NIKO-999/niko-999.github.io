@@ -58,6 +58,20 @@ const lum = ([r, g, b]) => {
   const f = (c) => { c /= 255; return c <= .03928 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4; };
   return .2126 * f(r) + .7152 * f(g) + .0722 * f(b);
 };
+/* ── A COMPUTED COLOUR IS NOT ALWAYS `rgb()` ──
+   Chromium serialises a `color-mix` result as `color(srgb 1 0.79 0.79)`
+   — three floats in 0..1, not three bytes. Pulling the numbers out with
+   a bare digit match therefore reads a near-WHITE label as near-black,
+   which is how a tag measuring 6.98:1 was reported at 2.04 and nearly
+   had a colour changed that was never wrong. This repo has met the same
+   serialisation once before, on a box-shadow whose value a string check
+   against a hex could not see. */
+const rgbOf = (c) => {
+  const m = (c || '').match(/[\d.]+/g);
+  if (!m) return null;
+  const v = m.slice(0, 3).map(Number);
+  return /^color\(/.test(String(c).trim()) ? v.map((x) => Math.round(x * 255)) : v;
+};
 const ratio = (a, b) => {
   const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m);
   return (x + .05) / (y + .05);
@@ -11436,9 +11450,9 @@ const SAID = [
           }
         let bk = '', bn = -1;
         t.forEach((n, k) => { if (n > bn) { bn = n; bk = k; } });
-        const fg = (s.fg.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+        const fg = rgbOf(s.fg);
         const r = ratio(fg, bk.split(',').map(Number));
-        if (r < worst.r) worst = { r: +r.toFixed(2), cls: cls };
+        if (r < worst.r) worst = { r: +r.toFixed(2), cls: cls, fg: s.fg, bg: bk };
       }
       ok(`${face}: every state tag clears the bar at the warmer wash`,
         worst.r >= 4.5, worst);
