@@ -6744,3 +6744,10 @@ It compares the row against ITSELF now, measured before the children
 are planted and after. That is the only version of the claim that is
 true at every hour, and it is a stronger one — a neighbour matching
 proves nothing about the row that changed.
+
+**Run the file a change touches, not the whole suite.** `schedule` is
+six minutes and the full run is twelve; a change to one app is covered
+by that app's file plus `names`, which is a tenth of a second and is the
+one that catches a duplicate declaration or a token nothing defines. The
+full suite is for a change that crosses files — the shell, a shared
+token, the runner itself — and before a release you care about.
