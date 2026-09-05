@@ -6459,3 +6459,18 @@ absolutely positioned descendants, which would have meant
 wrapper and dot, counted after they were inserted. Read the element
 before you touch it, and the second reading is not a measurement of the
 first.
+
+## Orrery is parked, and parked is not deleted
+
+Out of `npm test` on request. `tests/run.js` refuses to start if
+`tests/` holds a file its list does not name — written after a new file
+was added, the suite reported all green, and none of its assertions had
+run — so quietly deleting the name from SUITE would have been that
+exact failure committed on purpose: three minutes off the run and no
+line anywhere saying three hundred assertions had stopped.
+
+It is named in `PARKED` instead, the guard reads both lists, and the
+default run PRINTS what it is skipping every time. The file is
+untouched and still runs when it is asked for by name, because the
+argument path checks the disk rather than SUITE. The day it is wanted
+back it moves one line up.

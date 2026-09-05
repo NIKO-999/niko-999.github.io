@@ -33,9 +33,23 @@ const SUITE = [
   'bt', 'models', 'restest', 'swingtest', 'psptest', 'aligntest',
   'logtest', 'journal', 'bintest', 'snaptest', 'daytest', 'intest',
   'lenstest', 'besttest', 'scratch', 'tiles',
-  'checkin', 'habits', 'reminders', 'days', 'jade', 'schedule', 'orrery',
+  'checkin', 'habits', 'reminders', 'days', 'jade', 'schedule',
   'gauntlet',
 ];
+
+/* ── PARKED, AND NAMED RATHER THAN DROPPED ──
+   Not run by `npm test`, on request. The point is that it is written
+   down HERE: the guard below exists because a hardcoded list silently
+   skips whatever is not in it, and quietly deleting a name from SUITE
+   would have been exactly that failure done on purpose — three minutes
+   off the run and no line anywhere saying three hundred assertions had
+   stopped.
+
+   The file is untouched and still runs when it is asked for by name
+   (`npm test orrery`), because `want` checks the disk rather than
+   SUITE. Parking is about the DEFAULT run, not about deleting a test:
+   the day it is wanted back it moves one line up. */
+const PARKED = ['orrery'];
 
 /* The list above is ordered on purpose, so it cannot be a directory
    scan — but a hardcoded list SILENTLY SKIPS anything not in it, and it
@@ -49,10 +63,11 @@ const HELPERS = new Set(['run', 'lib', 'seed']);
   const disk = fs.readdirSync(__dirname)
     .filter(f => f.endsWith('.js')).map(f => f.slice(0, -3))
     .filter(n => !HELPERS.has(n));
-  const missing = disk.filter(n => !SUITE.includes(n));
+  const missing = disk.filter(n => !SUITE.includes(n) && !PARKED.includes(n));
   if (missing.length) {
     console.error(`\n  tests/ holds ${missing.join(', ')}, which the suite does not run.`);
-    console.error('  Add it to SUITE in tests/run.js — where in the order is a decision.\n');
+    console.error('  Add it to SUITE in tests/run.js — where in the order is a decision.');
+    console.error('  Or to PARKED, if it is deliberately not run.\n');
     process.exit(2);
   }
 }
@@ -106,6 +121,14 @@ const alive = (url) => new Promise((res) => {
   if (!up) { stop(); console.error(`Server never came up on ${base}.`); process.exit(2); }
 
   console.log(`\n\x1b[1mserving ${ROOT}\x1b[0m on ${base}\n`);
+  /* SAID OUT LOUD, EVERY RUN. A file that stops running without the
+     output saying so is the bug this runner's own guard was written
+     for, and parking one silently would be that bug wearing a
+     decision's clothes. */
+  if (!want.length && PARKED.length) {
+    console.log(`  \x1b[2mparked: ${PARKED.join(', ')}`
+      + ` — run by name to include\x1b[0m\n`);
+  }
 
   const rows = [];
   let bad = 0;
