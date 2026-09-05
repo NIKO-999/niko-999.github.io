@@ -3362,8 +3362,12 @@ const SAID = [
     veil: !document.getElementById('scTyVeil').hidden,
     logged: !!document.querySelector('.ty-row[data-item="p"].is-on'),
   }));
+  /* 260 is EXACTLY what the double tap defers a first press by, so
+     this waited for the deferral and then asserted the thing the
+     deferral does — a check decided by whichever of the two won the
+     frame. Past it, not on it. */
   await page.click('.ty-card[data-item="p"]');
-  await page.waitForTimeout(260);
+  await page.waitForTimeout(500);
   const tapped = await page.evaluate(() => ({
     veil: !document.getElementById('scTyVeil').hidden,
     sheet: !document.getElementById('scSheet').hidden,
@@ -5042,8 +5046,19 @@ const SAID = [
        figures, and the answer is not one of them. */
     await fp.keyboard.press('Escape');
     await fp.waitForTimeout(360);
+    /* ── AND MIND IS DISMISSED THE WAY TRAIN IS, TWO LINES UP ──
+       Mind asks what you read, so its picker comes up over the tally
+       and takes every press after it. This waited 220ms and pressed
+       on — which is UNDER the 260 the double tap defers a first press
+       by, so the press had not landed yet and the sheet opened later,
+       over whatever was pressed next. It survived on that race: the
+       sheet was reliably late enough to miss the click behind it, and
+       any change that moved either number by forty milliseconds broke
+       it. Waited out and dismissed, like the deck above. */
     await fp.click('.ty-card[data-item="m"]');
-    await fp.waitForTimeout(220);
+    await fp.waitForTimeout(500);
+    await fp.keyboard.press('Escape');
+    await fp.waitForTimeout(360);
     /* A number nothing else in the app could produce, typed into
        Steps. The tick means YOU LOGGED IT and never what it was, and
        the only way to hold that claim is to go looking for the figure
@@ -10581,6 +10596,252 @@ const SAID = [
 
     ok('nothing threw through any of it', merrs.length === 0, merrs);
     await mctx.close();
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     THE PRESS ANSWERS WHERE YOUR FINGER LANDED
+
+     ITS OWN CONTEXT, at the foot of the file, for the reason the
+     sideways-scroll check is here: this one presses every control on a
+     view, which logs ticks, opens sheets and turns tabs. A check that
+     changes the state of the app is a check that has to be alone.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    console.log('\n── the press answers where your finger landed ──');
+    const { PNG } = require('pngjs');
+    const pctx = await browser.newContext({ ...PHONE });
+    const pp = await pctx.newPage();
+    const perrs = [];
+    pp.on('pageerror', (e) => perrs.push(String(e)));
+    await pp.addInitScript(() => {
+      ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+        .forEach((k) => localStorage.setItem(k, '1'));
+      localStorage.setItem('sched.net.v1',
+        JSON.stringify({ on: false, url: '', code: '' }));
+    });
+    await pp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await pp.waitForTimeout(500);
+
+    /* ── ON A CONTROL THAT HAD NOTHING ──
+       Seven selectors in the whole app answered a press before this,
+       and the tally tiles were not among them. Pressed at a corner, so
+       the reach below is measuring something other than a centre. */
+    const tile = await pp.$('.ty-card') || await pp.$('.st-d');
+    const tr = await tile.boundingBox();
+    await pp.mouse.move(tr.x + 10, tr.y + 9);
+    await pp.mouse.down();
+    await pp.waitForTimeout(90);
+    const born = await pp.evaluate(() => {
+      const e = document.querySelector('.rp');
+      if (!e) return null;
+      const h = e.parentElement;
+      const hr = h.getBoundingClientRect(), er = e.getBoundingClientRect();
+      const cs = getComputedStyle(e), i = e.querySelector('i');
+      const ics = getComputedStyle(i);
+      return {
+        host: h.className,
+        /* Clipped TO the host: a circle reaching the far corner of a
+           44px control is several times the control. */
+        out: [er.left - hr.left, er.top - hr.top,
+              hr.right - er.right, hr.bottom - er.bottom]
+          .filter((v) => v < -0.6).length,
+        ov: cs.overflow,
+        rad: cs.borderRadius === getComputedStyle(h).borderRadius,
+        tap: cs.pointerEvents,
+        /* The reach is worked out per press, not a constant: the far
+           corner FROM THE FINGER. A press at 10,9 of a 170x96 tile has
+           to cover about 178px, which is 22 times the 8px seed. */
+        rs: parseFloat(i.style.getPropertyValue('--rs')),
+        want: Math.max(
+          Math.hypot(10, 9), Math.hypot(hr.width - 10, 9),
+          Math.hypot(10, hr.height - 9),
+          Math.hypot(hr.width - 10, hr.height - 9)) / 8,
+        anim: ics.animationName,
+        op: parseFloat(ics.opacity),
+      };
+    });
+    ok('a press on a control that had no response now makes one', !!born, born);
+    ok('...clipped to the control, and to its own corners',
+      born && born.out === 0 && born.ov === 'hidden' && born.rad
+        && born.tap === 'none', born);
+    ok('...reaching the far corner from the finger, not a constant',
+      born && born.rs >= born.want - 0.05 && born.rs <= born.want + 2,
+      born && { rs: born.rs, want: +born.want.toFixed(2) });
+    await pp.mouse.up();
+
+    /* ── AND IT IS SWEPT ──
+       On the animation AND on a timer, so a host removed by the render
+       the press caused cannot leave the wash on screen for good. */
+    await pp.waitForTimeout(1600);
+    ok('the wash is swept when the pass is over',
+      await pp.evaluate(() => document.querySelectorAll('.rp').length) === 0);
+
+    /* ── EVERY CONTROL, WHICH IS THE WHOLE OF THE ASK ──
+       One delegated listener rather than a wiring per call site: a list
+       of classes silently skips whatever is added next, which is the
+       failure the flight-pause rule and the runner's own SUITE list
+       have each already had. Asserted by pressing everything that is
+       drawn on a view and requiring a wash on each. */
+    const missed = await pp.evaluate(async () => {
+      const out = [];
+      const hosts = [...document.querySelectorAll('button,[role="switch"]')]
+        .filter((h) => h.getClientRects().length
+          && h.getBoundingClientRect().width > 8);
+      for (const h of hosts) {
+        const r = h.getBoundingClientRect();
+        h.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true,
+          clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 }));
+        if (!h.querySelector('.rp')) out.push(h.className || h.tagName);
+        h.querySelectorAll('.rp').forEach((e) => e.remove());
+      }
+      return { n: hosts.length, out };
+    });
+    ok('every control on the week answers a press, and there are some',
+      missed.n > 6 && missed.out.length === 0, missed);
+
+    /* ── THE ROW'S OWN FILL IS GONE, NOT DOUBLED UP ──
+       `.row:active { background: var(--tick-off) }` said the same thing
+       the wash says and said it louder — and it took the "Not yet" tag
+       on that row to 2.55:1 for as long as your finger was down, which
+       is the number that decided this. Read off the rule rather than
+       off a pressed pixel, because a wash sitting over the fill would
+       measure as "something changed" either way. */
+    const rowFill = await pp.evaluate(() => {
+      for (const sh of document.styleSheets) {
+        let rules; try { rules = sh.cssRules; } catch (e) { continue; }
+        for (const r of rules) {
+          if ((r.selectorText || '').trim() === '.row:active') {
+            return r.style.getPropertyValue('background') || 'set';
+          }
+        }
+      }
+      return null;
+    });
+    ok('the row no longer fills on a press as well as washing', rowFill === null,
+      { rowFill });
+
+    /* ── NOTHING IS MADE AT ALL UNDER REDUCED MOTION ──
+       The stylesheet hides it too, and that is deliberate belt and
+       braces — but a node built and swept sixteen times a morning for
+       something that was never going to be painted is waste, so the
+       script refuses first. Asserted as the node being ABSENT rather
+       than not drawn, which is what tells the two halves apart. */
+    const rctx = await browser.newContext({ ...PHONE, reducedMotion: 'reduce' });
+    const rp = await rctx.newPage();
+    await rp.addInitScript(() => {
+      ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+        .forEach((k) => localStorage.setItem(k, '1'));
+      localStorage.setItem('sched.net.v1',
+        JSON.stringify({ on: false, url: '', code: '' }));
+    });
+    await rp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await rp.waitForTimeout(500);
+    const quiet = await rp.evaluate(() => {
+      const h = document.querySelector('.row') || document.querySelector('button');
+      const r = h.getBoundingClientRect();
+      h.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true,
+        clientX: r.left + 8, clientY: r.top + 8 }));
+      return { rp: document.querySelectorAll('.rp').length, had: !!h };
+    });
+    ok('reduced motion makes no wash at all, rather than an invisible one',
+      quiet.had && quiet.rp === 0, quiet);
+    await rctx.close();
+
+    /* ── AND IT CANNOT BE THE THING THAT BREAKS A RATIO ──
+       The tightest pair in the app is `--spent` on the 9%-ink chip the
+       "Not yet" tag and the ghost objective share: 4.82:1 before
+       anything is drawn over it, a rounding error above the bar. Held
+       to 4.5 the wash caps at 4.9% and is then too faint to be a press
+       response at all.
+
+       THE BAR IS THE PRESS STATE THE APP ALREADY HAD, and measuring it
+       is what settled this: the fill this replaced took that same pair
+       to 2.55:1. So the claim is that the wash is BETTER than what
+       shipped, and that nothing else in the app goes near it.
+
+       Both faces, because the one nobody develops on is the one that
+       breaks — and computed on the wash's own arithmetic, which is a
+       flat overlay of a known colour at a known alpha over a ground
+       read off real pixels. Frozen at full coverage AND full alpha,
+       a state the real pass never reaches since it fades the whole
+       time it grows, so every figure here is an upper bound. */
+    for (const face of ['dark', 'light']) {
+      const cctx = await browser.newContext({ ...PHONE, colorScheme: face });
+      const cp = await cctx.newPage();
+      await cp.addInitScript(() => {
+        ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+          .forEach((k) => localStorage.setItem(k, '1'));
+        localStorage.setItem('sched.net.v1',
+          JSON.stringify({ on: false, url: '', code: '' }));
+      });
+      await cp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+      await cp.waitForTimeout(500);
+      const spots = await cp.evaluate(() => {
+        const out = [];
+        document.querySelectorAll('button,[role="switch"]').forEach((h) => {
+          if (!h.getClientRects().length) return;
+          const hc = getComputedStyle(h).color;
+          [h].concat([...h.querySelectorAll('*')]).forEach((n) => {
+            if (![...n.childNodes].some((c) => c.nodeType === 3 && c.textContent.trim())) return;
+            const r = n.getBoundingClientRect();
+            if (r.width < 8 || r.height < 6) return;
+            out.push({ fg: getComputedStyle(n).color, hostColor: hc,
+              x: Math.round(r.left), y: Math.round(r.top),
+              w: Math.round(r.width), h: Math.round(r.height),
+              who: (h.className || h.tagName) + ' / '
+                + (n.textContent || '').trim().slice(0, 10) });
+          });
+        });
+        const rs = getComputedStyle(document.documentElement);
+        return { out, ink: rs.getPropertyValue('--ink'),
+          paper: rs.getPropertyValue('--paper'),
+          a: parseFloat(rs.getPropertyValue('--rp-a')) };
+      });
+      const png = PNG.sync.read(await cp.screenshot());
+      const at = (x, y) => { const i = (png.width * y + x) << 2;
+        return [png.data[i], png.data[i + 1], png.data[i + 2]]; };
+      const hx = (h) => { const m = /^#?([0-9a-f]{6})$/i.exec((h || '').trim());
+        if (!m) return (h.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+        const n = parseInt(m[1], 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+      const nm = (c) => { const m = (c || '').match(/[\d.]+/g);
+        return m ? m.slice(0, 3).map(Number) : null; };
+      const ov = (c, w, a) => c.map((v, i) => a * w[i] + (1 - a) * v);
+      const INK = hx(spots.ink), PAP = hx(spots.paper);
+      let worst = { r: 99 }, seen = 0;
+      spots.out.forEach((s) => {
+        /* THE GROUND IS THE MOST COMMON PIXEL IN THE LABEL'S OWN BOX.
+           A min/max over the box picks antialiased edge pixels at both
+           ends and reported a shipped, passing screen at 4.02:1. */
+        const t = new Map();
+        for (let y = s.y * 2; y < (s.y + s.h) * 2 && y < png.height; y++)
+          for (let x = s.x * 2; x < (s.x + s.w) * 2 && x < png.width; x++) {
+            const k = at(x, y).join(','); t.set(k, (t.get(k) || 0) + 1);
+          }
+        let bk = '', bn = -1;
+        t.forEach((n, k) => { if (n > bn) { bn = n; bk = k; } });
+        const bg = bk.split(',').map(Number), fg = nm(s.fg);
+        if (!fg) return;
+        /* Only what clears the bar WITHOUT a press. The app ships a few
+           captions under it that nothing has ever asserted, and holding
+           the wash to those would be solving a constraint the app never
+           had. */
+        if (ratio(fg, bg) < 4.5) return;
+        seen++;
+        const hl = lum(nm(s.hostColor) || [255, 255, 255]);
+        const w = Math.abs(hl - lum(INK)) <= Math.abs(hl - lum(PAP)) ? INK : PAP;
+        const r = ratio(ov(fg, w, spots.a), ov(bg, w, spots.a));
+        if (r < worst.r) worst = { r: +r.toFixed(2), who: s.who,
+          base: +ratio(fg, bg).toFixed(2) };
+      });
+      /* A check that finds nothing must not pass. */
+      ok(`${face}: the wash beats the fill it replaced on every label that passes`,
+        seen > 8 && worst.r >= 3.9, { seen, worst, was: 2.55 });
+      await cctx.close();
+    }
+
+    ok('nothing threw through any of it', perrs.length === 0, perrs);
+    await pctx.close();
   }
 
   ok('no page errors through any of it', errs.length === 0, errs);

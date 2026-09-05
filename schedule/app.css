@@ -2402,9 +2402,16 @@ body {
   cursor: pointer;
   position: relative;
 }
-/* --tick-off, not a literal grey: it is the lightest neutral each
-   theme owns, and on white it is the #ececec this always was. */
-.row:active { background: var(--tick-off); }
+/* ── THE ROW'S OWN PRESS FILL IS GONE ──
+   It was `background: var(--tick-off)` — the lightest neutral each
+   theme owns — and it was the loudest press response in the app at a
+   time when about ninety controls had none at all. The wash says the
+   same thing and says WHERE as well, so keeping both is one surface
+   answering one press twice.
+
+   And it was never the cheap half: filling the row took the "Not yet"
+   tag on it to 2.55:1 for as long as your finger was down, where the
+   wash that replaced it reads 3.95:1. See the note on `--rp-a`. */
 .row:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
 
 /* ── the measure is gone ──
@@ -5225,3 +5232,118 @@ body {
 .mn-art-ic { width: 44%; height: 44%; fill: none; stroke: #fff;
   stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
   opacity: .92; }
+
+/* ═══════════════════════════════════════════════════════════════
+   THE PRESS ANSWERS WHERE YOUR FINGER LANDED
+
+   Every control in this app changed state silently. On a fast phone
+   that reads as instant; on a slow one it reads as a press that
+   missed, and the whole of the difference is that nothing told your
+   hand it was heard.
+
+   Five systems were built as a working page and pressed side by side
+   — one that compresses the object, one that draws the mark, one that
+   lifts it off the paper, one that springs, and this. What this one
+   says that none of the others can is WHERE, which is the question a
+   thumb on two tiles side by side is actually asking.
+
+   IT IS THE SURFACE'S OWN INK, never a colour. `currentColor` at 20%,
+   so the wash on the white add button is near-black and the wash on a
+   row is white — each one is the thing it is drawn in, at a strength
+   nothing has to be measured against because it is already the pair
+   the surface uses.
+
+   THE HOST CLIPS IT, NOT THE BUTTON. A circle reaching the far corner
+   of a 44px control is several times the control, so it has to be cut
+   to the shape it is inside — and setting `overflow: hidden` on every
+   button in the app to get that would be changing what a hundred
+   controls do at rest in order to draw something that only exists for
+   under a second. The wrapper does it instead: inset to the host,
+   `border-radius: inherit` so a circle stays a circle and a 10px card
+   stays a card, and nothing about the host's own overflow moves.
+
+   AND IT REACHES THE FAR CORNER, which is why the scale is worked out
+   per press rather than being a constant. Pressing a wide row at its
+   left edge and pressing it in the middle are different distances to
+   the end of the same object; one number for both leaves half the row
+   untouched on the first.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* THE SHAPE AND THE CLOCK ARE SEPARATE SETTINGS, which is the
+     workout deck's own lesson and the reason it is a token: those two
+     passes were chosen at half speed and shipped at 0.8x without a
+     keyframe moving. This was chosen at half speed too. Changing it
+     is one number here and nothing else in either file. */
+  --rp-t: 840ms;
+  /* ── AND THE STRENGTH IS MEASURED AGAINST WHAT ALREADY SHIPS ──
+     The tightest pair in the app is `--spent` on the 9%-ink chip the
+     "Not yet" tag and the ghost objective share: 4.82:1, which is a
+     rounding error above the bar before anything is drawn over it. Held
+     to "no label may go under 4.5" the wash caps at 4.9%, and at 3.5%
+     for a margin worth the name — too faint to be a press response.
+
+     THE BAR IS THE PRESS STATE THE APP ALREADY HAS, and that is not a
+     relaxation, it is the first time anybody measured it: `.row:active`
+     filled the whole row with `--tick-off`, which takes that same tag
+     to **2.55:1** for as long as your finger is down. A 12% wash puts
+     it at 3.95:1 — better than what shipped, on the one pair that
+     binds — and every other label in the app holds above 4.5, the
+     next-tightest being a stop at 5.35 which reads 4.70.
+
+     The old fill went with it: two answers to one press on one
+     surface, and the louder of the two was the one costing contrast. */
+  --rp-a: .12;
+}
+
+/* Only ever added to a host that computes STATIC, and only at the
+   moment it is first pressed. Nothing in this app has an absolutely
+   positioned descendant inside a static button — measured across
+   every view and inside a sheet — so this moves nothing. */
+.rp-h { position: relative; }
+
+.rp {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.rp i {
+  /* Declared here so the static check can see them: all three are
+     written onto the element by the script, and `tests/names.js`
+     refuses a var() whose token nothing defines — the same reason
+     `.wo-p` carries a default for `--wo-c`. The defaults are also the
+     honest picture of a page whose script did not run: a dot in the
+     middle at its own size, rather than nothing. */
+  --rx: 50%; --ry: 50%; --rs: 1; --rp-c: currentColor;
+  position: absolute;
+  left: var(--rx); top: var(--ry);
+  width: 16px; height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  /* NOT `currentColor`, and that cost a round. On a stop whose own text
+     is `--spent` the wash comes out dim, so it washes the label TOWARD
+     its own colour and eats the contrast twice as fast — measured at
+     4.57:1 where the ink gives 4.70. The script picks whichever of
+     `--ink` and `--paper` the host's text is nearer, which is right on
+     a normal surface and on an inverted one without either being a
+     list of elements that rots. */
+  background: var(--rp-c, currentColor);
+  transform: scale(0);
+  animation: rp-out var(--rp-t) cubic-bezier(.22, .72, .24, 1) forwards;
+}
+
+@keyframes rp-out {
+  from { transform: scale(0); opacity: var(--rp-a); }
+  to { transform: scale(var(--rs)); opacity: 0; }
+}
+
+/* The house rule, and the one degradation that costs nothing: the
+   state still lands, there is simply no travel. Said here as well as
+   in the script so a wash cannot survive a build where the script's
+   own check is the thing that broke. */
+@media (prefers-reduced-motion: reduce) {
+  .rp { display: none; }
+}

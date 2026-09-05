@@ -6289,3 +6289,131 @@ back false against a rule that was working. Fifth time this file has
 recorded that shape; it reads a row that is neither done nor past now,
 and throws with a sentence naming what it wanted rather than handing
 false to the next line.
+
+## The press answers where your finger landed
+
+Reported as wanting a response on everything, and the count is what
+made it a real complaint rather than a preference: **seven selectors in
+the whole app answered a press** — `.row`, `.prime`, `.btn.go`,
+`.fr-link`, `.fr-row.is-tap` and two glyphs. The tally tiles, the day
+chips, the tabs, the stops and the objective cards all changed state in
+silence. On a fast phone that reads as instant; on a slow one it reads
+as a press that missed.
+
+**FIVE SYSTEMS WERE BUILT AS A WORKING PAGE, not a contact sheet.**
+Motion is the subject and five stills of it are five stills — the same
+thing `particle-lab` concluded. Each was applied to the same six real
+controls in the app's own palette: WEIGHT compresses the object, INK
+draws the mark and never moves it, ORIGIN radiates from the touch
+point, LIFT takes the object off the paper, SPRING overshoots. With a
+sixth showing what ships today, so the control was pressable too.
+
+**Origin, and at half speed** — which is the workout deck's rule
+arriving again from the other side: *a motion is chosen at the speed
+you study it and set at the speed you live with*. Those two passes were
+chosen at half speed and shipped at 0.8x with no keyframe moving. This
+one was chosen at half speed and **shipped at it**, because the choice
+was the speed rather than merely the shape. It is one token either way.
+
+**ONE LISTENER, IN CAPTURE, NEVER A WIRING PER CALL SITE.** The app
+builds buttons in about forty places and rebuilds most of them on every
+render, so anything wired where a control is made is a list that
+silently skips whatever is added next — the flight-pause rule's own
+bug, and `tests/run.js`'s. Capture, because a handler that stops
+propagation is a handler about what the press MEANS and this is about
+the press landing; those are not the same event and one must not be
+able to swallow the other.
+
+**THE HOST CLIPS IT, AND THE BUTTON IS NOT TOUCHED.** A circle reaching
+the far corner of a 44px control is several times the control, and
+setting `overflow: hidden` on every button in the app to cut it would
+be changing what a hundred controls do at rest to draw something that
+exists for under a second. A wrapper does it: inset to the host,
+`border-radius: inherit` so a circle stays a circle and a 10px card
+stays a card. The only thing written on the host is `position:
+relative`, and only when it computes static — measured first across
+every view and inside a sheet, **no static button in this app has an
+absolutely positioned descendant**, so it moves nothing.
+
+**The reach is worked out per press.** The far corner FROM THE FINGER,
+because pressing a wide row at its left edge and pressing it in the
+middle are different distances to the end of the same object: one
+constant leaves half the row untouched on the first and overshoots a
+44px circle on every one.
+
+### `currentColor` is the obvious colour and it is wrong
+
+It is right on an ordinary surface and right on an inverted one — the
+white add button's own text is `--paper`, so the wash comes out dark
+without anybody saying so. What it gets wrong is the case in between: a
+stop whose label is `--spent` washes itself toward its own grey, so the
+label and its ground close on each other from both ends at once.
+Measured at **4.57:1** where the ink gives **4.70:1**.
+
+`--ink` alone fails the other way, drawing white on the white button.
+**Whichever of the two the host's TEXT is nearer** is correct in all
+four cases — ordinary and inverted, on both faces — and it is a rule
+rather than a list of elements that rots.
+
+### The bar is the press state the app already had
+
+The tightest pair in the app is `--spent` on the 9%-ink chip that the
+"Not yet" tag and the ghost objective share: **4.82:1** before anything
+is drawn over it, which is a rounding error above the bar and not a
+margin. Held to *no label may go under 4.5* the wash caps at **4.9%**,
+and at **3.5%** for a margin worth the name — too faint to be a press
+response at all. Lifting that one label from `--spent` to `--dim` would
+buy 12.6%, and it is a change to two tags nobody asked about.
+
+**What settled it was measuring what already shipped.** `.row:active`
+filled the whole row with `--tick-off`, and that fill takes the same
+tag to **2.55:1** for as long as your finger is down. This app has
+never held a press state to 4.5:1; it had simply never been measured.
+So the claim the check makes is the one that is actually this change's
+to keep: **the wash is better than the fill it replaced**, at 3.95:1 on
+the pair that binds, with the next-tightest thing in the app at 5.35
+reading 4.70. Both faces, because the one nobody develops on is the one
+that breaks.
+
+**And the row's own fill went with it.** Two answers to one press on
+one surface, and the louder of the two was the one costing contrast.
+Read off the RULE rather than off a pressed pixel: a wash sitting over
+a fill measures as "something changed" either way.
+
+### Three measurements were wrong before one was right
+
+**A min/max over a label's box picks antialiased edge pixels at both
+ends.** It reported a shipped, suite-green screen at **4.02:1** and had
+me solving a constraint the app never had. The ground is the MOST
+COMMON pixel in the box — the polarity-agnostic technique the friends
+board already settled on — and the text is its computed colour, which
+is exact and needs no pixel at all.
+
+**A probe that presses and then screenshots twice has measured
+nothing.** The first look at the ripple reported `NO RIPPLE` three
+times: two screenshots and their waits came to more than the 840ms
+pass, so every reading was taken after the sweep. It looked exactly
+like a feature that had not shipped.
+
+**And the wash I was looking at was mostly not the wash.** Pressing a
+row takes its ground from `[12,12,14]` to `[58,58,66]` — which is
+`.row:active`, not the ripple — so the first three rounds of "that is
+far too strong" were about a rule that had been there for a year. The
+control that found it is one line: press with `--rp-a: 0`.
+
+
+**And two checks were waiting exactly as long as the thing they were
+testing takes.** `scDoubleTap` defers a first press by 260ms. One check
+pressed a tile, waited **260**, and then asserted the sheet that press
+opens was up — a check decided by whichever of the two won the frame.
+The other pressed Mind, waited **220**, and pressed on: under the
+deferral, so the press had not landed yet and the picker opened later,
+over whatever was pressed next. It survived because the sheet was
+reliably late enough to miss the click behind it, and any change that
+moved either number by forty milliseconds broke it — which is what a
+handler doing a style read on every press did.
+
+Both are the same fault as sampling a spring at a fixed wall-clock
+moment: **a check timed to the mechanism it is testing is measuring the
+machine.** Waited past, not on — and Mind is dismissed like the deck
+two lines above it, which was the actual missing step.

@@ -10194,6 +10194,119 @@
   });
   scStartTick();
 
+  /* ── THE PRESS ANSWERS WHERE YOUR FINGER LANDED ──
+     One listener on the document, never a call per control. The app
+     builds buttons in about forty places and rebuilds most of them on
+     every render, so anything wired at the call site is a list that
+     silently skips whatever is added next — which is the same failure
+     the flight-pause rule and the runner's own SUITE list have each
+     already had. A delegated handler covers a control the day it is
+     written, including one inside a sheet that does not exist yet.
+
+     IN CAPTURE, because a handler that stops propagation is a handler
+     about what the press MEANS, and this is about the press landing.
+     The two are not the same event and one must not be able to
+     swallow the other.
+
+     Nothing here is drawn for a press that is not a press: a
+     secondary button, a disabled control and an element with no box
+     are all refused before a node is made. */
+  function scRippleMs() {
+    var v = getComputedStyle(document.documentElement)
+      .getPropertyValue('--rp-t').trim();
+    var n = parseFloat(v);
+    if (!n) return 840;
+    return /ms\s*$/.test(v) ? n : n * 1000;
+  }
+  var rpMs = scRippleMs();
+
+  /* ── THE WASH IS THE SURFACE'S INK, NOT THE HOST'S TEXT COLOUR ──
+     `currentColor` is the obvious answer and it is wrong on exactly the
+     controls where it matters: a stop whose label is `--spent` washes
+     itself toward its own grey, which eats the contrast from both ends
+     at once. `--ink` alone is wrong the other way, on the filled
+     controls — a white wash on the white add button draws nothing.
+
+     Whichever of the two the host's TEXT is nearer is right in all four
+     cases, and it is a rule rather than a list: an ordinary surface has
+     ink-coloured text and takes the ink; an inverted one has
+     paper-coloured text and takes the paper, which is the dark wash the
+     white button needs. It reads the tokens, so it follows the face. */
+  function scRippleLum(c) {
+    var m = (c || '').match(/[\d.]+/g);
+    if (!m) return 1;
+    var f = function (v) {
+      v = Number(v) / 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * f(m[0]) + 0.7152 * f(m[1]) + 0.0722 * f(m[2]);
+  }
+  function scRippleInk(color) {
+    var rs = getComputedStyle(document.documentElement);
+    var ink = scRippleLum(scHexRgb(rs.getPropertyValue('--ink').trim()));
+    var pap = scRippleLum(scHexRgb(rs.getPropertyValue('--paper').trim()));
+    var me = scRippleLum(color);
+    return Math.abs(me - ink) <= Math.abs(me - pap) ? 'var(--ink)' : 'var(--paper)';
+  }
+  /* The tokens are hexes and `scRippleLum` reads a list of numbers, so
+     one of the two has to give. A hex is turned into the same shape
+     rather than the reader being taught a second format. */
+  function scHexRgb(h) {
+    var m = /^#?([0-9a-f]{6})$/i.exec(h || '');
+    if (!m) return h;
+    var n = parseInt(m[1], 16);
+    return 'rgb(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ')';
+  }
+
+  function scRipple(ev) {
+    /* The stylesheet hides it as well. This is the half that stops a
+       node being made and swept sixteen times a morning for something
+       that was never going to be painted. */
+    if (window.matchMedia
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (ev.button) return;
+    var t = ev.target;
+    if (!t || !t.closest) return;
+    var host = t.closest('button, [role="switch"]');
+    if (!host || host.disabled) return;
+    var r = host.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+
+    var x = ev.clientX == null ? r.width / 2 : ev.clientX - r.left;
+    var y = ev.clientY == null ? r.height / 2 : ev.clientY - r.top;
+    /* The far corner FROM THE FINGER, so the wash reaches the whole of
+       whatever it is inside whichever edge you pressed. A constant
+       here leaves half a wide row untouched on an edge press and
+       overshoots a 44px circle on every one. */
+    var w = r.width - x, h = r.height - y;
+    var far = Math.max(Math.sqrt(x * x + y * y), Math.sqrt(w * w + y * y),
+      Math.sqrt(x * x + h * h), Math.sqrt(w * w + h * h));
+
+    var cs = getComputedStyle(host);
+    if (cs.position === 'static') host.classList.add('rp-h');
+
+    var box = document.createElement('span');
+    box.className = 'rp';
+    var dot = document.createElement('i');
+    dot.style.setProperty('--rp-c', scRippleInk(cs.color));
+    dot.style.setProperty('--rx', x + 'px');
+    dot.style.setProperty('--ry', y + 'px');
+    dot.style.setProperty('--rs', (far / 8).toFixed(2));
+    box.appendChild(dot);
+    host.appendChild(box);
+
+    /* Swept on the animation AND on a timer, which is the workout
+       deck's rule for the deck's reason: an animation that never runs
+       — a backgrounded tab, a host removed mid-press by the render the
+       press caused — would otherwise leave the wash on screen for
+       good. The timer is derived from the token rather than typed, so
+       moving the clock cannot leave the fallback firing early. */
+    var done = function () { if (box.parentNode) box.parentNode.removeChild(box); };
+    dot.addEventListener('animationend', done);
+    setTimeout(done, rpMs + 400);
+  }
+  document.addEventListener('pointerdown', scRipple, true);
+
   /* ── LAST, AND AFTER THE FIRST PAINT ──
      The intro is a screen ABOUT the app, so the app has to be there
      behind it — opened before scPaintView the week is not built yet,
