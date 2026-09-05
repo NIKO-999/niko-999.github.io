@@ -125,7 +125,40 @@
         id: typeof it.id === 'string' && it.id ? it.id : scId(),
         d: d | 0, s: s | 0, e: e | 0,
         r: typeof it.r === 'string' ? it.r.slice(0, 14) : '',
-        n: it.n.trim().slice(0, 60)
+        n: it.n.trim().slice(0, 60),
+        /* ── WHAT YOU DO DURING IT ──
+           A four-hour shift is one block with things inside it — lunch,
+           an hour of trading content — and none of them is a block of
+           its own: they have no clock, they do not belong on the day's
+           spine, and giving them times would put six more rows in the
+           column you scan.
+
+           They are part of the TEMPLATE, like the block, so they repeat
+           every week the way the shift does. Whether one HAPPENED is a
+           different record and lives in its own key.
+
+           REPAIRED, NOT DISCARDED: a damaged list costs the children
+           and never the block, which is the schedule's oldest rule
+           about a stored shape. */
+        k: scCleanKids(it.k)
+      });
+    }
+    return out;
+  }
+
+  /* Eight, because the list is a thing you glance at inside a row —
+     past that it is a screen of its own and this is the wrong place
+     for it. */
+  function scCleanKids(raw) {
+    if (!Array.isArray(raw)) return [];
+    var out = [];
+    for (var i = 0; i < raw.length && out.length < 8; i++) {
+      var k = raw[i];
+      if (!k || typeof k !== 'object') continue;
+      if (typeof k.n !== 'string' || !k.n.trim()) continue;
+      out.push({
+        id: typeof k.id === 'string' && k.id ? k.id : scId(),
+        n: k.n.trim().slice(0, 40)
       });
     }
     return out;
@@ -1360,6 +1393,78 @@
         ed.addEventListener('click', function () { scEditSheet(it, d); });
         wrap.appendChild(ed);
         (sess || card).appendChild(wrap);
+
+        /* ── WHAT IS INSIDE THE BLOCK ──
+           Two states and they were chosen as a pair. Shut, the children
+           are DOTS IN THE GUTTER — one per child, filled as each is
+           done — so a shift says how much of itself is left without
+           taking a line, and the ordinary rows around it do not move.
+           Open, they hang off a hairline dropped from the block's own
+           glyph: the line is the belonging, so nothing has to be
+           indented to say it.
+
+           THE DOTS ARE THEIR OWN BUTTON, and that is not a detail. The
+           row already answers a tap by ticking and a double tap by
+           opening the editor; a third gesture on the same target is the
+           control answering one more question than it can. A sibling
+           press target is what `.chk` and `.row-ed` already are, and it
+           is why a button cannot go INSIDE the row — that is invalid
+           and collapses to one press while looking exactly right.
+
+           OPEN IS NOT REMEMBERED. It is a position on a screen you are
+           looking at, which is the same argument the tally's panels
+           make: one restored from yesterday opens on a shift you are
+           not on. */
+        if (it.k && it.k.length) {
+          var kd = scDateOfDow(d);
+          var kday = scDay(kd);
+          var kids = scEl('div', 'kids');
+          var open = !!kidOpen[it.id];
+          kids.hidden = !open;
+
+          var dots = scEl('button', 'row-kids');
+          dots.type = 'button';
+          dots.setAttribute('aria-expanded', open ? 'true' : 'false');
+          var paintDots = function () {
+            dots.textContent = '';
+            it.k.forEach(function (k) {
+              dots.appendChild(scEl('i', scKidDone(kday, k) ? 'on' : ''));
+            });
+            dots.setAttribute('aria-label',
+              scKidsKept(kday, it) + ' of ' + it.k.length + ' inside ' + it.n);
+          };
+          paintDots();
+
+          it.k.forEach(function (k) {
+            var kb = scEl('button', 'kid' + (scKidDone(kday, k) ? ' is-done' : ''));
+            kb.type = 'button';
+            kb.setAttribute('aria-pressed', scKidDone(kday, k) ? 'true' : 'false');
+            kb.innerHTML = '<span class="km"><svg viewBox="0 0 24 24" aria-hidden="true">'
+              + '<path d="M4.5 12.8l5.2 5.2L19.5 6"/></svg></span>';
+            kb.appendChild(scEl('span', 'kn', k.n));
+            kb.addEventListener('click', function () {
+              var was = scKidDone(kday, k);
+              if (!scSetKidDone(kday, k, was ? 0 : 1)) {
+                scToast('That day has closed', false);
+                return;
+              }
+              kb.classList.toggle('is-done', !was);
+              kb.setAttribute('aria-pressed', was ? 'false' : 'true');
+              paintDots();
+            });
+            kids.appendChild(kb);
+          });
+
+          dots.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            open = !open;
+            kidOpen[it.id] = open;
+            kids.hidden = !open;
+            dots.setAttribute('aria-expanded', open ? 'true' : 'false');
+          });
+          wrap.appendChild(dots);
+          (sess || card).appendChild(kids);
+        }
       });
 
       /* ── AND TODAY'S CARD ENDS BY ASKING ──
@@ -2433,6 +2538,14 @@
 
   var TICK_KEY = 'sched.tick.v1';
   var LOG_KEY = 'sched.log.v1';
+  /* ── A THIRD RECORD, AND NOT A CORNER OF THE SECOND ──
+     A child's done-ness is the same KIND of claim a block's is, which
+     is the argument for folding it into blockLog and is exactly why it
+     must not be. `scShareWork` sends how many BLOCKS you kept, and the
+     friends board draws that figure — putting children in the same map
+     would silently change what that number counts, on records already
+     on the server, with nothing anywhere saying so. */
+  var KID_KEY = 'sched.kid.v1';
   var OFF_KEY = 'sched.off.v1';
 
   /* One glyph per item, and like TALLY itself this is CODE rather than
@@ -2665,7 +2778,9 @@
      Named to pair with blockLog, which is the other half of the same
      record. */
   var tickLog = null;      /* { '2026-09-01': { t:1, p:'8420' } } */
+  var kidOpen = {};     /* which blocks are showing their children, this view only */
   var blockLog = null;  /* { '2026-09-01': { <block id>: 1 } } */
+  var kidLog = null;    /* the same shape, keyed by CHILD id */
   var offLog = null;    /* the same shape, and the opposite claim */
 
   /* Local date, never toISOString(). toISOString is UTC, so anywhere
@@ -2741,6 +2856,7 @@
     };
     tickLog = read(TICK_KEY);
     blockLog = read(LOG_KEY);
+    kidLog = read(KID_KEY);
     offLog = read(OFF_KEY);
     /* Pruned to the window anything draws it in, and FORWARD without
        limit: a day off is the one record here you write before it
@@ -2755,6 +2871,7 @@
     try {
       localStorage.setItem(TICK_KEY, JSON.stringify(tickLog));
       localStorage.setItem(LOG_KEY, JSON.stringify(blockLog));
+      localStorage.setItem(KID_KEY, JSON.stringify(kidLog));
       localStorage.setItem(OFF_KEY, JSON.stringify(offLog));
     } catch (e) {}
   }
@@ -2882,6 +2999,31 @@
     scTickSave();
     scPush();
     return true;
+  }
+
+  /* ── THE CHILDREN, AND WHAT THEY DO NOT TOUCH ──
+     Ticking one writes nothing but its own record: not the block, not
+     the tally, not the push. A block is done when YOU say it is, and
+     four of four children finished is not the same claim — you can
+     have had lunch and watched the content and still not call the
+     shift kept. Deriving one from the other would be the app deciding
+     something about your day that you did not. */
+  function scKidDone(day, kid) {
+    return !!(kidLog && kidLog[day] && kidLog[day][kid.id]);
+  }
+  function scSetKidDone(day, kid, val) {
+    if (!scTallyOpen(day)) return false;
+    if (!kidLog[day]) kidLog[day] = {};
+    if (val) kidLog[day][kid.id] = 1; else delete kidLog[day][kid.id];
+    if (!Object.keys(kidLog[day]).length) delete kidLog[day];
+    scTickSave();
+    return true;
+  }
+  function scKidsKept(day, it) {
+    if (!it.k || !it.k.length) return 0;
+    var n = 0;
+    it.k.forEach(function (k) { if (scKidDone(day, k)) n++; });
+    return n;
   }
 
   function scSetBlockDone(day, block, dow, val) {
@@ -9535,6 +9677,60 @@
       body.appendChild(scEl('span', 'label', 'Where'));
       body.appendChild(room);
 
+      /* ── AND WHAT YOU DO DURING IT ──
+         Held here rather than on the row, because these are part of the
+         block's SHAPE — they repeat every week the way its time does,
+         and the row is where you tick them rather than where you decide
+         what they are. On a new block there is nothing to attach them
+         to yet, so the field appears once it has been saved: offering
+         it before the block exists is a form asking about a thing that
+         does not. */
+      var kidList = item ? item.k.slice() : [];
+      var kidBox = scEl('div', 'kid-edit');
+      var kidAdd = scEl('input', 'field');
+      kidAdd.type = 'text';
+      kidAdd.placeholder = 'Lunch, watch trading content…';
+      kidAdd.maxLength = 40;
+      function paintKids() {
+        kidBox.textContent = '';
+        kidList.forEach(function (k, i) {
+          var r = scEl('div', 'kid-row');
+          r.appendChild(scEl('span', 'kid-n', k.n));
+          var x = scEl('button', 'kid-x');
+          x.type = 'button';
+          x.setAttribute('aria-label', 'Take off ' + k.n);
+          x.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+            + '<path d="M6 6l12 12M18 6L6 18"/></svg>';
+          x.addEventListener('click', function () { kidList.splice(i, 1); paintKids(); });
+          r.appendChild(x);
+          kidBox.appendChild(r);
+        });
+        kidAdd.disabled = kidList.length >= 8;
+        kidAdd.placeholder = kidList.length >= 8
+          ? 'Eight is the most a row can hold' : 'Lunch, watch trading content…';
+      }
+      function addKid() {
+        var v = kidAdd.value.trim();
+        if (!v || kidList.length >= 8) return;
+        kidList.push({ id: scId(), n: v.slice(0, 40) });
+        kidAdd.value = '';
+        paintKids();
+      }
+      kidAdd.addEventListener('keydown', function (ev) {
+        if (ev.key !== 'Enter') return;
+        ev.preventDefault();
+        addKid();
+      });
+      if (!isNew) {
+        body.appendChild(scEl('span', 'label', 'During it'));
+        body.appendChild(kidBox);
+        var kidRow = scEl('div', 'kid-new');
+        kidRow.appendChild(kidAdd);
+        kidRow.appendChild(scBtn('off', 'Add', addKid));
+        body.appendChild(kidRow);
+        paintKids();
+      }
+
       var acts = scEl('div', 'acts');
       if (!isNew) acts.appendChild(scBtn('bad', 'Delete', function () {
         scMark();
@@ -9559,6 +9755,11 @@
         } else {
           item.d = days[0]; item.s = s; item.e = e;
           item.r = room.value.trim(); item.n = name.value.trim();
+          /* A name still in the field when Save is pressed is one you
+             typed and meant — losing it because you did not also press
+             Add is the form throwing away work you can see. */
+          addKid();
+          item.k = kidList;
         }
         scClose();
         scCommit(isNew ? 'Added' : 'Saved');

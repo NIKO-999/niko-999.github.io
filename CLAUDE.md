@@ -6572,3 +6572,96 @@ This is the same shape as the palette name nothing matched and the
 workout key that resolved to two cards: **an identifier that reads
 plausibly and means something else, where the failure mode is always
 green.**
+
+## What is inside a block
+
+A four-hour shift is one block with things in it — lunch, an hour of
+trading content — and none of them is a block of its own. They have no
+clock, they do not belong on the day's spine, and giving them times
+would put six more rows in the column you scan.
+
+**TWO STATES, CHOSEN AS A PAIR.** Shut, the children are DOTS IN THE
+GUTTER, one each and filled as they are done — so a shift says how much
+of itself is left **without taking a line**, and every ordinary row
+around it stays exactly where it was. Asserted as the row measuring
+identical to a childless one, because "the list is hidden" passes on a
+build that still reserves its space. Open, they hang off a hairline
+dropped from the block's own glyph: the line is what says they belong
+to it, so nothing has to be indented to say the same thing twice.
+
+**THE DOTS ARE THEIR OWN BUTTON.** The row already answers a tap by
+ticking and a double tap by opening the editor; a third gesture on one
+target is the control answering one more question than it can. A
+sibling press target is what `.chk` and `.row-ed` already are — and a
+button INSIDE the row is invalid and collapses to one press while
+looking exactly right.
+
+**THE CHILDREN NEVER TAKE THE TIME COLUMN.** That gutter is the day's
+one continuous line and the column you scan. A child has no clock, so
+an invented time there — or a ragged hole down the column — costs every
+other row in order to serve one row that is not ordinary. Asserted as
+nothing of a child's drawing inside the 54px the time owns.
+
+**A THIRD RECORD, AND NOT A CORNER OF THE SECOND.** A child's done-ness
+is the same KIND of claim a block's is, which is the argument for
+folding it into `blockLog` and is exactly why it must not be:
+`scShareWork` sends **how many blocks you kept** and the friends board
+draws that figure, so children in the same map would silently change
+what that number counts — on records already on the server, with
+nothing anywhere saying so. `sched.kid.v1`, asserted as the tick
+landing there and nowhere near `sched.log.v1`.
+
+**AND FOUR OF FOUR IS NOT THE BLOCK BEING DONE.** You can have had
+lunch and watched the content and still not call the shift kept.
+Deriving one from the other would be the app deciding something about
+your day that you did not.
+
+**They are part of the block's SHAPE**, so they repeat every week the
+way its time does and are edited in its editor rather than on the row —
+the row is where you tick them, not where you decide what they are.
+Eight is the cap: past that the list is a screen of its own and this is
+the wrong place for it. Open is NOT remembered, which is the tally
+panels' own argument — a position on a screen you are looking at, and
+one restored from yesterday opens on a shift you are not on.
+
+**A name still in the field when Save is pressed is one you meant.**
+Losing it because you did not also press Add is a form throwing away
+work you can see on the screen.
+
+**And a damaged list costs the children, never the block.** The
+schedule's oldest rule about a stored shape, asserted on a list of five
+where two are good.
+
+### The tags are warmer, and the two numbers moved in opposite directions
+
+Asked for higher saturation on Completed, In progress and Not yet.
+
+**THE OBVIOUS WARMER IS BOTH NUMBERS UP AND IT FAILS.** A tag is
+`--tg` at 22% fill under a label mixed 72% toward the ink, and the two
+pull the same way: a label moved further toward a mid-tone hue closes
+on a ground moving toward that same hue from the other side. Measured
+over the three state hues on both faces, 30/80 gives **3.69:1** on the
+light face and 34/88 gives **3.20**.
+
+A tag reads warmer by strengthening the GROUND while the label stays
+near the ink. **36% under a label 40% of the way to the hue** is a chip
+about two thirds stronger than the one it replaces and measures
+**5.79:1** at its worst across both faces.
+
+**IT IS THE STATE TAGS ONLY.** The same arithmetic dresses every tag in
+the app, and the binding hues there are the WORKOUT ones —
+`--w-violet` is 4.63:1 on the dark face at the shipped 22/72 and
+`--w-green` 4.24 on the light. Raising the shared rule would have taken
+a dozen tags under the bar to warm up three. `.row .st` came OUT of the
+group and carries its own pair, which is what the static check requires
+anyway: one selector in a group and again in its own rule is the same
+property written twice with only the last one live, and `.row .t`
+already had to be split for exactly this.
+
+**AND NOT YET WENT TO `--dim`, WHICH FIXED A FAILURE NOBODY HAD
+FOUND.** It was `--spent` on a 9% wash of the ink, and that pair
+measures **3.36:1 on the light face** — under the bar, shipped, and
+asserted nowhere. It is the one tag with no hue in it, so neither
+number above touches it; making it read stronger meant moving the
+grey. 7.71:1 on the dark face now and 6.86 on the light, and still the
+flat neutral, which is the half of the rule that matters.

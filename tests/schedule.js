@@ -11146,6 +11146,342 @@ const SAID = [
     await dctx.close();
   }
 
+  /* ══════════════════════════════════════════════════════════════
+     WHAT IS INSIDE A BLOCK
+
+     A four-hour shift is one block with things in it, and none of them
+     is a block of its own. Shut, they are dots in the gutter; open,
+     they hang off a rail dropped from the block's own glyph.
+
+     ITS OWN CONTEXT: this plants children on the schedule, ticks them
+     and edits them, and a check that changes the state of the app is a
+     check that has to be alone.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    console.log('\n── what is inside a block ──');
+    const kctx = await browser.newContext({ ...PHONE });
+    const kp = await kctx.newPage();
+    const kerrs = [];
+    kp.on('pageerror', (e) => kerrs.push(String(e)));
+    await kp.addInitScript(() => {
+      ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+        .forEach((k) => localStorage.setItem(k, '1'));
+      localStorage.setItem('sched.net.v1',
+        JSON.stringify({ on: false, url: '', code: '' }));
+    });
+    await kp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await kp.waitForTimeout(500);
+
+    /* Planted on the RECORD rather than through the editor, so what is
+       being measured below is the row rather than the form. */
+    const plant = () => kp.evaluate(() => {
+      const st = JSON.parse(localStorage.getItem('sched.v1'));
+      const dow = new Date().getDay();
+      const b = st.items.filter((i) => i.d === dow).sort((a, c) => a.s - c.s)[1];
+      b.k = [{ id: 'k1', n: 'Coffee and the open' },
+             { id: 'k2', n: 'Watch trading content' },
+             { id: 'k3', n: 'Lunch' }, { id: 'k4', n: 'Journal the session' }];
+      localStorage.setItem('sched.v1', JSON.stringify(st));
+      return b.id;
+    });
+    const owner = await plant();
+    await kp.reload({ waitUntil: 'networkidle' });
+    await kp.waitForTimeout(600);
+
+    /* ── SHUT, IT COSTS THE ROW NOTHING ──
+       The whole reason the dots are in the gutter: a shift says how
+       much of itself is left without taking a line, and every ordinary
+       row around it stays where it was. Measured as the row's own
+       height against a row with no children, because "the list is
+       hidden" passes on a build that still reserves its space. */
+    const shut = await kp.evaluate(() => {
+      const d = document.querySelector('.row-kids');
+      if (!d) throw new Error('no dots on a block with children');
+      const wraps = [...document.querySelectorAll('.rowwrap')];
+      const mine = d.closest('.rowwrap');
+      const other = wraps.find((w) => w !== mine && !w.querySelector('.row-kids'));
+      return {
+        dots: d.querySelectorAll('i').length,
+        lit: d.querySelectorAll('i.on').length,
+        named: d.getAttribute('aria-label'),
+        expanded: d.getAttribute('aria-expanded'),
+        /* A BUTTON INSIDE A BUTTON IS INVALID and collapses to one
+           press while looking exactly right — the dots are a sibling,
+           the way .chk and .row-ed already are. */
+        nested: !!mine.querySelector('.row .row-kids'),
+        sibling: d.parentElement.classList.contains('rowwrap'),
+        h: Math.round(mine.getBoundingClientRect().height),
+        plain: Math.round(other.getBoundingClientRect().height),
+        listDrawn: document.querySelector('.kids').getClientRects().length > 0,
+      };
+    });
+    ok('a block with things inside it shows one dot each, in the gutter',
+      shut.dots === 4 && shut.lit === 0 && /0 of 4 inside/.test(shut.named || ''), shut);
+    ok('...as a sibling of the row, never a button inside one',
+      shut.sibling && !shut.nested, shut);
+    ok('...and shut it costs the row not one pixel',
+      shut.h === shut.plain && !shut.listDrawn && shut.expanded === 'false', shut);
+
+    /* ── OPEN, THEY HANG OFF THE BLOCK'S OWN GLYPH ──
+       And they never take the time column. That gutter is the day's one
+       continuous line and the column you scan; a child has no clock, so
+       anything drawn in it there costs every other row. */
+    await kp.click('.row-kids');
+    await kp.waitForTimeout(360);
+    const open = await kp.evaluate(() => {
+      const k = document.querySelector('.kids');
+      const kids = [...k.querySelectorAll('.kid')];
+      const kr = k.getBoundingClientRect();
+      const rail = getComputedStyle(k, '::before');
+      const row = document.querySelector('.row-kids').closest('.rowwrap').querySelector('.row');
+      const glyph = row.querySelector('.ic') || row.querySelector('svg');
+      const gb = glyph.getBoundingClientRect();
+      return {
+        n: kids.length,
+        names: kids.map((x) => x.querySelector('.kn').textContent),
+        /* nothing of a child's is inside the 54px the time owns */
+        inGutter: kids.some((x) => [...x.children].some((c) => {
+          const b = c.getBoundingClientRect();
+          return b.width > 2 && b.left - kr.left < 50;
+        })),
+        railX: parseFloat(rail.left),
+        glyphMid: Math.round(gb.left - kr.left + gb.width / 2),
+        expanded: document.querySelector('.row-kids').getAttribute('aria-expanded'),
+      };
+    });
+    ok('pressing the dots opens them, all four, with their names whole',
+      open.n === 4 && open.expanded === 'true'
+      && open.names[1] === 'Watch trading content', open);
+    ok('...nothing of theirs is in the time column',
+      !open.inGutter, open);
+    ok('...and the rail falls down the middle of the block’s own glyph',
+      Math.abs(open.railX - open.glyphMid) <= 2,
+      { rail: open.railX, glyph: open.glyphMid });
+
+    /* ── TICKING ONE WRITES ITS OWN RECORD AND NOTHING ELSE ──
+       The sharpest half. `scShareWork` sends how many BLOCKS you kept
+       and the friends board draws that figure, so a child landing in
+       blockLog would silently change what that number counts — on
+       records already on the server, with nothing saying so. */
+    await kp.evaluate(() => document.querySelectorAll('.kid')[1].click());
+    await kp.waitForTimeout(380);
+    const ticked = await kp.evaluate((id) => {
+      const kid = JSON.parse(localStorage.getItem('sched.kid.v1') || '{}');
+      const blk = JSON.parse(localStorage.getItem('sched.log.v1') || '{}');
+      const d = document.querySelector('.row-kids');
+      return {
+        stored: JSON.stringify(kid).includes('k2'),
+        inBlockLog: JSON.stringify(blk).includes('k2'),
+        blockDone: Object.values(blk).some((v) => v[id]),
+        lit: d.querySelectorAll('i.on').length,
+        said: d.getAttribute('aria-label'),
+        rowDone: !!document.querySelector('.rowwrap.is-done .row-kids'),
+      };
+    }, owner);
+    ok('ticking one is filed under its own key, and nowhere near the blocks',
+      ticked.stored && !ticked.inBlockLog && !ticked.blockDone, ticked);
+    ok('...and the gutter says so without opening anything',
+      ticked.lit === 1 && /1 of 4 inside/.test(ticked.said || ''), ticked);
+
+    /* ── AND THE BLOCK IS DONE WHEN YOU SAY IT IS ──
+       Four of four finished is not the same claim as the shift being
+       kept: you can have had lunch and watched the content and still
+       not call it a day's work. Deriving one from the other would be
+       the app deciding something about your day that you did not. */
+    await kp.evaluate(() => {
+      document.querySelectorAll('.kid:not(.is-done)').forEach((x) => x.click());
+    });
+    await kp.waitForTimeout(420);
+    const all = await kp.evaluate((id) => {
+      const blk = JSON.parse(localStorage.getItem('sched.log.v1') || '{}');
+      return { lit: document.querySelectorAll('.row-kids i.on').length,
+        blockDone: Object.values(blk).some((v) => v[id]),
+        rowDone: !!document.querySelector('.row-kids').closest('.rowwrap')
+          .classList.contains('is-done') };
+    }, owner);
+    ok('all four done still does not tick the block itself',
+      all.lit === 4 && !all.blockDone && !all.rowDone, all);
+
+    /* ── OPEN IS NOT REMEMBERED ──
+       It is a position on a screen you are looking at, which is the
+       argument the tally's panels already make: one restored from
+       yesterday opens on a shift you are not on. */
+    await kp.reload({ waitUntil: 'networkidle' });
+    await kp.waitForTimeout(600);
+    ok('...and it comes back shut, because open is not a preference',
+      await kp.evaluate(() => document.querySelector('.kids').hidden
+        && document.querySelector('.row-kids').getAttribute('aria-expanded') === 'false'));
+
+    /* ── A DAMAGED LIST COSTS THE CHILDREN AND NEVER THE BLOCK ── */
+    await kp.evaluate(() => {
+      const st = JSON.parse(localStorage.getItem('sched.v1'));
+      const b = st.items.find((i) => i.k && i.k.length);
+      b.k = [{ n: 'Good one' }, 'rubbish', null, { n: '' }, { n: 'Also good' }];
+      localStorage.setItem('sched.v1', JSON.stringify(st));
+    });
+    await kp.reload({ waitUntil: 'networkidle' });
+    await kp.waitForTimeout(600);
+    const repaired = await kp.evaluate(() => {
+      const st = JSON.parse(localStorage.getItem('sched.v1'));
+      const b = st.items.find((i) => i.k && i.k.length);
+      return { kept: b.k.map((x) => x.n), block: b.n, ids: b.k.every((x) => !!x.id),
+        rows: document.querySelectorAll('.row').length };
+    });
+    ok('a broken list costs the children and never the block they are in',
+      repaired.kept.join('|') === 'Good one|Also good' && repaired.ids
+      && repaired.rows > 3, repaired);
+
+    /* ── THE EDITOR IS WHERE THEY ARE DECIDED ──
+       They repeat every week the way the block's time does, so they
+       belong to its shape rather than to one date — and the row is
+       where you TICK them rather than where you say what they are. */
+    await kp.evaluate(() => {
+      const st = JSON.parse(localStorage.getItem('sched.v1'));
+      st.items.forEach((i) => { delete i.k; });
+      localStorage.setItem('sched.v1', JSON.stringify(st));
+    });
+    await kp.reload({ waitUntil: 'networkidle' });
+    await kp.waitForTimeout(600);
+    ok('a block with nothing inside it draws no dots at all',
+      await kp.evaluate(() => document.querySelectorAll('.row-kids').length === 0));
+
+    await kp.evaluate(() => document.querySelectorAll('.row-ed')[1].click());
+    await kp.waitForTimeout(560);
+    await kp.fill('.kid-new .field', 'Watch trading content');
+    await kp.click('.kid-new .btn');
+    await kp.waitForTimeout(260);
+    /* A NAME STILL IN THE FIELD WHEN SAVE IS PRESSED IS ONE YOU MEANT.
+       Losing it because you did not also press Add is a form throwing
+       away work you can see on the screen. */
+    await kp.fill('.kid-new .field', 'Lunch');
+    await kp.click('.sheet .btn.go');
+    await kp.waitForTimeout(620);
+    const made = await kp.evaluate(() => {
+      const st = JSON.parse(localStorage.getItem('sched.v1'));
+      const b = st.items.find((i) => i.k && i.k.length);
+      return { names: b.k.map((x) => x.n),
+        dots: document.querySelectorAll('.row-kids i').length };
+    });
+    ok('the editor adds them, and keeps the one still in the field on Save',
+      made.names.join('|') === 'Watch trading content|Lunch' && made.dots === 2, made);
+
+    await kp.evaluate(() => document.querySelectorAll('.row-ed')[1].click());
+    await kp.waitForTimeout(560);
+    await kp.evaluate(() => document.querySelector('.kid-x').click());
+    await kp.waitForTimeout(220);
+    await kp.click('.sheet .btn.go');
+    await kp.waitForTimeout(620);
+    ok('...and takes one off again',
+      await kp.evaluate(() => {
+        const st = JSON.parse(localStorage.getItem('sched.v1'));
+        const b = st.items.find((i) => i.k && i.k.length);
+        return b.k.length === 1 && b.k[0].n === 'Lunch';
+      }));
+
+    ok('nothing threw through any of it', kerrs.length === 0, kerrs);
+    await kctx.close();
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     THE STATE TAGS ARE WARMER, AND STILL CLEAR THE BAR
+     ══════════════════════════════════════════════════════════════ */
+  {
+    console.log('\n── the state tags are warmer ──');
+    const { PNG: PNG3 } = require('pngjs');
+    for (const face of ['dark', 'light']) {
+      const tctx = await browser.newContext({ ...PHONE, colorScheme: face });
+      const tp = await tctx.newPage();
+      await tp.addInitScript(() => {
+        ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+          .forEach((k) => localStorage.setItem(k, '1'));
+        localStorage.setItem('sched.net.v1',
+          JSON.stringify({ on: false, url: '', code: '' }));
+      });
+      await tp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+      await tp.waitForTimeout(520);
+
+      /* Every state planted, because which ones are drawn depends on
+         the hour — and a check that only sees "not yet" is one that
+         passes at 6am and says nothing. */
+      const spots = await tp.evaluate(() => {
+        const st = [...document.querySelectorAll('.row .st')];
+        if (!st.length) throw new Error('no state tags on the week');
+        const want = ['is-todo', 'is-ok', 'is-now', 'is-bad'];
+        const out = [];
+        want.forEach((cls, i) => {
+          const e = st[i % st.length];
+          want.forEach((c) => e.classList.remove(c));
+          e.classList.add(cls);
+          const cs = getComputedStyle(e);
+          const r = e.getBoundingClientRect();
+          out.push({ cls, fg: cs.color,
+            x: Math.round(r.left), y: Math.round(r.top),
+            w: Math.round(r.width), h: Math.round(r.height) });
+        });
+        return out;
+      });
+      const png = PNG3.sync.read(await tp.screenshot());
+      const at = (x, y) => { const i = (png.width * y + x) << 2;
+        return [png.data[i], png.data[i + 1], png.data[i + 2]]; };
+      let worst = { r: 99 };
+      spots.forEach((s) => {
+        /* the mode of the chip's own box is its wash — a min/max picks
+           antialiased edge pixels and understates every pair */
+        const t = new Map();
+        for (let y = s.y * 2; y < (s.y + s.h) * 2 && y < png.height; y++)
+          for (let x = s.x * 2; x < (s.x + s.w) * 2 && x < png.width; x++) {
+            const k = at(x, y).join(','); t.set(k, (t.get(k) || 0) + 1);
+          }
+        let bk = '', bn = -1;
+        t.forEach((n, k) => { if (n > bn) { bn = n; bk = k; } });
+        const fg = (s.fg.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+        const r = ratio(fg, bk.split(',').map(Number));
+        if (r < worst.r) worst = { r: +r.toFixed(2), cls: s.cls };
+      });
+      ok(`${face}: every state tag clears the bar at the warmer wash`,
+        worst.r >= 4.5, worst);
+      await tctx.close();
+    }
+
+    /* ── AND IT IS THE STATE TAGS ONLY ──
+       The same arithmetic dressed every tag in the app and the binding
+       hues there are the WORKOUT ones — --w-violet is 4.63:1 on the
+       dark face at the shipped 22/72. Raising the shared rule would
+       have taken a dozen tags under the bar to warm up three, so the
+       session pills must not have moved. Read off the rules, because
+       what is being asserted is that one selector changed and another
+       did not. */
+    const rules = await (async () => {
+      const rctx = await browser.newContext({ ...PHONE });
+      const rp = await rctx.newPage();
+      await rp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+      await rp.waitForTimeout(400);
+      const out = await rp.evaluate(() => {
+        const found = {};
+        for (const sh of document.styleSheets) {
+          let rs; try { rs = sh.cssRules; } catch (e) { continue; }
+          for (const r of rs) {
+            const sel = (r.selectorText || '').trim();
+            if (sel === '.row .st' || /\.wk-sh b/.test(sel)) {
+              found[sel] = (r.style.getPropertyValue('background') || '')
+                + ' | ' + (r.style.getPropertyValue('color') || '');
+            }
+          }
+        }
+        return found;
+      });
+      await rctx.close();
+      return out;
+    })();
+    const st = rules['.row .st'] || '';
+    const grp = Object.keys(rules).find((k) => k !== '.row .st');
+    ok('the state tags carry their own, warmer pair',
+      /36%/.test(st) && /40%/.test(st), { st });
+    ok('...and every other tag in the app is untouched at 22 and 72',
+      /22%/.test(rules[grp] || '') && /72%/.test(rules[grp] || ''),
+      { group: grp, val: rules[grp] });
+  }
+
   ok('no page errors through any of it', errs.length === 0, errs);
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);

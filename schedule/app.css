@@ -2214,7 +2214,6 @@ body {
    colour and cannot go stale when one moves. */
 .wk-sh b,
 .ty-card .tg,
-.row .st,
 .pill.is-now {
   border: none;
   background: color-mix(in srgb, var(--tg) 22%, transparent);
@@ -2638,7 +2637,31 @@ body {
    Its own rule rather than shared with .pill.is-now: sharing a rule
    and then overriding one property from it is the duplicate, not a
    way around it. */
+/* ── THE STATE TAGS ARE WARMER THAN EVERY OTHER TAG, AND THE TWO
+       NUMBERS MOVED IN OPPOSITE DIRECTIONS ──
+   Out of the group above and carrying its own pair, which is what the
+   static check requires: one selector in a group and again in its own
+   rule is the same property written twice with only the last one live,
+   and `.row .t` already had to be split for exactly this.
+
+   THE OBVIOUS WARMER IS BOTH NUMBERS UP AND IT FAILS. The fill and the
+   label pull the same way — a label mixed further toward a mid-tone hue
+   closes on a ground moving toward the same hue from the other side. At
+   30/80 the three state hues come to 3.69:1 on the light face and at
+   34/88 to 3.20. A tag reads warmer by strengthening the GROUND while
+   the label stays near the ink: 36% under a label only 40% of the way
+   to the hue is a chip two thirds stronger than the one it replaces
+   and measures 5.79:1 at its worst across both faces.
+
+   IT IS THE STATE TAGS ONLY, deliberately. The same arithmetic dressed
+   every tag in the app, and the binding hues there are the workout
+   ones — `--w-violet` is 4.63:1 on the dark face at the shipped 22/72
+   and `--w-green` 4.24 on the light, so raising the shared rule would
+   have taken a dozen tags under the bar to warm up three. */
 .row .st {
+  border: none;
+  background: color-mix(in srgb, var(--tg) 36%, transparent);
+  color: color-mix(in srgb, var(--tg) 40%, var(--ink));
   font-size: 9.5px;
   font-weight: 600;
   letter-spacing: .01em;
@@ -2766,9 +2789,18 @@ body {
    almost the ink. Measured on the light face it came to about 2.2:1.
    It carries the neutral pair the Showing up tag already uses for the
    same state, which is a wash of the ink under --spent. */
+/* ── AND NOT YET WENT TO --dim, WHICH FIXED A FAILURE ──
+   It was `--spent` on this wash, and that pair measures **3.36:1 on
+   the light face** — under the bar, shipped, and asserted nowhere. It
+   is the one tag with no hue in it, so neither number above touches
+   it; making it read stronger meant moving the grey. `--dim` on the
+   same 9% wash is 7.71:1 on the dark face and 6.86 on the light, and
+   it is still the flat neutral, which is the half of the rule that
+   matters: a thing you have not got to has not happened, and a colour
+   there would be the screen counting down at you. */
 .row .st.is-todo {
   background: color-mix(in srgb, var(--ink) 9%, transparent);
-  color: var(--spent);
+  color: var(--dim);
 }
 /* A run of days is the accent as a COLOUR, not as a ground: it is a
    figure about you rather than a state of the screen. */
@@ -5437,3 +5469,142 @@ body {
 
 /* A press that would do nothing must not look like one that would. */
 .acts .btn:disabled { opacity: .38; cursor: default; }
+
+/* ═══════════════════════════════════════════════════════════════
+   WHAT IS INSIDE A BLOCK
+
+   Two states, chosen as a pair. Shut, the children are DOTS IN THE
+   GUTTER — the block says how much of itself is left without taking a
+   line, and every ordinary row around it stays exactly where it was.
+   Open, they hang off a hairline dropped from the block's own glyph:
+   the line is what says they belong to it, so nothing has to be
+   indented to say the same thing again.
+
+   THE CHILDREN NEVER TAKE THE TIME COLUMN. That gutter is the day's
+   one continuous line and the column you scan; a child has no clock,
+   so filling it with an invented time — or leaving ragged holes down
+   it — makes every other row harder to read in order to serve one row
+   that is not ordinary.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* A SIBLING of the row, like .chk and .row-ed, because a button inside
+   a button is invalid and collapses to one press. It sits in the time
+   column's own width, under the figure. */
+.row-kids {
+  position: absolute;
+  left: 0; bottom: 9px;
+  width: 54px;
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 0 2px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+.row-kids i {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--tick-off);
+  display: block;
+}
+.row-kids i.on { background: var(--ink); }
+.row-kids:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; border-radius: 6px; }
+
+/* The rail. `--meas` is the gutter and the glyph sits in the 20px after
+   it, so the line falls down the middle of the glyph's own column. */
+.kids {
+  position: relative;
+  padding: 2px 0 8px;
+}
+.kids::before {
+  content: '';
+  position: absolute;
+  /* Down the middle of the GLYPH's own column, which is 54px of gutter
+     plus a 10px gap plus half of a 22px track — so the line falls out
+     of the block's mark rather than beside it. Written as the sum
+     rather than as 74, because the three numbers are the row's and a
+     constant here goes stale the day one of them moves. */
+  left: calc(54px + 10px + 11px - .75px);
+  top: 0; bottom: 14px;
+  width: 1.5px;
+  border-radius: 1px;
+  background: var(--hair);
+}
+.kid {
+  display: grid;
+  /* THE ROW'S OWN TRACKS. Anything else and the mark drifts off the
+     rail — the first cut used 20px for a 22px column and put the name
+     in the glyph's track, where it wrapped one word to a line. */
+  grid-template-columns: 54px 22px minmax(0, 1fr);
+  gap: 0 10px;
+  align-items: center;
+  width: 100%;
+  padding: 7px 0;
+  background: none;          /* a button with none declared is painted
+                                buttonface — the row's own lesson */
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+}
+.kid .km {
+  grid-column: 2;
+  width: 15px; height: 15px;
+  border-radius: 50%;
+  border: 1.5px solid var(--tick-off);
+  justify-self: center;
+  display: grid;
+  place-items: center;
+  /* over the rail rather than beside it, so the line reads as passing
+     behind each mark */
+  background: var(--paper);
+  position: relative;
+  z-index: 1;
+}
+.kid .km svg {
+  width: 9px; height: 9px;
+  fill: none;
+  stroke: var(--paper);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+}
+.kid.is-done .km { background: var(--ink); border-color: var(--ink); }
+.kid.is-done .km svg { opacity: 1; }
+.kid .kn { grid-column: 3; font-size: 13px; color: var(--dim); }
+.kid.is-done .kn { color: var(--spent); text-decoration: line-through; }
+.kid:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; border-radius: 8px; }
+
+/* ── the editor's half ── */
+.kid-edit:empty { display: none; }
+.kid-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.kid-row:last-child { border-bottom: 0; }
+.kid-n { flex: 1; font-size: 14px; }
+.kid-x {
+  width: 30px; height: 30px;
+  flex: none;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.kid-x svg {
+  width: 15px; height: 15px;
+  fill: none;
+  stroke: var(--spent);
+  stroke-width: 1.9;
+  stroke-linecap: round;
+}
+.kid-x:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; border-radius: 8px; }
+.kid-new { display: flex; gap: 8px; align-items: stretch; }
+.kid-new .field { flex: 1; min-width: 0; }
+.kid-new .btn { flex: none; }
