@@ -3868,14 +3868,32 @@
   }
 
   /* ── A HABIT OF YOURS HAS NO BOUNDS WRITTEN DOWN ──
-     The six above carry their own. A number you named gets twice what
-     you are aiming at, rounded up, so the dial is built around the
-     figure you told the app you cared about — and a round default when
-     you set no aim, because a track from nought to nought is not one. */
+     The six above carry their own. A number you named has to get its
+     ceiling from somewhere, and the record is the only honest source:
+     the largest figure you have actually logged, with half as much
+     again above it, so the track always has room to beat your best
+     and never runs to a number nobody has.
+
+     NOT FROM `aim`, WHICH WAS THE FIRST VERSION AND IS A DIFFERENT
+     QUANTITY ENTIRELY. It reads like a target and it is DAYS A WEEK —
+     `scHabitLoad` clamps it to 0-7 — so twice the aim gave every
+     custom number a ceiling of at most twenty, whether it counted
+     pages, kilometres or R. It looked right in the code and the check
+     written for it is what found it: a name that reads plausibly and
+     means something else, which is this file's oldest kind of bug.
+
+     A round default until there is a record, because a track from
+     nought to nought is not one — and it moves the first time you log
+     anything. */
   function scNumRange(item) {
     if (item.max) return { max: item.max, step: item.step || 1 };
-    var aim = +item.aim || 0;
-    var max = aim ? Math.max(10, Math.ceil((aim * 2) / 10) * 10) : 100;
+    var best = 0;
+    for (var d in tickLog) {
+      if (!Object.prototype.hasOwnProperty.call(tickLog, d)) continue;
+      var v = +((tickLog[d] || {})[item.id]);
+      if (v > best) best = v;
+    }
+    var max = best ? Math.ceil((best * 1.5) / 10) * 10 : 100;
     return { max: max, step: Math.max(1, Math.round(max / 100)) };
   }
 

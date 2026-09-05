@@ -6541,3 +6541,34 @@ nought is not one.
 **Sleep was not asked about and had to get something.** It is the
 fourth number on the same sheet, so leaving it alone would have left
 one item with a control the other three no longer have.
+
+### `aim` reads like a target and is DAYS A WEEK
+
+The dial's ceiling for a habit of your own went in as twice `item.aim`,
+which reads exactly like the figure you are shooting for. It is not:
+`scHabitLoad` clamps it to **0-7**, because it means how many days a
+week you want the habit on. So twice the aim gave every custom number a
+ceiling of at most **twenty** — whether it counted pages, kilometres or
+R — and the code said `aim * 2` in a way nobody reading it would
+question.
+
+**The check written for it is the only thing that found it**, and only
+because it asserted the FIGURE rather than that a figure existed. An
+assertion reading "a number of your own has a max" passes on twenty as
+happily as on a hundred.
+
+**It comes off the record now**: the largest figure you have actually
+logged for that habit, with half as much again above it, so the track
+always has room to beat your own best and never runs to a number nobody
+has. A round default until there is a record, and it moves the first
+time you log anything.
+
+**Asserted in BOTH directions**, on the same habit, twice — once before
+it has been logged and once after. A default passes on a build that
+ignores the record entirely; a record-following figure passes on one
+with no default. Neither half catches the other.
+
+This is the same shape as the palette name nothing matched and the
+workout key that resolved to two cards: **an identifier that reads
+plausibly and means something else, where the failure mode is always
+green.**

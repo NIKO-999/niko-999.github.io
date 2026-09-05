@@ -11100,22 +11100,46 @@ const SAID = [
       /0\.2 L/.test(after.spoken || '') && after.read === '0.2 L', after);
     await esc();
 
-    /* ── A HABIT OF YOURS IS BOUNDED BY WHAT YOU AIMED AT ──
-       The six carry their own figures; a number you named has none, so
-       the dial is built around the aim you set rather than a constant
-       that would be wrong for every unit at once. */
+    /* ── A HABIT OF YOURS IS BOUNDED BY ITS OWN RECORD ──
+       The six carry written-down figures; a number you named has none.
+       It went in derived from `aim` — which reads like a target and is
+       DAYS A WEEK, clamped 0-7, so twice it gave every custom number a
+       ceiling of at most twenty whatever its unit. This check is what
+       found that, and it only found it by asserting the figure rather
+       than that one existed.
+
+       BOTH DIRECTIONS. A default on a habit with no history passes on
+       a build that ignores the record entirely, and a figure that
+       follows the record passes on one with no default — so the same
+       habit is measured twice, once before it has been logged and once
+       after. */
     await dp.evaluate(() => {
       const h = JSON.parse(localStorage.getItem('sched.habit.v1') || '[]');
       h.push({ id: 'x9', n: 'Pages', k: 'num', unit: ' pp', hue: '--w-teal',
-        neg: 0, aim: 30, cnt: 1, own: 1 });
+        neg: 0, aim: 4, cnt: 1, own: 1 });
       localStorage.setItem('sched.habit.v1', JSON.stringify(h));
     });
     await dp.reload({ waitUntil: 'networkidle' });
     await dp.waitForTimeout(560);
     await open('x9');
-    const mine = await dial();
-    ok('a number of your own is bounded by twice the aim you set',
-      mine && mine.max === 60, mine);
+    const fresh = await dial();
+    ok('a number of your own opens on a round default before it has a record',
+      fresh && fresh.max === 100, fresh);
+    await esc();
+
+    await dp.evaluate(() => {
+      const t = JSON.parse(localStorage.getItem('sched.tick.v1') || '{}');
+      const k = Object.keys(t).sort().pop() || '2026-09-01';
+      t[k] = t[k] || {};
+      t[k].x9 = '120';
+      localStorage.setItem('sched.tick.v1', JSON.stringify(t));
+    });
+    await dp.reload({ waitUntil: 'networkidle' });
+    await dp.waitForTimeout(560);
+    await open('x9');
+    const grown = await dial();
+    ok('...and the ceiling then follows your own best, with room above it',
+      grown && grown.max === 180, grown);
     await esc();
 
     ok('nothing threw through any of it', derrs.length === 0, derrs);
