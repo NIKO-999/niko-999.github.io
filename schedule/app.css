@@ -3879,6 +3879,21 @@ body {
    in tests/schedule.js reads this matrix back off .wc.b1 while the
    deal is running, so it fails whether the rule is deleted or
    overwritten by keyframes naming `transform`. */
+/* ── AND THE TWO BEHIND CANNOT BE PRESSED, WHICH THE FILE ALREADY
+   SAID AND THE CURSOR DENIED ──
+   `scTrainBack` builds them `aria-hidden` with no handler, and the
+   note on `scTrainCard` says outright that the pair behind show an
+   edge each and cannot be pressed. They still inherited `.wc`'s
+   `cursor: pointer` and still took the hit-test on the 13 and 25
+   pixels of themselves that show — a card advertising a press that
+   does nothing.
+
+   It is load-bearing now rather than tidying: the wash finds its host
+   by walking up to the outermost box the app has made pressable, so a
+   decorative card claiming the cursor would have been washed as though
+   it were a control. A response to a press that did nothing is worse
+   than no response at all. */
+.wc.b1, .wc.b2 { cursor: default; pointer-events: none; }
 .wc.b1 {
   transform: translate(13px, 9px) rotate(3deg) scale(.965);
   background: var(--wc-wash), color-mix(in srgb, var(--wc-hue) 34%, #202028);

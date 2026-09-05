@@ -10268,6 +10268,24 @@
     var t = ev.target;
     if (!t || !t.closest) return;
     var host = t.closest('button, [role="switch"]');
+    /* ── AND A CONTROL IS NOT ALWAYS A BUTTON ──
+       The friends board's rows are `<li>`, because a row is only
+       pressable when somebody is behind it and the app puts that on a
+       class rather than changing the element. Naming `.fr-row.is-tap`
+       here would be the list this whole handler exists not to be, so
+       the rule is the one the app already writes down: the OUTERMOST
+       box carrying `cursor: pointer` of its own. Measured across every
+       view and every sheet, the row is the only thing it finds —
+       which is only true because the two cards fanned behind a workout
+       stopped claiming a cursor they never answered. */
+    if (!host) {
+      var n = t;
+      while (n && n.nodeType === 1 && n !== document.body
+             && getComputedStyle(n).cursor === 'pointer') {
+        host = n;
+        n = n.parentElement;
+      }
+    }
     if (!host || host.disabled) return;
     var r = host.getBoundingClientRect();
     if (!r.width || !r.height) return;

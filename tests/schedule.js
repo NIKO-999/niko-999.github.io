@@ -10682,22 +10682,99 @@ const SAID = [
        failure the flight-pause rule and the runner's own SUITE list
        have each already had. Asserted by pressing everything that is
        drawn on a view and requiring a wash on each. */
-    const missed = await pp.evaluate(async () => {
+    const press = () => pp.evaluate(() => {
       const out = [];
-      const hosts = [...document.querySelectorAll('button,[role="switch"]')]
-        .filter((h) => h.getClientRects().length
-          && h.getBoundingClientRect().width > 8);
+      /* A CONTROL IS NOT ALWAYS A BUTTON, which is exactly what this
+         check could not see when it was written: the friends board's
+         rows are <li>, because a row is only pressable when somebody
+         is behind it. So the net is the one the app itself writes
+         down — a button, a switch, or the OUTERMOST box carrying
+         `cursor: pointer` of its own. */
+      const hosts = [...document.querySelectorAll('body *')].filter((h) => {
+        if (!h.getClientRects().length) return false;
+        if (h.getBoundingClientRect().width <= 8) return false;
+        if (h.matches('button,[role="switch"]')) return true;
+        if (h.closest('button,[role="switch"]')) return false;
+        if (getComputedStyle(h).cursor !== 'pointer') return false;
+        const par = h.parentElement;
+        return !(par && getComputedStyle(par).cursor === 'pointer');
+      });
       for (const h of hosts) {
         const r = h.getBoundingClientRect();
         h.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true,
           clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 }));
-        if (!h.querySelector('.rp')) out.push(h.className || h.tagName);
-        h.querySelectorAll('.rp').forEach((e) => e.remove());
+        if (!h.querySelector('.rp')) {
+          out.push((h.className.baseVal !== undefined ? h.className.baseVal
+            : h.className) || h.tagName);
+        }
+        document.querySelectorAll('.rp').forEach((e) => e.remove());
       }
       return { n: hosts.length, out };
     });
+    const missed = await press();
     ok('every control on the week answers a press, and there are some',
       missed.n > 6 && missed.out.length === 0, missed);
+
+    /* ── INCLUDING THE ONE THAT IS NOT A BUTTON ──
+       The friends board's row was the only thing in the app the first
+       cut of this check could not see, because it presses buttons and
+       the row is an <li>. Both halves: the net has to reach it, and it
+       has to be there to be reached. */
+    await pp.evaluate(() => document.querySelector('#scTabFriends').click());
+    await pp.waitForTimeout(700);
+    const fr = await press();
+    const nonBtn = await pp.evaluate(() => {
+      const li = document.querySelector('.fr-row.is-tap');
+      if (!li) return null;
+      const sp = li.querySelector('.fr-n') || li.firstElementChild;
+      const r = sp.getBoundingClientRect();
+      sp.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true,
+        clientX: r.left + 2, clientY: r.top + 2 }));
+      const rp = document.querySelector('.rp');
+      const host = rp && rp.parentElement;
+      /* Pressed on a CHILD, and it has to resolve to the row rather
+         than washing a 29px span in the middle of it. */
+      const ok = !!host && host === li;
+      document.querySelectorAll('.rp').forEach((e) => e.remove());
+      return { ok, tag: li.tagName, host: host && host.className };
+    });
+    ok('the friends board answers too, row and all', fr.out.length === 0, fr);
+    ok('...and its row is an <li>, pressed anywhere inside it',
+      nonBtn && nonBtn.ok && nonBtn.tag === 'LI', nonBtn);
+    await pp.evaluate(() => document.querySelector('#scTabWeek').click());
+    await pp.waitForTimeout(500);
+
+    /* ── AND THE RULE MUST NOT OVER-REACH ──
+       `scTrainCard`'s own note says the pair fanned behind a workout
+       show an edge each and CANNOT be pressed — and they carried
+       `.wc`'s `cursor: pointer` anyway, which would have made the walk
+       above wash a decoration. A response to a press that does nothing
+       is worse than no response at all. */
+    await pp.evaluate(() => document.querySelector('#scTabTally').click());
+    await pp.waitForTimeout(500);
+    await pp.evaluate(() => {
+      const c = document.querySelector('.ty-card[data-item="t"]');
+      if (c) c.click();
+    });
+    await pp.waitForTimeout(900);
+    const fan = await pp.evaluate(() => {
+      const b1 = document.querySelector('.wc.b1');
+      if (!b1) return null;
+      const cs = getComputedStyle(b1);
+      const r = b1.getBoundingClientRect();
+      b1.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true,
+        clientX: r.right - 4, clientY: r.bottom - 4 }));
+      const out = { cur: cs.cursor, pe: cs.pointerEvents,
+        washed: !!b1.querySelector('.rp') };
+      document.querySelectorAll('.rp').forEach((e) => e.remove());
+      return out;
+    });
+    ok('a card that cannot be pressed does not claim it can, and is not washed',
+      fan && fan.cur !== 'pointer' && fan.pe === 'none' && !fan.washed, fan);
+    await pp.keyboard.press('Escape');
+    await pp.waitForTimeout(420);
+    await pp.evaluate(() => document.querySelector('#scTabWeek').click());
+    await pp.waitForTimeout(500);
 
     /* ── THE ROW'S OWN FILL IS GONE, NOT DOUBLED UP ──
        `.row:active { background: var(--tick-off) }` said the same thing

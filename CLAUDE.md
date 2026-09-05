@@ -6417,3 +6417,45 @@ Both are the same fault as sampling a spring at a fixed wall-clock
 moment: **a check timed to the mechanism it is testing is measuring the
 machine.** Waited past, not on — and Mind is dismissed like the deck
 two lines above it, which was the actual missing step.
+
+### A control is not always a button
+
+Asked what else was still silent, and a sweep of every view and every
+sheet found exactly two things — opposite faults with one fix between
+them.
+
+**THE FRIENDS BOARD'S ROW IS AN `<li>`**, because a row is only
+pressable when somebody is behind it and the app puts that on a class
+rather than changing the element. So the check written the day before
+could not see it: it presses `button, [role="switch"]`, which is the
+selector the handler used, so the check and the bug agreed with each
+other. A row had a faint opacity dip and nothing else.
+
+**Fixed by RULE, never by name.** Naming `.fr-row.is-tap` in the
+selector is the list this handler exists not to be, and the next
+non-button control would be silent again with nothing to say so. The
+rule is the one the app already writes down: a button, a switch, or the
+OUTERMOST box carrying `cursor: pointer` of its own. Pressed on a
+child — a name, a crown, a figure — it resolves to the row rather than
+washing a 29px span in the middle of it.
+
+**AND THAT ONLY WORKS BECAUSE OF THE SECOND ONE.** The two cards fanned
+behind a workout carry `.wc`'s `cursor: pointer`, so the walk would
+have washed a decoration. `scTrainCard`'s own note says outright that
+the pair behind show an edge each and CANNOT be pressed — they are
+`aria-hidden` divs with no handler — and the cursor had been denying it
+for as long as they had existed, on the 13 and 25 pixels of each that a
+thumb can reach. **A response to a press that does nothing is worse
+than no response at all**, so the cursor is gone, the hit-test with it,
+and that half is asserted beside the other.
+
+Everything else came back clean and is worth writing down so nobody
+sweeps it again: the text and time fields answer with a caret, and the
+veils and scrims answer by the panel going away.
+
+**A probe counted its own artefacts.** The row looked like it had two
+absolutely positioned descendants, which would have meant
+`position: relative` on it moved something — it was the wash's own
+wrapper and dot, counted after they were inserted. Read the element
+before you touch it, and the second reading is not a measurement of the
+first.
