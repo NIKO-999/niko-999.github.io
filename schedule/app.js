@@ -777,10 +777,37 @@
      of the six items open a sheet asking for a number, and the second
      tap of a double would land on that sheet rather than on the tile.
 
-     260ms rather than the 300 a platform usually allows: it is the
-     shortest window that caught every deliberate double tap in
-     testing, and every millisecond of it is paid on the common action
-     to buy the rare one.
+     ── AND 260 WAS SHORTER THAN A FINGER, WHICH IS THE BUG ──
+     It went in at 260 "rather than the 300 a platform usually allows",
+     on the grounds that it was the shortest window that caught every
+     deliberate double tap in testing. That testing was a script, and a
+     script taps as fast as it is told to. Reported from the phone as
+     *if the time's already gone, I can't double click it or edit it*,
+     and measured with real touch events at 120, 200, 300 and 400ms
+     between taps: 120 and 200 open the editor on every row, 300 and
+     400 do not — they tick and then untick, so a person taps twice,
+     watches the row change and change back, and concludes the app has
+     no editor.
+
+     It is not about the block being past, which is only where you
+     notice it: a block behind you is the one you want to correct, so
+     it is where you try hardest. Every row fails the same way.
+
+     380ms, which is above iOS's own double-tap threshold of about 300
+     and below the 500 a desktop browser allows, so the gesture works
+     at the pace the phone taught you without the tick feeling stuck.
+     The 120ms it costs the common action is the price of the rare one
+     existing at all — a feature nobody can reach is not a saving.
+
+     WIDENING WAS THE ONLY FIX AVAILABLE, and the two that were not are
+     worth writing down. Acting immediately and undoing on the second
+     tap is rejected above and the argument still holds: the second tap
+     would land on the sheet the first one opened. And undoing AFTER
+     the single has fired cannot work here either, for the same reason
+     seen from the other side — on a Train row the single opens the
+     workout deck, whose scrim is what the second tap actually hits.
+     Measured: at a 300ms gap the deck is up and the press lands on
+     `.scrim`, not on the row.
 
      `touch-action: manipulation` on the element is not optional. This
      page sets no maximum-scale, so a double tap is a ZOOM gesture on
@@ -799,7 +826,7 @@
       wait = setTimeout(function () {
         wait = null;
         onSingle();
-      }, 260);
+      }, 380);
     });
   }
 

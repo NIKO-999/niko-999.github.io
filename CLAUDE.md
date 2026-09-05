@@ -6877,3 +6877,54 @@ Two things came out of it. Seed only when the key is ABSENT, which is
 what the net record already does. And **measure the BOX before
 screenshotting it** — a check that throws takes the file down and
 reports as a broken build, where a check that fails names the thing.
+
+## The double tap was shorter than a finger
+
+Reported from the phone as *I just found a glitch where if the time's
+already gone, I can't double click it or edit it.*
+
+**IT WAS NEVER ABOUT THE BLOCK BEING PAST.** Every row failed the same
+way; a block behind you is simply the one you want to correct, so it is
+where you try hardest and where the tick you get instead is most
+obviously wrong.
+
+**260ms was the whole of it.** The window went in "rather than the 300
+a platform usually allows", on the grounds that it was the shortest
+that caught every deliberate double tap in testing — and that testing
+was a script, which taps as fast as it is told to. Measured with real
+touch events at 120, 200, 300 and 400ms between taps: **120 and 200
+open the editor on every row; 300 and 400 tick and then untick.** So a
+person taps twice, watches the row change and change back, and
+concludes the app has no editor.
+
+The mechanism is that the deferred single fires at the window and calls
+`scRender()`, which rebuilds every row — so the second tap lands on a
+NEW element whose own `wait` is null, and is a fresh first tap.
+
+**380ms**, above Android's `getDoubleTapTimeout` and iOS's own
+threshold, both about 300, and below the 500 a desktop browser allows
+so the tick does not feel stuck. The 120ms it costs the common action
+is the price of the rare one existing at all: a feature nobody can
+reach is not a saving. Re-measured after the change — 300 opens the
+editor on every row, 400 does not.
+
+**WIDENING WAS THE ONLY FIX AVAILABLE**, and the two that were not are
+worth having written down. Acting immediately and undoing on the second
+tap was already rejected and the argument still holds: the second tap
+lands on the sheet the first one opened. And undoing AFTER the single
+has fired cannot work either, for that same reason seen from the other
+side — on a **Train** row the single opens the workout deck, and at a
+300ms gap the second press was measured landing on `.scrim`, not on the
+row. There is nothing for a correction handler on the row to hear.
+
+**And the check that missed it drove the gesture as fast as Playwright
+can.** `page.dblclick` and two synchronous `.click()` calls both land in
+one task, so they are recognised at ANY window and would pass at 50ms.
+The assertion is on the WINDOW now: the sheet is still shut 300ms after
+a first tap and open by 620.
+
+**Four waits in the suite were sized against 260 and had to move with
+it.** Three of them sat 40 to 60ms past the old window — which was
+already the race the comment beside one of them warns about, one step
+worse, because a wait level with the deferral is decided by whichever
+of the two wins the frame.

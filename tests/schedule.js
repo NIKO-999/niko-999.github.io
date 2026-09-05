@@ -31,7 +31,7 @@ const { open, BASE } = require('./lib.js');
    Showing up's own gesture.
 
    Fired as two synchronous clicks rather than through `dblclick`,
-   because scDoubleTap is a 260ms timer on the element and two clicks
+   because scDoubleTap is a 380ms timer on the element and two clicks
    in one task is exactly what it is waiting for — and because this
    has to work on whichever page object the caller is holding. */
 const openObj = async (pg) => {
@@ -2112,20 +2112,20 @@ const SAID = [
      card that had to be built to teach it could teach either gesture.
 
      Driven through the real handler rather than by calling the
-     function behind it, and the wait afterwards clears the 260ms the
+     function behind it, and the wait afterwards clears the 380ms the
      first tap is deferred by. */
   const holdCard = async (id) => {
     await page.dblclick(`.ty-card[data-item="${id}"]`);
-    await page.waitForTimeout(420);
+    await page.waitForTimeout(560);
   };
 
   /* ── TWO TAPS ON A WEEK ROW ──
      A tap ticks a block off and two open the editor. Driven through
-     the real handler, and the wait clears the 260ms the first tap is
+     the real handler, and the wait clears the 380ms the first tap is
      deferred by. */
   const dblRow = async (sel) => {
     await page.dblclick(sel);
-    await page.waitForTimeout(420);
+    await page.waitForTimeout(560);
   };
 
   const show = async (v) => {
@@ -2874,12 +2874,14 @@ const SAID = [
      with the strip beside them opening the history; the strip went with
      the tile, so the two remaining controls each took one job. */
   /* AWAITED, because the first tap of a possible double is deferred:
-     a press does not log on the frame it lands, it logs 260ms later
+     a press does not log on the frame it lands, it logs 380ms later
      once nothing has followed it. Read synchronously this came back
-     null, on a tap that worked. */
+     null, on a tap that worked. Comfortably past the window rather
+     than level with it — a wait sized to the deferral is a check
+     decided by whichever of the two wins the frame. */
   const stored = await page.evaluate(async () => {
     document.querySelector('.ty-card[data-item="t"]').click();
-    await new Promise((r) => setTimeout(r, 420));
+    await new Promise((r) => setTimeout(r, 620));
     return localStorage.getItem('sched.tick.v1');
   });
   /* Ticking Train opens the workout deck over this screen. Nothing
@@ -3376,12 +3378,14 @@ const SAID = [
     veil: !document.getElementById('scTyVeil').hidden,
     logged: !!document.querySelector('.ty-row[data-item="p"].is-on'),
   }));
-  /* 260 is EXACTLY what the double tap defers a first press by, so
-     this waited for the deferral and then asserted the thing the
-     deferral does — a check decided by whichever of the two won the
-     frame. Past it, not on it. */
+  /* WELL PAST THE DEFERRAL, NOT ON IT. This once waited exactly the
+     260 the double tap deferred a first press by, and then asserted
+     the thing the deferral does — a check decided by whichever of the
+     two won the frame. The window is 380 now, so a wait sized against
+     260 is under it rather than merely level with it, which is the
+     same race one step worse. */
   await page.click('.ty-card[data-item="p"]');
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(700);
   const tapped = await page.evaluate(() => ({
     veil: !document.getElementById('scTyVeil').hidden,
     sheet: !document.getElementById('scSheet').hidden,
@@ -3397,7 +3401,7 @@ const SAID = [
 
   /* ── AND THE FIRST TAP WAITS ──
      A second press cannot be recognised without waiting for it, so a
-     log lands 260ms after the finger leaves rather than on the frame.
+     log lands 380ms after the finger leaves rather than on the frame.
      That is the cost of the gesture and it is asserted, not assumed: a
      build that acted immediately would open the number sheet on the
      first tap of a double and the second would land on the sheet. */
@@ -3405,12 +3409,38 @@ const SAID = [
     const was = !document.getElementById('scSheet').hidden;
     document.querySelector('.ty-card[data-item="f"]').click();
     const at0 = !document.getElementById('scSheet').hidden;
-    await new Promise((r) => setTimeout(r, 420));
+    await new Promise((r) => setTimeout(r, 620));
     return { was, at0, after: !document.getElementById('scSheet').hidden };
   });
   ok('...and the first tap waits for a possible second',
     deferred.was === false && deferred.at0 === false
     && deferred.after === true, deferred);
+  /* ── AND IT WAITS LONG ENOUGH FOR A FINGER ──
+     The window went in at 260 "rather than the 300 a platform usually
+     allows", on the grounds that it was the shortest that caught every
+     deliberate double tap in testing. That testing was a script, and a
+     script taps as fast as it is told to. Reported from the phone as
+     the editor being unreachable, and measured with real touch: 120
+     and 200ms between taps opened it, 300 and 400 ticked and then
+     unticked — so a person taps twice, watches the row change and
+     change back, and concludes there is no editor.
+
+     Asserted as the WINDOW rather than as a gesture at one speed,
+     because every check in this file that drives a double tap does it
+     as fast as Playwright can and would pass at any window at all.
+     Read off the deferral: the sheet must still be shut at 300ms,
+     which is iOS's own double-tap threshold, and open by 620. */
+  const window300 = await page.evaluate(async () => {
+    document.getElementById('scScrim').click();
+    await new Promise((r) => setTimeout(r, 400));
+    document.querySelector('.ty-card[data-item="f"]').click();
+    await new Promise((r) => setTimeout(r, 300));
+    const at300 = !document.getElementById('scSheet').hidden;
+    await new Promise((r) => setTimeout(r, 320));
+    return { at300, at620: !document.getElementById('scSheet').hidden };
+  });
+  ok('...and the window is wider than a finger, not than a script',
+    window300.at300 === false && window300.at620 === true, window300);
   await page.evaluate(() => document.getElementById('scScrim').click());
   await page.waitForFunction(() => document.getElementById('scSheet').hidden,
     null, { timeout: 4000 });
@@ -4779,7 +4809,7 @@ const SAID = [
 
   const tapRow = async () => {
     await page.click('.week.is-today .row[data-id]');
-    await page.waitForTimeout(440);
+    await page.waitForTimeout(640);
   };
   const rowState = () => page.evaluate(() => {
     const r = document.querySelector('.week.is-today .row[data-id]');
@@ -5063,14 +5093,16 @@ const SAID = [
     /* ── AND MIND IS DISMISSED THE WAY TRAIN IS, TWO LINES UP ──
        Mind asks what you read, so its picker comes up over the tally
        and takes every press after it. This waited 220ms and pressed
-       on — which is UNDER the 260 the double tap defers a first press
-       by, so the press had not landed yet and the sheet opened later,
-       over whatever was pressed next. It survived on that race: the
-       sheet was reliably late enough to miss the click behind it, and
-       any change that moved either number by forty milliseconds broke
-       it. Waited out and dismissed, like the deck above. */
+       on — which is UNDER the 260 the double tap deferred a first
+       press by at the time, so the press had not landed yet and the
+       sheet opened later, over whatever was pressed next. It survived
+       on that race: the sheet was reliably late enough to miss the
+       click behind it, and any change that moved either number by
+       forty milliseconds broke it. The window is 380 now, so the wait
+       is sized against that rather than left level with the old
+       number. Waited out and dismissed, like the deck above. */
     await fp.click('.ty-card[data-item="m"]');
-    await fp.waitForTimeout(500);
+    await fp.waitForTimeout(700);
     await fp.keyboard.press('Escape');
     await fp.waitForTimeout(360);
     /* A number nothing else in the app could produce, DRAGGED into
