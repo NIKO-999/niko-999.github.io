@@ -6665,3 +6665,16 @@ asserted nowhere. It is the one tag with no hue in it, so neither
 number above touches it; making it read stronger meant moving the
 grey. 7.71:1 on the dark face now and 6.86 on the light, and still the
 flat neutral, which is the half of the rule that matters.
+
+**And the check that measured it planted four states on one element.**
+Which states are DRAWN depends on the hour, so all four have to be
+planted — and the first cut planted them in one pass and shot the page
+once. There are not always four tags on screen, so the same element
+took each class in turn and ended as the last one: the check then
+compared a colour read at one moment against pixels from another and
+reported **2.04:1 on a chip that is 6.6**. One state, one screenshot,
+each time. **A colour and the pixels it is measured against have to
+come from the same frame** — which is the spring sampled at a fixed
+wall-clock moment in different units, and the dangerous kind, because a
+contrast number that looks wrong invites somebody to change a colour
+that was never wrong.

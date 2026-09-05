@@ -11400,31 +11400,33 @@ const SAID = [
       await tp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
       await tp.waitForTimeout(520);
 
-      /* Every state planted, because which ones are drawn depends on
-         the hour — and a check that only sees "not yet" is one that
-         passes at 6am and says nothing. */
-      const spots = await tp.evaluate(() => {
-        const st = [...document.querySelectorAll('.row .st')];
-        if (!st.length) throw new Error('no state tags on the week');
-        const want = ['is-todo', 'is-ok', 'is-now', 'is-bad'];
-        const out = [];
-        want.forEach((cls, i) => {
-          const e = st[i % st.length];
-          want.forEach((c) => e.classList.remove(c));
-          e.classList.add(cls);
-          const cs = getComputedStyle(e);
-          const r = e.getBoundingClientRect();
-          out.push({ cls, fg: cs.color,
-            x: Math.round(r.left), y: Math.round(r.top),
-            w: Math.round(r.width), h: Math.round(r.height) });
-        });
-        return out;
-      });
-      const png = PNG3.sync.read(await tp.screenshot());
-      const at = (x, y) => { const i = (png.width * y + x) << 2;
-        return [png.data[i], png.data[i + 1], png.data[i + 2]]; };
+      /* ── ONE STATE AT A TIME, AND A SCREENSHOT EACH ──
+         Every state has to be planted, because which ones are DRAWN
+         depends on the hour and a check that only ever sees "not yet"
+         passes at six in the morning saying nothing.
+
+         The first cut planted all four in one pass and shot the page
+         once. There are not always four tags on screen, so the same
+         element took each class in turn and ended as the last one —
+         and the check then measured a colour read at one moment
+         against pixels from another, reporting 2.04:1 on a chip that
+         is 6.6. A colour and the pixels it is compared against have to
+         come from the same frame. */
       let worst = { r: 99 };
-      spots.forEach((s) => {
+      for (const cls of ['is-todo', 'is-ok', 'is-now', 'is-bad']) {
+        const s = await tp.evaluate((c) => {
+          const e = document.querySelector('.row .st');
+          if (!e) throw new Error('no state tag on the week');
+          ['is-todo', 'is-ok', 'is-now', 'is-bad'].forEach((k) => e.classList.remove(k));
+          e.classList.add(c);
+          const r = e.getBoundingClientRect();
+          return { fg: getComputedStyle(e).color,
+            x: Math.round(r.left), y: Math.round(r.top),
+            w: Math.round(r.width), h: Math.round(r.height) };
+        }, cls);
+        const png = PNG3.sync.read(await tp.screenshot());
+        const at = (x, y) => { const i = (png.width * y + x) << 2;
+          return [png.data[i], png.data[i + 1], png.data[i + 2]]; };
         /* the mode of the chip's own box is its wash — a min/max picks
            antialiased edge pixels and understates every pair */
         const t = new Map();
@@ -11436,8 +11438,8 @@ const SAID = [
         t.forEach((n, k) => { if (n > bn) { bn = n; bk = k; } });
         const fg = (s.fg.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
         const r = ratio(fg, bk.split(',').map(Number));
-        if (r < worst.r) worst = { r: +r.toFixed(2), cls: s.cls };
-      });
+        if (r < worst.r) worst = { r: +r.toFixed(2), cls: cls };
+      }
       ok(`${face}: every state tag clears the bar at the warmer wash`,
         worst.r >= 4.5, worst);
       await tctx.close();
