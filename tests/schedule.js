@@ -11186,6 +11186,23 @@ const SAID = [
     await kp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
     await kp.waitForTimeout(500);
 
+    /* ── THE SAME ROW, BEFORE AND AFTER ──
+       Its height with nothing inside it, measured first. Compared
+       against a NEIGHBOUR this failed on the clock: rows are not one
+       height, and the block the children go on is a running one for
+       part of every day — it draws a countdown and a progress line and
+       comes out at 71px where a plain row is 59. Comparing a row
+       against itself is the only version of this claim that is true at
+       every hour. */
+    const before = await kp.evaluate(() => {
+      const dow = new Date().getDay();
+      const st = JSON.parse(localStorage.getItem('sched.v1'));
+      const b = st.items.filter((i) => i.d === dow).sort((a, c) => a.s - c.s)[1];
+      const r = document.querySelector('.row[data-id="' + b.id + '"]');
+      if (!r) throw new Error('no row for the block children go on');
+      return { id: b.id, h: Math.round(r.closest('.rowwrap').getBoundingClientRect().height) };
+    });
+
     /* Planted on the RECORD rather than through the editor, so what is
        being measured below is the row rather than the form. */
     const plant = () => kp.evaluate(() => {
@@ -11211,9 +11228,7 @@ const SAID = [
     const shut = await kp.evaluate(() => {
       const d = document.querySelector('.row-kids');
       if (!d) throw new Error('no dots on a block with children');
-      const wraps = [...document.querySelectorAll('.rowwrap')];
       const mine = d.closest('.rowwrap');
-      const other = wraps.find((w) => w !== mine && !w.querySelector('.row-kids'));
       return {
         dots: d.querySelectorAll('i').length,
         lit: d.querySelectorAll('i.on').length,
@@ -11225,7 +11240,6 @@ const SAID = [
         nested: !!mine.querySelector('.row .row-kids'),
         sibling: d.parentElement.classList.contains('rowwrap'),
         h: Math.round(mine.getBoundingClientRect().height),
-        plain: Math.round(other.getBoundingClientRect().height),
         listDrawn: document.querySelector('.kids').getClientRects().length > 0,
       };
     });
@@ -11287,7 +11301,8 @@ const SAID = [
     await kp.click('.row-kids');
     await kp.waitForTimeout(320);
     ok('...and shut it costs the row not one pixel',
-      shut.h === shut.plain && !shut.listDrawn && shut.expanded === 'false', shut);
+      shut.h === before.h && !shut.listDrawn && shut.expanded === 'false',
+      { with: shut.h, without: before.h, shut });
 
     /* ── OPEN, THEY HANG OFF THE BLOCK'S OWN GLYPH ──
        And they never take the time column. That gutter is the day's one

@@ -6732,3 +6732,15 @@ way in — and the row still has two other ways to tick.
 whole point: the press has to be claimed well away from the mark. And
 in BOTH directions, because "the children opened" passes on a build
 that also ticked, and that is exactly what was reported.
+
+**And the check for it failed on the CLOCK, which is this file's oldest
+shape.** "Shut it costs the row not one pixel" compared the children's
+row against a NEIGHBOUR — and rows are not one height: the block the
+children go on is a running one for part of every day, drawing a
+countdown and a progress line at **71px** where a plain row is **59**.
+Green all morning, red for the hour the block is live.
+
+It compares the row against ITSELF now, measured before the children
+are planted and after. That is the only version of the claim that is
+true at every hour, and it is a stronger one — a neighbour matching
+proves nothing about the row that changed.
