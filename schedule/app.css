@@ -5490,14 +5490,31 @@ body {
 /* A SIBLING of the row, like .chk and .row-ed, because a button inside
    a button is invalid and collapses to one press. It sits in the time
    column's own width, under the figure. */
+/* ── THE DRAWING IS FIVE PIXELS AND THE PRESS IS THE WHOLE GUTTER ──
+   The dots went in as their own box, which made the target about
+   thirteen pixels tall — a thumb aimed at it landed on the row instead
+   and TICKED THE BLOCK, which is the one wrong answer available. The
+   mark is unchanged; what grew is what a finger can hit.
+
+   It spans the row's own height rather than a number of pixels, so it
+   cannot reach into the row above however tall a row gets, and it is
+   bounded by the 54px the time owns so it can never take a press meant
+   for the name. What that costs is that on a block with children the
+   gutter no longer ticks — which is the rule stated rather than a side
+   effect: the time column IS the way in, and the row still has its
+   whole width and its own check.
+
+   Same shape as the objectives plus, which is a small mark inside the
+   44px everything else holds to. */
 .row-kids {
   position: absolute;
-  left: 0; bottom: 9px;
+  left: 0; top: 0; bottom: 0;
   width: 54px;
   display: flex;
+  align-items: flex-end;
   justify-content: center;
   gap: 4px;
-  padding: 6px 0 2px;
+  padding: 0 0 11px;
   background: none;
   border: 0;
   cursor: pointer;

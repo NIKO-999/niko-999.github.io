@@ -6702,3 +6702,33 @@ a task file while the check ran happily against the UNMODIFIED file and
 the suite re-ran the old code to the same failure. The assertion did its
 job; nothing was reading it. **Run the edit in the foreground and look
 at what it printed before running anything on the result.**
+
+### The drawing is five pixels and the press is the whole gutter
+
+Reported straight after it shipped: a thumb aimed at the dots landed on
+the ROW and ticked the block, which is the one wrong answer available
+there. The dots went in as their own box and that made the target about
+thirteen pixels tall.
+
+**The mark did not change. What grew is what a finger can hit** — which
+is the objectives plus's own rule, a small drawing inside the 44px
+everything else in this app holds to.
+
+**It spans the ROW's height rather than a number of pixels**, so it
+cannot reach into the row above however tall a row gets — and rows here
+are not one height: a running block draws a countdown and a progress
+line and comes out at 71px where a plain one is under 50. A constant
+would have been right on one of those and wrong on the other.
+
+**And it is bounded to the 54px the time owns**, so it can never take a
+press meant for the name. The row keeps its whole width and its own
+check.
+
+**What it costs is said rather than hidden: on a block with children
+the gutter no longer ticks.** That is the rule — the time column IS the
+way in — and the row still has two other ways to tick.
+
+**Asserted at the TIME's own centre, not at the dots'**, which is the
+whole point: the press has to be claimed well away from the mark. And
+in BOTH directions, because "the children opened" passes on a build
+that also ticked, and that is exactly what was reported.

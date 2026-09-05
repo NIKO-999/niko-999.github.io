@@ -11233,6 +11233,59 @@ const SAID = [
       shut.dots === 4 && shut.lit === 0 && /0 of 4 inside/.test(shut.named || ''), shut);
     ok('...as a sibling of the row, never a button inside one',
       shut.sibling && !shut.nested, shut);
+
+    /* ── THE DRAWING IS FIVE PIXELS AND THE PRESS IS THE WHOLE GUTTER ──
+       Reported: a thumb aimed at the dots landed on the row and TICKED
+       THE BLOCK, which is the one wrong answer available. The mark did
+       not change; the target did.
+
+       Asserted at the TIME's own centre rather than at the dots', which
+       is the point — the press has to be claimed by the gutter well
+       away from the mark. Both halves, because "the children opened"
+       passes on a build that also ticked, and that is exactly the bug. */
+    const reach = await kp.evaluate(() => {
+      const d = document.querySelector('.row-kids');
+      const w = d.closest('.rowwrap');
+      const row = w.querySelector('.row');
+      const t = row.querySelector('.t');
+      const bx = (e) => e.getBoundingClientRect();
+      const db = bx(d), rb = bx(row), tb = bx(t);
+      const wraps = [...document.querySelectorAll('.rowwrap')];
+      const prev = wraps[wraps.indexOf(w) - 1];
+      const cls = (e) => e ? ((e.className.baseVal !== undefined
+        ? e.className.baseVal : e.className) || e.tagName) : 'none';
+      return {
+        h: Math.round(db.height), w: Math.round(db.width),
+        /* bounded to the column the time owns, so it can never take a
+           press meant for the name */
+        gutter: Math.round(db.width) <= 56,
+        /* and it spans the row rather than a number of pixels, so it
+           cannot reach into the row above however tall a row gets */
+        intoPrev: prev ? db.top < bx(prev).bottom - 1 : false,
+        atTime: cls(document.elementFromPoint(tb.left + tb.width / 2,
+          tb.top + tb.height / 2)),
+        atName: cls(document.elementFromPoint(rb.left + 180, rb.top + rb.height / 2)),
+        time: { x: tb.left + tb.width / 2, y: tb.top + tb.height / 2 },
+      };
+    });
+    ok('the press is the whole gutter, at the size everything else holds to',
+      reach.h >= 44 && reach.gutter && !reach.intoPrev
+      && reach.atTime === 'row-kids', reach);
+    ok('...and it never reaches the name, which is still the row’s',
+      reach.atName !== 'row-kids', reach);
+
+    await kp.mouse.click(reach.time.x, reach.time.y);
+    await kp.waitForTimeout(420);
+    const pressed = await kp.evaluate((id) => {
+      const blk = JSON.parse(localStorage.getItem('sched.log.v1') || '{}');
+      return { opened: !document.querySelector('.kids').hidden,
+        ticked: Object.values(blk).some((v) => v[id]) };
+    }, owner);
+    ok('a press by the dots opens what is inside, and does NOT tick the block',
+      pressed.opened && !pressed.ticked, pressed);
+    /* back to shut, because the section below measures it closed */
+    await kp.click('.row-kids');
+    await kp.waitForTimeout(320);
     ok('...and shut it costs the row not one pixel',
       shut.h === shut.plain && !shut.listDrawn && shut.expanded === 'false', shut);
 
