@@ -6766,10 +6766,29 @@ only thing picked is Rest — a control that exists and refuses is worse
 than one that is not there, which is the deck's own conclusion about
 the way back out.
 
-**`every`, NOT `[0]`.** A session can be more than one thing, so Rest
-beside Core is a real session that happens to include a card called
-Rest, and it is asked both questions like any other. Only a day that is
-nothing but rest is the case with no length in it.
+**REST IS EXCLUSIVE, AND THAT REVERSED THE FIRST ANSWER.** It shipped
+for a day as one card among the rest, on the reading that a session
+can be more than one thing — so Rest beside Core was "a real session
+that happens to include a card called Rest" and was asked both
+questions like any other. `every`, not `[0]`, carefully.
+
+Reported back in one line: *rest shouldn't have a timer, and it
+shouldn't say how hard it was. Rest is just rest.* **You cannot
+half-rest.** A day with core work on it is a Core day, and Rest
+sitting beside it is the record saying you did nothing AND did
+something — which is not a session, it is two claims about one day.
+
+So picking Rest clears the rest and picking anything else clears Rest.
+The two figures then have no path to a rest day AT ALL, rather than
+one guarded in three places: the state is impossible instead of
+handled. Asserted in both directions, because each passes on the
+other's bug — a build that only clears on the way in leaves Rest +
+Core reachable by pressing them the other way round.
+
+**`scRestOnly` stays, and it is now the REPAIR's function rather than
+the picker's.** Records written by the build that allowed the pair are
+on disk with up to ninety days to live, and `scTrainLoad` is what has
+to keep reading them without filling their blanks back in.
 
 **FOUR PLACES ASK THAT QUESTION AND ONE FUNCTION ANSWERS IT.** The
 sheet decides whether to draw the two rows, the CARD decides whether to
@@ -6928,3 +6947,112 @@ it.** Three of them sat 40 to 60ms past the old window — which was
 already the race the comment beside one of them warns about, one step
 worse, because a wait level with the deferral is decided by whichever
 of the two wins the frame.
+
+## A time can be another block, and no day means today
+
+Two asks in one sentence: *if I write train from seven thirty to eight
+thirty and I don't write the day, it should automatically think it's
+gonna be today* — and *if I write walk after the gym, it should
+automatically put it after training, for an hour.*
+
+**A TIME WITH NO DAY IS A TIME TODAY.** `train from 7:30 to 8:30` was
+answered with *still needs which day*, which is the app asking about
+the only day it could sensibly have meant: every other reading — next
+Tuesday, the whole week — is a thing you would have said. `now` already
+did this for itself and the reason generalises.
+
+**ADD ONLY.** A delete finds its block by name and needs no day at all;
+a `clear` with no day is destructive, and a guess there is a day of
+somebody's week gone on an assumption. Asserted in both directions,
+because a default that only ever fires is indistinguishable from one
+that fires everywhere.
+
+### The order was the fact, not the digits
+
+*After the gym* is how you say when a thing happens when the clock is
+not the point. The other thing already has a time on the day; the new
+one starts where it ends. An hour, for the same reason a bare "at 9"
+gets one.
+
+**THROUGH THE KEYWORD TABLE, and that is what makes it worth having.**
+Nobody calls their gym session "Train" out loud. Two passes: the NAME
+first, both directions — "after training" finds Train, "after work"
+finds Work — and then the glyph, because two names resolving to one
+glyph are the same kind of thing and gym=Train is already written down
+once. Nothing had to be written down twice.
+
+The reverse containment is floored at three characters: a block
+somebody named "PT" would otherwise match every phrase carrying those
+two letters anywhere in it. And it takes the FIRST match in the day's
+own order — a day with two gym blocks is ambiguous however it is
+resolved, and the one thing a guess must be is predictable.
+
+**STRUCK OUT ONLY IF IT RESOLVES.** Eaten unconditionally, "lunch after
+the meeting" on a day with no meeting came back as a bare "Lunch"
+needing a time — the words gone and nothing to show for them. A phrase
+the app cannot place stays in the name, which is exactly where it was
+before this existed, so a sentence it does not understand costs
+nothing.
+
+**BUT AN EXPLICIT CLOCK DOES NOT PUT IT BACK.** The phrase is scanned
+whatever else the sentence carries and used for the TIME only when
+nothing else set one — "now"'s own rule for "now"'s own reason. `Walk
+after the gym at 4` is a Walk at four, not a block called "Walk After
+the Gym". Both halves are asserted because they fail apart.
+
+**TRIMMED AT A WORD ALREADY STRUCK OUT.** The day words are marked long
+before this runs, so "after work tomorrow" and "after the gym on
+monday" both put a used span inside the capture. Checking `free` over
+the WHOLE match rejected them outright and the anchor never fired: the
+phrase is "work" and "gym", and the rest was never part of it. Then
+longest-first with a pop, so a two-word block name gets its chance
+before the one-word fallback.
+
+A bare `for 30 minutes` needed its own pattern — `RE_AT_FOR` requires a
+clock in front of its "for", so a length with no time before it had
+nowhere to be read.
+
+### One clock cannot speak for several days
+
+The parse fixes a span off the FIRST day so the preview has something
+to print, and `scApply` resolves it again for each day it lands on.
+Without that, "coffee after work on monday and friday" files Monday's
+answer under both — silently, and self-consistently, which is the shape
+of every bug this file has had to write down twice. **The fixture is
+what makes it a claim**: Work ends 21:00 on Monday and 18:00 on Friday,
+so one span is provably wrong for one of them, where a fixture with the
+anchor at the same time each day would pass on the bug.
+
+**And the preview says which block rather than one day's clock**, when
+there is more than one day. Measured: Train at 06:30 on Monday and
+18:00 on Wednesday puts Stretch at 07:30 and 19:00, under a preview
+reading 07:30 for both. It prints the resolved block's NAME rather than
+the phrase you typed — "after Train" says what it found, where "after
+Gym" only repeats what you said.
+
+**A day the anchor is not on keeps the preview's span** rather than
+being skipped: that is what was shown and agreed to, and dropping the
+block would be the app refusing after the fact.
+
+### And a length check that only passed before eleven at night
+
+`every block prints its start in the gutter and its length below`
+required at least two rows still AHEAD of you, read off whatever day
+was open — which is today. `is-past` is set on today's rows alone, so
+that is a fact about the clock rather than about the app: at 22:5x the
+seeded day is down to one block still running and everything before it
+behind, and after 23:00 there are none at all. Green all day, red for
+the last hour of it, on a rule that was working perfectly.
+
+**The sixth time this file has recorded that shape**, and the answer is
+the same one every time: measure a day the hour cannot reach. Another
+day's card has no past row by construction, and the claim — that a row
+prints its start and its length — was never about today. The half that
+IS about today is the check under it, which plants `is-done` and
+`is-past` itself rather than waiting for them, and whose own comment
+had already written the lesson down.
+
+**And the day it switches to has to be switched back.** The section
+forty rows above it already does exactly that, which is what makes
+leaving it out the easy mistake — a check that changes the state of the
+app is a check that breaks the next one.

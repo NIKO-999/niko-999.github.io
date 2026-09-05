@@ -393,6 +393,28 @@ const SAID = [
      statement as start-to-end, and it is what these hold — the old
      assertions were replaced rather than deleted, because what they
      protect is that a row still says how long the block is. */
+  /* ── MEASURED ON A DAY THE HOUR CANNOT REACH ──
+     `is-past` is set by scLive on TODAY's rows alone, so read off
+     today this asks for at least two blocks still ahead of you and
+     that is a fact about the clock rather than about the app. It
+     failed at 22:5x with `durAhead` down to one — the last block of
+     the seeded day still running and everything before it behind —
+     and would have failed outright after 23:00 with none at all.
+
+     Green all day, red for the last hour of it, on a rule that was
+     working perfectly: the sixth time this file has recorded that
+     shape, and the answer is the same one every time. Another day's
+     card has no past row by construction at any hour, and the claim
+     here — that a row prints its start and its length — is not about
+     today. The half that IS about today is the check below, which
+     plants the two classes itself rather than waiting for them. */
+  const OTHER = (new Date().getDay() + 3) % 7;
+  await page.evaluate((d) => {
+    const b = [...document.querySelectorAll('.st-d')].find((x) => +x.dataset.d === d);
+    if (!b) throw new Error('no chip for day ' + d);
+    b.click();
+  }, OTHER);
+  await page.waitForTimeout(460);
   const spans = await page.$$eval('.row[data-id]', (rows) => rows.map((r) => {
     const d = r.querySelector('.dur');
     return {
@@ -473,6 +495,10 @@ const SAID = [
     durGone.before && !durGone.done && !durGone.past && durGone.after
     && durAhead.every((s) => s.dv),
     { durGone, ahead: durAhead.map((s) => [s.n, s.d, s.dv]) });
+  /* And a day that is not today has nothing behind you on it, which is
+     the whole reason the two checks above can be true at any hour. */
+  ok('...and no row on another day is ever behind you, whatever the time',
+    spans.length > 4 && spans.every((s) => !s.past), spans.slice(0, 3));
   /* Present is not enough — a constant string is also present, which is
      the shape of the failure the measure's own check was written for.
      So both halves have to be the block's REAL figures, and both have
@@ -510,6 +536,15 @@ const SAID = [
      nothing, which is what the first cut of this printed. */
   ok('and the gutter carries the glyph alone unless the block is done',
     gutter.every(okGut), gutter.filter((g) => !okGut(g)).slice(0, 4));
+
+  /* Back to today, so nothing below reads a week left where the length
+     checks above put it. The same line is already needed forty rows up
+     for the same reason, which is what makes leaving one out the easy
+     mistake: a check that changes the state of the app has to put it
+     back. */
+  await page.evaluate(() => [...document.querySelectorAll('.st-d')]
+    .find((b) => +b.dataset.d === new Date().getDay()).click());
+  await page.waitForTimeout(460);
 
   /* ── contrast, on real pixels ──
      Sampled the length of the poster, because the sky is lightest at
@@ -832,6 +867,90 @@ const SAID = [
     n5 && /^15:00 to 16:00/.test(n5.meta), n5);
   ok('...while the word still leaves the name and still says the day',
     n5 && n5.days === 'TUE' && !/now/i.test(n5.name), n5);
+
+  /* ══════════════════════════════════════════════════════════════
+     A SENTENCE WITH NO DAY ON IT MEANS TODAY
+
+     "train from 7:30 to 8:30" was answered with *still needs which
+     day*, which is the app asking about the only day it could
+     sensibly have meant. "now" already did this for itself and the
+     reason generalises.
+     ══════════════════════════════════════════════════════════════ */
+  const d1 = await nowSaid('Train from 7:30 to 8:30');
+  ok('a time with no day on it is a time today',
+    d1 && d1.days === 'TUE' && /^07:30 to 08:30/.test(d1.meta), d1);
+  /* And a day that IS said still wins — the default must not be a
+     rule that overrides what you typed. */
+  const d2 = await nowSaid('Train thursday 7:30 to 8:30');
+  ok('...and a day you did say is untouched by it',
+    d2 && d2.days === 'THU', d2);
+  /* ADD ONLY. A delete finds its block by name and a `clear` with no
+     day is destructive — a guess there is a day of somebody's week
+     gone on an assumption, so it still asks. */
+  const d3 = await nowSaid('clear');
+  ok('...and a clear with no day still asks rather than guessing today',
+    d3 && /which day to clear/.test(d3.meta), d3);
+
+  /* ══════════════════════════════════════════════════════════════
+     AND A TIME CAN BE ANOTHER BLOCK
+
+     "walk after the gym" is how somebody says when a thing happens
+     when the clock is not the point: it is AFTER the other thing, and
+     the other thing already has a time on the day. The fixture's
+     Tuesday runs Train 06:30-07:30, Trading 09:00-11:00 and Down at
+     22:45, with no Work on it at all — which is what makes the
+     unresolved case below testable rather than merely stated.
+     ══════════════════════════════════════════════════════════════ */
+  const r1 = await nowSaid('Walk after training');
+  ok('a block can be placed after another block, and gets an hour',
+    r1 && r1.days === 'TUE' && /^07:30 to 08:30/.test(r1.meta), r1);
+  ok('...and the words do not end up in the name',
+    r1 && r1.name === 'Walk', r1);
+  /* THROUGH THE KEYWORD TABLE, which is what makes this worth having:
+     nobody calls their gym session "Train" out loud, and gym=Train is
+     already written down once as the glyph both names resolve to. */
+  const r2 = await nowSaid('Walk after the gym');
+  ok('...and a phrase the schedule does not use finds it by kind',
+    r2 && /^07:30 to 08:30/.test(r2.meta) && r2.name === 'Walk', r2);
+  const r3 = await nowSaid('Read before bed');
+  ok('before runs the other way, ending where that block starts',
+    r3 && /^21:45 to 22:45/.test(r3.meta), r3);
+  const r4 = await nowSaid('Walk after the gym for 30 minutes');
+  ok('...and a bare length is read, with no clock in front of it',
+    r4 && /^07:30 to 08:00/.test(r4.meta) && r4.name === 'Walk', r4);
+  const r5 = await nowSaid('Stretch after trading for 2 hours');
+  ok('...in hours as well as minutes',
+    r5 && /^11:00 to 13:00/.test(r5.meta), r5);
+  /* ── STRUCK OUT ONLY IF IT RESOLVES ──
+     Eaten unconditionally, a phrase naming nothing on the day left a
+     bare name needing a time and the words gone with nothing to show
+     for them. Tuesday has no Work on it, so this is the real case. */
+  const r6 = await nowSaid('Lunch after work');
+  ok('a phrase naming nothing on that day keeps its words',
+    r6 && /after work/i.test(r6.name) && /what time/.test(r6.meta), r6);
+  /* An explicit clock still wins outright: somebody who says both is
+     correcting themselves and the digits are the correction. */
+  /* BOTH HALVES, because they fail apart — which is the shape the
+     "now" checks above already had to take. The clock has to win the
+     TIME, and the phrase still has to leave the name: struck out only
+     when it supplies the span, "Walk after the gym at 4" came out as a
+     block called "Walk After the Gym" at four o'clock. */
+  const r7 = await nowSaid('Walk after the gym at 4');
+  ok('...and a real time said with it wins the clock',
+    r7 && /^16:00 to 17:00/.test(r7.meta), r7);
+  ok('...while the phrase still leaves the name',
+    r7 && r7.name === 'Walk', r7);
+  /* ── ONE CLOCK CANNOT SPEAK FOR SEVERAL DAYS ──
+     An anchored block is resolved per day at apply time, so a span
+     printed here would be the FIRST day's answer under a card naming
+     two. Work ends 21:00 on Monday and 18:00 on Friday, so a single
+     clock is provably wrong for one of them. */
+  const r8 = await nowSaid('Coffee after work on monday and friday');
+  ok('over several days it says which block, not one day\u2019s clock',
+    r8 && /after Work/.test(r8.meta) && !/\d\d:\d\d/.test(r8.meta), r8);
+  ok('...and it still names both days',
+    r8 && /MON/.test(r8.days) && /FRI/.test(r8.days), r8);
+
   await page.keyboard.press('Escape');
   await page.waitForTimeout(160);
   /* ── morning, afternoon, evening ──
@@ -9770,6 +9889,81 @@ const SAID = [
     await hctx.close();
   }
 
+  /* ══════════════════════════════════════════════════════════════
+     AN ANCHORED BLOCK IS RESOLVED AGAIN, PER DAY
+
+     The parse fixes a span off the FIRST day so the preview has
+     something to print, and scApply resolves it again for each day it
+     lands on. Without that, "coffee after work on monday and friday"
+     files Monday's answer under both — silently, and
+     self-consistently, which is the shape of every bug this file has
+     had to write down twice.
+
+     THE FIXTURE IS WHAT MAKES IT A CLAIM. Work ends 21:00 on Monday
+     and 18:00 on Friday, so one span for both is provably wrong for
+     one of them; a fixture where the anchor sat at the same time each
+     day would pass on the bug.
+
+     ITS OWN CONTEXT, because it writes blocks into the week.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    console.log('\n\u2500\u2500 an anchored block is resolved per day \u2500\u2500');
+    const actx = await browser.newContext({ ...PHONE });
+    const ap = await actx.newPage();
+    const aerrs = [];
+    ap.on('pageerror', (e) => aerrs.push(String(e)));
+    await ap.addInitScript((wk) => {
+      ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+        .forEach((k) => localStorage.setItem(k, '1'));
+      if (!localStorage.getItem('sched.v1')) {
+        localStorage.setItem('sched.v1', JSON.stringify(wk));
+      }
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1',
+          JSON.stringify({ on: false, url: '', code: '' }));
+      }
+    }, WEEK);
+    await ap.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await ap.waitForTimeout(500);
+
+    const before = await ap.evaluate(() => {
+      const st = JSON.parse(localStorage.getItem('sched.v1'));
+      const at = (d) => (st.items.find((i) => i.d === d && i.n === 'Work') || {}).e;
+      return { mon: at(1), fri: at(5) };
+    });
+    ok('the fixture puts the anchor at a different time on each day',
+      before.mon === 1260 && before.fri === 1080, before);
+
+    await ap.click('#scAdd');
+    await ap.waitForTimeout(200);
+    await ap.fill('#scSheetBody .field', 'Coffee after work on monday and friday');
+    await ap.waitForTimeout(220);
+    await ap.evaluate(() => {
+      const b = [...document.querySelectorAll('#scSheetBody .btn.go')][0];
+      if (!b) throw new Error('no add button on the sheet');
+      b.click();
+    });
+    await ap.waitForTimeout(700);
+
+    const made = await ap.evaluate(() => {
+      const st = JSON.parse(localStorage.getItem('sched.v1'));
+      const at = (d) => st.items.filter((i) => i.d === d && i.n === 'Coffee')
+        .map((i) => [i.s, i.e]);
+      return { mon: at(1), fri: at(5) };
+    });
+    ok('each day gets the block after ITS own anchor, not the first day\u2019s',
+      made.mon.length === 1 && made.fri.length === 1
+      && made.mon[0][0] === 1260 && made.mon[0][1] === 1320
+      && made.fri[0][0] === 1080 && made.fri[0][1] === 1140, made);
+    /* The bug this replaces, stated as the thing that must NOT be
+       true: both days carrying Monday's span. */
+    ok('...so the two days do not share one clock',
+      made.mon[0][0] !== made.fri[0][0], made);
+
+    ok('nothing threw through any of it', aerrs.length === 0, aerrs);
+    await actx.close();
+  }
+
   /* ── NOTHING IN THIS APP SCROLLS SIDEWAYS ──
      The board was a horizontal scroller of 212px columns, so a third
      session sat off the side of the phone and the first was cut in
@@ -11329,6 +11523,11 @@ const SAID = [
       await rp.waitForTimeout(900);
     };
     const state = () => rp.evaluate(() => ({
+      /* The CHIP is the pager and its tick is a readout of the
+         selection, so this is what says which cards are chosen
+         without stepping through the deck to find them. */
+      picked: [...document.querySelectorAll('.wc-chip.is-picked')]
+        .map((e) => e.textContent.trim()),
       ef: document.querySelectorAll('.wc-ef').length,
       mn: document.querySelectorAll('.wc-min').length,
       head: (document.querySelector('.wc:not(.b1):not(.b2) .wc-top') || {}).textContent,
@@ -11415,25 +11614,48 @@ const SAID = [
     ok('...and a reload does not fill the two blanks in behind you',
       survived && survived.e === '' && survived.m === 0, survived);
 
-    /* ── REST BESIDE A REAL SESSION IS A REAL SESSION ──
-       `every`, not `[0]`: a session can be more than one thing, so a
-       card called Rest inside a session that also has Core is asked
-       both questions like any other. Without this the check above
-       passes on a build that silences the rows for any session that
-       merely CONTAINS rest. */
+    /* ── REST IS EXCLUSIVE, AND THAT REPLACED THE OPPOSITE CLAIM ──
+       This asserted that Rest beside Core was "a real session that
+       happens to include a card called Rest" and was asked both
+       questions like any other — the `every`, not `[0]` reading. It
+       shipped for a day and was reported back in one line: *rest
+       shouldn't have a timer, and it shouldn't say how hard it was.
+       Rest is just rest.*
+
+       You cannot half-rest. A day with core work on it is a Core day,
+       and Rest sitting beside it is the record saying you did nothing
+       AND did something. So the pair is IMPOSSIBLE rather than
+       handled, and the two figures then have no path to a rest day at
+       all rather than one guarded in three places.
+
+       BOTH DIRECTIONS, because each passes on the other's bug: Rest
+       has to clear a selection that is already there, and anything
+       else has to clear Rest. A build that only did the first leaves
+       Rest + Core reachable by pressing them the other way round. */
     await openTrain();
     await chip('Recovery');
     await front();
     await rp.waitForTimeout(1600);
-    await chip('Rest');
-    await front();
     await chip('Core');
     await front();
-    const both = await state();
-    ok('rest beside another session is asked both, like any other session',
-      both.ef > 0 && both.mn > 0 && /Effort/.test(both.head), both);
-    ok('...and the foot names the whole of it',
-      /Rest \+ Core/.test(both.go), both);
+    await chip('Cold');
+    await front();
+    const two = await state();
+    ok('two real sessions still go together, and are asked both',
+      two.picked.length === 2 && two.ef > 0 && two.mn > 0
+      && /Core \+ Cold/.test(two.go), two);
+    await chip('Rest');
+    await front();
+    const rested = await state();
+    ok('...and pressing Rest clears them, because rest is just rest',
+      rested.picked.join('+') === 'Rest'
+      && rested.ef === 0 && rested.mn === 0 && rested.go === 'Log Rest', rested);
+    await chip('Core');
+    await front();
+    const back = await state();
+    ok('...and pressing a session clears Rest, which is the same rule back',
+      back.picked.join('+') === 'Core'
+      && back.ef > 0 && back.mn > 0 && back.go === 'Log Core', back);
     await rp.evaluate(() => document.querySelector('.wc-go').click());
     await rp.waitForTimeout(800);
     const pair = await rp.evaluate(() => {
@@ -11441,9 +11663,8 @@ const SAID = [
       const d = t[Object.keys(t).sort().pop()] || {};
       return d[Object.keys(d)[0]] || null;
     });
-    ok('...and both figures are filed for it',
-      pair && /rec\.rest/.test(pair.k) && /rec\.core/.test(pair.k)
-      && pair.e !== '' && pair.m > 0, pair);
+    ok('...and what is filed is that session alone, with its figures',
+      pair && pair.k === 'rec.core' && pair.e !== '' && pair.m > 0, pair);
 
     /* ── AND THE PANEL DOES NOT AVERAGE THE BLANK ──
        Read as the rest of them a rest day gives "Avg 0 min", which is

@@ -374,6 +374,24 @@
   var RE_NOW_FOR = /\bnow\s*(?:for|,)?\s*(\d{1,3})\s*(hours?|hrs?|h|minutes?|mins?|m)\b/g;
   var RE_NOW = /\bnow\b/g;
 
+  /* ── A TIME CAN BE ANOTHER BLOCK ──
+     "walk after the gym" is how somebody says when a thing happens
+     when the clock is not the point: it is AFTER the other thing, and
+     the other thing already has a time on the day. The digits were
+     never the fact — the ORDER was.
+
+     Up to three words, trimmed at the first stop word, because a lazy
+     capture with a lookahead for every possible tail is a regex
+     nobody can read and "after the gym for 30 minutes" is the case it
+     gets wrong: the phrase is "gym" and "for 30 minutes" is the
+     length. Trimming a captured list is the same rule written where
+     it can be seen. */
+  var RE_REL = /\b(after|before)\s+(?:the\s+|my\s+|a\s+)?([a-z]+(?:\s+[a-z]+){0,2})\b/g;
+  var REL_STOP = /^(for|on|at|and|to|in|then|from|until|till|thru|with|every|next|this)$/;
+  /* A bare length with no clock in front of it, which is what an
+     anchored block takes: RE_AT_FOR needs a time before the "for". */
+  var RE_FOR = /\bfor\s+(\d{1,3})\s*(hours?|hrs?|h|minutes?|mins?|m)\b/g;
+
   function scHM(tok) {
     tok = String(tok).trim();
     var h, m = 0, c = /^(\d{1,2})[:.](\d{2})$/.exec(tok);
@@ -492,6 +510,67 @@
     while (w.length && FILLER[w[0].toLowerCase().replace(/[^a-z]/g, '')]) w.shift();
     while (w.length && FILLER[w[w.length - 1].toLowerCase().replace(/[^a-z]/g, '')]) w.pop();
     return w.join(' ');
+  }
+
+  /* ── WHICH BLOCK A PHRASE MEANS ──
+     Two passes, and the second is the one that earns its keep. The
+     NAME first, both directions — "after training" has to find a block
+     called Train, and "after work" a block called Work — and then the
+     KEYWORD TABLE, which is what makes "after the gym" find Train
+     without anybody writing gym=Train down a second time. Two names
+     that resolve to one glyph are the same kind of thing, and that
+     table is already the app's answer to what kind of thing a block
+     is.
+
+     The reverse containment is floored at three characters: a block
+     somebody named "PT" would otherwise match every phrase with those
+     two letters anywhere in it.
+
+     FIRST in the day's own order, never nearest or last. "After the
+     gym" on a day with two gym blocks is ambiguous however it is
+     resolved, and the one thing a guess must be is predictable. */
+  function scRelBlock(phrase, day) {
+    var q = String(phrase || '').toLowerCase().trim();
+    if (q.length < 2) return null;
+    var on = state.items.filter(function (it) { return it.d === day; })
+      .sort(function (a, b) { return a.s - b.s; });
+    var hit = null;
+    on.forEach(function (it) {
+      if (hit) return;
+      var n = String(it.n || '').toLowerCase();
+      if (!n) return;
+      if (n.indexOf(q) >= 0 || (n.length >= 3 && q.indexOf(n) >= 0)) hit = it;
+    });
+    if (!hit) {
+      var g = scIconFor(q);
+      if (g !== 'block') {
+        on.forEach(function (it) {
+          if (!hit && scIconFor(it.n) === g) hit = it;
+        });
+      }
+    }
+    return hit;
+  }
+
+  /* ── AND WHERE THAT PUTS THE NEW ONE ──
+     After a block starts where it ends; before one ends where it
+     starts. Clamped to the day rather than rolled over, which is the
+     rule "now" already keeps: a block from 23:40 to 00:40 is on two
+     days and this app's whole record is one day per row.
+
+     Returns null rather than a span when the anchor is not on that
+     day, so the sentence falls back to "still needs what time" — a
+     guess with nothing behind it is worse than the question. */
+  function scRelSpan(rel, ref, len, day) {
+    var b = scRelBlock(ref, day);
+    if (!b) return null;
+    var n = len > 0 ? len : 60;
+    if (rel === 'before') {
+      if (b.s <= 0) return null;
+      return { s: Math.max(0, b.s - n), e: b.s };
+    }
+    if (b.e >= 1440) return null;
+    return { s: b.e, e: Math.min(1440, b.e + n) };
   }
 
   function scParseOne(text) {
@@ -617,11 +696,122 @@
     if (!span && nowSpan) span = nowSpan;
 
     if (span) { out.s = span.s; out.e = span.e; }
-    /* "now" carries its own day. Saying it on a Tuesday and being asked
-       which day is the app not having listened — and the day words are
-       struck out long before this runs, so it can only be filled in
-       here. */
+
+    /* ── AFTER THE GYM ──
+       "walk after the gym" is how somebody says when a thing happens
+       when the clock is not the point: it is AFTER the other thing,
+       and the other thing already has a time on the day. The digits
+       were never the fact — the ORDER was.
+
+       STRUCK OUT ONLY IF IT RESOLVES, which was got wrong first. Eaten
+       unconditionally, "lunch after the meeting" on a day with no
+       meeting came back as a bare "Lunch" needing a time — the words
+       gone and nothing to show for them. A phrase the app cannot place
+       stays in the name, which is exactly where it was before this
+       existed, so a sentence it does not understand costs nothing.
+
+       SCANNED WHATEVER ELSE THE SENTENCE CARRIES, and used for the
+       TIME only if nothing else set one — which is "now"'s own rule
+       and it is here for "now"'s own reason. An explicit clock wins,
+       because somebody who says both is correcting themselves and the
+       digits are the correction; but "walk after the gym at 4" still
+       has to come out as a Walk at four rather than a block called
+       "Walk After the Gym", so the phrase leaves the name either
+       way. */
+    var relKind = '', relRef = '', relName = '', relLen = 0, relSpan = null;
+    if (out.kind === 'add') {
+      /* The lookup needs a day before the day default below has run,
+         and today is what that default is going to say. */
+      var probeDay = out.days.length ? out.days[0] : new Date().getDay();
+      RE_REL.lastIndex = 0;
+      while ((m = RE_REL.exec(low))) {
+        var head = m.index;
+        var at = head + m[0].indexOf(m[2]);
+        if (!free(head, at)) continue;
+        /* ── TRIMMED AT A WORD ALREADY STRUCK OUT ──
+           The day words are marked long before this runs, so "after
+           work tomorrow" and "after the gym on monday" both put a used
+           span inside the capture. Checking `free` over the WHOLE
+           match rejected them outright and the anchor never fired —
+           the phrase is "work" and "gym", and the rest was never part
+           of it. */
+        var keep = [], ends = [], wre = /[a-z]+/g, wm;
+        while ((wm = wre.exec(m[2]))) {
+          if (REL_STOP.test(wm[0])) break;
+          var a0 = at + wm.index, b0 = a0 + wm[0].length;
+          if (!free(a0, b0)) break;
+          keep.push(wm[0]);
+          ends.push(b0);
+        }
+        /* Longest first, then shorter: "after the gym at the park"
+           trims at `at`, but a two-word block name has to get its
+           chance before the one-word fallback. */
+        while (keep.length) {
+          var ref = keep.join(' ');
+          var rs = scRelSpan(m[1], ref, 0, probeDay);
+          if (rs) {
+            relKind = m[1];
+            relRef = ref;
+            /* The BLOCK's name rather than the phrase, because the
+               preview is a readout of what was understood: "after Gym"
+               only repeats what you typed, where "after Train" says
+               which block it found. */
+            relName = (scRelBlock(ref, probeDay) || {}).n || ref;
+            relSpan = rs;
+            mark(head, ends[keep.length - 1]);
+            break;
+          }
+          keep.pop();
+          ends.pop();
+        }
+        if (relKind) break;
+      }
+      /* The length, and only once there is something for it to be the
+         length OF. RE_AT_FOR needs a clock in front of its "for", so a
+         bare one has nowhere else to be read. */
+      if (relKind) {
+        RE_FOR.lastIndex = 0;
+        while ((m = RE_FOR.exec(low))) {
+          if (!free(m.index, m.index + m[0].length)) continue;
+          var fl = /^(h|hr|hour)/.test(m[2]) ? +m[1] * 60 : +m[1];
+          if (!(fl > 0 && fl <= 480)) continue;
+          var rl = scRelSpan(relKind, relRef, fl, probeDay);
+          if (!rl) break;
+          relLen = fl;
+          relSpan = rl;
+          mark(m.index, m.index + m[0].length);
+          break;
+        }
+      }
+    }
+
+    /* ── AND A SENTENCE WITH NO DAY ON IT MEANS TODAY ──
+       "train from 7:30 to 8:30" was answered with *still needs which
+       day*, which is the app asking about the only day it could
+       sensibly have meant. Every other reading — next Tuesday, the
+       whole week — is a thing you would have said.
+
+       "now" already did this for itself and the reason generalises: a
+       time with no day is a time today. ADD only, because a delete
+       finds its block by name and a `clear` with no day is
+       destructive — a guess there is a day of somebody's week gone on
+       an assumption. */
     if (nowSeen && !out.days.length) out.days = [new Date().getDay()];
+    if (out.kind === 'add' && !out.days.length && (span || relSpan)) {
+      out.days = [new Date().getDay()];
+    }
+
+    /* Resolved against the FIRST day for the preview; scApply resolves
+       it again per day, because "walk after training" on Monday and
+       Wednesday is two different clock times where Train moves. */
+    if (relSpan && !span) {
+      out.s = relSpan.s;
+      out.e = relSpan.e;
+      out.rel = relKind;
+      out.ref = relRef;
+      out.refName = relName;
+      out.len = relLen || 60;
+    }
 
     /* ── where ── */
     for (var r = 0; r < ROOM_RES.length && !out.room; r++) {
@@ -699,7 +889,25 @@
     list.forEach(function (p) {
       if (p.kind === 'add') {
         p.days.forEach(function (d) {
-          state.items.push({ id: scId(), d: d, s: p.s, e: p.e, r: p.room, n: p.name });
+          var s0 = p.s, e0 = p.e;
+          /* ── RESOLVED AGAIN, PER DAY ──
+             The parse fixed a span off the FIRST day so the preview
+             has something to print. "Walk after training on Monday
+             and Wednesday" is two different clock times where Train
+             moves between them, and one span for all of them would be
+             Monday's answer filed under both — silently, and
+             self-consistently, which is the shape of every bug this
+             file has had to write down twice.
+
+             A day the anchor is not on keeps the preview's span
+             rather than being skipped: that is what was shown and
+             agreed to, and dropping the block would be the app
+             refusing after the fact. */
+          if (p.rel) {
+            var r = scRelSpan(p.rel, p.ref, p.len, d);
+            if (r) { s0 = r.s; e0 = r.e; }
+          }
+          state.items.push({ id: scId(), d: d, s: s0, e: e0, r: p.room, n: p.name });
           added++;
         });
       } else {
@@ -6281,10 +6489,17 @@
       acts.appendChild(go);
 
       var hint = scEl('p', 'hint');
+      /* The second example is the one nobody guesses. A day is assumed
+         when none is given, and a block can be placed against another
+         block rather than against the clock — neither is discoverable
+         by pressing around, so the one line that is already here says
+         it. */
+      var EG = '<em>“Walk weekdays 7:45 to 8:30”</em> or '
+        + '<em>“Walk after the gym for 30 minutes”</em>';
       hint.innerHTML = SR
-        ? 'Or type it. <em>“Walk weekdays 7:45 to 8:30”</em>'
-        : 'This browser has no speech button — use the microphone key on your keyboard, ' +
-          'or type it. <em>“Walk weekdays 7:45 to 8:30”</em>';
+        ? 'Or type it. ' + EG
+        : 'This browser has no speech button — use the microphone key on your keyboard, '
+          + 'or type it. ' + EG;
 
       body.appendChild(heard);
 
@@ -6336,7 +6551,23 @@
             ok++;
             card.appendChild(scEl('span', 'p-day', p.days.map(function (d) { return ABBR[d]; }).join(' ')));
             card.appendChild(scEl('span', 'p-name', p.name));
-            card.appendChild(scEl('span', 'p-meta', scRangeLong(p.s, p.e) + (p.room ? '  ·  ' + p.room : '')));
+            /* ── ONE CLOCK CANNOT SPEAK FOR SEVERAL DAYS ──
+               An anchored block is resolved per day at apply time, so
+               a span printed here is the FIRST day's answer. On one
+               day that is exact and worth showing; on several it is a
+               statement about Monday drawn under a card that says MON
+               WED, and the app would be showing a time Wednesday is
+               not going to get. Measured: Train at 6:30 on Monday and
+               18:00 on Wednesday puts Stretch at 7:30 and 19:00, under
+               a preview reading 07:30 for both.
+
+               So it says what it actually knows — after which block,
+               and for how long. */
+            var when = (p.rel && p.days.length > 1)
+              ? (p.rel === 'before' ? 'before ' : 'after ') + (p.refName || scTitleCase(p.ref))
+                + '  ·  ' + scDurShort(p.e - p.s)
+              : scRangeLong(p.s, p.e);
+            card.appendChild(scEl('span', 'p-meta', when + (p.room ? '  ·  ' + p.room : '')));
           } else {
             var hits = scMatches(p);
             ok += hits.length ? 1 : 0;
@@ -6855,9 +7086,12 @@
      minute back on the next boot and WROTE THEM. The fix had a life of
      exactly one page load and nothing said so.
 
-     `every`, not `[0]`: a session can be more than one thing, so Rest
-     beside Abs is a real session that happens to include a card called
-     Rest, and it is asked both questions like any other. */
+     `every` RATHER THAN `[0]`, and that is history now: the picker
+     made Rest exclusive, so a live record can only be rest alone. It
+     stays `every` because records written by the build that allowed
+     Rest beside another card are on disk with up to ninety days to
+     live, and the one thing this must not do is read one of those as
+     a real session and fill its blanks back in. */
   function scRestOnly(k) {
     var ws = scWorkoutsOf(k);
     return !!ws.length && ws.every(function (w) { return w.rest; });
@@ -8303,7 +8537,32 @@
              the cost — and it buys a screen where you can see what you
              are about to file. */
           var i = sel.indexOf(w.key);
-          if (i >= 0) sel.splice(i, 1); else sel.push(w.key);
+          if (i >= 0) { sel.splice(i, 1); draw(); return; }
+          /* ── REST IS EXCLUSIVE, AND THAT IS WHAT "REST IS JUST REST"
+                 MEANS ──
+             It shipped for a day as one card among the rest, on the
+             reading that a session can be more than one thing — so
+             Rest beside Core was "a real session that happens to
+             include a card called Rest", and was asked how long it
+             took and how hard it was like any other.
+
+             That is not a session. You cannot half-rest: a day with
+             core work on it is a Core day, and Rest sitting next to it
+             is the record saying you did nothing AND did something.
+             So picking Rest clears the rest and picking anything else
+             clears Rest, which makes the combination IMPOSSIBLE rather
+             than handled — and the two figures then have no path to a
+             rest day at all, rather than one guarded in three places.
+
+             `scRestOnly` stays: it is what the REPAIR reads, and a
+             record written by the build that allowed the pair is still
+             on disk with up to ninety days to live. */
+          if (w.rest) sel.length = 0;
+          else sel = sel.filter(function (k) {
+            var x = scWorkout(k);
+            return !(x && x.rest);
+          });
+          sel.push(w.key);
           draw();
         };
       }
