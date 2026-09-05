@@ -4389,9 +4389,17 @@ body {
   background: color-mix(in srgb, var(--tg) 22%, transparent);
   color: color-mix(in srgb, var(--tg) 72%, var(--ink));
 }
+/* ── THE NEUTRAL TAG, AND IT HAD NEVER BEEN DRAWN ──
+   The fallback for a workout whose colour is not one of the seven
+   solved pairs. Every workout's colour WAS one of them until Rest,
+   so this rule shipped as dead code and was measured for the first
+   time the day something reached it: at --spent it came to 3.33:1 on
+   the light face. --spent is the LIGHTER token and 9.5px is the
+   smallest type on the row, which is this file's own mistake for the
+   third time. --dim, measured composited on both faces. */
 .row .wo.is-off {
   background: color-mix(in srgb, var(--ink) 9%, transparent);
-  color: var(--spent);
+  color: var(--dim);
 }
 
 /* A row: the way back, the answer, and the undo. Stacked they were
@@ -5459,6 +5467,71 @@ body {
   border: 3px solid var(--paper);
   box-shadow: var(--card-shadow);
 }
+
+/* ── THE MARKS ──
+   A drag is a gesture with no landmarks in it: to reach ten thousand
+   steps on a track that runs to fifty you aim at a fifth of the way
+   along and hope. These are the figures you actually log, made
+   pressable — the common answer is one press and the drag is for
+   everything else.
+
+   TWO PARTS, AND THE SPLIT IS A MEASUREMENT RATHER THAN A TASTE.
+   Putting the labels at their true positions along the track is the
+   obvious drawing and it does not fit: 5,000 through 20,000 on a
+   50,000 track land at 10, 20, 30 and 40 percent, which at the sheet's
+   358px is 36px apart — and each label is about 49px wide. They would
+   sit on top of one another at exactly the ceiling the user gave.
+
+   So the TICK is on the track at its true place, where two pixels can
+   never collide, and the LABEL is in an even row underneath where it
+   has room to be read and pressed. The tick says where on the track
+   the figure is; the chip is the thing you hit. */
+.nm-ticks {
+  position: relative;
+  height: 0;
+  pointer-events: none;      /* the drag underneath is the point */
+}
+.nm-tick {
+  position: absolute;
+  bottom: 15px;              /* the track is 14px and centred in 44 */
+  width: 2px;
+  height: 14px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--paper);
+  opacity: .55;
+}
+
+.nm-marks {
+  display: flex;
+  gap: 6px;
+  margin: 8px 0 0;
+}
+.nm-mark {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--hair);
+  background: var(--card);
+  color: var(--dim);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  padding: 9px 4px;
+  /* ON THE SCALE. 9 is the "stray 9px" the radius check's own comment
+     names, and nothing caught it: that check reads a hardcoded list
+     of eight selectors and this element is not on it, which is the
+     trap this repo has now recorded three times. */
+  border-radius: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  cursor: pointer;
+}
+.nm-mark.is-at { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.nm-mark:active { opacity: .82; }
+.nm-mark:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
 .nm-ends {
   display: flex; justify-content: space-between;

@@ -2743,15 +2743,15 @@
        spend most of its width on numbers nobody has, and put every
        real value in the first inch of it. */
     { id: 'p', n: 'Steps', s: 'Log the number',        k: 'num', unit: '', dp: 0,
-      max: 50000, step: 100 },
+      max: 50000, step: 100, marks: [5000, 10000, 15000, 20000] },
     /* `neu` — a number you do NOT want more of. Every other figure on
        this screen gets called "your best"; doing that to a calorie count
        calls your biggest day a win, which is the opposite of what the
        number is for. Same figure, named without the praise. */
     { id: 'f', n: 'Fuel',  s: 'Log what you ate',      k: 'num', unit: ' kcal', dp: 0, neu: 1,
-      max: 10000, step: 10 },
+      max: 10000, step: 10, marks: [500, 1500, 2500, 3500] },
     { id: 'w', n: 'Water', s: 'Log what you drank',    k: 'num', unit: ' L', dp: 1,
-      max: 5, step: 0.1 },
+      max: 5, step: 0.1, marks: [0.5, 1, 2, 3] },
     /* ── THE SIXTH, AND THE ONE YOU DID NOT DO ──
        Every other item here is something you went and did; this is what
        happened while you were not deciding anything, and it is the
@@ -2761,7 +2761,7 @@
        not better; a long night is a good night. Six rows fit a 390x844
        phone with 37px to spare, measured before it was written. */
     { id: 's', n: 'Sleep', s: 'Hours last night',      k: 'num', unit: ' h', dp: 1,
-      max: 12, step: 0.25 }
+      max: 12, step: 0.25, marks: [6, 7, 8, 9] }
   ];
 
   /* Two records, not one, and they are different KINDS of thing: which
@@ -4028,7 +4028,7 @@
      nought to nought is not one — and it moves the first time you log
      anything. */
   function scNumRange(item) {
-    if (item.max) return { max: item.max, step: item.step || 1 };
+    if (item.max) return { max: item.max, step: item.step || 1, marks: item.marks || [] };
     var best = 0;
     for (var d in tickLog) {
       if (!Object.prototype.hasOwnProperty.call(tickLog, d)) continue;
@@ -4036,7 +4036,14 @@
       if (v > best) best = v;
     }
     var max = best ? Math.ceil((best * 1.5) / 10) * 10 : 100;
-    return { max: max, step: Math.max(1, Math.round(max / 100)) };
+    /* ── AND A HABIT OF YOURS GETS ITS MARKS OFF ITS OWN CEILING ──
+       Quarters of it, which is the only figure available: the six
+       carry marks somebody chose because somebody knows what ten
+       thousand steps is, and nothing here knows what a good number of
+       pages is. */
+    var q = Math.round(max / 4 / 5) * 5 || 1;
+    return { max: max, step: Math.max(1, Math.round(max / 100)),
+      marks: [q, q * 2, q * 3] };
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -4099,6 +4106,46 @@
       dial.setAttribute('aria-label', 'How much to add to ' + item.n);
       body.appendChild(dial);
 
+      /* ── THE FIGURES YOU ACTUALLY LOG, AS MARKS ──
+         A drag is a gesture with no landmarks in it: to reach ten
+         thousand steps on a track that runs to fifty you aim at a
+         fifth of the way along and hope. These are the ends of the
+         track's own scale written out and made pressable, so the
+         common answer is one press and the drag is for everything
+         else. */
+      var live = (R.marks || []).filter(function (m) { return m > 0 && m <= R.max; });
+      /* The ticks first, over the track, so the row below has something
+         to point at. Two pixels each, so they cannot collide however
+         close the figures are. */
+      var ticks = scEl('div', 'nm-ticks');
+      var markBtns = [];
+      live.forEach(function (m) {
+        var t = scEl('span', 'nm-tick');
+        t.style.left = ((m / R.max) * 100) + '%';
+        ticks.appendChild(t);
+      });
+      if (live.length) body.appendChild(ticks);
+
+      var marks = scEl('div', 'nm-marks');
+      live.forEach(function (m) {
+        var mb = scEl('button', 'nm-mark', scPatMid(item, m));
+        mb.type = 'button';
+        mb.dataset.at = m;
+        /* THEY SET, THEY DO NOT ADD, and that is the one thing worth
+           arguing over: the dial adds, so a mark that added ten
+           thousand would give a different total every time you pressed
+           the same one. A mark is a PLACE ON THE TRACK — pressing it
+           puts the dial there, and Add still does the adding. */
+        mb.addEventListener('click', function () {
+          dial.value = m;
+          add = +dial.value;
+          paint();
+        });
+        markBtns.push(mb);
+        marks.appendChild(mb);
+      });
+      if (live.length) body.appendChild(marks);
+
       var ends = scEl('div', 'nm-ends');
       ends.appendChild(scEl('span', null, '0'));
       ends.appendChild(scEl('span', null, scPatMid(item, R.max)));
@@ -4146,6 +4193,11 @@
           + scPatMid(item, +now.toFixed(dp)) + ' today');
         go.disabled = !add;
         go.textContent = add ? 'Add ' + scPatMid(item, +add.toFixed(dp)) : 'Add';
+        /* The one you are standing on is filled, so a mark says where
+           the dial IS as well as where it could go. */
+        markBtns.forEach(function (mb) {
+          mb.classList.toggle('is-at', Math.abs(+mb.dataset.at - add) < 1e-9);
+        });
         if (!add) {
           sub.textContent = have
             ? scPatMid(item, have) + ' today · drag to add more'
@@ -6624,7 +6676,21 @@
       { k: 'core',    sw: 'd', n: 'Core',         t: 20, c: '#17a06b',
         d: 'Abs, obliques and lower back.' },
       { k: 'cold',    sw: 'b', n: 'Cold',         t: 10, c: '#2f7fe6',
-        d: 'Plunge or the end of a shower.' }
+        d: 'Plunge or the end of a shower.' },
+      /* ── AND THE DAY YOU DID NOTHING, ON PURPOSE ──
+         In Recovery rather than as a fifth kind, and that is the
+         honest home: recovery is the category and a full rest day is
+         the most of it. A fifth segment would also not fit — four
+         kinds are a closed set on one track at 390px and "All
+         exercises" is already the widest word on it.
+
+         `rest` is the one card that asks NEITHER of the two questions
+         under the deck. How hard was it and how long did it take are
+         questions about a session, and this is the absence of one:
+         a rest day with an effort on it is the app inventing a fact,
+         and one with fifty minutes against it is worse. */
+      { k: 'rest',    sw: 'e', n: 'Rest',         t: 0,  c: '#5F6672',
+        rest: 1, d: 'Nothing, and that is the session.' }
     ] }
   ];
 
@@ -6681,8 +6747,11 @@
     grp.of.forEach(function (w) {
       w.gk = grp.k;
       w.key = grp.k + '.' + w.k;
-      w.lab = 'Est. time';
-      w.val = w.t + ' min';
+      /* A card built to carry a figure has to say something where the
+         figure would be. "0 min" is a length somebody could have
+         trained for and did not; "Rest day" is what the card is. */
+      w.lab = w.rest ? 'Today' : 'Est. time';
+      w.val = w.rest ? 'Rest day' : (w.t + ' min');
       WORKOUTS.push(w);
     });
   });
@@ -6747,6 +6816,25 @@
   function scWorkName(k) {
     return scWorkoutsOf(k).map(function (w) { return w.n; }).join(' + ');
   }
+  /* ── A DAY THAT IS NOTHING BUT REST HAS NEITHER FIGURE ──
+     How hard was it and how long did it take are questions about a
+     session, so a rest day is asked neither and stores neither. THREE
+     places need the answer — the sheet decides whether to draw the two
+     rows, the commit decides whether to file the two figures, and the
+     repair below decides whether a missing one is damage or the point
+     — and the first version of this asked it three times. The repair
+     is what made that expensive: it read an empty effort as an unknown
+     one and a zero length as an old record, so it put "Light" and one
+     minute back on the next boot and WROTE THEM. The fix had a life of
+     exactly one page load and nothing said so.
+
+     `every`, not `[0]`: a session can be more than one thing, so Rest
+     beside Abs is a real session that happens to include a card called
+     Rest, and it is asked both questions like any other. */
+  function scRestOnly(k) {
+    var ws = scWorkoutsOf(k);
+    return !!ws.length && ws.every(function (w) { return w.rest; });
+  }
 
   function scTrainLoad() {
     trainLog = scReadJSON(TRAIN_KEY, {});
@@ -6784,6 +6872,10 @@
            word moved; the record did not. */
         if (r.e === 'Easy') r.e = 'Light';
         var est = scTrainMins(ws);
+        /* A rest day's two blanks are the record, not damage — see
+           scRestOnly. Repairing them is how the fix that stops them
+           being stored lasts exactly one boot. */
+        if (scRestOnly(r.k)) { r.e = ''; r.m = 0; rec[id] = r; return; }
         if (EFFORTS.indexOf(r.e) < 0) r.e = scEffort(est);
         /* Every record written before the minutes existed has none, and
            the card's own estimate is the honest stand-in: it is what
@@ -8191,7 +8283,17 @@
 
       function commit() {
         if (!sel.length) return;
-        scTrainSet(day, item.id, sel.join('+'), ef, mins);
+        /* ── AND A REST DAY CARRIES NEITHER FIGURE ──
+           Nothing asked for them, so nothing may be stored: an effort
+           of "Light" on a day you did not train is the app answering a
+           question on your behalf, and the Workouts panel would then
+           average it into a figure you never gave. Worked out here
+           rather than read off the guard that hides the two rows,
+           because that one is about what is DRAWN and this is about
+           what is FILED. */
+        var onlyRest = scRestOnly(sel.join('+'));
+        scTrainSet(day, item.id, sel.join('+'),
+          onlyRest ? '' : ef, onlyRest ? 0 : mins);
         scClose();
         if (view === 'tally') scPaintTally(); else scRender();
         scToast(scWorkName(sel.join('+')) + ' logged', false);
@@ -8360,9 +8462,19 @@
         }
         deck.appendChild(scTrainBack(w, 'b2'));
         deck.appendChild(scTrainBack(w, 'b1'));
+        /* ── A REST DAY IS ASKED NOTHING, AND SHOWS NOTHING ──
+           The card's Effort figure is a READOUT of the row below it,
+           so on a day with no row it is a figure with nothing behind
+           it: the head read "Today / Rest day" and "Effort / Light" in
+           one breath, which is the card contradicting itself. Worked
+           out here rather than inside scTrainCard, because it is the
+           same question the row and the commit both ask and answering
+           it in three places is three chances to disagree — which is
+           why all three go through scRestOnly. */
+        var resting = scRestOnly(sel.join('+'));
         deck.appendChild(scTrainCard(w, 'is-front'
           + (into && sel.indexOf(w.key) >= 0 ? ' is-picked' : ''),
-          press(w), into ? ef : '', saidMin ? mins : 0));
+          press(w), (into && !resting) ? ef : '', saidMin ? mins : 0));
 
         /* ── HOW HARD IT WAS IS A ROW, NOT A FIELD ON THE CARD ──
            The card is a <button> and a control inside a button is
@@ -8374,7 +8486,14 @@
            Drawn only at step two: a group is four sessions running
            from ten minutes to seventy-five and has no one effort. */
         howHard.textContent = '';
-        if (into) {
+        /* ── A REST DAY IS ASKED NOTHING ──
+           How hard was it and how long did it take are both questions
+           about a session. A rest day with an effort against it is the
+           app inventing a fact about your day, and one carrying fifty
+           minutes is worse — so when the only thing picked is Rest,
+           neither row is drawn at all. Not disabled: a control that
+           exists and refuses is worse than one that is not there. */
+        if (into && !resting) {
           var lab = scEl('span', 'wc-eff-l', 'How hard was it?');
           lab.id = 'scEffLab';
           howHard.appendChild(lab);
@@ -8643,8 +8762,16 @@
     var ws = scWorkoutsOf(sig);
     var col = ws[0] ? ws[0].c : '#888';
     var grp = ws[0] ? scTrainGroup(ws[0].key.split('.')[0]) : null;
-    var mins = Math.round(hits.reduce(function (n, h) { return n + h.m; }, 0)
-      / hits.length);
+    /* ── A REST PANEL HAS NO TIME, AND THAT IS NOT A ZERO ──
+       Every other figure here is an average over the sessions of one
+       kind, and a rest day HAS no length: drawn as the rest of them it
+       reads "Avg 0 min", which is a duration nobody's day had rather
+       than the absence of one. The effort pill already dropped itself
+       on this record, because scWorkEffort skips a word it does not
+       know — this is the same claim in the other unit. */
+    var mins = scRestOnly(sig) ? 0
+      : Math.round(hits.reduce(function (n, h) { return n + h.m; }, 0)
+        / hits.length);
     var p = scEl('button', 'wo-p' + (open ? ' is-open' : ''));
     p.type = 'button';
     p.dataset.workout = sig;
@@ -8670,7 +8797,7 @@
     var mine = month.filter(function (h) { return scWorkSig(h) === sig; }).length;
     var share = month.length && mine ? Math.round(mine / month.length * 100) : 0;
     var dow = scWorkDow(hits);
-    figs.appendChild(scEl('span', 'pill', 'Avg ' + mins + ' min'));
+    if (mins) figs.appendChild(scEl('span', 'pill', 'Avg ' + mins + ' min'));
     if (eff) figs.appendChild(scEl('span', 'pill', eff));
     if (share) figs.appendChild(scEl('span', 'pill', share + '% this month'));
     figs.appendChild(scEl('span', 'pill', dow || scWorkAgo(hits[0].day)));
@@ -8679,7 +8806,7 @@
     p.setAttribute('aria-label', name + ', ' + hits.length
       + (hits.length === 1 ? ' session' : ' sessions')
       + (dow ? ', usually ' + dow : ', last ' + scWorkAgo(hits[0].day))
-      + '. ' + mins + ' minutes on average'
+      + (mins ? '. ' + mins + ' minutes on average' : '')
       + (eff ? ', usually ' + eff.toLowerCase() : '')
       + (share ? ', ' + share + ' per cent of this month\'s sessions' : '') + '. '
       + (open ? 'Showing its three months.' : 'Show its three months.'));

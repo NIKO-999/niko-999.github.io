@@ -176,8 +176,26 @@ const alive = (url) => new Promise((res) => {
     if (ill) bad++;
     rows.push({ name, line, ill, secs, out });
     console.log(`  ${ill ? '\x1b[31m✗\x1b[0m' : '\x1b[32m✓\x1b[0m'} ${name.padEnd(11)} ${line.padEnd(24)} ${secs}s`);
-    if (ill) console.log(out.split('\n').filter(l => /FAIL|✗|Error|error/.test(l)).slice(0, 12)
-      .map(l => '      ' + l).join('\n'));
+    /* ── A FILE THAT CRASHED NEEDS ITS TAIL, NOT A FILTER ──
+       Grepping for FAIL / Error is right for a file that RAN and
+       reported failures. It is wrong for one that died: a Playwright
+       error is a multi-line object and the only line in it matching
+       /Error/ is `name: 'Error'` — the message, the selector and the
+       stack all fall through the sieve. That has now cost two
+       seven-minute round trips, each ending in a re-run of the file
+       by hand against a server started by hand, which is exactly the
+       thing this runner exists to remove.
+
+       `no summary` is the tell: the file produced no count, so there
+       are no failures to filter down to and the last thing it said
+       is the whole of what there is. */
+    if (ill && !m && !bare && !faults) {
+      console.log(out.trimEnd().split('\n').slice(-24)
+        .map(l => '      ' + l).join('\n'));
+    } else if (ill) {
+      console.log(out.split('\n').filter(l => /FAIL|✗|Error|error/.test(l)).slice(0, 12)
+        .map(l => '      ' + l).join('\n'));
+    }
   }
 
   stop();

@@ -7026,7 +7026,11 @@ const SAID = [
       }
     }
     ok(`every workout is stored under its own key (${keys.length} of them)`,
-      keys.length === 18 && new Set(keys).size === 18
+      /* NINETEEN since Rest joined Recovery. Written down rather than
+         counted off the app: a count read from the thing it is about
+         is vacuously true, and this one bit correctly on the day the
+         card went in — which is the whole of what it is for. */
+      keys.length === 19 && new Set(keys).size === 19
       && keys.every((k) => /^(bro|ppl|run|rec)\.[a-z]+$/.test(k))
       && keys.filter((k) => /\.legs$/.test(k)).length === 2, keys);
 
@@ -7206,7 +7210,7 @@ const SAID = [
         wide: box.width, tall: box.height };
     });
     ok(`every card carries a swoop, and there are six of them (${new Set(swoops).size})`,
-      swoops.length === 18 && swoops.every((k) => /^[a-f]$/.test(k))
+      swoops.length === 19 && swoops.every((k) => /^[a-f]$/.test(k))
       && new Set(swoops).size === 6, swoops);
     ok('...drawn past both edges, filling the card, and not stroke-scaled',
       /^M-6 |^M106 /.test(drawn.d) && /106 |-6[ Z]/.test(drawn.d)
@@ -11156,8 +11160,379 @@ const SAID = [
       grown && grown.max === 180, grown);
     await esc();
 
+    /* ── AND THE FIGURES YOU ACTUALLY REACH FOR ARE ONE PRESS ──
+       Ten thousand steps is a drag across most of a track, done by
+       eye, and landing on 9,800 instead is the same decision fatigue
+       the dial was built to remove. So the four figures a person
+       actually aims at are chips.
+
+       ASSERTED PER ITEM, because "there are marks" passes on one set
+       shared by all four — and 5,000 steps of water is not a figure.
+       Held to the exact four, the way the bounds above are. */
+    const marks = {};
+    for (const id of ['p', 'f', 'w', 's']) {
+      await open(id);
+      marks[id] = await dp.evaluate(() => {
+        const m = [...document.querySelectorAll('.nm-mark')];
+        const t = [...document.querySelectorAll('.nm-tick')];
+        const d = document.querySelector('.nm-dial').getBoundingClientRect();
+        const boxes = m.map((e) => e.getBoundingClientRect());
+        let overlap = false;
+        for (let i = 1; i < boxes.length; i++) {
+          if (boxes[i].left < boxes[i - 1].right - 0.5) overlap = true;
+        }
+        return {
+          txt: m.map((e) => e.textContent),
+          ticks: t.length,
+          /* On the TRACK, not merely present: a tick is a statement
+             about where a figure sits on the dial, and one drawn
+             outside its ends is pointing at nothing. */
+          onTrack: t.length > 0 && t.every((e) => {
+            const b = e.getBoundingClientRect();
+            return b.left >= d.left - 2 && b.right <= d.right + 2;
+          }),
+          overlap,
+        };
+      });
+      await esc();
+    }
+    ok('the figures you reach for are one press, on every number',
+      ['p', 'f', 'w', 's'].every((k) => marks[k].ticks === 4), marks);
+    ok('...and they are that number\u2019s own figures, not one set for all four',
+      marks.p.txt.join('|') === '5,000|10,000|15,000|20,000'
+      && marks.f.txt.join('|') === '500 kcal|1,500 kcal|2,500 kcal|3,500 kcal'
+      && marks.w.txt.join('|') === '0.5 L|1.0 L|2.0 L|3.0 L',
+      { steps: marks.p.txt, fuel: marks.f.txt, water: marks.w.txt });
+    ok('...each marked where it actually falls on the track',
+      ['p', 'f', 'w', 's'].every((k) => marks[k].onTrack), marks);
+    /* ── THE LABELS ARE AN EVEN ROW, THE TICKS ARE NOT ──
+       Drawn at their true positions the four labels are 36px apart
+       and about 49px wide, so they sit on top of one another —
+       measured, which is why the row below the track is evenly
+       spaced and the marks ON the track are not. */
+    ok('...and no two labels sit on top of each other',
+      ['p', 'f', 'w', 's'].every((k) => !marks[k].overlap), marks);
+
+    /* ── A MARK SETS, IT DOES NOT ADD ──
+       The dial adds to the day, and that is right for a drag. A chip
+       saying 10,000 has to MEAN ten thousand: pressing it on a day
+       already carrying 2,000 and getting 12,000 is a control that
+       lies about its own label. So it moves the dial to the figure
+       and the foot then says what that will add. */
+    await open('p');
+    await drag(3000);
+    await dp.evaluate(() => [...document.querySelectorAll('.nm-mark')]
+      .find((e) => e.textContent === '10,000').click());
+    await dp.waitForTimeout(280);
+    const set = await dp.evaluate(() => ({
+      val: +document.querySelector('.nm-dial').value,
+      big: document.querySelector('.nm-read b').textContent,
+      go: document.querySelector('.acts .btn.go').textContent,
+      at: document.querySelectorAll('.nm-mark.is-at').length,
+    }));
+    ok('pressing a figure sets the dial to it rather than adding it on',
+      set.val === 10000 && set.big === '10,000' && /Add 10,000/.test(set.go), set);
+    ok('...and exactly the one you are on reads as chosen',
+      set.at === 1, set);
+    await esc();
+
     ok('nothing threw through any of it', derrs.length === 0, derrs);
     await dctx.close();
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     A REST DAY IS ASKED NOTHING
+
+     How hard was it and how long did it take are questions about a
+     session. A day you deliberately did not train is a real answer to
+     "what did you train" and it has neither figure — so the two rows
+     are not drawn, the card's own readout of them is not drawn, and
+     neither figure is stored.
+
+     ITS OWN CONTEXT: it walks the workout deck and files records.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    console.log('\n\u2500\u2500 a rest day is asked nothing \u2500\u2500');
+    const rctx = await browser.newContext({ ...PHONE });
+    const rp = await rctx.newPage();
+    const rerrs = [];
+    rp.on('pageerror', (e) => rerrs.push(String(e)));
+    await rp.addInitScript(() => {
+      ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+        .forEach((k) => localStorage.setItem(k, '1'));
+      /* ── SEEDED ONLY WHEN ABSENT, AND THAT IS THIS FILE'S OWN
+             OLDEST TRAP ──
+         An init script runs on EVERY navigation. Written
+         unconditionally these two put the view back to `tally` on the
+         reload three assertions below — after that reload had been
+         made precisely to draw the WEEK, so the tag it was about was
+         in the document with a zero-width box and the screenshot
+         threw. The net record was bitten by exactly this once before
+         and the note beside it says so. */
+      [['sched.view.v1', 'tally'], ['sched.ty.v1', 'up']]
+        .forEach(([k, v]) => { if (!localStorage.getItem(k)) localStorage.setItem(k, v); });
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1',
+          JSON.stringify({ on: false, url: '', code: '' }));
+      }
+    });
+    await rp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await rp.waitForTimeout(500);
+
+    /* THE CHIP IS THE PAGER AND THE CARD IS THE PICKER — pressing a
+       chip brings a card to the front and says nothing about whether
+       it is chosen. A probe that pressed chips alone found the deck
+       working and nothing selected. */
+    const chip = async (n) => {
+      await rp.evaluate((x) => {
+        const c = [...document.querySelectorAll('.wc-chip')]
+          .find((e) => e.textContent.trim() === x);
+        if (!c) throw new Error('no chip ' + x);
+        c.click();
+      }, n);
+      await rp.waitForTimeout(1300);
+    };
+    const front = async () => {
+      await rp.evaluate(() => document.querySelector('.wc:not(.b1):not(.b2)').click());
+      await rp.waitForTimeout(900);
+    };
+    const state = () => rp.evaluate(() => ({
+      ef: document.querySelectorAll('.wc-ef').length,
+      mn: document.querySelectorAll('.wc-min').length,
+      head: (document.querySelector('.wc:not(.b1):not(.b2) .wc-top') || {}).textContent,
+      go: (document.querySelector('.wc-go') || {}).textContent,
+    }));
+
+    /* ── THE DECK HANGS OFF THE TICK GOING ON, NOT OFF THE PRESS ──
+       Pressing an already-ticked Train tile takes it OFF and opens
+       nothing, so the second time this section wants the deck it has
+       to untick first. Written idempotently and off the RECORD rather
+       than the words on the tile — an identifier in a fixture is a
+       reference nothing type-checks, and openMind was rewritten for
+       exactly this once already. Without it the second visit reported
+       "no chip Recovery", which reads as the deck being broken. */
+    const trainTile = () => rp.evaluate(() => {
+      const c = document.querySelector('.ty-card[data-item="t"]');
+      if (!c) throw new Error('no Train tile on Today');
+      const t = JSON.parse(localStorage.getItem('sched.tick.v1') || '{}');
+      const d = new Date();
+      const k = [d.getFullYear(), String(d.getMonth() + 1).padStart(2, '0'),
+                 String(d.getDate()).padStart(2, '0')].join('-');
+      const was = !!(t[k] && t[k].t);
+      c.click();
+      return was;
+    });
+    const openTrain = async () => {
+      if (await trainTile()) {      /* it was on: that press took it off */
+        await rp.waitForTimeout(520);
+        await trainTile();          /* and this one puts it back */
+      }
+      await rp.waitForTimeout(900);
+    };
+
+    await openTrain();
+    await chip('Recovery');
+    await front();
+    await rp.waitForTimeout(1600);
+    ok('rest is a session you can log, and it is in Recovery',
+      await rp.evaluate(() => [...document.querySelectorAll('.wc-chip')]
+        .some((e) => e.textContent.trim() === 'Rest')),
+      await rp.evaluate(() => [...document.querySelectorAll('.wc-chip')]
+        .map((e) => e.textContent.trim())));
+
+    await chip('Rest');
+    await front();
+    const rest = await state();
+    /* NOT DISABLED — a control that exists and refuses is worse than
+       one that is not there. Asserted as the rows being absent. */
+    ok('a rest day is asked neither how hard nor how long',
+      rest.ef === 0 && rest.mn === 0, rest);
+    /* The card's Effort figure is a READOUT of the row below it, so on
+       a card with no row it is a figure with nothing behind it: the
+       head read "Rest day" and "Effort / Light" in one breath. */
+    ok('...and the card does not print a figure it was never given',
+      /Rest day/.test(rest.head) && !/Effort/.test(rest.head), rest);
+    ok('...and the foot still names what it is about to file',
+      rest.go === 'Log Rest', rest);
+
+    await rp.evaluate(() => document.querySelector('.wc-go').click());
+    await rp.waitForTimeout(800);
+    const filed = await rp.evaluate(() => {
+      const t = JSON.parse(localStorage.getItem('sched.train.v1') || '{}');
+      const d = t[Object.keys(t).sort().pop()] || {};
+      return d[Object.keys(d)[0]] || null;
+    });
+    ok('neither figure is stored either \u2014 an effort nobody gave is not a record',
+      filed && filed.k === 'rec.rest' && filed.e === '' && filed.m === 0, filed);
+
+    /* ── AND THE REPAIR MUST NOT PUT THEM BACK ──
+       This is the whole fix's life expectancy. scTrainLoad reads an
+       empty effort as an unknown one and a zero length as a record
+       written before minutes existed, so it filled both in and WROTE
+       the result: one page load turned the rest day into Light and one
+       minute, and nothing said so. Measured across a real reload,
+       because a repair that only runs at boot is invisible to any
+       check that does not take one. */
+    await rp.reload({ waitUntil: 'networkidle' });
+    await rp.waitForTimeout(700);
+    const survived = await rp.evaluate(() => {
+      const t = JSON.parse(localStorage.getItem('sched.train.v1') || '{}');
+      const d = t[Object.keys(t).sort().pop()] || {};
+      return d[Object.keys(d)[0]] || null;
+    });
+    ok('...and a reload does not fill the two blanks in behind you',
+      survived && survived.e === '' && survived.m === 0, survived);
+
+    /* ── REST BESIDE A REAL SESSION IS A REAL SESSION ──
+       `every`, not `[0]`: a session can be more than one thing, so a
+       card called Rest inside a session that also has Core is asked
+       both questions like any other. Without this the check above
+       passes on a build that silences the rows for any session that
+       merely CONTAINS rest. */
+    await openTrain();
+    await chip('Recovery');
+    await front();
+    await rp.waitForTimeout(1600);
+    await chip('Rest');
+    await front();
+    await chip('Core');
+    await front();
+    const both = await state();
+    ok('rest beside another session is asked both, like any other session',
+      both.ef > 0 && both.mn > 0 && /Effort/.test(both.head), both);
+    ok('...and the foot names the whole of it',
+      /Rest \+ Core/.test(both.go), both);
+    await rp.evaluate(() => document.querySelector('.wc-go').click());
+    await rp.waitForTimeout(800);
+    const pair = await rp.evaluate(() => {
+      const t = JSON.parse(localStorage.getItem('sched.train.v1') || '{}');
+      const d = t[Object.keys(t).sort().pop()] || {};
+      return d[Object.keys(d)[0]] || null;
+    });
+    ok('...and both figures are filed for it',
+      pair && /rec\.rest/.test(pair.k) && /rec\.core/.test(pair.k)
+      && pair.e !== '' && pair.m > 0, pair);
+
+    /* ── AND THE PANEL DOES NOT AVERAGE THE BLANK ──
+       Read as the rest of them a rest day gives "Avg 0 min", which is
+       a duration nobody's day had rather than the absence of one. The
+       effort pill already dropped itself, because scWorkEffort skips a
+       word it does not know; this is the same claim in the other unit.
+       Both halves, because "the rest panel has no time" passes on a
+       build where no panel has one. */
+    await rp.evaluate(() => {
+      const day = (n) => {
+        const d = new Date(); d.setDate(d.getDate() - n);
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+          + '-' + String(d.getDate()).padStart(2, '0');
+      };
+      localStorage.setItem('sched.train.v1', JSON.stringify({
+        [day(1)]: { a: { k: 'rec.rest', e: '', m: 0 } },
+        [day(3)]: { a: { k: 'rec.rest', e: '', m: 0 } },
+        [day(2)]: { a: { k: 'ppl.push', e: 'Hard', m: 60 } },
+        [day(5)]: { a: { k: 'ppl.push', e: 'Light', m: 30 } },
+      }));
+    });
+    await rp.reload({ waitUntil: 'networkidle' });
+    await rp.waitForTimeout(700);
+    await rp.evaluate(() => document.querySelector('[data-tystop="work"]').click());
+    await rp.waitForTimeout(600);
+    const panels = await rp.evaluate(() => {
+      const o = {};
+      [...document.querySelectorAll('.wo-p')].forEach((e) => {
+        o[e.dataset.workout] = {
+          pills: [...e.querySelectorAll('.props .pill')].map((x) => x.textContent),
+          aria: e.getAttribute('aria-label'),
+        };
+      });
+      return o;
+    });
+    ok('a rest panel carries no length, because a rest day has none',
+      panels['rec.rest']
+      && !panels['rec.rest'].pills.some((t) => /min/.test(t))
+      && !/minutes on average/.test(panels['rec.rest'].aria), panels);
+    ok('...and a real session on the same screen still has its average',
+      panels['ppl.push']
+      && panels['ppl.push'].pills.includes('Avg 45 min'), panels);
+    /* Per signature, so a rest day cannot dilute another session's
+       figure — 45 is the mean of 30 and 60, which is a figure neither
+       input had, and it is what tells an average from a pick. */
+    ok('...and the rest days did not drag that average down',
+      panels['ppl.push'] && !panels['ppl.push'].pills.includes('Avg 23 min'),
+      panels['ppl.push']);
+
+    /* ── ITS TAG IS THE FLAT NEUTRAL, AND THAT PATH HAD NEVER DRAWN ──
+       Rest is the first workout whose colour is not one of the seven
+       solved pairs, so `.wo.is-off` shipped as dead code and was
+       measured for the first time the day something reached it: at
+       --spent it came to 3.33:1 on the light face, which is this
+       file's own mistake about the LIGHTER token for the third time.
+       Measured composited, because the tag is a wash over a card and
+       the arithmetic only knows about the page. */
+    /* THE WEEK FIRST, THEN THE PLANT. The row's id is read off the
+       rows that are DRAWN, and the app is on Workouts at this point —
+       planting from there reads an empty list and files the record
+       under a block that does not exist, which reports as the tag not
+       being drawn rather than as the fixture being wrong. */
+    await rp.evaluate(() => document.querySelector('#scTabWeek').click());
+    await rp.waitForTimeout(520);
+    await rp.evaluate(() => {
+      const d = new Date();
+      const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+        + '-' + String(d.getDate()).padStart(2, '0');
+      const tr = document.querySelector('.row[data-id]');
+      if (!tr) throw new Error('no row with an id on the week');
+      localStorage.setItem('sched.view.v1', 'list');
+      localStorage.setItem('sched.train.v1',
+        JSON.stringify({ [k]: { [tr.dataset.id]: { k: 'rec.rest', e: '', m: 0 } } }));
+    });
+    await rp.reload({ waitUntil: 'networkidle' });
+    await rp.waitForTimeout(700);
+    const tag = await rp.evaluate(() => {
+      const t = document.querySelector('.row .wo');
+      if (!t) throw new Error('no workout tag on any row');
+      const b = t.getBoundingClientRect();
+      return { txt: t.textContent, off: t.classList.contains('is-off'),
+        box: { x: b.x, y: b.y, width: b.width, height: b.height } };
+    });
+    /* THE BOX, not just the element. A tag in a view that is put away
+       is in the document with a zero-width rect, and the screenshot
+       below then throws rather than failing — which takes the file
+       down with it and reports as a broken build. */
+    ok('a rest day\u2019s tag says which, in the flat neutral',
+      tag.txt === 'Rest' && tag.off && tag.box.width > 0 && tag.box.height > 0, tag);
+    /* GUARDED, so the assertion above is what reports a missing box.
+       Left to run on an empty clip the screenshot throws, which takes
+       the file down forty assertions from anything and prints as a
+       broken build rather than as one failing check. */
+    const { PNG } = require('pngjs');
+    const restPx = [];
+    if (tag.box.width > 0 && tag.box.height > 0) {
+      const restPng = PNG.sync.read(await rp.screenshot({ clip: tag.box }));
+      for (let i = 0; i < restPng.data.length; i += 4) {
+        restPx.push([restPng.data[i], restPng.data[i + 1], restPng.data[i + 2]]);
+      }
+    }
+    /* Ground is the MOST COMMON pixel in the patch, not the lightest
+       or the darkest: this repo has made the light-on-dark assumption
+       in three separate harnesses and reported a label at 1.05:1 that
+       measured 7.64. The mode holds whichever way round the face is. */
+    const restTally = {};
+    restPx.forEach((q) => { const k = q.join(','); restTally[k] = (restTally[k] || 0) + 1; });
+    const restKeys = Object.keys(restTally).sort((a, c) => restTally[c] - restTally[a]);
+    const restGround = restKeys.length ? restKeys[0].split(',').map(Number) : null;
+    let restWorst = 0;
+    if (restGround) {
+      restPx.forEach((q) => {
+        const r = ratio(q, restGround);
+        if (r > restWorst) restWorst = r;
+      });
+    }
+    ok('...and it clears the bar on real pixels rather than in the sum',
+      restWorst >= 4.5, { ratio: +restWorst.toFixed(2), ground: restGround });
+
+    ok('nothing threw through any of it', rerrs.length === 0, rerrs);
+    await rctx.close();
   }
 
   /* ══════════════════════════════════════════════════════════════

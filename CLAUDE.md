@@ -6751,3 +6751,129 @@ by that app's file plus `names`, which is a tenth of a second and is the
 one that catches a duplicate declaration or a token nothing defines. The
 full suite is for a change that crosses files — the shell, a shared
 token, the runner itself — and before a release you care about.
+
+## A rest day is a session, and it is asked nothing
+
+*Can you add in a rest option for the workout?* — so Recovery has a
+fifth card. **A rest day is a real answer to what did you train**, and
+it is the one answer with neither of the two figures every other card
+carries: how hard it was and how long it took are questions about a
+session, and a rest day with fifty minutes and *Light* against it is
+the app inventing a fact about your day.
+
+**NOT DISABLED, ABSENT.** The two rows are not drawn at all when the
+only thing picked is Rest — a control that exists and refuses is worse
+than one that is not there, which is the deck's own conclusion about
+the way back out.
+
+**`every`, NOT `[0]`.** A session can be more than one thing, so Rest
+beside Core is a real session that happens to include a card called
+Rest, and it is asked both questions like any other. Only a day that is
+nothing but rest is the case with no length in it.
+
+**FOUR PLACES ASK THAT QUESTION AND ONE FUNCTION ANSWERS IT.** The
+sheet decides whether to draw the two rows, the CARD decides whether to
+print its Effort figure, the commit decides whether to file the two
+figures, and the repair decides whether a missing one is damage or the
+point. The first version asked it three times in three places and got
+the fourth wrong by not knowing it existed — `scRestOnly` is the
+answer, and the comment beside it says why writing it out again is how
+these drift.
+
+**THE CARD'S EFFORT FIGURE IS A READOUT OF THE ROW BELOW IT**, so on a
+card with no row it is a figure with nothing behind it: the head read
+*Today · Rest day* and *Effort · Light* in one breath, which is the
+card contradicting itself in the space of two columns. That was found
+by reading the card's own text off a probe rather than by looking at
+the screenshot, where the two sit far enough apart to scan past.
+
+**AND THE REPAIR GAVE THE FIX A LIFE OF EXACTLY ONE PAGE LOAD.**
+`scTrainLoad` reads an effort outside `EFFORTS` as an unknown one and
+`!(m > 0)` as a record written before minutes existed — so it filled
+both in and **wrote the result**: `{e:'', m:0}` came back from the next
+boot as `{e:'Light', m:1}`, in the record, silently. The commit was
+right, the sheet was right, and the app undid both while you were not
+looking. **A record whose POINT is a blank field cannot go through a
+repair that reads a blank as damage.** Measured across a real reload,
+because a repair that only runs at boot is invisible to any check that
+does not take one.
+
+**AND THE PANEL MUST NOT AVERAGE THE BLANK.** Read as the rest of them
+a rest day gives `Avg 0 min`, which is a duration nobody's day had
+rather than the absence of one. The effort pill was already right by
+accident — `scWorkEffort` skips a word it does not know, so a rest
+record contributes nothing to it — and the time pill is the same claim
+in the other unit, said out loud. Both halves are checked, because *the
+rest panel has no time* passes on a build where no panel has one. The
+panels are per SIGNATURE, so rest never diluted another session's
+average; what was wrong was only rest's own figure.
+
+**ITS TAG IS THE FLAT NEUTRAL, AND THAT PATH HAD NEVER BEEN DRAWN.**
+`.wo.is-off` is the fallback for a workout whose colour is not one of
+the seven solved pairs — and every workout's colour WAS one of them,
+so the rule shipped as dead code and was measured for the first time
+the day something reached it: **3.33:1 on the light face** at
+`--spent`. That is the LIGHTER token under 9.5px type, which is this
+file's own mistake for the third time. `--dim` measures 7.79 and 5.11.
+
+The neutral is also the right answer rather than a fallback: a colour
+here says WHICH, and rest is the one entry on that list that is not a
+claim about doing anything — the day-off toggle's own argument, one
+screen over.
+
+## The figures you reach for are one press
+
+*Can you put a marker at ten thousand, fifteen, twenty thousand so I
+could just click that and automatically go to that?* Ten thousand steps
+is a drag across most of a track, done by eye, and landing on 9,800
+instead is the same decision fatigue the dial was built to remove.
+
+**A MARK SETS; THE DIAL ADDS.** That is the one thing about this that
+could have gone either way and only has one right answer: the dial adds
+to the day, which is right for a drag, but a chip labelled 10,000 has
+to MEAN ten thousand — pressing it on a day already carrying 2,000 and
+getting 12,000 is a control that lies about its own label. So it moves
+the dial to the figure and the foot then says what that will add.
+
+**THE TICKS ARE ON THE TRACK AND THE LABELS ARE AN EVEN ROW**, which
+looks like an inconsistency and is a measurement: drawn at their true
+positions the four labels are 36px apart and about 49px wide, so they
+sit on top of one another. A tick carries the position and a chip
+carries the press, and neither has to do both.
+
+**FOUR PER NUMBER, AND THEY ARE THAT NUMBER'S OWN.** 5/10/15/20k steps,
+500-3,500 kcal, 0.5-3 L, 6-9 h. Asserted as the exact four rather than
+as *there are marks*, because one shared set passes that — and five
+thousand steps of water is not a figure anybody aims at.
+
+
+## A file that crashed needs its tail, not a filter
+
+`tests/run.js` printed the failing lines of a file by grepping its
+output for `FAIL`, `✗`, `Error` or `error`. That is right for a file
+that RAN and reported failures. It is wrong for one that DIED: a
+Playwright error is a multi-line object and the only line in it
+matching `/Error/` is `name: 'Error'` — the message, the selector and
+the stack all fall through the sieve, and the runner prints one useless
+word.
+
+It cost two seven-minute round trips in one afternoon, each ending in
+running `tests/schedule.js` by hand against a server started by hand,
+which is the exact thing the runner exists to remove. `no summary` is
+the tell that tells them apart: the file produced no count, so there
+are no failures to filter down to and the last thing it said is the
+whole of what there is. Twenty-four lines, verbatim.
+
+**And the crash it hid was this file's own oldest trap.** `addInitScript`
+runs on EVERY navigation. The Rest section seeded `sched.view.v1` and
+`sched.ty.v1` unconditionally, so the reload three assertions later —
+made precisely in order to draw the WEEK — put the view back to the
+tally. The tag it was about was then in the document with a zero-width
+box, and `page.screenshot` threw on the clip rather than failing an
+assertion. The net record was bitten by exactly this once before and
+the note beside it already said so.
+
+Two things came out of it. Seed only when the key is ABSENT, which is
+what the net record already does. And **measure the BOX before
+screenshotting it** — a check that throws takes the file down and
+reports as a broken build, where a check that fails names the thing.
