@@ -2373,6 +2373,8 @@
     if (n % 100 >= 11 && n % 100 <= 13) return 'th';
     return ['th', 'st', 'nd', 'rd'][n % 10] || 'th';
   }
+  var VIEW_NAME = { tally: 'Today', friends: 'Friends', goals: 'Goals' };
+
   var HEAD_ICON = {
     today: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/>'
       + '<path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4'
@@ -2384,7 +2386,9 @@
       + ' width="7" height="7"/><rect x="13" y="13" width="7" height="7"/></svg>',
     friends: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4"/>'
       + '<path d="M3 19c0-3.2 2.7-5 6-5s6 1.8 6 5"/>'
-      + '<path d="M16.5 6.4a3.4 3.4 0 010 6.5M21 19c0-2.7-1.8-4.4-4.2-4.8"/></svg>'
+      + '<path d="M16.5 6.4a3.4 3.4 0 010 6.5M21 19c0-2.7-1.8-4.4-4.2-4.8"/></svg>',
+    goals: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/>'
+      + '<circle cx="12" cy="12" r="3"/></svg>'
   };
   /* ── THE HEAD SAYS WHICH SCREEN, WHICH DAY, AND WHAT IS ON IT ──
      A glyph tile, the name at 30px, and one line: the date, how many
@@ -2393,11 +2397,17 @@
   function scDate() {
     var t = new Date(), now = scT(scNowMin()) + scMerIf(scNowMin());
     var ic = $('scHdIc'), day = $('scHdDay'), sub = $('scHdDate');
+    /* THE HEAD NAMES THE SCREEN OFF THE LIST, and it named two of
+       what is now three. `view === 'tally' ? 'Today' : 'Friends'` is
+       a two-way question, so the day Goals landed it drew "Friends"
+       over the goals pane with the friends glyph beside it. A ternary
+       is a list of two with no room in it; a lookup names the next
+       view on the day it is added. */
     if (view !== 'list') {
-      day.textContent = view === 'tally' ? 'Today' : 'Friends';
+      day.textContent = VIEW_NAME[view] || 'Today';
       sub.textContent = FULL[t.getDay()] + ' ' + t.getDate() + ' '
         + MON[t.getMonth()] + ' \u00b7 ' + now;
-      ic.innerHTML = HEAD_ICON[view === 'tally' ? 'tally' : 'friends'];
+      ic.innerHTML = HEAD_ICON[view] || HEAD_ICON.tally;
       return;
     }
     var d = scOpenDay(), cd = scObjDay(d);
@@ -6375,12 +6385,20 @@
      block, and the head now draws the shape of the whole day. A stored
      'ring' falls through to the list below, so nobody is stranded on a
      view that no longer exists. */
-  var VIEWS = ['list', 'tally', 'friends'];
+  /* ── AND GOALS IS THE FOURTH ──
+     It is a TAB rather than a stop on Today, and that is the whole
+     claim: Showing up, Workouts and Pattern are three ways of reading
+     the day you are in, and a goal is not a way of reading today. It
+     is what today is in service of. Four labels also did not fit
+     across the stops — measured at 372px against the 358 a 390px
+     phone has — where the bar's own tabs are flex:1 and simply
+     divide, so the bar was the arrangement that cost nothing. */
+  var VIEWS = ['list', 'tally', 'friends', 'goals'];
 
   function scSetView(v, save) {
     var from = view;
     view = VIEWS.indexOf(v) >= 0 ? v : 'list';
-    var tal = view === 'tally', fr = view === 'friends';
+    var tal = view === 'tally', fr = view === 'friends', gl = view === 'goals';
     /* ── ARRIVING IS WHAT OFFERS A CARD, AND LEAVING TAKES IT ──
        Coming BACK to a screen is a new visit, so a card closed with
        "Got it" is offered once more. Guarded on the view actually
@@ -6404,14 +6422,15 @@
 
     $('scTally').hidden = !tal;
     $('scFriends').hidden = !fr;
+    $('scGoals').hidden = !gl;
     /* ONE SECTION PER VIEW, and `[hidden]` has to be said out loud
        once a thing takes a display — .week is a flex column, and an
        author display outranks the browser's own [hidden] rule. That
        has cost this app the rail, the dots, the toast and the intro,
        each in turn, so the check measures the BOX rather than the
        attribute. */
-    $('scWeek').hidden = tal || fr;
-    $('scEmpty').hidden = tal || fr || state.items.length > 0;
+    $('scWeek').hidden = tal || fr || gl;
+    $('scEmpty').hidden = tal || fr || gl || state.items.length > 0;
     /* The head is the day's on the week and the screen's elsewhere,
        and the objectives row belongs to the week alone — it takes the
        open day rather than a local, because there is no day in scope
@@ -6437,6 +6456,11 @@
        already keeps. A paint that fetched would recurse the first time
        it ran, which is a bug this file has already had once. */
     else if (fr) { scPaintFriends(); scFrStop(frStop, false); scArriveFriends(); }
+    /* ARRIVING is what puts the checkpoint up, the same split the
+       friends half already keeps: drawing only draws. A goal whose
+       date has come round asks once, here, rather than on every
+       render of every screen. */
+    else if (gl) { scPaintGoals(); scGoalCheck(); }
     else scLive();
 
     /* ── AFTER THE CHAIN, NEVER INSIDE IT ──
@@ -10969,6 +10993,1106 @@
     });
   }
 
+
+  /* ═══════════════════════════════════════════════════════════
+     GOALS
+
+     Every other screen in this app records what you DID. This one is
+     the only thing that says what any of it is FOR — and it earns a
+     tab rather than a stop because a goal is not a way of reading
+     today. It is the thing today is in service of.
+
+     THE WHOLE FEATURE IS ONE PRESS: a sentence you typed becomes a
+     block on your week. The list of goals is only where you press it
+     from. That is why the cap is small and why the archive is folded
+     — a goals screen with nine things on it is a wish list, and this
+     repository has already deleted one of those: `arc/` held a vision
+     board and a long-term timeline and both are gone.
+
+     NOTHING HERE LEAVES THE PHONE. `sched.goal.v1` is not in
+     scPushNow's body and no path from this screen calls scPush. A
+     goal is further down the road that "a count may leave and a list
+     may not" was written about than anything else on the record.
+     ═══════════════════════════════════════════════════════════ */
+
+  var GOAL_KEY = 'sched.goal.v1';
+
+  /* Two live, three at a push. Not a suggestion — the app refuses a
+     fourth until one is finished or dropped. */
+  var GOAL_CAP = 3;
+
+  var goals = { live: [], done: [] };
+  var glOpen = null, glIdx = 0;
+
+  /* ── THE DOSE IS SOLVED, NOT TYPED ──
+     Each suggestion carries the length it wants (`full`) and the one
+     below which it stops being the thing (`floor`). Reading floors at
+     15; a session does not go below 30 and still count.
+
+     DAYS A WEEK MOVE FIRST. Fifteen minutes of reading a day and
+     forty-five minutes three times a week are the same weekly total,
+     and the second is a session you can actually finish — so a longer
+     window buys fewer days at a real length rather than a token every
+     morning. Length only shortens until it reaches the floor, and
+     then another day goes instead.
+
+     TWO LINES OF WHY AND NEVER THREE. The first says what the thing
+     does; the second says why THIS dose, which is the half nothing
+     else on the screen says. A third is a paragraph, and a paragraph
+     is a thing you scroll past. */
+  var GOAL_KINDS = [
+    { k: 'trading', n: 'Trading', recs: [
+      { n: 'Backtest', p: 'candles', full: 60, floor: 20, ses: 'e',
+        w: 'Backtesting is where a rule gets tested with nothing on it.' },
+      { n: 'Collect data', p: 'ledger', full: 30, floor: 10, ses: 'e',
+        w: 'A record you wrote yourself is the only edge nobody else has a copy of.' },
+      { n: 'Watch content', p: 'waveform', full: 45, floor: 15, ses: 'e',
+        w: 'Someone else’s reasoning is cheaper to learn from than your own losses.' },
+      { n: 'Review the week', p: 'spiral', full: 45, floor: 20, ses: 'e', weekly: true,
+        w: 'A week you never read back is a week you cannot learn anything from.' } ] },
+
+    { k: 'training', n: 'Training', recs: [
+      { n: 'Session', p: 'reps', full: 75, floor: 40, ses: 'm',
+        w: 'The session is the only part of getting stronger you control.' },
+      { n: 'Walk', p: 'path', full: 40, floor: 20, ses: 'm',
+        w: 'Easy movement is what lets the hard days keep happening.' },
+      { n: 'Rest', p: 'breath', full: 30, floor: 30, ses: 'e',
+        w: 'Rest is training. It is when the work you already did lands.' } ] },
+
+    { k: 'reading', n: 'Reading', recs: [
+      { n: 'Read', p: 'lines', full: 60, floor: 15, ses: 'e',
+        w: 'Reading is the one input that compounds without a screen in it.' },
+      { n: 'Notes', p: 'margin', full: 20, floor: 10, ses: 'e',
+        w: 'A book you took nothing out of is a book you will read again.' } ] },
+
+    { k: 'skill', n: 'A skill', recs: [
+      { n: 'Practice', p: 'loop', full: 45, floor: 15, ses: 'e',
+        w: 'A skill moves on repetitions, not on hours of reading about it.' },
+      { n: 'A drill', p: 'pulse', full: 20, floor: 10, ses: 'e',
+        w: 'One narrow thing done badly today is the thing done well in a month.' },
+      { n: 'Make something', p: 'lattice', full: 60, floor: 30, ses: 'a', weekly: true,
+        w: 'Output is the only honest test of whether the practice worked.' } ] },
+
+    /* MONEY FOLDS IN HERE. A goal that says "earn more" wants the same
+       process as one that says "grow the business", and two entries
+       would be one table written twice. */
+    { k: 'business', n: 'Business', recs: [
+      { n: 'The thing that earns', p: 'compound', full: 90, floor: 45, ses: 'm',
+        w: 'One block a day on the part that actually brings money in.' },
+      { n: 'Outreach', p: 'broadcast', full: 45, floor: 15, ses: 'a',
+        w: 'Nothing else in a business compounds as fast as talking to more people.' },
+      { n: 'Build', p: 'lattice', full: 90, floor: 30, ses: 'a',
+        w: 'The work only you can do, in the hours nobody can reach you.' },
+      { n: 'Weekly numbers', p: 'columns', full: 30, floor: 20, ses: 'e', weekly: true,
+        w: 'A figure you look at once a week is a figure you can steer by.' } ] },
+
+    { k: 'creating', n: 'Creating', recs: [
+      { n: 'Draft', p: 'strokes', full: 90, floor: 25, ses: 'm',
+        w: 'Drafting badly is the only way anybody has ever drafted well.' },
+      { n: 'Edit', p: 'strike', full: 45, floor: 20, ses: 'a',
+        w: 'Editing is a different job from writing and wants a different hour.' },
+      { n: 'Publish', p: 'sheets', full: 30, floor: 15, ses: 'e', weekly: true,
+        w: 'Shipping on a schedule beats shipping when it feels ready.' } ] },
+
+    { k: 'study', n: 'Study', recs: [
+      { n: 'Study', p: 'squared', full: 90, floor: 25, ses: 'm',
+        w: 'The session is where it goes in; everything else is admin.' },
+      { n: 'Past papers', p: 'boxes', full: 60, floor: 30, ses: 'a', weekly: true,
+        w: 'A paper under time is the only rehearsal that resembles the day.' },
+      { n: 'Review', p: 'loop', full: 25, floor: 10, ses: 'e',
+        w: 'Going back over old ground is what stops it leaving again.' } ] },
+
+    { k: 'routine', n: 'Routine', recs: [
+      { n: 'Wind down', p: 'decay', full: 45, floor: 20, ses: 'e',
+        w: 'The hour before bed decides the night more than the bedtime does.' },
+      { n: 'Fixed wake', p: 'sunrise', full: 15, floor: 15, ses: 'm',
+        w: 'One constant time anchors every other hour of the day to it.' } ] },
+
+    /* THIN ON PURPOSE. The honest process for saving is a weekly look
+       at what went out and one transfer — two blocks, one of them five
+       minutes. Padding it to four so it matched the others would be
+       the app inventing work. */
+    { k: 'saving', n: 'Saving', recs: [
+      { n: 'Look at what went out', p: 'tally', full: 20, floor: 10, ses: 'e', weekly: true,
+        w: 'You cannot cut a number you have never actually looked at.' },
+      { n: 'Move it across', p: 'stack', full: 10, floor: 5, ses: 'e', weekly: true,
+        w: 'Saving on the day it arrives beats saving on whatever is left.' } ] }
+  ];
+
+  /* THERE IS NO WEIGHT GOAL, and its absence is the decision. This app
+     has never asked what you weigh and says so out loud; a table entry
+     for it would reverse that quietly. Training covers the honest
+     half — you cannot control the number, you can control the
+     sessions. */
+
+  function scGoalKind(k) {
+    for (var i = 0; i < GOAL_KINDS.length; i++) if (GOAL_KINDS[i].k === k) return GOAL_KINDS[i];
+    return null;
+  }
+  function scGoalRecs(g) { var kk = scGoalKind(g.k); return kk ? kk.recs : []; }
+
+  /* ── THE PATTERNS ──
+     Not a picture of the thing — the RHYTHM of the thing. A drawing of
+     a dumbbell at this size is a glyph, and this app already learned
+     that ten honest drawings of a lift come out as one silhouette ten
+     times. A cadence of reps in sets is a picture of nothing and is
+     still unmistakably training.
+
+     TWO PATTERNS WITH ONE SILHOUETTE IS WORSE THAN A PATTERN MISSING,
+     because the card is then confidently wrong — so they were judged
+     side by side rather than one at a time, which is the only way that
+     fault is visible. Two were replaced on exactly that ground: scan
+     lines read as a television AND were a fifth horizontal-rule
+     pattern in a set that already had four; seven arcs read as bunting
+     at card size and left most of the card empty.
+
+     They are a TABLE, which is the cost of them meaning anything — a
+     second list to keep in step with the first. What pays for it is
+     scGoalPat's fallback: a suggestion with no drawing gets one seeded
+     from its own name, so a card is never blank.
+
+     STROKES ARE NON-SCALING. A width in viewBox units is multiplied by
+     whatever the box is stretched to, and it fails silently — the
+     drawing stays correct and comes out several times too heavy. */
+  function glW(a) { return 'rgba(255,255,255,' + a + ')'; }
+  function glLn(x1, y1, x2, y2, a, w) {
+    return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2
+      + '" stroke="' + glW(a) + '" stroke-width="' + (w || 1)
+      + '" vector-effect="non-scaling-stroke" stroke-linecap="round"/>';
+  }
+
+  var GOAL_PATS = {
+    candles: function () {
+      var o = '', x = 4, i = 0;
+      while (x < 104) {
+        var h = 6 + ((i * 37) % 26), y = 24 + ((i * 53) % 26) - h / 2;
+        o += glLn(x, y - 5, x, y + h + 5, .10, 1);
+        o += '<rect x="' + (x - 2.2) + '" y="' + y + '" width="4.4" height="' + h + '" fill="'
+          + glW(i % 3 ? .10 : .05) + '" stroke="' + glW(.13)
+          + '" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+        x += 7.4; i++;
+      }
+      return o;
+    },
+    ledger: function () {
+      var o = '', y, x, i;
+      for (y = 6; y < 80; y += 7.5) o += glLn(-2, y, 102, y, .07, .9);
+      for (x = 12; x < 100; x += 17) o += glLn(x, -2, x, 82, .05, .9);
+      for (i = 0; i < 26; i++) {
+        o += '<rect x="' + (14 + (i % 5) * 17) + '" y="' + (9 + Math.floor(i / 5) * 7.5)
+          + '" width="' + (4 + (i * 7) % 9) + '" height="1.6" fill="' + glW(.1) + '"/>';
+      }
+      return o;
+    },
+    /* WATCH CONTENT. The one pattern in the set mirrored about a
+       horizontal axis, so it can be confused with nothing — and the
+       reason a waveform is right for it rather than a picture of a
+       screen is that content is a thing you give TIME to. Scan lines
+       and progress tracks were both drawn here first: the first read
+       as a television and was a fifth horizontal-rule pattern in a set
+       that already had four, the second read as a to-do list. */
+    waveform: function () {
+      var o = '', i, x, h;
+      for (i = 0; i < 46; i++) {
+        x = 1 + i * 2.2;
+        h = 5 + 26 * Math.abs(Math.sin(i * .38) * Math.sin(i * .11 + 1));
+        o += '<rect x="' + x.toFixed(1) + '" y="' + (40 - h).toFixed(1) + '" width="1.3" height="'
+          + (h * 2).toFixed(1) + '" rx="0.6" fill="' + glW(i % 3 ? .085 : .14) + '"/>';
+      }
+      return o;
+    },
+    /* REVIEW THE WEEK. One line going round and coming back over
+       ground it has already covered, which is the whole of what a
+       review is. Nothing else in the set is a spiral. Seven arcs on a
+       baseline were drawn first and read as bunting at card size, and
+       seven bands with a line across them read as a chart. */
+    spiral: function () {
+      var d = '', i, th, r;
+      for (i = 0; i <= 260; i++) {
+        th = i * 0.11; r = 1.6 + th * 3.05;
+        d += (i ? ' L ' : 'M ') + (50 + r * Math.cos(th)).toFixed(1)
+          + ' ' + (40 + r * Math.sin(th) * 0.8).toFixed(1);
+      }
+      return '<path d="' + d + '" fill="none" stroke="' + glW(.05)
+        + '" stroke-width="4.6" vector-effect="non-scaling-stroke"/>'
+        + '<path d="' + d + '" fill="none" stroke="' + glW(.14)
+        + '" stroke-width="1.3" vector-effect="non-scaling-stroke"/>';
+    },
+    reps: function () {
+      var o = '', x = 6, sets = [5, 8, 6, 10, 5, 8, 6], s, r;
+      for (s = 0; s < sets.length; s++) {
+        for (r = 0; r < sets[s]; r++) {
+          var y = 12 + s * 9.6;
+          o += glLn(x + r * 2.9, y - 3.4, x + r * 2.9, y + 3.4, .13, 1.3);
+        }
+        x += sets[s] * 2.9 + 7;
+        if (x > 92) x = 6;
+      }
+      return o;
+    },
+    path: function () {
+      var d = 'M -6 62 C 14 30, 26 74, 44 44 S 72 16, 106 40';
+      return '<path d="' + d + '" fill="none" stroke="' + glW(.13)
+        + '" stroke-width="1.3" vector-effect="non-scaling-stroke" stroke-dasharray="0.1 5.4"'
+        + ' stroke-linecap="round"/><path d="' + d + '" fill="none" stroke="' + glW(.045)
+        + '" stroke-width="7" vector-effect="non-scaling-stroke"/>';
+    },
+    breath: function () {
+      var o = '', k;
+      for (k = 0; k < 3; k++) {
+        o += '<path d="M -6 ' + (26 + k * 14) + ' C 24 ' + (2 + k * 14) + ', 46 ' + (50 + k * 14)
+          + ', 106 ' + (20 + k * 14) + '" fill="none" stroke="' + glW(.10 - k * .025)
+          + '" stroke-width="' + (1.6 - k * .3) + '" vector-effect="non-scaling-stroke"/>';
+      }
+      return o;
+    },
+    lines: function () {
+      var o = '', y = 5, i = 0;
+      while (y < 80) {
+        if ((i % 7) === 6) { y += 3.4; i++; continue; }
+        o += '<rect x="7" y="' + y + '" width="' + (30 + ((i * 41) % 62))
+          + '" height="1.9" rx="0.9" fill="' + glW(.10) + '"/>';
+        y += 4.6; i++;
+      }
+      return o;
+    },
+    margin: function () {
+      var o = glLn(30, -2, 30, 82, .15, 1.3), y = 6, i = 0, k, run, w;
+      while (y < 80) {
+        run = 2 + (i % 3);
+        for (k = 0; k < run && y < 80; k++) {
+          w = 5 + ((i * 13 + k * 7) % 11);
+          o += glLn(30 - w, y, 30 + (k === 0 ? 7 : 3), y, k === 0 ? .16 : .08, k === 0 ? 1.5 : 1.1);
+          y += 4.4;
+        }
+        y += 5.5; i++;
+      }
+      return o;
+    },
+    compound: function () {
+      var o = '', x, y, i, d = 'M -4 76';
+      for (x = 0; x <= 100; x += 12.5) o += glLn(x, -2, x, 82, .035, .9);
+      for (y = 4; y < 80; y += 12) o += glLn(-2, y, 102, y, .035, .9);
+      for (i = 0; i <= 40; i++) {
+        var t = i / 40;
+        d += ' L ' + (t * 108 - 4).toFixed(1) + ' ' + (76 - 74 * Math.pow(t, 2.7)).toFixed(1);
+      }
+      o += '<path d="' + d + '" fill="none" stroke="' + glW(.15)
+        + '" stroke-width="1.6" vector-effect="non-scaling-stroke"/>';
+      o += '<path d="' + d + ' L 104 80 L -4 80 Z" fill="' + glW(.04) + '"/>';
+      return o;
+    },
+    broadcast: function () {
+      var o = '', i;
+      for (i = 0; i < 9; i++) {
+        o += '<circle cx="-6" cy="40" r="' + (14 + i * 12.5) + '" fill="none" stroke="'
+          + glW(.115 - i * .009) + '" stroke-width="' + (1.5 - i * .1).toFixed(2)
+          + '" vector-effect="non-scaling-stroke"/>';
+      }
+      return o + '<circle cx="-6" cy="40" r="3.4" fill="' + glW(.2) + '"/>';
+    },
+    lattice: function () {
+      var o = '', x, y, i, j;
+      for (x = 0; x <= 100; x += 16.6) o += glLn(x, -2, x, 82, .075, 1);
+      for (y = 3; y <= 79; y += 19) o += glLn(-2, y, 102, y, .075, 1);
+      for (i = 0; i < 6; i++) for (j = 0; j < 4; j++) {
+        if ((i + j) % 2) continue;
+        o += glLn(i * 16.6, 3 + j * 19, (i + 1) * 16.6, 22 + j * 19, .05, .9);
+      }
+      return o;
+    },
+    columns: function () {
+      var o = glLn(-2, 70, 102, 70, .1, 1), x = 5, i = 0;
+      while (x < 100) {
+        var h = 8 + ((i * 29) % 48);
+        o += '<rect x="' + x + '" y="' + (70 - h) + '" width="5.4" height="' + h + '" fill="'
+          + glW(i % 4 === 3 ? .13 : .065) + '"/>';
+        x += 8.6; i++;
+      }
+      return o;
+    },
+    strokes: function () {
+      var o = '', i;
+      for (i = 0; i < 7; i++) {
+        var y = 6 + i * 11.5;
+        o += '<path d="M -6 ' + y + ' C 22 ' + (y - 9) + ', 46 ' + (y + 11) + ', 106 ' + (y - 4)
+          + '" fill="none" stroke="' + glW(i % 2 ? .06 : .11) + '" stroke-width="'
+          + (i % 2 ? 2.6 : 1.2) + '" vector-effect="non-scaling-stroke" stroke-linecap="round"/>';
+      }
+      return o;
+    },
+    strike: function () {
+      var o = '', y = 7, i = 0;
+      while (y < 80) {
+        var w = 34 + ((i * 47) % 56);
+        o += '<rect x="8" y="' + y + '" width="' + w + '" height="1.8" rx="0.9" fill="' + glW(.07) + '"/>';
+        if (i % 3 === 1) o += glLn(6, y + .9, 12 + w, y + .9, .16, 1.3);
+        y += 6.2; i++;
+      }
+      return o;
+    },
+    sheets: function () {
+      var o = '', i;
+      for (i = 7; i >= 0; i--) {
+        o += '<rect x="' + (10 + i * 7) + '" y="' + (6 + i * 5.4) + '" width="52" height="42" rx="3"'
+          + ' fill="' + glW(.018) + '" stroke="' + glW(.13 - i * .012)
+          + '" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+      }
+      return o;
+    },
+    squared: function () {
+      var o = '', x, y;
+      for (x = 0; x <= 100; x += 5.6) o += glLn(x, -2, x, 82, x % 28 < 1 ? .11 : .05, 1);
+      for (y = 2; y <= 82; y += 5.6) o += glLn(-2, y, 102, y, (y - 2) % 28 < 1 ? .11 : .05, 1);
+      return o;
+    },
+    boxes: function () {
+      var o = '', r, c;
+      for (r = 0; r < 5; r++) for (c = 0; c < 5; c++) {
+        o += '<rect x="' + (4 + c * 19.6) + '" y="' + (4 + r * 15.4) + '" width="16" height="11.6"'
+          + ' rx="2" fill="' + glW((r + c) % 4 === 0 ? .05 : .015) + '" stroke="' + glW(.09)
+          + '" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+      }
+      return o;
+    },
+    loop: function () {
+      var o = '', i;
+      for (i = 0; i < 6; i++) {
+        var y = 10 + i * 13;
+        o += '<path d="M 12 ' + y + ' C 60 ' + (y - 11) + ', 92 ' + (y + 5) + ', 88 ' + y
+          + ' C 84 ' + (y - 5) + ', 46 ' + (y + 9) + ', 12 ' + y + ' Z" fill="none" stroke="'
+          + glW(.09) + '" stroke-width="1.15" vector-effect="non-scaling-stroke"/>';
+      }
+      return o;
+    },
+    decay: function () {
+      var d = 'M -6 40', i;
+      for (i = 0; i <= 120; i++) {
+        d += ' L ' + (-6 + i * .93).toFixed(1) + ' '
+          + (40 + Math.sin(i * .42) * 30 * Math.pow(1 - i / 120, 2.1)).toFixed(1);
+      }
+      return '<path d="' + d + '" fill="none" stroke="' + glW(.15)
+        + '" stroke-width="1.4" vector-effect="non-scaling-stroke"/>' + glLn(-2, 40, 102, 40, .05, 1);
+    },
+    sunrise: function () {
+      var o = glLn(-2, 62, 102, 62, .07, 1), i;
+      for (i = 0; i < 22; i++) {
+        var x = 3 + i * 4.6, tall = i % 7 === 3;
+        o += glLn(x, 62, x, 62 - (tall ? 34 : 12), tall ? .17 : .08, tall ? 1.6 : 1.1);
+      }
+      return o;
+    },
+    pulse: function () {
+      var o = glLn(-2, 40, 102, 40, .06, 1), i;
+      for (i = 0; i < 15; i++) {
+        var x = 4 + i * 6.8, big = i % 5 === 2;
+        o += glLn(x, 40, x, 40 - (big ? 26 : 9), big ? .17 : .09, big ? 1.7 : 1.1);
+        o += glLn(x, 40, x, 40 + (big ? 26 : 9), big ? .17 : .09, big ? 1.7 : 1.1);
+      }
+      return o;
+    },
+    tally: function () {
+      var o = '', x = 5, y = 10, g, i;
+      for (g = 0; g < 14; g++) {
+        for (i = 0; i < 4; i++) o += glLn(x + i * 2.7, y, x + i * 2.7, y + 11, .12, 1.2);
+        o += glLn(x - 1.6, y + 10, x + 10.4, y + 1, .12, 1.2);
+        x += 17;
+        if (x > 92) { x = 5; y += 18; }
+      }
+      return o;
+    },
+    stack: function () {
+      var o = '', h = 0, i;
+      for (i = 0; i < 13; i++) {
+        h += 3 + (i % 3);
+        o += '<rect x="' + (3 + i * 7.6) + '" y="' + (78 - h) + '" width="6" height="' + h
+          + '" rx="1" fill="' + glW(.05) + '" stroke="' + glW(.11)
+          + '" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+      }
+      return o;
+    }
+  };
+
+  /* Seeded from the name, so a suggestion the table has no drawing for
+     is never a blank card. */
+  function glHash(s) {
+    var h = 2166136261, i;
+    for (i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+  function scGoalPat(key, name) {
+    var body;
+    if (GOAL_PATS[key]) body = GOAL_PATS[key]();
+    else {
+      var s = glHash(String(name || key)), o = '', i;
+      var rnd = function () { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
+      var cx = 20 + rnd() * 60, cy = 15 + rnd() * 50, rot = rnd() * 180;
+      for (i = 1; i <= 7; i++) {
+        o += '<ellipse cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" rx="'
+          + (i * (5 + rnd() * 3)).toFixed(1) + '" ry="' + (i * (3.6 + rnd() * 2.4)).toFixed(1)
+          + '" transform="rotate(' + rot.toFixed(0) + ' ' + cx.toFixed(1) + ' ' + cy.toFixed(1)
+          + ')" fill="none" stroke="' + glW(.085 - i * .006)
+          + '" stroke-width="1.1" vector-effect="non-scaling-stroke"/>';
+      }
+      body = o;
+    }
+    return '<svg viewBox="0 0 100 80" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'
+      + body + '</svg>';
+  }
+
+  /* ── THE RECORD ──
+     A damaged entry is dropped and the record is not: the goals are
+     what you cannot get back. Asserted as the good ones SURVIVING
+     rather than as the bad one being refused, because rejecting the
+     whole object passes any check written the other way round. */
+  function scGoalCleanOne(raw, arch) {
+    if (!raw || typeof raw !== 'object') return null;
+    if (typeof raw.n !== 'string' || !raw.n.trim()) return null;
+    if (!scGoalKind(raw.k)) return null;
+    var from = +raw.from, due = +raw.due;
+    if (!(from > 0) || !(due > 0)) return null;
+    var g = {
+      id: typeof raw.id === 'string' && raw.id ? raw.id : scId(),
+      n: raw.n.trim().slice(0, 80),
+      k: raw.k,
+      from: from, due: due,
+      /* was: the date it was ORIGINALLY due, kept the first time it is
+         extended. It is what the amber tag is about. */
+      was: +raw.was > 0 ? +raw.was : 0,
+      ext: Math.max(0, Math.min(120, (+raw.ext || 0) | 0)),
+      /* asked: the due date this goal has already put the checkpoint
+         up for, so it asks once rather than on every render. */
+      asked: +raw.asked > 0 ? +raw.asked : 0,
+      on: []
+    };
+    if (arch) {
+      g.end = +raw.end > 0 ? +raw.end : due;
+      g.ok = !!raw.ok;
+      g.kept = Math.max(0, (+raw.kept || 0) | 0);
+      g.of = Math.max(0, (+raw.of || 0) | 0);
+      return g;
+    }
+    var recs = scGoalRecs(g), list = Array.isArray(raw.on) ? raw.on : [];
+    for (var i = 0; i < list.length && g.on.length < 8; i++) {
+      var x = list[i];
+      if (!x || typeof x !== 'object') continue;
+      var si = +x.si;
+      /* A component naming a suggestion this build no longer has is
+         dropped and the rest of the goal survives — scWorkoutsOf's own
+         rule, one screen over. */
+      if (!(si >= 0 && si < recs.length)) continue;
+      var len = +x.len, days = +x.days;
+      g.on.push({
+        si: si | 0,
+        len: len >= 5 && len <= 240 ? len | 0 : recs[si].full,
+        days: days >= 1 && days <= 7 ? days | 0 : 3,
+        time: (+x.time >= 0 && +x.time < 1440) ? +x.time | 0 : 18 * 60
+      });
+    }
+    return g;
+  }
+
+  function scGoalClean(raw) {
+    var out = { live: [], done: [] }, i, g;
+    if (!raw || typeof raw !== 'object') return out;
+    var lv = Array.isArray(raw.live) ? raw.live : [];
+    for (i = 0; i < lv.length && out.live.length < GOAL_CAP; i++) {
+      g = scGoalCleanOne(lv[i], false);
+      if (g) out.live.push(g);
+    }
+    /* THE ARCHIVE HOLDS BOTH, and dropped goals go in it marked as
+       dropped rather than vanishing. Setting and dropping the same
+       goal three times is a real fact about yourself, and this app has
+       never flattered you. It is a record, not a scoreboard, so a
+       dropped one is the flat neutral and says nothing else. */
+    var dn = Array.isArray(raw.done) ? raw.done : [];
+    for (i = 0; i < dn.length && out.done.length < 40; i++) {
+      g = scGoalCleanOne(dn[i], true);
+      if (g) out.done.push(g);
+    }
+    return out;
+  }
+
+  function scGoalSave() {
+    try { localStorage.setItem(GOAL_KEY, JSON.stringify(goals)); } catch (e) {}
+  }
+
+  function scGoalLoad() {
+    var raw = null;
+    try { raw = JSON.parse(localStorage.getItem(GOAL_KEY)); } catch (e) { raw = null; }
+    if (raw === null) { goals = { live: [], done: [] }; return; }
+    var before = JSON.stringify(raw);
+    goals = scGoalClean(raw);
+    /* ── AND THE REPAIR IS WRITTEN BACK ──
+       scClean mints an id for a goal that has none, and a repair held
+       only in memory is redone every boot and lost the moment anything
+       else writes the key. That hole has shipped three times in this
+       app already — block ids, the summed workout estimate, and Mind's
+       unknown kind. Only when something actually CHANGED, so an intact
+       record costs no write on every open. */
+    if (JSON.stringify(goals) !== before) scGoalSave();
+  }
+
+  /* ── THE DOSE ──
+     Days a week move first; length holds until it reaches the floor
+     and then another day goes instead. */
+  var GL_WEEK = 6048e5;
+
+  /* Midnight LOCAL, never toISOString — the day a goal is due is a
+     date on your calendar, and UTC hands back yesterday for most of
+     the evening west of Greenwich. scDay already keeps that rule for
+     the tick log; this is the same rule as a timestamp. */
+  function scGlMid(d) {
+    var x = new Date(d || Date.now());
+    x.setHours(0, 0, 0, 0);
+    return +x;
+  }
+
+  function scGoalWeeks(g) {
+    return Math.max(1, Math.round((g.due - scGlMid()) / GL_WEEK));
+  }
+
+  function scGoalDose(s, wk) {
+    if (s.weekly) return { len: s.full, days: 1 };
+    var target = Math.max(s.floor * 2, s.full * 5 * Math.min(1, 8 / Math.max(1, wk)));
+    var len = s.full, days = Math.round(target / len);
+    while (days < 2 && len > s.floor) {
+      len = Math.max(s.floor, len - 5);
+      days = Math.round(target / len);
+    }
+    return { len: len, days: Math.max(1, Math.min(6, days)) };
+  }
+
+  function scGoalDoseLine(d) {
+    if (d.days >= 6) return scDurShort(d.len) + ' a day';
+    if (d.days === 1) return scDurShort(d.len) + ', once a week';
+    return scDurShort(d.len) + ', ' + d.days + ' days a week';
+  }
+
+  function scGoalWin(wk) {
+    if (wk >= 52) { var y = Math.round(wk / 52); return y + (y === 1 ? ' year' : ' years'); }
+    if (wk >= 8) return Math.round(wk / 4.34) + ' months';
+    return wk + (wk === 1 ? ' week' : ' weeks');
+  }
+
+  function scGoalWhy2(wk, d) {
+    var w = scGoalWin(wk);
+    if (d.days === 1) return w + ' of this is a weekly job, not a daily one — once, properly.';
+    if (d.days >= 6) return w + ' is short, so it runs every day, at a length short enough to finish.';
+    if (d.days >= 4) return w + ' leaves room for ' + d.days
+      + ' days a week and three evenings that owe you nothing.';
+    return w + ' is long enough to go ' + d.days
+      + ' days a week at a real length, rather than a token every day.';
+  }
+
+  /* The times you already use, narrowed to the part of the day the
+     suggestion belongs in — scCommonTimes' own list, filtered rather
+     than a second one written here. */
+  function scGoalTimes(ses) {
+    var band = ses === 'm' ? [4 * 60, 12 * 60] : ses === 'a' ? [12 * 60, 17 * 60] : [17 * 60, 23 * 60 + 30];
+    var mine = scCommonTimes('s', '').filter(function (t) { return t >= band[0] && t < band[1]; });
+    var dflt = ses === 'm' ? [6 * 60 + 30, 8 * 60, 9 * 60] : ses === 'a' ? [12 * 60, 14 * 60, 16 * 60]
+      : [18 * 60, 19 * 60, 20 * 60, 21 * 60];
+    dflt.forEach(function (t) { if (mine.indexOf(t) < 0) mine.push(t); });
+    return mine.sort(function (a, b) { return a - b; }).slice(0, 4);
+  }
+
+  /* WHICH DAYS a dose lands on. Spread rather than stacked, so three a
+     week is Monday, Wednesday, Friday and not the first three days of
+     it — a process bunched into the front of the week is one you have
+     already failed by Thursday. */
+  var GL_DAYS = { 1: [0], 2: [2, 5], 3: [1, 3, 5], 4: [1, 2, 4, 5], 5: [1, 2, 3, 4, 5],
+    6: [1, 2, 3, 4, 5, 6], 7: [0, 1, 2, 3, 4, 5, 6] };
+
+  /* ── HOW MUCH OF IT YOU ACTUALLY KEPT ──
+     Read off blockLog rather than stored, because the block is the
+     record and a second count would be a copy that drifts. The app
+     cannot know how profitable you are; it knows exactly how many
+     sessions you kept, and the process is what this reports. */
+  function scGoalKept(g) {
+    var kept = 0, of = 0;
+    var mine = state.items.filter(function (it) { return it.g === g.id; });
+    if (!mine.length) return { kept: 0, of: 0 };
+    var end = new Date(), start = new Date(Math.max(g.from, end - 90 * 864e5));
+    for (var t = scGlMid(start); t <= scGlMid(end); t += 864e5) {
+      var day = new Date(t), key = scDay(day), dow = day.getDay();
+      /* Today is not a day you missed it — the day is not over. */
+      if (key === scDay(end)) continue;
+      mine.forEach(function (it) {
+        if (it.d !== dow) return;
+        of++;
+        if (blockLog[key] && blockLog[key][it.id]) kept++;
+      });
+    }
+    return { kept: kept, of: of };
+  }
+
+  /* ── THE SCREEN ──
+     Two states in one pane: the goals, and one goal's cards. A goal
+     you press replaces the list rather than unfolding under it,
+     because the card is 286px and an unfold puts the second goal below
+     the fold before you have decided anything. */
+  function scPaintGoals() {
+    var pane = $('scGoalPane');
+    if (!pane) return;
+    pane.textContent = '';
+    var g = glOpen ? scGoalById(glOpen) : null;
+    if (g) scGoalDeck(pane, g); else scGoalList(pane);
+  }
+
+  function scGoalById(id) {
+    for (var i = 0; i < goals.live.length; i++) if (goals.live[i].id === id) return goals.live[i];
+    return null;
+  }
+
+  /* ── THE TAG THAT SAYS IT RAN LONG ──
+     Amber, and NOT red. Red already means one thing in this app —
+     Missed, on a block whose hour came and went — and an extended goal
+     is one you are still doing, so red would say the opposite of what
+     happened. Amber is the honest register for "past where it was
+     meant to be" without the verdict, and it is far enough from red
+     that the two can never be misread for each other.
+
+     THE COLOUR CARRIES THE OVERRUN AND THE WORDS CARRY HOW MUCH. It
+     STAYS amber once extended, even while the new date is still ahead:
+     "this ran past what you planned" goes on being true, and a colour
+     that resets loses the at-a-glance read the tag exists for.
+
+     ONLY THE TAG. Not the countdown, not the card's edge, not the
+     title — one mark, one claim, or an overrunning goal is the loudest
+     thing on the screen, which is the wash-of-red problem arriving by
+     another door.
+
+     This is a deliberate reversal of "colour never says whether", the
+     way Missed was, and it is written down here rather than smuggled
+     in as a relaxed rule. */
+  function scGoalTags(g) {
+    var box = scEl('div', 'gl-tags');
+    var kk = scGoalKind(g.k);
+    var t1 = scEl('span', 'gl-tag', kk ? kk.n : g.k);
+    box.appendChild(t1);
+    var t2 = scEl('span', 'gl-tag' + (g.ext ? ' is-over' : ''),
+      g.ext ? 'Extended · +' + g.ext + ' months' : scGoalWin(scGoalWeeks(g)) + ' left');
+    box.appendChild(t2);
+    return box;
+  }
+
+  function scGoalList(pane) {
+    var head = scEl('div', 'grp-h');
+    head.appendChild(scEl('b', null, 'Live goals'));
+    head.appendChild(scEl('span', 'pill', goals.live.length + ' of ' + GOAL_CAP));
+    pane.appendChild(head);
+
+    if (!goals.live.length) {
+      var e = scEl('p', 'gl-none');
+      e.appendChild(scEl('b', null, 'Nothing yet.'));
+      e.appendChild(document.createTextNode(
+        ' A goal here turns into blocks on your week — say what you are'
+        + ' working on and by when, and it does the rest.'));
+      pane.appendChild(e);
+    }
+
+    goals.live.forEach(function (g) {
+      var b = scEl('button', 'gl-card');
+      b.appendChild(scEl('span', 'gl-n', g.n));
+      b.appendChild(scGoalTags(g));
+      var k = scGoalKept(g);
+      var f = scEl('span', 'gl-f', g.on.length
+        ? g.on.length + ' in your week' + (k.of ? ' · kept ' + k.kept + ' of ' + k.of : '')
+        : 'Nothing on your week yet');
+      b.appendChild(f);
+      b.addEventListener('click', function () { glOpen = g.id; glIdx = 0; scPaintGoals(); });
+      pane.appendChild(b);
+    });
+
+    if (goals.live.length < GOAL_CAP) {
+      var add = scEl('button', 'gl-new');
+      add.appendChild(scEl('span', 'gl-plus', '+'));
+      add.appendChild(scEl('span', null, 'New goal'));
+      add.addEventListener('click', scGoalNewSheet);
+      pane.appendChild(add);
+    } else {
+      pane.appendChild(scEl('p', 'hint gl-cap',
+        'Three is the cap. Finish or drop one before you set another —'
+        + ' a goals screen with nine things on it is a wish list.'));
+    }
+
+    if (goals.done.length) scGoalArchive(pane);
+  }
+
+  /* Folded shut, and remembered per visit only. A completed goal does
+     not earn a tab, and a list of names is a trophy cabinet you look
+     at twice — what makes it a record is that each one keeps what its
+     process WAS and how much of it you kept. Six months later the
+     useful half is not that you did it, it is what you actually did. */
+  function scGoalArchive(pane) {
+    var wrap = scEl('div', 'gl-arch');
+    var h = scEl('h3', 'grp-h');
+    var btn = scEl('button', 'gl-fold');
+    btn.type = 'button';
+    btn.setAttribute('aria-expanded', String(!!glArchOpen));
+    btn.setAttribute('aria-controls', 'scGoalArch');
+    btn.appendChild(scEl('b', null, 'Archive'));
+    btn.appendChild(scEl('span', 'pill', String(goals.done.length)));
+    var chev = scEl('span', 'gl-chev');
+    chev.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+    btn.appendChild(chev);
+    btn.addEventListener('click', function () { glArchOpen = !glArchOpen; scPaintGoals(); });
+    h.appendChild(btn);
+    wrap.appendChild(h);
+
+    var box = scEl('div', 'gl-arch-b');
+    box.id = 'scGoalArch';
+    box.hidden = !glArchOpen;
+    goals.done.forEach(function (g) {
+      var c = scEl('div', 'gl-card is-arch');
+      c.appendChild(scEl('span', 'gl-n', g.n));
+      var tg = scEl('div', 'gl-tags');
+      tg.appendChild(scEl('span', 'gl-tag' + (g.ok ? ' is-ok' : ''), g.ok ? 'Done' : 'Dropped'));
+      c.appendChild(tg);
+      var mo = Math.max(1, Math.round((g.end - g.from) / 26298e5));
+      c.appendChild(scEl('span', 'gl-f', mo + (mo === 1 ? ' month' : ' months')
+        + (g.of ? ' · kept ' + g.kept + ' of ' + g.of + ' sessions' : '')));
+      box.appendChild(c);
+    });
+    wrap.appendChild(box);
+    pane.appendChild(wrap);
+  }
+  var glArchOpen = false;
+
+  /* ── ONE CARD ──
+     Not a hand. A stack behind it says these are ALTERNATIVES, and a
+     process is a set — you may well want three of them. The chips are
+     the pager and the card in front is the whole of what is drawn. */
+  function scGoalDeck(pane, g) {
+    var recs = scGoalRecs(g), wk = scGoalWeeks(g);
+    if (glIdx >= recs.length) glIdx = 0;
+
+    var crumb = scEl('div', 'gl-crumb');
+    var back = scEl('button', 'gl-back');
+    back.setAttribute('aria-label', 'All goals');
+    back.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+    back.addEventListener('click', function () { glOpen = null; scPaintGoals(); });
+    crumb.appendChild(back);
+    crumb.appendChild(scEl('b', null, g.n));
+    pane.appendChild(crumb);
+    pane.appendChild(scGoalTags(g));
+
+    var chips = scEl('div', 'gl-chips');
+    recs.forEach(function (s, i) {
+      var c = scEl('button', 'gl-chip', s.n);
+      c.setAttribute('aria-pressed', String(i === glIdx));
+      if (scGoalOn(g, i)) c.classList.add('is-on');
+      c.addEventListener('click', function () { glIdx = i; scPaintGoals(); });
+      chips.appendChild(c);
+    });
+    pane.appendChild(chips);
+
+    var s = recs[glIdx], on = scGoalOn(g, glIdx), d = on ? on : scGoalDose(s, wk);
+    var card = scEl('div', 'gl-wc');
+    card.style.setProperty('--gl-h', GL_HUES[glIdx % GL_HUES.length]);
+    var pat = scEl('div', 'gl-pat');
+    pat.innerHTML = scGoalPat(s.p, s.n);
+    card.appendChild(pat);
+    var body = scEl('div', 'gl-body');
+    body.appendChild(scEl('span', 'gl-lab', on ? 'On your week' : 'Suggested'));
+    body.appendChild(scEl('span', 'gl-nm', s.n));
+    body.appendChild(scEl('span', 'gl-ds', scGoalDoseLine(d)
+      + (on ? ' · ' + scT(on.time) : '')));
+    body.appendChild(scEl('p', 'gl-w', s.w));
+    body.appendChild(scEl('p', 'gl-w', scGoalWhy2(wk, d)));
+    card.appendChild(body);
+    pane.appendChild(card);
+
+    if (on) {
+      var off = scEl('button', 'btn gl-off', 'Take it off your week');
+      off.addEventListener('click', function () { scGoalRemove(g, glIdx); });
+      pane.appendChild(off);
+    } else {
+      var go = scEl('button', 'btn go gl-go', 'Set a time and add');
+      go.addEventListener('click', function () { scGoalAddSheet(g, glIdx); });
+      pane.appendChild(go);
+    }
+    pane.appendChild(scEl('p', 'hint gl-count',
+      (glIdx + 1) + ' of ' + recs.length + ' · step the chips'));
+
+    var ctl = scEl('div', 'gl-ctl');
+    ctl.appendChild(scGoalBtn('Mark it done', function () { scGoalFinish(g, true); }));
+    ctl.appendChild(scGoalBtn('Extend', function () { scGoalExtend(g); }));
+    ctl.appendChild(scGoalBtn('Drop it', function () { scGoalFinish(g, false); }));
+    pane.appendChild(ctl);
+  }
+
+  function scGoalBtn(label, fn) {
+    var b = scEl('button', 'gl-mini', label);
+    b.addEventListener('click', fn);
+    return b;
+  }
+
+  /* Nine hues, the workout cards' own argument: a colour that says
+     WHICH has to be the same at every angle of the wheel. These are
+     literals for the reason those are. */
+  var GL_HUES = ['#e3b341', '#5fa8e8', '#a98be8', '#57c77e'];
+
+  function scGoalOn(g, si) {
+    for (var i = 0; i < g.on.length; i++) if (g.on[i].si === si) return g.on[i];
+    return null;
+  }
+
+  /* ── THE ADD ──
+     The dose arrives already answered and is still one tap to move,
+     which is the workout ladder's rule: the figure the card is SHOWING
+     you has to be pressable, or the control disagrees with the thing
+     above it.
+
+     AND THE COST OF THE DAY, BEFORE AND AFTER. The app already knows
+     the hours on a day — the head prints them — and nothing else uses
+     the figure. Drawn at the one moment it can change your mind. */
+  function scGoalAddSheet(g, si) {
+    var recs = scGoalRecs(g), s = recs[si], wk = scGoalWeeks(g);
+    var d = scGoalDose(s, wk);
+    var len = d.len, days = d.days, at = scGoalTimes(s.ses)[0];
+
+    scSheet(s.n, function (body) {
+      var draw = function () {
+        body.textContent = '';
+
+        var w1 = scEl('p', 'gl-sw', s.w);
+        var w2 = scEl('p', 'gl-sw is-dim', scGoalWhy2(wk, { len: len, days: days }));
+        body.appendChild(w1); body.appendChild(w2);
+
+        body.appendChild(scEl('p', 'label', 'How long'));
+        var lad = scEl('div', 'gl-lad');
+        var rungs = [10, 15, 20, 30, 45, 60, 75, 90].filter(function (m) { return m >= s.floor; });
+        if (rungs.indexOf(len) < 0) { rungs.push(len); rungs.sort(function (a, b) { return a - b; }); }
+        rungs.slice(0, 8).forEach(function (m) {
+          var r = scEl('button', 'gl-rung', String(m));
+          r.setAttribute('aria-pressed', String(m === len));
+          r.addEventListener('click', function () { len = m; draw(); });
+          lad.appendChild(r);
+        });
+        body.appendChild(lad);
+
+        body.appendChild(scEl('p', 'label', 'Days a week'));
+        var lad2 = scEl('div', 'gl-lad');
+        [1, 2, 3, 4, 5, 6].forEach(function (n) {
+          var r = scEl('button', 'gl-rung is-w', String(n));
+          r.setAttribute('aria-pressed', String(n === days));
+          r.addEventListener('click', function () { days = n; draw(); });
+          lad2.appendChild(r);
+        });
+        body.appendChild(lad2);
+
+        body.appendChild(scEl('p', 'label', 'When'));
+        var lad3 = scEl('div', 'gl-lad');
+        var times = scGoalTimes(s.ses);
+        if (times.indexOf(at) < 0) { times.push(at); times.sort(function (a, b) { return a - b; }); }
+        times.slice(0, 4).forEach(function (t) {
+          var r = scEl('button', 'gl-rung', scT(t));
+          r.setAttribute('aria-pressed', String(t === at));
+          r.addEventListener('click', function () { at = t; draw(); });
+          lad3.appendChild(r);
+        });
+        body.appendChild(lad3);
+
+        /* WHAT THE DAY COSTS. The first weekday this dose lands on,
+           since that is the one it actually changes. */
+        var dows = GL_DAYS[days] || GL_DAYS[3];
+        var dow = dows[0], had = 0;
+        state.items.forEach(function (it) { if (it.d === dow) had += (it.e - it.s); });
+        body.appendChild(scEl('p', 'label', 'What it costs'));
+        var cost = scEl('p', 'gl-sw is-dim');
+        cost.appendChild(document.createTextNode(FULL[dow] + ' goes from '));
+        cost.appendChild(scEl('b', null, scDurShort(had)));
+        cost.appendChild(document.createTextNode(' to '));
+        cost.appendChild(scEl('b', null, scDurShort(had + len)));
+        cost.appendChild(document.createTextNode('.'));
+        body.appendChild(cost);
+
+        var go = scEl('button', 'btn go', 'Add to ' + days + ' ' + (days === 1 ? 'day' : 'days') + ' a week');
+        go.addEventListener('click', function () { scGoalCommit(g, si, len, days, at); });
+        body.appendChild(go);
+        var no = scEl('button', 'btn off', 'Not now');
+        no.addEventListener('click', scClose);
+        body.appendChild(no);
+      };
+      draw();
+    });
+  }
+
+  /* ── THE BLOCK CARRIES ITS GOAL ──
+     One field, and it is what lets the goal answer the only question
+     worth asking it: am I actually doing this. What it must NOT do is
+     change what anything else counts — scShareWork sends how many
+     BLOCKS you kept, and a block from a goal is a block you kept. */
+  function scGoalCommit(g, si, len, days, at) {
+    var s = scGoalRecs(g)[si];
+    var dows = GL_DAYS[days] || GL_DAYS[3];
+    scMark();
+    dows.forEach(function (d) {
+      var e = Math.min(1440, at + len);
+      if (e <= at) return;
+      state.items.push({ id: scId(), d: d, s: at, e: e, r: '', n: s.n, k: [], g: g.id });
+    });
+    g.on.push({ si: si, len: len, days: days, time: at });
+    scGoalSave();
+    scClose();
+    scCommit(s.n + ' · ' + scGoalDoseLine({ len: len, days: days }));
+    scPaintGoals();
+  }
+
+  function scGoalRemove(g, si) {
+    var s = scGoalRecs(g)[si];
+    scMark();
+    state.items = state.items.filter(function (it) {
+      return !(it.g === g.id && it.n === s.n);
+    });
+    g.on = g.on.filter(function (x) { return x.si !== si; });
+    scGoalSave();
+    scCommit(s.n + ' taken off your week');
+    scPaintGoals();
+  }
+
+  /* ── ONLY YOU END A GOAL ──
+     The date is a checkpoint, not an ending. When it arrives the goal
+     asks once — still on it, done, or drop it — and nothing expires on
+     its own. `asked` records which due date it has already put the
+     question for, so extending sets a new date and a new question
+     rather than asking again on the next render. */
+  function scGoalDueOne() {
+    var now = scGlMid();
+    for (var i = 0; i < goals.live.length; i++) {
+      var g = goals.live[i];
+      if (g.due <= now && g.asked !== g.due) return g;
+    }
+    return null;
+  }
+
+  function scGoalCheck() {
+    var g = scGoalDueOne();
+    if (!g || sheetOpen) return;
+    scSheet('Still on it?', function (body) {
+      body.appendChild(scEl('p', 'gl-sw', g.n));
+      body.appendChild(scEl('p', 'gl-sw is-dim',
+        'The date you set has come round. Nothing happens to a goal'
+        + ' until you say so — this is the only thing that ends one.'));
+      var ext = scEl('button', 'btn go', 'Still on it · give it 2 more months');
+      ext.addEventListener('click', function () { g.asked = 0; scGoalExtend(g); });
+      body.appendChild(ext);
+      var dn = scEl('button', 'btn off', 'Done — put it in the archive');
+      dn.addEventListener('click', function () { scGoalFinish(g, true); });
+      body.appendChild(dn);
+      var dr = scEl('button', 'btn off', 'Drop it');
+      dr.addEventListener('click', function () { scGoalFinish(g, false); });
+      body.appendChild(dr);
+    });
+    g.asked = g.due;
+    scGoalSave();
+  }
+
+  function scGoalExtend(g) {
+    if (!g.was) g.was = g.due;
+    g.ext += 2;
+    var d = new Date(g.due);
+    d.setMonth(d.getMonth() + 2);
+    g.due = scGlMid(d);
+    g.asked = 0;
+    scGoalSave();
+    scClose();
+    scPaintGoals();
+    scToast('Extended by 2 months', false);
+  }
+
+  /* Done and dropped both go to the archive, and the blocks STAY.
+     They are your week now — the goal ends and the process is what is
+     left, which is most of the point of the feature. */
+  function scGoalFinish(g, ok) {
+    var k = scGoalKept(g);
+    goals.done.unshift({
+      id: g.id, n: g.n, k: g.k, from: g.from, due: g.due, was: g.was, ext: g.ext,
+      end: scGlMid(), ok: !!ok, kept: k.kept, of: k.of, on: []
+    });
+    if (goals.done.length > 40) goals.done.length = 40;
+    goals.live = goals.live.filter(function (x) { return x.id !== g.id; });
+    state.items.forEach(function (it) { if (it.g === g.id) delete it.g; });
+    scSave();
+    scGoalSave();
+    glOpen = null;
+    scClose();
+    scPaintGoals();
+    scToast(ok ? 'Archived' : 'Dropped', false);
+  }
+
+  var GL_WINDOWS = [[6, '6 weeks'], [13, '3 months'], [26, '6 months'],
+    [39, '9 months'], [52, 'A year'], [78, '18 months']];
+
+  function scGoalNewSheet() {
+    var name = '', kind = null, wk = null;
+    scSheet('New goal', function (body) {
+      var draw = function () {
+        body.textContent = '';
+        body.appendChild(scEl('p', 'label', 'What are you working on'));
+        var f = scEl('input', 'field');
+        f.type = 'text';
+        f.value = name;
+        f.placeholder = 'Get consistently profitable trading';
+        f.setAttribute('aria-label', 'What are you working on');
+        f.addEventListener('input', function () { name = f.value; });
+        body.appendChild(f);
+
+        body.appendChild(scEl('p', 'label', 'Which kind'));
+        var l1 = scEl('div', 'gl-lad');
+        GOAL_KINDS.forEach(function (x) {
+          var r = scEl('button', 'gl-rung is-w', x.n);
+          r.setAttribute('aria-pressed', String(kind === x.k));
+          r.addEventListener('click', function () { name = f.value; kind = x.k; draw(); });
+          l1.appendChild(r);
+        });
+        body.appendChild(l1);
+
+        body.appendChild(scEl('p', 'label', 'By when'));
+        var l2 = scEl('div', 'gl-lad');
+        GL_WINDOWS.forEach(function (x) {
+          var r = scEl('button', 'gl-rung is-w', x[1]);
+          r.setAttribute('aria-pressed', String(wk === x[0]));
+          r.addEventListener('click', function () { name = f.value; wk = x[0]; draw(); });
+          l2.appendChild(r);
+        });
+        body.appendChild(l2);
+
+        /* WHAT IT WOULD SUGGEST, before you commit to anything. The
+           window changes the dose and not the list, and seeing that
+           happen is what makes the window feel like a decision rather
+           than a field. */
+        if (kind && wk) {
+          body.appendChild(scEl('p', 'label', 'It would suggest'));
+          scGoalKind(kind).recs.forEach(function (s) {
+            var row = scEl('p', 'gl-sug');
+            row.appendChild(scEl('b', null, s.n));
+            row.appendChild(document.createTextNode(' · ' + scGoalDoseLine(scGoalDose(s, wk))));
+            body.appendChild(row);
+          });
+          var go = scEl('button', 'btn go', 'Create it');
+          go.addEventListener('click', function () {
+            var n = (f.value || '').trim();
+            if (!n) { f.focus(); return; }
+            var due = new Date();
+            due.setDate(due.getDate() + wk * 7);
+            var g = { id: scId(), n: n.slice(0, 80), k: kind, from: scGlMid(),
+              due: scGlMid(due), was: 0, ext: 0, asked: 0, on: [] };
+            goals.live.push(g);
+            scGoalSave();
+            glOpen = g.id; glIdx = 0;
+            scClose();
+            scPaintGoals();
+          });
+          body.appendChild(go);
+        }
+      };
+      draw();
+    });
+  }
+
   /* ═══════════════════════════════════════════════════════════
      WIRING
      ═══════════════════════════════════════════════════════════ */
@@ -10993,6 +12117,7 @@
   scTrainLoad();
   scMindLoad();
   scRateLoad();
+  scGoalLoad();
 
   try {
     var fs2 = localStorage.getItem(FRSTOP_KEY);

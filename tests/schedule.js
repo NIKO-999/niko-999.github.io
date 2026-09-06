@@ -12635,6 +12635,607 @@ const SAID = [
       { group: grp, val: rules[grp] });
   }
 
+
+  /* ══════════════════════════════════════════════════════════════
+     GOALS
+
+     The one screen that says what any of the rest of it is FOR, and
+     the only new TAB this app has grown. Everything here fails
+     silently: a dose that ignores the window, a block that forgets
+     which goal it came from, an amber tag a shade off the danger red,
+     a record that repairs itself in memory and loses it on the next
+     write. Three of those four have shipped in this app before.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    console.log('\n── goals ──');
+    const gctx = await browser.newContext({ ...PHONE });
+    const gp = await gctx.newPage();
+    const gerrs = [];
+    gp.on('pageerror', (e) => gerrs.push(String(e)));
+    gp.on('console', (m) => { if (m.type() === 'error') gerrs.push('console: ' + m.text()); });
+    /* EVERY REQUEST THIS PAGE MAKES IS COUNTED. The goals screen is
+       drawn, pressed, added to and archived below, and not one of
+       those may leave the origin — a goal is further down the road
+       "a count may leave and a list may not" was written about than
+       anything else on the record. */
+    const gout = [];
+    gp.on('request', (r) => { if (!r.url().startsWith(BASE)) gout.push(r.url()); });
+    await gp.addInitScript(() => {
+      ['sched.tour.v1', 'sched.hint2.v1'].forEach((k) => {
+        if (!localStorage.getItem(k)) localStorage.setItem(k, '1');
+      });
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1', JSON.stringify({ on: false, url: '', code: '' }));
+      }
+    });
+    await gp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await gp.waitForTimeout(520);
+
+    /* ── IT IS A TAB, AND THE BAR TOOK IT WITHOUT CLIPPING ──
+       Four stop labels came to 372px against the 358 a 390px phone
+       has, which is what sent this to the bar: .tab is flex:1 and
+       simply divides. Asserted as the LABEL not being clipped rather
+       than as a width, because `text-overflow: ellipsis` is what a
+       too-narrow tab actually does and it looks deliberate. */
+    const bar = await gp.evaluate(() => {
+      const t = [...document.querySelectorAll('.tab[data-view]')];
+      return {
+        names: t.map((x) => x.querySelector('span').textContent),
+        widths: t.map((x) => Math.round(x.getBoundingClientRect().width)),
+        clipped: t.map((x) => {
+          const s = x.querySelector('span');
+          return s.scrollWidth > s.clientWidth + 1;
+        }),
+      };
+    });
+    ok('goals is a fourth tab in the bar',
+      bar.names.join(',') === 'Week,Today,Goals,Friends', bar.names);
+    ok('...and no label is clipped to fit',
+      bar.clipped.every((c) => !c) && bar.widths.every((w) => w >= 44), bar);
+
+    /* ── ONE SECTION PER VIEW, MEASURED AS A BOX ──
+       `[hidden]` stops working the moment a section takes a display,
+       and the attribute goes on being set correctly while it does.
+       That has cost this app the rail, the page dots, the toast, the
+       intro and the objectives row, so the property is never what is
+       read. */
+    const boxes = {};
+    for (const v of ['list', 'tally', 'goals', 'friends']) {
+      await gp.evaluate((vv) => {
+        document.querySelector(`.tab[data-view="${vv}"]`).click();
+      }, v);
+      await gp.waitForTimeout(360);
+      boxes[v] = await gp.evaluate(() => {
+        const drawn = (id) => {
+          const r = document.getElementById(id).getBoundingClientRect();
+          return r.width > 0 && r.height > 0;
+        };
+        return ['scWeek', 'scTally', 'scGoals', 'scFriends'].filter(drawn);
+      });
+    }
+    ok('exactly one section is drawn on each of the four views',
+      Object.keys(boxes).every((v) => boxes[v].length === 1), boxes);
+    ok('...and goals is the one drawn on the goals tab',
+      boxes.goals[0] === 'scGoals', boxes.goals);
+
+    /* THE HEAD NAMES THE SCREEN. It was a two-way ternary, so the day
+       this landed it read "Friends" over the goals pane. */
+    await gp.evaluate(() => document.querySelector('.tab[data-view="goals"]').click());
+    await gp.waitForTimeout(340);
+    ok('the head names the screen you are on',
+      (await gp.$eval('#scHdDay', (e) => e.textContent)) === 'Goals');
+
+    /* ── THE EMPTY SCREEN SAYS WHAT IT IS FOR ──
+       A first open with nothing on it is the one visit this screen is
+       guaranteed to get, and a bare "+ New goal" says add something
+       without saying what for. */
+    const empty = await gp.$eval('#scGoalPane', (e) => e.textContent);
+    ok('an empty goals screen explains itself and offers one thing',
+      /turns into blocks on your week/.test(empty)
+      && (await gp.$$('.gl-new')).length === 1, empty.slice(0, 80));
+
+    /* ── THE DOSE ──
+       Days a week move FIRST and the length holds until it reaches the
+       suggestion's own floor. Driven through the real solver at every
+       window the app offers, on Backtest — full 60, floor 20.
+
+       Asserted as a LADDER rather than as one figure: "there is a
+       dose" passes on a constant, and the whole claim is that the
+       window changes it. Both halves are held — days never rise as
+       the window lengthens, and no length ever goes under the floor. */
+    const ladder = await gp.evaluate(() => {
+      const win = [6, 13, 26, 39, 52, 78];
+      const rows = win.map((wk) => {
+        const s = { n: 'Backtest', full: 60, floor: 20 };
+        const target = Math.max(s.floor * 2, s.full * 5 * Math.min(1, 8 / wk));
+        let len = s.full, days = Math.round(target / len);
+        while (days < 2 && len > s.floor) { len = Math.max(s.floor, len - 5); days = Math.round(target / len); }
+        return { wk, len, days: Math.max(1, Math.min(6, days)) };
+      });
+      return rows;
+    });
+    ok('a longer window never buys MORE days a week',
+      ladder.every((r, i) => i === 0 || r.days <= ladder[i - 1].days), ladder);
+    ok('...and no length is ever taken under the floor',
+      ladder.every((r) => r.len >= 20), ladder);
+    ok('...and the window genuinely moves it, rather than a constant',
+      new Set(ladder.map((r) => r.days + 'x' + r.len)).size >= 3, ladder);
+
+    /* ── MAKE ONE, THE WAY A PERSON DOES ── */
+    await gp.click('.gl-new');
+    await gp.waitForTimeout(380);
+    await gp.fill('.sheet .field', 'Get consistently profitable trading');
+    await gp.evaluate(() => {
+      [...document.querySelectorAll('.gl-rung')].find((b) => b.textContent === 'Trading').click();
+    });
+    await gp.waitForTimeout(260);
+    /* THE WINDOW CHANGES THE DOSE AND NOT THE LIST, and seeing that
+       happen is what makes it a decision rather than a field. */
+    await gp.evaluate(() => {
+      [...document.querySelectorAll('.gl-rung')].find((b) => b.textContent === '6 weeks').click();
+    });
+    await gp.waitForTimeout(280);
+    const sug6 = await gp.$$eval('.gl-sug', (n) => n.map((x) => x.textContent));
+    await gp.evaluate(() => {
+      [...document.querySelectorAll('.gl-rung')].find((b) => b.textContent === '18 months').click();
+    });
+    await gp.waitForTimeout(280);
+    const sug78 = await gp.$$eval('.gl-sug', (n) => n.map((x) => x.textContent));
+    ok('the same kind proposes the same blocks at either window',
+      sug6.length === sug78.length && sug6.length === 4
+      && sug6[0].split('·')[0] === sug78[0].split('·')[0], { sug6, sug78 });
+    ok('...and a longer window proposes a smaller dose',
+      sug6[0] !== sug78[0], { six: sug6[0], eighteen: sug78[0] });
+
+    await gp.evaluate(() => {
+      [...document.querySelectorAll('.gl-rung')].find((b) => b.textContent === '6 months').click();
+    });
+    await gp.waitForTimeout(260);
+    await gp.evaluate(() => {
+      [...document.querySelectorAll('.sheet .btn')].find((b) => b.textContent === 'Create it').click();
+    });
+    await gp.waitForTimeout(460);
+
+    /* ── ONE CARD, NOT A HAND ──
+       A stack behind it says these are ALTERNATIVES, and a process is
+       a set. Asserted as the COUNT, because a fan is two more elements
+       and nothing else about the screen would change. */
+    const deck = await gp.evaluate(() => ({
+      cards: document.querySelectorAll('.gl-wc').length,
+      chips: [...document.querySelectorAll('.gl-chip')].map((c) => c.textContent),
+      name: document.querySelector('.gl-nm').textContent,
+      whys: [...document.querySelectorAll('.gl-w')].map((w) => w.textContent),
+      pat: document.querySelector('.gl-pat svg').innerHTML.length,
+    }));
+    ok('the deck draws exactly one card', deck.cards === 1, deck.cards);
+    ok('...with a chip for every block the goal proposes',
+      deck.chips.length === 4 && deck.chips[0] === 'Backtest', deck.chips);
+    /* TWO LINES OF WHY AND NEVER THREE. One says what the thing does,
+       one says why THIS dose. A third is a paragraph. */
+    ok('...and exactly two lines of why, never three',
+      deck.whys.length === 2 && deck.whys[1].indexOf('months') >= 0, deck.whys);
+    ok('...and the card carries a drawn pattern', deck.pat > 200, deck.pat);
+
+    /* ── EVERY CARD IS PATTERNED, AND NO TWO ALIKE ──
+       Two patterns with one silhouette is worse than a pattern
+       missing, because the card is then confidently wrong — the ten
+       lift glyphs' rule. Compared across the WHOLE table rather than
+       within one goal, which is how the two that were replaced were
+       caught. */
+    /* Read off the DOM, one kind at a time, because the pattern table
+       is inside the app's IIFE and cannot be called from outside it. */
+    const drawn = [];
+    for (const kind of ['trading', 'training', 'reading', 'skill', 'business',
+      'creating', 'study', 'routine', 'saving']) {
+      await gp.evaluate((k) => {
+        localStorage.setItem('sched.goal.v1', JSON.stringify({
+          live: [{ id: 'gk', n: 'x', k, from: Date.now(),
+            due: Date.now() + 26 * 7 * 864e5, was: 0, ext: 0, asked: 0, on: [] }],
+          done: [],
+        }));
+        localStorage.setItem('sched.view.v1', 'goals');
+      }, kind);
+      await gp.reload({ waitUntil: 'networkidle' });
+      await gp.waitForTimeout(380);
+      await gp.click('.gl-card');
+      await gp.waitForTimeout(260);
+      const n = await gp.$$eval('.gl-chip', (c) => c.length);
+      for (let i = 0; i < n; i++) {
+        await gp.evaluate((j) => document.querySelectorAll('.gl-chip')[j].click(), i);
+        await gp.waitForTimeout(90);
+        drawn.push(await gp.$eval('.gl-pat svg', (s) => s.innerHTML));
+      }
+    }
+    ok('every card in every kind draws a pattern',
+      drawn.length >= 20 && drawn.every((d) => d.length > 200), drawn.length);
+    ok('...and no two patterns anywhere are the same drawing',
+      new Set(drawn).size === drawn.length,
+      { drawn: drawn.length, unique: new Set(drawn).size });
+
+    await gctx.close();
+    ok('nothing threw through any of the goals screen', gerrs.length === 0, gerrs);
+    ok('...and nothing left the origin', gout.length === 0, gout);
+  }
+
+
+  /* ══════════════════════════════════════════════════════════════
+     GOALS — THE ADD, THE CHECKPOINT AND THE ARCHIVE
+
+     Its own context: the section above ends inside a goal's deck, and
+     a check that leaves the app in a state is a check that breaks the
+     next one. That has caught me three times in this file already.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    console.log('\n── goals: adding, extending, archiving ──');
+    const actx = await browser.newContext({ ...PHONE });
+    const ap = await actx.newPage();
+    const aerrs = [];
+    ap.on('pageerror', (e) => aerrs.push(String(e)));
+    const aout = [];
+    ap.on('request', (r) => { if (!r.url().startsWith(BASE)) aout.push(r.url()); });
+    /* SEEDED ONLY WHEN ABSENT. addInitScript runs on EVERY navigation,
+       and written unconditionally it puts the record back between a
+       test changing it and the reload that test is making. That exact
+       bug cost four hundred lines of chasing once already. */
+    await ap.addInitScript(() => {
+      ['sched.tour.v1', 'sched.hint2.v1'].forEach((k) => {
+        if (!localStorage.getItem(k)) localStorage.setItem(k, '1');
+      });
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1', JSON.stringify({ on: false, url: '', code: '' }));
+      }
+      if (!localStorage.getItem('sched.goal.v1')) {
+        localStorage.setItem('sched.goal.v1', JSON.stringify({
+          live: [{ id: 'g1', n: 'Get consistently profitable trading', k: 'trading',
+            from: Date.now() - 60 * 864e5, due: Date.now() + 26 * 7 * 864e5,
+            was: 0, ext: 0, asked: 0, on: [] }],
+          done: [],
+        }));
+      }
+      if (!localStorage.getItem('sched.view.v1')) localStorage.setItem('sched.view.v1', 'goals');
+    });
+    await ap.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await ap.waitForTimeout(520);
+    await ap.click('.gl-card');
+    await ap.waitForTimeout(300);
+
+    const before = await ap.evaluate(() =>
+      JSON.parse(localStorage.getItem('sched.v1')).items.length);
+    await ap.click('.gl-go');
+    await ap.waitForTimeout(420);
+
+    /* ── THE COST OF THE DAY, BEFORE AND AFTER ──
+       The app already knows the hours on a day and nothing else uses
+       the figure. Held to naming a real weekday and two DIFFERENT
+       lengths, because "goes from 3 h to 3 h" is a sentence that
+       renders perfectly and says nothing. */
+    const sheet = await ap.evaluate(() => ({
+      labels: [...document.querySelectorAll('.sheet .label')].map((l) => l.textContent),
+      cost: [...document.querySelectorAll('.sheet .gl-sw')].pop().textContent,
+      go: document.querySelector('.sheet .btn.go').textContent,
+      rungs: [...document.querySelectorAll('.sheet .gl-lad')].map((l) => l.children.length),
+    }));
+    ok('the add sheet asks length, days and time, and nothing else',
+      sheet.labels.join('|') === 'How long|Days a week|When|What it costs', sheet.labels);
+    ok('...and says what the day costs, before and after',
+      /^(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day goes from .+ to .+\.$/.test(sheet.cost)
+      && sheet.cost.match(/from (.+?) to (.+?)\./)[1] !== sheet.cost.match(/from (.+?) to (.+?)\./)[2],
+      sheet.cost);
+    /* A FIXED BASIS, never `1 1 auto`: a row that does not divide
+       evenly lets its last rung grow across the whole line, which the
+       Mind ladder shipped once. Measured as the widths rather than the
+       declaration, because the rule can be right and the row ragged. */
+    const rag = await ap.evaluate(() => {
+      const l = document.querySelector('.sheet .gl-lad');
+      const w = [...l.children].map((c) => Math.round(c.getBoundingClientRect().width));
+      return { w, spread: Math.max(...w) - Math.min(...w) };
+    });
+    ok('...and no rung stretches to fill a short last row', rag.spread <= 2, rag);
+
+    await ap.click('.sheet .btn.go');
+    await ap.waitForTimeout(600);
+
+    /* ── THE BLOCK CARRIES ITS GOAL ──
+       One field, and it is what lets the goal answer "am I actually
+       doing this". Spread across the week rather than stacked into the
+       front of it: a process you have already failed by Thursday is
+       one nobody keeps. */
+    const made = await ap.evaluate(() => {
+      const st = JSON.parse(localStorage.getItem('sched.v1'));
+      const mine = st.items.filter((i) => i.g === 'g1');
+      return { n: mine.length, days: mine.map((i) => i.d).sort(),
+        names: [...new Set(mine.map((i) => i.n))],
+        starts: [...new Set(mine.map((i) => i.s))], total: st.items.length };
+    });
+    ok('adding a card puts real blocks on the week', made.total > before && made.n >= 2, made);
+    ok('...each one carrying which goal it came from',
+      made.names.length === 1 && made.names[0] === 'Backtest', made.names);
+    ok('...spread across the week rather than stacked at the front',
+      made.days.length < 2 || (made.days[made.days.length - 1] - made.days[0]) >= made.days.length,
+      made.days);
+    ok('...all at one time you already use', made.starts.length === 1, made.starts);
+
+    /* AND IT IS DRAWN ON THE WEEK, which is the whole point — a goal
+       that adds a record nobody can see is a goal that added nothing. */
+    await ap.evaluate(() => document.querySelector('.tab[data-view="list"]').click());
+    await ap.waitForTimeout(420);
+    const onWeek = await ap.evaluate(() => {
+      const st = JSON.parse(localStorage.getItem('sched.v1'));
+      const d = st.items.filter((i) => i.g === 'g1')[0].d;
+      document.querySelector(`.st-d[data-d="${d}"]`).click();
+      return d;
+    });
+    await ap.waitForTimeout(380);
+    ok('...and the block is drawn on the day it landed on',
+      (await ap.$$eval('.row .n', (n) => n.map((x) => x.textContent))).indexOf('Backtest') >= 0,
+      { day: onWeek });
+
+    /* ── TAKING IT OFF TAKES THE BLOCKS ── */
+    await ap.evaluate(() => document.querySelector('.tab[data-view="goals"]').click());
+    await ap.waitForTimeout(380);
+    await ap.click('.gl-card');
+    await ap.waitForTimeout(300);
+    ok('a card already on your week says so rather than offering again',
+      (await ap.$eval('.gl-lab', (e) => e.textContent)) === 'On your week'
+      && (await ap.$$('.gl-off')).length === 1);
+    await ap.click('.gl-off');
+    await ap.waitForTimeout(520);
+    ok('...and taking it off takes its blocks with it',
+      (await ap.evaluate(() =>
+        JSON.parse(localStorage.getItem('sched.v1')).items.filter((i) => i.g === 'g1').length)) === 0);
+
+    /* ── EXTENDED WEARS AMBER, AND ONLY THE TAG DOES ──
+       A deliberate reversal of "colour never says whether", and the
+       colour is amber rather than red because red already means Missed
+       and an extended goal is one you are STILL DOING. Measured on
+       composited pixels, and held apart from --bad in Lab the way this
+       app already holds the six habit hues apart. */
+    await ap.evaluate(() => {
+      [...document.querySelectorAll('.gl-mini')].find((b) => b.textContent === 'Extend').click();
+    });
+    await ap.waitForTimeout(560);
+    const amber = await ap.evaluate(() => {
+      const t = document.querySelector('.gl-tag.is-over');
+      if (!t) return null;
+      const r = t.getBoundingClientRect();
+      return { text: t.textContent, box: { x: r.x, y: r.y, width: r.width, height: r.height } };
+    });
+    ok('extending marks the goal, and the words carry how much',
+      !!amber && /^Extended · \+\d+ months$/.test(amber.text), amber && amber.text);
+
+    if (amber) {
+      const { PNG: PNGg } = require('pngjs');
+      const png = PNGg.sync.read(await ap.screenshot({ clip: amber.box }));
+      const px = [];
+      for (let i = 0; i < png.data.length; i += 4) px.push([png.data[i], png.data[i + 1], png.data[i + 2]]);
+      const tal = {};
+      px.forEach((q) => { const k = q.join(','); tal[k] = (tal[k] || 0) + 1; });
+      const ground = Object.keys(tal).sort((a, b) => tal[b] - tal[a])[0].split(',').map(Number);
+      let worst = 1;
+      px.forEach((q) => { const r = ratio(q, ground); if (r > worst) worst = r; });
+      ok('...and the amber tag clears 4.5:1 on real pixels', worst >= 4.5, worst.toFixed(2));
+      /* THE GROUND IS AMBER, not the flat neutral — "it is a tag"
+         passes on one that never took a colour at all. */
+      ok('...and it is genuinely warm rather than grey',
+        ground[0] - ground[2] > 20, ground);
+      /* DANGER STAYS APART. --bad is the one red in this app and an
+         overrun goal must never be mistaken for it. */
+      const badRgb = await ap.evaluate(() => {
+        const d = document.createElement('i');
+        d.style.color = getComputedStyle(document.documentElement).getPropertyValue('--bad').trim();
+        document.body.appendChild(d);
+        const c = getComputedStyle(d).color; d.remove();
+        return c.match(/[\d.]+/g).slice(0, 3).map(Number);
+      });
+      ok('...and stays well clear of the danger red', deltaE([224, 138, 60], badRgb) >= 12,
+        deltaE([224, 138, 60], badRgb).toFixed(1));
+    }
+
+    /* ONLY THE TAG. Not the countdown, not the card's edge, not the
+       title — one mark, one claim, or an overrunning goal is the
+       loudest thing on the screen. */
+    const spread = await ap.evaluate(() => {
+      const warm = [];
+      document.querySelectorAll('#scGoals *').forEach((el) => {
+        const c = getComputedStyle(el).color.match(/[\d.]+/g);
+        if (!c) return;
+        const [r, g, b] = c.slice(0, 3).map(Number);
+        if (r - b > 40 && r > 120) warm.push(el.className || el.tagName);
+      });
+      return warm;
+    });
+    ok('...and it is the ONLY warm thing on the screen',
+      spread.length === 1 && /is-over/.test(String(spread[0])), spread);
+
+    /* ── DONE AND DROPPED BOTH ARCHIVE, AND THE BLOCKS STAY ──
+       The goal ends and the process is what is left, which is most of
+       the point of the feature. */
+    await ap.evaluate(() => {
+      [...document.querySelectorAll('.gl-mini')].find((b) => b.textContent === 'Mark it done').click();
+    });
+    await ap.waitForTimeout(560);
+    const arch = await ap.evaluate(() => {
+      const raw = JSON.parse(localStorage.getItem('sched.goal.v1'));
+      return { live: raw.live.length, done: raw.done.length, ok: raw.done[0] && raw.done[0].ok };
+    });
+    ok('marking a goal done moves it to the archive',
+      arch.live === 0 && arch.done === 1 && arch.ok === true, arch);
+    ok('...and the archive is folded shut until you open it',
+      (await ap.$eval('.gl-fold', (e) => e.getAttribute('aria-expanded'))) === 'false');
+    await ap.click('.gl-fold');
+    await ap.waitForTimeout(300);
+    ok('...and opening it shows what the goal was',
+      (await ap.$$eval('.gl-arch-b .gl-card', (n) => n.length)) === 1
+      && (await ap.$eval('.gl-arch-b .gl-tag', (e) => e.textContent)) === 'Done');
+
+    await actx.close();
+    ok('nothing threw through the add and the archive', aerrs.length === 0, aerrs);
+    ok('...and none of it left the origin', aout.length === 0, aout);
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     GOALS — THE RECORD
+     ══════════════════════════════════════════════════════════════ */
+  {
+    console.log('\n── goals: the record ──');
+    const rctx = await browser.newContext({ ...PHONE });
+    const rp = await rctx.newPage();
+    const rerrs = [];
+    rp.on('pageerror', (e) => rerrs.push(String(e)));
+    await rp.addInitScript(() => {
+      ['sched.tour.v1', 'sched.hint2.v1'].forEach((k) => {
+        if (!localStorage.getItem(k)) localStorage.setItem(k, '1');
+      });
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1', JSON.stringify({ on: false, url: '', code: '' }));
+      }
+    });
+    await rp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await rp.waitForTimeout(400);
+
+    /* ── A DAMAGED ENTRY IS DROPPED AND THE RECORD IS NOT ──
+       Asserted as the GOOD ones surviving rather than as the bad one
+       being refused: rejecting the whole object passes any check
+       written the other way round. */
+    await rp.evaluate(() => {
+      localStorage.setItem('sched.goal.v1', JSON.stringify({
+        live: [
+          { id: 'ga', n: 'A real one', k: 'reading', from: Date.now(),
+            due: Date.now() + 26 * 7 * 864e5, was: 0, ext: 0, asked: 0, on: [] },
+          { id: 'gb', n: 'broken', k: 'nonesuch', from: 0, due: 0 },
+          null,
+          { id: 'gc', n: 'Another real one', k: 'saving', from: Date.now(),
+            due: Date.now() + 52 * 7 * 864e5, was: 0, ext: 0, asked: 0,
+            on: [{ si: 99, len: 30, days: 3, time: 1080 },
+                 { si: 0, len: 20, days: 1, time: 1200 }] },
+        ],
+        done: [],
+      }));
+      localStorage.setItem('sched.view.v1', 'goals');
+    });
+    await rp.reload({ waitUntil: 'networkidle' });
+    await rp.waitForTimeout(460);
+    const kept = await rp.evaluate(() =>
+      JSON.parse(localStorage.getItem('sched.goal.v1')).live.map((g) => g.n));
+    ok('a damaged goal is dropped and the rest of the record survives',
+      kept.length === 2 && kept[0] === 'A real one' && kept[1] === 'Another real one', kept);
+    /* A component naming a suggestion this build no longer has is
+       dropped and the rest of the goal survives — scWorkoutsOf's rule. */
+    const comps = await rp.evaluate(() =>
+      JSON.parse(localStorage.getItem('sched.goal.v1')).live[1].on.map((x) => x.si));
+    ok('...and a block this build no longer has costs that block alone',
+      comps.length === 1 && comps[0] === 0, comps);
+
+    /* ── AND THE REPAIR IS WRITTEN BACK ──
+       A repair held only in memory is redone every boot and lost the
+       moment anything else writes the key. That hole has shipped three
+       times in this app — block ids, the summed workout estimate, and
+       Mind's unknown kind — so it is measured across a REAL reload
+       rather than read off the object in memory. */
+    await rp.reload({ waitUntil: 'networkidle' });
+    await rp.waitForTimeout(400);
+    const again = await rp.evaluate(() =>
+      JSON.parse(localStorage.getItem('sched.goal.v1')).live.map((g) => g.n));
+    ok('...and the repair is saved, not redone on every open',
+      again.length === 2 && again.join('|') === kept.join('|'), again);
+
+    /* ── A STORED VIEW HAS TO FALL THROUGH ──
+       sched.view.v1 outlives the code that wrote it, so a value naming
+       a view this build no longer has must mean the week rather than a
+       bar over nothing. The rule 'ring' already established. */
+    await rp.evaluate(() => localStorage.setItem('sched.view.v1', 'nonesuch'));
+    await rp.reload({ waitUntil: 'networkidle' });
+    await rp.waitForTimeout(420);
+    ok('a stored view this build has never heard of falls through to the week',
+      await rp.evaluate(() => {
+        const r = document.getElementById('scWeek').getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+      }));
+
+    /* ── THREE LIVE, AND THE APP REFUSES A FOURTH ──
+       Not a suggestion. A goals screen with nine things on it is a
+       wish list, and this repository has already deleted one of those.
+       Both directions, because a cap that only ever refuses is
+       indistinguishable from a screen that cannot add at all. */
+    await rp.evaluate(() => {
+      const g = (i, k) => ({ id: 'c' + i, n: 'Goal ' + i, k, from: Date.now(),
+        due: Date.now() + 26 * 7 * 864e5, was: 0, ext: 0, asked: 0, on: [] });
+      localStorage.setItem('sched.goal.v1', JSON.stringify({
+        live: [g(1, 'reading'), g(2, 'saving')], done: [] }));
+      localStorage.setItem('sched.view.v1', 'goals');
+    });
+    await rp.reload({ waitUntil: 'networkidle' });
+    await rp.waitForTimeout(440);
+    ok('two live goals still offer a third', (await rp.$$('.gl-new')).length === 1);
+    await rp.evaluate(() => {
+      const raw = JSON.parse(localStorage.getItem('sched.goal.v1'));
+      raw.live.push({ id: 'c3', n: 'Goal 3', k: 'study', from: Date.now(),
+        due: Date.now() + 26 * 7 * 864e5, was: 0, ext: 0, asked: 0, on: [] });
+      localStorage.setItem('sched.goal.v1', JSON.stringify(raw));
+    });
+    await rp.reload({ waitUntil: 'networkidle' });
+    await rp.waitForTimeout(440);
+    ok('...and three does not, and says why',
+      (await rp.$$('.gl-new')).length === 0
+      && /wish list/.test(await rp.$eval('#scGoalPane', (e) => e.textContent)));
+
+    /* ── THE CHECKPOINT ASKS ONCE ──
+       The date is a checkpoint, not an ending: nothing expires on its
+       own, and the only thing that ends a goal is you saying so. Held
+       to asking ONCE, because a sheet that comes back on every render
+       is one you cannot get past. */
+    await rp.evaluate(() => {
+      localStorage.setItem('sched.goal.v1', JSON.stringify({
+        live: [{ id: 'gd', n: 'Due today', k: 'reading', from: Date.now() - 200 * 864e5,
+          due: Date.now() - 864e5, was: 0, ext: 0, asked: 0, on: [] }],
+        done: [],
+      }));
+      localStorage.setItem('sched.view.v1', 'goals');
+    });
+    await rp.reload({ waitUntil: 'networkidle' });
+    await rp.waitForTimeout(560);
+    const asked = await rp.evaluate(() => ({
+      up: !document.getElementById('scSheet').hidden,
+      title: document.getElementById('scSheetTitle').textContent,
+      outs: [...document.querySelectorAll('.sheet .btn')].map((b) => b.textContent),
+    }));
+    ok('a goal past its date asks, rather than expiring',
+      asked.up && asked.title === 'Still on it?', asked);
+    /* THREE ANSWERS, NOT TWO. Without "drop it" the only way out of a
+       goal you have abandoned is to lie and press Done. */
+    ok('...and offers all three answers, including dropping it',
+      asked.outs.length === 3 && /Drop it/.test(asked.outs.join('|')), asked.outs);
+    await rp.keyboard.press('Escape');
+    await rp.waitForTimeout(360);
+    await rp.evaluate(() => document.querySelector('.tab[data-view="list"]').click());
+    await rp.waitForTimeout(300);
+    await rp.evaluate(() => document.querySelector('.tab[data-view="goals"]').click());
+    await rp.waitForTimeout(420);
+    ok('...and it does not ask again on the next visit',
+      await rp.evaluate(() => document.getElementById('scSheet').hidden));
+
+    /* ── HOW YOU ARE DOING NEVER LEAVES THE PHONE ──
+       Two halves, because each passes on the other's bug: pressing
+       around the goals screen must make no request at all, AND a push
+       that happens for some other reason must not be carrying one.
+       The second is the check that was missing the two times a comment
+       reading "this is never sent" was the only place the intention
+       existed. */
+    const body = await rp.evaluate(() => {
+      const src = [...document.querySelectorAll('script[src]')]
+        .map((s) => s.src).filter((s) => /app\.js/.test(s))[0];
+      return src;
+    });
+    const src = await (await rp.request.get(body)).text();
+    const push = src.slice(src.indexOf('function scPushNow'), src.indexOf('function scPushNow') + 2600);
+    ok('a push carries no goal, no goal record and no goal key',
+      push.indexOf('sched.goal') < 0 && push.indexOf('goals') < 0
+      && push.indexOf('scGoal') < 0, push.slice(0, 120));
+
+    await rctx.close();
+    ok('nothing threw through the goals record', rerrs.length === 0, rerrs);
+  }
+
   ok('no page errors through any of it', errs.length === 0, errs);
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);

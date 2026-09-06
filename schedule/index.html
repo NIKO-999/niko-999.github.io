@@ -47,7 +47,7 @@
   } catch (e) {}
 }());
 </script>
-<link rel="stylesheet" href="app.css?v=5d663e9d" />
+<link rel="stylesheet" href="app.css?v=456a1234" />
 </head>
 <body>
 
@@ -149,6 +149,15 @@
        list, the sessions as its headings, nothing peeking at the
        edges and nothing to swipe. The back of the day is still a
        back — the flip is on the panel now rather than on a card. -->
+  <!-- ── GOALS ──
+       Its own tab rather than a stop on Today: Showing up, Workouts
+       and Pattern are three ways of reading the day you are in, and a
+       goal is not one of those — it is what the day is in service of.
+       One pane, two states: the goals, and one goal's cards. -->
+  <section class="goals" id="scGoals" hidden>
+    <div id="scGoalPane"></div>
+  </section>
+
   <section class="week" id="scWeek">
     <div class="strip" id="scDayStrip" role="group" aria-label="The week"></div>
     <!-- ── THE DAY'S OBJECTIVES, ON THE DAY ──
@@ -192,6 +201,13 @@
          leaderboard and the feed are the same subject seen twice — who
          is doing what — and a bar with both on it spends two of four
          stops on a part of the app you may never turn on. -->
+    <!-- A ring with its centre: what you are aiming at. Filled at the
+         middle so it does not read as the view control's own ring,
+         which is the collision `#scMenu svg circle` was written for. -->
+    <button class="tab" id="scTabGoals" data-view="goals" aria-label="Goals">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>
+      <span>Goals</span>
+    </button>
     <button class="tab" id="scTabFriends" data-view="friends" aria-label="Friends">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4"/><path d="M3 19c0-3.2 2.7-5 6-5s6 1.8 6 5"/><path d="M16.5 6.4a3.4 3.4 0 0 1 0 6.5M17 14.4c2.6.4 4 2.1 4 4.6"/></svg>
       <span>Friends</span>
@@ -242,6 +258,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=5b28534f"></script>
+<script src="app.js?v=03f58219"></script>
 </body>
 </html>

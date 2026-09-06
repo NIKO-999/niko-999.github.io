@@ -5782,3 +5782,215 @@ body {
 .kid-new { display: flex; gap: 8px; align-items: stretch; }
 .kid-new .field { flex: 1; min-width: 0; }
 .kid-new .btn { flex: none; }
+
+/* ═══════════════════════════════════════════════════════════
+   GOALS
+
+   Its own tab. Two states in one pane — the goals, and one goal's
+   cards — and everything here is prefixed `gl-`, because this file
+   has had three functions and two CSS classes silently clobbered by
+   generic names and a collision does not throw, it REPLACES.
+
+   `[hidden]` HAS TO BE SAID ONCE A THING TAKES A DISPLAY, and this
+   is the seventh time in this app: the rail, the page dots, the
+   toast, the intro, the objectives row and the tally's panes each
+   had the attribute set correctly while an author `display`
+   outranked the browser's own rule. .goals is a block, so it would
+   survive as written — it is said anyway, because the next person to
+   give this section a flex or a grid is the one who pays.
+   ═══════════════════════════════════════════════════════════ */
+.goals { display: block; }
+.goals[hidden] { display: none !important; }
+
+.gl-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+  padding: 13px 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.gl-card.is-arch { cursor: default; opacity: .74; box-shadow: none; }
+.gl-n {
+  display: block;
+  font-size: 15.5px; font-weight: 600; line-height: 1.3;
+  letter-spacing: -.01em; color: var(--ink);
+}
+.gl-f {
+  display: block; margin-top: 8px;
+  font-size: 11.5px; color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
+.gl-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+/* A tag is 22% fill under a label 72% of the way to the ink — the
+   app's own arithmetic, measured over every hue it is used with. */
+.gl-tag {
+  display: inline-block;
+  border-radius: 6px;
+  padding: 3px 7px;
+  font-size: 9.5px; font-weight: 600; line-height: 1.25;
+  letter-spacing: .06em; text-transform: uppercase;
+  background: color-mix(in srgb, var(--dim) 22%, transparent);
+  color: color-mix(in srgb, var(--dim) 72%, var(--ink));
+}
+/* ── EXTENDED WEARS AMBER, AND THIS IS A DELIBERATE REVERSAL ──
+   The rule everywhere else is that colour says WHICH, never whether,
+   and there is exactly one red in the app: Missed, on a block whose
+   hour came and went. An extended goal is one you are STILL DOING,
+   so red would say the opposite of what happened.
+
+   Amber is the honest register for "past where it was meant to be"
+   without the verdict, and it is far enough from --bad that the two
+   cannot be misread for each other. The colour carries the overrun
+   and the words carry how much. 36/40 rather than 22/72, which is
+   the state tags' own pair — a tag naming a state has to read as an
+   area rather than as a tint. */
+.gl-tag.is-over {
+  --gl-amber: #e08a3c;
+  background: color-mix(in srgb, var(--gl-amber) 36%, transparent);
+  color: color-mix(in srgb, var(--gl-amber) 40%, var(--ink));
+}
+.gl-tag.is-ok {
+  background: color-mix(in srgb, var(--st-ok) 36%, transparent);
+  color: color-mix(in srgb, var(--st-ok) 40%, var(--ink));
+}
+
+.gl-new {
+  display: flex; align-items: center; gap: 11px;
+  width: 100%; text-align: left;
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+  border-radius: 14px;
+  padding: 13px 14px;
+  font-size: 14px; font-weight: 600; color: var(--ink);
+  cursor: pointer;
+}
+.gl-plus { width: 20px; text-align: center; font-size: 17px; font-weight: 400; color: var(--dim); }
+.gl-none, .gl-cap { padding: 2px 2px 12px; }
+.gl-none { font-size: 13px; line-height: 1.55; color: var(--spent); }
+.gl-none b { color: var(--ink); font-weight: 600; }
+
+.gl-crumb { display: flex; align-items: center; gap: 10px; padding: 2px 0 2px; }
+.gl-crumb b { font-size: 13px; font-weight: 600; line-height: 1.25; }
+.gl-back {
+  width: 30px; height: 30px; flex: none;
+  display: grid; place-items: center;
+  background: none; border: 0; padding: 0; cursor: pointer; color: var(--dim);
+}
+.gl-back svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.9;
+  stroke-linecap: round; stroke-linejoin: round; }
+
+/* Four is a closed set you choose FROM and six is a pager you step
+   along, so these WRAP rather than scroll: nothing in this app moves
+   sideways except the objectives row, which is a named exception. */
+.gl-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 0 14px; }
+.gl-chip {
+  flex: 0 0 auto;
+  padding: 8px 11px;
+  border: 0; border-radius: 9px;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  color: var(--dim);
+  font: 500 12.5px/1 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+}
+.gl-chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); font-weight: 600; }
+.gl-chip.is-on::after { content: ' ✓'; }
+
+/* ── ONE CARD, NOT A HAND ──
+   A stack behind it says these are ALTERNATIVES, and a process is a
+   set — you may well want three of them. No backface, no fan, and no
+   `backdrop-filter`: this is the one object on the screen that
+   carries a picture, and a backdrop pass is redone whenever the
+   filtered element's own subtree repaints. */
+.gl-wc {
+  /* Declared here as well as written on the element: the hue is set
+     inline per card, and a token nothing in the stylesheet defines is
+     invisible to the static check — which is how days/ shipped a
+     var(--ink-on) at 1.74:1. */
+  --gl-h: #e3b341;
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  min-height: 286px;
+  background: linear-gradient(150deg,
+    color-mix(in srgb, var(--gl-h) 42%, #101013) 0%, #101013 64%);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--gl-h) 26%, transparent),
+              0 16px 34px rgba(0, 0, 0, .5);
+}
+.gl-pat { position: absolute; inset: 0; pointer-events: none; }
+.gl-pat svg { display: block; width: 100%; height: 100%; }
+.gl-body { position: relative; z-index: 2; padding: 20px 18px 22px; }
+.gl-lab {
+  display: block;
+  font-size: 9.5px; font-weight: 600; letter-spacing: .13em; text-transform: uppercase;
+  color: rgba(255, 255, 255, .74);
+}
+.gl-nm {
+  display: block; margin-top: 10px;
+  font-size: 30px; font-weight: 700; line-height: 1.05; letter-spacing: -.025em;
+  color: #fff;
+}
+.gl-ds {
+  display: block; margin-top: 8px;
+  font-size: 14.5px; font-weight: 600; line-height: 1.2;
+  color: color-mix(in srgb, var(--gl-h) 62%, white);
+}
+.gl-w { margin: 15px 0 0; font-size: 12.8px; line-height: 1.52; color: rgba(255, 255, 255, .82); }
+.gl-w + .gl-w { margin-top: 5px; color: rgba(255, 255, 255, .6); }
+
+.gl-go, .gl-off { width: 100%; margin-top: 16px; }
+.gl-count { text-align: center; padding-top: 10px; }
+.gl-ctl { display: flex; gap: 7px; margin-top: 18px; }
+.gl-mini {
+  flex: 1 1 0; min-width: 0;
+  padding: 11px 4px;
+  border: 1px solid var(--hair); border-radius: 11px;
+  background: none; color: var(--dim);
+  font: 500 12px/1 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.gl-fold {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; padding: 0; border: 0; background: none;
+  color: inherit; font: inherit; cursor: pointer; text-align: left;
+}
+.gl-fold b { font-weight: 600; }
+.gl-chev { margin-left: auto; display: grid; place-items: center; }
+.gl-chev svg {
+  width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+  transition: transform .18s ease;
+}
+/* 180, never 90 — 90 lays the chevron on its side. */
+.gl-fold[aria-expanded="true"] .gl-chev svg { transform: rotate(180deg); }
+.gl-arch-b[hidden] { display: none !important; }
+
+/* the sheet's own bits */
+.gl-lad { display: flex; flex-wrap: wrap; gap: 7px; padding: 2px 0 3px; }
+.gl-rung {
+  flex: 0 0 calc((100% - 21px) / 4);
+  min-width: 0; padding: 11px 0;
+  border: 1px solid var(--hair); border-radius: 11px;
+  background: none; color: var(--dim);
+  font: 500 12.5px/1 'Inter', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  text-align: center; cursor: pointer;
+}
+/* A FIXED BASIS, never `1 1 auto`: a row that does not divide evenly
+   lets its last rung grow across the whole line, which reads as a
+   mistake rather than as a ladder. The Mind ladder shipped that once
+   already. */
+.gl-rung.is-w { flex: 0 0 calc((100% - 14px) / 3); }
+.gl-rung[aria-pressed="true"] {
+  background: var(--ink); border-color: var(--ink); color: var(--paper); font-weight: 600;
+}
+.gl-sw { margin: 0 0 6px; font-size: 13.5px; line-height: 1.55; color: var(--ink); }
+.gl-sw.is-dim { color: var(--dim); }
+.gl-sw b { font-weight: 600; color: var(--ink); }
+.gl-sug { margin: 0 0 4px; font-size: 12.5px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.gl-sug b { color: var(--ink); font-weight: 600; }

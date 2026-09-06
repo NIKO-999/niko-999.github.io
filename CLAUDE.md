@@ -7284,3 +7284,203 @@ anything I had written.
 an edit that was supposed to delete. A replace that removes nothing is
 not a replace. Bound the search to after the anchor, and assert on the
 region's own content before writing it.
+
+## Goals is a tab, and a sentence becomes a block on Tuesday
+
+Every other screen in this app records what you DID. This one is the
+only thing that says what any of it is FOR, and **the whole feature is
+one press**: a goal you typed becomes a block on your week. The list of
+goals is only where you press it from.
+
+**A TAB, NOT A STOP ON TODAY.** Showing up, Workouts and Pattern are
+three ways of reading the day you are in; a goal is not one of those,
+it is what the day is in service of. The arrangement was also decided
+by a measurement rather than by taste: four stop labels came to
+**372px against the 358 a 390px phone has**, where `.tab` is `flex: 1`
+and simply divides — four tabs at 68px each with no label clipped. The
+bar was the arrangement that cost nothing.
+
+**Nothing here leaves the phone.** `sched.goal.v1` is not in
+`scPushNow`'s body and no path from this screen calls `scPush`. A goal
+is further down the road that *a count may leave and a list may not*
+was written about than anything else on the record — and the check is
+in two halves, because each passes on the other's bug: pressing around
+the screen makes no request at all, AND a push that happens for some
+other reason is not carrying one. That second half is what was missing
+the two times a comment reading "this is never sent" was the only place
+the intention existed.
+
+### The dose is solved, and days move before minutes
+
+Each suggestion carries the length it wants and the one below which it
+stops being the thing — reading floors at 15, a session does not go
+below 30 and still count. **Fifteen minutes of reading a day and
+forty-five minutes three times a week are the same weekly total, and
+the second is a session you can actually finish**, so a longer window
+buys fewer days at a real length rather than a token every morning.
+Length only shortens once days would drop under two, and then stops at
+the floor and drops another day instead.
+
+Measured across every window the app offers, on a 60-minute block with
+a 20-minute floor: **5 × 60, 3 × 60, 2 × 60, 2 × 40, 2 × 30, 2 × 20**.
+Asserted as a LADDER rather than as one figure — "there is a dose"
+passes on a constant, and the whole claim is that the window moves it.
+
+**TWO LINES OF WHY AND NEVER THREE.** One says what the thing does, one
+says why THIS dose — which is the half nothing else on the screen says.
+A third is a paragraph, and a paragraph is a thing you scroll past.
+
+**And the cost of the day, before and after.** The app already knows the
+hours on a day; the head prints them and nothing else uses the figure.
+Drawn at the one moment it can change your mind. Held to naming a real
+weekday and two DIFFERENT lengths, because *goes from 3 h to 3 h* is a
+sentence that renders perfectly and says nothing.
+
+### One card, not a hand
+
+The workout deck's fan was built here first and taken back out. **A
+stack behind it says these are ALTERNATIVES, and a process is a set** —
+you may well want three of them. The chips are the pager and the card
+in front is the whole of what is drawn, asserted as the COUNT, because
+a fan is two more elements and nothing else about the screen changes.
+
+**The pattern is the RHYTHM of the thing, never a picture of it.** A
+drawing of a dumbbell at this size is a glyph, and this app already
+learned that ten honest drawings of a lift come out as one silhouette
+ten times. A cadence of reps in sets is a picture of nothing and is
+still unmistakably training. Backtesting gets candle bodies along a
+mid line with no axis and no scale; reading gets ragged-right blocks at
+a paragraph's rhythm; outreach gets arcs going out from one point at
+the edge; rest gets one very slow wave, the only pattern in the set
+with nothing repeated fast in it.
+
+**Two took three attempts each, and every rejection was caught by
+looking at the whole set at once rather than at one card.** *Watch
+content* was scan lines, which read as a television and were a fifth
+horizontal-rule pattern in a set that already had four; then stacked
+progress tracks, which read as a to-do list. It is a **waveform** — the
+one pattern in the set mirrored about a horizontal axis, so it can be
+confused with nothing, and the honest reason it beats a picture of a
+screen is that content is a thing you give TIME to. *Review the week*
+was seven arcs on a baseline, which read as bunting at card size and
+left most of the card empty; then seven bands with a line across them,
+which read as a chart. It is a **spiral** — one line going round and
+coming back over ground it has already covered, which is the whole of
+what a review is, and nothing else in the set is a spiral. A third pair
+was fixed the same way: *Notes* was ruled lines with a spine, identical
+to *Read* and IN THE SAME DECK, so it is annotation ticks crossing a
+spine; and *Study* was a fifth horizontal-rule pattern, so it is
+squared paper — coarser than a scan pitch, finer than scaffolding, no
+diagonals. **Judged together rather than one at a time, which is the
+only way that fault is visible.**
+
+They are a TABLE, which is the cost of them meaning anything — a second
+list to keep in step with the first. What pays for it is the fallback:
+a suggestion the table has no drawing for gets one seeded from its own
+name, so a card is never blank.
+
+**Non-scaling strokes, which is the waves' lesson kept.** A width in
+viewBox units is multiplied by whatever the box is stretched to, and it
+fails silently: the drawing stays correct and comes out several times
+too heavy.
+
+### Only you end a goal
+
+**The date is a checkpoint, not an ending.** A goal that dies on a date
+is a goal the calendar decided about. When the date comes round it asks
+once — still on it, done, or drop it — and `asked` records which due
+date it has already put the question for, so extending sets a new date
+and a new question rather than asking again on the next render.
+
+**THREE ANSWERS, NOT TWO.** Without *drop it* the only way out of a goal
+you have genuinely abandoned is to lie and press Done.
+
+**Both done and dropped go to the archive**, and a dropped one is
+marked as dropped in the flat neutral. Setting and dropping the same
+goal three times is a real fact about yourself and this app has never
+flattered you; it is a record, not a scoreboard. What makes the archive
+worth opening is that each finished goal keeps **what its process was
+and how much of it you kept** — six months later the useful half is not
+that you did it, it is what you actually did. Folded shut, because a
+completed goal does not earn a tab.
+
+**And the blocks STAY.** They are your week now: the goal ends and the
+process is what is left, which is most of the point of the feature.
+
+### Extended wears amber, and that is a deliberate reversal
+
+The rule everywhere else is that colour says WHICH, never whether, and
+there is exactly one red in this app — Missed, on a block whose hour
+came and went. **An extended goal is one you are STILL DOING, so red
+would say the opposite of what happened.** Amber is the honest register
+for *past where it was meant to be* without the verdict.
+
+The colour carries the overrun and the words carry how much — `Extended
+· +2 months`. It **stays** amber once extended, even while the new date
+is still ahead: "this ran past what you planned" goes on being true,
+and a colour that resets loses the at-a-glance read the tag exists for.
+
+**ONLY THE TAG.** Not the countdown, not the card's edge, not the title
+— one mark, one claim, or an overrunning goal is the loudest thing on
+the screen, which is the wash-of-red problem arriving by another door.
+Asserted as the tag being the only warm thing anywhere on the screen.
+
+Measured on composited pixels: **6.24:1 on the dark face and 5.94:1 on
+the light**, at the state tags' own 36/40 pair rather than 22/72, since
+a tag naming a state has to read as an area rather than as a tint. And
+held apart from `--bad` in Lab at **ΔE 38**, which is the habits
+screen's own rule about two colours that must never be confused.
+
+### The block carries its goal, and that is one field
+
+It is what lets the goal answer the only question worth asking it: am I
+actually doing this. Read off `blockLog` rather than stored, because
+the block is the record and a second count is a copy that drifts. The
+app cannot know how profitable you are; it knows exactly how many
+sessions you kept, and **the process is what it reports** — the same
+reason this app has never asked what you weigh.
+
+**Spread across the week, never stacked into the front of it.** Three a
+week is Monday, Wednesday, Friday: a process bunched into the first
+three days is one you have already failed by Thursday.
+
+What it must NOT do is change what anything else counts. `scShareWork`
+sends how many BLOCKS you kept, and a block from a goal is a block you
+kept — which is why the goal is a field ON the block rather than a
+fourth log beside `blockLog`, `kidLog` and `offLog`.
+
+### Two live, three at a push
+
+Not a suggestion — the app refuses a fourth and says why. **A goals
+screen with nine things on it is a wish list**, and this repository has
+already deleted one of those: `arc/` held a vision board and a
+long-term timeline and both are gone. Asserted in both directions,
+because a cap that only ever refuses is indistinguishable from a screen
+that cannot add at all.
+
+**There is no weight goal, and its absence is the decision.** This app
+has never asked what you weigh and says so out loud; a table entry for
+it would reverse that quietly. Training covers the honest half — you
+cannot control the number, you can control the sessions.
+
+**Money folds into Business**, because a goal that says "earn more"
+wants the same process as one that says "grow the business" and two
+entries would be one table written twice. **Saving stays thin on
+purpose**: a weekly look at what went out and one transfer, two blocks,
+one of them five minutes. Padding it to four so it matched the others
+would be the app inventing work.
+
+### The head named two of what is now three
+
+`view === 'tally' ? 'Today' : 'Friends'` is a two-way question, so the
+day Goals landed it drew **"Friends" over the goals pane** with the
+friends glyph beside it. A ternary is a list of two with no room in it;
+a lookup names the next view on the day it is added.
+
+**And `--h` was both undeclared and generic.** The hue is written onto
+the card inline, so the stylesheet never declared the token — which
+`tests/names.js` caught in a tenth of a second, the same check that
+would have saved `days/` its `var(--ink-on)` at 1.74:1. It is `--gl-h`
+now, with a default on `.gl-wc` so the token exists in the sheet, which
+is `.wo-p`'s own answer. Every class this screen owns is `gl-`
+prefixed, because a collision here does not throw, it REPLACES.
