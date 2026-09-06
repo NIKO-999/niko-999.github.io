@@ -6414,6 +6414,19 @@
       if (tal) hintShut.ty = false;
       if (view === 'list') hintShut.wk = false;
       scHintClose(false);
+      /* ── ARRIVING AT GOALS LANDS ON THE GOALS ──
+         Which goal is open is a position on a screen you are looking
+         at, not a preference — the tally panels' own rule. Left set,
+         pressing Goals put you back inside whichever card you had
+         opened before, so the screen the tab is named after was one
+         you could only reach by pressing back. It is not stored
+         either, for the same reason one restored from last week opens
+         on a goal you have stopped working on.
+
+         Only on a real view CHANGE: scPaintGoals is called again after
+         every add and every removal, and resetting there would throw
+         you out of the deck each time you pressed Add. */
+      if (gl) glOpen = null;
     }
 
     /* The history sits OUTSIDE the tally section, so hiding the section
