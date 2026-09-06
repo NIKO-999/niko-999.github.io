@@ -1393,8 +1393,34 @@ body {
 }
 .row-ed:active { opacity: .82; }
 .row-ed:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
-/* A finished row goes quiet around it, and so does this. */
-.is-done > .row-ed, .is-past > .row-ed { opacity: .55; }
+
+/* ── PUT AWAY UNTIL THE ROW IS ARMED ──
+   A double tap on the row brings it out, and only on that row. You
+   edit a block a few times ever, and a control on every one of them
+   is a second mark down a screen whose whole job is the words.
+
+   `opacity` and `pointer-events` rather than `display: none` or the
+   `hidden` attribute, ON PURPOSE: this is the keyboard's edit control
+   as well, and taking it out of the layout takes it out of the tab
+   order with it. A keyboard never has to arm anything — focus alone
+   brings it out, which is what it always did.
+
+   :focus-visible, AND THAT REVERSED THE RULE THIS CONTROL HAD. While
+   it was clipped to a pixel a pointer could never land on it, so
+   every focus it took was a keyboard's and plain :focus was the
+   honest test. It is a real pointer target now while armed — and
+   scClose puts focus BACK on whatever opened the sheet, so :focus
+   left the pencil lit on the row you had just finished editing. The
+   heuristic is what tells those two apart. */
+.row-ed { opacity: 0; pointer-events: none; }
+.rowwrap.is-armed > .row-ed { opacity: 1; pointer-events: auto; }
+.row-ed:focus-visible { opacity: 1; pointer-events: auto; }
+/* A finished row goes quiet around it, and so does this — but only
+   once it is out. Written after the rules above, because a later rule
+   at equal specificity is the live one and this file has been bitten
+   by that five times. */
+.rowwrap.is-armed.is-done > .row-ed,
+.rowwrap.is-armed.is-past > .row-ed { opacity: .55; }
 
 /* ── THE WAY IN A HOLD CANNOT OFFER ──
    A long press reaches neither a keyboard nor a screen reader, so the

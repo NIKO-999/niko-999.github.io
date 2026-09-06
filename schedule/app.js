@@ -1677,7 +1677,50 @@
            What it costs is a second mark on every row, on a screen
            whose whole job is the words, so it is drawn as quietly as
            a control can be: a hairline, no fill, the dim grey. */
-        row.addEventListener('click', tick);
+        /* ── AND THE PENCIL IS NOT THERE UNTIL YOU ASK FOR IT ──
+           A control on every row is a second mark on a screen whose
+           whole job is the words, and you edit a block a few times
+           ever. So the row is bare, a DOUBLE tap arms it, and the
+           pencil appears on that row alone.
+
+           THE FIRST TAP IS NOT DEFERRED, and that is the whole reason
+           this can be a double tap at all. The editor used to be
+           behind one and it was reported as inconsistent twice,
+           because a mistimed gesture meant the thing you asked for
+           did not happen. Here it cannot: every tap ticks the moment
+           it lands, and a second tap inside the window UNDOES the
+           first and arms the row instead — so a double tap leaves the
+           record exactly where it found it, and a double tap read as
+           two singles is one tick and one untick, which is also
+           nothing. There is no window at which you lose anything.
+
+           `armed` is read by the render, so it has to be set BEFORE
+           the untick redraws the week. */
+        /* ── AND THE PAIR IS REMEMBERED OUTSIDE THE ELEMENT ──
+           A timer held in this closure can never see the second tap.
+           The first one ticks IMMEDIATELY, and a tick re-renders the
+           week — so the second press lands on a freshly built row
+           whose own timer is null and reads as another first tap.
+           That is the same fault the old deferred window had, from
+           the opposite direction: there the render came at the end of
+           the window, here it comes at the start, and either way the
+           element the pair is stored on does not survive the pair.
+
+           Keyed by BLOCK ID rather than by element, so it survives
+           any number of rebuilds, and closed by a clock rather than a
+           timer so there is nothing to cancel. */
+        row.addEventListener('click', function () {
+          var now = Date.now();
+          if (tapId === it.id && now - tapAt < 380) {
+            tapId = null;
+            armed = it.id;
+            tick();
+            return;
+          }
+          tapId = it.id;
+          tapAt = now;
+          tick();
+        });
         /* A long press reaches neither a keyboard nor a screen reader,
            and it is deliberately NOT the only way to tick a block: the
            tally does the same thing with a plain press and always did.
@@ -1690,7 +1733,8 @@
            two over each other and the row leaves room for it. It IS
            the done-mark now — the tick that used to sit beside the
            glyph is this, moved to where a thumb expects it. */
-        var wrap = scEl('div', 'rowwrap' + (row.classList.contains('is-done') ? ' is-done' : ''));
+        var wrap = scEl('div', 'rowwrap' + (row.classList.contains('is-done') ? ' is-done' : '')
+          + (armed === it.id ? ' is-armed' : ''));
         var chk = scEl('button', 'chk');
         chk.type = 'button';
         chk.setAttribute('aria-label', (row.classList.contains('is-done') ? 'Untick ' : 'Tick ') + it.n);
@@ -1730,6 +1774,15 @@
           + '<path d="M4 20h4L18 10l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
         ed.addEventListener('click', function (ev) {
           ev.stopPropagation();
+          /* The pencil has done its job the moment it is pressed, and
+             it is put away HERE rather than on the sheet closing — so
+             every way back to the week finds a bare row, saved,
+             deleted or abandoned alike. The CLASS goes too: saving
+             re-renders and would drop it anyway, but Escape does not
+             re-render anything, and a variable nothing has read yet
+             is not a control that has gone. */
+          armed = null;
+          wrap.classList.remove('is-armed');
           scEditSheet(it, d);
         });
         wrap.appendChild(ed);
@@ -1861,6 +1914,13 @@
   function scDeckGo(d) {
     if (d === scOpenDay()) return;
     openDay = d;
+    /* ── AND THE ARMED ROW IS NOT ON SCREEN ANY MORE ──
+       A pencil is a position on a screen you are looking at, so
+       leaving the day it belonged to puts it away. Without this it
+       survives every render — which is deliberate, since a tick
+       rebuilds the week and the row has to keep it — so the ONLY
+       things that clear it are pressing it and leaving. */
+    armed = null;
     /* A day found face-down is the app having kept the wrong half of a
        decision, and that is truer still of the day BEFORE the one you
        just pressed. */
@@ -6371,6 +6431,13 @@
      record and this is a preference about looking at it, and folding a
      preference into the record is how a damaged one takes the other
      down with it. */
+  /* ── WHICH ROW HAS ITS PENCIL OUT ──
+     One at a time, and never stored: it is a position on a screen you
+     are looking at, which is the tally panels' rule and the same one
+     that sends you back to the goals list when you press the tab. A
+     row armed yesterday would be a control you did not ask for. */
+  var armed = null, tapId = null, tapAt = 0;
+
   var VIEW_KEY = 'sched.view.v1';
   var view = 'list';
 
@@ -6427,6 +6494,10 @@
          every add and every removal, and resetting there would throw
          you out of the deck each time you pressed Add. */
       if (gl) glOpen = null;
+      /* Same rule as the day chips one level up: a pencil left out on
+         a week you have walked away from is a control you did not ask
+         for when you come back. */
+      armed = null;
     }
 
     /* The history sits OUTSIDE the tally section, so hiding the section
@@ -11056,70 +11127,70 @@
   var GOAL_KINDS = [
     { k: 'trading', n: 'Trading', recs: [
       { n: 'Backtest', p: 'candles', full: 60, floor: 20, ses: 'e',
-        w: 'Backtesting is where a rule gets tested with nothing on it.' },
+        w: 'Backtesting is where a rule gets tested with nothing on it. Every edge you will ever trade was either proved here first or paid for in the market, and one of those is a great deal cheaper than the other.' },
       { n: 'Collect data', p: 'ledger', full: 30, floor: 10, ses: 'e',
-        w: 'A record you wrote yourself is the only edge nobody else has a copy of.' },
+        w: 'A record you wrote yourself is the only edge nobody else has a copy of. Screenshots, notes, the level you were watching when it turned — worth almost nothing on the day and worth everything six months later.' },
       { n: 'Watch content', p: 'waveform', full: 45, floor: 15, ses: 'e',
-        w: 'Someone else’s reasoning is cheaper to learn from than your own losses.' },
+        w: 'Someone else’s reasoning is cheaper to learn from than your own losses. You are not there for a signal; you are there for how somebody further along thinks about the same chart you are looking at.' },
       { n: 'Review the week', p: 'spiral', full: 45, floor: 20, ses: 'e', weekly: true,
-        w: 'A week you never read back is a week you cannot learn anything from.' } ] },
+        w: 'A week you never read back is a week you cannot learn anything from. The trades are already on the record — what is missing is the hour where you go and find out what they have in common.' } ] },
 
     { k: 'training', n: 'Training', recs: [
       { n: 'Session', p: 'reps', full: 75, floor: 40, ses: 'm',
-        w: 'The session is the only part of getting stronger you control.' },
+        w: 'The session is the only part of getting stronger you control. Sleep, food and stress all move on their own; this is the one input you decide on, and it is the one the results are actually built out of.' },
       { n: 'Walk', p: 'path', full: 40, floor: 20, ses: 'm',
-        w: 'Easy movement is what lets the hard days keep happening.' },
+        w: 'Easy movement is what lets the hard days keep happening. It moves blood without adding fatigue, so the sessions that matter land on a body that has recovered from the last one instead of one that has not.' },
       { n: 'Rest', p: 'breath', full: 30, floor: 30, ses: 'e',
-        w: 'Rest is training. It is when the work you already did lands.' } ] },
+        w: 'Rest is training. The adaptation happens between the sessions rather than during them, so a day off is not time away from the work — it is where the work you already did turns into something.' } ] },
 
     { k: 'reading', n: 'Reading', recs: [
       { n: 'Read', p: 'lines', full: 60, floor: 15, ses: 'e',
-        w: 'Reading is the one input that compounds without a screen in it.' },
+        w: 'Reading is the one input that compounds without a screen in it. A book is somebody’s decade compressed into a week of evenings, and there is nothing else you can do with forty minutes that returns at that rate.' },
       { n: 'Notes', p: 'margin', full: 20, floor: 10, ses: 'e',
-        w: 'A book you took nothing out of is a book you will read again.' } ] },
+        w: 'A book you took nothing out of is a book you will read again. Three lines in your own words at the end of a session is the whole difference between having read something and being able to use it.' } ] },
 
     { k: 'skill', n: 'A skill', recs: [
       { n: 'Practice', p: 'drift', full: 45, floor: 15, ses: 'e',
-        w: 'A skill moves on repetitions, not on hours of reading about it.' },
+        w: 'A skill moves on repetitions, not on hours of reading about it. The gap between knowing how a thing is done and being able to do it only ever closes one way, and this is it.' },
       { n: 'A drill', p: 'pulse', full: 20, floor: 10, ses: 'e',
-        w: 'One narrow thing done badly today is the thing done well in a month.' },
+        w: 'One narrow thing done badly today is the thing done well in a month. Practice spread across everything improves nothing you can measure; a drill takes the single weakest part and puts all of the attention there.' },
       { n: 'Make something', p: 'assemble', full: 60, floor: 30, ses: 'a', weekly: true,
-        w: 'Output is the only honest test of whether the practice worked.' } ] },
+        w: 'Output is the only honest test of whether the practice worked. Finishing a real thing exposes every gap the drills let you walk around, and it is the only proof that survives somebody else looking at it.' } ] },
 
     /* MONEY FOLDS IN HERE. A goal that says "earn more" wants the same
        process as one that says "grow the business", and two entries
        would be one table written twice. */
     { k: 'business', n: 'Business', recs: [
       { n: 'The thing that earns', p: 'compound', full: 90, floor: 45, ses: 'm',
-        w: 'One block a day on the part that actually brings money in.' },
+        w: 'One block a day on the part that actually brings money in. Everything else in a business feels like work and most of it is maintenance — this is the hour that moves the number.' },
       { n: 'Outreach', p: 'broadcast', full: 45, floor: 15, ses: 'a',
-        w: 'Nothing else in a business compounds as fast as talking to more people.' },
+        w: 'Nothing else in a business compounds as fast as talking to more people. Most of what you build is wrong until somebody who might pay for it tells you so, and that conversation costs a fraction of the build.' },
       { n: 'Build', p: 'lattice', full: 90, floor: 30, ses: 'a',
-        w: 'The work only you can do, in the hours nobody can reach you.' },
+        w: 'The work only you can do, in the hours nobody can reach you. It needs an unbroken block: starting is most of the cost, so an hour with two interruptions in it buys about twenty minutes.' },
       { n: 'Weekly numbers', p: 'columns', full: 30, floor: 20, ses: 'e', weekly: true,
-        w: 'A figure you look at once a week is a figure you can steer by.' } ] },
+        w: 'A figure you look at once a week is a figure you can steer by. Daily is noise and monthly is too late to act on — a week is the shortest window where something you changed shows up as a change in the number.' } ] },
 
     { k: 'creating', n: 'Creating', recs: [
       { n: 'Draft', p: 'strokes', full: 90, floor: 25, ses: 'm',
-        w: 'Drafting badly is the only way anybody has ever drafted well.' },
+        w: 'Drafting badly is the only way anybody has ever drafted well. The first version exists to be wrong on paper instead of vague in your head, and being wrong on paper is the entire job it has.' },
       { n: 'Edit', p: 'strike', full: 45, floor: 20, ses: 'a',
-        w: 'Editing is a different job from writing and wants a different hour.' },
+        w: 'Editing is a different job from writing and wants a different hour. You cannot judge a sentence and produce it at the same time — the two run on opposite settings, and doing them together gets you careful work at half the speed.' },
       { n: 'Publish', p: 'sheets', full: 30, floor: 15, ses: 'e', weekly: true,
-        w: 'Shipping on a schedule beats shipping when it feels ready.' } ] },
+        w: 'Shipping on a schedule beats shipping when it feels ready. Nothing improves in a drawer, and the feedback that would have made it better only ever arrives after it is out.' } ] },
 
     { k: 'study', n: 'Study', recs: [
       { n: 'Study', p: 'squared', full: 90, floor: 25, ses: 'm',
-        w: 'The session is where it goes in; everything else is admin.' },
+        w: 'The session is where it goes in; everything else is admin. Highlighting, re-organising and making the notes tidier all feel like studying and none of them is, which is exactly why this block is the one to protect.' },
       { n: 'Past papers', p: 'boxes', full: 60, floor: 30, ses: 'a', weekly: true,
-        w: 'A paper under time is the only rehearsal that resembles the day.' },
+        w: 'A paper under time is the only rehearsal that resembles the day. Knowing the material and being able to produce it in ninety minutes with a clock running are two different skills, and only one of them is examined.' },
       { n: 'Review', p: 'loop', full: 25, floor: 10, ses: 'e',
-        w: 'Going back over old ground is what stops it leaving again.' } ] },
+        w: 'Going back over old ground is what stops it leaving again. Everything you learned last month is quietly draining away, and twenty minutes on old material is worth more than an hour on new.' } ] },
 
     { k: 'routine', n: 'Routine', recs: [
       { n: 'Wind down', p: 'decay', full: 45, floor: 20, ses: 'e',
-        w: 'The hour before bed decides the night more than the bedtime does.' },
+        w: 'The hour before bed decides the night more than the bedtime does. What you do in it sets how fast you drop off, and going up earlier makes up for none of a wound-up hour before it.' },
       { n: 'Fixed wake', p: 'sunrise', full: 15, floor: 15, ses: 'm',
-        w: 'One constant time anchors every other hour of the day to it.' } ] },
+        w: 'One constant time anchors every other hour of the day to it. It is the single lever that moves your sleep, your appetite and your energy together, and it works whether or not the night before went well.' } ] },
 
     /* THIN ON PURPOSE. The honest process for saving is a weekly look
        at what went out and one transfer — two blocks, one of them five
@@ -11127,9 +11198,9 @@
        the app inventing work. */
     { k: 'saving', n: 'Saving', recs: [
       { n: 'Look at what went out', p: 'tally', full: 20, floor: 10, ses: 'e', weekly: true,
-        w: 'You cannot cut a number you have never actually looked at.' },
+        w: 'You cannot cut a number you have never actually looked at. Most of what leaves an account each month leaves quietly, and twenty minutes with the statement finds more than any amount of resolving to spend less.' },
       { n: 'Move it across', p: 'stack', full: 10, floor: 5, ses: 'e', weekly: true,
-        w: 'Saving on the day it arrives beats saving on whatever is left.' } ] }
+        w: 'Saving on the day it arrives beats saving on whatever is left. What is left is never what you expected, so the amount you move first is the only amount you reliably keep.' } ] }
   ];
 
   /* THERE IS NO WEIGHT GOAL, and its absence is the decision. This app
@@ -11844,8 +11915,20 @@
     body.appendChild(scEl('span', 'gl-nm', s.n));
     body.appendChild(scEl('span', 'gl-ds', scGoalDoseLine(d)
       + (on ? ' · ' + scT(on.time) : '')));
+    /* ── ONE DESCRIPTION ON THE CARD, AND IT IS THE LONG ONE ──
+       There were two lines: what the block does, and why THIS dose.
+       The second went from here, and taking it out is what made room
+       for the first to be worth reading. It was also the weaker half
+       ON THIS SURFACE — the dose is printed in figures two lines
+       above it, so a sentence restating "3 days a week" in words is
+       the duplication this project keeps having to take back out.
+
+       It survives on the ADD SHEET, which is the one place it earns
+       its line: that is where you are choosing the dose, so the
+       sentence explains the default your thumb is about to move. The
+       card answers why the thing matters; the sheet answers why this
+       much of it. */
     body.appendChild(scEl('p', 'gl-w', s.w));
-    body.appendChild(scEl('p', 'gl-w', scGoalWhy2(wk, d)));
     card.appendChild(body);
     pane.appendChild(card);
 
@@ -11902,9 +11985,13 @@
       var draw = function () {
         body.textContent = '';
 
-        var w1 = scEl('p', 'gl-sw', s.w);
-        var w2 = scEl('p', 'gl-sw is-dim', scGoalWhy2(wk, { len: len, days: days }));
-        body.appendChild(w1); body.appendChild(w2);
+        /* NOT the description again — you have just read it on the
+           card you pressed to get here, and repeating a paragraph
+           above three ladders is a sheet you scroll past. What this
+           line says is why the dose is what it is, which is the
+           question the controls under it are about. */
+        body.appendChild(scEl('p', 'gl-sw is-dim',
+          scGoalWhy2(wk, { len: len, days: days })));
 
         body.appendChild(scEl('p', 'label', 'How long'));
         var lad = scEl('div', 'gl-lad');
@@ -12080,7 +12167,12 @@
         var f = scEl('input', 'field');
         f.type = 'text';
         f.value = name;
-        f.placeholder = 'Get consistently profitable trading';
+        /* A PLACEHOLDER NAMES NO PARTICULAR LIFE. It read "Get
+           consistently profitable trading", which is one person's goal
+           standing in a field everybody types into — the same mistake
+           the seeded week made before the specific one moved out into
+           the fixture. */
+        f.placeholder = 'Get in shape';
         f.setAttribute('aria-label', 'What are you working on');
         f.addEventListener('input', function () { name = f.value; });
         body.appendChild(f);

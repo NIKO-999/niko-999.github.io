@@ -5037,8 +5037,84 @@ const SAID = [
   ok('every row carries a pencil, one each',
     peds.rows > 0 && peds.eds === peds.rows, peds);
 
+  /* ── LEAVING THE DAY PUTS IT AWAY, AND THAT IS WHY THIS CAN
+         MEASURE ANYTHING ──
+     The section above double-taps a row, which now ARMS it — so
+     without a reset the check below reads a pencil a previous check
+     brought out. That is this file's own lesson about a check leaving
+     the app in a state, and the reset is a real rule rather than a
+     tidy-up: a pencil is a position on a screen you are looking at, so
+     walking off the day puts it away. Asserted as exactly that. */
+  const leftOut = await page.evaluate(() =>
+    document.querySelectorAll('.week.is-today .rowwrap.is-armed').length);
+  await page.evaluate(() => {
+    const d = (new Date().getDay() + 3) % 7;
+    document.querySelector('.st-d[data-d="' + d + '"]').click();
+  });
+  await page.waitForTimeout(360);
+  await page.evaluate(() => {
+    document.querySelector('.st-d[data-d="' + new Date().getDay() + '"]').click();
+  });
+  await page.waitForTimeout(360);
+  ok('leaving the day puts an armed pencil away',
+    leftOut > 0 && (await page.evaluate(() =>
+      document.querySelectorAll('.week.is-today .rowwrap.is-armed').length)) === 0,
+    { wasArmed: leftOut });
+
+  /* ── AND EVERY ONE OF THEM IS PUT AWAY ──
+     A control on every row is a second mark down a screen whose whole
+     job is the words, and you edit a block a few times ever. Measured
+     as the COMPUTED opacity and pointer-events rather than as a class,
+     because what this is about is whether a thumb can reach it — the
+     attribute-versus-box lesson in its other units.
+
+     BUILT though, never removed: it is the keyboard's control as well,
+     so it stays in the layout and in the tab order, and `eds === rows`
+     above is the half that says so. */
+  const putAway = await page.evaluate(() =>
+    [...document.querySelectorAll('.week.is-today .rowwrap .row-ed')].map((e) => {
+      const cs = getComputedStyle(e);
+      return +cs.opacity === 0 && cs.pointerEvents === 'none';
+    }));
+  ok('...and every one of them is put away until you ask',
+    putAway.length > 0 && putAway.every(Boolean), putAway);
+
+  /* ── A DOUBLE TAP BRINGS OUT ONE, ON THE ROW IT LANDED ON ── */
+  const armd = await page.evaluate(async () => {
+    const rows = [...document.querySelectorAll('.week.is-today .row[data-id]')];
+    /* A row whose tick opens NOTHING. Train opens the workout deck and
+       Walk or Read feed Mind, so a tick on any of those puts a scrim
+       over the screen and every press after it lands on that instead.
+       It cost a probe two rounds before it was noticed. */
+    const r = rows.find((x) => !/train|walk|read|gym/i.test(x.querySelector('.n').textContent));
+    if (!r) throw new Error('no plain row on today to arm');
+    const id = r.dataset.id;
+    const done = () => document.querySelectorAll('.week.is-today .row.is-done').length;
+    const before = done();
+    r.click();
+    await new Promise((z) => setTimeout(z, 120));
+    document.querySelector('.week.is-today .row[data-id="' + id + '"]').click();
+    await new Promise((z) => setTimeout(z, 520));
+    const shown = [...document.querySelectorAll('.week.is-today .rowwrap')]
+      .map((w) => +getComputedStyle(w.querySelector('.row-ed')).opacity > 0);
+    return { id, before, after: done(), armed: shown.filter(Boolean).length,
+      which: shown.indexOf(true),
+      want: [...document.querySelectorAll('.week.is-today .row[data-id]')]
+        .findIndex((x) => x.dataset.id === id) };
+  });
+  ok('a double tap brings out one pencil, on the row it landed on',
+    armd.armed === 1 && armd.which === armd.want, armd);
+  /* AND THE RECORD IS WHERE IT WAS. The first tap ticks the moment it
+     lands — there is no deferral, which is what the last two rounds of
+     this gesture were reported for — and the second undoes it. So a
+     double tap costs nothing whether it is read as a pair or as two
+     singles, at any speed there is. */
+  ok('...and leaves the record exactly where it found it',
+    armd.after === armd.before, armd);
+
   const pencil = await page.evaluate(async () => {
-    const w = document.querySelector('.week.is-today .rowwrap');
+    const w = document.querySelector('.week.is-today .rowwrap.is-armed')
+      || document.querySelector('.week.is-today .rowwrap');
     const id = w.querySelector('.row[data-id]').dataset.id;
     const at = () => {
       const r = document.querySelector('.week.is-today .row[data-id="' + id + '"]');
@@ -5062,6 +5138,19 @@ const SAID = [
     null, { timeout: 4000 });
   await page.waitForTimeout(160);
 
+  /* ── AND THEY GO BACK AWAY AFTER AN EDIT ──
+     Put away when the pencil is PRESSED rather than when the sheet
+     closes, so every way back to the week finds a bare row — saved,
+     deleted or abandoned alike. Dismissed here with the scrim rather
+     than with Escape: Escape is a keyboard action, and a keyboard is
+     the one case where the pencil keeping focus and staying drawn is
+     the right answer. */
+  const backAway = await page.evaluate(() =>
+    [...document.querySelectorAll('.week.is-today .rowwrap .row-ed')]
+      .filter((e) => +getComputedStyle(e).opacity > 0).length);
+  ok('...and every pencil is put away again once the editor has been',
+    backAway === 0, backAway);
+
   /* ── THE DRAWING IS 26px AND THE TARGET IS 44 ──
      Which is what everything else in this app holds to; the
      objectives plus and the children's dots are the same arrangement.
@@ -5069,6 +5158,10 @@ const SAID = [
      beside another small thing — and the whole argument for a control
      over a gesture is that you hit it the first time. */
   const hit = await page.evaluate(() => {
+    /* Armed by hand. The box is there whether or not it is drawn, and
+       this check is about SIZE — arming it through the gesture again
+       would be measuring the gesture twice. */
+    document.querySelector('.week.is-today .rowwrap').classList.add('is-armed');
     const e = document.querySelector('.week.is-today .rowwrap .row-ed');
     const r = e.getBoundingClientRect();
     const grow = parseFloat(getComputedStyle(e, '::before').top);
@@ -12829,8 +12922,20 @@ const SAID = [
       deck.chips.length === 4 && deck.chips[0] === 'Backtest', deck.chips);
     /* TWO LINES OF WHY AND NEVER THREE. One says what the thing does,
        one says why THIS dose. A third is a paragraph. */
-    ok('...and exactly two lines of why, never three',
-      deck.whys.length === 2 && deck.whys[1].indexOf('months') >= 0, deck.whys);
+    /* ── ONE DESCRIPTION ON THE CARD, AND IT IS THE LONG ONE ──
+       The second line said why THIS dose, and it went from here: the
+       dose is printed in figures two lines above it, so a sentence
+       restating "3 days a week" in words was the duplication this
+       project keeps taking back out. It survives on the add sheet,
+       which is where the dose is actually chosen.
+
+       Held to a LENGTH as well as a count, because "one line" passes
+       on the short one it replaced — the whole point of dropping the
+       other was to make room for this to say something. */
+    ok('...and exactly one line of why, never two',
+      deck.whys.length === 1, deck.whys);
+    ok('...and it is long enough to be worth the room it took',
+      deck.whys[0].length >= 150 && /\. /.test(deck.whys[0]), deck.whys[0].length);
     ok('...and the card carries a drawn pattern', deck.pat > 200, deck.pat);
 
     /* ── EVERY CARD IS PATTERNED, AND NO TWO ALIKE ──
