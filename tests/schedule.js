@@ -12140,8 +12140,307 @@ const SAID = [
         return b.k.length === 1 && b.k[0].n === 'Lunch';
       }));
 
+    /* ── ONE LINE, COMMAS ──
+       "lunch, trading content, emails" is one field for a whole shift
+       rather than one field used three times. Nine presses became one
+       line — which is what was asked for, and what it costs is a name
+       with a comma in it. */
+    const kidNames = async () => kp.evaluate(() =>
+      [...document.querySelectorAll('.kid-n')].map((e) => e.textContent));
+    const kidAdd = async (v) => {
+      await kp.fill('.kid-new .field', v);
+      await kp.click('.kid-new .btn');
+      await kp.waitForTimeout(220);
+    };
+    await kp.evaluate(() => document.querySelectorAll('.row-ed')[1].click());
+    await kp.waitForTimeout(560);
+    await kp.evaluate(() => {
+      [...document.querySelectorAll('.kid-x')].forEach((x) => x.click());
+    });
+    await kp.waitForTimeout(220);
+    await kidAdd('Lunch, trading content, emails');
+    ok('a whole list goes in on one line',
+      (await kidNames()).join('|') === 'Lunch|trading content|emails',
+      await kidNames());
+    /* A stray comma is a typo rather than an item. */
+    await kidAdd('  ,  , Calls ,, ');
+    ok('...and the empties between commas are not items',
+      (await kidNames()).join('|') === 'Lunch|trading content|emails|Calls',
+      await kidNames());
+    /* ── CAPPED IN THE MIDDLE, NOT REFUSED WHOLE ──
+       Pasting eight when four are already there takes the four that
+       fit. Refusing the lot is a field that silently does nothing,
+       which reads as broken. */
+    await kidAdd('a, b, c, d, e, f, g, h');
+    const capped = await kidNames();
+    ok('...and past the cap it takes what fits rather than nothing',
+      capped.length === 8 && capped[7] === 'd', capped);
+    ok('...and says so where the placeholder was',
+      /Eight is the most/.test(await kp.evaluate(() =>
+        document.querySelector('.kid-new .field').placeholder)));
+    await kp.keyboard.press('Escape');
+    await kp.waitForTimeout(420);
+
     ok('nothing threw through any of it', kerrs.length === 0, kerrs);
     await kctx.close();
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     THE TIMES YOU ALREADY USE
+
+     Two `<input type="time">` is two system wheels: tap, spin the
+     hour, spin the minute, spin AM/PM, dismiss — then again for the
+     end, which is about ten presses to say a thing you say every
+     week. Most blocks start at one of about eight times and this app
+     knows which, because they are on your own week.
+
+     A CHIP SETS, AND THE FIELD STAYS — the number dial's own shape,
+     for the dial's own reason: the chips make the common answer one
+     press and the control underneath reaches every other answer.
+
+     ITS OWN CONTEXT: it plants an unusual time to prove the list is
+     read off the record rather than written down.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    console.log('\n\u2500\u2500 the times you already use \u2500\u2500');
+    const tctx = await browser.newContext({ ...PHONE });
+    const tp = await tctx.newPage();
+    const terrs = [];
+    tp.on('pageerror', (e) => terrs.push(String(e)));
+    await tp.addInitScript((wk) => {
+      ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+        .forEach((k) => localStorage.setItem(k, '1'));
+      if (!localStorage.getItem('sched.v1')) {
+        localStorage.setItem('sched.v1', JSON.stringify(wk));
+      }
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1',
+          JSON.stringify({ on: false, url: '', code: '' }));
+      }
+    }, WEEK);
+    await tp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await tp.waitForTimeout(500);
+
+    const openEd = async (n) => {
+      await tp.evaluate((i) => {
+        const e = document.querySelectorAll('.row-ed')[i];
+        if (!e) throw new Error('no edit control at ' + i);
+        e.click();
+      }, n);
+      await tp.waitForTimeout(560);
+    };
+    const rung = () => tp.evaluate(() => ({
+      rows: [...document.querySelectorAll('.chips-t')].map((x) =>
+        [...x.children].map((e) => e.textContent)),
+      lit: [...document.querySelectorAll('.chip-t.is-at')].map((e) => e.textContent),
+      fields: [...document.querySelectorAll('#scSheetBody .field')]
+        .filter((e) => e.type === 'time').map((e) => e.value),
+    }));
+
+    await openEd(1);
+    const r0 = await rung();
+    /* ── EACH ROW UNDER THE FIELD IT SETS ──
+       Two full-width rows below the pair were four indistinguishable
+       rows of figures with nothing saying which was which. Asserted
+       as the BOX, because "there are two rows" passes on a build that
+       stacks them. */
+    const under = await tp.evaluate(() => {
+      const f = [...document.querySelectorAll('#scSheetBody .field')]
+        .filter((e) => e.type === 'time');
+      const c = [...document.querySelectorAll('.chips-t')];
+      if (f.length !== 2 || c.length !== 2) return null;
+      const b = (e) => e.getBoundingClientRect();
+      return {
+        startsUnder: b(c[0]).top >= b(f[0]).bottom - 1
+          && Math.abs(b(c[0]).left - b(f[0]).left) < 2,
+        endsUnder: b(c[1]).top >= b(f[1]).bottom - 1
+          && Math.abs(b(c[1]).left - b(f[1]).left) < 2,
+        apart: Math.round(b(c[1]).left - b(c[0]).left),
+      };
+    });
+    ok('each time field carries the times you use, under it',
+      under && under.startsUnder && under.endsUnder && under.apart > 100, under);
+    /* THE BLOCK'S OWN TIME IS ALWAYS A RUNG. The figure the sheet is
+       SHOWING has to be pressable, or the control disagrees with the
+       thing above it — the workout ladder's own rule. */
+    ok('...and the time it is on is among them, and lit',
+      r0.lit.length === 2
+      && r0.rows[0].indexOf(r0.lit[0]) >= 0
+      && r0.rows[1].indexOf(r0.lit[1]) >= 0, r0);
+    /* ── NO RUNG STRETCHES ──
+       `flex: 1 1 0` lets a row that does not divide evenly blow its
+       last chip across the whole line, which reads as a mistake
+       rather than as a ladder. Measured as the widths, because the
+       declaration can be right and the layout still ragged. */
+    const widths = await tp.evaluate(() =>
+      [...document.querySelectorAll('.chips-t')[0].children]
+        .map((e) => Math.round(e.getBoundingClientRect().width)));
+    ok('...and no chip stretches to fill a short last row',
+      widths.length > 0 && new Set(widths).size === 1, widths);
+
+    /* ── THE LIST IS YOUR WEEK, NOT A WRITTEN-DOWN ONE ──
+       Planted at a time nothing else uses. A fixed list of sensible
+       hours passes every check above and fails this one. */
+    await tp.keyboard.press('Escape');
+    await tp.waitForTimeout(420);
+    await tp.evaluate(() => {
+      const st = JSON.parse(localStorage.getItem('sched.v1'));
+      [2, 3, 4].forEach((d, i) => {
+        st.items.push({ id: 'odd' + i, d, s: 943, e: 1003, r: '', n: 'Odd' });
+      });
+      localStorage.setItem('sched.v1', JSON.stringify(st));
+    });
+    await tp.reload({ waitUntil: 'networkidle' });
+    await tp.waitForTimeout(600);
+    await openEd(1);
+    const r1 = await rung();
+    ok('the chips are the times on YOUR week, not a list somebody wrote',
+      r1.rows[0].indexOf('15:43') >= 0, r1.rows[0]);
+    /* Eight is the cap, and it is two rows of four at 390px. */
+    ok('...and there are never more than eight of them',
+      r1.rows.every((x) => x.length <= 8), r1.rows.map((x) => x.length));
+    await tp.keyboard.press('Escape');
+    await tp.waitForTimeout(420);
+
+    /* ══════════════════════════════════════════════════════════════
+       AND THEY ARE THIS BLOCK'S OWN TIMES FIRST
+
+       Reported in one line: *trading shouldn't recommend its last
+       used for gym*. A suggestion is only a suggestion if it is one
+       for THIS thing.
+
+       It also fixes what ranking the whole week could not. The
+       fixture has twelve distinct starts against eight slots, and the
+       four that fall off are the once-used ones — which are the SHIFT
+       starts, the times that move and therefore the ones you opened
+       the sheet to change. The stable half of the week was crowding
+       out the half being worked on.
+
+       MEASURED AS THE TRADE. Work's own hours are 10:00, 11:00, 12:00
+       and 13:00; ranked across the whole week 12:00 and 13:00 fall off
+       and Trading's 08:45 and 09:00 take their slots. Asserted in both
+       directions, because "Work's times are there" passes on a build
+       that simply shows more of them.
+       ══════════════════════════════════════════════════════════════ */
+    await tp.evaluate(() => {
+      const it = [];
+      for (let d = 0; d < 7; d++) {
+        it.push({ id: 'w' + d, d, s: 345, e: 375, r: '', n: 'Wake' });
+        it.push({ id: 't' + d, d, s: 390, e: 450, r: '', n: 'Train' });
+        it.push({ id: 'k' + d, d, s: 465, e: 510, r: '', n: 'Walk' });
+        it.push({ id: 'z' + d, d, s: 1365, e: 1380, r: '', n: 'Down' });
+      }
+      [[0, 540], [1, 540], [2, 540], [3, 540], [4, 540], [5, 525], [6, 525]]
+        .forEach((x, i) => it.push({ id: 'g' + i, d: x[0], s: x[1], e: x[1] + 90, r: '', n: 'Trading' }));
+      [[0, 660], [1, 780], [4, 720], [5, 600], [6, 600]]
+        .forEach((x, i) => it.push({ id: 'j' + i, d: x[0], s: x[1], e: x[1] + 300, r: '', n: 'Work' }));
+      const st = JSON.parse(localStorage.getItem('sched.v1'));
+      st.items = it;
+      localStorage.setItem('sched.v1', JSON.stringify(st));
+    });
+    await tp.reload({ waitUntil: 'networkidle' });
+    await tp.waitForTimeout(600);
+    /* Monday, which is the day this fixture puts a Work shift on. */
+    await tp.evaluate(() => {
+      const b2 = [...document.querySelectorAll('.st-d')].find((x) => x.dataset.d === '1');
+      if (!b2) throw new Error('no day chip for Monday');
+      b2.click();
+    });
+    await tp.waitForTimeout(500);
+    const edName = async (want) => {
+      await tp.evaluate((n) => {
+        const r = [...document.querySelectorAll('.row[data-id]')]
+          .find((x) => (x.querySelector('.n') || {}).textContent.trim().startsWith(n));
+        if (!r) throw new Error('no row named ' + n);
+        r.parentElement.querySelector('.row-ed').click();
+      }, want);
+      await tp.waitForTimeout(600);
+    };
+    await edName('Work');
+    const onWork = (await rung()).rows[0];
+    ok('a shift keeps its OWN hours, which ranking the week dropped',
+      onWork.indexOf('12:00') >= 0 && onWork.indexOf('13:00') >= 0, onWork);
+    ok('...and it is a trade: the other block\u2019s hours give up the slots',
+      onWork.indexOf('08:45') < 0 && onWork.indexOf('09:00') < 0, onWork);
+    await tp.keyboard.press('Escape');
+    await tp.waitForTimeout(420);
+    /* THE OTHER HALF: the gym must not be offered the shift's hours
+       ahead of anything. Train sits at one time all week, so its own
+       list is a single rung and the rest of the week fills in — what
+       must NOT happen is Work's 12:00 and 13:00 arriving there. */
+    await edName('Train');
+    const onTrain = (await rung()).rows[0];
+    ok('...and the gym is not handed the shift\u2019s hours',
+      onTrain.indexOf('12:00') < 0 && onTrain.indexOf('13:00') < 0, onTrain);
+    /* ── AND THE CHIPS FOLLOW THE NAME FIELD ──
+       Off the field rather than off the saved name, so a new block
+       gets its own times the moment you have said what it is. */
+    await tp.fill('#scSheetBody .field', 'Work');
+    await tp.waitForTimeout(520);
+    const renamed = (await rung()).rows[0];
+    ok('renaming it in the sheet moves the chips to what it is becoming',
+      renamed.indexOf('12:00') >= 0 && renamed.indexOf('13:00') >= 0, renamed);
+    await tp.keyboard.press('Escape');
+    await tp.waitForTimeout(420);
+    await openEd(1);
+
+    /* ── PRESSING A START KEEPS THE LENGTH ──
+       Moving a block is the common edit and its length is not what
+       you are changing; an end that stayed put would silently stretch
+       or invert it. */
+    const moved = await tp.evaluate(async () => {
+      const f = [...document.querySelectorAll('#scSheetBody .field')]
+        .filter((e) => e.type === 'time');
+      const was = { s: f[0].value, e: f[1].value };
+      const c = [...document.querySelectorAll('.chips-t')[0].children]
+        .find((x) => !x.classList.contains('is-at'));
+      c.click();
+      await new Promise((r) => setTimeout(r, 200));
+      return { was, now: { s: f[0].value, e: f[1].value },
+        lit: [...document.querySelectorAll('.chip-t.is-at')].map((e) => e.textContent) };
+    });
+    const mins = (v) => (+v.slice(0, 2)) * 60 + (+v.slice(3, 5));
+    ok('pressing a start moves the block and keeps how long it is',
+      moved.now.s !== moved.was.s
+      && mins(moved.now.e) - mins(moved.now.s) === mins(moved.was.e) - mins(moved.was.s),
+      moved);
+    ok('...and both chips relight off the fields',
+      moved.lit.length === 2, moved);
+
+    /* ── AND THE FIELD IS STILL THE WAY TO EVERY OTHER TIME ──
+       Taking the fields away would make an odd time HARDER than it is
+       today and take the screen reader's route with it. Typed into,
+       the chips have to follow — they are redrawn off the field, so
+       the two can never disagree about what is set. */
+    const typed = await tp.evaluate(async () => {
+      const f = [...document.querySelectorAll('#scSheetBody .field')]
+        .filter((e) => e.type === 'time');
+      f[0].value = '11:11';
+      f[0].dispatchEvent(new Event('change', { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 200));
+      return { lit: [...document.querySelectorAll('.chip-t.is-at')].map((e) => e.textContent),
+        named: [...document.querySelectorAll('.chip-t')].slice(0, 1)
+          .map((e) => e.getAttribute('aria-label')) };
+    });
+    ok('a time typed into the field lights its own chip, spliced in',
+      typed.lit.indexOf('11:11') >= 0, typed);
+    /* The figure alone is "06:30, pressed" — which of the two it sets
+       is carried by position, and position is what a screen reader
+       does not get. */
+    ok('...and every chip says which end it sets',
+      /^(Start|End) at /.test(typed.named[0] || ''), typed);
+
+    /* Nothing in this app scrolls sideways, and a wrapped row of
+       chips is where that rule gets broken by accident. */
+    ok('nothing on the sheet scrolls sideways',
+      (await tp.evaluate(() => [...document.querySelectorAll('#scSheetBody *')]
+        .filter((e) => e.scrollWidth > e.clientWidth + 1
+          && /auto|scroll/.test(getComputedStyle(e).overflowX)).length)) === 0);
+
+    await tp.keyboard.press('Escape');
+    await tp.waitForTimeout(420);
+    ok('nothing threw through any of it', terrs.length === 0, terrs);
+    await tctx.close();
   }
 
   /* ══════════════════════════════════════════════════════════════

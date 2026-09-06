@@ -5530,6 +5530,53 @@ body {
   cursor: pointer;
 }
 .nm-mark.is-at { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* ── THE TIMES YOU ALREADY USE ──
+   The dial marks' own shape, and deliberately: both are a row of
+   figures that SET the control above them, so a person who has met
+   one has met the other. Eight of them, WRAPPED to two rows of four
+   rather than scrolled — nothing in this app scrolls sideways, and
+   the rung you want must never be the one off the edge.
+
+   `flex: 1 1 0` with a basis of nought, so four to a row divide the
+   width evenly whatever the figures are: `auto` lets a 12-hour phone's
+   wider "10:30 pm" take more than its share and the row comes out
+   ragged, which is the length ladder's own note read across. */
+.chips-t {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.chips-t + .chips-t { margin-top: 6px; }
+.chip-t {
+  /* ── A FIXED BASIS, NOT A GROWING ONE ──
+     `flex: 1 1 0` lets a row that does not divide evenly stretch its
+     last rung across the whole line: five chips came out as four and
+     a full-width fifth, which reads as a mistake rather than as a
+     ladder. That is the Mind ladder's own fault, and this is its own
+     fix — every chip is exactly half its column whether or not the
+     last row is full. */
+  flex: 0 0 calc((100% - 6px) / 2);
+  min-width: 0;
+  border: 1px solid var(--hair);
+  background: var(--card);
+  color: var(--dim);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  padding: 9px 4px;
+  border-radius: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  cursor: pointer;
+}
+.chip-t.is-at { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.chip-t:active { opacity: .82; }
+.chip-t:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .nm-mark:active { opacity: .82; }
 .nm-mark:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 

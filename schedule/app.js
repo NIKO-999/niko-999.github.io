@@ -279,6 +279,74 @@
   /* '' on a 24-hour phone, so every caller can concatenate it blind. */
   function scMerIf(min) { return H12 ? ' ' + scMer(min) : ''; }
 
+  /* ── THE TIMES YOU ALREADY USE, FOR THIS THING ──
+     Most blocks start at one of about eight times, and this app knows
+     which because they are on your own week. So the chips are not a
+     guess at what a sensible hour is — 8:00, 8:30, 9:00 is somebody
+     else's list — they are the schedule read back.
+
+     THIS BLOCK'S OWN TIMES FIRST, and that is the whole of what makes
+     them worth pressing: a suggestion is only a suggestion if it is
+     one for THIS thing. Trading's hours are no help when you are
+     moving the gym.
+
+     It also fixes what ranking the whole week could not. Counted on
+     the real fixture: twelve distinct starts against eight slots, and
+     the four that fall off are the once-used ones — which are the
+     SHIFT starts, the times that move and therefore the ones you
+     opened the sheet to change. The stable half of the week was
+     crowding out the half being worked on. Per name, a shift's own
+     four hours are the first four chips.
+
+     THEN THE REST OF THE WEEK, so a block with one time to its name
+     still gets a full row — and a new block, which has no name until
+     you type one, gets the week until it does.
+
+     RANKED BY HOW OFTEN inside each half, then by the clock. Frequency
+     is what makes it YOUR list; the clock is what makes it readable
+     once the counts tie, and without it the row reorders itself every
+     time you add a block, which is a control that moves under your
+     thumb.
+
+     Eight, which is two rows of four at 390px — the workout ladder's
+     own figure, and the row it is drawn in wraps rather than scrolls,
+     because nothing in this app scrolls sideways. */
+  function scCommonTimes(key, name) {
+    var q = String(name || '').trim().toLowerCase();
+    var mine = {}, rest = {};
+    state.items.forEach(function (it) {
+      var v = it[key];
+      if (typeof v !== 'number' || v < 0 || v > 1440) return;
+      var box = (q && String(it.n || '').trim().toLowerCase() === q) ? mine : rest;
+      box[v] = (box[v] || 0) + 1;
+    });
+    var rank = function (n) {
+      return Object.keys(n).map(Number)
+        .sort(function (a, b) { return n[b] - n[a] || a - b; });
+    };
+    /* THIS BLOCK'S OWN TIMES FIRST, then the rest of the week. A time
+       is only a suggestion if it is a suggestion for THIS thing —
+       Trading's hours are no help when you are moving the gym. */
+    var out = rank(mine);
+    rank(rest).forEach(function (m) { if (out.indexOf(m) < 0) out.push(m); });
+    return out.slice(0, 8).sort(function (a, b) { return a - b; });
+  }
+
+  /* ── AND THE ONE YOU ARE ON IS ALWAYS PRESSABLE ──
+     Spliced in wherever it is not already there, which is the workout
+     ladder's rule for the workout ladder's reason: the figure the
+     sheet is SHOWING you has to be one of the rungs, or the control
+     disagrees with the thing above it. Dropping the least common one
+     to make room rather than growing the row, so the count is fixed
+     and the layout cannot move. */
+  function scTimeRungs(key, at, name) {
+    var list = scCommonTimes(key, name);
+    if (list.indexOf(at) >= 0) return list;
+    if (list.length >= 8) list.pop();
+    list.push(at);
+    return list.sort(function (a, b) { return a - b; });
+  }
+
   function scFromHHMM(v) {
     var m = /^(\d{1,2}):(\d{2})$/.exec(String(v || '').trim());
     if (!m) return null;
@@ -2803,6 +2871,7 @@
      on the server, with nothing anywhere saying so. */
   var KID_KEY = 'sched.kid.v1';
   var OFF_KEY = 'sched.off.v1';
+
 
   /* One glyph per item, and like TALLY itself this is CODE rather than
      data: the five are fixed and identical for everybody, so their
@@ -10095,7 +10164,97 @@
       var t2 = scEl('input', 'field'); t2.type = 'time'; t2.step = 300;
       t1.value = scHHMM(item ? item.s : 480);
       t2.value = scHHMM(item ? item.e : 570);
-      times.appendChild(t1); times.appendChild(t2);
+      /* The label above them is a <span> rather than a <label>, so
+         these were announced as two unnamed time fields. */
+      t1.setAttribute('aria-label', 'Starts at');
+      t2.setAttribute('aria-label', 'Ends at');
+      /* ── EACH ROW UNDER THE FIELD IT SETS ──
+         Built as two columns rather than two full-width rows below
+         the pair. Stacked, the starts and the ends were four
+         indistinguishable rows of figures with nothing saying which
+         was which — and labelling them costs two more registers of
+         type on a sheet that already has six. Under its own field
+         there is nothing to say: the association is the position. */
+      var c1 = scEl('div'), c2 = scEl('div');
+      c1.appendChild(t1); c2.appendChild(t2);
+      times.appendChild(c1); times.appendChild(c2);
+
+      /* ── AND THE TIMES YOU ALREADY USE, AS CHIPS ──
+         The two fields are `<input type="time">`, so on iOS each one
+         opens the system wheel: tap, spin the hour, spin the minute,
+         spin AM/PM, dismiss — then again for the end. That is about
+         ten presses to say a thing you say every week.
+
+         A CHIP SETS, AND THE FIELD STAYS. This is the number dial's
+         own shape and it is here for the dial's own reason: the marks
+         make the common answer one press, and the control underneath
+         is what reaches every other answer. Taking the fields away
+         would make an odd time HARDER than it is today, and it would
+         take the keyboard and the screen reader's route with it —
+         a chip row reaches a pointer and a keyboard, but the field is
+         what a screen reader announces as a time.
+
+         PRESSING A START KEEPS THE LENGTH. Moving a block is the
+         common edit and its length is not what you are changing; an
+         end that stayed put would silently stretch or invert it. The
+         end is clamped into the day rather than rolled over, which is
+         the rule the parser already keeps. */
+      var startRow = scEl('div', 'chips-t');
+      var endRow = scEl('div', 'chips-t');
+      c1.appendChild(startRow);
+      c2.appendChild(endRow);
+      function drawRungs() {
+        var s0 = scFromHHMM(t1.value), e0 = scFromHHMM(t2.value);
+        [[startRow, 's', s0], [endRow, 'e', e0]].forEach(function (pair) {
+          var box = pair[0], key = pair[1], at = pair[2];
+          box.textContent = '';
+          if (at === null) return;
+          scTimeRungs(key, at, name.value).forEach(function (m) {
+            var b = scEl('button', 'chip-t' + (m === at ? ' is-at' : ''), scT(m));
+            b.type = 'button';
+            b.setAttribute('aria-pressed', m === at ? 'true' : 'false');
+            /* The figure alone is "06:30, pressed" — which of the two
+               it sets is carried by POSITION, and position is the one
+               thing a screen reader does not get. */
+            b.setAttribute('aria-label',
+              (key === 's' ? 'Start at ' : 'End at ') + scT(m));
+            b.addEventListener('click', function () {
+              var a = scFromHHMM(t1.value), z = scFromHHMM(t2.value);
+              if (key === 's') {
+                var len = (a !== null && z !== null && z > a) ? z - a : 60;
+                t1.value = scHHMM(m);
+                t2.value = scHHMM(Math.min(1440, m + len));
+              } else {
+                t2.value = scHHMM(m);
+                if (a !== null && m <= a) t1.value = scHHMM(Math.max(0, m - 60));
+              }
+              drawRungs();
+            });
+            box.appendChild(b);
+          });
+        });
+      }
+      /* Redrawn off the FIELD rather than off a variable, so a time
+         typed or wheeled in lights its own chip and splices itself in
+         if it is not one — the two can never disagree about what is
+         set, because there is only one place the answer lives. */
+      t1.addEventListener('change', drawRungs);
+      t2.addEventListener('change', drawRungs);
+      /* ── AND THE CHIPS FOLLOW THE NAME ──
+         Off the FIELD rather than off `item.n`, so a new block gets
+         its own times the moment you have said what it is: type Work
+         and the row becomes the hours Work is kept at. On an existing
+         block the two are the same until you rename it, and then the
+         chips are for what it is BECOMING, which is the useful half.
+
+         Debounced by a frame rather than per keystroke — this reads
+         every block on the week, and doing that on each letter of a
+         name is a scan a character. */
+      var nameWait = null;
+      name.addEventListener('input', function () {
+        if (nameWait) return;
+        nameWait = setTimeout(function () { nameWait = null; drawRungs(); }, 220);
+      });
 
       var room = scEl('input', 'field');
       room.type = 'text';
@@ -10108,6 +10267,7 @@
       body.appendChild(picks);
       body.appendChild(scEl('span', 'label', 'From — to'));
       body.appendChild(times);
+      drawRungs();
       body.appendChild(scEl('span', 'label', 'Where'));
       body.appendChild(room);
 
@@ -10123,7 +10283,7 @@
       var kidBox = scEl('div', 'kid-edit');
       var kidAdd = scEl('input', 'field');
       kidAdd.type = 'text';
-      kidAdd.placeholder = 'Lunch, watch trading content…';
+      kidAdd.placeholder = 'Lunch, trading content, emails…';
       kidAdd.maxLength = 40;
       function paintKids() {
         kidBox.textContent = '';
@@ -10141,12 +10301,33 @@
         });
         kidAdd.disabled = kidList.length >= 8;
         kidAdd.placeholder = kidList.length >= 8
-          ? 'Eight is the most a row can hold' : 'Lunch, watch trading content…';
+          ? 'Eight is the most a row can hold' : 'Lunch, trading content, emails…';
       }
+      /* ── ONE LINE, COMMAS ──
+         "lunch, trading content, emails" is one field for a whole
+         shift rather than one field used three times, and it is how
+         you would say it out loud. Nine presses became one line.
+
+         WHAT IT COSTS is a name with a comma in it, and that is the
+         trade this was chosen for rather than an oversight — the
+         placeholder says the shape so it is visible before you type
+         rather than after.
+
+         CAPPED IN THE MIDDLE, NOT REFUSED WHOLE. Pasting ten when six
+         are already there takes the two that fit rather than dropping
+         the lot: the alternative is a field that silently does
+         nothing, which reads as broken. */
       function addKid() {
-        var v = kidAdd.value.trim();
-        if (!v || kidList.length >= 8) return;
-        kidList.push({ id: scId(), n: v.slice(0, 40) });
+        var raw = kidAdd.value.split(',');
+        var room = 8 - kidList.length;
+        var taken = 0;
+        raw.forEach(function (part) {
+          var v = part.trim();
+          if (!v || taken >= room) return;
+          kidList.push({ id: scId(), n: v.slice(0, 40) });
+          taken++;
+        });
+        if (!taken) return;
         kidAdd.value = '';
         paintKids();
       }

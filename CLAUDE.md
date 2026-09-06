@@ -7094,3 +7094,117 @@ had already written the lesson down.
 forty rows above it already does exactly that, which is what makes
 leaving it out the easy mistake — a check that changes the state of the
 app is a check that breaks the next one.
+
+## The times you already use
+
+Two `<input type="time">` is two system wheels: tap, spin the hour,
+spin the minute, spin AM/PM, dismiss — then again for the end. About
+ten presses to say a thing you say every week, and the wheel is the one
+control on the sheet that hides the rest of it.
+
+**THE CHIPS ARE THE SCHEDULE READ BACK, NOT A LIST SOMEBODY WROTE.**
+8:00, 8:30, 9:00 is a guess at what a sensible hour is; the times on
+your own week are a fact about you. `scCommonTimes` counts them off
+`state.items`.
+
+**THIS BLOCK'S OWN TIMES FIRST**, and that is the whole of what makes
+them worth pressing. Reported in one line: *trading shouldn't recommend
+its last used for gym*. A suggestion is only a suggestion if it is one
+for THIS thing.
+
+It also fixes what ranking the whole week could not, and the numbers
+are why the first version was wrong. Counted on the real fixture:
+**twelve distinct starts against eight slots, and the four that fall
+off are the once-used ones** — which are the SHIFT starts, the times
+that move and therefore the ones you opened the sheet to change. The
+stable half of the week (wake, train, walk) was crowding out the half
+being worked on. Per name, a shift's own four hours are guaranteed
+slots: editing Work gains 12:00 and 13:00 and gives up Trading's 08:45
+and 09:00, which is asserted as that exact trade in both directions —
+"Work's times are there" passes on a build that simply shows more of
+them.
+
+**RECENCY WAS THE ASK AND PER-NAME IS THE ANSWER.** A log of the times
+you last set was built for a minute and taken back out: it needs a key
+of its own, with a cap, a repair and a sweep, to approximate what
+`state.items` already knows exactly. Recency was a proxy for RELEVANCE,
+and same-task is relevance itself.
+
+**THEN THE REST OF THE WEEK**, so a block with one time to its name
+still gets a full row — Train sits at 06:30 all week, and its own list
+is a single rung. A new block, which has no name until you type one,
+gets the week until it does.
+
+**RANKED BY HOW OFTEN INSIDE EACH HALF, then by the clock.** Frequency
+is what makes it your list; the clock is what makes it readable once
+the counts tie — and without it the row reorders itself every time you
+add a block, which is a control that moves under your thumb.
+
+**AND THE CHIPS FOLLOW THE NAME FIELD**, not the saved name: type Work
+into a new block and the row becomes the hours Work is kept at. On an
+existing block the two agree until you rename it, and then the chips
+are for what it is BECOMING, which is the useful half. Debounced by a
+frame, because this reads every block on the week and doing that per
+keystroke is a scan a character.
+
+**A CHIP SETS, AND THE FIELD STAYS.** The number dial's own shape, for
+the dial's own reason: the chips make the common answer one press and
+the control underneath reaches every other answer. Taking the fields
+away would make an odd time HARDER than it is today and would take the
+keyboard and the screen reader's route with it — a chip row reaches a
+pointer and a keyboard, but the field is what a screen reader announces
+as a time.
+
+**PRESSING A START KEEPS THE LENGTH.** Moving a block is the common
+edit and its length is not what you are changing; an end that stayed
+put would silently stretch or invert it.
+
+**THE BLOCK'S OWN TIME IS ALWAYS A RUNG**, spliced in wherever it is
+not already there — the workout ladder's rule for the workout ladder's
+reason: the figure the sheet is SHOWING has to be pressable, or the
+control disagrees with the thing above it. The least common one is
+dropped to make room rather than the row growing, so the count is fixed
+and the layout cannot move.
+
+**REDRAWN OFF THE FIELD, NEVER OFF A VARIABLE.** A time typed or
+wheeled in lights its own chip and splices itself in, because there is
+only one place the answer lives.
+
+**EACH ROW UNDER THE FIELD IT SETS.** Built first as two full-width
+rows below the pair, which came out as four indistinguishable rows of
+figures with nothing saying which was which — and labelling them costs
+two more registers of type on a sheet that already has six. Under its
+own field there is nothing to say: the association is the position.
+Asserted as the BOX, because "there are two rows" passes on a build
+that stacks them.
+
+**A FIXED BASIS, NOT A GROWING ONE.** `flex: 1 1 0` let a row that does
+not divide evenly stretch its last rung across the whole line: five
+chips came out as four and a full-width fifth, which reads as a mistake
+rather than as a ladder. That is the Mind ladder's own fault arriving a
+second time, and the fix is the same — every chip is exactly half its
+column whether or not the last row is full. Measured as the widths,
+because the declaration can be right and the layout still ragged.
+
+**And the chips are NAMED.** The figure alone is "06:30, pressed" —
+which of the two it sets is carried by position, and position is the
+one thing a screen reader does not get. The fields gained labels with
+them: the heading above the pair is a `<span>` rather than a `<label>`,
+so they were announced as two unnamed time fields.
+
+## One line, commas
+
+The sub-item field took the whole of its value as one item, so three
+things was three trips through a field and an Add button. It splits on
+commas now: **"lunch, trading content, emails"** is one field for a
+whole shift rather than one field used three times, and it is how you
+would say it out loud.
+
+**WHAT IT COSTS IS A NAME WITH A COMMA IN IT**, and that is the trade
+this was chosen for rather than an oversight — the placeholder says the
+shape, so it is visible before you type rather than after.
+
+**CAPPED IN THE MIDDLE, NOT REFUSED WHOLE.** Pasting eight when four
+are already there takes the four that fit; refusing the lot is a field
+that silently does nothing, which reads as broken. A stray comma is a
+typo rather than an item, so the empties between them are dropped.
