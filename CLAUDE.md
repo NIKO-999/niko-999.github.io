@@ -7374,10 +7374,28 @@ squared paper — coarser than a scan pitch, finer than scaffolding, no
 diagonals. **Judged together rather than one at a time, which is the
 only way that fault is visible.**
 
+**AND TWO CARDS SHARED A DRAWING ACROSS DECKS, which the check found
+and I had not.** *Practice* and *Review* were both `loop`; *Build* and
+*Make something* were both `lattice`. Neither pair is ever on screen
+together, and the temptation was to narrow the assertion to "within one
+goal" — which is exactly the widening this file warns about everywhere
+else. They got their own instead: **drift**, one movement done again
+and again with each pass landing a little off the last, and
+**assemble**, parts of different sizes packed until they fill the
+space. Building is scaffolding and making is the object that comes off
+it, so the two were never the same claim anyway.
+
 They are a TABLE, which is the cost of them meaning anything — a second
 list to keep in step with the first. What pays for it is the fallback:
 a suggestion the table has no drawing for gets one seeded from its own
 name, so a card is never blank.
+
+**COVERAGE IS ASSERTED IN BOTH DIRECTIONS**, which is the keyword
+table's own rule: a card naming a drawing the table does not have falls
+through to the fallback silently — the card looks fine and the drawing
+meant for it was never used — and a drawing nothing can reach is dead
+weight that looks like coverage. 26 patterns, 26 cards, none twice and
+none dead.
 
 **Non-scaling strokes, which is the waves' lesson kept.** A width in
 viewBox units is multiplied by whatever the box is stretched to, and it
@@ -7469,6 +7487,24 @@ entries would be one table written twice. **Saving stays thin on
 purpose**: a weekly look at what went out and one transfer, two blocks,
 one of them five minutes. Padding it to four so it matched the others
 would be the app inventing work.
+
+### Two counts written as three, and a claim the app is allowed to make
+
+`tabs.length === 3` and a joined string of three labels were both
+written when there were three views, and the day Goals landed they
+**failed together while the bar was perfectly correct**. Same shape as
+`tests/run.js`'s hardcoded SUITE list and the flight-pause rule's list
+of layers: a hardcoded count silently skips what is not in it, right up
+until it does not. Named now, and the ORDER is asserted too, because it
+is a decision — Goals sits beside Today, which is what it is about.
+
+**And the four-view box loop presses Friends, which CLAIMS A CODE.**
+That is the app working, and it is why the friends assertions live in a
+context of their own. Dropped into a section whose whole claim is
+"nothing leaves", it failed on the one request the app is supposed to
+make. The loop still visits all four — "exactly one section is drawn"
+is vacuous if it skips one — and the claim is NAMED in the filter
+rather than counted away, so anything else at all is still a leak.
 
 ### The head named two of what is now three
 

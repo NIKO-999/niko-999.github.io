@@ -2611,10 +2611,17 @@ const SAID = [
     return out;
   });
   ok('every view has its own tab and lights only that one',
-    tabs.length === 3 && tabs.every((t) => t.lit.length === 1 && t.lit[0] === t.want), tabs);
-  ok('and each one is labelled',
+    tabs.length === 4 && tabs.every((t) => t.lit.length === 1 && t.lit[0] === t.want), tabs);
+  /* NAMED, not counted. `tabs.length === 3` and a joined string of
+     three labels were both written when there were three, and the day
+     Goals landed they failed together while the bar was perfectly
+     correct — which is the same shape as tests/run.js's hardcoded
+     SUITE list and the flight-pause rule's list of layers. The order
+     is asserted because it is a decision: Goals sits beside Today,
+     which is what it is about, rather than at the end. */
+  ok('and each one is labelled, in the order they were chosen',
     await page.$$eval('.tab span:last-child',
-      (e) => e.map((x) => x.textContent).join(' ')) === 'Week Today Friends');
+      (e) => e.map((x) => x.textContent).join(' ')) === 'Week Today Goals Friends');
 
   /* The ground is a gradient the palette can reach, which on the
      shipped palette resolves to the flat white page it has always been.
@@ -12699,6 +12706,16 @@ const SAID = [
        That has cost this app the rail, the page dots, the toast, the
        intro and the objectives row, so the property is never what is
        read. */
+    /* ── THE FRIENDS TAB IS PRESSED LAST, AND THE COUNT IS TAKEN
+           BEFORE IT ──
+       Arriving at Friends CLAIMS A CODE — that is the app working, and
+       it is why the friends assertions live in a context of their own.
+       Pressing it inside a section whose whole claim is "nothing
+       leaves" makes the check fail on the one request the app is
+       supposed to make. The view-box loop still visits all four,
+       because "exactly one section is drawn" is vacuous if it skips
+       one; what moves is where the tally of off-origin requests is
+       read. */
     const boxes = {};
     for (const v of ['list', 'tally', 'goals', 'friends']) {
       await gp.evaluate((vv) => {
@@ -12853,8 +12870,16 @@ const SAID = [
       { drawn: drawn.length, unique: new Set(drawn).size });
 
     await gctx.close();
-    ok('nothing threw through any of the goals screen', gerrs.length === 0, gerrs);
-    ok('...and nothing left the origin', gout.length === 0, gout);
+    /* The friends tab's own claim is the one request allowed here, and
+       it is named rather than counted away: anything else at all is a
+       leak. Console errors are filtered the same way — a claim that
+       cannot reach the worker from this sandbox logs a failed fetch,
+       which is a fact about the network and not about the app. */
+    const stray = gout.filter((u) => !/\/v1\/claim$/.test(u));
+    const threw = gerrs.filter((e) => !/ERR_TUNNEL_CONNECTION_FAILED|ERR_NAME_NOT_RESOLVED/.test(e));
+    ok('nothing threw through any of the goals screen', threw.length === 0, threw);
+    ok('...and nothing left the origin but the friends tab\u2019s own claim',
+      stray.length === 0, stray);
   }
 
 
@@ -13228,6 +13253,32 @@ const SAID = [
     });
     const src = await (await rp.request.get(body)).text();
     const push = src.slice(src.indexOf('function scPushNow'), src.indexOf('function scPushNow') + 2600);
+    /* ── BOTH DIRECTIONS OF PATTERN COVERAGE ──
+       A card naming a drawing the table does not have falls through to
+       the seeded fallback, which is correct and is also silently
+       invisible — the card looks fine and the drawing meant for it was
+       never used. And a drawing nothing can reach is dead weight that
+       looks like coverage. The keyword table's own rule, one screen
+       over, and the reason `tests/schedule.js` already holds the row
+       glyphs to both halves. */
+    const cov = (() => {
+      const kinds = src.slice(src.indexOf('var GOAL_KINDS'), src.indexOf('function scGoalKind'));
+      const table = src.slice(src.indexOf('var GOAL_PATS = {'), src.indexOf('function glHash'));
+      const used = (kinds.match(/p: '([a-z]+)'/g) || []).map((m) => m.slice(4, -1));
+      const has = (table.match(/^    ([a-z]+): function/gm) || [])
+        .map((m) => m.trim().split(':')[0]);
+      return {
+        used: used.length,
+        twice: [...new Set(used.filter((u, i) => used.indexOf(u) !== i))],
+        missing: used.filter((u) => has.indexOf(u) < 0),
+        dead: has.filter((h) => used.indexOf(h) < 0),
+      };
+    })();
+    ok('every card names a pattern the table actually has',
+      cov.used >= 20 && cov.missing.length === 0, cov);
+    ok('...no pattern is drawn on two different cards', cov.twice.length === 0, cov.twice);
+    ok('...and no pattern is dead weight nothing can reach', cov.dead.length === 0, cov.dead);
+
     ok('a push carries no goal, no goal record and no goal key',
       push.indexOf('sched.goal') < 0 && push.indexOf('goals') < 0
       && push.indexOf('scGoal') < 0, push.slice(0, 120));

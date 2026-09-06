@@ -11066,11 +11066,11 @@
         w: 'A book you took nothing out of is a book you will read again.' } ] },
 
     { k: 'skill', n: 'A skill', recs: [
-      { n: 'Practice', p: 'loop', full: 45, floor: 15, ses: 'e',
+      { n: 'Practice', p: 'drift', full: 45, floor: 15, ses: 'e',
         w: 'A skill moves on repetitions, not on hours of reading about it.' },
       { n: 'A drill', p: 'pulse', full: 20, floor: 10, ses: 'e',
         w: 'One narrow thing done badly today is the thing done well in a month.' },
-      { n: 'Make something', p: 'lattice', full: 60, floor: 30, ses: 'a', weekly: true,
+      { n: 'Make something', p: 'assemble', full: 60, floor: 30, ses: 'a', weekly: true,
         w: 'Output is the only honest test of whether the practice worked.' } ] },
 
     /* MONEY FOLDS IN HERE. A goal that says "earn more" wants the same
@@ -11298,6 +11298,38 @@
       for (i = 0; i < 6; i++) for (j = 0; j < 4; j++) {
         if ((i + j) % 2) continue;
         o += glLn(i * 16.6, 3 + j * 19, (i + 1) * 16.6, 22 + j * 19, .05, .9);
+      }
+      return o;
+    },
+    /* PRACTICE. One movement done again and again, each pass landing a
+       little off the last — which is what practice looks like from the
+       outside and is a shape no other card here has. It replaced a
+       shared `loop`: Practice and Review both had it, and two cards
+       with one drawing is the fault the whole set is checked for, even
+       when the two are in different decks. */
+    drift: function () {
+      var o = '', r, c, a, x, y;
+      for (r = 0; r < 7; r++) for (c = 0; c < 10; c++) {
+        a = (r * 10 + c) * 0.17;
+        x = 6 + c * 10; y = 8 + r * 11.4;
+        o += glLn(x - Math.cos(a) * 3.4, y - Math.sin(a) * 3.4,
+                  x + Math.cos(a) * 3.4, y + Math.sin(a) * 3.4, .11, 1.3);
+      }
+      return o;
+    },
+    /* MAKE SOMETHING. Parts of different sizes packed until they fill
+       the space — a made thing rather than the frame it was built on.
+       It replaced a shared `lattice`, which Build still has: building
+       is scaffolding and making is the object that comes off it. */
+    assemble: function () {
+      var o = '', i;
+      var parts = [[2, 2, 34, 26], [38, 2, 24, 16], [64, 2, 34, 38], [2, 30, 22, 22],
+        [26, 20, 36, 30], [2, 54, 40, 24], [44, 52, 26, 26], [64, 42, 34, 18],
+        [72, 62, 26, 16], [46, 20, 16, 14]];
+      for (i = 0; i < parts.length; i++) {
+        o += '<rect x="' + parts[i][0] + '" y="' + parts[i][1] + '" width="' + parts[i][2]
+          + '" height="' + parts[i][3] + '" rx="2" fill="' + glW(i % 3 === 0 ? .05 : .02)
+          + '" stroke="' + glW(.105) + '" stroke-width="1" vector-effect="non-scaling-stroke"/>';
       }
       return o;
     },
