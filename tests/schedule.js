@@ -13059,17 +13059,39 @@ const SAID = [
     /* ONLY THE TAG. Not the countdown, not the card's edge, not the
        title — one mark, one claim, or an overrunning goal is the
        loudest thing on the screen. */
+    /* ── AND THE OVERRUN IS THE ONLY PLACE THAT COLOUR APPEARS ──
+       One mark, one claim: not the countdown, not the card's edge, not
+       the title, or an overrunning goal is the loudest thing on the
+       screen. The CARD is excluded, and that is the honest scope
+       rather than a relaxation — it deliberately carries a hue of its
+       own, which is the workout cards' argument that a colour saying
+       WHICH must be the same at every angle of the wheel. The claim
+       here is about the app's chrome.
+
+       AND THE COLOUR IS READ THROUGH A PARSER, NEVER A DIGIT MATCH.
+       Chromium serialises a color-mix result as `color(srgb 0.95 0.82
+       0.69)` — three floats in 0..1, not three bytes — so a bare digit
+       match reads a warm label as near-black, and this check found
+       NOTHING. It failed rather than passing only because the count is
+       asserted beside the state. This repo met the same serialisation
+       once before, on a box-shadow a string check could not see. */
     const spread = await ap.evaluate(() => {
+      const rgb = (str) => {
+        const m = str.match(/[\d.]+/g);
+        if (!m) return null;
+        const v = m.slice(0, 3).map(Number);
+        return /color\(/.test(str) ? v.map((x) => Math.round(x * 255)) : v;
+      };
       const warm = [];
       document.querySelectorAll('#scGoals *').forEach((el) => {
-        const c = getComputedStyle(el).color.match(/[\d.]+/g);
+        if (el.closest('.gl-wc')) return;
+        const c = rgb(getComputedStyle(el).color);
         if (!c) return;
-        const [r, g, b] = c.slice(0, 3).map(Number);
-        if (r - b > 40 && r > 120) warm.push(el.className || el.tagName);
+        if (c[0] - c[2] > 40 && c[0] > 120) warm.push(el.className || el.tagName);
       });
       return warm;
     });
-    ok('...and it is the ONLY warm thing on the screen',
+    ok('...and it is the ONLY warm thing in the screen\u2019s chrome',
       spread.length === 1 && /is-over/.test(String(spread[0])), spread);
 
     /* ── DONE AND DROPPED BOTH ARCHIVE, AND THE BLOCKS STAY ──
@@ -13252,7 +13274,19 @@ const SAID = [
       return src;
     });
     const src = await (await rp.request.get(body)).text();
-    const push = src.slice(src.indexOf('function scPushNow'), src.indexOf('function scPushNow') + 2600);
+    /* THE FUNCTION'S BODY, matched by braces rather than by a fixed
+       number of characters — a 2600-char slice runs off the end of
+       scPushNow into whatever happens to follow it, so the check fails
+       on its neighbour's code rather than on its own subject. */
+    const push = (() => {
+      const at = src.indexOf('function scPushNow');
+      let depth = 0;
+      for (let j = src.indexOf('{', at); j < src.length; j++) {
+        if (src[j] === '{') depth++;
+        else if (src[j] === '}') { depth--; if (!depth) return src.slice(at, j + 1); }
+      }
+      return '';
+    })();
     /* ── BOTH DIRECTIONS OF PATTERN COVERAGE ──
        A card naming a drawing the table does not have falls through to
        the seeded fallback, which is correct and is also silently
@@ -13279,9 +13313,38 @@ const SAID = [
     ok('...no pattern is drawn on two different cards', cov.twice.length === 0, cov.twice);
     ok('...and no pattern is dead weight nothing can reach', cov.dead.length === 0, cov.dead);
 
-    ok('a push carries no goal, no goal record and no goal key',
-      push.indexOf('sched.goal') < 0 && push.indexOf('goals') < 0
-      && push.indexOf('scGoal') < 0, push.slice(0, 120));
+    ok('the push function was found at all',
+      push.length > 200 && push.length < 6000, push.length);
+    /* ── AND `goals` IS NOT ON THE FORBIDDEN LIST, WHICH IS ITSELF
+           THE FINDING ──
+       The profile has carried a field called `goals` since it shipped,
+       and it means your OBJECTIVES — one of the four things a switch
+       can share. The new tab is also called Goals, so the first
+       version of this check flagged the profile's own field as a leak
+       from a record it has never read.
+
+       That is the naming collision this app was warned about while the
+       feature was still being argued: Objectives already means "what
+       matters today", and a second thing called Goals gets confused
+       with it. It has now confused a check. The record is what is
+       asserted instead — the key and the functions that reach it —
+       and the profile's field is held to reading objLog, so the
+       collision cannot quietly become a real leak later. */
+    ok('...and it carries no goal record and nothing that reads one',
+      push.indexOf('sched.goal') < 0 && push.indexOf('scGoal') < 0,
+      push.slice(0, 140));
+    const shareGoals = (() => {
+      const at = src.indexOf('function scShareGoals');
+      let depth = 0;
+      for (let j = src.indexOf('{', at); j < src.length; j++) {
+        if (src[j] === '{') depth++;
+        else if (src[j] === '}') { depth--; if (!depth) return src.slice(at, j + 1); }
+      }
+      return '';
+    })();
+    ok('...and the profile\u2019s own `goals` field is the objectives, not these',
+      shareGoals.indexOf('objLog') > 0 && shareGoals.indexOf('scGoal') < 0
+      && shareGoals.indexOf('sched.goal') < 0, shareGoals.slice(0, 120));
 
     await rctx.close();
     ok('nothing threw through the goals record', rerrs.length === 0, rerrs);
