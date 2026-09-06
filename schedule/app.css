@@ -1339,31 +1339,62 @@ body {
 /* The row's own keyboard route to the editor, drawn the way the
    tile's history control is and for the same reason: a double tap
    reaches a pointer and nothing else. */
+/* ── THE PENCIL ──
+   The editor was behind a DOUBLE tap and it was reported as
+   inconsistent, which it was: the window is 380ms against a platform
+   threshold of about 300, and at 400ms between taps the row ticks
+   twice instead. A visible control cannot be mistimed, which is the
+   whole of the argument for it.
+
+   THE SAME BUTTON A KEYBOARD ALWAYS HAD. This was clipped to a pixel
+   and drawn only on focus, because the pointer's way in was a gesture
+   and a gesture reaches no keyboard. Now that the pointer's way in is
+   a button, the two are ONE button — the reason to prefer a control
+   over a gesture, and why this is not a new element beside the old.
+
+   AS QUIET AS A CONTROL CAN BE. It sits on every row of a screen
+   whose whole job is the words, so it is a hairline with no fill and
+   the dim grey — the check beside it is the mark that carries the
+   accent, and two filled marks on one row would make the row read as
+   a toolbar. */
 .row-ed {
   position: absolute;
-  width: 1px; height: 1px;
-  margin: -1px; padding: 0; border: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  background: none; color: inherit; font: inherit;
+  /* 45, not 41: the DRAWING is 26px and the press target is the 44px
+     everything in this app holds to, so the target reaches 9px past
+     the square on every side and has to start clear of the check's
+     own. The objectives plus and the children's dots are the same
+     arrangement — a small mark inside a target a thumb can hit. */
+  right: 45px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 26px; height: 26px;
+  display: grid; place-items: center;
+  padding: 0;
+  border: 1px solid var(--hair);
+  border-radius: 8px;
+  background: none;
+  color: var(--spent);
+  cursor: pointer;
 }
-.row-ed:focus {
-  /* `:focus`, not `:focus-visible`. The control is clipped to a pixel,
-     so a pointer can never land on it and every focus it gets is a
-     keyboard's — and the heuristic behind :focus-visible does not
-     always agree, which had it staying 1x1 while genuinely focused. */
-  position: static;
-  width: auto; height: auto;
-  margin: 0 0 6px 52px;
-  clip-path: none;
-  display: block;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 11.5px; font-weight: 600;
-  color: var(--ink);
-  outline: 2px solid var(--ink); outline-offset: 2px;
+.row-ed svg {
+  width: 14px; height: 14px;
+  fill: none; stroke: currentColor; stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round;
 }
+/* The target, which is not the drawing. Measured before this: 26px,
+   which is a small thing to aim at beside another small thing — and
+   the whole argument for a control over a gesture is that you hit it
+   first time. */
+.row-ed::before {
+  content: '';
+  position: absolute;
+  inset: -9px;
+}
+.row-ed:active { opacity: .82; }
+.row-ed:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+/* A finished row goes quiet around it, and so does this. */
+.is-done > .row-ed, .is-past > .row-ed { opacity: .55; }
 
 /* ── THE WAY IN A HOLD CANNOT OFFER ──
    A long press reaches neither a keyboard nor a screen reader, so the
@@ -2384,7 +2415,13 @@ body {
      a list where every line opens an editor. The sheet is taller for
      it and that is the correct trade: a target you miss costs more
      than a scroll you did not need. */
-  padding: 11px 34px 11px 2px;
+  /* 34 was the check alone. The pencil sits inboard of it and its
+     press target reaches 9px further in again, so the name has to
+     clear BOTH the drawing and the target — otherwise a tap meant for
+     a long name opens the editor, which is the fault this control
+     exists to remove. 80 = 3 (check inset) + 22 + 45 - 26 + 26 + 9,
+     measured rather than guessed. */
+  padding: 11px 80px 11px 2px;
   border: 0;
   /* A RULE BETWEEN ROWS, WHICH REVERSES A RULE THIS FILE ARGUED FOR.
      "Nothing is drawn between the rows" was written about rows with

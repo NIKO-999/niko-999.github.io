@@ -2238,10 +2238,12 @@ const SAID = [
     await page.waitForTimeout(560);
   };
 
-  /* ── TWO TAPS ON A WEEK ROW ──
-     A tap ticks a block off and two open the editor. Driven through
-     the real handler, and the wait clears the 380ms the first tap is
-     deferred by. */
+  /* ── TWO TAPS ON A WEEK ROW, WHICH NOW DO NOTHING SPECIAL ──
+     A tap ticks a block off and the pencil beside it edits. This is
+     kept to assert that the gesture is GONE rather than merely
+     unused: a build that left the double tap in place beside the
+     pencil passes every other check, and the gesture is the thing
+     that was reported. */
   const dblRow = async (sel) => {
     await page.dblclick(sel);
     await page.waitForTimeout(560);
@@ -3033,11 +3035,13 @@ const SAID = [
      invalid, the same trap the folding panels have a rule about. */
   await show('list');
   await page.evaluate(() => {
-    [...document.querySelectorAll('.week.is-today .row[data-id]')]
-      .find((r) => r.querySelector('.n').textContent.startsWith('Walk')).click();
-      /* TWICE: the editor is behind a double tap now. */
-      [...document.querySelectorAll('.week.is-today .row[data-id]')]
-      .find((r) => r.querySelector('.n').textContent.startsWith('Walk')).click();
+    /* THE PENCIL, not two clicks. The editor is a control beside the
+       row now — and two clicks would tick and untick it on the way,
+       which is a check changing the state it is about to measure. */
+    const r = [...document.querySelectorAll('.week.is-today .row[data-id]')]
+      .find((x) => x.querySelector('.n').textContent.startsWith('Walk'));
+    if (!r) throw new Error('no Walk row on today');
+    r.parentElement.querySelector('.row-ed').click();
   });
   await page.waitForTimeout(360);
   const hasToggle = await page.evaluate(() => {
@@ -3175,11 +3179,13 @@ const SAID = [
      row draws a tick for any done block now, so the state is visible
      and the refusal was the leftover. */
   await page.evaluate(() => {
-    [...document.querySelectorAll('.week.is-today .row[data-id]')]
-      .find((r) => r.querySelector('.n').textContent.startsWith('Trading')).click();
-      /* TWICE: the editor is behind a double tap now. */
-      [...document.querySelectorAll('.week.is-today .row[data-id]')]
-      .find((r) => r.querySelector('.n').textContent.startsWith('Trading')).click();
+    /* THE PENCIL, not two clicks. The editor is a control beside the
+       row now — and two clicks would tick and untick it on the way,
+       which is a check changing the state it is about to measure. */
+    const r = [...document.querySelectorAll('.week.is-today .row[data-id]')]
+      .find((x) => x.querySelector('.n').textContent.startsWith('Trading'));
+    if (!r) throw new Error('no Trading row on today');
+    r.parentElement.querySelector('.row-ed').click();
   });
   await page.waitForTimeout(360);
   const feedsNothing = await page.evaluate(() => {
@@ -3210,11 +3216,13 @@ const SAID = [
 
   /* Put it back, so the rows below this see the week they expect. */
   await page.evaluate(() => {
-    [...document.querySelectorAll('.week.is-today .row[data-id]')]
-      .find((r) => r.querySelector('.n').textContent.startsWith('Trading')).click();
-      /* TWICE: the editor is behind a double tap now. */
-      [...document.querySelectorAll('.week.is-today .row[data-id]')]
-      .find((r) => r.querySelector('.n').textContent.startsWith('Trading')).click();
+    /* THE PENCIL, not two clicks. The editor is a control beside the
+       row now — and two clicks would tick and untick it on the way,
+       which is a check changing the state it is about to measure. */
+    const r = [...document.querySelectorAll('.week.is-today .row[data-id]')]
+      .find((x) => x.querySelector('.n').textContent.startsWith('Trading'));
+    if (!r) throw new Error('no Trading row on today');
+    r.parentElement.querySelector('.row-ed').click();
   });
   await page.waitForTimeout(360);
   await page.evaluate(() => document.querySelector('.sheet .mark').click());
@@ -3867,11 +3875,13 @@ const SAID = [
     await page.waitForTimeout(360);
     const open = async (name) => {
       await page.evaluate((n) => {
-        [...document.querySelectorAll('.week.is-today .row[data-id]')]
-          .find((r) => r.querySelector('.n').textContent.startsWith(n)).click();
-      /* TWICE: the editor is behind a double tap now. */
-      [...document.querySelectorAll('.week.is-today .row[data-id]')]
-          .find((r) => r.querySelector('.n').textContent.startsWith(n)).click();
+        /* THE PENCIL. Two clicks would tick and untick on the way in,
+           and this section is about what the marks below do to that
+           very state. */
+        const r = [...document.querySelectorAll('.week.is-today .row[data-id]')]
+          .find((x) => x.querySelector('.n').textContent.startsWith(n));
+        if (!r) throw new Error('no ' + n + ' row on today');
+        r.parentElement.querySelector('.row-ed').click();
       }, name);
       await page.waitForTimeout(420);
     };
@@ -3949,12 +3959,13 @@ const SAID = [
       return w;
     });
     await page.waitForTimeout(520);
-    /* Two clicks, because the row's editor is behind a double tap now.
-       Dispatched back to back rather than through page.dblclick, since
-       this section is driving a day that is not today. */
+    /* THE PENCIL, not two clicks. The editor is its own control beside
+       the row now, and two clicks would tick and untick the block on
+       the way — a check changing the state it is about to measure. */
     await page.evaluate(() => {
       const r = document.querySelector('.row[data-id]');
-      r.click(); r.click();
+      if (!r) throw new Error('no row on the card being measured');
+      r.parentElement.querySelector('.row-ed').click();
     });
     await page.waitForTimeout(440);
     const far = await page.evaluate(() => ({
@@ -4867,54 +4878,60 @@ const SAID = [
      Both directions, because each passes on the other's bug: a build
      that still opened the editor on one tap passes "two taps edit",
      and one where the second press did nothing passes "a tap ticks". */
-  /* ── AND THE WEEK HAS ITS OWN CARD, WITH ITS OWN SCENE ──
-     Two screens went to a double tap and neither gesture can announce
-     itself, so each gets a card. A KEY EACH, because they are two
-     lessons: learning that two taps open a tile's stats does not teach
-     you that two taps edit a block.
+  /* ── THE WEEK'S TEACHING CARD WENT WITH THE GESTURE ──
+     It read "Two taps to edit · Tap to tick off, double tap to edit",
+     and the week's editor is a visible pencil now — a card teaching a
+     gesture the app does not have is worse than no card, which this
+     file has recorded once already about the intro. With a control
+     there is nothing to teach, which is most of the argument for one.
 
-     THE SCENES MUST DIFFER. The tile's draws the gesture, because what
-     it teaches is a press; this one draws what the press produces, a
-     sheet coming up. Two cards running one animation would be the app
-     saying the same thing twice and meaning two different things. */
-  console.log('\n── the card that teaches the week ──');
-  await page.evaluate(() => localStorage.removeItem('sched.hintw.v1'));
+     ASSERTED AS GONE, and as the KEY being swept: a record marking a
+     card seen is a record of a card that does not exist, the same
+     answer the old palette name and the two view keys got. Showing up
+     keeps its own card, because its tile still opens on a double
+     tap — so this also holds that the two were never one card. */
+  console.log('\n\u2500\u2500 the week teaches no gesture now \u2500\u2500');
+  await page.evaluate(() => {
+    localStorage.removeItem('sched.hintw.v1');
+    localStorage.removeItem('sched.hint2.v1');
+  });
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(420);
   await show('list');
-  await page.waitForTimeout(300);
-  const wkHint = await page.evaluate(() => {
+  await page.waitForTimeout(340);
+  const noWk = await page.evaluate(() => {
+    const surf = document.getElementById('scHint');
+    const r = surf.getBoundingClientRect();
+    return { drawn: !surf.hidden && r.width > 300 && r.height > 300,
+             text: (document.querySelector('.gh-card') || {}).textContent || '' };
+  });
+  ok('the week draws no card, and teaches no double tap',
+    !noWk.drawn && !/double tap/i.test(noWk.text), noWk);
+  ok('...and the key that marked it seen is swept, not left behind',
+    (await page.evaluate(() => localStorage.getItem('sched.hintw.v1'))) === null);
+  /* THE OTHER HALF: Showing up still has its card, so this is not a
+     build that simply stopped drawing them. */
+  await show('tally');
+  await page.waitForTimeout(420);
+  const tyHint = await page.evaluate(() => {
     const surf = document.getElementById('scHint');
     const c = document.querySelector('.gh-card');
-    if (!c || surf.hidden) return { up: false };
-    const sr = surf.getBoundingClientRect();
-    const anim = [];
-    c.querySelectorAll('.gh-ic svg *').forEach((e) =>
-      e.getAnimations().forEach((a) => anim.push(a.animationName)));
-    return { up: sr.width > 300 && sr.height > 300,
-             says: /double tap/i.test(c.textContent),
-             tick: /tick/i.test(c.textContent),
-             anim: [...new Set(anim)],
-             ok: !!c.querySelector('.gh-ok'),
-             never: !!c.querySelector('.gh-never') };
+    return { up: !surf.hidden && surf.getBoundingClientRect().width > 300,
+             says: /double tap/i.test((c || {}).textContent || '') };
   });
-  ok('a card comes up over the week and names both gestures',
-    wkHint.up && wkHint.says && wkHint.tick, wkHint);
-  ok('...with its own scene, not the tile card\u2019s ripple',
-    wkHint.anim.length > 0 && wkHint.anim.every((n) => !/gh-r[12]/.test(n)),
-    wkHint);
-  ok('...and both ways out', wkHint.ok && wkHint.never, wkHint);
-  /* Its own key: dismissing this one for good must not silence the
-     other, and the tile's key is untouched here. */
-  await page.evaluate(() => document.querySelector('.gh-never').click());
-  await page.waitForFunction(() => document.getElementById('scHint').hidden,
-    null, { timeout: 4000 });
-  const keys = await page.evaluate(() => ({
-    wk: localStorage.getItem('sched.hintw.v1'),
-    ty: localStorage.getItem('sched.hint2.v1') }));
-  ok('“Don’t show again” marks THIS card seen and leaves the other alone',
-    keys.wk === '1' && keys.ty === '1', keys);
-  await page.waitForTimeout(160);
+  ok('...while Showing up still teaches its own, which it still has',
+    tyHint.up && tyHint.says, tyHint);
+  await page.evaluate(() => {
+    const n = document.querySelector('.gh-never');
+    if (n) n.click();
+  });
+  await page.waitForTimeout(420);
+  await page.evaluate(() => {
+    localStorage.setItem('sched.hint2.v1', '1');
+    localStorage.setItem('sched.hintw.v1', '1');
+  });
+  await show('list');
+  await page.waitForTimeout(220);
 
   console.log('\n── two taps on the week ──');
   await show('list');
@@ -4946,39 +4963,41 @@ const SAID = [
   await tapRow();                                  /* back where it was */
   await page.waitForTimeout(120);
 
+  /* ══════════════════════════════════════════════════════════════
+     ONE TAP TICKS, AND THE PENCIL EDITS
+
+     The editor was behind a DOUBLE tap and it was reported as
+     inconsistent, which it was: the window is 380ms against a
+     platform threshold of about 300, and at 400ms between taps the
+     row ticks twice instead. A race against a clock you cannot see —
+     the same press means two different things depending on how fast
+     the second one lands, and no window makes it right for everybody.
+
+     A VISIBLE CONTROL CANNOT BE MISTIMED, which is the whole of the
+     argument for it. It is also the SAME BUTTON a keyboard always
+     had, stopped being clipped, so the pointer's route and the
+     keyboard's route are one control rather than two mechanisms.
+     ══════════════════════════════════════════════════════════════ */
+  /* THE GESTURE IS GONE, NOT MERELY UNUSED. A build that kept the
+     double tap beside the pencil passes every check below — and the
+     gesture is the thing that was reported, so it is the thing that
+     has to be measured. */
   await dblRow('.week.is-today .row[data-id]');
-  ok('two taps open the editor',
-    await page.evaluate(() => !document.getElementById('scSheet').hidden));
-  await page.evaluate(() => document.getElementById('scScrim').click());
-  await page.waitForFunction(() => document.getElementById('scSheet').hidden,
-    null, { timeout: 4000 });
-  await page.waitForTimeout(160);
+  ok('two taps on a row no longer open the editor at all',
+    await page.evaluate(() => document.getElementById('scSheet').hidden));
+  ok('...they are a tick and an untick, so the row ends where it began',
+    (await rowState()).done === before.done, await rowState());
 
-  /* ── AND THE CHECK ANSWERS THE SAME TWO GESTURES ──
-     Reported as *double clicking it and it's not letting me edit*,
-     which read as a timing fault and was not one. The check is a 44px
-     target laid over the END of the row — a perfectly ordinary place
-     for a thumb to land on a row you are aiming at — and it carried a
-     plain click that ticked, so two taps there ticked twice and
-     opened nothing AT ANY SPEED. Measured on real touch: the name and
-     the gutter opened the editor at 150, 250 and 350ms between taps;
-     the check opened it at none of them.
+  /* ── THE CHECK TICKS, AND ONLY TICKS ──
+     It briefly carried the row's double tap, because a thumb aiming at
+     the row lands on the check as often as not. With the editor on a
+     button of its own there is nothing left for it to carry.
 
-     Nobody distinguishes "the row" from "the check on the row", so
-     one press means one thing across the whole of it.
-
-     BOTH HALVES, because they fail apart: a single tap there still has
-     to tick — that is the check's own job and the only one a keyboard
-     can reach — and two have to edit. A build that simply moved the
-     editor onto the check would pass the second and break the first. */
-  /* ── READ THE ROW BACK BY ID, NOT OFF THE ELEMENT ──
-     The tick calls scRender, which rebuilds every row — so an element
-     captured before the press is DETACHED by the time the wait is
-     over, and it keeps the classes it had. Read that way this
-     reported `was: false, now: false` on a tick that worked
-     perfectly. It is the double tap's own mechanism seen from the
-     test's side: the thing you were holding is not the thing on
-     screen any more. */
+     READ THE ROW BACK BY ID, NOT OFF THE ELEMENT. The tick calls
+     scRender, which rebuilds every row — so an element captured before
+     the press is DETACHED by the time the wait is over and keeps the
+     classes it had. Read that way this reported `was: false,
+     now: false` on a tick that worked perfectly. */
   const chkTick = await page.evaluate(async () => {
     const c = document.querySelector('.week.is-today .rowwrap .chk');
     if (!c) throw new Error('no check beside a row on today');
@@ -4990,25 +5009,91 @@ const SAID = [
     const was = at();
     c.click();
     await new Promise((r) => setTimeout(r, 620));
-    return { id, was, now: at(),
-             sheet: !document.getElementById('scSheet').hidden };
+    return { id, was, now: at(), sheet: !document.getElementById('scSheet').hidden };
   });
-  ok('one tap on the check still ticks the row, and opens nothing',
+  ok('one tap on the check ticks the row, and opens nothing',
     chkTick.now !== chkTick.was && !chkTick.sheet, chkTick);
   await page.evaluate(() => document.querySelector('.week.is-today .rowwrap .chk').click());
   await page.waitForTimeout(700);                  /* back where it was */
-
   await dblRow('.week.is-today .rowwrap .chk');
-  ok('...and two taps on it open the editor, like anywhere else on the row',
-    await page.evaluate(() => !document.getElementById('scSheet').hidden));
+  ok('...and two taps on it open nothing either',
+    await page.evaluate(() => document.getElementById('scSheet').hidden));
+  await page.waitForTimeout(700);
+
+  /* ON EVERY ROW. Built behind any condition and it would exist on
+     whichever row happened to satisfy it, which is the turn control's
+     own bug. */
+  const peds = await page.evaluate(() => ({
+    rows: document.querySelectorAll('.week.is-today .row[data-id]').length,
+    eds: document.querySelectorAll('.week.is-today .rowwrap .row-ed').length,
+  }));
+  ok('every row carries a pencil, one each',
+    peds.rows > 0 && peds.eds === peds.rows, peds);
+
+  const pencil = await page.evaluate(async () => {
+    const w = document.querySelector('.week.is-today .rowwrap');
+    const id = w.querySelector('.row[data-id]').dataset.id;
+    const at = () => {
+      const r = document.querySelector('.week.is-today .row[data-id="' + id + '"]');
+      return !!r && r.classList.contains('is-done');
+    };
+    const was = at();
+    w.querySelector('.row-ed').click();
+    await new Promise((r) => setTimeout(r, 620));
+    return { was, now: at(), sheet: !document.getElementById('scSheet').hidden,
+             title: (document.getElementById('scSheetTitle') || {}).textContent };
+  });
+  /* BOTH HALVES, because they fail apart: it has to open the editor
+     AND it must not also tick — a control doing both would be the
+     thing this change removes, wearing a pencil. */
+  ok('one tap on the pencil opens the editor',
+    pencil.sheet && /Edit/.test(pencil.title || ''), pencil);
+  ok('...and does not tick the row on the way',
+    pencil.now === pencil.was, pencil);
   await page.evaluate(() => document.getElementById('scScrim').click());
   await page.waitForFunction(() => document.getElementById('scSheet').hidden,
     null, { timeout: 4000 });
   await page.waitForTimeout(160);
 
-  /* ── AND A GESTURE IS NEVER THE ONLY WAY IN ──
-     A double tap reaches a pointer and nothing else. The check beside
-     the row is the keyboard's tick; this is its edit. */
+  /* ── THE DRAWING IS 26px AND THE TARGET IS 44 ──
+     Which is what everything else in this app holds to; the
+     objectives plus and the children's dots are the same arrangement.
+     Measured at 26 before this, which is a small thing to aim at
+     beside another small thing — and the whole argument for a control
+     over a gesture is that you hit it the first time. */
+  const hit = await page.evaluate(() => {
+    const e = document.querySelector('.week.is-today .rowwrap .row-ed');
+    const r = e.getBoundingClientRect();
+    const grow = parseFloat(getComputedStyle(e, '::before').top);
+    return { drawW: Math.round(r.width), drawH: Math.round(r.height),
+             hitW: Math.round(r.width - 2 * grow), hitH: Math.round(r.height - 2 * grow) };
+  });
+  ok('the pencil is drawn small and pressed big',
+    hit.drawW <= 30 && hit.hitW >= 44 && hit.hitH >= 44, hit);
+
+  /* ── AND NOTHING RUNS UNDER IT ──
+     A name long enough to reach the controls has to stop at the
+     pencil's TARGET rather than at its drawing, or a tap meant for the
+     name opens the editor — the fault this control exists to remove,
+     arriving from the other side. Measured as the BOX. */
+  const clears = await page.evaluate(() => {
+    const out = [];
+    document.querySelectorAll('.week.is-today .rowwrap').forEach((w) => {
+      const n = w.querySelector('.n'); const e = w.querySelector('.row-ed');
+      if (!n || !e) return;
+      const grow = parseFloat(getComputedStyle(e, '::before').top);
+      out.push(Math.round(e.getBoundingClientRect().left + grow
+        - n.getBoundingClientRect().right));
+    });
+    return out;
+  });
+  ok('...and no name reaches into the pencil\u2019s press target',
+    clears.length > 0 && clears.every((v) => v >= 0), clears);
+
+  /* ── IT IS THE KEYBOARD'S CONTROL TOO, WHICH IS THE POINT ──
+     Clipped to a pixel and drawn on focus while the pointer's way in
+     was a gesture. Now that the pointer's way in is a button, the two
+     are ONE button. */
   const rowEd = await page.evaluate(() => {
     const e = document.querySelector('.week.is-today .rowwrap .row-ed');
     if (!e) return null;
@@ -5018,7 +5103,7 @@ const SAID = [
              focused: document.activeElement === e,
              w: Math.round(r.width), h: Math.round(r.height) };
   });
-  ok('every row carries a real edit control for a keyboard',
+  ok('the same control is the one a keyboard reaches, and it is named',
     rowEd && /^Edit /.test(rowEd.label) && rowEd.focused
     && rowEd.w > 20 && rowEd.h > 10, rowEd);
   await page.evaluate(() => document.activeElement.blur());
@@ -6669,8 +6754,13 @@ const SAID = [
       withMer.length === twelve.row.length && twelve.row.length > 1
       && twelve.row.every((t) => (t.match(/[AP]M/g) || []).length === 1
         && /[AP]M$/.test(t)), twelve.row);
-    /* Twice: the editor is behind a double tap now. */
-    await up.dblclick('.row[data-id]');
+    /* The pencil, not two clicks: the editor is its own control beside
+       the row, and a pair of clicks would tick and untick the block. */
+    await up.evaluate(() => {
+      const r = document.querySelector('.row[data-id]');
+      if (!r) throw new Error('no row to edit on the 12-hour phone');
+      r.parentElement.querySelector('.row-ed').click();
+    });
     await up.waitForTimeout(440);
     const fields = await up.$$eval('#scSheetBody input[type="time"]',
       (i) => i.map((x) => x.value));

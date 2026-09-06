@@ -7208,3 +7208,79 @@ shape, so it is visible before you type rather than after.
 are already there takes the four that fit; refusing the lot is a field
 that silently does nothing, which reads as broken. A stray comma is a
 typo rather than an item, so the empties between them are dropped.
+
+## One tap ticks, and the pencil edits
+
+The editor was behind a DOUBLE tap and it was reported as
+inconsistent, which it was. The window is **380ms** against a platform
+threshold of about **300**, and at **400ms** between taps the row ticks
+twice instead — measured on real touch. That is a race against a clock
+you cannot see: the same press means two different things depending on
+how fast the second one lands, and no window makes it right for
+everybody. Widening it once already cost the common action 120ms and
+did not remove the class of fault.
+
+**A VISIBLE CONTROL CANNOT BE MISTIMED.** That is the whole of the
+argument. Ten routes were built as a working page — a swipe, a mode, a
+long press, the time column, the glyph, a drag, an accordion, a
+handle, the toast — and every one of them is either a gesture with a
+hidden rule, a mode you can be in without noticing, or a region of the
+row you have to learn. The pencil is the only one a person gets right
+the first time and every time after.
+
+**AND IT IS THE SAME BUTTON A KEYBOARD ALWAYS HAD.** `.row-ed` was
+clipped to a pixel and drawn only on focus, because the pointer's way
+in was a gesture and a gesture reaches no keyboard. Now that the
+pointer's way in is a button, the two are ONE button — which is the
+reason to prefer a control over a gesture, and why this is not a new
+element beside the old one.
+
+**THE DRAWING IS 26px AND THE TARGET IS 44.** It went in at 26 for
+both, which is a small thing to aim at beside another small thing, and
+the argument for a control is that you hit it first time. The
+objectives plus and the children's dots are the same arrangement. The
+row's right padding went 34 → 80 to clear both the drawing and the
+target: measured, a name now stops exactly on the target's edge, and
+without it a tap meant for a long name opens the editor — the fault
+this control exists to remove, arriving from the other side.
+
+**AS QUIET AS A CONTROL CAN BE.** A hairline, no fill, `--spent` —
+5.86:1 on the dark face and 4.08:1 on the light, against the 3:1 a
+graphic needs. The check beside it is the mark that carries the
+accent, and two filled marks on one row would make the row read as a
+toolbar.
+
+**THE CHECK TICKS, AND ONLY TICKS.** It briefly carried the row's
+double tap as well, because a thumb aiming at the row lands on the
+check as often as not. With the editor on a button of its own there is
+nothing left for it to carry, and a control answering two questions is
+exactly what this change removes.
+
+**AND THE WEEK'S TEACHING CARD WENT WITH THE GESTURE.** It read *Two
+taps to edit · Tap to tick off, double tap to edit*, which is a card
+teaching a gesture the app no longer has — worse than no card, and
+this file recorded that once already about the intro. With a visible
+control there is nothing left to teach, which is most of the argument
+for one. `sched.hintw.v1` is removed rather than left: a key marking a
+card seen is a record of a card that does not exist. **Showing up
+keeps its own card**, because its tile still opens on a double tap,
+and the test holds both halves so this is not a build that quietly
+stopped drawing them.
+
+**Asserted as the gesture being GONE**, not merely unused: a build
+that kept the double tap beside the pencil passes every other check,
+and the gesture is the thing that was reported.
+
+### And a replace whose end marker matched earlier in the file
+
+`s[:start] + new + s[end:]` with `end` found by a bare `s.index(B)`
+rather than `s.index(B, start)`. The marker occurred earlier in the
+file, so `end < start` and the slice **duplicated 1,614 lines** rather
+than replacing 3,887 characters. It reported as `Identifier 'gest' has
+already been declared` — a name collision fifteen hundred lines from
+anything I had written.
+
+`git diff --stat` is what named it: **1614 insertions, 0 deletions** on
+an edit that was supposed to delete. A replace that removes nothing is
+not a replace. Bound the search to after the anchor, and assert on the
+region's own content before writing it.

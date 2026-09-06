@@ -1661,7 +1661,23 @@
            the double tap. Two gestures for one action is a control
            answering the same question twice, and the one that had to
            go is the one nothing on screen can describe. */
-        scDoubleTap(row, tick, function () { scEditSheet(it, d); });
+        /* ── ONE TAP TICKS, AND THE PENCIL EDITS ──
+           The editor was behind a DOUBLE tap and it was reported as
+           inconsistent, which it was — measured, the window is 380ms
+           against a platform threshold of about 300, and at 400ms
+           between taps the row ticks twice instead. That is a race
+           against a clock you cannot see: the same press means two
+           different things depending on how fast the second one
+           lands, and no window makes it reliable for everybody.
+
+           A VISIBLE CONTROL CANNOT BE MISTIMED. It is the only route
+           that is right the first time and every time after, and the
+           only one that needs no second mechanism for a keyboard —
+           because it IS the keyboard's control, stopped being hidden.
+           What it costs is a second mark on every row, on a screen
+           whose whole job is the words, so it is drawn as quietly as
+           a control can be: a hairline, no fill, the dim grey. */
+        row.addEventListener('click', tick);
         /* A long press reaches neither a keyboard nor a screen reader,
            and it is deliberately NOT the only way to tick a block: the
            tally does the same thing with a plain press and always did.
@@ -1680,41 +1696,42 @@
         chk.setAttribute('aria-label', (row.classList.contains('is-done') ? 'Untick ' : 'Tick ') + it.n);
         chk.setAttribute('aria-pressed', row.classList.contains('is-done') ? 'true' : 'false');
         chk.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.8l5.2 5.2L19.5 6"/></svg>';
-        /* ── THE CHECK ANSWERS THE SAME TWO GESTURES THE ROW DOES ──
-           It was a plain click that ticked, and that is what was
-           reported as *double clicking it and it's not letting me
-           edit*. The check is a 44px target laid over the END of the
-           row, which is a perfectly ordinary place for a thumb to
-           land on a row you are aiming at — and there a double tap
-           ticked twice and opened nothing, at any speed. Measured:
-           the name and the gutter opened the editor at 150, 250 and
-           350ms between taps; the check opened it at NONE of them.
+        /* ── THE CHECK TICKS, AND ONLY TICKS ──
+           It briefly carried the row's double tap as well, because a
+           thumb aiming at the row lands on the check as often as not
+           and the editor was behind that gesture. With the editor on
+           a button of its own there is nothing left for it to carry,
+           and a control answering two questions is exactly what this
+           change removes.
 
-           Nobody distinguishes "the row" from "the check on the row",
-           so one press means one thing across the whole of it. The
-           single tap still ticks, which is why this is scDoubleTap
-           rather than a second handler: the check keeps its own job
-           and gains the row's.
-
-           stopPropagation stays on its own listener. The two are
-           siblings under .rowwrap rather than nested, so this is
-           belt and braces — but the ripple reads pointerdown in
-           CAPTURE, so nothing about it depends on this bubbling. */
-        chk.addEventListener('click', function (ev) { ev.stopPropagation(); });
-        scDoubleTap(chk, tick, function () { scEditSheet(it, d); });
+           stopPropagation stays: the two are siblings under .rowwrap
+           rather than nested, so it is belt and braces — and the
+           ripple reads pointerdown in CAPTURE, so nothing about the
+           press response depends on this bubbling. */
+        chk.addEventListener('click', function (ev) { ev.stopPropagation(); tick(); });
         wrap.appendChild(chk);
         wrap.appendChild(row);
-        /* ── THE WAY IN A GESTURE CANNOT OFFER ──
-           A double tap reaches a pointer and nothing else: a keyboard
-           sends one activation per press. The check beside the row is
-           the keyboard's tick; this is its edit. Off screen rather
-           than `display: none`, which would take it out of the
-           accessibility tree, and drawn again on focus so somebody who
-           has tabbed to it can see where they are. */
-        var ed = scEl('button', 'row-ed', 'Edit');
+        /* ── AND IT IS THE SAME CONTROL A KEYBOARD ALWAYS HAD ──
+           This was clipped to a pixel and drawn only on focus, because
+           the pointer's way in was a gesture and a gesture reaches no
+           keyboard. Now that the pointer's way in is a button, the two
+           are ONE button — which is the whole reason to prefer a
+           control over a gesture, and it is why this is not a new
+           element beside the old one.
+
+           A SIBLING of the row rather than a child: a <button> inside
+           a <button> is invalid and collapses to one press while
+           looking exactly right, which is the trap the check and the
+           children's dots both have a rule about. */
+        var ed = scEl('button', 'row-ed');
         ed.type = 'button';
         ed.setAttribute('aria-label', 'Edit ' + it.n);
-        ed.addEventListener('click', function () { scEditSheet(it, d); });
+        ed.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+          + '<path d="M4 20h4L18 10l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
+        ed.addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          scEditSheet(it, d);
+        });
         wrap.appendChild(ed);
         (sess || card).appendChild(wrap);
 
@@ -2756,6 +2773,10 @@
     try {
       localStorage.removeItem('sched.tyview.v1');
       localStorage.removeItem('sched.wkview.v1');
+      /* And the week's teaching card, which went with the gesture it
+         taught. A key marking a card seen is a record of a card that
+         does not exist. */
+      localStorage.removeItem('sched.hintw.v1');
     } catch (e) {}
   } catch (e) {}
   var mode = 'auto';
@@ -3655,38 +3676,8 @@
       ic: '<circle class="gh-r1" cx="12" cy="12" r="4.6" opacity=".8"/>'
         + '<circle class="gh-r2" cx="12" cy="12" r="8.4" opacity=".32"/>'
         + '<circle cx="12" cy="12" r="2.3" fill="currentColor" stroke="none"/>'
-    },
-    wk: {
-      key: 'sched.hintw.v1',
-      t: 'Two taps to edit',
-      s: 'Tap to tick off, double tap to edit.',
-      /* ── A DIFFERENT SCENE, AND THAT IS THE POINT ──
-         The tile's card draws the GESTURE because what it teaches is
-         a press. This one draws what the press PRODUCES: a sheet
-         coming up over the rows. Two cards with one animation would
-         be the app saying the same thing twice and meaning two
-         different things.
-
-         Clipped to the page, so the sheet rises out of the page's own
-         bottom edge rather than sliding over the outside of it. */
-      ic: '<clipPath id="scGhWk">'
-        + '<rect x="3.4" y="2.4" width="17.2" height="19.2" rx="2.6"/>'
-        + '</clipPath>'
-        + '<rect x="3.4" y="2.4" width="17.2" height="19.2" rx="2.6"'
-        + ' opacity=".4"/>'
-        + '<g fill="currentColor" stroke="none" opacity=".35">'
-        + '<rect x="6" y="5.6" width="9.4" height="1.6" rx=".8"/>'
-        + '<rect x="6" y="9" width="7" height="1.6" rx=".8"/>'
-        + '</g>'
-        + '<g clip-path="url(#scGhWk)"><g class="gh-sheet">'
-        + '<rect x="4.9" y="12.4" width="14.2" height="11" rx="2.4"'
-        + ' fill="var(--ground)" stroke="currentColor" stroke-width="1.5"/>'
-        + '<rect x="9.7" y="14" width="4.6" height="1.2" rx=".6"'
-        + ' fill="currentColor" stroke="none" opacity=".45"/>'
-        + '<rect x="7.4" y="17.4" width="9.2" height="2.2" rx="1.1"'
-        + ' fill="currentColor" stroke="none"/>'
-        + '</g></g>'
     }
+
   };
   var hintShut = {};         /* closed for this visit, not for ever */
 
@@ -6460,7 +6451,14 @@
        rather than on painting — a repaint happens on every tick and
        every half minute, and a card that came back on one of those is
        a thing you dismissed reappearing while you were looking at it. */
-    if (view === 'list') scHintCard('wk');
+    /* ── THE WEEK'S CARD WENT WITH THE GESTURE IT TAUGHT ──
+       It read "Two taps to edit · Tap to tick off, double tap to
+       edit", which is a card teaching a gesture the app no longer
+       has — worse than no card, and this file has recorded that once
+       already about the intro. And with a visible pencil there is
+       nothing left to teach, which is most of the argument for a
+       control over a gesture. Showing up keeps its own card, because
+       its tile still opens on a double tap. */
   }
 
   /* ═══════════════════════════════════════════════════════════
