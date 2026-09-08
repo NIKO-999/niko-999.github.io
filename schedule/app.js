@@ -1702,7 +1702,14 @@
                block again under a sheet asking about that same block
                is the sentence and the picture this project keeps
                having to take back out. */
-            if (!was && scIsTrain(it)) { scTrainAsk(it, d, bd); return; }
+            if (!was && scIsTrain(it)) {
+              clearTimeout(askT);
+              askT = setTimeout(function () {
+                askT = null;
+                scTrainAsk(it, d, bd);
+              }, TAP_MS);
+              return;
+            }
             scToast(was ? it.n + ' unticked' : it.n + ' done', false);
         };
         /* ── A TAP TICKS, TWO TAPS EDIT ──
@@ -1744,13 +1751,11 @@
            because a mistimed gesture meant the thing you asked for
            did not happen. Here it cannot: every tap ticks the moment
            it lands, and a second tap inside the window UNDOES the
-           first and arms the row instead — so a double tap leaves the
+           first and opens the editor — so a double tap leaves the
            record exactly where it found it, and a double tap read as
            two singles is one tick and one untick, which is also
-           nothing. There is no window at which you lose anything.
-
-           `armed` is read by the render, so it has to be set BEFORE
-           the untick redraws the week. */
+           nothing. There is no window at which you lose anything, and
+           the worst a mistimed one costs is a press. */
         /* ── AND THE PAIR IS REMEMBERED OUTSIDE THE ELEMENT ──
            A timer held in this closure can never see the second tap.
            The first one ticks IMMEDIATELY, and a tick re-renders the
@@ -1765,11 +1770,33 @@
            any number of rebuilds, and closed by a clock rather than a
            timer so there is nothing to cancel. */
         row.addEventListener('click', function () {
-          var now = Date.now();
-          if (tapId === it.id && now - tapAt < 380) {
+          /* ── performance.now(), NEVER Date.now() ──
+             A monotonic clock is the right primitive for measuring an
+             interval: the wall clock can be stepped by NTP or a
+             timezone change, and an interval read across one of those
+             is nonsense.
+
+             It is also the difference between a gesture that can be
+             tested and one that cannot. The suite FREEZES Date so the
+             week is drawn on a fixed day — Date.now() then returns a
+             constant, `now - tapAt` is always 0, and every second tap
+             on a row reads as a pair however far apart it was. That
+             is not a test artefact to work around: a gesture whose
+             whole meaning is an elapsed time must not read the one
+             clock the app lets anything else move. */
+          var now = performance.now();
+          if (tapId === it.id && now - tapAt < TAP_MS) {
             tapId = null;
-            armed = it.id;
+            /* The picker the first tap asked for is called off: you
+               were reaching for the editor, not answering a question
+               about a session you are about to untick. */
+            clearTimeout(askT);
+            askT = null;
+            /* The first tap's tick is UNDONE and then the editor
+               opens, in that order, so the sheet is the last thing to
+               happen and the week behind it is already correct. */
             tick();
+            scEditSheet(it, d);
             return;
           }
           tapId = it.id;
@@ -1788,8 +1815,7 @@
            two over each other and the row leaves room for it. It IS
            the done-mark now — the tick that used to sit beside the
            glyph is this, moved to where a thumb expects it. */
-        var wrap = scEl('div', 'rowwrap' + (row.classList.contains('is-done') ? ' is-done' : '')
-          + (armed === it.id ? ' is-armed' : ''));
+        var wrap = scEl('div', 'rowwrap' + (row.classList.contains('is-done') ? ' is-done' : ''));
         var chk = scEl('button', 'chk');
         chk.type = 'button';
         chk.setAttribute('aria-label', (row.classList.contains('is-done') ? 'Untick ' : 'Tick ') + it.n);
@@ -1829,15 +1855,6 @@
           + '<path d="M4 20h4L18 10l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
         ed.addEventListener('click', function (ev) {
           ev.stopPropagation();
-          /* The pencil has done its job the moment it is pressed, and
-             it is put away HERE rather than on the sheet closing — so
-             every way back to the week finds a bare row, saved,
-             deleted or abandoned alike. The CLASS goes too: saving
-             re-renders and would drop it anyway, but Escape does not
-             re-render anything, and a variable nothing has read yet
-             is not a control that has gone. */
-          armed = null;
-          wrap.classList.remove('is-armed');
           scEditSheet(it, d);
         });
         wrap.appendChild(ed);
@@ -1969,13 +1986,6 @@
   function scDeckGo(d) {
     if (d === scOpenDay()) return;
     openDay = d;
-    /* ── AND THE ARMED ROW IS NOT ON SCREEN ANY MORE ──
-       A pencil is a position on a screen you are looking at, so
-       leaving the day it belonged to puts it away. Without this it
-       survives every render — which is deliberate, since a tick
-       rebuilds the week and the row has to keep it — so the ONLY
-       things that clear it are pressing it and leaving. */
-    armed = null;
     /* A day found face-down is the app having kept the wrong half of a
        decision, and that is truer still of the day BEFORE the one you
        just pressed. */
@@ -6486,12 +6496,30 @@
      record and this is a preference about looking at it, and folding a
      preference into the record is how a damaged one takes the other
      down with it. */
-  /* ── WHICH ROW HAS ITS PENCIL OUT ──
-     One at a time, and never stored: it is a position on a screen you
-     are looking at, which is the tally panels' rule and the same one
-     that sends you back to the goals list when you press the tab. A
-     row armed yesterday would be a control you did not ask for. */
-  var armed = null, tapId = null, tapAt = 0;
+  /* Which block was tapped last, and when. Keyed by BLOCK ID rather
+     than held on the element: the first tap ticks immediately and a
+     tick re-renders the week, so the second press lands on a freshly
+     built row and a timer stored on the old one never sees the pair.
+
+     ── 500ms, AND THE WIDTH IS MEASURED ──
+     Driven with real touch at 80, 150, 250, 330 and 370ms between
+     taps, on every row of a day and at three places across each. At
+     380 the last of those missed on four rows out of five: the
+     platform's own threshold is around 300, and anything past it is a
+     coin toss on a slow thumb. Being too WIDE costs ticking and
+     immediately unticking the same row inside half a second, which
+     opens the editor and which nobody does; being too narrow costs a
+     gesture that does not answer, which was reported three times. */
+  var TAP_MS = 500;
+  var tapId = null, tapAt = 0;
+  /* ── AND THE PICKER WAITS OUT THE WINDOW ──
+     A tick on a Train block asks what you trained, and that sheet
+     covers the row it was asked from — so the first tap put a surface
+     over the second and the pair could never complete. Measured: at
+     80ms between taps the editor never opened on that row, and only
+     on that row. The tick still lands on the frame; the question
+     arrives after the window instead of inside it. */
+  var askT = null;
 
   var VIEW_KEY = 'sched.view.v1';
   var view = 'list';
@@ -6549,10 +6577,6 @@
          every add and every removal, and resetting there would throw
          you out of the deck each time you pressed Add. */
       if (gl) glOpen = null;
-      /* Same rule as the day chips one level up: a pencil left out on
-         a week you have walked away from is a control you did not ask
-         for when you come back. */
-      armed = null;
     }
 
     /* The history sits OUTSIDE the tally section, so hiding the section

@@ -1428,15 +1428,22 @@ body {
    that is. Chromium does not reproduce it, which is this app's oldest
    lesson about the one browser it is developed on. */
 .row-ed, .chk { touch-action: manipulation; }
+/* ── AND THE PENCIL IS THE KEYBOARD'S, WHICH IS ALL IT EVER WAS ──
+   It went the long way round: drawn on every row, then drawn on a row
+   a double tap had armed. Both were trying to give the gesture
+   something to point at, and both put a SECOND press between you and
+   the editor — which is where it kept failing on the phone.
+
+   Two taps on the row open the editor now, so a pointer needs nothing
+   here at all. `opacity` and `pointer-events` rather than `display:
+   none` or the `hidden` attribute, because taking it out of the
+   layout takes it out of the tab order with it, and a keyboard has no
+   double tap to fall back on.
+
+   :focus-visible, not :focus — scClose puts focus BACK on whatever
+   opened the sheet, and after a pointer edit that is this button. */
 .row-ed { opacity: 0; pointer-events: none; }
-.rowwrap.is-armed > .row-ed { opacity: 1; pointer-events: auto; }
 .row-ed:focus-visible { opacity: 1; pointer-events: auto; }
-/* A finished row goes quiet around it, and so does this — but only
-   once it is out. Written after the rules above, because a later rule
-   at equal specificity is the live one and this file has been bitten
-   by that five times. */
-.rowwrap.is-armed.is-done > .row-ed,
-.rowwrap.is-armed.is-past > .row-ed { opacity: .55; }
 
 /* ── THE WAY IN A HOLD CANNOT OFFER ──
    A long press reaches neither a keyboard nor a screen reader, so the
