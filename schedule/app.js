@@ -460,6 +460,31 @@
      anchored block takes: RE_AT_FOR needs a time before the "for". */
   var RE_FOR = /\bfor\s+(\d{1,3})\s*(hours?|hrs?|h|minutes?|mins?|m)\b/g;
 
+  /* ── A TIME WITH NO WORD IN FRONT OF IT ──
+     "wake 6am" is how people actually type it, and every pattern above
+     needs a preposition — so it came back as "still needs what time"
+     while "wake AT 6am" landed 06:00 to 07:00. Reported as exactly
+     that: having to write out 6am to 7am every time.
+
+     AND IT IS DELIBERATELY NOT `HM`. That one allows a bare one- or
+     two-digit number, which is safe only because "at" is in front of
+     it — without the preposition it would read "walk 3 dogs" as a
+     three o'clock walk and "read 12 pages" as noon. So the shape
+     carries the proof instead: a time with a COLON needs nothing else
+     (6:30, 18:00), and a bare hour needs a MERIDIEM (6am, 8 p.m.).
+     One alternation, because that is the rule stated once rather than
+     two patterns that have to agree.
+
+     The length variant is its own pattern rather than an optional
+     tail, which is `now`'s rule for `now`'s reason: an optional group
+     makes both alternatives match at the same index and leaves the
+     winner to the engine's backtracking. */
+  var BARE = '(?:(\\d{1,2}[:.]\\d{2})\\s*(a\\.?m\\.?|p\\.?m\\.?)?'
+    + '|(\\d{1,2})\\s*(a\\.?m\\.?|p\\.?m\\.?))';
+  var RE_BARE_FOR = new RegExp('\\b' + BARE
+    + '\\s*(?:for|,)?\\s*(\\d{1,3})\\s*(hours?|hrs?|h|minutes?|mins?|m)\\b', 'g');
+  var RE_BARE = new RegExp('\\b' + BARE + '(?![\\d:.])', 'g');
+
   function scHM(tok) {
     tok = String(tok).trim();
     var h, m = 0, c = /^(\d{1,2})[:.](\d{2})$/.exec(tok);
@@ -730,6 +755,36 @@
         if (span) { mark(m.index, m.index + m[0].length); break; }
       }
     }
+    /* ── THEN THE SAME TIME WITH NO WORD IN FRONT OF IT ──
+       After the prepositioned ones, so "at 6am" is matched by RE_AT
+       and this never sees it — `free` refuses anything already
+       marked. An hour by default, which is the rule "at 9" and "now"
+       both already keep. */
+    if (!span) {
+      RE_BARE_FOR.lastIndex = 0;
+      while ((m = RE_BARE_FOR.exec(low))) {
+        if (!free(m.index, m.index + m[0].length)) continue;
+        var bt = scHM(m[1] || m[3]);
+        if (!bt) continue;
+        bt.mer = scMerOf(m[2] || m[4]);
+        var blen = /^(h|hour|hours|hr|hrs)/.test(m[6]) ? +m[5] * 60 : +m[5];
+        if (!(blen > 0 && blen <= 480)) continue;
+        span = scPickOne(bt, blen);
+        if (span) { mark(m.index, m.index + m[0].length); break; }
+      }
+    }
+    if (!span) {
+      RE_BARE.lastIndex = 0;
+      while ((m = RE_BARE.exec(low))) {
+        if (!free(m.index, m.index + m[0].length)) continue;
+        var b1 = scHM(m[1] || m[3]);
+        if (!b1) continue;
+        b1.mer = scMerOf(m[2] || m[4]);
+        span = scPickOne(b1, 60);
+        if (span) { mark(m.index, m.index + m[0].length); break; }
+      }
+    }
+
     /* ── NOW, and an hour of it ──
        Scanned whatever else the sentence carries, and used for the
        time only if nothing else set one: an explicit clock beats it,

@@ -1412,6 +1412,22 @@ body {
    scClose puts focus BACK on whatever opened the sheet, so :focus
    left the pencil lit on the row you had just finished editing. The
    heuristic is what tells those two apart. */
+/* ── AND `touch-action: manipulation` IS NOT OPTIONAL HERE ──
+   This page sets no maximum-scale, so a double tap is a ZOOM gesture
+   on iOS by default. `.row` was given this the day it took a double
+   tap; these two were built when it did not, and they are SIBLINGS
+   rather than children, so they inherited nothing — touch-action is
+   not an inherited property.
+
+   The row taking a double tap again is what made that bite: iOS holds
+   a tap on the pencil for ~300ms to see whether a second one follows,
+   then delivers a click that lands on the scrim the editor has just
+   put over the screen — so the sheet opened and was dismissed by the
+   press that opened it. It reported as "the edit button shows up but
+   you can't tick it, it cancels out the edit", which is exactly what
+   that is. Chromium does not reproduce it, which is this app's oldest
+   lesson about the one browser it is developed on. */
+.row-ed, .chk { touch-action: manipulation; }
 .row-ed { opacity: 0; pointer-events: none; }
 .rowwrap.is-armed > .row-ed { opacity: 1; pointer-events: auto; }
 .row-ed:focus-visible { opacity: 1; pointer-events: auto; }

@@ -892,6 +892,55 @@ const SAID = [
     d3 && /which day to clear/.test(d3.meta), d3);
 
   /* ══════════════════════════════════════════════════════════════
+     A TIME WITH NO WORD IN FRONT OF IT
+
+     "wake 6am" is how people type it, and every pattern in the parser
+     needed a preposition — so it came back as "still needs what time"
+     while "wake AT 6am" landed 06:00 to 07:00. Reported as exactly
+     that: having to write out 6am to 7am every time.
+
+     THE SHAPE CARRIES THE PROOF. A bare one- or two-digit number is
+     only safely a time because "at" is in front of it; without the
+     preposition it would read "walk 3 dogs" as a three o'clock walk.
+     So a time with a COLON needs nothing else and a bare hour needs a
+     MERIDIEM — and both halves of that are checked, because a pattern
+     that reads every number as a clock passes the first half
+     perfectly.
+     ══════════════════════════════════════════════════════════════ */
+  const b1 = await nowSaid('Wake 6am');
+  ok('a bare clock with a meridiem is a time, and gets an hour',
+    b1 && b1.days === 'TUE' && /^06:00 to 07:00/.test(b1.meta) && b1.name === 'Wake', b1);
+  const b2 = await nowSaid('Walk 6:30 thursday');
+  ok('...and so does one with a colon and no meridiem',
+    b2 && b2.days === 'THU' && /^06:30 to 07:30/.test(b2.meta) && b2.name === 'Walk', b2);
+  const b3 = await nowSaid('Gym 6am for 45 minutes');
+  ok('...and a length after it is read',
+    b3 && /^06:00 to 06:45/.test(b3.meta) && b3.name === 'Gym', b3);
+  /* ── AND A NUMBER THAT IS NOT A TIME IS LEFT ALONE ──
+     The half that makes the above worth anything. Each of these is a
+     bare number with no colon and no meridiem, so none of them may
+     become a clock — and the digits stay in the name, because a
+     sentence the app does not understand has to cost nothing. */
+  for (const [said, want] of [['Walk 3 dogs', '3'], ['Read 12 pages', '12'],
+    ['Run 5 km', '5'], ['Study 2 chapters', '2']]) {
+    const n = await nowSaid(said);
+    ok(`...and "${said}" is not read as a time`,
+      n && /what time/.test(n.meta) && n.name.indexOf(want) >= 0, n);
+  }
+  /* A bare hour on its own is the case the meridiem rule exists for:
+     "meeting 9" could be nine in the morning, nine at night or nine
+     of something, and the app does not guess between them. */
+  const b4 = await nowSaid('Meeting 9');
+  ok('...and a bare hour with nothing to place it still asks',
+    b4 && /what time/.test(b4.meta), b4);
+  /* AND THE PREPOSITIONED PATTERNS STILL WIN. They run first, so this
+     one never sees a time they have already marked — proved by the
+     range, which would otherwise be read as its start alone. */
+  const b5 = await nowSaid('Wake 6am to 7:30am');
+  ok('...and a range is still a range rather than its first half',
+    b5 && /^06:00 to 07:30/.test(b5.meta), b5);
+
+  /* ══════════════════════════════════════════════════════════════
      AND A TIME CAN BE ANOTHER BLOCK
 
      "walk after the gym" is how somebody says when a thing happens
@@ -5137,6 +5186,30 @@ const SAID = [
   await page.waitForFunction(() => document.getElementById('scSheet').hidden,
     null, { timeout: 4000 });
   await page.waitForTimeout(160);
+
+  /* ── AND BOTH SIBLINGS ANSWER A TAP WITHOUT iOS'S DELAY ──
+     This page sets no maximum-scale, so a double tap is a ZOOM
+     gesture on iOS by default. `.row` was given `touch-action:
+     manipulation` the day it took a double tap; the pencil and the
+     check are SIBLINGS rather than children and touch-action is not
+     inherited, so they had none — and the row taking a double tap
+     again is what made that bite. iOS held a tap on the pencil for
+     ~300ms to see if a second followed, then delivered a click onto
+     the scrim the editor had just raised, so the sheet was dismissed
+     by the press that opened it.
+
+     THIS IS A GUARD AGAINST REINTRODUCING THE MISTAKE, NOT PROOF THE
+     FIX WORKS, and those are different claims. Chromium has no such
+     delay, so nothing measurable here changes either way — the same
+     shape as the `loading="lazy"` check, and said out loud for the
+     same reason. */
+  const ta = await page.evaluate(() => {
+    const w = document.querySelector('.week.is-today .rowwrap');
+    const g = (sel) => getComputedStyle(w.querySelector(sel)).touchAction;
+    return { row: g('.row'), ed: g('.row-ed'), chk: g('.chk') };
+  });
+  ok('the row, the pencil and the check all opt out of double-tap zoom',
+    ta.row === 'manipulation' && ta.ed === 'manipulation' && ta.chk === 'manipulation', ta);
 
   /* ── AND THEY GO BACK AWAY AFTER AN EDIT ──
      Put away when the pencil is PRESSED rather than when the sheet
