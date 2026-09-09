@@ -5038,34 +5038,28 @@ const SAID = [
   await page.waitForTimeout(120);
 
   /* ══════════════════════════════════════════════════════════════
-     ONE TAP TICKS, TWO TAPS EDIT
+     ONE TAP TICKS, AND EDIT ARMS ONE PRESS
 
-     It went the long way round. The editor was behind a double tap
-     and was reported as inconsistent; it moved to a pencil drawn on
-     every row; then to a pencil a double tap brought out. Both of the
-     middle two were trying to give the gesture something to point at,
-     and both put a SECOND press between you and the editor — which is
-     where it kept failing on the phone.
+     It went the long way round: a double tap, then a pencil on every
+     row, then a pencil a double tap brought out, then the double tap
+     again with the window measured at 500ms. Every one of the middle
+     three was trying to give a GESTURE something to point at, and the
+     gesture was reported three times over — because a window is a
+     clock you cannot see, so the same press means two different
+     things depending on how fast the second one lands.
 
-     WHAT MAKES THE GESTURE SAFE NOW IS THAT THE TICK IS NOT
-     DEFERRED. Every tap ticks the moment it lands and a second inside
-     the window undoes it, so a pair costs nothing and a pair read as
-     two singles is a tick and an untick, which is also nothing. There
-     is no window at which you lose anything — which is what the
-     original was reported for, and what the width below is measured
-     against.
+     A CONTROL IN THE HEAD CANNOT BE MISTIMED, and this one cannot
+     leave you in a mode either: it disarms the instant the editor
+     opens. That is what makes a mode affordable here at all, and it
+     is why the disarm is asserted beside every arm below — a mode you
+     can be in without noticing is the fault every other route to this
+     editor was rejected for.
      ══════════════════════════════════════════════════════════════ */
   await dblRow('.week.is-today .row[data-id]');
-  ok('two taps on a row open the editor',
-    await page.evaluate(() => !document.getElementById('scSheet').hidden
-      && /Edit/.test(document.getElementById('scSheetTitle').textContent)));
-  ok('...and they are a tick and an untick, so the row ends where it began',
+  ok('two taps on a row are a tick and an untick, and open nothing',
+    await page.evaluate(() => document.getElementById('scSheet').hidden));
+  ok('...so the row ends exactly where it began',
     (await rowState()).done === before.done, await rowState());
-  /* AND THE SHEET IS PUT AWAY: a check that leaves a surface over the
-     screen is a check that breaks the next one, and this file has
-     been caught by that three times. */
-  await page.keyboard.press('Escape');
-  await page.waitForTimeout(440);
 
   /* ── THE CHECK TICKS, AND ONLY TICKS ──
      It briefly carried the row's double tap, because a thumb aiming at
@@ -5109,108 +5103,154 @@ const SAID = [
   ok('every row carries a pencil, one each',
     peds.rows > 0 && peds.eds === peds.rows, peds);
 
-  /* ── THE PENCIL IS THE KEYBOARD'S, AND NOTHING ELSE'S ──
-     It went the long way round: drawn on every row, then drawn on a
-     row a double tap had armed. Both were trying to give the gesture
-     something to point at, and both put a SECOND press between you and
-     the editor — which is where it kept failing on the phone. Two taps
-     on the row open it now and a pointer needs nothing here.
-
-     BUILT though, never removed: a keyboard has no double tap to fall
-     back on, so it stays in the layout and in the tab order. `eds ===
-     rows` above is the half that says so; this is the half that says
-     no thumb can reach it. */
+  /* ── THE PENCIL IS PUT AWAY UNTIL THE WEEK IS ARMED ──
+     BUILT though, never removed: it is the keyboard's edit control, and
+     a keyboard has no way to press a row and mean "edit this one". So
+     it stays in the layout and in the tab order — `eds === rows` above
+     is the half that says so, and this is the half that says no thumb
+     can reach it at rest. Measured as the computed opacity and
+     pointer-events rather than as a class, because what the check is
+     about is whether a thumb can reach it. */
   const putAway = await page.evaluate(() =>
-    [...document.querySelectorAll('.week.is-today .rowwrap .row-ed')].map((e) => {
+    [...document.querySelectorAll('.week .row-ed')].map((e) => {
       const cs = getComputedStyle(e);
       return +cs.opacity === 0 && cs.pointerEvents === 'none';
     }));
   ok('the pencil is put away for a pointer, on every row',
     putAway.length > 0 && putAway.every(Boolean), putAway);
 
-  /* ── AND TWO TAPS OPEN THE EDITOR, AT EVERY GAP THERE IS ──
-     This is the assertion the last three rounds of this gesture were
-     missing. It was driven with `page.dblclick` and with two
-     synchronous clicks, and both land in ONE task — so they are
-     recognised at any window at all and would pass on a build nobody
-     could use. Real touch, at five gaps from well inside the window
-     to just under it, and the pair has to work at all of them.
+  /* ── AND THE WHOLE MODE, IN ONE PASS ──
+     Arm, press, disarm. Every one of these fails apart from the
+     others: a build that arms and never disarms passes the first two,
+     one that opens the editor AND ticks passes the first three, and
+     one that leaves the rows looking identical passes all of them
+     while being a mode with nothing on screen naming it. */
+  const armBox = await page.evaluate(() => {
+    const e = document.getElementById('scHdEd');
+    if (!e) throw new Error('no edit control in the head');
+    const r = e.getBoundingClientRect();
+    return { w: Math.round(r.width), h: Math.round(r.height), drawn: r.width > 0 };
+  });
+  ok('the edit control is in the head, at a real press size',
+    armBox.drawn && armBox.w >= 34 && armBox.h >= 34, armBox);
 
-     A ROW WHOSE TICK OPENS NOTHING. Train asks what you trained and
-     that sheet covers the row it was asked from, which is its own
-     check below; Walk and Read feed Mind. Measured on the plain one
-     here so this says something about the GESTURE. */
-  const gaps = [];
-  for (const gap of [80, 150, 250, 330, 370]) {
-    const r = await page.evaluate(async (ms) => {
-      const rows = [...document.querySelectorAll('.week.is-today .row[data-id]')];
-      const el = rows.find((x) => !/train|walk|read|gym/i.test(x.querySelector('.n').textContent));
-      if (!el) throw new Error('no plain row on today');
-      const id = el.dataset.id;
-      const done = () => document.querySelectorAll('.week.is-today .row.is-done').length;
-      const before = done();
-      el.click();
-      await new Promise((z) => setTimeout(z, ms));
-      document.querySelector('.week.is-today .row[data-id="' + id + '"]').click();
-      await new Promise((z) => setTimeout(z, 420));
-      const out = { gap: ms, sheet: !document.getElementById('scSheet').hidden,
-        title: (document.getElementById('scSheetTitle') || {}).textContent,
-        moved: done() !== before };
-      return out;
-    }, gap);
-    gaps.push(r);
-    await page.keyboard.press('Escape');
-    await page.waitForTimeout(420);
+  const armed = await page.evaluate(async () => {
+    document.getElementById('scHdEd').click();
+    await new Promise((z) => setTimeout(z, 260));
+    return {
+      pressed: document.getElementById('scHdEd').getAttribute('aria-pressed'),
+      pencils: [...document.querySelectorAll('.week .row-ed')]
+        .filter((e) => +getComputedStyle(e).opacity > 0).length,
+      rows: document.querySelectorAll('.week .row[data-id]').length,
+      says: document.getElementById('scHdDate').textContent,
+    };
+  });
+  ok('pressing it arms the week, and says so', armed.pressed === 'true', armed);
+  /* THE MODE NAMES ITSELF, in the line the head already draws. */
+  ok('...in the line under the day, rather than in a banner',
+    /edit/i.test(armed.says), armed.says);
+  /* AND EVERY ROW SAYS IT IS EDITABLE. "It is armed" passes on a build
+     where the rows look exactly as they did, which is a mode you
+     cannot see. */
+  ok('...and every row shows the pencil while it is armed',
+    armed.rows > 0 && armed.pencils === armed.rows, armed);
+
+  const used = await page.evaluate(async () => {
+    const rows = [...document.querySelectorAll('.week .row[data-id]')];
+    /* A row whose tick opens NOTHING, so "the editor is up" cannot be
+       satisfied by the workout deck: Train asks what you trained, and
+       Walk and Read feed Mind. */
+    const r = rows.find((x) => !/train|walk|read|gym/i.test(x.querySelector('.n').textContent));
+    if (!r) throw new Error('no plain row on this day');
+    const done = () => document.querySelectorAll('.week .row.is-done').length;
+    const was = done();
+    r.click();
+    await new Promise((z) => setTimeout(z, 420));
+    return {
+      sheet: !document.getElementById('scSheet').hidden,
+      title: (document.getElementById('scSheetTitle') || {}).textContent,
+      moved: done() !== was,
+      pressed: document.getElementById('scHdEd').getAttribute('aria-pressed'),
+      pencils: [...document.querySelectorAll('.week .row-ed')]
+        .filter((e) => +getComputedStyle(e).opacity > 0).length,
+    };
+  });
+  ok('a press while armed opens the editor', used.sheet && /Edit/.test(used.title || ''), used);
+  ok('...and does not tick the row on the way', !used.moved, used);
+  /* THE WHOLE POINT: it disarms itself, so the next press ticks again
+     and there is no mode to get out of. */
+  ok('...and disarms itself the instant the editor opens',
+    used.pressed === 'false' && used.pencils === 0, used);
+
+  await page.evaluate(() => document.getElementById('scScrim').click());
+  await page.waitForFunction(() => document.getElementById('scSheet').hidden,
+    null, { timeout: 4000 });
+  await page.waitForTimeout(200);
+  const after = await page.evaluate(async () => {
+    const rows = [...document.querySelectorAll('.week .row[data-id]')];
+    const r = rows.find((x) => !/train|walk|read|gym/i.test(x.querySelector('.n').textContent));
+    const done = () => document.querySelectorAll('.week .row.is-done').length;
+    const was = done();
+    r.click();
+    await new Promise((z) => setTimeout(z, 380));
+    const out = { ticked: done() !== was, sheet: !document.getElementById('scSheet').hidden };
+    r.click();
+    await new Promise((z) => setTimeout(z, 380));
+    return out;
+  });
+  ok('...so the very next press ticks again', after.ticked && !after.sheet, after);
+
+  /* PRESSING IT TWICE CANCELS. A mode you can enter and not leave is
+     the fault this control exists to avoid, and the control that put
+     you in one has to be the one that takes you out. */
+  const off = await page.evaluate(async () => {
+    const b = document.getElementById('scHdEd');
+    b.click();
+    await new Promise((z) => setTimeout(z, 200));
+    b.click();
+    await new Promise((z) => setTimeout(z, 260));
+    return { pressed: b.getAttribute('aria-pressed'),
+      pencils: [...document.querySelectorAll('.week .row-ed')]
+        .filter((e) => +getComputedStyle(e).opacity > 0).length };
+  });
+  ok('...and pressing it again cancels rather than trapping you',
+    off.pressed === 'false' && off.pencils === 0, off);
+
+  /* IT IS THE WEEK'S CONTROL. There are no blocks on Today, Goals or
+     Friends, so a control offering to edit one is a control that
+     cannot do anything. Measured as the BOX, which is the seventh time
+     in this app that reading the attribute would have missed it. */
+  const edViews = {};
+  for (const v of ['tally', 'goals', 'friends', 'list']) {
+    await page.evaluate((vv) => document.querySelector(`.tab[data-view="${vv}"]`).click(), v);
+    await page.waitForTimeout(340);
+    edViews[v] = await page.evaluate(() =>
+      document.getElementById('scHdEd').getBoundingClientRect().width > 0);
   }
-  ok('two taps open the editor at every gap inside the window',
-    gaps.every((g) => g.sheet && /Edit/.test(g.title || '')), gaps);
-  /* AND THE RECORD IS WHERE IT WAS. The first tap ticks the moment it
-     lands — there is no deferral, which is what the earlier rounds
-     were reported for — and the second undoes it. So a pair costs
-     nothing, and a pair read as two singles is a tick and an untick,
-     which is also nothing. */
-  ok('...and none of them moves the record',
-    gaps.every((g) => !g.moved), gaps);
+  ok('the edit control is drawn on the week and nowhere else',
+    edViews.list && !edViews.tally && !edViews.goals && !edViews.friends, edViews);
 
-  /* ── AND THE WORKOUT PICKER WAITS OUT THE WINDOW ──
-     A tick on a Train block asks what you trained, and that sheet
-     covers the row it was asked from — so the first tap put a surface
-     over the second and the pair could never complete on that row,
-     and only on that row. Both halves: the pair now works there, AND
-     a single tap still gets the question, late rather than never. */
-  const trainPair = await page.evaluate(async () => {
-    const el = [...document.querySelectorAll('.week.is-today .row[data-id]')]
-      .find((x) => /train/i.test(x.querySelector('.n').textContent));
-    if (!el) return null;
-    const id = el.dataset.id;
-    el.click();
-    await new Promise((z) => setTimeout(z, 90));
-    document.querySelector('.week.is-today .row[data-id="' + id + '"]').click();
-    await new Promise((z) => setTimeout(z, 460));
-    return { title: (document.getElementById('scSheetTitle') || {}).textContent,
-      sheet: !document.getElementById('scSheet').hidden };
+  /* AND LEAVING THE WEEK PUTS IT AWAY. Arming, walking off and coming
+     back must not find the week still armed — that is a decision the
+     app kept half of. */
+  const walked = await page.evaluate(async () => {
+    document.getElementById('scHdEd').click();
+    await new Promise((z) => setTimeout(z, 220));
+    document.querySelector('.tab[data-view="tally"]').click();
+    await new Promise((z) => setTimeout(z, 320));
+    document.querySelector('.tab[data-view="list"]').click();
+    await new Promise((z) => setTimeout(z, 320));
+    return { pressed: document.getElementById('scHdEd').getAttribute('aria-pressed'),
+      pencils: [...document.querySelectorAll('.week .row-ed')]
+        .filter((e) => +getComputedStyle(e).opacity > 0).length };
   });
-  ok('two taps reach the editor on a row whose tick opens a sheet',
-    !trainPair || (trainPair.sheet && /Edit/.test(trainPair.title || '')), trainPair);
-  await page.keyboard.press('Escape');
-  await page.waitForTimeout(420);
-  const trainOne = await page.evaluate(async () => {
-    const el = [...document.querySelectorAll('.week.is-today .row[data-id]')]
-      .find((x) => /train/i.test(x.querySelector('.n').textContent));
-    if (!el) return null;
-    el.click();
-    await new Promise((z) => setTimeout(z, 150));
-    const early = !document.getElementById('scSheet').hidden;
-    await new Promise((z) => setTimeout(z, 700));
-    return { early, late: (document.getElementById('scSheetTitle') || {}).textContent,
-      up: !document.getElementById('scSheet').hidden };
-  });
-  ok('...and one tap still gets the question, after the window rather than inside it',
-    !trainOne || (!trainOne.early && trainOne.up && /train/i.test(trainOne.late || '')), trainOne);
-  await page.keyboard.press('Escape');
-  await page.waitForTimeout(420);
+  ok('...and walking off the week disarms it',
+    walked.pressed === 'false' && walked.pencils === 0, walked);
 
   const pencil = await page.evaluate(async () => {
+    /* The pencil itself still opens the editor — it is what a keyboard
+       presses, and a programmatic click reaches it whether or not a
+       pointer could. */
     const w = document.querySelector('.week.is-today .rowwrap');
     const id = w.querySelector('.row[data-id]').dataset.id;
     const at = () => {

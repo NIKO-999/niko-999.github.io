@@ -1702,105 +1702,30 @@
                block again under a sheet asking about that same block
                is the sentence and the picture this project keeps
                having to take back out. */
-            if (!was && scIsTrain(it)) {
-              clearTimeout(askT);
-              askT = setTimeout(function () {
-                askT = null;
-                scTrainAsk(it, d, bd);
-              }, TAP_MS);
-              return;
-            }
+            if (!was && scIsTrain(it)) { scTrainAsk(it, d, bd); return; }
             scToast(was ? it.n + ' unticked' : it.n + ' done', false);
         };
-        /* ── A TAP TICKS, TWO TAPS EDIT ──
-           It was the other way round, with a long press to tick. The
-           tap does the thing you do every morning now and the editor
-           is behind the second press, which is the same trade Showing
-           up made: the daily action on the whole row, the rare one a
-           gesture away.
+        /* ── A TAP TICKS, AND EDIT ARMS ONE PRESS ──
+           The editor was behind a double tap for three rounds and was
+           reported three times: the window is a clock you cannot see,
+           so the same press means two different things depending on
+           how fast the second one lands. Widening it from 260 to 380
+           to 500 each helped and none of them removed the class of
+           fault.
 
-           The long press went with it rather than being kept beside
-           the double tap. Two gestures for one action is a control
-           answering the same question twice, and the one that had to
-           go is the one nothing on screen can describe. */
-        /* ── ONE TAP TICKS, AND THE PENCIL EDITS ──
-           The editor was behind a DOUBLE tap and it was reported as
-           inconsistent, which it was — measured, the window is 380ms
-           against a platform threshold of about 300, and at 400ms
-           between taps the row ticks twice instead. That is a race
-           against a clock you cannot see: the same press means two
-           different things depending on how fast the second one
-           lands, and no window makes it reliable for everybody.
+           A CONTROL IN THE HEAD CANNOT BE MISTIMED, and this one
+           cannot leave you in a mode either — it disarms the instant
+           the editor opens, so the next press ticks again. That is
+           what makes it affordable where a plain toggle would not be:
+           a mode you can be in without noticing is the thing every
+           other route here was rejected for.
 
-           A VISIBLE CONTROL CANNOT BE MISTIMED. It is the only route
-           that is right the first time and every time after, and the
-           only one that needs no second mechanism for a keyboard —
-           because it IS the keyboard's control, stopped being hidden.
-           What it costs is a second mark on every row, on a screen
-           whose whole job is the words, so it is drawn as quietly as
-           a control can be: a hairline, no fill, the dim grey. */
-        /* ── AND THE PENCIL IS NOT THERE UNTIL YOU ASK FOR IT ──
-           A control on every row is a second mark on a screen whose
-           whole job is the words, and you edit a block a few times
-           ever. So the row is bare, a DOUBLE tap arms it, and the
-           pencil appears on that row alone.
-
-           THE FIRST TAP IS NOT DEFERRED, and that is the whole reason
-           this can be a double tap at all. The editor used to be
-           behind one and it was reported as inconsistent twice,
-           because a mistimed gesture meant the thing you asked for
-           did not happen. Here it cannot: every tap ticks the moment
-           it lands, and a second tap inside the window UNDOES the
-           first and opens the editor — so a double tap leaves the
-           record exactly where it found it, and a double tap read as
-           two singles is one tick and one untick, which is also
-           nothing. There is no window at which you lose anything, and
-           the worst a mistimed one costs is a press. */
-        /* ── AND THE PAIR IS REMEMBERED OUTSIDE THE ELEMENT ──
-           A timer held in this closure can never see the second tap.
-           The first one ticks IMMEDIATELY, and a tick re-renders the
-           week — so the second press lands on a freshly built row
-           whose own timer is null and reads as another first tap.
-           That is the same fault the old deferred window had, from
-           the opposite direction: there the render came at the end of
-           the window, here it comes at the start, and either way the
-           element the pair is stored on does not survive the pair.
-
-           Keyed by BLOCK ID rather than by element, so it survives
-           any number of rebuilds, and closed by a clock rather than a
-           timer so there is nothing to cancel. */
+           So the row is a tap again. No pair to remember, no window,
+           no deferral — and the workout deck goes back to opening on
+           the frame, because the only reason it ever waited was to
+           let a second tap through. */
         row.addEventListener('click', function () {
-          /* ── performance.now(), NEVER Date.now() ──
-             A monotonic clock is the right primitive for measuring an
-             interval: the wall clock can be stepped by NTP or a
-             timezone change, and an interval read across one of those
-             is nonsense.
-
-             It is also the difference between a gesture that can be
-             tested and one that cannot. The suite FREEZES Date so the
-             week is drawn on a fixed day — Date.now() then returns a
-             constant, `now - tapAt` is always 0, and every second tap
-             on a row reads as a pair however far apart it was. That
-             is not a test artefact to work around: a gesture whose
-             whole meaning is an elapsed time must not read the one
-             clock the app lets anything else move. */
-          var now = performance.now();
-          if (tapId === it.id && now - tapAt < TAP_MS) {
-            tapId = null;
-            /* The picker the first tap asked for is called off: you
-               were reaching for the editor, not answering a question
-               about a session you are about to untick. */
-            clearTimeout(askT);
-            askT = null;
-            /* The first tap's tick is UNDONE and then the editor
-               opens, in that order, so the sheet is the last thing to
-               happen and the week behind it is already correct. */
-            tick();
-            scEditSheet(it, d);
-            return;
-          }
-          tapId = it.id;
-          tapAt = now;
+          if (editArm) { scEditArm(false); scEditSheet(it, d); return; }
           tick();
         });
         /* A long press reaches neither a keyboard nor a screen reader,
@@ -1986,6 +1911,8 @@
   function scDeckGo(d) {
     if (d === scOpenDay()) return;
     openDay = d;
+    /* Pressing another day is not the press the mode was armed for. */
+    if (editArm) scEditArm(false);
     /* A day found face-down is the app having kept the wrong half of a
        decision, and that is truer still of the day BEFORE the one you
        just pressed. */
@@ -2545,6 +2472,16 @@
       return a2 + (scOff(cd, it.id) ? 0 : it.e - it.s);
     }, 0);
     day.textContent = FULL[d];
+    /* ── THE MODE SAYS WHAT IT IS WAITING FOR ──
+       In the line the head already draws rather than in a banner: a
+       mode with nothing on screen naming it is the thing every other
+       route here was rejected for, and a second element would be one
+       more object above a screen whose whole job is the words. */
+    if (editArm) {
+      sub.textContent = 'Pick a block to edit';
+      ic.innerHTML = HEAD_ICON[d === t.getDay() ? 'today' : 'week'];
+      return;
+    }
     sub.textContent = when.getDate() + ' ' + MON[when.getMonth()]
       + (mins ? ' \u00b7 ' + (mins / 60).toFixed(mins % 60 ? 1 : 0) + ' hrs' : '')
       + ' \u00b7 ' + now;
@@ -6496,30 +6433,26 @@
      record and this is a preference about looking at it, and folding a
      preference into the record is how a damaged one takes the other
      down with it. */
-  /* Which block was tapped last, and when. Keyed by BLOCK ID rather
-     than held on the element: the first tap ticks immediately and a
-     tick re-renders the week, so the second press lands on a freshly
-     built row and a timer stored on the old one never sees the pair.
+  /* ── EDIT ARMS EXACTLY ONE PRESS ──
+     Never stored, and cleared on the way out of the week for the same
+     reason the goals list is: it is a position on a screen you are
+     looking at, and a week found armed tomorrow morning is the app
+     having kept half of a decision. */
+  var editArm = false;
 
-     ── 500ms, AND THE WIDTH IS MEASURED ──
-     Driven with real touch at 80, 150, 250, 330 and 370ms between
-     taps, on every row of a day and at three places across each. At
-     380 the last of those missed on four rows out of five: the
-     platform's own threshold is around 300, and anything past it is a
-     coin toss on a slow thumb. Being too WIDE costs ticking and
-     immediately unticking the same row inside half a second, which
-     opens the editor and which nobody does; being too narrow costs a
-     gesture that does not answer, which was reported three times. */
-  var TAP_MS = 500;
-  var tapId = null, tapAt = 0;
-  /* ── AND THE PICKER WAITS OUT THE WINDOW ──
-     A tick on a Train block asks what you trained, and that sheet
-     covers the row it was asked from — so the first tap put a surface
-     over the second and the pair could never complete. Measured: at
-     80ms between taps the editor never opened on that row, and only
-     on that row. The tick still lands on the frame; the question
-     arrives after the window instead of inside it. */
-  var askT = null;
+  /* ── ONE FUNCTION SETS IT, AND IT SETS ALL THREE THINGS ──
+     The button's own state, the week's class — which is what draws a
+     pencil on every row — and the line under the day, which is where
+     the mode says what it is waiting for. Written out at each call
+     site they drift, and the one that drifts is whichever the next
+     caller forgets. */
+  function scEditArm(on) {
+    editArm = !!on && view === 'list';
+    var b = $('scHdEd'), wk = $('scWeek');
+    if (b) b.setAttribute('aria-pressed', editArm ? 'true' : 'false');
+    if (wk) wk.classList.toggle('is-edit', editArm);
+    scDate();
+  }
 
   var VIEW_KEY = 'sched.view.v1';
   var view = 'list';
@@ -6577,6 +6510,12 @@
          every add and every removal, and resetting there would throw
          you out of the deck each time you pressed Add. */
       if (gl) glOpen = null;
+      /* Leaving the week disarms it: the control is about blocks, and
+         there are none on Today, Goals or Friends. */
+      editArm = false;
+      var eb = $('scHdEd');
+      if (eb) eb.setAttribute('aria-pressed', 'false');
+      $('scWeek').classList.remove('is-edit');
     }
 
     /* The history sits OUTSIDE the tally section, so hiding the section
@@ -6586,6 +6525,10 @@
     $('scTally').hidden = !tal;
     $('scFriends').hidden = !fr;
     $('scGoals').hidden = !gl;
+    /* Only where there are blocks to edit. `[hidden]` is said out
+       loud in the stylesheet for this one too, which is the seventh
+       time in this app: it takes a `display: grid`. */
+    $('scHdEd').hidden = view !== 'list';
     /* ONE SECTION PER VIEW, and `[hidden]` has to be said out loud
        once a thing takes a display — .week is a flex column, and an
        author display outranks the browser's own [hidden] rule. That
@@ -12312,6 +12255,12 @@
   /* ═══════════════════════════════════════════════════════════
      WIRING
      ═══════════════════════════════════════════════════════════ */
+
+  /* Pressing it again cancels: a mode you can enter and not leave is
+     the fault every route to this editor has been rejected for, and
+     the control that put you in one has to be the one that takes you
+     out. */
+  $('scHdEd').addEventListener('click', function () { scEditArm(!editArm); });
 
   scLoad();
 

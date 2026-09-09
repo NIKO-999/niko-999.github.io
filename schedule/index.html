@@ -47,7 +47,7 @@
   } catch (e) {}
 }());
 </script>
-<link rel="stylesheet" href="app.css?v=4c48f526" />
+<link rel="stylesheet" href="app.css?v=7b7a75ee" />
 </head>
 <body>
 
@@ -67,6 +67,16 @@
         <h2 class="h-day" id="scHdDay"></h2>
         <p class="h-sub" id="scHdDate"></p>
       </div>
+      <!-- ── EDIT, AND IT ARMS ONE PRESS ──
+           The editor was behind a double tap for three rounds and was
+           reported three times. A visible control cannot be mistimed,
+           and this one cannot leave you in a mode either: it arms, the
+           next block you press opens, and it disarms itself on the way
+           — so there is no state to be in without knowing. The week's
+           own tile, so the head reads as tiles and a title. -->
+      <button class="hd-ed" id="scHdEd" aria-pressed="false" aria-label="Edit a block">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L18 10l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>
+      </button>
       <button class="head-you" id="scTabYou" aria-label="You and settings">
         <span class="tab-face" id="scTabFace"></span>
       </button>
@@ -258,6 +268,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=d2988ab5"></script>
+<script src="app.js?v=cadfeb66"></script>
 </body>
 </html>

@@ -469,6 +469,52 @@ body {
 }
 .hd-top .head-you { flex: none; }
 
+/* ── EDIT ARMS ONE PRESS ──
+   The head's own tile at the glyph's size, so the top row reads as
+   tiles and a title rather than as a control bolted beside one.
+
+   `touch-action: manipulation` for the reason the pencil needed it:
+   this page sets no maximum-scale, so a tap near another tap is a
+   zoom gesture on iOS by default — and this control sits between two
+   others a thumb also aims at. */
+.hd-ed {
+  flex: none;
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow);
+  color: var(--dim);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.hd-ed svg {
+  width: 19px; height: 19px;
+  fill: none; stroke: currentColor; stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.hd-ed:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+/* ARMED IS THE FILLED STATE every other control in this app uses for
+   one — the ink, with the paper on it. A colour would be inventing a
+   fifth meaning for the accent, which says WHICH and never what mode
+   you are in. */
+.hd-ed[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: none;
+}
+.hd-ed[hidden] { display: none !important; }
+
+/* ── AND EVERY ROW SAYS IT IS EDITABLE ──
+   The pencil is the keyboard's control at rest; while the week is
+   armed it is drawn on every row, which is the one honest use for it
+   being there — temporary, and the whole point is that you can see
+   which things the next press will open. */
+.week.is-edit .row-ed { opacity: 1; }
+.week.is-edit .row { cursor: pointer; }
+
 /* ── the day's span ──
    A scale, in 24-hour time, because AM/PM on an axis is four glyphs
    saying what the position already says. The track is the divider the

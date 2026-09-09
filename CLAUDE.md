@@ -7520,3 +7520,85 @@ would have saved `days/` its `var(--ink-on)` at 1.74:1. It is `--gl-h`
 now, with a default on `.gl-wc` so the token exists in the sheet, which
 is `.wo-p`'s own answer. Every class this screen owns is `gl-`
 prefixed, because a collision here does not throw, it REPLACES.
+
+## Edit arms one press
+
+The editor went the long way round and was reported at every stop: a
+double tap, then a pencil on every row, then a pencil a double tap
+brought out, then the double tap again with its window measured up
+from 260 to 380 to 500ms. **Every one of the middle three was trying
+to give a GESTURE something to point at.**
+
+A window is a clock you cannot see. The same press means two different
+things depending on how fast the second one lands, and no width makes
+that right for everybody — 500 measured 75 of 75 in emulation and was
+still a rule nothing on screen could describe.
+
+**A CONTROL IN THE HEAD CANNOT BE MISTIMED**, and the app already had
+the rule that settles it: *two gestures for one action is a control
+answering the same question twice, and the one that has to go is the
+one nothing on screen can describe.*
+
+**AND IT CANNOT LEAVE YOU IN A MODE.** That is what makes a mode
+affordable here at all, when *a mode you can be in without noticing*
+is precisely what every other route to this editor was rejected for.
+It arms, the next block you press opens, and it disarms itself the
+instant the editor opens — so the press after that ticks again and
+there is nothing to get out of. Pressing it again cancels, walking off
+the week cancels, and changing day cancels.
+
+**THE MODE NAMES ITSELF IN THE LINE THE HEAD ALREADY DRAWS.** "Pick a
+block to edit" replaces the date while armed, rather than a banner
+appearing above a screen whose whole job is the words.
+
+**AND EVERY ROW SHOWS ITS PENCIL WHILE IT IS ARMED**, which is the one
+honest use for that control being drawn: temporary, and the point is
+seeing which things the next press will open. Asserted beside the
+armed state, because "it is armed" passes on a build where the rows
+look exactly as they did — which is a mode you cannot see.
+
+**The button is the head's own tile**, 38px beside the glyph and the
+face, so the top row reads as tiles and a title rather than as a
+control bolted beside one. Armed is the filled state every other
+control in this app uses for one — the ink with the paper on it. A
+colour would be inventing a fifth meaning for the accent, which says
+WHICH and never what mode you are in.
+
+**And the deferral went with the gesture.** The workout picker was
+held back by the whole tap window, because a tick on Train raises a
+sheet over the row the second tap needed to land on. With no pair to
+wait for, the picker opens on the frame again — `TAP_MS`, `tapId`,
+`tapAt` and `askT` are all gone. **A mechanism that exists only to
+serve another mechanism goes when that one does**, or it reads as
+something somebody might edit.
+
+**`[hidden]` is said out loud for it, the seventh time in this app.**
+The control takes a `display: grid`, so the attribute alone stops
+meaning anything — the rail, the page dots, the toast, the intro, the
+objectives row and the goals section each had that bug with the
+attribute set correctly throughout. Measured as the BOX on all four
+views.
+
+### And a probe's selector reported the feature broken
+
+The pencils came back as **0 while armed** and the rule was right. The
+probe asked for `.week.is-today .row-ed`, and `is-today` is on
+`#scWeek` itself — it comes OFF the moment you open another day, which
+the probe had done three lines earlier. A compound selector matching
+nothing filters to an empty list, and an empty list passes `every` and
+fails a count identically to a broken feature.
+
+**A zero from a selector is not a measurement until you have proved
+the selector matches anything**, which is the `getClientRects()` hue
+scan's lesson and the axis sampling its own excluded edge, in a third
+place.
+
+### `elsewhere` was already declared
+
+A `const` at the top level of `tests/schedule.js` collided with one
+four hundred lines away and took the whole file down with a
+SyntaxError before a single assertion ran — **this repo's oldest bug,
+in test-file clothes, for the third time.** Found by listing every
+top-level declaration and counting them rather than by fixing the one
+the parser happened to name first, which is the only version of that
+check worth running.
