@@ -7285,241 +7285,252 @@ an edit that was supposed to delete. A replace that removes nothing is
 not a replace. Bound the search to after the anchor, and assert on the
 region's own content before writing it.
 
-## Goals is a tab, and a sentence becomes a block on Tuesday
+## Notes is a tab, and a block can point at one
 
-Every other screen in this app records what you DID. This one is the
-only thing that says what any of it is FOR, and **the whole feature is
-one press**: a goal you typed becomes a block on your week. The list of
-goals is only where you press it from.
+Goals came out and this went in its place. A goals screen is a list of
+things you have not done yet, and this repository has already deleted
+one of those — `arc/` held a vision board and a long-term timeline and
+both are gone. Every other screen here is a RECORD; **this is the only
+one you WRITE**.
 
-**A TAB, NOT A STOP ON TODAY.** Showing up, Workouts and Pattern are
-three ways of reading the day you are in; a goal is not one of those,
-it is what the day is in service of. The arrangement was also decided
-by a measurement rather than by taste: four stop labels came to
-**372px against the 358 a 390px phone has**, where `.tab` is `flex: 1`
-and simply divides — four tabs at 68px each with no label clipped. The
-bar was the arrangement that cost nothing.
+**AND WHAT MAKES IT PART OF THE APP RATHER THAN A NOTEPAD BESIDE IT IS
+THE TAG ON THE ROW.** A block names a note, the row draws that note's
+title in the note's own colour, and pressing it lands you in the note.
+That is the whole of what was asked for and it is worth stating
+precisely: **not the line copied onto the day — a way back to where it
+is written.**
 
-**Nothing here leaves the phone.** `sched.goal.v1` is not in
-`scPushNow`'s body and no path from this screen calls `scPush`. A goal
+`sched.goal.v1` is REMOVED on boot rather than left. A key nothing can
+read is a second copy of a decision that no longer exists, which is the
+same call this file has now made about the palette name, the subtitle,
+the old rating scale and two view keys.
+
+**Nothing here leaves the phone.** `sched.note.v1` is not in
+`scPushNow`'s body and no path from this screen calls `scPush`. A note
 is further down the road that *a count may leave and a list may not*
-was written about than anything else on the record — and the check is
-in two halves, because each passes on the other's bug: pressing around
-the screen makes no request at all, AND a push that happens for some
-other reason is not carrying one. That second half is what was missing
-the two times a comment reading "this is never sent" was the only place
-the intention existed.
+was written about than anything else on the record. Both halves are
+asserted, because each passes on the other's bug: pressing around the
+screen makes no request at all, AND a push that happens for some other
+reason is not carrying one. That second half is the check that was
+missing the two times a comment reading "this is never sent" was the
+only place the intention ever existed.
 
-### The dose is solved, and days move before minutes
+### Eleven options, then eight, then eight more
 
-Each suggestion carries the length it wants and the one below which it
-stops being the thing — reading floors at 15, a session does not go
-below 30 and still count. **Fifteen minutes of reading a day and
-forty-five minutes three times a week are the same weekly total, and
-the second is a session you can actually finish**, so a longer window
-buys fewer days at a real length rather than a token every morning.
-Length only shortens once days would drop under two, and then stops at
-the floor and drops another day instead.
+The whole design was chosen from plates rendered at 390x844 in the
+app's own palette and type, and the pattern held: **the first round was
+one idea four ways.**
 
-Measured across every window the app offers, on a 60-minute block with
-a 20-minute floor: **5 × 60, 3 × 60, 2 × 60, 2 × 40, 2 × 30, 2 × 20**.
-Asserted as a LADDER rather than as one figure — "there is a dose"
-passes on a constant, and the whole claim is that the window moves it.
+Three decisions came out separable — how a line is MARKED, how notes
+are HELD, how a note REACHES the day — and only the middle one was
+settled first time. Held as **a list** of cards, reached by **a tag on
+the row**. The marking took twenty options across three rounds.
 
-**TWO LINES OF WHY AND NEVER THREE.** One says what the thing does, one
-says why THIS dose — which is the half nothing else on the screen says.
-A third is a paragraph, and a paragraph is a thing you scroll past.
+**A COMPARISON HAS TO BE ON ONE PAGE.** The first eight were behind
+tabs, one at a time, and the fault that kills a mark is only visible
+next to the others — a treatment that reads beautifully alone can be
+the loudest thing in a row of eight. The second sheet put all twenty up
+at once, grouped by what the mark IS: a wash behind the words, the
+words themselves, something beside them, the line's own edge, or an
+object. **The grouping was the useful half**, because it showed that
+five of the rejected options were the same idea at different volumes.
 
-**And the cost of the day, before and after.** The app already knows the
-hours on a day; the head prints them and nothing else uses the figure.
-Drawn at the one moment it can change your mind. Held to naming a real
-weekday and two DIFFERENT lengths, because *goes from 3 h to 3 h* is a
-sentence that renders perfectly and says nothing.
+**And the crops were at TRUE SIZE with the height trimmed**, never
+scaled down to fit more in. This repo has already chosen a particle
+treatment off a sheet rendered at half scale and had to say so.
 
-### One card, not a hand
+### The mark is a SWIPE
 
-The workout deck's fan was built here first and taken back out. **A
-stack behind it says these are ALTERNATIVES, and a process is a set** —
-you may well want three of them. The chips are the pager and the card
-in front is the whole of what is drawn, asserted as the COUNT, because
-a fan is two more elements and nothing else about the screen changes.
+One stroke of the hue, strong where it started and gone by the end of
+the line. It says *this one* without shouting to the end of the
+sentence.
 
-**The pattern is the RHYTHM of the thing, never a picture of it.** A
-drawing of a dumbbell at this size is a glyph, and this app already
-learned that ten honest drawings of a lift come out as one silhouette
-ten times. A cadence of reps in sets is a picture of nothing and is
-still unmistakably training. Backtesting gets candle bodies along a
-mid line with no axis and no scale; reading gets ragged-right blocks at
-a paragraph's rhythm; outreach gets arcs going out from one point at
-the edge; rest gets one very slow wave, the only pattern in the set
-with nothing repeated fast in it.
+What it beat: a **slab** filling the row (the loudest thing on a screen
+whose job is the words), a **pen** at one flat alpha, a **margin**
+rule, a **section**-only treatment, an **underline**, a **bullet** in
+the hue, an **end dot**, a **tag** carrying a word, a **card** the line
+lifts onto, a **bracket** spanning a run, a **notch** in the right
+margin, **weight** with no colour at all, a **marker** with hand-drawn
+edges, a **half-line** wash, a **full-width band**, an **outline**,
+**tinted words**, a **strike**, an **indent**, and a **rule under**.
 
-**Two took three attempts each, and every rejection was caught by
-looking at the whole set at once rather than at one card.** *Watch
-content* was scan lines, which read as a television and were a fifth
-horizontal-rule pattern in a set that already had four; then stacked
-progress tracks, which read as a to-do list. It is a **waveform** — the
-one pattern in the set mirrored about a horizontal axis, so it can be
-confused with nothing, and the honest reason it beats a picture of a
-screen is that content is a thing you give TIME to. *Review the week*
-was seven arcs on a baseline, which read as bunting at card size and
-left most of the card empty; then seven bands with a line across them,
-which read as a chart. It is a **spiral** — one line going round and
-coming back over ground it has already covered, which is the whole of
-what a review is, and nothing else in the set is a spiral. A third pair
-was fixed the same way: *Notes* was ruled lines with a spine, identical
-to *Read* and IN THE SAME DECK, so it is annotation ticks crossing a
-spine; and *Study* was a fifth horizontal-rule pattern, so it is
-squared paper — coarser than a scan pitch, finer than scaffolding, no
-diagonals. **Judged together rather than one at a time, which is the
-only way that fault is visible.**
+**IT IS A MIRROR BEHIND THE FIELD, and that is the whole mechanism.**
+The swipe is fitted to the WORDS and a textarea's own background fills
+its BOX — so a wash written on the field runs the width of the column
+and fades at a place with nothing to do with where the sentence ends.
+A mirror div carries the same text with the same metrics, draws the
+wash and paints no ink; the field sits on top with the ink and no
+ground. **Every property that decides wrapping is set on both**, or the
+two come apart on the first line long enough to wrap and the wash lands
+under the wrong words. `tests/schedule.js` asserts the list of them
+rather than the look, because that is the only half that can fail
+silently.
 
-**AND TWO CARDS SHARED A DRAWING ACROSS DECKS, which the check found
-and I had not.** *Practice* and *Review* were both `loop`; *Build* and
-*Make something* were both `lattice`. Neither pair is ever on screen
-together, and the temptation was to narrow the assertion to "within one
-goal" — which is exactly the widening this file warns about everywhere
-else. They got their own instead: **drift**, one movement done again
-and again with each pass landing a little off the last, and
-**assemble**, parts of different sizes packed until they fill the
-space. Building is scaffolding and making is the object that comes off
-it, so the two were never the same claim anyway.
+### The heading is two things, and only the clause is coloured
 
-They are a TABLE, which is the cost of them meaning anything — a second
-list to keep in step with the first. What pays for it is the fallback:
-a suggestion the table has no drawing for gets one seeded from its own
-name, so a card is never blank.
+"Negative — what takes away from me" is a **name** and an explanation,
+and only the name is a label. **Two fields, two values, nothing
+parsed**: written as one string the two would have to be split back out
+on every render, and a dash somebody typed inside a name would be read
+as the seam.
 
-**COVERAGE IS ASSERTED IN BOTH DIRECTIONS**, which is the keyword
-table's own rule: a card naming a drawing the table does not have falls
-through to the fallback silently — the card looks fine and the drawing
-meant for it was never used — and a drawing nothing can reach is dead
-weight that looks like coverage. 26 patterns, 26 cards, none twice and
-none dead.
+The name stays ink and **the clause takes the section's hue**. A
+coloured label over coloured marks is the section said twice, and the
+name is the half that has to stay legible at label size.
 
-**Non-scaling strokes, which is the waves' lesson kept.** A width in
-viewBox units is multiplied by whatever the box is stretched to, and it
-fails silently: the drawing stays correct and comes out several times
-too heavy.
+**12.5px, not 9.5.** It went in at the app's own label size, which is
+right for a caption naming a control and wrong here: this is the only
+heading in the app that names something you WROTE, and over 15px
+sentences it read as a caption for the lines rather than as the thing
+they are under. The clause went 11.5 to 14 with it — the two are one
+heading, and moving one alone makes it a label with a note stuck on the
+end.
 
-### Only you end a goal
+### There is no bullet, and that is a decision
 
-**The date is a checkpoint, not an ending.** A goal that dies on a date
-is a goal the calendar decided about. When the date comes round it asks
-once — still on it, done, or drop it — and `asked` records which due
-date it has already put the question for, so extending sets a new date
-and a new question rather than asking again on the next render.
+Chosen over a dash, a dot, a ring, a square, a caret, a checkbox and
+the row's own keyword glyph. A note is sentences, and a marker in front
+of every one of them is a column of furniture down a screen whose whole
+job is the words. **What it costs is real** — a wrapped line is harder
+to tell from a new one — and the line height is what pays for it.
 
-**THREE ANSWERS, NOT TWO.** Without *drop it* the only way out of a goal
-you have genuinely abandoned is to lie and press Done.
+Asserted, because a bullet is one line of CSS away from coming back.
 
-**Both done and dropped go to the archive**, and a dropped one is
-marked as dropped in the flat neutral. Setting and dropping the same
-goal three times is a real fact about yourself and this app has never
-flattered you; it is a record, not a scoreboard. What makes the archive
-worth opening is that each finished goal keeps **what its process was
-and how much of it you kept** — six months later the useful half is not
-that you did it, it is what you actually did. Folded shut, because a
-completed goal does not earn a tab.
+**The checkbox was the one that was not a look.** It turns a note line
+into something you can complete, which is a feature rather than a mark,
+and it was put separately rather than smuggled in with a bullet
+choice. It is not built.
 
-**And the blocks STAY.** They are your week now: the goal ends and the
-process is what is left, which is most of the point of the feature.
+### Seven hues, and they are the workout cards' own
 
-### Extended wears amber, and that is a deliberate reversal
+A colour that says WHICH has to be the same colour every time you see
+it, so it cannot come off the wheel. These seven are already literals
+with a light-face twin each, and already measured as a 22% wash under a
+72% label — which is exactly the arithmetic a heading's clause and a
+line's mark both use. Seven rather than a new set, because seven is
+what is actually different.
 
-The rule everywhere else is that colour says WHICH, never whether, and
-there is exactly one red in this app — Missed, on a block whose hour
-came and went. **An extended goal is one you are STILL DOING, so red
-would say the opposite of what happened.** Amber is the honest register
-for *past where it was meant to be* without the verdict.
+**A LINE'S MARK TAKES ITS SECTION'S HUE**, never one of its own. That
+is the whole of what stopped this screen having nine coloured bars down
+it, and it is why a line above every heading can be typed but **not
+marked** — a colour nobody chose is the wheel arriving through the back
+door. The Mark control says so by REFUSING rather than by not being
+there: a control that comes and goes as you move down a note is worse
+than one plainly not available yet.
 
-The colour carries the overrun and the words carry how much — `Extended
-· +2 months`. It **stays** amber once extended, even while the new date
-is still ahead: "this ran past what you planned" goes on being true,
-and a colour that resets loses the at-a-glance read the tag exists for.
+**And the note's own colour is its FIRST heading's, derived rather than
+set.** A second colour to choose, that had to agree with the sections
+inside it, is one decision too many for a thing whose only job is to be
+recognised on a row.
 
-**ONLY THE TAG.** Not the countdown, not the card's edge, not the title
-— one mark, one claim, or an overrunning goal is the loudest thing on
-the screen, which is the wash-of-red problem arriving by another door.
-Asserted as the tag being the only warm thing anywhere on the screen.
+### Return makes a line, Backspace takes one away
 
-Measured on composited pixels: **6.24:1 on the dark face and 5.94:1 on
-the light**, at the state tags' own 36/40 pair rather than 22/72, since
-a tag naming a state has to read as an area rather than as a tint. And
-held apart from `--bad` in Lab at **ΔE 38**, which is the habits
-screen's own rule about two colours that must never be confused.
+Which is the whole reason there is **no per-row furniture**: a delete
+control on every line is a column of controls down a screen whose job
+is the words. Return splits at the caret, which is what a return in the
+middle of a sentence means everywhere else anybody has typed.
+Backspace at the head of a line joins it back on — except onto a
+HEADING, where merging would put a sentence inside a section name, so
+an empty line deletes itself and a full one stays put.
 
-### The block carries its goal, and that is one field
+**THE CONTROLS SIT ON THE LINE THAT HAS FOCUS**, which is `.row-ed`'s
+own pattern one screen over: one strip, moved, rather than a toolbar
+that is always up or a gesture nothing on screen can name. Asserted as
+WHICH row it follows, because "the tools exist" passes on a toolbar.
 
-It is what lets the goal answer the only question worth asking it: am I
-actually doing this. Read off `blockLog` rather than stored, because
-the block is the record and a second count is a copy that drifts. The
-app cannot know how profitable you are; it knows exactly how many
-sessions you kept, and **the process is what it reports** — the same
-reason this app has never asked what you weigh.
+**A quieter focus ring than the app's, and the strip is why.** Every
+other field here takes a 2px accent outline, which is right for a boxed
+control in a sheet and wrong for a sentence — a white slab drawn round
+the line you are typing is the loudest thing on the screen, and this is
+the one place in the app you type continuously. What makes that
+affordable is that focus is already drawn: the controls appear under
+the focused line, which is bigger and more specific than any ring and
+moves with the focus.
 
-**Spread across the week, never stacked into the front of it.** Three a
-week is Monday, Wednesday, Friday: a process bunched into the first
-three days is one you have already failed by Thursday.
+### Typing writes on a timer, and the page going away is the one exit the app does not control
 
-What it must NOT do is change what anything else counts. `scShareWork`
-sends how many BLOCKS you kept, and a block from a goal is a block you
-kept — which is why the goal is a field ON the block rather than a
-fourth log beside `blockLog`, `kidLog` and `offLog`.
+A note is one localStorage key and a character is not worth a whole-key
+write, so typing debounces. Leaving the tab flushes and so does every
+structural change — but a phone backgrounding the app, a tab closing or
+a reload does neither, and half a second of typing is a whole sentence.
+`pagehide` and `visibilitychange`, never `beforeunload`, which iOS does
+not fire for a page going into the background at all.
 
-### Two live, three at a push
+**AND THAT FLUSH BROKE TWO CHECKS, WHICH IS WORTH WRITING DOWN.** A
+test that writes the key and reloads has the app write its own
+in-memory copy straight back over it on the way out — so the damaged-
+shape check measured the note it started with and would have passed on
+anything. Its own context is the fix; planting the damage in an init
+script on the same page is no answer either, because an init script
+runs on every navigation and the seven reloads after it would each get
+the damaged record back.
 
-Not a suggestion — the app refuses a fourth and says why. **A goals
-screen with nine things on it is a wish list**, and this repository has
-already deleted one of those: `arc/` held a vision board and a
-long-term timeline and both are gone. Asserted in both directions,
-because a cap that only ever refuses is indistinguishable from a screen
-that cannot add at all.
+### A block carries a note ID, never the note
 
-**There is no weight goal, and its absence is the decision.** This app
-has never asked what you weigh and says so out loud; a table entry for
-it would reverse that quietly. Training covers the honest half — you
-cannot control the number, you can control the sessions.
+Two copies of a title drift the moment you rename one of them, and the
+note is the record. It is part of the TEMPLATE like the children are,
+so a block that is about your trading rules is about them every week.
 
-**Money folds into Business**, because a goal that says "earn more"
-wants the same process as one that says "grow the business" and two
-entries would be one table written twice. **Saving stays thin on
-purpose**: a weekly look at what went out and one transfer, two blocks,
-one of them five minutes. Padding it to four so it matched the others
-would be the app inventing work.
+**A dangling id costs the tag and nothing else.** `scNoteOf` returns
+null and the row simply draws none, which is what happens for a note
+removed on another device before this one has caught up — and removing
+a note clears the field on every block naming it, so the dangle is the
+race rather than the ordinary case.
 
-### Two counts written as three, and a claim the app is allowed to make
+**THE TAG IS A SIBLING OF THE ROW**, like the check, the pencil and the
+children's dots, because a `<button>` inside a `<button>` is invalid
+and collapses to one press while looking exactly right. On its own line
+at a fixed x, so it needs no measurement against a props line whose
+width changes with whatever else is on it.
 
-`tabs.length === 3` and a joined string of three labels were both
-written when there were three views, and the day Goals landed they
-**failed together while the bar was perfectly correct**. Same shape as
-`tests/run.js`'s hardcoded SUITE list and the flight-pause rule's list
-of layers: a hardcoded count silently skips what is not in it, right up
-until it does not. Named now, and the ORDER is asserted too, because it
-is a decision — Goals sits beside Today, which is what it is about.
+**98px, MEASURED rather than added up.** The row's grid is 54px of
+time, 22 of glyph and two 8px gaps over a 2px padding — and the tag has
+to start where the NAME does, which is the only alignment on this row
+anybody reads. Computed off the grid it came out **14px short**, and
+the check holds the two edges equal rather than holding the constant.
 
-**And the four-view box loop presses Friends, which CLAIMS A CODE.**
-That is the app working, and it is why the friends assertions live in a
-context of their own. Dropped into a section whose whole claim is
-"nothing leaves", it failed on the one request the app is supposed to
-make. The loop still visits all four — "exactly one section is drawn"
-is vacuous if it skips one — and the claim is NAMED in the filter
-rather than counted away, so anything else at all is still a leak.
+**And a jump has to say it is a jump.** Arriving at Notes clears which
+note is open — the tally panels' own rule — so `scNoteJump` sets a flag
+the arrival consumes. Without it every tag press lands on the list
+while looking entirely correct.
 
-### The head named two of what is now three
+### The plus makes a note, and only on this screen
 
-`view === 'tally' ? 'Today' : 'Friends'` is a two-way question, so the
-day Goals landed it drew **"Friends" over the goals pane** with the
-friends glyph beside it. A ternary is a list of two with no room in it;
-a lookup names the next view on the day it is added.
+The bar holds three tabs and one add control at 390px, which is the
+whole of what fits — a second button for notes would be the control
+that made the row too tight to press. On Notes it makes a note;
+everywhere else it is the block sheet it has always been.
 
-**And `--h` was both undeclared and generic.** The hue is written onto
-the card inline, so the stylesheet never declared the token — which
-`tests/names.js` caught in a tenth of a second, the same check that
-would have saved `days/` its `var(--ink-on)` at 1.74:1. It is `--gl-h`
-now, with a default on `.gl-wc` so the token exists in the sheet, which
-is `.wo-p`'s own answer. Every class this screen owns is `gl-`
-prefixed, because a collision here does not throw, it REPLACES.
+**Removing a note ASKS, and there is no bin.** The log's rule rather
+than the schedule's: a bin protects a record you cannot rebuild, and
+everything else in this app that deletes without one is a thing you can
+write again in a second. A note is the opposite — it is the only record
+here that is only ever what you typed — so the ask stands in for the
+bin. Both halves are asserted, because "it asks" passes on a sheet
+whose button does nothing.
+
+### Three faults the suite found, and two were in the checks
+
+**A CHECK THAT MEASURED ONE COLOUR SEVEN TIMES.** The clause-contrast
+loop set the hue on a LINE, where `scNoteCleanOne` drops it — because a
+colour only means anything on a heading. All seven readings came back
+red and the check could not have failed. It finds the heading by `h`
+now, and **the number of DISTINCT readings is asserted beside the
+floor**, which is the only version of that check worth running.
+
+**A ROW FOUND BY NAME.** The tag check reached for "the Train row",
+and the week draws one day whose identity follows the clock — so it
+crashed on the day Train was not on the open card. It tags whichever
+block is actually drawn now. This file has recorded that shape six
+times and it is always the same fix: measure something the hour cannot
+reach.
+
+**`gl` outlived the rename.** Two lines still read `tal || fr || gl`
+after the view variable became `nt`; `node --check` passes on it
+happily because it is a runtime `ReferenceError`, and the symptom was
+the week staying on screen under the Notes tab. Found by a render
+rather than by reading the diff, which is the whole argument for
+opening a screen other than the one you edited.
 
 ## Edit arms one press
 

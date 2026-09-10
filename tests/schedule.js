@@ -2670,7 +2670,7 @@ const SAID = [
      which is what it is about, rather than at the end. */
   ok('and each one is labelled, in the order they were chosen',
     await page.$$eval('.tab span:last-child',
-      (e) => e.map((x) => x.textContent).join(' ')) === 'Week Today Goals Friends');
+      (e) => e.map((x) => x.textContent).join(' ')) === 'Week Today Notes Friends');
 
   /* The ground is a gradient the palette can reach, which on the
      shipped palette resolves to the flat white page it has always been.
@@ -5228,19 +5228,19 @@ const SAID = [
   ok('...and pressing it again cancels rather than trapping you',
     off.pressed === 'false' && off.pencils === 0, off);
 
-  /* IT IS THE WEEK'S CONTROL. There are no blocks on Today, Goals or
+  /* IT IS THE WEEK'S CONTROL. There are no blocks on Today, Notes or
      Friends, so a control offering to edit one is a control that
      cannot do anything. Measured as the BOX, which is the seventh time
      in this app that reading the attribute would have missed it. */
   const edViews = {};
-  for (const v of ['tally', 'goals', 'friends', 'list']) {
+  for (const v of ['tally', 'notes', 'friends', 'list']) {
     await page.evaluate((vv) => document.querySelector(`.tab[data-view="${vv}"]`).click(), v);
     await page.waitForTimeout(340);
     edViews[v] = await page.evaluate(() =>
       document.getElementById('scHdEd').getBoundingClientRect().width > 0);
   }
   ok('the edit control is drawn on the week and nowhere else',
-    edViews.list && !edViews.tally && !edViews.goals && !edViews.friends, edViews);
+    edViews.list && !edViews.tally && !edViews.notes && !edViews.friends, edViews);
 
   /* AND LEAVING THE WEEK PUTS IT AWAY. Arming, walking off and coming
      back must not find the week still armed — that is a decision the
@@ -12963,722 +12963,564 @@ const SAID = [
 
 
   /* ══════════════════════════════════════════════════════════════
-     GOALS
+     NOTES
 
-     The one screen that says what any of the rest of it is FOR, and
-     the only new TAB this app has grown. Everything here fails
-     silently: a dose that ignores the window, a block that forgets
-     which goal it came from, an amber tag a shade off the danger red,
-     a record that repairs itself in memory and loses it on the next
-     write. Three of those four have shipped in this app before.
+     The tab where Goals was, and the only screen in this app you
+     WRITE rather than tick. Everything below fails silently: a mark
+     that paints under the wrong words, a repair held in memory, a
+     heading whose clause is a rounding error above the contrast bar,
+     a block pointing at a note that is gone, and — the one that
+     matters most — a note leaving the phone.
      ══════════════════════════════════════════════════════════════ */
   {
-    console.log('\n── goals ──');
-    const gctx = await browser.newContext({ ...PHONE });
-    const gp = await gctx.newPage();
-    const gerrs = [];
-    gp.on('pageerror', (e) => gerrs.push(String(e)));
-    gp.on('console', (m) => { if (m.type() === 'error') gerrs.push('console: ' + m.text()); });
-    /* EVERY REQUEST THIS PAGE MAKES IS COUNTED. The goals screen is
-       drawn, pressed, added to and archived below, and not one of
-       those may leave the origin — a goal is further down the road
-       "a count may leave and a list may not" was written about than
-       anything else on the record. */
-    const gout = [];
-    gp.on('request', (r) => { if (!r.url().startsWith(BASE)) gout.push(r.url()); });
-    await gp.addInitScript(() => {
-      ['sched.tour.v1', 'sched.hint2.v1'].forEach((k) => {
-        if (!localStorage.getItem(k)) localStorage.setItem(k, '1');
-      });
-      if (!localStorage.getItem('sched.net.v1')) {
-        localStorage.setItem('sched.net.v1', JSON.stringify({ on: false, url: '', code: '' }));
-      }
-    });
-    await gp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
-    await gp.waitForTimeout(520);
+    const nctx = await browser.newContext(PHONE);
+    const npage = await nctx.newPage();
+    const nerrs = [];
+    npage.on('pageerror', (e) => nerrs.push(String(e)));
+    npage.on('console', (m) => { if (m.type() === 'error') nerrs.push(m.text()); });
+    /* Every request this page makes, counted. The whole friends split
+       exists so this number can be held to the origin, and a note is
+       further down the road that "a count may leave and a list may
+       not" was written about than anything else on the record. */
+    const nasked = [];
+    npage.on('request', (r) => nasked.push(r.url()));
 
-    /* ── IT IS A TAB, AND THE BAR TOOK IT WITHOUT CLIPPING ──
-       Four stop labels came to 372px against the 358 a 390px phone
-       has, which is what sent this to the bar: .tab is flex:1 and
-       simply divides. Asserted as the LABEL not being clipped rather
-       than as a width, because `text-overflow: ellipsis` is what a
-       too-narrow tab actually does and it looks deliberate. */
-    const bar = await gp.evaluate(() => {
-      const t = [...document.querySelectorAll('.tab[data-view]')];
+    await npage.addInitScript((wk) => {
+      if (!localStorage.getItem('sched.v1')) localStorage.setItem('sched.v1', JSON.stringify(wk));
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1',
+          JSON.stringify({ on: false, url: '', code: '' }));
+      }
+      if (!localStorage.getItem('sched.tour.v1')) {
+        localStorage.setItem('sched.tour.v1', '1');
+        localStorage.setItem('sched.hint2.v1', '1');
+      }
+      localStorage.setItem('sched.view.v1', 'list');
+      /* A note whose lines carry every case at once: two sections in
+         two hues, marked and unmarked lines in each, and a line above
+         every heading which therefore has no section and no colour. */
+      if (!localStorage.getItem('sched.note.v1')) {
+        localStorage.setItem('sched.note.v1', JSON.stringify({ list: [
+          { id: 'nA', t: 'Energy delegation', u: 1756900000000, l: [
+            { i: 'l0', h: 0, c: '', x: 'Before any heading', y: '', m: 0 },
+            { i: 'l1', h: 1, c: 'red', x: 'Negative', y: 'what takes away', m: 0 },
+            { i: 'l2', h: 0, c: '', x: 'YouTube entertainment', y: '', m: 0 },
+            { i: 'l3', h: 0, c: '', x: 'Conversations that do not serve me', y: '', m: 1 },
+            { i: 'l4', h: 1, c: 'teal', x: 'Positive', y: 'what feeds me', m: 0 },
+            { i: 'l5', h: 0, c: '', x: 'Morning walks', y: '', m: 0 },
+            { i: 'l6', h: 0, c: '', x: 'Fasting till the afternoon', y: '', m: 1 } ] },
+          { id: 'nB', t: 'Trading rules', u: 1756800000000, l: [
+            { i: 'm1', h: 1, c: 'amber', x: 'Entries', y: 'what I may take', m: 0 },
+            { i: 'm2', h: 0, c: '', x: 'Only the setup you wrote down', y: '', m: 1 } ] }
+        ] }));
+      }
+    }, WEEK);
+    await npage.route(`${BASE}/schedule/nofriends/**`, (route) => route.fulfill({
+      status: 200, contentType: 'application/json', body: '{"ok":true}' }));
+    await npage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await npage.waitForTimeout(500);
+
+    console.log('\n── notes ──');
+
+    const toNotes = async (page) => {
+      await page.evaluate(() => document.querySelector('.tab[data-view="notes"]').click());
+      await page.waitForTimeout(340);
+    };
+
+    /* ── EXACTLY ONE SECTION IS DRAWN, MEASURED AS THE BOX ──
+       `[hidden]` has to be said out loud once a thing takes a display,
+       and reading the attribute is what missed that six times running.
+       Friends is left out of the loop on purpose: pressing it CLAIMS a
+       code, which is the one request this page is allowed to make and
+       would fail the count this whole section is built around. */
+    const drawn = (id) => {
+      const e = document.getElementById(id);
+      const r = e.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    };
+    const nboxes = {};
+    for (const v of ['notes', 'tally', 'list']) {
+      await npage.evaluate((vv) => document.querySelector(`.tab[data-view="${vv}"]`).click(), v);
+      await npage.waitForTimeout(320);
+      nboxes[v] = await npage.evaluate((d) => {
+        const f = new Function('id', 'return (' + d + ')(id)');
+        return ['scWeek', 'scTally', 'scNotes', 'scFriends'].filter(f);
+      }, drawn.toString());
+    }
+    ok('Notes is a section of its own, and exactly one is ever drawn',
+      nboxes.notes.length === 1 && nboxes.notes[0] === 'scNotes'
+      && nboxes.tally.length === 1 && nboxes.list.length === 1, nboxes);
+
+    /* ── THE LIST ── */
+    await toNotes(npage);
+    const list = await npage.evaluate(() => ({
+      cards: [...document.querySelectorAll('.nt-card')].map((c) => ({
+        t: c.querySelector('.nt-t').textContent,
+        meta: c.querySelector('.nt-meta').textContent,
+        dots: [...c.querySelectorAll('.nt-dots i')].map((i) => getComputedStyle(i).backgroundColor)
+      })),
+      head: document.getElementById('scHdDay').textContent
+    }));
+    ok('the tab is Notes and it lists them, newest first',
+      list.head === 'Notes' && list.cards.length === 2
+      && list.cards[0].t === 'Energy delegation'
+      && list.cards[1].t === 'Trading rules', list);
+    /* Lines are the ones you WROTE, so a heading is not one of them —
+       "8 lines" on a note with six sentences and two headings is a
+       figure about your formatting. */
+    ok('...and a card counts its lines and its marks, headings excluded',
+      /^5 lines · 2 marked · /.test(list.cards[0].meta)
+      && /^1 line · 1 marked · /.test(list.cards[1].meta), list.cards.map((c) => c.meta));
+    /* ONE DOT PER SECTION COLOUR, and they are that note's own — a
+       count of them would be a figure about formatting too. */
+    ok('...and its dots are one per section colour',
+      list.cards[0].dots.length === 2 && list.cards[1].dots.length === 1
+      && list.cards[0].dots[0] !== list.cards[0].dots[1], list.cards.map((c) => c.dots));
+
+    /* ── ONE NOTE ── */
+    await npage.click('.nt-card');
+    await npage.waitForTimeout(320);
+    const one = await npage.evaluate(() => {
+      const rows = [...document.querySelectorAll('.nt-row')];
       return {
-        names: t.map((x) => x.querySelector('span').textContent),
-        widths: t.map((x) => Math.round(x.getBoundingClientRect().width)),
-        clipped: t.map((x) => {
-          const s = x.querySelector('span');
-          return s.scrollWidth > s.clientWidth + 1;
-        }),
+        title: document.querySelector('.nt-title').value,
+        heads: rows.filter((r) => r.classList.contains('is-head')).map((r) => ({
+          w: r.querySelector('.nt-hw').value,
+          c: r.querySelector('.nt-hc').value,
+          hue: getComputedStyle(r.querySelector('.nt-hc')).color
+        })),
+        lines: rows.filter((r) => !r.classList.contains('is-head'))
+          .map((r) => r.querySelector('.nt-in').value),
+        marks: [...document.querySelectorAll('.nt-mir span.is-mk')].map((s) => s.textContent),
+        bullets: rows.filter((r) => !r.classList.contains('is-head'))
+          .map((r) => getComputedStyle(r, '::before').content)
       };
     });
-    ok('goals is a fourth tab in the bar',
-      bar.names.join(',') === 'Week,Today,Goals,Friends', bar.names);
-    ok('...and no label is clipped to fit',
-      bar.clipped.every((c) => !c) && bar.widths.every((w) => w >= 44), bar);
+    ok('a note draws its title, its headings and its lines',
+      one.title === 'Energy delegation' && one.heads.length === 2
+      && one.lines.length === 5, one);
 
-    /* ── ONE SECTION PER VIEW, MEASURED AS A BOX ──
-       `[hidden]` stops working the moment a section takes a display,
-       and the attribute goes on being set correctly while it does.
-       That has cost this app the rail, the page dots, the toast, the
-       intro and the objectives row, so the property is never what is
-       read. */
-    /* ── THE FRIENDS TAB IS PRESSED LAST, AND THE COUNT IS TAKEN
-           BEFORE IT ──
-       Arriving at Friends CLAIMS A CODE — that is the app working, and
-       it is why the friends assertions live in a context of their own.
-       Pressing it inside a section whose whole claim is "nothing
-       leaves" makes the check fail on the one request the app is
-       supposed to make. The view-box loop still visits all four,
-       because "exactly one section is drawn" is vacuous if it skips
-       one; what moves is where the tally of off-origin requests is
-       read. */
-    const boxes = {};
-    for (const v of ['list', 'tally', 'goals', 'friends']) {
-      await gp.evaluate((vv) => {
-        document.querySelector(`.tab[data-view="${vv}"]`).click();
-      }, v);
-      await gp.waitForTimeout(360);
-      boxes[v] = await gp.evaluate(() => {
-        const drawn = (id) => {
-          const r = document.getElementById(id).getBoundingClientRect();
-          return r.width > 0 && r.height > 0;
-        };
-        return ['scWeek', 'scTally', 'scGoals', 'scFriends'].filter(drawn);
-      });
-    }
-    ok('exactly one section is drawn on each of the four views',
-      Object.keys(boxes).every((v) => boxes[v].length === 1), boxes);
-    ok('...and goals is the one drawn on the goals tab',
-      boxes.goals[0] === 'scGoals', boxes.goals);
+    /* ── THE HEADING IS TWO THINGS, AND ONLY THE CLAUSE IS COLOURED ──
+       "Negative — what takes away from me" is a NAME and an
+       explanation. Two fields, two values, nothing parsed out of one
+       string — and the NAME stays ink, because a coloured label over
+       coloured marks is the section said twice. */
+    ok('...its heading is a name and a clause, held apart',
+      one.heads[0].w === 'Negative' && one.heads[0].c === 'what takes away'
+      && one.heads[1].w === 'Positive' && one.heads[1].c === 'what feeds me', one.heads);
+    ok('...and the two clauses wear their own section hues, not one colour',
+      one.heads[0].hue !== one.heads[1].hue, one.heads.map((h) => h.hue));
 
-    /* THE HEAD NAMES THE SCREEN. It was a two-way ternary, so the day
-       this landed it read "Friends" over the goals pane. */
-    await gp.evaluate(() => document.querySelector('.tab[data-view="goals"]').click());
-    await gp.waitForTimeout(340);
-    ok('the head names the screen you are on',
-      (await gp.$eval('#scHdDay', (e) => e.textContent)) === 'Goals');
+    /* ── NO BULLET, WHICH IS A DECISION AND NOT AN OMISSION ──
+       Chosen over a dash, a dot, a ring, a square, a caret, a checkbox
+       and the row's own glyph: a note is sentences, and a marker in
+       front of every one of them is a column of furniture down a
+       screen whose job is the words. Asserted, because a bullet is one
+       line of CSS away from coming back. */
+    ok('...and no line draws a bullet',
+      one.bullets.every((c) => c === 'none' || c === 'normal' || c === '""'), one.bullets);
 
-    /* ── THE EMPTY SCREEN SAYS WHAT IT IS FOR ──
-       A first open with nothing on it is the one visit this screen is
-       guaranteed to get, and a bare "+ New goal" says add something
-       without saying what for. */
-    const empty = await gp.$eval('#scGoalPane', (e) => e.textContent);
-    ok('an empty goals screen explains itself and offers one thing',
-      /turns into blocks on your week/.test(empty)
-      && (await gp.$$('.gl-new')).length === 1, empty.slice(0, 80));
+    /* ── THE MARK IS A SWIPE AND IT IS FITTED TO THE WORDS ──
+       A textarea's own background fills its BOX, so a wash written on
+       the field would run the width of the column and fade at a place
+       with nothing to do with where the sentence ends. The mirror is
+       what makes it fit — and the two have to wrap identically, which
+       is what the width comparison below is really checking. */
+    ok('...only the marked lines are marked, and they are the right ones',
+      one.marks.length === 2
+      && one.marks[0] === 'Conversations that do not serve me'
+      && one.marks[1] === 'Fasting till the afternoon', one.marks);
 
-    /* ── THE DOSE ──
-       Days a week move FIRST and the length holds until it reaches the
-       suggestion's own floor. Driven through the real solver at every
-       window the app offers, on Backtest — full 60, floor 20.
-
-       Asserted as a LADDER rather than as one figure: "there is a
-       dose" passes on a constant, and the whole claim is that the
-       window changes it. Both halves are held — days never rise as
-       the window lengthens, and no length ever goes under the floor. */
-    const ladder = await gp.evaluate(() => {
-      const win = [6, 13, 26, 39, 52, 78];
-      const rows = win.map((wk) => {
-        const s = { n: 'Backtest', full: 60, floor: 20 };
-        const target = Math.max(s.floor * 2, s.full * 5 * Math.min(1, 8 / wk));
-        let len = s.full, days = Math.round(target / len);
-        while (days < 2 && len > s.floor) { len = Math.max(s.floor, len - 5); days = Math.round(target / len); }
-        return { wk, len, days: Math.max(1, Math.min(6, days)) };
-      });
-      return rows;
-    });
-    ok('a longer window never buys MORE days a week',
-      ladder.every((r, i) => i === 0 || r.days <= ladder[i - 1].days), ladder);
-    ok('...and no length is ever taken under the floor',
-      ladder.every((r) => r.len >= 20), ladder);
-    ok('...and the window genuinely moves it, rather than a constant',
-      new Set(ladder.map((r) => r.days + 'x' + r.len)).size >= 3, ladder);
-
-    /* ── MAKE ONE, THE WAY A PERSON DOES ── */
-    await gp.click('.gl-new');
-    await gp.waitForTimeout(380);
-    await gp.fill('.sheet .field', 'Get consistently profitable trading');
-    await gp.evaluate(() => {
-      [...document.querySelectorAll('.gl-rung')].find((b) => b.textContent === 'Trading').click();
-    });
-    await gp.waitForTimeout(260);
-    /* THE WINDOW CHANGES THE DOSE AND NOT THE LIST, and seeing that
-       happen is what makes it a decision rather than a field. */
-    await gp.evaluate(() => {
-      [...document.querySelectorAll('.gl-rung')].find((b) => b.textContent === '6 weeks').click();
-    });
-    await gp.waitForTimeout(280);
-    const sug6 = await gp.$$eval('.gl-sug', (n) => n.map((x) => x.textContent));
-    await gp.evaluate(() => {
-      [...document.querySelectorAll('.gl-rung')].find((b) => b.textContent === '18 months').click();
-    });
-    await gp.waitForTimeout(280);
-    const sug78 = await gp.$$eval('.gl-sug', (n) => n.map((x) => x.textContent));
-    ok('the same kind proposes the same blocks at either window',
-      sug6.length === sug78.length && sug6.length === 4
-      && sug6[0].split('·')[0] === sug78[0].split('·')[0], { sug6, sug78 });
-    ok('...and a longer window proposes a smaller dose',
-      sug6[0] !== sug78[0], { six: sug6[0], eighteen: sug78[0] });
-
-    await gp.evaluate(() => {
-      [...document.querySelectorAll('.gl-rung')].find((b) => b.textContent === '6 months').click();
-    });
-    await gp.waitForTimeout(260);
-    await gp.evaluate(() => {
-      [...document.querySelectorAll('.sheet .btn')].find((b) => b.textContent === 'Create it').click();
-    });
-    await gp.waitForTimeout(460);
-
-    /* ── ONE CARD, NOT A HAND ──
-       A stack behind it says these are ALTERNATIVES, and a process is
-       a set. Asserted as the COUNT, because a fan is two more elements
-       and nothing else about the screen would change. */
-    const deck = await gp.evaluate(() => ({
-      cards: document.querySelectorAll('.gl-wc').length,
-      chips: [...document.querySelectorAll('.gl-chip')].map((c) => c.textContent),
-      name: document.querySelector('.gl-nm').textContent,
-      whys: [...document.querySelectorAll('.gl-w')].map((w) => w.textContent),
-      pat: document.querySelector('.gl-pat svg').innerHTML.length,
-    }));
-    ok('the deck draws exactly one card', deck.cards === 1, deck.cards);
-    ok('...with a chip for every block the goal proposes',
-      deck.chips.length === 4 && deck.chips[0] === 'Backtest', deck.chips);
-    /* TWO LINES OF WHY AND NEVER THREE. One says what the thing does,
-       one says why THIS dose. A third is a paragraph. */
-    /* ── ONE DESCRIPTION ON THE CARD, AND IT IS THE LONG ONE ──
-       The second line said why THIS dose, and it went from here: the
-       dose is printed in figures two lines above it, so a sentence
-       restating "3 days a week" in words was the duplication this
-       project keeps taking back out. It survives on the add sheet,
-       which is where the dose is actually chosen.
-
-       Held to a LENGTH as well as a count, because "one line" passes
-       on the short one it replaced — the whole point of dropping the
-       other was to make room for this to say something. */
-    ok('...and exactly one line of why, never two',
-      deck.whys.length === 1, deck.whys);
-    ok('...and it is long enough to be worth the room it took',
-      deck.whys[0].length >= 150 && /\. /.test(deck.whys[0]), deck.whys[0].length);
-    ok('...and the card carries a drawn pattern', deck.pat > 200, deck.pat);
-
-    /* ── EVERY CARD IS PATTERNED, AND NO TWO ALIKE ──
-       Two patterns with one silhouette is worse than a pattern
-       missing, because the card is then confidently wrong — the ten
-       lift glyphs' rule. Compared across the WHOLE table rather than
-       within one goal, which is how the two that were replaced were
-       caught. */
-    /* Read off the DOM, one kind at a time, because the pattern table
-       is inside the app's IIFE and cannot be called from outside it. */
-    const drawn = [];
-    for (const kind of ['trading', 'training', 'reading', 'skill', 'business',
-      'creating', 'study', 'routine', 'saving']) {
-      await gp.evaluate((k) => {
-        localStorage.setItem('sched.goal.v1', JSON.stringify({
-          live: [{ id: 'gk', n: 'x', k, from: Date.now(),
-            due: Date.now() + 26 * 7 * 864e5, was: 0, ext: 0, asked: 0, on: [] }],
-          done: [],
-        }));
-        localStorage.setItem('sched.view.v1', 'goals');
-      }, kind);
-      await gp.reload({ waitUntil: 'networkidle' });
-      await gp.waitForTimeout(380);
-      await gp.click('.gl-card');
-      await gp.waitForTimeout(260);
-      const n = await gp.$$eval('.gl-chip', (c) => c.length);
-      for (let i = 0; i < n; i++) {
-        await gp.evaluate((j) => document.querySelectorAll('.gl-chip')[j].click(), i);
-        await gp.waitForTimeout(90);
-        drawn.push(await gp.$eval('.gl-pat svg', (s) => s.innerHTML));
-      }
-    }
-    ok('every card in every kind draws a pattern',
-      drawn.length >= 20 && drawn.every((d) => d.length > 200), drawn.length);
-    ok('...and no two patterns anywhere are the same drawing',
-      new Set(drawn).size === drawn.length,
-      { drawn: drawn.length, unique: new Set(drawn).size });
-
-    await gctx.close();
-    /* The friends tab's own claim is the one request allowed here, and
-       it is named rather than counted away: anything else at all is a
-       leak. Console errors are filtered the same way — a claim that
-       cannot reach the worker from this sandbox logs a failed fetch,
-       which is a fact about the network and not about the app. */
-    const stray = gout.filter((u) => !/\/v1\/claim$/.test(u));
-    const threw = gerrs.filter((e) => !/ERR_TUNNEL_CONNECTION_FAILED|ERR_NAME_NOT_RESOLVED/.test(e));
-    ok('nothing threw through any of the goals screen', threw.length === 0, threw);
-    ok('...and nothing left the origin but the friends tab\u2019s own claim',
-      stray.length === 0, stray);
-  }
-
-
-  /* ══════════════════════════════════════════════════════════════
-     GOALS — THE ADD, THE CHECKPOINT AND THE ARCHIVE
-
-     Its own context: the section above ends inside a goal's deck, and
-     a check that leaves the app in a state is a check that breaks the
-     next one. That has caught me three times in this file already.
-     ══════════════════════════════════════════════════════════════ */
-  {
-    console.log('\n── goals: adding, extending, archiving ──');
-    const actx = await browser.newContext({ ...PHONE });
-    const ap = await actx.newPage();
-    const aerrs = [];
-    ap.on('pageerror', (e) => aerrs.push(String(e)));
-    const aout = [];
-    ap.on('request', (r) => { if (!r.url().startsWith(BASE)) aout.push(r.url()); });
-    /* SEEDED ONLY WHEN ABSENT. addInitScript runs on EVERY navigation,
-       and written unconditionally it puts the record back between a
-       test changing it and the reload that test is making. That exact
-       bug cost four hundred lines of chasing once already. */
-    await ap.addInitScript(() => {
-      ['sched.tour.v1', 'sched.hint2.v1'].forEach((k) => {
-        if (!localStorage.getItem(k)) localStorage.setItem(k, '1');
-      });
-      if (!localStorage.getItem('sched.net.v1')) {
-        localStorage.setItem('sched.net.v1', JSON.stringify({ on: false, url: '', code: '' }));
-      }
-      if (!localStorage.getItem('sched.goal.v1')) {
-        localStorage.setItem('sched.goal.v1', JSON.stringify({
-          live: [{ id: 'g1', n: 'Get consistently profitable trading', k: 'trading',
-            from: Date.now() - 60 * 864e5, due: Date.now() + 26 * 7 * 864e5,
-            was: 0, ext: 0, asked: 0, on: [] }],
-          done: [],
-        }));
-      }
-      if (!localStorage.getItem('sched.view.v1')) localStorage.setItem('sched.view.v1', 'goals');
-    });
-    await ap.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
-    await ap.waitForTimeout(520);
-    await ap.click('.gl-card');
-    await ap.waitForTimeout(300);
-
-    const before = await ap.evaluate(() =>
-      JSON.parse(localStorage.getItem('sched.v1')).items.length);
-    await ap.click('.gl-go');
-    await ap.waitForTimeout(420);
-
-    /* ── THE COST OF THE DAY, BEFORE AND AFTER ──
-       The app already knows the hours on a day and nothing else uses
-       the figure. Held to naming a real weekday and two DIFFERENT
-       lengths, because "goes from 3 h to 3 h" is a sentence that
-       renders perfectly and says nothing. */
-    const sheet = await ap.evaluate(() => ({
-      labels: [...document.querySelectorAll('.sheet .label')].map((l) => l.textContent),
-      cost: [...document.querySelectorAll('.sheet .gl-sw')].pop().textContent,
-      go: document.querySelector('.sheet .btn.go').textContent,
-      rungs: [...document.querySelectorAll('.sheet .gl-lad')].map((l) => l.children.length),
-    }));
-    ok('the add sheet asks length, days and time, and nothing else',
-      sheet.labels.join('|') === 'How long|Days a week|When|What it costs', sheet.labels);
-    ok('...and says what the day costs, before and after',
-      /^(Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day goes from .+ to .+\.$/.test(sheet.cost)
-      && sheet.cost.match(/from (.+?) to (.+?)\./)[1] !== sheet.cost.match(/from (.+?) to (.+?)\./)[2],
-      sheet.cost);
-    /* A FIXED BASIS, never `1 1 auto`: a row that does not divide
-       evenly lets its last rung grow across the whole line, which the
-       Mind ladder shipped once. Measured as the widths rather than the
-       declaration, because the rule can be right and the row ragged. */
-    const rag = await ap.evaluate(() => {
-      const l = document.querySelector('.sheet .gl-lad');
-      const w = [...l.children].map((c) => Math.round(c.getBoundingClientRect().width));
-      return { w, spread: Math.max(...w) - Math.min(...w) };
-    });
-    ok('...and no rung stretches to fill a short last row', rag.spread <= 2, rag);
-
-    await ap.click('.sheet .btn.go');
-    await ap.waitForTimeout(600);
-
-    /* ── THE BLOCK CARRIES ITS GOAL ──
-       One field, and it is what lets the goal answer "am I actually
-       doing this". Spread across the week rather than stacked into the
-       front of it: a process you have already failed by Thursday is
-       one nobody keeps. */
-    const made = await ap.evaluate(() => {
-      const st = JSON.parse(localStorage.getItem('sched.v1'));
-      const mine = st.items.filter((i) => i.g === 'g1');
-      return { n: mine.length, days: mine.map((i) => i.d).sort(),
-        names: [...new Set(mine.map((i) => i.n))],
-        starts: [...new Set(mine.map((i) => i.s))], total: st.items.length };
-    });
-    ok('adding a card puts real blocks on the week', made.total > before && made.n >= 2, made);
-    ok('...each one carrying which goal it came from',
-      made.names.length === 1 && made.names[0] === 'Backtest', made.names);
-    ok('...spread across the week rather than stacked at the front',
-      made.days.length < 2 || (made.days[made.days.length - 1] - made.days[0]) >= made.days.length,
-      made.days);
-    ok('...all at one time you already use', made.starts.length === 1, made.starts);
-
-    /* AND IT IS DRAWN ON THE WEEK, which is the whole point — a goal
-       that adds a record nobody can see is a goal that added nothing. */
-    await ap.evaluate(() => document.querySelector('.tab[data-view="list"]').click());
-    await ap.waitForTimeout(420);
-    const onWeek = await ap.evaluate(() => {
-      const st = JSON.parse(localStorage.getItem('sched.v1'));
-      const d = st.items.filter((i) => i.g === 'g1')[0].d;
-      document.querySelector(`.st-d[data-d="${d}"]`).click();
-      return d;
-    });
-    await ap.waitForTimeout(380);
-    ok('...and the block is drawn on the day it landed on',
-      (await ap.$$eval('.row .n', (n) => n.map((x) => x.textContent))).indexOf('Backtest') >= 0,
-      { day: onWeek });
-
-    /* ── TAKING IT OFF TAKES THE BLOCKS ── */
-    await ap.evaluate(() => document.querySelector('.tab[data-view="goals"]').click());
-    await ap.waitForTimeout(380);
-    await ap.click('.gl-card');
-    await ap.waitForTimeout(300);
-    ok('a card already on your week says so rather than offering again',
-      (await ap.$eval('.gl-lab', (e) => e.textContent)) === 'On your week'
-      && (await ap.$$('.gl-off')).length === 1);
-    await ap.click('.gl-off');
-    await ap.waitForTimeout(520);
-    ok('...and taking it off takes its blocks with it',
-      (await ap.evaluate(() =>
-        JSON.parse(localStorage.getItem('sched.v1')).items.filter((i) => i.g === 'g1').length)) === 0);
-
-    /* ── EXTENDED WEARS AMBER, AND ONLY THE TAG DOES ──
-       A deliberate reversal of "colour never says whether", and the
-       colour is amber rather than red because red already means Missed
-       and an extended goal is one you are STILL DOING. Measured on
-       composited pixels, and held apart from --bad in Lab the way this
-       app already holds the six habit hues apart. */
-    await ap.evaluate(() => {
-      [...document.querySelectorAll('.gl-mini')].find((b) => b.textContent === 'Extend').click();
-    });
-    await ap.waitForTimeout(560);
-    const amber = await ap.evaluate(() => {
-      const t = document.querySelector('.gl-tag.is-over');
-      if (!t) return null;
-      const r = t.getBoundingClientRect();
-      return { text: t.textContent, box: { x: r.x, y: r.y, width: r.width, height: r.height } };
-    });
-    ok('extending marks the goal, and the words carry how much',
-      !!amber && /^Extended · \+\d+ months$/.test(amber.text), amber && amber.text);
-
-    if (amber) {
-      const { PNG: PNGg } = require('pngjs');
-      const png = PNGg.sync.read(await ap.screenshot({ clip: amber.box }));
-      const px = [];
-      for (let i = 0; i < png.data.length; i += 4) px.push([png.data[i], png.data[i + 1], png.data[i + 2]]);
-      const tal = {};
-      px.forEach((q) => { const k = q.join(','); tal[k] = (tal[k] || 0) + 1; });
-      const ground = Object.keys(tal).sort((a, b) => tal[b] - tal[a])[0].split(',').map(Number);
-      let worst = 1;
-      px.forEach((q) => { const r = ratio(q, ground); if (r > worst) worst = r; });
-      ok('...and the amber tag clears 4.5:1 on real pixels', worst >= 4.5, worst.toFixed(2));
-      /* THE GROUND IS AMBER, not the flat neutral — "it is a tag"
-         passes on one that never took a colour at all. */
-      ok('...and it is genuinely warm rather than grey',
-        ground[0] - ground[2] > 20, ground);
-      /* DANGER STAYS APART. --bad is the one red in this app and an
-         overrun goal must never be mistaken for it. */
-      const badRgb = await ap.evaluate(() => {
-        const d = document.createElement('i');
-        d.style.color = getComputedStyle(document.documentElement).getPropertyValue('--bad').trim();
-        document.body.appendChild(d);
-        const c = getComputedStyle(d).color; d.remove();
-        return c.match(/[\d.]+/g).slice(0, 3).map(Number);
-      });
-      ok('...and stays well clear of the danger red', deltaE([224, 138, 60], badRgb) >= 12,
-        deltaE([224, 138, 60], badRgb).toFixed(1));
-    }
-
-    /* ONLY THE TAG. Not the countdown, not the card's edge, not the
-       title — one mark, one claim, or an overrunning goal is the
-       loudest thing on the screen. */
-    /* ── AND THE OVERRUN IS THE ONLY PLACE THAT COLOUR APPEARS ──
-       One mark, one claim: not the countdown, not the card's edge, not
-       the title, or an overrunning goal is the loudest thing on the
-       screen. The CARD is excluded, and that is the honest scope
-       rather than a relaxation — it deliberately carries a hue of its
-       own, which is the workout cards' argument that a colour saying
-       WHICH must be the same at every angle of the wheel. The claim
-       here is about the app's chrome.
-
-       AND THE COLOUR IS READ THROUGH A PARSER, NEVER A DIGIT MATCH.
-       Chromium serialises a color-mix result as `color(srgb 0.95 0.82
-       0.69)` — three floats in 0..1, not three bytes — so a bare digit
-       match reads a warm label as near-black, and this check found
-       NOTHING. It failed rather than passing only because the count is
-       asserted beside the state. This repo met the same serialisation
-       once before, on a box-shadow a string check could not see. */
-    const spread = await ap.evaluate(() => {
-      const rgb = (str) => {
-        const m = str.match(/[\d.]+/g);
-        if (!m) return null;
-        const v = m.slice(0, 3).map(Number);
-        return /color\(/.test(str) ? v.map((x) => Math.round(x * 255)) : v;
+    const swipe = await npage.evaluate(() => {
+      const rows = [...document.querySelectorAll('.nt-row')]
+        .filter((r) => !r.classList.contains('is-head'));
+      const hit = rows.find((r) => r.querySelector('.nt-mir span.is-mk'));
+      const sp = hit.querySelector('span.is-mk');
+      const f = hit.querySelector('.nt-in');
+      const cs = getComputedStyle(sp), fs = getComputedStyle(f), ms = getComputedStyle(hit.querySelector('.nt-mir'));
+      return {
+        bg: cs.backgroundImage,
+        fieldBg: fs.backgroundImage + ' ' + fs.backgroundColor,
+        w: Math.round(sp.getBoundingClientRect().width),
+        rowW: Math.round(hit.getBoundingClientRect().width),
+        /* Every property that decides wrapping, on both. One of them
+           different and the wash lands under the wrong words on the
+           first line long enough to wrap. */
+        same: ['fontSize', 'fontFamily', 'lineHeight', 'letterSpacing',
+               'paddingLeft', 'paddingRight', 'whiteSpace', 'overflowWrap']
+          .filter((k) => ms[k] !== fs[k])
       };
-      const warm = [];
-      document.querySelectorAll('#scGoals *').forEach((el) => {
-        if (el.closest('.gl-wc')) return;
-        const c = rgb(getComputedStyle(el).color);
-        if (!c) return;
-        if (c[0] - c[2] > 40 && c[0] > 120) warm.push(el.className || el.tagName);
-      });
-      return warm;
     });
-    ok('...and it is the ONLY warm thing in the screen\u2019s chrome',
-      spread.length === 1 && /is-over/.test(String(spread[0])), spread);
+    ok('...the mark is a gradient that fades, never a flat fill',
+      /linear-gradient/.test(swipe.bg) && /transparent|rgba\(0, 0, 0, 0\)/.test(swipe.bg),
+      swipe.bg);
+    /* FITTED TO THE WORDS: a wash on the field would be the full
+       column. This line is well short of it and must measure so. */
+    ok('...and it is the width of the words, not of the column',
+      swipe.w > 40 && swipe.w < swipe.rowW - 20, swipe);
+    ok('...the field itself draws no ground, or there would be two',
+      /none/.test(swipe.fieldBg) && /rgba\(0, 0, 0, 0\)/.test(swipe.fieldBg), swipe.fieldBg);
+    ok('...and the mirror wraps exactly as the field does',
+      swipe.same.length === 0, swipe.same);
 
-    /* ── DONE AND DROPPED BOTH ARCHIVE, AND THE BLOCKS STAY ──
-       The goal ends and the process is what is left, which is most of
-       the point of the feature. */
-    await ap.evaluate(() => {
-      [...document.querySelectorAll('.gl-mini')].find((b) => b.textContent === 'Mark it done').click();
+    /* A line above every heading has no section, so it has no colour
+       to be marked IN — and a colour nobody chose is the wheel
+       arriving through the back door. The Mark button says so by
+       refusing rather than by not being there: a control that comes
+       and goes as you move down a note is worse than one plainly not
+       available yet. */
+    const noSect = await npage.evaluate(async () => {
+      const f = document.querySelectorAll('.nt-row:not(.is-head) .nt-in')[0];
+      f.focus();
+      await new Promise((z) => setTimeout(z, 200));
+      const b = document.querySelector('.nt-mkb');
+      return { text: f.value, there: !!b, off: b ? b.disabled : null };
     });
-    await ap.waitForTimeout(560);
-    const arch = await ap.evaluate(() => {
-      const raw = JSON.parse(localStorage.getItem('sched.goal.v1'));
-      return { live: raw.live.length, done: raw.done.length, ok: raw.done[0] && raw.done[0].ok };
-    });
-    ok('marking a goal done moves it to the archive',
-      arch.live === 0 && arch.done === 1 && arch.ok === true, arch);
-    ok('...and the archive is folded shut until you open it',
-      (await ap.$eval('.gl-fold', (e) => e.getAttribute('aria-expanded'))) === 'false');
-    await ap.click('.gl-fold');
-    await ap.waitForTimeout(300);
-    ok('...and opening it shows what the goal was',
-      (await ap.$$eval('.gl-arch-b .gl-card', (n) => n.length)) === 1
-      && (await ap.$eval('.gl-arch-b .gl-tag', (e) => e.textContent)) === 'Done');
+    ok('a line above every heading can be typed but not marked',
+      noSect.text === 'Before any heading' && noSect.there && noSect.off === true, noSect);
 
-    await actx.close();
-    ok('nothing threw through the add and the archive', aerrs.length === 0, aerrs);
-    ok('...and none of it left the origin', aout.length === 0, aout);
-  }
-
-  /* ══════════════════════════════════════════════════════════════
-     GOALS — THE RECORD
-     ══════════════════════════════════════════════════════════════ */
-  {
-    console.log('\n── goals: the record ──');
-    const rctx = await browser.newContext({ ...PHONE });
-    const rp = await rctx.newPage();
-    const rerrs = [];
-    rp.on('pageerror', (e) => rerrs.push(String(e)));
-    await rp.addInitScript(() => {
-      ['sched.tour.v1', 'sched.hint2.v1'].forEach((k) => {
-        if (!localStorage.getItem(k)) localStorage.setItem(k, '1');
-      });
-      if (!localStorage.getItem('sched.net.v1')) {
-        localStorage.setItem('sched.net.v1', JSON.stringify({ on: false, url: '', code: '' }));
+    /* ── THE CONTROLS SIT ON THE LINE THAT HAS FOCUS ──
+       One strip, moved — `.row-ed`'s own pattern. Asserted as WHICH
+       row it follows, because "the tools exist" passes on a toolbar
+       that is always up, which is the thing this is not. */
+    const follows = await npage.evaluate(async () => {
+      const rows = [...document.querySelectorAll('.nt-row')];
+      const out = [];
+      for (const i of [2, 5]) {
+        rows[i].querySelector('textarea, input').focus();
+        await new Promise((z) => setTimeout(z, 180));
+        const t = document.querySelector('.nt-tools');
+        out.push({ after: t.previousElementSibling === rows[i], hidden: t.hidden });
       }
+      return out;
     });
-    await rp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
-    await rp.waitForTimeout(400);
+    ok('the controls follow the line that has focus, rather than standing still',
+      follows.every((f) => f.after && !f.hidden), follows);
 
-    /* ── A DAMAGED ENTRY IS DROPPED AND THE RECORD IS NOT ──
-       Asserted as the GOOD ones surviving rather than as the bad one
-       being refused: rejecting the whole object passes any check
-       written the other way round. */
-    await rp.evaluate(() => {
-      localStorage.setItem('sched.goal.v1', JSON.stringify({
-        live: [
-          { id: 'ga', n: 'A real one', k: 'reading', from: Date.now(),
-            due: Date.now() + 26 * 7 * 864e5, was: 0, ext: 0, asked: 0, on: [] },
-          { id: 'gb', n: 'broken', k: 'nonesuch', from: 0, due: 0 },
-          null,
-          { id: 'gc', n: 'Another real one', k: 'saving', from: Date.now(),
-            due: Date.now() + 52 * 7 * 864e5, was: 0, ext: 0, asked: 0,
-            on: [{ si: 99, len: 30, days: 3, time: 1080 },
-                 { si: 0, len: 20, days: 1, time: 1200 }] },
-        ],
-        done: [],
-      }));
-      localStorage.setItem('sched.view.v1', 'goals');
+    /* On a HEADING the strip offers colours and no mark; on a LINE it
+       offers a mark and no colours. A line's mark takes its section's
+       hue, which is the whole of what stopped this screen having a
+       coloured bar on every row. */
+    const strips = await npage.evaluate(async () => {
+      const rows = [...document.querySelectorAll('.nt-row')];
+      const read = async (i) => {
+        rows[i].querySelector('textarea, input').focus();
+        await new Promise((z) => setTimeout(z, 180));
+        const t = document.querySelector('.nt-tools');
+        return { sw: t.querySelectorAll('.nt-c').length, mk: t.querySelectorAll('.nt-mkb').length };
+      };
+      return { head: await read(1), line: await read(3) };
     });
-    await rp.reload({ waitUntil: 'networkidle' });
-    await rp.waitForTimeout(460);
-    const kept = await rp.evaluate(() =>
-      JSON.parse(localStorage.getItem('sched.goal.v1')).live.map((g) => g.n));
-    ok('a damaged goal is dropped and the rest of the record survives',
-      kept.length === 2 && kept[0] === 'A real one' && kept[1] === 'Another real one', kept);
-    /* A component naming a suggestion this build no longer has is
-       dropped and the rest of the goal survives — scWorkoutsOf's rule. */
-    const comps = await rp.evaluate(() =>
-      JSON.parse(localStorage.getItem('sched.goal.v1')).live[1].on.map((x) => x.si));
-    ok('...and a block this build no longer has costs that block alone',
-      comps.length === 1 && comps[0] === 0, comps);
+    ok('a heading is offered colours and a line is offered a mark, never both',
+      strips.head.sw === 7 && strips.head.mk === 0
+      && strips.line.sw === 0 && strips.line.mk === 1, strips);
 
-    /* ── AND THE REPAIR IS WRITTEN BACK ──
-       A repair held only in memory is redone every boot and lost the
-       moment anything else writes the key. That hole has shipped three
-       times in this app — block ids, the summed workout estimate, and
-       Mind's unknown kind — so it is measured across a REAL reload
-       rather than read off the object in memory. */
-    await rp.reload({ waitUntil: 'networkidle' });
-    await rp.waitForTimeout(400);
-    const again = await rp.evaluate(() =>
-      JSON.parse(localStorage.getItem('sched.goal.v1')).live.map((g) => g.n));
-    ok('...and the repair is saved, not redone on every open',
-      again.length === 2 && again.join('|') === kept.join('|'), again);
-
-    /* ── A STORED VIEW HAS TO FALL THROUGH ──
-       sched.view.v1 outlives the code that wrote it, so a value naming
-       a view this build no longer has must mean the week rather than a
-       bar over nothing. The rule 'ring' already established. */
-    await rp.evaluate(() => localStorage.setItem('sched.view.v1', 'nonesuch'));
-    await rp.reload({ waitUntil: 'networkidle' });
-    await rp.waitForTimeout(420);
-    ok('a stored view this build has never heard of falls through to the week',
-      await rp.evaluate(() => {
-        const r = document.getElementById('scWeek').getBoundingClientRect();
-        return r.width > 0 && r.height > 0;
-      }));
-
-    /* ── THREE LIVE, AND THE APP REFUSES A FOURTH ──
-       Not a suggestion. A goals screen with nine things on it is a
-       wish list, and this repository has already deleted one of those.
-       Both directions, because a cap that only ever refuses is
-       indistinguishable from a screen that cannot add at all. */
-    await rp.evaluate(() => {
-      const g = (i, k) => ({ id: 'c' + i, n: 'Goal ' + i, k, from: Date.now(),
-        due: Date.now() + 26 * 7 * 864e5, was: 0, ext: 0, asked: 0, on: [] });
-      localStorage.setItem('sched.goal.v1', JSON.stringify({
-        live: [g(1, 'reading'), g(2, 'saving')], done: [] }));
-      localStorage.setItem('sched.view.v1', 'goals');
+    /* ── RETURN MAKES A LINE, BACKSPACE TAKES ONE AWAY ──
+       Which is the whole reason there is no per-row furniture: a
+       delete control on every line is a column of controls down a
+       screen whose job is the words. Both directions, because a build
+       that only splits fills the note with lines you cannot remove. */
+    const typed = await npage.evaluate(async () => {
+      const rows = [...document.querySelectorAll('.nt-row:not(.is-head)')];
+      const f = rows[1].querySelector('.nt-in');
+      f.focus();
+      f.setSelectionRange(7, 7);
+      f.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+      await new Promise((z) => setTimeout(z, 260));
+      return JSON.parse(localStorage.getItem('sched.note.v1')).list
+        .find((n) => n.id === 'nA').l.map((L) => L.x);
     });
-    await rp.reload({ waitUntil: 'networkidle' });
-    await rp.waitForTimeout(440);
-    ok('two live goals still offer a third', (await rp.$$('.gl-new')).length === 1);
-    await rp.evaluate(() => {
-      const raw = JSON.parse(localStorage.getItem('sched.goal.v1'));
-      raw.live.push({ id: 'c3', n: 'Goal 3', k: 'study', from: Date.now(),
-        due: Date.now() + 26 * 7 * 864e5, was: 0, ext: 0, asked: 0, on: [] });
-      localStorage.setItem('sched.goal.v1', JSON.stringify(raw));
-    });
-    await rp.reload({ waitUntil: 'networkidle' });
-    await rp.waitForTimeout(440);
-    ok('...and three does not, and says why',
-      (await rp.$$('.gl-new')).length === 0
-      && /wish list/.test(await rp.$eval('#scGoalPane', (e) => e.textContent)));
+    ok('return splits the line at the caret',
+      typed.indexOf('YouTube') === 2 && typed[2] === 'YouTube'
+      && typed[3] === ' entertainment', typed);
 
-    /* ── THE CHECKPOINT ASKS ONCE ──
-       The date is a checkpoint, not an ending: nothing expires on its
-       own, and the only thing that ends a goal is you saying so. Held
-       to asking ONCE, because a sheet that comes back on every render
-       is one you cannot get past. */
-    await rp.evaluate(() => {
-      localStorage.setItem('sched.goal.v1', JSON.stringify({
-        live: [{ id: 'gd', n: 'Due today', k: 'reading', from: Date.now() - 200 * 864e5,
-          due: Date.now() - 864e5, was: 0, ext: 0, asked: 0, on: [] }],
-        done: [],
-      }));
-      localStorage.setItem('sched.view.v1', 'goals');
+    const merged = await npage.evaluate(async () => {
+      const rows = [...document.querySelectorAll('.nt-row:not(.is-head)')];
+      const f = rows[2].querySelector('.nt-in');
+      f.focus();
+      f.setSelectionRange(0, 0);
+      f.dispatchEvent(new KeyboardEvent('keydown', { key: 'Backspace', bubbles: true, cancelable: true }));
+      await new Promise((z) => setTimeout(z, 260));
+      return JSON.parse(localStorage.getItem('sched.note.v1')).list
+        .find((n) => n.id === 'nA').l.map((L) => L.x);
     });
-    await rp.reload({ waitUntil: 'networkidle' });
-    await rp.waitForTimeout(560);
-    const asked = await rp.evaluate(() => ({
-      up: !document.getElementById('scSheet').hidden,
-      title: document.getElementById('scSheetTitle').textContent,
-      outs: [...document.querySelectorAll('.sheet .btn')].map((b) => b.textContent),
-    }));
-    ok('a goal past its date asks, rather than expiring',
-      asked.up && asked.title === 'Still on it?', asked);
-    /* THREE ANSWERS, NOT TWO. Without "drop it" the only way out of a
-       goal you have abandoned is to lie and press Done. */
-    ok('...and offers all three answers, including dropping it',
-      asked.outs.length === 3 && /Drop it/.test(asked.outs.join('|')), asked.outs);
-    await rp.keyboard.press('Escape');
-    await rp.waitForTimeout(360);
-    await rp.evaluate(() => document.querySelector('.tab[data-view="list"]').click());
-    await rp.waitForTimeout(300);
-    await rp.evaluate(() => document.querySelector('.tab[data-view="goals"]').click());
-    await rp.waitForTimeout(420);
-    ok('...and it does not ask again on the next visit',
-      await rp.evaluate(() => document.getElementById('scSheet').hidden));
+    ok('...and backspace at the head of one joins it back on',
+      merged[2] === 'YouTube entertainment' && merged.length === typed.length - 1, merged);
 
-    /* ── HOW YOU ARE DOING NEVER LEAVES THE PHONE ──
+    /* ── THE PLUS MAKES A NOTE, AND ONLY ON THIS SCREEN ──
+       The bar holds three tabs and one add control at 390px, which is
+       the whole of what fits — so a second button for notes would be
+       the control that made the row too tight to press. */
+    const added = await npage.evaluate(async () => {
+      document.querySelector('.nt-back').click();
+      await new Promise((z) => setTimeout(z, 260));
+      const was = JSON.parse(localStorage.getItem('sched.note.v1')).list.length;
+      document.getElementById('scAdd').click();
+      await new Promise((z) => setTimeout(z, 320));
+      return {
+        was: was,
+        now: JSON.parse(localStorage.getItem('sched.note.v1')).list.length,
+        onNote: !!document.querySelector('.nt-title'),
+        rows: document.querySelectorAll('.nt-row').length,
+        sheet: !document.getElementById('scSheet').hidden
+      };
+    });
+    ok('the plus makes a note and opens it on an empty line',
+      added.now === added.was + 1 && added.onNote && added.rows === 1
+      && !added.sheet, added);
+
+    /* ── REMOVING ASKS, AND THERE IS NO BIN ──
+       The log's rule rather than the schedule's: a note is the only
+       record here that is only ever what you typed, so the ask stands
+       in for the bin. Both halves, because "it asks" passes on a
+       sheet whose button does nothing. */
+    const gone = await npage.evaluate(async () => {
+      document.querySelector('.nt-rm').click();
+      await new Promise((z) => setTimeout(z, 380));
+      const asked = !document.getElementById('scSheet').hidden;
+      const title = (document.getElementById('scSheetTitle') || {}).textContent;
+      const keep = [...document.querySelectorAll('#scSheetBody .btn')]
+        .find((b) => /Keep/.test(b.textContent));
+      keep.click();
+      await new Promise((z) => setTimeout(z, 380));
+      const kept = JSON.parse(localStorage.getItem('sched.note.v1')).list.length;
+      document.querySelector('.nt-rm').click();
+      await new Promise((z) => setTimeout(z, 380));
+      [...document.querySelectorAll('#scSheetBody .btn')]
+        .find((b) => /Remove/.test(b.textContent)).click();
+      await new Promise((z) => setTimeout(z, 420));
+      return { asked: asked, title: title, kept: kept,
+        left: JSON.parse(localStorage.getItem('sched.note.v1')).list.length,
+        onList: !!document.querySelector('.nt-card') };
+    });
+    ok('removing a note asks first, and Keep it keeps it',
+      gone.asked && /Remove this note/.test(gone.title || '') && gone.kept === 3, gone);
+    ok('...and Remove it removes it and lands you on the list',
+      gone.left === 2 && gone.onList, gone);
+
+    /* ══════════════════════════
+       THE TAG ON THE ROW
+
+       The whole reason Notes is in this app rather than beside it.
+       ══════════════════════════ */
+    /* WHICHEVER BLOCK IS ACTUALLY DRAWN, never one found by name.
+       The week draws ONE day and which day that is follows the clock,
+       so "the Train row" is a fact about the hour rather than about
+       the app — this file has recorded five checks that only passed at
+       certain times and every one of them was this shape. */
+    await npage.evaluate(() => document.querySelector('.tab[data-view="list"]').click());
+    await npage.waitForTimeout(320);
+    const tagged = await npage.evaluate(() => {
+      const r = document.querySelector('.week .rowwrap .row[data-id]');
+      if (!r) throw new Error('no block drawn on the open day');
+      const id = r.dataset.id;
+      const s = JSON.parse(localStorage.getItem('sched.v1'));
+      const it = s.items.find((q) => q.id === id);
+      if (!it) throw new Error('the drawn row is not in the record: ' + id);
+      it.nt = 'nA';
+      localStorage.setItem('sched.v1', JSON.stringify(s));
+      return id;
+    });
+    await npage.reload({ waitUntil: 'networkidle' });
+    await npage.waitForTimeout(520);
+    const tag = await npage.evaluate((id) => {
+      const w = document.querySelector(`.week .rowwrap .row[data-id="${id}"]`);
+      if (!w) throw new Error('the tagged block is no longer drawn: ' + id);
+      const wrap = w.parentElement;
+      const b = wrap.querySelector('.row-note');
+      if (!b) throw new Error('no note tag on a block that names one');
+      const n = w.querySelector('.n');
+      return {
+        text: b.textContent,
+        tag: Math.round(b.getBoundingClientRect().x),
+        name: Math.round(n.getBoundingClientRect().x),
+        /* A SIBLING of the row, never a child: a <button> inside a
+           <button> is invalid and collapses to one press while looking
+           exactly right. */
+        inside: w.contains(b),
+        button: b.tagName,
+        others: wrap.querySelectorAll('.row-note').length
+      };
+    }, tagged);
+    ok('a block that names a note draws that note’s title on the row',
+      tag.text === 'Energy delegation' && tag.button === 'BUTTON', tag);
+    ok('...as a sibling of the row rather than a button inside a button',
+      !tag.inside && tag.others === 1, tag);
+    /* The one alignment on this row anybody reads. It was computed
+       from the grid first and came out 14px short of the name. */
+    ok('...starting exactly where the name does', tag.tag === tag.name, tag);
+
+    const jumped = await npage.evaluate(async (id) => {
+      document.querySelector(`.week .rowwrap .row[data-id="${id}"]`)
+        .parentElement.querySelector('.row-note').click();
+      await new Promise((z) => setTimeout(z, 420));
+      return {
+        title: (document.querySelector('.nt-title') || {}).value,
+        onNotes: !document.getElementById('scNotes').hidden,
+        ticked: document.querySelectorAll('.week .row.is-done').length
+      };
+    }, tagged);
+    /* A JUMP LANDS IN THE NOTE, NOT ON THE LIST. Arriving at this tab
+       clears which note is open — that is the tally panels' own rule —
+       so the jump has to say it is a jump, and a build that forgot
+       would land every press on the list while looking correct. */
+    ok('pressing it lands you in that note rather than on the list',
+      jumped.onNotes && jumped.title === 'Energy delegation', jumped);
+    ok('...and does not tick the block on the way', jumped.ticked === 0, jumped);
+
+    /* ── A DANGLING ID COSTS THE TAG AND NOTHING ELSE ── */
+    const dangle = await npage.evaluate(async (id) => {
+      const s = JSON.parse(localStorage.getItem('sched.v1'));
+      s.items.find((it) => it.id === id).nt = 'nope';
+      localStorage.setItem('sched.v1', JSON.stringify(s));
+      return true;
+    }, tagged);
+    await npage.reload({ waitUntil: 'networkidle' });
+    await npage.waitForTimeout(500);
+    const after = await npage.evaluate((id) => ({
+      row: !!document.querySelector(`.week .rowwrap .row[data-id="${id}"]`),
+      tags: document.querySelectorAll('.week .row-note').length
+    }), tagged);
+    ok('a block naming a note that is gone draws no tag, and keeps its row',
+      after.row && after.tags === 0, { dangle, after });
+
+    /* ── THE STORED SHAPE IS REPAIRED, AND THE REPAIR IS WRITTEN BACK ──
+       The fourth time this hole has been found in this file. A repair
+       held only in memory is redone every boot and lost the moment
+       anything else writes the key — which is how "repaired, not
+       discarded" quietly becomes "discarded on the next write".
+
+       IN ITS OWN CONTEXT, and that is not tidiness. The app flushes
+       what it is holding on `pagehide`, so writing a damaged record
+       into localStorage and reloading has the app write its own
+       in-memory copy straight back over it on the way out — the check
+       then measures the note it started with and passes on anything.
+       It cost a run to find, and planting the damage in an init script
+       on THIS page is no answer either: an init script runs on every
+       navigation, so the seven reloads below would each get the
+       damaged record back. */
+    {
+      const dctx = await browser.newContext(PHONE);
+      const dpage = await dctx.newPage();
+      const derrs = [];
+      dpage.on('pageerror', (e) => derrs.push(String(e)));
+      await dpage.addInitScript(() => {
+        localStorage.setItem('sched.tour.v1', '1');
+        localStorage.setItem('sched.hint2.v1', '1');
+        localStorage.setItem('sched.net.v1',
+          JSON.stringify({ on: false, url: '', code: '' }));
+        if (!localStorage.getItem('sched.note.v1')) {
+          localStorage.setItem('sched.note.v1', JSON.stringify({ list: [
+            { id: 'nD', t: 'Damaged', u: 1756900000000, l: [
+              { i: 'd1', h: 1, c: 'not-a-hue', x: 'Kept', y: 'and repaired', m: 0 },
+              'this is not a line',
+              null,
+              { i: 'd2', h: 0, c: '', x: 'The days are what you cannot get back', y: '', m: 1 } ] },
+            'nor is this a note'
+          ] }));
+        }
+      });
+      await dpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+      await dpage.waitForTimeout(520);
+      const fixed = await dpage.evaluate(() => {
+        const raw = JSON.parse(localStorage.getItem('sched.note.v1'));
+        return { notes: raw.list.length, lines: raw.list[0].l.length,
+          hue: raw.list[0].l[0].c, kept: raw.list[0].l[1].x, t: raw.list[0].t };
+      });
+      /* Asserted as the good lines SURVIVING rather than the bad ones
+         being refused: rejecting the whole object passes any check
+         written the other way round, and the note is what you cannot
+         get back. */
+      ok('a damaged note keeps its good lines and loses only the broken ones',
+        fixed.notes === 1 && fixed.lines === 2 && fixed.t === 'Damaged'
+        && fixed.kept === 'The days are what you cannot get back', fixed);
+      ok('...an unknown hue falls through rather than rendering as nothing',
+        ['red', 'orange', 'amber', 'green', 'teal', 'blue', 'violet'].indexOf(fixed.hue) >= 0,
+        fixed.hue);
+      ok('...and the repair is on DISK, not only in memory',
+        JSON.stringify(fixed).indexOf('not-a-hue') < 0, fixed);
+      ok('...and nothing threw doing it', derrs.length === 0, derrs.slice(0, 3));
+      await dctx.close();
+    }
+
+    /* ── NOTHING HERE LEAVES THE PHONE ──
        Two halves, because each passes on the other's bug: pressing
-       around the goals screen must make no request at all, AND a push
-       that happens for some other reason must not be carrying one.
-       The second is the check that was missing the two times a comment
-       reading "this is never sent" was the only place the intention
-       existed. */
-    const body = await rp.evaluate(() => {
-      const src = [...document.querySelectorAll('script[src]')]
-        .map((s) => s.src).filter((s) => /app\.js/.test(s))[0];
-      return src;
-    });
-    const src = await (await rp.request.get(body)).text();
-    /* THE FUNCTION'S BODY, matched by braces rather than by a fixed
-       number of characters — a 2600-char slice runs off the end of
-       scPushNow into whatever happens to follow it, so the check fails
-       on its neighbour's code rather than on its own subject. */
-    const push = (() => {
-      const at = src.indexOf('function scPushNow');
-      let depth = 0;
-      for (let j = src.indexOf('{', at); j < src.length; j++) {
-        if (src[j] === '{') depth++;
-        else if (src[j] === '}') { depth--; if (!depth) return src.slice(at, j + 1); }
-      }
-      return '';
-    })();
-    /* ── BOTH DIRECTIONS OF PATTERN COVERAGE ──
-       A card naming a drawing the table does not have falls through to
-       the seeded fallback, which is correct and is also silently
-       invisible — the card looks fine and the drawing meant for it was
-       never used. And a drawing nothing can reach is dead weight that
-       looks like coverage. The keyword table's own rule, one screen
-       over, and the reason `tests/schedule.js` already holds the row
-       glyphs to both halves. */
-    const cov = (() => {
-      const kinds = src.slice(src.indexOf('var GOAL_KINDS'), src.indexOf('function scGoalKind'));
-      const table = src.slice(src.indexOf('var GOAL_PATS = {'), src.indexOf('function glHash'));
-      const used = (kinds.match(/p: '([a-z]+)'/g) || []).map((m) => m.slice(4, -1));
-      const has = (table.match(/^    ([a-z]+): function/gm) || [])
-        .map((m) => m.trim().split(':')[0]);
-      return {
-        used: used.length,
-        twice: [...new Set(used.filter((u, i) => used.indexOf(u) !== i))],
-        missing: used.filter((u) => has.indexOf(u) < 0),
-        dead: has.filter((h) => used.indexOf(h) < 0),
-      };
-    })();
-    ok('every card names a pattern the table actually has',
-      cov.used >= 20 && cov.missing.length === 0, cov);
-    ok('...no pattern is drawn on two different cards', cov.twice.length === 0, cov.twice);
-    ok('...and no pattern is dead weight nothing can reach', cov.dead.length === 0, cov.dead);
+       around this screen must make no request at all, AND a push that
+       happens for some other reason must not be carrying one. That
+       second half is the check that was missing the two times a
+       comment reading "this is never sent" was the only place the
+       intention ever existed. */
+    const noteOff = nasked.filter((u) => !u.startsWith(BASE));
+    ok('the notes screen reaches nothing off this origin',
+      noteOff.length === 0, noteOff.slice(0, 4));
 
-    ok('the push function was found at all',
-      push.length > 200 && push.length < 6000, push.length);
-    /* ── AND `goals` IS NOT ON THE FORBIDDEN LIST, WHICH IS ITSELF
-           THE FINDING ──
-       The profile has carried a field called `goals` since it shipped,
-       and it means your OBJECTIVES — one of the four things a switch
-       can share. The new tab is also called Goals, so the first
-       version of this check flagged the profile's own field as a leak
-       from a record it has never read.
+    const src = await npage.evaluate(() => fetch('./app.js').then((r) => r.text()));
+    const pi = src.indexOf('function scPushNow');
+    let depth = 0, pend = pi;
+    for (let i = src.indexOf('{', pi); i < src.length; i++) {
+      if (src[i] === '{') depth++;
+      else if (src[i] === '}') { depth--; if (!depth) { pend = i; break; } }
+    }
+    const push = src.slice(pi, pend);
+    ok('the push function was found at all', push.length > 200 && pi > 0, push.length);
+    ok('...and it carries no note record and nothing that reads one',
+      push.indexOf('sched.note') < 0 && push.indexOf('scNote') < 0
+      && push.indexOf('notes') < 0, push.slice(0, 140));
 
-       That is the naming collision this app was warned about while the
-       feature was still being argued: Objectives already means "what
-       matters today", and a second thing called Goals gets confused
-       with it. It has now confused a check. The record is what is
-       asserted instead — the key and the functions that reach it —
-       and the profile's field is held to reading objLog, so the
-       collision cannot quietly become a real leak later. */
-    ok('...and it carries no goal record and nothing that reads one',
-      push.indexOf('sched.goal') < 0 && push.indexOf('scGoal') < 0,
-      push.slice(0, 140));
-    const shareGoals = (() => {
-      const at = src.indexOf('function scShareGoals');
-      let depth = 0;
-      for (let j = src.indexOf('{', at); j < src.length; j++) {
-        if (src[j] === '{') depth++;
-        else if (src[j] === '}') { depth--; if (!depth) return src.slice(at, j + 1); }
-      }
-      return '';
-    })();
-    ok('...and the profile\u2019s own `goals` field is the objectives, not these',
-      shareGoals.indexOf('objLog') > 0 && shareGoals.indexOf('scGoal') < 0
-      && shareGoals.indexOf('sched.goal') < 0, shareGoals.slice(0, 120));
+    /* ── AND THE HEADING'S CLAUSE IS THE THING NOTHING WOULD MEASURE ──
+       11.5px at 72% of a hue toward the ink, on the page rather than
+       on a tag's tinted ground. This repo has now shipped 4.74:1 twice
+       believing that was a margin, so it is measured on composited
+       pixels at every one of the seven. */
+    /* ── DRIVEN THROUGH THE SWATCHES, NEVER THROUGH THE RECORD ──
+       Two versions of this were wrong before one was right, and both
+       reported a plausible sheet of numbers.
 
-    await rctx.close();
-    ok('nothing threw through the goals record', rerrs.length === 0, rerrs);
+       The first set the hue on a LINE, where scNoteCleanOne drops it —
+       a colour only means anything on a heading — so all seven
+       readings came back the same red. The second set it on the right
+       line and reloaded, and the app writes what it is HOLDING back
+       over the key on `pagehide`, which fires on any navigation away
+       including a fresh `goto`. Seven identical readings again.
+
+       Pressing the swatch is the path a person takes and there is
+       nothing to clobber. THE COUNT OF DISTINCT READINGS IS ASSERTED
+       BESIDE THE FLOOR, because a loop measuring one colour seven
+       times passes any threshold that one colour happens to clear —
+       which is exactly what both wrong versions did. */
+    await toNotes(npage);
+    await npage.click('.nt-card');
+    await npage.waitForTimeout(320);
+    const ratios = [];
+    for (let i = 0; i < 7; i++) {
+      const col = await npage.evaluate(async (idx) => {
+        const head = document.querySelector('.nt-row.is-head');
+        if (!head) throw new Error('no heading on the open note');
+        head.querySelector('.nt-hw').focus();
+        await new Promise((z) => setTimeout(z, 200));
+        const sw = document.querySelectorAll('.nt-tools .nt-c');
+        if (sw.length !== 7) throw new Error('the strip offers ' + sw.length + ' colours');
+        sw[idx].click();
+        await new Promise((z) => setTimeout(z, 300));
+        const e = document.querySelector('.nt-hc');
+        if (!e) throw new Error('no clause drawn after picking a colour');
+        return { fg: getComputedStyle(e).color,
+                 bg: getComputedStyle(document.body).backgroundColor,
+                 saved: (JSON.parse(localStorage.getItem('sched.note.v1'))
+                   .list.find((n) => n.l.some((L) => L.h)) || { l: [] })
+                   .l.filter((L) => L.h)[0].c };
+      }, i);
+      ratios.push({ i: i, c: col.saved, r: +ratio(rgbOf(col.fg), rgbOf(col.bg)).toFixed(2) });
+    }
+    const worstClause = ratios.reduce((a, b) => (a.r < b.r ? a : b));
+    ok('the seven swatches are seven different colours, not one measured seven times',
+      new Set(ratios.map((r) => r.c)).size === 7
+      && new Set(ratios.map((r) => r.r)).size >= 5, ratios);
+    ok('...and every heading’s clause clears 4.5:1 against the page it is on',
+      worstClause.r >= 4.5, ratios);
+
+    await nctx.close();
+    ok('nothing threw through the notes record', nerrs.length === 0, nerrs.slice(0, 4));
   }
 
   ok('no page errors through any of it', errs.length === 0, errs);

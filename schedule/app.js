@@ -140,7 +140,18 @@
            REPAIRED, NOT DISCARDED: a damaged list costs the children
            and never the block, which is the schedule's oldest rule
            about a stored shape. */
-        k: scCleanKids(it.k)
+        k: scCleanKids(it.k),
+        /* ── AND WHICH NOTE IT IS ABOUT ──
+           An id, never the note itself: two copies of a title drift the
+           moment you rename one of them, and the note is the record.
+           Part of the template like the children are, so a block that
+           is about your trading rules is about them every week.
+
+           A dangling id costs the tag and nothing else — scNoteOf
+           returns null and the row simply draws none, which is what
+           happens for a note removed on another device before this one
+           has caught up. */
+        nt: typeof it.nt === 'string' && it.nt ? it.nt.slice(0, 40) : ''
       });
     }
     return out;
@@ -1808,6 +1819,39 @@
           scEditSheet(it, d);
         });
         wrap.appendChild(ed);
+
+        /* ── AND WHICH NOTE THIS BLOCK IS ABOUT ──
+           The reference, and it is the whole point of the Notes tab
+           being in this app rather than beside it: press it and you
+           are in the note. On its own line under the row's figures —
+           a fixed x, so it can be a plain absolutely-positioned
+           sibling rather than something measured against a props line
+           whose width changes with every tag on it.
+
+           A SIBLING, like the check and the pencil, because a
+           <button> inside a <button> is invalid and collapses to one
+           press while looking exactly right.
+
+           And it is NOT part of the armed edit mode: while the week
+           is armed every target on the row opens the block, this one
+           included, because a mode that opens a note from one corner
+           of a row and the editor from the rest is a lottery about
+           which small box a thumb found. */
+        var nrec = scNoteOf(it);
+        if (nrec) {
+          row.classList.add('has-note');
+          var nb = scEl('button', 'row-note');
+          nb.type = 'button';
+          nb.style.setProperty('--tg', scNtVar(scNoteHue(nrec)));
+          nb.setAttribute('aria-label', 'Open the note ' + scNoteTitle(nrec));
+          nb.appendChild(scEl('span', null, scNoteTitle(nrec)));
+          nb.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            if (editArm) { scEditArm(false); scEditSheet(it, d); return; }
+            scNoteJump(nrec.id);
+          });
+          wrap.appendChild(nb);
+        }
         (sess || card).appendChild(wrap);
 
         /* ── WHAT IS INSIDE THE BLOCK ──
@@ -2454,7 +2498,7 @@
     if (n % 100 >= 11 && n % 100 <= 13) return 'th';
     return ['th', 'st', 'nd', 'rd'][n % 10] || 'th';
   }
-  var VIEW_NAME = { tally: 'Today', friends: 'Friends', goals: 'Goals' };
+  var VIEW_NAME = { tally: 'Today', friends: 'Friends', notes: 'Notes' };
 
   var HEAD_ICON = {
     today: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/>'
@@ -2468,8 +2512,8 @@
     friends: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4"/>'
       + '<path d="M3 19c0-3.2 2.7-5 6-5s6 1.8 6 5"/>'
       + '<path d="M16.5 6.4a3.4 3.4 0 010 6.5M21 19c0-2.7-1.8-4.4-4.2-4.8"/></svg>',
-    goals: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/>'
-      + '<circle cx="12" cy="12" r="3"/></svg>'
+    notes: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 3.5h9l4 4v13h-13z"/>'
+      + '<path d="M14.5 3.5v4h4M8.5 12h7M8.5 16h4.5"/></svg>'
   };
   /* ── THE HEAD SAYS WHICH SCREEN, WHICH DAY, AND WHAT IS ON IT ──
      A glyph tile, the name at 30px, and one line: the date, how many
@@ -2878,6 +2922,15 @@
          taught. A key marking a card seen is a record of a card that
          does not exist. */
       localStorage.removeItem('sched.hintw.v1');
+      /* And the goals, which Notes replaced outright. A goals screen
+         is a list of things you have not done yet and this repository
+         has already deleted one of those — `arc/` held a vision board
+         and a long-term timeline and both are gone. The key is
+         REMOVED rather than left: a record nothing can read is a
+         second copy of a decision that no longer exists, and this file
+         has now made that same call about the palette name, the
+         subtitle, the old rating scale and two view keys. */
+      localStorage.removeItem('sched.goal.v1');
     } catch (e) {}
   } catch (e) {}
   var mode = 'auto';
@@ -6505,12 +6558,12 @@
      across the stops — measured at 372px against the 358 a 390px
      phone has — where the bar's own tabs are flex:1 and simply
      divide, so the bar was the arrangement that cost nothing. */
-  var VIEWS = ['list', 'tally', 'friends', 'goals'];
+  var VIEWS = ['list', 'tally', 'friends', 'notes'];
 
   function scSetView(v, save) {
     var from = view;
     view = VIEWS.indexOf(v) >= 0 ? v : 'list';
-    var tal = view === 'tally', fr = view === 'friends', gl = view === 'goals';
+    var tal = view === 'tally', fr = view === 'friends', nt = view === 'notes';
     /* ── ARRIVING IS WHAT OFFERS A CARD, AND LEAVING TAKES IT ──
        Coming BACK to a screen is a new visit, so a card closed with
        "Got it" is offered once more. Guarded on the view actually
@@ -6526,19 +6579,24 @@
       if (tal) hintShut.ty = false;
       if (view === 'list') hintShut.wk = false;
       scHintClose(false);
-      /* ── ARRIVING AT GOALS LANDS ON THE GOALS ──
-         Which goal is open is a position on a screen you are looking
-         at, not a preference — the tally panels' own rule. Left set,
-         pressing Goals put you back inside whichever card you had
-         opened before, so the screen the tab is named after was one
-         you could only reach by pressing back. It is not stored
-         either, for the same reason one restored from last week opens
-         on a goal you have stopped working on.
+      /* ── ARRIVING AT NOTES LANDS ON THE LIST ──
+         Which note is open is a position on a screen you are looking
+         at, not a preference — the tally panels' own rule, and the
+         one the goals deck had before it. Left set, pressing Notes
+         put you back inside whichever note you had open, so the
+         screen the tab is named after was one you could only reach by
+         pressing back.
 
-         Only on a real view CHANGE: scPaintGoals is called again after
-         every add and every removal, and resetting there would throw
-         you out of the deck each time you pressed Add. */
-      if (gl) glOpen = null;
+         Only on a real view CHANGE, and only when the arrival is not
+         a JUMP: scNoteJump sets ntOpen and then asks for this view,
+         which is the whole of how a tag on a row reaches a note, and
+         clearing it here would land that press on the list. */
+      if (nt && !ntJump) ntOpen = null;
+      ntJump = false;
+      /* Typing is written on a timer, so walking off the screen has to
+         flush it: a note half a second old when you press another tab
+         is a note that loses its last sentence. */
+      if (from === 'notes') scNoteFlush();
       /* Leaving the week disarms it: the control is about blocks, and
          there are none on Today, Goals or Friends. */
       editArm = false;
@@ -6553,7 +6611,7 @@
 
     $('scTally').hidden = !tal;
     $('scFriends').hidden = !fr;
-    $('scGoals').hidden = !gl;
+    $('scNotes').hidden = !nt;
     /* Only where there are blocks to edit. `[hidden]` is said out
        loud in the stylesheet for this one too, which is the seventh
        time in this app: it takes a `display: grid`. */
@@ -6564,8 +6622,8 @@
        has cost this app the rail, the dots, the toast and the intro,
        each in turn, so the check measures the BOX rather than the
        attribute. */
-    $('scWeek').hidden = tal || fr || gl;
-    $('scEmpty').hidden = tal || fr || gl || state.items.length > 0;
+    $('scWeek').hidden = tal || fr || nt;
+    $('scEmpty').hidden = tal || fr || nt || state.items.length > 0;
     /* The head is the day's on the week and the screen's elsewhere,
        and the objectives row belongs to the week alone — it takes the
        open day rather than a local, because there is no day in scope
@@ -6591,11 +6649,7 @@
        already keeps. A paint that fetched would recurse the first time
        it ran, which is a bug this file has already had once. */
     else if (fr) { scPaintFriends(); scFrStop(frStop, false); scArriveFriends(); }
-    /* ARRIVING is what puts the checkpoint up, the same split the
-       friends half already keeps: drawing only draws. A goal whose
-       date has come round asks once, here, rather than on every
-       render of every screen. */
-    else if (gl) { scPaintGoals(); scGoalCheck(); }
+    else if (nt) scPaintNotes();
     else scLive();
 
     /* ── AFTER THE CHAIN, NEVER INSIDE IT ──
@@ -10298,6 +10352,13 @@
       name.value = item ? item.n : '';
       name.autocapitalize = 'words';
 
+      var noteSel = item && item.nt ? item.nt : '';
+      /* A note removed since this block last named it: the id is
+         dropped on the way IN rather than left to be saved back, so
+         re-saving a block cannot resurrect a reference to something
+         that no longer exists. */
+      if (noteSel && !scNoteById(noteSel)) noteSel = '';
+
       var picked = {};
       if (item) picked[item.d] = 1; else picked[day === undefined ? new Date().getDay() : day] = 1;
 
@@ -10501,6 +10562,44 @@
         kidRow.appendChild(scBtn('off', 'Add', addKid));
         body.appendChild(kidRow);
         paintKids();
+
+        /* ── AND WHICH NOTE IT IS ABOUT ──
+           Part of the template, beside the children, because it is the
+           same kind of fact: a block that is about your trading rules
+           is about them every week. One row of chips — your notes, and
+           None — rather than a picker sheet, because there are rarely
+           more than a handful and a second sheet to choose one thing
+           from is a screen you have to come back out of.
+
+           Only where there is a note to point AT: a row offering to
+           attach one before you have written any is a control that
+           can only refuse. */
+        if (notes.length) {
+          body.appendChild(scEl('span', 'label', 'About'));
+          var nrow = scEl('div', 'nt-pick');
+          var mk = function (id, label, hue) {
+            var b = scEl('button', 'nt-pk' + (noteSel === id ? ' is-on' : ''));
+            b.type = 'button';
+            b.textContent = label;
+            b.setAttribute('aria-pressed', noteSel === id ? 'true' : 'false');
+            if (hue) b.style.setProperty('--tg', scNtVar(hue));
+            b.addEventListener('click', function () {
+              noteSel = id;
+              nrow.querySelectorAll('.nt-pk').forEach(function (o) {
+                o.classList.remove('is-on');
+                o.setAttribute('aria-pressed', 'false');
+              });
+              b.classList.add('is-on');
+              b.setAttribute('aria-pressed', 'true');
+            });
+            nrow.appendChild(b);
+          };
+          mk('', 'None', '');
+          notes.slice().sort(function (a, b2) { return b2.u - a.u; }).forEach(function (q) {
+            mk(q.id, scNoteTitle(q), scNoteHue(q));
+          });
+          body.appendChild(nrow);
+        }
       }
 
       var acts = scEl('div', 'acts');
@@ -10532,6 +10631,7 @@
              Add is the form throwing away work you can see. */
           addKid();
           item.k = kidList;
+          item.nt = noteSel;
         }
         scClose();
         scCommit(isNew ? 'Added' : 'Saved');
@@ -11130,1155 +11230,548 @@
 
 
   /* ═══════════════════════════════════════════════════════════
-     GOALS
+     NOTES
 
-     Every other screen in this app records what you DID. This one is
-     the only thing that says what any of it is FOR — and it earns a
-     tab rather than a stop because a goal is not a way of reading
-     today. It is the thing today is in service of.
+     Every other screen in this app is a RECORD — what you did, what
+     you kept, how the day went. This one is the only place you write
+     something down, and it went in where Goals came out: a goals
+     screen is a list of things you have not done yet, and this
+     repository has already deleted one of those.
 
-     THE WHOLE FEATURE IS ONE PRESS: a sentence you typed becomes a
-     block on your week. The list of goals is only where you press it
-     from. That is why the cap is small and why the archive is folded
-     — a goals screen with nine things on it is a wish list, and this
-     repository has already deleted one of those: `arc/` held a vision
-     board and a long-term timeline and both are gone.
+     WHAT MAKES IT PART OF THE APP RATHER THAN A NOTEPAD BESIDE IT is
+     the tag on the row. A block can name a note, the row draws that
+     note's title, and pressing it lands you in the note — which is
+     the whole of the ask: not the line copied onto the day, a way
+     back to where it is written.
 
-     NOTHING HERE LEAVES THE PHONE. `sched.goal.v1` is not in
+     NOTHING HERE LEAVES THE PHONE. `sched.note.v1` is not in
      scPushNow's body and no path from this screen calls scPush. A
-     goal is further down the road that "a count may leave and a list
-     may not" was written about than anything else on the record.
+     note is further down the road that "a count may leave and a list
+     may not" was written about than anything else on the record —
+     `tests/schedule.js` holds both halves, because each passes on the
+     other's bug: pressing around this screen must make no request at
+     all, AND a push that happens for some other reason must not be
+     carrying one.
      ═══════════════════════════════════════════════════════════ */
 
-  var GOAL_KEY = 'sched.goal.v1';
+  var NOTE_KEY = 'sched.note.v1';
+  /* Storage guards rather than a design cap. The goals screen was
+     capped at three and the cap was the point — two live goals is a
+     decision and nine is a wish list. A note is not that: there is no
+     number of notes that is too many to have written down, so these
+     are only here to stop one browser key eating the 5MB the ledger
+     shares. */
+  var NOTE_CAP = 40, NOTE_LINES = 300;
 
-  /* Two live, three at a push. Not a suggestion — the app refuses a
-     fourth until one is finished or dropped. */
-  var GOAL_CAP = 3;
+  /* ── SEVEN HUES, AND THEY ARE THE WORKOUT CARDS' OWN ──
+     A colour that says WHICH has to be the same colour every time you
+     see it, so it cannot come off the wheel. These seven are already
+     literals with a light-face twin each, and already measured as a
+     22% wash under a 72% label — which is exactly the arithmetic a
+     heading's clause and a line's mark both use. Seven rather than a
+     new set, because seven is what is actually different. */
+  var NT_HUES = ['red', 'orange', 'amber', 'green', 'teal', 'blue', 'violet'];
+  function scNtHue(c) { return NT_HUES.indexOf(c) >= 0 ? c : 'blue'; }
+  function scNtVar(c) { return 'var(--w-' + scNtHue(c) + ')'; }
 
-  var goals = { live: [], done: [] };
-  var glOpen = null, glIdx = 0;
+  var notes = [];
+  var ntOpen = null;
+  /* scNoteJump sets ntOpen and then asks for this view; scSetView
+     clears ntOpen on a real arrival, so without this the tag on a row
+     would always land on the list. Consumed by the arrival it is for,
+     never left standing. */
+  var ntJump = false;
+  var ntSaveT = null;
 
-  /* ── THE DOSE IS SOLVED, NOT TYPED ──
-     Each suggestion carries the length it wants (`full`) and the one
-     below which it stops being the thing (`floor`). Reading floors at
-     15; a session does not go below 30 and still count.
+  function scNtId() { return 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
-     DAYS A WEEK MOVE FIRST. Fifteen minutes of reading a day and
-     forty-five minutes three times a week are the same weekly total,
-     and the second is a session you can actually finish — so a longer
-     window buys fewer days at a real length rather than a token every
-     morning. Length only shortens until it reaches the floor, and
-     then another day goes instead.
-
-     TWO LINES OF WHY AND NEVER THREE. The first says what the thing
-     does; the second says why THIS dose, which is the half nothing
-     else on the screen says. A third is a paragraph, and a paragraph
-     is a thing you scroll past. */
-  var GOAL_KINDS = [
-    { k: 'trading', n: 'Trading', recs: [
-      { n: 'Backtest', p: 'candles', full: 60, floor: 20, ses: 'e',
-        w: 'Backtesting is where a rule gets tested with nothing on it. Every edge you will ever trade was either proved here first or paid for in the market, and one of those is a great deal cheaper than the other.' },
-      { n: 'Collect data', p: 'ledger', full: 30, floor: 10, ses: 'e',
-        w: 'A record you wrote yourself is the only edge nobody else has a copy of. Screenshots, notes, the level you were watching when it turned — worth almost nothing on the day and worth everything six months later.' },
-      { n: 'Watch content', p: 'waveform', full: 45, floor: 15, ses: 'e',
-        w: 'Someone else’s reasoning is cheaper to learn from than your own losses. You are not there for a signal; you are there for how somebody further along thinks about the same chart you are looking at.' },
-      { n: 'Review the week', p: 'spiral', full: 45, floor: 20, ses: 'e', weekly: true,
-        w: 'A week you never read back is a week you cannot learn anything from. The trades are already on the record — what is missing is the hour where you go and find out what they have in common.' } ] },
-
-    { k: 'training', n: 'Training', recs: [
-      { n: 'Session', p: 'reps', full: 75, floor: 40, ses: 'm',
-        w: 'The session is the only part of getting stronger you control. Sleep, food and stress all move on their own; this is the one input you decide on, and it is the one the results are actually built out of.' },
-      { n: 'Walk', p: 'path', full: 40, floor: 20, ses: 'm',
-        w: 'Easy movement is what lets the hard days keep happening. It moves blood without adding fatigue, so the sessions that matter land on a body that has recovered from the last one instead of one that has not.' },
-      { n: 'Rest', p: 'breath', full: 30, floor: 30, ses: 'e',
-        w: 'Rest is training. The adaptation happens between the sessions rather than during them, so a day off is not time away from the work — it is where the work you already did turns into something.' } ] },
-
-    { k: 'reading', n: 'Reading', recs: [
-      { n: 'Read', p: 'lines', full: 60, floor: 15, ses: 'e',
-        w: 'Reading is the one input that compounds without a screen in it. A book is somebody’s decade compressed into a week of evenings, and there is nothing else you can do with forty minutes that returns at that rate.' },
-      { n: 'Notes', p: 'margin', full: 20, floor: 10, ses: 'e',
-        w: 'A book you took nothing out of is a book you will read again. Three lines in your own words at the end of a session is the whole difference between having read something and being able to use it.' } ] },
-
-    { k: 'skill', n: 'A skill', recs: [
-      { n: 'Practice', p: 'drift', full: 45, floor: 15, ses: 'e',
-        w: 'A skill moves on repetitions, not on hours of reading about it. The gap between knowing how a thing is done and being able to do it only ever closes one way, and this is it.' },
-      { n: 'A drill', p: 'pulse', full: 20, floor: 10, ses: 'e',
-        w: 'One narrow thing done badly today is the thing done well in a month. Practice spread across everything improves nothing you can measure; a drill takes the single weakest part and puts all of the attention there.' },
-      { n: 'Make something', p: 'assemble', full: 60, floor: 30, ses: 'a', weekly: true,
-        w: 'Output is the only honest test of whether the practice worked. Finishing a real thing exposes every gap the drills let you walk around, and it is the only proof that survives somebody else looking at it.' } ] },
-
-    /* MONEY FOLDS IN HERE. A goal that says "earn more" wants the same
-       process as one that says "grow the business", and two entries
-       would be one table written twice. */
-    { k: 'business', n: 'Business', recs: [
-      { n: 'The thing that earns', p: 'compound', full: 90, floor: 45, ses: 'm',
-        w: 'One block a day on the part that actually brings money in. Everything else in a business feels like work and most of it is maintenance — this is the hour that moves the number.' },
-      { n: 'Outreach', p: 'broadcast', full: 45, floor: 15, ses: 'a',
-        w: 'Nothing else in a business compounds as fast as talking to more people. Most of what you build is wrong until somebody who might pay for it tells you so, and that conversation costs a fraction of the build.' },
-      { n: 'Build', p: 'lattice', full: 90, floor: 30, ses: 'a',
-        w: 'The work only you can do, in the hours nobody can reach you. It needs an unbroken block: starting is most of the cost, so an hour with two interruptions in it buys about twenty minutes.' },
-      { n: 'Weekly numbers', p: 'columns', full: 30, floor: 20, ses: 'e', weekly: true,
-        w: 'A figure you look at once a week is a figure you can steer by. Daily is noise and monthly is too late to act on — a week is the shortest window where something you changed shows up as a change in the number.' } ] },
-
-    { k: 'creating', n: 'Creating', recs: [
-      { n: 'Draft', p: 'strokes', full: 90, floor: 25, ses: 'm',
-        w: 'Drafting badly is the only way anybody has ever drafted well. The first version exists to be wrong on paper instead of vague in your head, and being wrong on paper is the entire job it has.' },
-      { n: 'Edit', p: 'strike', full: 45, floor: 20, ses: 'a',
-        w: 'Editing is a different job from writing and wants a different hour. You cannot judge a sentence and produce it at the same time — the two run on opposite settings, and doing them together gets you careful work at half the speed.' },
-      { n: 'Publish', p: 'sheets', full: 30, floor: 15, ses: 'e', weekly: true,
-        w: 'Shipping on a schedule beats shipping when it feels ready. Nothing improves in a drawer, and the feedback that would have made it better only ever arrives after it is out.' } ] },
-
-    { k: 'study', n: 'Study', recs: [
-      { n: 'Study', p: 'squared', full: 90, floor: 25, ses: 'm',
-        w: 'The session is where it goes in; everything else is admin. Highlighting, re-organising and making the notes tidier all feel like studying and none of them is, which is exactly why this block is the one to protect.' },
-      { n: 'Past papers', p: 'boxes', full: 60, floor: 30, ses: 'a', weekly: true,
-        w: 'A paper under time is the only rehearsal that resembles the day. Knowing the material and being able to produce it in ninety minutes with a clock running are two different skills, and only one of them is examined.' },
-      { n: 'Review', p: 'loop', full: 25, floor: 10, ses: 'e',
-        w: 'Going back over old ground is what stops it leaving again. Everything you learned last month is quietly draining away, and twenty minutes on old material is worth more than an hour on new.' } ] },
-
-    { k: 'routine', n: 'Routine', recs: [
-      { n: 'Wind down', p: 'decay', full: 45, floor: 20, ses: 'e',
-        w: 'The hour before bed decides the night more than the bedtime does. What you do in it sets how fast you drop off, and going up earlier makes up for none of a wound-up hour before it.' },
-      { n: 'Fixed wake', p: 'sunrise', full: 15, floor: 15, ses: 'm',
-        w: 'One constant time anchors every other hour of the day to it. It is the single lever that moves your sleep, your appetite and your energy together, and it works whether or not the night before went well.' } ] },
-
-    /* THIN ON PURPOSE. The honest process for saving is a weekly look
-       at what went out and one transfer — two blocks, one of them five
-       minutes. Padding it to four so it matched the others would be
-       the app inventing work. */
-    { k: 'saving', n: 'Saving', recs: [
-      { n: 'Look at what went out', p: 'tally', full: 20, floor: 10, ses: 'e', weekly: true,
-        w: 'You cannot cut a number you have never actually looked at. Most of what leaves an account each month leaves quietly, and twenty minutes with the statement finds more than any amount of resolving to spend less.' },
-      { n: 'Move it across', p: 'stack', full: 10, floor: 5, ses: 'e', weekly: true,
-        w: 'Saving on the day it arrives beats saving on whatever is left. What is left is never what you expected, so the amount you move first is the only amount you reliably keep.' } ] }
-  ];
-
-  /* THERE IS NO WEIGHT GOAL, and its absence is the decision. This app
-     has never asked what you weigh and says so out loud; a table entry
-     for it would reverse that quietly. Training covers the honest
-     half — you cannot control the number, you can control the
-     sessions. */
-
-  function scGoalKind(k) {
-    for (var i = 0; i < GOAL_KINDS.length; i++) if (GOAL_KINDS[i].k === k) return GOAL_KINDS[i];
-    return null;
-  }
-  function scGoalRecs(g) { var kk = scGoalKind(g.k); return kk ? kk.recs : []; }
-
-  /* ── THE PATTERNS ──
-     Not a picture of the thing — the RHYTHM of the thing. A drawing of
-     a dumbbell at this size is a glyph, and this app already learned
-     that ten honest drawings of a lift come out as one silhouette ten
-     times. A cadence of reps in sets is a picture of nothing and is
-     still unmistakably training.
-
-     TWO PATTERNS WITH ONE SILHOUETTE IS WORSE THAN A PATTERN MISSING,
-     because the card is then confidently wrong — so they were judged
-     side by side rather than one at a time, which is the only way that
-     fault is visible. Two were replaced on exactly that ground: scan
-     lines read as a television AND were a fifth horizontal-rule
-     pattern in a set that already had four; seven arcs read as bunting
-     at card size and left most of the card empty.
-
-     They are a TABLE, which is the cost of them meaning anything — a
-     second list to keep in step with the first. What pays for it is
-     scGoalPat's fallback: a suggestion with no drawing gets one seeded
-     from its own name, so a card is never blank.
-
-     STROKES ARE NON-SCALING. A width in viewBox units is multiplied by
-     whatever the box is stretched to, and it fails silently — the
-     drawing stays correct and comes out several times too heavy. */
-  function glW(a) { return 'rgba(255,255,255,' + a + ')'; }
-  function glLn(x1, y1, x2, y2, a, w) {
-    return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2
-      + '" stroke="' + glW(a) + '" stroke-width="' + (w || 1)
-      + '" vector-effect="non-scaling-stroke" stroke-linecap="round"/>';
-  }
-
-  var GOAL_PATS = {
-    candles: function () {
-      var o = '', x = 4, i = 0;
-      while (x < 104) {
-        var h = 6 + ((i * 37) % 26), y = 24 + ((i * 53) % 26) - h / 2;
-        o += glLn(x, y - 5, x, y + h + 5, .10, 1);
-        o += '<rect x="' + (x - 2.2) + '" y="' + y + '" width="4.4" height="' + h + '" fill="'
-          + glW(i % 3 ? .10 : .05) + '" stroke="' + glW(.13)
-          + '" stroke-width="1" vector-effect="non-scaling-stroke"/>';
-        x += 7.4; i++;
-      }
-      return o;
-    },
-    ledger: function () {
-      var o = '', y, x, i;
-      for (y = 6; y < 80; y += 7.5) o += glLn(-2, y, 102, y, .07, .9);
-      for (x = 12; x < 100; x += 17) o += glLn(x, -2, x, 82, .05, .9);
-      for (i = 0; i < 26; i++) {
-        o += '<rect x="' + (14 + (i % 5) * 17) + '" y="' + (9 + Math.floor(i / 5) * 7.5)
-          + '" width="' + (4 + (i * 7) % 9) + '" height="1.6" fill="' + glW(.1) + '"/>';
-      }
-      return o;
-    },
-    /* WATCH CONTENT. The one pattern in the set mirrored about a
-       horizontal axis, so it can be confused with nothing — and the
-       reason a waveform is right for it rather than a picture of a
-       screen is that content is a thing you give TIME to. Scan lines
-       and progress tracks were both drawn here first: the first read
-       as a television and was a fifth horizontal-rule pattern in a set
-       that already had four, the second read as a to-do list. */
-    waveform: function () {
-      var o = '', i, x, h;
-      for (i = 0; i < 46; i++) {
-        x = 1 + i * 2.2;
-        h = 5 + 26 * Math.abs(Math.sin(i * .38) * Math.sin(i * .11 + 1));
-        o += '<rect x="' + x.toFixed(1) + '" y="' + (40 - h).toFixed(1) + '" width="1.3" height="'
-          + (h * 2).toFixed(1) + '" rx="0.6" fill="' + glW(i % 3 ? .085 : .14) + '"/>';
-      }
-      return o;
-    },
-    /* REVIEW THE WEEK. One line going round and coming back over
-       ground it has already covered, which is the whole of what a
-       review is. Nothing else in the set is a spiral. Seven arcs on a
-       baseline were drawn first and read as bunting at card size, and
-       seven bands with a line across them read as a chart. */
-    spiral: function () {
-      var d = '', i, th, r;
-      for (i = 0; i <= 260; i++) {
-        th = i * 0.11; r = 1.6 + th * 3.05;
-        d += (i ? ' L ' : 'M ') + (50 + r * Math.cos(th)).toFixed(1)
-          + ' ' + (40 + r * Math.sin(th) * 0.8).toFixed(1);
-      }
-      return '<path d="' + d + '" fill="none" stroke="' + glW(.05)
-        + '" stroke-width="4.6" vector-effect="non-scaling-stroke"/>'
-        + '<path d="' + d + '" fill="none" stroke="' + glW(.14)
-        + '" stroke-width="1.3" vector-effect="non-scaling-stroke"/>';
-    },
-    reps: function () {
-      var o = '', x = 6, sets = [5, 8, 6, 10, 5, 8, 6], s, r;
-      for (s = 0; s < sets.length; s++) {
-        for (r = 0; r < sets[s]; r++) {
-          var y = 12 + s * 9.6;
-          o += glLn(x + r * 2.9, y - 3.4, x + r * 2.9, y + 3.4, .13, 1.3);
-        }
-        x += sets[s] * 2.9 + 7;
-        if (x > 92) x = 6;
-      }
-      return o;
-    },
-    path: function () {
-      var d = 'M -6 62 C 14 30, 26 74, 44 44 S 72 16, 106 40';
-      return '<path d="' + d + '" fill="none" stroke="' + glW(.13)
-        + '" stroke-width="1.3" vector-effect="non-scaling-stroke" stroke-dasharray="0.1 5.4"'
-        + ' stroke-linecap="round"/><path d="' + d + '" fill="none" stroke="' + glW(.045)
-        + '" stroke-width="7" vector-effect="non-scaling-stroke"/>';
-    },
-    breath: function () {
-      var o = '', k;
-      for (k = 0; k < 3; k++) {
-        o += '<path d="M -6 ' + (26 + k * 14) + ' C 24 ' + (2 + k * 14) + ', 46 ' + (50 + k * 14)
-          + ', 106 ' + (20 + k * 14) + '" fill="none" stroke="' + glW(.10 - k * .025)
-          + '" stroke-width="' + (1.6 - k * .3) + '" vector-effect="non-scaling-stroke"/>';
-      }
-      return o;
-    },
-    lines: function () {
-      var o = '', y = 5, i = 0;
-      while (y < 80) {
-        if ((i % 7) === 6) { y += 3.4; i++; continue; }
-        o += '<rect x="7" y="' + y + '" width="' + (30 + ((i * 41) % 62))
-          + '" height="1.9" rx="0.9" fill="' + glW(.10) + '"/>';
-        y += 4.6; i++;
-      }
-      return o;
-    },
-    margin: function () {
-      var o = glLn(30, -2, 30, 82, .15, 1.3), y = 6, i = 0, k, run, w;
-      while (y < 80) {
-        run = 2 + (i % 3);
-        for (k = 0; k < run && y < 80; k++) {
-          w = 5 + ((i * 13 + k * 7) % 11);
-          o += glLn(30 - w, y, 30 + (k === 0 ? 7 : 3), y, k === 0 ? .16 : .08, k === 0 ? 1.5 : 1.1);
-          y += 4.4;
-        }
-        y += 5.5; i++;
-      }
-      return o;
-    },
-    compound: function () {
-      var o = '', x, y, i, d = 'M -4 76';
-      for (x = 0; x <= 100; x += 12.5) o += glLn(x, -2, x, 82, .035, .9);
-      for (y = 4; y < 80; y += 12) o += glLn(-2, y, 102, y, .035, .9);
-      for (i = 0; i <= 40; i++) {
-        var t = i / 40;
-        d += ' L ' + (t * 108 - 4).toFixed(1) + ' ' + (76 - 74 * Math.pow(t, 2.7)).toFixed(1);
-      }
-      o += '<path d="' + d + '" fill="none" stroke="' + glW(.15)
-        + '" stroke-width="1.6" vector-effect="non-scaling-stroke"/>';
-      o += '<path d="' + d + ' L 104 80 L -4 80 Z" fill="' + glW(.04) + '"/>';
-      return o;
-    },
-    broadcast: function () {
-      var o = '', i;
-      for (i = 0; i < 9; i++) {
-        o += '<circle cx="-6" cy="40" r="' + (14 + i * 12.5) + '" fill="none" stroke="'
-          + glW(.115 - i * .009) + '" stroke-width="' + (1.5 - i * .1).toFixed(2)
-          + '" vector-effect="non-scaling-stroke"/>';
-      }
-      return o + '<circle cx="-6" cy="40" r="3.4" fill="' + glW(.2) + '"/>';
-    },
-    lattice: function () {
-      var o = '', x, y, i, j;
-      for (x = 0; x <= 100; x += 16.6) o += glLn(x, -2, x, 82, .075, 1);
-      for (y = 3; y <= 79; y += 19) o += glLn(-2, y, 102, y, .075, 1);
-      for (i = 0; i < 6; i++) for (j = 0; j < 4; j++) {
-        if ((i + j) % 2) continue;
-        o += glLn(i * 16.6, 3 + j * 19, (i + 1) * 16.6, 22 + j * 19, .05, .9);
-      }
-      return o;
-    },
-    /* PRACTICE. One movement done again and again, each pass landing a
-       little off the last — which is what practice looks like from the
-       outside and is a shape no other card here has. It replaced a
-       shared `loop`: Practice and Review both had it, and two cards
-       with one drawing is the fault the whole set is checked for, even
-       when the two are in different decks. */
-    drift: function () {
-      var o = '', r, c, a, x, y;
-      for (r = 0; r < 7; r++) for (c = 0; c < 10; c++) {
-        a = (r * 10 + c) * 0.17;
-        x = 6 + c * 10; y = 8 + r * 11.4;
-        o += glLn(x - Math.cos(a) * 3.4, y - Math.sin(a) * 3.4,
-                  x + Math.cos(a) * 3.4, y + Math.sin(a) * 3.4, .11, 1.3);
-      }
-      return o;
-    },
-    /* MAKE SOMETHING. Parts of different sizes packed until they fill
-       the space — a made thing rather than the frame it was built on.
-       It replaced a shared `lattice`, which Build still has: building
-       is scaffolding and making is the object that comes off it. */
-    assemble: function () {
-      var o = '', i;
-      var parts = [[2, 2, 34, 26], [38, 2, 24, 16], [64, 2, 34, 38], [2, 30, 22, 22],
-        [26, 20, 36, 30], [2, 54, 40, 24], [44, 52, 26, 26], [64, 42, 34, 18],
-        [72, 62, 26, 16], [46, 20, 16, 14]];
-      for (i = 0; i < parts.length; i++) {
-        o += '<rect x="' + parts[i][0] + '" y="' + parts[i][1] + '" width="' + parts[i][2]
-          + '" height="' + parts[i][3] + '" rx="2" fill="' + glW(i % 3 === 0 ? .05 : .02)
-          + '" stroke="' + glW(.105) + '" stroke-width="1" vector-effect="non-scaling-stroke"/>';
-      }
-      return o;
-    },
-    columns: function () {
-      var o = glLn(-2, 70, 102, 70, .1, 1), x = 5, i = 0;
-      while (x < 100) {
-        var h = 8 + ((i * 29) % 48);
-        o += '<rect x="' + x + '" y="' + (70 - h) + '" width="5.4" height="' + h + '" fill="'
-          + glW(i % 4 === 3 ? .13 : .065) + '"/>';
-        x += 8.6; i++;
-      }
-      return o;
-    },
-    strokes: function () {
-      var o = '', i;
-      for (i = 0; i < 7; i++) {
-        var y = 6 + i * 11.5;
-        o += '<path d="M -6 ' + y + ' C 22 ' + (y - 9) + ', 46 ' + (y + 11) + ', 106 ' + (y - 4)
-          + '" fill="none" stroke="' + glW(i % 2 ? .06 : .11) + '" stroke-width="'
-          + (i % 2 ? 2.6 : 1.2) + '" vector-effect="non-scaling-stroke" stroke-linecap="round"/>';
-      }
-      return o;
-    },
-    strike: function () {
-      var o = '', y = 7, i = 0;
-      while (y < 80) {
-        var w = 34 + ((i * 47) % 56);
-        o += '<rect x="8" y="' + y + '" width="' + w + '" height="1.8" rx="0.9" fill="' + glW(.07) + '"/>';
-        if (i % 3 === 1) o += glLn(6, y + .9, 12 + w, y + .9, .16, 1.3);
-        y += 6.2; i++;
-      }
-      return o;
-    },
-    sheets: function () {
-      var o = '', i;
-      for (i = 7; i >= 0; i--) {
-        o += '<rect x="' + (10 + i * 7) + '" y="' + (6 + i * 5.4) + '" width="52" height="42" rx="3"'
-          + ' fill="' + glW(.018) + '" stroke="' + glW(.13 - i * .012)
-          + '" stroke-width="1" vector-effect="non-scaling-stroke"/>';
-      }
-      return o;
-    },
-    squared: function () {
-      var o = '', x, y;
-      for (x = 0; x <= 100; x += 5.6) o += glLn(x, -2, x, 82, x % 28 < 1 ? .11 : .05, 1);
-      for (y = 2; y <= 82; y += 5.6) o += glLn(-2, y, 102, y, (y - 2) % 28 < 1 ? .11 : .05, 1);
-      return o;
-    },
-    boxes: function () {
-      var o = '', r, c;
-      for (r = 0; r < 5; r++) for (c = 0; c < 5; c++) {
-        o += '<rect x="' + (4 + c * 19.6) + '" y="' + (4 + r * 15.4) + '" width="16" height="11.6"'
-          + ' rx="2" fill="' + glW((r + c) % 4 === 0 ? .05 : .015) + '" stroke="' + glW(.09)
-          + '" stroke-width="1" vector-effect="non-scaling-stroke"/>';
-      }
-      return o;
-    },
-    loop: function () {
-      var o = '', i;
-      for (i = 0; i < 6; i++) {
-        var y = 10 + i * 13;
-        o += '<path d="M 12 ' + y + ' C 60 ' + (y - 11) + ', 92 ' + (y + 5) + ', 88 ' + y
-          + ' C 84 ' + (y - 5) + ', 46 ' + (y + 9) + ', 12 ' + y + ' Z" fill="none" stroke="'
-          + glW(.09) + '" stroke-width="1.15" vector-effect="non-scaling-stroke"/>';
-      }
-      return o;
-    },
-    decay: function () {
-      var d = 'M -6 40', i;
-      for (i = 0; i <= 120; i++) {
-        d += ' L ' + (-6 + i * .93).toFixed(1) + ' '
-          + (40 + Math.sin(i * .42) * 30 * Math.pow(1 - i / 120, 2.1)).toFixed(1);
-      }
-      return '<path d="' + d + '" fill="none" stroke="' + glW(.15)
-        + '" stroke-width="1.4" vector-effect="non-scaling-stroke"/>' + glLn(-2, 40, 102, 40, .05, 1);
-    },
-    sunrise: function () {
-      var o = glLn(-2, 62, 102, 62, .07, 1), i;
-      for (i = 0; i < 22; i++) {
-        var x = 3 + i * 4.6, tall = i % 7 === 3;
-        o += glLn(x, 62, x, 62 - (tall ? 34 : 12), tall ? .17 : .08, tall ? 1.6 : 1.1);
-      }
-      return o;
-    },
-    pulse: function () {
-      var o = glLn(-2, 40, 102, 40, .06, 1), i;
-      for (i = 0; i < 15; i++) {
-        var x = 4 + i * 6.8, big = i % 5 === 2;
-        o += glLn(x, 40, x, 40 - (big ? 26 : 9), big ? .17 : .09, big ? 1.7 : 1.1);
-        o += glLn(x, 40, x, 40 + (big ? 26 : 9), big ? .17 : .09, big ? 1.7 : 1.1);
-      }
-      return o;
-    },
-    tally: function () {
-      var o = '', x = 5, y = 10, g, i;
-      for (g = 0; g < 14; g++) {
-        for (i = 0; i < 4; i++) o += glLn(x + i * 2.7, y, x + i * 2.7, y + 11, .12, 1.2);
-        o += glLn(x - 1.6, y + 10, x + 10.4, y + 1, .12, 1.2);
-        x += 17;
-        if (x > 92) { x = 5; y += 18; }
-      }
-      return o;
-    },
-    stack: function () {
-      var o = '', h = 0, i;
-      for (i = 0; i < 13; i++) {
-        h += 3 + (i % 3);
-        o += '<rect x="' + (3 + i * 7.6) + '" y="' + (78 - h) + '" width="6" height="' + h
-          + '" rx="1" fill="' + glW(.05) + '" stroke="' + glW(.11)
-          + '" stroke-width="1" vector-effect="non-scaling-stroke"/>';
-      }
-      return o;
-    }
-  };
-
-  /* Seeded from the name, so a suggestion the table has no drawing for
-     is never a blank card. */
-  function glHash(s) {
-    var h = 2166136261, i;
-    for (i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
-    return h >>> 0;
-  }
-  function scGoalPat(key, name) {
-    var body;
-    if (GOAL_PATS[key]) body = GOAL_PATS[key]();
-    else {
-      var s = glHash(String(name || key)), o = '', i;
-      var rnd = function () { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
-      var cx = 20 + rnd() * 60, cy = 15 + rnd() * 50, rot = rnd() * 180;
-      for (i = 1; i <= 7; i++) {
-        o += '<ellipse cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" rx="'
-          + (i * (5 + rnd() * 3)).toFixed(1) + '" ry="' + (i * (3.6 + rnd() * 2.4)).toFixed(1)
-          + '" transform="rotate(' + rot.toFixed(0) + ' ' + cx.toFixed(1) + ' ' + cy.toFixed(1)
-          + ')" fill="none" stroke="' + glW(.085 - i * .006)
-          + '" stroke-width="1.1" vector-effect="non-scaling-stroke"/>';
-      }
-      body = o;
-    }
-    return '<svg viewBox="0 0 100 80" preserveAspectRatio="xMidYMid slice" aria-hidden="true">'
-      + body + '</svg>';
-  }
-
-  /* ── THE RECORD ──
-     A damaged entry is dropped and the record is not: the goals are
-     what you cannot get back. Asserted as the good ones SURVIVING
-     rather than as the bad one being refused, because rejecting the
-     whole object passes any check written the other way round. */
-  function scGoalCleanOne(raw, arch) {
+  /* ── A DAMAGED NOTE COSTS ITS LINES, NEVER THE RECORD ──
+     The schedule's oldest rule about a stored shape: repair, do not
+     discard. A line that is not an object is dropped and the note
+     around it survives, because the note is what you cannot get back. */
+  function scNoteCleanOne(raw) {
     if (!raw || typeof raw !== 'object') return null;
-    if (typeof raw.n !== 'string' || !raw.n.trim()) return null;
-    if (!scGoalKind(raw.k)) return null;
-    var from = +raw.from, due = +raw.due;
-    if (!(from > 0) || !(due > 0)) return null;
-    var g = {
-      id: typeof raw.id === 'string' && raw.id ? raw.id : scId(),
-      n: raw.n.trim().slice(0, 80),
-      k: raw.k,
-      from: from, due: due,
-      /* was: the date it was ORIGINALLY due, kept the first time it is
-         extended. It is what the amber tag is about. */
-      was: +raw.was > 0 ? +raw.was : 0,
-      ext: Math.max(0, Math.min(120, (+raw.ext || 0) | 0)),
-      /* asked: the due date this goal has already put the checkpoint
-         up for, so it asks once rather than on every render. */
-      asked: +raw.asked > 0 ? +raw.asked : 0,
-      on: []
+    var n = {
+      id: typeof raw.id === 'string' && raw.id ? raw.id : scNtId(),
+      t: typeof raw.t === 'string' ? raw.t.slice(0, 80) : '',
+      u: typeof raw.u === 'number' && raw.u > 0 ? raw.u : Date.now(),
+      l: []
     };
-    if (arch) {
-      g.end = +raw.end > 0 ? +raw.end : due;
-      g.ok = !!raw.ok;
-      g.kept = Math.max(0, (+raw.kept || 0) | 0);
-      g.of = Math.max(0, (+raw.of || 0) | 0);
-      return g;
-    }
-    var recs = scGoalRecs(g), list = Array.isArray(raw.on) ? raw.on : [];
-    for (var i = 0; i < list.length && g.on.length < 8; i++) {
-      var x = list[i];
-      if (!x || typeof x !== 'object') continue;
-      var si = +x.si;
-      /* A component naming a suggestion this build no longer has is
-         dropped and the rest of the goal survives — scWorkoutsOf's own
-         rule, one screen over. */
-      if (!(si >= 0 && si < recs.length)) continue;
-      var len = +x.len, days = +x.days;
-      g.on.push({
-        si: si | 0,
-        len: len >= 5 && len <= 240 ? len | 0 : recs[si].full,
-        days: days >= 1 && days <= 7 ? days | 0 : 3,
-        time: (+x.time >= 0 && +x.time < 1440) ? +x.time | 0 : 18 * 60
+    var src = Array.isArray(raw.l) ? raw.l : [];
+    for (var i = 0; i < src.length && n.l.length < NOTE_LINES; i++) {
+      var r = src[i];
+      if (!r || typeof r !== 'object') continue;
+      var head = !!r.h;
+      n.l.push({
+        i: typeof r.i === 'string' && r.i ? r.i : scNtId(),
+        h: head ? 1 : 0,
+        /* A colour only means anything on a heading — it is the
+           section's, and a line's mark takes whichever section it is
+           under. Stored on the line as well would be a second record
+           of one decision. */
+        c: head ? scNtHue(r.c) : '',
+        x: typeof r.x === 'string' ? r.x.slice(0, 300) : '',
+        y: head && typeof r.y === 'string' ? r.y.slice(0, 300) : '',
+        m: (!head && r.m) ? 1 : 0
       });
     }
-    return g;
+    return n;
   }
 
-  function scGoalClean(raw) {
-    var out = { live: [], done: [] }, i, g;
-    if (!raw || typeof raw !== 'object') return out;
-    var lv = Array.isArray(raw.live) ? raw.live : [];
-    for (i = 0; i < lv.length && out.live.length < GOAL_CAP; i++) {
-      g = scGoalCleanOne(lv[i], false);
-      if (g) out.live.push(g);
-    }
-    /* THE ARCHIVE HOLDS BOTH, and dropped goals go in it marked as
-       dropped rather than vanishing. Setting and dropping the same
-       goal three times is a real fact about yourself, and this app has
-       never flattered you. It is a record, not a scoreboard, so a
-       dropped one is the flat neutral and says nothing else. */
-    var dn = Array.isArray(raw.done) ? raw.done : [];
-    for (i = 0; i < dn.length && out.done.length < 40; i++) {
-      g = scGoalCleanOne(dn[i], true);
-      if (g) out.done.push(g);
+  function scNoteClean(raw) {
+    var src = Array.isArray(raw) ? raw : (raw && Array.isArray(raw.list) ? raw.list : []);
+    var out = [];
+    for (var i = 0; i < src.length && out.length < NOTE_CAP; i++) {
+      var n = scNoteCleanOne(src[i]);
+      if (n) out.push(n);
     }
     return out;
   }
 
-  function scGoalSave() {
-    try { localStorage.setItem(GOAL_KEY, JSON.stringify(goals)); } catch (e) {}
+  function scNoteSave() {
+    try { localStorage.setItem(NOTE_KEY, JSON.stringify({ list: notes })); } catch (e) {}
   }
+  /* Typing writes on a timer rather than per keystroke: a note is one
+     localStorage key and a character is not worth a whole-key write.
+     Flushed on every structural change and on leaving the screen, so
+     nothing waits on the timer to be durable. */
+  function scNoteSaveSoon() {
+    clearTimeout(ntSaveT);
+    ntSaveT = setTimeout(scNoteSave, 500);
+  }
+  function scNoteFlush() { clearTimeout(ntSaveT); scNoteSave(); }
+  /* AND THE PAGE GOING AWAY IS THE ONE EXIT THE APP DOES NOT CONTROL.
+     Leaving the tab flushes, and so does every structural change — but
+     a phone backgrounding the app, a tab closing or a reload does
+     neither, and half a second of typing is a whole sentence.
+     `pagehide` rather than `beforeunload`, which iOS does not fire for
+     a page going into the background at all. */
+  window.addEventListener('pagehide', scNoteFlush);
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') scNoteFlush();
+  });
 
-  function scGoalLoad() {
+  function scNoteLoad() {
     var raw = null;
-    try { raw = JSON.parse(localStorage.getItem(GOAL_KEY)); } catch (e) { raw = null; }
-    if (raw === null) { goals = { live: [], done: [] }; return; }
+    try { raw = JSON.parse(localStorage.getItem(NOTE_KEY)); } catch (e) { raw = null; }
+    if (raw === null) { notes = []; return; }
     var before = JSON.stringify(raw);
-    goals = scGoalClean(raw);
-    /* ── AND THE REPAIR IS WRITTEN BACK ──
-       scClean mints an id for a goal that has none, and a repair held
-       only in memory is redone every boot and lost the moment anything
-       else writes the key. That hole has shipped three times in this
-       app already — block ids, the summed workout estimate, and Mind's
-       unknown kind. Only when something actually CHANGED, so an intact
+    notes = scNoteClean(raw);
+    /* THE REPAIR IS WRITTEN BACK — the fourth time this hole has been
+       found in this file. A repair held only in memory is redone every
+       boot and lost the moment anything else writes the key, which is
+       how "repaired, not discarded" quietly becomes "discarded on the
+       next write". Only when something actually changed, so an intact
        record costs no write on every open. */
-    if (JSON.stringify(goals) !== before) scGoalSave();
+    if (JSON.stringify({ list: notes }) !== before) scNoteSave();
   }
 
-  /* ── THE DOSE ──
-     Days a week move first; length holds until it reaches the floor
-     and then another day goes instead. */
-  var GL_WEEK = 6048e5;
-
-  /* Midnight LOCAL, never toISOString — the day a goal is due is a
-     date on your calendar, and UTC hands back yesterday for most of
-     the evening west of Greenwich. scDay already keeps that rule for
-     the tick log; this is the same rule as a timestamp. */
-  function scGlMid(d) {
-    var x = new Date(d || Date.now());
-    x.setHours(0, 0, 0, 0);
-    return +x;
+  function scNoteById(id) {
+    for (var i = 0; i < notes.length; i++) if (notes[i].id === id) return notes[i];
+    return null;
   }
 
-  function scGoalWeeks(g) {
-    return Math.max(1, Math.round((g.due - scGlMid()) / GL_WEEK));
+  /* The note's own colour is its FIRST heading's, derived rather than
+     set: a second colour to choose, that had to agree with the
+     sections inside it, is one decision too many for a thing whose
+     only job is to be recognised on a row. */
+  function scNoteHue(n) {
+    for (var i = 0; i < n.l.length; i++) if (n.l[i].h) return n.l[i].c;
+    return '';
   }
-
-  function scGoalDose(s, wk) {
-    if (s.weekly) return { len: s.full, days: 1 };
-    var target = Math.max(s.floor * 2, s.full * 5 * Math.min(1, 8 / Math.max(1, wk)));
-    var len = s.full, days = Math.round(target / len);
-    while (days < 2 && len > s.floor) {
-      len = Math.max(s.floor, len - 5);
-      days = Math.round(target / len);
+  function scNoteHues(n) {
+    var out = [];
+    n.l.forEach(function (L) {
+      if (L.h && L.c && out.indexOf(L.c) < 0) out.push(L.c);
+    });
+    return out.slice(0, 5);
+  }
+  function scNoteTitle(n) { return n.t || 'Untitled'; }
+  function scNoteCount(n) {
+    var lines = 0, marked = 0;
+    n.l.forEach(function (L) { if (!L.h) { lines++; if (L.m) marked++; } });
+    return { lines: lines, marked: marked };
+  }
+  /* The first thing you actually wrote, headings skipped — a preview
+     that opens with "Negative" tells you nothing the title did not. */
+  function scNotePrev(n) {
+    var out = [];
+    for (var i = 0; i < n.l.length && out.length < 3; i++) {
+      if (!n.l[i].h && n.l[i].x.trim()) out.push(n.l[i].x.trim());
     }
-    return { len: len, days: Math.max(1, Math.min(6, days)) };
+    return out.join(' · ');
+  }
+  /* Which section a line is in, walking back for the nearest heading.
+     A line above every heading has no section and no colour — and it
+     is drawn unmarked rather than defaulted to one, because a colour
+     nobody chose is the wheel arriving through the back door. */
+  function scNoteSect(n, idx) {
+    for (var i = idx; i >= 0; i--) if (n.l[i].h) return n.l[i].c;
+    return '';
   }
 
-  function scGoalDoseLine(d) {
-    if (d.days >= 6) return scDurShort(d.len) + ' a day';
-    if (d.days === 1) return scDurShort(d.len) + ', once a week';
-    return scDurShort(d.len) + ', ' + d.days + ' days a week';
-  }
+  /* ═══════════════════════════
+     THE LIST
+     ═══════════════════════════ */
 
-  function scGoalWin(wk) {
-    if (wk >= 52) { var y = Math.round(wk / 52); return y + (y === 1 ? ' year' : ' years'); }
-    if (wk >= 8) return Math.round(wk / 4.34) + ' months';
-    return wk + (wk === 1 ? ' week' : ' weeks');
-  }
-
-  function scGoalWhy2(wk, d) {
-    var w = scGoalWin(wk);
-    if (d.days === 1) return w + ' of this is a weekly job, not a daily one — once, properly.';
-    if (d.days >= 6) return w + ' is short, so it runs every day, at a length short enough to finish.';
-    if (d.days >= 4) return w + ' leaves room for ' + d.days
-      + ' days a week and three evenings that owe you nothing.';
-    return w + ' is long enough to go ' + d.days
-      + ' days a week at a real length, rather than a token every day.';
-  }
-
-  /* The times you already use, narrowed to the part of the day the
-     suggestion belongs in — scCommonTimes' own list, filtered rather
-     than a second one written here. */
-  function scGoalTimes(ses) {
-    var band = ses === 'm' ? [4 * 60, 12 * 60] : ses === 'a' ? [12 * 60, 17 * 60] : [17 * 60, 23 * 60 + 30];
-    var mine = scCommonTimes('s', '').filter(function (t) { return t >= band[0] && t < band[1]; });
-    var dflt = ses === 'm' ? [6 * 60 + 30, 8 * 60, 9 * 60] : ses === 'a' ? [12 * 60, 14 * 60, 16 * 60]
-      : [18 * 60, 19 * 60, 20 * 60, 21 * 60];
-    dflt.forEach(function (t) { if (mine.indexOf(t) < 0) mine.push(t); });
-    return mine.sort(function (a, b) { return a - b; }).slice(0, 4);
-  }
-
-  /* WHICH DAYS a dose lands on. Spread rather than stacked, so three a
-     week is Monday, Wednesday, Friday and not the first three days of
-     it — a process bunched into the front of the week is one you have
-     already failed by Thursday. */
-  var GL_DAYS = { 1: [0], 2: [2, 5], 3: [1, 3, 5], 4: [1, 2, 4, 5], 5: [1, 2, 3, 4, 5],
-    6: [1, 2, 3, 4, 5, 6], 7: [0, 1, 2, 3, 4, 5, 6] };
-
-  /* ── HOW MUCH OF IT YOU ACTUALLY KEPT ──
-     Read off blockLog rather than stored, because the block is the
-     record and a second count would be a copy that drifts. The app
-     cannot know how profitable you are; it knows exactly how many
-     sessions you kept, and the process is what this reports. */
-  function scGoalKept(g) {
-    var kept = 0, of = 0;
-    var mine = state.items.filter(function (it) { return it.g === g.id; });
-    if (!mine.length) return { kept: 0, of: 0 };
-    var end = new Date(), start = new Date(Math.max(g.from, end - 90 * 864e5));
-    for (var t = scGlMid(start); t <= scGlMid(end); t += 864e5) {
-      var day = new Date(t), key = scDay(day), dow = day.getDay();
-      /* Today is not a day you missed it — the day is not over. */
-      if (key === scDay(end)) continue;
-      mine.forEach(function (it) {
-        if (it.d !== dow) return;
-        of++;
-        if (blockLog[key] && blockLog[key][it.id]) kept++;
-      });
-    }
-    return { kept: kept, of: of };
-  }
-
-  /* ── THE SCREEN ──
-     Two states in one pane: the goals, and one goal's cards. A goal
-     you press replaces the list rather than unfolding under it,
-     because the card is 286px and an unfold puts the second goal below
-     the fold before you have decided anything. */
-  function scPaintGoals() {
-    var pane = $('scGoalPane');
+  function scPaintNotes() {
+    var pane = $('scNotePane');
     if (!pane) return;
     pane.textContent = '';
-    var g = glOpen ? scGoalById(glOpen) : null;
-    if (g) scGoalDeck(pane, g); else scGoalList(pane);
-  }
+    var open = ntOpen ? scNoteById(ntOpen) : null;
+    if (open) { scPaintNote(pane, open); return; }
+    ntOpen = null;
 
-  function scGoalById(id) {
-    for (var i = 0; i < goals.live.length; i++) if (goals.live[i].id === id) return goals.live[i];
-    return null;
-  }
-
-  /* ── THE TAG THAT SAYS IT RAN LONG ──
-     Amber, and NOT red. Red already means one thing in this app —
-     Missed, on a block whose hour came and went — and an extended goal
-     is one you are still doing, so red would say the opposite of what
-     happened. Amber is the honest register for "past where it was
-     meant to be" without the verdict, and it is far enough from red
-     that the two can never be misread for each other.
-
-     THE COLOUR CARRIES THE OVERRUN AND THE WORDS CARRY HOW MUCH. It
-     STAYS amber once extended, even while the new date is still ahead:
-     "this ran past what you planned" goes on being true, and a colour
-     that resets loses the at-a-glance read the tag exists for.
-
-     ONLY THE TAG. Not the countdown, not the card's edge, not the
-     title — one mark, one claim, or an overrunning goal is the loudest
-     thing on the screen, which is the wash-of-red problem arriving by
-     another door.
-
-     This is a deliberate reversal of "colour never says whether", the
-     way Missed was, and it is written down here rather than smuggled
-     in as a relaxed rule. */
-  function scGoalTags(g) {
-    var box = scEl('div', 'gl-tags');
-    var kk = scGoalKind(g.k);
-    var t1 = scEl('span', 'gl-tag', kk ? kk.n : g.k);
-    box.appendChild(t1);
-    var t2 = scEl('span', 'gl-tag' + (g.ext ? ' is-over' : ''),
-      g.ext ? 'Extended · +' + g.ext + ' months' : scGoalWin(scGoalWeeks(g)) + ' left');
-    box.appendChild(t2);
-    return box;
-  }
-
-  function scGoalList(pane) {
-    var head = scEl('div', 'grp-h');
-    head.appendChild(scEl('b', null, 'Live goals'));
-    head.appendChild(scEl('span', 'pill', goals.live.length + ' of ' + GOAL_CAP));
-    pane.appendChild(head);
-
-    if (!goals.live.length) {
-      var e = scEl('p', 'gl-none');
-      e.appendChild(scEl('b', null, 'Nothing yet.'));
-      e.appendChild(document.createTextNode(
-        ' A goal here turns into blocks on your week — say what you are'
-        + ' working on and by when, and it does the rest.'));
+    if (!notes.length) {
+      var e = scEl('p', 'nt-none');
+      e.innerHTML = 'Nothing written down yet. <b>Press the plus</b> and the '
+        + 'first note opens on an empty line.';
       pane.appendChild(e);
+      return;
     }
-
-    goals.live.forEach(function (g) {
-      var b = scEl('button', 'gl-card');
-      b.appendChild(scEl('span', 'gl-n', g.n));
-      b.appendChild(scGoalTags(g));
-      var k = scGoalKept(g);
-      var f = scEl('span', 'gl-f', g.on.length
-        ? g.on.length + ' in your week' + (k.of ? ' · kept ' + k.kept + ' of ' + k.of : '')
-        : 'Nothing on your week yet');
-      b.appendChild(f);
-      b.addEventListener('click', function () { glOpen = g.id; glIdx = 0; scPaintGoals(); });
-      pane.appendChild(b);
+    /* Newest first, which is the one order a list of notes can be in
+       without somebody having to file anything. */
+    notes.slice().sort(function (a, b) { return b.u - a.u; }).forEach(function (n) {
+      var card = scEl('button', 'nt-card');
+      card.type = 'button';
+      card.appendChild(scEl('b', 'nt-t', scNoteTitle(n)));
+      var pv = scNotePrev(n);
+      if (pv) card.appendChild(scEl('p', 'nt-p', pv));
+      var hues = scNoteHues(n);
+      if (hues.length) {
+        var dots = scEl('span', 'nt-dots');
+        hues.forEach(function (h) {
+          var d = scEl('i');
+          d.style.background = scNtVar(h);
+          dots.appendChild(d);
+        });
+        card.appendChild(dots);
+      }
+      var c = scNoteCount(n);
+      card.appendChild(scEl('span', 'nt-meta',
+        c.lines + (c.lines === 1 ? ' line' : ' lines')
+        + (c.marked ? ' · ' + c.marked + ' marked' : '')
+        + ' · ' + scAgo(n.u)));
+      card.addEventListener('click', function () { ntOpen = n.id; scPaintNotes(); });
+      pane.appendChild(card);
     });
-
-    if (goals.live.length < GOAL_CAP) {
-      var add = scEl('button', 'gl-new');
-      add.appendChild(scEl('span', 'gl-plus', '+'));
-      add.appendChild(scEl('span', null, 'New goal'));
-      add.addEventListener('click', scGoalNewSheet);
-      pane.appendChild(add);
-    } else {
-      pane.appendChild(scEl('p', 'hint gl-cap',
-        'Three is the cap. Finish or drop one before you set another —'
-        + ' a goals screen with nine things on it is a wish list.'));
-    }
-
-    if (goals.done.length) scGoalArchive(pane);
   }
 
-  /* Folded shut, and remembered per visit only. A completed goal does
-     not earn a tab, and a list of names is a trophy cabinet you look
-     at twice — what makes it a record is that each one keeps what its
-     process WAS and how much of it you kept. Six months later the
-     useful half is not that you did it, it is what you actually did. */
-  function scGoalArchive(pane) {
-    var wrap = scEl('div', 'gl-arch');
-    var h = scEl('h3', 'grp-h');
-    var btn = scEl('button', 'gl-fold');
-    btn.type = 'button';
-    btn.setAttribute('aria-expanded', String(!!glArchOpen));
-    btn.setAttribute('aria-controls', 'scGoalArch');
-    btn.appendChild(scEl('b', null, 'Archive'));
-    btn.appendChild(scEl('span', 'pill', String(goals.done.length)));
-    var chev = scEl('span', 'gl-chev');
-    chev.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
-    btn.appendChild(chev);
-    btn.addEventListener('click', function () { glArchOpen = !glArchOpen; scPaintGoals(); });
-    h.appendChild(btn);
-    wrap.appendChild(h);
+  /* ═══════════════════════════
+     ONE NOTE
 
-    var box = scEl('div', 'gl-arch-b');
-    box.id = 'scGoalArch';
-    box.hidden = !glArchOpen;
-    goals.done.forEach(function (g) {
-      var c = scEl('div', 'gl-card is-arch');
-      c.appendChild(scEl('span', 'gl-n', g.n));
-      var tg = scEl('div', 'gl-tags');
-      tg.appendChild(scEl('span', 'gl-tag' + (g.ok ? ' is-ok' : ''), g.ok ? 'Done' : 'Dropped'));
-      c.appendChild(tg);
-      var mo = Math.max(1, Math.round((g.end - g.from) / 26298e5));
-      c.appendChild(scEl('span', 'gl-f', mo + (mo === 1 ? ' month' : ' months')
-        + (g.of ? ' · kept ' + g.kept + ' of ' + g.of + ' sessions' : '')));
-      box.appendChild(c);
-    });
-    wrap.appendChild(box);
-    pane.appendChild(wrap);
+     A stack of rows, each of them a real field. Return makes the next
+     line, Backspace at the head of an empty one takes it away, and
+     there is no per-row furniture at all — which is the whole reason
+     those two keys do the work: a delete control on every line is a
+     column of controls down a screen whose job is the words.
+
+     THE CONTROLS APPEAR ON THE LINE THAT HAS FOCUS, which is
+     `.row-ed`'s own pattern one screen over. One strip, moved, rather
+     than a toolbar that is always up or a gesture nothing can name.
+     ═══════════════════════════ */
+
+  function scNoteGrow(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
   }
-  var glArchOpen = false;
 
-  /* ── ONE CARD ──
-     Not a hand. A stack behind it says these are ALTERNATIVES, and a
-     process is a set — you may well want three of them. The chips are
-     the pager and the card in front is the whole of what is drawn. */
-  function scGoalDeck(pane, g) {
-    var recs = scGoalRecs(g), wk = scGoalWeeks(g);
-    if (glIdx >= recs.length) glIdx = 0;
-
-    var crumb = scEl('div', 'gl-crumb');
-    var back = scEl('button', 'gl-back');
-    back.setAttribute('aria-label', 'All goals');
-    back.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
-    back.addEventListener('click', function () { glOpen = null; scPaintGoals(); });
+  function scPaintNote(pane, n, focus, caret) {
+    var crumb = scEl('div', 'nt-crumb');
+    var back = scEl('button', 'nt-back');
+    back.type = 'button';
+    back.setAttribute('aria-label', 'All notes');
+    back.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+      + '<path d="M15 5l-7 7 7 7"/></svg>';
+    back.addEventListener('click', function () {
+      scNoteFlush(); ntOpen = null; scPaintNotes();
+    });
     crumb.appendChild(back);
-    crumb.appendChild(scEl('b', null, g.n));
+    /* The title is a field like every line is, rather than a sheet you
+       open to rename it: there is nothing else on this screen you have
+       to leave in order to change. */
+    var ti = scEl('input', 'nt-title');
+    ti.type = 'text';
+    ti.value = n.t;
+    ti.placeholder = 'Title';
+    ti.setAttribute('aria-label', 'Note title');
+    ti.addEventListener('input', function () {
+      n.t = ti.value.slice(0, 80); n.u = Date.now(); scNoteSaveSoon();
+    });
+    crumb.appendChild(ti);
     pane.appendChild(crumb);
-    pane.appendChild(scGoalTags(g));
 
-    var chips = scEl('div', 'gl-chips');
-    recs.forEach(function (s, i) {
-      var c = scEl('button', 'gl-chip', s.n);
-      c.setAttribute('aria-pressed', String(i === glIdx));
-      if (scGoalOn(g, i)) c.classList.add('is-on');
-      c.addEventListener('click', function () { glIdx = i; scPaintGoals(); });
-      chips.appendChild(c);
-    });
-    pane.appendChild(chips);
+    var body = scEl('div', 'nt-body');
+    pane.appendChild(body);
 
-    var s = recs[glIdx], on = scGoalOn(g, glIdx), d = on ? on : scGoalDose(s, wk);
-    var card = scEl('div', 'gl-wc');
-    card.style.setProperty('--gl-h', GL_HUES[glIdx % GL_HUES.length]);
-    var pat = scEl('div', 'gl-pat');
-    pat.innerHTML = scGoalPat(s.p, s.n);
-    card.appendChild(pat);
-    var body = scEl('div', 'gl-body');
-    body.appendChild(scEl('span', 'gl-lab', on ? 'On your week' : 'Suggested'));
-    body.appendChild(scEl('span', 'gl-nm', s.n));
-    body.appendChild(scEl('span', 'gl-ds', scGoalDoseLine(d)
-      + (on ? ' · ' + scT(on.time) : '')));
-    /* ── ONE DESCRIPTION ON THE CARD, AND IT IS THE LONG ONE ──
-       There were two lines: what the block does, and why THIS dose.
-       The second went from here, and taking it out is what made room
-       for the first to be worth reading. It was also the weaker half
-       ON THIS SURFACE — the dose is printed in figures two lines
-       above it, so a sentence restating "3 days a week" in words is
-       the duplication this project keeps having to take back out.
+    var tools = scEl('div', 'nt-tools');
+    tools.hidden = true;
+    /* Pressing a control must not take focus off the line it is
+       about — the line IS the argument to every one of them. */
+    tools.addEventListener('pointerdown', function (ev) { ev.preventDefault(); });
 
-       It survives on the ADD SHEET, which is the one place it earns
-       its line: that is where you are choosing the dose, so the
-       sentence explains the default your thumb is about to move. The
-       card answers why the thing matters; the sheet answers why this
-       much of it. */
-    body.appendChild(scEl('p', 'gl-w', s.w));
-    card.appendChild(body);
-    pane.appendChild(card);
+    var live = -1;
 
-    if (on) {
-      var off = scEl('button', 'btn gl-off', 'Take it off your week');
-      off.addEventListener('click', function () { scGoalRemove(g, glIdx); });
-      pane.appendChild(off);
-    } else {
-      var go = scEl('button', 'btn go gl-go', 'Set a time and add');
-      go.addEventListener('click', function () { scGoalAddSheet(g, glIdx); });
-      pane.appendChild(go);
+    function redraw(fi, fc) {
+      pane.textContent = '';
+      scPaintNote(pane, n, fi, fc);
     }
-    pane.appendChild(scEl('p', 'hint gl-count',
-      (glIdx + 1) + ' of ' + recs.length + ' · step the chips'));
 
-    var ctl = scEl('div', 'gl-ctl');
-    ctl.appendChild(scGoalBtn('Mark it done', function () { scGoalFinish(g, true); }));
-    ctl.appendChild(scGoalBtn('Extend', function () { scGoalExtend(g); }));
-    ctl.appendChild(scGoalBtn('Drop it', function () { scGoalFinish(g, false); }));
-    pane.appendChild(ctl);
-  }
+    function fill() {
+      tools.textContent = '';
+      if (live < 0 || !n.l[live]) return;
+      var L = n.l[live];
+      var hb = scEl('button', 'nt-tool' + (L.h ? ' is-on' : ''));
+      hb.type = 'button';
+      hb.textContent = 'Heading';
+      hb.setAttribute('aria-pressed', L.h ? 'true' : 'false');
+      hb.addEventListener('click', function () {
+        n.u = Date.now();
+        if (L.h) { L.h = 0; L.c = ''; L.y = ''; }
+        else { L.h = 1; L.m = 0; L.c = L.c || scNoteSect(n, live) || 'blue'; }
+        scNoteFlush(); redraw(L.i, null);
+      });
+      tools.appendChild(hb);
 
-  function scGoalBtn(label, fn) {
-    var b = scEl('button', 'gl-mini', label);
-    b.addEventListener('click', fn);
-    return b;
-  }
-
-  /* Nine hues, the workout cards' own argument: a colour that says
-     WHICH has to be the same at every angle of the wheel. These are
-     literals for the reason those are. */
-  var GL_HUES = ['#e3b341', '#5fa8e8', '#a98be8', '#57c77e'];
-
-  function scGoalOn(g, si) {
-    for (var i = 0; i < g.on.length; i++) if (g.on[i].si === si) return g.on[i];
-    return null;
-  }
-
-  /* ── THE ADD ──
-     The dose arrives already answered and is still one tap to move,
-     which is the workout ladder's rule: the figure the card is SHOWING
-     you has to be pressable, or the control disagrees with the thing
-     above it.
-
-     AND THE COST OF THE DAY, BEFORE AND AFTER. The app already knows
-     the hours on a day — the head prints them — and nothing else uses
-     the figure. Drawn at the one moment it can change your mind. */
-  function scGoalAddSheet(g, si) {
-    var recs = scGoalRecs(g), s = recs[si], wk = scGoalWeeks(g);
-    var d = scGoalDose(s, wk);
-    var len = d.len, days = d.days, at = scGoalTimes(s.ses)[0];
-
-    scSheet(s.n, function (body) {
-      var draw = function () {
-        body.textContent = '';
-
-        /* NOT the description again — you have just read it on the
-           card you pressed to get here, and repeating a paragraph
-           above three ladders is a sheet you scroll past. What this
-           line says is why the dose is what it is, which is the
-           question the controls under it are about. */
-        body.appendChild(scEl('p', 'gl-sw is-dim',
-          scGoalWhy2(wk, { len: len, days: days })));
-
-        body.appendChild(scEl('p', 'label', 'How long'));
-        var lad = scEl('div', 'gl-lad');
-        var rungs = [10, 15, 20, 30, 45, 60, 75, 90].filter(function (m) { return m >= s.floor; });
-        if (rungs.indexOf(len) < 0) { rungs.push(len); rungs.sort(function (a, b) { return a - b; }); }
-        rungs.slice(0, 8).forEach(function (m) {
-          var r = scEl('button', 'gl-rung', String(m));
-          r.setAttribute('aria-pressed', String(m === len));
-          r.addEventListener('click', function () { len = m; draw(); });
-          lad.appendChild(r);
+      if (L.h) {
+        var sw = scEl('div', 'nt-sw');
+        NT_HUES.forEach(function (h) {
+          var b = scEl('button', 'nt-c' + (L.c === h ? ' is-on' : ''));
+          b.type = 'button';
+          b.style.setProperty('--c', scNtVar(h));
+          b.setAttribute('aria-label', h);
+          b.setAttribute('aria-pressed', L.c === h ? 'true' : 'false');
+          b.addEventListener('click', function () {
+            L.c = h; n.u = Date.now(); scNoteFlush(); redraw(L.i, null);
+          });
+          sw.appendChild(b);
         });
-        body.appendChild(lad);
-
-        body.appendChild(scEl('p', 'label', 'Days a week'));
-        var lad2 = scEl('div', 'gl-lad');
-        [1, 2, 3, 4, 5, 6].forEach(function (n) {
-          var r = scEl('button', 'gl-rung is-w', String(n));
-          r.setAttribute('aria-pressed', String(n === days));
-          r.addEventListener('click', function () { days = n; draw(); });
-          lad2.appendChild(r);
+        tools.appendChild(sw);
+      } else {
+        /* No colour to choose on a line: a mark takes its SECTION's,
+           which is the whole of what stopped this screen having nine
+           coloured bars down it. The button is disabled above the
+           first heading rather than hidden, because a control that
+           comes and goes as you move down a note is worse than one
+           that is plainly not available yet. */
+        var sect = scNoteSect(n, live);
+        var mb = scEl('button', 'nt-tool nt-mkb' + (L.m ? ' is-on' : ''));
+        mb.type = 'button';
+        mb.textContent = 'Mark';
+        mb.setAttribute('aria-pressed', L.m ? 'true' : 'false');
+        if (sect) mb.style.setProperty('--c', scNtVar(sect));
+        else mb.disabled = true;
+        mb.addEventListener('click', function () {
+          if (!sect) return;
+          L.m = L.m ? 0 : 1; n.u = Date.now(); scNoteFlush(); redraw(L.i, null);
         });
-        body.appendChild(lad2);
+        tools.appendChild(mb);
+      }
+    }
 
-        body.appendChild(scEl('p', 'label', 'When'));
-        var lad3 = scEl('div', 'gl-lad');
-        var times = scGoalTimes(s.ses);
-        if (times.indexOf(at) < 0) { times.push(at); times.sort(function (a, b) { return a - b; }); }
-        times.slice(0, 4).forEach(function (t) {
-          var r = scEl('button', 'gl-rung', scT(t));
-          r.setAttribute('aria-pressed', String(t === at));
-          r.addEventListener('click', function () { at = t; draw(); });
-          lad3.appendChild(r);
-        });
-        body.appendChild(lad3);
+    function show(idx, row) {
+      live = idx;
+      fill();
+      tools.hidden = false;
+      if (row.nextSibling !== tools) body.insertBefore(tools, row.nextSibling);
+    }
 
-        /* WHAT THE DAY COSTS. The first weekday this dose lands on,
-           since that is the one it actually changes. */
-        var dows = GL_DAYS[days] || GL_DAYS[3];
-        var dow = dows[0], had = 0;
-        state.items.forEach(function (it) { if (it.d === dow) had += (it.e - it.s); });
-        body.appendChild(scEl('p', 'label', 'What it costs'));
-        var cost = scEl('p', 'gl-sw is-dim');
-        cost.appendChild(document.createTextNode(FULL[dow] + ' goes from '));
-        cost.appendChild(scEl('b', null, scDurShort(had)));
-        cost.appendChild(document.createTextNode(' to '));
-        cost.appendChild(scEl('b', null, scDurShort(had + len)));
-        cost.appendChild(document.createTextNode('.'));
-        body.appendChild(cost);
+    n.l.forEach(function (L, idx) {
+      var row = scEl('div', 'nt-row' + (L.h ? ' is-head' : ''));
+      if (L.h) row.style.setProperty('--c', scNtVar(L.c));
 
-        var go = scEl('button', 'btn go', 'Add to ' + days + ' ' + (days === 1 ? 'day' : 'days') + ' a week');
-        go.addEventListener('click', function () { scGoalCommit(g, si, len, days, at); });
-        body.appendChild(go);
-        var no = scEl('button', 'btn off', 'Not now');
-        no.addEventListener('click', scClose);
-        body.appendChild(no);
+      var mark = function (el) {
+        el.addEventListener('focus', function () { show(idx, row); });
       };
-      draw();
-    });
-  }
 
-  /* ── THE BLOCK CARRIES ITS GOAL ──
-     One field, and it is what lets the goal answer the only question
-     worth asking it: am I actually doing this. What it must NOT do is
-     change what anything else counts — scShareWork sends how many
-     BLOCKS you kept, and a block from a goal is a block you kept. */
-  function scGoalCommit(g, si, len, days, at) {
-    var s = scGoalRecs(g)[si];
-    var dows = GL_DAYS[days] || GL_DAYS[3];
-    scMark();
-    dows.forEach(function (d) {
-      var e = Math.min(1440, at + len);
-      if (e <= at) return;
-      state.items.push({ id: scId(), d: d, s: at, e: e, r: '', n: s.n, k: [], g: g.id });
-    });
-    g.on.push({ si: si, len: len, days: days, time: at });
-    scGoalSave();
-    scClose();
-    scCommit(s.n + ' · ' + scGoalDoseLine({ len: len, days: days }));
-    scPaintGoals();
-  }
+      if (L.h) {
+        /* ── TWO FIELDS, BECAUSE THE HEADING IS TWO THINGS ──
+           "Negative — what takes away from me" is a NAME and an
+           explanation, and only the name is a label. Written as one
+           field the two would have to be split back out of the string
+           on every render, and a dash somebody typed in the middle of
+           a name would be read as the seam. Two fields, two values,
+           nothing parsed. */
+        var w = scEl('input', 'nt-hw');
+        w.type = 'text'; w.value = L.x; w.placeholder = 'Heading';
+        w.setAttribute('aria-label', 'Section name');
+        w.addEventListener('input', function () {
+          L.x = w.value.slice(0, 300); n.u = Date.now(); scNoteSaveSoon();
+        });
+        mark(w);
+        row.appendChild(w);
 
-  function scGoalRemove(g, si) {
-    var s = scGoalRecs(g)[si];
-    scMark();
-    state.items = state.items.filter(function (it) {
-      return !(it.g === g.id && it.n === s.n);
-    });
-    g.on = g.on.filter(function (x) { return x.si !== si; });
-    scGoalSave();
-    scCommit(s.n + ' taken off your week');
-    scPaintGoals();
-  }
+        var cl = scEl('input', 'nt-hc');
+        cl.type = 'text'; cl.value = L.y || ''; cl.placeholder = 'what it is';
+        cl.setAttribute('aria-label', 'What the section is');
+        cl.addEventListener('input', function () {
+          L.y = cl.value.slice(0, 300); n.u = Date.now(); scNoteSaveSoon();
+        });
+        mark(cl);
+        row.appendChild(cl);
+        row.appendChild(scEl('span', 'nt-hr'));
+      } else {
+        var sect = scNoteSect(n, idx);
+        /* ── THE MARK IS A MIRROR BEHIND THE FIELD ──
+           The swipe is fitted to the WORDS, and a textarea's own
+           background fills its box — so a wash written on the field
+           would run the width of the column and fade at a place that
+           has nothing to do with where the sentence ends. The mirror
+           carries the same text with the same metrics, draws the wash
+           behind it and paints no ink; the field sits on top with the
+           ink and no ground. They wrap identically because every
+           property that decides wrapping is set on both. */
+        var mir = scEl('div', 'nt-mir');
+        var sp = scEl('span', L.m && sect ? 'is-mk' : '');
+        if (L.m && sect) sp.style.setProperty('--c', scNtVar(sect));
+        sp.textContent = L.x;
+        mir.appendChild(sp);
+        mir.setAttribute('aria-hidden', 'true');
+        row.appendChild(mir);
 
-  /* ── ONLY YOU END A GOAL ──
-     The date is a checkpoint, not an ending. When it arrives the goal
-     asks once — still on it, done, or drop it — and nothing expires on
-     its own. `asked` records which due date it has already put the
-     question for, so extending sets a new date and a new question
-     rather than asking again on the next render. */
-  function scGoalDueOne() {
-    var now = scGlMid();
-    for (var i = 0; i < goals.live.length; i++) {
-      var g = goals.live[i];
-      if (g.due <= now && g.asked !== g.due) return g;
+        var f = scEl('textarea', 'nt-in');
+        f.rows = 1;
+        f.value = L.x;
+        f.setAttribute('aria-label', 'Line');
+        f.addEventListener('input', function () {
+          L.x = f.value.slice(0, 300);
+          sp.textContent = L.x;
+          scNoteGrow(f);
+          n.u = Date.now();
+          scNoteSaveSoon();
+        });
+        f.addEventListener('keydown', function (ev) {
+          if (ev.key === 'Enter') {
+            ev.preventDefault();
+            /* Split at the caret, which is what a return in the middle
+               of a sentence means everywhere else somebody has typed. */
+            var at = f.selectionStart, rest = f.value.slice(at);
+            L.x = f.value.slice(0, at);
+            var add = { i: scNtId(), h: 0, c: '', x: rest, y: '', m: 0 };
+            if (n.l.length < NOTE_LINES) n.l.splice(idx + 1, 0, add);
+            n.u = Date.now(); scNoteFlush(); redraw(add.i, 0);
+            return;
+          }
+          if (ev.key === 'Backspace' && f.selectionStart === 0
+              && f.selectionEnd === 0 && idx > 0) {
+            var pr = n.l[idx - 1];
+            /* Merging into a HEADING would put a sentence inside a
+               section name, so a line backspacing onto one only
+               deletes itself when it is empty. */
+            if (pr.h && f.value) return;
+            ev.preventDefault();
+            var join = pr.h ? (pr.y || '').length : pr.x.length;
+            if (!pr.h) pr.x = (pr.x + f.value).slice(0, 300);
+            else if (f.value) pr.y = ((pr.y || '') + f.value).slice(0, 300);
+            n.l.splice(idx, 1);
+            n.u = Date.now(); scNoteFlush(); redraw(pr.i, join);
+          }
+        });
+        mark(f);
+        row.appendChild(f);
+      }
+      body.appendChild(row);
+    });
+
+    /* One empty line on a note with none, so there is always something
+       to type in — an empty note with no field is a screen that looks
+       like it has failed to load. */
+    if (!n.l.length) {
+      n.l.push({ i: scNtId(), h: 0, c: '', x: '', y: '', m: 0 });
+      pane.textContent = '';
+      scPaintNote(pane, n, n.l[0].i, 0);
+      return;
     }
-    return null;
-  }
 
-  function scGoalCheck() {
-    var g = scGoalDueOne();
-    if (!g || sheetOpen) return;
-    scSheet('Still on it?', function (body) {
-      body.appendChild(scEl('p', 'gl-sw', g.n));
-      body.appendChild(scEl('p', 'gl-sw is-dim',
-        'The date you set has come round. Nothing happens to a goal'
-        + ' until you say so — this is the only thing that ends one.'));
-      var ext = scEl('button', 'btn go', 'Still on it · give it 2 more months');
-      ext.addEventListener('click', function () { g.asked = 0; scGoalExtend(g); });
-      body.appendChild(ext);
-      var dn = scEl('button', 'btn off', 'Done — put it in the archive');
-      dn.addEventListener('click', function () { scGoalFinish(g, true); });
-      body.appendChild(dn);
-      var dr = scEl('button', 'btn off', 'Drop it');
-      dr.addEventListener('click', function () { scGoalFinish(g, false); });
-      body.appendChild(dr);
+    var add = scEl('button', 'nt-add');
+    add.type = 'button';
+    add.textContent = '+  Line';
+    add.addEventListener('click', function () {
+      if (n.l.length >= NOTE_LINES) return;
+      var L = { i: scNtId(), h: 0, c: '', x: '', y: '', m: 0 };
+      n.l.push(L); n.u = Date.now(); scNoteFlush(); redraw(L.i, 0);
     });
-    g.asked = g.due;
-    scGoalSave();
-  }
+    pane.appendChild(add);
 
-  function scGoalExtend(g) {
-    if (!g.was) g.was = g.due;
-    g.ext += 2;
-    var d = new Date(g.due);
-    d.setMonth(d.getMonth() + 2);
-    g.due = scGlMid(d);
-    g.asked = 0;
-    scGoalSave();
-    scClose();
-    scPaintGoals();
-    scToast('Extended by 2 months', false);
-  }
+    var rm = scEl('button', 'nt-rm');
+    rm.type = 'button';
+    rm.textContent = 'Remove this note';
+    rm.addEventListener('click', function () { scNoteRemove(n); });
+    pane.appendChild(rm);
 
-  /* Done and dropped both go to the archive, and the blocks STAY.
-     They are your week now — the goal ends and the process is what is
-     left, which is most of the point of the feature. */
-  function scGoalFinish(g, ok) {
-    var k = scGoalKept(g);
-    goals.done.unshift({
-      id: g.id, n: g.n, k: g.k, from: g.from, due: g.due, was: g.was, ext: g.ext,
-      end: scGlMid(), ok: !!ok, kept: k.kept, of: k.of, on: []
-    });
-    if (goals.done.length > 40) goals.done.length = 40;
-    goals.live = goals.live.filter(function (x) { return x.id !== g.id; });
-    state.items.forEach(function (it) { if (it.g === g.id) delete it.g; });
-    scSave();
-    scGoalSave();
-    glOpen = null;
-    scClose();
-    scPaintGoals();
-    scToast(ok ? 'Archived' : 'Dropped', false);
-  }
-
-  var GL_WINDOWS = [[6, '6 weeks'], [13, '3 months'], [26, '6 months'],
-    [39, '9 months'], [52, 'A year'], [78, '18 months']];
-
-  function scGoalNewSheet() {
-    var name = '', kind = null, wk = null;
-    scSheet('New goal', function (body) {
-      var draw = function () {
-        body.textContent = '';
-        body.appendChild(scEl('p', 'label', 'What are you working on'));
-        var f = scEl('input', 'field');
-        f.type = 'text';
-        f.value = name;
-        /* A PLACEHOLDER NAMES NO PARTICULAR LIFE. It read "Get
-           consistently profitable trading", which is one person's goal
-           standing in a field everybody types into — the same mistake
-           the seeded week made before the specific one moved out into
-           the fixture. */
-        f.placeholder = 'Get in shape';
-        f.setAttribute('aria-label', 'What are you working on');
-        f.addEventListener('input', function () { name = f.value; });
-        body.appendChild(f);
-
-        body.appendChild(scEl('p', 'label', 'Which kind'));
-        var l1 = scEl('div', 'gl-lad');
-        GOAL_KINDS.forEach(function (x) {
-          var r = scEl('button', 'gl-rung is-w', x.n);
-          r.setAttribute('aria-pressed', String(kind === x.k));
-          r.addEventListener('click', function () { name = f.value; kind = x.k; draw(); });
-          l1.appendChild(r);
-        });
-        body.appendChild(l1);
-
-        body.appendChild(scEl('p', 'label', 'By when'));
-        var l2 = scEl('div', 'gl-lad');
-        GL_WINDOWS.forEach(function (x) {
-          var r = scEl('button', 'gl-rung is-w', x[1]);
-          r.setAttribute('aria-pressed', String(wk === x[0]));
-          r.addEventListener('click', function () { name = f.value; wk = x[0]; draw(); });
-          l2.appendChild(r);
-        });
-        body.appendChild(l2);
-
-        /* WHAT IT WOULD SUGGEST, before you commit to anything. The
-           window changes the dose and not the list, and seeing that
-           happen is what makes the window feel like a decision rather
-           than a field. */
-        if (kind && wk) {
-          body.appendChild(scEl('p', 'label', 'It would suggest'));
-          scGoalKind(kind).recs.forEach(function (s) {
-            var row = scEl('p', 'gl-sug');
-            row.appendChild(scEl('b', null, s.n));
-            row.appendChild(document.createTextNode(' · ' + scGoalDoseLine(scGoalDose(s, wk))));
-            body.appendChild(row);
-          });
-          var go = scEl('button', 'btn go', 'Create it');
-          go.addEventListener('click', function () {
-            var n = (f.value || '').trim();
-            if (!n) { f.focus(); return; }
-            var due = new Date();
-            due.setDate(due.getDate() + wk * 7);
-            var g = { id: scId(), n: n.slice(0, 80), k: kind, from: scGlMid(),
-              due: scGlMid(due), was: 0, ext: 0, asked: 0, on: [] };
-            goals.live.push(g);
-            scGoalSave();
-            glOpen = g.id; glIdx = 0;
-            scClose();
-            scPaintGoals();
-          });
-          body.appendChild(go);
+    /* Focus is restored by LINE ID rather than by index: a redraw that
+       deleted a line has moved every index after it, and landing one
+       row off is the kind of fault that reads as the app losing your
+       place rather than as an off-by-one. */
+    if (focus) {
+      var rows = body.querySelectorAll('.nt-row');
+      for (var i = 0; i < n.l.length; i++) {
+        if (n.l[i].i !== focus) continue;
+        var el = rows[i] && rows[i].querySelector('textarea, input');
+        if (!el) break;
+        el.focus();
+        if (caret !== null && caret !== undefined && el.setSelectionRange) {
+          try { el.setSelectionRange(caret, caret); } catch (e) {}
         }
-      };
-      draw();
+        break;
+      }
+    }
+    body.querySelectorAll('textarea').forEach(function (t) { scNoteGrow(t); });
+  }
+
+  function scNoteAdd() {
+    if (notes.length >= NOTE_CAP) { scToast('That is as many notes as this keeps', false); return; }
+    var n = { id: scNtId(), t: '', u: Date.now(),
+      l: [{ i: scNtId(), h: 0, c: '', x: '', y: '', m: 0 }] };
+    notes.push(n);
+    scNoteFlush();
+    ntOpen = n.id;
+    scPaintNotes();
+    var t = $('scNotePane').querySelector('.nt-title');
+    if (t) setTimeout(function () { t.focus(); }, 60);
+  }
+
+  /* ── REMOVING ASKS, AND THERE IS NO BIN ──
+     The log's own rule rather than the schedule's: a bin protects a
+     record you cannot rebuild, and everything else in this app that
+     deletes without one is a thing you can write again in a second. A
+     note is the opposite — it is the only record here that is only
+     ever what you typed — so the ask stands in for the bin. */
+  function scNoteRemove(n) {
+    scSheet('Remove this note?', function (body) {
+      body.appendChild(scEl('p', 'hint',
+        'It goes with everything written in it, and there is no bin for '
+        + 'notes. Any block pointing at it loses its tag.'));
+      var go = scBtn('go', 'Remove it', function () {
+        notes = notes.filter(function (q) { return q.id !== n.id; });
+        /* A block naming a note that is gone would draw an empty tag
+           for ever, and the block is not the record of the note. */
+        state.items.forEach(function (it) { if (it.nt === n.id) delete it.nt; });
+        scNoteFlush(); scSave();
+        ntOpen = null;
+        scClose(); scPaintNotes(); scRender();
+        scToast('Removed', false);
+      });
+      var row = scEl('div', 'lg-row');
+      row.appendChild(scBtn('', 'Keep it', scClose));
+      row.appendChild(go);
+      body.appendChild(row);
     });
+  }
+
+  /* ── THE TAG ON THE ROW IS THE WHOLE FEATURE ──
+     A block names a note; the row draws that note's title in the
+     note's own colour; pressing it lands you in the note. It is a
+     SIBLING of the row rather than a child, because a <button> inside
+     a <button> is invalid and collapses to one press while looking
+     exactly right — the same reason the check, the pencil and the
+     children's dots are all siblings. */
+  function scNoteOf(it) { return it && it.nt ? scNoteById(it.nt) : null; }
+
+  function scNoteJump(id) {
+    ntOpen = id;
+    ntJump = true;
+    scSetView('notes', true);
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -12311,7 +11804,7 @@
   scTrainLoad();
   scMindLoad();
   scRateLoad();
-  scGoalLoad();
+  scNoteLoad();
 
   try {
     var fs2 = localStorage.getItem(FRSTOP_KEY);
@@ -12428,6 +11921,13 @@
      permission prompt from somebody who meant to type. */
   $('scAdd').addEventListener('click', function () {
     if (rec) { scStopVoice(); return; }
+    /* ONE CONTROL, AND IT ADDS WHATEVER THE SCREEN IS ABOUT. The bar
+       holds three tabs and this, which is the whole of what fits at
+       390px — so a second add button for notes would be the control
+       that made the row too tight to press. On Notes it makes a note;
+       everywhere else it is the block sheet it has always been. */
+    if (view === 'notes' && !ntOpen) { scNoteAdd(); return; }
+    if (view === 'notes') return;
     scVoiceSheet(false);
   });
   $('scScrim').addEventListener('click', scClose);

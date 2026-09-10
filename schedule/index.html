@@ -47,7 +47,7 @@
   } catch (e) {}
 }());
 </script>
-<link rel="stylesheet" href="app.css?v=458d430a" />
+<link rel="stylesheet" href="app.css?v=3fcdc2bb" />
 </head>
 <body>
 
@@ -159,13 +159,15 @@
        list, the sessions as its headings, nothing peeking at the
        edges and nothing to swipe. The back of the day is still a
        back — the flip is on the panel now rather than on a card. -->
-  <!-- ── GOALS ──
-       Its own tab rather than a stop on Today: Showing up, Workouts
-       and Pattern are three ways of reading the day you are in, and a
-       goal is not one of those — it is what the day is in service of.
-       One pane, two states: the goals, and one goal's cards. -->
-  <section class="goals" id="scGoals" hidden>
-    <div id="scGoalPane"></div>
+  <!-- ── NOTES ──
+       Its own tab, where Goals was. Showing up, Workouts and Pattern
+       are three ways of reading the day you are in; a note is not one
+       of those — it is the thinking the day is in service of, and it
+       is the one screen here you write rather than tick.
+
+       One pane, two states: the list, and one note. -->
+  <section class="notes" id="scNotes" hidden>
+    <div id="scNotePane"></div>
   </section>
 
   <section class="week" id="scWeek">
@@ -214,9 +216,9 @@
     <!-- A ring with its centre: what you are aiming at. Filled at the
          middle so it does not read as the view control's own ring,
          which is the collision `#scMenu svg circle` was written for. -->
-    <button class="tab" id="scTabGoals" data-view="goals" aria-label="Goals">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>
-      <span>Goals</span>
+    <button class="tab" id="scTabNotes" data-view="notes" aria-label="Notes">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 3.5h9l4 4v13h-13z"/><path d="M14.5 3.5v4h4M8.5 12h7M8.5 16h4.5"/></svg>
+      <span>Notes</span>
     </button>
     <button class="tab" id="scTabFriends" data-view="friends" aria-label="Friends">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4"/><path d="M3 19c0-3.2 2.7-5 6-5s6 1.8 6 5"/><path d="M16.5 6.4a3.4 3.4 0 0 1 0 6.5M17 14.4c2.6.4 4 2.1 4 4.6"/></svg>
@@ -268,6 +270,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=6596232e"></script>
+<script src="app.js?v=c21a56ea"></script>
 </body>
 </html>
