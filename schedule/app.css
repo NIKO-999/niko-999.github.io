@@ -5976,6 +5976,10 @@ body {
   font: inherit; font-size: 21px; font-weight: 700; letter-spacing: -.025em;
 }
 .nt-title::placeholder { color: var(--spent); font-weight: 600; }
+/* Reading, it is a heading rather than a field: a text box round the
+   name of a thing you are only looking at is the whole of what made
+   this screen read as always-in-edit. */
+.nt-title.is-view { margin: 0; padding: 4px 2px; }
 .nt-title:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
 .nt-body { padding: 2px 0 4px; }
@@ -6148,6 +6152,68 @@ body {
 }
 .nt-c.is-on { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink); }
 .nt-c:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+
+/* ── READING ──
+   No field on top, so the mark goes straight onto the words and there
+   is no mirror to keep in step. Same wash, same geometry — the two
+   have to be indistinguishable, because switching modes must not look
+   like the note changed. */
+.nt-v {
+  font-size: 15px;
+  line-height: 1.42;
+  display: inline;
+}
+.nt-v.is-mk {
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--c) 34%, transparent), transparent);
+  border-radius: 3px 12px 12px 3px;
+  padding: 1px 4px;
+  margin: 0 -4px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.nt-body:not(.is-edit) .nt-row { padding: 7px 0; }
+.nt-body:not(.is-edit) .nt-row.is-head { padding: 20px 0 7px; }
+.nt-body:not(.is-edit) .nt-row.is-head:first-child { padding-top: 4px; }
+/* The same two registers the fields draw, as text. */
+.nt-body:not(.is-edit) .nt-hw { max-width: none; width: auto; }
+.nt-body:not(.is-edit) .nt-hc { font-style: normal; }
+
+/* ── THE GRIP, AND IT IS THE ONLY `touch-action: none` HERE ──
+   A drag that started anywhere on the heading would fight every
+   attempt to put a caret in its two fields, and one that did not opt
+   out of touch scrolling could never move at all inside a scrolling
+   column. A small dedicated target answers both: the page still
+   scrolls from everywhere else on the row. */
+.nt-grip {
+  flex: none;
+  width: 34px; height: 30px;
+  margin-right: -6px;
+  display: grid; place-items: center;
+  padding: 0; border: 0; border-radius: 8px;
+  background: none;
+  color: var(--spent);
+  cursor: grab;
+  touch-action: none;
+}
+.nt-grip svg {
+  width: 17px; height: 17px;
+  fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round;
+}
+.nt-grip:focus-visible { outline: 2px solid var(--red); outline-offset: 1px; }
+.nt-grip:active { cursor: grabbing; }
+
+/* The run being carried, and the ones parting for it. Only the
+   others transition: the one under your finger has to be exactly
+   where the finger is, and a transition on it lags the pointer. */
+.nt-body.is-drag .nt-row { transition: transform 160ms ease; }
+.nt-body.is-drag .nt-row.is-lift {
+  transition: none;
+  position: relative;
+  z-index: 3;
+  opacity: .92;
+}
+.nt-body.is-drag { cursor: grabbing; }
 
 .nt-add {
   display: block;

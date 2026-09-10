@@ -2530,8 +2530,13 @@
        view on the day it is added. */
     if (view !== 'list') {
       day.textContent = VIEW_NAME[view] || 'Today';
-      sub.textContent = FULL[t.getDay()] + ' ' + t.getDate() + ' '
-        + MON[t.getMonth()] + ' \u00b7 ' + now;
+      /* THE MODE SAYS WHAT IT IS, in the line the head already draws —
+         the week's own rule, and the reason it is here rather than in
+         a banner over a screen whose whole job is the words. */
+      sub.textContent = (view === 'notes' && ntEdit)
+        ? 'Editing \u00b7 tap a line, drag a heading'
+        : FULL[t.getDay()] + ' ' + t.getDate() + ' '
+          + MON[t.getMonth()] + ' \u00b7 ' + now;
       ic.innerHTML = HEAD_ICON[view] || HEAD_ICON.tally;
       return;
     }
@@ -6593,6 +6598,7 @@
          clearing it here would land that press on the list. */
       if (nt && !ntJump) ntOpen = null;
       ntJump = false;
+      if (!nt) ntEdit = false;
       /* Typing is written on a timer, so walking off the screen has to
          flush it: a note half a second old when you press another tab
          is a note that loses its last sentence. */
@@ -6616,6 +6622,7 @@
        loud in the stylesheet for this one too, which is the seventh
        time in this app: it takes a `display: grid`. */
     $('scHdEd').hidden = view !== 'list';
+    scNtChrome();
     /* ONE SECTION PER VIEW, and `[hidden]` has to be said out loud
        once a thing takes a display — .week is a flex column, and an
        author display outranks the browser's own [hidden] rule. That
@@ -11419,8 +11426,13 @@
     if (!pane) return;
     pane.textContent = '';
     var open = ntOpen ? scNoteById(ntOpen) : null;
-    if (open) { scPaintNote(pane, open); return; }
+    if (open) { scNtChrome(); scPaintNote(pane, open); return; }
     ntOpen = null;
+    /* There is nothing on a list to edit, so the mode cannot survive
+       arriving at one — and a tile lit over a screen it does not apply
+       to is a mode you are in without knowing. */
+    ntEdit = false;
+    scNtChrome();
 
     if (!notes.length) {
       var e = scEl('p', 'nt-none');
@@ -11452,7 +11464,11 @@
         c.lines + (c.lines === 1 ? ' line' : ' lines')
         + (c.marked ? ' · ' + c.marked + ' marked' : '')
         + ' · ' + scAgo(n.u)));
-      card.addEventListener('click', function () { ntOpen = n.id; scPaintNotes(); });
+      card.addEventListener('click', function () {
+        /* A note opens to be READ. Edit is a press away and the whole
+           point of the mode is that you asked for it. */
+        ntOpen = n.id; ntEdit = false; scPaintNotes(); scDate();
+      });
       pane.appendChild(card);
     });
   }
@@ -11471,6 +11487,86 @@
      than a toolbar that is always up or a gesture nothing can name.
      ═══════════════════════════ */
 
+  /* ── VIEW UNTIL YOU SAY OTHERWISE ──
+     Every line was a field, so a note was always in the state you
+     write in: a tap put a caret somewhere, the controls came out
+     under whatever you had touched, and nothing on the screen ever
+     read as a finished thing. A note is READ far more often than it
+     is written.
+
+     So the note draws as text and an Edit control turns the fields
+     on. It is the week's own control in the week's own place — the
+     head's third tile — because it is the same question, and the app
+     already answers it there.
+
+     WHERE IT IS NOT THE WEEK'S CONTROL is that this one STAYS. There,
+     the mode spends itself on one press: the row's ordinary press
+     ticks, so a mode you were in without noticing would edit when you
+     meant to tick. Here the ordinary press does nothing at all — view
+     is inert — so there is nothing for a standing mode to get wrong,
+     and you are editing several lines rather than one.
+
+     NOT STORED, which is the tally panels' rule: a position on a
+     screen you are looking at. A note found in edit mode tomorrow
+     morning is the app having kept half a decision. */
+  var ntEdit = false;
+
+  function scNtEdit(on) {
+    ntEdit = !!on && !!ntOpen;
+    if (!ntEdit) scNoteFlush();
+    scPaintNotes();
+    scDate();
+  }
+
+  /* ── ONE PLACE SETS THE TILE ──
+     Whether it is drawn and whether it is lit both follow two things
+     that move independently — the view, and whether a note is open —
+     so written at each call site they drift, and the one that drifts
+     is whichever the next caller forgets. The week's own scEditArm
+     makes the same argument. */
+  function scNtChrome() {
+    var b = $('scNtEd');
+    if (!b) return;
+    b.hidden = view !== 'notes' || !ntOpen;
+    b.setAttribute('aria-pressed', ntEdit ? 'true' : 'false');
+  }
+
+  /* ── A SECTION IS A RUN, NOT A RECORD ──
+     The note is a flat list of lines and a heading is one of them, so
+     a section is the heading plus everything until the next one. Kept
+     flat rather than nested because every other reader of this record
+     — the list card, the preview, the colour dots, the tag on a row —
+     walks lines and would each need to learn a second shape.
+
+     Lines above the first heading are a run with no head. They cannot
+     be dragged, because there is nothing to take hold of, and they
+     stay where they are. */
+  function scNoteRuns(n) {
+    var out = [], cur = null;
+    n.l.forEach(function (L, i) {
+      if (L.h || !cur) { cur = { head: L.h ? i : -1, from: i, to: i }; out.push(cur); }
+      else cur.to = i;
+    });
+    return out;
+  }
+
+  /* Moving a run is a splice of a contiguous slice, which is the whole
+     dividend of keeping the model flat. */
+  function scNoteMove(n, from, to) {
+    var runs = scNoteRuns(n);
+    if (from === to || !runs[from] || !runs[to]) return false;
+    if (runs[from].head < 0) return false;
+    var cut = n.l.splice(runs[from].from, runs[from].to - runs[from].from + 1);
+    var after = scNoteRuns(n);
+    var at = to > from
+      ? (after[to - 1] ? after[to - 1].to + 1 : n.l.length)
+      : (after[to] ? after[to].from : 0);
+    Array.prototype.splice.apply(n.l, [at, 0].concat(cut));
+    n.u = Date.now();
+    scNoteFlush();
+    return true;
+  }
+
   function scNoteGrow(el) {
     el.style.height = 'auto';
     el.style.height = el.scrollHeight + 'px';
@@ -11484,26 +11580,64 @@
     back.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
       + '<path d="M15 5l-7 7 7 7"/></svg>';
     back.addEventListener('click', function () {
-      scNoteFlush(); ntOpen = null; scPaintNotes();
+      ntEdit = false; scNoteFlush(); ntOpen = null; scPaintNotes(); scDate();
     });
     crumb.appendChild(back);
-    /* The title is a field like every line is, rather than a sheet you
-       open to rename it: there is nothing else on this screen you have
-       to leave in order to change. */
-    var ti = scEl('input', 'nt-title');
-    ti.type = 'text';
-    ti.value = n.t;
-    ti.placeholder = 'Title';
-    ti.setAttribute('aria-label', 'Note title');
-    ti.addEventListener('input', function () {
-      n.t = ti.value.slice(0, 80); n.u = Date.now(); scNoteSaveSoon();
-    });
-    crumb.appendChild(ti);
+
+    if (ntEdit) {
+      /* The title is a field like every line is, rather than a sheet
+         you open to rename it: there is nothing else on this screen
+         you have to leave in order to change. */
+      var ti = scEl('input', 'nt-title');
+      ti.type = 'text';
+      ti.value = n.t;
+      ti.placeholder = 'Title';
+      ti.setAttribute('aria-label', 'Note title');
+      ti.addEventListener('input', function () {
+        n.t = ti.value.slice(0, 80); n.u = Date.now(); scNoteSaveSoon();
+      });
+      crumb.appendChild(ti);
+    } else {
+      crumb.appendChild(scEl('h2', 'nt-title is-view', scNoteTitle(n)));
+    }
     pane.appendChild(crumb);
 
-    var body = scEl('div', 'nt-body');
+    var body = scEl('div', 'nt-body' + (ntEdit ? ' is-edit' : ''));
     pane.appendChild(body);
 
+    /* ═══════════════════════════
+       READING
+       ═══════════════════════════ */
+    if (!ntEdit) {
+      n.l.forEach(function (L, idx) {
+        if (L.h) {
+          var h = scEl('div', 'nt-row is-head');
+          h.style.setProperty('--c', scNtVar(L.c));
+          h.appendChild(scEl('b', 'nt-hw', L.x));
+          if (L.y) h.appendChild(scEl('i', 'nt-hc', L.y));
+          body.appendChild(h);
+          return;
+        }
+        var r = scEl('div', 'nt-row');
+        var sect = scNoteSect(n, idx);
+        /* The same mark the field wears, drawn straight onto the words
+           — there is no mirror to keep in step here, because in view
+           there is no field on top of it. */
+        var sp = scEl('span', 'nt-v' + (L.m && sect ? ' is-mk' : ''), L.x);
+        if (L.m && sect) sp.style.setProperty('--c', scNtVar(sect));
+        r.appendChild(sp);
+        body.appendChild(r);
+      });
+      if (!n.l.length || !n.l.some(function (L) { return L.x.trim(); })) {
+        body.appendChild(scEl('p', 'nt-none',
+          'Nothing in this note yet. Press Edit and start typing.'));
+      }
+      return;
+    }
+
+    /* ═══════════════════════════
+       EDITING
+       ═══════════════════════════ */
     var tools = scEl('div', 'nt-tools');
     tools.hidden = true;
     /* Pressing a control must not take focus off the line it is
@@ -11576,9 +11710,11 @@
       if (row.nextSibling !== tools) body.insertBefore(tools, row.nextSibling);
     }
 
+    var rows = [];
     n.l.forEach(function (L, idx) {
       var row = scEl('div', 'nt-row' + (L.h ? ' is-head' : ''));
       if (L.h) row.style.setProperty('--c', scNtVar(L.c));
+      rows.push(row);
 
       var mark = function (el) {
         el.addEventListener('focus', function () { show(idx, row); });
@@ -11590,8 +11726,7 @@
            explanation, and only the name is a label. Written as one
            field the two would have to be split back out of the string
            on every render, and a dash somebody typed in the middle of
-           a name would be read as the seam. Two fields, two values,
-           nothing parsed. */
+           a name would be read as the seam. */
         var w = scEl('input', 'nt-hw');
         w.type = 'text'; w.value = L.x; w.placeholder = 'Heading';
         w.setAttribute('aria-label', 'Section name');
@@ -11609,23 +11744,19 @@
         });
         mark(cl);
         row.appendChild(cl);
-        row.appendChild(scEl('span', 'nt-hr'));
+        row.appendChild(scNoteGrip(n, pane, idx, L));
       } else {
-        var sect = scNoteSect(n, idx);
+        var sect2 = scNoteSect(n, idx);
         /* ── THE MARK IS A MIRROR BEHIND THE FIELD ──
            The swipe is fitted to the WORDS, and a textarea's own
            background fills its box — so a wash written on the field
            would run the width of the column and fade at a place that
-           has nothing to do with where the sentence ends. The mirror
-           carries the same text with the same metrics, draws the wash
-           behind it and paints no ink; the field sits on top with the
-           ink and no ground. They wrap identically because every
-           property that decides wrapping is set on both. */
+           has nothing to do with where the sentence ends. */
         var mir = scEl('div', 'nt-mir');
-        var sp = scEl('span', L.m && sect ? 'is-mk' : '');
-        if (L.m && sect) sp.style.setProperty('--c', scNtVar(sect));
-        sp.textContent = L.x;
-        mir.appendChild(sp);
+        var sp2 = scEl('span', L.m && sect2 ? 'is-mk' : '');
+        if (L.m && sect2) sp2.style.setProperty('--c', scNtVar(sect2));
+        sp2.textContent = L.x;
+        mir.appendChild(sp2);
         mir.setAttribute('aria-hidden', 'true');
         row.appendChild(mir);
 
@@ -11635,7 +11766,7 @@
         f.setAttribute('aria-label', 'Line');
         f.addEventListener('input', function () {
           L.x = f.value.slice(0, 300);
-          sp.textContent = L.x;
+          sp2.textContent = L.x;
           scNoteGrow(f);
           n.u = Date.now();
           scNoteSaveSoon();
@@ -11704,7 +11835,6 @@
        row off is the kind of fault that reads as the app losing your
        place rather than as an off-by-one. */
     if (focus) {
-      var rows = body.querySelectorAll('.nt-row');
       for (var i = 0; i < n.l.length; i++) {
         if (n.l[i].i !== focus) continue;
         var el = rows[i] && rows[i].querySelector('textarea, input');
@@ -11719,6 +11849,128 @@
     body.querySelectorAll('textarea').forEach(function (t) { scNoteGrow(t); });
   }
 
+  /* ═══════════════════════════
+     A SECTION MOVES BY ITS HEADING
+
+     Asked for in those words, and the heading is the only honest grab
+     point: it is the one row that names the whole run, and taking hold
+     of a line inside a section to move the section would be a control
+     whose target is not the thing under your finger.
+
+     A DEDICATED HANDLE, NEVER THE WHOLE HEADING. The heading is two
+     text fields you have to be able to put a caret in, and a drag that
+     starts anywhere on it would fight every attempt to type. The grip
+     is the only element on this screen carrying `touch-action: none`,
+     so the page still scrolls from everywhere else — which is the half
+     that makes a drag inside a scroller possible at all.
+
+     AND ARROWS FROM THE SAME BUTTON, because a drag reaches neither a
+     keyboard nor a screen reader, and this app's own rule is that a
+     route only a gesture can reach is a route half the people using it
+     do not have. One control, two ways, so there is nothing extra
+     drawn for the second one.
+     ═══════════════════════════ */
+  function scNoteGrip(n, pane, idx, L) {
+    var g = scEl('button', 'nt-grip');
+    g.type = 'button';
+    g.setAttribute('aria-label', 'Move the ' + (L.x || 'section') + ' section');
+    g.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+      + '<path d="M5 9h14M5 15h14"/></svg>';
+
+    var runs = scNoteRuns(n);
+    var mine = -1;
+    runs.forEach(function (r, i) { if (r.head === idx) mine = i; });
+
+    var redraw = function (keep) {
+      pane.textContent = '';
+      scPaintNote(pane, n, null, null);
+      if (!keep) return;
+      /* Back on the handle you were holding, found by the LINE it
+         belongs to rather than by position — the whole point of the
+         press was that the position changed. */
+      var gs = pane.querySelectorAll('.nt-grip');
+      var at = -1, k = 0;
+      n.l.forEach(function (q) { if (q.h) { if (q.i === L.i) at = k; k++; } });
+      if (gs[at]) gs[at].focus();
+    };
+
+    g.addEventListener('keydown', function (ev) {
+      var d = ev.key === 'ArrowUp' ? -1 : ev.key === 'ArrowDown' ? 1 : 0;
+      if (!d) return;
+      ev.preventDefault();
+      if (scNoteMove(n, mine, mine + d)) redraw(true);
+    });
+
+    g.addEventListener('pointerdown', function (ev) {
+      if (ev.button) return;
+      ev.preventDefault();
+      var body = g.closest('.nt-body');
+      if (!body) return;
+      var els = [].slice.call(body.querySelectorAll('.nt-row'));
+      /* Every run's element list and box, measured ONCE at the start.
+         Re-measuring per move would read a layout the drag is itself
+         changing, which is the deck's own lesson about reading a box
+         mid-transition. */
+      var groups = scNoteRuns(n).map(function (r) {
+        var own = els.slice(r.from, r.to + 1);
+        var top = own[0].offsetTop;
+        var bot = own[own.length - 1].offsetTop + own[own.length - 1].offsetHeight;
+        return { own: own, top: top, h: bot - top, fixed: r.head < 0 };
+      });
+      var me = groups[mine];
+      if (!me) return;
+      var y0 = ev.clientY, target = mine, moved = false;
+      g.setPointerCapture(ev.pointerId);
+      body.classList.add('is-drag');
+      me.own.forEach(function (e) { e.classList.add('is-lift'); });
+
+      var place = function (dy) {
+        /* Where the dragged run's own middle has got to, against the
+           middles of the others. */
+        var mid = me.top + me.h / 2 + dy;
+        var t = mine;
+        for (var i = 0; i < groups.length; i++) {
+          if (i === mine || groups[i].fixed) continue;
+          var g2 = groups[i];
+          if (i < mine && mid < g2.top + g2.h / 2) { t = Math.min(t, i); }
+          if (i > mine && mid > g2.top + g2.h / 2) { t = Math.max(t, i); }
+        }
+        target = t;
+        groups.forEach(function (g2, i) {
+          if (i === mine) return;
+          var off = 0;
+          if (target > mine && i > mine && i <= target) off = -me.h;
+          if (target < mine && i >= target && i < mine) off = me.h;
+          g2.own.forEach(function (e) {
+            e.style.transform = off ? 'translateY(' + off + 'px)' : '';
+          });
+        });
+      };
+
+      var move = function (e2) {
+        var dy = e2.clientY - y0;
+        if (!moved && Math.abs(dy) < 4) return;
+        moved = true;
+        me.own.forEach(function (el) { el.style.transform = 'translateY(' + dy + 'px)'; });
+        place(dy);
+      };
+      var up = function () {
+        document.removeEventListener('pointermove', move);
+        document.removeEventListener('pointerup', up);
+        document.removeEventListener('pointercancel', up);
+        groups.forEach(function (g2) {
+          g2.own.forEach(function (e) { e.style.transform = ''; e.classList.remove('is-lift'); });
+        });
+        body.classList.remove('is-drag');
+        if (moved && target !== mine) { scNoteMove(n, mine, target); redraw(true); }
+      };
+      document.addEventListener('pointermove', move);
+      document.addEventListener('pointerup', up);
+      document.addEventListener('pointercancel', up);
+    });
+    return g;
+  }
+
   function scNoteAdd() {
     if (notes.length >= NOTE_CAP) { scToast('That is as many notes as this keeps', false); return; }
     var n = { id: scNtId(), t: '', u: Date.now(),
@@ -11726,7 +11978,13 @@
     notes.push(n);
     scNoteFlush();
     ntOpen = n.id;
+    /* THE ONE NOTE THAT OPENS IN EDIT. It is empty by construction, so
+       view mode would draw a title, a sentence saying there is nothing
+       in it, and a control you would have to find — for a screen you
+       arrived at by pressing Add. */
+    ntEdit = true;
     scPaintNotes();
+    scDate();
     var t = $('scNotePane').querySelector('.nt-title');
     if (t) setTimeout(function () { t.focus(); }, 60);
   }
@@ -11748,8 +12006,8 @@
            for ever, and the block is not the record of the note. */
         state.items.forEach(function (it) { if (it.nt === n.id) delete it.nt; });
         scNoteFlush(); scSave();
-        ntOpen = null;
-        scClose(); scPaintNotes(); scRender();
+        ntOpen = null; ntEdit = false;
+        scClose(); scPaintNotes(); scRender(); scDate();
         scToast('Removed', false);
       });
       var row = scEl('div', 'lg-row');
@@ -11783,6 +12041,7 @@
      the control that put you in one has to be the one that takes you
      out. */
   $('scHdEd').addEventListener('click', function () { scEditArm(!editArm); });
+  $('scNtEd').addEventListener('click', function () { scNtEdit(!ntEdit); });
 
   scLoad();
 

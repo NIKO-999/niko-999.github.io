@@ -7532,6 +7532,102 @@ the week staying on screen under the Notes tab. Found by a render
 rather than by reading the diff, which is the whole argument for
 opening a screen other than the one you edited.
 
+### A note is READ until you say otherwise
+
+Every line was a field, so a note was always in the state you WRITE
+in: a tap put a caret somewhere, the controls came out under whatever
+you had touched, and nothing on the screen ever read as a finished
+thing. A note is read far more often than it is written.
+
+**It is the week's own control in the week's own place** — the head's
+third tile, the same pencil — because it is the same question and the
+app already answers it there. Asserted as the FIELDS being absent
+rather than as a class, because that is the whole of what the mode is.
+
+**WHERE IT IS NOT THE WEEK'S CONTROL IS THAT THIS ONE STAYS.** There
+the mode spends itself on one press, and it has to: a row's ordinary
+press TICKS, so a mode you were in without noticing would edit when
+you meant to tick. Here the ordinary press does nothing at all — view
+is inert — so there is nothing for a standing mode to get wrong, and
+you are editing several lines rather than one.
+
+**The mode names itself in the line the head already draws**, which is
+that control's own rule, and it is why there is no banner over a
+screen whose whole job is the words.
+
+**NOT STORED**, which is the tally panels' argument: a position on a
+screen you are looking at. A note found in edit mode tomorrow morning
+is the app having kept half a decision. Arriving from the list, from
+a tag on a row, or from another tab all land in view.
+
+**THE ONE NOTE THAT OPENS IN EDIT IS A NEW ONE.** It is empty by
+construction, so view would draw a title, a sentence saying there is
+nothing in it, and a control you would have to find — for a screen you
+arrived at by pressing Add.
+
+**Add and Remove are edits**, so neither is on a screen you are
+reading, which is also what keeps the foot of it quiet.
+
+**AND THE MARKS HAVE TO BE IDENTICAL IN BOTH.** Reading draws the
+swipe straight onto the words; editing needs a mirror behind a field.
+That is two drawings of one thing, so switching modes is exactly where
+they would drift — and a mode switch that looks like the note changed
+is worse than no mode at all. The same lines, the same wash, asserted
+in both.
+
+### A section moves by its heading
+
+Asked for in those words, and the heading is the only honest grab
+point: it is the one row that names the whole run, and taking hold of
+a line inside a section to move the section would be a control whose
+target is not the thing under your finger.
+
+**A SECTION IS A RUN, NOT A RECORD.** The note is a flat list and a
+heading is one of its lines, so a section is that heading plus
+everything until the next one. Kept flat rather than nested because
+every other reader of this record — the list card, the preview, the
+colour dots, the tag on a row — walks lines and would each have to
+learn a second shape. Moving one is then a splice of a contiguous
+slice, which is the whole dividend.
+
+**A DEDICATED HANDLE, NEVER THE WHOLE HEADING.** The heading is two
+text fields you have to be able to put a caret in, and a drag starting
+anywhere on it would fight every attempt to type. The grip is **the
+only element on this screen carrying `touch-action: none`**, which is
+the half that makes a drag inside a scrolling column possible at all —
+the page still scrolls from everywhere else on the row.
+
+**AND ARROWS FROM THE SAME BUTTON.** A drag reaches neither a keyboard
+nor a screen reader, and this app's rule is that a route only a
+gesture can reach is a route half the people using it do not have. One
+control, two ways, so there is nothing extra drawn for the second —
+and focus lands back on the handle you were holding, found by the LINE
+it belongs to, because the whole point of the press was that the
+position changed.
+
+**Measured ONCE at the start of the drag.** Re-measuring per move
+reads a layout the drag is itself changing, which is the deck's own
+lesson about reading a box mid-transition. Only the runs parting for
+it transition; the one under your finger must be exactly where the
+finger is, and a transition on it lags the pointer.
+
+**Lines above the first heading are a run with no head.** There is
+nothing to take hold of, so they stay where they are — and the grips
+are one per HEADING, which is the same claim from the other side.
+
+**THE CHECK THAT MATTERS IS THAT THE LINES GO WITH IT**, and the proof
+is what a heading-only splice does: `Positive` moves above `Negative`
+and `Reading` is left behind, landing under `Negative`. **The heading
+ORDER comes out correct either way** — `["Positive", "Negative"]` — so
+a check written on the headings alone passes cleanly on a build that
+orphans every line it moves. Measured both ways rather than reasoned
+about.
+
+**And index 0 is the headless run**, which the first version of that
+check compared against — so it read a clean swap as a failed drag. A
+grip's number and a run's number are only the same once the headless
+one is dropped.
+
 ## Edit arms one press
 
 The editor went the long way round and was reported at every stop: a

@@ -47,7 +47,7 @@
   } catch (e) {}
 }());
 </script>
-<link rel="stylesheet" href="app.css?v=3fcdc2bb" />
+<link rel="stylesheet" href="app.css?v=1b5bd656" />
 </head>
 <body>
 
@@ -75,6 +75,14 @@
            — so there is no state to be in without knowing. The week's
            own tile, so the head reads as tiles and a title. -->
       <button class="hd-ed" id="scHdEd" aria-pressed="false" aria-label="Edit a block">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L18 10l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>
+      </button>
+      <!-- ── AND NOTES HAS ONE TOO ──
+           The same tile in the same corner, because it is the same
+           question — but this one STAYS pressed: the week's spends
+           itself on one press because a row's ordinary press ticks,
+           and a note's ordinary press does nothing at all. -->
+      <button class="hd-ed" id="scNtEd" aria-pressed="false" aria-label="Edit this note" hidden>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L18 10l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>
       </button>
       <button class="head-you" id="scTabYou" aria-label="You and settings">
@@ -270,6 +278,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=c21a56ea"></script>
+<script src="app.js?v=1b6702db"></script>
 </body>
 </html>

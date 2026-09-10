@@ -13026,6 +13026,18 @@ const SAID = [
       await page.evaluate(() => document.querySelector('.tab[data-view="notes"]').click());
       await page.waitForTimeout(340);
     };
+    /* IDEMPOTENT, because a note now opens to be READ and half the
+       checks below are about the fields. A helper that toggles rather
+       than sets is one that leaves the next section in whichever mode
+       the last one happened to end in. */
+    const toEdit = async (page, on) => {
+      await page.evaluate((want) => {
+        const b = document.getElementById('scNtEd');
+        if (!b) throw new Error('no edit control in the head');
+        if ((b.getAttribute('aria-pressed') === 'true') !== want) b.click();
+      }, on !== false);
+      await page.waitForTimeout(320);
+    };
 
     /* ── EXACTLY ONE SECTION IS DRAWN, MEASURED AS THE BOX ──
        `[hidden]` has to be said out loud once a thing takes a display,
@@ -13077,9 +13089,60 @@ const SAID = [
       list.cards[0].dots.length === 2 && list.cards[1].dots.length === 1
       && list.cards[0].dots[0] !== list.cards[0].dots[1], list.cards.map((c) => c.dots));
 
-    /* ── ONE NOTE ── */
+    /* ══════════════════════════
+       A NOTE OPENS TO BE READ
+
+       Every line was a field, so a note was always in the state you
+       write in: a tap put a caret somewhere and nothing ever read as
+       a finished thing. Asserted as the FIELDS being absent rather
+       than as a class, because that is the whole of what the mode is.
+       ══════════════════════════ */
     await npage.click('.nt-card');
     await npage.waitForTimeout(320);
+    const view = await npage.evaluate(() => {
+      const b = document.getElementById('scNtEd');
+      return {
+        fields: document.querySelectorAll('.nt-body input, .nt-body textarea').length,
+        grips: document.querySelectorAll('.nt-grip').length,
+        rows: document.querySelectorAll('.nt-body .nt-row').length,
+        marks: [...document.querySelectorAll('.nt-v.is-mk')].map((s) => s.textContent),
+        title: document.querySelector('.nt-title').tagName,
+        add: !!document.querySelector('.nt-add'),
+        rm: !!document.querySelector('.nt-rm'),
+        tile: !b.hidden, lit: b.getAttribute('aria-pressed')
+      };
+    });
+    ok('a note opens with nothing to type in', view.fields === 0 && view.rows > 0, view);
+    ok('...its title is a heading rather than a field', view.title === 'H2', view);
+    /* Add and Remove are edits. A screen you are reading offers
+       neither, which is also what keeps the foot of it quiet. */
+    ok('...and neither Add nor Remove is on a screen you are reading',
+      !view.add && !view.rm, view);
+    /* THE MARKS HAVE TO BE IDENTICAL IN BOTH, because switching modes
+       must not look like the note changed — and reading draws them
+       straight onto the words where editing needs a mirror behind a
+       field, which is two drawings of one thing. */
+    ok('...the marks are still drawn, and on the same lines',
+      view.marks.length === 2
+      && view.marks[0] === 'Conversations that do not serve me'
+      && view.marks[1] === 'Fasting till the afternoon', view.marks);
+    ok('the edit control is in the head, drawn but not lit',
+      view.tile && view.lit === 'false', view);
+
+    await toEdit(npage);
+    const editOn = await npage.evaluate(() => ({
+      lit: document.getElementById('scNtEd').getAttribute('aria-pressed'),
+      fields: document.querySelectorAll('.nt-body input, .nt-body textarea').length,
+      says: document.getElementById('scHdDate').textContent,
+      add: !!document.querySelector('.nt-add'), rm: !!document.querySelector('.nt-rm')
+    }));
+    ok('pressing it turns the fields on', editOn.lit === 'true'
+      && editOn.fields > 0 && editOn.add && editOn.rm, editOn);
+    /* THE MODE NAMES ITSELF in the line the head already draws, which
+       is the week's own rule for the week's own reason. */
+    ok('...and says so where the head already writes',
+      /edit/i.test(editOn.says), editOn.says);
+
     const one = await npage.evaluate(() => {
       const rows = [...document.querySelectorAll('.nt-row')];
       return {
@@ -13247,6 +13310,120 @@ const SAID = [
     ok('...and backspace at the head of one joins it back on',
       merged[2] === 'YouTube entertainment' && merged.length === typed.length - 1, merged);
 
+    /* ══════════════════════════
+       A SECTION MOVES BY ITS HEADING
+
+       Asked for in those words. A section is a heading and everything
+       under it until the next one, so the claim is that the LINES go
+       with it — a check on the headings' order alone passes on a
+       build that shuffles three headings through a fixed list of
+       sentences, which is the bug worth catching.
+       ══════════════════════════ */
+    const heads = () => npage.evaluate(() =>
+      JSON.parse(localStorage.getItem('sched.note.v1')).list
+        .find((n) => n.id === 'nA').l.filter((L) => L.h).map((L) => L.x));
+    const runs = () => npage.evaluate(() => {
+      const l = JSON.parse(localStorage.getItem('sched.note.v1')).list
+        .find((n) => n.id === 'nA').l;
+      const out = []; let cur = null;
+      l.forEach((L) => {
+        if (L.h) { cur = { h: L.x, l: [] }; out.push(cur); }
+        else if (cur) cur.l.push(L.x);
+        else out.push({ h: null, l: [L.x] });
+      });
+      return out;
+    });
+
+    const grips = await npage.evaluate(() => ({
+      n: document.querySelectorAll('.nt-grip').length,
+      heads: document.querySelectorAll('.nt-body .nt-row.is-head').length,
+      tag: (document.querySelector('.nt-grip') || {}).tagName,
+      /* THE ONLY `touch-action: none` on this screen. A drag that did
+         not opt out could never move inside a scrolling column, and
+         one on the whole heading would fight every attempt to put a
+         caret in its two fields. */
+      touch: getComputedStyle(document.querySelector('.nt-grip')).touchAction
+    }));
+    ok('every heading carries a grip while editing, and it is a button',
+      grips.n > 1 && grips.n === grips.heads && grips.tag === 'BUTTON', grips);
+    ok('...and only the grip opts out of touch scrolling',
+      grips.touch === 'none', grips);
+
+    const before = await runs();
+    /* A DRAG REACHES NEITHER A KEYBOARD NOR A SCREEN READER, and this
+       app's rule is that a route only a gesture can reach is a route
+       half the people using it do not have. The same button answers
+       both, so there is nothing extra drawn for the second one. */
+    const byKey = await npage.evaluate(async () => {
+      const g = document.querySelectorAll('.nt-grip');
+      g[g.length - 1].focus();
+      g[g.length - 1].dispatchEvent(new KeyboardEvent('keydown',
+        { key: 'ArrowUp', bubbles: true, cancelable: true }));
+      await new Promise((z) => setTimeout(z, 300));
+      return { focus: document.activeElement.className };
+    });
+    const afterKey = await runs();
+    ok('an arrow on a grip moves that section up one',
+      afterKey[afterKey.length - 1].h === before[before.length - 2].h
+      && afterKey[afterKey.length - 2].h === before[before.length - 1].h,
+      { before: before.map((r) => r.h), after: afterKey.map((r) => r.h) });
+    /* THE LINES GO WITH IT, which is the whole claim. */
+    ok('...and its lines go with it',
+      JSON.stringify(afterKey[afterKey.length - 2].l)
+        === JSON.stringify(before[before.length - 1].l)
+      && JSON.stringify(afterKey[afterKey.length - 1].l)
+        === JSON.stringify(before[before.length - 2].l), afterKey);
+    /* Back on the handle you were holding — found by the LINE it
+       belongs to, because the whole point of the press was that the
+       position changed. */
+    ok('...leaving you on the grip you pressed',
+      /nt-grip/.test(byKey.focus), byKey);
+
+    /* AND THE DRAG ITSELF, driven as a real pointer through the
+       handle. `page.dragAndDrop` lands both events in one task and
+       would pass on a build with no pointermove handling at all. */
+    const dragged = await (async () => {
+      const box = await npage.evaluate(() => {
+        const g = document.querySelectorAll('.nt-grip')[0].getBoundingClientRect();
+        const rows = [...document.querySelectorAll('.nt-body .nt-row')];
+        const heads = rows.filter((r) => r.classList.contains('is-head'));
+        const to = heads[1].getBoundingClientRect();
+        return { x: Math.round(g.x + g.width / 2), y: Math.round(g.y + g.height / 2),
+                 drop: Math.round(to.bottom + 30) };
+      });
+      await npage.mouse.move(box.x, box.y);
+      await npage.mouse.down();
+      for (let i = 1; i <= 8; i++) {
+        await npage.mouse.move(box.x, box.y + Math.round((box.drop - box.y) * i / 8));
+        await npage.waitForTimeout(16);
+      }
+      await npage.mouse.up();
+      await npage.waitForTimeout(340);
+      return runs();
+    })();
+    /* INDEX 0 IS THE HEADLESS RUN, and the first version of this
+       compared against it — so the check read the drag as having
+       failed while the record showed a clean swap. The grips are one
+       per HEADING, so a grip's number and a run's number are only the
+       same once the headless one is dropped. */
+    const sec = (rs) => rs.filter((r) => r.h !== null);
+    ok('and dragging a heading carries its section past the next one',
+      sec(dragged)[0].h === sec(afterKey)[1].h
+      && sec(dragged)[1].h === sec(afterKey)[0].h
+      && JSON.stringify(sec(dragged)[1].l) === JSON.stringify(sec(afterKey)[0].l),
+      { was: sec(afterKey).map((r) => r.h), now: sec(dragged).map((r) => r.h) });
+
+    /* Lines above the first heading are a run with no head — there is
+       nothing to take hold of, so they stay put. Asserted as the grip
+       COUNT matching the headings above, which is the same claim from
+       the other side. */
+    const first = await npage.evaluate(() =>
+      JSON.parse(localStorage.getItem('sched.note.v1')).list
+        .find((n) => n.id === 'nA').l[0]);
+    ok('the lines above every heading are still above every heading',
+      !first.h && first.x === 'Before any heading', first);
+
+
     /* ── THE PLUS MAKES A NOTE, AND ONLY ON THIS SCREEN ──
        The bar holds three tabs and one add control at 390px, which is
        the whole of what fits — so a second button for notes would be
@@ -13354,8 +13531,12 @@ const SAID = [
       document.querySelector(`.week .rowwrap .row[data-id="${id}"]`)
         .parentElement.querySelector('.row-note').click();
       await new Promise((z) => setTimeout(z, 420));
+      const t = document.querySelector('.nt-title');
       return {
-        title: (document.querySelector('.nt-title') || {}).value,
+        /* It lands in VIEW, so the title is a heading — read either,
+           because what the assertion is about is which note opened. */
+        title: t ? (t.value !== undefined ? t.value : t.textContent) : '',
+        reading: document.querySelectorAll('.nt-body input, .nt-body textarea').length,
         onNotes: !document.getElementById('scNotes').hidden,
         ticked: document.querySelectorAll('.week .row.is-done').length
       };
@@ -13366,6 +13547,9 @@ const SAID = [
        would land every press on the list while looking correct. */
     ok('pressing it lands you in that note rather than on the list',
       jumped.onNotes && jumped.title === 'Energy delegation', jumped);
+    /* AND IN VIEW, never in the fields: arriving from a block is
+       reading what you wrote about it. */
+    ok('...to read rather than to type in', jumped.reading === 0, jumped);
     ok('...and does not tick the block on the way', jumped.ticked === 0, jumped);
 
     /* ── A DANGLING ID COSTS THE TAG AND NOTHING ELSE ── */
@@ -13491,6 +13675,7 @@ const SAID = [
     await toNotes(npage);
     await npage.click('.nt-card');
     await npage.waitForTimeout(320);
+    await toEdit(npage);
     const ratios = [];
     for (let i = 0; i < 7; i++) {
       const col = await npage.evaluate(async (idx) => {
