@@ -11451,7 +11451,14 @@
            it must still not throw it away — that is the whole of what
            makes switching between the three lossless. */
         y: typeof r.y === 'string' ? r.y.slice(0, 300) : '',
-        m: (!head && r.m) ? 1 : 0
+        /* ── TWO HIGHLIGHTS, AND THE MARK IS WHICH ──
+           1 is the SWIPE and 2 is the BRACKET. It was a flag, and a
+           record written before this reads as a swipe because that is
+           the only mark there was. Anything else falls to the swipe
+           rather than to nothing: a line somebody marked is a line
+           they marked, and a build that does not know the style still
+           has to draw it. */
+        m: (!head && r.m) ? (r.m === 2 ? 2 : 1) : 0
       });
     }
     n.a = NT_HUES.indexOf(raw.a) >= 0 ? raw.a : '';
@@ -11606,6 +11613,32 @@
   function scNoteSect(n, idx) {
     for (var i = idx; i >= 0; i--) if (n.l[i].h) return n.l[i].c;
     return '';
+  }
+
+  /* ── A BRACKET SPANS A RUN, WHICH IS THE WHOLE OF WHY IT IS HERE ──
+     A swipe is per line and cannot say "these three go together"; a
+     bracket can, and that is the one thing it does that a second
+     colour of wash would not. Consecutive bracketed lines share one
+     mark, and a HEADING breaks it — a bracket reaching across a
+     section boundary would be claiming the two sections are one run.
+
+     The feet are drawn by the FIRST and LAST row of the run rather
+     than by a wrapper element, so nothing has to be grouped: the rows
+     stay flat, the tools strip still slots in beside any of them, and
+     a run is a fact worked out at render rather than a shape stored. */
+  function scNoteBr(n, idx) {
+    var L = n.l[idx];
+    if (!L || L.h || L.m !== 2 || !scNoteSect(n, idx)) return null;
+    var run = function (j) {
+      var q = n.l[j];
+      return !!q && !q.h && q.m === 2 && !!scNoteSect(n, j);
+    };
+    return { top: !run(idx - 1), bot: !run(idx + 1) };
+  }
+  function scNoteBrCls(n, idx) {
+    var b = scNoteBr(n, idx);
+    if (!b) return '';
+    return ' is-br' + (b.top ? ' is-br-top' : '') + (b.bot ? ' is-br-bot' : '');
   }
 
   /* ═══════════════════════════
@@ -11867,7 +11900,18 @@
       pane.appendChild(pick);
     }
 
-    var body = scEl('div', 'nt-body is-' + n.k + (ntEdit ? ' is-edit' : ''));
+    /* ── THE GUTTER IS RESERVED ON THE WHOLE NOTE, NOT PER LINE ──
+       A bracket lives OUTSIDE the words, so the row it is on has to
+       give it room — and indenting only those rows makes the text
+       column step in and out down the page, which reads as ragged
+       rather than as a mark. Every line in a note that HAS a bracket
+       shares the gutter, and a note with none is untouched: the column
+       is still, and nothing is paid for a mark nobody used. */
+    var hasBr = n.k === 'note' && n.l.some(function (L, i) {
+      return !L.h && L.m === 2 && !!scNoteSect(n, i);
+    });
+    var body = scEl('div', 'nt-body is-' + n.k + (hasBr ? ' is-brs' : '')
+      + (ntEdit ? ' is-edit' : ''));
     body.style.setProperty('--c', scNtVar(scNoteHue(n)));
     pane.appendChild(body);
 
@@ -11947,13 +11991,14 @@
           body.appendChild(h);
           return;
         }
-        var r = scEl('div', 'nt-row');
         var sect = scNoteSect(n, idx);
+        var r = scEl('div', 'nt-row' + scNoteBrCls(n, idx));
         /* The same mark the field wears, drawn straight onto the words
            — there is no mirror to keep in step here, because in view
            there is no field on top of it. */
-        var sp = scEl('span', 'nt-v' + (L.m && sect ? ' is-mk' : ''), L.x);
-        if (L.m && sect) sp.style.setProperty('--c', scNtVar(sect));
+        var sp = scEl('span', 'nt-v' + (L.m === 1 && sect ? ' is-mk' : ''), L.x);
+        if (sect) r.style.setProperty('--c', scNtVar(sect));
+        if (L.m === 1 && sect) sp.style.setProperty('--c', scNtVar(sect));
         r.appendChild(sp);
         body.appendChild(r);
       });
@@ -12023,22 +12068,33 @@
            comes and goes as you move down a note is worse than one
            that is plainly not available yet. */
         var sect = scNoteSect(n, live);
-        var mb = scEl('button', 'nt-tool nt-mkb' + (L.m ? ' is-on' : ''));
-        mb.type = 'button';
-        /* One field, three claims — because the mark is drawn three
-           ways and a control named for the drawing would be lying in
-           two of them. On a goal it strikes the line out, which is the
-           one place this means something other than "this matters". */
-        mb.textContent = n.k === 'proc' ? 'Key step'
-          : n.k === 'goal' ? 'Ruled out' : 'Mark';
-        mb.setAttribute('aria-pressed', L.m ? 'true' : 'false');
-        if (sect) mb.style.setProperty('--c', scNtVar(sect));
-        else mb.disabled = true;
-        mb.addEventListener('click', function () {
-          if (!sect) return;
-          L.m = L.m ? 0 : 1; n.u = Date.now(); scNoteFlush(); redraw(L.i, null);
-        });
-        tools.appendChild(mb);
+        /* ── ONE FIELD, AND EACH LAYOUT NAMES IT FOR WHAT IT DRAWS ──
+           The mark is drawn three ways, so a control named for the
+           drawing would be lying in two of them. On a goal it strikes
+           the line out, which is the one place this means something
+           other than "this matters".
+
+           And on a NOTE there are two of them, because a note is the
+           one layout where the mark has a choice of shape. Mutually
+           exclusive: a line carries one highlight, and pressing the
+           one it is already wearing takes it off. */
+        var mk = function (cls, label, val) {
+          var b = scEl('button', 'nt-tool ' + cls + (L.m === val ? ' is-on' : ''));
+          b.type = 'button';
+          b.textContent = label;
+          b.setAttribute('aria-pressed', L.m === val ? 'true' : 'false');
+          if (sect) b.style.setProperty('--c', scNtVar(sect));
+          else b.disabled = true;
+          b.addEventListener('click', function () {
+            if (!sect) return;
+            L.m = L.m === val ? 0 : val;
+            n.u = Date.now(); scNoteFlush(); redraw(L.i, null);
+          });
+          tools.appendChild(b);
+        };
+        mk('nt-mkb', n.k === 'proc' ? 'Key step'
+          : n.k === 'goal' ? 'Ruled out' : 'Swipe', 1);
+        if (n.k === 'note') mk('nt-brb', 'Bracket', 2);
       }
     }
 
@@ -12067,7 +12123,12 @@
          goal wearing a highlight where it should be struck out. */
       var row = scEl('div', 'nt-row' + (L.h ? ' is-head' : '')
         + (n.k === 'proc' && !L.h ? ' is-step' : '')
-        + (!L.h && L.m ? ' is-mkd' : ''));
+        + (!L.h && L.m ? ' is-mkd' : '')
+        + (n.k === 'note' ? scNoteBrCls(n, idx) : ''));
+      if (!L.h && n.k === 'note') {
+        var bsect = scNoteSect(n, idx);
+        if (bsect) row.style.setProperty('--c', scNtVar(bsect));
+      }
       if (L.h && n.k === 'note') row.style.setProperty('--c', scNtVar(L.c));
       rows.push(row);
 
@@ -12108,8 +12169,8 @@
            would run the width of the column and fade at a place that
            has nothing to do with where the sentence ends. */
         var mir = scEl('div', 'nt-mir');
-        var sp2 = scEl('span', L.m && sect2 ? 'is-mk' : '');
-        if (L.m && sect2) sp2.style.setProperty('--c', scNtVar(sect2));
+        var sp2 = scEl('span', L.m === 1 && sect2 ? 'is-mk' : '');
+        if (L.m === 1 && sect2) sp2.style.setProperty('--c', scNtVar(sect2));
         sp2.textContent = L.x;
         mir.appendChild(sp2);
         mir.setAttribute('aria-hidden', 'true');

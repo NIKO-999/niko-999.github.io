@@ -13868,9 +13868,17 @@ const SAID = [
             { i: 'g0', h: 0, c: '', x: 'First payout cleared', y: '', m: 0 },
             { i: 'g1', h: 1, c: 'amber', x: 'Not this', y: '', m: 0 },
             { i: 'g2', h: 0, c: '', x: 'Adding to a loser', y: '', m: 1 } ] },
+        /* Two highlights and three runs: a SWIPE, an unmarked line, a
+           bracketed run of two, a HEADING breaking it, and a bracketed
+           run of ONE — which is the case that has to draw both feet. */
         { id: 'kN', t: 'Energy delegation', k: 'note', a: 'red', u: 1756700000000, l: [
           { i: 'n1', h: 1, c: 'red', x: 'Negative', y: 'what takes away', m: 0 },
-          { i: 'n2', h: 0, c: '', x: 'Doom scrolling', y: '', m: 1 } ] },
+          { i: 'n2', h: 0, c: '', x: 'Doom scrolling', y: '', m: 1 },
+          { i: 'n3', h: 0, c: '', x: 'An ordinary line', y: '', m: 0 },
+          { i: 'n4', h: 0, c: '', x: 'Fasting till the afternoon', y: '', m: 2 },
+          { i: 'n5', h: 0, c: '', x: 'Reading before the phone', y: '', m: 2 },
+          { i: 'n6', h: 1, c: 'teal', x: 'Positive', y: 'what feeds me', m: 0 },
+          { i: 'n7', h: 0, c: '', x: 'Cold water first thing', y: '', m: 2 } ] },
         /* A kind this build does not have, and one with no colour at
            all — the two shapes a key that outlives its code takes. */
         { id: 'kX', t: 'From another build', k: 'ledger', u: 1756600000000, l: [
@@ -13958,13 +13966,13 @@ const SAID = [
       ok('...the figures speak each kind’s own language',
         /^3 steps · 2 sessions/.test(lyBy('Trading day').figs)
         && /days left · due 30 Nov/.test(lyBy('Prop firm payout').figs)
-        && /^1 line · 1 marked/.test(lyBy('Energy delegation').figs),
+        && /^5 lines · 4 marked/.test(lyBy('Energy delegation').figs),
         lyCards.map((c) => c.figs));
       /* The section dots are a NOTE's own fact — how many sections and
          which colours — and the other two draw every heading in the
          note's one colour, so there is nothing for them to be about. */
       ok('...and only a plain note draws its section dots',
-        lyBy('Energy delegation').dots === 1
+        lyBy('Energy delegation').dots === 2
         && lyBy('Trading day').dots === 0
         && lyBy('Prop firm payout').dots === 0,
         lyCards.map((c) => c.dots));
@@ -14066,9 +14074,103 @@ const SAID = [
         mk: document.querySelectorAll('.nt-mk').length
       }));
       ok('a plain note is drawn exactly as it always was',
-        lyPlain.heads === 1 && lyPlain.clause === 'what takes away'
+        lyPlain.heads === 2 && lyPlain.clause === 'what takes away'
         && lyPlain.swipe === 1 && lyPlain.spine === 0 && lyPlain.mk === 0,
         lyPlain);
+
+      /* ── AND THE SECOND HIGHLIGHT IS A BRACKET ──
+         A swipe is per line and cannot say "these three go together";
+         a bracket can, and that is the whole of why it is a second
+         control rather than a second colour of wash. Measured as the
+         BORDERS on each row's own ::before, because the feet are what
+         make it a bracket rather than the margin rule this project
+         already rejected as a mark. */
+      const lyBr = await lypage.evaluate(() => {
+        const rows = [...document.querySelectorAll('.nt-row:not(.is-head)')];
+        if (!rows.length) throw new Error('no lines drawn on the note');
+        const w = (el, p) => parseFloat(getComputedStyle(el, '::before')[p]) || 0;
+        return {
+          words: rows.map((r) => r.textContent),
+          br: rows.map((r) => r.classList.contains('is-br')),
+          stem: rows.map((r) => w(r, 'borderLeftWidth')),
+          top: rows.map((r) => w(r, 'borderTopWidth')),
+          bot: rows.map((r) => w(r, 'borderBottomWidth')),
+          /* Every line shares one left edge — a gutter reserved per
+             row makes the text column step in and out down the page. */
+          lefts: [...new Set(rows.map((r) => Math.round(
+            r.getBoundingClientRect().left + parseFloat(getComputedStyle(r).paddingLeft))))],
+          swipes: rows.filter((r) => r.querySelector('.nt-v.is-mk')).length,
+          brWithSwipe: rows.filter((r) => r.classList.contains('is-br')
+            && r.querySelector('.nt-v.is-mk')).length
+        };
+      });
+      /* Rows are [swipe, plain, run-of-two ×2, run-of-one]. The run of
+         two takes a top foot on the first and a bottom on the last and
+         NEITHER in between; the run of one takes both. */
+      ok('a bracket spans a run, with a foot at each end and none inside',
+        lyBr.br.join() === 'false,false,true,true,true'
+        && lyBr.stem[2] > 1 && lyBr.stem[3] > 1 && lyBr.stem[4] > 1
+        && lyBr.top[2] > 1 && lyBr.bot[2] === 0
+        && lyBr.top[3] === 0 && lyBr.bot[3] > 1, lyBr);
+      /* A HEADING BREAKS A RUN. Without that the bracket would reach
+         across a section boundary and claim the two sections are one
+         run, which is the one thing it is drawn to say. */
+      ok('...a heading breaks it, and a run of one draws both feet',
+        lyBr.top[4] > 1 && lyBr.bot[4] > 1, lyBr);
+      /* The two are exclusive: a line carries one highlight. A build
+         that drew both would pass every check on either alone. */
+      ok('...a bracketed line never also wears the swipe',
+        lyBr.swipes === 1 && lyBr.brWithSwipe === 0, lyBr);
+      ok('...and the gutter is reserved on the whole note, so the column holds',
+        lyBr.lefts.length === 1, lyBr.lefts);
+
+      /* Two controls on a NOTE and one everywhere else, because a note
+         is the only layout where the mark has a choice of shape —
+         offering a bracket on a goal would be a control whose effect
+         you cannot see, which is the per-section colour's own rule. */
+      await lyEdit(true);
+      const lyMk = await lypage.evaluate(async () => {
+        const focus = async (i) => {
+          const rows = [...document.querySelectorAll('.nt-row:not(.is-head)')];
+          rows[i].querySelector('textarea, input').focus();
+          await new Promise((z) => setTimeout(z, 220));
+        };
+        const rec = () => JSON.parse(localStorage.getItem('sched.note.v1'))
+          .list.find((q) => q.id === 'kN').l.map((L) => L.m).join('');
+        await focus(0);
+        const names = [...document.querySelectorAll('.nt-tools .nt-tool')]
+          .map((b) => b.textContent);
+        const before = rec();
+        /* The swiped line, moved to a bracket and back. */
+        document.querySelector('.nt-brb').click();
+        await new Promise((z) => setTimeout(z, 320));
+        await focus(0);
+        const moved = rec();
+        document.querySelector('.nt-brb').click();
+        await new Promise((z) => setTimeout(z, 320));
+        return { names: names, before: before, moved: moved, off: rec() };
+      });
+      ok('a line in a note is offered both highlights, and they are exclusive',
+        lyMk.names.join(' ') === 'Heading Swipe Bracket'
+        && lyMk.before === '0102202' && lyMk.moved === '0202202'
+        && lyMk.off === '0002202', lyMk);
+
+      /* The mark is one claim: a bracketed line is still MARKED, so
+         the other two layouts have to draw it their own way rather
+         than treating 2 as an unknown value and dropping it. */
+      const lyCarry = await lypage.evaluate(async () => {
+        const press = async (name) => {
+          [...document.querySelectorAll('.nt-lb')]
+            .find((x) => x.textContent.indexOf(name) >= 0).click();
+          await new Promise((z) => setTimeout(z, 340));
+        };
+        await press('Daily process');
+        const keys = document.querySelectorAll('.nt-row.is-step.is-mkd').length;
+        await press('Note');
+        return { keys: keys, back: document.querySelectorAll('.nt-row.is-br').length };
+      });
+      ok('...and a bracketed line is still marked in the other layouts',
+        lyCarry.keys === 3 && lyCarry.back === 3, lyCarry);
 
       /* ── THE LAYOUT CHANGES THE DRAWING, NEVER THE RECORD ──
          The claim the whole feature stands on. Switch a note to a
@@ -14108,7 +14210,7 @@ const SAID = [
         && lySwitch.asGoal.w === lySwitch.before, lySwitch);
       ok('...and it genuinely redrew, or that passes on a dead control',
         lySwitch.asProc.spine === 1 && lySwitch.asGoal.mk === 1
-        && lySwitch.plain === 1, lySwitch);
+        && lySwitch.plain === 2, lySwitch);
 
       /* ── THE COLOUR IS THE NOTE'S, AND IT IS YOURS ──
          Seven, the app's own — and it has to reach the DRAWING rather

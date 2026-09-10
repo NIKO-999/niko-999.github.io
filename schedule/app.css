@@ -6464,6 +6464,39 @@ body {
 /* The clause is a NOTE's fact — the other two layouts draw a heading
    as one label, so a field for a second half would be a control whose
    effect you cannot see. */
+/* ── THE BRACKET, WHICH IS THE OTHER HIGHLIGHT ──
+   A swipe is per line and cannot say "these three go together"; a
+   bracket can, and that is the whole of why it is worth a second
+   control rather than a second colour of wash.
+
+   THE FEET ARE DRAWN BY THE RUN'S OWN FIRST AND LAST ROW, so nothing
+   has to be wrapped: every row in a run carries the stem, the first
+   adds the top foot and the last the bottom one. A run of one gets
+   both and reads as a complete bracket.
+
+   A plain vertical rule was already REJECTED as a mark — it is the
+   margin rule, and it says nothing about where a run ends. The feet
+   are the difference. */
+.nt-body.is-brs .nt-row:not(.is-head) { padding-left: 15px; }
+.nt-row.is-br::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 7px;
+  border-left: 2px solid color-mix(in srgb, var(--c) 62%, transparent);
+}
+.nt-row.is-br-top::before {
+  top: 5px;
+  border-top: 2px solid color-mix(in srgb, var(--c) 62%, transparent);
+  border-top-left-radius: 3px;
+}
+.nt-row.is-br-bot::before {
+  bottom: 5px;
+  border-bottom: 2px solid color-mix(in srgb, var(--c) 62%, transparent);
+  border-bottom-left-radius: 3px;
+}
+/* The bracket sits OUTSIDE the words rather than behind them, so it
+   is the one highlight that costs the line no contrast at all — and
+   the field's own marked rule must not strike or fade it. */
+.nt-body.is-note .nt-row.is-br.is-mkd .nt-in { color: var(--ink); }
+
 .nt-body:not(.is-note) .nt-hc { display: none; }
 .nt-body.is-goal .nt-row.is-head .nt-hw {
   border-bottom: 0; padding-right: 10px;

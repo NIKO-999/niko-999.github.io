@@ -7962,3 +7962,59 @@ wants `line-through`; the tag sort reduced to `return 0` reverses the
 row to attachment order. **A `cp` you do not check is not a backup** —
 that lesson cost an hour of work once, and the discipline that replaced
 it is a scripted break, a scripted inverse, and a hash.
+
+### And the second highlight is a BRACKET
+
+Asked for as *brackets as well for a highlight option* — so the mark
+stopped being a flag. `m` is 0, 1 or 2: none, the swipe, the bracket.
+A record written before this reads as a swipe because that is the only
+mark there was, and **anything else falls to the swipe rather than to
+nothing**: a line somebody marked is a line they marked, and a build
+that does not know the style still has to draw it.
+
+**A BRACKET SPANS A RUN, WHICH IS THE WHOLE OF WHY IT IS HERE.** A
+swipe is per line and cannot say *these three go together*; a bracket
+can, and that is the one thing it does that a second colour of wash
+would not. It is also what separates it from the **margin rule** this
+project already rejected as a mark: a plain vertical line says nothing
+about where a run ends, and the feet are the difference.
+
+**The feet are drawn by the run's own first and last row**, so nothing
+has to be wrapped. Every row in a run carries the stem, the first adds
+the top foot and the last the bottom one, and a run of ONE gets both —
+which is the case that has to look like a complete bracket rather than
+a stub. The rows stay flat, so the tools strip still slots in beside
+any of them and a run is a fact worked out at render rather than a
+shape stored.
+
+**A HEADING BREAKS A RUN**, and that guard is belt and braces: a
+heading can never carry `m` at all, because `scNoteCleanOne` drops the
+field on one. It is written anyway because a heading is a run boundary
+as a matter of MEANING — a bracket reaching across a section is
+claiming the two sections are one run — rather than as a consequence
+of which fields the clean happens to keep. Said plainly because the
+bite proof found it: breaking `!q.h` changes nothing on screen, so
+that half of the check rides on the clean, and the half that is really
+proved is the run of one.
+
+**THE GUTTER IS RESERVED ON THE WHOLE NOTE, NOT PER LINE.** A bracket
+lives outside the words, so its row has to give it room — and
+indenting only those rows makes the text column step in and out down
+the page, which reads as ragged rather than as a mark. Every line in a
+note that HAS a bracket shares the gutter; a note with none is
+untouched. Asserted as every line sharing ONE left edge.
+
+**Two controls, and only on a note.** `Swipe` and `Bracket`, mutually
+exclusive — pressing the one a line is already wearing takes it off. A
+process and a goal keep their single control (`Key step`, `Ruled out`),
+because those layouts draw the mark their own way and a bracket there
+would be a control whose effect you cannot see: the per-section
+colour's own rule. `Mark` became `Swipe` the moment there were two of
+them, since a control named for the category stops naming anything
+once its sibling is in the same category.
+
+**And a bracketed line is still MARKED.** The other two layouts read
+`m` for truth rather than for the value 2, so switching a note full of
+brackets to a process fills those nodes and to a goal strikes those
+lines. Asserted directly, because treating 2 as an unknown and
+dropping it is the obvious way for this to go silently wrong.
