@@ -10432,6 +10432,124 @@ const SAID = [
     await actx.close();
   }
 
+  /* ══════════════════════════════════════════════════════════════
+     AND NOTHING IS UNDER THE BAR
+
+     The tab bar is `position: fixed` and `body` is `100dvh`, so a tab
+     that is a plain block rather than a column with its own scroller
+     simply GROWS past the bottom of the poster — and the document can
+     then only be scrolled by however far the poster overflows its
+     parent, leaving the rest genuinely unreachable.
+
+     The week was the only one built right. Measured at 390x844 with
+     the pill's top at 766, before this was fixed:
+
+       Notes, a two-section note   last line 913, 73 of 147 reachable
+       Showing up, seven habits    .ty-foot 1013, 169 of 247 reachable
+       Friends, nine rows          .friends 990, 146 of 224 reachable
+
+     ITS OWN CONTEXT, at the foot of the file, for the sideways check's
+     own reason: it presses every tab and seeds a fixture long enough
+     to overflow all of them, which is not a state to hand the next
+     section.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    const bctx = await browser.newContext(PHONE);
+    const bpage = await bctx.newPage();
+    const berrs = [];
+    bpage.on('pageerror', (e) => berrs.push(String(e)));
+    await bpage.route(`${BASE}/schedule/nofriends/**`, (route) => route.fulfill({
+      status: 200, contentType: 'application/json', body: '{"ok":true}' }));
+    await bpage.addInitScript((wk) => {
+      ['sched.tour.v1', 'sched.hint2.v1'].forEach((k) => localStorage.setItem(k, '1'));
+      if (!localStorage.getItem('sched.v1')) localStorage.setItem('sched.v1', JSON.stringify(wk));
+      /* LONG ENOUGH TO OVERFLOW EVERY ONE OF THEM, which is the whole
+         condition: "nothing is under the bar" is vacuously true of a
+         screen that fits, so the panes are asserted to be scrolling
+         beside it. */
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1', JSON.stringify({
+          on: true, url: location.origin + '/schedule/nofriends',
+          code: 'AAAA1111', key: 'k'.repeat(32) }));
+        localStorage.setItem('sched.me.v1', JSON.stringify({ name: 'Me' }));
+        const fr = [];
+        for (let i = 0; i < 9; i++) {
+          fr.push({ code: 'C' + i + '000000', name: 'Friend ' + i, acc: '#8a4fe0', days: {}, up: 0 });
+        }
+        localStorage.setItem('sched.friends.v1', JSON.stringify(fr));
+        localStorage.setItem('sched.habit.v1', JSON.stringify(
+          ['Cold plunge', 'Charting', 'Journalling', 'Stretching', 'Sunlight', 'Vitamins', 'Calls']
+            .map((n, i) => ({ id: 'h' + i, n: n, k: 'tick', unit: '', c: 'blue', aim: 5, on: 1 }))));
+        const l = [];
+        for (let sn = 0; sn < 2; sn++) {
+          l.push({ i: 'h' + sn, h: 1, c: sn ? 'red' : 'teal',
+            x: sn ? 'Negative energy' : 'Positive energy', y: 'and what it is', m: 0 });
+          for (let i = 0; i < 10; i++) {
+            l.push({ i: 'l' + sn + i, h: 0, c: '', x: 'A line worth writing down ' + i, y: '', m: 1 });
+          }
+        }
+        localStorage.setItem('sched.note.v1',
+          JSON.stringify({ list: [{ id: 'nA', t: 'Energy delegation', u: Date.now(), l: l }] }));
+      }
+    }, WEEK);
+    await bpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await bpage.waitForTimeout(600);
+
+    console.log('\n── nothing is under the bar ──');
+    const floors = {};
+    for (const v of ['list', 'tally', 'notes', 'friends']) {
+      await bpage.evaluate((vv) =>
+        document.querySelector(`.tab[data-view="${vv}"]`).click(), v);
+      await bpage.waitForTimeout(420);
+      if (v === 'notes') {
+        await bpage.evaluate(() => {
+          const c = document.querySelector('.nt-card');
+          if (c) c.click();
+        });
+        await bpage.waitForTimeout(340);
+      }
+      floors[v] = await bpage.evaluate(() => {
+        const pill = document.querySelector('.tabs').getBoundingClientRect();
+        /* EVERY PANE TO ITS END FIRST. Content below the fold inside a
+           scroller is not under the bar, it is further down the page —
+           measuring before scrolling reports a working scroller as
+           broken, which is what the first version of this probe did. */
+        let scrolled = 0;
+        document.querySelectorAll('.poster *').forEach((e) => {
+          const d = e.scrollHeight - e.clientHeight;
+          if (d > 2) { e.scrollTop = e.scrollHeight; scrolled += d; }
+        });
+        let worst = null;
+        document.querySelectorAll('.poster *').forEach((e) => {
+          if (!e.getClientRects().length) return;
+          const b = e.getBoundingClientRect();
+          if (b.height < 1 || b.width < 1) return;
+          if (b.bottom > pill.top + 1 && (!worst || b.bottom > worst.b)) {
+            worst = { c: String(e.className && e.className.baseVal === undefined
+              ? e.className : e.tagName), b: Math.round(b.bottom) };
+          }
+        });
+        const doc = document.scrollingElement;
+        return { scrolled: scrolled, under: worst,
+          pill: Math.round(pill.top), doc: doc.scrollHeight - doc.clientHeight };
+      });
+    }
+    const views = Object.keys(floors);
+    ok('every tab scrolls its own pane rather than growing past the column',
+      views.every((v) => floors[v].scrolled > 40), floors);
+    ok('...and nothing is left under the bar once it is scrolled to the end',
+      views.every((v) => floors[v].under === null),
+      views.filter((v) => floors[v].under).map((v) => v + ': ' + JSON.stringify(floors[v].under)));
+    /* `body` is 100dvh, so a document that scrolls at all is content
+       that has escaped the column — which is the fault itself rather
+       than a second symptom of it. */
+    ok('...and the document itself never scrolls',
+      views.every((v) => floors[v].doc === 0), floors);
+
+    await bctx.close();
+    ok('nothing threw measuring the floor', berrs.length === 0, berrs.slice(0, 3));
+  }
+
   /* ── NOTHING IN THIS APP SCROLLS SIDEWAYS ──
      The board was a horizontal scroller of 212px columns, so a third
      session sat off the side of the phone and the first was cut in

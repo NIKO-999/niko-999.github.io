@@ -385,6 +385,53 @@ body {
   min-height: 0;
 }
 
+/* ── AND EVERY TAB IS A COLUMN THAT SCROLLS ──
+   The week has always been one — `.week` fills the poster and
+   `.day-card` inside it does the scrolling — and the other three were
+   plain blocks that simply GREW past the bottom of the column. The
+   symptom is the same on all of them and it is invisible until a
+   screen is long enough: `body` is `100dvh`, so the document can only
+   be scrolled by however far the poster overflows its own parent, and
+   the rest is unreachable under a bar that is `position: fixed`.
+
+   Measured at 390x844 with the pill's top at 766:
+
+     Notes, a two-section note   last line 913, 73 of 147 reachable
+     Showing up, seven habits    .ty-foot 1013, 169 of 247 reachable
+     Friends, nine rows          .friends 990, 146 of 224 reachable
+
+   Reported from the phone as a note clipping into the bar, which is
+   exactly what it is. Stated ONCE over the three rather than three
+   times, because it is one shape and the next tab added should get it
+   by being a tab rather than by somebody remembering.
+
+   THE PANE SCROLLS AND THE STOPS DO NOT, which falls out of the same
+   rule: the segmented control is navigation, so it stays where the
+   head is rather than sliding away with the list it names.
+
+   `[hidden]` was already said out loud for all four panes — the one
+   thing that would otherwise have broken here, and the eighth time
+   this app has had that bug. */
+.tally, .friends, .notes {
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+}
+#scTyPane, #scFrPane, #scFeed, #scNotePane {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  /* ── AND ROOM TO SCROLL PAST THE LAST LINE ──
+     Asked for in those words, and it is the other half: clearing the
+     bar is the bug above, and this is a reading decision. A list whose
+     last line stops dead on the bottom edge reads as cut off whether
+     or not it is. */
+  padding-bottom: 40px;
+}
+#scTyPane::-webkit-scrollbar, #scFrPane::-webkit-scrollbar,
+#scFeed::-webkit-scrollbar, #scNotePane::-webkit-scrollbar { display: none; }
+
 /* ── the head ────────────────────────────────────────────── */
 
 .head { flex: none; padding-bottom: 10px; }
@@ -595,7 +642,7 @@ body {
   pointer-events: none; }
 
 /* ── friends ── */
-.friends { margin-top: 18px; }
+.friends { margin-top: 18px; display: flex; }
 .friends[hidden] { display: none; }
 
 /* ── the two stops ──
@@ -1120,7 +1167,7 @@ body {
    panel. The timetable idiom still owns every other screen: the week,
    the ring and the sheet are square, and nothing here is shadowed.
    ═════════════════════════════════════════════════════════ */
-.tally { margin-top: 18px; }
+.tally { margin-top: 18px; display: flex; }
 .tally[hidden] { display: none; }
 /* ── SHOWING UP IS A LIST OF CARDS ──
    Craft's row, the week card's own: a circle check, the glyph, the
@@ -5898,7 +5945,7 @@ body {
    generic names and a collision does not throw, it REPLACES.
    ═══════════════════════════════════════════════════════════ */
 
-.notes { display: block; }
+.notes { display: flex; }
 /* `[hidden]` HAS TO BE SAID ONCE A THING TAKES A DISPLAY, and this is
    the eighth time in this app. The rail, the page dots, the toast, the
    intro, the objectives row and the edit control each had the
@@ -6017,6 +6064,25 @@ body {
   font-size: 12.5px; font-weight: 700;
   letter-spacing: .1em; text-transform: uppercase;
   color: var(--ink);
+  /* ── A RULE UNDER THE NAME, WITH A LEAD-OUT ──
+     Chosen from thirteen, each rendered with THREE headings running
+     down a page — because one rule on its own says nothing about what
+     three look like, which is the only question a heading treatment
+     has.
+
+     Under the NAME and never the clause: the clause already carries
+     the section's hue, and a rule under both turns every section into
+     a table header, which is what this app keeps removing from lists.
+
+     THE SIXTEEN PIXELS ARE THE POINT. Ended at the last letter the
+     rule and the clause beside it read as one object with a line
+     under half of it; run past the word, the two are visibly separate
+     things and the rule reads as belonging to the name. What it costs
+     is that the clause sits sixteen pixels further right, which is
+     the trade this was picked with. */
+  border-bottom: 1px solid var(--hair);
+  padding-bottom: 4px;
+  padding-right: 16px;
   field-sizing: content;
 }
 .nt-hc {

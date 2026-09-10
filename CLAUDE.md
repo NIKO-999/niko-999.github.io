@@ -7575,6 +7575,73 @@ they would drift — and a mode switch that looks like the note changed
 is worse than no mode at all. The same lines, the same wash, asserted
 in both.
 
+### The name is ruled, with a lead-out
+
+Chosen from **thirteen**, each rendered with THREE headings running
+down a page — because one rule on its own says nothing about what
+three look like, which is the only question a heading treatment has.
+What it beat: nothing at all, a plain hairline, full ink, the section
+hue, a marker wash across the letters' lower half, a real text
+underline, a double rule, a hairline dropped ten pixels, Swipe's own
+gradient turned into a rule, a fixed 22px tick, an overline, and the
+rule under the whole row.
+
+**Under the NAME and never the clause.** The clause already carries
+the section's hue, and a rule under both turns every section into a
+table header — which is what this app keeps removing from lists.
+
+**THE SIXTEEN PIXELS ARE THE POINT.** Ended at the last letter, the
+rule and the clause beside it read as one object with a line under
+half of it; run past the word, the two are visibly separate things and
+the rule reads as belonging to the name. What it costs is that the
+clause sits sixteen pixels further right, which is the trade it was
+picked with.
+
+### Every tab is a column that scrolls, and three of them were not
+
+The bar is `position: fixed` and `body` is `100dvh`, so a tab that is
+a plain block rather than a column with its own scroller simply GROWS
+past the bottom of the poster — and the document can then only be
+scrolled by however far the poster overflows its parent, leaving the
+rest genuinely unreachable.
+
+**The week was the only one built right**: `.week` fills the poster
+and `.day-card` inside it does the scrolling. Measured at 390x844 with
+the pill's top at 766:
+
+| | last drawn thing | reachable |
+| --- | --- | --- |
+| Notes, a two-section note | 913 | 73 of 147 |
+| Showing up, seven habits | 1013 | 169 of 247 |
+| Friends, nine rows | 990 | 146 of 224 |
+
+Reported from the phone as a note clipping into the bar, which is
+exactly what it is.
+
+**STATED ONCE OVER THE THREE**, not three times, because it is one
+shape and the next tab added should get it by being a tab rather than
+by somebody remembering. **The pane scrolls and the stops do not**,
+which falls out of the same rule: a segmented control is navigation,
+so it stays where the head is rather than sliding away with the list
+it names.
+
+**`[hidden]` was already said out loud for all four panes** — the one
+thing that would otherwise have broken here, and the eighth time this
+app has had that bug.
+
+**And room to scroll PAST the last line**, asked for in those words.
+Clearing the bar is the bug; the 40px under it is a reading decision —
+a list whose last line stops dead on the bottom edge reads as cut off
+whether or not it is.
+
+**THE FIRST PROBE REPORTED THE FIX AS BROKEN.** It looked for anything
+drawn below the pill without scrolling the panes first — so content
+below the fold INSIDE a scroller counted as content under the bar, and
+a working column measured identically to the bug. The check scrolls
+every pane to its end before it looks, and asserts that the panes
+scrolled at all beside it: "nothing is under the bar" is vacuously
+true of a screen that fits.
+
 ### A section moves by its heading
 
 Asked for in those words, and the heading is the only honest grab
