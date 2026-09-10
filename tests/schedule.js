@@ -5154,6 +5154,18 @@ const SAID = [
      cannot see. */
   ok('...and every row shows the pencil while it is armed',
     armed.rows > 0 && armed.pencils === armed.rows, armed);
+  /* ── AND THE PENCIL IT DRAWS CAN BE PRESSED ──
+     It is put away with `opacity: 0` AND `pointer-events: none`, and
+     the armed rule restored only the first — so arming drew a control
+     on every row that no thumb could reach. It read as working
+     because the press fell THROUGH to the row underneath, which opens
+     the same editor. `opacity > 0` passes on exactly that build,
+     which is why this is a second reading rather than a wider one. */
+  const armPe = await page.evaluate(() =>
+    [...document.querySelectorAll('.week .row-ed')]
+      .map((e) => getComputedStyle(e).pointerEvents));
+  ok('...and the pencil it draws is pressable, not just visible',
+    armPe.length > 0 && armPe.every((v) => v === 'auto'), armPe);
 
   const used = await page.evaluate(async () => {
     const rows = [...document.querySelectorAll('.week .row[data-id]')];
@@ -5246,6 +5258,74 @@ const SAID = [
   });
   ok('...and walking off the week disarms it',
     walked.pressed === 'false' && walked.pencils === 0, walked);
+
+  /* ═══════════════════════════════════════════════════════════
+     WHILE ARMED, THE WHOLE ROW IS ONE TARGET
+
+     This is the fault that was reported, in the reporter's own
+     words: "the edit button shows up but you can't tick it, it
+     cancels out the edit." A row is three SIBLING press targets laid
+     over one another — the row, the check at its right end, and the
+     pencil beside that — because a <button> inside a <button> is
+     invalid. The check is a 44px box at the end of a 354px row,
+     which is where a thumb lands when it is aiming at "the row", and
+     it went on ticking while the week was armed: the mode was spent
+     on the one wrong answer available, and pressing again did the
+     same thing.
+
+     A control must not answer two questions, and while the week is
+     armed there is exactly one question on the screen. So every one
+     of the three goes the same way — and all three are asserted,
+     because they fail APART: the row alone passed for the whole life
+     of the bug.
+     ═══════════════════════════════════════════════════════════ */
+  const armTargets = {};
+  for (const sel of ['.row', '.chk', '.row-ed']) {
+    armTargets[sel] = await page.evaluate(async (s) => {
+      const shut = () => document.getElementById('scSheet').hidden;
+      if (!shut()) {
+        document.getElementById('scScrim').click();
+        await new Promise((z) => setTimeout(z, 320));
+      }
+      /* A row whose tick opens nothing of its own, so "the editor is
+         up" cannot be satisfied by the workout deck or Mind. */
+      const w = [...document.querySelectorAll('.week .rowwrap')]
+        .find((x) => x.querySelector('.row[data-id]')
+          && !/train|walk|read|gym/i.test(x.querySelector('.n').textContent));
+      if (!w) throw new Error('no plain row on this day');
+      const t = w.querySelector(s);
+      if (!t) throw new Error('no ' + s + ' on that row');
+      const done = () => document.querySelectorAll('.week .row.is-done').length;
+      document.getElementById('scHdEd').click();
+      await new Promise((z) => setTimeout(z, 240));
+      const was = done();
+      t.click();
+      await new Promise((z) => setTimeout(z, 440));
+      return {
+        sheet: !document.getElementById('scSheet').hidden,
+        title: (document.getElementById('scSheetTitle') || {}).textContent || '',
+        ticked: done() !== was,
+        armed: document.getElementById('scHdEd').getAttribute('aria-pressed'),
+      };
+    }, sel);
+  }
+  const armOk = (r) => r.sheet && /Edit/.test(r.title) && !r.ticked && r.armed === 'false';
+  ok('armed, a press on the row itself opens that block',
+    armOk(armTargets['.row']), armTargets['.row']);
+  /* THE ONE THAT WAS REPORTED. */
+  ok('...and so does the check, rather than ticking it',
+    armOk(armTargets['.chk']), armTargets['.chk']);
+  ok('...and so does the pencil, spending the mode with it',
+    armOk(armTargets['.row-ed']), armTargets['.row-ed']);
+
+  await page.evaluate(async () => {
+    if (!document.getElementById('scSheet').hidden) {
+      document.getElementById('scScrim').click();
+      await new Promise((z) => setTimeout(z, 320));
+    }
+  });
+  await page.waitForFunction(() => document.getElementById('scSheet').hidden,
+    null, { timeout: 4000 });
 
   const pencil = await page.evaluate(async () => {
     /* The pencil itself still opens the editor — it is what a keyboard

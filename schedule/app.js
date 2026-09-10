@@ -1758,7 +1758,25 @@
            rather than nested, so it is belt and braces — and the
            ripple reads pointerdown in CAPTURE, so nothing about the
            press response depends on this bubbling. */
-        chk.addEventListener('click', function (ev) { ev.stopPropagation(); tick(); });
+        /* ── AND WHILE THE WEEK IS ARMED IT EDITS ──
+           This is the one that was reported: the check is a 44px
+           target at the END of a row, which is where a thumb lands
+           when it is aiming at "the row" — so arming the week and
+           pressing a block ticked it instead, and the mode was spent
+           on the one wrong answer available. Reported in those words:
+           "the edit button shows up but you can't tick it, it cancels
+           out the edit."
+
+           A control must not answer two questions, and while the week
+           is armed there is only one question on the screen. Every
+           press target on a row goes the same way — the row, the
+           check, the pencil, the children's dots — or the mode is a
+           lottery about which small box a thumb found. */
+        chk.addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          if (editArm) { scEditArm(false); scEditSheet(it, d); return; }
+          tick();
+        });
         wrap.appendChild(chk);
         wrap.appendChild(row);
         /* ── AND IT IS THE SAME CONTROL A KEYBOARD ALWAYS HAD ──
@@ -1780,6 +1798,13 @@
           + '<path d="M4 20h4L18 10l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
         ed.addEventListener('click', function (ev) {
           ev.stopPropagation();
+          /* Disarmed on the way, like every other target on the row.
+             This one opened the editor and left the mode standing, so
+             closing the sheet and pressing a second block edited that
+             one too — a mode that says it spends itself on one press
+             and then does not is worse than one that stays, because
+             nothing on screen disagrees with it. */
+          if (editArm) scEditArm(false);
           scEditSheet(it, d);
         });
         wrap.appendChild(ed);
@@ -1848,6 +1873,10 @@
 
           dots.addEventListener('click', function (ev) {
             ev.stopPropagation();
+            /* The gutter is a press target too, and while the week is
+               armed it is the block's, like every other one on the
+               row. */
+            if (editArm) { scEditArm(false); scEditSheet(it, d); return; }
             open = !open;
             kidOpen[it.id] = open;
             kids.hidden = !open;

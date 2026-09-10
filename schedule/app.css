@@ -512,7 +512,17 @@ body {
    armed it is drawn on every row, which is the one honest use for it
    being there — temporary, and the whole point is that you can see
    which things the next press will open. */
-.week.is-edit .row-ed { opacity: 1; }
+/* ── AND `pointer-events` WITH IT, WHICH IS THE WHOLE BUG ──
+   The pencil is put away with `opacity: 0` AND `pointer-events:
+   none`, and this rule restored only the first — so arming the week
+   drew a control on every row that could not be pressed. It read as
+   working because the press fell THROUGH to the row underneath, which
+   opens the same editor; what it did not fall through to is the
+   check, whose own 44px target is right beside it and which ticked
+   instead. A drawn control that does nothing is worse than no control
+   at all — this app's own conclusion about the two cards fanned
+   behind a workout, arriving from the other side. */
+.week.is-edit .row-ed { opacity: 1; pointer-events: auto; }
 .week.is-edit .row { cursor: pointer; }
 
 /* ── the day's span ──
