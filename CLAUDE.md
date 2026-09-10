@@ -7776,3 +7776,189 @@ in test-file clothes, for the third time.** Found by listing every
 top-level declaration and counting them rather than by fixing the one
 the parser happened to name first, which is the only version of that
 check worth running.
+
+## A note picks a layout, and the layout is the language
+
+Reported as *it doesn't read the same as how it would be for the notes
+because it's underneath a daily process — so a different layout*. A
+note, a daily process and a goal are three different things and they
+were one screen. What separates them is not a label on top of the same
+drawing: it is what is big, what is in the gutter, and what carries the
+order.
+
+**THE LAYOUT CHANGES THE DRAWING, NEVER THE RECORD.** A note is a title
+and a list of lines in all three, so switching a goal back to a plain
+note shows the same words in the plain layout with nothing lost. That is
+the claim the whole feature stands on and it is asserted directly:
+switch a note to a process, to a goal, and back, and every line has to
+come back word for word — **with the drawing demonstrably having changed
+in between**, or the check passes on a picker that does nothing at all.
+
+**AND NO TICKS ANYWHERE.** A checklist was built as a fourth layout and
+rejected in one line: *I don't want no ticks or checklists, I want it to
+have its own language.* None of the three ever says whether you did the
+thing. The record of what you actually did already lives on the week and
+on Showing up; these are what you decided.
+
+### A daily process is a SPINE
+
+One line down the whole height with a node on every step. The fact a
+process has that a note does not is **order**, and five ways of carrying
+it were rendered over the real palette at 390x844:
+
+- **Timetable** — a clock in the gutter. Too close to the WEEK, which is
+  this layout with a time column, so a process would read as a second
+  copy of the screen it hangs off.
+- **Flow** — each step a tinted block with an arrow. Five tinted blocks
+  is a wall of colour and a real day runs to eleven of them.
+- **Stair** — one unbroken rule down the left. That is a blockquote; it
+  does not read as order at all.
+- **Numerals** — outlined figures in the gutter. The plainest way to say
+  order and the least interesting to look at, and reordering renumbers
+  everything under it.
+- **Spine**, which shipped. Nothing else in the app looks like it — the
+  week is rows and a note is sentences, and a continuous line is
+  neither.
+
+**The heading BREAKS the line**, and that was chosen from ten drawn with
+*three* headings running down a page, because one heading on its own
+says nothing about what three look like. A ring was six circles down one
+line at two sizes — two marks with one silhouette. A rule was the week
+card's own treatment. A chip was three filled blocks on a note. What
+shipped is a stub on the spine with the label in the note's own colour:
+**a break in a line is the one mark that cannot be mistaken for a point
+on it**, which is exactly what a session heading has to say.
+
+**A step carries a note under it**, and it is the same `y` a heading's
+clause uses. No second shape for a reader to learn, and nothing is
+thrown away by switching layouts — it simply stops being drawn.
+
+### A goal is a MARKER
+
+The statement on its own tinted block with a heavy left edge, the date
+and what is left of it under it, everything else visibly below. Five
+were drawn: **Countdown** makes the clock the subject, and a number that
+only ever goes down at 46px is pressure rather than a goal. **Milestones**
+asks for a date on every line. **Statement** and **Horizon** were the
+close seconds and both are type-only.
+
+**THE STATEMENT IS THE FIRST LINE, not a field of its own.** A goal that
+invented a second text box would be the one kind you could not switch
+away from without losing something. The date is `d`, ten characters an
+`<input type="date">` speaks, so there is nothing to parse — and the
+countdown comes OFF it rather than being stored, so there is nothing to
+keep up to date and nothing that can disagree with the date. Counted
+between DATES rather than as a difference in milliseconds, or an hour of
+daylight saving inside the window rounds a whole day off the answer.
+
+**A GOAL HAS TO HAVE SOMEWHERE TO PUT ITS STATEMENT.** A note that opens
+with a heading has no leading plain line, so switching it to a goal drew
+a screen with no marker at all — which reads as the layout having
+failed rather than as a goal with nothing written in it yet. One empty
+line is prepended, and that is the one thing a layout switch may do to
+the record: **it takes no word away, it makes room for one.** The check
+that caught it compares only lines with words in them, for exactly that
+reason.
+
+### The mark is ONE claim drawn three ways
+
+A swipe behind the words on a note, a filled node on a process, and
+**struck through on a goal — the thing you have ruled out**, which is
+the one place this means something other than "this one matters". The
+control is named for the layout too: `Mark`, `Key step`, `Ruled out`.
+
+**In EDIT there is a field on top of it, and the first cut got that
+wrong.** The swipe is drawn by a MIRROR behind the field, so all three
+layouts wore it — a goal with a highlight where it should have had a
+strike. The row carries `is-mkd` now and each layout's own rule decides
+what it looks like; the mirror's wash is switched off wherever it is not
+the note's.
+
+### The card names its kind, and the figures name it again
+
+Nine ways were drawn, every one of which kept the shipped card exactly
+as it is — title, preview, section dots, figures — and added one thing.
+**An edge in the note's colour was the interesting rejection**: it looks
+right and says which NOTE, not which KIND, because you can give a goal
+the same teal as a process. Trading the section dots for a glyph loses a
+fact to add one. A chip above the title and a tile beside it were the
+loudest and both ate something.
+
+What shipped is a small-caps label over the title in the note's own
+colour. Beside it the bottom line already speaks each kind's language —
+`3 steps · 2 sessions`, `81 days left · due 30 Nov`, `1 line · 1 marked`
+— and **both halves are asserted, because each passes on the other's
+bug**: a build that labelled every card "Note" passes the figures check,
+and one that counted lines for a process passes the label check.
+
+**Only a plain note draws its section dots.** They are a note's own fact
+— how many sections and which colours — and the other two draw every
+heading in the note's one colour, so there is nothing for a row of dots
+to be about.
+
+### The colour is the note's, and it is yours
+
+Seven, the app's own, on the note rather than derived from its first
+heading. That derivation was right while a colour only ever meant a
+SECTION; with three layouts it also draws the spine, the marker, the
+kind label and the tag on a block, and **a note with no headings had no
+colour at all**. Repaired from the first heading on the way in, so
+nothing already written changes appearance.
+
+A per-section colour is offered **only in the plain layout** — the other
+two draw every heading in the note's one colour, so a swatch there would
+be a control whose effect you cannot see, which is worse than one that
+is not there. The stored value is untouched, so switching back restores
+it.
+
+### A block carries several, in one order
+
+Goal, then process, then note. The order you attached them in is not a
+fact about the block, so a row carrying three has to read the same way
+every time. Capped at three: past that a row stops reading as a row.
+
+**ONE TAG TO A LINE, and the first cut shared them.** Three tags in the
+180px between the name's left edge and the pencil came out as
+`PR… T… ENE…` — three coloured boxes and no titles, and the whole point
+of a tag is the name. Stacked they are all readable and the row is
+honestly taller for carrying three. The count goes on the row as a data
+attribute so the CSS can reserve the space: the bar is absolutely
+positioned, so nothing else can tell the row how tall to be, and
+measuring it back would be a forced reflow per row on every render.
+
+**`it.nt` IS A LIST NOW, and every block written before this carries a
+bare string** — read as a list of one. The writer is this phone and it
+overwrites itself on the next save, so there is nothing to migrate. A
+dangling id costs its tag and never the row.
+
+**And the glyph is the layout shrunk** — three rules for a note, a spine
+for a process, a flag for a goal — so the tag and the note it opens are
+the same object at two sizes. It is what says which KIND, where the
+colour only ever says which note.
+
+### `.nt-pick` was already taken, four hundred lines down the same file
+
+The layout picker went in as `.nt-pick` and that is the block editor's
+own row of note chips. Caught by grepping the name before writing it
+rather than by a screenshot weeks later, which is the oldest rule in
+this file and the one that still has to be followed on the day you are
+busy. It is `.nt-set`.
+
+### A `<span>` is not the only `<span>`
+
+The tag's title came back as three empty strings on a row that was
+drawing perfectly. `querySelector('span')` found the GLYPH — which is a
+span as well, and comes first. The label is `.nt-tt` now and the check
+asks for it by name. Same shape as a row found by its label instead of
+its `data-d`: **the selector matched, it just matched the wrong thing,
+and a wrong match reads exactly like a broken feature.**
+
+### Proved to bite, with no backup file
+
+Two claims, two exact string replacements, each undone by its own
+inverse, with the files hashed back to the known-good sha1 afterwards.
+Striking removed from a goal's marked line reads `none` where the check
+wants `line-through`; the tag sort reduced to `return 0` reverses the
+row to attachment order. **A `cp` you do not check is not a backup** —
+that lesson cost an hour of work once, and the discipline that replaced
+it is a scripted break, a scripted inverse, and a hash.

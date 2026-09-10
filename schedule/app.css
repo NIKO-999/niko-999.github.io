@@ -6291,6 +6291,207 @@ body {
   cursor: pointer;
 }
 .nt-add:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+/* ═══════════════════════════
+   THREE KINDS, THREE LAYOUTS
+
+   The record is a title and a list of lines whichever one is chosen;
+   everything below is only how each part is DRAWN. --c is the note's
+   own colour, set on .nt-body by scPaintNote.
+   ═══════════════════════════ */
+
+/* The glyph a kind wears — on the tag, on the picker, on the block
+   editor's chips. Sized here rather than on the markup, because an
+   inline <svg> with no width falls back to 300x150 and fills its
+   parent, silently. */
+.nt-g { display: inline-flex; flex: none; }
+.nt-g svg { width: 1em; height: 1em; display: block; }
+
+/* ── THE KIND, OVER THE TITLE ──
+   Chosen from nine, all of which kept the card as it was. 72% toward
+   the ink rather than the raw hue: this is the smallest type on the
+   card and it sits on a wash of white over the page. */
+.nt-k {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 9.5px; font-weight: 700;
+  letter-spacing: .18em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--c) 72%, var(--ink));
+}
+
+/* ── THE PICKER, WHILE EDITING ONLY ── */
+.nt-set { margin: 2px 0 14px; }
+.nt-lay { display: flex; flex-wrap: wrap; gap: 7px; }
+.nt-lb {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 34px; padding: 7px 12px;
+  border: 1px solid var(--card-edge); border-radius: 999px;
+  background: var(--card);
+  color: var(--dim);
+  font: inherit; font-size: 12.5px; font-weight: 600;
+  cursor: pointer;
+}
+.nt-lb.is-on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.nt-lb:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.nt-asw { display: flex; gap: 8px; margin-top: 10px; }
+.nt-ac {
+  width: 28px; height: 28px; flex: none;
+  border: 0; border-radius: 99px;
+  background: var(--c);
+  cursor: pointer;
+}
+.nt-ac.is-on { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink); }
+.nt-ac:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+
+/* ── A DAILY PROCESS IS A SPINE ──
+   One line down the whole height with a node on every step. It is an
+   element rather than a rule on the body so it stops at the last step
+   rather than running past the add controls. */
+.nt-sp { position: relative; padding-left: 30px; }
+.nt-sp::before {
+  content: ""; position: absolute; left: 6px; top: 6px; bottom: 8px;
+  width: 2px; border-radius: 2px;
+  background: linear-gradient(180deg, var(--c),
+    color-mix(in srgb, var(--c) 20%, transparent));
+}
+.nt-st { position: relative; padding: 9px 0; }
+.nt-st::before, .nt-sp.is-edit .nt-row.is-step::before {
+  content: ""; position: absolute; left: -28px; top: 14px;
+  width: 10px; height: 10px; border-radius: 99px;
+  background: var(--paper); box-shadow: 0 0 0 2.5px var(--c);
+}
+/* A KEY STEP FILLS ITS NODE. The mark is one claim drawn three ways —
+   a swipe on a note, a filled node here, a strike on a goal — so the
+   record says the same thing whichever layout is up. */
+.nt-st.is-key::before { background: color-mix(in srgb, var(--c) 92%, var(--ink)); }
+.nt-st b { display: block; font-size: 14.5px; font-weight: 600; line-height: 1.35; }
+.nt-st.is-key b { font-weight: 700; }
+.nt-st i {
+  display: block; margin-top: 2px;
+  font-size: 11.5px; font-style: normal; line-height: 1.45; color: var(--spent);
+}
+/* ── THE HEADING BREAKS THE LINE ──
+   Chosen from ten, each drawn with three headings running down a page
+   — one heading on its own says nothing about what three look like. A
+   break in a line is the one mark that cannot be mistaken for a point
+   on it, and the label takes the note's own colour. */
+.nt-sh { position: relative; padding: 16px 0 4px; }
+.nt-sh:first-child { padding-top: 2px; }
+.nt-sh b, .nt-sp.is-edit .nt-row.is-head .nt-hw {
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--c) 72%, var(--ink));
+}
+.nt-sh::before, .nt-sp.is-edit .nt-row.is-head::before {
+  content: ""; position: absolute; left: -30px; top: 18px;
+  width: 14px; height: 4px; border-radius: 2px;
+  background: color-mix(in srgb, var(--c) 85%, transparent);
+}
+.nt-sp.is-edit .nt-row.is-head .nt-hw {
+  border-bottom: 0; padding-right: 10px; max-width: 62%;
+}
+/* A step's own note, under it. Same field a heading's clause uses, so
+   nothing new is stored and nothing is lost by switching layouts. */
+.nt-sy {
+  display: block; width: 100%;
+  margin-top: 2px; padding: 2px 0;
+  border: 0; background: none;
+  color: var(--spent);
+  font: inherit; font-size: 11.5px;
+}
+.nt-sy::placeholder { color: var(--tick-off); }
+.nt-sy:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+/* ── A GOAL IS A MARKER ──
+   The statement on its own block with a heavy edge, the date under
+   it, everything else visibly below. */
+.nt-mk {
+  padding: 14px 15px;
+  border-radius: 14px;
+  border-left: 4px solid color-mix(in srgb, var(--c) 85%, transparent);
+  background: color-mix(in srgb, var(--c) 12%, transparent);
+}
+.nt-mk-s { font-size: 19px; font-weight: 700; letter-spacing: -.02em; line-height: 1.25; }
+.nt-mk-w {
+  margin-top: 8px;
+  font-size: 12px; font-weight: 600;
+  font-variant-numeric: tabular-nums; letter-spacing: .02em;
+  color: color-mix(in srgb, var(--c) 72%, var(--ink));
+}
+.nt-mk.is-edit .nt-row { padding: 0; }
+.nt-mk.is-edit .nt-in {
+  font-size: 19px; font-weight: 700; letter-spacing: -.02em; line-height: 1.25;
+}
+.nt-mk.is-edit .nt-mir { font-size: 19px; font-weight: 700; letter-spacing: -.02em; line-height: 1.25; }
+.nt-dw { display: flex; align-items: center; gap: 9px; margin-top: 9px; }
+.nt-dl {
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--c) 72%, var(--ink));
+}
+/* THE NATIVE BOX IS HANDED BACK, which is the edit sheet's own lesson:
+   a natively-appearing control in Safari keeps its own metrics and
+   overflows its track however the track is sized. box-sizing has to be
+   said again locally, because the universal reset is where it was
+   being taken from. */
+.nt-di {
+  -webkit-appearance: none; appearance: none;
+  box-sizing: border-box;
+  min-width: 0; max-width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--card-edge); border-radius: 8px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit; font-size: 13px; font-variant-numeric: tabular-nums;
+}
+.nt-di:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.nt-gh {
+  margin: 20px 0 6px;
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--c) 72%, var(--ink));
+}
+.nt-gl { padding: 7px 0; font-size: 15px; line-height: 1.4; }
+/* A MARKED LINE IN A GOAL IS STRUCK — the thing you have ruled out,
+   which is the one place the mark says something other than "this one
+   matters". Named on the control too: it reads "Ruled out" here. */
+.nt-gl.is-cut {
+  color: var(--spent);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--c) 70%, transparent);
+  text-decoration-thickness: 1.5px;
+}
+/* The clause is a NOTE's fact — the other two layouts draw a heading
+   as one label, so a field for a second half would be a control whose
+   effect you cannot see. */
+.nt-body:not(.is-note) .nt-hc { display: none; }
+.nt-body.is-goal .nt-row.is-head .nt-hw {
+  border-bottom: 0; padding-right: 10px;
+  font-size: 10.5px; letter-spacing: .16em;
+  color: color-mix(in srgb, var(--c) 72%, var(--ink));
+}
+
+/* ── THE FOOT ── */
+/* ── THE MARK, IN EDIT, PER LAYOUT ──
+   The mirror behind the field draws the swipe, which is the NOTE's
+   drawing — so the other two switch it off and take their own. */
+.nt-body:not(.is-note) .nt-mir span.is-mk { background: none; }
+.nt-sp.is-edit .nt-row.is-step.is-mkd::before {
+  background: color-mix(in srgb, var(--c) 92%, var(--ink));
+}
+.nt-sp.is-edit .nt-row.is-mkd .nt-in { font-weight: 700; }
+.nt-body.is-goal .nt-row.is-mkd .nt-in {
+  color: var(--spent);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--c) 70%, transparent);
+  text-decoration-thickness: 1.5px;
+}
+/* The statement is never struck: it is the goal itself, and it is
+   excluded from the marked list on the way in. */
+.nt-mk.is-edit .nt-row.is-mkd .nt-in { color: var(--ink); text-decoration: none; }
+
+.nt-foot { display: flex; align-items: center; gap: 20px; }
+.nt-add.is-sec { color: var(--dim); }
 .nt-rm {
   display: block;
   margin: 22px 0 4px;
@@ -6305,6 +6506,7 @@ body {
 /* ── AND WHICH NOTE A BLOCK IS ABOUT ── */
 .nt-pick { display: flex; flex-wrap: wrap; gap: 6px; padding: 2px 0 4px; }
 .nt-pk {
+  display: inline-flex; align-items: center; gap: 6px;
   padding: 6px 11px;
   border: 1px solid var(--hair);
   border-radius: 999px;
@@ -6314,9 +6516,12 @@ body {
   cursor: pointer;
   max-width: 100%;
   overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* The glyph says which KIND you are attaching, where the chip's own
+   colour only ever says which note. It keeps its width while the
+   title gives its up, for the row tag's own reason. */
+.nt-pk .nt-tt { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .nt-pk:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 .nt-pk.is-on {
   background: color-mix(in srgb, var(--tg, var(--ink)) 22%, transparent);
@@ -6331,6 +6536,27 @@ body {
    needs no measurement against a props line whose width changes with
    whatever else is on it — the row simply leaves the height. */
 .row.has-note { padding-bottom: 30px; }
+/* ── SEVERAL TAGS, AND NEVER A SECOND LINE ──
+   Three is the cap, and they share one line: a bar that wrapped would
+   change the row's height with the length of a title, and the row
+   has no way to tell the block above it. Each tag keeps its glyph —
+   which is the whole of what says WHICH KIND — and gives up its words
+   first. */
+.row-notes {
+  position: absolute; left: 98px; right: 80px; bottom: 7px;
+  z-index: 2;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 5px;
+}
+.row.has-note[data-nt="2"] { padding-bottom: 54px; }
+.row.has-note[data-nt="3"] { padding-bottom: 78px; }
+.row-notes .row-note {
+  position: static;
+  display: inline-flex; align-items: center; gap: 5px;
+  min-width: 0; max-width: none; flex: 0 1 auto;
+}
+.row-note .nt-tt {
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .row-note {
   position: absolute;
   /* 98, MEASURED rather than added up. The row's grid is 54px of time,

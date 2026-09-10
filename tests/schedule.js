@@ -13822,6 +13822,404 @@ const SAID = [
     ok('...and every heading’s clause clears 4.5:1 against the page it is on',
       worstClause.r >= 4.5, ratios);
 
+    /* ═══════════════════════════
+       THREE KINDS, THREE LAYOUTS
+
+       Its OWN context, and that is not tidiness: the app flushes what
+       it is holding back over the key on `pagehide`, which fires on
+       any navigation away including a fresh goto — so a section that
+       plants notes and reloads measures the notes it started with.
+       This file has already been bitten by that twice.
+
+       Every local is prefixed. `fresh`, `made`, `added` and `gone`
+       were all already standing in this file, and a second const in
+       one scope is a SyntaxError reported as "0 assertions across 1
+       files" — the greenest-looking failure there is.
+       ═══════════════════════════ */
+    {
+      const lyctx = await browser.newContext(PHONE);
+      const lypage = await lyctx.newPage();
+      const lyerrs = [];
+      lypage.on('pageerror', (e) => lyerrs.push(String(e)));
+      lypage.on('console', (m) => { if (m.type() === 'error') lyerrs.push(m.text()); });
+      const lyasked = [];
+      lypage.on('request', (r) => lyasked.push(r.url()));
+      await lypage.addInitScript(([w, notes]) => {
+        localStorage.setItem('sched.tour.v1', '1');
+        localStorage.setItem('sched.hint2.v1', '1');
+        localStorage.setItem('sched.hintw.v1', '1');
+        localStorage.setItem('sched.net.v1',
+          JSON.stringify({ on: false, url: '', code: '' }));
+        if (!localStorage.getItem('sched.v1')) {
+          localStorage.setItem('sched.v1', JSON.stringify(w));
+        }
+        if (!localStorage.getItem('sched.note.v1')) {
+          localStorage.setItem('sched.note.v1', JSON.stringify(notes));
+        }
+      }, [WEEK, { list: [
+        { id: 'kP', t: 'Trading day', k: 'proc', a: 'teal', u: 1756900000000, l: [
+          { i: 'p1', h: 1, c: 'teal', x: 'Before', y: '', m: 0 },
+          { i: 'p2', h: 0, c: '', x: 'Mark the levels', y: 'written down', m: 1 },
+          { i: 'p3', h: 0, c: '', x: 'Plan typed before the open', y: '', m: 0 },
+          { i: 'p4', h: 1, c: 'teal', x: 'During', y: '', m: 0 },
+          { i: 'p5', h: 0, c: '', x: 'Size off the stop', y: '', m: 0 } ] },
+        { id: 'kG', t: 'Prop firm payout', k: 'goal', a: 'amber', d: '2026-11-30',
+          u: 1756800000000, l: [
+            { i: 'g0', h: 0, c: '', x: 'First payout cleared', y: '', m: 0 },
+            { i: 'g1', h: 1, c: 'amber', x: 'Not this', y: '', m: 0 },
+            { i: 'g2', h: 0, c: '', x: 'Adding to a loser', y: '', m: 1 } ] },
+        { id: 'kN', t: 'Energy delegation', k: 'note', a: 'red', u: 1756700000000, l: [
+          { i: 'n1', h: 1, c: 'red', x: 'Negative', y: 'what takes away', m: 0 },
+          { i: 'n2', h: 0, c: '', x: 'Doom scrolling', y: '', m: 1 } ] },
+        /* A kind this build does not have, and one with no colour at
+           all — the two shapes a key that outlives its code takes. */
+        { id: 'kX', t: 'From another build', k: 'ledger', u: 1756600000000, l: [
+          { i: 'x1', h: 1, c: 'green', x: 'Kept', y: '', m: 0 } ] }
+      ] }]);
+      await lypage.route(`${BASE}/schedule/nofriends/**`, (route) => route.fulfill({
+        status: 200, contentType: 'application/json', body: '{"ok":true}' }));
+      await lypage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+      await lypage.waitForTimeout(520);
+
+      const lyTo = async () => {
+        await lypage.evaluate(() => {
+          const b = document.querySelector('.nt-back');
+          if (b) { b.click(); return; }
+          document.querySelector('.tab[data-view="notes"]').click();
+        });
+        await lypage.waitForTimeout(340);
+        await lypage.evaluate(() => {
+          document.querySelector('.tab[data-view="notes"]').click();
+        });
+        await lypage.waitForTimeout(300);
+      };
+      const lyOpen = async (title) => {
+        await lyTo();
+        await lypage.evaluate((t) => {
+          const c = [...document.querySelectorAll('.nt-card')]
+            .find((x) => x.textContent.indexOf(t) >= 0);
+          if (!c) throw new Error('no card named ' + t);
+          c.click();
+        }, title);
+        await lypage.waitForTimeout(340);
+      };
+      const lyEdit = async (on) => {
+        await lypage.evaluate((want) => {
+          const b = document.getElementById('scNtEd');
+          if (!b) throw new Error('no edit control in the head');
+          if ((b.getAttribute('aria-pressed') === 'true') !== want) b.click();
+        }, on !== false);
+        await lypage.waitForTimeout(340);
+      };
+
+      /* ── THE CARD SAYS WHICH KIND, AND THE FIGURES SAY IT AGAIN ──
+         Chosen from nine, all of which kept the card as it ships and
+         added one thing. Both halves are asserted because each passes
+         on the other's bug: a build that labelled every card "Note"
+         passes the figures check, and one that counted lines for a
+         process passes the label check. */
+      await lyTo();
+      const lyCards = await lypage.evaluate(() => {
+        return [...document.querySelectorAll('.nt-card')].map((c) => {
+          const k = c.querySelector('.nt-k');
+          const t = c.querySelector('.nt-t');
+          const m = c.querySelector('.nt-meta');
+          const st = k ? getComputedStyle(k) : null;
+          return {
+            kind: k ? k.textContent : null,
+            title: t ? t.textContent : null,
+            figs: m ? m.textContent : null,
+            over: k && t ? k.getBoundingClientRect().bottom <= t.getBoundingClientRect().top + 1 : null,
+            caps: st ? st.textTransform : null,
+            fg: st ? st.color : null,
+            dots: c.querySelectorAll('.nt-dots i').length
+          };
+        });
+      });
+      const lyBy = (t) => {
+        const r = lyCards.find((c) => c.title === t);
+        if (!r) throw new Error('no card for ' + t + ' — got '
+          + lyCards.map((c) => c.title).join(', '));
+        return r;
+      };
+      ok('every card names its kind, in a label ABOVE the title',
+        lyCards.length === 4
+        && lyBy('Trading day').kind === 'Daily process'
+        && lyBy('Prop firm payout').kind === 'Goal'
+        && lyBy('Energy delegation').kind === 'Note'
+        && lyCards.every((c) => c.over && c.caps === 'uppercase'),
+        lyCards.map((c) => c.kind));
+      /* A stored kind this build no longer has falls through to a
+         note, the way a stored view falls through to the week — the
+         key outlives the code that wrote it. */
+      ok('...and a kind this build does not have falls through to a note',
+        lyBy('From another build').kind === 'Note',
+        lyBy('From another build'));
+      ok('...the figures speak each kind’s own language',
+        /^3 steps · 2 sessions/.test(lyBy('Trading day').figs)
+        && /days left · due 30 Nov/.test(lyBy('Prop firm payout').figs)
+        && /^1 line · 1 marked/.test(lyBy('Energy delegation').figs),
+        lyCards.map((c) => c.figs));
+      /* The section dots are a NOTE's own fact — how many sections and
+         which colours — and the other two draw every heading in the
+         note's one colour, so there is nothing for them to be about. */
+      ok('...and only a plain note draws its section dots',
+        lyBy('Energy delegation').dots === 1
+        && lyBy('Trading day').dots === 0
+        && lyBy('Prop firm payout').dots === 0,
+        lyCards.map((c) => c.dots));
+      /* Three different colours, because a label reading the right
+         word in one colour is a build that hardcoded it. */
+      ok('...each in its own note’s colour, never one colour three times',
+        new Set([lyBy('Trading day').fg, lyBy('Prop firm payout').fg,
+          lyBy('Energy delegation').fg]).size === 3,
+        [lyBy('Trading day').fg, lyBy('Prop firm payout').fg]);
+
+      /* ── A DAILY PROCESS IS A SPINE ──
+         Measured as a BOX rather than as a class: a rule that stopped
+         drawing the line would keep every class it has. The spine has
+         to be TALLER than one step and no wider than a few pixels,
+         which is what tells a line from a panel. */
+      await lyOpen('Trading day');
+      const lySpine = await lypage.evaluate(() => {
+        const sp = document.querySelector('.nt-sp');
+        if (!sp) throw new Error('no spine on a daily process');
+        const b = sp.getBoundingClientRect();
+        const line = getComputedStyle(sp, '::before');
+        const steps = [...document.querySelectorAll('.nt-st')];
+        const node = steps.length
+          ? getComputedStyle(steps[0], '::before') : null;
+        return {
+          h: Math.round(b.height),
+          lineW: parseFloat(line.width),
+          lineH: parseFloat(line.height),
+          steps: steps.length,
+          heads: document.querySelectorAll('.nt-sh').length,
+          subs: [...document.querySelectorAll('.nt-st i')].map((i) => i.textContent),
+          nodeR: node ? node.borderTopLeftRadius : null,
+          nodeShadow: node ? node.boxShadow : null,
+          key: document.querySelectorAll('.nt-st.is-key').length,
+          plain: document.querySelectorAll('.nt-row.is-head').length,
+          swipe: document.querySelectorAll('.nt-v.is-mk').length
+        };
+      });
+      ok('a daily process draws one line down its whole height',
+        lySpine.lineW <= 4 && lySpine.lineH > 120
+        && lySpine.lineH > lySpine.h * 0.8, lySpine);
+      ok('...with a node on every step and a break at every session',
+        lySpine.steps === 3 && lySpine.heads === 2
+        && /50%|99px|9999px/.test(String(lySpine.nodeR))
+        && /px/.test(String(lySpine.nodeShadow)), lySpine);
+      ok('...a step carries the note under it',
+        lySpine.subs.indexOf('written down') >= 0, lySpine.subs);
+      /* The mark is one claim drawn three ways. Here it fills the node
+         — so the note's swipe must be ABSENT, or the layout is drawing
+         two answers to the same question. */
+      ok('...and a marked step fills its node rather than wearing a swipe',
+        lySpine.key === 1 && lySpine.swipe === 0 && lySpine.plain === 0, lySpine);
+
+      /* ── A GOAL IS A MARKER ── */
+      await lyOpen('Prop firm payout');
+      const lyGoal = await lypage.evaluate(() => {
+        const mk = document.querySelector('.nt-mk');
+        if (!mk) throw new Error('no marker on a goal');
+        const cs = getComputedStyle(mk);
+        const cut = document.querySelector('.nt-gl.is-cut');
+        return {
+          stmt: (mk.querySelector('.nt-mk-s') || {}).textContent,
+          when: (mk.querySelector('.nt-mk-w') || {}).textContent,
+          edge: parseFloat(cs.borderLeftWidth),
+          ground: cs.backgroundColor,
+          heads: document.querySelectorAll('.nt-gh').length,
+          lines: document.querySelectorAll('.nt-gl').length,
+          cutLine: cut ? cut.textContent : null,
+          cutDeco: cut ? getComputedStyle(cut).textDecorationLine : null,
+          spine: document.querySelectorAll('.nt-sp').length,
+          swipe: document.querySelectorAll('.nt-v.is-mk').length
+        };
+      });
+      ok('a goal puts its statement on a marker with a heavy edge',
+        lyGoal.stmt === 'First payout cleared' && lyGoal.edge >= 3
+        && !/rgba\(0, 0, 0, 0\)/.test(lyGoal.ground), lyGoal);
+      /* THE DATE IS THE ONE FIELD A GOAL HAS, and the countdown comes
+         OFF it rather than being stored — so there is nothing to keep
+         up to date and nothing that can disagree with the date. */
+      ok('...with the date and what is left of it, off the date itself',
+        /30 Nov/.test(lyGoal.when) && /day/.test(lyGoal.when), lyGoal.when);
+      ok('...the statement is out of the list, not repeated under it',
+        lyGoal.lines === 1 && lyGoal.heads === 1, lyGoal);
+      ok('...and a marked line is STRUCK, never swiped',
+        lyGoal.cutLine === 'Adding to a loser'
+        && /line-through/.test(String(lyGoal.cutDeco))
+        && lyGoal.swipe === 0 && lyGoal.spine === 0, lyGoal);
+
+      /* ── AND A PLAIN NOTE IS EXACTLY WHAT IT WAS ──
+         Asserted beside the other two, because "the layouts differ"
+         passes on a build that broke the one everything already
+         written is. */
+      await lyOpen('Energy delegation');
+      const lyPlain = await lypage.evaluate(() => ({
+        heads: document.querySelectorAll('.nt-row.is-head .nt-hw').length,
+        clause: (document.querySelector('.nt-hc') || {}).textContent,
+        swipe: document.querySelectorAll('.nt-v.is-mk').length,
+        spine: document.querySelectorAll('.nt-sp').length,
+        mk: document.querySelectorAll('.nt-mk').length
+      }));
+      ok('a plain note is drawn exactly as it always was',
+        lyPlain.heads === 1 && lyPlain.clause === 'what takes away'
+        && lyPlain.swipe === 1 && lyPlain.spine === 0 && lyPlain.mk === 0,
+        lyPlain);
+
+      /* ── THE LAYOUT CHANGES THE DRAWING, NEVER THE RECORD ──
+         The claim the whole feature stands on. Switch a note to a
+         process and to a goal and back, and every line has to come
+         back word for word — with the drawing demonstrably having
+         changed in between, or the check passes on a picker that does
+         nothing at all. */
+      await lyEdit(true);
+      const lySwitch = await lypage.evaluate(async () => {
+        /* Empty lines are skipped, because switching to a goal ADDS
+           one: the statement is the first line and a note opening on a
+           heading has nowhere to put it. The claim is that no WORD is
+           lost, not that the array never changes length. */
+        const words = () => JSON.parse(localStorage.getItem('sched.note.v1'))
+          .list.find((q) => q.id === 'kN').l
+          .filter((L) => L.x.trim() || (L.y || '').trim())
+          .map((L) => [L.h, L.c, L.x, L.y, L.m].join('|')).join(' / ');
+        const press = async (name) => {
+          const b = [...document.querySelectorAll('.nt-lb')]
+            .find((x) => x.textContent.indexOf(name) >= 0);
+          if (!b) throw new Error('no ' + name + ' in the picker');
+          b.click();
+          await new Promise((z) => setTimeout(z, 340));
+        };
+        const before = words();
+        await press('Daily process');
+        const asProc = { spine: document.querySelectorAll('.nt-sp').length, w: words() };
+        await press('Goal');
+        const asGoal = { mk: document.querySelectorAll('.nt-mk').length, w: words() };
+        await press('Note');
+        return { before: before, asProc: asProc, asGoal: asGoal,
+          after: words(), plain: document.querySelectorAll('.nt-row.is-head .nt-hw').length };
+      });
+      ok('switching layout redraws and loses not one word',
+        lySwitch.before === lySwitch.after
+        && lySwitch.asProc.w === lySwitch.before
+        && lySwitch.asGoal.w === lySwitch.before, lySwitch);
+      ok('...and it genuinely redrew, or that passes on a dead control',
+        lySwitch.asProc.spine === 1 && lySwitch.asGoal.mk === 1
+        && lySwitch.plain === 1, lySwitch);
+
+      /* ── THE COLOUR IS THE NOTE'S, AND IT IS YOURS ──
+         Seven, the app's own — and it has to reach the DRAWING rather
+         than only the record, which is what a swatch that only wrote
+         the key would pass. */
+      const lyHue = await lypage.evaluate(async () => {
+        const sw = [...document.querySelectorAll('.nt-ac')];
+        if (sw.length !== 7) throw new Error('the picker offers ' + sw.length + ' colours');
+        const b4 = getComputedStyle(document.querySelector('.nt-hc')).color;
+        sw[5].click();
+        await new Promise((z) => setTimeout(z, 340));
+        const rec = JSON.parse(localStorage.getItem('sched.note.v1'))
+          .list.find((q) => q.id === 'kN');
+        const lab = getComputedStyle(document.querySelector('.nt-k') || document.body).color;
+        return { n: sw.length, saved: rec.a, b4: b4,
+          card: lab, on: document.querySelectorAll('.nt-ac.is-on').length };
+      });
+      ok('the seven colours are the note’s own, and exactly one is on',
+        lyHue.n === 7 && lyHue.saved === 'blue' && lyHue.on === 1, lyHue);
+
+      /* ── SEVERAL ON ONE BLOCK, IN ONE ORDER ──
+         Goal, then process, then note. The order you attached them in
+         is not a fact about the block, so a row carrying three has to
+         read the same way every time. */
+      await lypage.evaluate(() => {
+        const st = JSON.parse(localStorage.getItem('sched.v1'));
+        const d = new Date().getDay();
+        const it = st.items.filter((x) => x.d === d)[0] || st.items[0];
+        /* Deliberately the WRONG way round, and one id that no longer
+           names anything — a dangling reference costs its tag and
+           never the row. */
+        it.nt = ['kN', 'kP', 'kG', 'gone-forever'];
+        localStorage.setItem('sched.v1', JSON.stringify(st));
+      });
+      await lypage.reload({ waitUntil: 'networkidle' });
+      await lypage.waitForTimeout(560);
+      await lypage.evaluate(() => document.querySelector('.tab[data-view="list"]').click());
+      await lypage.waitForTimeout(420);
+      const lyTags = await lypage.evaluate(() => {
+        const bar = document.querySelector('.row-notes');
+        if (!bar) throw new Error('no tags on any row');
+        const t = [...bar.querySelectorAll('.row-note')];
+        const row = bar.closest('.rowwrap').querySelector('.row');
+        const rb = row.getBoundingClientRect();
+        return {
+          names: t.map((x) => x.querySelector('.nt-tt').textContent),
+          glyphs: t.map((x) => x.querySelectorAll('.nt-g svg').length),
+          cols: t.map((x) => getComputedStyle(x).color),
+          stacked: t.length > 1
+            && t[1].getBoundingClientRect().top >= t[0].getBoundingClientRect().bottom - 1,
+          inside: t.every((x) => {
+            const b = x.getBoundingClientRect();
+            return b.left >= rb.left - 1 && b.right <= rb.right + 1
+              && b.bottom <= rb.bottom + 1;
+          }),
+          clipped: t.every((x) => {
+            const sp = x.querySelector('.nt-tt');
+            return sp.scrollWidth <= sp.clientWidth + 1;
+          }),
+          stored: JSON.parse(localStorage.getItem('sched.v1')).items
+            .filter((i) => Array.isArray(i.nt) && i.nt.length).map((i) => i.nt.length)
+        };
+      });
+      ok('a block carries several notes, ordered goal then process then note',
+        lyTags.names.join(' | ')
+          === 'Prop firm payout | Trading day | Energy delegation', lyTags.names);
+      ok('...each with its own kind’s glyph and its own note’s colour',
+        lyTags.glyphs.every((g) => g === 1)
+        && new Set(lyTags.cols).size === 3, lyTags);
+      /* ONE A LINE. Three sharing 180px came out as PR… T… ENE…, which
+         is three coloured boxes and no titles — and the whole point of
+         a tag is the name. Both halves: stacked, and none of them
+         clipped or outside the row it belongs to. */
+      ok('...one to a line, none clipped and none outside its row',
+        lyTags.stacked && lyTags.inside && lyTags.clipped, lyTags);
+      ok('...and four ids are capped at three, the dangling one dropped',
+        lyTags.stored.every((c) => c <= 3), lyTags.stored);
+
+      /* Removing a note takes it off every block that named it —
+         asserted on the RECORD, because a tag that stopped drawing
+         while the id stayed would pass any check on the screen. */
+      await lypage.evaluate(() => document.querySelector('.tab[data-view="notes"]').click());
+      await lypage.waitForTimeout(340);
+      const lyRm = await lypage.evaluate(async () => {
+        const c = [...document.querySelectorAll('.nt-card')]
+          .find((x) => x.textContent.indexOf('Trading day') >= 0);
+        c.click();
+        await new Promise((z) => setTimeout(z, 320));
+        document.getElementById('scNtEd').click();
+        await new Promise((z) => setTimeout(z, 320));
+        document.querySelector('.nt-rm').click();
+        await new Promise((z) => setTimeout(z, 340));
+        const go = [...document.querySelectorAll('#scSheetBody .btn')]
+          .find((b) => /Remove it/.test(b.textContent));
+        if (!go) throw new Error('the remove sheet has no confirm');
+        go.click();
+        await new Promise((z) => setTimeout(z, 420));
+        return JSON.parse(localStorage.getItem('sched.v1')).items
+          .filter((i) => Array.isArray(i.nt) && i.nt.indexOf('kP') >= 0).length;
+      });
+      ok('removing a note takes its id off every block that named it',
+        lyRm === 0, lyRm);
+
+      /* THE WHOLE OF THIS SCREEN STILL REACHES NOTHING. */
+      const lyOff = lyasked.filter((u) => !u.startsWith(BASE));
+      ok('and none of the three layouts reaches off this origin',
+        lyOff.length === 0, lyOff.slice(0, 4));
+      ok('nothing threw through any of it', lyerrs.length === 0, lyerrs.slice(0, 4));
+      await lyctx.close();
+    }
+
     await nctx.close();
     ok('nothing threw through the notes record', nerrs.length === 0, nerrs.slice(0, 4));
   }

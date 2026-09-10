@@ -151,7 +151,20 @@
            returns null and the row simply draws none, which is what
            happens for a note removed on another device before this one
            has caught up. */
-        nt: typeof it.nt === 'string' && it.nt ? it.nt.slice(0, 40) : ''
+        /* ── A BLOCK CAN BE ABOUT MORE THAN ONE THING ──
+           A goal, the process for it and a note beside them are three
+           different records about one morning, so `nt` is a LIST. Every
+           block written before this carries a bare string and reads as
+           a list of one — the writer is this phone and it overwrites
+           itself on the next save, so there is nothing to migrate.
+
+           Three, because at four a row stops reading as a row and
+           starts being a card with a list under it. */
+        nt: (typeof it.nt === 'string' ? (it.nt ? [it.nt] : [])
+          : Array.isArray(it.nt) ? it.nt : [])
+          .filter(function (q) { return typeof q === 'string' && q; })
+          .map(function (q) { return q.slice(0, 40); })
+          .slice(0, 3)
       });
     }
     return out;
@@ -1837,20 +1850,46 @@
            included, because a mode that opens a note from one corner
            of a row and the editor from the rest is a lottery about
            which small box a thumb found. */
-        var nrec = scNoteOf(it);
-        if (nrec) {
+        var nrecs = scNoteOf(it);
+        if (nrecs.length) {
           row.classList.add('has-note');
-          var nb = scEl('button', 'row-note');
-          nb.type = 'button';
-          nb.style.setProperty('--tg', scNtVar(scNoteHue(nrec)));
-          nb.setAttribute('aria-label', 'Open the note ' + scNoteTitle(nrec));
-          nb.appendChild(scEl('span', null, scNoteTitle(nrec)));
-          nb.addEventListener('click', function (ev) {
-            ev.stopPropagation();
-            if (editArm) { scEditArm(false); scEditSheet(it, d); return; }
-            scNoteJump(nrec.id);
+          /* ── ONE TAG A LINE, AND THE COUNT IS ON THE ROW ──
+             Three tags sharing 180px came out as PR… T… ENE…, which
+             is three coloured boxes and no titles — the whole point of
+             a tag is the name. Stacked they are all readable, and the
+             row is honestly taller for carrying three.
+
+             The count goes on the row so the CSS can reserve the
+             space: the bar is absolutely positioned, so nothing else
+             can tell the row how tall to be, and measuring it back
+             would be a forced reflow per row on every render. */
+          row.dataset.nt = String(nrecs.length);
+          var nbar = scEl('div', 'row-notes');
+          nrecs.forEach(function (nrec) {
+            var nb = scEl('button', 'row-note');
+            nb.type = 'button';
+            nb.style.setProperty('--tg', scNtVar(scNoteHue(nrec)));
+            nb.setAttribute('aria-label',
+              'Open the ' + scNtKindName(nrec.k).toLowerCase()
+              + ' ' + scNoteTitle(nrec));
+            /* THE GLYPH IS THE LAYOUT SHRUNK, so the tag and the note
+               it opens are the same object at two sizes — and it is
+               what says WHICH KIND where the colour only ever says
+               which note. */
+            nb.appendChild(scNtGlyph(nrec.k, 'nt-g'));
+            /* Named, because the glyph is a <span> as well and a bare
+               `querySelector('span')` finds that one — which is how a
+               check reading the tag's title came back with three empty
+               strings on a row that was drawing perfectly. */
+            nb.appendChild(scEl('span', 'nt-tt', scNoteTitle(nrec)));
+            nb.addEventListener('click', function (ev) {
+              ev.stopPropagation();
+              if (editArm) { scEditArm(false); scEditSheet(it, d); return; }
+              scNoteJump(nrec.id);
+            });
+            nbar.appendChild(nb);
           });
-          wrap.appendChild(nb);
+          wrap.appendChild(nbar);
         }
         (sess || card).appendChild(wrap);
 
@@ -10359,12 +10398,12 @@
       name.value = item ? item.n : '';
       name.autocapitalize = 'words';
 
-      var noteSel = item && item.nt ? item.nt : '';
       /* A note removed since this block last named it: the id is
          dropped on the way IN rather than left to be saved back, so
          re-saving a block cannot resurrect a reference to something
          that no longer exists. */
-      if (noteSel && !scNoteById(noteSel)) noteSel = '';
+      var noteSel = (item && Array.isArray(item.nt) ? item.nt : [])
+        .filter(function (q) { return !!scNoteById(q); }).slice(0, 3);
 
       var picked = {};
       if (item) picked[item.d] = 1; else picked[day === undefined ? new Date().getDay() : day] = 1;
@@ -10583,27 +10622,33 @@
            can only refuse. */
         if (notes.length) {
           body.appendChild(scEl('span', 'label', 'About'));
+          /* ── SEVERAL, AND THE CHIPS TOGGLE ──
+             A goal, the process for it and a note about it are three
+             different records about one morning. There is no None
+             chip any more: pressing a chip that is on takes it off,
+             which is the same control answering one question instead
+             of two. */
           var nrow = scEl('div', 'nt-pick');
-          var mk = function (id, label, hue) {
-            var b = scEl('button', 'nt-pk' + (noteSel === id ? ' is-on' : ''));
+          notes.slice().sort(function (a, b2) { return b2.u - a.u; }).forEach(function (q) {
+            var on = noteSel.indexOf(q.id) >= 0;
+            var b = scEl('button', 'nt-pk' + (on ? ' is-on' : ''));
             b.type = 'button';
-            b.textContent = label;
-            b.setAttribute('aria-pressed', noteSel === id ? 'true' : 'false');
-            if (hue) b.style.setProperty('--tg', scNtVar(hue));
+            b.appendChild(scNtGlyph(q.k, 'nt-g'));
+            b.appendChild(scEl('span', 'nt-tt', scNoteTitle(q)));
+            b.setAttribute('aria-pressed', on ? 'true' : 'false');
+            b.style.setProperty('--tg', scNtVar(scNoteHue(q)));
             b.addEventListener('click', function () {
-              noteSel = id;
-              nrow.querySelectorAll('.nt-pk').forEach(function (o) {
-                o.classList.remove('is-on');
-                o.setAttribute('aria-pressed', 'false');
-              });
-              b.classList.add('is-on');
-              b.setAttribute('aria-pressed', 'true');
+              var at = noteSel.indexOf(q.id);
+              if (at >= 0) noteSel.splice(at, 1);
+              else if (noteSel.length >= 3) {
+                scToast('Three is as many as a row can carry', false);
+                return;
+              } else noteSel.push(q.id);
+              var now = noteSel.indexOf(q.id) >= 0;
+              b.classList.toggle('is-on', now);
+              b.setAttribute('aria-pressed', now ? 'true' : 'false');
             });
             nrow.appendChild(b);
-          };
-          mk('', 'None', '');
-          notes.slice().sort(function (a, b2) { return b2.u - a.u; }).forEach(function (q) {
-            mk(q.id, scNoteTitle(q), scNoteHue(q));
           });
           body.appendChild(nrow);
         }
@@ -10638,7 +10683,7 @@
              Add is the form throwing away work you can see. */
           addKid();
           item.k = kidList;
-          item.nt = noteSel;
+          item.nt = noteSel.slice(0, 3);
         }
         scClose();
         scCommit(isNew ? 'Added' : 'Saved');
@@ -11281,6 +11326,72 @@
   function scNtHue(c) { return NT_HUES.indexOf(c) >= 0 ? c : 'blue'; }
   function scNtVar(c) { return 'var(--w-' + scNtHue(c) + ')'; }
 
+  /* ═══════════════════════════
+     THREE KINDS, AND EACH ONE IS A LAYOUT
+
+     A note, a daily process and a goal are three different things, so
+     they must not read the same. What separates them is not a label:
+     it is what is big, what is in the gutter, and what carries the
+     order.
+
+       note  sections you name, sentences under them, a swipe on the
+             ones that matter. Unchanged, and every note written
+             before this is one.
+       proc  a SPINE — one line down the whole height with a node on
+             every step. The fact a process has that a note does not
+             is ORDER, and a continuous line is the only way to say it
+             that nothing else in this app already looks like.
+       goal  a MARKER — the statement on its own tinted block with a
+             heavy edge, a date, and what is left of it. The fact a
+             goal has is a DATE and one statement outranking the rest.
+
+     THE LAYOUT CHANGES THE DRAWING, NEVER THE RECORD. A note is a
+     title and a list of lines in all three, so switching a goal back
+     to a note shows the same words in the plain layout and nothing is
+     lost. What the kind decides is how each part is drawn:
+
+       heading   note → name and clause with a ruled lead-out
+                 proc → a stub on the spine, the label in the colour
+                 goal → a small-caps label in the colour
+       marked    note → a swipe of the colour behind the words
+                 proc → the node fills in and the name goes heavier
+                 goal → struck through, the thing you have ruled out
+     ═══════════════════════════ */
+  var NT_KINDS = [
+    { k: 'note', n: 'Note' },
+    { k: 'proc', n: 'Daily process' },
+    { k: 'goal', n: 'Goal' }
+  ];
+  /* Ordered goal, then process, then note — so a block carrying
+     several reads the same way every time rather than in whatever
+     order you happened to attach them. */
+  var NT_ORD = { goal: 0, proc: 1, note: 2 };
+  function scNtKind(k) {
+    for (var i = 0; i < NT_KINDS.length; i++) if (NT_KINDS[i].k === k) return k;
+    return 'note';
+  }
+  function scNtKindName(k) {
+    for (var i = 0; i < NT_KINDS.length; i++) if (NT_KINDS[i].k === k) return NT_KINDS[i].n;
+    return 'Note';
+  }
+  /* ── EACH KIND'S OWN MARK, AND IT IS THE LAYOUT SHRUNK ──
+     Three rules for a note, a spine for a process, a flag for a goal.
+     The card and the tag on a block wear the same one, so the two
+     teach each other rather than being two systems to learn. */
+  var NT_PATH = {
+    note: '<path d="M5 7h14M5 12h14M5 17h9"/>',
+    proc: '<path d="M5 5v14"/><circle cx="5" cy="9" r="1.7" fill="currentColor" stroke="none"/>'
+      + '<path d="M11 9h8M11 16h6"/>',
+    goal: '<path d="M6 21V4h12l-3 4 3 4H6"/>'
+  };
+  function scNtGlyph(k, cls) {
+    var g = scEl('span', cls || 'nt-g');
+    g.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+      + 'stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" '
+      + 'aria-hidden="true">' + NT_PATH[scNtKind(k)] + '</svg>';
+    return g;
+  }
+
   var notes = [];
   var ntOpen = null;
   /* scNoteJump sets ntOpen and then asks for this view; scSetView
@@ -11302,6 +11413,22 @@
       id: typeof raw.id === 'string' && raw.id ? raw.id : scNtId(),
       t: typeof raw.t === 'string' ? raw.t.slice(0, 80) : '',
       u: typeof raw.u === 'number' && raw.u > 0 ? raw.u : Date.now(),
+      /* A kind this build does not have falls through to a note, the
+         way a stored view falls through to the week: the key outlives
+         the code that wrote it, and a blank screen with a bar on it is
+         not an answer. */
+      k: scNtKind(raw.k),
+      /* THE NOTE'S OWN COLOUR, and it used to be derived from the first
+         heading. That was right while a colour only ever meant a
+         SECTION — with three layouts it also draws the spine, the
+         marker, the kind label on the card and the tag on a block, and
+         a note with no headings had no colour at all. Repaired from the
+         first heading so nothing already written changes appearance. */
+      a: '',
+      /* The one field a goal has that neither of the others does.
+         Kept as the ten characters an <input type="date"> speaks, so
+         there is nothing to parse and nothing to get wrong. */
+      d: /^\d{4}-\d{2}-\d{2}$/.test(raw.d) ? raw.d : '',
       l: []
     };
     var src = Array.isArray(raw.l) ? raw.l : [];
@@ -11318,10 +11445,22 @@
            of one decision. */
         c: head ? scNtHue(r.c) : '',
         x: typeof r.x === 'string' ? r.x.slice(0, 300) : '',
-        y: head && typeof r.y === 'string' ? r.y.slice(0, 300) : '',
+        /* On a heading this is the clause; on a step in a daily
+           process it is the note under it. Kept on any line rather
+           than only on headings, because a layout that is not drawing
+           it must still not throw it away — that is the whole of what
+           makes switching between the three lossless. */
+        y: typeof r.y === 'string' ? r.y.slice(0, 300) : '',
         m: (!head && r.m) ? 1 : 0
       });
     }
+    n.a = NT_HUES.indexOf(raw.a) >= 0 ? raw.a : '';
+    if (!n.a) {
+      for (var q = 0; q < n.l.length; q++) {
+        if (n.l[q].h && n.l[q].c) { n.a = n.l[q].c; break; }
+      }
+    }
+    if (!n.a) n.a = 'blue';
     return n;
   }
 
@@ -11378,14 +11517,9 @@
     return null;
   }
 
-  /* The note's own colour is its FIRST heading's, derived rather than
-     set: a second colour to choose, that had to agree with the
-     sections inside it, is one decision too many for a thing whose
-     only job is to be recognised on a row. */
-  function scNoteHue(n) {
-    for (var i = 0; i < n.l.length; i++) if (n.l[i].h) return n.l[i].c;
-    return '';
-  }
+  /* Set on the note now rather than derived from its first heading —
+     see the repair in scNoteCleanOne for why that had to change. */
+  function scNoteHue(n) { return scNtHue(n.a); }
   function scNoteHues(n) {
     var out = [];
     n.l.forEach(function (L) {
@@ -11395,13 +11529,70 @@
   }
   function scNoteTitle(n) { return n.t || 'Untitled'; }
   function scNoteCount(n) {
-    var lines = 0, marked = 0;
-    n.l.forEach(function (L) { if (!L.h) { lines++; if (L.m) marked++; } });
-    return { lines: lines, marked: marked };
+    var lines = 0, marked = 0, heads = 0;
+    n.l.forEach(function (L) {
+      if (L.h) { heads++; return; }
+      lines++; if (L.m) marked++;
+    });
+    return { lines: lines, marked: marked, heads: heads };
+  }
+
+  /* ── A GOAL'S ONE FIGURE ──
+     Days from today to the date, off the DATES rather than off a
+     difference in milliseconds: an hour of daylight saving inside the
+     window would otherwise round a whole day off the answer. */
+  function scNoteDays(n) {
+    if (!n.d) return null;
+    var p = n.d.split('-');
+    var due = Date.UTC(+p[0], +p[1] - 1, +p[2]);
+    var t = new Date();
+    var now = Date.UTC(t.getFullYear(), t.getMonth(), t.getDate());
+    return Math.round((due - now) / 864e5);
+  }
+  function scNoteDue(n) {
+    if (!n.d) return '';
+    var p = n.d.split('-');
+    return (+p[2]) + ' ' + MON[+p[1] - 1];
+  }
+  /* THE STATEMENT IS THE FIRST LINE, not a field of its own. A note is
+     a title and a list of lines in all three layouts, and a goal that
+     invented a second text field would be the one kind you could not
+     switch away from without losing something. */
+  function scNoteStmt(n) {
+    return (n.l.length && !n.l[0].h) ? n.l[0] : null;
+  }
+
+  /* ── THE FIGURES SPEAK EACH KIND'S OWN LANGUAGE ──
+     Steps and sessions for a process, a countdown for a goal, lines
+     and marks for a note. It is the second half of what says which
+     kind a card is, and it costs nothing: the same walk, counted for
+     what that layout is about. */
+  function scNoteFigs(n) {
+    var c = scNoteCount(n);
+    if (n.k === 'proc') {
+      return [c.lines + (c.lines === 1 ? ' step' : ' steps')]
+        .concat(c.heads ? [c.heads + (c.heads === 1 ? ' session' : ' sessions')] : []);
+    }
+    if (n.k === 'goal') {
+      var d = scNoteDays(n);
+      if (d === null) return [c.lines + (c.lines === 1 ? ' line' : ' lines')];
+      if (d < 0) return [-d + (d === -1 ? ' day over' : ' days over'), 'was ' + scNoteDue(n)];
+      if (d === 0) return ['due today', scNoteDue(n)];
+      return [d + (d === 1 ? ' day left' : ' days left'), 'due ' + scNoteDue(n)];
+    }
+    return [c.lines + (c.lines === 1 ? ' line' : ' lines')]
+      .concat(c.marked ? [c.marked + ' marked'] : []);
   }
   /* The first thing you actually wrote, headings skipped — a preview
      that opens with "Negative" tells you nothing the title did not. */
   function scNotePrev(n) {
+    /* A goal's preview is its STATEMENT and nothing else. Run on with
+       the process under it, the card said the goal and then a list of
+       what it costs, which is the marker's job one screen in. */
+    if (n.k === 'goal') {
+      var st = scNoteStmt(n);
+      return st && st.x.trim() ? st.x.trim() : '';
+    }
     var out = [];
     for (var i = 0; i < n.l.length && out.length < 3; i++) {
       if (!n.l[i].h && n.l[i].x.trim()) out.push(n.l[i].x.trim());
@@ -11446,10 +11637,26 @@
     notes.slice().sort(function (a, b) { return b.u - a.u; }).forEach(function (n) {
       var card = scEl('button', 'nt-card');
       card.type = 'button';
+      card.style.setProperty('--c', scNtVar(scNoteHue(n)));
+      /* ── THE KIND IS A LABEL OVER THE TITLE ──
+         Chosen from nine, every one of which kept this card exactly
+         as it was and added one thing. A word above the name reads
+         without being looked for, and it is the only one that says
+         the kind in words rather than asking you to learn a mark.
+
+         In the note's own colour, which is a colour saying WHICH
+         NOTE — the word beside it is what says which KIND. An edge or
+         a tint would have had the colour carrying both, and you can
+         give a goal the same teal as a process. */
+      card.appendChild(scEl('span', 'nt-k', scNtKindName(n.k)));
       card.appendChild(scEl('b', 'nt-t', scNoteTitle(n)));
       var pv = scNotePrev(n);
       if (pv) card.appendChild(scEl('p', 'nt-p', pv));
-      var hues = scNoteHues(n);
+      /* The section dots are a note's own fact — how many sections and
+         which colours — and the other two layouts draw every heading
+         in the note's one colour, so there is nothing for a row of
+         dots to be about. */
+      var hues = n.k === 'note' ? scNoteHues(n) : [];
       if (hues.length) {
         var dots = scEl('span', 'nt-dots');
         hues.forEach(function (h) {
@@ -11459,11 +11666,8 @@
         });
         card.appendChild(dots);
       }
-      var c = scNoteCount(n);
       card.appendChild(scEl('span', 'nt-meta',
-        c.lines + (c.lines === 1 ? ' line' : ' lines')
-        + (c.marked ? ' · ' + c.marked + ' marked' : '')
-        + ' · ' + scAgo(n.u)));
+        scNoteFigs(n).concat([scAgo(n.u)]).join(' · ')));
       card.addEventListener('click', function () {
         /* A note opens to be READ. Edit is a press away and the whole
            point of the mode is that you asked for it. */
@@ -11602,13 +11806,138 @@
     }
     pane.appendChild(crumb);
 
-    var body = scEl('div', 'nt-body' + (ntEdit ? ' is-edit' : ''));
+    /* ── THE PICKER IS TWO ROWS AND IT ONLY EXISTS WHILE EDITING ──
+       Which layout, then which colour. A layout is something you SET,
+       not something you read, so a reader is never shown a control for
+       it — the tally panels' own rule about a position on a screen you
+       are looking at.
+
+       Changing either redraws what is already written and loses
+       nothing: the record is a title and a list of lines whichever one
+       is chosen. */
+    if (ntEdit) {
+      /* `.nt-pick` is the EDITOR's row of note chips, defined further
+         down app.css — the oldest bug in this file is a name taken
+         twice, and this one was caught by grepping before writing it
+         rather than by a screenshot weeks later. */
+      var pick = scEl('div', 'nt-set');
+      var lay = scEl('div', 'nt-lay');
+      NT_KINDS.forEach(function (K) {
+        var b = scEl('button', 'nt-lb' + (n.k === K.k ? ' is-on' : ''));
+        b.type = 'button';
+        b.setAttribute('aria-pressed', n.k === K.k ? 'true' : 'false');
+        b.appendChild(scNtGlyph(K.k, 'nt-g'));
+        b.appendChild(scEl('span', null, K.n));
+        b.addEventListener('click', function () {
+          if (n.k === K.k) return;
+          n.k = K.k;
+          /* ── A GOAL HAS TO HAVE SOMEWHERE TO PUT ITS STATEMENT ──
+             The statement is the first line, so a note that opens with
+             a HEADING has none — and switching it to a goal drew a
+             screen with no marker on it at all, which reads as the
+             layout having failed rather than as a goal with nothing
+             written in it yet. One empty line is added, and that is
+             the one thing a layout switch may do to the record: it
+             takes no word away, it makes room for one. */
+          if (K.k === 'goal' && (!n.l.length || n.l[0].h)
+              && n.l.length < NOTE_LINES) {
+            n.l.unshift({ i: scNtId(), h: 0, c: '', x: '', y: '', m: 0 });
+          }
+          n.u = Date.now(); scNoteFlush();
+          scPaintNotes();
+        });
+        lay.appendChild(b);
+      });
+      pick.appendChild(lay);
+
+      var sws = scEl('div', 'nt-asw');
+      NT_HUES.forEach(function (h) {
+        var b = scEl('button', 'nt-ac' + (n.a === h ? ' is-on' : ''));
+        b.type = 'button';
+        b.style.setProperty('--c', scNtVar(h));
+        b.setAttribute('aria-label', h);
+        b.setAttribute('aria-pressed', n.a === h ? 'true' : 'false');
+        b.addEventListener('click', function () {
+          n.a = h; n.u = Date.now(); scNoteFlush();
+          scPaintNotes();
+        });
+        sws.appendChild(b);
+      });
+      pick.appendChild(sws);
+      pane.appendChild(pick);
+    }
+
+    var body = scEl('div', 'nt-body is-' + n.k + (ntEdit ? ' is-edit' : ''));
+    body.style.setProperty('--c', scNtVar(scNoteHue(n)));
     pane.appendChild(body);
 
     /* ═══════════════════════════
        READING
        ═══════════════════════════ */
     if (!ntEdit) {
+      /* ── A DAILY PROCESS IS A SPINE ──
+         One line down the whole height with a node on every step. The
+         headings BREAK it rather than sitting beside it, and the label
+         takes the note's own colour: a break in a line is the one mark
+         that cannot be mistaken for a point on it, which is exactly
+         what a session heading has to say. */
+      if (n.k === 'proc') {
+        var sp2 = scEl('div', 'nt-sp');
+        n.l.forEach(function (L) {
+          if (L.h) {
+            var sh = scEl('div', 'nt-sh');
+            sh.appendChild(scEl('b', null, L.x));
+            sp2.appendChild(sh);
+            return;
+          }
+          var st = scEl('div', 'nt-st' + (L.m ? ' is-key' : ''));
+          st.appendChild(scEl('b', null, L.x));
+          if (L.y) st.appendChild(scEl('i', null, L.y));
+          sp2.appendChild(st);
+        });
+        body.appendChild(sp2);
+        if (!n.l.some(function (L) { return L.x.trim(); })) {
+          body.appendChild(scEl('p', 'nt-none',
+            'Nothing in this process yet. Press Edit and add a step.'));
+        }
+        return;
+      }
+
+      /* ── A GOAL IS A MARKER ──
+         The statement on its own block with a heavy edge, the date and
+         what is left of it under it, and everything else plain and
+         visibly below it. A marked line here is STRUCK — the thing you
+         have ruled out — which is the one place the mark says
+         something other than "this one matters". */
+      if (n.k === 'goal') {
+        var st0 = scNoteStmt(n);
+        if (st0 && st0.x.trim()) {  /* reading draws it only once written */
+          var mk = scEl('div', 'nt-mk');
+          mk.appendChild(scEl('div', 'nt-mk-s', st0.x));
+          var bits = [];
+          if (n.d) {
+            var dd = scNoteDays(n);
+            bits.push(scNoteDue(n));
+            bits.push(dd === null ? ''
+              : dd < 0 ? (-dd) + (dd === -1 ? ' day over' : ' days over')
+              : dd === 0 ? 'due today'
+              : dd + (dd === 1 ? ' day left' : ' days left'));
+          }
+          if (bits.length) mk.appendChild(scEl('div', 'nt-mk-w', bits.join(' \u00b7 ')));
+          body.appendChild(mk);
+        }
+        n.l.forEach(function (L, idx) {
+          if (st0 && idx === 0) return;
+          if (L.h) { body.appendChild(scEl('div', 'nt-gh', L.x)); return; }
+          body.appendChild(scEl('div', 'nt-gl' + (L.m ? ' is-cut' : ''), L.x));
+        });
+        if (!n.l.some(function (L) { return L.x.trim(); })) {
+          body.appendChild(scEl('p', 'nt-none',
+            'Nothing in this goal yet. Press Edit and write what it is.'));
+        }
+        return;
+      }
+
       n.l.forEach(function (L, idx) {
         if (L.h) {
           var h = scEl('div', 'nt-row is-head');
@@ -11667,7 +11996,12 @@
       });
       tools.appendChild(hb);
 
-      if (L.h) {
+      /* A per-section colour is only drawn in the plain layout — the
+         other two draw every heading in the note's one colour. Offered
+         there anyway it would be a control whose effect you cannot
+         see, which is worse than one that is not there. The stored
+         value is untouched, so switching back restores it. */
+      if (L.h && n.k === 'note') {
         var sw = scEl('div', 'nt-sw');
         NT_HUES.forEach(function (h) {
           var b = scEl('button', 'nt-c' + (L.c === h ? ' is-on' : ''));
@@ -11681,7 +12015,7 @@
           sw.appendChild(b);
         });
         tools.appendChild(sw);
-      } else {
+      } else if (!L.h) {
         /* No colour to choose on a line: a mark takes its SECTION's,
            which is the whole of what stopped this screen having nine
            coloured bars down it. The button is disabled above the
@@ -11691,7 +12025,12 @@
         var sect = scNoteSect(n, live);
         var mb = scEl('button', 'nt-tool nt-mkb' + (L.m ? ' is-on' : ''));
         mb.type = 'button';
-        mb.textContent = 'Mark';
+        /* One field, three claims — because the mark is drawn three
+           ways and a control named for the drawing would be lying in
+           two of them. On a goal it strikes the line out, which is the
+           one place this means something other than "this matters". */
+        mb.textContent = n.k === 'proc' ? 'Key step'
+          : n.k === 'goal' ? 'Ruled out' : 'Mark';
         mb.setAttribute('aria-pressed', L.m ? 'true' : 'false');
         if (sect) mb.style.setProperty('--c', scNtVar(sect));
         else mb.disabled = true;
@@ -11707,13 +12046,29 @@
       live = idx;
       fill();
       tools.hidden = false;
-      if (row.nextSibling !== tools) body.insertBefore(tools, row.nextSibling);
+      /* The row's own parent rather than the body: on a daily process
+         the rows live inside the spine, and a strip inserted into the
+         body would jump to the foot of the note. */
+      if (row.nextSibling !== tools) row.parentNode.insertBefore(tools, row.nextSibling);
     }
+
+    /* The spine is a real element rather than a rule on the body,
+       because it has to stop at the last step rather than run down
+       past the add controls and Remove, which are not on the process. */
+    var host = body;
+    if (n.k === 'proc') { host = scEl('div', 'nt-sp is-edit'); body.appendChild(host); }
 
     var rows = [];
     n.l.forEach(function (L, idx) {
-      var row = scEl('div', 'nt-row' + (L.h ? ' is-head' : ''));
-      if (L.h) row.style.setProperty('--c', scNtVar(L.c));
+      /* The mark is one claim drawn three ways, and in EDIT there is a
+         field on top of it — so the row carries the state and the
+         layout's own rule decides what it looks like. Written on the
+         mirror alone it was the note's swipe on all three, which is a
+         goal wearing a highlight where it should be struck out. */
+      var row = scEl('div', 'nt-row' + (L.h ? ' is-head' : '')
+        + (n.k === 'proc' && !L.h ? ' is-step' : '')
+        + (!L.h && L.m ? ' is-mkd' : ''));
+      if (L.h && n.k === 'note') row.style.setProperty('--c', scNtVar(L.c));
       rows.push(row);
 
       var mark = function (el) {
@@ -11800,8 +12155,26 @@
         });
         mark(f);
         row.appendChild(f);
+
+        /* A STEP CARRIES A NOTE UNDER IT, and only a process draws
+           one. The field is the same `y` a heading's clause uses, so
+           there is no second shape for a reader to learn and nothing
+           is thrown away by switching layouts — it simply stops being
+           drawn. */
+        if (n.k === 'proc') {
+          var sy = scEl('input', 'nt-sy');
+          sy.type = 'text';
+          sy.value = L.y || '';
+          sy.placeholder = 'and a note under it';
+          sy.setAttribute('aria-label', 'A note under this step');
+          sy.addEventListener('input', function () {
+            L.y = sy.value.slice(0, 300); n.u = Date.now(); scNoteSaveSoon();
+          });
+          mark(sy);
+          row.appendChild(sy);
+        }
       }
-      body.appendChild(row);
+      host.appendChild(row);
     });
 
     /* One empty line on a note with none, so there is always something
@@ -11814,15 +12187,61 @@
       return;
     }
 
+    /* ── THE STATEMENT AND THE DATE ARE ONE OBJECT ──
+       The first line is wrapped into the marker rather than being a
+       field of its own, so a goal is still a title and a list of lines
+       — and the date sits inside the same block, because it is a fact
+       about the statement rather than about the note. */
+    if (n.k === 'goal' && rows.length && !n.l[0].h) {
+      var mkw = scEl('div', 'nt-mk is-edit');
+      body.insertBefore(mkw, rows[0]);
+      mkw.appendChild(rows[0]);
+      var dw = scEl('div', 'nt-dw');
+      var dl = scEl('label', 'nt-dl');
+      dl.setAttribute('for', 'scNtDue');
+      dl.textContent = 'By';
+      var di = scEl('input', 'nt-di');
+      di.type = 'date';
+      di.id = 'scNtDue';
+      di.value = n.d || '';
+      di.addEventListener('input', function () {
+        n.d = /^\d{4}-\d{2}-\d{2}$/.test(di.value) ? di.value : '';
+        n.u = Date.now(); scNoteFlush();
+      });
+      dw.appendChild(dl);
+      dw.appendChild(di);
+      mkw.appendChild(dw);
+    }
+
+    var foot = scEl('div', 'nt-foot');
     var add = scEl('button', 'nt-add');
     add.type = 'button';
-    add.textContent = '+  Line';
+    /* The words follow the layout too: a process has steps and
+       sessions where the other two have lines and sections. */
+    add.textContent = n.k === 'proc' ? '+  Step' : '+  Line';
     add.addEventListener('click', function () {
       if (n.l.length >= NOTE_LINES) return;
       var L = { i: scNtId(), h: 0, c: '', x: '', y: '', m: 0 };
       n.l.push(L); n.u = Date.now(); scNoteFlush(); redraw(L.i, 0);
     });
-    pane.appendChild(add);
+    foot.appendChild(add);
+
+    /* A heading and a line together, because a section with nothing
+       under it is a heading you then have to add a line to — and the
+       Heading toggle on a line is still there for turning one you
+       already typed. */
+    var sec = scEl('button', 'nt-add is-sec');
+    sec.type = 'button';
+    sec.textContent = n.k === 'proc' ? '+  Session' : '+  Section';
+    sec.addEventListener('click', function () {
+      if (n.l.length + 2 > NOTE_LINES) return;
+      var H = { i: scNtId(), h: 1, c: n.a, x: '', y: '', m: 0 };
+      var L2 = { i: scNtId(), h: 0, c: '', x: '', y: '', m: 0 };
+      n.l.push(H); n.l.push(L2);
+      n.u = Date.now(); scNoteFlush(); redraw(H.i, 0);
+    });
+    foot.appendChild(sec);
+    pane.appendChild(foot);
 
     var rm = scEl('button', 'nt-rm');
     rm.type = 'button';
@@ -12004,7 +12423,10 @@
         notes = notes.filter(function (q) { return q.id !== n.id; });
         /* A block naming a note that is gone would draw an empty tag
            for ever, and the block is not the record of the note. */
-        state.items.forEach(function (it) { if (it.nt === n.id) delete it.nt; });
+        state.items.forEach(function (it) {
+          if (!Array.isArray(it.nt)) return;
+          it.nt = it.nt.filter(function (q) { return q !== n.id; });
+        });
         scNoteFlush(); scSave();
         ntOpen = null; ntEdit = false;
         scClose(); scPaintNotes(); scRender(); scDate();
@@ -12024,7 +12446,18 @@
      a <button> is invalid and collapses to one press while looking
      exactly right — the same reason the check, the pencil and the
      children's dots are all siblings. */
-  function scNoteOf(it) { return it && it.nt ? scNoteById(it.nt) : null; }
+  /* ── ORDERED GOAL, PROCESS, NOTE ──
+     A row carrying several has to read the same way every time, and
+     the order you happened to attach them in is not a fact about the
+     block. A dangling id costs its tag and nothing else: a note
+     removed on another device before this one caught up is the race,
+     and the block is not the record of the note. */
+  function scNoteOf(it) {
+    if (!it || !Array.isArray(it.nt)) return [];
+    return it.nt.map(scNoteById)
+      .filter(function (q) { return !!q; })
+      .sort(function (a, b) { return NT_ORD[a.k] - NT_ORD[b.k]; });
+  }
 
   function scNoteJump(id) {
     ntOpen = id;
