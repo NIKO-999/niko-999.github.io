@@ -12933,6 +12933,29 @@
     window.visualViewport.addEventListener('scroll', scKb);
   }
   window.addEventListener('orientationchange', scKb);
+  /* ── AND AGAIN ONCE IT HAS SETTLED, WHICH IS THE REPORTED BUG ──
+     iOS reveals a focused field by PANNING the visual viewport, and
+     it does that AFTER the focus lands — so a value read on the focus
+     is taken before the pan and is stale by however far it panned.
+     Reported from the phone as exactly that: on a line near the foot
+     the page went up 83px and the strip stayed where it was, which
+     put it behind the keyboard's own accessory bar.
+
+     A ladder of re-reads rather than one, because the pan and the
+     keyboard animation do not finish together and neither publishes
+     an event saying it is done. It is idempotent and it writes one
+     custom property, so a read that changes nothing costs nothing.
+
+     THIS IS REASONED, NOT MEASURED — there is no software keyboard in
+     the test browser. `schedule/probe.html` is what takes the numbers
+     off the device, and it gets deleted the moment it has answered. */
+  document.addEventListener('focusin', function (ev) {
+    var t = ev.target;
+    if (!t || !/^(INPUT|TEXTAREA)$/.test(t.tagName)) return;
+    scKb();
+    [60, 180, 360, 700].forEach(function (ms) { setTimeout(scKb, ms); });
+  });
+  window.addEventListener('scroll', scKb, true);
 
   /* ── LAST, AND AFTER THE FIRST PAINT ──
      The intro is a screen ABOUT the app, so the app has to be there

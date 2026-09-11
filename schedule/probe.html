@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<title>kb probe</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100dvh; overflow: hidden;
+    background: #0C0C0E; color: #fff;
+    font: 400 16px/1.4 -apple-system, system-ui, sans-serif; }
+  #pane { position: absolute; inset: 0 0 0 0; overflow-y: auto; overflow-x: hidden;
+    padding: 12px 14px 320px; }
+  textarea { display: block; width: 100%; margin: 0 0 10px; padding: 8px 10px;
+    font: inherit; font-size: 16px; -webkit-appearance: none; appearance: none;
+    background: none; color: #fff; border: 1px solid #333; border-radius: 8px; }
+  /* A — what ships: bottom driven by --kb */
+  #barA { position: fixed; left: 0; right: 0; bottom: var(--kb, 0px);
+    background: #1d4ed8; padding: 10px 14px; font-weight: 700; z-index: 50; }
+  /* B — same arithmetic, applied as a TRANSFORM off bottom:0 */
+  #barB { position: fixed; left: 0; right: 0; bottom: 0;
+    transform: translateY(calc(-1 * var(--kb, 0px)));
+    background: #15803d; padding: 10px 14px; font-weight: 700; z-index: 49; }
+  /* C — no arithmetic at all: pinned to the TOP, which a keyboard never covers */
+  #barC { position: fixed; left: 0; right: 0; top: 0;
+    background: #b45309; padding: 8px 14px; font-weight: 700; z-index: 51;
+    font-size: 13px; }
+  #out { position: fixed; left: 0; right: 0; top: 34px; z-index: 51;
+    background: #000; color: #7CFC9A; padding: 8px 10px;
+    font: 500 12px/1.45 ui-monospace, Menlo, monospace; white-space: pre; }
+</style>
+</head>
+<body>
+<div id="barC">C — TOP. Always reachable, no maths.</div>
+<pre id="out">…</pre>
+<div id="pane"></div>
+<div id="barA">A — bottom:var(--kb)  (what ships)</div>
+<div id="barB">B — translateY(--kb)</div>
+<script>
+(function () {
+  var pane = document.getElementById('pane');
+  for (var i = 1; i <= 16; i++) {
+    var t = document.createElement('textarea');
+    t.rows = 1; t.value = 'Line ' + i + ' — tap the LAST one';
+    pane.appendChild(t);
+  }
+  var n = { resize: 0, scroll: 0, focus: 0, settle: 0 };
+  function kb() {
+    var vv = window.visualViewport;
+    var px = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
+    document.documentElement.style.setProperty('--kb', Math.round(px) + 'px');
+    show(px);
+  }
+  function show(px) {
+    var vv = window.visualViewport || {};
+    var a = document.getElementById('barA').getBoundingClientRect();
+    var b = document.getElementById('barB').getBoundingClientRect();
+    document.getElementById('out').textContent =
+      'innerHeight ' + window.innerHeight + '   scrollY ' + Math.round(window.scrollY) + '\n'
+      + 'vv.height   ' + Math.round(vv.height || 0)
+      + '   offsetTop ' + Math.round(vv.offsetTop || 0) + '\n'
+      + 'vv.pageTop  ' + Math.round(vv.pageTop || 0)
+      + '   scale ' + (vv.scale || 1) + '\n'
+      + '--kb        ' + Math.round(px) + '\n'
+      + 'A bottom    ' + Math.round(a.bottom) + '   (want <= ' + Math.round((vv.offsetTop||0)+(vv.height||0)) + ')\n'
+      + 'B bottom    ' + Math.round(b.bottom) + '\n'
+      + 'events  rs ' + n.resize + '  sc ' + n.scroll + '  fo ' + n.focus + '  st ' + n.settle;
+  }
+  kb();
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', function () { n.resize++; kb(); });
+    window.visualViewport.addEventListener('scroll', function () { n.scroll++; kb(); });
+  }
+  window.addEventListener('scroll', kb, true);
+  window.addEventListener('orientationchange', kb);
+  /* iOS reveals the field AFTER focus, so a single read at focus time
+     is taken before the pan. Re-read on a settle. */
+  document.addEventListener('focusin', function () {
+    n.focus++; kb();
+    [60, 180, 360, 700].forEach(function (ms) {
+      setTimeout(function () { n.settle++; kb(); }, ms);
+    });
+  });
+})();
+</script>
+</body>
+</html>
