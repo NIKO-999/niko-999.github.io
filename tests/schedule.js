@@ -13440,7 +13440,9 @@ const SAID = [
         rows[i].querySelector('textarea, input').focus();
         await new Promise((z) => setTimeout(z, 220));
         const b = t.getBoundingClientRect(), r = rows[i].getBoundingClientRect();
-        return { gap: Math.round(r.top - b.bottom), top: Math.round(b.top) };
+        /* BENEATH the row: above it covers a line already written,
+           which is what it was reported doing. */
+        return { gap: Math.round(b.top - r.bottom), top: Math.round(b.top) };
       };
       const two = await at(2), four = await at(4);
       const p = document.querySelector('#scNotePane').getBoundingClientRect();

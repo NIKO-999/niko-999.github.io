@@ -8294,17 +8294,33 @@ coordinates.
 mechanism that exists only to serve another mechanism goes when that
 one does**, or it reads as something somebody might edit.
 
-**ABOVE the line, which is the one deviation from what was asked and
-is the whole of why it works.** The keyboard is at the FOOT of the
-screen, so the band under a revealed field is the band that can be
-covered and the band over it is the one that cannot.
+### It went in ABOVE the line and that was the wrong half of the answer
 
-**CLAMPED, NOT FLIPPED.** A flip below for a row with no room above
-was built first and was UNREACHABLE: measured, the title, the kind
-picker and the swatches put the first row **132px** into the pane's
-content against a **43px** strip, so the branch could not be exercised
-on any note. `Math.max(0, …)` is the same guard in one number with
-nothing in it that cannot run.
+The argument was that the keyboard is at the FOOT of the screen, so
+the band over a revealed field is the one that cannot be covered. It
+is true, and it answers a question nobody asked. **A floating strip
+COVERS something**, and above the line that something is a sentence
+you have already written — reported off the phone with a screenshot
+showing a written line gone behind the chips and a clear hundred and
+twenty pixels of nothing under the caret: *why is it above where I'm
+gonna text, blocking what I've previously written. Make it beneath it
+as there is nothing clipping with it.*
+
+**BENEATH, which is what was asked the first time.** Below the line
+you are typing is the line you have not got to, and at the foot of a
+note it is nothing at all.
+
+**And the keyboard was never the direction's problem.** It is the
+ANCHOR's, and the anchor already answers it: the strip is in the same
+coordinates as the field, so iOS's own pan to reveal that field brings
+the strip with it. What made the old one unreachable was being pinned
+to the viewport, not being at the bottom of the screen. Reasoning from
+"the keyboard is at the foot" to "so draw it at the top" carried a
+solved problem into a decision it had no business in.
+
+Off the row's BOTTOM, so the strip's own height never enters the
+arithmetic and there is nothing to measure — which also took out the
+clamp, and with it a `Math.max` that could not go negative.
 
 **And nothing re-places it on a keystroke.** A row that wraps gets
 taller and its own TOP does not move, so the anchor is stable — an

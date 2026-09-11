@@ -12149,18 +12149,23 @@
        to reveal the focused FIELD, so a strip glued to that field
        arrives with it and there is no keyboard left to measure.
 
-       ABOVE the line rather than below it, which is the one deviation
-       from what was asked and is the whole of why it works. The
-       keyboard is at the FOOT of the screen, so the band under a
-       revealed field is the band that can be covered and the band
-       over it is the one that cannot.
+       BENEATH the line, and it went in ABOVE for one round on an
+       argument that was reasoned rather than measured: the keyboard
+       is at the foot of the screen, so the band over a revealed field
+       is the one that cannot be covered. True, and it answers the
+       wrong question — the strip has to cover SOMETHING, and above
+       the line that something is a sentence you have already written.
+       Reported off the phone as exactly that, with a screenshot
+       showing a written line gone behind the chips and a clear
+       hundred and twenty pixels under the caret. What is beneath the
+       line you are typing is the line you have not got to yet, and
+       at the end of a note it is nothing at all.
 
-       CLAMPED rather than flipped. A flip below for a row with no
-       room above it was built first and is UNREACHABLE: the title,
-       the kind picker and the swatches put the first row 132px into
-       the pane's content against a 43px strip, so the branch could
-       not be exercised on any note. A `Math.max` is the same guard in
-       one number with nothing in it that cannot run. */
+       That the band below can be covered by a keyboard is what the
+       ANCHOR already answers: the strip is in the same coordinates as
+       the field, so iOS's own pan to reveal that field brings the
+       strip with it. It was never the direction that made the old one
+       unreachable, it was being pinned to the viewport. */
     var liveRow = null;
     function place() {
       if (!liveRow || tools.hidden || !liveRow.parentNode) return;
@@ -12169,9 +12174,10 @@
          scrolls with the words it belongs to and nothing has to tell
          it when the pane moves. The pane has no top padding and no
          border, so its padding box and its border box share an origin
-         and one subtraction is the whole conversion. */
-      var top = rr.top - pr.top + pane.scrollTop;
-      tools.style.top = Math.max(0, top - tools.offsetHeight - 2) + 'px';
+         and one subtraction is the whole conversion. Off the row's
+         BOTTOM, so the strip's own height never enters it and there
+         is nothing to measure. */
+      tools.style.top = (rr.bottom - pr.top + pane.scrollTop + 2) + 'px';
     }
     function show(idx, row) {
       live = idx;

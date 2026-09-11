@@ -6220,10 +6220,13 @@ body {
    focused field brings it along. There is no keyboard left in the
    arithmetic.
 
-   ABOVE the line: the keyboard is at the FOOT of the screen, so the
-   band over a revealed field is the one that cannot be covered. `top`
-   is written by the app rather than by a transform, because the same
-   number is what clamps it into the pane.
+   BENEATH the line. It was above for one round, on the reasoning that
+   the band over a revealed field cannot be covered by a keyboard —
+   which is true and answers the wrong question: the strip covers
+   SOMETHING, and above the line that something is a sentence already
+   written. Below it is the line you have not reached, and at the foot
+   of a note it is nothing. The keyboard is the ANCHOR's problem and
+   the anchor solves it.
 
    AND IT DRAWS NO FRAME. It went in as a card — a lifted ground, a
    hairline and a cast — and read as a panel bolted onto the note
