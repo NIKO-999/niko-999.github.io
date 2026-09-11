@@ -8079,3 +8079,105 @@ Mutually exclusive with the other two: pressing the one a line is
 already wearing takes it off, and `m === 3` is still MARKED
 everywhere, so a dotted line fills its node on a daily process and is
 struck out on a goal.
+
+## Edit mode moved around, and the page was zooming
+
+Reported from the phone with three screenshots: a note in edit mode
+panned sideways and oversized, the head riding up under the status bar,
+the tab bar clipped at both ends. *It shouldn't be able to do that, the
+camera angle.*
+
+**MEASURED OFF THE SCREENSHOTS BEFORE ANYTHING WAS CHANGED, and the
+figure is what named the cause.** The text is about **1.1x** bigger in
+the panned shot than in the settled one — which is 16/15, and nothing a
+finger does. **iOS ZOOMS THE PAGE WHEN YOU FOCUS A FIELD COMPUTING
+UNDER 16px**, and what you are left panning is a screen that fitted a
+second before. A pinch would have been any ratio at all; 1.07 is the
+browser arithmetic.
+
+**AND THE APP ALREADY KEPT THAT FLOOR AND SAID SO.** `.field` carries
+`font-size: 16px` under a comment reading *16px exactly: anything
+smaller and iOS zooms the page on focus*, and the viewport comment in
+`index.html` said there was deliberately no `maximum-scale` **because**
+the floor stopped it instead. Notes was built with fields of its own —
+`.nt-in`, `.nt-hw`, `.nt-hc` — that never joined `.field`, so the floor
+was **a rule kept as a list of members rather than as a property of the
+app**, which is the flight-pause rule's own bug and `tests/run.js`'s.
+
+**The lines went to the floor and their view twins went with them.**
+`.nt-in` / `.nt-mir` 15 to 16, and `.nt-v`, `.nt-st b` and `.nt-gl`
+with them — because a mode switch that changes the type is the note
+looking like it changed. **The process step was already drifting**, at
+14.5 against a 15px field, and nobody had noticed until the check asked
+the two to be equal.
+
+**THE TWO HEADING FIELDS CANNOT PAY IT, AND THAT WAS RENDERED RATHER
+THAN ARGUED.** At 16px the section name and its clause dominate the
+sentences they head — the clause ends up the size of the lines — which
+is the decision that took the name from 9.5 to 12.5 in the first place.
+Shot at 390x844 both ways and read at 1:1; the shipped heading is
+plainly better.
+
+**So `maximum-scale=1` goes on the viewport, and it is not a shortcut
+past the floor.** It is the only thing that covers a field the type
+scale will not let up — and the next one added, which is the half a
+floor enforced field by field keeps losing. **What it costs is said
+rather than hidden**: Android Chrome honours it and drops pinch-zoom
+unless Force enable zoom is set. iOS has IGNORED it for user-initiated
+zoom since iOS 10, deliberately, so on the phone this was reported from
+the pinch survives and only the automatic zoom goes — which is the
+thing the old comment was trying to protect.
+
+**Asserted as the CAP plus a field that needs it.** "Every field is at
+the floor" is what this build cannot claim, and a cap with nothing
+under the floor is a line somebody deletes as redundant, so the two
+halves are stated together. Chromium cannot reproduce the zoom, so this
+is the `loading="lazy"` case again: **the check is a guard against
+reintroducing the mistake, not proof the fix works**, and it says so.
+
+### And six pixels of it really were the layout
+
+The zoom is the big half; the other half was measurable here and was
+found by widening the sideways check rather than by reasoning.
+
+**`#scNotePane` was a 6px horizontal scroller, in edit mode only.**
+`overflow-y: auto` with `overflow-x` left at `visible` computes the
+other axis to `auto` — so anything a child pokes out is not merely
+drawn outside, it is PANNABLE. **This is `.sheet`'s own lesson a second
+time**, and the note pane never got the rule.
+
+**What poked out was a drag handle's optical pull.** `.nt-grip` carried
+`margin-right: -6px` to bring the mark out to the text column's right
+edge, which put six pixels of a 34px press target outside the pane —
+and six is exactly what the pane scrolled by. The axis is stated on all
+four panes now, and the pull is GONE rather than clipped: `overflow:
+hidden` clips hit-testing too, so keeping it would have traded a pan
+for a smaller target. The mark sits about eight pixels in instead of
+two.
+
+**The sideways check visited three views and never a note.** It reads
+Notes now, and a note OPENED and put into edit with a field focused —
+its own step rather than a fourth entry in the loop, because that is a
+state the other three views do not have.
+
+### Three things the checks found about themselves
+
+**A GOAL HAS TWO LINE SIZES.** The first cut read "the first line
+field" in each layout — and in a goal that is the STATEMENT, its own
+pair at 19. It reported `read: 16, write: 19` on a build where both
+pairs were correct. Both are read now, which is strictly stronger: 19
+against 19 is right and 19 against a 16px `.nt-gl` is the bug.
+
+**A blank statement draws no marker.** Switching a note that opens on a
+heading prepends an empty line, so the statement was empty and the view
+drew *nothing in this goal yet* instead of `.nt-mk-s` — the check threw
+rather than failed. It types one in and clears it again, because a
+check that changes the state of the app is a check that breaks the next
+one.
+
+**And the bite proof's INVERSE was not unique.** `scrollbar-width:
+none` is in three rules, so restoring `overflow-x: hidden` by that
+anchor matched three places and the assertion stopped it. That is the
+scripted-break discipline working as designed — the break ran, the
+inverse refused, and the file was put back by a unique anchor and
+hashed against the known-good sha1 rather than trusted.

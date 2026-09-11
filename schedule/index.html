@@ -4,9 +4,31 @@
 <meta charset="utf-8" />
 <!-- viewport-fit=cover so the paper runs under the notch and the home
      bar; every edge that holds a control pays it back with env(safe-area-*).
-     No maximum-scale: pinch-zoom stays available, and the input font
-     floor of 16px is what stops iOS zooming on focus instead. -->
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+     maximum-scale=1 BECAUSE iOS ZOOMS THE PAGE ON FOCUS when the field
+     you tapped computes under 16px — and then you are panning a screen
+     that was the right size a moment before. Reported from the phone as
+     a note in edit mode "moving around", and measured off those
+     screenshots at about 1.1x, which is 16/15 rather than anything a
+     finger did.
+
+     This comment used to say the opposite: no maximum-scale, because a
+     16px input floor stopped the zoom instead. `.field` does keep that
+     floor and says so in its own rule — and Notes was built with fields
+     of its own that never joined it, so the floor was a rule kept as a
+     LIST OF MEMBERS rather than as a property of the app. The lines are
+     at 16 now. The two heading fields cannot be: rendered at 16 the
+     section name and its clause dominate the sentences they head, which
+     is the decision that took them from 9.5px to 12.5px in the first
+     place. A cap is the only thing left that covers a field the type
+     scale will not let up to the floor — and the next one added.
+
+     What it costs, said rather than hidden: Android Chrome honours
+     maximum-scale and drops pinch-zoom with it unless Force enable zoom
+     is set. iOS has IGNORED it for user-initiated zoom since iOS 10,
+     deliberately, so on the phone this was reported from the pinch
+     survives and only the automatic zoom goes. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light" />
 <meta name="theme-color" content="#ffffff" />
 <meta name="description" content="The shape of your week, one block at a time, spoken in." />
@@ -47,7 +69,7 @@
   } catch (e) {}
 }());
 </script>
-<link rel="stylesheet" href="app.css?v=c0437926" />
+<link rel="stylesheet" href="app.css?v=747c8496" />
 </head>
 <body>
 

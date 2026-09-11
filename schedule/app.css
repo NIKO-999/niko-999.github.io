@@ -421,6 +421,15 @@ body {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  /* ── AND THE OTHER AXIS IS SAID OUT LOUD, WHICH IS `.sheet`'S OWN
+     LESSON A SECOND TIME ── `overflow-x` is `visible` here, and beside
+     a scrolling `overflow-y` that COMPUTES to `auto`: anything a child
+     pokes out is then not merely drawn outside, it is PANNABLE. The
+     note pane was 360px of content in a 354px box on nothing but a
+     drag handle's -6px optical pull, and the whole screen slid
+     sideways for it. Stated on all four rather than on the one that
+     was caught, because the next child to poke out is the point. */
+  overflow-x: hidden;
   scrollbar-width: none;
   /* ── AND ROOM TO SCROLL PAST THE LAST LINE ──
      Asked for in those words, and it is the other half: clearing the
@@ -6108,10 +6117,17 @@ body {
 
    EVERY PROPERTY THAT DECIDES WRAPPING IS SET ON BOTH, or the two come
    apart on the first line long enough to wrap and the wash lands under
-   the wrong words. */
+   the wrong words.
+
+   AND 16px IS A FLOOR, NOT A SIZE — the same one `.field` keeps and
+   names: under it, iOS zooms the whole page the moment you focus, and
+   you are left panning a screen that fitted a second ago. It was 15,
+   which is 16/15 = the 1.1x measured off the phone's own screenshots.
+   The view twins below move with it, because a mode switch that
+   changes the type is the note looking like it changed. */
 .nt-mir, .nt-in {
   font: inherit;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.42;
   letter-spacing: 0;
   padding: 4px 0;
@@ -6221,11 +6237,11 @@ body {
 
 /* ── READING ──
    No field on top, so the mark goes straight onto the words and there
-   is no mirror to keep in step. Same wash, same geometry — the two
-   have to be indistinguishable, because switching modes must not look
-   like the note changed. */
+   is no mirror to keep in step. Same wash, same geometry, and the same
+   SIZE — the two have to be indistinguishable, because switching modes
+   must not look like the note changed. */
 .nt-v {
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.42;
   display: inline;
 }
@@ -6254,7 +6270,13 @@ body {
 .nt-grip {
   flex: none;
   width: 34px; height: 30px;
-  margin-right: -6px;
+  /* NO NEGATIVE MARGIN. It was -6px, to pull the mark out to the text
+     column's own right edge — and it put six pixels of a 34px press
+     target outside the pane, which is exactly the width the pane then
+     scrolled sideways by. The axis above clips it now, and a clipped
+     press target is a smaller press target, so the pull goes rather
+     than being clipped: the mark sits about eight pixels in instead of
+     two, and nothing escapes the column. */
   display: grid; place-items: center;
   padding: 0; border: 0; border-radius: 8px;
   background: none;
@@ -6364,7 +6386,7 @@ body {
    a swipe on a note, a filled node here, a strike on a goal — so the
    record says the same thing whichever layout is up. */
 .nt-st.is-key::before { background: color-mix(in srgb, var(--c) 92%, var(--ink)); }
-.nt-st b { display: block; font-size: 14.5px; font-weight: 600; line-height: 1.35; }
+.nt-st b { display: block; font-size: 16px; font-weight: 600; line-height: 1.35; }
 .nt-st.is-key b { font-weight: 700; }
 .nt-st i {
   display: block; margin-top: 2px;
@@ -6451,7 +6473,7 @@ body {
   letter-spacing: .16em; text-transform: uppercase;
   color: color-mix(in srgb, var(--c) 72%, var(--ink));
 }
-.nt-gl { padding: 7px 0; font-size: 15px; line-height: 1.4; }
+.nt-gl { padding: 7px 0; font-size: 16px; line-height: 1.4; }
 /* A MARKED LINE IN A GOAL IS STRUCK — the thing you have ruled out,
    which is the one place the mark says something other than "this one
    matters". Named on the control too: it reads "Ruled out" here. */

@@ -10575,8 +10575,14 @@ const SAID = [
     const opage = await octx.newPage();
     const oerrs = [];
     opage.on('pageerror', (e) => oerrs.push(String(e)));
-    await opage.addInitScript(([w, nowhere]) => {
+    await opage.addInitScript(([w, nowhere, note]) => {
       if (!localStorage.getItem('sched.v1')) localStorage.setItem('sched.v1', JSON.stringify(w));
+      /* A note to open, because the edit-mode half below needs one —
+         seeded only when ABSENT, like everything else here: an init
+         script runs on every navigation. */
+      if (!localStorage.getItem('sched.note.v1')) {
+        localStorage.setItem('sched.note.v1', JSON.stringify(note));
+      }
       if (!localStorage.getItem('sched.net.v1')) {
         localStorage.setItem('sched.net.v1', JSON.stringify({
           url: nowhere, code: '', key: '', name: '', pic: '', on: false }));
@@ -10584,7 +10590,14 @@ const SAID = [
       if (!localStorage.getItem('sched.tour.v1')) localStorage.setItem('sched.tour.v1', '1');
       if (!localStorage.getItem('sched.hint2.v1')) localStorage.setItem('sched.hint2.v1', '1');
       if (!localStorage.getItem('sched.hintw.v1')) localStorage.setItem('sched.hintw.v1', '1');
-    }, [WEEK, `${BASE}/schedule/nofriends`]);
+    }, [WEEK, `${BASE}/schedule/nofriends`, { list: [
+      /* A line long enough to wrap and a bracket reserving the gutter,
+         so a note that DID overflow would have something to overflow
+         with rather than passing by being short. */
+      { id: 'ow', t: 'Energy', k: 'note', a: 'red', u: 1756700000000, l: [
+        { i: 'o1', h: 1, c: 'red', x: 'Negative energy', y: 'What takes from me', m: 0 },
+        { i: 'o2', h: 0, c: '', x: 'Listening to music inside of car instead of educational', m: 1 },
+        { i: 'o3', h: 0, c: '', x: 'Skipping backtesting', m: 2 } ] } ] }]);
     await opage.route(`${BASE}/schedule/nofriends/**`, (route) => route.fulfill({
       status: 200, contentType: 'application/json', body: '{"ok":true}' }));
     await opage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
@@ -10610,7 +10623,7 @@ const SAID = [
        that only visited the week would pass on a Today pane three
        columns wide. */
     for (const [name, sel] of [['week', '#scTabWeek'], ['today', '#scTabTally'],
-                               ['friends', '#scTabFriends']]) {
+                               ['notes', '#scTabNotes'], ['friends', '#scTabFriends']]) {
       const hit = await opage.evaluate((s) => {
         const b = document.querySelector(s);
         if (!b) return false;
@@ -10624,6 +10637,41 @@ const SAID = [
     }
     ok('no view scrolls sideways, and nothing on one is a scroller with more outside it',
       wide.length === 0, wide);
+
+    /* ── AND A NOTE IN EDIT MODE, WHICH IS WHERE IT WAS REPORTED ──
+       "In edit mode you can move around" came in from the phone with
+       screenshots of a panned, oversized screen — and the layout is not
+       what does it: the page never overflows, so the only thing that
+       can move the picture is iOS zooming on a field under 16px, which
+       the floor and the viewport cap answer elsewhere in this file.
+       This is the half that says so, and it is the measurable one.
+
+       Its own step rather than a fourth entry in the loop above: a note
+       has to be OPENED and put into edit, which is a state the other
+       three views do not have. */
+    const edited = await opage.evaluate(async () => {
+      const tab = document.getElementById('scTabNotes');
+      if (!tab) return 'no notes tab';
+      tab.click();
+      await new Promise((z) => setTimeout(z, 420));
+      const card = document.querySelector('.nt-card');
+      if (!card) return 'no note to open';
+      card.click();
+      await new Promise((z) => setTimeout(z, 420));
+      const ed = document.getElementById('scNtEd');
+      if (!ed) return 'no edit control';
+      ed.click();
+      await new Promise((z) => setTimeout(z, 420));
+      const f = document.querySelector('.nt-row:not(.is-head) .nt-in');
+      if (!f) return 'no field to focus';
+      f.focus();
+      await new Promise((z) => setTimeout(z, 220));
+      return document.activeElement === f ? '' : 'focus did not land';
+    });
+    const inEdit = edited ? null : await scan();
+    ok('a note being typed in does not scroll sideways either',
+      edited === '' && inEdit.over.length === 0 && inEdit.doc <= 1,
+      { why: edited, found: inEdit });
 
     /* ── AND THERE IS NO BOARD TO CHECK, WHICH IS THE POINT ──
        The week's second layout was where the sideways scrolling came
@@ -14290,6 +14338,102 @@ const SAID = [
       ok('...and it genuinely redrew, or that passes on a dead control',
         lySwitch.asProc.spine === 1 && lySwitch.asGoal.mk === 1
         && lySwitch.plain === 2, lySwitch);
+
+      /* ── A FIELD YOU CAN PUT A CARET IN IS 16px, OR iOS ZOOMS ──
+         Reported from the phone as a note in edit mode "moving around":
+         focus a field computing under 16px and iOS zooms the whole page,
+         which leaves you panning a screen that fitted a second before.
+         Measured off those screenshots at about 1.1x — 16/15, not a
+         pinch. `.field` already kept that floor and said so; Notes was
+         built with fields of its own and never joined it, which is a
+         rule kept as a LIST OF MEMBERS rather than as a property.
+
+         Measured in BOTH modes and in all three layouts, because the
+         view twin has to move with the field or the mode switch changes
+         the type — and the process step was already drifting at 14.5
+         against a 15px field, which nobody had noticed. */
+      const lyFloor = await lypage.evaluate(async () => {
+        const press = async (name) => {
+          const b = [...document.querySelectorAll('.nt-lb')]
+            .find((x) => x.textContent.indexOf(name) >= 0);
+          if (!b) throw new Error('no ' + name + ' in the picker');
+          b.click();
+          await new Promise((z) => setTimeout(z, 340));
+        };
+        const ed = async (want) => {
+          const b = document.getElementById('scNtEd');
+          if ((b.getAttribute('aria-pressed') === 'true') !== want) b.click();
+          await new Promise((z) => setTimeout(z, 340));
+        };
+        const px = (sel) => {
+          const e = document.querySelector(sel);
+          if (!e) throw new Error('nothing drawn for ' + sel);
+          return parseFloat(getComputedStyle(e).fontSize);
+        };
+        /* The goal's STATEMENT is its own pair at 19 — a bigger field
+           and a bigger view twin — so a check reaching for "the first
+           line field" in that layout reads it rather than an ordinary
+           line, which is what the first cut of this did. Both pairs are
+           read, because 19 against 19 is correct and 19 against a 16px
+           `.nt-gl` is the bug. */
+        const field = (lay) => {
+          const all = [...document.querySelectorAll('.nt-row:not(.is-head) .nt-in')];
+          const f = lay === 'Goal' ? all.find((e) => !e.closest('.nt-mk')) : all[0];
+          if (!f) throw new Error('no ordinary line field in ' + lay);
+          return parseFloat(getComputedStyle(f).fontSize);
+        };
+        const out = {};
+        for (const [lay, seen] of [['Note', '.nt-v'], ['Daily process', '.nt-st b'],
+                                   ['Goal', '.nt-gl']]) {
+          await ed(true); await press(lay);
+          await ed(false);
+          const read = px(seen);
+          await ed(true);
+          out[lay] = { read: read, write: field(lay) };
+          if (lay === 'Goal') {
+            /* The statement is the FIRST line, and switching a note
+               that opens on a heading prepends an empty one — so on
+               this fixture it is blank, and a blank statement draws the
+               "nothing in this goal yet" sentence rather than the
+               marker. It is typed in to be read and cleared again
+               afterwards, because a check that changes the state of the
+               app is a check that breaks the next one. */
+            const f = document.querySelector('.nt-mk .nt-in');
+            if (!f) throw new Error('no statement field in the goal');
+            const sWrite = parseFloat(getComputedStyle(f).fontSize);
+            f.value = 'First payout cleared';
+            f.dispatchEvent(new Event('input', { bubbles: true }));
+            await new Promise((z) => setTimeout(z, 340));
+            await ed(false);
+            const sRead = px('.nt-mk-s');
+            await ed(true);
+            const g = document.querySelector('.nt-mk .nt-in');
+            g.value = '';
+            g.dispatchEvent(new Event('input', { bubbles: true }));
+            await new Promise((z) => setTimeout(z, 340));
+            out.statement = { read: sRead, write: sWrite };
+          }
+        }
+        await ed(true); await press('Note');
+        /* The two the type scale will not let up to the floor, and the
+           cap that is therefore load-bearing rather than belt and
+           braces: at 16 the section name and its clause dominate the
+           sentences they head, which is the decision that took them
+           from 9.5 to 12.5 in the first place. */
+        return { lay: out, head: px('.nt-hw'), clause: px('.nt-hc'),
+          cap: (document.querySelector('meta[name="viewport"]') || {}).content || '' };
+      });
+      ok('a note’s line is at the 16px floor, and reads the size it writes',
+        Object.keys(lyFloor.lay).length === 4
+        && Object.values(lyFloor.lay).every((v) => v.write >= 16 && v.read === v.write),
+        lyFloor.lay);
+      /* Asserted as the CAP plus a field that needs it. "Every field is
+         at the floor" is what this build cannot claim, and a cap with
+         nothing under the floor is a line somebody would delete as
+         redundant — so the two halves are stated together. */
+      ok('...and the viewport caps the scale for the heading fields, which are under it',
+        /maximum-scale\s*=\s*1\b/.test(lyFloor.cap)
+        && lyFloor.head < 16 && lyFloor.clause < 16, lyFloor);
 
       /* ── THE COLOUR IS THE NOTE'S, AND IT IS YOURS ──
          Seven, the app's own — and it has to reach the DRAWING rather
