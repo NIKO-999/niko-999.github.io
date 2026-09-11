@@ -8181,3 +8181,85 @@ anchor matched three places and the assertion stopped it. That is the
 scripted-break discipline working as designed — the break ran, the
 inverse refused, and the file was put back by a unique anchor and
 hashed against the known-good sha1 rather than trusted.
+
+## The jank was not the zoom, it was the strip
+
+Reported as *janky whenever I'm trying to put in the notes, and how it
+zooms in — how do we make note taking feel a lot more natural?* The
+zoom is answered above. This is the rest of it, and it was MEASURED
+before anything was proposed, by driving the editor rather than by
+reading it.
+
+**TAPPING A LINE MOVED EVERY LINE BELOW IT 43px.** The tools strip was
+inserted after the focused row — in the FLOW — so putting a caret in a
+sentence pushed the whole note down under your thumb. On the
+twenty-line fixture that is twenty lines jumping, every tap. One
+number, and it is the whole complaint.
+
+**AND THE THINGS THAT LOOKED WORSE WERE NOT FELT AT ALL.** Return
+rebuilds the entire note — **0 of 103 elements kept** — which reads
+like the obvious culprit and is not: the scroll position survives
+(400 → 402), focus survives, and the caret lands where it should.
+Measuring that is what stopped a pointless rewrite of the row builder.
+**The expensive thing and the janky thing were different things.**
+
+**THE STRIP FLOATS ABOVE THE KEYBOARD NOW**, which is where a format
+bar goes in every editor that has one. Measured after: every row
+shifts **0**.
+
+**IT REVERSES A WRITTEN RULE, and the reversal is the measurement.**
+*The controls sit on the line that has focus — one strip, moved,
+rather than a toolbar that is always up.* That was written for a
+screen where every line was a field and there was no reading mode. The
+strip is only ever up while a caret is in a line and it goes the
+moment focus leaves, so it is still the one strip you are handed
+rather than a toolbar you cannot put away — it has simply stopped
+paying for that by shoving the words.
+
+**`--kb` IS WHERE THE KEYBOARD ENDS, and iOS is why it has to exist.**
+The LAYOUT viewport does not shrink for the keyboard, so `bottom: 0`
+alone puts a fixed bar behind the keys. The VISUAL viewport is the one
+that moves, and it is the same object the deck's height arithmetic
+already trusted for a URL bar collapsing — `window.resize` does not
+fire reliably on iOS and that one does. Written as a custom property
+so the one rule that needs it reads it in CSS and nothing has to be
+told when it changes, and floored at zero because the difference goes
+briefly negative while the page rubber-bands.
+
+**Floored above the BAR for the case with no keyboard** — a hardware
+one, or a desktop. 78px is what the bar actually PAINTS at 390x844,
+which is the pill's own top rather than the bar's box: the box reports
+759 and the pill 766, and this file already had to learn that
+difference once.
+
+**Fixed positioning was checked against its ancestors first.** A
+`transform`, `filter`, `backdrop-filter`, `perspective`, `contain` or
+`will-change` on any ancestor turns `fixed` into `absolute` — silently,
+and only on the screen that has one. All four of `#scNotePane`'s
+ancestors came back clean before a line was written.
+
+**And it is appended to the PANE rather than the poster**, so a
+repaint sweeps it. Anywhere the paint does not clear, a strip would
+survive every redraw and stack up.
+
+**The room under the last line is taken in EDIT, not on focus.**
+`padding-bottom` extends the scroll area without moving a single line,
+and spending it when the mode opens rather than when a caret lands is
+what keeps the measured shift at exactly zero.
+
+**Asserted as the SHIFT, never as where the strip sits.** A build that
+merely moved it somewhere else in the flow passes any check on its
+parent and fails the person typing. Proved to bite by putting
+`insertBefore` and `position: static` back together — the pair that
+was the bug — and watching it report `moved: [-45, -45]`, then
+restored and hashed against the known-good sha1.
+
+**WHAT IS STILL NOT APPLE NOTES, said rather than left to be
+discovered.** The editor is one `<textarea>` per line — eight form
+controls for a six-line note — so a selection cannot span two lines
+and a paragraph cannot be dragged over and deleted. That is the one
+remaining structural difference and it is a rewrite to a single
+contenteditable surface, not a tweak: every reader of this record
+walks a flat list of lines with `h`, `c`, `x`, `y`, `m` on each, and a
+contenteditable would have to parse back into that on every keystroke.
+Not attempted here, and worth knowing before somebody starts.

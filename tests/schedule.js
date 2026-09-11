@@ -13408,23 +13408,47 @@ const SAID = [
     ok('a line above every heading can be typed but not marked',
       noSect.text === 'Before any heading' && noSect.there && noSect.off === true, noSect);
 
-    /* ── THE CONTROLS SIT ON THE LINE THAT HAS FOCUS ──
-       One strip, moved — `.row-ed`'s own pattern. Asserted as WHICH
-       row it follows, because "the tools exist" passes on a toolbar
-       that is always up, which is the thing this is not. */
-    const follows = await npage.evaluate(async () => {
+    /* ── THE STRIP DOES NOT MOVE THE WORDS ──
+       It was inserted after the focused row, and a strip in the FLOW
+       pushes: measured on the real editor at 390x844, tapping a line
+       shoved every line below it 43px, which on a twenty-line note is
+       twenty lines jumping under your thumb. Reported as janky, and
+       that is exactly what it was.
+
+       ASSERTED AS THE SHIFT, never as where the strip sits: a build
+       that merely moved it somewhere else in the flow passes any
+       check on its parent and fails the person typing. */
+    const floats = await npage.evaluate(async () => {
       const rows = [...document.querySelectorAll('.nt-row')];
-      const out = [];
-      for (const i of [2, 5]) {
-        rows[i].querySelector('textarea, input').focus();
-        await new Promise((z) => setTimeout(z, 180));
-        const t = document.querySelector('.nt-tools');
-        out.push({ after: t.previousElementSibling === rows[i], hidden: t.hidden });
-      }
+      const tops = () => rows.map((r) => Math.round(r.getBoundingClientRect().top));
+      const before = tops();
+      rows[2].querySelector('textarea, input').focus();
+      await new Promise((z) => setTimeout(z, 220));
+      const t = document.querySelector('.nt-tools');
+      const box = t.getBoundingClientRect();
+      const out = {
+        moved: tops().map((v, i) => v - before[i]).filter((d) => d !== 0),
+        shown: !t.hidden,
+        pos: getComputedStyle(t).position,
+        /* Above the painted bar with no keyboard up, which is the
+           only case this browser has — `--kb` is the keyboard's own
+           height and there is not one here. */
+        clearsBar: Math.round(box.bottom) < window.innerHeight - 40,
+        kb: getComputedStyle(document.documentElement).getPropertyValue('--kb').trim()
+      };
+      /* And it goes with the caret — the half that keeps this one
+         strip you are handed rather than a toolbar you cannot put
+         away, which is what the rule it replaced was protecting. */
+      document.activeElement.blur();
+      await new Promise((z) => setTimeout(z, 220));
+      out.goneOnBlur = t.hidden;
       return out;
     });
-    ok('the controls follow the line that has focus, rather than standing still',
-      follows.every((f) => f.after && !f.hidden), follows);
+    ok('putting a caret in a line moves not one pixel of the note',
+      floats.moved.length === 0 && floats.shown && floats.pos === 'fixed',
+      floats);
+    ok('...the strip floats clear of the bar, and goes when the caret does',
+      floats.clearsBar && floats.goneOnBlur && floats.kb === '0px', floats);
 
     /* On a HEADING the strip offers colours and no mark; on a LINE it
        offers a mark and no colours. A line's mark takes its section's

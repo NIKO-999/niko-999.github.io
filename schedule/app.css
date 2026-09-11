@@ -6198,13 +6198,45 @@ body {
 /* ── THE CONTROLS SIT ON THE LINE THAT HAS FOCUS ──
    `.row-ed`'s own pattern one screen over: not a toolbar that is
    always up, and not a gesture nothing on screen can name. */
+/* ── THE STRIP FLOATS ABOVE THE KEYBOARD ──
+   It sat between the lines, and a strip in the flow pushes: measured
+   at 390x844, tapping a line moved every line below it 43px. Fixed,
+   nothing in the text moves when a caret lands in it.
+
+   `--kb` is where the keyboard ends, written by the app off the
+   VISUAL viewport — iOS never shrinks the layout one, so bottom:0
+   alone puts this behind the keys. With no keyboard the token is 0
+   and the strip sits on the bar, which is the right trade while you
+   are typing: the tabs are not the job.
+
+   It needs a GROUND now that it is over the words, and the sheet's
+   own answer is the one that fits — the page's surface and one pixel
+   of hair. A shadow would be a second object and a radius would be a
+   sixth rounded thing arriving by the back door. */
 .nt-tools {
+  position: fixed;
+  left: 0; right: 0;
+  /* Floored ABOVE THE BAR for the case with no keyboard — a hardware
+     one, or a desktop. 78px is what the bar actually PAINTS at
+     390x844, which is the pill's own top rather than the bar's box:
+     the box reports 759 and the pill 766, and this file already had
+     to learn that difference once. With a keyboard up `--kb` is three
+     hundred-odd and wins, and the bar is behind the keys anyway. */
+  bottom: max(var(--kb, 0px), calc(86px + env(safe-area-inset-bottom, 0px)));
+  z-index: 45;
   display: flex;
   align-items: center;
   gap: 7px;
   flex-wrap: wrap;
-  padding: 7px 0 9px;
+  padding: 8px 16px calc(9px + env(safe-area-inset-bottom, 0px));
+  background: var(--paper);
+  border-top: 1px solid var(--hair);
 }
+/* Room under the last line for it, taken in EDIT rather than on
+   focus: padding-bottom extends the scroll area without moving a
+   single line, and spending it when the mode opens means a tap costs
+   no layout change at all. */
+.nt-body.is-edit { padding-bottom: 104px; }
 .nt-tools[hidden] { display: none !important; }
 .nt-tool {
   padding: 5px 11px;

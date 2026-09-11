@@ -12038,6 +12038,16 @@
     /* Pressing a control must not take focus off the line it is
        about — the line IS the argument to every one of them. */
     tools.addEventListener('pointerdown', function (ev) { ev.preventDefault(); });
+    /* And it goes away when the caret does. Deferred by a frame and
+       asked of the ANSWER rather than of the event: a press on a tool
+       fires focusout on the field before anything lands, so reading
+       the event alone hides the strip you are pressing. */
+    pane.addEventListener('focusout', function () {
+      setTimeout(function () {
+        var a = document.activeElement;
+        if (!a || (!tools.contains(a) && !pane.contains(a))) tools.hidden = true;
+      }, 0);
+    });
 
     var live = -1;
 
@@ -12120,15 +12130,32 @@
       }
     }
 
+    /* ── THE STRIP DOES NOT LIVE BETWEEN THE LINES ──
+       It was inserted after the focused row, and a strip in the FLOW
+       pushes everything under it down: measured at 390x844, tapping a
+       line shoved every line below it 43px — on a twenty-line note,
+       twenty lines moving under your thumb on every tap. That is what
+       "janky" measured as.
+
+       It floats above the keyboard now, which is where a format bar
+       goes in every editor that has one, so nothing in the text moves
+       when you put a caret in it. The rule it reverses — the controls
+       sit ON the line that has focus — was written for a screen where
+       every line was a field and there was no reading mode; the strip
+       is only ever up while you are typing, so it is still the one
+       strip that follows the caret rather than a toolbar you cannot
+       put away. */
     function show(idx, row) {
       live = idx;
       fill();
       tools.hidden = false;
-      /* The row's own parent rather than the body: on a daily process
-         the rows live inside the spine, and a strip inserted into the
-         body would jump to the foot of the note. */
-      if (row.nextSibling !== tools) row.parentNode.insertBefore(tools, row.nextSibling);
+      if (tools.parentNode !== pane) pane.appendChild(tools);
     }
+    /* Inside the PANE rather than the poster, so a repaint sweeps it:
+       appended anywhere the paint does not clear, a strip would
+       survive every redraw and stack up. Fixed positioning escapes
+       the pane's own scroller regardless — measured: no ancestor of
+       it creates a containing block. */
 
     /* The spine is a real element rather than a rule on the body,
        because it has to stop at the last step rather than run down
@@ -12875,6 +12902,37 @@
     setTimeout(done, rpMs + 400);
   }
   document.addEventListener('pointerdown', scRipple, true);
+
+  /* ── WHERE THE KEYBOARD ENDS, IN ONE TOKEN ──
+     iOS does not shrink the LAYOUT viewport for the keyboard, so a
+     `position: fixed` bar at bottom:0 sits behind it. The visual
+     viewport is the one that moves, and it is the same object the
+     deck's own height arithmetic trusted for a URL bar collapsing —
+     `window.resize` does not fire reliably on iOS and this one does.
+
+     Written as a custom property rather than onto an element, so the
+     one thing that needs it reads it in CSS and nothing has to be
+     told when it changes. Floored at zero: the difference goes
+     slightly negative while the page is rubber-banding, and a bar
+     that dips below the screen for a frame reads as a flicker.
+
+     THIS HALF IS NOT MEASURABLE HERE — there is no software keyboard
+     in the test browser, so what the suite can hold is that the token
+     exists and reads 0 with no keyboard up. The keyboard case is
+     reasoned from the mechanism and has to be confirmed on a phone,
+     which is this app's oldest rule about the one browser it is
+     developed on. */
+  function scKb() {
+    var vv = window.visualViewport;
+    var px = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
+    document.documentElement.style.setProperty('--kb', Math.round(px) + 'px');
+  }
+  scKb();
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', scKb);
+    window.visualViewport.addEventListener('scroll', scKb);
+  }
+  window.addEventListener('orientationchange', scKb);
 
   /* ── LAST, AND AFTER THE FIRST PAINT ──
      The intro is a screen ABOUT the app, so the app has to be there
