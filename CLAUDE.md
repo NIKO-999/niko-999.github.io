@@ -8453,3 +8453,150 @@ So a SHORT row is covered whole and a long one is not. Past a heading's
 height what is underneath is words, and words half covered still read
 as words. The strip takes its height from the row beneath it when that
 row is no taller than a heading, and otherwise stays as it is.
+
+## The deck is gone, and the picker is one board
+
+Nineteen sessions under four headings, all on one screen, one press
+each. It was a deck: four kinds on a chip row, the one you pressed
+opening into its own hand of three cards, dealt on the way in and
+cascaded or peeled between.
+
+**THIS REVERSES "TWO LEVELS, BECAUSE A SPLIT IS NOT A WORKOUT."** That
+argument was that one flat list puts Push beside Run as if they were
+the same answer, and it was right about the thing it was protecting
+and wrong about what protected it. **What it was protecting is the
+GROUP, not the level** — and a heading carries it exactly as well:
+Push sits under PPL and Easy under Run, nothing on the board claims
+the two are the same kind of thing, and every session is one press
+away rather than three. The level was how the group was SAID; it was
+never the only way to say it. It is `.grp-h`, the app's own section
+heading, because a heading reads the same wherever one is.
+
+**THE CHOICE WAS MADE ON PRESSABLE OPTIONS, NOT ON PICTURES.** Three
+labs, all rendered over the real nineteen sessions at 390x844 and all
+pressable, because a picker has to be pressed to be judged: thirty-one
+selection layouts, then twelve boards asking what the glyph IS, then
+twelve marks in the ring's family. That is the rim lab's rule — options
+come from lenses, and every proposal is rendered in the real app before
+it is shown.
+
+**WHAT GOES WITH THE DECK IS REAL AND IS LISTED**, so nobody goes
+looking for it: the deal, the cascade, the peel and the lift with their
+four keyframe sets, the two cards fanned behind the front one, the
+swoop and its six drawings, the facet rim lit on a cone, the generated
+grain, the scrim behind the figures, `--wc-lit` and `--wc-wash`, the
+ten lift glyphs and four pace profiles, and the chip pager that stepped
+through a hand. **595 lines of stylesheet and 188 of drawing came out
+in one pass** rather than being left to cascade at nothing — a dead
+rule that still cascades is not dead, and this repo has shipped that
+three times.
+
+**What survives whole is every BEHAVIOUR**, because none of it was
+ever about a stack: a session can be more than one thing, rest is
+exclusive both ways, the figures are yours and the minutes only
+suggest them, the ladder splices the estimate, the foot names what it
+is about to file, and the repair still reads a record written before
+any of it existed.
+
+### The mark is two rings
+
+**The outer is how long, the inner is how hard.** Six ticks of ten
+minutes, full at an hour.
+
+**THE CAP CAME DOWN FROM TWO HOURS AND THAT IS THE WHOLE OF WHY IT
+READS.** At 120 every session on the board sat in the bottom two
+thirds of the arc and the top third was never drawn. Ten minutes is a
+unit people say; fifteen gives four ticks and four marks round a
+circle is a cross.
+
+**A FULL MARK MEANS YOU GOT THERE.** Rounding alone lights all six on
+a fifty-five minute session at a sixty minute cap, so a mark saying
+"an hour" is drawn on a session that was not one. Below the cap the
+count is held one short: full is reached by the clock, never by
+arithmetic. Asserted in both directions, because a build that simply
+never fills passes the first half on its own.
+
+**AND NOTHING LOGGED DRAWS ZERO.** Ten minutes of cold rounding to
+nought is an empty ring on a session you did — the day-off dot's rule,
+that a thing which happened is never drawn as a thing that did not.
+Both tracks are drawn whole under the filled part, so a ring at nought
+is a ring rather than a hole, which is the habits screen's own
+argument about losing the misses.
+
+**THE INNER RING IS THE SUGGESTION, NOT YOUR ANSWER.** Effort is
+derived from the session's own estimate through `scEffort`, the way
+the card's Effort figure always was, so a tile says what this KIND of
+session usually costs and the row under the board is where you say
+what THIS one did. A ring that moved when you pressed Hard would be
+the tile answering a question about the session rather than about
+itself.
+
+**THE OUTER IS THE HUE AND THE INNER IS THE INK.** A second hue would
+be the tile answering *which session* twice; the SAME hue on both
+makes the pair read as one thick ring with a gap in it, and the whole
+point is that they are two marks. `--dim` rather than the full ink,
+because the inner is the quieter fact and it sits inside the louder
+one.
+
+**1.7 WIDE, AND THE ARITHMETIC IS THE REASON.** The radii are 3.2
+units apart, so at 1.7 there are 1.5 units of ground between the two
+strokes and at 2.4 there are 0.8 — under a device pixel on a 1x
+screen, and the pair closes into a disc with a hole in it. The 3.4
+floor this repo measured before a closed shape fills in does NOT
+apply: that is about an outline inside a glyph, where both edges are
+strokes of one drawing and the space between them is a slot. A ring
+inside a ring is two marks with ground between them.
+
+**AND NOTHING ON SCREEN SAYS WHICH RING IS WHICH.** That is the cost,
+it was named before this was built, and it is paid rather than solved.
+What makes it affordable is that neither ring is the only statement of
+its fact — the minutes are printed under the name and **both are
+spoken in the tile's own accessible name**, which is the half a screen
+reader does not have to pay.
+
+**Two glyph passes were run before this and both were rejected**, and
+the reason is the one this repo already had in writing: every honest
+drawing of a lift is a bar with plates, so ten would be one silhouette
+ten times. A tile is a third of a card and has no room to try again.
+**The mark is a quantity because a quantity is a thing a shape can
+genuinely be** — which is why the four pace profiles survived on the
+card when the ten lifts did not.
+
+### The answer must not go below the fold
+
+The deck was 312px with the foot directly under it, so the control
+that files your answer was always in view. **Nineteen tiles under four
+headings are 841px in a 742px sheet**, measured on the real app at
+390x844 — so with the foot in the flow you pick a session and then
+have to go looking for the button that logs it. That is the board's one
+genuine cost against the deck, and it is one the board does not have
+to pay: the foot is `position: sticky`.
+
+It only ever exists once something is picked, so there is nothing
+stuck to the foot of a screen you have not answered yet. Asserted as
+the button being ON SCREEN at the scroll position a press leaves you
+at — a check that merely read `position: sticky` would pass on a foot
+stuck to the wrong edge — and beside it that the sheet really does
+overflow, because "the answer is in view" is vacuously true of a board
+that fits.
+
+**And it was found by opening the screen, not by reading the diff.**
+Every other assertion passed on the build that had it buried.
+
+### Two things the surgery itself taught
+
+**`--wb-hue` is written on the element and declared in the sheet.**
+The colours are DATA — one more workout is a row in `TRAIN_GROUPS`, not
+a rule in the stylesheet — but a token only ever set from JavaScript is
+invisible to `tests/names.js`, which fails it as pointing at nothing.
+A default on `.wb-t` is what makes the check able to see it. The
+Workouts swatch's `--wo-c` had to do exactly this, and the second time
+is what makes it a rule.
+
+**A test file has scopes, and `stored` was already taken.** A second
+`const` at the same block level is a SyntaxError that takes the whole
+file down before one assertion runs — this repo's oldest bug in test
+clothes, for the fourth time. Found by listing every top-level
+declaration in the section and counting them rather than by fixing the
+one the parser happened to name first, which is the only version of
+that check worth running.

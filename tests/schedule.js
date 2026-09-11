@@ -7096,511 +7096,227 @@ const SAID = [
   }
 
   /* ═══════════════════════════════════════════════════════════
-     THE WORKOUT DECK
+     THE WORKOUT BOARD
 
-     Finish a training block and it asks what you trained: four kinds
-     of session, and the one you press opens into its own. Everything
-     here fails silently — a record filed under a key two cards share,
-     a figure at 3:1 on the card's own ground, a deck whose back cards
-     land square on top of the front one — so none of it is read off a
+     Finish a training block and it asks what you trained: nineteen
+     sessions under four headings, all on one screen. Everything here
+     fails silently — a record filed under a key two sessions share, a
+     mark that says an hour on a fifty-five minute session, a rest day
+     repaired into a figure nobody gave — so none of it is read off a
      declaration.
+
+     IT WAS A DECK, and this section was 1,200 lines of it: the deal,
+     the cascade, the peel, the lift, the fan matrix read back off b1
+     mid-animation, the swoop, the card's own ground, its label at
+     5.54:1, and the facet rim measured as its own contribution. All
+     of it went with the layout it was about. What survives whole is
+     every BEHAVIOUR the deck carried — a session can be more than one
+     thing, rest is exclusive, the figures are yours and the minutes
+     only suggest them — because none of that was ever about a stack.
      ═══════════════════════════════════════════════════════════ */
   {
-    /* Its own require and its own scale: the pair at the top of this
-       file are block-scoped to the section that declared them. */
-    const { PNG: PNG5 } = require('pngjs');
-    const dpr5 = 2;
-    const deck = async (theme) => {
-      await page.evaluate((t) => {
-        if (t !== null) localStorage.setItem('sched.accent.v1', String(t));
-        else localStorage.removeItem('sched.accent.v1');
+    const board = async () => {
+      await page.evaluate(() => {
         localStorage.removeItem('sched.train.v1');
         localStorage.removeItem('sched.tick.v1');
         localStorage.removeItem('sched.log.v1');
         localStorage.setItem('sched.view.v1', 'tally');
-      }, theme);
+      });
       await page.reload({ waitUntil: 'networkidle' });
       await page.waitForTimeout(320);
       await page.click('.ty-card[data-item="t"]');
-      await page.waitForTimeout(560);
+      await page.waitForTimeout(460);
+    };
+    /* Pressed BY KEY, never by the words on it. Legs is in two groups
+       and Core is in two more, so a tile found by its name is one of
+       two tiles and which one is whichever the query reached first —
+       which is the collision the qualified key exists to stop, and
+       the trap a fixture that names things by label always falls in.
+       It throws with a sentence rather than handing null to the next
+       line, because forty assertions later is where that surfaces. */
+    const tap = async (key) => {
+      await page.evaluate((k) => {
+        const t = document.querySelector(`.wb-t[data-workout="${k}"]`);
+        if (!t) throw new Error('no tile for ' + k);
+        t.click();
+      }, key);
+      await page.waitForTimeout(240);
     };
     const face = () => page.evaluate(() => ({
       title: document.getElementById('scSheetTitle').textContent,
-      chips: [...document.querySelectorAll('.wc-chips .wc-chip')].map((c) => c.textContent),
-      on: [...document.querySelectorAll('.wc-chips .wc-chip')]
-        .findIndex((c) => c.getAttribute('aria-pressed') === 'true'),
-      cards: [...document.querySelectorAll('.wc')].map((c) => c.className),
-      front: (document.querySelector('.wc.is-front') || {}).dataset,
-      foot: [...document.querySelectorAll('.wc-foot button')]
-        .map((b) => b.textContent.trim()).filter(Boolean),
-      back: !!document.querySelector('.wc-back'),
+      heads: [...document.querySelectorAll('.wb .grp-h .pill')].map((h) => h.textContent),
+      counts: [...document.querySelectorAll('.wb .grp-h .c')].map((c) => c.textContent),
+      tiles: [...document.querySelectorAll('.wb-t')].map((t) => t.dataset.workout),
+      names: [...document.querySelectorAll('.wb-t .wb-n')].map((n) => n.textContent),
+      picked: [...document.querySelectorAll('.wb-t.is-picked .wb-n')].map((n) => n.textContent),
+      go: (document.querySelector('.wc-go') || {}).textContent,
+      foot: [...document.querySelectorAll('.wc-foot button')].map((b) => b.className),
     }));
 
-    await deck(null);
+    await board();
     const one = await face();
     ok('ticking a training block asks what you trained',
-      one.title === 'What did you train?'
-      && one.chips.join('|') === 'All exercises|PPL|Run|Recovery', one);
+      one.title === 'What did you train?' && one.go === undefined, one);
 
-    /* A DECK IS THREE CARDS AND ONE OF THEM IS PRESSABLE. The pair
-       behind show an edge each; focusable, they are two tab stops that
-       do nothing and two more things a screen reader has to walk past.
+    /* ── ONE LEVEL, AND THE GROUP IS A HEADING ──
+       This reverses "two levels, because a split is not a workout" —
+       the argument being that one flat list puts Push beside Run as
+       if they were the same answer. What that was protecting is the
+       GROUP, not the level, and a heading carries it: every session
+       is one press away and nothing on the board claims Push and Easy
+       are the same kind of thing.
 
-       AND THEY CARRY NO WORDS. They used to be the next two workouts
-       in the group, drawn in full and clipped to the corner showing —
-       so pressing a chip changed what was BEHIND the card as well as
-       the card itself, and mid-deal another session's name and figures
-       slid under the one you were reading. What they hold now is the
-       front card's own surface — its hue and its swoop, one child
-       each and no text at all — so the hand is three of the same card.
-       The fan is 13 and 25 pixels, so a name drawn there could not be
-       read and would be DOM the deck pays for on every draw. */
-    const shape = await page.evaluate(() => {
-      const all = [...document.querySelectorAll('.wc')];
-      const front = document.querySelector('.wc.is-front');
-      const r = front.getBoundingClientRect();
-      const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-      return { n: all.length,
-        tags: all.map((c) => c.tagName),
-        hidden: all.filter((c) => c.getAttribute('aria-hidden') === 'true').length,
-        onTop: front.contains(hit),
-        behind: all.filter((c) => c !== front)
-          .map((c) => c.childNodes.length + ':' + c.textContent.trim().length),
-        only: all.filter((c) => c !== front)
-          .every((c) => c.firstChild && c.firstChild.classList
-            && c.firstChild.classList.contains('wc-sw')) };
-    });
-    ok('...as a stack of three, one of them a button, the front one on top',
-      shape.n === 3 && shape.tags.filter((t) => t === 'BUTTON').length === 1
-      && shape.hidden === 2 && shape.onTop, shape);
-    ok('...and the two behind carry the swoop and not one word',
-      shape.behind.join('|') === '1:0|1:0' && shape.only, shape);
-
-    /* ── THE DEAL ──
-       All three fly in, and the keyframes name `translate` and `scale`
-       rather than `transform`. That is the whole assertion: b1 and b2
-       ARE a transform — translate(15px, 11px) scale(.965) is what makes
-       one the card behind — so keyframes touching `transform` replace
-       it, the pair land square on the front card, and the deck arrives
-       as a single card. Read as the resting transform surviving while
-       the animation is running. */
-    const deal = await page.evaluate(() => {
-      const of = (s) => {
-        const el = document.querySelector(s);
-        const cs = getComputedStyle(el);
-        return { name: cs.animationName, delay: cs.animationDelay,
-          m: cs.transform, state: el.getAnimations().length };
-      };
-      return { b2: of('.wc.b2'), b1: of('.wc.b1'), front: of('.wc.is-front') };
-    });
-    const m1 = ((deal.b1.m.match(/matrix\(([^)]+)\)/) || [])[1] || '')
-      .split(',').map(Number);
-    ok('all three are dealt in, on their own delays',
-      [deal.b2, deal.b1, deal.front].every((d) => d.name === 'wcDeal' && d.state > 0)
-      && new Set([deal.b2.delay, deal.b1.delay, deal.front.delay]).size === 3, deal);
-    /* ── AND THE DEAL DOES NOT FLATTEN THE TWO BEHIND ──
-       Read as the resting transform surviving while the animation is
-       running: b1 is offset AND turned, so the matrix has to carry a
-       .965 scale, three degrees of rotation and a 13/9 translate. Any
-       keyframe naming `transform` replaces all of that, the pair land
-       square on the front card, and the deck arrives as one card with
-       a heavier shadow — which is not a shape anybody would report.
-       Decomposed rather than string-matched, because the six numbers
-       are a product of three properties and a literal would have to be
-       retyped every time one of them is nudged. */
-    const scale1 = Math.hypot(m1[0], m1[1]);
-    const turn1 = Math.atan2(m1[1], m1[0]) * 180 / Math.PI;
-    ok(`...and the deal does not flatten the two behind onto the front card `
-      + `(${scale1.toFixed(3)} at ${turn1.toFixed(1)}°)`,
-      Math.abs(scale1 - .965) < .004 && Math.abs(turn1 - 3) < .3
-      && m1[4] === 13 && m1[5] === 9, deal.b1.m);
-
-    /* ── AND IT DEALS AGAIN ON EVERY KIND ──
-       This asserted the opposite for a long time: the deck dealt once
-       and every later draw put the same fold up with no entrance,
-       because re-dealing on every press meant sitting through four
-       entrances to compare four splits. That was right about draw()
-       and wrong about WHICH draws.
-
-       The four kinds are a HAND, and choosing between All exercises,
-       PPL, Run and Recovery CASCADES it: the front card leaves first
-       and the two behind follow it out, then the new hand lands back
-       to front. What that level must not do is peel, which is the step
-       through one hand below — and an effort, a length or a pick move
-       the deck at all.
-
-       THE STAGGER IS THE WHOLE OF IT, so it is asserted as three
-       different delays rather than as a named animation: a cascade
-       whose three cards share one delay is the block this replaced,
-       and it would pass any check that only read the keyframes' name. */
-    await page.click('.wc-chips .wc-chip:nth-child(2)');
-    await page.waitForTimeout(60);
-    const again = await page.evaluate(() => {
-      const deck = document.querySelector('.wc-deck');
-      const of = (s2) => {
-        const e = deck.querySelector(s2);
-        if (!e) return null;
-        const cs = getComputedStyle(e);
-        return { name: cs.animationName, delay: parseFloat(cs.animationDelay) };
-      };
-      return {
-        out: ['.wc.is-out:not(.b1):not(.b2)', '.wc.is-out.b1', '.wc.is-out.b2'].map(of),
-        into: ['.wc.is-front', '.wc.b1:not(.is-out)', '.wc.b2:not(.is-out)'].map(of),
-        on: deck.classList.contains('is-cascading'),
-        dealing: deck.classList.contains('is-dealing') };
-    });
-    const delays = (a) => a.map((x) => x && x.delay);
-    ok('...and a press on another KIND cascades the whole hand out',
-      again.on && !again.dealing
-      && again.out.every((x) => x && x.name === 'wcCascOut')
-      && again.into.every((x) => x && x.name === 'wcCascIn'), again);
-    ok(`...front first out, back first in (${delays(again.out).join('/')} then `
-      + `${delays(again.into).join('/')})`,
-      again.out[0].delay < again.out[1].delay && again.out[1].delay < again.out[2].delay
-      && again.into[0].delay > again.into[1].delay
-      && again.into[1].delay > again.into[2].delay, again);
-    await page.waitForTimeout(1800);
-    await page.click('.wc-chips .wc-chip:nth-child(1)');
-    await page.waitForTimeout(1800);
-
-    /* ── THE SECOND LEVEL LIFTS, AND ONLY THE FRONT CARD MOVES ──
-       Pressing a kind card replaced the front card outright, which
-       after a dealt first level reads as dead rather than as restraint.
-       Four entrances were rendered over the real sheet before this one
-       — a lateral page, a short fold, the whole hand tightening, and
-       this — and what settled it is that the other three all move
-       something the deal already moved. The two behind carry no
-       information, so anything they do is decoration; holding them
-       perfectly still is the property being asserted.
-
-       DRIVEN, not read off the stylesheet: a rule naming .is-front is
-       only worth anything if the class is on the card the press
-       produces, and the whole mechanism is a flag consumed by the next
-       draw. */
-    const lift = await page.evaluate(() => {
-      document.querySelector('.wc.is-front').click();            /* into a group */
-      const of = (sel) => {
-        const el = document.querySelector(sel);
-        const cs = getComputedStyle(el);
-        return { name: cs.animationName, ms: parseFloat(cs.animationDuration) * 1000,
-          n: el.getAnimations().length };
-      };
-      return { front: of('.wc.is-front'), b1: of('.wc.b1'), b2: of('.wc.b2'),
-        deck: document.querySelector('.wc-deck').className,
-        /* The keyframes, off the stylesheet, for the one thing a
-           computed style cannot say: `transform` in a keyframe REPLACES
-           the resting transform that makes the pair the cards behind.
-           This rule only reaches .is-front today, and it uses the
-           independent properties anyway so the next hand it is pointed
-           at survives. */
-        keys: [...document.styleSheets].flatMap((sh) => {
-          try { return [...sh.cssRules]; } catch (e) { return []; }
-        }).filter((r) => r.type === CSSRule.KEYFRAMES_RULE && r.name === 'wcTurn')
-          .map((r) => [...r.cssRules].map((k) => k.style.cssText).join(' ')) };
-    });
-    await page.waitForTimeout(320);
-    ok('stepping into a group lifts the front card in',
-      lift.front.name === 'wcTurn' && lift.front.n > 0
-      && /is-turning/.test(lift.deck), lift);
-    ok('...and the two behind do not move at all',
-      lift.b1.name === 'none' && lift.b2.name === 'none'
-      && lift.b1.n === 0 && lift.b2.n === 0, lift);
-    /* SHORTER AND SHALLOWER THAN THE DEAL, asserted as a relationship
-       so a change to either curve keeps the claim meaningful: it has to
-       read as the same object settling rather than as a second
-       arrival. */
-    const dealMs = await page.evaluate(() => {
-      const el = document.createElement('i');
-      el.className = 'wc is-front';
-      const d = document.createElement('div');
-      d.className = 'wc-deck is-dealing';
-      d.appendChild(el); document.body.appendChild(d);
-      const ms = parseFloat(getComputedStyle(el).animationDuration) * 1000;
-      d.remove(); return ms;
-    });
-    /* Shorter than the deal, and it was "under half" for one round —
-       an arbitrary line that the first visible version of this
-       animation immediately failed. What the number has to hold is
-       that the two are the same gesture at two sizes, not that one is
-       any particular fraction of the other. */
-    ok(`the lift is shorter than the deal (${lift.front.ms}ms against ${dealMs}ms)`,
-      lift.front.ms > 0 && lift.front.ms < dealMs * .7, { lift: lift.front.ms, dealMs });
-    ok('...and it names translate, never transform',
-      lift.keys.length === 1 && /translate/.test(lift.keys[0])
-      && !/transform/.test(lift.keys[0]), lift.keys);
-
-    /* ── AND INSIDE A GROUP THE WHOLE HAND IS TAKEN OFF THE LEFT ──
-       You are stepping THROUGH one hand here, not choosing another, so
-       the hand you were on is taken off and the next comes over the
-       top. THE HAND, not its top card: the two behind are the same
-       card as the one in front, so taking only the front one off left
-       two Chest slabs standing while a Push card slid in over them.
-
-       The outgoing cards are KEPT rather than rebuilt: they carry the
-       workout you were looking at, with its own name and its own
-       colour, and the whole gesture is that THOSE cards are the ones
-       going. Asserted by the front one's name, so a fresh element
-       standing in for it would fail — and by every outgoing card
-       sitting BEFORE every arriving one, since these are absolutely
-       positioned siblings with no z-index and source order is the
-       stacking order. The outgoing card used to go in last, on top of
-       everything, and fade to nothing there: two names and two swoops
-       legible at once, which is a card passing through another card
-       rather than past it. Neither keyframe carries an opacity now, so
-       the order is the only thing keeping the two hands from being
-       double-exposed while they cross — which is why it is asserted
-       here and why the fade is asserted ABSENT below. */
-    /* .wc-n is the card's NAME. The first `b` on a card is the Est.
-       time figure, which is the same "50 min" on both cards and would
-       have made this pass on any element at all. */
-    const was = await page.evaluate(() =>
-      document.querySelector('.wc.is-front .wc-n').textContent);
-    /* ── AND THE HAND IS ALL THE SAME CARD ──
-       The two behind were grey slabs, which said "there are more of
-       these" and left out WHICH these are: a stack of grey behind a red
-       card is a stack of something else. They carry the front card's
-       own hue and its own swoop now, so Chest is a hand of Chest.
-
-       No WORDS on them, and that is the half that must not drift: the
-       fan is 13 and 25 pixels, so a name drawn there cannot be read and
-       is DOM the deck pays for on every draw. Read as the elements
-       being EMPTY of text rather than as a class, and with the two
-       still aria-hidden and still not buttons — a stack of focusable
-       cards is two tab stops that do nothing. */
-    const hand = (tag) => page.evaluate((t) => {
-      const at = (s) => document.querySelector('.wc-deck .wc' + s + ':not(.is-out)');
-      const back = [at('.b2'), at('.b1')];
-      const front = at('.is-front');
-      return { tag: t,
-        hue: back.concat([front]).map((c) => c.style.getPropertyValue('--wc-hue')),
-        swoop: back.concat([front]).map((c) => {
-          const g = c.querySelector('.wc-sw');
-          return g ? g.dataset.swoop : null;
-        }),
-        mute: back.every((c) => !c.textContent.trim()),
-        loud: !!front.textContent.trim(),
-        quiet: back.every((c) => c.getAttribute('aria-hidden') === 'true'
-          && c.tagName === 'DIV') };
-    }, tag);
-    const hand0 = await hand('before');
-    await page.evaluate(() =>
-      document.querySelector('.wc-chips .wc-chip:nth-child(3)').click());
-    const shuf = await page.evaluate(() => {
-      const deck = document.querySelector('.wc-deck');
-      const kids = [...deck.querySelectorAll('.wc')];
-      const gone = kids.filter((c) => c.classList.contains('is-out'));
-      const here = kids.filter((c) => !c.classList.contains('is-out'));
-      const o = gone.find((c) => !c.classList.contains('b1')
-        && !c.classList.contains('b2'));
-      const nm = (c) => getComputedStyle(c).animationName;
-      const dl = (c) => parseFloat(getComputedStyle(c).animationDelay);
-      /* b2, b1, front in DOM order — so a rising delay down each list
-         is the front card leaving first and the back card landing
-         first, which is the peel. */
-      return { on: deck.classList.contains('is-peeling'),
-        went: gone.length, came: here.length,
-        out: gone.every((c) => nm(c) === 'wcPeelOut'),
-        into: here.every((c) => nm(c) === 'wcPeelIn'),
-        outDelay: gone.map(dl), inDelay: here.map(dl),
-        /* THE PIVOT IS ON THE FRONT CARD ALONE. On b1 or b2 it applies
-           to their resting fan transform as well and drops them 14.1
-           and 27.8px the instant the class lands, before a frame of
-           the pass has run — measured on the real deck. */
-        pivot: gone.map((c) => getComputedStyle(c).transformOrigin),
-        name: o && o.querySelector('.wc-n').textContent,
-        under: gone.length > 0 && here.length > 0
-          && kids.indexOf(gone[gone.length - 1]) < kids.indexOf(here[0]),
-        deaf: gone.every((c) => getComputedStyle(c).pointerEvents === 'none'),
-        /* Each hand keeps its own fan: b2 behind b1 behind the front. */
-        fan: [gone, here].every((h) => h[0].classList.contains('b2')
-          && h[1].classList.contains('b1')
-          && h[2].classList.contains('is-front') === (h === here)) };
-    });
-    ok(`a step inside a group peels the whole ${was} hand off`,
-      shuf.on && shuf.went === 3 && shuf.out && shuf.name === was
-      && shuf.under && shuf.deaf, { was, shuf });
-    ok('...and the hand arriving is three cards, each with its own fan',
-      shuf.came === 3 && shuf.into && shuf.fan, shuf);
-    /* ONE AT A TIME, which is the whole of what a peel is: the cards
-       leave front-first and land back-first, and a peel whose three
-       cards share one delay is the block this replaced. */
-    ok(`...one at a time (${shuf.outDelay.join('/')} out, ${shuf.inDelay.join('/')} in)`,
-      shuf.outDelay[0] > shuf.outDelay[1] && shuf.outDelay[1] > shuf.outDelay[2]
-      && shuf.inDelay[0] < shuf.inDelay[1] && shuf.inDelay[1] < shuf.inDelay[2], shuf);
-    ok('...pivoting on the corner, and only the card that has no fan to swing',
-      /^0(px)? /.test(shuf.pivot[2]) && shuf.pivot[0] === shuf.pivot[1]
-      && shuf.pivot[0] !== shuf.pivot[2], shuf.pivot);
-    /* ── OFF ONE SIDE, IN FROM THE OTHER, AND NEITHER OF THEM FADES ──
-       Both halves measured on the composited box rather than read off
-       the stylesheet: the animations are seeked to a third of the way
-       through and the two cards' left edges are compared against the
-       deck's own, so a keyframe that names the right property and the
-       wrong sign fails. The old pass receded the outgoing card DOWN
-       AND RIGHT onto the fan while fading it to nothing, which put two
-       names on screen at once and then vanished one of them; it is
-       taken off to the left now and the next one comes in from the
-       right, at full strength end to end.
-
-       The fade is asserted ABSENT rather than assumed gone — an
-       opacity keyframe is one line to add back and it is the whole of
-       what was wrong, so it is checked on the keyframes themselves,
-       which is where it would reappear. */
-    const cross = await page.evaluate(() => {
-      const deck = document.querySelector('.wc-deck');
-      /* The outgoing FRONT card, not whichever .is-out comes first:
-         b2 is 25px right of it and both hands are three deep now. */
-      const o = deck.querySelector('.wc.is-out:not(.b1):not(.b2)');
-      const f = deck.querySelector('.wc.is-front');
-      const anim = (el) => el.getAnimations();
-      const fades = (el) => anim(el).some((a) =>
-        a.effect.getKeyframes().some((k) => k.opacity != null));
-      const faded = fades(o) || fades(f);
-      anim(o).concat(anim(f)).forEach((a) => {
-        a.pause(); a.currentTime = a.effect.getTiming().duration * .34;
+       Both halves, because each passes on the other's build. Nineteen
+       tiles with no headings is the flat list that argument refused;
+       four headings over a board that only draws one group's worth is
+       the deck with its chips relabelled. */
+    ok('every session is on one screen, all nineteen of them',
+      one.tiles.length === 19 && new Set(one.tiles).size === 19
+      && one.tiles.every((k) => /^(bro|ppl|run|rec)\.[a-z]+$/.test(k))
+      && one.tiles.filter((k) => /\.legs$/.test(k)).length === 2, one.tiles);
+    ok('...under the four kinds, as the app’s own section heading',
+      one.heads.join('|') === 'All exercises|PPL|Run|Recovery'
+      && one.counts.join('|') === '6|4|4|5'
+      && one.counts.reduce((a, b) => a + +b, 0) === one.tiles.length, one);
+    /* A heading over nothing is furniture and a group with a tile
+       missing is a session you cannot log at all, so the two are
+       asserted as the same fact: each heading is followed by exactly
+       its own count of tiles, in the document's own order. */
+    const runs = await page.evaluate(() => {
+      const out = [];
+      [...document.querySelectorAll('.wb > *')].forEach((el) => {
+        if (el.classList.contains('grp-h')) out.push({ h: el.querySelector('.pill').textContent, n: 0 });
+        else if (out.length) out[out.length - 1].n = el.querySelectorAll('.wb-t').length;
       });
-      const d = deck.getBoundingClientRect();
-      const r = { faded, out: o.getBoundingClientRect().x - d.x,
-        into: f.getBoundingClientRect().x - d.x,
-        oOp: +getComputedStyle(o).opacity, fOp: +getComputedStyle(f).opacity };
-      anim(o).concat(anim(f)).forEach((a) => a.finish());
-      return r;
+      return out;
     });
-    ok('...and it is taken off the LEFT while the next comes in from the right',
-      cross.out < -40 && cross.into > 20, cross);
-    ok('...at full strength the whole way — nothing on this pass fades',
-      !cross.faded && cross.oOp === 1 && cross.fOp === 1, cross);
-    /* SWEPT, and each card on its own animationend rather than one
-       listener on the hand: the peel is staggered, so the card that
-       finishes LAST is b2 at the back — a single listener on the front
-       one fired at 1.24s and tore the other two off the screen
-       mid-flight. On a timer as well, because an animation that never
-       runs — a background tab — would otherwise leave a dead hand on
-       the pile for the next press to stack on.
+    ok('...and each heading has its own group under it, none empty',
+      runs.length === 4 && runs.map((r) => r.n).join('|') === '6|4|4|5', runs);
 
-       WAITED OUT ON THE ANIMATIONS, not on a number of milliseconds.
-       This was an 800ms wait, which was past the 600ms the pass used
-       to take and is under the peel's 1.39s — and the durations have
-       moved twice since, which is the whole argument for not writing
-       one here at all. */
-    await page.waitForFunction(() =>
-      [...document.querySelectorAll('.wc-deck .wc')].every((c) =>
-        c.getAnimations().every((a) => a.playState === 'finished')),
-      { timeout: 6000 });
-    await page.waitForTimeout(120);
-    ok('...and the hand taken off is swept whole, not left on the pile',
-      await page.evaluate(() =>
-        document.querySelectorAll('.wc-deck .wc').length === 3
-        && !document.querySelector('.wc.is-out')));
+    /* ── THE MARK IS TWO RINGS ──
+       The outer is how long against an hour, the inner is how hard.
+       Read off `data-lit` and `data-eff` because the circles are
+       anonymous and a dasharray is the only thing on them — which is
+       the same reason the glyphs carry a `data-kind`.
 
-    const hand1 = await hand('after');
-    ok('the two behind are the card in front — its hue, its swoop, no words',
-      [hand0, hand1].every((h) => new Set(h.hue).size === 1 && h.hue[0]
-        && new Set(h.swoop).size === 1 && /^[a-f]$/.test(h.swoop[0])
-        && h.mute && h.loud && h.quiet), { hand0, hand1 });
-    /* AND THEY FOLLOW IT. Read as the hue and the swoop having MOVED
-       across the pass, so a build that set them once at the deal and
-       left them there fails — which is the shape the two behind had
-       for their whole life before this. */
-    ok(`...and the whole hand turns over with it (${hand0.hue[0]} to ${hand1.hue[0]})`,
-      hand0.hue[0] !== hand1.hue[0], { hand0, hand1 });
+       AND THE TRACK IS DRAWN UNDER BOTH. A ring at nought has to be a
+       ring, not a hole: the habits screen's own rule, that losing the
+       misses is the one thing a record of showing up must never do.
+       Asserted as three circles on every tile that draws both arcs
+       and two on the one that draws neither. */
+    const marks = await page.evaluate(() => {
+      const out = {};
+      [...document.querySelectorAll('.wb-t')].forEach((t) => {
+        const a = t.querySelector('.wb-arc');
+        out[t.dataset.workout] = {
+          min: +(t.querySelector('.wb-m').textContent.match(/\d+/) || [0])[0],
+          lit: +a.dataset.lit, eff: +a.dataset.eff,
+          off: a.querySelectorAll('.wb-off').length,
+          on: a.querySelectorAll('.wb-lit').length,
+          hard: a.querySelectorAll('.wb-hard').length };
+      });
+      return out;
+    });
+    const each = Object.entries(marks);
+    ok('the outer ring is how long, six ticks of ten minutes',
+      each.every(([, m]) => m.lit === (!m.min ? 0
+        : m.min >= 60 ? 6 : Math.min(5, Math.max(1, Math.round(m.min / 10))))), marks);
+    /* ── A FULL MARK MEANS YOU GOT THERE ──
+       Rounding alone lights all six on Push at fifty-five, so a mark
+       saying "an hour" is drawn on a session that was not one. Both
+       halves: nothing under the cap is ever full, and everything at
+       or over it always is. A build that simply never fills passes
+       the first on its own. */
+    ok('...and nothing short of an hour ever fills it',
+      each.filter(([, m]) => m.min && m.min < 60).every(([, m]) => m.lit === 5 || m.lit < 5)
+      && each.filter(([, m]) => m.min && m.min < 60).every(([, m]) => m.lit < 6)
+      && marks['ppl.push'].min === 55 && marks['ppl.push'].lit === 5, marks);
+    ok('...while everything at an hour or over does',
+      each.filter(([, m]) => m.min >= 60).length === 3
+      && each.filter(([, m]) => m.min >= 60).every(([, m]) => m.lit === 6), marks);
+    /* A session rounding to nought would be an empty ring on a day you
+       trained — the day-off dot's rule, that a thing which happened is
+       never drawn as a thing that did not.
 
-    /* AND AN EFFORT, A LENGTH AND A PICK MOVE NOTHING. draw() runs on
-       all three, and on every one of them the card in front is the SAME
-       card with different figures on it — a deck that moved for a press
-       on Hard would be answering a question nobody asked. */
-    const quiet = {};
-    for (const [what, sel] of [['an effort', '.wc-eff .wc-chip:nth-child(1)'],
-                               ['a length', '.wc-mins .wc-min:nth-child(2)'],
-                               ['a pick', '.wc.is-front']]) {
-      await page.click(sel);
-      await page.waitForTimeout(90);
-      quiet[what] = await page.evaluate(() => ({
-        front: getComputedStyle(document.querySelector('.wc.is-front')).animationName,
-        cards: document.querySelectorAll('.wc-deck .wc').length }));
-    }
-    ok('an effort, a length and a pick move the deck not at all',
-      Object.values(quiet).every((v) => v.front === 'none' && v.cards === 3), quiet);
-    /* Coming back is a level change too and gets the same lift — but
-       never the deal, which is a first-arrival event. */
-    await page.click('.wc-back');
-    await page.waitForTimeout(80);
-    const home = await page.evaluate(() => ({
-      name: getComputedStyle(document.querySelector('.wc.is-front')).animationName,
-      b1: getComputedStyle(document.querySelector('.wc.b1')).animationName,
-      deck: document.querySelector('.wc-deck').className }));
-    ok('coming back lifts too, and still does not re-deal',
-      home.name === 'wcTurn' && home.b1 === 'none'
-      && !/is-dealing/.test(home.deck), home);
-    await page.waitForTimeout(300);
+       WHAT THIS FIXTURE CAN AND CANNOT PROVE, said rather than left to
+       look stronger than it is: the floor inside scArcLit only bites
+       under five minutes, and the shortest session on this board is
+       Cold at ten, so deleting it changes nothing here. What IS held
+       is the observable half — rest is the ONLY empty mark, which
+       fails the moment the guard above the floor goes. */
+    ok('...and rest is the only empty mark on the board',
+      each.filter(([k]) => k !== 'rec.rest').every(([, m]) => m.lit >= 1)
+      && marks['rec.rest'].lit === 0 && marks['rec.cold'].lit === 1, marks);
+    ok('the inner ring is how hard, and the minutes are what suggest it',
+      each.every(([, m]) => m.eff === (!m.min ? 0
+        : m.min < 25 ? 1 : m.min < 50 ? 2 : 3))
+      && new Set(each.filter(([, m]) => m.min).map(([, m]) => m.eff)).size === 3, marks);
+    ok('...and both tracks are drawn whole, so nought is a ring and not a hole',
+      each.every(([, m]) => m.off === 2)
+      && each.filter(([, m]) => m.min).every(([, m]) => m.on === 1 && m.hard === 1)
+      && marks['rec.rest'].on === 0 && marks['rec.rest'].hard === 0, marks);
+    /* ── AND IT IS SPOKEN, BECAUSE NEITHER RING IS LABELLED ──
+       That is the cost of two tracks on one mark and it was named
+       before this was built. The half a screen reader does not have
+       to pay is the tile's own name carrying both figures. */
+    const spoken = await page.evaluate(() => ({
+      pull: document.querySelector('.wb-t[data-workout="ppl.pull"]').getAttribute('aria-label'),
+      rest: document.querySelector('.wb-t[data-workout="rec.rest"]').getAttribute('aria-label'),
+    }));
+    ok('...and the tile’s own name carries both, since nothing draws a legend',
+      /^Pull, about 50 minutes, hard\./.test(spoken.pull)
+      && /^Rest\./.test(spoken.rest) && !/minutes/.test(spoken.rest), spoken);
 
-    /* ── STEPPING IN ──
-       A split is not a workout. The first press says which KIND of
-       session, the second says which one — on the same three controls,
-       so the chips have to be REBUILT rather than relabelled: four
-       kinds and six body parts are different lengths, and a pass that
-       only rewrites the text leaves a chip standing that selects an
-       index nothing is at. */
-    await page.click('.wc.is-front');
-    await page.waitForTimeout(520);
-    const two = await face();
-    ok('pressing a kind opens it, and the chips become its own',
-      two.title === 'All exercises' && two.chips.length === 6
-      && two.chips.join('|') === 'Chest|Back|Shoulders|Arms|Legs|Abs'
-      && two.back && two.foot.join('|') === '', two);
+    /* ── AND THE DECK IS GONE, NOT HIDDEN ──
+       A build that kept both passes every assertion above, and this
+       app has shipped a dead rule that still cascaded three times.
+       Asserted on the markup AND on the stylesheet, because the
+       elements going and the 595 lines of keyframes staying is
+       exactly the shape that survives a green suite. */
+    const deckGone = await page.evaluate(async () => {
+      const css = await (await fetch(document.querySelector('link[href^="app.css"]').href)).text();
+      /* NOT `.wc-chips` or `.wc-back`: those are Mind's sheet, which
+         shares the chip and the back arrow and always did. What is
+         being asserted gone is the CARD and its stack. */
+      return { el: document.querySelectorAll('.wc, .wc-deck, .wc-sw, .wc-top, .wc-g').length,
+        rules: (css.match(/@keyframes wc(Deal|Turn|Casc\w+|Peel\w+)/g) || []).length,
+        card: /^\s*\.wc\s*\{/m.test(css) };
+    });
+    ok('the deck itself is gone — no cards, no keyframes, no stylesheet left cascading',
+      deckGone.el === 0 && deckGone.rules === 0 && !deckGone.card, deckGone);
 
     /* ── A SESSION CAN BE MORE THAN ONE THING ──
        Pull and abs, legs and core: most people's actual session is a
        lift plus one small thing, and made to pick one they either lie
-       or stop logging. So the card TOGGLES and the foot is the answer
+       or stop logging. So the tile TOGGLES and the foot is the answer
        — which costs a press on a single pick and buys a screen where
-       you can see what you are about to file.
+       you can see what you are about to file. */
+    await tap('bro.chest');
+    const pick1 = await face();
+    const filedYet = () => page.evaluate(() =>
+      JSON.parse(localStorage.getItem('sched.train.v1') || '{}'));
+    ok('pressing a tile chooses it rather than filing it',
+      pick1.go === 'Log Chest' && pick1.picked.join('') === 'Chest'
+      && !Object.keys(await filedYet()).length, pick1);
 
-       The control names what it will file, and the chips carry a tick
-       for anything chosen, so a pick scrolled off the front is still
-       visible without stepping through the deck to find it. */
-    await page.click('.wc.is-front');
-    await page.waitForTimeout(300);
-    const pick1 = await page.evaluate(() => ({
-      go: (document.querySelector('.wc-go') || {}).textContent,
-      ticked: [...document.querySelectorAll('.wc-chip.is-picked')].map((c) => c.textContent.trim()),
-      card: document.querySelector('.wc.is-front').classList.contains('is-picked'),
-      stored: localStorage.getItem('sched.train.v1'),
-    }));
-    ok('pressing a card chooses it rather than filing it',
-      pick1.go === 'Log Chest' && pick1.ticked.join('') === 'Chest' && pick1.card
-      && !Object.keys(JSON.parse(pick1.stored || '{}')).length, pick1);
-
-    await page.click('.wc-chips .wc-chip:nth-child(6)');           /* Abs */
-    await page.waitForTimeout(300);
-    await page.click('.wc.is-front');
-    await page.waitForTimeout(300);
-    const both = await page.evaluate(() => ({
-      go: document.querySelector('.wc-go').textContent,
-      ticked: [...document.querySelectorAll('.wc-chip.is-picked')].map((c) => c.textContent.trim()),
-    }));
-    ok('...and a second card adds to it rather than replacing it',
+    await tap('bro.abs');
+    const both = await face();
+    ok('...and a second adds to it rather than replacing it',
       both.go === 'Log Chest + Abs'
-      && both.ticked.join('|') === 'Chest|Abs', both);
+      && both.picked.join('|') === 'Chest|Abs', both);
 
-    /* Pressing a chosen card again takes it off — a toggle, or the
+    /* Pressing a chosen tile again takes it off — a toggle, or the
        only way out of a mis-tap is closing the sheet. */
-    await page.click('.wc.is-front');
-    await page.waitForTimeout(300);
-    const off = await page.evaluate(() => ({
-      go: document.querySelector('.wc-go').textContent,
-      ticked: [...document.querySelectorAll('.wc-chip.is-picked')].map((c) => c.textContent.trim()),
-    }));
+    await tap('bro.abs');
+    const off = await face();
     ok('...and pressing it again takes it off',
-      off.go === 'Log Chest' && off.ticked.join('') === 'Chest', off);
+      off.go === 'Log Chest' && off.picked.join('') === 'Chest', off);
 
     /* ── AND BOTH GO ON THE BLOCK, UNDER ONE RECORD ──
        One session, not two: the keys are joined in the same field, so
        every reader of this record goes through one place and a shape
        nothing else knows about cannot leak. */
-    await page.click('.wc-chips .wc-chip:nth-child(6)');
-    await page.waitForTimeout(280);
-    await page.click('.wc.is-front');
-    await page.waitForTimeout(280);
+    await tap('bro.abs');
     await page.click('.wc-go');
     await page.waitForTimeout(460);
     const multi = await page.evaluate(() => {
@@ -7610,48 +7326,38 @@ const SAID = [
         blocks: Object.keys(raw[day] || {}).length,
         rec: Object.values(raw[day] || {})[0] };
     });
-    ok('two cards file as one session naming both',
+    ok('two tiles file as one session naming both',
       multi.days === 1 && multi.blocks === 1
       && multi.rec.k === 'bro.chest+bro.abs', multi);
 
-    /* Filing closes the sheet, so everything below has to be put back
-       where it found it: a clean record, the deck open, and stepped
-       into the first group. */
-    await deck(null);
-    await page.click('.wc.is-front');
-    await page.waitForTimeout(480);
+    /* ── AND THE ANSWER DOES NOT GO BELOW THE FOLD ──
+       The deck was 312px with the foot under it, so the control that
+       files your answer was always in view. Nineteen tiles under four
+       headings are taller than the sheet, and with the foot in the
+       flow you pick a session and then have to go looking for the
+       button that logs it.
 
-    /* ── EVERY KEY IS QUALIFIED ──
-       Legs is in two groups and Core is in two more. A bare 'legs' on
-       disk names two cards with two colours, and the one it resolved
-       to would be whichever came first in the list — which is not a
-       decision anybody took. Walked across all four groups, because a
-       collision is only visible from outside one of them. */
-    const keys = [];
-    for (let g = 0; g < 4; g++) {
-      if (g) {
-        await page.click('.wc-back');
-        await page.waitForTimeout(360);
-        await page.click(`.wc-chips .wc-chip:nth-child(${g + 1})`);
-        await page.waitForTimeout(360);
-        await page.click('.wc.is-front');
-        await page.waitForTimeout(420);
-      }
-      const n = await page.$$eval('.wc-chips .wc-chip', (c) => c.length);
-      for (let i = 0; i < n; i++) {
-        await page.click(`.wc-chips .wc-chip:nth-child(${i + 1})`);
-        await page.waitForTimeout(120);
-        keys.push(await page.$eval('.wc.is-front', (e) => e.dataset.workout));
-      }
-    }
-    ok(`every workout is stored under its own key (${keys.length} of them)`,
-      /* NINETEEN since Rest joined Recovery. Written down rather than
-         counted off the app: a count read from the thing it is about
-         is vacuously true, and this one bit correctly on the day the
-         card went in — which is the whole of what it is for. */
-      keys.length === 19 && new Set(keys).size === 19
-      && keys.every((k) => /^(bro|ppl|run|rec)\.[a-z]+$/.test(k))
-      && keys.filter((k) => /\.legs$/.test(k)).length === 2, keys);
+       Asserted as the button being ON SCREEN at the scroll position a
+       press leaves you at — a rule that merely said `position:
+       sticky` would pass on a foot stuck to the wrong edge. Both
+       halves, because "the sheet does not scroll" would pass the
+       first on a build where the board had gone missing. */
+    await board();
+    await tap('ppl.pull');
+    const reach = await page.evaluate(() => {
+      const sh = document.querySelector('.sheet:not([hidden])');
+      const g = document.querySelector('.wc-go').getBoundingClientRect();
+      const r = sh.getBoundingClientRect();
+      return { over: sh.scrollHeight > sh.clientHeight + 40,
+        inView: g.bottom <= r.bottom + 1 && g.top >= r.top,
+        at: Math.round(sh.scrollTop) };
+    });
+    ok('the board is longer than the sheet, and the answer is on screen anyway',
+      reach.over && reach.inView && reach.at === 0, reach);
+
+    /* Filing and re-opening put everything back; the record is clear
+       and nothing is picked. */
+    await board();
 
     /* ── EFFORT IS YOURS, AND THE MINUTES ONLY SUGGEST IT ──
        Two wrong answers came before this. A field somebody typed is
@@ -7661,83 +7367,66 @@ const SAID = [
        came back "Moderate". So the minutes set where the control
        starts and a press moves it.
 
-       THE ROW IS A SIBLING OF THE CARD, never a control inside it:
-       the card is a <button>, and a button inside a button is invalid
-       and collapses to one press while looking exactly right. */
-    await page.click('.wc-back');
-    await page.waitForTimeout(360);
-    await page.click('.wc-chips .wc-chip:nth-child(1)');
-    await page.waitForTimeout(360);
-    await page.click('.wc.is-front');
-    await page.waitForTimeout(420);
-    const figs = [];
-    for (let i = 0; i < 6; i++) {
-      await page.click(`.wc-chips .wc-chip:nth-child(${i + 1})`);
-      await page.waitForTimeout(120);
-      figs.push(await page.$eval('.wc.is-front', (e) => [...e.querySelectorAll('.wc-top div')]
-        .map((d) => d.querySelector('span').textContent + ' ' + d.querySelector('b').textContent)));
-    }
-    const said = figs.map((f) => f.join(' / '));
-    const eff = (s) => (s.match(/Effort (\w+)/) || [])[1];
-    const min = (s) => +(s.match(/Est\. time (\d+)/) || [])[1];
-    ok('every card says how long and what that costs',
-      said.every((s) => /^Est\. time \d+ min \/ Effort (Light|Moderate|Hard)$/.test(s)), said);
-    ok('...and the minutes are what suggest it, on every card in the group',
-      said.every((s) => eff(s) === (min(s) < 25 ? 'Light' : min(s) < 50 ? 'Moderate' : 'Hard'))
-      && new Set(said.map(eff)).size === 3, said);
+       THE ROW IS A SIBLING OF THE TILE, never a control inside it:
+       a tile is a <button>, and a button inside a button is invalid
+       and collapses to one press while looking exactly right.
 
+       AND IT IS DRAWN OFF THE SELECTION, NOT OFF A LEVEL. The deck
+       drew it once you were inside a group; a board has no inside,
+       and the honest gate is the same one plainly stated — before
+       anything is picked there is no session to ask about. */
+    const rows = () => page.evaluate(() => ({
+      ef: document.querySelectorAll('.wc-ef').length,
+      mn: document.querySelectorAll('.wc-min').length,
+    }));
+    ok('nothing is asked about a session you have not picked yet',
+      JSON.stringify(await rows()) === '{"ef":0,"mn":0}', await rows());
+
+    await tap('bro.legs');                                  /* 60, Hard */
     const effRow = await page.evaluate(() => {
       const r = document.querySelector('.wc-eff-r');
       const b = [...r.querySelectorAll('.wc-ef')];
       return { names: b.map((x) => x.textContent),
         on: b.filter((x) => x.getAttribute('aria-pressed') === 'true').map((x) => x.textContent),
-        card: document.querySelector('.wc.is-front .wc-top div:nth-child(2) b').textContent,
-        outside: !document.querySelector('.wc .wc-eff-r'),
+        outside: !document.querySelector('.wb-t .wc-eff-r'),
         labelled: r.getAttribute('aria-labelledby') === 'scEffLab' };
     });
-    ok('the effort row stands outside the card, named, showing the suggestion',
+    ok('the effort row stands outside the tile, named, showing the suggestion',
       effRow.names.join('|') === 'Light|Moderate|Hard' && effRow.outside
-      && effRow.labelled && effRow.on.length === 1
-      && effRow.on[0] === effRow.card, effRow);
+      && effRow.labelled && effRow.on.join('') === 'Hard', effRow);
 
-    await page.click('.wc-eff-r .wc-ef:nth-child(3)');
-    await page.waitForTimeout(320);
-    const overruled = await page.evaluate(() => ({
-      card: document.querySelector('.wc.is-front .wc-top div:nth-child(2) b').textContent,
-      on: [...document.querySelectorAll('.wc-eff-r .wc-ef')]
-        .filter((x) => x.getAttribute('aria-pressed') === 'true').map((x) => x.textContent),
-    }));
-    ok('...and pressing one overrules it, on the card as well as the row',
-      overruled.card === 'Hard' && overruled.on.join('') === 'Hard', overruled);
+    await page.click('.wc-eff-r .wc-ef:nth-child(1)');      /* say Light */
+    await page.waitForTimeout(280);
+    const overruled = await page.evaluate(() => [...document.querySelectorAll('.wc-ef')]
+      .filter((x) => x.getAttribute('aria-pressed') === 'true').map((x) => x.textContent));
+    ok('...and pressing one overrules it', overruled.join('') === 'Light', overruled);
 
-    /* ── AND WHAT YOU SAID SURVIVES THE NEXT CARD ──
+    /* ── AND WHAT YOU SAID SURVIVES THE NEXT PICK ──
        Both figures are seeded off the selection and both stop moving
        with it the moment a press says otherwise: an effort and a
-       length are about the session you did, not about the card you
-       happen to be looking at.
-
-       This is where the two halves fought. The chip handler blanked
-       the effort so the next card could suggest its own, and once a
-       press could SAY one, the clear emptied it and the suggestion
-       refused to refill it — because it had been told not to. The
-       card came back with no Effort column at all. */
-    await page.click('.wc-chips .wc-chip:nth-child(5)');           /* Legs, 60 */
-    await page.waitForTimeout(320);
-    const moved = await page.evaluate(() => {
-      const f = document.querySelector('.wc.is-front');
-      return f ? [...f.querySelectorAll('.wc-top div b')].map((x) => x.textContent) : null;
-    });
-    ok('...and an effort you pressed survives moving to the next card',
-      moved && moved.length === 2 && moved[1] === 'Hard', moved);
+       length are about the session you did, not about the tile you
+       happen to be looking at. This is where the two halves fought —
+       a handler that blanked the effort so the next suggestion could
+       refill it, against a suggestion that had been told not to. */
+    await tap('bro.abs');                                   /* now Legs + Abs */
+    const kept = await page.evaluate(() => ({
+      on: [...document.querySelectorAll('.wc-ef')]
+        .filter((x) => x.getAttribute('aria-pressed') === 'true').map((x) => x.textContent),
+      go: document.querySelector('.wc-go').textContent,
+    }));
+    ok('...and an effort you pressed survives adding a second session',
+      kept.on.join('') === 'Light' && kept.go === 'Log Legs + Abs', kept);
 
     /* ── HOW LONG, AS A LADDER ──
        A field would be a keyboard for a number everybody rounds
-       anyway: nobody trains for 47 minutes, they train for about three
-       quarters of an hour. The card's own estimate is spliced into the
-       rungs where it is not already one of them, so the suggestion is
-       always reachable in one press and never a rung you cannot get
-       back to. Legs is sixty, which IS a rung; the check that it is
-       spliced is below, on a card that is not. */
+       anyway: nobody trains for 47 minutes, they train for about
+       three quarters of an hour. The selection's own estimate is
+       spliced into the rungs where it is not already one of them, so
+       the suggestion is always reachable in one press.
+
+       AND THE ESTIMATE IS THE SESSION'S, NOT A TILE'S: Legs and Abs
+       is eighty minutes, which is no rung at all — a fixture where
+       the two agree could not tell the splice from a fixed list. */
     const ladder = await page.evaluate(() => {
       const r = document.querySelector('.wc-mins');
       const b = [...r.querySelectorAll('.wc-min')];
@@ -7745,279 +7434,39 @@ const SAID = [
         on: b.filter((x) => x.getAttribute('aria-pressed') === 'true')
           .map((x) => x.textContent),
         labelled: r.getAttribute('aria-labelledby') === 'scMinLab',
-        outside: !document.querySelector('.wc .wc-mins'),
+        outside: !document.querySelector('.wb-t .wc-mins'),
         spoken: b[0].getAttribute('aria-label') };
     });
-    ok('the length is a ladder outside the card, suggesting the estimate',
-      ladder.rungs.join(' ') === '15 20 30 45 60 75 90 120'
-      && ladder.on.join('') === '60' && ladder.labelled && ladder.outside
+    ok('the length is a ladder outside the tile, suggesting the session’s own estimate',
+      ladder.rungs.join(' ') === '15 20 30 45 60 75 80 90 120'
+      && ladder.on.join('') === '80' && ladder.labelled && ladder.outside
       && ladder.spoken === '15 minutes', ladder);
 
-    /* Shoulders is forty-five... which is also a rung. Arms is forty,
-       which is NOT — so the ladder has to grow one and put it in
-       order, or the suggestion would be a figure nothing on screen can
-       select. */
-    await page.click('.wc-chips .wc-chip:nth-child(4)');           /* Arms, 40 */
-    await page.waitForTimeout(320);
-    const spliced = await page.evaluate(() =>
+    await tap('bro.abs');                                   /* back to Legs alone */
+    const plain = await page.evaluate(() =>
       [...document.querySelectorAll('.wc-min')].map((x) => x.textContent));
-    ok('...and an estimate that is not a rung is spliced in, in order',
-      spliced.join(' ') === '15 20 30 40 45 60 75 90 120', spliced);
+    ok('...and a session whose estimate IS a rung grows no extra one',
+      plain.join(' ') === '15 20 30 45 60 75 90 120', plain);
 
-    /* ── AND A LENGTH YOU PRESS IS WHAT GOES ON THE CARD ──
-       The card says "Est. time" for a figure nobody has touched and
-       drops the word once you have: the ladder's suggestion is not a
-       choice, and a card that called it Time would be the app putting
-       words in your mouth. */
-    const before = await page.$eval('.wc.is-front .wc-top div:first-child',
-      (d) => d.textContent);
-    await page.click('.wc-mins .wc-min:nth-child(6)');              /* 60 */
-    await page.waitForTimeout(320);
-    const after = await page.evaluate(() => ({
-      fig: document.querySelector('.wc.is-front .wc-top div:first-child').textContent,
-      on: [...document.querySelectorAll('.wc-min')]
-        .filter((x) => x.getAttribute('aria-pressed') === 'true')
-        .map((x) => x.textContent).join(''),
-    }));
-    ok('a length you press goes on the card, and drops the word Est.',
-      /^Est\. time40 min$/.test(before) && after.fig === 'Time60 min'
-      && after.on === '60', { before, after });
-
-    /* ── THE SWOOP ──
-       A curve through the card and nothing else: the wordmark this
-       replaced said in ghost type what the 34px name at the bottom
-       already says, and the eye reads a word whether or not it is
-       meant to. Six drawings across twenty-two cards, assigned by
-       character, so a deck three cards deep is never the same curve
-       twice over.
-
-       BOTH HALVES. That every card HAS one passes on a single drawing
-       used everywhere, which is wallpaper; that six exist passes on a
-       set nothing reaches. And the strokes have to be non-scaling —
-       the failure there is silent, since the drawing stays correct
-       and simply comes out several times too heavy. */
-    const swoops = [];
-    for (let g = 0; g < 4; g++) {
-      if (g) {
-        await page.click('.wc-back');
-        await page.waitForTimeout(340);
-        await page.click(`.wc-chips .wc-chip:nth-child(${g + 1})`);
-        await page.waitForTimeout(340);
-        await page.click('.wc.is-front');
-        await page.waitForTimeout(400);
-      } else {
-        await page.click('.wc-back');
-        await page.waitForTimeout(340);
-        await page.click('.wc-chips .wc-chip:nth-child(1)');
-        await page.waitForTimeout(340);
-        await page.click('.wc.is-front');
-        await page.waitForTimeout(400);
-      }
-      const n = await page.$$eval('.wc-chips .wc-chip', (c) => c.length);
-      for (let i = 0; i < n; i++) {
-        await page.click(`.wc-chips .wc-chip:nth-child(${i + 1})`);
-        await page.waitForTimeout(110);
-        swoops.push(await page.$eval('.wc.is-front .wc-sw', (e) => e.dataset.swoop));
-      }
-    }
-    const drawn = await page.$eval('.wc.is-front .wc-sw', (e) => {
-      const p = e.querySelector('path');
-      const box = e.getBoundingClientRect();
-      const d = p.getAttribute('d');
-      return { n: e.querySelectorAll('path').length, d,
-        stroke: getComputedStyle(p).vectorEffect,
-        wide: box.width, tall: box.height };
-    });
-    ok(`every card carries a swoop, and there are six of them (${new Set(swoops).size})`,
-      swoops.length === 19 && swoops.every((k) => /^[a-f]$/.test(k))
-      && new Set(swoops).size === 6, swoops);
-    ok('...drawn past both edges, filling the card, and not stroke-scaled',
-      /^M-6 |^M106 /.test(drawn.d) && /106 |-6[ Z]/.test(drawn.d)
-      && drawn.wide > 300 && drawn.tall > 200
-      && (drawn.stroke === 'non-scaling-stroke' || !drawn.d.includes('sw-')), drawn);
-
-    /* ── THE CARD'S OWN COLOUR, MEASURED ON THE CARD ──
-       Every workout carries a literal hex, which is the one exception
-       on this screen and the habits screen's argument: a colour that
-       says WHICH thing this is has to be the same on every palette or
-       it has stopped being that thing's colour. What it must never do
-       is fail to be readable — these hues on --ink run from about
-       2.6:1 to 4.1:1 raw, so the card mixes each toward its own
-       --paper and this measures the result on composited pixels.
-
-       BOTH POLARITIES. On a dark palette --ink is near-white and the
-       card inverts, so a check written for a black card measures the
-       one case that cannot go wrong. */
-    for (const theme of [null, 264]) {
-      await deck(theme);
-      await page.click('.wc.is-front');                  /* into Bro split */
-      await page.waitForTimeout(500);
-      const worst = { fig: 99, glyph: 99, desc: 99, lab: 99, of: '' };
-      for (let i = 0; i < 6; i++) {
-        await page.click(`.wc-chips .wc-chip:nth-child(${i + 1})`);
-        /* WAITED OUT ON THE ANIMATION, never on a number of
-           milliseconds. This was 420ms, which was comfortably past the
-           300ms the shuffle used to take — and the day the pass was
-           slowed to 600ms so you could see one card leave and the next
-           arrive, every sample here was taken with the card still
-           sliding in from the right, a third of it off the screen. The
-           figures came back 1.57:1 and it read as a contrast
-           regression on a colour nothing had touched. */
-        await page.waitForFunction(() =>
-          [...document.querySelectorAll('.wc-deck .wc')].every((c) =>
-            c.getAnimations().every((a) => a.playState === 'finished')));
-        const at = await page.evaluate(() => {
-          const c = document.querySelector('.wc.is-front');
-          const box = (s) => { const r = c.querySelector(s).getBoundingClientRect();
-            return { x: r.left + r.width / 2, y: r.top + r.height / 2,
-              l: r.left, r: r.right, t: r.top, b: r.bottom }; };
-          return { name: c.dataset.workout, card: c.getBoundingClientRect().toJSON(),
-            fig: box('.wc-top div b'), lab: box('.wc-top div span'),
-            g: box('.wc-g'), d: box('.wc-d') };
-        });
-        const png = PNG5.sync.read(await page.screenshot());
-        const px = (x, y) => {
-          const i2 = (png.width * Math.round(y * dpr5) + Math.round(x * dpr5)) << 2;
-          return [png.data[i2], png.data[i2 + 1], png.data[i2 + 2]];
-        };
-        /* Ink and ground are taken from the SAME neighbourhood: the
-           card's own gradient and its wordmark both move the ground
-           under a figure, and a ratio against --ink read off the
-           stylesheet would be measuring a colour that is nowhere on
-           screen. Darkest and lightest pixel in a band through the
-           mark is the honest pair, and it is polarity-agnostic. */
-        const band = (b, pad) => {
-          const out = [];
-          for (let x = Math.round(b.l); x < b.r; x++) {
-            for (let y = Math.round(b.t) - pad; y < b.b + pad; y++) out.push(px(x, y));
-          }
-          return out;
-        };
-        const worstOf = (b, pad) => {
-          const s = band(b, pad).sort((p, q) => lum(p) - lum(q));
-          return ratio(s[0], s[s.length - 1]);
-        };
-        const fig = worstOf(at.fig, 1), g = worstOf(at.g, 0), d = worstOf(at.d, 1);
-        const lab = worstOf(at.lab, 1);
-        if (fig < worst.fig) { worst.fig = fig; worst.of = at.name; }
-        worst.glyph = Math.min(worst.glyph, g);
-        worst.desc = Math.min(worst.desc, d);
-        worst.lab = Math.min(worst.lab, lab);
-      }
-      const t = theme === null ? 'the lime it ships with' : 'hue ' + theme;
-      ok(`the figures clear 4.5:1 on the card on ${t} (worst ${worst.fig.toFixed(2)}:1 on ${worst.of})`,
-        worst.fig >= 4.5, worst);
-      ok(`...the description too, over the wordmark behind it (${worst.desc.toFixed(2)}:1)`,
-        worst.desc >= 4.5, worst);
-      /* ── AND THE LABEL, WHICH NOTHING MEASURED UNTIL THE GROUND
-             MOVED ──
-         9.5px uppercase is the smallest type on the card and the
-         weakest white on it, so it is the first thing a lighter ground
-         breaks — and it was sitting at 4.58:1 before anything moved,
-         which is a rounding error above the bar rather than a margin.
-         The one piece of text on this surface that was not held was
-         the one that needed holding. */
-      ok(`...and the label over them, the smallest type on the card `
-        + `(${worst.lab.toFixed(2)}:1)`,
-        worst.lab >= 4.5, worst);
-      ok(`...and the glyph clears 3:1 as a graphic (${worst.glyph.toFixed(2)}:1)`,
-        worst.glyph >= 3, worst);
-    }
-
-    /* ── AND THE CARD HAS AN EDGE, LIT ON A CONE ──
-       Without a ring the card is a slab against a page that is nearly
-       the same black, and the two behind — which carry no words at all
-       — have nothing but an edge to say they are there with.
-
-       WHAT MAKES IT A FACET RATHER THAN A RIM IS THE SECOND ARC. A
-       linear gradient's brightness is a function of position along one
-       axis, so walking round the perimeter it rises once and falls
-       once: one lit side, one dark one. A conic is a function of the
-       ANGLE from the centre, so the light comes round the card and
-       there are two bright arcs with dark between them, which is what
-       a machined block does under one lamp.
-
-       MEASURED AS THE RING'S OWN CONTRIBUTION — each edge pixel less
-       the card's own ground 7px in along the same normal. A bare
-       reading at the edge is mostly the WASH, and that is not a
-       hypothetical: the first version of this check compared absolute
-       perimeter values, and it worked only while the card was nearly
-       black. The day the ground was lightened the wash swamped the
-       ring, the linear rim it replaced scored .37 against a bar of
-       .30, and the check had quietly stopped telling a cone from a
-       sweep while still passing. It is the friends crown's lesson and
-       the Workouts panel's, a third time: a thin mark over a coloured
-       ground has to be measured as the DIFFERENCE it makes.
-
-       Two halves, each catching a different reversion, both on
-       composited pixels:
-
-         LIT   the ring's brightest contribution — .49 here, .26 for
-               the linear rim, and .03 with the ring deleted, which is
-               the half that says a ring exists at all.
-         ARCS  its brightest contribution at least a quarter-turn away
-               from that, as a fraction of it — .44 here and .23 for
-               the linear rim, which is the cone showing up as a
-               number. The no-ring case scores .48 on this one and
-               fails the other, which is why both are needed.
-
-       SAMPLED ALONG THE STRAIGHT EDGES ONLY. The corner radius is
-       22px, so a sample taken at 45 degrees lands where the ring is
-       turning and half a pixel either way is off it. */
-    await page.waitForFunction(() =>
-      [...document.querySelectorAll('.wc-deck .wc')].every((c) =>
-        c.getAnimations().every((a) => a.playState === 'finished')));
-    const lit = await page.evaluate(() =>
-      document.querySelector('.wc.is-front').getBoundingClientRect().toJSON());
-    const pngE = PNG5.sync.read(await page.screenshot());
-    const atE = (x, y) => {
-      const i = (pngE.width * Math.round(y * dpr5) + Math.round(x * dpr5)) << 2;
-      return [pngE.data[i], pngE.data[i + 1], pngE.data[i + 2]];
-    };
-    const IN = .6, DEEP = 7, RAD = 30, PER = 6, ring = [];
-    const pair = (x, y, nx, ny) =>
-      ring.push(lum(atE(x, y)) - lum(atE(x + nx * DEEP, y + ny * DEEP)));
-    for (let i = 0; i < PER; i++) {                               /* head */
-      pair(lit.x + RAD + (lit.width - 2 * RAD) * (i + .5) / PER, lit.y + IN, 0, 1);
-    }
-    for (let i = 0; i < PER; i++) {                               /* trailing */
-      pair(lit.right - IN,
-        lit.y + RAD + (lit.height - 2 * RAD) * (i + .5) / PER, -1, 0);
-    }
-    for (let i = 0; i < PER; i++) {                               /* foot */
-      pair(lit.right - RAD - (lit.width - 2 * RAD) * (i + .5) / PER,
-        lit.bottom - IN, 0, -1);
-    }
-    for (let i = 0; i < PER; i++) {                               /* leading */
-      pair(lit.x + IN,
-        lit.bottom - RAD - (lit.height - 2 * RAD) * (i + .5) / PER, 1, 0);
-    }
-    const top5 = ring.indexOf(Math.max(...ring));
-    let arc2 = -1;
-    ring.forEach((v, i) => {
-      const d = Math.min(Math.abs(i - top5), ring.length - Math.abs(i - top5));
-      if (d >= ring.length / 4 && v > arc2) arc2 = v;
-    });
-    const arcs = arc2 / ring[top5];
-    ok(`the card's edge catches a light its middle does not `
-      + `(${ring[top5].toFixed(2)} over its own ground)`,
-      ring[top5] >= .12, { brightest: ring[top5], at: top5 });
-    ok(`...on a cone, so a second arc a quarter-turn away catches too `
-      + `(${arcs.toFixed(2)} of the first)`,
-      arcs >= .33, { arcs, arc2, brightest: ring[top5], at: top5 });
+    /* ── AND A LENGTH YOU PRESS IS WHAT GETS FILED ──
+       The tile always prints its own estimate — it has one line of
+       10.5px type and no room for the card's "Est. time" label, so
+       the word lives in the spoken name and the figure you chose is
+       the pressed rung. What matters is that the rung is what lands
+       in the record, which is asserted where it is filed, below. */
+    await page.click('.wc-mins .wc-min:nth-child(7)');      /* 90 */
+    await page.waitForTimeout(280);
+    const said = await page.evaluate(() => [...document.querySelectorAll('.wc-min')]
+      .filter((x) => x.getAttribute('aria-pressed') === 'true').map((x) => x.textContent));
+    ok('a length you press is the one the ladder holds', said.join('') === '90', said);
 
     /* ── IT LANDS ON THE BLOCK, AND IT STAYS THERE ── */
-    await deck(null);
-    await page.click('.wc.is-front');
-    await page.waitForTimeout(460);
-    await page.click('.wc-chips .wc-chip:nth-child(5)');           /* Legs */
-    await page.waitForTimeout(420);
-    await page.click('.wc.is-front');                              /* choose it */
-    await page.waitForTimeout(320);
+    await board();
+    await tap('bro.legs');                                         /* choose it */
     await page.click('.wc-eff-r .wc-ef:nth-child(1)');             /* say Light */
-    await page.waitForTimeout(320);
+    await page.waitForTimeout(280);
     await page.click('.wc-mins .wc-min:nth-child(7)');             /* say 90 */
-    await page.waitForTimeout(320);
+    await page.waitForTimeout(280);
     await page.click('.wc-go');                                    /* file it */
     await page.waitForTimeout(460);
     const stored = await page.evaluate(() =>
@@ -11630,11 +11079,18 @@ const SAID = [
     await pp.waitForTimeout(500);
 
     /* ── AND THE RULE MUST NOT OVER-REACH ──
-       `scTrainCard`'s own note says the pair fanned behind a workout
-       show an edge each and CANNOT be pressed — and they carried
-       `.wc`'s `cursor: pointer` anyway, which would have made the walk
-       above wash a decoration. A response to a press that does nothing
-       is worse than no response at all. */
+       This was about the deck: the pair fanned behind a workout card
+       showed an edge each and CANNOT be pressed, and they carried
+       `.wc`'s `cursor: pointer` anyway — so the walk above would have
+       washed a decoration. A response to a press that does nothing is
+       worse than no response at all.
+
+       The cards are gone and the rule is not. On the board the same
+       question is the other way up: a tile's mark and its name are
+       drawn INSIDE the button, so a press landing on one has to
+       resolve outward to the tile rather than washing an 18px ring in
+       its corner. Same walk, same failure, a different element to
+       find it on. */
     await pp.evaluate(() => document.querySelector('#scTabTally').click());
     await pp.waitForTimeout(500);
     await pp.evaluate(() => {
@@ -11642,20 +11098,32 @@ const SAID = [
       if (c) c.click();
     });
     await pp.waitForTimeout(900);
-    const fan = await pp.evaluate(() => {
-      const b1 = document.querySelector('.wc.b1');
-      if (!b1) return null;
-      const cs = getComputedStyle(b1);
-      const r = b1.getBoundingClientRect();
-      b1.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true,
-        clientX: r.right - 4, clientY: r.bottom - 4 }));
-      const out = { cur: cs.cursor, pe: cs.pointerEvents,
-        washed: !!b1.querySelector('.rp') };
+    /* NOT read off the computed `cursor`: it is an INHERITED property,
+       so every child of a pointer-cursor button computes `pointer` and
+       an assertion on it can never fail. That is the version this
+       shipped with for one run, and the suite said so. What is
+       actually being claimed is where the wash LANDED — and beside it
+       that the tile holds no nested button, which is the mistake that
+       would genuinely split one press into two. */
+    const inner = await pp.evaluate(() => {
+      const t = document.querySelector('.wb-t[data-workout="ppl.pull"]');
+      if (!t) throw new Error('no Pull tile on the board');
+      const mark = t.querySelector('.wb-arc');
+      if (!mark) throw new Error('the Pull tile draws no mark');
+      const r = mark.getBoundingClientRect();
+      mark.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true,
+        clientX: r.left + 2, clientY: r.top + 2 }));
+      const rp = document.querySelector('.rp');
+      const host = rp && rp.parentElement;
+      const out = { on: !!host && host === t, host: host && host.className,
+        inMark: !!mark.querySelector('.rp'),
+        nested: [...document.querySelectorAll('.wb-t')]
+          .reduce((n, x) => n + x.querySelectorAll('button, [role="button"]').length, 0) };
       document.querySelectorAll('.rp').forEach((e) => e.remove());
       return out;
     });
-    ok('a card that cannot be pressed does not claim it can, and is not washed',
-      fan && fan.cur !== 'pointer' && fan.pe === 'none' && !fan.washed, fan);
+    ok('a press on a tile\u2019s own mark washes the tile, never the mark',
+      inner.on && !inner.inMark && inner.nested === 0, inner);
     await pp.keyboard.press('Escape');
     await pp.waitForTimeout(420);
     await pp.evaluate(() => document.querySelector('#scTabWeek').click());
@@ -12139,32 +11607,34 @@ const SAID = [
     await rp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
     await rp.waitForTimeout(500);
 
-    /* THE CHIP IS THE PAGER AND THE CARD IS THE PICKER — pressing a
-       chip brings a card to the front and says nothing about whether
-       it is chosen. A probe that pressed chips alone found the deck
-       working and nothing selected. */
-    const chip = async (n) => {
+    /* PRESSED BY KEY, never by the words on the tile. Legs is in two
+       groups and Core is in two more, so a tile found by its name is
+       one of two tiles and which one is whichever the query reached
+       first — which is the collision the qualified key exists to
+       stop. It was a chip and a card before the board: two presses,
+       and a probe that pressed only chips once found the deck working
+       and nothing selected. */
+    const chip = async (k) => {
       await rp.evaluate((x) => {
-        const c = [...document.querySelectorAll('.wc-chip')]
-          .find((e) => e.textContent.trim() === x);
-        if (!c) throw new Error('no chip ' + x);
-        c.click();
-      }, n);
-      await rp.waitForTimeout(1300);
-    };
-    const front = async () => {
-      await rp.evaluate(() => document.querySelector('.wc:not(.b1):not(.b2)').click());
-      await rp.waitForTimeout(900);
+        const t = document.querySelector(`.wb-t[data-workout="${x}"]`);
+        if (!t) throw new Error('no tile for ' + x);
+        t.click();
+      }, k);
+      await rp.waitForTimeout(320);
     };
     const state = () => rp.evaluate(() => ({
-      /* The CHIP is the pager and its tick is a readout of the
-         selection, so this is what says which cards are chosen
-         without stepping through the deck to find them. */
-      picked: [...document.querySelectorAll('.wc-chip.is-picked')]
+      picked: [...document.querySelectorAll('.wb-t.is-picked .wb-n')]
         .map((e) => e.textContent.trim()),
       ef: document.querySelectorAll('.wc-ef').length,
       mn: document.querySelectorAll('.wc-min').length,
-      head: (document.querySelector('.wc:not(.b1):not(.b2) .wc-top') || {}).textContent,
+      /* The tile, not the card's head: Rest prints an em dash where
+         every other tile prints its minutes, which is the same claim
+         the card's "Rest day" figure made. */
+      head: (document.querySelector('.wb-t[data-workout="rec.rest"] .wb-m') || {}).textContent,
+      rings: (() => {
+        const a = document.querySelector('.wb-t[data-workout="rec.rest"] .wb-arc');
+        return a ? a.dataset.lit + '/' + a.dataset.eff : null;
+      })(),
       go: (document.querySelector('.wc-go') || {}).textContent,
     }));
 
@@ -12196,27 +11666,35 @@ const SAID = [
     };
 
     await openTrain();
-    await chip('Recovery');
-    await front();
     await rp.waitForTimeout(1600);
-    ok('rest is a session you can log, and it is in Recovery',
-      await rp.evaluate(() => [...document.querySelectorAll('.wc-chip')]
-        .some((e) => e.textContent.trim() === 'Rest')),
-      await rp.evaluate(() => [...document.querySelectorAll('.wc-chip')]
-        .map((e) => e.textContent.trim())));
+    /* IN Recovery, and asserted as which heading it sits under rather
+       than as its presence anywhere on the board: recovery is the
+       category and a full rest day is the most of it, so a Rest tile
+       filed under Run would be the record saying something else. */
+    const where = await rp.evaluate(() => {
+      let head = null;
+      for (const el of document.querySelectorAll('.wb > *')) {
+        if (el.classList.contains('grp-h')) head = el.querySelector('.pill').textContent;
+        else if (el.querySelector('.wb-t[data-workout="rec.rest"]')) return head;
+      }
+      return null;
+    });
+    ok('rest is a session you can log, and it is under Recovery',
+      where === 'Recovery', where);
 
-    await chip('Rest');
-    await front();
+    await chip('rec.rest');
     const rest = await state();
     /* NOT DISABLED — a control that exists and refuses is worse than
        one that is not there. Asserted as the rows being absent. */
     ok('a rest day is asked neither how hard nor how long',
       rest.ef === 0 && rest.mn === 0, rest);
-    /* The card's Effort figure is a READOUT of the row below it, so on
-       a card with no row it is a figure with nothing behind it: the
-       head read "Rest day" and "Effort / Light" in one breath. */
-    ok('...and the card does not print a figure it was never given',
-      /Rest day/.test(rest.head) && !/Effort/.test(rest.head), rest);
+    /* The card's Effort figure was a READOUT of the row below it, so
+       on a card with no row it read "Rest day" and "Effort / Light" in
+       one breath. A tile prints one figure and the claim survives: a
+       rest day is the one tile with no length on it, and its mark is
+       two empty rings rather than a length nobody gave. */
+    ok('...and the tile does not print a figure it was never given',
+      rest.head === '\u2014' && rest.rings === '0/0', rest);
     ok('...and the foot still names what it is about to file',
       rest.go === 'Log Rest', rest);
 
@@ -12267,25 +11745,19 @@ const SAID = [
        else has to clear Rest. A build that only did the first leaves
        Rest + Core reachable by pressing them the other way round. */
     await openTrain();
-    await chip('Recovery');
-    await front();
     await rp.waitForTimeout(1600);
-    await chip('Core');
-    await front();
-    await chip('Cold');
-    await front();
+    await chip('rec.core');
+    await chip('rec.cold');
     const two = await state();
     ok('two real sessions still go together, and are asked both',
       two.picked.length === 2 && two.ef > 0 && two.mn > 0
       && /Core \+ Cold/.test(two.go), two);
-    await chip('Rest');
-    await front();
+    await chip('rec.rest');
     const rested = await state();
     ok('...and pressing Rest clears them, because rest is just rest',
       rested.picked.join('+') === 'Rest'
       && rested.ef === 0 && rested.mn === 0 && rested.go === 'Log Rest', rested);
-    await chip('Core');
-    await front();
+    await chip('rec.core');
     const back = await state();
     ok('...and pressing a session clears Rest, which is the same rule back',
       back.picked.join('+') === 'Core'

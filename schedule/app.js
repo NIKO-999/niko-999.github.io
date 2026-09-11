@@ -7049,238 +7049,49 @@
      the key is not in the pushed record.
      ═══════════════════════════════════════════════════════════ */
 
-  /* ── ONE GLYPH, NOT FIVE ──
-     Five drawings were made and every one of them was a different
-     class of object — a barbell with an arrow, a figure on a rail, a
-     squat, a torso, a shoe — which is the right rule when the glyph
-     has to say WHICH. Here it does not: the card already says Push in
-     34px type with a line under it explaining what that means, so a
-     second thing saying the same word in pictures is the sentence and
-     the picture this project keeps having to take back out.
-
-     The weight is what all five have in common — it says this card is
-     a session — so it is the Train row's own dumbbell, reused
-     verbatim. Two dumbbells on one app is the mistake the Steps
-     footprint taught.
-
-     ONE PER GROUP, THEREFORE, AND NOT ONE PER WORKOUT: the weight is
-     right for all four of a split and wrong on a cold plunge, so Run
-     takes the row's shoe and Recovery its stretch. Three glyphs
-     answering the only question a picture is left on this card —
-     which of the three kinds of session this is. */
-  var WORKOUT_ICON = {
-    bro: BLOCK_ICON.train,
-    ppl: BLOCK_ICON.train,
-    run: BLOCK_ICON.run,
-    /* ── RECOVERY HAS NONE, DELIBERATELY ──
-       It had the row's stretching figure, which is a stick person —
-       ruled out for these in capitals two comments up, and drawn at
-       40px it is a circle on four sticks rather than a marker. It was
-       also simply false on two of the four cards: a figure stretching
-       over one whose line reads "Abs, obliques and lower back".
-
-       Nothing honest replaces it. A rolled mat reads as a hook, a
-       padlock or a capsule; a circular arrow is a refresh button; a
-       foam roller is a battery; a dome is the wake glyph. Recovery is
-       four sessions that have nothing in common except when you do
-       them, so there is no object that is all four — and an empty slot
-       is what this file already concluded about the ten lifts. The
-       name is there at 34px with its line under it. */
-    rec: ''
-  };
-
-  /* ── THE SWOOP ──
-     A curve sweeping through the card, behind everything on it. Two
-     things were tried here first and both were wrong. Four contour
-     waves, stretched to the card's width with the stroke stretched
-     with them, drew as black bars lying across it. The card's own
-     name, blown up and cropped, was better and still wrong: it says
-     in ghost type what the 34px line at the bottom already says at
-     full strength, and the eye reads a word whether or not it is
-     meant to.
-
-     A curve carries no reading at all. It fills the empty middle, it
-     gives the name something to sit on, and there is nothing in it to
-     understand — which is the whole job.
-
-     SIX OF THEM, AND WHICH ONE IS DATA. Twenty-two cards is too many
-     for one drawing: every card the same is wallpaper, and the deck is
-     three cards deep so two of them are always on screen together.
-     They are assigned by CHARACTER rather than one each — the heavy
-     lifts share the solid band, the runs share the open arcs, and
-     recovery gets the quietest of them. Cards that are the same kind
-     of session look the same on purpose.
-
-     100x80 AGAINST A CARD THAT IS 354x284, which is the same ratio to
-     within half a percent, so `slice` crops almost nothing and every
-     curve keeps the shape it was drawn as. The paths run from -6 to
-     106 on purpose: a curve that starts inside the card has a visible
-     end, and a visible end is a shape sitting on the card rather than
-     something the card is a window onto.
-
-     THE STROKES ARE NON-SCALING. It is the waves' lesson kept: a
-     stroke width in viewBox units is scaled by whatever the box is
-     stretched to, and the failure is silent — the drawing is still
-     correct and simply several times too heavy. */
-  var SWOOP = {
-    /* One band, and the name sits on it. */
-    a: '<path class="sw-f" d="M-6 54C20 26 48 66 106 18V86H-6Z"/>',
-    /* Two open arcs and nothing filled — the lightest of the six. */
-    b: '<path class="sw-l" d="M-6 44C20 16 48 56 106 8"/>'
-     + '<path class="sw-l" d="M-6 64C20 36 48 76 106 28"/>',
-    /* The band with a hairline running off the top of it. */
-    c: '<path class="sw-f" d="M-6 58C20 30 48 70 106 22V86H-6Z"/>'
-     + '<path class="sw-l" d="M-6 44C20 16 48 56 106 8"/>',
-    /* A crescent off the top-right corner, so the weight is opposite
-       the name rather than under it. */
-    d: '<path class="sw-f" d="M106 -6C60 -6 22 26 -6 78V-6Z"/>',
-    /* Three nested hairlines. */
-    e: '<path class="sw-l" d="M-6 40C22 12 50 52 106 4"/>'
-     + '<path class="sw-l" d="M-6 56C22 28 50 68 106 20"/>'
-     + '<path class="sw-l" d="M-6 72C22 44 50 84 106 36"/>',
-    /* One thick tapering sweep, low and to the right. */
-    f: '<path class="sw-s" d="M-6 66C24 34 46 74 106 14"/>'
-  };
-
-  /* ── AND A GLYPH FOR THE SESSION ITSELF ──
-     WORKOUT_ICON above says which of the four KINDS this is and is the
-     same on every card in a group. This is the other question — which
-     one — and where it has an answer it takes the same 40px slot,
-     because two glyphs on one card is the card saying twice over what
-     it is and the words are what it is for.
-
-     NOT A FIGURE, ANYWHERE IN HERE. A stick person bent into the shape
-     of the muscle it means is the collision this file has run into
-     four times: walk, run and stretch were one silhouette in three
-     poses at 22px, and a body drawn to mean "arms" beside one drawn to
-     mean "abs" is worse, because they differ by which limb is thicker.
-     So: equipment, a shape of muscle with no body attached, or the
-     SHAPE OF THE EFFORT.
-
-     JUDGED AT 40PX AND DRAWN FOR IT. The first cut of these sat at
-     26px beside the name and every one of the lifts was a smudge —
-     two capital Ts for a bench press, a squiggle for an arm. The run
-     profiles were the only four that survived, because they are three
-     strokes each. Given the whole slot they are drawings rather than
-     marks, and the ones that still could not be drawn honestly are
-     simply not here.
-
-     MISSING IS A STATE, NOT A GAP. Stretch has no mark that is not a
-     figure, and a glyph that has to be explained is worse than the
-     group's own: the name is beside it at 34px either way. */
-  var KIND_ICON = {
-    /* ── THE FOUR RUNS ARE PACE PROFILES ──
-       A shallow wave, a plateau, a spike train, and a late rise held.
-       They are the one place on this sheet where the drawing carries
-       something the words do not: Tempo and Intervals are both hard,
-       and they are hard in shapes you can see.
-
-       ALL FOUR SIT ON THE SAME BASELINE AT y21, and the axis running
-       left to right is the whole grammar. `easy` had its baseline at
-       19.6 with the profile a parallel line above it: no figure and no
-       ground, which at 40px is an equals sign rather than a run.
-
-       AND TEMPO IS A PLATEAU, NOT A STEP. Drawn as rise-and-hold it
-       was `long` shifted left — the same silhouette with the knee in a
-       different place, which at this size is a parameter rather than a
-       shape, and the two are adjacent cards in one group. A block you
-       come down off is what a tempo run is anyway. */
-    easy:  '<path d="M2.4 14.6q4.8-3 9.6 0t9.6 0"/>'
-         + '<path d="M2.4 21h19.2" opacity=".4"/>',
-    tempo: '<path d="M2.4 17h3.4l2.6-8.4h7.2l2.6 8.4h3.4"/>'
-         + '<path d="M2.4 21h19.2" opacity=".4"/>',
-    reps:  '<path d="M2.4 17h2.6l1.8-8.6h1.8L10.4 17h2.4l1.8-8.6h1.8L18.2 17h3.4"/>'
-         + '<path d="M2.4 21h19.2" opacity=".4"/>',
-    long:  '<path d="M2.4 17h12.2l3.2-7.6h3.8"/>'
-         + '<path d="M2.4 21h19.2" opacity=".4"/>'
-  };
-
-  /* ── NOTHING ELSE IS IN THAT LIST, AND THAT IS THE RESULT RATHER
-     THAN THE GAP ──
-     Chest, Back, Shoulders, Arms, Legs, Abs, Push, Pull and Core were
-     drawn twice over and cut both times. At 26px beside the name every
-     one was a smudge. Redrawn for the 40px slot they were legible and
-     wrong: the back's V-taper read as a SHIELD, the flexed arm as a
-     squiggle, the bent leg as a hook, and the waist with two bands as
-     a coffee bean.
-
-     The run four work because a pace profile is not a picture of an
-     object — it is the shape of the session, which is a thing a line
-     can be. A lift has no equivalent: every honest drawing of one is a
-     bar with plates on it, so ten of them would be one silhouette ten
-     times. And a glyph that is confidently the wrong object is worse
-     than none, because the card then says something false rather than
-     nothing.
-
-     A RAMP FOR THE INCLINE WALK AND A SNOWFLAKE FOR THE COLD WENT THE
-     SAME WAY, later and for a softer reason: both were legible and
-     both were stock. A right triangle is a set square and a six-barbed
-     flake is the one in every icon set there has ever been — neither
-     is wrong, and neither is worth the slot. The first ramp was also
-     drawn MIRRORED, descending left to right against four pace
-     profiles that all rise, which nobody spotted for two rounds.
-
-     So the lifts wear the group's weight, which is true of all of
-     them, and the name is beside it at 34px with the muscles named
-     under it. If any of these come back it will be because somebody
-     found a drawing, not because the gap looked untidy. */
-
-  function scTrainSwoop(w) {
-    var box = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    box.setAttribute('class', 'wc-sw');
-    box.setAttribute('viewBox', '0 0 100 80');
-    box.setAttribute('preserveAspectRatio', 'xMidYMid slice');
-    box.setAttribute('aria-hidden', 'true');
-    /* Named on the element: the paths are anonymous curves, so this is
-       the only thing a check outside this file can hold the pairing to. */
-    box.setAttribute('data-swoop', w.sw);
-    box.innerHTML = SWOOP[w.sw];
-    return box;
-  }
-
   var TRAIN_GROUPS = [
-    { k: 'bro', n: 'All exercises', sw: 'a', c: '#e6412f', d: 'One body part a day.', of: [
-      { k: 'chest', sw: 'a', n: 'Chest',     t: 50, c: '#e6412f',
+    { k: 'bro', n: 'All exercises', c: '#e6412f', d: 'One body part a day.', of: [
+      { k: 'chest', n: 'Chest',     t: 50, c: '#e6412f',
         d: 'Press, fly and dip.' },
-      { k: 'back',  sw: 'a', n: 'Back',      t: 50, c: '#2f7fe6',
+      { k: 'back',  n: 'Back',      t: 50, c: '#2f7fe6',
         d: 'Rows, pulldowns and pull-ups.' },
-      { k: 'delts', sw: 'c', n: 'Shoulders', t: 45, c: '#8a4fe0',
+      { k: 'delts', n: 'Shoulders', t: 45, c: '#8a4fe0',
         d: 'Press and all three heads.' },
-      { k: 'arms',  sw: 'c', n: 'Arms',      t: 40, c: '#e0761a',
+      { k: 'arms',  n: 'Arms',      t: 40, c: '#e0761a',
         d: 'Biceps and triceps.' },
-      { k: 'legs',  sw: 'f', n: 'Legs',      t: 60, c: '#17a06b',
+      { k: 'legs',  n: 'Legs',      t: 60, c: '#17a06b',
         d: 'Quads, hamstrings, glutes and calves.' },
-      { k: 'abs',   sw: 'd', n: 'Abs',       t: 20, c: '#14a2a2',
+      { k: 'abs',   n: 'Abs',       t: 20, c: '#14a2a2',
         d: 'Abs, obliques and lower back.' }
     ] },
-    { k: 'ppl', n: 'PPL', sw: 'c', c: '#2f7fe6', d: 'Push, pull, legs and core.', of: [
-      { k: 'push', sw: 'a', n: 'Push', t: 55, c: '#e6412f',
+    { k: 'ppl', n: 'PPL', c: '#2f7fe6', d: 'Push, pull, legs and core.', of: [
+      { k: 'push', n: 'Push', t: 55, c: '#e6412f',
         d: 'Chest, shoulders and triceps.' },
-      { k: 'pull', sw: 'a', n: 'Pull', t: 50, c: '#2f7fe6',
+      { k: 'pull', n: 'Pull', t: 50, c: '#2f7fe6',
         d: 'Back, lats and biceps.' },
-      { k: 'legs', sw: 'f', n: 'Legs', t: 60, c: '#8a4fe0',
+      { k: 'legs', n: 'Legs', t: 60, c: '#8a4fe0',
         d: 'Quads, hamstrings, glutes and calves.' },
-      { k: 'core', sw: 'd', n: 'Core', t: 20, c: '#17a06b',
+      { k: 'core', n: 'Core', t: 20, c: '#17a06b',
         d: 'Abs, obliques and lower back.' }
     ] },
-    { k: 'run', n: 'Run', sw: 'b', c: '#e08a12', d: 'Easy, tempo, intervals or long.', of: [
-      { k: 'easy',  sw: 'b', n: 'Easy',      t: 40, c: '#17a06b',
+    { k: 'run', n: 'Run', c: '#e08a12', d: 'Easy, tempo, intervals or long.', of: [
+      { k: 'easy',  n: 'Easy',      t: 40, c: '#17a06b',
         d: 'Conversational pace, flat.' },
-      { k: 'tempo', sw: 'f', n: 'Tempo',     t: 35, c: '#e0761a',
+      { k: 'tempo', n: 'Tempo',     t: 35, c: '#e0761a',
         d: 'Comfortably hard, held.' },
-      { k: 'reps',  sw: 'f', n: 'Intervals', t: 45, c: '#e6412f',
+      { k: 'reps',  n: 'Intervals', t: 45, c: '#e6412f',
         d: 'Hard efforts, walked or jogged between.' },
-      { k: 'long',  sw: 'b', n: 'Long',      t: 75, c: '#2f7fe6',
+      { k: 'long',  n: 'Long',      t: 75, c: '#2f7fe6',
         d: 'Time on the feet, easy throughout.' }
     ] },
-    { k: 'rec', n: 'Recovery', sw: 'e', c: '#14a2a2', d: 'Walk, stretch, core or cold.', of: [
-      { k: 'incline', sw: 'e', n: 'Incline walk', t: 40, c: '#14a2a2',
+    { k: 'rec', n: 'Recovery', c: '#14a2a2', d: 'Walk, stretch, core or cold.', of: [
+      { k: 'incline', n: 'Incline walk', t: 40, c: '#14a2a2',
         d: 'Steep, slow, nothing to prove.' },
-      { k: 'stretch', sw: 'e', n: 'Stretch',      t: 20, c: '#8a4fe0',
+      { k: 'stretch', n: 'Stretch',      t: 20, c: '#8a4fe0',
         d: 'Mobility and long holds.' },
-      { k: 'core',    sw: 'd', n: 'Core',         t: 20, c: '#17a06b',
+      { k: 'core',    n: 'Core',         t: 20, c: '#17a06b',
         d: 'Abs, obliques and lower back.' },
-      { k: 'cold',    sw: 'b', n: 'Cold',         t: 10, c: '#2f7fe6',
+      { k: 'cold',    n: 'Cold',         t: 10, c: '#2f7fe6',
         d: 'Plunge or the end of a shower.' },
       /* ── AND THE DAY YOU DID NOTHING, ON PURPOSE ──
          In Recovery rather than as a fifth kind, and that is the
@@ -7294,7 +7105,7 @@
          questions about a session, and this is the absence of one:
          a rest day with an effort on it is the app inventing a fact,
          and one with fifty minutes against it is worse. */
-      { k: 'rest',    sw: 'e', n: 'Rest',         t: 0,  c: '#5F6672',
+      { k: 'rest',    n: 'Rest',         t: 0,  c: '#5F6672',
         rest: 1, d: 'Nothing, and that is the session.' }
     ] }
   ];
@@ -7347,16 +7158,9 @@
   var WORKOUTS = [];
   TRAIN_GROUPS.forEach(function (grp) {
     grp.key = grp.k;
-    grp.lab = 'Sessions';
-    grp.val = String(grp.of.length);
     grp.of.forEach(function (w) {
       w.gk = grp.k;
       w.key = grp.k + '.' + w.k;
-      /* A card built to carry a figure has to say something where the
-         figure would be. "0 min" is a length somebody could have
-         trained for and did not; "Rest day" is what the card is. */
-      w.lab = w.rest ? 'Today' : 'Est. time';
-      w.val = w.rest ? 'Rest day' : (w.t + ' min');
       WORKOUTS.push(w);
     });
   });
@@ -8688,161 +8492,190 @@
      where it cannot be read is DOM the deck pays for on every draw.
      What a card behind a card has to say is "there are more of THIS",
      and a surface is the whole of that sentence. */
-  function scTrainBack(w, cls) {
-    var card = scEl('div', 'wc ' + cls);
-    card.style.setProperty('--wc-hue', w.c);
-    card.setAttribute('aria-hidden', 'true');
-    card.appendChild(scTrainSwoop(w));
-    return card;
+  /* ═══════════════════════════════════════════════════════════
+     THE MARK IS A QUANTITY, NEVER A PICTURE
+
+     Ten lift glyphs were drawn twice for the deck's cards and cut
+     both times, because every honest drawing of a lift is a bar with
+     plates and ten would be one silhouette ten times. A tile is a
+     third of a card and has no room to try again — so the mark says
+     HOW LONG instead, which is a thing a shape can genuinely be.
+
+     SIX PIECES OF A RING, TEN MINUTES EACH, FULL AT AN HOUR. The cap
+     was two hours when this was drawn in a lab, and every session on
+     the board then sat in the bottom two thirds of the arc with its
+     top third never drawn at all. Ten minutes is a unit people say;
+     fifteen gives four pieces, and four pieces round a circle is a
+     cross.
+
+     TWO TRACKS: THE OUTER IS HOW LONG AND THE INNER IS HOW HARD.
+     Three drawings of the same scale were rendered over this board at
+     390x844 — six radial spokes, six pieces of a divided ring, and
+     this — and the twin ring is what was picked. Effort is the other
+     figure the sheet asks for, and it is the one thing on a tile that
+     nothing else carries: the minutes are printed under the name, so
+     an outer ring alone would be a second drawing of a number already
+     in words, which is exactly what got the single ring rejected.
+
+     THE INNER RING IS THE SUGGESTION, NOT YOUR ANSWER. Effort is
+     derived from the session's own estimate through scEffort, the way
+     the card's Effort figure always was — so a tile says what this
+     KIND of session usually costs, and the row under the board is
+     where you say what THIS one did. A ring that moved when you
+     pressed Hard would be the tile answering a question about the
+     session rather than about itself.
+
+     AND NOTHING ON SCREEN SAYS WHICH RING IS WHICH. That is the cost,
+     it was named before this was built, and it is not solved — it is
+     paid. What makes it affordable is that neither ring is the only
+     statement of its fact: the minutes are printed on the tile and
+     both are spoken in the tile's own name, so the rings are a thing
+     you learn once rather than a thing you have to decode.
+     ═══════════════════════════════════════════════════════════ */
+  var ARC_N = 6, ARC_UNIT = 10, ARC_CAP = 60;
+  /* The outer ring at r7.4 and the inner at r4.2 — 3.2 units apart,
+     which at 1.7 wide leaves 1.5 units of ground between the two
+     strokes. That is under the 3.4 this repo measured as the floor
+     before a closed shape fills in, and the floor does not apply:
+     it is about an OUTLINE inside a glyph, where both edges are
+     strokes of one drawing and the space between them is a slot. A
+     ring inside a ring is two marks with ground between them. */
+  var ARC_RO = 7.4, ARC_RI = 4.2;
+
+  /* ── A FULL MARK MEANS YOU GOT THERE ──
+     Rounding alone lights all six on a fifty-five minute session at a
+     sixty minute cap, so a mark saying "an hour" is drawn on a
+     session that was not one. Below the cap the count is held one
+     short: full is reached by the clock and never by arithmetic.
+
+     AND NOTHING LOGGED DRAWS ZERO. Ten minutes of cold rounding to
+     nought is an empty track on a session you did — the day-off dot's
+     own rule, which is that a thing that happened is never drawn as a
+     thing that did not. */
+  function scArcLit(t) {
+    if (!t) return 0;
+    if (t >= ARC_CAP) return ARC_N;
+    return Math.min(ARC_N - 1, Math.max(1, Math.round(t / ARC_UNIT)));
   }
 
-  /* ── the card ──
-     A <button>, and the only one in the deck: a stack of focusable
-     cards is two tab stops that do nothing, and the pair behind show
-     an edge each and cannot be pressed. */
-  function scTrainCard(w, cls, pick, ef, mins) {
-    var card = scEl(pick ? 'button' : 'div', 'wc' + (cls ? ' ' + cls : ''));
-    /* Set on the element rather than as a class per workout: these are
-       DATA — another one is a row in TRAIN_GROUPS — and a stylesheet
-       that has to grow a rule alongside it is the same fact in two
-       files, kept in step by hand. */
-    card.style.setProperty('--wc-hue', w.c);
-    card.dataset.workout = w.key;
-    if (pick) {
-      card.type = 'button';
-      card.setAttribute('aria-label',
-        'Trained ' + w.n + (mins ? ', ' + mins + ' minutes' : '')
-        + (ef ? ', ' + ef.toLowerCase() : '') + '. ' + w.d);
-    } else {
-      card.setAttribute('aria-hidden', 'true');
-    }
-
-    /* Behind everything, and first in the source rather than pushed
-       there with a z-index: it is the only absolutely positioned child
-       in the card's own stacking context, so source order IS the depth
-       and nothing has to be lifted over it. */
-    card.appendChild(scTrainSwoop(w));
-
-    var top = scEl('div', 'wc-top');
-    /* The time, then what that costs. Effort is worked out from the
-       minutes rather than set beside them — see scEffort. */
-    /* ── EST. TIME UNTIL YOU SAY OTHERWISE ──
-       The card shows its own estimate, labelled as one, until a length
-       is actually chosen — and then it shows the SESSION's length and
-       drops the word, because it has stopped being an estimate. The
-       ladder's suggestion is not a choice: a card that said "Time" for
-       a figure nobody had touched would be the app putting words in
-       your mouth. */
-    var figs = [[mins ? 'Time' : w.lab, mins ? mins + ' min' : w.val]];
-    /* A group has no one duration, so it has no effort either — the
-       cards inside it run from ten minutes to seventy-five. */
-    if (ef) figs.push(['Effort', ef]);
-    figs.forEach(function (pair) {
-      var col = scEl('div');
-      col.appendChild(scEl('span', null, pair[0]));
-      col.appendChild(scEl('b', null, pair[1]));
-      top.appendChild(col);
-    });
-
-    /* The session's own drawing where there is one, the group's where
-       there is not, and NOTHING where neither has one — an empty 40px
-       <svg> is a hole the layout still pays for. Named on the element,
-       because these are anonymous paths and it is the only thing a
-       check outside this file can hold the pairing to. */
-    var mark = KIND_ICON[w.k] || WORKOUT_ICON[w.gk || w.k];
-    if (mark) {
-      var g = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      g.setAttribute('class', 'wc-g');
-      g.setAttribute('viewBox', '0 0 24 24');
-      g.setAttribute('aria-hidden', 'true');
-      g.setAttribute('data-kind', KIND_ICON[w.k] ? w.k : (w.gk || w.k));
-      g.innerHTML = mark;
-      top.appendChild(g);
-    }
-    card.appendChild(top);
-
-    card.appendChild(scEl('span', 'wc-n', w.n));
-    card.appendChild(scEl('span', 'wc-d', w.d));
-    if (pick) card.addEventListener('click', pick);
-    return card;
+  /* One ring, as a track and the part of it that is filled. Drawn as
+     a dasharray on a circle rather than as an arc path, because an
+     arc path has to know whether it is the long way round and a
+     dasharray does not — and the two rings are then one function with
+     a radius in it rather than two drawings to keep in step. */
+  function scArcRing(r, frac, cls) {
+    var c = 2 * Math.PI * r;
+    return '<circle class="wb-off" cx="9" cy="9" r="' + r + '"/>'
+      + (frac > 0
+        ? '<circle class="' + cls + '" cx="9" cy="9" r="' + r + '"'
+          + ' stroke-dasharray="' + (c * frac).toFixed(2) + ' ' + (c + 1).toFixed(2) + '"/>'
+        : '');
   }
 
-  /* ── the sheet, in two steps ──
-     The deck answers WHICH KIND first and WHICH ONE second, on the
-     same three controls: a chip row, a stack, and the front card.
-     Stepping in swaps what the chips are and what the deck holds,
-     which is why both are rebuilt by one draw() rather than by two
-     builders that have to agree about the layout between them.
+  /* The filled parts take a CLASS rather than a stroke attribute. A
+     presentation attribute is beaten by any rule, so the two would be
+     a colour written in two files kept in step by hand — and this way
+     the unlit track is one declaration for the whole app. */
+  function scTrainArc(w) {
+    /* The outer ring is the DISCRETE count over six, not the raw
+       fraction, so "full means you got there" survives being drawn as
+       a smooth arc: a 55-minute session is five sixths of the ring
+       and cannot round up into a closed one. */
+    var lit = scArcLit(w.rest ? 0 : w.t);
+    var hard = w.rest ? 0 : EFFORTS.indexOf(scEffort(w.t)) + 1;
+    var g = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    g.setAttribute('class', 'wb-arc');
+    g.setAttribute('viewBox', '0 0 18 18');
+    g.setAttribute('aria-hidden', 'true');
+    /* Both counts are written on the element: the circles are
+       anonymous and a dasharray is the only thing on them, so this is
+       all a check outside this file has to hold the pairing to. */
+    g.setAttribute('data-lit', String(lit));
+    g.setAttribute('data-eff', String(hard));
+    g.innerHTML = '<g transform="rotate(-90 9 9)">'
+      + scArcRing(ARC_RO, lit / ARC_N, 'wb-lit')
+      + scArcRing(ARC_RI, hard / EFFORTS.length, 'wb-hard')
+      + '</g>';
+    return g;
+  }
 
-     THE STEP IS NOT REMEMBERED. Coming back to a block you already
-     logged opens on ITS group with ITS card at the front, and a block
-     with nothing on it opens on the three kinds — the state is read
-     off the record every time rather than kept in a variable that
-     outlives the sheet. */
-  /* ── the sheet, in two steps ──
-     The deck answers WHICH KIND first and WHICH ONE second, on the
-     same three controls: a chip row, a stack, and the front card.
-     Stepping in swaps what the chips are and what the deck holds,
-     which is why both are rebuilt by one draw() rather than by two
-     builders that have to agree about the layout between them.
+  /* ── a tile ──
+     The colour bar, the name, the minutes and the arc. Everything the
+     card carried that a tile cannot — the session's sentence, the
+     effort readout, the swoop — is either spoken or drawn elsewhere,
+     and nothing is squeezed in at a size it stops reading at.
 
-     THE STEP IS NOT REMEMBERED. Coming back to a block you already
-     logged opens on ITS group with ITS card at the front and ITS
-     effort already chosen — the state is read off the record every
-     time rather than kept in a variable that outlives the sheet. */
+     THE MINUTES ON A TILE ARE ALWAYS THE ESTIMATE. The card said
+     "Est. time" until a length was pressed and then dropped the word;
+     a tile has one line of 10.5px type and cannot carry a label, so
+     the word lives in the spoken name and the length you actually
+     chose is the pressed rung on the ladder below. The arc does not
+     move with it either: it is a property of the SESSION, the way its
+     name is, and a session can be two workouts with one length. */
+  function scTrainTile(w, picked, press) {
+    var b = scEl('button', 'wb-t' + (picked ? ' is-picked' : ''));
+    b.type = 'button';
+    b.style.setProperty('--wb-hue', w.c);
+    b.dataset.workout = w.key;
+    b.setAttribute('aria-pressed', picked ? 'true' : 'false');
+    /* BOTH RINGS ARE SPOKEN, because neither is labelled on screen —
+       which is the half of that cost a screen reader does not have to
+       pay, and the reason the cost is affordable at all. */
+    b.setAttribute('aria-label', w.rest
+      ? w.n + '. ' + w.d
+      : w.n + ', about ' + w.t + ' minutes, '
+        + scEffort(w.t).toLowerCase() + '. ' + w.d);
+    b.appendChild(scTrainArc(w));
+    b.appendChild(scEl('span', 'wb-bar'));
+    b.appendChild(scEl('span', 'wb-n', w.n));
+    b.appendChild(scEl('span', 'wb-m', w.rest ? '—' : w.t + ' min'));
+    b.addEventListener('click', press);
+    return b;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     THE SHEET, AND IT IS ONE LEVEL NOW
+
+     It was a deck: four kinds on a chip row, the one you pressed
+     opening into its own hand of three cards, dealt on the way in and
+     cascaded or peeled between. THE BOARD REPLACES BOTH LEVELS WITH
+     ONE, and that reverses a decision argued at length — "two levels,
+     because a split is not a workout", on the grounds that one flat
+     list put Push beside Run as if they were the same answer.
+
+     WHAT THAT ARGUMENT WAS PROTECTING IS THE GROUP, NOT THE LEVEL.
+     A heading carries it exactly as well: Push sits under PPL and
+     Easy under Run, so nothing on the board claims the two are the
+     same kind of answer — and every session is now one press away
+     rather than three. The level was how the group was SAID; it was
+     never the only way to say it. The same heading the objectives,
+     Pattern and the week already use, because a section heading reads
+     the same wherever one is.
+
+     WHAT GOES WITH THE DECK IS REAL, and is listed so nobody looks
+     for it later: the deal, the cascade, the peel and the lift, the
+     two cards fanned behind the front one, the swoop, the facet rim,
+     the grain, the scrim over the figures, and the chip pager that
+     stepped through a hand. Every one of those was measured, several
+     of them twice, and none of them survives a layout with no stack
+     in it. The two BEHAVIOURS the deck carried do survive whole: a
+     session can be more than one thing, and rest is exclusive.
+     ═══════════════════════════════════════════════════════════ */
   function scTrainAsk(item, dow, day) {
     var rec = scTrainOf(day, item.id);
     /* ── WHAT IS ALREADY ON THE BLOCK, AS A SELECTION ──
        Order is press order, so "Pull + Abs" reads the way it was
-       chosen. The group opened is the FIRST pick's, because that is
-       the one somebody went looking for — abs is what you add to it. */
+       chosen. Nothing else is read off the record any more: with one
+       level there is no group to open on and no card to put in front,
+       which is most of the state the deck needed. */
     var sel = rec ? scWorkoutsOf(rec.k).map(function (w) { return w.key; }) : [];
-    var got = sel.length ? scWorkout(sel[0]) : null;
-    var into = got ? scTrainGroup(got.gk) : null;
-    var at = got ? into.of.indexOf(got) : 0;
-    var ef = got ? rec.e : '';
-    var mins = got ? rec.m : 0;
+    var ef = rec ? rec.e : '';
+    var mins = rec ? rec.m : 0;
     /* Whether the figures were CHOSEN or merely suggested. Both are
-       seeded off the selection, and both stop moving with it the
-       moment a press says otherwise — an effort and a length are about
-       the session you did, not about the card you are looking at. */
+       seeded off the selection and both stop moving with it the moment
+       a press says otherwise — an effort and a length are about the
+       session you did, not about the tile you are looking at. */
     var saidEf = !!ef, saidMin = !!mins;
-    /* ── THE DEAL HAPPENS ONCE, WHEN THE SHEET OPENS ──
-       draw() rebuilds the whole deck on every press — of a chip, of an
-       effort, of a kind — and the cards are new elements each time, so
-       the animation ran again on every one of them. Comparing four
-       splits meant watching the same hand dealt four times, which is a
-       control putting on a performance while you are trying to read
-       it. The fold is the thing worth having; the deal is worth
-       exactly one showing. */
-    /* ── THE TWO LEVELS MOVE DIFFERENTLY, AND THAT IS THE POINT ──
-       Between the four kinds you are choosing what SORT of session
-       this was, so the hand comes apart and reassembles: the front
-       card leaves first and the two behind follow it out, then the new
-       hand lands back to front. A CASCADE.
-
-       Inside a group you are stepping THROUGH one hand, so the cards
-       come off the top one at a time — each lifts, arcs away, and the
-       next is already there underneath. A PEEL. Cascading inside a
-       group would say the four sessions were one stack; peeling
-       between kinds would say you had started again.
-
-       Both were chosen by playing seven candidates against each other
-       in a lab running the real card, and both are the lab's own
-       figures at 0.8x — which is where app.css's durations come from
-       rather than from anybody's guess. The speed is a setting
-       separate from the shape: it has moved twice and no keyframe
-       moved with it.
-
-       Four entrances then, and one variable rather than four flags: a
-       draw is a deal, a lift, a cascade, a peel, or nothing. draw()
-       also runs on an effort, a length and a pick, and on every one of
-       those the card in front is the SAME card with different figures
-       on it — a
-       deck that moved for a press on Hard would be answering a question
-       nobody asked. Set where the intent is and consumed by the next
-       draw, so nothing else can inherit it. */
-    var entr = 'deal';
 
     scSheet('What did you train?', function (body) {
       /* "What you did", not "one": a session can be a lift and one
@@ -8851,21 +8684,21 @@
       body.appendChild(scEl('p', 'wc-sub',
         'Pick what you did and it goes on ' + item.n + '.'));
 
-      var chips = scEl('div', 'wc-chips');
-      var deck = scEl('div', 'wc-deck');
+      var board = scEl('div', 'wb');
       var howHard = scEl('div', 'wc-eff');
-      var foot = scEl('div', 'wc-foot');
-      body.appendChild(chips);
-      body.appendChild(deck);
+      var foot = scEl('div', 'wc-foot wb-foot');
+      body.appendChild(board);
       body.appendChild(howHard);
       body.appendChild(foot);
 
-      function list() { return into ? into.of : TRAIN_GROUPS; }
-
+      /* ── THE ROWS ARE DRAWN OFF THE SELECTION, NOT OFF A LEVEL ──
+         The deck drew them once you were inside a group, because a
+         group of four running from ten minutes to seventy-five has no
+         one effort. A board has no inside, and the honest gate is the
+         same one seen plainly: before anything is picked there is no
+         session to ask how long it took. */
       function suggest() {
-        var est = sel.length
-          ? scTrainMins(sel.map(scWorkout))
-          : scTrainMins([list()[at]]);
+        var est = scTrainMins(sel.map(scWorkout));
         if (!saidEf) ef = scEffort(est);
         if (!saidMin) mins = est;
         return est;
@@ -8873,33 +8706,21 @@
 
       function press(w) {
         return function () {
-          /* Step one opens the group. */
-          if (!into) { into = w; at = 0; ef = ''; entr = 'lift'; draw(); return; }
-          /* ── STEP TWO TOGGLES, IT DOES NOT LOG ──
-             It used to log on the press, which is one tap and made a
-             second workout impossible: most people's real session is a
-             lift plus one small thing, and made to pick one they lie
-             or stop logging. So the card is a choice and the foot is
-             the answer. Selecting one is a press and a press, which is
-             the cost — and it buys a screen where you can see what you
-             are about to file. */
+          /* ── A PRESS TOGGLES, IT DOES NOT LOG ──
+             Most people's real session is a lift plus one small thing,
+             and made to pick one they either lie or stop logging. So
+             the tile is a choice and the foot is the answer. */
           var i = sel.indexOf(w.key);
-          if (i >= 0) { sel.splice(i, 1); draw(); return; }
-          /* ── REST IS EXCLUSIVE, AND THAT IS WHAT "REST IS JUST REST"
-                 MEANS ──
-             It shipped for a day as one card among the rest, on the
-             reading that a session can be more than one thing — so
-             Rest beside Core was "a real session that happens to
-             include a card called Rest", and was asked how long it
-             took and how hard it was like any other.
-
-             That is not a session. You cannot half-rest: a day with
-             core work on it is a Core day, and Rest sitting next to it
-             is the record saying you did nothing AND did something.
-             So picking Rest clears the rest and picking anything else
-             clears Rest, which makes the combination IMPOSSIBLE rather
-             than handled — and the two figures then have no path to a
-             rest day at all, rather than one guarded in three places.
+          if (i >= 0) { sel.splice(i, 1); draw(w.key); return; }
+          /* ── REST IS EXCLUSIVE, AND THAT IS WHAT "REST IS JUST
+                 REST" MEANS ──
+             You cannot half-rest: a day with core work on it is a Core
+             day, and Rest sitting next to it is the record saying you
+             did nothing AND did something. Picking Rest clears the
+             rest and picking anything else clears Rest, which makes
+             the combination IMPOSSIBLE rather than handled — so the
+             two figures have no path to a rest day at all, rather than
+             one guarded in three places.
 
              `scRestOnly` stays: it is what the REPAIR reads, and a
              record written by the build that allowed the pair is still
@@ -8910,7 +8731,7 @@
             return !(x && x.rest);
           });
           sel.push(w.key);
-          draw();
+          draw(w.key);
         };
       }
 
@@ -8923,7 +8744,9 @@
            average it into a figure you never gave. Worked out here
            rather than read off the guard that hides the two rows,
            because that one is about what is DRAWN and this is about
-           what is FILED. */
+           what is FILED — and answering it in two places is two
+           chances to disagree, which is why both go through
+           scRestOnly. */
         var onlyRest = scRestOnly(sel.join('+'));
         scTrainSet(day, item.id, sel.join('+'),
           onlyRest ? '' : ef, onlyRest ? 0 : mins);
@@ -8932,201 +8755,42 @@
         scToast(scWorkName(sel.join('+')) + ' logged', false);
       }
 
-      function draw() {
-        var all = list();
-        var w = all[at];
-        /* THE MINUTES SET WHERE THE CONTROL STARTS, and only where a
-           choice has not been made: moving to another card in the same
-           group has to re-suggest, because sixty minutes of legs and
-           ten minutes of cold are not the same session — but a press
-           on the effort row must survive a redraw of the deck. */
-        /* The selection suggests both figures until a press says
-           otherwise, and it re-suggests as the selection changes: pull
-           and core is seventy minutes where pull alone is fifty. */
-        if (into) suggest();
-        $('scSheetTitle').textContent = into ? into.n : 'What did you train?';
+      /* `keep` is the tile to put the focus back on. A press rebuilds
+         the board, which destroys the button that was pressed and
+         takes the focus with it — so without this a keyboard walks
+         back to the top of the sheet on every pick. By KEY, because
+         the element it lands on is a new one. */
+      function draw(keep) {
+        var resting = scRestOnly(sel.join('+'));
+        if (sel.length) suggest();
 
-        /* THE CHIPS ARE REBUILT, NOT RELABELLED. The two levels have
-           different lengths, so a pass that only rewrites the text
-           leaves a chip standing on a group of four that selects an
-           index nothing is at. */
-        chips.textContent = '';
-        /* ── FOUR OR FEWER IS A SEGMENTED CONTROL, MORE IS A LADDER ──
-           The top level is the four kinds of session, and four is a set
-           you choose FROM: one track, equal shares, the whole choice
-           visible without moving. Inside a group there can be six, and
-           six equal segments on a 390px phone is 58px a segment, which
-           clips "Shoulders" — so those stay a scrolling row, which is
-           also the honest shape for a pager you step along.
-
-           Measured off the count rather than off which level you are
-           on, because the deciding fact is whether they FIT. */
-        chips.classList.toggle('is-seg', all.length <= 4);
-        all.forEach(function (x, i) {
-          /* THE CHIP IS THE PAGER, NOT THE PICKER. It says which card
-             is at the front; whether that card is CHOSEN is the card's
-             own state, and a chip that meant both would be one control
-             answering two questions. The tick is a readout of the
-             selection so you can see a pick that is scrolled off the
-             front without stepping through the deck to find it. */
-          var picked = into && sel.indexOf(x.key) >= 0;
-          var c = scEl('button', 'wc-chip' + (picked ? ' is-picked' : ''));
-          c.type = 'button';
-          if (picked) {
-            c.insertAdjacentHTML('beforeend',
-              '<svg viewBox="0 0 24 24" aria-hidden="true">'
-              + '<path d="M4.5 12.8l5.2 5.2L19.5 6"/></svg>');
-          }
-          c.appendChild(document.createTextNode(x.n));
-          c.setAttribute('aria-pressed', i === at ? 'true' : 'false');
-          if (picked) c.setAttribute('aria-label', x.n + ', chosen');
-          c.addEventListener('click', function () {
-            if (at === i) return;
-            at = i;
-            /* A hand at the top level, one hand being stepped through
-               inside a group. */
-            entr = into ? 'peel' : 'cascade';
-            /* Nothing is cleared here. This line used to blank the
-               effort so the next card could suggest its own, and once
-               a press could SAY an effort the two fought: the clear
-               emptied it and the suggestion refused to refill it,
-               because it had been told not to. suggest() owns both
-               figures and knows which of them you have chosen. */
-            draw();
+        board.textContent = '';
+        TRAIN_GROUPS.forEach(function (grp) {
+          var gh = scEl('div', 'grp-h');
+          gh.appendChild(scEl('span', 'pill', grp.n));
+          gh.appendChild(scEl('span', 'c', String(grp.of.length)));
+          board.appendChild(gh);
+          var g = scEl('div', 'wb-g');
+          grp.of.forEach(function (w) {
+            g.appendChild(scTrainTile(w, sel.indexOf(w.key) >= 0, press(w)));
           });
-          chips.appendChild(c);
+          board.appendChild(g);
         });
 
-        /* THE TWO BEHIND GO IN FIRST. These are absolutely positioned
-           siblings with no z-index between them, so the stacking order
-           IS the source order — written front-first the pair that make
-           it a deck are painted over the card they are behind, and the
-           whole thing reads as one card with a shadow. */
-        /* Set BEFORE the cards go in, because it is what they match
-           on — the cards are new elements every draw, so a class on the
-           deck is what decides whether they arrive with anything. */
-        deck.classList.toggle('is-dealing', entr === 'deal');
-        deck.classList.toggle('is-turning', entr === 'lift');
-        deck.classList.toggle('is-cascading', entr === 'cascade');
-        deck.classList.toggle('is-peeling', entr === 'peel');
-
-        /* ── THE WHOLE HAND GOES, NOT THE TOP CARD ──
-           The two behind are the same card as the one in front now, so
-           what leaves is a hand of Chest and what arrives is a hand of
-           Push — the deck turns over rather than swapping its top
-           card. Taking only the front one off left two Chest slabs
-           standing while a Push card slid in over them, which is the
-           thing this whole treatment is about seen from the other
-           side.
-
-           Kept rather than rebuilt: they carry the outgoing workout's
-           own colour and its own swoop, and the whole gesture is that
-           THOSE cards are the ones going away. Fresh elements would be
-           a different hand pretending.
-
-           textContent = '' detaches them along with everything else,
-           which is what makes this work at all — an element removed
-           and re-inserted starts its animation on insertion, so the
-           pass begins exactly when the new hand is laid out rather
-           than whenever the class happened to land. */
-        var out = null;
-        if (entr === 'cascade' || entr === 'peel') {
-          /* ── A PRESS LANDING MID-PASS DROPS THE HAND ALREADY GOING ──
-             These passes are a second and a half, so walking down the
-             chips faster than that is ordinary rather than perverse —
-             and without this the next draw marks the leaving hand
-             `is-out` a second time, so six cards leave, then nine.
-             The hand you have already left is not worth watching. */
-          [].forEach.call(deck.querySelectorAll('.wc.is-out'), function (c) {
-            c.parentNode.removeChild(c);
-          });
-          out = [].slice.call(deck.querySelectorAll('.wc'));
-          out.forEach(function (c) {
-            c.classList.remove('is-front', 'is-picked');
-            c.classList.add('is-out');
-          });
-          if (!out.length) out = null;
-        }
-        entr = null;
-
-        deck.textContent = '';
-        /* ── THE HAND BEING TAKEN OFF GOES IN FIRST ──
-           These are absolutely positioned siblings with no z-index
-           between them, so source order IS the stacking order. The
-           outgoing card used to go in LAST, on top of the whole deck,
-           and it faded to nothing there — which is a card passing
-           THROUGH the one that replaced it and then disappearing, and
-           that is exactly what it was reported as.
-
-           Under the arriving hand is where a hand taken off a deck
-           actually is. Nothing fades now, so this order is the only
-           thing keeping the two hands from being double-exposed while
-           they cross — and b2 before b1 before the front inside each
-           hand, so each keeps its own fan.
-
-           Swept on animationend AND on a timer, because an animation
-           that never runs — reduced motion, a background tab — would
-           otherwise leave a dead hand on the pile for the next press
-           to stack on. */
-        if (out) {
-          /* ── EACH CARD SWEEPS ITSELF ──
-             It used to be one listener on the last card in the hand,
-             which was right only while all three moved together. Both
-             passes are staggered now and the card that finishes LAST
-             is b2, at the back — so a single listener on the front one
-             fired at 1.24s and tore the other two off the screen
-             mid-flight. A card knows when its own animation is over.
-
-             On a timer as well, because an animation that never runs —
-             a background tab — would otherwise leave a dead hand on
-             the pile for the next press to stack on. The timer has to
-             outlast the longest card, which is the peel's b2 at
-             .38 + .78 = 1.16s. Fire it early and it kills a card
-             mid-flight, which is the bug the per-card listener above
-             was fixing. */
-          out.forEach(function (c) {
-            deck.appendChild(c);
-            var kill = function () {
-              if (c.parentNode) c.parentNode.removeChild(c);
-            };
-            c.addEventListener('animationend', kill);
-            setTimeout(kill, 1800);
-          });
-        }
-        deck.appendChild(scTrainBack(w, 'b2'));
-        deck.appendChild(scTrainBack(w, 'b1'));
-        /* ── A REST DAY IS ASKED NOTHING, AND SHOWS NOTHING ──
-           The card's Effort figure is a READOUT of the row below it,
-           so on a day with no row it is a figure with nothing behind
-           it: the head read "Today / Rest day" and "Effort / Light" in
-           one breath, which is the card contradicting itself. Worked
-           out here rather than inside scTrainCard, because it is the
-           same question the row and the commit both ask and answering
-           it in three places is three chances to disagree — which is
-           why all three go through scRestOnly. */
-        var resting = scRestOnly(sel.join('+'));
-        deck.appendChild(scTrainCard(w, 'is-front'
-          + (into && sel.indexOf(w.key) >= 0 ? ' is-picked' : ''),
-          press(w), (into && !resting) ? ef : '', saidMin ? mins : 0));
-
-        /* ── HOW HARD IT WAS IS A ROW, NOT A FIELD ON THE CARD ──
-           The card is a <button> and a control inside a button is
+        /* ── HOW HARD IT WAS IS A ROW, NOT A FIGURE ON THE TILE ──
+           A tile is a <button> and a control inside a button is
            invalid: it collapses to one press while looking exactly
-           right, which is the trap the day cards and the tally rows
-           have both had a rule about. So it is a SIBLING, and the
-           card's own Effort figure is a readout of it.
-
-           Drawn only at step two: a group is four sessions running
-           from ten minutes to seventy-five and has no one effort. */
+           right, which is the trap the day cards, the schedule rows
+           and the tally tiles have each had a rule about. */
         howHard.textContent = '';
         /* ── A REST DAY IS ASKED NOTHING ──
            How hard was it and how long did it take are both questions
            about a session. A rest day with an effort against it is the
            app inventing a fact about your day, and one carrying fifty
-           minutes is worse — so when the only thing picked is Rest,
-           neither row is drawn at all. Not disabled: a control that
-           exists and refuses is worse than one that is not there. */
-        if (into && !resting) {
+           minutes is worse — so neither row is drawn at all. Not
+           disabled: a control that exists and refuses is worse than
+           one that is not there. */
+        if (sel.length && !resting) {
           var lab = scEl('span', 'wc-eff-l', 'How hard was it?');
           lab.id = 'scEffLab';
           howHard.appendChild(lab);
@@ -9148,16 +8812,12 @@
           howHard.appendChild(row);
 
           /* ── AND HOW LONG ──
-             A ladder rather than a field: nobody trains for 47 minutes,
-             they train for about three quarters of an hour, and a
-             keyboard for a number everybody rounds anyway is a keyboard
-             for nothing. The card's own estimate is spliced into the
-             rungs where it is not already one, so the suggestion is
-             always reachable in one press.
-
-             BLED to the sheet's edges, because eight rungs do not fit
-             across a phone and a row that stops inside the padding
-             reads as a short list rather than one that continues. */
+             A ladder rather than a field: nobody trains for 47
+             minutes, they train for about three quarters of an hour,
+             and a keyboard for a number everybody rounds anyway is a
+             keyboard for nothing. The selection's own estimate is
+             spliced into the rungs where it is not already one, so the
+             suggestion is always reachable in one press. */
           var mlab = scEl('span', 'wc-eff-l', 'How long, in minutes?');
           mlab.id = 'scMinLab';
           howHard.appendChild(mlab);
@@ -9181,39 +8841,11 @@
         }
 
         foot.textContent = '';
-        if (into) {
-          /* ── A BACK ARROW, NOT THE WORDS "ALL KINDS" ──
-             It was an underlined sentence sitting under the deck
-             beside "Take it off", so the two ways out of the sheet
-             read as a paragraph of options rather than as a way back
-             and a delete. A back control is the one thing on a screen
-             that never needs naming. */
-          var back = scEl('button', 'wc-back');
-          back.type = 'button';
-          back.setAttribute('aria-label', 'All kinds');
-          back.insertAdjacentHTML('beforeend',
-            '<svg viewBox="0 0 24 24" aria-hidden="true">'
-            + '<path d="M15 4.5L7.5 12l7.5 7.5"/></svg>');
-          back.addEventListener('click', function () {
-            at = TRAIN_GROUPS.indexOf(into);
-            into = null;
-            sel = [];
-            ef = '';
-            /* Coming back is a level change, so it lifts. It is NOT a
-               deal, even though the four kinds are what you land on:
-               the deal is for choosing among them, and arriving back
-               is one step of a movement you are already making. */
-            entr = 'lift';
-            draw();
-          });
-          foot.appendChild(back);
-        }
-
         /* ── THE ANSWER IS THE FOOT, AND IT NAMES ITSELF ──
-           "Log Pull + Abs" rather than "Done": the whole reason the
-           card stopped logging on its own press is that a session can
-           be more than one thing, so the control that files it has to
-           say what it is about to file. */
+           "Log Pull + Abs" rather than "Done": the whole reason a tile
+           does not log on its own press is that a session can be more
+           than one thing, so the control that files it has to say what
+           it is about to file. */
         if (sel.length) {
           var go = scEl('button', 'wc-go', 'Log ' + scWorkName(sel.join('+')));
           go.type = 'button';
@@ -9235,12 +8867,16 @@
           });
           foot.appendChild(clear);
         }
+
+        if (keep) {
+          var back = board.querySelector('.wb-t[data-workout="' + keep + '"]');
+          if (back) back.focus();
+        }
       }
 
       draw();
     });
   }
-
   /* ═══════════════════════════════════════════════════════════
      THE WORKOUTS VIEW
 

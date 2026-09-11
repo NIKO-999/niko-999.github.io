@@ -3753,32 +3753,145 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   THE WORKOUT DECK
+   THE WORKOUT BOARD
 
-   Finish a training block and it asks what you trained. Five cards
-   in a stack, one at the front, the two behind it peeking out — the
-   shape is the reference's and the surface is this app's: the card
-   is --ink with --paper on it, so it is the one INVERTED thing on
-   the screen and it does not need a second colour to say so.
+   Finish a training block and it asks what you trained. Nineteen
+   tiles under four headings, all on one screen, one press each.
 
-   EVERY WORKOUT HAS ITS OWN COLOUR AND IT IS A LITERAL, which is the
-   one exception on this screen: everything else mixes its colour out
-   of the palette, because the wheel moves --red
-   together and a hex would be somebody else's app on twelve of them.
-   A colour that says WHICH thing this is has to be the same colour on
-   every theme or it has stopped being that thing's colour — the
-   habits screen already argued this. It never says WHETHER.
+   IT WAS A DECK: a hand of three cards, 284px tall, dealt on the way
+   in and cascaded or peeled between, with the front one carrying its
+   own hue at 62% toward white, a conic facet rim, a generated grain,
+   a scrim behind the figures and a 34px name. Every one of those was
+   measured — several of them twice — and none of it survives a layout
+   with no stack in it. The whole of that stylesheet came out in one
+   pass rather than being left to cascade at nothing, which is this
+   app's own rule: a dead rule that still cascades is not dead.
 
-   THE COLOUR ON THE CARD IS MIXED, NEVER DRAWN RAW. These hues on
-   --ink measure between about 2.6:1 and 4.1:1, which fails the bar
-   for the 16px figure sitting in them. --wc-lit is the hue mixed
-   toward white, and it moves whenever the card's ground moves: the
-   two are one setting seen from either side, and changing one without
-   the other is what put the figures at 3.6:1 on the first attempt to
-   lighten this card. tests/schedule.js measures all four things that
-   sit on it — the figures, the label, the description and the glyph —
-   on composited pixels, across six cards and two accents.
+   A TILE IS THE APP'S OWN CARD, NOT A SMALL VERSION OF THAT ONE. The
+   card was the single object in this app that did not follow the
+   theme — its ground was fixed so the nine hues would read the same
+   at every angle of the wheel. A tile is too small to be its own
+   world: it is `--card` over the page like every other surface here,
+   and the hue is the 4px bar across its head, which is exactly what
+   the schedule's rows already do.
    ═══════════════════════════════════════════════════════════ */
+
+/* ── THE BOARD ──
+   Three across at 390px. Two would be a list with a gap down it and
+   four clips "Incline walk", which is the widest name on the board. */
+.wb-g {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+/* The first heading has the sub line above it, so it does not need
+   the air the ones between groups do. */
+.wb .grp-h:first-child { padding-top: 4px; }
+
+.wb-t {
+  /* Written on the element by the board, because these are DATA — one
+     more workout is a row in TRAIN_GROUPS, not a rule in here. The
+     default is what lets the static check see the token exists at all:
+     `--wo-c` on the Workouts swatch had to do exactly this. */
+  --wb-hue: var(--ink);
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  min-height: 68px;
+  padding: 10px 9px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: var(--card-shadow);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  /* The arc is drawn in the workout's own hue, and `currentColor` is
+     what carries it into the lit pieces — so the colour is written
+     once, on the element, rather than into every path. */
+  overflow: hidden;
+}
+.wb-bar {
+  width: 26px; height: 4px;
+  border-radius: 2px;
+  background: var(--wb-hue);
+}
+.wb-n { font-size: 12.5px; font-weight: 600; line-height: 1.2; }
+.wb-m {
+  font-size: 10.5px;
+  color: var(--spent);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── PICKED IS THE INK, NOT THE HUE ──
+   "This one is chosen" is the same fact whichever session it is, and
+   the hue answers a different question — which is the card's own
+   argument kept after the card went. The accent is not available for
+   it either: the accent went neutral, so the ink IS what a filled
+   control wears here. */
+.wb-t.is-picked {
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 13%, transparent);
+}
+.wb-t:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+/* ── THE MARK ──
+   Two rings: the outer is how long against an hour, the inner is how
+   hard. Both tracks are drawn whole with the filled part over them,
+   so an empty ring is a ring at nought rather than a hole —
+   `--tick-off` rather than `--hair`, because this is a MARK carrying
+   a fact and not a surface separating two panels. The tally's own
+   note applies exactly: an unlit track you cannot see is a scale
+   with no bottom to it.
+
+   THE OUTER IS THE HUE AND THE INNER IS THE INK. A second hue would
+   be the tile answering "which session" twice, and the SAME hue on
+   both makes the pair read as one thick ring with a gap in it — the
+   whole point is that they are two marks. `--dim` rather than the
+   full ink, because the inner is the quieter fact and it sits inside
+   the louder one.
+
+   1.7 WIDE, AND THE ARITHMETIC IS THE REASON. The radii are 3.2
+   units apart, so at 1.7 there are 1.5 units of ground between the
+   two strokes and at 2.4 there are 0.8 — which on an 18px mark is
+   under a device pixel on a 1x screen, and the pair closes into a
+   disc with a hole in it. 1.5 is what keeps them two rings. */
+.wb-arc {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 18px; height: 18px;
+  color: var(--wb-hue);
+  fill: none;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+}
+.wb-arc .wb-lit { stroke: currentColor; }
+.wb-arc .wb-hard { stroke: var(--dim); }
+.wb-arc .wb-off { stroke: var(--tick-off); }
+/* ── AND THE ANSWER STAYS ON SCREEN ──
+   The deck was 312px with the foot directly under it, so the control
+   that files your answer was always in view. Nineteen tiles under
+   four headings are 841px in a 742px sheet — measured on the real
+   app at 390x844 — so with the foot in the flow you pick a session
+   and then have to go looking for the button that logs it. That is
+   the board's one genuine cost against the deck, and it is a cost
+   the board does not have to pay.
+
+   It only ever exists once something is picked, so there is nothing
+   stuck to the foot of a screen you have not answered yet — and the
+   ground and the hairline are what stop it reading as a button
+   floating over the tiles it is scrolling past. */
+.wb-foot {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  margin: 0 calc(var(--pad) * -1);
+  padding: 12px var(--pad) calc(4px + env(safe-area-inset-bottom));
+  background: var(--paper);
+}
+.wb-foot:not(:empty) { border-top: 1px solid var(--hair); }
 
 .wc-sub {
   margin: -2px 0 15px;
@@ -3873,320 +3986,6 @@ body {
 }
 .wc-chip:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
-/* The two behind are offset down and right, so the stack peeks at the
-   bottom and the trailing edge. The box has to hold the front card
-   PLUS that offset plus the shadow under it — a height equal to the
-   card clips the pair that make it a deck. */
-.wc-deck {
-  position: relative;
-  height: 312px;
-}
-
-.wc {
-  position: absolute;
-  left: 0; right: 0; top: 0;
-  height: 284px;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  padding: 19px 20px 21px;
-  border: 0;
-  border-radius: 22px;
-  text-align: left;
-  cursor: pointer;
-
-  /* The wordmark runs off all four edges, so the card has to cut it —
-     and the radius is what makes that a card rather than a crop. */
-  overflow: hidden;
-
-  /* ── THE CARD IS ITS OWN OBJECT, NOT THE PAGE INVERTED ──
-     It was --ink with --paper on it, which made it the one inverted
-     thing on the screen — and that was right for exactly as long as
-     every palette was a light one. On a dark theme --ink is near-white,
-     so the day the light palettes were deleted every workout card
-     turned into a pale sticker: a washed-out pink rectangle where the
-     reference has a slab of near-black with one colour in it.
-
-     So the ground is its own, and it is the SAME on all thirteen
-     palettes — which is the argument the nine hues already make. A
-     colour that says WHICH session this is has to be the same colour
-     everywhere or it has stopped being that thing's colour, and a card
-     built to carry them is the same object for the same reason. It is
-     the one surface in this app that does not follow the theme.
-
-     --wc-hue is written onto the element by the card that uses it, so
-     the value here is the fallback and the declaration tests/names.js
-     needs. --wc-lit is mixed toward white rather than toward --paper:
-     the ground no longer moves, so neither does the correction, and
-     the sum that used to be wrong about it — 4.6:1 computed against
-     --ink and 3.28:1 measured on screen — is not being made any more.
-
-     IT WENT 62% TO 42% WHEN THE GROUND WAS LIGHTENED, which is the
-     direction that always surprises: a lighter card needs MORE white
-     in the figure, so the percentage of the hue goes DOWN. What that
-     costs is real — 42% of a red is a salmon rather than a red — and
-     it is the reason the ground was not taken any lighter than it
-     was. Past this the figures stop being the hue at all, which is
-     the one thing a card built to carry a colour cannot trade. */
-  --wc-hue: var(--red);
-  --wc-dark: #1a1a20;
-  --wc-lit: color-mix(in srgb, var(--wc-hue) 42%, #ffffff);
-
-  /* ── THE CARD CARRIES ITS COLOUR ALL THE WAY ACROSS ──
-     It was a 30% wash of the hue in the near corner running to nothing
-     by 56%, so more than half the card was flat #101013 — and it was
-     reported as simply too dark. The hues read as a muddy maroon and a
-     muddy navy rather than as red and blue, because the only place
-     they existed at strength was one corner.
-
-     44% to 28% over a lifted base instead: the far corner measures
-     7.9x the luminance it did, so the card is a coloured object rather
-     than a black one with a tint on the shoulder.
-
-     AND THE SCRIM IS WHAT MAKES THAT AFFORDABLE. The figures and the
-     glyph sit in the LIGHTEST corner, which is why every attempt to
-     lighten the card took contrast off them first — measured, a ground
-     this light on its own put them at 3.6:1. A short dark fade down
-     from the head, behind those two and nothing else, puts their own
-     ground back where it was and lets the rest of the card go as light
-     as it likes.
-
-     ONE STACK, NAMED, because b1 and b2 restate the background to sit
-     two steps up and would each need their own copy of every layer —
-     which is three places to keep a wash in step by hand. */
-  --wc-wash:
-    linear-gradient(to bottom, rgba(0, 0, 0, .26) 0%, transparent 30%),
-    linear-gradient(150deg,
-      color-mix(in srgb, var(--wc-hue) 44%, transparent) 0%,
-      color-mix(in srgb, var(--wc-hue) 28%, transparent) 100%);
-  background: var(--wc-wash), var(--wc-dark);
-  color: #ffffff;
-
-  /* ── AND IT IS LIFTED OFF THE PAGE ──
-     Three shadows, and each does a different job. A half-pixel ring of
-     the workout's own colour gives the card an EDGE, so it stops fading
-     into a page that is nearly the same black. A tight contact shadow
-     puts it on something. A wide offset one puts a gap under it. One
-     flat 14px blur did all three badly, and the card read as a
-     rectangle that happened to be darker. */
-  /* Light just inside the head, light just inside the trailing edge,
-     shadow just inside the foot. The ring below is an EDGE; these
-     three are what give that edge a thickness, and a thickness is the
-     whole of what reads as three-dimensional. THREE sides rather than
-     two, because the ring turns on a cone: a bevel lit only top and
-     bottom under a light that comes round the corner is the two
-     halves disagreeing about where the lamp is. A token because
-     .wc.is-picked replaces this list outright to draw its accent
-     ring, and a card you had chosen would otherwise be the one in the
-     deck with a flat edge. */
-  --wc-bev: inset 0 2px 2px -1px rgba(255, 255, 255, .2),
-            inset -2px 0 2px -1px rgba(255, 255, 255, .08),
-            inset 0 -2px 2px -1px rgba(0, 0, 0, .66);
-  box-shadow: 0 0 0 .5px color-mix(in srgb, var(--wc-hue) 30%, transparent),
-              var(--wc-bev),
-              0 1px 2px rgba(0, 0, 0, .55),
-              0 16px 38px -10px rgba(0, 0, 0, .72);
-
-}
-
-/* ── A TOOTH OVER THE WHOLE SURFACE ──
-   A generated grain at 14%, in `overlay` so it lifts the light half of
-   the gradient and deepens the dark half rather than greying both.
-
-   It is doing one measurable job. The card is a 284px sweep from a
-   tinted corner to near-black, which is exactly the shape that BANDS
-   on an 8-bit display — visible steps across the middle of it. Noise
-   is the standard answer to that, and it is also why the surface reads
-   as printed matter rather than as a fill.
-
-   INLINE AS A DATA URI, because this app fetches nothing. */
-.wc::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
-  background-size: 120px 120px;
-  opacity: .14;
-  mix-blend-mode: overlay;
-}
-
-/* ── AND THE EDGE IS GLASS ──
-   The card was a slab with a half-pixel ring of its own hue around it,
-   and against a page that is nearly the same black that ring is the
-   only thing saying where the card stops. It reads as a rectangle
-   rather than as an object with a thickness — which is exactly what
-   the two cards behind it are for, and they had the same problem.
-
-   A rim, then — the day card's foil trick at rest, a border-width mask
-   with the middle excluded rather than a `border`, because a border is
-   one flat colour all the way round and the whole point here is that
-   it is not. What travels round it is below.
-
-   ON EVERY .wc, so the two behind get it too. They are what says
-   there are more of these, and an edge is the only thing they have to
-   say it with: they carry no words at all.
-
-   `z-index: 1` puts it over the swoop AND over the grain. Without it
-   the swoop draws across the rim — it is `inset: 0` and comes after
-   in the source — and the 14% overlay grain lies on top of the whole
-   thing, which is enough to make a 1px highlight granular.
-
-   The two INSETS on the box-shadow are the other half. A line round
-   the edge is a rim; a line of light just inside the top and a line
-   of shadow just inside the bottom is a BEVEL, and a bevel is what
-   reads as thickness. They are a token because .wc.is-picked replaces
-   the whole shadow list to draw its accent ring, and a card you had
-   chosen would otherwise be the one card in the deck with no edge. */
-.wc::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1.5px;
-  /* ── ONE LAMP, AND EVERY CORNER TAKES IT DIFFERENTLY ──
-     A CONIC gradient rather than a linear one, which is the whole
-     difference between an edge and a FACET. A linear gradient's
-     brightness is a function of position along one axis, so walking
-     round the perimeter it rises once and falls once: the card has a
-     lit half and a dark half, which is a sheet of something glassy.
-     A conic is a function of the ANGLE from the centre, so each edge
-     and each corner meets the light at its own incidence — two bright
-     arcs, two dark ones, and the corners between them catching in a
-     way a straight sweep cannot produce. That is what a machined
-     block does under one lamp, and it is why this reads as an object
-     rather than as a card with a highlight drawn on it.
-
-     Six edges were rendered over the real deck at rest and mid-pass:
-     a hairline rim, this, a three-pixel bezel, a stack of hard
-     offsets giving the card a literal side, a glass pane with a gloss
-     across it, and one with no drawn edge at all that floats on a
-     shadow instead. */
-  background: conic-gradient(from 202deg at 50% 50%,
-    rgba(255, 255, 255, .06),
-    rgba(255, 255, 255, .70) 11%,
-    rgba(255, 255, 255, .06) 29%,
-    rgba(255, 255, 255, .02) 52%,
-    rgba(255, 255, 255, .40) 70%,
-    rgba(255, 255, 255, .03) 90%,
-    rgba(255, 255, 255, .06));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* ── THE TWO BEHIND, FANNED, AND MORE OF THE SAME CARD ──
-   Offset AND turned, three degrees apart, so the stack reads as a hand
-   of cards rather than as one card with two shadows under it. Square,
-   the pair only showed along the bottom and the right — a fan shows a
-   corner of each, which is what says there are more of these.
-
-   They carry no WORDS, and they never will: they used to be the next
-   two workouts in the group, so pressing a chip changed what was
-   behind the card as well as the card itself, the deck read as moving
-   through the list, and another session's name sat under the one you
-   were reading. What they do carry now is the front card's own hue and
-   its own swoop, so Chest is a hand of Chest and stepping to Push
-   turns the whole hand over. A stack of grey behind a red card says
-   there are more of SOMETHING; the thing worth saying is that there
-   are more of THIS.
-
-   AND A LITERAL COPY OF THE SURFACE IS NOT IT. The card's ground is a
-   150° wash of its hue running to transparent by 56%, and the corner
-   the fan shows is the FAR one — so copying the ground exactly gives a
-   near-black sliver, darker than the grey slabs it replaced, and the
-   deck goes back to reading as one card. Rendered and looked at, at
-   rest and halfway through a pass. The two behind carry the hue at the
-   GROUND instead, two steps up, so the edge that is actually visible
-   is the one that says which card this is.
-
-   Mixed toward a literal rather than toward --paper: this whole object
-   is the same whatever the accent is, which is the argument the nine
-   hues already make. Not an alpha — an opacity would let the page
-   through and make the pair a different colour on each hue.
-
-   THE TRANSFORM IS WHAT MAKES THEM THE CARDS BEHIND, and it was
-   deleted once already — a rewrite of the block above this one took
-   the region between two anchors and these two rules were inside it.
-   Nothing threw; the deck simply arrived as a single card with a
-   heavier shadow, which is not a shape anybody would report. The check
-   in tests/schedule.js reads this matrix back off .wc.b1 while the
-   deal is running, so it fails whether the rule is deleted or
-   overwritten by keyframes naming `transform`. */
-/* ── AND THE TWO BEHIND CANNOT BE PRESSED, WHICH THE FILE ALREADY
-   SAID AND THE CURSOR DENIED ──
-   `scTrainBack` builds them `aria-hidden` with no handler, and the
-   note on `scTrainCard` says outright that the pair behind show an
-   edge each and cannot be pressed. They still inherited `.wc`'s
-   `cursor: pointer` and still took the hit-test on the 13 and 25
-   pixels of themselves that show — a card advertising a press that
-   does nothing.
-
-   It is load-bearing now rather than tidying: the wash finds its host
-   by walking up to the outermost box the app has made pressable, so a
-   decorative card claiming the cursor would have been washed as though
-   it were a control. A response to a press that did nothing is worse
-   than no response at all. */
-.wc.b1, .wc.b2 { cursor: default; pointer-events: none; }
-.wc.b1 {
-  transform: translate(13px, 9px) rotate(3deg) scale(.965);
-  background: var(--wc-wash), color-mix(in srgb, var(--wc-hue) 34%, #202028);
-}
-.wc.b2 {
-  transform: translate(25px, 18px) rotate(6deg) scale(.93);
-  background: var(--wc-wash), color-mix(in srgb, var(--wc-hue) 46%, #26262f);
-}
-
-/* ── THE SWOOP ──
-   Behind everything, filling the card. `slice` on a box whose ratio
-   matches the card's crops almost nothing, so each curve keeps the
-   shape it was drawn as while still running off both edges.
-
-   NON-SCALING STROKES. A width in viewBox units is multiplied by
-   whatever the box is stretched to, and it fails silently: the drawing
-   stays correct and comes out several times too heavy. The waves this
-   replaced were four black bars across the card for exactly that. */
-.wc-sw {
-  position: absolute;
-  inset: 0;
-  width: 100%; height: 100%;
-  display: block;
-  pointer-events: none;
-}
-/* 15%, not 20%: the crescent covers the top-right corner, which is
-   where the two figures and the glyph sit, and it was taking about a
-   fifth off their measured contrast on its own. */
-.sw-f { fill: color-mix(in srgb, var(--wc-hue) 15%, transparent); stroke: none; }
-.sw-l {
-  fill: none;
-  stroke: color-mix(in srgb, var(--wc-hue) 46%, transparent);
-  stroke-width: 1.2;
-  vector-effect: non-scaling-stroke;
-}
-.sw-s {
-  fill: none;
-  stroke: color-mix(in srgb, var(--wc-hue) 26%, transparent);
-  stroke-width: 26;
-  stroke-linecap: round;
-  vector-effect: non-scaling-stroke;
-}
-
-/* ── A CHOSEN CARD SAYS SO ON THE CARD ──
-   A ring of the accent around the whole thing, outside the hue's own
-   half-pixel edge, so it reads as a selection rather than as part of
-   the card's design. It is the accent and not the workout's colour
-   because "this one is chosen" is the same fact whichever session it
-   is — the hue answers a different question. */
-.wc.is-picked {
-  box-shadow: 0 0 0 2px var(--red),
-              var(--wc-bev),
-              0 1px 2px rgba(0, 0, 0, .55),
-              0 16px 38px -10px rgba(0, 0, 0, .72);
-}
-
 /* ── THE WAY BACK IS AN ARROW ──
    It was the words "All kinds", underlined, sitting under the deck
    beside "Take it off" — so the two ways out read as a paragraph of
@@ -4265,289 +4064,6 @@ body {
   padding: 2px 0 3px;
 }
 .wc-min { min-width: 0; flex: 1 1 auto; padding: 0 10px; font-variant-numeric: tabular-nums; }
-
-.wc-top {
-  display: flex;
-  align-items: flex-start;
-  gap: 24px;
-}
-.wc-top div { display: flex; flex-direction: column; gap: 5px; }
-/* ── THE LABEL MOVED WITH THE GROUND ──
-   9.5px uppercase is the smallest type on the card and the weakest
-   white on it, so it is the first thing a lighter ground breaks — and
-   it was ALREADY at 4.58:1 before anything moved, which is this file's
-   oldest lesson about a margin that is really a rounding error. .78
-   reads 5.54:1 on the new ground, better than it ever was on the old
-   one, and tests/schedule.js holds it now rather than leaving the
-   weakest text on the card as the one thing nothing measured. */
-.wc-top div span {
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: .13em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, .78);
-}
-.wc-top div b {
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: -.01em;
-  color: var(--wc-lit);
-}
-
-/* Sized in the sheet, never on the markup: an inline <svg> with no
-   width or height falls back to 300x150 and fills its parent, and it
-   is silent — the glyph is still correct, just enormous. */
-.wc-g {
-  width: 40px; height: 40px;
-  margin-left: auto;
-  flex: none;
-  fill: none;
-  stroke: var(--wc-lit);
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* auto on the top margin, so the name and its line sit on the floor of
-   the card whatever the description wraps to. */
-.wc-n {
-  margin: auto 0 0;
-  font-size: 34px;
-  font-weight: 800;
-  letter-spacing: -.032em;
-  line-height: 1;
-  color: #ffffff;
-}
-.wc-d {
-  margin-top: 9px;
-  font-size: 13.5px;
-  line-height: 1.35;
-  color: rgba(255, 255, 255, .86);
-}
-
-/* ── THE DECK IS DEALT ONCE, ON AN ANGLE ──
-   All three come in from below and to the right, turned, and settle
-   flat. The first cut slid them straight up with no rotation and it
-   read as a panel appearing rather than as cards being put down —
-   which is the whole difference, because a straight slide is what
-   every sheet in this app already does and this one is a HAND.
-
-   ONCE, AND ONLY ON THE WAY IN. draw() rebuilds the deck on every
-   press, and the cards are new elements each time — so with the
-   animation on `.wc` it ran again for every chip, every effort and
-   every step into a group, and comparing four splits meant watching
-   the same hand dealt four times. What is worth having is the FOLD:
-   two cards showing a corner each, which is what says there are more
-   of these. That is a resting state, not a performance. The deck
-   carries `is-dealing` for its first draw and nothing after it.
-
-   IT ANIMATES `translate`, `rotate` AND `scale`, NEVER `transform`.
-   The two behind ARE a transform: b1 sits at translate(13px, 9px)
-   rotate(3deg) scale(.965), and that is what makes it the card behind.
-   Keyframes naming `transform` replace that outright, so the pair land
-   square on top of the front card and the deck arrives as one card
-   with a heavier shadow — which is not a shape anybody would report.
-   The individual properties compose with it instead, so one set of
-   keyframes is correct for all three positions and none of them has to
-   know its own resting place. tests/schedule.js reads that matrix back
-   off .wc.b1 WHILE the deal is running. */
-@keyframes wcDeal {
-  from { translate: 30px 46px; rotate: -9deg; scale: .92; opacity: 0; }
-  to   { translate: 0 0; rotate: 0deg; scale: 1; opacity: 1; }
-}
-/* Back to front, 70ms apart. Dealt front-first the card you are being
-   asked about arrives first and is then covered twice, which reads as
-   the deck landing ON your answer. */
-.wc-deck.is-dealing .wc { animation: wcDeal .46s cubic-bezier(.22, 1, .36, 1) both; }
-/* Back to front, 70ms apart. Dealt front-first the card you are being
-   asked about arrives first and is then covered twice, which reads as
-   the deck landing ON your answer. */
-.wc-deck.is-dealing .wc.b2 { animation-delay: 0s; }
-.wc-deck.is-dealing .wc.b1 { animation-delay: .07s; }
-.wc-deck.is-dealing .wc.is-front { animation-delay: .14s; }
-
-/* ── THE SECOND LEVEL LIFTS, IT DOES NOT DEAL ──
-   Pressing a kind card used to replace the front card outright — a
-   hard cut, which after a dealt first level reads as dead rather than
-   as restraint. Four entrances were rendered over the real sheet
-   first, each at three moments of its own curve: a lateral page, a
-   short fold, the whole hand tightening, and this. What settled it is
-   that the other three all move something the deal already moved. The
-   two behind hold perfectly still here, which is the property that was
-   actually asked for. They carry the same card's colour now rather
-   than being blank, and lifting the whole hand was built and looked at
-   for it — at the top of the curve the front card is still at zero
-   opacity, so a hand that lifts together spends the first frames as a
-   wordless coloured stack. The front card arriving over a hand that
-   was already there is the gesture; the pass between two cards in a
-   group is where the whole hand moves.
-
-   26px and 260ms against the deal's 46px and 460ms — a bit over half
-   the distance and a bit over half the time, so it still reads as the
-   same object settling rather than as a second arrival.
-
-   IT WENT IN AT 14px AND 200ms AND NOBODY COULD SEE IT. Two things
-   were wrong and only one of them was the size. The curve was the
-   deal's own cubic-bezier(.22, 1, .36, 1), which is a hard ease-out:
-   it is four fifths done in the first third, so a 200ms animation is
-   really a 70ms one with a long tail nothing moves during. The curve
-   here is gentler, which spends the time on travel you can actually
-   watch. A duration is not a length of motion — the curve decides how
-   much of it you see.
-
-   `translate` and `opacity`, never `transform`: the two behind are
-   positioned by a resting `transform`, and a keyframe naming transform
-   REPLACES it — which is how the fan was flattened once already. This
-   rule only reaches .is-front, which has no resting transform, and it
-   uses the independent property anyway so the next hand it is pointed
-   at survives. */
-@keyframes wcTurn {
-  from { translate: 0 26px; opacity: 0; }
-  to   { translate: 0 0;    opacity: 1; }
-}
-.wc-deck.is-turning .wc.is-front {
-  animation: wcTurn .26s cubic-bezier(.2, .7, .3, 1) both;
-}
-/* ── THE TWO PASSES, ONE PER LEVEL ──
-   Both were chosen by playing seven candidates against each other in a
-   lab that ran the real card — same 284px, same rim, same fan, same
-   hues — with a speed control and a scrubber. That is where the
-   numbers below come from: they are the lab's own figures at 0.8x,
-   not durations anybody guessed at.
-
-   THE SPEED IS A SETTING SEPARATE FROM THE SHAPE, and it took three
-   passes to land. Both gestures were picked at HALF speed, which is
-   what you choose when you are watching a pass once to see how it
-   works — and 1.64s and 1.94s are lengths you feel on the fifth chip
-   press rather than the first. 0.8x is the same two shapes at 1.03s
-   and 1.21s: still slow enough to watch a hand come apart, short
-   enough to sit under a control you press repeatedly. A motion is
-   chosen at the speed you STUDY it and set at the speed you LIVE
-   with, and nothing about the keyframes moved between the two —
-   which is why changing it costs one number per rule and no
-   rendering.
-
-   What was rejected is worth as much as what was picked. ONE BLOCK —
-   the whole hand travelling as a single rigid object — was what
-   shipped, and it is the thing being replaced: nothing separates, so
-   the two behind read as a shadow on the front card rather than as
-   cards. UNFOLD opened the fan before it went, STRETCH gave each card
-   its own speed, RIFFLE splayed them on widening arcs, and PUSH-OFF
-   made the arriving hand shove the outgoing one out. All five say the
-   same thing at different volumes; these two say it at the right one
-   for the level they are on.
-
-   AND THE TWO LEVELS ARE DIFFERENT ON PURPOSE, which is the rule the
-   deck has always had. Between the four kinds you are choosing what
-   sort of session this was, so the hand comes apart and reassembles —
-   a CASCADE. Inside a group you are stepping through one hand, so the
-   cards come off the top one at a time — a PEEL. Dealing inside a
-   group would say you had started again; peeling between kinds would
-   say the four were one stack.
-
-   FULL STRENGTH FROM END TO END. There is no opacity in any keyframe
-   here, deliberately, and adding one back is how this reverts to the
-   fade that was reported as a card vanishing rather than going
-   anywhere. The sheet is a scroll container, so its own left edge
-   cuts a leaving card and nothing has to fade for it to be gone.
-
-   THE TRAVEL IS A PERCENTAGE, NOT A NUMBER OF PIXELS. Each card
-   clears its own width whatever the screen is, which is the only
-   figure that means "off the side" on a phone this app does not know
-   the width of.
-
-   Written with the independent `translate` / `rotate` / `scale`
-   properties rather than `transform`: a keyframe naming transform
-   REPLACES a resting one, and that is how the fan was flattened once
-   already. b1 and b2 carry their fan in `transform`, so these
-   properties COMPOSE with it — one pair of keyframes moves the whole
-   hand and each card keeps its own three degrees.
-
-   `pointer-events: none` — a press landing on a card that is leaving
-   is a press on the workout you just moved away from. */
-.wc.is-out { pointer-events: none; }
-
-/* ── CASCADE, BETWEEN THE FOUR KINDS ──
-   The front card goes first and the two behind follow it out, 113ms
-   apart; arriving, the order reverses so the hand assembles back to
-   front and the card you asked for lands last. That stagger is the
-   whole of it — it is what makes three cards separate on the way out
-   instead of one block sliding. */
-@keyframes wcCascOut {
-  from { translate: 0 0;        rotate: 0deg;  scale: 1; }
-  to   { translate: -118% 16px; rotate: -7deg; scale: .95; }
-}
-@keyframes wcCascIn {
-  from { translate: 112% 14px; rotate: 6deg; scale: .95; }
-  to   { translate: 0 0;       rotate: 0deg; scale: 1; }
-}
-.wc-deck.is-cascading .wc.is-out {
-  animation: wcCascOut .7s cubic-bezier(.5, 0, .78, .4) both;
-}
-.wc-deck.is-cascading .wc.is-out.b1 { animation-delay: .11s; }
-.wc-deck.is-cascading .wc.is-out.b2 { animation-delay: .23s; }
-.wc-deck.is-cascading .wc:not(.is-out) {
-  animation: wcCascIn .7s cubic-bezier(.2, .78, .28, 1) both;
-  animation-delay: .33s;
-}
-.wc-deck.is-cascading .wc.b1:not(.is-out) { animation-delay: .21s; }
-.wc-deck.is-cascading .wc.b2:not(.is-out) { animation-delay: .1s; }
-
-/* ── PEEL, INSIDE A GROUP ──
-   One card at a time off the top: it lifts up and back before it goes,
-   then arcs away to the left, and the next one is already there
-   underneath. 188ms apart, which is far enough that you watch three
-   separate cards leave rather than a hand.
-
-   THE PIVOT IS THE LOWER-LEFT CORNER, AND ONLY THE FRONT CARD GETS
-   IT. transform-origin applies to a resting `transform` as well as to
-   an animation, and b1 and b2 carry their whole fan in one — so
-   putting the pivot on them swings them off their own position the
-   instant the class lands, before a single frame of the pass has run.
-   Measured on the real deck: b1 drops 14.1px and b2 drops 27.8px
-   between the frame the deck is at rest and the frame the peel
-   starts, which is a jump at exactly the moment the eye is on them.
-
-   The front card has no resting transform, so the pivot costs it
-   nothing — and it is the card you are watching leave, the one on
-   top, so the arc lands where it reads. The two behind peel about
-   their own centres. Rendered side by side at rest and at three
-   moments of the pass: with the pivot on all three there is a visible
-   drop at t=0 and the arcs are otherwise indistinguishable. */
-@keyframes wcPeelOut {
-  0%   { translate: 0 0;         rotate: 0deg;   scale: 1; }
-  28%  { translate: -16px -22px; rotate: -6deg;  scale: 1.02; }
-  100% { translate: -126% 40px;  rotate: -22deg; scale: .96; }
-}
-@keyframes wcPeelIn {
-  from { translate: 114% 26px; rotate: 14deg; scale: .96; }
-  to   { translate: 0 0;       rotate: 0deg;  scale: 1; }
-}
-.wc-deck.is-peeling .wc.is-out {
-  animation: wcPeelOut .78s cubic-bezier(.36, .02, .5, 1) both;
-}
-.wc-deck.is-peeling .wc.is-out:not(.b1):not(.b2) { transform-origin: 0% 100%; }
-.wc-deck.is-peeling .wc.is-out.b1 { animation-delay: .19s; }
-.wc-deck.is-peeling .wc.is-out.b2 { animation-delay: .38s; }
-.wc-deck.is-peeling .wc:not(.is-out) {
-  animation: wcPeelIn .75s cubic-bezier(.2, .78, .28, 1) both;
-  animation-delay: .46s;
-}
-.wc-deck.is-peeling .wc.b1:not(.is-out) { animation-delay: .3s; }
-.wc-deck.is-peeling .wc.b2:not(.is-out) { animation-delay: .14s; }
-
-/* ── AND IT IS NOT GATED, BECAUSE THE DEAL IS NOT ──
-   This went in behind a prefers-reduced-motion rule while the deal —
-   46px of travel with a rotate and a scale on three cards — has never
-   had one. That is exactly backwards: it gated the gentler of the two
-   and left the stronger one running, so a phone with Reduce Motion on
-   saw the deal every time and this never, which is indistinguishable
-   from it not shipping. The pair are one gesture at two sizes and they
-   answer that query together or not at all; today neither does, which
-   is the decision the deck made on the day it was asked to fly in. */
-
-.wc:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
-
 .wc-clear {
   display: block;
   margin: 15px auto 0;
