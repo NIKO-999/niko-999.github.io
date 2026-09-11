@@ -8387,3 +8387,69 @@ the discipline is a scripted break, a scripted inverse and a hash,
 rather than a copy of the file. The restore was redone against a
 unique anchor and the file hashed back to the known-good sha1 before
 anything else ran.
+
+### The strip ran into the line, and only typing found it
+
+Reported with a screenshot of the chips sitting on top of the line
+being written: *when continuing, it runs into those options. I need you
+to run a whole typing process to make sure that it actually works.*
+
+**THE CHECK THAT SHIPPED PUT A CARET IN A ROW THAT WAS ALREADY LAID
+OUT**, which is the one path that was never broken. A probe that
+actually TYPED — thirteen steps, a caret into a wrapped line, a Return,
+four characters, a line grown to three, a Return from that, a break
+off, a chip press, a Backspace merge and a heading — found it on the
+second step and measured it: **21px of overlap the frame the Return
+lands, 43 by the third wrapped line.**
+
+**TWO FAULTS, and the strip's own anchor is why there are two.** It
+hangs off the row's BOTTOM, which is a moving number:
+
+- **`scPaintNote` grows every textarea LAST**, after the focus that
+  places the strip — so a redraw measured a note whose wrapped rows
+  were still one line tall and everything below them sat 45px high.
+- **A line that wraps moves its own bottom**, and nothing re-placed the
+  strip. That hook had been taken out one round earlier on the
+  reasoning that the row's TOP does not move — true, and the anchor is
+  not the top. `scNoteGrow` has already written a height and read
+  `scrollHeight` back on that keystroke, so the layout is flushed
+  either way and two rects on top of it cost nothing.
+
+**AND THE FIRST CHECK WAS BLIND TO THE FIRST FAULT: the suite ran GREEN
+with that fix deleted.** Every line on the fixture fits on one, so a
+Return taken from one of them puts a one-line row under a one-line row
+and growing it changes nothing. **The order is the check**: type until
+the field wraps to three lines, and only then press Return. Proved by
+running with each fix removed on its own — `onReturn: -45` for the
+grow, `onWrap: -43` for the input.
+
+**ASSERTED AS THE GAP, never as overlap alone.** A strip that has come
+adrift and sits ninety pixels clear of the line overlaps nothing at
+all, which is how three steps of the first probe scored a pass while
+plainly wrong.
+
+**A REFERENCE HELD ACROSS A REDRAW IS A DETACHED NODE.** The check
+captured `.nt-tools` once; a Return empties the pane and builds a new
+strip, so every later read was of an element nothing draws. It reported
+`gap: -554` on a build that was working — the same shape as a probe
+whose selector matched the wrong thing, and the standalone probe was
+right only because it re-queried inside each evaluate.
+
+**And the restore has to clear the SAVE DEBOUNCE.** Every structural
+change flushes on its own and a keystroke does not, so a 300ms wait
+read the record back before the restore had landed — reporting the note
+dirty on a build that had put it back, and leaving it dirty for the
+section underneath. 700ms, past the 500 the debounce takes.
+
+### A fragment of a mark reads as a fault; a fragment of a paragraph does not
+
+The strip covers whatever is under it and no one height covers every
+row: a plain line is 37px, a heading 59 and a wrapped one 105.
+Measured, a heading left its bottom **14px** showing — the tail of the
+name, its rule and the grip — which reads as a stray hairline rather
+than as a heading behind something.
+
+So a SHORT row is covered whole and a long one is not. Past a heading's
+height what is underneath is words, and words half covered still read
+as words. The strip takes its height from the row beneath it when that
+row is no taller than a heading, and otherwise stays as it is.

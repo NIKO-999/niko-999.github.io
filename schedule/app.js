@@ -12178,6 +12178,24 @@
          BOTTOM, so the strip's own height never enters it and there
          is nothing to measure. */
       tools.style.top = (rr.bottom - pr.top + pane.scrollTop + 2) + 'px';
+      /* ── A FRAGMENT OF A MARK READS AS A FAULT; A FRAGMENT OF A
+         PARAGRAPH READS AS A LINE BEHIND SOMETHING ──
+         The strip covers whatever is under it, and no one height
+         covers every row: a plain line is 37px, a heading 59 and a
+         wrapped one 105. Measured, a heading left its bottom 14px
+         showing — the tail of the name, its rule and the grip —
+         which reads as a stray hairline rather than as a heading
+         behind something. So a SHORT row is covered whole and a long
+         one is not: past a heading's height what is underneath is
+         words, and words half covered still read as words. */
+      tools.style.minHeight = '';
+      var nx = liveRow.nextElementSibling;
+      if (nx) {
+        var nr = nx.getBoundingClientRect(), tb = tools.getBoundingClientRect();
+        if (nr.height <= 64 && nr.bottom > tb.bottom) {
+          tools.style.minHeight = Math.ceil(tb.height + (nr.bottom - tb.bottom)) + 'px';
+        }
+      }
     }
     function show(idx, row) {
       live = idx;
@@ -12271,6 +12289,15 @@
           L.x = f.value.slice(0, 300);
           sp2.textContent = L.x;
           scNoteGrow(f);
+          /* AND THE STRIP FOLLOWS THE ROW DOWN. It hangs off the
+             row's BOTTOM, and a textarea that wraps onto a second
+             line moves its own bottom — measured by typing: the
+             strip stayed put and the line grew under it, 43px into
+             the chips by the third wrapped line. `scNoteGrow` has
+             already written a height and read `scrollHeight` back,
+             so the layout is flushed either way and two rects on
+             top of that cost nothing extra. */
+          if (live === idx) place();
           n.u = Date.now();
           scNoteSaveSoon();
         });
@@ -12431,7 +12458,16 @@
         break;
       }
     }
+    /* EVERY TEXTAREA IS GROWN LAST, AND THE FOCUS ABOVE FIRES
+       FIRST — so the strip was placed against a row still one line
+       tall and the grown row swallowed it. Measured by pressing
+       Return on a wrapped line: 21px of overlap on the frame it
+       lands, before a character is typed. Placing again after the
+       heights are written is the whole fix, and it is why `place`
+       has to be reachable from here rather than living inside the
+       focus handler. */
     body.querySelectorAll('textarea').forEach(function (t) { scNoteGrow(t); });
+    if (typeof place === 'function') place();
   }
 
   /* ═══════════════════════════

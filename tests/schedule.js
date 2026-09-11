@@ -13475,6 +13475,99 @@ const SAID = [
     ok('...inside the pane, and gone when the caret is',
       floats.inPane && floats.goneOnBlur, floats);
 
+    /* ── AND IT HOLDS THROUGH A TYPING SESSION ──
+       The check above puts a caret in a row that is already laid out,
+       which is the one path that was never broken. Reported from the
+       phone as *when continuing, it runs into those options* — press
+       Return and the strip sat 21px INTO the new line, and 43 by the
+       time it wrapped.
+
+       Two faults and each needs its own step here. `scPaintNote`
+       grows every textarea LAST, after the focus that places the
+       strip, so a redraw measured a row still one line tall. And the
+       strip hangs off the row's BOTTOM, which a wrapping line moves —
+       so it has to be placed again on input, where `scNoteGrow` has
+       already flushed the layout anyway.
+
+       ASSERTED AS THE GAP, never as overlap alone: a strip that has
+       come adrift and sits ninety pixels clear of the line overlaps
+       nothing at all, which is how three steps of the first probe
+       scored a pass while plainly wrong. */
+    const typing = await npage.evaluate(async () => {
+      const wait = (ms) => new Promise((z) => setTimeout(z, ms));
+      /* THE STRIP IS RE-QUERIED EVERY TIME, and holding a reference
+         across a Return is what this check got wrong first: a redraw
+         empties the pane and builds a NEW strip, so the captured one
+         is a detached node reporting a box nothing is drawn in. It
+         read `gap: -554` on a build that was working — the same shape
+         as a probe whose selector matched the wrong thing. */
+      const gap = () => {
+        const t = document.querySelector('.nt-tools');
+        const row = document.activeElement.closest('.nt-row');
+        if (!t || t.hidden || !row) throw new Error('no strip on the focused row');
+        const b = t.getBoundingClientRect(), r = row.getBoundingClientRect();
+        return { gap: Math.round(b.top - r.bottom), rowH: Math.round(r.height) };
+      };
+      const lines = () => JSON.parse(localStorage.getItem('sched.note.v1')).list
+        .find((n) => n.id === 'nA').l.map((L) => L.x);
+      const start = lines();
+      const rows = [...document.querySelectorAll('.nt-row:not(.is-head)')];
+      const f = rows[rows.length - 1].querySelector('.nt-in');
+      const was = f.value;
+      f.focus();
+      await wait(220);
+      const onFocus = gap();
+      /* THE WRAP COMES FIRST, AND THAT ORDER IS THE WHOLE CHECK. The
+         fixture's lines all fit on one, so a Return taken from one of
+         them puts a one-line row under a one-line row and growing it
+         changes nothing — the suite ran GREEN with the grow fix
+         deleted. The fault needs a row whose grown height differs
+         from its laid-out one, so this types a line that wraps to
+         three and only then presses Return. */
+      f.value = was + ' and then a sentence long enough to wrap this '
+        + 'field onto a second line and onto a third one as well';
+      f.dispatchEvent(new Event('input', { bubbles: true }));
+      await wait(300);
+      const onWrap = gap();
+      /* NOW the Return, with a wrapped row above the one it makes:
+         the redraw grows every field AFTER the focus that places the
+         strip, so the whole note below the wrapped row sits higher at
+         the moment it is measured than a frame later. */
+      const g0 = document.activeElement;
+      g0.setSelectionRange(g0.value.length, g0.value.length);
+      g0.dispatchEvent(new KeyboardEvent('keydown',
+        { key: 'Enter', bubbles: true, cancelable: true }));
+      await wait(320);
+      const onReturn = gap();
+      /* Put it back: the added line is empty, so one Backspace at its
+         head takes it away, and the typed tail comes off the line it
+         was added to. */
+      const g = document.activeElement;
+      g.setSelectionRange(0, 0);
+      g.dispatchEvent(new KeyboardEvent('keydown',
+        { key: 'Backspace', bubbles: true, cancelable: true }));
+      await wait(300);
+      const h = document.activeElement;
+      h.value = was;
+      h.dispatchEvent(new Event('input', { bubbles: true }));
+      /* PAST THE SAVE DEBOUNCE, which is 500ms — every structural
+         change here flushes on its own and a keystroke does not, so a
+         300ms wait read the record back before the restore had landed
+         and reported the note dirty on a build that had put it back
+         correctly. It also left it dirty for the section under this
+         one, which is the same lesson from the other side. */
+      await wait(700);
+      return { onFocus, onWrap, onReturn, start, back: lines() };
+    });
+    const glued = (g) => g.gap >= 0 && g.gap <= 6;
+    ok('the strip stays on the line through a whole typing session',
+      glued(typing.onFocus) && glued(typing.onReturn) && glued(typing.onWrap),
+      typing);
+    ok('...and the wrapped row really was taller, or that proved nothing',
+      typing.onWrap.rowH > typing.onReturn.rowH, typing);
+    ok('...and the note is left as it was found',
+      typing.back.join('\n') === typing.start.join('\n'), typing);
+
     /* ── A MARK CONTINUES ONTO THE NEXT LINE ──
        Asked for as "if I press bracket and then press the spacebar it
        should automatically continue there unless I break off of it",
