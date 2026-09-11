@@ -8531,12 +8531,38 @@ what THIS one did. A ring that moved when you pressed Hard would be
 the tile answering a question about the session rather than about
 itself.
 
-**THE OUTER IS THE HUE AND THE INNER IS THE INK.** A second hue would
-be the tile answering *which session* twice; the SAME hue on both
-makes the pair read as one thick ring with a gap in it, and the whole
-point is that they are two marks. `--dim` rather than the full ink,
-because the inner is the quieter fact and it sits inside the louder
-one.
+**BOTH RINGS ARE ONE HUE, AND THE INNER IS A LIGHTER OF IT.** That
+reverses what stood here for a day: the inner was `--dim`, on the
+argument that the same hue on both makes the pair read as one thick
+ring with a gap in it. **The argument was about the same hue at the
+same STRENGTH** — two marks told apart by nothing. A lighter tint is
+told apart by VALUE, which is the register the grey was borrowing
+anyway, and it costs nothing to say, because the pair is still one
+colour: the tile answers *which session* once.
+
+**62% OF THE HUE TOWARD `--ink`, SOLVED RATHER THAN PICKED.** Two
+constraints pull opposite ways — paler separates the rings and costs
+the hue, stronger keeps the hue and closes them up — so the figure is
+the most hue that still clears a real separation. Measured in Lab
+across the eight hues by two faces: at 70% the worst pair is **dE
+11.9**, under the dE >= 12 floor this app already holds two colours on
+one screen to; at 62% it is **15.6 dark and 22.8 light** with 57% of
+the hue's own chroma left, so it still reads as that colour. Against
+the CARD, because a ring is a graphic: **6.81:1 dark, 5.90:1 light**.
+
+**AND IT IS `--ink` RATHER THAN WHITE, so "lighter" is per face.** On
+the dark page `--ink` is white and the tint is paler; on the light one
+it is near-black and the same rule DEEPENS it — which is the only
+version of "lighter" that survives a white card, and the workout hues'
+own light-face twins made that argument first.
+
+**THREE HALVES, AND EACH IS THE OTHERS' BITE PROOF.** Reverting to
+`--dim` reads **chroma 3.3** and fails the hue half while passing the
+other two; drawing the inner in `currentColor` reads **dE 0.0** and
+fails the two-marks half while passing the other two. Neither is
+redundant and that is measured rather than argued. The chroma half is
+a CHROMA rather than a hue angle on purpose: an angle off a near-grey
+is noise, and `Math.atan2` returns a plausible number for it.
 
 **1.7 WIDE, AND THE ARITHMETIC IS THE REASON.** The radii are 3.2
 units apart, so at 1.7 there are 1.5 units of ground between the two

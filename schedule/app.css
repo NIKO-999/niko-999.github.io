@@ -3846,12 +3846,31 @@ body {
    note applies exactly: an unlit track you cannot see is a scale
    with no bottom to it.
 
-   THE OUTER IS THE HUE AND THE INNER IS THE INK. A second hue would
-   be the tile answering "which session" twice, and the SAME hue on
-   both makes the pair read as one thick ring with a gap in it — the
-   whole point is that they are two marks. `--dim` rather than the
-   full ink, because the inner is the quieter fact and it sits inside
-   the louder one.
+   BOTH RINGS ARE THE SAME HUE, AND THE INNER IS A LIGHTER OF IT.
+   That reverses what stood here: the inner was `--dim`, on the
+   argument that the same hue on both makes the pair read as one thick
+   ring with a gap in it. The argument was about the same hue at the
+   same STRENGTH — two marks told apart by nothing. A lighter tint is
+   told apart by VALUE, which is the register a grey was borrowing
+   anyway, and it costs nothing to say because the pair is still one
+   colour: the tile says which session once.
+
+   62% OF THE HUE TOWARD `--ink`, WHICH IS SOLVED RATHER THAN PICKED.
+   Two constraints pull opposite ways — paler separates the rings and
+   costs the hue, stronger keeps the hue and closes them up — so the
+   figure is the most hue that still clears a real separation. In Lab
+   across the eight hues by two faces: at 70% the worst pair is
+   **dE 11.9**, under the dE >= 12 floor this app already holds two
+   colours on one screen to; at 62% it is **15.6 dark and 22.8 light**
+   with 57% of the hue's own chroma left, so it still reads as that
+   colour. Measured against the CARD as well, since the inner is a
+   graphic: 6.81:1 dark and 5.90:1 light.
+
+   AND IT IS `--ink` RATHER THAN WHITE, so "lighter" is per face. On
+   the dark page `--ink` is white and the tint is paler; on the light
+   one it is near-black and the same rule DEEPENS it — which is the
+   only version of "lighter" that survives a white card, and the
+   workout hues' own light-face twins made this argument first.
 
    1.7 WIDE, AND THE ARITHMETIC IS THE REASON. The radii are 3.2
    units apart, so at 1.7 there are 1.5 units of ground between the
@@ -3868,7 +3887,7 @@ body {
   stroke-linecap: round;
 }
 .wb-arc .wb-lit { stroke: currentColor; }
-.wb-arc .wb-hard { stroke: var(--dim); }
+.wb-arc .wb-hard { stroke: color-mix(in srgb, var(--wb-hue) 62%, var(--ink)); }
 .wb-arc .wb-off { stroke: var(--tick-off); }
 /* ── AND THE ANSWER STAYS ON SCREEN ──
    The deck was 312px with the foot directly under it, so the control

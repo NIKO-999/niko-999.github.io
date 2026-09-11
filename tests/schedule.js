@@ -7255,6 +7255,63 @@ const SAID = [
       each.every(([, m]) => m.off === 2)
       && each.filter(([, m]) => m.min).every(([, m]) => m.on === 1 && m.hard === 1)
       && marks['rec.rest'].on === 0 && marks['rec.rest'].hard === 0, marks);
+    /* ── BOTH RINGS ARE ONE HUE, AND THE INNER IS A LIGHTER OF IT ──
+       Three claims, and each is the others' bite proof:
+
+       SAME HUE, so a build that reverts the inner to `--dim` fails. A
+       grey has no hue at all, so this is measured as the inner's own
+       CHROMA in Lab rather than as an angle — an angle off a near-grey
+       is noise, and `Math.atan2` on it returns a plausible number.
+
+       DISTINCT, so a build that draws the inner in the outer's exact
+       colour fails. dE >= 12, which is the floor this app already
+       holds two colours on one screen to, and the reason 62% of the
+       hue is the figure: at 70% the worst pair measured 11.9.
+
+       AND 3:1 ON THE CARD, because a ring is a graphic. Read off the
+       computed stroke through `rgbOf`, since `color-mix` serialises as
+       `color(srgb …)` and a digit match on that reads a pale tint as
+       near-black — this repo has been caught by exactly that twice. */
+    const rings = await page.evaluate(() => {
+      const out = [];
+      document.querySelectorAll('.wb-t').forEach((t) => {
+        const lit = t.querySelector('.wb-arc .wb-lit');
+        const hard = t.querySelector('.wb-arc .wb-hard');
+        if (!lit || !hard) return;
+        out.push({ k: t.dataset.workout,
+          outer: getComputedStyle(lit).stroke,
+          inner: getComputedStyle(hard).stroke,
+          card: getComputedStyle(t).backgroundColor,
+          page: getComputedStyle(document.body).backgroundColor });
+      });
+      return out;
+    });
+    /* The card is a white wash over the page, so its alpha has to be
+       composited before anything is measured against it — solving the
+       crown against `--g0` and reading 2.82 on the row it is drawn on
+       is the mistake this avoids. */
+    const onCard = (card, page) => {
+      const p = rgbOf(page), m = (card || '').match(/[\d.]+/g);
+      if (!m || m.length < 4) return rgbOf(card) || p;
+      const a = +m[3];
+      return [0, 1, 2].map((i) => Math.round(+m[i] * a + p[i] * (1 - a)));
+    };
+    const hueRows = rings.map((r) => {
+      const o = rgbOf(r.outer), i = rgbOf(r.inner), c = onCard(r.card, r.page);
+      const lab = toLab(i);
+      return { k: r.k, chroma: +Math.hypot(lab[1], lab[2]).toFixed(1),
+        apart: +deltaE(i, o).toFixed(1), onCard: +ratio(i, c).toFixed(2) };
+    });
+    ok(`the inner ring is the outer's own hue, not a grey `
+      + `(chroma ${Math.min(...hueRows.map((r) => r.chroma)).toFixed(1)} at worst)`,
+      hueRows.length === 18 && hueRows.every((r) => r.chroma >= 14), hueRows);
+    ok(`...and a lighter of it, far enough off to read as two marks `
+      + `(dE ${Math.min(...hueRows.map((r) => r.apart)).toFixed(1)} at worst)`,
+      hueRows.every((r) => r.apart >= 12), hueRows);
+    ok(`...and it clears 3:1 on the card it is drawn on `
+      + `(${Math.min(...hueRows.map((r) => r.onCard)).toFixed(2)}:1 at worst)`,
+      hueRows.every((r) => r.onCard >= 3), hueRows);
+
     /* ── AND IT IS SPOKEN, BECAUSE NEITHER RING IS LABELLED ──
        That is the cost of two tracks on one mark and it was named
        before this was built. The half a screen reader does not have
