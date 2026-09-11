@@ -12130,32 +12130,64 @@
       }
     }
 
-    /* ── THE STRIP DOES NOT LIVE BETWEEN THE LINES ──
+    /* ── THE STRIP IS GLUED TO THE LINE, NOT TO THE KEYBOARD ──
        It was inserted after the focused row, and a strip in the FLOW
        pushes everything under it down: measured at 390x844, tapping a
        line shoved every line below it 43px — on a twenty-line note,
        twenty lines moving under your thumb on every tap. That is what
-       "janky" measured as.
+       "janky" measured as, and that half is not being reversed: this
+       is out of the flow, so it still moves nothing.
 
-       It floats above the keyboard now, which is where a format bar
-       goes in every editor that has one, so nothing in the text moves
-       when you put a caret in it. The rule it reverses — the controls
-       sit ON the line that has focus — was written for a screen where
-       every line was a field and there was no reading mode; the strip
-       is only ever up while you are typing, so it is still the one
-       strip that follows the caret rather than a toolbar you cannot
-       put away. */
+       What IS reversed is anchoring it to the KEYBOARD. That was the
+       visual viewport's own arithmetic, it was correct, and it was
+       unreachable twice running — the strip sat behind the accessory
+       bar on exactly the lines that needed it, and each fix was
+       another guess at a keyboard this machine cannot draw. Reported
+       as "I still can't see it. It needs to be just below or on the
+       side of the text I'm doing", which is the ask that removes the
+       problem rather than fighting it: iOS pans the visual viewport
+       to reveal the focused FIELD, so a strip glued to that field
+       arrives with it and there is no keyboard left to measure.
+
+       ABOVE the line rather than below it, which is the one deviation
+       from what was asked and is the whole of why it works. The
+       keyboard is at the FOOT of the screen, so the band under a
+       revealed field is the band that can be covered and the band
+       over it is the one that cannot.
+
+       CLAMPED rather than flipped. A flip below for a row with no
+       room above it was built first and is UNREACHABLE: the title,
+       the kind picker and the swatches put the first row 132px into
+       the pane's content against a 43px strip, so the branch could
+       not be exercised on any note. A `Math.max` is the same guard in
+       one number with nothing in it that cannot run. */
+    var liveRow = null;
+    function place() {
+      if (!liveRow || tools.hidden || !liveRow.parentNode) return;
+      var pr = pane.getBoundingClientRect(), rr = liveRow.getBoundingClientRect();
+      /* Read in the PANE's own content coordinates, so the strip
+         scrolls with the words it belongs to and nothing has to tell
+         it when the pane moves. The pane has no top padding and no
+         border, so its padding box and its border box share an origin
+         and one subtraction is the whole conversion. */
+      var top = rr.top - pr.top + pane.scrollTop;
+      tools.style.top = Math.max(0, top - tools.offsetHeight - 2) + 'px';
+    }
     function show(idx, row) {
       live = idx;
+      liveRow = row;
       fill();
       tools.hidden = false;
       if (tools.parentNode !== pane) pane.appendChild(tools);
+      place();
     }
     /* Inside the PANE rather than the poster, so a repaint sweeps it:
        appended anywhere the paint does not clear, a strip would
-       survive every redraw and stack up. Fixed positioning escapes
-       the pane's own scroller regardless — measured: no ancestor of
-       it creates a containing block. */
+       survive every redraw and stack up. It is also what makes the
+       pane the containing block, which is the whole mechanism — and
+       every other absolutely positioned thing in here already
+       resolves against a `.nt-row`, `.nt-sp`, `.nt-st` or `.nt-sh` of
+       its own, so giving the pane one moved nothing. */
 
     /* The spine is a real element rather than a rule on the body,
        because it has to stop at the last step rather than run down
@@ -12239,11 +12271,29 @@
         f.addEventListener('keydown', function (ev) {
           if (ev.key === 'Enter') {
             ev.preventDefault();
+            /* ── RETURN ON AN EMPTY MARKED LINE BREAKS OFF ──
+               The mark CONTINUES, so the strip is pressed once for a
+               RUN rather than once a line — which is what a list does
+               in every editor anybody has typed in, and it is why the
+               second Return has to be the way out. Asked for in those
+               words: "unless I break off of it". An empty line still
+               wearing a mark is somebody who has finished the run, so
+               the mark comes off and the line stays where it is —
+               there is nothing to add, because the line they would be
+               given is the one they are already on. */
+            if (L.m && !f.value) {
+              L.m = 0; n.u = Date.now(); scNoteFlush(); redraw(L.i, 0);
+              return;
+            }
             /* Split at the caret, which is what a return in the middle
                of a sentence means everywhere else somebody has typed. */
             var at = f.selectionStart, rest = f.value.slice(at);
             L.x = f.value.slice(0, at);
-            var add = { i: scNtId(), h: 0, c: '', x: rest, y: '', m: 0 };
+            /* And the new line wears what the old one wore. A bracket
+               is a RUN, so an inherited 2 extends it rather than
+               starting a second one beside it — which is the one mark
+               here that could not be continued any other way. */
+            var add = { i: scNtId(), h: 0, c: '', x: rest, y: '', m: L.m };
             if (n.l.length < NOTE_LINES) n.l.splice(idx + 1, 0, add);
             n.u = Date.now(); scNoteFlush(); redraw(add.i, 0);
             return;
@@ -12903,59 +12953,6 @@
   }
   document.addEventListener('pointerdown', scRipple, true);
 
-  /* ── WHERE THE KEYBOARD ENDS, IN ONE TOKEN ──
-     iOS does not shrink the LAYOUT viewport for the keyboard, so a
-     `position: fixed` bar at bottom:0 sits behind it. The visual
-     viewport is the one that moves, and it is the same object the
-     deck's own height arithmetic trusted for a URL bar collapsing —
-     `window.resize` does not fire reliably on iOS and this one does.
-
-     Written as a custom property rather than onto an element, so the
-     one thing that needs it reads it in CSS and nothing has to be
-     told when it changes. Floored at zero: the difference goes
-     slightly negative while the page is rubber-banding, and a bar
-     that dips below the screen for a frame reads as a flicker.
-
-     THIS HALF IS NOT MEASURABLE HERE — there is no software keyboard
-     in the test browser, so what the suite can hold is that the token
-     exists and reads 0 with no keyboard up. The keyboard case is
-     reasoned from the mechanism and has to be confirmed on a phone,
-     which is this app's oldest rule about the one browser it is
-     developed on. */
-  function scKb() {
-    var vv = window.visualViewport;
-    var px = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
-    document.documentElement.style.setProperty('--kb', Math.round(px) + 'px');
-  }
-  scKb();
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', scKb);
-    window.visualViewport.addEventListener('scroll', scKb);
-  }
-  window.addEventListener('orientationchange', scKb);
-  /* ── AND AGAIN ONCE IT HAS SETTLED, WHICH IS THE REPORTED BUG ──
-     iOS reveals a focused field by PANNING the visual viewport, and
-     it does that AFTER the focus lands — so a value read on the focus
-     is taken before the pan and is stale by however far it panned.
-     Reported from the phone as exactly that: on a line near the foot
-     the page went up 83px and the strip stayed where it was, which
-     put it behind the keyboard's own accessory bar.
-
-     A ladder of re-reads rather than one, because the pan and the
-     keyboard animation do not finish together and neither publishes
-     an event saying it is done. It is idempotent and it writes one
-     custom property, so a read that changes nothing costs nothing.
-
-     THIS IS REASONED, NOT MEASURED — there is no software keyboard in
-     the test browser. `schedule/probe.html` is what takes the numbers
-     off the device, and it gets deleted the moment it has answered. */
-  document.addEventListener('focusin', function (ev) {
-    var t = ev.target;
-    if (!t || !/^(INPUT|TEXTAREA)$/.test(t.tagName)) return;
-    scKb();
-    [60, 180, 360, 700].forEach(function (ms) { setTimeout(scKb, ms); });
-  });
-  window.addEventListener('scroll', scKb, true);
 
   /* ── LAST, AND AFTER THE FIRST PAINT ──
      The intro is a screen ABOUT the app, so the app has to be there

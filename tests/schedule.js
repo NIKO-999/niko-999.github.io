@@ -13408,7 +13408,8 @@ const SAID = [
     ok('a line above every heading can be typed but not marked',
       noSect.text === 'Before any heading' && noSect.there && noSect.off === true, noSect);
 
-    /* ── THE STRIP DOES NOT MOVE THE WORDS ──
+    /* ── THE STRIP DOES NOT MOVE THE WORDS, AND IT IS GLUED TO THE
+       LINE ──
        It was inserted after the focused row, and a strip in the FLOW
        pushes: measured on the real editor at 390x844, tapping a line
        shoved every line below it 43px, which on a twenty-line note is
@@ -13417,24 +13418,42 @@ const SAID = [
 
        ASSERTED AS THE SHIFT, never as where the strip sits: a build
        that merely moved it somewhere else in the flow passes any
-       check on its parent and fails the person typing. */
+       check on its parent and fails the person typing.
+
+       Then it was fixed to the KEYBOARD, off a token read from the
+       visual viewport — correct, and unreachable twice running,
+       because iOS pans to reveal the focused field AFTER the focus
+       lands and the strip sat behind the accessory bar on exactly
+       the lines that needed it. It is absolute against the pane now,
+       in the same coordinates as the words, which is the half this
+       browser CAN measure: it sits on the line being edited and it
+       moves to the next one. There is no software keyboard here, so
+       the phone half is reasoned from that and confirmed on the
+       device — this app's oldest rule about the one browser it is
+       developed on. */
     const floats = await npage.evaluate(async () => {
       const rows = [...document.querySelectorAll('.nt-row')];
       const tops = () => rows.map((r) => Math.round(r.getBoundingClientRect().top));
       const before = tops();
-      rows[2].querySelector('textarea, input').focus();
-      await new Promise((z) => setTimeout(z, 220));
       const t = document.querySelector('.nt-tools');
+      const at = async (i) => {
+        rows[i].querySelector('textarea, input').focus();
+        await new Promise((z) => setTimeout(z, 220));
+        const b = t.getBoundingClientRect(), r = rows[i].getBoundingClientRect();
+        return { gap: Math.round(r.top - b.bottom), top: Math.round(b.top) };
+      };
+      const two = await at(2), four = await at(4);
+      const p = document.querySelector('#scNotePane').getBoundingClientRect();
       const box = t.getBoundingClientRect();
       const out = {
         moved: tops().map((v, i) => v - before[i]).filter((d) => d !== 0),
         shown: !t.hidden,
         pos: getComputedStyle(t).position,
-        /* Above the painted bar with no keyboard up, which is the
-           only case this browser has — `--kb` is the keyboard's own
-           height and there is not one here. */
-        clearsBar: Math.round(box.bottom) < window.innerHeight - 40,
-        kb: getComputedStyle(document.documentElement).getPropertyValue('--kb').trim()
+        two, four,
+        /* Inside the pane it is anchored to, which is what stops a
+           row near the top putting it above the scroll origin where
+           nothing can reach it. */
+        inPane: box.top >= p.top - 1 && box.bottom <= p.bottom + 1
       };
       /* And it goes with the caret — the half that keeps this one
          strip you are handed rather than a toolbar you cannot put
@@ -13445,10 +13464,75 @@ const SAID = [
       return out;
     });
     ok('putting a caret in a line moves not one pixel of the note',
-      floats.moved.length === 0 && floats.shown && floats.pos === 'fixed',
+      floats.moved.length === 0 && floats.shown && floats.pos === 'absolute',
       floats);
-    ok('...the strip floats clear of the bar, and goes when the caret does',
-      floats.clearsBar && floats.goneOnBlur && floats.kb === '0px', floats);
+    ok('...the strip sits on the line being edited and follows it to the next',
+      floats.two.gap >= 0 && floats.two.gap <= 6
+      && floats.four.gap >= 0 && floats.four.gap <= 6
+      && floats.four.top > floats.two.top, floats);
+    ok('...inside the pane, and gone when the caret is',
+      floats.inPane && floats.goneOnBlur, floats);
+
+    /* ── A MARK CONTINUES ONTO THE NEXT LINE ──
+       Asked for as "if I press bracket and then press the spacebar it
+       should automatically continue there unless I break off of it",
+       which is what a list does in every editor anybody has typed in
+       — and the strip is then pressed once for a RUN rather than once
+       a line.
+
+       BOTH DIRECTIONS, because each passes on the other's bug: a
+       build that inherits and never releases fills the rest of the
+       note with brackets, and one that releases without inheriting
+       has nothing to release. The break is a Return on a line that is
+       marked and EMPTY, so it needs no control of its own. */
+    const carried = await npage.evaluate(async () => {
+      const key = (f, k) => f.dispatchEvent(new KeyboardEvent('keydown',
+        { key: k, bubbles: true, cancelable: true }));
+      const lines = () => JSON.parse(localStorage.getItem('sched.note.v1')).list
+        .find((n) => n.id === 'nA').l.map((L) => L.x + '|' + (L.m || 0));
+      const start = lines();
+      const marked = [...document.querySelectorAll('.nt-row:not(.is-head)')]
+        .find((r) => r.classList.contains('is-mkd'));
+      if (!marked) throw new Error('no marked line on the fixture to continue');
+      const f = marked.querySelector('.nt-in');
+      f.focus();
+      f.setSelectionRange(f.value.length, f.value.length);
+      const was = f.value;
+      /* Read off the RECORD rather than typed in: the claim is that
+         whatever mark this line wears is the one the next one gets,
+         which holds for a swipe, a bracket and a dot alike. Naming a
+         value here would make it a check on the fixture. */
+      const m = start.find((l) => l.split('|')[0] === was).split('|')[1];
+      key(f, 'Enter');
+      await new Promise((z) => setTimeout(z, 300));
+      const on = lines();
+      /* The new line is empty and wearing the mark, so the second
+         Return is the way out — the mark comes off and no line is
+         added, because the one it would give you is the one you are
+         already on. */
+      key(document.activeElement, 'Enter');
+      await new Promise((z) => setTimeout(z, 300));
+      const off = lines();
+      /* And put it back: a check that changes the state of the app is
+         a check that breaks the next one, and four sections below
+         read this record by index. The empty line is removed the way
+         the app removes one. */
+      const g = document.activeElement;
+      g.setSelectionRange(0, 0);
+      key(g, 'Backspace');
+      await new Promise((z) => setTimeout(z, 300));
+      return { was, m, start, on, off, back: lines() };
+    });
+    const iAt = carried.start.findIndex((l) => l.split('|')[0] === carried.was);
+    ok('return carries the line\'s mark onto the next one',
+      carried.m !== '0' && carried.on.length === carried.start.length + 1
+      && carried.on[iAt] === carried.was + '|' + carried.m
+      && carried.on[iAt + 1] === '|' + carried.m, carried);
+    ok('...and a return on the empty one breaks off rather than making another',
+      carried.off.length === carried.on.length
+      && carried.off[iAt + 1] === '|0', carried);
+    ok('...and the note is left as it was found',
+      carried.back.join('\n') === carried.start.join('\n'), carried);
 
     /* On a HEADING the strip offers colours and no mark; on a LINE it
        offers a mark and no colours. A line's mark takes its section's

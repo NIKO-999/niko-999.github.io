@@ -8263,3 +8263,111 @@ contenteditable surface, not a tweak: every reader of this record
 walks a flat list of lines with `h`, `c`, `x`, `y`, `m` on each, and a
 contenteditable would have to parse back into that on every keystroke.
 Not attempted here, and worth knowing before somebody starts.
+
+## The strip is glued to the line, and a mark carries
+
+Reported twice in one message: *I'm still unable to access the bottom
+row of the dots, brackets, headings. I can't see it. It needs to
+probably be just below or on the side of the text of the note that I'm
+doing.* And: *let's say I press bracket, and then I press the spacebar.
+It should automatically continue there unless I break off of it.*
+
+### Anchoring it to the keyboard was correct twice and reachable never
+
+The strip was `position: fixed` at the keyboard's own top, off a token
+the app wrote from the visual viewport — the layout viewport does not
+shrink on iOS, so `bottom: 0` alone is behind the keys. Then a ladder
+of re-reads, because iOS pans to reveal a focused field AFTER the
+focus lands. Each round was another guess at a keyboard **this machine
+cannot draw**, and each came back as *I still can't see it*.
+
+**THE ASK REMOVES THE PROBLEM RATHER THAN FIGHTING IT.** iOS pans the
+visual viewport to reveal the focused FIELD — so a strip in the same
+coordinates as that field arrives with it, and there is no keyboard
+left in the arithmetic. `position: absolute` against `#scNotePane`,
+`top` written from the row's own rect in the pane's content
+coordinates.
+
+`--kb`, `scKb`, the two `visualViewport` listeners, the
+`orientationchange` listener, the `focusin` settle ladder, the capture
+`scroll` listener and `schedule/probe.html` all went with it. **A
+mechanism that exists only to serve another mechanism goes when that
+one does**, or it reads as something somebody might edit.
+
+**ABOVE the line, which is the one deviation from what was asked and
+is the whole of why it works.** The keyboard is at the FOOT of the
+screen, so the band under a revealed field is the band that can be
+covered and the band over it is the one that cannot.
+
+**CLAMPED, NOT FLIPPED.** A flip below for a row with no room above
+was built first and was UNREACHABLE: measured, the title, the kind
+picker and the swatches put the first row **132px** into the pane's
+content against a **43px** strip, so the branch could not be exercised
+on any note. `Math.max(0, …)` is the same guard in one number with
+nothing in it that cannot run.
+
+**And nothing re-places it on a keystroke.** A row that wraps gets
+taller and its own TOP does not move, so the anchor is stable — an
+`input` hook there would have been a forced reflow per character for
+a number that cannot change.
+
+### Seamless is the absence of a frame
+
+It shipped for one render as a CARD — a lifted ground, a hairline, the
+card cast — and read as a panel bolted onto the note rather than as
+part of it. The chips are already pills with edges of their own, so a
+box round them is **the frame inside a frame this project has taken
+out of five other screens.**
+
+Flat page ground, no border, no radius, no shadow, aligned to the text
+column rather than inset from it: it blots the sentence it covers, and
+what is left reads as the note having opened a gap for the controls.
+
+**AND IT COVERS WHAT IT COVERS WHOLE.** At 37px over a 43px row the
+bottom of the hidden line came through underneath — on a bracketed one
+that is six pixels of stem hanging below the chips, which reads as a
+stray mark rather than as a line behind something. Sized to a plain
+row and laid right on top of one.
+
+### A mark continues, and the second Return is the way out
+
+`m` is inherited by the line a Return creates, so the strip is pressed
+once for a RUN rather than once a line — which is what a list does in
+every editor anybody has typed in. **A bracket is the one mark that
+could not be continued any other way**: it spans a contiguous run, so
+an inherited 2 extends it rather than starting a second one beside it.
+
+**THE BREAK OFF NEEDS NO CONTROL.** A Return on a line that is marked
+and EMPTY takes the mark off and adds nothing — there is nothing to
+add, because the line it would hand you is the one you are already on.
+Asked for in those words: *unless I break off of it*.
+
+**Both directions, because each passes on the other's bug.** A build
+that inherits and never releases fills the rest of the note with
+brackets; one that releases without inheriting has nothing to release.
+Proved by breaking each on its own: with the release removed and
+inheritance intact, the empty line splits into a second `|1`; with
+inheritance removed, the new line is born `|0`.
+
+**And the mark is read off the RECORD, never named in the check.** The
+claim is that whatever mark a line wears is the one the next one gets,
+which holds for a swipe, a bracket and a dot alike — a value written
+into the assertion would make it a check on the fixture. The fixture
+carries a swipe, so naming `2` there was a check that could only ever
+have passed by accident.
+
+**The check puts the note back**, with the extra line removed the way
+the app removes one and the whole record asserted equal to what it
+found — four sections below it read that record by index. A check that
+changes the state of the app is a check that breaks the next one, and
+this file has now recorded that four times.
+
+### An empty string is not an anchor
+
+The scripted break for the release was a replacement to `''`, so its
+INVERSE searched the file for `''` and matched 596,811 times. The
+assertion refused and nothing was written — which is the whole reason
+the discipline is a scripted break, a scripted inverse and a hash,
+rather than a copy of the file. The restore was redone against a
+unique anchor and the file hashed back to the known-good sha1 before
+anything else ran.
