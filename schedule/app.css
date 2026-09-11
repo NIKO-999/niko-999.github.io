@@ -559,6 +559,39 @@ body {
   stroke-linecap: round; stroke-linejoin: round;
 }
 .hd-ed:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+
+/* ── 38 DRAWN, 44 REACHABLE ──
+   The drawing is 38px and the press target is the 44px everything in
+   this app holds to: `.row-ed` draws 26 inside 44, the objectives plus
+   draws a small mark inside 44, and the children's dots grew the
+   target and left the mark exactly as it was. These two tiles shipped
+   with the drawing and the target the SAME — 38 and 38, in the
+   top-right corner a thumb reaches across the phone for, with 10px of
+   bare head between them. A press three pixels wide of either landed
+   on nothing at all, which is indistinguishable from a control that
+   does not work, and it is what a finger does where a synthetic tap
+   at the exact centre never will.
+
+   THIS IS NOT A REPRODUCTION. The arm was driven with real touch
+   events across every state it has — at rest, armed, on the pencil,
+   at three fractions of a row's width, armed twice, and on a second
+   day — and it worked in all of them on this machine. What is fixed
+   here is the one thing that MEASURED wrong: a target under the app's
+   own floor, in the place that was reported. If a phone still says
+   otherwise, the next step is a probe on the device rather than
+   another round of reasoning here.
+
+   `position: relative` with it, because the target is an absolutely
+   positioned `::before` and a static host resolves one against
+   whatever ancestor happens to be positioned — which for this row is
+   neither. 3px a side takes 38 to 44 and leaves 4 of the 10px gap, so
+   the pair still cannot overlap. */
+.hd-ed, .head-you { position: relative; }
+.hd-ed::before, .head-you::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+}
 /* ARMED IS THE FILLED STATE every other control in this app uses for
    one — the ink, with the paper on it. A colour would be inventing a
    fifth meaning for the accent, which says WHICH and never what mode

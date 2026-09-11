@@ -7733,7 +7733,52 @@ look exactly as they did — which is a mode you cannot see.
 
 **The button is the head's own tile**, 38px beside the glyph and the
 face, so the top row reads as tiles and a title rather than as a
-control bolted beside one. Armed is the filled state every other
+control bolted beside one.
+
+**38 DRAWN, 44 REACHABLE — and it shipped 38 and 38.** Reported as the
+edit button not working. The arm itself was driven with real touch
+across every state it has — at rest, armed, on the pencil, at three
+fractions of a row's width, armed twice, and on a second day — and it
+worked in all of them on this machine. What MEASURED wrong is the
+target: the tile owned exactly its drawn 38px, under the 44 this app
+holds every other press target to, in the top-right corner a thumb
+reaches across the phone for, with the face 10px away and bare head
+behind the gap. A press three pixels wide of it landed on nothing,
+which is indistinguishable from a control that does not work.
+
+The fix is the one this app has already applied three times and named
+each time: `.row-ed` draws 26 inside 44, the objectives plus draws a
+small mark inside 44, and the children's dots grew the target and left
+the drawing alone. `::before { inset: -3px }` takes 38 to 44 and
+leaves 4 of the 10px gap, so the pair still cannot overlap — any more
+and a press aimed at Edit lands on the face, which is a control doing
+the wrong thing rather than nothing.
+
+**`position: relative` IS LOAD-BEARING, and the middle state is worse
+than the bug.** The target is an absolutely positioned `::before`, and
+a static host resolves one against whatever ancestor happens to be
+positioned — which for this row is neither. Measured in that state the
+tile owns **one pixel**, and the face beside it owns 80. So the two
+declarations go together or not at all.
+
+**AND DRIVING A TAP CANNOT MEASURE THIS.** Chromium snaps a touch to a
+nearby clickable target within a slop region, so a real tap 22px off a
+38px tile's centre still arms it and the reading is IDENTICAL at 38 and
+at 44 — a check that cannot fail, which is what made three earlier
+claims of "fixed" sound verified. `elementFromPoint` has no such
+forgiveness, so the box the element OWNS is walked out from its own
+centre until it stops answering: **38x38 before, 44x44 after, drawing
+unchanged.** iOS has its own, different forgiveness, which is the whole
+reason the app has to own the 44 rather than borrow it.
+
+**And the drawn box is not the claim.** The drawing is deliberately 38,
+so a check on `getBoundingClientRect` would fail on the correct build.
+
+**THIS IS NOT A REPRODUCTION, said plainly.** Nothing here could be
+made to fail, so the fix is reasoned from a measurement rather than
+from the symptom — the `loading="lazy"` case and the edit sheet's time
+fields both over again. If a phone still says otherwise, the next step
+is a probe on the device rather than another round of reasoning here. Armed is the filled state every other
 control in this app uses for one — the ink with the paper on it. A
 colour would be inventing a fifth meaning for the accent, which says
 WHICH and never what mode you are in.

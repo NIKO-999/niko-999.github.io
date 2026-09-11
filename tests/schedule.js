@@ -5146,6 +5146,61 @@ const SAID = [
     };
   });
   ok('pressing it arms the week, and says so', armed.pressed === 'true', armed);
+  /* ── 38 DRAWN, 44 REACHABLE ──
+     Reported as the edit button not working, and the arm itself was
+     driven with real touch across every state it has — at rest, armed,
+     on the pencil, at three fractions of a row's width, armed twice,
+     and on a second day — and worked in all of them here. What
+     measured wrong is the TARGET: the tile drew 38px and owned 38px,
+     under the 44 this app holds every other press target to, in the
+     top-right corner a thumb reaches across the phone for, with the
+     face 10px away and bare head behind the gap.
+
+     MEASURED THROUGH `elementFromPoint`, NEVER BY DRIVING A TAP.
+     Chromium snaps a touch to a nearby clickable target within a slop
+     region, so a real tap 22px off a 38px tile's centre still arms it
+     and the reading is IDENTICAL whether the target is 38 or 44 — a
+     check that cannot fail, which is the thing this repo has shipped
+     three times believing it was verified. `elementFromPoint` has no
+     such forgiveness. iOS has its own, different forgiveness, which is
+     the whole reason the app has to own the 44 rather than borrow it.
+
+     AND THE DRAWN BOX IS NOT THE CLAIM. The drawing is deliberately
+     38 — `.row-ed` draws 26 inside 44 and the objectives plus draws
+     smaller still — so a check on `getBoundingClientRect` would fail
+     on the correct build. What is asserted is the box the element
+     OWNS, walked out from its own centre until it stops answering. */
+  const headHit = await page.evaluate(() => ['scHdEd', 'scTabYou'].map((id) => {
+    const el = document.getElementById(id);
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const owns = (x, y) => { const h = document.elementFromPoint(x, y);
+      return !!h && (h === el || el.contains(h)); };
+    const out = (dx, dy) => { let n = 0;
+      while (n < 40 && owns(cx + dx * (n + 1), cy + dy * (n + 1))) n++;
+      return n; };
+    return { id, drawn: Math.round(r.width),
+      w: out(-1, 0) + out(1, 0) + 1, h: out(0, -1) + out(0, 1) + 1 };
+  }));
+  ok(`both head tiles own 44px, however small they are drawn `
+    + `(${headHit.map((t) => `${t.id} ${t.drawn}→${t.w}x${t.h}`).join(', ')})`,
+    headHit.length === 2 && headHit.every((t) => t.w >= 44 && t.h >= 44), headHit);
+  /* AND THEY STILL DO NOT OVERLAP. 3px a side takes 38 to 44 and
+     leaves 4 of the 10px gap; any more and the two would fight over
+     the pixels between them, which is worse than either being small —
+     a press that lands on the face when you aimed at Edit is a control
+     doing the wrong thing rather than nothing. */
+  const gapMid = await page.evaluate(() => {
+    const a = document.getElementById('scHdEd').getBoundingClientRect();
+    const b = document.getElementById('scTabYou').getBoundingClientRect();
+    const mid = (a.right + b.left) / 2, y = a.top + a.height / 2;
+    const h = document.elementFromPoint(mid, y);
+    return { gap: Math.round(b.left - a.right),
+      atMid: h ? (h.id || h.tagName) : 'nothing' };
+  });
+  ok(`...and there is still gapMid head between them (${gapMid.gap}px)`,
+    gapMid.gap >= 8 && !/scHdEd|scTabYou/.test(gapMid.atMid), gapMid);
+
   /* THE MODE NAMES ITSELF, in the line the head already draws. */
   ok('...in the line under the day, rather than in a banner',
     /edit/i.test(armed.says), armed.says);
