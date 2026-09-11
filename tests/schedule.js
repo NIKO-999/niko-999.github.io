@@ -13868,9 +13868,10 @@ const SAID = [
             { i: 'g0', h: 0, c: '', x: 'First payout cleared', y: '', m: 0 },
             { i: 'g1', h: 1, c: 'amber', x: 'Not this', y: '', m: 0 },
             { i: 'g2', h: 0, c: '', x: 'Adding to a loser', y: '', m: 1 } ] },
-        /* Two highlights and three runs: a SWIPE, an unmarked line, a
-           bracketed run of two, a HEADING breaking it, and a bracketed
-           run of ONE — which is the case that has to draw both feet. */
+        /* Three highlights: a SWIPE, an unmarked line, a bracketed run
+           of two, a HEADING breaking it, a bracketed run of ONE —
+           which is the case that has to draw both feet — and a DOT,
+           which also ends the run above it. */
         { id: 'kN', t: 'Energy delegation', k: 'note', a: 'red', u: 1756700000000, l: [
           { i: 'n1', h: 1, c: 'red', x: 'Negative', y: 'what takes away', m: 0 },
           { i: 'n2', h: 0, c: '', x: 'Doom scrolling', y: '', m: 1 },
@@ -13878,7 +13879,8 @@ const SAID = [
           { i: 'n4', h: 0, c: '', x: 'Fasting till the afternoon', y: '', m: 2 },
           { i: 'n5', h: 0, c: '', x: 'Reading before the phone', y: '', m: 2 },
           { i: 'n6', h: 1, c: 'teal', x: 'Positive', y: 'what feeds me', m: 0 },
-          { i: 'n7', h: 0, c: '', x: 'Cold water first thing', y: '', m: 2 } ] },
+          { i: 'n7', h: 0, c: '', x: 'Cold water first thing', y: '', m: 2 },
+          { i: 'n8', h: 0, c: '', x: 'Ten pages before bed', y: '', m: 3 } ] },
         /* A kind this build does not have, and one with no colour at
            all — the two shapes a key that outlives its code takes. */
         { id: 'kX', t: 'From another build', k: 'ledger', u: 1756600000000, l: [
@@ -13966,7 +13968,7 @@ const SAID = [
       ok('...the figures speak each kind’s own language',
         /^3 steps · 2 sessions/.test(lyBy('Trading day').figs)
         && /days left · due 30 Nov/.test(lyBy('Prop firm payout').figs)
-        && /^5 lines · 4 marked/.test(lyBy('Energy delegation').figs),
+        && /^6 lines · 5 marked/.test(lyBy('Energy delegation').figs),
         lyCards.map((c) => c.figs));
       /* The section dots are a NOTE's own fact — how many sections and
          which colours — and the other two draw every heading in the
@@ -14108,7 +14110,7 @@ const SAID = [
          two takes a top foot on the first and a bottom on the last and
          NEITHER in between; the run of one takes both. */
       ok('a bracket spans a run, with a foot at each end and none inside',
-        lyBr.br.join() === 'false,false,true,true,true'
+        lyBr.br.join() === 'false,false,true,true,true,false'
         && lyBr.stem[2] > 1 && lyBr.stem[3] > 1 && lyBr.stem[4] > 1
         && lyBr.top[2] > 1 && lyBr.bot[2] === 0
         && lyBr.top[3] === 0 && lyBr.bot[3] > 1, lyBr);
@@ -14124,8 +14126,85 @@ const SAID = [
       ok('...and the gutter is reserved on the whole note, so the column holds',
         lyBr.lefts.length === 1, lyBr.lefts);
 
-      /* Two controls on a NOTE and one everywhere else, because a note
-         is the only layout where the mark has a choice of shape —
+      /* ── AND THE DOT IS THE THIRD, WHICH IS A POINT RATHER THAN A RUN ──
+         A swipe sits behind the words and a bracket beside a run of
+         them; a dot is one line, said in the margin. It shares the
+         BRACKET'S OWN gutter rather than opening a second one — two
+         marks outside the words in two different columns would make
+         the text column step in and out down the page, which is the
+         ragged edge `lyBr.lefts` above exists to stop.
+
+         Read off the same pseudo-element as the bracket, because the
+         claim is that the two are different DRAWINGS in one column: a
+         dot is a fill with no stem where a bracket is a stem with no
+         fill, and a check on either alone passes on a build that drew
+         the wrong one. */
+      const lyDot = await lypage.evaluate(() => {
+        const rows = [...document.querySelectorAll('.nt-row:not(.is-head)')];
+        if (!rows.length) throw new Error('no lines drawn on the note');
+        const cs = (r) => getComputedStyle(r, '::before');
+        const dot = rows.filter((r) => r.classList.contains('is-dot'));
+        const br = rows.find((r) => r.classList.contains('is-br'));
+        if (!dot.length) throw new Error('no line on the fixture wears a dot');
+        if (!br) throw new Error('no line on the fixture wears a bracket');
+        const s2 = cs(dot[0]);
+        const b2 = dot[0].getBoundingClientRect();
+        return {
+          dots: rows.map((r) => r.classList.contains('is-dot')),
+          w: parseFloat(s2.width), h: parseFloat(s2.height),
+          round: s2.borderRadius, fill: s2.backgroundColor,
+          stem: parseFloat(s2.borderLeftWidth) || 0,
+          brFill: cs(br).backgroundColor,
+          brStem: parseFloat(cs(br).borderLeftWidth) || 0,
+          /* THE OTHER HALF OF "THIS IS NOT A BULLET": inside a note
+             that HAS the gutter, the lines you did not mark draw
+             nothing at all in it. A marker in front of every line is
+             the furniture this app refuses; one on the lines you
+             pressed is a mark. */
+          bare: rows.filter((r) => !r.classList.contains('is-dot')
+            && !r.classList.contains('is-br'))
+            .map((r) => cs(r).content),
+          /* Where to sample: the dot's own centre, and clean gutter
+             a few pixels along the same line. */
+          at: { x: b2.left + parseFloat(s2.left) + parseFloat(s2.width) / 2,
+            y: b2.top + parseFloat(s2.top) + parseFloat(s2.height) / 2,
+            gx: b2.left + 11 }
+        };
+      });
+      ok('a dot is a point in the bracket’s own gutter, on the marked line alone',
+        lyDot.dots.join() === 'false,false,false,false,false,true'
+        && lyDot.w === 5 && lyDot.h === 5 && lyDot.stem === 0
+        && /50%/.test(lyDot.round)
+        && lyDot.brStem > 1 && /rgba\(0, 0, 0, 0\)|transparent/.test(lyDot.brFill),
+        lyDot);
+      /* A dot on the lines you MARKED is a mark; a dot in front of
+         EVERY line is the bullet this app decided against. One dot
+         across six lines is the first half of that; the second is that
+         a line carrying no gutter mark draws no pseudo-element at all,
+         so the column is empty everywhere you did not press. */
+      ok('...and a line with no gutter mark draws nothing in it',
+        lyDot.dots.filter(Boolean).length === 1
+        && lyDot.bare.length >= 2
+        && lyDot.bare.every((c) => c === 'none' || c === 'normal'), lyDot.bare);
+      /* A GRAPHIC, and the smallest mark on the screen — so it is held
+         to 3:1 on composited pixels rather than to the wash arithmetic
+         the tags use. Sampled at the dot's own centre against clean
+         gutter on the same line, because a ground taken from the row
+         above lands on the words. */
+      {
+        const lyPng = PNG.sync.read(await lypage.screenshot());
+        const lyPx = (x, y) => {
+          const i = (lyPng.width * Math.round(y * dpr) + Math.round(x * dpr)) << 2;
+          return [lyPng.data[i], lyPng.data[i + 1], lyPng.data[i + 2]];
+        };
+        const lyIk = lyPx(lyDot.at.x, lyDot.at.y);
+        const lyGd = lyPx(lyDot.at.gx, lyDot.at.y);
+        ok('...and it clears 3:1 against the ground it is drawn on',
+          ratio(lyIk, lyGd) >= 3, { ink: lyIk, ground: lyGd, r: ratio(lyIk, lyGd) });
+      }
+
+      /* Three controls on a NOTE and one everywhere else, because a
+         note is the only layout where the mark has a choice of shape —
          offering a bracket on a goal would be a control whose effect
          you cannot see, which is the per-section colour's own rule. */
       await lyEdit(true);
@@ -14150,10 +14229,10 @@ const SAID = [
         await new Promise((z) => setTimeout(z, 320));
         return { names: names, before: before, moved: moved, off: rec() };
       });
-      ok('a line in a note is offered both highlights, and they are exclusive',
-        lyMk.names.join(' ') === 'Heading Swipe Bracket'
-        && lyMk.before === '0102202' && lyMk.moved === '0202202'
-        && lyMk.off === '0002202', lyMk);
+      ok('a line in a note is offered all three highlights, and they are exclusive',
+        lyMk.names.join(' ') === 'Heading Swipe Bracket Dot'
+        && lyMk.before === '01022023' && lyMk.moved === '02022023'
+        && lyMk.off === '00022023', lyMk);
 
       /* The mark is one claim: a bracketed line is still MARKED, so
          the other two layouts have to draw it their own way rather
@@ -14170,7 +14249,7 @@ const SAID = [
         return { keys: keys, back: document.querySelectorAll('.nt-row.is-br').length };
       });
       ok('...and a bracketed line is still marked in the other layouts',
-        lyCarry.keys === 3 && lyCarry.back === 3, lyCarry);
+        lyCarry.keys === 4 && lyCarry.back === 3, lyCarry);
 
       /* ── THE LAYOUT CHANGES THE DRAWING, NEVER THE RECORD ──
          The claim the whole feature stands on. Switch a note to a

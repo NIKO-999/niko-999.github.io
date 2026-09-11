@@ -8018,3 +8018,64 @@ once its sibling is in the same category.
 brackets to a process fills those nodes and to a goal strikes those
 lines. Asserted directly, because treating 2 as an unknown and
 dropping it is the obvious way for this to go silently wrong.
+
+### And the third is a HUE DOT
+
+Asked for as *hue dot points*, the round after the bracket — so the
+mark is a choice of three: behind the words, beside a run of them, or
+a point in the margin. `m` is 0, 1, 2 or 3, and **anything the build
+does not know still falls to the swipe**, which is the rule the
+bracket already set: a line somebody marked is a line they marked.
+
+**IT IS NOT THE BULLET THIS APP REFUSES, AND THE DIFFERENCE IS WHICH
+LINES GET ONE.** That rule was written about a marker in front of
+EVERY line — a column of furniture down a screen whose whole job is
+the words, with the line height paying for what the marker would have
+said. A dot on the lines you MARKED is a mark: it is only ever there
+because you pressed something, and a note nobody marked draws none at
+all and reserves no gutter either. Both halves are asserted, because
+one dot on a fixture of six lines passes on a build that draws a
+bullet on all six unless somebody counts the other five.
+
+**And the existing check could not have caught it.** *No line draws a
+bullet* reads `list-style` and `::marker` on every non-heading row —
+which is the right question about an `<li>` and the wrong one about
+this app, where the bracket already draws in `::before` and passes it
+cleanly. The new check reads the pseudo-element, so the thing being
+looked at is a treatment drawn the way this app draws things.
+
+**IT SHARES THE BRACKET'S GUTTER RATHER THAN OPENING A SECOND ONE.**
+Two marks outside the words in two different columns make the text
+column step in and out down the page, which is the ragged edge the
+shared gutter exists to stop — so `is-brs` became `is-gut`, the
+reserved 15px covers both, and the one-left-edge check now has a dot
+in it. A note using neither is untouched.
+
+**Read off the SAME pseudo-element as the bracket, because the claim
+is that they are two drawings in one column**: a dot is a fill with no
+stem where a bracket is a stem with no fill. A check on either alone
+passes on a build that drew the wrong one, and swapping the dot's
+`background` for a `border-left` is exactly what the bite proof did —
+it fails on the shape, on the vacuous bullet, and on the contrast,
+three assertions out of one break.
+
+**Full strength, where the bracket's stem is 62%.** This is the
+smallest mark on the screen and it is a graphic, so a dilute one is a
+smudge before it is a colour — the friend's-week disc's own lesson.
+Held to 3:1 on composited pixels, sampled at the dot's own centre
+against clean gutter **on the same line**: a ground taken from a few
+pixels above lands on the row before it, which is the mistake the
+almanac's check and the Pattern axis each made once.
+
+**A DOTTED LINE ENDS THE RUN ABOVE IT**, which falls out of the
+bracket's own run test rather than needing a rule: `run(j)` asks for
+`m === 2`, so a 3 breaks it the way a heading does. The fixture puts
+the dot directly under a bracketed run of one, so the feet are
+measured against a neighbour that is marked and marked differently.
+
+**Four chips on the strip, and they fit.** `.nt-tools` wraps, so the
+fourth was free — measured at 390px it is one row ending 284px in.
+Mutually exclusive with the other two: pressing the one a line is
+already wearing takes it off, and `m === 3` is still MARKED
+everywhere, so a dotted line fills its node on a daily process and is
+struck out on a goal.

@@ -11451,14 +11451,14 @@
            it must still not throw it away — that is the whole of what
            makes switching between the three lossless. */
         y: typeof r.y === 'string' ? r.y.slice(0, 300) : '',
-        /* ── TWO HIGHLIGHTS, AND THE MARK IS WHICH ──
-           1 is the SWIPE and 2 is the BRACKET. It was a flag, and a
-           record written before this reads as a swipe because that is
-           the only mark there was. Anything else falls to the swipe
-           rather than to nothing: a line somebody marked is a line
-           they marked, and a build that does not know the style still
-           has to draw it. */
-        m: (!head && r.m) ? (r.m === 2 ? 2 : 1) : 0
+        /* ── THREE HIGHLIGHTS, AND THE MARK IS WHICH ──
+           1 is the SWIPE, 2 the BRACKET and 3 the DOT. It was a flag,
+           and a record written before any of that reads as a swipe
+           because that is the only mark there was. Anything else falls
+           to the swipe rather than to nothing: a line somebody marked
+           is a line they marked, and a build that does not know the
+           style still has to draw it. */
+        m: (!head && r.m) ? (r.m === 2 ? 2 : r.m === 3 ? 3 : 1) : 0
       });
     }
     n.a = NT_HUES.indexOf(raw.a) >= 0 ? raw.a : '';
@@ -11639,6 +11639,30 @@
     var b = scNoteBr(n, idx);
     if (!b) return '';
     return ' is-br' + (b.top ? ' is-br-top' : '') + (b.bot ? ' is-br-bot' : '');
+  }
+
+  /* ── AND THE DOT IS THE THIRD, WHICH IS A POINT RATHER THAN A RUN ──
+     A swipe sits behind the words and a bracket beside a run of them;
+     a dot is one line, said in the margin. It shares the bracket's
+     gutter rather than opening a second one — two marks living
+     outside the words in two different columns would make the text
+     column step in and out down the page, which is the ragged edge
+     the shared gutter exists to stop.
+
+     THIS IS NOT THE BULLET THIS APP REFUSES. That rule is about a
+     marker in front of EVERY line, which is a column of furniture
+     down a screen whose whole job is the words. A dot on the lines
+     you MARKED is a mark: it is only ever there because you pressed
+     something, and a note nobody marked draws none at all. */
+  function scNoteGutCls(n, idx) {
+    var L = n.l[idx];
+    if (L && !L.h && L.m === 3 && scNoteSect(n, idx)) return ' is-dot';
+    return scNoteBrCls(n, idx);
+  }
+  function scNoteGut(n) {
+    return n.k === 'note' && n.l.some(function (L, i) {
+      return !L.h && (L.m === 2 || L.m === 3) && !!scNoteSect(n, i);
+    });
   }
 
   /* ═══════════════════════════
@@ -11907,10 +11931,7 @@
        rather than as a mark. Every line in a note that HAS a bracket
        shares the gutter, and a note with none is untouched: the column
        is still, and nothing is paid for a mark nobody used. */
-    var hasBr = n.k === 'note' && n.l.some(function (L, i) {
-      return !L.h && L.m === 2 && !!scNoteSect(n, i);
-    });
-    var body = scEl('div', 'nt-body is-' + n.k + (hasBr ? ' is-brs' : '')
+    var body = scEl('div', 'nt-body is-' + n.k + (scNoteGut(n) ? ' is-gut' : '')
       + (ntEdit ? ' is-edit' : ''));
     body.style.setProperty('--c', scNtVar(scNoteHue(n)));
     pane.appendChild(body);
@@ -11992,7 +12013,7 @@
           return;
         }
         var sect = scNoteSect(n, idx);
-        var r = scEl('div', 'nt-row' + scNoteBrCls(n, idx));
+        var r = scEl('div', 'nt-row' + scNoteGutCls(n, idx));
         /* The same mark the field wears, drawn straight onto the words
            — there is no mirror to keep in step here, because in view
            there is no field on top of it. */
@@ -12074,10 +12095,11 @@
            the line out, which is the one place this means something
            other than "this matters".
 
-           And on a NOTE there are two of them, because a note is the
-           one layout where the mark has a choice of shape. Mutually
-           exclusive: a line carries one highlight, and pressing the
-           one it is already wearing takes it off. */
+           And on a NOTE there are THREE, because a note is the one
+           layout where the mark has a choice of shape: behind the
+           words, beside a run of them, or a point in the margin.
+           Mutually exclusive — a line carries one highlight, and
+           pressing the one it is already wearing takes it off. */
         var mk = function (cls, label, val) {
           var b = scEl('button', 'nt-tool ' + cls + (L.m === val ? ' is-on' : ''));
           b.type = 'button';
@@ -12094,7 +12116,7 @@
         };
         mk('nt-mkb', n.k === 'proc' ? 'Key step'
           : n.k === 'goal' ? 'Ruled out' : 'Swipe', 1);
-        if (n.k === 'note') mk('nt-brb', 'Bracket', 2);
+        if (n.k === 'note') { mk('nt-brb', 'Bracket', 2); mk('nt-dtb', 'Dot', 3); }
       }
     }
 
@@ -12124,7 +12146,7 @@
       var row = scEl('div', 'nt-row' + (L.h ? ' is-head' : '')
         + (n.k === 'proc' && !L.h ? ' is-step' : '')
         + (!L.h && L.m ? ' is-mkd' : '')
-        + (n.k === 'note' ? scNoteBrCls(n, idx) : ''));
+        + (n.k === 'note' ? scNoteGutCls(n, idx) : ''));
       if (!L.h && n.k === 'note') {
         var bsect = scNoteSect(n, idx);
         if (bsect) row.style.setProperty('--c', scNtVar(bsect));
