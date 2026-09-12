@@ -3457,7 +3457,7 @@ const SAID = [
     shutNow.gone && shutNow.key === null, shutNow);
   /* Leaving the stop and coming back is a new visit, which is what
      "for now" has to mean if it is to mean anything. */
-  await page.evaluate(() => document.getElementById('scTyPat').click());
+  await page.evaluate(() => document.getElementById('scTyWork').click());
   await page.waitForTimeout(240);
   await page.evaluate(() => document.getElementById('scTyUp').click());
   await page.waitForTimeout(280);
@@ -8091,15 +8091,14 @@ const SAID = [
                  .filter((b) => b.getAttribute('aria-current') === 'true')
                  .map((b) => b.dataset.tystop),
                up: box('scTyPane'), work: box('scWorkPane'),
-               pat: box('scPatPane'),
                /* The hero's own label went with the stop that replaced
                   it: a word naming a section directly under the button
                   that opens that section is the same word twice. */
                lbl: document.querySelectorAll('.ty-lbl').length };
     });
-    ok('Today has three stops and only the one you pressed is drawn',
-      stops.names.join('|') === 'Showing up|Workouts|Pattern'
-      && stops.on.join('') === 'work' && stops.work && !stops.up && !stops.pat
+    ok('Today has two stops and only the one you pressed is drawn',
+      stops.names.join('|') === 'Showing up|Workouts'
+      && stops.on.join('') === 'work' && stops.work && !stops.up
       && stops.lbl === 0, stops);
 
     /* An empty record draws no apparatus. A calendar of ninety unlit
@@ -8491,185 +8490,42 @@ const SAID = [
       await ppage.reload({ waitUntil: 'networkidle' });
       await ppage.waitForTimeout(320);
     };
-    const readRows = () => ppage.evaluate(() => [...document.querySelectorAll('.pat-row')]
-      .map((r) => ({ n: r.querySelector('.pat-nm').textContent,
-                     v: r.querySelector('.pat-n').textContent,
-                     bar: (() => { const b = r.querySelector('.pat-bar');
-                       return b ? { side: b.className.replace('pat-bar ', ''),
-                                    w: b.getBoundingClientRect().width } : null; })() })));
-
     await ppage.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
-
-    /* ── THE FIGURE IS A DIFFERENCE OF MEANS, AND BOTH HALVES OF IT
-           ARE ASSERTED ──
-       Train ticked on twenty days rated Good, not ticked on twenty
-       rated Rough. Mean 2 against mean 0 on a three-point scale, so
-       the answer is exactly +2.0 and nothing else is in the record to
-       be ranked beside it. */
     await plant({ n: 40, body:
       'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 5 : 1 };' });
-    let rows = await readRows();
-    ok('a thing on your good days and off your rough ones reads +4.0',
-      rows.length === 1 && rows[0].n === 'Train' && rows[0].v === '+4.0', rows);
 
-    /* And the same yes-side against a different no-side. A screen
-       printing the MEAN OF THE DAYS IT WAS ON — which is the figure
-       somebody reaches for first, and is not an answer to the
-       question — reads +2.0 on both fixtures and cannot tell them
-       apart. This one is 2 − 1. */
-    await plant({ n: 40, body:
-      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 5 : 3 };' });
-    rows = await readRows();
-    ok('...and the same good days against ordinary ones read +2.0, '
-      + 'which is what makes it a difference rather than an average',
-      rows.length === 1 && rows[0].v === '+2.0', rows);
+    /* ── THE DOOR IS THE CALENDAR'S DAY SHEET NOW ──
+       Every check below used to press `#scPatPane .rt`. Pattern is
+       gone and the ask is not, so they press the row where it lives —
+       which is the same `scRateRow`, because two drawings of one
+       question is how they drift.
 
-    /* The other direction, and the sign is on the number AND on the
-       side of the axis the bar is drawn. */
-    await plant({ n: 40, body:
-      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 1 : 5 };' });
-    rows = await readRows();
-    ok('a thing on your rough days reads −4.0 and draws left of the axis',
-      rows.length === 1 && rows[0].v === '−4.0'
-      && rows[0].bar && rows[0].bar.side === 'is-dn', rows);
-
-    /* ── A DAY IT WAS NEVER ON IS NOT A DAY YOU MISSED IT ──
-       The tally strip's own rule, and the thing this screen would get
-       silently wrong. Sleep is logged on twenty days that split ten
-       Good and ten Rough; on twenty MORE rated days it is not logged
-       at all, and those are all Good.
-
-       Read correctly — the unlogged days dropped from Sleep's
-       arithmetic entirely — it is 5 − 1 = +4.0. Counted as a night
-       below the middle it is 5 − (5·20 + 1·10)/30 = +1.3. The two
-       fixtures differ only in what is done with a day that never
-       asked the question. */
-    await plant({ n: 40, body: `
-      if (i <= 10) return { tick: { s: '8' }, rate: 5 };
-      if (i <= 20) return { tick: { s: '5' }, rate: 1 };
-      return { tick: {}, rate: 5 };` });
-    rows = await readRows();
-    const sleep = rows.filter((r) => /^Sleep/.test(r.n))[0];
-    ok('a night you did not record is dropped from that figure, never '
-      + 'counted as a short one', sleep && sleep.v === '+4.0', rows);
-    /* And the split is printed at the item's own precision, off YOUR
-       own middle rather than a target this app picked — half of your
-       own record is also the only threshold that guarantees both
-       sides have days on them. */
-    ok('...and the row names the split it made, at your own middle',
-      sleep && sleep.n === 'Sleep over 6.5 h', rows);
-
-    /* ── AND A WEEKDAY THE BLOCK IS NOT ON IS THE SAME ANSWER ──
-       Train three days a week, rated Good on the four days it is not
-       scheduled. Counted as four misses a week the figure collapses;
-       dropped, it is the +2.0 the ticks actually say. This is the
-       `do` half of the rule the fixture above proves for a number. */
-    const wk = { title: 'Daily Process', items: [] };
-    for (let d = 0; d < 7; d++) {
-      if (d === 1 || d === 3 || d === 5) {
-        wk.items.push({ d, s: 390, e: 450, r: '', n: 'Train' });
-      }
-      wk.items.push({ d, s: 1275, e: 1305, r: '', n: 'Read' });
-    }
-    await plant({ n: 84, week: wk, body: `
-      const dow = new Date(d + 'T12:00:00').getDay();
-      const on = dow === 1 || dow === 3 || dow === 5;
-      if (!on) return { tick: {}, rate: 5 };
-      return { tick: i % 2 ? { t: 1 } : {}, rate: i % 2 ? 5 : 1 };` });
-    rows = await readRows();
-    const train = rows.filter((r) => r.n === 'Train')[0];
-    ok('a day the block was never on is dropped too, so a three-day '
-      + 'schedule is not four misses a week', train && train.v === '+4.0',
-      rows);
-
-    /* ── FIVE DAYS EITHER SIDE, OR IT IS NOT RANKED ──
-       Two days against eighty is not a comparison, and a difference
-       of means over a sample that small swings on one bad night and
-       prints it as a finding. Both directions, because a floor that
-       only ever refuses is indistinguishable from a factor that never
-       worked. */
-    await plant({ n: 40, body:
-      'return { tick: i <= 4 ? { t: 1 } : {}, rate: i <= 4 ? 5 : 1 };' });
-    ok('four days on one side of a thing is not enough to rank it',
-      (await readRows()).length === 0);
-    await plant({ n: 40, body:
-      'return { tick: i <= 5 ? { t: 1 } : {}, rate: i <= 5 ? 5 : 1 };' });
-    ok('...and five is', (await readRows()).length === 1);
-
-    /* ── AND THE SCREEN SAYS HOW MANY MORE DAYS IT NEEDS ──
-       Below the floor it has nothing to say, and the honest thing to
-       do with nothing is to say what would fix it. Measured as the
-       list being ABSENT rather than empty: a list with no rows still
-       draws its axis. */
-    await plant({ n: 13, body: 'return { tick: { t: 1 }, rate: (i % 3) + 1 };' });
-    const few = await ppage.evaluate(() => ({
-      say: (document.querySelector('.pat-none') || {}).textContent || '',
-      list: !!document.querySelector('.pat-list'),
-      ask: !!document.querySelector('#scPatPane .rt-row'),
-    }));
-    ok('under the floor it says how many more days, draws no list, and '
-      + 'still asks about today',
-      /Rate 1 more day\b/.test(few.say) && !few.list && few.ask, few);
-
-    /* ── NOTHING EVER PRINTS −0.0 ──
-       A lift of −0.04 is zero at one decimal place, and reading the
-       sign off the raw number put a minus sign on nothing — which
-       reads as a rendering fault rather than as a thing that makes no
-       difference. A zero wears no sign and draws no bar; the axis
-       runs through the row unbroken. */
-    await plant({ n: 60, body:
-      'return { tick: i % 2 ? { t: 1 } : {}, rate: (i % 3) + 1 };' });
-    const zed = await readRows();
-    ok('a factor that moves nothing prints a bare 0.0 and draws no bar',
-      zed.length > 0 && zed.every((r) => !/−0\.0|\+0\.0/.test(r.v))
-      && zed.filter((r) => r.v === '0.0').every((r) => !r.bar), zed);
-
-    /* ── THE AXIS IS THE WHOLE OF WHAT SAYS UP OR DOWN ──
-       Which side of it a bar sits on is the only thing carrying the
-       direction, because a colour here would be this screen saying
-       whether — the one thing it never does. So the axis has to be
-       VISIBLE, and it went in as --g0, which is `var(--paper)`: the
-       line was painted in the page it was drawn on and measured
-       1.01:1 on screen. It looked like a faint line in a screenshot
-       because the rows nearest zero drew a bar about a pixel wide,
-       and a green sliver is not an axis.
-
-       Measured as the brightest pixel in a band across where the
-       axis is, against the ground a few pixels off it — never read
-       off the declaration, since --hair and --tick-off both LOOK like
-       the token for this and measure 1.27:1 and 1.60:1. */
-    await plant({ n: 40, body:
-      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 5 : 1 };' });
-    const geo = await ppage.evaluate(() => {
-      const l = document.querySelector('.pat-list').getBoundingClientRect();
-      const right = parseFloat(getComputedStyle(
-        document.querySelector('.pat-list'), '::before').right);
-      const r = document.querySelector('.pat-row').getBoundingClientRect();
-      /* Six pixels up from the row's foot: clear of the bar, which
-         takes the middle eight of a thirty-four pixel row, and INSIDE
-         the axis. Written first as `height - 2` — the axis is inset
-         two pixels top and bottom, so that is its excluded bottom
-         EDGE, and every sample came back as bare page. It reported
-         1.00:1 on an axis that is plainly there in a screenshot,
-         which is the same failure as measuring the wrong machine:
-         a check can be wrong about where it is looking as easily as
-         about what it is looking for. */
-      return { x: l.x + l.width - right, y: r.y + r.height - 6 };
-    });
-    const ppng = PNG.sync.read(await ppage.screenshot());
-    const pAt = (x, y) => { const i = (ppng.width * Math.round(y * dpr)
-      + Math.round(x * dpr)) << 2;
-      return [ppng.data[i], ppng.data[i + 1], ppng.data[i + 2]]; };
-    let axPx = [0, 0, 0];
-    for (let dx = -3; dx <= 0; dx += 0.5) {
-      const p = pAt(geo.x + dx, geo.y);
-      if (lum(p) > lum(axPx)) axPx = p;
-    }
-    const axGround = pAt(geo.x + 16, geo.y);
-    const axR = ratio(axPx, axGround);
-    ok(`the axis is a mark you can see (${axR.toFixed(2)}:1 on composited `
-      + 'pixels, against 1.01 for the token it went in as)',
-      axR >= 3, { axPx, axGround, geo });
+       It throws with a sentence rather than handing an empty list to
+       the next line: a selector that matches nothing filters to []
+       and passes `every` identically to a working feature, which this
+       file has now recorded three times. */
+    const openRate = async () => {
+      await ppage.evaluate(async () => {
+        if (document.querySelector('.sheet:not([hidden])')) {
+          document.getElementById('scScrim').click();
+          await new Promise((z) => setTimeout(z, 260));
+        }
+        document.querySelector('.tab[data-view="list"]').click();
+        await new Promise((z) => setTimeout(z, 240));
+        document.getElementById('scHdDate').click();
+        await new Promise((z) => setTimeout(z, 560));
+        const n = String(new Date().getDate());
+        const cell = [...document.querySelectorAll('.cl-c')]
+          .find((e) => (e.querySelector('b') || e).textContent.trim() === n);
+        if (!cell) throw new Error('no cell for today on the month');
+        cell.click();
+        await new Promise((z) => setTimeout(z, 440));
+      });
+      const n = await ppage.evaluate(() =>
+        document.querySelectorAll('.sheet:not([hidden]) .rt').length);
+      if (n !== 5) throw new Error('the day sheet drew ' + n + ' marks, wanted 5');
+    };
+    await openRate();
 
     /* ── LIT IS THE ACCENT, UNLIT IS THE FLAT NEUTRAL ──
        The accent on this app makes exactly one claim, that something
@@ -8683,17 +8539,21 @@ const SAID = [
        test measures nothing the day it turns. */
     await plant({ n: 40, body:
       'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 5 : 1 };' });
+    /* `plant` reloads, and a reload closes the sheet the ask lives in
+       — so the door is opened again rather than the press landing on
+       whatever happens to be under it. */
+    await openRate();
     await ppage.evaluate(() =>
-      document.querySelectorAll('#scPatPane .rt')[2].click());
+      document.querySelectorAll('.sheet:not([hidden]) .rt')[2].click());
     await ppage.waitForTimeout(220);
     const markPx = await (async () => {
       const b = await ppage.evaluate(() => {
-        const on = document.querySelector('#scPatPane .rt.is-on');
-        const off = document.querySelector('#scPatPane .rt:not(.is-on)');
+        const on = document.querySelector('.sheet:not([hidden]) .rt.is-on');
+        const off = document.querySelector('.sheet:not([hidden]) .rt:not(.is-on)');
         const box = (e) => { const r = e.getBoundingClientRect();
           return { x: r.x, y: r.y, w: r.width, h: r.height }; };
         return { on: box(on), off: box(off),
-                 lit: document.querySelectorAll('#scPatPane .rt.is-on').length };
+                 lit: document.querySelectorAll('.sheet:not([hidden]) .rt.is-on').length };
       });
       const png = PNG.sync.read(await ppage.screenshot());
       const at = (x, y) => { const i = (png.width * Math.round(y * dpr)
@@ -8748,11 +8608,11 @@ const SAID = [
     const wasSet = await ppage.evaluate((k) =>
       JSON.parse(localStorage.getItem('sched.rate.v2'))[k], today);
     await ppage.evaluate(() =>
-      document.querySelectorAll('#scPatPane .rt')[2].click());
+      document.querySelectorAll('.sheet:not([hidden]) .rt')[2].click());
     await ppage.waitForTimeout(180);
     const now = await ppage.evaluate((k) => ({
       has: k in JSON.parse(localStorage.getItem('sched.rate.v2')),
-      on: document.querySelectorAll('#scPatPane .rt.is-on').length,
+      on: document.querySelectorAll('.sheet:not([hidden]) .rt.is-on').length,
     }), today);
     ok('pressing the circle you are on takes the day off again',
       wasSet === 3 && !now.has, { wasSet, now });
@@ -8784,9 +8644,10 @@ const SAID = [
     }, HOSTX);
     await ppage.reload({ waitUntil: 'networkidle' });
     await ppage.waitForTimeout(320);
+    await openRate();
     const markA = pAsked.length;
     await ppage.evaluate(() =>
-      document.querySelectorAll('#scPatPane .rt')[3].click());
+      document.querySelectorAll('.sheet:not([hidden]) .rt')[3].click());
     await ppage.waitForTimeout(2200);          /* past the 1.5s push debounce */
     const sinceRate = pAsked.slice(markA).filter((u) => u.startsWith(HOSTX));
     ok('rating a day makes no request at all', sinceRate.length === 0, sinceRate);
@@ -8794,8 +8655,17 @@ const SAID = [
     /* Now something that DOES push, so there is a real body to read.
        Mind rather than Train: ticking a training block opens the
        workout picker, and a sheet in the way is a different test. */
-    await ppage.evaluate(() => document.getElementById('scTyUp').click());
-    await ppage.waitForTimeout(200);
+    /* The ask is on a SHEET now and the sheet is still up, over a
+       week rather than over Today — so it is dismissed and the view
+       moved before anything reaches for a tile. A check that leaves a
+       surface over the screen is a check that breaks the next one. */
+    await ppage.evaluate(() => document.getElementById('scScrim').click());
+    await ppage.waitForTimeout(320);
+    await ppage.evaluate(() => {
+      document.querySelector('.tab[data-view="tally"]').click();
+      document.getElementById('scTyUp').click();
+    });
+    await ppage.waitForTimeout(260);
     await ppage.evaluate(() =>
       document.querySelector('.ty-card[data-item="m"]').click());
     await ppage.waitForTimeout(2400);
@@ -8837,11 +8707,10 @@ const SAID = [
     });
     await ppage.reload({ waitUntil: 'networkidle' });
     await ppage.waitForTimeout(300);
-    for (const [stop, id] of [['up', 'scTyPane'], ['work', 'scWorkPane'],
-                              ['pat', 'scPatPane']]) {
+    for (const [stop, id] of [['up', 'scTyPane'], ['work', 'scWorkPane']]) {
       await ppage.evaluate((s) => document.querySelector('[data-tystop="' + s + '"]').click(), stop);
       await ppage.waitForTimeout(160);
-      const drawn = await ppage.evaluate(() => ['scTyPane', 'scWorkPane', 'scPatPane']
+      const drawn = await ppage.evaluate(() => ['scTyPane', 'scWorkPane']
         .filter((k) => { const r = document.getElementById(k).getBoundingClientRect();
           return r.width > 1 && r.height > 1; }));
       ok(`on ${stop}, ${id} is the only pane drawing`,
@@ -8853,8 +8722,13 @@ const SAID = [
        pane this build no longer has must mean the first one rather
        than a screen with a bar on it and nothing above the bar. Same
        rule sched.view.v1 already keeps, and the reason the list is
-       written out rather than trusted. */
-    await ppage.evaluate(() => localStorage.setItem('sched.ty.v1', 'ring'));
+       written out rather than trusted.
+
+       IT PLANTS `pat`, which is the value this build just stopped
+       having — every phone that was last on Pattern is carrying it
+       right now, so it is the case that actually happens rather than
+       an invented one. */
+    await ppage.evaluate(() => localStorage.setItem('sched.ty.v1', 'pat'));
     await ppage.reload({ waitUntil: 'networkidle' });
     await ppage.waitForTimeout(300);
     ok('a stop naming a pane that is gone falls through to the first',
@@ -8879,18 +8753,22 @@ const SAID = [
     });
     await ppage.reload({ waitUntil: 'networkidle' });
     await ppage.waitForTimeout(320);
-    const hurt = await ppage.evaluate(() => ({
-      foot: document.querySelector('#scPatPane .ty-foot').textContent,
-      rows: document.querySelectorAll('.pat-row').length,
-    }));
+    /* Read off the RECORD the app rewrote rather than off a figure
+       it printed: Pattern's foot used to say "40 days", and with that
+       screen gone the surviving claim is the repair itself. */
+    const hurt = await ppage.evaluate(() => {
+      const r = JSON.parse(localStorage.getItem('sched.rate.v2') || '{}');
+      return { n: Object.keys(r).length,
+        bad: Object.keys(r).filter((k) => !(r[k] >= 1 && r[k] <= 5)).length };
+    });
     ok('three damaged days are dropped and the other thirty-seven read',
-      /\b37 days\b/.test(hurt.foot) && hurt.rows === 1, hurt);
+      hurt.n === 37 && hurt.bad === 0, hurt);
 
     /* ── THE SAME CONTROL IS AT THE FOOT OF TODAY'S CARD ──
        The foot of the day is where you are when the day is over, which
-       Pattern is not: that screen is where you go to READ what your
-       good days have in common. One control built once and used twice,
-       because two drawings of one question is how they drift.
+       the calendar is not: that sheet is where you go to READ a day
+       back. One control built once and used twice, because two
+       drawings of one question is how they drift.
 
        AND ONLY ONCE THE DAY IS DONE. A question about how the day went
        asked at nine in the morning is a question you cannot answer, and
@@ -8971,38 +8849,47 @@ const SAID = [
       onCards.asks.length === 1 && onCards.asks[0] === onCards.today
       && onCards.marks === 5 && onCards.inCard, onCards);
 
-    /* Pattern's own ask is NOT gated, and must not be: a day you never
-       finished is still a day you can say something about, and that
-       screen is where you go to fill one in afterwards. The card's ask
-       is a convenience at the end of a day, not the only door. */
+    /* ── AND THE UNGATED DOOR IS THE CALENDAR'S DAY SHEET ──
+       PATTERN WAS THIS DOOR AND THE GATE WAS ONLY AFFORDABLE BECAUSE
+       OF IT. The card's ask arrives when the last block is ticked, so
+       with Pattern gone and nothing put in its place a day you never
+       finished could never be rated at all — the record made
+       impossible to keep on exactly the days worth recording, which
+       is what the card's own comment says it is not.
+
+       The sheet is where it belongs rather than anywhere new: it is
+       the screen that already READ the rating back, and a reader that
+       cannot answer its own question is a readout beside a control
+       somewhere else. The fixture leaves every block unticked, so
+       this is the day the card refuses. */
     await ppage.evaluate(() => {
       localStorage.setItem('sched.log.v1', '{}');
-      localStorage.setItem('sched.view.v1', 'tally');
-      localStorage.setItem('sched.ty.v1', 'pat');
+      localStorage.setItem('sched.view.v1', 'list');
     });
     await ppage.reload({ waitUntil: 'networkidle' });
     await ppage.waitForTimeout(450);
-    ok('Pattern still asks about a day you did not finish',
-      await ppage.evaluate(() =>
-        document.querySelectorAll('#scPatPane .rt').length) === 5);
-    await ppage.evaluate(() => localStorage.setItem('sched.view.v1', 'list'));
+    const unfin = await ppage.evaluate(() =>
+      document.querySelectorAll('.week.is-today .rt').length);
+    await openRate();
+    ok('the card refuses a day you did not finish and the calendar asks anyway',
+      unfin === 0 && await ppage.evaluate(() =>
+        document.querySelectorAll('.sheet:not([hidden]) .rt').length) === 5,
+      { unfin });
+    await ppage.evaluate(() => document.getElementById('scScrim').click());
+    await ppage.waitForTimeout(300);
     await doBlocks(null);
 
     /* ── AND THE TWO PLACES ARE ONE RECORD ──
        A day rated four at the foot of the card had better be a day
-       rated four on Pattern. */
+       rated four on the sheet that reads it back. That is the whole
+       reason it is one `scRateRow` rather than two drawings. */
     await ppage.evaluate(() =>
       document.querySelectorAll('.week.is-today .rt')[3].click());
     await ppage.waitForTimeout(300);
-    await ppage.evaluate(() => {
-      localStorage.setItem('sched.view.v1', 'tally');
-      localStorage.setItem('sched.ty.v1', 'pat');
-    });
-    await ppage.reload({ waitUntil: 'networkidle' });
-    await ppage.waitForTimeout(450);
-    ok('a day rated on the card reads the same on Pattern',
+    await openRate();
+    ok('a day rated on the card reads the same on the calendar',
       await ppage.evaluate(() =>
-        document.querySelectorAll('#scPatPane .rt.is-on').length) === 4);
+        document.querySelectorAll('.sheet:not([hidden]) .rt.is-on').length) === 4);
 
     /* ── THE OLD THREE-POINT SCALE COMES ACROSS ONCE ──
        Rough, Fine and Good were 0, 1 and 2 under their own key, and
@@ -9034,10 +8921,10 @@ const SAID = [
     ok('...and the key they came from is spent, not left behind',
       moved.old === null, moved);
 
-    ok('nothing threw anywhere on Pattern', perrs.length === 0, perrs);
+    ok('nothing threw anywhere on the ask', perrs.length === 0, perrs);
     /* The whole screen, on every fixture above, reached nothing off
        this origin except the one stub it was pointed at on purpose. */
-    ok('and Pattern asked for nothing off origin',
+    ok('and the ask reached nothing off origin',
       pAsked.every((u) => u.startsWith(BASE) || u.startsWith(HOSTX)
         || u.startsWith('data:') || u.startsWith('blob:') || isArt(u)),
       pAsked.filter((u) => !u.startsWith(BASE) && !u.startsWith(HOSTX)
@@ -9048,7 +8935,7 @@ const SAID = [
   /* ═══════════════════════════════════════════════════════════
      THE INTRO
 
-     Four cards on a first open, on its own page because it is the one
+     Three cards on a first open, on its own page because it is the one
      screen in this file that only exists when a key is ABSENT — and
      every other section seeds that key precisely so the intro is not
      sitting on top of whatever they are pressing.
@@ -9112,16 +8999,18 @@ const SAID = [
 
     ok('the intro opens on a first visit', await drawn());
 
-    /* ── FOUR CARDS, AND THE ORDER IS THE DESIGN ──
+    /* ── THREE CARDS, AND THE ORDER IS THE DESIGN ──
        It went in at six and two of them were the same card wearing
-       different verbs. Both the count and the order are asserted
-       because both are one line to change and neither would throw. */
+       different verbs; it was four until Pattern went, and the card
+       about rating a day went with the screen that read the ratings.
+       Both the count and the order are asserted because both are one
+       line to change and neither would throw. */
     const first = await card();
-    ok('four cards, in their order, the two hidden doors last',
-      first.n === 4
+    ok('three cards, in their order, the two hidden doors last',
+      first.n === 3
       && [...await ipage.evaluate(() =>
           [...document.querySelectorAll('.tr-slide')].map((s) => s.dataset.card))]
-        .join('|') === 'week|pattern|friends|back', first);
+        .join('|') === 'week|friends|back', first);
 
     /* ── ONE CARD ON SCREEN, AND THE OTHERS OUT OF REACH ──
        A track that moves rather than a scroller leaves the other three
@@ -9130,9 +9019,9 @@ const SAID = [
        which looks exactly like the page having scrolled sideways. */
     ok('exactly one card is on screen, and it is the first',
       first.lit.length === 1 && first.lit[0] === 'week'
-      && first.live.join('') === 'week' && first.inert === 3, first);
+      && first.live.join('') === 'week' && first.inert === 2, first);
     ok('...and the button says Continue on it, not the last word',
-      first.go === 'Continue' && first.step === 'Step 1 of 4', first);
+      first.go === 'Continue' && first.step === 'Step 1 of 3', first);
 
     /* ── THE LAST CARD IS THE TWO HIDDEN DOORS ──
        It was the objectives one, and the row of cards on the day
@@ -9141,14 +9030,14 @@ const SAID = [
        pair you cannot find by pressing around, which is the last card
        for the reason the objectives were — it is the one still on
        screen when the intro ends. */
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
       await ipage.evaluate(() => document.querySelector('.tr-go').click());
       await ipage.waitForTimeout(400);
     }
     const last = await card();
     ok('the last card is the two hidden doors, and it starts the week',
       last.live.join('') === 'back' && last.go === 'Start the week'
-      && last.step === 'Step 4 of 4', last);
+      && last.step === 'Step 3 of 3', last);
 
     /* ── THE POINTER IS GONE, AND SO IS WHAT IT POINTED AT ──
        That card drew a day card at its real proportions with the turn
@@ -9185,14 +9074,14 @@ const SAID = [
                  n: a.length, run: a.filter((x) => x === 'running').length };
       }));
     ok('every card’s icon is a scene that moves',
-      anim.length === 4 && anim.every((a) => a.n > 0), anim);
+      anim.length === 3 && anim.every((a) => a.n > 0), anim);
     /* ── AND ONLY THE ONE ON SCREEN IS RUNNING ──
        Three of the four are laid out off the side at all times, and a
        loop on one of them is a compositor pass a frame to draw what
        nobody can see. The rule is written on the SUBTREE rather than
        on a list of the elements in it, so the next scene added here is
        covered on the day it is added. */
-    ok('...and the three off the side are paused',
+    ok('...and the two off the side are paused',
       anim.filter((a) => a.on).every((a) => a.run === a.n && a.n > 0)
       && anim.filter((a) => !a.on).every((a) => a.run === 0 && a.n > 0), anim);
 
@@ -9260,7 +9149,7 @@ const SAID = [
     const again = await card();
     ok('Settings plays it again, from the first card',
       row && await drawn() && again.live.join('') === 'week'
-      && again.step === 'Step 1 of 4', again);
+      && again.step === 'Step 1 of 3', again);
 
     /* A swipe moves it, which is what the dots promise. */
     const box = await ipage.$eval('.tr-win', (e) => {
@@ -9272,14 +9161,14 @@ const SAID = [
     await ipage.mouse.move(box.l, box.y, { steps: 8 });
     await ipage.mouse.up();
     await ipage.waitForTimeout(420);
-    ok('a swipe moves it on a card', (await card()).live.join('') === 'pattern');
+    ok('a swipe moves it on a card', (await card()).live.join('') === 'friends');
 
     /* ── THE COPY IS PLAIN, AND THAT INCLUDES HAVING NO DASHES ──
        It went in written the way the notes beside the code are
        written, which is the wrong register for a screen somebody
        reads once before they know what the app is. Asserted rather
        than trusted, because prose drifts back: an em dash is the
-       shape of a second thought, and each of these four cards is
+       shape of a second thought, and each of these three cards is
        allowed exactly one. */
     const copy = await ipage.evaluate(() =>
       [...document.querySelectorAll('.tr-slide')]
@@ -9292,7 +9181,7 @@ const SAID = [
     /* And it stays short. The reference this was drawn from runs two
        or three words on top and one sentence under it; six cards of
        this file's own voice is what it replaced. */
-    const longest = Math.max(...copy.slice(0, 4).map((t) => t.length));
+    const longest = Math.max(...copy.slice(0, 3).map((t) => t.length));
     ok(`and every card is one short sentence (longest ${longest} chars)`,
       longest <= 110, copy);
 
@@ -9399,8 +9288,8 @@ const SAID = [
       });
       return { n, anim, bad };
     });
-    ok(`reduced motion stops all four scenes (${rest.n} marks)`,
-      rest.n > 20 && rest.anim === 0, rest);
+    ok(`reduced motion stops all three scenes (${rest.n} marks)`,
+      rest.n > 14 && rest.anim === 0, rest);
     ok('...and leaves every one of them complete', rest.bad.length === 0,
       rest.bad);
     await rctx.close();
@@ -15468,6 +15357,12 @@ const SAID = [
         labels: [...document.querySelectorAll('#scSheetBody .label')]
           .map((l) => l.textContent),
         logged: [...document.querySelectorAll('.cl-sum')].map((p) => p.textContent),
+        /* The rating is an ASK on a day still inside the backfill
+           window and a figure in the summary outside it — so what is
+           read here is the marks, since this fixture's day is one the
+           record is still open on. */
+        lit: document.querySelectorAll('#scSheetBody .rt.is-on').length,
+        marks: document.querySelectorAll('#scSheetBody .rt').length,
       };
     });
     ok('a day opens on everything that was on it, and what became of each',
@@ -15476,13 +15371,20 @@ const SAID = [
       && clDay.rows[0].t === '06:00' && clDay.rows[0].st === 'Completed'
       && clDay.rows[1].wo === 'Push', clDay);
     ok('...and it says what you logged by name, not only how many',
-      /2 of 2 kept/.test(clDay.sum) && /rated 4 of 5/.test(clDay.sum)
+      /2 of 2 kept/.test(clDay.sum)
+      && clDay.marks === 5 && clDay.lit === 4
       && clDay.labels.indexOf('Logged') >= 0
       && clDay.logged.join(' ').indexOf('8420') >= 0, clDay);
     /* NOTHING IN HERE IS A CONTROL THAT REFUSES. Every write on this
        app is refused outside the backfill window, so a row you could
        press on a day three weeks gone would be a button whose only
-       answer is no. */
+       answer is no.
+
+       THE ONE EXCEPTION IS THE ASK, and it is drawn only on the days
+       it can answer: that is the door Pattern used to be, and it sits
+       here because this sheet is what reads the answer back. Outside
+       the window it is a figure in the summary and no control at
+       all — asserted a few lines down, on a day that is. */
     ok('...and not one row of it is a control',
       clDay.rows.every((r) => r.press === 'DIV'), clDay.rows.map((r) => r.press));
 

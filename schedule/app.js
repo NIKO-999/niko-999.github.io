@@ -5059,7 +5059,7 @@
 
       var marks = scEl('div', 'nm-marks');
       live.forEach(function (m) {
-        var mb = scEl('button', 'nm-mark', scPatMid(item, m));
+        var mb = scEl('button', 'nm-mark', scFig(item, m));
         mb.type = 'button';
         mb.dataset.at = m;
         /* THEY SET, THEY DO NOT ADD, and that is the one thing worth
@@ -5079,7 +5079,7 @@
 
       var ends = scEl('div', 'nm-ends');
       ends.appendChild(scEl('span', null, '0'));
-      ends.appendChild(scEl('span', null, scPatMid(item, R.max)));
+      ends.appendChild(scEl('span', null, scFig(item, R.max)));
       body.appendChild(ends);
 
       body.appendChild(scEl('p', 'hint',
@@ -5115,15 +5115,15 @@
 
       function paint() {
         var now = have + add;
-        big.textContent = scPatMid(item, +now.toFixed(dp));
+        big.textContent = scFig(item, +now.toFixed(dp));
         /* The fill is written on the element because a range's track
            cannot be painted to a value in CSS alone. */
         dial.style.setProperty('--fill', (R.max ? (add / R.max) * 100 : 0) + '%');
         dial.setAttribute('aria-valuetext',
-          scPatMid(item, +add.toFixed(dp)) + ' added, '
-          + scPatMid(item, +now.toFixed(dp)) + ' today');
+          scFig(item, +add.toFixed(dp)) + ' added, '
+          + scFig(item, +now.toFixed(dp)) + ' today');
         go.disabled = !add;
-        go.textContent = add ? 'Add ' + scPatMid(item, +add.toFixed(dp)) : 'Add';
+        go.textContent = add ? 'Add ' + scFig(item, +add.toFixed(dp)) : 'Add';
         /* The one you are standing on is filled, so a mark says where
            the dial IS as well as where it could go. */
         markBtns.forEach(function (mb) {
@@ -5131,17 +5131,17 @@
         });
         if (!add) {
           sub.textContent = have
-            ? scPatMid(item, have) + ' today · drag to add more'
+            ? scFig(item, have) + ' today · drag to add more'
             : 'drag to set';
         } else if (add >= R.max) {
           /* SAID AT THE TOP OF THE TRACK, because the bound is only
              defensible if the way past it is on screen at the moment
              you reach it. */
-          sub.textContent = scPatMid(item, have) + ' now · that is the most one drag adds'
+          sub.textContent = scFig(item, have) + ' now · that is the most one drag adds'
             + ' — add it and open again for more';
         } else {
-          sub.textContent = (have ? scPatMid(item, have) + ' now · ' : '')
-            + 'adding ' + scPatMid(item, +add.toFixed(dp));
+          sub.textContent = (have ? scFig(item, have) + ' now · ' : '')
+            + 'adding ' + scFig(item, +add.toFixed(dp));
         }
       }
 
@@ -9774,28 +9774,51 @@
     });
     pane.appendChild(list);
   }
+  /* ── A FIGURE WITH ITS UNIT ON IT ──
+     THIS WAS `scPatMid` AND IT NEVER BELONGED TO PATTERN. The prefix
+     said one screen owned it while the NUMBER DIAL called it in eight
+     places — the readout, the ladder's ends, the foot's "620 added,
+     2,620 today", and both of the sub's two states. Deleting Pattern
+     took it with them and `node --check` was perfectly happy, because
+     a missing function is a runtime fault: the dial would have thrown
+     on the first drag of Steps and nothing before that press would
+     have said so.
+
+     Renamed rather than left under a prefix that now names nothing —
+     `scPat*` is gone, and a name pointing at a deleted screen is the
+     shape somebody deletes next. */
+  function scFig(it, v) {
+    if (v === undefined) return '';
+    var dp = it.dp || 0;
+    return v.toLocaleString('en-GB',
+      { minimumFractionDigits: dp, maximumFractionDigits: dp })
+      + (it.unit || '');
+  }
+
   var RATE_KEY = 'sched.rate.v2';
   var RATE_OLD = 'sched.rate.v1';
   var rateLog = null;              /* { '2026-09-01': 4 } */
   var RATE_MAX = 5;
 
-  /* Twelve weeks. Long enough that a factor can have five days either
-     side of it — which is the floor below — and short enough to be
-     about what you are doing rather than about your history. The
-     tally's own window is 26 weeks and answers a different question:
-     that one is the shape of one thing over time, this is a
-     comparison, and a comparison over half a year is a comparison
-     with somebody you no longer are. */
-  var PAT = 84;
-  /* Five on each side of a factor, or it is not ranked at all. Two
-     days against eighty is not a comparison, it is two days — and a
-     difference of means over a sample that small swings on one bad
-     night and prints it as a finding. */
-  var PAT_SIDE = 5;
-  /* And fourteen rated days before the screen says anything. Below
-     that it says how many more, which is honest and is also the only
-     thing it can usefully do on its first open. */
-  var PAT_FLOOR = 14;
+  /* ── PATTERN IS GONE, AND THE RATING IS NOT ──
+     That screen was the third stop on Today and the one place this app
+     READ the record back rather than showing it: of everything you
+     log, which things are on your good days and which are on your
+     rough ones, ranked by a difference of means. It went, and with it
+     scPatMids, scPatBlocks, scPatHeld, scPatRank, scPaintPat, the
+     twelve-week window, the five-a-side floor and the fourteen rated
+     days before it would say anything. `scPatMid` came back as
+     `scFig`: see the note on it, it was never Pattern's.
+
+     WHAT STAYS IS THE ASK, because it kept a reader. `sched.rate.v2`
+     is still written by the row at the foot of today's card and still
+     drawn back on the calendar's day sheet, which prints "rated 4 of
+     5" among what that day was. A record with somewhere to be read is
+     not a key nothing reads — that is the test this file applies to
+     the palette name, the subtitle and the old rating scale, and this
+     one passes it.
+
+     So the arithmetic went and the question did not. */
 
   function scRateLoad() {
     var read = function (k) {
@@ -9830,10 +9853,29 @@
 
     /* A damaged entry is dropped and the rest of the record survives
        — the days are what you cannot get back, and one bad value must
-       not take a season of them with it. */
+       not take a season of them with it.
+
+       AND THE REPAIR IS WRITTEN BACK, WHICH IS THE FOURTH TIME THIS
+       HOLE HAS SHIPPED. scClean minted block ids that scLoad did not
+       save, scTrainLoad filled in a summed estimate it never saved,
+       scMindLoad normalised a damaged day in memory — and this one
+       dropped three bad values on every boot and left all three on
+       disk, so the repair was redone every open and would have been
+       lost the moment anything else wrote the key.
+
+       It survived because the only thing that ever read it was
+       Pattern, which read the repaired copy IN MEMORY: the screen
+       looked right while the record stayed damaged, for as long as
+       nobody asked the record. The check that found it is the one
+       that stopped reading a figure off a screen and read the store.
+
+       Written back only when something actually changed, so an intact
+       record costs no write on every open. */
+    var hurt = false;
     Object.keys(rateLog).forEach(function (k) {
-      if (!scRateOK(rateLog[k])) delete rateLog[k];
+      if (!scRateOK(rateLog[k])) { delete rateLog[k]; hurt = true; }
     });
+    if (hurt) scRateSave();
   }
   function scRateOK(v) {
     return typeof v === 'number' && v >= 1 && v <= RATE_MAX && v === Math.round(v);
@@ -9856,169 +9898,6 @@
     return true;
   }
 
-  /* ── THE FACTORS ──
-     One question per thing you log, and every one of them has to be
-     answerable YES or NO on a given day — or not at all.
-
-     THE THIRD ANSWER IS WHAT MAKES THE OTHER TWO WORTH HAVING. A day
-     Train was never scheduled is not a day you skipped it; a night
-     you did not record is not a short night. Both are dropped from
-     that factor's arithmetic rather than counted as a no, which is
-     the strip's own three states seen from the other side.
-
-     A NUMBER IS SPLIT AT ITS OWN MIDDLE, never at a figure this app
-     picked. Eight thousand steps is somebody else's target, and
-     halving your own record is what guarantees both sides have days
-     on them — which is the whole condition for a difference of means
-     to say anything. */
-  function scPatMids() {
-    var mid = {}, floor = scDayBack(PAT - 1);
-    scItems().forEach(function (it) {
-      if (it.k !== 'num') return;
-      var vals = [];
-      Object.keys(tickLog).forEach(function (day) {
-        if (day < floor) return;
-        var v = parseFloat(tickLog[day][it.id]);
-        if (v > 0) vals.push(v);
-      });
-      vals.sort(function (a, b) { return a - b; });
-      if (!vals.length) return;
-      var h = vals.length >> 1;
-      mid[it.id] = vals.length % 2 ? vals[h] : (vals[h - 1] + vals[h]) / 2;
-    });
-    return mid;
-  }
-
-  /* ── AND THE BLOCKS NOTHING ELSE ASKS ABOUT ──
-     Train and Mind already carry Train, Walk and Read, so listing
-     those blocks again would be one question asked twice under two
-     names. What is left is everything the five never look at — the
-     shift, the trading hours, the wind-down — and that is the half of
-     this screen the tally could never have produced.
-
-     BY NAME, not by id. A block's id is per weekday, so "Work" on a
-     Monday and "Work" on a Tuesday are two records, and a factor
-     built on one of them has twelve days in a twelve-week window. */
-  function scPatBlocks() {
-    var seen = {}, out = [];
-    state.items.forEach(function (b) {
-      if (seen[b.n] || scItemsFor(b.n).length) return;
-      seen[b.n] = 1;
-      out.push(b.n);
-    });
-    return out;
-  }
-
-  /* ── DOES THIS FACTOR HOLD ON THIS DAY? ──
-     Yes, no, or NOT ASKED. Named apart from scRateRow below, which is
-     the control that asks YOU: this one asks whether a THING held on a
-     day, and confusing the two in a file this size is a reading trap. */
-  function scPatHeld(f, day, mid) {
-    var i, bs;
-    if (f.item) {
-      var raw = tickLog[day] && tickLog[day][f.item.id];
-      if (f.item.k === 'do') {
-        if (raw) return 1;
-        return scApplied(f.item, day) ? 0 : -1;
-      }
-      var v = parseFloat(raw);
-      if (!(v > 0) || mid[f.item.id] === undefined) return -1;
-      return v >= mid[f.item.id] ? 1 : 0;
-    }
-    /* A block name: scheduled that weekday and not taken off, or the
-       question was never put. */
-    bs = scByDay(new Date(day + 'T12:00:00').getDay()).filter(function (b) {
-      return b.n === f.block && !scOff(day, b.id);
-    });
-    if (!bs.length) return -1;
-    for (i = 0; i < bs.length; i++) {
-      if (blockLog[day] && blockLog[day][bs[i].id]) return 1;
-    }
-    return 0;
-  }
-
-  /* ── HOW FAR A THING MOVES A DAY ──
-     The mean rating of the days it was on, less the mean of the days
-     it was not. That is the whole statistic, and it is deliberately
-     the simplest one that answers the question asked — anything with
-     a coefficient in it would be a model, and a model you cannot see
-     the working of is exactly the kind of answer this app refuses
-     elsewhere.
-
-     It says what your days have in common. It does not say what
-     caused what, and the foot of the screen says so out loud rather
-     than leaving it to be inferred from a bar. */
-  function scPatRank() {
-    var floor = scDayBack(PAT - 1), mid = scPatMids(), rated = [];
-    Object.keys(rateLog).forEach(function (day) {
-      if (day >= floor && day <= scDay()) rated.push(day);
-    });
-
-    var facts = [];
-    scItems().forEach(function (it) {
-      facts.push({
-        key: 'i:' + it.id, item: it,
-        /* "Steps over 8,400", never "Steps 8,400+": the suffix hangs
-           off a unit that already has a space in front of it, so
-           "Sleep 7.5 h+" reads as a typo — and the name is dropped
-           whole into the sentence at the top, where a word is a word
-           and a plus sign is punctuation nobody speaks. */
-        n: it.k === 'do' ? it.n
-          : it.n + ' over ' + scPatMid(it, mid[it.id])
-      });
-    });
-    scPatBlocks().forEach(function (n) {
-      facts.push({ key: 'b:' + n, block: n, n: n });
-    });
-
-    var out = [];
-    facts.forEach(function (f) {
-      var yes = 0, ys = 0, no = 0, ns = 0;
-      rated.forEach(function (day) {
-        var a = scPatHeld(f, day, mid);
-        if (a < 0) return;
-        if (a) { yes++; ys += rateLog[day]; } else { no++; ns += rateLog[day]; }
-      });
-      if (yes < PAT_SIDE || no < PAT_SIDE) return;
-      out.push({ key: f.key, n: f.n, item: f.item, block: f.block,
-                 yes: yes, no: no, lift: ys / yes - ns / no });
-    });
-    out.sort(function (a, b) { return Math.abs(b.lift) - Math.abs(a.lift); });
-    return { rows: out, rated: rated.length };
-  }
-
-  /* The split printed at the item's own precision, so "Sleep 7.2 h"
-     and "Steps 8,400" both read as the figure you would have typed. */
-  function scPatMid(it, v) {
-    if (v === undefined) return '';
-    var dp = it.dp || 0;
-    return v.toLocaleString('en-GB',
-      { minimumFractionDigits: dp, maximumFractionDigits: dp })
-      + (it.unit || '');
-  }
-
-  /* ── THE ASK IS FIVE MARKS, AND IT IS IN TWO PLACES ──
-     It was three chips on one screen. Five because the question has
-     more than three honest answers in it and a row you fill is a
-     control nobody has to be taught, and in TWO places because the
-     screen that asks and the screen that reads the answer were the
-     same screen: Pattern is where you go to see what your good days
-     have in common, which is not where you are standing when a day
-     ends.
-
-     ONE CONTROL, built once and used twice. Two drawings of one
-     question is how they drift, and a day rated four at the foot of
-     the card had better be a day rated four on Pattern.
-
-     Pressing the mark you are already on takes the day off again, so
-     a mis-tap has a way back without a second control to explain it.
-
-     THE FILLED ONES ARE THE ACCENT, which is this app's one claim:
-     that something happened, and what happened is that you ANSWERED.
-     The rest stay hollow. How the day went is carried by how many are
-     filled, never by a colour — a red mark for a bad day would be the
-     screen grading you back, and this is the one screen in the app
-     that takes an opinion. */
   function scRateRow(day, ttl, after) {
     var wrap = scEl('div', 'rt-ask');
     if (ttl) wrap.appendChild(scEl('span', 'label', ttl));
@@ -10063,164 +9942,6 @@
      keep in step. */
   var RATE_DOT = '<svg viewBox="0 0 24 24" aria-hidden="true">'
     + '<circle cx="12" cy="12" r="8.8"/></svg>';
-
-  function scPaintPat() {
-    var pane = $('scPatPane');
-    pane.textContent = '';
-    var today = scDay();
-
-    pane.appendChild(scRateRow(today, 'How was today?', scPaintPat));
-    /* Yesterday only while it is unrated AND still open, so the row is
-       a thing to catch rather than a second permanent control. Two
-       days behind is inside the window too and is not offered: at
-       that distance you are not remembering a day, you are guessing
-       at one. */
-    var y = scDayBack(1);
-    if (scRateOf(y) === null && scTallyOpen(y)) {
-      pane.appendChild(scRateRow(y, 'And yesterday?', scPaintPat));
-    }
-
-    var rank = scPatRank();
-    if (rank.rated < PAT_FLOOR) {
-      var left = PAT_FLOOR - rank.rated;
-      pane.appendChild(scEl('p', 'pat-none', rank.rated
-        ? 'Rate ' + left + (left === 1 ? ' more day' : ' more days')
-          + ' and this starts reading. It needs both kinds to compare.'
-        : 'Say how a day went and this fills in. It lines up everything '
-          + 'you already log against the days you called good.'));
-      return;
-    }
-    if (!rank.rows.length) {
-      /* Rated enough days and still nothing to rank: every factor is
-         lopsided — you kept everything, or logged one thing. Said as
-         what is missing rather than as an error. */
-      pane.appendChild(scEl('p', 'pat-none',
-        'Nothing you log has enough days on both sides of it yet. It '
-        + 'needs ' + PAT_SIDE + ' days with a thing and ' + PAT_SIDE
-        + ' without.'));
-      return;
-    }
-
-    /* ── THE SENTENCE ──
-       The strongest thing in each direction, named. Never a
-       manufactured claim about why: "is on your good days" is what
-       the arithmetic actually found, and anything warmer than that is
-       a sentence the data cannot pay for. */
-    var up = null, dn = null;
-    rank.rows.forEach(function (r) {
-      if (r.lift > .05 && (!up || r.lift > up.lift)) up = r;
-      if (r.lift < -.05 && (!dn || r.lift < dn.lift)) dn = r;
-    });
-    var say = scEl('p', 'pat-say');
-    if (!up && !dn) {
-      say.textContent = 'Nothing you log tells your days apart yet.';
-    } else {
-      if (up) {
-        say.appendChild(scEl('b', null, up.n));
-        say.appendChild(document.createTextNode(
-          ' is on your good days more than anything else you log.'));
-      }
-      if (dn) {
-        if (up) say.appendChild(document.createTextNode(' '));
-        say.appendChild(scEl('b', null, dn.n));
-        say.appendChild(document.createTextNode(' is on your rough ones.'));
-      }
-    }
-    pane.appendChild(say);
-
-    var gh = scEl('div', 'grp-h');
-    gh.appendChild(scEl('span', 'pill', 'What moves a day, most first'));
-    gh.appendChild(scEl('span', 'c', String(rank.rows.length)));
-    pane.appendChild(gh);
-
-    /* ── BOTH DIRECTIONS WEAR THE SAME COLOUR ──
-       Which side of the zero line a bar is on is the whole of what
-       says up or down, and it costs no contrast at all — the day-off
-       dot's own argument. A red bar for the things on your rough days
-       would be the one thing this app never does: colour saying
-       whether. The number beside it carries the sign in words.
-
-       Scaled against the LARGEST thing on your own list, not against
-       a ceiling nobody set — the workouts ring's rule, for the same
-       reason: the rows have to read against each other. */
-    var most = Math.abs(rank.rows[0].lift) || 1;
-    var list = scEl('ul', 'pat-list');
-    rank.rows.forEach(function (r) {
-      var li = scEl('li', 'pat-row');
-      /* The glyph the thing already wears elsewhere: the tally's own
-         for one of the five, the block's for a block. */
-      var ic = r.item ? TALLY_ICON[r.item.id] : BLOCK_ICON[scIconFor(r.block)];
-      li.insertAdjacentHTML('beforeend',
-        '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">' + (ic || '') + '</svg>');
-      li.appendChild(scEl('span', 'pat-nm', r.n));
-      var mid = scEl('span', 'pat-mid');
-      mid.setAttribute('aria-hidden', 'true');
-      li.appendChild(mid);
-      /* ── THE SIGN COMES OFF THE ROUNDED FIGURE ──
-         A lift of -0.04 is zero at one decimal place, and reading the
-         sign off the raw number printed "−0.0" — a minus sign on
-         nothing, which reads as a rendering fault rather than as a
-         thing that makes no difference. Rounded first, and a zero
-         wears no sign at all. */
-      var fig = Math.abs(r.lift).toFixed(1);
-      var nil = fig === '0.0';
-      /* ── A ROW AT ZERO DRAWS NO BAR ──
-         Scaled against the top of the list, a lift of .02 comes out
-         about a pixel wide — a green speck sitting ON the axis, which
-         made the axis look green on exactly the rows that have
-         nothing to say. The figure beside it already reads 0.0, and
-         an unbroken axis with nothing on it is what that looks like. */
-      if (!nil) {
-        var bar = scEl('span', 'pat-bar ' + (r.lift < 0 ? 'is-dn' : 'is-up'));
-        bar.style.width = (Math.abs(r.lift) / most * 50).toFixed(2) + '%';
-        mid.appendChild(bar);
-      }
-      li.appendChild(scEl('span', 'pat-n pill' + (r.lift >= .5 ? ' is-up' : ''),
-        (nil ? '' : r.lift < 0 ? '−' : '+') + fig));
-      /* Spoken as one sentence with its sample in it. The bar says
-         nothing a screen reader can use and the bare figure says less
-         — "+0.4" under a heading is a number about nothing. */
-      li.setAttribute('aria-label', r.n + (nil
-        ? ' makes no difference to a day'
-        : ' moves a day ' + (r.lift < 0 ? 'down ' : 'up ') + fig)
-        + ', from ' + r.yes + ' days with it and ' + r.no + ' without.');
-      list.appendChild(li);
-    });
-    pane.appendChild(list);
-
-    pane.appendChild(scEl('p', 'ty-foot',
-      'From the ' + rank.rated + ' days you rated, out of the last twelve '
-      + 'weeks. It says what your days have in common, never what caused '
-      + 'what.'));
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     THE INTRO
-
-     Six cards on the first open, and the rule for what gets one is
-     narrow: it has to be something you could not find by pressing
-     around. A slide about the tab bar is a picture of the thing you
-     are already looking at.
-
-     Four of the six are genuinely invisible — a day card has a BACK,
-     the add control takes a SENTENCE, a long press on a row ticks it,
-     and Pattern is inert until you have rated some days. The other two
-     are the shape of the week and the promise about where the data
-     lives, and both are things you would otherwise have to be told by
-     somebody.
-
-     ── ONE MEANING PER CONTROL, AND NO HIDDEN THIRD STATE ──
-     Continue advances; the last one starts the week. "Don't show
-     again" leaves from any card. BOTH mark it seen, and Escape does
-     what "Don't show again" does — a way out that quietly means "ask
-     me tomorrow" is a third state nothing on screen tells you about,
-     and a first-run screen that comes back after you dismissed it has
-     stopped being an intro and become furniture.
-
-     Which is affordable only because it is not lost: Settings carries
-     "Show the intro" and it plays again from the top. Nothing here is
-     a one-time gift.
-     ═══════════════════════════════════════════════════════════ */
 
   var TOUR_KEY = 'sched.tour.v1';
 
@@ -10315,37 +10036,6 @@
        + '<circle cx="4.6" cy="21.4" r="1.5"/>'
        + '<rect x="7.6" y="20.4" width="10.2" height="2" rx="1"/>'
        + '</g></g>'
-    },
-    {
-      k: 'pattern',
-      t: 'It reads itself back',
-      s: 'Rate how a day went and see what your best days have in '
-       + 'common.',
-      /* ── RANKED BARS OFF AN AXIS, AND IT IS NOT THE PANEL'S OWN
-             SHAPE ──
-         Pattern draws bars either side of a centre axis, because the
-         side is what carries the direction. Drawn that way small it
-         does not read: the bar crossing the axis at its midpoint makes
-         a plus sign, moving the crossing down makes a flag, and four
-         bars close enough to fill the box merge into a blob. Three
-         attempts, all rendered beside the other three, all worse than
-         the ones next to them.
-
-         So it is the panel's other true fact instead: bars ranked
-         longest first off an axis at the side. That IS what the screen
-         shows, it reads as a chart at a glance, and what it leaves out
-         is a distinction nobody needs before they have seen it.
-
-         They are RECTS rather than the paths this went in as, because
-         the growth is a scaleX about the axis and a horizontal path
-         has a zero-height bounding box for `transform-box: fill-box`
-         to work from. */
-      i: '<path d="M4.4 3.4v17.2" opacity=".45"/>'
-       + '<g fill="currentColor" stroke="none">'
-       + '<rect class="tr-bar" x="5.4" y="6.3" width="13.4" height="2.7" rx="1.35"/>'
-       + '<rect class="tr-bar" x="5.4" y="11" width="9.6" height="2.7" rx="1.35"/>'
-       + '<rect class="tr-bar" x="5.4" y="15.7" width="5.4" height="2.7" rx="1.35"/>'
-       + '</g>'
     },
     {
       k: 'friends',
@@ -10596,7 +10286,7 @@
      first one — the same rule sched.view.v1 already keeps, and the
      reason the list is written out rather than trusted. */
   var TYSTOP_KEY = 'sched.ty.v1';
-  var TYSTOPS = ['up', 'work', 'pat'];
+  var TYSTOPS = ['up', 'work'];
   var tyStop = 'up';
 
   function scTyStop(v, save) {
@@ -10609,14 +10299,12 @@
     tyStop = TYSTOPS.indexOf(v) < 0 ? 'up' : v;
     $('scTyPane').hidden = tyStop !== 'up';
     $('scWorkPane').hidden = tyStop !== 'work';
-    $('scPatPane').hidden = tyStop !== 'pat';
     [].forEach.call(document.querySelectorAll('[data-tystop]'), function (t) {
       var on = t.dataset.tystop === tyStop;
       t.classList.toggle('on', on);
       t.setAttribute('aria-current', on ? 'true' : 'false');
     });
     if (tyStop === 'work') scPaintWork();
-    if (tyStop === 'pat') scPaintPat();
     /* Arriving at the stop is what brings the card up, not painting
        the screen: a repaint happens on every tick and every half
        minute, and a card that came back on one of those would be a
@@ -13404,8 +13092,52 @@
         var bits = [];
         if (c.on.length) bits.push(c.kept + ' of ' + c.on.length + ' kept');
         bits.push(c.ticks + ' of ' + c.items + ' logged');
-        if (c.rate) bits.push('rated ' + c.rate + ' of ' + RATE_MAX);
+        /* Outside the window there is nothing to press, so the answer
+           is a figure among the others the way it always was. */
+        if (!scTallyOpen(open) && c.rate) {
+          bits.push('rated ' + c.rate + ' of ' + RATE_MAX);
+        }
         body.appendChild(scEl('p', 'cl-sum', bits.join(' · ')));
+
+        /* ── AND THE UNGATED DOOR LANDED HERE WHEN PATTERN WENT ──
+           The ask was in two places and it is ONE control: the foot of
+           today's card, and the screen that reads the answers back.
+           The card's is a CONVENIENCE and is gated on `scDayDone` —
+           it arrives when the last block is ticked, which is the
+           moment the day stops being a plan — so it was only ever
+           affordable because a second, UNGATED door existed. Pattern
+           was that door. Take it away and leave the gate standing and
+           a day you never finished can never be rated at all, which
+           is the record made impossible to keep on exactly the days
+           worth recording.
+
+           This sheet is where that door belongs rather than anywhere
+           new: it is the one screen that already READS the rating —
+           it printed "rated 4 of 5" among what the day was — and a
+           reader that cannot answer its own question is a readout
+           beside a control somewhere else.
+
+           IT IS THE SAME `scRateRow`, which is the rule this pair has
+           always kept: two drawings of one question is how they
+           drift, and a day rated four here had better be a day rated
+           four on the card. `scSetRate` refuses outside the backfill
+           window on its own and the row says so, so a month of days
+           that cannot be written needs no second gate here — which
+           is also why the calendar stays a read-back rather than
+           becoming an editor: this is the one thing on the sheet you
+           can answer, and it is an opinion rather than a record. */
+        /* AND ONLY WHERE IT CAN BE ANSWERED. `scSetRate` refuses
+           outside today and the two days behind it, so on a day three
+           weeks back this would be five controls whose every press is
+           a toast saying no — and a control that exists and refuses
+           is worse than one that is not there, which is the deck's
+           own conclusion about the way back out. Drawn on the days
+           the record is open and read back as a figure on the rest. */
+        if (scTallyOpen(open)) {
+          body.appendChild(scRateRow(open, 'How was this day?', function () {
+            draw();
+          }));
+        }
 
         if (!c.all.length) {
           body.appendChild(scEl('p', 'mn-say', 'Nothing was on this day'));

@@ -2665,6 +2665,10 @@ of `--hair`.
 
 ## Pattern is the record read back
 
+**THIS SCREEN IS GONE — see "Pattern is gone, and the ask stayed" at
+the foot of this file.** Everything below is the reasoning it was
+built on, kept because half of it is about the ASK, which survives it.
+
 Every other screen in this app SHOWS you the record. This one reads
 it: of everything you log, which things are on your good days and
 which are on your rough ones, ranked by how far each one moves a day.
@@ -9563,3 +9567,102 @@ check measures.
 **`.tr-sheet` went with the card that used it.** Nothing referenced
 those keyframes afterwards, and a dead rule that still cascades is not
 dead.
+
+## Pattern is gone, and the ask stayed
+
+The third stop on Today, and the one screen here that READ the record
+back rather than drawing it. Out on request. What went with it is the
+whole of the arithmetic — the difference of means, the twelve-week
+window, the five-days-a-side floor, the fourteen rated days before it
+would say anything, the ranked bars and the axis that carried their
+direction — plus `scPatMids`, `scPatBlocks`, `scPatHeld`, `scPatRank`,
+`scPaintPat`, 158 lines of stylesheet and its card in the intro.
+
+**WHAT STAYED IS THE ASK, BECAUSE IT KEPT A READER.** `sched.rate.v2`
+is still written by the row at the foot of today's card and still
+drawn on the calendar's day sheet, which printed *rated 4 of 5* among
+what that day was long before this. A record with somewhere to be read
+is not a key nothing reads — the test this file applies to the palette
+name, the subtitle and the old rating scale — and this one passes it.
+The data is untouched: nothing sweeps `sched.rate.v2`.
+
+### Removing a screen moved a door, and the gate is why
+
+**THE CARD'S ASK IS GATED AND WAS ONLY EVER AFFORDABLE BECAUSE PATTERN
+WAS NOT.** `scDayDone` holds it back until every block the day asked
+of you is ticked, which is right — *"How was today?"* at nine in the
+morning is a question you cannot answer. The cost of that gate was
+paid by a second, UNGATED door, and this file already said so in the
+card's own comment: *gating the only ask in the app on finishing
+everything would make the record impossible to keep on exactly the
+days worth recording.*
+
+Take Pattern out and leave the gate standing and a day you never
+finished can never be rated at all. **So the door moved to the
+calendar's day sheet**, which is where it belongs rather than anywhere
+new: that sheet is the one screen that already READ the rating, and a
+reader that cannot answer its own question is a readout beside a
+control somewhere else.
+
+**It is the same `scRateRow`**, which is the rule this pair has always
+kept — two drawings of one question is how they drift, and a day rated
+four on the card had better be a day rated four here.
+
+**AND ONLY ON THE DAYS IT CAN ANSWER.** `scSetRate` refuses outside
+today and the two days behind it, so on a day three weeks back the row
+would be five controls whose every press is a toast saying no — and a
+control that exists and refuses is worse than one that is not there.
+Inside the window it is the ask; outside it the figure goes back into
+the summary line, which is what that sheet drew before. Both halves
+are measured, because each passes on the other's bug.
+
+### Two functions were deleted that were never Pattern's
+
+**`scPatMid` FORMATS A FIGURE WITH ITS UNIT AND THE NUMBER DIAL CALLS
+IT EIGHT TIMES** — the readout, the ladder's ends, the foot's *620
+added, 2,620 today*, and both of the sub's states. The prefix said one
+screen owned it; the dial had depended on it for months. It is `scFig`
+now, renamed rather than left under a prefix pointing at a deleted
+screen.
+
+**And `scRateOf`, `scRateOK`, `scSetRate` and `scRateLoad` sat inside
+the same region** and went with it, while four call sites outside kept
+calling them.
+
+**`node --check` WAS PERFECTLY HAPPY WITH BOTH.** A missing function
+is a runtime fault: the dial would have thrown on the first drag of
+Steps and the day card on the first render, and nothing before those
+presses would have said a word. **What found them was opening the
+screens** — the parse is not a check that the app still works.
+
+### The rating's repair never wrote back, and that is the fourth time
+
+The stricter check found a bug that had nothing to do with this
+change. `scRateLoad` drops a damaged entry from `rateLog` in memory
+and **did not save the result**, so three bad values were dropped on
+every boot and all three stayed on disk — the repair redone every open
+and lost the moment anything else wrote the key.
+
+**It survived because the only thing that ever read it was Pattern,
+which read the repaired copy IN MEMORY.** The screen looked right
+while the record stayed damaged, for as long as nobody asked the
+record. The old check read Pattern's own foot; the new one reads the
+store, and reported `n: 40, bad: 3` at once.
+
+`scClean` minting block ids that `scLoad` did not save, `scTrainLoad`
+filling in a summed estimate it never saved, `scMindLoad` normalising
+a damaged day in memory — and this. **Four times, and every one of
+them was found by asking the RECORD rather than the screen.**
+
+### And the intro went to three cards
+
+*It reads itself back — rate how a day went and see what your best
+days have in common* named a screen that no longer exists, which is
+the fault the card added one commit earlier exists to catch. Removed
+rather than reworded: what it taught is gone. `tr-bar`'s keyframes
+went with the only scene that used them.
+
+**Three cards is not a worse intro than four.** A count is not a
+shape: the rule was always that each card says one thing nobody can
+find by pressing around, and the rating row appears at the foot of the
+day by itself.

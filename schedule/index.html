@@ -69,7 +69,7 @@
   } catch (e) {}
 }());
 </script>
-<link rel="stylesheet" href="app.css?v=52352a5d" />
+<link rel="stylesheet" href="app.css?v=bf22644c" />
 </head>
 <body>
 
@@ -125,8 +125,6 @@
               aria-current="true">Showing up</button>
       <button class="fr-stop" id="scTyWork" data-tystop="work"
               aria-current="false">Workouts</button>
-      <button class="fr-stop" id="scTyPat" data-tystop="pat"
-              aria-current="false">Pattern</button>
     </nav>
     <div id="scTyPane">
       <div class="ty-hero">
@@ -141,7 +139,6 @@
       <p class="ty-foot" id="scTallyFoot"></p>
     </div>
     <div class="work" id="scWorkPane" hidden></div>
-    <div class="pat" id="scPatPane" hidden></div>
   </section>
 
   <!-- ── the history a row opens ──
@@ -200,9 +197,9 @@
        edges and nothing to swipe. The back of the day is still a
        back — the flip is on the panel now rather than on a card. -->
   <!-- ── NOTES ──
-       Its own tab, where Goals was. Showing up, Workouts and Pattern
-       are three ways of reading the day you are in; a note is not one
-       of those — it is the thinking the day is in service of, and it
+       Its own tab, where Goals was. Showing up and Workouts are two
+       ways of reading the day you are in; a note is not one of
+       those — it is the thinking the day is in service of, and it
        is the one screen here you write rather than tick.
 
        One pane, two states: the list, and one note. -->
@@ -285,11 +282,11 @@
 <!-- ── the intro ──
      The first open, and the only screen in this app that explains
      rather than records. It exists because four of the things this app
-     can do are INVISIBLE until somebody tells you: a day card has a
-     BACK, the add button takes a sentence, a long press on a row ticks
-     it, and Pattern does nothing at all until you have rated some days.
-     None of those is findable by pressing around, which is the only
-     test a card here has to pass — a slide about the tab bar would be
+     can do are INVISIBLE until somebody tells you: the add button
+     takes a sentence, a line of type is the door to the month and to
+     the week, and a friend's board is behind a code. None of those is
+     findable by pressing around, which is the only test a card here
+     has to pass — a slide about the tab bar would be
      a picture of something you are already looking at.
 
      It is built by scTourOpen and empty until then: six slides of
@@ -310,6 +307,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=a0d69421"></script>
+<script src="app.js?v=8496844d"></script>
 </body>
 </html>
