@@ -15441,23 +15441,48 @@ const SAID = [
       if (!localStorage.getItem('sched.habit.v1')) {
         localStorage.setItem('sched.habit.v1', JSON.stringify([
           { id: 'h1', n: 'Cooking', k: 'do', unit: '', aim: 2,
-            hue: '--w-orange' }]));
-        /* Sundays, and nothing else — so "usually on" has a real
-           answer and the last one is three days behind the frozen
+            hue: '--w-orange' },
+          /* TWO HABITS, BECAUSE THE AIM IS WHAT DECIDES THE PANEL. One
+             with a number to be measured against and one without, so
+             each path is measured on the record it is for rather than
+             one of them being asserted as an absence. */
+          { id: 'h2', n: 'Charting', k: 'do', unit: '', aim: 0,
+            hue: '--w-violet' }]));
+        const day = (x) => x.getFullYear() + '-'
+          + String(x.getMonth() + 1).padStart(2, '0') + '-'
+          + String(x.getDate()).padStart(2, '0');
+        const log = {};
+        const put = (x, k) => { const d = day(x); log[d] = log[d] || {}; log[d][k] = 1; };
+        /* Charting on Sundays and nothing else — so "usually on" has a
+           real answer and the last one is six days behind the frozen
            Saturday. Train on every other day beside it, which is what
            makes the built-in half of this testable rather than
            stated. */
-        const log = {};
         for (let i = 0; i < 140; i++) {
           const x = new Date(FROZEN);
           x.setDate(x.getDate() - i);
-          const day = x.getFullYear() + '-'
-            + String(x.getMonth() + 1).padStart(2, '0') + '-'
-            + String(x.getDate()).padStart(2, '0');
-          log[day] = {};
-          if (x.getDay() === 0) log[day].h1 = 1;
-          if (x.getDay() % 2 === 0) log[day].t = 1;
+          if (x.getDay() === 0) put(x, 'h2');
+          if (x.getDay() % 2 === 0) put(x, 't');
         }
+        /* COOKING IS BUILT BY THE WEEK, because that is the grain the
+           panel draws: twelve completed weeks of Wednesday-and-Sunday
+           with TWO of them short, so ten of twelve hit the aim and the
+           unlit pair is a real reading rather than an empty set. This
+           week is the Wednesday alone — its Sunday has not happened —
+           which puts the bar at one of two. */
+        const PER = [2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2];
+        const mon = new Date(FROZEN);
+        mon.setDate(mon.getDate() - ((mon.getDay() + 6) % 7));
+        PER.forEach((n, w) => {
+          const back = PER.length - w;
+          [2, 6].slice(0, n).forEach((off) => {
+            const x = new Date(mon);
+            x.setDate(x.getDate() - back * 7 + off);
+            put(x, 'h1');
+          });
+        });
+        const wed = new Date(mon); wed.setDate(wed.getDate() + 2);
+        put(wed, 'h1');
         localStorage.setItem('sched.tick.v1', JSON.stringify(log));
       }
       if (!localStorage.getItem('sched.net.v1')) {
@@ -15498,13 +15523,15 @@ const SAID = [
       return out;
     };
 
-    const hbMine = await hbFigs('Cooking');
+    const hbMine = await hbFigs('Charting');
     /* WHEN IT LANDS, HOW MUCH OF IT LATELY, AND HOW LONG IT IS BEEN.
        Every Sunday for twenty weeks, so the weekday is unambiguous —
-       and the frozen day is a Saturday, which puts the last one three
-       days back rather than on the day the check runs. */
+       and the frozen day is a Saturday, which puts the last one six
+       days back rather than on the day the check runs. THIS habit has
+       no aim, which is what keeps it on the map: one with a number to
+       be measured against gets the bar instead, asserted below. */
     ok('a habit of yours says when it lands rather than how long a streak is',
-      hbMine.title === 'Cooking'
+      hbMine.title === 'Charting'
       && hbMine.vals[0] === 'Sundays' && hbMine.caps[0] === 'usually on'
       && hbMine.caps[1] === 'in 30 days' && hbMine.vals[1] === '4'
       && hbMine.vals[2] === '6 days' && hbMine.caps[2] === 'since the last',
@@ -15522,6 +15549,106 @@ const SAID = [
     ok('...and a built-in tick still says the three it always said',
       hbTrain.caps[0] === 'longest streak'
       && hbTrain.caps[2] === 'days a week', hbTrain);
+
+    /* ═════════════════════════════════════════════════════
+       A HABIT WITH AN AIM IS ASKED ABOUT PROGRESS, NOT DRAWN A MAP
+
+       Nine treatments were rendered over the real sheet and the one
+       picked drops the twenty-six week map rather than sitting under
+       it. What fails silently: a panel that keeps both is two pictures
+       of one record, a bar built from its own arithmetic drifts from
+       the tile's, and a sweeping change takes the map off Steps.
+       ═════════════════════════════════════════════════════ */
+    const hbSolo = await hbpage.evaluate(async () => {
+      const r = [...document.querySelectorAll('.ty-row')]
+        .find((x) => x.dataset.item === 'h1');
+      if (!r) throw new Error('no Cooking row');
+      r.querySelector('.ty-hist').click();
+      await new Promise((z) => setTimeout(z, 520));
+      const t = document.querySelector('.ty-sol-t');
+      const f = t && t.querySelector('i');
+      const bars = [...document.querySelectorAll('.ty-sol-w > i')];
+      /* The token RESOLVED, never its declared text: a computed
+         background serialises as rgb() and --tick-off is a hex, so a
+         string comparison between the two never matches and every bar
+         counts as lit. Read a probe element the browser has actually
+         styled. */
+      const probe = document.createElement('i');
+      probe.style.background = 'var(--tick-off)';
+      document.querySelector('.ty-panel').appendChild(probe);
+      const off = getComputedStyle(probe).backgroundColor;
+      probe.remove();
+      return {
+        span: (document.querySelector('.ty-span') || {}).textContent,
+        cal: !!document.querySelector('.ty-cal'),
+        stats: document.querySelectorAll('.ty-stats > div').length,
+        fig: (document.querySelector('.ty-sol > b') || {}).textContent,
+        cap: (document.querySelector('.ty-sol > span') || {}).textContent,
+        /* The BOX the fill draws, never the width it was told to be. */
+        fill: t && f ? Math.round(f.getBoundingClientRect().width
+          / t.getBoundingClientRect().width * 100) : null,
+        bars: bars.length,
+        /* Lit is read off the composited colour rather than off a
+           class: a bar carrying the right class over the neutral is
+           exactly what a broken hue looks like in the DOM. */
+        off: off,
+        lit: bars.filter((b) =>
+          getComputedStyle(b).backgroundColor !== off).length,
+        heights: bars.map((b) => Math.round(b.getBoundingClientRect().height)),
+        lab: (document.querySelector('.ty-sol-w') || {}).getAttribute('aria-label'),
+        foot: (document.querySelector('.ty-hint') || {}).textContent,
+      };
+    });
+    await hbpage.keyboard.press('Escape');
+    await hbpage.waitForTimeout(380);
+    /* THE MAP IS GONE AND THE THREE FIGURES WITH IT, which is the whole
+       of what was chosen — a build that added the bar under them
+       passes every other assertion here. */
+    ok('a habit with an aim gets the week instead of the map',
+      hbSolo.cal === false && hbSolo.stats === 0
+      && hbSolo.span === '12 weeks'
+      && hbSolo.fig === '1 of 2' && hbSolo.cap === 'this week', hbSolo);
+    /* THE BAR IS THE FIGURE BESIDE IT. One of two is half the track,
+       measured as the box rather than read back off the declaration. */
+    ok('...and the bar is that figure drawn, not a full one',
+      hbSolo.fill === 50, hbSolo);
+    /* TWELVE WEEKS, TEN OF THEM LIT. Both halves: a build that lights
+       every bar passes a count of twelve, and one that lights none
+       passes any check that only asks how many there are. The two
+       short weeks are in the fixture on purpose. */
+    ok('...and twelve weeks behind it, lit where you hit the aim',
+      hbSolo.bars === 12 && hbSolo.lit === 10
+      && /10 of the last 12 weeks/.test(hbSolo.lab || ''), hbSolo);
+    /* A SHAPE IS NOTHING IF EVERY BAR IS THE SAME HEIGHT. */
+    ok('...and the weeks are drawn as tall as they were',
+      new Set(hbSolo.heights).size >= 2, hbSolo.heights);
+    /* AND THE LONG RECORD STILL SAYS WHAT IT ALWAYS SAID, which is the
+       only thing left on the panel about the other fourteen weeks. */
+    ok('...and the days line survives the map it used to sit under',
+      /of 182 days/.test(hbSolo.foot || ''), hbSolo.foot);
+
+    const hbTile = await hbpage.evaluate(() =>
+      [...document.querySelectorAll('.ty-row')].map((r) => {
+        const t = r.querySelector('.ty-tl'), f = t && t.querySelector('i');
+        return { id: r.dataset.item,
+          w: t && f ? Math.round(f.getBoundingClientRect().width
+            / t.getBoundingClientRect().width * 100) : null,
+          lab: (r.querySelector('.ty-card') || {}).getAttribute
+            ? r.querySelector('.ty-card').getAttribute('aria-label') : '' };
+      }));
+    const hbMe = hbTile.find((x) => x.id === 'h1');
+    /* ONE SOURCE, TWO DRAWINGS. The tile's track and the sheet's bar
+       are the same figure at two sizes, so they are asserted EQUAL
+       rather than each against a number — a second piece of
+       arithmetic for it is exactly how the two come to disagree. */
+    ok('the tile carries the same week the sheet does',
+      hbMe && hbMe.w === hbSolo.fill
+      && / 1 of 2 this week/.test(hbMe.lab || ''), { tile: hbMe, sheet: hbSolo.fill });
+    /* AND ONLY WHERE THERE IS A NUMBER TO BE MEASURED AGAINST. Six
+       built-ins and a habit of yours with no aim, none of which has a
+       denominator — a track on those would be a bar to nowhere. */
+    ok('...and no tile without an aim has one at all',
+      hbTile.filter((x) => x.w !== null).length === 1, hbTile);
 
     ok('nothing threw through the habit figures', hberrs.length === 0,
       hberrs.slice(0, 4));

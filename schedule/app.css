@@ -1830,6 +1830,46 @@ body {
    the quietest token and had the two backwards. */
 .ty-hint { margin-top: 16px; font-size: 11px; color: var(--dim); }
 
+/* ── A HABIT OF YOURS WITH AN AIM: THE BAR INSTEAD OF THE MAP ──
+   34px, because with the map gone this is the first thing on the
+   panel rather than a figure under a picture — the three it replaces
+   were 22 and were three. */
+.ty-sol { margin-top: 16px; }
+.ty-sol > b {
+  display: block; font-size: 34px; font-weight: 700;
+  letter-spacing: -.03em; line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+.ty-sol > span { display: block; margin-top: 2px; font-size: 11.5px; color: var(--spent); }
+/* The track is a SURFACE and the fill is a mark: the fill is held to
+   3:1 against the card it is drawn on, which every one of the seven
+   habit hues clears on both faces. Against the track it cannot be
+   held to anything — no grey exists that clears 3:1 against all
+   seven, the ceiling being 2.69 with a white one. */
+.ty-sol-t {
+  position: relative; margin-top: 16px; height: 10px;
+  border-radius: 5px; background: var(--tick-off); overflow: hidden;
+}
+.ty-sol-t > i { position: absolute; inset: 0 auto 0 0; border-radius: 5px; }
+/* Twelve weeks, each as tall as it was. A week under the aim keeps the
+   flat neutral rather than a weaker copy of the hue, which is the
+   strip's own rule: an unlit mark never says WHICH, only the lit one
+   does. */
+.ty-sol-w {
+  display: flex; align-items: flex-end; gap: 4px;
+  margin-top: 22px; height: 56px;
+}
+.ty-sol-w > i { flex: 1 1 0; border-radius: 2px; background: var(--tick-off); }
+/* On the tile, in the CARD's grid: `.ty-body` is `display: contents`,
+   so a track that did not span the columns would size to its own
+   content and come out about forty pixels wide. Measured. */
+.ty-card .ty-tl {
+  position: relative; grid-column: 1 / -1;
+  margin-top: 8px; height: 4px;
+  border-radius: 2px; background: var(--tick-off); overflow: hidden;
+}
+.ty-card .ty-tl > i { position: absolute; inset: 0 auto 0 0; border-radius: 2px; }
+
 /* A backdrop-filter on a panel that neither moves nor animates. The
    orrery took every CSS filter off ITS map after measuring what one
    costs over a subtree being rescaled every frame; the argument does

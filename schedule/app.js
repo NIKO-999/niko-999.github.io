@@ -3773,6 +3773,26 @@
         if (run >= 2) props.appendChild(scEl('span', 'pill' + (run >= 7 ? ' is-run' : ''), run + ' days'));
       }
       body.appendChild(props);
+      /* ── AND A HABIT WITH AN AIM CARRIES THE WEEK ON ITS FOOT ──
+         The word above it is about TODAY and this is about the week,
+         which is two windows on one tile — and it is what the tile was
+         missing: the tag already says "3 a week" and nothing anywhere
+         said how many of the three you had. The sheet two presses in
+         draws the same figure at a size you can read; this is the one
+         you see every morning without asking for it.
+
+         `.ty-body` is `display: contents`, so this lands in the CARD's
+         own grid rather than in a box of its own — which is why the
+         rule spans the whole of it rather than sizing to its content. */
+      if (scSolo(it)) {
+        var wp = scWeekProg(it);
+        var wtr = scEl('span', 'ty-tl');
+        var wfi = scEl('i');
+        wfi.style.width = Math.min(1, wp.week / wp.aim) * 100 + '%';
+        wfi.style.background = scTagHue(it);
+        wtr.appendChild(wfi);
+        body.appendChild(wtr);
+      }
       /* ── THE TICK LOGS AND THE TILE OPENS THE RECORD ──
          Both were logging before, with the strip beside them opening
          the history — and the strip is what went, so the way in had to
@@ -3790,7 +3810,8 @@
       c.setAttribute('aria-label', (on ? 'Unlog ' : 'Log ') + it.n + ', '
         + (on ? 'logged' : 'not yet')
         + (on && it.k === 'num' ? ', ' + got[it.id] + (it.unit || '') : '')
-        + (late ? ', missed its window' : ''));
+        + (late ? ', missed its window' : '')
+        + (scSolo(it) ? ', ' + scWeekProg(it).week + ' of ' + it.aim + ' this week' : ''));
       scDoubleTap(c, function () { scTallyTap(it, day); }, function () {
         /* Using the gesture is the best possible sign that it has been
            learned, so the card that teaches it stops appearing. */
@@ -4192,6 +4213,49 @@
     since: '<circle cx="12" cy="12" r="8.6"/><path d="M12 6.8V12l3.8 2.2"/>'
   };
 
+  /* ── A HABIT OF YOURS WITH AN AIM IS ASKED ABOUT PROGRESS ──
+     The six built-ins are daily by design and their history is a map
+     of every day: twenty-six weeks, kept against missed. One of yours
+     is kept three times a week, and on that shape a map is mostly
+     empty and the question you actually have is whether you are
+     keeping the number you set.
+
+     Nine treatments were rendered over the real sheet at 390x844 on a
+     real record and read at 1:1. What this beat: one bar under the
+     map, the same figure drawn as the aim's own units, a bar with the
+     aim marked on it so you can go past it, a percentage of the
+     thirty days, twelve weeks under the map, now against the thirty
+     days before, and a rolling rate as a line. What shipped drops the
+     MAP rather than sitting under it, which is what made the rest of
+     them two pictures of one record.
+
+     An aim of nought has no denominator, so it keeps the map and the
+     rhythm figures — which is the same gate `scTagWord` already uses
+     to decide whether the tile can say "3 a week" at all. */
+  function scSolo(item) {
+    return !!(item && item.own && item.k === 'do' && item.aim > 0);
+  }
+  /* ONE SOURCE, TWO DRAWINGS. The tile's track and the sheet's bar are
+     the same figure at two sizes, and a second piece of arithmetic for
+     it is how the two come to disagree about the week you are in. */
+  function scWeekProg(item, d) {
+    var h = d || scHist(item.id);
+    var lead = ((h.length ? h[h.length - 1].dow : 0) + 6) % 7;
+    var start = h.length - 1 - lead;          /* the Monday of this week */
+    var i, n = 0;
+    for (i = Math.max(0, start); i < h.length; i++) if (h[i].on) n++;
+    /* The twelve weeks BEHIND this one. The week in progress is the
+       figure above them, so drawing it here as well puts a stub on the
+       end that reads as a week you missed rather than one you are in
+       — and says the same thing twice. */
+    var weeks = [];
+    for (var w = 12; w >= 1; w--) {
+      var s = start - w * 7, c = 0;
+      for (i = Math.max(0, s); i < s + 7 && i < h.length; i++) if (h[i].on) c++;
+      weeks.push(c);
+    }
+    return { week: n, aim: item.aim, weeks: weeks };
+  }
   /* ── A DAY THAT DID NOT APPLY IS SKIPPED, NOT COUNTED EITHER WAY ──
      It neither breaks a streak nor extends one, and it is out of the
      denominator. Counting it as a miss was the old behaviour and it
@@ -4321,8 +4385,9 @@
     var t = scEl('span', 'ty-title', item.n);
     t.id = 'scTyTitle';
     head.appendChild(t);
-    head.appendChild(scEl('span', 'ty-span', '26 weeks'));
+    head.appendChild(scEl('span', 'ty-span', scSolo(item) ? '12 weeks' : '26 weeks'));
     p.appendChild(head);
+    if (scSolo(item)) { scSoloBody(p, item, d); scHistFoot(p, item, st); return; }
     p.insertAdjacentHTML('beforeend', scCalSvg(d));
 
     var stats = scEl('div', 'ty-stats');
@@ -4344,6 +4409,65 @@
       stats.appendChild(cell);
     });
     p.appendChild(stats);
+    scHistFoot(p, item, st);
+  }
+
+  /* ── THE BAR INSTEAD OF THE MAP ──
+     A big figure saying where this week stands against the number you
+     set, the bar under it, and the twelve weeks behind it as a shape.
+     Nothing else: the twenty-six week map and the three rhythm figures
+     both went, because a progress bar UNDER a map is two pictures of
+     one record, which is what every rejected treatment had in common.
+
+     The bars are the habit's own hue, which is the colour its tag
+     wears everywhere else — a colour in this app says WHICH, and this
+     one says which habit. A week under the aim is the flat neutral,
+     never a diluted version of the hue: an unlit mark is never a
+     weaker copy of a lit one, which is the strip's own rule.
+
+     AND THE FILL IS MEASURED AGAINST THE CARD, NOT AGAINST THE TRACK.
+     The obvious claim is 3:1 between the filled part and the rest, and
+     it is unreachable: scanned over every grey from black to white,
+     the best any track can do against the worst of the seven hues is
+     2.69:1 on the dark face, with a WHITE track. The fill's top, foot
+     and leading edges all border the card, where the worst hue reads
+     3.52:1 dark and 4.44:1 light; the track is a surface, held to what
+     every other unlit mark here is held to. */
+  function scSoloBody(p, item, d) {
+    var pr = scWeekProg(item, d);
+    var hue = scTagHue(item);
+    var sol = scEl('div', 'ty-sol');
+    sol.appendChild(scEl('b', null, pr.week + ' of ' + pr.aim));
+    sol.appendChild(scEl('span', null, 'this week'));
+    var tr = scEl('div', 'ty-sol-t');
+    var fi = scEl('i');
+    fi.style.width = Math.min(1, pr.week / pr.aim) * 100 + '%';
+    fi.style.background = hue;
+    tr.appendChild(fi);
+    sol.appendChild(tr);
+    var top = pr.aim + 1, hit = 0;
+    pr.weeks.forEach(function (c) { if (c > top) top = c; if (c >= pr.aim) hit++; });
+    var wk = scEl('div', 'ty-sol-w');
+    pr.weeks.forEach(function (c) {
+      var bar = scEl('i');
+      bar.style.height = Math.max(6, (c / top) * 56) + 'px';
+      if (c >= pr.aim) bar.style.background = hue;
+      wk.appendChild(bar);
+    });
+    /* The shape carries how many weeks you hit it, and a shape says
+       nothing at all to a screen reader — so the figure it draws is
+       written out rather than the twelve counts read one by one. */
+    wk.setAttribute('role', 'img');
+    wk.setAttribute('aria-label', hit + ' of the last 12 weeks you did it '
+      + pr.aim + (pr.aim === 1 ? ' time' : ' times') + ' or more');
+    sol.appendChild(wk);
+    p.appendChild(sol);
+  }
+
+  /* One foot, both bodies: the days line, the way into a habit's own
+     settings, and the veil. Written twice they drift, and the second
+     copy is the one nobody remembers to change. */
+  function scHistFoot(p, item, st) {
     /* Out of the days it was ON. "121 of 182" on a three-day-a-week
        session is a fraction of a number nobody was ever aiming at. */
     p.appendChild(scEl('p', 'ty-hint',

@@ -9129,6 +9129,99 @@ filled blocks, and a clock for how long it has been. The clock never
 sits beside `now`, the other ring on that list, because this is the
 figure that replaces it.
 
+### And a habit with an AIM is asked about progress instead
+
+Asked for as *can we just try the progress, maybe just having a
+progress bar, then how consistent that will be with making progress*
+— which turns out to be two questions, and the options split on which
+one they answer. **Nine treatments were rendered over the real sheet
+at 390x844 on a real record and read at 1:1**, plus two on the tile.
+
+**THE MAP GOES; IT DOES NOT GET A BAR UNDER IT.** That is the whole
+of what was chosen and it is what every rejected treatment had in
+common — a bar under twenty-six weeks of cells is two pictures of one
+record, which is the frame-inside-a-frame this project keeps taking
+back out. The six built-ins are daily by design and a map of every
+day is the right picture for them; one of yours is kept three times a
+week, and on that shape the map is mostly empty while the question
+you actually have is whether you are keeping the number you set.
+
+What it beat: **one bar under the map** (the duplication above),
+**pips** — the aim drawn in its own units, which is better at three
+and is seven slivers at seven — **a marked target**, the only one
+that can show you going past the aim and the one that costs a moment
+to read, **a percentage of thirty days**, which on a real record
+landed on exactly 100% and cannot say you did more, **twelve weeks
+under the map**, **now against the thirty days before**, and **a
+rolling rate as a line**.
+
+**AND TWO OF THEM FAILED ON A RULE RATHER THAN A LOOK.** Now-against-
+before prints a big **−1** when you are level, because the current
+thirty days always contain an unfinished week — and a figure that
+large saying you have got worse is the screen grading you, which this
+app has never done. The rolling line was the only treatment that
+SHOWS you got better rather than stating it, and it is the one to
+come back to if the consistency question is ever asked on its own.
+
+**AN AIM OF NOUGHT KEEPS THE MAP**, because there is no denominator
+to draw against — the same gate `scTagWord` already uses to decide
+whether the tile can say "3 a week" at all.
+
+**THE TWELVE WEEKS ARE THE TWELVE BEHIND THIS ONE.** The week in
+progress is the figure above them, so drawing it in the strip as well
+puts a stub on the end that reads as a week you missed rather than
+one you are in — and says the same thing twice. The rendered option
+had it; the shipped one does not.
+
+**THE HEAD SAYS WHAT THE PANEL COVERS**, which is what `.ty-span` has
+always done: `12 weeks` where every other item says `26`. Left at 26
+it is a caption for a drawing that is no longer there.
+
+**AND THE FILL IS MEASURED AGAINST THE CARD, NEVER AGAINST THE
+TRACK.** The obvious claim is 3:1 between the filled part and the
+rest, and it is **unreachable**: scanned over every grey from black to
+white, the best any track can do against the worst of the seven habit
+hues is **2.69:1 on the dark face, with a WHITE track** — violet is
+simply too mid-luminance for a neutral that also has to be visible
+against a near-black card. So the requirement was wrong rather than
+the design. The fill's top, foot and leading edges all border the
+card, where the worst hue reads **3.52:1 dark and 4.44:1 light**; the
+track is a SURFACE, held to what every other unlit mark here is held
+to. A track tinted with the hue itself would have cleared it and is
+refused on a different rule: an unlit mark is never a weaker copy of
+a lit one.
+
+**THE SAME FIGURE IS ON THE TILE**, which is the screen you actually
+look at — the sheet is two presses in. The tag already said *3 a
+week* and nothing anywhere said how many of the three you had. What
+it costs is two windows on one tile: the word is about TODAY and the
+track is about the week. Asserted as the tile and the sheet being
+EQUAL rather than each against a number, because one source drawn
+twice is exactly how the two come to disagree — proved by giving the
+tile its own denominator and watching it read 33 against 50.
+
+**`.ty-body` IS `display: contents`**, so a track appended to it
+lands in the CARD's own grid and sizes to its content: measured, it
+came out about forty pixels wide in a 145px tile. `grid-column: 1 /
+-1` is what makes it a bar.
+
+**And the fixture had to be split in two.** The habit the rhythm
+figures were measured on had an aim, so the day this shipped it
+stopped drawing them — the check would have failed for the right
+reason and named the wrong thing. There are two habits now, one with
+a number to be measured against and one without, so each path is
+measured on the record it is for rather than one of them being
+asserted as an absence.
+
+**And a computed background is never the token's own text.**
+`--tick-off` is a hex and `getComputedStyle` serialises `rgb()`, so
+the first cut of the lit/unlit count compared the two as strings,
+matched nothing, and reported **twelve of twelve lit on a panel
+drawing ten**. It resolves the token through a probe element the
+browser has actually styled. This repo has now met that class of
+fault three times — a `color-mix` read by a digit match, a box-shadow
+read by a hex compare, and this.
+
 ### Two checks the suite found about itself
 
 **A DISABLED CONTROL IS NOT A CONTROL.** The press sweep asks every
