@@ -10287,7 +10287,12 @@
      described a deck that is a strip of chips now, and "Flip for
      objectives" described a mechanism that has been deleted. A first
      open that teaches a gesture the app does not have is worse than no
-     first open, because the person then goes looking for it. */
+     first open, because the person then goes looking for it.
+
+     AND IT HAPPENED A THIRD TIME: "Open objectives from the top of the
+     week" outlived the control it named by two passes. The card is
+     gone rather than reworded, because the objectives row on the day
+     already teaches itself — see the card that replaced it. */
   var TOUR = [
     {
       k: 'week',
@@ -10369,39 +10374,62 @@
        + '</g></g>'
     },
     {
-      k: 'obj',
-      t: 'What matters today',
-      s: 'Open objectives from the top of the week for the few things '
-       + 'that count.',
-      /* The gesture itself: a sheet rising from the foot of the page,
-         with the control it comes from lit at the top. Clipped to the
-         page, so it emerges from the page's own bottom edge rather
-         than sliding over the outside of it.
+      k: 'back',
+      t: 'Look back',
+      s: 'Press the date for the month, or the count on Showing up for '
+       + 'the week.',
+      /* ── THIS REPLACED THE OBJECTIVES CARD, and the row on the day
+             is what retired it ──
+         That card read "Open objectives from the top of the week",
+         which named a control deleted two passes earlier — the third
+         time a sentence here has taught a mechanism this app does not
+         have. It did not need rewording, it needed removing: the
+         objectives are a row of cards ON the day now, and the ghost
+         card in that row prints "What matters today" in the shape of
+         the missing thing. A card about something the screen already
+         draws is a picture of what you are looking at, which is the
+         one thing this intro refuses.
 
-         The sheet is FILLED with the ground rather than left open,
-         because a transparent one has the rows behind it showing
-         through and reads as a rectangle drawn over a list instead of
-         as a surface in front of it. */
-      i: '<clipPath id="scTrObjClip">'
-       + '<rect x="3.4" y="2.4" width="17.2" height="19.2" rx="2.6"/>'
-       + '</clipPath>'
-       + '<rect x="3.4" y="2.4" width="17.2" height="19.2" rx="2.6"'
-       + ' opacity=".45"/>'
-       + '<rect class="tr-tile" x="5.6" y="4.6" width="4" height="4" rx="1.4"'
-       + ' fill="currentColor" stroke="none" opacity=".55"/>'
-       + '<g fill="currentColor" stroke="none" opacity=".3">'
-       + '<rect x="11.2" y="5.1" width="7.2" height="1.6" rx=".8"/>'
-       + '<rect x="11.2" y="7.7" width="4.6" height="1.6" rx=".8"/>'
+         What it makes room for is the pair nobody can find by
+         pressing around, and the evidence is that it was asked for in
+         those words: both doors are a LINE OF TYPE that already says
+         the answer for one day, and neither looks like a control. The
+         date opens the month and the count opens the week — one
+         mechanism, so one card.
+
+         ── AND A MONTH GRID WAS DRAWN TWICE AND CUT BOTH TIMES ──
+         First as a 4x2 of 1.9-unit cells on a sheet rising from the
+         foot, which at the 26px this is drawn is two pixels a cell:
+         the grid smeared into a keypad under what read as a display.
+         Then bigger, 4x3 at 3.4 units with the page and the sheet
+         gone — and rendered at 1:1 it is still a NUMPAD, because a
+         short bar over a grid of rounded squares is that silhouette
+         whatever the cells measure. Two glyphs with one silhouette is
+         worse than a glyph missing, because the card is then
+         confidently wrong.
+
+         So it is a different true thing, which is the ten lift
+         glyphs' rule and Pattern's own: a STACK of days, the one you
+         are on in front and the ones behind it behind. Three big
+         shapes rather than thirteen small ones, it is a silhouette no
+         other card here has, and it is what both doors actually open
+         — more days than the one you are looking at. Each page is
+         FILLED with the ground so it covers the one behind, which is
+         the deck glyph's own fix. The line on the front is lit as the
+         pair slide out from under it. */
+      i: '<g fill="var(--g0)" stroke="currentColor" stroke-width="1.5">'
+       + '<g class="tr-day"><rect x="7.6" y="2.6" width="12.8" height="15.6"'
+       + ' rx="2.4" opacity=".45"/></g>'
+       + '<g class="tr-day"><rect x="5.6" y="4.4" width="12.8" height="15.6"'
+       + ' rx="2.4" opacity=".7"/></g>'
+       + '<rect x="3.6" y="6.2" width="12.8" height="15.6" rx="2.4"/>'
        + '</g>'
-       + '<g clip-path="url(#scTrObjClip)"><g class="tr-sheet">'
-       + '<rect x="4.9" y="12.4" width="14.2" height="11" rx="2.4"'
-       + ' fill="var(--g0)" stroke="currentColor" stroke-width="1.5"/>'
-       + '<rect x="9.7" y="14" width="4.6" height="1.2" rx=".6"'
-       + ' fill="currentColor" stroke="none" opacity=".45"/>'
-       + '<g fill="currentColor" stroke="none">'
-       + '<circle cx="8.2" cy="18" r="1.4"/>'
-       + '<rect x="10.8" y="17" width="6.4" height="2" rx="1"/>'
-       + '</g></g></g>'
+       + '<rect class="tr-tile" x="5.8" y="8.8" width="7.2" height="1.8"'
+       + ' rx=".9" fill="currentColor" stroke="none" opacity=".55"/>'
+       + '<g fill="currentColor" stroke="none" opacity=".45">'
+       + '<rect x="5.8" y="12.8" width="8.4" height="1.6" rx=".8"/>'
+       + '<rect x="5.8" y="16" width="5.8" height="1.6" rx=".8"/>'
+       + '</g>'
     }
   ];
 

@@ -9491,3 +9491,75 @@ which was the rule ABOVE rather than the one below — so the file came
 back visually identical (the `:not` carries enough specificity to win
 either way round) and hashed differently. The hash is what caught it,
 and a restore nobody hashes is a restore nobody has checked.
+
+## The intro's last card is the two doors nobody can find
+
+Asked in one line — *how to access weekly view and also calendar view*
+— and that question IS the finding. Both are a LINE OF TYPE that
+already says the answer for one day: the head's date opens the month,
+and `5 of 6 today · 1 day streak` opens the week. Neither looks like a
+control, which is exactly the intro's own rule for what earns a card:
+it has to be something you could not find by pressing around.
+
+**AND THE CARD IT REPLACED HAD TO GO ANYWAY.** *Open objectives from
+the top of the week* named a control deleted two passes earlier — the
+THIRD sentence here to outlive its mechanism, after "Seven day cards"
+and "Flip for objectives". It did not need rewording: the objectives
+are a row of cards ON the day now, and the ghost card in that row
+prints *What matters today* in the shape of the missing thing. **A
+card about something the screen already draws is a picture of what you
+are already looking at**, which is the one thing this intro refuses.
+So the count stays at four.
+
+**THE CHECK THAT WAS MISSING ALL THREE TIMES IS THE ONE ADDED.** The
+copy checks hold the VOICE — no dash, one short sentence — and could
+not have caught a single one of them. The doors a card names are
+asserted to be real `<button>`s on the page behind the intro, so the
+day the date goes back to a paragraph the suite fails rather than the
+sentence quietly becoming false. Proved by reverting `#scHdDate` to a
+`<p>` and watching it fall over.
+
+**AND THE FIRST VERSION OF THAT CHECK FAILED ON THE CORRECT BUILD.**
+It also asked the tally caption for its accessible name — which
+`scPaintTally` writes, and the intro opens over the WEEK, so the
+caption is an empty button until Today is painted. Its *open this
+week* is asserted where Today is up, in the week sheet's own section.
+A check that cannot pass on a working app is the crown-placement
+trap, caught before shipping this time rather than after.
+
+### A month grid was drawn twice and cut both times
+
+**First as a 4x2 of 1.9-unit cells on a sheet rising from the foot** —
+the objectives card's own machinery kept, on the argument that the
+gesture is the same one. At the 26px this is drawn that is two pixels
+a cell: the grid smeared into a keypad under what read as a display,
+and the whole thing was a calculator.
+
+**Then bigger — 4x3 at 3.4 units, the page and the sheet gone.**
+Rendered at 1:1 it is STILL a numpad, because a short bar over a grid
+of rounded squares is that silhouette whatever the cells measure. Two
+glyphs with one silhouette is worse than a glyph missing, because the
+card is then confidently wrong.
+
+**So it is a different true thing**, which is the ten lift glyphs'
+rule and Pattern's own: **a STACK of days**, the one you are on in
+front and the ones behind it behind. Three big shapes rather than
+thirteen small ones, a silhouette no other card here has, and it is
+what both doors actually open — more days than the one you are looking
+at. Each page is FILLED with the ground so it covers the one behind,
+which is the deck glyph's own fix.
+
+**The one furthest back arrives LAST**, or the pair reads as a shuffle
+rather than as days coming out from behind today.
+
+**AND THE FIRST TWO SCREENSHOTS OF IT MEASURED THE ANIMATION.** The
+scene was shot at an arbitrary moment and came back as a bare line
+with no grid at all, because `0%, 26%` is opacity zero — a full second
+of every cycle where the drawing is not there. It reads exactly like a
+feature that did not ship. **A drawing is judged at rest**, with
+`animation: none`, which is also the only state the reduced-motion
+check measures.
+
+**`.tr-sheet` went with the card that used it.** Nothing referenced
+those keyframes afterwards, and a dead rule that still cascades is not
+dead.

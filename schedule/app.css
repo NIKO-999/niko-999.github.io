@@ -4840,12 +4840,20 @@ body {
 /* The sheet is the gesture, so it is the slowest of the four and holds
    at the top for most of the loop: what you are meant to read is where
    it ENDS, not the travel. */
-@keyframes tr-sheet {
-  0%       { transform: translateY(12px); }
-  30%, 90% { transform: translateY(0); }
-  100%     { transform: translateY(12px); }
+/* A ROW AT A TIME, which is what says the days ARRIVE rather than
+   being a picture of a month that was always there. Ending at the
+   element's own natural state, so `animation: none` under reduced
+   motion leaves the grid complete rather than a frame with two rows
+   missing — tr-new's own shape. */
+@keyframes tr-day {
+  0%, 26%   { opacity: 0; transform: translate(-2.1px, 1.9px); }
+  50%, 100% { opacity: 1; transform: translate(0, 0); }
 }
-.tr-sheet { animation: tr-sheet 4s cubic-bezier(.22, 1, .36, 1) infinite; }
+.tr-day { animation: tr-day 3.8s cubic-bezier(.22, 1, .36, 1) infinite; }
+/* The one furthest back arrives last, or the pair reads as a shuffle
+   rather than as days coming out from behind the day you are on. */
+.tr-day:first-of-type { animation-delay: .14s; }
+
 @keyframes tr-tile {
   0%, 22%  { opacity: .55; }
   10%      { opacity: 1; }

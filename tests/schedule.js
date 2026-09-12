@@ -9117,11 +9117,11 @@ const SAID = [
        different verbs. Both the count and the order are asserted
        because both are one line to change and neither would throw. */
     const first = await card();
-    ok('four cards, in their order, objectives last',
+    ok('four cards, in their order, the two hidden doors last',
       first.n === 4
       && [...await ipage.evaluate(() =>
           [...document.querySelectorAll('.tr-slide')].map((s) => s.dataset.card))]
-        .join('|') === 'week|pattern|friends|obj', first);
+        .join('|') === 'week|pattern|friends|back', first);
 
     /* ── ONE CARD ON SCREEN, AND THE OTHERS OUT OF REACH ──
        A track that moves rather than a scroller leaves the other three
@@ -9134,14 +9134,20 @@ const SAID = [
     ok('...and the button says Continue on it, not the last word',
       first.go === 'Continue' && first.step === 'Step 1 of 4', first);
 
-    /* ── THE LAST CARD IS THE OBJECTIVES ONE ── */
+    /* ── THE LAST CARD IS THE TWO HIDDEN DOORS ──
+       It was the objectives one, and the row of cards on the day
+       retired it: a card about something the screen already draws is
+       a picture of what you are looking at. What took the slot is the
+       pair you cannot find by pressing around, which is the last card
+       for the reason the objectives were — it is the one still on
+       screen when the intro ends. */
     for (let i = 0; i < 3; i++) {
       await ipage.evaluate(() => document.querySelector('.tr-go').click());
       await ipage.waitForTimeout(400);
     }
     const last = await card();
-    ok('the last card is the objectives one and starts the week',
-      last.live.join('') === 'obj' && last.go === 'Start the week'
+    ok('the last card is the two hidden doors, and it starts the week',
+      last.live.join('') === 'back' && last.go === 'Start the week'
       && last.step === 'Step 4 of 4', last);
 
     /* ── THE POINTER IS GONE, AND SO IS WHAT IT POINTED AT ──
@@ -9162,8 +9168,9 @@ const SAID = [
 
     /* ── AND THE ICON MOVES ──
        A still picture can only say WHERE a thing is. A moving one says
-       WHAT HAPPENS, which on the objectives card is the whole of what
-       nobody guesses: a sheet comes up from the head.
+       WHAT HAPPENS, which on the last card is the whole of what
+       nobody guesses: the line of type lights and the days behind
+       today slide out from under it.
 
        The count is asserted beside the state, for the reason the foil
        rim's own check had to be: a check that finds nothing must not
@@ -9197,7 +9204,7 @@ const SAID = [
        three assertions in this file were once pinned to a shipped red
        and measured nothing the day it moved. */
     const glyph = await ipage.evaluate(() => getComputedStyle(
-      document.querySelector('.tr-slide[data-card="obj"] .tr-ic svg')).stroke);
+      document.querySelector('.tr-slide[data-card="back"] .tr-ic svg')).stroke);
     const want = await ipage.evaluate(() => {
       const d = document.createElement('div');
       d.style.color = getComputedStyle(document.documentElement)
@@ -9288,6 +9295,44 @@ const SAID = [
     const longest = Math.max(...copy.slice(0, 4).map((t) => t.length));
     ok(`and every card is one short sentence (longest ${longest} chars)`,
       longest <= 110, copy);
+
+    /* ── AND A DOOR IT NAMES HAS TO EXIST ──
+       THIS IS THE CHECK THAT WAS MISSING THREE TIMES. "Seven day
+       cards" outlived the deck, "Flip for objectives" outlived the
+       flip, and "Open objectives from the top of the week" outlived
+       the control in that corner by two passes — every one of them a
+       sentence teaching a mechanism this app does not have, which is
+       worse than no intro at all because the person then goes looking
+       for it. The copy checks above hold the VOICE and could not have
+       caught any of the three.
+
+       The last card names two doors and both are a line of type
+       rather than anything that looks like a control, which is the
+       whole reason it earns a card. So they are asserted as real
+       BUTTONS on the page behind the intro: the day the date goes
+       back to a paragraph this fails, rather than the sentence
+       quietly becoming false.
+
+       THE TALLY CAPTION'S NAME IS NOT ASKED FOR HERE, and the first
+       version did ask — which FAILED ON THE CORRECT BUILD. That
+       label is written by `scPaintTally`, and the intro opens over
+       the WEEK, so the caption is an empty button until Today is
+       painted. Its "open this week" is asserted where Today is up,
+       which is the week sheet's own section. A check that cannot pass
+       on a working app is the crown's own trap, caught here before it
+       shipped rather than after. */
+    const doors = await ipage.evaluate(() => {
+      const d = document.getElementById('scHdDate');
+      const c = document.getElementById('scTallyCap');
+      const nm = (e) => (e.getAttribute('aria-label') || e.textContent || '').trim();
+      return { date: d && d.tagName, dateNamed: !!(d && nm(d)),
+        count: c && c.tagName,
+        says: [...document.querySelectorAll('.tr-slide')]
+          .map((x) => x.querySelector('p').textContent).join(' ') };
+    });
+    ok('the last card names two doors and both are real controls',
+      doors.date === 'BUTTON' && doors.count === 'BUTTON' && doors.dateNamed
+      && /date/.test(doors.says) && /Showing up/.test(doors.says), doors);
 
     await ipage.evaluate(() => document.querySelector('.tr-skip').click());
     await ipage.waitForTimeout(200);
