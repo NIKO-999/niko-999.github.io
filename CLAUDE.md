@@ -8980,38 +8980,89 @@ this file already decided is worse than a control that is not there.
 The only buttons in it are the days, the months and the way back, and
 that is asserted as the day's rows being `<div>`.
 
-### The cell is a ring and a row of hue dots
+### The cell is a ruled box, a date in its corner, and a rule at its foot
 
 **SIX TREATMENTS WERE DRAWN OVER THE REAL MONTH at 390x844 and read at
 1:1**, because what kills a cell treatment is what THIRTY of it look
-like rather than what one does. What it beat: a **bar** under the
-number, which floats between two rows and reads as the row below's; a
-**cell filled** by the share, which is the loudest object on the sheet
-at the top of its range and cannot tell a half-kept day from a missed
-one at the bottom; a **disc** that grows, which is a blob with no scale
-on it; an **underline** at the cell's foot, same fault as the bar; and
-the **date shaded** by how much you kept, which is quiet to the point
-of saying nothing. A ring belongs unambiguously to the number inside it
-and was the only one of the six that could say TWO THIRDS.
+like rather than what one does. A ring round the date won that round
+and shipped. Ten more were drawn a day later, from deliberately
+distant structures — a ruled wall calendar, cards, a flood, a tile
+grid, dots with no cell at all, stacked marks, a row a day, a bar
+chart, an area chart and a clock face — and what was picked off that
+sheet is **Paper**: the grid ruled into cells, the date top-left, its
+hue dots under it, and one thin rule along the foot for how much of
+the day you kept.
 
-**THE RING SAYS HOW MUCH, THE DOTS SAY WHICH.** Reported in one line
+**A CALENDAR IS THE ONE LIST IN THIS APP THAT IS A TABLE**, which is
+the rule this reverses and the reason it is allowed to. Nothing is
+drawn between the rows anywhere else here, because a line between two
+items is what makes a list a table and a table is a thing you scan
+for a value rather than a list of things you are going to do. A month
+IS a thing you scan for a value: the 9th is a cell you find by
+counting across and down, and the rules are what you count along.
+
+**AND THE RULE AT THE FOOT IS THE BAR THAT WAS REJECTED**, which only
+looks like a reversal. The bar lost on a GAPPED grid, where a mark
+floating under a number reads as belonging to the row below it; a
+cell with its own four edges is what takes that argument away. The
+edge is the whole difference and it is why the two rounds could
+honestly reach opposite answers.
+
+**WHAT THE OTHER NINE COST.** Cards and a flood are the loudest
+objects on the sheet at the top of their range and cannot separate a
+half-kept day from a missed one at the bottom. Dots with no cell are
+the purest answer to the hue dots and leave you counting rows to find
+the 9th. Stacked marks say how many and never which. A row a day
+reads beautifully and is thirty rows of scrolling with the week's
+shape gone. A bar chart gives the month's shape and no weekday, so
+*I always miss Wednesdays* is unanswerable. An area chart draws a
+line between Tuesday and Wednesday, claiming a value that does not
+exist. And a clock face is the most distinctive thing of the ten with
+no dates and no weekdays at all — it answers what shape the month is,
+never what you did on the 9th.
+
+**THE RULE SAYS HOW MUCH, THE DOTS SAY WHICH.** Reported in one line
 mid-build — *I wanna see the hue dots indicating what was done that
 day* — and it is the rule this app already keeps: a colour says WHICH
 and only a colour can say six things inside forty pixels. Each dot is
 that item's own hue through `scTagHue`, which is the colour its tag
 wears everywhere else, and a habit you added yourself brings its own.
-The ring carries no hue at all, because a colour there would be the
+The rule carries no hue at all, because a colour there would be the
 screen grading your month back at you.
 
-**TWO MARKS, TWO ZONES.** Drawn in one centred stack the dots landed on
-the ring's own lower arc and read as a mark that had come loose. The
-ring is sized to the DATE and the dots sit under it.
+**A DATE IS A DATE, AT ONE WEIGHT.** The ring version dimmed every
+day outside the record, which was right while every cell carried a
+mark and a quiet one had to be told from a kept one. With the rule
+drawn only where there is something to say, there is nothing left for
+the dimming to separate — so it went, and the class stayed, because
+it is still what gates the rule and what the check reads.
 
-**A DAY WITH NOTHING TO SAY DRAWS NO RING AT ALL**, which reverses the
+**A `<button>` CENTRES ITS OWN CONTENT WHATEVER `display` SAYS.** The
+cell went in as `display: block` with 3px of padding, and the date
+landed **17.9px down a 50px cell** — exactly where the dots start —
+so every logged day wore a hue dot across its number. `display: block`
+on the number did not move it either; the centring is the BUTTON's.
+A flex column is what turns it off. The lab this was chosen from drew
+the cell as a `<span>`, which has no such rule, so the treatment was
+correct and the shipped copy of it was not: **a mock and the app
+disagree about the element, and that is a difference a render finds
+and a diff does not.**
+
+Asserted as the GAP between the date's box and the dots', because the
+cause is one declaration and the symptom is what anybody would
+report. Proved to bite: reverted, it reads `top: 19.4, gap: -11.4`.
+
+**AND THE DAY LETTERS HAD TO LOSE THEIR GAP WITH IT.** `.cl-dows` was
+a 7-column grid with a 4px gap over a grid that now has none, so the
+two sets of columns no longer describe the same tracks. At `gap: 0`
+they agree to within 0.9px at the left edge and 0.1px at the right,
+measured rather than assumed.
+
+**A DAY WITH NOTHING TO SAY DRAWS NO RULE AT ALL**, which reverses the
 day-off dot's rule about never leaving a hole — and the reason is what
 a MONTH is made of. With a track on every cell the eighteen days still
-ahead drew eighteen full grey rings, which is wallpaper, and it made
-the grey ring on a day you actually missed mean nothing. The NUMBER
+ahead drew eighteen full grey ones, which is wallpaper, and it made
+the grey one on a day you actually missed mean nothing. The NUMBER
 holds the cell's geometry either way, so there is no hole left.
 
 **AND A DAY BEFORE THE RECORD BEGAN IS NOT A DAY YOU MISSED.** Drawn

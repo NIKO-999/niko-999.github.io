@@ -12943,50 +12943,30 @@
             b.type = 'button';
             b.dataset.day = day;
             var share = c.on.length ? c.kept / c.on.length : 0;
-            /* ── THE MARK IS A RING ROUND THE DATE ──
-               Six treatments were drawn over the real month at 390x844
+            /* -- THE DATE IN A CORNER, ITS MARKS UNDER IT, A RULE AT
+                   THE FOOT --
+               Ten treatments were drawn over the real month at 390x844
                and read at 1:1, which is the only size that settles
                one: what kills a cell treatment is what THIRTY of it
                look like, not what one does.
 
-               A ring belongs unambiguously to the number inside it,
-               and it is the only one of the six that could say TWO
-               THIRDS. A bar under the number floats between two rows
-               and reads as belonging to the row below. A cell filled
-               by the share is the loudest object on the sheet at the
-               top of its range and cannot separate a half-kept day
-               from a missed one at the bottom. A disc that grows is a
-               blob with no scale on it. And the date in type alone,
-               shaded by how much you kept, is quiet to the point of
-               saying nothing.
-
-               A day with NOTHING TO SAY draws no ring at all. That
-               reverses the day-off dot's rule about never leaving a
-               hole, and the reason is what a month is made of: with a
-               track on every cell, eighteen days still ahead drew
-               eighteen full grey rings, which is wallpaper — and it
-               made the grey ring on a day you actually missed mean
-               nothing. The NUMBER holds the cell's geometry either
-               way, so there is no hole to leave. */
-            if (!quiet) {
-              var R = 15, CIR = 2 * Math.PI * R;
-              var arc = '<circle class="bg" cx="18" cy="18" r="' + R + '"/>';
-              if (share > 0) {
-                arc += '<circle class="fg" cx="18" cy="18" r="' + R
-                  + '" stroke-dasharray="' + (CIR * share).toFixed(2)
-                  + ' ' + CIR.toFixed(2) + '" transform="rotate(-90 18 18)"/>';
-              }
-              b.insertAdjacentHTML('beforeend', '<svg class="cl-a" viewBox="0 0 36 36"'
-                + ' aria-hidden="true">' + arc + '</svg>');
-            }
+               What this beat: a ring round the date, which says a
+               share unambiguously and gives a month of thirty small
+               circles nothing to line up along; a cell filled or
+               flooded by the share, which is the loudest object on
+               the sheet at the top of its range; a disc that grows,
+               which is a blob with no scale on it; a spoke dial and a
+               bar chart, which are both pictures of a month with no
+               way to point at the 9th; and a row a day, which is the
+               list this screen exists to be an alternative to. */
             b.appendChild(scEl('i', null, String(n3)));
-            /* ── AND A HUE DOT FOR EACH THING YOU DID ──
-               The ring says how much of the day you kept, which is one
+            /* -- AND A HUE DOT FOR EACH THING YOU DID --
+               The rule says how much of the day you kept, which is one
                number; this says WHICH things you logged, which is the
                question the screen was asked. Each dot is that item's
-               own colour — the same one its tag wears two screens over
-               — because a colour in this app says WHICH and only a
-               colour can say six things inside forty pixels. */
+               own colour -- the same one its tag wears two screens
+               over -- because a colour in this app says WHICH and only
+               a colour can say six things inside forty pixels. */
             if (c.did.length) {
               var dots = scEl('span', 'cl-d');
               c.did.slice(0, 8).forEach(function (it) {
@@ -12995,6 +12975,21 @@
                 dots.appendChild(dt);
               });
               b.appendChild(dots);
+            }
+            /* A day with NOTHING TO SAY draws no rule at all. That
+               reverses the day-off dot's rule about never leaving a
+               hole, and the reason is what a month is made of: with a
+               track on every cell, eighteen days still ahead drew
+               eighteen full grey ones, which is wallpaper -- and it
+               made the grey one on a day you actually missed mean
+               nothing. The NUMBER holds the cell's geometry either
+               way, so there is no hole to leave. */
+            if (!quiet) {
+              var tr = scEl('span', 'cl-b');
+              var fill = scEl('i');
+              fill.style.width = (share * 100).toFixed(1) + '%';
+              tr.appendChild(fill);
+              b.appendChild(tr);
             }
             b.setAttribute('aria-label', FULL[c.dow] + ' ' + n3 + ' '
               + MONTH_FULL[m]

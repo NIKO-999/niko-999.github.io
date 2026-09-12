@@ -6470,7 +6470,7 @@ body {
 .cl-dows {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: 0;
   margin-top: 10px;
 }
 .cl-dows span {
@@ -6483,85 +6483,72 @@ body {
 .cl-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
   margin-top: 4px;
+  border-top: 1px solid var(--hair);
+  border-left: 1px solid var(--hair);
 }
-/* TWO MARKS, TWO ZONES. The ring is sized to the DATE and the dots
-   sit under it: drawn in one centred stack they landed on the ring's
-   own lower arc, which reads as a mark that has come loose rather
-   than as two facts about one day. */
+/* -- A CALENDAR IS THE ONE LIST IN THIS APP THAT IS A TABLE --
+   Nothing is drawn between the rows anywhere else here, because a
+   line between two items is what makes a list a table and a table is
+   a thing you scan for a value rather than a list of things you are
+   going to do. A month IS a thing you scan for a value: the 9th is a
+   cell you find by counting across and down, and the rules are what
+   you count along. Ten treatments were rendered over the real month
+   at 390x844 and this is the one that was chosen. */
 .cl-c {
   position: relative;
+  /* FLEX, and that is not a style choice. A <button> centres its own
+     content vertically whatever `display` says, so `block` with
+     3px of padding-top put the date 17.9px down a 50px cell --
+     exactly where the dots start -- and the marks were drawn across
+     the number. Measured, not read off the cascade: the lab this was
+     chosen from drew the cell as a <span>, which has no such rule. */
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
-  gap: 4px;
-  min-height: 50px;
+  text-align: left;
+  aspect-ratio: 1;
   border: 0;
-  border-radius: 10px;
+  border-right: 1px solid var(--hair);
+  border-bottom: 1px solid var(--hair);
+  border-radius: 0;
   background: none;
   cursor: pointer;
-  padding: 0;
+  padding: 3px 4px;
 }
 .cl-c.is-pad { cursor: default; }
+/* A date is a DATE, at one weight whether or not the day has
+   anything on it. The ring version dimmed everything outside the
+   record, which was right while every cell carried a mark and a
+   quiet one had to be told from a kept one. With the rule drawn only
+   where there is something to say, there is nothing left for the
+   dimming to separate. */
 .cl-c > i {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 32px; height: 32px;
   font-style: normal;
-  font-size: 13px;
+  font-size: 10.5px;
   font-weight: 600;
   color: var(--dim);
   font-variant-numeric: tabular-nums;
-  line-height: 1;
+  line-height: 1.3;
 }
-/* ── THE RING SAYS HOW MUCH OF THE DAY YOU KEPT ──
-   Six treatments were drawn over the real month at 390x844 and read
-   at 1:1, because what kills a cell treatment is what THIRTY of it
-   look like rather than what one does. A ring belongs unambiguously
-   to the number inside it and is the only one of the six that could
-   say TWO THIRDS: a bar under the number floats between two rows and
-   reads as the row below's, a cell filled by the share is the loudest
-   object on the sheet at the top of its range and cannot tell a
-   half-kept day from a missed one at the bottom, a disc that grows is
-   a blob with no scale, and the date shaded by how much you kept is
-   quiet to the point of saying nothing.
-
-   No hue in it: a colour here would be the screen grading your month
-   back at you, which is the one thing this app has never done. The
-   colour on this grid says WHICH, and that is the dots' job. */
-.cl-a { position: absolute; top: 0; left: 50%; margin-left: -16px;
-  width: 32px; height: 32px; }
-.cl-a circle { fill: none; stroke-width: 2.4; }
-.cl-a .bg { stroke: var(--tick-off); }
-.cl-a .fg { stroke: var(--red); stroke-linecap: round; }
-/* A day with nothing to say draws no ring at all, which reverses the
-   day-off dot's rule about never leaving a hole — and the reason is
-   what a MONTH is made of. With a track on every cell the eighteen
-   days still ahead drew eighteen full grey rings, which is wallpaper,
-   and it made the grey ring on a day you actually missed mean
-   nothing. The number holds the cell's geometry either way. */
-.cl-c.is-quiet > i { color: var(--spent); }
-/* ── TODAY IS THE STRONGEST TYPE ON THE GRID, NOT A SECOND RING ──
-   A ring round the date is already the mark and a second one
-   concentric with it is two marks answering different questions in
-   one drawing. The head's own rule for saying YOU ARE HERE. */
+/* -- TODAY IS THE STRONGEST TYPE ON THE GRID, NOT A SECOND MARK --
+   The head's own rule for saying YOU ARE HERE. */
 .cl-c.is-now > i { color: var(--red); font-weight: 800; }
-.cl-c:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
-/* ── AND A DOT FOR EACH THING YOU LOGGED ──
+/* Inset, because an outline outside a ruled cell draws over its
+   neighbours rather than round itself. */
+.cl-c:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
+/* -- A HUE DOT FOR EACH THING YOU LOGGED --
    The item's own colour, which is the one its tag wears everywhere
    else: six things inside forty pixels is a thing only a colour can
    say. Wrapped rather than scrolled or clipped, because a habit you
    added yourself is a seventh dot and the cell has to take it. */
 .cl-d {
+  position: absolute;
+  left: 4px; right: 4px; top: 20px;
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
   gap: 2px;
-  max-width: 80%;
-  position: relative;
 }
 .cl-d > i {
   display: block;
@@ -6569,6 +6556,23 @@ body {
   border-radius: 50%;
   background: var(--tg);
 }
+/* -- AND A RULE AT THE FOOT SAYS HOW MUCH OF THE DAY YOU KEPT --
+   At the foot of a RULED cell rather than floating under a number: a
+   bar was rejected on the gapped grid for reading as the row below's,
+   and a cell with its own four edges is what takes that argument
+   away. No hue in it, because a colour here would be the screen
+   grading your month back at you -- the colour on this grid says
+   WHICH, and that is the dots' job. */
+.cl-b {
+  position: absolute;
+  left: 4px; right: 4px; bottom: 4px;
+  height: 2.5px;
+  border-radius: 2px;
+  background: var(--tick-off);
+  overflow: hidden;
+  display: block;
+}
+.cl-b > i { position: absolute; inset: 0 auto 0 0; background: var(--red); }
 
 .cl-sum {
   margin-top: 10px;

@@ -15252,21 +15252,42 @@ const SAID = [
     await clpage.waitForTimeout(520);
     const clMonth = await clpage.evaluate(() => {
       const cells = [...document.querySelectorAll('.cl-c:not(.is-pad)')];
-      /* The share is read back off the ARC rather than off a class:
-         the dash is the drawing, and a cell that carries the right
-         class over the wrong arc looks exactly right in the DOM. */
+      /* The share is read back off the BOX the rule actually draws
+         rather than off a class or the width it was told to be: a
+         cell that carries the right class over a track no rule sizes
+         looks exactly right in the DOM. */
       const fill = (d) => {
         const c = cells.find((x) => x.dataset.day === d);
         if (!c) return null;
-        const fg = c.querySelector('.cl-a .fg');
-        const da = fg && fg.getAttribute('stroke-dasharray');
-        const sh = da ? Math.round(parseFloat(da.split(' ')[0])
-          / parseFloat(da.split(' ')[1]) * 100) : 0;
-        return { sh: sh, ring: !!c.querySelector('.cl-a'),
+        const tr = c.querySelector('.cl-b'), fi = tr && tr.querySelector('i');
+        const w = tr ? tr.getBoundingClientRect().width : 0;
+        return { sh: fi && w ? Math.round(fi.getBoundingClientRect().width / w * 100) : 0,
+          ring: !!tr,
           dots: [...c.querySelectorAll('.cl-d > i')]
             .map((i2) => getComputedStyle(i2).backgroundColor),
           quiet: c.classList.contains('is-quiet') };
       };
+      /* ── AND THE DATE IS IN THE CORNER, WITH ITS MARKS CLEAR OF IT ──
+         A <button> centres its own content vertically whatever
+         `display` says, so the first cut of this drew the date 17.9px
+         down a 50px cell — right where the dots start — and every
+         logged day wore a hue dot across its number. Measured as the
+         GAP between the two boxes, because the cause is one
+         declaration and the symptom is what anybody would report. */
+      const corner = (() => {
+        const c = cells.find((x) => x.dataset.day === '2026-09-10');
+        const cr = c.getBoundingClientRect();
+        const ir = c.querySelector('i').getBoundingClientRect();
+        const dr = c.querySelector('.cl-d').getBoundingClientRect();
+        const br = c.querySelector('.cl-b').getBoundingClientRect();
+        return { top: +(ir.top - cr.top).toFixed(1),
+          left: +(ir.left - cr.left).toFixed(1),
+          gap: +(dr.top - ir.bottom).toFixed(1),
+          foot: +(cr.bottom - br.bottom).toFixed(1),
+          edge: parseFloat(getComputedStyle(c).borderRightWidth),
+          grid: parseFloat(getComputedStyle(
+            document.querySelector('.cl-grid')).borderTopWidth) };
+      })();
       return {
         title: (document.querySelector('.cl-head > b') || {}).textContent,
         cells: cells.length,
@@ -15276,13 +15297,25 @@ const SAID = [
         none: fill('2026-09-09'), ahead: fill('2026-09-20'),
         before: fill('2026-09-02'), kept10: fill('2026-09-10'),
         buttons: document.querySelectorAll('#scSheetBody button').length,
+        corner: corner,
       };
     });
     ok('the date opens the month it is in, Monday first',
       clMonth.title === 'September 2026' && clMonth.cells === 30
       && clMonth.pads === 1, clMonth);
-    ok('...and today is the one cell that is ringed',
+    ok('...and today is the one cell marked today',
       clMonth.now && clMonth.now.day === '2026-09-12', clMonth.now);
+    /* ── A CALENDAR IS THE ONE LIST IN THIS APP THAT IS RULED ──
+       Ten treatments were rendered over the real month and this is
+       the one that was picked: a ruled grid, the date in its corner,
+       its hue dots under it and a rule at the foot. Every other list
+       here draws nothing between its rows, so the cell's own four
+       edges are asserted rather than left to be tidied away by
+       somebody applying that rule where it does not hold. */
+    ok('...and the grid is ruled, with the date in its corner and clear of its marks',
+      clMonth.corner.edge === 1 && clMonth.corner.grid === 1
+      && clMonth.corner.top <= 6 && clMonth.corner.left <= 6
+      && clMonth.corner.gap >= 1 && clMonth.corner.foot <= 8, clMonth.corner);
 
     /* THREE READINGS OFF ONE MARK, and a build that draws the same bar
        on every day passes any check that only asks whether one is
@@ -15292,16 +15325,16 @@ const SAID = [
     ok('a cell says how much of that day you kept',
       clMonth.kept.sh === 100 && clMonth.half.sh === 50
       && !clMonth.kept.quiet && !clMonth.half.quiet, clMonth);
-    /* ── AND A DAY WITH NOTHING TO SAY DRAWS NO RING AT ALL ──
+    /* ── AND A DAY WITH NOTHING TO SAY DRAWS NO RULE AT ALL ──
        Both halves, because the class alone passes on a build that
-       still draws the track: eighteen full grey rings on the days
-       still ahead is wallpaper, and it makes the grey ring on a day
+       still draws the track: eighteen full grey rules on the days
+       still ahead is wallpaper, and it makes the grey one on a day
        you actually missed mean nothing. */
     ok('...and a day nothing was on, or that is still ahead, says so quietly',
       clMonth.none.quiet === true && clMonth.ahead.quiet === true
       && clMonth.none.ring === false && clMonth.ahead.ring === false, clMonth);
     /* ── THE DOTS SAY WHICH, WHICH IS WHAT A COLOUR IS FOR HERE ──
-       The ring is one number and this is the question the screen was
+       The rule is one number and this is the question the screen was
        asked: what did you do that day. Two dots on the 10th, in two
        different colours, because one colour repeated says how many
        rather than which. */
