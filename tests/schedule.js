@@ -14448,28 +14448,74 @@ const SAID = [
          that put it OUTSIDE a pane whose `overflow-x` is deliberately
          hidden: measured at 11 against a pane starting at 18, so the
          end came out square. The day card's own lesson, reported there
-         as "that doesn't look like the pill shape". */
+         as "that doesn't look like the pill shape".
+
+         THIS NOTE ALSO CARRIES BRACKETS, AND THAT SWALLOWED THE CHECK
+         ONCE ALREADY. A bracket anywhere in a note reserves the shared
+         gutter on every line, 15px of it — so with a bracket left
+         standing the text column sits 15px past the pane's edge
+         regardless of the 8px overhang room, and the pill (7px left of
+         the text) never came near either boundary: measured at pane 10
+         and pane 18 — WITH and WITHOUT the CSS fix — the pill sat at 26
+         both times. The assertion passed on the fix and passed again
+         with it deleted, which is a check that cannot fail.
+
+         WHICH LINES CURRENTLY CARRY ONE IS READ, NEVER ASSUMED FROM
+         THE FIXTURE. Earlier in this file the pen exclusivity tests
+         already cleared a bracket or two of their own — pressing the
+         pen on a bracketed line is the other half of that exclusivity
+         — so a toggle keyed to the fixture's ORIGINAL marks would find
+         some already off and switch them back ON instead, which is
+         exactly the bug this replaced. The live record is read right
+         before acting on it, and whatever it says is on comes off for
+         the one measurement that needs the pane flush against the
+         text, then goes back on before anything later reads it. */
+      const gutterState = () => lypage.evaluate(() => {
+        const l = JSON.parse(localStorage.getItem('sched.note.v1'))
+          .list.find((q) => q.id === 'kN').l;
+        const rows = l.filter((L) => !L.h);
+        return rows.map((L, i) => ({ i: i, m: L.m }))
+          .filter((r) => r.m === 2 || r.m === 3);
+      });
+      const toggleAt = async (i, cls) => lypage.evaluate(async ([idx, c]) => {
+        const f = [...document.querySelectorAll('#scNotePane .nt-in')][idx];
+        f.focus();
+        await new Promise((z) => setTimeout(z, 160));
+        document.querySelector('.' + c).click();
+      }, [i, cls]);
+      const onNow = await gutterState();
+      await lyEdit(true);
+      for (const r of onNow) await toggleAt(r.i, r.m === 2 ? 'nt-brb' : 'nt-dtb');
+      await lypage.waitForTimeout(220);
+      await lyEdit(false);
       const penCut = await lypage.evaluate(() => {
         const pane = document.getElementById('scNotePane');
         const w = [...pane.querySelectorAll('.nt-w')]
           .find((e) => !e.previousSibling);
         if (!w) throw new Error('no mark starting a line to measure');
         const pr = pane.getBoundingClientRect(), br = w.getBoundingClientRect();
+        const body = pane.querySelector('.nt-body');
         return { pill: +br.left.toFixed(1), pane: +pr.left.toFixed(1),
           clip: getComputedStyle(pane).overflowX,
+          gut: !!body && body.className.indexOf('is-gut') >= 0,
           text: +document.querySelector('#scNotePane .nt-v').getBoundingClientRect()
             .left.toFixed(1) };
       });
-      /* BOTH HALVES. "The pill is inside the pane" is vacuously true of
-         a pill with no overhang at all, which is the build that reads
-         cramped rather than cut — so the overhang is asserted to EXIST
-         (the pill reaches left of the words) and to be CONTAINED. A
-         constant for the text column would also be wrong here: this
-         fixture carries brackets, so the note reserves the shared
-         gutter and the words start 15px in. */
+      /* BOTH HALVES on the overhang. "The pill is inside the pane" is
+         vacuously true of a pill with no overhang at all, which is the
+         build that reads cramped rather than cut — so the overhang is
+         asserted to EXIST (the pill reaches left of the words) and to
+         be CONTAINED. The gutter is asserted OFF as well, or a bracket
+         added back to this note later passes here for the same
+         swallowed reason it failed to catch anything the first time. */
       ok('...and a mark starting a line is inside the pane rather than cut by it',
         penCut.pill >= penCut.pane && penCut.clip === 'hidden'
-        && penCut.pill < penCut.text, penCut);
+        && penCut.pill < penCut.text && !penCut.gut, penCut);
+      /* Put the note back the way the rest of this file still reads it. */
+      await lyEdit(true);
+      for (const r of onNow) await toggleAt(r.i, r.m === 2 ? 'nt-brb' : 'nt-dtb');
+      await lypage.waitForTimeout(220);
+      await lyEdit(false);
 
       /* THE INK OVER THE PEN'S OWN WASH, on composited pixels and from
          the most common pixel outward — the polarity-agnostic reading

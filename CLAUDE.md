@@ -8312,6 +8312,23 @@ reaches left of the words, because "inside the pane" is vacuously true
 of a pill with no overhang at all — which is the build that reads
 cramped rather than cut.
 
+**AND IT PASSED WITH THE ROOM DELETED, WHICH IS A CHECK THAT CANNOT
+FAIL.** The fixture note this measured on also carries brackets, and a
+bracket anywhere reserves the shared gutter on every line — 15px of
+it. With the gutter standing, the text column already sits 15px past
+the pane's edge whatever the 8px overhang room is doing, so the pill
+never came near either boundary: measured at pane 10 and pane 18, WITH
+and WITHOUT the CSS fix, the pill sat at 26 both times. A regression
+check proven to bite on the day it shipped had, four days later, a
+fixture reshaped under it by an unrelated bracket test and gone blind
+without a line of the app changing. It reads the note's OWN current
+marks now rather than the ones the fixture was written with — an
+earlier pen test already clears a bracket or two of its own on the way
+through, which is the other half of the exclusivity above, so a toggle
+keyed to what the fixture SHIPPED with found some already off and
+switched them back on. Whatever is on comes off for the one
+measurement, and back on before anything later reads it.
+
 **The ink over it is 11.87:1 on the dark face and 10.47:1 on the
 light**, worst of seven hues each, from the most common pixel outward.
 A 30% wash barely moves the ground, which is the whole argument for a
