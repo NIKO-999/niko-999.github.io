@@ -5038,7 +5038,7 @@ const SAID = [
   await page.waitForTimeout(120);
 
   /* ══════════════════════════════════════════════════════════════
-     ONE TAP TICKS, AND EDIT ARMS ONE PRESS
+     ONE TAP TICKS, AND EDIT IS A MODE THAT STAYS
 
      It went the long way round: a double tap, then a pencil on every
      row, then a pencil a double tap brought out, then the double tap
@@ -5048,12 +5048,22 @@ const SAID = [
      clock you cannot see, so the same press means two different
      things depending on how fast the second one lands.
 
-     A CONTROL IN THE HEAD CANNOT BE MISTIMED, and this one cannot
-     leave you in a mode either: it disarms the instant the editor
-     opens. That is what makes a mode affordable here at all, and it
-     is why the disarm is asserted beside every arm below — a mode you
-     can be in without noticing is the fault every other route to this
-     editor was rejected for.
+     A CONTROL IN THE HEAD CANNOT BE MISTIMED, and that half held. The
+     half that did not is that it SPENT itself on the first press, on
+     the reading that a mode you can be in without noticing is the
+     fault every other route to this editor was rejected for. That is
+     an argument about a mode you cannot SEE, and this one is drawn
+     twice over — a pencil on every row and a line under the day
+     saying what it is waiting for.
+
+     What one-press cost was measured rather than argued: armed once
+     and four blocks pressed in turn, the first opened the editor and
+     the other three were TICKED, one of them raising the workout
+     picker. Reported as "still works for some, doesn't for others",
+     which is exactly what a silently spent mode looks like from the
+     outside. So the mode stays, and the assertions below hold BOTH
+     halves — every block opens while it is on, and the tick comes
+     back the moment it is turned off.
      ══════════════════════════════════════════════════════════════ */
   await dblRow('.week.is-today .row[data-id]');
   ok('two taps on a row are a tick and an untick, and open nothing',
@@ -5240,32 +5250,74 @@ const SAID = [
       pressed: document.getElementById('scHdEd').getAttribute('aria-pressed'),
       pencils: [...document.querySelectorAll('.week .row-ed')]
         .filter((e) => +getComputedStyle(e).opacity > 0).length,
+      rows: document.querySelectorAll('.week .row[data-id]').length,
     };
   });
   ok('a press while armed opens the editor', used.sheet && /Edit/.test(used.title || ''), used);
   ok('...and does not tick the row on the way', !used.moved, used);
-  /* THE WHOLE POINT: it disarms itself, so the next press ticks again
-     and there is no mode to get out of. */
-  ok('...and disarms itself the instant the editor opens',
-    used.pressed === 'false' && used.pencils === 0, used);
+  /* ── AND THE MODE IS STILL ON ──
+     This assertion is the reversal, so it is the one that carries the
+     report: the old build set this to false here, and the block you
+     pressed next was ticked instead of opened. Read as the control's
+     own state AND as the pencils, because a build that left the flag
+     up while the rows went back to looking ordinary is a mode with
+     nothing on screen naming it. */
+  ok('...and the mode stays on, still drawn on every row',
+    used.pressed === 'true' && used.rows > 0 && used.pencils === used.rows, used);
 
   await page.evaluate(() => document.getElementById('scScrim').click());
   await page.waitForFunction(() => document.getElementById('scSheet').hidden,
     null, { timeout: 4000 });
   await page.waitForTimeout(200);
+  /* ── A SECOND BLOCK, WHICH IS THE ASK IN ONE LINE ──
+     A DIFFERENT row from the one above, because "the editor opens"
+     passes on a build that simply re-opens the block you already had.
+     Nothing is ticked on the way: the mode answers one question and
+     the tick is the other one. */
+  const second = await page.evaluate(async () => {
+    const rows = [...document.querySelectorAll('.week .row[data-id]')]
+      .filter((x) => !/train|walk|read|gym/i.test(x.querySelector('.n').textContent));
+    if (rows.length < 2) throw new Error('need two plain rows on this day, found ' + rows.length);
+    const first = rows[0].dataset.id, r = rows[1];
+    const done = () => document.querySelectorAll('.week .row.is-done').length;
+    const was = done();
+    r.click();
+    await new Promise((z) => setTimeout(z, 440));
+    return { first, id: r.dataset.id,
+      sheet: !document.getElementById('scSheet').hidden,
+      title: (document.getElementById('scSheetTitle') || {}).textContent || '',
+      ticked: done() !== was,
+      armed: document.getElementById('scHdEd').getAttribute('aria-pressed') };
+  });
+  ok('...so the next block opens as well, rather than being ticked',
+    second.id !== second.first && second.sheet && /Edit/.test(second.title)
+    && !second.ticked && second.armed === 'true', second);
+
+  /* ── AND TURNING IT OFF PUTS THE TICK BACK ──
+     The other half, and it fails apart from the one above: a build
+     that never leaves the mode passes everything before this and is a
+     week you can no longer tick anything on. */
+  await page.evaluate(() => document.getElementById('scScrim').click());
+  await page.waitForFunction(() => document.getElementById('scSheet').hidden,
+    null, { timeout: 4000 });
+  await page.waitForTimeout(200);
   const after = await page.evaluate(async () => {
+    document.getElementById('scHdEd').click();
+    await new Promise((z) => setTimeout(z, 260));
     const rows = [...document.querySelectorAll('.week .row[data-id]')];
     const r = rows.find((x) => !/train|walk|read|gym/i.test(x.querySelector('.n').textContent));
     const done = () => document.querySelectorAll('.week .row.is-done').length;
     const was = done();
     r.click();
     await new Promise((z) => setTimeout(z, 380));
-    const out = { ticked: done() !== was, sheet: !document.getElementById('scSheet').hidden };
+    const out = { ticked: done() !== was, sheet: !document.getElementById('scSheet').hidden,
+      armed: document.getElementById('scHdEd').getAttribute('aria-pressed') };
     r.click();
     await new Promise((z) => setTimeout(z, 380));
     return out;
   });
-  ok('...so the very next press ticks again', after.ticked && !after.sheet, after);
+  ok('...and turning the mode off puts the tick back',
+    after.ticked && !after.sheet && after.armed === 'false', after);
 
   /* PRESSING IT TWICE CANCELS. A mode you can enter and not leave is
      the fault this control exists to avoid, and the control that put
@@ -5333,6 +5385,11 @@ const SAID = [
      of the three goes the same way — and all three are asserted,
      because they fail APART: the row alone passed for the whole life
      of the bug.
+
+     Each of the three is also held to LEAVING THE MODE ON, which is
+     the half that was reported later: the three branches spent it,
+     so whichever target a thumb found made the other two stop
+     working for the rest of the week.
      ═══════════════════════════════════════════════════════════ */
   const armTargets = {};
   for (const sel of ['.row', '.chk', '.row-ed']) {
@@ -5351,8 +5408,15 @@ const SAID = [
       const t = w.querySelector(s);
       if (!t) throw new Error('no ' + s + ' on that row');
       const done = () => document.querySelectorAll('.week .row.is-done').length;
-      document.getElementById('scHdEd').click();
-      await new Promise((z) => setTimeout(z, 240));
+      /* ARMED IDEMPOTENTLY. The control is a toggle and the mode now
+         survives a press, so a bare click on the second pass through
+         this loop turns it OFF and measures a build that is working
+         as a build that is not. */
+      const eb = document.getElementById('scHdEd');
+      if (eb.getAttribute('aria-pressed') !== 'true') {
+        eb.click();
+        await new Promise((z) => setTimeout(z, 240));
+      }
       const was = done();
       t.click();
       await new Promise((z) => setTimeout(z, 440));
@@ -5364,16 +5428,57 @@ const SAID = [
       };
     }, sel);
   }
-  const armOk = (r) => r.sheet && /Edit/.test(r.title) && !r.ticked && r.armed === 'false';
+  const armOk = (r) => r.sheet && /Edit/.test(r.title) && !r.ticked && r.armed === 'true';
   ok('armed, a press on the row itself opens that block',
     armOk(armTargets['.row']), armTargets['.row']);
-  /* THE ONE THAT WAS REPORTED. */
+  /* THE ONE THAT WAS REPORTED FIRST. */
   ok('...and so does the check, rather than ticking it',
     armOk(armTargets['.chk']), armTargets['.chk']);
-  ok('...and so does the pencil, spending the mode with it',
+  ok('...and so does the pencil, with the mode left standing',
     armOk(armTargets['.row-ed']), armTargets['.row-ed']);
 
+  /* ── AND THE MODE CROSSES THE DAY WITH YOU ──
+     It ended on a day change, on the reading that pressing another
+     day is not the press it was armed for. That is the same silent
+     hand-off one level up now that it stays: the pencils are drawn on
+     the day you land on, so ending it there would leave the screen
+     saying one thing and the next press doing another. Asserted as
+     the pencils on the NEW day, not just the flag. */
+  const crossed = await page.evaluate(async () => {
+    const eb = document.getElementById('scHdEd');
+    if (!document.getElementById('scSheet').hidden) {
+      document.getElementById('scScrim').click();
+      await new Promise((z) => setTimeout(z, 340));
+    }
+    if (eb.getAttribute('aria-pressed') !== 'true') {
+      eb.click();
+      await new Promise((z) => setTimeout(z, 240));
+    }
+    const from = +document.getElementById('scWeek').dataset.d;
+    const to = (from + 3) % 7;
+    document.querySelector('.st-d[data-d="' + to + '"]').click();
+    await new Promise((z) => setTimeout(z, 380));
+    return { from, to, landed: +document.getElementById('scWeek').dataset.d,
+      armed: eb.getAttribute('aria-pressed'),
+      rows: document.querySelectorAll('.week .row[data-id]').length,
+      pencils: [...document.querySelectorAll('.week .row-ed')]
+        .filter((e) => +getComputedStyle(e).opacity > 0).length };
+  });
+  ok('...and the mode crosses to another day rather than ending there',
+    crossed.landed === crossed.to && crossed.armed === 'true'
+    && crossed.rows > 0 && crossed.pencils === crossed.rows, crossed);
+
+  /* Back to where the sections below expect it: off, on today's day.
+     A check that changes the state of the app is a check that breaks
+     the next one, and this file has recorded that four times. */
   await page.evaluate(async () => {
+    const eb = document.getElementById('scHdEd');
+    if (eb.getAttribute('aria-pressed') === 'true') {
+      eb.click();
+      await new Promise((z) => setTimeout(z, 240));
+    }
+    document.querySelector('.st-d[data-d="' + new Date().getDay() + '"]').click();
+    await new Promise((z) => setTimeout(z, 360));
     if (!document.getElementById('scSheet').hidden) {
       document.getElementById('scScrim').click();
       await new Promise((z) => setTimeout(z, 320));

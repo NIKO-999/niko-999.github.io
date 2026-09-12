@@ -1737,19 +1737,35 @@
            to 500 each helped and none of them removed the class of
            fault.
 
-           A CONTROL IN THE HEAD CANNOT BE MISTIMED, and this one
-           cannot leave you in a mode either — it disarms the instant
-           the editor opens, so the next press ticks again. That is
-           what makes it affordable where a plain toggle would not be:
-           a mode you can be in without noticing is the thing every
-           other route here was rejected for.
+           A CONTROL IN THE HEAD CANNOT BE MISTIMED. So the row is a
+           tap again — no pair to remember, no window, no deferral,
+           and the workout deck goes back to opening on the frame,
+           because the only reason it ever waited was to let a second
+           tap through.
 
-           So the row is a tap again. No pair to remember, no window,
-           no deferral — and the workout deck goes back to opening on
-           the frame, because the only reason it ever waited was to
-           let a second tap through. */
+           ── AND THE MODE STAYS, WHICH REVERSED THE RULE IT SHIPPED
+           UNDER ──
+           It spent itself on the first press, on the argument that a
+           mode you can be in without noticing is the thing every
+           other route here was rejected for. That argument is about
+           a mode you cannot SEE, and this one is drawn twice over:
+           a pencil appears on every row, and the line under the day
+           says what it is waiting for.
+
+           What the one-press version cost was measured rather than
+           argued. Armed once and four blocks pressed in turn: the
+           first opened the editor and the other three were TICKED,
+           one of them raising the workout picker. That is not a mode
+           failing to work, it is a mode answering with the one wrong
+           answer available — and it is exactly what was reported, as
+           "still works for some, doesn't for others".
+
+           It ends when you press the control again, or when you walk
+           off the week. Not on the day, either: the mode is drawn on
+           whichever day you land on, so disarming there would be the
+           same silent hand-off one level up. */
         row.addEventListener('click', function () {
-          if (editArm) { scEditArm(false); scEditSheet(it, d); return; }
+          if (editArm) { scEditSheet(it, d); return; }
           tick();
         });
         /* A long press reaches neither a keyboard nor a screen reader,
@@ -1798,7 +1814,7 @@
            lottery about which small box a thumb found. */
         chk.addEventListener('click', function (ev) {
           ev.stopPropagation();
-          if (editArm) { scEditArm(false); scEditSheet(it, d); return; }
+          if (editArm) { scEditSheet(it, d); return; }
           tick();
         });
         wrap.appendChild(chk);
@@ -1822,13 +1838,10 @@
           + '<path d="M4 20h4L18 10l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
         ed.addEventListener('click', function (ev) {
           ev.stopPropagation();
-          /* Disarmed on the way, like every other target on the row.
-             This one opened the editor and left the mode standing, so
-             closing the sheet and pressing a second block edited that
-             one too — a mode that says it spends itself on one press
-             and then does not is worse than one that stays, because
-             nothing on screen disagrees with it. */
-          if (editArm) scEditArm(false);
+          /* Nothing to disarm: the mode stays until the control in the
+             head is pressed again. This branch used to spend it, which
+             made the pencil on the row below stop working the moment
+             you had used the one above it. */
           scEditSheet(it, d);
         });
         wrap.appendChild(ed);
@@ -1884,7 +1897,7 @@
             nb.appendChild(scEl('span', 'nt-tt', scNoteTitle(nrec)));
             nb.addEventListener('click', function (ev) {
               ev.stopPropagation();
-              if (editArm) { scEditArm(false); scEditSheet(it, d); return; }
+              if (editArm) { scEditSheet(it, d); return; }
               scNoteJump(nrec.id);
             });
             nbar.appendChild(nb);
@@ -1959,7 +1972,7 @@
             /* The gutter is a press target too, and while the week is
                armed it is the block's, like every other one on the
                row. */
-            if (editArm) { scEditArm(false); scEditSheet(it, d); return; }
+            if (editArm) { scEditSheet(it, d); return; }
             open = !open;
             kidOpen[it.id] = open;
             kids.hidden = !open;
@@ -2023,8 +2036,12 @@
   function scDeckGo(d) {
     if (d === scOpenDay()) return;
     openDay = d;
-    /* Pressing another day is not the press the mode was armed for. */
-    if (editArm) scEditArm(false);
+    /* AND THE MODE CROSSES WITH YOU. It used to end here, on the
+       reading that pressing another day is not the press it was armed
+       for — which was true of a mode spent on one press and is the
+       silent hand-off seen one level up now that it stays: the pencils
+       are drawn on the day you land on, so ending it there would leave
+       the screen saying one thing and the next press doing another. */
     /* A day found face-down is the app having kept the wrong half of a
        decision, and that is truer still of the day BEFORE the one you
        just pressed. */
@@ -6559,10 +6576,22 @@
      record and this is a preference about looking at it, and folding a
      preference into the record is how a damaged one takes the other
      down with it. */
-  /* ── EDIT ARMS EXACTLY ONE PRESS ──
+  /* ── EDIT IS A MODE, AND IT STAYS UNTIL YOU TURN IT OFF ──
+     It armed exactly one press for two rounds, and the second one is
+     what was reported: the first block you pressed opened the editor
+     and every block after it was TICKED instead — four presses aimed
+     at the editor giving one editor and three ticks, measured. A mode
+     that spends itself silently is a mode that hands the next press
+     to the one wrong answer available.
+
+     What made one-press look right is that a standing mode is
+     dangerous when you cannot see it. This one you can: `is-edit`
+     draws a pencil on every row and the head says what it is waiting
+     for, so the state is on the screen the whole time it is on.
+
      Never stored, and cleared on the way out of the week for the same
      reason the goals list is: it is a position on a screen you are
-     looking at, and a week found armed tomorrow morning is the app
+     looking at, and a week found in edit tomorrow morning is the app
      having kept half of a decision. */
   var editArm = false;
 

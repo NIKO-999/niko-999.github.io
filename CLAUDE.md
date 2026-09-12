@@ -7695,7 +7695,7 @@ check compared against — so it read a clean swap as a failed drag. A
 grip's number and a run's number are only the same once the headless
 one is dropped.
 
-## Edit arms one press
+## Edit is a mode, and it stays until you turn it off
 
 The editor went the long way round and was reported at every stop: a
 double tap, then a pencil on every row, then a pencil a double tap
@@ -7713,23 +7713,61 @@ the rule that settles it: *two gestures for one action is a control
 answering the same question twice, and the one that has to go is the
 one nothing on screen can describe.*
 
-**AND IT CANNOT LEAVE YOU IN A MODE.** That is what makes a mode
-affordable here at all, when *a mode you can be in without noticing*
-is precisely what every other route to this editor was rejected for.
-It arms, the next block you press opens, and it disarms itself the
-instant the editor opens — so the press after that ticks again and
-there is nothing to get out of. Pressing it again cancels, walking off
-the week cancels, and changing day cancels.
+**IT SPENT ITSELF ON ONE PRESS AND THAT WAS THE NEXT REPORT.** The
+argument for one press was that *a mode you can be in without
+noticing* is precisely what every other route to this editor was
+rejected for — so it armed, the block you pressed opened, and it
+disarmed the instant the editor did.
+
+What that cost was measured rather than argued. Armed once and four
+blocks pressed in turn: **the first opened the editor and the other
+three were TICKED**, one of them raising the workout picker. Four
+presses aimed at the editor, one editor and three ticks. Reported as
+*still works for some doesn't for others*, which is exactly what a
+silently spent mode looks like from outside — and it is worse than a
+control that does nothing, because the block you meant to edit comes
+back marked done.
+
+**THE ARGUMENT FOR SPENDING IT IS ABOUT A MODE YOU CANNOT SEE, AND
+THIS ONE IS DRAWN TWICE OVER.** A pencil appears on every row and the
+line under the day says what it is waiting for. Notes already made
+this distinction out loud in the other direction — *where it is not
+the week's control is that this one STAYS* — on the grounds that a
+row's ordinary press ticks, so a standing mode would edit when you
+meant to tick. That is a real cost and it is the smaller one: a
+spent mode TICKS when you meant to edit, which changes the record.
+
+It ends when you press the control again, or when you walk off the
+week. **Not on the day**, either, and that reversed a line as well:
+ending it there was right for a mode armed for one press and is the
+same silent hand-off one level up now that it stays, since the
+pencils are drawn on whichever day you land on.
+
+**Every press target on a row goes the same way and all of them leave
+it standing** — the row, the check, the pencil, the note tag, the
+children's dots. Three of the five were measured across every block
+state there is: done, missed, off, running, a row carrying three note
+tags, a row with children in the gutter, and a fourteen-block day.
+267 presses, every one of them the editor. **The app had no per-block
+fault at all; the only way a block did not open was that the mode had
+already gone.**
+
+**And both halves are asserted, because each passes on the other's
+bug.** Every block opens while it is on — asserted on a SECOND row,
+since "the editor opens" passes on a build that re-opens the one you
+already had — and the tick comes back the moment it is turned off,
+which a build that can never leave the mode would fail.
 
 **THE MODE NAMES ITSELF IN THE LINE THE HEAD ALREADY DRAWS.** "Pick a
 block to edit" replaces the date while armed, rather than a banner
 appearing above a screen whose whole job is the words.
 
 **AND EVERY ROW SHOWS ITS PENCIL WHILE IT IS ARMED**, which is the one
-honest use for that control being drawn: temporary, and the point is
-seeing which things the next press will open. Asserted beside the
-armed state, because "it is armed" passes on a build where the rows
-look exactly as they did — which is a mode you cannot see.
+honest use for that control being drawn: the point is seeing which
+things a press will open, and with the mode standing that is the
+whole of what tells you which state the week is in. Asserted beside
+the armed state, because "it is armed" passes on a build where the
+rows look exactly as they did — which is a mode you cannot see.
 
 **The button is the head's own tile**, 38px beside the glyph and the
 face, so the top row reads as tiles and a title rather than as a
