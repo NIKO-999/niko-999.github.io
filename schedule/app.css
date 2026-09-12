@@ -546,13 +546,31 @@ body {
   letter-spacing: -.03em;
   line-height: 1.05;
 }
+/* ── AND THE DATE IS THE DOOR TO THE CALENDAR ──
+   A button rather than a paragraph, because on the week it opens a
+   month of days: the head already prints which day you are on, and
+   pressing it for more days is the control naming itself. It carries
+   no chrome of its own — a filled chip up here would be a second
+   object beside the two tiles — so every one of these declarations is
+   the `<p>` this replaced, plus the resets a button needs to look
+   like one. Disabled on every other view, where there is no day for
+   it to be about and it is honestly not a control. */
 .h-sub {
   margin-top: 1px;
   font-size: 12.5px;
   font-weight: 500;
   color: var(--dim);
   font-variant-numeric: tabular-nums;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  text-align: left;
+  letter-spacing: inherit;
 }
+.h-sub:disabled { color: var(--dim); opacity: 1; }
 .hd-top .head-you { flex: none; }
 
 /* ── EDIT ARMS ONE PRESS ──
@@ -2854,7 +2872,7 @@ body {
 }
 /* A status with nothing to say draws nothing — an empty pill is a
    grey dash on every row that is neither running nor done. */
-.row .st:empty { display: none; }
+.row .st:empty, .cl-r .st:empty { display: none; }
 /* ── A FACT IS TYPE, NOT A TAG ──
    Every figure on every screen was a grey chip: two on a schedule
    row, four on a workout tile, one on every item of Showing up. A
@@ -2919,7 +2937,7 @@ body {
    ones — `--w-violet` is 4.63:1 on the dark face at the shipped 22/72
    and `--w-green` 4.24 on the light, so raising the shared rule would
    have taken a dozen tags under the bar to warm up three. */
-.row .st {
+.row .st, .cl-r .st {
   border: none;
   background: color-mix(in srgb, var(--tg) 36%, transparent);
   color: color-mix(in srgb, var(--tg) 40%, var(--ink));
@@ -3033,8 +3051,8 @@ body {
    All three are just a --tg, so the wash and the label come from the
    one rule every tag in this app shares and nothing here restates
    them. */
-.row .st.is-now, .pill.is-now { --tg: var(--live); }
-.row .st.is-ok { --tg: var(--st-ok); }
+.row .st.is-now, .cl-r .st.is-now, .pill.is-now { --tg: var(--live); }
+.row .st.is-ok, .cl-r .st.is-ok { --tg: var(--st-ok); }
 /* MISSED, and it is the one tag in this app that is red. The rule it
    reverses said a colour never says WHETHER — written about a wash of
    red across a week you had not kept, which is a judgement. An hour
@@ -3042,7 +3060,7 @@ body {
    it is the state you would most want to catch without reading. --bad
    is the app's own red and is already solved: 7.12:1 as a tag on the
    dark face and 5.11 on the light. */
-.row .st.is-bad { --tg: var(--bad); }
+.row .st.is-bad, .cl-r .st.is-bad { --tg: var(--bad); }
 /* ── AND NOT YET IS NOT A HUE AT ALL ──
    Written as a --tg of --tick-off it would take the shared rule's own
    arithmetic, and that arithmetic is for a COLOUR: 22% of a near-grey
@@ -3059,7 +3077,7 @@ body {
    it is still the flat neutral, which is the half of the rule that
    matters: a thing you have not got to has not happened, and a colour
    there would be the screen counting down at you. */
-.row .st.is-todo {
+.row .st.is-todo, .cl-r .st.is-todo {
   background: color-mix(in srgb, var(--ink) 9%, transparent);
   color: var(--dim);
 }
@@ -4174,7 +4192,7 @@ body {
    piece of type on the row. Its --tg is the workout's own hue, set on
    the element; `is-off` is the fallback for a colour this build does
    not know. */
-.row .wo {
+.row .wo, .cl-r .wo {
   font-size: 9.5px;
   font-weight: 600;
   letter-spacing: .01em;
@@ -4193,7 +4211,7 @@ body {
    the light face. --spent is the LIGHTER token and 9.5px is the
    smallest type on the row, which is this file's own mistake for the
    third time. --dim, measured composited on both faces. */
-.row .wo.is-off {
+.row .wo.is-off, .cl-r .wo.is-off {
   background: color-mix(in srgb, var(--ink) 9%, transparent);
   color: var(--dim);
 }
@@ -5083,6 +5101,14 @@ body {
 .mn-art-ic { width: 44%; height: 44%; fill: none; stroke: #fff;
   stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
   opacity: .92; }
+
+/* A note's cover carries the layout's own glyph — the same drawing
+   the tag on a block uses, so the two are one object at two sizes.
+   scNtGlyph strokes in `currentColor`, so the colour is set here
+   rather than on the svg the way MIND_ICON's is. */
+.mn-art-nt { width: 46%; height: 46%; display: block; color: #fff;
+  opacity: .94; }
+.mn-art-nt svg { width: 100%; height: 100%; display: block; }
 
 /* ═══════════════════════════════════════════════════════════════
    THE PRESS ANSWERS WHERE YOUR FINGER LANDED
@@ -6387,3 +6413,194 @@ body {
   white-space: nowrap;
 }
 .row-note:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   THE CALENDAR IS THE WEEK READ BACK
+
+   A month of days, each carrying how much of itself you kept, and a
+   press opens that day in full. Everything in here is the app's own
+   material: the arrows are the workout sheet's back control, the
+   state words on a day are the week row's own tags, and the mark in
+   a cell is the running row's progress line at a different size.
+
+   THE MARK SAYS HOW MUCH, NEVER HOW GOOD. A cell is a track in the
+   flat neutral with a fill in the ink, which is the tally calendar's
+   own pair — no hue anywhere, because a colour here would be the
+   screen grading your month back at you, and this app has never done
+   that. A day with nothing to say draws the track SHORT rather than
+   drawing nothing: a hole keeps the grid's geometry and scatters
+   gaps through it that read as a rendering fault, which is the
+   day-off dot's own argument.
+   ═══════════════════════════════════════════════════════════════ */
+.cl-head { display: flex; align-items: center; gap: 6px; }
+.cl-head > b {
+  flex: 1;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+.cl-arw {
+  flex: none;
+  width: 44px; height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  cursor: pointer;
+}
+.cl-arw svg {
+  width: 19px; height: 19px;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* One drawing, turned over. A second path for the other direction is
+   a second thing to keep in step for no reading at all. */
+.cl-arw.is-fwd svg { transform: scaleX(-1); }
+/* A day's own heading sits beside the arrow it belongs to rather than
+   in the middle of a row with a control on one side only. */
+.cl-head.is-day > b { text-align: left; font-size: 17px; }
+.cl-arw:disabled { opacity: .3; cursor: default; }
+.cl-arw:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+.cl-dows {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-top: 10px;
+}
+.cl-dows span {
+  text-align: center;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  color: var(--spent);
+}
+.cl-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-top: 4px;
+}
+/* TWO MARKS, TWO ZONES. The ring is sized to the DATE and the dots
+   sit under it: drawn in one centred stack they landed on the ring's
+   own lower arc, which reads as a mark that has come loose rather
+   than as two facts about one day. */
+.cl-c {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  min-height: 50px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+}
+.cl-c.is-pad { cursor: default; }
+.cl-c > i {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 32px; height: 32px;
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+/* ── THE RING SAYS HOW MUCH OF THE DAY YOU KEPT ──
+   Six treatments were drawn over the real month at 390x844 and read
+   at 1:1, because what kills a cell treatment is what THIRTY of it
+   look like rather than what one does. A ring belongs unambiguously
+   to the number inside it and is the only one of the six that could
+   say TWO THIRDS: a bar under the number floats between two rows and
+   reads as the row below's, a cell filled by the share is the loudest
+   object on the sheet at the top of its range and cannot tell a
+   half-kept day from a missed one at the bottom, a disc that grows is
+   a blob with no scale, and the date shaded by how much you kept is
+   quiet to the point of saying nothing.
+
+   No hue in it: a colour here would be the screen grading your month
+   back at you, which is the one thing this app has never done. The
+   colour on this grid says WHICH, and that is the dots' job. */
+.cl-a { position: absolute; top: 0; left: 50%; margin-left: -16px;
+  width: 32px; height: 32px; }
+.cl-a circle { fill: none; stroke-width: 2.4; }
+.cl-a .bg { stroke: var(--tick-off); }
+.cl-a .fg { stroke: var(--red); stroke-linecap: round; }
+/* A day with nothing to say draws no ring at all, which reverses the
+   day-off dot's rule about never leaving a hole — and the reason is
+   what a MONTH is made of. With a track on every cell the eighteen
+   days still ahead drew eighteen full grey rings, which is wallpaper,
+   and it made the grey ring on a day you actually missed mean
+   nothing. The number holds the cell's geometry either way. */
+.cl-c.is-quiet > i { color: var(--spent); }
+/* ── TODAY IS THE STRONGEST TYPE ON THE GRID, NOT A SECOND RING ──
+   A ring round the date is already the mark and a second one
+   concentric with it is two marks answering different questions in
+   one drawing. The head's own rule for saying YOU ARE HERE. */
+.cl-c.is-now > i { color: var(--red); font-weight: 800; }
+.cl-c:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+/* ── AND A DOT FOR EACH THING YOU LOGGED ──
+   The item's own colour, which is the one its tag wears everywhere
+   else: six things inside forty pixels is a thing only a colour can
+   say. Wrapped rather than scrolled or clipped, because a habit you
+   added yourself is a seventh dot and the cell has to take it. */
+.cl-d {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+  max-width: 80%;
+  position: relative;
+}
+.cl-d > i {
+  display: block;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--tg);
+}
+
+.cl-sum {
+  margin-top: 10px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
+.cl-rows { margin-top: 10px; }
+.cl-r {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 0;
+  border-top: 1px solid var(--hair);
+}
+.cl-r:first-child { border-top: 0; }
+.cl-t {
+  flex: none;
+  width: 54px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
+.cl-n {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -10510,7 +10510,10 @@ const SAID = [
     }));
     ok('pressing Mind on Today asks what you put in your head',
       sheet.title === 'Mind'
-      && sheet.kinds.join('|') === 'Read|Podcast|Walk|Journal'
+      /* Note sits third, between the two that ask a search and the two
+         that ask nothing — it asks a list, which is the pick that
+         costs no network at all. */
+      && sheet.kinds.join('|') === 'Read|Podcast|Note|Walk|Journal'
       && sheet.seg && sheet.note === 1 && sheet.rungs === 0, sheet);
     ok('...and the field says SEARCH, not the name of a book',
       sheet.label === 'Search' && sheet.placeholder === 'Search…', sheet);
@@ -11244,6 +11247,15 @@ const SAID = [
       const hosts = [...document.querySelectorAll('body *')].filter((h) => {
         if (!h.getClientRects().length) return false;
         if (h.getBoundingClientRect().width <= 8) return false;
+        /* ── AND A DISABLED CONTROL IS NOT A CONTROL ──
+           The handler refuses one outright, which is the app's own
+           rule that a response to a press that does nothing is worse
+           than no response at all. The head's date is a button on the
+           week and disabled everywhere else, so without this the
+           sweep asked the one thing in the app that is deliberately
+           inert to answer a press. Narrowed rather than relaxed: it
+           still presses every control that IS one. */
+        if (h.disabled) return false;
         if (h.matches('button,[role="switch"]')) return true;
         if (h.closest('button,[role="switch"]')) return false;
         if (getComputedStyle(h).cursor !== 'pointer') return false;
@@ -12796,8 +12808,18 @@ const SAID = [
           let rs; try { rs = sh.cssRules; } catch (e) { continue; }
           for (const r of rs) {
             const sel = (r.selectorText || '').trim();
-            if (sel === '.row .st' || /\.wk-sh b/.test(sel)) {
-              found[sel] = (r.style.getPropertyValue('background') || '')
+            /* ── BY CONTAINMENT, NEVER BY AN EXACT STRING ──
+               The rule is a comma list and the calendar's own day rows
+               joined it, so `sel === '.row .st'` stopped matching the
+               day the selector grew — a check keyed to the exact
+               spelling of a selector is an identifier in a fixture,
+               which is the trap this file has now recorded four
+               times. Keyed back to '.row .st' so what is asserted
+               below is still about that selector. */
+            const parts = sel.split(',').map((x) => x.trim());
+            if (parts.indexOf('.row .st') >= 0 || /\.wk-sh b/.test(sel)) {
+              found[parts.indexOf('.row .st') >= 0 ? '.row .st' : sel] =
+                (r.style.getPropertyValue('background') || '')
                 + ' | ' + (r.style.getPropertyValue('color') || '');
             }
           }
@@ -14823,6 +14845,654 @@ const SAID = [
 
     await nctx.close();
     ok('nothing threw through the notes record', nerrs.length === 0, nerrs.slice(0, 4));
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     NOTE TAKING IS ONE OF THE FIVE
+
+     Mind asked what you read and what you listened to and had no
+     answer at all for the thing you do in this app's own Notes tab.
+     A fifth kind, and the one pick in that sheet that costs no
+     network: the list is already on the device.
+
+     Every one of these fails silently. A record keyed on a TITLE goes
+     stale the moment you rename the note and nothing says so. A pick
+     that survives the wrong chip files a book under a note. And a
+     kind that reached a search would break the oldest promise in this
+     app on the screen that promise was written for.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    const nkctx = await browser.newContext(PHONE);
+    const nkpage = await nkctx.newPage();
+    const nkerrs = [];
+    nkpage.on('pageerror', (e) => nkerrs.push(String(e)));
+    nkpage.on('console', (m) => { if (m.type() === 'error') nkerrs.push(m.text()); });
+    const nkasked = [];
+    nkpage.on('request', (r) => nkasked.push(r.url()));
+    await jackets(nkpage);
+
+    await nkpage.addInitScript(() => {
+      /* Seeded only when ABSENT: an init script runs on EVERY
+         navigation, and written unconditionally it would put the
+         record back between a test writing it and the reload that
+         test is making. That exact bug cost four hundred lines once. */
+      if (!localStorage.getItem('sched.note.v1')) {
+        localStorage.setItem('sched.note.v1', JSON.stringify({ list: [
+          { id: 'qA', t: 'Shift (mindset)', k: 'note', a: 'teal', u: 1756900000000,
+            l: [{ i: 'a1', h: 0, c: '', x: 'Protect your energy', y: '', m: 0, w: [] }] },
+          { id: 'qB', t: 'Morning process', k: 'proc', a: 'amber', u: 1756800000000,
+            l: [{ i: 'b1', h: 0, c: '', x: 'Water, then the desk', y: '', m: 0, w: [] }] }
+        ] }));
+      }
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1',
+          JSON.stringify({ on: false, url: '', code: '' }));
+      }
+      if (!localStorage.getItem('sched.tour.v1')) {
+        localStorage.setItem('sched.tour.v1', '1');
+        localStorage.setItem('sched.hint2.v1', '1');
+      }
+    });
+    await nkpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await nkpage.waitForTimeout(420);
+
+    /* The tile's door opens on a tick that goes off→on, so a tile
+       already ticked has to be pressed twice. Asked of the SHEET
+       rather than of the words on the tile: a helper that reads the
+       tile's text is a helper keyed to whatever the assertions above
+       it happened to log, which took forty assertions down once. */
+    const nkOpen = async () => {
+      for (let i = 0; i < 3; i++) {
+        await nkpage.evaluate(() => {
+          document.querySelector('.tab[data-view="tally"]').click();
+        });
+        await nkpage.waitForTimeout(340);
+        await nkpage.evaluate(() => {
+          const t = [...document.querySelectorAll('.ty-card')]
+            .find((b) => /Mind/i.test(b.getAttribute('aria-label') || ''));
+          if (!t) throw new Error('no Mind tile on the grid');
+          t.click();
+        });
+        await nkpage.waitForTimeout(620);
+        const up = await nkpage.evaluate(() =>
+          !document.getElementById('scSheet').hidden);
+        if (up) return;
+      }
+      throw new Error('the Mind sheet never opened');
+    };
+    const nkChip = async (word) => {
+      await nkpage.evaluate((w) => {
+        const c = [...document.querySelectorAll('.wc-chip')]
+          .find((b) => b.textContent === w);
+        if (!c) throw new Error('no ' + w + ' chip');
+        c.click();
+      }, word);
+      await nkpage.waitForTimeout(360);
+    };
+
+    await nkOpen();
+    /* FIVE KINDS ON ONE ROW. Four was a segmented control and six is a
+       ladder; five had to be measured rather than assumed, because a
+       chip that clips reads as a rendering fault and a second row of
+       them is the two rows of chrome Showing up took its switcher out
+       for. */
+    const nkChips = await nkpage.evaluate(() => {
+      const cs = [...document.querySelectorAll('.wc-chip')];
+      return { names: cs.map((b) => b.textContent),
+        rows: new Set(cs.map((b) => Math.round(b.getBoundingClientRect().top))).size,
+        clipped: cs.filter((b) => b.scrollWidth > b.clientWidth + 1)
+          .map((b) => b.textContent) };
+    });
+    ok('Mind asks about a note, beside the four it already asked about',
+      nkChips.names.join('|') === 'Read|Podcast|Note|Walk|Journal', nkChips.names);
+    ok('...and the five still sit on one row with none of them cut',
+      nkChips.rows === 1 && nkChips.clipped.length === 0, nkChips);
+
+    await nkChip('Note');
+    const nkList = await nkpage.evaluate(() => ({
+      label: [...document.querySelectorAll('#scSheetBody .label')]
+        .map((l) => l.textContent),
+      chips: [...document.querySelectorAll('.nt-pk')].map((b) => b.textContent),
+      glyphs: document.querySelectorAll('.nt-pk .nt-g svg').length,
+      foot: (document.querySelector('#scSheetBody .btn.go') || {}).textContent,
+    }));
+    ok('...and it offers the notes you have, drawn the way a block draws them',
+      nkList.chips.length === 2 && nkList.glyphs === 2
+      && nkList.chips.join('|').indexOf('Shift (mindset)') >= 0, nkList);
+
+    /* THE FOOT NAMES WHAT IT IS ABOUT TO FILE, which is the only
+       thing on the sheet that says which note this is going to be. */
+    await nkpage.evaluate(() => {
+      const b = [...document.querySelectorAll('.nt-pk')]
+        .find((x) => /Shift/.test(x.textContent));
+      b.click();
+    });
+    await nkpage.waitForTimeout(360);
+    const nkPicked = await nkpage.evaluate(() => ({
+      foot: (document.querySelector('#scSheetBody .btn.go') || {}).textContent,
+      by: (document.querySelector('.mn-pt span') || {}).textContent,
+      glyph: !!document.querySelector('.mn-art.is-big .mn-art-nt svg'),
+      initials: !!document.querySelector('.mn-art.is-big i'),
+    }));
+    ok('...and the pick wears the note’s own glyph rather than initials',
+      nkPicked.foot === 'Log Shift (mindset)' && nkPicked.glyph
+      && !nkPicked.initials && nkPicked.by === 'Note', nkPicked);
+
+    await nkpage.evaluate(() => document.querySelector('#scSheetBody .btn.go').click());
+    await nkpage.waitForTimeout(340);
+    await nkpage.evaluate(() => {
+      const b = [...document.querySelectorAll('.wc-min')].find((x) => x.textContent === '15');
+      if (!b) throw new Error('no 15 minute rung');
+      b.click();
+    });
+    await nkpage.waitForTimeout(620);
+    const nkRec = await nkpage.evaluate(() => {
+      const log = JSON.parse(localStorage.getItem('sched.mind.v1') || '{}');
+      const day = Object.keys(log)[0];
+      return { day: day, r: log[day] };
+    });
+    /* THE ID IS THE RECORD AND THE TITLE IS THE FALLBACK, which is a
+       claim about the shape rather than about the words: a build
+       storing only the title passes every check on the screen and
+       goes stale on the first rename. */
+    ok('a note session files WHICH note, not a copy of its name',
+      nkRec.r && nkRec.r.k === 'note' && nkRec.r.nt === 'qA'
+      && nkRec.r.t === 'Shift (mindset)' && nkRec.r.m === 15, nkRec);
+
+    /* ── AND THE WALL SAYS THE DAY IT WAS TAKEN ON ──
+       Which is the whole of what was asked for: the tile carries the
+       date, and the entry is told apart from a book by the note's own
+       glyph and its own colour. */
+    const nkWall = async () => {
+      await nkpage.evaluate(async () => {
+        document.querySelector('.tab[data-view="tally"]').click();
+        await new Promise((z) => setTimeout(z, 340));
+        const t = [...document.querySelectorAll('.ty-card')]
+          .find((b) => /Mind/i.test(b.getAttribute('aria-label') || ''));
+        const h = t.parentElement.querySelector('.ty-hist')
+          || t.closest('li, div').querySelector('.ty-hist');
+        if (!h) throw new Error('no history control beside Mind');
+        h.click();
+      });
+      await nkpage.waitForTimeout(520);
+      const out = await nkpage.evaluate(() => {
+        const b = document.querySelector('.mn-hist-t');
+        return b ? { label: b.getAttribute('aria-label'),
+          day: (b.querySelector('.mn-hist-ov b') || {}).textContent,
+          glyph: !!b.querySelector('.mn-art-nt svg') } : null;
+      });
+      await nkpage.keyboard.press('Escape');
+      await nkpage.waitForTimeout(340);
+      return out;
+    };
+    const nkTile = await nkWall();
+    const nkWhen = new Date(nkRec.day + 'T12:00:00');
+    const nkSaid = nkWhen.getDate() + ' '
+      + ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+         'Oct', 'Nov', 'Dec'][nkWhen.getMonth()];
+    ok('...and the wall carries it under the day it was taken on',
+      !!nkTile && nkTile.day === nkSaid && nkTile.glyph
+      && /Shift \(mindset\)/.test(nkTile.label), { nkTile, nkSaid });
+
+    /* RENAME THE NOTE AND THE WALL FOLLOWS, which is what the id buys
+       and the one thing a stored copy of the title cannot do.
+
+       THROUGH THE UI, never through the key. A note flushes its own
+       in-memory copy on the way out of the page, so writing the key
+       and reloading has the app put the old title straight back —
+       which is this file's own lesson about that record, and it read
+       here as the rename simply not landing. */
+    await nkpage.evaluate(async () => {
+      document.querySelector('.tab[data-view="notes"]').click();
+      await new Promise((z) => setTimeout(z, 360));
+      const c = [...document.querySelectorAll('.nt-card')]
+        .find((x) => /Shift/.test(x.textContent));
+      if (!c) throw new Error('no card for the note to rename');
+      c.click();
+      await new Promise((z) => setTimeout(z, 380));
+      document.getElementById('scNtEd').click();
+      await new Promise((z) => setTimeout(z, 380));
+      const t = document.querySelector('#scNotePane .nt-title');
+      if (!t) throw new Error('no title field in the note');
+      t.value = 'Shift, renamed';
+      t.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    /* Past the 500ms save debounce, or the record still reads as it
+       was and the check measures the wait rather than the rename. */
+    await nkpage.waitForTimeout(760);
+    const nkRenamed = await nkWall();
+    ok('...and renaming the note renames it on the wall, which the id is for',
+      !!nkRenamed && /Shift, renamed/.test(nkRenamed.label), nkRenamed);
+
+    /* AND A NOTE YOU HAVE SINCE REMOVED STILL READS AS SOMETHING YOU
+       DID. The dangling id costs the live title and nothing else,
+       which is the rule the tag on a block already keeps. */
+    await nkpage.evaluate(() => {
+      const log = JSON.parse(localStorage.getItem('sched.mind.v1'));
+      const day = Object.keys(log)[0];
+      log[day] = { k: 'note', t: 'A note that is gone', nt: 'zzzz', b: '', m: 20 };
+      localStorage.setItem('sched.mind.v1', JSON.stringify(log));
+    });
+    await nkpage.reload({ waitUntil: 'networkidle' });
+    await nkpage.waitForTimeout(460);
+    const nkGone = await nkWall();
+    ok('...and one whose note has gone keeps the name it was filed under',
+      !!nkGone && /A note that is gone/.test(nkGone.label), nkGone);
+
+    /* ── THE PICK CROSSES SOME CHIPS AND NOT OTHERS ──
+       Both halves, because each passes on the other's bug: a build
+       that never clears files a book under a note, and one that always
+       clears throws your typing away for a press you meant. */
+    await nkpage.evaluate(() => {
+      const log = JSON.parse(localStorage.getItem('sched.mind.v1'));
+      const day = Object.keys(log)[0];
+      log[day] = { k: 'read', t: 'Deep Work', a: 'Cal Newport', c: '', b: '', m: 30 };
+      localStorage.setItem('sched.mind.v1', JSON.stringify(log));
+      /* ── AND THE TICK COMES OFF WITH IT ──
+         A tick and this record are ONE claim, so unticking Mind
+         DELETES the record — which is the app working, and it is what
+         the door helper above does on its first press when the tile is
+         already on. Planted against a ticked tile the record was gone
+         before the sheet could read it, and the pick came back empty
+         on a build that was right. */
+      const tk = JSON.parse(localStorage.getItem('sched.tick.v1') || '{}');
+      Object.keys(tk).forEach((k) => { delete tk[k].m; });
+      localStorage.setItem('sched.tick.v1', JSON.stringify(tk));
+    });
+    await nkpage.reload({ waitUntil: 'networkidle' });
+    await nkpage.waitForTimeout(460);
+    await nkOpen();
+    const nkRead = await nkpage.evaluate(() =>
+      (document.querySelector('.mn-pt b') || {}).textContent);
+    /* ── READ OFF THE FOOT ON THE CHIPS THAT DRAW NO PICK ──
+       Walk asks nothing, so it draws no pick ROW — the pick is still
+       held and the foot is the one thing on that screen that says so,
+       because the foot names what it is about to file. A check on the
+       row would report the pick gone on a build where it survived. */
+    await nkChip('Walk');
+    const nkWalk = await nkpage.evaluate(() =>
+      (document.querySelector('#scSheetBody .btn.go') || {}).textContent);
+    await nkChip('Note');
+    const nkCross = await nkpage.evaluate(() => ({
+      pick: (document.querySelector('.mn-pt b') || {}).textContent || null,
+      chips: document.querySelectorAll('.nt-pk').length,
+      foot: (document.querySelector('#scSheetBody .btn.go') || {}).textContent,
+    }));
+    ok('a book survives the chips that ask nothing, and not the one that asks a note',
+      nkRead === 'Deep Work' && nkWalk === 'Log Deep Work'
+      && nkCross.pick === null && nkCross.chips === 2
+      && nkCross.foot === 'Log Note',
+      { nkRead, nkWalk, nkCross });
+
+    /* AND NONE OF IT LEFT THE PHONE. The note kind has no search at
+       all, so the two shapes this file allows are the only thing that
+       may ever appear here — and they only ever do because the sheet
+       opens on Read. */
+    const nkOff = nkasked.filter((u) => !u.startsWith(BASE) && !isArt(u));
+    ok('...and asking which note reaches nothing off this origin',
+      nkOff.length === 0, nkOff.slice(0, 4));
+    ok('nothing threw through the note kind', nkerrs.length === 0, nkerrs.slice(0, 4));
+    await nkctx.close();
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     THE CALENDAR IS THE WEEK READ BACK
+
+     Seven chips and one day is the right shape for the day you are in
+     and says nothing about the month behind you. Asked for as a
+     better view of the things you have done on those days.
+
+     What fails silently here: a grid drawn from the TEMPLATE alone
+     reads as a year of days you kept none of, which is the wash of
+     red this app refuses by name; a cell that draws the same mark
+     whatever the record says looks exactly right and measures
+     nothing; and a read-back full of controls that refuse is the
+     thing this file already decided is worse than no control.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    const clctx = await browser.newContext(PHONE);
+    const clpage = await clctx.newPage();
+    const clerrs = [];
+    clpage.on('pageerror', (e) => clerrs.push(String(e)));
+    clpage.on('console', (m) => { if (m.type() === 'error') clerrs.push(m.text()); });
+    const clasked = [];
+    clpage.on('request', (r) => clasked.push(r.url()));
+
+    /* BOTH CLOCKS FROZEN TOGETHER, and the expectations are read off
+       the page's own date rather than off Node's. The two agree on
+       exactly one real day, which is the day the fixture was written
+       — every later one puts the month, the lead pad and which cells
+       are still ahead somewhere else. */
+    await clpage.addInitScript(() => {
+      const FROZEN = new Date('2026-09-12T16:20:00').getTime();
+      const R = Date;
+      // eslint-disable-next-line no-global-assign
+      Date = class extends R {
+        constructor(...a) { super(...(a.length ? a : [FROZEN])); }
+        static now() { return FROZEN; }
+      };
+      if (!localStorage.getItem('sched.v1')) {
+        const B = (id, d, s, e, n) => ({ id, d, s, e, r: '', n });
+        localStorage.setItem('sched.v1', JSON.stringify({
+          title: 'Daily Process', sub: '', items: [
+            B('wake1', 1, 360, 390, 'Wake'), B('tr1', 1, 390, 480, 'Train'),
+            B('wake2', 2, 360, 390, 'Wake'), B('tr2', 2, 390, 480, 'Train'),
+            B('wake4', 4, 360, 390, 'Wake'), B('tr4', 4, 390, 480, 'Train'),
+            B('wake5', 5, 360, 390, 'Wake'), B('wk5', 5, 540, 1020, 'Work')
+          ] }));
+        /* Wednesday has nothing on it at all, which is what makes
+           "a day that asked nothing" testable rather than stated. */
+        localStorage.setItem('sched.log.v1', JSON.stringify({
+          '2026-09-07': { wake1: 1, tr1: 1 },
+          '2026-09-08': { wake2: 1 },
+          '2026-09-10': { wake4: 1, tr4: 1 },
+          '2026-09-11': { wake5: 1 }
+        }));
+        localStorage.setItem('sched.tick.v1', JSON.stringify({
+          '2026-09-10': { t: 1, p: '8420' } }));
+        localStorage.setItem('sched.train.v1', JSON.stringify({
+          '2026-09-10': { tr4: { k: 'ppl.push', e: 'Hard', m: 60 } } }));
+        localStorage.setItem('sched.rate.v2', JSON.stringify({ '2026-09-10': 4 }));
+      }
+      /* ── POINTED AT A DEAD END ON THIS ORIGIN ──
+         The door check visits Friends to prove the date is not a
+         control there, and arriving at that tab CLAIMS a code — so
+         with no url the app falls back to its own deployed worker and
+         the section makes the one request this whole file exists to
+         forbid. A check that has to break the app's central promise in
+         order to run is a check that has to be narrower. */
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1', JSON.stringify({
+          on: false, url: window.location.origin + '/schedule/nofriends',
+          code: '' }));
+      }
+      if (!localStorage.getItem('sched.tour.v1')) {
+        localStorage.setItem('sched.tour.v1', '1');
+        localStorage.setItem('sched.hint2.v1', '1');
+      }
+      localStorage.setItem('sched.view.v1', 'list');
+    });
+    await clpage.route(`${BASE}/schedule/nofriends/**`, (r) => r.fulfill({
+      status: 200, contentType: 'application/json', body: '{"ok":true}' }));
+    await clpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await clpage.waitForTimeout(460);
+
+    /* ── THE DOOR IS THE DATE, AND ONLY WHERE IT IS A DATE ──
+       Measured as the BOX and the disabled state on every view rather
+       than as a class: what is drawn is the only thing an attribute
+       was ever a proxy for, which is the lesson the rail, the dots,
+       the toast and the intro each taught once. */
+    const clDoor = await clpage.evaluate(async () => {
+      const b = document.getElementById('scHdDate');
+      const read = () => ({ tag: b.tagName, off: b.disabled,
+        lab: b.getAttribute('aria-label') || '' });
+      const out = { week: read() };
+      document.getElementById('scHdEd').click();
+      await new Promise((z) => setTimeout(z, 260));
+      out.armed = read();
+      document.getElementById('scHdEd').click();
+      await new Promise((z) => setTimeout(z, 260));
+      for (const v of ['tally', 'notes', 'friends']) {
+        document.querySelector('.tab[data-view="' + v + '"]').click();
+        await new Promise((z) => setTimeout(z, 320));
+        out[v] = read();
+      }
+      document.querySelector('.tab[data-view="list"]').click();
+      await new Promise((z) => setTimeout(z, 320));
+      return out;
+    });
+    ok('the head’s date is the door to the calendar, on the week',
+      clDoor.week.tag === 'BUTTON' && clDoor.week.off === false
+      && /open the calendar/.test(clDoor.week.lab), clDoor.week);
+    ok('...and it is not a control where the line is not a date',
+      clDoor.armed.off === true && clDoor.tally.off === true
+      && clDoor.notes.off === true && clDoor.friends.off === true, clDoor);
+
+    await clpage.evaluate(() => document.getElementById('scHdDate').click());
+    await clpage.waitForTimeout(520);
+    const clMonth = await clpage.evaluate(() => {
+      const cells = [...document.querySelectorAll('.cl-c:not(.is-pad)')];
+      /* The share is read back off the ARC rather than off a class:
+         the dash is the drawing, and a cell that carries the right
+         class over the wrong arc looks exactly right in the DOM. */
+      const fill = (d) => {
+        const c = cells.find((x) => x.dataset.day === d);
+        if (!c) return null;
+        const fg = c.querySelector('.cl-a .fg');
+        const da = fg && fg.getAttribute('stroke-dasharray');
+        const sh = da ? Math.round(parseFloat(da.split(' ')[0])
+          / parseFloat(da.split(' ')[1]) * 100) : 0;
+        return { sh: sh, ring: !!c.querySelector('.cl-a'),
+          dots: [...c.querySelectorAll('.cl-d > i')]
+            .map((i2) => getComputedStyle(i2).backgroundColor),
+          quiet: c.classList.contains('is-quiet') };
+      };
+      return {
+        title: (document.querySelector('.cl-head > b') || {}).textContent,
+        cells: cells.length,
+        pads: document.querySelectorAll('.cl-c.is-pad').length,
+        now: (document.querySelector('.cl-c.is-now') || {}).dataset,
+        kept: fill('2026-09-07'), half: fill('2026-09-08'),
+        none: fill('2026-09-09'), ahead: fill('2026-09-20'),
+        before: fill('2026-09-02'), kept10: fill('2026-09-10'),
+        buttons: document.querySelectorAll('#scSheetBody button').length,
+      };
+    });
+    ok('the date opens the month it is in, Monday first',
+      clMonth.title === 'September 2026' && clMonth.cells === 30
+      && clMonth.pads === 1, clMonth);
+    ok('...and today is the one cell that is ringed',
+      clMonth.now && clMonth.now.day === '2026-09-12', clMonth.now);
+
+    /* THREE READINGS OFF ONE MARK, and a build that draws the same bar
+       on every day passes any check that only asks whether one is
+       there. A day you kept whole, a day you kept half, and a day that
+       asked nothing — which is drawn SHORT rather than left out,
+       because a hole in a grid reads as a rendering fault. */
+    ok('a cell says how much of that day you kept',
+      clMonth.kept.sh === 100 && clMonth.half.sh === 50
+      && !clMonth.kept.quiet && !clMonth.half.quiet, clMonth);
+    /* ── AND A DAY WITH NOTHING TO SAY DRAWS NO RING AT ALL ──
+       Both halves, because the class alone passes on a build that
+       still draws the track: eighteen full grey rings on the days
+       still ahead is wallpaper, and it makes the grey ring on a day
+       you actually missed mean nothing. */
+    ok('...and a day nothing was on, or that is still ahead, says so quietly',
+      clMonth.none.quiet === true && clMonth.ahead.quiet === true
+      && clMonth.none.ring === false && clMonth.ahead.ring === false, clMonth);
+    /* ── THE DOTS SAY WHICH, WHICH IS WHAT A COLOUR IS FOR HERE ──
+       The ring is one number and this is the question the screen was
+       asked: what did you do that day. Two dots on the 10th, in two
+       different colours, because one colour repeated says how many
+       rather than which. */
+    ok('...and a hue dot says WHICH things you logged that day',
+      clMonth.kept10 && clMonth.kept10.dots.length === 2
+      && clMonth.kept10.dots[0] !== clMonth.kept10.dots[1], clMonth.kept10);
+    /* A DAY BEFORE THE RECORD BEGAN IS NOT A DAY YOU MISSED. The
+       earliest thing ever logged here is the 7th, so the 2nd has a
+       full Wednesday of blocks on the template and nothing to say
+       about them. Drawn from the template alone it would read as a
+       day you kept none of. */
+    ok('...and so is a day before the first thing you ever logged',
+      clMonth.before.quiet === true, clMonth.before);
+
+    const clDay = await clpage.evaluate(async () => {
+      const c = [...document.querySelectorAll('.cl-c:not(.is-pad)')]
+        .find((b) => b.dataset.day === '2026-09-10');
+      c.click();
+      await new Promise((z) => setTimeout(z, 420));
+      return {
+        head: (document.querySelector('.cl-head > b') || {}).textContent,
+        sum: (document.querySelector('.cl-sum') || {}).textContent,
+        rows: [...document.querySelectorAll('.cl-r')].map((r) => ({
+          t: (r.querySelector('.cl-t') || {}).textContent,
+          n: (r.querySelector('.cl-n') || {}).textContent,
+          st: (r.querySelector('.st') || {}).textContent,
+          wo: (r.querySelector('.wo') || {}).textContent || null,
+          press: r.tagName,
+        })),
+        labels: [...document.querySelectorAll('#scSheetBody .label')]
+          .map((l) => l.textContent),
+        logged: [...document.querySelectorAll('.cl-sum')].map((p) => p.textContent),
+      };
+    });
+    ok('a day opens on everything that was on it, and what became of each',
+      clDay.head === 'Thursday 10 Sep'
+      && clDay.rows.length === 2
+      && clDay.rows[0].t === '06:00' && clDay.rows[0].st === 'Completed'
+      && clDay.rows[1].wo === 'Push', clDay);
+    ok('...and it says what you logged by name, not only how many',
+      /2 of 2 kept/.test(clDay.sum) && /rated 4 of 5/.test(clDay.sum)
+      && clDay.labels.indexOf('Logged') >= 0
+      && clDay.logged.join(' ').indexOf('8420') >= 0, clDay);
+    /* NOTHING IN HERE IS A CONTROL THAT REFUSES. Every write on this
+       app is refused outside the backfill window, so a row you could
+       press on a day three weeks gone would be a button whose only
+       answer is no. */
+    ok('...and not one row of it is a control',
+      clDay.rows.every((r) => r.press === 'DIV'), clDay.rows.map((r) => r.press));
+
+    const clBack = await clpage.evaluate(async () => {
+      document.querySelector('.cl-arw').click();
+      await new Promise((z) => setTimeout(z, 380));
+      return {
+        title: (document.querySelector('.cl-head > b') || {}).textContent,
+        cells: document.querySelectorAll('.cl-c:not(.is-pad)').length,
+        back: document.querySelectorAll('.cl-arw')[0].disabled,
+        fwd: document.querySelectorAll('.cl-arw')[1].disabled,
+      };
+    });
+    /* AND THE WAY BACK IS THE WAY BACK. The arrows refuse at both
+       ends rather than landing you on an empty grid: nothing before
+       the first thing you logged, and no month that has not happened. */
+    ok('...and the way back out of a day is the month it was in',
+      clBack.title === 'September 2026' && clBack.cells === 30
+      && clBack.back === true && clBack.fwd === true, clBack);
+
+    const clOff = clasked.filter((u) => !u.startsWith(BASE) && !isArt(u));
+    ok('and the calendar reaches nothing off this origin',
+      clOff.length === 0, clOff.slice(0, 4));
+    ok('nothing threw through the calendar', clerrs.length === 0, clerrs.slice(0, 4));
+    await clctx.close();
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     A HABIT OF YOURS IS NOT ASKED ABOUT STREAKS
+
+     Reported in one line: the built-in three make sense on the things
+     that are meant to be daily and none of them makes sense on
+     something like cooking. A streak on a habit you keep twice a week
+     can never pass two whatever you do, so it is a figure about the
+     CALENDAR — and "days on now" is that same figure asked again.
+
+     What fails silently: a panel that names a weekday off one Sunday
+     is the app inventing a routine out of a single day, and a change
+     that swept the built-ins in with yours would take the streak off
+     Train, where it means exactly what it says.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    const hbctx = await browser.newContext(PHONE);
+    const hbpage = await hbctx.newPage();
+    const hberrs = [];
+    hbpage.on('pageerror', (e) => hberrs.push(String(e)));
+    hbpage.on('console', (m) => { if (m.type() === 'error') hberrs.push(m.text()); });
+
+    await hbpage.addInitScript(() => {
+      const FROZEN = new Date('2026-09-12T16:20:00').getTime();
+      const R = Date;
+      // eslint-disable-next-line no-global-assign
+      Date = class extends R {
+        constructor(...a) { super(...(a.length ? a : [FROZEN])); }
+        static now() { return FROZEN; }
+      };
+      if (!localStorage.getItem('sched.habit.v1')) {
+        localStorage.setItem('sched.habit.v1', JSON.stringify([
+          { id: 'h1', n: 'Cooking', k: 'do', unit: '', aim: 2,
+            hue: '--w-orange' }]));
+        /* Sundays, and nothing else — so "usually on" has a real
+           answer and the last one is three days behind the frozen
+           Saturday. Train on every other day beside it, which is what
+           makes the built-in half of this testable rather than
+           stated. */
+        const log = {};
+        for (let i = 0; i < 140; i++) {
+          const x = new Date(FROZEN);
+          x.setDate(x.getDate() - i);
+          const day = x.getFullYear() + '-'
+            + String(x.getMonth() + 1).padStart(2, '0') + '-'
+            + String(x.getDate()).padStart(2, '0');
+          log[day] = {};
+          if (x.getDay() === 0) log[day].h1 = 1;
+          if (x.getDay() % 2 === 0) log[day].t = 1;
+        }
+        localStorage.setItem('sched.tick.v1', JSON.stringify(log));
+      }
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1',
+          JSON.stringify({ on: false, url: '', code: '' }));
+      }
+      if (!localStorage.getItem('sched.tour.v1')) {
+        localStorage.setItem('sched.tour.v1', '1');
+        localStorage.setItem('sched.hint2.v1', '1');
+      }
+    });
+    await hbpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await hbpage.waitForTimeout(460);
+    await hbpage.evaluate(() => document.querySelector('.tab[data-view="tally"]').click());
+    await hbpage.waitForTimeout(420);
+
+    const hbFigs = async (name) => {
+      await hbpage.evaluate((n) => {
+        const c = [...document.querySelectorAll('.ty-card')]
+          .find((b) => new RegExp(n, 'i')
+            .test(b.getAttribute('aria-label') || ''));
+        if (!c) throw new Error('no tile for ' + n);
+        const h = (c.parentElement || c).querySelector('.ty-hist');
+        if (!h) throw new Error('no history control for ' + n);
+        h.click();
+      }, name);
+      await hbpage.waitForTimeout(560);
+      const out = await hbpage.evaluate(() => ({
+        title: (document.querySelector('.ty-title') || {}).textContent,
+        caps: [...document.querySelectorAll('.ty-stats > div span')]
+          .map((x) => x.textContent),
+        vals: [...document.querySelectorAll('.ty-stats > div b')]
+          .map((x) => x.textContent),
+        glyphs: document.querySelectorAll('.ty-stats > div span svg').length,
+      }));
+      await hbpage.keyboard.press('Escape');
+      await hbpage.waitForTimeout(380);
+      return out;
+    };
+
+    const hbMine = await hbFigs('Cooking');
+    /* WHEN IT LANDS, HOW MUCH OF IT LATELY, AND HOW LONG IT IS BEEN.
+       Every Sunday for twenty weeks, so the weekday is unambiguous —
+       and the frozen day is a Saturday, which puts the last one three
+       days back rather than on the day the check runs. */
+    ok('a habit of yours says when it lands rather than how long a streak is',
+      hbMine.title === 'Cooking'
+      && hbMine.vals[0] === 'Sundays' && hbMine.caps[0] === 'usually on'
+      && hbMine.caps[1] === 'in 30 days' && hbMine.vals[1] === '4'
+      && hbMine.vals[2] === '6 days' && hbMine.caps[2] === 'since the last',
+      hbMine);
+    /* ASSERTED AS THE ABSENCE OF THE WORD, because a build that added
+       the three beside the old ones would pass every check above. */
+    ok('...and the word streak is nowhere on its panel',
+      hbMine.caps.join(' ').indexOf('streak') < 0
+      && hbMine.glyphs === 3, hbMine);
+
+    const hbTrain = await hbFigs('Train');
+    /* THE BUILT-IN HALF IS UNTOUCHED, which is the other direction and
+       the one a sweeping change would have broken: Train is meant to
+       be daily and its streak means exactly what it says. */
+    ok('...and a built-in tick still says the three it always said',
+      hbTrain.caps[0] === 'longest streak'
+      && hbTrain.caps[2] === 'days a week', hbTrain);
+
+    ok('nothing threw through the habit figures', hberrs.length === 0,
+      hberrs.slice(0, 4));
+    await hbctx.close();
   }
 
   ok('no page errors through any of it', errs.length === 0, errs);

@@ -8891,3 +8891,212 @@ clothes, for the fourth time. Found by listing every top-level
 declaration in the section and counting them rather than by fixing the
 one the parser happened to name first, which is the only version of
 that check worth running.
+
+## Note taking is one of the five
+
+Mind asked what you read and what you listened to and had no answer at
+all for the thing you do in this app's own Notes tab. Asked for as *I
+want note taking to be a part of Mind as well, which you can select
+which one, so you can see the day it was taken on* — so a fifth kind,
+and the one pick in that sheet that costs no network at all, because
+the list is already on the device.
+
+**IT IS A KIND, NOT A SECOND FIELD ON JOURNAL.** A journal entry is
+words with nowhere else to live; this is a session spent in a note that
+exists on its own screen. Two different answers to what you put in your
+head, and folding them together would have made the title of one the
+placeholder of the other.
+
+**WHICH NOTE, NEVER A COPY OF IT.** The record carries `nt`, the note's
+id, beside the title it had on the day. The id is what is read where it
+still resolves, so renaming a note renames it on the wall — and the
+recorded title is what is left when the note has gone, which is the
+dangling-id rule the tag on a block already keeps. Asserted as both: the
+rename following, and an id pointing at nothing still reading as
+something you did.
+
+**THE PICK IS DRAWN THE WAY A BLOCK DRAWS ONE.** `.nt-pick` chips with
+the note's own glyph and its own hue — the same control the block editor
+offers, single-select here because this is one session in one note where
+a block is ABOUT several. And the cover on the wall is the note's glyph
+on its own colour rather than initials on a hashed hue: a note already
+has both, so a tile is the same object at a bigger size.
+
+**The hue is seeded into the cover's own `--mh` rather than taking
+`--w-*` whole.** That material is white on a fixed 42/34 hsl and is
+measured at that; pouring a tag literal in at full strength would put
+white on a colour nothing has checked. Only the angle moves.
+
+**FIVE CHIPS STILL FIT ON ONE ROW, and that was measured rather than
+assumed.** Four was a segmented control and six is a ladder — at 390px
+the five come out 68px each with none clipped, so the segmented track
+stays. A second row of them is the two rows of chrome Showing up took
+its switcher out for.
+
+**THE PICK SURVIVES A CHANGE OF KIND, AND THE FIRST GUARD ASKED THE
+WRONG THING.** Written as a comparison between the OLD kind and the NEW
+one it was right for Read to Note and wrong for Read to Walk to Note:
+Walk has no pick of its own, so the middle press broke the chain and a
+book arrived on the note list with the foot still offering to file it.
+A pick knows which list it came off — it carries a note id or it does
+not — so the question is asked of the PICK. Found by a check that read
+the foot as well as the row, because the row alone said the pick had
+gone while the foot said it had not.
+
+**And a tick and this record are ONE claim**, so unticking Mind deletes
+it. That is the app working and it cost a fixture an hour: a helper that
+presses the tile to open the sheet unticks first when the tile is
+already on, so a record planted against a ticked tile was gone before
+the sheet could read it and the pick came back empty on a build that was
+right.
+
+**A note's key is flushed on the way OUT of the page.** So a test that
+writes `sched.note.v1` and reloads has the app put the old copy straight
+back — which is already written up against the damaged-shape check and
+read here as a rename simply not landing. Renamed through the UI
+instead, past the 500ms save debounce.
+
+## The calendar is the week read back
+
+Asked for as *a calendar view for the main tab so I can see the things
+I've done on those days from a better view*. The strip is seven chips
+and the list under it is one day, which is the right shape for the day
+you are IN and says nothing about the month behind you.
+
+**THE DOOR IS THE DATE.** The head already prints which day you are on;
+pressing it for more days is the control naming itself, which is the
+rule that put the stops on Today and took the corner glyph off the
+objectives. A calendar glyph in a corner names nothing and this app has
+removed one of those already. `#scHdDate` is a `<button>` now and
+DISABLED on every other view and while the head is armed — one node
+rather than a paragraph swapped for a button, because one node cannot
+drift from itself, and a control that does nothing where it does
+nothing should not be in the tab order saying so.
+
+**IT IS A READ-BACK, NOT A SECOND EDITOR.** Every write on this app is
+refused outside today and the two days behind it, so a month of
+pressable rows would be a screen of controls that mostly refuse — which
+this file already decided is worse than a control that is not there.
+The only buttons in it are the days, the months and the way back, and
+that is asserted as the day's rows being `<div>`.
+
+### The cell is a ring and a row of hue dots
+
+**SIX TREATMENTS WERE DRAWN OVER THE REAL MONTH at 390x844 and read at
+1:1**, because what kills a cell treatment is what THIRTY of it look
+like rather than what one does. What it beat: a **bar** under the
+number, which floats between two rows and reads as the row below's; a
+**cell filled** by the share, which is the loudest object on the sheet
+at the top of its range and cannot tell a half-kept day from a missed
+one at the bottom; a **disc** that grows, which is a blob with no scale
+on it; an **underline** at the cell's foot, same fault as the bar; and
+the **date shaded** by how much you kept, which is quiet to the point
+of saying nothing. A ring belongs unambiguously to the number inside it
+and was the only one of the six that could say TWO THIRDS.
+
+**THE RING SAYS HOW MUCH, THE DOTS SAY WHICH.** Reported in one line
+mid-build — *I wanna see the hue dots indicating what was done that
+day* — and it is the rule this app already keeps: a colour says WHICH
+and only a colour can say six things inside forty pixels. Each dot is
+that item's own hue through `scTagHue`, which is the colour its tag
+wears everywhere else, and a habit you added yourself brings its own.
+The ring carries no hue at all, because a colour there would be the
+screen grading your month back at you.
+
+**TWO MARKS, TWO ZONES.** Drawn in one centred stack the dots landed on
+the ring's own lower arc and read as a mark that had come loose. The
+ring is sized to the DATE and the dots sit under it.
+
+**A DAY WITH NOTHING TO SAY DRAWS NO RING AT ALL**, which reverses the
+day-off dot's rule about never leaving a hole — and the reason is what
+a MONTH is made of. With a track on every cell the eighteen days still
+ahead drew eighteen full grey rings, which is wallpaper, and it made
+the grey ring on a day you actually missed mean nothing. The NUMBER
+holds the cell's geometry either way, so there is no hole left.
+
+**AND A DAY BEFORE THE RECORD BEGAN IS NOT A DAY YOU MISSED.** Drawn
+from the template alone every cell reads as a full day you kept none
+of, so a phone that opened the app yesterday would show a year of
+failure — the wash of red across a week you missed that the habits
+screen refuses by name. The grid says nothing before the first thing
+you ever logged.
+
+**TODAY IS THE STRONGEST TYPE ON THE GRID, NOT A SECOND RING.** A ring
+round the date is already the mark and a concentric one is two marks
+answering different questions in one drawing.
+
+### And a day opens on everything that was on it
+
+The blocks it asked for and what became of each, in the week row's own
+four words; then what you LOGGED by name rather than only how many,
+because a count says you showed up and the names say what you did;
+then what you trained, what you read and what you had decided mattered.
+`scWorkTag` is one drawing of the trained tag now, shared with the
+week's row — two constructions of it is two places to keep the token,
+the first-component rule and the neutral fallback in step.
+
+**The arrows refuse at both ends** rather than landing you on an empty
+grid: nothing before the first thing you logged, and no month that has
+not happened.
+
+**And the check for it must not claim a friend code.** The door check
+visits Friends to prove the date is not a control there, and arriving
+at that tab CLAIMS one — with no url the app falls back to its own
+deployed worker and the section made the one request this whole file
+exists to forbid. Pointed at a dead end on this origin instead.
+
+## A habit of yours is not asked about streaks
+
+Reported in one line: the built-in three make sense on the things that
+are meant to be daily, and none of them makes sense on something like
+cooking. **A streak on a habit you keep twice a week can never pass
+two whatever you do** — it is a figure about the CALENDAR rather than
+about you — and "days on now" is that same figure asked again.
+
+What a habit like that has instead is a shape in the week and a
+rhythm: **which day it lands on, how many there have been in thirty
+days, and how long it has been.** Yours only. Train and Mind are daily
+by design and their streaks mean exactly what they say, which is the
+half of the old reading that survives — and a change that swept them in
+with yours would have taken the streak off the one item it is truest
+about. Both directions are asserted.
+
+**A MAJORITY OF ONE IS ONE**, which is the Workouts panel's own rule
+for the same reason: naming "Sundays" under a figure of 1 is the app
+inventing a routine out of a single Sunday. Three of them, and a real
+share of the whole — with seven days to land on, chance alone is a
+seventh, so a day carrying two fifths of them is the day. Anything
+less says *Any day*, which is a true answer rather than a missing one.
+
+**Asserted as the ABSENCE of the word as well as the presence of the
+three**, because a build that added them beside the old ones passes
+every check written the other way round.
+
+**Two glyphs went in with it.** A tally — four uprights and the fifth
+struck across them — which cannot be taken for the streak's three
+filled blocks, and a clock for how long it has been. The clock never
+sits beside `now`, the other ring on that list, because this is the
+figure that replaces it.
+
+### Two checks the suite found about itself
+
+**A DISABLED CONTROL IS NOT A CONTROL.** The press sweep asks every
+button in the app to answer a press, and the handler refuses a disabled
+one outright — which is the app's own rule that a response to a press
+that does nothing is worse than no response at all. The head's date is
+a button on the week and disabled everywhere else, so the sweep was
+asking the one thing in the app that is deliberately inert. Narrowed
+rather than relaxed, and **proved by breaking something it must still
+catch**: a handler taught to skip `.tab` reports four silent tabs. The
+first attempt at that proof did not bite and was a bad BREAK rather
+than a blind check — excluding tabs from the `closest()` left them
+reachable through the `cursor: pointer` fallback, and the handler found
+them a second way.
+
+**AND A SELECTOR STRING IN A FIXTURE IS AN IDENTIFIER NOTHING TYPE-
+CHECKS.** The state tags' contrast check read its rule with
+`sel === '.row .st'`, so the day the calendar's own rows joined that
+comma list the check stopped matching and reported an empty tag. It
+reads by CONTAINMENT now. Fourth time this file has recorded that
+shape, and the first time the identifier was a CSS selector rather than
+a palette name or a workout key.

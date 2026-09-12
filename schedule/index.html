@@ -69,7 +69,7 @@
   } catch (e) {}
 }());
 </script>
-<link rel="stylesheet" href="app.css?v=a162a3ad" />
+<link rel="stylesheet" href="app.css?v=d493d33f" />
 </head>
 <body>
 
@@ -87,7 +87,13 @@
       <span class="h-ic" id="scHdIc" aria-hidden="true"></span>
       <div class="h-tx">
         <h2 class="h-day" id="scHdDay"></h2>
-        <p class="h-sub" id="scHdDate"></p>
+        <!-- ── THE DATE IS THE DOOR TO THE CALENDAR ──
+             A month of days, reached by pressing the day you are on.
+             Disabled on every other view rather than swapped for a
+             paragraph: one node cannot drift from itself, and a
+             control that does nothing where it does nothing should
+             not be in the tab order saying so. -->
+        <button class="h-sub" id="scHdDate" type="button"></button>
       </div>
       <!-- ── EDIT, AND IT ARMS ONE PRESS ──
            The editor was behind a double tap for three rounds and was
@@ -300,6 +306,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=a8f75c0f"></script>
+<script src="app.js?v=d2faa8a2"></script>
 </body>
 </html>

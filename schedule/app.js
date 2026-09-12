@@ -49,6 +49,13 @@
      puts "September" across a 118px column. */
   var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  /* The long form, and it is spent in exactly one place: the calendar
+     names the month it is SHOWING, which is a title rather than a
+     figure beside a date. Everywhere a month sits next to a number it
+     is still the short one, for the reason written above. */
+  var MONTH_FULL = ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November',
+                    'December'];
 
   /* ── the seed ──
      What a person sees the first time they open this, and it is a
@@ -1660,23 +1667,12 @@
            a 22% tag wash they come to 3.36:1 on the light face — the
            amber worst. The state tag beside it is already carrying a
            colour, and two on one row is a row wearing a highlight. */
-        if (wk) {
-          var wtag = scEl('span', 'wo', wk);
-          /* ── AND IT WEARS THE WORKOUT'S OWN COLOUR ──
-             Which session this was is the purest WHICH there is, so it
-             is exactly what a tag's colour is for. Taken from the
-             FIRST component, because that is the one that names the
-             session: Pull + Abs is a Pull.
-
-             Through a TOKEN rather than the card's literal hex, so it
-             follows the face — the card is the one surface in this app
-             that does not, and a tag is not a card. */
-          var w0 = scWorkoutsOf(wr.k)[0];
-          var tone = w0 && WO_TONE[String(w0.c).toLowerCase()];
-          if (tone) wtag.style.setProperty('--tg', 'var(--w-' + tone + ')');
-          else wtag.classList.add('is-off');
-          props.appendChild(wtag);
-        }
+        /* ── AND IT WEARS THE WORKOUT'S OWN COLOUR ──
+           Built by scWorkTag, which the calendar's own day draws the
+           same tag from: the colour, the first-component rule and the
+           neutral fallback all live in one place, because two of them
+           is two things to keep in step. */
+        if (wk) props.appendChild(scWorkTag(wr));
         props.appendChild(scEl('span', 'st'));
         row.appendChild(props);
         /* ── HOW MUCH OF IT IS LEFT ──
@@ -2584,7 +2580,15 @@
        over the goals pane with the friends glyph beside it. A ternary
        is a list of two with no room in it; a lookup names the next
        view on the day it is added. */
+    /* ── AND IT IS ONLY A CONTROL WHERE IT IS A DATE ──
+       The calendar is the week read back, so the door is live on the
+       week and nowhere else — and not while the head is saying what
+       it is waiting for either, because that line is a MODE rather
+       than a day and a door on it would be answering a question
+       nobody asked. */
+    sub.disabled = view !== 'list';
     if (view !== 'list') {
+      sub.removeAttribute('aria-label');
       day.textContent = VIEW_NAME[view] || 'Today';
       /* THE MODE SAYS WHAT IT IS, in the line the head already draws —
          the week's own rule, and the reason it is here rather than in
@@ -2612,6 +2616,8 @@
        route here was rejected for, and a second element would be one
        more object above a screen whose whole job is the words. */
     if (editArm) {
+      sub.disabled = true;
+      sub.removeAttribute('aria-label');
       sub.textContent = 'Pick a block to edit';
       ic.innerHTML = HEAD_ICON[d === t.getDay() ? 'today' : 'week'];
       return;
@@ -2619,6 +2625,9 @@
     sub.textContent = when.getDate() + ' ' + MON[when.getMonth()]
       + (mins ? ' \u00b7 ' + (mins / 60).toFixed(mins % 60 ? 1 : 0) + ' hrs' : '')
       + ' \u00b7 ' + now;
+    /* The line already says the date; what a screen reader cannot get
+       from it is that pressing it is worth anything. */
+    sub.setAttribute('aria-label', sub.textContent + ', open the calendar');
     ic.innerHTML = HEAD_ICON[d === t.getDay() ? 'today' : 'week'];
   }
 
@@ -4170,7 +4179,17 @@
        two glyphs sharing a silhouette does not apply to: these two sit
        side by side and are the top and the bottom of the same figure,
        so reading as a pair is the point rather than a collision. */
-    low: '<path d="M2.6 4.6l6.6 9.4 4-4.6 3.6 6 4.6-10.8z"/>'
+    low: '<path d="M2.6 4.6l6.6 9.4 4-4.6 3.6 6 4.6-10.8z"/>',
+    /* A TALLY, which is what a count of days actually is — four
+       uprights and the fifth struck across them. It cannot be taken
+       for the streak's three blocks: those are filled and square and
+       these are strokes at an angle. */
+    tally: '<path d="M5.4 5.4v13.2M10.2 5.4v13.2M15 5.4v13.2'
+         + 'M19.8 5.4v13.2M3.4 17l18-10.4"/>',
+    /* A clock, for how long it has been. It never sits beside `now`,
+       which is the other ring on this list — that one is a tick's
+       figure and this one replaces it. */
+    since: '<circle cx="12" cy="12" r="8.6"/><path d="M12 6.8V12l3.8 2.2"/>'
   };
 
   /* ── A DAY THAT DID NOT APPLY IS SKIPPED, NOT COUNTED EITHER WAY ──
@@ -4191,6 +4210,46 @@
        and the foot of this same panel already says it better, as "121
        of 182 days". Two statements of one thing, neither of them about
        the quantity the panel is for. */
+    /* ── A HABIT OF YOURS IS NOT ASKED ABOUT STREAKS ──
+       Reported in one line: the built-in three make sense on the ones
+       that are about doing a thing every day, and none of them makes
+       sense on something like cooking. A streak on a habit you keep
+       twice a week is a fact about the CALENDAR rather than about
+       you — it can never pass two, whatever you do — and "days on
+       now" is the same figure asked a second way.
+
+       What a habit like that actually has is a SHAPE IN THE WEEK and
+       a rhythm: which day it lands on, how much of it there has been
+       lately, and how long it is been. Yours only: Train and Mind are
+       daily by design and their streaks mean what they say, which is
+       the half of the old reading that survives. */
+    if (item.own && item.k === 'do') {
+      var byDow = [0, 0, 0, 0, 0, 0, 0], onAt = -1, mth = 0, j;
+      for (j = 0; j < d.length; j++) {
+        if (!d[j].on) continue;
+        byDow[d[j].dow]++;
+        onAt = j;
+        if (j >= d.length - 30) mth++;
+      }
+      var top = 0;
+      for (j = 1; j < 7; j++) if (byDow[j] > byDow[top]) top = j;
+      /* ── A MAJORITY OF ONE IS ONE ──
+         The Workouts panel's own rule, for the same reason: naming
+         "Sundays" under a figure of 1 is the app inventing a routine
+         out of a single Sunday. Three of them, and a real share of
+         the whole — with seven days to land on, chance alone is a
+         seventh, so a day carrying two fifths of them is the day. */
+      var lands = (byDow[top] >= 3 && byDow[top] >= kept.length * 0.4)
+        ? FULL[top] + 's' : 'Any day';
+      var ago = onAt < 0 ? null : d.length - 1 - onAt;
+      return { kept: kept.length, live: live.length, rows: [
+        { v: lands, cap: 'usually on', ic: 'week' },
+        { v: String(mth), cap: 'in 30 days', ic: 'tally' },
+        { v: ago === null ? '—'
+          : ago === 0 ? 'Today' : ago === 1 ? 'Yesterday' : ago + ' days',
+          cap: ago === null ? 'never logged' : 'since the last', ic: 'since' }
+      ] };
+    }
     if (item.k === 'do') {
       var best = 0, run = 0, now = 0, i;
       for (i = 0; i < d.length; i++) {
@@ -7254,6 +7313,26 @@
   function scWorkName(k) {
     return scWorkoutsOf(k).map(function (w) { return w.n; }).join(' + ');
   }
+  /* ── ONE DRAWING OF WHAT YOU TRAINED ──
+     The week's row and the calendar's day both say it, and two
+     constructions of one tag is two places to keep the token, the
+     fallback and the first-component rule in step. The colour is
+     taken from the FIRST component because that is the one that names
+     the session — Pull + Abs is a Pull — and through a token rather
+     than the card's own literal hex, so it follows the face: the card
+     is the one surface in this app that does not, and a tag is not a
+     card. A hue this build cannot solve falls to the flat neutral,
+     which is the path `.wo.is-off` exists for. */
+  function scWorkTag(wr) {
+    var name = wr && scWorkName(wr.k);
+    if (!name) return null;
+    var tag = scEl('span', 'wo', name);
+    var w0 = scWorkoutsOf(wr.k)[0];
+    var tone = w0 && WO_TONE[String(w0.c).toLowerCase()];
+    if (tone) tag.style.setProperty('--tg', 'var(--w-' + tone + ')');
+    else tag.classList.add('is-off');
+    return tag;
+  }
   /* ── A DAY THAT IS NOTHING BUT REST HAS NEITHER FIGURE ──
      How hard was it and how long did it take are questions about a
      session, so a rest day is asked neither and stores neither. THREE
@@ -7426,12 +7505,29 @@
      workout card's own rule, which is that the minutes suggest an
      answer and a press is what makes it one. Nobody reads for 47
      minutes, they read for about half an hour. */
+  /* ── AND WRITING IS ONE OF THE FIVE ──
+     Asked for as *note taking to be a part of Mind as well, which you
+     can select which one, so you can see the day it was taken on*.
+     Read asks a search which book; this asks your own Notes tab WHICH
+     NOTE, which is the one pick in this sheet that costs no network
+     at all — the list is already on the device.
+
+     It is a fifth KIND rather than a second field on Journal: a
+     journal entry is words with nowhere else to live, and this is a
+     session spent in a note that exists on its own screen. The two
+     are different answers to what you put in your head.
+
+     `pk` says where the pick comes from — 'find' is a search off this
+     device and 'note' is the list already here. A kind with neither
+     asks nothing at all, which is Walk's whole point. */
   var MIND_KINDS = [
-    { k: 'read', n: 'Read',    ask: 'book',    t: 30 },
-    { k: 'pod',  n: 'Podcast', ask: 'podcast', t: 30 },
-    { k: 'walk', n: 'Walk',    ask: '',        t: 30 },
-    { k: 'jrnl', n: 'Journal', ask: '',        t: 10 }
+    { k: 'read', n: 'Read',    ask: 'book',    pk: 'find', t: 30 },
+    { k: 'pod',  n: 'Podcast', ask: 'podcast', pk: 'find', t: 30 },
+    { k: 'note', n: 'Note',    ask: '',        pk: 'note', t: 15 },
+    { k: 'walk', n: 'Walk',    ask: '',        pk: '',     t: 30 },
+    { k: 'jrnl', n: 'Journal', ask: '',        pk: '',     t: 10 }
   ];
+  function scMindPick(k) { var x = scMindKind(k); return (x && x.pk) || ''; }
   /* ── MIND'S OWN RUNGS, and it is not tidiness ──
      The workout ladder starts at 15 because nothing shorter is a
      session; ten minutes with a notebook is the ordinary case here.
@@ -7469,6 +7565,13 @@
              t: String(v.t || '').slice(0, 120),
              a: String(v.a || '').slice(0, 120),
              c: String(v.c || '').slice(0, 400),
+             /* WHICH note, never the note. A block already carries an
+                id rather than a copy of a title, for the reason two
+                copies drift the moment you rename one — and the title
+                beside it is not a second copy, it is what this entry
+                said on the day, kept so a note you have since removed
+                still reads as something you did. */
+             nt: String(v.nt || '').slice(0, 40),
              b: String(v.b || '').slice(0, 1000),
              m: +v.m || 0 };
   }
@@ -7531,9 +7634,21 @@
     if (rec) mindLog[day] = rec; else delete mindLog[day];
     scMindSave();
   }
+  /* ── AND A NOTE'S NAME IS READ LIVE ──
+     The title on the record is what this entry said on the day; the
+     note is a thing you can still rename, and a wall reading a name
+     you have changed is two records disagreeing about one morning.
+     So the id wins where it still resolves, and the recorded title is
+     what is left when the note has gone — which is the dangling-id
+     rule the block's own tag already keeps, one screen over. */
+  function scMindNote(rec) {
+    return (rec && rec.nt && scNoteById(rec.nt)) || null;
+  }
   function scMindName(rec) {
     if (!rec) return '';
     var kk = scMindKind(rec.k);
+    var q = scMindNote(rec);
+    if (q) return scNoteTitle(q);
     return rec.t || (kk ? kk.n : '');
   }
 
@@ -7868,6 +7983,22 @@
      place of initials, so the wall still tells them apart. */
   var MIND_ICON = { walk: 'walk', jrnl: 'write' };
 
+  /* ── A NOTE'S COVER IS ITS OWN COLOUR AND ITS OWN GLYPH ──
+     Initials on a hashed hue is the right answer for a book, whose
+     jacket this app cannot draw. A note already HAS a colour you
+     chose and a glyph that says which layout it is, and the tag on a
+     block draws exactly those two — so a note on the wall is the same
+     object at a bigger size rather than a second drawing of it.
+
+     The hue is seeded into the cover's own `--mh` rather than taking
+     `--w-*` whole: the cover material is white on a fixed 42/34 hsl
+     and is measured at that, so pouring a tag literal in at full
+     strength would put white on a colour nothing has checked. The
+     angle is the only thing that moves, which keeps the drawing in
+     the note's own family and the contrast exactly where it was. */
+  var NT_ANGLE = { red: 4, orange: 26, amber: 42, green: 140,
+                   teal: 172, blue: 212, violet: 268 };
+
   /* One drawing of a cover, used by the results, by the pick and by
      the row — three copies of this would be three things to keep in
      step, and the generated one is the case that has to look
@@ -7875,6 +8006,12 @@
   function scMindArt(hit, cls) {
     var a = scEl('span', 'mn-art' + (cls ? ' ' + cls : ''));
     var t = (hit && hit.t) || '';
+    var q = hit && hit.nt ? scNoteById(hit.nt) : null;
+    if (q) {
+      a.style.setProperty('--mh', String(NT_ANGLE[scNoteHue(q)] || 212));
+      a.appendChild(scNtGlyph(q.k, 'mn-art-nt'));
+      return a;
+    }
     var glyph = !t && hit && MIND_ICON[hit.k];
     if (glyph) {
       a.style.setProperty('--mh', String(scMindHue(hit.k)));
@@ -8059,7 +8196,8 @@
        purpose: typing a title, realising it was a podcast rather than
        a book and losing the words is the form throwing your work away
        for a press you meant. */
-    var pick = rec && rec.t ? { t: rec.t, a: rec.a, c: rec.c } : null;
+    var pick = rec && (rec.t || rec.nt)
+      ? { t: rec.t, a: rec.a, c: rec.c, nt: rec.nt } : null;
     /* ── THE SHOW, WHILE YOU ARE CHOOSING AN EPISODE ──
        A second level, and the deck's own rule for one: `pick` is the
        ANSWER and `show` is where you are. They are separate because
@@ -8087,12 +8225,15 @@
     var resBox = null, footBox = null;
 
     function est() { var k = scMindKind(cur); return saidMin ? mins : (k ? k.t : 30); }
-    function named() { return scMindName({ k: cur, t: pick ? pick.t : '' }); }
+    function named() {
+      return scMindName({ k: cur, t: pick ? pick.t : '',
+        nt: pick ? pick.nt : '' });
+    }
 
     scSheet('Mind', function (body) {
       function commit() {
         scMindSet(day, { k: cur, t: pick ? pick.t : '', a: pick ? pick.a : '',
-          c: pick ? pick.c : '', b: note, m: est() });
+          c: pick ? pick.c : '', nt: pick ? pick.nt : '', b: note, m: est() });
         /* The tile's tick and this record are one claim, so pressing
            Log is enough on its own — you can reach this sheet from a
            tile you have not ticked yet. */
@@ -8277,6 +8418,23 @@
           c.setAttribute('aria-pressed', x.k === cur ? 'true' : 'false');
           c.addEventListener('click', function () {
             if (cur === x.k) return;
+            /* ── THE PICK SURVIVES A CHANGE OF KIND, WHERE IT CAN ──
+               Typing a title, realising it was a podcast rather than a
+               book and losing it is the form throwing your work away
+               — and a book is still a book on the Walk chip, so the
+               two that ask nothing keep it too. A NOTE is not a book:
+               the two come from different lists and neither is an
+               answer to the other's question.
+
+               ASKED OF THE PICK, NEVER OF THE CHIP YOU CAME FROM.
+               Written as a comparison between the two kinds it was
+               right for Read to Note and wrong for Read to Walk to
+               Note — Walk has no pick of its own, so the middle press
+               broke the chain and a book arrived on the note list with
+               the foot still offering to file it. A pick knows which
+               list it came off: it carries a note id or it does not. */
+            var src = pick ? (pick.nt ? 'note' : 'find') : '';
+            if (src && scMindPick(x.k) && src !== scMindPick(x.k)) pick = null;
             cur = x.k;
             hits = []; state = ''; want = 0;
             show = null; eps = []; epState = ''; epWant = 0;
@@ -8412,6 +8570,54 @@
             body.appendChild(f);
             resBox = scEl('div', 'mn-box');
             body.appendChild(resBox);
+          }
+        } else if (kk.pk === 'note') {
+          /* ── WHICH NOTE, AND THE LIST IS ALREADY HERE ──
+             The block editor's own row of chips rather than a second
+             way of choosing the same thing: same class, same glyph,
+             same hue, so a note is the same object wherever you pick
+             it. Single-select here, because this is one session in
+             one note — where a BLOCK is about several. */
+          if (pick && pick.nt) {
+            var ng = scEl('div', 'mn-pick');
+            ng.appendChild(scMindArt(pick, 'is-big'));
+            var npt = scEl('div', 'mn-pt');
+            npt.appendChild(scEl('b', null, scMindName({ k: 'note',
+              t: pick.t, nt: pick.nt })));
+            if (pick.a) npt.appendChild(scEl('span', null, pick.a));
+            ng.appendChild(npt);
+            ng.appendChild(scBtn('off', 'Change', function () {
+              pick = null; asking = false; draw();
+            }));
+            body.appendChild(ng);
+          } else if (notes.length) {
+            body.appendChild(scEl('span', 'label', 'Which note'));
+            var nrw = scEl('div', 'nt-pick');
+            notes.slice().sort(function (a2, b2) { return b2.u - a2.u; })
+              .forEach(function (q) {
+                var nb = scEl('button', 'nt-pk');
+                nb.type = 'button';
+                nb.appendChild(scNtGlyph(q.k, 'nt-g'));
+                nb.appendChild(scEl('span', 'nt-tt', scNoteTitle(q)));
+                nb.style.setProperty('--tg', scNtVar(scNoteHue(q)));
+                nb.addEventListener('click', function () {
+                  /* The kind's own name as the second line, which is
+                     what `a` already is on every other pick: the thing
+                     the title is BY. A note is by its layout. */
+                  pick = { t: scNoteTitle(q), a: scNtKindName(q.k),
+                    c: '', nt: q.id };
+                  draw();
+                });
+                nrw.appendChild(nb);
+              });
+            body.appendChild(nrw);
+          } else {
+            /* Nothing to point at yet. It still logs — the words below
+               are the record either way — because a kind that refuses
+               until you have been somewhere else is a door that only
+               ever says no. */
+            body.appendChild(scEl('p', 'mn-say',
+              'No notes yet · this still logs the time and the words'));
           }
         }
 
@@ -12610,6 +12816,305 @@
   }
 
   /* ═══════════════════════════════════════════════════════════
+     THE CALENDAR IS THE WEEK READ BACK
+
+     The strip is seven chips and the list under it is one day, which
+     is the right shape for the day you are IN and says nothing about
+     the month behind you. Asked for as *a calendar view for the main
+     tab so I can see the things I've done on those days from a better
+     view* — so this is a month of days, each carrying how much of
+     itself you kept, and a press opens that day in full.
+
+     IT IS A READ-BACK, NOT A SECOND EDITOR, and that is the whole
+     shape of it. Every write on this app is refused outside today and
+     the two days behind it, so a month of pressable rows would be a
+     screen of controls that mostly refuse — which this file already
+     decided is worse than a control that is not there. The only
+     buttons in here are the days, the months and the way back.
+
+     AND THE DOOR IS THE DATE. The head already prints which day you
+     are on; pressing it for more days is the control naming itself,
+     which is the rule that put the stops on Today and took the corner
+     glyph off the objectives. A calendar glyph in a corner names
+     nothing, and this app has removed one of those already.
+     ═══════════════════════════════════════════════════════════ */
+
+  /* Everything one cell needs, read rather than stored. `on` is what
+     the day actually asked of you — a block marked off is not one of
+     them, which is the day-off record's whole point and the same
+     reading scDayDone takes. */
+  function scCalOf(day) {
+    var dow = new Date(day + 'T12:00:00').getDay();
+    var all = scByDay(dow);
+    var on = all.filter(function (b) { return !scOff(day, b.id); });
+    var kept = 0;
+    on.forEach(function (b) {
+      if (blockLog[day] && blockLog[day][b.id]) kept++;
+    });
+    var items = scItems();
+    var did = items.filter(function (it) { return scTicked(day, it.id); });
+    return { day: day, dow: dow, all: all, on: on, kept: kept,
+             did: did, ticks: did.length, items: items.length,
+             rate: scRateOf(day), mind: scMindOf(day), obj: scObjFor(day) };
+  }
+
+  /* ── A DAY BEFORE THE RECORD STARTS IS NOT A DAY YOU MISSED ──
+     Every cell drawn from the template alone reads as a full day you
+     kept none of, so a phone that opened the app yesterday would show
+     a year of failure — which is the wash of red across a week you
+     missed that the habits screen refuses by name. The grid says
+     nothing at all before the first thing you ever logged. */
+  function scCalFrom() {
+    var first = scDay();
+    [blockLog, tickLog, mindLog, trainLog, offLog, kidLog].forEach(function (m) {
+      Object.keys(m || {}).forEach(function (k) {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(k) && k < first) first = k;
+      });
+    });
+    return first;
+  }
+
+  function scCalOpen() {
+    var t = new Date();
+    var y = t.getFullYear(), m = t.getMonth();
+    var open = null;          /* the day being read, or null for the month */
+
+    scSheet('Calendar', function (body) {
+      function month() {
+        body.textContent = '';
+        var from = scCalFrom(), today = scDay();
+
+        var head = scEl('div', 'cl-head');
+        var back = scEl('button', 'cl-arw');
+        back.type = 'button';
+        back.setAttribute('aria-label', 'The month before');
+        back.insertAdjacentHTML('beforeend',
+          '<svg viewBox="0 0 24 24" aria-hidden="true">'
+          + '<path d="M15 4.5L7.5 12l7.5 7.5"/></svg>');
+        /* Nothing before the first thing you logged and nothing after
+           this month: a control that can only ever land on an empty
+           grid is one that should not be pressable. */
+        var prev = new Date(y, m - 1, 1);
+        back.disabled = scDay(new Date(y, m, 1)) <= from;
+        back.addEventListener('click', function () {
+          y = prev.getFullYear(); m = prev.getMonth(); month();
+        });
+        head.appendChild(back);
+        head.appendChild(scEl('b', null, MONTH_FULL[m] + ' ' + y));
+        var fwd = scEl('button', 'cl-arw is-fwd');
+        fwd.type = 'button';
+        fwd.setAttribute('aria-label', 'The month after');
+        fwd.insertAdjacentHTML('beforeend',
+          '<svg viewBox="0 0 24 24" aria-hidden="true">'
+          + '<path d="M15 4.5L7.5 12l7.5 7.5"/></svg>');
+        fwd.disabled = y > t.getFullYear() || (y === t.getFullYear() && m >= t.getMonth());
+        fwd.addEventListener('click', function () {
+          var nx = new Date(y, m + 1, 1);
+          y = nx.getFullYear(); m = nx.getMonth(); month();
+        });
+        head.appendChild(fwd);
+        body.appendChild(head);
+
+        var dows = scEl('div', 'cl-dows');
+        dows.setAttribute('aria-hidden', 'true');
+        ORDER.forEach(function (n) {
+          dows.appendChild(scEl('span', null, ABBR[n].slice(0, 1)));
+        });
+        body.appendChild(dows);
+
+        var grid = scEl('div', 'cl-grid');
+        var first = new Date(y, m, 1);
+        /* Monday first, which is the week strip's own rule: a grid
+           that begins on today has no shape to remember. */
+        var lead = (first.getDay() + 6) % 7;
+        var days = new Date(y, m + 1, 0).getDate();
+        for (var i = 0; i < lead; i++) grid.appendChild(scEl('span', 'cl-c is-pad'));
+        for (var n2 = 1; n2 <= days; n2++) {
+          (function (n3) {
+            var day = scDay(new Date(y, m, n3));
+            var c = scCalOf(day);
+            /* Three states and the third is a SIZE, which is the
+               day-off dot's own answer: a day with nothing to say is
+               the same neutral drawn short rather than a hole in the
+               grid or a third colour inventing a judgement. */
+            var quiet = day > today || day < from || !c.on.length;
+            var b = scEl('button', 'cl-c' + (day === today ? ' is-now' : '')
+              + (quiet ? ' is-quiet' : ''));
+            b.type = 'button';
+            b.dataset.day = day;
+            var share = c.on.length ? c.kept / c.on.length : 0;
+            /* ── THE MARK IS A RING ROUND THE DATE ──
+               Six treatments were drawn over the real month at 390x844
+               and read at 1:1, which is the only size that settles
+               one: what kills a cell treatment is what THIRTY of it
+               look like, not what one does.
+
+               A ring belongs unambiguously to the number inside it,
+               and it is the only one of the six that could say TWO
+               THIRDS. A bar under the number floats between two rows
+               and reads as belonging to the row below. A cell filled
+               by the share is the loudest object on the sheet at the
+               top of its range and cannot separate a half-kept day
+               from a missed one at the bottom. A disc that grows is a
+               blob with no scale on it. And the date in type alone,
+               shaded by how much you kept, is quiet to the point of
+               saying nothing.
+
+               A day with NOTHING TO SAY draws no ring at all. That
+               reverses the day-off dot's rule about never leaving a
+               hole, and the reason is what a month is made of: with a
+               track on every cell, eighteen days still ahead drew
+               eighteen full grey rings, which is wallpaper — and it
+               made the grey ring on a day you actually missed mean
+               nothing. The NUMBER holds the cell's geometry either
+               way, so there is no hole to leave. */
+            if (!quiet) {
+              var R = 15, CIR = 2 * Math.PI * R;
+              var arc = '<circle class="bg" cx="18" cy="18" r="' + R + '"/>';
+              if (share > 0) {
+                arc += '<circle class="fg" cx="18" cy="18" r="' + R
+                  + '" stroke-dasharray="' + (CIR * share).toFixed(2)
+                  + ' ' + CIR.toFixed(2) + '" transform="rotate(-90 18 18)"/>';
+              }
+              b.insertAdjacentHTML('beforeend', '<svg class="cl-a" viewBox="0 0 36 36"'
+                + ' aria-hidden="true">' + arc + '</svg>');
+            }
+            b.appendChild(scEl('i', null, String(n3)));
+            /* ── AND A HUE DOT FOR EACH THING YOU DID ──
+               The ring says how much of the day you kept, which is one
+               number; this says WHICH things you logged, which is the
+               question the screen was asked. Each dot is that item's
+               own colour — the same one its tag wears two screens over
+               — because a colour in this app says WHICH and only a
+               colour can say six things inside forty pixels. */
+            if (c.did.length) {
+              var dots = scEl('span', 'cl-d');
+              c.did.slice(0, 8).forEach(function (it) {
+                var dt = scEl('i');
+                dt.style.setProperty('--tg', scTagHue(it));
+                dots.appendChild(dt);
+              });
+              b.appendChild(dots);
+            }
+            b.setAttribute('aria-label', FULL[c.dow] + ' ' + n3 + ' '
+              + MONTH_FULL[m]
+              + (quiet ? '' : ', ' + c.kept + ' of ' + c.on.length + ' kept')
+              + (c.ticks ? ', ' + c.ticks + ' of ' + c.items + ' logged' : ''));
+            b.addEventListener('click', function () { open = day; draw(); });
+            grid.appendChild(b);
+          }(n2));
+        }
+        body.appendChild(grid);
+      }
+
+      /* ── ONE DAY, EVERYTHING ON IT ──
+         The blocks it asked for and what became of each, then the
+         things that are not blocks at all: what you ticked, what you
+         trained, what you read and what you had decided mattered.
+         Quiet type with a dot between rather than a row of chips,
+         because every one of these is a FIGURE — a chip is for
+         something categorical, which is the rule the whole app took
+         its little grey boxes out for. */
+      function oneDay() {
+        body.textContent = '';
+        var c = scCalOf(open);
+        var when = new Date(open + 'T12:00:00');
+
+        /* Left of centre, beside the arrow it belongs to. Centred it
+           reads as off-centre, because there is a control on one side
+           and nothing on the other — and a spacer put in to balance
+           it would be an element that exists to be invisible. */
+        var head = scEl('div', 'cl-head is-day');
+        var back = scEl('button', 'cl-arw');
+        back.type = 'button';
+        back.setAttribute('aria-label', 'Back to the month');
+        back.insertAdjacentHTML('beforeend',
+          '<svg viewBox="0 0 24 24" aria-hidden="true">'
+          + '<path d="M15 4.5L7.5 12l7.5 7.5"/></svg>');
+        back.addEventListener('click', function () { open = null; draw(); });
+        head.appendChild(back);
+        head.appendChild(scEl('b', null, FULL[c.dow] + ' ' + when.getDate()
+          + ' ' + MON[when.getMonth()]));
+        body.appendChild(head);
+
+        var bits = [];
+        if (c.on.length) bits.push(c.kept + ' of ' + c.on.length + ' kept');
+        bits.push(c.ticks + ' of ' + c.items + ' logged');
+        if (c.rate) bits.push('rated ' + c.rate + ' of ' + RATE_MAX);
+        body.appendChild(scEl('p', 'cl-sum', bits.join(' · ')));
+
+        if (!c.all.length) {
+          body.appendChild(scEl('p', 'mn-say', 'Nothing was on this day'));
+        } else {
+          var list = scEl('div', 'cl-rows');
+          c.all.forEach(function (b) {
+            var r = scEl('div', 'cl-r');
+            r.appendChild(scEl('span', 'cl-t', scT(b.s) + scMerIf(b.s)));
+            var nm = scEl('span', 'cl-n', b.n);
+            r.appendChild(nm);
+            var off = scOff(open, b.id);
+            var done = !!(blockLog[open] && blockLog[open][b.id]);
+            var st = scEl('span', 'st');
+            /* The same four words the row itself draws, and MISSED is
+               only ever said about a day that has been: a block on a
+               day still ahead has not been missed, it has not come. */
+            if (off) { st.textContent = 'Off'; st.classList.add('is-todo'); }
+            else if (done) { st.textContent = 'Completed'; st.classList.add('is-ok'); }
+            else if (open < scDay()) { st.textContent = 'Missed'; st.classList.add('is-bad'); }
+            else { st.textContent = 'Not yet'; st.classList.add('is-todo'); }
+            r.appendChild(st);
+            if (done && scIsTrain(b)) {
+              var tag = scWorkTag(scTrainOf(open, b.id));
+              if (tag) r.insertBefore(tag, st);
+            }
+            list.appendChild(r);
+          });
+          body.appendChild(list);
+        }
+
+        /* ── AND WHAT YOU LOGGED, BY NAME ──
+           "3 of 6" is the figure and this is the answer: a count says
+           you showed up and the names say what you did, which is the
+           whole of what this screen was asked for. The value rides the
+           name where there is one, because 8,420 is the thing you went
+           and did and a tick is not. */
+        var lg = c.items ? scItems().filter(function (it) {
+          return scTicked(c.day, it.id);
+        }) : [];
+        if (lg.length) {
+          body.appendChild(scEl('span', 'label', 'Logged'));
+          body.appendChild(scEl('p', 'cl-sum', lg.map(function (it) {
+            var v = tickLog[c.day] && tickLog[c.day][it.id];
+            return it.n + (v && v !== 1 && v !== '1'
+              ? ' ' + v + (it.unit ? ' ' + it.unit : '') : '');
+          }).join(' · ')));
+        }
+        if (c.mind) {
+          body.appendChild(scEl('span', 'label', 'Mind'));
+          body.appendChild(scEl('p', 'cl-sum', scMindName(c.mind)
+            + (c.mind.m ? ' · ' + scMindFmtMin(c.mind.m) : '')));
+        }
+        if (c.obj.length) {
+          body.appendChild(scEl('span', 'label', 'What mattered'));
+          var ol = scEl('div', 'cl-rows');
+          c.obj.forEach(function (o) {
+            var r2 = scEl('div', 'cl-r');
+            r2.appendChild(scEl('span', 'cl-n', o.n));
+            var s2 = scEl('span', 'st' + (o.done ? ' is-ok' : ' is-todo'),
+              o.done ? 'Done' : 'Not yet');
+            r2.appendChild(s2);
+            ol.appendChild(r2);
+          });
+          body.appendChild(ol);
+        }
+      }
+
+      function draw() { if (open) oneDay(); else month(); }
+      draw();
+    });
+  }
+
+  /* ═══════════════════════════════════════════════════════════
      WIRING
      ═══════════════════════════════════════════════════════════ */
 
@@ -12618,6 +13123,7 @@
      the control that put you in one has to be the one that takes you
      out. */
   $('scHdEd').addEventListener('click', function () { scEditArm(!editArm); });
+  $('scHdDate').addEventListener('click', function () { scCalOpen(); });
   $('scNtEd').addEventListener('click', function () { scNtEdit(!ntEdit); });
 
   scLoad();
