@@ -14170,7 +14170,7 @@ const SAID = [
         return { names: names, before: before, moved: moved, off: rec() };
       });
       ok('a line in a note is offered all three highlights, and they are exclusive',
-        lyMk.names.join(' ') === 'Heading Swipe Bracket Dot'
+        lyMk.names.join(' ') === 'Heading Swipe Bracket Dot Pen'
         && lyMk.before === '01022023' && lyMk.moved === '02022023'
         && lyMk.off === '00022023', lyMk);
 
@@ -14190,6 +14190,344 @@ const SAID = [
       });
       ok('...and a bracketed line is still marked in the other layouts',
         lyCarry.keys === 4 && lyCarry.back === 3, lyCarry);
+
+      /* ═══════════════════════════════════════════════════
+         EDITING A NOTE IS THE WORDS, AND NOTHING DRAWN ROUND THEM
+
+         Reported off the phone with two screenshots: "I don't like how
+         it has the box, the rim around the line you're about to put
+         in... there shouldn't be borders around certain things. I want
+         it to literally feel like Notes."
+
+         Three faults and all three were measured rather than read off
+         the picture: a full 1px box 2px outside the focused line — and
+         `:focus-visible` MATCHES A TEXTAREA ON TOUCH, so it drew on
+         every tap rather than only for a keyboard; eight outlined
+         pills above and below the words; and a section name genuinely
+         cut, "THINGS TO REMEMBER" coming out as "THINGS TO REMEMB".
+         ═══════════════════════════════════════════════════ */
+      await lyEdit(true);
+      const zen = await lypage.evaluate(async () => {
+        const pane = document.getElementById('scNotePane');
+        /* A field focused the way a finger focuses one. */
+        const f = [...pane.querySelectorAll('.nt-in')][1];
+        f.focus();
+        await new Promise((z) => setTimeout(z, 300));
+        const ringOf = (el) => {
+          const cs = getComputedStyle(el);
+          return (cs.outlineStyle === 'none' || parseFloat(cs.outlineWidth) === 0)
+            ? '' : cs.outlineStyle + ' ' + cs.outlineWidth;
+        };
+        /* EVERY text field in the note, by what it IS rather than by a
+           list of the classes that have one today — a ring comes back
+           one element at a time, which is the conic gradient's own
+           lesson. A button keeps its ring: it has no caret to say it
+           with. */
+        const fields = [...pane.querySelectorAll('input[type="text"], textarea')];
+        const rung = fields.filter((e) => {
+          e.focus();
+          return ringOf(e);
+        }).map((e) => e.className + ' ' + ringOf(e));
+        f.focus();
+        await new Promise((z) => setTimeout(z, 260));
+        /* And every drawn border under the pane. The heading's own
+           rule is the one mark that stays — it is a heading treatment
+           chosen from thirteen, not a box round a control. */
+        const bordered = [];
+        pane.querySelectorAll('*').forEach((e) => {
+          const cs = getComputedStyle(e);
+          const r = e.getBoundingClientRect();
+          if (!r.width || !r.height) return;
+          const w = ['Top', 'Right', 'Bottom', 'Left']
+            .map((k) => parseFloat(cs['border' + k + 'Width']) || 0);
+          const col = ['Top', 'Right', 'Bottom', 'Left']
+            .map((k) => cs['border' + k + 'Color']);
+          const drawn = w.some((v, i) => v > 0
+            && !/rgba\(0, 0, 0, 0\)|transparent/.test(col[i]));
+          if (drawn) bordered.push(e.className || e.tagName);
+        });
+        /* The chips are told apart by their GROUND rather than by a
+           line drawn round them. */
+        const chips = [...pane.querySelectorAll('.nt-tool, .nt-lb')].map((b) => {
+          const cs = getComputedStyle(b);
+          return { w: parseFloat(cs.borderTopWidth) || 0,
+            filled: !/rgba\(0, 0, 0, 0\)|transparent/.test(cs.backgroundColor) };
+        });
+        /* And the section name is not cut. PLANTED, because the
+           fixture's own names are eight characters and the fault
+           needs a long one — "THINGS TO REMEMBER" is the name that
+           came out as "THINGS TO REMEMB", and a check that measures
+           "Positive" is measuring nothing. */
+        const hw = [...pane.querySelectorAll('.nt-hw')];
+        const wasName = hw[1].value;
+        hw[1].value = 'Things to remember';
+        hw[1].dispatchEvent(new Event('input', { bubbles: true }));
+        await new Promise((z) => setTimeout(z, 200));
+        const names = hw.map((e) => ({
+          v: e.value, over: e.scrollWidth - e.clientWidth }));
+        /* Put it back: a check that changes the state of the app is a
+           check that breaks the next one. */
+        hw[1].value = wasName;
+        hw[1].dispatchEvent(new Event('input', { bubbles: true }));
+        await new Promise((z) => setTimeout(z, 200));
+        return { rung: rung, bordered: bordered, chips: chips, names: names,
+          fields: fields.length };
+      });
+      /* Both halves: no field draws a ring, AND there were fields to
+         look at — "none of them" is vacuously true of a screen with no
+         text fields on it, which is exactly what reading mode is. */
+      ok('editing a note draws no ring round any line you type in',
+        zen.fields >= 3 && zen.rung.length === 0, zen.rung);
+      /* The heading's rule is the ONE drawn edge left, and it is
+         asserted by name so that taking it out fails too — it was
+         chosen from thirteen treatments and is not an oversight. */
+      ok('...and the only drawn edge left is the heading’s own rule',
+        zen.bordered.length > 0
+        && zen.bordered.every((c) => /nt-hw/.test(c)), zen.bordered);
+      ok('...and every chip is told apart by its ground, not by a border',
+        zen.chips.length >= 5 && zen.chips.every((c) => c.w === 0 && c.filled),
+        zen.chips);
+      /* The one thing in the screenshot that genuinely was clipping. */
+      ok('...and a long section name is not cut off',
+        zen.names.length >= 2 && zen.names.every((n) => n.over <= 1)
+        && zen.names.some((n) => n.v.length >= 18), zen.names);
+
+      /* ═══════════════════════════════════════════════════
+         THE PEN MARKS WORDS, NOT THE LINE
+
+         A phrase mark is a different claim from a line mark, and the
+         drawing was already free: the swipe is an inline span fitted
+         to the WORDS and only wrapped round all of them. What is new
+         is the RECORD — `w`, a list of word INDICES rather than
+         character offsets, because an offset moves when anything
+         before it is typed and an index only moves when a word does.
+         ═══════════════════════════════════════════════════ */
+      await lyEdit(true);
+      /* Focus a line, THEN move the caret, which is the order a finger
+         produces — and the order that found the real bug: the chip
+         captured the selection when the strip was BUILT, so a caret at
+         character 3 of "Doom scrolling" marked the last word. */
+      const pen = async (li, a, b) => lypage.evaluate(async ([i, x, y]) => {
+        const f = [...document.querySelectorAll('#scNotePane .nt-in')][i];
+        f.focus();
+        await new Promise((z) => setTimeout(z, 200));
+        f.setSelectionRange(x, y === undefined ? x : y);
+        document.dispatchEvent(new Event('selectionchange'));
+        await new Promise((z) => setTimeout(z, 120));
+        const chip = document.querySelector('.nt-pnb');
+        const said = chip.getAttribute('aria-pressed');
+        if (chip.disabled) return { said: said, off: true };
+        chip.click();
+        await new Promise((z) => setTimeout(z, 340));
+        return { said: said, off: false };
+      }, [li, a, b]);
+      const penRec = () => lypage.evaluate(() =>
+        JSON.parse(localStorage.getItem('sched.note.v1'))
+          .list.find((q) => q.id === 'kN').l
+          .map((L) => ({ x: L.x, m: L.m, w: L.w })));
+      const penDrawn = (sel) => lypage.evaluate((q) =>
+        [...document.querySelectorAll('#scNotePane ' + q)]
+          .map((m) => [...m.querySelectorAll('.nt-w')].map((s2) => s2.textContent)), sel);
+
+      /* "An ordinary line" — caret inside the FIRST word. */
+      await pen(1, 1);
+      const penOne = (await penRec())[2];
+      ok('a caret inside a word marks THAT word, not the one the strip was built on',
+        penOne.w.join() === '0' && penOne.m === 0, penOne);
+
+      /* A dragged selection across three words of "Fasting till the
+         afternoon" — and they are CONSECUTIVE, so they have to come
+         out as ONE pill. Three pills with the spaces showing between
+         them is what the phrase-scale render rejected. */
+      await pen(2, 8, 20);
+      const penRun = (await penRec())[3];
+      const penSpans = await penDrawn('.nt-mir');
+      ok('...and a dragged selection marks every word it touches',
+        penRun.w.join() === '1,2,3', penRun);
+      /* `.nt-mir` exists on the LINES only, so its list is not indexed
+         by record position — the two headings are not in it. Record 3
+         is line 2. */
+      ok('...drawn as ONE mark across the run, not one per word',
+        penSpans[2].length === 1 && penSpans[2][0] === 'till the afternoon', penSpans[2]);
+
+      /* ── EXCLUSIVE WITH THE LINE MARKS, BOTH WAYS ──
+         "This line matters" and "these words matter" are the same
+         claim at two sizes, and a line wearing both says it twice with
+         a swipe washing the ground the pen is drawn on. Each half
+         passes on the other's bug: clearing only on the way in leaves
+         the pair reachable by pressing them the other way round, which
+         is the rest day's own lesson. */
+      const penEx = await lypage.evaluate(async () => {
+        const rec = () => JSON.parse(localStorage.getItem('sched.note.v1'))
+          .list.find((q) => q.id === 'kN').l[2];
+        const f = [...document.querySelectorAll('#scNotePane .nt-in')][1];
+        f.focus();
+        await new Promise((z) => setTimeout(z, 220));
+        document.querySelector('.nt-mkb').click();
+        await new Promise((z) => setTimeout(z, 340));
+        const afterSwipe = rec();
+        const g = [...document.querySelectorAll('#scNotePane .nt-in')][1];
+        g.focus();
+        await new Promise((z) => setTimeout(z, 220));
+        g.setSelectionRange(1, 1);
+        document.dispatchEvent(new Event('selectionchange'));
+        await new Promise((z) => setTimeout(z, 120));
+        document.querySelector('.nt-pnb').click();
+        await new Promise((z) => setTimeout(z, 340));
+        return { swipe: { m: afterSwipe.m, w: afterSwipe.w }, pen: rec() };
+      });
+      ok('a line mark clears the pen, and the pen clears the line mark',
+        penEx.swipe.m === 1 && penEx.swipe.w.length === 0
+        && penEx.pen.m === 0 && penEx.pen.w.join() === '0', penEx);
+
+      /* ── AND THE CHIP SAYS WHICH WAY THE NEXT PRESS GOES ──
+         Its state is refreshed as the caret MOVES rather than only
+         when the strip is rebuilt: a chip reading "on" over a word
+         that is not marked is a control lying about what it does.
+         Both readings, because "always off" passes half of it. */
+      const penSays = await lypage.evaluate(async () => {
+        const f = [...document.querySelectorAll('#scNotePane .nt-in')][1];
+        f.focus();
+        await new Promise((z) => setTimeout(z, 220));
+        const at = async (x) => {
+          f.setSelectionRange(x, x);
+          document.dispatchEvent(new Event('selectionchange'));
+          await new Promise((z) => setTimeout(z, 90));
+          return document.querySelector('.nt-pnb').getAttribute('aria-pressed');
+        };
+        return { onMarked: await at(1), onBare: await at(f.value.length - 2) };
+      });
+      ok('...and the chip reads the caret as it moves, not as the strip was built',
+        penSays.onMarked === 'true' && penSays.onBare === 'false', penSays);
+
+      /* ── AN EDIT BEFORE A MARK MOVES IT; ONE INSIDE IT DROPS IT ──
+         Word indices are what make the first half cheap. The second is
+         a decision rather than a limitation: sliding the mark onto
+         whatever ends up in that position is the silent kind of wrong
+         this file has had to write down half a dozen times. */
+      const penEdit = await lypage.evaluate(async () => {
+        const rec = () => JSON.parse(localStorage.getItem('sched.note.v1'))
+          .list.find((q) => q.id === 'kN').l[3];
+        const f = [...document.querySelectorAll('#scNotePane .nt-in')][2];
+        f.focus();
+        f.setSelectionRange(0, 0);
+        f.setRangeText('So ', 0, 0, 'end');
+        f.dispatchEvent(new Event('input', { bubbles: true }));
+        /* Past the 500ms save debounce, or the record reads unchanged
+           and the check measures the wait rather than the remap. */
+        await new Promise((z) => setTimeout(z, 750));
+        const moved = rec().w.join();
+        const at = f.value.indexOf('till') + 2;
+        f.setSelectionRange(at, at);
+        f.setRangeText('XX', at, at, 'end');
+        f.dispatchEvent(new Event('input', { bubbles: true }));
+        await new Promise((z) => setTimeout(z, 750));
+        return { moved: moved, inside: rec().w.join(), x: rec().x };
+      });
+      ok('typing before a mark carries it along, and typing inside one takes it off',
+        penEdit.moved === '2,3,4' && penEdit.inside === '3,4', penEdit);
+
+      /* ── AND IT IS READ WHERE IT IS READ ──
+         Editing draws the runs into the mirror behind the field and
+         reading draws them straight onto the words. Two drawings of
+         one thing, so a mode switch is exactly where they drift — and
+         a switch that looks like the note changed is worse than no
+         mode at all. */
+      await lyEdit(false);
+      const penView = await penDrawn('.nt-v');
+      /* Line-indexed like the mirror. "till" lost its mark to the edit
+         above, which is the point of reading it here rather than
+         before: the view has to show what the record says NOW. */
+      ok('...and the view draws the same runs the mirror did',
+        penView[1].join('|') === 'An' && penView[2].join('|') === 'the afternoon',
+        penView);
+
+      /* ── AND THE FIRST WORD'S PILL IS NOT CUT ──
+         It reaches 7px past the first glyph so its round end is not
+         drawn through the letter, and on a run that starts the line
+         that put it OUTSIDE a pane whose `overflow-x` is deliberately
+         hidden: measured at 11 against a pane starting at 18, so the
+         end came out square. The day card's own lesson, reported there
+         as "that doesn't look like the pill shape". */
+      const penCut = await lypage.evaluate(() => {
+        const pane = document.getElementById('scNotePane');
+        const w = [...pane.querySelectorAll('.nt-w')]
+          .find((e) => !e.previousSibling);
+        if (!w) throw new Error('no mark starting a line to measure');
+        const pr = pane.getBoundingClientRect(), br = w.getBoundingClientRect();
+        return { pill: +br.left.toFixed(1), pane: +pr.left.toFixed(1),
+          clip: getComputedStyle(pane).overflowX,
+          text: +document.querySelector('#scNotePane .nt-v').getBoundingClientRect()
+            .left.toFixed(1) };
+      });
+      /* BOTH HALVES. "The pill is inside the pane" is vacuously true of
+         a pill with no overhang at all, which is the build that reads
+         cramped rather than cut — so the overhang is asserted to EXIST
+         (the pill reaches left of the words) and to be CONTAINED. A
+         constant for the text column would also be wrong here: this
+         fixture carries brackets, so the note reserves the shared
+         gutter and the words start 15px in. */
+      ok('...and a mark starting a line is inside the pane rather than cut by it',
+        penCut.pill >= penCut.pane && penCut.clip === 'hidden'
+        && penCut.pill < penCut.text, penCut);
+
+      /* THE INK OVER THE PEN'S OWN WASH, on composited pixels and from
+         the most common pixel outward — the polarity-agnostic reading
+         the friends board settled on, because this app has two faces
+         and the one nobody develops on is the one that breaks. */
+      {
+        const penPng = PNG.sync.read(await lypage.screenshot());
+        const band = await lypage.evaluate(() => {
+          const w = document.querySelector('#scNotePane .nt-w');
+          const r = w.getBoundingClientRect();
+          return { x: r.left, y: r.top, w: r.width, h: r.height,
+            ink: getComputedStyle(w).color };
+        });
+        const tally = {};
+        for (let y = 3; y < band.h - 3; y++) {
+          for (let x = 3; x < band.w - 3; x++) {
+            const i = (penPng.width * Math.round((band.y + y) * dpr)
+              + Math.round((band.x + x) * dpr)) << 2;
+            const k = penPng.data[i] + ',' + penPng.data[i + 1] + ',' + penPng.data[i + 2];
+            tally[k] = (tally[k] || 0) + 1;
+          }
+        }
+        const ground = Object.keys(tally)
+          .sort((a, b) => tally[b] - tally[a])[0].split(',').map(Number);
+        const penR = ratio(rgbOf(band.ink), ground);
+        ok('...and the ink on it clears 4.5:1 on the ground it is drawn on',
+          penR >= 4.5, { r: +penR.toFixed(2), ink: rgbOf(band.ink), ground: ground });
+      }
+
+      /* ── NOTE ONLY, for Bracket and Dot's own reason ──
+         A process draws a filled node and a goal strikes the line
+         through, and neither is a thing a PHRASE can be — offered
+         there it would be a control whose effect you cannot see, which
+         is the per-section colour's own rule. */
+      await lyEdit(true);
+      const penKinds = await lypage.evaluate(async () => {
+        const press = async (name) => {
+          [...document.querySelectorAll('.nt-lb')]
+            .find((x) => x.textContent.indexOf(name) >= 0).click();
+          await new Promise((z) => setTimeout(z, 340));
+        };
+        const has = async () => {
+          const f = [...document.querySelectorAll('#scNotePane .nt-in')][1];
+          if (!f) return 'no field';
+          f.focus();
+          await new Promise((z) => setTimeout(z, 240));
+          return document.querySelector('.nt-pnb') ? 'yes' : 'no';
+        };
+        await press('Daily process');
+        const proc = await has();
+        await press('Goal');
+        const goal = await has();
+        await press('Note');
+        return { proc: proc, goal: goal, note: await has() };
+      });
+      ok('the pen is offered on a note and on neither of the other two',
+        penKinds.note === 'yes' && penKinds.proc === 'no' && penKinds.goal === 'no',
+        penKinds);
 
       /* ── THE LAYOUT CHANGES THE DRAWING, NEVER THE RECORD ──
          The claim the whole feature stands on. Switch a note to a

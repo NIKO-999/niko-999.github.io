@@ -446,7 +446,30 @@ body {
    anchored to them and a containing block is not free: every
    absolutely positioned thing already inside here resolves against a
    row of its own, and was checked before this went in. */
-#scNotePane { position: relative; }
+#scNotePane {
+  position: relative;
+  /* ── ROOM FOR A MARK TO OVERHANG INTO, INSIDE THE CLIP ──
+     The pen's pill reaches 7px past the first and last glyph so its
+     round ends are not drawn through the letters — and on a run that
+     starts the line that put it 7px OUTSIDE a box whose `overflow-x`
+     is deliberately `hidden`. Measured: the pill's left edge at 11
+     against a pane starting at 18, so the first word's round end was
+     cut square. That is the day card's own lesson — the radius was
+     applied and the corners were cut off — and it was reported there
+     as "that doesn't look like the pill shape".
+
+     Padding OUT and a margin back, so the border box grows either side
+     and the content box does not move: the text column is untouched,
+     the clip boundary is 8px wider, and nothing has to be measured.
+     The poster's own padding is `--pad` at 18, so a border box 8px
+     proud of the poster's CONTENT box is still 10px inside its padding
+     box — there is nothing for anything to scroll sideways to, which
+     is the rule this pane's `overflow-x` was said out loud for. */
+  padding-left: 8px;
+  padding-right: 8px;
+  margin-left: -8px;
+  margin-right: -8px;
+}
 
 /* ── the head ────────────────────────────────────────────── */
 
@@ -5611,7 +5634,11 @@ body {
    name of a thing you are only looking at is the whole of what made
    this screen read as always-in-edit. */
 .nt-title.is-view { margin: 0; padding: 4px 2px; }
-.nt-title:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+/* The title is a text field too, and a 2px box round it on every tap
+   is the line's own rim one register up. A caret in the words is what
+   says a text field has focus — every BUTTON in here keeps its ring,
+   because a button has no caret to say it with. */
+.nt-title:focus, .nt-title:focus-visible { outline: none; }
 
 .nt-body { padding: 2px 0 4px; }
 
@@ -5625,7 +5652,12 @@ body {
    marks is the section said twice, and the word is the half that has
    to stay legible at 9.5px. */
 .nt-row { position: relative; padding: 3px 0; }
-.nt-row.is-head { display: flex; align-items: baseline; gap: 9px; padding: 20px 0 7px; }
+.nt-row.is-head {
+  display: flex; align-items: baseline; gap: 9px; padding: 20px 0 7px;
+  /* So a name too long for one line takes the clause down with it
+     rather than clipping it — nothing on this screen is cut. */
+  flex-wrap: wrap;
+}
 .nt-row.is-head:first-child { padding-top: 4px; }
 .nt-hw, .nt-hc {
   padding: 2px 0;
@@ -5636,7 +5668,15 @@ body {
 .nt-hw {
   flex: none;
   width: auto;
-  max-width: 46%;
+  /* ── A SECTION NAME IS NOT CUT ──
+     It was capped at 46% of the row, and "THINGS TO REMEMBER" came out
+     as "THINGS TO REMEMB" — reported as things clipping outwards, and
+     it is the one thing in the screenshot that genuinely was. The row
+     WRAPS instead: a long name takes the width it needs and the clause
+     drops under it rather than either of them losing a letter. 100%
+     rather than no cap at all, because `field-sizing: content` on an
+     input with nothing holding it would push the row itself wide. */
+  max-width: 100%;
   /* ── 12.5, NOT 9.5 ──
      It went in at the app's own label size, which is right for a
      caption naming a control and wrong here: this is the only heading
@@ -5732,6 +5772,25 @@ body {
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
+/* THE PEN, and it is not the swipe at a smaller width. The swipe
+   fades to nothing by the end of its run, which is what makes it right
+   on a line (it does not shout to the end of the sentence) and exactly
+   what makes it wrong on a phrase: where the phrase STOPS is the whole
+   point, and rendered at phrase width the fade ate half of a two-word
+   mark. A flat wash with round ends says both ends.
+
+   A run of consecutive words is ONE span, so the ends here are the
+   ends of the phrase rather than of every word in it. `clone` is what
+   carries the shape onto the second line when a phrase wraps. */
+.nt-w {
+  background: color-mix(in srgb, var(--c) 30%, transparent);
+  border-radius: 999px;
+  padding: 1px 7px;
+  margin: 0 -7px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
 .nt-in {
   position: relative;
   display: block;
@@ -5758,11 +5817,25 @@ body {
    controls appear under the focused line, which is a bigger and more
    specific indicator than any ring, and it moves with the focus. This
    is the second reading rather than the only one. */
-.nt-in:focus { outline: none; }
-.nt-in:focus-visible { outline: 1.5px solid var(--dim); outline-offset: 2px; border-radius: 4px; }
-.nt-hw:focus-visible, .nt-hc:focus-visible {
-  outline: 1.5px solid var(--dim); outline-offset: 2px; border-radius: 4px;
-}
+/* ── NO RING ON A SENTENCE ──
+   It drew a full rounded box 2px outside the line you were typing in,
+   and it was reported as exactly that: "I don't like how it has the
+   rim around the line you're about to put in." Two things made it the
+   loudest object on the screen. It is a BOX, on a page whose whole
+   job is the words — every other field in this app is a boxed control
+   in a sheet, and a sentence is not. And `:focus-visible` MATCHES A
+   TEXTAREA ON TOUCH, because typing is what the heuristic expects a
+   text field to be focused for, so it drew on every tap rather than
+   only for a keyboard.
+
+   What replaces it is not nothing. The tools strip appears directly
+   under the focused line and nowhere else, which is a larger, more
+   specific and more useful indicator than an outline — and the caret
+   is in the words. That is what Notes does, and it is why this is
+   allowed to go where the app's other fields keep theirs. */
+.nt-in:focus, .nt-in:focus-visible,
+.nt-hw:focus, .nt-hw:focus-visible,
+.nt-hc:focus, .nt-hc:focus-visible { outline: none; }
 /* NO BULLET. Chosen against a dash, a dot, a ring, a square, a caret,
    a checkbox and the row's own glyph: a note is sentences, and a
    marker in front of every one of them is a column of furniture down
@@ -5808,7 +5881,12 @@ body {
    one. */
 .nt-tools {
   position: absolute;
-  left: 0; right: 0;
+  /* The pane carries 8px of padding for the pen's overhang and this is
+     absolute against its PADDING box, so a bare `left: 0` would put
+     the chips 8px proud of the words they are about. Aligned to the
+     text column rather than inset from it is the whole of what makes
+     the strip read as part of the note. */
+  left: 8px; right: 8px;
   z-index: 45;
   display: flex;
   align-items: center;
@@ -5828,11 +5906,21 @@ body {
    tap costs no layout change at all. */
 .nt-body.is-edit { padding-bottom: 104px; }
 .nt-tools[hidden] { display: none !important; }
+/* ── FILLED, NEVER OUTLINED ──
+   Five outlined pills in a row is a diagram of five controls rather
+   than five controls, and with the layout picker above it that was
+   eight drawn hairlines on a screen of sentences. A hairline is how
+   this app draws a SURFACE boundary; a control is a fill. Reported as
+   "there shouldn't be borders around certain things", and it is the
+   same answer the friends board reached when two solid blocks came
+   off it — the volume was wrong in the other direction there and the
+   rule underneath is one rule: a control is told apart by its ground,
+   not by a line drawn round it. */
 .nt-tool {
-  padding: 5px 11px;
-  border: 1px solid var(--hair);
+  padding: 6px 12px;
+  border: 0;
   border-radius: 999px;
-  background: none;
+  background: color-mix(in srgb, var(--ink) 9%, transparent);
   color: var(--dim);
   font: inherit; font-size: 12px; font-weight: 600;
   cursor: pointer;
@@ -5841,8 +5929,11 @@ body {
 .nt-tool[disabled] { opacity: .42; cursor: default; }
 .nt-tool.is-on { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 /* The mark button wears what it draws, which is the record and the
-   control agreeing — the day-off toggle's own rule. */
-.nt-mkb.is-on {
+   control agreeing — the day-off toggle's own rule. The pen shares it
+   rather than taking a rule of its own: both are a wash of the
+   section's hue, and four points of alpha is not a difference a 26px
+   chip can carry. */
+.nt-mkb.is-on, .nt-pnb.is-on {
   background: color-mix(in srgb, var(--c) 34%, transparent);
   border-color: transparent;
   color: var(--ink);
@@ -5965,26 +6056,41 @@ body {
 
 /* ── THE PICKER, WHILE EDITING ONLY ── */
 .nt-set { margin: 2px 0 14px; }
-.nt-lay { display: flex; flex-wrap: wrap; gap: 7px; }
+.nt-lay { display: flex; flex-wrap: wrap; align-items: center; gap: 7px 9px; }
 .nt-lb {
   display: inline-flex; align-items: center; gap: 6px;
-  min-height: 34px; padding: 7px 12px;
-  border: 1px solid var(--card-edge); border-radius: 999px;
-  background: var(--card);
+  min-height: 34px; padding: 7px 13px;
+  border: 0; border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 9%, transparent);
   color: var(--dim);
   font: inherit; font-size: 12.5px; font-weight: 600;
   cursor: pointer;
 }
-.nt-lb.is-on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.nt-lb.is-on { background: var(--ink); color: var(--paper); }
 .nt-lb:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
-.nt-asw { display: flex; gap: 8px; margin-top: 10px; }
+/* ── ONE ROW OF CHROME, NOT TWO ──
+   The picker and seven 28px discs sat one above the other before a
+   single word of the note, which is two rows of chrome on a screen
+   whose whole job is the words — the same complaint Showing up took
+   its own switcher out for, reported there as "it's just looking like
+   too much". The swatches join the picker's row rather than taking
+   one of their own, and the row wraps if it must.
+
+   18px rather than 28, and the drawing is not the target: the press
+   stays the 44px everything in this app holds to, which is the
+   objectives plus's own rule and the children's dots'. Seven full
+   colour discs are seven claims; small marks with the chosen one
+   ringed is one. */
+.nt-asw { display: flex; gap: 9px; align-items: center; margin-left: 4px; }
 .nt-ac {
-  width: 28px; height: 28px; flex: none;
+  position: relative;
+  width: 18px; height: 18px; flex: none;
   border: 0; border-radius: 99px;
   background: var(--c);
   cursor: pointer;
 }
-.nt-ac.is-on { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink); }
+.nt-ac::before { content: ''; position: absolute; inset: -13px; }
+.nt-ac.is-on { box-shadow: 0 0 0 2px var(--paper), 0 0 0 3.5px var(--ink); }
 .nt-ac:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
 
 /* ── A DAILY PROCESS IS A SPINE ──
@@ -6044,7 +6150,9 @@ body {
   font: inherit; font-size: 11.5px;
 }
 .nt-sy::placeholder { color: var(--tick-off); }
-.nt-sy:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+/* A step's own note is a text field, so it goes the way the line and
+   the title do: the caret says it. */
+.nt-sy:focus, .nt-sy:focus-visible { outline: none; }
 
 /* ── A GOAL IS A MARKER ──
    The statement on its own block with a heavy edge, the date under

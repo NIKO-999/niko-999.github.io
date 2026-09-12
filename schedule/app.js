@@ -11123,7 +11123,21 @@
            to the swipe rather than to nothing: a line somebody marked
            is a line they marked, and a build that does not know the
            style still has to draw it. */
-        m: (!head && r.m) ? (r.m === 2 ? 2 : r.m === 3 ? 3 : 1) : 0
+        m: (!head && r.m) ? (r.m === 2 ? 2 : r.m === 3 ? 3 : 1) : 0,
+        /* ── AND THE PEN, WHICH MARKS WORDS RATHER THAN THE LINE ──
+           WORD INDICES, never character offsets: an offset moves when
+           anything before it is typed, and a word index only moves
+           when a WORD is added or taken away. Repaired rather than
+           refused, like every stored shape here — a damaged entry in
+           the list costs that word and never the line. A line mark
+           and a pen are exclusive, so a record carrying both is read
+           as the line mark, which is the one that was there first. */
+        w: (!head && !r.m && Array.isArray(r.w))
+          ? r.w.filter(function (k, q, a) {
+              return typeof k === 'number' && k >= 0 && k < 300
+                && (k | 0) === k && a.indexOf(k) === q;
+            }).sort(function (a, b) { return a - b; }).slice(0, 60)
+          : []
       });
     }
     n.a = NT_HUES.indexOf(raw.a) >= 0 ? raw.a : '';
@@ -11319,6 +11333,128 @@
      down a screen whose whole job is the words. A dot on the lines
      you MARKED is a mark: it is only ever there because you pressed
      something, and a note nobody marked draws none at all. */
+  /* ═══════════════════════════
+     MARKING WORDS, NOT THE LINE
+
+     The line marks say THIS LINE matters. A pen says which words in
+     it do, and they are different claims — so a line carries one or
+     the other and never both. `w` is a list of WORD INDICES rather
+     than character offsets, and that is the whole of why this is
+     affordable: fixing a typo in a different word moves a character
+     offset and does not move a word index.
+
+     The drawing was already free. The swipe is an inline span with
+     `box-decoration-break: clone`, fitted to the WORDS — it is only
+     wrapped round all of them today. A phrase is the same span at a
+     different width.
+     ═══════════════════════════ */
+
+  /* Every word's own character span. Split on whitespace runs, so the
+     unit is what a person would point at — punctuation rides the word
+     it is attached to, which is what a marker pen does to "day," as
+     well. */
+  function scNtWordSpans(x) {
+    var out = [], re = /\S+/g, m;
+    while ((m = re.exec(x))) out.push([m.index, m.index + m[0].length]);
+    return out;
+  }
+
+  /* ── CONSECUTIVE WORDS ARE ONE PILL, NOT FOUR ──
+     Marked 4, 5 and 6 is one phrase and has to be drawn as one mark:
+     three pills with the spaces showing between them is a fault the
+     phrase-scale render found before this shipped. Non-consecutive
+     runs always have a real unmarked word between them, so two marks
+     can never read as one. */
+  function scNtRuns(x, w) {
+    var sp = scNtWordSpans(x), out = [], i;
+    if (!w || !w.length) return out;
+    var on = {};
+    (w || []).forEach(function (k) { on[k] = 1; });
+    for (i = 0; i < sp.length; i++) {
+      if (!on[i]) continue;
+      var a = sp[i][0], b = sp[i][1];
+      while (i + 1 < sp.length && on[i + 1]) { i++; b = sp[i][1]; }
+      out.push([a, b]);
+    }
+    return out;
+  }
+
+  /* Which words a caret or a selection touches. A caret sitting inside
+     a word is that word — you do not have to select anything, which is
+     what makes this one press rather than a gesture with handles. */
+  function scNtWordsIn(x, a, b) {
+    var sp = scNtWordSpans(x), out = [];
+    for (var i = 0; i < sp.length; i++) {
+      if (sp[i][1] < a || sp[i][0] > b) continue;
+      /* A zero-width caret exactly on a boundary belongs to neither
+         word; inside one it belongs to that one. */
+      if (a === b && (a === sp[i][0] || a === sp[i][1]) && sp.length > 1) {
+        if (a === sp[i][1] && a !== sp[i][0]) out.push(i);
+        continue;
+      }
+      out.push(i);
+    }
+    return out;
+  }
+
+  /* ── AN EDIT THAT TOUCHES A MARKED WORD TAKES ITS MARK OFF ──
+     The alternative is sliding the mark onto whatever ends up in that
+     position, which is the silent kind of wrong this file has had to
+     write down half a dozen times. Worked out from the common prefix
+     and suffix, so a word before the edit keeps its index, one after
+     it moves by the character delta, and one the edit reached into
+     loses the mark rather than lying about it. */
+  function scNtRemap(was, now, w) {
+    if (!w || !w.length || was === now) return (w || []).slice();
+    var p = 0, n0 = was.length, n1 = now.length;
+    while (p < n0 && p < n1 && was.charAt(p) === now.charAt(p)) p++;
+    var t = 0;
+    while (t < n0 - p && t < n1 - p
+      && was.charAt(n0 - 1 - t) === now.charAt(n1 - 1 - t)) t++;
+    var endWas = n0 - t, d = n1 - n0;
+    var old = scNtWordSpans(was), fresh = scNtWordSpans(now), out = [];
+    w.forEach(function (k) {
+      var sp = old[k];
+      if (!sp) return;
+      var at;
+      if (sp[1] <= p) at = sp[0];
+      else if (sp[0] >= endWas) at = sp[0] + d;
+      else return;                       /* the edit reached into it */
+      for (var j = 0; j < fresh.length; j++) {
+        if (fresh[j][0] === at) { out.push(j); return; }
+      }
+    });
+    return out;
+  }
+
+  /* ── ONE LISTENER, NOT ONE PER STRIP ──
+     `selectionchange` is on the DOCUMENT, and the tools strip is
+     rebuilt every time a field takes focus — so registering it where
+     the chip is built adds a listener a press, each holding a closure
+     over a line that has since been repainted. The strip publishes its
+     current sync here instead and the paint clears it, which is the
+     same shape the app already uses for a repaint sweeping the strip
+     itself. */
+  var scNtPenSync = null;
+  document.addEventListener('selectionchange', function () {
+    if (scNtPenSync) scNtPenSync();
+  });
+
+  /* One span per run, laid into `host` with the plain text between. */
+  function scNtPaintWords(host, x, w, cvar, cls) {
+    var runs = scNtRuns(x, w), at = 0;
+    if (!runs.length) { host.appendChild(document.createTextNode(x)); return 0; }
+    runs.forEach(function (r) {
+      if (r[0] > at) host.appendChild(document.createTextNode(x.slice(at, r[0])));
+      var sp = scEl('span', cls, x.slice(r[0], r[1]));
+      if (cvar) sp.style.setProperty('--c', cvar);
+      host.appendChild(sp);
+      at = r[1];
+    });
+    if (at < x.length) host.appendChild(document.createTextNode(x.slice(at)));
+    return runs.length;
+  }
+
   function scNoteGutCls(n, idx) {
     var L = n.l[idx];
     if (L && !L.h && L.m === 3 && scNoteSect(n, idx)) return ' is-dot';
@@ -11499,6 +11635,10 @@
   }
 
   function scPaintNote(pane, n, focus, caret) {
+    /* The strip is swept by the repaint, so its caret hook goes with
+       it — held on, it would fire against a chip that is no longer in
+       the document. */
+    scNtPenSync = null;
     var crumb = scEl('div', 'nt-crumb');
     var back = scEl('button', 'nt-back');
     back.type = 'button';
@@ -11563,7 +11703,7 @@
              takes no word away, it makes room for one. */
           if (K.k === 'goal' && (!n.l.length || n.l[0].h)
               && n.l.length < NOTE_LINES) {
-            n.l.unshift({ i: scNtId(), h: 0, c: '', x: '', y: '', m: 0 });
+            n.l.unshift({ i: scNtId(), h: 0, c: '', x: '', y: '', m: 0, w: [] });
           }
           n.u = Date.now(); scNoteFlush();
           scPaintNotes();
@@ -11585,7 +11725,10 @@
         });
         sws.appendChild(b);
       });
-      pick.appendChild(sws);
+      /* Into the picker's OWN row rather than under it: two rows of
+         chrome before a single word of the note is what Showing up
+         took its switcher out for. */
+      lay.appendChild(sws);
       pane.appendChild(pick);
     }
 
@@ -11682,9 +11825,17 @@
         /* The same mark the field wears, drawn straight onto the words
            — there is no mirror to keep in step here, because in view
            there is no field on top of it. */
-        var sp = scEl('span', 'nt-v' + (L.m === 1 && sect ? ' is-mk' : ''), L.x);
+        var sp = scEl('span', 'nt-v' + (L.m === 1 && sect ? ' is-mk' : ''));
         if (sect) r.style.setProperty('--c', scNtVar(sect));
         if (L.m === 1 && sect) sp.style.setProperty('--c', scNtVar(sect));
+        /* The pen and the line marks are exclusive, so this is an
+           either/or rather than two drawings that could land on one
+           line. Without a section there is no hue for either. */
+        if (!L.m && L.w && L.w.length && sect) {
+          scNtPaintWords(sp, L.x, L.w, scNtVar(sect), 'nt-w');
+        } else {
+          sp.textContent = L.x;
+        }
         r.appendChild(sp);
         body.appendChild(r);
       });
@@ -11723,6 +11874,10 @@
 
     function fill() {
       tools.textContent = '';
+      /* Dropped whether or not this line gets a pen, so a heading or a
+         line above the first section cannot leave the last one's sync
+         pointing at a chip nothing draws. */
+      scNtPenSync = null;
       if (live < 0 || !n.l[live]) return;
       var L = n.l[live];
       var hb = scEl('button', 'nt-tool' + (L.h ? ' is-on' : ''));
@@ -11785,6 +11940,11 @@
           b.addEventListener('click', function () {
             if (!sect) return;
             L.m = L.m === val ? 0 : val;
+            /* The other half of the pen's exclusivity. Cleared on the
+               way IN as well as on the way out, or the pair is still
+               reachable by pressing them the other way round — which
+               is the rest day's own lesson, on a different screen. */
+            if (L.m) L.w = [];
             n.u = Date.now(); scNoteFlush(); redraw(L.i, null);
           });
           tools.appendChild(b);
@@ -11792,6 +11952,96 @@
         mk('nt-mkb', n.k === 'proc' ? 'Key step'
           : n.k === 'goal' ? 'Ruled out' : 'Swipe', 1);
         if (n.k === 'note') { mk('nt-brb', 'Bracket', 2); mk('nt-dtb', 'Dot', 3); }
+
+        /* ── THE PEN MARKS WORDS, AND IT READS THE CARET ──
+           A note-only control, for the reason Bracket and Dot are: a
+           process draws a filled node and a goal strikes the line
+           through, and neither of those is a thing a PHRASE can be —
+           offered there it would be a control whose effect you cannot
+           see, which is worse than one that is not there.
+
+           NO NEW GESTURE AND NO NEW MODE. The caret is already in the
+           word your finger went to, so a caret inside a word is that
+           word and a dragged selection is every word it touches. That
+           is why this is one press: selecting text on a phone brings
+           up the system's own Copy / Look Up bar, and a control that
+           needs handles would be fighting it.
+
+           AND IT IS EXCLUSIVE WITH THE LINE MARKS, both ways. "This
+           line matters" and "these words matter" are the same claim at
+           two sizes, and a line wearing both says it twice — with a
+           swipe washing the ground the pen is drawn on. Cleared on the
+           way in AND on the way out, so the pair is impossible rather
+           than handled: `mk` above already drops `w` when a line mark
+           is pressed. */
+        if (n.k === 'note') {
+          var pb = scEl('button', 'nt-tool nt-pnb');
+          pb.type = 'button';
+          pb.textContent = 'Pen';
+          /* ── READ AT THE PRESS, NEVER AT THE BUILD ──
+             The strip is built when the field takes FOCUS, and the
+             caret moves afterwards — every time, because moving it is
+             how you say which word you mean. Captured at build time
+             the chip marked whatever word the caret happened to be in
+             when the line was first touched: measured, a caret at
+             character 3 of "Morning light before the phone" marked
+             `phone`. It reads the live field on every question it is
+             asked. */
+          var penAt = function () {
+            var fld = liveRow && liveRow.querySelector('.nt-in');
+            if (!fld) return { hit: [], all: false, end: 0 };
+            var hit = scNtWordsIn(L.x, fld.selectionStart, fld.selectionEnd);
+            return {
+              hit: hit,
+              all: hit.length > 0 && hit.every(function (k) {
+                return (L.w || []).indexOf(k) >= 0;
+              }),
+              end: fld.selectionEnd
+            };
+          };
+          /* And the chip has to SAY which way it will go, so its own
+             state is refreshed as the caret moves rather than only
+             when the strip is rebuilt — a chip reading "on" over a
+             word that is not marked is a control lying about what the
+             next press does. */
+          var penSync = function () {
+            var st = penAt();
+            var live2 = sect && st.hit.length;
+            pb.disabled = !live2;
+            pb.classList.toggle('is-on', !!(live2 && st.all));
+            pb.setAttribute('aria-pressed', live2 && st.all ? 'true' : 'false');
+            pb.setAttribute('aria-label',
+              !live2 ? 'Pen' : (st.all ? 'Unmark ' : 'Mark ')
+                + st.hit.length + (st.hit.length === 1 ? ' word' : ' words'));
+            if (live2) pb.style.setProperty('--c', scNtVar(sect));
+          };
+          penSync();
+          /* `selectionchange` is the only event a caret MOVE fires in
+             a textarea — `input` does not, and neither does `click`
+             when the move came from a keyboard or from the system's
+             own handles. */
+          scNtPenSync = penSync;
+          pb.addEventListener('click', function () {
+            var st = penAt();
+            if (!sect || !st.hit.length) return;
+            /* Pressing it on words that are ALL marked takes them off,
+               which is the rule every other chip on this strip keeps. */
+            var next = (L.w || []).slice();
+            st.hit.forEach(function (k) {
+              var at = next.indexOf(k);
+              if (st.all) { if (at >= 0) next.splice(at, 1); }
+              else if (at < 0) next.push(k);
+            });
+            L.w = next.sort(function (x2, y2) { return x2 - y2; });
+            if (L.w.length) L.m = 0;
+            n.u = Date.now(); scNoteFlush();
+            /* The caret goes back where it was, so a second press on
+               the same word takes the mark off rather than landing on
+               a line with no selection in it. */
+            redraw(L.i, st.end);
+          });
+          tools.appendChild(pb);
+        }
       }
     }
 
@@ -11941,7 +12191,21 @@
         var mir = scEl('div', 'nt-mir');
         var sp2 = scEl('span', L.m === 1 && sect2 ? 'is-mk' : '');
         if (L.m === 1 && sect2) sp2.style.setProperty('--c', scNtVar(sect2));
-        sp2.textContent = L.x;
+        /* AND THE PEN HAS TO BE IDENTICAL IN BOTH. Reading draws the
+           runs straight onto the words; editing draws them into the
+           mirror behind the field. That is two drawings of one thing,
+           so a switch between the modes is exactly where they would
+           drift — and a mode switch that looks like the note changed
+           is worse than no mode at all. */
+        var paint2 = function () {
+          sp2.textContent = '';
+          if (!L.m && L.w && L.w.length && sect2) {
+            scNtPaintWords(sp2, L.x, L.w, scNtVar(sect2), 'nt-w');
+          } else {
+            sp2.textContent = L.x;
+          }
+        };
+        paint2();
         mir.appendChild(sp2);
         mir.setAttribute('aria-hidden', 'true');
         row.appendChild(mir);
@@ -11951,8 +12215,13 @@
         f.value = L.x;
         f.setAttribute('aria-label', 'Line');
         f.addEventListener('input', function () {
+          var was = L.x;
           L.x = f.value.slice(0, 300);
-          sp2.textContent = L.x;
+          /* The marks move with the words, and a word the edit reached
+             into loses its mark rather than sliding onto whatever ends
+             up in that position. */
+          if (L.w && L.w.length) L.w = scNtRemap(was, L.x, L.w);
+          paint2();
           scNoteGrow(f);
           /* AND THE STRIP FOLLOWS THE ROW DOWN. It hangs off the
              row's BOTTOM, and a textarea that wraps onto a second
@@ -11991,7 +12260,15 @@
                is a RUN, so an inherited 2 extends it rather than
                starting a second one beside it — which is the one mark
                here that could not be continued any other way. */
-            var add = { i: scNtId(), h: 0, c: '', x: rest, y: '', m: L.m };
+            /* The mark CONTINUES onto the line a Return makes, and the pen
+               does not: the words on the new line are different words,
+               so there is nothing for a word index to mean. `w` is
+               written out either way rather than left off — every
+               reader of a line does `L.w.length`, and a line built
+               without it threw inside the paint, which took the focus
+               restore with it and reported four hundred lines away as
+               a Backspace check finding no field. */
+            var add = { i: scNtId(), h: 0, c: '', x: rest, y: '', m: L.m, w: [] };
             if (n.l.length < NOTE_LINES) n.l.splice(idx + 1, 0, add);
             n.u = Date.now(); scNoteFlush(); redraw(add.i, 0);
             return;
@@ -12039,7 +12316,7 @@
        to type in — an empty note with no field is a screen that looks
        like it has failed to load. */
     if (!n.l.length) {
-      n.l.push({ i: scNtId(), h: 0, c: '', x: '', y: '', m: 0 });
+      n.l.push({ i: scNtId(), h: 0, c: '', x: '', y: '', m: 0, w: [] });
       pane.textContent = '';
       scPaintNote(pane, n, n.l[0].i, 0);
       return;
@@ -12079,7 +12356,7 @@
     add.textContent = n.k === 'proc' ? '+  Step' : '+  Line';
     add.addEventListener('click', function () {
       if (n.l.length >= NOTE_LINES) return;
-      var L = { i: scNtId(), h: 0, c: '', x: '', y: '', m: 0 };
+      var L = { i: scNtId(), h: 0, c: '', x: '', y: '', m: 0, w: [] };
       n.l.push(L); n.u = Date.now(); scNoteFlush(); redraw(L.i, 0);
     });
     foot.appendChild(add);
@@ -12093,8 +12370,8 @@
     sec.textContent = n.k === 'proc' ? '+  Session' : '+  Section';
     sec.addEventListener('click', function () {
       if (n.l.length + 2 > NOTE_LINES) return;
-      var H = { i: scNtId(), h: 1, c: n.a, x: '', y: '', m: 0 };
-      var L2 = { i: scNtId(), h: 0, c: '', x: '', y: '', m: 0 };
+      var H = { i: scNtId(), h: 1, c: n.a, x: '', y: '', m: 0, w: [] };
+      var L2 = { i: scNtId(), h: 0, c: '', x: '', y: '', m: 0, w: [] };
       n.l.push(H); n.l.push(L2);
       n.u = Date.now(); scNoteFlush(); redraw(H.i, 0);
     });
@@ -12260,7 +12537,7 @@
   function scNoteAdd() {
     if (notes.length >= NOTE_CAP) { scToast('That is as many notes as this keeps', false); return; }
     var n = { id: scNtId(), t: '', u: Date.now(),
-      l: [{ i: scNtId(), h: 0, c: '', x: '', y: '', m: 0 }] };
+      l: [{ i: scNtId(), h: 0, c: '', x: '', y: '', m: 0, w: [] }] };
     notes.push(n);
     scNoteFlush();
     ntOpen = n.id;

@@ -8163,6 +8163,171 @@ already wearing takes it off, and `m === 3` is still MARKED
 everywhere, so a dotted line fills its node on a daily process and is
 struck out on a goal.
 
+### Editing is the words, and nothing drawn round them
+
+Reported off the phone with two screenshots: *I don't like how it has
+the box, the rim around the line you're about to put in... there
+shouldn't be borders around certain things. I want it to literally
+feel like Notes.* Three faults, all measured rather than read off the
+picture.
+
+**THE RIM, AND `:focus-visible` MATCHES A TEXTAREA ON TOUCH.** The
+focused line took a full 1px box at `--spent`, 2px outside itself with
+a 4px radius — the loudest object on a page whose whole job is the
+words. And the heuristic fires for a text field on a TAP, because
+typing is what it expects one to be focused for, so this was never the
+keyboard ring it was written as. It is gone from every text field in
+the note: the line, the heading's name and clause, the title and a
+step's own note.
+
+**What replaces it is not nothing**, which is the only reason this is
+allowed where the rest of the app keeps its rings. The tools strip
+appears directly under the focused line and nowhere else — a larger,
+more specific indicator than an outline — and the caret is in the
+words. **Every BUTTON keeps its ring**, because a button has no caret
+to say it with, and that is the line the check is drawn on: by what
+the element IS, never by a list of the classes that have one today.
+
+**EIGHT OUTLINED PILLS, AND A CONTROL IS A FILL.** Three layout chips
+above the words and five tool chips under them, every one a 1px
+hairline. A hairline is how this app draws a SURFACE boundary; a
+control is told apart by its GROUND. They are a 9% wash of the ink
+now, which is also what makes the picker and the strip read as one
+system rather than two.
+
+**The one thing that genuinely WAS clipping** is the section name:
+`max-width: 46%` cut "THINGS TO REMEMBER" to "THINGS TO REMEMB". The
+heading row wraps instead, so a long name takes the width it needs and
+the clause drops under it — nothing on this screen is cut. Asserted
+with a long name PLANTED, because the fixture's own are eight
+characters and a check measuring "Positive" measures nothing.
+
+**And two rows of chrome became one.** The picker sat above seven 28px
+colour discs, before a single word of the note — which is the
+complaint Showing up took its own switcher out for, reported there as
+*it's just looking like too much*. The swatches join the picker's row
+and went to 18px with the press target still the 44px everything here
+holds to. Seven full discs are seven claims; small marks with the
+chosen one ringed is one.
+
+### And the fourth marks WORDS
+
+Asked for as *I want to be able to highlight certain words as an
+option too, not the whole line*. A line mark says THIS LINE matters; a
+pen says which words in it do, and they are different claims — so a
+line carries one or the other and never both.
+
+**THE DRAWING WAS ALREADY FREE, and that is why this was affordable.**
+The swipe is an inline span with `box-decoration-break: clone`, fitted
+to the WORDS — it is only wrapped round all of them today. A phrase is
+the same span at a different width, in both the view and the mirror.
+
+**IT IS NOT THE SWIPE AT A SMALLER WIDTH, and the render is what said
+so.** Six treatments were drawn over the real note at 390x844 and read
+at 1:1, and the useful result was a rejection: the swipe fades to
+nothing by the end of its run, which is what makes it right on a line —
+it does not shout to the end of the sentence — and exactly what makes
+it wrong on a phrase, where where the phrase STOPS is the whole point.
+On a two-word mark the fade ate half of it. **Pen** was picked: a flat
+wash with round ends, which says both. What it beat, and two of them
+were rejected at LINE scale for running the width of a sentence — an
+argument that does not survive the move to three words: **underline**
+(the marker-pen idiom, the closest second), **half-line**,
+**knockout** (the loudest thing on a screen whose job is the words)
+and **ink only** (which collides with the section clause, already the
+hue directly above it).
+
+**WORD INDICES, NEVER CHARACTER OFFSETS.** `w` is a list of which
+words, so fixing a typo in a different word moves an offset and does
+not move an index. An edit is remapped off the common prefix and
+suffix: a word before it keeps its index, one after it moves by the
+character delta, and **a word the edit reached INTO loses its mark**
+rather than sliding onto whatever ends up in that position — which is
+the silent kind of wrong this file has written down half a dozen
+times. Measured: typing at the head of a line carried `[2,3,4]` to
+`[3,4,5]` with the pill on the same words, and typing inside one took
+it to `[3,4]`.
+
+**CONSECUTIVE WORDS ARE ONE PILL, NOT FOUR.** Marked 2, 3 and 4 is one
+phrase and is drawn as one mark; three pills with the spaces showing
+between them was a fault the phrase render found before this shipped.
+Non-consecutive runs always have a real unmarked word between them, so
+two marks can never read as one — which is the merge fault the flat
+wash had at line scale, gone because the MODEL removed it rather than
+the drawing.
+
+**NO NEW GESTURE AND NO NEW MODE: it reads the caret.** A caret inside
+a word is that word, a dragged selection is every word it touches, and
+the chip is on the strip that is already there. Selecting text on a
+phone raises the system's own Copy / Look Up bar, so a control needing
+handles of its own would be fighting it.
+
+**AND IT READS THE CARET AT THE PRESS, NEVER AT THE BUILD.** The strip
+is built when a field takes FOCUS and the caret moves afterwards —
+every time, because moving it is how you say which word you mean.
+Captured at build time it marked whatever word the caret was in when
+the line was first touched: measured, a caret at character 3 of
+"Morning light before the phone" marked **phone**. The chip's own
+state is refreshed on `selectionchange` as well, because a chip
+reading "on" over a word that is not marked is a control lying about
+what the next press does.
+
+**ONE LISTENER, NOT ONE PER STRIP.** `selectionchange` is on the
+document and the strip is rebuilt on every focus, so registering it
+where the chip is built adds a listener a press, each holding a
+closure over a line since repainted. The strip publishes its current
+sync to one module-level hook and the paint clears it.
+
+**EXCLUSIVE WITH THE LINE MARKS, BOTH WAYS.** Cleared on the way in as
+well as on the way out, so the pair is impossible rather than handled
+— pressing them the other way round is how the rest day's own first
+version left the state reachable.
+
+**AND EVERY CONSTRUCTED LINE CARRIES `w`, which is how this broke a
+check four hundred lines away.** A line made by Return had no `w` at
+all, so `L.w.length` threw inside the paint — which took the focus
+restore with it and reported as a Backspace check finding no field, in
+a section about something else entirely. Written out at all seven
+construction sites AND guarded at every read: this record has one
+writer and a shape a reader has to defend against is a shape somebody
+will build without.
+
+**THE PANE HAD TO MAKE ROOM, and the pill was cut until it did.** The
+mark reaches 7px past the first and last glyph so its round ends are
+not drawn through the letters — and on a run that starts the line that
+put it OUTSIDE a pane whose `overflow-x` is deliberately `hidden`.
+Measured at **11 against a pane starting at 18**, so the first word's
+round end came out square: the day card's own lesson, reported there
+as *that doesn't look like the pill shape*. Padding OUT and a margin
+back, so the border box grows either side and the content box does
+not: the text column is untouched and the clip boundary is 8px wider.
+The poster's own padding is 18, so a border box 8px proud of its
+content box is still 10px inside its padding box — there is nothing to
+scroll sideways to, which is the rule this pane's `overflow-x` was
+said out loud for. `.nt-tools` takes `left: 8px` with it, or the chips
+sit proud of the words they are about.
+
+**Asserted as BOTH HALVES**: the pill is inside the pane AND it
+reaches left of the words, because "inside the pane" is vacuously true
+of a pill with no overhang at all — which is the build that reads
+cramped rather than cut.
+
+**The ink over it is 11.87:1 on the dark face and 10.47:1 on the
+light**, worst of seven hues each, from the most common pixel outward.
+A 30% wash barely moves the ground, which is the whole argument for a
+wash over a knockout.
+
+**Note only**, for Bracket and Dot's own reason: a process draws a
+filled node and a goal strikes the line through, and neither is a
+thing a PHRASE can be.
+
+**And the drawn checks are indexed by LINE, not by record position.**
+`.nt-v` and `.nt-mir` exist on the lines alone, so the two headings in
+the fixture are not in those lists — three of the new checks failed
+first for exactly that, which is the row-found-by-label trap in a
+third place.
+
+
 ## Edit mode moved around, and the page was zooming
 
 Reported from the phone with three screenshots: a note in edit mode
