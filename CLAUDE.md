@@ -7836,6 +7836,59 @@ objectives row and the goals section each had that bug with the
 attribute set correctly throughout. Measured as the BOX on all four
 views.
 
+### The editor opened and its Save was under the phone
+
+Reported as five blocks where the first four worked and the fifth did
+not, with a note that I had claimed to check this. **The claim was
+267 presses and it was true, and it measured the wrong thing**: every
+one of them asked whether the SHEET OPENED. None asked whether you
+could do anything once it had.
+
+**MEASURED ON THE REAL WEEK AT 390x844: the editor is 1058px of
+content in a 742px sheet, and Save ended at y=1016 — a hundred and
+seventy-two pixels under the bottom of the phone.** On a Train block,
+which carries a workout picker the others do not, **1099**. The sheet
+scrolls, so it was reachable; you had to know to go looking for the
+button that files the edit you had just made, which from outside is
+the same thing as the edit not working.
+
+**AND THE EDITOR IS NOT ONE HEIGHT**, which is the half that makes it
+look like a per-block fault: a Train block is 83px taller than a Wake
+block, a block inside the backfill window carries the "this day"
+rows, and one with sub-items carries its list. Whether Save was a
+short scroll away or a long one was a property of WHICH BLOCK you
+pressed.
+
+**THE FIX IS THE WORKOUT BOARD'S OWN RULE**, written down there a
+month earlier and never applied to the sheet this app opens most: the
+foot is `position: sticky`. `#scSheetBody > .acts:last-child`, so it
+is the sheet's FOOT rather than every row of buttons — two of these
+sheets put an `.acts` in the middle of their body, and a sticky one
+there would hover over its own content. The ground is what stops the
+rows scrolling through the buttons and the hairline is what stops
+them reading as buttons floating over a list; the history panel's
+Settings row already draws the same rule for the same reason. A sheet
+short enough not to scroll never sticks and is left exactly as it
+was.
+
+**Asserted over a WHOLE DAY and in both halves.** Every row on the
+open day is pressed rather than two of them — two cannot see a fault
+that depends on where a row sits or how tall its editor is — and the
+sheet must genuinely overflow before "Save is on screen" is allowed
+to mean anything. Proved to bite: reverted, six blocks report Save
+ending at 1016 and 1099 against a screen of 844.
+
+**What could NOT be reproduced is a fifth block.** 48 presses across
+every press target a row has — the row, the check, the pencil, the
+note tag, the children's dots — on fourteen blocks in every state
+there is (done, off, past, running, with children, on another day),
+plus five opened and SAVED in sequence, which is the one path every
+earlier sweep had skipped by closing with Escape. All 48 opened the
+editor, the mode stayed armed through all of them, and saving never
+disarmed it. Said plainly rather than left implied: if it still
+happens, the next step is a probe on the device, because this browser
+cannot show it.
+
 ### And a probe's selector reported the feature broken
 
 The pencils came back as **0 while armed** and the rule was right. The

@@ -5293,6 +5293,62 @@ const SAID = [
     second.id !== second.first && second.sheet && /Edit/.test(second.title)
     && !second.ticked && second.armed === 'true', second);
 
+  /* ══ A WHOLE DAY, NOT TWO ROWS OF IT ══
+     Reported as five blocks where the first four worked and the fifth
+     did not. Two rows is what was measured before and it cannot see a
+     fault that depends on where a row sits, how tall its editor is, or
+     what is on it — so every row on the open day is pressed, and the
+     thing that FILES the edit is measured as being on screen each
+     time. An editor whose Save you have to go looking for is an
+     editor that does not work, which is the workout board's own rule
+     arriving on the sheet this app opens most. */
+  await page.evaluate(() => document.getElementById('scScrim').click());
+  await page.waitForFunction(() => document.getElementById('scSheet').hidden,
+    null, { timeout: 4000 });
+  await page.waitForTimeout(220);
+  const wholeDay = await page.evaluate(async () => {
+    const b = document.getElementById('scHdEd');
+    if (b.getAttribute('aria-pressed') !== 'true') {
+      b.click();
+      await new Promise((z) => setTimeout(z, 260));
+    }
+    const ids = [...document.querySelectorAll('.week .row[data-id]')]
+      .map((r) => r.dataset.id);
+    const out = [];
+    for (const id of ids) {
+      const r = document.querySelector('.week .row[data-id="' + id + '"]');
+      r.scrollIntoView({ block: 'center' });
+      r.click();
+      await new Promise((z) => setTimeout(z, 430));
+      const sh = document.getElementById('scSheet');
+      const go = sh.querySelector('.btn.go');
+      const q = go ? go.getBoundingClientRect() : null;
+      out.push({ id: id,
+        n: (r.querySelector('.n') || {}).textContent,
+        opened: !sh.hidden
+          && /Edit/.test(document.getElementById('scSheetTitle').textContent),
+        /* How far the sheet scrolls: without this the next claim is
+           vacuously true of an editor that happens to fit. */
+        over: sh.scrollHeight - sh.clientHeight,
+        saveIn: q ? (q.bottom <= window.innerHeight + 0.5 && q.top >= 0) : false,
+        saveBot: q ? Math.round(q.bottom) : null });
+      document.getElementById('scScrim').click();
+      await new Promise((z) => setTimeout(z, 330));
+    }
+    return out;
+  });
+  ok('every block on the day opens the editor, not two of them',
+    wholeDay.length >= 3 && wholeDay.every((r) => r.opened),
+    wholeDay.filter((r) => !r.opened).concat([{ of: wholeDay.length }]));
+  /* BOTH HALVES. "Save is on screen" passes on any sheet short enough
+     not to scroll, and the editor is not one height — a Train block
+     carries a workout picker the others do not. Measured on the build
+     that was reported, Save ended 119px under the screen on an
+     ordinary block and 202px under on Train. */
+  ok('...and the control that files the edit is on screen on every one',
+    wholeDay.some((r) => r.over > 0) && wholeDay.every((r) => r.saveIn),
+    wholeDay.map((r) => ({ n: r.n, over: r.over, saveBot: r.saveBot })));
+
   /* ── AND TURNING IT OFF PUTS THE TICK BACK ──
      The other half, and it fails apart from the one above: a build
      that never leaves the mode passes everything before this and is a

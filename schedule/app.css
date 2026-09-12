@@ -5452,6 +5452,34 @@ body {
 /* A press that would do nothing must not look like one that would. */
 .acts .btn:disabled { opacity: .38; cursor: default; }
 
+/* ── THE ANSWER MUST NOT GO BELOW THE FOLD ──
+   The workout board's own rule, and the block editor never got it.
+   Measured on the real app at 390x844 on an ordinary five-block day:
+   the editor is 883px of content in a 742px sheet, and Save sits at
+   y=916 — seventy-two pixels under the bottom of the phone. The sheet
+   does scroll, so it was reachable; you had to know to go looking for
+   the button that files the edit you had just made, which is the same
+   thing as it not working.
+
+   `:last-child`, so this is the sheet's FOOT rather than every row of
+   buttons: two of these sheets put an `.acts` in the middle of the
+   body, and a sticky one there would hover over its own content.
+
+   The ground is what stops the rows scrolling through the buttons,
+   and the hairline is what stops them reading as buttons floating
+   over a list — the history panel's Settings row already draws the
+   same rule for the same reason. A sheet that fits never sticks and
+   is left exactly as it was. */
+#scSheetBody > .acts:last-child {
+  position: sticky;
+  bottom: calc((22px + env(safe-area-inset-bottom)) * -1);
+  z-index: 1;
+  margin: 18px calc(var(--pad) * -1) 0;
+  padding: 12px var(--pad) calc(22px + env(safe-area-inset-bottom));
+  background: var(--paper);
+  border-top: 1px solid var(--hair);
+}
+
 /* ═══════════════════════════════════════════════════════════════
    WHAT IS INSIDE A BLOCK
 
