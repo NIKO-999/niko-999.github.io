@@ -1267,7 +1267,71 @@ body {
    prototype put them and where they read as a caption rather than a
    dashboard. */
 .ty-hero { display: none; }
-.ty-cap { margin-top: 0; font-size: 12.5px; color: var(--dim); font-variant-numeric: tabular-nums; }
+/* A BUTTON now, and the resets are what keep it reading as the line
+   it was: no ground, no border, the page's own type, and the caret
+   rather than a pill. */
+.ty-cap { display: block; margin-top: 0; padding: 0; border: 0; background: none;
+  text-align: left; font: inherit; font-size: 12.5px; color: var(--dim);
+  font-variant-numeric: tabular-nums; cursor: pointer;
+  touch-action: manipulation; }
+.ty-cap:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+
+/* -- THE WEEK READ BACK, A DAY A CARD --
+   Fifteen weekly views were rendered over the real app at 390x844 on
+   a real week and this is the one that was picked. It is the app's own
+   object: a day is a CARD, and the six marks on it are the tile grid's
+   own glyphs at a smaller size, so nothing new is drawn. */
+.wv { margin-top: 14px; display: grid; gap: 7px; }
+.wv-c {
+  border-radius: 12px;
+  padding: 9px 11px;
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+/* Today is a ring rather than a brighter ground: the ground is what
+   says a card is a card, and lifting one card's would read as a
+   different kind of thing rather than as the one you are on. */
+.wv-c.is-t { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ink) 30%, transparent); }
+.wv-h { display: flex; justify-content: space-between; align-items: baseline; }
+.wv-h > b { font-size: 12.5px; font-weight: 700; }
+.wv-h > s { text-decoration: none; font-size: 10px; color: var(--spent);
+  font-variant-numeric: tabular-nums; }
+/* The column count is DATA, because the six are the six plus however
+   many of your own you have added: past six it goes to two balanced
+   rows rather than leaving one pair alone on a line, which is the
+   Mind ladder's own fault. */
+.wv-r {
+  --wv-c: 6;
+  display: grid;
+  grid-template-columns: repeat(var(--wv-c), 1fr);
+  gap: 4px 4px;
+  margin-top: 7px;
+}
+.wv-q { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.wv-g { display: grid; place-items: center; }
+.wv-g svg {
+  width: 15px; height: 15px;
+  fill: none; stroke: var(--tg); stroke-width: 1.9;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+/* A VALUE TAKES THE INK AND A STATE STAYS QUIET, which is the tile's
+   own rule one screen over: what you actually did is what you came to
+   read, and a dash is a state rather than an achievement.
+
+   AND THERE IS NO OPACITY ON THE PAIR. It went in at .45 over the whole
+   of an unlit one, which measured the dash at 2.75:1 on composited
+   pixels — under the bar, on the smallest type on the card. The glyph
+   already says unlit by wearing the flat neutral instead of the item's
+   hue, so the opacity was a second statement of one fact, and it was
+   the half costing contrast. Opacity was never the lever: that is the
+   friend's-week disc's own measurement, at 1.30:1. */
+.wv-q > em {
+  font-style: normal; font-size: 9.5px; font-weight: 600;
+  color: var(--dim); font-variant-numeric: tabular-nums;
+  /* A pair with nothing to say still holds its line, or the glyphs
+     above a blank step out of the row they share. */
+  min-height: 12px;
+}
+.wv-q:not(.is-off) > em { color: var(--ink); }
 .ty-foot { margin-top: 16px; font-size: 11px; line-height: 1.5; color: var(--dim); }
 /* ── SEVEN TILES, TWO ACROSS ──
    The screen was a full-width list with a 26-week strip down the right

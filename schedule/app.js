@@ -3705,6 +3705,16 @@
     $('scStreakNum').appendChild(scEl('i', null, st === 1 ? 'day' : 'days'));
     $('scTallyCap').textContent = n + ' of ' + all.length + ' today \u00b7 '
       + st + (st === 1 ? ' day streak' : ' day streak');
+    /* ── THE DOOR IS THE LINE THAT ALREADY SAYS HOW TODAY WENT ──
+       The calendar's own move: the head prints which day you are on
+       and pressing it asks for more days. Here the caption prints how
+       today went, so pressing it asks for the week that contains it —
+       a control naming itself, where a fourth stop would be a
+       segmented track of four on a 390px phone and a List/Week
+       switcher is exactly the second row of chrome this screen took
+       out once already. */
+    $('scTallyCap').setAttribute('aria-label',
+      $('scTallyCap').textContent + ', open this week');
     var grid = $('scTallyGrid');
     grid.textContent = '';
     /* ── SHOWING UP HAS ONE VIEW AND NO SWITCHER ──
@@ -4425,6 +4435,159 @@
   }
 
   var histBack = null;    /* what to hand focus back to on close */
+
+  /* ══ THE WEEK READ BACK, A DAY A CARD ══
+     Asked for as a weekly review — the calories, the habits, the sleep,
+     every day of the week where you can see all of it. Fifteen
+     treatments were rendered over the real app at 390x844 on a real
+     week and read at 1:1, and this is the one that was picked.
+
+     What it beat, and every rejection is a lens rather than a tweak:
+     four GRIDS of six rows by seven columns (plain figures, chips
+     behind them, the rows named by glyph, and one with a week column,
+     which packs the most in and mixes a total, two averages and a
+     count under one heading); a HEAT grid, where four days of steps
+     were indistinguishable and nothing said what you actually did;
+     four per-ITEM shapes (seven bars, a spark line, a ridge and a
+     range) — and a LINE lies about the two ticks, which are binary and
+     get drawn interpolating; and two DRAWINGS, six concentric arcs a
+     day and a seven-armed radial, both of which are the most
+     distinctive things on the sheet and precise about nothing.
+
+     What makes this one right is that it is the app's own object: a
+     day is a CARD, which is the unit every other screen here is built
+     from, and the six marks on it are the tile grid's own glyphs at a
+     smaller size. Nothing new had to be drawn. */
+  function scWvFig(it, v) {
+    if (it.k === 'do') return v ? '\u2713' : '\u2013';
+    var n = parseFloat(v);
+    if (!(n > 0)) return '\u2013';
+    /* One rule for every number rather than a table per item: the
+       GLYPH says which, so the figure only has to be short. */
+    if (n >= 10000) return (n / 1000).toFixed(0) + 'k';
+    if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+    return String(n);
+  }
+  function scWeekSheet() {
+    var off = 0;
+    scSheet('Week', function (body) {
+      var head = scEl('div', 'cl-head');
+      var back = scEl('button', 'cl-arw');
+      back.type = 'button';
+      back.setAttribute('aria-label', 'The week before');
+      back.insertAdjacentHTML('beforeend',
+        '<svg viewBox="0 0 24 24" aria-hidden="true">'
+        + '<path d="M15 4.5L7.5 12l7.5 7.5"/></svg>');
+      var title = scEl('b');
+      var fwd = scEl('button', 'cl-arw is-fwd');
+      fwd.type = 'button';
+      fwd.setAttribute('aria-label', 'The week after');
+      fwd.insertAdjacentHTML('beforeend',
+        '<svg viewBox="0 0 24 24" aria-hidden="true">'
+        + '<path d="M15 4.5L7.5 12l7.5 7.5"/></svg>');
+      head.appendChild(back);
+      head.appendChild(title);
+      head.appendChild(fwd);
+      body.appendChild(head);
+      var list = scEl('div', 'wv');
+      body.appendChild(list);
+
+      /* ── AND IT REACHES BACK ──
+         A review you can only run on the week you are in is a review
+         you cannot run on a Monday, when the week you want to look at
+         has just ended. The calendar's own control, reused rather than
+         redrawn, and it refuses at both ends: nothing before the first
+         thing you ever logged, and no week that has not started. */
+      var draw = function () {
+        var today = scDay();
+        var t0 = new Date(today + 'T12:00:00');
+        var mon = new Date(t0);
+        mon.setDate(mon.getDate() - ((t0.getDay() + 6) % 7) - off * 7);
+        var sun = new Date(mon);
+        sun.setDate(sun.getDate() + 6);
+        title.textContent = mon.getDate() + ' ' + MON[mon.getMonth()] + ' \u2014 '
+          + sun.getDate() + ' ' + MON[sun.getMonth()];
+        var first = scCalFrom();
+        back.disabled = !!first && scDay(mon) <= first;
+        fwd.disabled = off <= 0;
+        list.textContent = '';
+        var items = scItems();
+        var drawn = 0;
+        for (var i = 0; i < 7; i++) {
+          var d = new Date(mon);
+          d.setDate(d.getDate() + i);
+          var day = scDay(d);
+          /* A day that has not happened has no record, so it draws no
+             card — the calendar's own rule rather than seven cards of
+             dashes, which is furniture. */
+          if (day > today) continue;
+          /* AND A DAY BEFORE THE RECORD BEGAN IS NOT A DAY YOU MISSED
+             IT EITHER. Every number applies on every day, so a week
+             you never opened the app in draws a card of dashes reading
+             0 of 4 — a wash of red across days that were never asked
+             of you, which is what this screen never does. */
+          if (first && day < first) continue;
+          drawn++;
+          var rec = tickLog[day] || {};
+          var card = scEl('div', 'wv-c' + (day === today ? ' is-t' : ''));
+          var hd = scEl('div', 'wv-h');
+          hd.appendChild(scEl('b', null, FULL[d.getDay()]));
+          var on = 0, of = 0, said = [];
+          items.forEach(function (it) {
+            var got = rec[it.id] != null && rec[it.id] !== '';
+            /* A TICK ALWAYS WINS, which is the strip's own rule: Train
+               on a Sunday it is not scheduled is still a day you
+               trained, and a day that counted it out of the
+               denominator would read 4 of 5 on a day you kept five. */
+            var applies = got || scApplied(it, day);
+            if (it.cnt !== 0 && applies) { of++; if (got) on++; }
+          });
+          hd.appendChild(scEl('s', null, on + ' of ' + of));
+          card.appendChild(hd);
+          var row = scEl('div', 'wv-r');
+          row.style.setProperty('--wv-c',
+            String(items.length <= 6 ? items.length : Math.ceil(items.length / 2)));
+          items.forEach(function (it) {
+            var applies = scApplied(it, day);
+            var v = rec[it.id];
+            var got = v != null && v !== '';
+            var q = scEl('span', 'wv-q' + (got ? '' : ' is-off'));
+            var g = scEl('span', 'wv-g');
+            g.insertAdjacentHTML('beforeend',
+              '<svg viewBox="0 0 24 24" aria-hidden="true">' + scItemIcon(it) + '</svg>');
+            g.style.setProperty('--tg', got ? scTagHue(it) : 'var(--tick-off)');
+            q.appendChild(g);
+            /* A DAY THE THING WAS NEVER ON IS NOT A DAY YOU MISSED IT.
+               The strip's own rule, and here it costs no new mark: a
+               dash says it was on and you did not, and nothing at all
+               says it was never on. Two dashes told apart by weight
+               would be two glyphs with one silhouette. */
+            q.appendChild(scEl('em', null, (!got && !applies) ? '' : scWvFig(it, v)));
+            row.appendChild(q);
+            said.push(it.n + ' ' + (got ? scWvFig(it, v).replace('\u2713', 'yes')
+              : (applies ? 'no' : 'not on')));
+          });
+          card.appendChild(row);
+          /* SPOKEN ONCE, NOT AS TWELVE MARKS. Six glyphs and six
+             figures read out separately charge twice for what the card
+             already says, so the row is hidden and the card carries
+             one sentence — the Workouts panel's own rule. */
+          row.setAttribute('aria-hidden', 'true');
+          card.setAttribute('role', 'group');
+          card.setAttribute('aria-label', FULL[d.getDay()] + ' '
+            + d.getDate() + ' ' + MON[d.getMonth()] + ', ' + on + ' of ' + of
+            + '. ' + said.join(', '));
+          list.appendChild(card);
+        }
+        if (!drawn) {
+          list.appendChild(scEl('p', 'ty-hint', 'Nothing on this week yet.'));
+        }
+      };
+      back.addEventListener('click', function () { off++; draw(); });
+      fwd.addEventListener('click', function () { if (off > 0) { off--; draw(); } });
+      draw();
+    });
+  }
 
   function scOpenHist(item) {
     if (item.id === 'm') { scOpenMindHist(); return; }
@@ -13297,6 +13460,7 @@
      out. */
   $('scHdEd').addEventListener('click', function () { scEditArm(!editArm); });
   $('scHdDate').addEventListener('click', function () { scCalOpen(); });
+  $('scTallyCap').addEventListener('click', function () { scWeekSheet(); });
   $('scNtEd').addEventListener('click', function () { scNtEdit(!ntEdit); });
 
   scLoad();

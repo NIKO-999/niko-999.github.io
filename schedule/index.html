@@ -69,7 +69,7 @@
   } catch (e) {}
 }());
 </script>
-<link rel="stylesheet" href="app.css?v=b00c4440" />
+<link rel="stylesheet" href="app.css?v=f68086eb" />
 </head>
 <body>
 
@@ -132,7 +132,11 @@
       <div class="ty-hero">
         <b class="ty-fig" id="scStreakNum">0<i>days</i></b>
       </div>
-      <p class="ty-cap" id="scTallyCap"></p>
+      <!-- A BUTTON, because it is the door to the week: the line that
+           already says how today went is what asks for the seven days
+           around it. One node rather than a paragraph swapped for a
+           control, so the two cannot drift. -->
+      <button class="ty-cap" id="scTallyCap" type="button"></button>
       <div class="ty-grid" id="scTallyGrid"></div>
       <p class="ty-foot" id="scTallyFoot"></p>
     </div>
@@ -306,6 +310,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=a7642fbc"></script>
+<script src="app.js?v=4525f56d"></script>
 </body>
 </html>

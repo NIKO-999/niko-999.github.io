@@ -15915,6 +15915,252 @@ const SAID = [
     await nbctx.close();
   }
 
+  /* ═════════════════════════════════════════════════════
+     THE WEEK READ BACK, A DAY A CARD
+
+     Fifteen weekly views were rendered over the real app and this is
+     the one that was picked. What fails silently: a card whose figures
+     are not the record's, a day that has not happened drawing a row of
+     dashes, a day the thing was never on reading as a day you missed
+     it, six glyphs and six figures read out as twelve marks, and eight
+     items leaving one pair alone on a second line.
+     ═════════════════════════════════════════════════════ */
+  {
+    const wvctx = await browser.newContext(PHONE);
+    const wvpage = await wvctx.newPage();
+    const wverrs = [];
+    wvpage.on('pageerror', (e) => wverrs.push(String(e)));
+    wvpage.on('console', (m) => { if (m.type() === 'error') wverrs.push(m.text()); });
+    await wvpage.addInitScript(() => {
+      const FROZEN = new Date('2026-09-12T20:03:00').getTime();
+      const R = Date;
+      // eslint-disable-next-line no-global-assign
+      Date = class extends R {
+        constructor(...a) { super(...(a.length ? a : [FROZEN])); }
+        static now() { return FROZEN; }
+      };
+      if (!localStorage.getItem('sched.tick.v1')) {
+        /* Monday whole, Friday hard, today's twenty thousand steps \u2014
+           so a card that flattens a spread is visibly flattening one.
+           Train is ticked on Monday and NOT on Tuesday, and the week
+           below puts a Train block on Monday only: one is a day you
+           missed it and the other is a day it was never on. */
+        localStorage.setItem('sched.tick.v1', JSON.stringify({
+          '2026-09-02': { p: '5000' },
+          '2026-09-07': { m: 1, p: '12400', f: '2600', w: '3.1', s: '8.0' },
+          '2026-09-08': { p: '9200', f: '2100', w: '2.4', s: '6.5' },
+          '2026-09-12': { t: 1, p: '20000', f: '2500', w: '3.0', s: '6.5' } }));
+        localStorage.setItem('sched.v1', JSON.stringify({ title: 'W', sub: '', items: [
+          { id: 'wv1', d: 1, s: 390, e: 480, r: '', n: 'Train', k: [], nt: [] },
+          { id: 'wv2', d: 6, s: 390, e: 480, r: '', n: 'Train', k: [], nt: [] }] }));
+      }
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1',
+          JSON.stringify({ on: false, url: '', code: '' }));
+      }
+      if (!localStorage.getItem('sched.tour.v1')) {
+        localStorage.setItem('sched.tour.v1', '1');
+        localStorage.setItem('sched.hint2.v1', '1');
+      }
+      localStorage.setItem('sched.view.v1', 'tally');
+    });
+    await wvpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await wvpage.waitForTimeout(480);
+
+    /* THE DOOR IS THE LINE THAT ALREADY SAYS HOW TODAY WENT, which is
+       the calendar's own move. Asserted as the TAG and the label, not
+       as a class: a paragraph somebody styles to look pressable is not
+       a control. */
+    const wvDoor = await wvpage.evaluate(() => {
+      const b = document.getElementById('scTallyCap');
+      return { tag: b.tagName, lab: b.getAttribute('aria-label') || '' };
+    });
+    ok('the line that says how today went opens the week',
+      wvDoor.tag === 'BUTTON' && /open this week/.test(wvDoor.lab), wvDoor);
+
+    const wvWeek = await wvpage.evaluate(async () => {
+      document.getElementById('scTallyCap').click();
+      await new Promise((z) => setTimeout(z, 640));
+      const cards = [...document.querySelectorAll('.wv-c')];
+      const read = (n) => {
+        const c = cards[n];
+        return { day: (c.querySelector('.wv-h > b') || {}).textContent,
+          of: (c.querySelector('.wv-h > s') || {}).textContent,
+          figs: [...c.querySelectorAll('.wv-q > em')].map((e) => e.textContent),
+          lab: c.getAttribute('aria-label') || '',
+          hidden: c.querySelector('.wv-r').getAttribute('aria-hidden'),
+          tag: c.tagName };
+      };
+      return { title: (document.getElementById('scSheetTitle') || {}).textContent,
+        head: (document.querySelector('.cl-head > b') || {}).textContent,
+        n: cards.length,
+        today: cards.filter((c) => c.classList.contains('is-t'))
+          .map((c) => (c.querySelector('.wv-h > b') || {}).textContent),
+        mon: read(0), tue: read(1), sat: read(cards.length - 1),
+        tags: cards.map((c) => c.tagName),
+        /* Nothing of a card may run out of it. */
+        wide: cards.some((c) => [...c.querySelectorAll('*')].some((e) =>
+          e.getBoundingClientRect().right > c.getBoundingClientRect().right + 0.5)) };
+    });
+    /* SIX CARDS, NOT SEVEN. Sunday has not happened, and a card of
+       dashes for a day with no record is furniture — the calendar's own
+       rule about a day with nothing to say. */
+    ok('the week draws a card for every day that has happened, and no more',
+      wvWeek.title === 'Week' && wvWeek.n === 6
+      && /7 Sep/.test(wvWeek.head) && /13 Sep/.test(wvWeek.head)
+      && wvWeek.mon.day === 'Monday' && wvWeek.sat.day === 'Saturday', wvWeek);
+    ok('...and today is the one card ringed',
+      wvWeek.today.length === 1 && wvWeek.today[0] === 'Saturday', wvWeek.today);
+    /* THE FIGURES ARE THE RECORD'S OWN, read off the card rather than
+       trusted: a build drawing the same six numbers on every day
+       passes any check that only counts them. */
+    ok('...and every figure on a card is that day\u2019s own',
+      wvWeek.mon.figs.join('|') === '\u2013|\u2713|12k|2.6k|3.1|8'
+      && wvWeek.sat.figs.join('|') === '\u2713||20k|2.5k|3|6.5',
+      { mon: wvWeek.mon.figs, sat: wvWeek.sat.figs });
+    /* A DAY THE THING WAS NEVER ON IS NOT A DAY YOU MISSED IT. Monday
+       has a Train block and no tick, so it draws a DASH; Tuesday has
+       no Train block at all, so it draws NOTHING. Both halves, because
+       a build that blanks every miss passes the first on its own. */
+    ok('...and a day it was never on draws no figure, where a missed one draws a dash',
+      wvWeek.mon.figs[0] === '\u2013' && wvWeek.tue.figs[0] === ''
+      && wvWeek.mon.of === '5 of 6' && wvWeek.tue.of === '4 of 4',
+      { mon: wvWeek.mon, tue: wvWeek.tue });
+    /* SPOKEN ONCE, NOT AS TWELVE MARKS \u2014 the Workouts panel's rule. */
+    ok('...and the card carries one sentence with the marks hidden',
+      wvWeek.mon.hidden === 'true'
+      && /^Monday 7 Sep, 5 of 6\. /.test(wvWeek.mon.lab)
+      && /Steps 12k/.test(wvWeek.mon.lab), wvWeek.mon.lab);
+    /* NOT ONE ROW OF IT IS A CONTROL, which is the calendar's own rule:
+       every write is refused outside the backfill window, so a
+       pressable day would be a control whose only answer is no. */
+    ok('...and not one card is a control',
+      wvWeek.tags.every((t2) => t2 === 'DIV') && wvWeek.wide === false, wvWeek.tags);
+
+    /* AND IT REACHES BACK. The forward arrow refuses on the week you
+       are in rather than landing you on one that has not started. */
+    const wvBack = await wvpage.evaluate(async () => {
+      const arw = document.querySelectorAll('.cl-arw');
+      const fwdOff = arw[1].disabled;
+      arw[0].click();
+      await new Promise((z) => setTimeout(z, 420));
+      const now = document.querySelectorAll('.cl-arw');
+      return { fwdOff: fwdOff,
+        head: (document.querySelector('.cl-head > b') || {}).textContent,
+        n: document.querySelectorAll('.wv-c').length,
+        first: (document.querySelector('.wv-c .wv-h > b') || {}).textContent,
+        fwdNow: now[1].disabled, backNow: now[0].disabled };
+    });
+    /* AND IT BEGINS WHERE THE RECORD DOES. The fixture's first entry is
+       the Wednesday of that week, so the two days before it draw no
+       card at all — every number applies on every day, so a card for a
+       day you had not started would read 0 of 4 and claim you missed
+       four things. Both ends, because an arrow that only ever refuses
+       is indistinguishable from one that does nothing. */
+    ok('...and the week before is one press back, beginning where the record does',
+      wvBack.fwdOff === true && wvBack.fwdNow === false
+      && /31 Aug/.test(wvBack.head) && wvBack.n === 5
+      && wvBack.first === 'Wednesday' && wvBack.backNow === true, wvBack);
+
+    /* A VALUE IS THE INK AND A DASH CLEARS THE BAR, on COMPOSITED
+       pixels rather than off the token. It went in with .45 on the
+       whole of an unlit pair and the dash measured 2.75:1 - under the
+       bar on the smallest type on the card, which is the opacity
+       lesson this repo has now paid for three times. Both halves,
+       because a build drawing every figure in the ink passes the floor
+       and loses the distinction the dash is there to make. */
+    const { PNG: PNGW } = require('pngjs');
+    const wvCon = await wvpage.evaluate(() => {
+      const cards = [...document.querySelectorAll('.wv-c')];
+      const pick = (n, off) => {
+        const c = cards[n];
+        const em = [...c.querySelectorAll(
+          off ? '.wv-q.is-off > em' : '.wv-q:not(.is-off) > em')]
+          .filter((e) => e.textContent !== '')[0];
+        if (!em) throw new Error('no ' + (off ? 'unlit' : 'lit') + ' figure on card ' + n);
+        const r = em.getBoundingClientRect(), cr = c.getBoundingClientRect();
+        return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2),
+          gx: Math.round(cr.left + 6), gy: Math.round(r.top + r.height / 2),
+          col: getComputedStyle(em).color, txt: em.textContent };
+      };
+      /* The third card is a day with nothing logged on it, so its
+         numbers are dashes; the first carries Monday's figures. */
+      /* --ink is a HEX, and a hex has nothing for a digit match to
+         read - so the token is resolved through an element the
+         browser has actually styled. Third time this file has needed
+         that, after a color-mix and a box-shadow. */
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--ink)';
+      document.body.appendChild(probe);
+      const ink = getComputedStyle(probe).color;
+      probe.remove();
+      return { dash: pick(2, true), val: pick(0, false), ink: ink };
+    });
+    const wvImg = PNGW.sync.read(await wvpage.screenshot());
+    const wvDpr = wvImg.width / 390;
+    const wvAt = (x, y) => {
+      const k = (wvImg.width * Math.round(y * wvDpr) + Math.round(x * wvDpr)) << 2;
+      return [wvImg.data[k], wvImg.data[k + 1], wvImg.data[k + 2]];
+    };
+    /* The brightest pixel in the figure's own box against the card a
+       few pixels off it - a min/max over the box picks antialiased
+       edges at both ends, which this file has already been wrong
+       about once. */
+    const wvRatio = (m) => {
+      let best = wvAt(m.x, m.y);
+      for (let dx = -9; dx <= 9; dx++) {
+        for (let dy = -6; dy <= 6; dy++) {
+          const q = wvAt(m.x + dx, m.y + dy);
+          if (lum(q) > lum(best)) best = q;
+        }
+      }
+      return +ratio(best, wvAt(m.gx, m.gy)).toFixed(2);
+    };
+    const wvRd = wvRatio(wvCon.dash), wvRv = wvRatio(wvCon.val);
+    ok('a figure you logged is the ink and a dash still clears the bar',
+      wvRd >= 4.5 && wvRv >= 4.5
+      && rgbOf(wvCon.val.col).join(',') === rgbOf(wvCon.ink).join(',')
+      && wvCon.dash.col !== wvCon.val.col,
+      { dash: wvRd, val: wvRv, valCol: wvCon.val.col, dashCol: wvCon.dash.col });
+
+    /* EIGHT ITEMS GO TWO BALANCED ROWS, never seven and a lone one \u2014
+       the Mind ladder's own fault, and the lab this was chosen from
+       only ever drew six. */
+    const wvMany = await wvpage.evaluate(async () => {
+      document.getElementById('scScrim').click();
+      await new Promise((z) => setTimeout(z, 340));
+      localStorage.setItem('sched.habit.v1', JSON.stringify([
+        { id: 'h1', n: 'Cooking', k: 'do', unit: '', aim: 2, hue: '--w-orange' },
+        { id: 'h2', n: 'Pages', k: 'num', unit: 'pp', aim: 0, hue: '--w-violet' }]));
+      location.reload();
+      return true;
+    });
+    void wvMany;
+    await wvpage.waitForLoadState('networkidle');
+    await wvpage.waitForTimeout(520);
+    const wvCols = await wvpage.evaluate(async () => {
+      document.getElementById('scTallyCap').click();
+      await new Promise((z) => setTimeout(z, 640));
+      const c = document.querySelector('.wv-c');
+      const r = c.querySelector('.wv-r');
+      const tops = [...r.querySelectorAll('.wv-q')]
+        .map((q) => Math.round(q.getBoundingClientRect().top));
+      const rows = [...new Set(tops)];
+      return { pairs: r.querySelectorAll('.wv-q').length,
+        cols: getComputedStyle(r).getPropertyValue('--wv-c').trim(),
+        rows: rows.length,
+        perRow: rows.map((y) => tops.filter((t2) => t2 === y).length),
+        wide: [...c.querySelectorAll('*')].some((e) =>
+          e.getBoundingClientRect().right > c.getBoundingClientRect().right + 0.5) };
+    });
+    ok('eight items go four across and two balanced rows',
+      wvCols.pairs === 8 && wvCols.cols === '4' && wvCols.rows === 2
+      && wvCols.perRow.join(',') === '4,4' && wvCols.wide === false, wvCols);
+
+    ok('nothing threw through the week', wverrs.length === 0, wverrs.slice(0, 4));
+    await wvctx.close();
+  }
+
   ok('no page errors through any of it', errs.length === 0, errs);
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);

@@ -9360,3 +9360,134 @@ comma list the check stopped matching and reported an empty tag. It
 reads by CONTAINMENT now. Fourth time this file has recorded that
 shape, and the first time the identifier was a CSS selector rather than
 a palette name or a workout key.
+
+## The week read back, a day a card
+
+Asked for as a weekly view of the calories, the habits, the sleep —
+everything on Showing up, a day at a time, in one screen. **Fifteen
+were rendered over the real app at 390x844 and read at 1:1**, and the
+one that was picked is **day cards**: a card a day, its name and how
+many of the items it asked for you kept, and under that every item's
+own glyph with its figure beside it.
+
+**THE DOOR IS THE LINE THAT ALREADY SAYS HOW TODAY WENT.** `5 of 6
+today · 1 day streak` is the summary of one day, so pressing it for
+the rest of the week is the control naming itself — the calendar's own
+move, where the head's date opens the month. Nothing new is drawn on a
+screen that took its own switcher out for being too much, and the
+caption is a `<button>` rather than a paragraph somebody styled to look
+pressable.
+
+**IT IS A READ-BACK, NOT A SECOND EDITOR**, which is the calendar's
+rule for the calendar's reason: every write here is refused outside
+today and the two days behind it, so a week of pressable rows would be
+a screen of controls whose only answer is no. Asserted as every card
+being a `<div>`.
+
+**ONE NUMBER RULE FOR EVERY ITEM, BECAUSE THE GLYPH SAYS WHICH.** A
+tick is a tick, a thousand is `2.6k`, ten thousand is `12k` — the
+decimal goes at the point where it stops fitting rather than at the
+point where it stops mattering. Six figures with six units spelled out
+do not go across a phone, and the column is already named by the mark
+above it.
+
+**A DAY THE THING WAS NEVER ON IS NOT A DAY YOU MISSED IT**, and here
+it costs no new mark: a dash says it was on and you did not, and
+NOTHING says it was never on. Two dashes told apart by weight would be
+two glyphs with one silhouette. The fixture is what makes that a claim
+rather than a sentence — Train is on Monday's schedule and not
+Tuesday's, so one draws a dash and the other draws nothing, and a
+build that blanks every miss passes either half on its own.
+
+**AND A TICK ALWAYS WINS IN THE COUNT, which it did not.** The
+denominator was `scApplied` alone, so an item you ticked on a day the
+schedule never had it was dropped from the count entirely: measured on
+a day with five kept things it read **4 of 5**. That is the strip's own
+rule — Train on a Sunday it is not scheduled is still a day you
+trained — arriving one screen over, and it is the same shape as the
+count that reported a three-day-a-week schedule as four misses every
+week.
+
+**AND A DAY BEFORE THE RECORD BEGAN DRAWS NO CARD.** Every NUMBER
+applies on every day, so a week you never opened the app in comes out
+as seven cards of dashes reading `0 of 4` — a wash of red across days
+that were never asked of you, which is the one thing this screen never
+does. Measured: the fixture's record starts on a Wednesday and the week
+before it draws five cards, beginning there. A day still AHEAD draws
+none either, for the same reason the calendar's cells do.
+
+**SPOKEN ONCE, NOT AS TWELVE MARKS.** Six glyphs and six figures read
+out separately charge twice for what the card already says, so the row
+is `aria-hidden` and the card carries one sentence — the Workouts
+panel's own rule. It says *not on* where nothing is drawn, which is the
+half a screen reader would otherwise have no way to hear.
+
+**SIX ITEMS GO ONE ROW AND EIGHT GO TWO BALANCED ONES.** `--wv-c` is
+the item count up to six and half of it rounded up past that, so eight
+are 4 and 4 rather than six and a lone pair — the Mind ladder's own
+fault, and the lab this was chosen from only ever drew six of them.
+Asserted as the measured tops rather than the declaration, because a
+column count can be right and the layout still ragged.
+
+**AND IT REACHES BACK, refusing at both ends.** A review you can only
+run on the week you are in is a review you cannot run on a Monday,
+when the week you want is the one that has just ended. The calendar's
+own arrows, reused rather than redrawn: nothing before the first thing
+you ever logged, and no week that has not started. Both ends are
+asserted, because an arrow that only ever refuses is indistinguishable
+from one that does nothing.
+
+### The dash was 2.75:1, and opacity was the lever again
+
+An unlit pair went in at `opacity: .45` over the whole of it — glyph
+and figure together — and the figure is 9.5px, the smallest type on the
+card. Measured on composited pixels: **2.75:1**, under the bar, on a
+mark that had passed every check written about it because none of them
+looked at a pixel.
+
+**THE OPACITY WAS A SECOND STATEMENT OF ONE FACT.** The glyph already
+says unlit by wearing the flat neutral instead of the item's own hue,
+so the .45 said nothing the colour had not, and it was the half costing
+contrast. Gone rather than lowered: *opacity was never the lever* is
+the friend's-week disc's own measurement at 1.30:1, and *an unlit mark
+is never a weaker copy of a lit one* is the progress track's.
+
+**A VALUE TAKES THE INK AND A STATE STAYS QUIET**, which is the tile's
+own rule one screen over — *only a VALUE does: `not yet` and `missed`
+are states, and an absence drawn at the size of an achievement is the
+screen shouting about something that has not happened.* A logged figure
+is `--ink` at **17.73:1** and a dash is `--dim` at **8.59:1**.
+
+**Three halves, and the break fails all of them**: the dash's floor,
+the value being the ink, and the two being different colours at all.
+Put the opacity back and take the ink off and it reads `dash 2.75, val
+8.59, valIsInk false, differ false`.
+
+**And `--ink` is a HEX, so a digit match reads it as nothing.**
+`rgbOf('#fff')` is null and the check crashed on it — reported as **0
+assertions across 1 files**, which this file has already recorded as
+the greenest-looking failure there is. The token is resolved through an
+element the browser has actually styled. Third time: a `color-mix` read
+by a digit match, a box-shadow read by a hex compare, and this.
+
+### The inverse refused, and that is the discipline working
+
+The bite proof broke the tick rule by rewriting one line — and the line
+it rewrote to already existed further down the same function, in the
+row loop, so the INVERSE anchor matched twice and the assertion wrote
+nothing. The file stayed broken and the sha1 said so; the three later
+proofs then ran on top of it, which is visible in their output as
+Monday reading `4 of 5` throughout. Restored by an anchor carrying the
+line UNDER it, which is unique, and hashed back to the known-good
+value.
+
+**A break and its inverse are not the same edit read backwards.** One
+is unique going in and ambiguous coming out, and the hash is the only
+thing that knows.
+
+**AND AN INSERT'S INVERSE HAS TO PUT IT BACK WHERE IT WAS.** The CSS
+proof deleted a rule and re-inserted it against the nearest anchor,
+which was the rule ABOVE rather than the one below — so the file came
+back visually identical (the `:not` carries enough specificity to win
+either way round) and hashed differently. The hash is what caught it,
+and a restore nobody hashes is a restore nobody has checked.
