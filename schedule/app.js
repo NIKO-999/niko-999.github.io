@@ -177,6 +177,35 @@
     return out;
   }
 
+  /* ── ONE WRITER, ONE SHAPE ──
+     A block is made in two places — the parser and the editor's New —
+     and both pushed a PARTIAL object: an id, a day, a span, a room and
+     a name, with no `k` and no `nt`. `scClean` fills those in, and
+     `scClean` runs when the week is LOADED, so a block added in this
+     session had no sub-item list at all until the next reload.
+
+     The editor reads `item.k.slice()`, which throws on undefined — so
+     the one block you had just added was the one block you could not
+     edit, and it came back to life on its own the next time the app
+     was opened. Reported as five blocks where the fifth did not work,
+     and every sweep before this missed it because they all pressed
+     rows that were on the page when it loaded.
+
+     This is the record's own rule, written down against the pen's `w`
+     and got wrong here: a shape a reader has to defend against is a
+     shape somebody will build without. The reads are guarded as well,
+     because a throw inside the editor costs the whole control. */
+  function scNewBlock(d, s, e, r, n) {
+    return {
+      id: scId(),
+      d: d | 0, s: s | 0, e: e | 0,
+      r: String(r || '').slice(0, 14),
+      n: String(n || '').slice(0, 60),
+      k: [],
+      nt: []
+    };
+  }
+
   /* Eight, because the list is a thing you glance at inside a row —
      past that it is a screen of its own and this is the wrong place
      for it. */
@@ -224,7 +253,32 @@
 
   /* Every mutation goes through here, so every mutation is undoable and
      there is no path that writes without offering the way back. */
+  /* ── AND THE SHAPE IS ENFORCED ON THE WAY IN, NOT ONLY ON THE WAY
+         OUT ──
+     `scClean` is where a block's shape is written down, and it was
+     reached from `scLoad` and `scUndo` alone — both READERS. So every
+     writer was trusted to remember every field, and the two that make
+     a block both forgot the same two: no sub-item list, no notes. The
+     editor reads `item.k.slice()` and threw, so a block added in this
+     session was one you could not edit until the next reload
+     completed it. Reported as five blocks where the fifth did not
+     work.
+
+     That is the shape of the bug rather than one instance of it: the
+     same hole shipped three times before, each time as a repair that
+     ran on the way out and never on the way in — `scClean` minting
+     block ids that `scLoad` did not save, `scTrainLoad` filling in a
+     summed estimate it never wrote back, `scMindLoad` normalising a
+     damaged day in memory. Guarding the one read that threw would fix
+     the report and leave the next writer to find the next reader.
+
+     One line here closes the class. The comment above already claimed
+     every mutation goes through this function; now the shape does
+     too, so a creation site that forgets a field is corrected before
+     anything can read it and the record on disk cannot disagree with
+     the record in memory. */
   function scCommit(msg) {
+    state = scClean(state);
     scSave();
     scRender();
     if (msg) scToast(msg);
@@ -1061,7 +1115,7 @@
             var r = scRelSpan(p.rel, p.ref, p.len, d);
             if (r) { s0 = r.s; e0 = r.e; }
           }
-          state.items.push({ id: scId(), d: d, s: s0, e: e0, r: p.room, n: p.name });
+          state.items.push(scNewBlock(d, s0, e0, p.room, p.name));
           added++;
         });
       } else {
@@ -10538,7 +10592,7 @@
          to yet, so the field appears once it has been saved: offering
          it before the block exists is a form asking about a thing that
          does not. */
-      var kidList = item ? item.k.slice() : [];
+      var kidList = (item && Array.isArray(item.k)) ? item.k.slice() : [];
       var kidBox = scEl('div', 'kid-edit');
       var kidAdd = scEl('input', 'field');
       kidAdd.type = 'text';
@@ -10668,7 +10722,7 @@
         scMark();
         if (isNew) {
           days.forEach(function (d) {
-            state.items.push({ id: scId(), d: d, s: s, e: e, r: room.value.trim(), n: name.value.trim() });
+            state.items.push(scNewBlock(d, s, e, room.value.trim(), name.value.trim()));
           });
         } else {
           item.d = days[0]; item.s = s; item.e = e;

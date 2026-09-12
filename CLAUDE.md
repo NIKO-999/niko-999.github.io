@@ -7889,6 +7889,69 @@ disarmed it. Said plainly rather than left implied: if it still
 happens, the next step is a probe on the device, because this browser
 cannot show it.
 
+### And the block that would not open was the one you had just made
+
+Reported again after the Save fix: *still issues on the new adding
+block*. The sheet was fine. What was not fine is the BLOCK it makes.
+
+**A block added in this session threw inside the editor and fixed
+itself on the next reload.** `scEditSheet` reads `item.k.slice()` for
+the sub-item list; the parser and the editor's New both pushed a
+partial object — an id, a day, a span, a room and a name, with no `k`
+and no `nt` — so `.slice()` was called on undefined, the editor never
+opened, and nothing was drawn to say why. The row drew, it ticked,
+and only the editor was gone. That is the fifth block: the one just
+added.
+
+**AND THE ROOT CAUSE IS NOT THE MISSING FIELD.** `scClean` is where a
+block's shape is written down, and it was reached from `scLoad` and
+`scUndo` — **both readers**. Every writer was trusted to remember
+every field, and the two that make a block both forgot the same two.
+Guarding the one read that threw would have fixed the report and left
+the next writer to find the next reader.
+
+**This app has now shipped that same hole four times**, every one of
+them a repair that ran on the way OUT and never on the way IN:
+`scClean` minting block ids that `scLoad` did not write back,
+`scTrainLoad` filling in a summed estimate it never saved,
+`scMindLoad` normalising a damaged day in memory, and this. The first
+three are written up above as *a repair held only in memory is redone
+every boot* — which named the symptom and missed what they had in
+common.
+
+**`scCommit` NORMALISES NOW**, one line, and the comment above it
+already claimed every mutation goes through that function. So the
+shape does too: a creation site that forgets a field is corrected
+before anything can read it, and the record in memory cannot disagree
+with the record on disk.
+
+**Measured as sufficient ON ITS OWN.** With the factory reverted to a
+hand-rolled push AND the editor's guard removed, leaving only the one
+line in `scCommit`, the new block still opens at every point on the
+row. That is what makes it a root cause rather than a third patch —
+and `scNewBlock` and the guarded read are kept beside it as the
+record's own rule about writing a shape out at every construction
+site and defending it at every read.
+
+**And the cheap half is static.** `tests/names.js` holds every
+`state.items.push` to `scNewBlock`, so the next creation site is
+caught at the moment somebody writes it rather than by a browser test
+four minutes later — the same argument the missing token in `days/`
+made. Proved to bite by putting the hand-rolled push back.
+
+**The behavioural check adds the block through the real sheet and
+then edits it**, on both press targets, and asserts the SHAPE in the
+record beside it: a build that guards every read while still writing
+a partial block passes the behaviour and is wrong for every other
+reader of that key. Its own context, because adding a block changes
+the week for everything after it.
+
+**And the sweep that missed it pressed rows that were already on the
+page.** 267 presses, then 48 more across every state a row can be in,
+and not one of them had ever pressed a row the app had just built.
+**A fixture is a shape somebody already saved; the bug was in the
+shape nobody had saved yet.**
+
 ### And a probe's selector reported the feature broken
 
 The pencils came back as **0 while armed** and the rule was right. The

@@ -500,5 +500,33 @@ for (const app of APPS.concat([['shell.js']])) {
   ok('no image in schedule/app.js is loading="lazy"', lazy.length === 0, lazy);
 }
 
+/* ── A BLOCK IS MADE IN ONE PLACE ──
+   The shape of a block lives in `scClean`, and for a long time that
+   was reached from the two READERS alone — `scLoad` and `scUndo`. So
+   every writer was trusted to remember every field, and the two that
+   make a block both forgot the same two: no sub-item list, no notes.
+   A block added in the current session then threw inside the editor
+   on `item.k.slice()` and came back to life on the next reload.
+
+   `scCommit` normalises through `scClean` now, which closes the hole
+   at runtime for any writer there will ever be. This is the other
+   half and it is the cheap one: a creation site that hand-rolls the
+   object is caught in a tenth of a second, at the moment somebody
+   writes it, rather than by a browser test four minutes later — which
+   is the same argument the missing token in `days/` made.
+
+   `scNewBlock` is the only thing allowed to build one. */
+{
+  const src = read('schedule/app.js');
+  const pushes = src.match(/state\.items\.push\([^)]*/g) || [];
+  const hand = pushes.filter((p) => !/state\.items\.push\(scNewBlock\(/.test(p));
+  ok('every block is made by scNewBlock, never by hand',
+    pushes.length > 0 && hand.length === 0,
+    /* A string, because a bare object prints as [object Object] and a
+       check that will not say WHICH line is a check you have to go
+       and reproduce. */
+    'made ' + pushes.length + ', by hand: ' + hand.map((h) => h.slice(0, 64)).join(' | '));
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

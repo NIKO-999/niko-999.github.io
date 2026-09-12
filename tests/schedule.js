@@ -15711,6 +15711,210 @@ const SAID = [
     await hbctx.close();
   }
 
+  /* ═════════════════════════════════════════════════════
+     A BLOCK YOU JUST ADDED IS A BLOCK LIKE ANY OTHER
+
+     Reported as five blocks where the fifth did not work, and it was
+     the one that had just been added: the parser and the editor's New
+     both pushed a PARTIAL block — no sub-item list, no notes — and
+     `scClean` only completes the shape when the week is LOADED. The
+     editor reads `item.k.slice()` and threw, so the block you had
+     just made was the one you could not edit, and it fixed itself on
+     the next reload.
+
+     Every sweep before this pressed rows that were on the page when
+     it loaded, which is why 267 of them found nothing. Its own
+     context, because adding a block changes the week for everything
+     after it.
+     ═════════════════════════════════════════════════════ */
+  {
+    const nbctx = await browser.newContext(PHONE);
+    const nbpage = await nbctx.newPage();
+    const nberrs = [];
+    nbpage.on('pageerror', (e) => nberrs.push(String(e)));
+    nbpage.on('console', (m) => { if (m.type() === 'error') nberrs.push(m.text()); });
+    await nbpage.addInitScript(() => {
+      const FROZEN = new Date('2026-09-12T09:10:00').getTime();
+      const R = Date;
+      // eslint-disable-next-line no-global-assign
+      Date = class extends R {
+        constructor(...a) { super(...(a.length ? a : [FROZEN])); }
+        static now() { return FROZEN; }
+      };
+      if (!localStorage.getItem('sched.tour.v1')) {
+        localStorage.setItem('sched.tour.v1', '1');
+        localStorage.setItem('sched.hint2.v1', '1');
+      }
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1',
+          JSON.stringify({ on: false, url: '', code: '' }));
+      }
+    });
+    await nbpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await nbpage.waitForTimeout(460);
+
+    const nbAdd = await nbpage.evaluate(async () => {
+      const was = document.querySelectorAll('.week .row[data-id]').length;
+      document.getElementById('scAdd').click();
+      await new Promise((z) => setTimeout(z, 520));
+      const f = document.querySelector('.sheet input.field');
+      f.value = 'Yoga saturday 19:00 to 19:45';
+      f.dispatchEvent(new Event('input', { bubbles: true }));
+      await new Promise((z) => setTimeout(z, 520));
+      document.querySelector('.sheet .btn.go').click();
+      await new Promise((z) => setTimeout(z, 620));
+      const rows = [...document.querySelectorAll('.week .row[data-id]')];
+      const fresh = rows.find((r) => /yoga/i.test(r.querySelector('.n').textContent));
+      /* THE RECORD, not the drawing: the fault was a shape, and a
+         build that guards every read while still writing a partial
+         block is wrong for every other reader of this key. */
+      const week = JSON.parse(localStorage.getItem('sched.v1') || '{}');
+      const rec = (week.items || []).find((i) => /yoga/i.test(i.n || ''));
+      return { was, now: rows.length, drawn: !!fresh,
+        id: fresh ? fresh.dataset.id : null,
+        kids: rec ? Array.isArray(rec.k) : null,
+        notes: rec ? Array.isArray(rec.nt) : null };
+    });
+    ok('a block typed into the add sheet lands on the day',
+      nbAdd.drawn && nbAdd.now === nbAdd.was + 1, nbAdd);
+    ok('...and it is written with the shape every other block has',
+      nbAdd.kids === true && nbAdd.notes === true, nbAdd);
+
+    /* AND IT CAN BE EDITED WITHOUT A RELOAD, which is the half that
+       was reported: both press targets, because the row and the check
+       call the editor through two different handlers. */
+    const nbEdit = await nbpage.evaluate(async (id) => {
+      const out = [];
+      document.getElementById('scHdEd').click();
+      await new Promise((z) => setTimeout(z, 300));
+      for (const sel of ['row', '.chk']) {
+        const r = document.querySelector('.week .row[data-id="' + id + '"]');
+        const el = sel === 'row' ? r : r.parentElement.querySelector(sel);
+        el.scrollIntoView({ block: 'center' });
+        el.click();
+        await new Promise((z) => setTimeout(z, 460));
+        const sh = document.getElementById('scSheet');
+        out.push({ sel: sel, open: !sh.hidden,
+          title: (document.getElementById('scSheetTitle') || {}).textContent,
+          name: (sh.querySelector('input.field') || {}).value || null });
+        document.getElementById('scScrim').click();
+        await new Promise((z) => setTimeout(z, 330));
+      }
+      return out;
+    }, nbAdd.id);
+    ok('...and the block you just added opens the editor like any other',
+      nbEdit.length === 2
+      && nbEdit.every((r) => r.open && r.title === 'Edit' && /Yoga/i.test(r.name || '')),
+      nbEdit);
+    /* THE THROW IS THE FAULT, and it is silent from outside: the row
+       drew, it ticked, and only the editor was gone. */
+    ok('...and nothing threw on the way', nberrs.length === 0, nberrs.slice(0, 4));
+    await nbctx.close();
+  }
+
+  /* ═════════════════════════════════════════════════════
+     A BLOCK YOU JUST ADDED IS A BLOCK LIKE ANY OTHER
+
+     `scClean` is where a block's shape is written down and it was
+     reached from the two READERS alone, so every writer was trusted
+     to remember every field and the two that make a block both forgot
+     the same two. A block added in this session then threw inside the
+     editor on `item.k.slice()` and came back to life on the next
+     reload. `scCommit` normalises now, which is the runtime half; the
+     static half is in `tests/names.js`.
+
+     Every sweep before this pressed rows that were on the page when
+     it loaded, which is why 267 of them found nothing. Its own
+     context, because adding a block changes the week for everything
+     after it.
+     ═════════════════════════════════════════════════════ */
+  {
+    const nbctx = await browser.newContext(PHONE);
+    const nbpage = await nbctx.newPage();
+    const nberrs = [];
+    nbpage.on('pageerror', (e) => nberrs.push(String(e)));
+    nbpage.on('console', (m) => { if (m.type() === 'error') nberrs.push(m.text()); });
+    await nbpage.addInitScript(() => {
+      const FROZEN = new Date('2026-09-12T09:10:00').getTime();
+      const R = Date;
+      // eslint-disable-next-line no-global-assign
+      Date = class extends R {
+        constructor(...a) { super(...(a.length ? a : [FROZEN])); }
+        static now() { return FROZEN; }
+      };
+      if (!localStorage.getItem('sched.tour.v1')) {
+        localStorage.setItem('sched.tour.v1', '1');
+        localStorage.setItem('sched.hint2.v1', '1');
+      }
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1',
+          JSON.stringify({ on: false, url: '', code: '' }));
+      }
+    });
+    await nbpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await nbpage.waitForTimeout(460);
+
+    const nbAdd = await nbpage.evaluate(async () => {
+      const was = document.querySelectorAll('.week .row[data-id]').length;
+      document.getElementById('scAdd').click();
+      await new Promise((z) => setTimeout(z, 520));
+      const f = document.querySelector('.sheet input.field');
+      f.value = 'Yoga saturday 19:00 to 19:45';
+      f.dispatchEvent(new Event('input', { bubbles: true }));
+      await new Promise((z) => setTimeout(z, 520));
+      document.querySelector('.sheet .btn.go').click();
+      await new Promise((z) => setTimeout(z, 620));
+      const rows = [...document.querySelectorAll('.week .row[data-id]')];
+      const fresh = rows.find((r) => /yoga/i.test(r.querySelector('.n').textContent));
+      /* THE RECORD, not the drawing: the fault was a SHAPE, and a
+         build that guards every read while still writing a partial
+         block is wrong for every other reader of this key. */
+      const week = JSON.parse(localStorage.getItem('sched.v1') || '{}');
+      const rec = (week.items || []).find((i) => /yoga/i.test(i.n || ''));
+      return { was: was, now: rows.length, drawn: !!fresh,
+        id: fresh ? fresh.dataset.id : null,
+        kids: rec ? Array.isArray(rec.k) : null,
+        notes: rec ? Array.isArray(rec.nt) : null };
+    });
+    ok('a block typed into the add sheet lands on the day',
+      nbAdd.drawn && nbAdd.now === nbAdd.was + 1, nbAdd);
+    /* IN THE RECORD, because that is where the fault was. A block on
+       disk missing a field this app's own reader mints is a block the
+       next feature will trip over somewhere else. */
+    ok('...and it is written with the shape every other block has',
+      nbAdd.kids === true && nbAdd.notes === true, nbAdd);
+
+    const nbEdit = await nbpage.evaluate(async (id) => {
+      const out = [];
+      document.getElementById('scHdEd').click();
+      await new Promise((z) => setTimeout(z, 300));
+      for (const sel of ['row', '.chk']) {
+        const r = document.querySelector('.week .row[data-id="' + id + '"]');
+        const el = sel === 'row' ? r : r.parentElement.querySelector(sel);
+        el.scrollIntoView({ block: 'center' });
+        el.click();
+        await new Promise((z) => setTimeout(z, 460));
+        const sh = document.getElementById('scSheet');
+        out.push({ sel: sel, open: !sh.hidden,
+          title: (document.getElementById('scSheetTitle') || {}).textContent,
+          name: (sh.querySelector('input.field') || {}).value || null });
+        document.getElementById('scScrim').click();
+        await new Promise((z) => setTimeout(z, 330));
+      }
+      return out;
+    }, nbAdd.id);
+    /* Both press targets, because the row and the check reach the
+       editor through two different handlers. */
+    ok('...and the block you just added opens the editor like any other',
+      nbEdit.length === 2
+      && nbEdit.every((r) => r.open && r.title === 'Edit' && /Yoga/i.test(r.name || '')),
+      nbEdit);
+    /* THE THROW IS THE FAULT AND IT IS SILENT FROM OUTSIDE: the row
+       drew, it ticked, and only the editor was gone. */
+    ok('...and nothing threw on the way', nberrs.length === 0, nberrs.slice(0, 4));
+    await nbctx.close();
+  }
+
   ok('no page errors through any of it', errs.length === 0, errs);
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
