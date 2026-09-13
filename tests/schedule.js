@@ -2365,7 +2365,12 @@ const SAID = [
        the figure MEANS — `5 / 6` is unreadable without `days on this
        week` — so what fed the tick sits under the strip instead, where
        it is an extra rather than the label's stand-in. */
-    via: document.querySelector('.ty-card[data-item="t"] .ty-ft').textContent,
+    /* Read DEFENSIVELY: handed null this crashed the whole file forty
+       assertions early rather than failing with a name, which is the
+       greenest-looking failure there is. Found by deleting the foot on
+       purpose and watching the run report nothing at all. */
+    via: (document.querySelector('.ty-card[data-item="t"] .ty-ft')
+      || { textContent: '(no foot drawn)' }).textContent,
     says: document.querySelector('.ty-card[data-item="t"] .ty-when').textContent,
     cap: [...document.querySelectorAll('#scTallyCap .ty-fig > i')]
       .map((c) => c.textContent),
@@ -2982,8 +2987,16 @@ const SAID = [
     const wb = ar.parentElement.getBoundingClientRect();
     return {
       inWell: ar.parentElement.classList.contains('ty-well'),
-      /* Its own ground, and not the card's. */
+      /* ── ITS OWN GROUND, AND NOT MERELY A DIFFERENT ONE ──
+         Written as `wellBg !== cardBg` this passed on `background:
+         none`, which computes to a transparent black that differs
+         from the card by every channel — a well with no ground at all
+         sailing through the check that exists to require one. Proved
+         by breaking it and watching nothing fail. The ALPHA is the
+         claim: a plot area has to be painted. */
       wellBg: getComputedStyle(ar.parentElement).backgroundColor,
+      wellA: +((getComputedStyle(ar.parentElement).backgroundColor
+        .match(/[\d.]+\s*\)$/) || ['1)'])[0].replace(/[^\d.]/g, '')),
       cardBg: getComputedStyle(g('p')).backgroundColor,
       gaugeWell: !!g('w').querySelector('.ty-well'),
       weekWell: !!g('t').querySelector('.ty-well'),
@@ -3015,7 +3028,7 @@ const SAID = [
     };
   });
   ok('the area sits in a well of its own, and the gauge and the week do not',
-    well.inWell && well.wellBg !== well.cardBg
+    well.inWell && well.wellA > 0 && well.wellBg !== well.cardBg
     && !well.gaugeWell && !well.weekWell, well);
   ok('and the drawing is out of flow, so the row sizes the chart and not the reverse',
     well.pos === 'absolute' && well.floor > 0
