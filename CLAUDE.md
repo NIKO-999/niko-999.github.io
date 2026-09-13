@@ -9993,3 +9993,155 @@ fold reads `All|bro|ppl|Run` — the raw keys, because `LANE_N` has no
 entry for them — and putting an empty `.wo-head` back reads `head: 1`.
 The lanes check holds the pills beside the chips, because "the lanes
 are folded" passes on a build that dropped the strip outright.
+
+## Showing up is a mosaic
+
+Five whole-screen replacements were built as real 390x844 phones in the
+app's own palette and type, read at 1:1, and this is the one that was
+picked: tiles of deliberately unequal size, a figure with its chart
+inside the card, the vertical gauge with its stepper on its face. The
+four it beat are worth knowing rather than re-deriving — a printed
+LEDGER with dot leaders and no picture at all; a MATRIX of seven
+columns by six rows, which answers *I always miss Wednesdays* and
+throws every value away; a DIAL of six concentric arcs; a QUEUE holding
+one unanswered item at a time.
+
+**AND THE RAINBOW IS THE FINDING THE RENDER PAID FOR.** The dial drawn
+in the six item hues is six saturated bands in a fan — a toy rather
+than an instrument, and the loudest thing in the set. Six concentric
+arcs can only ever be that, so colour has to leave the drawing and live
+in the legend. None of that is visible in code.
+
+### The three figures are one line, and the line is the heading
+
+`Streak` over a 250px panel over `Progress` over the tiles: two hundred
+and fifty pixels before a single tile, on a screen whose whole claim is
+that you can see the day. They are one line now — the heading on the
+left, `5 / 6 · 14 days · best 14` on the right — and **that is not a
+tidy-up, it is what pays for the mosaic**.
+
+**It keeps every word of the complaint that built the panel.** What was
+wrong before the panel was three facts about one thing drawn in two
+places at two sizes; one line is one place at one size, which is the
+same rule taken further rather than reversed.
+
+**STILL THE DOOR TO THE WEEK**, which is why the id survived the
+rewrite: the line that already says how today went is what asks for the
+seven days around it. **A `<button>` inside the `<h2>`**, never an h2
+inside a button — the second is invalid and loses the heading for a
+screen reader.
+
+**30 drawn, 44 reachable.** A heading is about 20px of type and every
+press target here clears 44. Claiming the difference as HEIGHT spends
+fourteen pixels of the fold on nothing; a `::before` claims it as
+TARGET and draws none of it, which is `.row-ed`'s own rule and the
+objectives plus's and the children's dots'.
+
+### One tile is wide, and which one is arithmetic
+
+The tall tile takes two cells of a two-column grid, so six items occupy
+SEVEN cells and seven cannot pair. Something has to be full width, and
+drawing that as a half tile with a hole beside it is the state this
+fixes. **Which one is not a taste call either**: the tall tile and the
+two beside it fill the first two rows, so the odd cell is the first
+item after them.
+
+**Worked out rather than named**, so a seventh habit re-solves it — at
+seven items the cells come out even and nothing is wide at all. That
+half is asserted in the habits context, because the main fixture is
+always six and a rule stranded on six would pass every check written
+against it.
+
+**The add control came OFF the grid for the same arithmetic.** The rows
+carry a 108px floor so an eighth habit cannot compress every tile into
+a strip of labels — and a 41px control sitting in one of those rows was
+drawn at **168px**, a whole tile's worth of the one screen this layout
+exists to fit inside. It is not one of your habits, so it does not take
+a habit's box.
+
+### An `<svg>` with a viewBox has a RATIO, and it sized the grid
+
+`<svg viewBox="0 0 100 38">` at `width: 100%` resolves its height to
+38% of whatever it is given — 66px on a 173px tile. As a flex item with
+a basis of `auto` that 66px becomes the row's content height, and the
+grid then sizes **every** row to it: measured at **238px a row against
+the 108 asked for**, with nothing in the stylesheet looking wrong and
+the drawing still correct.
+
+Absolute inside a relative well, and a basis in PIXELS rather than
+`auto`, so the well's floor is the number written down and the drawing
+is told what it got rather than asked what it wants.
+
+**The check for it had to be about the ROW.** The well's own height
+cannot tell the two apart — stretched it measured **.36 of its width
+against an intrinsic .38**, which is a threshold that has to be wrong
+one way or the other. The row is unambiguous at 144 against 238, and it
+is held to the grid's own declared floor rather than to a number typed
+into the test.
+
+### The plot sits in a well, and only the plot
+
+A curve with no edge is a smear on the card. **This is not the frame
+inside a frame this project keeps removing**: that rule is about a
+panel drawn round a list of objects, and a well is the AREA the marks
+are measured inside. The gauge gets none and the week strip gets none,
+because a filled track and seven blocks are already their own shape —
+and a check that only looked at the area would pass on a build that put
+a well round all three.
+
+**The floor is 30px and it was 22 for one render.** A four-day series
+normalised to its own best has the whole of its shape in that height,
+and at 22 the curve came out as a smear along the top of the well:
+present, correct, and saying nothing.
+
+### The line under the figure names the figure
+
+`5 / 6` is unreadable without `days on this week`, so a tick says that
+every time rather than sometimes naming a block instead. **What the
+block or the book had to say has not gone** — it moved to the FOOT of
+the tile, under the strip, where it is an extra rather than the thing
+standing in for the label. `Missed its window` went with it, and gained
+the room to be the sentence the old line could only fit one word of.
+
+**A number names its window, and only the tall one names an aim.** `of
+3 L` is drawn there because the gauge beside it is literally measured
+against that figure. **Steps has no aim anywhere in this app** — its
+`marks` are the dial's ladder, so printing `of 20,000` off the top rung
+would be the screen inventing a target nobody set. The mock did exactly
+that and it had to be caught by reading the record rather than the
+picture.
+
+**Three marks on the gauge now.** A scale labelled at the top and the
+middle and left bare at the bottom reads as one that runs out rather
+than one that starts at nought, which is the end a person actually
+checks a water tracker against.
+
+### It does not all fit, and that is said rather than hidden
+
+Six tiles with charts, an add control and a foot note do not clear the
+fold on a 390x844 phone: the scroll went from **433px to about 150**,
+which is one flick rather than three. The mock fitted because it drew
+neither the add control nor the foot note. **Where there IS room the
+rows take it** — `flex: 1 0 auto` on the grid with `minmax(108px, 1fr)`
+rows, so a taller phone spends the difference on the charts rather than
+on a gap at the bottom.
+
+### And the glyph check had been measuring the label
+
+It sampled the card's "ground" 34px to the right of the glyph, which on
+this tile is the LABEL: measured, that point came back `--spent` on
+four of six cards, so the check was comparing the glyph against the
+words beside it. Both are around 5:1, so it passed — and it was not
+measuring the thing it names. The ground is the card's most common
+pixel now, which is the polarity-agnostic technique the friends board
+already settled on.
+
+**AND IT SAMPLED TILES THAT WERE NOT ON SCREEN.** `page.screenshot`
+captures the viewport, so a tile below the fold read the page behind it
+and reported **1.16 on a glyph that is drawn correctly**. Bounded by
+the PANE rather than the viewport, because `getBoundingClientRect`
+reports a box whether or not an ancestor is clipping it — a card
+scrolled under the stops still reports a positive y and is simply not
+painted. The pane is walked top and bottom and the COUNT of cards
+measured is asserted beside the ratio, since a check that quietly
+looked at four of six is a check that would miss the two it skipped.

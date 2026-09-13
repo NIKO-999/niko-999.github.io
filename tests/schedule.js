@@ -2071,14 +2071,20 @@ const SAID = [
     up: !document.getElementById('scTally').hidden,
     rail: document.getElementById('scWeek').hidden,
     cards: document.querySelectorAll('.ty-card').length,
-    /* THREE FIGURES, NOT A LINE. It was "5 of 6 today, 1 day streak"
-       with the longest run in a second line at the foot of the screen;
-       they are one panel now, split by hairlines, and the panel is
-       still the door to the week. Read as its cells rather than as a
-       joined string, because a string passes on a build that drew the
-       three in any order at all. */
-    cap: [...document.querySelectorAll('#scTallyCap .ty-t')]
-      .map((c) => c.querySelector('b').textContent + '|' + c.querySelector('i').textContent),
+    /* THREE FIGURES ON THE HEADING'S OWN LINE, and it is still the
+       door to the week. Read as cells rather than as a joined string,
+       because a string passes on a build that drew the three in any
+       order at all. */
+    cap: [...document.querySelectorAll('#scTallyCap .ty-fig > i')]
+      .map((c) => c.textContent),
+    /* A BUTTON INSIDE THE H2, never an h2 inside a button — the second
+       is invalid and loses the heading for a screen reader. */
+    capIn: document.getElementById('scTallyCap').parentElement.tagName,
+    capWord: document.querySelector('#scTallyCap > b').textContent,
+    /* AND THERE IS ONE HEADING. Streak and Progress both stood here
+       with a 250px panel between them; the pixels that bought are the
+       whole reason the mosaic fits. */
+    heads: document.querySelectorAll('#scTyPane .ty-sh').length,
     capLab: document.getElementById('scTallyCap').getAttribute('aria-label'),
   }));
   ok('the tally is a third view and it replaces the week',
@@ -2088,11 +2094,13 @@ const SAID = [
   ok('six cards, and the list is not editable from anywhere',
     tal.cards === 6, tal);
   ok('and nothing is logged on a fresh day',
-    tal.cap.join() === '0/ 6|Today,0|Streak,0|Best', tal);
+    tal.cap.join('|') === '0/ 6|0 days|best 0', tal);
+  ok('the three figures are one line, and the line is the only heading',
+    tal.heads === 1 && tal.capIn === 'H2' && tal.capWord === 'Today', tal);
   /* The denominator stays and the door is still named: adding a habit
-     makes today harder and the figure has to say so, and the panel has
+     makes today harder and the figure has to say so, and the line has
      to say what pressing it opens. */
-  ok('and the panel says what it is and what it opens',
+  ok('and the line says what it is and what it opens',
     /^0 of 6 today,/.test(tal.capLab) && /open this week$/.test(tal.capLab), tal);
 
   /* ── the glyph is the name ──
@@ -2176,8 +2184,10 @@ const SAID = [
     const figs = await page.evaluate(() => {
       const g = (id) => {
         const c = document.querySelector('.ty-card[data-item="' + id + '"]');
+        const ft = c.querySelector('.ty-ft');
         return { sub: c.querySelector('.props .val').textContent,
                  when: c.querySelector('.ty-when').textContent,
+                 ft: ft ? ft.textContent : '',
                  label: c.getAttribute('aria-label') };
       };
       return { p: g('p'), w: g('w'), f: g('f'), t: g('t') };
@@ -2198,9 +2208,18 @@ const SAID = [
        where "logged" was a restatement of the mark already in the
        corner — and where the tick came from moved to the line under it,
        which is the line that names the window on every other tile. */
-    ok('a tick prints its week, and says where it came from under it',
+    /* BOTH LINES, because they say different things and each passes on
+       the other's bug: the line under the figure NAMES the figure —
+       `3 / 5` is unreadable without it — and the foot carries what fed
+       the tick, which is an extra rather than the label's stand-in. */
+    ok('a tick prints its week, and the line under it names the figure',
       /^\d+\/ \d+$/.test(figs.t.sub)
-      && (figs.t.when === 'Logged today' || figs.t.when.indexOf('from ') === 0),
+      && figs.t.when === 'days on this week'
+      /* The foot is an EXTRA, so it is absent on a tick nothing fed —
+         which is this one, ticked straight off the tile. That it
+         carries the block when there IS one is asserted where the
+         suite actually makes one, a hundred lines below. */
+      && figs.t.ft === '',
       JSON.stringify(figs.t));
     /* An em dash, not a nought: a meal you have not recorded is not a
        meal of nothing. The unit stays, because it says which kind of
@@ -2236,31 +2255,79 @@ const SAID = [
       const [x, y] = [lum2(a), lum2(b)].sort((m, n) => n - m);
       return (x + .05) / (y + .05);
     };
+    /* ── THE GROUND IS THE CARD'S MOST COMMON PIXEL, NOT A POINT ──
+       It was sampled 34px to the right of the glyph, which on this
+       tile is the LABEL: measured, that point came back `--spent` on
+       four of six cards, so the "ground" was type and the check was
+       comparing the glyph against the words beside it. Both are around
+       5:1, so it passed — and it was not measuring the thing it names.
+
+       The mode of the card's own box is the ground by a mile, and it
+       is the polarity-agnostic technique this suite already settled on
+       for the friends board. Nothing about it cares which way round
+       the card is, which is the whole point of measuring both states.
+
+       AND ONLY CARDS THAT ARE ON SCREEN. `page.screenshot` captures
+       the viewport, so a tile below the fold samples the page behind
+       it and reports 1.16 on a glyph that is drawn correctly — which
+       is exactly what the mosaic surfaced. The pane is walked top and
+       bottom and the ids are unioned, so all six are measured and the
+       COUNT is asserted beside the ratio: a check that quietly looked
+       at four of them is a check that would miss the two it skipped. */
     let low = { r: 99 };
-    const png = PNG2.sync.read(await page.screenshot());
-    const at = (x, y) => {
-      const i = (png.width * Math.round(y * 2) + Math.round(x * 2)) << 2;
-      return [png.data[i], png.data[i + 1], png.data[i + 2]];
-    };
-    for (const m of await page.$$('.ty-card')) {
-      const g = await m.$('.ic');
-      const bx = await g.boundingBox();
-      const on = await m.evaluate((e) => e.classList.contains('on'));
-      /* The card's own ground, sampled clear of the glyph and clear of
-         the border; then the stroke, as the pixels furthest from it. */
-      const ground = at(bx.x + bx.width + 34, bx.y + bx.height / 2);
-      const px = [];
-      for (let x = 1; x < bx.width - 1; x++)
-        for (let y = 1; y < bx.height - 1; y++) px.push(at(bx.x + x, bx.y + y));
-      const gl = lum2(ground);
-      px.sort((a, c) => Math.abs(lum2(c) - gl) - Math.abs(lum2(a) - gl));
-      const ink = px.slice(0, 24)
-        .reduce((z, q) => q.map((c, i) => z[i] + c), [0, 0, 0]).map((c) => c / 24);
-      const r = +ratio2(ink, ground).toFixed(2);
-      if (r < low.r) low = { r, on };
+    const seen = new Set();
+    const key = (a) => (a[0] << 16) | (a[1] << 8) | a[2];
+    for (const top of [0, 99999]) {
+      await page.evaluate((t) => { document.getElementById('scTyPane').scrollTop = t; }, top);
+      await page.waitForTimeout(220);
+      const png = PNG2.sync.read(await page.screenshot());
+      const at = (x, y) => {
+        const i = (png.width * Math.round(y * 2) + Math.round(x * 2)) << 2;
+        return [png.data[i], png.data[i + 1], png.data[i + 2]];
+      };
+      /* ── AND THE FRAME IS THE PANE, NOT THE VIEWPORT ──
+         `getBoundingClientRect` reports a box whether or not an
+         ancestor is clipping it, which this file has had to learn
+         before. The pane scrolls under the stops, so a card scrolled
+         off its top still reports a positive y and is simply not
+         painted: measured at y=126 with the segmented control drawn
+         over it, and the glyph came back 1.21 against a ground that
+         was correct. Bounded by the pane's own box it is 5.21, which
+         is what the card actually draws. */
+      const pane = await (await page.$('#scTyPane')).boundingBox();
+      for (const m of await page.$$('.ty-card')) {
+        const cb = await m.boundingBox();
+        if (!cb || cb.y < pane.y
+            || cb.y + cb.height > Math.min(pane.y + pane.height, 744)) continue;
+        const g = await m.$('.ic');
+        const bx = await g.boundingBox();
+        const id = await m.evaluate((e) => e.dataset.item);
+        const on = await m.evaluate((e) => e.parentElement.classList.contains('is-on'));
+        const tally = new Map();
+        for (let x = 3; x < cb.width - 3; x += 2)
+          for (let y = 3; y < cb.height - 3; y += 2) {
+            const q = at(cb.x + x, cb.y + y), k = key(q);
+            const e = tally.get(k);
+            if (e) e.n++; else tally.set(k, { q, n: 1 });
+          }
+        const ground = [...tally.values()].sort((a, b) => b.n - a.n)[0].q;
+        const px = [];
+        for (let x = 1; x < bx.width - 1; x++)
+          for (let y = 1; y < bx.height - 1; y++) px.push(at(bx.x + x, bx.y + y));
+        const gl = lum2(ground);
+        px.sort((a, c) => Math.abs(lum2(c) - gl) - Math.abs(lum2(a) - gl));
+        const ink = px.slice(0, 24)
+          .reduce((z, q) => q.map((c, i) => z[i] + c), [0, 0, 0]).map((c) => c / 24);
+        const r = +ratio2(ink, ground).toFixed(2);
+        seen.add(id);
+        if (r < low.r) low = { r, id, on, ground, ink: ink.map(Math.round) };
+      }
     }
+    await page.evaluate(() => { document.getElementById('scTyPane').scrollTop = 0; });
+    await page.waitForTimeout(150);
+    low.measured = seen.size;
     ok('the glyph clears 3:1 on the card, measured on pixels',
-      low.r >= 3, JSON.stringify(low));
+      low.r >= 3 && low.measured === 6, JSON.stringify(low));
   }
 
   /* THE LIST IS CODE, NOT DATA. It is what makes a leaderboard over it
@@ -2294,13 +2361,19 @@ const SAID = [
   await page.waitForTimeout(150);
   const linked = await page.evaluate(() => ({
     card: document.querySelector('.ty-card[data-item="t"]').parentElement.className,
-    via: document.querySelector('.ty-card[data-item="t"] .ty-when').textContent,
-    cap: [...document.querySelectorAll('#scTallyCap .ty-t')]
-      .map((c) => c.querySelector('b').textContent),
+    /* THE BLOCK MOVED TO THE FOOT. The line under the figure says what
+       the figure MEANS — `5 / 6` is unreadable without `days on this
+       week` — so what fed the tick sits under the strip instead, where
+       it is an extra rather than the label's stand-in. */
+    via: document.querySelector('.ty-card[data-item="t"] .ty-ft').textContent,
+    says: document.querySelector('.ty-card[data-item="t"] .ty-when').textContent,
+    cap: [...document.querySelectorAll('#scTallyCap .ty-fig > i')]
+      .map((c) => c.textContent),
     log: localStorage.getItem('sched.log.v1'),
   }));
   ok('ticking an item ticks the block behind it',
     /is-|on/.test(linked.card) && linked.via === 'from Train'
+    && linked.says === 'days on this week'
     && /\{"\d{4}-\d{2}-\d{2}":\{".+":1\}\}/.test(linked.log), linked);
   ok('and the count moves with it', linked.cap[0] === '1/ 6', linked);
 
@@ -2520,17 +2593,26 @@ const SAID = [
   const late = await page.evaluate(() => {
     const g = (id) => {
       const c = document.querySelector('.ty-card[data-item="' + id + '"]');
+      const ft = c.querySelector('.ty-ft');
       return { late: c.parentElement.classList.contains('late'),
-               s: c.querySelector('.ty-when').textContent };
+               s: c.querySelector('.ty-when').textContent,
+               ft: ft ? ft.textContent : '' };
     };
     return { t: g('t'), m: g('m'), w: g('w') };
   });
-  /* One word, not a sentence: the line under a ring is a fifth of a
-     phone wide and `Missed its window` does not fit it. The fact is
-     still on the card's accessible name in full. */
-  ok('a block whose window has passed says so', late.t.late
-    && late.t.s === 'Missed', late);
-  ok('but one that can still be satisfied does not', !late.m.late, late);
+  /* ── AND IT SAYS SO ON THE FOOT, NOT ON THE LABEL ──
+     The line under the figure names what the figure means and does it
+     on every tile, every day: `5 / 6` is unreadable without `days on
+     this week`. A state that happens sometimes cannot live there, so
+     this moved under the strip — which is a full tile wide, and is why
+     it can be the sentence rather than the one word the old line had
+     room for. Both halves are read, because "the foot says Missed"
+     passes on a build that stopped naming the figure at all. */
+  ok('a block whose window has passed says so on its foot', late.t.late
+    && late.t.ft === 'Missed its window'
+    && late.t.s === 'days on this week', late);
+  ok('but one that can still be satisfied does not',
+    !late.m.late && late.m.ft === '', late);
   ok('and an item with no block behind it never can', !late.w.late, late);
 
   /* ── the streak ──
@@ -2552,28 +2634,34 @@ const SAID = [
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(250);
   const run = await page.evaluate(() => {
-    const cell = (w) => [...document.querySelectorAll('#scTallyCap .ty-t')]
-      .find((c) => c.querySelector('i').textContent === w);
+    const fig = [...document.querySelectorAll('#scTallyCap .ty-fig > i')];
     return {
-      fig: document.getElementById('scStreakNum').textContent,
-      /* The streak's own node IS the panel's middle cell rather than a
+      /* Three figures on ONE line, read as cells rather than as a
+         joined string: a string passes on a build that drew the three
+         in any order at all. */
+      cells: fig.map((c) => c.textContent),
+      streak: document.getElementById('scStreakNum').textContent,
+      /* The streak's own node IS the line's middle cell rather than a
          second element carrying the same figure, which is a second
          place for it to go stale. */
-      inPanel: document.getElementById('scStreakNum')
-        === cell('Streak').querySelector('b'),
-      best: cell('Best').querySelector('b').textContent,
+      inLine: document.getElementById('scStreakNum') === fig[1],
       foot: document.getElementById('scTallyFoot').textContent,
     };
   });
   ok('an unlogged today does not break the run',
-    run.fig === '5' && run.inPanel, run);
-  /* THE LONGEST RUN MOVED INTO THE PANEL. It was an 11px line at the
-     very foot of the screen saying "Longest streak 5 days." under
-     everything — the third of three facts about one thing, drawn in a
-     second place at a second size. The foot now carries the one thing
-     the panel cannot: what to do when there is no run at all. */
-  ok('and the longest streak is the third figure, not a line at the foot',
-    run.best === '5' && run.foot === '', run);
+    run.streak === '5 days' && run.inLine, run);
+  /* ── THREE FIGURES, ONE LINE, AND THE LINE IS THE HEADING ──
+     The longest run was an 11px sentence at the very foot of the
+     screen; then it was the third cell of a 250px panel with a heading
+     of its own. It is the third figure on the heading line now, which
+     keeps every word of the complaint that moved it — one place, one
+     size — and hands the mosaic under it the two hundred and fifty
+     pixels that make the day fit on one screen.
+
+     The foot still carries the one thing the line cannot: what to do
+     when there is no run at all. */
+  ok('and the longest run is the third figure on that line, not a foot note',
+    run.cells.join('|') === '0/ 6|5 days|best 5' && run.foot === '', run);
 
   /* ── two days, then the day shuts ──
      Unlimited backfill makes a shared number fiction — somebody fills
@@ -2847,6 +2935,100 @@ const SAID = [
     && /^Take 0\.3 L/.test(tile.step[0]) && /^Log an exact/.test(tile.step[1])
     && /^Add 0\.3 L/.test(tile.step[2])
     && tile.stepTap.every((n) => n >= 38), tile);
+
+  /* ══ THE MOSAIC ══
+     Five whole-screen replacements were drawn over the real app at
+     390x844 and this is the one that was picked. It is not a grid of
+     equal tiles: the tall one takes two rows of the right-hand column,
+     one takes the full width, and the rest pair off beside them.
+
+     MEASURED AS BOXES, never as classes. A rule that set `is-wide` and
+     no longer spanned would pass on the name alone, which is the
+     mistake the tall tile's own check already guards against. */
+  const mos = await page.evaluate(() => {
+    const r = [...document.querySelectorAll('.ty-row')];
+    const b = (x) => x.getBoundingClientRect();
+    const grid = document.querySelector('.ty-grid').getBoundingClientRect();
+    const half = grid.width * 0.55;
+    return {
+      n: r.length,
+      wide: r.filter((x) => b(x).width > half).map((x) => x.dataset.item),
+      tall: r.filter((x) => x.classList.contains('is-tall')).map((x) => x.dataset.item),
+      /* The wide one runs the whole track, and the halves are halves. */
+      wideW: Math.round(b(r.find((x) => x.classList.contains('is-wide'))).width),
+      gridW: Math.round(grid.width),
+      /* TWO COLUMNS: every tile that is not the wide one starts at one
+         of exactly two left edges. */
+      lefts: [...new Set(r.filter((x) => b(x).width <= half)
+        .map((x) => Math.round(b(x).left)))].sort((a, c) => a - c),
+    };
+  });
+  ok('the tiles are a mosaic: two columns, one tall, one full width',
+    mos.n === 6 && mos.tall.join() === 'w' && mos.wide.join() === 's'
+    && Math.abs(mos.wideW - mos.gridW) <= 1 && mos.lefts.length === 2, mos);
+
+  /* ══ THE PLOT SITS IN A WELL, AND ONLY THE PLOT ══
+     A curve with no edge is a smear on the card. This is NOT the frame
+     inside a frame this project keeps removing — that rule is about a
+     panel drawn round a list of objects, and a well is the area the
+     marks are measured inside. The gauge and the week strip get none,
+     because a filled track and seven blocks are already their own
+     shape, and a check that only looked at the area would pass on a
+     build that put a well round all three. */
+  const well = await page.evaluate(() => {
+    const g = (id) => document.querySelector('.ty-row[data-item="' + id + '"]');
+    const ar = g('p').querySelector('.ty-ar');
+    const cs = getComputedStyle(ar);
+    const wb = ar.parentElement.getBoundingClientRect();
+    return {
+      inWell: ar.parentElement.classList.contains('ty-well'),
+      /* Its own ground, and not the card's. */
+      wellBg: getComputedStyle(ar.parentElement).backgroundColor,
+      cardBg: getComputedStyle(g('p')).backgroundColor,
+      gaugeWell: !!g('w').querySelector('.ty-well'),
+      weekWell: !!g('t').querySelector('.ty-well'),
+      /* ── AND THE DRAWING IS OUT OF FLOW ──
+         An `<svg viewBox="0 0 100 38">` at `width: 100%` carries an
+         intrinsic RATIO, so in flow its height resolves to 38% of the
+         tile. As a flex item that becomes the row's content height and
+         the grid sizes every row to it: measured at 238px a row
+         against the 108 asked for, with nothing in the stylesheet
+         looking wrong.
+
+         THE SYMPTOM IS THE ROW, so that is what is measured. The
+         well's own height cannot tell the two apart — stretched it
+         came out at .36 of its width against an intrinsic .38, which
+         is a threshold that would have to be wrong one way or the
+         other. The row is unambiguous: 144 against 238.
+
+         Held to the grid's OWN declared floor rather than to a number
+         typed here, so a change to the type scale moves both and the
+         check still means what it says. */
+      pos: cs.position,
+      rowH: Math.round(g('p').getBoundingClientRect().height),
+      /* The track is `minmax(108px, 1fr)` and that is what computes,
+         so the floor has to be pulled OUT of it — `parseFloat` on the
+         whole string is NaN, which the check read as 0 and then
+         compared against happily. */
+      floor: +((getComputedStyle(document.querySelector('.ty-grid'))
+        .gridAutoRows.match(/([\d.]+)px/) || [0, 0])[1]),
+    };
+  });
+  ok('the area sits in a well of its own, and the gauge and the week do not',
+    well.inWell && well.wellBg !== well.cardBg
+    && !well.gaugeWell && !well.weekWell, well);
+  ok('and the drawing is out of flow, so the row sizes the chart and not the reverse',
+    well.pos === 'absolute' && well.floor > 0
+    && well.rowH <= well.floor * 1.8, well);
+
+  /* THREE MARKS ON THE GAUGE, and the foot is the one that was
+     missing: a scale labelled at the top and the middle and left bare
+     at the bottom reads as one that runs out rather than one that
+     starts at nought, which is the end a person checks a water
+     tracker against. */
+  ok('the gauge is marked at the top, the middle and the foot',
+    (await page.$$eval('.ty-row[data-item="w"] .ty-gm > span',
+      (m) => m.map((x) => x.textContent).join('|'))) === '100%|50%|0%');
 
   /* AND THE ARROWS ACTUALLY MOVE THE RECORD, both ways and never below
      nought. A stepper that draws and does nothing passes every check
@@ -9244,15 +9426,26 @@ const SAID = [
     await hp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
     await hp.waitForTimeout(500);
 
-    /* ── THE WAY IN IS ON THE GRID, NOT IN THE BAR ──
+    /* ── THE WAY IN IS UNDER THE GRID, NOT ON IT AND NOT IN THE BAR ──
        The bar holds three tabs and an add button at 390px, and a
        fourth would be the control that made the row too tight to
-       press. */
-    ok('the way in is the last thing on the grid',
+       press.
+
+       AND IT IS NOT A TILE. The grid's rows carry a floor so an eighth
+       habit cannot compress every tile into a strip of labels, and a
+       41px control sitting in one of those rows was drawn at 168 —
+       a whole tile's worth of the one screen this layout exists to fit
+       inside. Measured as its own box rather than as its parent, since
+       a control moved out of the grid and still given a tile's height
+       would pass any check on the markup alone. */
+    ok('the way in is under the grid, and it does not take a tile',
       await hp.evaluate(() => {
         const a = document.querySelector('.ty-add');
         const g = document.querySelector('.ty-grid');
-        return !!a && a === g.lastElementChild && /Add a habit/.test(a.textContent);
+        return !!a && a.previousElementSibling === g
+          && a.parentElement === g.parentElement
+          && a.getBoundingClientRect().height < 60
+          && /Add a habit/.test(a.textContent);
       }));
 
     await hp.click('.ty-add');
@@ -9310,7 +9503,7 @@ const SAID = [
     const added = await hp.evaluate(() => ({
       stored: JSON.parse(localStorage.getItem('sched.habit.v1') || '[]'),
       names: [...document.querySelectorAll('.ty-card .ty-nm')].map((x) => x.textContent),
-      cap: document.querySelector('#scTallyCap .ty-t b').textContent,
+      cap: document.querySelector('#scTallyCap .ty-fig > i').textContent,
       capAll: document.getElementById('scTallyCap').getAttribute('aria-label'),
     }));
     /* THE COUNT SAYS HOW MANY YOU HAVE, not a constant. Adding one
@@ -9325,6 +9518,25 @@ const SAID = [
       && added.names[added.names.length - 1] === 'Cold plunge'
       && added.cap === '0/ 7' && /of 7 today/.test(added.capAll), added);
 
+    /* ── AND THE WIDE TILE IS ARITHMETIC, NOT A NAME ──
+       The tall one takes two cells of a two-column grid, so six items
+       occupy seven and something has to be full width. Seven items
+       occupy eight, which pair — so nothing is wide at all, and the
+       rule re-solves instead of stranding itself on six.
+
+       This is the half that could not be checked on the main fixture,
+       which is always six. Measured as boxes for the reason the six
+       are: a rule that set the class and no longer spanned would pass
+       on the name alone. */
+    ok('...and with seven the cells pair, so nothing is full width',
+      await hp.evaluate(() => {
+        const r = [...document.querySelectorAll('.ty-row')];
+        const w = document.querySelector('.ty-grid').getBoundingClientRect().width;
+        return r.length === 7
+          && !r.some((x) => x.getBoundingClientRect().width > w * 0.55)
+          && r.filter((x) => x.classList.contains('is-tall')).length === 1;
+      }));
+
     /* ── AND IT LOGS LIKE ANY OTHER ──
        A tick ticks on one tap; a number opens the sheet that asks for
        one. Neither needed a branch — a habit of yours is a row of the
@@ -9337,7 +9549,7 @@ const SAID = [
         + '-' + String(d.getDate()).padStart(2, '0');
       return { rec: (JSON.parse(localStorage.getItem('sched.tick.v1') || '{}')[k] || {}).x1,
                sheet: !document.getElementById('scSheet').hidden,
-               cap: document.querySelector('#scTallyCap .ty-t b').textContent };
+               cap: document.querySelector('#scTallyCap .ty-fig > i').textContent };
     });
     ok('a tick of yours ticks on one tap, and opens nothing',
       ticked.rec === 1 && !ticked.sheet && ticked.cap === '1/ 7', ticked);
@@ -10152,14 +10364,20 @@ const SAID = [
     const mtile = await mpage.evaluate(() => {
       const c = document.querySelector('.ty-card[data-item="m"]');
       const px = (e) => (e ? parseFloat(getComputedStyle(e).fontSize) : -1);
-      /* It lands on the line that names the window on every other tile,
-         where `Today` and `This week` sit. */
-      return { says: c ? c.querySelector('.ty-when').textContent : '',
-               when: px(c && c.querySelector('.ty-when')),
+      /* ── ON THE FOOT, UNDER THE STRIP ──
+         It used to sit on the line that names the window, which is the
+         line every tile now spends on naming its own figure: `6 / 7`
+         cannot be read without `days on this week`. So the book moved
+         under the week rather than standing in for the label of it. */
+      const ft = c && c.querySelector('.ty-ft');
+      return { says: ft ? ft.textContent : '',
+               when: px(ft),
+               names: c ? c.querySelector('.ty-when').textContent : '',
                val: px(c && c.querySelector('.props .val')) };
     });
     ok('the Mind tile says what it was, at a label\u2019s size and not a figure\u2019s',
-      mtile.says === 'Eat That Frog!' && mtile.when < mtile.val * 0.6, mtile);
+      mtile.says === 'Eat That Frog!' && mtile.when < mtile.val * 0.6
+      && mtile.names === 'days on this week', mtile);
 
     /* ── A SEARCH THAT FAILS IS NOT AN ERROR STATE ──
        Every one of these is somebody else's server: it can be down,

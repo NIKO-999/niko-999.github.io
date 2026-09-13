@@ -1024,8 +1024,9 @@ body {
    be the control that made the row too tight to press. Quiet, because
    making a habit is something you do a handful of times ever. */
 .ty-add {
-  grid-column: 1 / -1;
-  display: flex; align-items: center; gap: 9px;
+  /* Full width and out of the grid, so it costs its own 41px rather
+     than a tile's 130. */
+  display: flex; flex: none; align-items: center; gap: 9px;
   margin-top: 4px; padding: 12px 2px;
   background: none; border: 0; color: var(--dim);
   font: inherit; font-size: 14px; text-align: left;
@@ -1228,6 +1229,10 @@ body {
    the ring and the sheet are square, and nothing here is shadowed.
    ═════════════════════════════════════════════════════════ */
 .tally { margin-top: 18px; display: flex; }
+/* A COLUMN, so the grid above can take the slack. Left as a block
+   the tiles size to their content and the day ends wherever it
+   ends, which is the screen the mosaic replaced. */
+#scTyPane { display: flex; flex-direction: column; }
 .tally[hidden] { display: none; }
 /* ── SHOWING UP IS A LIST OF CARDS ──
    Craft's row, the week card's own: a circle check, the glyph, the
@@ -1237,55 +1242,70 @@ body {
    prototype put them and where they read as a caption rather than a
    dashboard. */
 .ty-hero { display: none; }
-/* -- THE SECTION HEADING --
-   Two of them, Streak and Progress, which is what turns a screen of
-   objects into a screen with a shape. The app's own heading weight:
-   this is a name for the thing under it, so it is white and it is not
-   the small-caps label a tile wears. */
+/* -- THE SECTION HEADING, AND THERE IS ONE --
+   Streak and Progress both stood here with a 250px panel between
+   them. What is left is one line: the app's own heading weight on the
+   left, the day's three figures on the right, and the whole row is
+   the door to the week. */
 .ty-sh {
-  margin: 22px 0 11px; font-size: 15.5px; font-weight: 700;
+  margin: 2px 0 11px; font-size: 15.5px; font-weight: 700;
   letter-spacing: -.01em; color: var(--ink);
 }
-.ty-sh:first-child { margin-top: 6px; }
 
-/* -- THREE FIGURES, SPLIT BY HAIRLINES --
-   It was a 12.5px grey line reading "5 of 6 today, 1 day streak" with
-   the longest run in a second line at the very foot of the screen.
-   Three facts about one thing, in two places, at two sizes. They are
-   one panel now.
+/* -- THE DOOR, DRAWN AS A LINE --
+   A button inside the h2 rather than instead of it, so the heading
+   survives for a screen reader. Every reset is here because this is
+   the app's own heading being pressable rather than a control that
+   happens to carry a word: no border, no ground, the page's own type.
 
-   STILL THE DOOR TO THE WEEK, which is why it is a button and why the
-   resets are here: no border, the page's own type, and a ground that
-   is the card's rather than a control's. */
+   `min-height: 44px` is the one thing that is not a reset. The line
+   draws at about 20 and every press target in this app clears 44, so
+   the height is claimed and the text is centred in it. */
 .ty-cap {
-  display: flex; align-items: center; width: 100%;
-  margin: 0; padding: 17px 0; border: 0;
-  border-radius: 16px; background: var(--card);
+  position: relative;
+  display: flex; align-items: baseline; gap: 10px;
+  width: 100%;
+  margin: 0; padding: 5px 0; border: 0; background: none;
   font: inherit; color: inherit; text-align: left;
   cursor: pointer; touch-action: manipulation;
 }
+/* ── 30 DRAWN, 44 REACHABLE ──
+   A heading is about 20px of type and every press target in this app
+   clears 44. Claiming the difference as height would spend fourteen
+   pixels of the fold on nothing; a reach claims it as TARGET and
+   draws none of it, which is the rule `.row-ed`, the objectives plus
+   and the children's dots all already keep. */
+.ty-cap::before {
+  content: ''; position: absolute; left: 0; right: 0;
+  top: 50%; height: 44px; transform: translateY(-50%);
+}
 .ty-cap:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
-.ty-t { flex: 1; text-align: center; position: relative; min-width: 0; }
-/* The rule between two cells, drawn by the SECOND of the pair, so the
-   ends of the panel carry none. */
-.ty-t + .ty-t::before {
-  content: ''; position: absolute; left: 0; top: 2px; bottom: 2px;
-  width: 1px; background: var(--hair);
+.ty-cap > b { font: inherit; flex: none; }
+/* THE FIGURES ARE QUIET AND THE COUNT IS NOT. Three facts on one line
+   need an order to be read in, and the one you came for is how many of
+   today you have kept. The other two are context for it. */
+.ty-fig {
+  margin-left: auto; display: flex; align-items: baseline;
+  gap: 0 7px; min-width: 0;
+  font-size: 12.5px; font-weight: 600; color: var(--spent);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap; overflow: hidden;
 }
-.ty-t b {
-  display: block; font-size: 28px; font-weight: 700; letter-spacing: -.02em;
-  line-height: 1.05; color: var(--ink); font-variant-numeric: tabular-nums;
+.ty-fig > i { font-style: normal; }
+.ty-fig > i.is-n { color: var(--ink); font-size: 14px; }
+/* The denominator, quieter than the count for the reason it has
+   always been: what you read is how many. */
+.ty-fig > i.is-n > s {
+  text-decoration: none; color: var(--spent); font-size: 12.5px;
+  margin-left: 2px;
 }
-/* The denominator, and it stays: adding a habit makes today harder and
-   the figure has to say so. Quieter than the count, because what you
-   read is how many. */
-.ty-t b > s {
-  text-decoration: none; font-size: 16px; font-weight: 600;
-  color: var(--spent); letter-spacing: 0; margin-left: 3px;
-}
-.ty-t i {
-  display: block; font-style: normal; font-size: 11.5px;
-  color: var(--spent); margin-top: 4px;
+/* Punctuation between two facts, riding the second of the pair, so
+   the ends of the line carry none. */
+.ty-fig > i + i::before { content: '\00b7'; margin-right: 7px; }
+.ty-cv {
+  flex: none; width: 15px; height: 15px; align-self: center;
+  fill: none; stroke: var(--spent); stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
 }
 
 /* -- THE WEEK READ BACK, A DAY A CARD --
@@ -1345,6 +1365,10 @@ body {
 }
 .wv-q:not(.is-off) > em { color: var(--ink); }
 .ty-foot { margin-top: 16px; font-size: 11px; line-height: 1.5; color: var(--dim); }
+/* It says one thing and only when there is no run at all, so on every
+   other day it was an empty paragraph holding 33px of the one screen
+   this layout exists to fit inside. */
+.ty-foot:empty { display: none; }
 /* ── SEVEN TILES, TWO ACROSS ──
    The screen was a full-width list with a 26-week strip down the right
    of every row. The figure — what you actually did today — was a chip
@@ -1364,14 +1388,32 @@ body {
 .ty-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  /* `auto` rows, not `1fr`: the tall tile spans two of them, so equal
-     rows would size every row to half of whatever the gauge needs and
-     the short tiles would grow with it. */
-  grid-auto-rows: auto;
+  /* ── THE ROWS FILL WHAT IS LEFT, AND THEY HAVE A FLOOR ──
+     `auto` rows were right while this screen scrolled: the tall tile
+     spans two of them, so equal rows would have sized every row to
+     half of whatever the gauge needed. With the panel gone the pane
+     has room, and the point of the mosaic is that the whole day is on
+     one screen — so the rows take the slack.
+
+     `minmax(108px, 1fr)` is both halves of that in one line. The 1fr
+     distributes the leftover when six items fit; the 108px floor is
+     what stops an eighth habit compressing every tile into a strip of
+     labels. Past the floor the pane scrolls, which is the honest
+     answer and the cost this layout was chosen with. */
+  grid-auto-rows: minmax(108px, 1fr);
   align-items: stretch;
   gap: 9px;
+  /* `1 0 auto`: grow into the pane, and never shrink below the rows'
+     own height. `flex: 1` alone caps the box at the pane and the tiles
+     then spill out of a container that has nothing left to scroll. */
+  flex: 1 0 auto;
   margin-top: 0;
 }
+/* ONE TILE IS WIDE, and which one is arithmetic rather than a name —
+   see the count in scPaintTally. The add control is already full width
+   in its own rule and is deliberately NOT named here: it is not one of
+   your habits, so it sits outside the count that decides this. */
+.ty-row.is-wide { grid-column: 1 / -1; }
 /* ONE TILE IS TALL and it is the one you add to through the day. Two
    rows on the right, which is your reference's own arrangement — and
    the height is what the gauge and its stepper need rather than a
@@ -1385,7 +1427,10 @@ body {
      app that is above the page rather than on it. */
   background: var(--card);
   border-radius: 16px;
-  padding: 14px 15px 13px;
+  /* Two pixels off every edge against the tile this replaced. Small
+     on its own and four rows of it is a row of the grid, which is the
+     difference between the day fitting on one screen and not. */
+  padding: 13px 14px 12px;
   min-width: 0;
 }
 /* ── THE TAG, AND IT IS THE ONLY COLOUR ON THIS SCREEN ──
@@ -1424,7 +1469,10 @@ body {
    printed "logged" — a restatement of the mark already in the corner.
    It prints the week now. */
 .ty-card .props .val {
-  font-size: 27px;
+  /* 23, not 27. It is still the loudest thing on the tile by a long
+     way — the label above it is 11 and the line under it is 11 — and
+     the four pixels are what the chart gets back. */
+  font-size: 23px;
   font-weight: 700;
   color: var(--ink);
   letter-spacing: -.035em;
@@ -1456,8 +1504,8 @@ body {
    it says that instead. */
 .ty-when {
   grid-column: 1 / -1; grid-row: 3;
-  font-size: 12.5px; color: var(--spent); line-height: 1.3;
-  margin-top: 5px;
+  font-size: 11px; color: var(--spent); line-height: 1.3;
+  margin-top: 3px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 /* ── AND THE CHART SITS ON THE FOOT ──
@@ -1471,14 +1519,58 @@ body {
    Found by breaking it on purpose and watching the check pass — which
    is the only way a redundant declaration is ever found, and the reason
    a check is proved to bite rather than assumed to. */
+/* ── AND THE CHART IS WHAT ABSORBS THE ROW ──
+   It was `align-self: end` on a fixed 38px drawing, which is right on
+   a screen that scrolls: the tile is as tall as its content and the
+   chart sits on the foot of it. This screen does not scroll, so the
+   ROW decides the height and the chart has to take whatever is left —
+   a column that ends at the foot, with the drawing flexible above the
+   dated ticks and a floor under it.
+
+   `stretch`, not `end`: a flex column sized to its own content has
+   nothing to distribute, which is the shape of a declaration that
+   does nothing at all. */
 .ty-ch {
   grid-column: 1 / -1; grid-row: 4;
-  align-self: end; padding-top: 14px;
-  display: block; min-width: 0;
+  align-self: stretch; padding-top: 8px;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  min-width: 0; min-height: 0;
+}
+/* ── THE PLOT AREA, AND IT IS NOT A FRAME INSIDE A FRAME ──
+   That rule is about a panel drawn round a list of objects. This is
+   the area the marks are measured inside, which is what stops an
+   unedged curve reading as a smear on the card. Only the area chart
+   gets one: a gauge is a filled track and a week is seven blocks, and
+   both are already their own shape.
+
+   `overflow: hidden` is what the radius needs to bite, and it is safe
+   because the path tops out at y=3 in a 38-unit box — a 2px stroke
+   centred there has a pixel to spare. */
+/* ── AND THE DRAWING IS TAKEN OUT OF FLOW, WHICH IS LOAD-BEARING ──
+   An `<svg viewBox="0 0 100 38">` at `width: 100%` has an intrinsic
+   RATIO, so `height: auto` resolves to 38% of whatever it is given —
+   66px on a 173px tile. As a flex item with a basis of `auto` that
+   66px becomes the row's content height, and the grid then sizes
+   every row to it: measured at 238px a row against the 108 asked for,
+   with nothing in the stylesheet looking wrong.
+
+   Absolute inside a relative well, and a basis in PIXELS rather than
+   `auto`, so the well's own floor is the number written here and the
+   drawing is told what it got rather than asked what it wants. */
+.ty-well {
+  position: relative; display: block;
+  border-radius: 9px; overflow: hidden;
+  /* 30, and it was 22 for one render. A four-day series normalised
+     to its own best has the whole of its shape in that height, and at
+     22 the curve came out as a smear along the top of the well —
+     present, correct, and saying nothing. The floor is what the
+     drawing needs; anything above it is what the row has spare. */
+  flex: 1 1 30px; min-height: 30px;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
 }
 .ty-ar {
-  display: block; width: 100%; height: 38px;
-  overflow: visible;
+  position: absolute; inset: 0;
+  display: block; width: 100%; height: 100%;
 }
 /* The fill is what you read at this size and the stroke is what makes
    it a reading rather than a smear. `non-scaling-stroke` because the
@@ -1494,7 +1586,18 @@ body {
 /* The dated ticks are what say these are four READINGS rather than a
    continuous line, which is the whole of what makes an area honest on
    a daily count. */
-.ty-ax { display: flex; justify-content: space-between; margin-top: 7px; }
+.ty-ax { display: flex; justify-content: space-between; margin-top: 5px; flex: none; }
+/* ── THE FOOT ──
+   The book, the block that fed the tick. It sits in the card's own
+   grid rather than in the chart, so an empty one costs no line at all
+   — `.ty-body` is `display: contents`, which is why this has to name
+   its column the way the track under it does. */
+.ty-card .ty-ft {
+  grid-column: 1 / -1; grid-row: 5;
+  margin-top: 8px;
+  font-size: 11px; color: var(--spent); line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .ty-ax > span {
   font-size: 8.5px; color: var(--spent); white-space: nowrap;
   font-variant-numeric: tabular-nums;
@@ -1506,16 +1609,23 @@ body {
    state that is not one. A day still ahead is drawn like a day it was
    never on: nothing has happened yet, and drawing it as a miss would
    be the screen marking you down for Thursday on a Tuesday. */
-.ty-wk { display: flex; align-items: stretch; gap: 4px; height: 38px; }
+.ty-wk {
+  display: flex; align-items: stretch; gap: 4px;
+  flex: 1 1 30px; min-height: 30px;
+}
 .ty-wk > i { flex: 1 1 0; border-radius: 3px; background: var(--tick-off); }
 .ty-wk > i.is-on { background: var(--ink); }
 .ty-wk > i.is-off, .ty-wk > i.is-todo { opacity: .45; }
 /* ── THE GAUGE ──
    The marks sit BESIDE the track at their own heights, which is what
    makes it a gauge rather than a bar with a caption under it. */
+/* The gauge takes the row the same way the chart does. A 150px floor
+   was what made it a gauge while the screen scrolled; here the two
+   rows it spans are always more than that, and a fixed floor is what
+   pushed every other row past the fold. */
 .ty-g {
   display: flex; gap: 14px; align-items: stretch;
-  min-height: 150px; height: 100%; padding-top: 4px;
+  flex: 1 1 90px; min-height: 90px; padding-top: 4px;
 }
 .ty-gt {
   width: 15px; flex: none; border-radius: 8px; background: var(--tick-off);
@@ -1538,7 +1648,7 @@ body {
   position: absolute; left: 13px; right: 13px; bottom: 13px;
   display: flex; align-items: center; justify-content: space-between;
 }
-.ty-row.is-tall > .ty-card { padding-bottom: 48px; }
+.ty-row.is-tall > .ty-card { padding-bottom: 46px; }
 /* The two are written out rather than sharing a rule and overriding
    three properties from it: one selector carrying one property twice
    is a file with two values in it and only one of them live, whichever
@@ -1944,13 +2054,13 @@ body {
   /* Label, figure, window, chart — and the chart takes the 1fr, so it
      sits on the foot of whatever height the row settles on and two
      tiles side by side draw theirs on one line. */
-  grid-template-rows: auto auto auto 1fr auto;
+  grid-template-rows: auto auto auto 1fr auto auto;
   height: 100%;
 }
 .ty-card .props {
   grid-column: 1 / -1; grid-row: 2;
   flex-wrap: wrap; gap: 2px 8px;
-  align-items: flex-end; margin-top: 9px;
+  align-items: flex-end; margin-top: 7px;
 }
 /* The ring is gone; these are what the tests and the sheet still ask
    for by name, kept as the parts of the strip they were. */
@@ -2091,8 +2201,9 @@ body {
 /* On the tile, in the CARD's grid: `.ty-body` is `display: contents`,
    so a track that did not span the columns would size to its own
    content and come out about forty pixels wide. Measured. */
+/* Row 6, because row 5 is the foot line now. */
 .ty-card .ty-tl {
-  position: relative; grid-column: 1 / -1; grid-row: 5;
+  position: relative; grid-column: 1 / -1; grid-row: 6;
   margin-top: 8px; height: 4px;
   border-radius: 2px; background: var(--tick-off); overflow: hidden;
 }

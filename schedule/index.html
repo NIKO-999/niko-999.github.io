@@ -69,7 +69,7 @@
   } catch (e) {}
 }());
 </script>
-<link rel="stylesheet" href="app.css?v=ad4fa8fd" />
+<link rel="stylesheet" href="app.css?v=0f1039b0" />
 </head>
 <body>
 
@@ -131,13 +131,20 @@
               aria-current="false">Workouts</button>
     </nav>
     <div id="scTyPane">
-      <h2 class="ty-sh">Streak</h2>
-      <!-- A BUTTON, because it is the door to the week: the panel that
-           already says how today went is what asks for the seven days
-           around it. One node rather than a paragraph swapped for a
-           control, so the two cannot drift. -->
-      <button class="ty-cap" id="scTallyCap" type="button"></button>
-      <h2 class="ty-sh">Progress</h2>
+      <!-- ── THE HEADING IS THE DOOR, AND THE PANEL IT REPLACED IS GONE ──
+           Three figures sat here in a 16px card under a heading of its
+           own, with a second heading under that: two hundred and fifty
+           pixels before a single tile. They are one line now, and the
+           line is the heading. That is not a tidy-up — it is what makes
+           the whole day fit on one screen without scrolling, which is
+           the entire argument for the mosaic under it.
+
+           A BUTTON INSIDE THE H2, never an h2 inside a button: the
+           second is invalid and loses the heading for a screen reader.
+           The id is kept, because this is still the same door. -->
+      <h2 class="ty-sh">
+        <button class="ty-cap" id="scTallyCap" type="button"></button>
+      </h2>
       <div class="ty-grid" id="scTallyGrid"></div>
       <p class="ty-foot" id="scTallyFoot"></p>
     </div>
@@ -342,6 +349,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=6f3b5c57"></script>
+<script src="app.js?v=35d69851"></script>
 </body>
 </html>

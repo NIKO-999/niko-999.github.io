@@ -3392,41 +3392,45 @@
     var n = all.filter(function (it) { return got[it.id]; }).length;
     var st = scStreak(), best = scBest();
 
-    /* ── THREE FIGURES, AND THE ROW IS THE DOOR ──
-       It was one grey line reading "5 of 6 today · 1 day streak" with
-       the longest streak in a smaller line at the foot of the screen,
-       which is three facts about the same thing drawn in two places at
-       two sizes. They are one panel now, split by hairlines: today,
-       the run you are on, and the best you have had.
+    /* ── ONE LINE, AND THE LINE IS THE HEADING ──
+       It was three figures in a card of its own under a heading called
+       Streak, with a second heading called Progress under that. Two
+       hundred and fifty pixels, before a tile. The complaint that put
+       them in a panel was that they were three facts about one thing
+       drawn in two places at two sizes — and one line keeps every word
+       of that: one place, one size, in the order you read them.
 
-       AND IT IS STILL THE DOOR TO THE WEEK. The caption was a button
-       because the line that already says how today went is what asks
-       for the seven days around it; the row says the same thing three
-       ways, so the door moved onto it rather than needing a control of
-       its own.
+       WHAT IT BUYS IS THE WHOLE DAY ON ONE SCREEN, which is the only
+       reason the panel could go. The mosaic under it is sized to what
+       is left, so a screen that has to scroll to reach Sleep is not
+       the screen that was chosen.
 
-       The denominator stays. "5 of 6" and not "05": adding a habit
-       makes today harder and the figure has to say so, which is the
-       count's own rule and the one thing a bare number cannot do. */
-    var trio = $('scTallyCap');
-    trio.textContent = '';
-    [[n, '/ ' + all.length, 'Today', null],
-     [st, null, 'Streak', 'scStreakNum'],
-     [best, null, 'Best', null]].forEach(function (f) {
-      var cell = scEl('span', 'ty-t');
-      var b = scEl('b');
-      /* The streak's own node, named here rather than standing empty in
-         the markup: the panel is rebuilt on every paint, and a second
-         element carrying the same figure is a second place for it to go
-         stale. */
-      if (f[3]) b.id = f[3];
-      b.appendChild(document.createTextNode(String(f[0])));
-      if (f[1]) b.appendChild(scEl('s', null, f[1]));
-      cell.appendChild(b);
-      cell.appendChild(scEl('i', null, f[2]));
-      trio.appendChild(cell);
-    });
-    trio.setAttribute('aria-label', n + ' of ' + all.length + ' today, '
+       STILL THE DOOR TO THE WEEK: the line that already says how today
+       went is what asks for the seven days around it, which is the
+       control naming itself rather than a chevron somebody has to
+       find. The denominator stays — adding a habit makes today harder
+       and the figure has to say so. */
+    var cap = $('scTallyCap');
+    cap.textContent = '';
+    cap.appendChild(scEl('b', null, 'Today'));
+    var fig = scEl('span', 'ty-fig');
+    var cnt = scEl('i', 'is-n');
+    cnt.appendChild(document.createTextNode(String(n)));
+    cnt.appendChild(scEl('s', null, '/ ' + all.length));
+    fig.appendChild(cnt);
+    /* The streak's own node, named here rather than standing empty in
+       the markup: this line is rebuilt on every paint, and a second
+       element carrying the same figure is a second place for it to go
+       stale. */
+    var runI = scEl('i', null, st + (st === 1 ? ' day' : ' days'));
+    runI.id = 'scStreakNum';
+    fig.appendChild(runI);
+    fig.appendChild(scEl('i', null, 'best ' + best));
+    cap.appendChild(fig);
+    cap.insertAdjacentHTML('beforeend',
+      '<svg class="ty-cv" viewBox="0 0 24 24" aria-hidden="true">'
+      + '<path d="M9 4.5l7.5 7.5L9 19.5"/></svg>');
+    cap.setAttribute('aria-label', n + ' of ' + all.length + ' today, '
       + st + (st === 1 ? ' day streak' : ' day streak') + ', best '
       + best + (best === 1 ? ' day' : ' days') + ', open this week');
 
@@ -3447,10 +3451,28 @@
     ord.forEach(function (it, i) { if (tallAt < 0 && scTyTall(it)) tallAt = i; });
     if (tallAt > 1) ord.splice(1, 0, ord.splice(tallAt, 1)[0]);
 
-    ord.forEach(function (it) {
+    /* ── AND ONE IS WIDE, BECAUSE THE ARITHMETIC LEAVES AN ORPHAN ──
+       The tall tile takes two cells of the two-column grid, so six
+       items occupy seven cells and seven cells cannot pair. Something
+       has to be full width, and drawing that as a half tile with a
+       hole beside it is the mistake this fixes.
+
+       WHICH one is not a taste call either: the tall tile and the two
+       beside it fill the first two rows, so the odd cell is the FIRST
+       item after them. Worked out rather than named, so a seventh
+       habit re-solves it instead of stranding the rule on six — at
+       seven items the cells come out even and nothing is wide at all.
+
+       The add control at the foot is full width and sits OUTSIDE this
+       count: it is not one of your habits, so a grid that paired a
+       tile with it would be claiming it was. */
+    var wideAt = (ord.length + (tallAt >= 0 ? 1 : 0)) % 2
+      ? Math.min(tallAt >= 0 ? 3 : 0, ord.length - 1) : -1;
+
+    ord.forEach(function (it, oi) {
       var on = !!got[it.id], late = !on && scLate(it), tall = scTyTall(it);
       var row = scEl('div', 'ty-row' + (on ? ' is-on' : '') + (late ? ' late' : '')
-        + (tall ? ' is-tall' : ''));
+        + (tall ? ' is-tall' : '') + (oi === wideAt ? ' is-wide' : ''));
       row.dataset.item = it.id;
       /* ── DRAWN, NOT PRESSED ──
          The tile is one control: a tap logs and two taps open the
@@ -3533,13 +3555,27 @@
          presses in carries this one. */
       body.appendChild(props);
 
-      /* ── THE LINE UNDER THE FIGURE NAMES ITS WINDOW ──
-         `Today` on a number, `This week` on a tick — and where the tick
-         has something better to say, it says that instead: which block
-         fed it, or the book you read. */
-      var when = it.k === 'do'
-        ? (via || (on ? 'Logged today' : late ? 'Missed' : 'This week'))
-        : (on ? 'Today' : late ? 'Missed' : 'Not yet');
+      /* ── THE LINE UNDER THE FIGURE SAYS WHAT THE FIGURE MEANS ──
+         `5 / 6` is unreadable without it, so a tick says `days on this
+         week` every time rather than sometimes naming a block instead.
+         What the block or the book had to say has not gone: it moved
+         to the foot of the tile, under the strip, where it is an extra
+         rather than the thing standing in for the label.
+
+         A NUMBER NAMES ITS WINDOW, and only the tall one names an aim.
+         `of 3 L` is drawn there because the gauge beside it is
+         literally measured against that figure; Steps has no aim
+         anywhere in this app — its marks are the dial's ladder, and
+         printing `of 20,000` off the top rung would be the screen
+         inventing a target nobody set. */
+      var when;
+      if (it.k === 'do') {
+        when = 'days on this week';
+      } else if (tall && scTyAim(it)) {
+        when = 'of ' + scTyAim(it) + (it.unit || '');
+      } else {
+        when = on ? 'Today' : late ? 'Missed' : 'Not yet';
+      }
       body.appendChild(scEl('span', 'ty-when', when));
 
       var ch = scEl('span', 'ty-ch');
@@ -3555,7 +3591,12 @@
         trk.appendChild(fil);
         g.appendChild(trk);
         var mk = scEl('span', 'ty-gm');
-        [['100%', 0], ['50%', 50]].forEach(function (q) {
+        /* THREE MARKS, AND THE FOOT IS THE ONE THAT WAS MISSING. A
+           gauge labelled at the top and the middle and left bare at
+           the bottom reads as a scale that runs out rather than one
+           that starts at nought — which is the one end a person
+           actually checks a water tracker against. */
+        [['100%', 0], ['50%', 50], ['0%', 100]].forEach(function (q) {
           var sp = scEl('span', null, q[0]);
           sp.style.top = q[1] + '%';
           mk.appendChild(sp);
@@ -3575,13 +3616,34 @@
       } else {
         var ser = scTySeries(it);
         if (ser) {
-          ch.insertAdjacentHTML('beforeend', scTyArea(ser));
+          /* ── THE AREA SITS IN A WELL ──
+             A plot needs an edge or it is a smear on the card, and
+             this is the reference's own treatment. It is NOT the frame
+             inside a frame this project keeps removing: that rule is
+             about a panel drawn round a list of objects, and a well is
+             the plot AREA — the thing the marks are measured inside.
+             The gauge and the week strip get none, because neither is
+             a plot: a filled track and seven blocks are already their
+             own shape. */
+          var well = scEl('span', 'ty-well');
+          well.insertAdjacentHTML('beforeend', scTyArea(ser));
+          ch.appendChild(well);
           var ax2 = scEl('span', 'ty-ax');
           ser.forEach(function (s) { ax2.appendChild(scEl('span', null, s.lab)); });
           ch.appendChild(ax2);
         }
       }
       body.appendChild(ch);
+
+      /* ── AND THE FOOT CARRIES WHAT THE LABEL USED TO STAND IN FOR ──
+         The book you read, the block that fed the tick, or the one
+         thing a state can say that the strip cannot. Under the chart
+         rather than over it, because it is the least of what the tile
+         says and the figure is the most. */
+      var ft = it.k === 'do'
+        ? (via || (late ? 'Missed its window' : ''))
+        : '';
+      if (ft) body.appendChild(scEl('span', 'ty-ft', ft));
 
       /* ── AND A HABIT WITH AN AIM CARRIES THE WEEK ON ITS FOOT ──
          The figure above it is about the week too, but as a count; this
@@ -3666,17 +3728,26 @@
       }
       grid.appendChild(row);
     });
-    /* ── THE WAY IN, AND IT IS THE LAST THING ON THE GRID ──
+    /* ── THE WAY IN, AND IT IS UNDER THE GRID RATHER THAN ON IT ──
        Under the tiles rather than in the bar: the bar holds three tabs
        and an add button at 390px, and a fourth would be the control
-       that made the row too tight to press. */
+       that made the row too tight to press.
+
+       OUT OF THE GRID, and that is not tidiness. The rows have a
+       130px floor so an eighth habit cannot compress every tile into
+       a strip of labels — and a 41px control sitting in one of those
+       rows was drawn at 168px, taking a whole tile's worth of the one
+       screen this layout exists to fit inside. It is not one of your
+       habits, so it does not take a habit's box. */
     var add = scEl('button', 'ty-add');
     add.type = 'button';
     add.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
       + '<path d="M12 5v14M5 12h14"/></svg>';
     add.appendChild(document.createTextNode('Add a habit'));
     add.addEventListener('click', scHabitSheet);
-    grid.appendChild(add);
+    var was = grid.parentNode.querySelector(':scope > .ty-add');
+    if (was) was.parentNode.removeChild(was);
+    grid.parentNode.insertBefore(add, grid.nextSibling);
     /* The foot said the longest streak, which is the third figure in
        the panel at the top now. It carries the one thing that panel
        cannot: what to do when there is no run at all. */
