@@ -10072,12 +10072,19 @@ Absolute inside a relative well, and a basis in PIXELS rather than
 `auto`, so the well's floor is the number written down and the drawing
 is told what it got rather than asked what it wants.
 
-**The check for it had to be about the ROW.** The well's own height
-cannot tell the two apart — stretched it measured **.36 of its width
-against an intrinsic .38**, which is a threshold that has to be wrong
-one way or the other. The row is unambiguous at 144 against 238, and it
-is held to the grid's own declared floor rather than to a number typed
-into the test.
+**And the check for it asserts the POSITION, which is the half that
+could be proved.** Two consequence measurements were tried and neither
+discriminates: the well's own height stretched to **.36 of its width
+against an intrinsic .38**, a threshold that has to be wrong one way or
+the other; and the row, held to the grid's own declared floor, came
+back **169 against a ceiling of 194** with the svg put back in flow,
+because the row it sits in is already being stretched by something
+else. The 238px rows the bug produced needed a combination of this file
+that neither break could reach. Both figures ride the payload, where
+they name the shape of a failure; **neither is asserted, and that is
+written down rather than left to look verified** — a clause that cannot
+fail is worse than none, because it is what makes the rest of a claim
+sound checked.
 
 ### The plot sits in a well, and only the plot
 
@@ -10125,6 +10132,23 @@ neither the add control nor the foot note. **Where there IS room the
 rows take it** — `flex: 1 0 auto` on the grid with `minmax(108px, 1fr)`
 rows, so a taller phone spends the difference on the charts rather than
 on a gap at the bottom.
+
+### Two of the mosaic's own checks did not bite
+
+Proved by breaking each on purpose, which is the only way either was
+ever going to be found.
+
+**THE WELL CHECK PASSED ON A WELL WITH NO GROUND.** It was written as
+`wellBg !== cardBg`, and `background: none` computes to a transparent
+black that differs from the card on every channel — so deleting the
+plot area's ground sailed through the check that exists to require one.
+The ALPHA is the claim: a plot area has to be painted.
+
+**AND A MISSING FOOT TOOK THE FILE DOWN INSTEAD OF FAILING.** One read
+of `.ty-ft` had no guard, so removing the foot line threw forty
+assertions early and the run reported `no summary` — the greenest-
+looking failure there is, and the fourth time this file has recorded
+it. It reads defensively now and fails with a name.
 
 ### And the glyph check had been measuring the label
 

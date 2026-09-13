@@ -3008,15 +3008,23 @@ const SAID = [
          against the 108 asked for, with nothing in the stylesheet
          looking wrong.
 
-         THE SYMPTOM IS THE ROW, so that is what is measured. The
-         well's own height cannot tell the two apart — stretched it
-         came out at .36 of its width against an intrinsic .38, which
-         is a threshold that would have to be wrong one way or the
-         other. The row is unambiguous: 144 against 238.
+         THE POSITION IS THE PROVEN HALF, and the row height is NOT:
+         said plainly, because a clause that cannot fail is worse than
+         none — it is what makes the rest of a claim sound verified.
 
-         Held to the grid's OWN declared floor rather than to a number
-         typed here, so a change to the type scale moves both and the
-         check still means what it says. */
+         Two measurements were tried and neither discriminates. The
+         well's own height stretched to .36 of its width against an
+         intrinsic .38, which is a threshold that has to be wrong one
+         way or the other. The row was then held to the grid's own
+         declared floor — and with the svg put back in flow it came
+         back 169 against a ceiling of 194, well inside, because the
+         grid row it sits in is already being stretched by something
+         else. The 238px rows the bug actually produced needed a
+         different combination of this file than either break could
+         reach.
+
+         So both are carried in the PAYLOAD, where they name the shape
+         of a failure when one happens, and neither is asserted. */
       pos: cs.position,
       rowH: Math.round(g('p').getBoundingClientRect().height),
       /* The track is `minmax(108px, 1fr)` and that is what computes,
@@ -3031,8 +3039,7 @@ const SAID = [
     well.inWell && well.wellA > 0 && well.wellBg !== well.cardBg
     && !well.gaugeWell && !well.weekWell, well);
   ok('and the drawing is out of flow, so the row sizes the chart and not the reverse',
-    well.pos === 'absolute' && well.floor > 0
-    && well.rowH <= well.floor * 1.8, well);
+    well.pos === 'absolute', well);
 
   /* THREE MARKS ON THE GAUGE, and the foot is the one that was
      missing: a scale labelled at the top and the middle and left bare
