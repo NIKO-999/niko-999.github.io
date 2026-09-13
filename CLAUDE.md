@@ -9666,3 +9666,146 @@ went with the only scene that used them.
 shape: the rule was always that each card says one thing nobody can
 find by pressing around, and the rating row appears at the foot of the
 day by itself.
+
+## The month is a stop, and a cell says what you did
+
+Reported twice in four words: *I can't see where to change the view.*
+The calendar lived behind the date in the head — 12.5px of `--dim`
+with no ground, no edge and no mark, which is a caption whatever
+element it is. Seven treatments were drawn over the real head at 1:1
+and the answer was none of them: **it is a tab now**, which is the one
+place in this app nobody has to be told about.
+
+**FIVE STOPS FIT AND THAT IS MEASURED.** 56.4px each at 390 and 53.4
+at 375, 49 tall, both over the 44px floor, with `Calendar` at 45px of
+label in 54 of room. At 360 it needed two pixels and the tabs' own
+side padding paid them. At 320 five stops are **42.4px and under the
+floor** — that is an iPhone 5, this app is measured at 390, and it is
+a cost written down rather than one designed for.
+
+**THE DATE WENT BACK TO BEING A DATE.** Two doors to one screen is a
+control answering the same question twice, and the one that goes is
+always the one nothing on screen can describe. Eight declarations
+making a `<button>` look like a paragraph went with it, and so did the
+intro card that said *press the date for the month* — **a card
+picturing a tab is a picture of the thing you are already looking
+at**, which is this intro's own rule for what earns a card.
+
+**AND THE HEAD SAYS THE FIGURE, NOT THE MONTH.** It printed
+`September 2026` for one render with the row directly under it saying
+the same words beside the arrows that STEP it — a caption repeating
+the thing it captions. The row names the month; the head says how many
+of its days you put something on, which is the one fact the row cannot
+carry. Held as a string and worked out on the PAINT: `scDate` runs on
+the live pass every thirty seconds whatever view is up, and this walks
+thirty-one days of blocks, ticks and sessions for a number that cannot
+move while you are looking at it.
+
+**A DAY IS A SHEET OVER A PANE.** The month was a sheet too, so the
+day had to replace it and carry its own heading and an arrow back. As
+a pane it is simply still there: the way out of a day is the way out
+of any sheet in this app, and the sheet's title bar names the date, so
+`cl-head is-day` and its arrow both went. Asserted as the grid being
+under it the whole time and drawn again after — "the month came back"
+passes on a build that rebuilds it and on one that never lost it, and
+only the second is what a pane means.
+
+### The cell carries a name
+
+Asked for against a real app's calendar — a ruled grid with green
+pills in it — and the one thing that reference cannot do at 390px is
+fit a name: seven columns is **50.1px**, about six characters, so
+`CHEST/SH` and `CHEST/TRI` both read as *chest something*.
+
+Six treatments were drawn over the same August at 1:1: the reference
+faithfully, one-word pills, glyphs, letters, bars, and what shipped.
+**Pills carrying ONE WORD** won, because a workout's name already is
+one word by construction.
+
+**TASKS ARE THE BLOCKS YOU KEPT, not the ones the day asked of you.**
+The schedule repeats, so drawing the template on thirty days is the
+same five words thirty times; what changes day to day — and is
+therefore the only thing a month can be about — is what you actually
+did.
+
+**THE COLOUR IS THE BLOCK'S SESSION**, which is the one WHICH a block
+already has: morning, afternoon, evening, the same three the week's
+own headings wear. A per-block hue would be a colour nobody chose.
+Measured between a morning block and an afternoon one, because **a
+fixture whose blocks are all before noon cannot tell a colour that
+says which from a colour that says nothing at all** — the first cut of
+that check would have passed on one flat amber.
+
+**AND THE HUE DOTS WENT.** They were one dot per thing you TICKED,
+which is a third record beside blocks and sessions, and three
+registers do not go in 50px. What they said is still said by name in
+the day sheet's Logged line, one press away.
+
+**WHAT A CELL CANNOT HOLD, IT CUTS — and the List is the other half.**
+The pair is the claim and it is asserted on the same word: `Wind down`
+is cut in the grid and whole in the list. The fixture had to grow a
+day whose ONLY kept block has the long name, because on a day where it
+is the third of three it is a count rather than a pill and nothing is
+ever drawn too wide to fit.
+
+**THE OVERFLOW COUNT RIDES THE DATE'S LINE.** It sat under the pills,
+where the reference puts `+1 more` — and the foot of a cell here
+already belongs to the kept-rule, so the two drew over one another.
+The date is right-aligned with the whole left of that line free.
+
+**AND THE KEPT RULE WENT INTO FLOW.** It was pinned 4px off the cell's
+bottom, exact while a cell held a number and two 4px dots; with a name
+in it the second pill reaches the same band and the rule drew straight
+across the word — 1.5px of overlap, a mark printed over type rather
+than under it. `margin-top: auto` keeps it at the foot AND makes a
+collision impossible, because the content now decides where the foot
+is. It is **Tasks' alone**: on the workouts stop there is no
+denominator for it to be a share of.
+
+### Two questions, and only one of them is a pair
+
+Tasks or Workouts is WHAT the month is about and rides the stops —
+the same segmented control Today and Friends already use. Month or
+List is HOW that grid is drawn and rides the month row beside the
+arrows.
+
+**MONTH/LIST WENT IN AS A PAIR AND THE MEASUREMENT KILLED IT.** Two
+30px glyphs in a 64px track were chosen over two words in 96, on the
+argument that the words cost the month name its centre. Reaching each
+half to 44 makes them **overlap by twelve pixels**, so the later one
+takes presses aimed at the first: the pair owned **38px across** where
+a lone control owns 44. Widening it to hold two real targets is 88px,
+which is the words' 96 for none of the words' naming — **the icons
+were never buying anything.**
+
+**THEN IT WAS 34 DRAWN REACHING 44, AND THAT MEASURED 38 TOO.**
+`#scCalPane` is `overflow-x: hidden`, said out loud for `.sheet`'s own
+reason, and this control is the last thing on its row: its right edge
+and the pane's are the same pixel, so the five pixels the pseudo-
+element reached were CLIPPED. Vertically it worked, which is exactly
+what made the reading look like a neighbour stealing presses. **A
+reach cannot leave its own pane**, so the box is the target: 44x44,
+the same size as the two arrows beside it, square where they are round
+because they step the month and this changes what the month IS.
+
+One toggle, `aria-pressed`, filled when on — the head's Edit tile's
+own shape, and the same control both ways, because a mode you can
+enter and not leave is what every route to this app's editor was
+rejected for.
+
+### And a cell found by what it READS
+
+`openRate` matched a day on the cell's own `textContent`, which was
+the date and nothing else for exactly as long as a cell held a number
+and two 4px dots. The day it held a NAME the string became
+`13WakeTrain`, `find` returned undefined, and the next line took the
+whole file down with *no cell for today* — **forty assertions before
+the thing it was testing, and reported as `no summary`**, which is the
+greenest-looking failure there is.
+
+**Seventh time this file has recorded that shape**, after a day card
+found by its label, a row found by its name, a palette name nothing
+matched, a workout key that resolved to two cards, a selector string
+in a fixture and a `<span>` that was the wrong span. The fix is always
+the same one: ask for the thing the element was BUILT for. It reads
+`data-day`.

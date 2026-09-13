@@ -69,7 +69,7 @@
   } catch (e) {}
 }());
 </script>
-<link rel="stylesheet" href="app.css?v=bf22644c" />
+<link rel="stylesheet" href="app.css?v=11f3492a" />
 </head>
 <body>
 
@@ -87,13 +87,17 @@
       <span class="h-ic" id="scHdIc" aria-hidden="true"></span>
       <div class="h-tx">
         <h2 class="h-day" id="scHdDay"></h2>
-        <!-- ── THE DATE IS THE DOOR TO THE CALENDAR ──
-             A month of days, reached by pressing the day you are on.
-             Disabled on every other view rather than swapped for a
-             paragraph: one node cannot drift from itself, and a
-             control that does nothing where it does nothing should
-             not be in the tab order saying so. -->
-        <button class="h-sub" id="scHdDate" type="button"></button>
+        <!-- ── AND IT IS A DATE AGAIN, NOT A DOOR ──
+             It was a button for one release, on the argument that the
+             head already prints which day you are on so pressing it
+             for more days is the control naming itself. That argument
+             is sound and it was answering the wrong question: nothing
+             up here SAYS it is a control, so what it named was a
+             feature nobody could find. The month is a stop on the bar
+             now, and two doors to one screen is a control answering
+             the same question twice — the one that goes is always the
+             one nothing on screen can describe. -->
+        <p class="h-sub" id="scHdDate"></p>
       </div>
       <!-- ── EDIT, AND IT ARMS ONE PRESS ──
            The editor was behind a double tap for three rounds and was
@@ -207,6 +211,29 @@
     <div id="scNotePane"></div>
   </section>
 
+  <!-- ── THE MONTH READ BACK ──
+       A pane rather than a sheet, because it is a stop now. The day it
+       opens is still a sheet: one screen at a time is this app's own
+       shape, and a month with a day drawn under it would be two
+       records of one thing on one screen. -->
+  <section class="cal" id="scCal" hidden>
+    <!-- ── TWO STOPS, WHICH IS THE CONTROL TODAY AND FRIENDS ALREADY
+             USE ──
+         Tasks and Workouts are two records of the same month and only
+         one of them can be on a 50px cell at a time, so the choice is
+         a stop rather than a second screen. The other question on this
+         tab — month or list — rides the month row beside the arrows,
+         because it changes how that grid is drawn and this changes
+         WHAT is on it. -->
+    <nav class="fr-seg" id="scCalStops" aria-label="Calendar">
+      <button class="fr-stop on" id="scCalTask" data-calstop="task"
+              aria-current="true">Tasks</button>
+      <button class="fr-stop" id="scCalWork" data-calstop="work"
+              aria-current="false">Workouts</button>
+    </nav>
+    <div id="scCalPane"></div>
+  </section>
+
   <section class="week" id="scWeek">
     <div class="strip" id="scDayStrip" role="group" aria-label="The week"></div>
     <!-- ── THE DAY'S OBJECTIVES, ON THE DAY ──
@@ -245,6 +272,24 @@
     <button class="tab" id="scTabTally" data-view="tally" aria-label="Today’s five">
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7"/></svg>
       <span>Today</span>
+    </button>
+    <!-- ── THE MONTH IS A STOP, NOT A DOOR BEHIND A LINE OF TYPE ──
+         It lived behind the date in the head, which is 12.5px of
+         --dim with no ground, no edge and no mark — a control wearing
+         the same type as every caption in the app. It was reported as
+         simply not being there, twice, which is what an invisible
+         control is.
+
+         FIVE FIT AND THAT IS MEASURED. At 390 each stop is 56.4px
+         wide and 49 tall, both over the 44px floor, with "Calendar"
+         at 45px of label in 54 of room; at 375 it is 53.4 and still
+         clear. At 360 the label needed 2px and the tabs' own side
+         padding paid it. At 320 five stops are 42.4px and under the
+         floor — that is an iPhone 5 and this app is measured at 390,
+         so it is a cost written down rather than one designed for. -->
+    <button class="tab" id="scTabCal" data-view="cal" aria-label="Calendar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3.5v3M16 3.5v3"/><circle cx="8.5" cy="14.5" r="1.2"/><circle cx="12" cy="14.5" r="1.2"/><circle cx="15.5" cy="14.5" r="1.2"/></svg>
+      <span>Calendar</span>
     </button>
     <!-- One stop for the whole social half rather than two. The
          leaderboard and the feed are the same subject seen twice — who
@@ -307,6 +352,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=8496844d"></script>
+<script src="app.js?v=c6a006d5"></script>
 </body>
 </html>

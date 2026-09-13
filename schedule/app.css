@@ -412,12 +412,12 @@ body {
    `[hidden]` was already said out loud for all four panes — the one
    thing that would otherwise have broken here, and the eighth time
    this app has had that bug. */
-.tally, .friends, .notes {
+.tally, .friends, .notes, .cal {
   flex: 1;
   min-height: 0;
   flex-direction: column;
 }
-#scTyPane, #scFrPane, #scFeed, #scNotePane {
+#scTyPane, #scFrPane, #scFeed, #scNotePane, #scCalPane {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
@@ -546,31 +546,21 @@ body {
   letter-spacing: -.03em;
   line-height: 1.05;
 }
-/* ── AND THE DATE IS THE DOOR TO THE CALENDAR ──
-   A button rather than a paragraph, because on the week it opens a
-   month of days: the head already prints which day you are on, and
-   pressing it for more days is the control naming itself. It carries
-   no chrome of its own — a filled chip up here would be a second
-   object beside the two tiles — so every one of these declarations is
-   the `<p>` this replaced, plus the resets a button needs to look
-   like one. Disabled on every other view, where there is no day for
-   it to be about and it is honestly not a control. */
+/* ── AND IT IS A DATE AGAIN ──
+   It was a `<button>` for one release, on the argument that the head
+   already prints which day you are on so pressing it for more days is
+   the control naming itself. Sound, and answering the wrong question:
+   nothing up here SAYS it is a control, so what it named was a feature
+   nobody could find — reported twice. The month is a stop on the bar,
+   and the eight declarations that made a button look like a paragraph
+   went with the button. */
 .h-sub {
   margin-top: 1px;
   font-size: 12.5px;
   font-weight: 500;
   color: var(--dim);
   font-variant-numeric: tabular-nums;
-  display: block;
-  width: 100%;
-  padding: 0;
-  border: 0;
-  background: none;
-  font-family: inherit;
-  text-align: left;
-  letter-spacing: inherit;
 }
-.h-sub:disabled { color: var(--dim); opacity: 1; }
 .hd-top .head-you { flex: none; }
 
 /* ── EDIT ARMS ONE PRESS ──
@@ -3411,11 +3401,20 @@ body {
   border: 1px solid color-mix(in srgb, var(--ink) 11%, transparent);
 }
 
+/* ── 1px OF SIDE PADDING, AND IT IS THE FIFTH STOP THAT NEEDS IT ──
+   Measured at every phone width with Calendar on the bar: five stops
+   are 56.4px at 390 and 53.4 at 375, both clear. At 360 each stop is
+   50.4 and "Calendar" is 45px of label — which does not fit inside 4px
+   of padding and DID inside 2. A clipped word reads as a rendering
+   fault, which is why the deck's shut cards carry no words at all.
+   At 320 five stops are 42.4px and under this app's own 44px floor;
+   that is an iPhone 5 and this app is measured at 390, so it is a cost
+   written down rather than one designed for. */
 .tab {
   flex: 1; min-width: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 3px;
-  padding: 7px 2px 6px;
+  padding: 7px 1px 6px;
   border: 0; border-radius: 25px;
   background: none;
   color: var(--dim);
@@ -5543,6 +5542,18 @@ body {
    generic names and a collision does not throw, it REPLACES.
    ═══════════════════════════════════════════════════════════ */
 
+/* ── THE MONTH IS A STOP NOW ──
+   It was a sheet reached by pressing the date in the head, which is
+   12.5px of --dim with no ground and no mark: a control wearing the
+   same type as every caption in the app, reported twice as simply not
+   being there. `[hidden]` is said out loud because this takes a
+   `display`, which is the ninth time in this app — the rail, the page
+   dots, the toast, the intro, the objectives row, the edit control and
+   the panes each had the attribute set correctly while an author
+   `display` outranked the browser's own rule. */
+.cal { margin-top: 18px; display: flex; }
+.cal[hidden] { display: none !important; }
+
 .notes { display: flex; }
 /* `[hidden]` HAS TO BE SAID ONCE A THING TAKES A DISPLAY, and this is
    the eighth time in this app. The rail, the page dots, the toast, the
@@ -6428,9 +6439,108 @@ body {
 .cl-arw.is-fwd svg { transform: scaleX(-1); }
 /* A day's own heading sits beside the arrow it belongs to rather than
    in the middle of a row with a control on one side only. */
-.cl-head.is-day > b { text-align: left; font-size: 17px; }
 .cl-arw:disabled { opacity: .3; cursor: default; }
 .cl-arw:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+/* ── MONTH OR LIST, BESIDE THE MONTH IT DRAWS ──
+   Two glyphs rather than two words: the words take 96px of a row that
+   is already two arrows and a name, and the name loses its centre for
+   them. What that costs is real and is paid rather than argued away —
+   a glyph in a corner names nothing — so each carries a written label
+   and an `aria-pressed`.
+
+   30x26 DRAWN, 44 REACHABLE, which is this app's rule four times over:
+   `.row-ed` draws 26 inside 44, the objectives plus draws a small mark
+   inside 44, the children's dots grew the target and left the drawing
+   alone, and the head's two tiles shipped 38 and 38 and were reported
+   as not working. `position: relative` is load-bearing on the host,
+   or the pseudo-element resolves against whatever ancestor happens to
+   be positioned. */
+/* ── 44 DRAWN, BECAUSE A REACH CANNOT LEAVE THIS PANE ──
+   It went in at 34 with a -5px pseudo-element out to 44, which is
+   this app's rule five times over — `.row-ed` draws 26 inside 44, the
+   objectives plus draws a small mark inside 44, the children's dots
+   grew the target and left the drawing alone. It measured 38 across.
+   `#scCalPane` is `overflow-x: hidden`, said out loud for `.sheet`'s
+   own reason, and this control is the last thing on its row: its
+   right edge and the pane's are the same pixel, so the five pixels
+   the pseudo reaches were CLIPPED. Vertically it worked, which is
+   what made the reading look like a neighbour stealing presses.
+
+   So the box is the target. 44x44 is also what the two arrows beside
+   it are, and a smaller control in a row of controls reads as the
+   lesser one — which this is not. Square where they are round,
+   because they step the month and this changes what the month IS. */
+.cl-v {
+  flex: none;
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  color: var(--dim);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+/* FILLED WHEN ON, which is every other two-state control in this app:
+   the ink with the paper on it, never a colour. A colour would be
+   inventing a meaning for the accent, which says WHICH and never what
+   mode you are in. */
+.cl-v.on { background: var(--ink); color: var(--paper); }
+.cl-v svg {
+  width: 19px; height: 19px;
+  fill: none; stroke: currentColor; stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.cl-v:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
+
+/* ── THE SAME PILL ON A LINE OF ITS OWN ──
+   Nothing is drawn between the rows, which is this app's rule
+   everywhere except the month grid — and the grid is the exception
+   because a cell you find by counting across and down needs something
+   to count along. A list does not. */
+.cl-ls { margin-top: 10px; }
+.cl-lr {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 9px 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.cl-ld {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+}
+.cl-lr.is-now .cl-ld { color: var(--red); font-weight: 800; }
+.cl-ld > u {
+  display: block;
+  text-decoration: none;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  color: var(--spent);
+}
+.cl-lt { min-width: 0; display: flex; flex-wrap: wrap; gap: 5px; }
+/* A pill on a line has room, so it is bigger and it never ellipsises
+   — which is the one thing this view exists to do. */
+.cl-lt .cl-p {
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  white-space: normal;
+  overflow: visible;
+}
+.cl-lr:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
 .cl-dows {
   display: grid;
@@ -6473,14 +6583,24 @@ body {
   align-items: flex-start;
   justify-content: flex-start;
   text-align: left;
-  aspect-ratio: 1;
+  /* A MINIMUM, NOT A RATIO. `aspect-ratio: 1` was right while a cell
+     held a number and two 4px marks; a cell with two pills in it is
+     taller than it is wide, and a ratio would clip the second one.
+     `overflow: hidden` is what makes the clipping the CELL's rather
+     than the pill's — a pill wider than its column would otherwise
+     print itself over the day beside it, which is the shut card's own
+     bug and the reason that check measures every descendant against
+     the card's right edge. */
+  min-height: 52px;
+  min-width: 0;
+  overflow: hidden;
   border: 0;
   border-right: 1px solid var(--hair);
   border-bottom: 1px solid var(--hair);
   border-radius: 0;
   background: none;
   cursor: pointer;
-  padding: 3px 4px;
+  padding: 3px 3px 5px;
 }
 .cl-c.is-pad { cursor: default; }
 /* A date is a DATE, at one weight whether or not the day has
@@ -6490,6 +6610,13 @@ body {
    where there is something to say, there is nothing left for the
    dimming to separate. */
 .cl-c > i {
+  /* ALIGNED RIGHT, over pills that start at the left. The date is the
+     thing you count along a row to find and the pill is the thing you
+     read once you have found it, so they are not in the same column
+     on purpose — which is also what keeps a two-line cell from
+     reading as a name with a number stuck on the front of it. */
+  align-self: stretch;
+  text-align: right;
   font-style: normal;
   font-size: 10.5px;
   font-weight: 600;
@@ -6508,18 +6635,62 @@ body {
    else: six things inside forty pixels is a thing only a colour can
    say. Wrapped rather than scrolled or clipped, because a habit you
    added yourself is a seventh dot and the cell has to take it. */
-.cl-d {
-  position: absolute;
-  left: 4px; right: 4px; top: 20px;
+/* ── A NAME IN THE THING'S OWN COLOUR ──
+   22% under a label mixed 72% toward the ink, which is the tag's own
+   arithmetic everywhere else in this app — measured over all eighteen
+   tag hexes against the card each sits on, worst 5.13:1. Nothing new
+   is solved here because nothing new is drawn: it is the row's tag at
+   9px.
+
+   ELLIPSISED, NOT WRAPPED. A workout's name is one word by
+   construction and a block's is not, so "Wind down" has to end
+   somewhere — and a wrapped pill is two lines of a cell that has room
+   for two pills. Where it matters the List is one press away, which
+   is the whole of why that toggle is on this screen. */
+.cl-ps {
+  align-self: stretch;
+  min-width: 0;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 2px;
+  margin: 1px 0 3px;
 }
-.cl-d > i {
-  display: block;
-  width: 4px; height: 4px;
-  border-radius: 50%;
-  background: var(--tg);
+.cl-p {
+  min-width: 0;
+  border-radius: 3px;
+  padding: 1px 3px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: color-mix(in srgb, var(--tg) 22%, transparent);
+  color: color-mix(in srgb, var(--tg) 72%, var(--ink));
+}
+/* The flat neutral for a colour this build cannot resolve, which is
+   `.wo.is-off`'s own path and its own reason: a state is never
+   coloured, and an unknown is not a claim about anything. */
+.cl-p.is-off {
+  background: color-mix(in srgb, var(--ink) 9%, transparent);
+  color: var(--dim);
+}
+/* ── AND THE OVERFLOW COUNT RIDES THE DATE'S LINE ──
+   It sat under the pills, which is where a "+1 more" goes in the
+   reference this came from — and the foot of a cell here is already
+   the kept-rule's, so the two drew over one another. The date is
+   right-aligned with the whole left of that line free, so the count
+   goes there: it reads as "and two more on the 4th", it can never
+   collide with anything, and it costs the cell no height at all. */
+.cl-more {
+  position: absolute;
+  left: 3px; top: 3px;
+  font-size: 8.5px;
+  font-weight: 600;
+  color: var(--spent);
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
 }
 /* -- AND A RULE AT THE FOOT SAYS HOW MUCH OF THE DAY YOU KEPT --
    At the foot of a RULED cell rather than floating under a number: a
@@ -6528,9 +6699,18 @@ body {
    away. No hue in it, because a colour here would be the screen
    grading your month back at you -- the colour on this grid says
    WHICH, and that is the dots' job. */
+/* ── IN FLOW, NOT ABSOLUTE, and that is what a pill changed ──
+   It was pinned 4px off the cell's own bottom, which was exact while
+   a cell held a number and two 4px dots. With a name in it the second
+   pill reaches the same band and the rule drew straight across the
+   word — measured as 1.5px of overlap, which is a mark printed over
+   type rather than under it. `margin-top: auto` inside the cell's own
+   column keeps it at the foot AND makes it impossible to collide
+   with, because the content now decides where the foot is. */
 .cl-b {
-  position: absolute;
-  left: 4px; right: 4px; bottom: 4px;
+  position: relative;
+  align-self: stretch;
+  margin-top: auto;
   height: 2.5px;
   border-radius: 2px;
   background: var(--tick-off);

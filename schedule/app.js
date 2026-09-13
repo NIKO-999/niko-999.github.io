@@ -2604,7 +2604,8 @@
     if (n % 100 >= 11 && n % 100 <= 13) return 'th';
     return ['th', 'st', 'nd', 'rd'][n % 10] || 'th';
   }
-  var VIEW_NAME = { tally: 'Today', friends: 'Friends', notes: 'Notes' };
+  var VIEW_NAME = { tally: 'Today', friends: 'Friends', notes: 'Notes',
+                    cal: 'Calendar' };
 
   var HEAD_ICON = {
     today: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/>'
@@ -2619,7 +2620,17 @@
       + '<path d="M3 19c0-3.2 2.7-5 6-5s6 1.8 6 5"/>'
       + '<path d="M16.5 6.4a3.4 3.4 0 010 6.5M21 19c0-2.7-1.8-4.4-4.2-4.8"/></svg>',
     notes: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 3.5h9l4 4v13h-13z"/>'
-      + '<path d="M14.5 3.5v4h4M8.5 12h7M8.5 16h4.5"/></svg>'
+      + '<path d="M14.5 3.5v4h4M8.5 12h7M8.5 16h4.5"/></svg>',
+    /* THE MONTH'S OWN, and it is not `week`'s. The week head already
+       draws a bare calendar, so reusing it would be two screens under
+       one glyph — this app's own rule that two marks with one
+       silhouette is worse than a mark missing, because the head is
+       then confidently wrong about which screen you are on. The days
+       in it are what tells them apart. */
+    cal: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17"'
+      + ' height="15" rx="2.5"/><path d="M3.5 10h17M8 3.5v3M16 3.5v3"/>'
+      + '<circle cx="8.5" cy="14.5" r="1.2"/><circle cx="12" cy="14.5" r="1.2"/>'
+      + '<circle cx="15.5" cy="14.5" r="1.2"/></svg>'
   };
   /* ── THE HEAD SAYS WHICH SCREEN, WHICH DAY, AND WHAT IS ON IT ──
      A glyph tile, the name at 30px, and one line: the date, how many
@@ -2634,23 +2645,29 @@
        over the goals pane with the friends glyph beside it. A ternary
        is a list of two with no room in it; a lookup names the next
        view on the day it is added. */
-    /* ── AND IT IS ONLY A CONTROL WHERE IT IS A DATE ──
-       The calendar is the week read back, so the door is live on the
-       week and nowhere else — and not while the head is saying what
-       it is waiting for either, because that line is a MODE rather
-       than a day and a door on it would be answering a question
-       nobody asked. */
-    sub.disabled = view !== 'list';
+    /* ── AND IT IS A DATE, NOT A DOOR ──
+       It was a button for one release, opening the month. The month
+       is a stop on the bar now, and the argument that killed this is
+       the one the whole change is about: nothing up here says it is a
+       control, so what it named was a feature nobody could find. */
     if (view !== 'list') {
-      sub.removeAttribute('aria-label');
       day.textContent = VIEW_NAME[view] || 'Today';
       /* THE MODE SAYS WHAT IT IS, in the line the head already draws —
          the week's own rule, and the reason it is here rather than in
          a banner over a screen whose whole job is the words. */
       sub.textContent = (view === 'notes' && ntEdit)
         ? 'Editing \u00b7 tap a line, drag a heading'
-        : FULL[t.getDay()] + ' ' + t.getDate() + ' '
-          + MON[t.getMonth()] + ' \u00b7 ' + now;
+        /* ── AND ON THE MONTH IT IS THE FIGURE, NOT THE MONTH ──
+           It said the month's own name for one render and the row
+           directly under it says the same words beside the arrows
+           that STEP it — which is where a name belongs, and which
+           made the head a caption repeating the thing it captions.
+           The head carries what the row cannot: how many of those
+           days you actually put something on. */
+        : view === 'cal'
+          ? calFig
+          : FULL[t.getDay()] + ' ' + t.getDate() + ' '
+            + MON[t.getMonth()] + ' \u00b7 ' + now;
       ic.innerHTML = HEAD_ICON[view] || HEAD_ICON.tally;
       return;
     }
@@ -2670,8 +2687,6 @@
        route here was rejected for, and a second element would be one
        more object above a screen whose whole job is the words. */
     if (editArm) {
-      sub.disabled = true;
-      sub.removeAttribute('aria-label');
       sub.textContent = 'Pick a block to edit';
       ic.innerHTML = HEAD_ICON[d === t.getDay() ? 'today' : 'week'];
       return;
@@ -2679,9 +2694,6 @@
     sub.textContent = when.getDate() + ' ' + MON[when.getMonth()]
       + (mins ? ' \u00b7 ' + (mins / 60).toFixed(mins % 60 ? 1 : 0) + ' hrs' : '')
       + ' \u00b7 ' + now;
-    /* The line already says the date; what a screen reader cannot get
-       from it is that pressing it is worth anything. */
-    sub.setAttribute('aria-label', sub.textContent + ', open the calendar');
     ic.innerHTML = HEAD_ICON[d === t.getDay() ? 'today' : 'week'];
   }
 
@@ -7031,12 +7043,13 @@
      across the stops — measured at 372px against the 358 a 390px
      phone has — where the bar's own tabs are flex:1 and simply
      divide, so the bar was the arrangement that cost nothing. */
-  var VIEWS = ['list', 'tally', 'friends', 'notes'];
+  var VIEWS = ['list', 'tally', 'friends', 'notes', 'cal'];
 
   function scSetView(v, save) {
     var from = view;
     view = VIEWS.indexOf(v) >= 0 ? v : 'list';
-    var tal = view === 'tally', fr = view === 'friends', nt = view === 'notes';
+    var tal = view === 'tally', fr = view === 'friends', nt = view === 'notes',
+        cal = view === 'cal';
     /* ── ARRIVING IS WHAT OFFERS A CARD, AND LEAVING TAKES IT ──
        Coming BACK to a screen is a new visit, so a card closed with
        "Got it" is offered once more. Guarded on the view actually
@@ -7066,6 +7079,12 @@
          clearing it here would land that press on the list. */
       if (nt && !ntJump) ntOpen = null;
       ntJump = false;
+      /* ── AND ARRIVING AT THE MONTH LANDS ON THIS ONE ──
+         Which month is on screen is a position on a screen you are
+         looking at rather than a preference — the tally panels' own
+         rule, and Notes' one line up. Left set, pressing Calendar put
+         you back on whatever March you had walked to last week. */
+      if (cal) { calY = new Date().getFullYear(); calM = new Date().getMonth(); }
       if (!nt) ntEdit = false;
       /* Typing is written on a timer, so walking off the screen has to
          flush it: a note half a second old when you press another tab
@@ -7086,6 +7105,7 @@
     $('scTally').hidden = !tal;
     $('scFriends').hidden = !fr;
     $('scNotes').hidden = !nt;
+    $('scCal').hidden = !cal;
     /* Only where there are blocks to edit. `[hidden]` is said out
        loud in the stylesheet for this one too, which is the seventh
        time in this app: it takes a `display: grid`. */
@@ -7097,8 +7117,8 @@
        has cost this app the rail, the dots, the toast and the intro,
        each in turn, so the check measures the BOX rather than the
        attribute. */
-    $('scWeek').hidden = tal || fr || nt;
-    $('scEmpty').hidden = tal || fr || nt || state.items.length > 0;
+    $('scWeek').hidden = tal || fr || nt || cal;
+    $('scEmpty').hidden = tal || fr || nt || cal || state.items.length > 0;
     /* The head is the day's on the week and the screen's elsewhere,
        and the objectives row belongs to the week alone — it takes the
        open day rather than a local, because there is no day in scope
@@ -7125,6 +7145,13 @@
        it ran, which is a bug this file has already had once. */
     else if (fr) { scPaintFriends(); scFrStop(frStop, false); scArriveFriends(); }
     else if (nt) scPaintNotes();
+    /* ── AND THIS ARM WENT IN BEFORE THE `else`, NEVER OVER IT ──
+       Deleting or shadowing the first arm of an if/else chain is not
+       deleting a statement: the day the ring view went, taking one
+       line out joined the whole chain onto the branch above and every
+       view stopped painting, which surfaced four hundred lines later
+       as something else entirely. */
+    else if (cal) scCalStop(calWhat, false);
     else scLive();
 
     /* ── AFTER THE CHAIN, NEVER INSIDE IT ──
@@ -7664,13 +7691,21 @@
      is the one surface in this app that does not, and a tag is not a
      card. A hue this build cannot solve falls to the flat neutral,
      which is the path `.wo.is-off` exists for. */
+  /* THE FIRST COMPONENT NAMES THE SESSION and therefore colours it —
+     Pull + Abs is a Pull. Extracted because the calendar's month draws
+     the same claim at a smaller size, and two constructions of one
+     rule is two places to keep the token and the fallback in step. */
+  function scWoTone(k) {
+    var w0 = scWorkoutsOf(k)[0];
+    var tone = w0 && WO_TONE[String(w0.c).toLowerCase()];
+    return tone ? 'var(--w-' + tone + ')' : '';
+  }
   function scWorkTag(wr) {
     var name = wr && scWorkName(wr.k);
     if (!name) return null;
     var tag = scEl('span', 'wo', name);
-    var w0 = scWorkoutsOf(wr.k)[0];
-    var tone = w0 && WO_TONE[String(w0.c).toLowerCase()];
-    if (tone) tag.style.setProperty('--tg', 'var(--w-' + tone + ')');
+    var tone = scWoTone(wr.k);
+    if (tone) tag.style.setProperty('--tg', tone);
     else tag.classList.add('is-off');
     return tag;
   }
@@ -10066,8 +10101,13 @@
     {
       k: 'back',
       t: 'Look back',
-      s: 'Press the date for the month, or the count on Showing up for '
-       + 'the week.',
+      /* ── AND IT NAMES ONE DOOR NOW, NOT TWO ──
+         It said "Press the date for the month" as well, and the month
+         is a stop on the bar — which is findable by pressing around,
+         and this intro's whole rule is that a card is only for what
+         is not. A card picturing a tab is a picture of the thing you
+         are already looking at. */
+      s: 'The count on Showing up opens your whole week.',
       /* ── THIS REPLACED THE OBJECTIVES CARD, and the row on the day
              is what retired it ──
          That card read "Open objectives from the top of the week",
@@ -12931,13 +12971,115 @@
     return first;
   }
 
-  function scCalOpen() {
-    var t = new Date();
-    var y = t.getFullYear(), m = t.getMonth();
-    var open = null;          /* the day being read, or null for the month */
+  /* The month on screen. Module-level because the pane is repainted
+     from outside — a stop is arrived at rather than opened — and reset
+     to this month on every arrival, which is the tally panels' own
+     rule about a position on a screen you are looking at. */
+  var calY = new Date().getFullYear(), calM = new Date().getMonth();
 
-    scSheet('Calendar', function (body) {
-      function month() {
+  /* WHICH RECORD and HOW IT IS DRAWN, and both are stored the way the
+     tally's own stop is: which stop you were on is a preference, where
+     which MONTH you had walked to is a position on a screen you are
+     looking at and is reset on every arrival. A stored value this
+     build does not have falls through to the first, which is the rule
+     `sched.view.v1` and `sched.ty.v1` already keep — the list is
+     written out rather than trusted. */
+  var CAL_WHAT = ['task', 'work'], CAL_MODE = ['month', 'list'];
+  var CALW_KEY = 'sched.calw.v1', CALM_KEY = 'sched.calm.v1';
+  var calWhat = 'task', calMode = 'month';
+  try {
+    var cw = localStorage.getItem(CALW_KEY);
+    if (CAL_WHAT.indexOf(cw) >= 0) calWhat = cw;
+    var cm = localStorage.getItem(CALM_KEY);
+    if (CAL_MODE.indexOf(cm) >= 0) calMode = cm;
+  } catch (e) {}
+
+  function scCalStop(w, save) {
+    calWhat = CAL_WHAT.indexOf(w) >= 0 ? w : 'task';
+    [].forEach.call(document.querySelectorAll('[data-calstop]'), function (b) {
+      var on = b.dataset.calstop === calWhat;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-current', on ? 'true' : 'false');
+    });
+    if (save) { try { localStorage.setItem(CALW_KEY, calWhat); } catch (e2) {} }
+    scPaintCal();
+  }
+  function scCalSetMode(m, save) {
+    calMode = CAL_MODE.indexOf(m) >= 0 ? m : 'month';
+    if (save) { try { localStorage.setItem(CALM_KEY, calMode); } catch (e2) {} }
+    scPaintCal();
+  }
+
+  /* ── WHAT A CELL SAYS, AND IT IS A NAME ──
+     Six treatments were drawn over the same month at 1:1 and this is
+     the one that was picked: a pill in the thing's own colour carrying
+     ONE WORD. The reference this came from cuts its labels off at the
+     cell edge — seven columns is 50px, which is about six characters,
+     so CHEST/SH and CHEST/TRI both read as "chest something" — and a
+     clipped word reads as a rendering fault, which is why the deck's
+     shut cards carry no words at all.
+
+     A workout's name is one word by construction. A BLOCK's is not,
+     so a long one ellipsises and the List beside it is where it reads
+     whole — which is the whole reason that toggle earns its place.
+
+     TASKS ARE THE BLOCKS YOU KEPT, not the ones the day asked of you.
+     The schedule repeats, so drawing the template on all thirty days
+     is the same five words thirty times; what changes day to day, and
+     is therefore the only thing a month can be about, is what you
+     actually did. */
+  function scCalPills(c) {
+    var out = [];
+    if (calWhat === 'work') {
+      c.all.forEach(function (b) {
+        var wr = scTrainOf(c.day, b.id);
+        var w0 = wr && scWorkoutsOf(wr.k)[0];
+        if (w0) out.push({ n: w0.n, tg: scWoTone(wr.k) });
+      });
+    } else {
+      c.on.forEach(function (b) {
+        if (!(blockLog[c.day] && blockLog[c.day][b.id])) return;
+        /* The block's SESSION is its colour, because it is the one
+           WHICH a block already has: three of them, the same three the
+           week's own headings and pills wear. A per-block hue would be
+           a colour nobody chose. */
+        var s2 = b.s < 720 ? 'm' : (b.s < 1020 ? 'a' : 'e');
+        out.push({ n: b.n, tg: 'var(--s-' + s2 + ')' });
+      });
+    }
+    return out;
+  }
+
+  function scPaintCal() { calFig = scCalCount(); scCalMonth($('scCalPane')); scDate(); }
+
+  /* How many days of the month on screen carry anything at all — a
+     block kept, a tick, a session, a rating. It is the one figure the
+     month row cannot say, which is the whole of why the head says it:
+     the row names the month beside the arrows that step it, and a head
+     repeating that name is a caption for the thing under it.
+
+     HELD AS A STRING, NOT COMPUTED IN `scDate`. That function runs on
+     the LIVE pass every thirty seconds whatever view is up, and this
+     walks the month through `scCalOf` — thirty-one days of blocks,
+     ticks and sessions for a figure that cannot change while you are
+     looking at it, since nothing on this screen writes. Worked out on
+     the paint, which is the only moment it can move. */
+  var calFig = '';
+  function scCalCount() {
+    var days = new Date(calY, calM + 1, 0).getDate(), n = 0, today = scDay();
+    for (var i = 1; i <= days; i++) {
+      var d = scDay(new Date(calY, calM, i));
+      if (d > today) break;
+      var c = scCalOf(d);
+      if (c.kept || c.ticks || c.mind || c.rate) n++;
+    }
+    return n + (n === 1 ? ' day logged' : ' days logged');
+  }
+
+  function scCalMonth(body) {
+      var t = new Date();
+      var y = calY, m = calM;
+      {
         body.textContent = '';
         var from = scCalFrom(), today = scDay();
 
@@ -12954,7 +13096,7 @@
         var prev = new Date(y, m - 1, 1);
         back.disabled = scDay(new Date(y, m, 1)) <= from;
         back.addEventListener('click', function () {
-          y = prev.getFullYear(); m = prev.getMonth(); month();
+          calY = prev.getFullYear(); calM = prev.getMonth(); scPaintCal();
         });
         head.appendChild(back);
         head.appendChild(scEl('b', null, MONTH_FULL[m] + ' ' + y));
@@ -12967,10 +13109,53 @@
         fwd.disabled = y > t.getFullYear() || (y === t.getFullYear() && m >= t.getMonth());
         fwd.addEventListener('click', function () {
           var nx = new Date(y, m + 1, 1);
-          y = nx.getFullYear(); m = nx.getMonth(); month();
+          calY = nx.getFullYear(); calM = nx.getMonth(); scPaintCal();
         });
         head.appendChild(fwd);
+        /* ── MONTH OR LIST, AND IT IS ONE CONTROL ──
+           Beside the arrows, because it changes how THAT grid is drawn
+           where the stops above change what is on it.
+
+           IT WENT IN AS A PAIR AND THE MEASUREMENT KILLED IT. Two
+           glyphs in a 64px track was chosen over two words in 96, on
+           the argument that the words cost the month name its centre
+           — and a pair of 30px halves is two targets under this app's
+           own 44px floor. Reaching each one to 44 makes them OVERLAP
+           by twelve pixels, so the later one takes presses aimed at
+           the first: measured, the pair owned 38px across where a
+           lone control owns 44. Widening the pair to fit two real
+           targets is 88px, which is the words' 96 for none of the
+           words' naming — so the icons were never buying anything.
+
+           One toggle gives the month name back its centre and is
+           this app's existing shape for a two-state control: the
+           head's own Edit tile, `aria-pressed`, filled when on. The
+           glyph is the LIST, which is what pressing it gets you. It
+           is 44 DRAWN rather than a small mark reaching 44, and that
+           is measured too — it is the last thing on its row, so its
+           right edge and the pane's are the same pixel and the pane
+           clips anything past it. */
+        var lst = calMode === 'list';
+        var vw = scEl('button', 'cl-v' + (lst ? ' on' : ''));
+        vw.type = 'button';
+        vw.setAttribute('aria-label', 'Show the month as a list');
+        vw.setAttribute('aria-pressed', lst ? 'true' : 'false');
+        vw.insertAdjacentHTML('beforeend',
+          '<svg viewBox="0 0 24 24" aria-hidden="true">'
+          + '<path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg>');
+        vw.addEventListener('click', function () {
+          scCalSetMode(lst ? 'month' : 'list', true);
+        });
+        head.appendChild(vw);
         body.appendChild(head);
+
+        /* ── AND THE LIST IS WHERE A NAME READS WHOLE ──
+           It is the grid's own limit answered rather than a second
+           screen: seven columns cannot hold "Wind down", and this can.
+           Only the days that have something, because every day has
+           blocks on the template and a list of the template is the
+           week scrolled thirty times. */
+        if (calMode === 'list') { scCalList(body, y, m); return; }
 
         var dows = scEl('div', 'cl-dows');
         dows.setAttribute('aria-hidden', 'true');
@@ -13024,14 +13209,29 @@
                own colour -- the same one its tag wears two screens
                over -- because a colour in this app says WHICH and only
                a colour can say six things inside forty pixels. */
-            if (c.did.length) {
-              var dots = scEl('span', 'cl-d');
-              c.did.slice(0, 8).forEach(function (it) {
-                var dt = scEl('i');
-                dt.style.setProperty('--tg', scTagHue(it));
-                dots.appendChild(dt);
+            /* ── AND THE HUE DOTS WENT WITH THE STOPS ──
+               They were one dot per thing you TICKED — the six on
+               Today — which is a third record beside blocks and
+               sessions, and three registers do not go in 50px. What
+               they said is still said by name in the day sheet's own
+               Logged line, which is one press away; what a month gets
+               instead is the thing you came to it for, which is what
+               you actually did. */
+            var pills = scCalPills(c);
+            if (pills.length) {
+              var pw = scEl('span', 'cl-ps');
+              pills.slice(0, 2).forEach(function (o) {
+                var pi = scEl('span', 'cl-p', o.n);
+                if (o.tg) pi.style.setProperty('--tg', o.tg);
+                else pi.classList.add('is-off');
+                pw.appendChild(pi);
               });
-              b.appendChild(dots);
+              b.appendChild(pw);
+              /* Appended to the CELL rather than the stack, because it
+                 is positioned against the cell's own top-left. */
+              if (pills.length > 2) {
+                b.appendChild(scEl('span', 'cl-more', '+' + (pills.length - 2)));
+              }
             }
             /* A day with NOTHING TO SAY draws no rule at all. That
                reverses the day-off dot's rule about never leaving a
@@ -13041,24 +13241,101 @@
                made the grey one on a day you actually missed mean
                nothing. The NUMBER holds the cell's geometry either
                way, so there is no hole to leave. */
-            if (!quiet) {
+            /* AND ONLY ON TASKS. It is the share of the day's blocks
+               you kept, which is a fact about the schedule; on the
+               workouts stop there is no denominator for it to be a
+               share OF, so a track there would be a mark with nothing
+               behind it. */
+            if (!quiet && calWhat === 'task') {
               var tr = scEl('span', 'cl-b');
               var fill = scEl('i');
               fill.style.width = (share * 100).toFixed(1) + '%';
               tr.appendChild(fill);
               b.appendChild(tr);
             }
+            /* SPOKEN WHOLE, never as the two pills that fitted: the
+               cell draws at most two and a "+2", and a screen reader
+               handed that is handed the clipping rather than the
+               record. */
             b.setAttribute('aria-label', FULL[c.dow] + ' ' + n3 + ' '
               + MONTH_FULL[m]
-              + (quiet ? '' : ', ' + c.kept + ' of ' + c.on.length + ' kept')
+              + (quiet || calWhat !== 'task' ? ''
+                : ', ' + c.kept + ' of ' + c.on.length + ' kept')
+              + (pills.length ? ', ' + pills.map(function (o) { return o.n; }).join(', ') : '')
               + (c.ticks ? ', ' + c.ticks + ' of ' + c.items + ' logged' : ''));
-            b.addEventListener('click', function () { open = day; draw(); });
+            b.addEventListener('click', function () { scCalDay(day); });
             grid.appendChild(b);
           }(n2));
         }
         body.appendChild(grid);
       }
+  }
 
+  /* ── THE MONTH AS A LIST, WHERE A NAME READS WHOLE ──
+     Seven columns is 50px and a block can be called "Wind down"; here
+     there is a whole line for it. Newest first, because a month you
+     are reading back is read from the end you are standing at.
+
+     ONLY THE DAYS THAT HAVE SOMETHING. Every day has blocks on the
+     template, so a list of what was SCHEDULED is the week printed
+     thirty times — and a day with nothing on it says so once, at the
+     foot, rather than as thirty empty rows. */
+  function scCalList(body, y, m) {
+    var days = new Date(y, m + 1, 0).getDate(), today = scDay();
+    var from = scCalFrom();
+    var rows = scEl('div', 'cl-ls'), n = 0;
+    for (var i = days; i >= 1; i--) {
+      var day = scDay(new Date(y, m, i));
+      if (day > today || day < from) continue;
+      var c = scCalOf(day);
+      var pills = scCalPills(c);
+      if (!pills.length) continue;
+      n++;
+      (function (c2, pills2, i2) {
+        var r = scEl('button', 'cl-lr' + (c2.day === today ? ' is-now' : ''));
+        r.type = 'button';
+        var d = scEl('b', 'cl-ld', String(i2));
+        d.appendChild(scEl('u', null, ABBR[c2.dow]));
+        r.appendChild(d);
+        var tags = scEl('span', 'cl-lt');
+        pills2.forEach(function (o) {
+          var pi = scEl('span', 'cl-p', o.n);
+          if (o.tg) pi.style.setProperty('--tg', o.tg);
+          else pi.classList.add('is-off');
+          tags.appendChild(pi);
+        });
+        r.appendChild(tags);
+        r.setAttribute('aria-label', FULL[c2.dow] + ' ' + i2 + ' '
+          + MONTH_FULL[m] + ', ' + pills2.map(function (o) { return o.n; }).join(', '));
+        r.addEventListener('click', function () { scCalDay(c2.day); });
+        rows.appendChild(r);
+      }(c, pills, i));
+    }
+    if (!n) {
+      body.appendChild(scEl('p', 'mn-say',
+        calWhat === 'work' ? 'No sessions logged this month'
+          : 'Nothing kept this month'));
+      return;
+    }
+    body.appendChild(rows);
+  }
+
+  /* ── A DAY IS A SHEET OVER THE MONTH ──
+     One screen at a time is this app's own shape, and a day drawn
+     under the grid it came from would be two records of one thing on
+     one screen. The sheet's own title is the date, so the drawing
+     carries no heading of its own — a heading under a title bar
+     saying the same words is the frame-inside-a-frame this project
+     keeps taking back out.
+
+     AND THERE IS NO WAY BACK TO DRAW, which is what changed: the
+     month used to be a sheet too, so the day had to replace it and
+     put an arrow in. It is a PANE now, so closing the sheet reveals
+     it — the way back is the one the sheet already has. */
+  function scCalDay(open) {
+    var when = new Date(open + 'T12:00:00');
+    scSheet(FULL[when.getDay()] + ' ' + when.getDate()
+      + ' ' + MON[when.getMonth()], function (body) {
       /* ── ONE DAY, EVERYTHING ON IT ──
          The blocks it asked for and what became of each, then the
          things that are not blocks at all: what you ticked, what you
@@ -13070,24 +13347,6 @@
       function oneDay() {
         body.textContent = '';
         var c = scCalOf(open);
-        var when = new Date(open + 'T12:00:00');
-
-        /* Left of centre, beside the arrow it belongs to. Centred it
-           reads as off-centre, because there is a control on one side
-           and nothing on the other — and a spacer put in to balance
-           it would be an element that exists to be invisible. */
-        var head = scEl('div', 'cl-head is-day');
-        var back = scEl('button', 'cl-arw');
-        back.type = 'button';
-        back.setAttribute('aria-label', 'Back to the month');
-        back.insertAdjacentHTML('beforeend',
-          '<svg viewBox="0 0 24 24" aria-hidden="true">'
-          + '<path d="M15 4.5L7.5 12l7.5 7.5"/></svg>');
-        back.addEventListener('click', function () { open = null; draw(); });
-        head.appendChild(back);
-        head.appendChild(scEl('b', null, FULL[c.dow] + ' ' + when.getDate()
-          + ' ' + MON[when.getMonth()]));
-        body.appendChild(head);
 
         var bits = [];
         if (c.on.length) bits.push(c.kept + ' of ' + c.on.length + ' kept');
@@ -13135,7 +13394,9 @@
            the record is open and read back as a figure on the rest. */
         if (scTallyOpen(open)) {
           body.appendChild(scRateRow(open, 'How was this day?', function () {
-            draw();
+            /* And the month behind it, because a rating is one of the
+               things a cell counts. */
+            oneDay(); scPaintCal();
           }));
         }
 
@@ -13205,8 +13466,7 @@
         }
       }
 
-      function draw() { if (open) oneDay(); else month(); }
-      draw();
+      oneDay();
     });
   }
 
@@ -13219,9 +13479,11 @@
      the control that put you in one has to be the one that takes you
      out. */
   $('scHdEd').addEventListener('click', function () { scEditArm(!editArm); });
-  $('scHdDate').addEventListener('click', function () { scCalOpen(); });
   $('scTallyCap').addEventListener('click', function () { scWeekSheet(); });
   $('scNtEd').addEventListener('click', function () { scNtEdit(!ntEdit); });
+  [].forEach.call(document.querySelectorAll('[data-calstop]'), function (b) {
+    b.addEventListener('click', function () { scCalStop(b.dataset.calstop, true); });
+  });
 
   scLoad();
 

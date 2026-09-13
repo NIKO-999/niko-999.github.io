@@ -2660,17 +2660,20 @@ const SAID = [
     return out;
   });
   ok('every view has its own tab and lights only that one',
-    tabs.length === 4 && tabs.every((t) => t.lit.length === 1 && t.lit[0] === t.want), tabs);
+    tabs.length === 5 && tabs.every((t) => t.lit.length === 1 && t.lit[0] === t.want), tabs);
   /* NAMED, not counted. `tabs.length === 3` and a joined string of
      three labels were both written when there were three, and the day
      Goals landed they failed together while the bar was perfectly
      correct — which is the same shape as tests/run.js's hardcoded
      SUITE list and the flight-pause rule's list of layers. The order
-     is asserted because it is a decision: Goals sits beside Today,
-     which is what it is about, rather than at the end. */
+     is asserted because it is a decision: Calendar sits third, after
+     the two stops that are about a DAY, because it is the same record
+     one step out — and before Notes and Friends, which are not about
+     time at all. */
   ok('and each one is labelled, in the order they were chosen',
     await page.$$eval('.tab span:last-child',
-      (e) => e.map((x) => x.textContent).join(' ')) === 'Week Today Notes Friends');
+      (e) => e.map((x) => x.textContent).join(' '))
+      === 'Week Today Calendar Notes Friends');
 
   /* The ground is a gradient the palette can reach, which on the
      shipped palette resolves to the flat white page it has always been.
@@ -8510,14 +8513,24 @@ const SAID = [
           document.getElementById('scScrim').click();
           await new Promise((z) => setTimeout(z, 260));
         }
-        document.querySelector('.tab[data-view="list"]').click();
-        await new Promise((z) => setTimeout(z, 240));
-        document.getElementById('scHdDate').click();
+        document.querySelector('.tab[data-view="cal"]').click();
         await new Promise((z) => setTimeout(z, 560));
-        const n = String(new Date().getDate());
+        /* ── BY `data-day`, NEVER BY WHAT THE CELL READS ──
+           It matched on the cell's own textContent, which was the date
+           and nothing else for exactly as long as a cell held a number
+           and two 4px dots. The day it held a NAME the string became
+           "13WakeTrain", `find` returned undefined, and the next line
+           took the whole file down with `no cell for today` — forty
+           assertions before the thing it was testing. This file has
+           now recorded that shape seven times and the fix is always
+           the same one: ask for the thing the cell was BUILT for. */
+        const t2 = new Date();
+        const n = t2.getFullYear() + '-'
+          + String(t2.getMonth() + 1).padStart(2, '0') + '-'
+          + String(t2.getDate()).padStart(2, '0');
         const cell = [...document.querySelectorAll('.cl-c')]
-          .find((e) => (e.querySelector('b') || e).textContent.trim() === n);
-        if (!cell) throw new Error('no cell for today on the month');
+          .find((e) => e.dataset.day === n);
+        if (!cell) throw new Error('no cell for today on the month, wanted ' + n);
         cell.click();
         await new Promise((z) => setTimeout(z, 440));
       });
@@ -9211,17 +9224,22 @@ const SAID = [
        on a working app is the crown's own trap, caught here before it
        shipped rather than after. */
     const doors = await ipage.evaluate(() => {
-      const d = document.getElementById('scHdDate');
       const c = document.getElementById('scTallyCap');
-      const nm = (e) => (e.getAttribute('aria-label') || e.textContent || '').trim();
-      return { date: d && d.tagName, dateNamed: !!(d && nm(d)),
-        count: c && c.tagName,
+      return { count: c && c.tagName,
         says: [...document.querySelectorAll('.tr-slide')]
           .map((x) => x.querySelector('p').textContent).join(' ') };
     });
-    ok('the last card names two doors and both are real controls',
-      doors.date === 'BUTTON' && doors.count === 'BUTTON' && doors.dateNamed
-      && /date/.test(doors.says) && /Showing up/.test(doors.says), doors);
+    ok('the last card names a door and it is a real control',
+      doors.count === 'BUTTON' && /Showing up/.test(doors.says), doors);
+    /* ── AND IT NO LONGER NAMES THE DATE ──
+       The month is a stop now, and this intro's rule is that a card is
+       for what you could NOT find by pressing around. Asserted as the
+       sentence being gone, because a card teaching a mechanism the app
+       does not have is worse than no card — which this file has now
+       recorded three times, about "Seven day cards", "Flip for
+       objectives" and the objectives corner glyph. */
+    ok('...and it does not send you to the date, which is no longer one',
+      !/the date/.test(doors.says), doors.says);
 
     await ipage.evaluate(() => document.querySelector('.tr-skip').click());
     await ipage.waitForTimeout(200);
@@ -15168,15 +15186,30 @@ const SAID = [
             B('wake1', 1, 360, 390, 'Wake'), B('tr1', 1, 390, 480, 'Train'),
             B('wake2', 2, 360, 390, 'Wake'), B('tr2', 2, 390, 480, 'Train'),
             B('wake4', 4, 360, 390, 'Wake'), B('tr4', 4, 390, 480, 'Train'),
-            B('wake5', 5, 360, 390, 'Wake'), B('wk5', 5, 540, 1020, 'Work')
+            /* A LONG NAME AND A LATE ONE, and both are load-bearing.
+               "Wind down" is what a 50px cell cannot hold whole, which
+               is the entire argument for the List beside the grid; and
+               it is a third thing on the 10th, which is what draws the
+               overflow count. Work moved to the afternoon so the two
+               pills on the 11th are two SESSIONS — a fixture whose
+               blocks are all before noon cannot tell a colour that
+               says which from a colour that says nothing. */
+            B('ev4', 4, 1200, 1260, 'Wind down'),
+            B('wake5', 5, 360, 390, 'Wake'), B('wk5', 5, 780, 1020, 'Work')
           ] }));
         /* Wednesday has nothing on it at all, which is what makes
            "a day that asked nothing" testable rather than stated. */
         localStorage.setItem('sched.log.v1', JSON.stringify({
           '2026-09-07': { wake1: 1, tr1: 1 },
           '2026-09-08': { wake2: 1 },
-          '2026-09-10': { wake4: 1, tr4: 1 },
-          '2026-09-11': { wake5: 1 }
+          /* ONE KEPT BLOCK AND ITS NAME IS THE LONG ONE, which is
+             what makes "the grid cuts and the list does not" a claim
+             rather than a sentence: on the 10th "Wind down" is the
+             third of three and is a count rather than a pill, so
+             nothing there is ever drawn too wide to fit. */
+          '2026-09-03': { ev4: 1 },
+          '2026-09-10': { wake4: 1, tr4: 1, ev4: 1 },
+          '2026-09-11': { wake5: 1, wk5: 1 }
         }));
         localStorage.setItem('sched.tick.v1', JSON.stringify({
           '2026-09-10': { t: 1, p: '8420' } }));
@@ -15207,39 +15240,58 @@ const SAID = [
     await clpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
     await clpage.waitForTimeout(460);
 
-    /* ── THE DOOR IS THE DATE, AND ONLY WHERE IT IS A DATE ──
-       Measured as the BOX and the disabled state on every view rather
-       than as a class: what is drawn is the only thing an attribute
-       was ever a proxy for, which is the lesson the rail, the dots,
-       the toast and the intro each taught once. */
+    /* ── THE MONTH IS A STOP, AND THE DATE IS A DATE ──
+       It was a `<button>` in the head for one release and was reported
+       twice as not being there at all: 12.5px of --dim with no ground
+       and no mark is a caption, whatever element it is. Both halves
+       are asserted, because each passes on the other's bug — a build
+       that added the tab and left the invisible door standing passes
+       the first, and one that made the date a paragraph without
+       building the tab passes the second.
+
+       Measured as the BOX on every view rather than as a class, which
+       is the rail's, the dots', the toast's and the intro's lesson:
+       what is drawn is the only thing an attribute was ever a proxy
+       for. And the LABEL is read, because "there are five stops"
+       passes on five tabs called anything at all. */
     const clDoor = await clpage.evaluate(async () => {
-      const b = document.getElementById('scHdDate');
-      const read = () => ({ tag: b.tagName, off: b.disabled,
-        lab: b.getAttribute('aria-label') || '' });
-      const out = { week: read() };
-      document.getElementById('scHdEd').click();
-      await new Promise((z) => setTimeout(z, 260));
-      out.armed = read();
-      document.getElementById('scHdEd').click();
-      await new Promise((z) => setTimeout(z, 260));
-      for (const v of ['tally', 'notes', 'friends']) {
-        document.querySelector('.tab[data-view="' + v + '"]').click();
-        await new Promise((z) => setTimeout(z, 320));
-        out[v] = read();
-      }
-      document.querySelector('.tab[data-view="list"]').click();
-      await new Promise((z) => setTimeout(z, 320));
+      const t = document.querySelector('.tab[data-view="cal"]');
+      const r = t.getBoundingClientRect();
+      const lb = t.querySelector('span');
+      const out = {
+        tag: document.getElementById('scHdDate').tagName,
+        stop: { w: Math.round(r.width * 10) / 10, h: Math.round(r.height * 10) / 10,
+                name: lb.textContent,
+                cut: lb.scrollWidth > lb.clientWidth + 0.5 },
+        stops: document.querySelectorAll('.tab[data-view]').length
+      };
+      t.click();
+      await new Promise((z) => setTimeout(z, 420));
+      /* Exactly one section has a real box on the view that is up —
+         `[hidden]` stops meaning anything the day a section takes a
+         `display`, and this app has had that bug eight times with the
+         attribute set correctly throughout. */
+      out.boxes = {};
+      ['scWeek', 'scTally', 'scFriends', 'scNotes', 'scCal'].forEach((id) => {
+        const e = document.getElementById(id);
+        out.boxes[id] = e ? Math.round(e.getBoundingClientRect().height) : -1;
+      });
+      out.head = document.getElementById('scHdDay').textContent;
       return out;
     });
-    ok('the head’s date is the door to the calendar, on the week',
-      clDoor.week.tag === 'BUTTON' && clDoor.week.off === false
-      && /open the calendar/.test(clDoor.week.lab), clDoor.week);
-    ok('...and it is not a control where the line is not a date',
-      clDoor.armed.off === true && clDoor.tally.off === true
-      && clDoor.notes.off === true && clDoor.friends.off === true, clDoor);
+    ok('the month is a stop on the bar, named, and over the 44px floor',
+      clDoor.stop.name === 'Calendar' && clDoor.stop.cut === false
+      && clDoor.stop.w >= 44 && clDoor.stop.h >= 44 && clDoor.stops === 5,
+      clDoor.stop);
+    ok('...and the head’s date is a date again, not an invisible door',
+      clDoor.tag === 'P', clDoor.tag);
+    ok('...and exactly one section is drawn on it',
+      clDoor.head === 'Calendar' && clDoor.boxes.scCal > 100
+      && clDoor.boxes.scWeek === 0 && clDoor.boxes.scTally === 0
+      && clDoor.boxes.scFriends === 0 && clDoor.boxes.scNotes === 0,
+      clDoor.boxes);
 
-    await clpage.evaluate(() => document.getElementById('scHdDate').click());
-    await clpage.waitForTimeout(520);
+    await clpage.waitForTimeout(120);
     const clMonth = await clpage.evaluate(() => {
       const cells = [...document.querySelectorAll('.cl-c:not(.is-pad)')];
       /* The share is read back off the BOX the rule actually draws
@@ -15253,8 +15305,18 @@ const SAID = [
         const w = tr ? tr.getBoundingClientRect().width : 0;
         return { sh: fi && w ? Math.round(fi.getBoundingClientRect().width / w * 100) : 0,
           ring: !!tr,
-          dots: [...c.querySelectorAll('.cl-d > i')]
-            .map((i2) => getComputedStyle(i2).backgroundColor),
+          /* Read as the NAME and the composited ground together: a
+             build that drew the right words in one colour passes a
+             check on the words, and one that drew two colours on the
+             wrong words passes a check on the colours. */
+          pills: [...c.querySelectorAll('.cl-p')].map((e) => ({
+            n: e.textContent, bg: getComputedStyle(e).backgroundColor,
+            cut: e.scrollWidth > e.clientWidth + 0.5,
+            /* A pill wider than its column prints itself over the day
+               beside it, which is the shut card's own bug. */
+            over: +(e.getBoundingClientRect().right
+              - c.getBoundingClientRect().right).toFixed(1) })),
+          more: (c.querySelector('.cl-more') || {}).textContent || '',
           quiet: c.classList.contains('is-quiet') };
       };
       /* ── AND THE DATE IS IN THE CORNER, WITH ITS MARKS CLEAR OF IT ──
@@ -15268,7 +15330,7 @@ const SAID = [
         const c = cells.find((x) => x.dataset.day === '2026-09-10');
         const cr = c.getBoundingClientRect();
         const ir = c.querySelector('i').getBoundingClientRect();
-        const dr = c.querySelector('.cl-d').getBoundingClientRect();
+        const dr = c.querySelector('.cl-ps').getBoundingClientRect();
         const br = c.querySelector('.cl-b').getBoundingClientRect();
         return { top: +(ir.top - cr.top).toFixed(1),
           left: +(ir.left - cr.left).toFixed(1),
@@ -15286,6 +15348,7 @@ const SAID = [
         kept: fill('2026-09-07'), half: fill('2026-09-08'),
         none: fill('2026-09-09'), ahead: fill('2026-09-20'),
         before: fill('2026-09-02'), kept10: fill('2026-09-10'),
+        kept11: fill('2026-09-11'), long: fill('2026-09-03'),
         buttons: document.querySelectorAll('#scSheetBody button').length,
         corner: corner,
       };
@@ -15323,14 +15386,50 @@ const SAID = [
     ok('...and a day nothing was on, or that is still ahead, says so quietly',
       clMonth.none.quiet === true && clMonth.ahead.quiet === true
       && clMonth.none.ring === false && clMonth.ahead.ring === false, clMonth);
-    /* ── THE DOTS SAY WHICH, WHICH IS WHAT A COLOUR IS FOR HERE ──
-       The rule is one number and this is the question the screen was
-       asked: what did you do that day. Two dots on the 10th, in two
-       different colours, because one colour repeated says how many
-       rather than which. */
-    ok('...and a hue dot says WHICH things you logged that day',
-      clMonth.kept10 && clMonth.kept10.dots.length === 2
-      && clMonth.kept10.dots[0] !== clMonth.kept10.dots[1], clMonth.kept10);
+    /* ── A CELL SAYS WHAT YOU DID, BY NAME ──
+       Six treatments were drawn over the same month at 1:1 and this is
+       the one that was picked. What it replaced was a hue DOT per
+       thing ticked, which says how many and never which; the rule
+       below it is one number and this is the question the screen was
+       actually asked.
+
+       THE COLOUR IS THE BLOCK'S SESSION, which is the one WHICH a
+       block already has — three of them, the same three the week's own
+       headings wear. Measured on composited pixels between a morning
+       block and an afternoon one, because a fixture whose blocks are
+       all before noon cannot tell a colour that says which from a
+       colour that says nothing at all. */
+    ok('...and a cell says what you kept, by name',
+      clMonth.kept11.pills.map((p2) => p2.n).join(',') === 'Wake,Work'
+      && clMonth.kept11.pills[0].bg !== clMonth.kept11.pills[1].bg,
+      clMonth.kept11);
+    /* ── TWO, AND THE REST IS A COUNT ──
+       Three blocks kept on the 10th and a 50px cell holds two, so the
+       third is a figure rather than a clipped pill — and it rides the
+       DATE's line, because the foot of the cell already belongs to the
+       kept-rule and the two drew over one another when it did not. */
+    ok('...and a third is a count, never a third pill',
+      clMonth.kept10.pills.length === 2
+      && clMonth.kept10.more === '+1', clMonth.kept10);
+    /* ── AND WHAT A CELL CANNOT HOLD, IT CUTS ──
+       Seven columns is 50px and a block can be called "Wind down", so
+       something has to give — and the grid is not where a name reads
+       whole, which is the whole of why there is a List beside it. The
+       pair is the claim, and the other half is asserted where the
+       list is drawn: CUT here, WHOLE there, on the same word.
+
+       And the cut is the PILL's rather than a spill: `white-space:
+       nowrap` in a box nothing clips does not wrap and does not clip,
+       it RUNS OUT and prints itself over the day beside it, which is
+       the shut card's own bug. Measured against the cell's own right
+       edge alongside. */
+    ok('...and a name a 50px cell cannot hold is cut inside it',
+      clMonth.long.pills.length === 1
+      && clMonth.long.pills[0].n === 'Wind down'
+      && clMonth.long.pills[0].cut === true
+      && clMonth.long.pills[0].over <= 0.5
+      && clMonth.kept11.pills.every((p2) => !p2.cut && p2.over <= 0.5),
+      { long: clMonth.long.pills, short: clMonth.kept11.pills });
     /* A DAY BEFORE THE RECORD BEGAN IS NOT A DAY YOU MISSED. The
        earliest thing ever logged here is the 7th, so the 2nd has a
        full Wednesday of blocks on the template and nothing to say
@@ -15345,7 +15444,14 @@ const SAID = [
       c.click();
       await new Promise((z) => setTimeout(z, 420));
       return {
-        head: (document.querySelector('.cl-head > b') || {}).textContent,
+        /* ── THE SHEET TITLES IT ──
+           The month was a sheet too once, so the day had to replace it
+           and carry its own heading and an arrow back. It is a PANE
+           now and the day is the only sheet, so the title bar names it
+           — a heading under a title bar saying the same words is the
+           frame-inside-a-frame this project keeps taking out. */
+        head: (document.getElementById('scSheetTitle') || {}).textContent,
+        own: document.querySelectorAll('#scSheetBody .cl-head').length,
         sum: (document.querySelector('.cl-sum') || {}).textContent,
         rows: [...document.querySelectorAll('.cl-r')].map((r) => ({
           t: (r.querySelector('.cl-t') || {}).textContent,
@@ -15366,12 +15472,12 @@ const SAID = [
       };
     });
     ok('a day opens on everything that was on it, and what became of each',
-      clDay.head === 'Thursday 10 Sep'
-      && clDay.rows.length === 2
+      clDay.head === 'Thursday 10 Sep' && clDay.own === 0
+      && clDay.rows.length === 3
       && clDay.rows[0].t === '06:00' && clDay.rows[0].st === 'Completed'
       && clDay.rows[1].wo === 'Push', clDay);
     ok('...and it says what you logged by name, not only how many',
-      /2 of 2 kept/.test(clDay.sum)
+      /3 of 3 kept/.test(clDay.sum)
       && clDay.marks === 5 && clDay.lit === 4
       && clDay.labels.indexOf('Logged') >= 0
       && clDay.logged.join(' ').indexOf('8420') >= 0, clDay);
@@ -15388,22 +15494,145 @@ const SAID = [
     ok('...and not one row of it is a control',
       clDay.rows.every((r) => r.press === 'DIV'), clDay.rows.map((r) => r.press));
 
+    /* ── AND THE MONTH IS STILL BEHIND IT ──
+       The way out of a day is the way out of any sheet in this app,
+       because the month is a PANE rather than a sheet the day had to
+       replace — so there is nothing to draw a way back with. Measured
+       as the grid being THERE the whole time and drawn again once the
+       sheet is gone, since "the month came back" passes on a build
+       that rebuilds it and on one that never lost it, and only the
+       second is what a pane means. */
     const clBack = await clpage.evaluate(async () => {
-      document.querySelector('.cl-arw').click();
+      const under = document.querySelectorAll('#scCalPane .cl-c:not(.is-pad)').length;
+      document.getElementById('scScrim').click();
       await new Promise((z) => setTimeout(z, 380));
       return {
-        title: (document.querySelector('.cl-head > b') || {}).textContent,
-        cells: document.querySelectorAll('.cl-c:not(.is-pad)').length,
-        back: document.querySelectorAll('.cl-arw')[0].disabled,
-        fwd: document.querySelectorAll('.cl-arw')[1].disabled,
+        under,
+        title: (document.querySelector('#scCalPane .cl-head > b') || {}).textContent,
+        cells: document.querySelectorAll('#scCalPane .cl-c:not(.is-pad)').length,
+        shut: !!document.querySelector('.sheet[hidden]'),
+        back: document.querySelectorAll('#scCalPane .cl-arw')[0].disabled,
+        fwd: document.querySelectorAll('#scCalPane .cl-arw')[1].disabled,
       };
     });
-    /* AND THE WAY BACK IS THE WAY BACK. The arrows refuse at both
-       ends rather than landing you on an empty grid: nothing before
-       the first thing you logged, and no month that has not happened. */
-    ok('...and the way back out of a day is the month it was in',
-      clBack.title === 'September 2026' && clBack.cells === 30
+    /* AND THE ARROWS REFUSE AT BOTH ENDS rather than landing you on an
+       empty grid: nothing before the first thing you logged, and no
+       month that has not happened. */
+    ok('...and the way back out of a day is the month it never left',
+      clBack.under === 30 && clBack.shut === true
+      && clBack.title === 'September 2026' && clBack.cells === 30
       && clBack.back === true && clBack.fwd === true, clBack);
+
+    /* ══════════════════════════════════════════════════════════
+       TWO QUESTIONS, TWO CONTROLS
+
+       Tasks or Workouts is WHAT the month is about and rides the
+       stops; Month or List is HOW that grid is drawn and rides the
+       month row beside the arrows. Each is asserted to move its own
+       half and leave the other alone, because one control answering
+       both passes every check written about either on its own — which
+       is the same bug the two colour tokens were split to make
+       impossible.
+       ══════════════════════════════════════════════════════════ */
+    const clStop = await clpage.evaluate(async () => {
+      document.getElementById('scScrim').click();
+      await new Promise((z) => setTimeout(z, 300));
+      const read = () => {
+        const c = [...document.querySelectorAll('#scCalPane .cl-c:not(.is-pad)')]
+          .find((x) => x.dataset.day === '2026-09-10');
+        return {
+          pills: c ? [...c.querySelectorAll('.cl-p')].map((e) => e.textContent) : null,
+          rule: !!(c && c.querySelector('.cl-b')),
+          rows: document.querySelectorAll('#scCalPane .cl-lr').length,
+          grid: document.querySelectorAll('#scCalPane .cl-grid').length,
+          on: (document.querySelector('[data-calstop].on') || {}).dataset.calstop
+        };
+      };
+      const out = { task: read() };
+      document.getElementById('scCalWork').click();
+      await new Promise((z) => setTimeout(z, 320));
+      out.work = read();
+      /* Back to Tasks before the list is read, because the list draws
+         whichever record the stop is on and this check is about a
+         BLOCK's name being too long for a cell. */
+      document.getElementById('scCalTask').click();
+      await new Promise((z) => setTimeout(z, 320));
+      /* 44 DRAWN, AND THIS CHECK IS WHY IT IS DRAWN RATHER THAN
+         REACHED. It went in as a PAIR of 30px halves reaching 44:
+         two adjacent targets that wide overlap by twelve pixels, so
+         the second takes presses aimed at the first and the pair
+         owned 38px across. Then as one 34px toggle with a -5px
+         pseudo-element, which measured 38 too — the pane is
+         `overflow-x: hidden` and this control's right edge IS the
+         pane's, so the reach was clipped where nothing was in the
+         way at all. Walked out from the centre with
+         `elementFromPoint`, because a synthetic tap is snapped to a
+         nearby clickable target inside a slop region and reads
+         IDENTICALLY at 30 and at 44 — a check that cannot fail. */
+      const v = document.querySelector('#scCalPane .cl-v');
+      const r = v.getBoundingClientRect();
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      const owns = (dx, dy) => {
+        let n = 0;
+        while (n < 60) {
+          const e = document.elementFromPoint(cx + dx * (n + 1), cy + dy * (n + 1));
+          if (!e || !v.contains(e) && e !== v) break;
+          n++;
+        }
+        return n;
+      };
+      out.reach = { w: Math.round(r.width), h: Math.round(r.height),
+        own: [owns(-1, 0) + owns(1, 0), owns(0, -1) + owns(0, 1)] };
+      v.click();
+      await new Promise((z) => setTimeout(z, 320));
+      out.list = read();
+      out.pressed = document.querySelector('#scCalPane .cl-v')
+        .getAttribute('aria-pressed');
+      out.whole = [...document.querySelectorAll('#scCalPane .cl-lr')]
+        .map((e) => [...e.querySelectorAll('.cl-p')].map((p2) => ({
+          n: p2.textContent,
+          cut: p2.scrollWidth > p2.clientWidth + 0.5 }))).flat();
+      /* THE SAME CONTROL BOTH WAYS, which is the whole of what makes
+         it a toggle rather than a pair: a mode you can enter and not
+         leave is what every route to this app's editor was rejected
+         for. */
+      document.querySelector('#scCalPane .cl-v').click();
+      await new Promise((z) => setTimeout(z, 320));
+      out.back = read();
+      out.unpressed = document.querySelector('#scCalPane .cl-v')
+        .getAttribute('aria-pressed');
+      return out;
+    });
+    ok('Tasks and Workouts are two records of one month',
+      clStop.task.pills.join(',') === 'Wake,Train'
+      && clStop.work.pills.join(',') === 'Push'
+      && clStop.task.on === 'task' && clStop.work.on === 'work', clStop);
+    /* ── AND THE KEPT RULE IS TASKS' ALONE ──
+       It is the share of the day's BLOCKS you kept. On the workouts
+       stop there is no denominator for it to be a share of, so a track
+       there would be a mark with nothing behind it. */
+    ok('...and the kept rule belongs to the blocks, not the sessions',
+      clStop.task.rule === true && clStop.work.rule === false, clStop);
+    /* Both directions, because "the list drew" passes on a build that
+       drew it beside the grid rather than instead of it. */
+    ok('Month or List draws one of the two, never both',
+      clStop.list.rows > 0 && clStop.list.grid === 0
+      && clStop.task.grid === 1 && clStop.task.rows === 0
+      && clStop.back.grid === 1 && clStop.back.rows === 0, clStop);
+    ok('...and one control does both ways, saying which it is on',
+      clStop.pressed === 'true' && clStop.unpressed === 'false', clStop);
+    ok('...and it owns the 44px everything in this app reaches',
+      clStop.reach.w === 44 && clStop.reach.h === 44
+      && clStop.reach.own[0] >= 43 && clStop.reach.own[1] >= 43, clStop.reach);
+    /* ── AND THE LIST IS WHERE A NAME READS WHOLE ──
+       That is the whole of why the toggle is on this screen: seven
+       columns is 50px and "Wind down" does not fit in it. Asserted as
+       the long one being PRESENT and uncut, because "nothing is cut"
+       is vacuously true of a list with only short names on it. */
+    ok('...and a name a cell had to cut reads whole in the list',
+      clStop.whole.some((p2) => p2.n === 'Wind down')
+      && clStop.whole.every((p2) => !p2.cut), clStop.whole);
+
 
     const clOff = clasked.filter((u) => !u.startsWith(BASE) && !isArt(u));
     ok('and the calendar reaches nothing off this origin',
