@@ -3386,8 +3386,21 @@
        number is for. Same figure, named without the praise. */
     { id: 'f', n: 'Fuel',  s: 'Log what you ate',      k: 'num', unit: ' kcal', dp: 0, neu: 1,
       max: 10000, step: 10, marks: [500, 1500, 2500, 3500] },
+    /* `bump` is the one thing that makes a tile TALL, and Water is the
+       only item that has one: a glass is a real unit you add through
+       the day, where there is no serving of steps and no serving of
+       sleep. It is what the stepper adds and what the gauge fills by.
+
+       0.3 AND NOT 0.25, WHICH IS THE FAMILIAR FIGURE AND IS WRONG. The
+       record is kept at one decimal, so a quarter of a litre cannot be
+       written down: the first press stores 0.3, the fourth lands on 1.2
+       where four glasses should be 1.0, and the drift is invisible
+       because every figure on screen is a plausible one. A bump has to
+       be a multiple of the item's own `step` or the control is lying
+       about what it adds — asserted, because the next one added will be
+       typed by somebody thinking about servings rather than decimals. */
     { id: 'w', n: 'Water', s: 'Log what you drank',    k: 'num', unit: ' L', dp: 1,
-      max: 5, step: 0.1, marks: [0.5, 1, 2, 3] },
+      max: 5, step: 0.1, marks: [0.5, 1, 2, 3], bump: 0.3 },
     /* ── THE SIXTH, AND THE ONE YOU DID NOT DO ──
        Every other item here is something you went and did; this is what
        happened while you were not deciding anything, and it is the
@@ -3703,6 +3716,90 @@
     return mine.every(function (b) { return b.e <= now; });
   }
 
+  /* ── THE WEEK A TICK IS IN ──
+     Monday-first, seven states, and the denominator is the days it was
+     actually ON rather than seven. A day the thing was never on is not
+     a day you missed it — the strip's own rule — and without it a
+     three-a-week habit reads 3 of 7 for ever.
+
+     A tick always wins: trained on a Sunday it is not scheduled is
+     still a day you trained, so it counts on both sides. */
+  function scTyWeek(it) {
+    var today = new Date(), lead = (today.getDay() + 6) % 7;
+    var mon = new Date(today); mon.setDate(mon.getDate() - lead);
+    var days = [], kept = 0, n = 0;
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(mon); d.setDate(d.getDate() + i);
+      var day = scDay(d), on = scTicked(day, it.id), app = scApplied(it, day);
+      days.push(on ? 'on' : !app ? 'off' : i < lead ? 'miss' : 'todo');
+      if (on || app) n++;
+      if (on) kept++;
+    }
+    return { days: days, kept: kept, aim: it.aim || n };
+  }
+
+  /* ── FOUR READINGS, AND THE SHAPE IS WHAT YOU READ ──
+     Four rather than seven: at 38px a seven-day series is 9.6px a
+     reading and the dates under it stop being dates. Normalised to the
+     best of the four, so the picture is the shape of the run rather
+     than a share of an aim the item may not have. */
+  function scTySeries(it) {
+    var h = scHist(it.id).slice(-4), max = 0, i;
+    for (i = 0; i < h.length; i++) if (h[i].raw > max) max = h[i].raw;
+    /* FOUR DAYS OF NOTHING IS NOT FOUR DAYS OF ZERO. With no reading
+       anywhere in the window every point is on the floor, which draws a
+       flat line along the bottom of the tile and reads as four nights
+       you slept none — the loudest possible claim about a record that
+       does not exist. Nothing is drawn instead, and the dates go with
+       it: there is nothing for them to date. */
+    if (!max) return null;
+    var d = new Date(); d.setDate(d.getDate() - (h.length - 1));
+    var out = [];
+    for (i = 0; i < h.length; i++) {
+      out.push({ v: h[i].raw / max,
+                 lab: d.getDate() + ' ' + MON[d.getMonth()] });
+      d.setDate(d.getDate() + 1);
+    }
+    return out;
+  }
+
+  /* The gauge needs a denominator and the dial already has one: the top
+     mark is the figure the item's own ladder runs to. */
+  function scTyAim(it) {
+    return it.marks && it.marks.length ? it.marks[it.marks.length - 1] : (it.max || 0);
+  }
+
+  /* ── ONE TILE IS TALL, AND IT IS THE ONE YOU ADD TO ──
+     Your reference makes exactly one of its three tiles tall and puts a
+     stepper under it. What earns that height is not the item being more
+     important: it is that Water is the one figure here you add to in a
+     fixed unit through the day, so the gauge is a thing you watch fill
+     and the stepper is the way in. `bump` is that unit, and having one
+     is the whole condition — a number with no natural serving has
+     nothing for a stepper to add. */
+  function scTyTall(it) { return it.k === 'num' && it.bump > 0; }
+
+  /* ── THE AREA, AND IT IS AN AREA RATHER THAN BARS ──
+     Four bars at 38px is four solid blocks and a lot of ink per tile;
+     six tiles of that is the dashboard this screen keeps taking itself
+     back out of. A filled shape survives being small.
+
+     WHAT IT CLAIMS is the space between two readings, which on a daily
+     count is a value for a moment that never had one. That is the
+     honest objection and the trade was taken knowingly: the dated ticks
+     underneath are what say these are four readings rather than a
+     continuous line. */
+  function scTyArea(s) {
+    var i, p = '';
+    for (i = 0; i < s.length; i++) {
+      p += (i ? 'L' : 'M') + (i * (100 / (s.length - 1))).toFixed(1)
+        + ' ' + (35 - s[i].v * 32).toFixed(1);
+    }
+    return '<svg class="ty-ar" viewBox="0 0 100 38" preserveAspectRatio="none"'
+      + ' aria-hidden="true"><path class="f" d="' + p + 'L100 38L0 38Z"/>'
+      + '<path class="s" d="' + p + '"/></svg>';
+  }
+
   function scPaintTally() {
     var day = scDay();
     var got = tickLog[day] || {};
@@ -3710,67 +3807,74 @@
        figure without leaving the screen. */
     var all = scItems().filter(function (it) { return it.cnt !== 0; });
     var n = all.filter(function (it) { return got[it.id]; }).length;
+    var st = scStreak(), best = scBest();
 
-    var st = scStreak();
-    $('scStreakNum').textContent = '';
-    $('scStreakNum').appendChild(document.createTextNode(String(st)));
-    $('scStreakNum').appendChild(scEl('i', null, st === 1 ? 'day' : 'days'));
-    $('scTallyCap').textContent = n + ' of ' + all.length + ' today \u00b7 '
-      + st + (st === 1 ? ' day streak' : ' day streak');
-    /* ── THE DOOR IS THE LINE THAT ALREADY SAYS HOW TODAY WENT ──
-       The calendar's own move: the head prints which day you are on
-       and pressing it asks for more days. Here the caption prints how
-       today went, so pressing it asks for the week that contains it —
-       a control naming itself, where a fourth stop would be a
-       segmented track of four on a 390px phone and a List/Week
-       switcher is exactly the second row of chrome this screen took
-       out once already. */
-    $('scTallyCap').setAttribute('aria-label',
-      $('scTallyCap').textContent + ', open this week');
+    /* ── THREE FIGURES, AND THE ROW IS THE DOOR ──
+       It was one grey line reading "5 of 6 today · 1 day streak" with
+       the longest streak in a smaller line at the foot of the screen,
+       which is three facts about the same thing drawn in two places at
+       two sizes. They are one panel now, split by hairlines: today,
+       the run you are on, and the best you have had.
+
+       AND IT IS STILL THE DOOR TO THE WEEK. The caption was a button
+       because the line that already says how today went is what asks
+       for the seven days around it; the row says the same thing three
+       ways, so the door moved onto it rather than needing a control of
+       its own.
+
+       The denominator stays. "5 of 6" and not "05": adding a habit
+       makes today harder and the figure has to say so, which is the
+       count's own rule and the one thing a bare number cannot do. */
+    var trio = $('scTallyCap');
+    trio.textContent = '';
+    [[n, '/ ' + all.length, 'Today', null],
+     [st, null, 'Streak', 'scStreakNum'],
+     [best, null, 'Best', null]].forEach(function (f) {
+      var cell = scEl('span', 'ty-t');
+      var b = scEl('b');
+      /* The streak's own node, named here rather than standing empty in
+         the markup: the panel is rebuilt on every paint, and a second
+         element carrying the same figure is a second place for it to go
+         stale. */
+      if (f[3]) b.id = f[3];
+      b.appendChild(document.createTextNode(String(f[0])));
+      if (f[1]) b.appendChild(scEl('s', null, f[1]));
+      cell.appendChild(b);
+      cell.appendChild(scEl('i', null, f[2]));
+      trio.appendChild(cell);
+    });
+    trio.setAttribute('aria-label', n + ' of ' + all.length + ' today, '
+      + st + (st === 1 ? ' day streak' : ' day streak') + ', best '
+      + best + (best === 1 ? ' day' : ' days') + ', open this week');
+
     var grid = $('scTallyGrid');
     grid.textContent = '';
-    /* ── SHOWING UP HAS ONE VIEW AND NO SWITCHER ──
-       It had List and Board, sitting directly under the three stops
-       that are themselves a row of tabs — two rows of chrome, one on
-       top of the other, before a single row of the thing the screen is
-       about. Reported as "it's just looking like too much", and the
-       switcher is the half that goes: the stops say WHICH screen and
-       the switcher said how to draw it, which is a question this screen
-       only ever had one good answer to.
 
-       Kept and Still to do, side by side, with a row crossing over when
-       you press it. What that costs is the 26-week strip, which does
-       not fit half a phone — the history is still one press away on the
-       row itself. */
-    var old = $('scTallyCap').nextElementSibling;
-    if (old && old.classList.contains('views')) old.remove();
-    /* ── SEVEN TILES, TWO ACROSS, NO GROUPING ──
-       It was a full-width list with a 26-week strip down the right of
-       every row, and before that a two-column board headed Kept and
-       Still to do. Both are gone. The question you open this screen
-       with is what you have actually done today, and the answer is a
-       figure — so the figure is the loudest thing on it and everything
-       else on the tile is a label for that figure.
+    /* ── THE TALL ONE IS SECOND ──
+       So it starts the right-hand column at the top and spans the two
+       rows beside it, which is your reference's own arrangement. The
+       numbers lead because they are what carry a figure; the ticks
+       follow; yours come last in the order you made them. Nothing here
+       is ordered by whether it is logged — a grid that rearranges
+       itself as you press it is a grid you cannot learn. */
+    var items = scItems();
+    var ord = items.filter(function (it) { return it.k !== 'do'; })
+      .concat(items.filter(function (it) { return it.k === 'do'; }));
+    var tallAt = -1;
+    ord.forEach(function (it, i) { if (tallAt < 0 && scTyTall(it)) tallAt = i; });
+    if (tallAt > 1) ord.splice(1, 0, ord.splice(tallAt, 1)[0]);
 
-       No headings: whether a thing is kept is already said by its own
-       tick, and a heading saying it again splits seven items into two
-       lists that both have to be read. */
-    scItems().forEach(function (it, i) {
-      var on = !!got[it.id], late = !on && scLate(it);
-      var row = scEl('div', 'ty-row' + (on ? ' is-on' : '') + (late ? ' late' : ''));
+    ord.forEach(function (it) {
+      var on = !!got[it.id], late = !on && scLate(it), tall = scTyTall(it);
+      var row = scEl('div', 'ty-row' + (on ? ' is-on' : '') + (late ? ' late' : '')
+        + (tall ? ' is-tall' : ''));
       row.dataset.item = it.id;
-      /* ── ONE CONTROL A TILE: TAP LOGS, HOLD OPENS THE RECORD ──
-         The card opened the history on a plain press and the check
-         beside it logged, which had the rare thing on the big target
-         and the daily one on a 30px circle. It is the other way round
-         now: the whole tile logs, and the twenty-six weeks are behind
-         a hold.
-
-         So the circle is DRAWN rather than pressed. It was a sibling
-         button, and with the card logging too it would have been two
-         targets for one action on a 145px tile — the arrangement this
-         screen already removed once. A span inside the button is
-         valid where a second button would not be. */
+      /* ── DRAWN, NOT PRESSED ──
+         The tile is one control: a tap logs and two taps open the
+         record. A second target for the same action on a 145px tile is
+         the arrangement this screen removed once already, so the mark
+         is a span inside the button — where a second button would be
+         invalid — and it takes no press of its own. */
       var chk = scEl('span', 'chk');
       chk.setAttribute('aria-hidden', 'true');
       chk.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.8l5.2 5.2L19.5 6"/></svg>';
@@ -3778,12 +3882,20 @@
       var c = scEl('button', 'ty-card');
       c.type = 'button';
       c.dataset.item = it.id;
+      /* ── THE GLYPH STAYED AND THE NAME BECAME A LABEL ──
+         Your reference names each tile in small caps and draws no mark
+         at all, which is what buys the figure its size and the chart
+         its room. The glyph is kept at 13px on the same line, because
+         it is the one thing on the tile that is the same object here,
+         in the week's own rows and at the head of the history sheet —
+         and it costs the label nothing at this size. */
       c.insertAdjacentHTML('beforeend',
         '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">'
         + scItemIcon(it) + '</svg>');
       var body = scEl('span', 'ty-body');
       c.appendChild(body);
       body.appendChild(scEl('span', 'ty-nm', it.n));
+
       var via = null;
       if (on && it.from) {
         var b = scBlocksFor(it, new Date().getDay()).filter(function (x) {
@@ -3792,74 +3904,106 @@
         if (b) via = 'from ' + b.n;
       }
       /* ── MIND SAYS WHAT IT WAS ──
-         It carries a record of its own now, and the book or the show
-         is a better answer than which block happened to feed the
-         tick. Not `val`: that size is for a FIGURE, and a title drawn
-         at 22px would be the loudest thing on a screen of six tiles.
-         The row tag this replaces went with the block-keyed record —
-         a record you can only see by opening a sheet is one you stop
-         keeping, so it had to land somewhere, and the tile you press
-         is where it belongs. */
+         It carries a record of its own, and the book or the show is a
+         better answer than which block happened to feed the tick. */
       if (on && it.id === 'm') {
         var mrec = scMindOf(day);
         if (mrec) via = scMindName(mrec);
       }
+
+      /* ── THE FIGURE IS THE TILE ──
+         Twenty-seven pixels, and the unit rides it rather than sitting
+         in a tag underneath: `kcal` over `2,310 kcal` was the same word
+         twice on the one line that could have carried a chart. That is
+         why there is no tag on this screen any more.
+
+         A TICK HAS A FIGURE TOO, and it is the week: kept over the days
+         it was actually on. `3 / 5` is a real answer to what have I
+         done, where "logged" was a restatement of the mark already in
+         the corner. */
       var props = scEl('span', 'props');
-      var word = it.k === 'num' && on ? String(got[it.id]) + (it.unit || '')
-          : (via || (on ? 'logged' : (late ? 'missed' : 'not yet')));
-      /* `val` only where the word is a FIGURE. "not yet" and "missed"
-         are states, and a state drawn at the size of an achievement is
-         the screen making an absence loud. */
-      props.appendChild(scEl('span',
-        'pill' + (late ? ' is-late' : '') + (it.k === 'num' && on ? ' val' : ''),
-        word));
-      /* ── THE TAG IS THE ONLY COLOUR ON THIS SCREEN ──
-         It names the thing — Train, Steps, Water — so its colour says
-         WHICH, which is the one job colour has anywhere in this app
-         now that the accent is gone.
-
-         AND IT IS DRAWN ONLY OVER A VALUE. `not yet` and `missed` are
-         states, and a state wearing an item's colour would make a
-         colour say WHETHER, which is the rule this screen has kept
-         since it was a strip of pips: nothing is ever coloured to say
-         you failed. A day with nothing logged carries the flat neutral
-         tag instead. */
-      /* A habit of yours with no unit and no aim has nothing for a
-         tag to say, and an empty one is a grey stub — so it draws
-         none rather than repeating the name above it. */
-      var word = scTagWord(it);
-      var tg = word ? scEl('span', 'tg' + (on ? '' : ' is-off'), word) : null;
-      if (tg && on) tg.style.setProperty('--tg', scTagHue(it));
-      /* appendChild, not insertBefore(props): `props` is built above
-         but is not in `body` until the line below, so inserting before
-         it throws NotFoundError and takes the whole grid down — the
-         screen renders as a heading and nothing else. */
-      if (tg) body.appendChild(tg);
-      /* Days on now, for a TICK and only a tick — a run on a number
-         counts the days you remembered to type one in, which is a fact
-         about your logging. Drawn from two, because "1 day" under a
-         thing you just did is the check saying it twice. */
+      var val = scEl('span', 'pill val');
+      var wk = it.k === 'do' ? scTyWeek(it) : null;
       if (it.k === 'do') {
-        var run = 0, hist = scHist(it.id);
-        for (var j = hist.length - 1; j >= 0; j--) {
-          if (hist[j].on) run++;
-          else if (hist[j].off) continue;
-          else break;
-        }
-        if (run >= 2) props.appendChild(scEl('span', 'pill' + (run >= 7 ? ' is-run' : ''), run + ' days'));
+        val.appendChild(document.createTextNode(String(wk.kept)));
+        val.appendChild(scEl('s', null, '/ ' + wk.aim));
+      } else if (on) {
+        var num = +got[it.id];
+        val.appendChild(document.createTextNode(
+          num.toLocaleString('en-GB', { minimumFractionDigits: it.dp || 0,
+                                        maximumFractionDigits: it.dp || 0 })));
+        if (it.unit) val.appendChild(scEl('u', null, it.unit));
+      } else {
+        /* An em dash, not a nought: a night you have not recorded is
+           not a night you slept none. The unit stays, because it is
+           what says which kind of figure is missing. */
+        val.appendChild(document.createTextNode('—'));
+        if (it.unit) val.appendChild(scEl('u', null, it.unit));
       }
+      props.appendChild(val);
+      /* ── THE RUN OF DAYS CAME OFF THE TILE ──
+         A tick's own streak sat here as a second pill, wrapping to a
+         line of its own under the figure. With the figure now saying
+         `6 / 7` for the week and the line under it naming the window,
+         a run is a fourth register on a 145px tile — and the panel at
+         the top of the screen carries a run, while the history two
+         presses in carries this one. */
       body.appendChild(props);
-      /* ── AND A HABIT WITH AN AIM CARRIES THE WEEK ON ITS FOOT ──
-         The word above it is about TODAY and this is about the week,
-         which is two windows on one tile — and it is what the tile was
-         missing: the tag already says "3 a week" and nothing anywhere
-         said how many of the three you had. The sheet two presses in
-         draws the same figure at a size you can read; this is the one
-         you see every morning without asking for it.
 
-         `.ty-body` is `display: contents`, so this lands in the CARD's
-         own grid rather than in a box of its own — which is why the
-         rule spans the whole of it rather than sizing to its content. */
+      /* ── THE LINE UNDER THE FIGURE NAMES ITS WINDOW ──
+         `Today` on a number, `This week` on a tick — and where the tick
+         has something better to say, it says that instead: which block
+         fed it, or the book you read. */
+      var when = it.k === 'do'
+        ? (via || (on ? 'Logged today' : late ? 'Missed' : 'This week'))
+        : (on ? 'Today' : late ? 'Missed' : 'Not yet');
+      body.appendChild(scEl('span', 'ty-when', when));
+
+      var ch = scEl('span', 'ty-ch');
+      if (tall) {
+        /* ── THE GAUGE, AND THE MARKS SIT BESIDE THE TRACK ──
+           At their own heights, which is what makes it a gauge rather
+           than a bar with a caption under it. */
+        var aim = scTyAim(it) || 1;
+        var g = scEl('span', 'ty-g');
+        var trk = scEl('span', 'ty-gt');
+        var fil = scEl('i');
+        fil.style.height = Math.min(1, (+got[it.id] || 0) / aim) * 100 + '%';
+        trk.appendChild(fil);
+        g.appendChild(trk);
+        var mk = scEl('span', 'ty-gm');
+        [['100%', 0], ['50%', 50]].forEach(function (q) {
+          var sp = scEl('span', null, q[0]);
+          sp.style.top = q[1] + '%';
+          mk.appendChild(sp);
+        });
+        g.appendChild(mk);
+        ch.appendChild(g);
+      } else if (it.k === 'do') {
+        var wkw = scEl('span', 'ty-wk');
+        wk.days.forEach(function (s) {
+          wkw.appendChild(scEl('i', 'is-' + s));
+        });
+        ch.appendChild(wkw);
+        var ax = scEl('span', 'ty-ax');
+        ax.appendChild(scEl('span', null, 'Mon'));
+        ax.appendChild(scEl('span', null, 'Sun'));
+        ch.appendChild(ax);
+      } else {
+        var ser = scTySeries(it);
+        if (ser) {
+          ch.insertAdjacentHTML('beforeend', scTyArea(ser));
+          var ax2 = scEl('span', 'ty-ax');
+          ser.forEach(function (s) { ax2.appendChild(scEl('span', null, s.lab)); });
+          ch.appendChild(ax2);
+        }
+      }
+      body.appendChild(ch);
+
+      /* ── AND A HABIT WITH AN AIM CARRIES THE WEEK ON ITS FOOT ──
+         The figure above it is about the week too, but as a count; this
+         is the twelve weeks behind it, which is the only thing on the
+         tile that says whether you are keeping it up. */
       if (scSolo(it)) {
         var wp = scWeekProg(it);
         var wtr = scEl('span', 'ty-tl');
@@ -3869,25 +4013,14 @@
         wtr.appendChild(wfi);
         body.appendChild(wtr);
       }
-      /* ── THE TICK LOGS AND THE TILE OPENS THE RECORD ──
-         Both were logging before, with the strip beside them opening
-         the history — and the strip is what went, so the way in had to
-         move rather than disappear. On a tile with a check in its
-         corner, pressing the check to log and pressing the card to see
-         more is the division everybody already knows; two controls that
-         did the same thing and a third that did the other one was the
-         arrangement a full-width row could afford and a 145px tile
-         cannot. Still siblings, never nested. */
-      /* The card IS the toggle now, so it carries the state a screen
-         reader is told and the name says what a press does. The
-         figure the tile draws is still spoken, because "logged" alone
-         throws away the one thing you came to read. */
+
       c.setAttribute('aria-pressed', on ? 'true' : 'false');
       c.setAttribute('aria-label', (on ? 'Unlog ' : 'Log ') + it.n + ', '
         + (on ? 'logged' : 'not yet')
         + (on && it.k === 'num' ? ', ' + got[it.id] + (it.unit || '') : '')
+        + (it.k === 'do' ? ', ' + wk.kept + ' of ' + wk.aim + ' this week' : '')
         + (late ? ', missed its window' : '')
-        + (scSolo(it) ? ', ' + scWeekProg(it).week + ' of ' + it.aim + ' this week' : ''));
+        + (via ? ', ' + via : ''));
       scDoubleTap(c, function () { scTallyTap(it, day); }, function () {
         /* Using the gesture is the best possible sign that it has been
            learned, so the card that teaches it stops appearing. */
@@ -3895,34 +4028,52 @@
         scOpenHist(it);
       });
       row.appendChild(c);
-      /* ── AND THE HOLD IS NEVER THE ONLY WAY IN ──
-         A long press reaches neither a keyboard nor a screen reader.
-         That is why the week's own long press is a shortcut to
-         something the tally already does with a plain press — and
-         here there is nothing else, so the route has to be built. It
-         is a real button, focusable and named, drawn off screen
-         rather than `display: none`, which would take it out of the
-         accessibility tree and leave the history reachable by exactly
-         one gesture that half the people using this app cannot make. */
-      var hist = scEl('button', 'ty-hist', 'History');
-      hist.type = 'button';
-      hist.setAttribute('aria-label',
-        it.id === 'm' ? 'Mind, everything logged' : it.n + ', 26 weeks of history');
-      hist.addEventListener('click', function () { scOpenHist(it); });
-      row.appendChild(hist);
-      /* ── AND ONE OF YOURS CAN BE CHANGED ──
-         The six cannot: each has a made thing behind it and nothing
-         about them is a setting. Yours get a second off-screen
-         control, for the reason the first one exists — a route that
-         only a long press can reach is a route half the people using
-         this app do not have.
 
-         NO NEW GESTURE. A tap logs and two taps open the record, and
-         a third would be a long press — which this app deleted, on
-         the grounds that two gestures for one screen is a control
-         answering the same question twice. So the pointer route to
-         these settings is inside the habit's own history, which the
-         double tap already opens. */
+      /* ── THE STEPPER IS THREE SIBLINGS, NOT THREE CHILDREN ──
+         A button inside a button is invalid and collapses to one press
+         while looking exactly right, so these sit beside the card and
+         the card leaves room at its foot for them. The middle one is
+         the dial: the two arrows make the common answer one press and
+         the figure in between reaches every other answer, which is the
+         dial's own rule about its marks one level up. */
+      if (tall) {
+        var stp = scEl('span', 'ty-step');
+        [['-', -1], [null, 0], ['+', 1]].forEach(function (q) {
+          var bt = scEl('button', q[1] ? 'ty-sb' : 'ty-sv');
+          bt.type = 'button';
+          if (q[1]) {
+            bt.textContent = q[1] < 0 ? '−' : '+';
+            bt.setAttribute('aria-label',
+              (q[1] < 0 ? 'Take ' : 'Add ') + it.bump + (it.unit || '') + ' of ' + it.n);
+            bt.addEventListener('click', function () {
+              var have = +((tickLog[day] || {})[it.id]) || 0;
+              var next = Math.max(0, +(have + q[1] * it.bump).toFixed(it.dp || 0));
+              scSetTick(day, it.id, next ? String(next) : 0);
+              scPaintTally();
+            });
+          } else {
+            bt.textContent = it.bump + (it.unit || '');
+            bt.setAttribute('aria-label', 'Log an exact amount of ' + it.n);
+            bt.addEventListener('click', function () { scNumSheet(it, day); });
+          }
+          stp.appendChild(bt);
+        });
+        row.appendChild(stp);
+      }
+
+      /* ── AND THE HOLD IS NEVER THE ONLY WAY IN ──
+         A long press reaches neither a keyboard nor a screen reader, so
+         the route has to be built: a real button, focusable and named,
+         drawn off screen rather than `display: none`, which would take
+         it out of the accessibility tree and leave the history behind
+         exactly one gesture half the people using this app cannot
+         make. */
+      var hist2 = scEl('button', 'ty-hist', 'History');
+      hist2.type = 'button';
+      hist2.setAttribute('aria-label',
+        it.id === 'm' ? 'Mind, everything logged' : it.n + ', 26 weeks of history');
+      hist2.addEventListener('click', function () { scOpenHist(it); });
+      row.appendChild(hist2);
       if (it.own) {
         var ed = scEl('button', 'ty-hist', 'Settings');
         ed.type = 'button';
@@ -3935,9 +4086,7 @@
     /* ── THE WAY IN, AND IT IS THE LAST THING ON THE GRID ──
        Under the tiles rather than in the bar: the bar holds three tabs
        and an add button at 390px, and a fourth would be the control
-       that made the row too tight to press. A quiet line, because
-       making a habit is something you do a handful of times ever and
-       the tiles are what you came for. */
+       that made the row too tight to press. */
     var add = scEl('button', 'ty-add');
     add.type = 'button';
     add.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
@@ -3945,10 +4094,10 @@
     add.appendChild(document.createTextNode('Add a habit'));
     add.addEventListener('click', scHabitSheet);
     grid.appendChild(add);
-    var best = scBest();
-    $('scTallyFoot').textContent = st
-      ? 'Longest streak ' + best + (best === 1 ? ' day.' : ' days.')
-      : 'Log one thing and the run starts.';
+    /* The foot said the longest streak, which is the third figure in
+       the panel at the top now. It carries the one thing that panel
+       cannot: what to do when there is no run at all. */
+    $('scTallyFoot').textContent = st ? '' : 'Log one thing and the run starts.';
   }
 
   /* ══════════════════════════════════════════════════════

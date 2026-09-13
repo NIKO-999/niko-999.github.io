@@ -2887,7 +2887,15 @@ const SAID = [
     up: !document.getElementById('scTally').hidden,
     rail: document.getElementById('scWeek').hidden,
     cards: document.querySelectorAll('.ty-card').length,
-    cap: document.getElementById('scTallyCap').textContent,
+    /* THREE FIGURES, NOT A LINE. It was "5 of 6 today, 1 day streak"
+       with the longest run in a second line at the foot of the screen;
+       they are one panel now, split by hairlines, and the panel is
+       still the door to the week. Read as its cells rather than as a
+       joined string, because a string passes on a build that drew the
+       three in any order at all. */
+    cap: [...document.querySelectorAll('#scTallyCap .ty-t')]
+      .map((c) => c.querySelector('b').textContent + '|' + c.querySelector('i').textContent),
+    capLab: document.getElementById('scTallyCap').getAttribute('aria-label'),
   }));
   ok('the tally is a third view and it replaces the week',
     tal.up && tal.rail, tal);
@@ -2895,7 +2903,13 @@ const SAID = [
      the other five, and the only one of them you did not do. */
   ok('six cards, and the list is not editable from anywhere',
     tal.cards === 6, tal);
-  ok('and nothing is logged on a fresh day', tal.cap.startsWith('0 of 6 today'), tal);
+  ok('and nothing is logged on a fresh day',
+    tal.cap.join() === '0/ 6|Today,0|Streak,0|Best', tal);
+  /* The denominator stays and the door is still named: adding a habit
+     makes today harder and the figure has to say so, and the panel has
+     to say what pressing it opens. */
+  ok('and the panel says what it is and what it opens',
+    /^0 of 6 today,/.test(tal.capLab) && /open this week$/.test(tal.capLab), tal);
 
   /* ── the glyph is the name ──
      The card used to carry `Steps` at 17px bold in one corner and
@@ -2948,9 +2962,14 @@ const SAID = [
      DOES and the item's own name follows it. Asserted as that exact
      shape rather than as "the name appears somewhere", which passes on
      a label that has stopped saying what the control is for. */
+  /* BY `data-item`, never by position: the tall tile is hoisted to
+     second so it starts the right-hand column at the top, so the grid's
+     order is not the item list's — and a check keyed to position reads
+     a different card the day that order moves, silently. */
   ok('and every card still SAYS its name, after what pressing it does',
-    ['Train', 'Mind', 'Steps', 'Fuel', 'Water']
-      .every((n, i) => new RegExp('^(Log|Unlog) ' + n + '\\b').test(marks[i].label)),
+    [['t', 'Train'], ['m', 'Mind'], ['p', 'Steps'], ['f', 'Fuel'], ['w', 'Water']]
+      .every((x) => new RegExp('^(Log|Unlog) ' + x[1] + '\\b')
+        .test((marks.find((m) => m.item === x[0]) || {}).label || '')),
     marks.map((m) => m.label.slice(0, 18)).join(' | '));
 
   /* ── the figure under the ring ──
@@ -2973,22 +2992,37 @@ const SAID = [
     const figs = await page.evaluate(() => {
       const g = (id) => {
         const c = document.querySelector('.ty-card[data-item="' + id + '"]');
-        return { sub: c.querySelector('.props .pill').textContent,
+        return { sub: c.querySelector('.props .val').textContent,
+                 when: c.querySelector('.ty-when').textContent,
                  label: c.getAttribute('aria-label') };
       };
       return { p: g('p'), w: g('w'), f: g('f'), t: g('t') };
     });
-    ok('a logged number is written under its ring',
-      figs.p.sub === '12480' && figs.w.sub === '2.5 L', JSON.stringify(figs));
+    /* The figure is the TILE now, at 27px with its unit riding it —
+       and it is grouped, because 12480 is a figure you have to count
+       the digits of. */
+    ok('a logged number is the tile, grouped, with its unit on it',
+      figs.p.sub === '12,480' && figs.w.sub === '2.5 L', JSON.stringify(figs));
     ok('...and is in the accessible name too',
       figs.p.label.indexOf('12480') > 0 && figs.w.label.indexOf('2.5 L') > 0,
       figs.p.label);
     /* A do-item has no figure, so its line says where the tick came
        from instead — and an item with nothing logged says nothing
        rather than prompting under a ring that already reads as empty. */
-    ok('a thing with no number says where its tick came from',
-      figs.t.sub === 'logged' || figs.t.sub.indexOf('from ') === 0, figs.t.sub);
-    ok('and one with nothing logged says so, and no number', figs.f.sub === 'not yet', figs.f.sub);
+    /* A TICK HAS A FIGURE TOO, and it is the week: kept over the days
+       it was actually on. `3 / 5` is a real answer to what have I done,
+       where "logged" was a restatement of the mark already in the
+       corner — and where the tick came from moved to the line under it,
+       which is the line that names the window on every other tile. */
+    ok('a tick prints its week, and says where it came from under it',
+      /^\d+\/ \d+$/.test(figs.t.sub)
+      && (figs.t.when === 'Logged today' || figs.t.when.indexOf('from ') === 0),
+      JSON.stringify(figs.t));
+    /* An em dash, not a nought: a meal you have not recorded is not a
+       meal of nothing. The unit stays, because it says which kind of
+       figure is missing. */
+    ok('and one with nothing logged draws a dash and says Not yet',
+      figs.f.sub === '\u2014 kcal' && figs.f.when === 'Not yet', JSON.stringify(figs.f));
     /* PUT THE DAY BACK. This block seeds three ticks to have figures to
        read, and everything below it opens by asserting a fresh day —
        leaving them seeded broke three assertions that had nothing to do
@@ -3076,14 +3110,15 @@ const SAID = [
   await page.waitForTimeout(150);
   const linked = await page.evaluate(() => ({
     card: document.querySelector('.ty-card[data-item="t"]').parentElement.className,
-    via: document.querySelector('.ty-card[data-item="t"] .props .pill').textContent,
-    cap: document.getElementById('scTallyCap').textContent,
+    via: document.querySelector('.ty-card[data-item="t"] .ty-when').textContent,
+    cap: [...document.querySelectorAll('#scTallyCap .ty-t')]
+      .map((c) => c.querySelector('b').textContent),
     log: localStorage.getItem('sched.log.v1'),
   }));
   ok('ticking an item ticks the block behind it',
     /is-|on/.test(linked.card) && linked.via === 'from Train'
     && /\{"\d{4}-\d{2}-\d{2}":\{".+":1\}\}/.test(linked.log), linked);
-  ok('and the count moves with it', linked.cap.startsWith('1 of 6 today'), linked);
+  ok('and the count moves with it', linked.cap[0] === '1/ 6', linked);
 
   /* ── the link runs the OTHER way too ──
      This is the half that was missing, and the failure it caused is the
@@ -3301,7 +3336,8 @@ const SAID = [
   const late = await page.evaluate(() => {
     const g = (id) => {
       const c = document.querySelector('.ty-card[data-item="' + id + '"]');
-      return { late: c.parentElement.classList.contains('late'), s: c.querySelector('.props .pill').textContent };
+      return { late: c.parentElement.classList.contains('late'),
+               s: c.querySelector('.ty-when').textContent };
     };
     return { t: g('t'), m: g('m'), w: g('w') };
   });
@@ -3309,7 +3345,7 @@ const SAID = [
      phone wide and `Missed its window` does not fit it. The fact is
      still on the card's accessible name in full. */
   ok('a block whose window has passed says so', late.t.late
-    && late.t.s === 'missed', late);
+    && late.t.s === 'Missed', late);
   ok('but one that can still be satisfied does not', !late.m.late, late);
   ok('and an item with no block behind it never can', !late.w.late, late);
 
@@ -3331,17 +3367,29 @@ const SAID = [
   });
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(250);
-  const run = await page.evaluate(() => ({
-    fig: document.getElementById('scStreakNum').textContent,
-    foot: document.getElementById('scTallyFoot').textContent,
-  }));
-  ok('an unlogged today does not break the run', run.fig === '5days', run);
-  /* STREAK, not run — one word for it, everywhere. The panel a TICK's
-     row opens says "longest streak", and the foot of the same screen
-     saying "longest run" for the same idea is the screen using two
-     names for one thing in one glance. */
-  ok('and the longest streak is counted, and says “days” only when it is many',
-    run.foot === 'Longest streak 5 days.', run);
+  const run = await page.evaluate(() => {
+    const cell = (w) => [...document.querySelectorAll('#scTallyCap .ty-t')]
+      .find((c) => c.querySelector('i').textContent === w);
+    return {
+      fig: document.getElementById('scStreakNum').textContent,
+      /* The streak's own node IS the panel's middle cell rather than a
+         second element carrying the same figure, which is a second
+         place for it to go stale. */
+      inPanel: document.getElementById('scStreakNum')
+        === cell('Streak').querySelector('b'),
+      best: cell('Best').querySelector('b').textContent,
+      foot: document.getElementById('scTallyFoot').textContent,
+    };
+  });
+  ok('an unlogged today does not break the run',
+    run.fig === '5' && run.inPanel, run);
+  /* THE LONGEST RUN MOVED INTO THE PANEL. It was an 11px line at the
+     very foot of the screen saying "Longest streak 5 days." under
+     everything — the third of three facts about one thing, drawn in a
+     second place at a second size. The foot now carries the one thing
+     the panel cannot: what to do when there is no run at all. */
+  ok('and the longest streak is the third figure, not a line at the foot',
+    run.best === '5' && run.foot === '', run);
 
   /* ── two days, then the day shuts ──
      Unlimited backfill makes a shared number fiction — somebody fills
@@ -3525,6 +3573,140 @@ const SAID = [
   ok('the card says it logs, and says where it stands',
     rows.labels.every((l) => /^(Log|Unlog) /.test(l || ''))
     && rows.pressed.every((p) => p === 'true' || p === 'false'), rows.labels);
+
+  /* ══ THE TILE IS THE REFERENCE'S OBJECT ══
+     Twelve chart treatments were drawn on a real tile at 188px and
+     three taken across the whole screen at 390x844; what shipped is
+     the area, with Water kept as a tall vertical gauge. The claims
+     below are the four things that makes true, and each is asserted
+     against something a build could plausibly regress to. */
+  const tile = await page.evaluate(() => {
+    const r = [...document.querySelectorAll('.ty-row')];
+    const px = (e, p) => parseFloat(getComputedStyle(e)[p]);
+    const g = (id) => document.querySelector('.ty-row[data-item="' + id + '"]');
+    const steps = g('p'), water = g('w'), train = g('t');
+    return {
+      /* THE LABEL IS A LABEL AND THE FIGURE IS THE TILE. It was a
+         13.5px name over a 22px chip; the name is 11px small caps now
+         and the figure is what you read. Asserted as the RELATIONSHIP,
+         so a change to the type scale moves both and the check still
+         means what it says. */
+      lab: px(steps.querySelector('.ty-nm'), 'fontSize'),
+      labCase: getComputedStyle(steps.querySelector('.ty-nm')).textTransform,
+      val: px(steps.querySelector('.props .val'), 'fontSize'),
+      /* EVERY TILE CARRIES A CHART, and it sits on the FOOT of whatever
+         height the row settles on — so two side by side draw theirs on
+         one line rather than at their own heights.
+
+         PLANTED, because on this fixture the two tiles in a row are
+         already exactly their content's height, so a chart that had
+         stopped being pushed down would land in the same place and the
+         check could not fail. The tile is stretched 60px and the gap to
+         its own foot has to hold. */
+      charts: r.filter((x) => !!x.querySelector('.ty-ch')).length,
+      feet: [steps, g('f')].map((x) => {
+        const gap = () => Math.round(x.getBoundingClientRect().bottom
+          - x.querySelector('.ty-ch').getBoundingClientRect().bottom);
+        const at = gap();
+        x.style.minHeight = (x.getBoundingClientRect().height + 60) + 'px';
+        const grown = gap();
+        x.style.minHeight = '';
+        return [at, grown];
+      }),
+      /* A NUMBER DRAWS AN AREA WITH ITS DAYS DATED. The dated ticks
+         are what say these are four readings rather than a continuous
+         line, which is the whole of what makes an area honest on a
+         daily count. */
+      area: !!steps.querySelector('.ty-ch .ty-ar .f')
+        && !!steps.querySelector('.ty-ch .ty-ar .s'),
+      dates: [...steps.querySelectorAll('.ty-ch .ty-ax > span')].map((x) => x.textContent),
+      /* A TICK DRAWS ITS WEEK, Monday to Sunday, seven marks. */
+      week: train.querySelectorAll('.ty-ch .ty-wk > i').length,
+      weekAx: [...train.querySelectorAll('.ty-ch .ty-ax > span')].map((x) => x.textContent),
+      /* ONE TILE IS TALL and it is the one you add to in a fixed unit.
+         Asserted as the BOX rather than the class: a rule that set the
+         class and no longer spanned would pass on the name alone. */
+      tall: r.filter((x) => x.classList.contains('is-tall')).map((x) => x.dataset.item),
+      tallH: Math.round(water.getBoundingClientRect().height),
+      shortH: Math.round(steps.getBoundingClientRect().height),
+      gauge: !!water.querySelector('.ty-ch .ty-gt > i'),
+      /* THE STEPPER IS THREE SIBLINGS OF THE CARD, never children:
+         a button inside a button is invalid and collapses to one press
+         while looking exactly right. */
+      step: [...water.querySelectorAll(':scope > .ty-step button')]
+        .map((b) => b.getAttribute('aria-label')),
+      stepIn: !!water.querySelector('.ty-card .ty-step'),
+      stepTap: [...water.querySelectorAll(':scope > .ty-step button')].map((b) => {
+        const a = b.getBoundingClientRect();
+        return Math.round(Math.min(a.width, a.height));
+      }),
+    };
+  });
+  ok('the name is a small-caps label and the figure is the tile',
+    tile.lab < tile.val * 0.6 && tile.labCase === 'uppercase', tile);
+  ok('every tile carries a chart, and it sits on the foot',
+    tile.charts === 6
+    && tile.feet.every((f) => f[0] === f[1] && f[0] < 20), tile);
+  ok('a number draws an area with its four days dated',
+    tile.area && tile.dates.length === 4
+    && tile.dates.every((d) => /^\d+ [A-Z][a-z]{2}$/.test(d)), tile.dates);
+  ok('and a tick draws its week, Monday to Sunday',
+    tile.week === 7 && tile.weekAx.join() === 'Mon,Sun', tile);
+  /* SPANS TWO ROWS, measured. A tall tile that had stopped spanning
+     would still carry the class and still draw the gauge — squashed
+     into one row's height, which is the regression this catches. */
+  ok('exactly one tile is tall, it is the one you add to, and it spans two',
+    tile.tall.join() === 'w' && tile.gauge
+    && tile.tallH > tile.shortH * 1.8, tile);
+  ok('and its stepper is three siblings of the card, each a real target',
+    tile.step.length === 3 && !tile.stepIn
+    && /^Take 0\.3 L/.test(tile.step[0]) && /^Log an exact/.test(tile.step[1])
+    && /^Add 0\.3 L/.test(tile.step[2])
+    && tile.stepTap.every((n) => n >= 38), tile);
+
+  /* AND THE ARROWS ACTUALLY MOVE THE RECORD, both ways and never below
+     nought. A stepper that draws and does nothing passes every check
+     above it. */
+  const bump = await page.evaluate(async () => {
+    /* CAPTURED AND PUT BACK. A check that changes the state of the app
+       is a check that breaks the next one, and this one writes to the
+       record four times. */
+    const was = localStorage.getItem('sched.tick.v1');
+    const press = async (i) => {
+      document.querySelectorAll('.ty-row[data-item="w"] > .ty-step button')[i].click();
+      await new Promise((r) => setTimeout(r, 60));
+    };
+    const val = () => document.querySelector('.ty-row[data-item="w"] .props .val').textContent;
+    const fill = () => parseFloat(
+      document.querySelector('.ty-row[data-item="w"] .ty-gt > i').style.height);
+    const start = { v: val(), f: fill() };
+    await press(2); await press(2);
+    const up = { v: val(), f: fill() };
+    await press(0);
+    const down = val();
+    /* Six down from two up cannot land anywhere but the floor. */
+    for (let i = 0; i < 6; i++) await press(0);
+    const floor = val();
+    if (was === null) localStorage.removeItem('sched.tick.v1');
+    else localStorage.setItem('sched.tick.v1', was);
+    return { start, up, down, floor };
+  });
+  /* The aim is the top of the dial's own ladder, 3 L, so two glasses
+     is a sixth of the track. Asserted as the gauge MOVING with the
+     figure, because a fill that never changes draws exactly the same
+     as one that does on a tile you have not pressed. */
+  /* THE DELTA, never a literal: whatever the record holds when this
+     runs, two glasses is +0.6 and one back is -0.3. And the bump has to
+     be a MULTIPLE of the item's own step, or the figure drifts a
+     decimal at a time while every reading on screen stays plausible \u2014
+     which is what 0.25 did on a record kept at one decimal, four
+     glasses landing on 1.2 L where they should make 1.0. */
+  ok('a press of the stepper adds a glass, and the gauge fills with it',
+    +bump.up.v.replace(' L', '') === +(+bump.start.v.replace(' L', '') + 0.6).toFixed(1)
+    && bump.up.f > bump.start.f, bump);
+  ok('and it takes one off, and never goes under nought',
+    +bump.down.replace(' L', '') === +(+bump.up.v.replace(' L', '') - 0.3).toFixed(1)
+    && bump.floor === '\u2014 L', bump);
 
   /* ── AND THE GESTURE IS NEVER THE ONLY WAY IN ──
      A double tap reaches a pointer and nothing else: a keyboard sends
@@ -9900,7 +10082,8 @@ const SAID = [
     const added = await hp.evaluate(() => ({
       stored: JSON.parse(localStorage.getItem('sched.habit.v1') || '[]'),
       names: [...document.querySelectorAll('.ty-card .ty-nm')].map((x) => x.textContent),
-      cap: document.getElementById('scTallyCap').textContent,
+      cap: document.querySelector('#scTallyCap .ty-t b').textContent,
+      capAll: document.getElementById('scTallyCap').getAttribute('aria-label'),
     }));
     /* THE COUNT SAYS HOW MANY YOU HAVE, not a constant. Adding one
        makes today harder, and a figure that still said "of 6" would be
@@ -9908,7 +10091,11 @@ const SAID = [
     ok('adding one puts it on the grid and in the count',
       added.stored.length === 1 && added.stored[0].n === 'Cold plunge'
       && added.stored[0].k === 'do' && /^x/.test(added.stored[0].id)
-      && added.names[6] === 'Cold plunge' && /of 7 today/.test(added.cap), added);
+      /* LAST, and by NAME rather than by index: the numbers lead the
+         grid and the ticks follow, so a habit of yours lands at the end
+         of whichever group it belongs to. */
+      && added.names[added.names.length - 1] === 'Cold plunge'
+      && added.cap === '0/ 7' && /of 7 today/.test(added.capAll), added);
 
     /* ── AND IT LOGS LIKE ANY OTHER ──
        A tick ticks on one tap; a number opens the sheet that asks for
@@ -9922,10 +10109,10 @@ const SAID = [
         + '-' + String(d.getDate()).padStart(2, '0');
       return { rec: (JSON.parse(localStorage.getItem('sched.tick.v1') || '{}')[k] || {}).x1,
                sheet: !document.getElementById('scSheet').hidden,
-               cap: document.getElementById('scTallyCap').textContent };
+               cap: document.querySelector('#scTallyCap .ty-t b').textContent };
     });
     ok('a tick of yours ticks on one tap, and opens nothing',
-      ticked.rec === 1 && !ticked.sheet && /^1 of 7/.test(ticked.cap), ticked);
+      ticked.rec === 1 && !ticked.sheet && ticked.cap === '1/ 7', ticked);
 
     /* A second one, a number, to prove the kind decides the door. */
     await hp.evaluate(() => {
@@ -10734,13 +10921,17 @@ const SAID = [
 
        NOT at the figure's size: that is for a number, and a title at
        22px would be the loudest thing on a screen of six tiles. */
-    const tile = await mpage.evaluate(() => {
+    const mtile = await mpage.evaluate(() => {
       const c = document.querySelector('.ty-card[data-item="m"]');
-      return { says: c ? c.textContent : '',
-               val: c ? c.querySelectorAll('.pill.val').length : -1 };
+      const px = (e) => (e ? parseFloat(getComputedStyle(e).fontSize) : -1);
+      /* It lands on the line that names the window on every other tile,
+         where `Today` and `This week` sit. */
+      return { says: c ? c.querySelector('.ty-when').textContent : '',
+               when: px(c && c.querySelector('.ty-when')),
+               val: px(c && c.querySelector('.props .val')) };
     });
     ok('the Mind tile says what it was, at a label\u2019s size and not a figure\u2019s',
-      /Eat That Frog!/.test(tile.says) && tile.val === 0, tile);
+      mtile.says === 'Eat That Frog!' && mtile.when < mtile.val * 0.6, mtile);
 
     /* ── A SEARCH THAT FAILS IS NOT AN ERROR STATE ──
        Every one of these is somebody else's server: it can be down,

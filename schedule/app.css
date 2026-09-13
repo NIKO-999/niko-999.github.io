@@ -1257,14 +1257,56 @@ body {
    prototype put them and where they read as a caption rather than a
    dashboard. */
 .ty-hero { display: none; }
-/* A BUTTON now, and the resets are what keep it reading as the line
-   it was: no ground, no border, the page's own type, and the caret
-   rather than a pill. */
-.ty-cap { display: block; margin-top: 0; padding: 0; border: 0; background: none;
-  text-align: left; font: inherit; font-size: 12.5px; color: var(--dim);
-  font-variant-numeric: tabular-nums; cursor: pointer;
-  touch-action: manipulation; }
+/* -- THE SECTION HEADING --
+   Two of them, Streak and Progress, which is what turns a screen of
+   objects into a screen with a shape. The app's own heading weight:
+   this is a name for the thing under it, so it is white and it is not
+   the small-caps label a tile wears. */
+.ty-sh {
+  margin: 22px 0 11px; font-size: 15.5px; font-weight: 700;
+  letter-spacing: -.01em; color: var(--ink);
+}
+.ty-sh:first-child { margin-top: 6px; }
+
+/* -- THREE FIGURES, SPLIT BY HAIRLINES --
+   It was a 12.5px grey line reading "5 of 6 today, 1 day streak" with
+   the longest run in a second line at the very foot of the screen.
+   Three facts about one thing, in two places, at two sizes. They are
+   one panel now.
+
+   STILL THE DOOR TO THE WEEK, which is why it is a button and why the
+   resets are here: no border, the page's own type, and a ground that
+   is the card's rather than a control's. */
+.ty-cap {
+  display: flex; align-items: center; width: 100%;
+  margin: 0; padding: 17px 0; border: 0;
+  border-radius: 16px; background: var(--card);
+  font: inherit; color: inherit; text-align: left;
+  cursor: pointer; touch-action: manipulation;
+}
 .ty-cap:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+.ty-t { flex: 1; text-align: center; position: relative; min-width: 0; }
+/* The rule between two cells, drawn by the SECOND of the pair, so the
+   ends of the panel carry none. */
+.ty-t + .ty-t::before {
+  content: ''; position: absolute; left: 0; top: 2px; bottom: 2px;
+  width: 1px; background: var(--hair);
+}
+.ty-t b {
+  display: block; font-size: 28px; font-weight: 700; letter-spacing: -.02em;
+  line-height: 1.05; color: var(--ink); font-variant-numeric: tabular-nums;
+}
+/* The denominator, and it stays: adding a habit makes today harder and
+   the figure has to say so. Quieter than the count, because what you
+   read is how many. */
+.ty-t b > s {
+  text-decoration: none; font-size: 16px; font-weight: 600;
+  color: var(--spent); letter-spacing: 0; margin-left: 3px;
+}
+.ty-t i {
+  display: block; font-style: normal; font-size: 11.5px;
+  color: var(--spent); margin-top: 4px;
+}
 
 /* -- THE WEEK READ BACK, A DAY A CARD --
    Fifteen weekly views were rendered over the real app at 390x844 on
@@ -1342,10 +1384,19 @@ body {
 .ty-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  /* `auto` rows, not `1fr`: the tall tile spans two of them, so equal
+     rows would size every row to half of whatever the gauge needs and
+     the short tiles would grow with it. */
+  grid-auto-rows: auto;
   align-items: stretch;
   gap: 9px;
-  margin-top: 8px;
+  margin-top: 0;
 }
+/* ONE TILE IS TALL and it is the one you add to through the day. Two
+   rows on the right, which is your reference's own arrangement — and
+   the height is what the gauge and its stepper need rather than a
+   claim that Water matters more. */
+.ty-row.is-tall { grid-row: span 2; }
 .ty-row {
   position: relative;
   /* Filled, never outlined: on a page this dark a 1px border is the
@@ -1353,8 +1404,9 @@ body {
      And it does not CAST — the toast is still the only thing in this
      app that is above the page rather than on it. */
   background: var(--card);
-  border-radius: 14px;
-  padding: 11px 12px 12px;
+  border-radius: 16px;
+  padding: 14px 15px 13px;
+  min-width: 0;
 }
 /* ── THE TAG, AND IT IS THE ONLY COLOUR ON THIS SCREEN ──
    An outlined rounded rectangle in the item's own colour, naming the
@@ -1385,16 +1437,150 @@ body {
 /* ── THE FIGURE IS THE TILE ──
    It was a chip the same size as every other chip, so what you
    actually did today was drawn as quietly as the word "logged". It is
-   the one thing on this screen you came to read. Only the VALUE takes
-   it: "not yet" at 22px would be the screen shouting an absence, and a
-   state is not an achievement. */
+   the one thing on this screen you came to read, and at 27px it is the
+   loudest thing on every tile.
+
+   EVERY TILE HAS ONE, which is the change: a tick had no number, so it
+   printed "logged" — a restatement of the mark already in the corner.
+   It prints the week now. */
 .ty-card .props .val {
-  font-size: 22px;
+  font-size: 27px;
   font-weight: 700;
   color: var(--ink);
-  letter-spacing: -.03em;
-  line-height: 1.05;
+  letter-spacing: -.035em;
+  line-height: 1;
   width: 100%;
+  white-space: nowrap;
+}
+/* The unit rides the figure rather than sitting in a tag underneath —
+   `kcal` over `2,310 kcal` was the same word twice on the one line that
+   could have carried a chart, and it is why there is no tag on this
+   screen any more. */
+.ty-card .props .val u {
+  text-decoration: none; font-size: 16px; font-weight: 600;
+  letter-spacing: -.01em; margin-left: 3px;
+}
+/* A tick's denominator: the days it was actually ON this week. Quieter
+   than the count, the same pairing the panel at the top draws. */
+.ty-card .props .val s {
+  text-decoration: none; font-size: 16px; font-weight: 600;
+  color: var(--spent); letter-spacing: 0; margin-left: 3px;
+}
+/* An absence is not drawn at the size of an achievement: the dash is
+   the quiet grey, and at 27px in the ink it read as a redaction across
+   the tile rather than as a figure nobody has typed. */
+.ty-row:not(.is-on) .ty-card .props .val { color: var(--spent); }
+/* ── THE LINE UNDER THE FIGURE NAMES ITS WINDOW ──
+   `Today` on a number, `This week` on a tick, and where the tick has
+   something better to say — which block fed it, or the book you read —
+   it says that instead. */
+.ty-when {
+  grid-column: 1 / -1; grid-row: 3;
+  font-size: 12.5px; color: var(--spent); line-height: 1.3;
+  margin-top: 5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* ── AND THE CHART SITS ON THE FOOT ──
+   Whatever height the row settles on, so two tiles side by side draw
+   their charts on one line even when one of them is stretched by a
+   taller neighbour. Row 4 is the card's `1fr` and `align-self: end`
+   puts the chart at the bottom of it.
+
+   `margin-top: auto` was written here as well and it did NOTHING: the
+   slack is already in the row, so the margin had nothing to absorb.
+   Found by breaking it on purpose and watching the check pass — which
+   is the only way a redundant declaration is ever found, and the reason
+   a check is proved to bite rather than assumed to. */
+.ty-ch {
+  grid-column: 1 / -1; grid-row: 4;
+  align-self: end; padding-top: 14px;
+  display: block; min-width: 0;
+}
+.ty-ar {
+  display: block; width: 100%; height: 38px;
+  overflow: visible;
+}
+/* The fill is what you read at this size and the stroke is what makes
+   it a reading rather than a smear. `non-scaling-stroke` because the
+   viewBox is stretched by `preserveAspectRatio: none` — without it the
+   line is several times too heavy on a wide tile and thin on a narrow
+   one, and it fails silently, because the shape stays correct. */
+.ty-ar .f { fill: color-mix(in srgb, var(--ink) 20%, transparent); stroke: none; }
+.ty-ar .s {
+  fill: none; stroke: var(--ink); stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round; stroke-linecap: round;
+}
+/* The dated ticks are what say these are four READINGS rather than a
+   continuous line, which is the whole of what makes an area honest on
+   a daily count. */
+.ty-ax { display: flex; justify-content: space-between; margin-top: 7px; }
+.ty-ax > span {
+  font-size: 8.5px; color: var(--spent); white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+/* ── A TICK'S WEEK, AND IT IS THE STRIP'S OWN THREE STATES ──
+   Kept is the ink, missed is the flat neutral, and a day it was never
+   on is that same neutral at 45% — a SIZE rather than a third colour,
+   because a colour here would be inventing a judgement for the one
+   state that is not one. A day still ahead is drawn like a day it was
+   never on: nothing has happened yet, and drawing it as a miss would
+   be the screen marking you down for Thursday on a Tuesday. */
+.ty-wk { display: flex; align-items: stretch; gap: 4px; height: 38px; }
+.ty-wk > i { flex: 1 1 0; border-radius: 3px; background: var(--tick-off); }
+.ty-wk > i.is-on { background: var(--ink); }
+.ty-wk > i.is-off, .ty-wk > i.is-todo { opacity: .45; }
+/* ── THE GAUGE ──
+   The marks sit BESIDE the track at their own heights, which is what
+   makes it a gauge rather than a bar with a caption under it. */
+.ty-g {
+  display: flex; gap: 14px; align-items: stretch;
+  min-height: 150px; height: 100%; padding-top: 4px;
+}
+.ty-gt {
+  width: 15px; flex: none; border-radius: 8px; background: var(--tick-off);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  overflow: hidden;
+}
+.ty-gt > i { display: block; width: 100%; border-radius: 8px; background: var(--ink); }
+.ty-gm { flex: 0 1 58px; position: relative; }
+.ty-gm > span {
+  position: absolute; left: 0; transform: translateY(-50%);
+  font-size: 11px; color: var(--spent); white-space: nowrap;
+}
+/* ── THE STEPPER, AND IT IS THREE SIBLINGS ──
+   A button inside a button is invalid and collapses to one press while
+   looking exactly right, so these sit beside the card and the card
+   leaves room at its foot for them. The middle one is the dial: the
+   arrows make the common answer one press and the figure between them
+   reaches every other answer. */
+.ty-step {
+  position: absolute; left: 13px; right: 13px; bottom: 13px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.ty-row.is-tall > .ty-card { padding-bottom: 48px; }
+/* The two are written out rather than sharing a rule and overriding
+   three properties from it: one selector carrying one property twice
+   is a file with two values in it and only one of them live, whichever
+   order they are written in. */
+.ty-sv {
+  min-width: 38px; height: 38px; padding: 0 12px;
+  border: 1px solid var(--hair); border-radius: 19px;
+  background: none; color: var(--ink); font: inherit;
+  font-size: 14px; font-weight: 600; line-height: 1;
+  display: grid; place-items: center; cursor: pointer;
+  touch-action: manipulation; font-variant-numeric: tabular-nums;
+}
+.ty-sb {
+  width: 38px; height: 38px; padding: 0;
+  border: 1px solid var(--hair); border-radius: 19px;
+  background: none; color: var(--ink); font: inherit;
+  font-size: 17px; font-weight: 500; line-height: 1;
+  display: grid; place-items: center; cursor: pointer;
+  touch-action: manipulation;
+}
+.ty-sb:focus-visible, .ty-sv:focus-visible {
+  outline: 2px solid var(--red); outline-offset: 2px;
 }
 /* A run of days is a figure ABOUT YOU rather than a state of the
    screen, so it keeps the accent as a colour and sits under the
@@ -1734,7 +1920,7 @@ body {
      this, which is why it is written down rather than left to be
      found on a phone. */
   touch-action: manipulation;
-  display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 6px 8px;
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0 6px;
   align-items: center;
   width: 100%;
   min-width: 0; min-height: 44px; padding: 0; border: 0; border-radius: 0;
@@ -1742,41 +1928,49 @@ body {
   cursor: pointer;
 }
 .ty-card:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+/* 13px, on the label's own line. Your reference draws no mark at all,
+   which is what buys the figure its size — and the glyph costs an 11px
+   label nothing at this scale. It stays because it is the same object
+   here, on the week's rows and at the head of the history sheet, and a
+   screen that dropped it would be the only one that names its items in
+   words alone. */
 .ty-card .ic {
   grid-column: 1; grid-row: 1;
-  display: block; width: 20px; height: 20px;
-  fill: none; stroke: var(--dim); stroke-width: 1.8;
+  display: block; width: 19px; height: 19px;
+  fill: none; stroke: var(--spent); stroke-width: 1.9;
   stroke-linecap: round; stroke-linejoin: round;
 }
-.ty-row.is-on .ty-card .ic { stroke: var(--ink); }
+.ty-row.is-on .ty-card .ic { stroke: var(--dim); }
 .ty-body { display: contents; }
 /* The name shares the top line with the glyph and gives the whole of
    the second line to the figure. 13.5, not 15: it is a label for the
    number under it now rather than the row's own subject, and at 15 the
    two were the same size in a 145px box. */
+/* ── THE NAME IS A LABEL NOW ──
+   Small caps, 11px, the quiet grey — a label FOR the figure under it
+   rather than the tile's own subject. That is the whole of what buys
+   the figure 27px and the chart its room, and it is the change that
+   makes this screen read as composed rather than as six rows of the
+   same weight. */
 .ty-nm {
   grid-column: 2; grid-row: 1;
-  font-size: 13.5px; font-weight: 600; color: var(--ink);
-  line-height: 1.2; letter-spacing: -.014em;
+  font-size: 11px; font-weight: 600; color: var(--spent);
+  text-transform: uppercase; letter-spacing: .075em; line-height: 1.3;
   /* The tick sits in the corner over this line. */
-  padding-right: 22px;
+  padding-right: 20px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .ty-card {
-  /* The name sits on the top line and the figure on the bottom of
-     whatever height the row settles on, so the two tiles' numbers share
-     a baseline instead of floating at their own heights. */
-  grid-template-rows: auto 1fr;
+  /* Label, figure, window, chart — and the chart takes the 1fr, so it
+     sits on the foot of whatever height the row settles on and two
+     tiles side by side draw theirs on one line. */
+  grid-template-rows: auto auto auto 1fr auto;
   height: 100%;
 }
 .ty-card .props {
-  /* Row 3, not 2: the tag sits on the line between the name and the
-     figure. Declared HERE rather than overridden below — one selector
-     carrying one property twice is a file with two values in it and
-     only one of them live, whichever order they are written in. */
-  grid-column: 1 / -1; grid-row: 3;
+  grid-column: 1 / -1; grid-row: 2;
   flex-wrap: wrap; gap: 2px 8px;
-  align-items: flex-end; align-self: end;
+  align-items: flex-end; margin-top: 9px;
 }
 /* The ring is gone; these are what the tests and the sheet still ask
    for by name, kept as the parts of the strip they were. */
@@ -1918,7 +2112,7 @@ body {
    so a track that did not span the columns would size to its own
    content and come out about forty pixels wide. Measured. */
 .ty-card .ty-tl {
-  position: relative; grid-column: 1 / -1;
+  position: relative; grid-column: 1 / -1; grid-row: 5;
   margin-top: 8px; height: 4px;
   border-radius: 2px; background: var(--tick-off); overflow: hidden;
 }
