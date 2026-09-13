@@ -1540,7 +1540,6 @@
     $('scWeek').classList.toggle('is-today', d === today);
     $('scWeek').dataset.d = d;
     scDate();
-    scObjStrip(d);
 
     /* ── the week is a strip ──
        Monday first, for the reason the deck had: a rail that began on
@@ -1552,7 +1551,7 @@
       var b = scEl('button', 'st-d' + (n === d ? ' is-on' : ''));
       b.type = 'button';
       b.dataset.d = n;
-      var when = new Date(scObjDay(n) + 'T12:00:00');
+      var when = new Date(scWeekDate(n) + 'T12:00:00');
       b.appendChild(scEl('b', null, ABBR[n]));
       b.appendChild(scEl('i', null, String(when.getDate())));
       b.setAttribute('aria-label', FULL[n] + (n === today ? ', today' : ''));
@@ -1663,7 +1662,7 @@
            a row that vanishes is a block you have to remember was ever
            there, and the whole point of an exception is that the shape
            underneath it is unchanged. */
-        if (scOff(scObjDay(d), it.id)) row.classList.add('is-off');
+        if (scOff(scWeekDate(d), it.id)) row.classList.add('is-off');
 
         /* THE TIME GOES ABOVE THE NAME, and in the source as well as in
            the grid. It used to sit in a third column at the right
@@ -2157,433 +2156,24 @@
     }).filter(function (g) { return g.rows.length; });
   }
 
-  /* ═══════════════════════════════════════════════════════════
-     THE OBJECTIVES
-
-     What the day is FOR, as against what is on it. The schedule says
-     when things happen; this says which two or three of them actually
-     matter, in the order they should be done. It lives on the back of
-     the day's own card because it is the same day seen from the other
-     side, and a second screen for three lines would be a tab you stop
-     opening.
-
-     ── PER DATE, not per weekday ──
-     The schedule repeats: every Monday has the same shape, which is
-     what makes it a shape. An objective does not — "the thing that
-     matters today" is a decision you take on the day, and one that
-     repeated every Monday would be a routine wearing an objective's
-     clothes. So these are keyed by the real date, and a card in the
-     deck shows the objectives of the date that weekday falls on THIS
-     week.
-
-     ── AND THEY ARE ORDERED ──
-     Position is priority and the first is the frog: the one you would
-     rather not start. Nothing here sorts itself — the order is the
-     decision, and re-ranking is a press.
-     ═══════════════════════════════════════════════════════════ */
-
-  /* ── THE CHECKLIST-AND-TARGET MARK IS GONE ──
-     It was the glyph on the top-right control, drawn at 19px: a page
-     with two ticked rows and a target with an arrow still in flight,
-     reduced five times to read at that size. The control it lived on
-     is gone — the objectives are cards on the day now and the row is
-     the way in — so the mark had nothing left to label. Deleted
-     rather than left: this file's oldest lesson is that a thing which
-     still parses reads as a mechanism somebody might edit, and the
-     first thing they would find is that nothing calls it. */
-
-  var OBJ_KEY = 'sched.obj.v1';
-  var objLog = {};   /* date -> [{ id, n, tgt, done }] */
-
-  function scObjLoad() {
-    objLog = scReadJSON(OBJ_KEY, {});
-    if (!objLog || typeof objLog !== 'object' || Array.isArray(objLog)) objLog = {};
-    /* ── kept to a window, unlike the schedule ──
-       This is one record per DATE, so left alone it grows forever, and
-       an objective from March is not a record anybody wants back — it
-       is a decision that was taken and is over. Ninety days is long
-       enough to look back over a season and short enough that the key
-       cannot quietly become the biggest thing in this browser.
-
-       Repaired rather than rejected: a damaged day is dropped and the
-       rest of the record survives, because the days are independent and
-       throwing the object away would take a season with it. */
-    var cut = new Date();
-    cut.setDate(cut.getDate() - 90);
-    var floor = scDay(cut);
-    Object.keys(objLog).forEach(function (k) {
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(k) || k < floor
-          || !Array.isArray(objLog[k])) { delete objLog[k]; return; }
-      objLog[k] = objLog[k].filter(function (o) {
-        return o && typeof o === 'object' && typeof o.n === 'string' && o.n;
-      }).map(function (o) {
-        return { id: o.id || scRand(10, HEX_A), n: String(o.n).slice(0, 60),
-                 done: !!o.done };
-      });
-      if (!objLog[k].length) delete objLog[k];
-    });
-  }
-  function scObjSave() { scWriteJSON(OBJ_KEY, objLog); }
-
-  function scObjFor(day) { return objLog[day] || []; }
-
-  /* Five, and the ceiling is the feature. A list of twelve objectives
-     is a schedule with the times taken off — the whole point is that
-     naming the two or three that matter costs you the rest. */
-  var OBJ_MAX = 5;
-
-  /* ── a SENTENCE, not a name and a number ──
-     "Call a hundred clients" is the objective; there is no field for
-     how much, because the amount is already in the words and a form
-     that asked for it separately would make you take a decision apart
-     to type it in. The glyph is worked out from the same sentence, so
-     nothing is set twice. */
-  function scObjAdd(day, name) {
-    name = String(name || '').trim();
-    if (!name) return false;
-    var all = objLog[day] || (objLog[day] = []);
-    if (all.length >= OBJ_MAX) return false;
-    all.push({ id: scRand(10, HEX_A), n: name.slice(0, 60), done: false });
-    scObjSave();
-    return true;
-  }
-  function scObjDrop(day, id) {
-    if (!objLog[day]) return;
-    objLog[day] = objLog[day].filter(function (o) { return o.id !== id; });
-    if (!objLog[day].length) delete objLog[day];
-    scObjSave();
-  }
-  /* Re-ranking is one move and it is always the same move: make this
-     the frog. Up-and-down arrows on a list of at most five is four
-     presses to do what one should. */
-  function scObjFirst(day, id) {
-    var all = objLog[day];
-    if (!all) return;
-    var i = all.findIndex(function (o) { return o.id === id; });
-    if (i <= 0) return;
-    all.unshift(all.splice(i, 1)[0]);
-    scObjSave();
-  }
-  function scObjToggle(day, id) {
-    var all = objLog[day];
-    if (!all) return;
-    all.forEach(function (o) { if (o.id === id) o.done = !o.done; });
-    scObjSave();
-  }
-
-  /* ── the back of the card ──
-     Glyphs and figures, and deliberately no prose. A row of writing
-     here would be the schedule again with the times taken off; what
-     you want at a glance is WHICH thing and HOW MUCH, and both of
-     those are drawn. The name is still on the element for a screen
-     reader — the tally cards made exactly this trade and the rule that
-     came out of it was that the glyph may BE the name on screen, and
-     must never be the only place the name exists.
-
-     Rank in the gutter, and the first is the accent: the frog is
-     whatever you would rather not start, and this screen's only job is
-     to keep saying which one that is. */
-  /* ── THE DATE THIS CARD IS ──
+  /* ── THE DATE A WEEKDAY IS, IN THE WEEK YOU ARE LOOKING AT ──
      Not scDateOfDow, which is the TICK path's resolver: it looks back
      over the two-day backfill window only and then returns TODAY, so
      scTallyOpen can refuse a day that has shut rather than quietly
      filing against one that has not. That is right for a tick and
-     wrong for this — every card more than two days behind, and every
-     day still to come, was reading and writing TODAY's objectives.
-     Friday's card showed today's list, and adding one to it added it
-     to today.
+     wrong for anything keyed by DATE — every day more than two behind,
+     and every day still to come, resolved to today.
 
-     Objectives are per DATE and the deck is the Monday-first week
-     containing today, so that is what this answers: this week's
-     Monday, this week's Friday, behind you or ahead. A day still to
-     come simply has none yet, which is the honest answer — you decide
-     an objective on the day. */
-  function scObjDay(dow) {
+     This answers the Monday-first week containing today: this week's
+     Monday, this week's Friday, behind you or ahead. It is what the
+     day-off record and the calendar's day sheet both ask.
+
+     It was scObjDay and it outlived the objectives, which is the only
+     reason it is named for the question rather than for the feature. */
+  function scWeekDate(dow) {
     var d = new Date();
     d.setDate(d.getDate() - ((d.getDay() + 6) % 7) + ((dow + 6) % 7));
     return scDay(d);
-  }
-
-  function scObjBack(d, inSheet) {
-    var day = scObjDay(d);
-    var back = scEl('div', 'wk-back' + (inSheet ? ' in-sheet' : ''));
-    /* ── THE FACE IS HEADED, and it has no head of its own ──
-       It carried the day name and a second turn control, both of
-       which the page's own head now says: the day is up there at
-       30px and the one control turns the panel both ways. What is
-       left is the heading every other list in this app wears — small
-       caps and a count — so the back reads as one of them rather
-       than as a screen of its own. */
-    var all = scObjFor(day);
-    /* In a sheet the title bar already says what this is, and a
-       heading under it is the same words twice — the frame-inside-a-
-       frame this project keeps taking out, in type. */
-    if (!inSheet) {
-      var oh = scEl('div', 'grp-h ob-head');
-      oh.appendChild(scEl('b', 'pill', 'Main objectives'));
-      if (all.length) oh.appendChild(scEl('span', 'c', String(all.length)));
-      back.appendChild(oh);
-    }
-    var list = scEl('ol', 'ob-list');
-    all.forEach(function (o, i) {
-      var li = scEl('li');
-      var b = scEl('button', 'ob' + (o.done ? ' is-done' : '')
-        + (i === 0 ? ' is-frog' : ''));
-      /* The circle every row in this app is ticked by, drawn rather
-         than pressed: the whole row is the button here, and a button
-         inside a button is invalid and collapses to one press. */
-      var box = scEl('i', 'ob-box');
-      box.setAttribute('aria-hidden', 'true');
-      box.innerHTML = '<svg class="ob-tick" viewBox="0 0 24 24">'
-        + '<path d="M4.5 12.8l5.2 5.2L19.5 6"/></svg>';
-      b.appendChild(box);
-      var kind = scIconFor(o.n);
-      var ic = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      ic.setAttribute('class', 'ob-ic');
-      ic.setAttribute('viewBox', '0 0 24 24');
-      ic.setAttribute('aria-hidden', 'true');
-      ic.setAttribute('data-icon', kind);
-      ic.innerHTML = BLOCK_ICON[kind];
-      b.appendChild(ic);
-      b.appendChild(scEl('span', 'ob-t', o.n));
-      b.setAttribute('aria-label', (i + 1) + '. ' + o.n
-        + (i === 0 ? ', the main one' : '') + '. '
-        + (o.done ? 'Done' : 'Not done') + '. Tap to mark.');
-      b.setAttribute('aria-pressed', o.done ? 'true' : 'false');
-      b.addEventListener('click', function () {
-        scObjToggle(day, o.id);
-        scRender();
-        scObjRedraw(d);
-      });
-      li.appendChild(b);
-      list.appendChild(li);
-    });
-    back.appendChild(list);
-    if (all.length < OBJ_MAX) {
-      var add = scEl('button', 'ob-add');
-      add.setAttribute('aria-label', 'Add an objective for ' + FULL[d]);
-      add.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
-        + '<path d="M12 5v14M5 12h14"/></svg>';
-      add.appendChild(scEl('span', null, all.length ? 'Add another' : 'Add one'));
-      add.addEventListener('click', function () { scObjSheet(d, day); });
-      back.appendChild(add);
-    }
-    if (!all.length) {
-      back.appendChild(scEl('p', 'ob-empty',
-        'What today is for. Two or three, hardest first.'));
-    }
-    return back;
-  }
-
-  /* ── adding one, and re-ranking it ──
-     One sheet for the whole of it: a field to add, and every objective
-     already there with the two things you would want to do to it. A
-     separate edit screen for a list of at most five would be a second
-     place for the same five things to disagree.
-
-     Delete is final here and there is no bin, which is the reminders'
-     exception rather than a new one: a bin protects a record you cannot
-     rebuild, and an objective you have taken off today's card is a
-     decision you have just changed your mind about. */
-  function scObjSheet(d, day) {
-    scSheet('Objectives \u00b7 ' + FULL[d], function (body) {
-      var all = scObjFor(day);
-      if (all.length) {
-        body.appendChild(scEl('span', 'label', 'On the card'));
-        all.forEach(function (o, i) {
-          var row = scEl('div', 'ob-edit');
-          var kind = scIconFor(o.n);
-          var ic = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-          ic.setAttribute('class', 'ic');
-          ic.setAttribute('viewBox', '0 0 24 24');
-          ic.setAttribute('aria-hidden', 'true');
-          ic.innerHTML = BLOCK_ICON[kind];
-          row.appendChild(ic);
-          row.appendChild(scEl('span', 'ob-e-n', o.n));
-          /* One move, always the same move: make this the frog. Up and
-             down arrows on five rows is four presses to do what one
-             should, and the only rank anybody actually argues about is
-             which one is first. */
-          if (i > 0) {
-            row.appendChild(scBtn('off', 'First', function () {
-              scObjFirst(day, o.id);
-              scClose();
-              scRender();
-              scObjRedraw(d);
-            }));
-          }
-          row.appendChild(scBtn('bad', 'Remove', function () {
-            scObjDrop(day, o.id);
-            scClose();
-            scRender();
-            scObjRedraw(d);
-          }));
-          body.appendChild(row);
-        });
-      }
-
-      body.appendChild(scEl('span', 'label', 'Add one'));
-      /* ONE field. Say the whole thing — "Call a hundred clients" — and
-         the glyph comes out of the same sentence. A second box for the
-         amount would be asking you to take a decision apart in order to
-         type it in, and then to keep the two halves in step. */
-      var f = scEl('input', 'field');
-      f.type = 'text';
-      f.placeholder = 'Call a hundred clients\u2026';
-      f.maxLength = 60;
-      body.appendChild(f);
-
-      var acts = scEl('div', 'acts');
-      acts.appendChild(scBtn('off', 'Done', scClose));
-      acts.appendChild(scBtn('go', 'Add', function () {
-        if (!scObjAdd(day, f.value)) {
-          scToast(f.value.trim() ? 'Five is the most' : 'Give it a name', false);
-          return;
-        }
-        scClose();
-        scRender();
-        scObjRedraw(d);
-      }));
-      body.appendChild(acts);
-      setTimeout(function () { f.focus(); }, 260);
-    });
-  }
-
-  /* Turning is a class, and the state is not stored: an objective is
-     for today and a card found face-down tomorrow morning would be the
-     app remembering the wrong half of a decision. */
-  /* ── THE OBJECTIVES ARE A SHEET, NOT A FACE ──
-     They lived on the back of the day panel, reached by turning it
-     over. A face you have to turn a card to find is a feature named
-     nowhere: it needed a card of the intro to explain that it existed
-     at all, and every engine bug this app has had about composited
-     layers drawing through a backface came from that one mechanism.
-
-     A sheet is the control every other secondary surface in this app
-     already uses, it is one press from the head on every screen the
-     head is on, and it costs no 3D at all. The list itself is
-     unchanged — scObjBack builds the same rows, headed by the sheet's
-     own title rather than by one of its own. */
-  function scObjOpen(d) {
-    scSheet('Main objectives', function (body) {
-      body.appendChild(scObjBack(d, true));
-    });
-  }
-  /* ── AFTER AN ADD, THE LIST COMES BACK ──
-     Adding, removing and re-ranking each open a sheet of their own and
-     then call scClose, so a redraw that only repainted an OPEN sheet
-     would find none and leave you on the week — you would press the
-     head again to see the thing you just typed. Re-opening handles
-     both: scSheet replaces the body when one is up and opens one when
-     it is not. */
-  function scObjRedraw(d) { scObjOpen(d); }
-  /* ══════════════════════════════════════════════════════
-     THE OBJECTIVES ARE ON THE DAY, AND THE ROW IS THE WAY IN
-
-     They were behind a glyph in the top-right corner, which is a
-     control that names nothing: you had to be told it was there, and
-     what it opened was invisible until you pressed it. The day's
-     objectives are now drawn ON the day, as cards under the week
-     strip, and the row itself is the whole of the access.
-
-     ── IT SCROLLS SIDEWAYS, AND THAT REVERSES A RULE ──
-     "Nothing in this app scrolls sideways" was written after a board
-     of 212px columns put a session off the side of the phone and
-     clipped "Morning" to "ng" at the left edge. The rule is right and
-     it stands everywhere else; this row is a deliberate, approved
-     exception, and it is the one place where it costs nothing:
-
-       - There is nothing to LOSE off the side. A board column held
-         rows you had to read; this holds at most five cards, and the
-         count is already the point — you are meant to have two or
-         three. A card off the edge is one you have already decided.
-       - It BLEEDS to the screen edge, so a cut card reads as "there
-         is more" rather than as a card that has been clipped. That is
-         the deck's own lesson, and it is why the strip carries a
-         negative margin rather than stopping inside the padding.
-       - The wrapped version was built and looked at first. At 390px
-         every card takes most of the width, so wrapping gives a
-         COLUMN of cards — which is the objectives becoming a second
-         list above the schedule, three registers tall before the day
-         has started.
-
-     `tests/schedule.js` names this element as the single exception
-     and holds every other scroller to the rule, so the check stays
-     live rather than being relaxed.
-
-     ── THE PRESS TARGETS ──
-     Tap ticks it off; double tap opens the sheet. That is the week
-     row's own gesture and Showing up's own gesture, so there is
-     nothing here to learn — and the sheet is still where you add,
-     re-rank and remove, reached from the row rather than from a
-     corner of the head. */
-  function scObjStrip(d) {
-    var wrap = $('scObjStrip');
-    if (!wrap) return;
-    wrap.textContent = '';
-    /* Drawn on the week and nowhere else. `[hidden]` HAS TO BE SAID
-       ONCE A THING TAKES A DISPLAY and this element is a flex row —
-       the rail, the page dots, the toast and the intro each shipped
-       that bug with the attribute set correctly throughout, so the
-       rule is in the stylesheet beside the display. */
-    wrap.hidden = view !== 'list';
-    if (wrap.hidden) return;
-    var day = scObjDay(d);
-    var all = scObjFor(day);
-
-    /* ── A GHOST CARD, NOT A PLUS AND NOT NOTHING ──
-       Three empty states were rendered over the real app. Nothing at
-       all is silent: the row vanishes and there is no way in, which
-       is the hole the top-right glyph was filling. A bare "+ Objective"
-       chip says add something without saying what it is for. The
-       ghost is a real card's box with a dashed edge and the greyed
-       tag — the SHAPE of the missing thing, which teaches the feature
-       by being it, and pressing it adds the first one. */
-    if (!all.length) {
-      var g = scEl('button', 'obs-c is-ghost');
-      g.type = 'button';
-      g.appendChild(scEl('em', 'obs-t', 'Objective'));
-      g.appendChild(scEl('span', 'obs-n', 'What matters today'));
-      g.setAttribute('aria-label', 'No objectives for ' + FULL[d]
-        + '. Add one.');
-      g.addEventListener('click', function () { scObjSheet(d, day); });
-      wrap.appendChild(g);
-      return;
-    }
-
-    /* ── THE ADD CONTROL IS PINNED FIRST, and that is measured ──
-       Written at the END of the row — which is where a trailing
-       control belongs in a list that does not move — it sat 131px off
-       the right edge with only TWO objectives on the day. The one
-       control you need to reach was behind a swipe. First, it cannot
-       scroll away whatever is on the day. */
-    if (all.length < OBJ_MAX) {
-      var add = scEl('button', 'obs-add');
-      add.type = 'button';
-      add.setAttribute('aria-label', 'Add an objective for ' + FULL[d]);
-      add.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
-        + '<path d="M12 5v14M5 12h14"/></svg>';
-      add.addEventListener('click', function () { scObjSheet(d, day); });
-      wrap.appendChild(add);
-    }
-
-    all.forEach(function (o, i) {
-      var b = scEl('button', 'obs-c' + (o.done ? ' is-done' : ''));
-      b.type = 'button';
-      b.dataset.id = o.id;
-      b.appendChild(scEl('em', 'obs-t', 'Objective'));
-      b.appendChild(scEl('span', 'obs-n', o.n));
-      b.setAttribute('aria-label', (i + 1) + '. ' + o.n
-        + (i === 0 ? ', the main one' : '') + '. '
-        + (o.done ? 'Done' : 'Not done')
-        + '. Tap to mark, double tap to edit.');
-      b.setAttribute('aria-pressed', o.done ? 'true' : 'false');
-      scDoubleTap(b, function () {
-        scObjToggle(day, o.id);
-        scRender();
-      }, function () { scObjSheet(d, day); });
-      wrap.appendChild(b);
-    });
   }
 
   /* ── which day it is, and what time ──
@@ -2671,7 +2261,7 @@
       ic.innerHTML = HEAD_ICON[view] || HEAD_ICON.tally;
       return;
     }
-    var d = scOpenDay(), cd = scObjDay(d);
+    var d = scOpenDay(), cd = scWeekDate(d);
     var when = new Date(cd + 'T12:00:00');
     /* HOURS, not a count of blocks. It is what the day card's own head
        carried, and it is the figure a day off changes: a block marked
@@ -2855,7 +2445,6 @@
     '--s-m': '#F2B950', '--s-a': '#5FA8FF', '--s-e': '#B98BFF',
     '--t-train': '#E0574B', '--t-walk': '#4FBE87', '--t-read': '#5FA8FF',
     '--t-steps': '#F2B950', '--t-fuel': '#E0C15A', '--t-water': '#48C3CC',
-    '--t-obj': '#E571A3',
     '--st-ok': '#43B96C', '--gold': '#FFC83D',
     '--w-red': '#e6412f', '--w-blue': '#2f7fe6', '--w-teal': '#14a2a2',
     '--w-green': '#17a06b', '--w-violet': '#8a4fe0',
@@ -2871,12 +2460,6 @@
     '--s-m': '#8A5000', '--s-a': '#1668C7', '--s-e': '#6B3FC4',
     '--t-train': '#B3382E', '--t-walk': '#1C7A4E', '--t-read': '#1668C7',
     '--t-steps': '#8A5000', '--t-fuel': '#7A6200', '--t-water': '#0E6E76',
-    /* The objectives hue needs its own twin for the same reason the
-       workout hues do: read as a 22% wash under a 72% label, the dark
-       face's pink measures 3.75:1 on the light page. Same hue taken
-       down until it clears with margin rather than by a rounding
-       error — 5.18:1 measured, against 5.75 on the dark. */
-    '--t-obj': '#d32771',
     '--st-ok': '#19733F', '--gold': '#8A6100',
     /* ── THE WORKOUT HUES, SOLVED FOR A LIGHT PAGE ──
        The card's own nine are grounds for one fixed dark card and the
@@ -3109,7 +2692,7 @@
                 '--ground', '--card', '--card-edge', '--card-shadow',
                 '--s-m', '--s-a', '--s-e',
                 '--t-train', '--t-walk', '--t-read',
-                '--t-steps', '--t-fuel', '--t-water', '--t-obj',
+                '--t-steps', '--t-fuel', '--t-water',
                 '--done-bg', '--me', '--live', '--st-ok', '--gold',
                 '--w-red', '--w-blue', '--w-teal', '--w-green',
                 '--w-violet', '--w-orange', '--w-amber'];
@@ -5526,14 +5109,13 @@
   /* Every one OFF. A default that shares is a default nobody chose,
      and the whole of what makes this a decision is that it starts at
      nothing. */
-  var SHARE_DEF = { bio: '', up: 0, goals: 0, work: 0, mind: 0 };
+  var SHARE_DEF = { bio: '', up: 0, work: 0, mind: 0 };
   var share = {};
   /* The switches, and the sentence under each says what LEAVES rather
      than what the section is called — "Workouts" is the name of a
      screen, and what you are agreeing to is the list of sessions. */
   var SHARE_ROWS = [
     ['up', 'Showing up', 'A year of days you kept something, and your streak.'],
-    ['goals', 'Objectives', 'The sentences you wrote. Never whether you did them.'],
     ['work', 'Workouts', 'Which sessions you do and how many of each.'],
     ['mind', 'Reading', 'Books and shows by name. Never your notes on them.']
   ];
@@ -5567,26 +5149,6 @@
       s += String(Math.min(9, t + b));
     }
     return s;
-  }
-
-  /* ── THE SENTENCES, AND NEVER THE TICK ──
-     Whether you did an objective is the same claim as a rating: it is
-     about how the day went, and that is the one thing on this record
-     with no switch at all. Deduped and newest first, because the same
-     objective written on twelve days is one thing you are working on
-     rather than twelve. */
-  function scShareGoals() {
-    var seen = {}, out = [];
-    for (var i = 0; i < 90 && out.length < 6; i++) {
-      var list = objLog[scDayBack(i)] || [];
-      for (var j = 0; j < list.length && out.length < 6; j++) {
-        var n = String((list[j] && list[j].n) || '').trim().slice(0, 40);
-        if (!n || seen[n.toLowerCase()]) continue;
-        seen[n.toLowerCase()] = 1;
-        out.push(n);
-      }
-    }
-    return out;
   }
 
   /* Which sessions and how many, over the same 91 days the Workouts
@@ -5665,7 +5227,10 @@
            overwrite what was there before. */
         bio: scShareBio(),
         year: share.up ? scShareYear() : '',
-        goals: share.goals ? scShareGoals() : [],
+        /* `goals` went with the objectives. It is not sent as an empty
+           list either: a switch nobody has any more is not a switch
+           somebody turned off, and a reader on an older build draws
+           nothing for a key that is absent. */
         work: share.work ? scShareWork() : [],
         mind: share.mind ? scShareMind() : [],
         /* `local` is stripped HERE, and the first version did not do
@@ -6816,21 +6381,6 @@
         body.appendChild(grid);
       }
 
-      /* ── THEIR OBJECTIVES, AS THE TAGS THEY ALREADY ARE ──
-         The same object the day's own strip draws, so an objective
-         reads the same whoever is looking at it. The flat neutral
-         rather than a hue per goal: on your own day a colour says
-         WHICH of yours this is, and on somebody else's list there is
-         no which — they are all theirs. */
-      var goals = Array.isArray(r.goals) ? r.goals.slice(0, 6) : [];
-      if (goals.length) {
-        var gw = scEl('div', 'pf-goals');
-        goals.forEach(function (g) {
-          gw.appendChild(scEl('span', 'obs-t pf-gt', String(g).slice(0, 40)));
-        });
-        body.appendChild(gw);
-      }
-
       /* ── THE SHELF ──
          Real jackets, at a size you can recognise one. A cover that
          fails to load falls through to the drawn one underneath,
@@ -6969,7 +6519,6 @@
     var rec = {
       bio: scShareBio(),
       year: share.up ? scShareYear() : '',
-      goals: share.goals ? scShareGoals() : [],
       work: share.work ? scShareWork() : [],
       mind: share.mind ? scShareMind() : [],
       logs: posts.slice(-30).map(function (q) {
@@ -6991,8 +6540,7 @@
       /* Somebody who has turned nothing on gets a sheet with nothing
          drawn on it, which is the honest answer and reads as broken
          without a line saying so. */
-      if (!rec.bio && !rec.year && !rec.goals.length
-          && !rec.work.length && !rec.mind.length) {
+      if (!rec.bio && !rec.year && !rec.work.length && !rec.mind.length) {
         body.appendChild(scEl('p', 'hint',
           'Nothing is turned on, so a friend sees your name and your '
           + 'streak on the board and nothing else.'));
@@ -7268,12 +6816,8 @@
        attribute. */
     $('scWeek').hidden = tal || fr || nt || cal;
     $('scEmpty').hidden = tal || fr || nt || cal || state.items.length > 0;
-    /* The head is the day's on the week and the screen's elsewhere,
-       and the objectives row belongs to the week alone — it takes the
-       open day rather than a local, because there is no day in scope
-       here and the row is about whichever one the week is showing. */
+    /* The head is the day's on the week and the screen's elsewhere. */
     scDate();
-    scObjStrip(scOpenDay());
 
     /* The tab you are on, lit. The old single button had to draw the
        NEXT view rather than the current one — a control that shows its
@@ -10820,7 +10364,7 @@
          own bug written a second time. */
       if (!isNew) {
         var bDay = scDowDate(day);
-        var oDay = scObjDay(day);
+        var oDay = scWeekDate(day);
         var canDone = !!bDay && scTallyOpen(bDay);
         var canOff = scOffOpen(oDay);
         if (canDone || canOff) body.appendChild(scEl('span', 'label', 'This day'));
@@ -13101,7 +12645,7 @@
     var did = items.filter(function (it) { return scTicked(day, it.id); });
     return { day: day, dow: dow, all: all, on: on, kept: kept,
              did: did, ticks: did.length, items: items.length,
-             rate: scRateOf(day), mind: scMindOf(day), obj: scObjFor(day) };
+             rate: scRateOf(day), mind: scMindOf(day) };
   }
 
   /* ── A DAY BEFORE THE RECORD STARTS IS NOT A DAY YOU MISSED ──
@@ -13600,19 +13144,6 @@
           body.appendChild(scEl('p', 'cl-sum', scMindName(c.mind)
             + (c.mind.m ? ' · ' + scMindFmtMin(c.mind.m) : '')));
         }
-        if (c.obj.length) {
-          body.appendChild(scEl('span', 'label', 'What mattered'));
-          var ol = scEl('div', 'cl-rows');
-          c.obj.forEach(function (o) {
-            var r2 = scEl('div', 'cl-r');
-            r2.appendChild(scEl('span', 'cl-n', o.n));
-            var s2 = scEl('span', 'st' + (o.done ? ' is-ok' : ' is-todo'),
-              o.done ? 'Done' : 'Not yet');
-            r2.appendChild(s2);
-            ol.appendChild(r2);
-          });
-          body.appendChild(ol);
-        }
       }
 
       oneDay();
@@ -13650,7 +13181,6 @@
      filling in a frame later reads as having lost the day. */
   scTickLoad();
   scHabitLoad();
-  scObjLoad();
   scTrainLoad();
   scMindLoad();
   scRateLoad();

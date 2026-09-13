@@ -22,28 +22,6 @@
    ═══════════════════════════════════════════════════════════════ */
 const { open, BASE } = require('./lib.js');
 
-/* ── OPENING THE OBJECTIVES THE WAY A PERSON DOES ──
-   There is no control in the head any more: the row on the day is the
-   whole of the access, and which press opens it depends on what is on
-   the day. An empty day draws a ghost card and pressing it goes
-   straight to the sheet with the field on it; a day with objectives
-   opens on a DOUBLE tap, which is the week row's own gesture and
-   Showing up's own gesture.
-
-   Fired as two synchronous clicks rather than through `dblclick`,
-   because scDoubleTap is a 380ms timer on the element and two clicks
-   in one task is exactly what it is waiting for — and because this
-   has to work on whichever page object the caller is holding. */
-const openObj = async (pg) => {
-  await pg.evaluate(() => {
-    const g = document.querySelector('.obs-c.is-ghost');
-    if (g) { g.click(); return; }
-    const c = document.querySelector('.obs-c');
-    if (c) { c.click(); c.click(); }
-  });
-  await pg.waitForTimeout(560);
-};
-
 let pass = 0, fail = 0;
 const ok = (name, cond, extra) => {
   if (cond) { pass++; console.log(`  \x1b[32m✓\x1b[0m ${name}`); }
@@ -1661,851 +1639,6 @@ const SAID = [
     stillWeek.length === 0, stillWeek);
 
 
-  /* ═══ the objectives ═══
-     What the day is FOR, as against what is on it. Per DATE rather
-     than per weekday — the schedule repeats and a decision about today
-     does not.
-
-     THEY ARE A SHEET NOW, NOT THE BACK OF A CARD. A face you have to
-     turn a panel over to find is a feature named nowhere: it needed a
-     card of the intro to say it existed, and every engine bug this app
-     has had about a composited layer drawing through a backface came
-     from that one mechanism. A sheet is what every other secondary
-     surface here already uses, and it draws in two dimensions.
-
-     Asserted as the ABSENCE of the machinery, not just of the markup:
-     a flip left in place but never triggered would pass a check that
-     only looked for `.is-flipped`. */
-  console.log('\n── the objectives ──');
-
-  const noFlip = await page.evaluate(() => {
-    const w = document.querySelector('.week');
-    const c = document.querySelector('.day-card');
-    return { faces: document.querySelectorAll('.wk-front, .wk-back, .wk-flip').length,
-             flipped: w ? w.classList.contains('is-flipped') : null,
-             persp: w ? getComputedStyle(w).perspective : null,
-             style3d: c ? getComputedStyle(c.parentElement).transformStyle : null,
-             card: !!c };
-  });
-  ok('there is no flip: no faces, no perspective, no preserve-3d',
-    noFlip.card && noFlip.faces === 0 && noFlip.flipped === false
-    && noFlip.persp === 'none' && noFlip.style3d === 'flat', noFlip);
-  /* ── THE ROW IS THE WAY IN, AND THE CORNER GLYPH IS GONE ──
-     The objectives lived behind a 19px mark in the head's top-right
-     corner. A glyph in a corner names nothing: you had to be told the
-     feature was there, and it took a card of the intro to say so.
-     They are cards ON the day now, under the week strip, and the row
-     is the whole of the access.
-
-     Asserted as the ABSENCE of the control, not merely of its glyph —
-     a button left in place with an empty span would pass a check that
-     only looked for the mark. */
-  const noTurn = await page.evaluate(() => ({
-    btn: document.querySelectorAll('#scHdTurn, .wk-turn').length,
-    glyph: document.querySelectorAll('.tn-g, .tn-foil, .ob-foil').length,
-    strip: !!document.getElementById('scObjStrip'),
-  }));
-  ok('the top-right control is gone and the row is what replaced it',
-    noTurn.btn === 0 && noTurn.glyph === 0 && noTurn.strip, noTurn);
-
-  /* Pressed by hand rather than through goTo, which is declared four
-     hundred lines below this — a helper hoisted into a block it is
-     defined after is a ReferenceError, not a convenience. */
-  const openDow = async (dow) => {
-    await page.evaluate((d) => {
-      const b = [...document.querySelectorAll('.st-d')]
-        .find((x) => +x.dataset.d === d);
-      if (b) b.click();
-    }, dow);
-    await page.waitForTimeout(420);
-  };
-
-  /* ── THE EMPTY DAY IS A GHOST CARD ──
-     Three empty states were rendered over the real app. Drawing
-     NOTHING is silent — the row vanishes and there is no way in,
-     which is exactly the hole the corner glyph was filling. A bare
-     plus chip says add something without saying what for. The ghost
-     is a real card's box with a dashed edge and a greyed tag: the
-     SHAPE of the missing thing, so it teaches the feature by being
-     it.
-
-     Both halves, because each passes on the other's bug — "a ghost is
-     drawn" passes on a row that draws one over a day that has
-     objectives, and "no ghost with objectives" passes on a row that
-     never draws one at all. */
-  await openDow(4);
-  const ghost = await page.evaluate(() => {
-    const g = document.querySelector('.obs-c.is-ghost');
-    const w = document.getElementById('scObjStrip');
-    if (!g) return { none: true, hidden: w ? w.hidden : null };
-    const cs = getComputedStyle(g), r = g.getBoundingClientRect();
-    const t = getComputedStyle(g.querySelector('.obs-t'));
-    return {
-      drawn: r.width > 60 && r.height > 28,
-      edge: cs.borderTopStyle,
-      says: g.querySelector('.obs-n').textContent,
-      /* A STATE IS NEVER COLOURED: the ghost names no objective, so
-         its tag makes no claim about which kind of thing this is and
-         has to be a grey with no channel standing out. That rule is
-         the whole of what stops this screen having an opinion. */
-      tag: t.color,
-      cards: document.querySelectorAll('.obs-c').length,
-      add: document.querySelectorAll('.obs-add').length,
-    };
-  });
-  const spread3 = (c) => {
-    const n = (c.match(/[\d.]+/g) || []).map(Number).slice(0, 3)
-      .map((v) => (v <= 1 ? v * 255 : v));
-    return Math.max(...n) - Math.min(...n);
-  };
-  /* ── A CLOSED EDGE, NOT A ROW OF MARKS ──
-     It was dashed on the usual reading, that a broken edge draws a
-     thing that is not there yet. On the phone it is a row of short
-     marks rather than an edge — the loudest thing about a card whose
-     job is to be quiet — and at 14px of radius the dashes break across
-     the corners, so the box does not close. Reported as exactly that.
-
-     What still says the card is empty is that it has no GROUND: no
-     fill and no shadow where every other card in this app has both,
-     which is read without reading an outline at all. */
-  ok('an empty day draws one ghost card, closed, saying what it is for',
-    ghost.drawn && ghost.edge === 'solid'
-    && /what matters/i.test(ghost.says) && ghost.cards === 1, ghost);
-  ok('...and its tag is a grey, because a state is never coloured',
-    spread3(ghost.tag) < 12, { tag: ghost.tag, spread: spread3(ghost.tag) });
-  /* The ghost IS the add control on an empty day, so a second one
-     beside it would be two targets for one action — the arrangement
-     Showing up removed once already. */
-  ok('...and the plus is not drawn beside it, because the ghost is it',
-    ghost.add === 0, ghost);
-
-  /* ── AND NO EDGE IN THE APP IS BROKEN ──
-     The ghost and the plus are the only outlined boxes here and they
-     sit side by side, so a dashed one against a solid one reads as a
-     mistake in the drawing rather than as two states. Stated over
-     EVERY element on every view rather than as two selectors, which is
-     the rule this file already keeps about conic gradients: a
-     treatment comes back one element at a time, and a check naming the
-     two that have it now walks straight past the third.
-
-     Every side, because a border-bottom is as dashed as a border-top
-     and a check reading one of the four is three quarters blind. */
-  /* ── AND IT HAS TO HAVE SEEN AN OUTLINED BOX ──
-     "No edge is broken" is vacuously true of a screen with no drawn
-     borders at all, which is the shape of the check that finds nothing
-     and passes for it. The two outlined boxes are the ghost and the
-     plus, and exactly one is on screen at a time — the ghost IS the
-     add control on an empty day — so what is counted is drawn borders
-     rather than either selector. Proved by planting a dashed edge and
-     watching the scan report it; the first attempt aimed at .obs-add
-     on an empty day, found nothing, and looked exactly like a blind
-     check. */
-  const brokenEdge = [];
-  let outlined = 0;
-  /* NOT 'friends': arriving at that board claims a code and makes the
-     first request this page is allowed to make, and the assertion this
-     whole file is built around is that the week and the tally reach
-     nothing. A check that has to break the app's central promise to
-     run is a check that has to be narrower. */
-  for (const v of ['week', 'tally']) {
-    await page.evaluate((vv) => {
-      localStorage.setItem('sched.view.v1', vv);
-    }, v);
-    await page.reload({ waitUntil: 'networkidle' });
-    await page.waitForTimeout(360);
-    const seen = await page.evaluate((vv) => {
-      const out = []; let solid = 0;
-      for (const e of document.querySelectorAll('*')) {
-        if (e.getClientRects().length === 0) continue;
-        const c = getComputedStyle(e);
-        for (const side of ['Top', 'Right', 'Bottom', 'Left']) {
-          const st = c['border' + side + 'Style'];
-          if (st === 'dashed' || st === 'dotted') {
-            out.push(vv + ' ' + (e.getAttribute('class') || e.tagName)
-              + ' border-' + side.toLowerCase() + ': ' + st);
-          } else if (st === 'solid'
-            && parseFloat(c['border' + side + 'Width']) > 0) solid++;
-        }
-      }
-      return { out: out, solid: solid };
-    }, v);
-    brokenEdge.push(...seen.out);
-    outlined += seen.solid;
-  }
-  await page.evaluate(() => { localStorage.setItem('sched.view.v1', 'week'); });
-  await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForTimeout(360);
-  await openDow(4);
-  ok('no edge anywhere in the app is broken, and some were looked at',
-    brokenEdge.length === 0 && outlined > 0, { brokenEdge, outlined });
-
-  /* ── THE ROW IS THE ONE THING IN THIS APP THAT SCROLLS SIDEWAYS ──
-     "Nothing in this app scrolls sideways" was written after a 212px
-     board column put a session off the side of the phone and clipped
-     "Morning" to "ng" at the left edge. That rule is right and it
-     holds everywhere else; this element is a deliberate, approved
-     exception, and naming it HERE is what keeps the check live rather
-     than relaxing it — the general sweep at the foot of this file
-     excludes this id and nothing else.
-
-     It is affordable here because there is nothing to lose off the
-     edge: at most five cards, and having two or three is the point of
-     the feature. And it BLEEDS to the screen edge, so a cut card is
-     cut by the screen and reads as "there is more" rather than as a
-     card that has been clipped — measured as the row reaching past
-     the poster's own padding. */
-  const bleed = await page.evaluate(() => {
-    const w = document.getElementById('scObjStrip');
-    const card = document.querySelector('.day-card');
-    return { row: w.getBoundingClientRect().left,
-             card: card.getBoundingClientRect().left,
-             ox: getComputedStyle(w).overflowX };
-  });
-  ok('the row bleeds past the padding, so a cut card is cut by the screen',
-    bleed.ox === 'auto' && bleed.row < bleed.card - 8, bleed);
-
-  /* ── DRAWN ON THE WEEK AND NOWHERE ELSE ──
-     `[hidden]` HAS TO BE SAID ONCE A THING TAKES A DISPLAY, and this
-     app has now shipped that bug five times — the rail, the page
-     dots, the toast and the intro each had the attribute set
-     correctly throughout while an author `display` outranked the
-     browser's own rule. Measured as the BOX, because reading the
-     property is what missed it every one of those times. */
-  const elsewhere = [];
-  for (const v of ['tally', 'friends']) {
-    await page.click(`.tab[data-view="${v}"]`);
-    await page.waitForTimeout(420);
-    elsewhere.push(await page.$eval('#scObjStrip',
-      (w) => ({ v: 1, boxes: w.getClientRects().length })));
-  }
-  await page.click('.tab[data-view="list"]');
-  await page.waitForTimeout(420);
-  const onWeek = await page.$eval('#scObjStrip', (w) => w.getClientRects().length);
-  ok('the row is drawn on the week and on no other screen',
-    onWeek > 0 && elsewhere.every((e) => e.boxes === 0),
-    { onWeek, elsewhere });
-
-  /* ── AND THE GHOST OPENS THE SHEET ──
-     One press from the row to the place you write one, which is the
-     whole answer to how you reach objectives without a corner glyph. */
-  await openDow(2);
-  await page.click('.obs-c.is-ghost');
-  await page.waitForTimeout(560);
-  /* MEASURED AS A BOX, never as a class: what is claimed is that the
-     objectives are on screen, and a sheet that has the open class and
-     no height is not. */
-  const opened = await page.evaluate(() => {
-    const s = document.getElementById('scSheet');
-    const r = s ? s.getBoundingClientRect() : null;
-    return { drawn: !!r && r.height > 100 && r.width > 100,
-             title: (document.getElementById('scSheetTitle') || {}).textContent,
-             field: document.querySelectorAll('.sheet input[type=text]').length };
-  });
-  ok('pressing the ghost opens the sheet, with the field already on it',
-    opened.drawn && /objectives/i.test(opened.title || '') && opened.field === 1,
-    opened);
-
-  /* ── THE WEEK IS BEHIND A SCRIM, NOT BEHIND A BACKFACE ──
-     Everything that used to be asserted here was about a bug the flip
-     created: the running row's sweep was an infinite transform, hence
-     its own compositor layer, and a composited descendant of a
-     backface-hidden ancestor is not reliably culled with it — on iOS
-     the whole running row came through the objectives face MIRRORED.
-     It was guarded three times, with `backface-visibility`, then
-     `visibility`, then `opacity`, because the first two are paint-time
-     properties and the bug lives in a layer the compositor draws
-     without consulting the paint tree.
-
-     None of that can happen to a sheet. What replaces those checks is
-     the one thing that has to be true of any surface over another: the
-     week is still there, and it is behind a scrim rather than gone —
-     a sheet that removed what is under it would lose your scroll
-     position every time you glanced at the objectives. */
-  const behind = await page.evaluate(() => {
-    const w = document.querySelector('.week');
-    const s = document.getElementById('scScrim');
-    const sheet = document.getElementById('scSheet');
-    const z = (e) => +getComputedStyle(e).zIndex || 0;
-    return { week: !!w && !w.hidden && w.getBoundingClientRect().height > 100,
-             scrim: !!s && !s.hidden,
-             over: !!s && !!sheet && z(sheet) >= z(s) };
-  });
-  ok('the week is still under it, behind the scrim',
-    behind.week && behind.scrim && behind.over, behind);
-
-  /* ── THE ROW IS STILL THERE UNDER THE SHEET ──
-     It used to be a control in the head that had to stay drawn and
-     named while its own sheet was up, because a control that vanishes
-     under what it opened is one you cannot find your way back from.
-     The row inherits that claim: the objectives you are editing have
-     to still be on the day behind the sheet, or closing it lands you
-     somewhere that looks like the edit did nothing. */
-  const rowUnder = await page.evaluate(() => {
-    const w = document.getElementById('scObjStrip');
-    const r = w.getBoundingClientRect();
-    return { drawn: !w.hidden && r.height > 20,
-             cards: document.querySelectorAll('.obs-c').length };
-  });
-  ok('the objectives row is still on the day behind the sheet',
-    rowUnder.drawn && rowUnder.cards >= 1, rowUnder);
-
-  /* ── writing one ── */
-  /* The first add comes from the ghost card, which opens the sheet
-     with its field already on it; every one after that comes back
-     through scObjRedraw's list view, which has its own Add another.
-     One helper for both, so the path a person actually takes is the
-     path the test takes. */
-  const addObj = async (text) => {
-    if (await page.$('.ob-add')) {
-      await page.click('.ob-add');
-      await page.waitForTimeout(420);
-    }
-    await page.fill('.sheet input[type=text]', text);
-    await page.click('.sheet .btn.go');
-    await page.waitForTimeout(520);
-  };
-  await addObj('Call a hundred clients');
-  await addObj('Walk the dog before it gets dark');
-
-  const obs = await page.$$eval('.ob', (b) => b.map((x) => ({
-    text: x.querySelector('.ob-t').textContent,
-    icon: x.querySelector('.ob-ic').getAttribute('data-icon'),
-    frog: x.classList.contains('is-frog'),
-    label: x.getAttribute('aria-label'),
-  })));
-  /* A SENTENCE, and the whole of it. There is no field for how much —
-     the amount is already in the words, and a form that asked for it
-     separately would make you take a decision apart to type it in. */
-  ok('an objective is written out in full',
-    obs.length === 2 && obs[0].text === 'Call a hundred clients'
-    && obs[1].text === 'Walk the dog before it gets dark', obs);
-  /* The glyph comes out of the same sentence, through the app's own
-     keyword table — so nothing is set twice and "walk the dog" reaches
-     the paw rather than the walker. */
-  ok('...with a glyph worked out from those same words',
-    obs[0].icon === 'call' && obs[1].icon === 'pet', obs.map((o) => o.icon));
-  const icSize = await page.$eval('.ob-ic', (e) => ({
-    w: Math.round(e.getBoundingClientRect().width),
-    t: Math.round(document.querySelector('.ob-t')
-      .getBoundingClientRect().width),
-  }));
-  /* SMALL, and a marker rather than a picture: the sentence is the
-     thing you read, and a glyph that competes with the text it labels
-     has stopped labelling it. */
-  /* The glyph is the ROW's glyph now — the same 20px mark the
-     schedule's rows carry, since an objective is one of the same
-     cards — and the sentence still has the width. */
-  ok('...small beside it, not competing with it',
-    icSize.w <= 22 && icSize.t > icSize.w * 3, icSize);
-  ok('the first is the main one, and it is the only one marked',
-    obs.filter((o) => o.frog).length === 1 && obs[0].frog, obs);
-  /* ── EVERY glyph takes the accent ──
-     They were --dim with only the first in red, and marking one of five
-     as important said the other four were not. The list is the
-     important thing. What that costs is the frog's colour signal, so it
-     is carried by stroke WEIGHT and a step of type weight instead —
-     quieter than it was, and asserted rather than assumed. */
-  const obMarks = await page.evaluate(() => {
-    /* Guarded rather than assumed. This threw once — `getComputedStyle`
-       on a null — because the row it wanted was not on screen, and a
-       TypeError takes the whole file down with no assertion count and
-       no evidence about WHY. A missing element is a fact worth
-       reporting, so it is reported. */
-    const el = (s) => document.querySelector(s);
-    const probe = { frog: !!el('.ob.is-frog .ob-ic'),
-                    rest: !!el('.ob:not(.is-frog):not(.is-done) .ob-ic'),
-                    obs: [...document.querySelectorAll('.ob')]
-                      .map((o) => o.className) };
-    if (!probe.frog || !probe.rest) return { PROBE: probe };
-    const g = (s) => getComputedStyle(document.querySelector(s));
-    const frog = g('.ob.is-frog .ob-ic');
-    const rest = g('.ob:not(.is-frog):not(.is-done) .ob-ic');
-    /* THE ROOT, not the heading. This read its expected value off
-       MAIN OBJECTIVES, which was the accent — and the day every title
-       in the app went white it would have started asserting that the
-       glyphs are --dim. A check that reads what it expects off another
-       piece of the design moves with that piece. */
-    const red = 'rgb(' + getComputedStyle(document.documentElement)
-      .getPropertyValue('--red').trim().replace('#', '').match(/\w\w/g)
-      .map((x) => parseInt(x, 16)).join(', ') + ')';
-    /* The list's heading is the SHEET's title now, so that is what is
-       read. `.ob-head b` is gone with the face that had a heading of
-       its own, and reading a missing element threw a TypeError that
-       took the file down with no assertion count at all. */
-    const head = g('#scSheetTitle').color;
-    return { frog: frog.stroke, rest: rest.stroke, red, head,
-      fw: parseFloat(frog.strokeWidth), rw: parseFloat(rest.strokeWidth),
-      ft: g('.ob.is-frog .ob-t').fontWeight,
-      rt: g('.ob:not(.is-frog):not(.is-done) .ob-t').fontWeight,
-      ink: getComputedStyle(document.documentElement)
-        .getPropertyValue('--ink').trim(),
-      words: [...document.querySelectorAll(
-        '.ob:not(.is-done) .ob-t')].map((t) =>
-        getComputedStyle(t).color) };
-  });
-  ok('every objective\u2019s glyph is in the accent, not just the first',
-    obMarks.frog === obMarks.rest && obMarks.rest === obMarks.red, obMarks);
-  ok('...so the first is told apart by weight instead',
-    obMarks.fw > obMarks.rw && +obMarks.ft > +obMarks.rt, obMarks);
-  /* ── AND THE WORDS ARE THE GLYPHS' LESSON AGAIN ──
-     The frog had --ink to itself over four --dim rows, which said the
-     other four were the ones that did not matter. Every objective you
-     have not done is full strength, and the step of weight is the
-     whole of what marks the first. Held against the resolved --ink
-     rather than a literal, since thirteen palettes move it. */
-  ok('every objective\u2019s words are full strength, not just the first',
-    obMarks.words.length > 1
-    && new Set(obMarks.words).size === 1
-    && obMarks.words[0] === await page.evaluate((h) => {
-      const p = document.createElement('i');
-      p.style.color = h; document.body.appendChild(p);
-      const c = getComputedStyle(p).color; p.remove(); return c;
-    }, obMarks.ink), obMarks.words);
-  ok('...and never by a rank number',
-    (await page.$$eval('.ob-n', (n) => n.length)) === 0);
-
-  /* ── THE SHEET NAMES IT, AND THE ACCENT GOES WITH THE FACE ──
-     The heading was the one in this app that kept the accent: it named
-     a list you had to turn something over to reach, and the colour
-     said the list under it was the one you CHOSE rather than the one
-     you scheduled. There is nothing to turn over now — the sheet's
-     own title bar names it, in the treatment every other sheet in the
-     app uses, and a red title on one sheet out of eight would be the
-     exception with its reason gone.
-
-     What the accent still marks is the MARKS: every objective's glyph
-     wears it, which is the half of that rule about the record rather
-     than about a heading. */
-  ok('the sheet names the list, and the marks under it keep the accent',
-    (await page.$eval('#scSheetTitle', (e) => e.textContent))
-      === 'Main objectives' && obMarks.rest === obMarks.red
-      && obMarks.frog === obMarks.red, obMarks);
-
-  /* ── re-ranking is one move, and always the same move ── */
-  await page.click('.ob-add');
-  await page.waitForTimeout(420);
-  await page.click('.sheet .ob-edit .btn.off');
-  await page.waitForTimeout(560);
-  const ranked = await page.$$eval('.ob-t',
-    (t) => t.map((x) => x.textContent));
-  ok('making one the main objective moves it up, and nothing else moves',
-    ranked[0] === 'Walk the dog before it gets dark'
-    && ranked[1] === 'Call a hundred clients', ranked);
-
-  /* ── ticking ── */
-  await page.click('.ob >> nth=0');
-  await page.waitForTimeout(460);
-  ok('an objective ticks where it stands',
-    await page.$eval('.ob', (b) => b.classList.contains('is-done')
-      && b.getAttribute('aria-pressed') === 'true'));
-  ok('...and the sheet stays up while you do it',
-    await page.$eval('#scSheet', (s) => s.getBoundingClientRect().height > 100));
-  /* ── EVERY TICK IN THIS APP IS THE ACCENT ──
-     There are four and they are all the same claim: a done objective, a
-     done block, a picked workout, and Done today. This one was --ink,
-     which on the one face in the app that is not flat made a ticked-off
-     objective the same colour as the words it was ticking off. Asked
-     for as the resolved --red rather than a literal, since the wheel
-     turns it to anything. */
-  const obTick = await page.evaluate(() => {
-    const cs = getComputedStyle(document.documentElement);
-    const rgb = (k) => 'rgb(' + cs.getPropertyValue(k).trim().replace('#', '')
-      .match(/\w\w/g).map((x) => parseInt(x, 16)).join(', ') + ')';
-    const t = document.querySelector('.ob.is-done .ob-tick');
-    return { stroke: t && getComputedStyle(t).stroke,
-      shown: t && +getComputedStyle(t).opacity,
-      box: getComputedStyle(document.querySelector('.ob.is-done .ob-box'))
-        .backgroundColor,
-      accent: rgb('--red'), ink: rgb('--ink') };
-  });
-  /* THE MARK IS THE CIRCLE, and the tick is the ink on it — which is
-     what every other check in this app is now. The accent is still
-     what says the thing happened; it has moved from the stroke to the
-     ground under it. */
-  ok('...and the mark it draws is the accent, like every other tick',
-    obTick.shown === 1 && obTick.box === obTick.accent
-    && obTick.stroke !== obTick.accent, obTick);
-  const objStore = await page.evaluate(() => {
-    const o = JSON.parse(localStorage.getItem('sched.obj.v1') || '{}');
-    const d = new Date();
-    const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
-      + '-' + String(d.getDate()).padStart(2, '0');
-    return { keys: Object.keys(o), k, mine: o[k] };
-  });
-  ok('...saved under the DATE, not the weekday',
-    objStore.keys.length === 1 && objStore.keys[0] === objStore.k
-    && objStore.mine.length === 2 && objStore.mine[0].done === true,
-    JSON.stringify(objStore));
-
-  /* ── THE RARE CARD WAS THE LAST THING THAT DID NOT MATCH ──
-     The face was a sheen of the accent inside a card with a foil rim,
-     and three assertions held that gradient to being mixed from the
-     palette rather than written in hex. The whole app became cards on
-     a ground, and a panel behind a list of cards is the
-     frame-inside-a-frame this project keeps taking back out — so the
-     back is the same page as the front showing a different list, and
-     the turn is the whole of what says which. What survives is with
-     the tile above: nothing in this app sheens any more.
-
-     WHAT SURVIVES IS THE MEASUREMENT: an objective still has to be
-     readable on whatever it is drawn on, which is now a card on the
-     page rather than words on a wash. Measured on composited pixels,
-     and polarity-agnostic. */
-  const obInk = await (async () => {
-    const box = await page.$eval('.ob:not(.is-done) .ob-t', (e) => {
-      const b = e.getBoundingClientRect();
-      return { x: b.x, y: b.y, w: b.width, h: b.height };
-    });
-    const png = PNG.sync.read(await page.screenshot());
-    const px = [];
-    for (let dy = 1; dy < box.h - 1; dy++) {
-      for (let dx = 1; dx < box.w - 1; dx++) {
-        const i = (png.width * Math.round((box.y + dy) * dpr)
-          + Math.round((box.x + dx) * dpr)) << 2;
-        px.push([png.data[i], png.data[i + 1], png.data[i + 2]]);
-      }
-    }
-    const lum = (c) => {
-      const f = c.map((v) => { v /= 255;
-        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
-      return 0.2126 * f[0] + 0.7152 * f[1] + 0.0722 * f[2];
-    };
-    const ls = px.map(lum).sort((a, b) => a - b);
-    const lo = ls[Math.floor(ls.length * 0.05)];
-    const hi = ls[Math.floor(ls.length * 0.95)];
-    return Math.round(((Math.max(lo, hi) + 0.05) / (Math.min(lo, hi) + 0.05)) * 100) / 100;
-  })();
-  ok('an objective on its card still clears 4.5:1', obInk >= 4.5, obInk);
-
-  /* ── THE FOIL WENT WITH THE CARD ──
-     The face was a sheen inside a card with a light travelling round
-     its rim — a masked ring with a conic gradient turning in it, and
-     five assertions holding the ring, the loop, the square and the
-     pause. What the objectives are now is the page, a heading and a
-     list of the same cards every other screen is made of, so there is
-     no rim to turn and nothing here to hold. The one thing worth
-     keeping from it is stated with the tile above: nothing in this
-     app sheens or foils any more. */
-  /* ── closing ── */
-  await page.keyboard.press('Escape');
-  await page.waitForTimeout(520);
-  ok('and Escape puts it away, leaving the schedule',
-    await page.$eval('#scSheet', (s) => s.hidden
-      || s.getBoundingClientRect().height < 40)
-    && await page.$eval('.week', (w) => w.getBoundingClientRect().height > 100));
-  /* It is NOT remembered. An objective is for today, and a sheet found
-     open tomorrow morning is the app having kept the wrong half of a
-     decision — the same claim the flip's own check made about a card
-     found face-down. */
-  await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForTimeout(340);
-  ok('...and the sheet is never found open on the next visit',
-    await page.$eval('#scSheet', (s) => s.hidden
-      || s.getBoundingClientRect().height < 40));
-  /* WITHOUT OPENING ANYTHING, which is the whole change. The
-     objectives are drawn on the day, so what was written is on screen
-     at rest — a check that had to open a sheet to find them would be
-     testing the sheet. */
-  const survived = await page.$$eval('.obs-c:not(.is-ghost) .obs-n',
-    (n) => n.map((x) => x.textContent));
-  ok('...though what was written on it survives, on the day itself',
-    survived.length === 2, survived);
-
-  /* ── ONE TAP TICKS ──
-     The cheap half of the gesture, and the one somebody does every
-     day. Measured through the RECORD as well as the class, because a
-     card that takes the accent and writes nothing is a tick that is
-     lost on the next reload. */
-  /* Asserted as the TOGGLE and as the record AGREEING with it, never
-     as "it becomes done". Sections above this one have already ticked
-     the first objective, so a check that assumed the card started
-     undone would pass or fail on what ran before it — which is this
-     file's own lesson about checks that only hold in one state,
-     arriving as a fixture rather than as a clock. It reads the card's
-     OWN id out of the record, so it cannot be satisfied by some other
-     objective having moved. */
-  const ticked = await (async () => {
-    const id = await page.$eval('.obs-c', (c) => c.dataset.id);
-    const before = await page.$eval('.obs-c', (c) => c.classList.contains('is-done'));
-    await page.click('.obs-c');
-    await page.waitForTimeout(480);
-    const after = await page.$eval('.obs-c', (c) => c.classList.contains('is-done'));
-    const filed = await page.evaluate((oid) => {
-      const o = JSON.parse(localStorage.getItem('sched.obj.v1') || '{}');
-      const d = new Date();
-      const k = [d.getFullYear(), String(d.getMonth() + 1).padStart(2, '0'),
-                 String(d.getDate()).padStart(2, '0')].join('-');
-      const hit = (o[k] || []).find((x) => x.id === oid);
-      return hit ? !!hit.done : null;
-    }, id);
-    return { id, before, after, filed };
-  })();
-  ok('one tap on a card flips it, and the record follows',
-    ticked.after === !ticked.before && ticked.filed === ticked.after, ticked);
-  /* Put back, so the sections below this one meet the day they expect.
-     A check that changes the state of the app has to put it back. */
-  await page.click('.obs-c');
-  await page.waitForTimeout(480);
-
-  /* ── AND TWO OPEN THE EDITOR ──
-     Asserted as the EDITOR rather than as any sheet: a double tap that
-     opened the read-only list would look identical from outside and
-     would have taken the way to re-rank and remove with it. */
-  await openObj(page);
-  const editor = await page.evaluate(() => ({
-    rows: document.querySelectorAll('.sheet .ob-edit').length,
-    field: document.querySelectorAll('.sheet input[type=text]').length,
-    first: document.querySelectorAll('.sheet .ob-edit .btn.off').length,
-  }));
-  ok('...and two open the editor, where you add, re-rank and remove',
-    editor.rows === 2 && editor.field === 1 && editor.first === 1, editor);
-  /* AND PUT AWAY AGAIN. A section that leaves a sheet open hands the
-     next one a screen with the sheet's own white text sitting behind
-     the tab bar — which is exactly how the bar's contrast sweep came
-     back at 1.62:1 against a bar that had not changed. The same
-     lesson as the overflow check needing its own context: a check
-     that changes the state of the app has to put it back. */
-  await page.keyboard.press('Escape');
-  await page.waitForTimeout(480);
-
-  /* Each view is its own labelled tab, so a view is asked for by
-     name rather than reached by pressing a cycling button until it
-     turns up. A test that counts presses has to be re-counted every
-     time a stop is added, and the one time it is not, it silently
-     measures the wrong screen. */
-  /* ── TWO TAPS ON A SHOWING UP TILE ──
-     The tile is one control: a tap logs and two open the twenty-six
-     weeks. It was a long press, and the reason it is not is that a
-     hold is invisible — nothing on a tile can say "hold me", and the
-     card that had to be built to teach it could teach either gesture.
-
-     Driven through the real handler rather than by calling the
-     function behind it, and the wait afterwards clears the 380ms the
-     first tap is deferred by. */
-  const holdCard = async (id) => {
-    await page.dblclick(`.ty-card[data-item="${id}"]`);
-    await page.waitForTimeout(560);
-  };
-
-  /* ── TWO TAPS ON A WEEK ROW, WHICH NOW DO NOTHING SPECIAL ──
-     A tap ticks a block off and the pencil beside it edits. This is
-     kept to assert that the gesture is GONE rather than merely
-     unused: a build that left the double tap in place beside the
-     pencil passes every other check, and the gesture is the thing
-     that was reported. */
-  const dblRow = async (sel) => {
-    await page.dblclick(sel);
-    await page.waitForTimeout(560);
-  };
-
-  const show = async (v) => {
-    for (let i = 0; i < 3; i++) {
-      const at = await page.evaluate(() => ({
-        tally: !document.getElementById('scTally').hidden,
-        friends: !document.getElementById('scFriends').hidden,
-        rail: !document.getElementById('scWeek').hidden,
-      }));
-      if ((v === 'tally' && at.tally)
-          || (v === 'friends' && at.friends) || (v === 'list' && at.rail)) return;
-      await page.evaluate((want) => {
-        const t = document.querySelector('.tab[data-view="' + want + '"]');
-        if (t) t.click();
-      }, v);
-      await page.waitForTimeout(180);
-    }
-    throw new Error('could not reach view ' + v);
-  };
-
-  /* ── one view at a time, MEASURED rather than asked ──
-     `hidden` works by a UA rule of `display: none`, and any author
-     `display` beats it. The rail was a plain block for its whole life,
-     so setting `hidden` did what it looked like it did; the day it
-     became `display: flex` for the deck the attribute silently stopped
-     meaning anything, and the week stayed on screen under the friends
-     board and the tally. Nothing threw, and the property was still
-     being set exactly as before.
-
-     So this asks the LAYOUT, not the property: a real box with real
-     area is on screen whatever the attribute says. Reading `.hidden`
-     here would have passed throughout the bug — which is precisely
-     what the old check did. */
-  const onScreen = async () => page.evaluate(() => {
-    const box = (id) => {
-      const el = document.getElementById(id) || document.querySelector(id);
-      if (!el) return false;
-      const r = el.getBoundingClientRect();
-      return r.width > 1 && r.height > 1;
-    };
-    return { rail: box('scWeek'), tally: box('scTally'),
-             friends: box('scFriends') };
-  });
-  for (const [v, want] of [['list', 'rail'],
-                           ['tally', 'tally'], ['friends', 'friends']]) {
-    await show(v);
-    await page.waitForTimeout(160);
-    const on = await onScreen();
-    ok(`on ${v}, ${want} is the only view drawing`,
-      on[want] && ['rail', 'tally', 'friends']
-        .filter((k) => k !== want).every((k) => !on[k]), { v, on });
-    /* The dots were a sibling of the rail rather than a child, so
-       they were a second thing to hide and were the half left behind.
-       There is one section per view now and nothing beside it. */
-  }
-  await show('list');
-  await page.waitForTimeout(160);
-
-  /* ── leaving the week and coming back lands on today ──
-     Hiding the rail resets its scrollLeft to 0 and fires a scroll event
-     on the way out, which the deck's settle handler read as a swipe to
-     Monday. Nothing was visibly wrong at the moment it happened — the
-     only symptom is the card you find when you return, which is why it
-     needs a check that leaves and comes back rather than one that looks
-     at the deck standing still. */
-  const openName = () => page.$$eval('#scHdDay',
-    (d) => d.map((x) => x.textContent).join());
-  ok('the week opens on today to begin with',
-    (await openName()) === 'Tuesday', await openName());
-  for (const away of ['friends', 'tally']) {
-    await show(away);
-    await page.waitForTimeout(200);
-    await show('list');
-    await page.waitForTimeout(280);
-    ok(`...and is still on today after a trip to ${away}`,
-      (await openName()) === 'Tuesday', await openName());
-  }
-  /* ONE press, and it either opened that day or it did not. The deck
-     used to open whichever card ended up nearest the middle of the
-     scroller, so this helper scrolled and then corrected — geometry
-     standing in for an intention, and a test that had to model the
-     geometry to say anything. A press is the whole mechanism now. */
-  const goTo = async (dow) => {
-    const hit = await page.evaluate((d) => {
-      const b = [...document.querySelectorAll('.st-d')]
-        .find((x) => +x.dataset.d === d);
-      if (!b) return false;
-      b.click();
-      return true;
-    }, dow);
-    if (!hit) return false;
-    await page.waitForTimeout(420);
-    return +(await page.$eval('.week', (e) => e.dataset.d)) === dow;
-  };
-
-  /* ── every day opens, in one press ──
-     This is the reason the deck stopped opening by geometry. Nearest-
-     to-centre cannot choose the first card or the last: a scroller
-     stops at 0, and with the open card at 268px against 76px
-     neighbours the middle of the rail at that point sits over the THIRD
-     card. Monday and Sunday were not awkward, they were unreachable,
-     and Tuesday took two swipes. Every day is checked, not just the
-     ends, because the ends were only where it showed first. */
-  for (const dow of [1, 2, 3, 4, 5, 6, 0]) {
-    ok(`one press opens ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dow]}`,
-      await goTo(dow), await openName());
-  }
-  /* ── THE DECK'S OWN GEOMETRY WENT WITH THE DECK ──
-     Centring a card by moving a track, a window measured against the
-     painted floor of the bar and re-measured on every viewport move,
-     a press target over each shut card, and a width transition
-     between two lengths: five sections of this file, each of them a
-     fix for a problem the deck created. One day is drawn now and the
-     column it sits in is a flex child, so there is no arithmetic left
-     to get wrong and nothing to assert about it.
-
-     What was worth keeping is below: pressing a day opens that day,
-     the choice survives leaving the week, and every day is its own
-     date. */
-  /* ── a day you swiped to survives the trip too ──
-     The deck's scrollLeft is reset by hiding it, so coming back has to
-     put the open card in the middle again — otherwise the day you chose
-     is still `is-open` and 268px wide, sitting off the left of the
-     screen with Monday in front of it. Today passes this trivially,
-     because centring on today is what a fresh render does anyway; only
-     a day you moved to can tell the difference. */
-  ok('pressing a card opens it', await goTo(5) && (await openName()) === 'Friday',
-    await openName());
-  await show('tally');
-  await page.waitForTimeout(220);
-  await show('list');
-  await page.waitForTimeout(320);
-  ok('...and it is still the open one after leaving the week',
-    (await openName()) === 'Friday', await openName());
-  const centred = await page.evaluate(() => {
-    const win = document.getElementById('scWeek');
-    const el = win.querySelector('.day-card');
-    const r = el.getBoundingClientRect(), b = win.getBoundingClientRect();
-    return Math.round(Math.abs((r.left + r.width / 2) - (b.left + b.width / 2)));
-  });
-  ok('...and its rows are on screen where the day you left was',
-    centred <= 6, centred);
-  /* Put the week back on today for everything that follows. */
-  ok('...and it goes back to today when asked', await goTo(2)
-    && (await openName()) === 'Tuesday', await openName());
-
-  /* And the card it lands on is one you can actually reach: a deck left
-     scrolled to Monday puts today's rows in a 76px column whose own
-     container is display:none, so every row measures zero and nothing
-     on this screen can be pressed. */
-  ok('...with today drawn wide enough to hold its rows',
-    await page.$eval('.week', (d) => d.getBoundingClientRect().width) > 200);
-  ok('...and its rows on screen',
-    await page.$eval('.week.is-today .row[data-id]',
-      (r) => { const b = r.getBoundingClientRect();
-               return b.width > 100 && b.height > 20; }));
-
-  /* ── EVERY card is its own date ──
-     scObjBack resolved a card through scDateOfDow, which is the TICK
-     path's resolver: it looks back over the two-day backfill window
-     and then returns TODAY. So every card more than two days behind,
-     and every day still ahead, read and WROTE today's objectives —
-     Friday's card showed today's list, and adding one to Friday added
-     it to today.
-
-     The deck is the Monday-first week containing today, so that is
-     what a card's date means now. Planted on this week's Monday and
-     on this week's Friday, and each has to turn up on its own card
-     and on no other. Today is a Tuesday, so one is behind and one is
-     ahead — the two halves the old resolver got wrong for different
-     reasons. */
-  await page.evaluate(() => {
-    const iso = (off) => { const d = new Date();
-      d.setDate(d.getDate() - ((d.getDay() + 6) % 7) + off);
-      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
-        + '-' + String(d.getDate()).padStart(2, '0'); };
-    const o = JSON.parse(localStorage.getItem('sched.obj.v1') || '{}');
-    o[iso(0)] = [{ id: 'om', n: 'Monday only', done: false }];
-    o[iso(4)] = [{ id: 'of', n: 'Friday only', done: false }];
-    localStorage.setItem('sched.obj.v1', JSON.stringify(o));
-  });
-  await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForTimeout(260);
-  const perDay = await (async () => {
-    const out = [];
-    for (const d of [0, 1, 2, 3, 4, 5, 6]) {
-      await goTo(d);
-      /* Read off the ROW rather than out of a sheet. The objectives
-         are drawn on the day now, so what this section is about —
-         every day carrying its own DATE's list — is visible without
-         opening anything, and a walk that opened and shut a sheet
-         seven times was measuring the sheet. */
-      out.push(await page.evaluate(() => ({
-        day: document.getElementById('scHdDay').textContent,
-        obj: [...document.querySelectorAll('.obs-c:not(.is-ghost) .obs-n')]
-          .map((t) => t.textContent).join('|'),
-      })));
-    }
-    await goTo(2);
-    return out;
-  })();
-  const byName = Object.fromEntries(perDay.map((r) => [r.day, r.obj]));
-  ok('a past day’s card carries that day’s objectives',
-    byName.Monday === 'Monday only', byName);
-  ok('...a day still to come carries its own',
-    byName.Friday === 'Friday only', byName);
-  ok('...and neither has leaked onto today',
-    !/Monday only|Friday only/.test(byName.Tuesday || ''), byName);
-
-
   /* ── the bar ──
      Four labelled stops in a glass pill, and the one control that ADDS
      as its own circle beside it. What is asserted is the property, not
@@ -2598,6 +1731,57 @@ const SAID = [
   })();
   ok(`a label clears 4.5:1 with a row behind it (worst ${swept.low}:1 at ${swept.at}px)`,
     swept.low >= 4.5, swept);
+
+  /* ── TWO TAPS ON A SHOWING UP TILE ──
+     The tile is one control: a tap logs and two open the twenty-six
+     weeks. It was a long press, and the reason it is not is that a hold
+     is invisible — nothing on a tile can say "hold me", and the card
+     that had to be built to teach it could teach either gesture.
+
+     Driven through the real handler rather than by calling the function
+     behind it, and the wait afterwards clears the 380ms the first tap
+     is deferred by. */
+  const holdCard = async (id) => {
+    await page.dblclick(`.ty-card[data-item="${id}"]`);
+    await page.waitForTimeout(560);
+  };
+
+  /* ── TWO TAPS ON A WEEK ROW, WHICH NOW DO NOTHING SPECIAL ──
+     A tap ticks a block off and the pencil beside it edits. This is
+     kept to assert that the gesture is GONE rather than merely unused:
+     a build that left the double tap in place beside the pencil passes
+     every other check, and the gesture is the thing that was reported.
+
+     It lives HERE rather than beside its first caller because it was
+     defined inside the objectives block, and taking that block out took
+     both helpers with it — which reported as `0 assertions across 1
+     files`, the greenest-looking failure there is. */
+  const dblRow = async (sel) => {
+    await page.dblclick(sel);
+    await page.waitForTimeout(560);
+  };
+
+  /* Reaching a view by pressing its tab until the LAYOUT says it is up,
+     rather than by one click and a hope: a single press put the rail
+     back when the app was already on it, and the check underneath then
+     measured the wrong screen. */
+  const show = async (v) => {
+    for (let i = 0; i < 3; i++) {
+      const at = await page.evaluate(() => ({
+        tally: !document.getElementById('scTally').hidden,
+        friends: !document.getElementById('scFriends').hidden,
+        rail: !document.getElementById('scWeek').hidden,
+      }));
+      if ((v === 'tally' && at.tally)
+          || (v === 'friends' && at.friends) || (v === 'list' && at.rail)) return;
+      await page.evaluate((want) => {
+        const t = document.querySelector('.tab[data-view="' + want + '"]');
+        if (t) t.click();
+      }, v);
+      await page.waitForTimeout(180);
+    }
+    throw new Error('could not reach view ' + v);
+  };
 
   /* The view survives a reload. Its own key, not folded into the
      schedule: the schedule is the record and this is a preference about
@@ -6958,10 +6142,10 @@ const SAID = [
        to change is what a friend can SEE; the code is a thing you
        show once, and it is still behind Your code. */
     ok('your own row opens your profile, with a switch for each thing',
-      pv.title === 'Your profile' && pv.rows.length === 4
+      pv.title === 'Your profile' && pv.rows.length === 3
       && pv.bio === 1
       && pv.rows.map((r) => r.name).join('|')
-         === 'Showing up|Objectives|Workouts|Reading', pv);
+         === 'Showing up|Workouts|Reading', pv);
     /* A real role="switch" with aria-checked, not a styled div: a
        control whose whole job is to say on or off has to say it to a
        screen reader too. */
@@ -6972,8 +6156,16 @@ const SAID = [
     await fp.click('.sheet .btn.go');
     await fp.waitForTimeout(900);
     const bare = rec();
+    /* `goals` COMES BACK AS [] AND THAT IS THE WORKER, NOT THE APP.
+       The objectives went and the app stopped sending the field; the
+       worker still normalises it, because records pushed before the
+       removal have up to thirty days left on the server and a reader
+       that dropped an unknown key would take the day with it. So the
+       claim here is that nothing arrives in it — which is what it was
+       before, and the switch it belonged to is gone from the row count
+       three assertions above. */
     ok('with every switch off, a push carries none of it',
-      bare.year === '' && Array.isArray(bare.goals) && bare.goals.length === 0
+      bare.year === '' && !(bare.goals || []).length
       && Array.isArray(bare.work) && bare.work.length === 0
       && Array.isArray(bare.mind) && bare.mind.length === 0,
       { year: bare.year, goals: bare.goals, work: bare.work, mind: bare.mind });
@@ -6994,9 +6186,8 @@ const SAID = [
     const one = rec();
     ok('turning ONE on sends that one and still nothing else',
       typeof one.year === 'string' && one.year.length === 371
-      && one.goals.length === 0 && one.work.length === 0
-      && one.mind.length === 0,
-      { len: (one.year || '').length, goals: one.goals.length,
+      && one.work.length === 0 && one.mind.length === 0,
+      { len: (one.year || '').length,
         work: one.work.length, mind: one.mind.length });
     /* A year as one digit a day: 371 days written as a map of objects
        is about nine kilobytes of a record that shares a 96KB ceiling
@@ -7004,13 +6195,13 @@ const SAID = [
     ok('...and the year is one digit a day, not a map of objects',
       /^[0-9]{371}$/.test(one.year || ''), (one.year || '').slice(0, 24));
 
-    await fp.click('.pv-row >> nth=3');          /* Reading */
+    await fp.click('.pv-row >> nth=2');          /* Reading */
     await fp.waitForTimeout(800);
     const two = rec();
     ok('a second switch adds only its own',
       two.year.length === 371 && Array.isArray(two.mind)
-      && two.goals.length === 0 && two.work.length === 0,
-      { mind: two.mind.length, goals: two.goals.length, work: two.work.length });
+      && two.work.length === 0,
+      { mind: two.mind.length, work: two.work.length });
 
     /* ── AND SWITCHING ONE BACK OFF TAKES IT DOWN ──
        An off switch has to send the EMPTY shape rather than omit the
@@ -7033,8 +6224,12 @@ const SAID = [
        lesson the note check already learned: its first version looked
        for the word "indexed", which is a word the test itself types
        into a search box, so it matched the app working correctly. */
-    await fp.click('.pv-row >> nth=1');
-    await fp.click('.pv-row >> nth=2');
+    /* BY STATE, never by index: these were written when Objectives sat
+       at nth=1, and an index is a reference nothing type-checks — the
+       row it names moves the day a switch is added or removed and the
+       check goes on passing while measuring a different one. */
+    await fp.evaluate(() => [...document.querySelectorAll('.pv-row')]
+      .forEach((r) => { if (r.getAttribute('aria-checked') !== 'true') r.click(); }));
     await fp.waitForTimeout(900);
     const all = JSON.stringify(rec());
     ok('the week, the rating and your notes never leave — with everything on',
@@ -7069,10 +6264,14 @@ const SAID = [
        that draws: turn two on and two off, and the two that are off
        have to be absent here. */
     await openMe();
-    await fp.click('.pv-row >> nth=0');          /* Showing up on */
-    await fp.waitForTimeout(500);
-    await fp.click('.pv-row >> nth=1');          /* Objectives on  */
-    await fp.waitForTimeout(500);
+    /* Showing up ON and everything else OFF, set from the state each
+       row reports rather than from where it happens to sit. */
+    await fp.evaluate(() => [...document.querySelectorAll('.pv-row')]
+      .forEach((r, i) => {
+        const on = r.getAttribute('aria-checked') === 'true';
+        if (on !== (i === 0)) r.click();
+      }));
+    await fp.waitForTimeout(700);
     await fp.click('.sheet >> text=See it as a friend does');
     await fp.waitForTimeout(700);
     const seen = await fp.evaluate(() => ({
@@ -7103,7 +6302,7 @@ const SAID = [
     ok('...and the way back returns to the switches rather than closing',
       await fp.evaluate(() =>
         (document.getElementById('scSheetTitle') || {}).textContent === 'Your profile'
-        && document.querySelectorAll('.pv-row').length === 4));
+        && document.querySelectorAll('.pv-row').length === 3));
 
     /* And this block puts the app back the way it found it, which is
        the whole of what went wrong above. */
@@ -7123,6 +6322,11 @@ const SAID = [
       code: 'ZZPROF01', name: 'Sam Okafor', acc: '#5FA8FF', ink: '#0C0C0E',
       bio: 'Training for a half in April.', logs: [], at: Date.now(),
       year: '5'.repeat(200) + '0'.repeat(100) + '3'.repeat(71),
+      /* A record still carrying `goals` — the friends half has to keep
+         reading one, because every phone that pushed before the
+         objectives went has up to thirty days left on the server and
+         a reader that threw on an unknown key would lose the day with
+         it. What it must NOT do any more is draw them. */
       goals: ['20k steps a day', 'Read 12 books', 'Sub-90 half'],
       work: [{ n: 'Push', c: '#e6412f', v: 14 }, { n: 'Pull', c: '#2f7fe6', v: 12 }],
       mind: [{ t: 'Atomic Habits', a: 'James Clear', c: '', k: 'read' },
@@ -7178,7 +6382,7 @@ const SAID = [
         rows: grid ? getComputedStyle(grid).gridTemplateRows.split(' ').length : 0,
         label: grid ? grid.getAttribute('aria-label') : null,
         role: grid ? grid.getAttribute('role') : null,
-        goals: [...document.querySelectorAll('.pf-gt')].map((g) => g.textContent),
+        goals: document.querySelectorAll('.pf-gt').length,
         shelf: document.querySelectorAll('.pf-shelf .mn-art').length,
         cols: [...document.querySelectorAll('.pf-col .fp-k')].map((k) => k.textContent),
         train: [...document.querySelectorAll('.pf-col')][0]
@@ -7186,12 +6390,17 @@ const SAID = [
               .querySelectorAll('.pf-lrow').length : 0,
       };
     });
-    ok('a friend’s profile is a year of days, their goals, a shelf and two columns',
+    ok('a friend’s profile is a year of days, a shelf and two columns',
       prof.title === 'Sam Okafor'
       && prof.bio === 'Training for a half in April.'
       && prof.cells === 371 && prof.flow === 'column' && prof.rows === 7
-      && prof.goals.length === 3 && prof.shelf === 3
       && prof.cols.join('|') === 'Training|Listening' && prof.train === 2, prof);
+    /* AND THE GOALS ON IT ARE NOT DRAWN. The fixture carries three,
+       which is what a record pushed before the objectives went looks
+       like; a reader that still drew them would be showing a section
+       this app no longer has, from a key nothing writes. */
+    ok('...and a legacy record’s objectives are read without being drawn',
+      prof.goals === 0, prof.goals);
     /* role="img" with a written label: the grid is the only fact up
        there that nothing else repeats, so hiding it from a screen
        reader throws it away. */
@@ -7223,13 +6432,12 @@ const SAID = [
     await fp.keyboard.press('Escape');
     await fp.waitForTimeout(400);
     await plant({ code: 'ZZPROF02', name: 'Quiet Pat', acc: '#8B72FF',
-      ink: '#0C0C0E', bio: '', year: '', goals: [], work: [], mind: [],
+      ink: '#0C0C0E', bio: '', year: '', work: [], mind: [],
       logs: [], days: {}, at: Date.now() });
     const quiet = await fp.evaluate(() => ({
       title: (document.getElementById('scSheetTitle') || {}).textContent,
       bio: document.querySelectorAll('.pf-bio').length,
       yr: document.querySelectorAll('.pf-yr').length,
-      goals: document.querySelectorAll('.pf-gt').length,
       shelf: document.querySelectorAll('.pf-shelf').length,
       cols: document.querySelectorAll('.pf-cols').length,
       /* The sheet is still a sheet: their name and the way out. */
@@ -7237,7 +6445,7 @@ const SAID = [
     }));
     ok('somebody who shares nothing draws nothing, and the sheet still works',
       quiet.title === 'Quiet Pat' && quiet.bio === 0 && quiet.yr === 0
-      && quiet.goals === 0 && quiet.shelf === 0 && quiet.cols === 0
+      && quiet.shelf === 0 && quiet.cols === 0
       && quiet.rm === 1, quiet);
     await fp.keyboard.press('Escape');
     await fp.waitForTimeout(400);
@@ -9611,34 +8819,34 @@ const SAID = [
        four measured 0px; the answer was to put the turned-away face
        away.
 
-       The objectives are a sheet now, so there is no second face to
-       take the gesture and the fix is not a fix any more, it is an
-       absence. What survives is the MEASUREMENT that found it: a real
-       touch drag through CDP, against a control scroller on the same
-       page, because a zero is otherwise indistinguishable from a
+       There is no second face at all now — the objectives went, and
+       the turn went with them — so the fix is not a fix any more, it
+       is an absence. What survives is the MEASUREMENT that found it: a
+       real touch drag through CDP, against a control scroller on the
+       same page, because a zero is otherwise indistinguishable from a
        harness that cannot dispatch a scrolling touch at all.
 
-       Asserted round the sheet as well as at rest: opening one over
-       the week and closing it must leave the card scrolling, which is
-       the same round trip the turn used to make. */
-    await openObj(spage);
+       Asserted round a SHEET as well as at rest: any surface over the
+       week and back must leave the card scrolling, which is the same
+       round trip the turn used to make. The add control is the sheet
+       that is one press from this screen. */
+    await spage.click('.prime');
+    await spage.waitForTimeout(560);
     const overlay = await spage.evaluate(() => {
       const s = document.getElementById('scSheet');
       const c = document.querySelector('.day-card');
       return { sheet: !!s && s.getBoundingClientRect().height > 100,
-               faces: document.querySelectorAll('.wk-front, .wk-back, .wk-flip').length
-                    - document.querySelectorAll('#scSheetBody .wk-back').length,
+               faces: document.querySelectorAll('.wk-front, .wk-back, .wk-flip').length,
                cardStill: !!c && c.getBoundingClientRect().height > 100 };
     });
-    ok('the objectives open over the day rather than turning it over',
+    ok('a sheet opens over the day rather than turning it over',
       overlay.sheet && overlay.faces === 0 && overlay.cardStill, overlay);
     await spage.keyboard.press('Escape');
     await spage.waitForTimeout(560);
 
-    /* Still scrolls after a round trip, which is what the timer and
-       the transitionend between them are for. */
+    /* Still scrolls after a round trip. */
     const after = await dragUp('.day-card');
-    ok(`...and the card still scrolls after a turn there and back `
+    ok(`...and the card still scrolls after a sheet there and back `
       + `(${after.top}px)`, after.top >= Math.min(after.max - 2, 300), after);
 
     /* ── A CARD WITH MORE UNDER THE FOLD SAYS SO ──

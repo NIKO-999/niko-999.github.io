@@ -9809,3 +9809,143 @@ matched, a workout key that resolved to two cards, a selector string
 in a fixture and a `<span>` that was the wrong span. The fix is always
 the same one: ask for the thing the element was BUILT for. It reads
 `data-day`.
+
+## Showing up is the reference's screen
+
+Chosen from twelve chart treatments drawn on a real tile at 188px and
+three taken across the whole screen at 390x844, each read at 1:1. What
+shipped is the area, with Water kept tall as a vertical gauge.
+
+**THE CAPTION AND THE FOOT WERE ONE FACT IN TWO PLACES.** A 12.5px grey
+line reading *5 of 6 today · 1 day streak* under the stops, and the
+longest run in an 11px line at the very bottom of the screen. They are
+one panel now — today, the run you are on, the best you have had, split
+by hairlines — and **the panel is still the door to the week**, because
+the thing that already says how today went is what asks for the seven
+days around it. The denominator stays: adding a habit makes today
+harder and the figure has to say so.
+
+**THE NAME BECAME A LABEL.** 11px small caps in the quiet grey, which
+is the whole of what buys the figure 27px and the chart its room. The
+glyph stayed at 19px on the same line — your reference draws no mark at
+all, and it is kept because it is the same object here, on the week's
+rows and at the head of the history sheet.
+
+**THE UNIT RIDES THE FIGURE**, so there is no tag on this screen any
+more: `kcal` over `2,310 kcal` was the same word twice on the one line
+that could have carried a chart.
+
+**A TICK HAS A FIGURE TOO**, and it is the week — kept over the days it
+was actually ON, which is the strip's own rule and the only denominator
+that does not read a three-a-week habit as 3 of 7 for ever. "Logged"
+was a restatement of the mark already in the corner; where the tick
+came from moved to the line under the figure, which is where `Today`
+and `This week` sit, and where Mind's book lands.
+
+**AN AREA, NOT BARS.** Four bars at 38px is four solid blocks and a lot
+of ink per tile, and six tiles of that is the dashboard this screen
+keeps taking itself back out of. What an area CLAIMS is the space
+between two readings, which on a daily count is a value for a moment
+that never had one — the honest objection, taken knowingly, and the
+dated ticks underneath are what say these are four readings.
+
+**ONE TILE IS TALL AND IT IS THE ONE YOU ADD TO.** Not because Water
+matters more: it is the one figure here you add to in a fixed unit
+through the day, so the gauge is a thing you watch fill and the stepper
+is the way in. `bump` is that unit and having one is the whole
+condition. The stepper is three SIBLINGS of the card — a button inside
+a button is invalid and collapses to one press while looking exactly
+right — and the middle one is the dial, so the arrows make the common
+answer one press and the figure between them reaches every other.
+
+**0.3 L AND NOT 0.25, WHICH IS THE FAMILIAR FIGURE AND IS WRONG.** The
+record keeps water at one decimal, so a quarter of a litre cannot be
+written down: the first press stores 0.3, the fourth lands on 1.2 where
+four glasses should make 1.0, and **the drift is invisible because
+every figure on screen is a plausible one**. A bump has to be a
+multiple of the item's own `step` or the control is lying about what it
+adds.
+
+**FOUR DAYS OF NOTHING IS NOT FOUR DAYS OF ZERO.** With no reading
+anywhere in the window every point sits on the floor and draws a flat
+line along the bottom of the tile, which reads as four nights you slept
+none — the loudest possible claim about a record that does not exist.
+Nothing is drawn instead, and the dates go with it.
+
+**And `margin-top: auto` on the chart was doing NOTHING.** The card's
+own `1fr` row already holds the slack, so the margin had nothing to
+absorb; `align-self: end` is what puts the chart on the foot. Found by
+breaking it on purpose and watching the check pass, which is the only
+way a redundant declaration is ever found and the reason a check is
+proved to bite rather than assumed to.
+
+**A check keyed to POSITION had to move to `data-item`.** The tall tile
+is hoisted to second so it starts the right-hand column at the top, so
+the grid's order is not the item list's — and a check reading
+`marks[i]` reads a different card the day that order moves, silently.
+
+## The objectives are gone
+
+The row of cards under the week strip, the sheet behind it, the frog,
+the re-rank, the ghost card, `sched.obj.v1` and everything that read
+it. Out on request.
+
+**IT REACHED FURTHER THAN THE SCREEN IT WAS ON**, which is the thing
+worth writing down: a feature is not the code that draws it. Three
+other places were reading that record and each had to be answered on
+its own terms.
+
+**The friends profile had a switch for it.** `SHARE_ROWS` went from
+four to three and `scShareGoals` went with the record. What the payload
+does NOT do is send `goals: []` for ever: an off switch sends the empty
+shape because a reader cannot tell a field somebody turned off from one
+this build did not have — and a switch that no longer EXISTS is the
+second of those, so the key is absent rather than standing empty.
+
+**But the WORKER still normalises it, and that is not an oversight.**
+Records pushed before this went out have up to thirty days left on the
+server, and a reader that dropped an unknown key would take the day
+with it. So a friend's record can still arrive carrying objectives; it
+is read without being drawn, and the fixture carries three to prove it.
+
+**The calendar's day sheet had a *What mattered* section**, which went
+with the record it read.
+
+**`scObjDay` OUTLIVED THE FEATURE AND IS NOW `scWeekDate`.** It answers
+the Monday-first week containing today, and the day-off record and the
+calendar's day sheet both still ask it. Renamed for the QUESTION rather
+than the feature, because a helper named for something that no longer
+exists is the next person's wrong turn.
+
+**`--t-obj` went too.** A token nothing names is not caught by the
+static check, which only asks whether a `var()` points at something —
+so a dead colour sits in two palettes and in `TOKENS` looking exactly
+like a live one. A dead rule that still cascades is not dead.
+
+### Deleting a test section deleted four helpers with it
+
+`show`, `dblRow` and `holdCard` were all defined inside the objectives
+block, and forty-odd assertions elsewhere in the file called them. The
+first two reported as **`0 assertions across 1 files`** — the
+greenest-looking failure there is, because nothing says FAIL — and the
+third took another full run to find, one `ReferenceError` at a time.
+
+They live near the top of the run now rather than beside their first
+caller. **A helper's home is not where it happened to be written**, and
+a block you are about to delete has to be read for what it DEFINES as
+well as for what it asserts: the fix is to list every `const` in the
+range and check each against the rest of the file, which takes ten
+seconds and would have saved two six-minute rounds.
+
+**And a switch pressed by INDEX is an identifier nothing type-checks.**
+`.pv-row >> nth=1` was Objectives and is now Workouts, so three checks
+went on passing while measuring a different row. They set each switch
+from the state it reports instead. Fifth time this file has recorded
+that shape.
+
+**The stored record is NOT swept.** Every other removed key here — the
+palette name, the subtitle, the old rating scale, `sched.goal.v1` — was
+dropped on boot, on the rule that a key nothing reads is a second
+record of a decision that no longer exists. This one is sentences
+somebody wrote, and deleting those is not a tidy-up. It sits on disk,
+read by nothing.
