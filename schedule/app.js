@@ -7318,13 +7318,6 @@
     for (var i = 0; i < WORKOUTS.length; i++) if (WORKOUTS[i].key === k) return WORKOUTS[i];
     return null;
   }
-  function scTrainGroup(k) {
-    for (var i = 0; i < TRAIN_GROUPS.length; i++) {
-      if (TRAIN_GROUPS[i].k === k) return TRAIN_GROUPS[i];
-    }
-    return null;
-  }
-
   var TRAIN_KEY = 'sched.train.v1';
   var trainLog = {};                 /* date -> blockId -> { k, e } */
 
@@ -9334,7 +9327,10 @@
     var name = scWorkName(sig);
     var ws = scWorkoutsOf(sig);
     var col = ws[0] ? ws[0].c : '#888';
-    var grp = ws[0] ? scTrainGroup(ws[0].key.split('.')[0]) : null;
+    /* The LANE rather than the picker's group, for the strip's own
+       reason: a tile reading "PPL" beside one reading "All exercises"
+       is two words for one thing, and neither is what you did. */
+    var grp = ws[0] ? LANE_N[scWorkLane(ws[0].key.split('.')[0])] : null;
     /* ── A REST PANEL HAS NO TIME, AND THAT IS NOT A ZERO ──
        Every other figure here is an average over the sessions of one
        kind, and a rest day HAS no length: drawn as the rest of them it
@@ -9362,7 +9358,7 @@
     w.appendChild(scEl('i'));
     w.appendChild(document.createTextNode(name));
     txt.appendChild(w);
-    if (grp) txt.appendChild(scEl('span', 'pill wo-gp', grp.n));
+    if (grp) txt.appendChild(scEl('span', 'pill wo-gp', grp));
     p.appendChild(txt);
     var figs = scEl('span', 'props');
     figs.setAttribute('aria-hidden', 'true');
@@ -9425,6 +9421,20 @@
      ago opens on a session you have stopped doing. */
   var workOpen = '';
   var workGroup = 'all';
+
+  /* ── WEIGHT TRAINING IS ALL THE SAME THING ──
+     The picker has four groups because it has to tell Chest from Push
+     when you are choosing a session. This screen is the record read
+     back, and there "All exercises" against "PPL" is a distinction
+     about which LIST a session was picked off rather than about what
+     you did — two chips that both mean you lifted.
+
+     What is genuinely a different kind of session is a RUN and a
+     RECOVERY day, so those keep themselves and every lift group folds
+     into one. The fold is here rather than in TRAIN_GROUPS because the
+     picker still needs the four. */
+  function scWorkLane(g) { return g === 'run' || g === 'rec' ? g : 'lift'; }
+  var LANE_N = { lift: 'Weights', run: 'Run', rec: 'Recovery' };
   function scPaintWork() {
     var pane = $('scWorkPane');
     pane.textContent = '';
@@ -9446,20 +9456,23 @@
     });
     var floor = scDayBack(29);
     var month = all.filter(function (h) { return h.day >= floor; });
-    var head = scEl('div', 'wo-head');
-    var fig = scEl('b', 'ty-fig', String(all.length));
-    fig.appendChild(scEl('i', null, all.length === 1 ? 'session' : 'sessions'));
-    head.appendChild(fig);
-    head.appendChild(scEl('span', null, '\u00b7 ' + keys.length
-      + (keys.length === 1 ? ' kind' : ' kinds') + ' \u00b7 ' + month.length
-      + ' this month'));
-    pane.appendChild(head);
-    /* ── the groups as a strip ──
-       All, then only the groups you have actually done: a chip for a
-       kind with nothing under it is a filter that empties the screen. */
+    /* ── THE CAPTION WENT ──
+       "3 sessions · 3 kinds · 3 this month" over a list of three panels
+       that each print their own count and their own share of the
+       month. Three figures summarising a picture directly under them,
+       which is the duplication this project keeps taking back out —
+       and `kinds` was counting SIGNATURES, so Push + Abs and Push were
+       two of them. `month` stays because every panel's share is worked
+       out from it. */
+    /* ── the lanes as a strip ──
+       All, then only the lanes you have actually done: a chip for a
+       kind with nothing under it is a filter that empties the screen.
+       And with every lift group folded into one, a phone that only
+       lifts has ONE lane and draws no strip at all — which is the
+       whole of what a strip is for. */
     var groupOf = function (sig) {
       var w = scWorkoutsOf(sig)[0];
-      return w ? w.key.split('.')[0] : '';
+      return w ? scWorkLane(w.key.split('.')[0]) : '';
     };
     var groups = [];
     keys.forEach(function (k) {
@@ -9472,7 +9485,7 @@
       strip.setAttribute('role', 'group');
       strip.setAttribute('aria-label', 'Kind of session');
       [['all', 'All']].concat(groups.map(function (g) {
-        var tg = scTrainGroup(g); return [g, tg ? tg.n : g];
+        return [g, LANE_N[g] || g];
       })).forEach(function (c) {
         var b = scEl('button', 'wo-c' + (workGroup === c[0] ? ' is-on' : ''), c[1]);
         b.type = 'button';

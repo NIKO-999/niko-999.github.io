@@ -9949,3 +9949,47 @@ dropped on boot, on the rule that a key nothing reads is a second
 record of a decision that no longer exists. This one is sentences
 somebody wrote, and deleting those is not a tidy-up. It sits on disk,
 read by nothing.
+
+## Weight training is all the same thing
+
+Reported in one line with the screen attached: the caption goes, and
+the selection tab goes *unless it's running or recovery*.
+
+**THE CAPTION SUMMARISED THE PICTURE DIRECTLY UNDER IT.** *3 sessions ·
+3 kinds · 3 this month* sat over a list of panels that each print their
+own count and their own share of the month — three figures restating
+what is already drawn, which is the duplication this project keeps
+taking back out. And `kinds` was counting SIGNATURES, so Push + Abs and
+Push were two of them: a figure nobody could have checked against
+anything on the screen.
+
+**THE PICKER HAS FOUR GROUPS BECAUSE IT HAS TO TELL CHEST FROM PUSH.**
+This screen is the record read back, and there *All exercises* against
+*PPL* is a distinction about which LIST a session was chosen off rather
+than about what you did — two chips that both mean you lifted. What is
+genuinely a different kind of session is a RUN and a RECOVERY day.
+
+`scWorkLane` folds every lift group into one and leaves those two
+alone. It is a function on this screen rather than a change to
+`TRAIN_GROUPS`, because the picker still needs the four.
+
+**AND THE STRIP THEN DISAPPEARS BY ITSELF**, which is the whole of what
+the ask wanted: the rule was already *draw it only where there is more
+than one lane*, so a phone that only lifts has ONE and no strip at all.
+Nothing had to be special-cased for "unless it's running or recovery" —
+folding the lanes made the existing rule say it.
+
+**The tile's own pill went with it.** A tile reading `PPL` beside one
+reading `All exercises` is two words for one thing, and neither is what
+you did. It says `Weights`, `Run` or `Recovery` — the lane.
+
+**`scTrainGroup` had one caller and it was that pill**, so it went too:
+a helper nothing reaches is a mechanism somebody will edit, and the
+first thing they would find is that nothing calls it. `.wo-head` went
+with the caption for the same reason.
+
+**Both halves are asserted and both were proved to bite.** Undoing the
+fold reads `All|bro|ppl|Run` — the raw keys, because `LANE_N` has no
+entry for them — and putting an empty `.wo-head` back reads `head: 1`.
+The lanes check holds the pills beside the chips, because "the lanes
+are folded" passes on a build that dropped the strip outright.

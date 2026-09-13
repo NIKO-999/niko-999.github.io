@@ -7557,8 +7557,19 @@ const SAID = [
         };
       });
       const dots = [...document.querySelectorAll('.wo-d')];
-      return { fig: document.querySelector('.wo-head .ty-fig').textContent,
+      return {
+        /* THE CAPTION WENT. "15 sessions \u00b7 4 kinds \u00b7 3 this month" sat
+           over a list of panels that each print their own count and
+           their own share of the month \u2014 three figures summarising the
+           picture directly under them. Asserted as the absence, and
+           beside the panels that carry what it said. */
+        head: document.querySelectorAll('.wo-head').length,
         months: [...document.querySelectorAll('.wo-mn')].map((m) => m.textContent),
+        /* WEIGHT TRAINING IS ALL THE SAME THING, so All exercises and
+           PPL are one lane. Run and Recovery are genuinely different
+           sessions and keep themselves. */
+        lanes: [...document.querySelectorAll('.wo-c')].map((c) => c.textContent),
+        pills: [...document.querySelectorAll('.wo-gp')].map((c) => c.textContent),
         rows,
         cals: document.querySelectorAll('.wo-cal').length,
         lit: dots.filter((d) => d.classList.contains('is-on')).length,
@@ -7566,9 +7577,18 @@ const SAID = [
           && !d.classList.contains('is-gap')).length,
         label: document.querySelector('.wo-cal').getAttribute('aria-label') };
     });
-    ok('it counts every session and names three months',
-      /^15/.test(drawn.fig) && drawn.months.length === 3
+    ok('the count and the kinds are gone, and the months are named',
+      drawn.head === 0 && drawn.months.length === 3
       && drawn.months.every((m) => /^[A-Z][a-z]{2}$/.test(m)), drawn);
+    /* Every lift group folds into one, so a fixture of lifts and a run
+       offers three lanes rather than four \u2014 and a phone that only
+       lifts has ONE and draws no strip at all, which is the whole of
+       what a strip is for. Both halves, because "the lanes are folded"
+       passes on a build that dropped the strip outright. */
+    ok('the lanes fold every lift group into one, and Run keeps itself',
+      drawn.lanes.join('|') === 'All|Weights|Run'
+      && drawn.pills.every((p) => /^(Weights|Run|Recovery)$/.test(p))
+      && drawn.pills.indexOf('Weights') >= 0, drawn);
 
     /* ── A PANEL PER WORKOUT YOU DID, NOT PER WORKOUT THAT EXISTS ──
        Twenty-two panels, nineteen of them reading zero, is a menu
