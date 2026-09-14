@@ -10037,14 +10037,51 @@ fourteen pixels of the fold on nothing; a `::before` claims it as
 TARGET and draws none of it, which is `.row-ed`'s own rule and the
 objectives plus's and the children's dots'.
 
+### The ticks lead, and the tall tile had to be re-solved for it
+
+The numbers led, because they are what carry a figure. Asked for the
+other way round and **the reason is better than the one it replaces**:
+Train and Mind are the two things you DO, and the four numbers are what
+happened while you were doing them. The first pair on the screen should
+be the pair you came to press.
+
+Nothing here is ordered by whether it is logged — a grid that
+rearranges itself as you press it is a grid you cannot learn.
+
+**AND THE TALL ONE STILL STARTS THE RIGHT-HAND COLUMN, which is a
+property of the CURSOR rather than of an index.** A two-column grid
+places left then right, so the tall tile lands on the right only when
+an ODD number of half tiles precede it. It sat at index 1, which was
+true by accident of the numbers leading — reorder without re-solving it
+and Water drops into the left column with nothing else on screen
+looking wrong. It is the first odd slot at or after the ticks now: two
+ticks put it third, three put it fourth, and neither is a number
+anybody had to choose.
+
+**Asked of the DRAWING, never of a list of ids.** A tile drawing a
+seven-block week is a tick and one drawing an area is a number, which
+is the same fact the record carries one level down — and a fixture's
+own names are an identifier nothing type-checks, which this file has
+had to write down five times. **In reading order, never DOM order**:
+the grid places its own tiles, so a build that emitted the ticks first
+and let the placement put a number above them would pass on the markup
+alone.
+
+**And a habit of yours lands at the end of its OWN GROUP**, which is
+the claim that survived the reversal. The check said "last on the
+grid", which was true only while the numbers led; a tick of yours is
+the LAST TICK, and that is a rule rather than a position.
+
 ### One tile is wide, and which one is arithmetic
 
 The tall tile takes two cells of a two-column grid, so six items occupy
 SEVEN cells and seven cannot pair. Something has to be full width, and
 drawing that as a half tile with a hole beside it is the state this
-fixes. **Which one is not a taste call either**: the tall tile and the
-two beside it fill the first two rows, so the odd cell is the first
-item after them.
+fixes. **Which one is the LAST, and that moved with the order above**:
+every tile before the odd cell is a half, so the hole is always the
+last cell of the last row. It used to be the first item after the tall
+block, which is the same cell seen from the other end while the numbers
+led.
 
 **Worked out rather than named**, so a seventh habit re-solves it — at
 seven items the cells come out even and nothing is wide at all. That

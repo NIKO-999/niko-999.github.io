@@ -2972,6 +2972,47 @@ const SAID = [
     mos.n === 6 && mos.tall.join() === 'w' && mos.wide.join() === 's'
     && Math.abs(mos.wideW - mos.gridW) <= 1 && mos.lefts.length === 2, mos);
 
+  /* == THE TICKS LEAD ==
+     Train and Mind are the two things you DO, and the four numbers are
+     what happened while you were doing them, so the first pair on the
+     screen is the pair you came to press.
+
+     ASKED OF THE DRAWING, never of a list of ids. A tile drawing a
+     seven-block week is a tick and one drawing an area is a number,
+     which is the same fact the record carries one level down -- where a
+     fixture's own names are an identifier nothing type-checks, and this
+     file has had to write that down five times.
+
+     IN READING ORDER, never DOM order: the grid places its own tiles,
+     so a build that emitted the ticks first and let the placement put
+     a number above them would pass on the markup alone. */
+  const lead = await page.evaluate(() => {
+    const r = [...document.querySelectorAll('.ty-row')];
+    const b = (x) => x.getBoundingClientRect();
+    const read = r.map((x) => ({
+      tick: !!x.querySelector('.ty-ch .ty-wk'),
+      tall: x.classList.contains('is-tall'),
+      t: Math.round(b(x).top), l: Math.round(b(x).left),
+    })).sort((a, c) => a.t - c.t || a.l - c.l);
+    const lefts = [...new Set(read.map((x) => x.l))].sort((a, c) => a - c);
+    return {
+      seq: read.map((x) => (x.tick ? 'd' : 'n')).join(''),
+      ticks: read.filter((x) => x.tick).length,
+      /* AND THE TALL ONE STILL STARTS THE RIGHT-HAND COLUMN, which is
+         a property of the CURSOR rather than of an index: a two-column
+         grid places left then right, so the tall tile lands on the
+         right only when an odd number of half tiles precede it. It sat
+         at index 1, which was true by accident of the numbers leading
+         -- reorder without re-solving it and Water drops into the left
+         column with nothing else on screen looking wrong. */
+      tallL: read.filter((x) => x.tall).map((x) => x.l),
+      right: lefts[lefts.length - 1],
+    };
+  });
+  ok('the ticks lead the grid, and the tall tile still starts the right column',
+    lead.ticks === 2 && /^d+n+$/.test(lead.seq)
+    && lead.tallL.join() === String(lead.right), lead);
+
   /* ══ THE PLOT SITS IN A WELL, AND ONLY THE PLOT ══
      A curve with no edge is a smear on the card. This is NOT the frame
      inside a frame this project keeps removing — that rule is about a
@@ -9522,7 +9563,12 @@ const SAID = [
     await hp.waitForTimeout(700);
     const added = await hp.evaluate(() => ({
       stored: JSON.parse(localStorage.getItem('sched.habit.v1') || '[]'),
-      names: [...document.querySelectorAll('.ty-card .ty-nm')].map((x) => x.textContent),
+      names: [...document.querySelectorAll('.ty-row .ty-nm')].map((x) => x.textContent),
+      /* A TICK DRAWS A WEEK and a number draws an area, which is how
+         the grid says which group a tile is in without being handed a
+         list of ids. */
+      kinds: [...document.querySelectorAll('.ty-row')]
+        .map((x) => (x.querySelector('.ty-ch .ty-wk') ? 'd' : 'n')).join(''),
       cap: document.querySelector('#scTallyCap .ty-fig > i').textContent,
       capAll: document.getElementById('scTallyCap').getAttribute('aria-label'),
     }));
@@ -9532,10 +9578,12 @@ const SAID = [
     ok('adding one puts it on the grid and in the count',
       added.stored.length === 1 && added.stored[0].n === 'Cold plunge'
       && added.stored[0].k === 'do' && /^x/.test(added.stored[0].id)
-      /* LAST, and by NAME rather than by index: the numbers lead the
-         grid and the ticks follow, so a habit of yours lands at the end
-         of whichever group it belongs to. */
-      && added.names[added.names.length - 1] === 'Cold plunge'
+      /* AT THE END OF ITS OWN GROUP, and said that way rather than as
+         a position: the ticks lead and the numbers follow, so a tick of
+         yours is the LAST TICK rather than the last tile. Written as
+         "last on the grid" it was true only while the numbers led, which
+         is an index in a fixture standing in for a rule. */
+      && added.names.indexOf('Cold plunge') === added.kinds.lastIndexOf('d')
       && added.cap === '0/ 7' && /of 7 today/.test(added.capAll), added);
 
     /* ── AND THE WIDE TILE IS ARITHMETIC, NOT A NAME ──

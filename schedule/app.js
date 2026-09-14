@@ -3437,19 +3437,39 @@
     var grid = $('scTallyGrid');
     grid.textContent = '';
 
-    /* ── THE TALL ONE IS SECOND ──
-       So it starts the right-hand column at the top and spans the two
-       rows beside it, which is your reference's own arrangement. The
-       numbers lead because they are what carry a figure; the ticks
-       follow; yours come last in the order you made them. Nothing here
-       is ordered by whether it is logged — a grid that rearranges
-       itself as you press it is a grid you cannot learn. */
+    /* ── THE TICKS LEAD, AND THAT REVERSES WHAT STOOD HERE ──
+       The numbers led, because they are what carry a figure. Asked for
+       the other way round and the reason is better: Train and Mind are
+       the two things you DO, and the four numbers are what happened
+       while you were doing them. The first pair on the screen should
+       be the pair you came to press.
+
+       Nothing here is ordered by whether it is logged — a grid that
+       rearranges itself as you press it is a grid you cannot learn.
+
+       ── AND THE TALL ONE STILL STARTS THE RIGHT-HAND COLUMN ──
+       Which is your reference's own arrangement, and it is a property
+       of the CURSOR rather than of an index: a two-column grid places
+       left then right, so the tall tile lands on the right only when
+       an ODD number of half tiles precede it. Written as index 1 that
+       was true by accident of the numbers leading; with the ticks
+       first it has to be worked out, or Water drops into the left
+       column and the reference's shape is gone.
+
+       So: the first odd slot at or after the ticks. Two ticks put it
+       third, three ticks put it fourth, and neither is a number
+       anybody had to choose. */
     var items = scItems();
-    var ord = items.filter(function (it) { return it.k !== 'do'; })
-      .concat(items.filter(function (it) { return it.k === 'do'; }));
+    var ticks = items.filter(function (it) { return it.k === 'do'; });
+    var ord = ticks.concat(items.filter(function (it) { return it.k !== 'do'; }));
     var tallAt = -1;
     ord.forEach(function (it, i) { if (tallAt < 0 && scTyTall(it)) tallAt = i; });
-    if (tallAt > 1) ord.splice(1, 0, ord.splice(tallAt, 1)[0]);
+    if (tallAt >= 0) {
+      var want = Math.min(ticks.length % 2 ? ticks.length : ticks.length + 1,
+                          ord.length - 1);
+      if (want !== tallAt) ord.splice(want, 0, ord.splice(tallAt, 1)[0]);
+      tallAt = want;
+    }
 
     /* ── AND ONE IS WIDE, BECAUSE THE ARITHMETIC LEAVES AN ORPHAN ──
        The tall tile takes two cells of the two-column grid, so six
@@ -3457,17 +3477,27 @@
        has to be full width, and drawing that as a half tile with a
        hole beside it is the mistake this fixes.
 
-       WHICH one is not a taste call either: the tall tile and the two
-       beside it fill the first two rows, so the odd cell is the FIRST
-       item after them. Worked out rather than named, so a seventh
-       habit re-solves it instead of stranding the rule on six — at
-       seven items the cells come out even and nothing is wide at all.
+       WHICH one is the LAST, and that moved with the order above.
+       Every tile before the odd cell is a half, so the hole is always
+       the last cell of the last row — and the only tile that can fill
+       it is the one drawn into it. It used to be the first item after
+       the tall block, which was the same cell seen from the other end
+       while the numbers led.
+
+       Worked out rather than named, so a seventh habit re-solves it
+       instead of stranding the rule on six — at seven items the cells
+       come out even and nothing is wide at all.
 
        The add control at the foot is full width and sits OUTSIDE this
        count: it is not one of your habits, so a grid that paired a
        tile with it would be claiming it was. */
     var wideAt = (ord.length + (tallAt >= 0 ? 1 : 0)) % 2
-      ? Math.min(tallAt >= 0 ? 3 : 0, ord.length - 1) : -1;
+      ? ord.length - 1 : -1;
+    /* A tile cannot be both, and with the six built-ins it never is —
+       the tall one is placed near the front and the last is four
+       tiles past it. Said out loud because a two-by-two tile is the
+       one shape this grid has no room for. */
+    if (wideAt === tallAt) wideAt = -1;
 
     ord.forEach(function (it, oi) {
       var on = !!got[it.id], late = !on && scLate(it), tall = scTyTall(it);
