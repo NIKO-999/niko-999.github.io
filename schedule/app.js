@@ -3300,25 +3300,32 @@
   }
 
   /* ── THE WEEK A TICK IS IN ──
-     Monday-first, seven states, and the denominator is the days it was
-     actually ON rather than seven. A day the thing was never on is not
-     a day you missed it — the strip's own rule — and without it a
-     three-a-week habit reads 3 of 7 for ever.
+     Monday-first, seven states, and the FIGURE reads out of the whole
+     week. It went in as the days the thing was actually ON — a
+     three-a-week schedule reading 3 of 3 rather than 3 of 7 — which
+     was right about the little week strip and wrong about the number
+     beside it: Train and Mind are daily-shaped questions on this
+     tile, and shrinking the denominator to match the schedule made a
+     day you were never asked read the same as a day you kept.
+
+     The dots keep the older answer. `days` still marks a day `off`
+     when nothing was scheduled, so the STRIP goes on telling a day
+     you were never asked from a day you missed — only the printed
+     fraction stopped scaling itself down to agree with it.
 
      A tick always wins: trained on a Sunday it is not scheduled is
-     still a day you trained, so it counts on both sides. */
+     still a day you trained, so it counts on the strip either way. */
   function scTyWeek(it) {
     var today = new Date(), lead = (today.getDay() + 6) % 7;
     var mon = new Date(today); mon.setDate(mon.getDate() - lead);
-    var days = [], kept = 0, n = 0;
+    var days = [], kept = 0;
     for (var i = 0; i < 7; i++) {
       var d = new Date(mon); d.setDate(d.getDate() + i);
       var day = scDay(d), on = scTicked(day, it.id), app = scApplied(it, day);
       days.push(on ? 'on' : !app ? 'off' : i < lead ? 'miss' : 'todo');
-      if (on || app) n++;
       if (on) kept++;
     }
-    return { days: days, kept: kept, aim: it.aim || n };
+    return { days: days, kept: kept, aim: it.aim || 7 };
   }
 
   /* ── FOUR READINGS, AND THE SHAPE IS WHAT YOU READ ──
