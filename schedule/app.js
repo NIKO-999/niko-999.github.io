@@ -477,8 +477,35 @@
       row[1].forEach(function (w) { m[w] = row[0]; all.push(w); });
     });
     all.sort(function (a, b) { return b.length - a.length; });
-    return { map: m, re: new RegExp('\\b(' + all.join('|') + ')\\b', 'g') };
+    /* `words` is the same alternation `re` is built from, kept as a
+       string rather than rebuilt, so the range pattern below and any
+       later one agree with `re` about which spellings count by
+       construction instead of by two lists kept in step by hand. */
+    return { map: m, re: new RegExp('\\b(' + all.join('|') + ')\\b', 'g'), words: all.join('|') };
   })();
+
+  /* "MONDAY TO FRIDAY" IS A RUN, not two lone days — matched before
+     the single-day loop below, or that loop reads Monday and Friday
+     on their own and leaves Tuesday to Thursday out, which is the
+     opposite of what the sentence said. */
+  var RE_DAY_RANGE = new RegExp(
+    '\\b(' + DAY_MAP.words + ')\\s*(?:-|–|—|to|thru|through|till|until)\\s*('
+    + DAY_MAP.words + ')\\b', 'g');
+
+  /* Walked off ORDER rather than compared as numbers, because the
+     week here is Monday-first and Sunday (0) would otherwise sort
+     before Monday (1) — "Friday to Monday" wraps the week's own end
+     for anybody whose week does not stop at Friday, and ORDER is
+     already where that wrap is written down. */
+  function scDayRange(a, b) {
+    var ai = ORDER.indexOf(a), bi = ORDER.indexOf(b), out = [], i = ai;
+    while (true) {
+      out.push(ORDER[i]);
+      if (i === bi) break;
+      i = (i + 1) % 7;
+    }
+    return out;
+  }
 
   var NUM = {
     one: 1, two: 2, three: 3, four: 4, five: 5, six: 6,
@@ -518,6 +545,15 @@
        TIME, and rewriting it there would corrupt "6:30 to 7:30". */
     s = s.replace(/\bfor\s+(\d{1,2}):(\d{2})\b/gi,
       function (_, h, mm) { return 'for ' + String(+h * 60 + +mm) + ' minutes'; });
+    /* AND A LENGTH SAID IN WORDS IS THE SAME REWRITE, no "for" needed
+       — nothing here could ever be mistaken for a clock. LONGER
+       PATTERNS FIRST: "an hour and a half" contains "an hour", and
+       once that had already become "60 minutes" there was nothing
+       left for "and a half" to attach to. */
+    s = s.replace(/\bhalf an? hours?\b/gi, '30 minutes');
+    s = s.replace(/\b(?:a\s+)?quarter(?:\s+of)?\s+an?\s+hours?\b/gi, '15 minutes');
+    s = s.replace(/\ban?\s+hours?\s+and\s+an?\s+half\b/gi, '90 minutes');
+    s = s.replace(/\ban hour\b/gi, '60 minutes');
     s = s.replace(new RegExp('\\b(' + NUMW + ')\\b', 'gi'), function (w) { return val(w); });
     return s.slice(1, -1);
   }
@@ -529,6 +565,13 @@
     '\\b(?:at|starting(?:\\s+at)?|starts(?:\\s+at)?)\\s+' + HM +
     '\\s*(?:for|,)?\\s*(\\d{1,3})\\s*(hours?|hrs?|h|minutes?|mins?|m)\\b', 'g');
   var RE_AT = new RegExp('\\b(?:at|from|starting(?:\\s+at)?)\\s+' + HM + '\\b', 'g');
+  /* "MOVE WALK TO 8" is its own preposition, kept off RE_AT rather
+     than added to it: RE_RANGE's "to" is the middle of a PAIR, and
+     folding a lone "to" into the single-time pattern would read the
+     back half of "8 to 11" as a second, competing match on plenty of
+     ordinary add sentences. Read only where `out.kind === 'move'`
+     asks for it. */
+  var RE_MOVE_TO = new RegExp('\\bto\\s+' + HM + '\\b', 'g');
   /* ── "now" ──
      The one time word that needs no digits. Two patterns rather than
      one with an optional tail: an optional group after \bnow\b makes
@@ -781,23 +824,40 @@
       return true;
     };
 
-    var out = { days: [], s: null, e: null, room: '', name: '', kind: 'add' };
+    var out = { days: [], s: null, e: null, room: '', name: '', kind: 'add', moveTo: null };
 
     /* ── the verb, if there is one ──
        "no" and "skip" are their OWN kind, never folded into delete:
        a delete changes every week there will ever be, and "no gym
        tomorrow" is the day-off record's own exception on one date —
        the tool this app built so deleting the block was not the only
-       way to say a Monday is not this Monday. */
-    var cmd = /^\s*(delete|remove|cancel|drop|clear|wipe|erase|no|skip)\b/.exec(low);
+       way to say a Monday is not this Monday.
+
+       "MOVE" IS A RETIME, NEVER A DELETE-AND-ADD. Deleting Walk and
+       re-adding it at a new hour throws its sub-items, its notes and
+       every objective and note pointing at it away to change one
+       number. Matched by NAME the way delete is — this is a change to
+       something that already exists, not a description of something
+       new. */
+    var cmd = /^\s*(delete|remove|cancel|drop|clear|wipe|erase|no|skip|move)\b/.exec(low);
     if (cmd) {
       out.kind = /^(clear|wipe|erase)$/.test(cmd[1]) ? 'clear'
-        : /^(no|skip)$/.test(cmd[1]) ? 'off' : 'delete';
+        : /^(no|skip)$/.test(cmd[1]) ? 'off'
+        : /^move$/.test(cmd[1]) ? 'move' : 'delete';
       mark(cmd.index, cmd.index + cmd[0].length);
     }
 
-    /* ── which days ── */
+    /* ── which days, a RUN first ── */
     var seen = {}, m;
+    RE_DAY_RANGE.lastIndex = 0;
+    while ((m = RE_DAY_RANGE.exec(low))) {
+      if (!free(m.index, m.index + m[0].length)) continue;
+      scDayRange(DAY_MAP.map[m[1]], DAY_MAP.map[m[2]]).forEach(function (dd) {
+        if (!seen[dd]) { seen[dd] = 1; out.days.push(dd); }
+      });
+      mark(m.index, m.index + m[0].length);
+    }
+    /* ── then any day named on its own ── */
     DAY_MAP.re.lastIndex = 0;
     while ((m = DAY_MAP.re.exec(low))) {
       if (!free(m.index, m.index + m[0].length)) continue;
@@ -891,6 +951,27 @@
         span = scPickOne(b1, 60);
         if (span) { mark(m.index, m.index + m[0].length); break; }
       }
+    }
+
+    /* ── AND A MOVE READS ITS OWN "TO" ──
+       A retime is a single new START, never a span — the block's own
+       length is what MOVES with it, not a fact the sentence has to
+       restate. `scPickOne(mt, 0)` is the same am/pm scoring the block
+       above already trusts, asked for its start alone. */
+    if (out.kind === 'move') {
+      RE_MOVE_TO.lastIndex = 0;
+      while ((m = RE_MOVE_TO.exec(low))) {
+        if (!free(m.index, m.index + m[0].length)) continue;
+        var mt = scHM(m[1]);
+        if (!mt) continue;
+        mt.mer = scMerOf(m[2]);
+        var picked = scPickOne(mt, 0);
+        if (picked) { out.moveTo = picked.s; mark(m.index, m.index + m[0].length); break; }
+      }
+      /* "MOVE WALK AT 8" already resolved a span through the shared
+         "at" pattern above — its START is the same fact "to 8" would
+         have given, so a second preposition costs nothing here. */
+      if (out.moveTo === null && span) out.moveTo = span.s;
     }
 
     /* ── NOW, and an hour of it ──
@@ -1099,6 +1180,13 @@
     if (p.kind === 'off') {
       return !p.name ? 'what to skip' : !p.days.length ? 'which day' : null;
     }
+    /* A move needs no day, unlike off: left unsaid it means every day
+       the block already runs on, which is delete's own reading of a
+       bare name and the far more common thing to mean by "move my
+       walk" than one single occurrence. */
+    if (p.kind === 'move') {
+      return !p.name ? 'which block to move' : p.moveTo === null ? 'what time to move it to' : null;
+    }
     var want = [];
     if (!p.name) want.push('what it is');
     if (!p.days.length) want.push('which day');
@@ -1123,8 +1211,22 @@
 
   function scApply(list) {
     scMark();
-    var added = 0, gone = 0, offed = 0;
+    var added = 0, gone = 0, offed = 0, moved = 0;
     list.forEach(function (p) {
+      if (p.kind === 'move') {
+        /* NAME-MATCHED THE WAY DELETE IS, RETIMED THE WAY ADD IS —
+           and the days it applies to come from scMatches' own rule
+           for an empty day list: no filter at all, every occurrence
+           of the name. A length is never asked for and never
+           changed; only WHEN it starts moves. */
+        scMatches(p).forEach(function (it) {
+          var len = it.e - it.s;
+          it.s = p.moveTo;
+          it.e = Math.min(1440, p.moveTo + len);
+          moved++;
+        });
+        return;
+      }
       if (p.kind === 'off') {
         /* RESOLVED THE SAME WAY "AFTER TRAINING" IS — by name, then
            by keyword, and the LAST block added wins an ambiguous
@@ -1172,6 +1274,7 @@
     var msg = added && gone ? added + ' added, ' + gone + ' removed'
       : added ? (added === 1 ? 'Added' : added + ' blocks added')
       : gone ? (gone === 1 ? 'Removed' : gone + ' removed')
+      : moved ? (moved === 1 ? 'Moved' : moved + ' blocks moved')
       : offed ? (offed === 1 ? 'Marked off' : offed + ' marked off')
       : 'Nothing changed';
     /* NO UNDO WHEN ONLY THE OFF-LOG MOVED. scMark snapshots state,
@@ -1179,8 +1282,13 @@
        restore a state that never changed and leave the day off
        anyway — a control that exists and lies about what it does is
        worse than one that is not there. The row's own toggle already
-       ships this exact rule: pressing it again is the way back. */
-    scCommit(msg, added || gone ? undefined : false);
+       ships this exact rule: pressing it again is the way back.
+
+       A MOVE DOES touch state — it rewrites `s`/`e` on items already
+       in `state.items`, in place, after scMark has already snapshot
+       the array those objects live in — so Undo here is real and is
+       offered like add and delete already are. */
+    scCommit(msg, added || gone || moved ? undefined : false);
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -7247,6 +7355,18 @@
             card.appendChild(scEl('span', 'p-name', 'Skip ' + p.name));
             card.appendChild(scEl('span', 'p-meta', offHits.length
               ? offHits.map(function (x) { return ABBR[x.d] + ' ' + x.b.n; }).join('  ·  ')
+              : 'Nothing on the card matches that'));
+          } else if (p.kind === 'move') {
+            /* scMatches' OWN RULE FOR AN EMPTY DAY LIST — no filter
+               at all — is exactly what a move with no day said wants:
+               every occurrence of the name, not a day this preview
+               would have to invent. */
+            var moveHits = scMatches(p);
+            ok += moveHits.length ? 1 : 0;
+            card.appendChild(scEl('span', 'p-day', moveHits.length ? '−' + moveHits.length : '0'));
+            card.appendChild(scEl('span', 'p-name', 'Move ' + p.name));
+            card.appendChild(scEl('span', 'p-meta', moveHits.length
+              ? 'to ' + scT(p.moveTo) + scMerIf(p.moveTo)
               : 'Nothing on the card matches that'));
           } else {
             var hits = scMatches(p);

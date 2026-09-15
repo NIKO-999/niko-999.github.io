@@ -940,6 +940,41 @@ const SAID = [
   ok('...while a bare range with no "for" in front of it is untouched',
     c4 && /^06:30 to 07:30/.test(c4.meta), c4);
 
+  /* ── AND A LENGTH CAN BE SAID IN WORDS ──
+     No "for" needed — nothing here could ever be mistaken for a
+     clock — and LONGER FIRST is the thing worth proving: "an hour and
+     a half" contains "an hour", so getting the order backwards would
+     read 90 minutes as 60. */
+  const w1 = await nowSaid('Stretch at 8 for half an hour');
+  ok('a spelled length reads as minutes',
+    w1 && /^08:00 to 08:30/.test(w1.meta), w1);
+  const w2 = await nowSaid('Stretch at 8 for a quarter of an hour');
+  ok('...fifteen minutes, however many words it takes to say it',
+    w2 && /^08:00 to 08:15/.test(w2.meta), w2);
+  const w3 = await nowSaid('Stretch at 8 for an hour and a half');
+  ok('...and the longer phrase wins over the "an hour" inside it',
+    w3 && /^08:00 to 09:30/.test(w3.meta), w3);
+  const w4 = await nowSaid('Stretch at 8 for an hour');
+  ok('...with the bare phrase still on its own',
+    w4 && /^08:00 to 09:00/.test(w4.meta), w4);
+
+  /* ── AND THE DAYS CAN BE A RUN ──
+     "Monday to Friday" matched before the single-day loop, or that
+     loop reads Monday and Friday as two lone days and drops Tuesday
+     to Thursday — the opposite of what the sentence said. */
+  const rg1 = await nowSaid('Trading monday to friday 9 to 5');
+  ok('a day range expands to the whole run',
+    rg1 && rg1.days === 'MON TUE WED THU FRI', rg1);
+  const rg2 = await nowSaid('Trading tue-thu 9 to 5');
+  ok('...with a hyphen and short names',
+    rg2 && rg2.days === 'TUE WED THU', rg2);
+  /* WRAPPED, not refused: Friday to Monday is a real four-day run for
+     anybody whose week does not stop at Friday, and ORDER (Monday-
+     first) is what already knows where the wrap is. */
+  const rg3 = await nowSaid('Trading friday to monday 9 to 5');
+  ok('...and it wraps the week rather than reading backwards as nothing',
+    rg3 && rg3.days === 'MON FRI SAT SUN', rg3);
+
   /* ══════════════════════════════════════════════════════════════
      AND A TIME CAN BE ANOTHER BLOCK
 
@@ -1172,6 +1207,118 @@ const SAID = [
     });
     ok('...and the row on that date is struck, not removed', struck === true, struck);
     await octx.close();
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     AND A BLOCK CAN BE MOVED, NOT DELETED AND RE-ADDED
+
+     "Move walk to 8" is a retime, matched by NAME the way delete is
+     — deleting Walk and re-adding it at a new hour would throw its
+     sub-items, its notes and every objective pointing at it away to
+     change one number. The length is never asked for and never
+     moves; only WHEN it starts does.
+
+     IN ITS OWN CONTEXT, for the same reason the last two are: this
+     mutates the template in place and the shared week above is what
+     hundreds of assertions below still measure against. ══════════ */
+  {
+    console.log('\n── a block moved, not remade ──');
+    const mctx = await browser.newContext({ ...PHONE });
+    const mp = await mctx.newPage();
+    await mp.addInitScript(() => {
+      const FROZEN = new Date('2026-09-01T09:30:00').getTime(); /* Tuesday */
+      const R = Date;
+      // eslint-disable-next-line no-global-assign
+      Date = class extends R {
+        constructor(...a) { super(...(a.length ? a : [FROZEN])); }
+        static now() { return FROZEN; }
+      };
+      delete window.SpeechRecognition;
+      delete window.webkitSpeechRecognition;
+      ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+        .forEach((k) => localStorage.setItem(k, '1'));
+      localStorage.setItem('sched.net.v1',
+        JSON.stringify({ on: false, url: '', code: '' }));
+      /* Walk every day, 07:45-08:30 -- its own 45-minute length is
+         the fact the check holds onto after the move. */
+      if (!localStorage.getItem('sched.v1')) {
+        localStorage.setItem('sched.v1', JSON.stringify({
+          title: 'Seven walks',
+          items: [0, 1, 2, 3, 4, 5, 6].map((d) => (
+            { d, s: 465, e: 510, r: '', n: 'Walk' })),
+        }));
+      }
+    });
+    await mp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await mp.waitForTimeout(400);
+    const msaid = async (text) => {
+      await mp.fill('#scSheetBody .field', '');
+      await mp.fill('#scSheetBody .field', text);
+      await mp.waitForTimeout(80);
+      return mp.$eval('#scSheetBody .parsed', (e) => ({
+        day: e.querySelector('.p-day').textContent,
+        name: e.querySelector('.p-name').textContent,
+        meta: e.querySelector('.p-meta').textContent,
+        goDisabled: document.querySelector('#scSheetBody .btn.go').disabled,
+      })).catch(() => null);
+    };
+    await mp.click('#scAdd');
+    await mp.waitForTimeout(140);
+    const mv1 = await msaid('Move walk');
+    ok('a move with no time still asks for one',
+      mv1 && /what time to move it to/.test(mv1.meta), mv1);
+    const mv2 = await msaid('Move dentist to 8');
+    ok('...and a name matching nothing says so, same as delete would',
+      mv2 && mv2.day === '0' && /Nothing on the card matches/.test(mv2.meta)
+      && mv2.goDisabled, mv2);
+    /* NO DAY SAID, EVERY OCCURRENCE MEANT — the far more common
+       reading of "move my walk", and scMatches' own rule for an
+       empty day list already gives it for free. */
+    const mv3 = await msaid('Move walk to 8');
+    ok('...and with no day said, it previews every occurrence',
+      mv3 && mv3.day === '−7' && /to 08:00/.test(mv3.meta) && !mv3.goDisabled, mv3);
+    /* "AT" WORKS TOO -- the same fact "to" would have given, read
+       through the shared time pattern rather than a second one. */
+    const mv4 = await msaid('Move walk at 8');
+    ok('...and "at" reads the same time "to" does',
+      mv4 && mv4.day === '−7' && /to 08:00/.test(mv4.meta), mv4);
+    const mv5 = await msaid('Move walk to 8 on wednesday');
+    ok('...while a day said narrows it to that day alone',
+      mv5 && mv5.day === '−1', mv5);
+    await mp.click('#scSheetBody .btn.go');
+    await mp.waitForTimeout(300);
+    const moved = await mp.evaluate(() => {
+      const items = JSON.parse(localStorage.getItem('sched.v1')).items
+        .filter((it) => it.n === 'Walk');
+      const t = document.querySelector('.toast');
+      /* THE MESSAGE IS ITS OWN SPAN, separate from the Undo button —
+         reading the toast's whole textContent when a button IS there
+         reads "MovedUndo", which is the day-off check's own toast
+         read the other way round: that one could compare the whole
+         node because it has nothing else in it. */
+      return {
+        rows: items.map((it) => [it.d, it.s, it.e]),
+        toast: t ? t.querySelector('span').textContent : '',
+        undoBtn: t ? !!t.querySelector('button') : null,
+      };
+    });
+    /* ONLY WEDNESDAY MOVED, AND ITS LENGTH SURVIVED: 08:00 to 08:45,
+       the same 45 minutes it always ran for, just starting later. */
+    ok('it moves the one day asked for and keeps every length',
+      moved.rows.every((r) => r[0] === 3
+        ? r[1] === 480 && r[2] === 525
+        : r[1] === 465 && r[2] === 510), moved);
+    /* A MOVE TOUCHES STATE, so Undo is real here -- unlike the day
+       off above, this is add/delete's own case, not off's. */
+    ok('the toast offers a real Undo, because this one actually works',
+      moved.toast === 'Moved' && moved.undoBtn === true, moved);
+    await mp.click('.toast button');
+    await mp.waitForTimeout(300);
+    const undone = await mp.evaluate(() => JSON.parse(localStorage.getItem('sched.v1')).items
+      .filter((it) => it.n === 'Walk').map((it) => [it.d, it.s, it.e]));
+    ok('...and pressing it actually puts the time back',
+      undone.every((r) => r[1] === 465 && r[2] === 510), undone);
+    await mctx.close();
   }
   /* ── morning, afternoon, evening ──
      Noon and five o'clock. A session with nothing in it is not drawn:
