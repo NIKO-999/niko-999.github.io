@@ -704,17 +704,23 @@
      somebody named "PT" would otherwise match every phrase with those
      two letters anywhere in it.
 
-     FIRST in the day's own order, never nearest or last. "After the
-     gym" on a day with two gym blocks is ambiguous however it is
-     resolved, and the one thing a guess must be is predictable. */
+     THE LAST ONE WINS, AND IT IS INSERTION ORDER RATHER THAN THE
+     CLOCK. Two Walk blocks on one day used to resolve to whichever ran
+     earliest, on the argument that a guess must at least be
+     predictable — and it was, and it was also the wrong guess every
+     time "after walk" was said about the walk just typed in rather
+     than the standing one. `state.items` is never resorted: a block
+     is pushed once and only ever filtered back out (`names.js` holds
+     every push to `scNewBlock`), so the array's own order already IS
+     the order things were added in, oldest first — which makes the
+     match still standing at the end of the loop the most recent one,
+     with no timestamp to read or compare. */
   function scRelBlock(phrase, day) {
     var q = String(phrase || '').toLowerCase().trim();
     if (q.length < 2) return null;
-    var on = state.items.filter(function (it) { return it.d === day; })
-      .sort(function (a, b) { return a.s - b.s; });
+    var on = state.items.filter(function (it) { return it.d === day; });
     var hit = null;
     on.forEach(function (it) {
-      if (hit) return;
       var n = String(it.n || '').toLowerCase();
       if (!n) return;
       if (n.indexOf(q) >= 0 || (n.length >= 3 && q.indexOf(n) >= 0)) hit = it;
@@ -723,7 +729,7 @@
       var g = scIconFor(q);
       if (g !== 'block') {
         on.forEach(function (it) {
-          if (!hit && scIconFor(it.n) === g) hit = it;
+          if (scIconFor(it.n) === g) hit = it;
         });
       }
     }

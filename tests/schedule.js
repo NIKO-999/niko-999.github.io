@@ -980,6 +980,66 @@ const SAID = [
 
   await page.keyboard.press('Escape');
   await page.waitForTimeout(160);
+
+  /* ══════════════════════════════════════════════════════════════
+     AND THE LAST ONE WINS, NOT THE FIRST
+
+     Two blocks can share a name — a morning Train and an evening one
+     — and "after training" used to resolve to whichever ran EARLIEST,
+     on the reading that a guess must at least be predictable. It was
+     predictable and it was also the wrong guess every time somebody
+     said it about the block they had just typed in rather than the
+     standing one.
+
+     IN ITS OWN CONTEXT, because the shared week above has one Train a
+     day and this needs two — a genuinely ambiguous Tuesday rather
+     than the WEEK fixture mutated and put back, which every assertion
+     below this point still measures against. ══════════════════════ */
+  {
+    console.log('\n── the last one wins ──');
+    const dctx = await browser.newContext({ ...PHONE });
+    const dp = await dctx.newPage();
+    await dp.addInitScript(() => {
+      const FROZEN = new Date('2026-09-01T09:30:00').getTime();
+      const R = Date;
+      // eslint-disable-next-line no-global-assign
+      Date = class extends R {
+        constructor(...a) { super(...(a.length ? a : [FROZEN])); }
+        static now() { return FROZEN; }
+      };
+      delete window.SpeechRecognition;
+      delete window.webkitSpeechRecognition;
+      ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+        .forEach((k) => localStorage.setItem(k, '1'));
+      localStorage.setItem('sched.net.v1',
+        JSON.stringify({ on: false, url: '', code: '' }));
+      /* A morning Train, PUSHED first, and an evening one pushed
+         after it — the array's own order, which is the only thing
+         the fix reads. */
+      localStorage.setItem('sched.v1', JSON.stringify({
+        title: 'Two trains',
+        items: [
+          { d: 2, s: 390, e: 450, r: '', n: 'Train' },
+          { d: 2, s: 1080, e: 1140, r: '', n: 'Train' },
+        ],
+      }));
+    });
+    await dp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await dp.waitForTimeout(400);
+    await dp.click('#scAdd');
+    await dp.waitForTimeout(140);
+    await dp.fill('#scSheetBody .field', 'Walk after training');
+    await dp.waitForTimeout(60);
+    const dup = await dp.$eval('#scSheetBody .parsed', (e) => ({
+      days: e.querySelector('.p-day').textContent,
+      meta: e.querySelector('.p-meta').textContent,
+    })).catch(() => null);
+    /* The second Train ends at 19:00. Picking the first would answer
+       07:30 to 08:30 instead — the exact reading this replaces. */
+    ok('two blocks share a name, and "after" finds the one added last',
+      dup && dup.days === 'TUE' && /^19:00 to 20:00/.test(dup.meta), dup);
+    await dctx.close();
+  }
   /* ── morning, afternoon, evening ──
      Noon and five o'clock. A session with nothing in it is not drawn:
      an "Afternoon" heading over no rows is furniture, and on a real
