@@ -277,11 +277,11 @@
      too, so a creation site that forgets a field is corrected before
      anything can read it and the record on disk cannot disagree with
      the record in memory. */
-  function scCommit(msg) {
+  function scCommit(msg, undo) {
     state = scClean(state);
     scSave();
     scRender();
-    if (msg) scToast(msg);
+    if (msg) scToast(msg, undo);
     if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
   }
 
@@ -507,6 +507,17 @@
         var mm = /^thirty/i.test(b) ? '30' : /^fifteen/i.test(b) ? '15' : '45';
         return val(a) + ':' + mm;
       });
+    /* "1h30m" IS A LENGTH, NEVER A CLOCK — an h/m suffix never labels
+       a time of day, so it rewrites unconditionally into the minutes
+       the "for" patterns already read, rather than teaching four
+       regexes a second shape for the same fact. */
+    s = s.replace(/\b(\d{1,2})h\s*(\d{1,3})m?\b/gi,
+      function (_, h, mm) { return String(+h * 60 + +mm) + ' minutes'; });
+    /* AND "for 1:30" IS THE SAME LENGTH SPOKEN AS A CLOCK — but only
+       once "for" is in front of it. A bare 1:30 anywhere else is a
+       TIME, and rewriting it there would corrupt "6:30 to 7:30". */
+    s = s.replace(/\bfor\s+(\d{1,2}):(\d{2})\b/gi,
+      function (_, h, mm) { return 'for ' + String(+h * 60 + +mm) + ' minutes'; });
     s = s.replace(new RegExp('\\b(' + NUMW + ')\\b', 'gi'), function (w) { return val(w); });
     return s.slice(1, -1);
   }
@@ -772,10 +783,16 @@
 
     var out = { days: [], s: null, e: null, room: '', name: '', kind: 'add' };
 
-    /* ── the verb, if there is one ── */
-    var cmd = /^\s*(delete|remove|cancel|drop|clear|wipe|erase)\b/.exec(low);
+    /* ── the verb, if there is one ──
+       "no" and "skip" are their OWN kind, never folded into delete:
+       a delete changes every week there will ever be, and "no gym
+       tomorrow" is the day-off record's own exception on one date —
+       the tool this app built so deleting the block was not the only
+       way to say a Monday is not this Monday. */
+    var cmd = /^\s*(delete|remove|cancel|drop|clear|wipe|erase|no|skip)\b/.exec(low);
     if (cmd) {
-      out.kind = /^(clear|wipe|erase)$/.test(cmd[1]) ? 'clear' : 'delete';
+      out.kind = /^(clear|wipe|erase)$/.test(cmd[1]) ? 'clear'
+        : /^(no|skip)$/.test(cmd[1]) ? 'off' : 'delete';
       mark(cmd.index, cmd.index + cmd[0].length);
     }
 
@@ -1075,6 +1092,13 @@
   function scMissing(p) {
     if (p.kind === 'clear') return p.days.length ? null : 'which day to clear';
     if (p.kind === 'delete') return p.name ? null : 'which block to remove';
+    /* An off needs BOTH, unlike a delete: a name with no day is a
+       delete's own case (it reaches across the whole template) and a
+       day off has no such reading — "skip gym" alone names nothing to
+       skip IT ON. */
+    if (p.kind === 'off') {
+      return !p.name ? 'what to skip' : !p.days.length ? 'which day' : null;
+    }
     var want = [];
     if (!p.name) want.push('what it is');
     if (!p.days.length) want.push('which day');
@@ -1099,8 +1123,20 @@
 
   function scApply(list) {
     scMark();
-    var added = 0, gone = 0;
+    var added = 0, gone = 0, offed = 0;
     list.forEach(function (p) {
+      if (p.kind === 'off') {
+        /* RESOLVED THE SAME WAY "AFTER TRAINING" IS — by name, then
+           by keyword, and the LAST block added wins an ambiguous
+           name — because it is the same question asked of a specific
+           date instead of a relative one, and it deserves the same
+           answer. */
+        p.days.forEach(function (d) {
+          var b = scRelBlock(p.name, d);
+          if (b && scSetOff(scNextDate(d), b, d, true)) offed++;
+        });
+        return;
+      }
       if (p.kind === 'add') {
         p.days.forEach(function (d) {
           var s0 = p.s, e0 = p.e;
@@ -1136,8 +1172,15 @@
     var msg = added && gone ? added + ' added, ' + gone + ' removed'
       : added ? (added === 1 ? 'Added' : added + ' blocks added')
       : gone ? (gone === 1 ? 'Removed' : gone + ' removed')
+      : offed ? (offed === 1 ? 'Marked off' : offed + ' marked off')
       : 'Nothing changed';
-    scCommit(msg);
+    /* NO UNDO WHEN ONLY THE OFF-LOG MOVED. scMark snapshots state,
+       not offLog, so an Undo pressed after "no walk tomorrow" would
+       restore a state that never changed and leave the day off
+       anyway — a control that exists and lies about what it does is
+       worse than one that is not there. The row's own toggle already
+       ships this exact rule: pressing it again is the way back. */
+    scCommit(msg, added || gone ? undefined : false);
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -3083,6 +3126,19 @@
       if (d.getDay() === dow) return scDay(d);
     }
     return null;
+  }
+
+  /* ── THE SAME QUESTION, WALKING THE OTHER WAY ──
+     scDowDate looks BACK because it is answering for a row already
+     drawn — which date a tick already on the page is about. A day off
+     is the one record here written FORWARD, so its own resolver never
+     looks behind it: today, if today already is that weekday,
+     otherwise the next one coming. There is no window to fall out of
+     — the day after next Sunday is still just a week away. */
+  function scNextDate(dow) {
+    var d = new Date();
+    d.setDate(d.getDate() + ((dow - d.getDay() + 7) % 7));
+    return scDay(d);
   }
 
   function scTickLoad() {
@@ -7178,6 +7234,20 @@
                 + '  ·  ' + scDurShort(p.e - p.s)
               : scRangeLong(p.s, p.e);
             card.appendChild(scEl('span', 'p-meta', when + (p.room ? '  ·  ' + p.room : '')));
+          } else if (p.kind === 'off') {
+            /* THE SAME RESOLVER "AFTER TRAINING" USES, read here
+               rather than through scMatches — an off is not a
+               substring match across the template, it is one named
+               block on one specific date. */
+            var offHits = p.days.map(function (d) {
+              return { d: d, b: scRelBlock(p.name, d) };
+            }).filter(function (x) { return x.b; });
+            ok += offHits.length ? 1 : 0;
+            card.appendChild(scEl('span', 'p-day', offHits.length ? '−' + offHits.length : '0'));
+            card.appendChild(scEl('span', 'p-name', 'Skip ' + p.name));
+            card.appendChild(scEl('span', 'p-meta', offHits.length
+              ? offHits.map(function (x) { return ABBR[x.d] + ' ' + x.b.n; }).join('  ·  ')
+              : 'Nothing on the card matches that'));
           } else {
             var hits = scMatches(p);
             ok += hits.length ? 1 : 0;

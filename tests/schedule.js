@@ -918,6 +918,28 @@ const SAID = [
   ok('...and a range is still a range rather than its first half',
     b5 && /^06:00 to 07:30/.test(b5.meta), b5);
 
+  /* ── AND A LENGTH CAN BE COMPACT ──
+     "for 90 minutes" already worked; "for 1h30m" and "for 1:30" are
+     the same length written the way a person actually types it, and
+     both rewrite into the minutes the existing patterns already read
+     — in scNormalise, alongside "half past six" — rather than a fifth
+     copy of the same ternary bolted onto four regexes. */
+  const c1 = await nowSaid('Stretch at 8 for 1h30m');
+  ok('a compact length reads as minutes',
+    c1 && /^08:00 to 09:30/.test(c1.meta) && c1.name === 'Stretch', c1);
+  const c2 = await nowSaid('Stretch at 8 for 1h 30m');
+  ok('...with a space in it',
+    c2 && /^08:00 to 09:30/.test(c2.meta), c2);
+  const c3 = await nowSaid('Stretch at 8 for 1:30');
+  /* ONLY AFTER "for". The same digits anywhere else are a CLOCK, and
+     b5 above is the proof that reading one as a length would corrupt
+     it — this is that check's own mirror. */
+  ok('...and a colon length reads the same way, only after "for"',
+    c3 && /^08:00 to 09:30/.test(c3.meta), c3);
+  const c4 = await nowSaid('Train from 6:30 to 7:30');
+  ok('...while a bare range with no "for" in front of it is untouched',
+    c4 && /^06:30 to 07:30/.test(c4.meta), c4);
+
   /* ══════════════════════════════════════════════════════════════
      AND A TIME CAN BE ANOTHER BLOCK
 
@@ -1039,6 +1061,117 @@ const SAID = [
     ok('two blocks share a name, and "after" finds the one added last',
       dup && dup.days === 'TUE' && /^19:00 to 20:00/.test(dup.meta), dup);
     await dctx.close();
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     AND A DAY OFF CAN BE SAID, NOT ONLY TOGGLED
+
+     "No gym tomorrow" is the day-off record's own exception — one
+     block, one date — reached by a sentence rather than only through
+     the row's own control. It is resolved the way "after training"
+     is: the name, then the keyword table, and it writes to the SAME
+     record the row's toggle writes to, never to the template.
+
+     IN ITS OWN CONTEXT, for the reason the last one above is: this
+     needs a schedule the shared week does not have to hand, and the
+     off-log it writes would otherwise sit on disk for every assertion
+     below this point to trip over. ══════════════════════════════ */
+  {
+    console.log('\n── a day off, said ──');
+    const octx = await browser.newContext({ ...PHONE });
+    const op = await octx.newPage();
+    await op.addInitScript(() => {
+      const FROZEN = new Date('2026-09-01T09:30:00').getTime(); /* Tuesday */
+      const R = Date;
+      // eslint-disable-next-line no-global-assign
+      Date = class extends R {
+        constructor(...a) { super(...(a.length ? a : [FROZEN])); }
+        static now() { return FROZEN; }
+      };
+      delete window.SpeechRecognition;
+      delete window.webkitSpeechRecognition;
+      ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+        .forEach((k) => localStorage.setItem(k, '1'));
+      localStorage.setItem('sched.net.v1',
+        JSON.stringify({ on: false, url: '', code: '' }));
+      /* One Walk, on WEDNESDAY -- tomorrow, from a Tuesday.
+
+         SEEDED ONLY WHEN ABSENT. addInitScript runs on every
+         navigation, and this test reloads to prove the render — an
+         unconditional write would remint the block's id on that
+         reload, orphaning the off-log entry the FIRST load wrote and
+         reporting a working feature as broken. */
+      if (!localStorage.getItem('sched.v1')) {
+        localStorage.setItem('sched.v1', JSON.stringify({
+          title: 'One walk',
+          items: [{ d: 3, s: 390, e: 450, r: '', n: 'Walk' }],
+        }));
+      }
+    });
+    await op.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await op.waitForTimeout(400);
+    const said = async (text) => {
+      await op.fill('#scSheetBody .field', '');
+      await op.fill('#scSheetBody .field', text);
+      await op.waitForTimeout(80);
+      return op.$eval('#scSheetBody .parsed', (e) => ({
+        day: e.querySelector('.p-day').textContent,
+        name: e.querySelector('.p-name').textContent,
+        meta: e.querySelector('.p-meta').textContent,
+        goDisabled: document.querySelector('#scSheetBody .btn.go').disabled,
+      })).catch(() => null);
+    };
+    await op.click('#scAdd');
+    await op.waitForTimeout(140);
+    const o1 = await said('No walk');
+    ok('a day off with no day still asks, the same as an add would',
+      o1 && /which day/.test(o1.meta), o1);
+    const o2 = await said('No dentist tomorrow');
+    ok('...and a name matching nothing says so rather than guessing',
+      o2 && o2.day === '0' && /Nothing on the card matches/.test(o2.meta)
+      && o2.goDisabled, o2);
+    const o3 = await said('No walk tomorrow');
+    ok('...and a real match previews the block it found, by name',
+      o3 && o3.day === '−1' && /WED Walk/.test(o3.meta) && !o3.goDisabled, o3);
+    await op.click('#scSheetBody .btn.go');
+    await op.waitForTimeout(300);
+    const done = await op.evaluate(() => {
+      const off = JSON.parse(localStorage.getItem('sched.off.v1') || '{}');
+      const items = JSON.parse(localStorage.getItem('sched.v1')).items;
+      const t = document.querySelector('.toast');
+      return {
+        offDates: Object.keys(off),
+        offCounts: Object.values(off).map((d) => Object.keys(d).length),
+        walkCount: items.filter((it) => it.n === 'Walk').length,
+        toast: t ? t.textContent : '',
+        undoBtn: t ? !!t.querySelector('button') : null,
+      };
+    });
+    /* ONE DATE, THE TEMPLATE UNTOUCHED. This is an exception, not a
+       delete — the Walk block that was there is still there, on every
+       Wednesday there will ever be. */
+    ok('it writes one date to the off-log, and the template survives',
+      done.offDates.length === 1 && done.offCounts[0] === 1
+      && done.walkCount === 1, done);
+    /* NO UNDO ON THIS TOAST. scMark snapshots state, not the off-log,
+       so an Undo here would restore a state that never moved and
+       leave the day off regardless — a control that lies about what
+       it does. The row's own toggle already ships this exact rule. */
+    ok('the toast says so, and offers no Undo that would not undo it',
+      done.toast === 'Marked off' && done.undoBtn === false, done);
+    await op.reload({ waitUntil: 'networkidle' });
+    await op.waitForTimeout(300);
+    await op.click('.st-d[data-d="3"]');
+    await op.waitForTimeout(500);
+    /* AND THE ROW ITSELF SHOWS IT, on the day this actually reaches —
+       the week strip's own strike, read off the render rather than
+       inferred from storage. */
+    const struck = await op.evaluate(() => {
+      const row = document.querySelector('#scDayCard .row[data-id]');
+      return row ? row.classList.contains('is-off') : null;
+    });
+    ok('...and the row on that date is struck, not removed', struck === true, struck);
+    await octx.close();
   }
   /* ── morning, afternoon, evening ──
      Noon and five o'clock. A session with nothing in it is not drawn:
