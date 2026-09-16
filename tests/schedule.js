@@ -845,6 +845,33 @@ const SAID = [
     n5 && /^15:00 to 16:00/.test(n5.meta), n5);
   ok('...while the word still leaves the name and still says the day',
     n5 && n5.days === 'TUE' && !/now/i.test(n5.name), n5);
+  /* "Gym for 45mins now" is the same sentence backwards — the length
+     said first and "now" giving it somewhere to start, rather than
+     "now" leading and the length following it. */
+  const n6 = await nowSaid('Gym for 45mins now');
+  ok('a length can come before "now" as well as after it',
+    n6 && n6.days === 'TUE' && /^09:30 to 10:15/.test(n6.meta) && n6.name === 'Gym', n6);
+  const n7 = await nowSaid('Gym now for 45mins');
+  ok('...and the old order still reads the same block',
+    n7 && /^09:30 to 10:15/.test(n7.meta) && n7.name === 'Gym', n7);
+
+  /* "No time limit" is the other answer to the question a bare "now"
+     or a bare "at 9" already answers with an hour nobody asked for:
+     said instead of a number, it means there isn't one, and the block
+     runs to the end of the day rather than to a length invented for
+     it. */
+  const n8 = await nowSaid('Gym now no time limit');
+  ok('a bare "now" can run to the end of the day instead of an hour',
+    n8 && n8.days === 'TUE' && /^09:30 to 24:00/.test(n8.meta) && n8.name === 'Gym', n8);
+  const n9 = await nowSaid('Gym at 6pm no time limit');
+  ok('...and so can a bare clock time, with no "now" in it at all',
+    n9 && n9.days === 'TUE' && /^18:00 to 24:00/.test(n9.meta) && n9.name === 'Gym', n9);
+  /* It never overrides an EXPLICIT length — "for 45 mins" already
+     answered the question this phrase exists to answer, and the
+     phrase said alongside it must not silently win. */
+  const n10 = await nowSaid('Gym now for 45mins no time limit');
+  ok('...but a stated length still wins over it',
+    n10 && /^09:30 to 10:15/.test(n10.meta) && n10.name === 'Gym', n10);
 
   /* ══════════════════════════════════════════════════════════════
      A SENTENCE WITH NO DAY ON IT MEANS TODAY
@@ -1319,6 +1346,115 @@ const SAID = [
     ok('...and pressing it actually puts the time back',
       undone.every((r) => r[1] === 465 && r[2] === 510), undone);
     await mctx.close();
+  }
+  /* ══════════════════════════════════════════════════════════════
+     AND A REST DAY CAN BE SAID
+
+     "Rest day" is the workout picker's own Rest card, filed without
+     opening the sheet to press it: it names no block and asks no
+     time, it targets whichever training block the day already has —
+     ONE BLOCK ONLY, the tally tile's own rule, asked here instead of
+     at the tile.
+
+     IN ITS OWN CONTEXT, for the same reason the move above is: this
+     writes trainLog, blockLog and tickLog, and the shared week is
+     what hundreds of assertions elsewhere still measure against. */
+  {
+    console.log('\n── a rest day said ──');
+    const rctx = await browser.newContext({ ...PHONE });
+    const rp = await rctx.newPage();
+    await rp.addInitScript(() => {
+      const FROZEN = new Date('2026-09-01T09:30:00').getTime(); /* Tuesday */
+      const R = Date;
+      // eslint-disable-next-line no-global-assign
+      Date = class extends R {
+        constructor(...a) { super(...(a.length ? a : [FROZEN])); }
+        static now() { return FROZEN; }
+      };
+      delete window.SpeechRecognition;
+      delete window.webkitSpeechRecognition;
+      ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+        .forEach((k) => localStorage.setItem(k, '1'));
+      localStorage.setItem('sched.net.v1',
+        JSON.stringify({ on: false, url: '', code: '' }));
+      /* Tuesday has one training block, Wednesday two (Train and its
+         own Gym synonym) and Monday none — the three answers "rest
+         day" has to give. */
+      if (!localStorage.getItem('sched.v1')) {
+        localStorage.setItem('sched.v1', JSON.stringify({
+          title: 'Rest day fixture',
+          items: [
+            { d: 2, s: 390, e: 450, r: '', n: 'Train' },
+            { d: 3, s: 390, e: 450, r: '', n: 'Train' },
+            { d: 3, s: 900, e: 960, r: '', n: 'Gym' },
+          ],
+        }));
+      }
+    });
+    await rp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await rp.waitForTimeout(400);
+    const rsaid = async (text) => {
+      await rp.fill('#scSheetBody .field', '');
+      await rp.fill('#scSheetBody .field', text);
+      await rp.waitForTimeout(80);
+      return rp.$eval('#scSheetBody .parsed', (e) => ({
+        day: e.querySelector('.p-day').textContent,
+        name: e.querySelector('.p-name').textContent,
+        meta: e.querySelector('.p-meta').textContent,
+        goDisabled: document.querySelector('#scSheetBody .btn.go').disabled,
+      })).catch(() => null);
+    };
+    await rp.click('#scAdd');
+    await rp.waitForTimeout(140);
+    /* NO DAY SAID MEANS TODAY, the same rule "now" already keeps. */
+    const r1 = await rsaid('rest day');
+    ok('a bare "rest day" means today, and finds the one block on it',
+      r1 && r1.day === '−1' && r1.name === 'Rest day' && /TUE Train/.test(r1.meta)
+      && !r1.goDisabled, r1);
+    /* MONDAY HAS NOTHING TO REST FROM. */
+    const r2 = await rsaid('rest day monday');
+    ok('...a day with no training block at all refuses',
+      r2 && r2.day === '0' && /No single training block/.test(r2.meta) && r2.goDisabled, r2);
+    /* WEDNESDAY HAS TWO — the tally tile's own refusal, asked here. */
+    const r3 = await rsaid('rest day wednesday');
+    ok('...and so does a day with more than one',
+      r3 && r3.day === '0' && /No single training block/.test(r3.meta) && r3.goDisabled, r3);
+    await rp.fill('#scSheetBody .field', 'rest day');
+    await rp.waitForTimeout(80);
+    /* Checked rather than clicked blind: a build that never sets the
+       kind at all leaves this button disabled, and a click that waits
+       on a control which will never enable is a hang, not a failure —
+       this file's own "no summary" shape. */
+    const r4canGo = !(await rp.$eval('#scSheetBody .btn.go', (b) => b.disabled));
+    if (r4canGo) await rp.click('#scSheetBody .btn.go');
+    await rp.waitForTimeout(300);
+    const rested = r4canGo ? await rp.evaluate(() => {
+      const id = Object.keys(JSON.parse(localStorage.getItem('sched.log.v1'))['2026-09-01'] || {})[0];
+      const trainLog = JSON.parse(localStorage.getItem('sched.train.v1'));
+      const tickLog = JSON.parse(localStorage.getItem('sched.tick.v1'));
+      const t = document.querySelector('.toast');
+      return {
+        rec: id ? trainLog['2026-09-01'][id] : null,
+        ticked: tickLog['2026-09-01'],
+        toast: t ? t.querySelector('span').textContent : '',
+        undoBtn: t ? !!t.querySelector('button') : null,
+      };
+    }) : null;
+    /* AND IT CARRIES NEITHER FIGURE, the same rule the deck's own
+       Rest card keeps: nothing asked for an effort or a length, so
+       nothing is stored for either. */
+    ok('committing it logs the block as rest, with neither figure set',
+      rested && rested.rec && rested.rec.k === 'rec.rest'
+      && rested.rec.e === '' && rested.rec.m === 0, rested);
+    /* IT ALSO TICKS THE BLOCK DONE — the same tick "Done today" would
+       leave, cascaded through to the tally the same way. */
+    ok('...and marks the block, and what it feeds, done',
+      rested && rested.ticked && Object.keys(rested.ticked).length > 0, rested);
+    /* NO UNDO — rest writes trainLog and blockLog, neither of which
+       scMark snapshots, the day-off record's own reason. */
+    ok('...with no Undo offered, the same refusal a day off makes',
+      rested && rested.toast === 'Logged as rest' && rested.undoBtn === false, rested);
+    await rctx.close();
   }
   /* ── morning, afternoon, evening ──
      Noon and five o'clock. A session with nothing in it is not drawn:

@@ -579,7 +579,25 @@
      the one that wins is then whichever the engine backtracks to,
      which is not a thing to leave to the engine. */
   var RE_NOW_FOR = /\bnow\s*(?:for|,)?\s*(\d{1,3})\s*(hours?|hrs?|h|minutes?|mins?|m)\b/g;
+  /* "GYM FOR 45MINS NOW" IS THE SAME SENTENCE BACKWARDS — the length
+     said first and "now" giving it somewhere to start, rather than
+     "now" leading and the length following it. Its own pattern for
+     the same reason RE_NOW_FOR is two rather than one with an
+     optional tail: an engine choosing between two valid readings of
+     one string is not a decision to leave to it. */
+  var RE_FOR_NOW = /\bfor\s+(\d{1,3})\s*(hours?|hrs?|h|minutes?|mins?|m)\s*now\b/g;
   var RE_NOW = /\bnow\b/g;
+
+  /* ── NO TIME LIMIT ──
+     An hour is the default wherever nobody says a length — "at 9",
+     a bare time, a bare "now" — for the same reason a bare "at 9"
+     gets one at all: it is a length to start from, not a length
+     anybody chose. This is the other answer to that same question:
+     said instead of a number, it means there isn't one, and the
+     block runs to the end of the day rather than to an hour nobody
+     asked for. It never overrides an EXPLICIT length — "for 45 mins"
+     already answered the question this phrase exists to answer. */
+  var RE_NO_LIMIT = /\bno\s+(?:time\s+)?limits?\b/g;
 
   /* ── A TIME CAN BE ANOTHER BLOCK ──
      "walk after the gym" is how somebody says when a thing happens
@@ -673,11 +691,16 @@
   }
 
   /* A single time with no partner: same scoring, one hour long. */
+  /* `len < 0` is "no time limit" — the block runs to the end of the
+     day rather than to a length nobody gave it. Clamped the same way
+     "now" already clamps a block that would run past midnight: this
+     app's whole record is one day per row, so open-ended still means
+     open until midnight, never into tomorrow. */
   function scPickOne(a, len) {
     var aC = a.mer ? [sc24(a.h, a.mer)] : [sc24(a.h, 'am'), sc24(a.h, 'pm')];
     var best = null;
     for (var i = 0; i < aC.length; i++) {
-      var s = aC[i] * 60 + a.m, e = s + len;
+      var s = aC[i] * 60 + a.m, e = len < 0 ? 1440 : s + len;
       if (e > 1440) continue;
       var score = (s >= 360 && s <= 1260 ? 100 : 0) - s / 600;
       if (!best || score > best.score) best = { s: s, e: e, score: score };
@@ -847,6 +870,18 @@
       mark(cmd.index, cmd.index + cmd[0].length);
     }
 
+    /* ── REST DAY, SAID ──
+       The workout picker's own Rest card, filed without opening the
+       sheet to press it: "rest day" names no block and asks no time,
+       it targets whichever training block the day already has. A
+       phrase rather than a sixth verb prefix, because there is
+       nothing after it to be a name — "rest day" is the whole
+       sentence, the way "no time limit" is the whole modifier. */
+    if (!cmd) {
+      var rm = /\brest\s+days?\b/.exec(low);
+      if (rm) { out.kind = 'rest'; mark(rm.index, rm.index + rm[0].length); }
+    }
+
     /* ── which days, a RUN first ── */
     var seen = {}, m;
     RE_DAY_RANGE.lastIndex = 0;
@@ -888,6 +923,14 @@
     if (markAll(/\btomorrow\b/g) && none()) out.days = [(new Date().getDay() + 1) % 7];
     out.days.sort(function (a, b) { return ORDER.indexOf(a) - ORDER.indexOf(b); });
 
+    /* Read before any length is, so every fallback below can ask it
+       rather than reaching for its own 60. Struck out whether or not
+       it ends up mattering, the same as the day words above — left
+       in, "no time limit" would sit in the name of a block that also
+       had an explicit "for 45 mins" and did nothing there but read
+       oddly. */
+    var noLimit = markAll(RE_NO_LIMIT);
+
     /* ── when ── */
     var span = null;
     RE_RANGE.lastIndex = 0;
@@ -919,7 +962,7 @@
         var one = scHM(m[1]);
         if (!one) continue;
         one.mer = scMerOf(m[2]);
-        span = scPickOne(one, 60);
+        span = scPickOne(one, noLimit ? -1 : 60);
         if (span) { mark(m.index, m.index + m[0].length); break; }
       }
     }
@@ -948,7 +991,7 @@
         var b1 = scHM(m[1] || m[3]);
         if (!b1) continue;
         b1.mer = scMerOf(m[2] || m[4]);
-        span = scPickOne(b1, 60);
+        span = scPickOne(b1, noLimit ? -1 : 60);
         if (span) { mark(m.index, m.index + m[0].length); break; }
       }
     }
@@ -994,17 +1037,17 @@
       re.lastIndex = 0;
       while ((mm = re.exec(low))) {
         if (!free(mm.index, mm.index + mm[0].length)) continue;
-        var len = dur ? (/^(h|hr|hour)/.test(mm[2]) ? +mm[1] * 60 : +mm[1]) : 60;
-        if (!(len > 0 && len <= 480)) continue;
+        var len = dur ? (/^(h|hr|hour)/.test(mm[2]) ? +mm[1] * 60 : +mm[1]) : (noLimit ? -1 : 60);
+        if (!(len < 0 || (len > 0 && len <= 480))) continue;
         mark(mm.index, mm.index + mm[0].length);
         nowSeen = true;
         var st = scNowMin();
-        if (st < 1439) nowSpan = { s: st, e: Math.min(1440, st + len) };
+        if (st < 1439) nowSpan = { s: st, e: len < 0 ? 1440 : Math.min(1440, st + len) };
         return true;
       }
       return false;
     };
-    if (!nowScan(RE_NOW_FOR, true)) nowScan(RE_NOW, false);
+    if (!nowScan(RE_NOW_FOR, true) && !nowScan(RE_FOR_NOW, true)) nowScan(RE_NOW, false);
     if (!span && nowSpan) span = nowSpan;
 
     if (span) { out.s = span.s; out.e = span.e; }
@@ -1112,6 +1155,9 @@
     if (out.kind === 'add' && !out.days.length && (span || relSpan)) {
       out.days = [new Date().getDay()];
     }
+    /* "Rest day" alone is today, for the same reason "now" is: every
+       other reading is a day you would have named. */
+    if (out.kind === 'rest' && !out.days.length) out.days = [new Date().getDay()];
 
     /* Resolved against the FIRST day for the preview; scApply resolves
        it again per day, because "walk after training" on Monday and
@@ -1187,6 +1233,12 @@
     if (p.kind === 'move') {
       return !p.name ? 'which block to move' : p.moveTo === null ? 'what time to move it to' : null;
     }
+    /* A rest day names no block and asks no time — it targets
+       whichever training block is already on the day — so the only
+       thing it can be missing is the day, and it is never missing
+       that: "rest day" alone defaults to today the same way "now"
+       does. */
+    if (p.kind === 'rest') return p.days.length ? null : 'which day';
     var want = [];
     if (!p.name) want.push('what it is');
     if (!p.days.length) want.push('which day');
@@ -1211,8 +1263,29 @@
 
   function scApply(list) {
     scMark();
-    var added = 0, gone = 0, offed = 0, moved = 0;
+    var added = 0, gone = 0, offed = 0, moved = 0, rested = 0;
     list.forEach(function (p) {
+      if (p.kind === 'rest') {
+        /* WHICH TRAINING BLOCK IT MEANS IS THE TALLY'S OWN RULE:
+           one block only. A day with none has nothing to mark, and a
+           day with two has no way to say which session was the rest
+           — the same refusal "press Train and it asks" already
+           makes, asked here instead of at the tile. Resolved by
+           WEEKDAY first (the schedule is a weekly template) and then
+           to a real date through scDowDate, which is what refuses a
+           day that has already shut. */
+        p.days.forEach(function (d) {
+          var day = scDowDate(d);
+          if (!day) return;
+          var blocks = scByDay(d).filter(scIsTrain);
+          if (blocks.length !== 1) return;
+          var b = blocks[0];
+          scSetBlockDone(day, b, d, true);
+          scTrainSet(day, b.id, 'rec.rest', '', 0);
+          rested++;
+        });
+        return;
+      }
       if (p.kind === 'move') {
         /* NAME-MATCHED THE WAY DELETE IS, RETIMED THE WAY ADD IS —
            and the days it applies to come from scMatches' own rule
@@ -1276,6 +1349,7 @@
       : gone ? (gone === 1 ? 'Removed' : gone + ' removed')
       : moved ? (moved === 1 ? 'Moved' : moved + ' blocks moved')
       : offed ? (offed === 1 ? 'Marked off' : offed + ' marked off')
+      : rested ? (rested === 1 ? 'Logged as rest' : rested + ' days logged as rest')
       : 'Nothing changed';
     /* NO UNDO WHEN ONLY THE OFF-LOG MOVED. scMark snapshots state,
        not offLog, so an Undo pressed after "no walk tomorrow" would
@@ -1287,7 +1361,13 @@
        A MOVE DOES touch state — it rewrites `s`/`e` on items already
        in `state.items`, in place, after scMark has already snapshot
        the array those objects live in — so Undo here is real and is
-       offered like add and delete already are. */
+       offered like add and delete already are.
+
+       REST IS THE OFF-LOG'S CASE AGAIN, ONE STORE OVER: it writes
+       blockLog and trainLog, neither of which scMark snapshots, so
+       an Undo here would be the same lie a day off already refuses
+       to tell. The block's own row still has its own tick to press
+       back. */
     scCommit(msg, added || gone || moved ? undefined : false);
   }
 
@@ -7368,6 +7448,20 @@
             card.appendChild(scEl('span', 'p-meta', moveHits.length
               ? 'to ' + scT(p.moveTo) + scMerIf(p.moveTo)
               : 'Nothing on the card matches that'));
+          } else if (p.kind === 'rest') {
+            /* ONE TRAINING BLOCK OR NONE — the tally tile's own rule,
+               asked here instead of at the tile: a day with two has no
+               way to say which session was the rest. */
+            var restHits = p.days.map(function (d) {
+              var bs = scByDay(d).filter(scIsTrain);
+              return { d: d, b: bs.length === 1 ? bs[0] : null };
+            }).filter(function (x) { return x.b; });
+            ok += restHits.length ? 1 : 0;
+            card.appendChild(scEl('span', 'p-day', restHits.length ? '−' + restHits.length : '0'));
+            card.appendChild(scEl('span', 'p-name', 'Rest day'));
+            card.appendChild(scEl('span', 'p-meta', restHits.length
+              ? restHits.map(function (x) { return ABBR[x.d] + ' ' + x.b.n; }).join('  ·  ')
+              : 'No single training block that day'));
           } else {
             var hits = scMatches(p);
             ok += hits.length ? 1 : 0;
