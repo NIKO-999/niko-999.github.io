@@ -1,13 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- The measure: three rules of three different lengths, the middle
-       one red. It is the one idea this app has that a list does not,
-       and nothing else on a home screen looks like it. -->
-  <rect width="512" height="512" fill="#fff"/>
-  <rect x="64" y="96" width="384" height="10" fill="#111"/>
-  <g fill="#111">
-    <rect x="64" y="190" width="150" height="14"/>
-    <rect x="64" y="330" width="96"  height="14"/>
-    <rect x="64" y="398" width="232" height="14"/>
-  </g>
-  <rect x="64" y="260" width="384" height="14" fill="#e2231a"/>
+  <!-- Black and grey, the app's own dark ground rather than an
+       invented one — #0C0C0E is the same paper every screen in this
+       app is drawn on. The mark is a tick: the one shape this app
+       draws more than any other, on every row you finish. Full
+       bleed, no rounding baked in — the OS and the browser tab each
+       apply their own, and a shape rounded twice reads as a mistake
+       in one of them. -->
+  <defs>
+    <radialGradient id="bg" cx="32%" cy="24%" r="85%">
+      <stop offset="0%" stop-color="#1c1c20"/>
+      <stop offset="55%" stop-color="#111113"/>
+      <stop offset="100%" stop-color="#0c0c0e"/>
+    </radialGradient>
+    <linearGradient id="metal" x1="18%" y1="8%" x2="82%" y2="92%">
+      <stop offset="0%" stop-color="#f5f5f7"/>
+      <stop offset="38%" stop-color="#c7c7cd"/>
+      <stop offset="62%" stop-color="#8b8b92"/>
+      <stop offset="100%" stop-color="#55555c"/>
+    </linearGradient>
+    <filter id="drop" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <path d="M 118 274 L 216 366 L 396 148"
+        fill="none" stroke="url(#metal)" stroke-width="54"
+        stroke-linecap="round" stroke-linejoin="round"
+        filter="url(#drop)"/>
+  <!-- A hairline of pure white along the upper edge of the stroke is
+       what makes flat grey read as brushed metal rather than paint —
+       the same specular-hairline idiom every card in this app casts
+       with, one size up. -->
+  <path d="M 130 268 L 216 348 L 384 158"
+        fill="none" stroke="#ffffff" stroke-width="6" stroke-opacity="0.55"
+        stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
