@@ -126,7 +126,15 @@
       if (!it || typeof it !== 'object') continue;
       var d = +it.d, s = +it.s, e = +it.e;
       if (!(d >= 0 && d <= 6)) continue;
-      if (!(s >= 0 && s < 1440) || !(e > s && e <= 1440)) continue;
+      /* ── e === s IS A MOMENT, NOT DAMAGE ──
+         This read `e > s` for as long as every block had a length,
+         and it is the gate a moment has to come through: a block
+         filed at seven with nothing after it was being dropped on
+         the way in, silently, which is the harshest reading of a
+         record that is exactly what it meant to be. An end BEFORE
+         its start is still refused — that one cannot be read as
+         anything. */
+      if (!(s >= 0 && s < 1440) || !(e >= s && e <= 1440)) continue;
       if (typeof it.n !== 'string' || !it.n.trim()) continue;
       out.items.push({
         id: typeof it.id === 'string' && it.id ? it.id : scId(),
@@ -205,6 +213,24 @@
       nt: []
     };
   }
+
+  /* ── A BLOCK CAN BE A MOMENT ──
+     Waking up is not forty minutes long. It is a thing that happened
+     at seven, and the app inventing an hour for it so the row has a
+     length to print is the app answering a question nobody asked —
+     which is the same objection the number dial was built on, one
+     record over.
+
+     `e === s` rather than a null end, because every reader of this
+     shape does arithmetic on the pair: the head sums `e - s` for the
+     hours you have committed, the sort compares them, a move keeps
+     the difference. A moment is a zero-length span and all of that
+     keeps working, where a null would be a second shape to defend
+     against at every one of them.
+
+     Read with `<=` rather than `===` so a damaged record reads as a
+     moment rather than as a negative length. */
+  function scMoment(it) { return !!it && it.e <= it.s; }
 
   /* Eight, because the list is a thing you glance at inside a row —
      past that it is a screen of its own and this is the wrong place
@@ -363,74 +389,6 @@
   function scT(min) { return H12 ? sc12(min) : scHHMM(min); }
   /* '' on a 24-hour phone, so every caller can concatenate it blind. */
   function scMerIf(min) { return H12 ? ' ' + scMer(min) : ''; }
-
-  /* ── THE TIMES YOU ALREADY USE, FOR THIS THING ──
-     Most blocks start at one of about eight times, and this app knows
-     which because they are on your own week. So the chips are not a
-     guess at what a sensible hour is — 8:00, 8:30, 9:00 is somebody
-     else's list — they are the schedule read back.
-
-     THIS BLOCK'S OWN TIMES FIRST, and that is the whole of what makes
-     them worth pressing: a suggestion is only a suggestion if it is
-     one for THIS thing. Trading's hours are no help when you are
-     moving the gym.
-
-     It also fixes what ranking the whole week could not. Counted on
-     the real fixture: twelve distinct starts against eight slots, and
-     the four that fall off are the once-used ones — which are the
-     SHIFT starts, the times that move and therefore the ones you
-     opened the sheet to change. The stable half of the week was
-     crowding out the half being worked on. Per name, a shift's own
-     four hours are the first four chips.
-
-     THEN THE REST OF THE WEEK, so a block with one time to its name
-     still gets a full row — and a new block, which has no name until
-     you type one, gets the week until it does.
-
-     RANKED BY HOW OFTEN inside each half, then by the clock. Frequency
-     is what makes it YOUR list; the clock is what makes it readable
-     once the counts tie, and without it the row reorders itself every
-     time you add a block, which is a control that moves under your
-     thumb.
-
-     Eight, which is two rows of four at 390px — the workout ladder's
-     own figure, and the row it is drawn in wraps rather than scrolls,
-     because nothing in this app scrolls sideways. */
-  function scCommonTimes(key, name) {
-    var q = String(name || '').trim().toLowerCase();
-    var mine = {}, rest = {};
-    state.items.forEach(function (it) {
-      var v = it[key];
-      if (typeof v !== 'number' || v < 0 || v > 1440) return;
-      var box = (q && String(it.n || '').trim().toLowerCase() === q) ? mine : rest;
-      box[v] = (box[v] || 0) + 1;
-    });
-    var rank = function (n) {
-      return Object.keys(n).map(Number)
-        .sort(function (a, b) { return n[b] - n[a] || a - b; });
-    };
-    /* THIS BLOCK'S OWN TIMES FIRST, then the rest of the week. A time
-       is only a suggestion if it is a suggestion for THIS thing —
-       Trading's hours are no help when you are moving the gym. */
-    var out = rank(mine);
-    rank(rest).forEach(function (m) { if (out.indexOf(m) < 0) out.push(m); });
-    return out.slice(0, 8).sort(function (a, b) { return a - b; });
-  }
-
-  /* ── AND THE ONE YOU ARE ON IS ALWAYS PRESSABLE ──
-     Spliced in wherever it is not already there, which is the workout
-     ladder's rule for the workout ladder's reason: the figure the
-     sheet is SHOWING you has to be one of the rungs, or the control
-     disagrees with the thing above it. Dropping the least common one
-     to make room rather than growing the row, so the count is fixed
-     and the layout cannot move. */
-  function scTimeRungs(key, at, name) {
-    var list = scCommonTimes(key, name);
-    if (list.indexOf(at) >= 0) return list;
-    if (list.length >= 8) list.pop();
-    list.push(at);
-    return list.sort(function (a, b) { return a - b; });
-  }
 
   function scFromHHMM(v) {
     var m = /^(\d{1,2}):(\d{2})$/.exec(String(v || '').trim());
@@ -825,7 +783,10 @@
   function scRelSpan(rel, ref, len, day) {
     var b = scRelBlock(ref, day);
     if (!b) return null;
-    var n = len > 0 ? len : 60;
+    /* NO LENGTH SAID IS A MOMENT, not an hour — the rule every other
+       default in this parser now keeps. "Walk after the gym" says
+       WHEN, and how long it takes is a thing you would have said. */
+    var n = len > 0 ? len : 0;
     if (rel === 'before') {
       if (b.s <= 0) return null;
       return { s: Math.max(0, b.s - n), e: b.s };
@@ -962,15 +923,15 @@
         var one = scHM(m[1]);
         if (!one) continue;
         one.mer = scMerOf(m[2]);
-        span = scPickOne(one, noLimit ? -1 : 60);
+        span = scPickOne(one, noLimit ? -1 : 0);
         if (span) { mark(m.index, m.index + m[0].length); break; }
       }
     }
     /* ── THEN THE SAME TIME WITH NO WORD IN FRONT OF IT ──
        After the prepositioned ones, so "at 6am" is matched by RE_AT
        and this never sees it — `free` refuses anything already
-       marked. An hour by default, which is the rule "at 9" and "now"
-       both already keep. */
+       marked. A MOMENT by default, which is the rule "at 9" and
+       "now" both already keep. */
     if (!span) {
       RE_BARE_FOR.lastIndex = 0;
       while ((m = RE_BARE_FOR.exec(low))) {
@@ -991,7 +952,7 @@
         var b1 = scHM(m[1] || m[3]);
         if (!b1) continue;
         b1.mer = scMerOf(m[2] || m[4]);
-        span = scPickOne(b1, noLimit ? -1 : 60);
+        span = scPickOne(b1, noLimit ? -1 : 0);
         if (span) { mark(m.index, m.index + m[0].length); break; }
       }
     }
@@ -1027,7 +988,7 @@
        day it was on, which is the app hearing the word and using none
        of it.
 
-       An hour is the default, for the same reason a bare "at 9" gets
+       A MOMENT is the default, for the same reason a bare "at 9" is
        one. Clamped to the end of the day rather than rolled over: a
        block from 23:40 to 00:40 is on two days and this app's whole
        record is one day per row. */
@@ -1037,12 +998,21 @@
       re.lastIndex = 0;
       while ((mm = re.exec(low))) {
         if (!free(mm.index, mm.index + mm[0].length)) continue;
-        var len = dur ? (/^(h|hr|hour)/.test(mm[2]) ? +mm[1] * 60 : +mm[1]) : (noLimit ? -1 : 60);
-        if (!(len < 0 || (len > 0 && len <= 480))) continue;
+        var len = dur ? (/^(h|hr|hour)/.test(mm[2]) ? +mm[1] * 60 : +mm[1]) : (noLimit ? -1 : 0);
+        /* Only a STATED length is bounded. The two defaults are not
+           lengths to check — one is the absence of a length and the
+           other is the end of the day — and the old guard, written
+           when the default was sixty, refused both. */
+        if (dur && !(len > 0 && len <= 480)) continue;
         mark(mm.index, mm.index + mm[0].length);
         nowSeen = true;
         var st = scNowMin();
-        if (st < 1439) nowSpan = { s: st, e: len < 0 ? 1440 : Math.min(1440, st + len) };
+        /* The last minute of the day has no room for a length, which
+           is what that floor is about — but it has room for a moment,
+           and "wake now" at 23:59 is a thing that happened. */
+        if (st < 1439 || len === 0) {
+          nowSpan = { s: st, e: len < 0 ? 1440 : Math.min(1440, st + len) };
+        }
         return true;
       }
       return false;
@@ -1944,7 +1914,14 @@
            way. */
         row.insertBefore(tEl, row.firstChild);
         var props = scEl('span', 'props');
-        props.appendChild(scEl('span', 'dur', scDurShort(it.e - it.s)));
+        /* ── A MOMENT HAS NO LENGTH TO PRINT ──
+           Not a "0 min" pill, which is a length nobody's morning had,
+           and not an empty one holding the space: the gutter already
+           prints WHEN it was, and that is the whole of what a moment
+           has to say. The row loses a pill rather than gaining a
+           blank, which is the finished block's own rule seen from the
+           other side — a figure carrying nothing is not drawn. */
+        if (!scMoment(it)) props.appendChild(scEl('span', 'dur', scDurShort(it.e - it.s)));
         /* ── WHAT YOU TRAINED IS A TAG, AND IT COMES FIRST ──
            It hung off the NAME as a small italic — the one loose piece
            of type on a row otherwise made of a name and two figures.
@@ -1975,8 +1952,13 @@
         pr.setAttribute('aria-hidden', 'true');
         pr.appendChild(document.createElement('i'));
         row.appendChild(pr);
+        /* A moment is spoken as the one time it has. scRangeLong on a
+           zero span reads "07:00 to 07:00", which is a screen reader
+           being told the same minute twice and asked to make a range
+           of it. */
         row.setAttribute('aria-label',
-          it.n + ', ' + FULL[d] + ' ' + scRangeLong(it.s, it.e)
+          it.n + ', ' + FULL[d] + ' '
+          + (scMoment(it) ? scT(it.s) + scMerIf(it.s) : scRangeLong(it.s, it.e))
           + (it.r ? ', ' + it.r : '') + (wk ? ', ' + wk : '')
           + (row.classList.contains('is-done') ? '. Untick.' : '. Tick off.'));
         /* ── A TAP TICKS AND TWO TAPS EDIT ──
@@ -2360,6 +2342,115 @@
     if (m < 60) return m + ' min';
     var h = m / 60;
     return (h % 1 ? h.toFixed(1) : String(h)) + ' h';
+  }
+
+  /* A length spoken in the two units it has, where scDurShort rounds
+     to one: the pill on a row has a column to fit and this has a
+     whole readout, so "1 h 35 min" costs nothing here and is what
+     somebody setting a length is actually choosing. */
+  function scLenLong(m) {
+    if (m <= 0) return 'A moment';
+    var h = Math.floor(m / 60), mm = m % 60;
+    if (!h) return mm + ' min';
+    return h + ' h' + (mm ? ' ' + mm + ' min' : '');
+  }
+
+  /* ── A LENGTH IS A BAR, AND NOUGHT ON IT IS A MOMENT ──
+     The number dial's own control, down to its own classes, because
+     it is the same question asked about a different quantity — the
+     marks make the common answer one press and the bar reaches every
+     other one. Reusing `.nm-*` rather than dressing a second control
+     to match is what stops the two drifting: there is one set of
+     rules for what this looks like and both callers read it.
+
+     WHAT IT ADDS IS THE LEFT END. Every other dial in this app starts
+     at nought meaning "nothing yet"; here nought is an ANSWER — the
+     block is a thing that happened at a time rather than a thing that
+     took a while — so the readout says so in words instead of
+     printing "0 min", which is a length nobody's morning had.
+
+     FIVE-MINUTE GRAIN, matching the start field's own `step`: the end
+     of a block is start plus length, so a grain coarser than the
+     field's would put ends out of reach that you can type in directly
+     one control up. */
+  var LEN_MARKS = [15, 30, 60, 120];
+  var LEN_STEP = 5;
+  function scLenBar(box, len, at) {
+    /* The ceiling grows to hold a block that is already longer than
+       it — a shift can be ten hours and a bar that could not express
+       what is already saved would rewrite it on the way past. */
+    var max = Math.max(480, Math.ceil(len / 60) * 60);
+    var read = scEl('div', 'nm-read');
+    var big = scEl('b');
+    read.appendChild(big);
+    box.appendChild(read);
+    var sub = scEl('div', 'nm-sub');
+    box.appendChild(sub);
+
+    var dial = scEl('input', 'nm-dial');
+    dial.type = 'range';
+    dial.min = 0;
+    dial.max = max;
+    dial.step = LEN_STEP;
+    dial.value = Math.max(0, Math.min(max, len));
+    dial.setAttribute('aria-label', 'How long it is');
+    box.appendChild(dial);
+
+    var live = LEN_MARKS.filter(function (m) { return m <= max; });
+    var ticks = scEl('div', 'nm-ticks');
+    live.forEach(function (m) {
+      var t = scEl('span', 'nm-tick');
+      t.style.left = ((m / max) * 100) + '%';
+      ticks.appendChild(t);
+    });
+    box.appendChild(ticks);
+
+    var markBtns = [];
+    var marks = scEl('div', 'nm-marks');
+    live.forEach(function (m) {
+      var mb = scEl('button', 'nm-mark', scDurShort(m));
+      mb.type = 'button';
+      mb.dataset.at = m;
+      mb.setAttribute('aria-label', scLenLong(m));
+      /* A MARK SETS, the way the number dial's does — and here there
+         is no second reading available, because a length is a figure
+         the block HAS rather than one you are adding to it. */
+      mb.addEventListener('click', function () {
+        dial.value = m;
+        paint();
+      });
+      markBtns.push(mb);
+      marks.appendChild(mb);
+    });
+    box.appendChild(marks);
+
+    var ends = scEl('div', 'nm-ends');
+    /* Named rather than numbered at the left end, for the reason the
+       readout is: nought here is a state and "0" is a quantity. */
+    ends.appendChild(scEl('span', null, 'A moment'));
+    ends.appendChild(scEl('span', null, scDurShort(max)));
+    box.appendChild(ends);
+
+    function paint() {
+      var v = +dial.value;
+      big.textContent = scLenLong(v);
+      dial.style.setProperty('--fill', (max ? (v / max) * 100 : 0) + '%');
+      dial.setAttribute('aria-valuetext', scLenLong(v));
+      markBtns.forEach(function (mb) {
+        mb.classList.toggle('is-at', +mb.dataset.at === v);
+      });
+      /* THE END TIME IS THE POINT OF THE READOUT. A length on its own
+         is arithmetic you are being asked to do — the figure you are
+         actually choosing between is what time this finishes, and the
+         start is two controls up where you cannot see both at once. */
+      var s0 = at();
+      sub.textContent = s0 === null ? ''
+        : v > 0 ? 'ends ' + scT(Math.min(1440, s0 + v)) + scMerIf(Math.min(1440, s0 + v))
+        : 'at ' + scT(s0) + scMerIf(s0);
+    }
+    dial.addEventListener('input', paint);
+    paint();
+    return { paint: paint, value: function () { return +dial.value; } };
   }
 
   /* ── WHAT IS LEFT OF THE ONE THAT IS RUNNING ──
@@ -7417,10 +7508,16 @@
 
                So it says what it actually knows — after which block,
                and for how long. */
+            /* A MOMENT SAYS ONE TIME, not a range of one minute to
+               itself and not a length of nought — the row it is about
+               to become draws neither, and a preview that showed
+               something the block will not is the preview lying about
+               what it is filing. */
+            var mo = p.e <= p.s;
             var when = (p.rel && p.days.length > 1)
               ? (p.rel === 'before' ? 'before ' : 'after ') + (p.refName || scTitleCase(p.ref))
-                + '  ·  ' + scDurShort(p.e - p.s)
-              : scRangeLong(p.s, p.e);
+                + (mo ? '' : '  ·  ' + scDurShort(p.e - p.s))
+              : mo ? scT(p.s) + scMerIf(p.s) : scRangeLong(p.s, p.e);
             card.appendChild(scEl('span', 'p-meta', when + (p.room ? '  ·  ' + p.room : '')));
           } else if (p.kind === 'off') {
             /* THE SAME RESOLVER "AFTER TRAINING" USES, read here
@@ -10495,102 +10592,51 @@
         picks.appendChild(b);
       });
 
-      var times = scEl('div', 'grid2');
+      /* ── A START AND A LENGTH, NOT TWO CLOCK TIMES ──
+         The end field is gone and the bar below replaces it. Three
+         reasons, and the first is the one that was asked for: a block
+         with NO length is now an ordinary thing to want, and "a
+         moment" is not a time you can type into a second clock field
+         — it is the absence of one, which a field can only express by
+         being left equal to the first, which is exactly the state the
+         old Save refused.
+
+         Second, it takes the whole `e <= s` failure away rather than
+         guarding it: a start plus a length cannot be inverted, so the
+         toast telling you the end has to be after the start has
+         nothing left to say and is gone with the check.
+
+         Third, it is what you were choosing anyway. Nobody knows what
+         time a forty-minute walk from 07:45 finishes; they know it is
+         forty minutes. The readout under the bar prints the end, so
+         the figure the field used to hold is still on screen — as a
+         consequence of the answer rather than as the question. */
       var t1 = scEl('input', 'field'); t1.type = 'time'; t1.step = 300;
-      var t2 = scEl('input', 'field'); t2.type = 'time'; t2.step = 300;
       t1.value = scHHMM(item ? item.s : 480);
-      t2.value = scHHMM(item ? item.e : 570);
-      /* The label above them is a <span> rather than a <label>, so
-         these were announced as two unnamed time fields. */
+      /* The label above it is a <span> rather than a <label>, so this
+         was announced as an unnamed time field. */
       t1.setAttribute('aria-label', 'Starts at');
-      t2.setAttribute('aria-label', 'Ends at');
-      /* ── EACH ROW UNDER THE FIELD IT SETS ──
-         Built as two columns rather than two full-width rows below
-         the pair. Stacked, the starts and the ends were four
-         indistinguishable rows of figures with nothing saying which
-         was which — and labelling them costs two more registers of
-         type on a sheet that already has six. Under its own field
-         there is nothing to say: the association is the position. */
-      var c1 = scEl('div'), c2 = scEl('div');
-      c1.appendChild(t1); c2.appendChild(t2);
-      times.appendChild(c1); times.appendChild(c2);
 
-      /* ── AND THE TIMES YOU ALREADY USE, AS CHIPS ──
-         The two fields are `<input type="time">`, so on iOS each one
-         opens the system wheel: tap, spin the hour, spin the minute,
-         spin AM/PM, dismiss — then again for the end. That is about
-         ten presses to say a thing you say every week.
+      /* ── AND THE TIMES YOU USE ARE NOT CHIPS ANY MORE ──
+         There was a row of them under this field — your own week's
+         eight commonest starts, pressable, spliced so the one you
+         were on was always among them. It worked, it was measured,
+         and it is gone because of what it COST rather than what it
+         did: three chips wrap to two rows at 390px, and two rows of
+         figures between the field and the length bar is most of a
+         register of this sheet spent on a shortcut.
 
-         A CHIP SETS, AND THE FIELD STAYS. This is the number dial's
-         own shape and it is here for the dial's own reason: the marks
-         make the common answer one press, and the control underneath
-         is what reaches every other answer. Taking the fields away
-         would make an odd time HARDER than it is today, and it would
-         take the keyboard and the screen reader's route with it —
-         a chip row reaches a pointer and a keyboard, but the field is
-         what a screen reader announces as a time.
+         The field under them reached every time either way, and the
+         sheet they were crowding now has a bar in it that is the
+         thing you actually came to set. `scTimeRungs` and
+         `scCommonTimes` went with them: a helper nothing calls reads
+         as a mechanism somebody might edit, and the first thing they
+         would find is that nothing calls it.
 
-         PRESSING A START KEEPS THE LENGTH. Moving a block is the
-         common edit and its length is not what you are changing; an
-         end that stayed put would silently stretch or invert it. The
-         end is clamped into the day rather than rolled over, which is
-         the rule the parser already keeps. */
-      var startRow = scEl('div', 'chips-t');
-      var endRow = scEl('div', 'chips-t');
-      c1.appendChild(startRow);
-      c2.appendChild(endRow);
-      function drawRungs() {
-        var s0 = scFromHHMM(t1.value), e0 = scFromHHMM(t2.value);
-        [[startRow, 's', s0], [endRow, 'e', e0]].forEach(function (pair) {
-          var box = pair[0], key = pair[1], at = pair[2];
-          box.textContent = '';
-          if (at === null) return;
-          scTimeRungs(key, at, name.value).forEach(function (m) {
-            var b = scEl('button', 'chip-t' + (m === at ? ' is-at' : ''), scT(m));
-            b.type = 'button';
-            b.setAttribute('aria-pressed', m === at ? 'true' : 'false');
-            /* The figure alone is "06:30, pressed" — which of the two
-               it sets is carried by POSITION, and position is the one
-               thing a screen reader does not get. */
-            b.setAttribute('aria-label',
-              (key === 's' ? 'Start at ' : 'End at ') + scT(m));
-            b.addEventListener('click', function () {
-              var a = scFromHHMM(t1.value), z = scFromHHMM(t2.value);
-              if (key === 's') {
-                var len = (a !== null && z !== null && z > a) ? z - a : 60;
-                t1.value = scHHMM(m);
-                t2.value = scHHMM(Math.min(1440, m + len));
-              } else {
-                t2.value = scHHMM(m);
-                if (a !== null && m <= a) t1.value = scHHMM(Math.max(0, m - 60));
-              }
-              drawRungs();
-            });
-            box.appendChild(b);
-          });
-        });
-      }
-      /* Redrawn off the FIELD rather than off a variable, so a time
-         typed or wheeled in lights its own chip and splices itself in
-         if it is not one — the two can never disagree about what is
-         set, because there is only one place the answer lives. */
-      t1.addEventListener('change', drawRungs);
-      t2.addEventListener('change', drawRungs);
-      /* ── AND THE CHIPS FOLLOW THE NAME ──
-         Off the FIELD rather than off `item.n`, so a new block gets
-         its own times the moment you have said what it is: type Work
-         and the row becomes the hours Work is kept at. On an existing
-         block the two are the same until you rename it, and then the
-         chips are for what it is BECOMING, which is the useful half.
-
-         Debounced by a frame rather than per keystroke — this reads
-         every block on the week, and doing that on each letter of a
-         name is a scan a character. */
-      var nameWait = null;
-      name.addEventListener('input', function () {
-        if (nameWait) return;
-        nameWait = setTimeout(function () { nameWait = null; drawRungs(); }, 220);
-      });
+         The bar's readout prints the END, which is this field plus
+         the length — so moving the start still has to repaint it, or
+         it names a time the block no longer finishes at. */
+      t1.addEventListener('change', function () { if (lenBar) lenBar.paint(); });
 
       var room = scEl('input', 'field');
       room.type = 'text';
@@ -10601,9 +10647,25 @@
       body.appendChild(name);
       body.appendChild(scEl('span', 'label', isNew ? 'Days' : 'Day'));
       body.appendChild(picks);
-      body.appendChild(scEl('span', 'label', 'From — to'));
-      body.appendChild(times);
-      drawRungs();
+      body.appendChild(scEl('span', 'label', 'Starts at'));
+      body.appendChild(t1);
+      /* ── AND HOW LONG, IF IT IS ANYTHING ──
+         A NEW BLOCK OPENS AT A MOMENT, which is the whole of what was
+         asked for: everything starts as a thing you can just log, and
+         a length is a second press when you want one. The old default
+         was an hour, invented so the row had a span to draw, and on
+         Wake it was an hour of nothing.
+
+         An existing block opens at whatever it already is, so the bar
+         is a readout of the block as much as a control on it. */
+      body.appendChild(scEl('span', 'label', 'How long'));
+      /* Straight into the body rather than into a box of its own, the
+         way the number dial's parts are: every rule these carry is on
+         the `.nm-*` classes themselves, so a wrapper would be a class
+         with no rule behind it and one more thing between the control
+         and the sheet that could move it. */
+      var lenBar = scLenBar(body, item ? Math.max(0, item.e - item.s) : 0,
+        function () { return scFromHHMM(t1.value); });
       body.appendChild(scEl('span', 'label', 'Where'));
       body.appendChild(room);
 
@@ -10736,10 +10798,20 @@
       else acts.appendChild(scBtn('off', 'Cancel', scClose));
 
       acts.appendChild(scBtn('go', 'Save', function () {
-        var s = scFromHHMM(t1.value), e = scFromHHMM(t2.value);
+        var s = scFromHHMM(t1.value);
+        /* CLAMPED INTO THE DAY rather than rolled over, which is the
+           rule the parser already keeps: a block from 23:40 to 00:40
+           is on two days and this app's whole record is one day per
+           row. A length that would run past midnight stops there. */
+        var e = s === null ? null : Math.min(1440, s + lenBar.value());
         var days = Object.keys(picked).filter(function (d) { return picked[d]; }).map(Number);
         if (!name.value.trim()) { name.focus(); return; }
-        if (s === null || e === null || e <= s) { t2.focus(); scToast('The end has to be after the start', false); return; }
+        /* THE END CANNOT BE BEFORE THE START ANY MORE, so the toast
+           that said so is gone with the field that could say it: a
+           start plus a length has no inverted reading. What is left
+           is the one thing still worth refusing — a start that is not
+           a time at all. */
+        if (s === null) { t1.focus(); return; }
         if (!days.length) { scToast('Pick a day', false); return; }
 
         scMark();

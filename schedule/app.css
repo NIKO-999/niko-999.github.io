@@ -3547,22 +3547,20 @@ body {
 .field:focus { outline: 2px solid var(--red); outline-offset: 1px; }
 .field::placeholder { color: var(--spent); }
 
-/* minmax(0, 1fr), NOT 1fr — and the difference is the whole rule.
-   A `1fr` track is `minmax(auto, 1fr)`, so its floor is the item's
-   min-content width and a wide item pushes the track out rather than
-   being squeezed by it. `input[type=time]` is exactly that item: Safari
-   gives it an intrinsic width around 217px against a 173px track, so
-   the second field ran past the right margin and the 10px gap
-   disappeared under it.
+/* ── .grid2 IS GONE WITH THE SECOND TIME FIELD ──
+   It was a two-column grid holding a start and an end, and its
+   `minmax(0, 1fr)` tracks were the second half of the iOS overflow
+   fix: Safari gives `input[type=time]` an intrinsic width around
+   217px, and a bare `1fr` track is `minmax(auto, 1fr)`, so the
+   control pushed its own track out rather than being squeezed by it.
 
-   min-width:0 on .field was the first fix and it is NOT enough — it
-   was live on the phone that reported this. Safari keeps sizing the
-   control from its own shadow DOM, so the constraint has to be on the
-   TRACK, where it holds whatever the child does. Chromium sizes the
-   control to fit and never reproduced any of it, which is why this
-   went out twice. */
-.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
-.grid2 .field { margin: 0; min-width: 0; max-width: 100%; }
+   The editor asks for a start and a LENGTH now, so there is one
+   field and it is in normal flow, where `width: 100%` on a
+   border-box element cannot overflow its container. What is left of
+   that fix is the half that was always the real one and always lived
+   on `.field` itself — dropping the native appearance, which is what
+   hands the box back at all. A rule with nothing left to select is
+   not kept for the story: the story is here. */
 
 /* A LABEL OWNS THE GAP UNDER ITSELF. It used to carry margin-bottom:-4
    and lean on the next element having a 12px top margin of its own —
@@ -3581,7 +3579,6 @@ body {
 }
 .label + .field,
 .label + .days-pick,
-.label + .grid2,
 .label + .mark { margin-top: 0; }
 
 /* All seven share the row and split it evenly. Left to size themselves
@@ -5203,52 +5200,6 @@ body {
 }
 .nm-mark.is-at { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 
-/* ── THE TIMES YOU ALREADY USE ──
-   The dial marks' own shape, and deliberately: both are a row of
-   figures that SET the control above them, so a person who has met
-   one has met the other. Eight of them, WRAPPED to two rows of four
-   rather than scrolled — nothing in this app scrolls sideways, and
-   the rung you want must never be the one off the edge.
-
-   `flex: 1 1 0` with a basis of nought, so four to a row divide the
-   width evenly whatever the figures are: `auto` lets a 12-hour phone's
-   wider "10:30 pm" take more than its share and the row comes out
-   ragged, which is the length ladder's own note read across. */
-.chips-t {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
-}
-.chips-t + .chips-t { margin-top: 6px; }
-.chip-t {
-  /* ── A FIXED BASIS, NOT A GROWING ONE ──
-     `flex: 1 1 0` lets a row that does not divide evenly stretch its
-     last rung across the whole line: five chips came out as four and
-     a full-width fifth, which reads as a mistake rather than as a
-     ladder. That is the Mind ladder's own fault, and this is its own
-     fix — every chip is exactly half its column whether or not the
-     last row is full. */
-  flex: 0 0 calc((100% - 6px) / 2);
-  min-width: 0;
-  border: 1px solid var(--hair);
-  background: var(--card);
-  color: var(--dim);
-  font: inherit;
-  font-size: 11.5px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  padding: 9px 4px;
-  border-radius: 8px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: center;
-  cursor: pointer;
-}
-.chip-t.is-at { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.chip-t:active { opacity: .82; }
-.chip-t:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .nm-mark:active { opacity: .82; }
 .nm-mark:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 

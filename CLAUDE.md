@@ -10206,3 +10206,106 @@ scrolled under the stops still reports a positive y and is simply not
 painted. The pane is walked top and bottom and the COUNT of cards
 measured is asserted beside the ratio, since a check that quietly
 looked at four of six is a check that would miss the two it skipped.
+
+## A block can be a moment, and a length is a bar
+
+Waking up is not forty minutes long. Every block had a span because
+every block had to have one, so a bare "wake at 7" came out as 07:00
+to 08:00 — an hour the app invented so the row had a length to print,
+and on Wake it was an hour of nothing.
+
+**`e === s`, NOT A NULL END.** Every reader of this shape does
+arithmetic on the pair: the head sums `e - s` for the hours committed,
+the sort compares them, a move keeps the difference. A moment is a
+zero-length span and all of that keeps working, where a null would be
+a second shape to defend against at every one of them. Read with `<=`
+rather than `===`, so a damaged record reads as a moment rather than
+as a negative length.
+
+**`scClean` WAS DROPPING THEM ON THE WAY IN.** Its gate read `e > s`
+for as long as every block had a length, and the first render after
+this shipped had the moment simply missing from the week — silently,
+which is the harshest possible reading of a record that is exactly
+what it meant to be. An end BEFORE its start is still refused: that
+one cannot be read as anything. **The check asserts the ROW is drawn
+rather than that the key still holds it**, because scClean is what
+decides and a record it drops is one the week never draws.
+
+**NO LENGTH SAID IS A MOMENT, EVERYWHERE.** One rule rather than a
+default per pattern: "at 7", "7pm", "now" and "walk after the gym" all
+say WHEN, and how long it takes is a thing you would have said. It
+reverses five shipped assertions and that IS the change — the hour was
+never measured, it was assumed. What still makes a span is saying so:
+"for 45 mins", a stated range, or "no time limit", which is now the
+third answer rather than the opposite of the second.
+
+**The `before` anchor lands on the anchor's START.** Which is not
+where the old span STARTED — that was an hour earlier — so the
+assertion moved from 21:45 to 22:45 and the suite is what caught it.
+A test updated from a probe's own fixture rather than from the one it
+runs against is a test agreeing with the wrong week.
+
+### The end field is gone and the bar replaced it
+
+**A START AND A LENGTH, NOT TWO CLOCK TIMES.** Three reasons and the
+first is the ask: "a moment" is not a time you can type into a second
+clock field — it is the absence of one, which a field can only say by
+being left equal to the first, which is exactly the state the old Save
+refused. Second, it takes the `e <= s` failure away rather than
+guarding it, so the toast saying the end has to be after the start is
+gone with the check. Third, it is what you were choosing anyway:
+nobody knows what time a forty-minute walk from 07:45 finishes.
+
+**IT IS THE NUMBER DIAL'S OWN CONTROL, down to its classes.** `.nm-*`
+reused rather than a second control dressed to match, because that is
+what stops the two drifting — one set of rules for what a bar in this
+app looks like, and both callers read it. No new CSS at all.
+
+**WHAT IT ADDS IS THE LEFT END.** Every other dial here starts at
+nought meaning "nothing yet"; here nought is an ANSWER, so the readout
+says "A moment" in words and the track's left label does too. Printing
+"0 min" would be a length nobody's morning had.
+
+**THE READOUT PRINTS THE END**, which is the figure the deleted field
+used to hold — as a consequence of the answer rather than as the
+question. So moving the start has to repaint the bar, or it names a
+time the block no longer finishes at.
+
+**FIVE-MINUTE GRAIN, matching the start field's own `step`.** The end
+is start plus length, so a coarser grain would put ends out of reach
+that you can type directly one control up. The ceiling grows to hold a
+block already longer than it: a bar that could not express what is
+saved would rewrite it on the way past.
+
+### And the start chips went, for what they cost
+
+There was a row of them under the field — your own week's eight
+commonest starts, pressable, spliced so the one you were on was always
+among them. It worked, it was measured, and it is gone: **three chips
+wrap to two rows at 390px**, and two rows of figures between the field
+and the length bar is most of a register of that sheet spent on a
+shortcut the field underneath already reached.
+
+`scTimeRungs`, `scCommonTimes`, `.chips-t` and `.chip-t` went with
+them, and so did `.grid2` — a helper nothing calls reads as a
+mechanism somebody might edit, and the first thing they would find is
+that nothing calls it. **The iOS fix survived the grid's deletion
+because it never lived there**: `-webkit-appearance: none` and
+`box-sizing: border-box` are on `.field` itself, and the grid's
+`minmax(0, 1fr)` tracks were only the half about two controls sharing
+a row. One field in normal flow at `width: 100%` cannot overflow.
+
+### A check that hangs is not a check that fails
+
+The bite-prove broke `scClean`'s gate, which removed the row the
+editor half of the test then pressed — and `page.click` on a row that
+will never arrive is a HANG, reported as `no summary`, which is the
+greenest-looking failure there is. **Fifth time this file has recorded
+that shape**, and the second time in two days: the rest-day check had
+it for the same reason a week earlier.
+
+Every press that a broken build could make unreachable is now behind
+`if (await qp.$(...))`, and everything downstream reports null — which
+FAILS, and names which. Proved by breaking three things at once
+(`scClean`'s gate, the row's length pill, the parser's bare clock) and
+watching fifteen assertions go with no crash.

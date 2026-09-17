@@ -803,7 +803,7 @@ const SAID = [
      Tuesday 09:30 they are literals.
 
      Three claims, and each fails for its own reason: the clock is
-     taken from now, an hour is the default the way a bare "at 9" gets
+     taken from now, a MOMENT is the default the way a bare "at 9" is
      one, and the word is STRUCK OUT — "Watching podcast now" was
      landing a block called "Watching Podcast Now". */
   await page.click('#scAdd');
@@ -818,15 +818,19 @@ const SAID = [
     })).catch(() => null);
   };
   const n1 = await nowSaid('Watch a podcast now');
-  ok('“now” is a time, and it brings an hour with it',
-    n1 && n1.days === 'TUE' && /^09:30 to 10:30/.test(n1.meta), n1);
+  /* IT BRINGS NO LENGTH, and it used to bring an hour. Said with no
+     length at all it is a thing that happened at a time, so the
+     preview prints the one time rather than a range ending at an
+     hour nobody asked for. */
+  ok('“now” is a time, and on its own it is a moment',
+    n1 && n1.days === 'TUE' && /^09:30$/.test(n1.meta.trim()), n1);
   ok('...and the word does not end up in the name',
     n1 && !/now/i.test(n1.name), n1);
   /* It carries its own day. Saying "now" on a Tuesday and being asked
      which day is the app not having listened. */
   const n2 = await nowSaid('Watch a podcast today now');
   ok('...and a day said as well does not double it',
-    n2 && n2.days === 'TUE' && /^09:30 to 10:30/.test(n2.meta), n2);
+    n2 && n2.days === 'TUE' && /^09:30$/.test(n2.meta.trim()), n2);
   const n3 = await nowSaid('Read now for 90 minutes');
   ok('...and a length said after it is honoured',
     n3 && /^09:30 to 11:00/.test(n3.meta), n3);
@@ -842,7 +846,7 @@ const SAID = [
      using none of it. */
   const n5 = await nowSaid('Read now at 3');
   ok('...and a real time said with it wins the clock',
-    n5 && /^15:00 to 16:00/.test(n5.meta), n5);
+    n5 && /^15:00$/.test(n5.meta.trim()), n5);
   ok('...while the word still leaves the name and still says the day',
     n5 && n5.days === 'TUE' && !/now/i.test(n5.name), n5);
   /* "Gym for 45mins now" is the same sentence backwards — the length
@@ -855,13 +859,12 @@ const SAID = [
   ok('...and the old order still reads the same block',
     n7 && /^09:30 to 10:15/.test(n7.meta) && n7.name === 'Gym', n7);
 
-  /* "No time limit" is the other answer to the question a bare "now"
-     or a bare "at 9" already answers with an hour nobody asked for:
-     said instead of a number, it means there isn't one, and the block
-     runs to the end of the day rather than to a length invented for
-     it. */
+  /* "No time limit" is the third answer available. A bare time is a
+     MOMENT, a stated length is a span, and this one runs to the end
+     of the day — three different things, none of them invented for
+     you, and the phrase is what tells the third from the first. */
   const n8 = await nowSaid('Gym now no time limit');
-  ok('a bare "now" can run to the end of the day instead of an hour',
+  ok('a bare "now" can run to the end of the day instead of a moment',
     n8 && n8.days === 'TUE' && /^09:30 to 24:00/.test(n8.meta) && n8.name === 'Gym', n8);
   const n9 = await nowSaid('Gym at 6pm no time limit');
   ok('...and so can a bare clock time, with no "now" in it at all',
@@ -872,6 +875,20 @@ const SAID = [
   const n10 = await nowSaid('Gym now for 45mins no time limit');
   ok('...but a stated length still wins over it',
     n10 && /^09:30 to 10:15/.test(n10.meta) && n10.name === 'Gym', n10);
+
+  /* ── AND A BARE CLOCK IS A MOMENT TOO ──
+     The rule stated once for every default in this parser rather than
+     per pattern: "at 7" and "7pm" and "now" all say WHEN, and how
+     long it takes is a thing you would have said. Both halves, since
+     each passes on the other's bug — a build that made everything a
+     moment would fail the second, and the hour this replaced would
+     fail the first. */
+  const n11 = await nowSaid('Wake at 7');
+  ok('a bare clock time is a moment, not an invented hour',
+    n11 && n11.days === 'TUE' && /^07:00$/.test(n11.meta.trim()) && n11.name === 'Wake', n11);
+  const n12 = await nowSaid('Wake at 7 for 20 minutes');
+  ok('...and a length said beside it is still a span',
+    n12 && /^07:00 to 07:20/.test(n12.meta) && n12.name === 'Wake', n12);
 
   /* ══════════════════════════════════════════════════════════════
      A SENTENCE WITH NO DAY ON IT MEANS TODAY
@@ -913,11 +930,11 @@ const SAID = [
      perfectly.
      ══════════════════════════════════════════════════════════════ */
   const b1 = await nowSaid('Wake 6am');
-  ok('a bare clock with a meridiem is a time, and gets an hour',
-    b1 && b1.days === 'TUE' && /^06:00 to 07:00/.test(b1.meta) && b1.name === 'Wake', b1);
+  ok('a bare clock with a meridiem is a time, and on its own a moment',
+    b1 && b1.days === 'TUE' && /^06:00$/.test(b1.meta.trim()) && b1.name === 'Wake', b1);
   const b2 = await nowSaid('Walk 6:30 thursday');
-  ok('...and so does one with a colon and no meridiem',
-    b2 && b2.days === 'THU' && /^06:30 to 07:30/.test(b2.meta) && b2.name === 'Walk', b2);
+  ok('...and so is one with a colon and no meridiem',
+    b2 && b2.days === 'THU' && /^06:30$/.test(b2.meta.trim()) && b2.name === 'Walk', b2);
   const b3 = await nowSaid('Gym 6am for 45 minutes');
   ok('...and a length after it is read',
     b3 && /^06:00 to 06:45/.test(b3.meta) && b3.name === 'Gym', b3);
@@ -1013,8 +1030,8 @@ const SAID = [
      unresolved case below testable rather than merely stated.
      ══════════════════════════════════════════════════════════════ */
   const r1 = await nowSaid('Walk after training');
-  ok('a block can be placed after another block, and gets an hour',
-    r1 && r1.days === 'TUE' && /^07:30 to 08:30/.test(r1.meta), r1);
+  ok('a block can be placed after another block, landing where it ends',
+    r1 && r1.days === 'TUE' && /^07:30$/.test(r1.meta.trim()), r1);
   ok('...and the words do not end up in the name',
     r1 && r1.name === 'Walk', r1);
   /* THROUGH THE KEYWORD TABLE, which is what makes this worth having:
@@ -1022,10 +1039,10 @@ const SAID = [
      already written down once as the glyph both names resolve to. */
   const r2 = await nowSaid('Walk after the gym');
   ok('...and a phrase the schedule does not use finds it by kind',
-    r2 && /^07:30 to 08:30/.test(r2.meta) && r2.name === 'Walk', r2);
+    r2 && /^07:30$/.test(r2.meta.trim()) && r2.name === 'Walk', r2);
   const r3 = await nowSaid('Read before bed');
-  ok('before runs the other way, ending where that block starts',
-    r3 && /^21:45 to 22:45/.test(r3.meta), r3);
+  ok('before runs the other way, landing where that block starts',
+    r3 && /^22:45$/.test(r3.meta.trim()), r3);
   const r4 = await nowSaid('Walk after the gym for 30 minutes');
   ok('...and a bare length is read, with no clock in front of it',
     r4 && /^07:30 to 08:00/.test(r4.meta) && r4.name === 'Walk', r4);
@@ -1048,7 +1065,7 @@ const SAID = [
      block called "Walk After the Gym" at four o'clock. */
   const r7 = await nowSaid('Walk after the gym at 4');
   ok('...and a real time said with it wins the clock',
-    r7 && /^16:00 to 17:00/.test(r7.meta), r7);
+    r7 && /^16:00$/.test(r7.meta.trim()), r7);
   ok('...while the phrase still leaves the name',
     r7 && r7.name === 'Walk', r7);
   /* ── ONE CLOCK CANNOT SPEAK FOR SEVERAL DAYS ──
@@ -1119,9 +1136,9 @@ const SAID = [
       meta: e.querySelector('.p-meta').textContent,
     })).catch(() => null);
     /* The second Train ends at 19:00. Picking the first would answer
-       07:30 to 08:30 instead — the exact reading this replaces. */
+       07:30 instead — the exact reading this replaces. */
     ok('two blocks share a name, and "after" finds the one added last',
-      dup && dup.days === 'TUE' && /^19:00 to 20:00/.test(dup.meta), dup);
+      dup && dup.days === 'TUE' && /^19:00$/.test(dup.meta.trim()), dup);
     await dctx.close();
   }
 
@@ -1455,6 +1472,175 @@ const SAID = [
     ok('...with no Undo offered, the same refusal a day off makes',
       rested && rested.toast === 'Logged as rest' && rested.undoBtn === false, rested);
     await rctx.close();
+  }
+  /* ══════════════════════════════════════════════════════════════
+     A BLOCK CAN BE A MOMENT, AND A LENGTH IS A BAR
+
+     Waking up is not forty minutes long. The app used to invent an
+     hour for it so the row had a span to print, and the whole of this
+     is that it stops: a block starts as a thing that happened at a
+     time, and a length is a second press on a control that looks like
+     the number dial because it IS the number dial's control.
+
+     IN ITS OWN CONTEXT, for the reason the two above are: it saves
+     the week, and the shared one is what hundreds of assertions below
+     still measure against. */
+  {
+    console.log('\n── a moment, and the length bar ──');
+    const qctx = await browser.newContext({ ...PHONE });
+    const qp = await qctx.newPage();
+    const qerr = [];
+    qp.on('pageerror', (e) => qerr.push(String(e)));
+    await qp.addInitScript(() => {
+      const FROZEN = new Date('2026-09-01T09:30:00').getTime(); /* Tuesday */
+      const R = Date;
+      // eslint-disable-next-line no-global-assign
+      Date = class extends R {
+        constructor(...a) { super(...(a.length ? a : [FROZEN])); }
+        static now() { return FROZEN; }
+      };
+      delete window.SpeechRecognition;
+      delete window.webkitSpeechRecognition;
+      ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+        .forEach((k) => localStorage.setItem(k, '1'));
+      localStorage.setItem('sched.net.v1',
+        JSON.stringify({ on: false, url: '', code: '' }));
+      /* Wake is stored as a moment — `e === s` — so this is the
+         stored shape coming back through scClean as well as the row
+         drawing it. That gate read `e > s` for as long as every block
+         had a length, and it dropped a moment on the way IN. */
+      if (!localStorage.getItem('sched.v1')) {
+        localStorage.setItem('sched.v1', JSON.stringify({
+          title: 'Moments',
+          items: [
+            { id: 'q1', d: 2, s: 420, e: 420, r: '', n: 'Wake', k: [], nt: [] },
+            { id: 'q2', d: 2, s: 465, e: 510, r: '', n: 'Train', k: [], nt: [] },
+          ],
+        }));
+      }
+    });
+    await qp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await qp.waitForTimeout(400);
+
+    /* A STORED MOMENT SURVIVES THE READ. Asserted as the row being on
+       screen rather than as the key still holding it: scClean is what
+       decides, and a record it drops is one the week never draws. */
+    const qrows = await qp.$$eval('#scWeek .row[data-id]', (rs) => rs.map((r) => ({
+      id: r.dataset.id,
+      dur: r.querySelector('.dur') ? r.querySelector('.dur').textContent : null,
+      aria: r.getAttribute('aria-label'),
+    })));
+    const qwake = qrows.filter((r) => r.id === 'q1')[0];
+    const qtrain = qrows.filter((r) => r.id === 'q2')[0];
+    ok('a stored moment is drawn rather than dropped on the way in',
+      !!qwake, qrows);
+    /* BOTH HALVES, because each passes on the other's bug: a build
+       that drew no length on ANY row passes the first on its own. */
+    ok('...and it draws no length at all, where a span still does',
+      qwake && qwake.dur === null && qtrain && qtrain.dur === '45 min', qrows);
+    /* SPOKEN AS ONE TIME. scRangeLong on a zero span reads "07:00 to
+       07:00", which is a screen reader being handed the same minute
+       twice and asked to make a range of it. */
+    ok('...and says its one time rather than a range of it to itself',
+      qwake && /Wake, Tuesday 07:00\./.test(qwake.aria)
+      && qtrain && /07:45 to 08:30/.test(qtrain.aria), qwake);
+
+    /* ── THE LENGTH BAR ── */
+    /* ARMED ONLY IF IT IS NOT ALREADY. Edit is a MODE and it stays
+       until you turn it off or leave the week — a second blind press
+       DISARMS it, and the row then ticks instead of opening, which
+       reads from outside as the editor not opening at all. */
+    const qarm = async () => {
+      const on = await qp.$eval('#scHdEd', (b) => b.getAttribute('aria-pressed') === 'true');
+      if (!on) { await qp.click('#scHdEd'); await qp.waitForTimeout(150); }
+    };
+    /* ── OPENED ONLY IF THE ROW IS THERE ──
+       A build that drops a moment on the way in has no q1 to press,
+       and a click that waits on a row which will never arrive is a
+       HANG rather than a failure — this file's own "no summary"
+       shape, which reads from outside as a broken suite rather than
+       as the one assertion that went. Everything below reports null
+       instead, which fails and says which. */
+    const qopen = async () => {
+      await qarm();
+      if (!(await qp.$('#scWeek .row[data-id="q1"]'))) return false;
+      await qp.click('#scWeek .row[data-id="q1"]');
+      await qp.waitForTimeout(300);
+      return true;
+    };
+    const qhas = await qopen();
+    const qed = !qhas ? null : await qp.evaluate(() => ({
+      times: document.querySelectorAll('#scSheetBody input[type=time]').length,
+      dial: document.querySelector('#scSheetBody .nm-dial')
+        ? +document.querySelector('#scSheetBody .nm-dial').value : null,
+      read: document.querySelector('#scSheetBody .nm-read b')
+        ? document.querySelector('#scSheetBody .nm-read b').textContent : null,
+      sub: document.querySelector('#scSheetBody .nm-sub')
+        ? document.querySelector('#scSheetBody .nm-sub').textContent : null,
+      marks: [...document.querySelectorAll('#scSheetBody .nm-mark')].map((x) => x.textContent),
+    }));
+    /* ONE CLOCK FIELD, NOT TWO. The end field is what the bar
+       replaces, and a build that kept it beside the bar would be two
+       controls setting one fact — which is how they come to
+       disagree. */
+    ok('the editor asks for a start and a length, not two clock times',
+      qed && qed.times === 1, qed);
+    /* IT IS THE NUMBER DIAL'S OWN CONTROL, down to its classes, so
+       there is one set of rules for what a bar in this app looks
+       like. Asserted as the classes being found at all. */
+    ok('...and the length is the number dial\'s bar, opened at the moment',
+      qed && qed.dial === 0 && qed.read === 'A moment', qed);
+    /* NOUGHT IS AN ANSWER HERE, where every other dial's nought means
+       "nothing yet" — so the readout says it in words rather than
+       printing a length nobody's morning had. */
+    ok('...with the end time under it, and "at" rather than "ends" on a moment',
+      qed && qed.sub === 'at 07:00', qed);
+    ok('...and the marks are the lengths a block actually comes out at',
+      qed && qed.marks.join('|') === '15 min|30 min|1 h|2 h', qed);
+
+    /* A MARK SETS, and Save files start-plus-length. */
+    const qmark = !qhas ? null : await (async () => {
+      await qp.click('#scSheetBody .nm-mark >> nth=1');
+      await qp.waitForTimeout(120);
+      return qp.evaluate(() => ({
+        read: document.querySelector('#scSheetBody .nm-read b').textContent,
+        sub: document.querySelector('#scSheetBody .nm-sub').textContent,
+      }));
+    })();
+    ok('pressing a mark sets the bar, and the readout names the end it makes',
+      qmark && qmark.read === '30 min' && qmark.sub === 'ends 07:30', qmark);
+    if (qhas) { await qp.click('#scSheetBody .btn.go'); await qp.waitForTimeout(300); }
+    const qsaved = await qp.evaluate(() => JSON.parse(localStorage.getItem('sched.v1'))
+      .items.filter((i) => i.id === 'q1').map((i) => [i.s, i.e])[0]);
+    ok('...and Save files the start plus that length',
+      qsaved && qsaved[0] === 420 && qsaved[1] === 450, qsaved);
+
+    /* AND BACK THE OTHER WAY — the bar has to be able to return a
+       block to a moment, or this is a one-way door: a length set by
+       mistake would be permanent. */
+    const qhas2 = await qopen();
+    const qback = !qhas2 ? null : await qp.evaluate(() => {
+      const d = document.querySelector('#scSheetBody .nm-dial');
+      return { at: +d.value };
+    });
+    ok('re-opening it shows the length it now has',
+      qback && qback.at === 30, qback);
+    if (qhas2) {
+      await qp.evaluate(() => {
+        const d = document.querySelector('#scSheetBody .nm-dial');
+        d.value = 0;
+        d.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+      await qp.waitForTimeout(120);
+      await qp.click('#scSheetBody .btn.go');
+      await qp.waitForTimeout(300);
+    }
+    const qmo = await qp.evaluate(() => JSON.parse(localStorage.getItem('sched.v1'))
+      .items.filter((i) => i.id === 'q1').map((i) => [i.s, i.e])[0]);
+    ok('...and dragging it back to nought makes it a moment again',
+      qmo && qmo[0] === 420 && qmo[1] === 420, qmo);
+    ok('nothing threw through any of it', !qerr.length, qerr);
+    await qctx.close();
   }
   /* ── morning, afternoon, evening ──
      Noon and five o'clock. A session with nothing in it is not drawn:
@@ -2950,19 +3136,21 @@ const SAID = [
     ok('the cache-busting queries match what they name', stale.length === 0, stale);
   }
 
-  /* ── the two time fields, and the box the control keeps ──
-     They overflowed their row on iOS through FOUR attempted fixes, all
-     of them about grid track sizing. It was never the track. Measured
-     on the phone that had it: the tracks came out correct at 175px, the
+  /* ── the time field, and the box the control keeps ──
+     It overflowed its row on iOS through FOUR attempted fixes, all of
+     them about grid track sizing. It was never the track. Measured on
+     the phone that had it: the tracks came out correct at 175px, the
      field's `width` computed to 175px as told, and its BORDER BOX was
      205px — box-sizing came back content-box in spite of the `*` reset
      at the top of app.css, because Safari's natively-appearing control
      keeps its own metrics. 175 of content plus 28 padding plus 2 border
      is 205, and two of those overflow by 30, which is what it said.
 
-     The proof that it is APPEARANCE rather than specificity: on that
-     phone `.grid2 .field` set min-width and max-width in one rule, and
-     max-width applied while min-width came back 45px.
+     THERE IS ONE FIELD NOW, not two in a grid: the editor asks for a
+     start and a LENGTH, and the bar replaced the end. That takes the
+     track half of the story with it and leaves the half that was
+     always the real fix — the appearance and the box-sizing, both on
+     `.field` itself.
 
      THIS is measurable here, which the track theory never was — that is
      the whole reason four fixes shipped unverified. Chromium sizes the
@@ -2971,24 +3159,24 @@ const SAID = [
      overriding, and both are wrong the moment the fix goes. */
   {
     const fields = await page.evaluate(() => {
-      const g = document.querySelector('.sheet .grid2');
-      const gb = g.getBoundingClientRect();
-      const track = parseFloat(getComputedStyle(g).gridTemplateColumns.split(' ')[0]);
-      return [...g.children].map((e) => {
+      const box = document.querySelector('.sheet #scSheetBody');
+      const bb = box.getBoundingClientRect();
+      return [...document.querySelectorAll('.sheet input[type=time]')].map((e) => {
         const s = getComputedStyle(e), r = e.getBoundingClientRect();
         return { box: s.boxSizing, look: s.webkitAppearance || s.appearance,
-                 drawn: Math.round(r.width), track: Math.round(track),
-                 over: Math.round(r.right - gb.right) };
+                 over: Math.round(r.right - bb.right) };
       });
     });
-    ok('the time fields are sized by their border box, not their content',
-      fields.length === 2 && fields.every((f) => f.box === 'border-box'), fields);
+    /* ONE, asserted rather than assumed: a build that put the end field
+       back would pass every property check below it while quietly
+       being the two-control shape this replaced. */
+    ok('the editor has one time field, and it is sized by its border box',
+      fields.length === 1 && fields.every((f) => f.box === 'border-box'), fields);
     ok('and the native appearance is dropped, which is what hands the box over',
       fields.every((f) => f.look === 'none'), fields);
-    /* The consequence, and the thing a person actually sees: what is
-       drawn is the track, not the track plus the control's padding. */
-    ok('so what is drawn is the track itself, and nothing runs past the row',
-      fields.every((f) => f.drawn === f.track && f.over <= 0), fields);
+    /* The consequence, and the thing a person actually sees. */
+    ok('so nothing runs past the sheet it is in',
+      fields.every((f) => f.over <= 0), fields);
   }
   ok('and it says off before it is pressed',
     hasToggle && hasToggle.on === false && hasToggle.pressed === 'false', hasToggle);
@@ -7418,8 +7606,12 @@ const SAID = [
     await up.waitForTimeout(440);
     const fields = await up.$$eval('#scSheetBody input[type="time"]',
       (i) => i.map((x) => x.value));
-    ok('...while the edit fields stay strict 24-hour, which is all they take',
-      fields.length === 2 && fields.every((v) => /^\d{2}:\d{2}$/.test(v)), fields);
+    /* ONE field, not two: the end is a LENGTH now and the bar under
+       it is not a clock at all. What this is about is unchanged —
+       whatever a 12-hour phone draws everywhere else, the value an
+       `<input type="time">` takes is strict 24-hour. */
+    ok('...while the edit field stays strict 24-hour, which is all it takes',
+      fields.length === 1 && fields.every((v) => /^\d{2}:\d{2}$/.test(v)), fields);
     await up.close();
   }
 
@@ -12657,263 +12849,6 @@ const SAID = [
     await kctx.close();
   }
 
-  /* ══════════════════════════════════════════════════════════════
-     THE TIMES YOU ALREADY USE
-
-     Two `<input type="time">` is two system wheels: tap, spin the
-     hour, spin the minute, spin AM/PM, dismiss — then again for the
-     end, which is about ten presses to say a thing you say every
-     week. Most blocks start at one of about eight times and this app
-     knows which, because they are on your own week.
-
-     A CHIP SETS, AND THE FIELD STAYS — the number dial's own shape,
-     for the dial's own reason: the chips make the common answer one
-     press and the control underneath reaches every other answer.
-
-     ITS OWN CONTEXT: it plants an unusual time to prove the list is
-     read off the record rather than written down.
-     ══════════════════════════════════════════════════════════════ */
-  {
-    console.log('\n\u2500\u2500 the times you already use \u2500\u2500');
-    const tctx = await browser.newContext({ ...PHONE });
-    const tp = await tctx.newPage();
-    const terrs = [];
-    tp.on('pageerror', (e) => terrs.push(String(e)));
-    await tp.addInitScript((wk) => {
-      ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
-        .forEach((k) => localStorage.setItem(k, '1'));
-      if (!localStorage.getItem('sched.v1')) {
-        localStorage.setItem('sched.v1', JSON.stringify(wk));
-      }
-      if (!localStorage.getItem('sched.net.v1')) {
-        localStorage.setItem('sched.net.v1',
-          JSON.stringify({ on: false, url: '', code: '' }));
-      }
-    }, WEEK);
-    await tp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
-    await tp.waitForTimeout(500);
-
-    const openEd = async (n) => {
-      await tp.evaluate((i) => {
-        const e = document.querySelectorAll('.row-ed')[i];
-        if (!e) throw new Error('no edit control at ' + i);
-        e.click();
-      }, n);
-      await tp.waitForTimeout(560);
-    };
-    const rung = () => tp.evaluate(() => ({
-      rows: [...document.querySelectorAll('.chips-t')].map((x) =>
-        [...x.children].map((e) => e.textContent)),
-      lit: [...document.querySelectorAll('.chip-t.is-at')].map((e) => e.textContent),
-      fields: [...document.querySelectorAll('#scSheetBody .field')]
-        .filter((e) => e.type === 'time').map((e) => e.value),
-    }));
-
-    await openEd(1);
-    const r0 = await rung();
-    /* ── EACH ROW UNDER THE FIELD IT SETS ──
-       Two full-width rows below the pair were four indistinguishable
-       rows of figures with nothing saying which was which. Asserted
-       as the BOX, because "there are two rows" passes on a build that
-       stacks them. */
-    const under = await tp.evaluate(() => {
-      const f = [...document.querySelectorAll('#scSheetBody .field')]
-        .filter((e) => e.type === 'time');
-      const c = [...document.querySelectorAll('.chips-t')];
-      if (f.length !== 2 || c.length !== 2) return null;
-      const b = (e) => e.getBoundingClientRect();
-      return {
-        startsUnder: b(c[0]).top >= b(f[0]).bottom - 1
-          && Math.abs(b(c[0]).left - b(f[0]).left) < 2,
-        endsUnder: b(c[1]).top >= b(f[1]).bottom - 1
-          && Math.abs(b(c[1]).left - b(f[1]).left) < 2,
-        apart: Math.round(b(c[1]).left - b(c[0]).left),
-      };
-    });
-    ok('each time field carries the times you use, under it',
-      under && under.startsUnder && under.endsUnder && under.apart > 100, under);
-    /* THE BLOCK'S OWN TIME IS ALWAYS A RUNG. The figure the sheet is
-       SHOWING has to be pressable, or the control disagrees with the
-       thing above it — the workout ladder's own rule. */
-    ok('...and the time it is on is among them, and lit',
-      r0.lit.length === 2
-      && r0.rows[0].indexOf(r0.lit[0]) >= 0
-      && r0.rows[1].indexOf(r0.lit[1]) >= 0, r0);
-    /* ── NO RUNG STRETCHES ──
-       `flex: 1 1 0` lets a row that does not divide evenly blow its
-       last chip across the whole line, which reads as a mistake
-       rather than as a ladder. Measured as the widths, because the
-       declaration can be right and the layout still ragged. */
-    const widths = await tp.evaluate(() =>
-      [...document.querySelectorAll('.chips-t')[0].children]
-        .map((e) => Math.round(e.getBoundingClientRect().width)));
-    ok('...and no chip stretches to fill a short last row',
-      widths.length > 0 && new Set(widths).size === 1, widths);
-
-    /* ── THE LIST IS YOUR WEEK, NOT A WRITTEN-DOWN ONE ──
-       Planted at a time nothing else uses. A fixed list of sensible
-       hours passes every check above and fails this one. */
-    await tp.keyboard.press('Escape');
-    await tp.waitForTimeout(420);
-    await tp.evaluate(() => {
-      const st = JSON.parse(localStorage.getItem('sched.v1'));
-      [2, 3, 4].forEach((d, i) => {
-        st.items.push({ id: 'odd' + i, d, s: 943, e: 1003, r: '', n: 'Odd' });
-      });
-      localStorage.setItem('sched.v1', JSON.stringify(st));
-    });
-    await tp.reload({ waitUntil: 'networkidle' });
-    await tp.waitForTimeout(600);
-    await openEd(1);
-    const r1 = await rung();
-    ok('the chips are the times on YOUR week, not a list somebody wrote',
-      r1.rows[0].indexOf('15:43') >= 0, r1.rows[0]);
-    /* Eight is the cap, and it is two rows of four at 390px. */
-    ok('...and there are never more than eight of them',
-      r1.rows.every((x) => x.length <= 8), r1.rows.map((x) => x.length));
-    await tp.keyboard.press('Escape');
-    await tp.waitForTimeout(420);
-
-    /* ══════════════════════════════════════════════════════════════
-       AND THEY ARE THIS BLOCK'S OWN TIMES FIRST
-
-       Reported in one line: *trading shouldn't recommend its last
-       used for gym*. A suggestion is only a suggestion if it is one
-       for THIS thing.
-
-       It also fixes what ranking the whole week could not. The
-       fixture has twelve distinct starts against eight slots, and the
-       four that fall off are the once-used ones — which are the SHIFT
-       starts, the times that move and therefore the ones you opened
-       the sheet to change. The stable half of the week was crowding
-       out the half being worked on.
-
-       MEASURED AS THE TRADE. Work's own hours are 10:00, 11:00, 12:00
-       and 13:00; ranked across the whole week 12:00 and 13:00 fall off
-       and Trading's 08:45 and 09:00 take their slots. Asserted in both
-       directions, because "Work's times are there" passes on a build
-       that simply shows more of them.
-       ══════════════════════════════════════════════════════════════ */
-    await tp.evaluate(() => {
-      const it = [];
-      for (let d = 0; d < 7; d++) {
-        it.push({ id: 'w' + d, d, s: 345, e: 375, r: '', n: 'Wake' });
-        it.push({ id: 't' + d, d, s: 390, e: 450, r: '', n: 'Train' });
-        it.push({ id: 'k' + d, d, s: 465, e: 510, r: '', n: 'Walk' });
-        it.push({ id: 'z' + d, d, s: 1365, e: 1380, r: '', n: 'Down' });
-      }
-      [[0, 540], [1, 540], [2, 540], [3, 540], [4, 540], [5, 525], [6, 525]]
-        .forEach((x, i) => it.push({ id: 'g' + i, d: x[0], s: x[1], e: x[1] + 90, r: '', n: 'Trading' }));
-      [[0, 660], [1, 780], [4, 720], [5, 600], [6, 600]]
-        .forEach((x, i) => it.push({ id: 'j' + i, d: x[0], s: x[1], e: x[1] + 300, r: '', n: 'Work' }));
-      const st = JSON.parse(localStorage.getItem('sched.v1'));
-      st.items = it;
-      localStorage.setItem('sched.v1', JSON.stringify(st));
-    });
-    await tp.reload({ waitUntil: 'networkidle' });
-    await tp.waitForTimeout(600);
-    /* Monday, which is the day this fixture puts a Work shift on. */
-    await tp.evaluate(() => {
-      const b2 = [...document.querySelectorAll('.st-d')].find((x) => x.dataset.d === '1');
-      if (!b2) throw new Error('no day chip for Monday');
-      b2.click();
-    });
-    await tp.waitForTimeout(500);
-    const edName = async (want) => {
-      await tp.evaluate((n) => {
-        const r = [...document.querySelectorAll('.row[data-id]')]
-          .find((x) => (x.querySelector('.n') || {}).textContent.trim().startsWith(n));
-        if (!r) throw new Error('no row named ' + n);
-        r.parentElement.querySelector('.row-ed').click();
-      }, want);
-      await tp.waitForTimeout(600);
-    };
-    await edName('Work');
-    const onWork = (await rung()).rows[0];
-    ok('a shift keeps its OWN hours, which ranking the week dropped',
-      onWork.indexOf('12:00') >= 0 && onWork.indexOf('13:00') >= 0, onWork);
-    ok('...and it is a trade: the other block\u2019s hours give up the slots',
-      onWork.indexOf('08:45') < 0 && onWork.indexOf('09:00') < 0, onWork);
-    await tp.keyboard.press('Escape');
-    await tp.waitForTimeout(420);
-    /* THE OTHER HALF: the gym must not be offered the shift's hours
-       ahead of anything. Train sits at one time all week, so its own
-       list is a single rung and the rest of the week fills in — what
-       must NOT happen is Work's 12:00 and 13:00 arriving there. */
-    await edName('Train');
-    const onTrain = (await rung()).rows[0];
-    ok('...and the gym is not handed the shift\u2019s hours',
-      onTrain.indexOf('12:00') < 0 && onTrain.indexOf('13:00') < 0, onTrain);
-    /* ── AND THE CHIPS FOLLOW THE NAME FIELD ──
-       Off the field rather than off the saved name, so a new block
-       gets its own times the moment you have said what it is. */
-    await tp.fill('#scSheetBody .field', 'Work');
-    await tp.waitForTimeout(520);
-    const renamed = (await rung()).rows[0];
-    ok('renaming it in the sheet moves the chips to what it is becoming',
-      renamed.indexOf('12:00') >= 0 && renamed.indexOf('13:00') >= 0, renamed);
-    await tp.keyboard.press('Escape');
-    await tp.waitForTimeout(420);
-    await openEd(1);
-
-    /* ── PRESSING A START KEEPS THE LENGTH ──
-       Moving a block is the common edit and its length is not what
-       you are changing; an end that stayed put would silently stretch
-       or invert it. */
-    const moved = await tp.evaluate(async () => {
-      const f = [...document.querySelectorAll('#scSheetBody .field')]
-        .filter((e) => e.type === 'time');
-      const was = { s: f[0].value, e: f[1].value };
-      const c = [...document.querySelectorAll('.chips-t')[0].children]
-        .find((x) => !x.classList.contains('is-at'));
-      c.click();
-      await new Promise((r) => setTimeout(r, 200));
-      return { was, now: { s: f[0].value, e: f[1].value },
-        lit: [...document.querySelectorAll('.chip-t.is-at')].map((e) => e.textContent) };
-    });
-    const mins = (v) => (+v.slice(0, 2)) * 60 + (+v.slice(3, 5));
-    ok('pressing a start moves the block and keeps how long it is',
-      moved.now.s !== moved.was.s
-      && mins(moved.now.e) - mins(moved.now.s) === mins(moved.was.e) - mins(moved.was.s),
-      moved);
-    ok('...and both chips relight off the fields',
-      moved.lit.length === 2, moved);
-
-    /* ── AND THE FIELD IS STILL THE WAY TO EVERY OTHER TIME ──
-       Taking the fields away would make an odd time HARDER than it is
-       today and take the screen reader's route with it. Typed into,
-       the chips have to follow — they are redrawn off the field, so
-       the two can never disagree about what is set. */
-    const typed = await tp.evaluate(async () => {
-      const f = [...document.querySelectorAll('#scSheetBody .field')]
-        .filter((e) => e.type === 'time');
-      f[0].value = '11:11';
-      f[0].dispatchEvent(new Event('change', { bubbles: true }));
-      await new Promise((r) => setTimeout(r, 200));
-      return { lit: [...document.querySelectorAll('.chip-t.is-at')].map((e) => e.textContent),
-        named: [...document.querySelectorAll('.chip-t')].slice(0, 1)
-          .map((e) => e.getAttribute('aria-label')) };
-    });
-    ok('a time typed into the field lights its own chip, spliced in',
-      typed.lit.indexOf('11:11') >= 0, typed);
-    /* The figure alone is "06:30, pressed" — which of the two it sets
-       is carried by position, and position is what a screen reader
-       does not get. */
-    ok('...and every chip says which end it sets',
-      /^(Start|End) at /.test(typed.named[0] || ''), typed);
-
-    /* Nothing in this app scrolls sideways, and a wrapped row of
-       chips is where that rule gets broken by accident. */
-    ok('nothing on the sheet scrolls sideways',
-      (await tp.evaluate(() => [...document.querySelectorAll('#scSheetBody *')]
-        .filter((e) => e.scrollWidth > e.clientWidth + 1
-          && /auto|scroll/.test(getComputedStyle(e).overflowX)).length)) === 0);
-
-    await tp.keyboard.press('Escape');
-    await tp.waitForTimeout(420);
-    ok('nothing threw through any of it', terrs.length === 0, terrs);
-    await tctx.close();
-  }
 
   /* ══════════════════════════════════════════════════════════════
      THE STATE TAGS ARE WARMER, AND STILL CLEAR THE BAR
