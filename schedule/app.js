@@ -11934,14 +11934,25 @@
     return runs.length;
   }
 
+  /* ── ALL THREE LINE MARKS ARE IN THE GUTTER NOW ──
+     1 is the TAB, 2 the BRACKET and 3 the DOT: a line, a run and a
+     point, in one column. The tab replaced the SWIPE, which was the
+     only line mark drawn behind the words — so what the exchange buys
+     is that no line mark costs the sentence a point of contrast any
+     more, and what it costs is that the tab and the bracket share a
+     silhouette with only the bracket's feet between them. That was
+     rendered as a run of four and chosen with the collision in the
+     frame, which is the one way an exception to that rule is allowed
+     to be taken. */
   function scNoteGutCls(n, idx) {
     var L = n.l[idx];
+    if (L && !L.h && L.m === 1 && scNoteSect(n, idx)) return ' is-tab';
     if (L && !L.h && L.m === 3 && scNoteSect(n, idx)) return ' is-dot';
     return scNoteBrCls(n, idx);
   }
   function scNoteGut(n) {
     return n.k === 'note' && n.l.some(function (L, i) {
-      return !L.h && (L.m === 2 || L.m === 3) && !!scNoteSect(n, i);
+      return !L.h && L.m > 0 && !!scNoteSect(n, i);
     });
   }
 
@@ -12301,12 +12312,11 @@
         }
         var sect = scNoteSect(n, idx);
         var r = scEl('div', 'nt-row' + scNoteGutCls(n, idx));
-        /* The same mark the field wears, drawn straight onto the words
-           — there is no mirror to keep in step here, because in view
-           there is no field on top of it. */
-        var sp = scEl('span', 'nt-v' + (L.m === 1 && sect ? ' is-mk' : ''));
+        /* The line mark is drawn on the ROW, in the gutter, so the
+           span carries only the words — and the weight below is the
+           one mark that touches them. */
+        var sp = scEl('span', 'nt-v');
         if (sect) r.style.setProperty('--c', scNtVar(sect));
-        if (L.m === 1 && sect) sp.style.setProperty('--c', scNtVar(sect));
         /* The pen and the line marks are exclusive, so this is an
            either/or rather than two drawings that could land on one
            line. Without a section there is no hue for either. */
@@ -12429,7 +12439,7 @@
           tools.appendChild(b);
         };
         mk('nt-mkb', n.k === 'proc' ? 'Key step'
-          : n.k === 'goal' ? 'Ruled out' : 'Swipe', 1);
+          : n.k === 'goal' ? 'Ruled out' : 'Tab', 1);
         if (n.k === 'note') { mk('nt-brb', 'Bracket', 2); mk('nt-dtb', 'Dot', 3); }
 
         /* ── THE PEN MARKS WORDS, AND IT READS THE CARET ──
@@ -12456,7 +12466,7 @@
         if (n.k === 'note') {
           var pb = scEl('button', 'nt-tool nt-pnb');
           pb.type = 'button';
-          pb.textContent = 'Pen';
+          pb.textContent = 'Weight';
           /* ── READ AT THE PRESS, NEVER AT THE BUILD ──
              The strip is built when the field takes FOCUS, and the
              caret moves afterwards — every time, because moving it is
@@ -12490,7 +12500,7 @@
             pb.classList.toggle('is-on', !!(live2 && st.all));
             pb.setAttribute('aria-pressed', live2 && st.all ? 'true' : 'false');
             pb.setAttribute('aria-label',
-              !live2 ? 'Pen' : (st.all ? 'Unmark ' : 'Mark ')
+              !live2 ? 'Weight' : (st.all ? 'Unmark ' : 'Mark ')
                 + st.hit.length + (st.hit.length === 1 ? ' word' : ' words'));
             if (live2) pb.style.setProperty('--c', scNtVar(sect));
           };
@@ -12662,14 +12672,14 @@
         row.appendChild(scNoteGrip(n, pane, idx, L));
       } else {
         var sect2 = scNoteSect(n, idx);
-        /* ── THE MARK IS A MIRROR BEHIND THE FIELD ──
-           The swipe is fitted to the WORDS, and a textarea's own
-           background fills its box — so a wash written on the field
-           would run the width of the column and fade at a place that
-           has nothing to do with where the sentence ends. */
+        /* ── THE MIRROR DRAWS THE WORD MARK AND NOTHING ELSE ──
+           A textarea cannot style a substring, so a mark fitted to
+           WORDS needs a second copy of the line with the same metrics
+           to hang off. The three line marks are in the gutter and
+           need none of this; the weight is the only thing left that
+           does. */
         var mir = scEl('div', 'nt-mir');
-        var sp2 = scEl('span', L.m === 1 && sect2 ? 'is-mk' : '');
-        if (L.m === 1 && sect2) sp2.style.setProperty('--c', scNtVar(sect2));
+        var sp2 = scEl('span', '');
         /* AND THE PEN HAS TO BE IDENTICAL IN BOTH. Reading draws the
            runs straight onto the words; editing draws them into the
            mirror behind the field. That is two drawings of one thing,
@@ -12687,7 +12697,22 @@
         paint2();
         mir.appendChild(sp2);
         mir.setAttribute('aria-hidden', 'true');
-        row.appendChild(mir);
+        /* ── THE WELL IS WHAT KEEPS THE TWO ON ONE PIXEL ──
+           The mirror is `inset: 0`, which resolves against its
+           containing block's PADDING box — so parented to the row it
+           sat wherever the row's padding was not: 3px above the field
+           always, and a further 15px left of it on any note reserving
+           the gutter. Four separate rules set that padding, so
+           writing the insets to match is two numbers to keep in step
+           and the one that drifts is the invisible one.
+
+           A wrapper in normal flow IS the field's box, whatever the
+           row's padding does now or later. The line marks stay on the
+           ROW, because they are drawn in the padding the well is
+           inside of. */
+        var well = scEl('div', 'nt-well');
+        well.appendChild(mir);
+        row.appendChild(well);
 
         var f = scEl('textarea', 'nt-in');
         f.rows = 1;
@@ -12768,7 +12793,7 @@
           }
         });
         mark(f);
-        row.appendChild(f);
+        well.appendChild(f);
 
         /* A STEP CARRIES A NOTE UNDER IT, and only a process draws
            one. The field is the same `y` a heading's clause uses, so

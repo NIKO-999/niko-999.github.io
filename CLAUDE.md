@@ -10309,3 +10309,120 @@ Every press that a broken build could make unreachable is now behind
 FAILS, and names which. Proved by breaking three things at once
 (`scClean`'s gate, the row's length pill, the parser's bare clock) and
 watching fifteen assertions go with no crash.
+
+## The swipe and the pen were swapped out
+
+Two of the four highlights went, and the two that replaced them were
+picked off a sheet of five candidates rendered over the real note at
+390x844 and read at 1:1. **The record did not change shape at all**:
+`m === 1` is still the first line mark and `w` is still a list of word
+indices — only the DRAWING moved, which is why a note written before
+this reads back identically.
+
+**WHERE THE ROOM WAS IS THE FINDING.** Line-scope had had twenty
+treatments and shipped three; word-scope had had exactly one, the pen's
+fill. So four of the five candidates were word marks. What they beat:
+a BOX ringing a phrase like a term (a real second claim, and the
+loudest of the five, with its right edge crowding the next word) and a
+STRIKE through the chosen words (the only candidate making a claim
+nothing else here can — *not these* — and the one to come back to if
+that claim is ever wanted).
+
+### The tab is a line said in the margin
+
+**ALL THREE LINE MARKS ARE IN ONE COLUMN NOW** — a point, a line and a
+run, at three scales. The swipe was the only one drawn BEHIND the
+words, so what the exchange buys is that no line mark costs the
+sentence a point of contrast, and the rule about the field's own marked
+line not striking or fading a gutter mark now covers all three rather
+than two.
+
+**IT IS A PLAIN VERTICAL RULE, WHICH THIS FILE ALREADY RECORDS AS
+REJECTED**, and the rejection was not wrong: *a run of tabbed lines IS
+the bracket with its feet missing* — same column, same colour, told
+apart only by the feet. That was rendered as a run of four, put up with
+the collision in the frame, and chosen anyway. **That is the shape an
+exception to a measured rule has to have**: raised, drawn, and then
+decided by the person who owns the screen, rather than quietly slipping
+past. 3px at full strength against the bracket's 2px at 62% is the
+whole of what separates them on a single line, so neither number is
+free to move on its own.
+
+### The weight is a stroke, and it could not have been anything else
+
+The pen was a fill BEHIND the words; the weight IS the words — which is
+the one thing the mirror cannot paint. `.nt-mir` is `color:
+transparent` by construction and a textarea cannot style a substring,
+so the mirror had to come UP on top of the field and paint those words
+alone, over the field's own white ones. Every earlier mark was drawn
+behind it.
+
+**AND `font-weight` IS THE OBVIOUS ANSWER AND IT DOES NOT WORK.**
+Measured on a three-word run: **151.61px plain, 158.58 bold.** Seven
+pixels, so every word after it in the mirror lands seven pixels right
+of where the field puts it, which is the two coming apart on exactly
+the line that matters. `-webkit-text-stroke` is apparent weight at
+IDENTICAL metrics — the same run measures 151.61 either way.
+
+**DRAWN THE SAME WAY IN READING, AND THAT IS NOT TIDINESS.** Real bold
+there would wrap a long line at a different word than editing does, and
+a mode switch that re-wraps the note is the note looking like it
+changed. The stroke is what lets one declaration serve both faces of
+the mode, and the check holds the run to the same WIDTH in both.
+
+**5.67:1 AT ITS WORST**, measured across seven hues on two faces —
+16px body text, so the 4.5 bar rather than a graphic's 3. Best is 9.12.
+That is a margin rather than the rounding error this file has shipped
+twice believing otherwise.
+
+### The mirror was never on the field's box, and nothing had noticed
+
+`.nt-mir` is `inset: 0`, which resolves against its containing block's
+PADDING box — and it was parented to the row. So it sat **3px above the
+field always**, and a further **15px left of it** on any note reserving
+the gutter. A fill 3px out reads as a highlight sitting slightly high;
+GLYPHS 15px out are unreadable, which is the only reason this surfaced
+now. It was there for every note that carried a bracket and a pen.
+
+Four separate rules set the row's padding, so writing the insets to
+match is two numbers to keep in step and the one that drifts is the
+invisible one. **A wrapper in normal flow IS the field's box**,
+whatever the row's padding does now or later. The line marks stay on
+the ROW, because they are drawn in the padding the well sits inside of.
+Asserted as the two boxes differing by `0,0,0`.
+
+### And the room the pill needed went with the pill
+
+The pane carried 8px of padding either side, pulled back by an equal
+margin, so its clip boundary sat proud of the text column without
+moving it — and `.nt-tools` carried a `left: 8px` to cancel it. All of
+that was for the pen's 7px overhang. The weight has no ends to protect,
+so both went. **Measured across the removal: the text column, the
+marked run and the tools strip each held their pixel**, and only the
+pane's own box went flush.
+
+Its check went from *the pill reaches left of the words AND is inside
+the pane* to *the mark begins exactly where its own line's words do* —
+the equality, because "inside the pane" is passed without being looked
+at by a mark that cannot overhang. Re-introduce a pill and the negative
+margin puts it at 11 against a pane at 18, which is what the break
+reported.
+
+**And it reads its OWN line's text**, never the first `.nt-v` on the
+page, which is a different row the moment the fixture moves.
+
+### Two checks had their subject moved under them
+
+**The bare-lines check counted a gutter that had grown a third mark.**
+It excluded `is-dot` and `is-br`, so the tabbed line joined the set of
+lines that must draw nothing and failed for drawing its own bar. Its
+floor was `>= 2` bare lines and the tab left only one — so rather than
+lower the floor, which weakens the vacuity guard, the claim became
+**how many lines WEAR a gutter mark against how many DRAW one**. That
+reads every line instead of the handful left over, and a build putting
+a bullet on all of them fails whichever lines happen to be bare.
+
+**And eight assertions read `.nt-v.is-mk`**, which was the swipe's
+marker on the span. With the mark on the ROW that class is gone rather
+than left drawing nothing — a marker a test reads and nothing paints is
+the dead rule this file keeps taking out, one language over.

@@ -13106,7 +13106,7 @@ const SAID = [
         fields: document.querySelectorAll('.nt-body input, .nt-body textarea').length,
         grips: document.querySelectorAll('.nt-grip').length,
         rows: document.querySelectorAll('.nt-body .nt-row').length,
-        marks: [...document.querySelectorAll('.nt-v.is-mk')].map((s) => s.textContent),
+        marks: [...document.querySelectorAll('.nt-row.is-tab .nt-v')].map((s) => s.textContent),
         title: document.querySelector('.nt-title').tagName,
         add: !!document.querySelector('.nt-add'),
         rm: !!document.querySelector('.nt-rm'),
@@ -13155,7 +13155,7 @@ const SAID = [
         })),
         lines: rows.filter((r) => !r.classList.contains('is-head'))
           .map((r) => r.querySelector('.nt-in').value),
-        marks: [...document.querySelectorAll('.nt-mir span.is-mk')].map((s) => s.textContent),
+        marks: [...document.querySelectorAll('.nt-row.is-tab .nt-in')].map((s) => s.value),
         bullets: rows.filter((r) => !r.classList.contains('is-head'))
           .map((r) => getComputedStyle(r, '::before').content)
       };
@@ -13195,37 +13195,58 @@ const SAID = [
       && one.marks[0] === 'Conversations that do not serve me'
       && one.marks[1] === 'Fasting till the afternoon', one.marks);
 
-    const swipe = await npage.evaluate(() => {
+    /* ── THE TAB IS A GUTTER MARK, WHICH THE SWIPE WAS NOT ──
+       It replaced a wash drawn BEHIND the words, so what has to be
+       measured is that the mark is outside them: a bar on the row's
+       own ::before, left of where the words start, with nothing
+       painted on the line itself. */
+    const tab = await npage.evaluate(() => {
       const rows = [...document.querySelectorAll('.nt-row')]
         .filter((r) => !r.classList.contains('is-head'));
-      const hit = rows.find((r) => r.querySelector('.nt-mir span.is-mk'));
-      const sp = hit.querySelector('span.is-mk');
+      const hit = rows.find((r) => r.classList.contains('is-tab'));
+      if (!hit) throw new Error('no line on this note wears the tab');
       const f = hit.querySelector('.nt-in');
-      const cs = getComputedStyle(sp), fs = getComputedStyle(f), ms = getComputedStyle(hit.querySelector('.nt-mir'));
+      const mir = hit.querySelector('.nt-mir');
+      const bs = getComputedStyle(hit, '::before');
+      const fs = getComputedStyle(f), ms = getComputedStyle(mir);
+      const fb = f.getBoundingClientRect(), mb = mir.getBoundingClientRect();
       return {
-        bg: cs.backgroundImage,
+        barW: parseFloat(bs.width) || 0,
+        barBg: bs.backgroundColor,
+        barLeft: Math.round(hit.getBoundingClientRect().left + (parseFloat(bs.left) || 0)),
+        textLeft: Math.round(fb.left),
         fieldBg: fs.backgroundImage + ' ' + fs.backgroundColor,
-        w: Math.round(sp.getBoundingClientRect().width),
-        rowW: Math.round(hit.getBoundingClientRect().width),
+        mirBg: ms.backgroundImage + ' ' + ms.backgroundColor,
+        /* THE MIRROR IS THE FIELD'S OWN BOX. It is `inset: 0`, which
+           resolves against its containing block's PADDING box — so
+           parented to the row it sat 3px above the field, and a
+           further 15px left of it on any note reserving the gutter,
+           which put the word mark on the wrong words entirely. A
+           wrapper in normal flow is what makes the two identical. */
+        boxOff: [Math.round(mb.left - fb.left), Math.round(mb.top - fb.top),
+                 Math.round(mb.width - fb.width)],
         /* Every property that decides wrapping, on both. One of them
-           different and the wash lands under the wrong words on the
+           different and the word mark lands on the wrong words on the
            first line long enough to wrap. */
         same: ['fontSize', 'fontFamily', 'lineHeight', 'letterSpacing',
                'paddingLeft', 'paddingRight', 'whiteSpace', 'overflowWrap']
           .filter((k) => ms[k] !== fs[k])
       };
     });
-    ok('...the mark is a gradient that fades, never a flat fill',
-      /linear-gradient/.test(swipe.bg) && /transparent|rgba\(0, 0, 0, 0\)/.test(swipe.bg),
-      swipe.bg);
-    /* FITTED TO THE WORDS: a wash on the field would be the full
-       column. This line is well short of it and must measure so. */
-    ok('...and it is the width of the words, not of the column',
-      swipe.w > 40 && swipe.w < swipe.rowW - 20, swipe);
-    ok('...the field itself draws no ground, or there would be two',
-      /none/.test(swipe.fieldBg) && /rgba\(0, 0, 0, 0\)/.test(swipe.fieldBg), swipe.fieldBg);
+    ok('...the tab is a bar in the gutter, drawn left of the words',
+      tab.barW >= 2 && tab.barW <= 5 && !/rgba\(0, 0, 0, 0\)/.test(tab.barBg)
+      && tab.barLeft < tab.textLeft, tab);
+    /* NOTHING IS DRAWN BEHIND THE WORDS ANY MORE. The swipe was the
+       one line mark that was, so a build that kept a wash would pass
+       every check above while losing the contrast this exchange
+       bought. Both layers, because either one could carry it. */
+    ok('...and neither the field nor the mirror grounds the line',
+      /none/.test(tab.fieldBg) && /rgba\(0, 0, 0, 0\)/.test(tab.fieldBg)
+      && /none/.test(tab.mirBg) && /rgba\(0, 0, 0, 0\)/.test(tab.mirBg), tab);
+    ok('...the mirror sits on exactly the field\'s own box',
+      tab.boxOff.join() === '0,0,0', tab.boxOff);
     ok('...and the mirror wraps exactly as the field does',
-      swipe.same.length === 0, swipe.same);
+      tab.same.length === 0, tab.same);
 
     /* A line above every heading has no section, so it has no colour
        to be marked IN — and a colour nobody chose is the wheel
@@ -14096,7 +14117,7 @@ const SAID = [
           nodeShadow: node ? node.boxShadow : null,
           key: document.querySelectorAll('.nt-st.is-key').length,
           plain: document.querySelectorAll('.nt-row.is-head').length,
-          swipe: document.querySelectorAll('.nt-v.is-mk').length
+          tab: document.querySelectorAll('.nt-row.is-tab').length
         };
       });
       ok('a daily process draws one line down its whole height',
@@ -14112,7 +14133,7 @@ const SAID = [
          — so the note's swipe must be ABSENT, or the layout is drawing
          two answers to the same question. */
       ok('...and a marked step fills its node rather than wearing a swipe',
-        lySpine.key === 1 && lySpine.swipe === 0 && lySpine.plain === 0, lySpine);
+        lySpine.key === 1 && lySpine.tab === 0 && lySpine.plain === 0, lySpine);
 
       /* ── A GOAL IS A MARKER ── */
       await lyOpen('Prop firm payout');
@@ -14131,7 +14152,7 @@ const SAID = [
           cutLine: cut ? cut.textContent : null,
           cutDeco: cut ? getComputedStyle(cut).textDecorationLine : null,
           spine: document.querySelectorAll('.nt-sp').length,
-          swipe: document.querySelectorAll('.nt-v.is-mk').length
+          tab: document.querySelectorAll('.nt-row.is-tab').length
         };
       });
       ok('a goal puts its statement on a marker with a heavy edge',
@@ -14147,7 +14168,7 @@ const SAID = [
       ok('...and a marked line is STRUCK, never swiped',
         lyGoal.cutLine === 'Adding to a loser'
         && /line-through/.test(String(lyGoal.cutDeco))
-        && lyGoal.swipe === 0 && lyGoal.spine === 0, lyGoal);
+        && lyGoal.tab === 0 && lyGoal.spine === 0, lyGoal);
 
       /* ── AND A PLAIN NOTE IS EXACTLY WHAT IT WAS ──
          Asserted beside the other two, because "the layouts differ"
@@ -14157,13 +14178,13 @@ const SAID = [
       const lyPlain = await lypage.evaluate(() => ({
         heads: document.querySelectorAll('.nt-row.is-head .nt-hw').length,
         clause: (document.querySelector('.nt-hc') || {}).textContent,
-        swipe: document.querySelectorAll('.nt-v.is-mk').length,
+        tab: document.querySelectorAll('.nt-row.is-tab').length,
         spine: document.querySelectorAll('.nt-sp').length,
         mk: document.querySelectorAll('.nt-mk').length
       }));
       ok('a plain note is drawn exactly as it always was',
         lyPlain.heads === 2 && lyPlain.clause === 'what takes away'
-        && lyPlain.swipe === 1 && lyPlain.spine === 0 && lyPlain.mk === 0,
+        && lyPlain.tab === 1 && lyPlain.spine === 0 && lyPlain.mk === 0,
         lyPlain);
 
       /* ── AND THE SECOND HIGHLIGHT IS A BRACKET ──
@@ -14187,9 +14208,9 @@ const SAID = [
              row makes the text column step in and out down the page. */
           lefts: [...new Set(rows.map((r) => Math.round(
             r.getBoundingClientRect().left + parseFloat(getComputedStyle(r).paddingLeft))))],
-          swipes: rows.filter((r) => r.querySelector('.nt-v.is-mk')).length,
-          brWithSwipe: rows.filter((r) => r.classList.contains('is-br')
-            && r.querySelector('.nt-v.is-mk')).length
+          tabs: rows.filter((r) => r.classList.contains('is-tab')).length,
+          brWithTab: rows.filter((r) => r.classList.contains('is-br')
+            && r.classList.contains('is-tab')).length
         };
       });
       /* Rows are [swipe, plain, run-of-two ×2, run-of-one]. The run of
@@ -14207,8 +14228,8 @@ const SAID = [
         lyBr.top[4] > 1 && lyBr.bot[4] > 1, lyBr);
       /* The two are exclusive: a line carries one highlight. A build
          that drew both would pass every check on either alone. */
-      ok('...a bracketed line never also wears the swipe',
-        lyBr.swipes === 1 && lyBr.brWithSwipe === 0, lyBr);
+      ok('...a bracketed line never also wears the tab',
+        lyBr.tabs === 1 && lyBr.brWithTab === 0, lyBr);
       ok('...and the gutter is reserved on the whole note, so the column holds',
         lyBr.lefts.length === 1, lyBr.lefts);
 
@@ -14248,8 +14269,18 @@ const SAID = [
              the furniture this app refuses; one on the lines you
              pressed is a mark. */
           bare: rows.filter((r) => !r.classList.contains('is-dot')
-            && !r.classList.contains('is-br'))
+            && !r.classList.contains('is-br')
+            && !r.classList.contains('is-tab'))
             .map((r) => cs(r).content),
+          /* How many lines WEAR a gutter mark against how many DRAW
+             one. Equality is the whole claim and it reads every line
+             rather than the handful left over. */
+          wearing: rows.filter((r) => r.classList.contains('is-dot')
+            || r.classList.contains('is-br')
+            || r.classList.contains('is-tab')).length,
+          drawing: rows.filter((r) => {
+            const c = cs(r).content; return c !== 'none' && c !== 'normal';
+          }).length,
           /* Where to sample: the dot's own centre, and clean gutter
              a few pixels along the same line. */
           at: { x: b2.left + parseFloat(s2.left) + parseFloat(s2.width) / 2,
@@ -14267,11 +14298,19 @@ const SAID = [
          EVERY line is the bullet this app decided against. One dot
          across six lines is the first half of that; the second is that
          a line carrying no gutter mark draws no pseudo-element at all,
-         so the column is empty everywhere you did not press. */
+         so the column is empty everywhere you did not press. All
+         THREE line marks share that column now — the tab joined it
+         when it replaced the swipe, which was the one drawn behind
+         the words — so all three are excluded from the bare set. */
       ok('...and a line with no gutter mark draws nothing in it',
         lyDot.dots.filter(Boolean).length === 1
-        && lyDot.bare.length >= 2
-        && lyDot.bare.every((c) => c === 'none' || c === 'normal'), lyDot.bare);
+        && lyDot.bare.length >= 1
+        && lyDot.bare.every((c) => c === 'none' || c === 'normal')
+        /* The count is what makes this non-vacuous now that three of
+           the marks share the column: a build drawing a bullet on
+           every line gives more DRAWING than WEARING, whichever
+           lines happen to be left bare. */
+        && lyDot.wearing > 0 && lyDot.drawing === lyDot.wearing, lyDot);
       /* A GRAPHIC, and the smallest mark on the screen — so it is held
          to 3:1 on composited pixels rather than to the wash arithmetic
          the tags use. Sampled at the dot's own centre against clean
@@ -14316,7 +14355,7 @@ const SAID = [
         return { names: names, before: before, moved: moved, off: rec() };
       });
       ok('a line in a note is offered all three highlights, and they are exclusive',
-        lyMk.names.join(' ') === 'Heading Swipe Bracket Dot Pen'
+        lyMk.names.join(' ') === 'Heading Tab Bracket Dot Weight'
         && lyMk.before === '01022023' && lyMk.moved === '02022023'
         && lyMk.off === '00022023', lyMk);
 
@@ -14496,6 +14535,85 @@ const SAID = [
       ok('...drawn as ONE mark across the run, not one per word',
         penSpans[2].length === 1 && penSpans[2][0] === 'till the afternoon', penSpans[2]);
 
+      /* ── AND THE MARK IS A STROKE, NEVER `font-weight` ──
+         The pen was a fill BEHIND the words; the weight IS the words,
+         which is the one thing the mirror cannot paint — it is
+         `color: transparent` by construction and a textarea cannot
+         style a substring. So two things have to hold at once, and
+         each fails on the other's bug.
+
+         Real bold changes the advance widths: measured on a
+         three-word run, 151.61px against 158.58, so every word after
+         it in the mirror lands seven pixels right of where the field
+         puts it. A stroke is apparent weight at IDENTICAL metrics,
+         which is the whole reason this mark is drawable at all. */
+      const wMech = await lypage.evaluate(() => {
+        const sp = document.querySelector('#scNotePane .nt-mir .nt-w');
+        if (!sp) throw new Error('no weighted words drawn in the mirror');
+        const row = sp.closest('.nt-row');
+        const f = row.querySelector('.nt-in');
+        const cs = getComputedStyle(sp), fs = getComputedStyle(f);
+        const ms = getComputedStyle(sp.closest('.nt-mir'));
+        const rgb = (v) => {
+          let m = v.match(/^rgba?\(([^)]+)\)/);
+          if (m) return m[1].split(/[ ,\/]+/).slice(0, 3).map(Number);
+          m = v.match(/^color\(srgb ([^)]+)\)/);
+          if (m) return m[1].trim().split(/[ \/]+/).slice(0, 3)
+            .map((x) => Math.round(+x * 255));
+          return null;
+        };
+        const lum = (c) => { const q = c.map((v) => { v /= 255;
+          return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); });
+          return .2126 * q[0] + .7152 * q[1] + .0722 * q[2]; };
+        const ink = rgb(cs.color), grd = rgb(getComputedStyle(document.body).backgroundColor);
+        const l1 = lum(ink), l2 = lum(grd);
+        return {
+          stroke: parseFloat(cs.webkitTextStrokeWidth) || 0,
+          weight: cs.fontWeight, fieldWeight: fs.fontWeight,
+          bg: cs.backgroundImage + ' ' + cs.backgroundColor,
+          z: ms.zIndex,
+          w: +sp.getBoundingClientRect().width.toFixed(1),
+          text: sp.textContent,
+          ratio: +(((Math.max(l1, l2) + .05) / (Math.min(l1, l2) + .05))).toFixed(2)
+        };
+      });
+      ok('the weight is a stroke, drawn at the field’s own font-weight',
+        wMech.stroke > 0 && wMech.weight === wMech.fieldWeight, wMech);
+      /* A FILL WOULD BE THE PEN. The mark it replaced was a ground
+         behind the words, so a build that kept one passes every other
+         check here while drawing the old mark. */
+      ok('...and it draws no ground at all, because it IS the words',
+        /none/.test(wMech.bg) && /rgba\(0, 0, 0, 0\)/.test(wMech.bg), wMech.bg);
+      /* The mirror paints no ink, so the one mark that is ink has to
+         be drawn OVER the field rather than behind it — which is what
+         the mirror was for every other mark this note has had. */
+      ok('...over the field, where every earlier mark was behind it',
+        +wMech.z >= 1, wMech.z);
+      /* 16px body text, so the 4.5 bar rather than a graphic's 3.
+         Measured across seven hues on two faces, worst 5.67:1. */
+      ok('...and the marked words clear 4.5:1 on the page',
+        wMech.ratio >= 4.5, wMech.ratio);
+
+      /* ── AND READING DRAWS THE IDENTICAL MARK ──
+         Real bold in view alone would wrap a long line at a different
+         word than editing does, and a mode switch that re-wraps the
+         note is the note looking like it changed. Asserted as the run
+         measuring the same WIDTH in both, which is the thing a weight
+         difference could not survive. */
+      await lyEdit(false);
+      const wView = await lypage.evaluate(() => {
+        const sp = document.querySelector('#scNotePane .nt-v .nt-w');
+        if (!sp) throw new Error('no weighted words drawn in reading');
+        const cs = getComputedStyle(sp);
+        return { w: +sp.getBoundingClientRect().width.toFixed(1),
+                 text: sp.textContent, colour: cs.color,
+                 stroke: parseFloat(cs.webkitTextStrokeWidth) || 0 };
+      });
+      await lyEdit(true);
+      ok('...and reading draws the very same run at the very same width',
+        wView.text === wMech.text && Math.abs(wView.w - wMech.w) < 0.5
+        && wView.stroke === wMech.stroke, { wView: wView, wMech: wMech });
+
       /* ── EXCLUSIVE WITH THE LINE MARKS, BOTH WAYS ──
          "This line matters" and "these words matter" are the same
          claim at two sizes, and a line wearing both says it twice with
@@ -14643,20 +14761,29 @@ const SAID = [
         const body = pane.querySelector('.nt-body');
         return { pill: +br.left.toFixed(1), pane: +pr.left.toFixed(1),
           clip: getComputedStyle(pane).overflowX,
+          pad: parseFloat(getComputedStyle(pane).paddingLeft) || 0,
           gut: !!body && body.className.indexOf('is-gut') >= 0,
-          text: +document.querySelector('#scNotePane .nt-v').getBoundingClientRect()
-            .left.toFixed(1) };
+          /* ITS OWN line's text, never the first `.nt-v` on the page —
+             which is a different row the moment the fixture moves. */
+          text: +w.parentElement.getBoundingClientRect().left.toFixed(1) };
       });
-      /* BOTH HALVES on the overhang. "The pill is inside the pane" is
-         vacuously true of a pill with no overhang at all, which is the
-         build that reads cramped rather than cut — so the overhang is
-         asserted to EXIST (the pill reaches left of the words) and to
-         be CONTAINED. The gutter is asserted OFF as well, or a bracket
-         added back to this note later passes here for the same
-         swallowed reason it failed to catch anything the first time. */
-      ok('...and a mark starting a line is inside the pane rather than cut by it',
-        penCut.pill >= penCut.pane && penCut.clip === 'hidden'
-        && penCut.pill < penCut.text && !penCut.gut, penCut);
+      /* ── AND THE MARK HAS NO ENDS TO PROTECT ANY MORE ──
+         The pen's pill reached 7px past the first glyph so its round
+         ends were not drawn through the letters, and on a run that
+         STARTED a line that put it outside a pane whose `overflow-x`
+         is deliberately `hidden` — reported as the corners coming out
+         square. The weight that replaced it IS the glyphs, so it
+         begins exactly where its line's text begins.
+
+         Asserted as that EQUALITY rather than as "inside the pane",
+         which a mark with no overhang passes without being looked at:
+         re-introduce a pill and the negative margin puts it left of
+         its own parent, which fails here. The pane's padding is held
+         at 0 beside it, or the 8px of room the pill needed comes back
+         with nothing using it. */
+      ok('...and a mark starting a line begins exactly where its words do',
+        penCut.pill === penCut.text && penCut.pill >= penCut.pane
+        && penCut.pad === 0 && penCut.clip === 'hidden' && !penCut.gut, penCut);
       /* Put the note back the way the rest of this file still reads it. */
       await lyEdit(true);
       for (const r of onNow) await toggleAt(r.i, r.m === 2 ? 'nt-brb' : 'nt-dtb');

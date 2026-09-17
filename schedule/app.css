@@ -446,27 +446,16 @@ body {
    row of its own, and was checked before this went in. */
 #scNotePane {
   position: relative;
-  /* ── ROOM FOR A MARK TO OVERHANG INTO, INSIDE THE CLIP ──
-     The pen's pill reaches 7px past the first and last glyph so its
-     round ends are not drawn through the letters — and on a run that
-     starts the line that put it 7px OUTSIDE a box whose `overflow-x`
-     is deliberately `hidden`. Measured: the pill's left edge at 11
-     against a pane starting at 18, so the first word's round end was
-     cut square. That is the day card's own lesson — the radius was
-     applied and the corners were cut off — and it was reported there
-     as "that doesn't look like the pill shape".
-
-     Padding OUT and a margin back, so the border box grows either side
-     and the content box does not move: the text column is untouched,
-     the clip boundary is 8px wider, and nothing has to be measured.
-     The poster's own padding is `--pad` at 18, so a border box 8px
-     proud of the poster's CONTENT box is still 10px inside its padding
-     box — there is nothing for anything to scroll sideways to, which
-     is the rule this pane's `overflow-x` was said out loud for. */
-  padding-left: 8px;
-  padding-right: 8px;
-  margin-left: -8px;
-  margin-right: -8px;
+  /* ── NO ROOM FOR AN OVERHANG, BECAUSE NOTHING OVERHANGS ──
+     The pane carried 8px of padding either side, pulled back by an
+     equal margin, so its clip boundary sat proud of the text column
+     without moving it. That was for the PEN, whose pill reached 7px
+     past the first glyph and came out cut square on a run starting a
+     line. The weight that replaced it has no ends to protect — it is
+     the glyphs themselves — so the room and the `left: 8px` on
+     `.nt-tools` that cancelled it both went. Measured across the
+     removal: the text column, the marked run and the tools strip all
+     hold their pixel. */
 }
 
 /* ── the head ────────────────────────────────────────────── */
@@ -5619,43 +5608,49 @@ body {
   overflow-wrap: break-word;
   word-break: normal;
 }
+/* The box both layers share. It is in normal flow, so it is exactly
+   the field's own box — which is what makes `inset: 0` below mean the
+   field rather than the row minus whatever padding it happens to
+   carry. */
+.nt-well { position: relative; }
 .nt-mir {
   position: absolute;
   inset: 0;
   color: transparent;
   pointer-events: none;
   overflow: hidden;
+  /* ON TOP of the field, which the swipe never needed. A ground can
+     be painted behind the words; the WEIGHT is the words, so the
+     mirror has to draw over the field's own white ones. It is
+     `pointer-events: none`, so the caret and the selection are still
+     the field's. */
+  z-index: 1;
 }
-.nt-mir span.is-mk {
-  /* SWIPE. One stroke, strong where it started and gone by the end of
-     the line — it says THIS ONE without shouting to the end of the
-     sentence, and it is the only wash here that does not need the
-     words to sit on a flat coloured slab. */
-  background: linear-gradient(90deg,
-    color-mix(in srgb, var(--c) 34%, transparent), transparent);
-  border-radius: 3px 12px 12px 3px;
-  padding: 1px 4px;
-  margin: 0 -4px;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-}
-/* THE PEN, and it is not the swipe at a smaller width. The swipe
-   fades to nothing by the end of its run, which is what makes it right
-   on a line (it does not shout to the end of the sentence) and exactly
-   what makes it wrong on a phrase: where the phrase STOPS is the whole
-   point, and rendered at phrase width the fade ate half of a two-word
-   mark. A flat wash with round ends says both ends.
 
-   A run of consecutive words is ONE span, so the ends here are the
-   ends of the phrase rather than of every word in it. `clone` is what
-   carries the shape onto the second line when a phrase wraps. */
+/* ── THE WEIGHT, WHICH REPLACED THE PEN ──
+   The pen was a fill BEHIND the words and this is the words
+   themselves, which is the one thing the mirror cannot paint: it is
+   `color: transparent` by construction, and a textarea cannot style a
+   substring. So the mirror comes up on top (see `.nt-mir`) and paints
+   these words alone, over the field's own white ones.
+
+   AND IT IS A STROKE, NEVER `font-weight`. Real bold changes the
+   advance widths — measured on a three-word run, 151.61px to 158.58 —
+   so every word after it in the mirror sits seven pixels right of
+   where the field puts it, which is the two coming apart on exactly
+   the line that matters. A stroke is apparent weight at IDENTICAL
+   metrics: the same run measures 151.61 either way.
+
+   Drawn the same way in reading, and that is not tidiness. Real bold
+   there would wrap a long line at a different word than editing does,
+   and a mode switch that re-wraps the note is the note looking like
+   it changed. The stroke is what lets one declaration serve both.
+
+   A run of consecutive words is ONE span, so a phrase is stroked as a
+   phrase rather than word by word. */
 .nt-w {
-  background: color-mix(in srgb, var(--c) 30%, transparent);
-  border-radius: 999px;
-  padding: 1px 7px;
-  margin: 0 -7px;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
+  color: color-mix(in srgb, var(--c) 78%, var(--ink));
+  -webkit-text-stroke: .6px currentColor;
 }
 
 .nt-in {
@@ -5748,12 +5743,11 @@ body {
    one. */
 .nt-tools {
   position: absolute;
-  /* The pane carries 8px of padding for the pen's overhang and this is
-     absolute against its PADDING box, so a bare `left: 0` would put
-     the chips 8px proud of the words they are about. Aligned to the
-     text column rather than inset from it is the whole of what makes
-     the strip read as part of the note. */
-  left: 8px; right: 8px;
+  /* Aligned to the text column rather than inset from it, which is
+     the whole of what makes the strip read as part of the note. It
+     was `left: 8px` to cancel the padding the pane carried for the
+     pen's overhang; with no overhang there is nothing to cancel. */
+  left: 0; right: 0;
   z-index: 45;
   display: flex;
   align-items: center;
@@ -5816,23 +5810,13 @@ body {
 .nt-c:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
 
 /* ── READING ──
-   No field on top, so the mark goes straight onto the words and there
-   is no mirror to keep in step. Same wash, same geometry, and the same
-   SIZE — the two have to be indistinguishable, because switching modes
-   must not look like the note changed. */
+   No field on top, so the words are drawn once. Same size and same
+   metrics as the pair above — the two have to be indistinguishable,
+   because switching modes must not look like the note changed. */
 .nt-v {
   font-size: 16px;
   line-height: 1.42;
   display: inline;
-}
-.nt-v.is-mk {
-  background: linear-gradient(90deg,
-    color-mix(in srgb, var(--c) 34%, transparent), transparent);
-  border-radius: 3px 12px 12px 3px;
-  padding: 1px 4px;
-  margin: 0 -4px;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
 }
 .nt-body:not(.is-edit) .nt-row { padding: 7px 0; }
 .nt-body:not(.is-edit) .nt-row.is-head { padding: 20px 0 7px; }
@@ -6111,6 +6095,27 @@ body {
   border-bottom: 2px solid color-mix(in srgb, var(--c) 62%, transparent);
   border-bottom-left-radius: 3px;
 }
+/* ── THE TAB, WHICH REPLACED THE SWIPE ──
+   A line said in the margin, where the bracket is a run and the dot
+   is a point — so the three line marks are now one column at three
+   scales, and none of them is drawn behind the words.
+
+   IT IS A PLAIN VERTICAL RULE, WHICH THIS FILE RECORDS AS REJECTED,
+   and the rejection was not wrong: a run of tabbed lines IS the
+   bracket with its feet missing. What makes it allowed here is that
+   the collision was RENDERED as a run of four and looked at before
+   the mark was chosen, which is the shape an exception to a measured
+   rule has to have — raised, drawn, and then decided by somebody.
+
+   3px at full strength against the bracket's 2px at 62% is the whole
+   of what separates the two on a single line, so neither number is
+   free to move on its own. */
+.nt-row.is-tab::before {
+  content: ""; position: absolute; left: 0; top: 6px; bottom: 6px;
+  width: 3px; border-radius: 2px;
+  background: var(--c);
+}
+
 /* ── AND THE DOT, WHICH SHARES THAT GUTTER ──
    One line, said in the margin — the mark for a point where the
    bracket is the mark for a run. It takes the same column rather than
@@ -6141,9 +6146,9 @@ body {
 
 /* ── THE FOOT ── */
 /* ── THE MARK, IN EDIT, PER LAYOUT ──
-   The mirror behind the field draws the swipe, which is the NOTE's
-   drawing — so the other two switch it off and take their own. */
-.nt-body:not(.is-note) .nt-mir span.is-mk { background: none; }
+   The note's three line marks are gutter marks and `scNoteGutCls` is
+   asked for them on a note alone, so there is nothing here for the
+   other two layouts to switch off — they simply take their own. */
 .nt-sp.is-edit .nt-row.is-step.is-mkd::before {
   background: color-mix(in srgb, var(--c) 92%, var(--ink));
 }
