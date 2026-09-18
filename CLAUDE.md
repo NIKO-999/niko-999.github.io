@@ -10853,3 +10853,146 @@ port rather than killing the old one.
 runner detaches on its own; adding `nohup ... &` returns immediately,
 the tool's shell exits, and the child goes with it. Same empty output,
 same 144.
+
+## The spending row is led by what is left, and the plan has a stack
+
+Chosen off a sheet of seventeen drawn at 390x844 against what shipped,
+each marked. Two picked, and both were changed on the way in — stated
+here rather than shipped as drawn.
+
+### What is LEFT, and only on the rows you press
+
+The row printed `$265.50 of $400`, which is what you have SPENT. The
+decision you take at a till is whether you can spend AGAIN, so the
+figure is the remainder at 20px with the name and the allocation as
+its caption and a short gauge beside it.
+
+**THE NAME LEADS THE CAPTION.** `Groceries · left of $400`, not the
+other way round — a figure-led row loses the ability to scan a list by
+CATEGORY, and putting the name first is the whole of what buys it
+back.
+
+**AND IT IS THE SPENDING ROWS ALONE**, which is the change to what was
+drawn. The sheet showed four figure-led rows in a row and the cost
+written against it was that four 20px figures is loud. On a real
+budget only TWO of thirteen rows are spending — the others are direct
+debits, which are paid or not and have nothing left to decide — so
+applying it by KIND rather than to the whole list removes the cost
+almost entirely. Both halves are asserted, because a build that gave
+every row the treatment passes any check that only reads a spending
+one.
+
+**What it costs is one row above the fold**: 64px against 39, so six
+rows reach it where seven did. That is the trade, and it was the trade
+the option was picked with.
+
+**And the gauge is 64px beside the figure rather than full width under
+it.** A full-width rule sits exactly where a divider would and
+separates the rows as much as it measures one — which was the
+complaint about the row in the first place.
+
+### One stack, five shares, and the headings are the legend
+
+The plan is asked a different question from the tracker: not how far
+through, but **where the money goes**. Four group totals are a list of
+four numbers; a proportion is a picture, and nothing on that screen
+drew one.
+
+**THE LEGEND WENT, which is the second change to what was drawn.** It
+carried the group names and their totals — and the group HEADINGS
+already print both. Colouring the heading makes the heading the
+legend, and takes a whole row of chrome out. The colour then says
+WHICH group in two places at once rather than in three.
+
+**A GROUP HAS ONE COLOUR AND EVERYTHING ABOUT IT WEARS IT.** The first
+build coloured the plan's headings and left the tracker's on the
+NOTE's hue, so Spending was orange on one screen and teal on the next
+— a colour saying WHICH on one screen and nothing on the other. It is
+on the heading and on every row of the group now, so a spending row's
+gauge is the spending colour wherever it is drawn. Caught by opening
+the second screen, not by reading the diff.
+
+**THE WORKOUT HUES, not five new literals.** They are already solved
+for both faces and already measured as a wash under a label, and the
+two systems are never on one screen together. Measured in Lab, the
+worst of the five pairs is **dE 31.2 on the dark face and 27.5 on the
+light**, against the dE >= 12 this app holds two colours on one screen
+to. As headings they measure **7.5:1 at worst on the dark face and
+6.24 on the light**, composited.
+
+**Drawn only where it is a share OF something**, and only once more
+than one group is priced: a stack of one segment is a bar, not a
+picture, and with no income there is no denominator. It is spoken as
+the figures rather than left as five widths, which is the tally
+strip's own rule — a shape says nothing at all to a screen reader.
+
+**And the qualifier took a column.** A day, an `est`, or the figure
+you press sat inline after the name, so every name began at a
+different x and the list read ragged. In a column the names line up
+and the dates are scannable down the side — twelve rows reach the fold
+where nine did. It is `+$25` rather than `$25` for the spending rows:
+the column also carries days and the word "est", and a bare figure
+beside a $400 allocation reads as an amount rather than as the step it
+adds in.
+
+### The stack's shares were asserted against the wrong sheet
+
+Four figures typed into the check — 29.8%, 15.7%, `$691.78`,
+`$365.70` — taken from the REAL budget this was designed against
+rather than from the fixture the check runs on. And an earlier
+assertion in the same file edits that fixture's Food allocation, so
+they were stale twice over: wrong sheet, and wrong even for the right
+sheet by the time the check ran.
+
+They are computed from the STORE now — every segment against its own
+group's share of the income, whatever the record happens to say. That
+is the claim worth making anyway, it cannot go stale when something
+upstream edits the fixture, and it is the same lesson as an
+identifier in a fixture that nothing type-checks: **a figure typed
+into a check is a second copy of a number, and the copy is the one
+that rots.**
+
+### A check that crashes is not a check that fails, and mine did
+
+The contrast check's `pick` threw a named error when the element was
+missing — which is this file's own advice and is right on a working
+build. Under a bite proof it is wrong: the break removed the element
+it asks for, and the whole FILE went down instead of that one check
+failing. Three of the four breaks had already fired by then and the
+fourth went unproven.
+
+It records a missing spot now and asserts the COUNT beside the
+ratios, so a missing element still fails loudly and still says which
+selector found nothing. The naming survives; the crash does not.
+
+### And an edit script that throws applies none of its edits
+
+Three test updates were written, the fourth assertion in the same
+script refused, and — correctly — nothing was written at all. Then the
+LATER scripts ran and referenced a field the first three would have
+added. The suite reported it as two stale regexes and a crash on
+`bLive.led` being undefined, four hundred lines from the script that
+never ran.
+
+The discipline worked exactly as designed: the assertion fired before
+any write and the file was never half-edited. What it costs is that a
+refused script has to be re-run in full rather than assumed applied,
+and the thing that catches a forgotten re-run is the SUITE rather than
+anything cheaper.
+
+### And the option sheet had to be measured, not asserted
+
+The first draft of it claimed the tracker spent **228px** above the
+first row and that two rows reached the fold. Measured off the
+drawings: **363px and seven rows.** Worse, the "as it is" mockup
+stopped after two rows where the alternatives ran on — which
+understated what ships and tilted every comparison in the new
+options' favour.
+
+All four now share ONE row list and differ only in the head, and every
+figure on that page is read off the rendered page rather than
+estimated. It changed the recommendation: I expected to pick the
+dual-track head, which buys **29px**; the head-as-first-row buys
+**72px and two rows** and keeps the pace. **A comparison sheet whose
+control is drawn thinner than its candidates is an argument, not a
+comparison.**

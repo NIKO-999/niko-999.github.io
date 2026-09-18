@@ -16981,7 +16981,7 @@ const SAID = [
       bAdd.marks.join('|') === '$25|$50|$75|$100' && bAdd.before === '$129.25',
       bAdd);
     ok('...and it ADDS: fifty on top of what was there',
-      bAdd.go === 'Add $50' && /\$179\.25 of \$300/.test(bAdd.row)
+      bAdd.go === 'Add $50' && /\$120\.75Food \u00b7 left of \$300/.test(bAdd.row)
       && bAdd.big === '$240.75', bAdd);
 
     const bSet = await bgpage.evaluate(async () => {
@@ -17084,14 +17084,27 @@ const SAID = [
     const bLive = await bgpage.evaluate(() => ({
       row: (document.querySelector('.tk-r[data-row="vf"]') || {}).textContent,
       big: (document.querySelector('.tk-hd b') || {}).textContent,
-      over: !!(document.querySelector('.tk-r[data-row="vf"] .st.is-over'))
+      over: !!(document.querySelector('.tk-r[data-row="vf"] .tk-fg b.is-over')),
+      /* ── THE FIGURE-LED ROW IS THE SPENDING ROWS ALONE ──
+         A fixed row is paid or it is not and has nothing left to
+         decide, so it keeps the compact line. Both halves, because a
+         build that gave every row the 20px figure passes any check
+         that only reads a spending one. */
+      led: [...document.querySelectorAll('.tk-r')]
+        .filter((e) => e.querySelector('.tk-fg')).map((e) => e.dataset.bk),
+      plain: [...document.querySelectorAll('.tk-r')]
+        .filter((e) => !e.querySelector('.tk-fg')).map((e) => e.dataset.bk)
     }));
-    /* Food was $300 with $179.25 pressed against it. Taken to $200
-       the bar moves, the figure left drops by the hundred, and it is
-       still not over. */
+    /* Food was $300 with $179.25 pressed against it. Taken to $200 the
+       gauge moves, what is LEFT drops by the hundred — $120.75 to
+       $20.75 — and it is still not over. */
     ok('editing an allocation moves the tracker, with nothing to sync',
-      bEdit.was === '300.00' && /\$179\.25 of \$200/.test(bLive.row)
+      bEdit.was === '300.00' && /\$20\.75Food \u00b7 left of \$200/.test(bLive.row)
       && bLive.big === '$140.75' && bLive.over === false, { bEdit, bLive });
+    ok('...and the figure-led row is the spending rows and no others',
+      bLive.led.length === 2 && bLive.led.every((k) => k === 'var')
+      && bLive.plain.length > 0 && bLive.plain.every((k) => k !== 'var'),
+      { led: bLive.led, plain: bLive.plain });
     ok('...and the tracker stores no allocation of its own',
       bEdit.trkRec.length === 1 && bEdit.trkRec[0].lines === 0
       && bEdit.trkRec[0].src === 'nbud', bEdit.trkRec);
@@ -17110,6 +17123,175 @@ const SAID = [
        app has anything in memory to flush. Seeded unconditionally
        here rather than only-when-absent, because each of these three
        is a single page load with nothing to put back. */
+    /* ── NEITHER SCREEN SCROLLS SIDEWAYS ──
+       The app's own rule, and the existing sweep cannot see these two:
+       it opens the FIRST note in its own fixture, which is a plain
+       one. Asked as a SCROLLER rather than as a clip — `text-overflow:
+       ellipsis` puts scrollWidth over clientWidth on every truncated
+       name in the app, so "is the content wider than the box" flags
+       the whole design. Both screens and the plan in EDIT, which is
+       the one with a second column in every row. */
+    const bgWide = [];
+    for (const [bgname, bgwhich, bgedit] of [
+      ['plan', 'plan', false], ['plan-edit', 'plan', true], ['tracker', 'trk', false]]) {
+      await openNote(bgwhich);
+      if (bgedit) { await bgpage.click('#scNtEd'); await bgpage.waitForTimeout(420); }
+      const bgFound = await bgpage.evaluate(() => {
+        const out = [];
+        for (const e of document.querySelectorAll('body *')) {
+          if (e.getClientRects().length === 0) continue;
+          const ox = getComputedStyle(e).overflowX;
+          if (ox !== 'auto' && ox !== 'scroll') continue;
+          if (e.scrollWidth - e.clientWidth > 1) {
+            out.push((e.className || e.tagName) + ' +' + (e.scrollWidth - e.clientWidth));
+          }
+        }
+        return { over: out.slice(0, 5),
+          doc: document.scrollingElement.scrollWidth
+            - document.scrollingElement.clientWidth,
+          rows: document.querySelectorAll('.bd-r, .tk-r, .bd-in').length };
+      });
+      if (bgedit) { await bgpage.click('#scNtEd'); await bgpage.waitForTimeout(380); }
+      /* A zero is not a measurement until the screen has something on
+         it — the `getClientRects()` lesson in the other direction. */
+      if (bgFound.over.length || bgFound.doc > 1 || bgFound.rows === 0) {
+        bgWide.push([bgname, bgFound]);
+      }
+    }
+    ok('neither the budget nor its tracker scrolls sideways, in edit or out',
+      bgWide.length === 0, bgWide);
+
+    /* ── ONE STACK, AND ITS SHARES ARE THE SHARES ──
+       The only thing on the plan that is a proportion rather than a
+       figure, so it is the only thing a wrong sum would be invisible
+       in. Measured as WIDTHS against the income, not as the numbers
+       that were handed to it. */
+    await openNote('plan');
+    const bgStack = await bgpage.evaluate(() => {
+      const st = document.querySelector('.bd-stk');
+      if (!st) return { err: 'no stack on the plan' };
+      const w = st.getBoundingClientRect().width;
+      const segs = [...st.children].map((e) =>
+        +(e.getBoundingClientRect().width / w * 100).toFixed(1));
+      /* ── THE EXPECTED SHARES COME OUT OF THE RECORD ──
+         They were four figures typed into the check, taken from the
+         real sheet this was designed against rather than from the
+         FIXTURE — and an earlier check here edits that fixture's
+         Food allocation, so they were stale twice over. Computed from
+         the store, the claim is the one worth making: every segment
+         is its group's share of the income, whatever the record says
+         today. */
+      const plan = JSON.parse(localStorage.getItem('sched.note.v1')).list
+        .filter((n) => n.k === 'bud')[0];
+      const by = { fix: 0, est: 0, var: 0, dep: 0 };
+      plan.l.forEach((L) => { if (!L.h && by[L.bk] !== undefined) by[L.bk] += L.$ || 0; });
+      const left = plan.inc - by.fix - by.est - by.var - by.dep;
+      const want = ['fix', 'est', 'var', 'dep'].map((k) => by[k])
+        .concat([left]).map((c) => +(c / plan.inc * 100).toFixed(1));
+      return { segs: segs, want: want,
+        sum: +segs.reduce((a, b) => a + b, 0).toFixed(1),
+        money: { fix: by.fix, est: by.est, left: left },
+        label: st.getAttribute('aria-label') || '',
+        role: st.getAttribute('role') };
+    });
+    const bgFmt = (c) => '$' + (c / 100).toFixed(2).replace(/\.00$/, '')
+      .replace(/\B(?=(\d{3})+(?!\d)\.)/g, ',');
+    ok('the plan draws one stack of five shares, and each is its share of the income',
+      !bgStack.err && bgStack.segs.length === 5
+      && Math.abs(bgStack.sum - 100) < 0.6
+      && bgStack.segs.every((v, i) => Math.abs(v - bgStack.want[i]) < 0.6),
+      bgStack);
+    /* A SHAPE SAYS NOTHING TO A SCREEN READER, which is the tally
+       strip's own rule: the figure it draws is written out. */
+    ok('...and it is spoken as the figures rather than left as five widths',
+      bgStack.role === 'img'
+      && bgStack.label.indexOf('fixed ' + bgFmt(bgStack.money.fix)) >= 0
+      && bgStack.label.indexOf(bgFmt(bgStack.money.left) + ' left over') >= 0,
+      { label: bgStack.label, want: bgFmt(bgStack.money.fix), left: bgFmt(bgStack.money.left) });
+
+    /* ── A GROUP HAS ONE COLOUR, ON BOTH SCREENS ──
+       Spending was orange on the plan and teal on the tracker, which
+       is a colour saying WHICH on one screen and nothing on the next.
+       Read off composited-free computed colour on each, and asserted
+       EQUAL — and asserted DISTINCT between groups, because "they
+       match" passes on a build where all four are the same. */
+    const bgHue = async (which) => {
+      await openNote(which);
+      return bgpage.evaluate(() => {
+        const out = {};
+        document.querySelectorAll('.bd-g').forEach((g) => {
+          out[g.querySelector('b').textContent] = getComputedStyle(g).getPropertyValue('--c').trim();
+        });
+        return out;
+      });
+    };
+    const bgPlanHue = await bgHue('plan');
+    const bgTrkHue = await bgHue('trk');
+    const bgShared = Object.keys(bgTrkHue).filter((k) => bgPlanHue[k]);
+    /* ── AND THE MONEY IS READABLE ──
+       The figure-led row put a 20px figure over a 12px caption and
+       moved the group headings onto four hues, so every register on
+       the tracker is new type on a new ground. Measured on COMPOSITED
+       pixels against the most common pixel around each, rather than
+       off the declaration: a note's ground is a wash over the page
+       and the arithmetic knows about neither. */
+    const { PNG: PNGB } = require('pngjs');
+    await openNote('trk');
+    const bgSpots = await bgpage.evaluate(() => {
+      /* ── IT RECORDS A MISSING SPOT RATHER THAN THROWING ──
+         Throwing names what was wanted, which is right on a working
+         build and wrong under a break: the bite proof removed the
+         element this asks for and the whole FILE went down instead of
+         this one check failing. The count is asserted beside the
+         ratios, so a missing spot still fails loudly and still says
+         which. A check that crashes is not a check that fails. */
+      const pick = (sel, label) => {
+        const e = document.querySelector(sel);
+        if (!e) return { label: label, missing: sel };
+        const r = e.getBoundingClientRect();
+        if (r.width < 2 || r.height < 2) return { label: label, missing: 'no box' };
+        return { label: label, col: getComputedStyle(e).color,
+          x: Math.round(r.left), y: Math.round(r.top),
+          w: Math.round(r.width), h: Math.round(r.height) };
+      };
+      return [pick('.tk-r[data-bk="var"] .tk-fg > .x > b', 'the figure'),
+        pick('.tk-r[data-bk="var"] .tk-fg > .x > span', 'its caption'),
+        pick('.tk-r[data-bk="fix"] .f', 'a fixed row figure'),
+        pick('.bd-g > b', 'a group heading'),
+        pick('.bd-bv', 'the buffer')];
+    });
+    const bgImg = PNGB.sync.read(await bgpage.screenshot());
+    const bgDpr = bgImg.width / 390;
+    const bgAt = (x, y) => {
+      const k = (bgImg.width * Math.round(y * bgDpr) + Math.round(x * bgDpr)) << 2;
+      return [bgImg.data[k], bgImg.data[k + 1], bgImg.data[k + 2]];
+    };
+    const bgRatios = bgSpots.filter((sp) => !sp.missing).map((sp) => {
+      /* The GROUND is the most common pixel in the box, which is the
+         polarity-agnostic technique the friends board settled on: a
+         min/max over a line of type picks antialiased edges at both
+         ends and has reported a shipped screen a whole point light. */
+      const tally = {};
+      for (let y = sp.y; y < sp.y + sp.h; y++) {
+        for (let x = sp.x; x < sp.x + sp.w; x++) {
+          const k = bgAt(x, y).join(',');
+          tally[k] = (tally[k] || 0) + 1;
+        }
+      }
+      const ground = Object.keys(tally)
+        .sort((a, b) => tally[b] - tally[a])[0].split(',').map(Number);
+      return { label: sp.label, r: +ratio(rgbOf(sp.col), ground).toFixed(2) };
+    });
+    ok('every register on the tracker clears 4.5:1 on composited pixels',
+      bgRatios.length === 5 && bgRatios.every((q) => q.r >= 4.5),
+      { ratios: bgRatios, missing: bgSpots.filter((sp) => sp.missing) });
+
+    ok('a group wears one colour on the plan and on the tracker',
+      bgShared.length >= 3
+      && bgShared.every((k) => bgPlanHue[k] === bgTrkHue[k] && bgPlanHue[k])
+      && new Set(bgShared.map((k) => bgPlanHue[k])).size === bgShared.length,
+      { plan: bgPlanHue, trk: bgTrkHue });
+
     ok('nothing threw through the budget', bgerrs.length === 0, bgerrs.slice(0, 4));
     /* ── AND NONE OF IT LEAVES THE PHONE ──
        A budget is the most private record this app has — further down

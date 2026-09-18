@@ -11536,12 +11536,27 @@
      that you do not.
      ═══════════════════════════════════════════════════════════════ */
   var BUD_KINDS = ['fix', 'est', 'var', 'dep'];
+  /* ── A COLOUR PER GROUP, AND IT IS THE ONE THING A PLAN CANNOT
+     SAY IN TYPE ── Five shares of one income is a proportion, and a
+     proportion is a picture. The colour says WHICH group, which is
+     the only thing a colour ever says in this app — and it says it in
+     two places at once, on the stack and on the heading, so the
+     headings ARE the legend and there is no third row of chrome
+     repeating figures the headings already print.
+
+     THE WORKOUT HUES, not five new literals. They are already solved
+     for both faces and already measured as a wash under a label, and
+     the two systems are never on one screen together. Worst pair of
+     the five measured in Lab: dE 31.2 on the dark face and 27.5 on
+     the light, against the dE >= 12 this app holds two colours on one
+     screen to. */
   var BUD_GROUP = {
-    fix: { n: 'Fixed', c: 'Comes out on its own' },
-    est: { n: 'Estimated', c: 'The buffer absorbs these' },
-    var: { n: 'Spending', c: 'What you press against' },
-    dep: { n: 'Allocation', c: 'Out and away' }
+    fix: { n: 'Fixed', c: 'Comes out on its own', h: '--w-blue' },
+    est: { n: 'Estimated', c: 'The buffer absorbs these', h: '--w-teal' },
+    var: { n: 'Spending', c: 'What you press against', h: '--w-orange' },
+    dep: { n: 'Allocation', c: 'Out and away', h: '--w-violet' }
   };
+  var BUD_LEFT = '--w-green';
   var SPEND_KEY = 'sched.bspend.v1';
   /* Two hundred entries a cycle and twelve cycles kept. A fortnight
      of real spending is a few dozen presses; the cap is there so a
@@ -12205,14 +12220,52 @@
     body.appendChild(hd);
     body.appendChild(per);
 
+    /* ── ONE STACK, AND IT IS THE QUESTION THE PLAN IS ASKED ──
+       The tracker asks how far through you are; the plan asks where
+       the money GOES, and thirteen itemised rows cannot answer that
+       — four group totals are a list of four numbers, not a
+       proportion. Drawn only once there is an income to be a share
+       OF, and only once something is priced: a stack of one segment
+       is a bar, not a picture. */
+    var sums = {}, priced = 0;
+    BUD_KINDS.forEach(function (bk) {
+      sums[bk] = 0;
+      scBudRows(n).forEach(function (L) { if (L.bk === bk) sums[bk] += L.$; });
+      if (sums[bk] > 0) priced++;
+    });
+    if (n.inc > 0 && priced > 1) {
+      var stk = scEl('div', 'bd-stk');
+      var seg = function (cents, hue, name) {
+        if (cents <= 0) return;
+        var i = scEl('i');
+        i.style.width = (cents / n.inc) * 100 + '%';
+        i.style.background = 'var(' + hue + ')';
+        i.title = name;
+        stk.appendChild(i);
+      };
+      BUD_KINDS.forEach(function (bk) { seg(sums[bk], BUD_GROUP[bk].h, BUD_GROUP[bk].n); });
+      seg(t.buffer, BUD_LEFT, 'Buffer');
+      /* A shape says nothing at all to a screen reader, so the figure
+         it draws is written out rather than the five widths read as
+         percentages nobody can act on. */
+      stk.setAttribute('role', 'img');
+      stk.setAttribute('aria-label', 'Where the income goes: '
+        + BUD_KINDS.filter(function (bk) { return sums[bk] > 0; })
+          .map(function (bk) {
+            return BUD_GROUP[bk].n.toLowerCase() + ' ' + scMoney(sums[bk]);
+          }).join(', ')
+        + (t.buffer > 0 ? ', and ' + scMoney(t.buffer) + ' left over' : ''));
+      body.appendChild(stk);
+    }
+
     var any = false;
     BUD_KINDS.forEach(function (bk) {
       var rows = scBudRows(n).filter(function (L) { return L.bk === bk; });
       if (!rows.length) return;
       any = true;
-      var sum = 0;
-      rows.forEach(function (L) { sum += L.$; });
+      var sum = sums[bk];
       var sh = scEl('div', 'bd-g');
+      sh.style.setProperty('--c', 'var(' + BUD_GROUP[bk].h + ')');
       sh.appendChild(scEl('b', null, BUD_GROUP[bk].n));
       sh.appendChild(scEl('i', null, BUD_GROUP[bk].c));
       /* A group of rows nobody has priced has nothing to total, and
@@ -12221,13 +12274,24 @@
       if (sum > 0) sh.appendChild(scEl('em', null, scMoney(sum)));
       body.appendChild(sh);
       rows.forEach(function (L) {
+        /* ── THE QUALIFIER GETS ITS OWN COLUMN ──
+           A day, an "est", or the figure you press. It sat inline
+           after the name, so every name started at a different x and
+           the list read ragged; in a column of its own the names line
+           up and the dates are scannable down the side. Each kind's
+           qualifier is a different fact, which is why the column is
+           the ROW's rather than the day's. */
         var r = scEl('div', 'bd-r');
-        var nm = scEl('span', 'n', L.x || 'Untitled');
-        r.appendChild(nm);
-        /* A DAY IS ONLY DRAWN WHERE IT MEANS SOMETHING. A fixed row
-           has one because that is the whole of what it needs; a
-           grocery shop does not happen on the 4th. */
-        if (L.bk === 'fix' && L.dy) r.appendChild(scEl('span', 'd', 'day ' + L.dy));
+        var q = L.bk === 'fix' ? (L.dy ? 'day ' + L.dy : '')
+          : L.bk === 'est' ? 'est'
+          /* `+$25` rather than `$25`: the column also carries days and
+             the word "est", and a bare figure beside a $400
+             allocation reads as an amount rather than as the step it
+             adds in. */
+          : L.bk === 'var' ? '+' + scMoney(scBudStep(L))
+          : '';
+        r.appendChild(scEl('span', 'q', q));
+        r.appendChild(scEl('span', 'n', L.x || 'Untitled'));
         r.appendChild(scEl('span', 'a', L.$ ? scMoney(L.$) : '—'));
         body.appendChild(r);
       });
@@ -12393,14 +12457,25 @@
         gsum += scBudRowSum(ents, L.i);
         gall += L.$;
       });
+      /* ── A GROUP HAS ONE COLOUR AND EVERYTHING ABOUT IT WEARS IT ──
+         The plan's headings took the group's hue and the tracker's
+         kept the NOTE's, so Spending was orange on one screen and
+         teal on the other — which is a colour saying WHICH group on
+         one screen and nothing on the next. Set on the heading and on
+         each row, so a spending row's gauge is the spending colour
+         wherever it is drawn. */
+      var hue = 'var(' + BUD_GROUP[bk].h + ')';
       var sh = scEl('div', 'bd-g');
+      sh.style.setProperty('--c', hue);
       sh.appendChild(scEl('b', null, BUD_GROUP[bk].n));
       if (gall > 0) {
         sh.appendChild(scEl('em', null, scMoney(gsum) + ' of ' + scMoney(gall)));
       }
       body.appendChild(sh);
       rows.forEach(function (L) {
-        body.appendChild(scTrkRow(n, plan, cyc, L, scBudRowSum(ents, L.i)));
+        var r = scTrkRow(n, plan, cyc, L, scBudRowSum(ents, L.i));
+        r.style.setProperty('--c', hue);
+        body.appendChild(r);
       });
     });
   }
@@ -12428,22 +12503,41 @@
     b.type = 'button';
     b.dataset.row = L.i;
     b.dataset.bk = L.bk;
-    var top = scEl('div', 'tk-l');
-    top.appendChild(scEl('span', 'n', L.x || 'Untitled'));
-    var say = '';
+    var say = '', top;
+    /* ── A SPENDING ROW IS LED BY WHAT IS LEFT ──
+       It printed `$265.50 of $400`, which is what you have SPENT — and
+       the decision you are taking at the till is whether you can spend
+       again. The figure is what remains, at 20px, with the name and
+       the allocation as its caption and a short gauge beside it.
+
+       ONLY THE SPENDING ROWS. A fixed row has nothing left to decide —
+       it is paid or it is not — so it stays the compact two-figure
+       line, and on a real budget that means two tall rows out of
+       thirteen rather than a screen of 20px figures. The name leads
+       the caption so the list is still scannable by CATEGORY, which is
+       the one thing a figure-led row can lose. */
     if (L.bk === 'var') {
       var over = got > L.$;
-      top.appendChild(scEl('span', 'f', scMoney(got) + ' of ' + scMoney(L.$)));
-      if (over) top.appendChild(scBudTag('over ' + scMoney(got - L.$), 'is-over'));
-      b.appendChild(top);
+      var fg = scEl('div', 'tk-fg');
+      var col = scEl('div', 'x');
+      col.appendChild(scEl('b', over ? 'is-over' : null,
+        over ? '-' + scMoney(got - L.$) : scMoney(L.$ - got)));
+      col.appendChild(scEl('span', null, (L.x || 'Untitled') + ' \u00b7 '
+        + (over ? 'over ' : 'left of ') + scMoney(L.$)));
+      fg.appendChild(col);
       var tr = scEl('div', 'tk-t is-hue' + (over ? ' is-over' : ''));
       var fi = scEl('i');
       fi.style.width = (L.$ > 0 ? Math.min(1, got / L.$) * 100 : 0) + '%';
       tr.appendChild(fi);
-      b.appendChild(tr);
-      say = L.x + ', ' + scMoney(got) + ' of ' + scMoney(L.$) + ' spent'
-        + (over ? ', over by ' + scMoney(got - L.$) : '') + '. Press to add.';
+      fg.appendChild(tr);
+      b.appendChild(fg);
+      say = L.x + ', ' + (over
+        ? scMoney(got - L.$) + ' over ' + scMoney(L.$)
+        : scMoney(L.$ - got) + ' left of ' + scMoney(L.$))
+        + ', ' + scMoney(got) + ' spent. Press to add.';
     } else if (L.bk === 'est') {
+      top = scEl('div', 'tk-l');
+      top.appendChild(scEl('span', 'n', L.x || 'Untitled'));
       top.appendChild(scEl('span', 'f', 'est ' + scMoney(L.$)));
       if (got > 0) {
         top.appendChild(scBudTag(scMoney(got), got > L.$ ? 'is-over' : 'is-ok'));
@@ -12456,6 +12550,8 @@
       }
       b.appendChild(top);
     } else {
+      top = scEl('div', 'tk-l');
+      top.appendChild(scEl('span', 'n', L.x || 'Untitled'));
       var done = got > 0;
       if (L.bk === 'fix' && L.dy) top.appendChild(scEl('span', 'd', 'day ' + L.dy));
       top.appendChild(scEl('span', 'f', scMoney(L.$)));
