@@ -10996,3 +10996,52 @@ dual-track head, which buys **29px**; the head-as-first-row buys
 **72px and two rows** and keeps the pace. **A comparison sheet whose
 control is drawn thinner than its candidates is an argument, not a
 comparison.**
+
+## The tracker's head is the figure and one line
+
+Picked off the option sheet by screenshot. It was five registers — the
+figure, a sentence, a **Money** bar, a **Cycle** bar, and a line of
+type under them — which measured **363px of a 390x844 screen before
+the first row**, on the one screen whose whole job is the rows. Seven
+of thirteen rows reached the fold. Nine do now.
+
+**WHAT IT COSTS IS REAL AND IS WHY IT TOOK A SHEET TO DECIDE.** The
+two bars carried a reading no figure replaces: whether $234.50 is
+comfortable with two days left is a different question from how much
+is left, and nothing on the screen answers it any more. Three other
+heads were drawn that kept it — one folded both facts into a single
+track with a notch at the cycle, and it bought only **29px**. The rows
+won on the measurement.
+
+**The buffer rides the same sentence.** `left to spend · 2 days to go
+· $353.83 buffer` — a FACT rather than a state, so it is the line's
+own quiet register after a middle dot rather than a headline of its
+own. Drawn only where there is an income for it to be left OF.
+
+**And everything the bars needed went with them**: `scBudPace`,
+`.tk-p`, `.tk-t.is-lit`, `.tk-t.nu` and `.bd-bv`. A dead rule that
+still cascades is not dead, and a function nothing calls reads as one
+somebody might edit.
+
+### Entries, not Ledger
+
+**A tab you have to ask about is a tab named wrong**, and this one was
+asked about by name. "Ledger" is a word somebody has to be told; the
+day headings INSIDE that half already say "3 entries", so naming the
+tab for its own content means the screen uses one word for one thing
+rather than two.
+
+**And it is not "Tracker", which was the first suggestion.** The
+crumb directly above those tabs already reads TRACKER — it is the note
+KIND — so a tab of that name would be the same word twice on one
+screen, which is the duplication this project keeps taking out. Put
+back as a question rather than resolved quietly, because the fix
+either way is one word and the collision is not obvious from the
+screen you are looking at.
+
+**Proved to bite, three breaks in one run.** Dropping the buffer from
+the sentence, putting a `.tk-p` node back after the head, and renaming
+the tab to `Ledger` fired five assertions between them — the two new
+ones, the fortnight-back check and the estimate's buffer reading, plus
+the fingerprint, which a break to `app.js` always moves. Restored by
+the same script's inverse and hashed against the known-good sha1.

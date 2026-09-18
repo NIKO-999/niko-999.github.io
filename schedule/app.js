@@ -12197,7 +12197,7 @@
      Neither is stored, which is the tally panels' own rule: both are
      a position on a screen you are looking at, and one restored
      tomorrow morning opens on a fortnight you are no longer in. */
-  var trkBack = 0, trkLedger = false;
+  var trkBack = 0, trkEnts = false;
 
   function scBudTag(word, cls) {
     var t = scEl('span', 'st' + (cls ? ' ' + cls : ''), word);
@@ -12387,55 +12387,50 @@
        eleven. Ahead takes the accent and behind stays the flat
        neutral — never a red bar, which is the goal pace bar's own
        rule and the reason this screen can carry one red at all. */
+    /* ── THE HEAD IS THE FIGURE AND ONE LINE ──
+       It was five registers — the figure, a sentence, a Money bar, a
+       Cycle bar and a line of type under them — measuring 363px of a
+       390x844 screen before the first row, on the one screen whose
+       whole job IS the rows. Seven of thirteen reached the fold; nine
+       do now.
+
+       What it costs is real and was the reason to hesitate: nothing
+       says whether $234.50 is comfortable with two days left, which
+       is a reading the two bars genuinely carried and no figure
+       replaces. The rows won. */
     var hd = scEl('div', 'tk-hd');
     hd.appendChild(scEl('b', null, scMoney(t.left, 1)));
     var days = Math.max(0, cyc.len - cyc.dayIn);
     hd.appendChild(scEl('span', null, (t.left < 0 ? 'over the spending' : 'left to spend')
-      + (trkBack ? '' : ' · ' + (days === 1 ? '1 day' : days + ' days') + ' to go')));
+      + (trkBack ? '' : ' · ' + (days === 1 ? '1 day' : days + ' days') + ' to go')
+      /* The buffer is a FACT rather than a state, so it rides the same
+         quiet line after a middle dot rather than taking a headline of
+         its own — this app's own rule about what a figure looks like.
+         Drawn only where there is an income for it to be left OF. */
+      + (plan.inc ? ' · ' + scMoney(Math.abs(t.buffer))
+        + (t.buffer < 0 ? ' short' : ' buffer') : '')));
     body.appendChild(hd);
 
-    var line = scEl('p', 'hint');
-    if (t.alloc > 0) {
-      var ahead = cyc.frac - t.frac;
-      body.appendChild(scBudPace('Money', t.frac, ahead >= 0));
-      body.appendChild(scBudPace('Cycle', cyc.frac, false));
-      line.appendChild(document.createTextNode(trkBack
-        ? scMoney(t.spent) + ' of ' + scMoney(t.alloc) + ' spent \u00b7 '
-        : (Math.abs(ahead * 100) < 1 ? 'Level with the cycle \u00b7 '
-          : Math.round(Math.abs(ahead) * 100) + (ahead >= 0
-            ? ' points in hand \u00b7 ' : ' points gone early \u00b7 '))));
-    }
-    /* ── THE BUFFER RIDES THE PACE LINE ──
-       It went in as a second headline at 26px under a 40px one with a
-       rule between them, and that put the entire fold above the first
-       spending row — on the one screen whose whole job is the rows.
-       It is a FACT rather than a state, so it is quiet type after a
-       middle dot, which is this app's own rule about what a figure
-       looks like. */
-    if (plan.inc) {
-      var bv = scEl('b', 'bd-bv' + (t.buffer < 0 ? ' is-short' : ''),
-        scMoney(Math.abs(t.buffer)) + (t.buffer < 0 ? ' short' : ' buffer'));
-      line.appendChild(bv);
-    }
-    /* An empty hint still reserves its line, so it is only appended
-       when it has something in it. */
-    if (line.childNodes.length) body.appendChild(line);
-
     /* Two halves, and the CONTROL IS NOT A HEADING here: the rows and
-       the ledger are two readings of one cycle rather than two
+       the entries are two readings of one cycle rather than two
        sections of it, so they share the figures above and swap below.
        The friends board's two stops, one level down. */
     var tg = scEl('div', 'tk-tog');
-    [['Rows', false], ['Ledger', true]].forEach(function (q) {
-      var b = scBtn('tk-tb' + (trkLedger === q[1] ? ' is-on' : ''), q[0], function () {
-        trkLedger = q[1]; scPaintNotes();
+    /* ── ENTRIES, NOT LEDGER ──
+       "Ledger" is a word somebody has to be told, and it was: it was
+       asked about by name. The day headings INSIDE this half already
+       say "3 entries", so naming the tab for its own content means the
+       screen uses one word for one thing rather than two. */
+    [['Rows', false], ['Entries', true]].forEach(function (q) {
+      var b = scBtn('tk-tb' + (trkEnts === q[1] ? ' is-on' : ''), q[0], function () {
+        trkEnts = q[1]; scPaintNotes();
       });
-      b.setAttribute('aria-pressed', trkLedger === q[1] ? 'true' : 'false');
+      b.setAttribute('aria-pressed', trkEnts === q[1] ? 'true' : 'false');
       tg.appendChild(b);
     });
     body.appendChild(tg);
 
-    if (trkLedger) { scTrkLedger(body, n, plan, cyc, ents); return; }
+    if (trkEnts) { scTrkEnts(body, n, plan, cyc, ents); return; }
 
     /* ── THE TRACKER LEADS WITH WHAT YOU PRESS ──
        The plan is ordered the way the money is arranged: what comes
@@ -12480,17 +12475,6 @@
     });
   }
 
-  function scBudPace(label, frac, lit) {
-    var w = scEl('div', 'tk-p');
-    w.appendChild(scEl('span', 'k', label));
-    var tr = scEl('div', 'tk-t' + (lit ? ' is-lit' : ''));
-    var fi = scEl('i');
-    fi.style.width = Math.max(0, Math.min(1, frac)) * 100 + '%';
-    tr.appendChild(fi);
-    w.appendChild(tr);
-    w.appendChild(scEl('span', 'v', Math.round(frac * 100) + '%'));
-    return w;
-  }
 
   /* ── ONE ROW, FOUR BEHAVIOURS ──
      A spending row is a bar you press against and an estimate is a
@@ -12592,7 +12576,7 @@
   /* Newest first, grouped by day, with the day's own total on the
      heading. A press you got wrong is undone from here, which is the
      whole reason the entries are the record. */
-  function scTrkLedger(body, n, plan, cyc, ents) {
+  function scTrkEnts(body, n, plan, cyc, ents) {
     if (!ents.length) {
       body.appendChild(scEl('p', 'nt-none',
         'Nothing pressed this fortnight yet.'));
@@ -12827,7 +12811,7 @@
         notes.unshift(go);
         scNoteFlush();
       }
-      trkBack = 0; trkLedger = false;
+      trkBack = 0; trkEnts = false;
       ntEdit = false; ntOpen = go.id;
       scPaintNotes(); scDate();
     });
@@ -13082,7 +13066,7 @@
            you are in — the tally panels' own rule. Reset here as well
            as on the way in from a budget, because the list is the
            other door. */
-        trkBack = 0; trkLedger = false;
+        trkBack = 0; trkEnts = false;
         ntOpen = n.id; ntEdit = false; scPaintNotes(); scDate();
       });
       pane.appendChild(card);

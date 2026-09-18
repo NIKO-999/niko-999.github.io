@@ -6365,44 +6365,17 @@ body {
   font-variant-numeric: tabular-nums;
 }
 .tk-hd > span { display: block; margin-top: 3px; font-size: 11.5px; color: var(--spent); }
-/* The buffer, as quiet type on the line under the pace bars. `--dim`
-   rather than `--spent`: it is a figure somebody came for, and
-   `--spent` is the lighter token — which this file has shipped as a
-   rounding error above the bar twice.
 
-   ITS OWN CLASS RATHER THAN `.hint > b`. There are seventeen hints in
-   this app and none of them holds a bold today, which is exactly the
-   kind of rule the eighteenth walks into — the oldest bug in this
-   file is a name that reaches further than the thing it was written
-   for. */
-.bd-bv { font-weight: 600; color: var(--dim); }
-.bd-bv.is-short { color: var(--bad); }
-
-/* Money against time. Ahead takes the accent and behind stays the
-   flat neutral — never a red bar, which is what lets this screen
-   carry one red at all. */
-.tk-p { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
-.tk-p > .k {
-  flex: none; width: 44px;
-  font-size: 10px; font-weight: 700; letter-spacing: .13em;
-  text-transform: uppercase; color: var(--spent);
-}
-.tk-p > .v {
-  flex: none; width: 34px; text-align: right;
-  font-size: 11.5px; font-weight: 600; color: var(--dim);
-  font-variant-numeric: tabular-nums;
-}
+/* The gauge beside a spending row's figure. It was also the two pace
+   bars in the head — those went with the head, and `.tk-t.is-lit` and
+   `.tk-t.nu` went with them: a dead rule that still cascades is not
+   dead. */
 .tk-t {
   position: relative; flex: 1;
   height: 6px; border-radius: 5px;
   background: var(--tick-off); overflow: hidden;
 }
-.tk-t > i {
-  position: absolute; inset: 0 auto 0 0;
-  border-radius: 5px; background: var(--tick-off);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 16%, transparent);
-}
-.tk-t.is-lit > i { background: var(--red); box-shadow: none; }
+.tk-t > i { position: absolute; inset: 0 auto 0 0; border-radius: 5px; }
 .tk-t.is-hue > i { background: var(--c); box-shadow: none; }
 .tk-t.is-over > i { background: var(--bad); box-shadow: none; }
 

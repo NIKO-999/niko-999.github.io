@@ -16895,8 +16895,8 @@ const SAID = [
       cyc: (document.querySelector('.tk-cyc b') || {}).textContent,
       big: (document.querySelector('.tk-hd b') || {}).textContent,
       sub: (document.querySelector('.tk-hd span') || {}).textContent,
-      pace: [...document.querySelectorAll('.tk-p')].map((e) => e.textContent),
-      hint: (document.querySelector('.hint') || {}).textContent,
+      pace: document.querySelectorAll('.tk-p').length,
+      tabs: [...document.querySelectorAll('.tk-tb')].map((e) => e.textContent).join('|'),
       groups: [...document.querySelectorAll('.bd-g b')].map((e) => e.textContent),
       rows: [...document.querySelectorAll('.tk-r')].map((e) => ({
         bk: e.dataset.bk, row: e.dataset.row, txt: e.textContent,
@@ -16912,13 +16912,22 @@ const SAID = [
        order — eight direct debits above the bars spend the fold. */
     ok('...and the tracker leads with spending where the plan led with fixed',
       bTrk.groups.join('|') === 'Spending|Estimated|Fixed|Allocation', bTrk.groups);
-    /* MONEY AGAINST TIME: 12925 of 42000 is 31%, and day 8 of 14 is
-       57%, so there are 26 points in hand. */
-    ok('...and money is drawn against the cycle, with the buffer on the line under',
-      /^Money/.test(bTrk.pace[0]) && /31%/.test(bTrk.pace[0])
-      && /57%/.test(bTrk.pace[1])
-      && /26 points in hand/.test(bTrk.hint)
-      && /\$421\.45 buffer/.test(bTrk.hint), { pace: bTrk.pace, hint: bTrk.hint });
+    /* ── THE HEAD IS THE FIGURE AND ONE LINE ──
+       It carried a Money bar, a Cycle bar and a line of type under
+       them: 363px before the first row on the one screen whose job is
+       the rows. The buffer rides the same sentence now. Both halves —
+       the bars GONE and the buffer present — because a build that
+       merely moved the buffer and kept the bars passes either on its
+       own. */
+    ok('...and the head is two registers, with the buffer on the sentence',
+      bTrk.pace === 0 && /\$421\.45 buffer/.test(bTrk.sub)
+      && /left to spend \u00b7 6 days to go/.test(bTrk.sub),
+      { pace: bTrk.pace, sub: bTrk.sub });
+    /* ── ENTRIES, NOT LEDGER ── asked about by name, which is the
+       whole argument: a tab you have to be told is a tab named
+       wrong. The day headings inside it already say "3 entries". */
+    ok('...and the second half is named for what is in it',
+      bTrk.tabs === 'Rows|Entries', bTrk.tabs);
 
     /* ── NOT YET AND OVERDUE ARE NOT THE SAME WORD ──
        Both directions on one screen: Phone is day 3 and today is day
@@ -16943,13 +16952,15 @@ const SAID = [
       const a = document.querySelectorAll('.tk-a');
       return { cyc: (document.querySelector('.tk-cyc b') || {}).textContent,
         big: (document.querySelector('.tk-hd b') || {}).textContent,
-        hint: (document.querySelector('.hint') || {}).textContent,
+        sub: (document.querySelector('.tk-hd span') || {}).textContent,
         back: a[0].disabled, fwd: a[1].disabled };
     });
     ok('the fortnight before is one press back and carries its own entries',
       bTrk.fwd === true && bTrk.back === false
       && bBack.cyc === '11 Aug – 24 Aug' && bBack.big === '$220.00'
-      && /\$200 of \$420 spent/.test(bBack.hint)
+      /* A cycle behind you says no "days to go", and still carries
+         its own buffer. */
+      && !/to go/.test(bBack.sub) && /\$421\.45 buffer/.test(bBack.sub)
       && bBack.back === true && bBack.fwd === false, { bTrk: [bTrk.fwd, bTrk.back], bBack });
 
     /* ── A SPENDING ROW ADDS AND AN ESTIMATE SETS ──
@@ -17028,7 +17039,7 @@ const SAID = [
       await bgpage.waitForTimeout(360);
       await openNote('trk');
       return bgpage.evaluate(() => {
-        const h = document.querySelector('.hint');
+        const h = document.querySelector('.tk-hd span');
         const m = h && h.textContent.match(/\$([\d,.]+) (buffer|short)/);
         return { buf: m ? Math.round(parseFloat(m[1].replace(/,/g, '')) * 100)
             * (m[2] === 'short' ? -1 : 1) : null,
@@ -17258,7 +17269,7 @@ const SAID = [
         pick('.tk-r[data-bk="var"] .tk-fg > .x > span', 'its caption'),
         pick('.tk-r[data-bk="fix"] .f', 'a fixed row figure'),
         pick('.bd-g > b', 'a group heading'),
-        pick('.bd-bv', 'the buffer')];
+        pick('.tk-hd span', 'the head sentence')];
     });
     const bgImg = PNGB.sync.read(await bgpage.screenshot());
     const bgDpr = bgImg.width / 390;
