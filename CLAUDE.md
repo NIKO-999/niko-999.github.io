@@ -10426,3 +10426,106 @@ a bullet on all of them fails whichever lines happen to be bare.
 marker on the span. With the mark on the ROW that class is gone rather
 than left drawing nothing — a marker a test reads and nothing paints is
 the dead rule this file keeps taking out, one language over.
+
+## Push and Legs are split by what they were focused on
+
+A push day is a chest day or a shoulder day, and a leg day is a quad
+day or a hinge day. Which one it was is exactly what the Workouts
+panel could never tell you: every push session landed on one row
+called Push, with one average and one share of the month.
+
+**THE FOCUS IS PART OF THE SESSION, NOT A MODIFIER ON IT.** That is
+the decision underneath the drawing and it is bigger than the drawing:
+its own key, its own row, its own average, its own share, its own
+calendar. A modifier would have kept Push as one row and left the
+focus needing somewhere else to be drawn. Five placements were
+rendered over the real picker at 390x844 and read at 1:1 before
+anything was built — a row at the foot beside *How hard* and *How
+long*, chips in the grid under the tile, a two-segment track on the
+tile's face, a split colour bar, and more tiles — and the tiles are
+the only one that is both the drawing and the CHOICE in one press.
+
+**THE TILE KEEPS THE SESSION'S NAME.** Named *Chest focused* outright
+it wraps to two lines at 390px, and worse it stops saying which
+session it is: *Chest focused* sits two rows under *Chest* in All
+exercises with only a group heading between them. The name stays and
+the focus is a line under the minutes, at the minutes' own size, in
+the session's own hue — measured, nothing wraps and nothing clips.
+
+**A PLAIN PUSH AND A PLAIN LEGS ARE GONE FROM THE BOARD.** If you are
+running PPL your push day IS one or the other, and keeping them makes
+PPL eight tiles with three saying *Push*, one of which has no line and
+reads as unfinished.
+
+**SIX HUES, AND THE WORST PAIR MEASURES dE 31.2.** They are the seven
+solved pairs rather than new literals, because seven is what is
+actually different — and the check measures them in Lab off the tiles
+rather than comparing the hexes it was given.
+
+**5.95:1 AT ITS WORST**, on the focus line, across four hues by two
+faces. 10.5px body type, so 4.5 rather than a graphic's 3 — and
+composited against the CARD, which is a wash of the ink over the page.
+Solving it against the page alone is the friends crown's own mistake,
+and the first measurement made exactly that one: it read the tile's
+`rgba(255,255,255,.04)` ground as WHITE and reported 1.99:1 on a line
+that is 8.73. **A ground read off the declaration is not the ground.**
+
+### `ppl.push` and `ppl.legs` are retired, not deleted
+
+Records carrying them are on disk with up to ninety days to live, and
+a key this build cannot resolve is a component `scWorkoutsOf` DROPS —
+so a whole history of push sessions would simply go. They stay in the
+table so they still read back under their own name, and `hide` keeps
+them off the board so nothing new can be filed under a focus nobody
+chose. **Reusing the old keys for the focused versions was the other
+option and it is worse**: every push you ever logged would retroactively
+claim a focus you never picked.
+
+The board reads the DRAWN list and `WORKOUTS` reads `of`, which is the
+whole mechanism — two loops over one table, and only one of them
+filters. Asserted in both directions, because each passes on the
+other's bug: the retired key is absent from the board AND a record
+filed under it still draws its own panel.
+
+### Every trained row is 23px taller, and that is the trade
+
+The week's row carries the name now — `Push · Chest focused` — and the
+props line is **176px** against the **198** the tag and the state chip
+need together, so it wraps: measured, a trained row goes **59px to
+82**. Every one of the four wraps; the shortest is 110px against the
+109 that would fit. The short form `Push · Chest` fits at 77px and is
+one line away if the density is ever worth more than the word.
+
+### Two of the four breaks fired nothing, which was the finding
+
+The first bite proof broke four things and only two classes of check
+answered. **The focus line's COLOUR and the name carrying the focus
+were measured by probe and asserted nowhere** — a probe is evidence
+that it worked once, and a check is what stops it going. Both were
+added and the same break then reported eleven failures against eight.
+
+**And the eleventh was not printed.** `tests/run.js` caps its failure
+list at twelve lines and *no page errors* matches its own `/error/`
+filter, so two slots go to passing lines: the summary said 11 and the
+output showed 10. Running the file directly against a hand-started
+server is what showed the last one, which is the same fallback the
+runner's own note already records.
+
+### A fixture id is a reference nothing type-checks, again
+
+The reader probe seeded `trainLog` against the first Train block it
+found and drew nothing anywhere. A Train block exists **per weekday** —
+seven of them — so the drawn row is one day's block and seeding
+another day's id lands on a row nothing draws. Each record has to go
+on a date its own weekday actually falls on. Sixth time this file has
+recorded that shape, and the first time it was a WEEKDAY rather than a
+name or a key.
+
+### And a bite proof's inverse has to be unique and non-trivial, twice
+
+`return w.n;` is thirteen characters, under the guard's own floor, and
+`color: var(--spent);` matches five rules in the stylesheet. Both
+refused, both wrote nothing, and both were fixed by taking the whole
+rule rather than the one line that changed. **A break and its inverse
+are not one edit read backwards** — this file already said so once and
+the same pass met it twice more.

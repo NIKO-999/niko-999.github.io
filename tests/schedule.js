@@ -7690,14 +7690,130 @@ const SAID = [
        tiles with no headings is the flat list that argument refused;
        four headings over a board that only draws one group's worth is
        the deck with its chips relabelled. */
-    ok('every session is on one screen, all nineteen of them',
-      one.tiles.length === 19 && new Set(one.tiles).size === 19
+    ok('every session is on one screen, all twenty-one of them',
+      one.tiles.length === 21 && new Set(one.tiles).size === 21
       && one.tiles.every((k) => /^(bro|ppl|run|rec)\.[a-z]+$/.test(k))
-      && one.tiles.filter((k) => /\.legs$/.test(k)).length === 2, one.tiles);
+      /* The key is QUALIFIED, which is what lets two tiles share a
+         NAME: "Legs" is a card in All exercises and two more in PPL,
+         and a bare key would resolve to whichever came first. */
+      && one.names.filter((n) => n === 'Legs').length === 3, one);
     ok('...under the four kinds, as the app’s own section heading',
       one.heads.join('|') === 'All exercises|PPL|Run|Recovery'
-      && one.counts.join('|') === '6|4|4|5'
+      && one.counts.join('|') === '6|6|4|5'
       && one.counts.reduce((a, b) => a + +b, 0) === one.tiles.length, one);
+
+    /* ══════════════════════════════════════════════════════════
+       PUSH AND LEGS ARE SPLIT BY WHAT THEY WERE FOCUSED ON
+
+       A push day is a chest day or a shoulder day, and which one it
+       was is what the Workouts panel could never tell you: every push
+       session landed on one row called Push. So the focus is part of
+       the SESSION — its own key, its own row, its own average — and
+       the tile keeps the session's NAME with the focus on a line
+       under the minutes.
+       ══════════════════════════════════════════════════════════ */
+    const foc = await page.evaluate(() => {
+      const ppl = [...document.querySelectorAll('.wb-t')]
+        .filter((t) => /^ppl\./.test(t.dataset.workout));
+      const line = (t) => { const e = t.querySelector('.wb-f');
+        return e ? e.textContent : null; };
+      return {
+        keys: ppl.map((t) => t.dataset.workout),
+        pairs: ppl.map((t) => t.querySelector('.wb-n').textContent + '|' + (line(t) || '')),
+        /* Nothing on the board may be drawn too wide for its tile. */
+        over: ppl.map((t) => { const e = t.querySelector('.wb-f');
+          return e ? e.scrollWidth - e.clientWidth : 0; }),
+        /* SIDE BY SIDE MEANS THE SAME BOX: a focused tile is taller
+           than a plain one, so every tile in its grid ROW has to grow
+           with it rather than one sitting short beside it. */
+        rows: (() => { const by = {};
+          ppl.forEach((t) => { const r = t.getBoundingClientRect();
+            (by[Math.round(r.top)] = by[Math.round(r.top)] || [])
+              .push(Math.round(r.height)); });
+          return Object.values(by).map((v) => [...new Set(v)].length); })(),
+        /* SPOKEN as well as drawn, which is the half a screen reader
+           would otherwise never get. */
+        said: ppl.map((t) => t.getAttribute('aria-label')),
+        hues: ppl.map((t) => getComputedStyle(t).getPropertyValue('--wb-hue').trim()),
+        ink: ppl.map((t) => { const e = t.querySelector('.wb-f');
+          return e ? getComputedStyle(e).color : null; }),
+        card: ppl.map((t) => getComputedStyle(t).backgroundColor),
+        page: getComputedStyle(document.body).backgroundColor,
+        dim: getComputedStyle(document.documentElement).getPropertyValue('--spent').trim()
+      };
+    });
+    /* Retired keys are readable and NOT offered — the other half of
+       the check on the Workouts panel further down, which reads a
+       record filed under `ppl.push` and must still find it. */
+    ok('...and a retired session is never offered on the board',
+      !foc.keys.includes('ppl.push') && !foc.keys.includes('ppl.legs'), foc.keys);
+    ok('PPL splits push and legs by focus, and each says which',
+      foc.keys.join('|') === 'ppl.pushc|ppl.pushd|ppl.pull|ppl.legsq|ppl.legsh|ppl.core'
+      && foc.pairs.join(', ') === 'Push|Chest focused, Push|Shoulder focused, Pull|, '
+        + 'Legs|Quad focused, Legs|Ham focused, Core|', foc.pairs);
+    /* THE SESSION'S NAME STAYS THE TILE'S NAME. Named "Chest focused"
+       outright the tile stops saying which session it is — it sits two
+       rows under "Chest" in All exercises with only a heading between
+       them — so the name and the focus are asserted as a PAIR rather
+       than as one string. */
+    ok('...with nothing drawn wider than its own tile',
+      foc.over.every((n) => n === 0), foc.over);
+    ok('...and every tile in a row shares one height',
+      foc.rows.length > 0 && foc.rows.every((n) => n === 1), foc.rows);
+    ok('...and the focus is spoken, not only drawn',
+      /^Push, chest focused, about 55 minutes/.test(foc.said[0])
+      && /^Legs, ham focused, about 60 minutes/.test(foc.said[4])
+      /* Pull has none, so it must not be given one. */
+      && /^Pull, about 50 minutes/.test(foc.said[2]), foc.said);
+    /* ── THE LINE IS THE SESSION'S OWN HUE, AND IT CLEARS THE BAR ──
+       It is 10.5px body type rather than a graphic, so 4.5:1 and not
+       3. Composited against the CARD, which is a wash of the ink over
+       the page: solving against the page alone is the crown's own
+       mistake, and reading the declaration would miss it entirely.
+
+       Both halves fail apart. Held only to contrast, `--spent` passes
+       at 5.9:1 and the line stops saying which session it is; held
+       only to "not the neutral", any legible-looking tint passes. */
+    (() => {
+      const pg = rgbOf(foc.page);
+      const onCard = (card) => { const m = (card || '').match(/[\d.]+/g);
+        if (!m || m.length < 4) return rgbOf(card) || pg;
+        const a = +m[3];
+        return [0, 1, 2].map((i) => Math.round(+m[i] * a + pg[i] * (1 - a))); };
+      const neutral = rgbOf(foc.dim);
+      foc.lines = foc.ink.map((c, i) => c && ({
+        k: foc.keys[i], r: +ratio(rgbOf(c), onCard(foc.card[i])).toFixed(2),
+        offNeutral: +deltaE(rgbOf(c), neutral).toFixed(1) })).filter(Boolean);
+    })();
+    ok('...and the focus line clears 4.5:1 on the card it is drawn on',
+      foc.lines.length === 4 && foc.lines.every((l) => l.r >= 4.5), foc.lines);
+    ok('...in the session’s own hue, never the flat neutral',
+      foc.lines.every((l) => l.offNeutral >= 12)
+      /* Four sessions, four different colours — one hue on all of them
+         would pass the floor above and say nothing. */
+      && new Set(foc.ink.filter(Boolean)).size === 4, foc.lines);
+
+    /* SIX HUES ON ONE BOARD, held to the dE >= 12 this app keeps two
+       colours on one screen to — measured in Lab rather than by
+       comparing hex, which is the habits screen's own rule. */
+    ok('...and the six are told apart by colour as well as by word',
+      (() => {
+        const lab = (h) => { const v = [1, 3, 5].map((i) => parseInt(h.substr(i, 2), 16) / 255)
+            .map((c) => c <= .04045 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4));
+          const X = v[0] * .4124 + v[1] * .3576 + v[2] * .1805;
+          const Y = v[0] * .2126 + v[1] * .7152 + v[2] * .0722;
+          const Z = v[0] * .0193 + v[1] * .1192 + v[2] * .9505;
+          const g = (t) => t > .008856 ? Math.cbrt(t) : (7.787 * t + 16 / 116);
+          const x = g(X / .95047), y = g(Y), z = g(Z / 1.08883);
+          return [116 * y - 16, 500 * (x - y), 200 * (y - z)]; };
+        const L = foc.hues.map(lab);
+        let worst = 1e9;
+        for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++)
+          worst = Math.min(worst, Math.hypot(L[i][0] - L[j][0],
+            L[i][1] - L[j][1], L[i][2] - L[j][2]));
+        foc.worstDE = +worst.toFixed(1);
+        return worst >= 12;
+      })(), foc.hues.join(' ') + ' dE ' + foc.worstDE);
     /* A heading over nothing is furniture and a group with a tile
        missing is a session you cannot log at all, so the two are
        asserted as the same fact: each heading is followed by exactly
@@ -7711,7 +7827,7 @@ const SAID = [
       return out;
     });
     ok('...and each heading has its own group under it, none empty',
-      runs.length === 4 && runs.map((r) => r.n).join('|') === '6|4|4|5', runs);
+      runs.length === 4 && runs.map((r) => r.n).join('|') === '6|6|4|5', runs);
 
     /* ── THE MARK IS TWO RINGS ──
        The outer is how long against an hour, the inner is how hard.
@@ -7750,9 +7866,9 @@ const SAID = [
     ok('...and nothing short of an hour ever fills it',
       each.filter(([, m]) => m.min && m.min < 60).every(([, m]) => m.lit === 5 || m.lit < 5)
       && each.filter(([, m]) => m.min && m.min < 60).every(([, m]) => m.lit < 6)
-      && marks['ppl.push'].min === 55 && marks['ppl.push'].lit === 5, marks);
+      && marks['ppl.pushc'].min === 55 && marks['ppl.pushc'].lit === 5, marks);
     ok('...while everything at an hour or over does',
-      each.filter(([, m]) => m.min >= 60).length === 3
+      each.filter(([, m]) => m.min >= 60).length === 4
       && each.filter(([, m]) => m.min >= 60).every(([, m]) => m.lit === 6), marks);
     /* A session rounding to nought would be an empty ring on a day you
        trained — the day-off dot's rule, that a thing which happened is
@@ -7824,7 +7940,10 @@ const SAID = [
     });
     ok(`the inner ring is the outer's own hue, not a grey `
       + `(chroma ${Math.min(...hueRows.map((r) => r.chroma)).toFixed(1)} at worst)`,
-      hueRows.length === 18 && hueRows.every((r) => r.chroma >= 14), hueRows);
+      /* Every tile but Rest, which draws no arc at all — the count is
+         what stops "every ring is a hue" passing on a board that drew
+         none, so it moves when the board does. */
+      hueRows.length === 20 && hueRows.every((r) => r.chroma >= 14), hueRows);
     ok(`...and a lighter of it, far enough off to read as two marks `
       + `(dE ${Math.min(...hueRows.map((r) => r.apart)).toFixed(1)} at worst)`,
       hueRows.every((r) => r.apart >= 12), hueRows);
@@ -12400,6 +12519,10 @@ const SAID = [
         [day(3)]: { a: { k: 'rec.rest', e: '', m: 0 } },
         [day(2)]: { a: { k: 'ppl.push', e: 'Hard', m: 60 } },
         [day(5)]: { a: { k: 'ppl.push', e: 'Light', m: 30 } },
+        /* A FOCUSED session beside the retired one, so the panel has
+           to tell the two apart: they are both a push and the whole
+           point of the split is that they no longer share a row. */
+        [day(4)]: { a: { k: 'ppl.pushd', e: 'Hard', m: 45 } },
       }));
     });
     await rp.reload({ waitUntil: 'networkidle' });
@@ -12429,6 +12552,42 @@ const SAID = [
     ok('...and the rest days did not drag that average down',
       panels['ppl.push'] && !panels['ppl.push'].pills.includes('Avg 23 min'),
       panels['ppl.push']);
+
+    /* ── AND `ppl.push` IS A RETIRED KEY, WHICH IS WHY IT IS THE ONE
+           THIS FIXTURE USES ──
+       PPL splits Push and Legs by focus, so `ppl.push` and `ppl.legs`
+       are no longer offered — but records carrying them are on disk
+       with up to ninety days to live, and a key this build cannot
+       resolve is a component `scWorkoutsOf` DROPS. A whole history of
+       push sessions would simply go.
+
+       The two halves fail apart: deleting the entry loses the panel
+       above, and leaving it on the board lets something new be filed
+       under a focus nobody chose. */
+    const retired = await rp.evaluate(() => ({
+      panel: !!document.querySelector('.wo-p[data-workout="ppl.push"]'),
+      name: (document.querySelector('.wo-p[data-workout="ppl.push"] .wo-w') || {}).textContent,
+    }));
+    ok('a record on a retired session still reads back, under its own name',
+      retired.panel && /^Push$/.test((retired.name || '').trim()), retired);
+
+    /* ── AND THE FOCUS IS PART OF THE NAME, OR THE SPLIT BUYS
+           NOTHING ──
+       Two push sessions under one heading called "Push" is exactly
+       the state this change exists to leave, so the name is asserted
+       where it is READ rather than where it is built. Its own panel
+       beside the retired one, because "the name has the focus in it"
+       passes on a build that put every push on one row and labelled
+       it with the first focus it saw. */
+    const named = await rp.evaluate(() => {
+      const nm = (k) => { const e = document.querySelector('.wo-p[data-workout="' + k + '"] .wo-w');
+        return e ? e.textContent.replace(/\s+/g, ' ').trim() : null; };
+      return { focused: nm('ppl.pushd'), plain: nm('ppl.push'),
+        panels: document.querySelectorAll('.wo-p').length };
+    });
+    ok('...and a focused one reads back under a name that says the focus',
+      named.focused === 'Push \u00b7 Shoulder focused'
+      && named.plain === 'Push' && named.focused !== named.plain, named);
 
     /* ── ITS TAG IS THE FLAT NEUTRAL, AND THAT PATH HAD NEVER DRAWN ──
        Rest is the first workout whose colour is not one of the seven

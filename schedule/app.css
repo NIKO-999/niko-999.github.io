@@ -3904,6 +3904,18 @@ body {
   color: var(--spent);
   font-variant-numeric: tabular-nums;
 }
+/* ── WHAT THE SESSION WAS FOCUSED ON ──
+   The minutes' own size, in the session's own hue mixed toward the
+   ink so it follows the face rather than sitting at a fixed literal:
+   the workout CARD was the one surface here that did not follow the
+   theme, and a line of type is not a card. Held to 4.5:1 on both
+   faces, because it is 10.5px body type rather than a graphic. */
+.wb-f {
+  font-size: 10.5px;
+  line-height: 1.25;
+  margin-top: 1px;
+  color: color-mix(in srgb, var(--wb-hue) 62%, var(--ink));
+}
 
 /* ── PICKED IS THE INK, NOT THE HUE ──
    "This one is chosen" is the same fact whichever session it is, and

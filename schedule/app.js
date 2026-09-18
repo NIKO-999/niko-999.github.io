@@ -7708,15 +7708,50 @@
       { k: 'abs',   n: 'Abs',       t: 20, c: '#14a2a2',
         d: 'Abs, obliques and lower back.' }
     ] },
+    /* ── PUSH AND LEGS ARE SPLIT BY WHAT THEY WERE FOCUSED ON ──
+       A push day is a chest day or a shoulder day and a leg day is a
+       quad day or a hinge day, and which one it was is the thing the
+       Workouts panel could never tell you: every push session landed
+       on one row called Push. So the focus is part of the SESSION
+       rather than a modifier on it — its own key, its own row, its
+       own average and its own share of the month — which is what
+       makes it worth recording at all.
+
+       THE TILE KEEPS THE SESSION'S NAME and says the focus on a line
+       under the minutes. Named "Chest focused" outright it wraps to
+       two lines at 390px, and worse, it stops saying which session it
+       is: "Chest focused" sits two rows under "Chest" in All
+       exercises with only a group heading between them.
+
+       SIX HUES ON ONE BOARD and the worst pair measures dE 31.2, well
+       clear of the 12 this app holds two colours on one screen to.
+       They are the seven solved pairs rather than new literals,
+       because seven is what is actually different.
+
+       `push` AND `legs` ARE RETIRED, NOT DELETED. Records carrying
+       them are on disk with up to ninety days to live, and a key this
+       build cannot resolve is a component `scWorkoutsOf` drops — so a
+       history of push sessions would simply go. They stay in the
+       table so they still read back, and `hide` keeps them off the
+       board so nothing new can be filed under a focus nobody chose. */
     { k: 'ppl', n: 'PPL', c: '#2f7fe6', d: 'Push, pull, legs and core.', of: [
-      { k: 'push', n: 'Push', t: 55, c: '#e6412f',
-        d: 'Chest, shoulders and triceps.' },
+      { k: 'pushc', n: 'Push', f: 'Chest focused', t: 55, c: '#e6412f',
+        d: 'Chest, front delts and triceps.' },
+      { k: 'pushd', n: 'Push', f: 'Shoulder focused', t: 50, c: '#8a4fe0',
+        d: 'Shoulders, upper chest and triceps.' },
       { k: 'pull', n: 'Pull', t: 50, c: '#2f7fe6',
         d: 'Back, lats and biceps.' },
-      { k: 'legs', n: 'Legs', t: 60, c: '#8a4fe0',
-        d: 'Quads, hamstrings, glutes and calves.' },
+      { k: 'legsq', n: 'Legs', f: 'Quad focused', t: 60, c: '#e0761a',
+        d: 'Squats, presses and extensions.' },
+      { k: 'legsh', n: 'Legs', f: 'Ham focused', t: 60, c: '#14a2a2',
+        d: 'Hinges, curls and glutes.' },
       { k: 'core', n: 'Core', t: 20, c: '#17a06b',
-        d: 'Abs, obliques and lower back.' }
+        d: 'Abs, obliques and lower back.' },
+      /* Retired: read back, never offered. */
+      { k: 'push', n: 'Push', t: 55, c: '#e6412f', hide: 1,
+        d: 'Chest, shoulders and triceps.' },
+      { k: 'legs', n: 'Legs', t: 60, c: '#8a4fe0', hide: 1,
+        d: 'Quads, hamstrings, glutes and calves.' }
     ] },
     { k: 'run', n: 'Run', c: '#e08a12', d: 'Easy, tempo, intervals or long.', of: [
       { k: 'easy',  n: 'Easy',      t: 40, c: '#17a06b',
@@ -7859,8 +7894,15 @@
   function scWorkoutsOf(k) {
     return String(k || '').split('+').map(scWorkout).filter(Boolean);
   }
+  /* The focus is part of what the session WAS, so it is part of its
+     name everywhere the name is read — the Workouts panel's row, the
+     tag on a week row, the calendar's day and the toast. Without it
+     two sessions file under one heading called "Push", which is the
+     thing the split exists to fix. */
   function scWorkName(k) {
-    return scWorkoutsOf(k).map(function (w) { return w.n; }).join(' + ');
+    return scWorkoutsOf(k).map(function (w) {
+      return w.f ? w.n + ' · ' + w.f : w.n;
+    }).join(' + ');
   }
   /* ── ONE DRAWING OF WHAT YOU TRAINED ──
      The week's row and the calendar's day both say it, and two
@@ -9415,12 +9457,20 @@
        pay, and the reason the cost is affordable at all. */
     b.setAttribute('aria-label', w.rest
       ? w.n + '. ' + w.d
-      : w.n + ', about ' + w.t + ' minutes, '
+      : w.n + ', ' + (w.f ? w.f.toLowerCase() + ', ' : '')
+        + 'about ' + w.t + ' minutes, '
         + scEffort(w.t).toLowerCase() + '. ' + w.d);
     b.appendChild(scTrainArc(w));
     b.appendChild(scEl('span', 'wb-bar'));
     b.appendChild(scEl('span', 'wb-n', w.n));
     b.appendChild(scEl('span', 'wb-m', w.rest ? '—' : w.t + ' min'));
+    /* ── UNDER THE MINUTES, IN THE SESSION'S OWN HUE ──
+       The name stays the loudest thing on the tile: this is what KIND
+       of that session it was, which is a smaller claim and reads at
+       the minutes' own size. Drawn only where there is one, so an
+       ordinary tile is exactly what it always was and only the rows
+       holding a focused tile grow. */
+    if (w.f) b.appendChild(scEl('span', 'wb-f', w.f));
     b.addEventListener('click', press);
     return b;
   }
@@ -9560,10 +9610,13 @@
         TRAIN_GROUPS.forEach(function (grp) {
           var gh = scEl('div', 'grp-h');
           gh.appendChild(scEl('span', 'pill', grp.n));
-          gh.appendChild(scEl('span', 'c', String(grp.of.length)));
+          /* Off the DRAWN list rather than off `of`, which still
+             carries the retired keys so old records read back. */
+          var shown = grp.of.filter(function (w) { return !w.hide; });
+          gh.appendChild(scEl('span', 'c', String(shown.length)));
           board.appendChild(gh);
           var g = scEl('div', 'wb-g');
-          grp.of.forEach(function (w) {
+          shown.forEach(function (w) {
             g.appendChild(scTrainTile(w, sel.indexOf(w.key) >= 0, press(w)));
           });
           board.appendChild(g);
