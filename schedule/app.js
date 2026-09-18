@@ -12367,7 +12367,7 @@
      and an edit to an allocation is already here because there was
      never a second copy of it to update. */
   function scTrkBody(body, n) {
-    var back = scEl('div', 'mn-mlab');
+    var back = scEl('div', 'mn-mlab tk-back');
     var bb = scEl('button', 'wc-back');
     bb.type = 'button';
     bb.setAttribute('aria-label', 'Back to the budget');

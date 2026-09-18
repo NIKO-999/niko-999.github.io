@@ -11152,3 +11152,36 @@ tracker's, and the merged note's tracker face is asked to read them —
 if it prints the same `$290.75` the main test already established for
 those entries, the migration did not just move a key, it moved the
 one the app actually goes on to use.
+
+### The back button was a chord, not a circle
+
+Reported off a real phone screenshot: the "Back to the budget" control
+drew with its left edge cut flat, a bite taken out of what should have
+been a round button. `.wc-back` reused `.mn-mlab`'s own row — the way
+back was the episode picker's own arrow — and `.mn-mlab .wc-back`
+carries `margin-left: -6px`, an optical pull that aligns the circle
+with a SHEET's own wider padding.
+
+**THE PULL IS RIGHT FOR A SHEET AND WRONG FOR THIS PANE.** A sheet has
+room either side of that -6px to absorb it; `#scNotePane` does not —
+it clips at `overflow-x: hidden` flush with its own box, so the same
+pull dragged 6px of a 44px circle behind the clip boundary and cut it
+off. Nothing overflowed the VIEWPORT — the pane's own box sits inset
+by the poster's padding, so a probe checking the document for anything
+past 0 or 390 found nothing, which is exactly what made this the kind
+of bug a first pass of measuring "does anything cross the screen edge"
+does not catch. It was the pane's OWN edge the button crossed, not the
+phone's.
+
+**CANCELLED IN A SCOPED RULE, NOT IN THE SHARED ONE.** `.mn-pick
+.wc-back` already carries a different pull for a different context —
+this is the same pattern a second time: `.tk-back .wc-back { margin-
+left: 0; }`, a class added alongside `.mn-mlab` on the tracker's own
+back row rather than a change to the rule every reuse of `.wc-back`
+shares.
+
+**Asserted as the button's own left edge against the pane's**, because
+that is the one measurement a clipped circle fails and a whole one
+clears — asserting only that nothing crosses the viewport would have
+passed on the exact build that was broken. Proved to bite: reverted,
+the button's own box reads `left: 12` against a pane starting at 18.

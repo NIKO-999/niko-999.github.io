@@ -16941,6 +16941,22 @@ const SAID = [
       bTrk.cyc === '25 Aug – 7 Sep', bTrk.cyc);
     ok('...and what is left to spend is the allocation less what was pressed',
       bTrk.big === '$290.75' && /left to spend/.test(bTrk.sub), bTrk);
+    /* ── THE BACK ROW IS A WHOLE CIRCLE, NOT A CHORD ──
+       `.mn-mlab`'s -6px pull is measured against a SHEET's own wider
+       padding, which has the room to absorb it. `#scNotePane` clips at
+       `overflow-x: hidden` flush with its own box, so the same pull cut
+       the button's own left edge off — a flat chord where a round
+       control should be. Asserted as the button's box starting no
+       further left than the pane's own, which a clipped circle fails
+       and a whole one clears. */
+    const bBack1 = await bgpage.evaluate(() => {
+      const b = document.querySelector('.tk-back .wc-back');
+      const p = document.getElementById('scNotePane');
+      const br = b.getBoundingClientRect(), pr = p.getBoundingClientRect();
+      return { left: br.left, pane: pr.left, width: br.width };
+    });
+    ok('the tracker’s back button is a whole circle, not clipped by the pane',
+      bBack1.left >= bBack1.pane - 0.5 && bBack1.width >= 43, bBack1);
     /* THE TRACKER LEADS WITH WHAT YOU PRESS, which is the other
        order — eight direct debits above the bars spend the fold. */
     ok('...and the tracker leads with spending where the plan led with fixed',

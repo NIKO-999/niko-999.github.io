@@ -4868,6 +4868,15 @@ body {
 .mn-mlab { display: flex; align-items: center; gap: 6px; margin: 0 0 8px; }
 .mn-mlab .wc-back { flex: none; margin-left: -6px; }
 .mn-mlab .wc-eff-l { margin: 0; }
+/* ── THE TRACKER'S BACK ROW IS THE SAME SHAPE, ON A TIGHTER PANE ──
+   `.mn-mlab`'s -6px pulls the circle flush with a SHEET's own wider
+   padding, which has the room to absorb it. `#scNotePane` clips at
+   `overflow-x: hidden` with none of that slack, so the same pull cut
+   the circle's own left edge off — a flat chord where a round button
+   should be. Cancelled here rather than in the shared rule, the way
+   `.mn-pick .wc-back` already answers a different pull for a
+   different context. */
+.tk-back .wc-back { margin-left: 0; }
 
 /* ══════════════════════════════════════════════════════
    THE MIND WALL
