@@ -11512,6 +11512,62 @@
      shares. */
   var NOTE_CAP = 40, NOTE_LINES = 300;
 
+  /* ═══════════════════════════════════════════════════════════════
+     A BUDGET IS A NOTE WITH FIGURES, AND A TRACKER FILLS IT
+
+     Two notes in the list, one record underneath. The plan holds the
+     allocations; the tracker holds only what you pressed and reads
+     the plan by id. So editing an allocation moves the bar with no
+     sync at all, because there was never a second copy of it.
+
+     FOUR KINDS OF ROW, because a real budget is not one kind of
+     thing. Ten of twelve lines on the sheet this was built from are
+     direct debits — they do not want a bar, they want a DATE and a
+     tick. Only the two you stand at a till with do.
+
+       fix  a date and paid / not yet
+       est  an estimate, and what actually landed
+       var  an allocation and a bar you press against
+       dep  a transfer out. Done or not done.
+
+     And the BUFFER is none of the four: it is what the income leaves
+     once all of them are out, drawn as one figure with no track. A
+     bar invites you to fill it, and the whole point of a buffer is
+     that you do not.
+     ═══════════════════════════════════════════════════════════════ */
+  var BUD_KINDS = ['fix', 'est', 'var', 'dep'];
+  var BUD_GROUP = {
+    fix: { n: 'Fixed', c: 'Comes out on its own' },
+    est: { n: 'Estimated', c: 'The buffer absorbs these' },
+    var: { n: 'Spending', c: 'What you press against' },
+    dep: { n: 'Allocation', c: 'Out and away' }
+  };
+  var SPEND_KEY = 'sched.bspend.v1';
+  /* Two hundred entries a cycle and twelve cycles kept. A fortnight
+     of real spending is a few dozen presses; the cap is there so a
+     stuck finger cannot take the key past the quota and the ledger
+     with it. */
+  var SPEND_CAP = 200, SPEND_CYC = 12;
+
+  /* ── DRAWN AS DOLLARS, HELD AS CENTS ──
+     Grouped thousands, and the cents dropped when they are zero: a
+     column reading $300 and $69.23 is how a person writes it, where
+     $300.00 down a whole list is a spreadsheet. */
+  function scMoney(c, always) {
+    var neg = c < 0, v = Math.abs(Math.round(c));
+    var d = Math.floor(v / 100), r = v % 100;
+    var t = String(d).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return (neg ? '-$' : '$') + t + ((r || always) ? '.' + (r < 10 ? '0' : '') + r : '');
+  }
+  /* The figure a field shows and reads back. Plain, ungrouped, two
+     decimals — what you would type, which is not what you read. */
+  function scMoneyIn(c) { return (Math.round(c) / 100).toFixed(2); }
+  function scMoneyOut(v) {
+    var n = parseFloat(String(v).replace(/[^0-9.\-]/g, ''));
+    return isFinite(n) && n > 0 ? Math.min(1e9, Math.round(n * 100)) : 0;
+  }
+
+
   /* ── SEVEN HUES, AND THEY ARE THE WORKOUT CARDS' OWN ──
      A colour that says WHICH has to be the same colour every time you
      see it, so it cannot come off the wheel. These seven are already
@@ -11554,20 +11610,37 @@
                  proc → the node fills in and the name goes heavier
                  goal → struck through, the thing you have ruled out
      ═══════════════════════════ */
+  /* ── THE PICKABLE LAYOUTS, AND A TRACKER IS NOT ONE ──
+     A tracker reads a budget, so it cannot exist without one to point
+     at — and a chip that makes a note with a dangling reference is a
+     control whose first result is broken. It is made by a button on a
+     budget instead, which is the one place the id it needs is in
+     scope. So `trk` is a valid KIND and not an offer: scNtKind takes
+     it, the picker never draws it. */
+  /* ── THE CHIP'S LABEL AND THE CARD'S ARE NOT THE SAME WORD ──
+     Measured at 390, 375 and 360: a fourth chip took the picker from
+     two rows to three — 75px of chrome before a single line of the
+     note, on a screen where "two rows of chrome one on top of the
+     other" is a complaint this app has already answered once. `s` is
+     the chip's own shorter label; `n` is what the CARD says, where
+     "Daily process" is the clearer of the two and there is room for
+     it. */
   var NT_KINDS = [
     { k: 'note', n: 'Note' },
-    { k: 'proc', n: 'Daily process' },
-    { k: 'goal', n: 'Goal' }
+    { k: 'proc', n: 'Daily process', s: 'Process' },
+    { k: 'goal', n: 'Goal' },
+    { k: 'bud', n: 'Budget' }
   ];
+  var NT_ALL = ['note', 'proc', 'goal', 'bud', 'trk'];
   /* Ordered goal, then process, then note — so a block carrying
      several reads the same way every time rather than in whatever
      order you happened to attach them. */
-  var NT_ORD = { goal: 0, proc: 1, note: 2 };
+  var NT_ORD = { goal: 0, proc: 1, bud: 2, trk: 3, note: 4 };
   function scNtKind(k) {
-    for (var i = 0; i < NT_KINDS.length; i++) if (NT_KINDS[i].k === k) return k;
-    return 'note';
+    return NT_ALL.indexOf(k) >= 0 ? k : 'note';
   }
   function scNtKindName(k) {
+    if (k === 'trk') return 'Tracker';
     for (var i = 0; i < NT_KINDS.length; i++) if (NT_KINDS[i].k === k) return NT_KINDS[i].n;
     return 'Note';
   }
@@ -11579,7 +11652,19 @@
     note: '<path d="M5 7h14M5 12h14M5 17h9"/>',
     proc: '<path d="M5 5v14"/><circle cx="5" cy="9" r="1.7" fill="currentColor" stroke="none"/>'
       + '<path d="M11 9h8M11 16h6"/>',
-    goal: '<path d="M6 21V4h12l-3 4 3 4H6"/>'
+    goal: '<path d="M6 21V4h12l-3 4 3 4H6"/>',
+    /* A budget is a note with figures against its lines, so the mark
+       is the note's own three rules with a column of amounts beside
+       them. A tracker is the bar that budget fills. Judged at the
+       19px a tag draws them, where a coin and a wallet both came out
+       as a circle with something in it. */
+    bud: '<path d="M4 7h10M4 12h10M4 17h6"/><path d="M18 6v12"/>'
+      + '<circle cx="18" cy="6" r="1.5" fill="currentColor" stroke="none"/>'
+      + '<circle cx="18" cy="12" r="1.5" fill="currentColor" stroke="none"/>',
+    trk: '<rect x="3" y="7" width="18" height="4.4" rx="2.2"/>'
+      + '<path d="M3 9.2h9" stroke-width="4.4" stroke-linecap="butt"/>'
+      + '<rect x="3" y="15" width="18" height="4.4" rx="2.2"/>'
+      + '<path d="M3 17.2h14" stroke-width="4.4" stroke-linecap="butt"/>'
   };
   function scNtGlyph(k, cls) {
     var g = scEl('span', cls || 'nt-g');
@@ -11626,6 +11711,25 @@
          Kept as the ten characters an <input type="date"> speaks, so
          there is nothing to parse and nothing to get wrong. */
       d: /^\d{4}-\d{2}-\d{2}$/.test(raw.d) ? raw.d : '',
+      /* ── THE THREE A BUDGET HAS AND THE OTHERS DO NOT ──
+         Net income per cycle in cents, the cycle's anchor date, and
+         its length in days. The anchor is a PAY DATE rather than the
+         first of a month, because that is when the money arrives and
+         when the buffer starts again: 26 fortnights do not divide
+         into 12 months, so a monthly reset is wrong for a fortnight
+         after each of the two years' three-pay months. */
+      inc: (typeof raw.inc === 'number' && isFinite(raw.inc) && raw.inc > 0)
+        ? Math.min(1e9, Math.round(raw.inc)) : 0,
+      cs: /^\d{4}-\d{2}-\d{2}$/.test(raw.cs) ? raw.cs : '',
+      cl: (typeof raw.cl === 'number' && raw.cl >= 1 && raw.cl <= 31)
+        ? (raw.cl | 0) : 14,
+      /* A TRACKER CARRIES AN ID, NEVER A COPY. Two records of one
+         allocation drift the moment either is edited, and the whole
+         ask here was that editing the budget moves the bars — which
+         is free when there is only ever one number. A dangling id
+         costs the tracker its rows and never its entries: the
+         entries are the half you cannot get back. */
+      src: typeof raw.src === 'string' ? raw.src.slice(0, 40) : '',
       l: []
     };
     var src = Array.isArray(raw.l) ? raw.l : [];
@@ -11664,6 +11768,33 @@
            the list costs that word and never the line. A line mark
            and a pen are exclusive, so a record carrying both is read
            as the line mark, which is the one that was there first. */
+        /* ── MONEY IS AN INTEGER NUMBER OF CENTS ──
+           Never a float. $69.23 + $46.15 in floating point is not
+           $115.38, and a budget whose totals are a cent out in the
+           third place is one you stop trusting — which is the whole
+           of what a budget is for. Stored, summed and compared as
+           cents; turned into dollars only to be drawn. */
+        $: (!head && typeof r.$ === 'number' && isFinite(r.$) && r.$ > 0)
+          ? Math.min(1e9, Math.round(r.$)) : 0,
+        /* Which of the four a budget row is. Unknown falls to `fix`,
+           which is the safe end: a fixed row asks for a date and a
+           tick and never invents a bar to fill. */
+        bk: (!head && BUD_KINDS.indexOf(r.bk) >= 0) ? r.bk : 'fix',
+        /* Which day of the cycle a fixed row comes out on, 1-based, 0
+           for none. Bounded to the cycle rather than to a month: this
+           record is a fortnight and a "day 26" in it is not a day. */
+        dy: (!head && typeof r.dy === 'number' && r.dy >= 1 && r.dy <= 31)
+          ? (r.dy | 0) : 0,
+        /* ── THE FIGURE YOU ACTUALLY PRESS, ONCE ──
+           One number a row, and the four marks are it doubled, tripled
+           and quadrupled — $25 giving $25 / $50 / $75 / $100. Four
+           separate figures would be four things to keep in step for a
+           ladder that is always the same shape, and one increment is
+           what somebody can actually answer about a category. Unset
+           falls to a sixteenth of the allocation snapped to a round
+           figure, which on $400 is $25. */
+        mk: (!head && typeof r.mk === 'number' && r.mk > 0)
+          ? Math.min(1e8, Math.round(r.mk)) : 0,
         w: (!head && !r.m && Array.isArray(r.w))
           ? r.w.filter(function (k, q, a) {
               return typeof k === 'number' && k >= 0 && k < 300
@@ -11791,6 +11922,22 @@
       return [c.lines + (c.lines === 1 ? ' step' : ' steps')]
         .concat(c.heads ? [c.heads + (c.heads === 1 ? ' session' : ' sessions')] : []);
     }
+    /* A budget's own two facts: how many lines it prices, and what it
+       leaves. A tracker's: what is left to spend and where in the
+       cycle it is — which is the whole of why you would open it. */
+    if (n.k === 'bud') {
+      var bt = scBudTotals(n, []);
+      return [c.lines + (c.lines === 1 ? ' line' : ' lines')]
+        .concat(n.inc ? [scMoney(bt.buffer) + (bt.buffer < 0 ? ' short' : ' buffer')] : []);
+    }
+    if (n.k === 'trk') {
+      var tp = scBudPlan(n);
+      if (!tp) return ['no budget'];
+      var tc = scBudCycle(tp, 0);
+      var tt = scBudTotals(tp, scBudEnt(n.id, tc.iso));
+      return [scMoney(tt.left) + (tt.left < 0 ? ' over' : ' left')]
+        .concat(tc.iso ? ['day ' + tc.dayIn + ' of ' + tc.len] : []);
+    }
     if (n.k === 'goal') {
       var d = scNoteDays(n);
       if (d === null) return [c.lines + (c.lines === 1 ? ' line' : ' lines')];
@@ -11810,6 +11957,22 @@
     if (n.k === 'goal') {
       var st = scNoteStmt(n);
       return st && st.x.trim() ? st.x.trim() : '';
+    }
+    /* A budget previews as the shape of the month rather than as its
+       first three lines: "Rent · Payment · Groceries" is an
+       alphabetless list where the totals are what you came for. */
+    if (n.k === 'bud') {
+      var pt = scBudTotals(n, []);
+      var bits = [];
+      if (n.inc) bits.push(scMoney(n.inc) + ' in');
+      if (pt.fix + pt.est) bits.push(scMoney(pt.fix + pt.est) + ' fixed');
+      if (pt.alloc) bits.push(scMoney(pt.alloc) + ' to spend');
+      if (pt.dep) bits.push(scMoney(pt.dep) + ' out');
+      return bits.join(' · ');
+    }
+    if (n.k === 'trk') {
+      var sp = scBudPlan(n);
+      return sp ? 'Tracks ' + scNoteTitle(sp) : 'The budget it read has gone';
     }
     var out = [];
     for (var i = 0; i < n.l.length && out.length < 3; i++) {
@@ -11837,6 +12000,752 @@
      than by a wrapper element, so nothing has to be grouped: the rows
      stay flat, the tools strip still slots in beside any of them, and
      a run is a fact worked out at render rather than a shape stored. */
+  /* ── THE CYCLE, AS A COUNT OF DAYS ──
+     Both ends are plain ISO dates with no time on them, so they are
+     compared as day NUMBERS rather than as timestamps: a difference
+     in milliseconds loses or gains a day across a daylight-saving
+     boundary, which is the goal countdown's own lesson. */
+  function scBudNum(iso) {
+    var q = String(iso).split('-');
+    return Math.round(Date.UTC(+q[0], +q[1] - 1, +q[2]) / 864e5);
+  }
+  function scBudISO(num) {
+    var d = new Date(num * 864e5);
+    return d.getUTCFullYear() + '-' + scPad(d.getUTCMonth() + 1)
+      + '-' + scPad(d.getUTCDate());
+  }
+  function scBudLen(n) { return n && n.cl >= 1 ? n.cl : 14; }
+  /* How many whole cycles have run since the anchor. The arrow back
+     is clamped to this, so it refuses at the anchor rather than
+     walking into cycles that never happened — the calendar's own
+     rule about both ends. */
+  function scBudBack(n) {
+    if (!n || !n.cs) return 0;
+    var d = scBudNum(scDay()) - scBudNum(n.cs);
+    return d > 0 ? Math.floor(d / scBudLen(n)) : 0;
+  }
+  /* The cycle `back` cycles ago, 0 being the one you are in. `frac`
+     is how much of it has gone, which is the half of the pace figure
+     that is not about money — and it is 1 on any cycle behind you,
+     because a fortnight that has ended is entirely spent. */
+  function scBudCycle(n, back) {
+    var len = scBudLen(n);
+    if (!n || !n.cs) return { iso: '', len: len, dayIn: 0, frac: 0, end: '' };
+    back = Math.max(0, Math.min(scBudBack(n), back | 0));
+    var a = scBudNum(n.cs) + (scBudBack(n) - back) * len;
+    var today = scBudNum(scDay());
+    var inDays = today - a;
+    return {
+      iso: scBudISO(a),
+      end: scBudISO(a + len - 1),
+      len: len,
+      dayIn: Math.max(0, Math.min(len, inDays + 1)),
+      frac: back > 0 ? 1 : Math.max(0, Math.min(1, (inDays + 1) / len))
+    };
+  }
+
+  /* ── THE ENTRIES ARE THE RECORD, AND THE BARS ARE DERIVED ──
+     Every press is one entry against one row, so a bar is a sum of
+     things you can see and correct rather than a running total you
+     have to trust. That is also the only way a mistake has a way
+     back, and a budget you cannot correct is one you stop keeping.
+
+     ONE SHAPE FOR ALL FOUR KINDS of row, deliberately: a fixed row
+     paid is an entry of its own amount, an estimate landing is an
+     entry of what it really was, a deposit done is an entry of the
+     transfer. Four states, one log, nothing to keep in step. */
+  var budLog = null;
+  function scBudClean(raw) {
+    var out = {};
+    if (!raw || typeof raw !== 'object') return out;
+    Object.keys(raw).forEach(function (nid) {
+      if (typeof nid !== 'string' || !nid) return;
+      var cycs = raw[nid];
+      if (!cycs || typeof cycs !== 'object') return;
+      var keep = {};
+      Object.keys(cycs).sort().slice(-SPEND_CYC).forEach(function (cy) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(cy) || !Array.isArray(cycs[cy])) return;
+        var rows = [];
+        cycs[cy].forEach(function (e) {
+          /* A damaged entry costs that entry and never the cycle —
+             the schedule's oldest rule about a stored shape. */
+          if (!e || typeof e !== 'object') return;
+          if (typeof e.r !== 'string' || !e.r) return;
+          if (typeof e.a !== 'number' || !isFinite(e.a) || !e.a) return;
+          if (rows.length >= SPEND_CAP) return;
+          rows.push({
+            i: typeof e.i === 'string' && e.i ? e.i : scNtId(),
+            r: e.r.slice(0, 40),
+            a: Math.max(-1e9, Math.min(1e9, Math.round(e.a))),
+            t: (typeof e.t === 'number' && e.t > 0) ? e.t : Date.now()
+          });
+        });
+        if (rows.length) keep[cy] = rows;
+      });
+      if (Object.keys(keep).length) out[nid] = keep;
+    });
+    return out;
+  }
+  function scBudLoad() {
+    if (budLog) return budLog;
+    var raw = null;
+    try { raw = JSON.parse(localStorage.getItem(SPEND_KEY) || 'null'); } catch (e) {}
+    var was = JSON.stringify(raw && typeof raw === 'object' ? raw : {});
+    budLog = scBudClean(raw);
+    /* ── THE REPAIR IS WRITTEN BACK ──
+       Four times in this app a repair has run on the way IN and
+       never been saved, so it was redone every boot and lost the
+       moment anything else wrote the key. Only when something
+       actually changed, so an intact record costs no write. */
+    if (JSON.stringify(budLog) !== was) scBudSave();
+    return budLog;
+  }
+  function scBudSave() {
+    try { localStorage.setItem(SPEND_KEY, JSON.stringify(budLog || {})); } catch (e) {}
+  }
+  function scBudEnt(trkId, cyc) {
+    var L = scBudLoad();
+    return (L[trkId] && L[trkId][cyc]) ? L[trkId][cyc] : [];
+  }
+  function scBudAdd(trkId, cyc, rowId, cents) {
+    if (!trkId || !cyc || !rowId || !cents) return null;
+    var L = scBudLoad();
+    if (!L[trkId]) L[trkId] = {};
+    if (!L[trkId][cyc]) L[trkId][cyc] = [];
+    if (L[trkId][cyc].length >= SPEND_CAP) return null;
+    var e = { i: scNtId(), r: rowId, a: Math.round(cents), t: Date.now() };
+    L[trkId][cyc].push(e);
+    scBudSave();
+    return e;
+  }
+  function scBudDrop(trkId, cyc, entId) {
+    var L = scBudLoad();
+    if (!L[trkId] || !L[trkId][cyc]) return false;
+    var a = L[trkId][cyc], q = -1;
+    for (var i = 0; i < a.length; i++) if (a[i].i === entId) { q = i; break; }
+    if (q < 0) return false;
+    a.splice(q, 1);
+    if (!a.length) delete L[trkId][cyc];
+    scBudSave();
+    return true;
+  }
+  /* Everything pressed against one row this cycle. */
+  function scBudRowSum(ents, rowId) {
+    var t = 0;
+    ents.forEach(function (e) { if (e.r === rowId) t += e.a; });
+    return t;
+  }
+
+  /* The budget a tracker reads, or null. A dangling id costs the
+     rows and never the entries. */
+  function scBudPlan(n) {
+    if (!n || n.k !== 'trk' || !n.src) return null;
+    var p = scNoteById(n.src);
+    return (p && p.k === 'bud') ? p : null;
+  }
+  /* A budget's rows: every line that is not a heading. A row with no
+     amount on it yet is still a row — it is a line you have written
+     and not priced, which is a different thing from one that is not
+     there. */
+  function scBudRows(n) {
+    var out = [];
+    if (!n) return out;
+    n.l.forEach(function (L) { if (!L.h) out.push(L); });
+    return out;
+  }
+
+  /* ── THE FIVE FIGURES, AND THE BUFFER IS WHAT IS LEFT ──
+     An estimate uses what actually landed once it has, and its own
+     estimate until then — which is the whole of what "the buffer
+     absorbs the estimates" means: a bill coming in over its estimate
+     takes the difference out of the buffer, visibly, and nothing
+     else on the screen moves. */
+  function scBudTotals(plan, ents) {
+    var t = { inc: 0, fix: 0, est: 0, estAct: 0, alloc: 0, spent: 0,
+      dep: 0, depDone: 0, buffer: 0, left: 0, frac: 0 };
+    if (!plan) return t;
+    t.inc = plan.inc || 0;
+    scBudRows(plan).forEach(function (L) {
+      var got = scBudRowSum(ents, L.i);
+      if (L.bk === 'var') { t.alloc += L.$; t.spent += got; }
+      else if (L.bk === 'est') { t.est += L.$; t.estAct += got > 0 ? got : L.$; }
+      else if (L.bk === 'dep') { t.dep += L.$; t.depDone += got; }
+      else { t.fix += L.$; }
+    });
+    t.buffer = t.inc - t.fix - t.estAct - t.alloc - t.dep;
+    t.left = t.alloc - t.spent;
+    t.frac = t.alloc > 0 ? t.spent / t.alloc : 0;
+    return t;
+  }
+
+  /* ── WHICH CYCLE, AND WHICH HALF OF THE TRACKER ──
+     Neither is stored, which is the tally panels' own rule: both are
+     a position on a screen you are looking at, and one restored
+     tomorrow morning opens on a fortnight you are no longer in. */
+  var trkBack = 0, trkLedger = false;
+
+  function scBudTag(word, cls) {
+    var t = scEl('span', 'st' + (cls ? ' ' + cls : ''), word);
+    return t;
+  }
+
+  /* ── THE PLAN ──
+     Income at the head, the four kinds as their own groups with a
+     total on each heading, and the buffer as the last line. A group
+     with nothing in it is not drawn: a heading over no rows is
+     furniture, which is the session heading's own rule. */
+  function scBudBody(body, n) {
+    var t = scBudTotals(n, []);
+    var hd = scEl('div', 'bd-hd');
+    hd.appendChild(scEl('span', 'bd-k', 'Net income'));
+    hd.appendChild(scEl('b', null, n.inc ? scMoney(n.inc, 1) : '—'));
+    var per = scEl('span', 'bd-per',
+      'per ' + (scBudLen(n) === 14 ? 'fortnight' : scBudLen(n) + ' days')
+      + (n.cs ? ' · from ' + scBudDate(n.cs) : ''));
+    body.appendChild(hd);
+    body.appendChild(per);
+
+    var any = false;
+    BUD_KINDS.forEach(function (bk) {
+      var rows = scBudRows(n).filter(function (L) { return L.bk === bk; });
+      if (!rows.length) return;
+      any = true;
+      var sum = 0;
+      rows.forEach(function (L) { sum += L.$; });
+      var sh = scEl('div', 'bd-g');
+      sh.appendChild(scEl('b', null, BUD_GROUP[bk].n));
+      sh.appendChild(scEl('i', null, BUD_GROUP[bk].c));
+      /* A group of rows nobody has priced has nothing to total, and
+         "$0" four times down a fresh budget is a figure about the
+         form rather than about the money. */
+      if (sum > 0) sh.appendChild(scEl('em', null, scMoney(sum)));
+      body.appendChild(sh);
+      rows.forEach(function (L) {
+        var r = scEl('div', 'bd-r');
+        var nm = scEl('span', 'n', L.x || 'Untitled');
+        r.appendChild(nm);
+        /* A DAY IS ONLY DRAWN WHERE IT MEANS SOMETHING. A fixed row
+           has one because that is the whole of what it needs; a
+           grocery shop does not happen on the 4th. */
+        if (L.bk === 'fix' && L.dy) r.appendChild(scEl('span', 'd', 'day ' + L.dy));
+        r.appendChild(scEl('span', 'a', L.$ ? scMoney(L.$) : '—'));
+        body.appendChild(r);
+      });
+    });
+
+    if (!any) {
+      body.appendChild(scEl('p', 'nt-none',
+        'Nothing in this budget yet. Press Edit and add a line.'));
+      return;
+    }
+
+    /* ── THE BUFFER IS ONE FIGURE AND HAS NO TRACK ──
+       A bar invites you to fill it and the whole point of a buffer is
+       that you do not. It is what the income leaves once all four
+       groups are out, so it is drawn as an answer rather than as an
+       allocation of its own. */
+    /* ── AND NO INCOME IS NOT BEING SHORT ──
+       With nothing set, the buffer is minus everything the four
+       groups come to — so a fresh budget announced itself as short by
+       its own total, which is the screen telling you off for not
+       having filled a field in yet. It says what the figure needs
+       instead. */
+    if (!n.inc) {
+      body.appendChild(scEl('p', 'hint',
+        'Set the income and this says what the four groups leave.'));
+      return;
+    }
+    var ft = scEl('div', 'bd-ft' + (t.buffer < 0 ? ' is-over' : ''));
+    ft.appendChild(scEl('span', 'bd-k', t.buffer < 0 ? 'Short by' : 'Buffer'));
+    ft.appendChild(scEl('b', null, scMoney(Math.abs(t.buffer), 1)));
+    body.appendChild(ft);
+    body.appendChild(scEl('p', 'hint', t.buffer < 0
+      ? 'The four groups above come to more than the income.'
+      : 'What the income leaves. Estimates coming in over take it out of here.'));
+  }
+
+  function scBudDate(iso) {
+    var q = String(iso).split('-');
+    return (+q[2]) + ' ' + MON[+q[1] - 1];
+  }
+
+  /* ── THE TRACKER ──
+     The plan's own rows with what you have pressed against them, one
+     cycle at a time. It stores no allocation of its own, so an edit
+     to the budget is already here. */
+  function scTrkBody(body, n) {
+    var plan = scBudPlan(n);
+    if (!plan) {
+      body.appendChild(scEl('p', 'nt-none',
+        'This tracker has no budget. The one it read has been removed — '
+        + 'its entries are still here.'));
+      return;
+    }
+    var maxBack = scBudBack(plan);
+    trkBack = Math.max(0, Math.min(maxBack, trkBack));
+    var cyc = scBudCycle(plan, trkBack);
+    var ents = scBudEnt(n.id, cyc.iso);
+    var t = scBudTotals(plan, ents);
+
+    /* The cycle stepper, refusing at both ends: nothing before the
+       anchor and no fortnight that has not started. An arrow that
+       only ever refuses is indistinguishable from one that does
+       nothing, so both are asserted. */
+    var cw = scEl('div', 'tk-cyc');
+    var prev = scBtn('tk-a', '', function () { trkBack++; scPaintNotes(); });
+    prev.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+      + 'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" '
+      + 'aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>';
+    prev.setAttribute('aria-label', 'The fortnight before');
+    prev.disabled = trkBack >= maxBack;
+    var lbl = scEl('b', null, cyc.iso
+      ? scBudDate(cyc.iso) + ' – ' + scBudDate(cyc.end) : 'No cycle set');
+    var next = scBtn('tk-a', '', function () { trkBack--; scPaintNotes(); });
+    next.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+      + 'stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" '
+      + 'aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+    next.setAttribute('aria-label', 'The fortnight after');
+    next.disabled = trkBack <= 0;
+    cw.appendChild(prev); cw.appendChild(lbl); cw.appendChild(next);
+    body.appendChild(cw);
+
+    if (!cyc.iso) {
+      body.appendChild(scEl('p', 'nt-none',
+        'The budget has no start date yet. Open it, press Edit, and set '
+        + 'the day you are paid.'));
+      return;
+    }
+
+    /* ── THE FIGURE, THEN THE PACE ──
+       Left to spend is the number you came for; money against time is
+       what says whether it is comfortable, because the same figure
+       with three days to go is a different fortnight from one with
+       eleven. Ahead takes the accent and behind stays the flat
+       neutral — never a red bar, which is the goal pace bar's own
+       rule and the reason this screen can carry one red at all. */
+    var hd = scEl('div', 'tk-hd');
+    hd.appendChild(scEl('b', null, scMoney(t.left, 1)));
+    var days = Math.max(0, cyc.len - cyc.dayIn);
+    hd.appendChild(scEl('span', null, (t.left < 0 ? 'over the spending' : 'left to spend')
+      + (trkBack ? '' : ' · ' + (days === 1 ? '1 day' : days + ' days') + ' to go')));
+    body.appendChild(hd);
+
+    var line = scEl('p', 'hint');
+    if (t.alloc > 0) {
+      var ahead = cyc.frac - t.frac;
+      body.appendChild(scBudPace('Money', t.frac, ahead >= 0));
+      body.appendChild(scBudPace('Cycle', cyc.frac, false));
+      line.appendChild(document.createTextNode(trkBack
+        ? scMoney(t.spent) + ' of ' + scMoney(t.alloc) + ' spent \u00b7 '
+        : (Math.abs(ahead * 100) < 1 ? 'Level with the cycle \u00b7 '
+          : Math.round(Math.abs(ahead) * 100) + (ahead >= 0
+            ? ' points in hand \u00b7 ' : ' points gone early \u00b7 '))));
+    }
+    /* ── THE BUFFER RIDES THE PACE LINE ──
+       It went in as a second headline at 26px under a 40px one with a
+       rule between them, and that put the entire fold above the first
+       spending row — on the one screen whose whole job is the rows.
+       It is a FACT rather than a state, so it is quiet type after a
+       middle dot, which is this app's own rule about what a figure
+       looks like. */
+    if (plan.inc) {
+      var bv = scEl('b', 'bd-bv' + (t.buffer < 0 ? ' is-short' : ''),
+        scMoney(Math.abs(t.buffer)) + (t.buffer < 0 ? ' short' : ' buffer'));
+      line.appendChild(bv);
+    }
+    /* An empty hint still reserves its line, so it is only appended
+       when it has something in it. */
+    if (line.childNodes.length) body.appendChild(line);
+
+    /* Two halves, and the CONTROL IS NOT A HEADING here: the rows and
+       the ledger are two readings of one cycle rather than two
+       sections of it, so they share the figures above and swap below.
+       The friends board's two stops, one level down. */
+    var tg = scEl('div', 'tk-tog');
+    [['Rows', false], ['Ledger', true]].forEach(function (q) {
+      var b = scBtn('tk-tb' + (trkLedger === q[1] ? ' is-on' : ''), q[0], function () {
+        trkLedger = q[1]; scPaintNotes();
+      });
+      b.setAttribute('aria-pressed', trkLedger === q[1] ? 'true' : 'false');
+      tg.appendChild(b);
+    });
+    body.appendChild(tg);
+
+    if (trkLedger) { scTrkLedger(body, n, plan, cyc, ents); return; }
+
+    /* ── THE TRACKER LEADS WITH WHAT YOU PRESS ──
+       The plan is ordered the way the money is arranged: what comes
+       out on its own, then the estimates, then what is left to spend.
+       The tracker is asked a different question — spending is the
+       only group you press against and the reason you opened the
+       screen, and eight direct debits above it spend the whole fold.
+       Same rows, two orders, because the two screens are for two
+       different things. */
+    ['var', 'est', 'fix', 'dep'].forEach(function (bk) {
+      var rows = scBudRows(plan).filter(function (L) { return L.bk === bk; });
+      if (!rows.length) return;
+      /* ── OF, NOT JUST THE ONE FIGURE ──
+         "FIXED $550" is ambiguous: it reads as the group's total and
+         it was what had been paid of a group worth $691.78. Both
+         figures or neither. */
+      var gsum = 0, gall = 0;
+      rows.forEach(function (L) {
+        gsum += scBudRowSum(ents, L.i);
+        gall += L.$;
+      });
+      var sh = scEl('div', 'bd-g');
+      sh.appendChild(scEl('b', null, BUD_GROUP[bk].n));
+      if (gall > 0) {
+        sh.appendChild(scEl('em', null, scMoney(gsum) + ' of ' + scMoney(gall)));
+      }
+      body.appendChild(sh);
+      rows.forEach(function (L) {
+        body.appendChild(scTrkRow(n, plan, cyc, L, scBudRowSum(ents, L.i)));
+      });
+    });
+  }
+
+  function scBudPace(label, frac, lit) {
+    var w = scEl('div', 'tk-p');
+    w.appendChild(scEl('span', 'k', label));
+    var tr = scEl('div', 'tk-t' + (lit ? ' is-lit' : ''));
+    var fi = scEl('i');
+    fi.style.width = Math.max(0, Math.min(1, frac)) * 100 + '%';
+    tr.appendChild(fi);
+    w.appendChild(tr);
+    w.appendChild(scEl('span', 'v', Math.round(frac * 100) + '%'));
+    return w;
+  }
+
+  /* ── ONE ROW, FOUR BEHAVIOURS ──
+     A spending row is a bar you press against and an estimate is a
+     figure you set once it lands; a fixed row and a deposit are a
+     yes or a no. So the press is a sheet on the first two and a
+     toggle on the other two, which is what makes ten of twelve lines
+     cost one tap rather than a dial they have no use for. */
+  function scTrkRow(n, plan, cyc, L, got) {
+    var b = scEl('button', 'tk-r');
+    b.type = 'button';
+    b.dataset.row = L.i;
+    b.dataset.bk = L.bk;
+    var top = scEl('div', 'tk-l');
+    top.appendChild(scEl('span', 'n', L.x || 'Untitled'));
+    var say = '';
+    if (L.bk === 'var') {
+      var over = got > L.$;
+      top.appendChild(scEl('span', 'f', scMoney(got) + ' of ' + scMoney(L.$)));
+      if (over) top.appendChild(scBudTag('over ' + scMoney(got - L.$), 'is-over'));
+      b.appendChild(top);
+      var tr = scEl('div', 'tk-t is-hue' + (over ? ' is-over' : ''));
+      var fi = scEl('i');
+      fi.style.width = (L.$ > 0 ? Math.min(1, got / L.$) * 100 : 0) + '%';
+      tr.appendChild(fi);
+      b.appendChild(tr);
+      say = L.x + ', ' + scMoney(got) + ' of ' + scMoney(L.$) + ' spent'
+        + (over ? ', over by ' + scMoney(got - L.$) : '') + '. Press to add.';
+    } else if (L.bk === 'est') {
+      top.appendChild(scEl('span', 'f', 'est ' + scMoney(L.$)));
+      if (got > 0) {
+        top.appendChild(scBudTag(scMoney(got), got > L.$ ? 'is-over' : 'is-ok'));
+        say = L.x + ', estimated ' + scMoney(L.$) + ', came in at ' + scMoney(got)
+          + '. Press to change.';
+      } else {
+        top.appendChild(scBudTag('not yet'));
+        say = L.x + ', estimated ' + scMoney(L.$)
+          + ', not in yet. Press to enter what it was.';
+      }
+      b.appendChild(top);
+    } else {
+      var done = got > 0;
+      if (L.bk === 'fix' && L.dy) top.appendChild(scEl('span', 'd', 'day ' + L.dy));
+      top.appendChild(scEl('span', 'f', scMoney(L.$)));
+      /* ── NOT YET AND OVERDUE ARE NOT THE SAME WORD ──
+         A fixed row said "not yet" whether its day was next week or
+         nine days gone, and which of those it is, is the one fact on
+         this screen you would most want to catch without reading. It
+         is the Missed tag's own argument: a day that has been and
+         gone without the money leaving is a fact about the fortnight
+         rather than a verdict on you. Only where a day is SET — a row
+         with none has nothing to be late against. */
+      var late = !done && L.dy > 0 && (trkBack > 0 || cyc.dayIn > L.dy);
+      var word = done ? (L.bk === 'dep' ? 'done' : 'paid')
+        : late ? 'overdue' : 'not yet';
+      top.appendChild(scBudTag(word, done ? 'is-ok' : late ? 'is-over' : ''));
+      b.appendChild(top);
+      say = L.x + ', ' + scMoney(L.$) + ', ' + word
+        + '. Press to ' + (done ? 'undo' : 'mark it ' + (L.bk === 'dep' ? 'done' : 'paid')) + '.';
+    }
+    b.setAttribute('aria-label', say);
+    b.addEventListener('click', function () {
+      if (L.bk === 'var' || L.bk === 'est') { scBudMoney(n, plan, cyc, L, got); return; }
+      /* A toggle rather than a sheet, and it clears rather than
+         subtracting: a fixed row is one claim, so unsaying it is
+         taking the entry away rather than filing a second one. */
+      if (got > 0) {
+        scBudEnt(n.id, cyc.iso).slice().forEach(function (e) {
+          if (e.r === L.i) scBudDrop(n.id, cyc.iso, e.i);
+        });
+      } else if (L.$ > 0) {
+        scBudAdd(n.id, cyc.iso, L.i, L.$);
+      }
+      scPaintNotes();
+    });
+    return b;
+  }
+
+  /* Newest first, grouped by day, with the day's own total on the
+     heading. A press you got wrong is undone from here, which is the
+     whole reason the entries are the record. */
+  function scTrkLedger(body, n, plan, cyc, ents) {
+    if (!ents.length) {
+      body.appendChild(scEl('p', 'nt-none',
+        'Nothing pressed this fortnight yet.'));
+      return;
+    }
+    var names = {};
+    scBudRows(plan).forEach(function (L) { names[L.i] = L; });
+    var byDay = {};
+    ents.forEach(function (e) {
+      var k = scDay(new Date(e.t));
+      (byDay[k] = byDay[k] || []).push(e);
+    });
+    Object.keys(byDay).sort().reverse().forEach(function (k) {
+      var list = byDay[k].slice().sort(function (a, b) { return b.t - a.t; });
+      var sum = 0;
+      list.forEach(function (e) { sum += e.a; });
+      var sh = scEl('div', 'bd-g');
+      sh.appendChild(scEl('b', null, k === scDay() ? 'Today' : scBudDate(k)));
+      sh.appendChild(scEl('i', null,
+        list.length === 1 ? '1 entry' : list.length + ' entries'));
+      sh.appendChild(scEl('em', null, scMoney(sum)));
+      body.appendChild(sh);
+      list.forEach(function (e) {
+        var L = names[e.r];
+        var r = scEl('div', 'tk-lg');
+        var dot = scEl('u');
+        dot.style.background = scNtVar(scNoteHue(plan));
+        r.appendChild(dot);
+        var w = scEl('div', 'x');
+        w.appendChild(scEl('span', 'n', L ? (L.x || 'Untitled') : 'Removed line'));
+        w.appendChild(scEl('span', 't', new Date(e.t).toLocaleTimeString([],
+          { hour: 'numeric', minute: '2-digit' })));
+        r.appendChild(w);
+        r.appendChild(scEl('span', 'a', scMoney(e.a)));
+        var un = scBtn('tk-un', 'Undo', function () {
+          scBudDrop(n.id, cyc.iso, e.i); scPaintNotes();
+        });
+        un.setAttribute('aria-label', 'Undo ' + scMoney(e.a)
+          + ' on ' + (L ? L.x : 'a removed line'));
+        r.appendChild(un);
+        body.appendChild(r);
+      });
+    });
+  }
+
+  /* A round figure at about the right size. Money has its own idea
+     of round — 25 is a figure people press and 23 is not — so the
+     snap is to the set below rather than to a power of ten. */
+  function scBudNice(c) {
+    var steps = [100, 200, 500, 1000, 2000, 2500, 5000, 10000, 20000, 25000, 50000, 100000];
+    for (var i = 0; i < steps.length; i++) if (c <= steps[i]) return steps[i];
+    return steps[steps.length - 1];
+  }
+  function scBudStep(L) {
+    if (L.mk > 0) return L.mk;
+    return scBudNice(Math.max(100, Math.round((L.$ || 1600) / 16)));
+  }
+
+  /* ── THE MONEY SHEET ──
+     The same drawing the water and steps dials already have, down to
+     the class names, because that is what stops the two from
+     drifting: one set of rules for what a dial in this app looks
+     like, two callers that commit differently. What is NOT shared is
+     the body — the figure means a cycle against an allocation rather
+     than a day's own total, Clear takes entries away rather than
+     zeroing a tick, and a spending row ADDS where an estimate SETS.
+     That is most of the function, so a second builder over the same
+     classes is the honest split.
+
+     A SPENDING ROW ADDS AND AN ESTIMATE SETS, and the difference is
+     the record: you go to the shops several times a fortnight and
+     the power bill lands once. */
+  function scBudMoney(n, plan, cyc, L, got) {
+    var setting = L.bk === 'est';
+    var step = scBudStep(L);
+    var max = Math.max(step * 4, L.$ || 0, 100);
+    if (setting) max = Math.max(step * 4, (L.$ || 0) * 2, 100);
+    var marks = [step, step * 2, step * 3, step * 4].filter(function (m) {
+      return m > 0 && m <= max;
+    });
+    /* THE FIGURE THE ROW IS SHOWING HAS TO BE PRESSABLE, which is the
+       workout ladder's rule: an estimate you are confirming unchanged
+       is the commonest answer of all, so it is spliced in wherever it
+       is not already a mark. */
+    if (setting && L.$ > 0 && marks.indexOf(L.$) < 0) {
+      marks.push(L.$);
+      marks.sort(function (a, b) { return a - b; });
+      if (marks.length > 4) marks.shift();
+    }
+    scSheet(L.x || 'Untitled', function (body) {
+      var add = setting ? (got > 0 ? got : L.$) : 0;
+
+      var read = scEl('div', 'nm-read');
+      var big = scEl('b');
+      read.appendChild(big);
+      body.appendChild(read);
+      var sub = scEl('div', 'nm-sub');
+      body.appendChild(sub);
+
+      var dial = scEl('input', 'nm-dial');
+      dial.type = 'range';
+      dial.min = 0;
+      dial.max = max;
+      dial.step = 100;
+      dial.value = add;
+      dial.setAttribute('aria-label', setting
+        ? 'What ' + (L.x || 'this') + ' actually came to'
+        : 'How much to add to ' + (L.x || 'this'));
+      body.appendChild(dial);
+
+      var ticks = scEl('div', 'nm-ticks');
+      var markBtns = [];
+      marks.forEach(function (m) {
+        var tk = scEl('span', 'nm-tick');
+        tk.style.left = ((m / max) * 100) + '%';
+        ticks.appendChild(tk);
+      });
+      if (marks.length) body.appendChild(ticks);
+
+      var mrow = scEl('div', 'nm-marks');
+      marks.forEach(function (m) {
+        var mb = scEl('button', 'nm-mark', scMoney(m));
+        mb.type = 'button';
+        mb.dataset.at = m;
+        mb.addEventListener('click', function () {
+          dial.value = m; add = +dial.value; paint();
+        });
+        markBtns.push(mb);
+        mrow.appendChild(mb);
+      });
+      if (marks.length) body.appendChild(mrow);
+
+      var ends = scEl('div', 'nm-ends');
+      ends.appendChild(scEl('span', null, scMoney(0)));
+      ends.appendChild(scEl('span', null, scMoney(max)));
+      body.appendChild(ends);
+
+      body.appendChild(scEl('p', 'hint',
+        'Every figure here stays on this phone. Nothing about your money '
+        + 'is ever sent.'));
+
+      var acts = scEl('div', 'acts');
+      var left = got > 0
+        ? scBtn('off', 'Clear', function () {
+            scBudEnt(n.id, cyc.iso).slice().forEach(function (e) {
+              if (e.r === L.i) scBudDrop(n.id, cyc.iso, e.i);
+            });
+            got = 0; add = setting ? L.$ : 0; dial.value = add;
+            scPaintNotes();
+            paint();
+            left.textContent = 'Cancel';
+            left.onclick = scClose;
+          })
+        : scBtn('off', 'Cancel', scClose);
+      var go = scBtn('go', setting ? 'Set' : 'Add', function () {
+        if (!add) return;
+        if (setting) {
+          scBudEnt(n.id, cyc.iso).slice().forEach(function (e) {
+            if (e.r === L.i) scBudDrop(n.id, cyc.iso, e.i);
+          });
+        }
+        scBudAdd(n.id, cyc.iso, L.i, add);
+        scClose();
+        scPaintNotes();
+      });
+      acts.appendChild(left);
+      acts.appendChild(go);
+      body.appendChild(acts);
+
+      function paint() {
+        var now = setting ? add : got + add;
+        big.textContent = scMoney(now, 1);
+        dial.style.setProperty('--fill', (max ? (add / max) * 100 : 0) + '%');
+        dial.setAttribute('aria-valuetext', setting
+          ? scMoney(add) + ' for ' + (L.x || 'this')
+          : scMoney(add) + ' added, ' + scMoney(now) + ' this cycle');
+        go.disabled = !add;
+        go.textContent = add
+          ? (setting ? 'Set ' + scMoney(add) : 'Add ' + scMoney(add))
+          : (setting ? 'Set' : 'Add');
+        markBtns.forEach(function (mb) {
+          mb.classList.toggle('is-at', +mb.dataset.at === add);
+        });
+        if (setting) {
+          sub.textContent = L.$
+            ? 'estimated ' + scMoney(L.$) + (add === L.$ ? ' · as estimated'
+              : add > L.$ ? ' · ' + scMoney(add - L.$) + ' over'
+              : ' · ' + scMoney(L.$ - add) + ' under')
+            : 'what it came to';
+        } else if (!add) {
+          sub.textContent = got > 0
+            ? scMoney(got) + ' this cycle · drag to add more'
+            : 'drag to add';
+        } else if (L.$ > 0 && now > L.$) {
+          sub.textContent = 'over ' + scMoney(L.$) + ' by ' + scMoney(now - L.$);
+        } else if (L.$ > 0) {
+          sub.textContent = scMoney(L.$ - now) + ' would be left of ' + scMoney(L.$);
+        } else {
+          sub.textContent = scMoney(now) + ' this cycle';
+        }
+      }
+      dial.addEventListener('input', function () { add = +dial.value; paint(); });
+      paint();
+    });
+  }
+
+  /* ── THE PAIR IS MADE FROM THE BUDGET, NEVER FROM THE PICKER ──
+     A tracker without a budget to read is a note whose first result
+     is broken, and the only place the id it needs is in scope is
+     here. So this is both the way one is created and the way back to
+     it: one control, whichever state the pair is in.
+
+     One tracker to a budget. A second would be two records of one
+     fortnight's spending with no way to tell which is the one you
+     have been pressing. */
+  function scBudTrk(n) {
+    for (var i = 0; i < notes.length; i++) {
+      if (notes[i].k === 'trk' && notes[i].src === n.id) return notes[i];
+    }
+    return null;
+  }
+  function scBudLink(body, n) {
+    var t = scBudTrk(n);
+    var b = scBtn('bd-go', t ? 'Open the tracker' : 'Track this budget', function () {
+      var go = scBudTrk(n);
+      if (!go) {
+        if (notes.length >= NOTE_CAP) { scToast('No room for another note'); return; }
+        go = scNoteCleanOne({
+          id: scNtId(), k: 'trk', src: n.id, a: n.a,
+          t: scNoteTitle(n) + ' spending'
+        });
+        notes.unshift(go);
+        scNoteFlush();
+      }
+      trkBack = 0; trkLedger = false;
+      ntEdit = false; ntOpen = go.id;
+      scPaintNotes(); scDate();
+    });
+    b.setAttribute('aria-label', t
+      ? 'Open ' + scNoteTitle(t)
+      : 'Make a tracker for ' + scNoteTitle(n));
+    body.appendChild(b);
+    if (!t) {
+      body.appendChild(scEl('p', 'hint',
+        'A second note that reads this one. Change an allocation here '
+        + 'and the bar there has already moved.'));
+    }
+  }
+
   function scNoteBr(n, idx) {
     var L = n.l[idx];
     if (!L || L.h || L.m !== 2 || !scNoteSect(n, idx)) return null;
@@ -12072,6 +12981,12 @@
       card.addEventListener('click', function () {
         /* A note opens to be READ. Edit is a press away and the whole
            point of the mode is that you asked for it. */
+        /* Which cycle and which half are a position on a screen you
+           are looking at, so arriving at a tracker starts on the one
+           you are in — the tally panels' own rule. Reset here as well
+           as on the way in from a budget, because the list is the
+           other door. */
+        trkBack = 0; trkLedger = false;
         ntOpen = n.id; ntEdit = false; scPaintNotes(); scDate();
       });
       pane.appendChild(card);
@@ -12230,9 +13145,16 @@
       NT_KINDS.forEach(function (K) {
         var b = scEl('button', 'nt-lb' + (n.k === K.k ? ' is-on' : ''));
         b.type = 'button';
+        /* ── THE KIND ON THE ELEMENT, SO NOTHING HAS TO FIND IT BY ITS
+           WORDS ── The chip's label is a label: it went from "Daily
+           process" to "Process" to buy the picker a row back, and
+           four checks that pressed it by text broke on the rename
+           with a TypeError forty assertions early. A control is asked
+           for by what it IS. */
+        b.dataset.k = K.k;
         b.setAttribute('aria-pressed', n.k === K.k ? 'true' : 'false');
         b.appendChild(scNtGlyph(K.k, 'nt-g'));
-        b.appendChild(scEl('span', null, K.n));
+        b.appendChild(scEl('span', null, K.s || K.n));
         b.addEventListener('click', function () {
           if (n.k === K.k) return;
           n.k = K.k;
@@ -12247,6 +13169,35 @@
           if (K.k === 'goal' && (!n.l.length || n.l[0].h)
               && n.l.length < NOTE_LINES) {
             n.l.unshift({ i: scNtId(), h: 0, c: '', x: '', y: '', m: 0, w: [] });
+          }
+          /* ── A BUDGET OPENS ON THE SHAPE, NOT ON NOTHING ──
+             One row per kind, and only on a note with nothing written
+             in it. The four kinds are what make a budget a budget and
+             they live on the strip under the focused line — so an
+             empty one is a screen that hides its own structure, and
+             somebody types twelve rows all as Fixed because that is
+             the default and never finds the other three.
+
+             THIS IS NOT THE PRESET LIST THAT WAS REJECTED for
+             habits. That one was twelve ready-made habits to pick
+             from, and the objection was that a list tells you what to
+             care about. Four rows carrying no amounts say what a ROW
+             can be — which is the starter week's own argument: a
+             first open should have a shape rather than instructions
+             in an empty frame. Names anybody would recognise, no
+             figures at all, and nothing to delete that you did not
+             ask for: a note with one word in it is left alone. */
+          if (K.k === 'bud' && !n.l.some(function (L) { return L.x.trim(); })) {
+            n.l = [
+              { i: scNtId(), h: 0, c: '', x: 'Rent', y: '', m: 0, w: [],
+                $: 0, bk: 'fix', dy: 1, mk: 0 },
+              { i: scNtId(), h: 0, c: '', x: 'Power', y: '', m: 0, w: [],
+                $: 0, bk: 'est', dy: 0, mk: 0 },
+              { i: scNtId(), h: 0, c: '', x: 'Groceries', y: '', m: 0, w: [],
+                $: 0, bk: 'var', dy: 0, mk: 0 },
+              { i: scNtId(), h: 0, c: '', x: 'Savings', y: '', m: 0, w: [],
+                $: 0, bk: 'dep', dy: 0, mk: 0 }
+            ];
           }
           n.u = Date.now(); scNoteFlush();
           scPaintNotes();
@@ -12273,6 +13224,67 @@
          took its switcher out for. */
       lay.appendChild(sws);
       pane.appendChild(pick);
+
+      /* ── THE TWO A BUDGET SETS ONCE ──
+         The income everything is measured against, and the pay date
+         the cycle is anchored on. They belong to the NOTE rather than
+         to any line, so they sit above the lines rather than being a
+         row you have to know is special.
+
+         A DATE FIELD, NEVER A PARSED STRING: the ten characters an
+         <input type="date"> speaks, which is what the goal's own due
+         date already uses. The native box is handed back with
+         `appearance: none` for the reason the edit sheet's time
+         fields had to — Safari keeps its own metrics otherwise and
+         overflows the track however it is sized. */
+      if (n.k === 'bud') {
+        var bh = scEl('div', 'bd-set');
+        var iw = scEl('label', 'bd-f');
+        iw.appendChild(scEl('span', null, 'Net income a cycle'));
+        var ii = scEl('input', 'nt-di');
+        ii.type = 'text';
+        ii.inputMode = 'decimal';
+        ii.value = n.inc ? scMoneyIn(n.inc) : '';
+        ii.placeholder = '0.00';
+        ii.addEventListener('input', function () {
+          n.inc = scMoneyOut(ii.value); n.u = Date.now(); scNoteSaveSoon();
+        });
+        ii.addEventListener('blur', function () {
+          ii.value = n.inc ? scMoneyIn(n.inc) : '';
+          scNoteFlush(); scPaintNotes();
+        });
+        iw.appendChild(ii);
+        bh.appendChild(iw);
+
+        var cw2 = scEl('label', 'bd-f');
+        cw2.appendChild(scEl('span', null, 'First day you were paid'));
+        var ci = scEl('input', 'nt-di');
+        ci.type = 'date';
+        ci.value = n.cs;
+        ci.addEventListener('change', function () {
+          n.cs = /^\d{4}-\d{2}-\d{2}$/.test(ci.value) ? ci.value : '';
+          n.u = Date.now(); scNoteFlush(); scPaintNotes();
+        });
+        cw2.appendChild(ci);
+        bh.appendChild(cw2);
+
+        var lw = scEl('label', 'bd-f');
+        lw.appendChild(scEl('span', null, 'Days in a cycle'));
+        var li = scEl('input', 'nt-di');
+        li.type = 'number';
+        li.min = 1;
+        li.max = 31;
+        li.value = scBudLen(n);
+        li.addEventListener('change', function () {
+          var v = parseInt(li.value, 10);
+          n.cl = (v >= 1 && v <= 31) ? v : 14;
+          li.value = n.cl;
+          n.u = Date.now(); scNoteFlush(); scPaintNotes();
+        });
+        lw.appendChild(li);
+        bh.appendChild(lw);
+        pane.appendChild(bh);
+      }
     }
 
     /* ── THE GUTTER IS RESERVED ON THE WHOLE NOTE, NOT PER LINE ──
@@ -12297,6 +13309,14 @@
          takes the note's own colour: a break in a line is the one mark
          that cannot be mistaken for a point on it, which is exactly
          what a session heading has to say. */
+      /* ── THE BUDGET AND ITS TRACKER ──
+         Two notes in the list and one record underneath: the plan
+         holds the allocations, the tracker holds only what you
+         pressed and reads the plan by id. So an edit to an
+         allocation is already in the bar, because there was never a
+         second copy of it to update. */
+      if (n.k === 'bud') { scBudBody(body, n); scBudLink(body, n); return; }
+      if (n.k === 'trk') { scTrkBody(body, n); return; }
       if (n.k === 'proc') {
         var sp2 = scEl('div', 'nt-sp');
         n.l.forEach(function (L) {
@@ -12453,6 +13473,69 @@
           sw.appendChild(b);
         });
         tools.appendChild(sw);
+      } else if (!L.h && n.k === 'bud') {
+        /* ── WHICH OF THE FOUR, AND WHAT THAT ROW THEN NEEDS ──
+           The kind decides the behaviour, so it decides which other
+           controls exist: a fixed row asks for the day it comes out
+           and a spending row asks for the figure you press. Drawing
+           both on every row would be two fields that mean nothing on
+           half of them. */
+        var kinds = [['fix', 'Fixed'], ['est', 'Estimated'],
+          ['var', 'Spending'], ['dep', 'Allocation']];
+        kinds.forEach(function (q) {
+          var b = scEl('button', 'nt-tool' + (L.bk === q[0] ? ' is-on' : ''));
+          b.type = 'button';
+          b.textContent = q[1];
+          b.setAttribute('aria-pressed', L.bk === q[0] ? 'true' : 'false');
+          b.addEventListener('click', function () {
+            L.bk = q[0];
+            /* A day only means something on a fixed row, and an
+               increment only on the two you press. Cleared on the way
+               out rather than left to sit invisibly on a row that has
+               no use for it — a field nothing draws and nothing can
+               edit is the subtitle key all over again. */
+            if (q[0] !== 'fix') L.dy = 0;
+            if (q[0] !== 'var' && q[0] !== 'est') L.mk = 0;
+            n.u = Date.now(); scNoteFlush(); redraw(L.i, null);
+          });
+          tools.appendChild(b);
+        });
+        if (L.bk === 'fix') {
+          var dw = scEl('label', 'bd-dw');
+          dw.appendChild(scEl('span', null, 'Day'));
+          var di = scEl('input', 'bd-dy');
+          di.type = 'number';
+          di.min = 1;
+          di.max = scBudLen(n);
+          di.value = L.dy || '';
+          di.placeholder = '—';
+          di.setAttribute('aria-label', 'Day of the cycle it comes out');
+          di.addEventListener('change', function () {
+            var v = parseInt(di.value, 10);
+            L.dy = (v >= 1 && v <= 31) ? v : 0;
+            di.value = L.dy || '';
+            n.u = Date.now(); scNoteFlush();
+          });
+          dw.appendChild(di);
+          tools.appendChild(dw);
+        } else if (L.bk === 'var' || L.bk === 'est') {
+          var mw = scEl('label', 'bd-dw');
+          mw.appendChild(scEl('span', null, 'Press'));
+          var mi = scEl('input', 'bd-mk');
+          mi.type = 'text';
+          mi.inputMode = 'decimal';
+          mi.value = L.mk ? scMoneyIn(L.mk) : '';
+          mi.placeholder = scMoneyIn(scBudStep(L));
+          mi.setAttribute('aria-label',
+            'The figure to press for ' + (L.x || 'this line'));
+          mi.addEventListener('change', function () {
+            L.mk = scMoneyOut(mi.value);
+            mi.value = L.mk ? scMoneyIn(L.mk) : '';
+            n.u = Date.now(); scNoteFlush();
+          });
+          mw.appendChild(mi);
+          tools.appendChild(mw);
+        }
       } else if (!L.h) {
         /* No colour to choose on a line: a mark takes its SECTION's,
            which is the whole of what stopped this screen having nine
@@ -12847,6 +13930,37 @@
         });
         mark(f);
         well.appendChild(f);
+
+        /* ── A BUDGET LINE IS A NAME AND A FIGURE ──
+           Beside it rather than under it, because "Rent" and "$300"
+           are one fact read across. The row becomes a two-column
+           grid in `is-bud`; the well is a normal-flow child of it, so
+           the mirror's own box is untouched by the change.
+
+           EVERYTHING ELSE A ROW NEEDS IS ON THE STRIP — which kind of
+           row it is, the day it comes out, the figure you press. Four
+           controls inline would be a spreadsheet; the strip is
+           already the place this screen puts what belongs to the
+           line you are on. */
+        if (n.k === 'bud') {
+          var am = scEl('input', 'bd-in');
+          am.type = 'text';
+          am.inputMode = 'decimal';
+          am.value = L.$ ? scMoneyIn(L.$) : '';
+          am.placeholder = '0.00';
+          am.setAttribute('aria-label', 'Amount for ' + (L.x || 'this line'));
+          am.addEventListener('input', function () {
+            L.$ = scMoneyOut(am.value); n.u = Date.now(); scNoteSaveSoon();
+          });
+          /* Re-drawn from the record on the way out, so a half-typed
+             "12." settles to what was actually stored rather than
+             sitting there looking like a figure. */
+          am.addEventListener('blur', function () {
+            am.value = L.$ ? scMoneyIn(L.$) : '';
+            scNoteFlush();
+          });
+          row.appendChild(am);
+        }
 
         /* A STEP CARRIES A NOTE UNDER IT, and only a process draws
            one. The field is the same `y` a heading's clause uses, so

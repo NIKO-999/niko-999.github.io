@@ -2937,7 +2937,7 @@ body {
    ones — `--w-violet` is 4.63:1 on the dark face at the shipped 22/72
    and `--w-green` 4.24 on the light, so raising the shared rule would
    have taken a dozen tags under the bar to warm up three. */
-.row .st, .cl-r .st {
+.row .st, .cl-r .st, .tk-r .st {
   border: none;
   background: color-mix(in srgb, var(--tg) 36%, transparent);
   color: color-mix(in srgb, var(--tg) 40%, var(--ink));
@@ -3052,7 +3052,13 @@ body {
    one rule every tag in this app shares and nothing here restates
    them. */
 .row .st.is-now, .cl-r .st.is-now, .pill.is-now { --tg: var(--live); }
-.row .st.is-ok, .cl-r .st.is-ok { --tg: var(--st-ok); }
+.row .st.is-ok, .cl-r .st.is-ok, .tk-r .st.is-ok { --tg: var(--st-ok); }
+/* OVER, and it is the app's SECOND red — the Missed tag's own
+   argument, which is that a fact about what happened is not a
+   verdict on you. Going over on a category is the one state here
+   you would most want to catch without reading, and under budget is
+   never drawn green-for-good in exchange. */
+.tk-r .st.is-over { --tg: var(--bad); }
 /* MISSED, and it is the one tag in this app that is red. The rule it
    reverses said a colour never says WHETHER — written about a wash of
    red across a week you had not kept, which is a judgement. An hour
@@ -6155,6 +6161,286 @@ body {
   font-size: 10.5px; letter-spacing: .16em;
   color: color-mix(in srgb, var(--c) 72%, var(--ink));
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   A BUDGET IS A NOTE WITH FIGURES, AND A TRACKER FILLS IT
+
+   Two notes, one record. Nothing here casts and nothing here scrolls
+   sideways: it is a note, so it is on the page rather than held above
+   it, and every radius is off the app's own scale.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* A name and a figure read across, so the row is two columns. The
+   well is a normal-flow child of it and keeps its own box, which is
+   the whole reason the mirror was moved into one. */
+.nt-body.is-bud .nt-row:not(.is-head) {
+  display: grid; grid-template-columns: 1fr 84px;
+  gap: 10px; align-items: start;
+}
+.bd-in {
+  -webkit-appearance: none; appearance: none;
+  box-sizing: border-box;
+  width: 100%; min-width: 0;
+  margin-top: 1px;
+  padding: 4px 8px;
+  border: 1px solid var(--card-edge); border-radius: 8px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit; font-size: 15px; font-weight: 600;
+  font-variant-numeric: tabular-nums; text-align: right;
+}
+.bd-in::placeholder { color: var(--tick-off); font-weight: 500; }
+.bd-in:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+/* The three a budget sets once. Stacked, because each label is a
+   sentence and three of them across a phone is a form. */
+.bd-set { display: grid; gap: 9px; margin: 2px 0 14px; }
+.bd-f { display: flex; align-items: center; gap: 10px; }
+.bd-f > span {
+  flex: 1; min-width: 0;
+  font-size: 12.5px; color: var(--dim);
+}
+.bd-f > input { flex: none; width: 128px; text-align: right; }
+
+/* The day, and the figure you press: on the strip rather than in the
+   row, because they belong to the line you are on and mean nothing on
+   half the kinds. */
+.bd-dw { display: inline-flex; align-items: center; gap: 7px; }
+.bd-dw > span {
+  font-size: 10px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--spent);
+}
+/* Two fields, two widths — so they do NOT share a rule and then
+   override one property from it. That is the duplicate `tests/
+   names.js` exists to catch, and it caught this one: whichever order
+   the two are written in, one file carries two values for `width`
+   and only the last is live. */
+.bd-mk {
+  -webkit-appearance: none; appearance: none;
+  box-sizing: border-box;
+  width: 62px; min-width: 0;
+  padding: 5px 7px;
+  border: 1px solid var(--card-edge); border-radius: 8px;
+  background: var(--card); color: var(--ink);
+  font: inherit; font-size: 12.5px; font-weight: 600;
+  font-variant-numeric: tabular-nums; text-align: right;
+}
+.bd-dy {
+  -webkit-appearance: none; appearance: none;
+  box-sizing: border-box;
+  width: 46px; min-width: 0;
+  padding: 5px 7px;
+  border: 1px solid var(--card-edge); border-radius: 8px;
+  background: var(--card); color: var(--ink);
+  font: inherit; font-size: 12.5px; font-weight: 600;
+  font-variant-numeric: tabular-nums; text-align: right;
+}
+.bd-dy::-webkit-outer-spin-button, .bd-dy::-webkit-inner-spin-button {
+  -webkit-appearance: none; margin: 0;
+}
+.bd-dy:focus-visible, .bd-mk:focus-visible {
+  outline: 2px solid var(--red); outline-offset: 2px;
+}
+
+/* ── THE GROUP HEADING IS ITS OWN, NOT THE SPINE'S ──
+   `.nt-sh` was reused for one render and it belongs to the daily
+   process: it draws a 14x4 stub at left:-30px for the line it breaks,
+   and it has a rule for a name and none for a clause or a total — so
+   the three parts ran together in the browser's own italic at the
+   inherited 16px. A heading that carries three things is a different
+   object from one that carries one, and reusing the class quietly
+   brought the spine's mark with it.
+
+   The total is `em` and rides the right edge. A clause is `i` and is
+   the quiet grey rather than the hue: the NAME already takes the
+   note's colour, and a whole heading in it reads as a caption for
+   something else. */
+.bd-g {
+  display: flex; flex-wrap: wrap; align-items: baseline;
+  gap: 2px 10px; padding: 18px 0 6px;
+}
+.bd-g > b {
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--c) 72%, var(--ink));
+}
+.bd-g > i { font-style: normal; font-size: 11.5px; color: var(--spent); }
+.bd-g > em {
+  font-style: normal; margin-left: auto;
+  font-size: 13px; font-weight: 600; color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── THE HEAD: WHAT COMES IN ── */
+.bd-hd, .bd-ft { display: flex; align-items: baseline; gap: 12px; }
+.bd-hd { padding: 6px 0 0; }
+.bd-k {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--spent);
+}
+.bd-hd > b, .bd-ft > b {
+  margin-left: auto;
+  font-size: 26px; font-weight: 700; letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums;
+}
+.bd-per { display: block; margin-top: 2px; font-size: 11.5px; color: var(--spent); }
+
+/* A plan row: name, the day if it has one, the figure. */
+.bd-r { display: flex; align-items: baseline; gap: 10px; padding: 7px 0; }
+.bd-r > .n { font-size: 15px; font-weight: 500; min-width: 0; }
+.bd-r > .d, .tk-l > .d {
+  font-size: 10.5px; font-weight: 600; color: var(--spent);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.bd-r > .a {
+  margin-left: auto;
+  font-size: 15px; font-weight: 600;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+/* THE BUFFER IS ONE FIGURE AND HAS NO TRACK. A rule over it rather
+   than a card around it: it is the answer to the list above, not a
+   sixth group. */
+.bd-ft {
+  margin-top: 14px; padding-top: 13px;
+  border-top: 1px solid var(--hair);
+}
+.bd-ft.is-over > b, .bd-ft.is-over > .bd-k { color: var(--bad); }
+
+.bd-go {
+  display: block; width: 100%;
+  margin: 18px 0 0; padding: 12px 14px;
+  border: 0; border-radius: 12px;
+  background: var(--ink); color: var(--paper);
+  font: inherit; font-size: 14px; font-weight: 600;
+  text-align: center; cursor: pointer;
+}
+.bd-go:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+/* ── THE TRACKER ── */
+.tk-cyc { display: flex; align-items: center; gap: 8px; padding: 8px 0 2px; }
+.tk-cyc > b {
+  flex: 1; text-align: center;
+  font-size: 13px; font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.tk-a {
+  flex: none; width: 34px; height: 34px;
+  display: grid; place-items: center;
+  border: 0; border-radius: 8px;
+  background: var(--card); color: var(--dim);
+  cursor: pointer;
+}
+.tk-a svg { width: 17px; height: 17px; display: block; }
+.tk-a[disabled] { opacity: .32; cursor: default; }
+.tk-a:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+.tk-hd { padding: 12px 0 0; }
+.tk-hd > b {
+  display: block;
+  font-size: 40px; font-weight: 700; letter-spacing: -.035em; line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+.tk-hd > span { display: block; margin-top: 3px; font-size: 11.5px; color: var(--spent); }
+/* The buffer, as quiet type on the line under the pace bars. `--dim`
+   rather than `--spent`: it is a figure somebody came for, and
+   `--spent` is the lighter token — which this file has shipped as a
+   rounding error above the bar twice.
+
+   ITS OWN CLASS RATHER THAN `.hint > b`. There are seventeen hints in
+   this app and none of them holds a bold today, which is exactly the
+   kind of rule the eighteenth walks into — the oldest bug in this
+   file is a name that reaches further than the thing it was written
+   for. */
+.bd-bv { font-weight: 600; color: var(--dim); }
+.bd-bv.is-short { color: var(--bad); }
+
+/* Money against time. Ahead takes the accent and behind stays the
+   flat neutral — never a red bar, which is what lets this screen
+   carry one red at all. */
+.tk-p { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.tk-p > .k {
+  flex: none; width: 44px;
+  font-size: 10px; font-weight: 700; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--spent);
+}
+.tk-p > .v {
+  flex: none; width: 34px; text-align: right;
+  font-size: 11.5px; font-weight: 600; color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
+.tk-t {
+  position: relative; flex: 1;
+  height: 6px; border-radius: 5px;
+  background: var(--tick-off); overflow: hidden;
+}
+.tk-t > i {
+  position: absolute; inset: 0 auto 0 0;
+  border-radius: 5px; background: var(--tick-off);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 16%, transparent);
+}
+.tk-t.is-lit > i { background: var(--red); box-shadow: none; }
+.tk-t.is-hue > i { background: var(--c); box-shadow: none; }
+.tk-t.is-over > i { background: var(--bad); box-shadow: none; }
+
+/* Two readings of one cycle, so they share the figures above and
+   swap below. */
+.tk-tog {
+  display: flex; gap: 0; margin: 18px 0 2px;
+  padding: 3px; border-radius: 12px;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+.tk-tb {
+  flex: 1; padding: 7px 0;
+  border: 0; border-radius: 8px;
+  background: none; color: var(--spent);
+  font: inherit; font-size: 12.5px; font-weight: 600;
+  text-align: center; cursor: pointer;
+}
+.tk-tb.is-on { background: var(--ink); color: var(--paper); }
+.tk-tb:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+/* A row is a BUTTON, so its background has to be said out loud: a
+   button with none declared is painted in the UA's own buttonface,
+   which is a mid-grey slab on this ground. */
+.tk-r {
+  display: block; width: 100%;
+  margin: 0; padding: 9px 0;
+  border: 0; background: none;
+  color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.tk-r:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.tk-l { display: flex; align-items: baseline; gap: 8px; margin-bottom: 7px; }
+.tk-l > .n { font-size: 15px; font-weight: 500; min-width: 0; }
+.tk-l > .f {
+  margin-left: auto;
+  font-size: 12px; font-weight: 600; color: var(--dim);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.tk-r:not(:has(.tk-t)) .tk-l { margin-bottom: 0; }
+
+/* The ledger. Every press is one line with a way to undo it, which
+   is the whole reason the entries are the record. */
+.tk-lg { display: flex; align-items: center; gap: 10px; padding: 7px 0; }
+.tk-lg > u {
+  text-decoration: none; flex: none;
+  width: 7px; height: 7px; border-radius: 50%;
+}
+.tk-lg > .x { flex: 1; min-width: 0; }
+.tk-lg > .x > .n { display: block; font-size: 14.5px; font-weight: 500; }
+.tk-lg > .x > .t { display: block; font-size: 10.5px; color: var(--spent); }
+.tk-lg > .a {
+  flex: none;
+  font-size: 14.5px; font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.tk-un {
+  flex: none; padding: 5px 9px;
+  border: 1px solid var(--card-edge); border-radius: 8px;
+  background: none; color: var(--spent);
+  font: inherit; font-size: 11px; font-weight: 600; cursor: pointer;
+}
+.tk-un:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
 /* ── THE FOOT ── */
 /* ── THE MARK, IN EDIT, PER LAYOUT ──

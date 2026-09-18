@@ -14523,13 +14523,16 @@ const SAID = [
          than treating 2 as an unknown value and dropping it. */
       const lyCarry = await lypage.evaluate(async () => {
         const press = async (name) => {
-          [...document.querySelectorAll('.nt-lb')]
-            .find((x) => x.textContent.indexOf(name) >= 0).click();
+          /* BY KIND, never by the word on it: the chip's label is a
+             label and has already been shortened once. */
+          const c = document.querySelector('.nt-lb[data-k="' + name + '"]');
+          if (!c) throw new Error('no ' + name + ' chip in the picker');
+          c.click();
           await new Promise((z) => setTimeout(z, 340));
         };
-        await press('Daily process');
+        await press('proc');
         const keys = document.querySelectorAll('.nt-row.is-step.is-mkd').length;
-        await press('Note');
+        await press('note');
         return { keys: keys, back: document.querySelectorAll('.nt-row.is-br').length };
       });
       ok('...and a bracketed line is still marked in the other layouts',
@@ -14985,8 +14988,11 @@ const SAID = [
       await lyEdit(true);
       const penKinds = await lypage.evaluate(async () => {
         const press = async (name) => {
-          [...document.querySelectorAll('.nt-lb')]
-            .find((x) => x.textContent.indexOf(name) >= 0).click();
+          /* BY KIND, never by the word on it: the chip's label is a
+             label and has already been shortened once. */
+          const c = document.querySelector('.nt-lb[data-k="' + name + '"]');
+          if (!c) throw new Error('no ' + name + ' chip in the picker');
+          c.click();
           await new Promise((z) => setTimeout(z, 340));
         };
         const has = async () => {
@@ -14996,11 +15002,11 @@ const SAID = [
           await new Promise((z) => setTimeout(z, 240));
           return document.querySelector('.nt-pnb') ? 'yes' : 'no';
         };
-        await press('Daily process');
+        await press('proc');
         const proc = await has();
-        await press('Goal');
+        await press('goal');
         const goal = await has();
-        await press('Note');
+        await press('note');
         return { proc: proc, goal: goal, note: await has() };
       });
       ok('the pen is offered on a note and on neither of the other two',
@@ -15024,18 +15030,17 @@ const SAID = [
           .filter((L) => L.x.trim() || (L.y || '').trim())
           .map((L) => [L.h, L.c, L.x, L.y, L.m].join('|')).join(' / ');
         const press = async (name) => {
-          const b = [...document.querySelectorAll('.nt-lb')]
-            .find((x) => x.textContent.indexOf(name) >= 0);
-          if (!b) throw new Error('no ' + name + ' in the picker');
+          const b = document.querySelector('.nt-lb[data-k="' + name + '"]');
+          if (!b) throw new Error('no ' + name + ' chip in the picker');
           b.click();
           await new Promise((z) => setTimeout(z, 340));
         };
         const before = words();
-        await press('Daily process');
+        await press('proc');
         const asProc = { spine: document.querySelectorAll('.nt-sp').length, w: words() };
-        await press('Goal');
+        await press('goal');
         const asGoal = { mk: document.querySelectorAll('.nt-mk').length, w: words() };
-        await press('Note');
+        await press('note');
         return { before: before, asProc: asProc, asGoal: asGoal,
           after: words(), plain: document.querySelectorAll('.nt-row.is-head .nt-hw').length };
       });
@@ -15062,9 +15067,8 @@ const SAID = [
          against a 15px field, which nobody had noticed. */
       const lyFloor = await lypage.evaluate(async () => {
         const press = async (name) => {
-          const b = [...document.querySelectorAll('.nt-lb')]
-            .find((x) => x.textContent.indexOf(name) >= 0);
-          if (!b) throw new Error('no ' + name + ' in the picker');
+          const b = document.querySelector('.nt-lb[data-k="' + name + '"]');
+          if (!b) throw new Error('no ' + name + ' chip in the picker');
           b.click();
           await new Promise((z) => setTimeout(z, 340));
         };
@@ -15086,19 +15090,19 @@ const SAID = [
            `.nt-gl` is the bug. */
         const field = (lay) => {
           const all = [...document.querySelectorAll('.nt-row:not(.is-head) .nt-in')];
-          const f = lay === 'Goal' ? all.find((e) => !e.closest('.nt-mk')) : all[0];
+          const f = lay === 'goal' ? all.find((e) => !e.closest('.nt-mk')) : all[0];
           if (!f) throw new Error('no ordinary line field in ' + lay);
           return parseFloat(getComputedStyle(f).fontSize);
         };
         const out = {};
-        for (const [lay, seen] of [['Note', '.nt-v'], ['Daily process', '.nt-st b'],
-                                   ['Goal', '.nt-gl']]) {
+        for (const [lay, seen] of [['note', '.nt-v'], ['proc', '.nt-st b'],
+                                   ['goal', '.nt-gl']]) {
           await ed(true); await press(lay);
           await ed(false);
           const read = px(seen);
           await ed(true);
           out[lay] = { read: read, write: field(lay) };
-          if (lay === 'Goal') {
+          if (lay === 'goal') {
             /* The statement is the FIRST line, and switching a note
                that opens on a heading prepends an empty one — so on
                this fixture it is blank, and a blank statement draws the
@@ -15122,7 +15126,7 @@ const SAID = [
             out.statement = { read: sRead, write: sWrite };
           }
         }
-        await ed(true); await press('Note');
+        await ed(true); await press('note');
         /* The two the type scale will not let up to the floor, and the
            cap that is therefore load-bearing rather than belt and
            braces: at 16 the section name and its clause dominate the
@@ -16737,6 +16741,591 @@ const SAID = [
 
     ok('nothing threw through the week', wverrs.length === 0, wverrs.slice(0, 4));
     await wvctx.close();
+  }
+
+
+  /* ══════════════════════════════════════════════════════════════
+     A BUDGET IS A NOTE WITH FIGURES, AND A TRACKER FILLS IT
+
+     Two notes in the list, one record underneath: the plan holds the
+     allocations and the tracker holds only what you pressed. Every
+     figure here is INVENTED. This repo is public, so the real sheet
+     this was built from cannot be a fixture any more than it could
+     be a default — which is the starter week's own lesson, and a
+     fixture is published too.
+
+     Its own context, because it seeds two notes and a spend log and
+     walks the whole of both screens: a check that changes the state
+     of the app is a check that has to be alone.
+     ══════════════════════════════════════════════════════════════ */
+  /* THE CENTS ARE THE POINT of two of these figures. $10.10 and
+     $20.20 held as floats come to 30.299999999999997, which prints
+     as $30.29 — a total a cent under the two rows above it, in the
+     one place a budget cannot be wrong. */
+  const BUD = {
+    id: 'nbud', k: 'bud', a: 'teal', t: 'BUDONLYZQX plan',
+    inc: 180000, cs: '2026-08-11', cl: 14,
+    l: [
+      { i: 'fr', x: 'Rent', bk: 'fix', $: 60000, dy: 1 },
+      { i: 'fp', x: 'Phone', bk: 'fix', $: 3500, dy: 3 },
+      { i: 'fi', x: 'Insurance', bk: 'fix', $: 4325, dy: 12 },
+      { i: 'ep', x: 'Power', bk: 'est', $: 1010 },
+      { i: 'ew', x: 'Water', bk: 'est', $: 2020 },
+      { i: 'vf', x: 'Food', bk: 'var', $: 30000, mk: 2500 },
+      { i: 'vx', x: 'Fun', bk: 'var', $: 12000, mk: 2000 },
+      { i: 'ds', x: 'Savings', bk: 'dep', $: 25000 }
+    ]
+  };
+  const TRK = { id: 'ntrk', k: 'trk', a: 'teal', t: 'BUDONLYZQX spending', src: 'nbud' };
+  {
+    const bgctx = await browser.newContext({ ...PHONE });
+    const bgpage = await bgctx.newPage();
+    const bgerrs = [];
+    const bnet = [];
+    bgpage.on('pageerror', (e) => bgerrs.push(String(e)));
+    bgpage.on('console', (m) => { if (m.type() === 'error') bgerrs.push(m.text()); });
+    bgpage.on('request', (r) => bnet.push({ u: r.url(), b: r.postData() || '' }));
+    const bOff = () => bnet.filter((r) => !r.u.startsWith(BASE));
+
+
+    await bgpage.addInitScript(([bud, trk]) => {
+      const FROZEN = new Date('2026-09-01T09:30:00').getTime();
+      const R = Date;
+      // eslint-disable-next-line no-global-assign
+      Date = class extends R {
+        constructor(...a) { super(...(a.length ? a : [FROZEN])); }
+        static now() { return FROZEN; }
+      };
+      delete window.SpeechRecognition;
+      delete window.webkitSpeechRecognition;
+      ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+        .forEach((k) => localStorage.setItem(k, '1'));
+      /* Seeded only when ABSENT. An init script runs on every
+         navigation, and written unconditionally it puts the record
+         back between a test changing it and the reload that test is
+         making — the bug that cost four hundred lines once. */
+      if (!localStorage.getItem('sched.note.v1')) {
+        localStorage.setItem('sched.note.v1', JSON.stringify({ list: [bud, trk] }));
+      }
+      if (!localStorage.getItem('sched.bspend.v1')) {
+        localStorage.setItem('sched.bspend.v1', JSON.stringify({
+          ntrk: {
+            '2026-08-25': [
+              { i: 'x1', r: 'vf', a: 8525, t: FROZEN - 3 * 864e5 },
+              { i: 'x2', r: 'vf', a: 4400, t: FROZEN - 864e5 },
+              { i: 'x3', r: 'fr', a: 60000, t: FROZEN - 7 * 864e5 }
+            ],
+            '2026-08-11': [{ i: 'x0', r: 'vf', a: 20000, t: FROZEN - 18 * 864e5 }]
+          }
+        }));
+      }
+      localStorage.setItem('sched.view.v1', 'notes');
+    }, [BUD, TRK]);
+    await bgpage.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
+    await bgpage.waitForTimeout(420);
+
+    const openNote = async (which) => {
+      if (!(await bgpage.$('.nt-card'))) {
+        await bgpage.click('#scTabNotes').catch(() => {});
+        await bgpage.waitForTimeout(280);
+      }
+      const back = await bgpage.$('.nt-back');
+      if (back) { await back.click(); await bgpage.waitForTimeout(280); }
+      const bgcards = await bgpage.$$('.nt-card');
+      const want = which === 'plan' ? 0 : 1;
+      if (!bgcards[want]) throw new Error('no card for ' + which);
+      await bgcards[want].click();
+      await bgpage.waitForTimeout(340);
+    };
+
+    /* ── THE FOUR GROUPS AND THE BUFFER COME TO THE INCOME ──
+       The one arithmetic claim the whole feature stands on. Asserted
+       as an EXACT equality in cents rather than as a rounded pound,
+       because the failure this is for is a cent lost in a conversion
+       and a cent is invisible in a screenshot. */
+    await openNote('plan');
+    const bPlan = await bgpage.evaluate(() => ({
+      kind: (document.querySelector('.nt-card') || {}).textContent,
+      inc: (document.querySelector('.bd-hd b') || {}).textContent,
+      per: (document.querySelector('.bd-per') || {}).textContent,
+      groups: [...document.querySelectorAll('.bd-g')].map((e) => ({
+        n: e.querySelector('b').textContent,
+        t: (e.querySelector('em') || {}).textContent })),
+      buffer: (document.querySelector('.bd-ft') || {}).textContent,
+      rows: [...document.querySelectorAll('.bd-r')].map((e) => e.textContent),
+      link: (document.querySelector('.bd-go') || {}).textContent
+    }));
+    const money = (s) => Math.round(parseFloat(String(s).replace(/[^0-9.]/g, '')) * 100);
+    const gt = {};
+    bPlan.groups.forEach((g) => { gt[g.n] = money(g.t); });
+    ok('a budget prices its four groups, and they come to the income exactly',
+      money(bPlan.inc) === 180000
+      && gt.Fixed + gt.Estimated + gt.Spending + gt.Allocation
+        + money(bPlan.buffer) === 180000, { gt, buffer: bPlan.buffer, inc: bPlan.inc });
+    /* ── AND THE CENTS SURVIVE THE ROUND TRIP ──
+       $10.10 and $20.20 as floats really do sum to 30.299999999999997
+       — and `Math.round(x * 100)` takes that straight back to 3030,
+       so a float build prints this fixture IDENTICALLY. Measured,
+       rather than asserted on a story: ten times 0.10 and nine rows
+       of the real sheet both come back exact through a final round.
+       So this is a regression guard on the drawn total carrying its
+       cents, NOT a proof that the representation is integers. The
+       integers are kept because they make `===` on an amount mean
+       something and leave no accumulated error to reason about — a
+       discipline this check cannot and does not demonstrate. */
+    ok('...and a group of cents draws its exact total',
+      gt.Estimated === 3030 && /\$30\.30/.test(bPlan.groups
+        .find((g) => g.n === 'Estimated').t), bPlan.groups);
+    ok('...and the buffer is what the four leave',
+      bPlan.buffer === 'Buffer$421.45', bPlan.buffer);
+    /* THE PLAN IS ORDERED THE WAY THE MONEY IS ARRANGED. */
+    ok('...and the plan leads with what comes out on its own',
+      bPlan.groups.map((g) => g.n).join('|') === 'Fixed|Estimated|Spending|Allocation',
+      bPlan.groups.map((g) => g.n));
+    ok('...and it says which cycle it is per, and from when',
+      bPlan.per === 'per fortnight · from 11 Aug', bPlan.per);
+
+    /* ── THE CYCLE IS A PAY FORTNIGHT, ANCHORED ON THE PAY DATE ──
+       Not a calendar month: 26 fortnights do not divide into 12, so a
+       monthly reset is wrong for a fortnight after each three-pay
+       month. The anchor is 11 Aug and today is 1 Sep, so the cycle
+       you are in is the SECOND one — 25 Aug to 7 Sep, day 8 of 14. */
+    await openNote('trk');
+    const bTrk = await bgpage.evaluate(() => ({
+      cyc: (document.querySelector('.tk-cyc b') || {}).textContent,
+      big: (document.querySelector('.tk-hd b') || {}).textContent,
+      sub: (document.querySelector('.tk-hd span') || {}).textContent,
+      pace: [...document.querySelectorAll('.tk-p')].map((e) => e.textContent),
+      hint: (document.querySelector('.hint') || {}).textContent,
+      groups: [...document.querySelectorAll('.bd-g b')].map((e) => e.textContent),
+      rows: [...document.querySelectorAll('.tk-r')].map((e) => ({
+        bk: e.dataset.bk, row: e.dataset.row, txt: e.textContent,
+        tag: (e.querySelector('.st') || {}).textContent })),
+      fwd: document.querySelectorAll('.tk-a')[1].disabled,
+      back: document.querySelectorAll('.tk-a')[0].disabled
+    }));
+    ok('the cycle is the pay fortnight the anchor lands you in',
+      bTrk.cyc === '25 Aug – 7 Sep', bTrk.cyc);
+    ok('...and what is left to spend is the allocation less what was pressed',
+      bTrk.big === '$290.75' && /left to spend/.test(bTrk.sub), bTrk);
+    /* THE TRACKER LEADS WITH WHAT YOU PRESS, which is the other
+       order — eight direct debits above the bars spend the fold. */
+    ok('...and the tracker leads with spending where the plan led with fixed',
+      bTrk.groups.join('|') === 'Spending|Estimated|Fixed|Allocation', bTrk.groups);
+    /* MONEY AGAINST TIME: 12925 of 42000 is 31%, and day 8 of 14 is
+       57%, so there are 26 points in hand. */
+    ok('...and money is drawn against the cycle, with the buffer on the line under',
+      /^Money/.test(bTrk.pace[0]) && /31%/.test(bTrk.pace[0])
+      && /57%/.test(bTrk.pace[1])
+      && /26 points in hand/.test(bTrk.hint)
+      && /\$421\.45 buffer/.test(bTrk.hint), { pace: bTrk.pace, hint: bTrk.hint });
+
+    /* ── NOT YET AND OVERDUE ARE NOT THE SAME WORD ──
+       Both directions on one screen: Phone is day 3 and today is day
+       8, so it is overdue; Insurance is day 12 and is not. A build
+       saying "not yet" for both passes any check written on one. */
+    const tagOf = (r) => (bTrk.rows.find((q) => q.row === r) || {}).tag;
+    ok('a fixed row whose day has gone is overdue, and one still ahead is not',
+      tagOf('fp') === 'overdue' && tagOf('fi') === 'not yet'
+      && tagOf('fr') === 'paid', bTrk.rows.map((r) => [r.row, r.tag]));
+    ok('...and an estimate that has not landed says so',
+      tagOf('ep') === 'not yet'
+      && /est \$10\.10/.test(bTrk.rows.find((q) => q.row === 'ep').txt),
+      bTrk.rows.find((q) => q.row === 'ep'));
+
+    /* ── BOTH ARROWS REFUSE AT THEIR ENDS ──
+       An arrow that only ever refuses is indistinguishable from one
+       that does nothing, so both states are read. The anchor gives
+       exactly one cycle behind this one. */
+    const bBack = await bgpage.evaluate(async () => {
+      document.querySelectorAll('.tk-a')[0].click();
+      await new Promise((z) => setTimeout(z, 380));
+      const a = document.querySelectorAll('.tk-a');
+      return { cyc: (document.querySelector('.tk-cyc b') || {}).textContent,
+        big: (document.querySelector('.tk-hd b') || {}).textContent,
+        hint: (document.querySelector('.hint') || {}).textContent,
+        back: a[0].disabled, fwd: a[1].disabled };
+    });
+    ok('the fortnight before is one press back and carries its own entries',
+      bTrk.fwd === true && bTrk.back === false
+      && bBack.cyc === '11 Aug – 24 Aug' && bBack.big === '$220.00'
+      && /\$200 of \$420 spent/.test(bBack.hint)
+      && bBack.back === true && bBack.fwd === false, { bTrk: [bTrk.fwd, bTrk.back], bBack });
+
+    /* ── A SPENDING ROW ADDS AND AN ESTIMATE SETS ──
+       The difference is the record: you go to the shops several times
+       a fortnight and the power bill lands once. Both, because each
+       passes on the other's bug — an estimate that added would double
+       on a correction, and a shop that set would lose every earlier
+       receipt. */
+    const bAdd = await bgpage.evaluate(async () => {
+      document.querySelectorAll('.tk-a')[1].click();
+      await new Promise((z) => setTimeout(z, 380));
+      document.querySelector('.tk-r[data-row="vf"]').click();
+      await new Promise((z) => setTimeout(z, 360));
+      const marks = [...document.querySelectorAll('.nm-mark')].map((e) => e.textContent);
+      const before = (document.querySelector('.nm-read b') || {}).textContent;
+      document.querySelectorAll('.nm-mark')[1].click();
+      await new Promise((z) => setTimeout(z, 140));
+      const go = document.querySelector('.acts .go').textContent;
+      document.querySelector('.acts .go').click();
+      await new Promise((z) => setTimeout(z, 420));
+      return { marks: marks, before: before, go: go,
+        row: (document.querySelector('.tk-r[data-row="vf"]') || {}).textContent,
+        big: (document.querySelector('.tk-hd b') || {}).textContent };
+    });
+    /* THE MARKS ARE ONE INCREMENT, DOUBLED, TRIPLED AND QUADRUPLED —
+       $25 giving $25 / $50 / $75 / $100, which is one number a row
+       rather than four to keep in step. */
+    ok('a spending row presses to the dial, with its own increment as the marks',
+      bAdd.marks.join('|') === '$25|$50|$75|$100' && bAdd.before === '$129.25',
+      bAdd);
+    ok('...and it ADDS: fifty on top of what was there',
+      bAdd.go === 'Add $50' && /\$179\.25 of \$300/.test(bAdd.row)
+      && bAdd.big === '$240.75', bAdd);
+
+    const bSet = await bgpage.evaluate(async () => {
+      const out = [];
+      for (let i = 0; i < 2; i++) {
+        document.querySelector('.tk-r[data-row="ep"]').click();
+        await new Promise((z) => setTimeout(z, 360));
+        const go = document.querySelector('.acts .go');
+        out.push({ go: go.textContent,
+          sub: (document.querySelector('.nm-sub') || {}).textContent });
+        go.click();
+        await new Promise((z) => setTimeout(z, 420));
+      }
+      const ents = JSON.parse(localStorage.getItem('sched.bspend.v1'))
+        .ntrk['2026-08-25'].filter((e) => e.r === 'ep');
+      return { out: out, n: ents.length, a: ents.map((e) => e.a),
+        row: (document.querySelector('.tk-r[data-row="ep"]') || {}).textContent,
+        hint: (document.querySelector('.hint') || {}).textContent };
+    });
+    /* SET, so pressing it twice is one entry and not two. The sheet
+       OPENS on the estimate, which is the workout ladder's rule about
+       the figure the row is showing being pressable. */
+    ok('an estimate SETS: twice through the sheet is one entry, not two',
+      bSet.out[0].go === 'Set $10.10' && bSet.n === 1 && bSet.a.join() === '1010',
+      bSet);
+    ok('...and it opens on the estimate, saying it is as estimated',
+      / as estimated$/.test(bSet.out[0].sub), bSet.out[0].sub);
+
+    /* ── THE BUFFER ABSORBS THE ESTIMATES, BOTH WAYS ──
+       A bill over its estimate takes the difference out of the buffer
+       and nothing else on the screen moves. Both directions, because
+       a build that only ever shrinks it passes the first half on its
+       own. Power is estimated $10.10: landing it at $15.00 is $4.90
+       over, and at $5.00 is $5.10 under, against a $421.45 buffer. */
+    const setEst = async (cents) => {
+      await bgpage.evaluate((c) => {
+        const L = JSON.parse(localStorage.getItem('sched.bspend.v1'));
+        L.ntrk['2026-08-25'] = L.ntrk['2026-08-25']
+          .filter((e) => e.r !== 'ep')
+          .concat(c ? [{ i: 'zz', r: 'ep', a: c, t: Date.now() }] : []);
+        localStorage.setItem('sched.bspend.v1', JSON.stringify(L));
+      }, cents);
+      await bgpage.reload({ waitUntil: 'networkidle' });
+      await bgpage.waitForTimeout(360);
+      await openNote('trk');
+      return bgpage.evaluate(() => {
+        const h = document.querySelector('.hint');
+        const m = h && h.textContent.match(/\$([\d,.]+) (buffer|short)/);
+        return { buf: m ? Math.round(parseFloat(m[1].replace(/,/g, '')) * 100)
+            * (m[2] === 'short' ? -1 : 1) : null,
+          left: (document.querySelector('.tk-hd b') || {}).textContent };
+      });
+    };
+    const bOver = await setEst(1500);
+    const bUnder = await setEst(500);
+    const bNone = await setEst(0);
+    ok('an estimate landing over its figure takes the difference out of the buffer',
+      bNone.buf === 42145 && bOver.buf === 42145 - 490
+      && bUnder.buf === 42145 + 510,
+      { none: bNone.buf, over: bOver.buf, under: bUnder.buf });
+    /* AND NOTHING ELSE MOVES. The buffer is the only figure an
+       estimate touches: what is left to spend is about the spending
+       rows, and a build that folded the two together would read
+       differently here on every one of the three. */
+    /* The regex is the vacuity guard: three `undefined`s are equal to
+       each other, so an equality on its own passes on a build that
+       draws no figure at all. */
+    ok('...and what is left to spend does not move with it',
+      /^-?\$[\d,.]+$/.test(String(bNone.left))
+      && bNone.left === bOver.left && bOver.left === bUnder.left,
+      { none: bNone.left, over: bOver.left, under: bUnder.left });
+
+    /* ── THE LINK IS LIVE, BECAUSE THERE IS NO SECOND COPY ──
+       The whole of the ask: edit the budget and the bar has already
+       moved. Driven through the EDITOR rather than through the
+       record, because what is being claimed is the path a person
+       takes. Asserted as the tracker's own figures changing AND as
+       the tracker's record holding no allocation of its own — a
+       build that copied the number on creation passes the first. */
+    await openNote('plan');
+    const bEdit = await bgpage.evaluate(async () => {
+      document.getElementById('scNtEd').click();
+      await new Promise((z) => setTimeout(z, 420));
+      const amts = [...document.querySelectorAll('.bd-in')];
+      const food = amts[5];
+      if (!food) throw new Error('no amount field for Food');
+      const was = food.value;
+      food.value = '200.00';
+      food.dispatchEvent(new Event('input', { bubbles: true }));
+      food.dispatchEvent(new Event('blur', { bubbles: true }));
+      await new Promise((z) => setTimeout(z, 420));
+      document.getElementById('scNtEd').click();
+      await new Promise((z) => setTimeout(z, 420));
+      return { was: was,
+        trkRec: JSON.parse(localStorage.getItem('sched.note.v1')).list
+          .filter((n) => n.k === 'trk')
+          .map((n) => ({ lines: n.l.length, src: n.src })) };
+    });
+    await openNote('trk');
+    const bLive = await bgpage.evaluate(() => ({
+      row: (document.querySelector('.tk-r[data-row="vf"]') || {}).textContent,
+      big: (document.querySelector('.tk-hd b') || {}).textContent,
+      over: !!(document.querySelector('.tk-r[data-row="vf"] .st.is-over'))
+    }));
+    /* Food was $300 with $179.25 pressed against it. Taken to $200
+       the bar moves, the figure left drops by the hundred, and it is
+       still not over. */
+    ok('editing an allocation moves the tracker, with nothing to sync',
+      bEdit.was === '300.00' && /\$179\.25 of \$200/.test(bLive.row)
+      && bLive.big === '$140.75' && bLive.over === false, { bEdit, bLive });
+    ok('...and the tracker stores no allocation of its own',
+      bEdit.trkRec.length === 1 && bEdit.trkRec[0].lines === 0
+      && bEdit.trkRec[0].src === 'nbud', bEdit.trkRec);
+
+    /* ── THREE CHECKS THAT NEEDED THEIR OWN CONTEXTS ──
+       Each of the three below writes a stored shape and reloads, and
+       all three were written into this context first and were wrong
+       for one reason: **`sched.note.v1` is flushed on the way OUT of
+       the page**, so the app writes its own in-memory copy straight
+       back over the edit and the reload reads what was there before.
+       It is written up against the damaged-note check already, and it
+       still caught this pass — the tell was a deleted budget coming
+       back with `kinds: ["bud","trk"]` after the reload.
+
+       An init script seeds the shape instead, which runs BEFORE the
+       app has anything in memory to flush. Seeded unconditionally
+       here rather than only-when-absent, because each of these three
+       is a single page load with nothing to put back. */
+    ok('nothing threw through the budget', bgerrs.length === 0, bgerrs.slice(0, 4));
+    /* ── AND NONE OF IT LEAVES THE PHONE ──
+       A budget is the most private record this app has — further down
+       the road that "a count may leave and a list may not" was
+       written about than anything else on it. Two halves, because
+       each passes on the other's bug: pressing around the whole of
+       both screens makes no request at all, AND a push that happens
+       for some other reason is not carrying one. That second one is
+       the check that was missing the two times a comment reading
+       "this is never sent" was the only place the intention lived. */
+    ok('nothing about the budget has left the origin',
+      bOff().length === 0, bOff().slice(0, 4).map((r) => r.u));
+    await bgctx.close();
+  }
+
+  /* Each of the three below is one page load against a shape the init
+     script planted, for the reason written where they used to be: the
+     note key is flushed on the way out, so a shape written into a live
+     page and reloaded comes back as whatever the app still had. */
+  const budSeed = async (pg, notes, spend) => {
+    await pg.addInitScript(([ns, sp]) => {
+      const F = new Date('2026-09-01T09:30:00').getTime();
+      const R = Date;
+      // eslint-disable-next-line no-global-assign
+      Date = class extends R {
+        constructor(...a) { super(...(a.length ? a : [F])); }
+        static now() { return F; }
+      };
+      delete window.SpeechRecognition;
+      delete window.webkitSpeechRecognition;
+      ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+        .forEach((k) => localStorage.setItem(k, '1'));
+      localStorage.setItem('sched.note.v1', JSON.stringify({ list: ns }));
+      localStorage.setItem('sched.bspend.v1', JSON.stringify(sp));
+      localStorage.setItem('sched.view.v1', 'notes');
+    }, [notes, spend]);
+    await pg.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
+    await pg.waitForTimeout(420);
+  };
+  const SPEND = { ntrk: { '2026-08-25': [
+    { i: 'x1', r: 'vf', a: 8525, t: Date.now() },
+    { i: 'x2', r: 'vf', a: 4400, t: Date.now() },
+    { i: 'x3', r: 'fr', a: 60000, t: Date.now() } ] } };
+
+  /* ── A DANGLING SOURCE COSTS THE ROWS AND NEVER THE ENTRIES ──
+     The budget is gone and the tracker keeps every press. The entries
+     are the half you cannot get back, which is the schedule's oldest
+     rule about a stored shape one screen further on. */
+  {
+    const dctx2 = await browser.newContext({ ...PHONE });
+    const dpage2 = await dctx2.newPage();
+    const derrs2 = [];
+    dpage2.on('pageerror', (e) => derrs2.push(String(e)));
+    await budSeed(dpage2, [TRK], SPEND);
+    const dOpen = await dpage2.evaluate(async () => {
+      const card = document.querySelector('.nt-card');
+      if (!card) return { err: 'no card at all' };
+      card.click();
+      await new Promise((z) => setTimeout(z, 420));
+      return {
+        body: (document.querySelector('.nt-body') || {}).className,
+        says: (document.querySelector('.nt-none') || {}).textContent,
+        rows: document.querySelectorAll('.tk-r').length,
+        kept: JSON.parse(localStorage.getItem('sched.bspend.v1'))
+          .ntrk['2026-08-25'].length
+      };
+    });
+    ok('a tracker whose budget has gone keeps its entries and says so',
+      /has no budget/.test(String(dOpen.says)) && dOpen.rows === 0
+      && dOpen.kept === 3, dOpen);
+    ok('...and nothing threw with nothing to read',
+      derrs2.length === 0, derrs2.slice(0, 3));
+    await dctx2.close();
+  }
+
+  /* ── A DAMAGED ENTRY COSTS THAT ENTRY AND NEVER THE CYCLE ──
+     And the repair is WRITTEN BACK. Four times in this app a repair
+     has run on the way in and never been saved, so it was redone
+     every boot and lost the moment anything else wrote the key.
+     Asserted on the STORE rather than on the screen, which is what
+     would have caught all four. */
+  {
+    const rctx2 = await browser.newContext({ ...PHONE });
+    const rpage2 = await rctx2.newPage();
+    await budSeed(rpage2, [BUD, TRK], { ntrk: { '2026-08-25': [
+      { i: 'g1', r: 'vf', a: 1000, t: 1756000000000 },
+      null,
+      { i: 'g2', r: '', a: 500, t: 1756000000000 },
+      { i: 'g3', r: 'vf', a: 'lots', t: 1756000000000 },
+      { i: 'g4', r: 'vf', a: 2000, t: 1756000000000 }
+    ] } });
+    /* `e && e.i` because a build that does NOT repair leaves the
+       planted null in the array, and `null.i` throws — which takes
+       the file down rather than failing the check. */
+    const rKept = await rpage2.evaluate(() =>
+      JSON.parse(localStorage.getItem('sched.bspend.v1')).ntrk['2026-08-25']
+        .map((e) => (e && e.i) || 'DAMAGED'));
+    ok('a damaged entry is dropped, the good ones survive, and the repair is saved',
+      rKept.join('|') === 'g1|g4', rKept);
+    await rctx2.close();
+  }
+
+  /* ── AN UNKNOWN KIND FALLS TO A NOTE, AND A TRACKER IS NOT ONE ──
+     The key outlives the code that wrote it. `trk` is a valid kind
+     the PICKER never offers, because a tracker with no budget to read
+     is a note whose first result is broken — so the two lists are
+     separate, and both halves are read. */
+  {
+    const kctx2 = await browser.newContext({ ...PHONE });
+    const kpage2 = await kctx2.newPage();
+    const kBud = JSON.parse(JSON.stringify(BUD));
+    kBud.k = 'ledger';
+    await budSeed(kpage2, [kBud, TRK], SPEND);
+    const kGot = await kpage2.evaluate(async () => {
+      const out = {
+        kinds: JSON.parse(localStorage.getItem('sched.note.v1')).list
+          .map((n) => n.k).join('|')
+      };
+      document.querySelector('.nt-card').click();
+      await new Promise((z) => setTimeout(z, 380));
+      const ed = document.getElementById('scNtEd');
+      if (ed) { ed.click(); await new Promise((z) => setTimeout(z, 420)); }
+      out.chips = [...document.querySelectorAll('.nt-lb')]
+        .map((e) => e.textContent).join('|');
+      return out;
+    });
+    ok('a kind this build does not have falls through to a note, and trk survives',
+      kGot.kinds === 'note|trk', kGot);
+    /* AND THE PICKER NEVER OFFERS A TRACKER. Four chips, not five —
+       asserted beside the kind above, because "trk is valid" and "trk
+       is not offered" are two claims and each passes on the other's
+       bug. */
+    ok('...and the picker offers four layouts, none of them a tracker',
+      kGot.chips === 'Note|Process|Goal|Budget', kGot.chips);
+    await kctx2.close();
+  }
+
+  /* ── AND A PUSH THAT HAPPENS FOR SOME OTHER REASON IS NOT CARRYING
+     ONE ── Its own context, because the one above asserts that NO
+     request leaves and this one has to make one. The friends half is
+     turned on against a stand-in, a tick is logged to force the push,
+     and the whole body is read for any trace of the budget: a
+     category name, an amount in cents, an amount in dollars, and the
+     two keys. Pressing around and seeing nothing leave is the easy
+     half; this is the half that was missing the two times a comment
+     reading "this is never sent" was the only place the intention
+     ever existed. */
+  {
+    const bpctx = await browser.newContext({ ...PHONE });
+    const bppage = await bpctx.newPage();
+    const bperrs = [];
+    const posts = [];
+    bppage.on('pageerror', (e) => bperrs.push(String(e)));
+    await bppage.route(`${BASE}/schedule/nobudget/**`, (route) => {
+      posts.push(route.request().postData() || '');
+      return route.fulfill({ status: 200, contentType: 'application/json',
+        body: '{"ok":true}' });
+    });
+    await bppage.addInitScript(([bud, trk, where]) => {
+      const FROZEN = new Date('2026-09-01T09:30:00').getTime();
+      const R = Date;
+      // eslint-disable-next-line no-global-assign
+      Date = class extends R {
+        constructor(...a) { super(...(a.length ? a : [FROZEN])); }
+        static now() { return FROZEN; }
+      };
+      delete window.SpeechRecognition;
+      delete window.webkitSpeechRecognition;
+      ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+        .forEach((k) => localStorage.setItem(k, '1'));
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1', JSON.stringify({
+          url: where, code: 'ZQX7PM4K', key: 'a'.repeat(32),
+          name: 'Reader', pic: '', on: true }));
+      }
+      if (!localStorage.getItem('sched.note.v1')) {
+        localStorage.setItem('sched.note.v1', JSON.stringify({ list: [bud, trk] }));
+      }
+      if (!localStorage.getItem('sched.bspend.v1')) {
+        localStorage.setItem('sched.bspend.v1', JSON.stringify({
+          ntrk: { '2026-08-25': [{ i: 'p1', r: 'vf', a: 8525, t: FROZEN }] } }));
+      }
+      localStorage.setItem('sched.view.v1', 'week');
+    }, [BUD, TRK, `${BASE}/schedule/nobudget`]);
+    await bppage.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
+    await bppage.waitForTimeout(460);
+    /* ── A BLOCK'S OWN CHECK, AND 1500ms OF DEBOUNCE ──
+       A tick is what forces a push, so this drives the real path
+       rather than calling a function by hand. Two things had to be
+       right and neither was: every tile on Showing up opens a SHEET
+       on a press — the workout deck, the Mind picker, the number dial
+       — so not one of them completes a tick in one click, and a week
+       row's check does. And `scPush` waits **1500ms** before it
+       fires, so a 900ms wait measured a push that had not left yet.
+       It reported `pushes: 0`, which the check refuses to pass on
+       rather than reading as "nothing leaked". */
+    const bgcard = await bppage.$('.chk');
+    if (bgcard) { await bgcard.click(); await bppage.waitForTimeout(2400); }
+    const bgbody = posts.join(' ');
+    /* ── EVERY TOKEN HAS TO BE ONE THE PAYLOAD CANNOT CONTAIN BY
+       ACCIDENT ── `1800`, `bud` and `inc` were in this list and all
+       three are loose enough to match a timestamp or an innocent key,
+       which would report a leak on a build that is working. That is
+       the note-token lesson: a filter that can match correct
+       behaviour is worse than no filter. What is left is a name
+       nothing else uses, the category names, the figures in both
+       cents and dollars, and the keys quoted. */
+    const traces = ['BUDONLYZQX', 'Groceries', 'Insurance', 'Savings', 'Food',
+      'Rent', 'Power', '180000', '42145', '421.45', '8525', '85.25', '30000',
+      'bspend', '"cs"', '"inc"', '"bk"', '"mk"', '"src"']
+      .filter((t2) => bgbody.indexOf(t2) >= 0);
+    ok('a push carries no trace of the budget at all',
+      posts.length > 0 && traces.length === 0,
+      { pushes: posts.length, traces: traces, body: bgbody.slice(0, 220) });
+    ok('nothing threw while the push was made', bperrs.length === 0, bperrs.slice(0, 3));
+    await bpctx.close();
   }
 
   ok('no page errors through any of it', errs.length === 0, errs);

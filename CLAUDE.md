@@ -10529,3 +10529,327 @@ refused, both wrote nothing, and both were fixed by taking the whole
 rule rather than the one line that changed. **A break and its inverse
 are not one edit read backwards** — this file already said so once and
 the same pass met it twice more.
+
+## A budget is a note with figures, and a tracker fills it
+
+Asked for as two things you can see side by side — *October budget*
+and *October spending* — with the second tracking the first, and a
+press that files what you just spent and moves the bar. Two notes in
+the list; **one record underneath**.
+
+**THE TRACKER CARRIES AN ID, NEVER A COPY.** That is the whole of
+what makes the pair interlinked rather than kept in step: the plan
+holds the allocations, the tracker holds only what you pressed, and
+an edit to an allocation is already in the bar because there was
+never a second number to update. It is the note tag on a block's own
+mechanism — a dangling id costs the tracker its ROWS and never its
+entries, because the entries are the half you cannot get back.
+
+**ONE TRACKER TO A BUDGET, and it is made FROM the budget.** A
+tracker with nothing to read is a note whose first result is broken,
+and the only place the id it needs is in scope is the budget itself.
+So `trk` is a valid kind the PICKER never offers, and the control
+that makes one is the same control that opens it.
+
+### The cycle is a pay fortnight, and that is not a taste call
+
+Everything on the sheet this was built from is fortnightly, and **26
+fortnights do not divide into 12 months**: two months a year carry a
+third pay, so a monthly reset is wrong for a fortnight after each of
+them and a monthly "what is left" is a figure nobody can act on. The
+anchor is a PAY DATE. The buffer starts again when the money arrives,
+which is the only moment it means anything.
+
+Which also means there are no new notes each month. One pair, an
+arrow back through the fortnights that have been, **refusing at both
+ends** — nothing before the anchor and no cycle that has not started.
+
+### Four kinds of row, because a budget is not one kind of thing
+
+Ten of the twelve lines on that sheet are **direct debits**. They do
+not want a bar, they want a DATE and a tick — and only the two you
+actually stand at a till with have anything to press against. That is
+the finding the whole layout came out of, and it was in the data
+rather than in any mock.
+
+    fix  a date and paid / not yet
+    est  an estimate, and what actually landed
+    var  an allocation and a bar you press against
+    dep  a transfer out. Done or not done.
+
+**THE BUFFER IS NONE OF THE FOUR.** It is what the income leaves once
+all of them are out, drawn as one figure with no track — a bar
+invites you to fill it and the whole point of a buffer is that you do
+not. And it **absorbs the estimates**: a bill landing over its figure
+takes the difference out of there, visibly, and nothing else on the
+screen moves. Asserted in BOTH directions and with what is left to
+spend held still across all three, because a build that folded the
+two figures together would read differently on every one of them.
+
+**The five come to the income exactly**, which is the one arithmetic
+claim the feature stands on and is asserted as an equality in CENTS
+rather than as a rounded pound: the failure this is for is a cent
+lost in a conversion, and a cent is invisible in a screenshot.
+
+### Money is an integer number of cents
+
+**And the first reason written down for it was wrong.** The note said
+`$10.10 + $20.20` in floating point is `30.299999999999997` and so
+prints a cent light. The first half is true and the second is not:
+`Math.round(x * 100)` takes that straight back to 3030, and measured,
+ten times `0.10` and nine rows of the real sheet both come back exact
+through a final round. **A float build draws this fixture
+identically**, so the check written to catch it could not have
+failed — which is worse than no check, because it is what makes the
+rest of a claim sound measured. It is relabelled as what it is: a
+guard that the drawn total carries its cents.
+
+The integers stay, on the reason that survives. `===` on an amount
+means something, there is no accumulated error to reason about at
+any point in the future, and a comparison against an allocation is
+exact rather than nearly. That is a discipline rather than a bug
+already caught, and it is written as one. Summed and compared as
+cents,
+turned into dollars only to be drawn, and drawn WITHOUT the cents
+when they are zero: a column reading `$300` and `$69.23` is how a
+person writes it, where `$300.00` down a whole list is a spreadsheet.
+
+### The entries are the record and the bars are derived
+
+Every press is one entry against one row, so a bar is a sum of things
+you can see and correct rather than a figure you have to trust — and
+the Ledger is the only way a mistake has a way back. A budget you
+cannot correct is one you stop keeping.
+
+**ONE SHAPE FOR ALL FOUR KINDS**, deliberately: a fixed row paid is
+an entry of its own amount, an estimate landing is an entry of what
+it really was, a deposit done is an entry of the transfer. Four
+states, one log, nothing to keep in step.
+
+**A SPENDING ROW ADDS AND AN ESTIMATE SETS**, and the difference is
+the record rather than a preference: you go to the shops several
+times a fortnight and the power bill lands once. Both are asserted,
+because each passes on the other's bug — an estimate that added would
+double on a correction, and a shop that set would lose every earlier
+receipt.
+
+**The marks are ONE increment, doubled, tripled and quadrupled** —
+$25 giving $25 / $50 / $75 / $100, which is what was asked for and is
+one number a row rather than four to keep in step. Unset it falls to
+a sixteenth of the allocation snapped to a figure people actually
+press, which on $400 is $25. Money has its own idea of round: 25 is a
+figure you press and 23 is not, so the snap is to a written set
+rather than to a power of ten.
+
+**The sheet is the dial the water and steps rows already open**, down
+to the class names, because that is what stops the two drifting. What
+is NOT shared is the body — the figure means a cycle against an
+allocation rather than a day's total, Clear takes entries away rather
+than zeroing a tick, and one adds where the other sets. That is most
+of the function, so a second builder over the same classes is the
+honest split rather than a generalisation of a shipped path.
+
+### Not yet and overdue are not the same word
+
+A fixed row said "not yet" whether its day was next week or nine days
+gone, and which of those it is, is the one fact on the screen you
+would most want to catch without reading. **It is the app's second
+red**, on the Missed tag's own argument: a day that has been and gone
+without the money leaving is a fact about the fortnight rather than a
+verdict on you. Only where a day is SET — a row with none has nothing
+to be late against — and under budget is never drawn green-for-good
+in exchange. Both directions are asserted on one screen, because a
+build saying "not yet" for both passes any check written on one.
+
+### The plan and the tracker are ordered differently
+
+The plan runs the way the money is arranged: what comes out on its
+own, then the estimates, then what is left to spend. The tracker
+leads with **spending**, because that is the only group you press
+against and the reason you opened it — and eight direct debits above
+the bars spend the whole fold. Same rows, two orders, because the two
+screens are asked different questions. Found by opening the screen,
+not by reading the diff.
+
+**And the buffer came out of the head.** It went in as a second
+headline at 26px under a 40px one with a rule between them, which put
+the entire fold above the first spending row on the one screen whose
+whole job is the rows. It is a FACT rather than a state, so it is
+quiet type after a middle dot — this app's own rule about what a
+figure looks like.
+
+### `.nt-sh` is the SPINE's heading, and reusing it cost a render
+
+The group heading was `.nt-sh` for one draw. That class belongs to
+the daily process: it puts a 14x4 stub at `left: -30px` for the line
+it breaks, and it has a rule for a NAME and none for a clause or a
+total — so three parts ran together in the browser's own italic at
+the inherited 16px. **A heading carrying three things is a different
+object from one carrying one**, and taking the class quietly brought
+the spine's mark with it. `.bd-g` is its own.
+
+**The static check caught the other one.** `.bd-dy` shared a rule
+with `.bd-mk` and then overrode `width` from it — which is the
+duplicate `tests/names.js` exists to find, not a way around it:
+whichever order the two are written in, the file carries two values
+and only the last is live. They are two rules now.
+
+### A budget opens on the shape, not on nothing
+
+Switching an empty note to Budget seeds **one row per kind**, no
+figures at all. The four kinds live on the strip under the focused
+line, so an empty budget is a screen that hides its own structure —
+you type twelve rows all as Fixed, because that is the default, and
+never find the other three.
+
+**This is not the preset list that was rejected for habits.** That
+one was twelve ready-made habits to choose from and the objection was
+that a list tells you what to care about. Four unpriced rows say what
+a ROW can be, which is the starter week's own argument: a first open
+should have a shape rather than instructions in an empty frame. Only
+on a note with nothing written in it, so a note with one word in it
+is left alone.
+
+### None of it leaves the phone, and there is no bank connection
+
+A budget is further down the road that *a count may leave and a list
+may not* was written about than anything else on this record.
+`sched.bspend.v1` is not in `scPushNow`'s body and no path from
+either screen reaches the worker. **Two halves, because each passes
+on the other's bug**: pressing around the whole of both screens makes
+no request at all, AND a push that happens for some other reason is
+not carrying one — the second is the check that was missing the two
+times a comment reading "this is never sent" was the only place the
+intention ever existed. It reads the real POST body for a category
+name, an amount in cents, an amount in dollars and both keys.
+
+And it never reads `ledger.v1`. The trading record keeps its own
+figures and nothing crosses, which is the rule that keeps habits out
+of the money seen from a third screen.
+
+**The obvious next idea is the one that breaks it.** *Let it read my
+transactions* is the single feature that would undo the promise the
+rest of the app is built on. If that is ever wanted it is a different
+app, not a note.
+
+### AND IT IS NOT IN THE BACKUP, WHICH IS A GAP RATHER THAN A DESIGN
+
+`Copy a backup` puts `state` on the clipboard — the SCHEDULE, and the
+caption says so. Notes have never been in it, so a budget is not
+either, and that means the one record here made of figures somebody
+typed can go with a cleared cache and have no way back. Known, not
+fixed in this pass: the honest fix is a backup that carries every
+`sched.*` key rather than one of them, which is a change to a shipped
+restore path and wants its own round. Said out loud because a
+financial record with no export is the kind of gap that is only ever
+discovered the once.
+
+### The real sheet is not a fixture and not a default
+
+This repo is **public**. The figures this was built from — a salary, a
+rent, what somebody is owed — cannot go in it as a starter and cannot
+go in it as a test fixture either, because a fixture is published
+too. That is the seed week's own lesson arriving with higher stakes:
+the app ships a generic skeleton, `tests/schedule.js` carries invented
+numbers, and the real ones are typed in on the phone they stay on.
+
+### The bite proof found five of six, and three faults of its own
+
+Six breaks in one run, which is this file's own practice — the deal's
+three-at-once is the precedent. Five fired exactly the assertion they
+were aimed at: the tracker's order came back `Fixed|Estimated|
+Spending|Allocation`, the overdue row read `not yet`, the estimate
+filed two entries instead of one, the buffer read `42145` on all
+three of over / under / absent, and the damaged entry survived the
+reload as `g1|DAMAGED|g2|g3|g4`. The sixth — the money contrast — was
+proved on its own pixels rather than in the run, because the file
+crashed before reaching it: the row figure measures **1.73:1** in
+`--tick-off` against the 4.5 bar.
+
+**And the run found three things wrong with the checks themselves,
+which is most of what a bite proof is for.**
+
+**`sched.note.v1` IS FLUSHED ON THE WAY OUT OF THE PAGE, and that is
+already written down.** Three checks wrote a stored shape and
+reloaded — a deleted budget, a damaged log, an unknown kind — and the
+app wrote its own in-memory copy straight back over all three. The
+tell was a deleted budget coming back as `kinds: ["bud","trk"]`. Each
+is its own CONTEXT now with the shape planted by an init script,
+which runs before the app has anything in memory to flush. The note
+that warns about this sits twenty lines from where I wrote them.
+
+**`location.reload()` and then awaiting inside the same `evaluate`
+destroys the context the await is running in.** "Execution context
+was destroyed" took the file down rather than failing anything. The
+pattern that works is the one already in the file: return first, wait
+outside.
+
+**And a rename matched the prefix of a longer name.** `const card` →
+`const bgcard` turned `const cards` into `const bgcards` and left
+`cards[want]` pointing at nothing — a `ReferenceError` forty
+assertions early. That is the keyword table's word-boundary rule,
+self-inflicted, in a rename script rather than in the app.
+
+### The push check refused to pass on nothing, twice over
+
+`posts.length > 0` is in that assertion beside the trace scan, and it
+earned itself: the first version reported **`pushes: 0`** and would
+have read as *nothing leaked* without it. Two things were wrong and
+both are worth knowing.
+
+**EVERY TILE ON SHOWING UP OPENS A SHEET.** Train opens the workout
+deck, Mind the picker, and the four numbers the dial — so not one of
+them completes a tick in a single press, and the check was pressing
+Train and waiting. A week row's own check ticks a block, which is one
+press and pushes.
+
+**And `scPush` waits 1500ms.** The check waited 900, so it measured a
+push that had not left yet.
+
+**The tokens had to be tightened too.** `1800`, `bud` and `inc` were
+on the scan list and all three can match a timestamp or an innocent
+key — which would report a leak on a build that is working. That is
+the note token's own lesson: a filter that can match correct
+behaviour is worse than no filter. Measured clean, the whole payload
+is `name / acc / ink / pic / days / bio / year / work / mind / logs /
+at`, and `days` is `{ t: 0, b: 1 }` — counts, the way it has always
+been.
+
+### AND THE CHIP CARRIES ITS KIND, because the label moved
+
+Shortening the chip broke four checks that pressed it by its WORDS —
+`.find(x => x.textContent.indexOf('Daily process') >= 0)` returns
+undefined, and `.click()` on that is a TypeError forty assertions
+early. Fifth time this file has recorded an identifier in a fixture
+that nothing type-checks, after a palette name, a workout key, a CSS
+selector string and a cell found by its own text.
+
+`data-k` is on the chip now and every press asks for the KIND. The
+card's label is still `n` and still reads "Daily process", because
+that is a label with room for the clearer of the two words — and the
+one check that reads the CARD reads it there.
+
+### The fourth chip cost the picker a row
+
+Measured at 390, 375 and 360: `Note / Daily process / Goal / Budget`
+plus the seven colour swatches went from two rows to three, which is
+75px of chrome before a line of the note. A short label on the
+longest chip buys it back at **390, where this app is measured** —
+two rows and 59px. At 375 and below it is still three, and that is
+stated rather than chased: 16px in EDIT mode on a phone narrower than
+the design target. `n` is what the card says, `s` is what the chip
+says, and "Daily process" is the clearer of the two where there is
+room for it.
+
+### Two ways to kill your own shell
+
+**`pkill -f "http.server 8899"` matches the command line it is
+running in.** The pattern is in the shell's own argv, so pkill killed
+the shell and the whole command reported as SIGTERM with no output —
+twice, and read the second time as the suite failing. Use a fresh
+port rather than killing the old one.
+
+**And `&` with a backgrounded tool call is not backgrounding.** The
+runner detaches on its own; adding `nohup ... &` returns immediately,
+the tool's shell exits, and the child goes with it. Same empty output,
+same 144.
