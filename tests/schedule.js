@@ -16745,18 +16745,21 @@ const SAID = [
 
 
   /* ══════════════════════════════════════════════════════════════
-     A BUDGET IS A NOTE WITH FIGURES, AND A TRACKER FILLS IT
+     A BUDGET IS A NOTE WITH FIGURES, AND THE TRACKER IS ITS OTHER
+     FACE
 
-     Two notes in the list, one record underneath: the plan holds the
-     allocations and the tracker holds only what you pressed. Every
-     figure here is INVENTED. This repo is public, so the real sheet
-     this was built from cannot be a fixture any more than it could
-     be a default — which is the starter week's own lesson, and a
-     fixture is published too.
+     One note in the list, one record underneath: the plan and the
+     tracker used to be two notes, the second reading the first by
+     id, and "Open the tracker" found or made it. There is nothing
+     left to find or make — the same button flips which half of this
+     one note is drawn. Every figure here is INVENTED. This repo is
+     public, so the real sheet this was built from cannot be a
+     fixture any more than it could be a default — which is the
+     starter week's own lesson, and a fixture is published too.
 
-     Its own context, because it seeds two notes and a spend log and
-     walks the whole of both screens: a check that changes the state
-     of the app is a check that has to be alone.
+     Its own context, because it seeds a note and a spend log and
+     walks both faces of it: a check that changes the state of the
+     app is a check that has to be alone.
      ══════════════════════════════════════════════════════════════ */
   /* THE CENTS ARE THE POINT of two of these figures. $10.10 and
      $20.20 held as floats come to 30.299999999999997, which prints
@@ -16776,6 +16779,11 @@ const SAID = [
       { i: 'ds', x: 'Savings', bk: 'dep', $: 25000 }
     ]
   };
+  /* A LEGACY SHAPE, KEPT ONLY TO PROVE THE MERGE REPAIRS IT — the
+     two-note form this app shipped for a day: a `trk` note with its
+     own id, pointing back at the budget by `src`. Nothing writes
+     this shape any more; the migration tests below plant it exactly
+     as it would sit on a phone that used the app before the merge. */
   const TRK = { id: 'ntrk', k: 'trk', a: 'teal', t: 'BUDONLYZQX spending', src: 'nbud' };
   {
     const bgctx = await browser.newContext({ ...PHONE });
@@ -16788,7 +16796,7 @@ const SAID = [
     const bOff = () => bnet.filter((r) => !r.u.startsWith(BASE));
 
 
-    await bgpage.addInitScript(([bud, trk]) => {
+    await bgpage.addInitScript(([bud]) => {
       const FROZEN = new Date('2026-09-01T09:30:00').getTime();
       const R = Date;
       // eslint-disable-next-line no-global-assign
@@ -16805,11 +16813,13 @@ const SAID = [
          back between a test changing it and the reload that test is
          making — the bug that cost four hundred lines once. */
       if (!localStorage.getItem('sched.note.v1')) {
-        localStorage.setItem('sched.note.v1', JSON.stringify({ list: [bud, trk] }));
+        localStorage.setItem('sched.note.v1', JSON.stringify({ list: [bud] }));
       }
+      /* Entries are keyed by the BUDGET's own id now — there is no
+         second note to key them by. */
       if (!localStorage.getItem('sched.bspend.v1')) {
         localStorage.setItem('sched.bspend.v1', JSON.stringify({
-          ntrk: {
+          nbud: {
             '2026-08-25': [
               { i: 'x1', r: 'vf', a: 8525, t: FROZEN - 3 * 864e5 },
               { i: 'x2', r: 'vf', a: 4400, t: FROZEN - 864e5 },
@@ -16820,10 +16830,16 @@ const SAID = [
         }));
       }
       localStorage.setItem('sched.view.v1', 'notes');
-    }, [BUD, TRK]);
+    }, [BUD]);
     await bgpage.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
     await bgpage.waitForTimeout(420);
 
+    /* ── ONE CARD, AND THE FACE IS A SECOND STEP ──
+       Opening the card always lands on the plan — arriving resets
+       which face is drawn, the tally panels' own rule — so reaching
+       the tracker is the plan plus one more press on its own button.
+       Reused as the toggle in both directions: from the tracker,
+       the same helper asked for 'plan' presses the way back. */
     const openNote = async (which) => {
       if (!(await bgpage.$('.nt-card'))) {
         await bgpage.click('#scTabNotes').catch(() => {});
@@ -16832,10 +16848,19 @@ const SAID = [
       const back = await bgpage.$('.nt-back');
       if (back) { await back.click(); await bgpage.waitForTimeout(280); }
       const bgcards = await bgpage.$$('.nt-card');
-      const want = which === 'plan' ? 0 : 1;
-      if (!bgcards[want]) throw new Error('no card for ' + which);
-      await bgcards[want].click();
+      if (!bgcards[0]) throw new Error('no budget card');
+      await bgcards[0].click();
       await bgpage.waitForTimeout(340);
+      if (which === 'trk') {
+        await bgpage.click('.bd-go');
+        await bgpage.waitForTimeout(340);
+        /* A CHECK THAT CRASHES IS NOT A CHECK THAT FAILS — thrown here,
+           at the one point where the toggle could have not worked,
+           rather than forty assertions later on a `null.disabled`
+           somewhere in the middle of the cycle tests, which reports
+           as a dead file rather than as a named thing that broke. */
+        if (!(await bgpage.$('.tk-cyc'))) throw new Error('the tracker did not open');
+      }
     };
 
     /* ── THE FOUR GROUPS AND THE BUFFER COME TO THE INCOME ──
@@ -16845,7 +16870,6 @@ const SAID = [
        and a cent is invisible in a screenshot. */
     await openNote('plan');
     const bPlan = await bgpage.evaluate(() => ({
-      kind: (document.querySelector('.nt-card') || {}).textContent,
       inc: (document.querySelector('.bd-hd b') || {}).textContent,
       per: (document.querySelector('.bd-per') || {}).textContent,
       groups: [...document.querySelectorAll('.bd-g')].map((e) => ({
@@ -16884,6 +16908,15 @@ const SAID = [
       bPlan.groups.map((g) => g.n));
     ok('...and it says which cycle it is per, and from when',
       bPlan.per === 'per fortnight · from 11 Aug', bPlan.per);
+    /* ── ONE NOTE, SO THE BUTTON HAS ONE WORD FOR IT ──
+       It used to say "Track this budget" until a second note existed
+       and "Open the tracker" once one did. There is nothing left to
+       make, so it is unconditionally the second — asserted here
+       rather than assumed, because a build that quietly brought the
+       find-or-create branch back would still pass every figure
+       check below it. */
+    ok('...and the button always opens the tracker, never makes one',
+      bPlan.link === 'Open the tracker', bPlan.link);
 
     /* ── THE CYCLE IS A PAY FORTNIGHT, ANCHORED ON THE PAY DATE ──
        Not a calendar month: 26 fortnights do not divide into 12, so a
@@ -17007,7 +17040,7 @@ const SAID = [
         await new Promise((z) => setTimeout(z, 420));
       }
       const ents = JSON.parse(localStorage.getItem('sched.bspend.v1'))
-        .ntrk['2026-08-25'].filter((e) => e.r === 'ep');
+        .nbud['2026-08-25'].filter((e) => e.r === 'ep');
       return { out: out, n: ents.length, a: ents.map((e) => e.a),
         row: (document.querySelector('.tk-r[data-row="ep"]') || {}).textContent,
         hint: (document.querySelector('.hint') || {}).textContent };
@@ -17030,7 +17063,7 @@ const SAID = [
     const setEst = async (cents) => {
       await bgpage.evaluate((c) => {
         const L = JSON.parse(localStorage.getItem('sched.bspend.v1'));
-        L.ntrk['2026-08-25'] = L.ntrk['2026-08-25']
+        L.nbud['2026-08-25'] = L.nbud['2026-08-25']
           .filter((e) => e.r !== 'ep')
           .concat(c ? [{ i: 'zz', r: 'ep', a: c, t: Date.now() }] : []);
         localStorage.setItem('sched.bspend.v1', JSON.stringify(L));
@@ -17065,13 +17098,14 @@ const SAID = [
       && bNone.left === bOver.left && bOver.left === bUnder.left,
       { none: bNone.left, over: bOver.left, under: bUnder.left });
 
-    /* ── THE LINK IS LIVE, BECAUSE THERE IS NO SECOND COPY ──
-       The whole of the ask: edit the budget and the bar has already
-       moved. Driven through the EDITOR rather than through the
-       record, because what is being claimed is the path a person
-       takes. Asserted as the tracker's own figures changing AND as
-       the tracker's record holding no allocation of its own — a
-       build that copied the number on creation passes the first. */
+    /* ── THE TRACKER IS LIVE, BECAUSE THERE IS NO SECOND COPY ──
+       The whole of the ask: edit the budget and the tracker has
+       already moved. Driven through the EDITOR rather than through
+       the record, because what is being claimed is the path a
+       person takes. Asserted as the tracker's own figures changing
+       AND as the note list still holding one note — a build that
+       quietly started making a second note for the tracker again
+       passes the first. */
     await openNote('plan');
     const bEdit = await bgpage.evaluate(async () => {
       document.getElementById('scNtEd').click();
@@ -17087,9 +17121,8 @@ const SAID = [
       document.getElementById('scNtEd').click();
       await new Promise((z) => setTimeout(z, 420));
       return { was: was,
-        trkRec: JSON.parse(localStorage.getItem('sched.note.v1')).list
-          .filter((n) => n.k === 'trk')
-          .map((n) => ({ lines: n.l.length, src: n.src })) };
+        kinds: JSON.parse(localStorage.getItem('sched.note.v1')).list
+          .map((n) => n.k) };
     });
     await openNote('trk');
     const bLive = await bgpage.evaluate(() => ({
@@ -17116,9 +17149,8 @@ const SAID = [
       bLive.led.length === 2 && bLive.led.every((k) => k === 'var')
       && bLive.plain.length > 0 && bLive.plain.every((k) => k !== 'var'),
       { led: bLive.led, plain: bLive.plain });
-    ok('...and the tracker stores no allocation of its own',
-      bEdit.trkRec.length === 1 && bEdit.trkRec[0].lines === 0
-      && bEdit.trkRec[0].src === 'nbud', bEdit.trkRec);
+    ok('...and there is one note in the list, never a second one for the tracker',
+      bEdit.kinds.length === 1 && bEdit.kinds[0] === 'bud', bEdit.kinds);
 
     /* ── THREE CHECKS THAT NEEDED THEIR OWN CONTEXTS ──
        Each of the three below writes a stored shape and reloads, and
@@ -17318,7 +17350,7 @@ const SAID = [
     await bgctx.close();
   }
 
-  /* Each of the three below is one page load against a shape the init
+  /* Each of the checks below is one page load against a shape the init
      script planted, for the reason written where they used to be: the
      note key is flushed on the way out, so a shape written into a live
      page and reloaded comes back as whatever the app still had. */
@@ -17342,40 +17374,74 @@ const SAID = [
     await pg.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
     await pg.waitForTimeout(420);
   };
-  const SPEND = { ntrk: { '2026-08-25': [
-    { i: 'x1', r: 'vf', a: 8525, t: Date.now() },
-    { i: 'x2', r: 'vf', a: 4400, t: Date.now() },
-    { i: 'x3', r: 'fr', a: 60000, t: Date.now() } ] } };
 
-  /* ── A DANGLING SOURCE COSTS THE ROWS AND NEVER THE ENTRIES ──
-     The budget is gone and the tracker keeps every press. The entries
-     are the half you cannot get back, which is the schedule's oldest
-     rule about a stored shape one screen further on. */
+  /* ── A LEGACY TRACKER IS FOLDED IN ON THE WAY IN ──
+     The two-note shape this app shipped for a day: a `trk` note
+     pointing at its budget by `src`, with its entries filed under
+     the TRACKER's own id. There is nothing left to point at, so the
+     first load that finds one folds it back in — the entries move
+     onto the budget's own id and the note that carried nothing else
+     is dropped. Both halves are asserted: the list holds one note,
+     and the entries answer through it — proved end to end by reading
+     the same figure the main fixture above reads off the same
+     entries, filed the OLD way here. */
   {
-    const dctx2 = await browser.newContext({ ...PHONE });
-    const dpage2 = await dctx2.newPage();
-    const derrs2 = [];
-    dpage2.on('pageerror', (e) => derrs2.push(String(e)));
-    await budSeed(dpage2, [TRK], SPEND);
-    const dOpen = await dpage2.evaluate(async () => {
-      const card = document.querySelector('.nt-card');
-      if (!card) return { err: 'no card at all' };
-      card.click();
-      await new Promise((z) => setTimeout(z, 420));
-      return {
-        body: (document.querySelector('.nt-body') || {}).className,
-        says: (document.querySelector('.nt-none') || {}).textContent,
-        rows: document.querySelectorAll('.tk-r').length,
-        kept: JSON.parse(localStorage.getItem('sched.bspend.v1'))
-          .ntrk['2026-08-25'].length
-      };
+    const mctx = await browser.newContext({ ...PHONE });
+    const mpage = await mctx.newPage();
+    const merrs = [];
+    mpage.on('pageerror', (e) => merrs.push(String(e)));
+    await budSeed(mpage, [BUD, TRK], { ntrk: {
+      '2026-08-25': [
+        { i: 'x1', r: 'vf', a: 8525, t: Date.now() },
+        { i: 'x2', r: 'vf', a: 4400, t: Date.now() },
+        { i: 'x3', r: 'fr', a: 60000, t: Date.now() }
+      ],
+      '2026-08-11': [{ i: 'x0', r: 'vf', a: 20000, t: Date.now() }]
+    } });
+    const mAfter = await mpage.evaluate(() => ({
+      kinds: JSON.parse(localStorage.getItem('sched.note.v1')).list.map((n) => n.k),
+      spendKeys: Object.keys(JSON.parse(localStorage.getItem('sched.bspend.v1')))
+    }));
+    ok('a legacy tracker note is gone from the list once its budget has read it',
+      mAfter.kinds.length === 1 && mAfter.kinds[0] === 'bud', mAfter.kinds);
+    ok('...and its entries moved onto the budget’s own id',
+      mAfter.spendKeys.join(',') === 'nbud', mAfter.spendKeys);
+    const mTrk = await mpage.evaluate(async () => {
+      document.querySelector('.nt-card').click();
+      await new Promise((z) => setTimeout(z, 340));
+      document.querySelector('.bd-go').click();
+      await new Promise((z) => setTimeout(z, 340));
+      return { big: (document.querySelector('.tk-hd b') || {}).textContent };
     });
-    ok('a tracker whose budget has gone keeps its entries and says so',
-      /has no budget/.test(String(dOpen.says)) && dOpen.rows === 0
-      && dOpen.kept === 3, dOpen);
-    ok('...and nothing threw with nothing to read',
-      derrs2.length === 0, derrs2.slice(0, 3));
-    await dctx2.close();
+    ok('...and the merged note’s tracker reads them correctly',
+      mTrk.big === '$290.75', mTrk);
+    ok('nothing threw folding the legacy note in', merrs.length === 0, merrs.slice(0, 3));
+    await mctx.close();
+  }
+
+  /* ── AN ORPHANED TRACKER IS DROPPED WITH ITS ENTRIES ──
+     A legacy tracker whose budget is already gone has nothing left to
+     fold in, and nothing can ever address its entries again either
+     way — there is no screen left that reads them by that id. Dropped
+     rather than kept as a card for a screen that no longer exists. */
+  {
+    const octx = await browser.newContext({ ...PHONE });
+    const opage = await octx.newPage();
+    const oerrs = [];
+    opage.on('pageerror', (e) => oerrs.push(String(e)));
+    await budSeed(opage, [TRK], { ntrk: { '2026-08-25': [
+      { i: 'x1', r: 'vf', a: 8525, t: Date.now() }
+    ] } });
+    const oAfter = await opage.evaluate(() => ({
+      notes: JSON.parse(localStorage.getItem('sched.note.v1')).list,
+      spend: JSON.parse(localStorage.getItem('sched.bspend.v1'))
+    }));
+    ok('an orphaned legacy tracker is dropped rather than left with nothing to read',
+      oAfter.notes.length === 0, oAfter.notes);
+    ok('...and its entries go with it',
+      Object.keys(oAfter.spend).length === 0, oAfter.spend);
+    ok('nothing threw dropping an orphaned tracker', oerrs.length === 0, oerrs.slice(0, 3));
+    await octx.close();
   }
 
   /* ── A DAMAGED ENTRY COSTS THAT ENTRY AND NEVER THE CYCLE ──
@@ -17383,11 +17449,12 @@ const SAID = [
      has run on the way in and never been saved, so it was redone
      every boot and lost the moment anything else wrote the key.
      Asserted on the STORE rather than on the screen, which is what
-     would have caught all four. */
+     would have caught all four. Entries are the budget's own id now
+     — there is no second note to key them by. */
   {
     const rctx2 = await browser.newContext({ ...PHONE });
     const rpage2 = await rctx2.newPage();
-    await budSeed(rpage2, [BUD, TRK], { ntrk: { '2026-08-25': [
+    await budSeed(rpage2, [BUD], { nbud: { '2026-08-25': [
       { i: 'g1', r: 'vf', a: 1000, t: 1756000000000 },
       null,
       { i: 'g2', r: '', a: 500, t: 1756000000000 },
@@ -17398,24 +17465,21 @@ const SAID = [
        planted null in the array, and `null.i` throws — which takes
        the file down rather than failing the check. */
     const rKept = await rpage2.evaluate(() =>
-      JSON.parse(localStorage.getItem('sched.bspend.v1')).ntrk['2026-08-25']
+      JSON.parse(localStorage.getItem('sched.bspend.v1')).nbud['2026-08-25']
         .map((e) => (e && e.i) || 'DAMAGED'));
     ok('a damaged entry is dropped, the good ones survive, and the repair is saved',
       rKept.join('|') === 'g1|g4', rKept);
     await rctx2.close();
   }
 
-  /* ── AN UNKNOWN KIND FALLS TO A NOTE, AND A TRACKER IS NOT ONE ──
-     The key outlives the code that wrote it. `trk` is a valid kind
-     the PICKER never offers, because a tracker with no budget to read
-     is a note whose first result is broken — so the two lists are
-     separate, and both halves are read. */
+  /* ── AN UNKNOWN KIND FALLS TO A NOTE ──
+     The key outlives the code that wrote it. */
   {
     const kctx2 = await browser.newContext({ ...PHONE });
     const kpage2 = await kctx2.newPage();
     const kBud = JSON.parse(JSON.stringify(BUD));
     kBud.k = 'ledger';
-    await budSeed(kpage2, [kBud, TRK], SPEND);
+    await budSeed(kpage2, [kBud], {});
     const kGot = await kpage2.evaluate(async () => {
       const out = {
         kinds: JSON.parse(localStorage.getItem('sched.note.v1')).list
@@ -17429,12 +17493,9 @@ const SAID = [
         .map((e) => e.textContent).join('|');
       return out;
     });
-    ok('a kind this build does not have falls through to a note, and trk survives',
-      kGot.kinds === 'note|trk', kGot);
-    /* AND THE PICKER NEVER OFFERS A TRACKER. Four chips, not five —
-       asserted beside the kind above, because "trk is valid" and "trk
-       is not offered" are two claims and each passes on the other's
-       bug. */
+    ok('a kind this build does not have falls through to a note',
+      kGot.kinds === 'note', kGot);
+    /* AND THE PICKER NEVER OFFERS A TRACKER. Four chips, not five. */
     ok('...and the picker offers four layouts, none of them a tracker',
       kGot.chips === 'Note|Process|Goal|Budget', kGot.chips);
     await kctx2.close();
@@ -17461,7 +17522,7 @@ const SAID = [
       return route.fulfill({ status: 200, contentType: 'application/json',
         body: '{"ok":true}' });
     });
-    await bppage.addInitScript(([bud, trk, where]) => {
+    await bppage.addInitScript(([bud, where]) => {
       const FROZEN = new Date('2026-09-01T09:30:00').getTime();
       const R = Date;
       // eslint-disable-next-line no-global-assign
@@ -17479,14 +17540,14 @@ const SAID = [
           name: 'Reader', pic: '', on: true }));
       }
       if (!localStorage.getItem('sched.note.v1')) {
-        localStorage.setItem('sched.note.v1', JSON.stringify({ list: [bud, trk] }));
+        localStorage.setItem('sched.note.v1', JSON.stringify({ list: [bud] }));
       }
       if (!localStorage.getItem('sched.bspend.v1')) {
         localStorage.setItem('sched.bspend.v1', JSON.stringify({
-          ntrk: { '2026-08-25': [{ i: 'p1', r: 'vf', a: 8525, t: FROZEN }] } }));
+          nbud: { '2026-08-25': [{ i: 'p1', r: 'vf', a: 8525, t: FROZEN }] } }));
       }
       localStorage.setItem('sched.view.v1', 'week');
-    }, [BUD, TRK, `${BASE}/schedule/nobudget`]);
+    }, [BUD, `${BASE}/schedule/nobudget`]);
     await bppage.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
     await bppage.waitForTimeout(460);
     /* ── A BLOCK'S OWN CHECK, AND 1500ms OF DEBOUNCE ──

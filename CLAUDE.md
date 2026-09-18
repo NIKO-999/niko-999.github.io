@@ -10532,6 +10532,15 @@ the same pass met it twice more.
 
 ## A budget is a note with figures, and a tracker fills it
 
+**THE TWO NOTES BELOW ARE ONE NOW — see "The two notes become one" much
+further down.** What survives here is the mechanics: the pay-fortnight
+cycle, the four row kinds, money held as cents, the entries as the
+record and the bars as derived from it, the bite-proof figures. What
+is superseded is the SPLIT — every sentence below reading "the plan"
+and "the tracker" as two notes, "the pair", "the link", or a tracker
+found or made by a button, is describing the shape this shipped in for
+a day rather than the shape it ships in now.
+
 Asked for as two things you can see side by side — *October budget*
 and *October spending* — with the second tracking the first, and a
 press that files what you just spent and moves the bar. Two notes in
@@ -11055,3 +11064,91 @@ reading, plus the fingerprint, which a break to `app.js` always moves.
 Renaming the first tab back to `Rows` fired the tab-name assertion on
 its own. Restored each time by the script's own inverse and hashed
 against the known-good sha1.
+
+## The two notes become one
+
+Asked for in one line, the day after the split shipped: *I want it
+all in one note both budget and keep the open tracker.* The plan and
+the tracker were never two records — the tracker held nothing of its
+own, only an id pointing back — so the split was a second CARD for a
+second SCREEN, and the ask was to keep the screen and lose the card.
+
+**`budTrk` IS THE SAME QUESTION `trkEnts` ALREADY ANSWERS, ONE LEVEL
+UP.** Which half of a `bud` note is drawn — the plan or the tracker —
+is a position on a screen you are looking at, never stored, and reset
+wherever the other two already are: opening a card from the list,
+jumping to one from a block's tag. Arriving at a budget always opens
+on the plan, because that is what "arriving" means for every other
+position this app keeps in memory rather than on disk.
+
+**"Open the tracker" NOW FLIPS THE FLAG INSTEAD OF FINDING OR MAKING A
+NOTE.** `scBudTrk` and the old `scBudLink` are gone; `scBudOpen` is
+one button, unconditionally worded, because there is no longer a
+first-press-creates-it state to word differently. The way back is the
+episode picker's own arrow — `.wc-back` inside `.mn-mlab`, reused
+rather than drawn again — labelled `Budget`, because that is the one
+thing on the tracker face that still needs a name: the plan doesn't,
+since arriving there is arriving at the note.
+
+**`scTrkBody` TAKES THE BUDGET DIRECTLY NOW; `scBudPlan` IS GONE.** It
+used to resolve a tracker's `src` to find the plan it read; the
+tracker IS the plan's other face, so there is nothing left to
+resolve — every place that took `plan` alongside `n` now takes `n`
+once, because after the merge the two were always the same note.
+
+**THE CARD SHOWS WHAT IS LIVE, AND FALLS BACK TO WHAT IS PRICED.**
+One card now stands for both of the old ones, and it cannot say both
+things at once — the tally strip's own rule about a chip meaning one
+thing. Before a cycle is set there is nothing to track, so the card
+reads the plan's own two facts: how many lines, what they leave.
+Once a cycle is running that is the figure you would open the note
+FOR most days, so the card shows it instead — the same "left to
+spend · day N of M" the tracker card used to carry on its own.
+
+**THE SPLIT IS UNDONE ON THE WAY IN, ONCE, FOR WHATEVER IS ALREADY ON
+THE PHONE.** This shipped for a day, so a real phone can carry the
+old shape: a `trk` note with its own id, and its entries filed under
+that id rather than the budget's. `trk` STAYS a kind `scNtKind`
+recognises — the picker still never offers it — for exactly one
+reason: `scNoteCleanOne` has to keep reading it as `trk` long enough
+for `scBudMerge` to find it, on the very next load, before anything
+is repainted. Coercing it to `note` here the way an unknown kind
+falls through would erase the fact that it needs folding in at all.
+
+**THE ENTRIES ARE THE HALF THAT MATTERS, so they are what moves.**
+`scBudMerge` walks the loaded notes backwards, and for every `trk` it
+finds: looks up the budget it names by `src`, moves that budget's
+entries in `sched.bspend.v1` from the tracker's id onto the budget's
+own — which is what every read of them uses from here on, since
+`scTrkBody` now keys them off `n.id` where `n` is the budget itself —
+and drops the tracker note. **AN ORPHANED TRACKER, WHOSE BUDGET IS
+ALREADY GONE, HAS NOTHING LEFT TO FOLD IN** and is dropped with its
+entries: there is no longer a screen anywhere that reads them by that
+id, so keeping them is keeping a key nothing can ever address again —
+the same call this file already made about a stored palette name and
+a stale view key. Guarded on the KIND, not merely on the id resolving
+to something: a budget whose kind has since changed to something else
+is the same case as one that is gone.
+
+**NEITHER HALF OF THE MERGE WAS PROVABLE FROM THE APP ALONE, so both
+were bite-proved on their own.** One break turned "Open the tracker"
+into a button that repaints the plan it is already on; the tracker
+tests crashed on the first read of the cycle stepper rather than
+failing named, which is the shape this file has recorded before —
+so the test that opens the tracker now asserts the cycle stepper
+actually exists before reading anything off it, the same "no budget
+card" guard `openNote` already had for the list. The other broke the
+migration's own move, leaving a legacy tracker's entries behind under
+its old id: caught clean, by the two assertions built for exactly
+that, with nothing else in the suite so much as flickering. Restored
+each time by the script's own inverse and hashed against the
+known-good sha1.
+
+**AND THE MIGRATION TEST REUSES THE MAIN FIXTURE'S OWN ENTRIES, FILED
+THE OLD WAY.** The happy path is proved end to end rather than by
+inspecting the record alone: the same three entries the main context
+seeds under the budget's own id are seeded here under a legacy
+tracker's, and the merged note's tracker face is asked to read them —
+if it prints the same `$290.75` the main test already established for
+those entries, the migration did not just move a key, it moved the
+one the app actually goes on to use.

@@ -11861,12 +11861,45 @@
     if (document.visibilityState === 'hidden') scNoteFlush();
   });
 
+  /* ── THE SPLIT IS UNDONE ON THE WAY IN ──
+     A tracker used to be a second note, made or found by a button on
+     the budget it read. There is no second note any more — the
+     button flips a view of the budget itself — so any `trk` note
+     still on disk from before this shipped is folded back in here,
+     once, on the first load that sees it.
+
+     ITS ENTRIES ARE THE HALF THAT MATTERS. They move onto the
+     budget's own id, which is what every read of them uses from here
+     on — "a dangling id costs the rows and never the entries" is the
+     rule this repairs under. The tracker note itself carried nothing
+     of its own: no lines, no figure nobody else already has. Once
+     its entries have somewhere to live, it is dropped rather than
+     kept as a second card for a screen that no longer exists. An
+     orphaned tracker, whose budget is already gone, has nothing left
+     to fold in and is dropped with its entries — nothing can ever
+     address them again either way. */
+  function scBudMerge() {
+    var L = null;
+    var i = notes.length;
+    while (i--) {
+      var t = notes[i];
+      if (t.k !== 'trk') continue;
+      if (!L) L = scBudLoad();
+      var b = t.src ? scNoteById(t.src) : null;
+      if (b && b.k === 'bud' && L[t.id] && !L[b.id]) L[b.id] = L[t.id];
+      if (L[t.id]) delete L[t.id];
+      notes.splice(i, 1);
+    }
+    if (L) scBudSave();
+  }
+
   function scNoteLoad() {
     var raw = null;
     try { raw = JSON.parse(localStorage.getItem(NOTE_KEY)); } catch (e) { raw = null; }
     if (raw === null) { notes = []; return; }
     var before = JSON.stringify(raw);
     notes = scNoteClean(raw);
+    scBudMerge();
     /* THE REPAIR IS WRITTEN BACK — the fourth time this hole has been
        found in this file. A repair held only in memory is redone every
        boot and lost the moment anything else writes the key, which is
@@ -11937,21 +11970,24 @@
       return [c.lines + (c.lines === 1 ? ' step' : ' steps')]
         .concat(c.heads ? [c.heads + (c.heads === 1 ? ' session' : ' sessions')] : []);
     }
-    /* A budget's own two facts: how many lines it prices, and what it
-       leaves. A tracker's: what is left to spend and where in the
-       cycle it is — which is the whole of why you would open it. */
+    /* ── THE CARD SHOWS WHAT IS LIVE, AND FALLS BACK TO WHAT IS PRICED ──
+       Before a cycle is set there is nothing to track yet, so the card
+       is the plan's own two facts: how many lines it prices, and what
+       it leaves. Once a cycle is running the figure you check most
+       days is what is left to spend and where in the cycle you are —
+       the same two facts the tracker used to carry on a second card —
+       so the card shows those instead, because that is the one you
+       actually glance at the list for. */
     if (n.k === 'bud') {
+      if (n.cs) {
+        var cyc0 = scBudCycle(n, 0);
+        var tt = scBudTotals(n, scBudEnt(n.id, cyc0.iso));
+        return [scMoney(tt.left) + (tt.left < 0 ? ' over' : ' left')]
+          .concat(cyc0.iso ? ['day ' + cyc0.dayIn + ' of ' + cyc0.len] : []);
+      }
       var bt = scBudTotals(n, []);
       return [c.lines + (c.lines === 1 ? ' line' : ' lines')]
         .concat(n.inc ? [scMoney(bt.buffer) + (bt.buffer < 0 ? ' short' : ' buffer')] : []);
-    }
-    if (n.k === 'trk') {
-      var tp = scBudPlan(n);
-      if (!tp) return ['no budget'];
-      var tc = scBudCycle(tp, 0);
-      var tt = scBudTotals(tp, scBudEnt(n.id, tc.iso));
-      return [scMoney(tt.left) + (tt.left < 0 ? ' over' : ' left')]
-        .concat(tc.iso ? ['day ' + tc.dayIn + ' of ' + tc.len] : []);
     }
     if (n.k === 'goal') {
       var d = scNoteDays(n);
@@ -11984,10 +12020,6 @@
       if (pt.alloc) bits.push(scMoney(pt.alloc) + ' to spend');
       if (pt.dep) bits.push(scMoney(pt.dep) + ' out');
       return bits.join(' · ');
-    }
-    if (n.k === 'trk') {
-      var sp = scBudPlan(n);
-      return sp ? 'Tracks ' + scNoteTitle(sp) : 'The budget it read has gone';
     }
     var out = [];
     for (var i = 0; i < n.l.length && out.length < 3; i++) {
@@ -12151,13 +12183,6 @@
     return t;
   }
 
-  /* The budget a tracker reads, or null. A dangling id costs the
-     rows and never the entries. */
-  function scBudPlan(n) {
-    if (!n || n.k !== 'trk' || !n.src) return null;
-    var p = scNoteById(n.src);
-    return (p && p.k === 'bud') ? p : null;
-  }
   /* A budget's rows: every line that is not a heading. A row with no
      amount on it yet is still a row — it is a line you have written
      and not priced, which is a different thing from one that is not
@@ -12193,11 +12218,13 @@
     return t;
   }
 
-  /* ── WHICH CYCLE, AND WHICH HALF OF THE TRACKER ──
-     Neither is stored, which is the tally panels' own rule: both are
-     a position on a screen you are looking at, and one restored
-     tomorrow morning opens on a fortnight you are no longer in. */
-  var trkBack = 0, trkEnts = false;
+  /* ── WHICH CYCLE, WHICH HALF, AND WHICH FACE OF THE NOTE ──
+     None of the three is stored, which is the tally panels' own rule:
+     each is a position on a screen you are looking at, and one
+     restored tomorrow morning opens on a fortnight — or a face —
+     you are no longer on. `budTrk` is the tracker face of a budget
+     note; the plan is what a `bud` note draws while it is false. */
+  var trkBack = 0, trkEnts = false, budTrk = false;
 
   function scBudTag(word, cls) {
     var t = scEl('span', 'st' + (cls ? ' ' + cls : ''), word);
@@ -12333,23 +12360,29 @@
     return (+q[2]) + ' ' + MON[+q[1] - 1];
   }
 
-  /* ── THE TRACKER ──
-     The plan's own rows with what you have pressed against them, one
-     cycle at a time. It stores no allocation of its own, so an edit
-     to the budget is already here. */
+  /* ── THE TRACKER IS THE OTHER FACE OF THE SAME NOTE ──
+     Its own rows with what you have pressed against them, one cycle
+     at a time. It used to be a second note reading a first one by id;
+     folded into one, `n` is both — there is nothing left to look up,
+     and an edit to an allocation is already here because there was
+     never a second copy of it to update. */
   function scTrkBody(body, n) {
-    var plan = scBudPlan(n);
-    if (!plan) {
-      body.appendChild(scEl('p', 'nt-none',
-        'This tracker has no budget. The one it read has been removed — '
-        + 'its entries are still here.'));
-      return;
-    }
-    var maxBack = scBudBack(plan);
+    var back = scEl('div', 'mn-mlab');
+    var bb = scEl('button', 'wc-back');
+    bb.type = 'button';
+    bb.setAttribute('aria-label', 'Back to the budget');
+    bb.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 24 24" aria-hidden="true">'
+      + '<path d="M15 4.5L7.5 12l7.5 7.5"/></svg>');
+    bb.addEventListener('click', function () { budTrk = false; scPaintNotes(); });
+    back.appendChild(bb);
+    back.appendChild(scEl('span', 'wc-eff-l', 'Budget'));
+    body.appendChild(back);
+
+    var maxBack = scBudBack(n);
     trkBack = Math.max(0, Math.min(maxBack, trkBack));
-    var cyc = scBudCycle(plan, trkBack);
+    var cyc = scBudCycle(n, trkBack);
     var ents = scBudEnt(n.id, cyc.iso);
-    var t = scBudTotals(plan, ents);
+    var t = scBudTotals(n, ents);
 
     /* The cycle stepper, refusing at both ends: nothing before the
        anchor and no fortnight that has not started. An arrow that
@@ -12407,7 +12440,7 @@
          quiet line after a middle dot rather than taking a headline of
          its own — this app's own rule about what a figure looks like.
          Drawn only where there is an income for it to be left OF. */
-      + (plan.inc ? ' · ' + scMoney(Math.abs(t.buffer))
+      + (n.inc ? ' · ' + scMoney(Math.abs(t.buffer))
         + (t.buffer < 0 ? ' short' : ' buffer') : '')));
     body.appendChild(hd);
 
@@ -12435,7 +12468,7 @@
     });
     body.appendChild(tg);
 
-    if (trkEnts) { scTrkEnts(body, n, plan, cyc, ents); return; }
+    if (trkEnts) { scTrkEnts(body, n, cyc, ents); return; }
 
     /* ── THE TRACKER LEADS WITH WHAT YOU PRESS ──
        The plan is ordered the way the money is arranged: what comes
@@ -12443,10 +12476,10 @@
        The tracker is asked a different question — spending is the
        only group you press against and the reason you opened the
        screen, and eight direct debits above it spend the whole fold.
-       Same rows, two orders, because the two screens are for two
+       Same rows, two orders, because the two faces are for two
        different things. */
     ['var', 'est', 'fix', 'dep'].forEach(function (bk) {
-      var rows = scBudRows(plan).filter(function (L) { return L.bk === bk; });
+      var rows = scBudRows(n).filter(function (L) { return L.bk === bk; });
       if (!rows.length) return;
       /* ── OF, NOT JUST THE ONE FIGURE ──
          "FIXED $550" is ambiguous: it reads as the group's total and
@@ -12473,7 +12506,7 @@
       }
       body.appendChild(sh);
       rows.forEach(function (L) {
-        var r = scTrkRow(n, plan, cyc, L, scBudRowSum(ents, L.i));
+        var r = scTrkRow(n, cyc, L, scBudRowSum(ents, L.i));
         r.style.setProperty('--c', hue);
         body.appendChild(r);
       });
@@ -12487,7 +12520,7 @@
      yes or a no. So the press is a sheet on the first two and a
      toggle on the other two, which is what makes ten of twelve lines
      cost one tap rather than a dial they have no use for. */
-  function scTrkRow(n, plan, cyc, L, got) {
+  function scTrkRow(n, cyc, L, got) {
     var b = scEl('button', 'tk-r');
     b.type = 'button';
     b.dataset.row = L.i;
@@ -12562,7 +12595,7 @@
     }
     b.setAttribute('aria-label', say);
     b.addEventListener('click', function () {
-      if (L.bk === 'var' || L.bk === 'est') { scBudMoney(n, plan, cyc, L, got); return; }
+      if (L.bk === 'var' || L.bk === 'est') { scBudMoney(n, cyc, L, got); return; }
       /* A toggle rather than a sheet, and it clears rather than
          subtracting: a fixed row is one claim, so unsaying it is
          taking the entry away rather than filing a second one. */
@@ -12581,14 +12614,14 @@
   /* Newest first, grouped by day, with the day's own total on the
      heading. A press you got wrong is undone from here, which is the
      whole reason the entries are the record. */
-  function scTrkEnts(body, n, plan, cyc, ents) {
+  function scTrkEnts(body, n, cyc, ents) {
     if (!ents.length) {
       body.appendChild(scEl('p', 'nt-none',
         'Nothing pressed this fortnight yet.'));
       return;
     }
     var names = {};
-    scBudRows(plan).forEach(function (L) { names[L.i] = L; });
+    scBudRows(n).forEach(function (L) { names[L.i] = L; });
     var byDay = {};
     ents.forEach(function (e) {
       var k = scDay(new Date(e.t));
@@ -12608,7 +12641,7 @@
         var L = names[e.r];
         var r = scEl('div', 'tk-lg');
         var dot = scEl('u');
-        dot.style.background = scNtVar(scNoteHue(plan));
+        dot.style.background = scNtVar(scNoteHue(n));
         r.appendChild(dot);
         var w = scEl('div', 'x');
         w.appendChild(scEl('span', 'n', L ? (L.x || 'Untitled') : 'Removed line'));
@@ -12654,7 +12687,7 @@
      A SPENDING ROW ADDS AND AN ESTIMATE SETS, and the difference is
      the record: you go to the shops several times a fortnight and
      the power bill lands once. */
-  function scBudMoney(n, plan, cyc, L, got) {
+  function scBudMoney(n, cyc, L, got) {
     var setting = L.bk === 'est';
     var step = scBudStep(L);
     var max = Math.max(step * 4, L.$ || 0, 100);
@@ -12788,47 +12821,20 @@
     });
   }
 
-  /* ── THE PAIR IS MADE FROM THE BUDGET, NEVER FROM THE PICKER ──
-     A tracker without a budget to read is a note whose first result
-     is broken, and the only place the id it needs is in scope is
-     here. So this is both the way one is created and the way back to
-     it: one control, whichever state the pair is in.
-
-     One tracker to a budget. A second would be two records of one
-     fortnight's spending with no way to tell which is the one you
-     have been pressing. */
-  function scBudTrk(n) {
-    for (var i = 0; i < notes.length; i++) {
-      if (notes[i].k === 'trk' && notes[i].src === n.id) return notes[i];
-    }
-    return null;
-  }
-  function scBudLink(body, n) {
-    var t = scBudTrk(n);
-    var b = scBtn('bd-go', t ? 'Open the tracker' : 'Track this budget', function () {
-      var go = scBudTrk(n);
-      if (!go) {
-        if (notes.length >= NOTE_CAP) { scToast('No room for another note'); return; }
-        go = scNoteCleanOne({
-          id: scNtId(), k: 'trk', src: n.id, a: n.a,
-          t: scNoteTitle(n) + ' spending'
-        });
-        notes.unshift(go);
-        scNoteFlush();
-      }
-      trkBack = 0; trkEnts = false;
-      ntEdit = false; ntOpen = go.id;
-      scPaintNotes(); scDate();
+  /* ── ONE NOTE, TWO FACES ──
+     This used to make a second note or find the one it had already
+     made, and navigate to it — a tracker without a budget to read was
+     a note whose first result was broken, and the id it needed only
+     ever existed here. There is nothing left to make or find: the
+     budget IS the tracker's plan, so the button flips which half of
+     THIS note is drawn rather than opening another one. */
+  function scBudOpen(body, n) {
+    var b = scBtn('bd-go', 'Open the tracker', function () {
+      trkBack = 0; trkEnts = false; budTrk = true;
+      scPaintNotes();
     });
-    b.setAttribute('aria-label', t
-      ? 'Open ' + scNoteTitle(t)
-      : 'Make a tracker for ' + scNoteTitle(n));
+    b.setAttribute('aria-label', 'Open the tracker for ' + scNoteTitle(n));
     body.appendChild(b);
-    if (!t) {
-      body.appendChild(scEl('p', 'hint',
-        'A second note that reads this one. Change an allocation here '
-        + 'and the bar there has already moved.'));
-    }
   }
 
   function scNoteBr(n, idx) {
@@ -13066,12 +13072,11 @@
       card.addEventListener('click', function () {
         /* A note opens to be READ. Edit is a press away and the whole
            point of the mode is that you asked for it. */
-        /* Which cycle and which half are a position on a screen you
-           are looking at, so arriving at a tracker starts on the one
-           you are in — the tally panels' own rule. Reset here as well
-           as on the way in from a budget, because the list is the
-           other door. */
-        trkBack = 0; trkEnts = false;
+        /* Which cycle, which half and which face are a position on a
+           screen you are looking at, so arriving at a budget starts
+           on the plan every time rather than wherever it was left —
+           the tally panels' own rule. */
+        trkBack = 0; trkEnts = false; budTrk = false;
         ntOpen = n.id; ntEdit = false; scPaintNotes(); scDate();
       });
       pane.appendChild(card);
@@ -13394,14 +13399,20 @@
          takes the note's own colour: a break in a line is the one mark
          that cannot be mistaken for a point on it, which is exactly
          what a session heading has to say. */
-      /* ── THE BUDGET AND ITS TRACKER ──
-         Two notes in the list and one record underneath: the plan
-         holds the allocations, the tracker holds only what you
-         pressed and reads the plan by id. So an edit to an
-         allocation is already in the bar, because there was never a
-         second copy of it to update. */
-      if (n.k === 'bud') { scBudBody(body, n); scBudLink(body, n); return; }
-      if (n.k === 'trk') { scTrkBody(body, n); return; }
+      /* ── THE BUDGET AND ITS TRACKER ARE ONE NOTE, TWO FACES ──
+         They were two notes — a plan holding the allocations and a
+         tracker reading it by id — and pressing "Open the tracker"
+         found or made the second one. `budTrk` is the same switch
+         without the second note: false draws the plan, true draws
+         the tracker, and an edit to an allocation is already in the
+         bar either way, because there was never a second copy of it
+         to update. Reset on arrival like every other position on a
+         screen you are looking at, so opening a budget from the list
+         always opens on the plan. */
+      if (n.k === 'bud') {
+        if (budTrk) { scTrkBody(body, n); } else { scBudBody(body, n); scBudOpen(body, n); }
+        return;
+      }
       if (n.k === 'proc') {
         var sp2 = scEl('div', 'nt-sp');
         n.l.forEach(function (L) {
@@ -14360,6 +14371,7 @@
   }
 
   function scNoteJump(id) {
+    trkBack = 0; trkEnts = false; budTrk = false;
     ntOpen = id;
     ntJump = true;
     scSetView('notes', true);
