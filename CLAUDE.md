@@ -11023,7 +11023,7 @@ own. Drawn only where there is an income for it to be left OF.
 still cascades is not dead, and a function nothing calls reads as one
 somebody might edit.
 
-### Entries, not Ledger
+### Lines and Entries, not Rows and Ledger
 
 **A tab you have to ask about is a tab named wrong**, and this one was
 asked about by name. "Ledger" is a word somebody has to be told; the
@@ -11039,9 +11039,19 @@ back as a question rather than resolved quietly, because the fix
 either way is one word and the collision is not obvious from the
 screen you are looking at.
 
-**Proved to bite, three breaks in one run.** Dropping the buffer from
-the sentence, putting a `.tk-p` node back after the head, and renaming
-the tab to `Ledger` fired five assertions between them — the two new
-ones, the fortnight-back check and the estimate's buffer reading, plus
-the fingerprint, which a break to `app.js` always moves. Restored by
-the same script's inverse and hashed against the known-good sha1.
+**"Rows" was the same fault one press later, asked about in the same
+breath.** It is a UI word — a description of the DOM rather than a
+fact about the budget — and the budget's own card caption already
+reads "12 lines". A line is what you priced; an entry is what you
+pressed against one, which is the same distinction the first rename
+already drew and is why the two land on different words rather than
+on a shared one.
+
+**Proved to bite, four breaks across two runs.** Dropping the buffer
+from the sentence, putting a `.tk-p` node back after the head, and
+renaming the tab to `Ledger` fired five assertions between them — the
+two new ones, the fortnight-back check and the estimate's buffer
+reading, plus the fingerprint, which a break to `app.js` always moves.
+Renaming the first tab back to `Rows` fired the tab-name assertion on
+its own. Restored each time by the script's own inverse and hashed
+against the known-good sha1.

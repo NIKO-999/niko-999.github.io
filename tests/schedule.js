@@ -16927,7 +16927,7 @@ const SAID = [
        whole argument: a tab you have to be told is a tab named
        wrong. The day headings inside it already say "3 entries". */
     ok('...and the second half is named for what is in it',
-      bTrk.tabs === 'Rows|Entries', bTrk.tabs);
+      bTrk.tabs === 'Lines|Entries', bTrk.tabs);
 
     /* ── NOT YET AND OVERDUE ARE NOT THE SAME WORD ──
        Both directions on one screen: Phone is day 3 and today is day
