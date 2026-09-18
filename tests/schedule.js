@@ -890,6 +890,38 @@ const SAID = [
   ok('...and a length said beside it is still a span',
     n12 && /^07:00 to 07:20/.test(n12.meta) && n12.name === 'Wake', n12);
 
+  /* ── "in 10 mins" ──
+     "now" is the instant; this is a promise about the next one. Read
+     on the same frozen 09:30 clock as "now", for "now"'s own reason:
+     the expected times move with the real clock otherwise, and a test
+     computing them the same way the app does is a test agreeing with
+     itself. */
+  const i1 = await nowSaid('Watch a podcast in 10 mins');
+  ok('"in 10 mins" is a time too, counted from now',
+    i1 && i1.days === 'TUE' && /^09:40$/.test(i1.meta.trim()), i1);
+  ok('...and the word does not end up in the name',
+    i1 && !/\bin\b/i.test(i1.name), i1);
+  const i2 = await nowSaid('Read in 90 minutes for 30 minutes');
+  ok('...and a length said after it is honoured',
+    i2 && /^11:00 to 11:30/.test(i2.meta), i2);
+  const i3 = await nowSaid('Read in 2 hours');
+  ok('...the offset in hours as well as minutes',
+    i3 && /^11:30$/.test(i3.meta.trim()), i3);
+  /* An explicit clock still wins: somebody who says both is correcting
+     themselves, and the digits are the correction — "now"'s own rule. */
+  const i4 = await nowSaid('Read in 10 mins at 3');
+  ok('...and a real time said with it wins the clock',
+    i4 && /^15:00$/.test(i4.meta.trim()) && i4.name === 'Read', i4);
+  const i5 = await nowSaid('Gym in 10 mins no time limit');
+  ok('...and it can run to the end of the day instead of a moment',
+    i5 && /^09:40 to 24:00/.test(i5.meta), i5);
+  /* A moment more than a day from now is refused rather than clamped
+     or silently rolled onto tomorrow — this record is one day per
+     row, and there is no tomorrow to put it on. */
+  const i6 = await nowSaid('Gym in 20 hours');
+  ok('...but an offset that would cross midnight is refused, not clamped',
+    i6 && i6.meta === 'Still needs which day and what time' && i6.name === 'Gym in 20 hours', i6);
+
   /* ══════════════════════════════════════════════════════════════
      A SENTENCE WITH NO DAY ON IT MEANS TODAY
 
@@ -14251,48 +14283,59 @@ const SAID = [
           lyBy('Energy delegation').fg]).size === 3,
         [lyBy('Trading day').fg, lyBy('Prop firm payout').fg]);
 
-      /* ── A DAILY PROCESS IS A SPINE ──
-         Measured as a BOX rather than as a class: a rule that stopped
-         drawing the line would keep every class it has. The spine has
-         to be TALLER than one step and no wider than a few pixels,
-         which is what tells a line from a panel. */
+      /* ── A DAILY PROCESS IS A ROW OF BEADS ──
+         The spine's line went on request; this is what replaced it.
+         A pseudo-element nothing draws computes its `content` to
+         `none` or `normal` — the same test this file already uses to
+         tell a real mark from one that is not there — so a rule that
+         stopped drawing the line, or put a mark back on a heading,
+         both fail it rather than merely keeping their class. */
       await lyOpen('Trading day');
       const lySpine = await lypage.evaluate(() => {
         const sp = document.querySelector('.nt-sp');
-        if (!sp) throw new Error('no spine on a daily process');
-        const b = sp.getBoundingClientRect();
+        if (!sp) throw new Error('no spine wrapper on a daily process');
         const line = getComputedStyle(sp, '::before');
         const steps = [...document.querySelectorAll('.nt-st')];
-        const node = steps.length
-          ? getComputedStyle(steps[0], '::before') : null;
+        const plainStep = steps.find((s) => !s.classList.contains('is-key'));
+        const keyStep = steps.find((s) => s.classList.contains('is-key'));
+        if (!plainStep || !keyStep) throw new Error('fixture needs one plain and one key step');
+        const plainNode = getComputedStyle(plainStep, '::before');
+        const keyNode = getComputedStyle(keyStep, '::before');
+        const head = document.querySelector('.nt-sh');
+        const headMark = head ? getComputedStyle(head, '::before') : null;
         return {
-          h: Math.round(b.height),
-          lineW: parseFloat(line.width),
-          lineH: parseFloat(line.height),
+          lineContent: line.content,
           steps: steps.length,
           heads: document.querySelectorAll('.nt-sh').length,
           subs: [...document.querySelectorAll('.nt-st i')].map((i) => i.textContent),
-          nodeR: node ? node.borderTopLeftRadius : null,
-          nodeShadow: node ? node.boxShadow : null,
+          headMarkContent: headMark ? headMark.content : null,
+          plainR: plainNode.borderTopLeftRadius,
+          plainShadow: plainNode.boxShadow,
+          plainBg: plainNode.backgroundColor,
+          keyShadow: keyNode.boxShadow,
+          keyBg: keyNode.backgroundColor,
           key: document.querySelectorAll('.nt-st.is-key').length,
           plain: document.querySelectorAll('.nt-row.is-head').length,
           tab: document.querySelectorAll('.nt-row.is-tab').length
         };
       });
-      ok('a daily process draws one line down its whole height',
-        lySpine.lineW <= 4 && lySpine.lineH > 120
-        && lySpine.lineH > lySpine.h * 0.8, lySpine);
-      ok('...with a node on every step and a break at every session',
+      const noMark = (c) => c === 'none' || c === 'normal';
+      ok('a daily process draws no line down its height any more',
+        noMark(lySpine.lineContent), lySpine);
+      ok('...a round bead on every step, and none on a session break',
         lySpine.steps === 3 && lySpine.heads === 2
-        && /50%|99px|9999px/.test(String(lySpine.nodeR))
-        && /px/.test(String(lySpine.nodeShadow)), lySpine);
+        && /50%|99px|9999px/.test(String(lySpine.plainR))
+        && noMark(lySpine.headMarkContent), lySpine);
       ok('...a step carries the note under it',
         lySpine.subs.indexOf('written down') >= 0, lySpine.subs);
-      /* The mark is one claim drawn three ways. Here it fills the node
-         — so the note's swipe must be ABSENT, or the layout is drawing
-         two answers to the same question. */
-      ok('...and a marked step fills its node rather than wearing a swipe',
-        lySpine.key === 1 && lySpine.tab === 0 && lySpine.plain === 0, lySpine);
+      /* The mark is one claim drawn three ways. Here a key step's bead
+         takes the hue with a halo round it, and an ordinary one stays
+         the flat neutral with none — so the note's swipe must also be
+         ABSENT, or the layout is drawing two answers to one question. */
+      ok('...a key bead takes the hue and a halo; a plain one is flat and bare',
+        /px/.test(lySpine.keyShadow) && lySpine.plainShadow === 'none'
+        && lySpine.keyBg !== lySpine.plainBg
+        && lySpine.key === 1 && lySpine.tab === 0 && lySpine.plain === 0, lySpine);
 
       /* ── A GOAL IS A MARKER ── */
       await lyOpen('Prop firm payout');

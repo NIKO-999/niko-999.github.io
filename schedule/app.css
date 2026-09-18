@@ -5971,49 +5971,44 @@ body {
 .nt-ac.is-on { box-shadow: 0 0 0 2px var(--paper), 0 0 0 3.5px var(--ink); }
 .nt-ac:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
 
-/* ── A DAILY PROCESS IS A SPINE ──
-   One line down the whole height with a node on every step. It is an
-   element rather than a rule on the body so it stops at the last step
-   rather than running past the add controls. */
-.nt-sp { position: relative; padding-left: 30px; }
-.nt-sp::before {
-  content: ""; position: absolute; left: 6px; top: 6px; bottom: 8px;
-  width: 2px; border-radius: 2px;
-  background: linear-gradient(180deg, var(--c),
-    color-mix(in srgb, var(--c) 20%, transparent));
-}
+/* ── A DAILY PROCESS IS A ROW OF BEADS ──
+   It was a line down the whole height with a node on every step, and
+   the line went on request: a mark per step without the line's
+   weight, order carried by the column rather than drawn as a rail
+   down it. `.nt-sp` stays as the wrapper — nothing about the DOM or
+   the gutter it reserves changed, only what draws in it. */
+.nt-sp { position: relative; padding-left: 22px; }
 .nt-st { position: relative; padding: 9px 0; }
 .nt-st::before, .nt-sp.is-edit .nt-row.is-step::before {
-  content: ""; position: absolute; left: -28px; top: 14px;
-  width: 10px; height: 10px; border-radius: 99px;
-  background: var(--paper); box-shadow: 0 0 0 2.5px var(--c);
+  content: ""; position: absolute; left: -18px; top: 16px;
+  width: 6px; height: 6px; border-radius: 99px;
+  background: var(--tick-off);
 }
-/* A KEY STEP FILLS ITS NODE. The mark is one claim drawn three ways —
-   a swipe on a note, a filled node here, a strike on a goal — so the
-   record says the same thing whichever layout is up. */
-.nt-st.is-key::before { background: color-mix(in srgb, var(--c) 92%, var(--ink)); }
+/* A KEY STEP TAKES THE HUE, WITH A SOFT HALO ROUND IT. The mark is one
+   claim drawn three ways — a swipe on a note, a bead here, a strike
+   on a goal — so the record says the same thing whichever layout is
+   up. An ordinary bead is the flat neutral this app already uses for
+   an unlit mark; a key one is the note's own colour, never a weaker
+   copy of it. */
+.nt-st.is-key::before {
+  background: var(--c);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 24%, transparent);
+}
 .nt-st b { display: block; font-size: 16px; font-weight: 600; line-height: 1.35; }
 .nt-st.is-key b { font-weight: 700; }
 .nt-st i {
   display: block; margin-top: 2px;
   font-size: 11.5px; font-style: normal; line-height: 1.45; color: var(--spent);
 }
-/* ── THE HEADING BREAKS THE LINE ──
-   Chosen from ten, each drawn with three headings running down a page
-   — one heading on its own says nothing about what three look like. A
-   break in a line is the one mark that cannot be mistaken for a point
-   on it, and the label takes the note's own colour. */
+/* A heading draws no bead at all — it was breaking a line that no
+   longer runs, and a stub with nothing to break is a mark with
+   nothing to say. */
 .nt-sh { position: relative; padding: 16px 0 4px; }
 .nt-sh:first-child { padding-top: 2px; }
 .nt-sh b, .nt-sp.is-edit .nt-row.is-head .nt-hw {
   font-size: 10.5px; font-weight: 700;
   letter-spacing: .16em; text-transform: uppercase;
   color: color-mix(in srgb, var(--c) 72%, var(--ink));
-}
-.nt-sh::before, .nt-sp.is-edit .nt-row.is-head::before {
-  content: ""; position: absolute; left: -30px; top: 18px;
-  width: 14px; height: 4px; border-radius: 2px;
-  background: color-mix(in srgb, var(--c) 85%, transparent);
 }
 .nt-sp.is-edit .nt-row.is-head .nt-hw {
   border-bottom: 0; padding-right: 10px; max-width: 62%;
@@ -6476,7 +6471,8 @@ body {
    asked for them on a note alone, so there is nothing here for the
    other two layouts to switch off — they simply take their own. */
 .nt-sp.is-edit .nt-row.is-step.is-mkd::before {
-  background: color-mix(in srgb, var(--c) 92%, var(--ink));
+  background: var(--c);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 24%, transparent);
 }
 .nt-sp.is-edit .nt-row.is-mkd .nt-in { font-weight: 700; }
 .nt-body.is-goal .nt-row.is-mkd .nt-in {

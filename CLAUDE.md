@@ -197,6 +197,15 @@ what it is for, not what was built.
 - Comments explain *why*, at the place the decision lives. A comment
   that restates the code is noise; one that records what was tried and
   rejected is the only copy of that.
+- **No new `.hint` paragraph describing a control, going forward.** A
+  worked example under a field, a reassurance that a figure "stays on
+  this phone" — these read as description, and a control that needs a
+  caption to be understood should be clearer instead. Two kinds still
+  get one: an irreversible action with no bin behind it needs a
+  sentence saying what is about to be lost, and a screen that is the
+  actual moment of consent before something first leaves the phone
+  needs to say so in full, once, there — never a reminder of a
+  decision already taken.
 
 ## Verifying
 
@@ -11193,3 +11202,90 @@ rename named what each tab HOLDS; this one names what you are doing
 when you press it — taking stock of the cycle, or looking back at
 what you pressed against it. Neither is a fault a check found, so
 this is the record of a preference rather than a bug write-up.
+
+## A daily process is a row of beads
+
+The spine — one line down the whole height with a node on every step
+— was reported as not liked. Five treatments were rendered over the
+real note before this one and picked: a mark per step with no line
+running through them, order carried by the column rather than drawn
+as a rail down it. `.nt-sp` is still the wrapper and the DOM did not
+change at all, only what the CSS draws in the gutter it reserves.
+
+**AN ORDINARY BEAD IS THE FLAT NEUTRAL, WITH NOTHING ELSE ON IT.** No
+ring, no box-shadow — a plain 6px dot in `--tick-off`, the same token
+this app already uses for an unlit mark. **A key step takes the hue,
+with a soft halo round it**, which is the mark's third drawing: a
+swipe on a note, a bead here, a strike on a goal, one claim in three
+skins.
+
+**THE HEADING DRAWS NO MARK AT ALL.** Its stub existed to break the
+line, and a line does not run through this layout any more — a stub
+with nothing to break is a mark with nothing to say, so it went
+rather than being left to read as a mechanism somebody might edit.
+
+Asserted as the pseudo-element's own `content` computing to `none` or
+`normal`, which is how this file already tells a real pseudo-element
+from one nothing draws — a rule that stopped drawing the line would
+otherwise still pass a check that only reads its class.
+
+## Two kinds of hint went, and one kind stayed on purpose
+
+Asked to remove "the description of everything" as unnecessary and
+wasted space. That could have meant any of several things this app
+draws as a quiet `.hint` paragraph, and most of them are not
+descriptions at all — a warning before a delete with no bin behind
+it, a sentence a friend-turn-on sheet uses as its actual moment of
+consent. Asked which, narrowed to two: the worked examples under the
+add sheet, and the reassurances that a figure or a picture stays on
+the phone.
+
+**THE ADD SHEET'S EXAMPLES ARE GONE, AND SO IS THE HINT ITSELF WHERE
+SPEECH IS AVAILABLE.** "Or type it. 'Walk weekdays 7:45 to 8:30' or
+'Walk after the gym for 30 minutes'" was two worked examples under a
+field that already fails softly — type the wrong thing and the
+preview says what it is still missing. Where a browser has no speech
+button at all, one line stays: it is the only route left to
+dictation, and there is nowhere else on the screen that says so.
+
+**FIVE REASSURANCES ARE GONE**: the number dial (twice, once for a
+tally figure and once for a budget one), the profile-share switches,
+the avatar sheet, and the "everything lives in this browser" note
+under Settings' backup controls. Each was a repetition of a promise
+this file documents everywhere else — the friends worker's own
+consent screen still states in full what leaves and what never does,
+because that one is the actual decision rather than a reminder of one
+already taken, and it stayed.
+
+Not a bug a check found, so there is nothing new to assert — the
+suite's own coverage of what the app actually sends over the network
+is what still guards the promise these lines were only repeating.
+
+## "In 10 mins" is a time too, counted from now
+
+`now` is the instant; this is a promise about the next one — the
+train leaves in ten minutes, not right now, and "Train in 10mins" was
+coming back *still needs which day and what time* because nothing in
+the parser had ever heard the word.
+
+**READ THE SAME WAY "NOW" IS.** A length only if one is STATED, a
+moment otherwise, and its own two patterns for "now"'s own reason: an
+optional tail on one regex makes "in 10 mins" and "in 10 mins for 30
+mins" the same match at the same index and hands the choice to the
+engine's backtracking, which is not a decision to leave to it. An
+explicit clock still wins — "read in 10 mins at 3" is fifteen
+hundred, not ten minutes from now — because somebody who says both is
+correcting themselves and the digits are the correction.
+
+**THE OFFSET IS CHECKED AGAINST THE CLOCK, NEVER CLAMPED.** "Gym in
+20 hours" at half past nine in the morning lands after midnight, and
+this record is one day per row with no tomorrow to silently put it
+on. Refused rather than rolled over or clamped to 23:59, which would
+land the block on a time nobody asked for and look exactly as
+deliberate as the one they meant.
+
+**AND A DAY-LESS SENTENCE ALREADY MEANS TODAY**, for the reason "now"
+generalised it: `out.days` gets today from the same rule that reads
+any resolved span, so "in" needed no special case of its own there —
+only the one rule this file already has for a time with no day on
+it.

@@ -546,6 +546,15 @@
   var RE_FOR_NOW = /\bfor\s+(\d{1,3})\s*(hours?|hrs?|h|minutes?|mins?|m)\s*now\b/g;
   var RE_NOW = /\bnow\b/g;
 
+  /* ── "in 10 mins" ──
+     "now" is the instant; this is a promise about the next one. Its
+     own two patterns for "now"'s own reason: an optional tail on one
+     regex makes "in 10 mins" and "in 10 mins for 30 mins" the same
+     match at the same index and hands the choice to the engine's
+     backtracking, which is not a decision to leave to it. */
+  var RE_IN_FOR = /\bin\s+(\d{1,3})\s*(hours?|hrs?|h|minutes?|mins?|m)\s*(?:for|,)?\s*(\d{1,3})\s*(hours?|hrs?|h|minutes?|mins?|m)\b/g;
+  var RE_IN = /\bin\s+(\d{1,3})\s*(hours?|hrs?|h|minutes?|mins?|m)\b/g;
+
   /* ── NO TIME LIMIT ──
      An hour is the default wherever nobody says a length — "at 9",
      a bare time, a bare "now" — for the same reason a bare "at 9"
@@ -1019,6 +1028,36 @@
     };
     if (!nowScan(RE_NOW_FOR, true) && !nowScan(RE_FOR_NOW, true)) nowScan(RE_NOW, false);
     if (!span && nowSpan) span = nowSpan;
+
+    /* ── AND "IN 10 MINS" IS A TIME TOO, COUNTED FROM NOW ──
+       Read the same way "now" is: a length only if one is STATED, a
+       moment otherwise. The offset is checked against the clock
+       rather than clamped, because a moment more than a day from now
+       is not a time this record can hold — one day per row, and
+       there is no tomorrow to silently land it on. */
+    var inSpan = null;
+    var inScan = function (re, dur) {
+      var mm;
+      re.lastIndex = 0;
+      while ((mm = re.exec(low))) {
+        if (!free(mm.index, mm.index + mm[0].length)) continue;
+        var off = /^(h|hr|hour)/.test(mm[2]) ? +mm[1] * 60 : +mm[1];
+        if (!(off > 0)) continue;
+        var len = dur ? (/^(h|hr|hour)/.test(mm[4]) ? +mm[3] * 60 : +mm[3])
+          : (noLimit ? -1 : 0);
+        if (dur && !(len > 0 && len <= 480)) continue;
+        var st = scNowMin() + off;
+        if (st > 1439) continue;
+        mark(mm.index, mm.index + mm[0].length);
+        if (st < 1439 || len === 0) {
+          inSpan = { s: st, e: len < 0 ? 1440 : Math.min(1440, st + len) };
+        }
+        return true;
+      }
+      return false;
+    };
+    inScan(RE_IN_FOR, true) || inScan(RE_IN, false);
+    if (!span && inSpan) span = inSpan;
 
     if (span) { out.s = span.s; out.e = span.e; }
 
@@ -5275,10 +5314,6 @@
       ends.appendChild(scEl('span', null, scFig(item, R.max)));
       body.appendChild(ends);
 
-      body.appendChild(scEl('p', 'hint',
-        'The number stays on this phone. Only whether you logged it is '
-        + 'ever shared.'));
-
       var acts = scEl('div', 'acts');
       /* Two buttons whichever state it is in, and the left one is
          whichever makes sense: there is nothing to clear on a day with
@@ -6525,14 +6560,6 @@
       see.addEventListener('click', scProfileMine);
       body.appendChild(see);
 
-      /* Said on the screen where the switches are, and it names the
-         three things no switch can reach. A promise is only worth
-         anything where the decision is being taken. */
-      body.appendChild(scEl('p', 'hint',
-        'Your week never leaves this phone, and neither does how a day felt '
-        + 'or anything you wrote in a note. Everything above is off until you '
-        + 'turn it on.'));
-
       var acts = scEl('div', 'acts');
       acts.appendChild(scBtn('off', 'Not now', scClose));
       acts.appendChild(scBtn('go', 'Save', function () {
@@ -7433,18 +7460,12 @@
       acts.appendChild(scBtn('off', 'Cancel', scClose));
       acts.appendChild(go);
 
-      var hint = scEl('p', 'hint');
-      /* The second example is the one nobody guesses. A day is assumed
-         when none is given, and a block can be placed against another
-         block rather than against the clock — neither is discoverable
-         by pressing around, so the one line that is already here says
-         it. */
-      var EG = '<em>“Walk weekdays 7:45 to 8:30”</em> or '
-        + '<em>“Walk after the gym for 30 minutes”</em>';
-      hint.innerHTML = SR
-        ? 'Or type it. ' + EG
-        : 'This browser has no speech button — use the microphone key on your keyboard, '
-          + 'or type it. ' + EG;
+      /* SR true means the sheet's own Say it button reaches speech, so
+         there is nothing to tell a keyboard user that pressing around
+         would not already show them. Only a browser with no button at
+         all needs the one line saying dictation is still reachable. */
+      var hint = SR ? null : scEl('p', 'hint',
+        'This browser has no speech button — use the microphone key on your keyboard.');
 
       body.appendChild(heard);
 
@@ -7475,7 +7496,7 @@
 
       body.appendChild(field);
       body.appendChild(preview);
-      body.appendChild(hint);
+      if (hint) body.appendChild(hint);
       body.appendChild(acts);
 
       var parsed = [];
@@ -11224,11 +11245,6 @@
       acts.appendChild(scBtn('go', myPic ? 'Choose another' : 'Choose a photo',
         function () { file.click(); }));
       body.appendChild(acts);
-
-      body.appendChild(scEl('p', 'hint',
-        'A picture is the first thing this app would ever send anywhere, and it '
-        + 'only would once you add a friend. The face never leaves — it is drawn '
-        + 'from the palette you already picked.'));
     });
   }
 
@@ -11429,13 +11445,6 @@
           b2.appendChild(acts);
         });
       });
-
-      var note = scEl('p', 'hint');
-      note.style.marginTop = '18px';
-      note.innerHTML = 'Everything lives in this browser and is never uploaded. ' +
-        'Dictation is the exception — your phone sends those few seconds of audio to ' +
-        'its own speech service to turn into text. Typing the same sentence does not.';
-      body.appendChild(note);
     });
   }
 
@@ -12746,10 +12755,6 @@
       ends.appendChild(scEl('span', null, scMoney(0)));
       ends.appendChild(scEl('span', null, scMoney(max)));
       body.appendChild(ends);
-
-      body.appendChild(scEl('p', 'hint',
-        'Every figure here stays on this phone. Nothing about your money '
-        + 'is ever sent.'));
 
       var acts = scEl('div', 'acts');
       var left = got > 0
