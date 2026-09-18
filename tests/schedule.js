@@ -920,7 +920,7 @@ const SAID = [
      row, and there is no tomorrow to put it on. */
   const i6 = await nowSaid('Gym in 20 hours');
   ok('...but an offset that would cross midnight is refused, not clamped',
-    i6 && i6.meta === 'Still needs which day and what time' && i6.name === 'Gym in 20 hours', i6);
+    i6 && i6.meta === 'Still needs which day and what time' && i6.name === 'Gym in 20 Hours', i6);
 
   /* ══════════════════════════════════════════════════════════════
      A SENTENCE WITH NO DAY ON IT MEANS TODAY
