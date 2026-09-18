@@ -12449,17 +12449,12 @@
        sections of it, so they share the figures above and swap below.
        The friends board's two stops, one level down. */
     var tg = scEl('div', 'tk-tog');
-    /* ── LINES AND ENTRIES, NOT ROWS AND LEDGER ──
-       "Ledger" is a word somebody has to be told, and it was: it was
-       asked about by name. The day headings INSIDE this half already
-       say "3 entries", so naming the tab for its own content means the
-       screen uses one word for one thing rather than two.
-
-       "Rows" was the same fault one press earlier — a UI word rather
-       than a fact about the budget — and the budget's own card caption
-       already reads "12 lines". A line is what you priced; an entry
-       is what you pressed against one. */
-    [['Lines', false], ['Entries', true]].forEach(function (q) {
+    /* ── OVERVIEW AND HISTORY, THE SECOND RENAME OF THIS PAIR ──
+       "Lines" and "Entries" named what each tab holds; these name what
+       you are doing when you press one — taking stock of the cycle, or
+       looking back at what you pressed. Asked for by name, so this is
+       the record of a preference rather than a fault a check found. */
+    [['Overview', false], ['History', true]].forEach(function (q) {
       var b = scBtn('tk-tb' + (trkEnts === q[1] ? ' is-on' : ''), q[0], function () {
         trkEnts = q[1]; scPaintNotes();
       });

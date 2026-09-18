@@ -16972,11 +16972,11 @@ const SAID = [
       bTrk.pace === 0 && /\$421\.45 buffer/.test(bTrk.sub)
       && /left to spend \u00b7 6 days to go/.test(bTrk.sub),
       { pace: bTrk.pace, sub: bTrk.sub });
-    /* ── ENTRIES, NOT LEDGER ── asked about by name, which is the
-       whole argument: a tab you have to be told is a tab named
-       wrong. The day headings inside it already say "3 entries". */
-    ok('...and the second half is named for what is in it',
-      bTrk.tabs === 'Lines|Entries', bTrk.tabs);
+    /* ── OVERVIEW AND HISTORY, THE SECOND RENAME OF THIS PAIR ──
+       Asked for by name: what you are doing when you press each tab,
+       rather than what it holds. */
+    ok('...and the tabs are named for the second time',
+      bTrk.tabs === 'Overview|History', bTrk.tabs);
 
     /* ── NOT YET AND OVERDUE ARE NOT THE SAME WORD ──
        Both directions on one screen: Phone is day 3 and today is day

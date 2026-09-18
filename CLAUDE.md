@@ -11185,3 +11185,11 @@ that is the one measurement a clipped circle fails and a whole one
 clears — asserting only that nothing crosses the viewport would have
 passed on the exact build that was broken. Proved to bite: reverted,
 the button's own box reads `left: 12` against a pane starting at 18.
+
+### Overview and History, the second rename of this pair
+
+Asked for by name, the day after Lines and Entries shipped. The first
+rename named what each tab HOLDS; this one names what you are doing
+when you press it — taking stock of the cycle, or looking back at
+what you pressed against it. Neither is a fault a check found, so
+this is the record of a preference rather than a bug write-up.
