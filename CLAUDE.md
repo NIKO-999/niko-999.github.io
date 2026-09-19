@@ -9676,6 +9676,34 @@ shape: the rule was always that each card says one thing nobody can
 find by pressing around, and the rating row appears at the foot of the
 day by itself.
 
+## "How was your day" is gone
+
+The ask itself, not just Pattern's screen: the row of circles at the
+foot of today's card and the same control on the ungated door the
+calendar's day sheet had become. `scRateRow`, `scSetRate`, `scRateOf`,
+`scRateLoad`, `scRateOK`, `scRateSave` and the ring-that-fills glyph
+all go with it, and so does the "rated 4 of 5" line the day sheet used
+to print among what a day was.
+
+**`sched.rate.v2` IS SWEPT ON BOOT, NOT LEFT.** It joins the palette
+name, the subtitle and the goals key in the boot-time removal list: a
+record with nowhere left to be read is a second copy of a decision
+that no longer exists, and this repo has made that call often enough
+that leaving it standing would be the surprise.
+
+**AND `scDayDone` WENT WITH ITS ONLY CALLER.** It existed to gate the
+card's ask on every block being ticked, and once the ask is gone the
+gate has nothing left to guard — a function nothing calls reads as a
+mechanism somebody might edit. `scDowDate`, which the ask also used to
+resolve which card a rating belonged to, stays: it is a general
+resolver two other places still call.
+
+The whole PATTERN section of `tests/schedule.js` went with it — 512
+lines built to measure an ask that no longer exists — along with the
+calendar day sheet's `.rt` assertions and the rating half of the
+friends-profile network-leak check, which is now "the week and the
+note never leave" rather than three things.
+
 ## The month is a stop, and a cell says what you did
 
 Reported twice in four words: *I can't see where to change the view.*

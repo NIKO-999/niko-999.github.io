@@ -4695,51 +4695,11 @@ body {
 }
 .tr-skip:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
 
-/* ═══════════════════════════════════════════════════════════
-   THE DAY'S RATING
-
-   Five marks, and the one control the app has in two places: the foot
-   of today's card, which is where you are when a day ends, and
-   Pattern, which is where you go to read what the answers add up to.
-   Built once and used twice, because two drawings of one question is
-   how they drift.
-   ═══════════════════════════════════════════════════════════ */
-
-.rt-ask { margin-top: 18px; }
-.rt-row { display: flex; gap: 2px; margin-left: -10px; }
-.rt {
-  /* 44px of press target around a 20px mark, which is the size every
-     other thing you tap in this app answers to. The negative margin on
-     the row puts the first mark's INK on the card's own left edge
-     rather than its padding. */
-  width: 44px; height: 44px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  padding: 0;
-  background: none;
-  cursor: pointer;
-}
-.rt svg { width: 20px; height: 20px; }
-/* ── HOLLOW UNTIL YOU PICK IT, FILLED AFTER ──
-   The habits screen's own rule: a kept mark takes the colour and a
-   missed one stays hollow. It is also what keeps five circles in a row
-   from reading as the deck's page dots, which are filled discs of the
-   same family a few inches below — those are always solid, these are
-   rings until you answer.
-
-   The accent on this app makes exactly one claim, that something
-   happened, and what happened here is that you ANSWERED. How the day
-   went is carried by HOW MANY are filled, never by a colour: a red
-   mark for a bad day would be the screen grading you.
-
-   --tick-off rather than --hair for the ring. It is the token the
-   tally draws a missed day in and it is deliberately lighter than it
-   looks like it needs to be, for this exact reason: a mark you cannot
-   see is a mark that is not there. */
-.rt svg circle { fill: none; stroke: var(--tick-off); stroke-width: 2.2; }
-.rt.is-on svg circle { fill: var(--red); stroke: var(--red); }
-.rt:focus-visible { outline: 2px solid var(--red); outline-offset: -8px; }
+/* ── "HOW WAS YOUR DAY" IS GONE ──
+   Five marks lived here: the foot of today's card, and the ungated
+   door Pattern left behind on the calendar's day sheet. `.rt-ask`,
+   `.rt-row` and `.rt` went with the ask itself — see the note on
+   `sched.rate.v2` in `app.js`. */
 
 /* ══════════════════════════════════════════════════════
    THE MIND SHEET

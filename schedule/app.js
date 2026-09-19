@@ -2290,43 +2290,12 @@
         }
       });
 
-      /* ── AND TODAY'S CARD ENDS BY ASKING ──
-         The foot of the day is where you are when the day is over,
-         which Pattern is not: that screen is where you go to READ what
-         your good days have in common, so an ask living only there was
-         an ask nobody was standing in front of.
-
-         TODAY'S CARD AND NO OTHER. Every card is built for its own
-         weekday, and a rating written from Friday's card on a Tuesday
-         would land on today under a heading that says Friday — which
-         is exactly the round trip through one wrong answer that
-         "Done today" made, self-consistently, for months. scDowDate is
-         the resolver that can say no, and this draws nothing when it
-         does.
-
-         Inside the scroller rather than under it, so on a long day it
-         is the thing you arrive at having gone through everything,
-         which is when the question makes sense to answer.
-
-         AND ONLY ONCE THE DAY IS DONE. The question is what the day
-         was like, which is not one you can answer at eight in the
-         morning — and a control sitting under an unfinished list all
-         day is one more thing on the card that is not the card. It
-         arrives when the last block is ticked, which is the moment
-         the day stops being a plan.
-
-         It is a CONVENIENCE, not the only door: Pattern asks
-         unconditionally, so a day you never finished is still a day
-         you can rate. Gating the only ask in the app on finishing
-         everything would make the record impossible to keep on exactly
-         the days worth recording. */
-    var rd = scDowDate(d);
-    if (rd === scDay() && scDayDone(rd, d)) {
-      card.appendChild(scRateRow(rd, 'How was today?', function () {
-        scRender();
-        scPaintTally();
-      }));
-    }
+      /* ── "HOW WAS YOUR DAY" IS GONE ──
+         The card used to end by asking, at the foot of the day once
+         the last block was ticked. Removed rather than reworded: the
+         calendar's day sheet carried the same question as its one
+         ungated door, and that went with it too — see the note on
+         `sched.rate.v2` at boot. */
     if (!card.dataset.wired) {
       card.dataset.wired = '1';
       card.addEventListener('scroll', function () { scCardFade(card); });
@@ -3017,6 +2986,12 @@
          has now made that same call about the palette name, the
          subtitle, the old rating scale and two view keys. */
       localStorage.removeItem('sched.goal.v1');
+      /* And "how was your day", the ask this app carried through
+         Pattern's own removal and is now removing outright. A record
+         with nowhere left to be read is the same call as the palette
+         name, the subtitle and the goals key: a key nothing reads is
+         a second copy of a decision that no longer exists. */
+      localStorage.removeItem('sched.rate.v2');
     } catch (e) {}
   } catch (e) {}
   var mode = 'auto';
@@ -3548,25 +3523,6 @@
     var bs = scBlocksFor(item, new Date(day + 'T12:00:00').getDay());
     if (!bs.length) return false;
     return bs.some(function (b) { return !scOff(day, b.id); });
-  }
-
-  /* ── IS THE DAY DONE? ──
-     Every block the day actually asked of you, ticked. A block marked
-     OFF is not one of them — that is the whole point of a day off, and
-     counting it would make an exception you granted yourself into a
-     thing you failed to do.
-
-     A day with nothing on it is NOT done, and that is deliberate
-     rather than an oversight: "all of them" over an empty list is
-     vacuously true, so an empty Tuesday would call itself finished at
-     one minute past midnight. There has to be something to have
-     finished. */
-  function scDayDone(day, dow) {
-    var mine = scByDay(dow).filter(function (b) { return !scOff(day, b.id); });
-    if (!mine.length) return false;
-    return mine.every(function (b) {
-      return !!(blockLog[day] && blockLog[day][b.id]);
-    });
   }
 
   function scTicked(day, id) {
@@ -5582,13 +5538,12 @@
      them on one screen — so what you are sharing is something you can
      read in one go rather than infer from four places.
 
-     AND THREE THINGS STILL HAVE NO SWITCH, because a switch would
-     imply they are on the table. The WEEK never leaves: it is the
-     shape of your life and it is the one record this app has never
-     sent. How a day FELT never leaves (`sched.rate.v1`), which was
-     already its own rule. And the NOTE on a Mind entry never leaves —
-     the title is what you read, the note is what you thought, and
-     only the first of those is a fact about a book. */
+     AND TWO THINGS STILL HAVE NO SWITCH, because a switch would imply
+     they are on the table. The WEEK never leaves: it is the shape of
+     your life and it is the one record this app has never sent. And
+     the NOTE on a Mind entry never leaves — the title is what you
+     read, the note is what you thought, and only the first of those
+     is a fact about a book. */
   var SHARE_KEY = 'sched.share.v1';
   /* Every one OFF. A default that shares is a default nobody chose,
      and the whole of what makes this a decision is that it starts at
@@ -10105,153 +10060,15 @@
       + (it.unit || '');
   }
 
-  var RATE_KEY = 'sched.rate.v2';
-  var RATE_OLD = 'sched.rate.v1';
-  var rateLog = null;              /* { '2026-09-01': 4 } */
-  var RATE_MAX = 5;
-
-  /* ── PATTERN IS GONE, AND THE RATING IS NOT ──
-     That screen was the third stop on Today and the one place this app
-     READ the record back rather than showing it: of everything you
-     log, which things are on your good days and which are on your
-     rough ones, ranked by a difference of means. It went, and with it
-     scPatMids, scPatBlocks, scPatHeld, scPatRank, scPaintPat, the
-     twelve-week window, the five-a-side floor and the fourteen rated
-     days before it would say anything. `scPatMid` came back as
-     `scFig`: see the note on it, it was never Pattern's.
-
-     WHAT STAYS IS THE ASK, because it kept a reader. `sched.rate.v2`
-     is still written by the row at the foot of today's card and still
-     drawn back on the calendar's day sheet, which prints "rated 4 of
-     5" among what that day was. A record with somewhere to be read is
-     not a key nothing reads — that is the test this file applies to
-     the palette name, the subtitle and the old rating scale, and this
-     one passes it.
-
-     So the arithmetic went and the question did not. */
-
-  function scRateLoad() {
-    var read = function (k) {
-      try {
-        var raw = JSON.parse(localStorage.getItem(k) || 'null');
-        return (raw && typeof raw === 'object' && !Array.isArray(raw)) ? raw : null;
-      } catch (e) { return null; }
-    };
-    rateLog = read(RATE_KEY) || {};
-
-    /* ── THE OLD SCALE COMES ACROSS ONCE ──
-       Rough, Fine and Good were 0, 1 and 2; they are the bottom, the
-       middle and the top of five now, which keeps their order and the
-       even spacing they had. Only when there is nothing under the new
-       key: a v2 record is the one somebody has been writing since, and
-       a migration that ran twice would put months-old answers back
-       over it. The old key is REMOVED rather than left — a number that
-       resolves to another number is not something to keep resolving,
-       and left there it is a second record of the same days that
-       nothing reads. */
-    if (!read(RATE_KEY)) {
-      var was = read(RATE_OLD);
-      if (was) {
-        Object.keys(was).forEach(function (k) {
-          var v = was[k];
-          if (v === 0 || v === 1 || v === 2) rateLog[k] = [1, 3, 5][v];
-        });
-        scRateSave();
-      }
-    }
-    try { localStorage.removeItem(RATE_OLD); } catch (e) {}
-
-    /* A damaged entry is dropped and the rest of the record survives
-       — the days are what you cannot get back, and one bad value must
-       not take a season of them with it.
-
-       AND THE REPAIR IS WRITTEN BACK, WHICH IS THE FOURTH TIME THIS
-       HOLE HAS SHIPPED. scClean minted block ids that scLoad did not
-       save, scTrainLoad filled in a summed estimate it never saved,
-       scMindLoad normalised a damaged day in memory — and this one
-       dropped three bad values on every boot and left all three on
-       disk, so the repair was redone every open and would have been
-       lost the moment anything else wrote the key.
-
-       It survived because the only thing that ever read it was
-       Pattern, which read the repaired copy IN MEMORY: the screen
-       looked right while the record stayed damaged, for as long as
-       nobody asked the record. The check that found it is the one
-       that stopped reading a figure off a screen and read the store.
-
-       Written back only when something actually changed, so an intact
-       record costs no write on every open. */
-    var hurt = false;
-    Object.keys(rateLog).forEach(function (k) {
-      if (!scRateOK(rateLog[k])) { delete rateLog[k]; hurt = true; }
-    });
-    if (hurt) scRateSave();
-  }
-  function scRateOK(v) {
-    return typeof v === 'number' && v >= 1 && v <= RATE_MAX && v === Math.round(v);
-  }
-  function scRateSave() {
-    try { localStorage.setItem(RATE_KEY, JSON.stringify(rateLog)); } catch (e) {}
-  }
-  function scRateOf(day) {
-    var v = rateLog[day];
-    return scRateOK(v) ? v : null;
-  }
-  /* The same window every other write on this app takes: today and
-     the two behind it. A rating you can revise a month later is a
-     rating about how the month went, which is not what any of this
-     is measuring. */
-  function scSetRate(day, v) {
-    if (!scTallyOpen(day)) return false;
-    if (v === null) delete rateLog[day]; else rateLog[day] = v;
-    scRateSave();
-    return true;
-  }
-
-  function scRateRow(day, ttl, after) {
-    var wrap = scEl('div', 'rt-ask');
-    if (ttl) wrap.appendChild(scEl('span', 'label', ttl));
-    var row = scEl('div', 'rt-row');
-    row.setAttribute('role', 'group');
-    row.setAttribute('aria-label', ttl || 'Rate this day');
-    var now = scRateOf(day);
-    for (var i = 1; i <= RATE_MAX; i++) {
-      (function (n) {
-        var b = scEl('button', 'rt' + (now !== null && n <= now ? ' is-on' : ''));
-        b.type = 'button';
-        b.dataset.rate = String(n);
-        /* Spoken as what it DOES, not as where it sits in a row: "3"
-           on its own is a number, and five buttons called 1 to 5 with
-           no unit are five numbers. */
-        b.setAttribute('aria-label',
-          'Rate this day ' + n + ' out of ' + RATE_MAX);
-        b.setAttribute('aria-pressed', now === n ? 'true' : 'false');
-        b.innerHTML = RATE_DOT;
-        b.addEventListener('click', function () {
-          if (!scSetRate(day, now === n ? null : n)) {
-            scToast('That day is not open yet', false);
-            return;
-          }
-          if (navigator.vibrate) { try { navigator.vibrate(8); } catch (e) {} }
-          if (after) after();
-        });
-        row.appendChild(b);
-      }(i));
-    }
-    wrap.appendChild(row);
-    return wrap;
-  }
-
-  /* ── A RING THAT FILLS, NOT A STAR ──
-     One circle, and the two states are the same shape: hollow until
-     you pick it, filled after. That is the habits screen's own rule —
-     a kept mark takes the colour and a missed one stays hollow — and
-     it is what keeps five circles in a row from reading as the deck's
-     page dots, which are filled discs of the same family a few inches
-     below. A second path for the outline would be a second thing to
-     keep in step. */
-  var RATE_DOT = '<svg viewBox="0 0 24 24" aria-hidden="true">'
-    + '<circle cx="12" cy="12" r="8.8"/></svg>';
+  /* ── "HOW WAS YOUR DAY" IS GONE ──
+     `sched.rate.v2`, `scRateLoad`, `scRateOK`, `scRateSave`,
+     `scRateOf`, `scSetRate`, `scRateRow` and the ring-that-fills glyph
+     all lived here. The screen that read the record back — Pattern —
+     went first, and the ask outlived it for a while because it still
+     had a reader: the foot of today's card, and the calendar's day
+     sheet. Removing the ask itself leaves neither with anything to
+     read, so the arithmetic and the question are both gone now. The
+     key is swept on boot, not left: see the note there. */
 
   var TOUR_KEY = 'sched.tour.v1';
 
@@ -14817,8 +14634,7 @@
 
   /* Everything one cell needs, read rather than stored. `on` is what
      the day actually asked of you — a block marked off is not one of
-     them, which is the day-off record's whole point and the same
-     reading scDayDone takes. */
+     them, which is the day-off record's whole point. */
   function scCalOf(day) {
     var dow = new Date(day + 'T12:00:00').getDay();
     var all = scByDay(dow);
@@ -14831,7 +14647,7 @@
     var did = items.filter(function (it) { return scTicked(day, it.id); });
     return { day: day, dow: dow, all: all, on: on, kept: kept,
              did: did, ticks: did.length, items: items.length,
-             rate: scRateOf(day), mind: scMindOf(day) };
+             mind: scMindOf(day) };
   }
 
   /* ── A DAY BEFORE THE RECORD STARTS IS NOT A DAY YOU MISSED ──
@@ -14958,8 +14774,8 @@
   function scPaintCal() { calFig = scCalCount(); scCalMonth($('scCalPane')); scDate(); }
 
   /* How many days of the month on screen carry anything at all — a
-     block kept, a tick, a session, a rating. It is the one figure the
-     month row cannot say, which is the whole of why the head says it:
+     block kept, a tick, a session. It is the one figure the month row
+     cannot say, which is the whole of why the head says it:
      the row names the month beside the arrows that step it, and a head
      repeating that name is a caption for the thing under it.
 
@@ -14976,7 +14792,7 @@
       var d = scDay(new Date(calY, calM, i));
       if (d > today) break;
       var c = scCalOf(d);
-      if (c.kept || c.ticks || c.mind || c.rate) n++;
+      if (c.kept || c.ticks || c.mind) n++;
     }
     return n + (n === 1 ? ' day logged' : ' days logged');
   }
@@ -15265,54 +15081,14 @@
         var bits = [];
         if (c.on.length) bits.push(c.kept + ' of ' + c.on.length + ' kept');
         bits.push(c.ticks + ' of ' + c.items + ' logged');
-        /* Outside the window there is nothing to press, so the answer
-           is a figure among the others the way it always was. */
-        if (!scTallyOpen(open) && c.rate) {
-          bits.push('rated ' + c.rate + ' of ' + RATE_MAX);
-        }
         body.appendChild(scEl('p', 'cl-sum', bits.join(' · ')));
 
-        /* ── AND THE UNGATED DOOR LANDED HERE WHEN PATTERN WENT ──
-           The ask was in two places and it is ONE control: the foot of
-           today's card, and the screen that reads the answers back.
-           The card's is a CONVENIENCE and is gated on `scDayDone` —
-           it arrives when the last block is ticked, which is the
-           moment the day stops being a plan — so it was only ever
-           affordable because a second, UNGATED door existed. Pattern
-           was that door. Take it away and leave the gate standing and
-           a day you never finished can never be rated at all, which
-           is the record made impossible to keep on exactly the days
-           worth recording.
-
-           This sheet is where that door belongs rather than anywhere
-           new: it is the one screen that already READS the rating —
-           it printed "rated 4 of 5" among what the day was — and a
-           reader that cannot answer its own question is a readout
-           beside a control somewhere else.
-
-           IT IS THE SAME `scRateRow`, which is the rule this pair has
-           always kept: two drawings of one question is how they
-           drift, and a day rated four here had better be a day rated
-           four on the card. `scSetRate` refuses outside the backfill
-           window on its own and the row says so, so a month of days
-           that cannot be written needs no second gate here — which
-           is also why the calendar stays a read-back rather than
-           becoming an editor: this is the one thing on the sheet you
-           can answer, and it is an opinion rather than a record. */
-        /* AND ONLY WHERE IT CAN BE ANSWERED. `scSetRate` refuses
-           outside today and the two days behind it, so on a day three
-           weeks back this would be five controls whose every press is
-           a toast saying no — and a control that exists and refuses
-           is worse than one that is not there, which is the deck's
-           own conclusion about the way back out. Drawn on the days
-           the record is open and read back as a figure on the rest. */
-        if (scTallyOpen(open)) {
-          body.appendChild(scRateRow(open, 'How was this day?', function () {
-            /* And the month behind it, because a rating is one of the
-               things a cell counts. */
-            oneDay(); scPaintCal();
-          }));
-        }
+        /* "How was this day?" lived here, as the ungated door Pattern
+           left behind — the card's own ask was a convenience gated on
+           the day being finished, and this sheet was the one place a
+           day you never finished could still be rated. The ask is
+           gone rather than moved: see the note on `sched.rate.v2` at
+           boot. */
 
         if (!c.all.length) {
           body.appendChild(scEl('p', 'mn-say', 'Nothing was on this day'));
@@ -15404,7 +15180,6 @@
   scHabitLoad();
   scTrainLoad();
   scMindLoad();
-  scRateLoad();
   scNoteLoad();
 
   try {
