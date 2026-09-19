@@ -11289,3 +11289,108 @@ generalised it: `out.days` gets today from the same rule that reads
 any resolved span, so "in" needed no special case of its own there —
 only the one rule this file already has for a time with no day on
 it.
+
+## A goal or a process can carry a metric
+
+Neither kind had a number. A goal was a statement and a date; a
+process was a spine of steps. Asked what else could help hit one, the
+answer that survived a real comparison was the budget's own
+arithmetic pointed somewhere else — entries are the record, a total
+is derived from them, so a mis-press is undone through the entries
+rather than through the target.
+
+**FOUR TREATMENTS WERE RENDERED AS AN ARTIFACT BEFORE ANY OF THIS WAS
+BUILT**, each the app's own dark card material rather than a diagram
+of one: a progress bar, a stepper with a trend, a presence grid of
+kept days, and milestone beads borrowed from the process's own spine.
+Two survived being looked at. The presence grid was right for a habit
+with a deadline rather than a climbing number, and the beads were
+refused for the reason the daily process kept its own spine and never
+grew a metric option of its own: reusing that drawing for a
+checkpoint list would have made the two features answer to one
+picture, and a checkpoint has no partial credit — a number does.
+
+**BAR AND TREND, AND EITHER KIND CAN CARRY ONE.** A goal and a
+process are both "a thing with a date and a shape," which is closer
+to each other than either is to a note, so there was no reason to
+give one the feature and not the other. Bar leads with a track
+against the target — cheapest, reuses the budget's own bar, and only
+ever shows today's position. Trend leads with the figure, the way
+Water and Steps already read, with a fourteen-day sparkline under it
+so you can see whether you are accelerating or stalling rather than
+only where you stand.
+
+**ONE KEY, NEXT TO THE BUDGET'S OWN.** `sched.ntmetric.v1`, keyed by
+note id, holding entries of `{ i, t, v }` — an id, a timestamp, a
+signed amount in hundredths. A goal's kilometres and a category's
+dollars are the same shape, an amount and a date, so pointing the
+same storage at a second domain cost nothing a new key would not have
+saved. Capped at three hundred entries a note, for the reason the
+budget's own log is capped: a stuck finger must not be able to take
+the key past the quota and every other note's metric with it.
+
+**HUNDREDTHS, NOT FLOATS**, for the reason the budget already
+gives — `$10.10 + $20.20` is not `$30.30` in floating point, and a
+target that is a cent out in the third decimal is a target you stop
+trusting. A distance and a page count round the same way a dollar
+figure does, so the same arithmetic serves all three: `scMetFmt` is
+`scMoney` with the `$` made optional rather than assumed, and `$` is
+the one unit that goes in FRONT, because that is the one everybody
+already reads that way.
+
+**THE RECORD KEEPS `mt` REGARDLESS OF `n.k`**, the way it already
+keeps a goal's date and a budget's income on a note switched to some
+other layout. The layout changes the drawing, never the record: a
+metric set on a goal and then switched to a plain note and back is
+exactly as it was. What IS gated by kind is the offer — the "+
+Metric" control and the metric's own drawing appear only on a goal or
+a process, because neither a plain note nor a budget has anywhere for
+a second number to mean anything.
+
+**THE CARD DRAWS NOTHING UNTIL A TARGET IS SET.** The kind and the
+label can be typed with nothing to show for it, and a bar or a trend
+with no target is a control with nothing to press against. Silent
+absence rather than a line explaining what to go and do in Edit —
+this file's own rule against a new hint describing a control, and
+there is nothing here worth saying that the editor's own placeholders
+(Distance, km, 500, 5) do not already say.
+
+**A STEP UNSET FALLS TO A TWENTIETH OF THE TARGET**, snapped to a
+round figure through the budget's own `scBudNice` — the same
+function, because a round number is a round number whether it is
+counting dollars or kilometres, and a stuck-open control has to add
+something the first time it is pressed, before anybody has said how
+much.
+
+**THE ENTRIES ARE THE RECORD, AND THAT IS WHERE A MIS-PRESS IS
+UNDONE.** Pressing the figure opens the same shape the tracker's own
+`scTrkEnts` already draws — grouped by day, newest first, each row
+carrying an Undo — pointed at a metric's log instead of a budget's.
+Nothing new was drawn for it: `.bd-g` and `.tk-lg` already are what a
+grouped, undoable log looks like on this screen.
+
+**REMOVING A METRIC ASKS, AND THERE IS NO BIN**, the note's own rule:
+every entry pressed against it lived only in this one key, so taking
+the metric off is the same shape as removing a note — a sentence
+saying what goes with it, "Keep it" beside "Remove it," never a bare
+confirm().
+
+**THE SPARKLINE IS THE TALLY'S OWN AREA CHART, RETARGETED.**
+`scTyArea` already draws a fill and a stroke from the ink; here the
+CSS repoints both at the note's own colour instead, `--c`, so the
+line reads as this goal's rather than a borrowed one. No second
+drawing function for a second area chart — one mechanism, and the
+only thing that changed is which token it is scoped under.
+
+**A DAMAGED ENTRY COSTS ITSELF, NEVER THE METRIC** — this file's
+oldest rule about a stored shape, arriving at this log the way it
+already has at the budget's and the tally's. And the repair is
+written back on the way in, the way this app has had to relearn four
+times: held only in memory it would be redone every boot and lost the
+moment anything else wrote the key.
+
+**REACHED FROM NOWHERE `scPushNow` WALKS.** A metric is further down
+the road that "a count may leave and a list may not" was written
+about than almost anything else here — even the word you typed into
+Tracking never reaches the network, because there is no path from
+this key to a push at all.

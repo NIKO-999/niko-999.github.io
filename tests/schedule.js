@@ -17641,6 +17641,366 @@ const SAID = [
     await bpctx.close();
   }
 
+  /* ══════════════════════════════════════════════════════════════
+     A GOAL OR A PROCESS CAN CARRY A METRIC
+
+     Optional, and drawn nowhere until a target is set. Entries are
+     the record and the total is derived from them — the budget's own
+     arithmetic, pointed at a note id instead of a category — so a
+     mis-press is undone through the history rather than through the
+     target. Its own context throughout: every section below changes
+     the note or the log and reads the result back.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    const metGoal = {
+      id: 'nmgoal', k: 'goal', a: 'teal', t: 'Distance goal',
+      d: '2027-01-01',
+      l: [{ i: 'g0', h: 0, c: '', x: 'Run 500km this year', y: '', m: 0, w: [] }]
+    };
+    const seedMet = async (page, list, extra) => {
+      await page.addInitScript(([nlist, ex]) => {
+        const FROZEN = new Date('2026-09-15T09:00:00').getTime();
+        const R = Date;
+        // eslint-disable-next-line no-global-assign
+        Date = class extends R {
+          constructor(...a) { super(...(a.length ? a : [FROZEN])); }
+          static now() { return FROZEN; }
+        };
+        delete window.SpeechRecognition;
+        delete window.webkitSpeechRecognition;
+        ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
+          .forEach((k) => localStorage.setItem(k, '1'));
+        if (!localStorage.getItem('sched.note.v1')) {
+          localStorage.setItem('sched.note.v1', JSON.stringify({ list: nlist }));
+        }
+        if (ex.metric && !localStorage.getItem('sched.ntmetric.v1')) {
+          localStorage.setItem('sched.ntmetric.v1', JSON.stringify(ex.metric));
+        }
+      }, [list, extra || {}]);
+      await page.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
+      await page.waitForTimeout(400);
+      await page.evaluate(() => document.querySelector('.tab[data-view="notes"]').click());
+      await page.waitForTimeout(250);
+    };
+    const openView = async (page, title) => {
+      await page.evaluate((t) => {
+        [...document.querySelectorAll('.nt-card')]
+          .find((c) => c.textContent.indexOf(t) >= 0).click();
+      }, title);
+      await page.waitForTimeout(250);
+    };
+    const openEdit = async (page, title) => {
+      await page.evaluate((t) => {
+        [...document.querySelectorAll('.nt-card')]
+          .find((c) => c.textContent.indexOf(t) >= 0).click();
+      }, title);
+      await page.waitForTimeout(250);
+      await page.evaluate(() => {
+        const b = document.getElementById('scNtEd');
+        if (b && b.getAttribute('aria-pressed') !== 'true') b.click();
+      });
+      await page.waitForTimeout(250);
+    };
+
+    /* ── NOTHING IS DRAWN UNTIL A TARGET IS SET, AND THE CONTROL IS
+       ONE BUTTON UNTIL THEN ── */
+    {
+      const mctx = await browser.newContext({ ...PHONE });
+      const mpage = await mctx.newPage();
+      const merrs = [];
+      mpage.on('pageerror', (e) => merrs.push(String(e)));
+      await seedMet(mpage, [JSON.parse(JSON.stringify(metGoal))]);
+      await openEdit(mpage, 'Distance goal');
+      const before = await mpage.evaluate(() => ({
+        addBtn: [...document.querySelectorAll('.nt-add')]
+          .some((b) => b.textContent.trim() === '+  Metric'),
+        chips: document.querySelector('.nt-mkind'),
+      }));
+      ok('a goal with no metric shows one add control and no chips',
+        before.addBtn && !before.chips, before);
+
+      /* Press it into existence, fill in the shape, and switch back
+         to view — nothing should draw with the target still at 0. */
+      const noTarget = await mpage.evaluate(() => {
+        [...document.querySelectorAll('.nt-add')]
+          .find((b) => b.textContent.trim() === '+  Metric').click();
+        return { chips: !!document.querySelector('.nt-mkind') };
+      });
+      await mpage.waitForTimeout(150);
+      ok('pressing it reveals the Bar/Trend chips', noTarget.chips, noTarget);
+      const labels = await mpage.evaluate(() => [...document.querySelectorAll('.nt-mkind button')]
+        .map((b) => b.textContent));
+      ok('the two chips are Bar and Trend', labels.join('|') === 'Bar|Trend', labels);
+
+      await mpage.evaluate(() => {
+        const ed = document.getElementById('scNtEd');
+        ed.click();
+      });
+      await mpage.waitForTimeout(200);
+      const drawnAtZero = await mpage.evaluate(() => !!document.querySelector('.nt-met'));
+      ok('a metric with no target draws nothing in view', !drawnAtZero, drawnAtZero);
+      await mpage.evaluate(() => { document.getElementById('scNtEd').click(); });
+      await mpage.waitForTimeout(200);
+
+      ok('nothing threw setting up an empty metric', merrs.length === 0, merrs);
+      await mctx.close();
+    }
+
+    /* ── THE BAR: LABEL, TARGET, FILL, AND A ONE-PRESS ADD ── */
+    {
+      const bctx = await browser.newContext({ ...PHONE });
+      const bpage = await bctx.newPage();
+      const berrs = [];
+      bpage.on('pageerror', (e) => berrs.push(String(e)));
+      const g = JSON.parse(JSON.stringify(metGoal));
+      g.mt = { k: 'bar', lb: 'Distance', u: 'km', g: 50000, st: 500 };
+      await seedMet(bpage, [g]);
+      await openView(bpage, 'Distance goal');
+      const bar1 = await bpage.evaluate(() => ({
+        lab: document.querySelector('.met-row .lab').textContent,
+        fig: document.querySelector('.met-fig').textContent.replace(/\s+/g, ' ').trim(),
+        fill: document.querySelector('.met-fill').style.width,
+        addLabel: document.querySelector('.met-add').textContent.trim(),
+      }));
+      ok('the bar reads the label, the figure against the target, and starts at 0%',
+        bar1.lab === 'Distance' && bar1.fig === '0 / 500 km'
+        && bar1.fill === '0%' && bar1.addLabel === '+ Add 5 km', bar1);
+
+      await bpage.click('.met-add');
+      await bpage.waitForTimeout(150);
+      await bpage.click('.met-add');
+      await bpage.waitForTimeout(150);
+      const bar2 = await bpage.evaluate(() => ({
+        fig: document.querySelector('.met-fig').textContent.replace(/\s+/g, ' ').trim(),
+        fill: document.querySelector('.met-fill').style.width,
+      }));
+      ok('two presses add twice the step and move the fill',
+        bar2.fig === '10 / 500 km' && bar2.fill === '2%', bar2);
+
+      /* And it survives a reload — the entries are the record. */
+      await bpage.reload({ waitUntil: 'networkidle' });
+      await bpage.waitForTimeout(400);
+      await bpage.evaluate(() => document.querySelector('.tab[data-view="notes"]').click());
+      await bpage.waitForTimeout(250);
+      await bpage.evaluate(() => document.querySelector('.nt-card').click());
+      await bpage.waitForTimeout(250);
+      const bar3 = await bpage.evaluate(() =>
+        document.querySelector('.met-fig').textContent.replace(/\s+/g, ' ').trim());
+      ok('the total survives a reload', bar3 === '10 / 500 km', bar3);
+
+      ok('nothing threw pressing the bar', berrs.length === 0, berrs);
+      await bctx.close();
+    }
+
+    /* ── THE TREND: THE FIGURE LEADS, WITH A SPARKLINE AND A STEPPER ── */
+    {
+      const sctx = await browser.newContext({ ...PHONE });
+      const spage = await sctx.newPage();
+      const serrs = [];
+      spage.on('pageerror', (e) => serrs.push(String(e)));
+      const g = JSON.parse(JSON.stringify(metGoal));
+      g.mt = { k: 'step', lb: 'Distance', u: 'km', g: 50000, st: 500 };
+      await seedMet(spage, [g], { metric: { nmgoal: [
+        { i: 'e1', t: new Date('2026-09-14T09:00:00').getTime(), v: 30000 }
+      ] } });
+      await openView(spage, 'Distance goal');
+      const s1 = await spage.evaluate(() => ({
+        fig: document.querySelector('.met-figbtn b').textContent,
+        of: document.querySelector('.met-of').textContent,
+        spark: !!document.querySelector('.met-spark svg.ty-ar'),
+        mid: document.querySelector('.met-stepper .mid').textContent.trim(),
+      }));
+      ok('the trend leads with the figure, names the target, and draws a sparkline',
+        s1.fig === '300 km' && s1.of === 'of 500 km' && s1.spark
+        && s1.mid === '+ 5 km', s1);
+
+      /* Re-queried every press: `scPaintNotes` rebuilds the whole
+         card, so a handle held across it points at a detached node —
+         this file's own oldest lesson about a redraw. */
+      const stepBtn = (i) => spage.$$('.met-stepper button').then((a) => a[i]);
+      await (await stepBtn(1)).click();  /* the plus */
+      await spage.waitForTimeout(150);
+      const s2 = await spage.evaluate(() => document.querySelector('.met-figbtn b').textContent);
+      ok('the plus adds the step', s2 === '305 km', s2);
+      await (await stepBtn(0)).click();  /* the minus */
+      await spage.waitForTimeout(150);
+      await (await stepBtn(0)).click();
+      await spage.waitForTimeout(150);
+      const s3 = await spage.evaluate(() => document.querySelector('.met-figbtn b').textContent);
+      ok('the minus subtracts it, twice over', s3 === '295 km', s3);
+
+      ok('nothing threw on the trend', serrs.length === 0, serrs);
+      await sctx.close();
+    }
+
+    /* ── THE ENTRIES ARE THE RECORD, AND A MIS-PRESS UNDOES THROUGH
+       THEM RATHER THAN THROUGH THE TARGET ── */
+    {
+      const hctx = await browser.newContext({ ...PHONE });
+      const hpage = await hctx.newPage();
+      const herrs = [];
+      hpage.on('pageerror', (e) => herrs.push(String(e)));
+      const g = JSON.parse(JSON.stringify(metGoal));
+      g.mt = { k: 'bar', lb: 'Distance', u: 'km', g: 50000, st: 500 };
+      await seedMet(hpage, [g], { metric: { nmgoal: [
+        { i: 'e1', t: new Date('2026-09-14T09:00:00').getTime(), v: 30000 },
+        { i: 'e2', t: new Date('2026-09-15T08:00:00').getTime(), v: 20000 }
+      ] } });
+      await openView(hpage, 'Distance goal');
+      await hpage.click('.met-fig');
+      await hpage.waitForTimeout(300);
+      const hist1 = await hpage.evaluate(() => ({
+        title: document.getElementById('scSheetTitle').textContent,
+        groups: document.querySelectorAll('.bd-g').length,
+        rows: document.querySelectorAll('.tk-lg').length,
+      }));
+      ok('the history sheet is titled for the metric and groups by day',
+        hist1.title === 'Distance entries' && hist1.groups === 2 && hist1.rows === 2, hist1);
+
+      await hpage.click('.tk-un');
+      await hpage.waitForTimeout(200);
+      const hist2 = await hpage.evaluate(() => document.querySelectorAll('.tk-lg').length);
+      ok('undo removes one entry from the open sheet', hist2 === 1, hist2);
+      await hpage.evaluate(() => document.getElementById('scScrim').click());
+      await hpage.waitForTimeout(400);
+      const hist3 = await hpage.evaluate(() =>
+        document.querySelector('.met-fig').textContent.replace(/\s+/g, ' ').trim());
+      /* The undo took the FIRST row — today's group sorts to the top,
+         and today's is the 200-unit entry, so 300 survives. */
+      ok('and the card behind it reflects the undo', hist3 === '300 / 500 km', hist3);
+
+      ok('nothing threw in the history sheet', herrs.length === 0, herrs);
+      await hctx.close();
+    }
+
+    /* ── REMOVING A METRIC ASKS, AND THERE IS NO BIN ── */
+    {
+      const rctx = await browser.newContext({ ...PHONE });
+      const rpage = await rctx.newPage();
+      const rerrs = [];
+      rpage.on('pageerror', (e) => rerrs.push(String(e)));
+      const g = JSON.parse(JSON.stringify(metGoal));
+      g.mt = { k: 'bar', lb: 'Distance', u: 'km', g: 50000, st: 500 };
+      await seedMet(rpage, [g], { metric: { nmgoal: [
+        { i: 'e1', t: new Date('2026-09-14T09:00:00').getTime(), v: 30000 }
+      ] } });
+      await openEdit(rpage, 'Distance goal');
+      const rmBtn = () => rpage.evaluate(() => {
+        const b = [...document.querySelectorAll('.nt-rm')]
+          .find((x) => x.textContent.trim() === 'Remove this metric');
+        b.click();
+      });
+      await rmBtn();
+      await rpage.waitForTimeout(250);
+      const ask = await rpage.evaluate(() => ({
+        title: document.getElementById('scSheetTitle').textContent,
+        hint: document.querySelector('#scSheetBody .hint').textContent,
+      }));
+      ok('it asks before removing, and says what has no bin',
+        ask.title === 'Remove this metric?' && ask.hint.indexOf('no bin') >= 0, ask);
+
+      /* Keep it first, and confirm nothing changed. */
+      await rpage.evaluate(() => [...document.querySelectorAll('.lg-row button')]
+        .find((b) => b.textContent.trim() === 'Keep it').click());
+      await rpage.waitForTimeout(200);
+      const kept = await rpage.evaluate(() =>
+        JSON.parse(localStorage.getItem('sched.note.v1')).list[0].mt !== null);
+      ok('Keep it leaves the metric standing', kept, kept);
+
+      await rmBtn();
+      await rpage.waitForTimeout(250);
+      await rpage.evaluate(() => [...document.querySelectorAll('.lg-row button')]
+        .find((b) => b.textContent.trim() === 'Remove it').click());
+      await rpage.waitForTimeout(200);
+      const gone = await rpage.evaluate(() => ({
+        mt: JSON.parse(localStorage.getItem('sched.note.v1')).list[0].mt,
+        log: JSON.parse(localStorage.getItem('sched.ntmetric.v1') || '{}').nmgoal,
+        met: !!document.querySelector('.nt-met') || !!document.querySelector('.nt-mkind'),
+      }));
+      ok('Remove it clears the metric and its whole entry log',
+        gone.mt === null && gone.log === undefined && !gone.met, gone);
+
+      ok('nothing threw removing the metric', rerrs.length === 0, rerrs);
+      await rctx.close();
+    }
+
+    /* ── A DAMAGED ENTRY IS DROPPED, THE GOOD ONES SURVIVE, AND THE
+       REPAIR IS SAVED ── the schedule's oldest rule about a stored
+       shape, arriving at a fourth log. */
+    {
+      const dctx = await browser.newContext({ ...PHONE });
+      const dpage = await dctx.newPage();
+      const derrs = [];
+      dpage.on('pageerror', (e) => derrs.push(String(e)));
+      const g = JSON.parse(JSON.stringify(metGoal));
+      g.mt = { k: 'bar', lb: 'Distance', u: 'km', g: 50000, st: 500 };
+      await seedMet(dpage, [g], { metric: { nmgoal: [
+        { i: 'g1', t: 1000, v: 10000 },
+        null,
+        { i: 'g2', v: 0 },
+        'not an entry',
+        { i: 'g3', t: 2000, v: 5000 }
+      ] } });
+      await openView(dpage, 'Distance goal');
+      const rec = await dpage.evaluate(() => JSON.parse(localStorage.getItem('sched.ntmetric.v1')));
+      ok('a damaged entry is dropped, the good ones survive, and the repair is saved',
+        Array.isArray(rec.nmgoal) && rec.nmgoal.length === 2
+        && rec.nmgoal.map((e) => e.i).join('|') === 'g1|g3', rec);
+      const fig = await dpage.evaluate(() =>
+        document.querySelector('.met-fig').textContent.replace(/\s+/g, ' ').trim());
+      ok('the total is summed off the repaired log, not the raw one',
+        fig === '150 / 500 km', fig);
+
+      ok('nothing threw repairing a damaged log', derrs.length === 0, derrs);
+      await dctx.close();
+    }
+
+    /* ── NO METRIC ON A NOTE OR A BUDGET ── */
+    {
+      const gctx = await browser.newContext({ ...PHONE });
+      const gpage = await gctx.newPage();
+      const gerrs = [];
+      gpage.on('pageerror', (e) => gerrs.push(String(e)));
+      const plain = { id: 'nplain', k: 'note', a: 'blue', t: 'A plain note',
+        l: [{ i: 'p0', h: 0, c: '', x: 'Just words', y: '', m: 0, w: [] }] };
+      await seedMet(gpage, [plain]);
+      await openEdit(gpage, 'A plain note');
+      const none = await gpage.evaluate(() => [...document.querySelectorAll('.nt-add')]
+        .some((b) => b.textContent.trim() === '+  Metric'));
+      ok('a plain note offers no metric control', !none, none);
+      ok('nothing threw', gerrs.length === 0, gerrs);
+      await gctx.close();
+    }
+
+    /* ── NOTHING HERE LEAVES THE PHONE ── every press above, replayed
+       in one pass with every request counted. */
+    {
+      const nctx = await browser.newContext({ ...PHONE });
+      const npage = await nctx.newPage();
+      const nerrs = [];
+      const nnet = [];
+      npage.on('pageerror', (e) => nerrs.push(String(e)));
+      npage.on('request', (r) => nnet.push(r.url()));
+      const g = JSON.parse(JSON.stringify(metGoal));
+      g.mt = { k: 'bar', lb: 'Distance', u: 'km', g: 50000, st: 500 };
+      await seedMet(npage, [g], { metric: { nmgoal: [
+        { i: 'e1', t: new Date('2026-09-14T09:00:00').getTime(), v: 30000 }
+      ] } });
+      await openView(npage, 'Distance goal');
+      await npage.click('.met-add');
+      await npage.waitForTimeout(120);
+      await npage.click('.met-fig');
+      await npage.waitForTimeout(200);
+      await npage.click('.tk-un');
+      await npage.waitForTimeout(200);
+      const off = nnet.filter((u) => !u.startsWith(BASE));
+      ok('pressing add, opening the history and undoing an entry reach nothing off origin',
+        off.length === 0, off);
+      ok('nothing threw', nerrs.length === 0, nerrs);
+      await nctx.close();
+    }
+  }
+
   ok('no page errors through any of it', errs.length === 0, errs);
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);

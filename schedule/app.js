@@ -11754,6 +11754,22 @@
          costs the tracker its rows and never its entries: the
          entries are the half you cannot get back. */
       src: typeof raw.src === 'string' ? raw.src.slice(0, 40) : '',
+      /* ── A METRIC IS OPTIONAL, AND IT IS THE BUDGET'S OWN ARITHMETIC ──
+         A running total against a target, pointed at a goal or a
+         process instead of a category. Kept regardless of `n.k` — the
+         layout changes the drawing, never the record, so a metric set
+         on a goal survives a trip through Note and back. `g` and `st`
+         are hundredths, the budget's own unit, so a mistyped decimal
+         cannot drift the way a float sum would. */
+      mt: (raw.mt && typeof raw.mt === 'object') ? {
+        k: raw.mt.k === 'step' ? 'step' : 'bar',
+        lb: typeof raw.mt.lb === 'string' ? raw.mt.lb.slice(0, 24) : '',
+        u: typeof raw.mt.u === 'string' ? raw.mt.u.slice(0, 8) : '',
+        g: (typeof raw.mt.g === 'number' && isFinite(raw.mt.g) && raw.mt.g > 0)
+          ? Math.min(1e11, Math.round(raw.mt.g)) : 0,
+        st: (typeof raw.mt.st === 'number' && isFinite(raw.mt.st) && raw.mt.st > 0)
+          ? Math.min(1e9, Math.round(raw.mt.st)) : 0
+      } : null,
       l: []
     };
     var src = Array.isArray(raw.l) ? raw.l : [];
@@ -12821,6 +12837,313 @@
     });
   }
 
+  /* ═══════════════════════════
+     A GOAL OR A PROCESS CAN CARRY A METRIC
+
+     Neither kind has a number today — a goal is a statement and a
+     date, a process is a spine of steps — and asked what else could
+     help hit one, the answer that survived a real comparison sheet
+     was the budget's own arithmetic pointed somewhere else: entries
+     are the record, a total is derived from them, and a mis-press has
+     a way back through the entries rather than through the target.
+
+     BAR leads with a track against a target — cheapest, reuses the
+     budget's own bar, but only ever shows today's position. STEP
+     leads with the figure and a trend under it, the way Water and
+     Steps already read, so you can see whether you are accelerating
+     or stalling. Both were rendered side by side before either was
+     built, and both survived: which one fits is a property of the
+     goal, not a verdict on the mechanism.
+
+     ONE KEY, KEYED BY NOTE ID, next to `sched.bspend.v1` for the same
+     reason — a category's spending and a goal's progress are the same
+     shape, an amount and a date, and pointing the same storage at two
+     domains costs nothing a second key would not. Reached from
+     nowhere `scPushNow` walks: a metric is further down the road that
+     "a count may leave and a list may not" was written about than
+     almost anything else in this app, since even the LABEL you typed
+     stays on the phone. */
+  var MET_KEY = 'sched.ntmetric.v1';
+  /* Three hundred entries a note. A goal you press once a day for a
+     year is 365; the cap is there so a stuck finger cannot take the
+     key past the quota and every other note's metric with it. */
+  var MET_CAP = 300;
+  var metLog = null;
+
+  /* A damaged entry costs itself, never the note it belongs to — this
+     file's oldest rule about a stored shape, arriving a third time
+     after the budget's own log and the tally's ticks. */
+  function scMetClean(raw) {
+    var out = {};
+    if (!raw || typeof raw !== 'object') return out;
+    Object.keys(raw).forEach(function (id) {
+      var src = raw[id];
+      if (!Array.isArray(src)) return;
+      var keep = [];
+      for (var i = 0; i < src.length && keep.length < MET_CAP; i++) {
+        var e = src[i];
+        if (!e || typeof e !== 'object') continue;
+        var v = Math.round(+e.v);
+        if (!isFinite(v) || !v) continue;
+        keep.push({
+          i: typeof e.i === 'string' && e.i ? e.i : scNtId(),
+          t: (typeof e.t === 'number' && e.t > 0) ? e.t : Date.now(),
+          v: v
+        });
+      }
+      if (keep.length) out[id] = keep;
+    });
+    return out;
+  }
+  function scMetLoad() {
+    if (metLog) return metLog;
+    var raw = null;
+    try { raw = JSON.parse(localStorage.getItem(MET_KEY) || 'null'); } catch (e) {}
+    var was = JSON.stringify(raw && typeof raw === 'object' ? raw : {});
+    metLog = scMetClean(raw);
+    /* The repair is written back — this app has shipped a repair held
+       only in memory four times, and every one of them was redone
+       every boot and lost the moment anything else wrote the key. */
+    if (JSON.stringify(metLog) !== was) scMetSave();
+    return metLog;
+  }
+  function scMetSave() {
+    try { localStorage.setItem(MET_KEY, JSON.stringify(metLog || {})); } catch (e) {}
+  }
+  function scMetEnt(id) {
+    var L = scMetLoad();
+    return (L[id] || []).slice();
+  }
+  function scMetAdd(id, v) {
+    v = Math.round(v);
+    if (!id || !v) return null;
+    var L = scMetLoad();
+    if (!L[id]) L[id] = [];
+    if (L[id].length >= MET_CAP) return null;
+    var e = { i: scNtId(), t: Date.now(), v: v };
+    L[id].push(e);
+    scMetSave();
+    return e;
+  }
+  function scMetDrop(id, entId) {
+    var L = scMetLoad();
+    if (!L[id]) return false;
+    var a = L[id], q = -1;
+    for (var i = 0; i < a.length; i++) if (a[i].i === entId) { q = i; break; }
+    if (q < 0) return false;
+    a.splice(q, 1);
+    if (!a.length) delete L[id];
+    scMetSave();
+    return true;
+  }
+  function scMetClear(id) {
+    var L = scMetLoad();
+    if (L[id]) { delete L[id]; scMetSave(); }
+  }
+  function scMetTotal(id) {
+    var t = 0;
+    scMetEnt(id).forEach(function (e) { t += e.v; });
+    return t;
+  }
+  /* Fourteen days, oldest first, each floored at zero — a stepper's
+     correction can leave a day negative and a sparkline has no way to
+     draw a bar below its own axis. */
+  function scMetDays(id, days) {
+    var sums = {};
+    scMetEnt(id).forEach(function (e) {
+      var k = scDay(new Date(e.t));
+      sums[k] = (sums[k] || 0) + e.v;
+    });
+    var out = [], now = new Date();
+    for (var i = days - 1; i >= 0; i--) {
+      var k = scDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - i));
+      out.push({ k: k, v: Math.max(0, sums[k] || 0) });
+    }
+    return out;
+  }
+
+  /* Drawn as the unit's own figure, grouped thousands, the hundredths
+     dropped when they are zero — `scMoney`'s own rule, generalised
+     past dollars because a distance and a page count round the same
+     way. `$` is the one unit that goes in FRONT, because that is the
+     one everybody already reads that way. */
+  function scMetFmt(v) {
+    var neg = v < 0, a = Math.abs(Math.round(v));
+    var d = Math.floor(a / 100), r = a % 100;
+    var t = String(d).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    return (neg ? '-' : '') + t + (r ? '.' + (r < 10 ? '0' : '') + r : '');
+  }
+  function scMetOut(v) {
+    var n = parseFloat(String(v).replace(/[^0-9.\-]/g, ''));
+    return isFinite(n) && n > 0 ? Math.min(1e11, Math.round(n * 100)) : 0;
+  }
+  function scMetUnitStr(u, v) {
+    var fig = scMetFmt(v);
+    return u === '$' ? '$' + fig : fig + (u ? ' ' + u : '');
+  }
+  /* Unset falls to a twentieth of the target snapped to a round
+     figure — the budget's own `scBudStep`, one screen over, for the
+     same reason: a stuck-open control has to add something the first
+     time it is pressed, before anybody has said how much. */
+  function scMetStep(mt) {
+    if (mt.st > 0) return mt.st;
+    return scBudNice(Math.max(100, Math.round((mt.g || 10000) / 20)));
+  }
+
+  /* ── THE CARD DRAWS NOTHING UNTIL A TARGET IS SET ──
+     The kind and the label can be typed with nothing to show for it
+     yet, and a bar with no target or a trend with no target is a
+     control with nothing to press against. Silent absence rather than
+     a line explaining what to go and do in Edit — the house rule
+     against a new hint describing a control, and there is nothing
+     this one needs to say that the editor's own placeholders do not
+     already say. */
+  function scMetBody(host, n) {
+    var mt = n.mt;
+    if (!mt || !mt.g) return;
+    var total = scMetTotal(n.id), step = scMetStep(mt);
+    var wrap = scEl('div', 'nt-met');
+    if (mt.k === 'step') {
+      var stat = scEl('div', 'met-stat');
+      var figBtn = scEl('button', 'met-figbtn');
+      figBtn.type = 'button';
+      figBtn.setAttribute('aria-label', 'Review entries for '
+        + (mt.lb || 'this metric'));
+      figBtn.appendChild(scEl('b', null, scMetUnitStr(mt.u, total)));
+      figBtn.appendChild(scEl('span', 'met-of', 'of ' + scMetUnitStr(mt.u, mt.g)));
+      figBtn.addEventListener('click', function () { scMetHist(n); });
+      stat.appendChild(figBtn);
+      var days = scMetDays(n.id, 14);
+      var max = 1;
+      days.forEach(function (d) { if (d.v > max) max = d.v; });
+      var spark = scEl('div', 'met-spark');
+      spark.innerHTML = scTyArea(days.map(function (d) { return { v: d.v / max }; }));
+      stat.appendChild(spark);
+      wrap.appendChild(stat);
+
+      var stepper = scEl('div', 'met-stepper');
+      var minus = scEl('button', null, '−');
+      minus.type = 'button';
+      minus.setAttribute('aria-label', 'Subtract ' + scMetUnitStr(mt.u, step)
+        + ' from ' + (mt.lb || 'this metric'));
+      minus.addEventListener('click', function () {
+        scMetAdd(n.id, -step); scPaintNotes();
+      });
+      var mid = scEl('span', 'mid', '+ ' + scMetUnitStr(mt.u, step));
+      var plus = scEl('button', null, '+');
+      plus.type = 'button';
+      plus.setAttribute('aria-label', 'Add ' + scMetUnitStr(mt.u, step)
+        + ' to ' + (mt.lb || 'this metric'));
+      plus.addEventListener('click', function () {
+        scMetAdd(n.id, step); scPaintNotes();
+      });
+      stepper.appendChild(minus); stepper.appendChild(mid); stepper.appendChild(plus);
+      wrap.appendChild(stepper);
+    } else {
+      var row = scEl('div', 'met-row');
+      row.appendChild(scEl('span', 'lab', mt.lb || 'Progress'));
+      var fig = scEl('button', 'met-fig');
+      fig.type = 'button';
+      fig.setAttribute('aria-label', 'Review entries for ' + (mt.lb || 'this metric'));
+      fig.appendChild(document.createTextNode(scMetFmt(total)));
+      fig.appendChild(scEl('span', null, ' / ' + scMetUnitStr(mt.u, mt.g)));
+      fig.addEventListener('click', function () { scMetHist(n); });
+      row.appendChild(fig);
+      wrap.appendChild(row);
+
+      var track = scEl('div', 'met-track');
+      var fill = scEl('div', 'met-fill');
+      fill.style.width = Math.max(0, Math.min(100, (total / mt.g) * 100)) + '%';
+      track.appendChild(fill);
+      wrap.appendChild(track);
+
+      var addBtn = scEl('button', 'met-add', '+ Add ' + scMetUnitStr(mt.u, step));
+      addBtn.type = 'button';
+      addBtn.addEventListener('click', function () {
+        scMetAdd(n.id, step); scPaintNotes();
+      });
+      wrap.appendChild(addBtn);
+    }
+    host.appendChild(wrap);
+  }
+
+  /* ── THE ENTRIES ARE THE RECORD, AND A MIS-PRESS IS UNDONE HERE ──
+     Newest first, grouped by day, with the day's own total on the
+     heading — the tracker's own `scTrkEnts`, pointed at a metric's log
+     instead of a budget's. Reused rather than redrawn: `.bd-g` and
+     `.tk-lg` already are what a grouped, undoable log looks like in
+     this app. */
+  function scMetHist(n) {
+    var mt = n.mt;
+    scSheet((mt.lb || 'Metric') + ' entries', function (body) {
+      function paint() {
+        body.textContent = '';
+        var ents = scMetEnt(n.id).sort(function (a, b) { return b.t - a.t; });
+        if (!ents.length) {
+          body.appendChild(scEl('p', 'nt-none', 'Nothing logged yet.'));
+          return;
+        }
+        var byDay = {};
+        ents.forEach(function (e) {
+          var k = scDay(new Date(e.t));
+          (byDay[k] = byDay[k] || []).push(e);
+        });
+        Object.keys(byDay).sort().reverse().forEach(function (k) {
+          var list = byDay[k], sum = 0;
+          list.forEach(function (e) { sum += e.v; });
+          var sh = scEl('div', 'bd-g');
+          sh.appendChild(scEl('b', null, k === scDay() ? 'Today' : scBudDate(k)));
+          sh.appendChild(scEl('i', null,
+            list.length === 1 ? '1 entry' : list.length + ' entries'));
+          sh.appendChild(scEl('em', null,
+            (sum < 0 ? '− ' : '+ ') + scMetUnitStr(mt.u, Math.abs(sum))));
+          body.appendChild(sh);
+          list.forEach(function (e) {
+            var r = scEl('div', 'tk-lg');
+            var dot = scEl('u');
+            dot.style.background = scNtVar(scNoteHue(n));
+            r.appendChild(dot);
+            var w = scEl('div', 'x');
+            w.appendChild(scEl('span', 'n',
+              (e.v < 0 ? '− ' : '+ ') + scMetUnitStr(mt.u, Math.abs(e.v))));
+            w.appendChild(scEl('span', 't', new Date(e.t).toLocaleTimeString([],
+              { hour: 'numeric', minute: '2-digit' })));
+            r.appendChild(w);
+            var un = scBtn('tk-un', 'Undo', function () {
+              scMetDrop(n.id, e.i); scPaintNotes(); paint();
+            });
+            un.setAttribute('aria-label', 'Undo this entry');
+            r.appendChild(un);
+            body.appendChild(r);
+          });
+        });
+      }
+      paint();
+    });
+  }
+
+  /* ── REMOVING A METRIC ASKS, AND THERE IS NO BIN ──
+     The note's own rule: a bin protects a record you cannot rebuild,
+     and every entry pressed against a metric only ever lived in this
+     one key. The sentence stays — an irreversible action with no bin
+     behind it is one of the two things this app still explains. */
+  function scMetRemove(n) {
+    scSheet('Remove this metric?', function (body) {
+      body.appendChild(scEl('p', 'hint',
+        'Every entry logged against it goes too, and there is no bin for it.'));
+      var go = scBtn('go', 'Remove it', function () {
+        n.mt = null;
+        scMetClear(n.id);
+        n.u = Date.now(); scNoteFlush();
+        scClose(); scPaintNotes();
+      });
+      var row = scEl('div', 'lg-row');
+      row.appendChild(scBtn('', 'Keep it', scClose));
+      row.appendChild(go);
+      body.appendChild(row);
+    });
+  }
+
   /* ── ONE NOTE, TWO FACES ──
      This used to make a second note or find the one it had already
      made, and navigate to it — a tracker without a budget to read was
@@ -13375,6 +13698,95 @@
         bh.appendChild(lw);
         pane.appendChild(bh);
       }
+
+      /* ── A METRIC IS OPTIONAL ON A GOAL OR A PROCESS ──
+         Above the lines rather than woven into them, the budget's own
+         income and cycle fields' own place: a fact about the NOTE
+         rather than about any one line in it. Nothing is drawn until
+         you press it into existence, and the ghost stays a single
+         button rather than a form with nothing in it yet. */
+      if (n.k === 'goal' || n.k === 'proc') {
+        if (!n.mt) {
+          var metGo = scEl('button', 'nt-add', '+  Metric');
+          metGo.type = 'button';
+          metGo.addEventListener('click', function () {
+            n.mt = { k: 'bar', lb: '', u: '', g: 0, st: 0 };
+            n.u = Date.now(); scNoteFlush(); scPaintNotes();
+          });
+          pane.appendChild(metGo);
+        } else {
+          var mw = scEl('div', 'nt-mkind');
+          [['bar', 'Bar'], ['step', 'Trend']].forEach(function (pair) {
+            var b = scEl('button', 'nt-tool' + (n.mt.k === pair[0] ? ' is-on' : ''));
+            b.type = 'button';
+            b.textContent = pair[1];
+            b.setAttribute('aria-pressed', n.mt.k === pair[0] ? 'true' : 'false');
+            b.addEventListener('click', function () {
+              if (n.mt.k === pair[0]) return;
+              n.mt.k = pair[0]; n.u = Date.now(); scNoteFlush(); scPaintNotes();
+            });
+            mw.appendChild(b);
+          });
+          pane.appendChild(mw);
+
+          var mset = scEl('div', 'bd-set');
+          var mlw = scEl('label', 'bd-f');
+          mlw.appendChild(scEl('span', null, 'Tracking'));
+          var mli = scEl('input', 'nt-di');
+          mli.type = 'text'; mli.maxLength = 24; mli.placeholder = 'Distance';
+          mli.value = n.mt.lb;
+          mli.addEventListener('input', function () {
+            n.mt.lb = mli.value.slice(0, 24); n.u = Date.now(); scNoteSaveSoon();
+          });
+          mlw.appendChild(mli);
+          mset.appendChild(mlw);
+
+          var muw = scEl('label', 'bd-f');
+          muw.appendChild(scEl('span', null, 'Unit'));
+          var mui = scEl('input', 'nt-di');
+          mui.type = 'text'; mui.maxLength = 8; mui.placeholder = 'km';
+          mui.value = n.mt.u;
+          mui.addEventListener('input', function () {
+            n.mt.u = mui.value.slice(0, 8); n.u = Date.now(); scNoteSaveSoon();
+          });
+          muw.appendChild(mui);
+          mset.appendChild(muw);
+
+          var mgw = scEl('label', 'bd-f');
+          mgw.appendChild(scEl('span', null, 'Target'));
+          var mgi = scEl('input', 'nt-di');
+          mgi.type = 'text'; mgi.inputMode = 'decimal'; mgi.placeholder = '500';
+          mgi.value = n.mt.g ? scMetFmt(n.mt.g) : '';
+          mgi.addEventListener('input', function () {
+            n.mt.g = scMetOut(mgi.value); n.u = Date.now(); scNoteSaveSoon();
+          });
+          mgi.addEventListener('blur', function () {
+            mgi.value = n.mt.g ? scMetFmt(n.mt.g) : ''; scNoteFlush(); scPaintNotes();
+          });
+          mgw.appendChild(mgi);
+          mset.appendChild(mgw);
+
+          var msw = scEl('label', 'bd-f');
+          msw.appendChild(scEl('span', null, 'Each press adds'));
+          var msi = scEl('input', 'nt-di');
+          msi.type = 'text'; msi.inputMode = 'decimal'; msi.placeholder = '5';
+          msi.value = n.mt.st ? scMetFmt(n.mt.st) : '';
+          msi.addEventListener('input', function () {
+            n.mt.st = scMetOut(msi.value); n.u = Date.now(); scNoteSaveSoon();
+          });
+          msi.addEventListener('blur', function () {
+            msi.value = n.mt.st ? scMetFmt(n.mt.st) : ''; scNoteFlush();
+          });
+          msw.appendChild(msi);
+          mset.appendChild(msw);
+          pane.appendChild(mset);
+
+          var metRm = scEl('button', 'nt-rm', 'Remove this metric');
+          metRm.type = 'button';
+          metRm.addEventListener('click', function () { scMetRemove(n); });
+          pane.appendChild(metRm);
+        }
+      }
     }
 
     /* ── THE GUTTER IS RESERVED ON THE WHOLE NOTE, NOT PER LINE ──
@@ -13414,6 +13826,7 @@
         return;
       }
       if (n.k === 'proc') {
+        scMetBody(body, n);
         var sp2 = scEl('div', 'nt-sp');
         n.l.forEach(function (L) {
           if (L.h) {
@@ -13458,6 +13871,7 @@
           if (bits.length) mk.appendChild(scEl('div', 'nt-mk-w', bits.join(' \u00b7 ')));
           body.appendChild(mk);
         }
+        scMetBody(body, n);
         n.l.forEach(function (L, idx) {
           if (st0 && idx === 0) return;
           if (L.h) { body.appendChild(scEl('div', 'nt-gh', L.x)); return; }

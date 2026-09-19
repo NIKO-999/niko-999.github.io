@@ -6086,6 +6086,83 @@ body {
   text-decoration-color: color-mix(in srgb, var(--c) 70%, transparent);
   text-decoration-thickness: 1.5px;
 }
+
+/* ── A METRIC, ON A GOAL OR A PROCESS ──
+   The budget's own bar and the tally's own dial, pointed at whichever
+   of the two a goal turns out to be — a card of its own between the
+   marker (or the spine) and the rest, in the note's own colour rather
+   than a hue of its own, because it is a fact about THIS goal, not a
+   category that has to be told apart from six others. */
+.nt-met { margin: 12px 0 16px; }
+.nt-body.is-proc .nt-met { margin-top: 0; margin-bottom: 18px; }
+
+.met-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 7px; }
+.met-row .lab {
+  font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--c) 72%, var(--ink));
+}
+.met-fig {
+  border: 0; background: none; padding: 0; margin: 0;
+  font: inherit; font-size: 15px; font-weight: 700; color: var(--ink);
+  font-variant-numeric: tabular-nums; cursor: pointer;
+}
+.met-fig span { font-weight: 500; color: var(--dim); }
+.met-fig:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.met-track {
+  height: 7px; border-radius: 99px;
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+  overflow: hidden; margin-bottom: 10px;
+}
+.met-fill { height: 100%; border-radius: 99px; background: var(--c); }
+.met-add {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: 0; border-radius: 999px; padding: 7px 13px 7px 11px;
+  background: color-mix(in srgb, var(--c) 16%, transparent);
+  color: var(--c);
+  font: inherit; font-size: 12.5px; font-weight: 650; cursor: pointer;
+}
+.met-add:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+/* Trend leads with the figure, the way Water and Steps already do,
+   and the sparkline is `scTyArea` — the tally's own area chart — with
+   the fill and stroke retargeted from the ink to the note's own hue,
+   so it reads as this goal's line rather than a borrowed one. */
+.met-stat { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.met-figbtn {
+  border: 0; background: none; padding: 0; margin: 0; text-align: left; cursor: pointer;
+  display: block;
+}
+.met-figbtn b {
+  display: block; font-size: 24px; font-weight: 700; line-height: 1;
+  font-variant-numeric: tabular-nums; color: var(--ink);
+}
+.met-figbtn .met-of { font-size: 12px; font-weight: 500; color: var(--dim); display: block; margin-top: 4px; }
+.met-figbtn:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.met-spark { position: relative; width: 118px; height: 38px; flex: none; }
+.met-spark .ty-ar .f { fill: color-mix(in srgb, var(--c) 20%, transparent); }
+.met-spark .ty-ar .s { stroke: var(--c); }
+.met-stepper {
+  display: flex; align-items: center; justify-content: center; gap: 18px;
+  background: color-mix(in srgb, var(--ink) 4.5%, transparent);
+  border-radius: 12px; padding: 9px 12px;
+}
+.met-stepper button {
+  width: 28px; height: 28px; border-radius: 50%; border: 0;
+  background: color-mix(in srgb, var(--ink) 9%, transparent); color: var(--ink);
+  font: inherit; font-size: 16px; font-weight: 600; line-height: 1;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.met-stepper button:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.met-stepper .mid {
+  font-size: 13px; font-weight: 700; color: var(--c);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The editor's own kind chips, `.nt-tool` reused so a Bar/Trend choice
+   reads exactly like a Tab/Bracket/Dot one — one pill system rather
+   than a second. */
+.nt-mkind { display: flex; gap: 6px; margin: 2px 0 10px; }
+
 /* The clause is a NOTE's fact — the other two layouts draw a heading
    as one label, so a field for a second half would be a control whose
    effect you cannot see. */
