@@ -11425,6 +11425,11 @@ this key to a push at all.
 
 ## Showing up is the calendar's third stop
 
+**THIS STOP IS GONE — see "Showing up is gone from the calendar" at
+the foot of this file.** Everything below is the reasoning it was
+built on, kept because half of it is about the CELL mechanism the
+other two stops still use.
+
 Tasks and Workouts already answer "what is this month about" as a
 stop rather than a second screen, because only one record fits a
 50px cell at a time. Showing up is the third answer, not a fourth
@@ -11472,3 +11477,38 @@ sizes, on two screens — the duplication this project keeps taking
 back out. The cell is where you find WHICH days; pressing one is
 where you read what happened on it. The pill went back to a bare
 name.
+
+## Showing up is gone from the calendar
+
+Asked for in one line: the metrics are already on, so a third stop
+reading the tally back is a fourth place carrying a fact the app
+already says twice. `CAL_WHAT` is `['task', 'work']` now, `scCalPills`
+has one branch left besides Tasks', `#scCalUp` is gone from the
+markup, and a stored `'up'` falls through to `'task'` the way a stored
+value this build does not have always has here — the list is written
+out rather than trusted, so nothing is stranded.
+
+**WHAT IT WAS READING BACK WAS NEVER ONLY HERE.** The day sheet's own
+"Logged" line already prints every ticked item by name and its value,
+and the tally screen is one tab away for the shape of a month at a
+glance — a streak, a share, a history wall per item. The calendar's
+own hue dots were the third drawing of a fact the app already carries
+in two places built for it, which is the same duplication the pill's
+own figure was taken back out for a page earlier in this file.
+
+**TASKS' `!c.on.length` GATE IS THE ONLY QUIET RULE LEFT**, so the
+carve-out for "Showing up's own quiet is about range, never about
+blocks" went with the stop it was carved out for — there is no longer
+a second denominator in `scCalMonth` for it to disagree with.
+
+**AND THE TRACK AT THE CELL'S FOOT IS TASKS' ALONE AGAIN.** It read
+`c.ticks / c.items` on this stop and `c.kept / c.on.length` on the
+other; with one stop left needing a share at all, the ternary is the
+one formula. Workouts still draws none, for the reason it always
+did — a session has no denominator to be a share of.
+
+`tests/schedule.js` lost the `clStop.up` half of "TWO QUESTIONS, TWO
+CONTROLS" and the whole of "SHOWING UP'S OWN QUIET IS ABOUT RANGE,
+NEVER ABOUT BLOCKS" — a fixture built to prove a gate that no longer
+exists. What is left asserts two stops fit one row rather than three,
+which is the same measurement on the row that remains.

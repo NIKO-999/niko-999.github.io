@@ -14679,7 +14679,7 @@
      build does not have falls through to the first, which is the rule
      `sched.view.v1` and `sched.ty.v1` already keep — the list is
      written out rather than trusted. */
-  var CAL_WHAT = ['task', 'work', 'up'], CAL_MODE = ['month', 'list'];
+  var CAL_WHAT = ['task', 'work'], CAL_MODE = ['month', 'list'];
   var CALW_KEY = 'sched.calw.v1', CALM_KEY = 'sched.calm.v1';
   var calWhat = 'task', calMode = 'month';
   try {
@@ -14724,11 +14724,10 @@
      is therefore the only thing a month can be about, is what you
      actually did.
 
-     SHOWING UP IS THE THIRD ANSWER TO WHAT A MONTH IS ABOUT, not a
-     fourth register squeezed into the same fifty pixels. A tally item
-     has no schedule to repeat, so there is nothing here to filter the
-     way Tasks filters the template — every item is on every day, and
-     what changes is only which of them you logged. */
+     SHOWING UP IS GONE FROM HERE — see the note at the foot of this
+     file. Its hue dots are the day sheet's own "Logged" line now,
+     which already reads `c.did` the same pills would have, one press
+     away rather than squeezed into fifty pixels. */
   function scCalPills(c) {
     var out = [];
     if (calWhat === 'work') {
@@ -14736,26 +14735,6 @@
         var wr = scTrainOf(c.day, b.id);
         var w0 = wr && scWorkoutsOf(wr.k)[0];
         if (w0) out.push({ n: w0.n, tg: scWoTone(wr.k) });
-      });
-    } else if (calWhat === 'up') {
-      /* THE HUE DOTS CAME BACK, AS A STOP RATHER THAN A LAYER.
-         They went because three registers do not fit one 50px
-         cell; a third STOP costs nothing, since only one of the
-         three is ever drawn at once. `c.did` is the same list the
-         day sheet's own "Logged" line already reads, and each pill
-         is the item's own colour — the one its tag wears on Today
-         and on its own history wall.
-
-         AND THE PILL STAYS A BARE NAME, ON PURPOSE. A figure was
-         tried here — riding the name the way the Logged line writes
-         it — and taken back out: the cell is where you find WHICH
-         days, and the day sheet already opens on press with every
-         item's name AND its value. Two places drawing the same
-         number is the duplication this project keeps taking back
-         out, so the pill only ever says which, and pressing the
-         day is where all of it reads. */
-      c.did.forEach(function (it) {
-        out.push({ n: it.n, tg: scTagHue(it) });
       });
     } else {
       c.on.forEach(function (b) {
@@ -14900,19 +14879,12 @@
                day-off dot's own answer: a day with nothing to say is
                the same neutral drawn short rather than a hole in the
                grid or a third colour inventing a judgement. */
-            /* Items are asked every day — there is no per-day
-               schedule for one the way a block has, so a tally item
-               is never "off" — so Showing up's own quiet is only
-               ever about being out of range, never about the day's
-               block count. */
-            var quiet = day > today || day < from
-              || (calWhat !== 'up' && !c.on.length);
+            var quiet = day > today || day < from || !c.on.length;
             var b = scEl('button', 'cl-c' + (day === today ? ' is-now' : '')
               + (quiet ? ' is-quiet' : ''));
             b.type = 'button';
             b.dataset.day = day;
-            var share = calWhat === 'up' ? (c.items ? c.ticks / c.items : 0)
-              : (c.on.length ? c.kept / c.on.length : 0);
+            var share = c.on.length ? c.kept / c.on.length : 0;
             /* -- THE DATE IN A CORNER, ITS MARKS UNDER IT, A RULE AT
                    THE FOOT --
                Ten treatments were drawn over the real month at 390x844
@@ -14971,10 +14943,8 @@
                way, so there is no hole to leave. */
             /* AND NEVER ON WORKOUTS. A session has no denominator to
                be a share OF, so a track there would be a mark with
-               nothing behind it. Showing up has one — the same count
-               the tile itself divides by — which is what makes it
-               the second stop to earn a track rather than the third
-               register the hue dots already tried and lost. */
+               nothing behind it — Tasks is the one stop left with
+               one, the kept fraction of what the day asked for. */
             if (!quiet && calWhat !== 'work') {
               var tr = scEl('span', 'cl-b');
               var fill = scEl('i');
@@ -15043,7 +15013,6 @@
     if (!n) {
       body.appendChild(scEl('p', 'mn-say',
         calWhat === 'work' ? 'No sessions logged this month'
-          : calWhat === 'up' ? 'Nothing logged this month'
           : 'Nothing kept this month'));
       return;
     }
