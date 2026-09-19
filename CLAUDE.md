@@ -11432,3 +11432,15 @@ about blocks that has nothing to do with the record this stop reads.
 ticked on it never had anything to keep in the first place, so the
 list view's empty state says so in words for the record it is
 actually the record of.
+
+**THE FIGURE RODE THE NAME FOR A DAY, AND CAME BACK OUT.** `scWvFig`
+went into the pill — `8,420` down to `8.4k` beside Steps, a tick
+staying bare — on the reasoning that a block-pill can never say a
+number, so this stop should. That was solving a problem the app had
+already solved one press away: the cell already opens the day sheet,
+and the sheet's own Logged line already prints every item's name AND
+its value. A figure in the 50px pill was the same fact twice, at two
+sizes, on two screens — the duplication this project keeps taking
+back out. The cell is where you find WHICH days; pressing one is
+where you read what happened on it. The pill went back to a bare
+name.

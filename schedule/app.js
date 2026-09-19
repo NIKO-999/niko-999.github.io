@@ -14928,7 +14928,16 @@
          three is ever drawn at once. `c.did` is the same list the
          day sheet's own "Logged" line already reads, and each pill
          is the item's own colour — the one its tag wears on Today
-         and on its own history wall. */
+         and on its own history wall.
+
+         AND THE PILL STAYS A BARE NAME, ON PURPOSE. A figure was
+         tried here — riding the name the way the Logged line writes
+         it — and taken back out: the cell is where you find WHICH
+         days, and the day sheet already opens on press with every
+         item's name AND its value. Two places drawing the same
+         number is the duplication this project keeps taking back
+         out, so the pill only ever says which, and pressing the
+         day is where all of it reads. */
       c.did.forEach(function (it) {
         out.push({ n: it.n, tg: scTagHue(it) });
       });

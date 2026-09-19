@@ -16073,9 +16073,12 @@ const SAID = [
       && clStop.task.on === 'task' && clStop.work.on === 'work', clStop);
     /* ── AND SHOWING UP IS THE THIRD, READING `c.did` RATHER THAN THE
            TEMPLATE OR A SESSION ──
-       Train (t) and Steps (p) are the two ticks the fixture logs on
+       Train (t) and Steps (p) are the two items the fixture logs on
        the 10th — `sched.tick.v1`'s own `{ t: 1, p: '8420' }` — so a
-       stop reading anything else is reading the wrong record. */
+       stop reading anything else is reading the wrong record. The
+       pill is a bare name: a figure was tried here and taken back
+       out, because pressing the day already opens the sheet's own
+       Logged line with every item's name and its value. */
     ok('Showing up is a third record of the same month',
       clStop.up.pills.join(',') === 'Train,Steps' && clStop.up.on === 'up',
       clStop.up);
