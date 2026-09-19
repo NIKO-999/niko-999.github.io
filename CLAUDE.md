@@ -11394,3 +11394,41 @@ the road that "a count may leave and a list may not" was written
 about than almost anything else here — even the word you typed into
 Tracking never reaches the network, because there is no path from
 this key to a push at all.
+
+## Showing up is the calendar's third stop
+
+Tasks and Workouts already answer "what is this month about" as a
+stop rather than a second screen, because only one record fits a
+50px cell at a time. Showing up is the third answer, not a fourth
+register squeezed in beside them: press it and the grid reads the
+tally instead of the blocks or the sessions, and nothing about the
+cell's own drawing had to be invented to say so — a pill in the
+item's own colour and a rule at the foot are already what Tasks
+draws, just fed a different record.
+
+**IT READS `c.did`, THE SAME LIST THE DAY SHEET'S OWN "LOGGED" LINE
+ALREADY READS.** The hue dots tried this once as a THIRD LAYER on
+every cell and were removed for it — three registers do not fit one
+50px square. A third STOP costs nothing, because only one of the
+three a cell can say is ever drawn at once; what went was the
+layering, not the idea.
+
+**AND ITS TRACK HAS A DENOMINATOR TASKS DOES NOT SHARE WITH
+WORKOUTS.** A session has nothing to be a share OF, which is why that
+stop alone draws no rule at the cell's foot. An item logged is a
+share of the day's own items — the same count the tally tile already
+divides by — so Showing up earns the track Tasks has, on its own
+arithmetic rather than borrowed.
+
+**QUIET IS ABOUT RANGE HERE, NEVER ABOUT BLOCKS.** Tasks is right to
+dim a day where every block is off — there was nothing on the
+schedule to keep. An item has no per-day schedule to be off from; it
+is asked every day, so a day you logged something on while every
+block sat off is not a day this stop has nothing to say about. Task's
+own `!c.on.length` gate would have called it quiet anyway, on a fact
+about blocks that has nothing to do with the record this stop reads.
+
+**AND "NOTHING KEPT" IS A CLAIM ABOUT BLOCKS.** A month with nothing
+ticked on it never had anything to keep in the first place, so the
+list view's empty state says so in words for the record it is
+actually the record of.

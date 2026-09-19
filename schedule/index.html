@@ -223,19 +223,21 @@
        shape, and a month with a day drawn under it would be two
        records of one thing on one screen. -->
   <section class="cal" id="scCal" hidden>
-    <!-- ── TWO STOPS, WHICH IS THE CONTROL TODAY AND FRIENDS ALREADY
+    <!-- ── THREE STOPS, WHICH IS THE CONTROL TODAY AND FRIENDS ALREADY
              USE ──
-         Tasks and Workouts are two records of the same month and only
-         one of them can be on a 50px cell at a time, so the choice is
-         a stop rather than a second screen. The other question on this
-         tab — month or list — rides the month row beside the arrows,
-         because it changes how that grid is drawn and this changes
-         WHAT is on it. -->
+         Tasks, Workouts and Showing up are three records of the same
+         month and only one of them can be on a 50px cell at a time, so
+         the choice is a stop rather than a second screen. The other
+         question on this tab — month or list — rides the month row
+         beside the arrows, because it changes how that grid is drawn
+         and this changes WHAT is on it. -->
     <nav class="fr-seg" id="scCalStops" aria-label="Calendar">
       <button class="fr-stop on" id="scCalTask" data-calstop="task"
               aria-current="true">Tasks</button>
       <button class="fr-stop" id="scCalWork" data-calstop="work"
               aria-current="false">Workouts</button>
+      <button class="fr-stop" id="scCalUp" data-calstop="up"
+              aria-current="false">Showing up</button>
     </nav>
     <div id="scCalPane"></div>
   </section>
@@ -349,6 +351,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=571e7393"></script>
+<script src="app.js?v=0f57c92b"></script>
 </body>
 </html>

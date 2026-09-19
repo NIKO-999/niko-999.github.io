@@ -15991,6 +15991,8 @@ const SAID = [
           .find((x) => x.dataset.day === '2026-09-10');
         return {
           pills: c ? [...c.querySelectorAll('.cl-p')].map((e) => e.textContent) : null,
+          pillsTg: c ? [...c.querySelectorAll('.cl-p')]
+            .map((e) => e.style.getPropertyValue('--tg')) : null,
           rule: !!(c && c.querySelector('.cl-b')),
           rows: document.querySelectorAll('#scCalPane .cl-lr').length,
           grid: document.querySelectorAll('#scCalPane .cl-grid').length,
@@ -16001,6 +16003,19 @@ const SAID = [
       document.getElementById('scCalWork').click();
       await new Promise((z) => setTimeout(z, 320));
       out.work = read();
+      /* ── SHOWING UP IS THE THIRD STOP, NEVER A FOURTH REGISTER ──
+         The hue dots went because three registers do not fit one 50px
+         cell; this is the same records read on a stop rather than
+         layered onto the two that already exist. */
+      document.getElementById('scCalUp').click();
+      await new Promise((z) => setTimeout(z, 320));
+      out.up = read();
+      out.stopsRow = [...document.querySelectorAll('#scCalStops .fr-stop')]
+        .map((b) => {
+          const r = b.getBoundingClientRect();
+          return { top: Math.round(r.top), h: Math.round(r.height),
+            left: Math.round(r.left), right: Math.round(r.right) };
+        });
       /* Back to Tasks before the list is read, because the list draws
          whichever record the stop is on and this check is about a
          BLOCK's name being too long for a cell. */
@@ -16056,12 +16071,34 @@ const SAID = [
       clStop.task.pills.join(',') === 'Wake,Train'
       && clStop.work.pills.join(',') === 'Push'
       && clStop.task.on === 'task' && clStop.work.on === 'work', clStop);
-    /* ── AND THE KEPT RULE IS TASKS' ALONE ──
-       It is the share of the day's BLOCKS you kept. On the workouts
-       stop there is no denominator for it to be a share of, so a track
-       there would be a mark with nothing behind it. */
-    ok('...and the kept rule belongs to the blocks, not the sessions',
-      clStop.task.rule === true && clStop.work.rule === false, clStop);
+    /* ── AND SHOWING UP IS THE THIRD, READING `c.did` RATHER THAN THE
+           TEMPLATE OR A SESSION ──
+       Train (t) and Steps (p) are the two ticks the fixture logs on
+       the 10th — `sched.tick.v1`'s own `{ t: 1, p: '8420' }` — so a
+       stop reading anything else is reading the wrong record. */
+    ok('Showing up is a third record of the same month',
+      clStop.up.pills.join(',') === 'Train,Steps' && clStop.up.on === 'up',
+      clStop.up);
+    ok('...and each pill carries its OWN item colour, not one shared',
+      clStop.up.pillsTg.length === 2 && !!clStop.up.pillsTg[0]
+      && !!clStop.up.pillsTg[1] && clStop.up.pillsTg[0] !== clStop.up.pillsTg[1],
+      clStop.up.pillsTg);
+    /* ── AND THE KEPT RULE IS TASKS' ALONE, AND SHOWING UP'S TOO ──
+       It is the share of the day's BLOCKS you kept, or of the day's
+       ITEMS you logged — Showing up has a denominator the same way
+       Tasks does. On the workouts stop there is none: a session has
+       nothing to be a share OF, so a track there would be a mark with
+       nothing behind it. */
+    ok('...and the kept rule belongs to blocks and items, not sessions',
+      clStop.task.rule === true && clStop.up.rule === true
+      && clStop.work.rule === false, clStop);
+    ok('...and three stops fit one row without overlapping',
+      clStop.stopsRow.length === 3
+      && clStop.stopsRow.every((s) => s.top === clStop.stopsRow[0].top
+        && s.h === clStop.stopsRow[0].h)
+      && clStop.stopsRow[0].right <= clStop.stopsRow[1].left
+      && clStop.stopsRow[1].right <= clStop.stopsRow[2].left,
+      clStop.stopsRow);
     /* Both directions, because "the list drew" passes on a build that
        drew it beside the grid rather than instead of it. */
     ok('Month or List draws one of the two, never both',
@@ -16088,6 +16125,105 @@ const SAID = [
       clOff.length === 0, clOff.slice(0, 4));
     ok('nothing threw through the calendar', clerrs.length === 0, clerrs.slice(0, 4));
     await clctx.close();
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     SHOWING UP'S OWN QUIET IS ABOUT RANGE, NEVER ABOUT BLOCKS
+
+     A tally item has no per-day schedule the way a block has one — it
+     is asked every day — so reusing Tasks' own `!c.on.length` unchanged
+     would have dimmed a day where every block is off but something was
+     still logged, on the argument that nothing was on. What fails
+     silently: a build that keeps the old gate reads exactly right on
+     an ordinary day and only shows its fault on the one day nothing
+     was scheduled at all — which is the shape this file has already
+     written down more than once.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    const upctx = await browser.newContext(PHONE);
+    const uppage = await upctx.newPage();
+    const uperrs = [];
+    uppage.on('pageerror', (e) => uperrs.push(String(e)));
+    uppage.on('console', (m) => { if (m.type() === 'error') uperrs.push(m.text()); });
+
+    await uppage.addInitScript(() => {
+      const FROZEN = new Date('2026-09-17T16:20:00').getTime(); // a Thursday
+      const R = Date;
+      // eslint-disable-next-line no-global-assign
+      Date = class extends R {
+        constructor(...a) { super(...(a.length ? a : [FROZEN])); }
+        static now() { return FROZEN; }
+      };
+      if (!localStorage.getItem('sched.v1')) {
+        localStorage.setItem('sched.v1', JSON.stringify({ title: 'Week', items: [
+          { id: 'blk1', d: 4, s: 420, e: 480, r: '', n: 'Gym' }
+        ] }));
+        localStorage.setItem('sched.tick.v1', JSON.stringify({
+          '2026-09-17': { t: 1 } }));
+        /* Every block the day asked for is off, so Tasks has nothing
+           to call kept — and Showing up must not inherit that. */
+        localStorage.setItem('sched.off.v1', JSON.stringify({
+          '2026-09-17': { blk1: 1 } }));
+      }
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1', JSON.stringify({
+          on: false, url: window.location.origin + '/schedule/nofriends',
+          code: '' }));
+      }
+      if (!localStorage.getItem('sched.tour.v1')) {
+        localStorage.setItem('sched.tour.v1', '1');
+      }
+    });
+    await uppage.route(`${BASE}/schedule/nofriends/**`, (r) => r.fulfill({
+      status: 200, contentType: 'application/json', body: '{"ok":true}' }));
+    await uppage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await uppage.waitForTimeout(420);
+
+    const upOut = await uppage.evaluate(async () => {
+      document.querySelector('.tab[data-view="cal"]').click();
+      await new Promise((z) => setTimeout(z, 300));
+      document.getElementById('scCalUp').click();
+      await new Promise((z) => setTimeout(z, 200));
+      const cellOf = () => document.querySelector('.cl-c[data-day="2026-09-17"]');
+      const up = cellOf();
+      const upQuiet = up.classList.contains('is-quiet');
+      const upPills = [...up.querySelectorAll('.cl-p')].map((e) => e.textContent);
+      document.getElementById('scCalTask').click();
+      await new Promise((z) => setTimeout(z, 200));
+      const taskQuiet = cellOf().classList.contains('is-quiet');
+      return { upQuiet, upPills, taskQuiet };
+    });
+    ok('an all-off day is quiet on Tasks, where there was nothing to keep',
+      upOut.taskQuiet === true, upOut);
+    ok('...and not quiet on Showing up, where the day asked for it anyway',
+      upOut.upQuiet === false && upOut.upPills.join(',') === 'Train', upOut);
+
+    /* ── AND AN EMPTY MONTH SAYS SO IN ITS OWN WORDS ──
+       "Nothing kept" is a claim about blocks; a month with nothing
+       ticked on it never had anything to keep in the first place.
+       Reloaded through Playwright's own navigation rather than a
+       `location.reload()` called from inside an `evaluate` that then
+       keeps running — the exact trap this file has already written up
+       once, where the execution context is destroyed mid-await. */
+    await uppage.evaluate(() => localStorage.removeItem('sched.tick.v1'));
+    await uppage.reload({ waitUntil: 'networkidle' });
+    await uppage.waitForTimeout(420);
+    const upMsg = await uppage.evaluate(async () => {
+      document.querySelector('.tab[data-view="cal"]').click();
+      await new Promise((z) => setTimeout(z, 250));
+      document.getElementById('scCalUp').click();
+      await new Promise((z) => setTimeout(z, 150));
+      document.querySelector('#scCalPane .cl-v').click();
+      await new Promise((z) => setTimeout(z, 150));
+      const p = document.querySelector('#scCalPane .mn-say');
+      return p ? p.textContent : null;
+    });
+    ok('an empty month on Showing up says so in its own words',
+      upMsg === 'Nothing logged this month', upMsg);
+
+    ok('nothing threw across Showing up’s own stop', uperrs.length === 0,
+      uperrs.slice(0, 4));
+    await upctx.close();
   }
 
   /* ══════════════════════════════════════════════════════════════
