@@ -12375,3 +12375,69 @@ reaches 44, and two pixels of separation between things. What is left
 in the bar is a 20px glyph, a 9.5px label and 44px of target. There
 is no number left in either that is not one of those three, which is
 the honest end of this rather than a place to stop.
+
+### A floor cannot see a reach landing in a neighbour
+
+The suite caught the pass above with one failure, and it is the most
+useful one this exercise produced: on the calendar, the Month/List
+toggle owned **42** of its own 44.
+
+**TWO CUTS THAT WERE EACH FREE ON THEIR OWN.** `.fr-stop` padding went
+6 to 5 — two pixels off the drawing, paid for by taking the claimed
+box from -8 to -10 — and `.fr-seg`'s foot went 8 to 6. Neither moved
+the stop's own reach by a pixel and together they overran it by two:
+the reach asks for ten below and only eight was left. On Today what
+is under a stop is a heading, so it cost nothing anybody could press;
+on the calendar it is a 44px toggle, so **a press aimed at Month
+arrived at Workouts** — which is the exact fault that toggle's own
+comment was written about, arriving from the other side.
+
+**THE GAP UNDER A CONTROL THAT REACHES IS PART OF THE CONTROL.** That
+is the rule the two cuts broke without either of them touching it,
+and it is why it is written on `.fr-seg` rather than left implied.
+
+**THE REACH IS ASYMMETRIC NOW, BECAUSE THE ROOM IS.** Above a stop is
+the head's own padding, which nothing draws in; below it the next
+control begins. Six pairs were swept against every control on three
+views: **-14/-6 costs no layout at all and takes four pixels off the
+head's face tile**, -12/-6 takes three, -11/-7 takes one. `-10/-8`
+with the segment's foot back at 8 is the only one where nothing
+anywhere is worse — the stops own 45, the toggle gets its unclipped
+45, and the tile keeps all of its own. Two pixels come back, and they
+come back in a gap rather than in the drawing: 26 drawn reads slimmer
+than 28, and nobody sees a margin.
+
+**AND THE CHECK THAT MISSED IT WAS READING A FLOOR.** Every assertion
+about the drawing-and-target split asks *does this control own 44* —
+and both controls did, the whole time. What no check asked is whether
+a control owns **its own drawing**, which is the question the fault is
+actually about. It is asserted on every view now: no control loses a
+pixel of its own band to the part of another that lies outside its own
+box.
+
+**EVERY ROW OF THE BAND, NEVER A SAMPLE.** The first cut read three
+rows — top plus two, the middle, bottom less two — and reported the
+broken build as CLEAN, because the fault is two pixels deep and `t +
+2` rounds past it. **Fourth time this file has recorded a check wrong
+about WHERE it looks**, after the Pattern axis, the almanac's ground
+and the dial's own offset, and the first time the narrowing that
+blinded it was one I had just written to remove a false positive.
+
+**THREE NARROWINGS, AND EACH IS A CLAIM RATHER THAN A RELAXATION.** A
+control that cannot be pressed cannot be robbed — the row's pencil is
+`opacity: 0` and `pointer-events: none` until edit is armed, which the
+first sweep reported as forty faults. `getBoundingClientRect` reports
+a box whether or not an ancestor is clipping it, so the tally's add
+control read as sitting under the bar while its own pane had clipped
+it away. And **a control that genuinely SITS on another is a
+composition, not a reach**: the water tile's stepper is three siblings
+laid over its card, so what is flagged is only a pixel taken from
+outside the robber's own box. A pixel and a half of slack at a seam,
+because two stacked rows meet at a fractional boundary and the row on
+it belongs to one or the other by rounding — the fault this exists for
+is nine pixels clear of any seam.
+
+**AND THE CALENDAR WAS IN NEITHER SWEEP.** The sideways-scroll check
+visits week, today, notes and friends; the calendar is the one view
+where a 44px control sits directly beneath the stops, and it was in no
+list. It is in this one.

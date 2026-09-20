@@ -2530,7 +2530,7 @@ const SAID = [
   })();
   ok('the bar draws thinner than the target it hands a thumb',
     slim.week.tabs.length === 5 && slim.week.tabs.every((t) => t.drawn <= 42)
-    && slim.week.prime <= 48 && slim.week.bar <= 70, slim.week);
+    && slim.week.prime === 44 && slim.week.bar <= 70, slim.week);
   ok('...and every tab still OWNS the 44px floor',
     slim.week.tabs.every((t) => t.owns >= 44), slim.week.tabs);
   ok('the stops draw thinner than the target they hand a thumb',
@@ -10515,6 +10515,99 @@ const SAID = [
       && after.rows > 0, after);
     ok('and the week still scrolls in one direction only',
       stillFits.over.length === 0 && stillFits.doc <= 1, stillFits);
+
+    /* ── AND NO CONTROL'S REACH LANDS IN ANOTHER'S DRAWING ──
+       Half the press targets in this app are bigger than the thing
+       they draw: a 26px stop, a 26px pencil, a dot in a gutter, each
+       claiming the 44 a thumb needs through a pseudo-element. Every
+       check on that until now read a FLOOR — does this control own 44
+       — and a floor cannot see the fault that actually shipped. The
+       stops went two pixels shorter and the gap under them two pixels
+       tighter, each free on its own, and together the stop's reach
+       took the top two rows of the month row's own toggle: a press
+       aimed at Month arrived at Workouts, with both controls still
+       owning their 44.
+
+       EVERY ROW OF THE BAND, never a sample. The first cut read three
+       — top plus two, the middle, bottom less two — and stepped clean
+       over a fault two pixels deep, which is this file's own "wrong
+       about WHERE it looks" a fourth time.
+
+       Three narrowings, and each is a claim rather than a relaxation.
+       A control that cannot be pressed cannot be robbed, so the row's
+       pencil — opacity 0 and pointer-events none until edit is armed —
+       is not in the set. `getBoundingClientRect` reports a box whether
+       or not an ancestor is clipping it, so the band is cut to every
+       scroller above. And a control that genuinely SITS on another is
+       a composition rather than a reach: the water tile's stepper is
+       three siblings laid over its card, so what is flagged is a pixel
+       taken by the part of a control lying OUTSIDE its own box. A
+       pixel and a half of slack at a seam, because two stacked rows
+       meet at a fractional boundary and the row on it is one or the
+       other by rounding — the fault this is for is nine pixels clear
+       of any seam.
+
+       THE CALENDAR IS IN THIS LIST AND IS NOT IN THE ONE ABOVE, which
+       is most of why this went unseen: it is the one view where a
+       44px control sits directly beneath the stops. */
+    const robbed = [];
+    let seenCtrls = 0;
+    for (const [name, sel] of [['week', '#scTabWeek'], ['today', '#scTabTally'],
+                               ['calendar', '#scTabCal'], ['notes', '#scTabNotes'],
+                               ['friends', '#scTabFriends']]) {
+      const hit = await opage.evaluate((q) => {
+        const b = document.querySelector(q);
+        if (!b) return false;
+        b.click();
+        return true;
+      }, sel);
+      if (!hit) { robbed.push([name, 'NO TAB']); continue; }
+      await opage.waitForTimeout(460);
+      const found = await opage.evaluate(() => {
+        const nmOf = (e) => e.tagName.toLowerCase() + (e.id ? '#' + e.id : '')
+          + (typeof e.className === 'string' && e.className
+            ? '.' + e.className.trim().split(/\s+/)[0] : '');
+        const live = (e) => { const c = getComputedStyle(e);
+          return c.pointerEvents !== 'none' && c.visibility !== 'hidden'
+            && +c.opacity > 0.05; };
+        const band = (e) => {
+          const b = e.getBoundingClientRect();
+          let t = b.top, bo = b.bottom;
+          for (let q = e.parentElement; q; q = q.parentElement) {
+            const c = getComputedStyle(q);
+            if (c.overflowY === 'visible' && c.overflowX === 'visible') continue;
+            const qb = q.getBoundingClientRect();
+            t = Math.max(t, qb.top); bo = Math.min(bo, qb.bottom);
+          }
+          return { t, b: bo, cx: b.left + b.width / 2 };
+        };
+        const ctrls = [...document.querySelectorAll('button, [role="switch"], input')]
+          .filter((e) => { const b = e.getBoundingClientRect();
+            return e.getClientRects().length && b.width >= 8 && b.height >= 8
+              && !e.disabled && live(e); });
+        const up = (e) => { while (e) { if (ctrls.includes(e)) return e;
+          e = e.parentElement; } return null; };
+        const out = [];
+        for (const t of ctrls) {
+          const c = band(t);
+          if (c.b - c.t < 8) continue;
+          for (let y = Math.ceil(c.t); y < c.b; y++) {
+            const h = up(document.elementFromPoint(Math.round(c.cx), Math.round(y)));
+            if (!h || h === t || t.contains(h) || h.contains(t)) continue;
+            const hb = h.getBoundingClientRect();
+            if (y >= hb.top - 1.5 && y < hb.bottom + 1.5) continue;
+            out.push(nmOf(t) + ' loses ' + Math.round(y) + ' to ' + nmOf(h));
+          }
+        }
+        return { n: ctrls.length, out: [...new Set(out)].slice(0, 6) };
+      });
+      seenCtrls += found.n;
+      if (found.out.length) robbed.push([name, found.out]);
+    }
+    /* The count is asserted beside the finding, because "no control is
+       robbed" is vacuously true of a sweep that found no controls. */
+    ok('no control loses a pixel of its own drawing to another’s reach',
+      robbed.length === 0 && seenCtrls > 60, { robbed, seenCtrls });
 
     ok('nothing threw while measuring it', oerrs.length === 0, oerrs);
     await octx.close();

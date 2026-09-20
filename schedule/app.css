@@ -740,13 +740,18 @@ body {
   display: flex;
   gap: 4px;
   padding: 2px;
-  margin-bottom: 6px;
+  /* THE GAP UNDER THE SEGMENT IS THE STOP'S REACH, not slack. The stop
+     draws 26 and owns 44 through a pseudo-element, so what is below it
+     has to be able to absorb the difference — at 6 the reach landed
+     two pixels inside the month row's own toggle, and a press aimed at
+     one arrived at the other. */
+  margin-bottom: 8px;
   border-radius: 17px;
   background: color-mix(in srgb, var(--ink) 7%, transparent);
 }
 .fr-stop {
   flex: 1;
-  /* 28 DRAWN, 44 REACHABLE — the tab's own split, on the control the
+  /* 26 DRAWN, 44 REACHABLE — the tab's own split, on the control the
      tab's own comment calls the same object. At 44 drawn the segment
      was 50px of chrome directly under a head, before a word of the
      thing the screen is about. */
@@ -761,7 +766,12 @@ body {
   font-weight: 600;
   cursor: pointer;
 }
-.fr-stop::before { content: ''; position: absolute; inset: -10px 0; }
+/* ASYMMETRIC, because the room is. Above a stop is the head's own
+   padding, which nothing draws in; below it the next control begins —
+   on the calendar that is a 44px toggle whose top edge is eight
+   pixels away. 26 and 10 and 8 is the 44, claimed where there is
+   something to claim it from. */
+.fr-stop::before { content: ''; position: absolute; inset: -10px 0 -8px; }
 .fr-stop.on { background: var(--card); color: var(--ink); box-shadow: var(--card-shadow); }
 .fr-stop:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
 #scFrPane[hidden], .fr-feed[hidden] { display: none; }
