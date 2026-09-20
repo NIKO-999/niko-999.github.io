@@ -17041,10 +17041,121 @@ const SAID = [
     });
     ok('a kind this build does not have falls through to a note',
       kGot.kinds === 'note', kGot);
-    /* AND THE PICKER NEVER OFFERS A TRACKER. Four chips, not five. */
-    ok('...and the picker offers four layouts, none of them a tracker',
-      kGot.chips === 'Note|Process|Goal|Budget', kGot.chips);
+    /* AND THE PICKER NEVER OFFERS A TRACKER. Five chips, not six. */
+    ok('...and the picker offers five layouts, none of them a tracker',
+      kGot.chips === 'Note|Process|Checklist|Goal|Budget', kGot.chips);
     await kctx2.close();
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     A CHECKLIST IS A NOTE WITH THE ROW'S OWN CHECK
+
+     The one mark in this app pressable from READ mode rather than
+     through the edit tools strip — the same `.chk` the week's row and
+     Showing up's tile already fill on a kept item, right-aligned
+     rather than a fourth glyph vocabulary. Both halves matter: the
+     mark has to actually toggle, and toggling it must not be the
+     thing that opens edit.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    const ckCtx = await browser.newContext({ ...PHONE });
+    const ckPage = await ckCtx.newPage();
+    const ckErrs = [];
+    const ckAsked = [];
+    ckPage.on('pageerror', (e) => ckErrs.push(String(e)));
+    ckPage.on('console', (m) => { if (m.type() === 'error') ckErrs.push(m.text()); });
+    ckPage.on('request', (r) => ckAsked.push(r.url()));
+    const CK = {
+      id: 'nCk', t: 'Before the trip', u: Date.now(), k: 'chk', a: 'blue',
+      l: [
+        { i: 'ch1', h: 1, c: 'blue', x: 'Packing', y: '', m: 0, w: [] },
+        { i: 'ch2', h: 0, c: '', x: 'Pack passports', y: '', m: 0, w: [] },
+        { i: 'ch3', h: 0, c: '', x: 'Charge batteries', y: '', m: 1, w: [] },
+        { i: 'ch4', h: 0, c: '', x: 'Call the vet', y: '', m: 0, w: [] }
+      ]
+    };
+    await budSeed(ckPage, [CK], {});
+
+    const ck1 = await ckPage.evaluate(async () => {
+      document.querySelector('.nt-card').click();
+      await new Promise((z) => setTimeout(z, 380));
+      const rows = () => [...document.querySelectorAll('#scNotePane .nt-row:not(.is-head)')];
+      const heads = [...document.querySelectorAll('#scNotePane .nt-gh')]
+        .map((e) => e.textContent);
+      const before = rows().map((r) => {
+        const c = r.querySelector('.chk');
+        return {
+          t: (r.querySelector('.nt-v') || {}).textContent,
+          done: r.classList.contains('is-done'),
+          pressed: c ? c.getAttribute('aria-pressed') : null,
+        };
+      });
+      /* Press the already-done row's check off, and an undone one on. */
+      rows()[1].querySelector('.chk').click();
+      rows()[0].querySelector('.chk').click();
+      await new Promise((z) => setTimeout(z, 220));
+      const after = rows().map((r) => r.classList.contains('is-done'));
+      const stillReading = !document.querySelector('#scNotePane .nt-in');
+      return {
+        heads, before, after, stillReading,
+        stored: JSON.parse(localStorage.getItem('sched.note.v1')).list[0].l
+          .filter((L) => !L.h).map((L) => L.m),
+      };
+    });
+    /* HEADINGS GROUP IT EXACTLY LIKE A NOTE'S DO, drawn as the small-
+       caps label a goal's own heading already is — `.nt-gh` reused
+       whole rather than a second heading treatment. */
+    ok('a checklist heading is the goal\'s own small-caps label',
+      ck1.heads.join('|') === 'Packing', ck1.heads);
+    ok('every line carries the row\'s own check, filled only when done',
+      ck1.before.every((r) => r.pressed === (r.done ? 'true' : 'false'))
+      && ck1.before[0].done === false && ck1.before[1].done === true, ck1.before);
+    ok('...and pressing it toggles the line, in either direction',
+      ck1.after[0] === true && ck1.after[1] === false, ck1.after);
+    ok('...and it never opens edit — the whole reason it is pressable here',
+      ck1.stillReading, ck1);
+    ok('...and the toggle is the record, not a display-only state',
+      ck1.stored.join(',') === '1,0,0', ck1.stored);
+
+    /* ── AND IN EDIT, THE SAME MARK IS "DONE" — NEVER "TAB" ──
+       The generic mark button falls to "Tab" for any kind that is
+       not proc or goal, which is a note's own word for a note's own
+       highlight and means nothing on a checklist. */
+    const ck2 = await ckPage.evaluate(async () => {
+      document.getElementById('scNtEd').click();
+      await new Promise((z) => setTimeout(z, 260));
+      document.querySelectorAll('.nt-in')[1].focus();
+      await new Promise((z) => setTimeout(z, 220));
+      const label = (document.querySelector('.nt-mkb') || {}).textContent;
+      document.querySelector('.nt-mkb').click();
+      await new Promise((z) => setTimeout(z, 200));
+      const markedNow = document.querySelectorAll('.nt-row.is-mkd').length;
+      return { label, markedNow };
+    });
+    ok('the edit-mode mark control reads "Done" on a checklist',
+      ck2.label === 'Done', ck2.label);
+    ok('...and it reaches the same field the read-mode check reads',
+      ck2.markedNow > 0, ck2);
+
+    /* ── THE CARD NAMES THE KIND AND COUNTS ITEMS DONE, NOT LINES
+       MARKED ── A count says you have things left to do; "2 marked"
+       is a note's own word for a highlight, which this is not. */
+    const ck3 = await ckPage.evaluate(async () => {
+      document.querySelector('.nt-back').click();
+      await new Promise((z) => setTimeout(z, 260));
+      const card = document.querySelector('.nt-card');
+      return {
+        kind: (card.querySelector('.nt-k') || {}).textContent,
+        meta: (card.querySelector('.nt-meta') || {}).textContent,
+      };
+    });
+    ok('the card names the kind Checklist and counts items and done',
+      ck3.kind === 'Checklist' && /^\d+ items? · \d+ done/.test(ck3.meta), ck3);
+
+    const ckOff = ckAsked.filter((u) => !u.startsWith(BASE));
+    ok('a checklist reaches nothing off this origin', ckOff.length === 0, ckOff.slice(0, 4));
+    ok('nothing threw through the checklist', ckErrs.length === 0, ckErrs.slice(0, 4));
+    await ckCtx.close();
   }
 
   /* ── AND A PUSH THAT HAPPENS FOR SOME OTHER REASON IS NOT CARRYING

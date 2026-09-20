@@ -6204,6 +6204,29 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   A CHECKLIST IS A NOTE WITH THE ROW'S OWN CHECK
+
+   `.chk` is the accent circle the week's row and Showing up's tile
+   already fill on a kept item — reused whole rather than a fourth
+   glyph vocabulary, and scoped here rather than widened, the way
+   `.rowwrap > .chk` and `.ty-row > .chk` each own their own context
+   instead of one selector trying to fit every row shape.
+   ═══════════════════════════════════════════════════════════════ */
+.nt-body.is-chk .nt-row:not(.is-head) { padding-right: 34px; }
+.nt-body.is-chk .nt-row > .chk { left: auto; right: 2px; }
+/* Struck and dropped to the quiet grey — the goal's own "ruled out"
+   recipe, because a checked-off line and a ruled-out one are both a
+   claim about a line you no longer have to read, drawn the same way
+   in both places this app makes it. */
+.nt-body.is-chk .nt-row.is-done .nt-v,
+.nt-body.is-chk .nt-row.is-mkd .nt-in {
+  color: var(--spent);
+  text-decoration: line-through;
+  text-decoration-color: var(--tick-off);
+  text-decoration-thickness: 1.5px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    A BUDGET IS A NOTE WITH FIGURES, AND A TRACKER FILLS IT
 
    Two notes, one record. Nothing here casts and nothing here scrolls

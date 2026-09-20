@@ -11512,3 +11512,62 @@ CONTROLS" and the whole of "SHOWING UP'S OWN QUIET IS ABOUT RANGE,
 NEVER ABOUT BLOCKS" — a fixture built to prove a gate that no longer
 exists. What is left asserts two stops fit one row rather than three,
 which is the same measurement on the row that remains.
+
+## A checklist is a note with the row's own check
+
+A fifth layout beside Note, Daily process, Goal and Budget — asked for
+directly after this file's own note about why the first one was built
+and taken back out: *"I don't want no ticks or checklists, I want it
+to have its own language."* That argument was against borrowing a
+to-do app's language wholesale; what shipped is this app's own mark,
+not a second vocabulary, which is the difference that makes the
+reversal a decision rather than a retreat from one.
+
+**EIGHT MARKS WERE COMPARED BEFORE ANY OF THIS WAS BUILT**, rendered
+on a mock note at real size rather than reasoned about: a circle
+check, a square checkbox, strike-only with no glyph at all, the
+circle moved to the right edge, the note's own bracket stem filled
+solid, a bead on the process's own spine, a fill-under-the-line bar,
+and the swipe highlight gone full solid. The one picked is the row's
+own check, right-aligned — the same mark this app already fills on a
+kept tally item and a finished week block, at the place a thumb
+already expects it, rather than a fourth glyph nothing else here
+wears.
+
+**IT IS PRESSABLE IN READ MODE, WHICH NO OTHER NOTE MARK IS.** The
+swipe, the bracket, the dot, a process's key step, a goal's ruled-out
+line — every one of those is a decision about the WORDS, reached
+through the tools strip while you are writing them. A checklist is
+read and ticked far more than it is written, so the tick has to work
+without opening edit at all: the same argument that put a real button
+on Showing up's tile rather than behind a gesture. `L.m` is what every
+other layout already uses for "this line is marked" read as a plain
+truthy flag — proc fills a node on it, a goal strikes on it, a
+checklist fills the check on it. No new field, because the record
+already had one.
+
+**THE HEADING IS THE GOAL'S OWN, REUSED WHOLE.** `.nt-gh` — a
+small-caps label in the note's one colour — rather than a plain
+note's name-and-clause, because a checklist's sections are the same
+kind of fact a goal's single heading already is: something you group
+by, not something that needs an explanation under it. No per-section
+colour picker either, for the reason proc and goal do not have one: a
+control whose effect you cannot see is worse than one that is not
+there.
+
+**AND IN EDIT, THE SAME MARK READS "DONE" — NEVER "TAB".** The one
+mark control every non-note kind shares fell to "Tab" by default,
+which is a note's own word for a highlight and means nothing here. A
+checklist gets its own word, reaching the same field the read-mode
+check does, so a keyboard or a screen reader has the identical route
+a pointer has.
+
+**THE CARD COUNTS ITEMS AND DONE, NOT LINES AND MARKED.** "2 marked"
+is a note's own report of a highlight; a checklist's card says how
+many of what you wrote is left, which is the fact the screen is
+actually for.
+
+`NT_ORD` — goal, process, checklist, then budget, tracker, note — puts
+it beside process rather than at the end, because a block naming
+several reads the tags in the same order every time regardless of
+when you attached them.

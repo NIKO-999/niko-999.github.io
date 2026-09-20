@@ -11469,14 +11469,15 @@
   var NT_KINDS = [
     { k: 'note', n: 'Note' },
     { k: 'proc', n: 'Daily process', s: 'Process' },
+    { k: 'chk', n: 'Checklist' },
     { k: 'goal', n: 'Goal' },
     { k: 'bud', n: 'Budget' }
   ];
-  var NT_ALL = ['note', 'proc', 'goal', 'bud', 'trk'];
-  /* Ordered goal, then process, then note — so a block carrying
-     several reads the same way every time rather than in whatever
-     order you happened to attach them. */
-  var NT_ORD = { goal: 0, proc: 1, bud: 2, trk: 3, note: 4 };
+  var NT_ALL = ['note', 'proc', 'chk', 'goal', 'bud', 'trk'];
+  /* Ordered goal, then process, then checklist, then note — so a
+     block carrying several reads the same way every time rather than
+     in whatever order you happened to attach them. */
+  var NT_ORD = { goal: 0, proc: 1, chk: 2, bud: 3, trk: 4, note: 5 };
   function scNtKind(k) {
     return NT_ALL.indexOf(k) >= 0 ? k : 'note';
   }
@@ -11493,6 +11494,12 @@
     note: '<path d="M5 7h14M5 12h14M5 17h9"/>',
     proc: '<path d="M5 5v14"/><circle cx="5" cy="9" r="1.7" fill="currentColor" stroke="none"/>'
       + '<path d="M11 9h8M11 16h6"/>',
+    /* The layout shrunk, the same rule as the other three: a
+       checklist's own mark is the row's right-aligned check, so the
+       glyph is that circle at tag size rather than a fourth
+       vocabulary — a square box or a bare tick would be a shape
+       nothing else on the card wears. */
+    chk: '<circle cx="12" cy="12" r="8.5"/><path d="M8.3 12.4l2.6 2.6 4.8-5.4"/>',
     goal: '<path d="M6 21V4h12l-3 4 3 4H6"/>',
     /* A budget is a note with figures against its lines, so the mark
        is the note's own three rules with a column of amounts beside
@@ -11837,6 +11844,10 @@
       if (d < 0) return [-d + (d === -1 ? ' day over' : ' days over'), 'was ' + scNoteDue(n)];
       if (d === 0) return ['due today', scNoteDue(n)];
       return [d + (d === 1 ? ' day left' : ' days left'), 'due ' + scNoteDue(n)];
+    }
+    if (n.k === 'chk') {
+      return [c.lines + (c.lines === 1 ? ' item' : ' items')]
+        .concat(c.marked ? [c.marked + ' done'] : []);
     }
     return [c.lines + (c.lines === 1 ? ' line' : ' lines')]
       .concat(c.marked ? [c.marked + ' marked'] : []);
@@ -13665,6 +13676,54 @@
         return;
       }
 
+      /* ── A CHECKLIST IS A NOTE WITH THE ROW'S OWN CHECK ──
+         Headings group it exactly like a plain note's do; the one
+         thing that differs is the mark, and it is the right-aligned
+         `.chk` circle the week's row and Showing up's tile already
+         fill on a kept item — one accent circle meaning "this
+         happened", not a fourth glyph vocabulary for a fourth layout.
+
+         PRESSABLE HERE, IN READ MODE — which no other note mark is.
+         Every other highlight is edit-only, reached through the tools
+         strip, because it is a decision about the WORDS you make while
+         writing them. A checklist is read and ticked far more than it
+         is written, so the tick has to work without opening edit at
+         all — the same argument that put a real button on Showing
+         up's tile rather than behind a gesture. */
+      if (n.k === 'chk') {
+        n.l.forEach(function (L) {
+          if (L.h) {
+            /* The heading itself is a small-caps label in the note's
+               own colour, `.nt-gh` reused whole from the goal — the
+               other place a heading is a label rather than a name and
+               a clause, because a checklist's sections are the same
+               kind of fact a goal's single heading already is. */
+            body.appendChild(scEl('div', 'nt-gh', L.x));
+            return;
+          }
+          var cr = scEl('div', 'nt-row' + (L.m ? ' is-done' : ''));
+          cr.appendChild(scEl('span', 'nt-v', L.x));
+          var cb = scEl('button', 'chk');
+          cb.type = 'button';
+          cb.setAttribute('aria-pressed', L.m ? 'true' : 'false');
+          cb.setAttribute('aria-label',
+            (L.m ? 'Not done: ' : 'Done: ') + (L.x || 'this line'));
+          cb.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+            + '<path d="M4 12l5 5L20 6"/></svg>';
+          cb.addEventListener('click', function () {
+            L.m = L.m ? 0 : 1;
+            n.u = Date.now(); scNoteFlush(); redraw(null, null);
+          });
+          cr.appendChild(cb);
+          body.appendChild(cr);
+        });
+        if (!n.l.some(function (L) { return L.x.trim(); })) {
+          body.appendChild(scEl('p', 'nt-none',
+            'Nothing on this checklist yet. Press Edit and add a line.'));
+        }
+        return;
+      }
+
       /* ── A GOAL IS A MARKER ──
          The statement on its own block with a heavy edge, the date and
          what is left of it under it, and everything else plain and
@@ -13902,7 +13961,7 @@
           tools.appendChild(b);
         };
         mk('nt-mkb', n.k === 'proc' ? 'Key step'
-          : n.k === 'goal' ? 'Ruled out' : 'Tab', 1);
+          : n.k === 'goal' ? 'Ruled out' : n.k === 'chk' ? 'Done' : 'Tab', 1);
         if (n.k === 'note') { mk('nt-brb', 'Bracket', 2); mk('nt-dtb', 'Dot', 3); }
 
         /* ── THE PEN MARKS WORDS, AND IT READS THE CARET ──
