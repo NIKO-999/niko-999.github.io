@@ -12329,3 +12329,49 @@ five pixels inside it, so a reservation sized off the box is five
 pixels of room nothing draws in. `body`'s bottom padding is the bar's
 own height plus twelve, which is what keeps the poster's foot a
 constant distance from the thing you can actually see.
+
+### And then every remaining pixel, asked for as max slim
+
+The pass above took the bar to 65 on the argument that a tab drawn at
+40 still reads. **Asked to go as far as it goes**, so the rest was
+measured rather than shaved: what is left in the bar is its own
+padding, and what is left above the fold is eight gaps nobody had put
+beside each other.
+
+**THE BAR IS 56 AND THE ADD BUTTON IS EXACTLY 44.** `.tab` padding
+4/3 to 2/2 and its gap 2 to 1 — 36 drawn, `::before` at -4 for the
+44 — the pill's own padding 4 to 3, and the bar's 5/10 to 4/8. The
+add button lands ON the floor rather than two pixels over it, which
+is where it should have been: a control that needs no claimed box is
+one whose drawing IS 44.
+
+**ONE STEP PAST IT WAS RENDERED AND REJECTED FOR TWO PIXELS.** The
+glyph 20 to 18 with the gap at zero reaches 54 — and it costs the
+rule that a tab glyph is the row's glyph, which the pass above had
+just paid for. **Two pixels is not a reason to break a rule that was
+measured**, and at zero gap the label sits against the mark.
+
+**The stops are 30 and the day strip is 30.** A stop is 26 drawn with
+its box at -10; a day chip is 30 drawn at -7. One step past each was
+drawn too: at 24 the lozenge hugs the cap height of "Showing up" and
+reads as type in a box, and at 29 with no gap SUN sits on 20.
+
+**AND EIGHT GAPS WERE NEVER SET BESIDE EACH OTHER.** The body's top
+14 to 10, the poster's 8 to 6, the head's foot 6 to 4, the week
+strip's 6 to 4, the stops' foot 8 to 6, the calendar's day letters 6
+to 4 and its grid's own 2 to nothing. **`.friends` was at 18 where
+its three siblings were at 6** — a stray of exactly the kind the type
+scale kept finding, in a margin rather than a size, because nothing
+had ever listed the four together.
+
+Measured at 390x844: **the head 52.5 to 51, the first block of the
+week y139 to y127, the first tile on Today y162 to y148, and the bar
+84 to 56 across the two passes.** Every press target still owns 44,
+walked out from its own centre.
+
+**AND THE FLOOR IS NAMED RATHER THAN IMPLIED.** What is left above
+the fold is the 30px day asked for by name, a 38px head tile that
+reaches 44, and two pixels of separation between things. What is left
+in the bar is a 20px glyph, a 9.5px label and 44px of target. There
+is no number left in either that is not one of those three, which is
+the honest end of this rather than a place to stop.
