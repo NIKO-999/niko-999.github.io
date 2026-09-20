@@ -11803,3 +11803,153 @@ about contrast. The pull put back to −22 reads the field's bottom
 edge as `nm-dial bd-dial` and fails that half alone. Restored each
 time by the script's own inverse and hashed against the known-good
 sha1.
+
+## Thirty type sizes, and ten of them said "caption"
+
+Asked to go over the whole app and make it smaller and more minimal.
+Measured first, at 390x844 and read at 1:1 — every element that draws
+text on twenty-one screens — and the scan said two things nobody had
+written down. **Thirty distinct font sizes were declared and twenty-one
+were drawn**, nine of them below 13px doing one job between them. And
+every tab spent ninety pixels on a head that named the tab you were
+already on.
+
+### The screen's name is not drawn
+
+`Today` at 30px, over a panel heading reading `Today`, under a lit tab
+saying it a third time. `Calendar` at 30px over a row that prints
+September 2026 beside the arrows that step it. **A head that names the
+screen you are on is the picture-of-what-you-are-looking-at this app
+refuses on an intro card**, at the top of every screen instead.
+
+**THE WEEK KEEPS ITS DAY**, which is the whole of what makes this a
+removal rather than a rule. `Sunday` is information — it says which of
+the seven you are reading — where `Notes` is a label for the thing
+under it.
+
+**MUTED, NOT HIDDEN, AND NOT EMPTIED.** `hidden` takes the heading out
+of the accessibility tree and then nothing names the pane at all; an
+emptied node still reserves its line. `.h-day.is-mute` takes `.title`'s
+own visually-hidden block — **one rule for both**, because two copies
+of that treatment are two places for somebody to fix one of.
+
+What is left up there is the glyph tile, which says which screen
+without spending a line on it, and the date. 58px to 48.
+
+### Six steps: 26 / 19 / 15 / 13 / 11 / 9.5
+
+Applied as a script over every declaration rather than by hand, so it
+is reproducible and reversible, with two mechanical rules doing most of
+the deciding:
+
+- **An uppercase or tracked-out label is the MICRO register whatever it
+  happens to measure today.** 10.5px split between real labels and
+  section headings; the ones carrying `text-transform: uppercase` or
+  `letter-spacing: .1em`+ went to 9.5 and the rest to 11.
+- **`font: inherit` is the honest marker for a CONTROL's own label**,
+  because that is what a `<button>` or an `<input>` needs. It is what
+  told a 12.5px chip from a 12.5px caption.
+
+**FOUR SIZES WENT UP, WHICH IS NOT A CONTRADICTION.** 8.5 and 9 were
+already under this file's own 9.5 floor and had been for as long as
+they existed. Minimal here is FEWER STEPS, not smaller type — the space
+comes from the head and from density, and the bottom of the scale was a
+bug being fixed on the way past.
+
+**A FIELD IS NOT ON THE SCALE.** `.field` is 16px under a comment
+saying anything smaller and iOS zooms the page on focus, and it was
+never touched because it declares its size inside a `font:` shorthand
+the sweep could not see. `.nt-in`, `.nt-v`, `.nt-st b` and `.nt-gl` went
+to 15 with everything else and the suite caught all four: a note's line
+and its read twin are held to the floor together, or a mode switch
+re-wraps the note. They are back at 16, named as the field floor rather
+than as a seventh step. `.bd-in` is the body step, because it carries
+the figure its own row is about and reads at the name beside it.
+
+**AND A COVER'S INITIAL IS A DRAWING, NOT TYPE.** `.mn-art i` is one
+letter scaled to its box at three sizes — 15, 20 and 22 — and forcing
+those onto a type scale would size a picture by a rule about words.
+Skipped by name.
+
+### Density is nine measured cuts, not a sweep
+
+Where the height actually went was measured before anything moved: on
+Today, **129px of chrome above the first tile**. The poster's own top
+padding, the pane's margin, the stops, the stops' margin and the
+heading each took a slice, and no one of them looked wrong.
+
+12 → 10 on the poster, 10 → 8 under the head, 18 → 10 on the pane, 18 →
+12 under the stops, 5 → 2 on the heading, 9 → 8 on the tile grid, 14/8
+→ 10/6 on both section headings, 11 → 9 on a week row. 129px of chrome
+to 107, a row 59px to 55, and the whole of Showing up now fits one
+screen.
+
+**NOTHING THAT IS OR CONTAINS A PRESS TARGET MOVED.** `.fr-stop` keeps
+its 44px floor and the stops bar its 52; `.ty-add` and `.btn` are
+already 41 and 40 and were left where they are rather than taken
+further. The tile heading's own reach is a 44px `::before`, so its
+padding is free to go — which is the rule this app already applies to
+the pencil, the objectives plus and the children's dots.
+
+### Three checks failed and two of them were about the check
+
+**A RATIO IS TWO SCALE STEPS WRITTEN AS A LITERAL.** "the day is at
+more than twice a block's name" read `day > row * 1.8`, which was
+30/15 with a fifth of a step in hand. Collapsed onto six steps it comes
+out at 1.73 and fails on a head that is plainly the biggest thing on
+the screen. It asserts what the head is actually FOR now — **nothing
+drawn on the week is larger than the day** — which survives the scale
+moving again. Clipped headings are skipped by their `clip-path` rather
+than by a size, because `.title` really is 1x1 and a threshold would be
+a guess at the next one.
+
+**AND THE BAR'S SWEEP HAD NEVER MOVED ANYTHING.** It scrolled
+`window` over nine offsets to put a row behind the bar — and the poster
+is a flex column whose panes do their own scrolling, so the document's
+height IS the viewport's and all nine samples were the identical frame.
+There is nothing to find either way: **the poster's bottom is 748 and
+the pill's top is 767**, so a row cannot reach the bar at all since
+every tab became a column that stops above it. That geometry is
+asserted now instead, so the day a pane goes back to being a plain
+block the check fails and says the sweep has to come back.
+
+**It was also reading its own antialiasing.** The technique skipped a
+pixel near the label's colour, guarded by a fixed ±2 neighbourhood —
+which works while a glyph's stroke is wider than its fringe. At 9.5px a
+THIRD of a label's box is fringe, so the day the type came down half a
+pixel a fringe pixel scored **1.85:1 against a bar nothing had
+touched**. Measured from the most common pixel outward it is 9.53:1 on
+every label. Third time this file has recorded that technique and the
+first time it was the type size that broke it.
+
+**Two grounds are asserted beside the ratio**, because the lit tab sits
+on the pill's own card and the other four sit on the page — one ground
+would mean the check had looked at one surface five times.
+
+**AND THE DIAL'S PULL WAS A BOUNDARY, NOT A MARGIN.** `-16px` was
+measured against a 24px field and put the dial's box exactly flush with
+the field's bottom edge: zero to spare, which two pixels of drift took.
+Swept again across the pair — the field's size and the pull together —
+rather than splitting a one-pixel difference: at `-14` under a 15px
+field it is 21 above against 25 below with three pixels of the field
+still free. Both figures are real margins now.
+
+### `String.replace` eats `$$`
+
+An edit script wrote `page.$$('.tab span')` and the file came out
+carrying `page.$('.tab span')`, which threw `is not iterable` and took
+the whole file down before one assertion ran — reported as **`0
+assertions across 1 files`**, the greenest-looking failure there is.
+`$$` in a replacement string is the escape for a literal `$`, along
+with `$&`, `` $` `` and `$'`. **A replacement string is not a string.**
+
+### And a break that does not invert the claim proves nothing
+
+`.poster { height: auto }` was the obvious way to break *no pane can
+put a row behind the bar*, and it does two wrong things: the suite dies
+on it, because the bar then intercepts every click and Playwright times
+out rather than failing an assertion — and it does not invert the claim
+anyway. Measured, `height: auto` makes the poster **shorter** (748 to
+473), so it clears the pill by more than it did. Lifting the bar into
+the poster is the honest inverse, and it reports `pass: false` where
+the other reported `pass: true` on a build that was broken.

@@ -2577,6 +2577,23 @@
        the one the whole change is about: nothing up here says it is a
        control, so what it named was a feature nobody could find. */
     if (view !== 'list') {
+      /* ── AND THE SCREEN'S NAME IS NOT DRAWN ──
+         It was the tab's own word at 30px — "Today" over a panel
+         heading reading "Today", with the lit tab saying it a third
+         time an inch below. A head that names the screen you are
+         already on is the picture-of-what-you-are-looking-at this
+         app refuses on an intro card, at the top of every screen.
+         The glyph tile says which screen without spending a line on
+         it; the week keeps its day, because a day is information
+         rather than a label.
+
+         MUTED, NOT HIDDEN, and not emptied either. `hidden` takes the
+         heading out of the accessibility tree, and then nothing on
+         the pane names it at all; an emptied node still reserves its
+         line. `.is-mute` is `.title`'s own treatment — the same rule,
+         so there is one copy of it — which draws nothing and keeps
+         the heading. */
+      day.classList.add('is-mute');
       day.textContent = VIEW_NAME[view] || 'Today';
       /* THE MODE SAYS WHAT IT IS, in the line the head already draws —
          the week's own rule, and the reason it is here rather than in
@@ -2606,6 +2623,7 @@
     var mins = scByDay(d).reduce(function (a2, it) {
       return a2 + (scOff(cd, it.id) ? 0 : it.e - it.s);
     }, 0);
+    day.classList.remove('is-mute');
     day.textContent = FULL[d];
     /* ── THE MODE SAYS WHAT IT IS WAITING FOR ──
        In the line the head already draws rather than in a banner: a

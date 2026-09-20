@@ -370,7 +370,7 @@ body {
   max-width: 460px;
   height: 100%;
   margin: 0 auto;
-  padding: 12px var(--pad) 0;
+  padding: 10px var(--pad) 0;
   /* ── A COLUMN, NOT A PAGE ──
      The head is fixed and the view under it scrolls, which is what
      lets the week be one day drawn in full: the list owns the room
@@ -460,7 +460,7 @@ body {
 
 /* ── the head ────────────────────────────────────────────── */
 
-.head { flex: none; padding-bottom: 10px; }
+.head { flex: none; padding-bottom: 8px; }
 
 /* Stays a label, and that is a decision rather than the absence of one.
    Nine treatments were rendered in the real app at phone size — a
@@ -480,8 +480,18 @@ body {
 /* The app's own name is a heading for a screen reader and nothing
    drawn. It was an uppercase line above the day — the app saying what
    it is on every screen of every day — and renaming lives in
-   Settings now, beside the other things you set once. */
-.title {
+   Settings now, beside the other things you set once.
+
+   ── AND THE SCREEN'S NAME JOINED IT ──
+   `.h-day.is-mute` is every view but the week: the head drew the
+   TAB's own word at 30px, over a pane whose own heading repeats it
+   and under a lit tab that says it a third time. One rule for both,
+   because two copies of a visually-hidden block are two places for
+   the next person to fix one of. Never `hidden`, which takes the
+   heading out of the accessibility tree and leaves the pane named
+   nowhere, and never an emptied node, which still reserves its
+   line. */
+.title, .h-day.is-mute {
   position: absolute;
   width: 1px; height: 1px;
   margin: -1px; padding: 0;
@@ -528,7 +538,7 @@ body {
 }
 .h-tx { flex: 1; min-width: 0; }
 .h-day {
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 700;
   letter-spacing: -.03em;
   line-height: 1.05;
@@ -543,7 +553,7 @@ body {
    went with the button. */
 .h-sub {
   margin-top: 1px;
-  font-size: 12.5px;
+  font-size: 11px;
   font-weight: 500;
   color: var(--dim);
   font-variant-numeric: tabular-nums;
@@ -726,7 +736,7 @@ body {
   display: flex;
   gap: 4px;
   padding: 4px;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
   border-radius: 22px;
   background: color-mix(in srgb, var(--ink) 7%, transparent);
 }
@@ -780,13 +790,13 @@ body {
   padding: 12px; border-radius: 14px;
   background: var(--card);
   box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow); }
-.fr-rank { font-size: 12px; font-weight: 700; color: var(--dim); width: 12px;
+.fr-rank { font-size: 11px; font-weight: 700; color: var(--dim); width: 12px;
   font-variant-numeric: tabular-nums; }
 .fr-row.is-me .fr-rank { color: var(--ink); font-weight: 800; }
 .fr-nw { display: flex; align-items: center; gap: 7px; }
-.fr-n { font-size: 16px; font-weight: 700; letter-spacing: -.014em; }
+.fr-n { font-size: 15px; font-weight: 700; letter-spacing: -.014em; }
 .fr-s { display: block; margin-top: 1px; font-size: 11px; color: var(--dim); }
-.fr-t { margin-left: auto; font-size: 17px; font-weight: 700;
+.fr-t { margin-left: auto; font-size: 15px; font-weight: 700;
   font-variant-numeric: tabular-nums; }
 
 /* The crown, in the leader's own accent with a halo of the same
@@ -811,7 +821,7 @@ body {
 .fr-crown svg { position: relative; width: 17px; height: 14px; display: block;
   fill: var(--gold); }
 
-.fr-note { margin-top: 12px; font-size: 12.5px; line-height: 1.55; color: var(--dim); }
+.fr-note { margin-top: 12px; font-size: 11px; line-height: 1.55; color: var(--dim); }
 
 /* A row is a button only when somebody is behind it, so the pressed
    state is on a class the script adds rather than on .fr-row. Your own
@@ -827,7 +837,7 @@ body {
    spaced, because it is going to be transcribed by hand and an
    ambiguous character is the whole cost of getting it wrong. The
    alphabet already drops I, O, 0 and 1. */
-.fr-code { margin-top: 6px; font-size: 27px; font-weight: 800;
+.fr-code { margin-top: 6px; font-size: 26px; font-weight: 800;
   letter-spacing: .16em; font-variant-numeric: tabular-nums; }
 
 /* Yours and the button that copies it, on one line. `Copy` is next to
@@ -837,7 +847,7 @@ body {
    do". */
 .fr-swap { display: flex; align-items: center; gap: 12px; }
 .fr-swap .fr-code { flex: 1; min-width: 0; margin-top: 0;
-  font-size: 24px; letter-spacing: .13em; }
+  font-size: 19px; letter-spacing: .13em; }
 .fr-swap .btn { flex: none; padding: 11px 18px; }
 
 /* ── a log ──
@@ -863,8 +873,8 @@ body {
    card is the frame-inside-a-frame this project keeps taking out. */
 .po.is-bare { background: none; box-shadow: none; padding: 0; margin-top: 18px; }
 .po-h { display: flex; align-items: center; gap: 9px; }
-.po-n { font-size: 13.5px; font-weight: 700; letter-spacing: -.01em; }
-.po-s { display: block; margin-top: 1px; font-size: 10.5px; color: var(--dim); }
+.po-n { font-size: 13px; font-weight: 700; letter-spacing: -.01em; }
+.po-s { display: block; margin-top: 1px; font-size: 11px; color: var(--dim); }
 /* 44px of target on an 18px mark, pushed into the card's own padding so
    the drawing sits where the corner is rather than an inch inside it. */
 .po-x { margin: -13px -13px -13px auto; width: 44px; height: 44px;
@@ -888,7 +898,7 @@ body {
 .po-img:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 /* THE CAPTION LEADS, so its margin is under the head rather than
    under the picture. */
-.po-c { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; }
+.po-c { margin: 8px 0 0; font-size: 13px; line-height: 1.5; }
 .po-c + .po-img { margin-top: 9px; }
 
 /* -- the whole picture --
@@ -911,7 +921,7 @@ body {
   object-fit: contain; border-radius: 10px;
 }
 .ph-c {
-  margin: 0; font-size: 13.5px; line-height: 1.45; color: var(--dim);
+  margin: 0; font-size: 13px; line-height: 1.45; color: var(--dim);
   text-align: center; max-width: 34em;
 }
 
@@ -977,7 +987,7 @@ body {
 .fp-hold { width: 100%; aspect-ratio: 1; display: grid; place-items: center; }
 .fp-d i { display: block; aspect-ratio: 1; border-radius: 50%;
   background: var(--tick-off); }
-.fp-w { font-size: 10px; color: var(--dim); }
+.fp-w { font-size: 9.5px; color: var(--dim); }
 
 /* ── the wall ──
    Three across, square, and the photograph fills its tile. It was
@@ -1018,7 +1028,7 @@ body {
   display: flex; flex: none; align-items: center; gap: 9px;
   margin-top: 4px; padding: 12px 2px;
   background: none; border: 0; color: var(--dim);
-  font: inherit; font-size: 14px; text-align: left;
+  font: inherit; font-size: 13px; text-align: left;
   touch-action: manipulation;
 }
 .ty-add svg {
@@ -1039,9 +1049,9 @@ body {
   fill: none; stroke: var(--ink); stroke-width: 1.7;
   stroke-linecap: round; stroke-linejoin: round;
 }
-.hb-guess b { display: block; font-size: 14px; font-weight: 600; }
+.hb-guess b { display: block; font-size: 15px; font-weight: 600; }
 .hb-guess span span {
-  display: block; font-size: 11.5px; color: var(--spent);
+  display: block; font-size: 11px; color: var(--spent);
   margin-top: 2px; line-height: 1.35;
 }
 .hb-seg {
@@ -1050,7 +1060,7 @@ body {
   border-radius: 12px; padding: 3px;
 }
 .hb-k {
-  flex: 1; text-align: center; font: inherit; font-size: 12.5px;
+  flex: 1; text-align: center; font: inherit; font-size: 13px;
   font-weight: 600; padding: 9px 0; border: 0; border-radius: 9px;
   background: none; color: var(--spent); touch-action: manipulation;
 }
@@ -1062,7 +1072,7 @@ body {
 .ty-edit {
   display: block; width: 100%; margin-top: 12px; padding: 11px 0;
   background: none; border: 0; border-top: 1px solid var(--hair);
-  color: var(--dim); font: inherit; font-size: 13.5px; font-weight: 600;
+  color: var(--dim); font: inherit; font-size: 13px; font-weight: 600;
   touch-action: manipulation;
 }
 
@@ -1084,7 +1094,7 @@ body {
    summarises is the duplication this project keeps taking out. */
 .pf-sub {
   display: flex; gap: 14px; margin-bottom: 12px;
-  font-size: 12px; color: var(--dim);
+  font-size: 11px; color: var(--dim);
   font-variant-numeric: tabular-nums;
 }
 .pf-sub span + span::before {
@@ -1137,11 +1147,11 @@ body {
   background: hsl(var(--mh, 0) 42% 34%);
 }
 .pf-lrow b {
-  font-size: 12.5px; font-weight: 500; flex: 1;
+  font-size: 11px; font-weight: 500; flex: 1;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .pf-lrow em {
-  font-style: normal; font-size: 12.5px; font-weight: 600;
+  font-style: normal; font-size: 11px; font-weight: 600;
   color: var(--dim); font-variant-numeric: tabular-nums;
 }
 
@@ -1156,9 +1166,9 @@ body {
   color: var(--ink); font: inherit; touch-action: manipulation;
 }
 .pv-t { flex: 1; min-width: 0; }
-.pv-t b { display: block; font-size: 14.5px; font-weight: 600; }
+.pv-t b { display: block; font-size: 15px; font-weight: 600; }
 .pv-t span {
-  display: block; font-size: 11.5px; color: var(--spent);
+  display: block; font-size: 11px; color: var(--spent);
   line-height: 1.35; margin-top: 2px;
 }
 .pv-sw {
@@ -1217,7 +1227,7 @@ body {
    panel. The timetable idiom still owns every other screen: the week,
    the ring and the sheet are square, and nothing here is shadowed.
    ═════════════════════════════════════════════════════════ */
-.tally { margin-top: 18px; display: flex; }
+.tally { margin-top: 10px; display: flex; }
 /* A COLUMN, so the grid above can take the slack. Left as a block
    the tiles size to their content and the day ends wherever it
    ends, which is the screen the mosaic replaced. */
@@ -1237,7 +1247,7 @@ body {
    left, the day's three figures on the right, and the whole row is
    the door to the week. */
 .ty-sh {
-  margin: 2px 0 11px; font-size: 15.5px; font-weight: 700;
+  margin: 2px 0 11px; font-size: 15px; font-weight: 700;
   letter-spacing: -.01em; color: var(--ink);
 }
 
@@ -1254,7 +1264,7 @@ body {
   position: relative;
   display: flex; align-items: baseline; gap: 10px;
   width: 100%;
-  margin: 0; padding: 5px 0; border: 0; background: none;
+  margin: 0; padding: 2px 0; border: 0; background: none;
   font: inherit; color: inherit; text-align: left;
   cursor: pointer; touch-action: manipulation;
 }
@@ -1276,16 +1286,16 @@ body {
 .ty-fig {
   margin-left: auto; display: flex; align-items: baseline;
   gap: 0 7px; min-width: 0;
-  font-size: 12.5px; font-weight: 600; color: var(--spent);
+  font-size: 11px; font-weight: 600; color: var(--spent);
   font-variant-numeric: tabular-nums;
   white-space: nowrap; overflow: hidden;
 }
 .ty-fig > i { font-style: normal; }
-.ty-fig > i.is-n { color: var(--ink); font-size: 14px; }
+.ty-fig > i.is-n { color: var(--ink); font-size: 13px; }
 /* The denominator, quieter than the count for the reason it has
    always been: what you read is how many. */
 .ty-fig > i.is-n > s {
-  text-decoration: none; color: var(--spent); font-size: 12.5px;
+  text-decoration: none; color: var(--spent); font-size: 11px;
   margin-left: 2px;
 }
 /* Punctuation between two facts, riding the second of the pair, so
@@ -1313,8 +1323,8 @@ body {
    different kind of thing rather than as the one you are on. */
 .wv-c.is-t { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ink) 30%, transparent); }
 .wv-h { display: flex; justify-content: space-between; align-items: baseline; }
-.wv-h > b { font-size: 12.5px; font-weight: 700; }
-.wv-h > s { text-decoration: none; font-size: 10px; color: var(--spent);
+.wv-h > b { font-size: 11px; font-weight: 700; }
+.wv-h > s { text-decoration: none; font-size: 9.5px; color: var(--spent);
   font-variant-numeric: tabular-nums; }
 /* The column count is DATA, because the six are the six plus however
    many of your own you have added: past six it goes to two balanced
@@ -1391,7 +1401,7 @@ body {
      answer and the cost this layout was chosen with. */
   grid-auto-rows: minmax(108px, 1fr);
   align-items: stretch;
-  gap: 9px;
+  gap: 8px;
   /* `1 0 auto`: grow into the pane, and never shrink below the rows'
      own height. `flex: 1` alone caps the box at the pane and the tiles
      then spill out of a container that has nothing left to scroll. */
@@ -1438,7 +1448,7 @@ body {
   margin: 5px 0 2px;
   padding: 1px 7px;
   border-radius: 6px;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
   line-height: 1.6;
   white-space: nowrap;
@@ -1461,7 +1471,7 @@ body {
   /* 23, not 27. It is still the loudest thing on the tile by a long
      way — the label above it is 11 and the line under it is 11 — and
      the four pixels are what the chart gets back. */
-  font-size: 23px;
+  font-size: 19px;
   font-weight: 700;
   color: var(--ink);
   letter-spacing: -.035em;
@@ -1474,13 +1484,13 @@ body {
    could have carried a chart, and it is why there is no tag on this
    screen any more. */
 .ty-card .props .val u {
-  text-decoration: none; font-size: 16px; font-weight: 600;
+  text-decoration: none; font-size: 15px; font-weight: 600;
   letter-spacing: -.01em; margin-left: 3px;
 }
 /* A tick's denominator: the days it was actually ON this week. Quieter
    than the count, the same pairing the panel at the top draws. */
 .ty-card .props .val s {
-  text-decoration: none; font-size: 16px; font-weight: 600;
+  text-decoration: none; font-size: 15px; font-weight: 600;
   color: var(--spent); letter-spacing: 0; margin-left: 3px;
 }
 /* An absence is not drawn at the size of an achievement: the dash is
@@ -1588,7 +1598,7 @@ body {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .ty-ax > span {
-  font-size: 8.5px; color: var(--spent); white-space: nowrap;
+  font-size: 9.5px; color: var(--spent); white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 /* ── A TICK'S WEEK, AND IT IS THE STRIP'S OWN THREE STATES ──
@@ -1646,7 +1656,7 @@ body {
   min-width: 38px; height: 38px; padding: 0 12px;
   border: 1px solid var(--hair); border-radius: 19px;
   background: none; color: var(--ink); font: inherit;
-  font-size: 14px; font-weight: 600; line-height: 1;
+  font-size: 13px; font-weight: 600; line-height: 1;
   display: grid; place-items: center; cursor: pointer;
   touch-action: manipulation; font-variant-numeric: tabular-nums;
 }
@@ -1654,7 +1664,7 @@ body {
   width: 38px; height: 38px; padding: 0;
   border: 1px solid var(--hair); border-radius: 19px;
   background: none; color: var(--ink); font: inherit;
-  font-size: 17px; font-weight: 500; line-height: 1;
+  font-size: 19px; font-weight: 500; line-height: 1;
   display: grid; place-items: center; cursor: pointer;
   touch-action: manipulation;
 }
@@ -1766,10 +1776,10 @@ body {
   fill: none; stroke: var(--ink); stroke-width: 1.6;
   stroke-linecap: round; stroke-linejoin: round;
 }
-.gh-tx b { display: block; font-size: 14px; font-weight: 700; }
+.gh-tx b { display: block; font-size: 15px; font-weight: 700; }
 .gh-tx p {
   margin: 1px 0 0;
-  font-size: 12.5px; line-height: 1.45; color: var(--dim);
+  font-size: 11px; line-height: 1.45; color: var(--dim);
 }
 .gh-row {
   grid-column: 1 / -1;
@@ -1793,14 +1803,14 @@ body {
   flex: none;
   min-height: 38px;
   padding: 9px 18px;
-  font-size: 13.5px;
+  font-size: 13px;
   border-radius: 10px;
 }
 .gh-never {
   flex: none;
   min-height: 38px; padding: 8px 10px;
   border: 0; background: none;
-  font: inherit; font-size: 12.5px; font-weight: 600;
+  font: inherit; font-size: 13px; font-weight: 600;
   color: var(--spent);
   cursor: pointer;
 }
@@ -1985,7 +1995,7 @@ body {
   display: block;
   padding: 4px 8px;
   border-radius: 6px;
-  font-size: 11.5px; font-weight: 600;
+  font-size: 11px; font-weight: 600;
   color: var(--ink);
   outline: 2px solid var(--ink); outline-offset: 2px;
 }
@@ -2114,14 +2124,14 @@ body {
 .ty-cal { display: block; width: 100%; margin-top: 16px; }
 .ty-stats { display: flex; gap: 18px; margin-top: 20px; }
 .ty-stats b {
-  display: block; font-size: 22px; font-weight: 700;
+  display: block; font-size: 19px; font-weight: 700;
   letter-spacing: -.025em; font-variant-numeric: tabular-nums;
 }
 /* The unit rides the FIGURE, not the caption. "2,631" and "2.7" beside
    each other are unreadable without one, and putting it in the caption
    makes the caption say two things. */
 .ty-stats b i {
-  font-style: normal; font-size: 12px; font-weight: 600;
+  font-style: normal; font-size: 11px; font-weight: 600;
   letter-spacing: 0; margin-left: 2px; color: var(--spent);
 }
 /* The caption carries a glyph, and it is on the caption rather than
@@ -2130,7 +2140,7 @@ body {
    told apart before any of them is read. */
 .ty-stats span {
   display: flex; align-items: center; gap: 4px;
-  margin-top: 2px; font-size: 10.5px; color: var(--spent);
+  margin-top: 2px; font-size: 11px; color: var(--spent);
 }
 /* currentColor, so it fades and themes with the words it belongs to
    rather than holding a colour of its own. 2.1 rather than 1.8: a
@@ -2163,11 +2173,11 @@ body {
    were 22 and were three. */
 .ty-sol { margin-top: 16px; }
 .ty-sol > b {
-  display: block; font-size: 34px; font-weight: 700;
+  display: block; font-size: 26px; font-weight: 700;
   letter-spacing: -.03em; line-height: 1.05;
   font-variant-numeric: tabular-nums;
 }
-.ty-sol > span { display: block; margin-top: 2px; font-size: 11.5px; color: var(--spent); }
+.ty-sol > span { display: block; margin-top: 2px; font-size: 11px; color: var(--spent); }
 /* The track is a SURFACE and the fill is a mark: the fill is held to
    3:1 against the card it is drawn on, which every one of the seven
    habit hues clears on both faces. Against the track it cannot be
@@ -2396,7 +2406,7 @@ body {
   background: none; color: var(--dim); font: inherit; cursor: pointer;
 }
 .st-d b {
-  font-size: 9px; font-weight: 700; letter-spacing: .08em;
+  font-size: 9.5px; font-weight: 700; letter-spacing: .08em;
   text-transform: uppercase;
 }
 .st-d i {
@@ -2456,7 +2466,7 @@ body {
 .wk-sh {
   display: flex;
   align-items: center;
-  padding: 14px 2px 8px;
+  padding: 10px 2px 6px;
 }
 .wk-sh:first-child { padding-top: 2px; }
 /* ══════════════════════════════════════════════════════
@@ -2530,7 +2540,7 @@ body {
 .wk-sh b.m { --tg: var(--s-m); }
 .wk-sh b.a { --tg: var(--s-a); }
 .wk-sh b.e { --tg: var(--s-e); }
-.wk-sh .c { margin-left: 8px; font-size: 11.5px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.wk-sh .c { margin-left: 8px; font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
 /* THE LIVE SESSION IS NOT RINGED, and that reverses the note that
    stood here. The argument was that the session you are in is the
    running block seen one level up, so it earns the accent — true, and
@@ -2663,7 +2673,7 @@ body {
      a long name opens the editor, which is the fault this control
      exists to remove. 80 = 3 (check inset) + 22 + 45 - 26 + 26 + 9,
      measured rather than guessed. */
-  padding: 11px 80px 11px 2px;
+  padding: 9px 80px 9px 2px;
   border: 0;
   /* A RULE BETWEEN ROWS, WHICH REVERSES A RULE THIS FILE ARGUED FOR.
      "Nothing is drawn between the rows" was written about rows with
@@ -2831,7 +2841,7 @@ body {
    those three is ever red. */
 .row .n em {
   font-style: normal;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 600;
   letter-spacing: .09em;
   text-transform: uppercase;
@@ -2887,7 +2897,7 @@ body {
    average, a share, how long ago — is quiet tabular type with a
    middle dot between, which is how a sentence separates two facts. */
 .row .dur, .pill {
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 500;
   color: var(--dim);
   font-variant-numeric: tabular-nums;
@@ -3094,7 +3104,7 @@ body {
 /* ── the group heading ──
    A session pill and a count, the week card's own heading reused on
    every list in the app: it is what makes them one family. */
-.grp-h { display: flex; align-items: center; gap: 8px; padding: 14px 2px 8px; font-size: 11px; color: var(--spent); font-variant-numeric: tabular-nums; }
+.grp-h { display: flex; align-items: center; gap: 8px; padding: 10px 2px 6px; font-size: 11px; color: var(--spent); font-variant-numeric: tabular-nums; }
 /* A HEADING, not a chip: it names the list under it, which is what
    small caps are for. The app's own .label treatment, so a section
    heading reads the same wherever one is. */
@@ -3341,7 +3351,7 @@ body {
   color: var(--ink);
 }
 .tab span {
-  font-size: 10px; font-weight: 600; letter-spacing: .01em;
+  font-size: 9.5px; font-weight: 600; letter-spacing: .01em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
 }
 .tab svg {
@@ -3566,7 +3576,7 @@ body {
 .label {
   display: block;
   margin: 14px 0 8px;
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 700;
   letter-spacing: .2em;
   text-transform: uppercase;
@@ -3609,14 +3619,14 @@ body {
   border-top: 1px solid var(--hair);
 }
 .parsed .p-day {
-  font-size: 12px; font-weight: 700; letter-spacing: .06em;
+  font-size: 11px; font-weight: 700; letter-spacing: .06em;
   color: var(--dim);
 }
 .parsed .p-name { font-size: 15px; font-weight: 600; }
 .parsed .p-meta {
   grid-column: 2;
   margin-top: 3px;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--dim);
   font-variant-numeric: tabular-nums;
 }
@@ -3709,7 +3719,7 @@ body {
 .menu-item .sub-note {
   display: block;
   margin-top: 3px;
-  font-size: 12px;
+  font-size: 11px;
   color: var(--dim);
 }
 .menu-item.bad { color: var(--bad); }
@@ -3811,7 +3821,7 @@ body {
   background: var(--g0);
   color: var(--ink);
   box-shadow: 0 0 0 1px var(--hair), 0 10px 30px -12px rgba(0, 0, 0, .8);
-  font-size: 14px;
+  font-size: 13px;
   opacity: 0;
   transform: translateY(8px);
   transition: opacity .22s ease, transform .22s ease;
@@ -3904,9 +3914,9 @@ body {
   border-radius: 2px;
   background: var(--wb-hue);
 }
-.wb-n { font-size: 12.5px; font-weight: 600; line-height: 1.2; }
+.wb-n { font-size: 11px; font-weight: 600; line-height: 1.2; }
 .wb-m {
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--spent);
   font-variant-numeric: tabular-nums;
 }
@@ -3917,7 +3927,7 @@ body {
    theme, and a line of type is not a card. Held to 4.5:1 on both
    faces, because it is 10.5px body type rather than a graphic. */
 .wb-f {
-  font-size: 10.5px;
+  font-size: 11px;
   line-height: 1.25;
   margin-top: 1px;
   color: color-mix(in srgb, var(--wb-hue) 62%, var(--ink));
@@ -4058,7 +4068,7 @@ body {
   padding: 0 6px;
   border: 0;
   border-radius: 7px;
-  font-size: 12px;
+  font-size: 11px;
   /* The names have to fit the share they are given rather than the
      track scrolling to fit them: a segment that clips is the reason
      the six-wide case is still a scroller. */
@@ -4159,7 +4169,7 @@ body {
 .wc-eff-l {
   display: block;
   margin-bottom: 8px;
-  font-size: 12.5px;
+  font-size: 11px;
   color: var(--dim);
 }
  /* .wc-ef and .wc-min as well as .wc-chip: these wear the chip's
@@ -4277,7 +4287,7 @@ body {
 .wo-c {
   flex: 1; min-width: 0; min-height: 34px; padding: 6px 0;
   border: 0; border-radius: 8px; background: none;
-  color: var(--dim); font: inherit; font-size: 11.5px; font-weight: 500;
+  color: var(--dim); font: inherit; font-size: 11px; font-weight: 500;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
 }
 .wo-c.is-on { background: var(--card); color: var(--ink); box-shadow: var(--card-shadow); }
@@ -4307,12 +4317,12 @@ body {
   display: flex; align-items: flex-end; gap: 4px;
   height: 54px; padding: 10px;
   background: linear-gradient(135deg, var(--wo-c), color-mix(in srgb, var(--wo-c) 67%, transparent));
-  color: #fff; font-size: 24px; font-weight: 700; letter-spacing: -.02em;
+  color: #fff; font-size: 19px; font-weight: 700; letter-spacing: -.02em;
   font-variant-numeric: tabular-nums; line-height: 1;
 }
 .wo-sw small { font-size: 11px; font-weight: 500; opacity: .85; }
 .wo-tx { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 12px 12px 6px; min-width: 0; }
-.wo-w { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; letter-spacing: -.01em; line-height: 1.15; min-width: 0; }
+.wo-w { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; letter-spacing: -.01em; line-height: 1.15; min-width: 0; }
 .wo-w i { flex: none; width: 12px; height: 12px; border-radius: 4px; background: var(--wo-c); }
 .wo-gp {
   padding: 2px 9px; border-radius: 999px;
@@ -4330,7 +4340,7 @@ body {
 .wo-mn {
   display: block;
   margin-bottom: 9px;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 700;
   letter-spacing: .1em;
   text-transform: uppercase;
@@ -4628,7 +4638,7 @@ body {
      "friends" sat alone on a line, which reads as a wrap fault rather
      than as a title. */
   max-width: 19ch;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -.02em;
@@ -4759,7 +4769,7 @@ body {
 }
 .mn-pt { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
 .mn-pt b { font-size: 15px; font-weight: 700; }
-.mn-pt span { font-size: 12.5px; color: var(--dim); }
+.mn-pt span { font-size: 11px; color: var(--dim); }
 
 /* ── THE RESULTS ARE A COLUMN, NOT A GRID OF COVERS ──
    A grid shows the jackets and hides the titles, and at 44px a jacket
@@ -4781,11 +4791,11 @@ body {
 .mn-hit:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
 .mn-ht2 { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .mn-ht2 b {
-  font-size: 14px; font-weight: 600;
+  font-size: 15px; font-weight: 600;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .mn-ht2 span {
-  font-size: 12px; color: var(--dim);
+  font-size: 11px; color: var(--dim);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 /* What you typed, offered above the results and whatever the search
@@ -4796,7 +4806,7 @@ body {
   background: var(--card);
   box-shadow: inset 0 1px 0 var(--card-edge);
 }
-.mn-say { margin: 8px 2px 0; font-size: 12.5px; color: var(--spent); }
+.mn-say { margin: 8px 2px 0; font-size: 11px; color: var(--spent); }
 
 .mn-note { min-height: 64px; resize: vertical; line-height: 1.45; }
 
@@ -4889,7 +4899,7 @@ body {
   pointer-events: none;
 }
 .mn-hist-ov b {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   color: #fff;
   line-height: 1.2;
@@ -5059,10 +5069,10 @@ body {
 
 .nm-read { display: flex; align-items: baseline; gap: 8px; margin-top: 2px; }
 .nm-read b {
-  font-size: 40px; font-weight: 800; letter-spacing: -.035em;
+  font-size: 26px; font-weight: 800; letter-spacing: -.035em;
   font-variant-numeric: tabular-nums; line-height: 1.05;
 }
-.nm-sub { font-size: 12.5px; color: var(--spent); margin-top: 3px; min-height: 17px; }
+.nm-sub { font-size: 11px; color: var(--spent); margin-top: 3px; min-height: 17px; }
 
 /* ── THE NATIVE BOX IS WANTED HERE, AND ONLY THE PAINT IS NOT ──
    The edit sheet's time fields had to have `appearance: none` because
@@ -5159,7 +5169,7 @@ body {
   background: var(--card);
   color: var(--dim);
   font: inherit;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   padding: 9px 4px;
@@ -5351,7 +5361,7 @@ body {
   border-bottom: 1px solid var(--hair);
 }
 .kid-row:last-child { border-bottom: 0; }
-.kid-n { flex: 1; font-size: 14px; }
+.kid-n { flex: 1; font-size: 13px; }
 .kid-x {
   width: 30px; height: 30px;
   flex: none;
@@ -5403,7 +5413,7 @@ body {
    browser's own rule. */
 .notes[hidden] { display: none !important; }
 
-.nt-none { padding: 4px 2px 12px; font-size: 13.5px; line-height: 1.6; color: var(--spent); }
+.nt-none { padding: 4px 2px 12px; font-size: 13px; line-height: 1.6; color: var(--spent); }
 .nt-none b { color: var(--ink); font-weight: 600; }
 
 /* ── THE LIST ── */
@@ -5422,10 +5432,10 @@ body {
   cursor: pointer;
 }
 .nt-card:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
-.nt-t { display: block; font-size: 15.5px; font-weight: 600; letter-spacing: -.01em; }
+.nt-t { display: block; font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
 .nt-p {
   margin: 5px 0 0;
-  font-size: 12.5px;
+  font-size: 11px;
   line-height: 1.4;
   color: var(--spent);
   display: -webkit-box;
@@ -5470,7 +5480,7 @@ body {
   border: 0; border-radius: 8px;
   background: none;
   color: var(--ink);
-  font: inherit; font-size: 21px; font-weight: 700; letter-spacing: -.025em;
+  font: inherit; font-size: 19px; font-weight: 700; letter-spacing: -.025em;
 }
 .nt-title::placeholder { color: var(--spent); font-weight: 600; }
 /* Reading, it is a heading rather than a field: a text box round the
@@ -5528,7 +5538,7 @@ body {
      the thing they are under. A step and a half up, and the clause
      goes with it — the two are one heading and moving one alone is
      what makes it read as a label with a note stuck on the end. */
-  font-size: 12.5px; font-weight: 700;
+  font-size: 13px; font-weight: 700;
   letter-spacing: .1em; text-transform: uppercase;
   color: var(--ink);
   /* ── A RULE UNDER THE NAME, WITH A LEAD-OUT ──
@@ -5554,7 +5564,7 @@ body {
 }
 .nt-hc {
   flex: 1;
-  font-size: 14px; font-weight: 500;
+  font-size: 15px; font-weight: 500;
   color: color-mix(in srgb, var(--c) 72%, var(--ink));
 }
 .nt-hw::placeholder { color: var(--spent); }
@@ -5585,6 +5595,10 @@ body {
    changes the type is the note looking like it changed. */
 .nt-mir, .nt-in {
   font: inherit;
+  /* 16px exactly, and it is the FIELD FLOOR rather than a step on the
+     scale: anything smaller and iOS zooms the page on focus. `.field`
+     carries the same number for the same reason, and the read twin is
+     held to the field so a mode switch cannot re-wrap the note. */
   font-size: 16px;
   line-height: 1.42;
   letter-spacing: 0;
@@ -5770,7 +5784,7 @@ body {
   border-radius: 999px;
   background: color-mix(in srgb, var(--ink) 9%, transparent);
   color: var(--dim);
-  font: inherit; font-size: 12px; font-weight: 600;
+  font: inherit; font-size: 13px; font-weight: 600;
   cursor: pointer;
 }
 .nt-tool:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
@@ -5801,6 +5815,10 @@ body {
    metrics as the pair above — the two have to be indistinguishable,
    because switching modes must not look like the note changed. */
 .nt-v {
+  /* 16px exactly, and it is the FIELD FLOOR rather than a step on the
+     scale: anything smaller and iOS zooms the page on focus. `.field`
+     carries the same number for the same reason, and the read twin is
+     held to the field so a mode switch cannot re-wrap the note. */
   font-size: 16px;
   line-height: 1.42;
   display: inline;
@@ -5901,7 +5919,7 @@ body {
   border: 0; border-radius: 999px;
   background: color-mix(in srgb, var(--ink) 9%, transparent);
   color: var(--dim);
-  font: inherit; font-size: 12.5px; font-weight: 600;
+  font: inherit; font-size: 13px; font-weight: 600;
   cursor: pointer;
 }
 .nt-lb.is-on { background: var(--ink); color: var(--paper); }
@@ -5958,7 +5976,7 @@ body {
 .nt-st.is-key b { font-weight: 700; }
 .nt-st i {
   display: block; margin-top: 2px;
-  font-size: 11.5px; font-style: normal; line-height: 1.45; color: var(--spent);
+  font-size: 11px; font-style: normal; line-height: 1.45; color: var(--spent);
 }
 /* A heading draws no bead at all — it was breaking a line that no
    longer runs, and a stub with nothing to break is a mark with
@@ -5966,7 +5984,7 @@ body {
 .nt-sh { position: relative; padding: 16px 0 4px; }
 .nt-sh:first-child { padding-top: 2px; }
 .nt-sh b, .nt-sp.is-edit .nt-row.is-head .nt-hw {
-  font-size: 10.5px; font-weight: 700;
+  font-size: 9.5px; font-weight: 700;
   letter-spacing: .16em; text-transform: uppercase;
   color: color-mix(in srgb, var(--c) 72%, var(--ink));
 }
@@ -5980,7 +5998,7 @@ body {
   margin-top: 2px; padding: 2px 0;
   border: 0; background: none;
   color: var(--spent);
-  font: inherit; font-size: 11.5px;
+  font: inherit; font-size: 11px;
 }
 .nt-sy::placeholder { color: var(--tick-off); }
 /* A step's own note is a text field, so it goes the way the line and
@@ -5999,7 +6017,7 @@ body {
 .nt-mk-s { font-size: 19px; font-weight: 700; letter-spacing: -.02em; line-height: 1.25; }
 .nt-mk-w {
   margin-top: 8px;
-  font-size: 12px; font-weight: 600;
+  font-size: 11px; font-weight: 600;
   font-variant-numeric: tabular-nums; letter-spacing: .02em;
   color: color-mix(in srgb, var(--c) 72%, var(--ink));
 }
@@ -6010,7 +6028,7 @@ body {
 .nt-mk.is-edit .nt-mir { font-size: 19px; font-weight: 700; letter-spacing: -.02em; line-height: 1.25; }
 .nt-dw { display: flex; align-items: center; gap: 9px; margin-top: 9px; }
 .nt-dl {
-  font-size: 10.5px; font-weight: 700;
+  font-size: 9.5px; font-weight: 700;
   letter-spacing: .16em; text-transform: uppercase;
   color: color-mix(in srgb, var(--c) 72%, var(--ink));
 }
@@ -6032,7 +6050,7 @@ body {
 .nt-di:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 .nt-gh {
   margin: 20px 0 6px;
-  font-size: 10.5px; font-weight: 700;
+  font-size: 9.5px; font-weight: 700;
   letter-spacing: .16em; text-transform: uppercase;
   color: color-mix(in srgb, var(--c) 72%, var(--ink));
 }
@@ -6058,7 +6076,7 @@ body {
 
 .met-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 7px; }
 .met-row .lab {
-  font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  font-size: 9.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
   color: color-mix(in srgb, var(--c) 72%, var(--ink));
 }
 .met-fig {
@@ -6079,7 +6097,7 @@ body {
   border: 0; border-radius: 999px; padding: 7px 13px 7px 11px;
   background: color-mix(in srgb, var(--c) 16%, transparent);
   color: var(--c);
-  font: inherit; font-size: 12.5px; font-weight: 650; cursor: pointer;
+  font: inherit; font-size: 13px; font-weight: 650; cursor: pointer;
 }
 .met-add:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
@@ -6093,10 +6111,10 @@ body {
   display: block;
 }
 .met-figbtn b {
-  display: block; font-size: 24px; font-weight: 700; line-height: 1;
+  display: block; font-size: 26px; font-weight: 700; line-height: 1;
   font-variant-numeric: tabular-nums; color: var(--ink);
 }
-.met-figbtn .met-of { font-size: 12px; font-weight: 500; color: var(--dim); display: block; margin-top: 4px; }
+.met-figbtn .met-of { font-size: 11px; font-weight: 500; color: var(--dim); display: block; margin-top: 4px; }
 .met-figbtn:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 .met-spark { position: relative; width: 118px; height: 38px; flex: none; }
 .met-spark .ty-ar .f { fill: color-mix(in srgb, var(--c) 20%, transparent); }
@@ -6109,7 +6127,7 @@ body {
 .met-stepper button {
   width: 28px; height: 28px; border-radius: 50%; border: 0;
   background: color-mix(in srgb, var(--ink) 9%, transparent); color: var(--ink);
-  font: inherit; font-size: 16px; font-weight: 600; line-height: 1;
+  font: inherit; font-size: 19px; font-weight: 600; line-height: 1;
   display: flex; align-items: center; justify-content: center; cursor: pointer;
 }
 .met-stepper button:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
@@ -6199,7 +6217,7 @@ body {
 .nt-body:not(.is-note) .nt-hc { display: none; }
 .nt-body.is-goal .nt-row.is-head .nt-hw {
   border-bottom: 0; padding-right: 10px;
-  font-size: 10.5px; letter-spacing: .16em;
+  font-size: 9.5px; letter-spacing: .16em;
   color: color-mix(in srgb, var(--c) 72%, var(--ink));
 }
 
@@ -6256,7 +6274,12 @@ body {
   border: 1px solid var(--card-edge); border-radius: 7px;
   background: var(--card);
   color: var(--ink);
-  font: inherit; font-size: 14px; font-weight: 500;
+  /* THE FIELD IS THE BODY STEP, NOT A CONTROL LABEL. It carries the
+     figure its own row is about, so it reads at the name beside it —
+     and a field is sized by what it holds rather than by the scale
+     step a chip would take, which is the same argument `.field` and a
+     note line both make one size up. */
+  font: inherit; font-size: 15px; font-weight: 500;
   font-variant-numeric: tabular-nums; text-align: right;
 }
 .bd-in::placeholder { color: var(--tick-off); font-weight: 500; }
@@ -6323,7 +6346,7 @@ body {
    buys is the gap being 16 above the track and 24 below, so it
    plainly belongs to the row it is under — at -14 it was 18 and 16,
    which is a divider floating between two rows. */
-.bd-dial { grid-column: 1 / -1; margin: -16px 0 -4px; }
+.bd-dial { grid-column: 1 / -1; margin: -14px 0 -4px; }
 /* One declaration per engine, and a rule of its own rather than a
    second value inside `.nm-dial`'s: the same selector written twice
    in one file is the duplicate the static check refuses, whichever
@@ -6358,7 +6381,7 @@ body {
 .bd-f { display: flex; align-items: center; gap: 10px; }
 .bd-f > span {
   flex: 1; min-width: 0;
-  font-size: 12.5px; color: var(--dim);
+  font-size: 11px; color: var(--dim);
 }
 .bd-f > input { flex: none; width: 128px; text-align: right; }
 
@@ -6367,7 +6390,7 @@ body {
    half the kinds. */
 .bd-dw { display: inline-flex; align-items: center; gap: 7px; }
 .bd-dw > span {
-  font-size: 10px; font-weight: 700; letter-spacing: .12em;
+  font-size: 9.5px; font-weight: 700; letter-spacing: .12em;
   text-transform: uppercase; color: var(--spent);
 }
 /* Two fields, two widths — so they do NOT share a rule and then
@@ -6382,7 +6405,7 @@ body {
   padding: 5px 7px;
   border: 1px solid var(--card-edge); border-radius: 8px;
   background: var(--card); color: var(--ink);
-  font: inherit; font-size: 12.5px; font-weight: 600;
+  font: inherit; font-size: 13px; font-weight: 600;
   font-variant-numeric: tabular-nums; text-align: right;
 }
 .bd-dy {
@@ -6392,7 +6415,7 @@ body {
   padding: 5px 7px;
   border: 1px solid var(--card-edge); border-radius: 8px;
   background: var(--card); color: var(--ink);
-  font: inherit; font-size: 12.5px; font-weight: 600;
+  font: inherit; font-size: 13px; font-weight: 600;
   font-variant-numeric: tabular-nums; text-align: right;
 }
 .bd-dy::-webkit-outer-spin-button, .bd-dy::-webkit-inner-spin-button {
@@ -6420,11 +6443,11 @@ body {
   gap: 2px 10px; padding: 18px 0 6px;
 }
 .bd-g > b {
-  font-size: 10.5px; font-weight: 700;
+  font-size: 9.5px; font-weight: 700;
   letter-spacing: .16em; text-transform: uppercase;
   color: color-mix(in srgb, var(--c) 72%, var(--ink));
 }
-.bd-g > i { font-style: normal; font-size: 11.5px; color: var(--spent); }
+.bd-g > i { font-style: normal; font-size: 11px; color: var(--spent); }
 .bd-g > em {
   font-style: normal; margin-left: auto;
   font-size: 13px; font-weight: 600; color: var(--dim);
@@ -6435,7 +6458,7 @@ body {
 .bd-hd, .bd-ft { display: flex; align-items: baseline; gap: 12px; }
 .bd-hd { padding: 6px 0 0; }
 .bd-k {
-  font-size: 10.5px; font-weight: 700; letter-spacing: .14em;
+  font-size: 9.5px; font-weight: 700; letter-spacing: .14em;
   text-transform: uppercase; color: var(--spent);
 }
 .bd-hd > b, .bd-ft > b {
@@ -6443,7 +6466,7 @@ body {
   font-size: 26px; font-weight: 700; letter-spacing: -.03em;
   font-variant-numeric: tabular-nums;
 }
-.bd-per { display: block; margin-top: 2px; font-size: 11.5px; color: var(--spent); }
+.bd-per { display: block; margin-top: 2px; font-size: 11px; color: var(--spent); }
 
 /* A plan row: name, the day if it has one, the figure. */
 /* ── THE QUALIFIER GETS A COLUMN ──
@@ -6455,13 +6478,13 @@ body {
 .bd-r { display: flex; align-items: baseline; gap: 10px; padding: 7px 0; }
 .bd-r > .q {
   flex: none; width: 54px;
-  font-size: 10px; font-weight: 600; letter-spacing: .04em;
+  font-size: 9.5px; font-weight: 600; letter-spacing: .04em;
   text-transform: uppercase; color: var(--spent);
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
 .bd-r > .n { font-size: 15px; font-weight: 500; min-width: 0; }
 .tk-l > .d {
-  font-size: 10.5px; font-weight: 600; color: var(--spent);
+  font-size: 11px; font-weight: 600; color: var(--spent);
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
 
@@ -6495,7 +6518,7 @@ body {
   margin: 18px 0 0; padding: 12px 14px;
   border: 0; border-radius: 12px;
   background: var(--ink); color: var(--paper);
-  font: inherit; font-size: 14px; font-weight: 600;
+  font: inherit; font-size: 13px; font-weight: 600;
   text-align: center; cursor: pointer;
 }
 .bd-go:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
@@ -6521,10 +6544,10 @@ body {
 .tk-hd { padding: 12px 0 0; }
 .tk-hd > b {
   display: block;
-  font-size: 40px; font-weight: 700; letter-spacing: -.035em; line-height: 1.05;
+  font-size: 26px; font-weight: 700; letter-spacing: -.035em; line-height: 1.05;
   font-variant-numeric: tabular-nums;
 }
-.tk-hd > span { display: block; margin-top: 3px; font-size: 11.5px; color: var(--spent); }
+.tk-hd > span { display: block; margin-top: 3px; font-size: 11px; color: var(--spent); }
 
 /* The gauge beside a spending row's figure. It was also the two pace
    bars in the head — those went with the head, and `.tk-t.is-lit` and
@@ -6550,7 +6573,7 @@ body {
   flex: 1; padding: 7px 0;
   border: 0; border-radius: 8px;
   background: none; color: var(--spent);
-  font: inherit; font-size: 12.5px; font-weight: 600;
+  font: inherit; font-size: 13px; font-weight: 600;
   text-align: center; cursor: pointer;
 }
 .tk-tb.is-on { background: var(--ink); color: var(--paper); }
@@ -6576,13 +6599,13 @@ body {
 .tk-fg > .x { flex: 1; min-width: 0; }
 .tk-fg > .x > b {
   display: block;
-  font-size: 20px; font-weight: 700; letter-spacing: -.025em; line-height: 1.15;
+  font-size: 19px; font-weight: 700; letter-spacing: -.025em; line-height: 1.15;
   font-variant-numeric: tabular-nums;
 }
 .tk-fg > .x > b.is-over { color: var(--bad); }
 .tk-fg > .x > span {
   display: block; margin-top: 2px;
-  font-size: 12px; color: var(--spent);
+  font-size: 11px; color: var(--spent);
 }
 .tk-fg > .tk-t { flex: 0 0 64px; }
 
@@ -6590,7 +6613,7 @@ body {
 .tk-l > .n { font-size: 15px; font-weight: 500; min-width: 0; }
 .tk-l > .f {
   margin-left: auto;
-  font-size: 12px; font-weight: 600; color: var(--dim);
+  font-size: 11px; font-weight: 600; color: var(--dim);
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
 /* A row whose track is not a SIBLING of the line has no gap to leave
@@ -6606,11 +6629,11 @@ body {
   width: 7px; height: 7px; border-radius: 50%;
 }
 .tk-lg > .x { flex: 1; min-width: 0; }
-.tk-lg > .x > .n { display: block; font-size: 14.5px; font-weight: 500; }
-.tk-lg > .x > .t { display: block; font-size: 10.5px; color: var(--spent); }
+.tk-lg > .x > .n { display: block; font-size: 15px; font-weight: 500; }
+.tk-lg > .x > .t { display: block; font-size: 11px; color: var(--spent); }
 .tk-lg > .a {
   flex: none;
-  font-size: 14.5px; font-weight: 600;
+  font-size: 15px; font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 .tk-un {
@@ -6663,7 +6686,7 @@ body {
   border-radius: 999px;
   background: none;
   color: var(--dim);
-  font: inherit; font-size: 12.5px; font-weight: 600;
+  font: inherit; font-size: 13px; font-weight: 600;
   cursor: pointer;
   max-width: 100%;
   overflow: hidden;
@@ -6873,7 +6896,7 @@ body {
 .cl-ld > u {
   display: block;
   text-decoration: none;
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 600;
   letter-spacing: .06em;
   color: var(--spent);
@@ -6882,7 +6905,7 @@ body {
 /* A pill on a line has room, so it is bigger and it never ellipsises
    — which is the one thing this view exists to do. */
 .cl-lt .cl-p {
-  font-size: 12px;
+  font-size: 11px;
   padding: 3px 8px;
   border-radius: 5px;
   white-space: normal;
@@ -6966,7 +6989,7 @@ body {
   align-self: stretch;
   text-align: right;
   font-style: normal;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--dim);
   font-variant-numeric: tabular-nums;
@@ -7007,7 +7030,7 @@ body {
   min-width: 0;
   border-radius: 3px;
   padding: 1px 3px;
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 600;
   letter-spacing: -.01em;
   line-height: 1.35;
@@ -7034,7 +7057,7 @@ body {
 .cl-more {
   position: absolute;
   left: 3px; top: 3px;
-  font-size: 8.5px;
+  font-size: 9.5px;
   font-weight: 600;
   color: var(--spent);
   line-height: 1.5;
@@ -7069,7 +7092,7 @@ body {
 
 .cl-sum {
   margin-top: 10px;
-  font-size: 12.5px;
+  font-size: 11px;
   font-weight: 500;
   color: var(--dim);
   font-variant-numeric: tabular-nums;
@@ -7086,7 +7109,7 @@ body {
 .cl-t {
   flex: none;
   width: 54px;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--dim);
   font-variant-numeric: tabular-nums;
@@ -7094,7 +7117,7 @@ body {
 .cl-n {
   flex: 1;
   min-width: 0;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--ink);
   overflow: hidden;

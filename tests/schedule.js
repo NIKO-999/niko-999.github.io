@@ -1970,15 +1970,39 @@ const SAID = [
     const t = document.querySelector('.title');
     const row = [...document.querySelectorAll('.row[data-id] .n')][0];
     const day = document.getElementById('scHdDay');
+    /* ── THE LARGEST THING DRAWN, not a multiple of one other thing ──
+       This read `day > row * 1.8`, which was two steps of the scale
+       expressed as a literal — and the day the scale collapsed from
+       thirty sizes onto six it came out at 1.73 and failed on a head
+       that is plainly the biggest thing on the screen. The claim the
+       head has to keep is that the DAY is what you read first, so it
+       is asserted as that: nothing drawn on the week is larger. */
+    let big = 0, at = '';
+    document.querySelectorAll('.poster *').forEach((e) => {
+      const r = e.getBoundingClientRect();
+      if (r.width < 1 || r.height < 1 || r.top > innerHeight) return;
+      const cs = getComputedStyle(e);
+      if (cs.visibility === 'hidden' || +cs.opacity === 0) return;
+      /* A heading clipped to a pixel is not drawn, and it is how this
+         app keeps the screen’s own name for a screen reader while
+         drawing none of it — .title and .ty-hist both. Skipped by
+         the MECHANISM rather than by a size, because the box really is
+         1x1 and a threshold would be a guess at the next one. */
+      if (cs.clipPath !== 'none') return;
+      if (![...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())) return;
+      const f = parseFloat(cs.fontSize);
+      if (f > big) { big = f; at = (e.className || e.tagName) + ' ' + e.textContent.trim().slice(0, 12); }
+    });
     return { title: t.getBoundingClientRect().width,
              day: px(day), sub: px(document.getElementById('scHdDate')),
-             row: px(row), text: day.textContent,
+             row: px(row), text: day.textContent, big, at,
              ic: !!document.querySelector('.h-ic svg') };
   });
   ok('the app\u2019s own name is not drawn on the screen at all',
     head.title <= 1, head);
-  ok('...and the day is, at more than twice a block\u2019s name',
-    head.day > head.row * 1.8 && /^[A-Z][a-z]+$/.test(head.text), head);
+  ok('...and the day is the largest thing drawn on the week',
+    head.day === head.big && head.day > head.row * 1.5
+    && /^[A-Z][a-z]+$/.test(head.text), head);
   ok('...over one quieter line, beside a glyph saying which screen',
     head.sub < head.day && head.ic, head);
   ok('the head names the date, what is on it, and the clock',
@@ -2368,63 +2392,78 @@ const SAID = [
   ok('and tinted, not merely transparent',
     /rgba?\(|color\(/.test(bar.tint) && !/rgba\(0, 0, 0, 0\)/.test(bar.tint), bar);
 
-  /* And the labels survive a row passing underneath, which is the only
-     state a fixed bar is about. Swept rather than sampled once: one
-     scroll offset misses the row that breaks it by four pixels. */
+  /* ── A LABEL CLEARS 4.5:1 ON THE PAGE IT IS DRAWN OVER ──
+     This swept `window.scrollTo(0, y)` over nine offsets to put a row
+     behind the bar. Two things were wrong with it and they are worth
+     keeping written down.
+
+     NOTHING SCROLLED. The poster is a flex column and each pane does
+     its own scrolling, so the document's height IS the viewport's —
+     every one of the nine samples was the identical frame. And there
+     is nothing for the sweep to find either way: measured at 390x844
+     the poster's bottom is 748 and the pill's top is 767, so a row
+     CANNOT reach the bar since every tab became a column that stops
+     above it. That geometry is asserted below rather than assumed, so
+     the day a pane goes back to being a plain block this check fails
+     and says the sweep has to come back.
+
+     AND IT WAS READING ITS OWN ANTIALIASING. The technique skipped a
+     pixel whose colour was near the label's, guarded by a fixed ±2
+     neighbourhood — which works while a glyph's stroke is wider than
+     its fringe. At 9.5px a THIRD of the label's box is fringe, so the
+     day the type came down half a pixel a fringe pixel scored 1.85:1
+     against a bar nothing had touched. Measured from the most common
+     pixel outward instead, which is the polarity-agnostic technique
+     this file already settled on twice. */
   const swept = await (async () => {
     /* ── THE STATE IS ESTABLISHED, NOT INHERITED ──
-       This is about the bar with the WEEK behind it, and it ran on
-       whatever the previous section happened to leave up: a sheet was
-       open, its --spent text sat behind the "Today" label, and the
-       sweep reported 1.62:1 against a bar that had not changed. Three
-       runs went into the number before the payload was made to say
-       which label and what was behind it — which is the fix worth
-       keeping as much as the Escape is. */
+       It ran on whatever the previous section happened to leave up: a
+       sheet was open, its --spent text sat behind the "Today" label,
+       and it reported 1.62:1 against a bar that had not changed. */
     await page.keyboard.press('Escape');
     await page.waitForTimeout(420);
     await page.evaluate(() => document.getElementById('scTabWeek').click());
     await page.waitForTimeout(420);
-    let low = 99, at = 0, worst = null;
-    for (let y = 0; y <= 200; y += 25) {
-      await page.evaluate((v) => window.scrollTo(0, v), y);
-      await page.waitForTimeout(60);
-      const png = PNG.sync.read(await page.screenshot());
-      const px = (x, yy) => { const i = (png.width * Math.round(yy * dpr)
-        + Math.round(x * dpr)) << 2; return [png.data[i], png.data[i + 1], png.data[i + 2]]; };
-      for (const el of await page.$$('.tab span:last-child')) {
-        const b2 = await el.boundingBox(); if (!b2) continue;
-        const col = (await el.evaluate((e) => getComputedStyle(e).color))
-          .match(/[\d.]+/g).slice(0, 3).map(Number);
-        const lab = await el.evaluate((e) => e.textContent);
-        const near = (q) => Math.abs(q[0] - col[0]) + Math.abs(q[1] - col[1])
-                          + Math.abs(q[2] - col[2]) < 110;
-        for (let x = 2; x < b2.width - 2; x += 3) {
-          for (let yy = 1; yy < b2.height - 1; yy += 1) {
-            let ok2 = true;
-            for (let d = -2; d <= 2 && ok2; d++)
-              if (near(px(b2.x + x + d, b2.y + yy)) || near(px(b2.x + x, b2.y + yy + d))) ok2 = false;
-            if (!ok2) continue;
-            const r = ratio(col, px(b2.x + x, b2.y + yy));
-            /* WHICH label and WHAT was behind it. Without this the
-               failure is a bare number and the state that produced it
-               has to be guessed at — which cost three runs. Read from
-               the pixel buffer rather than the page, because an await
-               inside this loop is a round trip per improving sample. */
-            if (r < low) { low = r; at = y;
-              worst = { lab, col, bg: px(b2.x + x, b2.y + yy) }; }
-          }
+    const png = PNG.sync.read(await page.screenshot());
+    const px = (x, y) => { const i = (png.width * Math.round(y * dpr)
+      + Math.round(x * dpr)) << 2; return [png.data[i], png.data[i + 1], png.data[i + 2]]; };
+    const rows = [];
+    for (const el of await page.$$('.tab span:last-child')) {
+      const b2 = await el.boundingBox(); if (!b2) continue;
+      const col = (await el.evaluate((e) => getComputedStyle(e).color))
+        .match(/[\d.]+/g).slice(0, 3).map(Number);
+      const lab = await el.evaluate((e) => e.textContent);
+      const tally = {};
+      for (let x = 0; x < b2.width; x++)
+        for (let y = 0; y < b2.height; y++) {
+          const k = px(b2.x + x, b2.y + y).join(',');
+          tally[k] = (tally[k] || 0) + 1;
         }
-      }
+      const bg = Object.keys(tally).sort((u, v) => tally[v] - tally[u])[0]
+        .split(',').map(Number);
+      rows.push({ lab, col, bg, r: +ratio(col, bg).toFixed(2) });
     }
-    await page.evaluate(() => window.scrollTo(0, 0));
-    const sheetUp = await page.evaluate(() => {
-      const s = document.getElementById('scSheet');
-      return !!s && !s.hidden;
-    });
-    return { low: +low.toFixed(2), at, worst, sheetUp };
+    const geo = await page.evaluate(() => ({
+      poster: Math.round(document.querySelector('.poster').getBoundingClientRect().bottom),
+      pill: Math.round(document.querySelector('.tabs').getBoundingClientRect().top),
+      doc: document.documentElement.scrollHeight, win: innerHeight }));
+    const worst = rows.slice().sort((u, v) => u.r - v.r)[0];
+    return { rows, worst, low: worst ? worst.r : 0, geo,
+      grounds: [...new Set(rows.map((q) => q.bg.join(',')))].length };
   })();
-  ok(`a label clears 4.5:1 with a row behind it (worst ${swept.low}:1 at ${swept.at}px)`,
-    swept.low >= 4.5, swept);
+  ok(`a bar label clears 4.5:1 on its own ground (worst ${swept.low}:1 on ${
+    swept.worst && swept.worst.lab})`,
+    swept.rows.length === 5 && swept.rows.every((q) => q.r >= 4.5), swept);
+  /* Two grounds, because the lit tab sits on the pill's own card and
+     the other four sit on the page — one ground would mean the sweep
+     had looked at one surface five times. */
+  ok('...on both of the two grounds the bar has', swept.grounds === 2, swept);
+  /* AND NOTHING CAN PASS BEHIND IT, which is what retired the sweep
+     this replaced. Stated as the measurement, so a pane that goes back
+     to being a plain block fails here rather than silently needing the
+     old check again. */
+  ok('...and no pane can put a row behind the bar at all',
+    swept.geo.poster < swept.geo.pill && swept.geo.doc <= swept.geo.win, swept.geo);
 
   /* ── TWO TAPS ON A SHOWING UP TILE ──
      The tile is one control: a tap logs and two open the twenty-six
@@ -17465,8 +17504,17 @@ const SAID = [
        reaches rather than about a margin.
 
        The gap is asserted beside it: the track has to read as
-       belonging to the row ABOVE it rather than floating between two,
-       which at -14 it did — 18 above against 16 below. */
+       belonging to the row ABOVE it rather than floating between two.
+
+       BOTH FIGURES WERE RE-MEASURED when the type came onto one
+       scale. The field is the body step now, so it is 27px tall
+       where it was 24 — and at the old -16 pull the dial’s box
+       closed on the field’s bottom exactly, which is a boundary
+       rather than a margin and drifted over it. Swept again across
+       the pair: -14 under a 15px field is 21 above against 25 below
+       with three pixels of the field still free, where -16 owns the
+       field’s last row and -12 puts the track nearer the next
+       row than its own. */
     const dvPull = await dvPage.evaluate(() => {
       const rows = [...document.querySelectorAll('.nt-row')]
         .filter((r) => r.querySelector('.bd-dial'));
