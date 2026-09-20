@@ -11571,3 +11571,144 @@ actually for.
 it beside process rather than at the end, because a block naming
 several reads the tags in the same order every time regardless of
 when you attached them.
+
+## A budget is adjusted by dragging
+
+Asked for as a screen — two screenshots of a budget calculator with
+three headline figures, a stacked bar, a legend under it, an income
+field, and then every expense as a slider you drag with the surplus
+updating live. *I want our budget to be like this.*
+
+**MOST OF THAT PICTURE WAS ALREADY HERE, AND TWO PARTS OF IT WERE
+DELIBERATELY NOT.** The stack is shipped. The group colours are
+shipped. The legend was REMOVED on the measured argument that
+colouring the headings makes the headings the legend and saves a whole
+row of chrome, and the three-figure head is the one the tracker was
+cut down FROM — five registers and 363px above the first row, picked
+off an option sheet by screenshot, where the shipped head buys seven
+rows back. Copying the reference wholesale would have undone both.
+
+**WHAT WAS GENUINELY MISSING IS THE INTERACTION**, and it is the whole
+of what shipped: the reference's own section is titled *Adjust*, which
+means it is a MODE, and Gemini only drew it permanently on screen
+because it had one screen to draw. This app already has that mode. So
+the plan face — the thing you read — is untouched at 169px of chrome
+and ten rows above the fold, and everything below lands in Edit, which
+is where the figures were already being changed.
+
+**EDITING A BUDGET HAD NO RUNNING TOTAL ANYWHERE ON IT.** You typed a
+figure and found out what it left by leaving. The one question you are
+asking while you change a number is what it leaves, so the buffer and
+the stack are pinned above the rows and every row is dragged against
+them.
+
+**STICKY, WHICH IS THE WHOLE OF WHY IT WORKS ON A PHONE.** The figure
+has to be readable while a thumb is on a dial four rows down, and a
+head that scrolls away is a head you cannot drag against — the workout
+board's sticky foot, at the other edge. Measured: pinned at the pane's
+own top with 500px scrolled. Below `.nt-tools` at 45 and never level
+with it, because a sticky box that outranked the strip would take the
+presses meant for it.
+
+**IT IS THE PLAN'S OWN TWO MARKS, NOT A THIRD DRAWING.** The same
+`.bd-k` and figure the plan face ends on, and the same `.bd-stk` it
+opens with — so what you watch move while you drag is the picture you
+came back to read. `Short by` in `--bad` past the income, which is
+that footer's own word.
+
+**A REPAINT WOULD TAKE THE DIAL OUT FROM UNDER YOUR THUMB.** A drag
+rewrites the strip alone — the search field's own lesson, where a
+redraw per keystroke destroyed the input between one character and the
+next and reported as *it cancels out my writing*. Asserted as the same
+NODE surviving its own input, because a rebuild that happened to
+restore the value passes any check on the figure.
+
+**AN `input[type=range]`, NEVER A DIV WITH A POINTER HANDLER**, and
+`.nm-dial` rather than a second drawing of one. A drag reaches neither
+a keyboard nor a screen reader; a range is arrows, Home, End and a
+spoken value for free. The field stays beside it: the dial makes the
+common answer a thumb and the field still reaches every other one,
+which is the number sheet's own split between its marks and its track.
+
+**THE TRACK WEARS ITS OWN GROUP'S COLOUR, and that was the second
+render rather than the first.** The strip says which colour each group
+is and the rows said nothing at all — the picture and the controls
+that move it were two screens' worth of information with no link
+between them. Drag an orange dial and the orange block above is the
+one that grows. It is the only thing a colour ever says here, and it
+costs no height to say. Four kinds are four hues, asserted as four
+DISTINCT ones, because a build that put one colour on all of them
+passes any check that counts the dials.
+
+**AND CHROMIUM DRAWS A RANGE'S FILLED HALF FROM A CUSTOM PROPERTY**,
+not from the value — so every writer of one has to set `--fill` on
+each input or the track sits empty under a thumb that has plainly
+moved. The first render had exactly that and it read as a slider that
+was not working.
+
+**THE CEILING IS TWICE THE ROW'S OWN FIGURE, NEVER A SHARE OF THE
+INCOME.** One ceiling off the income makes every track comparable and
+the small rows unaimable: a $45 phone bill on a $2,300 track is four
+per cent of it, which is the workout ring's own fault at a different
+scale. Twice its own figure puts every handle at the middle of its own
+track with equal room both ways, and the stack directly above already
+answers how the rows compare — **the track is for AIMING and the
+picture is for COMPARING.**
+
+**AND NOT THROUGH `scBudNice`, WHICH SATURATES.** That ladder ends at
+$1,000 because it picks the STEP a spending row adds in, where a rung
+above a thousand dollars would be absurd. Used as a ceiling it pins
+every row over five hundred at the end of its own track: measured, a
+$1,500 line came back with `max` 100000, its value clamped to 100000
+and its thumb at **100%**, with no room left to raise it. A decade
+that keeps climbing reads the same and has nothing to run out of —
+the same line now reads max 300000 at **50%**.
+
+**AND THE CHECK FOR IT COULD NOT FAIL AS FIRST WRITTEN.** It asked
+whether the ceiling cleared the figure — and a ceiling stuck at
+$1,000 is still ABOVE a $900 one, so it passed on the bug it was
+written for. What the saturation actually costs is ROOM, so that is
+what is measured: the thumb keeps a real fraction of its track above
+it. Proved by reverting the cap and watching 50% become 100%.
+
+**THE TRACK RESCALES WHILE YOU TYPE AND NEVER WHILE YOU DRAG**, which
+is the only order that is safe: a figure typed past the ceiling would
+otherwise pin the thumb at the end and then snap your number down to
+the cap the first time you touched it. Typing is not a gesture with a
+thumb on the track, so moving the ceiling there costs nothing — and a
+programmatic write to the field fires no `input`, so a drag can never
+rescale its own track mid-gesture.
+
+**THE FILL IS MEASURED AGAINST THE GROUND, NEVER AGAINST THE TRACK**,
+which is the habit progress bar's own finding arriving at a second
+control. Lit against unlit runs 2.29:1 for the violet on the dark face
+and no neutral fixes it — the requirement is wrong rather than the
+design. Against the page the worst of the four is **3.98:1 dark and
+4.20:1 light**, and the unlit track is a SURFACE held to what every
+other unlit mark here is held to.
+
+**WHAT IS NOT THERE IS GROUP HEADINGS IN EDIT**, and that is a cost
+rather than an oversight. The rows are drawn in record order, which is
+what makes Return, Backspace and drag-to-reorder work on them;
+grouping them would reorder the list away from the record and take all
+three with it. The track colour carries which group a row is in, and
+the reading face one press away has the headings in full.
+
+**AND NO INCOME IS NOT BEING SHORT — a rule this strip broke on the
+way in.** The plan face already carries it: with nothing set the
+buffer is minus everything the four groups come to, so a fresh budget
+announced itself as short by its own total, in red, which is the
+screen telling you off for not having filled a field in yet. The strip
+was written straight past that and did it again. What the four groups
+COME TO is a fact rather than a judgement, and it is the only figure
+there is to give until there is an income to measure it against — so
+it says `Total` until there is one, and the stack is put away with it,
+because five shares of nothing is not a proportion.
+
+**And the rows go 37px to 75, so four reach the fold where ten did.**
+That is the trade and it is only affordable because it is paid in the
+mode where you are changing one number at a time rather than reading
+thirteen. The 44px press target is kept whole; the negative margins
+pull the DRAWN track back under its own name, which it needed — left
+in flow the 14px track floated fifteen pixels clear and read as a
+divider between two rows rather than as part of one.

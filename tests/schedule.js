@@ -17158,6 +17158,213 @@ const SAID = [
     await ckCtx.close();
   }
 
+  /* ══════════════════════════════════════════════════════════════
+     A BUDGET IS ADJUSTED BY DRAGGING, AND THE BUFFER RIDES THE TOP
+
+     Editing a budget was a column of fields with no running total on
+     it anywhere: you typed a figure and found out what it left by
+     leaving. The question you are asking while you change a number
+     is what it leaves, so the answer is pinned above the rows and
+     every row is draggable against it.
+
+     Four halves, and each passes on another's bug: the strip has to
+     MOVE on a drag, the drag must not repaint the dial out from
+     under the thumb, the track has to wear its own group's colour so
+     the picture and the control that moves it are linked, and a
+     figure typed past the dial's ceiling has to move the ceiling
+     rather than being clamped down to it.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    const dvCtx = await browser.newContext({ ...PHONE });
+    const dvPage = await dvCtx.newPage();
+    const dvErrs = [];
+    dvPage.on('pageerror', (e) => dvErrs.push(String(e)));
+    dvPage.on('console', (m) => { if (m.type() === 'error') dvErrs.push(m.text()); });
+    const dvL = (i, bk, x, cents) => ({ i, h: 0, c: '', x, y: '', m: 0, w: [],
+      bk, $: cents, dy: 0, mk: 0 });
+    /* One row of each kind, so "the tracks differ by group" is a
+       claim a fixture of four spending rows could not make. */
+    const DV = {
+      id: 'nDv', t: 'Fortnight', u: Date.now(), k: 'bud', a: 'blue',
+      inc: 200000, cs: '2026-08-25', cl: 14,
+      l: [
+        dvL('d1', 'fix', 'Rent', 60000),
+        dvL('d2', 'est', 'Power', 12000),
+        dvL('d3', 'var', 'Groceries', 40000),
+        dvL('d4', 'dep', 'Savings', 30000)
+      ]
+    };
+    await budSeed(dvPage, [DV], {});
+
+    /* THE READING FACE IS UNTOUCHED, which is the half that pays for
+       all of this: the plan is the screen whose whole job is the
+       rows, and a dial on each of them is the head-shrinking lesson
+       being undone from the other end. */
+    const dvRead = await dvPage.evaluate(async () => {
+      document.querySelector('.nt-card').click();
+      await new Promise((z) => setTimeout(z, 380));
+      return {
+        dials: document.querySelectorAll('.bd-dial').length,
+        strip: document.querySelectorAll('.bd-lv').length,
+        rows: document.querySelectorAll('.bd-r').length,
+      };
+    });
+    ok('the plan face draws no dial and no live strip',
+      dvRead.dials === 0 && dvRead.strip === 0 && dvRead.rows === 4, dvRead);
+
+    const dvOpen = await dvPage.evaluate(async () => {
+      document.getElementById('scNtEd').click();
+      await new Promise((z) => setTimeout(z, 320));
+      /* The tools strip is built when a LINE takes focus, so the two
+         can only be compared in the state where they are both on
+         screen — which is also the only state where they could
+         collide. Read cold, `.nt-tools` is simply not in the
+         document and the comparison takes `null`, which crashes the
+         file forty assertions early rather than failing named. */
+      const f0 = document.querySelector('.nt-in');
+      if (f0) f0.focus();
+      await new Promise((z) => setTimeout(z, 240));
+      const lv = document.querySelector('.bd-lv');
+      const pane = document.querySelector('#scNotePane');
+      const tools = document.querySelector('.nt-tools');
+      const dials = [...document.querySelectorAll('.bd-dial')];
+      return {
+        has: !!lv,
+        key: (lv.querySelector('.bd-k') || {}).textContent,
+        big: (lv.querySelector('.bd-lvh > b') || {}).textContent,
+        sticky: getComputedStyle(lv).position,
+        dials: dials.length,
+        ranges: dials.filter((d) => d.type === 'range').length,
+        named: dials.filter((d) => (d.getAttribute('aria-label') || '').length > 3).length,
+        hues: dials.map((d) => getComputedStyle(d).getPropertyValue('--c').trim()),
+        /* Below `.nt-tools` at 45, never level with it: a sticky box
+           that outranked the strip would take its presses. */
+        z: +getComputedStyle(lv).zIndex,
+        hasTools: !!tools,
+        toolsZ: tools ? +getComputedStyle(tools).zIndex : -1,
+        paneScroll: getComputedStyle(pane).overflowY,
+      };
+    });
+    ok('editing a budget pins a live buffer strip above the rows',
+      dvOpen.has && dvOpen.key === 'Buffer' && dvOpen.big === '$580.00',
+      { key: dvOpen.key, big: dvOpen.big });
+    /* A check that finds nothing must not pass, so the strip being
+       on screen is asserted beside the comparison against it. */
+    ok('...and it is sticky against the pane, under the tools strip',
+      dvOpen.sticky === 'sticky' && dvOpen.hasTools && dvOpen.z < dvOpen.toolsZ
+      && dvOpen.paneScroll === 'auto', dvOpen);
+    ok('every budget row is a real range input with a name on it',
+      dvOpen.dials === 4 && dvOpen.ranges === 4 && dvOpen.named === 4, dvOpen);
+    /* A colour says WHICH and nothing else, so four kinds are four
+       hues — and a build that put one colour on all of them passes
+       any check that only counts the dials. */
+    ok('...and each track wears its own group\'s colour',
+      new Set(dvOpen.hues).size === 4, dvOpen.hues);
+
+    const dvDrag = await dvPage.evaluate(async () => {
+      const rowOf = (name) => [...document.querySelectorAll('.nt-row')]
+        .find((r) => (r.querySelector('.nt-in') || {}).value === name);
+      const gro = rowOf('Groceries');
+      if (!gro) throw new Error('no Groceries row to drag');
+      const dial = gro.querySelector('.bd-dial');
+      const field = gro.querySelector('.bd-in');
+      const buf = () => document.querySelector('.bd-lvh > b').textContent;
+      const segs = () => [...document.querySelectorAll('.bd-lv .bd-stk > i')]
+        .map((i) => Math.round(parseFloat(i.style.width)));
+      dial.dataset.mine = '1';
+      const was = { buf: buf(), segs: segs(), max: dial.max, val: +dial.value };
+      dial.value = 20000;
+      dial.dispatchEvent(new Event('input', { bubbles: true }));
+      await new Promise((z) => setTimeout(z, 80));
+      const now = { buf: buf(), segs: segs(), field: field.value,
+        /* THE DIAL MUST SURVIVE ITS OWN INPUT. A repaint per drag is
+           the search field rebuilt under the caret, one screen over —
+           and it would take the thumb with it mid-gesture. */
+        same: !!gro.querySelector('.bd-dial[data-mine]'),
+        fill: dial.style.getPropertyValue('--fill') };
+      /* Past the income and the strip says so in the plan's own
+         words, rather than drawing a negative buffer. A row's own
+         ceiling is twice its figure, so a track alone cannot reach
+         past an income four times it — the figure is typed up first
+         and then DRAGGED over, which is the gesture the claim is
+         about. */
+      field.value = '1500.00';
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+      await new Promise((z) => setTimeout(z, 80));
+      /* THE THUMB MUST NOT BE PINNED AT THE END OF ITS OWN TRACK,
+         which is the whole of what the saturating ladder did and the
+         only reading that catches it: a ceiling stuck at $1,000 is
+         still ABOVE a $900 figure, so a check that only asks whether
+         the max clears the value passes on the bug. What it cannot
+         do is leave room to raise it. */
+      const ceiling = { max: +dial.max, val: +dial.value,
+        fill: parseFloat(dial.style.getPropertyValue('--fill')) };
+      dial.value = dial.max;
+      dial.dispatchEvent(new Event('input', { bubbles: true }));
+      await new Promise((z) => setTimeout(z, 80));
+      const short = { key: document.querySelector('.bd-lv .bd-k').textContent,
+        over: document.querySelector('.bd-lv').classList.contains('is-over') };
+      /* AND TYPING PAST THE CEILING MOVES IT, in both directions.
+         `scBudNice` ends at $1,000 because it picks a spending row's
+         STEP; used as a cap it pinned every row over five hundred at
+         the end of its own track with no room left to raise it. */
+      field.value = '900.00';
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+      await new Promise((z) => setTimeout(z, 700));
+      const typed = { max: +dial.max, val: +dial.value,
+        stored: JSON.parse(localStorage.getItem('sched.note.v1'))
+          .list[0].l.find((x) => x.x === 'Groceries').$ };
+      return { was, now, ceiling, short, typed };
+    });
+    ok('a drag moves the buffer and the stack, live',
+      dvDrag.now.buf !== dvDrag.was.buf
+      && dvDrag.now.segs.join(',') !== dvDrag.was.segs.join(','),
+      { was: dvDrag.was, now: dvDrag.now });
+    ok('...and the field follows the thumb',
+      dvDrag.now.field === '200.00', dvDrag.now.field);
+    ok('...without repainting the dial out from under it',
+      dvDrag.now.same && dvDrag.now.fill === '25%', dvDrag.now);
+    ok('past the income the strip says Short by rather than a minus',
+      dvDrag.short.key === 'Short by' && dvDrag.short.over, dvDrag.short);
+    ok('a figure typed past the ceiling moves it, never clamps the figure',
+      dvDrag.typed.stored === 90000 && dvDrag.typed.val === 90000
+      && dvDrag.typed.max > 90000, dvDrag.typed);
+    ok('...and the thumb keeps room above it rather than pinning at the end',
+      dvDrag.ceiling.val === 150000 && dvDrag.ceiling.max >= 300000
+      && dvDrag.ceiling.fill <= 60, dvDrag.ceiling);
+    /* ── AND NO INCOME IS NOT BEING SHORT ──
+       The plan face's own rule, which this strip reintroduced the bug
+       of: with nothing set the buffer is minus everything the four
+       groups come to, so a fresh budget announced itself as short by
+       its own total, in red. Both halves, because "it says Total"
+       passes on a build that never says Buffer at all. */
+    const dvNoInc = await dvPage.evaluate(async () => {
+      const inc = [...document.querySelectorAll('.bd-f')]
+        .find((f) => /Net income/.test(f.textContent)).querySelector('input');
+      inc.value = '';
+      inc.dispatchEvent(new Event('input', { bubbles: true }));
+      await new Promise((z) => setTimeout(z, 120));
+      const lv = document.querySelector('.bd-lv');
+      const off = lv.querySelector('.bd-stk').classList.contains('is-off');
+      const seen = { key: lv.querySelector('.bd-k').textContent,
+        big: lv.querySelector('.bd-lvh > b').textContent,
+        over: lv.classList.contains('is-over'), stackOff: off };
+      inc.value = '2000.00';
+      inc.dispatchEvent(new Event('input', { bubbles: true }));
+      await new Promise((z) => setTimeout(z, 120));
+      seen.backKey = lv.querySelector('.bd-k').textContent;
+      seen.backOff = lv.querySelector('.bd-stk').classList.contains('is-off');
+      return seen;
+    });
+    ok('with no income the strip totals the groups rather than calling you short',
+      dvNoInc.key === 'Total' && dvNoInc.over === false
+      && dvNoInc.stackOff === true, dvNoInc);
+    ok('...and the buffer and the stack come back the moment one is set',
+      dvNoInc.backKey === 'Buffer' && dvNoInc.backOff === false, dvNoInc);
+    ok('nothing threw through the budget dials', dvErrs.length === 0, dvErrs.slice(0, 4));
+    await dvCtx.close();
+  }
+
   /* ── AND A PUSH THAT HAPPENS FOR SOME OTHER REASON IS NOT CARRYING
      ONE ── Its own context, because the one above asserts that NO
      request leaves and this one has to make one. The friends half is

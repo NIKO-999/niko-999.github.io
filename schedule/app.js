@@ -12521,6 +12521,33 @@
     return scBudNice(Math.max(100, Math.round((L.$ || 1600) / 16)));
   }
 
+  /* ── TWICE WHAT THE ROW IS, NEVER A SHARE OF THE INCOME ──
+     One ceiling off the income makes every track comparable and the
+     small rows unaimable: a $45 phone bill on a $2,300 track is four
+     per cent of it, which is the workout ring's own fault — at a cap
+     of 120 minutes every session sat in the bottom of the arc and the
+     top was never drawn. Twice its own figure puts every handle in
+     the lower half of its own track with real room either way, and
+     the stack directly above already answers how the rows compare —
+     so the track is for AIMING and the picture is for COMPARING.
+
+     Rounded up to a readable figure and floored at $100, so a line
+     you have not priced yet still has somewhere to drag to.
+
+     AND NOT THROUGH `scBudNice`, WHICH SATURATES. That ladder ends at
+     $1,000 because it exists to pick the STEP a spending row adds in,
+     where a rung above a thousand dollars would be absurd — as a
+     CEILING the same list pins every row over five hundred to the end
+     of its own track, measured: a $900 line came back with its thumb
+     at 90% and no room left to raise it. A decade that keeps climbing
+     is the same rounding with nothing to run out of. */
+  function scBudCap(L) {
+    var want = Math.max((L.$ || 0) * 2, 10000);
+    var unit = 10000;
+    while (unit * 20 < want) unit *= 10;
+    return Math.ceil(want / unit) * unit;
+  }
+
   /* ── THE MONEY SHEET ──
      The same drawing the water and steps dials already have, down to
      the class names, because that is what stops the two from
@@ -13338,6 +13365,12 @@
        it — held on, it would fire against a chip that is no longer in
        the document. */
     scNtPenSync = null;
+    /* The one hook a budget's rows reach the live strip through. A
+       dial four rows down has to move the buffer without repainting
+       the pane it is sitting in, so the strip publishes its own
+       refresh here and the next paint clears it — the tools strip's
+       own arrangement, for the same reason it has one. */
+    var budLive = null;
     var crumb = scEl('div', 'nt-crumb');
     var back = scEl('button', 'nt-back');
     back.type = 'button';
@@ -13479,6 +13512,88 @@
          fields had to — Safari keeps its own metrics otherwise and
          overflows the track however it is sized. */
       if (n.k === 'bud') {
+        /* ── THE BUFFER RIDES THE TOP WHILE YOU ADJUST ──
+           Editing a budget was a column of fields with no running
+           total anywhere on it: you typed a figure and found out what
+           it did to the buffer by leaving. The one question you are
+           asking while you change a number is what it leaves, so the
+           answer is on screen the whole time you are changing it.
+
+           STICKY, which is the whole of why it works on a phone. The
+           figure has to be visible while your thumb is on a dial four
+           rows down, and a head that scrolls away is a head you
+           cannot drag against — the workout board's own sticky foot,
+           at the other edge.
+
+           IT IS THE PLAN'S OWN TWO MARKS, NOT A THIRD DRAWING. The
+           same `.bd-k` / figure pair the plan face ends on and the
+           same `.bd-stk` it opens with, so what you watch move while
+           you drag is the picture you came back to read. */
+        var lv = scEl('div', 'bd-lv');
+        var lvh = scEl('div', 'bd-lvh');
+        var lvk = scEl('span', 'bd-k');
+        var lvb = scEl('b');
+        lvh.appendChild(lvk);
+        lvh.appendChild(lvb);
+        lv.appendChild(lvh);
+        var lvs = scEl('div', 'bd-stk');
+        lvs.setAttribute('role', 'img');
+        lv.appendChild(lvs);
+        /* A REPAINT WOULD TAKE THE DIAL OUT FROM UNDER YOUR THUMB, so
+           this rewrites the strip alone and nothing else — the search
+           field's own lesson, where a redraw per keystroke destroyed
+           the input between one character and the next. */
+        budLive = function () {
+          var lt = scBudTotals(n, []);
+          /* ── AND NO INCOME IS NOT BEING SHORT ──
+             The plan face's own rule, which this strip reintroduced
+             the bug of: with nothing set the buffer is minus
+             everything the four groups come to, so a fresh budget
+             announced itself as short by its own total in red — the
+             screen telling you off for not having filled a field in
+             yet. What the four groups COME TO is a fact rather than
+             a judgement, and it is the only figure there is to give
+             until an income exists to measure it against. */
+          var short = n.inc > 0 && lt.buffer < 0;
+          lv.classList.toggle('is-over', short);
+          lvk.textContent = !n.inc ? 'Total'
+            : short ? 'Short by' : 'Buffer';
+          lvb.textContent = scMoney(!n.inc
+            ? lt.fix + lt.estAct + lt.alloc + lt.dep
+            : Math.abs(lt.buffer), 1);
+          lvs.textContent = '';
+          var said = [], priced = 0;
+          BUD_KINDS.forEach(function (bk) {
+            var s = 0;
+            scBudRows(n).forEach(function (L2) { if (L2.bk === bk) s += L2.$; });
+            if (s <= 0) return;
+            priced++;
+            if (!n.inc) return;
+            var seg = scEl('i');
+            seg.style.width = (s / n.inc) * 100 + '%';
+            seg.style.background = 'var(' + BUD_GROUP[bk].h + ')';
+            lvs.appendChild(seg);
+            said.push(BUD_GROUP[bk].n.toLowerCase() + ' ' + scMoney(s));
+          });
+          if (n.inc && lt.buffer > 0) {
+            var gap = scEl('i');
+            gap.style.width = (lt.buffer / n.inc) * 100 + '%';
+            gap.style.background = 'var(' + BUD_LEFT + ')';
+            lvs.appendChild(gap);
+          }
+          /* The plan's own gate: a stack of one segment is a bar
+             rather than a picture, and with no income there is
+             nothing for the five to be a share OF. Put away by CLASS
+             rather than by the attribute, because `.bd-stk` takes a
+             `display` and this app has shipped that bug seven times. */
+          lvs.classList.toggle('is-off', !(n.inc > 0 && priced > 1));
+          lvs.setAttribute('aria-label', 'Where the income goes: '
+            + (said.length ? said.join(', ') : 'nothing priced yet')
+            + (lt.buffer > 0 ? ', and ' + scMoney(lt.buffer) + ' left over' : ''));
+        };
+        budLive();
+        pane.appendChild(lv);
+
         var bh = scEl('div', 'bd-set');
         var iw = scEl('label', 'bd-f');
         iw.appendChild(scEl('span', null, 'Net income a cycle'));
@@ -13489,6 +13604,7 @@
         ii.placeholder = '0.00';
         ii.addEventListener('input', function () {
           n.inc = scMoneyOut(ii.value); n.u = Date.now(); scNoteSaveSoon();
+          if (budLive) budLive();
         });
         ii.addEventListener('blur', function () {
           ii.value = n.inc ? scMoneyIn(n.inc) : '';
@@ -14337,6 +14453,17 @@
           am.setAttribute('aria-label', 'Amount for ' + (L.x || 'this line'));
           am.addEventListener('input', function () {
             L.$ = scMoneyOut(am.value); n.u = Date.now(); scNoteSaveSoon();
+            /* THE TRACK RESCALES WHILE YOU TYPE AND NEVER WHILE YOU
+               DRAG, which is the only order that is safe: a figure
+               typed past the dial's own ceiling would otherwise pin
+               the thumb at the end and then snap your number down to
+               the cap the first time you touched it. Typing is not a
+               gesture with a thumb on the track, so moving the
+               ceiling here costs nothing. */
+            dl.max = scBudCap(L);
+            dl.value = Math.min(L.$ || 0, +dl.max);
+            dlFill();
+            if (budLive) budLive();
           });
           /* Re-drawn from the record on the way out, so a half-typed
              "12." settles to what was actually stored rather than
@@ -14346,6 +14473,57 @@
             scNoteFlush();
           });
           row.appendChild(am);
+
+          /* ── AND THE FIGURE IS DRAGGED, WHICH IS THE WHOLE ASK ──
+             A budget is the one record here you change by COMPARING —
+             take fifty off the groceries and see what it leaves — and
+             a text field cannot be compared against anything. The
+             field stays: the dial makes the common answer a thumb and
+             the field underneath still reaches every other one, which
+             is the number sheet's own split between its marks and its
+             own track.
+
+             AN `input[type=range]`, NEVER A DIV WITH A POINTER
+             HANDLER, and `.nm-dial` rather than a second drawing of
+             one — a drag reaches neither a keyboard nor a screen
+             reader, and a range is arrows, Home, End and a spoken
+             value for nothing. */
+          var dl = scEl('input', 'nm-dial bd-dial');
+          dl.type = 'range';
+          dl.min = 0;
+          dl.max = scBudCap(L);
+          dl.step = 100;
+          dl.value = Math.min(L.$ || 0, +dl.max);
+          dl.setAttribute('aria-label', 'Set ' + (L.x || 'this line'));
+          /* ── THE TRACK WEARS ITS OWN GROUP'S COLOUR ──
+             The strip above says which colour each group is and the
+             rows said nothing at all, so the picture and the controls
+             that move it were two screens' worth of information with
+             no link between them. Drag an orange dial and the orange
+             block in the stack is the one that grows. It is the only
+             thing a colour ever says here — WHICH — and it costs not
+             one pixel of height to say it. */
+          dl.style.setProperty('--c',
+            'var(' + (BUD_GROUP[L.bk] || BUD_GROUP.fix).h + ')');
+          /* Chromium draws a range's filled half from a custom
+             property rather than from the value, so every writer of
+             one of these has to set it — at build and on every input,
+             or the track is empty under a thumb that has plainly
+             moved. */
+          var dlFill = function () {
+            dl.style.setProperty('--fill',
+              (+dl.max ? (+dl.value / +dl.max) * 100 : 0) + '%');
+          };
+          dlFill();
+          dl.addEventListener('input', function () {
+            L.$ = +dl.value;
+            am.value = L.$ ? scMoneyIn(L.$) : '';
+            n.u = Date.now(); scNoteSaveSoon();
+            dlFill();
+            if (budLive) budLive();
+          });
+          dl.addEventListener('change', function () { scNoteFlush(); });
+          row.appendChild(dl);
         }
 
         /* A STEP CARRIES A NOTE UNDER IT, and only a process draws

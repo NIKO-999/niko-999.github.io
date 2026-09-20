@@ -6256,6 +6256,51 @@ body {
 .bd-in::placeholder { color: var(--tick-off); font-weight: 500; }
 .bd-in:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
+/* ── THE BUFFER RIDES THE TOP WHILE YOU ADJUST ──
+   Sticky against the pane's own scroll, because the figure has to be
+   readable while a thumb is on a dial four rows down. An opaque
+   ground is what makes that legible over the rows passing behind it,
+   and it is the page's own — the same answer `.nt-tools` already
+   gives one layer up. Below the strip at z-index 45, never level
+   with it: a sticky box that outranks the tools would take the
+   presses meant for them. */
+.bd-lv {
+  position: sticky; top: 0; z-index: 2;
+  padding: 8px 0 10px;
+  background: var(--paper);
+}
+.bd-lvh { display: flex; align-items: baseline; gap: 12px; }
+.bd-lvh > b {
+  margin-left: auto;
+  font-size: 26px; font-weight: 700; letter-spacing: -.5px;
+  font-variant-numeric: tabular-nums;
+}
+.bd-lv.is-over .bd-k, .bd-lv.is-over .bd-lvh > b { color: var(--bad); }
+.bd-lv > .bd-stk { margin-top: 9px; }
+/* The plan's own gate said in CSS, because `.bd-stk` takes a
+   `display` and putting one away with the attribute alone is the bug
+   this app has now shipped seven times. */
+.bd-lv > .bd-stk.is-off { display: none; }
+
+/* A dial spans the row it belongs to rather than sitting in the
+   figure's 84px column — the name and the amount are one fact read
+   across, and the thing that sets them is under both. The negative
+   margins are the 44px press target being kept while the drawn track
+   is pulled back under its own name: left in flow the 14px track
+   floated fifteen pixels clear of the row it belongs to and read as
+   a divider between two of them. */
+.bd-dial { grid-column: 1 / -1; margin: -9px 0 -7px; }
+/* One declaration per engine, and a rule of its own rather than a
+   second value inside `.nm-dial`'s: the same selector written twice
+   in one file is the duplicate the static check refuses, whichever
+   order it is in. */
+.bd-dial::-webkit-slider-runnable-track {
+  background:
+    linear-gradient(var(--c), var(--c)) 0 / var(--fill, 0%) 100% no-repeat,
+    var(--tick-off);
+}
+.bd-dial::-moz-range-progress { background: var(--c); }
+
 /* The three a budget sets once. Stacked, because each label is a
    sentence and three of them across a phone is a form. */
 .bd-set { display: grid; gap: 9px; margin: 2px 0 14px; }
