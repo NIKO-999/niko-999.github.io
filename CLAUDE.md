@@ -12006,6 +12006,18 @@ names actually matched, which is what caught `.field` and
 `.menu-item` writing their leading inside a `font:` shorthand where a
 `line-height:` scan cannot see it.
 
+**AND FOUR STRAY SIZES SURVIVED THE FIRST PASS.** 22, 20, 12.5 and
+12, one declaration each, which is how a stray hides: a step used
+once looks like a decision. Two of them are the cover initial —
+`.mn-art i`, one letter scaled to its box, already exempt here as a
+DRAWING rather than type. The other two were a workout chip at 12.5
+and a picker chip at 12, both doing the job the control step already
+does at 13, and both a rounding error away from it. Folded onto it,
+which GROWS them by half a pixel and a pixel — the right trade, and
+the only place in this pass where anything got bigger: a stray step
+kept for being smaller is the fault this whole exercise exists to
+remove. **Eight declared sizes now, and one named exception.**
+
 **The nine density numbers went again, and so did eight more.** The
 poster 10 to 8, the head's foot 8 to 6, its gap 10 to 8, the week
 strip's margin 8 to 6, the tally's 10 to 6 — and the calendar's
