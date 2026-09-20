@@ -275,9 +275,9 @@
      The dial's thumb is a mark on the track rather than a grip: the
      press target is the input's own 44px box, which is why a 12px
      drawing costs nothing a thumb can feel. */
-  --trk:   4px;    /* a track, a progress line, a gauge */
-  --trk-s: 6px;    /* a stack, which has segments to tell apart */
-  --thumb: 12px;
+  --trk:   3px;    /* a track, a progress line, a gauge, a swatch */
+  --trk-s: 5px;    /* a stack, which has segments to tell apart */
+  --thumb: 10px;
   /* The open card's width, named because TWO rules need it: the card
      itself, and the lead-in the deck needs either side for that card to
      be able to sit in the middle. Written twice they drift, and the
@@ -371,7 +371,7 @@ body {
   font-feature-settings: 'tnum' 1;   /* a ticking countdown must not shift what is beside it */
   color: var(--ink);
   padding: max(14px, env(safe-area-inset-top)) 0
-           calc(96px + env(safe-area-inset-bottom)) 0;
+           calc(75px + env(safe-area-inset-bottom)) 0;
   overscroll-behavior-y: none;
 }
 
@@ -739,17 +739,21 @@ body {
 .fr-seg {
   display: flex;
   gap: 4px;
-  padding: 3px;
+  padding: 2px;
   margin-bottom: 8px;
-  border-radius: 22px;
+  border-radius: 19px;
   background: color-mix(in srgb, var(--ink) 7%, transparent);
 }
 .fr-stop {
   flex: 1;
-  min-height: 44px;
-  padding: 9px 0;
+  /* 28 DRAWN, 44 REACHABLE — the tab's own split, on the control the
+     tab's own comment calls the same object. At 44 drawn the segment
+     was 50px of chrome directly under a head, before a word of the
+     thing the screen is about. */
+  position: relative;
+  padding: 6px 0;
   border: 0;
-  border-radius: 18px;
+  border-radius: 15px;
   background: none;
   color: var(--dim);
   font: inherit;
@@ -757,6 +761,7 @@ body {
   font-weight: 600;
   cursor: pointer;
 }
+.fr-stop::before { content: ''; position: absolute; inset: -8px 0; }
 .fr-stop.on { background: var(--card); color: var(--ink); box-shadow: var(--card-shadow); }
 .fr-stop:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
 #scFrPane[hidden], .fr-feed[hidden] { display: none; }
@@ -1633,11 +1638,11 @@ body {
   flex: 1 1 90px; min-height: 90px; padding-top: 4px;
 }
 .ty-gt {
-  width: 8px; flex: none; border-radius: 4px; background: var(--tick-off);
+  width: 6px; flex: none; border-radius: 3px; background: var(--tick-off);
   display: flex; flex-direction: column; justify-content: flex-end;
   overflow: hidden;
 }
-.ty-gt > i { display: block; width: 100%; border-radius: 4px; background: var(--ink); }
+.ty-gt > i { display: block; width: 100%; border-radius: 3px; background: var(--ink); }
 .ty-gm { flex: 0 1 58px; position: relative; }
 .ty-gm > span {
   position: absolute; left: 0; transform: translateY(-50%);
@@ -2209,7 +2214,7 @@ body {
 /* Row 6, because row 5 is the foot line now. */
 .ty-card .ty-tl {
   position: relative; grid-column: 1 / -1; grid-row: 6;
-  margin-top: 8px; height: 4px;
+  margin-top: 8px; height: var(--trk);
   border-radius: 2px; background: var(--tick-off); overflow: hidden;
 }
 .ty-card .ty-tl > i { position: absolute; inset: 0 auto 0 0; border-radius: 2px; }
@@ -2407,10 +2412,17 @@ body {
 .st-d {
   flex: 1; min-width: 0;
   display: flex; flex-direction: column; align-items: center; gap: 1px;
-  min-height: 44px; padding: 6px 0;
-  border: 0; border-radius: 10px;
+  /* ── 32 DRAWN, 44 REACHABLE ──
+     Seven of these across the top of the main screen, each one the
+     floor exactly and each one drawing every pixel of it. The chip is
+     two lines of type and wants the room they need rather than the
+     room a thumb does, which is the bar's own split one screen up. */
+  position: relative;
+  padding: 2px 0;
+  border: 0; border-radius: 8px;
   background: none; color: var(--dim); font: inherit; cursor: pointer;
 }
+.st-d::before { content: ''; position: absolute; inset: -6px 0; }
 .st-d b {
   font-size: 9.5px; font-weight: 700; letter-spacing: .08em;
   text-transform: uppercase;
@@ -3208,7 +3220,7 @@ body {
 .row.is-done .dur, .row.is-past .dur { display: none; }
 .row-prog {
   grid-column: 3; grid-row: 3;
-  height: 3px; margin-top: 7px;
+  height: var(--trk); margin-top: 7px;
   border-radius: 2px;
   background: var(--tick-off);
   overflow: hidden;
@@ -3304,8 +3316,8 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 7px max(20px, env(safe-area-inset-left))
-           calc(17px + env(safe-area-inset-bottom))
+  padding: 5px max(20px, env(safe-area-inset-left))
+           calc(10px + env(safe-area-inset-bottom))
            max(20px, env(safe-area-inset-right));
   background: none;
   border-top: 0;
@@ -3315,8 +3327,8 @@ body {
   flex: 1; min-width: 0;
   display: flex;
   align-items: stretch;
-  padding: 5px;
-  border-radius: 30px;
+  padding: 4px;
+  border-radius: 24px;
   /* 78%, not 58. At 58 the blur was not enough to stop a row reading
      through it — a block name sat legibly behind a label and the row's
      own hairline cut across the pill at icon height, which is the
@@ -3341,14 +3353,25 @@ body {
 .tab {
   flex: 1; min-width: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 3px;
-  padding: 7px 1px 6px;
-  border: 0; border-radius: 25px;
+  gap: 2px;
+  padding: 4px 1px 3px;
+  border: 0; border-radius: 20px;
   background: none;
   color: var(--dim);
   font: inherit;
   cursor: pointer;
+  /* ── 40 DRAWN, 44 REACHABLE ──
+     The bar was 84px of an 844px screen and the tab was the whole of
+     it: 7/21/3/11/6, with the lozenge drawn on the press target
+     rather than inside it. The drawing comes down and the target is
+     claimed as a box that paints nothing, which is `.row-ed`'s own
+     split at 26-in-44, the objectives plus's, the children's dots'
+     and the head's Edit tile at 38-in-44. `position: relative` is
+     load-bearing: static, the box resolves against whatever ancestor
+     happens to be positioned and the tab owns almost nothing. */
+  position: relative;
 }
+.tab::before { content: ''; position: absolute; inset: -2px 0; }
 /* The lozenge behind the stop you are on. It is a fill rather than a
    colour change on the glyph, because at 10px a label that only shifts
    grey is a difference you have to go looking for. */
@@ -3361,7 +3384,7 @@ body {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
 }
 .tab svg {
-  width: 21px; height: 21px;
+  width: 20px; height: 20px;
   fill: none; stroke: currentColor; stroke-width: 1.9;
   stroke-linecap: round; stroke-linejoin: round;
 }
@@ -3375,9 +3398,10 @@ body {
 #scMenu svg circle, #scTabWeek svg circle { fill: currentColor; stroke: none; }
 .tab:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
 
-/* Your own face in the tab, at 21px. The one stop that is about you
-   rather than about the week already has a drawing, so it uses it. */
-.tab-face { width: 21px; height: 21px; border-radius: 50%; overflow: hidden; display: block; }
+/* Your own face in the tab, at the tabs' own glyph size. The one stop
+   that is about you rather than about the week already has a drawing,
+   so it uses it. */
+.tab-face { width: 20px; height: 20px; border-radius: 50%; overflow: hidden; display: block; }
 .tab-face svg, .tab-face img { display: block; width: 100%; height: 100%; }
 .tab-face img { object-fit: cover; }
 
@@ -3393,7 +3417,11 @@ body {
    so is the whole 554-line block that came with it. */
 .prime {
   flex: none;
-  width: 58px; height: 58px;
+  /* Over the 44px floor on its own, so this one needs no claimed box —
+     and UNDER the pill beside it, because the tallest thing in the bar
+     is what sets the bar's height and that should be the five stops
+     rather than the one control. */
+  width: 46px; height: 46px;
   display: grid; place-items: center;
   border: 0; border-radius: 50%;
   background: var(--ink);
@@ -3404,7 +3432,7 @@ body {
    second thing to keep true, and a press state does not need one. */
 .prime:active { opacity: .82; }
 .prime svg {
-  width: 26px; height: 26px;
+  width: 21px; height: 21px;
   fill: none; stroke: currentColor; stroke-width: 2.2;
   stroke-linecap: round; stroke-linejoin: round;
 }
@@ -3484,7 +3512,7 @@ body {
 }
 
 .grab {
-  width: 38px; height: 4px; border-radius: 2px;
+  width: 38px; height: var(--trk); border-radius: 2px;
   margin: 0 auto 16px;
   background: var(--tick-off);
 }
@@ -3916,7 +3944,7 @@ body {
   overflow: hidden;
 }
 .wb-bar {
-  width: 26px; height: 4px;
+  width: 26px; height: var(--trk);
   border-radius: 2px;
   background: var(--wb-hue);
 }
@@ -5154,7 +5182,11 @@ body {
 }
 .nm-tick {
   position: absolute;
-  bottom: 20px;              /* the track is --trk and centred in 44 */
+  /* The dial is 44 tall and the track is centred in it, so the tick's
+     own foot is arithmetic on the scale rather than a literal that was
+     right for one thickness. It WAS 20, which is exact at --trk 4 and
+     half a pixel out at 3 — a mark drawn off the thing it marks. */
+  bottom: calc((44px - var(--trk)) / 2);
   width: 2px;
   height: var(--trk);
   margin-left: -1px;
@@ -6316,10 +6348,12 @@ body {
   font-variant-numeric: tabular-nums;
 }
 .bd-lv.is-over .bd-k, .bd-lv.is-over .bd-lvh > b { color: var(--bad); }
-/* 18px of stack is the plan's, where it is the one picture on the
-   screen. Here it is a strip over a list, so it is a rule rather
-   than a block — the same five shares at a third of the weight. */
-.bd-lv > .bd-stk { height: 6px; border-radius: 3px; margin-top: 7px; }
+/* The plan's stack is the one picture on that screen; here it is a
+   strip over a list you are working in. It carried its own 6px to sit
+   a step up from a track, which is exactly what `--trk-s` says —
+   written out again where nothing could see it. Same token now, so
+   the two cannot drift. */
+.bd-lv > .bd-stk { height: var(--trk-s); border-radius: 2px; margin-top: 7px; }
 /* The plan's own gate said in CSS, because `.bd-stk` takes a
    `display` and putting one away with the attribute alone is the bug
    this app has now shipped seven times. */
@@ -7090,7 +7124,7 @@ body {
   position: relative;
   align-self: stretch;
   margin-top: auto;
-  height: 2.5px;
+  height: var(--trk);
   border-radius: 2px;
   background: var(--tick-off);
   overflow: hidden;

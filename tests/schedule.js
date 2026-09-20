@@ -2371,6 +2371,8 @@ const SAID = [
     const pill = getComputedStyle(document.querySelector('.tabs'));
     return { tabs: [...document.querySelectorAll('.tab')].map(g),
              prime: g(document.querySelector('.prime')),
+             pillH: Math.round(document.querySelector('.tabs')
+               .getBoundingClientRect().height),
              blur: pill.backdropFilter || pill.webkitBackdropFilter,
              tint: pill.backgroundColor };
   });
@@ -2382,8 +2384,15 @@ const SAID = [
      shifts grey is a difference you have to go looking for. */
   ok('exactly one tab is lit, and the rest carry no fill of their own',
     bar.tabs.filter(clear).length === bar.tabs.length - 1, bar.tabs);
+  /* 44 IS THE FLOOR AND THE PILL IS THE CEILING. It was 58 against a
+     60px pill and the check pinned it at 52; it is 46 against a 50px
+     pill now, because the tallest thing in the bar is what sets the
+     bar's height and that should be the five stops rather than the one
+     control. Over the floor on its own, so unlike the tabs beside it
+     this one needs no claimed box. */
   ok('the add button is the one filled control, and it is round',
-    !clear(bar.prime) && /50%/.test(bar.prime.r) && bar.prime.w >= 52, bar.prime);
+    !clear(bar.prime) && /50%/.test(bar.prime.r)
+    && bar.prime.w >= 44 && bar.prime.w <= bar.pillH, bar.prime);
 
   /* THE PILL IS GLASS, and both halves of that are checked. A blur with
      no tint puts row text straight behind a 10px label; a tint with no
@@ -2401,7 +2410,7 @@ const SAID = [
      its own scrolling, so the document's height IS the viewport's —
      every one of the nine samples was the identical frame. And there
      is nothing for the sweep to find either way: measured at 390x844
-     the poster's bottom is 748 and the pill's top is 767, so a row
+     the poster's bottom is 769 and the pill's top is 784, so a row
      CANNOT reach the bar since every tab became a column that stops
      above it. That geometry is asserted below rather than assumed, so
      the day a pane goes back to being a plain block this check fails
@@ -2464,6 +2473,80 @@ const SAID = [
      old check again. */
   ok('...and no pane can put a row behind the bar at all',
     swept.geo.poster < swept.geo.pill && swept.geo.doc <= swept.geo.win, swept.geo);
+
+  /* ── THE BAR IS A DRAWING AND A TARGET, AND THEY ARE NOT THE SAME BOX ──
+     It was 84px of an 844px screen: a 58px add button beside a 60px
+     pill whose tabs were 7/21/3/11/6, with the lit lozenge drawn ON
+     the press target rather than inside it. The drawing came down and
+     the target is claimed as a box that paints nothing, which is
+     `.row-ed`'s split at 26-in-44, the objectives plus's, the
+     children's dots' and the head's Edit tile at 38-in-44.
+
+     THE SEGMENTED STOPS WENT THE SAME WAY, and the tab's own comment
+     is why: it calls the two the same control. 44 drawn put 50px of
+     chrome directly under a head before a word of the thing the screen
+     is about.
+
+     ASSERTED IN BOTH DIRECTIONS, because each half passes on the
+     other's bug. A build that only shrank the drawing leaves a 40px
+     target and fails the second; one that left the box alone passes
+     the second and fails the first. And what an element OWNS is walked
+     out from its own centre with `elementFromPoint` rather than driven
+     with a tap: Chromium snaps a touch to a nearby target inside a slop
+     region, so a driven tap reads identically at 40 and at 44 — a check
+     that cannot fail, which is what made three earlier claims of
+     "fixed" on the Edit tile sound verified.
+
+     THE DRAWN BOX IS NOT THE CLAIM. The drawing is deliberately under
+     44, so a check on `getBoundingClientRect` alone would fail on the
+     correct build. */
+  const slim = await (async () => {
+    const read = async () => page.evaluate(() => {
+      const owns = (t) => {
+        const b = t.getBoundingClientRect(), cx = b.left + b.width / 2;
+        const mine = (y) => { const e = document.elementFromPoint(cx, y);
+          return !!e && (e === t || t.contains(e)); };
+        let top = b.top + b.height / 2, bot = top;
+        while (top > 1 && mine(top - 1)) top--;
+        while (bot < innerHeight - 1 && mine(bot + 1)) bot++;
+        return { drawn: Math.round(b.height), owns: Math.round(bot - top) + 1 };
+      };
+      const all = (sel) => [...document.querySelectorAll(sel)]
+        .filter((e) => e.getClientRects().length).map(owns);
+      const h = (sel) => { const e = document.querySelector(sel);
+        return e ? Math.round(e.getBoundingClientRect().height) : null; };
+      return { tabs: all('.tab'), stops: all('.fr-stop'), days: all('.st-d'),
+        bar: h('.bar'), pill: h('.tabs'), prime: h('.prime') };
+    });
+    await page.evaluate(() => document.getElementById('scTabWeek').click());
+    await page.waitForTimeout(380);
+    const week = await read();
+    await page.evaluate(() => document.getElementById('scTabTally').click());
+    await page.waitForTimeout(380);
+    const today = await read();
+    await page.evaluate(() => document.getElementById('scTabWeek').click());
+    await page.waitForTimeout(380);
+    return { week, today };
+  })();
+  ok('the bar draws thinner than the target it hands a thumb',
+    slim.week.tabs.length === 5 && slim.week.tabs.every((t) => t.drawn <= 42)
+    && slim.week.prime <= 48 && slim.week.bar <= 70, slim.week);
+  ok('...and every tab still OWNS the 44px floor',
+    slim.week.tabs.every((t) => t.owns >= 44), slim.week.tabs);
+  ok('the stops draw thinner than the target they hand a thumb',
+    slim.today.stops.length >= 2
+    && slim.today.stops.every((t) => t.drawn <= 32), slim.today.stops);
+  ok('...and every stop still OWNS the 44px floor',
+    slim.today.stops.every((t) => t.owns >= 44), slim.today.stops);
+  /* AND THE SEVEN DAY CHIPS, which are the same fault on the screen
+     you open the app to: each was `min-height: 44px` and each drew
+     every pixel of it. A chip is two lines of type and wants the room
+     THEY need. */
+  ok('the week’s day strip draws thinner than the target it hands a thumb',
+    slim.week.days.length === 7
+    && slim.week.days.every((t) => t.drawn <= 36), slim.week.days);
+  ok('...and every day chip still OWNS the 44px floor',
+    slim.week.days.every((t) => t.owns >= 44), slim.week.days);
 
   /* ── TWO TAPS ON A SHOWING UP TILE ──
      The tile is one control: a tap logs and two open the twenty-six
@@ -6409,9 +6492,26 @@ const SAID = [
        up the feed's own action at zero height and reports it as a
        control too small to press. It passed before only because friends
        were off and the feed had no action in it. */
+    /* ── WHAT IT OWNS, NOT WHAT IT DRAWS ──
+       The stops draw 28 and own 44 through a box that paints nothing,
+       which is this app's own split — so a check on the rect measures
+       the drawing and fails on the correct build. Walked out from the
+       element's own centre with `elementFromPoint`, never with a driven
+       tap: Chromium snaps a touch to a nearby target inside a slop
+       region, so a tap reads identically at 28 and at 44. The walk
+       stops on the first pixel that is NOT the element, so a box of N
+       reads N-1 and the count adds it back. */
+    const frReach = await fp.$$eval('#scFrPane .fr-link, .friends .fr-stop', (b) => b.map((t) => {
+      const r = t.getBoundingClientRect(), cx = r.left + r.width / 2;
+      const mine = (y) => { const e = document.elementFromPoint(cx, y);
+        return !!e && (e === t || t.contains(e)); };
+      let top = r.top + r.height / 2, bot = top;
+      while (top > 1 && mine(top - 1)) top--;
+      while (bot < innerHeight - 1 && mine(bot + 1)) bot++;
+      return { drawn: Math.round(r.height), owns: Math.round(bot - top) + 1 };
+    }));
     ok('and every one of them still clears 44px',
-      await fp.$$eval('#scFrPane .fr-link, .friends .fr-stop', (b) => b.length > 0
-        && b.every((x) => x.getBoundingClientRect().height >= 44)));
+      frReach.length > 0 && frReach.every((x) => x.owns >= 44), frReach);
     const mine = await fp.evaluate(() => JSON.parse(localStorage.getItem('sched.net.v1')));
     ok('it claims a code', /^[A-Z0-9]{8}$/.test(mine.code || ''), mine.code);
     /* I, O, 0 and 1 are out of the alphabet on purpose: this is a
@@ -11773,7 +11873,7 @@ const SAID = [
       return best;
     })();
     ok('the number dial draws the one track thickness, not its own',
-      trkBox.trk === 4 && trkBox.thumb === 12
+      trkBox.trk === 3 && trkBox.thumb === 10
       && trkRun >= trkWant && trkRun <= trkWant + 2,
       { ...trkBox, want: trkWant, run: trkRun });
     ok('...and what a finger reaches is still the 44px box',
@@ -15303,10 +15403,23 @@ const SAID = [
       const t = document.querySelector('.tab[data-view="cal"]');
       const r = t.getBoundingClientRect();
       const lb = t.querySelector('span');
+      /* THE TAB DRAWS 40 AND OWNS 44, so the floor is measured on the
+         box it CLAIMS rather than the one it paints — the drawing is
+         deliberately under 44 and a check on the rect fails on the
+         correct build. */
+      const reach = (t) => {
+        const b = t.getBoundingClientRect(), cx = b.left + b.width / 2;
+        const mine = (y) => { const e = document.elementFromPoint(cx, y);
+          return !!e && (e === t || t.contains(e)); };
+        let top = b.top + b.height / 2, bot = top;
+        while (top > 1 && mine(top - 1)) top--;
+        while (bot < innerHeight - 1 && mine(bot + 1)) bot++;
+        return Math.round(bot - top) + 1;
+      };
       const out = {
         tag: document.getElementById('scHdDate').tagName,
         stop: { w: Math.round(r.width * 10) / 10, h: Math.round(r.height * 10) / 10,
-                name: lb.textContent,
+                owns: reach(t), name: lb.textContent,
                 cut: lb.scrollWidth > lb.clientWidth + 0.5 },
         stops: document.querySelectorAll('.tab[data-view]').length
       };
@@ -15326,7 +15439,7 @@ const SAID = [
     });
     ok('the month is a stop on the bar, named, and over the 44px floor',
       clDoor.stop.name === 'Calendar' && clDoor.stop.cut === false
-      && clDoor.stop.w >= 44 && clDoor.stop.h >= 44 && clDoor.stops === 5,
+      && clDoor.stop.w >= 44 && clDoor.stop.owns >= 44 && clDoor.stops === 5,
       clDoor.stop);
     ok('...and the head’s date is a date again, not an invisible door',
       clDoor.tag === 'P', clDoor.tag);

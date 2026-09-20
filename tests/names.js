@@ -564,5 +564,41 @@ for (const app of APPS.concat([['shell.js']])) {
     seen >= 8 && bad.length === 0, 'rules ' + seen + ', off the scale: ' + bad.join(' | '));
 }
 
+/* ── AND SO IS EVERY OTHER THIN HORIZONTAL MARK ──
+   The check above covers a range input's five engine pseudo-elements,
+   which is where a literal hides best — and it missed six marks that
+   were never a slider at all: a habit's progress on a tally tile, a
+   running row's countdown, the rule at the foot of a calendar cell, a
+   workout swatch, a sheet's grab handle and the budget strip's own
+   stack. Every one of them a bar, none of them on the scale, and two
+   passes walked straight past all six because A HEIGHT IS NOT A SIZE
+   AND NOTHING WAS LOOKING.
+
+   Scoped by what the thing IS rather than by a list that rots: a
+   painted box between one and eight pixels tall whose width is not its
+   own height. A dot is square and falls out; a hairline is 1px and
+   falls out; the water gauge is a WIDTH, because it is read as a volume
+   down its length, and falls out with them. */
+{
+  const css = read('schedule/app.css').replace(/\/\*[\s\S]*?\*\//g, '');
+  const bad = []; let seen = 0;
+  for (const m of css.matchAll(/([^{}]*)\{([^{}]*)\}/g)) {
+    const sel = m[1].replace(/\s+/g, ' ').trim(), body = m[2];
+    const h = body.match(/(?<![-\w])height:\s*([^;]+)/);
+    if (!h || !/(?<![-\w])background(-color)?\s*:/.test(body)) continue;
+    const v = h[1].trim();
+    const px = /^([0-9.]+)px$/.exec(v);
+    const w = body.match(/(?<![-\w])width:\s*([0-9.]+)px/);
+    if (px && w && w[1] === px[1]) continue;        /* a dot is square */
+    if (px && (+px[1] <= 1 || +px[1] > 8)) continue; /* a hairline, or not a mark */
+    if (!px && !/var\(--(?:trk|trk-s|thumb)\)/.test(v)) continue;
+    seen++;
+    if (px) bad.push(sel.slice(0, 40) + ' height: ' + v);
+  }
+  ok('every thin horizontal mark is sized from the track scale',
+    seen >= 6 && bad.length === 0,
+    'marks ' + seen + ', off the scale: ' + bad.join(' | '));
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

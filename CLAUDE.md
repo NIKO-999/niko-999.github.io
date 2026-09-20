@@ -12164,3 +12164,168 @@ measuring first.** It is 81px on Today and 75 on a note, and every
 number left in it is either a 44px press target, the 30px day that
 was asked for by name, or two pixels of separation. The room that is
 left in this app is in what it DRAWS, not in what it reserves.
+
+## The bar was a drawing on its own press target
+
+Asked for in six words — bars skinnier, tabs skinnier. The bars were
+measured last pass and came onto one scale; the TABS had never been
+looked at at all, and the measurement is why this is one change rather
+than two.
+
+**84 PIXELS OF AN 844-PIXEL SCREEN, which is a tenth of the phone.**
+A 58px add button beside a 60px glass pill whose five tabs were
+7/21/3/11/6 — and every one of those forty-eight pixels was the press
+target, with the lit lozenge drawn ON it rather than inside it. The
+segmented stops were the same: 44px drawn, 50px of chrome directly
+under a head, before a word of the thing the screen is about.
+
+**THE DRAWING COMES DOWN AND THE TARGET DOES NOT**, which is this
+app's own split and is named here for the sixth time — `.row-ed` draws
+26 inside 44, the objectives plus draws a small mark inside 44, the
+children's dots grew the target and left the mark alone, the head's
+Edit tile draws 38 inside 44, and the Month/List toggle is a 34px
+glyph in a 44px box. A tab is 40 drawn and 44 owned; a stop is 28
+drawn and 44 owned. **`position: relative` is load-bearing on both**:
+static, an absolutely positioned box resolves against whatever
+ancestor happens to be positioned, and the Edit tile measured itself
+owning ONE pixel in that state.
+
+**THE ADD BUTTON NEEDS NO CLAIMED BOX AND IT MOVED ANYWAY.** 58 to 46
+— over the floor on its own, and UNDER the pill beside it, because the
+tallest thing in the bar is what sets the bar's height and that should
+be the five stops rather than the one control. Its glyph went 26 to
+21, matching the tabs' own.
+
+**AND THE WEEK'S OWN DAY STRIP WENT WITH THEM.** Seven chips across
+the top of the main screen, each `min-height: 44px` and each drawing
+every pixel of it — the same fault as the bar, on the screen you open
+the app to. A chip is two lines of type and wants the room THEY need,
+so it is 32 drawn and 44 owned, and the first block of the day comes up
+from 151 to 139. Four were rendered: at 28 the date drops to 12px,
+which is off the type scale, and the chip stops being a chip and
+becomes a box drawn tight on its own words.
+
+**AND THE TAB'S GLYPH IS THE ROW'S GLYPH.** 21 to 20, which is the
+size a schedule row already draws one at — a tab glyph a pixel off the
+row's is the two-steps-nobody-can-tell-apart fault the type scale pass
+existed to remove, in a drawing rather than in type.
+
+**FOUR BARS WERE RENDERED OVER THE REAL APP at 390x844 and read at
+1:1**, because what kills a bar treatment is what it does to the
+glyphs and the words, which a number cannot say. The shipped 84;
+**trim**, which gives back the padding and the gap alone (69); the one
+that ships (65, with the glyph down a step); and **mute**, which drops
+the five labels entirely and reaches 59. Mute is the interesting
+rejection: five unlabelled glyphs, two of which — Today's grid and the
+calendar — are genuinely ambiguous, and this app's own rule is that a
+route only a glyph names is a route you have to be told about. A bar
+that is a row of icons is a bar you learn once and re-learn every
+month.
+
+**FOUR STOPS WERE RENDERED THE SAME WAY.** The padding alone buys two
+pixels; the drawing-and-target split buys eighteen; **thin**, one step
+past it at 24, puts "Showing up" hard against the lozenge's own edge
+and reads as type crammed into a pill rather than as a control. 28 is
+the last step where the word still has room.
+
+**65 AGAINST 84, and the poster took the difference.** `body`'s
+bottom reservation is the bar's own height plus twelve and has always
+been — 96 was 84 and 12, and it is 75 now. Left at 96 the room would
+have been a gap nothing draws in. The pill measures 50 rather than the
+48 its padding and tabs come to, because it carries a 1px border top
+and bottom: a bar sized off the arithmetic rather than off the drawing
+is two pixels short of the thing it is measuring.
+
+### The tracks went one step down, and six strays came with them
+
+`--trk` 4 to 3, `--trk-s` 6 to 5, `--thumb` 12 to 10. **Three were
+rendered over the real dial** — the shipped 4, a 3 and a 2 — and 2 is
+where the track stops being a track: one device pixel on a 1x screen,
+all fringe, with the marks under it invisible and the thumb reading as
+a bead floating rather than riding anything.
+
+**AND THE BUDGET STRIP'S OWN STACK WAS A PRIVATE COPY.** `.bd-lv >
+.bd-stk` carried `height: 6px` to sit one step up from a track — which
+is exactly what `--trk-s` says, written out again where nothing could
+see it. That is the budget dial's own fault from the pass before:
+a rule that escapes a base by restating it is a second number to keep
+in step, and the one that drifts is the invisible one.
+
+**THE GAUGE IS THE ONE MARK WHOSE THICKNESS IS A FLOOR.** Water is
+read as a VOLUME down its length rather than as a share across it, so
+it is 6 wide where everything else is 3 — the same carve-out it
+already had at 8 against 4, one step down.
+
+**AND SIX MARKS WERE STILL LITERALS.** `.ty-card .ty-tl` at 4,
+`.row-prog` at 3, `.cl-b` at 2.5, `.wb-bar` at 4, `.grab` at 4 and
+`.bd-lv > .bd-stk` at 6 — every one of them a thin horizontal mark,
+none of them on the scale, and the last pass missed all six because a
+height is not a size and nothing was looking. `.cl-b` GROWS by half a
+pixel to join, which is the same trade the type pass made folding 12.5
+and 12 onto 13: a step kept for being half a pixel smaller is the fault
+the scale exists to remove.
+
+**SO IT IS A STATIC CHECK NOW, AND IT SHOULD HAVE BEEN ONE TWO PASSES
+AGO.** The one that shipped last time reads a range input's five engine
+pseudo-elements, which is where a literal hides best — and six marks
+that were never a slider walked straight past it. `tests/names.js`
+holds every painted box between one and eight pixels tall whose width
+is not its own height: a dot is square and falls out, a hairline is 1px
+and falls out, and the water gauge is a WIDTH and falls out with them.
+**Scoped by what the thing IS rather than by a list that rots**, which
+is the flight-pause rule's own lesson and `tests/run.js`'s. Proved to
+bite by putting `.row-prog` back to a literal.
+
+**The tick's foot is arithmetic now rather than a literal.** It sat at
+`bottom: 20px` under a comment saying the track is centred in the
+dial's 44 — exact at `--trk` 4 and half a pixel out at 3, which is a
+mark drawn off the thing it marks. `calc((44px - var(--trk)) / 2)`.
+
+### A driven tap cannot measure a press target
+
+Chromium snaps a touch to a nearby clickable target inside a slop
+region, so a tap aimed 20px off a 40px tab still arms it and the
+reading is IDENTICAL at 40 and at 44 — a check that cannot fail, which
+is what made three earlier claims of "fixed" on the head's Edit tile
+sound verified. What an element OWNS is walked out from its own centre
+with `elementFromPoint`, which has no such forgiveness.
+
+**The walk reports one pixel short and that is the method, not the
+app.** It stops on the first pixel that is NOT the element, so a box
+of 46 reads 45 — proved against `.prime`, whose 46 is declared. The
+count adds it back.
+
+**Both directions, because each half passes on the other's bug.** A
+build that only shrank the drawing leaves a 40px target and fails the
+floor; one that left the box alone passes the floor and fails the
+drawing. And the drawn box is deliberately UNDER 44, so a check on
+`getBoundingClientRect` alone fails on the correct build.
+
+**AND THREE CHECKS THAT ALREADY EXISTED WERE READING THE DRAWING.**
+The friends stops' own floor, the calendar door's, and the add
+button's pinned 52 — each of them written when the drawing WAS the
+target, and each of them correct until the two stopped being one box.
+All three failed on a build that is right, which is the shape of a
+check that has to move with a rule rather than be deleted: the
+question is still "does a finger reach 44", and the only thing that
+changed is where the answer lives. The add button's own floor became
+a FLOOR AND A CEILING — over 44 on its own, and no taller than the
+pill beside it, because the tallest thing in the bar is what sets the
+bar's height and that should be the five stops rather than the one
+control.
+
+**And three more moved for the day strip**, which is the same
+sentence one screen over: the week's own chips were `min-height:
+44px`, so anything asserting the strip's height was asserting the
+floor rather than the drawing.
+
+### And a bar this short has to be measured against what it PAINTS
+
+`.bar` is `background: none` — a transparent frame holding the glass
+pill and the round add button, and its own padding puts both of them
+below the box it reports. That is written up already and it bit again
+here in the other direction: the bar's box is 65 and the pill's top is
+five pixels inside it, so a reservation sized off the box is five
+pixels of room nothing draws in. `body`'s bottom padding is the bar's
+own height plus twelve, which is what keeps the poster's foot a
+constant distance from the thing you can actually see.
