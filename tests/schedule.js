@@ -17361,6 +17361,136 @@ const SAID = [
       && dvNoInc.stackOff === true, dvNoInc);
     ok('...and the buffer and the stack come back the moment one is set',
       dvNoInc.backKey === 'Buffer' && dvNoInc.backOff === false, dvNoInc);
+    /* ── A HAIRLINE DRAWN, A 44px TARGET KEPT ──
+       Ten dials down a list is ten heavy bars if each is the sheet's
+       own 14px track under a 30px thumb. Both halves, because
+       "skinny" passes just as well on a build that shrank the press
+       target with the drawing — which is the fault, not the fix.
+
+       MEASURED AS PIXELS, NEVER OFF THE PSEUDO-ELEMENT.
+       `getComputedStyle(el, '::-webkit-slider-runnable-track')` does
+       not return that pseudo-element's own box in Chromium — it
+       hands back the HOST's, so a correct build reported its track
+       as 44px tall and 354 wide. The drawn thickness is the run of
+       coloured rows through the filled half, which is the thing
+       itself rather than a declaration about it.
+
+       AND THE STRIP HAS TO BE PUT AWAY FIRST. The step above focuses
+       a line so `.nt-tools` exists to be compared against, and the
+       strip then sits over the rows — every sample here came back as
+       its flat ground, reporting 1:1 on dials that are drawn
+       correctly. A check that changes the state of the app is a
+       check that breaks the next one, and this time it was mine. */
+    await dvPage.evaluate(() => {
+      const f = document.querySelector('.nt-in');
+      if (f) f.blur();
+      const t = document.querySelector('.nt-tools');
+      if (t) t.hidden = true;
+      document.querySelector('#scNotePane').scrollTop = 0;
+    });
+    await dvPage.waitForTimeout(260);
+
+    const dvBox = await dvPage.evaluate(() => {
+      const strip = document.querySelector('.nt-tools');
+      return { stripGone: !strip || strip.hidden,
+        dials: [...document.querySelectorAll('.bd-dial')].map((d) => {
+          const r = d.getBoundingClientRect();
+          return { x: Math.round(r.left), y: Math.round(r.top),
+            h: Math.round(r.height), w: Math.round(r.width),
+            fill: parseFloat(d.style.getPropertyValue('--fill')) };
+        }).filter((b) => b.y > 0 && b.y + b.h < 780 && b.fill > 12) };
+    });
+    const { PNG: dvPNG } = require('pngjs');
+    const dvPng = dvPNG.sync.read(await dvPage.screenshot());
+    /* THE PHONE IS `deviceScaleFactor: 2`, so a screenshot is 780
+       pixels wide and a box read in CSS units addresses half the
+       intended point. Every earlier reading here came off a
+       standalone probe at dpr 1, which agreed with the design while
+       the suite read the row's name and then nothing at all — the
+       suite measuring a different machine from the probe, which is
+       this file's own oldest warning in the other direction. */
+    const dvDpr = await dvPage.evaluate(() => window.devicePixelRatio);
+    const dvAt = (x, y) => {
+      const i = (dvPng.width * Math.round(y * dvDpr) + Math.round(x * dvDpr)) << 2;
+      return [dvPng.data[i], dvPng.data[i + 1], dvPng.data[i + 2]];
+    };
+    /* The ground is the most common pixel INSIDE the dial's own box.
+       A fixed offset above it read the row's white name on the dark
+       face — [233, 233, 233] — and reported a correct build at
+       2.53:1, which is this file's own "a check can be wrong about
+       WHERE it looks" for the fourth time. */
+    const dvMarks = dvBox.dials.map((b) => {
+      /* The box is 44px and its negative margins put its own top over
+         the NAME row above — so a scan of the whole height reads a
+         letter stroke as a 16px "track". Bounded to the band the
+         track can occupy, and sampled a quarter into the filled half
+         so the 12px thumb at the fill's own end is never under the
+         column either. */
+      const mid = b.y + Math.round(b.h / 2);
+      const col = Math.round(b.x + b.w * b.fill / 400);
+      const tally = {};
+      for (let dy = 8; dy <= 18; dy++) for (let dx = 4; dx < b.w; dx += 11) {
+        const k = dvAt(b.x + dx, mid + dy).join(',');
+        tally[k] = (tally[k] || 0) + 1;
+      }
+      const g = Object.keys(tally).sort((u, v) => tally[v] - tally[u])[0]
+        .split(',').map(Number);
+      const off = (p) => Math.max(Math.abs(p[0] - g[0]),
+        Math.abs(p[1] - g[1]), Math.abs(p[2] - g[2])) > 18;
+      let run = 0, best = 0, lit = g;
+      for (let dy = -8; dy <= 8; dy++) {
+        const p = dvAt(col, mid + dy);
+        if (off(p)) { run++; if (run > best) { best = run; lit = p; } } else run = 0;
+      }
+      return { run: best, cr: +ratio(lit, g).toFixed(2) };
+    });
+    ok('the tools strip is out of the way before any pixel is read',
+      dvBox.stripGone && dvMarks.length >= 3, { stripGone: dvBox.stripGone, n: dvMarks.length });
+    ok('the budget dial draws a hairline and keeps its 44px target',
+      dvMarks.every((m) => m.run >= 2 && m.run <= 6)
+      && dvBox.dials.every((b) => b.h === 44), { dvMarks, h: dvBox.dials[0].h });
+    /* Against the GROUND rather than the unlit track, which is the
+       habit progress bar's own finding: lit against unlit is
+       unreachable for a mid-luminance hue, so the requirement is
+       wrong rather than the design. */
+    ok('...and every filled half still clears 3:1 against the page',
+      dvMarks.every((m) => m.cr >= 3), dvMarks);
+
+    /* ── AND THE PULL STOPS WHERE THE FIELD WOULD LOSE ITS EDGE ──
+       The track sits at the box's own middle, so bringing it up under
+       its name drags 22px of dead box over the row above. Past -16
+       that box owns the amount field's bottom, and a press on the
+       lower third of a field starts a DRAG. Read with
+       `elementFromPoint`, because the claim is about what a finger
+       reaches rather than about a margin.
+
+       The gap is asserted beside it: the track has to read as
+       belonging to the row ABOVE it rather than floating between two,
+       which at -14 it did — 18 above against 16 below. */
+    const dvPull = await dvPage.evaluate(() => {
+      const rows = [...document.querySelectorAll('.nt-row')]
+        .filter((r) => r.querySelector('.bd-dial'));
+      if (rows.length < 3) throw new Error('no budget rows carrying a dial');
+      const f = rows[1].querySelector('.bd-in');
+      const d = rows[1].querySelector('.bd-dial');
+      const fr = f.getBoundingClientRect();
+      const dr = d.getBoundingClientRect();
+      const mid = dr.top + dr.height / 2;
+      const nx = rows[2].querySelector('.bd-in').getBoundingClientRect();
+      const own = (y) => {
+        const e = document.elementFromPoint(fr.left + fr.width / 2, y);
+        return e && String(e.className);
+      };
+      return { top: own(fr.top + 2), mid: own(fr.top + fr.height / 2),
+        bot: own(fr.bottom - 2),
+        above: Math.round(mid - fr.bottom), below: Math.round(nx.top - mid) };
+    });
+    ok('the amount field keeps every pixel of itself under the dial',
+      /bd-in/.test(dvPull.top) && /bd-in/.test(dvPull.mid)
+      && /bd-in/.test(dvPull.bot), dvPull);
+    ok('...and the track sits nearer its own name than the next row\'s',
+      dvPull.above < dvPull.below, dvPull);
+
     ok('nothing threw through the budget dials', dvErrs.length === 0, dvErrs.slice(0, 4));
     await dvCtx.close();
   }

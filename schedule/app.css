@@ -6241,16 +6241,22 @@ body {
   display: grid; grid-template-columns: 1fr 84px;
   gap: 10px; align-items: start;
 }
+/* A FIGURE IS QUIET TABULAR TYPE, which is this app's own rule
+   everywhere a number is drawn rather than pressed — and the only
+   reason this one keeps a ground at all is that it is a FIELD: a
+   control is told apart by its ground, so the box stays and the
+   weight is what comes off. 15/600 beside a 15/500 name made the
+   amount the loudest thing on a row whose subject is the name. */
 .bd-in {
   -webkit-appearance: none; appearance: none;
   box-sizing: border-box;
   width: 100%; min-width: 0;
   margin-top: 1px;
-  padding: 4px 8px;
-  border: 1px solid var(--card-edge); border-radius: 8px;
+  padding: 3px 7px;
+  border: 1px solid var(--card-edge); border-radius: 7px;
   background: var(--card);
   color: var(--ink);
-  font: inherit; font-size: 15px; font-weight: 600;
+  font: inherit; font-size: 14px; font-weight: 500;
   font-variant-numeric: tabular-nums; text-align: right;
 }
 .bd-in::placeholder { color: var(--tick-off); font-weight: 500; }
@@ -6270,13 +6276,21 @@ body {
   background: var(--paper);
 }
 .bd-lvh { display: flex; align-items: baseline; gap: 12px; }
+/* 26/700 was the plan face's own headline, and this is not that: the
+   plan's foot is the LAST thing on a screen you read, where this is
+   a readout over a form you are working in. It says the same figure
+   a register quieter, which is what lets the rows under it be the
+   loud thing. */
 .bd-lvh > b {
   margin-left: auto;
-  font-size: 26px; font-weight: 700; letter-spacing: -.5px;
+  font-size: 19px; font-weight: 600; letter-spacing: -.2px;
   font-variant-numeric: tabular-nums;
 }
 .bd-lv.is-over .bd-k, .bd-lv.is-over .bd-lvh > b { color: var(--bad); }
-.bd-lv > .bd-stk { margin-top: 9px; }
+/* 18px of stack is the plan's, where it is the one picture on the
+   screen. Here it is a strip over a list, so it is a rule rather
+   than a block — the same five shares at a third of the weight. */
+.bd-lv > .bd-stk { height: 6px; border-radius: 3px; margin-top: 7px; }
 /* The plan's own gate said in CSS, because `.bd-stk` takes a
    `display` and putting one away with the attribute alone is the bug
    this app has now shipped seven times. */
@@ -6286,20 +6300,57 @@ body {
    figure's 84px column — the name and the amount are one fact read
    across, and the thing that sets them is under both. The negative
    margins are the 44px press target being kept while the drawn track
-   is pulled back under its own name: left in flow the 14px track
-   floated fifteen pixels clear of the row it belongs to and read as
-   a divider between two of them. */
-.bd-dial { grid-column: 1 / -1; margin: -9px 0 -7px; }
+   is pulled back under its own name: left in flow the track floated
+   fifteen pixels clear of the row it belongs to and read as a
+   divider between two of them.
+
+   ── AND IT IS A HAIRLINE, NOT THE SHEET'S OWN BAR ──
+   `.nm-dial` is 14px of track under a 30px thumb, which is right for
+   ONE control filling a sheet you opened to answer one question. Ten
+   of them down a list is ten heavy bars, and the screen stops being
+   a budget and becomes a mixing desk. 4px of track under a 12px
+   thumb says the same thing at a tenth of the ink — the press target
+   is untouched at 44px, because what got smaller is the DRAWING and
+   never what a thumb can hit.
+
+   AND -16 IS A MEASURED BOUNDARY, NOT A TASTE CALL. The track sits
+   at the box's own middle, so pulling it up under its name drags 22
+   pixels of dead box over the row above — and past -16 that box
+   takes the amount field's bottom edge, measured with
+   `elementFromPoint` rather than looked at: a press on the lower
+   third of a field starts a DRAG. Swept at 14 / 16 / 18 / 20 / 22,
+   the field keeps its own edge at 16 and loses it at 18. What that
+   buys is the gap being 16 above the track and 24 below, so it
+   plainly belongs to the row it is under — at -14 it was 18 and 16,
+   which is a divider floating between two rows. */
+.bd-dial { grid-column: 1 / -1; margin: -16px 0 -4px; }
 /* One declaration per engine, and a rule of its own rather than a
    second value inside `.nm-dial`'s: the same selector written twice
    in one file is the duplicate the static check refuses, whichever
    order it is in. */
 .bd-dial::-webkit-slider-runnable-track {
+  height: 4px; border-radius: 2px;
   background:
     linear-gradient(var(--c), var(--c)) 0 / var(--fill, 0%) 100% no-repeat,
     var(--tick-off);
 }
-.bd-dial::-moz-range-progress { background: var(--c); }
+.bd-dial::-moz-range-track { height: 4px; border-radius: 2px; }
+.bd-dial::-moz-range-progress {
+  height: 4px; border-radius: 2px; background: var(--c);
+}
+/* The ring is what keeps it a DOT where it lands on the boundary
+   between the filled half and the rest — the head span's own mark,
+   at a smaller size. What goes is the cast: a shadow under a 12px
+   circle is a smudge rather than a lift. Centred by hand, because a
+   thumb's offset is half the difference between the two. */
+.bd-dial::-webkit-slider-thumb {
+  width: 12px; height: 12px; margin-top: -4px;
+  border-width: 2px; box-shadow: none;
+}
+.bd-dial::-moz-range-thumb {
+  width: 12px; height: 12px;
+  border-width: 2px; box-shadow: none;
+}
 
 /* The three a budget sets once. Stacked, because each label is a
    sentence and three of them across a phone is a form. */

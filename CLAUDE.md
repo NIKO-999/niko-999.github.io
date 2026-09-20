@@ -11712,3 +11712,94 @@ thirteen. The 44px press target is kept whole; the negative margins
 pull the DRAWN track back under its own name, which it needed — left
 in flow the 14px track floated fifteen pixels clear and read as a
 divider between two rows rather than as part of one.
+
+### And the dial is a hairline
+
+Asked for in one line after the drag shipped: the bars skinnier and
+more minimal, and the text with them.
+
+**`.nm-dial` IS RIGHT FOR A SHEET AND WRONG FOR A LIST.** 14px of
+track under a 30px thumb is correct for ONE control filling a screen
+you opened to answer one question — and ten of them down a form is
+ten heavy bars, at which point the budget reads as a mixing desk. 4px
+of track under a 12px thumb, scoped to `.bd-dial` so the number
+sheet's own dial is untouched: the two are different objects at
+different densities rather than one drawing used twice.
+
+**THE PRESS TARGET IS UNTOUCHED AT 44px**, which is the half that
+makes it allowed. What got smaller is the DRAWING — the same split
+`.row-ed`, the objectives plus and the children's dots all already
+make, and the reason the check asserts the box beside the mark.
+
+**THE THUMB KEEPS ITS RING AND LOSES ITS CAST.** The `--paper` ring
+is what holds it a DOT where it lands on the boundary between the
+filled half and the rest — the head span's own mark, at a smaller
+size. A `box-shadow` under a 12px circle is a smudge rather than a
+lift.
+
+**AND THE TEXT WENT WITH IT.** The strip's figure 26/700 to 19/600 —
+the plan's foot is the last thing you read on a screen, where this is
+a readout over a form you are working in — and the stack 18px to 6,
+because there it is the one picture on the screen and here it is a
+rule over a list. The amount field 15/600 to 14/500: a figure is
+quiet tabular type everywhere in this app that it is not pressed, and
+15/600 beside a 15/500 name made the amount the loudest thing on a
+row whose subject is the name. The field keeps its GROUND, because a
+control is told apart by its ground and that is the whole of what
+still says this one is editable.
+
+**−16 IS A MEASURED BOUNDARY, NOT A TASTE CALL.** The track sits at
+the dial box's own middle, so pulling it up under its name drags 22px
+of dead box over the row above. Swept at 14 / 16 / 18 / 20 / 22 with
+`elementFromPoint`: the amount field keeps its own bottom edge at 16
+and loses it at 18, and a press on the lower third of a field that
+starts a DRAG is worse than any gap. What −16 buys is 16px above the
+track against 24 below, so it plainly belongs to the row it is under
+— at −14 it was 18 and 16, which is a divider floating between two
+rows, and that is what the first render actually looked like.
+
+### The thin mark's own check measured three different wrong things
+
+**FIRST, THE GROUND DRIFTED ONTO THE NAME.** The contrast probe read
+its ground at a fixed offset ABOVE the track — and the −16 pull moved
+the track, so on the dark face that sample came back `[233, 233,
+233]`, which is the row's white name. It reported a correct build at
+**2.53:1** and read exactly like a thin mark failing for the reason a
+thin mark would. Read as the most common pixel INSIDE the dial's own
+box instead, it is **3.98:1 dark and 4.20:1 light** — identical to the
+14px track, so the thinning cost nothing at all. Fourth time this
+file has recorded a check wrong about WHERE it looks.
+
+**THEN THE PSEUDO-ELEMENT LIED.** `getComputedStyle(el,
+'::-webkit-slider-runnable-track')` does not return that
+pseudo-element's box in Chromium — it hands back the HOST's, so a
+correct build reported its 4px track as **44px tall and 354 wide**.
+The thickness is measured as the RUN of coloured rows through the
+filled half now, which is the thing itself rather than a declaration
+about it.
+
+**AND THE SUITE'S PHONE IS `deviceScaleFactor: 2`.** Every reading
+here came off a standalone probe at dpr 1, which agreed with the
+design; the same code inside the suite addressed half the intended
+point and read the name row, then nothing at all. **A probe and the
+suite are two different machines**, which is this file's own oldest
+warning arriving from the opposite direction — there the phone was
+right and the suite wrong, here the probe was right and the suite was
+measuring somewhere else entirely.
+
+**A CHECK THAT CHANGES THE STATE OF THE APP BREAKS THE NEXT ONE, and
+this time it was mine.** The step above focuses a line so `.nt-tools`
+exists to be compared against — and the strip then sits over the rows,
+so every pixel sampled after it came back as the strip's own flat
+ground, reporting 1:1 on dials that are drawn correctly. It is put
+away before anything is read, and that the strip is gone is asserted
+rather than assumed.
+
+**Proved to bite, and the two halves are not redundant.** The track
+put back to 14px reads `run: 14` on all four dials and fails the
+hairline half while the contrast half still passes at 3.98 to 6.31 —
+correctly, because the heavy track was never the thing that was wrong
+about contrast. The pull put back to −22 reads the field's bottom
+edge as `nm-dial bd-dial` and fails that half alone. Restored each
+time by the script's own inverse and hashed against the known-good
+sha1.
