@@ -17506,15 +17506,17 @@ const SAID = [
        The gap is asserted beside it: the track has to read as
        belonging to the row ABOVE it rather than floating between two.
 
-       BOTH FIGURES WERE RE-MEASURED when the type came onto one
-       scale. The field is the body step now, so it is 27px tall
-       where it was 24 — and at the old -16 pull the dial’s box
-       closed on the field’s bottom exactly, which is a boundary
-       rather than a margin and drifted over it. Swept again across
-       the pair: -14 under a 15px field is 21 above against 25 below
-       with three pixels of the field still free, where -16 owns the
-       field’s last row and -12 puts the track nearer the next
-       row than its own. */
+       IT SAMPLED TWO PIXELS UP FROM THE FIELD'S BOTTOM, so a pull
+       that had already taken two of them passed — which is what -14
+       was doing for a whole round, and the day a pixel moved in the
+       row above it took three and failed. The check now counts how
+       many of the field's own rows the dial has claimed, from the
+       bottom up, and requires ZERO: the claim in its own name.
+
+       Swept from -18 to -8 on the shipped layout: three eaten at
+       -14, one at -12, none at -11, and past -8 the track sits
+       nearer the next row than its own. -11 is the centre of that
+       band. */
     const dvPull = await dvPage.evaluate(() => {
       const rows = [...document.querySelectorAll('.nt-row')]
         .filter((r) => r.querySelector('.bd-dial'));
@@ -17529,13 +17531,19 @@ const SAID = [
         const e = document.elementFromPoint(fr.left + fr.width / 2, y);
         return e && String(e.className);
       };
+      /* up from the foot until the field answers for itself */
+      let eaten = 0;
+      for (let y = Math.round(fr.bottom) - 1; y > fr.top; y--) {
+        if (/bd-in/.test(own(y) || '')) break;
+        eaten++;
+      }
       return { top: own(fr.top + 2), mid: own(fr.top + fr.height / 2),
-        bot: own(fr.bottom - 2),
+        bot: own(fr.bottom - 2), eaten, h: Math.round(fr.height),
         above: Math.round(mid - fr.bottom), below: Math.round(nx.top - mid) };
     });
     ok('the amount field keeps every pixel of itself under the dial',
       /bd-in/.test(dvPull.top) && /bd-in/.test(dvPull.mid)
-      && /bd-in/.test(dvPull.bot), dvPull);
+      && /bd-in/.test(dvPull.bot) && dvPull.eaten === 0, dvPull);
     ok('...and the track sits nearer its own name than the next row\'s',
       dvPull.above < dvPull.below, dvPull);
 

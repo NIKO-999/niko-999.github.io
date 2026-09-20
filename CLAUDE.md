@@ -11961,3 +11961,99 @@ anyway. Measured, `height: auto` makes the poster **shorter** (748 to
 473), so it clears the pill by more than it did. Lifting the bar into
 the poster is the honest inverse, and it reports `pass: false` where
 the other reported `pass: true` on a build that was broken.
+
+## The second dimension was the leading, and nobody had looked at it
+
+The type came onto six steps and the padding took nine cuts, and the
+ask came back: smaller still. So it was measured rather than shaved,
+and the measurement said two things.
+
+**THE SCALE IS AT ITS FLOOR AND THAT IS ARITHMETIC RATHER THAN
+TASTE.** The steps are 26 / 19 / 15 / 13 / 11 / 9.5, and the bottom is
+fixed by this file's own 9.5px minimum. Take the body register down
+one — 15 to 14 and 13 to 12 — and the label step has to follow to 10.5
+to keep its distance, which leaves 10.5 and 9.5 a pixel apart. **That
+is the exact fault the first pass existed to remove**: two steps
+nobody can tell apart, doing one job under two names. The scale did
+not move and the reason is written here so the next pass does not
+spend a round rediscovering it.
+
+**WHAT HAD NEVER BEEN LOOKED AT IS THE LEADING: 65 declarations
+across THIRTEEN values.** 1, 1.05, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4,
+1.42, 1.45, 1.5, 1.55, 1.6 — the type-scale problem in the other
+dimension, untouched, because a line-height does not look like a size.
+
+**AND THE APP'S COMMONEST LEADING WAS ONE NOBODY CHOSE.** Forty of
+fifty-eight drawn text boxes declared none at all and took the
+browser's `normal`, about 1.2. A value that arrived by default is not
+a decision, and it was the majority of the app.
+
+**SIX OF FIFTY-EIGHT TEXT BOXES EVER WRAP.** The other fifty-two are
+one line, and a one-line box's leading IS its height — an 11px label
+at 1.5 is a 16.5px box drawing 11px of type. Fourteen of them can
+never wrap at all, by their own `white-space: nowrap` or an ellipsis,
+and **eleven of those fourteen carried leading they could not use**.
+Read off the source rather than off the fixture, because whether a
+name wraps today is a fact about the words somebody typed.
+
+**THREE CEILINGS, AND A CEILING IS NEVER A TARGET.** `1` for a box
+that cannot wrap, `1.2` for a line that can, `1.35` for a paragraph
+you read. Applied as a MONOTONE pass — an element already below its
+ceiling keeps its own value — so nothing on the screen grew to meet a
+system. Thirteen values came down to five, and every one of the five
+is at or under what it replaced. The script asserts each selector it
+names actually matched, which is what caught `.field` and
+`.menu-item` writing their leading inside a `font:` shorthand where a
+`line-height:` scan cannot see it.
+
+**The nine density numbers went again, and so did eight more.** The
+poster 10 to 8, the head's foot 8 to 6, its gap 10 to 8, the week
+strip's margin 8 to 6, the tally's 10 to 6 — and the calendar's
+**18 to 6**, which is the same job as the tally's and had simply never
+been the same number. The stops' padding 4 to 3 and their margin 12 to
+8, the tally heading's foot 11 to 6, the grid's gap 8 to 6, a tile's
+padding 13/14/12 to 10/12/10, a note card's 13/14 to 10/12, the group
+headings' 10/6 to 8/4, the day-letter row's 10 to 6 and the month
+grid's 4 to 2.
+
+Measured on the real app at 390x844: **a week row 55px to 51**, its
+first row at y159 to **y151**; Showing up's first tile at y202 to
+**y180**; the month grid at y230 to **y202**; a note card 134px to
+**111**. The whole budget fits one screen with room where it did not.
+
+**AND THE FLOOR IS THREE RULES AND ONE REQUEST.** 44px press targets,
+which nothing here touched — every cut is padding, a gap, a margin or
+a leading, and where a control's reach is a `::before` its padding was
+free to go and its target was not. 9.5px type. 16px fields, because
+anything smaller zooms the page on focus in iOS. And the 30px day,
+asked for by name. Everything else is at the smallest number that was
+measured to work.
+
+**WHAT IS LEFT IS STRUCTURE, NOT SLACK, AND IT IS NOT TAKEN HERE.** A
+note spends 53px on the head and another 42 on its crumb — two title
+registers, one saying which SCREEN and one saying which NOTE, before a
+word of the note. That is the duplication this project keeps removing,
+and it is a decision about what the head is for rather than a number
+to shave, so it is written down rather than done.
+
+### The dial's pull was a boundary that passed by a sampling offset
+
+The check is named *the amount field keeps every pixel of itself under
+the dial*, and it read `elementFromPoint` **two pixels up from the
+field's bottom**. At the shipped -14 the dial had already taken two of
+them; the name was false and the sampling offset was the only reason
+it passed. A pixel moved somewhere in the row above, three went, and
+it failed — on a pull nobody had touched.
+
+Swept from -18 to -8: **three of the field's rows eaten at -14, one at
+-12, none at -11**, and past -8 the track sits nearer the next row
+than its own. -11 is the centre of that band and the only value that
+is a margin at both ends. It costs three pixels a dial row, which is
+said out loud rather than traded away by measuring somewhere else.
+
+**The check counts now.** It walks up from the field's foot until the
+field answers for itself and requires the count to be ZERO — which is
+what its own name always claimed. **A check that passes by where it
+looks rather than by what is there is the Pattern axis and the
+almanac's ground a third time**, and the first two were wrong about
+the pixel; this one was wrong about the offset.

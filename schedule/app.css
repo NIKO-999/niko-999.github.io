@@ -370,7 +370,7 @@ body {
   max-width: 460px;
   height: 100%;
   margin: 0 auto;
-  padding: 10px var(--pad) 0;
+  padding: 8px var(--pad) 0;
   /* ── A COLUMN, NOT A PAGE ──
      The head is fixed and the view under it scrolls, which is what
      lets the week be one day drawn in full: the list owns the room
@@ -460,7 +460,7 @@ body {
 
 /* ── the head ────────────────────────────────────────────── */
 
-.head { flex: none; padding-bottom: 8px; }
+.head { flex: none; padding-bottom: 6px; }
 
 /* Stays a label, and that is a decision rather than the absence of one.
    Nine treatments were rendered in the real app at phone size — a
@@ -508,7 +508,7 @@ body {
 .hd-top {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 /* A GLYPH TILE, the card material at 38px: it says which screen you
    are on in the one place the title cannot, because up here the
@@ -730,8 +730,8 @@ body {
 .fr-seg {
   display: flex;
   gap: 4px;
-  padding: 4px;
-  margin-bottom: 12px;
+  padding: 3px;
+  margin-bottom: 8px;
   border-radius: 22px;
   background: color-mix(in srgb, var(--ink) 7%, transparent);
 }
@@ -816,7 +816,7 @@ body {
 .fr-crown svg { position: relative; width: 17px; height: 14px; display: block;
   fill: var(--gold); }
 
-.fr-note { margin-top: 12px; font-size: 11px; line-height: 1.55; color: var(--dim); }
+.fr-note { margin-top: 12px; font-size: 11px; line-height: 1.35; color: var(--dim); }
 
 /* A row is a button only when somebody is behind it, so the pressed
    state is on a class the script adds rather than on .fr-row. Your own
@@ -893,7 +893,7 @@ body {
 .po-img:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 /* THE CAPTION LEADS, so its margin is under the head rather than
    under the picture. */
-.po-c { margin: 8px 0 0; font-size: 13px; line-height: 1.5; }
+.po-c { margin: 8px 0 0; font-size: 13px; line-height: 1.35; }
 .po-c + .po-img { margin-top: 9px; }
 
 /* -- the whole picture --
@@ -916,7 +916,7 @@ body {
   object-fit: contain; border-radius: 10px;
 }
 .ph-c {
-  margin: 0; font-size: 13px; line-height: 1.45; color: var(--dim);
+  margin: 0; font-size: 13px; line-height: 1.35; color: var(--dim);
   text-align: center; max-width: 34em;
 }
 
@@ -1005,7 +1005,7 @@ body {
    claim about somebody. */
 .fp-t.is-words { display: grid; align-items: start; padding: 9px;
   background: none; box-shadow: inset 0 0 0 1px var(--hair); }
-.fp-t.is-words span { font-size: 11px; line-height: 1.35; font-weight: 500;
+.fp-t.is-words span { font-size: 11px; line-height: 1.2; font-weight: 500;
   color: var(--dim); text-align: left; overflow: hidden;
   display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; }
 
@@ -1047,7 +1047,7 @@ body {
 .hb-guess b { display: block; font-size: 15px; font-weight: 600; }
 .hb-guess span span {
   display: block; font-size: 11px; color: var(--spent);
-  margin-top: 2px; line-height: 1.35;
+  margin-top: 2px; line-height: 1.2;
 }
 .hb-seg {
   display: flex; gap: 3px; margin: 12px 0 0;
@@ -1081,7 +1081,7 @@ body {
    nothing alike over twelve months -- so the grid is the page and
    everything else hangs under it. */
 .pf-bio {
-  font-size: 13px; color: var(--dim); line-height: 1.45;
+  font-size: 13px; color: var(--dim); line-height: 1.35;
   margin: 0 0 12px;
 }
 /* One line where two 26px figures used to be. They summarise the
@@ -1164,7 +1164,7 @@ body {
 .pv-t b { display: block; font-size: 15px; font-weight: 600; }
 .pv-t span {
   display: block; font-size: 11px; color: var(--spent);
-  line-height: 1.35; margin-top: 2px;
+  line-height: 1.2; margin-top: 2px;
 }
 .pv-sw {
   flex: 0 0 auto; width: 44px; height: 26px; border-radius: 13px;
@@ -1222,7 +1222,7 @@ body {
    panel. The timetable idiom still owns every other screen: the week,
    the ring and the sheet are square, and nothing here is shadowed.
    ═════════════════════════════════════════════════════════ */
-.tally { margin-top: 10px; display: flex; }
+.tally { margin-top: 6px; display: flex; }
 /* A COLUMN, so the grid above can take the slack. Left as a block
    the tiles size to their content and the day ends wherever it
    ends, which is the screen the mosaic replaced. */
@@ -1242,7 +1242,7 @@ body {
    left, the day's three figures on the right, and the whole row is
    the door to the week. */
 .ty-sh {
-  margin: 2px 0 11px; font-size: 15px; font-weight: 700;
+  margin: 2px 0 6px; font-size: 15px; font-weight: 700;
   letter-spacing: -.01em; color: var(--ink);
 }
 
@@ -1358,7 +1358,7 @@ body {
   min-height: 12px;
 }
 .wv-q:not(.is-off) > em { color: var(--ink); }
-.ty-foot { margin-top: 16px; font-size: 11px; line-height: 1.5; color: var(--dim); }
+.ty-foot { margin-top: 16px; font-size: 11px; line-height: 1.2; color: var(--dim); }
 /* It says one thing and only when there is no run at all, so on every
    other day it was an empty paragraph holding 33px of the one screen
    this layout exists to fit inside. */
@@ -1396,7 +1396,7 @@ body {
      answer and the cost this layout was chosen with. */
   grid-auto-rows: minmax(108px, 1fr);
   align-items: stretch;
-  gap: 8px;
+  gap: 6px;
   /* `1 0 auto`: grow into the pane, and never shrink below the rows'
      own height. `flex: 1` alone caps the box at the pane and the tiles
      then spill out of a container that has nothing left to scroll. */
@@ -1421,10 +1421,12 @@ body {
      app that is above the page rather than on it. */
   background: var(--card);
   border-radius: 16px;
-  /* Two pixels off every edge against the tile this replaced. Small
-     on its own and four rows of it is a row of the grid, which is the
-     difference between the day fitting on one screen and not. */
-  padding: 13px 14px 12px;
+  /* At the floor: three off the head and the foot, two off the sides.
+     Small on its own and six tiles of it is most of a row of the
+     grid, which is the difference between the day fitting on one
+     screen and not. The tile's own type is 22px over 11px labels, so
+     what is left inside is the marks rather than air. */
+  padding: 10px 12px 10px;
   min-width: 0;
 }
 /* ── THE TAG, AND IT IS THE ONLY COLOUR ON THIS SCREEN ──
@@ -1445,7 +1447,7 @@ body {
   border-radius: 6px;
   font-size: 11px;
   font-weight: 600;
-  line-height: 1.6;
+  line-height: 1;
   white-space: nowrap;
 }
 .ty-card .tg.is-off {
@@ -1498,7 +1500,7 @@ body {
    it says that instead. */
 .ty-when {
   grid-column: 1 / -1; grid-row: 3;
-  font-size: 11px; color: var(--spent); line-height: 1.3;
+  font-size: 11px; color: var(--spent); line-height: 1;
   margin-top: 3px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
@@ -1589,7 +1591,7 @@ body {
 .ty-card .ty-ft {
   grid-column: 1 / -1; grid-row: 5;
   margin-top: 8px;
-  font-size: 11px; color: var(--spent); line-height: 1.3;
+  font-size: 11px; color: var(--spent); line-height: 1.2;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .ty-ax > span {
@@ -1774,7 +1776,7 @@ body {
 .gh-tx b { display: block; font-size: 15px; font-weight: 700; }
 .gh-tx p {
   margin: 1px 0 0;
-  font-size: 11px; line-height: 1.45; color: var(--dim);
+  font-size: 11px; line-height: 1.35; color: var(--dim);
 }
 .gh-row {
   grid-column: 1 / -1;
@@ -2039,7 +2041,7 @@ body {
 .ty-nm {
   grid-column: 2; grid-row: 1;
   font-size: 11px; font-weight: 600; color: var(--spent);
-  text-transform: uppercase; letter-spacing: .075em; line-height: 1.3;
+  text-transform: uppercase; letter-spacing: .075em; line-height: 1;
   /* The tick sits in the corner over this line. */
   padding-right: 20px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -2392,7 +2394,7 @@ body {
    and Thursday sits somewhere different each time you look. The chip
    you are on takes the card material; today takes the accent, which
    is the one red up here besides whatever is running. */
-.strip { display: flex; gap: 3px; margin: 8px 0 2px; }
+.strip { display: flex; gap: 3px; margin: 6px 0 2px; }
 .st-d {
   flex: 1; min-width: 0;
   display: flex; flex-direction: column; align-items: center; gap: 1px;
@@ -2461,7 +2463,7 @@ body {
 .wk-sh {
   display: flex;
   align-items: center;
-  padding: 10px 2px 6px;
+  padding: 8px 2px 4px;
 }
 .wk-sh:first-child { padding-top: 2px; }
 /* ══════════════════════════════════════════════════════
@@ -2897,7 +2899,7 @@ body {
   color: var(--dim);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  line-height: 1.4;
+  line-height: 1;
 }
 /* OUT of the group above, not overriding one property from it: one
    selector carrying one property twice is a file with two values in it
@@ -2953,7 +2955,7 @@ body {
   border-radius: 5px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  line-height: 1.5;
+  line-height: 1;
 }
 /* THE TIME IS THE GUTTER, and it spans both lines so it centres
    against the pair rather than sitting on the name's baseline.
@@ -2978,7 +2980,7 @@ body {
   color: var(--dim);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  line-height: 1.4;
+  line-height: 1;
 }
 /* The dot rides the second item rather than sitting between them as
    an element of its own: a separator is punctuation, not a thing to
@@ -3099,7 +3101,7 @@ body {
 /* ── the group heading ──
    A session pill and a count, the week card's own heading reused on
    every list in the app: it is what makes them one family. */
-.grp-h { display: flex; align-items: center; gap: 8px; padding: 10px 2px 6px; font-size: 11px; color: var(--spent); font-variant-numeric: tabular-nums; }
+.grp-h { display: flex; align-items: center; gap: 8px; padding: 8px 2px 4px; font-size: 11px; color: var(--spent); font-variant-numeric: tabular-nums; }
 /* A HEADING, not a chip: it names the list under it, which is what
    small caps are for. The app's own .label treatment, so a section
    heading reads the same wherever one is. */
@@ -3234,7 +3236,7 @@ body {
 .empty {
   padding: 10px 0;
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.35;
   color: var(--ink);
 }
 .empty em { font-style: italic; }
@@ -3488,7 +3490,7 @@ body {
 
 .hint {
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.35;
   color: var(--dim);
 }
 .hint em { font-style: italic; color: var(--ink); }
@@ -3504,7 +3506,7 @@ body {
   border-radius: 12px;
   background: var(--card);
   font-size: 15px;
-  line-height: 1.45;
+  line-height: 1.35;
 }
 .heard .partial { color: var(--spent); }
 
@@ -3542,7 +3544,7 @@ body {
   background: var(--card);
   color: var(--ink);
   /* 16px exactly: anything smaller and iOS zooms the page on focus. */
-  font: 400 16px/1.4 'Inter', system-ui, sans-serif;
+  font: 400 16px/1.35 'Inter', system-ui, sans-serif;
 }
 .field:focus { outline: 2px solid var(--red); outline-offset: 1px; }
 .field::placeholder { color: var(--spent); }
@@ -3707,7 +3709,7 @@ body {
   border-bottom: 1px solid var(--hair);
   background: none;
   color: var(--ink);
-  font: 500 15px/1.3 'Inter', system-ui, sans-serif;
+  font: 500 15px/1.2 'Inter', system-ui, sans-serif;
   text-align: left;
   cursor: pointer;
 }
@@ -3923,7 +3925,7 @@ body {
    faces, because it is 10.5px body type rather than a graphic. */
 .wb-f {
   font-size: 11px;
-  line-height: 1.25;
+  line-height: 1.2;
   margin-top: 1px;
   color: color-mix(in srgb, var(--wb-hue) 62%, var(--ink));
 }
@@ -4018,7 +4020,7 @@ body {
 .wc-sub {
   margin: -2px 0 15px;
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 1.2;
   color: var(--dim);
 }
 
@@ -4228,7 +4230,7 @@ body {
   padding: 1px 5px;
   border-radius: 5px;
   white-space: nowrap;
-  line-height: 1.5;
+  line-height: 1;
   background: color-mix(in srgb, var(--tg) 22%, transparent);
   color: color-mix(in srgb, var(--tg) 72%, var(--ink));
 }
@@ -4371,7 +4373,7 @@ body {
 .wo-none {
   margin-top: 22px;
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.35;
   color: var(--dim);
 }
 
@@ -4642,7 +4644,7 @@ body {
   margin: 0;
   max-width: 30ch;
   font-size: 15px;
-  line-height: 1.55;
+  line-height: 1.35;
   color: var(--dim);
 }
 
@@ -4803,7 +4805,7 @@ body {
 }
 .mn-say { margin: 8px 2px 0; font-size: 11px; color: var(--spent); }
 
-.mn-note { min-height: 64px; resize: vertical; line-height: 1.45; }
+.mn-note { min-height: 64px; resize: vertical; line-height: 1.35; }
 
 /* ── MIND'S LADDER IS FOUR ACROSS, ALWAYS ──
    `.wc-min` is `flex: 1 1 auto`, so a row that does not divide evenly
@@ -5397,7 +5399,7 @@ body {
    dots, the toast, the intro, the objectives row, the edit control and
    the panes each had the attribute set correctly while an author
    `display` outranked the browser's own rule. */
-.cal { margin-top: 18px; display: flex; }
+.cal { margin-top: 6px; display: flex; }
 .cal[hidden] { display: none !important; }
 
 .notes { display: flex; }
@@ -5408,7 +5410,7 @@ body {
    browser's own rule. */
 .notes[hidden] { display: none !important; }
 
-.nt-none { padding: 4px 2px 12px; font-size: 13px; line-height: 1.6; color: var(--spent); }
+.nt-none { padding: 4px 2px 12px; font-size: 13px; line-height: 1.35; color: var(--spent); }
 .nt-none b { color: var(--ink); font-weight: 600; }
 
 /* ── THE LIST ── */
@@ -5416,7 +5418,7 @@ body {
   display: block;
   width: 100%;
   margin: 0 0 9px;
-  padding: 13px 14px;
+  padding: 10px 12px;
   border: 0;
   border-radius: 14px;
   background: var(--card);
@@ -5431,7 +5433,7 @@ body {
 .nt-p {
   margin: 5px 0 0;
   font-size: 11px;
-  line-height: 1.4;
+  line-height: 1.35;
   color: var(--spent);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -5451,7 +5453,7 @@ body {
 }
 
 /* ── ONE NOTE ── */
-.nt-crumb { display: flex; align-items: center; gap: 8px; padding: 2px 0 6px; }
+.nt-crumb { display: flex; align-items: center; gap: 8px; padding: 2px 0 4px; }
 .nt-back {
   flex: none;
   width: 34px; height: 34px;
@@ -5595,7 +5597,7 @@ body {
      carries the same number for the same reason, and the read twin is
      held to the field so a mode switch cannot re-wrap the note. */
   font-size: 16px;
-  line-height: 1.42;
+  line-height: 1.35;
   letter-spacing: 0;
   padding: 4px 0;
   border: 0;
@@ -5815,7 +5817,7 @@ body {
      carries the same number for the same reason, and the read twin is
      held to the field so a mode switch cannot re-wrap the note. */
   font-size: 16px;
-  line-height: 1.42;
+  line-height: 1.35;
   display: inline;
 }
 .nt-body:not(.is-edit) .nt-row { padding: 7px 0; }
@@ -5971,7 +5973,7 @@ body {
 .nt-st.is-key b { font-weight: 700; }
 .nt-st i {
   display: block; margin-top: 2px;
-  font-size: 11px; font-style: normal; line-height: 1.45; color: var(--spent);
+  font-size: 11px; font-style: normal; line-height: 1.35; color: var(--spent);
 }
 /* A heading draws no bead at all — it was breaking a line that no
    longer runs, and a stub with nothing to break is a mark with
@@ -6009,7 +6011,7 @@ body {
   border-left: 4px solid color-mix(in srgb, var(--c) 85%, transparent);
   background: color-mix(in srgb, var(--c) 12%, transparent);
 }
-.nt-mk-s { font-size: 19px; font-weight: 700; letter-spacing: -.02em; line-height: 1.25; }
+.nt-mk-s { font-size: 19px; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; }
 .nt-mk-w {
   margin-top: 8px;
   font-size: 11px; font-weight: 600;
@@ -6018,9 +6020,9 @@ body {
 }
 .nt-mk.is-edit .nt-row { padding: 0; }
 .nt-mk.is-edit .nt-in {
-  font-size: 19px; font-weight: 700; letter-spacing: -.02em; line-height: 1.25;
+  font-size: 19px; font-weight: 700; letter-spacing: -.02em; line-height: 1.2;
 }
-.nt-mk.is-edit .nt-mir { font-size: 19px; font-weight: 700; letter-spacing: -.02em; line-height: 1.25; }
+.nt-mk.is-edit .nt-mir { font-size: 19px; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; }
 .nt-dw { display: flex; align-items: center; gap: 9px; margin-top: 9px; }
 .nt-dl {
   font-size: 9.5px; font-weight: 700;
@@ -6049,7 +6051,7 @@ body {
   letter-spacing: .16em; text-transform: uppercase;
   color: color-mix(in srgb, var(--c) 72%, var(--ink));
 }
-.nt-gl { padding: 7px 0; font-size: 16px; line-height: 1.4; }
+.nt-gl { padding: 7px 0; font-size: 16px; line-height: 1.35; }
 /* A MARKED LINE IN A GOAL IS STRUCK — the thing you have ruled out,
    which is the one place the mark says something other than "this one
    matters". Named on the control too: it reads "Ruled out" here. */
@@ -6331,17 +6333,27 @@ body {
    is untouched at 44px, because what got smaller is the DRAWING and
    never what a thumb can hit.
 
-   AND -16 IS A MEASURED BOUNDARY, NOT A TASTE CALL. The track sits
-   at the box's own middle, so pulling it up under its name drags 22
-   pixels of dead box over the row above — and past -16 that box
-   takes the amount field's bottom edge, measured with
-   `elementFromPoint` rather than looked at: a press on the lower
-   third of a field starts a DRAG. Swept at 14 / 16 / 18 / 20 / 22,
-   the field keeps its own edge at 16 and loses it at 18. What that
-   buys is the gap being 16 above the track and 24 below, so it
-   plainly belongs to the row it is under — at -14 it was 18 and 16,
-   which is a divider floating between two rows. */
-.bd-dial { grid-column: 1 / -1; margin: -14px 0 -4px; }
+   AND THE PULL IS A MARGIN NOW, WHERE IT WAS A BOUNDARY TWICE. The
+   track sits at the box's own middle, so bringing it up under its
+   name drags 22 pixels of dead box over the row above — and a press
+   on the lower third of a field starts a DRAG rather than putting a
+   caret in it. Read with `elementFromPoint` rather than looked at.
+
+   Swept from -18 to -8: the dial takes THREE pixels of the field at
+   -14, one at -12, and none at -11. It shipped at -14 for a round
+   because the check sampled two pixels up from the field's bottom —
+   so two eaten pixels passed, and when a pixel moved somewhere in
+   the row above, three did not. A boundary that passes by a sampling
+   offset is not a margin, which is this file's own lesson for the
+   third time.
+
+   -11 is the centre of the band and the only value that is a margin
+   at both ends: the field keeps every pixel of itself, and the track
+   is 23 above against 25 below, so it still plainly belongs to the
+   row it is under. Past -8 that flips and the track reads as the
+   next row's. What it costs is three pixels a dial row, said out
+   loud rather than traded away by sampling somewhere else. */
+.bd-dial { grid-column: 1 / -1; margin: -11px 0 -4px; }
 /* One declaration per engine, and a rule of its own rather than a
    second value inside `.nm-dial`'s: the same selector written twice
    in one file is the duplicate the static check refuses, whichever
@@ -6885,7 +6897,7 @@ body {
   font-weight: 700;
   color: var(--dim);
   font-variant-numeric: tabular-nums;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 .cl-lr.is-now .cl-ld { color: var(--red); font-weight: 800; }
 .cl-ld > u {
@@ -6912,7 +6924,7 @@ body {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 0;
-  margin-top: 10px;
+  margin-top: 6px;
 }
 .cl-dows span {
   text-align: center;
@@ -6924,7 +6936,7 @@ body {
 .cl-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  margin-top: 4px;
+  margin-top: 2px;
   border-top: 1px solid var(--hair);
   border-left: 1px solid var(--hair);
 }
@@ -6988,7 +7000,7 @@ body {
   font-weight: 600;
   color: var(--dim);
   font-variant-numeric: tabular-nums;
-  line-height: 1.3;
+  line-height: 1.2;
 }
 /* -- TODAY IS THE STRONGEST TYPE ON THE GRID, NOT A SECOND MARK --
    The head's own rule for saying YOU ARE HERE. */
@@ -7028,7 +7040,7 @@ body {
   font-size: 9.5px;
   font-weight: 600;
   letter-spacing: -.01em;
-  line-height: 1.35;
+  line-height: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -7055,7 +7067,7 @@ body {
   font-size: 9.5px;
   font-weight: 600;
   color: var(--spent);
-  line-height: 1.5;
+  line-height: 1.2;
   font-variant-numeric: tabular-nums;
 }
 /* -- AND A RULE AT THE FOOT SAYS HOW MUCH OF THE DAY YOU KEPT --
