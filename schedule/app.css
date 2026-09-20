@@ -269,6 +269,15 @@
   --w-orange: #e0761a; --w-amber: #e08a12;
   --done-bg: rgba(255,255,255,.10);
   --pad:   18px;   /* the page's left edge — everything aligns to it */
+  /* ── ONE TRACK, EVERYWHERE ──
+     Every bar in this app measures a share of something, so there is
+     one thickness and a stack of several shares gets the one step up.
+     The dial's thumb is a mark on the track rather than a grip: the
+     press target is the input's own 44px box, which is why a 12px
+     drawing costs nothing a thumb can feel. */
+  --trk:   4px;    /* a track, a progress line, a gauge */
+  --trk-s: 6px;    /* a stack, which has segments to tell apart */
+  --thumb: 12px;
   /* The open card's width, named because TWO rules need it: the card
      itself, and the lead-in the deck needs either side for that card to
      be able to sit in the middle. Written twice they drift, and the
@@ -780,9 +789,9 @@ body {
 .fr-link:active { opacity: .6; }
 .fr-link:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
-.fr-list { list-style: none; margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+.fr-list { list-style: none; margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
 .fr-row { display: flex; align-items: center; gap: 13px;
-  padding: 12px; border-radius: 14px;
+  padding: 10px; border-radius: 14px;
   background: var(--card);
   box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow); }
 .fr-rank { font-size: 11px; font-weight: 700; color: var(--dim); width: 12px;
@@ -816,7 +825,7 @@ body {
 .fr-crown svg { position: relative; width: 17px; height: 14px; display: block;
   fill: var(--gold); }
 
-.fr-note { margin-top: 12px; font-size: 11px; line-height: 1.35; color: var(--dim); }
+.fr-note { margin-top: 10px; font-size: 11px; line-height: 1.35; color: var(--dim); }
 
 /* A row is a button only when somebody is behind it, so the pressed
    state is on a class the script adds rather than on .fr-row. Your own
@@ -825,14 +834,14 @@ body {
 .fr-row.is-tap:active { opacity: .8; }
 .fr-row.is-tap:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
 
-.fr-acts { display: flex; gap: 8px; margin-top: 14px; }
+.fr-acts { display: flex; gap: 8px; margin-top: 10px; }
 .fr-acts .btn { flex: 1; }
 
 /* The code, at the size somebody reads out over a phone. Tabular and
    spaced, because it is going to be transcribed by hand and an
    ambiguous character is the whole cost of getting it wrong. The
    alphabet already drops I, O, 0 and 1. */
-.fr-code { margin-top: 6px; font-size: 26px; font-weight: 800;
+.fr-code { margin-top: 6px; font-size: 22px; font-weight: 800;
   letter-spacing: .16em; font-variant-numeric: tabular-nums; }
 
 /* Yours and the button that copies it, on one line. `Copy` is next to
@@ -944,7 +953,7 @@ body {
   text-transform: none; color: var(--dim); margin: 22px 0 6px; }
 
 .fp-pair { display: flex; gap: 26px; margin: 2px 0 4px; }
-.fp-pair b { display: block; font-size: 26px; font-weight: 800;
+.fp-pair b { display: block; font-size: 22px; font-weight: 800;
   letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .fp-pair span { display: block; margin-top: 1px; font-size: 11px; color: var(--dim); }
 
@@ -1624,11 +1633,11 @@ body {
   flex: 1 1 90px; min-height: 90px; padding-top: 4px;
 }
 .ty-gt {
-  width: 15px; flex: none; border-radius: 8px; background: var(--tick-off);
+  width: 8px; flex: none; border-radius: 4px; background: var(--tick-off);
   display: flex; flex-direction: column; justify-content: flex-end;
   overflow: hidden;
 }
-.ty-gt > i { display: block; width: 100%; border-radius: 8px; background: var(--ink); }
+.ty-gt > i { display: block; width: 100%; border-radius: 4px; background: var(--ink); }
 .ty-gm { flex: 0 1 58px; position: relative; }
 .ty-gm > span {
   position: absolute; left: 0; transform: translateY(-50%);
@@ -2168,9 +2177,9 @@ body {
    34px, because with the map gone this is the first thing on the
    panel rather than a figure under a picture — the three it replaces
    were 22 and were three. */
-.ty-sol { margin-top: 16px; }
+.ty-sol { margin-top: 14px; }
 .ty-sol > b {
-  display: block; font-size: 26px; font-weight: 700;
+  display: block; font-size: 22px; font-weight: 700;
   letter-spacing: -.03em; line-height: 1.05;
   font-variant-numeric: tabular-nums;
 }
@@ -2181,17 +2190,17 @@ body {
    held to anything — no grey exists that clears 3:1 against all
    seven, the ceiling being 2.69 with a white one. */
 .ty-sol-t {
-  position: relative; margin-top: 16px; height: 10px;
-  border-radius: 5px; background: var(--tick-off); overflow: hidden;
+  position: relative; margin-top: 14px; height: var(--trk);
+  border-radius: 2px; background: var(--tick-off); overflow: hidden;
 }
-.ty-sol-t > i { position: absolute; inset: 0 auto 0 0; border-radius: 5px; }
+.ty-sol-t > i { position: absolute; inset: 0 auto 0 0; border-radius: 2px; }
 /* Twelve weeks, each as tall as it was. A week under the aim keeps the
    flat neutral rather than a weaker copy of the hue, which is the
    strip's own rule: an unlit mark never says WHICH, only the lit one
    does. */
 .ty-sol-w {
   display: flex; align-items: flex-end; gap: 4px;
-  margin-top: 22px; height: 56px;
+  margin-top: 16px; height: 56px;
 }
 .ty-sol-w > i { flex: 1 1 0; border-radius: 2px; background: var(--tick-off); }
 /* On the tile, in the CARD's grid: `.ty-body` is `display: contents`,
@@ -4635,7 +4644,7 @@ body {
      "friends" sat alone on a line, which reads as a wrap fault rather
      than as a title. */
   max-width: 19ch;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -.02em;
@@ -5066,7 +5075,7 @@ body {
 
 .nm-read { display: flex; align-items: baseline; gap: 8px; margin-top: 2px; }
 .nm-read b {
-  font-size: 26px; font-weight: 800; letter-spacing: -.035em;
+  font-size: 22px; font-weight: 800; letter-spacing: -.035em;
   font-variant-numeric: tabular-nums; line-height: 1.05;
 }
 .nm-sub { font-size: 11px; color: var(--spent); margin-top: 3px; min-height: 17px; }
@@ -5095,29 +5104,29 @@ body {
 /* One declaration per engine, because a selector an engine does not
    know invalidates the whole rule — so these cannot be a group. */
 .nm-dial::-webkit-slider-runnable-track {
-  height: 14px; border-radius: 7px;
+  height: var(--trk); border-radius: 2px;
   background:
     linear-gradient(var(--ink), var(--ink)) 0 / var(--fill, 0%) 100% no-repeat,
     var(--tick-off);
 }
 .nm-dial::-moz-range-track {
-  height: 14px; border-radius: 7px; background: var(--tick-off);
+  height: var(--trk); border-radius: 2px; background: var(--tick-off);
 }
-.nm-dial::-moz-range-progress { height: 14px; border-radius: 7px; background: var(--ink); }
+.nm-dial::-moz-range-progress { height: var(--trk); border-radius: 2px; background: var(--ink); }
 
 .nm-dial::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 30px; height: 30px; border-radius: 50%;
-  margin-top: -8px;          /* centred on a 14px track */
+  width: var(--thumb); height: var(--thumb); border-radius: 50%;
+  margin-top: calc((var(--trk) - var(--thumb)) / 2);
   background: var(--ink);
-  border: 3px solid var(--paper);
-  box-shadow: var(--card-shadow);
+  border: 2px solid var(--paper);
+  box-shadow: none;
 }
 .nm-dial::-moz-range-thumb {
-  width: 30px; height: 30px; border-radius: 50%;
+  width: var(--thumb); height: var(--thumb); border-radius: 50%;
   background: var(--ink);
-  border: 3px solid var(--paper);
-  box-shadow: var(--card-shadow);
+  border: 2px solid var(--paper);
+  box-shadow: none;
 }
 
 /* ── THE MARKS ──
@@ -5145,9 +5154,9 @@ body {
 }
 .nm-tick {
   position: absolute;
-  bottom: 15px;              /* the track is 14px and centred in 44 */
+  bottom: 20px;              /* the track is --trk and centred in 44 */
   width: 2px;
-  height: 14px;
+  height: var(--trk);
   margin-left: -1px;
   border-radius: 1px;
   background: var(--paper);
@@ -5417,7 +5426,7 @@ body {
 .nt-card {
   display: block;
   width: 100%;
-  margin: 0 0 9px;
+  margin: 0 0 7px;
   padding: 10px 12px;
   border: 0;
   border-radius: 14px;
@@ -5908,7 +5917,7 @@ body {
 }
 
 /* ── THE PICKER, WHILE EDITING ONLY ── */
-.nt-set { margin: 2px 0 14px; }
+.nt-set { margin: 2px 0 10px; }
 .nt-lay { display: flex; flex-wrap: wrap; align-items: center; gap: 7px 9px; }
 .nt-lb {
   display: inline-flex; align-items: center; gap: 6px;
@@ -6084,11 +6093,11 @@ body {
 .met-fig span { font-weight: 500; color: var(--dim); }
 .met-fig:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 .met-track {
-  height: 7px; border-radius: 99px;
+  height: var(--trk); border-radius: 2px;
   background: color-mix(in srgb, var(--ink) 12%, transparent);
-  overflow: hidden; margin-bottom: 10px;
+  overflow: hidden; margin-bottom: 8px;
 }
-.met-fill { height: 100%; border-radius: 99px; background: var(--c); }
+.met-fill { height: 100%; border-radius: 2px; background: var(--c); }
 .met-add {
   display: inline-flex; align-items: center; gap: 5px;
   border: 0; border-radius: 999px; padding: 7px 13px 7px 11px;
@@ -6102,13 +6111,13 @@ body {
    and the sparkline is `scTyArea` — the tally's own area chart — with
    the fill and stroke retargeted from the ink to the note's own hue,
    so it reads as this goal's line rather than a borrowed one. */
-.met-stat { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.met-stat { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
 .met-figbtn {
   border: 0; background: none; padding: 0; margin: 0; text-align: left; cursor: pointer;
   display: block;
 }
 .met-figbtn b {
-  display: block; font-size: 26px; font-weight: 700; line-height: 1;
+  display: block; font-size: 22px; font-weight: 700; line-height: 1;
   font-variant-numeric: tabular-nums; color: var(--ink);
 }
 .met-figbtn .met-of { font-size: 11px; font-weight: 500; color: var(--dim); display: block; margin-top: 4px; }
@@ -6359,28 +6368,20 @@ body {
    in one file is the duplicate the static check refuses, whichever
    order it is in. */
 .bd-dial::-webkit-slider-runnable-track {
-  height: 4px; border-radius: 2px;
+  height: var(--trk); border-radius: 2px;
   background:
     linear-gradient(var(--c), var(--c)) 0 / var(--fill, 0%) 100% no-repeat,
     var(--tick-off);
 }
-.bd-dial::-moz-range-track { height: 4px; border-radius: 2px; }
+.bd-dial::-moz-range-track { height: var(--trk); border-radius: 2px; }
 .bd-dial::-moz-range-progress {
-  height: 4px; border-radius: 2px; background: var(--c);
+  height: var(--trk); border-radius: 2px; background: var(--c);
 }
 /* The ring is what keeps it a DOT where it lands on the boundary
    between the filled half and the rest — the head span's own mark,
    at a smaller size. What goes is the cast: a shadow under a 12px
    circle is a smudge rather than a lift. Centred by hand, because a
    thumb's offset is half the difference between the two. */
-.bd-dial::-webkit-slider-thumb {
-  width: 12px; height: 12px; margin-top: -4px;
-  border-width: 2px; box-shadow: none;
-}
-.bd-dial::-moz-range-thumb {
-  width: 12px; height: 12px;
-  border-width: 2px; box-shadow: none;
-}
 
 /* The three a budget sets once. Stacked, because each label is a
    sentence and three of them across a phone is a form. */
@@ -6470,7 +6471,7 @@ body {
 }
 .bd-hd > b, .bd-ft > b {
   margin-left: auto;
-  font-size: 26px; font-weight: 700; letter-spacing: -.03em;
+  font-size: 22px; font-weight: 700; letter-spacing: -.03em;
   font-variant-numeric: tabular-nums;
 }
 .bd-per { display: block; margin-top: 2px; font-size: 11px; color: var(--spent); }
@@ -6501,8 +6502,8 @@ body {
    colour and already print the same totals, so a legend would be a
    third row repeating both. */
 .bd-stk {
-  display: flex; height: 18px; margin-top: 14px;
-  border-radius: 6px; overflow: hidden;
+  display: flex; height: var(--trk-s); margin-top: 12px;
+  border-radius: 3px; overflow: hidden;
 }
 .bd-stk > i { display: block; min-width: 2px; }
 .bd-r > .a {
@@ -6551,7 +6552,7 @@ body {
 .tk-hd { padding: 12px 0 0; }
 .tk-hd > b {
   display: block;
-  font-size: 26px; font-weight: 700; letter-spacing: -.035em; line-height: 1.05;
+  font-size: 22px; font-weight: 700; letter-spacing: -.035em; line-height: 1.05;
   font-variant-numeric: tabular-nums;
 }
 .tk-hd > span { display: block; margin-top: 3px; font-size: 11px; color: var(--spent); }
@@ -6562,7 +6563,7 @@ body {
    dead. */
 .tk-t {
   position: relative; flex: 1;
-  height: 6px; border-radius: 5px;
+  height: var(--trk); border-radius: 2px;
   background: var(--tick-off); overflow: hidden;
 }
 .tk-t > i { position: absolute; inset: 0 auto 0 0; border-radius: 5px; }

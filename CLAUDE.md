@@ -12069,3 +12069,98 @@ what its own name always claimed. **A check that passes by where it
 looks rather than by what is there is the Pattern axis and the
 almanac's ground a third time**, and the first two were wrong about
 the pixel; this one was wrong about the offset.
+
+## One track, every tab, and the display step down
+
+Asked for in six words — skinnier on all tabs, smaller still. Both
+halves measured before either was changed.
+
+**SEVEN ANSWERS TO ONE QUESTION.** Every bar in this app measures a
+share of something, and they were **14, 18, 15, 10, 7, 6 and 4**
+pixels: the number dial on Today, the budget's stack, the water
+gauge, a habit's progress in its history sheet, a metric on a goal,
+the tracker, and the budget dial that had already been thinned. Each
+was decided on its own screen and none of them had ever been set
+beside the others — which is the type scale's own fault in a third
+dimension, after the sizes and the leading.
+
+**`--trk`, `--trk-s`, `--thumb`.** 4 for a track, a progress line and
+a gauge; 6 for a STACK, which is the one that has segments to tell
+apart; 12 for the mark on a dial. The water gauge is 8 wide rather
+than 4, because it is read as a VOLUME down its length and 4 is a
+line rather than a vessel — the one place the scale is a floor and
+not a value.
+
+**AND THE BUDGET DIAL'S FOUR OVERRIDES WENT WITH IT.** It was the
+first thing thinned, so it carried a private copy of the whole
+geometry — `height: 4px` on three pseudo-elements and `12px` on two
+more — to escape a 14px base. With the base AT four, every one of
+those is the number it was overriding. **A dead override is a dead
+rule that still cascades**, one property at a time.
+
+**A DIAL'S THUMB IS A MARK, NOT A GRIP**, and that is what makes 30
+to 12 affordable. What a finger reaches is the input's own 44px box,
+which did not move; the 30px circle was drawing the target rather
+than a position on the track. The `--card-shadow` under it went too:
+a cast under a 12px circle is a smudge, which is the same finding the
+budget dial already recorded.
+
+**AND THE SLIDER IS THE HALF THAT IS STATICALLY DECIDABLE.** A range
+input's geometry lives in FIVE engine pseudo-elements, so the next
+dial somebody adds is five rules nobody diffs and a literal in any
+one of them is a heavy track on one screen with nothing anywhere
+saying so. `tests/names.js` holds every one of them to the tokens.
+The drawn thickness is measured in the browser beside it — as the RUN
+of rows that differ from the dial's own ground, because
+`getComputedStyle` on a slider's track pseudo-element hands back the
+HOST's box and reported a 4px track as 44px tall once already.
+
+### 26 was the display step, and 22 absorbs a stray
+
+The scale's bottom is fixed by the 9.5px floor and the 16px field,
+which is why the last pass could not go lower. **The TOP was never
+held by anything.** 26 carried eight display figures — the friend
+code, a profile pair, the history sheet's three figures, the intro
+title, the dial's readout, a metric, the budget's buffer and the
+tracker's head — and 26/19 was the one ratio in the scale at 1.37
+where every other step is about 1.16.
+
+22 closes that: **22/19 is 1.16**, the same step as the rest. And it
+absorbs one of the two strays the last pass had to name, because the
+cover initial is already drawn at 22 — so that exception is now one
+size rather than two, and the list of things off the scale is
+shorter by a line rather than longer.
+
+**19 STAYS, and that is a decision rather than an omission.** It
+carries the mosaic tile's own figure, every sheet title and every
+note title — a title register rather than a display one — so taking
+it down would shrink the words a screen is named by in order to
+shrink eight figures.
+
+**Ten more density cuts with it**, all of them the last few pixels:
+the friend row 12 to 10 with its list gap 8 to 6, its actions 14 to
+10 and its note 12 to 10; a note card's margin 9 to 7; the layout
+picker's foot 14 to 10; the history sheet's figures 16 to 14 and its
+twelve-week strip 22 to 16; the metric's track and stat 10 to 8.
+
+**AND THE DRAWN CHECK MEASURED THE WRONG UNITS FIRST.** It read
+`run: 8` on a correct 4px track and failed — because a screenshot is
+DEVICE pixels and the suite's phone is `deviceScaleFactor: 2`. The
+budget dial's own scan had already met that and normalises through
+`dvDpr`; this one indexed the image directly. It compares against
+`trk * dpr` now, which says out loud what a screenshot is. **Third
+time this file has recorded the probe and the suite being two
+machines**, and the first time both were mine on the same day.
+
+**Proved to bite, both halves from one break.** The dial's track put
+back to a literal 14px reports `off the scale:
+.nm-dial::-webkit-slider-runnable-track height: 14px` from the static
+check in a tenth of a second, and `want: 8, run: 28` from the drawn
+one — 14 pixels at dpr 2 — nine minutes later. Restored by the
+script's own inverse and hashed back to the known-good sha1.
+
+**AND THE CHROME ABOVE THE FOLD DID NOT MOVE, which is the point of
+measuring first.** It is 81px on Today and 75 on a note, and every
+number left in it is either a 44px press target, the 30px day that
+was asked for by name, or two pixels of separation. The room that is
+left in this app is in what it DRAWS, not in what it reserves.

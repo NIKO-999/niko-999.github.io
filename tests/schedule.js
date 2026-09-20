@@ -11710,6 +11710,76 @@ const SAID = [
       cleared.left === 'Cancel', cleared);
     await esc();
 
+    /* ── EVERY TRACK IN THIS APP IS THE SAME THICKNESS ──
+       This dial shipped at 14px of track under a 30px thumb, on the
+       argument that it is the ONE control filling a sheet you opened
+       to answer one question — and that argument was right about this
+       sheet and said nothing about the other six bars on the other
+       four tabs, which were 4, 18, 7, 4, 6 and 15. Seven answers to
+       one question.
+
+       Measured on real pixels rather than read off the declaration:
+       the pseudo-element a range draws its track in does NOT report
+       its own box to `getComputedStyle` — asked for one, Chromium
+       hands back the HOST's, which reported a 4px track as 44px tall
+       once already. So the claim is the RUN of rows that differ from
+       the dial's own ground down the filled half, which is the thing
+       itself.
+
+       And the thumb is a MARK rather than a grip. What a finger
+       reaches is the input's own 44px box, asserted beside it,
+       because the whole trade this change makes is a smaller drawing
+       for an unchanged target. */
+    await open('w');
+    await dp.evaluate(() => {
+      const d = document.querySelector('.nm-dial');
+      d.value = String(+d.max / 2);
+      d.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await dp.waitForTimeout(240);
+    const trkBox = await dp.evaluate(() => {
+      const cs = getComputedStyle(document.documentElement);
+      const d = document.querySelector('.nm-dial').getBoundingClientRect();
+      return { trk: parseFloat(cs.getPropertyValue('--trk')),
+        thumb: parseFloat(cs.getPropertyValue('--thumb')),
+        /* A screenshot is DEVICE pixels and this phone is dpr 2, so a
+           4px track is eight rows in the image — the same trap that
+           made the budget dial's own probe and the suite disagree. */
+        dpr: window.devicePixelRatio,
+        x: Math.round(d.left + d.width * 0.18), y: Math.round(d.top),
+        h: Math.round(d.height), w: Math.round(d.width) };
+    });
+    const trkShot = await dp.screenshot({ clip: { x: trkBox.x - 1, y: trkBox.y,
+      width: 3, height: trkBox.h } });
+    const trkWant = trkBox.trk * trkBox.dpr;
+    const trkRun = (() => {
+      const { PNG: PNGt } = require('pngjs');
+      const im = PNGt.sync.read(trkShot);
+      const at = (y) => { const i = (im.width * y + (im.width >> 1)) << 2;
+        return [im.data[i], im.data[i + 1], im.data[i + 2]]; };
+      /* the ground is whatever most of the column is */
+      const tally = {};
+      for (let y = 0; y < im.height; y++) tally[at(y).join(',')] =
+        (tally[at(y).join(',')] || 0) + 1;
+      const g = Object.keys(tally).sort((u, v) => tally[v] - tally[u])[0]
+        .split(',').map(Number);
+      let run = 0, best = 0;
+      for (let y = 0; y < im.height; y++) {
+        const p = at(y);
+        const off = Math.max(Math.abs(p[0] - g[0]), Math.abs(p[1] - g[1]),
+          Math.abs(p[2] - g[2])) > 18;
+        if (off) { run++; if (run > best) best = run; } else run = 0;
+      }
+      return best;
+    })();
+    ok('the number dial draws the one track thickness, not its own',
+      trkBox.trk === 4 && trkBox.thumb === 12
+      && trkRun >= trkWant && trkRun <= trkWant + 2,
+      { ...trkBox, want: trkWant, run: trkRun });
+    ok('...and what a finger reaches is still the 44px box',
+      trkBox.h === 44, trkBox);
+    await esc();
+
     /* ── AND A DRAG IS NEVER THE ONLY WAY IN ──
        It reaches neither a keyboard nor a screen reader, which is why
        this is a range input rather than a div with a pointer handler:

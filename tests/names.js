@@ -528,5 +528,41 @@ for (const app of APPS.concat([['shell.js']])) {
     'made ' + pushes.length + ', by hand: ' + hand.map((h) => h.slice(0, 64)).join(' | '));
 }
 
+/* ── EVERY TRACK IS ONE THICKNESS, AND A SLIDER CANNOT OPT OUT ──
+   The app draws bars on five tabs — a number dial, a budget dial, a
+   stack of shares, a metric, a habit's progress, a tracker, a water
+   gauge — and they were 14, 4, 18, 7, 4, 6 and 15 pixels, which is
+   seven answers to one question. They read `--trk`, `--trk-s` and
+   `--thumb` now.
+
+   The half that is decidable in the text is the sliders, and it is
+   the half that matters: a range input's geometry lives in four
+   engine pseudo-elements, so the next dial somebody adds is four
+   rules nobody diffs, and a literal in any one of them is a heavy
+   track on one screen with nothing anywhere saying so. Measured
+   thickness is asserted in `tests/schedule.js`; this is the guard
+   against a new one arriving off the scale. */
+{
+  const css = read('schedule/app.css')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+  const PSEUDO = /::(?:-webkit-slider-runnable-track|-moz-range-track|-moz-range-progress|-webkit-slider-thumb|-moz-range-thumb)/;
+  const bad = [];
+  let seen = 0;
+  for (const m of css.matchAll(/([^{}]*)\{([^{}]*)\}/g)) {
+    const sel = m[1].replace(/\s+/g, ' ').trim();
+    if (!PSEUDO.test(sel)) continue;
+    seen++;
+    /* Only the two properties that ARE the geometry. A border, a
+       radius and a colour are each that mark's own business. */
+    for (const d of m[2].matchAll(/(?<![-\w])(height|width):\s*([^;]+)/g)) {
+      if (!/var\(--(?:trk|trk-s|thumb)\)/.test(d[2])) {
+        bad.push(sel.slice(0, 40) + ' ' + d[1] + ': ' + d[2].trim());
+      }
+    }
+  }
+  ok('every slider track and thumb is sized from the track scale',
+    seen >= 8 && bad.length === 0, 'rules ' + seen + ', off the scale: ' + bad.join(' | '));
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
