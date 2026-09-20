@@ -2530,7 +2530,8 @@ const SAID = [
   })();
   ok('the bar draws thinner than the target it hands a thumb',
     slim.week.tabs.length === 5 && slim.week.tabs.every((t) => t.drawn <= 42)
-    && slim.week.prime === 44 && slim.week.bar <= 70, slim.week);
+    && slim.week.prime >= 44 && slim.week.prime <= slim.week.pill
+    && slim.week.bar <= 70, slim.week);
   ok('...and every tab still OWNS the 44px floor',
     slim.week.tabs.every((t) => t.owns >= 44), slim.week.tabs);
   ok('the stops draw thinner than the target they hand a thumb',

@@ -12441,3 +12441,57 @@ is nine pixels clear of any seam.
 visits week, today, notes and friends; the calendar is the one view
 where a 44px control sits directly beneath the stops, and it was in no
 list. It is in this one.
+
+### And then the sheets were looked at, and two of the four picks moved
+
+The bar, the stops, the day strip and the tracks each went out as a
+rendered sheet of variants over the real app. **The reply picked
+option 3 on the bar, option 2 on the tracks and the LAST on the
+stops**, and only one of the three is what was shipping.
+
+**THE BAR GOES BACK UP TO 65, WHICH REVERSES THE PASS ABOVE.** Option
+3 is the `glyph` variant — 40 drawn in a 50px pill with a 46px add
+button — and the 56 that shipped under *max slim* was a fifth option
+**nobody had ever been shown**: it was built and shipped without a
+sheet. That is the whole of why this reversed. The nine pixels come
+back exactly as they went: `.tab` padding 2/1 to 4/1/3 and its gap 1
+to 2, the pill's 3 to 4, the bar's 4/8 to 5/10, the add button 44 to
+46 with its glyph 20 to 21, and `body`'s reservation 68 to 75. **The
+eight gaps above the fold are NOT reverted** — they were never on a
+sheet and were never asked about, so the week's first block stays at
+y127.
+
+**AND THE 56 WAS RENDERED BESIDE THE 65 AFTERWARDS**, at 1:1, and
+sent — because the honest move when somebody picks from four is to
+show them the fifth. Picking again is one line; not knowing it
+existed is not a choice.
+
+**THE STOPS GO ONE STEP FURTHER DOWN, AND THE EARLIER NOTE ARGUED
+AGAINST IT.** `thin` is 24 drawn where 26 ships, and this file already
+records why it lost the first round: *at 24 the lozenge hugs the cap
+height of "Showing up" and reads as type in a box.* That reasoning
+stands and was overruled by the person who owns the screen, which is
+the shape an exception here has to have — raised, drawn, and then
+decided. `.fr-stop` padding 5 to 4 and its radius 14 to 13.
+
+**AND THE GAP UNDER IT GREW AGAIN, WHICH IS THE RULE FROM YESTERDAY
+PREDICTING ITSELF.** Two pixels off the drawing is two pixels onto
+the reach, and 24 needs twenty. Swept at six pairs against every
+control on both views: with the foot at 8 there is no clean answer —
+`-10/-8` leaves the stop owning **43**, `-11/-9` takes the head's
+face tile to 44, `-12/-8` takes it to 43, and `-10/-10` clips the
+calendar's toggle to 44. One pixel of foot buys all of it: at
+`margin-bottom: 9px` with `inset: -10px 0` the stop owns **45**, the
+tile keeps **45** and the toggle keeps **45**. The reach is symmetric
+again, so the note explaining why it was asymmetric went with it.
+
+**What it costs is one pixel above the fold**, said rather than
+traded away: the first tile on Today is y149 where it was y148, and
+the segment is 28 where it was 30.
+
+**THE TRACKS WERE ALREADY THE PICK.** Option 2 is `--trk: 3px`,
+`--trk-s: 5px`, `--thumb: 10px` — the scale that shipped a commit
+earlier — so the answer there was to change nothing and say so. A
+pick that agrees with the build is still worth confirming out loud,
+because the alternative is quietly doing nothing and letting it read
+as having been missed.
