@@ -480,18 +480,8 @@ body {
 /* The app's own name is a heading for a screen reader and nothing
    drawn. It was an uppercase line above the day — the app saying what
    it is on every screen of every day — and renaming lives in
-   Settings now, beside the other things you set once.
-
-   ── AND THE SCREEN'S NAME JOINED IT ──
-   `.h-day.is-mute` is every view but the week: the head drew the
-   TAB's own word at 30px, over a pane whose own heading repeats it
-   and under a lit tab that says it a third time. One rule for both,
-   because two copies of a visually-hidden block are two places for
-   the next person to fix one of. Never `hidden`, which takes the
-   heading out of the accessibility tree and leaves the pane named
-   nowhere, and never an emptied node, which still reserves its
-   line. */
-.title, .h-day.is-mute {
+   Settings now, beside the other things you set once. */
+.title {
   position: absolute;
   width: 1px; height: 1px;
   margin: -1px; padding: 0;
@@ -538,7 +528,12 @@ body {
 }
 .h-tx { flex: 1; min-width: 0; }
 .h-day {
-  font-size: 26px;
+  /* OFF THE SCALE ON PURPOSE, and it is the one thing that is. The
+     head names its screen on every view and the day on the week,
+     and it is the largest type in the app. Taken to the display
+     step for one pass and brought back: at 26 it reads as a heading
+     OVER the pane rather than as the pane’s subject. */
+  font-size: 30px;
   font-weight: 700;
   letter-spacing: -.03em;
   line-height: 1.05;

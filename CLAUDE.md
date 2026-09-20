@@ -11814,29 +11814,31 @@ were drawn**, nine of them below 13px doing one job between them. And
 every tab spent ninety pixels on a head that named the tab you were
 already on.
 
-### The screen's name is not drawn
+### The screen's name stayed, and that was reversed on report
 
 `Today` at 30px, over a panel heading reading `Today`, under a lit tab
 saying it a third time. `Calendar` at 30px over a row that prints
-September 2026 beside the arrows that step it. **A head that names the
-screen you are on is the picture-of-what-you-are-looking-at this app
-refuses on an intro card**, at the top of every screen instead.
+September 2026 beside the arrows that step it. The argument was this
+app's own rule about an intro card - **a head that names the screen
+you are on is a picture of what you are already looking at** - so it
+was muted on every view but the week, where the day is information
+rather than a label.
 
-**THE WEEK KEEPS ITS DAY**, which is the whole of what makes this a
-removal rather than a rule. `Sunday` is information — it says which of
-the seven you are reading — where `Notes` is a label for the thing
-under it.
+**REPORTED BACK IN ONE LINE AND PUT STRAIGHT BACK.** *I still want the
+day there and keep it at that size.* The whole mechanism went with it:
+there is no `.is-mute`, `.title` owns its visually-hidden block alone
+again, and `.h-day` is 30px.
 
-**MUTED, NOT HIDDEN, AND NOT EMPTIED.** `hidden` takes the heading out
-of the accessibility tree and then nothing names the pane at all; an
-emptied node still reserves its line. `.h-day.is-mute` takes `.title`'s
-own visually-hidden block — **one rule for both**, because two copies
-of that treatment are two places for somebody to fix one of.
+**WHICH MAKES 30 THE ONE SIZE OFF THE SCALE ON PURPOSE.** It was taken
+to the 26px display step and looked at: at 26 the head reads as a
+heading OVER the pane rather than as the pane's subject, which is the
+same fault the name was being removed for, one register quieter. So it
+is named as an exception in `app.css` beside the field floor rather
+than rounded onto a step it does not belong on.
 
-What is left up there is the glyph tile, which says which screen
-without spending a line on it, and the date. 58px to 48.
+What the head actually lost is **three pixels of padding**, 58 to 55.
 
-### Six steps: 26 / 19 / 15 / 13 / 11 / 9.5
+### Six steps: 26 / 19 / 15 / 13 / 11 / 9.5, and two exceptions
 
 Applied as a script over every declaration rather than by hand, so it
 is reproducible and reversible, with two mechanical rules doing most of
@@ -11855,6 +11857,11 @@ already under this file's own 9.5 floor and had been for as long as
 they existed. Minimal here is FEWER STEPS, not smaller type — the space
 comes from the head and from density, and the bottom of the scale was a
 bug being fixed on the way past.
+
+**TWO THINGS SIT OFF IT AND BOTH ARE NAMED** - the head at 30, above,
+and the field floor at 16. Everything else drawn in the app is one of
+six numbers: measured across eleven screens, **twenty distinct drawn
+sizes came down to eight**.
 
 **A FIELD IS NOT ON THE SCALE.** `.field` is 16px under a comment
 saying anything smaller and iOS zooms the page on focus, and it was
@@ -11878,7 +11885,8 @@ Today, **129px of chrome above the first tile**. The poster's own top
 padding, the pane's margin, the stops, the stops' margin and the
 heading each took a slice, and no one of them looked wrong.
 
-12 → 10 on the poster, 10 → 8 under the head, 18 → 10 on the pane, 18 →
+12 → 10 on the poster, 10 → 8 under the head - which is the whole
+of what the head lost once the name went back, 18 → 10 on the pane, 18 →
 12 under the stops, 5 → 2 on the heading, 9 → 8 on the tile grid, 14/8
 → 10/6 on both section headings, 11 → 9 on a week row. 129px of chrome
 to 107, a row 59px to 55, and the whole of Showing up now fits one
