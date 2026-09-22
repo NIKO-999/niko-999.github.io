@@ -295,10 +295,31 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .al-lrow .al-lt { flex: 1; min-width: 0; }
 .al-lrow .al-lt i { display: block; font-style: normal; font-size: 19px; font-weight: 450; letter-spacing: -.02em; line-height: 1.2; }
 
-.al-tag[data-f="inner"]  { --tg: #C9A227; }
-.al-tag[data-f="motion"] { --tg: #D2603A; }
-.al-tag[data-f="others"] { --tg: #7E9AA6; }
-.al-tag[data-f="time"]   { --tg: #8E9370; }
+/* THE LESSON, NOT THE LABEL. The foot of a story named its laws as
+   four bare words and you had to press each one to be told what that
+   law claims in general — never what it did in the story you had just
+   read. The row carries the line now, and the row is the control that
+   opens the law, so the name is not printed twice to get both. */
+.al-les { margin-bottom: var(--v4); }
+.al-le {
+  display: block; width: 100%; text-align: left;
+  padding: var(--v3) 0; border-bottom: 1px solid var(--hair);
+}
+.al-le:last-child { border-bottom: 0; }
+.al-le-n {
+  display: inline-flex; align-items: center; height: 30px; padding: 0 12px;
+  border-radius: var(--r-sq); margin-bottom: var(--v2);
+  font-size: 13px; font-weight: 500; letter-spacing: .01em;
+  background: rgba(11,10,8,.78);
+  border: 1px solid color-mix(in srgb, var(--tg) 30%, transparent);
+  color: color-mix(in srgb, var(--tg) 66%, var(--ink));
+}
+.al-le-d { display: block; font-size: 15px; line-height: 1.5; color: var(--dim); }
+
+.al-tag[data-f="inner"],  .al-le[data-f="inner"]  { --tg: #C9A227; }
+.al-tag[data-f="motion"], .al-le[data-f="motion"] { --tg: #D2603A; }
+.al-tag[data-f="others"], .al-le[data-f="others"] { --tg: #7E9AA6; }
+.al-tag[data-f="time"],   .al-le[data-f="time"]   { --tg: #8E9370; }
 
 .al-rule {
   border-radius: var(--r-card); padding: var(--v4); margin-bottom: var(--v2);
@@ -414,10 +435,10 @@ var S = [
   n: 'The Treasure Under the Stove',
   src: 'Sufi · Rumi, thirteenth century',
   laws: [
-    { n: 'Correspondence', f: 'inner' },
-    { n: 'Inspired Action', f: 'motion' },
-    { n: 'Relativity', f: 'time' },
-    { n: 'The Stranger’s Mouth', f: 'others' }
+    { n: 'Correspondence', f: 'inner', d: 'The dream described his own garden. He crossed a desert to be told the address of the house he had slept in for twelve years.' },
+    { n: 'Inspired Action', f: 'motion', d: 'The voice came three nights running and nothing happened until he sold the fig crop and started walking.' },
+    { n: 'Relativity', f: 'time', d: 'The treasure was under the stove for the whole eleven years he was losing everything. Nothing about it changed except where he had been.' },
+    { n: 'The Stranger’s Mouth', f: 'others', d: 'It reached him from a tired watch captain who was laughing at him and believed he was giving nothing away.' }
   ],
   teach: 'Coelho built The Alchemist out of this. Santiago, the sheep, the pyramids, the treasure back under the tree he started from — all of it is here, seven hundred years earlier, in about a page. Knowing that is useful, because it tells you the shape is older and more reliable than any one telling of it.',
   rule: 'You cannot be told. You can only be sent.',
@@ -494,7 +515,10 @@ var S = [
 },
 { id:'lamp', stage:'The Call', bg:'umber', mins:5,
   n:'The Lamp and the Keys', src:'Sufi · Nasrudin',
-  laws:[{n:'Cause and Effect',f:'motion'},{n:'Attention',f:'inner'}],
+  laws: [
+    { n: 'Cause and Effect', f: 'motion', d: 'Seven men searched for two hours in the one place the key could not be. Effort in the wrong place produces nothing, however much of it there is.' },
+    { n: 'Attention', f: 'inner', d: 'Three scripts, four architects, six years of savings. Every one of them was under the lamp, and Faisal’s yard was not.' }
+  ],
   rule:'Comfort decides where you search long before honesty decides what you find.',
   q:'Which problem are you working on because it is the one you know how to work on?',
   teach:'Nasrudin is the Sufi tradition’s holy fool, and the fool is how that tradition says the things nobody will hear straight. The joke is forty words. What is under it is the most expensive habit a person has: searching where searching is comfortable, and calling it searching.',
@@ -545,7 +569,10 @@ var S = [
   ] },
 { id:'cup', stage:'The Refusal', bg:'curve', mins:5,
   n:'The Cup That Was Already Full', src:'Zen · Nan-in, nineteenth century',
-  laws:[{n:'Mentalism',f:'inner'},{n:'Receptivity',f:'inner'}],
+  laws: [
+    { n: 'Mentalism', f: 'inner', d: 'Sato arrived holding the answer he had travelled two days to be given, and there was no room left for another one.' },
+    { n: 'Receptivity', f: 'inner', d: 'Twelve years later he said nothing at all, and the old man stopped the tea at the right place.' }
+  ],
   rule:'You are not being refused the answer. You are full.',
   q:'What would you have to stop being right about?',
   teach:'Nan-in was a Japanese master of the Meiji era and the professor was a real visitor. The tradition keeps this one because it is the only answer to a particular kind of person — and the trap is that everybody hearing it assumes they are the teacher in it.',
@@ -594,7 +621,10 @@ var S = [
   ] },
 { id:'river', stage:'The Refusal', bg:'silk', mins:5,
   n:'The Man Who Asked the River to Wait', src:'Ours',
-  laws:[{n:'Rhythm',f:'time'},{n:'Inspired Action',f:'motion'}],
+  laws: [
+    { n: 'Rhythm', f: 'time', d: 'The river was never ready. It was high or low or silted, and it went past at the rate of a whole river every day for thirty-three years.' },
+    { n: 'Inspired Action', f: 'motion', d: 'When you get in the boat. The crossing took four minutes and everything before it was weather.' }
+  ],
   rule:'Readiness is something you claim, never something you are granted.',
   q:'What are you calling preparation?',
   teach:'Ours, and the only wholly invented one in the first half of this arc. It is here because the tradition is thin on this particular refusal — the one that never says no and simply never says now.',
@@ -639,7 +669,11 @@ var S = [
   ] },
 { id:'horse', stage:'The Mentor', bg:'canyon', mins:4,
   n:'The Farmer Who Said We Shall See', src:'Taoist · Huainanzi',
-  laws:[{n:'Polarity',f:'time'},{n:'Relativity',f:'time'},{n:'Judgement',f:'inner'}],
+  laws: [
+    { n: 'Polarity', f: 'time', d: 'A lost horse, twelve horses, a broken leg, a name left off the conscription list. The same events read from four different distances.' },
+    { n: 'Relativity', f: 'time', d: 'The neighbours were certain four times and wrong four times, and being wrong did not slow them down once.' },
+    { n: 'Judgement', f: 'inner', d: 'Sai said maybe even at the end, when they came to his gate to tell him he had been right.' }
+  ],
   rule:'Every event is half a sentence. You keep reading it out as the whole one.',
   q:'What are you certain was a disaster?',
   teach:'From the Huainanzi, a Chinese text of the second century BC. It has survived two thousand years in a dozen languages because it is the shortest complete description of how judgement actually works — and because the farmer is not an optimist, which is what most retellings get wrong.',
@@ -678,7 +712,10 @@ var S = [
   ] },
 { id:'ferry', stage:'The Threshold', bg:'nightfall', mins:4,
   n:'The Ferryman’s Price', src:'Ours',
-  laws:[{n:'Compensation',f:'motion'},{n:'Sacrifice',f:'motion'}],
+  laws: [
+    { n: 'Compensation', f: 'motion', d: 'The horse was refused, and the cart, and the sealed box. The fare was the one thing in the cart worth nothing to anybody else.' },
+    { n: 'Sacrifice', f: 'motion', d: 'Two hundred and forty men who had cheated him. A list that only meant anything on the bank he was leaving.' }
+  ],
   rule:'The toll is always the thing you were going to keep.',
   q:'What are you trying to take across with you?',
   teach:'Ours. Every tradition has a crossing and a price and most of them hide the price until you are standing there, which is a way of saying something true about how a threshold actually works.',
@@ -721,7 +758,11 @@ var S = [
   ] },
 { id:'cutter', stage:'The Trials', bg:'abyss', mins:4,
   n:'The Stonecutter', src:'Japanese folk tale',
-  laws:[{n:'Envy',f:'others'},{n:'Vibration',f:'inner'},{n:'Power',f:'others'}],
+  laws: [
+    { n: 'Envy', f: 'others', d: 'Every position Ping reached had something above it that had not been visible from the one below.' },
+    { n: 'Vibration', f: 'inner', d: 'He got everything he asked for, immediately, at no cost, and it moved him nowhere at all.' },
+    { n: 'Power', f: 'others', d: 'The rock that nothing could move was being taken apart by a man with a chisel, which is what he had been holding on the first page.' }
+  ],
   rule:'Every position you envy is a position with something above it.',
   q:'Who are you measuring yourself against, and what are they measuring themselves against?',
   teach:'A Japanese folk tale, and one of the very few stories in any tradition that is a closed loop rather than a line. The shape is the argument: you cannot tell it without ending where it started, which is the only honest way to say what wanting to be somebody else actually does.',
@@ -768,7 +809,10 @@ var S = [
   ] },
 { id:'monks', stage:'The Trials', bg:'delta', mins:4,
   n:'Two Monks and the Woman at the Ford', src:'Zen · Tanzan and Ekido',
-  laws:[{n:'Attachment',f:'inner'},{n:'Rhythm',f:'time'}],
+  laws: [
+    { n: 'Attachment', f: 'inner', d: 'Tanzan carried her four seconds. Ekido carried her eleven hours, uphill, in silence, while also carrying his own pack.' },
+    { n: 'Rhythm', f: 'time', d: 'The event ended at the ford. Everything after it was being fed by one of the two men, continuously, at full strength.' }
+  ],
   rule:'You put it down hours ago. Somebody is still carrying it, and it is you.',
   q:'What did you set down that you are still holding?',
   teach:'Tanzan and Ekido were real, and this exchange is told as something that happened on a road. Zen keeps it because it is the shortest available demonstration that an event and the carrying of an event are two different things, and only one of them takes any time.',
@@ -804,7 +848,11 @@ var S = [
   ] },
 { id:'knot', stage:'The Ordeal', bg:'iceberg', mins:4,
   n:'The Knot Nobody Could Untie', src:'Greek · Alexander at Gordium',
-  laws:[{n:'Cause and Effect',f:'motion'},{n:'Strategy',f:'others'},{n:'Decision',f:'motion'}],
+  laws: [
+    { n: 'Cause and Effect', f: 'motion', d: 'A hundred years of good hands and real patience, all of it spent on a problem nobody had read properly.' },
+    { n: 'Strategy', f: 'others', d: 'That the rope must survive was never in the oracle. It arrived with the object, and nobody put it there on purpose.' },
+    { n: 'Decision', f: 'motion', d: 'He stood still for close on a minute, asked to hear the sentence out loud, and then drew the sword.' }
+  ],
   rule:'Most impossible problems are ordinary problems with a rule attached that nobody checked.',
   q:'Who told you it had to be untied?',
   teach:'Told about Alexander at Gordium in 333 BC and kept for two and a half thousand years, which is worth noticing on its own: what survives is not the campaign, it is thirty seconds with a sword. Some versions have him pull out the pin instead. Both endings are the same story.',
@@ -846,7 +894,10 @@ var S = [
   ] },
 { id:'pocket', stage:'The Reward', bg:'iris', mins:4,
   n:'The Diamond He Was Carrying', src:'Hindu · Ramakrishna',
-  laws:[{n:'Correspondence',f:'inner'},{n:'Sufficiency',f:'time'}],
+  laws: [
+    { n: 'Correspondence', f: 'inner', d: 'The sadhu slept beside it in the open four miles from anywhere. Anil could not put it down in a room with a door.' },
+    { n: 'Sufficiency', f: 'time', d: 'Two days rich, and he had not spent one minute of it doing anything except moving the stone around his room.' }
+  ],
   rule:'Having it and knowing you have it are two different acquisitions.',
   q:'What do you already have that you are still trying to get?',
   teach:'From the Ramakrishna tradition, and it is the one story in this set where the person gets everything they wanted, keeps it for three days, and then comes back to hand it over. That is the whole of the teaching and it is why the Reward is a stage rather than an ending.',
@@ -888,7 +939,10 @@ var S = [
   ] },
 { id:'bridge', stage:'The Road Back', bg:'cobalt', mins:4,
   n:'The Bridge You Burn Behind You', src:'Ours',
-  laws:[{n:'Commitment',f:'motion'},{n:'Polarity',f:'time'}],
+  laws: [
+    { n: 'Commitment', f: 'motion', d: 'Idris never used the bridge once in forty years. It took a little weight off every hard thing instead, and the weight was what would have finished him.' },
+    { n: 'Polarity', f: 'time', d: 'Nuri was frightened like that for two years and then was not, and by then he had the language, a trade, and two men who would lend him money.' }
+  ],
   rule:'A door left open behind you is a decision you have not finished making.',
   q:'What are you keeping open in case this does not work?',
   teach:'Ours, though the move is older than any of us — commanders have been burning their own boats on landing for as long as there have been boats, and always for the same unsentimental reason. It is put here as a bridge because most people’s version of this is not a fleet, it is a door.',
@@ -927,7 +981,11 @@ var S = [
   ] },
 { id:'mountain', stage:'The Return', bg:'turtle', mins:5,
   n:'The Old Man Who Moved the Mountains', src:'Chinese · Liezi',
-  laws:[{n:'Perpetual Transmutation',f:'motion'},{n:'Rhythm',f:'time'},{n:'Legacy',f:'time'}],
+  laws: [
+    { n: 'Perpetual Transmutation', f: 'motion', d: 'Fourteen years, a second cart and a better way down the slope. The hole was still nothing and the shape of the thing had changed entirely.' },
+    { n: 'Rhythm', f: 'time', d: 'The digging stopped for the mourning and started again in the spring. Twice.' },
+    { n: 'Legacy', f: 'time', d: 'The old man had been dead five years when the mountains went, and his grandson said he had never needed to know it would happen.' }
+  ],
   rule:'The work outlives the worker, which is the only reason it is worth starting.',
   q:'What are you refusing to begin because you will not see it finished?',
   teach:'From the Liezi, third or fourth century BC. It is the last story in this arc because it is the only one whose whole argument is about what happens after the person telling it is dead — which is the only honest place a journey about showing up can end.',
@@ -1174,13 +1232,16 @@ function paintStory(s) {
   var h = el('div', 'al-rule-hd'); h.appendChild(el('span', 'al-caps', 'What it teaches'));
   sh.appendChild(h);
 
-  var tg = el('div', 'al-tags');
+  var ls = el('div', 'al-les');
   s.laws.forEach(function (l) {
-    var x = el('button', 'al-tag', l.n);
-    x.setAttribute('data-f', l.f); x.setAttribute('data-law', l.n);
-    tg.appendChild(x);
+    var r = el('button', 'al-le');
+    r.setAttribute('data-f', l.f);
+    r.setAttribute('data-law', l.n);
+    r.appendChild(el('span', 'al-le-n', l.n));
+    if (l.d) r.appendChild(el('span', 'al-le-d', l.d));
+    ls.appendChild(r);
   });
-  sh.appendChild(tg);
+  sh.appendChild(ls);
 
   if (s.teach) { var tb = el('p', 'al-body'); tb.textContent = s.teach; tb.style.marginBottom = '22px'; sh.appendChild(tb); }
 
@@ -1251,7 +1312,7 @@ function open(id) {
 }
 
 document.addEventListener('click', function (e) {
-  var t = e.target.closest ? e.target.closest('.al-tab, .al-card, .al-pill, .al-tag, .al-lrow, #alOpenB, #alStoryX, #alLawX') : null;
+  var t = e.target.closest ? e.target.closest('.al-tab, .al-card, .al-pill, .al-tag, .al-le, .al-lrow, #alOpenB, #alStoryX, #alLawX') : null;
   if (!t) return;
   if (t.id === 'alOpenB') { var r = st.last && byId(st.last); return r && r.body ? open(r.id) : view('arc'); }
   var go = t.getAttribute && t.getAttribute('data-go');
