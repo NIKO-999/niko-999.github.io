@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en" data-view="open">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0A08">
+<title>Alignment</title>
+<link rel="preload" href="../arc/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face { font-family: 'Inter'; font-weight: 100 900; font-display: swap;
+  src: url('../arc/fonts/Inter.woff2') format('woff2'); }
+
+/*
+  ALIGNMENT. Its own ground, its own type, its own everything — it reads
+  none of the other keys and takes none of the shared shell. The whole
+  look rests on one mechanic: a photograph fills the screen, a vertical
+  gradient darkens it toward the foot, and white type sits on the dark
+  half. Nothing else has to be coloured.
+
+  THE GRADE IS THE APP'S, NOT THE PHOTOGRAPH'S. arc/bg holds fourteen
+  images and only five sit in this register on their own — the rest are
+  teal, cobalt and violet. One filter over all of them pulls the set
+  into one warm family, which is what the references are doing too:
+  none of those screens is a raw photograph either.
+*/
+
+:root {
+  --paper: #0B0A08;
+  --ink: #FFFFFF;
+  --dim: rgba(255,255,255,.72);
+  --spent: rgba(255,255,255,.46);
+  --hair: rgba(255,255,255,.14);
+  --glass: rgba(255,255,255,.10);
+  --sage: #8E9370;
+
+  --r-card: 26px;
+  --r-in: 18px;
+  --r-pill: 999px;
+  --r-sq: 14px;
+
+  --grade: saturate(.52) sepia(.20) contrast(1.10) brightness(1.02);
+  --veil: linear-gradient(180deg,
+      rgba(11,10,8,.30) 0%,
+      rgba(11,10,8,.00) 30%,
+      rgba(11,10,8,.44) 62%,
+      rgba(11,10,8,.93) 100%);
+
+  /* The list ground is a different room. In the references the browse
+     screen is a soft olive the cards sit on, not the near-black the
+     hero screens use, and losing that loses half of what makes the
+     set read as one system. The photograph behind it is blurred out
+     of legibility on purpose: it is a ground, not a picture. */
+  --sage-g: linear-gradient(180deg,
+      rgba(150,156,116,.88) 0%,
+      rgba(112,117,84,.80) 22%,
+      rgba(44,45,33,.90) 62%,
+      rgba(13,13,10,.98) 100%);
+
+  --gut: 22px;
+  --tap: 44px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body { height: 100%; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+[hidden] { display: none !important; }
+
+/* TYPE. Five steps and nothing between them. A tracked cap line is the
+   micro register whatever it measures; it is never body copy made small. */
+.al-disp  { font-size: 38px; font-weight: 600; line-height: 1.04; letter-spacing: -.026em; }
+.al-disp-s{ font-size: 28px; font-weight: 600; line-height: 1.08; letter-spacing: -.02em; }
+.al-caps  { font-size: 10px; font-weight: 600; letter-spacing: .32em; text-transform: uppercase; color: var(--spent); }
+.al-body  { font-size: 16px; font-weight: 400; line-height: 1.62; color: var(--dim); }
+.al-note  { font-size: 12px; font-weight: 450; line-height: 1.45; color: var(--spent); }
+
+/* THE PHOTO LAYER. Fixed behind everything and graded, so scrolling
+   moves the words over a still image rather than dragging the picture
+   up the screen with them. */
+.al-bg { position: fixed; inset: 0; z-index: 0; }
+.al-bg i {
+  position: absolute; inset: 0; display: block;
+  background-size: cover; background-position: center;
+  filter: var(--grade);
+  transform: scale(1.04);
+}
+.al-bg u { position: absolute; inset: 0; display: block; background: var(--veil); }
+.al-bg.is-sage i { filter: var(--grade) blur(46px) brightness(1.18); transform: scale(1.3); }
+.al-bg.is-sage u { background: var(--sage-g); }
+
+.al-view { position: relative; z-index: 1; height: 100%; display: none; flex-direction: column; }
+.al-view.is-on { display: flex; }
+
+/* ---- THE OPEN ---- */
+#alOpen { justify-content: flex-end; padding: 0 var(--gut) 34px; }
+#alOpen .al-mark { position: absolute; top: 22px; left: var(--gut); }
+.al-mark { display: flex; align-items: center; gap: 9px; }
+.al-mark svg { width: 20px; height: 20px; display: block; }
+.al-mark b { font-size: 11px; font-weight: 600; letter-spacing: .3em; text-transform: uppercase; }
+#alOpen .al-disp { margin-bottom: 12px; max-width: 8.5em; }
+#alOpen .al-note { margin-bottom: 26px; max-width: 20em; }
+
+.al-pill {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 54px; padding: 0 28px; border-radius: var(--r-pill);
+  background: var(--ink); color: #14120E;
+  font-size: 15px; font-weight: 600; letter-spacing: -.01em;
+  width: 100%;
+}
+.al-pill.is-glass { background: var(--glass); color: var(--ink); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border: 1px solid var(--hair); }
+.al-pill.is-auto { width: auto; }
+
+/* ---- THE HEAD, SHARED BY THE LISTS ---- */
+.al-head { padding: 20px var(--gut) 14px; display: flex; align-items: center; gap: 12px; flex: none; }
+.al-head .al-disp-s { flex: 1; }
+.al-round {
+  width: 40px; height: 40px; flex: none; border-radius: 999px;
+  background: var(--glass); border: 1px solid var(--hair);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  display: grid; place-items: center; position: relative;
+}
+.al-round::before { content: ''; position: absolute; inset: -2px; }
+.al-round svg { width: 17px; height: 17px; display: block; }
+
+.al-pane { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 0 var(--gut) 112px; }
+.al-pane::-webkit-scrollbar { display: none; }
+
+/* ---- THE ARC ---- */
+.al-card {
+  position: relative; display: block; width: 100%; text-align: left;
+  height: 258px; border-radius: var(--r-card); overflow: hidden;
+  margin-bottom: 14px; background: #16130F;
+  box-shadow: 0 1px 0 rgba(255,255,255,.07) inset, 0 18px 34px -18px rgba(0,0,0,.9);
+}
+.al-card i { position: absolute; inset: 0; display: block; background-size: cover; background-position: center; filter: var(--grade); }
+.al-card u {
+  position: absolute; inset: 0; display: block;
+  background: linear-gradient(180deg, rgba(11,10,8,.14) 0%, rgba(11,10,8,.00) 34%, rgba(11,10,8,.58) 72%, rgba(11,10,8,.94) 100%);
+}
+.al-card .al-cb { position: absolute; left: 20px; right: 64px; bottom: 18px; }
+.al-card .al-disp-s { font-size: 25px; margin-bottom: 8px; }
+.al-card .al-stg { position: absolute; top: 18px; left: 20px; }
+.al-stg {
+  display: inline-flex; align-items: center; height: 26px; padding: 0 11px;
+  border-radius: var(--r-pill); background: rgba(11,10,8,.46);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--hair);
+  font-size: 9.5px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--ink);
+}
+.al-go {
+  position: absolute; right: 18px; bottom: 18px;
+  width: 38px; height: 38px; border-radius: 999px;
+  background: rgba(255,255,255,.92); color: #14120E;
+  display: grid; place-items: center;
+}
+.al-go svg { width: 15px; height: 15px; }
+.al-card.is-read .al-go { background: var(--glass); color: var(--ink); border: 1px solid var(--hair); }
+
+.al-grp { padding: 20px 2px 10px; }
+
+/* ---- THE STORY ---- */
+#alStory .al-pane { padding-bottom: 150px; }
+.al-lead { height: 50vh; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 26px; }
+.al-lead .al-caps { color: var(--dim); margin-bottom: 12px; }
+.al-lead .al-disp { max-width: 9em; }
+.al-txt p { margin-bottom: 1.05em; }
+.al-txt p:first-child::first-letter { font-size: 2.9em; font-weight: 600; line-height: .88; float: left; margin: .06em .11em 0 0; color: var(--ink); }
+.al-txt p.al-beat { color: var(--ink); font-weight: 500; }
+
+.al-rule-hd { margin: 38px 0 18px; display: flex; align-items: center; gap: 12px; }
+.al-rule-hd:after { content: ''; flex: 1; height: 1px; background: var(--hair); }
+
+.al-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 22px; }
+.al-tag {
+  display: inline-flex; align-items: center; height: 27px; padding: 0 11px; border-radius: 8px;
+  font-size: 11px; font-weight: 600; letter-spacing: .01em;
+  background: color-mix(in srgb, var(--tg) 22%, transparent);
+  color: color-mix(in srgb, var(--tg) 72%, var(--ink));
+}
+.al-tag[data-f="inner"]  { --tg: #C9A227; }
+.al-tag[data-f="motion"] { --tg: #D2603A; }
+.al-tag[data-f="others"] { --tg: #7E9AA6; }
+.al-tag[data-f="time"]   { --tg: #8E9370; }
+
+.al-rule {
+  border-radius: var(--r-card); padding: 22px 22px 24px; margin-bottom: 12px;
+  background: rgba(255,255,255,.055);
+  box-shadow: 0 1px 0 rgba(255,255,255,.09) inset;
+}
+.al-rule .al-caps { margin-bottom: 12px; }
+.al-rule b { display: block; font-size: 21px; font-weight: 600; line-height: 1.26; letter-spacing: -.016em; }
+.al-q { border-radius: var(--r-card); padding: 22px 22px 24px; border: 1px solid var(--hair); }
+.al-q .al-caps { margin-bottom: 12px; }
+.al-q b { display: block; font-size: 19px; font-weight: 500; line-height: 1.34; letter-spacing: -.012em; color: var(--dim); }
+
+/* ---- THE FOOT ---- */
+.al-foot {
+  position: fixed; left: 16px; right: 16px; bottom: 18px; z-index: 30;
+  height: 60px; border-radius: var(--r-pill);
+  background: rgba(24,21,17,.62);
+  backdrop-filter: blur(26px) saturate(1.5); -webkit-backdrop-filter: blur(26px) saturate(1.5);
+  border: 1px solid var(--hair);
+  display: grid; grid-auto-flow: column; align-items: center;
+  padding: 0 6px;
+}
+.al-tab { height: 48px; border-radius: var(--r-pill); display: grid; place-items: center; color: var(--spent); }
+.al-tab svg { width: 20px; height: 20px; display: block; }
+.al-tab[aria-current="true"] { background: rgba(255,255,255,.12); color: var(--ink); }
+
+/* ---- THE CLOSE ---- */
+.al-x { position: fixed; top: 18px; right: 16px; z-index: 30; }
+</style>
+</head>
+<body>
+
+<div class="al-bg" id="alBg" aria-hidden="true"><i id="alBgI"></i><u></u></div>
+
+<section class="al-view is-on" id="alOpen">
+  <div class="al-mark">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v20M5 8l7-6 7 6M5 16l7 6 7-6"/></svg>
+    <b>Alignment</b>
+  </div>
+  <h1 class="al-disp" id="alOpenT">Twelve stories and one shape.</h1>
+  <p class="al-note" id="alOpenN">The oldest stories we have are all the same story. Read one, and find out which part of it you are standing in.</p>
+  <button class="al-pill" id="alOpenB">Begin</button>
+</section>
+
+<section class="al-view" id="alArc">
+  <div class="al-head">
+    <h1 class="al-disp-s">The Arc</h1>
+    <button class="al-round" aria-label="About Alignment">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 16v-5M12 8h.01"/><circle cx="12" cy="12" r="9"/></svg>
+    </button>
+  </div>
+  <div class="al-pane" id="alArcPane"></div>
+</section>
+
+<section class="al-view" id="alLaws">
+  <div class="al-head"><h1 class="al-disp-s">The Laws</h1></div>
+  <div class="al-pane" id="alLawsPane"></div>
+</section>
+
+<section class="al-view" id="alRules">
+  <div class="al-head"><h1 class="al-disp-s">The Rules</h1></div>
+  <div class="al-pane" id="alRulesPane"></div>
+</section>
+
+<section class="al-view" id="alStory">
+  <button class="al-round al-x" id="alStoryX" aria-label="Close the story">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+  <div class="al-pane" id="alStoryPane"></div>
+</section>
+
+<nav class="al-foot" id="alFoot">
+  <button class="al-tab" data-v="arc" aria-current="true" aria-label="The Arc">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 18c4-10 14-10 18 0"/><circle cx="3" cy="18" r="1.6" fill="currentColor" stroke="none"/><circle cx="21" cy="18" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="10.6" r="2.1"/></svg>
+  </button>
+  <button class="al-tab" data-v="laws" aria-label="The Laws">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 4v16M5 8h14M7.5 8 5 15h5zM16.5 8 14 15h5z"/></svg>
+  </button>
+  <button class="al-tab" data-v="rules" aria-label="The Rules">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 5h14v14H5zM9 10h6M9 14h4"/></svg>
+  </button>
+</nav>
+
+<script>
+(function () {
+'use strict';
+
+/*
+  ONE WRAPPER. Nothing escapes it. The other apps in this repo learned
+  that the hard way — a top-level name here does not throw when it
+  collides, it replaces, and the symptom turns up screens away.
+*/
+
+var KEY = 'align.v1';
+
+/* The stages are the path. Stories are filed at the one they belong to,
+   so a stage with nothing at it simply has nothing at it. */
+var STAGES = ['The Call', 'The Refusal', 'The Mentor', 'The Threshold',
+              'The Trials', 'The Ordeal', 'The Reward', 'The Road Back', 'The Return'];
+
+var S = [
+{
+  id: 'stove', stage: 'The Call', bg: 'desert', mins: 6,
+  n: 'The Treasure Under the Stove',
+  src: 'Sufi · Rumi, thirteenth century',
+  laws: [
+    { n: 'Correspondence', f: 'inner' },
+    { n: 'Inspired Action', f: 'motion' },
+    { n: 'Relativity', f: 'time' },
+    { n: 'The Stranger’s Mouth', f: 'others' }
+  ],
+  teach: 'Coelho built The Alchemist out of this. Santiago, the sheep, the pyramids, the treasure back under the tree he started from — all of it is here, seven hundred years earlier, in about a page. Knowing that is useful, because it tells you the shape is older and more reliable than any one telling of it.',
+  rule: 'You cannot be told. You can only be sent.',
+  q: 'What are you standing on, refusing to dig, because it is too close to be treasure?',
+  body: [
+    'There was a man in Baghdad who had been wealthy and was not any more.',
+    'It had not happened all at once, which is the part nobody tells you about losing things. There was no single morning he could point at. He had sold the second house, and then the horses, and then the good carpets one at a time so that the room emptied slowly enough that he could pretend each week it looked much as it had. What was left at the end was what his father had left him at the start: a house with a garden, a fig tree, a fountain that had stopped running some years ago and that he had stopped noticing, and a stove.',
+    'He was not lazy and he was not a fool. He worked, and every year there was a little less. A man can carry that for a long while. What he cannot carry is not knowing why.',
+    'One night he heard a voice.',
+    'Not in the room — in the dream, which is a different place, and he knew the difference even while it was happening. The voice was not grand about it. It said: your fortune is in Cairo. Go there and find it.',
+    'He woke up and laughed at himself in the dark, and went back to sleep. A man who has lost money dreams about money. There is nothing in that worth walking across a desert for.',
+    'It came again the next night. He laughed again, less.',
+    'The third night he did not laugh. He lay awake until the light came, and in the morning he sold the fig tree’s fruit and the last of the carpets and the door fittings, and he went.',
+    'The road to Cairo is long, and it is long in a particular way: nothing happens on it. That is what nobody prepares you for either. There is no ordeal on the road, no test, nothing that could be described afterwards as an adventure. There is heat, and the same conversation with different traders, and weeks of putting one foot down and then the other while the thing you left behind gets further away and the thing you are walking toward stays exactly as far off as it was. He had expected the journey to prove something. It proved nothing. It simply took the last of what he had and set him down in a city that did not know his name.',
+    'He arrived in Cairo with the clothes he stood in.',
+    'He had never in his life asked anyone for anything, and he found that he still could not do it in daylight. So he waited until dark. A man will do at night what he cannot do at noon, and he went out into a strange city after sunset to ask for bread.',
+    'That night the watch was hunting housebreakers.',
+    'They found a stranger in a doorway and they beat him. They beat him thoroughly and without any particular malice, out of the ordinary certainty of men who believe they have found the person they were sent to find.',
+    'The captain of the watch came down to look at him.',
+    'He asked who he was and what he was doing there, and the man — lying on the stones with nothing left at all to protect, which is its own strange kind of freedom — told him the truth. All of it. The house in Baghdad. The garden. The fig tree. The fountain that did not run. The voice, three nights running. Cairo.',
+    'The captain laughed.',
+    'He laughed for a long time, and the men laughed with him, and when he had finished he wiped his face and said: you walked from Baghdad. On a dream.',
+    'Then he said this.',
+    'Three times I have had a dream myself. A voice tells me there is a treasure in Baghdad, in such and such a quarter — a house with a garden, and a fig tree, and a fountain that has stopped — and the treasure is buried under the stove. Three times, the same voice, the same house. I have never gone one single step. Only a madman travels on a dream.',
+    'He had described the man’s garden. He had described the man’s fig tree and the man’s dead fountain and the man’s own stove, which the man had lit perhaps ten thousand times and had never once looked underneath.',
+    'The man said nothing at all. He thanked him. The captain, feeling something that was not quite pity, gave him coins enough to get home.',
+    'He walked back. It took exactly as long to return as it had taken to come.',
+    'He let himself in through his own door, and he dug under his own stove, and the treasure was there.',
+    'Now hold the two men side by side, because that is where this story actually lives.',
+    'The captain had the better information. He had it for nothing, three times over, in the comfort of his own bed, and he never had to stand up for it. He had the answer and he kept it as a joke to tell at the expense of fools. As far as anybody knows he died in Cairo with what he started with.',
+    'The other man had to walk to Egypt to be told the address of his own house.',
+    'And there was no shorter road. That is the part people want to argue with — surely somebody could just have told him. Somebody did. A voice told him, in his own bed, three nights in a row, and he did not believe a word of it until a stranger in another country laughed at him in the dark.',
+    'The treasure never moved. He did.'
+  ]
+},
+{ id:'lamp', stage:'The Call', bg:'umber', mins:4,
+  n:'The Lamp and the Keys', src:'Sufi · Nasrudin',
+  laws:[{n:'Cause and Effect',f:'motion'},{n:'Attention',f:'inner'}],
+  rule:'Comfort decides where you search long before honesty decides what you find.',
+  q:'Which problem are you working on because it is the one you know how to work on?' },
+{ id:'cup', stage:'The Refusal', bg:'curve', mins:4,
+  n:'The Cup That Was Already Full', src:'Zen · Nan-in, nineteenth century',
+  laws:[{n:'Mentalism',f:'inner'},{n:'Receptivity',f:'inner'}],
+  rule:'You are not being refused the answer. You are full.',
+  q:'What would you have to stop being right about?' },
+{ id:'river', stage:'The Refusal', bg:'silk', mins:5,
+  n:'The Man Who Asked the River to Wait', src:'Ours',
+  laws:[{n:'Rhythm',f:'time'},{n:'Inspired Action',f:'motion'}],
+  rule:'Readiness is something you claim, never something you are granted.',
+  q:'What are you calling preparation?' },
+{ id:'horse', stage:'The Mentor', bg:'canyon', mins:4,
+  n:'The Farmer Who Said We Shall See', src:'Taoist · Huainanzi',
+  laws:[{n:'Polarity',f:'time'},{n:'Relativity',f:'time'},{n:'Judgement',f:'inner'}],
+  rule:'Every event is half a sentence. You keep reading it out as the whole one.',
+  q:'What are you certain was a disaster?' },
+{ id:'ferry', stage:'The Threshold', bg:'nightfall', mins:5,
+  n:'The Ferryman’s Price', src:'Ours',
+  laws:[{n:'Compensation',f:'motion'},{n:'Sacrifice',f:'motion'}],
+  rule:'The toll is always the thing you were going to keep.',
+  q:'What are you trying to take across with you?' },
+{ id:'cutter', stage:'The Trials', bg:'abyss', mins:5,
+  n:'The Stonecutter', src:'Japanese folk tale',
+  laws:[{n:'Envy',f:'others'},{n:'Vibration',f:'inner'},{n:'Power',f:'others'}],
+  rule:'Every position you envy is a position with something above it.',
+  q:'Who are you measuring yourself against, and what are they measuring themselves against?' },
+{ id:'monks', stage:'The Trials', bg:'delta', mins:3,
+  n:'Two Monks and the Woman at the Ford', src:'Zen · Tanzan and Ekido',
+  laws:[{n:'Attachment',f:'inner'},{n:'Rhythm',f:'time'}],
+  rule:'You put it down hours ago. Somebody is still carrying it, and it is you.',
+  q:'What did you set down that you are still holding?' },
+{ id:'knot', stage:'The Ordeal', bg:'iceberg', mins:5,
+  n:'The Knot Nobody Could Untie', src:'Greek · Alexander at Gordium',
+  laws:[{n:'Cause and Effect',f:'motion'},{n:'Strategy',f:'others'},{n:'Decision',f:'motion'}],
+  rule:'Most impossible problems are ordinary problems with a rule attached that nobody checked.',
+  q:'Who told you it had to be untied?' },
+{ id:'pocket', stage:'The Reward', bg:'iris', mins:4,
+  n:'The Diamond He Was Carrying', src:'Hindu · Ramakrishna',
+  laws:[{n:'Correspondence',f:'inner'},{n:'Sufficiency',f:'time'}],
+  rule:'Having it and knowing you have it are two different acquisitions.',
+  q:'What do you already have that you are still trying to get?' },
+{ id:'bridge', stage:'The Road Back', bg:'violet', mins:5,
+  n:'The Bridge You Burn Behind You', src:'Ours',
+  laws:[{n:'Commitment',f:'motion'},{n:'Polarity',f:'time'}],
+  rule:'A door left open behind you is a decision you have not finished making.',
+  q:'What are you keeping open in case this does not work?' },
+{ id:'mountain', stage:'The Return', bg:'turtle', mins:5,
+  n:'The Old Man Who Moved the Mountains', src:'Chinese · Liezi',
+  laws:[{n:'Perpetual Transmutation',f:'motion'},{n:'Rhythm',f:'time'},{n:'Legacy',f:'time'}],
+  rule:'The work outlives the worker, which is the only reason it is worth starting.',
+  q:'What are you refusing to begin because you will not see it finished?' }
+];
+
+var $ = function (s) { return document.querySelector(s); };
+var el = function (t, c, x) { var n = document.createElement(t); if (c) n.className = c; if (x != null) n.textContent = x; return n; };
+var byId = function (i) { for (var k = 0; k < S.length; k++) { if (S[k].id === i) return S[k]; } return null; };
+
+var st = { read: [], last: null };
+try { var raw = localStorage.getItem(KEY); if (raw) { var o = JSON.parse(raw); if (o && typeof o === 'object') {
+  st.read = Array.isArray(o.read) ? o.read.filter(function (x) { return typeof x === 'string'; }) : [];
+  st.last = typeof o.last === 'string' ? o.last : null;
+} } } catch (e) {}
+var save = function () { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+
+/* The photograph behind everything. Set once per view rather than per
+   paint, so scrolling a story never touches it. */
+var bgNow = '';
+function bg(name) {
+  if (name === bgNow) return;
+  bgNow = name;
+  $('#alBgI').style.backgroundImage = 'url("../arc/bg/' + name + '.jpg")';
+}
+
+var ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>';
+
+function cardOf(s) {
+  var b = el('button', 'al-card' + (st.read.indexOf(s.id) >= 0 ? ' is-read' : ''));
+  b.setAttribute('data-id', s.id);
+  b.setAttribute('aria-label', s.n + '. ' + s.src + '. ' + s.mins + ' minutes.');
+  var i = el('i'); i.style.backgroundImage = 'url("../arc/bg/' + s.bg + '.jpg")';
+  b.appendChild(i); b.appendChild(el('u'));
+  b.appendChild(el('span', 'al-stg', s.stage));
+  var w = el('span', 'al-cb');
+  w.appendChild(el('div', 'al-disp-s', s.n));
+  w.appendChild(el('div', 'al-caps', s.src + '  ·  ' + s.mins + ' min'));
+  b.appendChild(w);
+  var g = el('span', 'al-go'); g.innerHTML = ARROW; b.appendChild(g);
+  return b;
+}
+
+function paintArc() {
+  var p = $('#alArcPane'); p.textContent = '';
+  for (var i = 0; i < STAGES.length; i++) {
+    var here = S.filter(function (s) { return s.stage === STAGES[i]; });
+    if (!here.length) continue;
+    p.appendChild(el('div', 'al-grp al-caps', STAGES[i]));
+    for (var j = 0; j < here.length; j++) p.appendChild(cardOf(here[j]));
+  }
+}
+
+function paintLaws() {
+  var p = $('#alLawsPane'); p.textContent = '';
+  var seen = {}, fams = { inner: 'The inner world', motion: 'Motion', others: 'Other people', time: 'Time' };
+  for (var f in fams) {
+    var rows = [];
+    S.forEach(function (s) { s.laws.forEach(function (l) {
+      if (l.f === f && !seen[l.n]) { seen[l.n] = 1; rows.push(l); } }); });
+    if (!rows.length) continue;
+    p.appendChild(el('div', 'al-grp al-caps', fams[f]));
+    var w = el('div', 'al-tags');
+    rows.forEach(function (l) { var t = el('span', 'al-tag', l.n); t.setAttribute('data-f', l.f); w.appendChild(t); });
+    p.appendChild(w);
+  }
+}
+
+function paintRules() {
+  var p = $('#alRulesPane'); p.textContent = '';
+  S.forEach(function (s) {
+    var d = el('div', 'al-rule');
+    d.appendChild(el('div', 'al-caps', s.stage));
+    d.appendChild(el('b', null, s.rule));
+    p.appendChild(d);
+  });
+}
+
+function paintStory(s) {
+  var p = $('#alStoryPane'); p.textContent = '';
+  bg(s.bg);
+
+  var lead = el('div', 'al-lead');
+  lead.appendChild(el('div', 'al-caps', s.src + '  ·  ' + s.mins + ' min'));
+  lead.appendChild(el('h1', 'al-disp', s.n));
+  p.appendChild(lead);
+
+  var t = el('div', 'al-txt al-body');
+  (s.body || []).forEach(function (x) { t.appendChild(el('p', null, x)); });
+  p.appendChild(t);
+
+  var h = el('div', 'al-rule-hd'); h.appendChild(el('span', 'al-caps', 'What it was teaching'));
+  p.appendChild(h);
+
+  var tg = el('div', 'al-tags');
+  s.laws.forEach(function (l) { var x = el('span', 'al-tag', l.n); x.setAttribute('data-f', l.f); tg.appendChild(x); });
+  p.appendChild(tg);
+
+  if (s.teach) { var tb = el('p', 'al-body'); tb.textContent = s.teach; tb.style.marginBottom = '26px'; p.appendChild(tb); }
+
+  var r = el('div', 'al-rule');
+  r.appendChild(el('div', 'al-caps', 'The rule'));
+  r.appendChild(el('b', null, s.rule));
+  p.appendChild(r);
+
+  var q = el('div', 'al-q');
+  q.appendChild(el('div', 'al-caps', 'What you are left with'));
+  q.appendChild(el('b', null, s.q));
+  p.appendChild(q);
+
+  $('#alStoryPane').scrollTop = 0;
+}
+
+var VIEWS = ['open', 'arc', 'laws', 'rules', 'story'];
+function view(v) {
+  if (VIEWS.indexOf(v) < 0) v = 'arc';
+  document.documentElement.setAttribute('data-view', v);
+  VIEWS.forEach(function (x) {
+    var n = $('#al' + x.charAt(0).toUpperCase() + x.slice(1));
+    if (n) n.classList.toggle('is-on', x === v);
+  });
+  $('#alFoot').hidden = (v === 'open' || v === 'story');
+  $('#alStoryX').hidden = (v !== 'story');
+  document.querySelectorAll('.al-tab').forEach(function (b) {
+    b.setAttribute('aria-current', b.getAttribute('data-v') === v ? 'true' : 'false');
+  });
+  $('#alBg').classList.toggle('is-sage', v === 'arc' || v === 'laws' || v === 'rules');
+  if (v === 'arc') { bg('curve'); paintArc(); }
+  if (v === 'laws') { bg('silk'); paintLaws(); }
+  if (v === 'rules') { bg('umber'); paintRules(); }
+}
+
+function open(id) {
+  var s = byId(id);
+  if (!s || !s.body) return;
+  st.last = id;
+  if (st.read.indexOf(id) < 0) st.read.push(id);
+  save();
+  paintStory(s);
+  view('story');
+}
+
+document.addEventListener('click', function (e) {
+  var t = e.target.closest ? e.target.closest('.al-tab, .al-card, #alOpenB, #alStoryX') : null;
+  if (!t) return;
+  if (t.id === 'alOpenB') return view('arc');
+  if (t.id === 'alStoryX') return view('arc');
+  if (t.classList.contains('al-tab')) return view(t.getAttribute('data-v'));
+  if (t.classList.contains('al-card')) return open(t.getAttribute('data-id'));
+});
+
+bg('desert');
+view('open');
+window.alDrive = { view: view, open: open };
+
+}());
+</script>
+</body>
+</html>
