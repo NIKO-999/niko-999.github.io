@@ -130,7 +130,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .al-view.is-on { display: flex; }
 
 #alOpen { justify-content: flex-end; padding: 0 var(--gut) var(--v5); }
-#alOpen .al-mark { position: absolute; top: var(--v4); left: var(--gut); }
+#alOpen .al-mark { position: absolute; top: calc(var(--v4) + env(safe-area-inset-top, 0px)); left: var(--gut); }
 .al-mark { display: flex; align-items: center; gap: 9px; }
 .al-mark svg { width: 20px; height: 20px; display: block; }
 .al-mark b { font-size: 13px; font-weight: 500; letter-spacing: 1.2em; text-transform: uppercase; }
@@ -155,7 +155,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 }
 .al-pill.is-grow { flex: 1; }
 
-.al-head { padding: var(--v4) var(--gut-list) var(--v3); display: flex; align-items: center; gap: 12px; flex: none; }
+.al-head { padding: calc(var(--v4) + env(safe-area-inset-top, 0px)) var(--gut-list) var(--v3); display: flex; align-items: center; gap: 12px; flex: none; }
 .al-head .al-disp-s { flex: 1; }
 .al-head .al-caps { flex: none; }
 
@@ -179,7 +179,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 }
 .al-round svg { width: 17px; height: 17px; display: block; }
 
-.al-pane { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 0 var(--gut-list) 118px; }
+.al-pane { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  padding: 0 var(--gut-list) calc(118px + env(safe-area-inset-bottom, 0px)); }
 .al-pane::-webkit-scrollbar { display: none; }
 
 /* A MASK, NEVER A GRADIENT LAID OVER THE CONTENT. The ground here is a
@@ -297,7 +298,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 /* ---- THE FOOT ---- */
 .al-foot {
-  position: fixed; left: 93px; right: 93px; bottom: var(--v4); z-index: 30;
+  position: fixed; left: 93px; right: 93px; z-index: 30;
+  bottom: calc(var(--v4) + env(safe-area-inset-bottom, 0px));
   height: 58px; border-radius: var(--r-pill);
   background: rgba(24,21,17,.62);
   backdrop-filter: blur(26px) saturate(1.5); -webkit-backdrop-filter: blur(26px) saturate(1.5);
@@ -309,7 +311,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .al-tab svg { width: 20px; height: 20px; display: block; }
 .al-tab[aria-current="true"] { background: rgba(255,255,255,.12); color: var(--ink); }
 
-.al-x { position: fixed; top: 18px; right: var(--gut); z-index: 30; }
+.al-x { position: fixed; top: calc(18px + env(safe-area-inset-top, 0px)); right: var(--gut); z-index: 30; }
 </style>
 </head>
 <body>
