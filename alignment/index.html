@@ -265,6 +265,15 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   color: color-mix(in srgb, var(--tg) 66%, var(--ink));
 }
 .al-le-d { display: block; font-size: 15px; line-height: 1.5; color: var(--dim); }
+/* WHAT THE IDEA IS, THEN WHERE IT TURNED UP. The first build printed
+   only the second, so a theme could be read off the page without ever
+   saying what it claimed — a label with an anecdote attached rather
+   than something you could carry out of the room. */
+.al-le-x {
+  display: block; margin-top: var(--v2);
+  padding-left: var(--v2); border-left: 2px solid color-mix(in srgb, var(--tg) 46%, transparent);
+  font-size: 14px; line-height: 1.5; color: var(--dim);
+}
 
 .al-tag[data-f="inner"],  .al-le[data-f="inner"]  { --tg: #C9A227; }
 .al-tag[data-f="motion"], .al-le[data-f="motion"] { --tg: #D2603A; }
@@ -326,7 +335,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 </section>
 
 <section class="al-view" id="alLaws">
-  <div class="al-head"><h1 class="al-disp-s">The Laws</h1><span class="al-caps al-count"></span></div>
+  <div class="al-head"><h1 class="al-disp-s">The Themes</h1><span class="al-caps al-count"></span></div>
   <div class="al-pane" id="alLawsPane"></div>
 </section>
 
@@ -353,7 +362,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   <button class="al-tab" data-v="arc" aria-current="true" aria-label="The Arc">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 18c4-10 14-10 18 0"/><circle cx="3" cy="18" r="1.6" fill="currentColor" stroke="none"/><circle cx="21" cy="18" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="10.6" r="2.1"/></svg>
   </button>
-  <button class="al-tab" data-v="laws" aria-label="The Laws">
+  <button class="al-tab" data-v="laws" aria-label="The Themes">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 4v16M5 8h14M7.5 8 5 15h5zM16.5 8 14 15h5z"/></svg>
   </button>
   <button class="al-tab" data-v="rules" aria-label="The Rules">
@@ -384,8 +393,8 @@ var S = [
   n:'The Long Way Round',
   src:'Ours',
   laws: [
-    { n: 'Correspondence', f: 'inner', d: 'The answer was in his own notebook, eleven times, in his own handwriting.' },
-    { n: 'Inspired Action', f: 'motion', d: 'He had been told it for years. It became true the week he spent everything getting to it.' },
+    { n: 'The Answer You Are Carrying', f: 'inner', d: 'The answer was in his own notebook, eleven times, in his own handwriting.' },
+    { n: 'The Walk', f: 'motion', d: 'He had been told it for years. It became true the week he spent everything getting to it.' },
     { n: 'The Stranger’s Mouth', f: 'others', d: 'It came from a man who was not trying to help him and would not remember saying it.' }
   ],
   teach: 'Coelho built The Alchemist out of this. Santiago, the sheep, the pyramids, the treasure back under the tree he started from — all of it is here, seven hundred years earlier, in about a page. Knowing that is useful, because it tells you the shape is older and more reliable than any one telling of it.',
@@ -415,9 +424,9 @@ var S = [
 { id:'lamp', stage:'The Call', bg:'umber', mins:2,
   n:'Where the Light Is', src:'Ours',
   laws: [
-    { n: 'Attention', f: 'inner', d: 'Every hour of it was real work and none of it was on the thing that was wrong.' },
-    { n: 'Cause and Effect', f: 'motion', d: 'Effort in the wrong place produces nothing, however much of it there is.' },
-    { n: 'Judgement', f: 'inner', d: 'He could have named the problem at any point. Naming it was never the same as going near it.' }
+    { n: 'The Lit Ground', f: 'inner', d: 'Learning to code has a screen that tells you it worked. Sitting still after a loss has nothing at all.' },
+    { n: 'The Walk', f: 'motion', d: 'He could have named the problem at three in the morning for a year and a half.' },
+    { n: 'The Quiet Middle', f: 'time', d: 'What fixed it was four minutes of doing nothing, then four minutes again, and nobody watched.' }
   ],
   rule:'Comfort decides where you search long before honesty decides what you find.',
   q:'Which problem are you working on because it is the one you know how to work on?',
@@ -444,9 +453,9 @@ var S = [
 { id:'cup', stage:'The Refusal', bg:'curve', mins:2,
   n:'The Man Who Kept Explaining', src:'Ours',
   laws: [
-    { n: 'Mentalism', f: 'inner', d: 'He arrived holding the answer he had come to be given, and there was no room for a second one.' },
-    { n: 'Receptivity', f: 'inner', d: 'He was not lazy and he was not stupid. He was full, which is a different problem and a harder one.' },
-    { n: 'The Stranger’s Mouth', f: 'others', d: 'The man he asked knew what was wrong inside two minutes and never got to finish saying it.' }
+    { n: 'The Full Cup', f: 'inner', d: 'He had prepared a page of notes about what the problem was, and brought them to a man he was asking what the problem was.' },
+    { n: 'The Cost of Being Right', f: 'inner', d: 'Letting it be the problem meant the last two years had been aimed at the wrong thing.' },
+    { n: 'The Stranger’s Mouth', f: 'others', d: 'Nine words, in the first two minutes, for nothing — and he argued with them twice and drove home.' }
   ],
   rule:'You are not being refused the answer. You are full.',
   q:'What would you have to stop being right about?',
@@ -475,9 +484,9 @@ var S = [
 { id:'river', stage:'The Refusal', bg:'silk', mins:2,
   n:'When You Get In', src:'Ours',
   laws: [
-    { n: 'Rhythm', f: 'time', d: 'The conditions were never right and were never going to be. That is what conditions are.' },
-    { n: 'Inspired Action', f: 'motion', d: 'Every hour of preparation was real and brought the crossing no closer.' },
-    { n: 'Judgement', f: 'inner', d: 'He never refused. He said yes for years, which is the harder version to catch.' }
+    { n: 'The River Does Not Wait', f: 'time', d: 'Every year he prepared, the thing he was preparing for went past at its own rate.' },
+    { n: 'The Number That Moves', f: 'time', d: 'Six months, then nine, then a year, then a year in the new money. Each one more sensible than the last.' },
+    { n: 'The Walk', f: 'motion', d: 'No size of account answers whether you are good enough. Only going does, and he did not want the answer.' }
   ],
   rule:'Readiness is something you claim, never something you are granted.',
   q:'What are you calling preparation?',
@@ -505,9 +514,9 @@ var S = [
 { id:'horse', stage:'The Mentor', bg:'canyon', mins:2,
   n:'Too Early To Say', src:'Ours',
   laws: [
-    { n: 'Polarity', f: 'time', d: 'The same four events, read from four different distances, gave four different verdicts.' },
-    { n: 'Relativity', f: 'time', d: 'Everyone around him was certain every time, and being wrong never slowed them down.' },
-    { n: 'Judgement', f: 'inner', d: 'A verdict delivered early is not a comment on what happened. It is the first move of what happens next.' }
+    { n: 'Two Ends of One Thing', f: 'time', d: 'Redundancy, a better job, walking out, four years on his own. Four events, four verdicts, all early.' },
+    { n: 'The Early Verdict', f: 'inner', d: 'Everyone around him was certain every time, and being wrong four times never slowed them down.' },
+    { n: 'Nothing Has a Size of Its Own', f: 'time', d: 'Eleven thousand more was a triumph until it was measured against fourteen months of Sunday evenings.' }
   ],
   rule:'Every event is half a sentence. You keep reading it out as the whole one.',
   q:'What are you certain was a disaster?',
@@ -536,9 +545,9 @@ var S = [
 { id:'ferry', stage:'The Threshold', bg:'nightfall', mins:2,
   n:'The Fuel', src:'Ours',
   laws: [
-    { n: 'Sacrifice', f: 'motion', d: 'What got him this far was the exact thing that could not come any further.' },
-    { n: 'Compensation', f: 'motion', d: 'He offered the hours, the money and the risk. None of those were the price.' },
-    { n: 'Commitment', f: 'motion', d: 'He had been running on somebody else’s doubt, which means somebody else had been steering.' }
+    { n: 'What Only Made Sense Back There', f: 'motion', d: 'The list got him up at five for six years and there was no version of the next thing it could give him a reason for.' },
+    { n: 'The Borrowed Engine', f: 'others', d: 'Four people who had doubted him had been choosing what mattered, every morning, for six years.' },
+    { n: 'The Toll', f: 'motion', d: 'He offered the hours and the money and the risk. None of those were the fare.' }
   ],
   rule:'The toll is always the thing you were going to keep.',
   q:'What are you trying to take across with you?',
@@ -566,9 +575,9 @@ var S = [
 { id:'cutter', stage:'The Trials', bg:'abyss', mins:2,
   n:'Four Systems', src:'Ours',
   laws: [
-    { n: 'Envy', f: 'others', d: 'Not one of the four was killed by the market. Every one was killed by a screenshot.' },
-    { n: 'Attention', f: 'inner', d: 'He could not tell you what his edge was, because he had never held one long enough to find out.' },
-    { n: 'Commitment', f: 'motion', d: 'The first one, left alone, would have worked. It was never given the chance to be boring.' }
+    { n: 'The Sideways Look', f: 'others', d: 'Not one of the four was killed by the market. Every one was killed by a screenshot.' },
+    { n: 'Nothing Has a Size of Its Own', f: 'time', d: 'Sixty-three per cent was a failure against that group chat and a good year against anything else.' },
+    { n: 'The Quiet Middle', f: 'time', d: 'The first one had to be allowed to be boring for a year, and never was.' }
   ],
   rule:'Every time you look sideways you start again from nothing.',
   q:'What did you stop doing because somebody else was doing better at something else?',
@@ -597,9 +606,9 @@ var S = [
 { id:'monks', stage:'The Trials', bg:'delta', mins:2,
   n:'Eleven Hours', src:'Ours',
   laws: [
-    { n: 'Attachment', f: 'inner', d: 'One of them carried it four seconds. The other carried it eleven hours, uphill, while also carrying his own work.' },
-    { n: 'Rhythm', f: 'time', d: 'The event ended in the meeting. Everything after it was being fed, continuously, by one person.' },
-    { n: 'Judgement', f: 'inner', d: 'The sentence arrived fully formed at half past six, as though it were the next thing said in a conversation.' }
+    { n: 'The Long Carry', f: 'inner', d: 'Four seconds in a meeting room. Eleven hours in him, and only one of those was being fed.' },
+    { n: 'The Sentence That Arrives Ready', f: 'inner', d: 'It came out in a kitchen at half past six with no introduction, to somebody who had not been there.' },
+    { n: 'The Early Verdict', f: 'inner', d: 'He decided what it meant at twenty past nine and spent the day building on a foundation nobody else had laid.' }
   ],
   rule:'You put it down hours ago. Somebody is still carrying it, and it is you.',
   q:'What did you set down that you are still holding?',
@@ -628,9 +637,9 @@ var S = [
 { id:'knot', stage:'The Ordeal', bg:'iceberg', mins:3,
   n:'The Column He Added', src:'Ours',
   laws: [
-    { n: 'Cause and Effect', f: 'motion', d: 'Thirty-one losses over his limit. Twenty-six of them were his own rule, broken by him, in writing, with a timestamp.' },
-    { n: 'Judgement', f: 'inner', d: 'The news and the spread and the broker had been the reason for months, and every one of those is a reason you can do nothing about.' },
-    { n: 'Decision', f: 'motion', d: 'What he felt was not shame. It was relief, which is the same thing said honestly.' }
+    { n: 'The Wheel', f: 'motion', d: 'Thirty-one losses over his limit. Twenty-six of them were his own rule, broken by him, in writing, with a timestamp.' },
+    { n: 'The Early Verdict', f: 'inner', d: 'The news, the spread, the broker and the summer. Every one of those is a reason you can do nothing about.' },
+    { n: 'The Handle', f: 'motion', d: 'What he felt was not shame. It was relief, which is the same thing said honestly.' }
   ],
   rule:'Make it your fault and you get the wheel.',
   q:'What are you calling bad luck?',
@@ -664,9 +673,9 @@ var S = [
 { id:'pocket', stage:'The Reward', bg:'iris', mins:2,
   n:'The Week He Was Rich', src:'Ours',
   laws: [
-    { n: 'Correspondence', f: 'inner', d: 'The man who gave it to him slept beside it in the open. He could not put it down in a locked flat.' },
-    { n: 'Sufficiency', f: 'time', d: 'He had the number he had wanted for four years and spent the week doing nothing at all except checking it.' },
-    { n: 'Attachment', f: 'inner', d: 'It arrived with a second thing he had not asked for, and the second thing was heavier.' }
+    { n: 'The Second Thing', f: 'time', d: 'It arrived with the fear of it going, which he had not asked for and had not been told about.' },
+    { n: 'The Long Carry', f: 'inner', d: 'He checked it in bed, in the morning and at traffic lights, to see whether it was still there.' },
+    { n: 'The Answer You Are Carrying', f: 'inner', d: 'The man on the stairwell was not further ahead. He could set it down, and that does not arrive in the account.' }
   ],
   rule:'Having it and knowing you have it are two different acquisitions.',
   q:'What do you already have that you are still trying to get?',
@@ -695,9 +704,9 @@ var S = [
 { id:'bridge', stage:'The Road Back', bg:'cobalt', mins:2,
   n:'The Job He Kept', src:'Ours',
   laws: [
-    { n: 'Commitment', f: 'motion', d: 'He never used it once. It took a little weight off every hard thing instead, for years.' },
-    { n: 'Polarity', f: 'time', d: 'The one with nothing behind him was frightened for a year and then had the thing the other never got.' },
-    { n: 'Decision', f: 'motion', d: 'A door left open is not optionality. The decision was already made; the door is the part of it that never finished.' }
+    { n: 'The Open Door', f: 'motion', d: 'He never used the two days once. They took a little off the top of every Tuesday for six years.' },
+    { n: 'Two Ends of One Thing', f: 'time', d: 'The one with nothing behind him was frightened for a year and got the thing the careful one never did.' },
+    { n: 'The Handle', f: 'motion', d: 'It costs nothing visible on any particular Tuesday, which is exactly why it is never the week to deal with it.' }
   ],
   rule:'A way back does not get used. It takes the pressure out of everything instead, and the pressure was what was going to finish it.',
   q:'What are you keeping open in case this does not work?',
@@ -725,9 +734,9 @@ var S = [
 { id:'mountain', stage:'The Return', bg:'turtle', mins:2,
   n:'Day Six Hundred and Seventeen', src:'Ours',
   laws: [
-    { n: 'Rhythm', f: 'time', d: 'The day that mattered was indistinguishable from the four hundred before it.' },
-    { n: 'Commitment', f: 'motion', d: 'He stopped telling people, and it was not modesty. Announcing it was spending the thing before he had earned it.' },
-    { n: 'Legacy', f: 'time', d: 'Nothing marked the day it changed. It changed anyway, and somebody else noticed before he did.' }
+    { n: 'The Quiet Middle', f: 'time', d: 'Day six hundred and seventeen was indistinguishable from the four hundred before it.' },
+    { n: 'The Spent Feeling', f: 'inner', d: 'Every time he announced it he drew down the feeling he was supposed to get from finishing.' },
+    { n: 'The Day Nobody Announced', f: 'time', d: 'There was no morning where he woke up and noticed he had won the fight.' }
   ],
   rule:'You will not feel it arrive. You will only notice it is already behind you.',
   q:'What have you been doing long enough that you cannot remember starting?',
@@ -776,29 +785,30 @@ var save = function () { try { localStorage.setItem(KEY, JSON.stringify(st)); } 
    naming the laws is that a story carries several and you can follow
    any of them sideways into the others that carry it. */
 var LAWS = {
-  'Correspondence': 'What is outside matches what is inside, and neither one is the cause of the other. The dream and the house are the same house.',
-  'Inspired Action': 'A thing you have understood and not acted on has not been understood. The walking is not the delivery of the insight, it is the rest of it.',
-  'Relativity': 'Nothing has a size of its own. It has a size against whatever you happen to be standing next to, and you choose what you stand next to far more often than you notice.',
-  'The Stranger\u2019s Mouth': 'The answer arrives from somebody who does not know they are giving it, is not trying to help, and is often laughing at you while they do it.',
-  'Cause and Effect': 'Every result is downstream of something, including the results you are calling luck. The question is never whether there was a cause, only whether you were looking at it.',
-  'Attention': 'What you look at is not decided by what matters. It is decided by what is easy to look at, unless you intervene.',
-  'Mentalism': 'You do not meet the world. You meet your account of it, continuously, and the account is made of what you already decided.',
-  'Receptivity': 'Nothing new enters a full container. Being taught is a thing you have to make room for, and the room is made by putting something down.',
-  'Rhythm': 'Everything swings. The high does not keep going up and the low is not the new floor, and both of them feel permanent from the inside.',
-  'Polarity': 'Two opposite things are one thing measured at different points. Hot and cold are a single quantity, and so are your best day and your worst.',
-  'Judgement': 'A verdict delivered early does not describe the event. It decides what you do next, which is how it makes itself true.',
-  'Compensation': 'Everything is paid for. Not morally and not always fairly, but it comes out of an account somewhere, and the only variable is whether you knew the price.',
-  'Sacrifice': 'A threshold charges you the thing that only made sense on the side you are leaving. That is not cruelty, it is the definition of a threshold.',
-  'Envy': 'Every position has something visible above it that was not visible from below. A man who moves because of what he can see will move for ever.',
-  'Vibration': 'Nothing is still. What looks like a state is a rate, and you are always either raising it or lowering it, never holding it.',
-  'Power': 'What people do is explained by what they can afford to do, far more often than by what they believe.',
-  'Attachment': 'The event has a duration. The carrying is a second thing, which you are doing, and it runs at full strength for as long as you keep feeding it.',
-  'Strategy': 'Most impossible problems are ordinary problems with a rule attached that nobody put there on purpose and nobody has checked.',
-  'Decision': 'A decision is not made when you know the answer. It is made when you close the other doors, and everything before that is research.',
-  'Sufficiency': 'Having a thing and knowing you have it are two separate acquisitions, and people routinely complete the first and never start the second.',
-  'Commitment': 'A way back does not get used. It drains a little pressure out of every hard thing instead, continuously, and the pressure was what was going to make you finish.',
-  'Perpetual Transmutation': 'Nothing holds its form. What you are working on is already becoming something else, and so is what is standing in your way.',
-  'Legacy': 'The work outlives the worker, which is the only reason a thing bigger than a life is worth beginning at all.'
+  'The Answer You Are Carrying': 'The thing you are looking for is very often already in your possession — written down, said to you, sitting under your feet. Finding it was never the difficulty. Being able to hear it is, and that is usually bought rather than given.',
+  'The Lit Ground': 'You search where searching is comfortable rather than where the thing actually is. The lit ground is not where you dropped it. It is simply the only place you can see, and effort spent there looks identical from outside to effort that would work.',
+  'The Full Cup': 'Nothing new enters a container that is already occupied. You are not being refused the answer; there is nowhere in you for it to go, and the thing filling the space is usually something you are right about.',
+  'The Cost of Being Right': 'Every answer you argue with is protecting a decision you have already made. The price of hearing it is admitting what it makes of the last two years, which is why people go looking for help and come home having defended themselves.',
+  'The Early Verdict': 'Every event arrives as half a sentence and you read it out as the whole one. A verdict delivered early is not a description of what happened — it is the first move of what happens next.',
+  'The Long Carry': 'The event has a duration and it ends. The carrying is a second thing, which you are doing, and it runs at full strength for as long as you keep feeding it. Nothing external is required after the first four seconds.',
+  'The Sentence That Arrives Ready': 'The tell that you are still carrying something is that it comes out fully formed, hours or years late, with no introduction, as though the conversation were still running. It is not still running. Nobody else is in it.',
+  'The Spent Feeling': 'Announcing a thing pays you a small amount of the feeling you were supposed to get from finishing it, out of the same account. Tell enough people and you can draw the whole balance without ever doing the work.',
+  'The Walk': 'Understanding a thing and acting on it are two separate acquisitions. Almost everybody completes the first, calls it done, and is genuinely surprised years later to find nothing moved.',
+  'The Wheel': 'Either your outcomes come out of your own hands or they come out of the weather. Both are beliefs and only one of them leaves you anything to do tomorrow, which is why the honest account of a bad year arrives as relief rather than shame.',
+  'The Toll': 'Everything is paid for, and rarely in the currency you offered. The bill comes from an account you did not know was open, and the fare is never the thing you were holding out.',
+  'What Only Made Sense Back There': 'A threshold charges you the thing that was only ever valuable on the side you are leaving. That is not cruelty. If it made sense on both banks it would not be a threshold, it would be a road.',
+  'The Handle': 'A problem you caused is a problem with a handle on it. Fault is not a moral verdict here; it is the difference between a situation you can reach and one you can only wait out.',
+  'The Open Door': 'A way back is almost never used. It takes a little pressure out of every hard thing instead, continuously and invisibly, and the pressure was what was going to finish the work.',
+  'The Stranger’s Mouth': 'The answer very often arrives from somebody who is not trying to help you, does not know they have given it, and will not remember saying it. People close to you have usually said the same thing and been unable to make it land.',
+  'The Sideways Look': 'Every position has something above it that was invisible from the one below. Whoever moves because of what they can see from where they stand will move for ever, and will never find out what they had.',
+  'The Borrowed Engine': 'Running on somebody else’s doubt works, and it means somebody else is steering. The only question that engine can ask is what would prove them wrong, and that is a different question from what you actually want.',
+  'The River Does Not Wait': 'Conditions are never right, because right is not a state conditions are in. The thing goes past at its own rate whether or not you are ready, and it has been going past the whole time you were preparing.',
+  'Two Ends of One Thing': 'A disaster and a making are frequently the same event measured from different distances. You never get to stand far enough back to be certain, and there is always another year after this one.',
+  'Nothing Has a Size of Its Own': 'A number is only ever large or small against whatever you have put beside it, and you choose what you put beside it far more often than you notice.',
+  'The Number That Moves': 'Readiness recedes as you approach it, because the thing you are waiting for was never a number. Every threshold you set will be more sensible than the last one, and you will never arrive.',
+  'The Second Thing': 'What you wanted arrives with something attached that you did not ask for and were not warned about. It is usually the fear of it leaving, and it usually weighs more than the thing.',
+  'The Quiet Middle': 'The work that decides it has no screen, no course, nobody to tell and no way to get better except by being in it. It pays nothing for a long time and there is no way to make it interesting.',
+  'The Day Nobody Announced': 'The morning it changed was indistinguishable from the four hundred before it. You will not feel it arrive. You will notice, much later and by accident, that it is already behind you.'
 };
 
 var IB = { desert:1.20, umber:2.00, iris:2.20, turtle:1.25, canyon:1.00,
@@ -953,7 +963,7 @@ function paintStory(s) {
   (s.body || []).forEach(function (x) { t.appendChild(el('p', null, x)); });
   sh.appendChild(t);
 
-  var h = el('div', 'al-rule-hd'); h.appendChild(el('span', 'al-caps', 'What it teaches'));
+  var h = el('div', 'al-rule-hd'); h.appendChild(el('span', 'al-caps', 'Key themes'));
   sh.appendChild(h);
 
   var ls = el('div', 'al-les');
@@ -962,7 +972,8 @@ function paintStory(s) {
     r.setAttribute('data-f', l.f);
     r.setAttribute('data-law', l.n);
     r.appendChild(el('span', 'al-le-n', l.n));
-    if (l.d) r.appendChild(el('span', 'al-le-d', l.d));
+    if (LAWS[l.n]) r.appendChild(el('span', 'al-le-d', LAWS[l.n]));
+    if (l.d) r.appendChild(el('span', 'al-le-x', l.d));
     ls.appendChild(r);
   });
   sh.appendChild(ls);
