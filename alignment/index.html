@@ -66,31 +66,6 @@
 
   --grade: saturate(.30) sepia(.55) contrast(1.02) brightness(1.20);
 
-  /* THE VEIL WAS INVERTED. Both references are brightest at the very
-     top of the screen — row medians of 222, 223, 223 — and never fall
-     below L24 at the foot. The first build read 57 at the top and
-     peaked in the middle, because a 30% black wash sat exactly where
-     the references put their light. */
-  --veil: linear-gradient(180deg,
-      rgba(11,10,8,.00)   0%,
-      rgba(11,10,8,.00)  44%,
-      rgba(11,10,8,.34)  68%,
-      rgba(11,10,8,.74)  90%,
-      rgba(11,10,8,.82) 100%);
-
-  /* The list ground is a different room, and it has a FLOOR. The
-     reference's olive falls for its top 45% and is then flat at L46-49
-     to the bottom edge; the first build ramped monotonically to L16.
-     It is also deeper than the reference's, which is a cost rather
-     than a preference: on that lightness pure white maxes at 3.05:1,
-     so no alpha of white carries 10px type there — the references put
-     DARK large type on their olive and nothing small at all. */
-  --sage-g: linear-gradient(180deg,
-      rgba(80,82,56,.97)   0%,
-      rgba(72,74,51,.97)  22%,
-      rgba(52,53,41,.97)  48%,
-      rgba(44,44,40,.97)  66%,
-      rgba(44,44,40,.97) 100%);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -115,22 +90,16 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .al-body   { font-size: 16px; font-weight: 400; line-height: 1.50; color: var(--dim); }
 .al-note   { font-size: 13px; font-weight: 450; line-height: 1.45; color: var(--dim); }
 
-.al-bg { position: fixed; inset: 0; z-index: 0; }
-.al-bg i {
-  position: absolute; inset: 0; display: block;
-  background-size: cover; background-position: center;
-  filter: var(--grade) brightness(var(--ib, 1));
-  transform: scale(1.04);
-}
-.al-bg u { position: absolute; inset: 0; display: block; background: var(--veil); }
-.al-bg.is-sage i { filter: var(--grade) brightness(var(--ib, 1)) blur(46px); transform: scale(1.3); }
-.al-bg.is-sage u { background: var(--sage-g); }
+/* A picture in a frame, never a ground under words. */
+.al-hero { position: relative; height: 188px; border-radius: var(--r-card); overflow: hidden; background: #0E0C0A; margin-bottom: var(--v4); }
+.al-hero i { position: absolute; inset: 0; display: block; background-size: cover; background-position: center; filter: var(--grade) brightness(var(--ib, 1)); }
 
 .al-view { position: relative; z-index: 1; height: 100%; display: none; flex-direction: column; }
 .al-view.is-on { display: flex; }
 
-#alOpen { justify-content: flex-end; padding: 0 var(--gut) var(--v5); }
-#alOpen .al-mark { position: absolute; top: calc(var(--v4) + env(safe-area-inset-top, 0px)); left: var(--gut); }
+#alOpen { justify-content: flex-end; padding: 0 var(--gut-list) var(--v5); }
+#alOpen .al-hero { flex: 1; height: auto; margin: calc(var(--v4) + env(safe-area-inset-top, 0px)) 0 var(--v5); }
+#alOpen .al-mark { margin-bottom: var(--v3); }
 .al-mark { display: flex; align-items: center; gap: 9px; }
 .al-mark svg { width: 20px; height: 20px; display: block; }
 .al-mark b { font-size: 13px; font-weight: 500; letter-spacing: 1.2em; text-transform: uppercase; }
@@ -231,37 +200,18 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 /* ---- THE STORY ---- */
 #alStoryPane { padding-bottom: var(--v6); }
-.al-lead.is-short { height: 34vh; }
-#alLawPane .al-sheet {
-  background: linear-gradient(180deg,
-      rgba(11,10,8,.62) 0, rgba(11,10,8,.94) 64px, rgba(11,10,8,.96) 100%);
-}
-.al-lead { position: relative; height: 50vh; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: var(--v4); }
-.al-lead::before {
-  content: ''; position: absolute; z-index: 0;
-  left: calc(var(--gut-list) * -1); right: calc(var(--gut-list) * -1); bottom: 0; height: 66%;
-  background: linear-gradient(180deg, rgba(11,10,8,.00), rgba(11,10,8,.52) 48%, rgba(11,10,8,.88));
-}
-.al-lead > * { position: relative; z-index: 1; }
+.al-lead { padding: var(--v4) 0; }
+.al-lead.is-short .al-hero { display: none; }
 .al-lead .al-mark { margin-bottom: var(--v3); color: var(--dim); }
 .al-lead .al-caps { margin-bottom: var(--v2); }
 .al-lead .al-disp { max-width: 9em; }
 
-/* THE SCRIM TRAVELS WITH THE TEXT, NOT WITH THE VIEWPORT. .al-bg is
-   fixed, so a veil written there is a screen gradient the words scroll
-   THROUGH — measured, one paragraph of this story passed over grounds
-   from L17 to L127 and the same declared colour read 3.23:1 at one
-   scroll position and 9.97 at another. A contrast failure that moves
-   is the hardest kind to see and the easiest kind to ship. */
-.al-sheet {
-  margin: 0 calc(var(--gut-list) * -1); padding: 0 var(--gut-list) var(--v6);
-  background: linear-gradient(180deg,
-      rgba(11,10,8,.86) 0,
-      rgba(11,10,8,.94) 120px,
-      rgba(11,10,8,.96) 100%);
-}
+/* Nothing to travel with any more: the ground under the words is the
+   page. The whole class of contrast failure that MOVES with the scroll
+   went out with the photograph. */
+.al-sheet { padding-bottom: var(--v6); }
 .al-txt p { margin-bottom: 1.05em; }
-.al-txt p:first-child::first-letter { font-size: 2.2em; font-weight: 450; line-height: .88; float: left; margin: .06em .11em 0 0; color: var(--ink); }
+.al-txt p:first-child { color: var(--ink); }
 
 .al-rule-hd { margin: var(--v5) 0 var(--v3); display: flex; align-items: center; gap: 12px; }
 .al-rule-hd:after { content: ''; flex: 1; height: 1px; background: var(--hair); }
@@ -357,9 +307,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 </head>
 <body>
 
-<div class="al-bg" id="alBg" aria-hidden="true"><i id="alBgI"></i><u></u></div>
-
 <section class="al-view is-on" id="alOpen">
+  <div class="al-hero"><i id="alOpenHero"></i></div>
   <div class="al-mark" role="img" aria-label="Alignment">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v20M5 8l7-6 7 6M5 16l7 6 7-6"/></svg>
   </div>
@@ -431,557 +380,378 @@ var STAGES = ['The Call', 'The Refusal', 'The Mentor', 'The Threshold',
 
 var S = [
 {
-  id: 'stove', stage: 'The Call', bg: 'desert', mins:13,
-  n: 'The Treasure Under the Stove',
-  src: 'Sufi · Rumi, thirteenth century',
+  id: 'stove', stage: 'The Call', bg: 'desert', mins:2,
+  n:'The Long Way Round',
+  src:'Ours',
   laws: [
-    { n: 'Correspondence', f: 'inner', d: 'The dream described his own garden. He crossed a desert to be told the address of the house he had slept in for twelve years.' },
-    { n: 'Inspired Action', f: 'motion', d: 'The voice came three nights running and nothing happened until he sold the fig crop and started walking.' },
-    { n: 'Relativity', f: 'time', d: 'The treasure was under the stove for the whole eleven years he was losing everything. Nothing about it changed except where he had been.' },
-    { n: 'The Stranger’s Mouth', f: 'others', d: 'It reached him from a tired watch captain who was laughing at him and believed he was giving nothing away.' }
+    { n: 'Correspondence', f: 'inner', d: 'The answer was in his own notebook, eleven times, in his own handwriting.' },
+    { n: 'Inspired Action', f: 'motion', d: 'He had been told it for years. It became true the week he spent everything getting to it.' },
+    { n: 'The Stranger’s Mouth', f: 'others', d: 'It came from a man who was not trying to help him and would not remember saying it.' }
   ],
   teach: 'Coelho built The Alchemist out of this. Santiago, the sheep, the pyramids, the treasure back under the tree he started from — all of it is here, seven hundred years earlier, in about a page. Knowing that is useful, because it tells you the shape is older and more reliable than any one telling of it.',
   rule: 'You cannot be told. You can only be sent.',
   q: 'What are you standing on, refusing to dig, because it is too close to be treasure?',
   body:[
-    "Yusuf's father left him a house in the eastern quarter of Baghdad, and in the house there were four things worth naming: a garden with a wall round it, a fig tree older than anyone could remember, a stone fountain, and a stove.",
-    "He was thirty-one when he inherited it and he was not poor then.",
-    "The losing took eleven years and there was never a day he could have pointed at. He bought and he sold, cloth mostly, and he was neither careless nor unlucky in any way he could name. It was simply that every year there was a little less than the year before, and a man can live inside that for a very long time without once saying the word out loud.",
-    "He sold the second house in the fourth year. He sold the horses in the sixth. After that he began on the carpets, one at a time, always the one nearest the door, so that the room emptied slowly enough that he could come in each evening and tell himself it looked much as it had.",
-    "The fountain stopped in the ninth year. Something had silted up beneath it. He meant to have it seen to, and then there was the winter, and then there was something else, and after a while he stopped hearing that it had stopped.",
-    "By the twelfth year what was left was the house, the wall, the tree, the dry fountain and the stove, and Yusuf, who lit the stove every evening and sat beside it.",
-    "The dream came in the spring.",
-    "He was standing somewhere with no features to it, aware in the way you are aware in dreams that he had been there a while. A voice spoke from a little behind his left shoulder and did not raise itself at all.",
-    "Your fortune is in Cairo, it said. Go there and find it.",
-    "He woke before dawn and lay listening to the birds starting up in the fig tree and laughed at himself, quietly, so as not to seem mad even to an empty house. A man who has lost money dreams about money. There is nothing in that.",
-    "It came again the next night. Word for word, the same flat voice from the same place behind him. He laughed again in the morning and the laugh was shorter.",
-    "On the third night he did not sleep afterwards. He lay with his eyes open until the window went grey, and somewhere in those hours the thing stopped being a dream he had had and became a thing he was going to do, and he could never afterwards say when it turned over.",
-    "He sold the fig crop standing. He sold the brass fittings off the doors and the good knife and the last carpet, which he had been keeping without admitting that he was keeping it. It came to enough for a place with a caravan, food for the road, and a little over.",
-    "His neighbour Abu Qasim stood in the lane and watched him strap the bundle.",
-    "Cairo, said Abu Qasim.",
-    "Yes.",
-    "For what?",
-    "And Yusuf found that he could not answer. He stood there with the strap in his hand and understood that there was no sentence available to him that would not sound exactly like what it was.",
-    "A man told me, he said at last.",
-    "Abu Qasim looked at him for a while. Then he did a kind thing, which was to say nothing more about it and help him with the strap.",
-    "The road to Cairo took ten weeks.",
-    "Nothing happened on it. That is the part nobody warns you about. He had expected the journey to prove something, to be the place where it began, and instead it was heat and dust and the same four conversations with different men, and the enormous slowness of a world crossed at the speed of a camel.",
-    "In the second month a driver called Ishaq asked him what he was going for. Yusuf, who had by then been asked eleven times and had eleven times said business, heard himself tell the truth.",
-    "Ishaq did not laugh. He chewed for a while and looked out at the country.",
-    "I had a brother who went to Isfahan on a dream, he said.",
-    "What happened to him?",
-    "Nothing. He came back. He was all right afterwards.",
-    "Yusuf waited for the rest of it.",
-    "That is all there is, said Ishaq. Some people go and some people do not, and the ones who do not talk about it for the rest of their lives. That is the whole of the difference I have ever been able to see.",
-    "They came into Cairo on a morning in the hot season, and within an hour Yusuf understood that he had been a fool about the size of it.",
-    "He had imagined arriving somewhere. Cairo was not somewhere. It was a country folded up and packed into streets, and it went on past every corner he turned, and by the afternoon of the first day he had given up holding a map of it in his head. Nobody looked at him. There is a particular loneliness in a place so large that a stranger is not even strange.",
-    "His money lasted nine days.",
-    "For three days after that he did not eat. He walked the city in the mornings looking for work, and there was work, but it went to men who had somebody to speak for them, and he had nobody in that city and no way to acquire anybody in an afternoon.",
-    "On the third evening he sat down against a wall and made himself say the thing plainly, which was that he was going to have to ask.",
-    "He had never in his life asked anyone for anything. He found, sitting there, that he still could not do it while people could see his face.",
-    "So he waited until dark.",
-    "What he did not know was that the watch had been out for eleven nights after a run of housebreakings in that quarter, and that they were tired, and that a stranger moving along a wall after the last call to prayer was the precise shape of the thing they had been sent to find.",
-    "They came out of a side street behind him and he never turned round properly.",
-    "He remembered afterwards that there were four of them, and that it was quick, and that the strangest part was how little malice there was in it. They were not angry with him. They did their work the way men do a job they have done before, and when he stopped being able to stand they stopped, and one of them went to fetch the captain.",
-    "The captain came with a lamp and crouched down and turned Yusuf's face toward the light with two fingers, not ungently.",
-    "Who are you, he said.",
-    "And Yusuf, lying on the stones of a city eleven weeks from his own door, with his mouth full of blood and nothing at all left to protect, told him.",
-    "He told him the whole of it. The house in the eastern quarter and the wall round the garden. The eleven years. The carpets by the door. The fountain that had stopped in the ninth year and that he had meant to see to. The voice behind his left shoulder, three nights running, and what it had said.",
-    "The captain listened to all of it and did not interrupt once.",
-    "Then he sat back on his heels and laughed.",
-    "He laughed for a long time, and his men laughed with him, and one of them had to set the lamp down. It was not cruel laughter. That was somehow worse. It was the laughter of a man who has been standing in a dark street half the night and has just been handed something to take home and tell people.",
-    "You walked here from Baghdad, he said. On a dream.",
-    "Yes.",
-    "Listen to me. Three times in my life I have had a dream myself. Three times, the same one. A voice tells me there is a treasure in Baghdad, and it tells me the quarter, and it tells me the house.",
-    "He wiped his eyes with the back of his wrist.",
-    "A house with a wall round the garden, he said, and a fig tree in it older than the house. And a stone fountain that does not run. And the treasure is under the stove.",
-    "He put his hands on his knees.",
-    "Three times, he said. And I have never gone one step. I have never so much as asked a man which road it is. Because I am not a lunatic, and only a lunatic crosses a desert on the strength of something he heard while he was asleep.",
-    "Yusuf did not say anything at all.",
-    "He lay on the stones and looked up at a tired man with a lamp who had just described his own garden, and the silence went on long enough that one of the watchmen shifted his feet.",
-    "Then he said thank you.",
-    "The captain, who had been ready for almost anything but that, was quiet a moment. Then he took some coins out of his belt and set them on the ground by Yusuf's hand, and told him to eat something, and go home, and stop dreaming.",
-    "The walk back took ten weeks, the same as the walk out.",
-    "It was not the same journey. He went by the same road and ate the same food and the country was exactly where he had left it, and every day of it was different, and he could not have explained that to anybody either.",
-    "He came into Baghdad in the early autumn. He went up his own lane, and Abu Qasim was not out, and he let himself in at his own door and stood in the empty room and smelled the particular smell of a house that has been shut eleven months.",
-    "The fig tree had fruited and dropped and nobody had gathered it.",
-    "He went to the stove. He had lit it ten thousand times. He had cleaned it and cursed it and sat beside it on every cold evening of his adult life, and in all those years he had never once looked underneath it.",
-    "He found a bar in the yard, and he dug.",
-    "It was not deep. It was about the depth a man buries a thing when he means to come back for it within a year or two, and has no shovel, and is in a hurry.",
-    "There was gold, and a quantity of old coin that had not been minted in his lifetime or his father's, and a small heavy thing wrapped in cloth gone to powder. He sat down on the kitchen floor and stayed there a long while as the light moved across the wall.",
-    "In the morning he went out and found a man who knew about water.",
-    "He had the fountain seen to first."
+    "He saved for two years to get into the room.",
+    "It was not cheap and it was not a scam either, which made it harder afterwards. A real man with a real record, a small group, four days, in a city he had never been to. He borrowed the last part of it and told nobody at work where he was going.",
+    "He had wanted this a long time. He kept a page at the back of a notebook with the questions he would ask if he ever got in the room, and by the time he got there the page was full.",
+    "The four days were good. He is careful about that when he tells it. The man was generous and said true things and sold nothing from the stage.",
+    "On the last afternoon he got his turn.",
+    "He laid it all out, fast, because others were waiting. The flat account. The system built and rebuilt. Everything he had tried.",
+    "The man listened, and thought for a moment, and said: you are trading too big and too often, and I think you already know that.",
+    "That was the whole answer.",
+    "He flew home the next morning. Somewhere over the water he got the notebook out to write it down before he lost it, turned to a clean page, and had to go back a few pages to find one.",
+    "It was already in there.",
+    "Not once. Eleven times, over two years, in his own handwriting, in eleven different moods. Too big. Too often. Size is the problem. Stop taking the second one. One of them underlined twice.",
+    "His old boss had said it to him in a car park. His brother, who knows nothing about any of it, had said a version of it at Christmas and been told he did not understand.",
+    "He sat with the notebook open and what he felt was not embarrassment.",
+    "It was that he could hear it now.",
+    "He had read those words eleven times and they had been information. A man three thousand miles away had said them once and they had gone somewhere further in, and the only difference between the eleven times and the once was everything it had cost to be sitting in that chair.",
+    "He does not think the trip was wasted. He does not think it was necessary either, in the way people mean that word. He thinks he could have had it for free, and did, and that the telling was never the problem.",
+    "He trades smaller now. One a day, and he takes the first one.",
+    "Somebody asked him what the course was like and he said it was good and left it there, because the only honest version is that he paid a great deal of money to hear something he had written down himself, and that it worked."
   ]
 },
-{ id:'lamp', stage:'The Call', bg:'umber', mins:5,
-  n:'The Lamp and the Keys', src:'Sufi · Nasrudin',
+{ id:'lamp', stage:'The Call', bg:'umber', mins:2,
+  n:'Where the Light Is', src:'Ours',
   laws: [
-    { n: 'Cause and Effect', f: 'motion', d: 'Seven men searched for two hours in the one place the key could not be. Effort in the wrong place produces nothing, however much of it there is.' },
-    { n: 'Attention', f: 'inner', d: 'Three scripts, four architects, six years of savings. Every one of them was under the lamp, and Faisal’s yard was not.' }
+    { n: 'Attention', f: 'inner', d: 'Every hour of it was real work and none of it was on the thing that was wrong.' },
+    { n: 'Cause and Effect', f: 'motion', d: 'Effort in the wrong place produces nothing, however much of it there is.' },
+    { n: 'Judgement', f: 'inner', d: 'He could have named the problem at any point. Naming it was never the same as going near it.' }
   ],
   rule:'Comfort decides where you search long before honesty decides what you find.',
   q:'Which problem are you working on because it is the one you know how to work on?',
-  teach:'Nasrudin is the Sufi tradition’s holy fool, and the fool is how that tradition says the things nobody will hear straight. The joke is forty words. What is under it is the most expensive habit a person has: searching where searching is comfortable, and calling it searching.',
+  teach:'A man on his knees under a street lamp, looking for a key he dropped indoors. The joke is four hundred years old and it is not a joke.',
   body:[
-    "The thing Kamal remembered afterwards was that he had almost walked past.",
-    "He was twenty-four and he worked for a man who copied documents, and he had spent that whole day doing it and his hand ached and he wanted his supper. It was the blue part of the evening, after the last light and before full dark, and the lamp at the corner of the street of the coppersmiths had been lit an hour.",
-    "Under it, on his hands and knees, was Nasrudin.",
-    "Everybody in that town knew Nasrudin. He was not mad and he was not a beggar. He had been a judge once, briefly, and there were four separate stories about why he had stopped being one, and none of them agreed. He now did nothing in particular and was to be found anywhere.",
-    "He was moving his palms across the dust in slow careful circles, working outward from the foot of the lamp post.",
-    "Kamal stopped because it would have been rude not to.",
-    "What have you lost, uncle?",
-    "My key, said Nasrudin, without looking up.",
-    "So Kamal put down his satchel and got down beside him, because that is what you do.",
-    "They worked together for a while in the way that two people do who have just started something: quickly, hopefully, covering the obvious ground. The circle of light was perhaps four paces across. The dust in it was fine and pale and showed everything, and they went over all of it, and there was nothing there.",
-    "Then they did it again, more slowly.",
-    "A man called Ilyas came past with bread under his arm and asked what they were doing, and when he heard, he put the bread on a step and joined in. Two boys stopped. One went home and came back with a lamp of his own so they could see under the lip of the doorway. By the time the moon was properly up there were seven people on their hands and knees in that circle of light, and they had worked out a system, and two of them were arguing about whether the drain had been checked.",
-    "Nobody thought it strange. A man had lost his key and his neighbours were helping him look for it. There is nothing in the world more ordinary than that.",
-    "It was Ilyas, in the end, who sat back on his heels.",
-    "His knees had gone and he was rubbing them, and he was looking at Nasrudin, and something had occurred to him in the way things occur to a man whose body has stopped and let his mind catch up.",
-    "Nasrudin, he said. Where were you when you dropped it?",
-    "In my house, said Nasrudin.",
-    "There was a pause of a particular kind.",
-    "In your house.",
-    "Yes.",
-    "Ilyas looked round at six men on their knees in the middle of a public street. Then why, he said, in the name of God, are we looking out here?",
-    "And Nasrudin said: because there is light here.",
-    "It went round the town within two days and was told for years afterwards, always with the same laugh at the end, and that is very nearly the whole of what happened. Everybody stood up. Somebody made a joke about the drain. Ilyas picked up his bread and went home. They all went home.",
-    "Kamal did not sleep.",
-    "He lay in the dark of his room and he was not laughing. He had been in that circle. He had been the first one down and had stayed the longest, and at one point he had been genuinely certain they were about to find it, and he had felt, kneeling in the dust with six other men, the particular satisfaction of hard work being done.",
-    "And there had never been anything there. Not once. Not at any moment in the whole two hours.",
-    "He turned over and tried to think about something else and found that the something else was worse.",
-    "Kamal had wanted to be a builder since he was eleven years old. Not a copier of documents. A builder, of houses, with his hands. He had said so out loud perhaps four times in his life and had not said it in six years.",
-    "What he had done instead, and he lay in the dark that night and went through it honestly for the first time, was this. He had learned a very good hand. He had learned three scripts. He had copied out the specifications of buildings, actual buildings, with measurements in them, for four different architects, and could now read a plan better than most men who worked on site. He had saved money carefully every month.",
-    "Every one of those things was true and useful and had taken years, and not one of them was walking to the yard on the eastern road and asking Faisal the builder for work.",
-    "He knew where the yard was. He had walked past it. He had, twice, crossed the road before he reached it.",
-    "Faisal was not going to be impressed by three scripts. Faisal would look at his hands, which were a copier's hands, and ask whether he had ever carried anything, and Kamal would have to say no in front of men who had. That was the whole of it. That was the entire obstacle, and there was no lamp anywhere near it.",
-    "The copying, on the other hand, had a lamp on it. The copying had a master who praised him and money at the end of the month and a skill that visibly improved, and every time he got better at it everyone around him said he was getting somewhere.",
-    "He had been on his hands and knees in the light for six years.",
-    "He did not go the next morning. He is not that kind of story. He copied for eleven more days, and on two of them he decided the whole thing had been a fancy brought on by tiredness.",
-    "But he had stopped being able to not know it, and that turns out to be the thing that moves a man in the end. Not resolve, which fades by Thursday. Simply the loss of the ability to pretend.",
-    "On the twelfth day he finished the page he was on, because he was not a dramatic person, and put down the pen and went out into the morning and walked east and did not cross the road.",
-    "The yard was loud. There were eight men in it and a half-built wall and a stack of timber, and Faisal was a wide man of about fifty with a bad shoulder who listened to the whole of Kamal's speech without any expression at all.",
-    "Then he said: can you carry a hod?",
-    "I do not know, said Kamal.",
-    "There is one there, said Faisal.",
-    "It was a bad day. It was the worst day he had had in years. His hands were open by noon and his back would not straighten and one of the men laughed at him twice, the second time not unkindly.",
-    "Walking home in the evening with his arms shaking he came past the street of the coppersmiths, and the lamp was lit, and there was nobody under it at all."
+    "He rebuilt the spreadsheet four times.",
+    "It was a good spreadsheet by the end. It pulled the numbers in by itself. It broke everything down by session and by setup and by day of the week and drew him a curve that updated on its own, and it had taken him most of a winter.",
+    "He was proud of it. He showed it to two people.",
+    "What was actually wrong with his trading was that he could not sit still after a loss. He knew this. If you had woken him at three in the morning and asked what his biggest problem was he would have said it without pausing, because he had known for about a year and a half.",
+    "He had never done one thing about it.",
+    "Here is what he did instead. He learned to code. He backtested eleven versions of his entry. He read four books, two of them twice. He changed brokers. He rebuilt the spreadsheet four times.",
+    "All of that is real and none of it is nothing. He was a considerably more capable person in the spring than he had been in the autumn.",
+    "And the losses were the same size and came the same way, which was always the trade straight after a bad one, always within about ten minutes, always bigger than it should have been.",
+    "The reason is not complicated and almost everybody does it.",
+    "Learning to code has a light on it. You can see yourself getting better. There is a screen that tells you it worked. You can mention it at the weekend and people will nod, and the nodding is genuine, because from outside sixty hours of building a tool looks exactly like sixty hours of fixing your problem.",
+    "Sitting still after a loss has no light on it at all.",
+    "There is nothing to learn. There is no screen. There is no course and nothing to buy and nobody to tell. The entire task is to do nothing for twenty minutes while your chest is going, and then do it again the next time, and there is no way to get better at it except by being in it and hating it.",
+    "So he built the spreadsheet a fifth time.",
+    "He got out of it eventually and there was no insight involved. He simply ran out of things to go and optimise, and found himself sitting in front of a screen after a loss with nowhere to put his hands.",
+    "He lasted four minutes the first time.",
+    "That is the whole of it, and it is not a good story, because the thing that worked was boring and slow and nobody watched him do it.",
+    "The spreadsheet is still there. It is still very good. He just stopped calling it the work."
   ] },
-{ id:'cup', stage:'The Refusal', bg:'curve', mins:5,
-  n:'The Cup That Was Already Full', src:'Zen · Nan-in, nineteenth century',
+{ id:'cup', stage:'The Refusal', bg:'curve', mins:2,
+  n:'The Man Who Kept Explaining', src:'Ours',
   laws: [
-    { n: 'Mentalism', f: 'inner', d: 'Sato arrived holding the answer he had travelled two days to be given, and there was no room left for another one.' },
-    { n: 'Receptivity', f: 'inner', d: 'Twelve years later he said nothing at all, and the old man stopped the tea at the right place.' }
+    { n: 'Mentalism', f: 'inner', d: 'He arrived holding the answer he had come to be given, and there was no room for a second one.' },
+    { n: 'Receptivity', f: 'inner', d: 'He was not lazy and he was not stupid. He was full, which is a different problem and a harder one.' },
+    { n: 'The Stranger’s Mouth', f: 'others', d: 'The man he asked knew what was wrong inside two minutes and never got to finish saying it.' }
   ],
   rule:'You are not being refused the answer. You are full.',
   q:'What would you have to stop being right about?',
-  teach:'Nan-in was a Japanese master of the Meiji era and the professor was a real visitor. The tradition keeps this one because it is the only answer to a particular kind of person — and the trap is that everybody hearing it assumes they are the teacher in it.',
+  teach:'A scholar goes to a master to ask about Zen, and the master pours his tea until it is running off the table.',
   body:[
-    "Professor Sato went up the mountain in the autumn of his forty-fourth year, and he went well prepared.",
-    "He was not a fool, and it matters to be clear about that, because the story gets told as though he were. He held a chair. He had read everything available in Japanese and a good deal in Chinese, and he had spent eleven years on a book about the transmission of the Zen schools that was, by any measure anybody could apply, a serious piece of work. He knew more about the history of what Nan-in taught than Nan-in did.",
-    "What he did not have was the thing itself, and he had begun to suspect, somewhere in the tenth year, that this was not a gap more reading was going to close.",
-    "So he wrote a letter. It was a good letter, modest in tone, and it named three specific difficulties he had arrived at, which he believed to be genuine difficulties and not the ordinary confusions of a beginner. The reply came after a month and said only that he would be received on the fourteenth.",
-    "The temple was two days' walk past the end of the road.",
-    "He went up through pine country in the rain, and stopped at an inn on the first night and did not sleep much, and on the second afternoon came out above the trees and saw the roof of the place below him in a fold of the hill, much smaller than he had expected.",
-    "A boy of about fifteen let him in and took his coat and put him in a room with a paper wall and nothing else in it, and left him there for two hours.",
-    "He was, by the end of that, considerably less modest in tone.",
-    "Nan-in came in at dusk. He was seventy-something and moved like a man with a bad hip, and he did not look at all like his photographs. He sat down opposite and said good evening and asked whether the walk had been hard, and Professor Sato said that it had not, and there was a silence.",
-    "Then the professor began.",
-    "He had, in fairness, been thinking about how to open for two days. He started with the three difficulties from the letter, because that seemed courteous, and he set them out precisely, and he was aware while doing it that he was setting them out well. Then he explained the position he had arrived at, which turned on a distinction between two uses of a term in the eighth century that he was fairly sure had been missed. Then, because the old man had not interrupted, he went on.",
-    "He talked for a long time.",
-    "At some point the boy brought tea, and Nan-in took the pot.",
-    "The professor watched him fill the cup while continuing to talk, because you can do that, and he was coming to the part he had most wanted to say, which was about what he thought the tradition had lost and roughly when.",
-    "The tea reached the top of the cup.",
-    "Nan-in kept pouring.",
-    "It came over the lip and went out across the lacquer in a thin sheet and found the edge of the table and started onto the floor, and the old man poured on with an entirely ordinary expression, the way a man pours when he has not noticed.",
-    "The professor stopped talking.",
-    "It is overfull, he said. No more will go in.",
-    "Nan-in set the pot down.",
-    "Like this cup, he said, you are full of your own opinions. How can I show you anything unless you first empty your cup?",
-    "There was a silence of some length.",
-    "Then Professor Sato said thank you, and stood, and bowed correctly, and went out and down the mountain in the dark, which was dangerous, and which he did anyway.",
-    "He was extremely angry for about four months.",
-    "He said nothing about the visit to anyone. He finished the book. It was well received, better than well received; it became the thing people cited, and it is still cited, and it made his name in the way eleven years of work is supposed to and mostly does not. He was given things. He was asked to speak in other countries, and went, and was good at it.",
-    "He thought about the tea perhaps once a month, always with the same flush of irritation, always with the same three or four sentences he would have said if he had thought of them in time.",
-    "Twelve years went by in the way twelve years do.",
-    "What broke it was not a crisis. There was no death and no illness. What happened was that a student came to see him, a quick difficult young man called Ueda who had been arguing with him for two terms, and laid out a position, and the professor listened to about a third of it and began to explain why it was wrong.",
-    "And somewhere in the middle of his own second paragraph he heard it.",
-    "Not the content. The shape. The particular smoothness of a man saying a thing he has said before, over the top of somebody who is still talking, in a room he is certain about.",
-    "He stopped in the middle of the sentence. Ueda waited, then asked if he was all right, and the professor said yes and asked him to start again from the beginning, and then sat and said nothing for eleven minutes, which was the longest he had gone without speaking in a professional conversation in his adult life.",
-    "He went back up the mountain in the spring.",
-    "He did not write ahead. The road went further than it used to and there was a bus for part of it and the walk was only one day now, and he was fifty-six and it was harder than it had been at forty-four.",
-    "Nan-in was still alive. He was very old. They put the professor in the same room, and this time he waited four hours, and he sat on the floor and watched the light go across the paper wall and did not compose anything.",
-    "When the old man was brought in he did not seem to recognise him, and the professor did not say who he was.",
-    "The boy, a different boy, obviously, a different boy entirely, brought tea.",
-    "Nan-in took the pot in both hands, which shook, and poured, and the professor watched the cup fill and said nothing at all, and the old man stopped at exactly the right place, the way anybody does.",
-    "They drank the tea.",
-    "After a while Nan-in asked whether the walk had been hard, and the professor said that it had, rather, this time.",
-    "Ah, said Nan-in. Yes.",
-    "That was the whole of the second visit. He stayed two nights. Nothing was explained to him and he asked for nothing, and he came down the mountain and went back to his work and taught for another nineteen years. Ueda, who became better known than his teacher in the end, used to say that the old man had one habit nobody could account for: he would stop, sometimes, in the middle of his own sentence, and ask you to start again."
+    "He asked a man he respected to look at his account.",
+    "It was not a small thing to ask. The man had been doing it fifteen years, did not teach, did not post, and said yes as a favour to somebody they both knew. They got a coffee on a Saturday.",
+    "He had prepared. The whole thing on one screen, colour coded, with a page of notes about what he thought the problem was.",
+    "He talked for eleven minutes before the other man said anything.",
+    "Then the man said: your winners and your losers are the same size.",
+    "And he said yes, but.",
+    "He does not remember what came after the but. There was quite a lot of it. He explained the strategy and why the win rate made that acceptable, and about a stretch in the spring that skewed everything, and he pulled up a version with the spring taken out.",
+    "The man looked at it and said: still the same size.",
+    "And he said yes, but on that particular sample.",
+    "They were there an hour and a half. He was polite the whole time and asked good questions, and every single time the man said something he said yes and then explained.",
+    "He drove home feeling it had gone quite well and that the man had not really understood his setup.",
+    "It took him months to see it, and what did it was watching somebody do it to him. A lad at work asked his advice and he gave it, and the lad said yes but, and then explained, and he sat there watching a person burn twenty minutes of free help defending the thing he had come for help with.",
+    "He went home and thought about the coffee.",
+    "Your winners and your losers are the same size. That was the answer. Nine words, from a man with fifteen years, in the first two minutes, for nothing.",
+    "He had heard it twice and argued with it twice and driven home.",
+    "He had not had the number wrong. He knew the number. What he could not do was let it be the problem, because letting it be the problem meant the last two years had been aimed at the wrong thing, and he had gone to that coffee shop to be told he was close.",
+    "That is what he had actually gone for. He did not know it until the lad at work said yes but.",
+    "He does not ask people to look at it often now. When he does he has a rule, which is that he does not get to talk for the first ten minutes.",
+    "It is a stupid rule and it works, and it works because it is very hard to explain yourself while you are not talking."
   ] },
-{ id:'river', stage:'The Refusal', bg:'silk', mins:5,
-  n:'The Man Who Asked the River to Wait', src:'Ours',
+{ id:'river', stage:'The Refusal', bg:'silk', mins:2,
+  n:'When You Get In', src:'Ours',
   laws: [
-    { n: 'Rhythm', f: 'time', d: 'The river was never ready. It was high or low or silted, and it went past at the rate of a whole river every day for thirty-three years.' },
-    { n: 'Inspired Action', f: 'motion', d: 'When you get in the boat. The crossing took four minutes and everything before it was weather.' }
+    { n: 'Rhythm', f: 'time', d: 'The conditions were never right and were never going to be. That is what conditions are.' },
+    { n: 'Inspired Action', f: 'motion', d: 'Every hour of preparation was real and brought the crossing no closer.' },
+    { n: 'Judgement', f: 'inner', d: 'He never refused. He said yes for years, which is the harder version to catch.' }
   ],
   rule:'Readiness is something you claim, never something you are granted.',
   q:'What are you calling preparation?',
-  teach:'Ours, and the only wholly invented one in the first half of this arc. It is here because the tradition is thin on this particular refusal — the one that never says no and simply never says now.',
+  teach:'A man stands on the bank of a river for thirty years, waiting for it to be the right week to cross.',
   body:[
-    "There was a village on the near bank and everything anybody wanted was on the far one.",
-    "That is an exaggeration, but not by much. The near bank had the village and the fields behind it and a road that went two days north to another village much like it. The far bank had the market town, and the road to the coast, and the schools, and the work, and whatever it is a young man means when he says he is going to go.",
-    "Hasan meant it at nineteen.",
-    "He said so to his mother in the spring, and she did not argue with him, and he walked down to the crossing that afternoon to look at the thing properly for the first time.",
-    "The river was in flood. It had rained nine days in the hills and the water was the colour of tea with milk in it, moving fast enough to carry whole branches past at walking pace, and there was a dead sheep in it while he stood there, turning over.",
-    "Any fool could see this was not the week.",
-    "So he went home, and he was entirely right, and nothing that follows makes him wrong about that afternoon.",
-    "He came back at the end of the dry season, when the water was low.",
-    "It was a different river and no better. Low meant wide and slow and silted, and you could not see the bottom for the silt, and there were stones under it a man would not find until his ankle did. He stood there a long time. A boy of about twelve went past behind him carrying a goat and did not look at the water at all.",
-    "Hasan decided that evening that the sensible thing was to learn something about rivers.",
-    "He was thorough. That is the part nobody ever held against him, and it is the part that did the damage. He talked to every man in the village who had crossed and several who had not. He learned that the current runs fastest on the outside of a bend and that the far bank of a curve is always deeper than it looks from the near one. He learned to read a surface: the flat glassy patch that means a rock a foot down, the seam where two flows meet and neither of them is where you think.",
-    "He made a rope. It was a good rope. Two years later he made a better one, having understood why the first was wrong.",
-    "By twenty-four he knew that crossing better than anyone alive.",
-    "There was a ferryman at the landing, an old man called Bilal with a flat-bottomed boat and a pole, who took people over for a coin and had done since before Hasan was born. Hasan talked to him a great deal in those years. Bilal was not a talkative man but he answered what he was asked, and answered accurately, and never once asked Hasan when he was going.",
-    "At twenty-six Hasan's mother died and there was a season of that.",
-    "At twenty-eight he took work with the man who bought grain, because he had to eat, and it was meant to be for a year.",
-    "At thirty-one he was still doing it and was good at it and was the one who went north twice a season, which everybody agreed was a responsible position for a man of his age.",
-    "He still went down to the crossing. Not every week. But he went, and he would stand at the top of the shingle with his hands behind his back and read the water, and he could tell you within a day when the level would start to drop, and he was almost always right.",
-    "He said out loud, to at least four people over those years, that he was going to cross.",
-    "At thirty-seven he married Sara, who came from the village two days north, and it was a good marriage. At forty he had a daughter. At forty-four he was given the grain man's business when the grain man died, because there was nobody else who knew where anything was.",
-    "He was fifty-two the day he asked Bilal the question.",
-    "It was an autumn evening and the ferryman was sitting on the gunwale doing nothing, the way he did, and Hasan came down and stood beside him and looked at the water a while and then said it.",
-    "What is the best time to cross?",
-    "Bilal thought about it.",
-    "When you get in the boat, he said.",
-    "Hasan waited for the rest of the answer and there was not any more of it.",
-    "He laughed, and then understood that the old man had not been making a joke, and then he explained. He explained about the flood season and the silt and the seam where the two flows meet. He explained that a crossing attempted at the wrong moment is not courage but stupidity, and he said, with some heat, that any fool can drown.",
-    "All of which was true, and Bilal did not argue with one word of it, because none of it was the thing.",
-    "The thing is that a river does not have a best time. It has times that are worse and times that are less bad, and it is never, at any hour of any season, ready for you, because ready is not a state rivers are in. It simply keeps going past. It had gone past for thirty-three years at the rate of a whole river, every day, while a man on the bank learned to read it.",
-    "Hasan went home and did not go down to the crossing for eleven months, which was the longest gap of his adult life.",
-    "He crossed at sixty-eight.",
-    "There was no reason for it. His daughter was married and gone over years before, by that same boat, at nineteen, on a Tuesday, without any fuss whatever. Sara had been dead two years. He came down in the morning with nothing in his hands, and Bilal was not there, because Bilal had been dead nine years, and the boat was his nephew's now, a heavy man of about forty who did not know Hasan except by sight.",
-    "Hasan got in.",
-    "The nephew pushed off and put the pole in, and the boat came out of the slack water by the landing and into the run, and the far bank started coming.",
-    "It took four minutes.",
-    "He stood on the shingle on the other side a while and watched the boat go back. Then he turned round and looked at the country he had come to, which was ordinary: a track going up between two fields, and a cart on it, and the market town somewhere beyond the rise.",
-    "And then he walked up the track, because that was what there was to do, and he was sixty-eight years old, and it was a fine morning, and he had a great deal less time than he had had at nineteen and considerably more than none at all."
+    "He was going to go full time when he had six months of expenses saved.",
+    "He got to six months. Then he thought about it properly, and six months is thin for a man with a car that is going, so he made it nine.",
+    "He got to nine.",
+    "By then he had read something about wanting a year of runway, and the thing was correct, and he was not being unreasonable, which is what makes this hard to talk about. Every number he moved to was more sensible than the one before it. If you had argued with him about any single one you would have lost.",
+    "He hit a year in the summer.",
+    "He had also been promoted by then, and the promotion meant a year was no longer a year, because his outgoings had gone up with it. A year was now about eight months in the new money. He wanted a year.",
+    "He was very good by this point. That is the part people skip. He had been at it in the mornings and the evenings for a long time and knew his own numbers to two decimals and was better than several people he knew who had already jumped.",
+    "He said out loud, to four or five people, that he was going to do it.",
+    "Somebody asked him once what he was waiting for and he gave the number, and they said fair enough, because it was a good number and it sounded like a plan.",
+    "Here is what was actually happening.",
+    "There is no amount of money that makes the jump safe, because money is not what makes it unsafe. What makes it unsafe is that you might not be good enough, and no size of account answers that question. You only get the answer by going.",
+    "He did not want the answer.",
+    "So he kept moving the number, and every time he moved it he got to feel like a careful man instead of a frightened one, and those two look identical from outside and very nearly identical from inside.",
+    "He went in the end, and not because he hit a number.",
+    "He went because the company restructured and offered him something worse, and he sat in the car park afterwards and understood that he had just been handed the thing he had spent years failing to give himself.",
+    "The first eight months were bad. He nearly went back twice. He will not tell you it was fine, because it was not, and the runway he had built is the one thing that got him through it.",
+    "What he says now, when somebody asks what number they should have, is that he does not know. Pick one. Write it down. Go on the day you hit it.",
+    "Because the number was never the thing. The day is the thing. And if you do not fix the day in advance, you will find, every single time you arrive at it, that there is a better number just a little further on."
   ] },
-{ id:'horse', stage:'The Mentor', bg:'canyon', mins:4,
-  n:'The Farmer Who Said We Shall See', src:'Taoist · Huainanzi',
+{ id:'horse', stage:'The Mentor', bg:'canyon', mins:2,
+  n:'Too Early To Say', src:'Ours',
   laws: [
-    { n: 'Polarity', f: 'time', d: 'A lost horse, twelve horses, a broken leg, a name left off the conscription list. The same events read from four different distances.' },
-    { n: 'Relativity', f: 'time', d: 'The neighbours were certain four times and wrong four times, and being wrong did not slow them down once.' },
-    { n: 'Judgement', f: 'inner', d: 'Sai said maybe even at the end, when they came to his gate to tell him he had been right.' }
+    { n: 'Polarity', f: 'time', d: 'The same four events, read from four different distances, gave four different verdicts.' },
+    { n: 'Relativity', f: 'time', d: 'Everyone around him was certain every time, and being wrong never slowed them down.' },
+    { n: 'Judgement', f: 'inner', d: 'A verdict delivered early is not a comment on what happened. It is the first move of what happens next.' }
   ],
   rule:'Every event is half a sentence. You keep reading it out as the whole one.',
   q:'What are you certain was a disaster?',
-  teach:'From the Huainanzi, a Chinese text of the second century BC. It has survived two thousand years in a dozen languages because it is the shortest complete description of how judgement actually works — and because the farmer is not an optimist, which is what most retellings get wrong.',
+  teach:'A farmer loses a horse, gains twelve, and his son breaks a leg. Four times the neighbours are sure, and four times they are early.',
   body:[
-    "The old man's name was Sai and he farmed the last piece of workable ground before the frontier.",
-    "It was not good land. Everything north of the wall was grass and wind and other people's business, and everything south of Sai's fence was better farmed by somebody else, and what he had was the strip between, which grew barley in a good year and dust in a bad one.",
-    "He had a son called Wen, who was seventeen, and one horse.",
-    "The horse mattered. In that country a horse was not an animal, it was the difference between carrying your grain to market and not going to market, and a man who had one was not rich but was a man with a horse, and everybody knew which men those were.",
-    "One morning in the autumn the gate was open and the horse was gone. It had gone north, which was the only direction with anywhere to go, and north was where nobody followed anything.",
-    "By the evening four neighbours had come.",
-    "They were good men and they came because that is what you do. Old Zhou, who had known Sai's father, sat on the wall and said what everybody had come to say, which was that it was a terrible business and very hard luck, and that a man of Sai's age should not be losing a horse.",
-    "Maybe, said Sai. We shall see.",
-    "Zhou waited for more and there was not any more, and after a while the neighbours went home and said to each other that the old man had taken it strangely, and one of them wondered whether he had quite understood.",
-    "Sai got up the next morning and mended the fence, which was what had been wrong with the gate, and then went out to the barley.",
-    "Four months later the horse came back.",
-    "It came down off the grass at dawn with a string of eleven wild horses behind it, shaggy northern animals with no brand on any of them, and it walked in through the gate Sai had mended as though it had been out for the afternoon.",
-    "By noon the whole district had heard.",
-    "They came again, the same men and several others. Zhou stood in the yard looking at eleven horses in a pen built for one and said that in sixty years he had not seen anything like it, and that Sai was a made man, and that this was the best luck that had ever come to anybody on that road.",
-    "Maybe, said Sai. We shall see.",
-    "And this time it annoyed them. There is a limit to how long a man can decline to be congratulated before it starts to look like a performance, and Zhou said something short on his way out that he was sorry about afterwards.",
-    "Wen was seventeen and there were eleven wild horses in the yard.",
-    "He worked with them through the spring and he was good at it, better than his father had ever been, and Sai watched him and said nothing either way. On a morning in the fifth month a grey mare that had been going well for three days put him into the fence post, and his thigh broke in two places, and the bone-setter who came up from the village was honest enough to say on the first night that the boy would walk but would not walk properly.",
-    "The neighbours came.",
-    "Zhou did not say anything at all this time, which was the kindest thing anybody did that week. It was one of the younger men who said it: that it was a cruel thing, and a waste, and that the horses had cost more than they were worth.",
-    "Maybe, said Sai. We shall see.",
-    "Wen was nineteen months healing and he healed crooked, and he was angry for most of the first year of it, and there were evenings when Sai sat outside rather than be in the house.",
-    "Then the war came.",
-    "It came the way those things come, which is not as an announcement but as a column of dust on the south road resolving into men with a list. They took every male between sixteen and forty-five from every farm on that road, and they took them in the morning and were gone by the afternoon, and the mothers followed the column to the end of the lane and then stopped because there is a place where you stop.",
-    "They looked at Wen's leg and did not write his name down.",
-    "Nine in ten of the men who went north that spring did not come back. Zhou lost two sons. The younger man who had spoken about the horses was not among the returning and nobody ever found out exactly where.",
-    "When it was over, and the lists were known, the people on that road came to Sai's gate one more time.",
-    "They came to say that he had been right. That was the whole of the errand. They had laughed at him for four years and they had come to say it out loud, and Zhou, who was very old by then, said that Sai had seen it coming and that there was something in the old man nobody had understood.",
-    "And Sai said: maybe.",
-    "They thought he was being modest.",
-    "He was not being modest. He was sixty-nine years old and his son was lame and alive and there was another year after this one, and after that another, and he had never once in his life been to the end of a sentence. He had simply stopped reading them out loud before they finished, which is not wisdom exactly, and is not calm, and is a great deal closer to a habit of work: you mend the fence, and you set the leg, and you go out to the barley, and you do not sit down in the yard waiting to be told what any of it was."
+    "He was made redundant in the February and everyone said it was a disaster.",
+    "It was a disaster. He had a mortgage and a kid coming and there was nothing else going in that town, and for six weeks he applied for things and heard nothing and lay awake doing arithmetic.",
+    "An older bloke he knew from the gym, a quiet man who had been self-employed his whole life, asked him how it was going. He said it was a disaster.",
+    "Too early to say, said the older man.",
+    "He thought that was a stupid thing to say and went home annoyed.",
+    "In the April he got a job that paid eleven thousand more than the one he had lost. Everybody agreed this was the best thing that could have happened. His mother said it out loud at a birthday: the redundancy was the best thing that ever happened to him.",
+    "Too early to say.",
+    "He worked there fourteen months and it took something out of him he had not known was available to be taken. The money was real and so was the manager, and by the end of it he was having the sort of Sunday evenings that people do not talk about at birthdays.",
+    "He walked out in the June with nothing lined up, which everybody agreed was a catastrophe and reckless with a young family.",
+    "Too early to say.",
+    "He started on his own because there was nothing else, and because after fourteen months of that he could not make himself sit in another interview. The first year was awful and thin. The second was not.",
+    "By the fourth year he had two people working for him and he was earning more than the eleven thousand extra had ever been, and everybody agreed that walking out had been the making of him, and his mother said so at another birthday.",
+    "He went to see the older man, who was properly old by then, to tell him.",
+    "He told the whole thing end to end, the redundancy and the job and the walking out and the four years, and how it had all turned out, and he was waiting for it, because he had earned it.",
+    "The old man said: too early to say.",
+    "And he laughed, and then he did not, because he understood for the first time that the man was not being wise at him.",
+    "He meant it. Literally and every time. There was another year coming after this one and then another, and the business could go, and the thing he was calling the making of him could turn out to be the start of something he would describe completely differently at sixty.",
+    "He has not stopped noticing it since. How fast he closes the book. How certain he is, every time, and how many times that has gone.",
+    "What he does now instead is mend the fence and go out to work. He is not waiting to find out what any of it meant. He just does not say the sentence out loud any more, because he has been wrong with it four times in a row and it never once slowed him down."
   ] },
-{ id:'ferry', stage:'The Threshold', bg:'nightfall', mins:4,
-  n:'The Ferryman’s Price', src:'Ours',
+{ id:'ferry', stage:'The Threshold', bg:'nightfall', mins:2,
+  n:'The Fuel', src:'Ours',
   laws: [
-    { n: 'Compensation', f: 'motion', d: 'The horse was refused, and the cart, and the sealed box. The fare was the one thing in the cart worth nothing to anybody else.' },
-    { n: 'Sacrifice', f: 'motion', d: 'Two hundred and forty men who had cheated him. A list that only meant anything on the bank he was leaving.' }
+    { n: 'Sacrifice', f: 'motion', d: 'What got him this far was the exact thing that could not come any further.' },
+    { n: 'Compensation', f: 'motion', d: 'He offered the hours, the money and the risk. None of those were the price.' },
+    { n: 'Commitment', f: 'motion', d: 'He had been running on somebody else’s doubt, which means somebody else had been steering.' }
   ],
   rule:'The toll is always the thing you were going to keep.',
   q:'What are you trying to take across with you?',
-  teach:'Ours. Every tradition has a crossing and a price and most of them hide the price until you are standing there, which is a way of saying something true about how a threshold actually works.',
+  teach:'A man at a river is told the fare, and the fare is one of the things he is carrying, and the ferryman chooses which.',
   body:[
-    "The river was half a mile across at the landing and there was no bridge and there never had been.",
-    "There was one ferryman. He was not old and not young and nobody in the district knew where he had come from, and he was not mysterious about the work: he sat by his boat in the mornings, and when you came down to the landing he looked at what you had with you, and then he named the price.",
-    "The price was never money.",
-    "It was one of the things you were carrying, and he chose it. That was the difficulty, and everybody understood it before they came down the hill, which is why most people who intended to cross spent a while at the top of the path first, going through the cart in their heads.",
-    "A merchant called Tahir came down on an afternoon in the spring with a good horse and a loaded cart.",
-    "He was fifty-one. He had spent nineteen years building what was in that cart and he had not slept properly for the last three of them, and the far bank was where the new road went, and he had worked out on paper that a man who got across in the next two years would be a man who mattered on that road for the rest of his life.",
-    "He began reasonably, because he was a reasonable man.",
-    "He offered the horse. It was a genuinely valuable animal and he did not pretend otherwise; he had bought it for the journey and it was the best thing he owned that could be pointed at.",
-    "No, said the ferryman.",
-    "Tahir offered the horse and the cart together, which was the larger part of everything he had in the world.",
-    "No.",
-    "He offered, after standing there for a while, a sealed wooden box that he had not opened in front of another person in eleven years.",
-    "No, said the ferryman, and then he named the price.",
-    "It was a book. A small one, bound in cloth, about the size of a hand, and it lived in Tahir's coat and had lived there or in a coat very like it for thirty years.",
-    "It was a list.",
-    "He had started it at twenty-one, after the business with his uncle, and he had kept it with a clerk's care ever since. Every man who had cheated him. Every one who had promised and not come, every short weight, every debt written off because chasing it would have cost more than it was worth. Dates. Amounts. Two hundred and forty entries, and the hand at the start was a young man's hand and the hand at the end was his.",
-    "Take the cart, said Tahir.",
-    "I do not want the cart.",
-    "Then take the cart and the horse and the box.",
-    "I do not want those either.",
-    "Why that? Tahir was not shouting. He was doing something worse, which was explaining. It is worth nothing. It is worth nothing to you and nothing to any man alive. You could not sell it for a coin. There is not one thing in it that anybody but me could even read.",
-    "And the ferryman said: it is not the price because it is worth something. It is the price because you cannot get in the boat holding it.",
-    "Tahir stood on that bank until the light went.",
-    "He tried, in the last of it, the thing everybody tries. He put the book at the bottom of the cart under the sacking and led the horse down to the water's edge, and the ferryman watched him do it with no expression at all and did not get up.",
-    "He did not accuse him. He did not say anything. He sat on the gunwale and looked at the river, and after a while Tahir walked the horse back up the shingle, because there is no arguing with a man who is simply not going to cast off.",
-    "He camped that night above the landing and did not light a fire.",
-    "He had the book out on his knee for a long time. He could not read it in the dark and he did not need to; he knew what was on most of the pages, and the ones he did not know by heart he could have found by the feel of the paper. There was an entry on the fourth leaf about a man who had been dead for twenty-two years.",
-    "He thought, that night, about the road on the other side.",
-    "And then he thought about what he would be on that road without the book, which was a man who had been cheated two hundred and forty times and could not any longer produce the evidence, and something in him went very still and very cold at that, and he understood that he was not going to do it.",
-    "He went back up the hill in the morning.",
-    "He did well, afterwards. That is worth saying, because people expect this story to punish him and it does not. He kept the business on the near bank for another twenty years and it was a decent business and he was not unhappy in it. He married. He was known as a hard man to get past, which in that trade is a compliment.",
-    "He went down to the landing perhaps twice a year. He never asked the price again. He would stand at the top of the path for a while and then go home.",
-    "The ferryman was still there when Tahir was seventy. He had not visibly changed, which the old men in the village had various theories about and which was probably just the way some faces go.",
-    "He never refused anybody. Nobody was ever turned away at that river.",
-    "They simply, most of them, declined to pay."
+    "He had a list and everybody like him has a version of it.",
+    "It was not written down. It was: the teacher who said he was not academic. The manager who laughed when he handed in his notice. His uncle at a wedding saying let us see where you are in five years. And one girlfriend who was not cruel about it and said, kindly, that she did not think this was going to work out.",
+    "He ran on that list for six years and it worked.",
+    "That is the part that has to be said properly, because the easy version of this story pretends the fuel was bad fuel and it was not. It got him up at five. It got him through the first two years when there was nothing. On the days when he could not find a reason, the list was a reason, and it never once ran out.",
+    "Then it started costing him.",
+    "He noticed it first in how he talked. Somebody would ask a straight question about what he did and he would answer it with an edge on, slightly too much, a little bit of the courtroom in it, and he would hear himself and not be able to stop.",
+    "He noticed it in what he chased. He took a contract that was wrong for him because the client knew his old manager. He picked a fight in public with somebody whose opinion did not matter, and won it, and felt nothing.",
+    "And he noticed it worst on the good days. He would do a thing he had worked years for, and the first thought through was not this is good, it was I wish they could see this, and then a few seconds of a conversation in his head with a man he had not spoken to since he was twenty-three.",
+    "He worked out what was actually happening on a Sunday, and it took him a long time to be willing to say it.",
+    "He had built the whole thing to settle an argument.",
+    "Which means the people on that list had been steering. Not once, not occasionally. For six years, every morning, they had decided what mattered, because the only question the list can ever ask is what would make them wrong, and that is not the same question as what do I want.",
+    "He could not get any further carrying it.",
+    "Not because it is unspiritual to hold a grudge. Because the next thing he wanted to build had nothing to do with any of them, and there was no version of it that the list could give him a reason to get up for, and on the mornings when there was no reason he would go looking for one, and the list was always there, and it always pointed somewhere slightly wrong.",
+    "Putting it down was harder than any of the work had been.",
+    "He did not forgive anybody. He is clear about that. Three of the four he has never spoken to since and probably never will, and if you asked him he would tell you the teacher was wrong about him.",
+    "He just stopped using it.",
+    "The mornings are worse now, some of them. There are days with no reason in them at all, and he gets up anyway, and that is a quieter engine and a much smaller one.",
+    "It goes where he points it."
   ] },
-{ id:'cutter', stage:'The Trials', bg:'abyss', mins:3,
+{ id:'cutter', stage:'The Trials', bg:'abyss', mins:2,
   n:'Four Systems', src:'Ours',
   laws: [
-    { n: 'Envy', f: 'others', d: 'Four systems in two years, and not one of them was killed by the market. Every one was killed by a screenshot.' },
-    { n: 'Attention', f: 'inner', d: 'He could not tell you what his own edge was, because he had never once held it long enough to find out.' },
-    { n: 'Commitment', f: 'motion', d: 'The first system, left alone, would have worked. It was never given the chance to be boring.' }
+    { n: 'Envy', f: 'others', d: 'Not one of the four was killed by the market. Every one was killed by a screenshot.' },
+    { n: 'Attention', f: 'inner', d: 'He could not tell you what his edge was, because he had never held one long enough to find out.' },
+    { n: 'Commitment', f: 'motion', d: 'The first one, left alone, would have worked. It was never given the chance to be boring.' }
   ],
   rule:'Every time you look sideways you start again from nothing.',
   q:'What did you stop doing because somebody else was doing better at something else?',
-  teach:'The oldest version of this is a stonecutter who wishes himself into being the sun and ends up back at the rock. This is the same shape with a phone in it.',
+  teach:'The old version is a stonecutter who wishes himself into the sun and the rain and a mountain, and ends up back at the rock with a chisel.',
   body:[
-    "In two years Marc ran four systems and he could tell you the date each one died.",
-    "The first one took him eight months to build and it worked. Not spectacularly. It made money in a flat sort of way, six or seven per cent over a quarter, and there were weeks where it made nothing at all and he sat there and let it not make anything, which he was quite proud of at the time.",
-    "He killed it on the nineteenth of March because Danny posted a forty per cent month.",
-    "Danny had been in the same group chat since the start. Same age. Started a month after Marc did. And he put up a screenshot on a Tuesday night with no caption and forty-one people reacted to it, and Marc looked at it in bed at eleven o'clock and felt the floor go out from under something.",
-    "He did not decide to stop. That is the part he could not explain to anybody afterwards. There was no evening where he sat down and reasoned it through and chose. He just started reading about what Danny was doing, and then paper trading it, and then running a small one alongside, and by the end of April the first system was off and he had not formally ended it. It had starved.",
-    "The second one lasted eleven weeks.",
-    "It died because a man in a Discord he had never spoken to posted an equity curve that went up in a way Marc's did not. He did not know the man's name. He did not know whether the curve was real. He rebuilt his entry criteria over a weekend.",
-    "The third lasted five months. The fourth was still running, sort of, in the sense that he had not looked at it properly in three weeks.",
-    "He did the thing on a Sunday in November because he was down and bored and wanted to feel bad in an organised way.",
-    "He pulled the first system out of the folder. The eight-month one, from before Danny. He still had the rules written out and he still had the data, and it took him about forty minutes to run it forward from the nineteenth of March to that Sunday as though he had simply left it alone.",
+    "He ran four systems and he could tell you the date each one died.",
+    "The first took him eight months to build and it worked. Not spectacularly. It made money in a flat sort of way, and there were weeks it made nothing and he sat there and let it make nothing, which he was quite proud of at the time.",
+    "He killed it in the March because a lad in the group chat posted a forty per cent month.",
+    "Same age. Started after him. Put up a screenshot on a Tuesday night with no caption, and forty people reacted to it, and he looked at it in bed and felt the floor go.",
+    "He did not decide to stop. That is the part he cannot explain. There was no evening where he sat down and reasoned it out and chose. He started reading about what the other lad was doing, then paper trading it, then running a small one alongside, and by the end of the month the first system was off and he had never formally ended it.",
+    "It starved.",
+    "The second lasted eleven weeks. It died because a man in a group he had never spoken to posted a curve that went up in a way his did not. He did not know the man's name. He did not know if the curve was real. He rebuilt his entries over a weekend.",
+    "The third lasted five months. The fourth was still running, in the sense that he had not looked at it properly in three weeks.",
+    "He did the thing on a Sunday because he was down and bored and wanted to feel bad in an organised way.",
+    "He pulled the first system out of the folder. The eight-month one, from before the screenshot. He still had the rules and he still had the data, and it took him about forty minutes to run it forward to that Sunday as though he had simply left it alone.",
     "It was up sixty-three per cent.",
-    "He sat with that for a while.",
-    "Then he did the second one, because he had to know. Up thirty-one. The third, flat. The fourth was the only one actually losing, and it was the one he still had on.",
-    "Sixty-three per cent. Not a good year by anybody's standards on that chat. He would not have posted it.",
-    "What got him, sitting there at the kitchen table with four curves open, was not the money. It was working out that in two years he had never once lost money to the market. Not in any meaningful way. The market had done its ordinary thing and every system he had built had been roughly fine.",
-    "He had lost it to a screenshot posted by a man he had never met.",
-    "Four times.",
-    "And here is the thing he could not get past, and did not sleep much that night because of it. He could not tell you what his edge was. Two years, four systems, and he had never held one of them long enough to find out what it actually did in a bad quarter, which is the only thing about any of them worth knowing.",
-    "He had been asked twice at work what it was he did with the trading. Both times he had said something vague, and he had put that down to not wanting to talk about money.",
-    "It was not that. He did not know the answer.",
-    "He turned the fourth one off in the morning and put the first one back on, and he did not tell anybody in the chat, and it made four hundred and eighty pounds in December, which he did not post."
+    "He sat with that a while. Then he did the second one, because he had to know. Up thirty-one. The third, flat. The fourth was the only one actually losing, and it was the one he still had on.",
+    "Sixty-three per cent. Not a good year by the standards of that chat. He would not have posted it.",
+    "What got him was not the money. It was working out that he had never once lost money to the market. The market had done its ordinary thing and every system he built had been roughly fine.",
+    "He had lost it to a screenshot, four times, posted by people he had never met.",
+    "And he could not tell you what his edge was. Four systems, and he had never held one long enough to find out what it did in a bad quarter, which is the only thing about any of them worth knowing.",
+    "He had been asked twice at work what it was he actually did. Both times he had said something vague and put it down to not wanting to talk about money.",
+    "It was not that. He did not know.",
+    "He turned the fourth one off in the morning and put the first one back on, and he did not tell the chat, and it made four hundred and eighty pounds in December, which he did not post."
   ] },
-{ id:'monks', stage:'The Trials', bg:'delta', mins:4,
-  n:'Two Monks and the Woman at the Ford', src:'Zen · Tanzan and Ekido',
+{ id:'monks', stage:'The Trials', bg:'delta', mins:2,
+  n:'Eleven Hours', src:'Ours',
   laws: [
-    { n: 'Attachment', f: 'inner', d: 'Tanzan carried her four seconds. Ekido carried her eleven hours, uphill, in silence, while also carrying his own pack.' },
-    { n: 'Rhythm', f: 'time', d: 'The event ended at the ford. Everything after it was being fed by one of the two men, continuously, at full strength.' }
+    { n: 'Attachment', f: 'inner', d: 'One of them carried it four seconds. The other carried it eleven hours, uphill, while also carrying his own work.' },
+    { n: 'Rhythm', f: 'time', d: 'The event ended in the meeting. Everything after it was being fed, continuously, by one person.' },
+    { n: 'Judgement', f: 'inner', d: 'The sentence arrived fully formed at half past six, as though it were the next thing said in a conversation.' }
   ],
   rule:'You put it down hours ago. Somebody is still carrying it, and it is you.',
   q:'What did you set down that you are still holding?',
-  teach:'Tanzan and Ekido were real, and this exchange is told as something that happened on a road. Zen keeps it because it is the shortest available demonstration that an event and the carrying of an event are two different things, and only one of them takes any time.',
+  teach:'Two monks cross a ford and one of them carries a stranger through the mud. The other carries her the rest of the day.',
   body:[
-    "They left the monastery before light and the road was in a bad state the whole way.",
-    "It had rained for a week and then stopped, which is worse than rain, because the water had gone off the hills and into the ruts and was sitting there. Tanzan was sixty-one and had made that journey perhaps forty times. Ekido was twenty-eight and had made it twice, and was carrying more, because he had insisted.",
-    "They were good company, in the ordinary way. Ekido asked questions and Tanzan answered most of them and declined to answer some, and the sun came up somewhere behind the cloud, and by the middle of the morning they had done about half of it.",
-    "The ford was at the bottom of a cut where the track came down to a stream.",
-    "In a dry month it was four flat stones and you kept your feet. That morning the stream was over the stones and spread out into the churned ground either side of it, and the whole crossing was thirty feet of mud with water moving through it.",
-    "There was a girl standing at the edge.",
-    "She was perhaps twenty and she was dressed for somewhere entirely else, in a silk kimono the colour of weak tea, with the sleeves and the hem of a person who had been going to a thing and had not expected this. She had been standing there a while. You could tell by the way she was standing, which was the way people stand when they have run out of ideas and are waiting for the situation to change on its own.",
-    "She looked at the two monks and then back at the mud.",
-    "Tanzan said, come on, girl.",
-    "He put his bundle over his shoulder, and got an arm under her knees and one round her back, and picked her up, and carried her across. It took perhaps four or five seconds. He put her down on the dry stones on the far side and she said something and he said something back, and then he hitched the bundle and went on up the track.",
-    "Ekido came over the ford behind him.",
-    "He did not say anything.",
-    "He did not say anything for the rest of the morning.",
-    "He walked about six feet behind and to the left, which was not where he had been walking before, and Tanzan talked from time to time about the state of the road and about a man they both knew at the temple they were going to, and Ekido said yes and no in the right places.",
-    "At midday they stopped and ate and Ekido ate very little.",
-    "In the afternoon it got warm, which made the mud worse rather than better, and there was a long climb. Tanzan asked him twice whether the load was too much and Ekido said no.",
-    "What was happening in Ekido's head, for those hours, was not idleness. It was work. He was constructing the thing properly, in order, the way he had been taught to construct an argument. There was the rule itself, which he could state. There was the reason for the rule, which he could also state, and which was not a stupid reason. There was the question of whether a senior man was exempt from it, and he had gone round that one several times and kept arriving at no. There was the fact that Tanzan had not hesitated, which was somehow the worst part, and which Ekido kept coming back to and worrying.",
-    "Underneath all of it, though he did not put it this way, was that he had stood on the near bank and watched and had not known what to do, and had then been given something to be certain about, and the certainty was a considerable relief.",
-    "They came over the last rise at about five and the temple was below them in the trees.",
-    "They went down and were met, and put their bundles in the room they were given, and washed their feet and their hands in the yard, and Ekido had been holding it in for eleven hours and could not hold it any more.",
-    "We monks do not go near females, he said. Especially not young and lovely ones. It is dangerous. Why did you do that?",
-    "Tanzan was drying his hands. He looked up with the towel still in them, and he did not look annoyed and he did not look caught out. He looked like a man who has been asked something out of nowhere and is working out what it refers to.",
-    "Then he said: I left the girl there.",
-    "He put the towel on the rail.",
-    "Are you still carrying her?",
-    "They went in and ate with the others and the evening was ordinary. Nobody else ever heard about it. Ekido did not sleep much, and lay in the dark of an unfamiliar room going over it, and was still angry, and then somewhere in the small hours stopped being angry and started being something else, which took a good deal longer to get to the bottom of and which he was still getting to the bottom of at sixty.",
-    "He told it, eventually, for the rest of his life. He always told it against himself and he never once left out the eleven hours, because the eleven hours were the whole of it.",
-    "Tanzan, as far as anybody knows, never mentioned it again."
+    "It was said at about twenty past nine on a Tuesday, in a meeting of eleven people, and it took under four seconds.",
+    "Someone from another team, going through a list, got to his part and said: yes, we had to redo most of that.",
+    "Then they moved on to the next item.",
+    "It was not even unkind. It was not aimed. The man who said it did not look up, and had no idea he had said anything, and by twenty-five past nine had genuinely forgotten it, in the way you forget a sentence in a meeting.",
+    "He carried it for eleven hours.",
+    "He did not say anything at the time, which he decided was the professional thing, and which meant he then had to do something with it. So he built the argument. He built it properly, the way you build a thing you have been taught to build: the facts, the dates, what had actually been redone and why, whose fault it had in fact been, what he could have said.",
+    "He was still working on it at lunch.",
+    "He was distracted through the afternoon. He did about half the work he would normally have done, and did it worse, and a message came in from his partner about the evening and he answered it late and short.",
+    "On the drive home he had the whole thing running again with a better opening line.",
+    "At half past six he came in and put his keys down and said, to a person who had not been in the meeting and had no idea what he was talking about: I mean, they had to redo most of it, apparently.",
+    "Fully formed. As though it were the next thing said in a conversation.",
+    "She said, what?",
+    "And he heard himself try to explain the context of a four-second remark made nine hours earlier by a man he barely knew, and got about a sentence and a half into it before he stopped.",
+    "The remark took four seconds. He had been carrying it since.",
+    "Not the remark. The remark was over at twenty past nine and had been lying in a meeting room ever since with nobody to pick it up. What he had been carrying was something he had made out of it, and he had been feeding it all day, and it had not weakened once, because the thing feeding it was him and he had not stopped.",
+    "He is not better at this now, particularly. He notices it sooner. That is all that has changed and it is not nothing.",
+    "The tell is always the same. The sentence arrives ready. It comes out of him in a kitchen or a car with no introduction, hours or years later, as though the conversation were still going.",
+    "It is not still going. Nobody else is in it.",
+    "He has been in it by himself the whole time."
   ] },
 { id:'knot', stage:'The Ordeal', bg:'iceberg', mins:3,
   n:'The Column He Added', src:'Ours',
   laws: [
     { n: 'Cause and Effect', f: 'motion', d: 'Thirty-one losses over his limit. Twenty-six of them were his own rule, broken by him, in writing, with a timestamp.' },
-    { n: 'Judgement', f: 'inner', d: 'For eleven months the news and the spread and the broker had been the reason, and each of those is a reason you can do nothing about.' },
-    { n: 'Decision', f: 'motion', d: 'The relief was not that it was fixable. It was that it was his — which is the same thing said honestly.' }
+    { n: 'Judgement', f: 'inner', d: 'The news and the spread and the broker had been the reason for months, and every one of those is a reason you can do nothing about.' },
+    { n: 'Decision', f: 'motion', d: 'What he felt was not shame. It was relief, which is the same thing said honestly.' }
   ],
   rule:'Make it your fault and you get the wheel.',
   q:'What are you calling bad luck?',
-  teach:'This one is the hinge of the whole arc. Every other story in it assumes you believe your own actions decide your outcomes. Until that is true, none of the rest can do anything for you.',
+  teach:'This is the hinge of the whole arc. Every other story here assumes you believe your own actions decide your outcomes. Until that is true, none of them can do anything for you.',
   body:[
-    "Sam had been at it two years and eight months and he was flat.",
-    "Not blown up. That is worth being exact about, because blown up would have been easier to talk about and easier to stop. He was flat. Eleven months of small wins and slightly larger losses, and an account almost exactly where it had been the previous January, and a growing suspicion he was not letting himself finish.",
-    "He told his brother about it in the kitchen at their mother's, in October, standing up, with the kettle going.",
-    "He was good at telling it. He had told it a few times by then and it had a shape. There had been the gap on the Thursday, which nobody could have traded. There was his broker, which was a joke, and he had the screenshots of the fills to prove it. There was the fact that the whole of that summer had been unreadable and everyone said so, everyone, you could go and look.",
-    "His brother listened to all of it and said, that's rough.",
-    "He did not say anything else. He was not making a point. He worked in logistics and had no opinion about any of it and he genuinely did think it sounded rough.",
-    "Sam drove home annoyed and could not work out who with.",
-    "He opened the journal that night at about eleven. He kept a good one — that was the thing, that was what made the whole situation so stupid. Four hundred and something trades, every one logged, entry, exit, size, reason, screenshot.",
+    "He was flat.",
+    "Not blown up. That is worth being exact about, because blown up would have been easier to talk about and easier to stop. Flat. Months of small wins and slightly larger losses and an account sitting almost exactly where it had started, and a growing suspicion that he was not letting himself finish.",
+    "He told his brother about it in a kitchen, standing up, with the kettle going.",
+    "He was good at telling it. He had told it a few times by then and it had a shape. There was the gap on the Thursday that nobody could have traded. There was his broker, which was a joke, and he had the screenshots to prove it. There was the fact that the whole of that summer had been unreadable and everyone said so, everyone, you could go and look.",
+    "His brother listened to all of it and said, that is rough.",
+    "He was not making a point. He worked in logistics and had no opinion about any of it and he genuinely thought it sounded rough.",
+    "He drove home annoyed and could not work out who with.",
+    "He opened the journal that night. He kept a good one. That was the thing. That was what made the whole situation so stupid. Every trade logged, entry, exit, size, reason, screenshot.",
     "He added a column.",
-    "He gave it a header and the header was: was this in the rules.",
-    "Then he went back to the first of January and did every single one, and it took until nearly three in the morning, and the answer was only ever yes or no, and he made himself write it without thinking about it and without adding anything after it.",
+    "The header was: was this in the rules.",
+    "Then he went back to the start of the year and did every single one, and it took until nearly three in the morning, and the answer was only ever yes or no, and he made himself write it without thinking and without adding anything after it.",
     "He had thirty-one losses over his own maximum. That was the number he had been carrying around, the one that explained the year.",
     "Twenty-six of them said no.",
-    "Twenty-six. Over his own size limit, or outside his own session, or averaging into something he had a written rule against averaging into, and in nineteen of the twenty-six he had typed the reason in himself at the time, in his own words, with a timestamp on it.",
-    "The gap on the Thursday was in there. It was a no. He had been in that trade at three times his size because of something he had decided on the Wednesday.",
-    "He sat in the room with the laptop open and the heating off and he waited to feel sick.",
+    "Twenty-six. Over his own size limit, or outside his own session, or averaging into something he had a written rule against averaging into. In nineteen of them he had typed the reason in himself at the time, in his own words, with a timestamp on it.",
+    "The gap on the Thursday was in there. It was a no. He had been in that trade at three times his size because of something he decided the day before.",
+    "He sat in the room with the laptop open and the heating off and waited to feel sick.",
     "He did not feel sick.",
-    "What came instead took him a long minute to identify, because he had not felt it in a long time and it had no business turning up on a night like that.",
+    "What came instead took him a minute to identify, because he had not felt it in a long time and it had no business turning up on a night like that.",
     "It was relief.",
-    "Because for eleven months he had been a passenger. If it was the news, and the spread, and the summer, and the broker, then there was nothing to be done and there never would be, and he was going to sit in that chair every morning for another five years hoping the weather changed.",
-    "And if it was him — if it was twenty-six decisions he had made with his own hands and written down at the time — then it was a thing with a handle on it.",
-    "He did not fix it that week. He broke the size rule again in November, once, and logged it, and the column made it very hard to tell himself the story afterwards, which turned out to be most of the mechanism.",
+    "Because if it was the news and the spread and the summer and the broker, then there was nothing to be done and there never would be, and he was going to sit in that chair every morning for another five years hoping the weather changed.",
+    "And if it was him, if it was twenty-six decisions made with his own hands and written down at the time, then it was a thing with a handle on it.",
+    "He did not fix it that week. He broke the size rule again the next month, once, and logged it, and the column made it very hard to tell himself the story afterwards, which turned out to be most of the mechanism.",
     "But he stopped saying the summer had been unreadable.",
-    "He has not said it since, and he is aware that he used to say it roughly twice a week, to anybody, including himself in a kitchen with the kettle going."
+    "He has not said it since, and he is aware that he used to say it about twice a week, to anybody, including himself, in a kitchen with the kettle going."
   ] },
-{ id:'pocket', stage:'The Reward', bg:'iris', mins:4,
-  n:'The Diamond He Was Carrying', src:'Hindu · Ramakrishna',
+{ id:'pocket', stage:'The Reward', bg:'iris', mins:2,
+  n:'The Week He Was Rich', src:'Ours',
   laws: [
-    { n: 'Correspondence', f: 'inner', d: 'The sadhu slept beside it in the open four miles from anywhere. Anil could not put it down in a room with a door.' },
-    { n: 'Sufficiency', f: 'time', d: 'Two days rich, and he had not spent one minute of it doing anything except moving the stone around his room.' }
+    { n: 'Correspondence', f: 'inner', d: 'The man who gave it to him slept beside it in the open. He could not put it down in a locked flat.' },
+    { n: 'Sufficiency', f: 'time', d: 'He had the number he had wanted for four years and spent the week doing nothing at all except checking it.' },
+    { n: 'Attachment', f: 'inner', d: 'It arrived with a second thing he had not asked for, and the second thing was heavier.' }
   ],
   rule:'Having it and knowing you have it are two different acquisitions.',
   q:'What do you already have that you are still trying to get?',
-  teach:'From the Ramakrishna tradition, and it is the one story in this set where the person gets everything they wanted, keeps it for three days, and then comes back to hand it over. That is the whole of the teaching and it is why the Reward is a stage rather than an ending.',
+  teach:'A poor man is given a diamond by a sadhu asleep under a tree, keeps it three days, and comes back to ask for something else.',
   body:[
-    "The road from the town to the river crossing ran for six miles through country with nothing in it, and Anil had walked it perhaps four hundred times.",
-    "He carried things for people. That was the work: you stood at the edge of the market from before dawn and if somebody needed a load taken to the crossing you took it, and if nobody did you stood there until the middle of the afternoon and then went home. He was thirty-four. He had done it since he was fifteen and he was not going to be doing anything else.",
-    "On a morning in the hot season he was on that road with nothing to carry, because there had been nothing, and about four miles out he came on a sadhu asleep under a tree.",
-    "This was not unusual. They went up and down that road all year.",
-    "What was unusual was what was lying beside him in the dust.",
-    "It was a stone about the size of a plum and it was doing something with the light that nothing in Anil's life had ever done. He stopped walking. He stood on the road and looked at it for a while, and even a man who has never seen one in his life knows, because there is nothing else that does that.",
-    "The sadhu woke up.",
-    "He was about sixty and he sat up and scratched his head and looked at Anil, and then at where Anil was looking, and then back at Anil, and he did not cover it or move it or put his hand near it.",
-    "Anil did not try to pretend he had been looking at something else.",
-    "He said: I have nothing. If I had that I would have everything.",
-    "Take it, said the sadhu. I found it in the riverbed last week.",
-    "And he lay back down and shut his eyes.",
-    "Anil stood there a moment longer than he needed to, because part of him was waiting for the rest of the transaction, and there was not any rest of it. So he picked it up. It was heavier than it looked. He put it in the fold of his cloth, and then took it out and put it in his fist instead, and walked back to town holding it.",
-    "That was the eleventh hour of the first day.",
-    "By the evening he had the whole of the rest of his life laid out, and it was a good life. He was going to buy land. He had known which land since he was nineteen, four fields on the east side where the water came, and he could name the man who owned them.",
-    "He did not sleep that night.",
-    "He had not made a plan for where to put it. That turned out to be the thing. He had a room with a mat and a shelf and a door that did not lock, and he lay on the mat with the stone in his hand and was extremely aware of his own door, and at some point he got up and moved it, and then at some point after that he moved it again.",
-    "In the morning he did not go to the market, which he had done every morning for nineteen years.",
-    "He stayed in the room. He told himself it was because he no longer needed to go, and that was true, and it was not the reason. The reason was that he could not work out whether to take the stone with him or leave it, and both of those were unbearable, and staying was the only thing that was not a decision.",
-    "On the second day a neighbour called through the door to ask if he was ill, and Anil heard himself say yes, and afterwards lay there and thought about the fact that he had just lied to Rao, who had helped him when his mother died.",
-    "On the second night he worked out what he had.",
-    "He had a thing worth four fields. He also had, and this had arrived with it and he had not been told about it, a door that did not lock, and a neighbour he had lied to, and a street he could not walk down while carrying it and could not leave it behind to walk down.",
-    "He had been rich for two days and he had not spent one minute of it doing anything.",
-    "And lying there in the dark he remembered the man under the tree, who had found the most valuable object either of them had ever seen, and had put it down in the dust beside his head, and had gone to sleep next to it.",
-    "That was the whole thing. That was what he could not get past.",
-    "Not that the sadhu had given it away. Anybody can give a thing away once, grandly, in front of somebody. It was that he had been asleep beside it. In the open. Four miles from anywhere. He had not been guarding it and he had not been thinking about it and he had not been awake.",
-    "Anil walked out on the third morning.",
-    "It took him two hours and he did not hurry, and the sadhu was still there, sitting up this time, eating something out of a leaf.",
-    "Anil crouched down and put the diamond in the dust where it had been.",
-    "The sadhu looked at it and then at him and waited.",
-    "And Anil said: give me the thing that lets you give this away.",
-    "The sadhu finished what he was eating. He was in no hurry at all and it took a while, and Anil stayed crouched on his heels on the side of the road and did not say anything else, and a cart went past behind them.",
-    "Then the old man said: sit down, then.",
-    "So Anil sat down."
+    "The number he had wanted for four years came through on a Wednesday.",
+    "It was not a fortune and he had never pretended it would be. It was the number he had written on a piece of paper when he started, the one that meant the thing was real, and it landed at about two in the afternoon while he was doing something else entirely.",
+    "He looked at it for a while.",
+    "Then he went and made a cup of tea and came back and looked at it again.",
+    "He had imagined this a great many times over four years, and in none of the versions had he sat in a quiet room by himself feeling mildly sick.",
+    "He did not sleep well that night, or the next one.",
+    "The problem was that he could not stop checking it. Not the account, the position. He had it on his phone and he looked at it in bed and in the morning and at traffic lights, and by the Friday he had worked out that he was checking to see whether it was still there, which is not a thing that had ever occurred to him to worry about when he did not have it.",
+    "On the Saturday somebody asked how it was going and he said fine, and changed the subject, and thought about that afterwards for a long time.",
+    "He had spent four years wanting to be asked that question.",
+    "What happened over that week is very simple and almost nobody warns you about it. He had got the thing. And the thing had arrived with a second thing attached that he had not asked for and had not been told about, which was the fear of it going, and the second one weighed more.",
+    "He had been rich for six days and he had not spent one hour of it doing anything. He had not built. He had not taken the next position. He had sat in a room checking a number and being unable to talk about it.",
+    "And somewhere in there he thought about a man he had met years before at the start of all this, who had many times more than that number and had said something about it in passing on a stairwell and then gone and got a coffee.",
+    "In passing. On a stairwell. And then gone for a coffee.",
+    "He had thought at the time that this was modesty, or a flex, or that the man was so far ahead the number was nothing to him.",
+    "It was not that. He understood it that Saturday and it took him the rest of the year to do anything about it.",
+    "The man could set it down. That was all. He was not gripping it, and because he was not gripping it, he could mention it on a stairwell and walk away and think about something else for the rest of the afternoon.",
+    "That is the thing worth having and it does not arrive in the account.",
+    "He is past that number now by some way. He still checks more than he should. But he noticed something in the spring: he had gone a whole Tuesday without looking, and had not decided to, and had not noticed until he was in bed.",
+    "That was a better day than the Wednesday was."
   ] },
-{ id:'bridge', stage:'The Road Back', bg:'cobalt', mins:4,
-  n:'The Bridge You Burn Behind You', src:'Ours',
+{ id:'bridge', stage:'The Road Back', bg:'cobalt', mins:2,
+  n:'The Job He Kept', src:'Ours',
   laws: [
-    { n: 'Commitment', f: 'motion', d: 'Idris never used the bridge once in forty years. It took a little weight off every hard thing instead, and the weight was what would have finished him.' },
-    { n: 'Polarity', f: 'time', d: 'Nuri was frightened like that for two years and then was not, and by then he had the language, a trade, and two men who would lend him money.' }
+    { n: 'Commitment', f: 'motion', d: 'He never used it once. It took a little weight off every hard thing instead, for years.' },
+    { n: 'Polarity', f: 'time', d: 'The one with nothing behind him was frightened for a year and then had the thing the other never got.' },
+    { n: 'Decision', f: 'motion', d: 'A door left open is not optionality. The decision was already made; the door is the part of it that never finished.' }
   ],
-  rule:'A door left open behind you is a decision you have not finished making.',
+  rule:'A way back does not get used. It takes the pressure out of everything instead, and the pressure was what was going to finish it.',
   q:'What are you keeping open in case this does not work?',
-  teach:'Ours, though the move is older than any of us — commanders have been burning their own boats on landing for as long as there have been boats, and always for the same unsentimental reason. It is put here as a bridge because most people’s version of this is not a fleet, it is a door.',
+  teach:'Two men cross a gorge on the same morning. One of them walks back out to the middle with a knife.',
   body:[
-    "There were two of them and they crossed on the same morning.",
-    "The gorge was about ninety feet across at the narrow point and a long way down, and the bridge was rope and plank and had been there longer than either of them. On the far side was a country nobody in their village had been to, which was the whole reason for going.",
-    "Idris and Nuri had been eleven years getting ready. They had grown up four doors apart. They had argued about it, saved for it, been talked out of it twice and back into it three times, and in the last two years they had stopped telling people about it, which is usually the sign that a thing is actually going to happen.",
-    "They went across one at a time because the bridge was not good.",
-    "On the far rock they put their packs down and sat in the sun for a while and did not say very much, and then Nuri stood up and walked back out onto the bridge to the middle of it, with his knife.",
-    "Idris said: what are you doing.",
-    "Nuri did not answer. He got down on one knee and started on the near hand-rope, and it took him a long time because it was old and thick and he was working one-handed with a hundred feet of air under him, and Idris stood on the rock and watched and did not stop him.",
-    "When it went it went suddenly. The whole of it dropped away down the gorge wall on the far side with a noise like a sail, and Nuri came back along the last eight feet of what was left and stepped off onto the rock, breathing hard, and put the knife away.",
-    "That is a stupid thing to have done, said Idris.",
-    "Maybe, said Nuri.",
-    "They were not the same after that, and neither of them ever said so.",
-    "The country was hard for the first four years. There was work, and it was bad work, and the language was not their language and they made the sort of mistakes that men make who do not know what anybody means. They shared a room for two of those years. Then Nuri went east to where the building was and Idris stayed, and after that they saw each other perhaps twice a year, and then once, and then at weddings.",
-    "Here is what Idris did, and he did it about twice a week for forty years, and it never once looked like a decision.",
-    "When the work went badly, he thought about the bridge.",
-    "Not in words. He never made a plan, and if you had asked him outright whether he was thinking of going back he would have laughed, and he would have meant it. He simply knew, in the ordinary background way you know where the door is in a dark room, that there was a bridge, and that it was four days' walk behind him, and that it was standing.",
-    "And every time he knew it, a small amount of weight came off whatever he was standing in.",
-    "That is not nothing. It is genuinely not nothing, and it is why this is difficult. Idris had a decent life. He was not miserable and he did not fail. He married a woman from that country and they were fond of each other and he was thought well of on his street.",
-    "But he never learned the place the way a man learns somewhere he cannot leave.",
-    "He did not make the friend you make when there is nobody else. He did not take the chance in the fourth year that would have cost him everything, because everything was not actually at stake. He kept, for forty years, a small reserve of himself that never went into the ground he was standing on, and nobody ever saw it, including him.",
-    "Nuri did the opposite, and not out of virtue.",
-    "He did it because on his second night in that country he understood with total clarity that there was nothing behind him, and the fear of that was so bad that he went out the next morning and did the thing he had been putting off, which was to go to the yard where nobody spoke his language and stand there until somebody gave him work.",
-    "He was frightened like that for about two years and then he was not any more, and by then he had the language and a trade and two men who would lend him money.",
-    "They met when they were both about sixty, at the wedding of Nuri's daughter.",
-    "They sat outside for a while afterwards and it was the first proper conversation they had had in twenty years, and somewhere in it Idris said, not as an accusation, more as an old joke: I still say that was a stupid thing you did on that bridge.",
-    "And Nuri, who had had thirty-eight years to think about it and had thought about it, said: it was. If that country had been a swamp I would have died in it.",
-    "Idris waited.",
-    "It was not a swamp though, said Nuri.",
-    "They left it there, because they were sixty and it was a wedding.",
-    "Idris went back once, at seventy-one, because his sister was ill. He went the long way round, four days south to the low crossing and then up, because there was no bridge. On the way home he made a detour of most of a day to stand on the far lip of the gorge and look at the two rope-ends hanging down the rock, which were still there, grey and frayed, and shorter than he remembered.",
-    "He stood there a while.",
-    "Then he walked back to the road, because it was getting late, and there was nothing there to see."
+    "Two of them went out on their own the same year.",
+    "They had worked at the same place and left within about a month of each other and had the same idea about what they were going to do, roughly, and neither of them had any money to speak of.",
+    "One of them kept two days a week at the old place.",
+    "It made complete sense. It covered his rent. His old boss was glad to have him and the work was easy and it meant he could build the real thing without the panic, and if you had told him he was doing something wrong he would have laughed at you, and he would have been right to.",
+    "The other one did not, and was frightened for about a year.",
+    "Here is what the two days did, and he did not see it for six years.",
+    "He never used them as a way back. Not once. If you had asked him outright whether he was thinking of going back he would have said no and meant it completely.",
+    "But on every bad Tuesday, in the part of his head that does not use words, he knew the two days were there. And every time he knew it, a small amount of weight came off whatever he was standing in.",
+    "That is not nothing. It is genuinely not nothing, and it is why this is hard. He was not miserable. The business was fine. He was thought well of.",
+    "He also never made the call he was dreading in the fourth year, because there was no particular need to make it that week. He never took the contract that was too big. He did not learn the trade the way a man learns something he cannot walk away from, and nobody ever saw that, including him.",
+    "The other one made the call in his second month because he had eleven days of money left.",
+    "They had a pint about six years in and talked about it properly for the first time, and the one with the two days said, half joking, that the other had been mad to do it the way he did.",
+    "And the other one said: I was. If it had not worked I would have been finished.",
+    "Then he said: it worked though.",
+    "They left it there, because it was a pint and not a seminar.",
+    "The one with the two days still has them. He is good at what he does and he earns a living and there is nothing in his life you could point at and call a failure.",
+    "He knows, though. That is the part. He has known since about the fourth year, and he has never done anything about it, because the two days do not cost anything visible on any particular Tuesday.",
+    "They just take a little off the top of every one."
   ] },
-{ id:'mountain', stage:'The Return', bg:'turtle', mins:3,
+{ id:'mountain', stage:'The Return', bg:'turtle', mins:2,
   n:'Day Six Hundred and Seventeen', src:'Ours',
   laws: [
-    { n: 'Rhythm', f: 'time', d: 'Six hundred and seventeen days, and the one that mattered was indistinguishable from the four hundred before it.' },
-    { n: 'Commitment', f: 'motion', d: 'He had stopped telling people, and that was not modesty. Announcing it had been costing him something he could not name.' },
-    { n: 'Legacy', f: 'time', d: 'Nothing in his life marked the day it changed. It changed anyway, and then somebody else noticed it before he did.' }
+    { n: 'Rhythm', f: 'time', d: 'The day that mattered was indistinguishable from the four hundred before it.' },
+    { n: 'Commitment', f: 'motion', d: 'He stopped telling people, and it was not modesty. Announcing it was spending the thing before he had earned it.' },
+    { n: 'Legacy', f: 'time', d: 'Nothing marked the day it changed. It changed anyway, and somebody else noticed before he did.' }
   ],
   rule:'You will not feel it arrive. You will only notice it is already behind you.',
-  q:'What have you been doing long enough that you have stopped being able to remember starting?',
-  teach:'The old version is a ninety-year-old man moving two mountains with baskets. The number in the title is the only thing that had to change.',
+  q:'What have you been doing long enough that you cannot remember starting?',
+  teach:'An old man sets out to move two mountains with baskets, and tells the neighbour who laughs at him that the mountain does not get any bigger.',
   body:[
-    "The alarm went at twenty to five and it was raining, which in November in that town means it will be raining at seven as well.",
+    "The alarm went at twenty to five and it was raining, which in November means it will be raining at seven as well.",
     "Day six hundred and seventeen.",
-    "He knew the number because it was in a spreadsheet, and the spreadsheet was the only part of it anybody could have pointed at. Two years and change of getting up before the shift and working on the thing for ninety minutes, and then going and doing eight hours of something else, and then some evenings doing another hour and some evenings not.",
-    "In that time the thing had made no money at all.",
+    "He knew the number because it was in a spreadsheet, and the spreadsheet was the only part of it anybody could have pointed at. Getting up before work and doing ninety minutes on the thing, then eight hours of something else, then some evenings another hour and some evenings not.",
+    "In all that time it had made no money at all.",
     "That is the honest statement and he had stopped softening it. Not a small amount. None. There had been a month where it looked like it was about to and then it did not, and he had told two people about that month and had to tell them afterwards as well, which is its own particular flavour of Tuesday.",
     "He had stopped telling people some time in the first year.",
-    "He had put that down to modesty at the time and it was not modesty. He worked it out much later: every time he announced it he got a small amount of the feeling he was supposed to be getting from finishing it, and it came out of the same account, and he was spending the thing before he had earned it.",
-    "So he stopped saying anything and it got harder and it got better.",
+    "He put that down to modesty at the time and it was not modesty. He worked it out much later. Every time he announced it, he got a small amount of the feeling he was supposed to get from finishing it, and it came out of the same account, and he was spending the thing before he had earned it.",
+    "So he stopped saying anything, and it got harder, and it got better.",
     "He got up on day six hundred and seventeen.",
-    "There is nothing to tell about that morning and that is why it is the one worth telling. He made coffee. He worked on a section he had already done twice and did it a third time because the second one was wrong. It went slowly. At six fifteen he was not further on than he had been at five and he had a real conversation with himself about whether the whole thing was a way of avoiding his actual life, which was a conversation he had perhaps once a fortnight and which always ended in the same unsatisfying draw.",
+    "There is nothing to tell about that morning and that is exactly why it is the one worth telling. He made coffee. He worked on a section he had already done twice, because the second attempt was wrong. It went slowly. At quarter past six he was no further on than he had been at five, and he had a real conversation with himself about whether the whole thing was a way of avoiding his actual life, which was a conversation he had about once a fortnight and which always ended in the same unsatisfying draw.",
     "At ten past seven he got in the car.",
     "Nothing happened. That is the entire content of day six hundred and seventeen and of about four hundred of the others.",
-    "In the March a lad started on the same shift, twenty-two, and asked him about it in the yard because somebody had mentioned it.",
+    "Months later somebody new asked him about it, because it had come up.",
     "How long have you been doing that, then.",
-    "And he opened his mouth to say two and a half years, and found that he could not do the arithmetic instantly, and had to actually count back, and in the two seconds that took he noticed something.",
+    "And he opened his mouth to answer, and found he could not do the arithmetic instantly and had to count back, and in the two seconds that took he noticed something.",
     "He could not remember what it had been like before.",
-    "Not the effort — he remembered that. He could not get back inside the version of himself who had to decide, every morning, whether to get up. That man had existed for about the first four months and had been in a fight every single day, and at some point that fight had simply stopped happening and nobody had told him. There had been no morning where he woke up and noticed he had won it.",
-    "The lad said, that's mad, and meant it kindly, and went off to do something with a pallet.",
-    "He stood in the yard for a second.",
-    "It was still not making any money. That did not change for another nine months, and when it did it was not dramatic either, and by then he had a system for not telling anybody about that.",
+    "Not the effort. He remembered that. He could not get back inside the version of himself who had to decide, every morning, whether to get up. That man had existed for about four months and had been in a fight every single day, and at some point the fight had simply stopped happening and nobody had told him.",
+    "There had been no morning where he woke up and noticed he had won it.",
+    "It still was not making any money. That took another nine months, and when it came it was not dramatic either.",
     "But he had become a person who got up at twenty to five, and it had happened without an announcement, on an ordinary day somewhere in the middle, and he had not been invited."
   ] }
 ];
@@ -1000,15 +770,6 @@ try { var raw = localStorage.getItem(KEY); if (raw) { var o = JSON.parse(raw); i
   st.last = typeof o.last === 'string' ? o.last : null;
 } } } catch (e) {}
 var save = function () { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
-
-/* The photograph behind everything. Set once per view rather than per
-   paint, so scrolling a story never touches it. */
-var bgNow = '';
-function bg(name) {
-  if (name === bgNow) return;
-  bgNow = name;
-  photo($('#alBgI'), name);
-}
 
 /* Each law in one line. A tag that opens nothing is a tag that reads
    as a category somebody forgot to wire up, and the whole point of
@@ -1174,9 +935,10 @@ function paintRules() {
 
 function paintStory(s) {
   var p = $('#alStoryPane'); p.textContent = '';
-  bg(s.bg);
 
   var lead = el('div', 'al-lead');
+  var hero = el('div', 'al-hero'); var hi = el('i'); photo(hi, s.bg);
+  hero.appendChild(hi); lead.appendChild(hero);
   var mk = el('div', 'al-mark'); mk.innerHTML = MARK; lead.appendChild(mk);
   lead.appendChild(el('h1', 'al-disp', s.n));
   lead.appendChild(el('div', 'al-caps', s.stage));
@@ -1244,14 +1006,12 @@ function view(v) {
   document.querySelectorAll('.al-tab').forEach(function (b) {
     b.setAttribute('aria-current', b.getAttribute('data-v') === v ? 'true' : 'false');
   });
-  $('#alBg').classList.toggle('is-sage', v === 'arc' || v === 'laws' || v === 'rules');
   document.querySelectorAll('.al-count').forEach(function (n) {
     n.textContent = st.read.length + ' of ' + S.length;
   });
-  if (v === 'arc') { bg('curve'); paintArc(); }
-  if (v === 'laws') { bg('silk'); paintLaws(); }
-  if (v === 'law') { $('#alBg').classList.remove('is-sage'); }
-  if (v === 'rules') { bg('umber'); paintRules(); }
+  if (v === 'arc') paintArc();
+  if (v === 'laws') paintLaws();
+  if (v === 'rules') paintRules();
 }
 
 var lawBack = 'laws';
@@ -1290,7 +1050,7 @@ document.addEventListener('click', function (e) {
 
 var resume = st.last && byId(st.last);
 if (resume) { $('#alOpenB').textContent = 'Continue'; $('#alOpenN').textContent = 'You stopped at ' + resume.n + '.'; }
-bg('desert');
+photo($('#alOpenHero'), 'desert');
 view('open');
 window.alDrive = { view: view, open: open };
 
