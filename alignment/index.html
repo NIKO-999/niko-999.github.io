@@ -311,7 +311,23 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .al-tab svg { width: 20px; height: 20px; display: block; }
 .al-tab[aria-current="true"] { background: rgba(255,255,255,.12); color: var(--ink); }
 
-.al-x { position: fixed; top: calc(18px + env(safe-area-inset-top, 0px)); right: var(--gut); z-index: 30; }
+/* GLASS OVER A PHOTOGRAPH IS A MATERIAL. GLASS OVER A SENTENCE IS A
+   SMEAR. This is the one round control that sits over running body
+   text, fixed, while the pane scrolls under it — and .al-round's own
+   --plate is 56%, which dims a word without removing it. Measured on
+   composited pixels, a letter behind the disc survived as a 44-point
+   luminance ghost and the screenshot read "you will b✕". At 94% the
+   ghost is 6 and the backdrop pass is drawing nothing anybody can
+   see, so it stops being glass either way: --card is the app's own
+   object material, the ghost is 0, and the disc reads as a thing ON
+   the page rather than a hole punched in it. The glyph costs nothing
+   — 19.3:1 on the old plate, 19.8 on this one. Both X's take it;
+   both sit over a pane of text. It is LATER in the file than
+   .al-round and the two are equal specificity, so source order is
+   what makes it win — the computed value is read back rather than
+   trusted. */
+.al-x { position: fixed; top: calc(18px + env(safe-area-inset-top, 0px)); right: var(--gut); z-index: 30;
+  background: var(--card); backdrop-filter: none; -webkit-backdrop-filter: none; }
 </style>
 </head>
 <body>
@@ -634,6 +650,38 @@ var S = [
     "It is not still going. Nobody else is in it.",
     "He has been in it by himself the whole time."
   ] },
+{ id:'post', stage:'The Trials', bg:'jade', mins:2,
+  n:'Nothing To Post', src:'Ours',
+  laws: [
+    { n: 'The Unwritten Half', f: 'inner', d: 'Three hours going through the book, and every trade in it passed. What was wrong had no line in it.' },
+    { n: 'The Prize Goes to the Exception', f: 'motion', d: 'The week that did the numbers was the least typical week of his year, and he knew it at the time.' },
+    { n: 'The Judge You Installed', f: 'others', d: 'Nobody told him an empty week was a failure. It had simply moved in, and it had been choosing his mornings ever since.' }
+  ],
+  rule:'An audience can only applaud what it can see, and what it can see is never the work.',
+  q:'What have you quietly stopped doing because there was nothing in it to show anybody?',
+  teach:'Goodhart wrote it about economics: a measure that becomes a target stops being a measure. The version that bites has no name and no economics in it — the moment anybody is watching, the visible part of your work quietly becomes the part you do.',
+  body:[
+    'He posted a green week and it went.',
+    'He had been posting for about a year into nothing. A screenshot, a line underneath, eleven likes, most of them people he already knew. This one did four thousand and he still could not tell you what was different about it. The week had been good and he had said so plainly.',
+    'Nothing bad happened next, and that is the part worth slowing down for. He did not become somebody. He did not sell anything. He did not start lying.',
+    'He kept trading the way he had been trading. He would tell you that now and he would get the journal out to prove it.',
+    'Six months later the account was down and the journal was clean.',
+    'He went through it one evening, trade by trade, against his own rules. Every one passed. Right setup, right size, right time of day. It took three hours and got him nowhere, because whatever had gone wrong was not in the book.',
+    'He found it on a Thursday, trying to write a post.',
+    'The week had been nothing. Two trades, both small, both fine. He sat there twenty minutes trying to make a week out of it, and somewhere in the twenty minutes he noticed what he was feeling.',
+    'It was disappointment.',
+    'That was new. A week with nothing in it used to be a week with nothing in it. He had had hundreds of them. They were most of his year and he had never once minded, because the whole thing only worked on volume — a small trade most mornings, most of them nothing much, and the year came out of the pile.',
+    'Now an empty week was a failure. Nobody had told him that. It had arrived at some point, quietly, in the weeks after the post that went, and it had been sitting there ever since taking a decision he did not know was being taken.',
+    'The decision was this. On the mornings with nothing in them, he waited.',
+    'He never broke a rule. He waited for something worth writing about, and most of those mornings nothing worth writing about turned up, and waiting all day is tiring, so he would shut the laptop having taken nothing at all.',
+    'Fifty-one trades in five months. The year before, over the same stretch, a hundred and ninety.',
+    'His win rate had gone up.',
+    'That is the part he tells people, because it is the part that is hard to hear. He had become more selective and more patient by every measure anybody writes about, and he had removed most of his own income doing it.',
+    'There is no record of a trade you did not take. A journal cannot hold an absence. The only place those hundred and thirty-nine exist is in the shape of the year.',
+    'He still posts. He posts a month behind now, so the week he is living is never the week he is showing, and that one change did more than deleting the account would have.',
+    'The other thing he noticed, later, was that the week which did four thousand was the least typical week of his year. He had known it was an outlier while it was happening.',
+    'He had spent five months trying to have it again.'
+  ] },
 { id:'knot', stage:'The Ordeal', bg:'iceberg', mins:3,
   n:'The Column He Added', src:'Ours',
   laws: [
@@ -808,12 +856,15 @@ var LAWS = {
   'The Number That Moves': 'Readiness recedes as you approach it, because the thing you are waiting for was never a number. Every threshold you set will be more sensible than the last one, and you will never arrive.',
   'The Second Thing': 'What you wanted arrives with something attached that you did not ask for and were not warned about. It is usually the fear of it leaving, and it usually weighs more than the thing.',
   'The Quiet Middle': 'The work that decides it has no screen, no course, nobody to tell and no way to get better except by being in it. It pays nothing for a long time and there is no way to make it interesting.',
+  'The Judge You Installed': 'Show the work to enough people and one of them takes up residence. It arrives with standards you never agreed to, it has no interest in the boring majority of what you do, and you will be working to please it for months before you notice it moved in.',
+  'The Unwritten Half': 'Every record is a record of what you did. The things you did not do leave no line, pass every audit, and are frequently the whole of what went wrong — which is why a clean book above a falling result is not a contradiction.',
+  'The Prize Goes to the Exception': 'What people respond to is almost never the thing that produced your year. It is the one week that did not look like the rest, and going after the applause means going after your own outlier, which is the single result you have no method for.',
   'The Day Nobody Announced': 'The morning it changed was indistinguishable from the four hundred before it. You will not feel it arrive. You will notice, much later and by accident, that it is already behind you.'
 };
 
 var IB = { desert:1.20, umber:2.00, iris:2.20, turtle:1.25, canyon:1.00,
            delta:1.00, silk:0.95, curve:0.90, iceberg:0.85, nightfall:1.60,
-           abyss:1.70, cobalt:1.10 };
+           abyss:1.70, cobalt:1.10, jade:2.60 };
 
 /* violet.jpg cannot be graded into this set: its brightest pixel in a
    phone crop is L102, darker than the references' own median, with 40%
