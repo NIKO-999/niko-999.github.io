@@ -129,7 +129,18 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
   display: grid; place-items: center; position: relative;
 }
-.al-round::before { content: ''; position: absolute; inset: -2px; }
+/* 44 OWNED, 40 DRAWN — and an inset cannot say that here. An
+   absolutely positioned box resolves against its host's PADDING box,
+   and .al-round carries a 1px border under a border-box reset, so its
+   padding box is 38 and inset:-2px reached 42 rather than the 44 the
+   declaration reads as. Two real controls sat under the floor and the
+   arithmetic was invisible in the source. Centring an explicit --tap
+   square is immune to the host's border, padding and drawn size alike,
+   and it is what makes the token load-bearing rather than decorative. */
+.al-round::before {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: var(--tap); height: var(--tap); transform: translate(-50%, -50%);
+}
 .al-round svg { width: 17px; height: 17px; display: block; }
 
 .al-pane { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 0 var(--gut) 112px; }
