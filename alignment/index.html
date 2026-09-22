@@ -12,16 +12,25 @@
 
 /*
   ALIGNMENT. Its own ground, its own type, its own everything — it reads
-  none of the other keys and takes none of the shared shell. The whole
-  look rests on one mechanic: a photograph fills the screen, a vertical
-  gradient darkens it toward the foot, and white type sits on the dark
-  half. Nothing else has to be coloured.
+  none of the other keys and takes none of the shared shell.
 
-  THE GRADE IS THE APP'S, NOT THE PHOTOGRAPH'S. arc/bg holds fourteen
-  images and only five sit in this register on their own — the rest are
-  teal, cobalt and violet. One filter over all of them pulls the set
-  into one warm family, which is what the references are doing too:
-  none of those screens is a raw photograph either.
+  A PHOTOGRAPH IS A GUEST INSIDE A FRAME, NEVER THE PAGE. That is the
+  whole construction and the first build got it backwards: the image
+  filled the card, the card's own ground was never visible anywhere on
+  screen, and every word was printed on a picture under a gradient laid
+  there to keep it readable. A photograph that bleeds is a page. A
+  photograph in a frame is an object. Interface lives in the MATERIAL
+  around the picture, which is also where the room for chrome comes
+  from.
+
+  THE GRADE IS PER IMAGE, MEASURED, AND THE COMMENT THAT USED TO SIT
+  HERE WAS FALSE. It claimed one filter pulled fourteen photographs
+  into one warm family; measured, the set spanned 235 degrees of hue
+  with five of twelve inside the band. Six reference screens holding a
+  snow mountain, a face, a desert, a cyan swimming pool and a volcano
+  all land inside hue 16-69, which no single transfer function does to
+  a mixed library. So --ib rides each image and the shared grade only
+  has to carry the hue.
 */
 
 :root {
@@ -31,33 +40,57 @@
   --spent: rgba(255,255,255,.46);
   --hair: rgba(255,255,255,.14);
   --glass: rgba(255,255,255,.10);
-  --sage: #8E9370;
+
+  /* Chrome sits on a PLATE, not on glass. A 10% white wash over a lit
+     photograph put the info glyph at 2.50:1 against the 3 a graphic
+     needs, and no alpha of white fixes a ground that bright. */
+  --plate: rgba(11,10,8,.56);
+
+  --card: #1A1611;
+  --card-edge: rgba(255,255,255,.08);
 
   --r-card: 26px;
   --r-in: 18px;
-  --r-pill: 999px;
   --r-sq: 14px;
+  --r-pill: 999px;
 
-  --grade: saturate(.52) sepia(.20) contrast(1.10) brightness(1.02);
-  --veil: linear-gradient(180deg,
-      rgba(11,10,8,.30) 0%,
-      rgba(11,10,8,.00) 30%,
-      rgba(11,10,8,.44) 62%,
-      rgba(11,10,8,.93) 100%);
-
-  /* The list ground is a different room. In the references the browse
-     screen is a soft olive the cards sit on, not the near-black the
-     hero screens use, and losing that loses half of what makes the
-     set read as one system. The photograph behind it is blurred out
-     of legibility on purpose: it is a ground, not a picture. */
-  --sage-g: linear-gradient(180deg,
-      rgba(150,156,116,.88) 0%,
-      rgba(112,117,84,.80) 22%,
-      rgba(44,45,33,.90) 62%,
-      rgba(13,13,10,.98) 100%);
+  /* Six vertical steps. The first build shipped eleven — 8 10 12 14 18
+     20 22 24 26 34 38 — which is this repo's own runaway-scale fault in
+     a third dimension after thirty type sizes and thirteen leadings. */
+  --v1: 6px;  --v2: 10px; --v3: 16px;
+  --v4: 22px; --v5: 34px; --v6: 52px;
 
   --gut: 22px;
+  --gut-list: 18px;
   --tap: 44px;
+
+  --grade: saturate(.30) sepia(.55) contrast(1.02) brightness(1.20);
+
+  /* THE VEIL WAS INVERTED. Both references are brightest at the very
+     top of the screen — row medians of 222, 223, 223 — and never fall
+     below L24 at the foot. The first build read 57 at the top and
+     peaked in the middle, because a 30% black wash sat exactly where
+     the references put their light. */
+  --veil: linear-gradient(180deg,
+      rgba(11,10,8,.00)   0%,
+      rgba(11,10,8,.00)  44%,
+      rgba(11,10,8,.34)  68%,
+      rgba(11,10,8,.74)  90%,
+      rgba(11,10,8,.82) 100%);
+
+  /* The list ground is a different room, and it has a FLOOR. The
+     reference's olive falls for its top 45% and is then flat at L46-49
+     to the bottom edge; the first build ramped monotonically to L16.
+     It is also deeper than the reference's, which is a cost rather
+     than a preference: on that lightness pure white maxes at 3.05:1,
+     so no alpha of white carries 10px type there — the references put
+     DARK large type on their olive and nothing small at all. */
+  --sage-g: linear-gradient(180deg,
+      rgba(80,82,56,.97)   0%,
+      rgba(72,74,51,.97)  22%,
+      rgba(52,53,41,.97)  48%,
+      rgba(44,44,40,.97)  66%,
+      rgba(44,44,40,.97) 100%);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -67,7 +100,7 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: 'Inter', -apple-system, system-ui, sans-serif;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.5;
   overflow: hidden;
   overscroll-behavior: none;
@@ -76,59 +109,56 @@ body {
 button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
 [hidden] { display: none !important; }
 
-/* TYPE. Five steps and nothing between them. A tracked cap line is the
-   micro register whatever it measures; it is never body copy made small. */
-.al-disp  { font-size: 38px; font-weight: 600; line-height: 1.04; letter-spacing: -.026em; }
-.al-disp-s{ font-size: 28px; font-weight: 600; line-height: 1.08; letter-spacing: -.02em; }
-.al-caps  { font-size: 10px; font-weight: 600; letter-spacing: .32em; text-transform: uppercase; color: var(--spent); }
-.al-body  { font-size: 16px; font-weight: 400; line-height: 1.62; color: var(--dim); }
-.al-note  { font-size: 12px; font-weight: 450; line-height: 1.45; color: var(--spent); }
+.al-disp   { font-size: 38px; font-weight: 450; line-height: 1.00; letter-spacing: -.03em; }
+.al-disp-s { font-size: 28px; font-weight: 450; line-height: 1.02; letter-spacing: -.024em; }
+.al-caps   { font-size: 10px; font-weight: 600; letter-spacing: .5em; text-transform: uppercase; color: var(--dim); }
+.al-body   { font-size: 16px; font-weight: 400; line-height: 1.50; color: var(--dim); }
+.al-note   { font-size: 13px; font-weight: 450; line-height: 1.45; color: var(--dim); }
 
-/* THE PHOTO LAYER. Fixed behind everything and graded, so scrolling
-   moves the words over a still image rather than dragging the picture
-   up the screen with them. */
 .al-bg { position: fixed; inset: 0; z-index: 0; }
 .al-bg i {
   position: absolute; inset: 0; display: block;
   background-size: cover; background-position: center;
-  filter: var(--grade);
+  filter: var(--grade) brightness(var(--ib, 1));
   transform: scale(1.04);
 }
 .al-bg u { position: absolute; inset: 0; display: block; background: var(--veil); }
-.al-bg.is-sage i { filter: var(--grade) blur(46px) brightness(1.18); transform: scale(1.3); }
+.al-bg.is-sage i { filter: var(--grade) brightness(var(--ib, 1)) blur(46px); transform: scale(1.3); }
 .al-bg.is-sage u { background: var(--sage-g); }
 
 .al-view { position: relative; z-index: 1; height: 100%; display: none; flex-direction: column; }
 .al-view.is-on { display: flex; }
 
-/* ---- THE OPEN ---- */
-#alOpen { justify-content: flex-end; padding: 0 var(--gut) 34px; }
-#alOpen .al-mark { position: absolute; top: 22px; left: var(--gut); }
+#alOpen { justify-content: flex-end; padding: 0 var(--gut) var(--v5); }
+#alOpen .al-mark { position: absolute; top: var(--v4); left: var(--gut); }
 .al-mark { display: flex; align-items: center; gap: 9px; }
 .al-mark svg { width: 20px; height: 20px; display: block; }
-.al-mark b { font-size: 11px; font-weight: 600; letter-spacing: .3em; text-transform: uppercase; }
-#alOpen .al-disp { margin-bottom: 12px; max-width: 8.5em; }
-#alOpen .al-note { margin-bottom: 26px; max-width: 20em; }
+.al-mark b { font-size: 13px; font-weight: 500; letter-spacing: 1.2em; text-transform: uppercase; }
+#alOpen .al-disp { margin-bottom: var(--v2); max-width: 7.2em; }
+#alOpen .al-note { margin-bottom: var(--v4); max-width: 20em; }
 
+/* A PILL IS SIZED TO ITS CONTENT. Not one of the four reference pills
+   spans the screen — they measure 217, 148, 187 and 134 CSS px, all
+   43 to 50 tall. A full-bleed primary was the widest object on the
+   open screen and read as a form submit. */
 .al-pill {
-  display: flex; align-items: center; justify-content: center;
-  min-height: 54px; padding: 0 28px; border-radius: var(--r-pill);
+  display: inline-flex; align-items: center; justify-content: center;
+  align-self: flex-start;
+  min-height: 48px; padding: 0 30px; border-radius: var(--r-pill);
   background: var(--ink); color: #14120E;
-  font-size: 15px; font-weight: 600; letter-spacing: -.01em;
-  width: 100%;
+  font-size: 16px; font-weight: 500; letter-spacing: -.01em;
 }
-.al-pill.is-glass { background: var(--glass); color: var(--ink); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border: 1px solid var(--hair); }
-.al-pill.is-auto { width: auto; }
-
-/* ---- THE HEAD, SHARED BY THE LISTS ---- */
-.al-head { padding: 20px var(--gut) 14px; display: flex; align-items: center; gap: 12px; flex: none; }
-.al-head .al-disp-s { flex: 1; }
-.al-round {
-  width: 40px; height: 40px; flex: none; border-radius: 999px;
-  background: var(--glass); border: 1px solid var(--hair);
+.al-pill.is-glass {
+  background: var(--plate); color: var(--ink);
   backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-  display: grid; place-items: center; position: relative;
+  border: 1px solid var(--hair);
 }
+.al-pill.is-grow { flex: 1; }
+
+.al-head { padding: var(--v4) var(--gut-list) var(--v3); display: flex; align-items: center; gap: 12px; flex: none; }
+.al-head .al-disp-s { flex: 1; }
+.al-head .al-caps { flex: none; }
+
 /* 44 OWNED, 40 DRAWN — and an inset cannot say that here. An
    absolutely positioned box resolves against its host's PADDING box,
    and .al-round carries a 1px border under a border-box reset, so its
@@ -137,66 +167,112 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
    arithmetic was invisible in the source. Centring an explicit --tap
    square is immune to the host's border, padding and drawn size alike,
    and it is what makes the token load-bearing rather than decorative. */
+.al-round {
+  width: 40px; height: 40px; flex: none; border-radius: var(--r-pill);
+  background: var(--plate); border: 1px solid var(--hair);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  display: grid; place-items: center; position: relative;
+}
 .al-round::before {
   content: ''; position: absolute; top: 50%; left: 50%;
   width: var(--tap); height: var(--tap); transform: translate(-50%, -50%);
 }
 .al-round svg { width: 17px; height: 17px; display: block; }
 
-.al-pane { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 0 var(--gut) 112px; }
+.al-pane { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 0 var(--gut-list) 118px; }
 .al-pane::-webkit-scrollbar { display: none; }
+
+/* A MASK, NEVER A GRADIENT LAID OVER THE CONTENT. The ground here is a
+   photograph, so a --paper overlay is a near-match that reads as a
+   smudge somewhere on the set. Off again at the end of the travel: a
+   soft edge over nothing is the same lie in the other direction. */
+.al-pane { -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 86px), transparent 100%);
+                   mask-image: linear-gradient(180deg, #000 calc(100% - 86px), transparent 100%); }
+.al-pane.is-end { -webkit-mask-image: none; mask-image: none; }
 
 /* ---- THE ARC ---- */
 .al-card {
   position: relative; display: block; width: 100%; text-align: left;
-  height: 258px; border-radius: var(--r-card); overflow: hidden;
-  margin-bottom: 14px; background: #16130F;
-  box-shadow: 0 1px 0 rgba(255,255,255,.07) inset, 0 18px 34px -18px rgba(0,0,0,.9);
+  border-radius: var(--r-card); overflow: hidden;
+  background: var(--card); padding: var(--v3);
+  margin-bottom: var(--v3);
+  box-shadow: inset 0 1px 0 var(--card-edge), 0 18px 34px -18px rgba(0,0,0,.92);
 }
-.al-card i { position: absolute; inset: 0; display: block; background-size: cover; background-position: center; filter: var(--grade); }
-.al-card u {
-  position: absolute; inset: 0; display: block;
-  background: linear-gradient(180deg, rgba(11,10,8,.14) 0%, rgba(11,10,8,.00) 34%, rgba(11,10,8,.58) 72%, rgba(11,10,8,.94) 100%);
+.al-ch { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--v3); }
+.al-ct { margin-bottom: var(--v3); }
+.al-ct .al-caps { margin-top: var(--v1); color: var(--spent); }
+
+.al-sq {
+  width: 38px; height: 38px; flex: none; border-radius: var(--r-sq);
+  background: var(--glass); border: 1px solid var(--hair);
+  display: grid; place-items: center;
 }
-.al-card .al-cb { position: absolute; left: 20px; right: 64px; bottom: 18px; }
-.al-card .al-disp-s { font-size: 25px; margin-bottom: 8px; }
-.al-card .al-stg { position: absolute; top: 18px; left: 20px; }
-.al-stg {
-  display: inline-flex; align-items: center; height: 26px; padding: 0 11px;
-  border-radius: var(--r-pill); background: rgba(11,10,8,.46);
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--hair);
-  font-size: 9.5px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--ink);
-}
+.al-sq { font-size: 13px; font-weight: 500; letter-spacing: .06em; color: var(--dim); }
+
 .al-go {
-  position: absolute; right: 18px; bottom: 18px;
-  width: 38px; height: 38px; border-radius: 999px;
+  width: 38px; height: 38px; flex: none; border-radius: var(--r-pill);
   background: rgba(255,255,255,.92); color: #14120E;
   display: grid; place-items: center;
 }
 .al-go svg { width: 15px; height: 15px; }
-.al-card.is-read .al-go { background: var(--glass); color: var(--ink); border: 1px solid var(--hair); }
+.al-card.is-read .al-go { background: var(--plate); color: var(--ink); border: 1px solid var(--hair); }
 
-.al-grp { padding: 20px 2px 10px; }
+/* The picture, inset inside the card's own material at its own smaller
+   radius. Two rounded rectangles at one radius read as a mistake. */
+.al-ph { position: relative; height: 300px; border-radius: var(--r-in); overflow: hidden; background: #0E0C0A; }
+.al-ph i {
+  position: absolute; inset: 0; display: block;
+  background-size: cover; background-position: center;
+  filter: var(--grade) brightness(var(--ib, 1));
+}
+
+.al-grp { padding: var(--v5) 2px var(--v2); }
 
 /* ---- THE STORY ---- */
-#alStory .al-pane { padding-bottom: 150px; }
-.al-lead { height: 50vh; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 26px; }
-.al-lead .al-caps { color: var(--dim); margin-bottom: 12px; }
+#alStoryPane { padding-bottom: var(--v6); }
+.al-lead { position: relative; height: 50vh; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: var(--v4); }
+.al-lead::before {
+  content: ''; position: absolute; z-index: 0;
+  left: calc(var(--gut-list) * -1); right: calc(var(--gut-list) * -1); bottom: 0; height: 66%;
+  background: linear-gradient(180deg, rgba(11,10,8,.00), rgba(11,10,8,.52) 48%, rgba(11,10,8,.88));
+}
+.al-lead > * { position: relative; z-index: 1; }
+.al-lead .al-mark { margin-bottom: var(--v3); color: var(--dim); }
+.al-lead .al-caps { margin-bottom: var(--v2); }
 .al-lead .al-disp { max-width: 9em; }
-.al-txt p { margin-bottom: 1.05em; }
-.al-txt p:first-child::first-letter { font-size: 2.9em; font-weight: 600; line-height: .88; float: left; margin: .06em .11em 0 0; color: var(--ink); }
-.al-txt p.al-beat { color: var(--ink); font-weight: 500; }
 
-.al-rule-hd { margin: 38px 0 18px; display: flex; align-items: center; gap: 12px; }
+/* THE SCRIM TRAVELS WITH THE TEXT, NOT WITH THE VIEWPORT. .al-bg is
+   fixed, so a veil written there is a screen gradient the words scroll
+   THROUGH — measured, one paragraph of this story passed over grounds
+   from L17 to L127 and the same declared colour read 3.23:1 at one
+   scroll position and 9.97 at another. A contrast failure that moves
+   is the hardest kind to see and the easiest kind to ship. */
+.al-sheet {
+  margin: 0 calc(var(--gut-list) * -1); padding: 0 var(--gut-list) var(--v6);
+  background: linear-gradient(180deg,
+      rgba(11,10,8,.00) 0,
+      rgba(11,10,8,.90) 130px,
+      rgba(11,10,8,.95) 100%);
+}
+.al-txt p { margin-bottom: 1.05em; }
+.al-txt p:first-child::first-letter { font-size: 2.2em; font-weight: 450; line-height: .88; float: left; margin: .06em .11em 0 0; color: var(--ink); }
+
+.al-rule-hd { margin: var(--v5) 0 var(--v3); display: flex; align-items: center; gap: 12px; }
 .al-rule-hd:after { content: ''; flex: 1; height: 1px; background: var(--hair); }
 
-.al-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 22px; }
+/* A TAG'S FILL AND ITS LABEL PULLED THE SAME WAY. Both were mixed from
+   one hue, so they closed on each other from both sides and the worst
+   pair measured 1.71:1 — the worst text in the app. The hue lives in
+   the label and the rim now; the ground is a plate. */
+.al-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: var(--v4); }
 .al-tag {
-  display: inline-flex; align-items: center; height: 27px; padding: 0 11px; border-radius: 8px;
-  font-size: 11px; font-weight: 600; letter-spacing: .01em;
-  background: color-mix(in srgb, var(--tg) 22%, transparent);
-  color: color-mix(in srgb, var(--tg) 72%, var(--ink));
+  display: inline-flex; align-items: center; height: 30px; padding: 0 12px;
+  border-radius: var(--r-sq);
+  font-size: 13px; font-weight: 500; letter-spacing: .01em;
+  background: rgba(11,10,8,.78);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border: 1px solid color-mix(in srgb, var(--tg) 30%, transparent);
+  color: color-mix(in srgb, var(--tg) 66%, var(--ink));
 }
 .al-tag[data-f="inner"]  { --tg: #C9A227; }
 .al-tag[data-f="motion"] { --tg: #D2603A; }
@@ -204,32 +280,36 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .al-tag[data-f="time"]   { --tg: #8E9370; }
 
 .al-rule {
-  border-radius: var(--r-card); padding: 22px 22px 24px; margin-bottom: 12px;
-  background: rgba(255,255,255,.055);
-  box-shadow: 0 1px 0 rgba(255,255,255,.09) inset;
+  border-radius: var(--r-card); padding: var(--v4); margin-bottom: var(--v2);
+  background: var(--card); box-shadow: inset 0 1px 0 var(--card-edge);
 }
-.al-rule .al-caps { margin-bottom: 12px; }
-.al-rule b { display: block; font-size: 21px; font-weight: 600; line-height: 1.26; letter-spacing: -.016em; }
-.al-q { border-radius: var(--r-card); padding: 22px 22px 24px; border: 1px solid var(--hair); }
-.al-q .al-caps { margin-bottom: 12px; }
+.al-rule .al-caps { margin-bottom: var(--v2); }
+.al-rule b { display: block; font-size: 19px; font-weight: 600; line-height: 1.26; letter-spacing: -.016em; }
+.al-q { border-radius: var(--r-card); padding: var(--v4); border: 1px solid var(--hair); }
+.al-q .al-caps { margin-bottom: var(--v2); }
 .al-q b { display: block; font-size: 19px; font-weight: 500; line-height: 1.34; letter-spacing: -.012em; color: var(--dim); }
+
+/* THE STORY ENDED IN 150px OF RESERVED NOTHING. Both references close
+   their detail screen on a pair — a primary and a secondary — and the
+   only way out of this one was scrolling four thousand pixels back to
+   the close button. */
+.al-acts { display: flex; gap: var(--v2); margin-top: var(--v4); }
 
 /* ---- THE FOOT ---- */
 .al-foot {
-  position: fixed; left: 16px; right: 16px; bottom: 18px; z-index: 30;
-  height: 60px; border-radius: var(--r-pill);
+  position: fixed; left: 93px; right: 93px; bottom: var(--v4); z-index: 30;
+  height: 58px; border-radius: var(--r-pill);
   background: rgba(24,21,17,.62);
   backdrop-filter: blur(26px) saturate(1.5); -webkit-backdrop-filter: blur(26px) saturate(1.5);
   border: 1px solid var(--hair);
   display: grid; grid-auto-flow: column; align-items: center;
-  padding: 0 6px;
+  padding: 0 var(--v1);
 }
-.al-tab { height: 48px; border-radius: var(--r-pill); display: grid; place-items: center; color: var(--spent); }
+.al-tab { height: 46px; border-radius: var(--r-pill); display: grid; place-items: center; color: var(--dim); }
 .al-tab svg { width: 20px; height: 20px; display: block; }
 .al-tab[aria-current="true"] { background: rgba(255,255,255,.12); color: var(--ink); }
 
-/* ---- THE CLOSE ---- */
-.al-x { position: fixed; top: 18px; right: 16px; z-index: 30; }
+.al-x { position: fixed; top: 18px; right: var(--gut); z-index: 30; }
 </style>
 </head>
 <body>
@@ -237,9 +317,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 <div class="al-bg" id="alBg" aria-hidden="true"><i id="alBgI"></i><u></u></div>
 
 <section class="al-view is-on" id="alOpen">
-  <div class="al-mark">
+  <div class="al-mark" role="img" aria-label="Alignment">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v20M5 8l7-6 7 6M5 16l7 6 7-6"/></svg>
-    <b>Alignment</b>
   </div>
   <h1 class="al-disp" id="alOpenT">Twelve stories and one shape.</h1>
   <p class="al-note" id="alOpenN">The oldest stories we have are all the same story. Read one, and find out which part of it you are standing in.</p>
@@ -249,20 +328,18 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 <section class="al-view" id="alArc">
   <div class="al-head">
     <h1 class="al-disp-s">The Arc</h1>
-    <button class="al-round" aria-label="About Alignment">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 16v-5M12 8h.01"/><circle cx="12" cy="12" r="9"/></svg>
-    </button>
+    <span class="al-caps al-count"></span>
   </div>
   <div class="al-pane" id="alArcPane"></div>
 </section>
 
 <section class="al-view" id="alLaws">
-  <div class="al-head"><h1 class="al-disp-s">The Laws</h1></div>
+  <div class="al-head"><h1 class="al-disp-s">The Laws</h1><span class="al-caps al-count"></span></div>
   <div class="al-pane" id="alLawsPane"></div>
 </section>
 
 <section class="al-view" id="alRules">
-  <div class="al-head"><h1 class="al-disp-s">The Rules</h1></div>
+  <div class="al-head"><h1 class="al-disp-s">The Rules</h1><span class="al-caps al-count"></span></div>
   <div class="al-pane" id="alRulesPane"></div>
 </section>
 
@@ -392,7 +469,7 @@ var S = [
   laws:[{n:'Correspondence',f:'inner'},{n:'Sufficiency',f:'time'}],
   rule:'Having it and knowing you have it are two different acquisitions.',
   q:'What do you already have that you are still trying to get?' },
-{ id:'bridge', stage:'The Road Back', bg:'violet', mins:5,
+{ id:'bridge', stage:'The Road Back', bg:'cobalt', mins:5,
   n:'The Bridge You Burn Behind You', src:'Ours',
   laws:[{n:'Commitment',f:'motion'},{n:'Polarity',f:'time'}],
   rule:'A door left open behind you is a decision you have not finished making.',
@@ -403,6 +480,10 @@ var S = [
   rule:'The work outlives the worker, which is the only reason it is worth starting.',
   q:'What are you refusing to begin because you will not see it finished?' }
 ];
+
+/* The index is drawn on every card. A finite path that ends is the
+   app's whole claim, and nothing else on the Arc said so. */
+S.forEach(function (x, i) { x.no = ('0' + (i + 1)).slice(-2); });
 
 var $ = function (s) { return document.querySelector(s); };
 var el = function (t, c, x) { var n = document.createElement(t); if (c) n.className = c; if (x != null) n.textContent = x; return n; };
@@ -421,8 +502,24 @@ var bgNow = '';
 function bg(name) {
   if (name === bgNow) return;
   bgNow = name;
-  $('#alBgI').style.backgroundImage = 'url("../arc/bg/' + name + '.jpg")';
+  photo($('#alBgI'), name);
 }
+
+var IB = { desert:1.20, umber:2.00, iris:2.20, turtle:1.25, canyon:1.00,
+           delta:1.00, silk:0.95, curve:0.90, iceberg:0.85, nightfall:1.60,
+           abyss:1.70, cobalt:1.10 };
+
+/* violet.jpg cannot be graded into this set: its brightest pixel in a
+   phone crop is L102, darker than the references' own median, with 40%
+   of the frame under L8. Lifting it leaves three quarters black behind
+   a lilac flare. nightfall and abyss are the same shape of problem and
+   survive only as cards, where the veil covers the lower two thirds. */
+function photo(node, name) {
+  node.style.backgroundImage = 'url("../arc/bg/' + name + '.jpg")';
+  node.style.setProperty('--ib', IB[name] || 1);
+}
+
+var MARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v20M5 8l7-6 7 6M5 16l7 6 7-6"/></svg>';
 
 var ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>';
 
@@ -430,15 +527,32 @@ function cardOf(s) {
   var b = el('button', 'al-card' + (st.read.indexOf(s.id) >= 0 ? ' is-read' : ''));
   b.setAttribute('data-id', s.id);
   b.setAttribute('aria-label', s.n + '. ' + s.src + '. ' + s.mins + ' minutes.');
-  var i = el('i'); i.style.backgroundImage = 'url("../arc/bg/' + s.bg + '.jpg")';
-  b.appendChild(i); b.appendChild(el('u'));
-  b.appendChild(el('span', 'al-stg', s.stage));
-  var w = el('span', 'al-cb');
+  var h = el('div', 'al-ch');
+  h.appendChild(el('span', 'al-sq', s.no));
+  var g = el('span', 'al-go'); g.innerHTML = ARROW; h.appendChild(g);
+  b.appendChild(h);
+
+  /* THE STAGE IS NOT SAID TWICE. It was a chip on the card ten pixels
+     under a group heading printing the same words, in two tracked-caps
+     registers half a pixel and a tenth of an em apart — one label said
+     twice in what reads as one voice. */
+  var w = el('div', 'al-ct');
   w.appendChild(el('div', 'al-disp-s', s.n));
-  w.appendChild(el('div', 'al-caps', s.src + '  ·  ' + s.mins + ' min'));
+  w.appendChild(el('div', 'al-note', s.src + '  ·  ' + s.mins + ' min'));
   b.appendChild(w);
-  var g = el('span', 'al-go'); g.innerHTML = ARROW; b.appendChild(g);
+
+  var ph = el('div', 'al-ph');
+  var i = el('i'); photo(i, s.bg);
+  ph.appendChild(i); b.appendChild(ph);
   return b;
+}
+
+function mask(p) {
+  var f = function () {
+    p.classList.toggle('is-end', p.scrollTop + p.clientHeight >= p.scrollHeight - 2);
+  };
+  if (!p.alMask) { p.alMask = f; p.addEventListener('scroll', f, { passive: true }); }
+  p.alMask();
 }
 
 function paintArc() {
@@ -449,6 +563,7 @@ function paintArc() {
     p.appendChild(el('div', 'al-grp al-caps', STAGES[i]));
     for (var j = 0; j < here.length; j++) p.appendChild(cardOf(here[j]));
   }
+  mask(p);
 }
 
 function paintLaws() {
@@ -464,6 +579,7 @@ function paintLaws() {
     rows.forEach(function (l) { var t = el('span', 'al-tag', l.n); t.setAttribute('data-f', l.f); w.appendChild(t); });
     p.appendChild(w);
   }
+  mask(p);
 }
 
 function paintRules() {
@@ -474,6 +590,7 @@ function paintRules() {
     d.appendChild(el('b', null, s.rule));
     p.appendChild(d);
   });
+  mask(p);
 }
 
 function paintStory(s) {
@@ -481,34 +598,50 @@ function paintStory(s) {
   bg(s.bg);
 
   var lead = el('div', 'al-lead');
-  lead.appendChild(el('div', 'al-caps', s.src + '  ·  ' + s.mins + ' min'));
+  var mk = el('div', 'al-mark'); mk.innerHTML = MARK; lead.appendChild(mk);
   lead.appendChild(el('h1', 'al-disp', s.n));
+  lead.appendChild(el('div', 'al-caps', s.stage));
+  lead.appendChild(el('div', 'al-note', s.src + '  ·  ' + s.mins + ' min'));
   p.appendChild(lead);
+
+  /* Everything past the lead sits on its own ground, and the ground is
+     a CHILD of the scroll rather than the fixed photograph behind it. */
+  var sh = el('div', 'al-sheet');
 
   var t = el('div', 'al-txt al-body');
   (s.body || []).forEach(function (x) { t.appendChild(el('p', null, x)); });
-  p.appendChild(t);
+  sh.appendChild(t);
 
-  var h = el('div', 'al-rule-hd'); h.appendChild(el('span', 'al-caps', 'What it was teaching'));
-  p.appendChild(h);
+  var h = el('div', 'al-rule-hd'); h.appendChild(el('span', 'al-caps', 'What it teaches'));
+  sh.appendChild(h);
 
   var tg = el('div', 'al-tags');
   s.laws.forEach(function (l) { var x = el('span', 'al-tag', l.n); x.setAttribute('data-f', l.f); tg.appendChild(x); });
-  p.appendChild(tg);
+  sh.appendChild(tg);
 
-  if (s.teach) { var tb = el('p', 'al-body'); tb.textContent = s.teach; tb.style.marginBottom = '26px'; p.appendChild(tb); }
+  if (s.teach) { var tb = el('p', 'al-body'); tb.textContent = s.teach; tb.style.marginBottom = '22px'; sh.appendChild(tb); }
 
   var r = el('div', 'al-rule');
   r.appendChild(el('div', 'al-caps', 'The rule'));
   r.appendChild(el('b', null, s.rule));
-  p.appendChild(r);
+  sh.appendChild(r);
 
   var q = el('div', 'al-q');
-  q.appendChild(el('div', 'al-caps', 'What you are left with'));
+  q.appendChild(el('div', 'al-caps', 'The question'));
   q.appendChild(el('b', null, s.q));
-  p.appendChild(q);
+  sh.appendChild(q);
 
-  $('#alStoryPane').scrollTop = 0;
+  var nx = null, at = S.indexOf(s);
+  for (var k = at + 1; k < S.length; k++) { if (S[k].body) { nx = S[k]; break; } }
+  var acts = el('div', 'al-acts');
+  var a1 = el('button', 'al-pill is-grow', nx ? 'The next story' : 'Back to the Arc');
+  a1.setAttribute('data-go', nx ? nx.id : 'arc');
+  acts.appendChild(a1);
+  if (nx) { var a2 = el('button', 'al-pill is-glass', 'The Arc'); a2.setAttribute('data-go', 'arc'); acts.appendChild(a2); }
+  sh.appendChild(acts);
+
+  p.appendChild(sh);
+  p.scrollTop = 0; mask(p);
 }
 
 var VIEWS = ['open', 'arc', 'laws', 'rules', 'story'];
@@ -525,6 +658,9 @@ function view(v) {
     b.setAttribute('aria-current', b.getAttribute('data-v') === v ? 'true' : 'false');
   });
   $('#alBg').classList.toggle('is-sage', v === 'arc' || v === 'laws' || v === 'rules');
+  document.querySelectorAll('.al-count').forEach(function (n) {
+    n.textContent = st.read.length + ' of ' + S.length;
+  });
   if (v === 'arc') { bg('curve'); paintArc(); }
   if (v === 'laws') { bg('silk'); paintLaws(); }
   if (v === 'rules') { bg('umber'); paintRules(); }
@@ -541,14 +677,18 @@ function open(id) {
 }
 
 document.addEventListener('click', function (e) {
-  var t = e.target.closest ? e.target.closest('.al-tab, .al-card, #alOpenB, #alStoryX') : null;
+  var t = e.target.closest ? e.target.closest('.al-tab, .al-card, .al-pill, #alOpenB, #alStoryX') : null;
   if (!t) return;
-  if (t.id === 'alOpenB') return view('arc');
+  if (t.id === 'alOpenB') { var r = st.last && byId(st.last); return r && r.body ? open(r.id) : view('arc'); }
+  var go = t.getAttribute && t.getAttribute('data-go');
+  if (go) return go === 'arc' ? view('arc') : open(go);
   if (t.id === 'alStoryX') return view('arc');
   if (t.classList.contains('al-tab')) return view(t.getAttribute('data-v'));
   if (t.classList.contains('al-card')) return open(t.getAttribute('data-id'));
 });
 
+var resume = st.last && byId(st.last);
+if (resume) { $('#alOpenB').textContent = 'Continue'; $('#alOpenN').textContent = 'You stopped at ' + resume.n + '.'; }
 bg('desert');
 view('open');
 window.alDrive = { view: view, open: open };
