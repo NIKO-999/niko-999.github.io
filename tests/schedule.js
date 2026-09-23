@@ -7532,9 +7532,9 @@ const SAID = [
        which looks exactly like the page having scrolled sideways. */
     ok('exactly one card is on screen, and it is the first',
       first.lit.length === 1 && first.lit[0] === 'week'
-      && first.live.join('') === 'week' && first.inert === 2, first);
+      && first.live.join('') === 'week' && first.inert === 1, first);
     ok('...and the button says Continue on it, not the last word',
-      first.go === 'Continue' && first.step === 'Step 1 of 3', first);
+      first.go === 'Continue' && first.step === 'Step 1 of 2', first);
 
     /* ── THE LAST CARD IS THE TWO HIDDEN DOORS ──
        It was the objectives one, and the row of cards on the day
@@ -7543,14 +7543,22 @@ const SAID = [
        pair you cannot find by pressing around, which is the last card
        for the reason the objectives were — it is the one still on
        screen when the intro ends. */
-    for (let i = 0; i < 2; i++) {
+    /* ── ONCE, NOT TWICE, AND THAT WAS A CRASH RATHER THAN A FAIL ──
+       It advanced twice when there were three cards. With two, the
+       second press is the LAST card's button — which starts the week
+       and takes the intro off the screen, so `card()` then read
+       elements that were gone and threw, taking the file down rather
+       than failing here. Driven off the count instead of a literal,
+       so the day a card is added or removed this walks to the end of
+       whatever is there. */
+    for (let i = 0; i < first.n - 1; i++) {
       await ipage.evaluate(() => document.querySelector('.tr-go').click());
       await ipage.waitForTimeout(400);
     }
     const last = await card();
     ok('the last card is the two hidden doors, and it starts the week',
       last.live.join('') === 'back' && last.go === 'Start the week'
-      && last.step === 'Step 3 of 3', last);
+      && last.step === 'Step 2 of 2', last);
 
     /* ── THE POINTER IS GONE, AND SO IS WHAT IT POINTED AT ──
        That card drew a day card at its real proportions with the turn
@@ -7587,11 +7595,11 @@ const SAID = [
                  n: a.length, run: a.filter((x) => x === 'running').length };
       }));
     ok('every card’s icon is a scene that moves',
-      anim.length === 3 && anim.every((a) => a.n > 0), anim);
+      anim.length === 2 && anim.every((a) => a.n > 0), anim);
     /* ── AND ONLY THE ONE ON SCREEN IS RUNNING ──
-       Three of the four are laid out off the side at all times, and a
-       loop on one of them is a compositor pass a frame to draw what
-       nobody can see. The rule is written on the SUBTREE rather than
+       The other card is laid out off the side at all times, and a
+       loop on it is a compositor pass a frame to draw what nobody can
+       see. The rule is written on the SUBTREE rather than
        on a list of the elements in it, so the next scene added here is
        covered on the day it is added. */
     ok('...and the two off the side are paused',
@@ -7662,7 +7670,7 @@ const SAID = [
     const again = await card();
     ok('Settings plays it again, from the first card',
       row && await drawn() && again.live.join('') === 'week'
-      && again.step === 'Step 1 of 3', again);
+      && again.step === 'Step 1 of 2', again);
 
     /* A swipe moves it, which is what the dots promise. */
     const box = await ipage.$eval('.tr-win', (e) => {
