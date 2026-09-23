@@ -339,31 +339,27 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 <body>
 
 <section class="al-view is-on" id="alOpen">
-  <div class="al-hero"><i id="alOpenHero"></i></div>
   <div class="al-mark" role="img" aria-label="Alignment">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v20M5 8l7-6 7 6M5 16l7 6 7-6"/></svg>
   </div>
-  <h1 class="al-disp" id="alOpenT">Twelve stories and one shape.</h1>
-  <p class="al-note" id="alOpenN">The oldest stories we have are all the same story. Read one, and find out which part of it you are standing in.</p>
+  <h1 class="al-disp" id="alOpenT">What takes you off, and what carries you.</h1>
+  <p class="al-note" id="alOpenN">Fifty-seven named things, sorted into the two that matter. Nothing here is a story. Each one is what it is and what it does.</p>
   <button class="al-pill" id="alOpenB">Begin</button>
 </section>
 
-<section class="al-view" id="alArc">
-  <div class="al-head">
-    <h1 class="al-disp-s">The Arc</h1>
-    <span class="al-caps al-count"></span>
-  </div>
-  <div class="al-pane" id="alArcPane"></div>
+<section class="al-view" id="alDark">
+  <div class="al-head"><h1 class="al-disp-s">Dark</h1><span class="al-caps al-count"></span></div>
+  <div class="al-pane" id="alDarkPane"></div>
 </section>
 
-<section class="al-view" id="alLaws">
-  <div class="al-head"><h1 class="al-disp-s">The Themes</h1><span class="al-caps al-count"></span></div>
-  <div class="al-pane" id="alLawsPane"></div>
+<section class="al-view" id="alLight">
+  <div class="al-head"><h1 class="al-disp-s">Light</h1><span class="al-caps al-count"></span></div>
+  <div class="al-pane" id="alLightPane"></div>
 </section>
 
-<section class="al-view" id="alRules">
-  <div class="al-head"><h1 class="al-disp-s">The Rules</h1><span class="al-caps al-count"></span></div>
-  <div class="al-pane" id="alRulesPane"></div>
+<section class="al-view" id="alLessons">
+  <div class="al-head"><h1 class="al-disp-s">The Lessons</h1><span class="al-caps al-count"></span></div>
+  <div class="al-pane" id="alLessonsPane"></div>
 </section>
 
 <section class="al-view" id="alLaw">
@@ -373,21 +369,14 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   <div class="al-pane" id="alLawPane"></div>
 </section>
 
-<section class="al-view" id="alStory">
-  <button class="al-round al-x" id="alStoryX" aria-label="Close the story">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
-  </button>
-  <div class="al-pane" id="alStoryPane"></div>
-</section>
-
 <nav class="al-foot" id="alFoot">
-  <button class="al-tab" data-v="arc" aria-current="true" aria-label="The Arc">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 18c4-10 14-10 18 0"/><circle cx="3" cy="18" r="1.6" fill="currentColor" stroke="none"/><circle cx="21" cy="18" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="10.6" r="2.1"/></svg>
+  <button class="al-tab" data-v="dark" aria-current="true" aria-label="Dark">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
   </button>
-  <button class="al-tab" data-v="laws" aria-label="The Themes">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 4v16M5 8h14M7.5 8 5 15h5zM16.5 8 14 15h5z"/></svg>
+  <button class="al-tab" data-v="light" aria-label="Light">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7"/></svg>
   </button>
-  <button class="al-tab" data-v="rules" aria-label="The Rules">
+  <button class="al-tab" data-v="lessons" aria-label="The Lessons">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 5h14v14H5zM9 10h6M9 14h4"/></svg>
   </button>
 </nav>
@@ -406,739 +395,208 @@ var KEY = 'align.v1';
 
 /* The stages are the path. Stories are filed at the one they belong to,
    so a stage with nothing at it simply has nothing at it. */
-var STAGES = ['The Call', 'The Refusal', 'The Mentor', 'The Threshold',
-              'The Trials', 'The Ordeal', 'The Reward', 'The Road Back', 'The Return'];
 
 var S = [
-{
-  id: 'stove', stage: 'The Call', bg: 'desert', mins:2,
-  n: 'The Course',
-  ab: 'Paying to hear what you had already written down', src:'Ours',
+{ id:'stove', src:'Ours',
   laws: [
     { n: 'The Answer You Are Carrying', f: 'inner', d: 'The answer was in his own notebook, eleven times, in his own handwriting.' },
     { n: 'The Walk', f: 'motion', d: 'He had been told it for years. It became true the week he spent everything getting to it.' },
     { n: 'The Stranger’s Mouth', f: 'others', d: 'It came from a man who was not trying to help him and would not remember saying it.' }
   ],
-  teach: 'Coelho built The Alchemist out of this. Santiago, the sheep, the pyramids, the treasure back under the tree he started from — all of it is here, seven hundred years earlier, in about a page. Knowing that is useful, because it tells you the shape is older and more reliable than any one telling of it.',
   rule: 'You already wrote down the answer. You will still pay somebody to say it to you.',
-  q: 'What are you standing on, refusing to dig, because it is too close to be treasure?',
-  body:[
-    "He saved for two years to get into the room.",
-    "It was not cheap and it was not a scam either, which made it harder afterwards. A real man with a real record, a small group, four days, in a city he had never been to. He borrowed the last part of it and told nobody at work where he was going.",
-    "He had wanted this a long time. He kept a page at the back of a notebook with the questions he would ask if he ever got in the room, and by the time he got there the page was full.",
-    "The four days were good. He is careful about that when he tells it. The man was generous and said true things and sold nothing from the stage.",
-    "On the last afternoon he got his turn.",
-    "He laid it all out, fast, because others were waiting. The flat account. The system built and rebuilt. Everything he had tried.",
-    "The man listened, and thought for a moment, and said: you are trading too big and too often, and I think you already know that.",
-    "That was the whole answer.",
-    "He flew home the next morning. Somewhere over the water he got the notebook out to write it down before he lost it, turned to a clean page, and had to go back a few pages to find one.",
-    "It was already in there.",
-    "Not once. Eleven times, over two years, in his own handwriting, in eleven different moods. Too big. Too often. Size is the problem. Stop taking the second one. One of them underlined twice.",
-    "His old boss had said it to him in a car park. His brother, who knows nothing about any of it, had said a version of it at Christmas and been told he did not understand.",
-    "He sat with the notebook open and what he felt was not embarrassment.",
-    "It was that he could hear it now.",
-    "He had read those words eleven times and they had been information. A man three thousand miles away had said them once and they had gone somewhere further in, and the only difference between the eleven times and the once was everything it had cost to be sitting in that chair.",
-    "He does not think the trip was wasted. He does not think it was necessary either, in the way people mean that word. He thinks he could have had it for free, and did, and that the telling was never the problem.",
-    "He trades smaller now. One a day, and he takes the first one.",
-    "Somebody asked him what the course was like and he said it was good and left it there, because the only honest version is that he paid a great deal of money to hear something he had written down himself, and that it worked."
-  ]
-},
-{ id:'lamp', stage:'The Call', bg:'umber', mins:2,
-  n: 'The Lessons He Skipped',
-  ab: 'The work with nothing enjoyable in it', src: 'Harry Potter',
+  q: 'What are you standing on, refusing to dig, because it is too close to be treasure?' },
+{ id:'lamp', src:'Harry Potter',
   laws: [
     { n: 'The Lit Ground', f: 'inner', d: 'Learning to code has a screen that tells you it worked. Sitting still after a loss has nothing at all.' },
     { n: 'The Walk', f: 'motion', d: 'He could have named the problem at three in the morning for a year and a half.' },
     { n: 'The Quiet Middle', f: 'time', d: 'What fixed it was four minutes of doing nothing, then four minutes again, and nobody watched.' }
   ],
   rule: 'The work that decides it usually has no audience, no progress you can see, and somebody you dislike attached to it.',
-  q: 'What are you doing brilliantly that is not the thing?',
-  teach: 'Order of the Phoenix. The Occlumency lessons are the only thread that year with no reward in them, and the book is deliberate about running them alongside Dumbledore’s Army, which has every reward and decides nothing.',
-  body:[
-    'He is told exactly what to do and he does not do it.',
-    'There is a door in his dreams. He has been walking down the same corridor all year and Dumbledore knows why — the connection is open, it runs both ways, and Voldemort can eventually use it. So Harry is sent to learn Occlumency, to close his own mind, and it is the one piece of work that year with absolutely nothing in it for him.',
-    'There is no flying. Nobody watches. He is bad at it, which for him is unusual and humiliating. The instruction is to empty himself of emotion, which is the single hardest thing to ask of him that year. And the person teaching it is Snape.',
-    'So he goes to the lessons, and he does the hour, and he does not practise.',
-    'That is the whole of it, and the thing worth noticing is that he is not lazy that year. He is the opposite of lazy.',
-    'He runs Dumbledore\'s Army. He teaches thirty students in a room that appears when he needs it, under a regime that would expel him for it, and he is genuinely excellent at it — Neville gets good, everybody gets good, and it is the best thing he does at that school. It is visible. It is exciting. People can see him doing it and they can see him being right about it.',
-    'The boring thing with no light on it is the one that mattered.',
-    'Then it ends badly. He looks into the Pensieve, because it is sitting there and he cannot stop himself, and what he sees is his father being a bully and Snape on the floor. Snape throws him out and refuses to teach him again, and Harry does not push, because now he has a reason not to.',
-    'And the door is still open.',
-    'Voldemort puts a picture through it. Sirius, at the Department of Mysteries, held and hurt and calling for him.',
-    'Hermione tells him it could be a trap. She says it out loud, in the room, more than once. She is right, and she has no way to prove it, and neither does he — because the only method for telling a planted feeling from a real one is the exact discipline he spent the year not practising.',
-    'So he goes, and takes five friends with him, and Neville\'s wand gets broken and Hermione is nearly killed and Sirius goes through the veil.',
-    'Dumbledore takes it on himself afterwards. He says he should have taught Harry personally, that he did not because he could not look at him, that his own failing was an old man\'s weakness. It is decent and it is true and it is not quite the point.',
-    'Harry was told. By somebody he trusted. He was given the method, given the hour, given the whole year.',
-    'And nothing about that failure looked like failure while it was happening.',
-    'It looked like the best year he had ever had.'
-  ] },
-{ id:'leap', stage:'The Call', bg:'cobalt', mins:2,
-  n:'The Leap', ab:'What a jump is actually made of, from inside', src:'Ours',
+  q: 'What are you doing brilliantly that is not the thing?' },
+{ id:'leap', src:'Ours',
   laws: [
     { n: 'The Picture Makes Tuesday Feel Like Failure', f: 'inner', d: 'The hours went in, nothing moved, and nothing was ever going to move on a Tuesday.' },
     { n: 'Sacrifice Now Or Sacrifice It', f: 'motion', d: 'The evenings were the bill. Declining it for two years did not cancel it, it just moved what got given up.' },
     { n: 'A Leap Is Seen From Outside', f: 'time', d: 'Two or three hundred days, most of them the same, and the only thing that made it a leap is that nothing interrupted them.' }
   ],
-  rule:'A leap is what a long run of ordinary days looks like from outside, afterwards.',
-  q:'What does the picture actually require of this Tuesday?',
-  teach:'Nothing about a compounding process feels like it is compounding while you are inside it, and the gap between the picture and the day is where almost everybody restarts. The restarts are the cost, and they are made of ambition rather than laziness, which is why they are so hard to see as the problem.',
-  body:[
-    'He wants a different life in nine months and he is not being stupid about it. He has watched it happen to people. It is a real thing and it has a real shape.',
-    'What he had wrong was what it is made of.',
-    'A leap is a description of the outside. From out there somebody\'s life changes inside a year and it reads as a jump, because you were not present for the middle and the middle does not photograph.',
-    'From inside it there is no jump anywhere in it. It is somewhere between two and three hundred days, most of them identical, almost none of them interesting, and the only thing that turned them into a leap is that nothing interrupted them.',
-    'Which is where the picture starts working against him, and this is the part worth knowing before it happens rather than after.',
-    'Hold a big enough image of where you are going and an ordinary day begins to read as evidence that it is not happening. You put the hours in, nothing moved, and nothing was ever going to move on a Tuesday — but the gap between the picture in your head and the day you just had is uncomfortable, and people do something about discomfort.',
-    'What they do is change the plan. Find a bigger lever. Start again with a better system, which will definitely work this time.',
-    'Every one of those restarts is what actually costs the nine months. Not laziness. Ambition, applied to the wrong end of the problem.',
-    'So he did it the other way round. He wrote down where he wants to be, then worked backwards to what a month has to contain, then a week, then a day.',
-    'The day is boring.',
-    'That is the correct answer and it was still a disappointment for about a week, and he thinks anybody honest would say the same.',
-    'He keeps both now. The picture is what gets him up in a room he does not want to be in. The day is what actually does it. What changed is that he stopped requiring the day to feel like the picture, and started checking a much smaller thing, which is whether he did it.',
-    'The leap is real.',
-    'Nobody is in the air for any of it.'
-  ] },
-{ id:'cup', stage:'The Refusal', bg:'curve', mins:2,
-  n: 'Explaining',
-  ab: 'Why advice cannot land while you are defending', src:'Ours',
+  rule: 'A leap is what a long run of ordinary days looks like from outside, afterwards.',
+  q: 'What does the picture actually require of this Tuesday?' },
+{ id:'cup', src:'Ours',
   laws: [
     { n: 'The Full Cup', f: 'inner', d: 'He had prepared a page of notes about what the problem was, and brought them to a man he was asking what the problem was.' },
     { n: 'The Cost of Being Right', f: 'inner', d: 'Letting it be the problem meant the last two years had been aimed at the wrong thing.' },
     { n: 'The Stranger’s Mouth', f: 'others', d: 'Nine words, in the first two minutes, for nothing — and he argued with them twice and drove home.' }
   ],
   rule: 'You cannot hear advice while you are explaining why it will not work.',
-  q:'What would you have to stop being right about?',
-  teach:'A scholar goes to a master to ask about Zen, and the master pours his tea until it is running off the table.',
-  body:[
-    "He asked a man he respected to look at his account.",
-    "It was not a small thing to ask. The man had been doing it fifteen years, did not teach, did not post, and said yes as a favour to somebody they both knew. They got a coffee on a Saturday.",
-    "He had prepared. The whole thing on one screen, colour coded, with a page of notes about what he thought the problem was.",
-    "He talked for eleven minutes before the other man said anything.",
-    "Then the man said: your winners and your losers are the same size.",
-    "And he said yes, but.",
-    "He does not remember what came after the but. There was quite a lot of it. He explained the strategy and why the win rate made that acceptable, and about a stretch in the spring that skewed everything, and he pulled up a version with the spring taken out.",
-    "The man looked at it and said: still the same size.",
-    "And he said yes, but on that particular sample.",
-    "They were there an hour and a half. He was polite the whole time and asked good questions, and every single time the man said something he said yes and then explained.",
-    "He drove home feeling it had gone quite well and that the man had not really understood his setup.",
-    "It took him months to see it, and what did it was watching somebody do it to him. A lad at work asked his advice and he gave it, and the lad said yes but, and then explained, and he sat there watching a person burn twenty minutes of free help defending the thing he had come for help with.",
-    "He went home and thought about the coffee.",
-    "Your winners and your losers are the same size. That was the answer. Nine words, from a man with fifteen years, in the first two minutes, for nothing.",
-    "He had heard it twice and argued with it twice and driven home.",
-    "He had not had the number wrong. He knew the number. What he could not do was let it be the problem, because letting it be the problem meant the last two years had been aimed at the wrong thing, and he had gone to that coffee shop to be told he was close.",
-    "That is what he had actually gone for. He did not know it until the lad at work said yes but.",
-    "He does not ask people to look at it often now. When he does he has a rule, which is that he does not get to talk for the first ten minutes.",
-    "It is a stupid rule and it works, and it works because it is very hard to explain yourself while you are not talking."
-  ] },
-{ id:'river', stage:'The Refusal', bg:'silk', mins:2,
-  n: 'Sailing West',
-  ab: 'Nobody is going to grant you the voyage', src: 'Vikings',
+  q: 'What would you have to stop being right about?' },
+{ id:'river', src:'Vikings',
   laws: [
     { n: 'The River Does Not Wait', f: 'time', d: 'Every year he prepared, the thing he was preparing for went past at its own rate.' },
     { n: 'The Number That Moves', f: 'time', d: 'Six months, then nine, then a year, then a year in the new money. Each one more sensible than the last.' },
     { n: 'The Walk', f: 'motion', d: 'No size of account answers whether you are good enough. Only going does, and he did not want the answer.' }
   ],
   rule: 'Nobody in charge of the old thing will authorise the thing that proves them wrong. Build it and go.',
-  q: 'Whose permission are you still waiting for?',
-  teach: 'Vikings, the first voyage west. Ragnar asks and is refused repeatedly before he builds the ship in secret — the show is careful to put the asking in, and careful to show that what made it work was the boat and the navigation rather than the nerve.',
-  body:[
-    'Every summer they raid east, because east is what the Earl permits.',
-    'Ragnar thinks there is land west across open water, and he has no proof that anybody in that hall would accept. What he has is a conviction, a rumour, and a way of finding latitude with a sun-board when there is no coastline to follow. He shows it to Rollo on a beach and even his own brother is not sure.',
-    'So he asks. This is the part worth slowing down for, because he does ask, properly, more than once.',
-    'He goes to Earl Haraldson in front of everybody and puts the case. He is refused. He goes again. He is refused again and told plainly that the raids go east, to the Baltic, to places they already know, and that a farmer does not decide where the ships go.',
-    'Nobody was ever going to say yes.',
-    'Not because Haraldson is stupid — he is not, he is shrewd and frightened and both of those are rational. A man in charge of a thing does not authorise an expedition that would prove him wrong about the last twenty years of his own decisions. And from where he is sitting, Ragnar is a farmer with a story about a stone.',
-    'So Ragnar stops asking and starts building.',
-    'Floki does it, in the trees, out of sight — and it is a different kind of ship, built for open sea rather than for rivers and coasts, shallow and light and able to take weather that would end the boats they have. It takes a season. Ragnar farms during the day and goes to look at it in the evenings.',
-    'Then he needs a crew, and he gets one the only way it can be got, which is one man at a time, quietly, from people who have nothing much to lose by coming.',
-    'What is easy to miss here is how little of this is courage and how much of it is preparation. He did not sail off into the west on hope. He had the boat, he had the navigation, he had men. He went without permission, which is a completely different act from going without permission and hoping.',
-    'Haraldson finds out and sends his own man along to watch. Even that Ragnar takes, because the point was never to win the argument. It was to go.',
-    'Then Lindisfarne. A monastery with no walls and no guard, more silver in one room than the whole settlement has seen in a decade, and a young monk called Athelstan who speaks their language and comes back with them.',
-    'And then the part that is the actual lesson.',
-    'They come home and the permission is suddenly not the question any more. Haraldson takes the spoils, because he is still the Earl and that is what an Earl does — and it does not matter, because everybody in that hall has now seen what is west, and no amount of authority puts that back in the box.',
-    'Ragnar never became a man the Earl considered ready.',
-    'He became a man the question no longer applied to.'
-  ] },
-{ id:'horse', stage:'The Mentor', bg:'canyon', mins:2,
-  n: 'Pity',
-  ab: 'The verdict delivered years too early', src: 'The Lord of the Rings',
+  q: 'Whose permission are you still waiting for?' },
+{ id:'horse', src:'The Lord of the Rings',
   laws: [
     { n: 'Two Ends of One Thing', f: 'time', d: 'Redundancy, a better job, walking out, four years on his own. Four events, four verdicts, all early.' },
     { n: 'The Early Verdict', f: 'inner', d: 'Everyone around him was certain every time, and being wrong four times never slowed them down.' },
     { n: 'Nothing Has a Size of Its Own', f: 'time', d: 'Eleven thousand more was a triumph until it was measured against fourteen months of Sunday evenings.' }
   ],
   rule: 'You deliver the verdict long before the story is finished, and then live as though it were settled.',
-  q: 'What did you close the account on too early?',
-  teach: 'Gandalf to Frodo in Moria, and the payoff at Mount Doom. He does not claim Gollum will turn out good — he says for good or ill, which is the honest version and the one that makes the ending land.',
-  body:[
-    'It starts in a tunnel under a mountain with two people who have never met.',
-    'Bilbo is lost in the dark and there is a thing down there with him, and they play a game for it, and Bilbo wins by cheating slightly. Then Gollum works out what has happened to his ring, and comes for him, and Bilbo is standing behind him, invisible, with a sword, and Gollum cannot see him at all.',
-    'It would have been the easiest thing in the world and nobody would ever have known.',
-    'He jumps over him instead.',
-    'Years later Frodo hears the whole story in a room in the Shire and says the obvious thing, which is that it is a pity Bilbo did not kill him when he had the chance.',
-    'Gandalf does not dispute a single fact.',
-    'He does not say Gollum is harmless, because he is not. He does not say Gollum will not betray them, because he will. Everything Frodo believes about him is correct and Gandalf knows it better than Frodo does, having had him tortured in Mordor and questioned him afterwards.',
-    'What he says is that pity stayed Bilbo\'s hand. That many that live deserve death, and some that die deserve life, and can you give it to them. That you should not be too eager to deal out death in judgement, for even the very wise cannot see all ends.',
-    'And then the line that is not comfort at all: his heart tells him that Gollum has some part to play yet, for good or ill, before this is over.',
-    'For good or ill. He is not promising it turns out well. He is saying the account is not closed.',
-    'Then the whole of the rest of it happens, and Sam is right about Gollum every single time.',
-    'He leads them through the Dead Marshes, which nobody else alive could have done, and Frodo shows him the same mercy Bilbo did and gets the same thing back for it — for a while. He is loyal in his way. He is also, the whole time, working out how to take it, and at Cirith Ungol he walks them into a spider and it very nearly ends everything there.',
-    'Sam wanted to kill him at the start. Sam was right on the facts and wrong about the story.',
-    'Because at the Crack of Doom, Frodo fails.',
-    'That is the part it is easy to lose in the retelling. Frodo does not throw the Ring into the fire. He stands at the last step, after everything, and puts it on and claims it for himself, and the quest is over and lost in that second.',
-    'And Gollum bites it off his hand and goes into the fire with it, dancing.',
-    'The creature who should have been killed in a tunnel sixty years earlier is the reason the world does not end.',
-    'Nobody planned that. Gandalf did not know it — he said for good or ill and he meant it. What he knew was narrower and more useful: that the verdict had been delivered a long way before the story was finished, and that a man who closes the account early has stopped being able to be surprised by it.'
-  ] },
-{ id:'box', stage:'The Mentor', bg:'turtle', mins:2,
-  n: 'The Box',
-  ab: 'What you were like before anybody got at you', src:'Ours',
+  q: 'What did you close the account on too early?' },
+{ id:'box', src:'Ours',
   laws: [
     { n: 'The Answer You Are Carrying', f: 'inner', d: 'Two hundred pages of the exact thing he was paying an app to make him do, in a box, in his own handwriting.' },
     { n: 'The Narrow Gift', f: 'motion', d: 'He could stay on one thing past the point anybody else was interested. He traded it for being easy to talk to.' },
     { n: 'What Got Rewarded', f: 'others', d: 'Nobody told him to stop. He read it off a pause in a conversation when he was about fourteen.' }
   ],
-  rule:'Whatever you did at nine, for nobody, with nothing riding on it, is the closest thing to a fact about you that exists.',
-  q:'What were you like before anybody had got at you?',
-  teach:'Nobody sat you down and decided what you would be like. You repeated whatever got a reaction and dropped whatever got a look, at an age when you had no way to tell a preference from a correction.',
-  body:[
-    'He was clearing his things out of the back room and found a box with his name on it.',
-    'There was the usual in it. Then there was a pad, A4, about two hundred pages, and every page was a table he had drawn by hand with a ruler.',
-    'It was a football season. Every game, every score, every scorer, copied out of the paper on a Sunday morning and totalled up, week by week, from August to May. He had been nine. The columns were straight. Where he had run out of room he had taped another page on.',
-    'Nobody had asked him to do it. He is fairly sure nobody knew he was doing it.',
-    'He sat on the floor with it and what he felt was not what you would expect. It was not nostalgia and it was not embarrassment either.',
-    'It was that he had spent the last two years trying to make himself keep a daily record, and failing, and paying for two different apps to help him, and reading about habits — and here was two hundred pages of exactly that, done by a nine-year-old, on a Sunday, for fun, in pen.',
-    'Nobody had motivated him. There was no streak to protect and nothing to show anybody.',
-    'So the question is not how does he become the sort of person who keeps a record. He already is one. The evidence is in a box.',
-    'The question is what happened.',
-    'He can more or less date it. Somewhere around thirteen or fourteen he worked out that being deep into one thing was a liability. Not from anything anybody said outright. From the pause when he answered a question about it, and from being asked whether he did anything else.',
-    'So he got a range. He learned to have three or four things he could talk about for two minutes each, and to change the subject before the other person had to. He became, by every account including his own, considerably easier to be around.',
-    'What he gave up for it was the only thing on that list worth anything.',
-    'He is not trying to be nine and he has not taken up football. What he changed is small and it happens in conversations.',
-    'Somebody asks what he is into and he tells them. Properly. Past the point where it is interesting, into the part that is only interesting to him, and he watches them start to go and he does not rescue them.',
-    'It costs him something every time, and he has decided it is worth it, because he now knows what it bought.',
-    'The pad is on the shelf behind his desk. Not as a keepsake. As a reference for what he is actually like before anybody has got at him.'
-  ] },
-{ id:'ferry', stage:'The Threshold', bg:'nightfall', mins:3,
-  n: 'The Black Suit',
-  ab: 'The power that works, and then starts steering', src: 'Spider-Man 3',
+  rule: 'Whatever you did at nine, for nobody, with nothing riding on it, is the closest thing to a fact about you that exists.',
+  q: 'What were you like before anybody had got at you?' },
+{ id:'ferry', src:'Spider-Man 3',
   laws: [
     { n: 'What Only Made Sense Back There', f: 'motion', d: 'The list got him up at five for six years and there was no version of the next thing it could give him a reason for.' },
     { n: 'The Borrowed Engine', f: 'others', d: 'Four people who had doubted him had been choosing what mattered, every morning, for six years.' },
     { n: 'The Toll', f: 'motion', d: 'He offered the hours and the money and the risk. None of those were the fare.' }
   ],
   rule: 'A power that makes you worse gets dropped in a week. The dangerous one is the power that genuinely works.',
-  q: 'What is working for you that you would not want to become?',
-  teach: 'Spider-Man 3, the symbiote arc. Connors states the mechanism out loud early — it bonds and amplifies, particularly aggression — and the film then spends an hour showing that the problem with a thing that amplifies you is that it works.',
-  body:[
-    'It arrives on a rock while he is sitting in a park with the girl, and neither of them notices.',
-    'He finds out what he has the way you find out about anything like this, which is that everything is suddenly easier. He wakes up on the side of a building in a suit he did not put on. The webs come quicker. He is stronger. He goes after Sandman in the subway and handles him in a way he could not have a week earlier, and none of that is a trick or a lie — the suit does exactly what it appears to do.',
-    'It also amplifies what is already in there, and what is already in there is anger.',
-    'Connors tells him this outright. It is symbiotic, it bonds, and it amplifies characteristics, especially aggression. Peter hears it the way everybody hears that kind of warning, which is as a fact about somebody else.',
-    'Then you watch it work.',
-    'Eddie Brock fakes a photograph to take his job. Peter does not simply expose him — he waits for the room to be full, does it in front of Jameson, and stands there while Brock loses everything and says that he needs this job. There is a version of that scene where Peter is right and it takes thirty seconds. This is not that version. He enjoys it.',
-    'Mary Jane is losing the thing she has wanted her whole life and he does not notice for weeks, because he is busy being adored in the street.',
-    'And then the club. He takes another girl there to be seen, to hurt Mary Jane, and he gets what he came for, and then it goes further than he meant and he hits her. Not a decision. The end of a run of decisions.',
-    'The thing he cannot argue with in any of this is that it is winning.',
-    'That is the whole difficulty and it is why he keeps it as long as he does. If the suit made him worse at the job he would have taken it off in a week and never thought about it again. It makes him better at the job. Every fight is going his way. The photographs are better. What it costs is not results — it is the person collecting them, and that bill does not arrive itemised.',
-    'He takes it off in a bell tower, and how he does it matters more than that he does it.',
-    'He does not out-will it. He cannot; there is no argument to win with a thing that is amplifying the person making the argument. He gets it off by climbing up into a sound loud enough to break the bond. He changed the room. That is the whole mechanism, and it is the only one available.',
-    'The suit comes off him and drops onto Brock, who is directly below, praying for Peter to die. It goes exactly where it was always going to go, which is into whoever wants it most.',
-    'Then the part people forget.',
-    'He fights the last one as himself, with no suit, against a thing that now has everything the suit gave him and a man inside it who has a real reason to hate him. And he is losing.',
-    'Harry comes.',
-    'Harry, who he had written off, who had every reason in the world not to come, who had been told the truth about his father by a butler and could have kept it to himself. He turns up because somebody went and asked him, and between the two of them it is finishable, and it kills him.',
-    'The suit was the version of Peter that needed nobody.',
-    'The other one had to be worth turning up for, which is a much harder thing to be.'
-  ] },
-{ id:'above', stage:'The Threshold', bg:'cobalt', mins:2,
-  n: 'The Step Back',
-  ab: 'Stopping because the next version would have', src:'Ours',
+  q: 'What is working for you that you would not want to become?' },
+{ id:'above', src:'Ours',
   laws: [
     { n: 'A Picture Is Not a Rehearsal', f: 'inner', d: 'A year of knowing exactly what that man did on a Tuesday, at no cost, while doing none of it.' },
     { n: 'Mostly It Is Not Doing Things', f: 'motion', d: 'The man in the picture was not busier than him. He simply would not have given six weeks to that job.' },
     { n: 'The Toll', f: 'motion', d: 'He paid for the crossing in the one currency he actually had, which was six weeks of money he needed.' }
   ],
-  rule:'Picturing the next version of you costs nothing, which is why you can do it for a year and not move.',
-  q:'What would the version of you one level up have said no to this week?',
-  teach:'The useful half of visualising is that it tells you what that person does. It is not doing it. Those are two separate acquisitions and almost everybody completes the first and stops there.',
-  body:[
-    'He had the picture and it was a good one.',
-    'He could tell you what that version of him did with a morning. What he read. What he did not look at. How he handled a week where nothing was working. Some of it was written down, he thought about it most days, and it was genuinely clear.',
-    'Nothing happened for a year.',
-    'He was not lazy about it either, and that is the part to be accurate about. He worked hard that year. He worked hard in exactly the way he had worked hard the year before.',
-    'What broke it was a bad run.',
-    'Not a catastrophe. A long flat stretch where he was down, and tired of it, and the honest version was that he had stopped learning months earlier and was pressing buttons on a system he no longer fully understood.',
-    'And the man in the picture would have stopped.',
-    'Not quit. Stopped. Shut it for a stretch and gone back to reading, because that version does not run a process he cannot explain out loud.',
-    'So he closed it, and then sat there feeling sick, because stopping while you are down is the one move that feels exactly like giving up and is not. Everybody he could think of would have read it as quitting. He was not sure himself.',
-    'Here is what actually happened, and it is not the story he expected to be telling.',
-    'Nothing arrived. Nobody told him he was right. Nothing stepped in.',
-    'What he had was empty weeks.',
-    'He spent them on the thing he had been saying for two years he would do when he had the time — read properly, and rebuild the process from the floor up rather than patching it. At the end of it there was something he could actually explain, and that is what changed the year after.',
-    'Not the decision. The weeks the decision freed up.',
-    'That is most of what the level above turns out to be. It is not somebody doing more. It is somebody doing considerably less, and having the room that makes.',
-    'He is careful telling it, because it sounds like a story about faith and it is not one. He took a real risk, it could have gone the other way, and he would have been further behind and wrong.',
-    'What he says instead is that he had a very clear picture of a man he was not being, for a year, at no cost at all, and that the picture did nothing whatsoever until it cost him something.'
-  ] },
-{ id:'alone', stage:'The Threshold', bg:'nightfall', mins:2,
-  n:'The Reason He Gave', ab:'A reason you cannot check from the inside', src:'Ours',
+  rule: 'Picturing the next version of you costs nothing, which is why you can do it for a year and not move.',
+  q: 'What would the version of you one level up have said no to this week?' },
+{ id:'alone', src:'Ours',
   laws: [
     { n: 'The Convenient Reason', f: 'inner', d: 'True, checked more than once, and also the single most convenient thing he could possibly believe.' },
     { n: 'What The Months Say', f: 'time', d: 'Not whether the reason was good. Whether the room it made gets spent on the thing he cleared it for.' },
     { n: 'The Toll', f: 'motion', d: 'He paid for the crossing in the one currency that was actually his to spend, and somebody else felt it.' }
   ],
-  rule:'A reason you cannot check from the inside gets checked by what you do with the room it made.',
-  q:'What are you about to find out about a decision you have already taken?',
-  teach:'You cannot audit your own motives by examining them, because the examining is done by the party with an interest. What you can audit is the following six weeks, which is why the only honest question is not was I right but what did I do with it.',
-  body:[
-    'He ended it, and she did not want it ended, and he is not going to dress that up.',
-    'The reason he gave is true. He is in a small room in his family\'s house with no money coming in and a plan that is going to need all of him for a while. She wanted a life he cannot start yet — not a greedy one, an ordinary one, the one most people want by now — and every month he stayed was a month of hers he was spending on a timetable only he could see.',
-    'All of that is accurate and he has checked it more than once.',
-    'It is also the single most convenient thing he could possibly believe.',
-    'That is the part that has kept him up. There is a version of this where a man wanted to be left alone with his own ambition and went and found a generous-sounding reason for it, and from the inside that version and this one are identical. Same words. Same sad conversation. Same relief underneath it that he has not admitted to anybody.',
-    'He cannot tell which one he is. He has tried.',
-    'He has gone over it the way he goes over everything, which is thoroughly and at night, and what he has worked out is that this is not a thing thinking can settle. The thinking is being done by the person who benefits from the answer.',
-    'So he stopped trying to establish whether he was right.',
-    'What he has instead is a test, and the test is not about the reason at all.',
-    'If the months after this are months of work — if he reads, and trains, and puts the hours in on the thing he said needed all of him — then the reason was real, because he will have spent the room on what he said he was clearing it for.',
-    'If they are months of relief and a phone and a room he does not leave, it was a cover story. A good one, believed sincerely, and still a cover story.',
-    'He will know inside six weeks and so will anybody watching.',
-    'He is not at peace with it and he does not think he is meant to be. He misses her. He thinks she will be better off and he is aware that this is also the convenient thing to think.',
-    'What he has is a question he cannot argue his way out of, which is more than he had a month ago, and the first few weeks of the only evidence that is ever going to come in.'
-  ] },
-{ id:'cutter', stage:'The Trials', bg:'abyss', mins:2,
-  n: 'The Number He Never Named',
-  ab: 'Getting out at a figure he never wrote down', src: 'Snowfall',
+  rule: 'A reason you cannot check from the inside gets checked by what you do with the room it made.',
+  q: 'What are you about to find out about a decision you have already taken?' },
+{ id:'cutter', src:'Snowfall',
   laws: [
     { n: 'The Number You Never Wrote Down', f: 'inner', d: 'He said he was getting out from the first season and never once said at what.' },
     { n: 'Nothing Has a Size of Its Own', f: 'time', d: 'Every figure that would have been enormous a year earlier became the new floor within weeks of reaching it.' },
     { n: 'The Quiet Middle', f: 'time', d: 'The moment to collect went past in an ordinary month with nothing happening, which is when it always goes past.' }
   ],
   rule: 'If you have not named the number you are stopping at, you are not going to stop.',
-  q: 'What is the figure you are getting out at, exactly?',
-  teach: 'Snowfall. Franklin says he is getting out from the beginning and the show never gives him a number, because he never gives himself one — and by the last season the question is not whether he will leave, it is whether there is anything left to leave with.',
-  body:[
-    'He says he is getting out from almost the first week.',
-    'That is worth holding on to, because the story people tell about Franklin afterwards is that he got greedy, and he did not, or not in the way that word usually means. He is not in it for cars. He wants a number and then a different life, and he says so, repeatedly, to his mother and his uncle and eventually to nobody.',
-    'He never names it.',
-    'Not once. Not to Cissy, who asks. Not to Jerome. Not in his own head as far as anybody watching can tell. It is always more than this, and out at some point, and both of those are moving targets dressed up as a plan.',
-    'So watch what happens to every figure he reaches.',
-    'The first real money is more than his mother has seen in her life and it is a floor within a month. Then the neighbourhood, then the city, then a pipeline with a government on the other end of it, and every single time the number that would have been enough a year ago is now the baseline he is operating from. That is not weakness. That is what an unnamed number does — it indexes to wherever you are standing.',
-    'And he is good at it, which makes it worse, because there is no obvious moment where it stops working.',
-    'The tell is that the exit stops being a plan and becomes a sentence. Something he says when somebody challenges him. Something he believes when he says it and does not act on in the week that follows, and then the week after, and then for six years.',
-    'By the time he actually has it, he has seventy-odd million dollars sitting in an arrangement he does not control.',
-    'And it goes. Teddy takes it, and everything after that is a man chasing money that is no longer money, it is a principle — because being robbed is unbearable in a way that never collecting was not.',
-    'He spends the rest of it on getting it back. Jerome dies. Louie turns. His mother kills the man responsible and goes to prison for it.',
-    'The last thing you see is Franklin on a street in the neighbourhood he came from, drinking, asking people for change.',
-    'He had it. That is the part to sit with. There was a stretch where he had enough to stop and go and do the other life, and he did not, and it was not because he chose the money over the life.',
-    'It is that he had never written down the figure where those two things swapped places.',
-    'So nothing announced itself. There was no line to cross. And a man with no line simply keeps going until somebody else decides where it stops.'
-  ] },
-{ id:'monks', stage:'The Trials', bg:'delta', mins:2,
-  n: 'Still Carrying It',
-  ab: 'Holding a thing that finished hours ago', src:'Ours',
+  q: 'What is the figure you are getting out at, exactly?' },
+{ id:'monks', src:'Ours',
   laws: [
     { n: 'The Long Carry', f: 'inner', d: 'Four seconds in a meeting room. Eleven hours in him, and only one of those was being fed.' },
     { n: 'The Sentence That Arrives Ready', f: 'inner', d: 'It came out in a kitchen at half past six with no introduction, to somebody who had not been there.' },
     { n: 'The Early Verdict', f: 'inner', d: 'He decided what it meant at twenty past nine and spent the day building on a foundation nobody else had laid.' }
   ],
   rule: 'Staying angry for eleven hours punishes nobody but you.',
-  q:'What did you set down that you are still holding?',
-  teach:'Two monks cross a ford and one of them carries a stranger through the mud. The other carries her the rest of the day.',
-  body:[
-    "It was said at about twenty past nine on a Tuesday, in a meeting of eleven people, and it took under four seconds.",
-    "Someone from another team, going through a list, got to his part and said: yes, we had to redo most of that.",
-    "Then they moved on to the next item.",
-    "It was not even unkind. It was not aimed. The man who said it did not look up, and had no idea he had said anything, and by twenty-five past nine had genuinely forgotten it, in the way you forget a sentence in a meeting.",
-    "He carried it for eleven hours.",
-    "He did not say anything at the time, which he decided was the professional thing, and which meant he then had to do something with it. So he built the argument. He built it properly, the way you build a thing you have been taught to build: the facts, the dates, what had actually been redone and why, whose fault it had in fact been, what he could have said.",
-    "He was still working on it at lunch.",
-    "He was distracted through the afternoon. He did about half the work he would normally have done, and did it worse, and a message came in from his partner about the evening and he answered it late and short.",
-    "On the drive home he had the whole thing running again with a better opening line.",
-    "At half past six he came in and put his keys down and said, to a person who had not been in the meeting and had no idea what he was talking about: I mean, they had to redo most of it, apparently.",
-    "Fully formed. As though it were the next thing said in a conversation.",
-    "She said, what?",
-    "And he heard himself try to explain the context of a four-second remark made nine hours earlier by a man he barely knew, and got about a sentence and a half into it before he stopped.",
-    "The remark took four seconds. He had been carrying it since.",
-    "Not the remark. The remark was over at twenty past nine and had been lying in a meeting room ever since with nobody to pick it up. What he had been carrying was something he had made out of it, and he had been feeding it all day, and it had not weakened once, because the thing feeding it was him and he had not stopped.",
-    "He is not better at this now, particularly. He notices it sooner. That is all that has changed and it is not nothing.",
-    "The tell is always the same. The sentence arrives ready. It comes out of him in a kitchen or a car with no introduction, hours or years later, as though the conversation were still going.",
-    "It is not still going. Nobody else is in it.",
-    "He has been in it by himself the whole time."
-  ] },
-{ id:'post', stage:'The Trials', bg:'jade', mins:2,
-  n: 'Who Needed To Be Seen',
-  ab: 'What being known costs, billed years later', src: 'Paid in Full',
+  q: 'What did you set down that you are still holding?' },
+{ id:'post', src:'Paid in Full',
   laws: [
     { n: 'The Judge You Installed', f: 'others', d: 'Rico ran the whole thing for a room that was watching, and it set the pace, the spending and the risk.' },
     { n: 'Visibility Is Billed Later', f: 'inner', d: 'It reads as free for years. Then it arrives all at once, from people who were watching for their own reasons.' },
     { n: 'Everything Is Paid For', f: 'motion', d: 'Ace put it down himself while it was still his to put down. Nobody else in the film got that option.' }
   ],
   rule: 'Being seen is a cost on a delay. The ones who need it most are the ones it finds first.',
-  q: 'What are you doing louder than it needs to be done?',
-  teach: 'Paid in Full. The three of them are in the same business with the same money and the difference between what happens to them is almost entirely how much of it they needed other people to know about.',
-  body:[
-    'Ace works in a dry cleaners and he is not in it at all.',
-    'That is where the film starts him. Quiet, polite, counting other people\'s shirts, watching men his own age come through the door with money and watching what it does to them. He does not want it. When he does finally get pulled in it is almost sideways, through somebody else\'s connection, and his first instinct is to be careful.',
-    'And careful is what he turns out to be extremely good at.',
-    'He keeps the same flat. He does not change how he dresses much. He moves an enormous amount of weight and almost nobody outside the thing knows his name, and that is not modesty, it is a working method — the fewer people who know, the fewer people there are who have a reason to come.',
-    'Rico is the other way entirely.',
-    'Rico needs the room. The jewellery, the cars, the clothes, the being recognised on the block, the arriving somewhere and having it register. Every choice he makes has an audience attached, and the audience sets the pace, because once you are being watched you cannot go backwards — you cannot spend less next month than you spent last month without everybody drawing the obvious conclusion.',
-    'That is the mechanism and it does not look like a mechanism at the time. It looks like a personality.',
-    'What it actually does is set his risk appetite for him. He has to keep moving because he has to keep spending, and he has to keep spending because he is being looked at, and the people looking include the ones counting.',
-    'Then Rico takes Mitch\'s little brother.',
-    'Ransom is paid. He kills him anyway. And that is the point where the film stops being about the business and starts being about the account, because everything after it is collection.',
-    'Mitch is murdered. Ace is shot and lives. The money, the cars, the reputation — all of it comes off the table, and none of the people it comes off from are surprised deep down, which is the worst part of the whole thing.',
-    'And Ace walks away.',
-    'He gives it up. Not after being forced out, not with a gun on him — he puts it down while it is still his to put down, which is the only version of leaving that is actually leaving, and he is the only one in that film who gets it.',
-    'The three of them were in the same business with the same product and the same money.',
-    'The difference in what happened to them is almost entirely how much of it they needed other people to know about.'
-  ] },
-{ id:'soft', stage:'The Trials', bg:'iris', mins:2,
-  n:'Nothing Bad Happened', ab:'What takes the evening, with nothing to point at', src:'Ours',
+  q: 'What are you doing louder than it needs to be done?' },
+{ id:'soft', src:'Ours',
   laws: [
     { n: 'Nothing To Point At', f: 'inner', d: 'No argument, no crisis, nothing to write down. Just nine o\'clock, a warm room, and forty minutes off the end of the day.' },
     { n: 'You Cannot Negotiate With A Room', f: 'motion', d: 'Every set of rules lasted a fortnight, because a rule is something he had to hold up and the room held itself up.' },
     { n: 'The Day Nobody Announced', f: 'time', d: 'There was no day it went wrong either. That is the same fact from the other side.' }
   ],
-  rule:'Nothing that is softening you will ever announce itself. It arrives as rest, and some of it genuinely is.',
-  q:'What takes your evenings that you could not point at if somebody asked?',
-  teach:'Every rule you set is a thing you have to keep holding up. The environment holds itself up, all day, at no cost, which is why it wins every arrangement you make with yourself and why the people who change have usually changed a room rather than a resolution.',
-  body:[
-    'Two steps forward and two steps back, for about two years, and he could never find the thing that was doing it.',
-    'He looked for a problem, because that is what you look for. There was no problem. Nothing bad happened in any of those weeks — no argument, no crisis, nothing you could write down and point at.',
-    'What happened is that it got to about nine, and the room was warm, and there was something on, and somebody there. And the day ended forty minutes earlier than it was supposed to.',
-    'Then it did that again the next night.',
-    'That is the whole of it and it is why it took two years to find. A thing that is hurting you announces itself and gets dealt with inside a week. A thing that is softening you never announces anything. It arrives as rest. Some of it genuinely is rest, which is exactly what lets it keep going.',
-    'He wants to be precise about the accounting here, because the lazy version of this story blames her and that version is false.',
-    'She was not stopping him. She asked him about it more than once and meant it. She would have been delighted if he had got up and gone and done the thing.',
-    'It was that the room was comfortable and he is somebody who goes comfortable when a room lets him. That is a fact about him. It would be true in any warm room with anybody in it.',
-    'Which is why it could never have been fixed with a conversation.',
-    'You do not negotiate with a room. He tried the version where you make rules — a time, a rule about screens, a rule about the evening — and each set of rules lasted about a fortnight, because a rule is a thing he had to hold up and the room was there all day, every day, holding itself up at no cost whatsoever.',
-    'So he changed the room.',
-    'He is not going to tell you it worked, because he does not know yet and anybody who tells you that at this stage is describing something that has not happened.',
-    'The honest report from the first few weeks is that the mornings are easier and the evenings are longer and worse, which is roughly what he expected and considerably less comfortable than expecting it made it sound.',
-    'What he does have is a name for the two steps back, and it was never a crisis, and it was never her.',
-    'It was nine o\'clock.'
-  ] },
-{ id:'mini', stage:'The Trials', bg:'umber', mins:2,
-  n: 'The Small Version', ab: 'Training through a month with no routine in it', src:'Ours',
+  rule: 'Nothing that is softening you will ever announce itself. It arrives as rest, and some of it genuinely is.',
+  q: 'What takes your evenings that you could not point at if somebody asked?' },
+{ id:'mini', src:'Ours',
   laws: [
     { n: 'Too Small To Bother With', f: 'inner', d: 'Two years lost to the idea that twenty minutes was beneath doing.' },
     { n: 'The Version You Can Always Do', f: 'motion', d: 'Twenty minutes, no equipment, doable on four hours of sleep in a hallway.' },
     { n: 'Starting Again Is the Cost', f: 'time', d: 'The missed session costs nothing. The fortnight after it is where the two years went.' }
   ],
-  rule:'A man who will only train for an hour trains nothing in a bad month.',
-  q:'What would you still do on the worst day you are going to have this month?',
-  teach:'Everything written about training assumes a normal week. Hardly anybody has one, and the plans are written by people whose job is the training.',
-  body:[
-    'Everything he owns is in bags in a room that is not really his.',
-    'The house is mid-move. There is no routine in the week at all — not a bad routine, none — and every programme he has ever followed assumes a life that is not currently happening.',
-    'He spent a long time trying to make the proper version happen anyway. Each time he got a few weeks in, something moved, and each time he started again from the beginning.',
-    'The move is not going to stop. That is worth saying plainly, because most of what he has read assumes the obstacle is him.',
-    'What he changed was the size of the thing.',
-    'Twenty minutes. Nothing needed. On the floor between the bags, in whatever state he is in, on a morning where nothing else about the day is settled.',
-    'The bit he had to get over was that twenty minutes is not worth doing.',
-    'That is not standards. He had it the other way round for a long time and it cost him the whole of it. Somebody who will only train properly trains nothing at all in a month like this, and there is always a month like this.',
-    'He has not missed a week since. Not a session — a week. Some weeks are four proper sessions and some weeks are one lot of twenty minutes on a floor, and both count the same for the thing that actually matters.',
-    'What the twenty minutes protects is not the muscle. Twenty minutes does very little for the muscle and he knows that.',
-    'It is that he never has to start again.',
-    'The session he misses costs almost nothing. What costs is the fortnight afterwards, when he is not somebody who does this any more and has to become one from nothing, and those fortnights are where all the lost time went.',
-    'He is ahead now of two people he knows who train properly, on a real plan, with everything set up — and who stop for six or eight weeks a couple of times a year and come back to it each time from the floor.',
-    'He is not better at this than they are. He is worse at it. He has just never stopped.'
-  ] },
-{ id:'knot', stage:'The Ordeal', bg:'iceberg', mins:3,
-  n: 'My Fault',
-  ab: 'Taking the blame on purpose, to get the wheel', src:'Ours',
+  rule: 'A man who will only train for an hour trains nothing in a bad month.',
+  q: 'What would you still do on the worst day you are going to have this month?' },
+{ id:'knot', src:'Ours',
   laws: [
     { n: 'The Wheel', f: 'motion', d: 'Thirty-one losses over his limit. Twenty-six of them were his own rule, broken by him, in writing, with a timestamp.' },
     { n: 'The Early Verdict', f: 'inner', d: 'The news, the spread, the broker and the summer. Every one of those is a reason you can do nothing about.' },
     { n: 'The Handle', f: 'motion', d: 'What he felt was not shame. It was relief, which is the same thing said honestly.' }
   ],
   rule: 'Write down which losses were your own fault. That is the only column you can do anything about.',
-  q:'What are you calling bad luck?',
-  teach:'This is the hinge of the whole arc. Every other story here assumes you believe your own actions decide your outcomes. Until that is true, none of them can do anything for you.',
-  body:[
-    "He was flat.",
-    "Not blown up. That is worth being exact about, because blown up would have been easier to talk about and easier to stop. Flat. Months of small wins and slightly larger losses and an account sitting almost exactly where it had started, and a growing suspicion that he was not letting himself finish.",
-    "He told his brother about it in a kitchen, standing up, with the kettle going.",
-    "He was good at telling it. He had told it a few times by then and it had a shape. There was the gap on the Thursday that nobody could have traded. There was his broker, which was a joke, and he had the screenshots to prove it. There was the fact that the whole of that summer had been unreadable and everyone said so, everyone, you could go and look.",
-    "His brother listened to all of it and said, that is rough.",
-    "He was not making a point. He worked in logistics and had no opinion about any of it and he genuinely thought it sounded rough.",
-    "He drove home annoyed and could not work out who with.",
-    "He opened the journal that night. He kept a good one. That was the thing. That was what made the whole situation so stupid. Every trade logged, entry, exit, size, reason, screenshot.",
-    "He added a column.",
-    "The header was: was this in the rules.",
-    "Then he went back to the start of the year and did every single one, and it took until nearly three in the morning, and the answer was only ever yes or no, and he made himself write it without thinking and without adding anything after it.",
-    "He had thirty-one losses over his own maximum. That was the number he had been carrying around, the one that explained the year.",
-    "Twenty-six of them said no.",
-    "Twenty-six. Over his own size limit, or outside his own session, or averaging into something he had a written rule against averaging into. In nineteen of them he had typed the reason in himself at the time, in his own words, with a timestamp on it.",
-    "The gap on the Thursday was in there. It was a no. He had been in that trade at three times his size because of something he decided the day before.",
-    "He sat in the room with the laptop open and the heating off and waited to feel sick.",
-    "He did not feel sick.",
-    "What came instead took him a minute to identify, because he had not felt it in a long time and it had no business turning up on a night like that.",
-    "It was relief.",
-    "Because if it was the news and the spread and the summer and the broker, then there was nothing to be done and there never would be, and he was going to sit in that chair every morning for another five years hoping the weather changed.",
-    "And if it was him, if it was twenty-six decisions made with his own hands and written down at the time, then it was a thing with a handle on it.",
-    "He did not fix it that week. He broke the size rule again the next month, once, and logged it, and the column made it very hard to tell himself the story afterwards, which turned out to be most of the mechanism.",
-    "But he stopped saying the summer had been unreadable.",
-    "He has not said it since, and he is aware that he used to say it about twice a week, to anybody, including himself, in a kitchen with the kettle going."
-  ] },
-{ id:'twice', stage:'The Ordeal', bg:'desert', mins:2,
-  n: 'Two Pages',
-  ab: 'The state that wrote the decision, not the thinking', src:'Ours',
+  q: 'What are you calling bad luck?' },
+{ id:'twice', src:'Ours',
   laws: [
     { n: 'The State Wrote It', f: 'inner', d: 'Two pages, three weeks apart, same facts, opposite answers, both argued out properly.' },
     { n: 'Nothing Records the Weather', f: 'time', d: 'Four years of what he decided and not one line about what sort of day it was.' },
     { n: 'The Handle', f: 'motion', d: 'Three words at the top of the page, and within six weeks he knew which of his own pages to distrust.' }
   ],
-  rule:'You think the conclusion came from the thinking. Ask yourself the same question on a bad morning and see what you get.',
-  q:'What did you decide this week on a day you would not want to be judged by?',
-  teach:'You are not a person who reasons and occasionally has a mood. You are a person in a state, doing some reasoning, and the state got there first.',
-  body:[
-    'He found the same page twice.',
-    'He keeps a notebook for anything he is turning over. He has done for years, the pages are dated, and that is the only reason this was findable at all.',
-    'Three weeks apart, the same decision. Same situation, same facts, nothing had changed in between.',
-    'One page said go. The other said absolutely not.',
-    'Both were argued out properly. Both had the reasons underneath in a list. Both ended in a line obviously written by somebody who had settled it and was slightly relieved.',
-    'He sat with the two pages open for a long time.',
-    'He is not stupid and neither page is stupid. Show either one to somebody and it reads as a person thinking clearly. The trouble is that they cannot both be that, and he has no memory of writing either of them in a particular mood.',
-    'So he went looking for what was different, and the honest answer is that he cannot find it, because it is not on the page.',
-    'The notebook records what he decided. It has never once recorded what kind of day it was.',
-    'He can tell you what he thought about that situation in March. He cannot tell you whether he had slept, whether the morning had gone badly, whether he had just had a conversation that went wrong, whether he had eaten, whether the week had been a good one.',
-    'Every one of those was in the room. None of them is in the record.',
-    'What he does now takes about four seconds and he was suspicious of it for a month.',
-    'At the top of the page, before anything else, three words about the day. Not a score out of ten and not a feeling. Just the day: slept badly. argued this morning. quiet week. first good one in a while.',
-    'Then the reasoning underneath, the way he always wrote it.',
-    'Within about six weeks he could do something he had never been able to do, which is read one of his own pages back and know, before he got to the reasoning, whether to trust it.',
-    'The pages have not improved. He still writes a certain kind of page on a certain kind of day. What changed is that he can see it coming, and the ones written on a bad morning he does not act on until he has written the same thing again on a different one.',
-    'Two pages, three weeks apart. It took him four years to catch it, and the only reason he ever did is that he happened to date them.'
-  ] },
-{ id:'cut', stage:'The Ordeal', bg:'delta', mins:2,
-  n:'The Last Variable', ab:'What subtraction can prove, and what it cannot', src:'Ours',
+  rule: 'You think the conclusion came from the thinking. Ask yourself the same question on a bad morning and see what you get.',
+  q: 'What did you decide this week on a day you would not want to be judged by?' },
+{ id:'cut', src:'Ours',
   laws: [
     { n: 'What Is Left Standing', f: 'inner', d: 'Nine things removed and the tenth gets the verdict, whether or not it earned it.' },
     { n: 'The Handle', f: 'motion', d: 'He called it his own doing rather than hers, which is the only version that leaves him anything to move.' },
     { n: 'The Test Runs Both Ways', f: 'time', d: 'If it goes and the two steps back keep coming, there is nothing left to remove and only himself to look at.' }
   ],
-  rule:'Subtraction only ever points at what is left standing. That is not the same as finding the cause.',
-  q:'If you removed it and nothing changed, what would you have to look at?',
-  teach:'Removing variables until one is left is a real method with one blind spot it cannot see from inside: it does not find the cause, it finds the survivor. Which is why the decision is not settled by the conclusion. It is settled by what happens after.',
-  body:[
-    'He took it apart the way he takes everything apart, which is by removing things one at a time and watching what happens.',
-    'The problem he could describe exactly and could not solve: forward, then back, then forward, then back, with the ground never once held.',
-    'So he started subtracting.',
-    'The nights out went first. Then the friends, or more honestly he stopped answering, which is the same thing done slowly enough that nobody has to say anything about it. The phone got cut down to almost nothing. He has no social life at all now and has not had one for a while.',
-    'And it kept happening.',
-    'By the end of it there was one variable left in the room, and he was living with her.',
-    'Here is the part he makes himself say out loud, because it is the part a man in his position would rather skip.',
-    'Elimination only ever points at what is left. Take out nine things and the tenth gets the verdict whether or not it earned it — and somebody who has removed almost his entire life has arranged it so that the only remaining explanation is the person he lives with. That is not proof of anything. That is the shape of what he did.',
-    'He knew that and he did it anyway, and the reason is not clever. He had run out of other moves. He could keep the variable and keep the result, or take it out and find out.',
-    'What stops it being a story he tells himself is that the test runs in both directions and he has thought about the second one.',
-    'If she goes and the two steps back keep happening, then it was never the variable. He will be standing in a very quiet room with nothing left to remove and nobody else in the frame, looking at the only thing he did not take out.',
-    'He thinks about that version more than the other one.',
-    'He is helping her move. Boxes, a van, the two of them doing something practical and not saying a great deal.',
-    'That is not in the method anywhere. It is the part he would want somebody to know about him.'
-  ] },
-{ id:'aim', stage:'The Ordeal', bg:'silk', mins:2,
-  n: 'The Same Engine', ab: 'The drive he was told to lose, pointed elsewhere', src: 'Get Rich or Die Trying',
+  rule: 'Subtraction only ever points at what is left standing. That is not the same as finding the cause.',
+  q: 'If you removed it and nothing changed, what would you have to look at?' },
+{ id:'aim', src:'Get Rich or Die Trying',
   laws: [
     { n: 'The Long Carry', f: 'inner', d: 'He carries his mother for the whole film and it never once lets go of him.' },
     { n: 'Aimed, Not Removed', f: 'motion', d: 'The exact quality that made him relentless on the corner is what makes him relentless in a booth. Nothing was taken out.' },
     { n: 'What They Called It', f: 'others', d: 'Cold, hard, too far gone — every word said about him was a report on what it cost the person saying it.' }
   ],
   rule: 'You are not going to remove it. You can decide what it points at.',
-  q: 'What in you were you told to lose, that could be aimed instead?',
-  teach: 'Get Rich or Die Trying. The quality that makes him frightening in the first half of the film is not replaced in the second half — it is the same quality, doing something else, which is why the second half is believable.',
-  body:[
-    'What everybody says about him is that he does not stop.',
-    'It is not a compliment when they say it. It is said about a kid who will not let something go, who will sit outside somewhere for six hours, who takes a beating and comes back, who works the corner in weather nobody else will stand in and is there again the next morning. People say it the way you say a thing about somebody you are slightly worried about.',
-    'And they are right about the quality. They are only wrong about whether it is the problem.',
-    'Watch what it does in the first half of the film. It makes him formidable. He rises because he will outlast anybody — not because he is more violent, there are far more violent people around him, but because he does not get bored and he does not get tired and he does not quietly stop showing up the way most people do at about month four.',
-    'It also nearly kills him, because a thing that will not let go does not let go of the wrong thing either.',
-    'Then nine bullets outside his grandmother\'s house.',
-    'And the months afterwards are the whole argument. He cannot speak properly. The jaw is wrong, the mouth is wrong, the words come out damaged — and he is a man whose one other gift was words, told effectively that the gift is gone.',
-    'So he does it again. The same thing. Sits with it, every day, for months, working a mouth that will not do what it did, over and over, refusing to accept the result — which is precisely, exactly, identically the quality that had him standing on a corner in the rain.',
-    'Nothing was removed from him.',
-    'Nobody taught him to let go. He did not become peaceful, he did not forgive anybody, he did not soften. The engine is untouched. He points it at a notebook and a booth instead of a block, and the slur that came out of the damage is the sound that makes him.',
-    'Bama had been saying it the whole time and Marcus could not hear it, because he had been told his whole life that the thing about him was a fault — and you do not go looking for a use for a fault.',
-    'That is the only move that was ever available.',
-    'Not becoming somebody else. Taking the one thing that was always going to be there anyway, and deciding where it was going to be spent.'
-  ] },
-{ id:'pocket', stage:'The Reward', bg:'iris', mins:2,
-  n: 'The Notebook He Already Had',
-  ab: 'Carrying the thing the whole time, uncounted', src: 'Get Rich or Die Trying',
+  q: 'What in you were you told to lose, that could be aimed instead?' },
+{ id:'pocket', src:'Get Rich or Die Trying',
   laws: [
     { n: 'The Second Thing', f: 'time', d: 'It arrived with the fear of it going, which he had not asked for and had not been told about.' },
     { n: 'The Long Carry', f: 'inner', d: 'He checked it in bed, in the morning and at traffic lights, to see whether it was still there.' },
     { n: 'The Answer You Are Carrying', f: 'inner', d: 'The man on the stairwell was not further ahead. He could set it down, and that does not arrive in the account.' }
   ],
   rule: 'You are not waiting to find it. You are waiting for the other option to close.',
-  q: 'What can you already do that you have never counted as the real business?',
-  teach: 'Get Rich or Die Trying. The rhymes are in the first ten minutes, before anything else happens to him, and the film is patient about the fact that he is good at the street too — which is why he stays.',
-  body:[
-    'He was writing rhymes before he ever stood on a corner.',
-    'That is in the film early and it goes past quickly, which is roughly how it went past him. A kid in Queens with a notebook and a way with words, in a house where his mother is doing what she does and everybody knows it, and the words are a thing he is good at and nobody is paying for.',
-    'Then she is gone, burned in her own apartment, and he is with his grandparents, and the corner is the only place he can see where a person like him turns effort into money this week.',
-    'So he takes the thing that pays now.',
-    'And he is good at that too. That is what makes the middle of it hard to watch — he is not a failure at the street, he rises, he is better at it than the people around him, he has money and standing and a car. Everything anybody told him was the way up, he does, and it works.',
-    'The notebook is still there the whole time.',
-    'He raps in the car. He raps in the club. Bama hears it in prison and will not stop going on about it, because Bama can hear what Marcus has and Marcus cannot, or can and has already decided it is not the real business.',
-    'That is the shape of it. The ability is not missing and it is not undeveloped. It is uncounted.',
-    'It took nine bullets outside his grandmother\'s house to change that. Nine, at close range, and he lives, and lying there afterwards unable to speak properly is the first time in his life he cannot go to work.',
-    'The mouth is damaged. The voice does not come out the way it used to.',
-    'So he has to rebuild the thing — rhyming through the injury, finding the sound underneath it, and the sound he finds is the one that makes him. The slur is the style. The thing that nearly ended it becomes the thing nobody else has.',
-    'He does not get the talent at the end of this film. He had it at the beginning.',
-    'What he gets is a stretch of time where the other option is physically closed to him, and that is the whole difference. Not desire and not discovery. Every week the corner was available was a week the notebook stayed a hobby.',
-    'The last scene is a stage and a room and the thing he could always do.',
-    'He spent ten years getting to a place he was standing in the whole time.'
-  ] },
-{ id:'five', stage:'The Reward', bg:'violet', mins:2,
-  n: 'The Photo',
-  ab: 'The mirror was never what needed to change', src:'Ours',
+  q: 'What can you already do that you have never counted as the real business?' },
+{ id:'five', src:'Ours',
   laws: [
     { n: 'The Measuring Does Not Stop', f: 'inner', d: 'A different body, three years later, and the same arithmetic on the same train with the same face on.' },
     { n: 'The Price Was the Purchase', f: 'motion', d: 'He had it booked as what the body cost. It was the only thing that came with him into a room.' },
     { n: 'The Quiet Middle', f: 'time', d: 'Forty minutes at twenty to six, for a year, without enjoying one of them, and nobody watching.' }
   ],
   rule: 'You keep the habit of turning up long after the reason you started stops mattering.',
-  q:'If you got the thing tomorrow, what would still be there?',
-  teach:'Every study that sets one training programme against another finds the same thing, and nobody quotes it: the variable that predicts the outcome is not which programme, it is whether you did it. The programme is the half people argue about and it is the half that does not decide anything.',
-  body:[
-    'Somebody tagged him in a photo.',
-    'He was at the back of it, not doing anything in particular, and he looked at it far longer than anybody looks at a photo of a night out, and then he put the phone face down on the bed.',
-    'He started training that week. The only hour nobody needed him, the same forty minutes, and he will tell you before you ask that he did not enjoy one of them for the best part of a year.',
-    'He got what he came for, and he does not do the modest thing about it. The body changed. People who had not seen him in a while said so, and they were not being kind, they were surprised.',
-    'Then somebody tagged him in another one.',
-    'He opened it on the bus and there he was at the edge of it, and he looked at it exactly the way he had looked at the first one.',
-    'He is careful about this part, because it is the part people want to soften for him. It was not that he looked bad. He did not look bad. It was that he sat on a bus running the same arithmetic he had run years earlier, about a completely different body, with the same face on.',
-    'The arithmetic had never been about the body.',
-    'What he wanted, if you made him say it, was to open his phone and not be counting. He had gone and bought the wrong thing for that. You cannot buy it at all, as far as he can tell, and if you could it would not be sold in a gym.',
-    'So that is the failure, it is real, and he does not pretend otherwise.',
-    'Here is the rest of it.',
-    'Somewhere in the second year he stopped negotiating with the alarm. There was no decision and no morning it happened. It went and he got up, on the mornings he wanted to and the mornings he did not, and whether he wanted to quietly stopped being one of the inputs.',
-    'He found out what that was worth doing something else entirely.',
-    'There was a conversation he had been avoiding for the best part of two years. The kind you rehearse walking and then do not have. He had a free afternoon and he had it. Not bravely, and not well. He had it the way he gets up, which is without asking himself first.',
-    'That is the part that came with him. None of the rest did. The body stays in the gym and does not walk into rooms, whatever anybody tells you.',
-    'He thought the training was what the body cost.',
-    'It was the other way round.'
-  ] },
-{ id:'bridge', stage:'The Road Back', bg:'cobalt', mins:2,
-  n: 'One Foot In',
-  ab: 'What keeping the other option quietly costs', src: 'Power',
+  q: 'If you got the thing tomorrow, what would still be there?' },
+{ id:'bridge', src:'Power',
   laws: [
     { n: 'The Open Door', f: 'motion', d: 'He never used the two days once. They took a little off the top of every Tuesday for six years.' },
     { n: 'Two Ends of One Thing', f: 'time', d: 'The one with nothing behind him was frightened for a year and got the thing the careful one never did.' },
     { n: 'The Handle', f: 'motion', d: 'It costs nothing visible on any particular Tuesday, which is exactly why it is never the week to deal with it.' }
   ],
   rule: 'The way out is not free. It quietly removes the pressure that was going to make the thing work.',
-  q: 'What are you keeping open in case this does not work?',
-  teach: 'Power. The whole run is a man with a legitimate business he is good at and an exit he never takes, and the show is patient about the fact that every single reason for not closing it is a reasonable one.',
-  body:[
-    'He wants out, and he never actually goes.',
-    'James has the club. It is real, it is legitimate, it is the thing he says he wants — and he is good at it, genuinely good, better at that room than at anything else he does. He has the taste for it and the front for it. He tells Tasha the street is the past and the club is the future, and he tells himself the same thing, and at the time he says it he means it.',
-    'And he never closes the door.',
-    'There is always a reason not to and every single reason is a good one. He owes people. Tommy would be left with nothing. There is one more shipment, one more connection to hand over properly, one more thing to sort before it can be finished cleanly. Ending it takes real work and letting it run takes none, and letting it run costs nothing this week.',
-    'What it costs is the thing he says he is building.',
-    'Every time the club needs all of him, he is not there — he is in a car, or on a phone, or three streets away dealing with the other life, and the other life has a claim on the same hours and the same head. The legitimate thing needed everything he had. It got whatever was left.',
-    'And it is worse than a split of time, which is the part that takes a while to see.',
-    'The other life is also his insurance. Whenever the club is struggling — a bad month, a licence problem, a partner getting cold — there is a version of him that has never stopped being able to make money the old way. So the club never has to work. And a business that does not have to work will not get the last ten per cent out of anybody, including the man whose name is on it.',
-    'He would have told you that keeping it open cost him nothing. That is what everybody says about a door they are not using.',
-    'By the time he is finally forced to choose, the choice has been made for him a dozen times over by all the small moments where he did not close it.',
-    'And everybody around him pays. Tommy, Tasha, Angela, Kanan, the kids. The whole situation only exists because one man would not shut one door, and every one of them ends up in a version of their life that is downstream of that.',
-    'He is not weak and he is not stupid and he is not even really greedy.',
-    'He simply believed that the option was free.'
-  ] },
-{ id:'free', stage:'The Road Back', bg:'nightfall', mins:2,
-  n: 'The Rogue Prince', ab: 'Unbound, and with authority over nothing', src: 'House of the Dragon',
+  q: 'What are you keeping open in case this does not work?' },
+{ id:'free', src:'House of the Dragon',
   laws: [
     { n: 'The Word You Reached For', f: 'inner', d: 'He wanted autonomy and went and bought the maximum possible amount of freedom, which is the opposite of it.' },
     { n: 'Freedom Is Not Autonomy', f: 'motion', d: 'No boss, no hours, no obligations — and he could not refuse a single thing that came in.' },
     { n: 'Leverage Is What Buys the No', f: 'others', d: 'He had no position and no scarce skill, so his whole day belonged to whoever was paying that week.' }
   ],
   rule: 'Answering to nobody is not the same as deciding anything. The second one has to be bought, usually with the first.',
-  q: 'What are you refusing to be under, that is costing you the room?',
-  teach: 'House of the Dragon. Daemon is handed a position roughly once a season and loses it the same way every time, and the Harrenhal sequence is the show finally naming what the something is.',
-  body:[
-    'He is the most dangerous man in the realm and he keeps losing.',
-    'Daemon can fight better than anybody in the story. He takes the Stepstones when the Crown will not, and wins them, and he does it by walking out alone under a white flag with a sword to draw the fire — which is either the bravest thing in the series or the most reckless and is honestly both.',
-    'He commands a dragon. He commanded the City Watch and turned it into something the city feared in a matter of weeks. Men follow him because he is the only one who does anything.',
-    'And for twenty years he has no actual power at all.',
-    'Named heir, then unnamed the moment a son is born. Made Commander of the Watch, then removed. Exiled, recalled, exiled again. It is never ability and it is never opportunity — Viserys hands him things repeatedly, because Viserys loves him and keeps hoping.',
-    'Every offer comes with the same condition, which is the one he cannot meet: that his brother is the King and he is not.',
-    'So he takes the other thing instead. He goes where he likes. He says what he likes, including at a funeral, including about a dead child. He answers to nobody and he is not in a single room where anything is decided, and those two facts are the same fact.',
-    'He has as much freedom as a man in that world can have.',
-    'He has no authority whatsoever.',
-    'The turn, when it finally comes, is not a battle and it is not a victory. It is Harrenhal — weeks alone in a ruin, being shown things he has spent his whole life not looking at: his brother, the children, Rhaenyra, all the versions of himself that the grievance was built on top of.',
-    'And he comes out of it and does the one thing he has never done in his life, which is kneel to Rhaenyra and mean it.',
-    'He does not become weaker. That is the part worth sitting with.',
-    'The moment he takes a position under somebody is the moment the ability starts converting into anything at all. Before it, he is a man with a dragon and a complaint. After it, he is a commander with an army, a war to run, and lords riding in — and they ride in because there is finally something to join, which there never was when he was free.',
-    'Freedom is what he had for twenty years.',
-    'It bought him nothing, and he had to give it up to get anything.'
-  ] },
-{ id:'mountain', stage:'The Return', bg:'turtle', mins:2,
-  n: 'No Day It Clicks',
-  ab: 'You only notice months after it happened', src:'Ours',
+  q: 'What are you refusing to be under, that is costing you the room?' },
+{ id:'mountain', src:'Ours',
   laws: [
     { n: 'The Quiet Middle', f: 'time', d: 'Day six hundred and seventeen was indistinguishable from the four hundred before it.' },
     { n: 'The Spent Feeling', f: 'inner', d: 'Every time he announced it he drew down the feeling he was supposed to get from finishing.' },
     { n: 'The Day Nobody Announced', f: 'time', d: 'There was no morning where he woke up and noticed he had won the fight.' }
   ],
   rule: 'There is no day it clicks. You look up one morning and it has been working for months.',
-  q:'What have you been doing long enough that you cannot remember starting?',
-  teach:'An old man sets out to move two mountains with baskets, and tells the neighbour who laughs at him that the mountain does not get any bigger.',
-  body:[
-    "The alarm went at twenty to five and it was raining, which in November means it will be raining at seven as well.",
-    "Day six hundred and seventeen.",
-    "He knew the number because it was in a spreadsheet, and the spreadsheet was the only part of it anybody could have pointed at. Getting up before work and doing ninety minutes on the thing, then eight hours of something else, then some evenings another hour and some evenings not.",
-    "In all that time it had made no money at all.",
-    "That is the honest statement and he had stopped softening it. Not a small amount. None. There had been a month where it looked like it was about to and then it did not, and he had told two people about that month and had to tell them afterwards as well, which is its own particular flavour of Tuesday.",
-    "He had stopped telling people some time in the first year.",
-    "He put that down to modesty at the time and it was not modesty. He worked it out much later. Every time he announced it, he got a small amount of the feeling he was supposed to get from finishing it, and it came out of the same account, and he was spending the thing before he had earned it.",
-    "So he stopped saying anything, and it got harder, and it got better.",
-    "He got up on day six hundred and seventeen.",
-    "There is nothing to tell about that morning and that is exactly why it is the one worth telling. He made coffee. He worked on a section he had already done twice, because the second attempt was wrong. It went slowly. At quarter past six he was no further on than he had been at five, and he had a real conversation with himself about whether the whole thing was a way of avoiding his actual life, which was a conversation he had about once a fortnight and which always ended in the same unsatisfying draw.",
-    "At ten past seven he got in the car.",
-    "Nothing happened. That is the entire content of day six hundred and seventeen and of about four hundred of the others.",
-    "Months later somebody new asked him about it, because it had come up.",
-    "How long have you been doing that, then.",
-    "And he opened his mouth to answer, and found he could not do the arithmetic instantly and had to count back, and in the two seconds that took he noticed something.",
-    "He could not remember what it had been like before.",
-    "Not the effort. He remembered that. He could not get back inside the version of himself who had to decide, every morning, whether to get up. That man had existed for about four months and had been in a fight every single day, and at some point the fight had simply stopped happening and nobody had told him.",
-    "There had been no morning where he woke up and noticed he had won it.",
-    "It still was not making any money. That took another nine months, and when it came it was not dramatic either.",
-    "But he had become a person who got up at twenty to five, and it had happened without an announcement, on an ordinary day somewhere in the middle, and he had not been invited."
-  ] },
-{ id:'slow', stage:'The Return', bg:'canyon', mins:2,
-  n: 'The Gardener', ab: 'The attribute nobody thought was one', src: 'The Lord of the Rings',
+  q: 'What have you been doing long enough that you cannot remember starting?' },
+{ id:'slow', src:'The Lord of the Rings',
   laws: [
     { n: 'The Talent Nobody Sells', f: 'inner', d: 'No course covers it, he did not develop it, and he was issued with it in a place he would not have chosen.' },
     { n: 'The Sunday Version Has the Vote', f: 'motion', d: 'He writes the rule calm on a Sunday and it does not occur to him that Wednesday gets a say.' },
     { n: 'The Quiet Middle', f: 'time', d: 'There is nothing to learn and nothing to show anybody, and if you asked him to teach it he could not.' }
   ],
   rule: 'The attribute that decides it is usually one nobody would have listed, including you.',
-  q: 'What are you good at that has never looked like a skill?',
-  teach: 'The Lord of the Rings, across all three. Every character with a gift is consumed in proportion to it, and the one with nothing is the one still standing on the mountain.',
-  body:[
-    'There is nothing exceptional about him and that is the entire point of him.',
-    'Sam is not clever. He is not a fighter. He is of no line, he has no destiny attached to him, and he is in the Fellowship because he was caught with his head under a window listening to a conversation he had no business hearing.',
-    'Look at who else is in that room. A wizard. The heir of Isildur. An elf lord\'s son, a dwarf of Durin\'s line, the son of the Steward of Gondor. Every one of them arrived with something.',
-    'Sam arrived with an opinion about potatoes and a length of rope his old dad told him to bring.',
-    'What he has is that he does not stop. That is it. That is the whole attribute.',
-    'It is not a virtue anybody would put on a list. It does not look like anything from outside, it cannot be taught in a hall, and there is no scene in three books where somebody says the gardener is the one who is going to manage this.',
-    'Then watch what the road actually does to everybody.',
-    'Boromir breaks, and he is the strongest man there, and he breaks precisely because he is strong enough to imagine using it. Frodo is taken apart slowly and completely by the thing round his neck, and by the end cannot remember the taste of food or the sound of water. Gollum carried it for five hundred years and is a ruin with a voice. Gandalf falls in Moria. Every single person with a gift is used up in rough proportion to the gift.',
-    'And the gardener keeps going.',
-    'He carries the pack. He carries the rope, the pans, the salt — he brings salt across Mordor, which is either the least heroic detail in the book or the most. He is the one who notices Gollum first and never stops watching him. He gets Frodo out of Cirith Ungol single-handed, through orcs, having already fought a spider older than the mountains.',
-    'He puts the Ring on. And he gives it back.',
-    'Nobody else in the entire history of that object manages it. Not Isildur. Not Boromir, and he never even held it. Not Frodo, at the last. Sam has it, is offered a vision of gardens covering the world, decides the small garden he actually has is the one he wants, and hands it over.',
-    'And then, on the mountain, the line that is the whole of what he is.',
-    'He cannot carry it for him. But he can carry him.',
-    'No gift. No plan. No prophecy. He picks the man up and walks up a volcano with him on his back.',
-    'Nobody would have chosen him for any of it.',
-    'It could not have been done by anybody else.'
-  ] },
+  q: 'What are you good at that has never looked like a skill?' },
 
 ];
 
@@ -1148,19 +606,20 @@ S.forEach(function (x, i) { x.no = ('0' + (i + 1)).slice(-2); });
 
 var $ = function (s) { return document.querySelector(s); };
 var el = function (t, c, x) { var n = document.createElement(t); if (c) n.className = c; if (x != null) n.textContent = x; return n; };
-var byId = function (i) { for (var k = 0; k < S.length; k++) { if (S[k].id === i) return S[k]; } return null; };
 
-var st = { read: [], last: null };
+/* st.last is a VIEW now rather than a story, so a stored value from the
+   build before this one names something VIEWS does not have — which
+   falls through to dark, the way any stored key here has to. */
+var st = { last: null };
 try { var raw = localStorage.getItem(KEY); if (raw) { var o = JSON.parse(raw); if (o && typeof o === 'object') {
-  st.read = Array.isArray(o.read) ? o.read.filter(function (x) { return typeof x === 'string'; }) : [];
   st.last = typeof o.last === 'string' ? o.last : null;
 } } } catch (e) {}
 var save = function () { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
 
-/* Each law in one line. A tag that opens nothing is a tag that reads
-   as a category somebody forgot to wire up, and the whole point of
-   naming the laws is that a story carries several and you can follow
-   any of them sideways into the others that carry it. */
+/* Each one in a line. A tag that opens nothing reads as a category
+   somebody forgot to wire up, and the point of naming them is that a
+   lesson carries three and you can follow any of them sideways into
+   the others that carry it. */
 var LAWS = {
   'The Answer You Are Carrying': 'The thing you are looking for is very often already in your possession — written down, said to you, sitting under your feet. Finding it was never the difficulty. Being able to hear it is, and that is usually bought rather than given.',
   'The Lit Ground': 'You search where searching is comfortable rather than where the thing actually is. The lit ground is not where you dropped it. It is simply the only place you can see, and effort spent there looks identical from outside to effort that would work.',
@@ -1221,76 +680,81 @@ var LAWS = {
   'The Day Nobody Announced': 'The morning it changed was indistinguishable from the four hundred before it. You will not feel it arrive. You will notice, much later and by accident, that it is already behind you.'
 };
 
-var IB = { desert:1.20, umber:2.00, iris:2.20, turtle:1.25, canyon:1.00,
-           delta:1.00, silk:0.95, curve:0.90, iceberg:0.85, nightfall:1.60,
-           abyss:1.70, cobalt:1.10, jade:2.60, violet:2.20 };
+/* DARK IS THE PULL AND LIGHT IS THE WAY. Every named thing here is one
+   or the other: something that takes you off, or something that carries
+   you. The family sorts inside each side, because thirty-three names in
+   a row with no structure is a wall rather than a list.
 
-/* THE NOTE THAT USED TO SIT HERE WAS RIGHT ABOUT VIOLET AND WRONG
-   ABOUT WHY, and the reason is the crop. It measured "40% of the frame
-   under L8" in a 390x844 phone crop — which no story photograph is ever
-   drawn in. The welcome hero is the only full-screen one and it is
-   hardcoded to desert; a story's image is a 322x300 card inset and a
-   354x188 open hero, both read off the live page. At the card crop
-   violet is 37.6% under L8 against abyss's 36.0, so it was never the
-   darkest thing here.
-   What is actually wrong with it is HUE. The mean lit hue of this set
-   is 29-33 — one warm tone — and violet comes through the shared grade
-   at 279, because saturate(.30) sepia(.55) is not enough to take a
-   purple that strong. That is the "lilac flare" the old note saw and
-   attributed to brightness. So the grade gets a per-image override the
-   way brightness already had one: at saturate(.12) sepia(.80) violet
-   measures hue 26, sat 22, inside the band. Rendered beside desert and
-   canyon at the real card size before it was believed. */
-var GR = { violet: 'saturate(.12) sepia(.80) contrast(1.02) brightness(1.20)' };
+   THIS TABLE IS WHAT GETS DRAWN, not the lessons. The list used to be
+   derived by walking every lesson's own three, which meant a name whose
+   last lesson was rewritten simply stopped existing — three of them had
+   gone that way and were sitting in LAWS with a definition and no way
+   to reach them. Reading the table instead makes that impossible, and
+   the two are asserted to hold exactly the same names on boot. */
+var SIDE = {
+  'The Answer You Are Carrying': ['light', 'inner'],
+  'The Lit Ground': ['dark', 'inner'],
+  'The Full Cup': ['dark', 'inner'],
+  'The Cost of Being Right': ['dark', 'inner'],
+  'The Early Verdict': ['dark', 'inner'],
+  'The Long Carry': ['dark', 'inner'],
+  'The Sentence That Arrives Ready': ['dark', 'inner'],
+  'The Spent Feeling': ['dark', 'inner'],
+  'The Walk': ['light', 'motion'],
+  'The Wheel': ['light', 'motion'],
+  'The Toll': ['dark', 'motion'],
+  'What Only Made Sense Back There': ['light', 'motion'],
+  'The Handle': ['light', 'motion'],
+  'The Open Door': ['dark', 'motion'],
+  'The Stranger’s Mouth': ['light', 'others'],
+  'The Sideways Look': ['dark', 'others'],
+  'The Borrowed Engine': ['dark', 'others'],
+  'The River Does Not Wait': ['light', 'time'],
+  'Two Ends of One Thing': ['light', 'time'],
+  'Nothing Has a Size of Its Own': ['dark', 'time'],
+  'The Number That Moves': ['dark', 'time'],
+  'The Second Thing': ['dark', 'time'],
+  'The Quiet Middle': ['light', 'time'],
+  'The Judge You Installed': ['dark', 'others'],
+  'The Unwritten Half': ['dark', 'inner'],
+  'The Prize Goes to the Exception': ['dark', 'motion'],
+  'The Price Was the Purchase': ['light', 'motion'],
+  'The Measuring Does Not Stop': ['dark', 'inner'],
+  'The Narrow Gift': ['light', 'motion'],
+  'What Got Rewarded': ['dark', 'others'],
+  'A Picture Is Not a Rehearsal': ['dark', 'inner'],
+  'Mostly It Is Not Doing Things': ['light', 'motion'],
+  'The State Wrote It': ['dark', 'inner'],
+  'Nothing Records the Weather': ['dark', 'time'],
+  'Freedom Is Not Autonomy': ['light', 'motion'],
+  'Leverage Is What Buys the No': ['light', 'others'],
+  'The Word You Reached For': ['dark', 'inner'],
+  'The Talent Nobody Sells': ['light', 'inner'],
+  'The Sunday Version Has the Vote': ['light', 'motion'],
+  'The Version You Can Always Do': ['light', 'motion'],
+  'Starting Again Is the Cost': ['dark', 'time'],
+  'Too Small To Bother With': ['dark', 'inner'],
+  'Aimed, Not Removed': ['light', 'motion'],
+  'What They Called It': ['dark', 'others'],
+  'The Convenient Reason': ['dark', 'inner'],
+  'What The Months Say': ['light', 'time'],
+  'Nothing To Point At': ['dark', 'inner'],
+  'You Cannot Negotiate With A Room': ['light', 'motion'],
+  'What Is Left Standing': ['dark', 'inner'],
+  'The Test Runs Both Ways': ['light', 'time'],
+  'A Leap Is Seen From Outside': ['light', 'time'],
+  'The Picture Makes Tuesday Feel Like Failure': ['dark', 'inner'],
+  'Sacrifice Now Or Sacrifice It': ['light', 'motion'],
+  'The Number You Never Wrote Down': ['dark', 'inner'],
+  'Visibility Is Billed Later': ['dark', 'inner'],
+  'Everything Is Paid For': ['dark', 'motion'],
+  'The Day Nobody Announced': ['light', 'time']
+};
 
-function photo(node, name) {
-  node.style.backgroundImage = 'url("../arc/bg/' + name + '.jpg")';
-  node.style.setProperty('--ib', IB[name] || 1);
-  if (GR[name]) node.style.setProperty('--grade', GR[name]);
-  else node.style.removeProperty('--grade');
-}
-
-var MARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v20M5 8l7-6 7 6M5 16l7 6 7-6"/></svg>';
-
-var ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>';
-
-function cardOf(s) {
-  var b = el('button', 'al-card' + (st.read.indexOf(s.id) >= 0 ? ' is-read' : ''));
-  b.setAttribute('data-id', s.id);
-  b.setAttribute('aria-label', s.n + '. ' + (s.src !== 'Ours' ? s.src + '. ' : '') + s.ab + '. ' + s.mins + ' minutes.');
-  /* THE MINUTES RIDE THE HEAD, which had a number at one end and an
-     arrow at the other and nothing in between. On the line under the
-     title they wrapped, and a wrapped line starting with the middle dot
-     reads as a bullet nobody asked for. */
-  var h = el('div', 'al-ch');
-  var hl = el('span', 'al-chl');
-  hl.appendChild(el('span', 'al-sq', s.no));
-  hl.appendChild(el('span', 'al-min', s.mins + ' min'));
-  h.appendChild(hl);
-  var g = el('span', 'al-go'); g.innerHTML = ARROW; h.appendChild(g);
-  b.appendChild(h);
-
-  /* THE STAGE IS NOT SAID TWICE. It was a chip on the card ten pixels
-     under a group heading printing the same words, in two tracked-caps
-     registers half a pixel and a tenth of an em apart — one label said
-     twice in what reads as one voice. */
-  var w = el('div', 'al-ct');
-  w.appendChild(el('div', 'al-disp-s', s.n));
-  /* WHAT IT IS ABOUT, WHERE THE SOURCE USED TO BE. 'Ours' was printed on
-     twenty-one cards and said nothing about any of them, and a title on
-     its own leaves you opening a card to find out whether you want it.
-     The minutes ride the same line rather than taking a third register. */
-  var nt = el('div', 'al-note al-ab');
-  if (s.src && s.src !== 'Ours') nt.appendChild(el('span', 'al-src', s.src));
-  nt.appendChild(document.createTextNode(s.ab));
-  w.appendChild(nt);
-  b.appendChild(w);
-
-  var ph = el('div', 'al-ph');
-  var i = el('i'); photo(i, s.bg);
-  ph.appendChild(i); b.appendChild(ph);
-  return b;
-}
+(function () {
+  for (var n in LAWS) if (!SIDE[n]) throw new Error('no side for ' + n);
+  for (var m in SIDE) if (!LAWS[m]) throw new Error('no definition for ' + m);
+}());
 
 function mask(p) {
   var f = function () {
@@ -1300,70 +764,28 @@ function mask(p) {
   p.alMask();
 }
 
-function paintArc() {
-  var p = $('#alArcPane'); p.textContent = '';
-  for (var i = 0; i < STAGES.length; i++) {
-    var here = S.filter(function (s) { return s.stage === STAGES[i]; });
-    if (!here.length) continue;
-    p.appendChild(el('div', 'al-grp al-caps', STAGES[i]));
-    for (var j = 0; j < here.length; j++) p.appendChild(cardOf(here[j]));
-  }
-  mask(p);
-}
+var FAM = { inner: 'The inner world', motion: 'Motion', others: 'Other people', time: 'Time' };
 
-function lawRow(x) {
-  var b = el('button', 'al-lrow');
-  b.setAttribute('data-id', x.id);
-  b.appendChild(el('span', 'al-sq', x.no));
-  var t = el('span', 'al-lt');
-  t.appendChild(el('i', null, x.n));
-  t.appendChild(el('span', 'al-caps', x.stage));
-  b.appendChild(t);
-  var g = el('span', 'al-go'); g.innerHTML = ARROW; b.appendChild(g);
-  return b;
-}
+function sideOf(n) { return (SIDE[n] || ['dark'])[0]; }
+function famOf(n) { return (SIDE[n] || [0, 'inner'])[1]; }
 
-function paintLaw(name) {
-  var p = $('#alLawPane'); p.textContent = '';
-  var fam = null;
-  S.forEach(function (x) { x.laws.forEach(function (l) { if (l.n === name) fam = l.f; }); });
-  var FAM = { inner: 'The inner world', motion: 'Motion', others: 'Other people', time: 'Time' };
-
-  var lead = el('div', 'al-lead is-short');
-  lead.appendChild(el('h1', 'al-disp', name));
-  lead.appendChild(el('div', 'al-caps', FAM[fam] || ''));
-  p.appendChild(lead);
-
-  var sh = el('div', 'al-sheet');
-  var d = el('p', 'al-body'); d.textContent = LAWS[name] || '';
-  d.style.marginBottom = '26px';
-  sh.appendChild(d);
-
-  var carry = S.filter(function (x) {
-    return x.laws.some(function (l) { return l.n === name; });
-  });
-  var h = el('div', 'al-rule-hd');
-  h.appendChild(el('span', 'al-caps', carry.length === 1 ? 'One story carries it' : carry.length + ' stories carry it'));
-  sh.appendChild(h);
-  carry.forEach(function (x) { sh.appendChild(lawRow(x)); });
-
-  p.appendChild(sh);
-  p.scrollTop = 0; mask(p);
-}
-
-function paintLaws() {
-  var p = $('#alLawsPane'); p.textContent = '';
-  var seen = {}, fams = { inner: 'The inner world', motion: 'Motion', others: 'Other people', time: 'Time' };
-  for (var f in fams) {
+/* ONE PAINTER, TWO SIDES. Dark and Light are the same screen reading
+   the same list through one field, so there is no second drawing to
+   drift. The families sort inside each side: thirty-three names in a
+   row with no structure is a wall rather than a list. */
+function paintSide(side) {
+  var p = $('#al' + side.charAt(0).toUpperCase() + side.slice(1) + 'Pane');
+  p.textContent = '';
+  for (var f in FAM) {
     var rows = [];
-    S.forEach(function (s) { s.laws.forEach(function (l) {
-      if (l.f === f && !seen[l.n]) { seen[l.n] = 1; rows.push(l); } }); });
+    for (var n in SIDE) if (SIDE[n][0] === side && SIDE[n][1] === f) rows.push(n);
     if (!rows.length) continue;
-    p.appendChild(el('div', 'al-grp al-caps', fams[f]));
+    rows.sort();
+    p.appendChild(el('div', 'al-grp al-caps', FAM[f]));
     var w = el('div', 'al-tags');
-    rows.forEach(function (l) {
-      var t = el('button', 'al-tag', l.n);
-      t.setAttribute('data-f', l.f); t.setAttribute('data-law', l.n);
+    rows.forEach(function (n) {
+      var t = el('button', 'al-tag', n);
+      t.setAttribute('data-f', SIDE[n][1]); t.setAttribute('data-law', n);
       w.appendChild(t);
     });
     p.appendChild(w);
@@ -1371,145 +793,106 @@ function paintLaws() {
   mask(p);
 }
 
-function paintRules() {
-  var p = $('#alRulesPane'); p.textContent = '';
+function countOf(side) {
+  var n = 0;
+  for (var m in SIDE) if (SIDE[m][0] === side) n++;
+  return n;
+}
+
+/* A LESSON IS THE LINE AND THE QUESTION. It used to name the story it
+   came from and open it; there is no story to open, so the card is a
+   div and the source is the film it was taken from. */
+function paintLessons() {
+  var p = $('#alLessonsPane'); p.textContent = '';
   S.forEach(function (s) {
-    // A RULE IN A LIST HAS NOTHING BEHIND IT. At the foot of its own
-    // story it has the whole story; here it was a stage label that
-    // repeats — two cards reading THE CALL and no way to tell them
-    // apart — over a sentence with no referent. It names the story and
-    // opens it, so the line always has somewhere to be explained.
-    var d = el('button', 'al-rule al-rgo');
-    d.setAttribute('data-id', s.id);
-    d.appendChild(el('div', 'al-caps', s.stage));
+    var d = el('div', 'al-rule');
+    if (s.src && s.src !== 'Ours') d.appendChild(el('div', 'al-caps', s.src));
     d.appendChild(el('b', null, s.rule));
-    d.appendChild(el('div', 'al-rfrom', s.n));
+    d.appendChild(el('div', 'al-rfrom', s.q));
     p.appendChild(d);
   });
   mask(p);
 }
 
-function paintStory(s) {
-  var p = $('#alStoryPane'); p.textContent = '';
+function paintLaw(name) {
+  var p = $('#alLawPane'); p.textContent = '';
 
-  var lead = el('div', 'al-lead');
-  var hero = el('div', 'al-hero'); var hi = el('i'); photo(hi, s.bg);
-  hero.appendChild(hi); lead.appendChild(hero);
-  var mk = el('div', 'al-mark'); mk.innerHTML = MARK; lead.appendChild(mk);
-  lead.appendChild(el('h1', 'al-disp', s.n));
-  lead.appendChild(el('div', 'al-caps', s.stage));
-  lead.appendChild(el('div', 'al-note', s.src + '  ·  ' + s.mins + ' min'));
+  var lead = el('div', 'al-lead is-short');
+  lead.appendChild(el('h1', 'al-disp', name));
+  lead.appendChild(el('div', 'al-caps',
+    (sideOf(name) === 'dark' ? 'Dark' : 'Light') + '  \u00b7  ' + (FAM[famOf(name)] || '')));
   p.appendChild(lead);
 
-  /* Everything past the lead sits on its own ground, and the ground is
-     a CHILD of the scroll rather than the fixed photograph behind it. */
   var sh = el('div', 'al-sheet');
+  var d = el('p', 'al-body'); d.textContent = LAWS[name] || '';
+  d.style.marginBottom = '26px';
+  sh.appendChild(d);
 
-  var t = el('div', 'al-txt al-body');
-  (s.body || []).forEach(function (x) { t.appendChild(el('p', null, x)); });
-  sh.appendChild(t);
-
-  var h = el('div', 'al-rule-hd'); h.appendChild(el('span', 'al-caps', 'Key themes'));
-  sh.appendChild(h);
-
-  var ls = el('div', 'al-les');
-  s.laws.forEach(function (l) {
-    var r = el('button', 'al-le');
-    r.setAttribute('data-f', l.f);
-    r.setAttribute('data-law', l.n);
-    r.appendChild(el('span', 'al-le-n', l.n));
-    if (LAWS[l.n]) r.appendChild(el('span', 'al-le-d', LAWS[l.n]));
-    if (l.d) r.appendChild(el('span', 'al-le-x', l.d));
-    ls.appendChild(r);
+  /* WHERE IT SHOWS UP. It listed the stories carrying it; it lists the
+     lessons now, which is the same relationship with the stories gone. */
+  var carry = S.filter(function (x) {
+    return x.laws.some(function (l) { return l.n === name; });
   });
-  sh.appendChild(ls);
-
-  if (s.teach) { var tb = el('p', 'al-body'); tb.textContent = s.teach; tb.style.marginBottom = '22px'; sh.appendChild(tb); }
-
-  var r = el('div', 'al-rule');
-  r.appendChild(el('div', 'al-caps', 'The rule'));
-  r.appendChild(el('b', null, s.rule));
-  sh.appendChild(r);
-
-  var q = el('div', 'al-q');
-  q.appendChild(el('div', 'al-caps', 'The question'));
-  q.appendChild(el('b', null, s.q));
-  sh.appendChild(q);
-
-  var nx = null, at = S.indexOf(s);
-  for (var k = at + 1; k < S.length; k++) { if (S[k].body) { nx = S[k]; break; } }
-  var acts = el('div', 'al-acts');
-  var a1 = el('button', 'al-pill is-grow', nx ? 'The next story' : 'Back to the Arc');
-  a1.setAttribute('data-go', nx ? nx.id : 'arc');
-  acts.appendChild(a1);
-  if (nx) { var a2 = el('button', 'al-pill is-glass', 'The Arc'); a2.setAttribute('data-go', 'arc'); acts.appendChild(a2); }
-  sh.appendChild(acts);
+  if (carry.length) {
+    var h = el('div', 'al-rule-hd');
+    h.appendChild(el('span', 'al-caps',
+      carry.length === 1 ? 'One lesson carries it' : carry.length + ' lessons carry it'));
+    sh.appendChild(h);
+    carry.forEach(function (x) {
+      var r = el('div', 'al-rule');
+      if (x.src && x.src !== 'Ours') r.appendChild(el('div', 'al-caps', x.src));
+      r.appendChild(el('b', null, x.rule));
+      sh.appendChild(r);
+    });
+  }
 
   p.appendChild(sh);
   p.scrollTop = 0; mask(p);
 }
 
-var VIEWS = ['open', 'arc', 'laws', 'rules', 'story', 'law'];
+var VIEWS = ['open', 'dark', 'light', 'lessons', 'law'];
 function view(v) {
-  if (VIEWS.indexOf(v) < 0) v = 'arc';
+  if (VIEWS.indexOf(v) < 0) v = 'dark';
   document.documentElement.setAttribute('data-view', v);
   VIEWS.forEach(function (x) {
     var n = $('#al' + x.charAt(0).toUpperCase() + x.slice(1));
     if (n) n.classList.toggle('is-on', x === v);
   });
-  $('#alFoot').hidden = (v === 'open' || v === 'story' || v === 'law');
-  $('#alStoryX').hidden = (v !== 'story');
+  $('#alFoot').hidden = (v === 'open' || v === 'law');
   $('#alLawX').hidden = (v !== 'law');
   document.querySelectorAll('.al-tab').forEach(function (b) {
     b.setAttribute('aria-current', b.getAttribute('data-v') === v ? 'true' : 'false');
   });
-  document.querySelectorAll('.al-count').forEach(function (n) {
-    n.textContent = st.read.length + ' of ' + S.length;
-  });
-  if (v === 'arc') paintArc();
-  if (v === 'laws') paintLaws();
-  if (v === 'rules') paintRules();
+  $('#alDark').querySelector('.al-count').textContent = countOf('dark');
+  $('#alLight').querySelector('.al-count').textContent = countOf('light');
+  $('#alLessons').querySelector('.al-count').textContent = S.length;
+  if (v === 'dark') paintSide('dark');
+  if (v === 'light') paintSide('light');
+  if (v === 'lessons') paintLessons();
+  if (v !== 'law') { st.last = v; save(); }
 }
 
-var lawBack = 'laws';
+var lawBack = 'dark';
 function openLaw(name) {
   if (!LAWS[name]) return;
   var now = document.documentElement.getAttribute('data-view');
-  if (now === 'story' || now === 'laws' || now === 'arc') lawBack = now === 'story' ? 'story' : now;
+  if (now !== 'law' && now !== 'open') lawBack = now;
   paintLaw(name);
   view('law');
 }
 
-function open(id) {
-  var s = byId(id);
-  if (!s || !s.body) return;
-  st.last = id;
-  if (st.read.indexOf(id) < 0) st.read.push(id);
-  save();
-  paintStory(s);
-  view('story');
-}
-
 document.addEventListener('click', function (e) {
-  var t = e.target.closest ? e.target.closest('.al-tab, .al-card, .al-pill, .al-tag, .al-le, .al-lrow, .al-rgo, #alOpenB, #alStoryX, #alLawX') : null;
+  var t = e.target.closest ? e.target.closest('.al-tab, .al-pill, .al-tag, .al-le, #alOpenB, #alLawX') : null;
   if (!t) return;
-  if (t.id === 'alOpenB') { var r = st.last && byId(st.last); return r && r.body ? open(r.id) : view('arc'); }
-  var go = t.getAttribute && t.getAttribute('data-go');
-  if (go) return go === 'arc' ? view('arc') : open(go);
-  if (t.id === 'alStoryX') return view('arc');
-  if (t.id === 'alLawX') return lawBack === 'story' ? view('story') : view(lawBack);
+  if (t.id === 'alOpenB') return view(VIEWS.indexOf(st.last) > 0 && st.last !== 'law' ? st.last : 'dark');
+  if (t.id === 'alLawX') return view(lawBack);
   var law = t.getAttribute && t.getAttribute('data-law');
   if (law) return openLaw(law);
-  if (t.classList.contains('al-lrow') || t.classList.contains('al-rgo')) return open(t.getAttribute('data-id'));
   if (t.classList.contains('al-tab')) return view(t.getAttribute('data-v'));
-  if (t.classList.contains('al-card')) return open(t.getAttribute('data-id'));
 });
 
-var resume = st.last && byId(st.last);
-if (resume) { $('#alOpenB').textContent = 'Continue'; $('#alOpenN').textContent = 'You stopped at ' + resume.n + '.'; }
-photo($('#alOpenHero'), 'desert');
 view('open');
-window.alDrive = { view: view, open: open };
+window.alDrive = { view: view, openLaw: openLaw };
 
 }());
 </script>
