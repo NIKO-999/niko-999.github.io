@@ -6088,9 +6088,20 @@ const SAID = [
   /* Against the BARE tag rather than against a hue: "it is not red"
      passes on a rule that dressed it any other colour at all, and the
      claim is that the class does nothing. */
+  /* Against the BARE tag, never against a hue: "it is not red" passes
+     on a rule that dressed it any other colour at all, and the claim
+     is that the class does nothing.
+
+     AND NOT AGAINST --bad's LEAD CHANNEL, which is what the first cut
+     of this asserted and what made it fail on a correct build. A bare
+     tag is white, so every channel ties and `indexOf(max)` returns 0;
+     --bad is a pale red, which also leads on 0. The two coincided by
+     arithmetic rather than by the rule being back. `is-ok` differing
+     from bare is the guard that belongs here instead — it proves the
+     measurement can tell a dressed class from an undressed one. */
   ok('...and Missed has no dress left — is-bad colours nothing',
     dress['is-bad'].col === dress.bare.col
-    && dress['is-bad'].lead !== dress.badLead, dress);
+    && dress['is-ok'].col !== dress.bare.col, dress);
   ok('...and In progress is a colour of its own too',
     dress['is-now'].spread >= 14, dress);
 
@@ -7946,15 +7957,28 @@ const SAID = [
       localStorage.setItem('sched.hint2.v1', '1');
       localStorage.setItem('sched.hintw.v1', '1');
       localStorage.setItem('sched.view.v1', 'list');
+      /* ── TWENTY, AND IT WAS FOURTEEN ──
+         Fourteen was chosen when a row behind you carried a Missed
+         tag and stood about 55px. The tag went, the row went to its
+         44px floor, and fourteen of them stopped overflowing the card
+         at all — `max` came back 0, so a check about a day that
+         scrolls had nothing to scroll and the fade under it had
+         nothing to bite on. The BAR is untouched at `max > 100`; what
+         moved is how many blocks it takes to get there, which is a
+         fact about the row rather than about the feature.
+
+         The step is 45 rather than 60 because twenty of those from
+         06:00 runs past midnight, and this record is one day a row. */
       const names = ['Wake', 'Train', 'Shower', 'Commute', 'Work', 'Coffee',
                      'Meeting', 'Lunch', 'Work', 'Walk', 'Shop', 'Cook',
-                     'Read', 'Down'].slice(0, rows);
+                     'Emails', 'Calls', 'Errands', 'Stretch', 'Plan',
+                     'Journal', 'Read', 'Down'].slice(0, rows);
       const items = []; let id = 1;
       for (let d = 0; d < 7; d++) {
         let t = 360;
         for (const nm of names) {
-          items.push({ id: 'b' + (id++), d, s: t, e: t + 45, r: '', n: nm });
-          t += 60;
+          items.push({ id: 'b' + (id++), d, s: t, e: t + 40, r: '', n: nm });
+          t += 45;
         }
       }
       localStorage.setItem('sched.v1',
@@ -7988,7 +8012,7 @@ const SAID = [
       }, sel);
     };
 
-    await heavy(14);
+    await heavy(20);
     await spage.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
     await spage.waitForTimeout(650);
 
@@ -8012,7 +8036,7 @@ const SAID = [
       ctl.top > 60, ctl);
 
     const long = await dragUp('.day-card');
-    ok(`...and it scrolls a day with fourteen blocks on it `
+    ok(`...and it scrolls a day with twenty blocks on it `
       + `(${long.top} of ${long.max}px)`,
       long.max > 100 && long.top >= Math.min(long.max - 2, 300), long);
 

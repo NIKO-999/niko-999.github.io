@@ -2350,6 +2350,22 @@ body {
      exists to remove. 80 = 3 (check inset) + 22 + 45 - 26 + 26 + 9,
      measured rather than guessed. */
   padding: 9px 80px 9px 2px;
+  /* ── AND 44 IS A FLOOR, WHICH THE DAY THE TAG WENT IT STOPPED
+         CLEARING ──
+     A row was two lines of content and cleared the 44px every press
+     target in this app holds to on its own. Taking the Missed tag off
+     a block behind you took a line with it, and the suite measured
+     `row is-past` at **39px** — under the floor, on the most-pressed
+     object on the screen you open the app to. Four other checks went
+     with it: a fourteen-block day stopped overflowing, so there was
+     nothing to scroll and nothing under the fold for the fade to
+     bite on, and the gutter's own press target fell with the row.
+
+     Said as a floor on the row rather than as padding, because the
+     row's height is CONTENT — one line, two, or three with a track
+     under it — and a padding big enough for the shortest is too much
+     for the rest. */
+  min-height: 44px;
   border: 0;
   /* A RULE BETWEEN ROWS, WHICH REVERSES A RULE THIS FILE ARGUED FOR.
      "Nothing is drawn between the rows" was written about rows with

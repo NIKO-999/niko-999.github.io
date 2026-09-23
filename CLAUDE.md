@@ -12763,3 +12763,56 @@ white on the dress — then restored by the inverse and hashed.
 The rows lost a line, so the week's list now ends about 54% up the
 screen where it ended at 45%. That is the next plate's problem and it
 is worse for this one having shipped.
+
+### And the row fell under the floor when the tag went
+
+Taking the Missed tag off a block behind you took a LINE off the row
+with it, and `row is-past` measured **39px** — under the 44 every press
+target in this app holds to, on the most-pressed object on the screen
+you open the app to. The suite caught it, and four other failures were
+all downstream of the same pixel: a fourteen-block day stopped
+overflowing the card, so there was nothing to scroll and nothing under
+the fold for the fade to bite on, and the gutter's own press target
+fell with the row.
+
+**Said as a floor on the row rather than as padding.** A row's height
+is CONTENT — one line, two, or three with a progress track under it —
+and a padding big enough to hold the shortest to 44 is too much for
+every other row on the card.
+
+**A REMOVAL THAT TAKES A LINE OFF A ROW IS A REMOVAL THAT CAN TAKE IT
+UNDER THE FLOOR**, and nothing about the change said so: it was a
+string going empty in one branch of a ternary. The check that found it
+is the one that walks every control on every view.
+
+### The long-day fixture said fourteen because the row was taller
+
+`heavy(14)` was chosen when a row behind you carried a tag and stood
+about 55px. At 44 they no longer overflow the card at all — `max` came
+back **0**, so a check about a day that scrolls had nothing to scroll.
+
+**The BAR is untouched at `max > 100`.** What moved is how many blocks
+it takes to get there, which is a fact about the row rather than about
+the feature: the day card still scrolls and its foot still fades, and
+both are still asserted at the same threshold. Twenty blocks measures
+`max: 289`. The step went 60 to 45 with it, because twenty of the old
+ones from 06:00 runs past midnight and this record is one day a row.
+
+Worth writing down because *the test failed so I changed the test* is
+usually the wrong move. It is the right one only when the claim and
+its threshold both survive and the fixture was calibrated to something
+that moved — which is exactly what a row height is.
+
+### And `indexOf(max)` on white is 0, which is also red's lead
+
+The `is-bad` check asserted the class's lead CHANNEL differed from
+`--bad`'s. A bare tag is white, so every channel ties and
+`indexOf(max)` returns 0; `--bad` is a pale red, which leads on 0 as
+well. **The two coincided by arithmetic rather than by the rule being
+back**, so the assertion failed on a correct build.
+
+What belongs there is that `is-ok` differs from BARE — which proves
+the measurement can tell a dressed class from an undressed one, and is
+the vacuity guard the lead clause was pretending to be. Same shape as
+every other lesson in this file about a check that is wrong about what
+it is looking at rather than about the thing.
