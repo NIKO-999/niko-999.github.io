@@ -4939,12 +4939,17 @@ const SAID = [
      is that colour says WHICH; with nothing left to say it takes the
      neutral pair every other mark on a neutral surface uses.
 
-     Asserted as NOT --me as well as as the neutral, because "it is
-     grey" passes on a build where --me happens to be grey. */
+     IT ALSO ASSERTED "not --me", on the grounds that "it is grey"
+     passes on a build where that colour happens to be grey. `--me`
+     went with the push that was its only reader, so the clause had
+     no subject left — and left reading a field the payload no longer
+     carries it threw a TypeError and took the file down forty
+     assertions early rather than failing. What is left is the
+     stronger half anyway: BOTH marks are asserted against the exact
+     token each is supposed to be, which no other colour passes. */
   ok('drawn in the flat neutral, and not in any colour of yours',
     pic.tile.toLowerCase() === pic.dim.toLowerCase()
-    && pic.on.toLowerCase() === pic.fig.toLowerCase()
-    && pic.tile.toLowerCase() !== pic.me.toLowerCase(), pic);
+    && pic.on.toLowerCase() === pic.fig.toLowerCase(), pic);
 
   /* MOVED, because the line above passes on a face painted with the
      shipped hex typed in as a literal. */
