@@ -749,6 +749,36 @@ var S = [
     "He is past that number now by some way. He still checks more than he should. But he noticed something in the spring: he had gone a whole Tuesday without looking, and had not decided to, and had not noticed until he was in bed.",
     "That was a better day than the Wednesday was."
   ] },
+{ id:'five', stage:'The Reward', bg:'violet', mins:2,
+  n:'Twenty To Six', src:'Ours',
+  laws: [
+    { n: 'The Measuring Does Not Stop', f: 'inner', d: 'A different body, three years later, and the same arithmetic on the same train with the same face on.' },
+    { n: 'The Price Was the Purchase', f: 'motion', d: 'He had it booked as what the body cost. It was the only thing that came with him into a room.' },
+    { n: 'The Quiet Middle', f: 'time', d: 'Forty minutes at twenty to six, for a year, without enjoying one of them, and nobody watching.' }
+  ],
+  rule:'What you are calling the price is usually the part you get to keep.',
+  q:'If you got the thing tomorrow, what would still be there?',
+  teach:'Every study that sets one training programme against another finds the same thing, and nobody quotes it: the variable that predicts the outcome is not which programme, it is whether you did it. The programme is the half people argue about and it is the half that does not decide anything.',
+  body:[
+    'He started because of a photograph.',
+    'Somebody sent them round after a wedding. He was at the edge of one, half turned, not doing anything, and he looked at it for a long time and then put the phone face down on the table.',
+    'He joined a gym that week. Twenty to six, because that was the only hour nobody needed him, and the same forty minutes, and he will tell you before you ask that he did not enjoy one of them for about a year.',
+    'Three years.',
+    'He got what he came for, and he does not do the modest thing about it. The body changed. People who had not seen him in a while said so, and they were not being kind, they were surprised.',
+    'Then there was another wedding.',
+    'The photographs went round afterwards and he opened them on the train home, and there he was at the edge of one, half turned, and he looked at it exactly the way he had looked at the first.',
+    'He is careful about this part, because it is the part people want to soften for him. It was not that he looked bad. He did not look bad. It was that he stood on a train doing the same arithmetic he had done three years earlier, about a completely different body, with the same face on.',
+    'The arithmetic had never been about the body. He had spent three years treating a photograph as the problem, and a photograph is a photograph.',
+    'What he wanted, if you made him say it, was to walk into a room and not be counting. He had gone and bought the wrong thing for that. You cannot buy it at all, as far as he can tell, and if you could it would not be sold at a gym.',
+    'So that is the failure, it is real, and he does not pretend otherwise.',
+    'Here is the rest of it.',
+    'Somewhere in the second year he stopped negotiating at twenty to six. There was no decision and no morning it happened. The alarm went and he got up, on the mornings he wanted to and the mornings he did not, and whether he wanted to quietly stopped being one of the inputs.',
+    'He found out what that was worth about eighteen months later, doing something else entirely.',
+    'There was a conversation he had been putting off for two years. The kind you rehearse in the car and then do not have. He had a free Tuesday and he had it. Not bravely, and not well. He had it the way he does twenty to six, which is without asking himself first.',
+    'That is the part that came with him. None of the rest did. The body stays at the gym and does not walk into rooms, whatever anybody tells you.',
+    'For three years he thought the training was what the body cost.',
+    'It was the other way round.'
+  ] },
 { id:'bridge', stage:'The Road Back', bg:'cobalt', mins:2,
   n:'The Job He Kept', src:'Ours',
   laws: [
@@ -859,21 +889,38 @@ var LAWS = {
   'The Judge You Installed': 'Show the work to enough people and one of them takes up residence. It arrives with standards you never agreed to, it has no interest in the boring majority of what you do, and you will be working to please it for months before you notice it moved in.',
   'The Unwritten Half': 'Every record is a record of what you did. The things you did not do leave no line, pass every audit, and are frequently the whole of what went wrong — which is why a clean book above a falling result is not a contradiction.',
   'The Prize Goes to the Exception': 'What people respond to is almost never the thing that produced your year. It is the one week that did not look like the rest, and going after the applause means going after your own outlier, which is the single result you have no method for.',
+  'The Price Was the Purchase': 'You name the thing you want and book everything it costs as the price. Very often the costs are the acquisition and the named thing is a souvenir — the patience, the tolerance for a boring morning, the not negotiating, all filed as expense for years while they were the only part that transferred.',
+  'The Measuring Does Not Stop': 'You think a number will end the counting. It will not, because the counting is a habit and not a verdict: arrive at the figure and you find yourself standing in the same place doing the same arithmetic about a different figure, with the same face on.',
   'The Day Nobody Announced': 'The morning it changed was indistinguishable from the four hundred before it. You will not feel it arrive. You will notice, much later and by accident, that it is already behind you.'
 };
 
 var IB = { desert:1.20, umber:2.00, iris:2.20, turtle:1.25, canyon:1.00,
            delta:1.00, silk:0.95, curve:0.90, iceberg:0.85, nightfall:1.60,
-           abyss:1.70, cobalt:1.10, jade:2.60 };
+           abyss:1.70, cobalt:1.10, jade:2.60, violet:2.20 };
 
-/* violet.jpg cannot be graded into this set: its brightest pixel in a
-   phone crop is L102, darker than the references' own median, with 40%
-   of the frame under L8. Lifting it leaves three quarters black behind
-   a lilac flare. nightfall and abyss are the same shape of problem and
-   survive only as cards, where the veil covers the lower two thirds. */
+/* THE NOTE THAT USED TO SIT HERE WAS RIGHT ABOUT VIOLET AND WRONG
+   ABOUT WHY, and the reason is the crop. It measured "40% of the frame
+   under L8" in a 390x844 phone crop — which no story photograph is ever
+   drawn in. The welcome hero is the only full-screen one and it is
+   hardcoded to desert; a story's image is a 322x300 card inset and a
+   354x188 open hero, both read off the live page. At the card crop
+   violet is 37.6% under L8 against abyss's 36.0, so it was never the
+   darkest thing here.
+   What is actually wrong with it is HUE. The mean lit hue of this set
+   is 29-33 — one warm tone — and violet comes through the shared grade
+   at 279, because saturate(.30) sepia(.55) is not enough to take a
+   purple that strong. That is the "lilac flare" the old note saw and
+   attributed to brightness. So the grade gets a per-image override the
+   way brightness already had one: at saturate(.12) sepia(.80) violet
+   measures hue 26, sat 22, inside the band. Rendered beside desert and
+   canyon at the real card size before it was believed. */
+var GR = { violet: 'saturate(.12) sepia(.80) contrast(1.02) brightness(1.20)' };
+
 function photo(node, name) {
   node.style.backgroundImage = 'url("../arc/bg/' + name + '.jpg")';
   node.style.setProperty('--ib', IB[name] || 1);
+  if (GR[name]) node.style.setProperty('--grade', GR[name]);
+  else node.style.removeProperty('--grade');
 }
 
 var MARK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v20M5 8l7-6 7 6M5 16l7 6 7-6"/></svg>';
