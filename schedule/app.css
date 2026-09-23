@@ -2745,14 +2745,20 @@ body {
    you would most want to catch without reading, and under budget is
    never drawn green-for-good in exchange. */
 .tk-r .st.is-over { --tg: var(--bad); }
-/* MISSED, and it is the one tag in this app that is red. The rule it
-   reverses said a colour never says WHETHER — written about a wash of
-   red across a week you had not kept, which is a judgement. An hour
-   that has been and gone without a tick is a fact about the day, and
-   it is the state you would most want to catch without reading. --bad
-   is the app's own red and is already solved: 7.12:1 as a tag on the
-   dark face and 5.11 on the light. */
-.row .st.is-bad, .cl-r .st.is-bad { --tg: var(--bad); }
+/* ── THERE IS NO RED ON A BLOCK ANY MORE, AND `is-bad` IS GONE ──
+   Missed was the one red tag here, at `--tg: var(--bad)`, and the
+   argument for it held for exactly one tag: an hour that has been and
+   gone is a fact about the day rather than a verdict on you. A real
+   morning draws five of them in a column, and five is a verdict. The
+   week's row now says it by being dimmed with its check open, and the
+   calendar's day sheet says it in the flat neutral with Off and Not
+   yet. The rule is one line again: nothing in this app is ever
+   coloured to say you failed.
+
+   `--bad` STAYS, and is still measured: it dresses `.tk-r .st.is-over`
+   just above, which is a budget category gone over. That one is about
+   money rather than about you, which is the whole of why it survives
+   a rule this one could not. */
 /* ── AND NOT YET IS NOT A HUE AT ALL ──
    Written as a --tg of --tick-off it would take the shared rule's own
    arithmetic, and that arithmetic is for a COLOUR: 22% of a near-grey

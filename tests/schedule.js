@@ -6047,8 +6047,15 @@ const SAID = [
 
      Not yet is the one that must stay neutral. A tag takes a hue when
      it names something that happened, and a thing you have not got to
-     has not happened; Missed is the reversal that was asked for, and
-     it is the only red tag in the app. */
+     has not happened.
+
+     AND MISSED IS ASSERTED AS ABSENT, in two halves. It was the one
+     red tag in this app and it is gone: a real morning drew five of
+     them in a column, which is the judgement the rule it reversed was
+     written against. `is-bad` must dress nothing — asserted as the
+     class landing on the SAME colour a bare tag has, because a rule
+     deleted and a rule that happens not to match look identical from
+     the outside — and no row behind you may draw a tag at all. */
   const dress = await page.evaluate(() => {
     const r = document.querySelector('.week.is-today .row[data-id]');
     const t = r.querySelector('.st');
@@ -6063,10 +6070,11 @@ const SAID = [
     const lead = (c) => { const v = num(c); return v.indexOf(Math.max(...v)); };
     const was = t.className;
     const out = {};
-    ['is-ok', 'is-now', 'is-bad', 'is-todo'].forEach((k) => {
-      t.className = 'st ' + k;
+    ['is-ok', 'is-now', 'is-bad', 'is-todo', ''].forEach((k) => {
+      t.className = ('st ' + k).trim();
       const g = getComputedStyle(t);
-      out[k] = { spread: Math.round(spread(g.color)), lead: lead(g.color) };
+      out[k || 'bare'] = { spread: Math.round(spread(g.color)), lead: lead(g.color),
+        col: g.color };
     });
     t.className = was;
     out.badLead = lead(paint(cs.getPropertyValue('--bad').trim()));
@@ -6075,12 +6083,96 @@ const SAID = [
   });
   ok('Not yet is a grey with no channel standing out',
     dress['is-todo'].spread <= 12, dress);
-  ok('Completed is green, and Missed is the app\u2019s own red',
-    dress['is-ok'].spread >= 14 && dress['is-ok'].lead === dress.okLead
-    && dress['is-bad'].spread >= 14 && dress['is-bad'].lead === dress.badLead
-    && dress['is-bad'].lead !== dress['is-ok'].lead, dress);
+  ok('Completed is green', dress['is-ok'].spread >= 14
+    && dress['is-ok'].lead === dress.okLead, dress);
+  /* Against the BARE tag rather than against a hue: "it is not red"
+     passes on a rule that dressed it any other colour at all, and the
+     claim is that the class does nothing. */
+  ok('...and Missed has no dress left — is-bad colours nothing',
+    dress['is-bad'].col === dress.bare.col
+    && dress['is-bad'].lead !== dress.badLead, dress);
   ok('...and In progress is a colour of its own too',
     dress['is-now'].spread >= 14, dress);
+
+  /* ── AND THE WORD IS GONE FROM THE WEEK, IN THREE CLOCK-PROOF
+         HALVES ──
+     The behaviour itself is not: `gone` needs is-past, which scLive
+     sets on TODAY's rows alone, so a check that waited for a real
+     block to be behind you would pass vacuously all morning and only
+     mean something at night. This file has recorded that shape six
+     times. So what is asserted is what holds at every hour.
+
+     `.st:empty` being undrawn is the LOAD-BEARING half — it is the
+     whole mechanism the absence rides on, it is what a day off
+     already uses, and one stylesheet tidy takes it away and leaves
+     empty pills down the card. Planted and restored inside one
+     evaluate, so nothing is left on the page.
+
+     And the count of tags drawn is asserted beside the word, because
+     "no tag says Missed" is vacuously true of a week that draws no
+     tags at all. */
+  const readTags = () => page.evaluate(() => {
+    const tags = [...document.querySelectorAll('.week .row .st')];
+    return { n: tags.length,
+      drawn: tags.filter((x) => x.getClientRects().length > 0).length,
+      words: [...new Set(tags.map((x) => x.textContent.trim()).filter(Boolean))] };
+  });
+  /* ── THE ALIVE HALF HAS TO MAKE A TAG, NOT WAIT FOR ONE ──
+     Two clock traps here, and the second only turned up under a probe.
+     `is-past` is set on TODAY's rows alone, so after the last block of
+     the day every row on today's card is gone and draws nothing. And
+     the tag is written by scLive, which walks `.week.is-today .row` —
+     so ANOTHER day's card draws no tag at any hour either, which is
+     not what this file's own note about "Not yet whatever the hour"
+     reads like. Measured at 23:09: today 0 drawn, another day 0 drawn.
+
+     So there is no day and no hour where a tag can be relied on to be
+     there already. Ticking a block MAKES one — Completed is written on
+     the spot, at every hour — which is the only version of this guard
+     that cannot pass vacuously. Unticked again immediately, because a
+     check that changes the state of the app is a check that breaks the
+     next one. */
+  const missAlive = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll('.week.is-today .row[data-id]')];
+    const r = rows.find((x) => !/train/i.test((x.querySelector('.n b') || {}).textContent || '')
+      && !x.classList.contains('is-done'));
+    if (!r) throw new Error('no untrained, unticked row on today to tick');
+    r.parentElement.querySelector('.chk').click();
+    return { id: r.dataset.id };
+  });
+  await page.waitForTimeout(420);
+  const missTick = await page.evaluate((id) => {
+    const r = document.querySelector('.week.is-today .row[data-id="' + id + '"]');
+    const t = r && r.querySelector('.st');
+    return { word: t ? t.textContent.trim() : null,
+      drawn: !!(t && t.getClientRects().length > 0) };
+  }, missAlive.id);
+  await page.evaluate((id) => {
+    const r = document.querySelector('.week.is-today .row[data-id="' + id + '"]');
+    if (r) r.parentElement.querySelector('.chk').click();
+  }, missAlive.id);
+  await page.waitForTimeout(420);
+  const missWords = await page.evaluate(() => {
+    const tags = [...document.querySelectorAll('.week .row .st')];
+    return { n: tags.length, back: document.querySelectorAll('.week .row.is-done').length,
+      words: [...new Set(tags.map((x) => x.textContent.trim()).filter(Boolean))] };
+  });
+  const emptied = await page.evaluate(() => {
+    const t = document.querySelector('.week .row .st');
+    if (!t) throw new Error('no state tag on the week');
+    const was = t.textContent;
+    t.textContent = '';
+    const drawn = t.getClientRects().length > 0;
+    t.textContent = was;
+    return { drawn, restored: t.textContent === was };
+  });
+  ok('ticking a block draws its tag, so the tag system is demonstrably alive',
+    missTick.drawn && missTick.word === 'Completed', missTick);
+  ok('...and with it unticked again, no tag on the week says Missed',
+    missWords.n > 2 && missWords.words.indexOf('Missed') < 0
+    && missWords.back === 0, missWords);
+  ok('...and an emptied tag draws nothing, which is what absence rides on',
+    emptied.drawn === false && emptied.restored, emptied);
 
   console.log('\n── the thumb ──');
   await dblRow('.week.is-today .row[data-id]');
@@ -11196,11 +11288,11 @@ const SAID = [
          is 6.6. A colour and the pixels it is compared against have to
          come from the same frame. */
       let worst = { r: 99 };
-      for (const cls of ['is-todo', 'is-ok', 'is-now', 'is-bad']) {
+      for (const cls of ['is-todo', 'is-ok', 'is-now']) {
         const s = await tp.evaluate((c) => {
           const e = document.querySelector('.row .st');
           if (!e) throw new Error('no state tag on the week');
-          ['is-todo', 'is-ok', 'is-now', 'is-bad'].forEach((k) => e.classList.remove(k));
+          ['is-todo', 'is-ok', 'is-now'].forEach((k) => e.classList.remove(k));
           e.classList.add(c);
           const r = e.getBoundingClientRect();
           return { fg: getComputedStyle(e).color,
@@ -14027,6 +14119,31 @@ const SAID = [
       && clDay.rows.length === 3
       && clDay.rows[0].t === '06:00' && clDay.rows[0].st === 'Completed'
       && clDay.rows[1].wo === 'Push', clDay);
+    /* ── AND MISSED KEEPS ITS WORD HERE AND LOSES ITS COLOUR ──
+       The week's row drops the word entirely, because that row is
+       dimmed with its check open and the hour has visibly passed.
+       These rows are none of those things — a flat read-back of a day
+       that has been — so the word is the only thing carrying it, and
+       it is neutral with Off and Not yet.
+
+       Read off a PLANTED class rather than waiting for a day with a
+       missed block on it, and compared against Not yet's own colour:
+       "it is not red" passes on any other hue, and the claim is that
+       the two states are dressed the same. */
+    const clMiss = await clpage.evaluate(() => {
+      const r = document.querySelector('.cl-r .st');
+      if (!r) throw new Error('no state tag in the day sheet');
+      const was = r.className;
+      const read = (c) => { r.className = 'st ' + c;
+        const g = getComputedStyle(r);
+        return { col: g.color, bg: g.backgroundColor }; };
+      const todo = read('is-todo'), ok2 = read('is-ok');
+      r.className = was;
+      return { todo, ok2, classes: was };
+    });
+    ok('...and a missed block in the day sheet wears Not yet\u2019s own neutral',
+      clMiss.todo.col !== clMiss.ok2.col
+      && /is-todo|is-ok/.test(clMiss.classes), clMiss);
     ok('...and it says what you logged by name, not only how many',
       /3 of 3 kept/.test(clDay.sum)
       && clDay.labels.indexOf('Logged') >= 0

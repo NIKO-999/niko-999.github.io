@@ -12687,3 +12687,79 @@ did the same thing one step quieter: it matched the shell asking the
 question and reported RUNNING for a process that had never been
 launched. **A `-f` pattern is matched against the command line you are
 typing it on.**
+
+## There is no red on a block any more
+
+`Missed` was the one red tag in this app, and the argument for it is
+written up above: a block whose hour has been and gone without a tick
+is a FACT about the day rather than a verdict on you, and it is the
+state you would most want to catch without reading. That argument is
+about ONE tag.
+
+**RENDERED AND LOOKED AT, A REAL MORNING DRAWS FIVE OF THEM.** A
+column of red down the one screen you open the app on, saying what you
+did not do — which is exactly the judgement the rule it reversed was
+written against. *Nothing is ever coloured to say you failed* had been
+eaten by its own exception, and the count is the whole of what
+changed: the reasoning was right about one and wrong about five.
+
+**WHAT REPLACES IT IS ABSENCE, NOT A QUIETER WORD.** The obvious fix
+is to take the tag to the flat neutral and keep the word. On the week
+that is a grey chip on a row that is ALREADY grey: `is-past` dims the
+glyph, the time and the name to `--spent` and leaves the check open,
+so the row says it three times before a tag opens its mouth. The word
+went instead.
+
+**AND IT NEEDED NO MECHANISM.** `.st:empty` is `display: none`
+already — it is how a day off draws no tag — so an empty word is a
+tag that is not there. Two lines of behaviour and one deleted rule.
+
+**THE DAY SHEET KEEPS THE WORD AND LOSES THE COLOUR**, and that is one
+rule rather than two answers. Those rows are not dimmed, their checks
+are not drawn and the hour has not visibly passed: it is a flat
+read-back of a day that has been, so the word is the only thing
+carrying it. Neutral, with Off and Not yet, because all three are the
+absence of a claim about doing something rather than three kinds of
+it. **A missed block is never coloured, and it keeps its word only
+where nothing else on the row already says so.**
+
+**`--bad` STAYS AND IS STILL MEASURED.** It dresses one thing now: a
+budget category gone over. That one is about money rather than about
+you, which is the whole of why it survives a rule this one could not.
+
+### The alive guard had to MAKE a tag, and two clock traps said so
+
+"No tag says Missed" is vacuously true of a week that draws no tags at
+all, so the count of tags drawn is asserted beside the word. Finding a
+tag to count turned out to be the hard half, and both failures were
+the shape this file has now recorded seven times.
+
+**TODAY'S CARD DRAWS NONE AFTER THE LAST BLOCK.** `is-past` is set on
+today's rows alone, so at 23:09 every row on it is gone and the card
+is bare. A guard read there passes all morning and fails at night.
+
+**AND ANOTHER DAY DRAWS NONE AT ANY HOUR.** This was the surprise, and
+only a probe found it: the tag is written by `scLive`, which walks
+`.week.is-today .row` — so no other day has ever drawn one. The note
+above reading *a block on another day is "Not yet" whatever the hour*
+describes what `gone` EVALUATES to, not what is on screen. Measured:
+today 0 drawn, another day 0 drawn.
+
+So there is no day and no hour where a tag can be relied on to be
+there already. **Ticking a block MAKES one** — `Completed` is written
+on the spot, at every hour — which is the only version of this guard
+that cannot pass vacuously. Unticked again immediately, because a
+check that changes the state of the app is a check that breaks the
+next one.
+
+**And `is-bad` is asserted against the BARE tag**, never against a
+hue: "it is not red" passes on a rule that dressed it any other colour
+at all, and the claim is that the class does nothing. Proved by
+putting both halves back — `words: ["Missed"]` on the behaviour, and
+`is-bad` computing `color(srgb 1 0.791 0.791)` against a bare tag's
+white on the dress — then restored by the inverse and hashed.
+
+**What it costs is the void, and that is said rather than hidden.**
+The rows lost a line, so the week's list now ends about 54% up the
+screen where it ended at 45%. That is the next plate's problem and it
+is worse for this one having shipped.

@@ -2704,27 +2704,44 @@
       var st = el.querySelector('.st');
       if (st) {
         var done = el.classList.contains('is-done');
-        /* ── FOUR STATES, AND MISSED IS THE ONE THAT REVERSES A RULE ──
-           This file said a tag never goes red for a thing you have not
-           done, because that is the screen grading you. Asked for
-           anyway, and it is a narrower claim than the rule was written
-           against: a block whose hour has been and gone without a tick
-           is a FACT about the day rather than a verdict on you, and it
-           is the one state you would want to catch at a glance.
+        /* ── AND MISSED SAYS NOTHING AT ALL, WHICH REVERTS A
+               REVERSAL ──
+           It was the one red tag in the app, and the argument for it
+           was good: a block whose hour has been and gone without a
+           tick is a FACT about the day rather than a verdict on you,
+           and it is the state you would most want to catch without
+           reading. That argument is about ONE tag. Rendered and looked
+           at, a real morning draws FIVE of them down the one screen
+           you open the app on, and a column of red saying what you did
+           not do is exactly the judgement the rule it reversed was
+           written against. The exception had eaten the rule.
 
-           `gone` is read off is-past, which scLive sets on TODAY's
-           rows alone — so a block on another day is "Not yet" whatever
-           the hour, and the week does not tell you it only runs
-           forwards. */
+           WHAT REPLACES IT IS ABSENCE, NOT A QUIETER WORD. `gone` is
+           read off is-past, which scLive sets on TODAY's rows alone —
+           and those rows are already dimmed to --spent, glyph and
+           time and name, with the check left open. The row says it has
+           been and gone three times over before a tag opens its mouth,
+           so a grey chip repeating it is the duplication this project
+           keeps taking back out. `.st:empty` is display:none already,
+           which is how a day off draws no tag, so there is no new
+           mechanism here.
+
+           NOTHING IS LOST ON ANOTHER DAY, because nothing was said
+           there: `gone` needs is-past, so a block on Monday's card has
+           always read "Not yet" whatever the hour. The one screen that
+           does say the word is the calendar's day sheet, where the
+           rows are NOT dimmed and the word is the only thing carrying
+           it — and it is neutral there now. One rule: a missed block
+           is never coloured, and it keeps its word only where nothing
+           else on the row already says so. */
         var gone = !done && !on && !skip && el.classList.contains('is-past');
-        var word = skip ? ''
+        var word = skip || gone ? ''
           : done ? 'Completed'
           : on ? 'In progress'
-          : gone ? 'Missed' : 'Not yet';
+          : 'Not yet';
         st.textContent = word;
         st.classList.toggle('is-now', on && !done);
         st.classList.toggle('is-ok', done);
-        st.classList.toggle('is-bad', gone);
         st.classList.toggle('is-todo', !done && !on && !skip && !gone);
       }
       /* And the track says how much of it has gone. Set on THIS pass
@@ -13534,7 +13551,15 @@
                day still ahead has not been missed, it has not come. */
             if (off) { st.textContent = 'Off'; st.classList.add('is-todo'); }
             else if (done) { st.textContent = 'Completed'; st.classList.add('is-ok'); }
-            else if (open < scDay()) { st.textContent = 'Missed'; st.classList.add('is-bad'); }
+            /* ── THE WORD SURVIVES HERE AND THE COLOUR DOES NOT ──
+               The week's row drops the word entirely, because that row
+               is dimmed and its check is open and the hour has
+               visibly passed. These rows are none of those things: it
+               is a flat read-back of a day that has been, so the word
+               is the only thing carrying it. Neutral, with Off and
+               Not yet, because all three are the absence of a claim
+               about doing something rather than three kinds of it. */
+            else if (open < scDay()) { st.textContent = 'Missed'; st.classList.add('is-todo'); }
             else { st.textContent = 'Not yet'; st.classList.add('is-todo'); }
             r.appendChild(st);
             if (done && scIsTrain(b)) {
