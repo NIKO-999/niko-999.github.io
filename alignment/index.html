@@ -191,6 +191,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .al-tl.is-les { color: color-mix(in srgb, var(--tg) 66%, var(--ink)); }
 .al-th[data-x="internal"] { --tg: #C9A227; }
 .al-th[data-x="external"] { --tg: #7E9AA6; }
+.al-th[data-x="karmic"]   { --tg: #D2603A; }
 
 /* A STORY IN THE INDEX IS A PRESS TARGET AND THE REST ARE NOT. The same
    card, with no second drawing — only the row that opens something
@@ -203,7 +204,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 /* ---- THE FOOT ---- */
 .al-foot {
-  position: fixed; left: 93px; right: 93px; z-index: 30;
+  /* FOUR TABS, SO THE BAR WIDENS RATHER THAN THE TABS NARROWING. At
+     93px either side the row is 204 wide, which is 49 a tab once the
+     padding is out — under the 44 a press target owns only because the
+     glyph is 20. Measured: at 60 the row is 270 and a tab owns 64. */
+  position: fixed; left: 60px; right: 60px; z-index: 30;
   bottom: calc(var(--v4) + env(safe-area-inset-bottom, 0px));
   height: 58px; border-radius: var(--r-pill);
   background: rgba(24,21,17,.62);
@@ -261,6 +266,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   <div class="al-pane" id="alExternalPane"></div>
 </section>
 
+<section class="al-view" id="alKarmic">
+  <div class="al-head"><h1 class="al-disp-s">Karmic</h1><span class="al-count"></span></div>
+  <div class="al-pane" id="alKarmicPane"></div>
+</section>
+
 <section class="al-view" id="alFilm">
   <button class="al-round al-x" id="alFilmX" aria-label="Close">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -277,6 +287,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   </button>
   <button class="al-tab" data-v="external" aria-label="External">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M13.5 4.5H19.5V10.5M19.5 4.5 12.5 11.5M18 14v4.5a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2H10"/></svg>
+  </button>
+  <button class="al-tab" data-v="karmic" aria-label="Karmic">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19.6 9.4A8.2 8.2 0 0 0 5.2 7.6M4.4 14.6a8.2 8.2 0 0 0 14.4 1.8"/><path d="M19.9 4.6v4.9h-4.9M4.1 19.4v-4.9h4.9"/></svg>
   </button>
 </nav>
 
@@ -306,11 +319,20 @@ var KEY = 'align.v1';
    currently doing that the scene is about — because a lesson you can
    agree with and walk away from has not been written yet.
 
-   Three internal and three external for each, which is a shape rather
-   than a quota: a story that only yielded two of one kind would be one
-   to cut rather than one to pad. */
+   Three of each axis for each story, which is a shape rather than a
+   quota: a story that only yielded two of one kind would be one to cut
+   rather than one to pad. Asserted at boot in both directions. */
 
-var AXIS = { internal: 'Internal', external: 'External' };
+/* THREE AXES, AND KARMIC IS NOT A TIDIER NAME FOR EXTERNAL. Internal
+   is the mechanism running inside you. External is the world not
+   caring what you think about it. Karmic is the account BETWEEN the
+   two over time — what you put out arriving back, on a delay long
+   enough that it does not feel connected to what opened it. Five
+   entries that were filed external turned out to be that: the
+   retaliation cycle, Rico, the product coming home, the suit falling
+   on Brock, the North remembering. They moved rather than being
+   copied, and external was written back up to three. */
+var AXIS = { internal: 'Internal', external: 'External', karmic: 'Karmic' };
 
 var SRC = [
   { i: "grich", n: "Get Rich or Die Tryin'", y: 2005 },
@@ -335,7 +357,7 @@ var TH = [
   { s: "grich", x: "internal", n: "Numb Is Not Healed", b: "Feeling as Freedom",
     t: "Going cold is what keeps him alive on the block, and it works so well that it follows him home. Charlene cannot reach him. His son cannot reach him. The armour has no off, because nobody ever gave it one.",
     l: "Isolation is the right call and numbness is what it turns into if you leave it running. One is a decision about your time. The other is a decision about your capacity to feel anything, and you will not notice the handover. Keep one person you tell the truth to." },
-  { s: "grich", x: "external", n: "Violence Begets Violence", b: "The Law of Return",
+  { s: "grich", x: "karmic", n: "Violence Begets Violence", b: "The Law of Return",
     t: "Levar says it flat: violence begets more violence, and violence does not beget more money. Every retaliation in the film buys exactly one more retaliation, and not one of them buys anything anybody wanted.",
     l: "Look at what your effort actually produces rather than what it was aimed at. If the honest answer is more of the same problem, you are not behind on the plan. You are on the wrong wheel, and more effort makes it worse. Step off and put the same force somewhere it compounds." },
   { s: "grich", x: "external", n: "Die Tryin'", b: "Memento Mori",
@@ -371,7 +393,7 @@ var TH = [
   { s: "paid", x: "internal", n: "After the Shot", b: "The Thing That Wakes You",
     t: "Ace is shot, and it is the recovery that changes him. What was normal a month earlier reads completely differently from a bed with nothing to do in it.",
     l: "A stop is the only time you can see the shape of what you were doing. If life has handed you one, an injury, an ending, a break you did not choose, use it before you are well enough to forget what it showed you." },
-  { s: "paid", x: "external", n: "Rico", b: "Karmic Debt",
+  { s: "paid", x: "karmic", n: "Rico", b: "Karmic Debt",
     t: "Rico takes from the people closest to him, and the film follows that account all the way down without ever commenting on it. Nothing he takes stays taken.",
     l: "The account is not moral and it is not fast, which is exactly why people believe they have got away with it. What you put out comes back in a currency you did not choose, at a time you are not ready for. The only variable you control is what goes in." },
   { s: "paid", x: "external", n: "The Ones Who Came Up With You", b: "Proximity Is Not Alignment",
@@ -389,7 +411,7 @@ var TH = [
   { s: "snow", x: "internal", n: "Cissy's Son", b: "What the Family Sees",
     t: "His mother watches it happen, names it clearly, and is ignored. She has nothing to gain by lying to him, which is precisely why her read is the one he cannot take.",
     l: "The people closest to you have no angle, and that is what makes their opinion unbearable rather than useless. When you catch yourself explaining to somebody who knows you, notice that you are explaining. Discounting the clearest view available is a decision." },
-  { s: "snow", x: "external", n: "The Product Comes Home", b: "Consequence Has an Address",
+  { s: "snow", x: "karmic", n: "The Product Comes Home", b: "Consequence Has an Address",
     t: "The neighbourhood he sells into is his own. The show never once lets the damage land somewhere abstract or on somebody you do not have to look at.",
     l: "There is no downstream. Every cost lands on a specific person, and if you cannot name who, that means you have not looked rather than that there is nobody. Being one step removed from a consequence is not the same as not causing it." },
   { s: "snow", x: "external", n: "Teddy", b: "You Are Somebody's Instrument",
@@ -407,7 +429,7 @@ var TH = [
   { s: "spid", x: "internal", n: "The Bell Tower", b: "You Cannot Argue With It",
     t: "He does not out-will the suit. He climbs into a sound loud enough to break the bond, because there was never an argument available to a man the thing was amplifying.",
     l: "You do not think your way out of a state, because the part doing the thinking is the part that is compromised. Change the room, the hour, the phone, the people. That is not weakness. It is the only mechanism that has ever worked." },
-  { s: "spid", x: "external", n: "It Falls on Brock", b: "It Goes to Whoever Wants It Most",
+  { s: "spid", x: "karmic", n: "It Falls on Brock", b: "It Goes to Whoever Wants It Most",
     t: "The suit comes off in the tower and drops straight onto Eddie, who is directly underneath praying for Peter to die. It goes exactly where it was always going to go.",
     l: "Whatever you put down does not stop existing. It finds whoever is most available to it, and that is usually somebody who will use it considerably worse. Quitting a thing and ending it are not the same act." },
   { s: "spid", x: "external", n: "Harry Comes", b: "You Have to Be Worth Turning Up For",
@@ -449,7 +471,7 @@ var TH = [
   { s: "got", x: "external", n: "Littlefinger", b: "Chaos Is a Ladder",
     t: "He has no army and no claim and outlasts most of the people who have both, because he is the only one whose position improves when things go wrong.",
     l: "Fragile plans need conditions to stay still and conditions never do. Ask what a shock does to your position rather than hoping none arrives. The good version is not the one that wins if everything goes right." },
-  { s: "got", x: "external", n: "The North Remembers", b: "Nothing Is Settled",
+  { s: "got", x: "karmic", n: "The North Remembers", b: "Nothing Is Settled",
     t: "The Red Wedding wins the war and does not end it. Every act creates a debt somebody else is carrying and will present later, at a time of their choosing.",
     l: "A win that leaves people alive who are owed is not a conclusion. Accounts persist a great deal longer than the events that opened them, and whoever is holding one is patient in a way you are not." },
   { s: "hotd", x: "internal", n: "Daemon Wants to Be Chosen", b: "Waiting for Recognition",
@@ -506,6 +528,96 @@ var TH = [
   { s: "vik", x: "external", n: "After Lindisfarne", b: "Permission Stops Being the Question",
     t: "Haraldson takes the spoils, because he is still the Earl and that is what an Earl does. It does not matter. Everybody in that hall has now seen what is west, and no amount of authority puts that back in the box.",
     l: "You do not become a person they consider ready. You become a person the question no longer applies to, and that only happens on the other side of having gone. Nobody hands it over." },
+  { s: "grich", x: "external", n: "The Block Has an Economy", b: "You Are in a System",
+    t: "Nothing Marcus does is invented by him. The corners, the prices, the hierarchy and the reprisals were all running before he arrived and go on running after he is gone.",
+    l: "Most of what feels like your decision is a slot in a system that was already there. Understanding the shape of the system is worth more than any amount of effort inside it, because it tells you which moves exist at all." },
+  { s: "paid", x: "external", n: "Harlem Watches", b: "Visibility Has a Price",
+    t: "The money is visible: cars, coats, jewellery, a name people say. Being known is what makes the come-up work, and it is also what puts everybody who takes it on a list.",
+    l: "Being seen is a cost that arrives late. It reads as free for years and then gets paid all at once, to people who were watching for reasons entirely of their own." },
+  { s: "snow", x: "external", n: "The Neighbourhood Decides", b: "You Are Standing on Somebody",
+    t: "The whole operation depends on the people who live there letting it run. The moment the block turns, nothing about his supply or his money matters at all.",
+    l: "Whatever you are building sits on somebody's goodwill and you will not notice whose until it goes. Count who has to keep saying yes for this to keep working." },
+  { s: "spid", x: "external", n: "Jameson's Front Page", b: "Somebody Else Writes the Story",
+    t: "Peter does the work and Jameson decides what it means in print. The public Spider-Man is authored by a man with his own reasons, and Peter has no say in any of it.",
+    l: "Whoever controls the description controls most of the outcome. You can do the thing perfectly and still lose to somebody better placed to narrate it. Own the channel or accept their version." },
+  { s: "got", x: "external", n: "The Wall", b: "The Thing Nobody Was Watching",
+    t: "Everybody spends five seasons on the throne while the actual threat walks south. The politics are real, and they are also almost entirely beside the point.",
+    l: "What ends up mattering is usually not the thing everybody is competing over. Ask once a quarter what you would be worried about if you were not busy with this." },
+  { s: "grich", x: "karmic", n: "The Ones Who Put Him There", b: "Nothing Is Anonymous",
+    t: "The shooting is not random. It is arranged by people he knows, over things he did, and the film lets you follow the line all the way back. Every name in that sequence was already in his life.",
+    l: "The bill is almost always presented by somebody you already know. Harm done at a distance still has an address, and it gets collected by whoever was standing closest to it rather than by a stranger." },
+  { s: "grich", x: "karmic", n: "What He Owes and What He Is Owed", b: "The Debt Runs Both Ways",
+    t: "The same network that shoots him is the one that fed him, raised him and taught him the only trade he had. The film refuses to make that simple, and both accounts are collected.",
+    l: "You are inside a set of accounts you did not open. Some of what is coming to you is somebody else's doing and some of it is yours, and the only part you get to decide is what you add from here." },
+  { s: "power", x: "karmic", n: "Every Body Comes Back", b: "Nothing Stays Buried",
+    t: "Every person Ghost removes to protect the plan returns as a problem: a widow, a brother, a detective, a son. The show is an accounting exercise dressed as a crime drama.",
+    l: "The thing you removed to make a problem go away is what the next problem is made of. What you do to get out of a hole is almost always the material for the following one." },
+  { s: "power", x: "karmic", n: "Tariq", b: "What You Taught Without Meaning To",
+    t: "Ghost spends the entire show keeping his son out of it, and his son becomes him anyway, because the boy was watching rather than listening.",
+    l: "What you pass on is what you did in front of people, never what you told them. Anybody who watched you for years took the behaviour, and the speech about it did not land at all." },
+  { s: "power", x: "karmic", n: "Kanan's Return", b: "An Old Debt Is Still a Debt",
+    t: "Kanan comes back after years inside for a thing Ghost did, and the time has changed nothing about what is owed. The interest is the years themselves.",
+    l: "An account you have stopped thinking about is still open on the other side. Silence is not settlement, and the longer it sits the larger it is when it arrives." },
+  { s: "paid", x: "karmic", n: "The Title Is the Point", b: "Everything Gets Settled",
+    t: "The film is called Paid in Full and it means the account rather than the money. Every character is paid out exactly what they put in, in the currency they used to put it there.",
+    l: "You are already being paid for what you are doing now, on a delay long enough that it does not feel connected to anything. That delay is the only reason it stays possible to keep doing it." },
+  { s: "paid", x: "karmic", n: "Mitch's Brother", b: "What It Costs Other People",
+    t: "What is done to Mitch's younger brother is the act that ends the entire world of the film. It is aimed at one man and it lands on a family.",
+    l: "Almost nothing you do lands only on the person you aimed it at. Before you act, count who else is standing there. That count is the real size of the decision." },
+  { s: "snow", x: "karmic", n: "Everyone Around Him Pays", b: "The Bill Is Distributed",
+    t: "Franklin survives longer than almost anybody near him. His cousin, his friends, his mother, his uncle: the cost of his rise is paid out across the people he loves rather than by him.",
+    l: "When consequences are not landing on you, find out who they are landing on. A long run of luck is often somebody nearby absorbing what should have been yours." },
+  { s: "snow", x: "karmic", n: "The Ending He Built", b: "You Arrive at What You Made",
+    t: "He finishes with nothing, alone, in the wreckage of a neighbourhood he helped wreck. Nothing in the last season is punishment arriving from outside. It is arrival.",
+    l: "You do not get punished. You get delivered to the place your decisions were pointing at the whole time, and it will look obvious from there and looks like nothing from here." },
+  { s: "spid", x: "karmic", n: "Sandman and Uncle Ben", b: "The Story You Were Owed Was Wrong",
+    t: "Peter has carried one version of his uncle's death for two films and it turns out to be incomplete. The man he has been owed by is not the man he thought he was owed by.",
+    l: "A debt you have carried for years is worth reopening before you collect on it. Being owed is the most comfortable position there is, and comfort is a poor reason to leave a story unchecked." },
+  { s: "spid", x: "karmic", n: "Forgiveness Ends It", b: "Somebody Has to Absorb the Last of It",
+    t: "The film ends with Peter forgiving Sandman, and it is the only thing in it that actually stops a cycle. Every other resolution in the story just moves the debt along to somebody else.",
+    l: "Closing an account is something you do rather than something that happens. Somebody has to take the last of it instead of passing it on, and the only person you can decide that for is you." },
+  { s: "lotr", x: "karmic", n: "Bilbo's Mercy", b: "Sixty Years Later",
+    t: "Bilbo spares Gollum in a tunnel for no strategic reason whatsoever, and sixty years later that is the reason the Ring goes into the fire. Nobody involved could possibly have known.",
+    l: "You will not see most of the returns on what you do. The ones that matter arrive on a timescale that makes them look like luck, which is why they are only available to people who were not calculating." },
+  { s: "lotr", x: "karmic", n: "Isildur", b: "Inheriting Somebody Else's Refusal",
+    t: "The whole story exists because one man, at the one moment it could have ended, did not throw it in. Everything after that is other people carrying a decision they were not part of.",
+    l: "Some of what you are dealing with was settled before you arrived, by somebody who had one clean chance at it. That is not unfair, it is how accounts work, and you are currently making one for whoever comes next." },
+  { s: "lotr", x: "karmic", n: "Saruman", b: "What You Become By Studying It",
+    t: "Saruman turns because he spent too long looking into the palantír, studying the enemy in order to beat him. He ends up as the thing he was researching.",
+    l: "Whatever you give your attention to works on you while you are working on it. You cannot study something daily for years and stay untouched, and nobody ever notices the direction of travel from inside it." },
+  { s: "got", x: "karmic", n: "Cersei's Children", b: "The Prophecy Was a Description",
+    t: "Maggy tells her she will have three children and outlive all of them. Everything Cersei does to protect them is part of why she loses them, and the show never once says whether the prophecy caused it.",
+    l: "Fear of losing a thing is the most reliable method of losing it. Check whether your protection of something has become a way of damaging it, because from the inside those two feel identical." },
+  { s: "got", x: "karmic", n: "Robb's Broken Word", b: "The Lender Sets the Price",
+    t: "Robb wins every battle and loses the war over one broken promise, to a man nobody respected. The Freys decided what it was worth, not him.",
+    l: "You do not get to decide what a debt is worth. The person owed does. Something you consider minor is entirely capable of being the whole of what somebody else has been waiting to collect." },
+  { s: "hotd", x: "karmic", n: "Blood and Cheese", b: "The Escalation Nobody Can Stop",
+    t: "A son for a son. What is done in that room is answered, and the answer is answered, and by the end there is nobody left who can stop it without being the one who lost.",
+    l: "Once an account is open between two people, neither can close it without appearing to lose. That is the whole mechanism, and the only cheap moment to stop was before the first entry." },
+  { s: "hotd", x: "karmic", n: "Aemond and Luke", b: "One Boy's Eye",
+    t: "A children's fight over a dragon costs a boy an eye, and years later that boy kills the other one in the air and starts the war. Neither of them forgot a second of it.",
+    l: "Humiliation has the longest memory of anything you can hand a person. What you do to somebody in front of others is filed and kept, at full strength, for as long as it takes." },
+  { s: "hotd", x: "karmic", n: "The Usurpation", b: "Founding on a Broken Thing",
+    t: "Every claim in the war traces back to an oath sworn by lords who then did not keep it. The realm is built on a promise and spends a generation paying for having broken it.",
+    l: "Anything you build on a thing you know is not right has to be held up for as long as it stands. It does not become true with time. It becomes expensive." },
+  { s: "hp", x: "karmic", n: "The Life Debt", b: "Pettigrew's Hand",
+    t: "Harry stops Sirius and Lupin killing Pettigrew, and Dumbledore tells him a debt now exists between them. Years later Pettigrew hesitates for one second, and that second is why Harry lives.",
+    l: "Mercy is not the soft option, it is an investment with an unknown maturity. You will almost never see the return, and the people who do it for the return do not get one." },
+  { s: "hp", x: "karmic", n: "Snape", b: "A Debt Paid Over a Lifetime",
+    t: "Everything Snape does for seventeen years is payment on one thing he did before the books begin. Nobody knows it until he is dying, including the person it was being paid for.",
+    l: "Some accounts are settled quietly, at length, by people who get no credit while they are alive. If you are owed by somebody, consider that they may already be paying and you have not been told." },
+  { s: "hp", x: "karmic", n: "Voldemort's Own Curse", b: "You Make the Thing That Ends You",
+    t: "He chooses Harry, marks him, hands him the means of surviving, and then dies to a spell he cast himself rebounding. Every step of his defeat is built by him.",
+    l: "What takes you down is usually something you made and then stopped looking at. Go and check what you have built that you no longer examine, because that is the only place it can be." },
+  { s: "vik", x: "karmic", n: "The Sons", b: "What You Leave Open Gets Collected",
+    t: "Ragnar's death is not the end of anything. It is the beginning of the Great Heathen Army, and everything his sons do afterwards is his account being settled by other people.",
+    l: "What you start does not stop with you. Whatever you leave open is inherited by people who did not choose it, and they will act on it with your name attached." },
+  { s: "vik", x: "karmic", n: "Athelstan", b: "What You Take Comes With You",
+    t: "Ragnar takes a monk from Lindisfarne as plunder, and that man changes how he thinks, what he believes and eventually what he is. The most valuable thing he ever took is the one that undid him.",
+    l: "What you take into your life arrives with everything attached to it. You do not get to select which parts, and the ones that change you are never the ones you were after." },
+  { s: "vik", x: "karmic", n: "Ragnar's Last Move", b: "Paying It On Your Own Terms",
+    t: "He walks into Ecbert's hands knowing exactly what happens next, and engineers his own execution so that his sons will come. He spends his own life as the final move.",
+    l: "There is a version of settling an account where you choose the terms, and it is the only version that ends anything. Everything else is waiting for somebody else to set the price." },
 ];
 
 var $ = function (s) { return document.querySelector(s); };
@@ -535,7 +647,10 @@ var save = function () { try { localStorage.setItem(KEY, JSON.stringify(st)); } 
     if (!AXIS[t.x]) throw new Error('bad axis for ' + t.n);
     seen[t.s] = true;
   });
-  SRC.forEach(function (x) { if (!seen[x.i]) throw new Error('no themes for ' + x.n); });
+  SRC.forEach(function (x) {
+    for (var a in AXIS) if (themesOf(x.i, a).length !== 3)
+      throw new Error(x.n + ' has ' + themesOf(x.i, a).length + ' ' + a);
+  });
 }());
 
 function mask(p) {
@@ -559,7 +674,7 @@ function card(t) {
   d.setAttribute('data-x', t.x);
   d.appendChild(el('h3', 'al-tn', t.n));
   d.appendChild(el('div', 'al-tsub', t.b));
-  d.appendChild(el('div', 'al-caps al-tl', 'The theme'));
+  d.appendChild(el('div', 'al-caps al-tl', 'Key theme'));
   d.appendChild(el('p', 'al-tb', t.t));
   d.appendChild(el('div', 'al-caps al-tl is-les', 'The spiritual lesson'));
   d.appendChild(el('p', 'al-tb is-les', t.l));
@@ -611,7 +726,7 @@ function paintFilm(id) {
   p.scrollTop = 0; mask(p);
 }
 
-var VIEWS = ['open', 'films', 'internal', 'external', 'film'];
+var VIEWS = ['open', 'films', 'internal', 'external', 'karmic', 'film'];
 function view(v) {
   if (VIEWS.indexOf(v) < 0) v = 'films';
   document.documentElement.setAttribute('data-view', v);
@@ -625,11 +740,13 @@ function view(v) {
     b.setAttribute('aria-current', b.getAttribute('data-v') === v ? 'true' : 'false');
   });
   $('#alFilms').querySelector('.al-count').textContent = SRC.length;
-  $('#alInternal').querySelector('.al-count').textContent = TH.filter(function (t) { return t.x === 'internal'; }).length;
-  $('#alExternal').querySelector('.al-count').textContent = TH.filter(function (t) { return t.x === 'external'; }).length;
+  for (var a in AXIS) {
+    var sec = $('#al' + a.charAt(0).toUpperCase() + a.slice(1));
+    sec.querySelector('.al-count').textContent =
+      TH.filter(function (t) { return t.x === sec.id.slice(2).toLowerCase(); }).length;
+  }
   if (v === 'films') paintFilms();
-  if (v === 'internal') paintAxis('internal');
-  if (v === 'external') paintAxis('external');
+  if (AXIS[v]) paintAxis(v);
   if (v !== 'film') { st.last = v; save(); }
 }
 
