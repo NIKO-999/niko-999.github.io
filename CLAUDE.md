@@ -12495,3 +12495,195 @@ earlier — so the answer there was to change nothing and say so. A
 pick that agrees with the build is still worth confirming out loud,
 because the alternative is quietly doing nothing and letting it read
 as having been missed.
+
+## Friends is gone, and the worker is a feed reader
+
+The tab, the leaderboard, the feed, a friend's profile, the almanac,
+the invitation link, the four sharing switches and the push. Out on
+request, in one pass: **1,727 lines of `app.js`, 351 of `app.css`, 36
+of markup, 221 of the worker and 1,556 of its tests.**
+
+**A FEATURE IS NOT THE CODE THAT DRAWS IT, and that is the whole of
+what made this a surgery rather than a delete.** The friends region
+was 1,963 contiguous lines and taking it out was the easy half. What
+took the work is that four things OUTSIDE it were reading into it,
+and three things INSIDE it were not about friends at all.
+
+**Three helpers came home rather than going.** `scReadJSON` and
+`scWriteJSON` lived there because friends were the first four keys
+that needed them — habits, workouts, Mind and Notes all came to use
+them, so they moved to STORE, which is where a helper the whole store
+shares belonged anyway. `scAgo` was written for a feed and a note
+card still asks the same question. And `scStreak` is written up in
+this file as living with the counting in FRIENDS "because the
+leaderboard has to count everybody the same way and there were about
+to be two implementations of it" — that argument was exactly right
+and it expired with the second implementation, so it is back beside
+the log it reads.
+
+**`HOME` SURVIVED, AND IT IS WHY THE WORKER DID.** `scMindEps` read
+`(net && net.url) || HOME` — the friends server if you were on one,
+the build's own otherwise — so deleting `net` took the podcast
+lookup's address with it. A feed is XML served by whoever hosts the
+show, almost never with a CORS header, so a browser cannot read one:
+that route is the one thing in `worker/` that is not about a person,
+and it is the only reason the worker still exists. It is `var base =
+HOME` now, declared beside its one caller.
+
+**THE WORKER KEPT ONE ROUTE AND LOST EVERY OTHER.** No `claim`, no
+`rec`, no `img`, no write key, no thirty-day window, no profile
+clamps, no leave. `Access-Control-Allow-Methods` went from
+`GET,PUT,POST,DELETE,OPTIONS` to `GET,OPTIONS` and the
+`Authorization` header went with them, because nothing writes any
+more. **The records already on the KV are not walked and deleted**:
+every one carried a thirty-day expiry from the day it was written, so
+they age out on their own — which is the same argument the leave
+route already made about images it did not chase.
+
+**AND `tests/worker.js` ASSERTS THE DOORS ARE NOT THERE.** It had that
+check already, for the endpoint that would put the social graph on
+somebody else's machine; it is now eight routes that all used to
+exist. A write path with no caller is a write path anybody can still
+call, and the way a removal like this half-happens is one of them
+being left behind.
+
+### What the removal killed that nothing had noticed
+
+**`--me` HAD EXACTLY TWO READERS AND BOTH WERE IN THE FRIENDS HALF.**
+Your face's colour is written up here as the one setting in this app
+that TRAVELS — pushed with your record, so a friend's board draws you
+in it — and that was the whole argument for it existing. With no
+board it became a token computed on every paint and read by nothing,
+which is *a dead rule that still cascades* one language over. The
+token, its key, its default and `scPickHex` all went; `--live` and
+`scPickDflt` stay, because the Now chip still reads one.
+
+The check moved rather than went: it asserted the two colours were
+different, which is a claim about a pair. It asserts `--me` resolves
+to the EMPTY STRING now — because a token left at a default would
+pass any check written as "it is not a colour", and the failure this
+is about is the token still being written.
+
+**AND THE FACE IS ASSERTED AS THE NEUTRAL ITSELF**, not as "not the
+chip's colour". The second passes on a face drawn in any of a hundred
+hues that happen not to be that one.
+
+### The intro lost a card, which is the third time
+
+"Compete with friends" named a screen that no longer exists. This
+file has now recorded that fault three times — "Seven day cards"
+described a deck that had become a strip, "Flip for objectives"
+described a mechanism that had been deleted, and this. **A card
+teaching a gesture or a screen the app does not have is worse than no
+card, because the person then goes looking for it.**
+
+Three cards to two, and the count is asserted beside the order for
+the reason it always was: both are one line to change and neither
+would throw. The crown's own keyframes went with the scene, or they
+would be a `@keyframes` block nothing names.
+
+### Two stale captions, and only a render could find them
+
+*Your picture — drawn from your colour* named a swatch row deleted
+before this change; *Show the intro — four cards* named a count this
+change made wrong. Both are a screen away from anything I edited, and
+both came back off one screenshot of Settings. **That is the whole
+argument for opening a screen other than the one you changed**, and
+it is the second time in this file that a caption outlived the
+control it described.
+
+### The checks that had to move rather than go
+
+**The suite counted every request the main page made and failed on one
+that left the origin** — the app's central promise, and the reason the
+friends half ran on its own page. That page is gone and the assertion
+is not: the strict count stays exactly as strict, and what changed is
+that it no longer has to be pointed away from a live server. **Thirty-
+two `sched.net.v1` seeds and six `nofriends` routes** existed only so
+the app could not reach the deployed worker on a run; with nothing
+left that claims a code, all of it is scaffolding for a fault that
+cannot happen.
+
+**THE NOTES PUSH SCAN BECAME THE ABSENCE OF A PUSH.** It read
+`scPushNow`'s body out of the source and required it to carry no note
+and nothing that reads one — the check that was missing the two times
+a comment reading "this is never sent" was the only place the
+intention lived. The claim is stronger now and is asserted as such:
+not "the one thing that sends is not sending this" but **there is no
+`scPush`, no `scPushNow` and no `scApi` in the file at all.** The
+budget's own push-body section went entirely, because a leak needs
+somewhere to leak to.
+
+**And three sweeps had five views and now have four.** The sideways
+check, the reach check and the "exactly one section is drawn" check
+each named Friends in a list; the calendar took its place in two of
+them, which is the more useful visit anyway — it is the one view where
+a 44px control sits directly beneath the stops.
+
+**The press sweep lost its non-button case**, and that is a real cost
+written down rather than hidden: the friends board's row was an `<li>`
+and was the only thing in the app the first cut of that check could
+not see. The RULE it proved survives in the code — a press resolves to
+the outermost box carrying `cursor: pointer` — and there is no longer
+an element to prove it on.
+
+### The tab bar is four, and the stop count with it
+
+`Week · Today · Calendar · Notes`, each `flex: 1`, so the four simply
+divide what five did. The calendar's own `clDoor.stops` assertion went
+from 5 to 4 with them — a figure that would have passed silently as a
+count of whatever is there.
+
+### The removal's own bug, and the check that now catches it
+
+**`photoOn` AND `scPhotoClose` WERE THE FULL-SCREEN PHOTO VIEWER, and
+the Escape handler still called them.** One line survived the cut:
+
+    if (photoOn) { ev.preventDefault(); scPhotoClose(); return; }
+
+So Escape threw a ReferenceError before reaching the history's own
+branch — the tally's history panel stopped closing, and the next
+`dblclick` landed on the veil instead of the tile. It surfaced a
+hundred seconds and forty assertions later as a Playwright timeout
+with `no summary`, which is the greenest-looking failure there is.
+
+**`node --check` IS PERFECTLY HAPPY WITH IT**, which is the whole
+shape of this class: a missing function is a runtime fault, nothing
+throws until the line runs, and the symptom lands wherever that
+happens to be. **The scan that should have caught it printed both
+names** — a list of 27, with `photoOn 1` and `scPhotoClose 1` in it,
+and I read past those two rows.
+
+**So it is a static check now.** `tests/names.js` holds every `scFoo(`
+an app CALLS to being one it DECLARES. Scoped to the `sc` prefix
+deliberately: a real undefined-variable analysis needs scope tracking
+and every browser global, where this asks one narrow question with an
+exact answer — by the convention this whole file already follows,
+every `scFoo(` is one of its own functions, so a call to one nothing
+declares is a bug with no second reading. Proved to bite by putting
+the line back: `scPhotoClose() at schedule/app.js:8693 is called and
+never declared`, in a tenth of a second, where the browser took a
+hundred seconds to say a dblclick timed out.
+
+**The duplicate-name check is the same question from the other side**
+and would have caught neither this nor `gl` outliving its rename —
+one asks whether a name is declared twice, this asks whether it is
+declared at all.
+
+### Three counts of five where there are four
+
+The bar-label contrast sweep required `rows.length === 5`, the slim-bar
+check `tabs.length === 5`, and the tab check `tabs.length === 5`. Every
+ratio and every measurement in all three payloads was correct; only the
+count was stale — which is exactly why the count is asserted beside the
+measurement rather than trusted to follow it.
+
+### And `pkill -f` matched its own shell, twice in one command
+
+`pkill -f "http.server 8931"` put the pattern in the running shell's
+own argv and killed it before `node` started — exit 144, no output, and
+this file already had that written down. Then `pgrep -f "tests/run.js"`
+did the same thing one step quieter: it matched the shell asking the
+question and reported RUNNING for a process that had never been
+launched. **A `-f` pattern is matched against the command line you are
+typing it on.**
