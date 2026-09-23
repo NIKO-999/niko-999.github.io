@@ -285,6 +285,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   background: var(--card); box-shadow: inset 0 1px 0 var(--card-edge);
 }
 .al-rule .al-caps { margin-bottom: var(--v2); }
+.al-rgo { display: block; width: 100%; text-align: left; font: inherit; color: inherit; border: 0; }
+.al-rfrom { margin-top: var(--v2); font-size: 13px; color: var(--dim); }
 .al-rule b { display: block; font-size: 19px; font-weight: 600; line-height: 1.26; letter-spacing: -.016em; }
 .al-q { border-radius: var(--r-card); padding: var(--v4); border: 1px solid var(--hair); }
 .al-q .al-caps { margin-bottom: var(--v2); }
@@ -414,7 +416,7 @@ var S = [
     { n: 'The Stranger’s Mouth', f: 'others', d: 'It came from a man who was not trying to help him and would not remember saying it.' }
   ],
   teach: 'Coelho built The Alchemist out of this. Santiago, the sheep, the pyramids, the treasure back under the tree he started from — all of it is here, seven hundred years earlier, in about a page. Knowing that is useful, because it tells you the shape is older and more reliable than any one telling of it.',
-  rule: 'You cannot be told. You can only be sent.',
+  rule: 'Good advice does nothing until it has cost you something to hear it.',
   q: 'What are you standing on, refusing to dig, because it is too close to be treasure?',
   body:[
     "He saved for two years to get into the room.",
@@ -444,7 +446,7 @@ var S = [
     { n: 'The Walk', f: 'motion', d: 'He could have named the problem at three in the morning for a year and a half.' },
     { n: 'The Quiet Middle', f: 'time', d: 'What fixed it was four minutes of doing nothing, then four minutes again, and nobody watched.' }
   ],
-  rule:'Comfort decides where you search long before honesty decides what you find.',
+  rule: 'You work on the problem you enjoy working on, not the one that is actually costing you.',
   q:'Which problem are you working on because it is the one you know how to work on?',
   teach:'A man on his knees under a street lamp, looking for a key he dropped indoors. The joke is four hundred years old and it is not a joke.',
   body:[
@@ -473,7 +475,7 @@ var S = [
     { n: 'The Cost of Being Right', f: 'inner', d: 'Letting it be the problem meant the last two years had been aimed at the wrong thing.' },
     { n: 'The Stranger’s Mouth', f: 'others', d: 'Nine words, in the first two minutes, for nothing — and he argued with them twice and drove home.' }
   ],
-  rule:'You are not being refused the answer. You are full.',
+  rule: 'You are not missing the answer. You are too busy defending the one you already have.',
   q:'What would you have to stop being right about?',
   teach:'A scholar goes to a master to ask about Zen, and the master pours his tea until it is running off the table.',
   body:[
@@ -504,7 +506,7 @@ var S = [
     { n: 'The Number That Moves', f: 'time', d: 'Six months, then nine, then a year, then a year in the new money. Each one more sensible than the last.' },
     { n: 'The Walk', f: 'motion', d: 'No size of account answers whether you are good enough. Only going does, and he did not want the answer.' }
   ],
-  rule:'Readiness is something you claim, never something you are granted.',
+  rule: 'Nobody is going to tell you that you are ready. You decide it yourself or you wait for ever.',
   q:'What are you calling preparation?',
   teach:'A man stands on the bank of a river for thirty years, waiting for it to be the right week to cross.',
   body:[
@@ -534,7 +536,7 @@ var S = [
     { n: 'The Early Verdict', f: 'inner', d: 'Everyone around him was certain every time, and being wrong four times never slowed them down.' },
     { n: 'Nothing Has a Size of Its Own', f: 'time', d: 'Eleven thousand more was a triumph until it was measured against fourteen months of Sunday evenings.' }
   ],
-  rule:'Every event is half a sentence. You keep reading it out as the whole one.',
+  rule: 'You decide what something means far too early. Most of the time you do not know yet.',
   q:'What are you certain was a disaster?',
   teach:'A farmer loses a horse, gains twelve, and his son breaks a leg. Four times the neighbours are sure, and four times they are early.',
   body:[
@@ -565,7 +567,7 @@ var S = [
     { n: 'The Borrowed Engine', f: 'others', d: 'Four people who had doubted him had been choosing what mattered, every morning, for six years.' },
     { n: 'The Toll', f: 'motion', d: 'He offered the hours and the money and the risk. None of those were the fare.' }
   ],
-  rule:'The toll is always the thing you were going to keep.',
+  rule: 'Every step up costs you something you had not planned to give up.',
   q:'What are you trying to take across with you?',
   teach:'A man at a river is told the fare, and the fare is one of the things he is carrying, and the ferryman chooses which.',
   body:[
@@ -595,7 +597,7 @@ var S = [
     { n: 'Nothing Has a Size of Its Own', f: 'time', d: 'Sixty-three per cent was a failure against that group chat and a good year against anything else.' },
     { n: 'The Quiet Middle', f: 'time', d: 'The first one had to be allowed to be boring for a year, and never was.' }
   ],
-  rule:'Every time you look sideways you start again from nothing.',
+  rule: 'Every time you switch because somebody else is doing better, you start again from zero.',
   q:'What did you stop doing because somebody else was doing better at something else?',
   teach:'The old version is a stonecutter who wishes himself into the sun and the rain and a mountain, and ends up back at the rock with a chisel.',
   body:[
@@ -626,7 +628,7 @@ var S = [
     { n: 'The Sentence That Arrives Ready', f: 'inner', d: 'It came out in a kitchen at half past six with no introduction, to somebody who had not been there.' },
     { n: 'The Early Verdict', f: 'inner', d: 'He decided what it meant at twenty past nine and spent the day building on a foundation nobody else had laid.' }
   ],
-  rule:'You put it down hours ago. Somebody is still carrying it, and it is you.',
+  rule: 'The thing that upset you finished hours ago. You are the only one still carrying it.',
   q:'What did you set down that you are still holding?',
   teach:'Two monks cross a ford and one of them carries a stranger through the mud. The other carries her the rest of the day.',
   body:[
@@ -657,7 +659,7 @@ var S = [
     { n: 'The Prize Goes to the Exception', f: 'motion', d: 'The week that did the numbers was the least typical week of his year, and he knew it at the time.' },
     { n: 'The Judge You Installed', f: 'others', d: 'Nobody told him an empty week was a failure. It had simply moved in, and it had been choosing his mornings ever since.' }
   ],
-  rule:'An audience can only applaud what it can see, and what it can see is never the work.',
+  rule: 'Once people are watching, you do the part that looks good and quietly stop doing the part that works.',
   q:'What have you quietly stopped doing because there was nothing in it to show anybody?',
   teach:'Goodhart wrote it about economics: a measure that becomes a target stops being a measure. The version that bites has no name and no economics in it — the moment anybody is watching, the visible part of your work quietly becomes the part you do.',
   body:[
@@ -689,7 +691,7 @@ var S = [
     { n: 'The Early Verdict', f: 'inner', d: 'The news, the spread, the broker and the summer. Every one of those is a reason you can do nothing about.' },
     { n: 'The Handle', f: 'motion', d: 'What he felt was not shame. It was relief, which is the same thing said honestly.' }
   ],
-  rule:'Make it your fault and you get the wheel.',
+  rule: 'Blame yourself rather than your luck. It is the only version where you have something to do tomorrow.',
   q:'What are you calling bad luck?',
   teach:'This is the hinge of the whole arc. Every other story here assumes you believe your own actions decide your outcomes. Until that is true, none of them can do anything for you.',
   body:[
@@ -725,7 +727,7 @@ var S = [
     { n: 'The Long Carry', f: 'inner', d: 'He checked it in bed, in the morning and at traffic lights, to see whether it was still there.' },
     { n: 'The Answer You Are Carrying', f: 'inner', d: 'The man on the stairwell was not further ahead. He could set it down, and that does not arrive in the account.' }
   ],
-  rule:'Having it and knowing you have it are two different acquisitions.',
+  rule: 'You already have things you are still chasing. You have just never stopped to notice.',
   q:'What do you already have that you are still trying to get?',
   teach:'A poor man is given a diamond by a sadhu asleep under a tree, keeps it three days, and comes back to ask for something else.',
   body:[
@@ -756,7 +758,7 @@ var S = [
     { n: 'The Price Was the Purchase', f: 'motion', d: 'He had it booked as what the body cost. It was the only thing that came with him into a room.' },
     { n: 'The Quiet Middle', f: 'time', d: 'Forty minutes at twenty to six, for a year, without enjoying one of them, and nobody watching.' }
   ],
-  rule:'What you are calling the price is usually the part you get to keep.',
+  rule: 'The discipline you build getting the thing is worth more than the thing.',
   q:'If you got the thing tomorrow, what would still be there?',
   teach:'Every study that sets one training programme against another finds the same thing, and nobody quotes it: the variable that predicts the outcome is not which programme, it is whether you did it. The programme is the half people argue about and it is the half that does not decide anything.',
   body:[
@@ -786,7 +788,7 @@ var S = [
     { n: 'Two Ends of One Thing', f: 'time', d: 'The one with nothing behind him was frightened for a year and got the thing the careful one never did.' },
     { n: 'The Handle', f: 'motion', d: 'It costs nothing visible on any particular Tuesday, which is exactly why it is never the week to deal with it.' }
   ],
-  rule:'A way back does not get used. It takes the pressure out of everything instead, and the pressure was what was going to finish it.',
+  rule: 'A backup plan is almost never used. It just quietly removes the pressure that would have made you finish.',
   q:'What are you keeping open in case this does not work?',
   teach:'Two men cross a gorge on the same morning. One of them walks back out to the middle with a knife.',
   body:[
@@ -816,7 +818,7 @@ var S = [
     { n: 'The Spent Feeling', f: 'inner', d: 'Every time he announced it he drew down the feeling he was supposed to get from finishing.' },
     { n: 'The Day Nobody Announced', f: 'time', d: 'There was no morning where he woke up and noticed he had won the fight.' }
   ],
-  rule:'You will not feel it arrive. You will only notice it is already behind you.',
+  rule: 'You will not feel the day it changes. You notice months later that it already did.',
   q:'What have you been doing long enough that you cannot remember starting?',
   teach:'An old man sets out to move two mountains with baskets, and tells the neighbour who laughs at him that the mountain does not get any bigger.',
   body:[
@@ -1033,9 +1035,16 @@ function paintLaws() {
 function paintRules() {
   var p = $('#alRulesPane'); p.textContent = '';
   S.forEach(function (s) {
-    var d = el('div', 'al-rule');
+    // A RULE IN A LIST HAS NOTHING BEHIND IT. At the foot of its own
+    // story it has the whole story; here it was a stage label that
+    // repeats — two cards reading THE CALL and no way to tell them
+    // apart — over a sentence with no referent. It names the story and
+    // opens it, so the line always has somewhere to be explained.
+    var d = el('button', 'al-rule al-rgo');
+    d.setAttribute('data-id', s.id);
     d.appendChild(el('div', 'al-caps', s.stage));
     d.appendChild(el('b', null, s.rule));
+    d.appendChild(el('div', 'al-rfrom', s.n));
     p.appendChild(d);
   });
   mask(p);
@@ -1143,7 +1152,7 @@ function open(id) {
 }
 
 document.addEventListener('click', function (e) {
-  var t = e.target.closest ? e.target.closest('.al-tab, .al-card, .al-pill, .al-tag, .al-le, .al-lrow, #alOpenB, #alStoryX, #alLawX') : null;
+  var t = e.target.closest ? e.target.closest('.al-tab, .al-card, .al-pill, .al-tag, .al-le, .al-lrow, .al-rgo, #alOpenB, #alStoryX, #alLawX') : null;
   if (!t) return;
   if (t.id === 'alOpenB') { var r = st.last && byId(st.last); return r && r.body ? open(r.id) : view('arc'); }
   var go = t.getAttribute && t.getAttribute('data-go');
@@ -1152,7 +1161,7 @@ document.addEventListener('click', function (e) {
   if (t.id === 'alLawX') return lawBack === 'story' ? view('story') : view(lawBack);
   var law = t.getAttribute && t.getAttribute('data-law');
   if (law) return openLaw(law);
-  if (t.classList.contains('al-lrow')) return open(t.getAttribute('data-id'));
+  if (t.classList.contains('al-lrow') || t.classList.contains('al-rgo')) return open(t.getAttribute('data-id'));
   if (t.classList.contains('al-tab')) return view(t.getAttribute('data-v'));
   if (t.classList.contains('al-card')) return open(t.getAttribute('data-id'));
 });
