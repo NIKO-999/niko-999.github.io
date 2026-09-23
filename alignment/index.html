@@ -246,8 +246,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   <div class="al-mark" role="img" aria-label="Alignment">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v20M5 8l7-6 7 6M5 16l7 6 7-6"/></svg>
   </div>
-  <h1 class="al-disp" id="alOpenT">Ten stories, read for what is in them.</h1>
-  <p class="al-note" id="alOpenN">Sixty themes taken from the films and the shows themselves, split into what happens inside you and what happens out there. What the story does, and what it leaves you with.</p>
+  <h1 class="al-disp" id="alOpenT">Eleven stories, read for what is in them.</h1>
+  <p class="al-note" id="alOpenN">Ninety-nine themes taken from the films, the shows and one real career, split into what happens inside you and what happens out there. What the story does, and what it leaves you with.</p>
   <button class="al-pill" id="alOpenB">Begin</button>
 </section>
 
@@ -313,6 +313,14 @@ var KEY = 'align.v1';
    it can be checked, and one without is somebody's opinion wearing a
    film's name.
 
+   ONE OF THE ELEVEN IS NOT A SCRIPT. 50 Cent is a real career rather
+   than a story somebody wrote, so the constraint tightens rather than
+   relaxes: every theme under it is a documented fact — the Chapter 11
+   filing and the exit, the Glacéau stake, the three free mixtapes, the
+   872,000 first week — and the one causal claim in it, that Ghetto
+   Qu'ran is why he was shot, is written the way it is actually known:
+   reported, and spoken about by him, rather than established.
+
    AND THE LESSON IS WRITTEN TO LAND, NOT TO SUMMARISE. A paraphrase of
    the plot with a moral on the end is the version everybody has already
    read. What is here names the uncomfortable half — the thing you are
@@ -335,6 +343,7 @@ var KEY = 'align.v1';
 var AXIS = { internal: 'Internal', external: 'External', karmic: 'Karmic' };
 
 var SRC = [
+  { i: "fifty", n: "50 Cent", y: 2003 },
   { i: "grich", n: "Get Rich or Die Tryin'", y: 2005 },
   { i: "power", n: "Power", y: 2014 },
   { i: "paid", n: "Paid in Full", y: 2002 },
@@ -618,6 +627,33 @@ var TH = [
   { s: "vik", x: "karmic", n: "Ragnar's Last Move", b: "Paying It On Your Own Terms",
     t: "He walks into Ecbert's hands knowing exactly what happens next, and engineers his own execution so that his sons will come. He spends his own life as the final move.",
     l: "There is a version of settling an account where you choose the terms, and it is the only version that ends anything. Everything else is waiting for somebody else to set the price." },
+  { s: "fifty", x: "internal", n: "\"I'm Not a Rapper\"", b: "Identity Decides the Moves",
+    t: "He has said it for twenty years and it is neither modesty nor a boast, it is the strategy. Music is one product line. The water, the books, the films, the television, the boxing promotion: none of that is a rapper diversifying. It is a man who never accepted the job title in the first place.",
+    l: "What you call yourself decides which moves are even available to you. Take the narrow title people hand you and you inherit its ceiling with it, and nobody is going to offer you a wider one later. Name the thing you are before you have earned the name." },
+  { s: "fifty", x: "internal", n: "He Was Never Insulted", b: "Attack as Material",
+    t: "Every feud he has been in, he escalated deliberately. Ja Rule, the 2007 sales bet against Kanye, twenty years of it. He is not being provoked in any of them. He picks the fight, sets the terms and sells the tickets.",
+    l: "What you treat as an insult decides whether it costs you or pays you. Most of what happens to you is neutral material until you decide to be wounded by it, and being wounded is the expensive option every single time." },
+  { s: "fifty", x: "internal", n: "The Bankruptcy Was a Filing", b: "Not Feeling What You Are Told to Feel",
+    t: "He filed Chapter 11 in 2015 after a court judgment, kept working straight through it, and came out in 2017. He treated it as a legal instrument with a defined process rather than as the end of a story about him.",
+    l: "Most events arrive with an emotion already attached that somebody else decided on. Separating what a thing IS from what you are supposed to feel about it is most of what composure actually is, and it is a skill rather than a temperament." },
+  { s: "fifty", x: "external", n: "The Mixtapes", b: "Build the Audience Before the Deal",
+    t: "Dropped by Columbia and untouchable after the shooting, he put out 50 Cent Is the Future, Guess Who's Back and No Mercy No Fear for nothing. By the time Eminem and Dre came, the demand already existed and he was not asking anybody for anything.",
+    l: "Leverage is built before you need it, and it is usually built by giving things away. Anybody negotiating from a position where they need the deal has already lost it. Make the thing so well that the room has to come to you." },
+  { s: "fifty", x: "external", n: "Vitamin Water", b: "Take the Equity, Not the Fee",
+    t: "He took a stake in Glacéau instead of an endorsement cheque. Coca-Cola bought the company in 2007, and that one decision paid more than any fee he could have negotiated for the same work.",
+    l: "A fee ends when the work ends. A share keeps paying while you sleep, and it is far more often available than people think, simply by asking for it instead of the money. The only cost is being paid nothing for a while, which is the whole test." },
+  { s: "fifty", x: "external", n: "From Talent to Owner", b: "Own the Thing You Appear In",
+    t: "Power, then Power Book II, III and IV, then BMF. He moved from being cast in things to producing them, and the production company rather than the performance is where the durable money sits.",
+    l: "Being the talent means somebody else decides whether there is any more of it. Get your name ON the thing rather than in it. That move is almost always available a level earlier than the people who eventually make it take it." },
+  { s: "fifty", x: "karmic", n: "Ghetto Qu'ran", b: "What You Put Out Has an Address",
+    t: "In 2000 he recorded a track naming real figures from the Queens drug trade. Months later he was shot nine times outside his grandmother's house and the industry stopped returning calls. He has spoken since about the connection between the two.",
+    l: "Everything you put out is addressed to somebody, whether or not you were thinking about them while you made it. The account opens the moment it leaves your hands, and it is settled on a timetable you do not get to set." },
+  { s: "fifty", x: "karmic", n: "The Ja Rule War", b: "Winning Defines You Too",
+    t: "He ended Murder Inc commercially and it worked completely. Twenty years later it is still one of the first things anybody says about him, and the years he spent on it are years of his own output that went into somebody else.",
+    l: "You become the thing you fight, in the eyes of everybody watching, whether or not you win. The cost of a war is not the risk of losing it. It is the years, and the description of you that outlives the result." },
+  { s: "fifty", x: "karmic", n: "Everything He Gave Away", b: "The Return Arrives Late and in Another Shape",
+    t: "The free mixtapes sold the album: 872,000 copies in its first week. And the persona built on that block is, twenty years later, the business — a television operation selling that exact world back to an audience the street had already built for him.",
+    l: "What you give away is not gone, it is placed. The return comes late and rarely in the shape you expected, which is why the people who calculate it never receive it and the people who simply keep putting things out do." },
 ];
 
 var $ = function (s) { return document.querySelector(s); };
