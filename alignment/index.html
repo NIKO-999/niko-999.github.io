@@ -194,10 +194,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   content: ''; position: absolute; left: 0; right: 0; top: 50%;
   height: var(--tap); transform: translateY(-50%);
 }
-.al-tag[data-f="inner"]   { --tg: #C9A227; }
-.al-tag[data-f="motion"]  { --tg: #D2603A; }
-.al-tag[data-f="others"]  { --tg: #7E9AA6; }
-.al-tag[data-f="time"]    { --tg: #8E9370; }
+/* One hue per group. It was four, one per family, and with two groups
+   each named by the heading directly over it a third and fourth colour
+   would be saying which of something that no longer exists. */
+.al-tag[data-f="internal"] { --tg: #C9A227; }
+.al-tag[data-f="external"] { --tg: #7E9AA6; }
 
 .al-rule {
   border-radius: var(--r-card); padding: var(--v4); margin-bottom: var(--v2);
@@ -596,68 +597,91 @@ var LAWS = {
    gone that way and were sitting in LAWS with a definition and no way
    to reach them. Reading the table instead makes that impossible, and
    the two are asserted to hold exactly the same names on boot. */
+/* TWO CUTS, NOT ONE. The side says what a thing DOES to you — dark is
+   the pull, light is the way. The axis says where it lives, and it
+   replaced four families (the inner world, motion, other people, time)
+   that were a description of subject matter rather than of anything
+   you could act on.
+
+   INTERNAL: the mechanism runs inside you and would still run in an
+   empty room — a belief, a state, a standard, a verdict you deliver,
+   what you are telling yourself.
+   EXTERNAL: it runs whether or not you have an opinion about it —
+   another person, the clock, a cost, the room, what the work is.
+
+   Internal comes first because that is the order the thing has: you
+   cannot do much about the second list from inside the first. All 57
+   were read against that rule rather than folded from their old
+   family, which is why the two do not line up — nine of the old
+   inner-world names are external here and most of Motion is not. */
+var AXIS = { internal: 'Internal', external: 'External' };
+
 var SIDE = {
-  'The Answer You Are Carrying': ['light', 'inner'],
-  'The Lit Ground': ['dark', 'inner'],
-  'The Full Cup': ['dark', 'inner'],
-  'The Cost of Being Right': ['dark', 'inner'],
-  'The Early Verdict': ['dark', 'inner'],
-  'The Long Carry': ['dark', 'inner'],
-  'The Sentence That Arrives Ready': ['dark', 'inner'],
-  'The Spent Feeling': ['dark', 'inner'],
-  'The Walk': ['light', 'motion'],
-  'The Wheel': ['light', 'motion'],
-  'The Toll': ['dark', 'motion'],
-  'What Only Made Sense Back There': ['light', 'motion'],
-  'The Handle': ['light', 'motion'],
-  'The Open Door': ['dark', 'motion'],
-  'The Stranger’s Mouth': ['light', 'others'],
-  'The Sideways Look': ['dark', 'others'],
-  'The Borrowed Engine': ['dark', 'others'],
-  'The River Does Not Wait': ['light', 'time'],
-  'Two Ends of One Thing': ['light', 'time'],
-  'Nothing Has a Size of Its Own': ['dark', 'time'],
-  'The Number That Moves': ['dark', 'time'],
-  'The Second Thing': ['dark', 'time'],
-  'The Quiet Middle': ['light', 'time'],
-  'The Judge You Installed': ['dark', 'others'],
-  'The Unwritten Half': ['dark', 'inner'],
-  'The Prize Goes to the Exception': ['dark', 'motion'],
-  'The Price Was the Purchase': ['light', 'motion'],
-  'The Measuring Does Not Stop': ['dark', 'inner'],
-  'The Narrow Gift': ['light', 'motion'],
-  'What Got Rewarded': ['dark', 'others'],
-  'A Picture Is Not a Rehearsal': ['dark', 'inner'],
-  'Mostly It Is Not Doing Things': ['light', 'motion'],
-  'The State Wrote It': ['dark', 'inner'],
-  'Nothing Records the Weather': ['dark', 'time'],
-  'Freedom Is Not Autonomy': ['light', 'motion'],
-  'Leverage Is What Buys the No': ['light', 'others'],
-  'The Word You Reached For': ['dark', 'inner'],
-  'The Talent Nobody Sells': ['light', 'inner'],
-  'The Sunday Version Has the Vote': ['light', 'motion'],
-  'The Version You Can Always Do': ['light', 'motion'],
-  'Starting Again Is the Cost': ['dark', 'time'],
-  'Too Small To Bother With': ['dark', 'inner'],
-  'Aimed, Not Removed': ['light', 'motion'],
-  'What They Called It': ['dark', 'others'],
-  'The Convenient Reason': ['dark', 'inner'],
-  'What The Months Say': ['light', 'time'],
-  'Nothing To Point At': ['dark', 'inner'],
-  'You Cannot Negotiate With A Room': ['light', 'motion'],
-  'What Is Left Standing': ['dark', 'inner'],
-  'The Test Runs Both Ways': ['light', 'time'],
-  'A Leap Is Seen From Outside': ['light', 'time'],
-  'The Picture Makes Tuesday Feel Like Failure': ['dark', 'inner'],
-  'Sacrifice Now Or Sacrifice It': ['light', 'motion'],
-  'The Number You Never Wrote Down': ['dark', 'inner'],
-  'Visibility Is Billed Later': ['dark', 'inner'],
-  'Everything Is Paid For': ['dark', 'motion'],
-  'The Day Nobody Announced': ['light', 'time']
+  'The Answer You Are Carrying': ['light', 'internal'],
+  'The Lit Ground': ['dark', 'internal'],
+  'The Full Cup': ['dark', 'internal'],
+  'The Cost of Being Right': ['dark', 'internal'],
+  'The Early Verdict': ['dark', 'internal'],
+  'The Long Carry': ['dark', 'internal'],
+  'The Sentence That Arrives Ready': ['dark', 'internal'],
+  'The Spent Feeling': ['dark', 'internal'],
+  'The Walk': ['light', 'external'],
+  'The Wheel': ['light', 'internal'],
+  'The Toll': ['dark', 'external'],
+  'What Only Made Sense Back There': ['light', 'external'],
+  'The Handle': ['light', 'internal'],
+  'The Open Door': ['dark', 'external'],
+  'The Stranger’s Mouth': ['light', 'external'],
+  'The Sideways Look': ['dark', 'external'],
+  'The Borrowed Engine': ['dark', 'external'],
+  'The River Does Not Wait': ['light', 'external'],
+  'Two Ends of One Thing': ['light', 'external'],
+  'Nothing Has a Size of Its Own': ['dark', 'internal'],
+  'The Number That Moves': ['dark', 'internal'],
+  'The Second Thing': ['dark', 'internal'],
+  'The Quiet Middle': ['light', 'external'],
+  'The Judge You Installed': ['dark', 'external'],
+  'The Unwritten Half': ['dark', 'internal'],
+  'The Prize Goes to the Exception': ['dark', 'external'],
+  'The Price Was the Purchase': ['light', 'external'],
+  'The Measuring Does Not Stop': ['dark', 'internal'],
+  'The Narrow Gift': ['light', 'internal'],
+  'What Got Rewarded': ['dark', 'external'],
+  'A Picture Is Not a Rehearsal': ['dark', 'internal'],
+  'Mostly It Is Not Doing Things': ['light', 'external'],
+  'The State Wrote It': ['dark', 'internal'],
+  'Nothing Records the Weather': ['dark', 'internal'],
+  'Freedom Is Not Autonomy': ['light', 'internal'],
+  'Leverage Is What Buys the No': ['light', 'external'],
+  'The Word You Reached For': ['dark', 'internal'],
+  'The Talent Nobody Sells': ['light', 'internal'],
+  'The Sunday Version Has the Vote': ['light', 'internal'],
+  'The Version You Can Always Do': ['light', 'internal'],
+  'Starting Again Is the Cost': ['dark', 'internal'],
+  'Too Small To Bother With': ['dark', 'internal'],
+  'Aimed, Not Removed': ['light', 'internal'],
+  'What They Called It': ['dark', 'external'],
+  'The Convenient Reason': ['dark', 'internal'],
+  'What The Months Say': ['light', 'external'],
+  'Nothing To Point At': ['dark', 'internal'],
+  'You Cannot Negotiate With A Room': ['light', 'external'],
+  'What Is Left Standing': ['dark', 'internal'],
+  'The Test Runs Both Ways': ['light', 'external'],
+  'A Leap Is Seen From Outside': ['light', 'external'],
+  'The Picture Makes Tuesday Feel Like Failure': ['dark', 'internal'],
+  'Sacrifice Now Or Sacrifice It': ['light', 'external'],
+  'The Number You Never Wrote Down': ['dark', 'internal'],
+  'Visibility Is Billed Later': ['dark', 'external'],
+  'Everything Is Paid For': ['dark', 'external'],
+  'The Day Nobody Announced': ['light', 'external']
 };
 
 (function () {
   for (var n in LAWS) if (!SIDE[n]) throw new Error('no side for ' + n);
+  for (var k in SIDE) {
+    if (['dark', 'light'].indexOf(SIDE[k][0]) < 0) throw new Error('bad side for ' + k);
+    if (!AXIS[SIDE[k][1]]) throw new Error('bad axis for ' + k);
+  }
   for (var m in SIDE) if (!LAWS[m]) throw new Error('no definition for ' + m);
 }());
 
@@ -669,24 +693,23 @@ function mask(p) {
   p.alMask();
 }
 
-var FAM = { inner: 'The inner world', motion: 'Motion', others: 'Other people', time: 'Time' };
 
 function sideOf(n) { return (SIDE[n] || ['dark'])[0]; }
-function famOf(n) { return (SIDE[n] || [0, 'inner'])[1]; }
+function axisOf(n) { return (SIDE[n] || [0, 'internal'])[1]; }
 
 /* ONE PAINTER, TWO SIDES. Dark and Light are the same screen reading
    the same list through one field, so there is no second drawing to
-   drift. The families sort inside each side: thirty-three names in a
-   row with no structure is a wall rather than a list. */
+   drift. Internal and external sort inside each side: thirty-three
+   names in a row with no structure is a wall rather than a list. */
 function paintSide(side) {
   var p = $('#al' + side.charAt(0).toUpperCase() + side.slice(1) + 'Pane');
   p.textContent = '';
-  for (var f in FAM) {
+  for (var f in AXIS) {
     var rows = [];
     for (var n in SIDE) if (SIDE[n][0] === side && SIDE[n][1] === f) rows.push(n);
     if (!rows.length) continue;
     rows.sort();
-    p.appendChild(el('div', 'al-grp al-caps', FAM[f]));
+    p.appendChild(el('div', 'al-grp al-caps', AXIS[f]));
     var w = el('div', 'al-tags');
     rows.forEach(function (n) {
       var t = el('button', 'al-tag', n);
@@ -725,7 +748,7 @@ function paintLaw(name) {
   var lead = el('div', 'al-lead');
   lead.appendChild(el('h1', 'al-disp', name));
   lead.appendChild(el('div', 'al-caps',
-    (sideOf(name) === 'dark' ? 'Dark' : 'Light') + '  \u00b7  ' + (FAM[famOf(name)] || '')));
+    (sideOf(name) === 'dark' ? 'Dark' : 'Light') + '  \u00b7  ' + (AXIS[axisOf(name)] || '')));
   p.appendChild(lead);
 
   var sh = el('div', 'al-sheet');
