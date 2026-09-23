@@ -14,23 +14,13 @@
   ALIGNMENT. Its own ground, its own type, its own everything — it reads
   none of the other keys and takes none of the shared shell.
 
-  A PHOTOGRAPH IS A GUEST INSIDE A FRAME, NEVER THE PAGE. That is the
-  whole construction and the first build got it backwards: the image
-  filled the card, the card's own ground was never visible anywhere on
-  screen, and every word was printed on a picture under a gradient laid
-  there to keep it readable. A photograph that bleeds is a page. A
-  photograph in a frame is an object. Interface lives in the MATERIAL
-  around the picture, which is also where the room for chrome comes
-  from.
-
-  THE GRADE IS PER IMAGE, MEASURED, AND THE COMMENT THAT USED TO SIT
-  HERE WAS FALSE. It claimed one filter pulled fourteen photographs
-  into one warm family; measured, the set spanned 235 degrees of hue
-  with five of twelve inside the band. Six reference screens holding a
-  snow mountain, a face, a desert, a cyan swimming pool and a volcano
-  all land inside hue 16-69, which no single transfer function does to
-  a mixed library. So --ib rides each image and the shared grade only
-  has to carry the hue.
+  THE FOURTEEN PHOTOGRAPHS WENT WITH THE STORIES. Every screen was a
+  picture in a frame with the interface living in the material around
+  it, under a per-image brightness beneath one shared grade — measured,
+  the set spanned 235 degrees of hue, and no single transfer function
+  pulls a mixed library into one family. There is no image in this app
+  now, so the grade token, the brightness token and both rules that
+  read them are gone rather than left to cascade at nothing.
 */
 
 :root {
@@ -43,7 +33,8 @@
 
   /* Chrome sits on a PLATE, not on glass. A 10% white wash over a lit
      photograph put the info glyph at 2.50:1 against the 3 a graphic
-     needs, and no alpha of white fixes a ground that bright. */
+     needs. The photographs have gone and the plate stays, because a
+     control is still told from the page by its own ground. */
   --plate: rgba(11,10,8,.56);
 
   --card: #1A1611;
@@ -61,10 +52,9 @@
   --v4: 22px; --v5: 34px; --v6: 52px;
 
   --gut: 22px;
+  --round: 40px;   /* drawn; the 44 it OWNS is the ::before square */
   --gut-list: 18px;
   --tap: 44px;
-
-  --grade: saturate(.30) sepia(.55) contrast(1.02) brightness(1.20);
 
 }
 
@@ -89,20 +79,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .al-caps   { font-size: 10px; font-weight: 600; letter-spacing: .5em; text-transform: uppercase; color: var(--dim); }
 .al-body   { font-size: 16px; font-weight: 400; line-height: 1.50; color: var(--dim); }
 .al-note   { font-size: 13px; font-weight: 450; line-height: 1.45; color: var(--dim); }
-.al-ab { color: var(--dim); }
-.al-src { margin-right: 9px; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
-.al-chl { display: flex; align-items: center; gap: 12px; }
-.al-min { font-size: 13px; color: var(--dim); white-space: nowrap; }
-
-/* A picture in a frame, never a ground under words. */
-.al-hero { position: relative; height: 188px; border-radius: var(--r-card); overflow: hidden; background: #0E0C0A; margin-bottom: var(--v4); }
-.al-hero i { position: absolute; inset: 0; display: block; background-size: cover; background-position: center; filter: var(--grade) brightness(var(--ib, 1)); }
 
 .al-view { position: relative; z-index: 1; height: 100%; display: none; flex-direction: column; }
 .al-view.is-on { display: flex; }
 
 #alOpen { justify-content: flex-end; padding: 0 var(--gut-list) var(--v5); }
-#alOpen .al-hero { flex: 1; height: auto; margin: calc(var(--v4) + env(safe-area-inset-top, 0px)) 0 var(--v5); }
 #alOpen .al-mark { margin-bottom: var(--v3); }
 .al-mark { display: flex; align-items: center; gap: 9px; }
 .al-mark svg { width: 20px; height: 20px; display: block; }
@@ -121,16 +102,17 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   background: var(--ink); color: #14120E;
   font-size: 16px; font-weight: 500; letter-spacing: -.01em;
 }
-.al-pill.is-glass {
-  background: var(--plate); color: var(--ink);
-  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-  border: 1px solid var(--hair);
-}
-.al-pill.is-grow { flex: 1; }
 
 .al-head { padding: calc(var(--v4) + env(safe-area-inset-top, 0px)) var(--gut-list) var(--v3); display: flex; align-items: center; gap: 12px; flex: none; }
 .al-head .al-disp-s { flex: 1; }
-.al-head .al-caps { flex: none; }
+.al-head .al-count { flex: none; }
+
+/* A COUNT IS A FIGURE, NOT A LABEL. It wore .al-caps, which is 10px at
+   half an em of tracking — right for a word and wrong for a number:
+   24 drew as "2 4", two digits with a space between them. It carries
+   its own rule rather than overriding .al-caps, because the two are
+   equal specificity and this repo has lost that race five times. */
+.al-count { font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--dim); }
 
 /* 44 OWNED, 40 DRAWN — and an inset cannot say that here. An
    absolutely positioned box resolves against its host's PADDING box,
@@ -141,7 +123,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
    square is immune to the host's border, padding and drawn size alike,
    and it is what makes the token load-bearing rather than decorative. */
 .al-round {
-  width: 40px; height: 40px; flex: none; border-radius: var(--r-pill);
+  width: var(--round); height: var(--round); flex: none; border-radius: var(--r-pill);
   background: var(--plate); border: 1px solid var(--hair);
   backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
   display: grid; place-items: center; position: relative;
@@ -156,66 +138,39 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   padding: 0 var(--gut-list) calc(118px + env(safe-area-inset-bottom, 0px)); }
 .al-pane::-webkit-scrollbar { display: none; }
 
-/* A MASK, NEVER A GRADIENT LAID OVER THE CONTENT. The ground here is a
-   photograph, so a --paper overlay is a near-match that reads as a
-   smudge somewhere on the set. Off again at the end of the travel: a
+/* A MASK, NEVER A GRADIENT LAID OVER THE CONTENT. It was written when
+   the ground was a photograph and a --paper overlay was a near-match
+   that read as a smudge somewhere on the set; over one flat ground a
+   gradient would do, and a mask is still the version with no colour
+   to get wrong. Off again at the end of the travel: a
    soft edge over nothing is the same lie in the other direction. */
 .al-pane { -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 86px), transparent 100%);
                    mask-image: linear-gradient(180deg, #000 calc(100% - 86px), transparent 100%); }
 .al-pane.is-end { -webkit-mask-image: none; mask-image: none; }
 
-/* ---- THE ARC ---- */
-.al-card {
-  position: relative; display: block; width: 100%; text-align: left;
-  border-radius: var(--r-card); overflow: hidden;
-  background: var(--card); padding: var(--v3);
-  margin-bottom: var(--v3);
-  box-shadow: inset 0 1px 0 var(--card-edge), 0 18px 34px -18px rgba(0,0,0,.92);
-}
-.al-ch { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--v3); }
-.al-ct { margin-bottom: var(--v3); }
-.al-ct .al-caps { margin-top: var(--v1); color: var(--spent); }
-
-.al-sq {
-  width: 38px; height: 38px; flex: none; border-radius: var(--r-sq);
-  background: var(--glass); border: 1px solid var(--hair);
-  display: grid; place-items: center;
-}
-.al-sq { font-size: 13px; font-weight: 500; letter-spacing: .06em; color: var(--dim); }
-
-.al-go {
-  width: 38px; height: 38px; flex: none; border-radius: var(--r-pill);
-  background: rgba(255,255,255,.92); color: #14120E;
-  display: grid; place-items: center;
-}
-.al-go svg { width: 15px; height: 15px; }
-.al-card.is-read .al-go { background: var(--plate); color: var(--ink); border: 1px solid var(--hair); }
-
-/* The picture, inset inside the card's own material at its own smaller
-   radius. Two rounded rectangles at one radius read as a mistake. */
-.al-ph { position: relative; height: 300px; border-radius: var(--r-in); overflow: hidden; background: #0E0C0A; }
-.al-ph i {
-  position: absolute; inset: 0; display: block;
-  background-size: cover; background-position: center;
-  filter: var(--grade) brightness(var(--ib, 1));
-}
-
 .al-grp { padding: var(--v5) 2px var(--v2); }
 
-/* ---- THE STORY ---- */
-#alStoryPane { padding-bottom: var(--v6); }
 .al-lead { padding: var(--v4) 0; }
-.al-lead.is-short .al-hero { display: none; }
-.al-lead .al-mark { margin-bottom: var(--v3); color: var(--dim); }
-.al-lead .al-caps { margin-bottom: var(--v2); }
-.al-lead .al-disp { max-width: 9em; }
+/* The title runs at line-height 1.00, so its last line box ends level
+   with the ink and a descender prints into whatever is next. Six
+   pixels, which is also what makes the pair read as two registers
+   rather than one wrapped line. */
+.al-lead .al-caps { margin: var(--v1) 0 var(--v2); }
+/* THE TITLE HAS TO CLEAR THE CLOSE BUTTON, AND 9em DID NOT. The X is
+   fixed at the viewport's own right edge, so the room the title has is
+   a number of PIXELS and an em measure cannot see it: at 38px, 9em is
+   342 and the button's left edge is 330. Twenty of fifty-seven titles
+   ran into it and twelve overlapped it outright — and the one this was
+   first looked at on was among the thirty-seven that clear, which is
+   what a single screenshot is worth as a check. Derived from the two
+   gutters and the button rather than written as 304px, so the day a
+   token moves the title moves with it. */
+.al-lead .al-disp { max-width: calc(100% - (var(--round) + var(--gut) - var(--gut-list) + 8px)); }
 
 /* Nothing to travel with any more: the ground under the words is the
    page. The whole class of contrast failure that MOVES with the scroll
    went out with the photograph. */
 .al-sheet { padding-bottom: var(--v6); }
-.al-txt p { margin-bottom: 1.05em; }
-.al-txt p:first-child { color: var(--ink); }
 
 .al-rule-hd { margin: var(--v5) 0 var(--v3); display: flex; align-items: center; gap: 12px; }
 .al-rule-hd:after { content: ''; flex: 1; height: 1px; background: var(--hair); }
@@ -239,68 +194,18 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   content: ''; position: absolute; left: 0; right: 0; top: 50%;
   height: var(--tap); transform: translateY(-50%);
 }
-.al-lrow {
-  position: relative; display: flex; align-items: center; gap: var(--v3);
-  width: 100%; text-align: left; padding: var(--v3) 0;
-  border-bottom: 1px solid var(--hair);
-}
-.al-lrow:last-child { border-bottom: 0; }
-.al-lrow .al-sq { background: var(--glass); }
-.al-lrow .al-lt { flex: 1; min-width: 0; }
-.al-lrow .al-lt i { display: block; font-style: normal; font-size: 19px; font-weight: 450; letter-spacing: -.02em; line-height: 1.2; }
-
-/* THE LESSON, NOT THE LABEL. The foot of a story named its laws as
-   four bare words and you had to press each one to be told what that
-   law claims in general — never what it did in the story you had just
-   read. The row carries the line now, and the row is the control that
-   opens the law, so the name is not printed twice to get both. */
-.al-les { margin-bottom: var(--v4); }
-.al-le {
-  display: block; width: 100%; text-align: left;
-  padding: var(--v3) 0; border-bottom: 1px solid var(--hair);
-}
-.al-le:last-child { border-bottom: 0; }
-.al-le-n {
-  display: inline-flex; align-items: center; height: 30px; padding: 0 12px;
-  border-radius: var(--r-sq); margin-bottom: var(--v2);
-  font-size: 13px; font-weight: 500; letter-spacing: .01em;
-  background: rgba(11,10,8,.78);
-  border: 1px solid color-mix(in srgb, var(--tg) 30%, transparent);
-  color: color-mix(in srgb, var(--tg) 66%, var(--ink));
-}
-.al-le-d { display: block; font-size: 15px; line-height: 1.5; color: var(--dim); }
-/* WHAT THE IDEA IS, THEN WHERE IT TURNED UP. The first build printed
-   only the second, so a theme could be read off the page without ever
-   saying what it claimed — a label with an anecdote attached rather
-   than something you could carry out of the room. */
-.al-le-x {
-  display: block; margin-top: var(--v2);
-  padding-left: var(--v2); border-left: 2px solid color-mix(in srgb, var(--tg) 46%, transparent);
-  font-size: 14px; line-height: 1.5; color: var(--dim);
-}
-
-.al-tag[data-f="inner"],  .al-le[data-f="inner"]  { --tg: #C9A227; }
-.al-tag[data-f="motion"], .al-le[data-f="motion"] { --tg: #D2603A; }
-.al-tag[data-f="others"], .al-le[data-f="others"] { --tg: #7E9AA6; }
-.al-tag[data-f="time"],   .al-le[data-f="time"]   { --tg: #8E9370; }
+.al-tag[data-f="inner"]   { --tg: #C9A227; }
+.al-tag[data-f="motion"]  { --tg: #D2603A; }
+.al-tag[data-f="others"]  { --tg: #7E9AA6; }
+.al-tag[data-f="time"]    { --tg: #8E9370; }
 
 .al-rule {
   border-radius: var(--r-card); padding: var(--v4); margin-bottom: var(--v2);
   background: var(--card); box-shadow: inset 0 1px 0 var(--card-edge);
 }
 .al-rule .al-caps { margin-bottom: var(--v2); }
-.al-rgo { display: block; width: 100%; text-align: left; font: inherit; color: inherit; border: 0; }
 .al-rfrom { margin-top: var(--v2); font-size: 13px; color: var(--dim); }
 .al-rule b { display: block; font-size: 19px; font-weight: 600; line-height: 1.26; letter-spacing: -.016em; }
-.al-q { border-radius: var(--r-card); padding: var(--v4); border: 1px solid var(--hair); }
-.al-q .al-caps { margin-bottom: var(--v2); }
-.al-q b { display: block; font-size: 19px; font-weight: 500; line-height: 1.34; letter-spacing: -.012em; color: var(--dim); }
-
-/* THE STORY ENDED IN 150px OF RESERVED NOTHING. Both references close
-   their detail screen on a pair — a primary and a secondary — and the
-   only way out of this one was scrolling four thousand pixels back to
-   the close button. */
-.al-acts { display: flex; gap: var(--v2); margin-top: var(--v4); }
 
 /* ---- THE FOOT ---- */
 .al-foot {
@@ -317,7 +222,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .al-tab svg { width: 20px; height: 20px; display: block; }
 .al-tab[aria-current="true"] { background: rgba(255,255,255,.12); color: var(--ink); }
 
-/* GLASS OVER A PHOTOGRAPH IS A MATERIAL. GLASS OVER A SENTENCE IS A
+/* GLASS OVER A PHOTOGRAPH WAS A MATERIAL. GLASS OVER A SENTENCE IS A
    SMEAR. This is the one round control that sits over running body
    text, fixed, while the pane scrolls under it — and .al-round's own
    --plate is 56%, which dims a word without removing it. Measured on
@@ -348,17 +253,17 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 </section>
 
 <section class="al-view" id="alDark">
-  <div class="al-head"><h1 class="al-disp-s">Dark</h1><span class="al-caps al-count"></span></div>
+  <div class="al-head"><h1 class="al-disp-s">Dark</h1><span class="al-count"></span></div>
   <div class="al-pane" id="alDarkPane"></div>
 </section>
 
 <section class="al-view" id="alLight">
-  <div class="al-head"><h1 class="al-disp-s">Light</h1><span class="al-caps al-count"></span></div>
+  <div class="al-head"><h1 class="al-disp-s">Light</h1><span class="al-count"></span></div>
   <div class="al-pane" id="alLightPane"></div>
 </section>
 
 <section class="al-view" id="alLessons">
-  <div class="al-head"><h1 class="al-disp-s">The Lessons</h1><span class="al-caps al-count"></span></div>
+  <div class="al-head"><h1 class="al-disp-s">The Lessons</h1><span class="al-count"></span></div>
   <div class="al-pane" id="alLessonsPane"></div>
 </section>
 
@@ -817,7 +722,7 @@ function paintLessons() {
 function paintLaw(name) {
   var p = $('#alLawPane'); p.textContent = '';
 
-  var lead = el('div', 'al-lead is-short');
+  var lead = el('div', 'al-lead');
   lead.appendChild(el('h1', 'al-disp', name));
   lead.appendChild(el('div', 'al-caps',
     (sideOf(name) === 'dark' ? 'Dark' : 'Light') + '  \u00b7  ' + (FAM[famOf(name)] || '')));
@@ -882,7 +787,7 @@ function openLaw(name) {
 }
 
 document.addEventListener('click', function (e) {
-  var t = e.target.closest ? e.target.closest('.al-tab, .al-pill, .al-tag, .al-le, #alOpenB, #alLawX') : null;
+  var t = e.target.closest ? e.target.closest('.al-tab, .al-pill, .al-tag, #alOpenB, #alLawX') : null;
   if (!t) return;
   if (t.id === 'alOpenB') return view(VIEWS.indexOf(st.last) > 0 && st.last !== 'law' ? st.last : 'dark');
   if (t.id === 'alLawX') return view(lawBack);
