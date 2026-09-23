@@ -89,6 +89,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .al-caps   { font-size: 10px; font-weight: 600; letter-spacing: .5em; text-transform: uppercase; color: var(--dim); }
 .al-body   { font-size: 16px; font-weight: 400; line-height: 1.50; color: var(--dim); }
 .al-note   { font-size: 13px; font-weight: 450; line-height: 1.45; color: var(--dim); }
+.al-ab { color: var(--dim); }
+.al-chl { display: flex; align-items: center; gap: 12px; }
+.al-min { font-size: 13px; color: var(--dim); white-space: nowrap; }
 
 /* A picture in a frame, never a ground under words. */
 .al-hero { position: relative; height: 188px; border-radius: var(--r-card); overflow: hidden; background: #0E0C0A; margin-bottom: var(--v4); }
@@ -409,7 +412,7 @@ var S = [
 {
   id: 'stove', stage: 'The Call', bg: 'desert', mins:2,
   n:'The Long Way Round',
-  src:'Ours',
+  ab: 'Paying to be told what you already wrote down', src:'Ours',
   laws: [
     { n: 'The Answer You Are Carrying', f: 'inner', d: 'The answer was in his own notebook, eleven times, in his own handwriting.' },
     { n: 'The Walk', f: 'motion', d: 'He had been told it for years. It became true the week he spent everything getting to it.' },
@@ -440,7 +443,8 @@ var S = [
   ]
 },
 { id:'lamp', stage:'The Call', bg:'umber', mins:2,
-  n:'Where the Light Is', src:'Ours',
+  n:'Where the Light Is',
+  ab: 'Working the easy problem instead of the real one', src:'Ours',
   laws: [
     { n: 'The Lit Ground', f: 'inner', d: 'Learning to code has a screen that tells you it worked. Sitting still after a loss has nothing at all.' },
     { n: 'The Walk', f: 'motion', d: 'He could have named the problem at three in the morning for a year and a half.' },
@@ -469,7 +473,8 @@ var S = [
     "The spreadsheet is still there. It is still very good. He just stopped calling it the work."
   ] },
 { id:'cup', stage:'The Refusal', bg:'curve', mins:2,
-  n:'The Man Who Kept Explaining', src:'Ours',
+  n:'The Man Who Kept Explaining',
+  ab: 'Why the advice never lands', src:'Ours',
   laws: [
     { n: 'The Full Cup', f: 'inner', d: 'He had prepared a page of notes about what the problem was, and brought them to a man he was asking what the problem was.' },
     { n: 'The Cost of Being Right', f: 'inner', d: 'Letting it be the problem meant the last two years had been aimed at the wrong thing.' },
@@ -500,7 +505,8 @@ var S = [
     "It is a stupid rule and it works, and it works because it is very hard to explain yourself while you are not talking."
   ] },
 { id:'river', stage:'The Refusal', bg:'silk', mins:2,
-  n:'When You Get In', src:'Ours',
+  n:'When You Get In',
+  ab: 'Waiting to be told you are ready', src:'Ours',
   laws: [
     { n: 'The River Does Not Wait', f: 'time', d: 'Every year he prepared, the thing he was preparing for went past at its own rate.' },
     { n: 'The Number That Moves', f: 'time', d: 'Six months, then nine, then a year, then a year in the new money. Each one more sensible than the last.' },
@@ -530,7 +536,8 @@ var S = [
     "Because the number was never the thing. The day is the thing. And if you do not fix the day in advance, you will find, every single time you arrive at it, that there is a better number just a little further on."
   ] },
 { id:'horse', stage:'The Mentor', bg:'canyon', mins:2,
-  n:'Too Early To Say', src:'Ours',
+  n:'Too Early To Say',
+  ab: 'Calling it a disaster far too early', src:'Ours',
   laws: [
     { n: 'Two Ends of One Thing', f: 'time', d: 'Redundancy, a better job, walking out, four years on his own. Four events, four verdicts, all early.' },
     { n: 'The Early Verdict', f: 'inner', d: 'Everyone around him was certain every time, and being wrong four times never slowed them down.' },
@@ -561,7 +568,8 @@ var S = [
     "What he does now instead is mend the fence and go out to work. He is not waiting to find out what any of it meant. He just does not say the sentence out loud any more, because he has been wrong with it four times in a row and it never once slowed him down."
   ] },
 { id:'box', stage:'The Mentor', bg:'turtle', mins:2,
-  n:'The Season He Wrote Down', src:'Ours',
+  n:'The Season He Wrote Down',
+  ab: 'What you were like before anybody got at you', src:'Ours',
   laws: [
     { n: 'The Answer You Are Carrying', f: 'inner', d: 'Two hundred pages of the exact thing he was paying an app to make him do, in a box, in his own handwriting.' },
     { n: 'The Narrow Gift', f: 'motion', d: 'He could stay on one thing past the point anybody else was interested. He traded it for being easy to talk to.' },
@@ -589,7 +597,8 @@ var S = [
     'The pad is on the shelf behind his desk. Not as a keepsake. As a reference for what he is actually like before anybody has got at him.'
   ] },
 { id:'ferry', stage:'The Threshold', bg:'nightfall', mins:2,
-  n:'The Fuel', src:'Ours',
+  n:'The Fuel',
+  ab: 'Running on proving people wrong', src:'Ours',
   laws: [
     { n: 'What Only Made Sense Back There', f: 'motion', d: 'The list got him up at five for six years and there was no version of the next thing it could give him a reason for.' },
     { n: 'The Borrowed Engine', f: 'others', d: 'Four people who had doubted him had been choosing what mattered, every morning, for six years.' },
@@ -619,7 +628,8 @@ var S = [
     "It goes where he points it."
   ] },
 { id:'above', stage:'The Threshold', bg:'cobalt', mins:2,
-  n:'The One He Turned Down', src:'Ours',
+  n:'The One He Turned Down',
+  ab: 'Acting like the next version instead of picturing it', src:'Ours',
   laws: [
     { n: 'A Picture Is Not a Rehearsal', f: 'inner', d: 'A year of knowing exactly what that man did on a Tuesday, at no cost, while doing none of it.' },
     { n: 'Mostly It Is Not Doing Things', f: 'motion', d: 'The man in the picture was not busier than him. He simply would not have given six weeks to that job.' },
@@ -647,7 +657,8 @@ var S = [
     'What he says instead is that he had a very clear picture of a man he was not being, for a year, at no cost at all, and that the picture did nothing whatsoever until it cost him something.'
   ] },
 { id:'cutter', stage:'The Trials', bg:'abyss', mins:2,
-  n:'Four Systems', src:'Ours',
+  n:'Four Systems',
+  ab: 'Switching every time somebody else is winning', src:'Ours',
   laws: [
     { n: 'The Sideways Look', f: 'others', d: 'Not one of the four was killed by the market. Every one was killed by a screenshot.' },
     { n: 'Nothing Has a Size of Its Own', f: 'time', d: 'Sixty-three per cent was a failure against that group chat and a good year against anything else.' },
@@ -678,7 +689,8 @@ var S = [
     "He turned the fourth one off in the morning and put the first one back on, and he did not tell the chat, and it made four hundred and eighty pounds in December, which he did not post."
   ] },
 { id:'monks', stage:'The Trials', bg:'delta', mins:2,
-  n:'Eleven Hours', src:'Ours',
+  n:'Eleven Hours',
+  ab: 'Still carrying a thing that ended hours ago', src:'Ours',
   laws: [
     { n: 'The Long Carry', f: 'inner', d: 'Four seconds in a meeting room. Eleven hours in him, and only one of those was being fed.' },
     { n: 'The Sentence That Arrives Ready', f: 'inner', d: 'It came out in a kitchen at half past six with no introduction, to somebody who had not been there.' },
@@ -709,7 +721,8 @@ var S = [
     "He has been in it by himself the whole time."
   ] },
 { id:'post', stage:'The Trials', bg:'jade', mins:2,
-  n:'Nothing To Post', src:'Ours',
+  n:'Nothing To Post',
+  ab: 'What an audience quietly does to your work', src:'Ours',
   laws: [
     { n: 'The Unwritten Half', f: 'inner', d: 'Three hours going through the book, and every trade in it passed. What was wrong had no line in it.' },
     { n: 'The Prize Goes to the Exception', f: 'motion', d: 'The week that did the numbers was the least typical week of his year, and he knew it at the time.' },
@@ -740,8 +753,35 @@ var S = [
     'The other thing he noticed, later, was that the week which did four thousand was the least typical week of his year. He had known it was an outlier while it was happening.',
     'He had spent five months trying to have it again.'
   ] },
+{ id:'mini', stage:'The Trials', bg:'umber', mins:2,
+  n:'The Twenty Minute Version', ab: 'Training around a roster that will not bend', src:'Ours',
+  laws: [
+    { n: 'Too Small To Bother With', f: 'inner', d: 'Two years lost to the idea that twenty minutes was beneath doing.' },
+    { n: 'The Version You Can Always Do', f: 'motion', d: 'Twenty minutes, no equipment, doable on four hours of sleep in a hallway.' },
+    { n: 'Starting Again Is the Cost', f: 'time', d: 'The missed session costs nothing. The fortnight after it is where the two years went.' }
+  ],
+  rule:'A man who will only train for an hour trains nothing in a bad month.',
+  q:'What would you still do on the worst day you are going to have this month?',
+  teach:'Everything written about training assumes a normal week. Hardly anybody has one, and the plans are written by people whose job is the training.',
+  body:[
+    'He works nights. Four on, four off, and the four rotate.',
+    'Every programme he ever downloaded assumed a Monday.',
+    'He spent about two years trying to make a normal week happen around a roster that does not have one. Each time he got three or four weeks in, the shift pattern would move and take the whole thing with it, and each time he started again from the beginning on the Monday after.',
+    'The roster is not going to change. That is worth saying plainly, because most of what he read assumed the obstacle was him.',
+    'What he changed was the size of the thing.',
+    'He built a version that takes twenty minutes, needs nothing, and can be done on four hours of sleep in a hallway. That is the whole invention. There is nothing clever in it.',
+    'The bit he had to get over was that twenty minutes is not worth doing.',
+    'That is not standards. He had it the other way round for two years and it cost him two years. A man who will only train for an hour trains zero times in a bad month, and a bad month is most months when the roster moves.',
+    'Three years on he has not missed a week. Not a session — a week. Some weeks are three hours across four days and some weeks are one lot of twenty minutes on a Thursday, and both of those count the same for the thing that actually matters.',
+    'What the twenty minutes protects is not the muscle. Twenty minutes does very little for the muscle and he knows that.',
+    'It is that he never has to start again.',
+    'The session he misses costs almost nothing. What costs is the fortnight afterwards, when he is not somebody who does this any more and has to become one from nothing, and that fortnight is where the two years went.',
+    'He is stronger now than two people he knows who train properly, on a real programme, in a gym, with a plan — and who stop for six or eight weeks a couple of times a year and come back to it each time from the floor.',
+    'He is not better at this than they are. He is worse at it. He has just never stopped.'
+  ] },
 { id:'knot', stage:'The Ordeal', bg:'iceberg', mins:3,
-  n:'The Column He Added', src:'Ours',
+  n:'The Column He Added',
+  ab: 'Taking the blame on purpose, to get the wheel', src:'Ours',
   laws: [
     { n: 'The Wheel', f: 'motion', d: 'Thirty-one losses over his limit. Twenty-six of them were his own rule, broken by him, in writing, with a timestamp.' },
     { n: 'The Early Verdict', f: 'inner', d: 'The news, the spread, the broker and the summer. Every one of those is a reason you can do nothing about.' },
@@ -777,7 +817,8 @@ var S = [
     "He has not said it since, and he is aware that he used to say it about twice a week, to anybody, including himself, in a kitchen with the kettle going."
   ] },
 { id:'twice', stage:'The Ordeal', bg:'desert', mins:2,
-  n:'The Same Decision Twice', src:'Ours',
+  n:'The Same Decision Twice',
+  ab: 'The state that wrote the decision', src:'Ours',
   laws: [
     { n: 'The State Wrote It', f: 'inner', d: 'Two pages, three weeks apart, same facts, opposite answers, both argued out properly.' },
     { n: 'Nothing Records the Weather', f: 'time', d: 'Four years of what he decided and not one line about what sort of day it was.' },
@@ -805,8 +846,37 @@ var S = [
     'The pages have not improved. He still writes a certain kind of page on a certain kind of day. What changed is that he can see it coming, and the ones written on a bad morning he does not act on until he has written the same thing again on a different one.',
     'Two pages, three weeks apart. It took him four years to catch it, and the only reason he ever did is that he happened to date them.'
   ] },
+{ id:'aim', stage:'The Ordeal', bg:'silk', mins:2,
+  n:'What He Was Told To Get Rid Of', ab: 'A trait aimed rather than removed', src:'Ours',
+  laws: [
+    { n: 'The Long Carry', f: 'inner', d: 'A conversation from four years ago, arriving at eleven at night, fully formed, running for an hour.' },
+    { n: 'Aimed, Not Removed', f: 'motion', d: 'The thing that will not drop a conversation is the same thing that stayed on one problem for eleven months.' },
+    { n: 'What They Called It', f: 'others', d: 'Every report card, every manager, three people who loved him, all giving the same advice, all describing what it is like to be them.' }
+  ],
+  rule:'You will not get rid of it. You can decide what it is pointed at.',
+  q:'What have you been trying to remove that could be aimed instead?',
+  teach:'What gets called a flaw is very often a real capability being run in a room where it does not apply. The destructive shape and the useful one are the same machinery, which is why fifteen years of trying to take it out never worked.',
+  body:[
+    'He cannot let things go.',
+    'This is not a figure of speech and he is not being hard on himself. A conversation from four years ago will arrive at eleven at night, fully formed, and he will be in it again — the actual words, the thing he should have said — and it will run for an hour.',
+    'Every report card he ever got had a version of it on there. Every manager mentioned it. Three people who loved him told him it was the thing that was going to cost him, and one of them was right.',
+    'All of the advice was the same advice. Let it go.',
+    'He tried for about fifteen years and he cannot do it, and he now thinks nobody who is built this way can, and that the people giving the advice were describing what it is like to be them.',
+    'What changed is that he stopped trying.',
+    'It started as an observation with no point to it. The thing that will not let a conversation go is the same thing that let him stay on one problem for eleven months, past the point where two other people had left, and come out the other end with the answer. Same machinery. Not similar — the same.',
+    'Which means it was never going to come out. You do not get to remove one and keep the other, and every year he had spent trying to be a person who lets things go had been a year spent trying to take out the only engine he has.',
+    'So he stopped working on removal and started working on aim.',
+    'It is one question and he asks it out loud. What would I do about this in the morning.',
+    'If there is an answer — if there is a call to make, a thing to write, a decision to take — then it runs, and he lets it run, because that is the machinery doing the one thing it is for.',
+    'If there is no answer, it is not a problem. It is a memory, and a memory with the engine on it is just a bad night.',
+    'That does not make it stop. He wants to be accurate about this, because the tidy version of this story has him at peace and he is not at peace.',
+    'It stops it counting as work. The eleven-at-night one is no longer something he has to solve before he is allowed to sleep, because he asked the question and there was no answer, and a thing with no answer is not his job.',
+    'Nobody would describe him as calm.',
+    'It is the same machinery. He has stopped apologising for it and started pointing it.'
+  ] },
 { id:'pocket', stage:'The Reward', bg:'iris', mins:2,
-  n:'The Week He Was Rich', src:'Ours',
+  n:'The Week He Was Rich',
+  ab: 'Having it and not noticing you have it', src:'Ours',
   laws: [
     { n: 'The Second Thing', f: 'time', d: 'It arrived with the fear of it going, which he had not asked for and had not been told about.' },
     { n: 'The Long Carry', f: 'inner', d: 'He checked it in bed, in the morning and at traffic lights, to see whether it was still there.' },
@@ -837,7 +907,8 @@ var S = [
     "That was a better day than the Wednesday was."
   ] },
 { id:'five', stage:'The Reward', bg:'violet', mins:2,
-  n:'Twenty To Six', src:'Ours',
+  n:'Twenty To Six',
+  ab: 'The discipline outlasting the thing you wanted', src:'Ours',
   laws: [
     { n: 'The Measuring Does Not Stop', f: 'inner', d: 'A different body, three years later, and the same arithmetic on the same train with the same face on.' },
     { n: 'The Price Was the Purchase', f: 'motion', d: 'He had it booked as what the body cost. It was the only thing that came with him into a room.' },
@@ -867,7 +938,8 @@ var S = [
     'It was the other way round.'
   ] },
 { id:'bridge', stage:'The Road Back', bg:'cobalt', mins:2,
-  n:'The Job He Kept', src:'Ours',
+  n:'The Job He Kept',
+  ab: 'What keeping a way out actually costs', src:'Ours',
   laws: [
     { n: 'The Open Door', f: 'motion', d: 'He never used the two days once. They took a little off the top of every Tuesday for six years.' },
     { n: 'Two Ends of One Thing', f: 'time', d: 'The one with nothing behind him was frightened for a year and got the thing the careful one never did.' },
@@ -896,8 +968,37 @@ var S = [
     "He knows, though. That is the part. He has known since about the fourth year, and he has never done anything about it, because the two days do not cost anything visible on any particular Tuesday.",
     "They just take a little off the top of every one."
   ] },
+{ id:'free', stage:'The Road Back', bg:'nightfall', mins:2,
+  n:'The Eight Months He Was Free', ab: 'Freedom and autonomy pulling opposite ways', src:'Ours',
+  laws: [
+    { n: 'The Word You Reached For', f: 'inner', d: 'He wanted autonomy and went and bought the maximum possible amount of freedom, which is the opposite of it.' },
+    { n: 'Freedom Is Not Autonomy', f: 'motion', d: 'No boss, no hours, no obligations — and he could not refuse a single thing that came in.' },
+    { n: 'Leverage Is What Buys the No', f: 'others', d: 'He had no position and no scarce skill, so his whole day belonged to whoever was paying that week.' }
+  ],
+  rule:'Nobody telling you what to do is not the same as getting to decide. The second one has to be bought.',
+  q:'Who actually decided how you spent this week?',
+  teach:'The word people reach for is freedom and the thing they mean is autonomy. Freedom is the absence of somebody standing over you. Autonomy is the authority to choose, and it runs on leverage — a scarce skill, a position, money behind you — which is exactly why the two can move in opposite directions.',
+  body:[
+    'He handed his notice in on a Friday and for about three weeks it was the best thing he had ever done.',
+    'Nobody to tell. No alarm. He could work at two in the morning if he felt like it, and some nights he did, and it felt like he had found something out that other people had not.',
+    'Eight months later he was taking work he did not want, at a price he had not set, from people who messaged him on a Saturday.',
+    'He was free. Completely free. No boss, no hours, no obligations, and he could not say no to a single thing.',
+    'That is the part it took him a long time to be able to say out loud. Freedom had turned out to be what you have when you have nothing else. He owned the whole day and had authority over none of it.',
+    'A client would want a call on Sunday and he would take it, because he needed it. Somebody would push on the price and he would take that too. He did work at two in the morning in the end, quite often, because something had come in at eleven and he could not afford to leave it until Tuesday.',
+    'Nobody was telling him what to do. Everything he did that year was decided by somebody else.',
+    'Here is the difference, and he has had a lot of time to think about it.',
+    'Freedom is measured in what you do not have to do. Autonomy is measured in what you get to decide. They sound like the same thing and they run in opposite directions — he had bought as much of the first as a person can buy, by getting rid of every single thing that would have bought him the second.',
+    'And autonomy is bought. That is the whole of it. He had nothing to buy it with: no position, no skill that was scarce, no money behind him, nothing anybody actually needed.',
+    'So he went back.',
+    'He took a job. A specific one, picked for what it would teach him rather than what it paid, and for two years he had a boss and a start time and considerably less freedom than he had had in the eight months.',
+    'At the end of it he could set a price. He could turn work down. He could say Tuesday.',
+    'He is busier now than he was when he was free. He is on a harder schedule than the job ever put him on and he works more hours than the eight months ever asked for.',
+    'The difference is that he wrote it.',
+    'The way he puts it, when somebody asks, is that freedom is what you want when you are running from something and autonomy is what you want when you are building something — and you can tell which one a person is chasing by whether their plan has any work in it.'
+  ] },
 { id:'mountain', stage:'The Return', bg:'turtle', mins:2,
-  n:'Day Six Hundred and Seventeen', src:'Ours',
+  n:'Day Six Hundred and Seventeen',
+  ab: 'There is no day it clicks', src:'Ours',
   laws: [
     { n: 'The Quiet Middle', f: 'time', d: 'Day six hundred and seventeen was indistinguishable from the four hundred before it.' },
     { n: 'The Spent Feeling', f: 'inner', d: 'Every time he announced it he drew down the feeling he was supposed to get from finishing.' },
@@ -927,7 +1028,36 @@ var S = [
     "There had been no morning where he woke up and noticed he had won it.",
     "It still was not making any money. That took another nine months, and when it came it was not dramatic either.",
     "But he had become a person who got up at twenty to five, and it had happened without an announcement, on an ordinary day somewhere in the middle, and he had not been invited."
-  ] }
+  ] },
+{ id:'slow', stage:'The Return', bg:'canyon', mins:2,
+  n:'The One Thing He Was Good At', ab: 'The attribute that decided it, that nobody teaches', src:'Ours',
+  laws: [
+    { n: 'The Talent Nobody Sells', f: 'inner', d: 'No course covers it, he did not develop it, and he was issued with it in a place he would not have chosen.' },
+    { n: 'The Sunday Version Has the Vote', f: 'motion', d: 'He writes the rule calm on a Sunday and it does not occur to him that Wednesday gets a say.' },
+    { n: 'The Quiet Middle', f: 'time', d: 'There is nothing to learn and nothing to show anybody, and if you asked him to teach it he could not.' }
+  ],
+  rule:'You will spend years fixing what you are bad at. The thing that works is usually something you already have and have never counted.',
+  q:'What are you good at that you have never counted as a skill?',
+  teach:'A field advertises what it can sell you lessons in, which is why the attribute that actually decides it is so rarely on the syllabus. Nobody can teach you to be somebody who does the thing they wrote down on a calmer day.',
+  body:[
+    'He is not quick.',
+    'He says it about himself without much feeling. In a room he is the slowest person in it. Somebody asks him something and there is a gap, and he has lost arguments he was right about because the gap went on longer than the other person\'s patience.',
+    'He has no feel for it either. Some people look at a screen and something in them says now. He has never had that and does not expect to get it.',
+    'What he has is one thing, and it took four years to work out it was the thing.',
+    'He can follow an instruction he does not agree with.',
+    'He got it somewhere that had nothing to do with any of this — a place where you did the job the way it was written, at the time it said, whether or not you could see the point of it that day, and where the people who could see a better way and took it were the problem rather than the talent.',
+    'He hated it at the time and would not go back.',
+    'What it does now is this. He writes the rule on a Sunday, when nothing is happening, when he is calm and nobody is taking money off him. Then on a Wednesday, when everything in him is saying the rule is wrong and there is obviously a better move available here, he does the rule.',
+    'Not gritted teeth. Not willpower, in the way people mean it. It does not seriously occur to him that the Wednesday version of himself gets a vote. The Sunday one wrote it down and the Sunday one was in a better state to be writing anything.',
+    'He has watched quicker people than him go round the same loop for years — people with the feel, people who see it a beat before he does — because on a Wednesday they can see a better move, and they are usually right about the move, and it does not matter.',
+    'Nobody sells this. There is no course on it, there is nothing to learn, it does not photograph, and if you asked him to teach it he could not.',
+    'He is fairly clear that it is an accident. He did not develop it. He was issued with it, in a place he would not have chosen, by people who were not trying to do him a favour.',
+    'The only thing he did was notice he had it.',
+    'That took four years, and what he did afterwards was the part that mattered: he stopped trying to get quicker.',
+    'He spent three years before that on speed. Drills. Reading faster. Trying to make the gap shorter. All of it was work on the one part of him that was never going to be the thing, and every hour of it was an hour not spent on the part that was.',
+    'He is still slow. He has stopped apologising for the gap.'
+  ] },
+
 ];
 
 /* The index is drawn on every card. A finite path that ends is the
@@ -984,6 +1114,16 @@ var LAWS = {
   'Mostly It Is Not Doing Things': 'The version of you one level up is not doing a great deal more than you are. They are doing considerably less, and the hours that frees up is most of the difference between you.',
   'The State Wrote It': 'You believe the conclusion came out of the thinking. Put the same facts to yourself on two different days and you get two answers, both fully argued and both certain, and the only thing that moved was what sort of day you were having.',
   'Nothing Records the Weather': 'Every record you keep holds what you decided and not what state you were in when you decided it. The missing half is the half that chose, which is why reading your own notes back teaches you so much less than it should.',
+  'Freedom Is Not Autonomy': 'Freedom is measured in what you do not have to do. Autonomy is measured in what you get to decide. They sound like one thing and they run in opposite directions — somebody with nothing has a great deal of the first and none of the second.',
+  'Leverage Is What Buys the No': 'Refusing work, setting a price and naming the day are not personality traits. They are bought, and the currency is something scarce that other people need. Until you hold that, every hour you own belongs to whoever is paying.',
+  'The Word You Reached For': 'You will chase the wrong thing for years because you took the nearest word for it. Freedom, success, respect — each of those is a word standing in front of something more specific, and the specific one is the only version with a method attached.',
+  'The Talent Nobody Sells': 'The attribute that decides it is usually one no course covers, because a field advertises what it can teach you and this is not that. You did not develop it. You were issued with it somewhere you would not have chosen, and the only move available is to notice.',
+  'The Sunday Version Has the Vote': 'The you who writes the rule is calm and has nothing at stake. The you who breaks it is neither. Settling in advance which of them is in charge is most of what discipline actually is, and it is a decision rather than a strength.',
+  'The Version You Can Always Do': 'Every plan is written for a good week. The one that decides your year is the one you can still run on the worst day of the month, and it is almost never the one you designed.',
+  'Starting Again Is the Cost': 'The session you miss costs very little. What costs is the fortnight after it, when you are no longer somebody who does this and have to become one again from nothing.',
+  'Too Small To Bother With': 'The reason you did nothing is that the only version available was beneath the standard you hold yourself to. That standard is not discipline. It is the most reliable method there is for doing nothing at all.',
+  'Aimed, Not Removed': 'The trait you have been trying to get rid of since you were twenty is not going anywhere. Its destructive shape and its useful one run on the same machinery, so the work was never removal. It is deciding what it points at.',
+  'What They Called It': 'The word other people put on a trait of yours was a report on how it affected them, never a description of the thing. Difficult, intense, obsessive, blunt — each of those tells you what it cost somebody, and none of them tells you what it is for.',
   'The Day Nobody Announced': 'The morning it changed was indistinguishable from the four hundred before it. You will not feel it arrive. You will notice, much later and by accident, that it is already behind you.'
 };
 
@@ -1023,9 +1163,16 @@ var ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-w
 function cardOf(s) {
   var b = el('button', 'al-card' + (st.read.indexOf(s.id) >= 0 ? ' is-read' : ''));
   b.setAttribute('data-id', s.id);
-  b.setAttribute('aria-label', s.n + '. ' + s.src + '. ' + s.mins + ' minutes.');
+  b.setAttribute('aria-label', s.n + '. ' + s.ab + '. ' + s.mins + ' minutes.');
+  /* THE MINUTES RIDE THE HEAD, which had a number at one end and an
+     arrow at the other and nothing in between. On the line under the
+     title they wrapped, and a wrapped line starting with the middle dot
+     reads as a bullet nobody asked for. */
   var h = el('div', 'al-ch');
-  h.appendChild(el('span', 'al-sq', s.no));
+  var hl = el('span', 'al-chl');
+  hl.appendChild(el('span', 'al-sq', s.no));
+  hl.appendChild(el('span', 'al-min', s.mins + ' min'));
+  h.appendChild(hl);
   var g = el('span', 'al-go'); g.innerHTML = ARROW; h.appendChild(g);
   b.appendChild(h);
 
@@ -1035,7 +1182,11 @@ function cardOf(s) {
      twice in what reads as one voice. */
   var w = el('div', 'al-ct');
   w.appendChild(el('div', 'al-disp-s', s.n));
-  w.appendChild(el('div', 'al-note', s.src + '  ·  ' + s.mins + ' min'));
+  /* WHAT IT IS ABOUT, WHERE THE SOURCE USED TO BE. 'Ours' was printed on
+     twenty-one cards and said nothing about any of them, and a title on
+     its own leaves you opening a card to find out whether you want it.
+     The minutes ride the same line rather than taking a third register. */
+  w.appendChild(el('div', 'al-note al-ab', s.ab));
   b.appendChild(w);
 
   var ph = el('div', 'al-ph');
