@@ -77,7 +77,6 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .al-disp   { font-size: 38px; font-weight: 450; line-height: 1.00; letter-spacing: -.03em; }
 .al-disp-s { font-size: 28px; font-weight: 450; line-height: 1.02; letter-spacing: -.024em; }
 .al-caps   { font-size: 10px; font-weight: 600; letter-spacing: .5em; text-transform: uppercase; color: var(--dim); }
-.al-body   { font-size: 16px; font-weight: 400; line-height: 1.50; color: var(--dim); }
 .al-note   { font-size: 13px; font-weight: 450; line-height: 1.45; color: var(--dim); }
 
 .al-view { position: relative; z-index: 1; height: 100%; display: none; flex-direction: column; }
@@ -172,41 +171,35 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
    went out with the photograph. */
 .al-sheet { padding-bottom: var(--v6); }
 
-.al-rule-hd { margin: var(--v5) 0 var(--v3); display: flex; align-items: center; gap: 12px; }
-.al-rule-hd:after { content: ''; flex: 1; height: 1px; background: var(--hair); }
 
-/* A TAG'S FILL AND ITS LABEL PULLED THE SAME WAY. Both were mixed from
-   one hue, so they closed on each other from both sides and the worst
-   pair measured 1.71:1 — the worst text in the app. The hue lives in
-   the label and the rim now; the ground is a plate. */
-.al-tags { display: flex; flex-wrap: wrap; gap: 16px 8px; margin-bottom: var(--v4); }
-.al-tag {
-  position: relative;
-  display: inline-flex; align-items: center; height: 30px; padding: 0 12px;
-  border-radius: var(--r-sq);
-  font-size: 13px; font-weight: 500; letter-spacing: .01em;
-  background: rgba(11,10,8,.78);
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  border: 1px solid color-mix(in srgb, var(--tg) 30%, transparent);
-  color: color-mix(in srgb, var(--tg) 66%, var(--ink));
-}
-.al-tag::before {
-  content: ''; position: absolute; left: 0; right: 0; top: 50%;
-  height: var(--tap); transform: translateY(-50%);
-}
-/* One hue per group. It was four, one per family, and with two groups
-   each named by the heading directly over it a third and fourth colour
-   would be saying which of something that no longer exists. */
-.al-tag[data-f="internal"] { --tg: #C9A227; }
-.al-tag[data-f="external"] { --tg: #7E9AA6; }
-
-.al-rule {
-  border-radius: var(--r-card); padding: var(--v4); margin-bottom: var(--v2);
+/* A THEME IS A CARD AND THE LESSON IS THE PAYLOAD. The theme is the
+   evidence, so it reads at the quieter weight; the lesson is what you
+   came for and takes the ink. The axis hue sits on the lesson's own
+   label and nowhere else — the group heading already names it, and a
+   colour repeating a word directly above it is saying which of
+   something that was never in question. */
+.al-th {
+  position: relative; display: block; width: 100%; text-align: left;
+  border-radius: var(--r-card); padding: var(--v4); margin-bottom: var(--v3);
   background: var(--card); box-shadow: inset 0 1px 0 var(--card-edge);
 }
-.al-rule .al-caps { margin-bottom: var(--v2); }
-.al-rfrom { margin-top: var(--v2); font-size: 13px; color: var(--dim); }
-.al-rule b { display: block; font-size: 19px; font-weight: 600; line-height: 1.26; letter-spacing: -.016em; }
+.al-tn { font-size: 19px; font-weight: 600; line-height: 1.26; letter-spacing: -.016em; }
+.al-tsub { margin-top: 3px; font-size: 13px; font-weight: 450; color: var(--dim); }
+.al-tl { margin: var(--v4) 0 var(--v1); }
+.al-tb { font-size: 15px; line-height: 1.5; color: var(--dim); }
+.al-tb.is-les { color: var(--ink); }
+.al-tl.is-les { color: color-mix(in srgb, var(--tg) 66%, var(--ink)); }
+.al-th[data-x="internal"] { --tg: #C9A227; }
+.al-th[data-x="external"] { --tg: #7E9AA6; }
+
+/* A STORY IN THE INDEX IS A PRESS TARGET AND THE REST ARE NOT. The same
+   card, with no second drawing — only the row that opens something
+   takes the reach. */
+.al-f::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 50%;
+  height: 100%; min-height: var(--tap); transform: translateY(-50%);
+}
+
 
 /* ---- THE FOOT ---- */
 .al-foot {
@@ -248,42 +241,42 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   <div class="al-mark" role="img" aria-label="Alignment">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v20M5 8l7-6 7 6M5 16l7 6 7-6"/></svg>
   </div>
-  <h1 class="al-disp" id="alOpenT">What takes you off, and what carries you.</h1>
-  <p class="al-note" id="alOpenN">Fifty-seven named things, sorted into the two that matter. Nothing here is a story. Each one is what it is and what it does.</p>
+  <h1 class="al-disp" id="alOpenT">Ten stories, read for what is in them.</h1>
+  <p class="al-note" id="alOpenN">Sixty themes taken from the films and the shows themselves, split into what happens inside you and what happens out there. What the story does, and what it leaves you with.</p>
   <button class="al-pill" id="alOpenB">Begin</button>
 </section>
 
-<section class="al-view" id="alDark">
-  <div class="al-head"><h1 class="al-disp-s">Dark</h1><span class="al-count"></span></div>
-  <div class="al-pane" id="alDarkPane"></div>
+<section class="al-view" id="alFilms">
+  <div class="al-head"><h1 class="al-disp-s">The Stories</h1><span class="al-count"></span></div>
+  <div class="al-pane" id="alFilmsPane"></div>
 </section>
 
-<section class="al-view" id="alLight">
-  <div class="al-head"><h1 class="al-disp-s">Light</h1><span class="al-count"></span></div>
-  <div class="al-pane" id="alLightPane"></div>
+<section class="al-view" id="alInternal">
+  <div class="al-head"><h1 class="al-disp-s">Internal</h1><span class="al-count"></span></div>
+  <div class="al-pane" id="alInternalPane"></div>
 </section>
 
-<section class="al-view" id="alLessons">
-  <div class="al-head"><h1 class="al-disp-s">The Lessons</h1><span class="al-count"></span></div>
-  <div class="al-pane" id="alLessonsPane"></div>
+<section class="al-view" id="alExternal">
+  <div class="al-head"><h1 class="al-disp-s">External</h1><span class="al-count"></span></div>
+  <div class="al-pane" id="alExternalPane"></div>
 </section>
 
-<section class="al-view" id="alLaw">
-  <button class="al-round al-x" id="alLawX" aria-label="Close">
+<section class="al-view" id="alFilm">
+  <button class="al-round al-x" id="alFilmX" aria-label="Close">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
   </button>
-  <div class="al-pane" id="alLawPane"></div>
+  <div class="al-pane" id="alFilmPane"></div>
 </section>
 
 <nav class="al-foot" id="alFoot">
-  <button class="al-tab" data-v="dark" aria-current="true" aria-label="Dark">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+  <button class="al-tab" data-v="films" aria-current="true" aria-label="The Stories">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="7" width="13" height="13" rx="2.4"/><path d="M8 4h11a2 2 0 0 1 2 2v11"/></svg>
   </button>
-  <button class="al-tab" data-v="light" aria-label="Light">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.4M12 19.6V22M2 12h2.4M19.6 12H22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M19.1 4.9l-1.7 1.7M6.6 17.4l-1.7 1.7"/></svg>
+  <button class="al-tab" data-v="internal" aria-label="Internal">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="3.1" fill="currentColor" stroke="none"/></svg>
   </button>
-  <button class="al-tab" data-v="lessons" aria-label="The Lessons">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 5h14v14H5zM9 10h6M9 14h4"/></svg>
+  <button class="al-tab" data-v="external" aria-label="External">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M13.5 4.5H19.5V10.5M19.5 4.5 12.5 11.5M18 14v4.5a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2H10"/></svg>
   </button>
 </nav>
 
@@ -299,390 +292,250 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 var KEY = 'align.v1';
 
-/* The stages are the path. Stories are filed at the one they belong to,
-   so a stage with nothing at it simply has nothing at it. */
+/* THE STORY IS THE EVIDENCE AND THE LESSON IS WHAT IT LEAVES YOU. The
+   theme is what actually happens in the film or the show — a named
+   scene, a line somebody says, a thing a character does — rather than
+   something invented and attributed afterwards. That constraint is the
+   whole of why this is worth reading: a lesson with a real scene under
+   it can be checked, and one without is somebody's opinion wearing a
+   film's name.
 
-var S = [
-{ id:'stove', src:'Ours',
-  laws: [
-    { n: 'The Answer You Are Carrying', f: 'inner', d: 'The answer was in his own notebook, eleven times, in his own handwriting.' },
-    { n: 'The Walk', f: 'motion', d: 'He had been told it for years. It became true the week he spent everything getting to it.' },
-    { n: 'The Stranger’s Mouth', f: 'others', d: 'It came from a man who was not trying to help him and would not remember saying it.' }
-  ],
-  rule: 'You already wrote down the answer. You will still pay somebody to say it to you.',
-  q: 'What are you standing on, refusing to dig, because it is too close to be treasure?' },
-{ id:'lamp', src:'Harry Potter',
-  laws: [
-    { n: 'The Lit Ground', f: 'inner', d: 'Learning to code has a screen that tells you it worked. Sitting still after a loss has nothing at all.' },
-    { n: 'The Walk', f: 'motion', d: 'He could have named the problem at three in the morning for a year and a half.' },
-    { n: 'The Quiet Middle', f: 'time', d: 'What fixed it was four minutes of doing nothing, then four minutes again, and nobody watched.' }
-  ],
-  rule: 'The work that decides it usually has no audience, no progress you can see, and somebody you dislike attached to it.',
-  q: 'What are you doing brilliantly that is not the thing?' },
-{ id:'leap', src:'Ours',
-  laws: [
-    { n: 'The Picture Makes Tuesday Feel Like Failure', f: 'inner', d: 'The hours went in, nothing moved, and nothing was ever going to move on a Tuesday.' },
-    { n: 'Sacrifice Now Or Sacrifice It', f: 'motion', d: 'The evenings were the bill. Declining it for two years did not cancel it, it just moved what got given up.' },
-    { n: 'A Leap Is Seen From Outside', f: 'time', d: 'Two or three hundred days, most of them the same, and the only thing that made it a leap is that nothing interrupted them.' }
-  ],
-  rule: 'A leap is what a long run of ordinary days looks like from outside, afterwards.',
-  q: 'What does the picture actually require of this Tuesday?' },
-{ id:'cup', src:'Ours',
-  laws: [
-    { n: 'The Full Cup', f: 'inner', d: 'He had prepared a page of notes about what the problem was, and brought them to a man he was asking what the problem was.' },
-    { n: 'The Cost of Being Right', f: 'inner', d: 'Letting it be the problem meant the last two years had been aimed at the wrong thing.' },
-    { n: 'The Stranger’s Mouth', f: 'others', d: 'Nine words, in the first two minutes, for nothing — and he argued with them twice and drove home.' }
-  ],
-  rule: 'You cannot hear advice while you are explaining why it will not work.',
-  q: 'What would you have to stop being right about?' },
-{ id:'river', src:'Vikings',
-  laws: [
-    { n: 'The River Does Not Wait', f: 'time', d: 'Every year he prepared, the thing he was preparing for went past at its own rate.' },
-    { n: 'The Number That Moves', f: 'time', d: 'Six months, then nine, then a year, then a year in the new money. Each one more sensible than the last.' },
-    { n: 'The Walk', f: 'motion', d: 'No size of account answers whether you are good enough. Only going does, and he did not want the answer.' }
-  ],
-  rule: 'Nobody in charge of the old thing will authorise the thing that proves them wrong. Build it and go.',
-  q: 'Whose permission are you still waiting for?' },
-{ id:'horse', src:'The Lord of the Rings',
-  laws: [
-    { n: 'Two Ends of One Thing', f: 'time', d: 'Redundancy, a better job, walking out, four years on his own. Four events, four verdicts, all early.' },
-    { n: 'The Early Verdict', f: 'inner', d: 'Everyone around him was certain every time, and being wrong four times never slowed them down.' },
-    { n: 'Nothing Has a Size of Its Own', f: 'time', d: 'Eleven thousand more was a triumph until it was measured against fourteen months of Sunday evenings.' }
-  ],
-  rule: 'You deliver the verdict long before the story is finished, and then live as though it were settled.',
-  q: 'What did you close the account on too early?' },
-{ id:'box', src:'Ours',
-  laws: [
-    { n: 'The Answer You Are Carrying', f: 'inner', d: 'Two hundred pages of the exact thing he was paying an app to make him do, in a box, in his own handwriting.' },
-    { n: 'The Narrow Gift', f: 'motion', d: 'He could stay on one thing past the point anybody else was interested. He traded it for being easy to talk to.' },
-    { n: 'What Got Rewarded', f: 'others', d: 'Nobody told him to stop. He read it off a pause in a conversation when he was about fourteen.' }
-  ],
-  rule: 'Whatever you did at nine, for nobody, with nothing riding on it, is the closest thing to a fact about you that exists.',
-  q: 'What were you like before anybody had got at you?' },
-{ id:'ferry', src:'Spider-Man 3',
-  laws: [
-    { n: 'What Only Made Sense Back There', f: 'motion', d: 'The list got him up at five for six years and there was no version of the next thing it could give him a reason for.' },
-    { n: 'The Borrowed Engine', f: 'others', d: 'Four people who had doubted him had been choosing what mattered, every morning, for six years.' },
-    { n: 'The Toll', f: 'motion', d: 'He offered the hours and the money and the risk. None of those were the fare.' }
-  ],
-  rule: 'A power that makes you worse gets dropped in a week. The dangerous one is the power that genuinely works.',
-  q: 'What is working for you that you would not want to become?' },
-{ id:'above', src:'Ours',
-  laws: [
-    { n: 'A Picture Is Not a Rehearsal', f: 'inner', d: 'A year of knowing exactly what that man did on a Tuesday, at no cost, while doing none of it.' },
-    { n: 'Mostly It Is Not Doing Things', f: 'motion', d: 'The man in the picture was not busier than him. He simply would not have given six weeks to that job.' },
-    { n: 'The Toll', f: 'motion', d: 'He paid for the crossing in the one currency he actually had, which was six weeks of money he needed.' }
-  ],
-  rule: 'Picturing the next version of you costs nothing, which is why you can do it for a year and not move.',
-  q: 'What would the version of you one level up have said no to this week?' },
-{ id:'alone', src:'Ours',
-  laws: [
-    { n: 'The Convenient Reason', f: 'inner', d: 'True, checked more than once, and also the single most convenient thing he could possibly believe.' },
-    { n: 'What The Months Say', f: 'time', d: 'Not whether the reason was good. Whether the room it made gets spent on the thing he cleared it for.' },
-    { n: 'The Toll', f: 'motion', d: 'He paid for the crossing in the one currency that was actually his to spend, and somebody else felt it.' }
-  ],
-  rule: 'A reason you cannot check from the inside gets checked by what you do with the room it made.',
-  q: 'What are you about to find out about a decision you have already taken?' },
-{ id:'cutter', src:'Snowfall',
-  laws: [
-    { n: 'The Number You Never Wrote Down', f: 'inner', d: 'He said he was getting out from the first season and never once said at what.' },
-    { n: 'Nothing Has a Size of Its Own', f: 'time', d: 'Every figure that would have been enormous a year earlier became the new floor within weeks of reaching it.' },
-    { n: 'The Quiet Middle', f: 'time', d: 'The moment to collect went past in an ordinary month with nothing happening, which is when it always goes past.' }
-  ],
-  rule: 'If you have not named the number you are stopping at, you are not going to stop.',
-  q: 'What is the figure you are getting out at, exactly?' },
-{ id:'monks', src:'Ours',
-  laws: [
-    { n: 'The Long Carry', f: 'inner', d: 'Four seconds in a meeting room. Eleven hours in him, and only one of those was being fed.' },
-    { n: 'The Sentence That Arrives Ready', f: 'inner', d: 'It came out in a kitchen at half past six with no introduction, to somebody who had not been there.' },
-    { n: 'The Early Verdict', f: 'inner', d: 'He decided what it meant at twenty past nine and spent the day building on a foundation nobody else had laid.' }
-  ],
-  rule: 'Staying angry for eleven hours punishes nobody but you.',
-  q: 'What did you set down that you are still holding?' },
-{ id:'post', src:'Paid in Full',
-  laws: [
-    { n: 'The Judge You Installed', f: 'others', d: 'Rico ran the whole thing for a room that was watching, and it set the pace, the spending and the risk.' },
-    { n: 'Visibility Is Billed Later', f: 'inner', d: 'It reads as free for years. Then it arrives all at once, from people who were watching for their own reasons.' },
-    { n: 'Everything Is Paid For', f: 'motion', d: 'Ace put it down himself while it was still his to put down. Nobody else in the film got that option.' }
-  ],
-  rule: 'Being seen is a cost on a delay. The ones who need it most are the ones it finds first.',
-  q: 'What are you doing louder than it needs to be done?' },
-{ id:'soft', src:'Ours',
-  laws: [
-    { n: 'Nothing To Point At', f: 'inner', d: 'No argument, no crisis, nothing to write down. Just nine o\'clock, a warm room, and forty minutes off the end of the day.' },
-    { n: 'You Cannot Negotiate With A Room', f: 'motion', d: 'Every set of rules lasted a fortnight, because a rule is something he had to hold up and the room held itself up.' },
-    { n: 'The Day Nobody Announced', f: 'time', d: 'There was no day it went wrong either. That is the same fact from the other side.' }
-  ],
-  rule: 'Nothing that is softening you will ever announce itself. It arrives as rest, and some of it genuinely is.',
-  q: 'What takes your evenings that you could not point at if somebody asked?' },
-{ id:'mini', src:'Ours',
-  laws: [
-    { n: 'Too Small To Bother With', f: 'inner', d: 'Two years lost to the idea that twenty minutes was beneath doing.' },
-    { n: 'The Version You Can Always Do', f: 'motion', d: 'Twenty minutes, no equipment, doable on four hours of sleep in a hallway.' },
-    { n: 'Starting Again Is the Cost', f: 'time', d: 'The missed session costs nothing. The fortnight after it is where the two years went.' }
-  ],
-  rule: 'A man who will only train for an hour trains nothing in a bad month.',
-  q: 'What would you still do on the worst day you are going to have this month?' },
-{ id:'knot', src:'Ours',
-  laws: [
-    { n: 'The Wheel', f: 'motion', d: 'Thirty-one losses over his limit. Twenty-six of them were his own rule, broken by him, in writing, with a timestamp.' },
-    { n: 'The Early Verdict', f: 'inner', d: 'The news, the spread, the broker and the summer. Every one of those is a reason you can do nothing about.' },
-    { n: 'The Handle', f: 'motion', d: 'What he felt was not shame. It was relief, which is the same thing said honestly.' }
-  ],
-  rule: 'Write down which losses were your own fault. That is the only column you can do anything about.',
-  q: 'What are you calling bad luck?' },
-{ id:'twice', src:'Ours',
-  laws: [
-    { n: 'The State Wrote It', f: 'inner', d: 'Two pages, three weeks apart, same facts, opposite answers, both argued out properly.' },
-    { n: 'Nothing Records the Weather', f: 'time', d: 'Four years of what he decided and not one line about what sort of day it was.' },
-    { n: 'The Handle', f: 'motion', d: 'Three words at the top of the page, and within six weeks he knew which of his own pages to distrust.' }
-  ],
-  rule: 'You think the conclusion came from the thinking. Ask yourself the same question on a bad morning and see what you get.',
-  q: 'What did you decide this week on a day you would not want to be judged by?' },
-{ id:'cut', src:'Ours',
-  laws: [
-    { n: 'What Is Left Standing', f: 'inner', d: 'Nine things removed and the tenth gets the verdict, whether or not it earned it.' },
-    { n: 'The Handle', f: 'motion', d: 'He called it his own doing rather than hers, which is the only version that leaves him anything to move.' },
-    { n: 'The Test Runs Both Ways', f: 'time', d: 'If it goes and the two steps back keep coming, there is nothing left to remove and only himself to look at.' }
-  ],
-  rule: 'Subtraction only ever points at what is left standing. That is not the same as finding the cause.',
-  q: 'If you removed it and nothing changed, what would you have to look at?' },
-{ id:'aim', src:'Get Rich or Die Trying',
-  laws: [
-    { n: 'The Long Carry', f: 'inner', d: 'He carries his mother for the whole film and it never once lets go of him.' },
-    { n: 'Aimed, Not Removed', f: 'motion', d: 'The exact quality that made him relentless on the corner is what makes him relentless in a booth. Nothing was taken out.' },
-    { n: 'What They Called It', f: 'others', d: 'Cold, hard, too far gone — every word said about him was a report on what it cost the person saying it.' }
-  ],
-  rule: 'You are not going to remove it. You can decide what it points at.',
-  q: 'What in you were you told to lose, that could be aimed instead?' },
-{ id:'pocket', src:'Get Rich or Die Trying',
-  laws: [
-    { n: 'The Second Thing', f: 'time', d: 'It arrived with the fear of it going, which he had not asked for and had not been told about.' },
-    { n: 'The Long Carry', f: 'inner', d: 'He checked it in bed, in the morning and at traffic lights, to see whether it was still there.' },
-    { n: 'The Answer You Are Carrying', f: 'inner', d: 'The man on the stairwell was not further ahead. He could set it down, and that does not arrive in the account.' }
-  ],
-  rule: 'You are not waiting to find it. You are waiting for the other option to close.',
-  q: 'What can you already do that you have never counted as the real business?' },
-{ id:'five', src:'Ours',
-  laws: [
-    { n: 'The Measuring Does Not Stop', f: 'inner', d: 'A different body, three years later, and the same arithmetic on the same train with the same face on.' },
-    { n: 'The Price Was the Purchase', f: 'motion', d: 'He had it booked as what the body cost. It was the only thing that came with him into a room.' },
-    { n: 'The Quiet Middle', f: 'time', d: 'Forty minutes at twenty to six, for a year, without enjoying one of them, and nobody watching.' }
-  ],
-  rule: 'You keep the habit of turning up long after the reason you started stops mattering.',
-  q: 'If you got the thing tomorrow, what would still be there?' },
-{ id:'bridge', src:'Power',
-  laws: [
-    { n: 'The Open Door', f: 'motion', d: 'He never used the two days once. They took a little off the top of every Tuesday for six years.' },
-    { n: 'Two Ends of One Thing', f: 'time', d: 'The one with nothing behind him was frightened for a year and got the thing the careful one never did.' },
-    { n: 'The Handle', f: 'motion', d: 'It costs nothing visible on any particular Tuesday, which is exactly why it is never the week to deal with it.' }
-  ],
-  rule: 'The way out is not free. It quietly removes the pressure that was going to make the thing work.',
-  q: 'What are you keeping open in case this does not work?' },
-{ id:'free', src:'House of the Dragon',
-  laws: [
-    { n: 'The Word You Reached For', f: 'inner', d: 'He wanted autonomy and went and bought the maximum possible amount of freedom, which is the opposite of it.' },
-    { n: 'Freedom Is Not Autonomy', f: 'motion', d: 'No boss, no hours, no obligations — and he could not refuse a single thing that came in.' },
-    { n: 'Leverage Is What Buys the No', f: 'others', d: 'He had no position and no scarce skill, so his whole day belonged to whoever was paying that week.' }
-  ],
-  rule: 'Answering to nobody is not the same as deciding anything. The second one has to be bought, usually with the first.',
-  q: 'What are you refusing to be under, that is costing you the room?' },
-{ id:'mountain', src:'Ours',
-  laws: [
-    { n: 'The Quiet Middle', f: 'time', d: 'Day six hundred and seventeen was indistinguishable from the four hundred before it.' },
-    { n: 'The Spent Feeling', f: 'inner', d: 'Every time he announced it he drew down the feeling he was supposed to get from finishing.' },
-    { n: 'The Day Nobody Announced', f: 'time', d: 'There was no morning where he woke up and noticed he had won the fight.' }
-  ],
-  rule: 'There is no day it clicks. You look up one morning and it has been working for months.',
-  q: 'What have you been doing long enough that you cannot remember starting?' },
-{ id:'slow', src:'The Lord of the Rings',
-  laws: [
-    { n: 'The Talent Nobody Sells', f: 'inner', d: 'No course covers it, he did not develop it, and he was issued with it in a place he would not have chosen.' },
-    { n: 'The Sunday Version Has the Vote', f: 'motion', d: 'He writes the rule calm on a Sunday and it does not occur to him that Wednesday gets a say.' },
-    { n: 'The Quiet Middle', f: 'time', d: 'There is nothing to learn and nothing to show anybody, and if you asked him to teach it he could not.' }
-  ],
-  rule: 'The attribute that decides it is usually one nobody would have listed, including you.',
-  q: 'What are you good at that has never looked like a skill?' },
+   AND THE LESSON IS WRITTEN TO LAND, NOT TO SUMMARISE. A paraphrase of
+   the plot with a moral on the end is the version everybody has already
+   read. What is here names the uncomfortable half — the thing you are
+   currently doing that the scene is about — because a lesson you can
+   agree with and walk away from has not been written yet.
 
+   Three internal and three external for each, which is a shape rather
+   than a quota: a story that only yielded two of one kind would be one
+   to cut rather than one to pad. */
+
+var AXIS = { internal: 'Internal', external: 'External' };
+
+var SRC = [
+  { i: "grich", n: "Get Rich or Die Tryin'", y: 2005 },
+  { i: "power", n: "Power", y: 2014 },
+  { i: "paid", n: "Paid in Full", y: 2002 },
+  { i: "snow", n: "Snowfall", y: 2017 },
+  { i: "spid", n: "Spider-Man 3", y: 2007 },
+  { i: "lotr", n: "The Lord of the Rings", y: 2001 },
+  { i: "got", n: "Game of Thrones", y: 2011 },
+  { i: "hotd", n: "House of the Dragon", y: 2022 },
+  { i: "hp", n: "Harry Potter", y: 2001 },
+  { i: "vik", n: "Vikings", y: 2013 },
 ];
 
-/* The index is drawn on every card. A finite path that ends is the
-   app's whole claim, and nothing else on the Arc said so. */
-S.forEach(function (x, i) { x.no = ('0' + (i + 1)).slice(-2); });
+var TH = [
+  { s: "grich", x: "internal", n: "Survival as Purpose", b: "Transmutation of Suffering",
+    t: "Nine shots outside his grandmother's house, and the one through the jaw is the one that matters: it changes how he sounds, and the sound is what people end up buying. Many Men is written with the whole of it still in him. The record is not about surviving. It is the surviving, put somewhere it can be used.",
+    l: "While you are in it there is nothing to show for it, and that is what this part looks like from the inside. It only becomes material later, and only if you were putting it somewhere at the time. The difference between a bad year and the thing you build on is whether anything got written down." },
+  { s: "grich", x: "internal", n: "The Saint and the Sinner", b: "Radical Self-Honesty",
+    t: "He wears the cross through all of it, and on Gotta Make It to Heaven he does not pretend the two fit. He names what he is doing and asks anyway. The film never resolves it, which is the honest version.",
+    l: "You already know which parts of your week do not match what you say you are doing. Saying them out loud costs you the story you have been telling, and that story was costing more. Nobody is one thing. The people who claim to be are spending everything on the claim." },
+  { s: "grich", x: "internal", n: "Numb Is Not Healed", b: "Feeling as Freedom",
+    t: "Going cold is what keeps him alive on the block, and it works so well that it follows him home. Charlene cannot reach him. His son cannot reach him. The armour has no off, because nobody ever gave it one.",
+    l: "Isolation is the right call and numbness is what it turns into if you leave it running. One is a decision about your time. The other is a decision about your capacity to feel anything, and you will not notice the handover. Keep one person you tell the truth to." },
+  { s: "grich", x: "external", n: "Violence Begets Violence", b: "The Law of Return",
+    t: "Levar says it flat: violence begets more violence, and violence does not beget more money. Every retaliation in the film buys exactly one more retaliation, and not one of them buys anything anybody wanted.",
+    l: "Look at what your effort actually produces rather than what it was aimed at. If the honest answer is more of the same problem, you are not behind on the plan. You are on the wrong wheel, and more effort makes it worse. Step off and put the same force somewhere it compounds." },
+  { s: "grich", x: "external", n: "Die Tryin'", b: "Memento Mori",
+    t: "The title is a condition, not a boast. Mortality is on screen the whole film: the shooting, the yard, the sense that today is allowed to be the last one. It is also what makes his focus look like obsession to everybody around him.",
+    l: "You have a number of years in which this is even possible and you do not know the number. That is arithmetic rather than motivation. Most of what you are currently deciding between does not survive being asked whether it is worth a week of a finite life." },
+  { s: "grich", x: "external", n: "Money Was Never the Cure", b: "False Idols",
+    t: "The money arrives and the wound is exactly where it was. The film refuses him the scene where the cars fix it, because the cars never fix it, and everybody who made that film knew somebody it had not fixed.",
+    l: "You are going to get some of what you are chasing and it is going to do less than you think. Better to know that now than at the other end. What is actually worth having is authorship, being the one who decides what happens next, and money is a tool for it rather than the thing." },
+  { s: "power", x: "internal", n: "Two Names, One Man", b: "The Divided Self",
+    t: "James runs the club and Ghost runs the distribution, and the series is the tax on holding both. Every time he commits to being only one of them, the other is what saves him, which is exactly why he never commits.",
+    l: "Running two versions of yourself costs energy before either of them does anything. If you are a different person at the gym, at the desk and in your family's house, that gap is not depth, it is overhead. Pick the one you are prepared to be seen as and let the others go." },
+  { s: "power", x: "internal", n: "The Legitimate Front", b: "Wanting to Be Clean",
+    t: "Truth is a real club and he is genuinely good at running it. It is also the reason he can keep telling himself the other half is temporary. The legitimate part is what makes the rest survivable.",
+    l: "Check what your good habit is excusing. Training hard is not a cover for anything, until the day it is the only thing you can point at. Ask whether you would still do it if the thing it lets you avoid disappeared tomorrow." },
+  { s: "power", x: "internal", n: "Angela", b: "Wanting the Old Version of Yourself",
+    t: "He goes after Angela partly because she knew him before, and she is the only available picture of the man he might have been. He builds the entire exit around a person, and a person cannot hold that.",
+    l: "When you want somebody back, work out whether you want them or the version of yourself they remember. Nobody can carry your redemption. Handing it to them is how you lose the person and the redemption in one move." },
+  { s: "power", x: "external", n: "Loyalty Is Not Symmetrical", b: "Tommy",
+    t: "Tommy is loyal to Ghost. Ghost is loyal to the plan. Neither of them says this out loud for six seasons, and the whole thing detonates on the difference.",
+    l: "Most betrayals are two people who never once agreed on what they owed each other. Find out what the other person thinks the arrangement is, in words, before you need it to hold. Awkward once, or a catastrophe later." },
+  { s: "power", x: "external", n: "You Cannot Retire From It", b: "The Business Keeps You",
+    t: "Every time Ghost announces he is out, it pulls him back. Not out of malice. He is load-bearing, and nothing load-bearing is permitted to walk away.",
+    l: "Anything that only works because you are inside it will not let you go. If you want out of something eventually, build it now so it runs without you. Otherwise the exit is somebody else's decision, and they will take it later than you would have." },
+  { s: "power", x: "external", n: "Kanan and Milan", b: "The Level Above",
+    t: "Every time Ghost reaches what looks like the top, somebody appears who was above him the whole time and completely invisible from where he was standing.",
+    l: "From where you are, the next level looks like the last one. It is not. Anybody who moves because of what they can see from their current position will be moving again shortly, and the only cure is to go and look before you commit." },
+  { s: "paid", x: "internal", n: "The Quiet One", b: "Temperament as Advantage",
+    t: "Ace works the dry cleaners, says almost nothing, and moves carefully. He is the least interesting person in the film to watch, and he is the only one with an ending.",
+    l: "The thing people call boring about you is usually what is keeping you alive. Not needing to be seen doing it is a strategy and it is cheaper than every alternative. It also means nobody will ever congratulate you for it." },
+  { s: "paid", x: "internal", n: "Mitch's Appetite", b: "Enough Was Never Named",
+    t: "Mitch has the money, the name and the life, and keeps going, because at no point did he write down a figure at which he would stop. An unwritten figure is not a figure.",
+    l: "Name the number now, while it is abstract and you lose nothing by being honest. If you cannot say what enough is, you will not recognise it while standing in it, and every level you reach will quietly become the new floor." },
+  { s: "paid", x: "internal", n: "After the Shot", b: "The Thing That Wakes You",
+    t: "Ace is shot, and it is the recovery that changes him. What was normal a month earlier reads completely differently from a bed with nothing to do in it.",
+    l: "A stop is the only time you can see the shape of what you were doing. If life has handed you one, an injury, an ending, a break you did not choose, use it before you are well enough to forget what it showed you." },
+  { s: "paid", x: "external", n: "Rico", b: "Karmic Debt",
+    t: "Rico takes from the people closest to him, and the film follows that account all the way down without ever commenting on it. Nothing he takes stays taken.",
+    l: "The account is not moral and it is not fast, which is exactly why people believe they have got away with it. What you put out comes back in a currency you did not choose, at a time you are not ready for. The only variable you control is what goes in." },
+  { s: "paid", x: "external", n: "The Ones Who Came Up With You", b: "Proximity Is Not Alignment",
+    t: "Three friends, one come-up, three completely different endings. Sharing a start turns out to say nothing at all about wanting the same thing.",
+    l: "Look at what the people around you are actually optimising for rather than at what you have in common. History explains why they are here. It predicts nothing about where they are going, and drifting from people headed somewhere else is not disloyalty." },
+  { s: "paid", x: "external", n: "Getting Out", b: "Leaving Before It Leaves You",
+    t: "Ace walks away with something left. It is the rarest event in the film, and it is a decision he takes early, while leaving still looks unnecessary.",
+    l: "Exits are taken early or not at all. By the time leaving is obviously right, the choice has usually been made for you and on worse terms. If you are already asking the question, you are later than you think." },
+  { s: "snow", x: "internal", n: "The Smart Kid", b: "Talent Without a Governor",
+    t: "Franklin is the brightest person in every room and the show makes that the problem. Intelligence is what lets him build an argument for a thing nobody should be able to argue themselves into.",
+    l: "Being able to pull something off is not a reason to. The smarter you are the better the case you will construct, which means your own reasoning is the last thing that will stop you. Decide what you will not do while the question is still theoretical." },
+  { s: "snow", x: "internal", n: "Just This Once", b: "Incrementalism",
+    t: "Nothing in the first season is a decision to become a kingpin. It is a bag, then a supplier, then a corner. Each one small, each one reasonable, none of them the moment.",
+    l: "Nobody crosses a line. They cross a hundred small ones, each defensible on its own, and the sum is a life nobody chose. The place to be strict is at the size where it does not feel like it matters, because that is the only size you are ever offered." },
+  { s: "snow", x: "internal", n: "Cissy's Son", b: "What the Family Sees",
+    t: "His mother watches it happen, names it clearly, and is ignored. She has nothing to gain by lying to him, which is precisely why her read is the one he cannot take.",
+    l: "The people closest to you have no angle, and that is what makes their opinion unbearable rather than useless. When you catch yourself explaining to somebody who knows you, notice that you are explaining. Discounting the clearest view available is a decision." },
+  { s: "snow", x: "external", n: "The Product Comes Home", b: "Consequence Has an Address",
+    t: "The neighbourhood he sells into is his own. The show never once lets the damage land somewhere abstract or on somebody you do not have to look at.",
+    l: "There is no downstream. Every cost lands on a specific person, and if you cannot name who, that means you have not looked rather than that there is nobody. Being one step removed from a consequence is not the same as not causing it." },
+  { s: "snow", x: "external", n: "Teddy", b: "You Are Somebody's Instrument",
+    t: "Franklin builds an empire while being supplied by an operation using him for something else entirely. He is the top of his world and a component of somebody else's.",
+    l: "Ask who benefits from your ambition besides you. Being the biggest thing inside your own frame tells you nothing about the frame, and the frame is where the decisions get taken. Go and find out who is above the person you are dealing with." },
+  { s: "snow", x: "external", n: "The Money Had Nowhere to Go", b: "Wealth Without Legitimacy",
+    t: "He ends up with more cash than he can move, clean or hold, and losing it, when it goes, is almost administrative.",
+    l: "Money you cannot hold is not wealth, it is exposure with a good feeling attached. Anything built outside the rules is held outside them, which means it can be taken with no recourse at all. Build the boring structure before you need it." },
+  { s: "spid", x: "internal", n: "The Suit Works", b: "Power That Amplifies",
+    t: "The symbiote is not a trick. Peter is faster, stronger and more decisive, and Connors says exactly what it does: it bonds, and it amplifies what is already there, especially aggression. Every fight goes his way while he is wearing it.",
+    l: "A thing that makes you worse gets dropped in a week. The dangerous one is the thing that genuinely works, because the bill is not paid in results. It is paid in who you turn into while collecting them, and that does not arrive itemised." },
+  { s: "spid", x: "internal", n: "Brock in the Newsroom", b: "Revenge as a Feeling",
+    t: "Peter is right that Eddie faked it. He waits for the room to be full anyway, does it in front of Jameson, and stands there while a man loses everything. There is a version of that scene that takes thirty seconds. This is not that version.",
+    l: "Being right and what you do with being right are two separate questions. Watch how long you wait, who you do it in front of, and whether you enjoy it. That is where the actual motive is, and it is visible to everybody except you." },
+  { s: "spid", x: "internal", n: "The Bell Tower", b: "You Cannot Argue With It",
+    t: "He does not out-will the suit. He climbs into a sound loud enough to break the bond, because there was never an argument available to a man the thing was amplifying.",
+    l: "You do not think your way out of a state, because the part doing the thinking is the part that is compromised. Change the room, the hour, the phone, the people. That is not weakness. It is the only mechanism that has ever worked." },
+  { s: "spid", x: "external", n: "It Falls on Brock", b: "It Goes to Whoever Wants It Most",
+    t: "The suit comes off in the tower and drops straight onto Eddie, who is directly underneath praying for Peter to die. It goes exactly where it was always going to go.",
+    l: "Whatever you put down does not stop existing. It finds whoever is most available to it, and that is usually somebody who will use it considerably worse. Quitting a thing and ending it are not the same act." },
+  { s: "spid", x: "external", n: "Harry Comes", b: "You Have to Be Worth Turning Up For",
+    t: "The last fight is not winnable alone. Harry, written off and lied to and with every reason to stay away, turns up because somebody went and asked him.",
+    l: "The version of you that needs nobody has a ceiling, and you will find it on the worst day. Whoever turns up for you then was built years earlier, in ordinary weeks, by you. Isolation is a tool. Having nobody is a position." },
+  { s: "spid", x: "external", n: "Mary Jane's Year", b: "What You Stopped Noticing",
+    t: "While Peter is being adored in the street, Mary Jane is losing the thing she has wanted her whole life, and he does not notice for weeks. None of his attention is malicious. It simply went where it was being rewarded.",
+    l: "Attention flows to whatever pays it back fastest, and a screen pays back fastest of all. Check what has gone quiet around you. The thing that stopped asking for your attention is usually the thing that needed it." },
+  { s: "lotr", x: "internal", n: "Frodo at the Crack of Doom", b: "Willpower Has a Limit",
+    t: "After the whole journey, standing at the exact place where it ends, Frodo does not throw the Ring in. He claims it. The quest is lost in that second, by the person who carried it the entire way.",
+    l: "Do not build anything that requires you to be strong at the worst possible moment, because you will not be. Assume the failure and design so it does not decide the outcome: rules set in advance, an account you cannot reach, somebody who knows the plan." },
+  { s: "lotr", x: "internal", n: "Boromir", b: "The Good Reason",
+    t: "Boromir wants the Ring for Gondor, for his people, for a city that is genuinely falling. The reason is true, and the film is careful that it never stops being true. It is also the door.",
+    l: "The explanation that is true and also happens to be the one you wanted is the hardest thing there is to examine, because the examining is being done by the person it benefits. A good reason is not evidence. Ask what you would do if it were false." },
+  { s: "lotr", x: "internal", n: "Sam's Ordinary Loyalty", b: "The Unremarkable Virtue",
+    t: "Sam carries the water, the rope, the pans and eventually Frodo. Nothing he does is impressive taken on its own, and it is the entire reason any of it works.",
+    l: "The decisive quality is almost never the exciting one. It is turning up on the days that do not count, and it does not photograph, which is why nobody trains for it and why it is still available to you." },
+  { s: "lotr", x: "external", n: "Gollum at the Fire", b: "The Verdict Delivered Early",
+    t: "Bilbo should have killed him in the tunnel. Sam is right about him at every single turn. And he is the reason the Ring goes into the fire, because Frodo failed and Gollum bit it off his hand.",
+    l: "You close accounts on people, and on yourself, long before the story has finished. Even the very wise cannot see all ends. That is not comfort. It is a warning about how much certainty you are spending on half a sentence." },
+  { s: "lotr", x: "external", n: "The Ring Corrupts Its Bearer", b: "The Tool Uses You",
+    t: "Nobody uses the Ring. Isildur, Gollum, Bilbo, Boromir, Frodo. It works on whoever is holding it, in exact proportion to how much that person wants.",
+    l: "Some instruments are not neutral. Leverage, an audience, a run of wins: ask what the thing does to the person holding it rather than only what it does for them. The ones that give you the most are the ones to check hardest." },
+  { s: "lotr", x: "external", n: "The Shire Is Not the Same", b: "You Cannot Go Back",
+    t: "They come home and the Shire has been occupied and scoured, and Frodo cannot live in it. The journey changed the one place that was supposed to stay still.",
+    l: "A threshold charges you the thing that was only ever valuable on the side you are leaving. That is not cruelty. If it made sense on both banks it would not be a threshold. Expect to lose the room you were planning to come back to." },
+  { s: "got", x: "internal", n: "Ned Stark", b: "Honour Without Leverage",
+    t: "Ned is the most honourable man in the story and it kills him inside one season. He tells the truth to people who have no incentive to reward it, and gives them warning first.",
+    l: "A principle you cannot enforce is a preference. Decide what you stand for and then build the position that lets you stand for it, in that order. The other way round is not integrity, it is a donation." },
+  { s: "got", x: "internal", n: "Jaime's Hand", b: "Identity Built on One Thing",
+    t: "Jaime is his sword hand. When it goes, the entire idea of who he is goes with it, and only then does anything else about him begin to exist.",
+    l: "Whatever you are entirely is something that can be taken from you in an afternoon. If your identity is one number, one body or one relationship, you are one bad quarter from having nothing to be. Breadth is not dilution, it is insurance." },
+  { s: "got", x: "internal", n: "Theon", b: "Belonging to Two Places",
+    t: "Raised a Stark and born a Greyjoy, he betrays the family that raised him in order to be accepted by the one that never wanted him, and is accepted by neither.",
+    l: "Trying to be claimed by people who have not claimed you will cost you the ones who have. Notice who is already there. Chasing a room that has no seat for you is a way of not sitting down anywhere." },
+  { s: "got", x: "external", n: "The Iron Throne", b: "Power Is a Position, Not a Person",
+    t: "Robert, Joffrey, Tommen, Cersei, Daenerys. The chair does roughly the same thing to all of them. It is a study of one seat rather than of one character.",
+    l: "Structures shape behaviour far more reliably than character does. When everybody who takes a role behaves the same way, stop reading the people and read the role, including the one you are about to step into." },
+  { s: "got", x: "external", n: "Littlefinger", b: "Chaos Is a Ladder",
+    t: "He has no army and no claim and outlasts most of the people who have both, because he is the only one whose position improves when things go wrong.",
+    l: "Fragile plans need conditions to stay still and conditions never do. Ask what a shock does to your position rather than hoping none arrives. The good version is not the one that wins if everything goes right." },
+  { s: "got", x: "external", n: "The North Remembers", b: "Nothing Is Settled",
+    t: "The Red Wedding wins the war and does not end it. Every act creates a debt somebody else is carrying and will present later, at a time of their choosing.",
+    l: "A win that leaves people alive who are owed is not a conclusion. Accounts persist a great deal longer than the events that opened them, and whoever is holding one is patient in a way you are not." },
+  { s: "hotd", x: "internal", n: "Daemon Wants to Be Chosen", b: "Waiting for Recognition",
+    t: "He is the best fighter in the realm and spends years circling the one thing he will never be handed: his brother's approval and the succession with it. Every time he gets close he does something that makes it impossible.",
+    l: "Waiting to be chosen is a way of not choosing, and the years go either way. If you are waiting for somebody to confirm you are ready, notice that the confirmation has no mechanism and never did." },
+  { s: "hotd", x: "internal", n: "The Stepstones", b: "Doing It Yourself",
+    t: "Refused everything at court, he takes the Stepstones with Corlys and wins it with a dragon and his own blood, then comes home and throws the crown at his brother's feet, because it was never about the crown.",
+    l: "What you take by going and doing it cannot be withdrawn by the person who refused you, and that is the whole value of it. Going is the only available answer to a no you cannot appeal, and it requires nobody to change their mind." },
+  { s: "hotd", x: "internal", n: "Rhaenyra and Daemon", b: "Appetite as Identity",
+    t: "Everything Daemon wants is wanted at full strength and pursued past every line there is. A throne, a niece, a war. The appetite is not a flaw in the man, it is the man.",
+    l: "A trait that size does not get removed, and the twenty years you spend trying is the waste. It gets aimed. The destructive shape and the useful one run on the same engine, and the only variable is direction." },
+  { s: "hotd", x: "external", n: "Viserys's Dream", b: "A Story Held Too Loosely",
+    t: "Viserys knows the reason his family must hold the throne and tells almost nobody clearly. His last words are misheard by the one person best placed to act on them, and the war starts in that room.",
+    l: "A reason that lives only in your head is not a reason anybody else can act on. Say it plainly, more than once, to the people who will have to carry it. Being understood is a job, and it is yours rather than theirs." },
+  { s: "hotd", x: "external", n: "The Greens and the Blacks", b: "A Succession Nobody Wrote Down",
+    t: "The entire war runs on an ambiguity that could have been settled in one afternoon at any point across twenty years, by a man who kept deciding not to have the conversation.",
+    l: "Unsettled questions do not stay small. Whatever you are avoiding naming is compounding the whole time you avoid it, and the cost of naming it only goes up. The awkward hour now is the cheapest it will ever be." },
+  { s: "hotd", x: "external", n: "Dragons Are Not Controllable", b: "Leverage Cuts Both Ways",
+    t: "The dragons make the family untouchable and then take the family apart. Nobody wins a dragon fight in that show. They survive one, mostly they do not, and the thing that made them safe is what kills them.",
+    l: "Every source of power is also an exposure. The thing that makes you hard to attack is usually the thing you can least afford to lose, and the size of the upside tells you the size of the other side." },
+  { s: "hp", x: "internal", n: "Occlumency", b: "The Work With No Reward",
+    t: "The one piece of work that year with nothing in it for him. No flying, no audience, he is bad at it, and Snape is teaching it. He does the hour and never practises, while running Dumbledore's Army brilliantly, which decides nothing.",
+    l: "The work that decides it usually has no screen, no progress you can see and somebody you dislike attached. You will skip it, and you will skip it while working hard on something else, which is what makes it invisible. Find the boring one. That is the year." },
+  { s: "hp", x: "internal", n: "The Mirror of Erised", b: "Wanting as a Trap",
+    t: "Dumbledore finds Harry sitting in front of a mirror showing him his dead parents, and tells him men have wasted away in front of it, not knowing whether what they saw was real or even possible.",
+    l: "A vivid enough picture of what you want can quietly replace doing anything about it. The image costs nothing and pays out a little of the feeling, which is why it is so easy to sit there. Check how much of your week went into the picture." },
+  { s: "hp", x: "internal", n: "Neville", b: "The Late Arrival",
+    t: "Neville is the joke of the first few books and he is standing at the end of the last one holding a sword. Nothing about the early version of him predicted any of it.",
+    l: "You deliver verdicts on people, yourself included, on about a tenth of the evidence. A slow start is not information about a finish. What it is, is the part nobody watches, which is why almost nobody is still there for it." },
+  { s: "hp", x: "external", n: "Riddle's Diary", b: "Never Trust What You Cannot Source",
+    t: "Ginny writes to a book and the book writes back. It is sympathetic, patient and endlessly interested in her, and it is Voldemort. Nothing about the experience feels like being used.",
+    l: "Anything that flatters you and asks for more of your attention is worth checking for who is on the other end and what they are getting. Comfort is the cheapest delivery mechanism there is, and what arrives through it never announces itself." },
+  { s: "hp", x: "external", n: "Dumbledore's Silence", b: "Withholding Is a Decision",
+    t: "He keeps the prophecy from Harry for five years to protect him, and admits afterwards that it was an old man's weakness. The withholding causes the exact thing it was meant to prevent.",
+    l: "Protecting somebody from information usually protects you from the conversation. Say it early, while there is still time for anybody to act on it. Late honesty is not honesty, it is a confession." },
+  { s: "hp", x: "external", n: "The Room of Requirement", b: "Circumstance Is Buildable",
+    t: "The room appears as whatever is needed, and only to somebody who needs it. Almost every useful thing that year happens inside a space they made on purpose.",
+    l: "You do not negotiate with a room, you choose one. Most of what looks like discipline from outside is somebody having arranged their surroundings so the decision was already taken. Set the room and stop spending willpower on it." },
+  { s: "vik", x: "internal", n: "Ragnar's Curiosity", b: "Wanting to Know",
+    t: "Ragnar is not after plunder first. He wants to know what is west across open water, and the wanting to know is what makes him dangerous to everybody around him, including to himself.",
+    l: "Curiosity outlasts motivation, which is why it is worth knowing which one you are running on. A question you actually want the answer to will carry you through years that a goal will not, because a goal has a finish and a question does not." },
+  { s: "vik", x: "internal", n: "What the Win Cost", b: "Arrival Is Not the End",
+    t: "He gets all of it. England, fame, sons, a kingdom. And he is hollowed out by it, on opium, no longer able to be the man who wanted any of it.",
+    l: "What you want arrives with something attached that nobody warned you about, usually the fear of it leaving. Decide now what you will do on the day you get it, because you will not be thinking clearly then and the person who arrives is not this one." },
+  { s: "vik", x: "internal", n: "Floki's Faith", b: "Belief as Engine and Blindness",
+    t: "Floki builds the ship that makes the whole thing possible, out of absolute conviction that nobody else shares. The same conviction later makes him murderous, and then lost.",
+    l: "The belief that lets you build something nobody asked for is not a different thing from the belief that stops you hearing anybody. It is one machine with two outputs, and you do not get to keep only the first." },
+  { s: "vik", x: "external", n: "Asking the Earl", b: "Nobody Authorises What Proves Them Wrong",
+    t: "Ragnar asks Haraldson to sail west, properly, in front of everybody, more than once, and is refused every time. Not because Haraldson is stupid. No man in charge of a thing approves the expedition that would prove him wrong about it.",
+    l: "You are waiting on a yes that has no reason to exist. That is arithmetic rather than malice and it does not improve with better asking. Build it quietly and go. The permission stops mattering the moment the thing works." },
+  { s: "vik", x: "external", n: "The Boat, Not the Nerve", b: "Preparation Is the Courage",
+    t: "He does not sail west on hope. Floki's ship is built for open sea, he has the sun-board for latitude, and he recruits a crew quietly, one man at a time, over a season, while farming during the day.",
+    l: "Going without permission and going without preparation are completely different acts, and only one of them works. The part that reads as nerve from outside is almost entirely a season of unglamorous preparation nobody watched." },
+  { s: "vik", x: "external", n: "After Lindisfarne", b: "Permission Stops Being the Question",
+    t: "Haraldson takes the spoils, because he is still the Earl and that is what an Earl does. It does not matter. Everybody in that hall has now seen what is west, and no amount of authority puts that back in the box.",
+    l: "You do not become a person they consider ready. You become a person the question no longer applies to, and that only happens on the other side of having gone. Nobody hands it over." },
+];
 
 var $ = function (s) { return document.querySelector(s); };
 var el = function (t, c, x) { var n = document.createElement(t); if (c) n.className = c; if (x != null) n.textContent = x; return n; };
 
-/* st.last is a VIEW now rather than a story, so a stored value from the
-   build before this one names something VIEWS does not have — which
-   falls through to dark, the way any stored key here has to. */
+/* st.last is a view, and the build before this one stored 'dark' or
+   'lessons' — names VIEWS no longer has. It falls through to the first
+   list, the way any stored key in this repo has to. */
 var st = { last: null };
 try { var raw = localStorage.getItem(KEY); if (raw) { var o = JSON.parse(raw); if (o && typeof o === 'object') {
   st.last = typeof o.last === 'string' ? o.last : null;
 } } } catch (e) {}
 var save = function () { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
 
-/* Each one in a line. A tag that opens nothing reads as a category
-   somebody forgot to wire up, and the point of naming them is that a
-   lesson carries three and you can follow any of them sideways into
-   the others that carry it. */
-var LAWS = {
-  'The Answer You Are Carrying': 'The thing you are looking for is very often already in your possession — written down, said to you, sitting under your feet. Finding it was never the difficulty. Being able to hear it is, and that is usually bought rather than given.',
-  'The Lit Ground': 'You search where searching is comfortable rather than where the thing actually is. The lit ground is not where you dropped it. It is simply the only place you can see, and effort spent there looks identical from outside to effort that would work.',
-  'The Full Cup': 'Nothing new enters a container that is already occupied. You are not being refused the answer; there is nowhere in you for it to go, and the thing filling the space is usually something you are right about.',
-  'The Cost of Being Right': 'Every answer you argue with is protecting a decision you have already made. The price of hearing it is admitting what it makes of the last two years, which is why people go looking for help and come home having defended themselves.',
-  'The Early Verdict': 'Every event arrives as half a sentence and you read it out as the whole one. A verdict delivered early is not a description of what happened — it is the first move of what happens next.',
-  'The Long Carry': 'The event has a duration and it ends. The carrying is a second thing, which you are doing, and it runs at full strength for as long as you keep feeding it. Nothing external is required after the first four seconds.',
-  'The Sentence That Arrives Ready': 'The tell that you are still carrying something is that it comes out fully formed, hours or years late, with no introduction, as though the conversation were still running. It is not still running. Nobody else is in it.',
-  'The Spent Feeling': 'Announcing a thing pays you a small amount of the feeling you were supposed to get from finishing it, out of the same account. Tell enough people and you can draw the whole balance without ever doing the work.',
-  'The Walk': 'Understanding a thing and acting on it are two separate acquisitions. Almost everybody completes the first, calls it done, and is genuinely surprised years later to find nothing moved.',
-  'The Wheel': 'Either your outcomes come out of your own hands or they come out of the weather. Both are beliefs and only one of them leaves you anything to do tomorrow, which is why the honest account of a bad year arrives as relief rather than shame.',
-  'The Toll': 'Everything is paid for, and rarely in the currency you offered. The bill comes from an account you did not know was open, and the fare is never the thing you were holding out.',
-  'What Only Made Sense Back There': 'A threshold charges you the thing that was only ever valuable on the side you are leaving. That is not cruelty. If it made sense on both banks it would not be a threshold, it would be a road.',
-  'The Handle': 'A problem you caused is a problem with a handle on it. Fault is not a moral verdict here; it is the difference between a situation you can reach and one you can only wait out.',
-  'The Open Door': 'A way back is almost never used. It takes a little pressure out of every hard thing instead, continuously and invisibly, and the pressure was what was going to finish the work.',
-  'The Stranger’s Mouth': 'The answer very often arrives from somebody who is not trying to help you, does not know they have given it, and will not remember saying it. People close to you have usually said the same thing and been unable to make it land.',
-  'The Sideways Look': 'Every position has something above it that was invisible from the one below. Whoever moves because of what they can see from where they stand will move for ever, and will never find out what they had.',
-  'The Borrowed Engine': 'Running on somebody else’s doubt works, and it means somebody else is steering. The only question that engine can ask is what would prove them wrong, and that is a different question from what you actually want.',
-  'The River Does Not Wait': 'Conditions are never right, because right is not a state conditions are in. The thing goes past at its own rate whether or not you are ready, and it has been going past the whole time you were preparing.',
-  'Two Ends of One Thing': 'A disaster and a making are frequently the same event measured from different distances. You never get to stand far enough back to be certain, and there is always another year after this one.',
-  'Nothing Has a Size of Its Own': 'A number is only ever large or small against whatever you have put beside it, and you choose what you put beside it far more often than you notice.',
-  'The Number That Moves': 'Readiness recedes as you approach it, because the thing you are waiting for was never a number. Every threshold you set will be more sensible than the last one, and you will never arrive.',
-  'The Second Thing': 'What you wanted arrives with something attached that you did not ask for and were not warned about. It is usually the fear of it leaving, and it usually weighs more than the thing.',
-  'The Quiet Middle': 'The work that decides it has no screen, no course, nobody to tell and no way to get better except by being in it. It pays nothing for a long time and there is no way to make it interesting.',
-  'The Judge You Installed': 'Show the work to enough people and one of them takes up residence. It arrives with standards you never agreed to, it has no interest in the boring majority of what you do, and you will be working to please it for months before you notice it moved in.',
-  'The Unwritten Half': 'Every record is a record of what you did. The things you did not do leave no line, pass every audit, and are frequently the whole of what went wrong — which is why a clean book above a falling result is not a contradiction.',
-  'The Prize Goes to the Exception': 'What people respond to is almost never the thing that produced your year. It is the one week that did not look like the rest, and going after the applause means going after your own outlier, which is the single result you have no method for.',
-  'The Price Was the Purchase': 'You name the thing you want and book everything it costs as the price. Very often the costs are the acquisition and the named thing is a souvenir — the patience, the tolerance for a boring morning, the not negotiating, all filed as expense for years while they were the only part that transferred.',
-  'The Measuring Does Not Stop': 'You think a number will end the counting. It will not, because the counting is a habit and not a verdict: arrive at the figure and you find yourself standing in the same place doing the same arithmetic about a different figure, with the same face on.',
-  'The Narrow Gift': 'The capacity to stay on one thing long past the point where it is interesting to anybody else. It gets called one-dimensional and it is trained out of most people by about fourteen, and it is the single attribute that separates the ones who get good.',
-  'What Got Rewarded': 'You did not choose most of what you are like. You repeated whatever got a reaction and stopped whatever got a look, and by the time you were old enough to examine it, it had been your personality for twenty years.',
-  'A Picture Is Not a Rehearsal': 'You can hold a completely accurate image of the person you intend to become and never once do a thing that person does. The picture costs nothing, which is exactly what makes it so easy to keep having instead.',
-  'Mostly It Is Not Doing Things': 'The version of you one level up is not doing a great deal more than you are. They are doing considerably less, and the hours that frees up is most of the difference between you.',
-  'The State Wrote It': 'You believe the conclusion came out of the thinking. Put the same facts to yourself on two different days and you get two answers, both fully argued and both certain, and the only thing that moved was what sort of day you were having.',
-  'Nothing Records the Weather': 'Every record you keep holds what you decided and not what state you were in when you decided it. The missing half is the half that chose, which is why reading your own notes back teaches you so much less than it should.',
-  'Freedom Is Not Autonomy': 'Freedom is measured in what you do not have to do. Autonomy is measured in what you get to decide. They sound like one thing and they run in opposite directions — somebody with nothing has a great deal of the first and none of the second.',
-  'Leverage Is What Buys the No': 'Refusing work, setting a price and naming the day are not personality traits. They are bought, and the currency is something scarce that other people need. Until you hold that, every hour you own belongs to whoever is paying.',
-  'The Word You Reached For': 'You will chase the wrong thing for years because you took the nearest word for it. Freedom, success, respect — each of those is a word standing in front of something more specific, and the specific one is the only version with a method attached.',
-  'The Talent Nobody Sells': 'The attribute that decides it is usually one no course covers, because a field advertises what it can teach you and this is not that. You did not develop it. You were issued with it somewhere you would not have chosen, and the only move available is to notice.',
-  'The Sunday Version Has the Vote': 'The you who writes the rule is calm and has nothing at stake. The you who breaks it is neither. Settling in advance which of them is in charge is most of what discipline actually is, and it is a decision rather than a strength.',
-  'The Version You Can Always Do': 'Every plan is written for a good week. The one that decides your year is the one you can still run on the worst day of the month, and it is almost never the one you designed.',
-  'Starting Again Is the Cost': 'The session you miss costs very little. What costs is the fortnight after it, when you are no longer somebody who does this and have to become one again from nothing.',
-  'Too Small To Bother With': 'The reason you did nothing is that the only version available was beneath the standard you hold yourself to. That standard is not discipline. It is the most reliable method there is for doing nothing at all.',
-  'Aimed, Not Removed': 'The trait you have been trying to get rid of since you were twenty is not going anywhere. Its destructive shape and its useful one run on the same machinery, so the work was never removal. It is deciding what it points at.',
-  'What They Called It': 'The word other people put on a trait of yours was a report on how it affected them, never a description of the thing. Difficult, intense, obsessive, blunt — each of those tells you what it cost somebody, and none of them tells you what it is for.',
-  'The Convenient Reason': 'The explanation that is true and also happens to be the one you wanted is the hardest thing there is to examine from the inside, because the examining is being done by the person it benefits. Thinking about it more carefully will not settle it. Nothing you can do at your desk will.',
-  'What The Months Say': 'A decision you cannot verify at the time gets verified by what you do with the room it made. The reason was real if the work happens and it was a cover story if it does not, and you find out inside about six weeks whichever way it goes.',
-  'Nothing To Point At': 'A thing that hurts you announces itself and gets dealt with. A thing that softens you never does. It arrives as rest, some of it genuinely is rest, and that is exactly what lets it take the same forty minutes off the end of every day for a year without once being named.',
-  'You Cannot Negotiate With A Room': 'A rule is something you have to hold up. The room holds itself up, all day, at no cost to itself, and it will outlast any arrangement you make with yourself about it. Change the room or expect the fortnight.',
-  'What Is Left Standing': 'Take away nine things and the tenth gets the verdict whether or not it earned it. Elimination is a real method with one failure it cannot see from inside: it never finds the cause, it finds the survivor, and somebody who has removed most of their life has arranged the answer in advance.',
-  'The Test Runs Both Ways': 'Remove it and the problem goes, and you were right. Remove it and the problem stays, and you are standing in a very quiet room with nothing left to take out and only yourself to look at. The decision is only honest if you have genuinely thought about the second one.',
-  'A Leap Is Seen From Outside': 'The jump is real and it is a description of the outside. From inside it there is no jump at all — two or three hundred days, most of them identical, and the only thing that made it a leap is that nothing interrupted them.',
-  'The Picture Makes Tuesday Feel Like Failure': 'Hold a big enough image of where you are going and an ordinary day starts reading as evidence that it is not happening. That gap is uncomfortable, and what people do about it is change the plan — which is the thing that actually costs the year.',
-  'Sacrifice Now Or Sacrifice It': 'What you want has a price and the bill does not go away when you decline it. Refuse the cost and the thing itself becomes the thing you gave up. You paid either way, and only one of the two came with it attached.',
-  'The Number You Never Wrote Down': 'Everybody says they are getting out at a figure and almost nobody names it. An unnamed number moves — every level you reach quietly becomes the new floor, and the moment to collect goes past without announcing itself, because there was never a line drawn for it to cross.',
-  'Visibility Is Billed Later': 'Being seen is a cost that arrives on a delay. It reads as free for years and gets paid all at once, to the people who were watching for reasons of their own, and the ones who needed it most are always the ones it finds first.',
-  'Everything Is Paid For': 'What you take does not stay taken. The account is not moral and it is not fast, and it does not care whether you meant it — the only choice available is whether you put it down yourself while it is still yours to put down.',
-  'The Day Nobody Announced': 'The morning it changed was indistinguishable from the four hundred before it. You will not feel it arrive. You will notice, much later and by accident, that it is already behind you.'
-};
 
-/* DARK IS THE PULL AND LIGHT IS THE WAY. Every named thing here is one
-   or the other: something that takes you off, or something that carries
-   you. The family sorts inside each side, because thirty-three names in
-   a row with no structure is a wall rather than a list.
 
-   THIS TABLE IS WHAT GETS DRAWN, not the lessons. The list used to be
-   derived by walking every lesson's own three, which meant a name whose
-   last lesson was rewritten simply stopped existing — three of them had
-   gone that way and were sitting in LAWS with a definition and no way
-   to reach them. Reading the table instead makes that impossible, and
-   the two are asserted to hold exactly the same names on boot. */
-/* TWO CUTS, NOT ONE. The side says what a thing DOES to you — dark is
-   the pull, light is the way. The axis says where it lives, and it
-   replaced four families (the inner world, motion, other people, time)
-   that were a description of subject matter rather than of anything
-   you could act on.
 
-   INTERNAL: the mechanism runs inside you and would still run in an
-   empty room — a belief, a state, a standard, a verdict you deliver,
-   what you are telling yourself.
-   EXTERNAL: it runs whether or not you have an opinion about it —
-   another person, the clock, a cost, the room, what the work is.
 
-   Internal comes first because that is the order the thing has: you
-   cannot do much about the second list from inside the first. All 57
-   were read against that rule rather than folded from their old
-   family, which is why the two do not line up — nine of the old
-   inner-world names are external here and most of Motion is not. */
-var AXIS = { internal: 'Internal', external: 'External' };
 
-var SIDE = {
-  'The Answer You Are Carrying': ['light', 'internal'],
-  'The Lit Ground': ['dark', 'internal'],
-  'The Full Cup': ['dark', 'internal'],
-  'The Cost of Being Right': ['dark', 'internal'],
-  'The Early Verdict': ['dark', 'internal'],
-  'The Long Carry': ['dark', 'internal'],
-  'The Sentence That Arrives Ready': ['dark', 'internal'],
-  'The Spent Feeling': ['dark', 'internal'],
-  'The Walk': ['light', 'external'],
-  'The Wheel': ['light', 'internal'],
-  'The Toll': ['dark', 'external'],
-  'What Only Made Sense Back There': ['light', 'external'],
-  'The Handle': ['light', 'internal'],
-  'The Open Door': ['dark', 'external'],
-  'The Stranger’s Mouth': ['light', 'external'],
-  'The Sideways Look': ['dark', 'external'],
-  'The Borrowed Engine': ['dark', 'external'],
-  'The River Does Not Wait': ['light', 'external'],
-  'Two Ends of One Thing': ['light', 'external'],
-  'Nothing Has a Size of Its Own': ['dark', 'internal'],
-  'The Number That Moves': ['dark', 'internal'],
-  'The Second Thing': ['dark', 'internal'],
-  'The Quiet Middle': ['light', 'external'],
-  'The Judge You Installed': ['dark', 'external'],
-  'The Unwritten Half': ['dark', 'internal'],
-  'The Prize Goes to the Exception': ['dark', 'external'],
-  'The Price Was the Purchase': ['light', 'external'],
-  'The Measuring Does Not Stop': ['dark', 'internal'],
-  'The Narrow Gift': ['light', 'internal'],
-  'What Got Rewarded': ['dark', 'external'],
-  'A Picture Is Not a Rehearsal': ['dark', 'internal'],
-  'Mostly It Is Not Doing Things': ['light', 'external'],
-  'The State Wrote It': ['dark', 'internal'],
-  'Nothing Records the Weather': ['dark', 'internal'],
-  'Freedom Is Not Autonomy': ['light', 'internal'],
-  'Leverage Is What Buys the No': ['light', 'external'],
-  'The Word You Reached For': ['dark', 'internal'],
-  'The Talent Nobody Sells': ['light', 'internal'],
-  'The Sunday Version Has the Vote': ['light', 'internal'],
-  'The Version You Can Always Do': ['light', 'internal'],
-  'Starting Again Is the Cost': ['dark', 'internal'],
-  'Too Small To Bother With': ['dark', 'internal'],
-  'Aimed, Not Removed': ['light', 'internal'],
-  'What They Called It': ['dark', 'external'],
-  'The Convenient Reason': ['dark', 'internal'],
-  'What The Months Say': ['light', 'external'],
-  'Nothing To Point At': ['dark', 'internal'],
-  'You Cannot Negotiate With A Room': ['light', 'external'],
-  'What Is Left Standing': ['dark', 'internal'],
-  'The Test Runs Both Ways': ['light', 'external'],
-  'A Leap Is Seen From Outside': ['light', 'external'],
-  'The Picture Makes Tuesday Feel Like Failure': ['dark', 'internal'],
-  'Sacrifice Now Or Sacrifice It': ['light', 'external'],
-  'The Number You Never Wrote Down': ['dark', 'internal'],
-  'Visibility Is Billed Later': ['dark', 'external'],
-  'Everything Is Paid For': ['dark', 'external'],
-  'The Day Nobody Announced': ['light', 'external']
-};
-
+/* A STORY WITH NO THEMES, OR A THEME POINTING AT A STORY THAT IS NOT
+   THERE, IS SILENT RATHER THAN BROKEN: the list simply comes out short
+   and nothing says so. Both directions, at boot. */
 (function () {
-  for (var n in LAWS) if (!SIDE[n]) throw new Error('no side for ' + n);
-  for (var k in SIDE) {
-    if (['dark', 'light'].indexOf(SIDE[k][0]) < 0) throw new Error('bad side for ' + k);
-    if (!AXIS[SIDE[k][1]]) throw new Error('bad axis for ' + k);
-  }
-  for (var m in SIDE) if (!LAWS[m]) throw new Error('no definition for ' + m);
+  var seen = {};
+  TH.forEach(function (t) {
+    if (!SRC.filter(function (x) { return x.i === t.s; })[0]) throw new Error('no story for ' + t.n);
+    if (!AXIS[t.x]) throw new Error('bad axis for ' + t.n);
+    seen[t.s] = true;
+  });
+  SRC.forEach(function (x) { if (!seen[x.i]) throw new Error('no themes for ' + x.n); });
 }());
 
 function mask(p) {
@@ -694,133 +547,113 @@ function mask(p) {
 }
 
 
-function sideOf(n) { return (SIDE[n] || ['dark'])[0]; }
-function axisOf(n) { return (SIDE[n] || [0, 'internal'])[1]; }
+function srcOf(id) { return SRC.filter(function (x) { return x.i === id; })[0]; }
+function themesOf(id, ax) { return TH.filter(function (t) { return t.s === id && t.x === ax; }); }
 
-/* ONE PAINTER, TWO SIDES. Dark and Light are the same screen reading
-   the same list through one field, so there is no second drawing to
-   drift. Internal and external sort inside each side: thirty-three
-   names in a row with no structure is a wall rather than a list. */
-function paintSide(side) {
-  var p = $('#al' + side.charAt(0).toUpperCase() + side.slice(1) + 'Pane');
+/* ONE CARD, DRAWN ONCE. It is built the same on a story's own page and
+   in the two axis lists, because two constructions of one object is how
+   the two come to disagree — this repo has written that down already
+   about a question asked in two places and a tag built twice. */
+function card(t) {
+  var d = el('div', 'al-th');
+  d.setAttribute('data-x', t.x);
+  d.appendChild(el('h3', 'al-tn', t.n));
+  d.appendChild(el('div', 'al-tsub', t.b));
+  d.appendChild(el('div', 'al-caps al-tl', 'The theme'));
+  d.appendChild(el('p', 'al-tb', t.t));
+  d.appendChild(el('div', 'al-caps al-tl is-les', 'The spiritual lesson'));
+  d.appendChild(el('p', 'al-tb is-les', t.l));
+  return d;
+}
+
+function paintFilms() {
+  var p = $('#alFilmsPane'); p.textContent = '';
+  SRC.forEach(function (x) {
+    var b = el('button', 'al-th al-f');
+    b.setAttribute('data-src', x.i);
+    b.appendChild(el('h3', 'al-tn', x.n));
+    b.appendChild(el('div', 'al-tsub', String(x.y)));
+    p.appendChild(b);
+  });
+  mask(p);
+}
+
+/* ONE PAINTER, TWO AXES — the same screen reading the same list through
+   one field, grouped by the story it came from, so a lesson is never
+   stranded from the thing that is evidence for it. */
+function paintAxis(ax) {
+  var p = $('#al' + ax.charAt(0).toUpperCase() + ax.slice(1) + 'Pane');
   p.textContent = '';
-  for (var f in AXIS) {
-    var rows = [];
-    for (var n in SIDE) if (SIDE[n][0] === side && SIDE[n][1] === f) rows.push(n);
-    if (!rows.length) continue;
-    rows.sort();
-    p.appendChild(el('div', 'al-grp al-caps', AXIS[f]));
-    var w = el('div', 'al-tags');
-    rows.forEach(function (n) {
-      var t = el('button', 'al-tag', n);
-      t.setAttribute('data-f', SIDE[n][1]); t.setAttribute('data-law', n);
-      w.appendChild(t);
-    });
-    p.appendChild(w);
-  }
-  mask(p);
-}
-
-function countOf(side) {
-  var n = 0;
-  for (var m in SIDE) if (SIDE[m][0] === side) n++;
-  return n;
-}
-
-/* A LESSON IS THE LINE AND THE QUESTION. It used to name the story it
-   came from and open it; there is no story to open, so the card is a
-   div and the source is the film it was taken from. */
-function paintLessons() {
-  var p = $('#alLessonsPane'); p.textContent = '';
-  S.forEach(function (s) {
-    var d = el('div', 'al-rule');
-    if (s.src && s.src !== 'Ours') d.appendChild(el('div', 'al-caps', s.src));
-    d.appendChild(el('b', null, s.rule));
-    d.appendChild(el('div', 'al-rfrom', s.q));
-    p.appendChild(d);
+  SRC.forEach(function (x) {
+    var rows = themesOf(x.i, ax);
+    if (!rows.length) return;
+    p.appendChild(el('div', 'al-grp al-caps', x.n));
+    rows.forEach(function (t) { p.appendChild(card(t)); });
   });
   mask(p);
 }
 
-function paintLaw(name) {
-  var p = $('#alLawPane'); p.textContent = '';
-
+function paintFilm(id) {
+  var x = srcOf(id); if (!x) return;
+  var p = $('#alFilmPane'); p.textContent = '';
   var lead = el('div', 'al-lead');
-  lead.appendChild(el('h1', 'al-disp', name));
-  lead.appendChild(el('div', 'al-caps',
-    (sideOf(name) === 'dark' ? 'Dark' : 'Light') + '  \u00b7  ' + (AXIS[axisOf(name)] || '')));
+  lead.appendChild(el('h1', 'al-disp', x.n));
+  lead.appendChild(el('div', 'al-caps', String(x.y)));
   p.appendChild(lead);
-
   var sh = el('div', 'al-sheet');
-  var d = el('p', 'al-body'); d.textContent = LAWS[name] || '';
-  d.style.marginBottom = '26px';
-  sh.appendChild(d);
-
-  /* WHERE IT SHOWS UP. It listed the stories carrying it; it lists the
-     lessons now, which is the same relationship with the stories gone. */
-  var carry = S.filter(function (x) {
-    return x.laws.some(function (l) { return l.n === name; });
-  });
-  if (carry.length) {
-    var h = el('div', 'al-rule-hd');
-    h.appendChild(el('span', 'al-caps',
-      carry.length === 1 ? 'One lesson carries it' : carry.length + ' lessons carry it'));
-    sh.appendChild(h);
-    carry.forEach(function (x) {
-      var r = el('div', 'al-rule');
-      if (x.src && x.src !== 'Ours') r.appendChild(el('div', 'al-caps', x.src));
-      r.appendChild(el('b', null, x.rule));
-      sh.appendChild(r);
-    });
+  for (var a in AXIS) {
+    var rows = themesOf(id, a);
+    if (!rows.length) continue;
+    sh.appendChild(el('div', 'al-grp al-caps', AXIS[a]));
+    rows.forEach(function (t) { sh.appendChild(card(t)); });
   }
-
   p.appendChild(sh);
   p.scrollTop = 0; mask(p);
 }
 
-var VIEWS = ['open', 'dark', 'light', 'lessons', 'law'];
+var VIEWS = ['open', 'films', 'internal', 'external', 'film'];
 function view(v) {
-  if (VIEWS.indexOf(v) < 0) v = 'dark';
+  if (VIEWS.indexOf(v) < 0) v = 'films';
   document.documentElement.setAttribute('data-view', v);
   VIEWS.forEach(function (x) {
     var n = $('#al' + x.charAt(0).toUpperCase() + x.slice(1));
     if (n) n.classList.toggle('is-on', x === v);
   });
-  $('#alFoot').hidden = (v === 'open' || v === 'law');
-  $('#alLawX').hidden = (v !== 'law');
+  $('#alFoot').hidden = (v === 'open' || v === 'film');
+  $('#alFilmX').hidden = (v !== 'film');
   document.querySelectorAll('.al-tab').forEach(function (b) {
     b.setAttribute('aria-current', b.getAttribute('data-v') === v ? 'true' : 'false');
   });
-  $('#alDark').querySelector('.al-count').textContent = countOf('dark');
-  $('#alLight').querySelector('.al-count').textContent = countOf('light');
-  $('#alLessons').querySelector('.al-count').textContent = S.length;
-  if (v === 'dark') paintSide('dark');
-  if (v === 'light') paintSide('light');
-  if (v === 'lessons') paintLessons();
-  if (v !== 'law') { st.last = v; save(); }
+  $('#alFilms').querySelector('.al-count').textContent = SRC.length;
+  $('#alInternal').querySelector('.al-count').textContent = TH.filter(function (t) { return t.x === 'internal'; }).length;
+  $('#alExternal').querySelector('.al-count').textContent = TH.filter(function (t) { return t.x === 'external'; }).length;
+  if (v === 'films') paintFilms();
+  if (v === 'internal') paintAxis('internal');
+  if (v === 'external') paintAxis('external');
+  if (v !== 'film') { st.last = v; save(); }
 }
 
-var lawBack = 'dark';
-function openLaw(name) {
-  if (!LAWS[name]) return;
+var filmBack = 'films';
+function openFilm(id) {
+  if (!srcOf(id)) return;
   var now = document.documentElement.getAttribute('data-view');
-  if (now !== 'law' && now !== 'open') lawBack = now;
-  paintLaw(name);
-  view('law');
+  if (now !== 'film' && now !== 'open') filmBack = now;
+  paintFilm(id);
+  view('film');
 }
 
 document.addEventListener('click', function (e) {
-  var t = e.target.closest ? e.target.closest('.al-tab, .al-pill, .al-tag, #alOpenB, #alLawX') : null;
+  var t = e.target.closest ? e.target.closest('.al-tab, .al-pill, .al-f, #alOpenB, #alFilmX') : null;
   if (!t) return;
-  if (t.id === 'alOpenB') return view(VIEWS.indexOf(st.last) > 0 && st.last !== 'law' ? st.last : 'dark');
-  if (t.id === 'alLawX') return view(lawBack);
-  var law = t.getAttribute && t.getAttribute('data-law');
-  if (law) return openLaw(law);
+  if (t.id === 'alOpenB') return view(VIEWS.indexOf(st.last) > 0 && st.last !== 'film' ? st.last : 'films');
+  if (t.id === 'alFilmX') return view(filmBack);
+  var id = t.getAttribute && t.getAttribute('data-src');
+  if (id) return openFilm(id);
   if (t.classList.contains('al-tab')) return view(t.getAttribute('data-v'));
 });
 
 view('open');
-window.alDrive = { view: view, openLaw: openLaw };
+window.alDrive = { view: view, openFilm: openFilm };
 
 }());
 </script>
