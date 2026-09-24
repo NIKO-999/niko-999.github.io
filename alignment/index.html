@@ -475,7 +475,7 @@ var SRC = [
      the footage, the argument, the positions held in the open for years —
      so the mindset half is where the evidence actually is, and the shape
      follows the evidence rather than a row in a table. */
-  { i: "goldie", n: "God Game Goldie", p: "London", k: "figure", g: "game", deep: true },
+  { i: "goldie", n: "Game God Goldie", p: "@GameGodGoldie", k: "figure", g: "game", deep: true },
   { i: "devil", n: "Outwitting the Devil", p: "Napoleon Hill", k: "book", g: "book" },
   { i: "tagr", n: "Think and Grow Rich", p: "Napoleon Hill", k: "book", g: "book" },
   { i: "mdh", n: "Million Dollar Habits", p: "Brian Tracy", k: "book", g: "book" },
@@ -1352,7 +1352,7 @@ var TH = [
     t: "No board, no acquisition, no obligation to grow. They can change the product, the price or the company's name whenever they decide to, and have.",
     l: "Autonomy is not a feeling, it is a structural position, and it is bought by everything you refused along the way. You will not notice you have it until somebody tries to tell you what to do." },
   { s: "goldie", x: "mindset", n: "The Name Is the Claim", b: "You Decide What You Are First",
-    t: "The whole thing is called God Game. He did not build a following on a technique with a name, he built it on a claim about who he is, made before anybody had agreed to it, and then spent years on camera making it expensive to argue with.",
+    t: "He calls himself a Game God. He did not build a following on a technique with a name, he built it on a claim about who he is, made before anybody had agreed to it, and then spent years on camera making it expensive to argue with.",
     l: "You are going to be wrong about yourself in one direction or the other, and nobody is coming to correct you kindly either way. Decide upward and then go and make it hard to contradict. The men waiting to feel worthy before they act are waiting on a feeling that only the acting produces." },
   { s: "goldie", x: "mindset", n: "Reps, Not Lines", b: "Volume Is the Method",
     t: "The method on the channel is not a script. It is going out, repeatedly, and starting conversations with people who did not ask you to, hundreds of times, most of which go nowhere in particular.",
@@ -1432,6 +1432,7 @@ SRC.forEach(function (x) {
 }());
 
 var STOPS = ['pin', 'hi'];
+function themesOfSrc(i) { return TH.filter(function (t) { return t.s === i; }); }
 function thOf(k) { return TH.filter(function (t) { return t.k === k; })[0]; }
 
 /* A MARK POINTING AT NOTHING IS DROPPED AND THE REST OF THE LIST IS NOT.
@@ -1524,6 +1525,33 @@ function mark(m, k) {
   /* And a source that says it is deep has to actually be — otherwise the flag
      is a permission nobody spent, sitting on a row that looks like every
      other one. */
+  /* A SOURCE'S OWN NAME, WRITTEN INTO ITS OWN PROSE, HAS TO MATCH THE
+     ROW. It shipped as "the whole thing is called God Game" on a source
+     the row calls Game God Goldie -- the name reversed, inside the one
+     theme that is ABOUT the name, which is the worst place for it to be
+     wrong and the easiest place to read past. Two names have now gone
+     out misspelt, so this is a rule rather than another correction.
+     Asserted as the reversed adjacent PAIR, which is the whole of the
+     fault: a scrambled name is a permutation, and a permutation of two
+     words is the one somebody actually types. Stop words and short
+     words are dropped first, or "the Devil the author describes" reads
+     as a reversal of "Outwitting the Devil". */
+  (function () {
+    var stop = { the: 1, and: 1, for: 1, his: 1, her: 1, its: 1, was: 1 };
+    SRC.forEach(function (x) {
+      var w = x.n.split(' ').filter(function (q) {
+        return q.length >= 3 && !stop[q.toLowerCase()];
+      });
+      for (var j = 1; j < w.length; j++) {
+        var back = (w[j] + ' ' + w[j - 1]).toLowerCase();
+        themesOfSrc(x.i).forEach(function (t) {
+          if ((t.t + ' ' + t.l).toLowerCase().indexOf(back) >= 0)
+            throw new Error(x.n + ' is written backwards as "' + back + '" in ' + t.n);
+        });
+      }
+    });
+  }());
+
   SRC.forEach(function (x) {
     if (!x.deep) return;
     var most = 0;
