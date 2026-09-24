@@ -5,6 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0B0A08">
 <title>Alignment</title>
+<!-- A PAGE ON THE WEB ANSWERS THE REQUEST THE BROWSER MAKES ANYWAY.
+     Without these Chromium asks for /favicon.ico on every load and the
+     server answers 404 — a console error on every open, which is noise
+     the one check that counts console errors then has to be taught to
+     ignore. The apple-touch-icon and the standalone meta are what make
+     Add to Home Screen open this full-screen rather than in a browser
+     with a URL bar over the head. -->
+<link rel="icon" href="../icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alignment">
+<meta name="description" content="288 themes and lessons from sixteen figures and eight books.">
 <link rel="preload" href="../arc/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 @font-face { font-family: 'Inter'; font-weight: 100 900; font-display: swap;

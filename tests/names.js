@@ -45,6 +45,13 @@ const APPS = [
   ['jade/index.html'],
   ['orrery/index.html'],
   ['schedule/index.html', 'schedule/app.js'],
+  /* alignment/ joined the day it shipped, which is this file's own rule
+     and the one days/ was written to enforce: it shipped with a
+     var(--ink-on) whose token it had not brought across, an invalid
+     declaration does not fall back, it inherits, and the chip ran at
+     1.74:1 looking entirely deliberate. This check finds that in a
+     tenth of a second where a browser test takes four minutes. */
+  ['alignment/index.html'],
 ];
 const NAMED = (app) => app[0];
 const MARKUP = (app) => app.filter(f => f.endsWith('.html'));
@@ -400,8 +407,10 @@ for (const app of APPS.concat([['shell.js']])) {
      it uses in its own :root and loads no shell.css — so it is checked
      against itself and the union is harmless. A fifth app is a fifth
      place for a token to go missing. */
+  /* alignment/ is the same case again — its own :root, no shell.css. */
   const SRC = ['shell.css', 'trading/index.html', 'days/index.html',
-               'jade/index.html', 'orrery/index.html', 'schedule/app.css'];
+               'jade/index.html', 'orrery/index.html', 'schedule/app.css',
+               'alignment/index.html'];
   const text = SRC.map(f => read(f)).join('\n');
   /* Defined anywhere: a stylesheet, an inline style attribute, or a
      template literal that sets one. All three are legitimate. */
