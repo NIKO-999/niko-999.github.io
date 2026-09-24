@@ -105,12 +105,19 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
       out.push(...[...document.querySelectorAll(id + ' .al-f[data-src]')].map(n => n.getAttribute('data-src'))); });
     return out;
   });
-  ok('twenty-four sources across the two indexes', srcs.length === 24, srcs.length);
+  ok('twenty-five sources across the two indexes', srcs.length === 25, srcs.length);
 
-  /* Every source opens, names itself, and carries four sections of
-     exactly three, with both paragraphs of real length on every card.
-     A card with one paragraph is the shape this file is for: it is
-     still a card, it still draws, and half of it is missing. */
+  /* Every source opens, names itself, and carries four sections of at
+     least three, with both paragraphs of real length on every card. A
+     card with one paragraph is the shape this file is for: it is still
+     a card, it still draws, and half of it is missing.
+
+     THREE IS A FLOOR HERE TOO, and the count is read off the sections
+     rather than pinned at twelve: one source is deliberately deeper
+     than the rest and a hard twelve would make the suite fail on the
+     feature. What still cannot pass is a section coming up short, or
+     the four sections disagreeing with the cards drawn under them —
+     which is the half a loosened count could have thrown away. */
   const bad = await page.evaluate((ids) => {
     const out = [];
     ids.forEach(id => {
@@ -126,14 +133,26 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
           || ps[1].textContent.split(' ').length < 15;
       }).length;
       const ax = cards.map(c => c.getAttribute('data-x'));
+      const per = ['mindset', 'internal', 'external', 'karmic'].map(k => ax.filter(a => a === k).length);
       if (!title || heads.join('|') !== 'Mindset|Internal|External|Karmic'
-        || cards.length !== 12 || thin
-        || ['mindset', 'internal', 'external', 'karmic'].some(k => ax.filter(a => a === k).length !== 3))
-        out.push([id, { title, heads, n: cards.length, thin }]);
+        || per.some(n => n < 3) || per.reduce((a, b) => a + b, 0) !== cards.length || thin)
+        out.push([id, { title, heads, n: cards.length, per, thin }]);
     });
     return out;
   }, srcs);
-  ok('every source carries four sections of exactly three', bad.length === 0, bad);
+  ok('every source carries four sections of at least three', bad.length === 0, bad);
+
+  /* AND EXACTLY ONE OF THEM IS DEEPER, asserted as a count rather than by
+     name: "some source has more than twelve" passes on a build where the
+     flag leaked onto all of them, and naming the id makes it a check on
+     the fixture rather than on the rule. */
+  const deep = await page.evaluate((ids) => ids.map(id => {
+    window.alDrive.openSource(id);
+    return document.querySelectorAll('#alSourcePane .al-th').length;
+  }), srcs);
+  ok('exactly one source runs deeper than twelve',
+     deep.filter(n => n > 12).length === 1 && deep.filter(n => n === 12).length === srcs.length - 1,
+     deep);
 
   /* ── THE FOUR HUES ─────────────────────────────────────────────── */
 

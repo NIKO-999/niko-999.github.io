@@ -327,8 +327,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   <div class="al-mark" role="img" aria-label="Alignment">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v20M5 8l7-6 7 6M5 16l7 6 7-6"/></svg>
   </div>
-  <h1 class="al-disp" id="alOpenT">Sixteen people and eight books.</h1>
-  <p class="al-note" id="alOpenN">Two hundred and eighty-eight themes, from sixteen real careers and eight books, split four ways: the model they ran on, what they were actually like, what the world did, and what came back. What the story does, and what it leaves you with.</p>
+  <h1 class="al-disp" id="alOpenT">Seventeen people and eight books.</h1>
+  <p class="al-note" id="alOpenN">Three hundred and five themes, from seventeen real careers and eight books, split four ways: the model they ran on, what they were actually like, what the world did, and what came back. What the story does, and what it leaves you with.</p>
   <button class="al-pill" id="alOpenB">Begin</button>
 </section>
 
@@ -450,7 +450,7 @@ var AXIS = { mindset: 'Mindset', internal: 'Internal', external: 'External', kar
    this project keeps having to take back out. The figures are two, and a
    founder sitting between Frank Lucas and Big Meech with nothing saying
    so reads as a mistake in the list rather than as a second kind. */
-var GROUP = { street: "The street", built: "The builders" };
+var GROUP = { street: "The street", built: "The builders", game: "The game" };
 
 var SRC = [
   { i: "fifty", n: "50 Cent", p: "Queens, New York", k: "figure", g: "street" },
@@ -469,6 +469,13 @@ var SRC = [
   { i: "spanx", n: "Sara Blakely", p: "Spanx", k: "figure", g: "built" },
   { i: "mchmp", n: "Ben Chestnut", p: "Mailchimp", k: "figure", g: "built" },
   { i: "sigs", n: "Jason Fried", p: "37signals", k: "figure", g: "built" },
+  /* THE ONE SOURCE THAT IS NOT TWELVE, and `deep` is what says so in the
+     data rather than in a comment. A teacher is a different kind of figure
+     from a career: what is documented about him IS the published method —
+     the footage, the argument, the positions held in the open for years —
+     so the mindset half is where the evidence actually is, and the shape
+     follows the evidence rather than a row in a table. */
+  { i: "goldie", n: "God Game Goldie", p: "London", k: "figure", g: "game", deep: true },
   { i: "devil", n: "Outwitting the Devil", p: "Napoleon Hill", k: "book", g: "book" },
   { i: "tagr", n: "Think and Grow Rich", p: "Napoleon Hill", k: "book", g: "book" },
   { i: "mdh", n: "Million Dollar Habits", p: "Brian Tracy", k: "book", g: "book" },
@@ -1344,6 +1351,57 @@ var TH = [
   { s: "sigs", x: "karmic", n: "Nobody Owns Them", b: "What Two Decades of No Bought",
     t: "No board, no acquisition, no obligation to grow. They can change the product, the price or the company's name whenever they decide to, and have.",
     l: "Autonomy is not a feeling, it is a structural position, and it is bought by everything you refused along the way. You will not notice you have it until somebody tries to tell you what to do." },
+  { s: "goldie", x: "mindset", n: "The Name Is the Claim", b: "You Decide What You Are First",
+    t: "The whole thing is called God Game. He did not build a following on a technique with a name, he built it on a claim about who he is, made before anybody had agreed to it, and then spent years on camera making it expensive to argue with.",
+    l: "You are going to be wrong about yourself in one direction or the other, and nobody is coming to correct you kindly either way. Decide upward and then go and make it hard to contradict. The men waiting to feel worthy before they act are waiting on a feeling that only the acting produces." },
+  { s: "goldie", x: "mindset", n: "Reps, Not Lines", b: "Volume Is the Method",
+    t: "The method on the channel is not a script. It is going out, repeatedly, and starting conversations with people who did not ask you to, hundreds of times, most of which go nowhere in particular.",
+    l: "You are not looking for the thing to say. You are building a nervous system that does not spike when a stranger looks at you, and nothing reaches that except the reps. Every man hunting for the perfect opener is buying a way out of the hundred boring attempts that would have fixed it." },
+  { s: "goldie", x: "mindset", n: "You Cannot Outperform What You Think You Are Worth", b: "Inner Before Outer",
+    t: "The material returns to one point across years of it: a man who does not believe he is worth talking to will sabotage any script handed to him, in the tone, in the timing, in the second he folds.",
+    l: "Technique sits on top of self-concept and can never rise above it. That is why the advice fails hardest for the man who needs it most, and why the only real fix is slow, unglamorous and internal, which is exactly the part nobody wants to hear." },
+  { s: "goldie", x: "mindset", n: "Discipline Is the Day You Feel Worst", b: "State Is Not a Prerequisite",
+    t: "The discipline the work actually asks for is going out cold, tired and already turned down twice. The days you felt good were never the part that was hard.",
+    l: "Motivation is a passenger. If you only move when you feel like moving you have handed your life to a mood, and a mood has no interest in what you were planning to become. Go on the bad day and the good days stop being load-bearing." },
+  { s: "goldie", x: "mindset", n: "The Fear Is Outlasted, Not Removed", b: "It Does Not Leave",
+    t: "The honest version in the material is that approach anxiety does not go away. It gets smaller relative to a man who has done it thousands of times, which is a different claim from it going.",
+    l: "You are waiting for the nerves to stop so you can begin. They will not. What changes is that you stop reading the feeling as a verdict and start reading it as weather, and that only happens on the far side of having done it afraid." },
+  { s: "goldie", x: "mindset", n: "A Standard Is a Refusal", b: "What You Will Not Accept",
+    t: "Abundance, stated plainly rather than as a slogan, is not that you get more. It is that you stop accepting less, and the stopping comes first.",
+    l: "Most people treat a standard as a reward you are issued once you have options. It is the cause, not the effect. You hold the line while you have nothing, and that is what produces something, which is precisely the order that makes it difficult." },
+  { s: "goldie", x: "internal", n: "He Films the Rejections", b: "The Part Everybody Else Cuts",
+    t: "The footage keeps the ones that do not work: the walk-off, the conversation that dies in four seconds, the flat no. On a channel where he is the product, the misses stay in.",
+    l: "What you will let people watch you fail at is the entire measure of how much of you is performance. Everybody's highlight reel looks the same; the man who publishes the misses is the only one telling you what the work costs." },
+  { s: "goldie", x: "internal", n: "The Persona Is Built, Not Found", b: "A Character You Can Stand Behind",
+    t: "The gold, the name, the way he presents \u2014 none of it is accidental and none of it pretends to be. It is a constructed version of a man, made deliberately and worn in public for years.",
+    l: "The choice is not between being authentic and being a character. It is whether you build the character on purpose or let one accumulate out of your worst habits. You are a version of yourself either way and only one of them was chosen." },
+  { s: "goldie", x: "internal", n: "The Silence Between Attempts", b: "Nobody Is Watching the Practice",
+    t: "The visible part is a four-minute clip. What produced it is hours on a street, mostly alone, mostly not filming, with nothing happening.",
+    l: "What you see of anybody is the fraction that was worth showing. You are comparing your own dead hours against somebody else's edit, losing, and then concluding something about yourself from a comparison that was never on offer." },
+  { s: "goldie", x: "internal", n: "Being Bad in Front of People", b: "The Only Way Through",
+    t: "A bootcamp means approaching while a coach and a camera watch you do it badly, in public, sober, with witnesses, at the start.",
+    l: "Almost every adult stops learning new things at exactly the point where they would have to be visibly incompetent. That is the ceiling, and it is not made of talent. Whoever can stand being bad in front of people for longer keeps improving after everybody else has quietly stopped." },
+  { s: "goldie", x: "external", n: "Four Seconds Decide the Next Four Minutes", b: "The Open Is the Trade",
+    t: "The material is specific about the opening: how you arrive, the pace, whether your feet are planted, what your face is doing. The part before a word has landed does most of the work.",
+    l: "In any first contact the frame is set before there is content to judge, and almost nobody prepares for the half that decides it. Whatever you rehearsed all week is the least of what is being read." },
+  { s: "goldie", x: "external", n: "You Are Interrupting, So Own It", b: "Do Not Apologise for Existing",
+    t: "An approach is an interruption of somebody who did not ask for one, and the answer in the material is never to disguise that. It is to be direct about it and be worth the interruption.",
+    l: "The apology in the voice is what turns it into an imposition. Hedging does not lower the cost of asking, it adds a second thing to be embarrassed about. Ask plainly and carry the answer either way." },
+  { s: "goldie", x: "external", n: "Most of It Is a No, by Design", b: "A Rate, Not a Verdict",
+    t: "The footage makes it plain that the large majority of attempts end in nothing at all. That is not the method failing. That is the shape the method has.",
+    l: "You are running a rate and treating every single trial as a referendum on you. One no contains no information worth having, and a man who reads it as one stops running the rate, which was the only thing that was ever going to work." },
+  { s: "goldie", x: "external", n: "He Went Where the People Are", b: "Proximity Is Half the Strategy",
+    t: "The work happens on busy streets in one of the largest cities in Europe, and that is not incidental: the method needs volume, and volume needs density.",
+    l: "You can be perfectly prepared standing somewhere the thing cannot happen. A great deal of what gets called luck is being in the room where the outcome is possible, repeatedly, for years." },
+  { s: "goldie", x: "karmic", n: "Somebody Is on the Other Side", b: "A Rep Count Is Not a Person",
+    t: "The footage is of real people going about their day, and the material draws a line where an offer turns into pressure.",
+    l: "A skill that treats other people as a number rots into something else while you are still calling it practice. Whatever you are getting good at, somebody is on the receiving end of it, and the day you stop noticing that is the day it stops being worth having." },
+  { s: "goldie", x: "karmic", n: "He Published the Method", b: "Given Away, Not Sold as a Secret",
+    t: "The bulk of it is free and public: the argument, the footage, the reasoning, years of it. What is paid for is time and attention rather than access to something hidden.",
+    l: "Nothing worth knowing has ever been kept secret by the person who actually had it. What gets sold as hidden knowledge is usually sold that way because it does not survive being tested in the open." },
+  { s: "goldie", x: "karmic", n: "Years of the Same Claim", b: "Consistency Is the Only Audit",
+    t: "The position taken years ago about self-belief, volume and standards is the position now, argued in public throughout, where anybody can go back and check.",
+    l: "There is no certificate for teaching confidence and no way to audit it except the length of the record. Whatever you are claiming, the only evidence you will ever have is that you were still saying it in the years it paid nothing." },
 ];
 
 var $ = function (s) { return document.querySelector(s); };
@@ -1448,9 +1506,29 @@ function mark(m, k) {
     if (!AXIS[t.x]) throw new Error('bad axis for ' + t.n);
     seen[t.s] = true;
   });
+  /* THREE IS A FLOOR AND ONLY A DECLARED SOURCE MAY PASS IT. Written as
+     `!== 3` this described the data rather than protecting anything, so the
+     day one source earned more the invariant was simply in the way. What it
+     was really holding is that no axis comes out short and no source is
+     lopsided by ACCIDENT — so the exception is named in the record, which is
+     this repo's own rule about an exception being raised rather than a check
+     being relaxed. A source without `deep` that grows a fourth theme still
+     throws, which is the half that catches a duplicated row. */
   SRC.forEach(function (x) {
-    for (var a in AXIS) if (themesOf(x.i, a).length !== 3)
-      throw new Error(x.n + ' has ' + themesOf(x.i, a).length + ' ' + a);
+    for (var a in AXIS) {
+      var n = themesOf(x.i, a).length;
+      if (n < 3) throw new Error(x.n + ' has only ' + n + ' ' + a);
+      if (n > 3 && !x.deep) throw new Error(x.n + ' has ' + n + ' ' + a + ' and is not deep');
+    }
+  });
+  /* And a source that says it is deep has to actually be — otherwise the flag
+     is a permission nobody spent, sitting on a row that looks like every
+     other one. */
+  SRC.forEach(function (x) {
+    if (!x.deep) return;
+    var most = 0;
+    for (var a in AXIS) most = Math.max(most, themesOf(x.i, a).length);
+    if (most <= 3) throw new Error(x.n + ' is marked deep and is not');
   });
   /* Four axes over one life will collapse into each other unless
      something refuses it, and the cheapest refusal is the name. */
