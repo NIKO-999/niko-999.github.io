@@ -13437,6 +13437,94 @@ rather than the new one: on an existing block the picker is
 single-select, so pressing the same chip twice turns the day OFF
 rather than putting it back.
 
+## What feeds Train is the keyword table, not a list of names
+
+Reported from the phone: **pressing Train on Showing up just ticked it
+instead of asking what you trained** — while the same block's own row
+in the week opened the picker the whole time.
+
+**`from: ['Train']` WAS THE SECOND LIST OF WORDS THIS FILE SAYS NOT TO
+KEEP.** `scIsTrain` asks the keyword table and `scBlocksFor` matched a
+literal name, so the two disagreed about what training is. The comment
+sitting on `scIsTrain` already said it — *what counts as training is
+the keyword table's answer, not a second list kept in step with it by
+hand* — and `from` was that second list, three thousand lines away.
+
+**IT WAS NEVER JUST THE DOOR.** `scBlocksFor` is the one place that
+decides which blocks feed a tally item, so a gym block called anything
+but "Train" also did not go green when you ticked Train, and the day
+did not count as one Train was on — which is the strip's own *a day the
+thing was never on is not a day you missed it*, arriving at the wrong
+answer from the other side.
+
+**THE ROW WORKED BECAUSE IT NEVER WENT THROUGH `from`.** It asks
+`scIsTrain(it)` about the block it is already holding. That is why
+exactly one of the two doors worked, and it is the whole shape of the
+report.
+
+**A NAME, OR THE GLYPH THAT NAME RESOLVES TO.** `from` is still a list
+of names; what changed is that a block also feeds the item when the
+table sends its name to the same glyph. So gym, lift and workout all
+feed Train, and adding a word to the table adds it here the same day —
+which is the point of there being one table.
+
+**`block` IS THE TABLE'S I-DO-NOT-KNOW, and it has to be excluded.** A
+`from` name the table cannot place would otherwise match every
+unrecognised block on the day, which is a widening that looks
+identical to the fix from the door that was broken. Asserted with two
+decoys: one the table places somewhere else, and one it cannot place
+at all.
+
+**AND THE REACH IS NARROWER THAN IT SOUNDS, which was measured rather
+than assumed.** Planting twenty names and reading the glyph the app
+itself assigns: `train` catches **Train, Gym and Workout** and nothing
+else. `Run`, `Swim`, `Cycle`, `Stretch` and `Yoga` all have glyphs of
+their own, so none of them feeds Train — and none of their rows opens
+the picker either, because the row asks the same question. The two
+doors agree, which is the whole of what was wrong.
+
+**Mind gained exactly one word**: `Book`, which the table sends to
+`read`. That is the same correction one item over rather than a side
+effect to regret.
+
+**TWO WORDS THE TABLE PLACES BADLY, raised rather than quietly
+changed.** `Lift` resolves to `drive` — a lift as in a ride — and
+`Hyrox` resolves to nothing at all, though the comment on `scIsTrain`
+uses hyrox as its own example of a word that should reach the deck.
+Both are the Train/railway decision again: *a word that means two
+things has to be DECIDED, and the decision belongs in the open where
+a test can hold it.* Neither is changed here, because neither was
+what was reported and both are somebody's call rather than mine.
+
+### And the check for it could not fail, twice over
+
+**`.wb-t` SURVIVES ESCAPE.** The sheet is put away with the `hidden`
+attribute and its DOM stays, so a bare `querySelector('.wb-t')` reads
+the sheet the PREVIOUS press opened. Every picker read here is scoped
+to `.sheet:not([hidden])` now. That is the ninth time this app's
+`hidden` has been the thing that made something look right.
+
+**AND THE ROW HALF WAS MEASURING A DOOR IT HAD ALREADY SHUT.**
+Pressing the tile ticks Train, which greens the gym block — so a row
+press in the same page UNticks it rather than asking, and the door
+reads as broken on a build where it works. It passed only because of
+the stale sheet above: two faults cancelling, which is the worst way
+for a check to be green. The row has its own context now.
+
+**THE BREAK THAT PROVED THE GUARD WAS INERT.** Loosening the `block`
+exclusion changes nothing today, because every name in a `from` list
+is placeable — the guard is defensive for the next one added, and a
+break on it cannot bite. The over-wide break is a genuinely over-wide
+MATCH instead, and Coffee goes green with it. Said out loud rather
+than left looking proven.
+
+**WHAT IS STILL NOT FIXED, and is the design rather than the bug**: a
+day with TWO training blocks refuses at the tile, because `trainLog`
+is keyed by block and one press has no way to say which session the
+answer is about — the rows are where that question has an answer. And
+a day with NO training block has nowhere to file a session at all.
+Neither is what was reported, and neither has a row to press either.
+
 ## The day you began
 
 Asked for as one thing in one line — a **begin journey**, a **reset**,

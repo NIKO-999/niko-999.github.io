@@ -3679,9 +3679,37 @@
       return it.from && it.from.indexOf(name) >= 0;
     });
   }
+  /* ── A NAME, OR THE GLYPH THAT NAME RESOLVES TO ──
+     `from` was a list of literal names, which is the second list of
+     words this file says not to keep: `scIsTrain` asks the keyword
+     table and this asked a hardcoded string, so the two disagreed
+     about what training is. A gym block called anything but "Train"
+     fed nothing — it did not go green when you ticked Train, the day
+     did not count as a day Train was on, and pressing Train on
+     Showing up ticked in SILENCE rather than asking what you trained.
+     The same block's own row opened the picker the whole time,
+     because that path goes through the table, which is exactly how it
+     was reported: it works from the week and not from the tally.
+
+     The glyph is the table's answer, so gym, lift, workout and
+     anything else it sends to `train` feed it — and adding a word to
+     the table adds it here the same day, which is the whole point of
+     there being one table.
+
+     `block` is the table's I-DO-NOT-KNOW, so a `from` name it cannot
+     place is matched by name alone: otherwise one unrecognised word
+     in that list would make every unrecognised block on the day feed
+     the item. */
   function scBlocksFor(item, dow) {
     if (!item.from) return [];
-    return scByDay(dow).filter(function (b) { return item.from.indexOf(b.n) >= 0; });
+    var want = [];
+    item.from.forEach(function (n) {
+      var g = scIconFor(n);
+      if (g !== 'block' && want.indexOf(g) < 0) want.push(g);
+    });
+    return scByDay(dow).filter(function (b) {
+      return item.from.indexOf(b.n) >= 0 || want.indexOf(scIconFor(b.n)) >= 0;
+    });
   }
 
   function scSetTick(day, id, val) {

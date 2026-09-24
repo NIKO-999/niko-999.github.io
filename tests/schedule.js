@@ -17874,6 +17874,143 @@ const SAID = [
     }
   }
 
+
+  /* ══════════════════════════════════════════════════════════════
+     WHAT FEEDS TRAIN IS THE KEYWORD TABLE, NOT A LIST OF NAMES
+
+     Reported from the phone: pressing Train on Showing up just ticked
+     it instead of asking what you trained — while the same block's own
+     row in the week opened the picker the whole time.
+
+     `from: ['Train']` matched a literal name where `scIsTrain` asks the
+     table, so the two disagreed about what training is. A gym block
+     called anything else fed nothing: it did not go green on the tick,
+     the day did not count as one Train was on, and the tally's door
+     refused in silence. The row's path already went through the table,
+     which is why exactly one of the two doors worked.
+
+     What fails silently here: a widening that makes EVERY block feed
+     the item looks identical from the door that was broken, and the
+     table's `block` is its I-do-not-know, so one unplaceable word in
+     that list would do precisely that.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    const tctx = await browser.newContext({ ...PHONE });
+    const tpage = await tctx.newPage();
+    const terrs = [];
+    tpage.on('pageerror', (e) => terrs.push(String(e)));
+    /* TODAY's own weekday, because the tally's door is about today and
+       a block on another day is not on the screen being pressed. */
+    await tpage.addInitScript(() => {
+      const D = new Date().getDay();
+      const B = (id, s, e, n) => ({ id, d: D, s, e, r: '', n });
+      localStorage.setItem('sched.tour.v1', '1');
+      localStorage.setItem('sched.hint2.v1', '1');
+      localStorage.setItem('sched.hintw.v1', '1');
+      if (!localStorage.getItem('sched.v1')) {
+        localStorage.setItem('sched.v1', JSON.stringify({
+          title: 'Daily Process', sub: '', items: [
+            /* NOT CALLED TRAIN, and that is the whole fixture. */
+            B('gym', 390, 450, 'Gym'),
+            /* Two decoys: one the table places somewhere ELSE, and one
+               it cannot place at all, which lands on `block`. Without
+               the second, a widening that swept up every unrecognised
+               name would pass. */
+            B('cof', 600, 660, 'Coffee'),
+            B('zzz', 900, 960, 'Qqqqq')
+          ] }));
+      }
+      localStorage.setItem('sched.view.v1', 'tally');
+    });
+    await tpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await tpage.waitForTimeout(600);
+    const today = await tpage.evaluate(() => { const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; });
+
+    const tile = await tpage.evaluate(async () => {
+      const c = document.querySelector('.ty-card[data-item="t"]');
+      if (!c) throw new Error('no Train tile on Showing up');
+      c.click();
+      /* Past the double-tap deferral, which is what defers the pick. */
+      await new Promise((r) => setTimeout(r, 700));
+      return {
+        /* SCOPED TO THE OPEN SHEET. `.wb-t` survives Escape — the
+           sheet is hidden and its DOM stays — so a bare query reads
+           the PREVIOUS sheet and can never fail, which is what the
+           first version of the row check below actually did. */
+        picker: !!document.querySelector('.sheet:not([hidden]) .wb-t'),
+        green: Object.keys(JSON.parse(localStorage.getItem('sched.log.v1') || '{}')[
+          (() => { const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+          })()] || {}),
+        ticked: !!(JSON.parse(localStorage.getItem('sched.tick.v1') || '{}')[
+          (() => { const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+          })()] || {}).t
+      };
+    });
+    ok('a gym block not called Train still opens the picker from Showing up',
+      tile.picker && tile.ticked, { ...tile, today });
+    /* BOTH HALVES. "The gym block feeds Train" passes on a build where
+       every block does, which is the same screen from the door that
+       was broken — so what the table sends elsewhere, and what it
+       cannot place at all, are asserted NOT to. */
+    ok('...and it is that block alone that goes green, not every block on the day',
+      tile.green.length === 1 && tile.green[0] === 'gym', tile.green);
+    await tpage.keyboard.press('Escape');
+    await tpage.waitForTimeout(300);
+
+    ok('nothing threw at the tally door', terrs.length === 0, terrs);
+    await tctx.close();
+
+    /* ── AND THE SAME BLOCK'S ROW OPENS THE SAME PICKER ──
+       Two doors to one question, which is what was asked for: the
+       week and the tally. A fix that mended only the tally passes
+       every assertion above and still leaves the two disagreeing.
+
+       ITS OWN CONTEXT, and that is not tidiness. Pressing the tile
+       above TICKS Train, which greens this very block — so a row
+       press after it UNticks rather than opening anything, and the
+       door reads as broken on a build where it works. The first
+       version of this check ran in the same page and passed anyway,
+       because `.wb-t` survives Escape: the sheet is hidden and its
+       DOM stays, so a bare query reads the sheet the TILE opened.
+       A check that cannot fail, measuring the wrong sheet, for the
+       wrong reason. */
+    const wctx = await browser.newContext({ ...PHONE });
+    const wpage = await wctx.newPage();
+    const werrs = [];
+    wpage.on('pageerror', (e) => werrs.push(String(e)));
+    await wpage.addInitScript(() => {
+      const D = new Date().getDay();
+      const B = (id, s, e, n) => ({ id, d: D, s, e, r: '', n });
+      localStorage.setItem('sched.tour.v1', '1');
+      localStorage.setItem('sched.hint2.v1', '1');
+      localStorage.setItem('sched.hintw.v1', '1');
+      if (!localStorage.getItem('sched.v1')) {
+        localStorage.setItem('sched.v1', JSON.stringify({
+          title: 'Daily Process', sub: '',
+          items: [B('gym', 390, 450, 'Gym'), B('cof', 600, 660, 'Coffee')] }));
+      }
+      /* `list`, not `week` — the tab's own value, which is what the
+         app switches on. */
+      localStorage.setItem('sched.view.v1', 'list');
+    });
+    await wpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await wpage.waitForTimeout(600);
+    const row = await wpage.evaluate(async () => {
+      const r0 = [...document.querySelectorAll('.row')]
+        .find((x) => (x.querySelector('.n') || {}).textContent === 'Gym');
+      if (!r0) throw new Error('no Gym row on the week');
+      r0.click();
+      await new Promise((r) => setTimeout(r, 700));
+      return { picker: !!document.querySelector('.sheet:not([hidden]) .wb-t') };
+    });
+    ok('...and its own row in the week opens the same picker', row.picker, row);
+    ok('nothing threw at the week door', werrs.length === 0, werrs);
+    await wctx.close();
+  }
+
   ok('no page errors through any of it', errs.length === 0, errs);
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
