@@ -2907,9 +2907,15 @@ const SAID = [
                      return [+(b.x - h).toFixed(2), +(b.y - h).toFixed(2),
                              +(b.x + b.width + h).toFixed(2),
                              +(b.y + b.height + h).toFixed(2)]; })(),
-      /* The ring became the circle check beside the card — a sibling,
-         because a button inside a button is invalid. */
-      ring: !!c.parentElement.querySelector('.chk'),
+      /* ── AND THE GLYPH WEARS THE ITEM'S OWN COLOUR ──
+         It was `--spent` on every card, so six tiles of one grey and
+         the only way to tell them apart was to read the word. The
+         hue is what makes a card findable unread, and it is the one
+         thing a colour is allowed to say on this screen: WHICH.
+         Read as a computed value rather than a token name, so it
+         survives either one being changed. */
+      hue: getComputedStyle(c.querySelector('.ic')).stroke,
+      nameHue: getComputedStyle(c.querySelector('.ty-nm')).color,
       label: c.getAttribute('aria-label'),
       sub: c.querySelector('.props .pill').textContent,
     })));
@@ -2920,7 +2926,15 @@ const SAID = [
   ok('and Steps is a pair of them',
     marks.find((m) => m.item === 'p').paths === 2,
     marks.map((m) => m.item + ':' + m.paths).join());
-  ok('and every one of them has a check beside it', marks.every((m) => m.ring));
+  /* SIX DISTINCT, and the name wears the same one: a build that put
+     the hue on the glyph alone leaves a grey word beside a coloured
+     mark, which reads as the mark belonging to something else. And
+     "they are coloured" passes on six cards sharing one hue, which
+     is the grey this replaced with extra steps. */
+  ok('every glyph wears its item\'s own colour, and its name wears the same one',
+    new Set(marks.map((m) => m.hue)).size === 6
+    && marks.every((m) => m.nameHue === m.hue),
+    marks.map((m) => m.item + ':' + m.hue).join(' '));
   /* THE CLIPPING CHECK. Steps sat half a stroke above its own viewBox
      and the ring cut a flat line across the top print — visible, and
      invisible to every other assertion here, because the element was
@@ -2935,10 +2949,11 @@ const SAID = [
      DOES and the item's own name follows it. Asserted as that exact
      shape rather than as "the name appears somewhere", which passes on
      a label that has stopped saying what the control is for. */
-  /* BY `data-item`, never by position: the tall tile is hoisted to
-     second so it starts the right-hand column at the top, so the grid's
-     order is not the item list's — and a check keyed to position reads
-     a different card the day that order moves, silently. */
+  /* BY `data-item`, never by position: this grid has been reordered
+     twice — the numbers led, then the ticks did, and the tall tile
+     was spliced to an odd cursor slot for as long as there were two
+     columns — and a check keyed to position reads a different card
+     the day that order moves, silently. */
   ok('and every card still SAYS its name, after what pressing it does',
     [['t', 'Train'], ['m', 'Mind'], ['p', 'Steps'], ['f', 'Fuel'], ['w', 'Water']]
       .every((x) => new RegExp('^(Log|Unlog) ' + x[1] + '\\b')
@@ -3444,8 +3459,8 @@ const SAID = [
      screen; then it was the third cell of a 250px panel with a heading
      of its own. It is the third figure on the heading line now, which
      keeps every word of the complaint that moved it — one place, one
-     size — and hands the mosaic under it the two hundred and fifty
-     pixels that make the day fit on one screen.
+     size — and hands the grid under it two hundred and fifty pixels,
+     which is what the charts are drawn in.
 
      The foot still carries the one thing the line cannot: what to do
      when there is no run at all. */
@@ -3599,18 +3614,26 @@ const SAID = [
      would have been two targets for one action on a 145px tile, which
      is the arrangement this screen removed once already.
 
-     `pointer-events: none` is asserted beside the markup, because a
-     span still swallows the press that lands on it and the press that
-     lands on it is the one aimed at the mark saying what it will do. */
+     ── AND THE CIRCLE IS GONE, WHICH LEAVES ONE STATEMENT ──
+     The tile said it three times: `2 / 7`, a seven-mark strip with two
+     lit, and a filled circle in the corner. The strip is the only part
+     that says WHICH days and the fraction is the only part that can
+     say two, so the circle is the one that goes — it repeated the
+     fraction on a card where the fraction is already the largest
+     thing.
+
+     IT COST NO CONTROL, and that is the half worth asserting: the
+     mark was `aria-hidden` with `pointer-events: none`, so the tile
+     is exactly the button it already was. Asserted as the node being
+     ABSENT rather than not drawn, because a rule that merely hid it
+     leaves a span still swallowing the press that lands on it. */
   const rows = await page.evaluate(() => {
     const r = [...document.querySelectorAll('.ty-row')];
     return {
       n: r.length,
       nested: r.some((x) => x.querySelector('button button')),
       cards: r.every((x) => !!x.querySelector(':scope > .ty-card')),
-      chkTag: [...new Set(r.map((x) => x.querySelector('.chk').tagName))],
-      chkDead: r.every((x) =>
-        getComputedStyle(x.querySelector('.chk')).pointerEvents === 'none'),
+      chk: r.filter((x) => x.querySelector('.chk')).length,
       taps: r.map((x) => {
         const a = x.querySelector('.ty-card').getBoundingClientRect();
         return Math.round(Math.min(a.width, a.height));
@@ -3625,8 +3648,8 @@ const SAID = [
   });
   ok('six tiles, each one card', rows.n === 6 && rows.cards, rows);
   ok('and nothing on a tile is a button inside a button', !rows.nested, rows);
-  ok('the circle is drawn rather than pressed',
-    rows.chkTag.join('') === 'SPAN' && rows.chkDead, rows);
+  ok('and no tile draws a circle, because the figure already says it',
+    rows.chk === 0, rows);
   ok('the card clears 44px for a thumb', rows.taps.every((a) => a >= 44), rows.taps);
   /* The card IS the toggle, so it says what a press does and carries
      the state — and it still speaks the figure, because "logged" alone
@@ -3647,11 +3670,17 @@ const SAID = [
     const g = (id) => document.querySelector('.ty-row[data-item="' + id + '"]');
     const steps = g('p'), water = g('w'), train = g('t');
     return {
-      /* THE LABEL IS A LABEL AND THE FIGURE IS THE TILE. It was a
-         13.5px name over a 22px chip; the name is 11px small caps now
-         and the figure is what you read. Asserted as the RELATIONSHIP,
-         so a change to the type scale moves both and the check still
-         means what it says. */
+      /* ── THE NAME IS A NAME AGAIN, AND THE FIGURE IS STILL THE TILE ──
+         It was 11px uppercase `--spent`: six tiles of one grey, where
+         the only way to tell a card apart was to read the word — the
+         exact wall the app's tag system exists to remove. It is
+         sentence case in the item's own colour now, which is how a
+         card is titled everywhere it is not a label naming a control.
+
+         THE RELATIONSHIP IS WHAT IS ASSERTED, so a change to the type
+         scale moves both and the check still means what it says. And
+         the CASE beside it, because "it is smaller" passes on the
+         uppercase label this replaced. */
       lab: px(steps.querySelector('.ty-nm'), 'fontSize'),
       labCase: getComputedStyle(steps.querySelector('.ty-nm')).textTransform,
       val: px(steps.querySelector('.props .val'), 'fontSize'),
@@ -3674,13 +3703,31 @@ const SAID = [
         x.style.minHeight = '';
         return [at, grown];
       }),
-      /* A NUMBER DRAWS AN AREA WITH ITS DAYS DATED. The dated ticks
-         are what say these are four readings rather than a continuous
-         line, which is the whole of what makes an area honest on a
-         daily count. */
-      area: !!steps.querySelector('.ty-ch .ty-ar .f')
-        && !!steps.querySelector('.ty-ch .ty-ar .s'),
-      dates: [...steps.querySelectorAll('.ty-ch .ty-ax > span')].map((x) => x.textContent),
+      /* ── A NUMBER DRAWS SEVEN BARS, AND IT DREW A FOUR-POINT AREA ──
+         The area normalised each day to the window's best on a
+         ZERO-BASED axis and filled to the floor, so a real steps week
+         of 6,200 to 9,011 never put a point below .69 and 74% of the
+         drawing was constant fill. Asserted as SEPARATE marks with
+         different heights: a build that went back to a filled curve
+         has one element where this has seven, and one that drew seven
+         bars all the same height has stopped reading the record.
+
+         AND THE TALLEST IS 100%, which is what makes the shape the
+         week's own rather than a share of an aim the item may not
+         have — and is the half a normalisation bug loses silently. */
+      bars: [...steps.querySelectorAll('.ty-ch .ty-bars > i')]
+        .map((x) => Math.round(parseFloat(x.style.height))),
+      /* TODAY IS THE INK AND THE OTHER SIX ARE THE ITEM'S HUE: the
+         figure printed above the chart is the mark you are looking
+         for, and the rest is what makes a card findable unread. */
+      barToday: [...steps.querySelectorAll('.ty-ch .ty-bars > i')]
+        .map((x) => x.classList.contains('is-today')),
+      /* ── THE AXIS NAMES THE TOP AND THE END ──
+         Four dated ticks were what said these were readings rather
+         than a curve; separate bars say that by being separate. What
+         a bar chart cannot draw is what its tallest mark is WORTH,
+         so that is what the axis carries. */
+      axis: [...steps.querySelectorAll('.ty-ch .ty-ax > span')].map((x) => x.textContent),
       /* A TICK DRAWS ITS WEEK, Monday to Sunday, seven marks. */
       week: train.querySelectorAll('.ty-ch .ty-wk > i').length,
       weekAx: [...train.querySelectorAll('.ty-ch .ty-ax > span')].map((x) => x.textContent),
@@ -3688,9 +3735,19 @@ const SAID = [
          Asserted as the BOX rather than the class: a rule that set the
          class and no longer spanned would pass on the name alone. */
       tall: r.filter((x) => x.classList.contains('is-tall')).map((x) => x.dataset.item),
-      tallH: Math.round(water.getBoundingClientRect().height),
-      shortH: Math.round(steps.getBoundingClientRect().height),
+      /* ── THE GAUGE LIES DOWN ──
+         It was a 6px vertical track with `100% / 50% / 0%` stacked
+         beside it at their own heights, which on the real screen is a
+         hairline with three unattached captions — and per cent is not
+         the unit anybody checks water in. Asserted as the FILL being
+         a width rather than a height, because a rule that turned the
+         rail sideways and left the fill growing upward draws an empty
+         rail on a day you have drunk something. */
       gauge: !!water.querySelector('.ty-ch .ty-gt > i'),
+      gaugeAxis: [...water.querySelectorAll('.ty-ch .ty-gm > span')]
+        .map((x) => x.textContent),
+      gaugeFill: (water.querySelector('.ty-ch .ty-gt > i').style.width || '') !== ''
+        && !water.querySelector('.ty-ch .ty-gt > i').style.height,
       /* THE STEPPER IS THREE SIBLINGS OF THE CARD, never children:
          a button inside a button is invalid and collapses to one press
          while looking exactly right. */
@@ -3703,58 +3760,202 @@ const SAID = [
       }),
     };
   });
-  ok('the name is a small-caps label and the figure is the tile',
-    tile.lab < tile.val * 0.6 && tile.labCase === 'uppercase', tile);
+  ok('the name is sentence case and the figure is still the tile',
+    tile.lab < tile.val * 0.8 && tile.labCase === 'none', tile);
   ok('every tile carries a chart, and it sits on the foot',
     tile.charts === 6
     && tile.feet.every((f) => f[0] === f[1] && f[0] < 20), tile);
-  ok('a number draws an area with its four days dated',
-    tile.area && tile.dates.length === 4
-    && tile.dates.every((d) => /^\d+ [A-Z][a-z]{2}$/.test(d)), tile.dates);
+  ok('a number draws seven bars, the best of them full, and today in the ink',
+    tile.bars.length === 7 && Math.max(...tile.bars) === 100
+    && new Set(tile.bars).size > 1
+    && tile.barToday.join() === 'false,false,false,false,false,false,true',
+    tile);
+  ok('...and the axis names what the tallest is worth, and where today is',
+    tile.axis.length === 2 && / best$/.test(tile.axis[0])
+    && /\d/.test(tile.axis[0]) && tile.axis[1] === 'Today', tile.axis);
   ok('and a tick draws its week, Monday to Sunday',
     tile.week === 7 && tile.weekAx.join() === 'Mon,Sun', tile);
-  /* SPANS TWO ROWS, measured. A tall tile that had stopped spanning
-     would still carry the class and still draw the gauge — squashed
-     into one row's height, which is the regression this catches. */
-  ok('exactly one tile is tall, it is the one you add to, and it spans two',
-    tile.tall.join() === 'w' && tile.gauge
-    && tile.tallH > tile.shortH * 1.8, tile);
+  /* THE GAUGE IS HORIZONTAL AND MARKED IN LITRES, both halves: a
+     rail turned sideways whose fill still grew upward draws empty on
+     a day you have drunk something, and one marked in per cent
+     answers a question nobody asks of a water tracker. */
+  ok('exactly one tile is the one you add to, and its gauge lies down in litres',
+    tile.tall.join() === 'w' && tile.gauge && tile.gaugeFill
+    && tile.gaugeAxis.join('|') === '0|3 L', tile);
   ok('and its stepper is three siblings of the card, each a real target',
     tile.step.length === 3 && !tile.stepIn
     && /^Take 0\.3 L/.test(tile.step[0]) && /^Log an exact/.test(tile.step[1])
     && /^Add 0\.3 L/.test(tile.step[2])
     && tile.stepTap.every((n) => n >= 38), tile);
 
-  /* ══ THE MOSAIC ══
-     Five whole-screen replacements were drawn over the real app at
-     390x844 and this is the one that was picked. It is not a grid of
-     equal tiles: the tall one takes two rows of the right-hand column,
-     one takes the full width, and the rest pair off beside them.
+  /* ══ ONE RING, AND THREE WOULD BE A COSTUME ══
+     Activity's three rings work because Move, Exercise and Stand are
+     three goals in three different units with three targets. This
+     screen asks ONE question — how many of today's items you kept —
+     so three would be the idiom worn as decoration rather than used.
 
-     MEASURED AS BOXES, never as classes. A rule that set `is-wide` and
-     no longer spanned would pass on the name alone, which is the
-     mistake the tall tile's own check already guards against. */
+     AND AN UNMET DAY IS AN OPEN RING, NEVER A RED ONE, which is the
+     same conclusion the week reached when the Missed tag lost its
+     colour. The track is the flat neutral and the arc is the ink,
+     which is what every other mark of the record already wears.
+
+     ── ASSERTED AS THE ARC TRACKING THE FIGURE, AT TWO STATES ──
+     One reading cannot say this: on a day where everything is kept
+     the arc is a full circle, and a build that drew a full circle
+     unconditionally passes. So a tick is toggled and both states are
+     matched against the caption's own fraction, with the two
+     required to DIFFER — which is the whole claim in one line.
+
+     Train, because unticking a tick is one press with no sheet
+     behind it; the record is captured and put back, since a check
+     that changes the state of the app is a check that breaks the
+     next one. */
+  {
+    const readRing = () => page.evaluate(() => {
+      const cap = document.getElementById('scTallyCap');
+      const sv = cap.querySelector('.ty-ring');
+      if (!sv) throw new Error('no ring in the tally caption');
+      const a = sv.querySelector('.a'), t = sv.querySelector('.t');
+      if (!a || !t) throw new Error('the ring has no arc or no track');
+      const C = +a.getAttribute('stroke-dasharray');
+      const off = +a.getAttribute('stroke-dashoffset');
+      const fig = cap.querySelector('.ty-fig > i.is-n');
+      const n = parseInt(fig.firstChild.textContent, 10);
+      const all = parseInt(fig.querySelector('s').textContent.replace(/\D/g, ''), 10);
+      /* A TOKEN THROUGH A PROBE, never a string compare: `--ink` is a
+         hex and a computed `stroke` is an `rgb()`, so a digit match
+         reads one as nothing. This file has met that three times. */
+      const probe = document.createElement('span');
+      document.body.appendChild(probe);
+      const tok = (v) => { probe.style.color = 'var(' + v + ')';
+                           return getComputedStyle(probe).color; };
+      const ink = tok('--ink'), dead = tok('--tick-off');
+      probe.remove();
+      return {
+        /* ROUNDED TO TWO, because the offset is written to one
+           decimal of a 97-unit circumference: a sixth came back .166
+           against a fraction of .167 on arithmetic that is exact. */
+        arc: +(1 - off / C).toFixed(2),
+        frac: +(n / all).toFixed(2),
+        n, all,
+        arcIsInk: getComputedStyle(a).stroke === ink,
+        trackIsNeutral: getComputedStyle(t).stroke === dead,
+        /* Never red on a day you did not finish: the one thing a
+           ring must not do on this screen is grade you. */
+        arcCol: getComputedStyle(a).stroke,
+        /* Inside the caption, which is already the one control that
+           opens the week — a ring that was a second press would be
+           two doors to one room. */
+        inCap: sv.parentElement.id === 'scTallyCap',
+        press: sv.closest('button') === cap,
+        hidden: sv.getAttribute('aria-hidden'),
+        rings: cap.querySelectorAll('.ty-ring').length,
+      };
+    });
+    /* ── SEEDED, NOT CLICKED ──
+       Pressing a tile is the obvious way to move the figure and it
+       cannot be relied on here: a Train tile that is OFF opens the
+       workout deck and a number opens the dial, so the tick lands
+       only once the sheet is committed — and Escape leaves the count
+       exactly where it was. A check whose two states can come back
+       equal is a check that reports a working build as broken.
+
+       Written straight into the record and reloaded, twice, at two
+       fractions that are neither nought nor whole: the arc has
+       somewhere to be wrong in both. */
+    const was = await page.evaluate(() => localStorage.getItem('sched.tick.v1'));
+    /* AND PUT BACK UNSET, or the assertion three hundred lines down
+       that USING the gesture retires the card is vacuous — it would
+       be reading a key this block wrote. The card only comes up on a
+       reload or a fresh visit to the stop, and nothing between here
+       and there does either, so the last word on the key is the
+       state the section above actually left. */
+    const hintWas = await page.evaluate(() => localStorage.getItem('sched.hint2.v1'));
+    const plant = async (rec) => {
+      await page.evaluate((r) => {
+        const d = new Date();
+        const pad = (n) => (n < 10 ? '0' : '') + n;
+        const k = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+        localStorage.setItem('sched.tick.v1', JSON.stringify({ [k]: r }));
+        localStorage.setItem('sched.view.v1', 'tally');
+        localStorage.setItem('sched.ty.v1', 'up');
+        /* ── AND THE TEACHING CARD HAS TO BE MARKED SEEN ──
+           The section above it ends on "Got it", which is for THIS
+           VISIT and deliberately writes no key — so the next reload
+           brings a full-screen modal back over the app, and every
+           press after it lands on the scrim. It took the file down
+           three hundred lines later on a click that was correct.
+           Every context seeds this for the same reason; a section
+           that reloads is a context. */
+        localStorage.setItem('sched.hint2.v1', '1');
+      }, rec);
+      await page.reload({ waitUntil: 'networkidle' });
+      await page.waitForTimeout(260);
+    };
+    await plant({ t: 1 });
+    const one = await readRing();
+    await plant({ t: 1, m: 1, p: '5000' });
+    const two = await readRing();
+    await page.evaluate((w) => {
+      if (w === null) localStorage.removeItem('sched.tick.v1');
+      else localStorage.setItem('sched.tick.v1', w);
+      localStorage.setItem('sched.hint2.v1', '1');
+    }, was);
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(260);
+    await page.evaluate((h) => {
+      if (h === null) localStorage.removeItem('sched.hint2.v1');
+      else localStorage.setItem('sched.hint2.v1', h);
+    }, hintWas);
+    ok('the caption carries one ring, inside the control, hidden from a reader',
+      one.rings === 1 && one.inCap && one.press && one.hidden === 'true', one);
+    ok('and its arc is the fraction the line beside it prints, at two states',
+      one.arc === one.frac && two.arc === two.frac && one.n !== two.n
+      && one.arc !== two.arc
+      /* Neither reading is nought or whole, so a ring stuck at either
+         end fails rather than matching a fraction by luck. */
+      && [one, two].every((x) => x.arc > 0 && x.arc < 1), { one, two });
+    ok('...drawn in the ink over the flat neutral, and never a red for a day you missed',
+      one.arcIsInk && one.trackIsNeutral && two.arcIsInk, { one, two });
+  }
+
+  /* ══ ONE COLUMN, AND IT WAS A MOSAIC ══
+     Five whole-screen replacements were drawn at 390x844 and the
+     mosaic was picked off them: the tall tile taking two rows of the
+     right-hand column, one tile full width, the rest paired beside
+     them. It fitted the whole day on one screen and it could not
+     carry a CHART — seven bars in 150px are marks twenty pixels
+     wide, and the four-point area it drew instead was a slab for
+     arithmetic reasons written up beside `scTyBars`.
+
+     So the screen scrolls now, deliberately, and the cost is stated
+     rather than hidden: the fold buys a chart you can read.
+
+     MEASURED AS BOXES, never as classes. The placement arithmetic is
+     GONE rather than computing a class nothing places — a tile is no
+     longer spliced to an odd cursor slot and none is marked wide —
+     so this asserts what one column actually means: every tile at
+     one left edge, at one width, each below the last. */
   const mos = await page.evaluate(() => {
     const r = [...document.querySelectorAll('.ty-row')];
     const b = (x) => x.getBoundingClientRect();
     const grid = document.querySelector('.ty-grid').getBoundingClientRect();
-    const half = grid.width * 0.55;
+    const read = r.map((x) => b(x)).sort((a, c) => a.top - c.top);
     return {
       n: r.length,
-      wide: r.filter((x) => b(x).width > half).map((x) => x.dataset.item),
-      tall: r.filter((x) => x.classList.contains('is-tall')).map((x) => x.dataset.item),
-      /* The wide one runs the whole track, and the halves are halves. */
-      wideW: Math.round(b(r.find((x) => x.classList.contains('is-wide'))).width),
+      lefts: [...new Set(r.map((x) => Math.round(b(x).left)))],
+      widths: [...new Set(r.map((x) => Math.round(b(x).width)))],
       gridW: Math.round(grid.width),
-      /* TWO COLUMNS: every tile that is not the wide one starts at one
-         of exactly two left edges. */
-      lefts: [...new Set(r.filter((x) => b(x).width <= half)
-        .map((x) => Math.round(b(x).left)))].sort((a, c) => a - c),
+      /* Each below the last, which is what a column IS — two tiles
+         at one left edge could still be stacked in two tracks. */
+      stacked: read.every((x, i) => i === 0 || x.top >= read[i - 1].bottom - 1),
+      wide: r.filter((x) => x.classList.contains('is-wide')).length,
     };
   });
-  ok('the tiles are a mosaic: two columns, one tall, one full width',
-    mos.n === 6 && mos.tall.join() === 'w' && mos.wide.join() === 's'
-    && Math.abs(mos.wideW - mos.gridW) <= 1 && mos.lefts.length === 2, mos);
+  ok('the tiles are one column: one edge, one width, each below the last',
+    mos.n === 6 && mos.lefts.length === 1 && mos.widths.length === 1
+    && Math.abs(mos.widths[0] - mos.gridW) <= 1 && mos.stacked
+    && mos.wide === 0, mos);
 
   /* == THE TICKS LEAD ==
      Train and Mind are the two things you DO, and the four numbers are
@@ -3782,98 +3983,75 @@ const SAID = [
     return {
       seq: read.map((x) => (x.tick ? 'd' : 'n')).join(''),
       ticks: read.filter((x) => x.tick).length,
-      /* AND THE TALL ONE STILL STARTS THE RIGHT-HAND COLUMN, which is
-         a property of the CURSOR rather than of an index: a two-column
-         grid places left then right, so the tall tile lands on the
-         right only when an odd number of half tiles precede it. It sat
-         at index 1, which was true by accident of the numbers leading
-         -- reorder without re-solving it and Water drops into the left
-         column with nothing else on screen looking wrong. */
-      tallL: read.filter((x) => x.tall).map((x) => x.l),
-      right: lefts[lefts.length - 1],
+      /* THE CURSOR SOLVE WENT WITH THE SECOND COLUMN. The tall tile
+         used to be spliced to the first ODD slot so it began the
+         right-hand column; one column has no cursor, so the order is
+         the record's own and Water sits where the item list puts it.
+         Asserted as the tall tile NOT having been moved, because a
+         splice left standing would reorder the numbers for a
+         placement that no longer happens. */
+      tall: read.findIndex((x) => x.tall),
+      lefts: lefts.length,
     };
   });
-  ok('the ticks lead the grid, and the tall tile still starts the right column',
+  ok('the ticks lead the grid, and nothing is spliced past them',
     lead.ticks === 2 && /^d+n+$/.test(lead.seq)
-    && lead.tallL.join() === String(lead.right), lead);
+    && lead.lefts === 1 && lead.tall === 4, lead);
 
-  /* ══ THE PLOT SITS IN A WELL, AND ONLY THE PLOT ══
-     A curve with no edge is a smear on the card. This is NOT the frame
-     inside a frame this project keeps removing — that rule is about a
-     panel drawn round a list of objects, and a well is the area the
-     marks are measured inside. The gauge and the week strip get none,
-     because a filled track and seven blocks are already their own
-     shape, and a check that only looked at the area would pass on a
-     build that put a well round all three. */
+  /* ══ THE WELL IS A BOX, AND IT LOST ITS GROUND ══
+     A plot area needs an edge when the plot is an AREA — a filled
+     curve on a card is a smear without one, which is why the well was
+     given its own ground and a check requiring it. Seven separate
+     bars are their own shape, the way the week strip beside them
+     already is, so the wash under them became a second rectangle
+     saying nothing and went.
+
+     THE BOX IS WHAT STAYS, and it is the half that was never about
+     the look: an `<svg viewBox="0 0 100 38">` at `width: 100%`
+     carries an intrinsic RATIO, so in flow its height resolves to
+     38% of the tile, becomes the row's content height, and the grid
+     sizes every row to it — measured at 238px a row against the 108
+     asked for, with nothing in the stylesheet looking wrong. The
+     marks are out of flow and the well is what gives them a height.
+
+     Both halves are asserted and they fail apart: a build that put
+     the wash back passes the geometry, and one that put the bars
+     back in flow passes the ground. */
   const well = await page.evaluate(() => {
     const g = (id) => document.querySelector('.ty-row[data-item="' + id + '"]');
-    const ar = g('p').querySelector('.ty-ar');
-    const cs = getComputedStyle(ar);
-    const wb = ar.parentElement.getBoundingClientRect();
+    const bars = g('p').querySelector('.ty-bars');
+    const cs = getComputedStyle(bars);
+    const w = bars.parentElement;
+    const alpha = (c) => +((c.match(/[\d.]+\s*\)$/) || ['1)'])[0].replace(/[^\d.]/g, ''));
     return {
-      inWell: ar.parentElement.classList.contains('ty-well'),
-      /* ── ITS OWN GROUND, AND NOT MERELY A DIFFERENT ONE ──
-         Written as `wellBg !== cardBg` this passed on `background:
-         none`, which computes to a transparent black that differs
-         from the card by every channel — a well with no ground at all
-         sailing through the check that exists to require one. Proved
-         by breaking it and watching nothing fail. The ALPHA is the
-         claim: a plot area has to be painted. */
-      wellBg: getComputedStyle(ar.parentElement).backgroundColor,
-      wellA: +((getComputedStyle(ar.parentElement).backgroundColor
-        .match(/[\d.]+\s*\)$/) || ['1)'])[0].replace(/[^\d.]/g, '')),
-      cardBg: getComputedStyle(g('p')).backgroundColor,
+      inWell: w.classList.contains('ty-well'),
+      /* NOT MERELY DIFFERENT FROM THE CARD: `background: none`
+         computes to a transparent black, which differs from the card
+         on every channel — a well with no ground at all sailed
+         through the check that used to exist to require one. The
+         ALPHA is the claim, and here the claim is the other way
+         round. */
+      wellA: alpha(getComputedStyle(w).backgroundColor),
+      pos: cs.position,
+      wellH: Math.round(w.getBoundingClientRect().height),
+      /* The gauge and the week strip are not plots and never had one. */
       gaugeWell: !!g('w').querySelector('.ty-well'),
       weekWell: !!g('t').querySelector('.ty-well'),
-      /* ── AND THE DRAWING IS OUT OF FLOW ──
-         An `<svg viewBox="0 0 100 38">` at `width: 100%` carries an
-         intrinsic RATIO, so in flow its height resolves to 38% of the
-         tile. As a flex item that becomes the row's content height and
-         the grid sizes every row to it: measured at 238px a row
-         against the 108 asked for, with nothing in the stylesheet
-         looking wrong.
-
-         THE POSITION IS THE PROVEN HALF, and the row height is NOT:
-         said plainly, because a clause that cannot fail is worse than
-         none — it is what makes the rest of a claim sound verified.
-
-         Two measurements were tried and neither discriminates. The
-         well's own height stretched to .36 of its width against an
-         intrinsic .38, which is a threshold that has to be wrong one
-         way or the other. The row was then held to the grid's own
-         declared floor — and with the svg put back in flow it came
-         back 169 against a ceiling of 194, well inside, because the
-         grid row it sits in is already being stretched by something
-         else. The 238px rows the bug actually produced needed a
-         different combination of this file than either break could
-         reach.
-
-         So both are carried in the PAYLOAD, where they name the shape
-         of a failure when one happens, and neither is asserted. */
-      pos: cs.position,
-      rowH: Math.round(g('p').getBoundingClientRect().height),
-      /* The track is `minmax(108px, 1fr)` and that is what computes,
-         so the floor has to be pulled OUT of it — `parseFloat` on the
-         whole string is NaN, which the check read as 0 and then
-         compared against happily. */
-      floor: +((getComputedStyle(document.querySelector('.ty-grid'))
-        .gridAutoRows.match(/([\d.]+)px/) || [0, 0])[1]),
     };
   });
-  ok('the area sits in a well of its own, and the gauge and the week do not',
-    well.inWell && well.wellA > 0 && well.wellBg !== well.cardBg
+  ok('the bars sit in a box of their own, and it paints nothing',
+    well.inWell && well.wellA === 0
     && !well.gaugeWell && !well.weekWell, well);
-  ok('and the drawing is out of flow, so the row sizes the chart and not the reverse',
-    well.pos === 'absolute', well);
+  ok('and the marks are out of flow, so the box sizes the chart and not the reverse',
+    well.pos === 'absolute' && well.wellH > 40, well);
 
-  /* THREE MARKS ON THE GAUGE, and the foot is the one that was
-     missing: a scale labelled at the top and the middle and left bare
-     at the bottom reads as one that runs out rather than one that
-     starts at nought, which is the end a person checks a water
-     tracker against. */
-  ok('the gauge is marked at the top, the middle and the foot',
+  /* TWO MARKS ON THE GAUGE, AND THEY ARE LITRES. It was `100% / 50%
+     / 0%` stacked beside a vertical hairline: labels not on the
+     track, in a unit nobody checks water in. You do not ask what
+     fraction of three litres you have had. */
+  ok('the gauge is marked at nought and at the aim, in the item\'s own unit',
     (await page.$$eval('.ty-row[data-item="w"] .ty-gm > span',
-      (m) => m.map((x) => x.textContent).join('|'))) === '100%|50%|0%');
+      (m) => m.map((x) => x.textContent).join('|'))) === '0|3 L');
 
   /* AND THE ARROWS ACTUALLY MOVE THE RECORD, both ways and never below
      nought. A stepper that draws and does nothing passes every check
@@ -3889,7 +4067,7 @@ const SAID = [
     };
     const val = () => document.querySelector('.ty-row[data-item="w"] .props .val').textContent;
     const fill = () => parseFloat(
-      document.querySelector('.ty-row[data-item="w"] .ty-gt > i').style.height);
+      document.querySelector('.ty-row[data-item="w"] .ty-gt > i').style.width);
     const start = { v: val(), f: fill() };
     await press(2); await press(2);
     const up = { v: val(), f: fill() };
@@ -4092,41 +4270,66 @@ const SAID = [
   ok('and the blurred copies are painted behind the solid marks',
     glow.lastIsSolid, glow);
 
-  /* ── ONE MARK, THREE SIZES, ONE COLOUR ──
-     The ring, the strip beside it and the calendar it opens are the
-     same claim drawn at three scales, so they move together or the
-     screen says one thing in two colours. It was --ink at all three,
-     which on a page whose ink is white made a kept day and a piece of
-     type the same object.
+  /* ── ONE MARK, TWO SIZES, ONE COLOUR — AND THE COLOUR IS THE
+     ITEM'S ──
+     The tile's seven-day strip and the half-year it opens are the
+     same claim drawn at two scales, so they move together or the
+     screen says one thing in two colours. Three things have stood in
+     this list: a circle check on the tile, which went when the
+     fraction beside it made it a third statement of one figure; the
+     strip; and the calendar. Both survivors were the ACCENT while
+     every glyph on the grid was one grey — and with the tile in the
+     item's own hue the calendar had to follow it, or opening Train's
+     record hands you a sheet drawn in a colour Train has never worn.
 
-     Asked for as the RESOLVED accent rather than a literal — the wheel
-     turns it to anything — and the unlit mark is measured in the same
-     breath, because a rule that painted everything the accent would
-     pass a check that only looked at the lit ones. Losing the misses
-     is the one thing a record of showing up must never do. */
+     RESOLVED THROUGH A PROBE rather than compared as strings: the
+     hue is a token and a computed fill is an `rgb()`, and this file
+     has read a hex as nothing three times.
+
+     The unlit mark is measured in the same breath, because a rule
+     that painted everything the item's colour would pass a check
+     that only looked at the lit ones. Losing the misses is the one
+     thing a record of showing up must never do. */
   const tyMark = await page.evaluate(() => {
-    const cs = getComputedStyle(document.documentElement);
-    const hex = (k) => cs.getPropertyValue(k).trim().toLowerCase();
-    const rgb = (h) => 'rgb(' + h.replace('#', '').match(/\w\w/g)
-      .map((x) => parseInt(x, 16)).join(', ') + ')';
-    /* The ring is the circle check, filled on a kept item, and the
-       row's own strip is gone with the tile — so the calendar in the
-       history sheet is the whole of the record this measures. */
-    const a1 = document.querySelector('.ty-row.is-on > .chk');
+    const probe = document.createElement('span');
+    document.body.appendChild(probe);
+    const tok = (v) => { probe.style.color = v; return getComputedStyle(probe).color; };
     const c1 = document.querySelector('.ty-cal');
-    if (!a1 || !c1) return { probe: [!!a1, !!c1] };
-    const arc = getComputedStyle(a1).backgroundColor;
-    const cal = [...c1.querySelectorAll(':scope > rect')].map((r) => r.getAttribute('fill'));
-    return { red: rgb(hex('--red')), off: rgb(hex('--tick-off')), arc,
-      calLit: cal.filter((f) => f === 'var(--red)').length,
-      calOff: cal.filter((f) => f === 'var(--tick-off)').length,
-      other: cal.filter((f) => f !== 'var(--red)' && f !== 'var(--tick-off)') };
+    const s1 = document.querySelector('.ty-row[data-item="t"] .ty-wk > i.is-on');
+    if (!c1 || !s1) { probe.remove(); return { probe: [!!c1, !!s1] }; }
+    /* The sheet that is open is Steps', so the calendar's colour is
+       read from the panel that actually carries it. */
+    const panel = c1.closest('#scTyPanel');
+    const raw = getComputedStyle(panel).getPropertyValue('--tc').trim();
+    const want = tok(raw);
+    const cal = [...c1.querySelectorAll(':scope > rect')]
+      .map((r) => tok(r.getAttribute('fill').replace('var(--tc, var(--red))', raw)));
+    const off = tok('var(--tick-off)');
+    /* AND THE SHEET'S COLOUR IS THE CARD'S: read off the glyph on the
+       grid behind it, found by the title the sheet prints, so the two
+       cannot be the same token by coincidence of the fixture. */
+    const who = document.getElementById('scTyTitle').textContent;
+    const card = [...document.querySelectorAll('.ty-card')]
+      .find((c) => (c.querySelector('.ty-nm') || {}).textContent === who);
+    const cardHue = card ? getComputedStyle(card.querySelector('.ic')).stroke : null;
+    /* Train's own strip, which is the same mark one size down — and a
+       DIFFERENT item, so "they agree" cannot pass on one colour. */
+    const strip = getComputedStyle(s1).backgroundColor;
+    const trainHue = getComputedStyle(
+      document.querySelector('.ty-card[data-item="t"] .ic')).stroke;
+    probe.remove();
+    return { want, off, cardHue, who, strip, trainHue,
+      calLit: cal.filter((f) => f === want).length,
+      calOff: cal.filter((f) => f === off).length,
+      other: cal.filter((f) => f !== want && f !== off) };
   });
-  ok('the check and the calendar both draw a kept day in the accent',
-    tyMark.arc === tyMark.red && tyMark.calLit > 0
-    && tyMark.other.length === 0, tyMark);
-  ok('...and a missed one is still drawn, in neither',
-    tyMark.calOff > 0 && tyMark.red !== tyMark.off, tyMark);
+  ok('the calendar draws a kept day in the item\'s own colour, and nothing else',
+    tyMark.calLit > 0 && tyMark.other.length === 0
+    && tyMark.want !== tyMark.off && tyMark.want === tyMark.cardHue, tyMark);
+  ok('...and the strip on the tile is the same mark in the same colour, one size down',
+    tyMark.strip === tyMark.trainHue && tyMark.trainHue !== tyMark.want, tyMark);
+  ok('...and a missed one is still drawn, in the flat neutral',
+    tyMark.calOff > 0, tyMark);
 
   /* ── weeks across, weekdays DOWN ──
      Without the first day's own weekday as a column offset, every
@@ -4211,9 +4414,15 @@ const SAID = [
       const rects = [...cal.querySelectorAll(':scope > rect')];
       const w = rects.map((r) => +(+r.getAttribute('width')).toFixed(2));
       const full = Math.max(...w);
+      /* A LIT DAY IS THE ITEM'S OWN COLOUR NOW, so the fill is read as
+         "not the neutral" rather than against the accent it used to
+         be. Written as a literal it counted nought on a calendar
+         drawing 78 of them, which is a zero shaped exactly like a
+         pass on the two assertions under it. */
+      const LIT = 'var(--tc, var(--red))';
       return {
         cells: rects.length,
-        lit: rects.filter((r) => r.getAttribute('fill') === 'var(--red)').length,
+        lit: rects.filter((r) => r.getAttribute('fill') === LIT).length,
         miss: rects.filter((r) => r.getAttribute('fill') === 'var(--tick-off)'
           && +r.getAttribute('width') === full).length,
         skip: rects.filter((r) => r.getAttribute('fill') === 'var(--tick-off)'
@@ -4221,7 +4430,7 @@ const SAID = [
         /* Every small mark is the NEUTRAL. A third state drawn in a
            third colour would be the app inventing a judgement for the
            one state that is not one. */
-        smallLit: rects.filter((r) => r.getAttribute('fill') === 'var(--red)'
+        smallLit: rects.filter((r) => r.getAttribute('fill') === LIT
           && +r.getAttribute('width') < full).length,
         figs: [...document.querySelectorAll('.ty-stats b')].map((b) => b.textContent),
         hint: document.querySelector('.ty-hint').textContent,
@@ -4234,6 +4443,10 @@ const SAID = [
        sevenths of the window, and none of them is lit. */
     ok(`a day it was never on is drawn small and neutral (${three.skip} of ${three.cells})`,
       three.cells === 182 && three.skip > 90 && three.skip < 115
+      /* AND SOME OF THEM ARE LIT, because the two counts under this
+         are differences and a calendar drawing nothing at all gives
+         the same answer as one drawing the wrong thing. */
+      && three.lit > 0
       && three.lit + three.miss + three.skip === 182 && three.smallLit === 0, three);
     /* The strip beside the row drew the same three states and is gone
        with the tile, so the calendar is the only place they are drawn
@@ -8454,8 +8667,8 @@ const SAID = [
        AND IT IS NOT A TILE. The grid's rows carry a floor so an eighth
        habit cannot compress every tile into a strip of labels, and a
        41px control sitting in one of those rows was drawn at 168 —
-       a whole tile's worth of the one screen this layout exists to fit
-       inside. Measured as its own box rather than as its parent, since
+       a whole tile's worth of a screen that was built to hold six.
+       Measured as its own box rather than as its parent, since
        a control moved out of the grid and still given a tile's height
        would pass any check on the markup alone. */
     ok('the way in is under the grid, and it does not take a tile',
@@ -8545,23 +8758,30 @@ const SAID = [
       && added.names.indexOf('Cold plunge') === added.kinds.lastIndexOf('d')
       && added.cap === '0/ 7' && /of 7 today/.test(added.capAll), added);
 
-    /* ── AND THE WIDE TILE IS ARITHMETIC, NOT A NAME ──
-       The tall one takes two cells of a two-column grid, so six items
-       occupy seven and something has to be full width. Seven items
-       occupy eight, which pair — so nothing is wide at all, and the
-       rule re-solves instead of stranding itself on six.
+    /* ── AND A SEVENTH TAKES THE COLUMN LIKE ANY OTHER ──
+       This used to be the half that could not be checked on the main
+       fixture: the tall tile took two cells of a two-column grid, so
+       six items occupied seven and one had to be full width — and
+       seven items occupied eight, which pair, so nothing was. The
+       grid is one column now and the arithmetic is gone with it, so
+       what is left to assert is that a habit of yours is a tile of
+       the same width as the six, at the same edge, and that the
+       cursor's splice really did go rather than reordering it.
 
-       This is the half that could not be checked on the main fixture,
-       which is always six. Measured as boxes for the reason the six
-       are: a rule that set the class and no longer spanned would pass
-       on the name alone. */
-    ok('...and with seven the cells pair, so nothing is full width',
+       Measured as boxes for the reason the six are: a rule that set
+       a class and no longer placed anything would pass on the name
+       alone. */
+    ok('...and a seventh is a tile like the six, at one edge and one width',
       await hp.evaluate(() => {
         const r = [...document.querySelectorAll('.ty-row')];
-        const w = document.querySelector('.ty-grid').getBoundingClientRect().width;
+        const b = (x) => x.getBoundingClientRect();
+        const w = Math.round(document.querySelector('.ty-grid').getBoundingClientRect().width);
         return r.length === 7
-          && !r.some((x) => x.getBoundingClientRect().width > w * 0.55)
-          && r.filter((x) => x.classList.contains('is-tall')).length === 1;
+          && new Set(r.map((x) => Math.round(b(x).left))).size === 1
+          && [...new Set(r.map((x) => Math.round(b(x).width)))]
+            .every((v) => Math.abs(v - w) <= 1)
+          && r.filter((x) => x.classList.contains('is-tall')).length === 1
+          && r.filter((x) => x.classList.contains('is-wide')).length === 0;
       }));
 
     /* ── AND IT LOGS LIKE ANY OTHER ──

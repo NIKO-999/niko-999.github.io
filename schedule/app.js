@@ -3732,8 +3732,22 @@
      reading and the dates under it stop being dates. Normalised to the
      best of the four, so the picture is the shape of the run rather
      than a share of an aim the item may not have. */
+  /* The same formatting the tile's own figure uses, so the best in
+     the axis and the reading above it cannot disagree about how many
+     decimals a litre has. */
+  function scTyNum(it, v) {
+    return (+v).toLocaleString('en-GB', { minimumFractionDigits: it.dp || 0,
+                                          maximumFractionDigits: it.dp || 0 });
+  }
+
   function scTySeries(it) {
-    var h = scHist(it.id).slice(-4), max = 0, i;
+    /* ── SEVEN, AND IT WAS FOUR ──
+       Four points is not a week, and on a 150px tile it was not a
+       shape either. Seven is the window every other figure on this
+       screen already uses — `days on this week`, the strip beside a
+       tick — so the chart and the fraction above it are finally about
+       the same seven days. */
+    var h = scHist(it.id).slice(-7), max = 0, i;
     for (i = 0; i < h.length; i++) if (h[i].raw > max) max = h[i].raw;
     /* FOUR DAYS OF NOTHING IS NOT FOUR DAYS OF ZERO. With no reading
        anywhere in the window every point is on the floor, which draws a
@@ -3745,10 +3759,12 @@
     var d = new Date(); d.setDate(d.getDate() - (h.length - 1));
     var out = [];
     for (i = 0; i < h.length; i++) {
-      out.push({ v: h[i].raw / max,
+      out.push({ v: h[i].raw / max, raw: h[i].raw,
+                 today: i === h.length - 1,
                  lab: d.getDate() + ' ' + MON[d.getMonth()] });
       d.setDate(d.getDate() + 1);
     }
+    out.max = max;
     return out;
   }
 
@@ -3778,6 +3794,19 @@
      honest objection and the trade was taken knowingly: the dated ticks
      underneath are what say these are four readings rather than a
      continuous line. */
+  /* ── THE AREA SURVIVES, FOR THE ONE PLACE IT IS HONEST ──
+     A goal's fourteen-day sparkline is a TREND on a number you are
+     pushing up, where a line is the right drawing and the zero base
+     is not a problem: the shape you are reading is the slope rather
+     than a comparison between days. The tally's own chart is bars
+     for the reasons below, and the two are different questions
+     rather than two answers to one.
+
+     `tests/names.js` is what said so out loud. Deleting this left
+     `scMetPanel` calling a function that no longer existed — a
+     runtime ReferenceError on the one screen a goal's metric draws,
+     which `node --check` is perfectly happy with. It was named in a
+     tenth of a second. */
   function scTyArea(s) {
     var i, p = '';
     for (i = 0; i < s.length; i++) {
@@ -3787,6 +3816,39 @@
     return '<svg class="ty-ar" viewBox="0 0 100 38" preserveAspectRatio="none"'
       + ' aria-hidden="true"><path class="f" d="' + p + 'L100 38L0 38Z"/>'
       + '<path class="s" d="' + p + '"/></svg>';
+  }
+
+  /* ── BARS, AND THE AREA WAS A SLAB BY ARITHMETIC ──
+     The area normalised each day to the window's best and plotted it
+     on a ZERO-BASED axis, filling to the floor. A real steps week of
+     6,200 to 9,011 never puts v below .69, so the line had 10 of 38
+     units to move in and the other 74% was constant fill — a grey
+     slab with a flat top. Sleep was worse: 6.2 to 8.1 hours never
+     leaves the top fifth. Any count whose RANGE is small next to its
+     MAGNITUDE draws one, which is most of what a person logs.
+
+     FITTING THE AXIS IS THE TEMPTING FIX AND IT IS A LIE. It buys
+     3.2x the visible variation and puts the week's worst day flat on
+     the floor — 6,180 steps drawn as a day you did not walk.
+
+     Bars survive the zero base an area cannot, because you read them
+     against each OTHER by height rather than reading one line against
+     a fill. Built as elements rather than an svg, which is the week
+     strip's own idiom one tile over: a stretched viewBox turns a 1px
+     corner radius into an ellipse, and `non-scaling-stroke` has no
+     equivalent for `rx`. */
+  function scTyBars(s) {
+    var w = scEl('span', 'ty-bars'), i, b;
+    for (i = 0; i < s.length; i++) {
+      b = scEl('i', s[i].today ? 'is-today' : null);
+      /* A floor of 2%, so a day you logged something small is a mark
+         rather than nothing — the day-off dot's own rule: a thing
+         that happened is never drawn as a thing that did not. A day
+         with no reading at all keeps the empty track. */
+      b.style.height = (s[i].raw ? Math.max(2, s[i].v * 100) : 0) + '%';
+      w.appendChild(b);
+    }
+    return w;
   }
 
   function scPaintTally() {
@@ -3833,6 +3895,32 @@
     fig.appendChild(runI);
     fig.appendChild(scEl('i', null, 'best ' + best));
     cap.appendChild(fig);
+    /* ── ONE RING, AND THREE WOULD BE A COSTUME ──
+       Activity's three work because Move, Exercise and Stand are
+       three goals in three different units, each with its own
+       target. This screen has ONE question — how many of today's
+       items you kept — so three rings would be the idiom worn as
+       decoration rather than the idiom used.
+
+       AND AN UNMET DAY IS AN OPEN RING, NEVER A RED ONE. That is
+       the same conclusion the week reached when the Missed tag lost
+       its colour, and it is the whole of why a ring is worth having
+       here: it says how far round you got without saying anything
+       about you. The track is the flat neutral; the arc is the ink,
+       which is what every other mark of the record wears.
+
+       It goes INSIDE the caption rather than beside it, because the
+       caption is already the one control that opens the week and a
+       ring that was a second press would be two doors to one room. */
+    var pct = all.length ? n / all.length : 0;
+    var C = 2 * Math.PI * 15.5;
+    cap.insertAdjacentHTML('afterbegin',
+      '<svg class="ty-ring" viewBox="0 0 38 38" aria-hidden="true">'
+      + '<circle class="t" cx="19" cy="19" r="15.5"/>'
+      + '<circle class="a" cx="19" cy="19" r="15.5"'
+      + ' stroke-dasharray="' + C.toFixed(1) + '"'
+      + ' stroke-dashoffset="' + (C * (1 - pct)).toFixed(1) + '"'
+      + ' transform="rotate(-90 19 19)"/></svg>');
     cap.insertAdjacentHTML('beforeend',
       '<svg class="ty-cv" viewBox="0 0 24 24" aria-hidden="true">'
       + '<path d="M9 4.5l7.5 7.5L9 19.5"/></svg>');
@@ -3853,73 +3941,39 @@
        Nothing here is ordered by whether it is logged — a grid that
        rearranges itself as you press it is a grid you cannot learn.
 
-       ── AND THE TALL ONE STILL STARTS THE RIGHT-HAND COLUMN ──
-       Which is your reference's own arrangement, and it is a property
-       of the CURSOR rather than of an index: a two-column grid places
-       left then right, so the tall tile lands on the right only when
-       an ODD number of half tiles precede it. Written as index 1 that
-       was true by accident of the numbers leading; with the ticks
-       first it has to be worked out, or Water drops into the left
-       column and the reference's shape is gone.
+       ── AND THE CURSOR ARITHMETIC WENT WITH THE SECOND COLUMN ──
+       Two rules stood here and both were about placing tiles in a
+       two-column grid: the tall one was spliced to the first ODD
+       slot so it started the right-hand column, and the last tile
+       was marked wide so six items did not leave a hole in seven
+       cells. One column has no cursor and no orphan, so both are
+       gone rather than left computing a class nothing places — a
+       dead rule that still cascades is not dead.
 
-       So: the first odd slot at or after the ticks. Two ticks put it
-       third, three ticks put it fourth, and neither is a number
-       anybody had to choose. */
+       What survives is the ORDER, which was never about columns:
+       Train and Mind are the two things you DO and the numbers are
+       what happened while you were doing them. */
     var items = scItems();
     var ticks = items.filter(function (it) { return it.k === 'do'; });
     var ord = ticks.concat(items.filter(function (it) { return it.k !== 'do'; }));
-    var tallAt = -1;
-    ord.forEach(function (it, i) { if (tallAt < 0 && scTyTall(it)) tallAt = i; });
-    if (tallAt >= 0) {
-      var want = Math.min(ticks.length % 2 ? ticks.length : ticks.length + 1,
-                          ord.length - 1);
-      if (want !== tallAt) ord.splice(want, 0, ord.splice(tallAt, 1)[0]);
-      tallAt = want;
-    }
 
-    /* ── AND ONE IS WIDE, BECAUSE THE ARITHMETIC LEAVES AN ORPHAN ──
-       The tall tile takes two cells of the two-column grid, so six
-       items occupy seven cells and seven cells cannot pair. Something
-       has to be full width, and drawing that as a half tile with a
-       hole beside it is the mistake this fixes.
-
-       WHICH one is the LAST, and that moved with the order above.
-       Every tile before the odd cell is a half, so the hole is always
-       the last cell of the last row — and the only tile that can fill
-       it is the one drawn into it. It used to be the first item after
-       the tall block, which was the same cell seen from the other end
-       while the numbers led.
-
-       Worked out rather than named, so a seventh habit re-solves it
-       instead of stranding the rule on six — at seven items the cells
-       come out even and nothing is wide at all.
-
-       The add control at the foot is full width and sits OUTSIDE this
-       count: it is not one of your habits, so a grid that paired a
-       tile with it would be claiming it was. */
-    var wideAt = (ord.length + (tallAt >= 0 ? 1 : 0)) % 2
-      ? ord.length - 1 : -1;
-    /* A tile cannot be both, and with the six built-ins it never is —
-       the tall one is placed near the front and the last is four
-       tiles past it. Said out loud because a two-by-two tile is the
-       one shape this grid has no room for. */
-    if (wideAt === tallAt) wideAt = -1;
-
-    ord.forEach(function (it, oi) {
+    ord.forEach(function (it) {
       var on = !!got[it.id], late = !on && scLate(it), tall = scTyTall(it);
       var row = scEl('div', 'ty-row' + (on ? ' is-on' : '') + (late ? ' late' : '')
-        + (tall ? ' is-tall' : '') + (oi === wideAt ? ' is-wide' : ''));
+        + (tall ? ' is-tall' : ''));
       row.dataset.item = it.id;
-      /* ── DRAWN, NOT PRESSED ──
-         The tile is one control: a tap logs and two taps open the
-         record. A second target for the same action on a 145px tile is
-         the arrangement this screen removed once already, so the mark
-         is a span inside the button — where a second button would be
-         invalid — and it takes no press of its own. */
-      var chk = scEl('span', 'chk');
-      chk.setAttribute('aria-hidden', 'true');
-      chk.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.8l5.2 5.2L19.5 6"/></svg>';
-      row.appendChild(chk);
+      /* ── AND THE CHECK IS GONE, WHICH LEAVES ONE STATEMENT ──
+         The tile said it three times: `2 / 7`, a seven-bar strip with
+         two lit, and a filled circle in the corner. The strip is the
+         only part that says WHICH days and the fraction is the only
+         part that can say two, so the check is the one that goes —
+         it repeated the fraction on a card where the fraction is
+         already the largest thing.
+
+         IT COST NO CONTROL. The mark was `aria-hidden` and took no
+         press of its own: the tile is the button, a tap logs and two
+         taps open the record. What said `logged` to a screen reader
+         is the card's own aria-label, which is unchanged. */
       var c = scEl('button', 'ty-card');
       c.type = 'button';
       c.dataset.item = it.id;
@@ -3930,6 +3984,15 @@
          it is the one thing on the tile that is the same object here,
          in the week's own rows and at the head of the history sheet —
          and it costs the label nothing at this size. */
+      /* ── AND BOTH OF THEM TAKE THE ITEM'S OWN HUE ──
+         Six colours were already solved here, one per item, each with
+         a light-face twin measured against its own ground — and this
+         screen drew every one of them grey. A colour says WHICH, and
+         which item a card is about is the purest WHICH there is; it
+         is also how you find Sleep on a list without reading a word.
+         The FIGURE stays the ink, because the figure is the record
+         and the accent rule has not moved. */
+      c.style.setProperty('--tc', scTagHue(it));
       c.insertAdjacentHTML('beforeend',
         '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">'
         + scItemIcon(it) + '</svg>');
@@ -4019,24 +4082,43 @@
         /* ── THE GAUGE, AND THE MARKS SIT BESIDE THE TRACK ──
            At their own heights, which is what makes it a gauge rather
            than a bar with a caption under it. */
+        /* ── THE GAUGE LIES DOWN, AND ITS MARKS SAY LITRES ──
+           It was a 6px vertical track with `100% / 50% / 0%` stacked
+           beside it at their own heights, and on the real screen that
+           reads as a hairline with three unattached captions: the
+           labels are not on the track, and per cent is not the unit
+           anybody checks water in. You do not ask what fraction of
+           three litres you have had, you ask how many litres.
+
+           Horizontal, so the marks sit UNDER the figures they name
+           and the rail can be thick enough to be a vessel. The
+           divisions are drawn ON the rail rather than captioned off
+           it, which is what makes it a scale rather than a bar with
+           numbers nearby. */
         var aim = scTyAim(it) || 1;
+        var have = +got[it.id] || 0;
         var g = scEl('span', 'ty-g');
         var trk = scEl('span', 'ty-gt');
         var fil = scEl('i');
-        fil.style.height = Math.min(1, (+got[it.id] || 0) / aim) * 100 + '%';
+        fil.style.width = Math.min(1, have / aim) * 100 + '%';
         trk.appendChild(fil);
+        /* One division a whole unit, up to four — past that they are
+           closer together than the rail is thick and read as noise
+           rather than as a scale. */
+        var divs = Math.min(4, Math.max(0, Math.round(aim) - 1));
+        for (var q2 = 1; q2 <= divs; q2++) {
+          var u2 = scEl('u');
+          u2.style.left = (q2 / (divs + 1)) * 100 + '%';
+          trk.appendChild(u2);
+        }
         g.appendChild(trk);
         var mk = scEl('span', 'ty-gm');
-        /* THREE MARKS, AND THE FOOT IS THE ONE THAT WAS MISSING. A
-           gauge labelled at the top and the middle and left bare at
-           the bottom reads as a scale that runs out rather than one
-           that starts at nought — which is the one end a person
-           actually checks a water tracker against. */
-        [['100%', 0], ['50%', 50], ['0%', 100]].forEach(function (q) {
-          var sp = scEl('span', null, q[0]);
-          sp.style.top = q[1] + '%';
-          mk.appendChild(sp);
-        });
+        mk.appendChild(scEl('span', null, '0'));
+        /* `scTyAim` raw, NOT through scTyNum: the line two rows up
+           says `of 3 L` from the same value, and running it through
+           the item's decimal places printed `3.0 L` underneath it —
+           one figure drawn twice in two formats on one card. */
+        mk.appendChild(scEl('span', null, aim + (it.unit || '')));
         g.appendChild(mk);
         ch.appendChild(g);
       } else if (it.k === 'do') {
@@ -4062,10 +4144,20 @@
              a plot: a filled track and seven blocks are already their
              own shape. */
           var well = scEl('span', 'ty-well');
-          well.insertAdjacentHTML('beforeend', scTyArea(ser));
+          well.appendChild(scTyBars(ser));
           ch.appendChild(well);
+          /* ── THE AXIS NAMES THE TOP AND THE END, NOT FOUR DATES ──
+             Four dated ticks under a four-point line were what said
+             these are readings rather than a continuous curve; bars
+             say that by being separate marks. What a bar chart needs
+             instead is the one thing the drawing cannot carry, which
+             is what its tallest mark is WORTH — without it the shape
+             is a shape and the figures are unreadable. Health names
+             the max and the end and nothing between. */
           var ax2 = scEl('span', 'ty-ax');
-          ser.forEach(function (s) { ax2.appendChild(scEl('span', null, s.lab)); });
+          ax2.appendChild(scEl('span', null,
+            scTyNum(it, ser.max) + (it.unit || '') + ' best'));
+          ax2.appendChild(scEl('span', null, 'Today'));
           ch.appendChild(ax2);
         }
       }
@@ -4463,9 +4555,9 @@
         return;
       }
       GLOW.forEach(function (L, n) {
-        lay[n] += scCalRect(g, i, cell, cell * L.grow, 'var(--red)');
+        lay[n] += scCalRect(g, i, cell, cell * L.grow, 'var(--tc, var(--red))');
       });
-      lit += scCalRect(g, i, cell, cell, 'var(--red)');
+      lit += scCalRect(g, i, cell, cell, 'var(--tc, var(--red))');
     });
     var body = '';
     GLOW.forEach(function (L, n) {
@@ -4848,6 +4940,22 @@
     var d = scHist(item.id), st = scHistStats(item, d);
     var p = $('scTyPanel');
     p.textContent = '';
+    /* ── ONE MARK, TWO SIZES, ONE COLOUR — AND THE COLOUR IS THE
+       ITEM'S ──
+       The tile's seven-day strip and the half-year under it are the
+       same claim drawn at two scales, so they move together or the
+       screen says one thing in two colours. Both were the accent
+       while every glyph on the grid was one grey; with the tile in
+       the item's own hue the calendar has to follow it, or opening
+       Train's record hands you a sheet drawn in a colour Train has
+       never worn.
+
+       It costs nothing this screen was protecting. The hue says
+       WHICH, which is exactly what a sheet devoted to one item is
+       for, and the glyph at the head of it is already drawn in the
+       same one. `--tc` with the accent behind it, so anything else
+       that draws a calendar is untouched. */
+    p.style.setProperty('--tc', scTagHue(item));
 
     var head = scEl('div', 'ty-head');
     var t = scEl('span', 'ty-title', item.n);

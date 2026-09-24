@@ -12816,3 +12816,255 @@ the measurement can tell a dressed class from an undressed one, and is
 the vacuity guard the lead clause was pretending to be. Same shape as
 every other lesson in this file about a check that is wrong about what
 it is looking at rather than about the thing.
+
+## Showing up, the way Apple would draw it
+
+Asked what Apple would change about that screen, then asked to make
+all of it. What came back was one finding rather than a list: **the
+screen was a dashboard of tiles and Health is a stack of CARDS**, and
+every other difference falls out of that. So the mosaic went — two
+columns, one tall tile spanning two rows, one marked wide to fill the
+odd cell — and with it the arithmetic that placed them.
+
+**THE COST IS THE FOLD, AND IT IS THE POINT.** Two-up put the whole
+day on one screen and it did: six tiles ended at 679px with the bar at
+784, a hundred spare. What it could not do is carry a CHART. Seven
+days across 150px is seven marks twenty pixels wide, which is why the
+tile drew four points and not seven, and four points on a 38px area
+was the slab below. The screen scrolls now, deliberately — Health's
+does — and the trade is a fold against a chart you can read.
+
+**THE PLACEMENT ARITHMETIC IS GONE, NOT LEFT COMPUTING A CLASS.** The
+tall tile was spliced to the first ODD slot so it began the right-hand
+column, and the last tile was marked `is-wide` because six items in a
+grid where one spans two cells occupy seven and seven cannot pair.
+One column has no cursor and no orphan. `is-wide` went entirely;
+`is-tall` stays because it answers a question the layout did not ask
+— which item you add to through the day — and the gauge, the stepper
+and the room for it are all written against it.
+
+### The area was a slab by ARITHMETIC, not by taste
+
+This is the finding worth keeping and it is not about the drawing. The
+chart normalised each day to the window's best and plotted it on a
+**zero-based** axis, filled to the floor. A real steps week of 6,200
+to 9,011 never puts a point below **.69**, so the line had 10 of 38
+units to move in and the other **74% was constant fill** — a grey slab
+with a slightly wavy top. Sleep is worse: 6.2 to 8.1 hours never
+leaves the top fifth.
+
+**ANY COUNT WHOSE RANGE IS SMALL NEXT TO ITS MAGNITUDE DRAWS ONE**,
+which is most of what a person logs. It was never a width problem and
+widening the tile would not have fixed it.
+
+**FITTING THE AXIS IS THE TEMPTING FIX AND IT IS A LIE.** It buys 3.2x
+the visible variation and puts the week's worst day flat on the floor
+— 6,180 steps drawn as a day you did not walk. On a count you read
+against nought, the base has to be nought.
+
+**BARS SURVIVE THE ZERO BASE AN AREA CANNOT**, because you read them
+against each OTHER by height rather than reading one line against a
+fill: seven marks at 69%, 82% and 100% are plainly three different
+days where one curve across the same three values is flat. Seven
+rather than four, which is the window every other figure on the screen
+already uses — `days on this week`, the strip beside a tick — so the
+chart and the fraction above it are finally about the same seven days.
+
+**ELEMENTS RATHER THAN AN SVG**, which is the week strip's own idiom
+one tile over: a stretched `viewBox` turns a 1px corner radius into an
+ellipse, and there is no `non-scaling-stroke` for `rx`.
+
+**A FLOOR OF 2%**, so a day you logged something small is a mark
+rather than nothing — the day-off dot's rule, that a thing which
+happened is never drawn as a thing that did not. A day with NO reading
+keeps the empty track, because nothing recorded is not nought.
+
+**AND THE AREA SURVIVES FOR THE ONE PLACE IT IS HONEST.** A goal's
+fourteen-day sparkline is a TREND on a number you are pushing up,
+where the shape you read is the slope rather than a comparison between
+days. `tests/names.js` is what said so out loud: deleting `scTyArea`
+left `scMetPanel` calling a function that no longer existed — a
+runtime `ReferenceError` on the one screen a goal's metric draws,
+which `node --check` is perfectly happy with. Named in a tenth of a
+second.
+
+**THE AXIS NAMES THE TOP AND THE END.** Four dated ticks were what
+said these were readings rather than a curve; separate bars say that
+by being separate. What a bar chart cannot draw is what its tallest
+mark is WORTH, so that is what the axis carries — `10,885 best` and
+`Today`, which is Health's own answer.
+
+**AND THE WELL LOST ITS GROUND.** A plot area needs an edge when the
+plot is an AREA. Seven separate bars are already their own shape, so
+the wash under them was a second rectangle saying nothing. The BOX
+stays, and it was never about the look: an `<svg viewBox="0 0 100
+38">` at `width: 100%` carries an intrinsic RATIO, so in flow its
+height resolves to 38% of the tile, becomes the row's content height,
+and the grid sizes every row to it. The marks are out of flow and the
+box is what gives them a height.
+
+**62px, BECAUSE A BAR HAS TO BE TALLER THAN IT IS WIDE.** Seven across
+306px are about 38 each; at the 52 this started on they came out very
+nearly square and read as blocks rather than as a chart — the eye
+compares HEIGHTS and a square has none to compare.
+
+### Colour says WHICH, and six tiles of one grey said nothing
+
+Every glyph was `--spent`. Six tiles of one grey, and the only way to
+tell a card apart was to read the word on it — which is the wall the
+whole app's tag system exists to remove. The glyph and the name wear
+the item's own hue now, and the bars wear it at 70%.
+
+**TODAY IS THE INK.** It is the figure printed above the chart and the
+one mark you are looking for; the other six are the hue, which is what
+makes a card findable unread.
+
+**IT IS THE ONE THING A COLOUR IS ALLOWED TO SAY HERE.** Not whether,
+which is the rule this screen has kept since it was a strip of pips
+and is why there is still no red anywhere on it.
+
+**Both halves are asserted, because each passes on the other's bug**:
+six DISTINCT hues, since "they are coloured" passes on six cards
+sharing one; and the name matching the glyph, since a hue on the glyph
+alone leaves a grey word beside a coloured mark and reads as the mark
+belonging to something else.
+
+### The gauge lies down
+
+It was a 6px vertical track with `100% / 50% / 0%` stacked beside it at
+their own heights, which on the real screen reads as a hairline with
+three unattached captions. **And per cent is not the unit anybody
+checks water in** — you do not ask what fraction of three litres you
+have had, you ask how many litres.
+
+Horizontal, so the marks sit UNDER the figures they name and the rail
+can be thick enough to be a vessel. The divisions are drawn ON the
+rail rather than captioned off it, which is what makes it a scale
+rather than a bar with numbers nearby — one a whole unit, up to four,
+past which they are closer together than the rail is thick.
+
+**AND THE END OF THE RAIL IS `scTyAim` RAW.** Through `scTyNum` it
+printed `3.0 L` directly under a line reading `of 3 L` — one figure
+drawn twice in two formats on one card.
+
+**Asserted as the FILL being a width**, because a rule that turned the
+rail sideways and left the fill growing upward draws an empty rail on
+a day you have drunk something.
+
+### The circle went, which leaves one statement
+
+The tile said it three times: `2 / 7`, a seven-mark strip with two lit,
+and a filled circle in the corner. The strip is the only part that says
+WHICH days and the fraction is the only part that can say two, so the
+circle is the one that goes — it repeated the fraction on a card where
+the fraction is already the largest thing.
+
+**IT COST NO CONTROL**, and that is the half worth asserting: the mark
+was `aria-hidden` with `pointer-events: none`, so the tile is exactly
+the button it already was. Asserted as the node being ABSENT rather
+than not drawn, because a rule that merely hid it leaves a span still
+swallowing the press that lands on it.
+
+### One ring, and three would be a costume
+
+Activity's three work because Move, Exercise and Stand are three goals
+in three different units with three targets. This screen asks ONE
+question — how many of today's items you kept — so three would be the
+idiom worn as decoration rather than used.
+
+**AN UNMET DAY IS AN OPEN RING, NEVER A RED ONE**, which is the same
+conclusion the week reached when the Missed tag lost its colour, and
+it is the whole of why a ring is worth having here: it says how far
+round you got without saying anything about you. The track is the flat
+neutral and the arc is the ink.
+
+**INSIDE the caption**, because that line is already the one control
+that opens the week and a ring beside it would be two doors to one
+room. `aria-hidden`, because the caption's own label already says `6
+of 6 today`.
+
+**ASSERTED AT TWO STATES, OR IT CANNOT FAIL.** On a day where
+everything is kept the arc is a full circle, and a build that drew a
+full circle unconditionally passes a single reading. Two fractions,
+each matched against the caption's own figure, required to differ and
+required to be neither nought nor whole.
+
+**SEEDED, NOT CLICKED.** Pressing a tile is the obvious way to move
+the figure and cannot be relied on: a Train tile that is OFF opens the
+workout deck and a number opens the dial, so the tick lands only once
+the sheet is committed and Escape leaves the count exactly where it
+was. **A check whose two states can come back equal is a check that
+reports a working build as broken.**
+
+**AND THE TOKEN GOES THROUGH A PROBE**, never a string compare:
+`--ink` is a hex and a computed `stroke` is an `rgb()`, so a digit
+match reads one as nothing. This file has now met that three times —
+a `color-mix` result, a `box-shadow` serialised as `color(srgb …)`,
+and this.
+
+### What was NOT done, and why
+
+Three things Apple would plainly do were left, and each is a decision
+rather than an omission.
+
+**A COLLAPSING LARGE TITLE.** Health's `Summary` is 34px and shrinks
+into the nav bar as you scroll. This app's head is shared by four
+tabs and carries the day, the date and the clock; making it collapse
+is a change to the app's chrome rather than to this screen, and it
+would want its own round.
+
+**THE TIMESTAMP ON A CARD.** Health prints `23:25` in the corner of
+every reading, and **this record has no sample time** — `tickLog`
+holds one total a day. Drawing an hour there would be inventing one.
+It is a schema change, not a layout one.
+
+**MOVING WATER'S STEPPER OFF THE CARD.** Health has no inline
+controls; you tap through to add. Taking the arrows off would remove
+the one thing that makes a running total addable in a press, which is
+a feature removal wearing a design argument.
+
+### The tile's strip and the calendar had to move together
+
+`tests/schedule.js` failed the pass with three assertions, and all
+three were the same rule being kept rather than broken.
+
+**ONE MARK, TWO SIZES, ONE COLOUR.** The strip beside a tick and the
+half-year it opens are the same claim at two scales. They were both
+the accent while every glyph on the grid was one grey; with the tile
+in the item's own hue the calendar had to follow, or opening Train's
+record hands you a sheet drawn in a colour Train has never worn.
+`scCalSvg` fills through `var(--tc, var(--red))` and `scOpenHistIn`
+sets `--tc` on the panel, so anything else that draws a calendar is
+untouched.
+
+**AND THE STRIP WENT TO FULL STRENGTH**, which was a 78% wash for one
+render: a wash is a different colour whatever it is mixed from, and
+the two sizes are the same mark or they are not.
+
+**THE CHECK COUNTED BY THE LITERAL `var(--red)`** and came back
+`lit: 0` on a calendar drawing seventy-eight of them — a zero shaped
+exactly like a pass on the two counts under it, which are
+DIFFERENCES. It reads "not the neutral" now, and `lit > 0` is
+asserted beside them.
+
+**A THIRD STATEMENT WENT WITH THE CIRCLE.** The rule was written as
+one mark at THREE sizes; the third was the tile's own check, which
+went when the fraction beside it made it a third drawing of one
+figure. The rule is shorter rather than weaker.
+
+### Four breaks in one run, and each fired its own assertion
+
+- `scTyBars` writing `100%` on every bar → *a number draws seven
+  bars* fails on `new Set(bars).size > 1`, reading
+  `[100,100,100,100,100,100,100]`.
+- the arc's `stroke-dashoffset` pinned to `0` → *its arc is the
+  fraction the line beside it prints* fails at `arc: 1, frac: 0.17`,
+  which is the build a single reading cannot catch.
+- the gauge's fill written as a `height` → *its gauge lies down in
+  litres* fails, and takes the stepper's own *the gauge fills with
+  it* with it, correctly.
+- `.ty-card .ic` back to `var(--spent)` → *every glyph wears its
+  item's own colour* fails with six readings of `rgb(140, 140, 148)`.
+
+Restored by the script's own inverse and hashed back to the
+known-good sha1.

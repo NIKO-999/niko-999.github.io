@@ -947,6 +947,16 @@ body {
 }
 .ty-cap:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
 .ty-cap > b { font: inherit; flex: none; }
+/* ── ONE RING ──
+   The track is the flat neutral and the arc is the ink: an unmet day
+   is an OPEN ring rather than a red one, which is the same answer the
+   week reached when Missed lost its colour. Round caps so a day with
+   one item kept is a mark rather than a hairline. */
+.ty-ring { width: 26px; height: 26px; flex: none; margin-right: 1px; }
+.ty-ring .t { fill: none; stroke: var(--tick-off); stroke-width: 5; }
+.ty-ring .a {
+  fill: none; stroke: var(--ink); stroke-width: 5; stroke-linecap: round;
+}
 /* THE FIGURES ARE QUIET AND THE COUNT IS NOT. Three facts on one line
    need an order to be read in, and the one you came for is how many of
    today you have kept. The other two are context for it. */
@@ -1053,7 +1063,21 @@ body {
    height whatever is in either. */
 .ty-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* ── ONE COLUMN, AND THE COST IS THE FOLD ──
+     Two-up was chosen to put the whole day on one screen, and it
+     did: six tiles ended at 679px with the bar at 784, 105 spare.
+     What it could not do is carry a CHART. A seven-day bar chart in
+     150px is seven marks about twenty pixels wide, and the four-day
+     area it replaced was a grey slab for arithmetic reasons written
+     up beside scTyBars.
+
+     So the screen scrolls now, deliberately: Health's does, and the
+     trade is a fold against a chart that can be read. The rows are
+     sized by their CONTENT again rather than filling the pane —
+     `1fr` rows over a scrolling column stretch the last tile into
+     whatever is left, which is the empty-box fault this screen had
+     before the figures went in. */
+  grid-template-columns: 1fr;
   /* ── THE ROWS FILL WHAT IS LEFT, AND THEY HAVE A FLOOR ──
      `auto` rows were right while this screen scrolled: the tall tile
      spans two of them, so equal rows would have sized every row to
@@ -1066,25 +1090,20 @@ body {
      what stops an eighth habit compressing every tile into a strip of
      labels. Past the floor the pane scrolls, which is the honest
      answer and the cost this layout was chosen with. */
-  grid-auto-rows: minmax(108px, 1fr);
+  grid-auto-rows: auto;
   align-items: stretch;
-  gap: 6px;
-  /* `1 0 auto`: grow into the pane, and never shrink below the rows'
-     own height. `flex: 1` alone caps the box at the pane and the tiles
-     then spill out of a container that has nothing left to scroll. */
-  flex: 1 0 auto;
+  gap: 8px;
+  flex: 0 0 auto;
   margin-top: 0;
 }
-/* ONE TILE IS WIDE, and which one is arithmetic rather than a name —
-   see the count in scPaintTally. The add control is already full width
-   in its own rule and is deliberately NOT named here: it is not one of
-   your habits, so it sits outside the count that decides this. */
-.ty-row.is-wide { grid-column: 1 / -1; }
-/* ONE TILE IS TALL and it is the one you add to through the day. Two
-   rows on the right, which is your reference's own arrangement — and
-   the height is what the gauge and its stepper need rather than a
-   claim that Water matters more. */
-.ty-row.is-tall { grid-row: span 2; }
+/* ── is-wide IS GONE AND is-tall PLACES NOTHING ──
+   Both were arithmetic about a two-column grid: which tile fills the
+   odd cell, and which one spans two rows so its gauge had height.
+   With one column every tile is full width and every tile is as tall
+   as what is in it, so `is-wide` went with the cursor that set it.
+   `is-tall` stays because it still answers a question the layout did
+   not ask — which item you add to through the day — and the gauge,
+   the stepper and the room for it are all written against it. */
 .ty-row {
   position: relative;
   /* Filled, never outlined: on a page this dark a 1px border is the
@@ -1225,6 +1244,11 @@ body {
    Absolute inside a relative well, and a basis in PIXELS rather than
    `auto`, so the well's own floor is the number written here and the
    drawing is told what it got rather than asked what it wants. */
+/* ── AND THE WELL LOST ITS GROUND ──
+   A plot area needs an edge when the plot is an AREA — a filled
+   curve on a card is a smear without one. Seven separate bars are
+   already their own shape, the way the week strip beside them is,
+   so the wash under them is a second rectangle saying nothing. */
 .ty-well {
   position: relative; display: block;
   border-radius: 9px; overflow: hidden;
@@ -1233,8 +1257,13 @@ body {
      22 the curve came out as a smear along the top of the well —
      present, correct, and saying nothing. The floor is what the
      drawing needs; anything above it is what the row has spare. */
-  flex: 1 1 30px; min-height: 30px;
-  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  /* ── 62, BECAUSE A BAR HAS TO BE TALLER THAN IT IS WIDE ──
+     Seven bars across 306px are about 38px each. At the 52 this
+     started on they came out very nearly square and read as blocks
+     rather than as a chart — the eye compares HEIGHTS, and a square
+     has none to compare. 62 with a 7px gap is the first ratio where
+     the week's shape is what you see. */
+  flex: none; height: 62px;
 }
 .ty-ar {
   position: absolute; inset: 0;
@@ -1254,6 +1283,27 @@ body {
 /* The dated ticks are what say these are four READINGS rather than a
    continuous line, which is the whole of what makes an area honest on
    a daily count. */
+/* ── SEVEN BARS, READ AGAINST EACH OTHER ──
+   Elements rather than an svg, which is the week strip's own idiom
+   four rules up: a stretched viewBox turns a 1px corner radius into
+   an ellipse, and there is no `non-scaling-stroke` for `rx`.
+
+   `align-items: flex-end` is the zero base — every bar grows from
+   the floor, which is the whole reason bars survive a base an area
+   cannot. A day with no reading keeps the empty track rather than
+   drawing a hairline, because nothing recorded is not nought. */
+.ty-bars {
+  position: absolute; inset: 0;
+  display: flex; align-items: flex-end; gap: 7px; padding: 0;
+}
+.ty-bars > i {
+  flex: 1 1 0; min-width: 0; border-radius: 3px;
+  background: color-mix(in srgb, var(--tc, var(--ink)) 70%, transparent);
+}
+/* Today in the ink, because it is the figure printed above the chart
+   and the one mark you are looking for. The other six are the item's
+   own hue, which is what makes a card findable without reading. */
+.ty-bars > i.is-today { background: var(--ink); }
 .ty-ax { display: flex; justify-content: space-between; margin-top: 5px; flex: none; }
 /* ── THE FOOT ──
    The book, the block that fed the tick. It sits in the card's own
@@ -1277,12 +1327,23 @@ body {
    state that is not one. A day still ahead is drawn like a day it was
    never on: nothing has happened yet, and drawing it as a miss would
    be the screen marking you down for Thursday on a Tuesday. */
+/* ── AND THE STRIP HAD TO COME DOWN WHEN THE TILE WENT WIDE ──
+   Seven blocks 30px tall were pips on a 150px tile. At full width
+   they are 44px wide each, and lit in the ink they were the loudest
+   objects on the screen — seven white rectangles saying what the
+   fraction two lines above already says. 20px, and the kept ones
+   take the item's own hue rather than the ink, which is the bars'
+   rule beside them: colour says WHICH, and the ink is for today. */
 .ty-wk {
   display: flex; align-items: stretch; gap: 4px;
-  flex: 1 1 30px; min-height: 30px;
+  flex: none; height: 20px;
 }
 .ty-wk > i { flex: 1 1 0; border-radius: 3px; background: var(--tick-off); }
-.ty-wk > i.is-on { background: var(--ink); }
+/* FULL STRENGTH, AND IT WAS A 78% WASH FOR ONE RENDER. This strip and
+   the half-year the tile opens are the same mark at two sizes, so they
+   are the same colour or the screen says one thing twice — and a wash
+   is a different colour, whatever it is mixed from. */
+.ty-wk > i.is-on { background: var(--tc, var(--ink)); }
 .ty-wk > i.is-off, .ty-wk > i.is-todo { opacity: .45; }
 /* ── THE GAUGE ──
    The marks sit BESIDE the track at their own heights, which is what
@@ -1291,20 +1352,36 @@ body {
    was what made it a gauge while the screen scrolled; here the two
    rows it spans are always more than that, and a fixed floor is what
    pushed every other row past the fold. */
+/* ── THE GAUGE LIES DOWN ──
+   It was a 6px vertical track with three per-cent captions stacked
+   beside it, and on the real screen the labels were not on the track
+   and per cent was not the unit: nobody asks what fraction of three
+   litres they have had. Horizontal, thick enough to read as a vessel,
+   with the divisions drawn ON the rail and the two ends named in
+   litres under it. */
 .ty-g {
-  display: flex; gap: 14px; align-items: stretch;
-  flex: 1 1 90px; min-height: 90px; padding-top: 4px;
+  display: flex; flex-direction: column; gap: 5px;
+  flex: none; padding-top: 6px;
 }
 .ty-gt {
-  width: 6px; flex: none; border-radius: 3px; background: var(--tick-off);
-  display: flex; flex-direction: column; justify-content: flex-end;
-  overflow: hidden;
+  height: 12px; border-radius: 7px; background: var(--tick-off);
+  position: relative; overflow: hidden;
 }
-.ty-gt > i { display: block; width: 100%; border-radius: 3px; background: var(--ink); }
-.ty-gm { flex: 0 1 58px; position: relative; }
+.ty-gt > i {
+  display: block; height: 100%; border-radius: 7px;
+  background: var(--tc, var(--ink));
+}
+/* The divisions are a hairline of the PAGE rather than of the ink, so
+   they read on the filled half and the empty one alike — a wash of
+   the ink disappears the moment the fill passes it. */
+.ty-gt > u {
+  position: absolute; top: 0; bottom: 0; width: 1px;
+  background: color-mix(in srgb, var(--paper) 60%, transparent);
+}
+.ty-gm { display: flex; justify-content: space-between; }
 .ty-gm > span {
-  position: absolute; left: 0; transform: translateY(-50%);
   font-size: 11px; color: var(--spent); white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 /* ── THE STEPPER, AND IT IS THREE SIBLINGS ──
    A button inside a button is invalid and collapses to one press while
@@ -1692,13 +1769,24 @@ body {
    here, on the week's rows and at the head of the history sheet, and a
    screen that dropped it would be the only one that names its items in
    words alone. */
+/* ── THE GLYPH TAKES THE ITEM'S HUE, AT EVERY STATE ──
+   It was `--spent` and went to `--dim` once the item was logged, so
+   the one thing on the card that says WHICH item this is said it in
+   two greys. `--tc` is written on the card by scPaintTally and is
+   the same token the name above reads, so there is one source.
+
+   MERGED INTO THIS RULE RATHER THAN WRITTEN AFTER IT. A second
+   `.ty-card .ic` setting `stroke` is one selector carrying one
+   property twice — the file then has two values in it and only the
+   last is live, whichever order they are in, and tests/names.js
+   fails it. That is the whole of what that check is for and it
+   caught this one in a tenth of a second. */
 .ty-card .ic {
   grid-column: 1; grid-row: 1;
   display: block; width: 19px; height: 19px;
-  fill: none; stroke: var(--spent); stroke-width: 1.9;
+  fill: none; stroke: var(--tc, var(--spent)); stroke-width: 1.9;
   stroke-linecap: round; stroke-linejoin: round;
 }
-.ty-row.is-on .ty-card .ic { stroke: var(--dim); }
 .ty-body { display: contents; }
 /* The name shares the top line with the glyph and gives the whole of
    the second line to the figure. 13.5, not 15: it is a label for the
@@ -1710,12 +1798,21 @@ body {
    the figure 27px and the chart its room, and it is the change that
    makes this screen read as composed rather than as six rows of the
    same weight. */
+/* ── THE NAME TAKES THE ITEM'S HUE ──
+   Health puts the metric name in its own colour, and it is how you
+   find Sleep on a list without reading a word. The hue is written on
+   the card as `--tc` by scPaintTally, so there is one source for it
+   and the glyph above reads the same one.
+
+   AND IT IS 12.5px SENTENCE CASE NOW, not 11px small caps. Small
+   caps at 11 is a LABEL — right when the name was a caption over a
+   figure on a 145px tile and the mark in the corner said the rest.
+   Full width it is the card's heading, which is what Health's is. */
 .ty-nm {
   grid-column: 2; grid-row: 1;
-  font-size: 11px; font-weight: 600; color: var(--spent);
-  text-transform: uppercase; letter-spacing: .075em; line-height: 1;
-  /* The tick sits in the corner over this line. */
-  padding-right: 20px;
+  font-size: 12.5px; font-weight: 600; color: var(--tc, var(--spent));
+  letter-spacing: -.006em; line-height: 1.1;
+  padding-right: 0;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .ty-card {
