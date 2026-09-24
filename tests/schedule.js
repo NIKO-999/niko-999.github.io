@@ -18197,6 +18197,19 @@ const SAID = [
       const yrec = await train(ypage);
       ok(`...and it lands on "${word}", never on a block that only reads like one`,
         Object.keys(yrec).length === 1 && Object.keys(yrec)[0] === 'w', { word, yrec });
+      /* AND THE SESSION BLOCK IS NOT TICKED WITH IT, which is the half
+         the record alone cannot catch: with `session` back in the
+         train row the workout still sorts first, so the session lands
+         on the right block and every assertion above passes. What a
+         phantom feeder actually DOES is mark somebody's trading hours
+         done because they pressed Train. */
+      const ygreen = await ypage.evaluate(() => {
+        const d = new Date();
+        const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return Object.keys(JSON.parse(localStorage.getItem('sched.log.v1') || '{}')[day] || {});
+      });
+      ok(`...and pressing Train does not tick a "session" block as well`,
+        ygreen.length === 1 && ygreen[0] === 'w', { word, ygreen });
       ok(`nothing threw on "${word}"`, yerrs.length === 0, yerrs);
       await yctx.close();
     }
