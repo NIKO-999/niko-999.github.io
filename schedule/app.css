@@ -257,9 +257,20 @@
      progress is the one exception, because it is the mark the whole
      screen is oriented around and it is already a setting. */
   --st-ok: #43B96C;
-  /* First place, and the same on every board — see app.js for why the
-     crown stopped being the leader's own colour. */
-  --gold: #FFC83D;
+  /* ── FIRST, AND THE ONE THING IN THIS APP THAT IS GOLD ──
+     It dressed the friends board's crown and outlived it as a token
+     nothing read — which is the dead rule this file keeps removing,
+     one language over. The day you began is the same claim the crown
+     made: a colour here says WHICH, and day one is one square out of
+     a year. `a crown in somebody's chosen violet says which PERSON,
+     which the name beside it already says. Gold says which PLACE.`
+
+     A PAIR, like every other WHICH colour here. The value moved with
+     the reader: #FFC83D is a yellow at this size, and the light face
+     was #8A6100, which puts `--paper` on it at 5.18:1 — a rounding
+     error above the 5.15 floor rather than a margin, which is the
+     mistake this file has now recorded three times. */
+  --gold: #E3B341;
   /* The seven hues a workout tag can be. The CARD keeps its own
      literal hex and does not follow the theme; a tag does, so it needs
      a token per face — see app.js for the light face's numbers. */
@@ -338,7 +349,7 @@
   --t-train: #B3382E; --t-walk: #1C7A4E; --t-read: #1668C7;
   --t-steps: #8A5000; --t-fuel: #7A6200; --t-water: #0E6E76;
   --st-ok: #19733F;
-  --gold: #8A6100;
+  --gold: #8A5D00;
   --w-red: #d83d2c; --w-blue: #2c76d6; --w-teal: #108383;
   --w-green: #14885b; --w-violet: #8a4fe0;
   --w-orange: #b56015; --w-amber: #a8670d;
@@ -3489,6 +3500,200 @@ body {
    or they read as one segmented control with two halves. */
 .mark + .mark { margin-top: 9px; }
 .mark:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+.glist {
+  background: var(--card);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 0 0 12px;
+}
+/* A GROUP HEADING STAYS A CAPS LABEL AND A FIELD LABEL DOES NOT, which
+   is the whole of the cut. `.label` above a GROUP names the group the
+   way an inset list's header does; `.label` above a single field was a
+   second line spent saying what the row already says on its own, and
+   there were six of them stacked down one sheet. */
+.label + .glist { margin-top: 0; }
+/* A ROW IS THE SAME BOX WHETHER IT HOLDS A FIELD OR OPENS A PANEL.
+   Written once and taken by a <div> and a <button> alike, because the
+   two have to land on the same pixel — the moment they are two rules
+   they come out a pixel apart across and three down, which is what
+   the two faces of the old day card already taught this file. */
+.glist .gl-r {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  /* ── ONE RIGHT EDGE, BY CONSTRUCTION RATHER THAN BY ARITHMETIC ──
+     The chevron is OUT of the flow and every row reserves its gutter,
+     so a row that has one and a row that does not end their value in
+     the same place. Written as two numbers that have to agree — a
+     padding on one kind of row and a chevron plus a gap on the other —
+     they came out 18px apart, which is a right-hand column that is not
+     one. There is nothing left to drift. */
+  position: relative;
+  padding: 7px 32px 7px 14px;
+  border: 0;
+  background: none;
+  text-align: left;
+  color: var(--ink);
+  /* THE WHOLE ROW IS AT THE FIELD FLOOR, and that is a claim rather
+     than a stray. Anything smaller zooms the page on focus in iOS, so
+     a row carrying an input has to be 16 — and a label at 15 beside a
+     value at 16 is a one-pixel mismatch on every line of a form whose
+     whole point is that the pair reads as one row. A grouped-list row
+     is a field row. */
+  font: 400 16px/1.25 'Inter', system-ui, sans-serif;
+  cursor: default;
+}
+/* A HAIRLINE BETWEEN ROWS AND NEVER AROUND THEM, which is the whole of
+   what a group IS: one surface with the rows ruled inside it, against
+   the stack of separately-bordered boxes this replaced.
+
+   Drawn by a pseudo-element rather than a border, for two reasons that
+   are both about the 44: a border adds to the row's own height, and
+   the rule has to start where the LABEL does rather than at the box's
+   edge, which is what makes an inset list read as ruled rather than as
+   a table. A row that follows a panel gets none — a panel is a surface
+   rather than a row, and the rule above it already closed the pair. */
+.glist > * + .gl-r::after {
+  content: '';
+  position: absolute;
+  left: 14px; right: 0; top: 0;
+  height: 1px;
+  background: var(--hair);
+}
+.glist > .gl-p + .gl-r::after { left: 0; }
+.gl-l { flex: none; }
+/* A VALUE YOU TAP THROUGH TO CHANGE IS QUIET; one you type into is the
+   ink. That is the only thing telling the two kinds of row apart, and
+   it is the same distinction the app already draws between a state and
+   a figure. */
+.gl-v {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  /* ── `--dim`, AND `--spent` WAS A REAL FAILURE ──
+     A value slot is 16px body type, so it is held to 4.5:1 — and
+     `--spent` over a card on the LIGHT face measures 4.30:1, which is
+     under the bar and was shipped for exactly one render. That is this
+     file's own oldest colour mistake for the fourth time: `--spent` is
+     the LIGHTER token and it is a rounding error above the bar on a
+     flat page, which is not a margin once anything is drawn under it.
+     `--dim` measures 8.42:1 and 6.61:1. */
+  color: var(--dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* QUIETER THAN THE VALUE IT SITS BESIDE, which is the order they are
+   read in: the value is the answer and the chevron is the affordance.
+   Held to 3:1 as a graphic rather than to 4.5 — it carries which rows
+   open, and the value beside it carries the fact. */
+.gl-c {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  width: 13px; height: 8px;
+  transform: translateY(-50%);
+  fill: none;
+  stroke: var(--spent);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform .18s ease;
+}
+/* 180°, never 90° — this repo's own rule for a folding panel, and the
+   reason the chevron points DOWN at rest rather than right. */
+.gl-r[aria-expanded="true"] .gl-c { transform: translateY(-50%) rotate(180deg); }
+.gl-c.gl-go {
+  width: 8px; height: 13px;
+  transform: translateY(-50%);
+}
+/* THE FIELD IS THE VALUE SLOT, so it keeps `.field` — every reader of
+   this sheet still finds an input by that name, and with it the 16px
+   floor and the appearance reset that hands Safari the box back. What
+   this takes off is the BOX: a bordered, grounded rectangle inside a
+   grounded row is the frame inside a frame. */
+.glist .field.gl-f {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  text-align: right;
+}
+.glist .field.gl-f:focus { outline: none; }
+/* ── THE TIME FIELD'S OWN INDICATOR IS A DESKTOP AFFORDANCE ──
+   `appearance: none` hands back the BOX and leaves this pseudo-element
+   drawn: a white clock glyph after the value, which at the value slot's
+   own size was the loudest mark on the sheet. iOS draws none of it and
+   opens the wheel on a tap anywhere in the field; Chromium opens it
+   from this and nothing else, so it is quietened rather than removed —
+   a control that exists on one platform and not the other is not one to
+   delete on the platform that has it. */
+.glist .field.gl-f::-webkit-calendar-picker-indicator {
+  width: 13px; height: 13px;
+  margin: 0 0 0 7px;
+  padding: 0;
+  opacity: .38;
+  cursor: pointer;
+}
+/* A caret in the words is what says which row you are in — the note's
+   own argument for dropping its ring, and it holds here for the same
+   reason. A keyboard still gets one, because a keyboard has no caret
+   to arrive with. */
+.glist .field.gl-f:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; border-radius: 4px; }
+.glist .gl-r:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
+/* ── AND THE PANEL IS A ROW THAT OPENED, NOT A SECOND SURFACE ──
+   `[hidden]` HAS TO BE SAID OUT LOUD ONCE A THING TAKES A DISPLAY, and
+   this app has had that bug eight times — the rail, the page dots, the
+   toast, the intro, the objectives row, the goals section. This one
+   takes a `display` the moment anything inside it is laid out, so the
+   attribute alone would stop meaning what it looks like it means. */
+.gl-p { padding: 2px 14px 12px; }
+.gl-p[hidden] { display: none; }
+.gl-p > .days-pick,
+.gl-p > .nt-pick { margin: 2px 0 0; }
+/* ── A TOGGLE IN A GROUP IS A ROW, AND IT CARRIES `.gl-r` TO SAY SO ──
+   `.mark` keeps its class — every check that reads this control still
+   finds it, and its mark, its aria-pressed and its behaviour are
+   untouched. What it loses is its own BOX: a bordered rectangle inside
+   a grouped list is the stack of boxes this pass took out.
+
+   WHAT IT KEEPS IS THE FILL, and that is a rule rather than an
+   oversight. This app's own line is that every filled control is
+   white, and *Done today* is one of the five it names — so a row that
+   stopped inverting would be reversing a written, measured decision
+   for a look, which is not an argument. It has to be said again here
+   only because `.glist .gl-r` sets `background: none` at the same
+   specificity and later in the file, and would otherwise win. */
+.glist .mark { border-radius: 0; margin-top: 0; }
+.glist .mark.is-on { background: var(--ink); color: var(--paper); }
+.glist .mark.mark-off.is-on { background: var(--tick-off); color: var(--dim); }
+/* ── AND DELETE IS NOT A PEER OF SAVE ──
+   It sat in a red outline at the same weight as Save, side by side, so
+   the one thing on the sheet you cannot undo read as the other half of
+   a pair. It is plain red type on its own row at the foot of the list,
+   which is where a destructive action goes — findable, and never in
+   the place your thumb lands on the way to filing an edit. */
+/* `.glist .gl-del`, NOT `.gl-del` — the sixth time in this file. The
+   row rule that gives every row its box also sets `color: var(--ink)`
+   at two classes, so a one-class rule after it loses however it is
+   written, and Delete shipped one render as white type that read as a
+   second Save. */
+.glist .gl-del {
+  /* A centred row has no value column, so it gives the chevron's
+     gutter back rather than sitting nine pixels off its own middle. */
+  padding-right: 14px;
+  justify-content: center;
+  color: var(--bad);
+  font-weight: 600;
+  cursor: pointer;
+}
 
 .acts { display: flex; gap: 10px; margin-top: 18px; }
 .btn {
@@ -6841,6 +7046,83 @@ body {
   font-variant-numeric: tabular-nums;
   line-height: 1.2;
 }
+/* ── THE DAY YOU BEGAN CASTS ──
+   A glow so you can find day one in a month at a glance, and it hangs
+   off the DATE rather than off the cell: the date's corner is the one
+   part of a cell pills never cover, and a bloom behind the pills is a
+   smudge across the words. Nine treatments were rendered over the real
+   month at 390x844 and read at 1:1 — a pip, a ring round the cell, a
+   wash, a lit left edge, a lit top edge, a frame, a corner halo and
+   two strengths of cast.
+
+   A BARE <i> IS `align-self: stretch`, so a shadow on it blooms along
+   the whole top of the cell rather than round the number — on the
+   light face a white bar with a grey edge, which is what the first
+   cast actually drew. It takes the pill's own box first.
+
+   AND THE RING IS WHAT STOPS IT READING AS A PILL. A non-inset
+   box-shadow paints outside the border box, so a bloom on its own
+   leaves the cell's ground showing through the middle: on the light
+   face that hole reads as a white pill, which is a mark this calendar
+   does not have. A hairline ring defines the edge, and ring-against-
+   fill is the two-state idiom this app already uses everywhere else.
+
+   MEASURED ON COMPOSITED PIXELS, and the dark face is the weak half —
+   a white bloom on a near-black ground moves the region's mean
+   luminance about a third as much as a dark bloom on white. Measured
+   on the shipped mark against the neighbour in its own row, it is
+   .076 dark against .186 light, where this file's own floor for "a
+   day you cannot see you missed" is .009.
+
+   `.cl-c` is `overflow: hidden`, so the bloom is cut at the cell's own
+   edges. Judged at 1:1, which is the size it is drawn: the clip is a
+   hard edge only under magnification, and the two ways out are worse —
+   `overflow: visible` lets that cell's pills run over the day beside
+   it, and insetting the date 5px takes it out of the column you count
+   along to find the 9th. */
+.cl-c.is-start > i,
+.cl-c.is-now > i {
+  /* ONE BOX, TWO SKINS. The two marks have to be the same size or a
+     row carrying both reads as two different objects — and on the one
+     day they land on the same cell there is only one box to get right.
+     Written as two they come out a pixel apart, which is the day
+     card's own lesson at a smaller size. */
+  align-self: flex-end;
+  min-width: 17px;
+  padding: 1px 4px;
+  border-radius: 999px;
+  text-align: center;
+}
+/* ── A MEDAL ON AN ORDINARY DAY, A RING ON THE DAY IT IS ALSO TODAY ──
+   A filled gold date is the strongest mark there is here and the one
+   that reads as DAY ONE unread — and on the single day the start is
+   also today it eats today's own pill, which breaks the rule the whole
+   drawing rests on: today is a FILL, which says which square, and this
+   is a LIGHT, which says what the square is. Two fills would be one
+   control answering two questions.
+
+   So the fill is the medal every ordinary day and steps back to a ring
+   and a bloom on that one. `.is-start.is-now` is (0,3,1) against
+   `.is-now`'s (0,2,1), so it wins the shadow on its own specificity
+   and today keeps the ground — this pair does not depend on source
+   order the way the ink version did.
+
+   Four treatments were rendered over the real month at 390x844 and
+   read at 1:1: the ink mark this replaces, a gold ring with an ink
+   numeral, a plain gold fill, and this. A fifth — ring, bloom and
+   numeral all gold — was drawn and dropped, because the numeral loses
+   its edge against the ring and the two blur into one gold blob: it
+   measured 1.95:1 on the overlap day. */
+.cl-c.is-start:not(.is-now) > i {
+  color: var(--paper);
+  font-weight: 700;
+  background: var(--gold);
+  box-shadow: 0 0 14px 4px color-mix(in srgb, var(--gold) 68%, transparent);
+}
+.cl-c.is-start.is-now > i {
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--gold) 88%, transparent),
+              0 0 14px 4px color-mix(in srgb, var(--gold) 76%, transparent);
+}
 /* ── TODAY IS THE APP'S OWN FILLED MARK, AND THAT REVERSES A RULE ──
    It was weight alone, under a note reading "not a second mark: a
    ring round the date is already the mark and a concentric one is two
@@ -6858,11 +7140,6 @@ body {
   color: var(--paper);
   font-weight: 700;
   background: var(--ink);
-  border-radius: 999px;
-  align-self: flex-end;
-  min-width: 17px;
-  padding: 1px 4px;
-  text-align: center;
 }
 /* Inset, because an outline outside a ruled cell draws over its
    neighbours rather than round itself. */

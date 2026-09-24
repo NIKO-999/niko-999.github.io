@@ -2420,15 +2420,24 @@
      one control up. */
   var LEN_MARKS = [15, 30, 60, 120];
   var LEN_STEP = 5;
-  function scLenBar(box, len, at) {
+  /* `say` is where the figure goes, and passing one is what STOPS the
+     big readout being drawn. Inside a grouped list the row's own value
+     already prints the length, so a 22px copy of it directly under the
+     row would be the same figure twice — and hiding it with a rule
+     would leave a dead element the function still builds. A caller that
+     wants the figure somewhere else says so, and gets it there. */
+  function scLenBar(box, len, at, say) {
     /* The ceiling grows to hold a block that is already longer than
        it — a shift can be ten hours and a bar that could not express
        what is already saved would rewrite it on the way past. */
     var max = Math.max(480, Math.ceil(len / 60) * 60);
-    var read = scEl('div', 'nm-read');
-    var big = scEl('b');
-    read.appendChild(big);
-    box.appendChild(read);
+    var big = null;
+    if (!say) {
+      var read = scEl('div', 'nm-read');
+      big = scEl('b');
+      read.appendChild(big);
+      box.appendChild(read);
+    }
     var sub = scEl('div', 'nm-sub');
     box.appendChild(sub);
 
@@ -2478,7 +2487,8 @@
 
     function paint() {
       var v = +dial.value;
-      big.textContent = scLenLong(v);
+      if (big) big.textContent = scLenLong(v);
+      if (say) say(scLenLong(v));
       dial.style.setProperty('--fill', (max ? (v / max) * 100 : 0) + '%');
       dial.setAttribute('aria-valuetext', scLenLong(v));
       markBtns.forEach(function (mb) {
@@ -2829,7 +2839,7 @@
     '--s-m': '#F2B950', '--s-a': '#5FA8FF', '--s-e': '#B98BFF',
     '--t-train': '#E0574B', '--t-walk': '#4FBE87', '--t-read': '#5FA8FF',
     '--t-steps': '#F2B950', '--t-fuel': '#E0C15A', '--t-water': '#48C3CC',
-    '--st-ok': '#43B96C', '--gold': '#FFC83D',
+    '--st-ok': '#43B96C', '--gold': '#E3B341',
     '--w-red': '#e6412f', '--w-blue': '#2f7fe6', '--w-teal': '#14a2a2',
     '--w-green': '#17a06b', '--w-violet': '#8a4fe0',
     '--w-orange': '#e0761a', '--w-amber': '#e08a12',
@@ -2844,7 +2854,7 @@
     '--s-m': '#8A5000', '--s-a': '#1668C7', '--s-e': '#6B3FC4',
     '--t-train': '#B3382E', '--t-walk': '#1C7A4E', '--t-read': '#1668C7',
     '--t-steps': '#8A5000', '--t-fuel': '#7A6200', '--t-water': '#0E6E76',
-    '--st-ok': '#19733F', '--gold': '#8A6100',
+    '--st-ok': '#19733F', '--gold': '#8A5D00',
     /* ── THE WORKOUT HUES, SOLVED FOR A LIGHT PAGE ──
        The card's own nine are grounds for one fixed dark card and the
        card does not follow the theme, deliberately. A TAG does: it is
@@ -3511,6 +3521,87 @@
   }
 
   /* ══════════════════════════════════════════════════════════
+     THE DAY YOU BEGAN
+
+     Every other date in this app is DERIVED — the calendar starts at
+     the first thing you ever logged, a streak counts back from today,
+     a month is a month. None of that can say when you DECIDED, and
+     the day you decided is the one you go looking for: the record has
+     a first entry, and a first entry is where you happened to open
+     the app rather than where you started.
+
+     ONE ISO DATE AND NOTHING ELSE. A start with a note on it, or a
+     list of them, is a journal — and this app already has one of
+     those, two tabs over. What it is for is a single mark on a single
+     square, so a single string is the whole of it.
+
+     A DATE AHEAD OF TODAY READS AS UNSET. A journey that has not
+     begun is a state nothing on the grid can draw: the mark would
+     land on a square the month calls quiet, under a Settings row
+     counting backwards into "Day -3".
+
+     AND THE REPAIR IS NOT WRITTEN BACK, which reverses what this app
+     has had to learn four times — and the reason is that the thing
+     making a date look wrong here may be the CLOCK rather than the
+     record. A device an hour behind, or a timezone crossed, puts a
+     real start date briefly in the future; clearing it then is the
+     one thing you cannot undo, where reading it as unset for an hour
+     costs a mark on a square. The other four repairs were shapes
+     that could only be damage. This one is a date, and a date has a
+     second way of being wrong.
+
+     Nothing diverges for it: `scStartSet` overwrites the key
+     outright, so there is no half-repaired state for a later write
+     to lose.
+     ═══════════════════════════════════════════════════════════ */
+  var START_KEY = 'sched.start.v1';
+  var startDay = '';
+  function scStartLoad() {
+    var v = '';
+    try { v = localStorage.getItem(START_KEY) || ''; } catch (e) { v = ''; }
+    startDay = (/^\d{4}-\d{2}-\d{2}$/.test(v) && v <= scDay()) ? v : '';
+  }
+  function scStartSet(d) {
+    startDay = d || '';
+    try {
+      if (startDay) localStorage.setItem(START_KEY, startDay);
+      else localStorage.removeItem(START_KEY);
+    } catch (e) {}
+  }
+  /* DAY ONE IS THE DAY YOU PRESSED IT, not the day after. Nobody
+     counts the morning they started as day nought, and an off-by-one
+     here is the figure the whole feature is about. */
+  function scStartNo(day) {
+    if (!startDay) return 0;
+    return scDayNum(day || scDay()) - scDayNum(startDay) + 1;
+  }
+
+  /* ── AND STARTING AGAIN CLEARS THE RECORD, NOT THE WEEK ──
+     What a reset means is the thing this had to decide, and the split
+     is the one the app already draws everywhere else: the RECORD is
+     what happened and the WEEK is the shape you built. Clearing the
+     shape too would hand you day one with nothing to do on it, which
+     is the opposite of beginning.
+
+     So the ticks, the blocks you kept, the sub-items, the days off,
+     the sessions and what you read all go; the schedule, your habits,
+     your notes and your pictures stay. It is said in full on the
+     sheet that asks, because this is the one delete in the app with
+     no bin behind it and nothing else to rebuild it from — which is
+     exactly the case this file's own rule still gives a sentence to.
+
+     NOT THROUGH `scMark`. That snapshots `state`, and none of these
+     keys is in it, so an Undo toast beside this would offer to put
+     back the one thing that had not gone. */
+  function scStartAgain() {
+    tickLog = {}; blockLog = {}; kidLog = {}; offLog = {};
+    scTickSave();
+    trainLog = {}; scTrainSave();
+    mindLog = {}; scMindSave();
+    scStartSet(scDay());
+  }
+
+  /* ══════════════════════════════════════════════════════════
      A DAY OFF
 
      The week is a template and that is what makes it a shape — every
@@ -3588,9 +3679,37 @@
       return it.from && it.from.indexOf(name) >= 0;
     });
   }
+  /* ── A NAME, OR THE GLYPH THAT NAME RESOLVES TO ──
+     `from` was a list of literal names, which is the second list of
+     words this file says not to keep: `scIsTrain` asks the keyword
+     table and this asked a hardcoded string, so the two disagreed
+     about what training is. A gym block called anything but "Train"
+     fed nothing — it did not go green when you ticked Train, the day
+     did not count as a day Train was on, and pressing Train on
+     Showing up ticked in SILENCE rather than asking what you trained.
+     The same block's own row opened the picker the whole time,
+     because that path goes through the table, which is exactly how it
+     was reported: it works from the week and not from the tally.
+
+     The glyph is the table's answer, so gym, lift, workout and
+     anything else it sends to `train` feed it — and adding a word to
+     the table adds it here the same day, which is the whole point of
+     there being one table.
+
+     `block` is the table's I-DO-NOT-KNOW, so a `from` name it cannot
+     place is matched by name alone: otherwise one unrecognised word
+     in that list would make every unrecognised block on the day feed
+     the item. */
   function scBlocksFor(item, dow) {
     if (!item.from) return [];
-    return scByDay(dow).filter(function (b) { return item.from.indexOf(b.n) >= 0; });
+    var want = [];
+    item.from.forEach(function (n) {
+      var g = scIconFor(n);
+      if (g !== 'block' && want.indexOf(g) < 0) want.push(g);
+    });
+    return scByDay(dow).filter(function (b) {
+      return item.from.indexOf(b.n) >= 0 || want.indexOf(scIconFor(b.n)) >= 0;
+    });
   }
 
   function scSetTick(day, id, val) {
@@ -8823,6 +8942,125 @@
      THE EDIT SHEET
      ═══════════════════════════════════════════════════════════ */
 
+  /* ═══════════════════════════════════════════════════════════
+     A FORM IS A GROUPED LIST
+
+     The editor was six tracked uppercase labels, each on its own line
+     above a full-width bordered field — 1,058px of form in a 742px
+     sheet, where the SHOUTING was the only thing telling one control
+     from the next and a value could not be scanned at all.
+
+     A grouped list is the other arrangement: one surface, the rows
+     ruled inside it, the label on the left and the value on the right.
+     What it buys is measured rather than claimed — five facts in the
+     height three labelled boxes took — and what it costs is that a
+     control wider than a row has to be DISCLOSED rather than always
+     drawn, which is the one thing these three helpers are for.
+
+     EVERY ROW IS THE SAME BOX. A value row is a <div>, a disclosure is
+     a <button> and a push is a <button>, and all three take `.gl-r`,
+     because the moment they are three boxes they come out a pixel
+     apart and the right-hand column stops being a column.
+     ═══════════════════════════════════════════════════════════ */
+
+  function scGlDown() {
+    /* Down at rest and 180° when open, which is this repo's own rule
+       for a folding panel — 90° lays a chevron on its side. A RIGHT
+       chevron would be a lie here: it says the row pushes to another
+       screen, and these open underneath. */
+    return '<svg class="gl-c" viewBox="0 0 13 8" aria-hidden="true">'
+      + '<path d="M1 1l5.5 6L12 1"/></svg>';
+  }
+  function scGlGo() {
+    /* And this one IS a push — the workout picker is its own sheet. */
+    return '<svg class="gl-c gl-go" viewBox="0 0 8 13" aria-hidden="true">'
+      + '<path d="M1 1l5.5 5.5L1 12"/></svg>';
+  }
+
+  /* A row whose value is a field you type into: the input keeps
+     `.field`, so the 16px floor and the appearance reset that hands
+     Safari its box back both come with it, and every reader of this
+     sheet still finds an input by that name. */
+  function scGlField(g, label, f) {
+    var r = scEl('div', 'gl-r');
+    r.appendChild(scEl('span', 'gl-l', label));
+    f.classList.add('gl-f');
+    /* The label is a <span> rather than a <label>, so without this the
+       field is announced as an unnamed input — which is exactly what
+       the start time was before it was given one. */
+    f.setAttribute('aria-label', label);
+    r.appendChild(f);
+    g.appendChild(r);
+    return r;
+  }
+
+  /* A row that opens a control underneath it. The value says what the
+     control is currently set to, so the row reads without opening —
+     which is the whole of why the control can be put away at all. */
+  function scGlOpen(g, label, value) {
+    var r = scEl('button', 'gl-r');
+    r.type = 'button';
+    var v = scEl('span', 'gl-v', value);
+    var p = scEl('div', 'gl-p');
+    /* `[hidden]` HAS TO BE SAID OUT LOUD ONCE A THING TAKES A DISPLAY,
+       and `.gl-p` does the moment anything inside it lays out. Said in
+       `app.css` beside the rule; set here. */
+    p.hidden = true;
+    p.id = 'scGl' + scId();
+    r.setAttribute('aria-expanded', 'false');
+    r.setAttribute('aria-controls', p.id);
+    r.appendChild(scEl('span', 'gl-l', label));
+    r.appendChild(v);
+    r.insertAdjacentHTML('beforeend', scGlDown());
+    r.addEventListener('click', function () {
+      var open = p.hidden;
+      p.hidden = !open;
+      r.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    g.appendChild(r);
+    g.appendChild(p);
+    return { row: r, panel: p, set: function (t) { v.textContent = t; } };
+  }
+
+  /* A row that pushes to a sheet of its own. */
+  function scGlPush(g, label, value, go) {
+    var r = scEl('button', 'gl-r');
+    r.type = 'button';
+    r.appendChild(scEl('span', 'gl-l', label));
+    r.appendChild(scEl('span', 'gl-v', value));
+    r.insertAdjacentHTML('beforeend', scGlGo());
+    r.addEventListener('click', go);
+    g.appendChild(r);
+    return r;
+  }
+
+  /* WHAT IS INSIDE IT AND WHAT IT IS ABOUT, by NAME rather than by
+     count. "3 things" is a figure you have to open the row to read;
+     the names are the thing itself, and `.gl-v` ellipsises whatever
+     does not fit, which is the honest end of a list too long for a
+     line. */
+  function scGlKids(list) {
+    return list.length ? list.map(function (k) { return k.n; }).join(', ') : 'None';
+  }
+  function scGlNotes(ids) {
+    var t = ids.map(function (q) {
+      var n = scNoteById(q);
+      return n ? scNoteTitle(n) : null;
+    }).filter(Boolean);
+    return t.length ? t.join(', ') : 'None';
+  }
+
+  /* WHICH DAYS, IN THE FEWEST WORDS THAT ARE STILL TRUE. One day is
+     named in full, because a row saying MON when the card behind it
+     says Monday is the app using two words for one thing. */
+  function scGlDays(picked) {
+    var on = scWeek().filter(function (d) { return picked[d]; });
+    if (!on.length) return 'None';
+    if (on.length === 7) return 'Every day';
+    if (on.length === 1) return FULL[on[0]];
+    return on.map(function (d) { return ABBR[d].charAt(0) + ABBR[d].slice(1).toLowerCase(); }).join(', ');
+  }
+
   function scEditSheet(item, day) {
     var isNew = !item;
     scSheet(isNew ? 'New block' : 'Edit', function (body) {
@@ -8853,9 +9091,14 @@
           if (!isNew) { picked = {}; picks.querySelectorAll('.pick').forEach(function (o) { o.setAttribute('aria-pressed', 'false'); }); }
           picked[d] = picked[d] ? 0 : 1;
           b.setAttribute('aria-pressed', picked[d] ? 'true' : 'false');
+          /* The row above the panel says which days, so it has to be
+             written back — a summary that only tells the truth until
+             you touch the control under it is worse than none. */
+          if (dayRow) dayRow.set(scGlDays(picked));
         });
         picks.appendChild(b);
       });
+      var dayRow = null;
 
       /* ── A START AND A LENGTH, NOT TWO CLOCK TIMES ──
          The end field is gone and the bar below replaces it. Three
@@ -8905,15 +9148,31 @@
 
       var room = scEl('input', 'field');
       room.type = 'text';
-      room.placeholder = 'Where, if it matters';
+      /* A PLACEHOLDER IN THE VALUE SLOT, so it reads as the absence of
+         an answer rather than as an instruction: the row's own label
+         is what says what the field is for, and a sentence in the
+         right-hand column would be the caption this pass removed. */
+      room.placeholder = 'None';
       room.value = item ? item.r : '';
 
-      body.appendChild(scEl('span', 'label', 'What'));
-      body.appendChild(name);
-      body.appendChild(scEl('span', 'label', isNew ? 'Days' : 'Day'));
-      body.appendChild(picks);
-      body.appendChild(scEl('span', 'label', 'Starts at'));
-      body.appendChild(t1);
+      /* ── ONE GROUP, FIVE FACTS ──
+         Name, Day, Starts, Lasts, Where — the whole of what a block
+         IS, on five rows of one surface. It was five caps labels over
+         five bordered boxes plus a seven-chip row and a dial, and the
+         two controls that are wider than a row are the two that are
+         put away: the row says what they are set to, which is the only
+         reason a control can be hidden and the screen still read.
+
+         WHICH TWO IS DECIDED BY WIDTH, not by how often you change
+         them. Seven day chips and a dial with four marks under it
+         cannot be a right-hand column at 390px; a name, a clock and a
+         room can. */
+      var g1 = scEl('div', 'glist');
+      scGlField(g1, 'Name', name);
+      dayRow = scGlOpen(g1, isNew ? 'Days' : 'Day', scGlDays(picked));
+      dayRow.panel.appendChild(picks);
+      scGlField(g1, 'Starts', t1);
+      var lenRow = scGlOpen(g1, 'Lasts', '');
       /* ── AND HOW LONG, IF IT IS ANYTHING ──
          A NEW BLOCK OPENS AT A MOMENT, which is the whole of what was
          asked for: everything starts as a thing you can just log, and
@@ -8921,18 +9180,15 @@
          was an hour, invented so the row had a span to draw, and on
          Wake it was an hour of nothing.
 
-         An existing block opens at whatever it already is, so the bar
-         is a readout of the block as much as a control on it. */
-      body.appendChild(scEl('span', 'label', 'How long'));
-      /* Straight into the body rather than into a box of its own, the
-         way the number dial's parts are: every rule these carry is on
-         the `.nm-*` classes themselves, so a wrapper would be a class
-         with no rule behind it and one more thing between the control
-         and the sheet that could move it. */
-      var lenBar = scLenBar(body, item ? Math.max(0, item.e - item.s) : 0,
-        function () { return scFromHHMM(t1.value); });
-      body.appendChild(scEl('span', 'label', 'Where'));
-      body.appendChild(room);
+         An existing block opens at whatever it already is, so the row
+         is a readout of the block as much as a way to a control on it.
+         `lenRow.set` is passed as the bar's own `say`, which is what
+         stops it drawing a 22px copy of the figure the row above it
+         has just printed. */
+      var lenBar = scLenBar(lenRow.panel, item ? Math.max(0, item.e - item.s) : 0,
+        function () { return scFromHHMM(t1.value); }, lenRow.set);
+      scGlField(g1, 'Where', room);
+      body.appendChild(g1);
 
       /* ── AND WHAT YOU DO DURING IT ──
          Held here rather than on the row, because these are part of the
@@ -8943,6 +9199,7 @@
          it before the block exists is a form asking about a thing that
          does not. */
       var kidList = (item && Array.isArray(item.k)) ? item.k.slice() : [];
+      var kidsRow = null;
       var kidBox = scEl('div', 'kid-edit');
       var kidAdd = scEl('input', 'field');
       kidAdd.type = 'text';
@@ -8965,6 +9222,10 @@
         kidAdd.disabled = kidList.length >= 8;
         kidAdd.placeholder = kidList.length >= 8
           ? 'Eight is the most a row can hold' : 'Lunch, trading content, emails…';
+        /* Written back on every repaint rather than on the two presses
+           that change the list: a summary kept in step by its callers
+           is one that goes stale the day somebody adds a third. */
+        if (kidsRow) kidsRow.set(scGlKids(kidList));
       }
       /* ── ONE LINE, COMMAS ──
          "lunch, trading content, emails" is one field for a whole
@@ -9000,12 +9261,18 @@
         addKid();
       });
       if (!isNew) {
-        body.appendChild(scEl('span', 'label', 'During it'));
-        body.appendChild(kidBox);
+        /* ── A SECOND GROUP, BECAUSE THESE ARE ABOUT A BLOCK'S PARTS ──
+           The first group is what the block IS; this is what is inside
+           it and what it is about. Two surfaces rather than one long
+           one, which is the only thing a group heading would otherwise
+           be needed to say. */
+        var g2 = scEl('div', 'glist');
+        kidsRow = scGlOpen(g2, 'During it', scGlKids(kidList));
+        kidsRow.panel.appendChild(kidBox);
         var kidRow = scEl('div', 'kid-new');
         kidRow.appendChild(kidAdd);
         kidRow.appendChild(scBtn('off', 'Add', addKid));
-        body.appendChild(kidRow);
+        kidsRow.panel.appendChild(kidRow);
         paintKids();
 
         /* ── AND WHICH NOTE IT IS ABOUT ──
@@ -9020,13 +9287,13 @@
            attach one before you have written any is a control that
            can only refuse. */
         if (notes.length) {
-          body.appendChild(scEl('span', 'label', 'About'));
           /* ── SEVERAL, AND THE CHIPS TOGGLE ──
              A goal, the process for it and a note about it are three
              different records about one morning. There is no None
              chip any more: pressing a chip that is on takes it off,
              which is the same control answering one question instead
              of two. */
+          var ntRow = scGlOpen(g2, 'About', scGlNotes(noteSel));
           var nrow = scEl('div', 'nt-pick');
           notes.slice().sort(function (a, b2) { return b2.u - a.u; }).forEach(function (q) {
             var on = noteSel.indexOf(q.id) >= 0;
@@ -9046,21 +9313,47 @@
               var now = noteSel.indexOf(q.id) >= 0;
               b.classList.toggle('is-on', now);
               b.setAttribute('aria-pressed', now ? 'true' : 'false');
+              ntRow.set(scGlNotes(noteSel));
             });
             nrow.appendChild(b);
           });
-          body.appendChild(nrow);
+          ntRow.panel.appendChild(nrow);
         }
+        body.appendChild(g2);
+      }
+
+      /* ── DELETE IS NOT A PEER OF SAVE, and that is one line of this
+         function and a whole change to what the sheet says ──
+         It sat in a red outline at the same weight as Save, side by
+         side at the foot: the one press on this form you cannot undo,
+         drawn as the other half of a pair and sitting where a thumb
+         lands on the way to filing an edit. It is a row at the END of
+         the list now — plain red type on its own surface, past
+         everything the form is actually for — which is where a
+         destructive action goes and is the only thing that stops it
+         being a fifty-fifty.
+
+         Cancel stays a button, because it is not destructive and it
+         is the other half of a genuine pair: on a NEW block there is
+         nothing to go back to and the scrim is the only other way
+         out. On an edit there is nothing to cancel — Escape and the
+         scrim both leave it alone — so Save has the row to itself. */
+      var del = null;
+      if (!isNew) {
+        del = scEl('div', 'glist');
+        var delBtn = scEl('button', 'gl-r gl-del', 'Delete this block');
+        delBtn.type = 'button';
+        delBtn.addEventListener('click', function () {
+          scMark();
+          state.items = state.items.filter(function (o) { return o.id !== item.id; });
+          scClose();
+          scCommit('Removed');
+        });
+        del.appendChild(delBtn);
       }
 
       var acts = scEl('div', 'acts');
-      if (!isNew) acts.appendChild(scBtn('bad', 'Delete', function () {
-        scMark();
-        state.items = state.items.filter(function (o) { return o.id !== item.id; });
-        scClose();
-        scCommit('Removed');
-      }));
-      else acts.appendChild(scBtn('off', 'Cancel', scClose));
+      if (isNew) acts.appendChild(scBtn('off', 'Cancel', scClose));
 
       acts.appendChild(scBtn('go', 'Save', function () {
         var s = scFromHHMM(t1.value);
@@ -9115,7 +9408,24 @@
         var oDay = scWeekDate(day);
         var canDone = !!bDay && scTallyOpen(bDay);
         var canOff = scOffOpen(oDay);
-        if (canDone || canOff) body.appendChild(scEl('span', 'label', 'This day'));
+        /* ── AND THE THREE ONE-DATE FACTS ARE ONE GROUP ──
+           `.label` stays here and nowhere else on this sheet, because
+           this one names a GROUP rather than a field: everything above
+           edits the block for every week there will ever be, and
+           everything in here is about one date. That is a distinction
+           a row's own left-hand label cannot make, which is exactly
+           what an inset list's header is for.
+
+           TRAINED JOINED IT, and its own caps label went. It was a
+           seventh label over a lone button directly under a grouped
+           list, which is the stack of boxes seen from the side — and
+           it is the same kind of fact as the two above it, filed
+           against the same date through the same window. The rule it
+           was written to keep still holds and is why the heading is
+           "This day": Off must not sit under a heading reading
+           TRAINED, and under this one it does not. */
+        var g3 = (canDone || canOff) ? scEl('div', 'glist') : null;
+        if (g3) body.appendChild(scEl('span', 'label', 'This day'));
 
         /* ── the other direction ──
            The tally ticks Train and the week agrees. This is the same
@@ -9148,6 +9458,7 @@
           tog.insertAdjacentHTML('beforeend',
             '<svg viewBox="0 0 24 24" aria-hidden="true">'
             + '<path d="M4.5 12.8l5.2 5.2L19.5 6"/></svg>');
+          tog.classList.add('gl-r');
           tog.setAttribute('aria-pressed', done ? 'true' : 'false');
           tog.addEventListener('click', function () {
             scSetBlockDone(bDay, item, day, !done);
@@ -9161,7 +9472,7 @@
             scToast(done ? 'Unmarked'
               : fed ? 'Counted toward ' + fed : 'Marked done', false);
           });
-          body.appendChild(tog);
+          g3.appendChild(tog);
         }
 
         /* ── AND THE OPPOSITE CLAIM, DIRECTLY UNDER IT ──
@@ -9183,6 +9494,7 @@
           otog.insertAdjacentHTML('beforeend',
             '<svg viewBox="0 0 24 24" aria-hidden="true">'
             + '<path d="M5 12h14"/></svg>');
+          otog.classList.add('gl-r');
           otog.setAttribute('aria-pressed', isOff ? 'true' : 'false');
           otog.addEventListener('click', function () {
             scSetOff(oDay, item, day, !isOff);
@@ -9191,7 +9503,7 @@
             if (view === 'tally') scPaintTally(); else scRender();
             scToast(isOff ? 'Back on' : 'Off for the day', false);
           });
-          body.appendChild(otog);
+          g3.appendChild(otog);
         }
 
         /* ── the deck's OTHER door, and it is the one that matters ──
@@ -9206,20 +9518,19 @@
         if (canDone && scIsTrain(item)) {
           var gr = scTrainOf(bDay, item.id);
           var got = gr && scWorkName(gr.k);
-          var wob = scEl('button', 'mark' + (got ? ' is-on' : ''));
-          wob.type = 'button';
-          wob.appendChild(document.createTextNode(got || 'Pick a workout'));
-          wob.insertAdjacentHTML('beforeend',
-            '<svg viewBox="0 0 24 24" aria-hidden="true">'
-            + '<path d="M9 5.5l6.5 6.5L9 18.5"/></svg>');
-          wob.addEventListener('click', function () {
+          /* A PUSH, so it takes the row's own right chevron rather
+             than the tick every other `.mark` carries: this one does
+             not toggle anything, it opens the picker. The label says
+             what the row is and the value says what is on it, which
+             is the seventh caps label paid back as two words. */
+          scGlPush(g3, 'Trained', got || 'Not yet', function () {
             scTrainAsk(item, day, bDay);
           });
-          body.appendChild(scEl('span', 'label', 'Trained'));
-          body.appendChild(wob);
         }
+        if (g3) body.appendChild(g3);
       }
 
+      if (del) body.appendChild(del);
       body.appendChild(acts);
 
       if (isNew) setTimeout(function () { name.focus(); }, 340);
@@ -9570,6 +9881,26 @@
       var rule = scEl('div', 'menu-rule');
       body.appendChild(rule);
 
+      /* ── THE JOURNEY, FIRST OF THE RECORD ──
+         Above Rename because it is not about the app's names: it is
+         the record's own beginning, and everything under it here is
+         about the record. One row in two states rather than two rows,
+         because "begin" and "start again" are the same press asked
+         at two moments — and a Begin control that stays on the screen
+         after you have begun is a task you can never finish, which is
+         the profile sheet's own rule about an offer that does not
+         stop. */
+      if (!startDay) {
+        item('Begin the journey', 'Marks today as day one', '', function () {
+          scStartSet(scDay());
+          scClose();
+          scPaintCal();
+          scToast('Day one.', false);
+        });
+      } else {
+        item('Day ' + scStartNo(), 'Began ' + scStartWhen(), '', scStartSheet);
+      }
+
       item('Rename', state.title, '', function () {
         scTextSheet('Rename', 'Title', state.title, function (v) { state.title = v || 'Schedule'; });
       });
@@ -9608,6 +9939,53 @@
           b2.appendChild(acts);
         });
       });
+    });
+  }
+
+  /* The date a person reads, never the ISO the record keeps: the
+     head's own line is "Thursday 24 Sep" and a start that printed
+     2026-09-24 beside it would be two spellings of a date on one
+     app. */
+  function scStartWhen() {
+    if (!startDay) return '';
+    var q = String(startDay).split('-');
+    var d = new Date(+q[0], +q[1] - 1, +q[2]);
+    return FULL[d.getDay()] + ' ' + d.getDate() + ' ' + MON[d.getMonth()];
+  }
+
+  /* ── THE ONE DELETE HERE WITH NO BIN, SO IT SAYS WHAT GOES ──
+     A hint paragraph describing a control is the thing this app
+     stopped writing; a sentence naming what an irreversible action is
+     about to take is one of the two kinds that still gets one, and
+     this is that kind. It names both halves — what goes and what
+     stays — because the half that stays is the surprising one and
+     finding out afterwards is not a way to find out. */
+  function scStartSheet() {
+    scSheet('Start again?', function (b2) {
+      b2.appendChild(scEl('p', 'hint',
+        'Day one becomes today. Everything you have logged goes with it — '
+        + 'the ticks, the blocks you kept, the sessions and what you read. '
+        + 'Your week, your habits and your notes stay exactly as they are.'));
+      var acts = scEl('div', 'acts');
+      acts.appendChild(scBtn('off', 'Keep going', scClose));
+      acts.appendChild(scBtn('bad', 'Start again', function () {
+        scStartAgain();
+        scClose();
+        /* ── `scRender` IS WHAT REPAINTS TODAY, AND THAT IS WHY THERE
+           IS NO THIRD CALL HERE ──
+           Settings opens from any tab, so this can be pressed while
+           Today is up, and Today's tiles are drawn from the same
+           `tickLog` just emptied. A line repainting the tally went in
+           for that and came straight back out: `scRender` ends in
+           `scLive`, and `scLive` repaints whichever half of Today is
+           up before it returns. The bug it was written for does not
+           exist, and the probe that read the caption either side of
+           the reset is the only thing that would have said so. */
+        scRender();
+        scPaintCal();
+        scToast('Day one.', false);
+      }));
+      b2.appendChild(acts);
     });
   }
 
@@ -10246,16 +10624,23 @@
      than by a wrapper element, so nothing has to be grouped: the rows
      stay flat, the tools strip still slots in beside any of them, and
      a run is a fact worked out at render rather than a shape stored. */
-  /* ── THE CYCLE, AS A COUNT OF DAYS ──
+  /* ── A DAY AS A COUNT OF DAYS ──
      Both ends are plain ISO dates with no time on them, so they are
      compared as day NUMBERS rather than as timestamps: a difference
      in milliseconds loses or gains a day across a daylight-saving
-     boundary, which is the goal countdown's own lesson. */
-  function scBudNum(iso) {
+     boundary, which is the goal countdown's own lesson.
+
+     NAMED FOR THE QUESTION RATHER THAN FOR THE SCREEN. It was
+     `scBudNum`, which was honest while the budget's cycle was the
+     only thing counting days — and the day the journey's own day one
+     needed the same arithmetic, a prefix naming one screen would have
+     been the next person's wrong turn. `scObjDay` became `scWeekDate`
+     and `scPatMid` became `scFig` for exactly this. */
+  function scDayNum(iso) {
     var q = String(iso).split('-');
     return Math.round(Date.UTC(+q[0], +q[1] - 1, +q[2]) / 864e5);
   }
-  function scBudISO(num) {
+  function scDayISO(num) {
     var d = new Date(num * 864e5);
     return d.getUTCFullYear() + '-' + scPad(d.getUTCMonth() + 1)
       + '-' + scPad(d.getUTCDate());
@@ -10267,7 +10652,7 @@
      rule about both ends. */
   function scBudBack(n) {
     if (!n || !n.cs) return 0;
-    var d = scBudNum(scDay()) - scBudNum(n.cs);
+    var d = scDayNum(scDay()) - scDayNum(n.cs);
     return d > 0 ? Math.floor(d / scBudLen(n)) : 0;
   }
   /* The cycle `back` cycles ago, 0 being the one you are in. `frac`
@@ -10278,12 +10663,12 @@
     var len = scBudLen(n);
     if (!n || !n.cs) return { iso: '', len: len, dayIn: 0, frac: 0, end: '' };
     back = Math.max(0, Math.min(scBudBack(n), back | 0));
-    var a = scBudNum(n.cs) + (scBudBack(n) - back) * len;
-    var today = scBudNum(scDay());
+    var a = scDayNum(n.cs) + (scBudBack(n) - back) * len;
+    var today = scDayNum(scDay());
     var inDays = today - a;
     return {
-      iso: scBudISO(a),
-      end: scBudISO(a + len - 1),
+      iso: scDayISO(a),
+      end: scDayISO(a + len - 1),
       len: len,
       dayIn: Math.max(0, Math.min(len, inDays + 1)),
       frac: back > 0 ? 1 : Math.max(0, Math.min(1, (inDays + 1) / len))
@@ -13483,7 +13868,18 @@
                the same neutral drawn short rather than a hole in the
                grid or a third colour inventing a judgement. */
             var quiet = day > today || day < from || !c.on.length;
+            /* ── AND THE DAY YOU BEGAN GLOWS ──
+               It is a SECOND mark on a cell that may already carry
+               today's, and that is the design rather than a collision
+               to guard against: the day you press Begin, both are the
+               same square. They can sit together because they are in
+               different registers — today is a FILL on the numeral,
+               which says which square, and this is a BLOOM behind it,
+               which says what the square is. Two fills would be one
+               control answering two questions; a fill and a light are
+               not. */
             var b = scEl('button', 'cl-c' + (day === today ? ' is-now' : '')
+              + (day === startDay ? ' is-start' : '')
               + (quiet ? ' is-quiet' : ''));
             b.type = 'button';
             b.dataset.day = day;
@@ -13567,8 +13963,12 @@
                cell draws at most two and a "+2", and a screen reader
                handed that is handed the clipping rather than the
                record. */
+            /* SPOKEN, because a glow is a graphic and a graphic says
+               nothing at all to a screen reader — which is the tally
+               strip's own rule about a shape. */
             b.setAttribute('aria-label', FULL[c.dow] + ' ' + n3 + ' '
               + MONTH_FULL[m]
+              + (day === startDay ? ', the day you began' : '')
               + (quiet || calWhat !== 'task' ? ''
                 : ', ' + c.kept + ' of ' + c.on.length + ' kept')
               + (pills.length ? ', ' + pills.map(function (o) { return o.n; }).join(', ') : '')
@@ -13818,6 +14218,7 @@
   scHabitLoad();
   scTrainLoad();
   scMindLoad();
+  scStartLoad();
   scNoteLoad();
 
   try {

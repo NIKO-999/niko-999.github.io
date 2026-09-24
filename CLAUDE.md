@@ -13217,3 +13217,589 @@ pill, with no count at all*, with the cutting asserted on a day no
 cell can hold — a Saturday of twelve blocks added to the fixture,
 because **a fixture that always fits cannot tell a fit that works from
 one that never runs.**
+
+## The editor is a grouped list
+
+Picked off a whole-app critique as the one thing to change, and it is
+the one finding there that was about STRUCTURE rather than about a
+colour or a count. The block editor was **eight tracked uppercase
+labels, each on its own line above its own full-width control** —
+measured on the seeded week at 390x844, **1,023px of form in a 743px
+sheet**, where the only thing telling one control from the next was
+which caps word was shouting above it, and no value could be scanned
+at all. Nothing was visibly broken, because the sticky foot fixed that
+a pass earlier: what it cost was that the form never fitted the sheet
+it was in.
+
+It is groups of rows now: label left, value right, one surface with
+the rows ruled inside it. **609px in a 684px sheet**, ten rows, eight
+caps labels down to one. On a Train block, which carries a row the
+others do not, **1,106px to 653**.
+
+**LABEL AND VALUE ON ONE LINE IS THE WHOLE OF IT.** Everything else
+here falls out of that — the caps label goes because the row says what
+it is, the box goes because the group is the surface, and the value
+becomes scannable because there is a column for it to be in. Asserted
+as BOXES rather than as source order, because a rule that stacked them
+visually would pass any check on the DOM.
+
+**A CAPS LABEL ABOVE A GROUP STAYS; ONE ABOVE A FIELD DOES NOT.**
+That is the precise cut, and it is why `.label` is still in this
+sheet exactly once. *This day* names a GROUP — everything above it
+edits the block for every week there will ever be and everything
+inside it is about one date, which is a distinction no row's own
+left-hand label can make. *What*, *Day*, *Starts at*, *How long*,
+*Where*, *During it*, *About* and *Trained* all named one control
+each, and a row can say that itself in the space it already has.
+
+**ONE RIGHT EDGE, BY CONSTRUCTION RATHER THAN BY ARITHMETIC.** The
+chevron is out of the flow and every row reserves its gutter, so a row
+that has one and a row that does not end their value in the same
+place. Written the obvious way — a padding on one kind of row, a
+chevron plus a gap on the other — they came out **18px apart**, which
+is a right-hand column that is not one, and it is two numbers that
+have to agree for ever. There is nothing left to drift.
+
+**EVERY ROW IS THE SAME BOX AND THE RULE IS WRITTEN ONCE.** A value
+row is a `<div>`, a disclosure is a `<button>` and a push is a
+`<button>`, and all three take `.gl-r` — the moment they are three
+rules they come out a pixel apart across and three down, which is what
+the old day card's two faces already taught this file. Measured: ten
+rows, every one of them 44.
+
+**THE WHOLE ROW IS AT THE 16px FIELD FLOOR, and that is a claim rather
+than a stray.** Anything smaller zooms the page on focus in iOS, so a
+row carrying an input has to be 16 — and a label at 15 beside a value
+at 16 is a one-pixel mismatch on every line of a form whose whole
+point is that the pair reads as one row. **A grouped-list row is a
+field row.** It is the named exception extended honestly rather than a
+seventh step on the type scale.
+
+### The two widest controls are put away, and the row says what they are set to
+
+Which is the only reason a control can be hidden and the screen still
+read. **Width decides which, never how often you change them**: seven
+day chips and a dial with four marks under it cannot be a right-hand
+column at 390px; a name, a clock and a room can.
+
+**THE CHEVRON POINTS DOWN AND TURNS 180°**, which is this repo's own
+rule for a folding panel — 90° lays it on its side. A RIGHT chevron
+would be a lie: it says the row pushes to another screen, and these
+open underneath. The one row that genuinely does push — *Trained*,
+into the workout picker — is the one that gets a right chevron, and
+that is the difference being drawn rather than a second icon for the
+same job.
+
+**AND THE SUMMARY IS WRITTEN BACK ON EVERY PRESS.** A row that only
+tells the truth until you touch the thing under it is worse than one
+that says nothing. The chips write the day back, `paintKids` writes
+the list back on every repaint rather than from the two presses that
+change it, and the length bar's own `say` writes the figure.
+
+**`say` IS WHAT STOPS THE BAR DRAWING A SECOND COPY OF ITS FIGURE.**
+`scLenBar` built a 22px readout, which inside a disclosure is the
+number the row above it has just printed, at four times the size.
+Hiding it with a rule would leave a dead element the function still
+builds, so passing a `say` skips it instead: a caller that wants the
+figure somewhere else says so and gets it there. The number dial,
+which passes none, still draws one — asserted as both halves, because
+a check on the editor alone passes on a build that took the readout
+off every sheet in the app.
+
+### Delete is not a peer of Save
+
+It sat in a red outline at the same weight as Save, side by side at
+the foot: the one press on this form you cannot undo, drawn as the
+other half of a pair and sitting where a thumb lands on the way to
+filing an edit. It is **a row at the END of the list** now — plain red
+type on its own surface, past everything the form is actually for.
+
+**Cancel stays a button**, because it is not destructive and it is the
+other half of a genuine pair: on a NEW block there is nothing to go
+back to and the scrim is the only other way out. On an edit there is
+nothing to cancel — Escape and the scrim both leave it alone — so Save
+has the row to itself.
+
+**Three halves, because each passes on the others' bug**: it is not in
+the row Save is in, it is BELOW Save in layout, and it is still
+findable as the last thing on the last group.
+
+**AND `.glist .gl-del`, NOT `.gl-del` — the sixth time in this file.**
+The row rule that gives every row its box also sets `color:
+var(--ink)` at two classes, so a one-class rule after it loses however
+it is written. Delete shipped one render as white type that read as a
+second Save, and a screenshot caught it where the cascade did not.
+
+### A toggle in a group is a row, and it KEEPS its fill
+
+`.mark` keeps its class — every check that reads *Done today* still
+finds it, and its tick, its `aria-pressed` and its behaviour are
+untouched. What it loses is its own BOX.
+
+**What it does NOT lose is the fill, and that was decided rather than
+skipped.** An inverted row inside a grouped list is a slab, and the
+first cut took it off on exactly that argument. It is back because
+this app's own line is that *every filled control is white* and *Done
+today* is one of the five it names by name: dropping it would be
+reversing a written, measured decision for a look, which is not an
+argument. It has to be said again in a scoped rule only because
+`.glist .gl-r` sets `background: none` at the same specificity and
+later in the file.
+
+**AND TRAINED JOINED THE GROUP.** It was a seventh caps label over a
+lone button directly under a grouped list, which is the stack of boxes
+seen from the side — and it is the same kind of fact as the two above
+it, filed against the same date through the same window. The rule its
+own label was written to keep still holds and is why the heading says
+*This day*: Off must not sit under a heading reading TRAINED, and
+under this one it does not.
+
+### The value column was `--spent`, and that is the fourth time
+
+A value slot is 16px body type, so it is held to 4.5:1 — and `--spent`
+over a card measures **4.30:1 on the LIGHT face** against 5.21 on the
+dark. Under the bar, shipped for one render, and passed every check
+written about it because the only one that looked was reading the
+other face. `--dim` measures **8.42:1 and 6.61:1**.
+
+The chevron keeps `--spent` and is held to **3**, because what it
+carries is which rows open where the value beside it carries the fact
+— and it being quieter than the value is the order the two are read
+in. 5.21 and 4.30.
+
+**The ground is the group's MOST COMMON pixel**, never a sample at an
+offset: a fixed offset lands on a label, a hairline or the row above
+it, and this repo has reported four correct builds broken for exactly
+that.
+
+### And the vacuity guard inverted, which IS the outcome
+
+*Save is on screen* passes on any sheet short enough not to scroll, so
+the claim was only worth making about an editor that DID scroll —
+`wholeDay.some(r => r.over > 0)` was the guard, and it was written for
+the build where Save ended a hundred and seventy-two pixels under the
+phone, which is the report the sticky foot answered.
+
+The form fits now, so that guard can never be met again. The honest
+replacement is the stronger claim — **Save is on screen because there
+is no longer anything to scroll past** — with the sticky foot left
+behind it as what catches a block carrying eight sub-items and three
+note tags on a shorter phone. Both are asserted together: the sheet
+fits AND Save is inside it, on every row of the day.
+
+### And the Delete check passed on the build it exists to reject
+
+The bite proof is what found it, four breaks in one run: three fired
+exactly the assertion they were aimed at and `.gl-del` fired nothing.
+**The check read SAVE's own colour and asked Delete to differ from
+it** — and Save is the white-filled control, so its TEXT is `--paper`.
+White Delete differs from black just as happily as red does. It was
+measuring a pair that can never be equal.
+
+It asks the two questions that were meant: Delete IS `--bad`, and it
+is NOT the ink every other row on the sheet takes. Both halves,
+because *it is red* passes on a page whose ink went red and *it is not
+the ink* passes on any colour at all. Measured: shipped it reads
+`rgb(255, 122, 122)` against a row's `rgb(255, 255, 255)`; with the
+rule back to one class it reads `rgb(255, 255, 255)` and both halves
+go false.
+
+**And the colour is resolved through an element the browser has
+actually styled**, never off the token's own text: a computed colour
+comes back `rgb()` and a token is a hex, and a digit match on the two
+has reported three correct builds broken in this file.
+
+**The object carried `bad` twice on the way there** — the colour and a
+count of `.btn.bad` — and an object literal keeps the second. That is
+this repo's oldest bug in the smallest possible space, caught by
+reading the diff rather than by a run.
+
+### Three checks had their subject moved under them
+
+**THE DAY CHIPS HAD TO BE OPENED TO BE MEASURED.** The 44px sweep
+filters on `h > 0`, and a chip behind a shut disclosure reports zero —
+so it would have reported clean without ever having looked at seven
+controls. **A zero shaped exactly like a pass**, which is the shape
+this file has now recorded five times. `openGl` presses the row first
+and throws on a label it cannot find, because a selector matching
+nothing filters to an empty list and an empty list passes `every`.
+
+**AND THE TOGGLE WAS MEASURED AGAINST `.sheet .field`.** That was the
+right comparison while the form was a stack of full-width boxes and
+the toggle was one more of them. It is measured against a ROW now, in
+another group — a row in its own would match a build where that whole
+group came out the wrong size.
+
+**AND THE DAY-CHIP PRESS IS PUT BACK.** A check that changes the state
+of the app is a check that breaks the next one, and the fifth time is
+still worth the two lines. The ORIGINAL chip is pressed to restore it
+rather than the new one: on an existing block the picker is
+single-select, so pressing the same chip twice turns the day OFF
+rather than putting it back.
+
+## What feeds Train is the keyword table, not a list of names
+
+Reported from the phone: **pressing Train on Showing up just ticked it
+instead of asking what you trained** — while the same block's own row
+in the week opened the picker the whole time.
+
+**`from: ['Train']` WAS THE SECOND LIST OF WORDS THIS FILE SAYS NOT TO
+KEEP.** `scIsTrain` asks the keyword table and `scBlocksFor` matched a
+literal name, so the two disagreed about what training is. The comment
+sitting on `scIsTrain` already said it — *what counts as training is
+the keyword table's answer, not a second list kept in step with it by
+hand* — and `from` was that second list, three thousand lines away.
+
+**IT WAS NEVER JUST THE DOOR.** `scBlocksFor` is the one place that
+decides which blocks feed a tally item, so a gym block called anything
+but "Train" also did not go green when you ticked Train, and the day
+did not count as one Train was on — which is the strip's own *a day the
+thing was never on is not a day you missed it*, arriving at the wrong
+answer from the other side.
+
+**THE ROW WORKED BECAUSE IT NEVER WENT THROUGH `from`.** It asks
+`scIsTrain(it)` about the block it is already holding. That is why
+exactly one of the two doors worked, and it is the whole shape of the
+report.
+
+**A NAME, OR THE GLYPH THAT NAME RESOLVES TO.** `from` is still a list
+of names; what changed is that a block also feeds the item when the
+table sends its name to the same glyph. So gym, lift and workout all
+feed Train, and adding a word to the table adds it here the same day —
+which is the point of there being one table.
+
+**`block` IS THE TABLE'S I-DO-NOT-KNOW, and it has to be excluded.** A
+`from` name the table cannot place would otherwise match every
+unrecognised block on the day, which is a widening that looks
+identical to the fix from the door that was broken. Asserted with two
+decoys: one the table places somewhere else, and one it cannot place
+at all.
+
+**AND THE REACH IS NARROWER THAN IT SOUNDS, which was measured rather
+than assumed.** Planting twenty names and reading the glyph the app
+itself assigns: `train` catches **Train, Gym and Workout** and nothing
+else. `Run`, `Swim`, `Cycle`, `Stretch` and `Yoga` all have glyphs of
+their own, so none of them feeds Train — and none of their rows opens
+the picker either, because the row asks the same question. The two
+doors agree, which is the whole of what was wrong.
+
+**Mind gained exactly one word**: `Book`, which the table sends to
+`read`. That is the same correction one item over rather than a side
+effect to regret.
+
+**TWO WORDS THE TABLE PLACES BADLY, raised rather than quietly
+changed.** `Lift` resolves to `drive` — a lift as in a ride — and
+`Hyrox` resolves to nothing at all, though the comment on `scIsTrain`
+uses hyrox as its own example of a word that should reach the deck.
+Both are the Train/railway decision again: *a word that means two
+things has to be DECIDED, and the decision belongs in the open where
+a test can hold it.* Neither is changed here, because neither was
+what was reported and both are somebody's call rather than mine.
+
+### And the check for it could not fail, twice over
+
+**`.wb-t` SURVIVES ESCAPE.** The sheet is put away with the `hidden`
+attribute and its DOM stays, so a bare `querySelector('.wb-t')` reads
+the sheet the PREVIOUS press opened. Every picker read here is scoped
+to `.sheet:not([hidden])` now. That is the ninth time this app's
+`hidden` has been the thing that made something look right.
+
+**AND THE ROW HALF WAS MEASURING A DOOR IT HAD ALREADY SHUT.**
+Pressing the tile ticks Train, which greens the gym block — so a row
+press in the same page UNticks it rather than asking, and the door
+reads as broken on a build where it works. It passed only because of
+the stale sheet above: two faults cancelling, which is the worst way
+for a check to be green. The row has its own context now.
+
+**THE BREAK THAT PROVED THE GUARD WAS INERT.** Loosening the `block`
+exclusion changes nothing today, because every name in a `from` list
+is placeable — the guard is defensive for the next one added, and a
+break on it cannot bite. The over-wide break is a genuinely over-wide
+MATCH instead, and Coffee goes green with it. Said out loud rather
+than left looking proven.
+
+**WHAT IS STILL NOT FIXED, and is the design rather than the bug**: a
+day with TWO training blocks refuses at the tile, because `trainLog`
+is keyed by block and one press has no way to say which session the
+answer is about — the rows are where that question has an answer. And
+a day with NO training block has nowhere to file a session at all.
+Neither is what was reported, and neither has a row to press either.
+
+## The day you began
+
+Asked for as one thing in one line — a **begin journey**, a **reset**,
+and a **glow on that day in the calendar so you can clearly see when
+you started**.
+
+**EVERY OTHER DATE IN THIS APP IS DERIVED.** The calendar starts at the
+first thing you ever logged, a streak counts back from today, a month
+is a month. None of that can say when you DECIDED — a first entry is
+where you happened to open the app, not where you started — and the day
+you decided is the one you go looking for.
+
+**ONE ISO DATE AND NOTHING ELSE.** `sched.start.v1`. A start with a note
+on it, or a list of them, is a journal, and this app has one of those
+two tabs over. What it is for is a single mark on a single square, so a
+single string is the whole of it.
+
+**DAY ONE IS THE DAY YOU PRESSED IT**, not the day after. Nobody counts
+the morning they started as day nought, and an off-by-one is the figure
+the whole feature is about. Asserted through the CONTROL rather than by
+reading the key, because the key being right under a row saying *Day 0*
+is the bug.
+
+**A DATE AHEAD OF TODAY READS AS UNSET**, and it is the repair worth
+writing down. A junk string is the ordinary damaged case; a FUTURE date
+is the one nobody writes on purpose and the one that breaks quietly —
+the grid calls a day still ahead quiet, so the mark lands on a square
+drawn as nothing, under a Settings row counting backwards into *Day -3*.
+
+**AND IT IS NOT WRITTEN BACK, which reverses the lesson this app has
+learned four times.** The thing making a date look wrong here may be
+the CLOCK rather than the record: a device an hour behind, or a
+timezone crossed, puts a real start date briefly in the future, and
+clearing it then is the one thing you cannot undo — where reading it
+as unset for an hour costs a mark on a square. The other four repairs
+were shapes that could only be damage. **A date has a second way of
+being wrong**, and that is the whole of the difference. Nothing
+diverges for it either, because the setter overwrites the key outright
+rather than merging into it.
+
+**ONE ROW IN TWO STATES, AND THE OFFER STOPS.** *Begin the journey*
+until you have, then *Day 11 · Began Monday 14 Sep*. A begin control
+still on the screen after you have begun is a task you can never
+finish, which is the profile sheet's own rule. Both states are read off
+one sheet re-opened, because "the row changed" passes on a build that
+drew both.
+
+### Starting again clears the record, not the week
+
+What a reset MEANS is the thing this had to decide, and the split is
+the one the app already draws everywhere else: the RECORD is what
+happened and the WEEK is the shape you built. Clearing the shape too
+hands you day one with nothing to do on it, which is the opposite of
+beginning.
+
+So the ticks, the blocks you kept, the sub-items, the days off, the
+sessions and what you read all go; the schedule, your habits, your
+notes and your pictures stay. **Both halves are asserted**, because
+each passes on the other's bug — a reset that clears everything passes
+*the ticks are gone* and one that clears nothing passes *the week is
+still there* — and the keys are read off the STORE rather than off the
+screen, which is how all four of this app's in-memory repairs were
+found.
+
+**NOT THROUGH `scMark`.** That snapshots `state`, and none of these
+keys is in it, so an Undo toast beside this would offer to put back the
+one thing that had not gone.
+
+**IT SAYS WHAT GOES AND WHAT STAYS.** This is the one delete in the app
+with no bin behind it and nothing else to rebuild it from, which is
+exactly the case this file's rule about a new `.hint` still gives a
+sentence to. It names both halves because the half that STAYS is the
+surprising one, and finding that out afterwards is not a way to find
+out.
+
+**And it stamps day one again**, which is what makes it a start rather
+than an erase.
+
+**AND A FIX WENT IN FOR A BUG THAT DOES NOT EXIST.** Settings opens
+from any tab, so the reset can be pressed while Today is up, and
+Today's tiles are drawn from the same `tickLog` it empties —
+reasoning which says the handler must repaint the tally, and which is
+wrong. `scRender` ends in `scLive`, and `scLive` repaints whichever
+half of Today is up before it returns. The line was written, it was
+correct, and it did nothing.
+
+**WHAT FOUND IT WAS THE BREAK FAILING TO BREAK ANYTHING.** Removing
+the line left the caption moving exactly as before — so the check
+written for it passed on the build it was supposed to reject, which
+is the shape this file calls *a check that cannot fail*. The line is
+gone and the comment in its place says why, so the next person
+reasoning the same way stops before writing it again.
+
+**The check stayed, because the CLAIM is real** — after a reset the
+screen you are standing on shows the new record — and the break that
+inverts it is removing `scRender` from the handler rather than the
+line that never mattered. **Measured with Today ALREADY up**, since
+switching to it afterwards repaints either way. And the fixture had
+to be given ticks on today for any of it to mean anything: a day with
+nothing on it reads the same figure both sides of a reset.
+
+### The mark is gold, and gold says WHICH
+
+Asked for in two words after the neutral version shipped, and shown
+before it was shipped: four treatments rendered over the real month at
+390x844 and read at 1:1.
+
+**A MEDAL ON AN ORDINARY DAY, A RING ON THE DAY IT IS ALSO TODAY.** A
+filled gold date is the strongest mark here and the one that reads as
+DAY ONE unread — and on the single day the start is also today it EATS
+today's own pill, which breaks the rule the drawing rests on: today is
+a FILL, which says which square, and this is a LIGHT, which says what
+the square is. Two fills would be one control answering two questions.
+So the fill is the medal every ordinary day and steps back to a ring
+and a bloom on that one.
+
+**`.is-start.is-now` IS (0,3,1) AGAINST `.is-now`'s (0,2,1)**, so it
+wins the shadow on its own specificity and today keeps the ground.
+Unlike the ink version, this pair does not depend on source order —
+which is one fewer thing for somebody to break by moving a rule.
+
+**WHAT WAS DRAWN AND DROPPED.** A gold ring with an ink numeral, which
+is correct everywhere and says nothing about being first on an ordinary
+day; a plain gold fill, which is the medal and eats today's mark; and
+gold EVERYTHING — ring, bloom and numeral — where the numeral loses its
+edge against the ring and the two blur into one gold blob, measured at
+**1.95:1** on the overlap day.
+
+**GOLD IS ALLOWED BECAUSE IT SAYS WHICH.** The chrome went neutral
+because one accent carrying eight meanings said none of them; day one
+is one square out of a year, and no other square is it. The precedent
+is in this file already, from a feature since removed: *a crown in
+somebody's chosen violet says which PERSON, which the name beside it
+already says. Gold says which PLACE.*
+
+**AND `--gold` WAS ALREADY THERE, DEAD.** It dressed that crown and
+outlived it as a token nothing read — the dead rule this file keeps
+removing, one language over. Giving it a reader again beats adding a
+second gold: this app has one gold and it means first.
+
+**BOTH VALUES MOVED WITH THE READER.** `#FFC83D` is a yellow at this
+size, and the light face was `#8A6100`, which puts `--paper` on it at
+**5.18:1** — a rounding error above the 5.15 floor rather than a
+margin, which is the mistake this file has recorded three times. It is
+`#E3B341` and `#8A5D00`, measured **10.04:1** and **5.38:1**.
+
+**A PALE GOLD FAILS THE OTHER WAY**, and that is why the light one is
+nearly a bronze: `#F2C94C` gives the numeral 12:1 and leaves the fill
+itself at **1.50:1** against the page — a faint yellow blob rather
+than a mark.
+
+**AND THE LIGHT FACE IS MEASURED NOW, WHICH REVERSES THE NOTE BELOW.**
+The bloom needed no light-face check because it was ONE declaration in
+`var(--ink)`, and the note under it says so. A fill is not that: it is
+a PAIR of literals, which is the exact case this app has been bitten by
+three times — and here the light half is the WEAK one rather than the
+strong one, at 5.4:1 against 10:1. The reasoning did not change; its
+subject did.
+
+**THE PALETTE IS WRITTEN DOWN TWICE AND THE SECOND COPY IS IN
+`app.js`.** The token was changed in `app.css`, the fingerprint was
+refreshed, and the page still drew `#FFC83D` — because `scPaint` writes
+its own copy onto the root and outranks the stylesheet. It reads as a
+caching bug for as long as it takes to grep. The suite already holds
+the two copies token for token, which is the only reason that is a
+footnote.
+
+**AND IT CAUGHT ITSELF AGAIN AN HOUR LATER.** The break written to
+prove the light-face ratio bites changed `--gold` in the STYLESHEET
+and reported `STILL PASSES` — the page went on drawing `#8A5D00`,
+because the copy in `app.js` is the one that wins. The break is aimed
+there now. **A break that cannot reach the value it is breaking is a
+break that proves the check does not bite**, and it is the same hazard
+twice in one change: once as a bug and once as a bad proof.
+
+**Two of the four breaks overlap the same three lines**, so run
+separately or the second refuses and the verdicts of the ones after it
+are read off a file broken by the first. Measured that way the first
+pass reported `litegold FAILS` against a fill that was simply absent.
+
+### The glow hangs off the date, not the cell
+
+**NINE TREATMENTS WERE RENDERED OVER THE REAL MONTH** at 390x844 and
+read at 1:1 — a pip, a ring round the cell, a wash, a lit left edge, a
+lit top edge, a frame, a corner halo and two strengths of cast. The
+finding is that **the date's corner is the one part of a cell that
+pills never cover**: on a real month a cell holds up to seven of them,
+so every treatment that lights the CELL is a smudge behind the words.
+
+**A BARE `<i>` IS `align-self: stretch`.** So the obvious cast — a
+box-shadow on the numeral — blooms along the whole top of the cell
+rather than round the number, which on the light face is a white bar
+with a grey edge. It takes today's own pill geometry first.
+
+**AND THE RING IS WHAT STOPS IT READING AS A PILL.** A non-inset
+box-shadow paints outside the border box, so a bloom on its own leaves
+the cell's ground showing through the middle — on the light face that
+hole reads as a white pill, a mark this calendar does not have. A
+hairline ring defines the edge, and ring-against-fill is the two-state
+idiom this app already uses everywhere else.
+
+**MEASURED ON COMPOSITED PIXELS, AND THE DARK FACE IS THE WEAK HALF.**
+A white bloom on a near-black ground moves the region's mean luminance
+about a third as much as a dark bloom on white: **.076 dark against
+.186 light**, where this file's own floor for *a day you cannot see you
+missed* is **.009**. Held against the neighbour in its OWN ROW, because
+a ground sampled a row above lands on another cell — which is the
+mistake the Pattern axis and the almanac's own check each made once.
+
+**AND THE DARK FACE IS THE ONE THE SUITE HOLDS, WHICH IS A DECISION
+RATHER THAN AN OMISSION.** This file's own rule is that the face
+nobody develops on is the one that breaks — and every time that has
+bitten here, the cause was a SECOND VALUE: eight swatches written once
+for two faces, nine workout hexes that needed light-face twins, a tag
+solved against one ground. There is no second value in this mark. It
+is one declaration in `var(--ink)`, so the two faces cannot disagree
+about anything except which way the bloom runs, and the dark face is
+the weaker of the two by measurement — hold it and the light one is
+held with room to spare. The light figure above is a probe rather than
+a check, and that is said out loud rather than left to look measured.
+
+**`.cl-c` IS `overflow: hidden`, SO THE BLOOM IS CUT AT THE CELL'S
+EDGES.** Judged at 1:1, which is the size it is drawn: the clip is a
+hard edge only under magnification, and both ways out are worse —
+`overflow: visible` lets that cell's pills run over the day beside it,
+which is the shut card's own bug, and insetting the date 5px takes it
+out of the column you count along to find the 9th.
+
+**TWO MARKS ON ONE CELL IS THE DESIGN, not a collision to guard
+against.** The day you press Begin, both land on the same square, and
+they can sit together because they are in different registers: today is
+a FILL on the numeral, which says which square, and this is a light
+around it, which says what the square is. Two fills would be one
+control answering two questions; a fill and a light are not.
+
+**WHICH IS DECIDED BY SOURCE ORDER ALONE.** `.cl-c.is-start > i` and
+`.cl-c.is-now > i` are the same specificity, so the start's rule is
+written FIRST and today takes the ground. A rule moved below the other
+turns today's date white on white, silently — the fifth time in this
+file that a cascade order has been the whole mechanism. Asserted as the
+computed ground AND the shadow together, because each passes on the
+other's bug.
+
+**ONE BOX, TWO SKINS.** The two marks share their geometry and differ
+only in surface, or a row carrying both reads as two different objects
+— and written as two boxes they come out a pixel apart, which is the
+day card's own lesson at a smaller size.
+
+**AND THE FIRST BREAK WRITTEN TO PROVE THAT DID NOT INVERT IT.** It
+inserted a copy of `.cl-c.is-now > i` ABOVE the start's rule — which
+changes nothing, because the ORIGINAL is-now rule still sits below
+both and wins anyway. Measured on the real page with the break
+applied, the date was still `--paper` on `--ink`: the assertion would
+have passed and the break would have read as *the check does not
+bite*. Only `tests/names.js` fired, on the duplicate. The break that
+inverts it appends the start's rule BELOW is-now, and then the date
+computes to `--ink` on `--ink`, which is the white-on-white the
+comment is about. **A break has to be measured doing the thing, not
+assumed to** — and a probe reading the two computed values the
+assertion reads is thirty seconds where the suite is ten minutes.
+
+**SPOKEN, because a glow is a graphic** and a graphic says nothing at
+all to a screen reader. The cell's `aria-label` carries *, the day you
+began*.
+
+### `scBudNum` is `scDayNum`
+
+Two helpers turn an ISO date into a day NUMBER and back, so a span is
+compared as days rather than as milliseconds — an hour of daylight
+saving inside a window otherwise rounds a whole day off the answer.
+They were `scBudNum` and `scBudISO`, which was honest while the
+budget's cycle was the only thing counting days.
+
+**A PREFIX NAMING ONE SCREEN IS THE NEXT PERSON'S WRONG TURN** the day
+a second screen needs the same arithmetic. `scObjDay` became
+`scWeekDate` and `scPatMid` became `scFig` for exactly this, and the
+rule is the same one every time: name a helper for the QUESTION rather
+than for the caller that happened to ask it first.
