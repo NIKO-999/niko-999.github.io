@@ -14090,7 +14090,18 @@ const SAID = [
                blocks are all before noon cannot tell a colour that
                says which from a colour that says nothing. */
             B('ev4', 4, 1200, 1260, 'Wind down'),
-            B('wake5', 5, 360, 390, 'Wake'), B('wk5', 5, 780, 1020, 'Work')
+            B('wake5', 5, 360, 390, 'Wake'), B('wk5', 5, 780, 1020, 'Work'),
+            /* ── AND A SATURDAY WITH TWELVE BLOCKS ON IT ──
+               The cap is measured rather than predicted now, so there
+               has to be a day no cell can hold: every other day here
+               fits whole, and a fixture that always fits cannot tell
+               a fit that works from one that never runs. */
+            B('s0', 6, 360, 390, 'B1'), B('s1', 6, 400, 430, 'B2'),
+            B('s2', 6, 440, 470, 'B3'), B('s3', 6, 480, 510, 'B4'),
+            B('s4', 6, 520, 550, 'B5'), B('s5', 6, 560, 590, 'B6'),
+            B('s6', 6, 600, 630, 'B7'), B('s7', 6, 640, 670, 'B8'),
+            B('s8', 6, 680, 710, 'B9'), B('s9', 6, 720, 750, 'B10'),
+            B('s10', 6, 760, 790, 'B11'), B('s11', 6, 800, 830, 'B12')
           ] }));
         /* Wednesday has nothing on it at all, which is what makes
            "a day that asked nothing" testable rather than stated. */
@@ -14104,7 +14115,9 @@ const SAID = [
              nothing there is ever drawn too wide to fit. */
           '2026-09-03': { ev4: 1 },
           '2026-09-10': { wake4: 1, tr4: 1, ev4: 1 },
-          '2026-09-11': { wake5: 1, wk5: 1 }
+          '2026-09-11': { wake5: 1, wk5: 1 },
+          '2026-09-05': { s0: 1, s1: 1, s2: 1, s3: 1, s4: 1, s5: 1,
+                          s6: 1, s7: 1, s8: 1, s9: 1, s10: 1, s11: 1 }
         }));
         localStorage.setItem('sched.tick.v1', JSON.stringify({
           '2026-09-10': { t: 1, p: '8420' } }));
@@ -14233,10 +14246,90 @@ const SAID = [
           grid: parseFloat(getComputedStyle(
             document.querySelector('.cl-grid')).borderTopWidth) };
       })();
+      /* ── THE MONTH FILLS THE SCREEN ──
+         Measured at 390x844 before this pass: the grid ended at 436
+         with the bar's pill at 767, so 348px of a screen whose whole
+         job is a month was empty, and a 54px cell held two pills and
+         hid up to five behind a count.
+
+         BOTH DIRECTIONS, because "as large as possible" quietly
+         becomes "one pixel into the tab bar" — which is the deck's own
+         lesson, in the one place left that is a grid. It has to reach
+         the pane's own foot AND it has to leave the painted bar
+         alone, and neither half catches the other. */
+      const pane = document.getElementById('scCalPane');
+      const pr = pane.getBoundingClientRect();
+      const all = [...document.querySelectorAll('.cl-c')];
+      const lastRow = all.slice(-7);
+      const fit = (() => {
+        /* The dense Saturday: twelve blocks kept, which no cell holds.
+           Drawn plus the count has to be the whole twelve — a cap
+           that predicted a number and a count that predicted another
+           would eventually disagree, and this is the one reading that
+           cannot. */
+        const c = cells.find((x) => x.dataset.day === '2026-09-05');
+        if (!c) return null;
+        const st = c.querySelector('.cl-ps');
+        const ps = [...st.querySelectorAll('.cl-p')];
+        const sr = st.getBoundingClientRect();
+        return {
+          drawn: ps.length,
+          more: +((c.querySelector('.cl-more') || { textContent: '+0' })
+            .textContent.replace('+', '')),
+          /* NOT SQUASHED. A flex item shrinks by default, so fourteen
+             pills in a 91px stack came back five pixels tall each —
+             every one of them present, none of them past the foot,
+             and not one readable. A check that counts pills cannot
+             see that at all. */
+          minH: Math.min(...ps.map((p3) => Math.round(
+            p3.getBoundingClientRect().height))),
+          /* AND NONE OF THEM PAST THE ROOM IT WAS GIVEN. */
+          past: ps.filter((p3) =>
+            p3.getBoundingClientRect().bottom > sr.bottom + 0.6).length,
+        };
+      })();
+      /* Resolved through a probe the browser has actually styled: a
+         token is a hex and a computed colour is an `rgb()`, and this
+         file has read one as nothing three times. */
+      const pb = document.createElement('span');
+      document.body.appendChild(pb);
+      const tok = (v) => { pb.style.color = 'var(' + v + ')';
+        return getComputedStyle(pb).color; };
+      const nowI = document.querySelector('.cl-c.is-now > i');
+      const todayMark = {
+        ink: tok('--ink'), paper: tok('--paper'),
+        fg: getComputedStyle(nowI).color,
+        bg: getComputedStyle(nowI).backgroundColor,
+        plain: getComputedStyle(cells.find((x) => x.dataset.day === '2026-09-10')
+          .querySelector('i')).backgroundColor,
+      };
+      pb.remove();
       return {
         title: (document.querySelector('.cl-head > b') || {}).textContent,
         cells: cells.length,
         pads: document.querySelectorAll('.cl-c.is-pad').length,
+        grid: {
+          /* The pane is a flex column in month mode and a scroller in
+             list mode, so "it fills" is the grid's foot against the
+             pane's foot rather than against the viewport. */
+          slack: Math.round(pr.bottom - all[all.length - 1]
+            .getBoundingClientRect().bottom),
+          scroll: pane.scrollHeight - pane.clientHeight,
+          clear: Math.round(document.querySelector('.tabs')
+            .getBoundingClientRect().top
+            - all[all.length - 1].getBoundingClientRect().bottom),
+          cellH: Math.round(all[0].getBoundingClientRect().height),
+          total: all.length,
+          /* A WHOLE RECTANGLE. The days before the 1st were ruled and
+             the days after the last were not there at all, so the
+             grid ended ragged — invisible on a 54px row and the
+             loudest thing on the sheet at 118. */
+          lastRow: lastRow.length,
+          lastTops: [...new Set(lastRow.map((x) =>
+            Math.round(x.getBoundingClientRect().top)))].length,
+        },
+        fit: fit,
+        todayMark: todayMark,
         now: (document.querySelector('.cl-c.is-now') || {}).dataset,
         kept: fill('2026-09-07'), half: fill('2026-09-08'),
         none: fill('2026-09-09'), ahead: fill('2026-09-20'),
@@ -14247,8 +14340,24 @@ const SAID = [
       };
     });
     ok('the date opens the month it is in, Monday first',
-      clMonth.title === 'September 2026' && clMonth.cells === 30
-      && clMonth.pads === 1, clMonth);
+      clMonth.title === 'September 2026' && clMonth.cells === 30, clMonth);
+    /* ── THE MONTH FILLS THE SCREEN, AND IT IS A WHOLE RECTANGLE ──
+       348px of an 844px phone were empty under a 54px cell. Both
+       directions: the grid has to reach the pane's own foot AND it
+       has to leave the painted bar alone, because "as large as
+       possible" quietly becomes "one pixel into the tab bar".
+
+       And the last row is seven cells at one top: the leading pads
+       were ruled and the trailing ones were not drawn at all, so a
+       month ending mid-week ended ragged. */
+    ok('...and the grid fills the pane without reaching the bar',
+      clMonth.grid.slack <= 2 && clMonth.grid.scroll <= 1
+      && clMonth.grid.clear > 8 && clMonth.grid.cellH > 90,
+      clMonth.grid);
+    ok('...and the month is a whole rectangle, trailing days ruled too',
+      clMonth.grid.total % 7 === 0 && clMonth.grid.lastRow === 7
+      && clMonth.grid.lastTops === 1
+      && clMonth.pads === clMonth.grid.total - 30, clMonth.grid);
     ok('...and today is the one cell marked today',
       clMonth.now && clMonth.now.day === '2026-09-12', clMonth.now);
     /* ── A CALENDAR IS THE ONE LIST IN THIS APP THAT IS RULED ──
@@ -14296,14 +14405,46 @@ const SAID = [
       clMonth.kept11.pills.map((p2) => p2.n).join(',') === 'Wake,Work'
       && clMonth.kept11.pills[0].bg !== clMonth.kept11.pills[1].bg,
       clMonth.kept11);
-    /* ── TWO, AND THE REST IS A COUNT ──
-       Three blocks kept on the 10th and a 50px cell holds two, so the
-       third is a figure rather than a clipped pill — and it rides the
-       DATE's line, because the foot of the cell already belongs to the
-       kept-rule and the two drew over one another when it did not. */
-    ok('...and a third is a count, never a third pill',
-      clMonth.kept10.pills.length === 2
-      && clMonth.kept10.more === '+1', clMonth.kept10);
+    /* ── WHAT FITS IS MEASURED, AND THE REST IS A COUNT ──
+       It was `pills.slice(0, 2)` and a `+n` off the same figure: two
+       predictions of one number, in a constant written where it
+       cannot see the row height, the type scale or whether the month
+       runs to five weeks or six. With the grid filling the pane a row
+       holds four or more, and three kept blocks on the 10th are now
+       three pills and no count at all.
+
+       THE CLAIM IS THE ARITHMETIC, on the one day no cell can hold:
+       twelve kept, and what is drawn plus what the count says has to
+       be the whole twelve. A cap and a count that each predicted a
+       figure would eventually disagree; these cannot, because the
+       count is built from what was actually taken out.
+
+       AND A DRAWN PILL IS NOT SQUASHED. A flex item shrinks by
+       default, so fourteen of them in a 91px stack came back FIVE
+       PIXELS tall each — all present, none past the foot, not one
+       readable, and invisible to any check that counts pills. */
+    ok('...and a day that fits draws every pill, with no count at all',
+      clMonth.kept10.pills.length === 3 && clMonth.kept10.more === '',
+      clMonth.kept10);
+    ok('...and a day that does not fit is cut, counted, and never squashed',
+      clMonth.fit && clMonth.fit.drawn + clMonth.fit.more === 12
+      && clMonth.fit.drawn >= 3 && clMonth.fit.more > 0
+      && clMonth.fit.minH >= 11 && clMonth.fit.past === 0, clMonth.fit);
+    /* ── TODAY IS THE APP'S OWN FILLED MARK ──
+       It was weight alone, under a note calling a second mark
+       "concentric with the ring" — and the ring went with the
+       treatment this grid replaced, so there was no first mark and
+       today was one bold number in a corner against four coloured
+       pills. The ink with the paper on it, which is the filled state
+       every other two-state control here already wears.
+
+       Asserted against the OTHER dates in the same breath, because "it
+       has a background" passes on a build that gave one to all
+       thirty. */
+    ok('...and today wears the ink with the paper on it, alone',
+      clMonth.todayMark.bg === clMonth.todayMark.ink
+      && clMonth.todayMark.fg === clMonth.todayMark.paper
+      && /, 0\)$/.test(clMonth.todayMark.plain), clMonth.todayMark);
     /* ── AND WHAT A CELL CANNOT HOLD, IT CUTS ──
        Seven columns is 50px and a block can be called "Wind down", so
        something has to give — and the grid is not where a name reads
@@ -14515,8 +14656,11 @@ const SAID = [
         .getAttribute('aria-pressed');
       return out;
     });
+    /* Three, and it was two: the cap is what the row measures now
+       rather than a constant, and a 118px cell holds the 10th whole.
+       A figure typed into a check is a second copy of a number. */
     ok('Tasks and Workouts are two records of one month',
-      clStop.task.pills.join(',') === 'Wake,Train'
+      clStop.task.pills.join(',') === 'Wake,Train,Wind down'
       && clStop.work.pills.join(',') === 'Push'
       && clStop.task.on === 'task' && clStop.work.on === 'work', clStop);
     /* ── AND THE KEPT RULE IS TASKS' ALONE ──

@@ -6737,6 +6737,42 @@ body {
   letter-spacing: .08em;
   color: var(--spent);
 }
+/* ── THE MONTH FILLS THE SCREEN ──
+   Measured at 390x844 before anything moved: the grid ended at 436
+   with the bar's pill at 767, so THREE HUNDRED AND FORTY-EIGHT pixels
+   of a screen whose whole job is a month were empty — and a cell was
+   54px, which holds two pills and hides up to five behind a `+n`.
+
+   The room was already being used for exactly this once a day was
+   pressed: the day sheet comes up over the bottom half and the grid
+   sits above it, which is the reference's own month-above / day-below
+   layout arriving by accident and only while a sheet is open.
+
+   `1fr` rows take it back. A row is about 118px, a cell holds four
+   pills rather than two, and the `+n` stops being the ordinary case.
+   The pane's own 40px of scroll room goes with it: that is a reading
+   decision about a LIST whose last line would otherwise stop dead on
+   the edge, and a grid that fills its box has no last line to protect
+   — the poster already ends 19px clear of the pill. */
+#scCalPane { display: flex; flex-direction: column; }
+#scCalPane.is-grid { padding-bottom: 0; }
+/* ── `minmax(0, 1fr)`, AND THE BARE `1fr` WAS A MEASUREMENT BUG ──
+   `1fr` on a grid row is `minmax(auto, 1fr)`, so a row whose content
+   cannot shrink GROWS past its share. A cell with twelve pills in it
+   did exactly that: the row inflated to hold all twelve, `scCalFit`
+   measured the stack against that inflated box and kept seven, and
+   the row then collapsed back to its 1fr the moment the other five
+   were removed — leaving the seventh 1.4px past the foot it had just
+   been measured as clearing.
+
+   The fit was being measured against a grid the fit was about to
+   change. A floor of 0 is what makes the row the pane's share and
+   nothing else, so the room a stack reports is the room it keeps. */
+#scCalPane.is-grid .cl-grid {
+  flex: 1 1 auto;
+  grid-auto-rows: minmax(0, 1fr);
+  min-height: 0;
+}
 .cl-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -6805,9 +6841,29 @@ body {
   font-variant-numeric: tabular-nums;
   line-height: 1.2;
 }
-/* -- TODAY IS THE STRONGEST TYPE ON THE GRID, NOT A SECOND MARK --
-   The head's own rule for saying YOU ARE HERE. */
-.cl-c.is-now > i { color: var(--red); font-weight: 800; }
+/* ── TODAY IS THE APP'S OWN FILLED MARK, AND THAT REVERSES A RULE ──
+   It was weight alone, under a note reading "not a second mark: a
+   ring round the date is already the mark and a concentric one is two
+   marks answering different questions in one drawing." That argument
+   was correct and its subject is gone — the ring went with the
+   treatment this grid replaced, so there is no first mark for a
+   second one to be concentric with, and today was carried by one bold
+   number in a corner against four coloured pills.
+
+   The ink with the paper on it, which is the filled state every other
+   two-state control in this app already wears — the head's Edit tile,
+   a picked chip. Nothing invented and no colour: a hue here would say
+   WHICH, and which day it is, is not that question. */
+.cl-c.is-now > i {
+  color: var(--paper);
+  font-weight: 700;
+  background: var(--ink);
+  border-radius: 999px;
+  align-self: flex-end;
+  min-width: 17px;
+  padding: 1px 4px;
+  text-align: center;
+}
 /* Inset, because an outline outside a ruled cell draws over its
    neighbours rather than round itself. */
 .cl-c:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
@@ -6828,13 +6884,21 @@ body {
    somewhere — and a wrapped pill is two lines of a cell that has room
    for two pills. Where it matters the List is one press away, which
    is the whole of why that toggle is on this screen. */
+/* `1 1 0`, so the stack REPORTS the room the row gave it rather than
+   sizing to its own content — which is the whole of what lets
+   `scCalFit` measure what fits instead of a constant predicting it.
+   `overflow: hidden` is belt and braces: a pill is removed rather
+   than clipped, and this is what stops one being drawn over the rule
+   for the frame between layout and the fit. */
 .cl-ps {
   align-self: stretch;
   min-width: 0;
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
   margin: 1px 0 3px;
+  overflow: hidden;
 }
 .cl-p {
   min-width: 0;
@@ -6850,6 +6914,19 @@ body {
   background: color-mix(in srgb, var(--tg) 22%, transparent);
   color: color-mix(in srgb, var(--tg) 72%, var(--ink));
 }
+/* ── AND A PILL IN THE STACK KEEPS ITS OWN HEIGHT ──
+   A flex item shrinks by default, so a cell with fourteen blocks on it
+   squashed all fourteen to FIVE PIXELS each rather than overflowing:
+   measured, a 91px stack held every one of them at `pillH: 5`, so
+   nothing was ever past the foot and `scCalFit` had nothing to take
+   back. Unreadable, and invisible to every check that counts pills
+   rather than measuring one. `0 0 auto` is what makes the excess
+   overflow, which is the state the fit exists to resolve.
+
+   Scoped to the STACK: the same pill wraps in a row in the List,
+   where shrinking is what lets a long name ellipsise instead of
+   running out of the line. */
+.cl-ps .cl-p { flex: 0 0 auto; }
 /* The flat neutral for a colour this build cannot resolve, which is
    `.wo.is-off`'s own path and its own reason: a state is never
    coloured, and an unknown is not a claim about anything. */

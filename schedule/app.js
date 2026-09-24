@@ -13333,7 +13333,27 @@
     return out;
   }
 
-  function scPaintCal() { calFig = scCalCount(); scCalMonth($('scCalPane')); scDate(); }
+  function scPaintCal() {
+    calFig = scCalCount();
+    /* The month fills the pane and the list scrolls it, which are two
+       different boxes rather than two ways of filling one — so the
+       pane is told which it is holding rather than the grid trying to
+       be both. */
+    $('scCalPane').classList.toggle('is-grid', calMode !== 'list');
+    /* ── THE HEAD IS WRITTEN FIRST, AND THAT IS `scDeckFit`'S OWN
+       LESSON ──
+       `scDate` puts the figure under the title, which is a register
+       the head does not have until it does — so on the first paint of
+       this screen the grid was measured against a head about to grow
+       and a pane about to lose eighteen pixels. `scCalFit` then kept
+       one pill more than the row could hold, and it came back 1.4px
+       past a foot it had just been measured as clearing. A repaint
+       with the head already there cut it correctly, which is the
+       whole tell: the fit was right and the geometry was a frame
+       early. */
+    scDate();
+    scCalMonth($('scCalPane'));
+  }
 
   /* How many days of the month on screen carry anything at all — a
      block kept, a tick, a session. It is the one figure the month row
@@ -13500,21 +13520,29 @@
                Logged line, which is one press away; what a month gets
                instead is the thing you came to it for, which is what
                you actually did. */
+            /* ── EVERY PILL IS BUILT; WHAT FITS IS DECIDED AFTER ──
+               It was `pills.slice(0, 2)`, which was the right number
+               for a 54px cell and is a CONSTANT written where it
+               cannot see the row height, the type scale or the number
+               of weeks in the month. With the grid filling the pane a
+               row is about 118px and holds four — and a six-week month
+               is shorter than a five-week one, so there is no single
+               figure that is right.
+
+               So the cap is not predicted at all: the stack is given
+               the room and `scCalFit` takes back whatever did not fit,
+               which is the only version that is exact at any row count
+               on any phone. */
             var pills = scCalPills(c);
             if (pills.length) {
               var pw = scEl('span', 'cl-ps');
-              pills.slice(0, 2).forEach(function (o) {
+              pills.forEach(function (o) {
                 var pi = scEl('span', 'cl-p', o.n);
                 if (o.tg) pi.style.setProperty('--tg', o.tg);
                 else pi.classList.add('is-off');
                 pw.appendChild(pi);
               });
               b.appendChild(pw);
-              /* Appended to the CELL rather than the stack, because it
-                 is positioned against the cell's own top-left. */
-              if (pills.length > 2) {
-                b.appendChild(scEl('span', 'cl-more', '+' + (pills.length - 2)));
-              }
             }
             /* A day with NOTHING TO SAY draws no rule at all. That
                reverses the day-off dot's rule about never leaving a
@@ -13549,8 +13577,58 @@
             grid.appendChild(b);
           }(n2));
         }
+        /* ── AND THE MONTH IS A WHOLE RECTANGLE ──
+           The days before the 1st were already drawn as ruled cells
+           and the ones after the last were not, so the grid ended
+           ragged — four empty columns beside the 30th with no rules
+           on them at all. That is invisible on a 54px row and is the
+           loudest thing on the sheet at 118: a table missing the
+           right-hand end of its last row reads as a drawing that
+           failed rather than as a month that ended. */
+        var tail = (7 - ((lead + days) % 7)) % 7;
+        for (var t2 = 0; t2 < tail; t2++) grid.appendChild(scEl('span', 'cl-c is-pad'));
         body.appendChild(grid);
+        scCalFit(grid);
       }
+  }
+
+  /* ── WHAT FITS IS MEASURED, NEVER PREDICTED ──
+     The stack is a flex child at `1 1 0`, so it reports the room the
+     row actually gave it; a pill whose foot is past that room is
+     taken out and counted. Read after ONE layout — every figure here
+     comes off `offsetTop`, which is relative to the cell, so nothing
+     forces a second flush.
+
+     TAKEN OUT RATHER THAN HIDDEN. `[hidden]` works on a pill only
+     because nothing declares a `display` for one, and that is the
+     attribute this app has had break on it eight times. A pill that
+     is not in the document cannot be drawn by a rule added later.
+
+     AND THE COUNT IS BUILT HERE, so it can never disagree with what
+     is on screen — which is what a predicted cap and a separately
+     predicted `+n` would eventually do. */
+  function scCalFit(grid) {
+    [].forEach.call(grid.querySelectorAll('.cl-ps'), function (st) {
+      /* RECTS, NOT `offsetTop`. Those round to whole pixels and a row
+         here is `1fr` of a fractional height, so a pill whose true
+         foot was .4 of a pixel past the stack measured as fitting and
+         was drawn over the kept rule — present, counted as fitting,
+         and past the box it was given. The check measures composited
+         boxes, so the fit has to as well or the two disagree by the
+         rounding alone. */
+      var foot = st.getBoundingClientRect().bottom, cut = [], i;
+      for (i = 0; i < st.children.length; i++) {
+        var k = st.children[i];
+        /* A tenth of a pixel of slack: a pill that lands exactly on
+           the foot is one that fits. */
+        if (k.getBoundingClientRect().bottom > foot + 0.1) cut.push(k);
+      }
+      for (i = 0; i < cut.length; i++) st.removeChild(cut[i]);
+      if (!cut.length) return;
+      /* Appended to the CELL rather than the stack, because it is
+         positioned against the cell's own top-left. */
+      st.parentNode.appendChild(scEl('span', 'cl-more', '+' + cut.length));
+    });
   }
 
   /* ── THE MONTH AS A LIST, WHERE A NAME READS WHOLE ──

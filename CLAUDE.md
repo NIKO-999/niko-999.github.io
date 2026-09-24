@@ -13068,3 +13068,152 @@ figure. The rule is shorter rather than weaker.
 
 Restored by the script's own inverse and hashed back to the
 known-good sha1.
+
+## The month fills the screen
+
+Asked for the calendar's own Apple pass. Measured at 390x844 before
+anything moved, and one number is the whole finding: **the grid ended
+at 436 with the bar's pill at 767, so THREE HUNDRED AND FORTY-EIGHT
+pixels of a screen whose only job is a month were empty.** A cell was
+54px, which holds two pills and hides up to five behind a `+n`.
+
+**THE ROOM WAS ALREADY BEING USED FOR EXACTLY THIS, once a day was
+pressed.** The day sheet comes up over the bottom half and the grid
+sits above it — which is the reference's own month-above / day-below
+layout, arriving by accident and only while a modal is open. The rest
+of the time it was a third of a screen of calendar over two thirds of
+nothing.
+
+`1fr` rows take it back. A row is **120px** where it was 54, a cell
+holds seven pills rather than two, and on a real month the `+n` is not
+drawn at all.
+
+**BOTH DIRECTIONS ARE ASSERTED**, because *as large as possible*
+quietly becomes *one pixel into the tab bar* — the deck's own lesson,
+in the one place left on this app that is a grid. The grid has to
+reach the pane's own foot AND leave the painted pill alone, and
+neither half catches the other.
+
+**AND THE PANE'S 40px OF SCROLL ROOM GOES WITH IT.** That is a reading
+decision about a LIST whose last line would otherwise stop dead on the
+edge; a grid that fills its box has no last line to protect, and the
+poster already ends nineteen pixels clear of the pill.
+
+**WHAT IT COSTS IS THE WORKOUTS STOP, and that is paid rather than
+solved.** One session a day in a 120px cell is a month that is mostly
+air. The alternative is rows sized to content, and it is refused for
+the reason a calendar is a calendar: **the two stops have to draw the
+same grid, or pressing Workouts re-lays the month and the 9th moves.**
+A cell you find by counting across and down cannot change size with
+how busy the week was.
+
+### What fits is MEASURED, never predicted
+
+It was `pills.slice(0, 2)` with a `+n` off the same figure — two
+predictions of one number, in a constant written where it cannot see
+the row height, the type scale, or whether the month runs to five
+weeks or six. With the grid filling the pane there is no single figure
+that is right.
+
+So the cap is not predicted at all: every pill is built, the stack is
+given the room, and `scCalFit` takes back whatever did not fit and
+builds the count **from what it actually removed**. A cap and a count
+that each predicted a figure would eventually disagree; these cannot.
+
+**TAKEN OUT RATHER THAN HIDDEN.** `[hidden]` works on a pill only
+because nothing declares a `display` for one, and that is the
+attribute this app has had break on it eight times. A pill that is not
+in the document cannot be drawn by a rule added later.
+
+**AND A PILL KEEPS ITS OWN HEIGHT, which is what made the first cut
+do nothing at all.** A flex item shrinks by default, so a cell with
+fourteen blocks on it squashed all fourteen to **five pixels each**
+rather than overflowing: every one present, none past the foot,
+`scCalFit` with nothing to take back, and not one of them readable.
+**Invisible to any check that counts pills rather than measuring
+one** — so the check holds a drawn pill to a real height beside the
+arithmetic. `flex: 0 0 auto`, scoped to the STACK: the same pill wraps
+in a row in the List, where shrinking is what lets a long name
+ellipsise instead of running out of the line.
+
+### Two measurement bugs, and both were the fit reading a stale box
+
+**`1fr` IS `minmax(auto, 1fr)`, so the row grew to hold the pills the
+fit was about to remove.** Twelve unshrinkable pills inflated the row,
+the stack was measured against that inflated box, seven were kept —
+and the row collapsed back to its share the moment the other five
+went, leaving the seventh **1.4px past a foot it had just been
+measured as clearing**. `minmax(0, 1fr)` makes the row the pane's
+share and nothing else, so the room a stack reports is the room it
+keeps.
+
+**AND `offsetTop` ROUNDS WHERE THE CHECK DOES NOT.** The fit read
+offsets and the check reads composited boxes, so a pill whose true
+foot was four tenths of a pixel past measured as fitting. The fit
+reads rects now: **a fit and the check on it have to measure in the
+same units or they disagree by the rounding alone.**
+
+**AND THE HEAD IS WRITTEN BEFORE THE GRID — `scDeckFit`'s own lesson,
+in a second place.** `scDate` puts the figure under the title, which
+is a register the head does not have until it does. On the FIRST paint
+of this screen the grid was measured against a head about to grow and
+a pane about to lose eighteen pixels, so the fit kept one pill more
+than the row could hold. A repaint with the head already there cut it
+correctly, which is the whole tell: **the fit was right and the
+geometry was a frame early.**
+
+### The month is a whole rectangle
+
+The days before the 1st were drawn as ruled cells and the days after
+the last were not drawn at all, so the grid ended ragged — four empty
+columns beside the 30th with no rules on them. That is invisible on a
+54px row and is the loudest thing on the sheet at 120: **a table
+missing the right-hand end of its last row reads as a drawing that
+failed rather than as a month that ended.**
+
+Asserted as the arithmetic rather than as a count — every row is seven
+cells at one top — because a figure typed into a check is a second
+copy of a number.
+
+### Today is the app's own filled mark, and that reverses a rule
+
+It was weight alone, under a note reading *"not a second mark: a ring
+round the date is already the mark and a concentric one is two marks
+answering different questions in one drawing."* **That argument was
+correct and its subject is gone** — the ring went with the treatment
+this grid replaced, so there is no first mark for a second one to be
+concentric with, and today was one bold number in a corner against
+seven coloured pills.
+
+The ink with the paper on it, which is the filled state every other
+two-state control in this app already wears — the head's Edit tile, a
+picked chip. Nothing invented and no colour: a hue here would say
+WHICH, and which day it is, is not that question.
+
+**Asserted against the other dates in the same breath**, because *it
+has a background* passes on a build that gave one to all thirty.
+
+### Four breaks, each firing its own assertion
+
+- `grid-auto-rows: 52px` → *the grid fills the pane* reads
+  `slack: 342, cellH: 52` — the hole, back to the pixel.
+- the trailing pads removed → *a whole rectangle* reads
+  `total: 31, lastTops: 2`.
+- `.cl-ps .cl-p` back to `flex: 0 1 auto` → *never squashed* reads
+  `minH: 2`, which is a two-pixel pill on a build every other check
+  passes.
+- today back to weight alone → *the ink with the paper on it* reads
+  `bg: rgba(0, 0, 0, 0)`.
+
+Restored by the script's own inverse and hashed back to the known-good
+sha1.
+
+### And two stale figures in the suite, both of them counts
+
+`pads === 1` and `kept10.more === '+1'` were correct for a 54px cell
+and are facts about the cap rather than about the feature. The first
+became the arithmetic; the second became *a day that fits draws every
+pill, with no count at all*, with the cutting asserted on a day no
+cell can hold — a Saturday of twelve blocks added to the fixture,
+because **a fixture that always fits cannot tell a fit that works from
+one that never runs.**
