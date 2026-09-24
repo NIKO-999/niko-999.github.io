@@ -609,5 +609,49 @@ for (const app of APPS.concat([['shell.js']])) {
     'marks ' + seen + ', off the scale: ' + bad.join(' | '));
 }
 
+/* ── a name the code CALLS that nothing declares ─────────────────
+   A missing function is a runtime ReferenceError: `node --check` is
+   perfectly happy with it, nothing throws until the line runs, and
+   the symptom lands wherever that happens to be.
+
+   IT HAS COST THIS REPO TWICE, both times after a deletion. `gl`
+   outlived a rename and surfaced as the week staying on screen under
+   the Notes tab. And the friends half taking `photoOn` and
+   `scPhotoClose` with it left the Escape handler calling them — which
+   meant Escape stopped closing the tally's history panel, and the
+   suite reported it as a dblclick timing out a hundred seconds and
+   forty assertions later. The duplicate-name check above is the same
+   question from the other side, and it would have caught neither.
+
+   SCOPED TO THE `sc` PREFIX, deliberately. A real undefined-variable
+   analysis needs scope tracking and every browser global; this asks
+   one narrow question with an exact answer — every `scFoo(` this app
+   calls is one of its own functions, by the convention the whole file
+   already follows, so a call to one nothing declares is a bug with no
+   second reading. It would have caught `scPhotoClose` on the same
+   line `photoOn` sits on, which is all it has to do. */
+for (const app of APPS) {
+  const declared = new Set();
+  const runs = codeOf(app);
+  for (const run of runs) for (const [n] of topLevel(run.body, run.at)) declared.add(n);
+  /* Namespaced state — scSearch.t, orPaint.match — is a property, not
+     a name, so the object is what has to exist and does. */
+  const called = new Map();
+  for (const run of runs) {
+    const code = run.body.replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/^\s*\/\/.*$/gm, '')
+      .replace(/'(?:[^'\\\n]|\\.)*'/g, "''")
+      .replace(/"(?:[^"\\\n]|\\.)*"/g, '""');
+    code.split('\n').forEach((ln, i) => {
+      for (const m of ln.matchAll(/(?<![.\w$])(sc[A-Z][\w$]*)\s*\(/g)) {
+        if (!called.has(m[1])) called.set(m[1], run.file + ':' + (run.at + i));
+      }
+    });
+  }
+  const loose = [...called].filter(([n]) => !declared.has(n));
+  ok(`${NAMED(app)}: every sc* it calls is one it declares`, loose.length === 0,
+     loose.map(([n, w]) => `${n}() at ${w} is called and never declared`).join('\n      '));
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

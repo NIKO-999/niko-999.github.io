@@ -69,7 +69,7 @@
   } catch (e) {}
 }());
 </script>
-<link rel="stylesheet" href="app.css?v=c1479454" />
+<link rel="stylesheet" href="app.css?v=62016547" />
 </head>
 <body>
 
@@ -161,34 +161,6 @@
     <div class="ty-panel" id="scTyPanel" role="dialog" aria-modal="true"
          aria-labelledby="scTyTitle" tabindex="-1"></div>
   </div>
-
-  <!-- ── friends ──
-       The leaderboard and the feed, which are the same subject seen
-       twice. YOU are on it from the first day: your thirty-day count
-       and your run are both computed out of the ticks already on this
-       phone, so this is a real screen with one real row rather than an
-       empty state waiting for a server. -->
-  <!-- TWO STOPS, and only one of them is ever on screen. The board and
-       the feed are different things — one is where you stand, the other
-       is what people did — and stacked they made a screen with two
-       headings, two filled buttons and a note line on it. Nothing is
-       removed here; it is put away, which is the rule the folding
-       panels elsewhere in this project already follow.
-
-       The stops are the section headings now. Two labels naming the two
-       halves, one of which is also the control that reaches them, is
-       the same word twice. -->
-  <section class="friends" id="scFriends" hidden>
-    <nav class="fr-seg" id="scFrSeg" aria-label="Friends">
-      <button class="fr-stop on" id="scFrBoard" data-stop="board" aria-current="page">Leaderboard</button>
-      <button class="fr-stop" id="scFrFeed" data-stop="feed" aria-current="false">Feed</button>
-    </nav>
-    <div id="scFrPane">
-      <ol class="fr-list" id="scFriendList"></ol>
-      <div class="fr-add" id="scFriendAdd"></div>
-    </div>
-    <div class="fr-feed" id="scFeed" hidden></div>
-  </section>
 
   <!-- ── the week ──
        A WINDOW with a track inside it, not a scroller. The deck was a
@@ -288,20 +260,12 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3.5v3M16 3.5v3"/><circle cx="8.5" cy="14.5" r="1.2"/><circle cx="12" cy="14.5" r="1.2"/><circle cx="15.5" cy="14.5" r="1.2"/></svg>
       <span>Calendar</span>
     </button>
-    <!-- One stop for the whole social half rather than two. The
-         leaderboard and the feed are the same subject seen twice — who
-         is doing what — and a bar with both on it spends two of four
-         stops on a part of the app you may never turn on. -->
     <!-- A ring with its centre: what you are aiming at. Filled at the
          middle so it does not read as the view control's own ring,
          which is the collision `#scMenu svg circle` was written for. -->
     <button class="tab" id="scTabNotes" data-view="notes" aria-label="Notes">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 3.5h9l4 4v13h-13z"/><path d="M14.5 3.5v4h4M8.5 12h7M8.5 16h4.5"/></svg>
       <span>Notes</span>
-    </button>
-    <button class="tab" id="scTabFriends" data-view="friends" aria-label="Friends">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4"/><path d="M3 19c0-3.2 2.7-5 6-5s6 1.8 6 5"/><path d="M16.5 6.4a3.4 3.4 0 0 1 0 6.5M17 14.4c2.6.4 4 2.1 4 4.6"/></svg>
-      <span>Friends</span>
     </button>
   </nav>
 
@@ -349,6 +313,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=166c48f3"></script>
+<script src="app.js?v=70d106f7"></script>
 </body>
 </html>

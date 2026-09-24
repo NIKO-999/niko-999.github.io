@@ -243,7 +243,6 @@
      app.js on every paint, which is the same arrangement every other
      token in this block is in — a page that flashes a white Now chip
      for a frame on every open is worse than a duplicated hex. */
-  --me:   #8B72FF;
   --live: #43B96C;
   /* ── ONE HEX A TAG, AND THE TAG DRAWS ITSELF FROM IT ──
      It was a background and a foreground per session, which is two
@@ -328,7 +327,6 @@
   --card:   rgba(255,255,255,.92);
   --card-edge: #ffffff;
   --card-shadow: 0 10px 26px -16px rgba(15,15,25,.40);
-  --me:   #5A3EDA;
   --live: #19733F;
   /* The light face needs its own pair for the FIRST PAINT: without
      them the dark block's white accent leaks through for a frame, and
@@ -405,7 +403,9 @@ body {
 
      Notes, a two-section note   last line 913, 73 of 147 reachable
      Showing up, seven habits    .ty-foot 1013, 169 of 247 reachable
-     Friends, nine rows          .friends 990, 146 of 224 reachable
+
+   A third was measured on the friends board at 990, 146 of 224; that
+   tab is gone and the rule it proved is not.
 
    Reported from the phone as a note clipping into the bar, which is
    exactly what it is. Stated ONCE over the three rather than three
@@ -419,12 +419,12 @@ body {
    `[hidden]` was already said out loud for all four panes — the one
    thing that would otherwise have broken here, and the eighth time
    this app has had that bug. */
-.tally, .friends, .notes, .cal {
+.tally, .notes, .cal {
   flex: 1;
   min-height: 0;
   flex-direction: column;
 }
-#scTyPane, #scFrPane, #scFeed, #scNotePane, #scCalPane {
+#scTyPane, #scNotePane, #scCalPane {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
@@ -445,8 +445,7 @@ body {
      or not it is. */
   padding-bottom: 40px;
 }
-#scTyPane::-webkit-scrollbar, #scFrPane::-webkit-scrollbar,
-#scFeed::-webkit-scrollbar, #scNotePane::-webkit-scrollbar { display: none; }
+#scTyPane::-webkit-scrollbar, #scNotePane::-webkit-scrollbar { display: none; }
 /* The tools strip is absolute against this, which is the whole of
    what glues it to the line being edited. Said on its own rather than
    in the group above, because the other three panes have nothing
@@ -722,10 +721,6 @@ body {
 .pic-file { position: absolute; width: 1px; height: 1px; opacity: 0;
   pointer-events: none; }
 
-/* ── friends ── */
-.friends { margin-top: 4px; display: flex; }
-.friends[hidden] { display: none; }
-
 /* ── the two stops ──
    The board and the feed used to be stacked under two letterspaced
    capital headings, with a filled accent button under each. Two stops
@@ -776,268 +771,6 @@ body {
 .fr-stop::before { content: ''; position: absolute; inset: -10px 0; }
 .fr-stop.on { background: var(--card); color: var(--ink); box-shadow: var(--card-shadow); }
 .fr-stop:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
-#scFrPane[hidden], .fr-feed[hidden] { display: none; }
-
-/* ── an action that is a line of type ──
-   These were a filled accent block and a bordered one, side by side,
-   under a three-row list. Two solid rectangles for things you do about
-   once a week each, louder than the board they were about. Same tap,
-   same 44px, none of the weight. */
-.fr-link {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  min-height: 44px;
-  padding: 11px 0;
-  border: 0;
-  background: none;
-  color: var(--dim);
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  text-align: left;
-  cursor: pointer;
-}
-.fr-link svg {
-  width: 13px; height: 13px; flex: none;
-  fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round;
-}
-.fr-link:active { opacity: .6; }
-.fr-link:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
-
-.fr-list { list-style: none; margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
-.fr-row { display: flex; align-items: center; gap: 13px;
-  padding: 10px; border-radius: 14px;
-  background: var(--card);
-  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow); }
-.fr-rank { font-size: 11px; font-weight: 700; color: var(--dim); width: 12px;
-  font-variant-numeric: tabular-nums; }
-.fr-row.is-me .fr-rank { color: var(--ink); font-weight: 800; }
-.fr-nw { display: flex; align-items: center; gap: 7px; }
-.fr-n { font-size: 15px; font-weight: 700; letter-spacing: -.014em; }
-.fr-s { display: block; margin-top: 1px; font-size: 11px; color: var(--dim); }
-.fr-t { margin-left: auto; font-size: 15px; font-weight: 700;
-  font-variant-numeric: tabular-nums; }
-
-/* The crown, in the leader's own accent with a halo of the same
-   colour. Four attempts got here: the accent raw is 1.67:1 on a light
-   page, mixed toward your ink it went grey, and a badge of their whole
-   theme was a shape nobody wanted. It dilutes only as far as the page
-   forces — 45 of 78 accent-and-reader pairings leave it exactly the
-   accent — and the halo never dilutes at all, because it carries
-   nothing. On your own row it is simply your accent. */
-/* --crown is written on the element for a FRIEND who leads, and falls
-   back to your own accent on your own row. It is one custom property
-   rather than three rules because the halo and the glyph have to move
-   together — a crown drawn in one palette haloed in another is not a
-   thing either theme contains. */
-.fr-crown { position: relative; width: 22px; height: 22px; flex: none;
-  display: grid; place-items: center; }
-.fr-crown::before { content: ''; position: absolute; inset: -7px;
-  border-radius: 50%; pointer-events: none;
-  background: radial-gradient(circle,
-    color-mix(in srgb, var(--gold) 70%, transparent) 0%,
-    color-mix(in srgb, var(--gold) 22%, transparent) 45%, transparent 72%); }
-.fr-crown svg { position: relative; width: 17px; height: 14px; display: block;
-  fill: var(--gold); }
-
-.fr-note { margin-top: 10px; font-size: 11px; line-height: 1.35; color: var(--dim); }
-
-/* A row is a button only when somebody is behind it, so the pressed
-   state is on a class the script adds rather than on .fr-row. Your own
-   row opens nothing and must not look as though it would. */
-.fr-row.is-tap { cursor: pointer; }
-.fr-row.is-tap:active { opacity: .8; }
-.fr-row.is-tap:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
-
-.fr-acts { display: flex; gap: 8px; margin-top: 10px; }
-.fr-acts .btn { flex: 1; }
-
-/* The code, at the size somebody reads out over a phone. Tabular and
-   spaced, because it is going to be transcribed by hand and an
-   ambiguous character is the whole cost of getting it wrong. The
-   alphabet already drops I, O, 0 and 1. */
-.fr-code { margin-top: 6px; font-size: 22px; font-weight: 800;
-  letter-spacing: .16em; font-variant-numeric: tabular-nums; }
-
-/* Yours and the button that copies it, on one line. `Copy` is next to
-   the thing it copies rather than down in the sheet's action row,
-   because the action row below belongs to adding THEM — two buttons
-   there would be two answers to the question "what does this sheet
-   do". */
-.fr-swap { display: flex; align-items: center; gap: 12px; }
-.fr-swap .fr-code { flex: 1; min-width: 0; margin-top: 0;
-  font-size: 19px; letter-spacing: .13em; }
-.fr-swap .btn { flex: none; padding: 11px 18px; }
-
-/* ── a log ──
-   Photograph, name, a line. The picture is square and the card has no
-   surface of its own: a feed of bordered boxes on a washed page is a
-   second grid competing with the week's. */
-/* ── A POST IS A CARD ──
-   A hairline and a radius, so a feed of them is a stack of things
-   rather than one column of text with pictures in it. Where one post
-   ended and the next began was carried by nothing but the gap, which
-   is enough between two lines and not between two photographs.
-
-   A border, never a shadow: the tally is this app's one exception to
-   "nothing rounded or shadowed", and it earned it by making the
-   photograph the card. Here the photograph is IN the card, so the card
-   only has to be a boundary. The radius nests inside the image's own —
-   16 outside, 12 in — because two rounded rectangles at the same
-   radius, one inside the other, read as a mistake. */
-.po { margin-top: 12px; padding: 12px 12px 13px;
-  border-radius: 16px; background: var(--card);
-  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow); }
-/* Inside the friend's sheet the frame is the sheet, and a card in a
-   card is the frame-inside-a-frame this project keeps taking out. */
-.po.is-bare { background: none; box-shadow: none; padding: 0; margin-top: 18px; }
-.po-h { display: flex; align-items: center; gap: 9px; }
-.po-n { font-size: 13px; font-weight: 700; letter-spacing: -.01em; }
-.po-s { display: block; margin-top: 1px; font-size: 11px; color: var(--dim); }
-/* 44px of target on an 18px mark, pushed into the card's own padding so
-   the drawing sits where the corner is rather than an inch inside it. */
-.po-x { margin: -13px -13px -13px auto; width: 44px; height: 44px;
-  display: grid; place-items: center; border: 0; background: none;
-  padding: 0; cursor: pointer; }
-.po-x svg { width: 15px; height: 15px; fill: none; stroke: var(--spent);
-  stroke-width: 2; stroke-linecap: round; }
-.po-x:active svg { stroke: var(--red); }
-.po-x:focus-visible { outline: 2px solid var(--red); outline-offset: -6px; }
-/* A BUTTON now, so it needs the reset a button does not get for
-   free: `background: none` is load-bearing here for the reason .row
-   already records -- a button with no background declared is painted
-   in the UA's own buttonface, a mid-grey slab on the dark face. */
-.po-img {
-  display: block; width: 100%; padding: 0;
-  margin-top: 9px; border: 0; border-radius: 12px; overflow: hidden;
-  background: var(--tick-off); aspect-ratio: 1;
-  touch-action: manipulation;
-}
-.po-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.po-img:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-/* THE CAPTION LEADS, so its margin is under the head rather than
-   under the picture. */
-.po-c { margin: 8px 0 0; font-size: 13px; line-height: 1.35; }
-.po-c + .po-img { margin-top: 9px; }
-
-/* -- the whole picture --
-   Above the sheet (50) and the toast (60), because it is opened from
-   inside a sheet and a photograph under the thing it was opened from
-   is not open. `contain` rather than `cover`: the card crops to a
-   square and this is the screen that does not, which is the entire
-   reason to press it. */
-.ph {
-  position: fixed; inset: 0; z-index: 80;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 14px;
-  padding: 24px 18px calc(24px + env(safe-area-inset-bottom));
-  background: rgba(0, 0, 0, .92);
-  opacity: 0; transition: opacity .18s ease;
-}
-.ph.is-open { opacity: 1; }
-.ph img {
-  display: block; max-width: 100%; max-height: 82%;
-  object-fit: contain; border-radius: 10px;
-}
-.ph-c {
-  margin: 0; font-size: 13px; line-height: 1.35; color: var(--dim);
-  text-align: center; max-width: 34em;
-}
-
-/* ── a friend ──
-   Two figures of the same kind, so they get the same size and sit on
-   one line. It was a 30px total with the streak running under it inside
-   a sentence — the two numbers you came to compare, at different
-   weights, one of them in prose. */
-/* A quieter heading, and ONLY on this sheet. `.label` is 9px accent
-   capitals at .2em, which is right where a sheet is a form — it is the
-   only thing separating a field from the one above it. Here the
-   headings sit over a figure and a row of discs, which separate
-   themselves, so the same treatment reads as two small alarms.
-   Restyling `.label` itself would have quietly changed every other
-   sheet in the app.
-
-   `.sheet` IS LOAD-BEARING, and this shipped without it for one round.
-   `.label` and `.menu-item` are defined further down this file, so at
-   equal specificity they win however this rule is written — the sheet
-   came out with two red capital headings and a hairline under Remove,
-   exactly as before, with the new classes on the elements and doing
-   nothing. Same shape as `.prime`, `.ghost svg circle` and `.bar`
-   before it: a later rule in the same file is the live one. */
-.sheet .fp-k { font-size: 11px; font-weight: 700; letter-spacing: -.01em;
-  text-transform: none; color: var(--dim); margin: 22px 0 6px; }
-
-.fp-pair { display: flex; gap: 26px; margin: 2px 0 4px; }
-.fp-pair b { display: block; font-size: 22px; font-weight: 800;
-  letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-.fp-pair span { display: block; margin-top: 1px; font-size: 11px; color: var(--dim); }
-
-/* Seven discs. How many of the five sets the WEIGHT of their colour;
-   a day with none is a flat neutral and never a red one. The habits
-   screen's rule and its reason: a wash of red across a week somebody
-   missed is a judgement about them, and a fainter mark is a fact.
-
-   It was seven bars of different heights — a chart of seven numbers
-   between 0 and 5, which is more apparatus than the numbers deserve.
-   A row of discs is read at a glance and measured by nobody. */
-/* The heading carries the figure, so the strip's number sits on the
-   words that name it rather than taking a column of its own. */
-.sheet .fp-kh { display: flex; align-items: baseline; gap: 10px; }
-.sheet .fp-kh .fp-k { margin-bottom: 0; }
-.sheet .fp-kh em { margin-left: auto; font-style: normal; font-size: 15px;
-  font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
-
-.fp-week { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-/* Thirty cells across a phone is nine pixels each, so the gap has to
-   come down with the count or the discs vanish into it. */
-.fp-week.is-month { gap: 2px; align-items: stretch; height: 46px; }
-/* The cell is the full height and the bar sits on the floor of it, so
-   thirty of them read as one shape with a baseline rather than as
-   thirty marks each floating at its own middle. */
-.fp-week.is-month .fp-hold { width: 100%; height: 100%; aspect-ratio: auto;
-  align-items: end; }
-.fp-week.is-month .fp-d i { width: 100%; aspect-ratio: auto;
-  border-radius: 2px; }
-.fp-d { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-/* The row is one box and the part that varies absorbs the difference:
-   every cell reserves the full disc's height so a quiet day cannot
-   shorten the strip, and the disc centres inside whatever it gets.
-   Width is written on the element; aspect-ratio makes it a circle. */
-.fp-hold { width: 100%; aspect-ratio: 1; display: grid; place-items: center; }
-.fp-d i { display: block; aspect-ratio: 1; border-radius: 50%;
-  background: var(--tick-off); }
-.fp-w { font-size: 9.5px; color: var(--dim); }
-
-/* ── the wall ──
-   Three across, square, and the photograph fills its tile. It was
-   every log drawn out in full one under another, which made the
-   profile a second feed — and the feed is its own stop two taps away.
-   A profile wants the SHAPE of what somebody has done; the words are
-   one press in.
-
-   The radius nests inside the sheet's own the way the feed card's
-   image nests inside the card. */
-.fp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
-  margin-top: 10px; }
-.fp-t { aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 0;
-  padding: 0; background: var(--tick-off); cursor: pointer; display: block; }
-.fp-t img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.fp-t:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
-/* A log with no photograph is still a thing they did, so it keeps a
-   tile and carries its own first line rather than being dropped —
-   dropping it would make this a photo album, which is a different
-   claim about somebody. */
-.fp-t.is-words { display: grid; align-items: start; padding: 9px;
-  background: none; box-shadow: inset 0 0 0 1px var(--hair); }
-.fp-t.is-words span { font-size: 11px; line-height: 1.2; font-weight: 500;
-  color: var(--dim); text-align: left; overflow: hidden;
-  display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; }
-
-/* No border and no paragraph. Removing somebody takes them off a list;
-   it is not the kind of delete that needs warning about, and the sheet
-   says so by not saying anything. */
 /* -- HABITS OF YOUR OWN --
    The way in sits at the foot of the grid rather than in the bar: the
    bar holds three tabs and an add button at 390px, and a fourth would
@@ -1097,85 +830,6 @@ body {
   touch-action: manipulation;
 }
 
-/* -- THE FRIEND PROFILE: AN ALMANAC --
-   Chosen from ten treatments rendered over the real app at 390x844
-   and read at 1:1, never as a grid of cells: this repo has twice
-   judged a treatment on an enlargement and been wrong about it.
-
-   TIME FIRST. A year of days answers "are they actually doing this"
-   in a way no figure can -- two people with the same streak look
-   nothing alike over twelve months -- so the grid is the page and
-   everything else hangs under it. */
-.pf-bio {
-  font-size: 13px; color: var(--dim); line-height: 1.35;
-  margin: 0 0 12px;
-}
-/* One line where two 26px figures used to be. They summarise the
-   picture directly below them, and a summary above the thing it
-   summarises is the duplication this project keeps taking out. */
-.pf-sub {
-  display: flex; gap: 14px; margin-bottom: 12px;
-  font-size: 11px; color: var(--dim);
-  font-variant-numeric: tabular-nums;
-}
-.pf-sub span + span::before {
-  content: '\00b7'; margin-right: 8px; color: var(--spent);
-}
-.pf-mn {
-  display: flex; justify-content: space-between;
-  font-size: 9.5px; color: var(--spent); margin-bottom: 5px;
-}
-/* 53 columns of seven, laid down the column and across -- which is
-   what makes a row one weekday and a column one week. grid-auto-flow
-   is the whole mechanism; written as a plain grid it fills across and
-   the year reads as noise. */
-.pf-yr {
-  display: grid; grid-auto-flow: column;
-  grid-template-rows: repeat(7, 1fr);
-  gap: 2.5px; margin-bottom: 16px;
-}
-.pf-yr i {
-  display: block; aspect-ratio: 1; border-radius: 1.5px;
-  /* A day with nothing on it is the flat neutral and never a red one.
-     That is the habits screen's rule and its reason: a wash of red
-     across a month somebody missed is a judgement about them. */
-  background: var(--tick-off);
-}
-/* SIX ACROSS AND IT DOES NOT SCROLL. Nothing in this app moves
-   sideways but one approved exception, and a shelf whose end is off
-   the screen is a shelf you have to go looking for. The count beside
-   the heading carries the real total. */
-.pf-shelf {
-  display: flex; gap: 8px; align-items: flex-end;
-  margin-bottom: 16px;
-}
-.pf-shelf .pf-jk {
-  flex: 1 1 0; min-width: 0; width: auto;
-  aspect-ratio: 2 / 3; height: auto;
-  border-radius: 4px;
-}
-.pf-shelf .pf-jk img { border-radius: 4px; }
-.pf-cols {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 22px;
-  margin-bottom: 4px;
-}
-.pf-col .fp-k { display: block; margin-bottom: 9px; }
-.pf-lrow {
-  display: flex; align-items: center; gap: 8px; padding: 3.5px 0;
-}
-.pf-lrow i {
-  width: 11px; height: 11px; border-radius: 3px; flex: 0 0 auto;
-  background: hsl(var(--mh, 0) 42% 34%);
-}
-.pf-lrow b {
-  font-size: 11px; font-weight: 500; flex: 1;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
-.pf-lrow em {
-  font-style: normal; font-size: 11px; font-weight: 600;
-  color: var(--dim); font-variant-numeric: tabular-nums;
-}
-
 /* -- THE SWITCHES --
    One per thing, every one off until it is pressed. A real
    role="switch" rather than a styled checkbox, so a screen reader is
@@ -1210,14 +864,6 @@ body {
 .pv-row.is-on .pv-sw i { transform: translateX(18px); }
 .pv-row:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
-.sheet .fp-rm { border-bottom: 0; padding: 16px 0 0;
-  font-size: 13px; font-weight: 600; }
-
-/* ── writing one ── */
-.lg-prev { margin-bottom: 12px; border-radius: 14px; overflow: hidden;
-  aspect-ratio: 1; background: var(--tick-off); }
-.lg-prev[hidden] { display: none; }
-.lg-prev img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .lg-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 6px; }
 .lg-c { padding: 10px 14px; min-height: 44px; border-radius: 22px;
   border: 1px solid var(--hair); background: none; color: var(--dim);
@@ -1301,6 +947,16 @@ body {
 }
 .ty-cap:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
 .ty-cap > b { font: inherit; flex: none; }
+/* ── ONE RING ──
+   The track is the flat neutral and the arc is the ink: an unmet day
+   is an OPEN ring rather than a red one, which is the same answer the
+   week reached when Missed lost its colour. Round caps so a day with
+   one item kept is a mark rather than a hairline. */
+.ty-ring { width: 26px; height: 26px; flex: none; margin-right: 1px; }
+.ty-ring .t { fill: none; stroke: var(--tick-off); stroke-width: 5; }
+.ty-ring .a {
+  fill: none; stroke: var(--ink); stroke-width: 5; stroke-linecap: round;
+}
 /* THE FIGURES ARE QUIET AND THE COUNT IS NOT. Three facts on one line
    need an order to be read in, and the one you came for is how many of
    today you have kept. The other two are context for it. */
@@ -1407,7 +1063,21 @@ body {
    height whatever is in either. */
 .ty-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* ── ONE COLUMN, AND THE COST IS THE FOLD ──
+     Two-up was chosen to put the whole day on one screen, and it
+     did: six tiles ended at 679px with the bar at 784, 105 spare.
+     What it could not do is carry a CHART. A seven-day bar chart in
+     150px is seven marks about twenty pixels wide, and the four-day
+     area it replaced was a grey slab for arithmetic reasons written
+     up beside scTyBars.
+
+     So the screen scrolls now, deliberately: Health's does, and the
+     trade is a fold against a chart that can be read. The rows are
+     sized by their CONTENT again rather than filling the pane —
+     `1fr` rows over a scrolling column stretch the last tile into
+     whatever is left, which is the empty-box fault this screen had
+     before the figures went in. */
+  grid-template-columns: 1fr;
   /* ── THE ROWS FILL WHAT IS LEFT, AND THEY HAVE A FLOOR ──
      `auto` rows were right while this screen scrolled: the tall tile
      spans two of them, so equal rows would have sized every row to
@@ -1420,25 +1090,20 @@ body {
      what stops an eighth habit compressing every tile into a strip of
      labels. Past the floor the pane scrolls, which is the honest
      answer and the cost this layout was chosen with. */
-  grid-auto-rows: minmax(108px, 1fr);
+  grid-auto-rows: auto;
   align-items: stretch;
-  gap: 6px;
-  /* `1 0 auto`: grow into the pane, and never shrink below the rows'
-     own height. `flex: 1` alone caps the box at the pane and the tiles
-     then spill out of a container that has nothing left to scroll. */
-  flex: 1 0 auto;
+  gap: 8px;
+  flex: 0 0 auto;
   margin-top: 0;
 }
-/* ONE TILE IS WIDE, and which one is arithmetic rather than a name —
-   see the count in scPaintTally. The add control is already full width
-   in its own rule and is deliberately NOT named here: it is not one of
-   your habits, so it sits outside the count that decides this. */
-.ty-row.is-wide { grid-column: 1 / -1; }
-/* ONE TILE IS TALL and it is the one you add to through the day. Two
-   rows on the right, which is your reference's own arrangement — and
-   the height is what the gauge and its stepper need rather than a
-   claim that Water matters more. */
-.ty-row.is-tall { grid-row: span 2; }
+/* ── is-wide IS GONE AND is-tall PLACES NOTHING ──
+   Both were arithmetic about a two-column grid: which tile fills the
+   odd cell, and which one spans two rows so its gauge had height.
+   With one column every tile is full width and every tile is as tall
+   as what is in it, so `is-wide` went with the cursor that set it.
+   `is-tall` stays because it still answers a question the layout did
+   not ask — which item you add to through the day — and the gauge,
+   the stepper and the room for it are all written against it. */
 .ty-row {
   position: relative;
   /* Filled, never outlined: on a page this dark a 1px border is the
@@ -1579,6 +1244,11 @@ body {
    Absolute inside a relative well, and a basis in PIXELS rather than
    `auto`, so the well's own floor is the number written here and the
    drawing is told what it got rather than asked what it wants. */
+/* ── AND THE WELL LOST ITS GROUND ──
+   A plot area needs an edge when the plot is an AREA — a filled
+   curve on a card is a smear without one. Seven separate bars are
+   already their own shape, the way the week strip beside them is,
+   so the wash under them is a second rectangle saying nothing. */
 .ty-well {
   position: relative; display: block;
   border-radius: 9px; overflow: hidden;
@@ -1587,8 +1257,13 @@ body {
      22 the curve came out as a smear along the top of the well —
      present, correct, and saying nothing. The floor is what the
      drawing needs; anything above it is what the row has spare. */
-  flex: 1 1 30px; min-height: 30px;
-  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  /* ── 62, BECAUSE A BAR HAS TO BE TALLER THAN IT IS WIDE ──
+     Seven bars across 306px are about 38px each. At the 52 this
+     started on they came out very nearly square and read as blocks
+     rather than as a chart — the eye compares HEIGHTS, and a square
+     has none to compare. 62 with a 7px gap is the first ratio where
+     the week's shape is what you see. */
+  flex: none; height: 62px;
 }
 .ty-ar {
   position: absolute; inset: 0;
@@ -1608,6 +1283,27 @@ body {
 /* The dated ticks are what say these are four READINGS rather than a
    continuous line, which is the whole of what makes an area honest on
    a daily count. */
+/* ── SEVEN BARS, READ AGAINST EACH OTHER ──
+   Elements rather than an svg, which is the week strip's own idiom
+   four rules up: a stretched viewBox turns a 1px corner radius into
+   an ellipse, and there is no `non-scaling-stroke` for `rx`.
+
+   `align-items: flex-end` is the zero base — every bar grows from
+   the floor, which is the whole reason bars survive a base an area
+   cannot. A day with no reading keeps the empty track rather than
+   drawing a hairline, because nothing recorded is not nought. */
+.ty-bars {
+  position: absolute; inset: 0;
+  display: flex; align-items: flex-end; gap: 7px; padding: 0;
+}
+.ty-bars > i {
+  flex: 1 1 0; min-width: 0; border-radius: 3px;
+  background: color-mix(in srgb, var(--tc, var(--ink)) 70%, transparent);
+}
+/* Today in the ink, because it is the figure printed above the chart
+   and the one mark you are looking for. The other six are the item's
+   own hue, which is what makes a card findable without reading. */
+.ty-bars > i.is-today { background: var(--ink); }
 .ty-ax { display: flex; justify-content: space-between; margin-top: 5px; flex: none; }
 /* ── THE FOOT ──
    The book, the block that fed the tick. It sits in the card's own
@@ -1631,12 +1327,23 @@ body {
    state that is not one. A day still ahead is drawn like a day it was
    never on: nothing has happened yet, and drawing it as a miss would
    be the screen marking you down for Thursday on a Tuesday. */
+/* ── AND THE STRIP HAD TO COME DOWN WHEN THE TILE WENT WIDE ──
+   Seven blocks 30px tall were pips on a 150px tile. At full width
+   they are 44px wide each, and lit in the ink they were the loudest
+   objects on the screen — seven white rectangles saying what the
+   fraction two lines above already says. 20px, and the kept ones
+   take the item's own hue rather than the ink, which is the bars'
+   rule beside them: colour says WHICH, and the ink is for today. */
 .ty-wk {
   display: flex; align-items: stretch; gap: 4px;
-  flex: 1 1 30px; min-height: 30px;
+  flex: none; height: 20px;
 }
 .ty-wk > i { flex: 1 1 0; border-radius: 3px; background: var(--tick-off); }
-.ty-wk > i.is-on { background: var(--ink); }
+/* FULL STRENGTH, AND IT WAS A 78% WASH FOR ONE RENDER. This strip and
+   the half-year the tile opens are the same mark at two sizes, so they
+   are the same colour or the screen says one thing twice — and a wash
+   is a different colour, whatever it is mixed from. */
+.ty-wk > i.is-on { background: var(--tc, var(--ink)); }
 .ty-wk > i.is-off, .ty-wk > i.is-todo { opacity: .45; }
 /* ── THE GAUGE ──
    The marks sit BESIDE the track at their own heights, which is what
@@ -1645,20 +1352,36 @@ body {
    was what made it a gauge while the screen scrolled; here the two
    rows it spans are always more than that, and a fixed floor is what
    pushed every other row past the fold. */
+/* ── THE GAUGE LIES DOWN ──
+   It was a 6px vertical track with three per-cent captions stacked
+   beside it, and on the real screen the labels were not on the track
+   and per cent was not the unit: nobody asks what fraction of three
+   litres they have had. Horizontal, thick enough to read as a vessel,
+   with the divisions drawn ON the rail and the two ends named in
+   litres under it. */
 .ty-g {
-  display: flex; gap: 14px; align-items: stretch;
-  flex: 1 1 90px; min-height: 90px; padding-top: 4px;
+  display: flex; flex-direction: column; gap: 5px;
+  flex: none; padding-top: 6px;
 }
 .ty-gt {
-  width: 6px; flex: none; border-radius: 3px; background: var(--tick-off);
-  display: flex; flex-direction: column; justify-content: flex-end;
-  overflow: hidden;
+  height: 12px; border-radius: 7px; background: var(--tick-off);
+  position: relative; overflow: hidden;
 }
-.ty-gt > i { display: block; width: 100%; border-radius: 3px; background: var(--ink); }
-.ty-gm { flex: 0 1 58px; position: relative; }
+.ty-gt > i {
+  display: block; height: 100%; border-radius: 7px;
+  background: var(--tc, var(--ink));
+}
+/* The divisions are a hairline of the PAGE rather than of the ink, so
+   they read on the filled half and the empty one alike — a wash of
+   the ink disappears the moment the fill passes it. */
+.ty-gt > u {
+  position: absolute; top: 0; bottom: 0; width: 1px;
+  background: color-mix(in srgb, var(--paper) 60%, transparent);
+}
+.ty-gm { display: flex; justify-content: space-between; }
 .ty-gm > span {
-  position: absolute; left: 0; transform: translateY(-50%);
   font-size: 11px; color: var(--spent); white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 /* ── THE STEPPER, AND IT IS THREE SIBLINGS ──
    A button inside a button is invalid and collapses to one press while
@@ -2046,13 +1769,24 @@ body {
    here, on the week's rows and at the head of the history sheet, and a
    screen that dropped it would be the only one that names its items in
    words alone. */
+/* ── THE GLYPH TAKES THE ITEM'S HUE, AT EVERY STATE ──
+   It was `--spent` and went to `--dim` once the item was logged, so
+   the one thing on the card that says WHICH item this is said it in
+   two greys. `--tc` is written on the card by scPaintTally and is
+   the same token the name above reads, so there is one source.
+
+   MERGED INTO THIS RULE RATHER THAN WRITTEN AFTER IT. A second
+   `.ty-card .ic` setting `stroke` is one selector carrying one
+   property twice — the file then has two values in it and only the
+   last is live, whichever order they are in, and tests/names.js
+   fails it. That is the whole of what that check is for and it
+   caught this one in a tenth of a second. */
 .ty-card .ic {
   grid-column: 1; grid-row: 1;
   display: block; width: 19px; height: 19px;
-  fill: none; stroke: var(--spent); stroke-width: 1.9;
+  fill: none; stroke: var(--tc, var(--spent)); stroke-width: 1.9;
   stroke-linecap: round; stroke-linejoin: round;
 }
-.ty-row.is-on .ty-card .ic { stroke: var(--dim); }
 .ty-body { display: contents; }
 /* The name shares the top line with the glyph and gives the whole of
    the second line to the figure. 13.5, not 15: it is a label for the
@@ -2064,12 +1798,21 @@ body {
    the figure 27px and the chart its room, and it is the change that
    makes this screen read as composed rather than as six rows of the
    same weight. */
+/* ── THE NAME TAKES THE ITEM'S HUE ──
+   Health puts the metric name in its own colour, and it is how you
+   find Sleep on a list without reading a word. The hue is written on
+   the card as `--tc` by scPaintTally, so there is one source for it
+   and the glyph above reads the same one.
+
+   AND IT IS 12.5px SENTENCE CASE NOW, not 11px small caps. Small
+   caps at 11 is a LABEL — right when the name was a caption over a
+   figure on a 145px tile and the mark in the corner said the rest.
+   Full width it is the card's heading, which is what Health's is. */
 .ty-nm {
   grid-column: 2; grid-row: 1;
-  font-size: 11px; font-weight: 600; color: var(--spent);
-  text-transform: uppercase; letter-spacing: .075em; line-height: 1;
-  /* The tick sits in the corner over this line. */
-  padding-right: 20px;
+  font-size: 12.5px; font-weight: 600; color: var(--tc, var(--spent));
+  letter-spacing: -.006em; line-height: 1.1;
+  padding-right: 0;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .ty-card {
@@ -2704,6 +2447,22 @@ body {
      exists to remove. 80 = 3 (check inset) + 22 + 45 - 26 + 26 + 9,
      measured rather than guessed. */
   padding: 9px 80px 9px 2px;
+  /* ── AND 44 IS A FLOOR, WHICH THE DAY THE TAG WENT IT STOPPED
+         CLEARING ──
+     A row was two lines of content and cleared the 44px every press
+     target in this app holds to on its own. Taking the Missed tag off
+     a block behind you took a line with it, and the suite measured
+     `row is-past` at **39px** — under the floor, on the most-pressed
+     object on the screen you open the app to. Four other checks went
+     with it: a fourteen-block day stopped overflowing, so there was
+     nothing to scroll and nothing under the fold for the fade to
+     bite on, and the gutter's own press target fell with the row.
+
+     Said as a floor on the row rather than as padding, because the
+     row's height is CONTENT — one line, two, or three with a track
+     under it — and a padding big enough for the shortest is too much
+     for the rest. */
+  min-height: 44px;
   border: 0;
   /* A RULE BETWEEN ROWS, WHICH REVERSES A RULE THIS FILE ARGUED FOR.
      "Nothing is drawn between the rows" was written about rows with
@@ -3099,14 +2858,20 @@ body {
    you would most want to catch without reading, and under budget is
    never drawn green-for-good in exchange. */
 .tk-r .st.is-over { --tg: var(--bad); }
-/* MISSED, and it is the one tag in this app that is red. The rule it
-   reverses said a colour never says WHETHER — written about a wash of
-   red across a week you had not kept, which is a judgement. An hour
-   that has been and gone without a tick is a fact about the day, and
-   it is the state you would most want to catch without reading. --bad
-   is the app's own red and is already solved: 7.12:1 as a tag on the
-   dark face and 5.11 on the light. */
-.row .st.is-bad, .cl-r .st.is-bad { --tg: var(--bad); }
+/* ── THERE IS NO RED ON A BLOCK ANY MORE, AND `is-bad` IS GONE ──
+   Missed was the one red tag here, at `--tg: var(--bad)`, and the
+   argument for it held for exactly one tag: an hour that has been and
+   gone is a fact about the day rather than a verdict on you. A real
+   morning draws five of them in a column, and five is a verdict. The
+   week's row now says it by being dimmed with its check open, and the
+   calendar's day sheet says it in the flat neutral with Off and Not
+   yet. The rule is one line again: nothing in this app is ever
+   coloured to say you failed.
+
+   `--bad` STAYS, and is still measured: it dresses `.tk-r .st.is-over`
+   just above, which is a budget category gone over. That one is about
+   money rather than about you, which is the whole of why it survives
+   a rule this one could not. */
 /* ── AND NOT YET IS NOT A HUE AT ALL ──
    Written as a --tg of --tick-off it would take the shared rule's own
    arithmetic, and that arithmetic is for a COLOUR: 22% of a near-grey
@@ -4626,14 +4391,6 @@ body {
   74%, 100% { opacity: 1; transform: translateY(0); }
 }
 .tr-new { animation: tr-new 3.4s cubic-bezier(.22, 1, .36, 1) infinite; }
-
-@keyframes tr-crown {
-  0%       { transform: translateY(-13px); opacity: 0; }
-  26%      { transform: translateY(0); opacity: 1; }
-  34%      { transform: translateY(-2.4px); }
-  44%, 100% { transform: translateY(0); opacity: 1; }
-}
-.tr-crown { animation: tr-crown 3.8s cubic-bezier(.3, 1.4, .5, 1) infinite; }
 
 /* The sheet is the gesture, so it is the slowest of the four and holds
    at the top for most of the loop: what you are meant to read is where
@@ -6980,6 +6737,42 @@ body {
   letter-spacing: .08em;
   color: var(--spent);
 }
+/* ── THE MONTH FILLS THE SCREEN ──
+   Measured at 390x844 before anything moved: the grid ended at 436
+   with the bar's pill at 767, so THREE HUNDRED AND FORTY-EIGHT pixels
+   of a screen whose whole job is a month were empty — and a cell was
+   54px, which holds two pills and hides up to five behind a `+n`.
+
+   The room was already being used for exactly this once a day was
+   pressed: the day sheet comes up over the bottom half and the grid
+   sits above it, which is the reference's own month-above / day-below
+   layout arriving by accident and only while a sheet is open.
+
+   `1fr` rows take it back. A row is about 118px, a cell holds four
+   pills rather than two, and the `+n` stops being the ordinary case.
+   The pane's own 40px of scroll room goes with it: that is a reading
+   decision about a LIST whose last line would otherwise stop dead on
+   the edge, and a grid that fills its box has no last line to protect
+   — the poster already ends 19px clear of the pill. */
+#scCalPane { display: flex; flex-direction: column; }
+#scCalPane.is-grid { padding-bottom: 0; }
+/* ── `minmax(0, 1fr)`, AND THE BARE `1fr` WAS A MEASUREMENT BUG ──
+   `1fr` on a grid row is `minmax(auto, 1fr)`, so a row whose content
+   cannot shrink GROWS past its share. A cell with twelve pills in it
+   did exactly that: the row inflated to hold all twelve, `scCalFit`
+   measured the stack against that inflated box and kept seven, and
+   the row then collapsed back to its 1fr the moment the other five
+   were removed — leaving the seventh 1.4px past the foot it had just
+   been measured as clearing.
+
+   The fit was being measured against a grid the fit was about to
+   change. A floor of 0 is what makes the row the pane's share and
+   nothing else, so the room a stack reports is the room it keeps. */
+#scCalPane.is-grid .cl-grid {
+  flex: 1 1 auto;
+  grid-auto-rows: minmax(0, 1fr);
+  min-height: 0;
+}
 .cl-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -7048,9 +6841,29 @@ body {
   font-variant-numeric: tabular-nums;
   line-height: 1.2;
 }
-/* -- TODAY IS THE STRONGEST TYPE ON THE GRID, NOT A SECOND MARK --
-   The head's own rule for saying YOU ARE HERE. */
-.cl-c.is-now > i { color: var(--red); font-weight: 800; }
+/* ── TODAY IS THE APP'S OWN FILLED MARK, AND THAT REVERSES A RULE ──
+   It was weight alone, under a note reading "not a second mark: a
+   ring round the date is already the mark and a concentric one is two
+   marks answering different questions in one drawing." That argument
+   was correct and its subject is gone — the ring went with the
+   treatment this grid replaced, so there is no first mark for a
+   second one to be concentric with, and today was carried by one bold
+   number in a corner against four coloured pills.
+
+   The ink with the paper on it, which is the filled state every other
+   two-state control in this app already wears — the head's Edit tile,
+   a picked chip. Nothing invented and no colour: a hue here would say
+   WHICH, and which day it is, is not that question. */
+.cl-c.is-now > i {
+  color: var(--paper);
+  font-weight: 700;
+  background: var(--ink);
+  border-radius: 999px;
+  align-self: flex-end;
+  min-width: 17px;
+  padding: 1px 4px;
+  text-align: center;
+}
 /* Inset, because an outline outside a ruled cell draws over its
    neighbours rather than round itself. */
 .cl-c:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
@@ -7071,13 +6884,21 @@ body {
    somewhere — and a wrapped pill is two lines of a cell that has room
    for two pills. Where it matters the List is one press away, which
    is the whole of why that toggle is on this screen. */
+/* `1 1 0`, so the stack REPORTS the room the row gave it rather than
+   sizing to its own content — which is the whole of what lets
+   `scCalFit` measure what fits instead of a constant predicting it.
+   `overflow: hidden` is belt and braces: a pill is removed rather
+   than clipped, and this is what stops one being drawn over the rule
+   for the frame between layout and the fit. */
 .cl-ps {
   align-self: stretch;
   min-width: 0;
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
   margin: 1px 0 3px;
+  overflow: hidden;
 }
 .cl-p {
   min-width: 0;
@@ -7093,6 +6914,19 @@ body {
   background: color-mix(in srgb, var(--tg) 22%, transparent);
   color: color-mix(in srgb, var(--tg) 72%, var(--ink));
 }
+/* ── AND A PILL IN THE STACK KEEPS ITS OWN HEIGHT ──
+   A flex item shrinks by default, so a cell with fourteen blocks on it
+   squashed all fourteen to FIVE PIXELS each rather than overflowing:
+   measured, a 91px stack held every one of them at `pillH: 5`, so
+   nothing was ever past the foot and `scCalFit` had nothing to take
+   back. Unreadable, and invisible to every check that counts pills
+   rather than measuring one. `0 0 auto` is what makes the excess
+   overflow, which is the state the fit exists to resolve.
+
+   Scoped to the STACK: the same pill wraps in a row in the List,
+   where shrinking is what lets a long name ellipsise instead of
+   running out of the line. */
+.cl-ps .cl-p { flex: 0 0 auto; }
 /* The flat neutral for a colour this build cannot resolve, which is
    `.wo.is-off`'s own path and its own reason: a state is never
    coloured, and an unknown is not a claim about anything. */

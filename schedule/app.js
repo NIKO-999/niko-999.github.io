@@ -113,6 +113,25 @@
   var state = null;
   var undoSnap = null;
 
+  /* ── THE TWO HELPERS EVERY OTHER KEY IS READ AND WRITTEN THROUGH ──
+     They lived in FRIENDS, because that is where the first four keys
+     that needed them were. Habits, workouts, Mind and Notes all came
+     to use them, so when friends went they had to come back here —
+     which is where a helper the whole store shares belonged anyway.
+
+     A damaged value falls back rather than throwing: a record this
+     app cannot parse is a record to replace, never a screen that
+     does not draw. */
+  function scReadJSON(k, fallback) {
+    try {
+      var v = JSON.parse(localStorage.getItem(k));
+      return v === null || v === undefined ? fallback : v;
+    } catch (e) { return fallback; }
+  }
+  function scWriteJSON(k, v) {
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
+  }
+
   /* A damaged stored shape is repaired, not discarded. A bad title, or
      one unreadable row, must not cost a week's worth of building — the
      rows are independent of each other and of the header. */
@@ -327,6 +346,24 @@
      ═══════════════════════════════════════════════════════════ */
 
   function scPad(n) { return (n < 10 ? '0' : '') + n; }
+
+  /* Relative, and it stops at the day. "3 weeks ago" is a number
+     nobody reads as a duration; past a week the date is the useful
+     thing. Written for a feed that no longer exists; it stayed
+     because a note card says how long ago it was touched, which is
+     the same question. */
+  function scAgo(at) {
+    if (!at) return '';
+    var s = Math.max(0, Math.round((Date.now() - at) / 1000));
+    if (s < 90) return 'just now';
+    var m = Math.round(s / 60);
+    if (m < 60) return m + 'm ago';
+    var h = Math.round(m / 60);
+    if (h < 24) return h + 'h ago';
+    var d = Math.round(h / 24);
+    if (d < 8) return d + 'd ago';
+    return new Date(at).toDateString().slice(4, 10);
+  }
 
   function sc12(min) {
     var h = Math.floor(min / 60) % 24, m = min % 60;
@@ -2530,8 +2567,7 @@
     if (n % 100 >= 11 && n % 100 <= 13) return 'th';
     return ['th', 'st', 'nd', 'rd'][n % 10] || 'th';
   }
-  var VIEW_NAME = { tally: 'Today', friends: 'Friends', notes: 'Notes',
-                    cal: 'Calendar' };
+  var VIEW_NAME = { tally: 'Today', notes: 'Notes', cal: 'Calendar' };
 
   var HEAD_ICON = {
     today: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/>'
@@ -2542,9 +2578,6 @@
     tally: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7"'
       + ' height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13"'
       + ' width="7" height="7"/><rect x="13" y="13" width="7" height="7"/></svg>',
-    friends: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4"/>'
-      + '<path d="M3 19c0-3.2 2.7-5 6-5s6 1.8 6 5"/>'
-      + '<path d="M16.5 6.4a3.4 3.4 0 010 6.5M21 19c0-2.7-1.8-4.4-4.2-4.8"/></svg>',
     notes: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 3.5h9l4 4v13h-13z"/>'
       + '<path d="M14.5 3.5v4h4M8.5 12h7M8.5 16h4.5"/></svg>',
     /* THE MONTH'S OWN, and it is not `week`'s. The week head already
@@ -2645,8 +2678,6 @@
       if (tyStop === 'work') scPaintWork(); else scPaintTally();
       return;
     }
-    if (view === 'friends') { scPaintFriends(); return; }
-
     var today = new Date().getDay(), now = scNowMin();
     var rows = document.querySelectorAll('.week.is-today .row');
     var live = null;
@@ -2673,27 +2704,44 @@
       var st = el.querySelector('.st');
       if (st) {
         var done = el.classList.contains('is-done');
-        /* ── FOUR STATES, AND MISSED IS THE ONE THAT REVERSES A RULE ──
-           This file said a tag never goes red for a thing you have not
-           done, because that is the screen grading you. Asked for
-           anyway, and it is a narrower claim than the rule was written
-           against: a block whose hour has been and gone without a tick
-           is a FACT about the day rather than a verdict on you, and it
-           is the one state you would want to catch at a glance.
+        /* ── AND MISSED SAYS NOTHING AT ALL, WHICH REVERTS A
+               REVERSAL ──
+           It was the one red tag in the app, and the argument for it
+           was good: a block whose hour has been and gone without a
+           tick is a FACT about the day rather than a verdict on you,
+           and it is the state you would most want to catch without
+           reading. That argument is about ONE tag. Rendered and looked
+           at, a real morning draws FIVE of them down the one screen
+           you open the app on, and a column of red saying what you did
+           not do is exactly the judgement the rule it reversed was
+           written against. The exception had eaten the rule.
 
-           `gone` is read off is-past, which scLive sets on TODAY's
-           rows alone — so a block on another day is "Not yet" whatever
-           the hour, and the week does not tell you it only runs
-           forwards. */
+           WHAT REPLACES IT IS ABSENCE, NOT A QUIETER WORD. `gone` is
+           read off is-past, which scLive sets on TODAY's rows alone —
+           and those rows are already dimmed to --spent, glyph and
+           time and name, with the check left open. The row says it has
+           been and gone three times over before a tag opens its mouth,
+           so a grey chip repeating it is the duplication this project
+           keeps taking back out. `.st:empty` is display:none already,
+           which is how a day off draws no tag, so there is no new
+           mechanism here.
+
+           NOTHING IS LOST ON ANOTHER DAY, because nothing was said
+           there: `gone` needs is-past, so a block on Monday's card has
+           always read "Not yet" whatever the hour. The one screen that
+           does say the word is the calendar's day sheet, where the
+           rows are NOT dimmed and the word is the only thing carrying
+           it — and it is neutral there now. One rule: a missed block
+           is never coloured, and it keeps its word only where nothing
+           else on the row already says so. */
         var gone = !done && !on && !skip && el.classList.contains('is-past');
-        var word = skip ? ''
+        var word = skip || gone ? ''
           : done ? 'Completed'
           : on ? 'In progress'
-          : gone ? 'Missed' : 'Not yet';
+          : 'Not yet';
         st.textContent = word;
         st.classList.toggle('is-now', on && !done);
         st.classList.toggle('is-ok', done);
-        st.classList.toggle('is-bad', gone);
         st.classList.toggle('is-todo', !done && !on && !skip && !gone);
       }
       /* And the track says how much of it has gone. Set on THIS pass
@@ -2873,11 +2921,18 @@
      of the pairing rather than needing a token of its own: black on
      the bright chip, white on the deep one. Worst measured is 5.54:1
      for the label and 5.09:1 against the page. */
-  var ME_KEY = 'sched.me.v1';
-  /* Violet was the app's own hue before the wheel went. Amber is what
-     a running block wears everywhere else that has one, so it is what
-     In progress starts as. */
-  var ME0 = 'violet', LIVE0 = 'amber';
+  /* ── AND `--me` WENT WITH THE ONLY TWO THINGS THAT READ IT ──
+     Your face's colour was the one setting here that TRAVELLED: it
+     was pushed with your record, so a friend's board drew you in it.
+     Its only two readers were the push and the profile, both in the
+     friends half, so the day that went it became a token written on
+     every paint and read by nothing — which is a dead rule that
+     still cascades, one language over. The key is swept on boot with
+     the palette name and the rest.
+
+     Amber is what a running block wears everywhere else that has
+     one, so it is what In progress starts as. */
+  var LIVE0 = 'amber';
   function scPickOf(key, dflt) {
     var v;
     try { v = localStorage.getItem(key); } catch (e) { v = null; }
@@ -2885,18 +2940,17 @@
     for (i = 0; i < PICKS.length; i++) if (PICKS[i].k === dflt) return PICKS[i];
     return PICKS[0];
   }
-  function scPickHex(key, dflt, light) {
-    var p = scPickOf(key, dflt);
-    return light ? p.l : p.d;
-  }
   /* ── THE NOW COLOUR IS FIXED, NOT CHOSEN ──
      It was the second row of swatches, on the argument that the mark
      the whole screen orients around is worth making yours the way
      your own face is. Taken away on request: what is left is Amber
      wherever the running row is, on both faces, and nothing under
-     Settings for it. `scPickDflt` is `scPickHex` with no key to read —
+     Settings for it. `scPickDflt` is `scPickOf` with no key to read —
      the same lookup, resolved to the DEFAULT swatch rather than to
-     whatever a phone might still have stored. */
+     whatever a phone might still have stored. `scPickHex` was the
+     keyed half and went with `--me`: a helper nothing calls reads as
+     a mechanism somebody might edit, and the first thing they would
+     find is that nothing calls it. */
   function scPickDflt(dflt, light) {
     for (var i = 0; i < PICKS.length; i++) {
       if (PICKS[i].k === dflt) return light ? PICKS[i].l : PICKS[i].d;
@@ -2935,10 +2989,9 @@
        way round the wheel. With the accent at the ink, the pair is
        the page's own two ends and there is nothing left to compute. */
     t['--on-red'] = base['--paper'];
-    /* The two chosen ones. They are written here rather than left to
-       the stylesheet because a swatch is a per-face pair and only this
-       function knows which face is up. */
-    t['--me'] = scPickHex(ME_KEY, ME0, light);
+    /* Written here rather than left to the stylesheet because a
+       swatch is a per-face pair and only this function knows which
+       face is up. */
     t['--live'] = scPickDflt(LIVE0, light);
     return t;
   }
@@ -3035,7 +3088,7 @@
                 '--s-m', '--s-a', '--s-e',
                 '--t-train', '--t-walk', '--t-read',
                 '--t-steps', '--t-fuel', '--t-water',
-                '--done-bg', '--me', '--live', '--st-ok', '--gold',
+                '--done-bg', '--live', '--st-ok', '--gold',
                 '--w-red', '--w-blue', '--w-teal', '--w-green',
                 '--w-violet', '--w-orange', '--w-amber'];
 
@@ -3066,12 +3119,6 @@
        to be told to read the tokens again. The rail is pure CSS and has
        already changed by the time this line runs. */
     if (typeof scPaintTabFace === 'function') scPaintTabFace();
-    /* Your face and your crown are drawn on your friends' screens out
-       of the two hexes in your record, so an accent they never see
-       still has to reach them. Debounced with everything else — the
-       wheel stays open while you drag through the whole circle, and a
-       drag must not be three hundred writes. */
-    if (save) scPush();
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -3565,7 +3612,6 @@
       if (!Object.keys(blockLog[day]).length) delete blockLog[day];
     }
     scTickSave();
-    scPush();
     return true;
   }
 
@@ -3611,15 +3657,32 @@
       if (!Object.keys(tickLog[day]).length) delete tickLog[day];
     });
     scTickSave();
-    scPush();
     return true;
   }
 
-  /* scStreak lives with the counting in FRIENDS now, because the
-     leaderboard has to count everybody the same way and there were
-     about to be two implementations of it — one walking tickLog for
-     you and one walking a record for a friend. The day those two
-     disagree the board is wrong and nothing on it says so. */
+  /* ── DAYS YOU DID ANYTHING, RUNNING BACK FROM TODAY ──
+     It lived in FRIENDS, because the board had to count everybody the
+     same way and there were about to be two implementations — one
+     walking tickLog for you and one walking a record for a friend.
+     There is no board and no record but yours, so it is back beside
+     the log it reads.
+
+     A TICK OR A BLOCK. Counting ticks alone made a day you kept every
+     block and touched none of the six a day off. And TODAY not being
+     logged yet does not break it: at nine in the morning it has not
+     failed, it has not happened, and a streak that resets every
+     midnight is a streak nobody keeps. */
+  function scStreak() {
+    var n = 0;
+    for (var i = 0; i < 3650; i++) {
+      var d = scDayBack(i);
+      var t = tickLog[d] && Object.keys(tickLog[d]).length;
+      var b = blockLog[d] && Object.keys(blockLog[d]).length;
+      if (t || b) n++;
+      else if (i > 0) break;
+    }
+    return n;
+  }
 
   /* ── missed its window ──
      The app already knows Train was 06:30 to 07:30 and that it is nine
@@ -3669,8 +3732,22 @@
      reading and the dates under it stop being dates. Normalised to the
      best of the four, so the picture is the shape of the run rather
      than a share of an aim the item may not have. */
+  /* The same formatting the tile's own figure uses, so the best in
+     the axis and the reading above it cannot disagree about how many
+     decimals a litre has. */
+  function scTyNum(it, v) {
+    return (+v).toLocaleString('en-GB', { minimumFractionDigits: it.dp || 0,
+                                          maximumFractionDigits: it.dp || 0 });
+  }
+
   function scTySeries(it) {
-    var h = scHist(it.id).slice(-4), max = 0, i;
+    /* ── SEVEN, AND IT WAS FOUR ──
+       Four points is not a week, and on a 150px tile it was not a
+       shape either. Seven is the window every other figure on this
+       screen already uses — `days on this week`, the strip beside a
+       tick — so the chart and the fraction above it are finally about
+       the same seven days. */
+    var h = scHist(it.id).slice(-7), max = 0, i;
     for (i = 0; i < h.length; i++) if (h[i].raw > max) max = h[i].raw;
     /* FOUR DAYS OF NOTHING IS NOT FOUR DAYS OF ZERO. With no reading
        anywhere in the window every point is on the floor, which draws a
@@ -3682,10 +3759,12 @@
     var d = new Date(); d.setDate(d.getDate() - (h.length - 1));
     var out = [];
     for (i = 0; i < h.length; i++) {
-      out.push({ v: h[i].raw / max,
+      out.push({ v: h[i].raw / max, raw: h[i].raw,
+                 today: i === h.length - 1,
                  lab: d.getDate() + ' ' + MON[d.getMonth()] });
       d.setDate(d.getDate() + 1);
     }
+    out.max = max;
     return out;
   }
 
@@ -3715,6 +3794,19 @@
      honest objection and the trade was taken knowingly: the dated ticks
      underneath are what say these are four readings rather than a
      continuous line. */
+  /* ── THE AREA SURVIVES, FOR THE ONE PLACE IT IS HONEST ──
+     A goal's fourteen-day sparkline is a TREND on a number you are
+     pushing up, where a line is the right drawing and the zero base
+     is not a problem: the shape you are reading is the slope rather
+     than a comparison between days. The tally's own chart is bars
+     for the reasons below, and the two are different questions
+     rather than two answers to one.
+
+     `tests/names.js` is what said so out loud. Deleting this left
+     `scMetPanel` calling a function that no longer existed — a
+     runtime ReferenceError on the one screen a goal's metric draws,
+     which `node --check` is perfectly happy with. It was named in a
+     tenth of a second. */
   function scTyArea(s) {
     var i, p = '';
     for (i = 0; i < s.length; i++) {
@@ -3724,6 +3816,39 @@
     return '<svg class="ty-ar" viewBox="0 0 100 38" preserveAspectRatio="none"'
       + ' aria-hidden="true"><path class="f" d="' + p + 'L100 38L0 38Z"/>'
       + '<path class="s" d="' + p + '"/></svg>';
+  }
+
+  /* ── BARS, AND THE AREA WAS A SLAB BY ARITHMETIC ──
+     The area normalised each day to the window's best and plotted it
+     on a ZERO-BASED axis, filling to the floor. A real steps week of
+     6,200 to 9,011 never puts v below .69, so the line had 10 of 38
+     units to move in and the other 74% was constant fill — a grey
+     slab with a flat top. Sleep was worse: 6.2 to 8.1 hours never
+     leaves the top fifth. Any count whose RANGE is small next to its
+     MAGNITUDE draws one, which is most of what a person logs.
+
+     FITTING THE AXIS IS THE TEMPTING FIX AND IT IS A LIE. It buys
+     3.2x the visible variation and puts the week's worst day flat on
+     the floor — 6,180 steps drawn as a day you did not walk.
+
+     Bars survive the zero base an area cannot, because you read them
+     against each OTHER by height rather than reading one line against
+     a fill. Built as elements rather than an svg, which is the week
+     strip's own idiom one tile over: a stretched viewBox turns a 1px
+     corner radius into an ellipse, and `non-scaling-stroke` has no
+     equivalent for `rx`. */
+  function scTyBars(s) {
+    var w = scEl('span', 'ty-bars'), i, b;
+    for (i = 0; i < s.length; i++) {
+      b = scEl('i', s[i].today ? 'is-today' : null);
+      /* A floor of 2%, so a day you logged something small is a mark
+         rather than nothing — the day-off dot's own rule: a thing
+         that happened is never drawn as a thing that did not. A day
+         with no reading at all keeps the empty track. */
+      b.style.height = (s[i].raw ? Math.max(2, s[i].v * 100) : 0) + '%';
+      w.appendChild(b);
+    }
+    return w;
   }
 
   function scPaintTally() {
@@ -3770,6 +3895,32 @@
     fig.appendChild(runI);
     fig.appendChild(scEl('i', null, 'best ' + best));
     cap.appendChild(fig);
+    /* ── ONE RING, AND THREE WOULD BE A COSTUME ──
+       Activity's three work because Move, Exercise and Stand are
+       three goals in three different units, each with its own
+       target. This screen has ONE question — how many of today's
+       items you kept — so three rings would be the idiom worn as
+       decoration rather than the idiom used.
+
+       AND AN UNMET DAY IS AN OPEN RING, NEVER A RED ONE. That is
+       the same conclusion the week reached when the Missed tag lost
+       its colour, and it is the whole of why a ring is worth having
+       here: it says how far round you got without saying anything
+       about you. The track is the flat neutral; the arc is the ink,
+       which is what every other mark of the record wears.
+
+       It goes INSIDE the caption rather than beside it, because the
+       caption is already the one control that opens the week and a
+       ring that was a second press would be two doors to one room. */
+    var pct = all.length ? n / all.length : 0;
+    var C = 2 * Math.PI * 15.5;
+    cap.insertAdjacentHTML('afterbegin',
+      '<svg class="ty-ring" viewBox="0 0 38 38" aria-hidden="true">'
+      + '<circle class="t" cx="19" cy="19" r="15.5"/>'
+      + '<circle class="a" cx="19" cy="19" r="15.5"'
+      + ' stroke-dasharray="' + C.toFixed(1) + '"'
+      + ' stroke-dashoffset="' + (C * (1 - pct)).toFixed(1) + '"'
+      + ' transform="rotate(-90 19 19)"/></svg>');
     cap.insertAdjacentHTML('beforeend',
       '<svg class="ty-cv" viewBox="0 0 24 24" aria-hidden="true">'
       + '<path d="M9 4.5l7.5 7.5L9 19.5"/></svg>');
@@ -3790,73 +3941,39 @@
        Nothing here is ordered by whether it is logged — a grid that
        rearranges itself as you press it is a grid you cannot learn.
 
-       ── AND THE TALL ONE STILL STARTS THE RIGHT-HAND COLUMN ──
-       Which is your reference's own arrangement, and it is a property
-       of the CURSOR rather than of an index: a two-column grid places
-       left then right, so the tall tile lands on the right only when
-       an ODD number of half tiles precede it. Written as index 1 that
-       was true by accident of the numbers leading; with the ticks
-       first it has to be worked out, or Water drops into the left
-       column and the reference's shape is gone.
+       ── AND THE CURSOR ARITHMETIC WENT WITH THE SECOND COLUMN ──
+       Two rules stood here and both were about placing tiles in a
+       two-column grid: the tall one was spliced to the first ODD
+       slot so it started the right-hand column, and the last tile
+       was marked wide so six items did not leave a hole in seven
+       cells. One column has no cursor and no orphan, so both are
+       gone rather than left computing a class nothing places — a
+       dead rule that still cascades is not dead.
 
-       So: the first odd slot at or after the ticks. Two ticks put it
-       third, three ticks put it fourth, and neither is a number
-       anybody had to choose. */
+       What survives is the ORDER, which was never about columns:
+       Train and Mind are the two things you DO and the numbers are
+       what happened while you were doing them. */
     var items = scItems();
     var ticks = items.filter(function (it) { return it.k === 'do'; });
     var ord = ticks.concat(items.filter(function (it) { return it.k !== 'do'; }));
-    var tallAt = -1;
-    ord.forEach(function (it, i) { if (tallAt < 0 && scTyTall(it)) tallAt = i; });
-    if (tallAt >= 0) {
-      var want = Math.min(ticks.length % 2 ? ticks.length : ticks.length + 1,
-                          ord.length - 1);
-      if (want !== tallAt) ord.splice(want, 0, ord.splice(tallAt, 1)[0]);
-      tallAt = want;
-    }
 
-    /* ── AND ONE IS WIDE, BECAUSE THE ARITHMETIC LEAVES AN ORPHAN ──
-       The tall tile takes two cells of the two-column grid, so six
-       items occupy seven cells and seven cells cannot pair. Something
-       has to be full width, and drawing that as a half tile with a
-       hole beside it is the mistake this fixes.
-
-       WHICH one is the LAST, and that moved with the order above.
-       Every tile before the odd cell is a half, so the hole is always
-       the last cell of the last row — and the only tile that can fill
-       it is the one drawn into it. It used to be the first item after
-       the tall block, which was the same cell seen from the other end
-       while the numbers led.
-
-       Worked out rather than named, so a seventh habit re-solves it
-       instead of stranding the rule on six — at seven items the cells
-       come out even and nothing is wide at all.
-
-       The add control at the foot is full width and sits OUTSIDE this
-       count: it is not one of your habits, so a grid that paired a
-       tile with it would be claiming it was. */
-    var wideAt = (ord.length + (tallAt >= 0 ? 1 : 0)) % 2
-      ? ord.length - 1 : -1;
-    /* A tile cannot be both, and with the six built-ins it never is —
-       the tall one is placed near the front and the last is four
-       tiles past it. Said out loud because a two-by-two tile is the
-       one shape this grid has no room for. */
-    if (wideAt === tallAt) wideAt = -1;
-
-    ord.forEach(function (it, oi) {
+    ord.forEach(function (it) {
       var on = !!got[it.id], late = !on && scLate(it), tall = scTyTall(it);
       var row = scEl('div', 'ty-row' + (on ? ' is-on' : '') + (late ? ' late' : '')
-        + (tall ? ' is-tall' : '') + (oi === wideAt ? ' is-wide' : ''));
+        + (tall ? ' is-tall' : ''));
       row.dataset.item = it.id;
-      /* ── DRAWN, NOT PRESSED ──
-         The tile is one control: a tap logs and two taps open the
-         record. A second target for the same action on a 145px tile is
-         the arrangement this screen removed once already, so the mark
-         is a span inside the button — where a second button would be
-         invalid — and it takes no press of its own. */
-      var chk = scEl('span', 'chk');
-      chk.setAttribute('aria-hidden', 'true');
-      chk.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.8l5.2 5.2L19.5 6"/></svg>';
-      row.appendChild(chk);
+      /* ── AND THE CHECK IS GONE, WHICH LEAVES ONE STATEMENT ──
+         The tile said it three times: `2 / 7`, a seven-bar strip with
+         two lit, and a filled circle in the corner. The strip is the
+         only part that says WHICH days and the fraction is the only
+         part that can say two, so the check is the one that goes —
+         it repeated the fraction on a card where the fraction is
+         already the largest thing.
+
+         IT COST NO CONTROL. The mark was `aria-hidden` and took no
+         press of its own: the tile is the button, a tap logs and two
+         taps open the record. What said `logged` to a screen reader
+         is the card's own aria-label, which is unchanged. */
       var c = scEl('button', 'ty-card');
       c.type = 'button';
       c.dataset.item = it.id;
@@ -3867,6 +3984,15 @@
          it is the one thing on the tile that is the same object here,
          in the week's own rows and at the head of the history sheet —
          and it costs the label nothing at this size. */
+      /* ── AND BOTH OF THEM TAKE THE ITEM'S OWN HUE ──
+         Six colours were already solved here, one per item, each with
+         a light-face twin measured against its own ground — and this
+         screen drew every one of them grey. A colour says WHICH, and
+         which item a card is about is the purest WHICH there is; it
+         is also how you find Sleep on a list without reading a word.
+         The FIGURE stays the ink, because the figure is the record
+         and the accent rule has not moved. */
+      c.style.setProperty('--tc', scTagHue(it));
       c.insertAdjacentHTML('beforeend',
         '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">'
         + scItemIcon(it) + '</svg>');
@@ -3956,24 +4082,43 @@
         /* ── THE GAUGE, AND THE MARKS SIT BESIDE THE TRACK ──
            At their own heights, which is what makes it a gauge rather
            than a bar with a caption under it. */
+        /* ── THE GAUGE LIES DOWN, AND ITS MARKS SAY LITRES ──
+           It was a 6px vertical track with `100% / 50% / 0%` stacked
+           beside it at their own heights, and on the real screen that
+           reads as a hairline with three unattached captions: the
+           labels are not on the track, and per cent is not the unit
+           anybody checks water in. You do not ask what fraction of
+           three litres you have had, you ask how many litres.
+
+           Horizontal, so the marks sit UNDER the figures they name
+           and the rail can be thick enough to be a vessel. The
+           divisions are drawn ON the rail rather than captioned off
+           it, which is what makes it a scale rather than a bar with
+           numbers nearby. */
         var aim = scTyAim(it) || 1;
+        var have = +got[it.id] || 0;
         var g = scEl('span', 'ty-g');
         var trk = scEl('span', 'ty-gt');
         var fil = scEl('i');
-        fil.style.height = Math.min(1, (+got[it.id] || 0) / aim) * 100 + '%';
+        fil.style.width = Math.min(1, have / aim) * 100 + '%';
         trk.appendChild(fil);
+        /* One division a whole unit, up to four — past that they are
+           closer together than the rail is thick and read as noise
+           rather than as a scale. */
+        var divs = Math.min(4, Math.max(0, Math.round(aim) - 1));
+        for (var q2 = 1; q2 <= divs; q2++) {
+          var u2 = scEl('u');
+          u2.style.left = (q2 / (divs + 1)) * 100 + '%';
+          trk.appendChild(u2);
+        }
         g.appendChild(trk);
         var mk = scEl('span', 'ty-gm');
-        /* THREE MARKS, AND THE FOOT IS THE ONE THAT WAS MISSING. A
-           gauge labelled at the top and the middle and left bare at
-           the bottom reads as a scale that runs out rather than one
-           that starts at nought — which is the one end a person
-           actually checks a water tracker against. */
-        [['100%', 0], ['50%', 50], ['0%', 100]].forEach(function (q) {
-          var sp = scEl('span', null, q[0]);
-          sp.style.top = q[1] + '%';
-          mk.appendChild(sp);
-        });
+        mk.appendChild(scEl('span', null, '0'));
+        /* `scTyAim` raw, NOT through scTyNum: the line two rows up
+           says `of 3 L` from the same value, and running it through
+           the item's decimal places printed `3.0 L` underneath it —
+           one figure drawn twice in two formats on one card. */
+        mk.appendChild(scEl('span', null, aim + (it.unit || '')));
         g.appendChild(mk);
         ch.appendChild(g);
       } else if (it.k === 'do') {
@@ -3999,10 +4144,20 @@
              a plot: a filled track and seven blocks are already their
              own shape. */
           var well = scEl('span', 'ty-well');
-          well.insertAdjacentHTML('beforeend', scTyArea(ser));
+          well.appendChild(scTyBars(ser));
           ch.appendChild(well);
+          /* ── THE AXIS NAMES THE TOP AND THE END, NOT FOUR DATES ──
+             Four dated ticks under a four-point line were what said
+             these are readings rather than a continuous curve; bars
+             say that by being separate marks. What a bar chart needs
+             instead is the one thing the drawing cannot carry, which
+             is what its tallest mark is WORTH — without it the shape
+             is a shape and the figures are unreadable. Health names
+             the max and the end and nothing between. */
           var ax2 = scEl('span', 'ty-ax');
-          ser.forEach(function (s) { ax2.appendChild(scEl('span', null, s.lab)); });
+          ax2.appendChild(scEl('span', null,
+            scTyNum(it, ser.max) + (it.unit || '') + ' best'));
+          ax2.appendChild(scEl('span', null, 'Today'));
           ch.appendChild(ax2);
         }
       }
@@ -4400,9 +4555,9 @@
         return;
       }
       GLOW.forEach(function (L, n) {
-        lay[n] += scCalRect(g, i, cell, cell * L.grow, 'var(--red)');
+        lay[n] += scCalRect(g, i, cell, cell * L.grow, 'var(--tc, var(--red))');
       });
-      lit += scCalRect(g, i, cell, cell, 'var(--red)');
+      lit += scCalRect(g, i, cell, cell, 'var(--tc, var(--red))');
     });
     var body = '';
     GLOW.forEach(function (L, n) {
@@ -4785,6 +4940,22 @@
     var d = scHist(item.id), st = scHistStats(item, d);
     var p = $('scTyPanel');
     p.textContent = '';
+    /* ── ONE MARK, TWO SIZES, ONE COLOUR — AND THE COLOUR IS THE
+       ITEM'S ──
+       The tile's seven-day strip and the half-year under it are the
+       same claim drawn at two scales, so they move together or the
+       screen says one thing in two colours. Both were the accent
+       while every glyph on the grid was one grey; with the tile in
+       the item's own hue the calendar has to follow it, or opening
+       Train's record hands you a sheet drawn in a colour Train has
+       never worn.
+
+       It costs nothing this screen was protecting. The hue says
+       WHICH, which is exactly what a sheet devoted to one item is
+       for, and the glyph at the head of it is already drawn in the
+       same one. `--tc` with the accent behind it, so anything else
+       that draws a calendar is untouched. */
+    p.style.setProperty('--tc', scTagHue(item));
 
     var head = scEl('div', 'ty-head');
     var t = scEl('span', 'ty-title', item.n);
@@ -5337,1780 +5508,6 @@
     });
   }
 
-  /* ═══════════════════════════════════════════════════════════
-     FRIENDS
-
-     The one part of this app that reaches a network. Everything else
-     here is a promise that nothing leaves the browser, and this is the
-     exception you turn on yourself — with a screen that says what goes
-     and a way back off that actually deletes.
-
-     UNTIL YOU TURN IT ON THERE IS NO URL, and with no URL `scApi`
-     returns before it builds a request. That is not a nicety: the
-     suite counts every request the page makes and fails on one that
-     leaves the origin, so the default has to be genuinely inert rather
-     than merely quiet.
-
-     THE FRIEND LIST LIVES HERE, in this browser, and the server has no
-     endpoint that would return it. You hold your friends' codes and
-     ask for each record by code, so what the server sees is a stream
-     of unrelated reads with no graph behind it. It would be one line
-     shorter to ask it "who are my people" and that one line is the
-     whole difference.
-     ═══════════════════════════════════════════════════════════ */
-
-  /* Four keys, four different things — and the split is the same
-     argument the rest of this app makes. Where the server is and who
-     you are on it is configuration. The friend list is the graph. The
-     peer cache is disposable. Your logs are the only one of the four
-     you would miss, and folding it in with the cache is how a stale
-     fetch takes it with it. */
-  var NET_KEY = 'sched.net.v1';
-  var FRIEND_KEY = 'sched.friends.v1';
-  var PEER_KEY = 'sched.peer.v1';
-  var POST_KEY = 'sched.post.v1';
-
-  /* ── the server this copy of the app is paired with ──
-     It was blank, and every person had to be told a `.workers.dev`
-     address and type it into a box before friends did anything. That is
-     a URL nobody can check and everybody mistypes, and it made joining
-     a conversation rather than a tap.
-
-     Naming it here does NOT make the app chatty. `scApi` still returns
-     before it builds a request when there is no url, and nothing on the
-     week or the tally calls it — the first request of any
-     kind happens when somebody opens the Friends tab. The suite still
-     counts every request the main page makes and still fails on one
-     that leaves the origin, which is the assertion that keeps this
-     honest rather than the empty string was.
-
-     Deploying your own copy means changing this line and nothing else.
-     An empty string puts the app back to asking. */
-  var HOME = 'https://sched.nikorapullin.workers.dev';
-
-  var net = { url: '', code: '', key: '', name: '', pic: '', on: false };
-  /* One attempt per visit. A claim that fails offline must not become a
-     request every time the tab is painted. */
-  var joining = false;
-  var friends = [];   /* [{ code, name }] — the graph, and it stays here  */
-  var peers = {};     /* code -> the last record fetched, so this paints offline */
-  var posts = [];     /* your own log entries */
-
-  function scReadJSON(k, fallback) {
-    try {
-      var v = JSON.parse(localStorage.getItem(k));
-      return v === null || v === undefined ? fallback : v;
-    } catch (e) { return fallback; }
-  }
-  function scWriteJSON(k, v) {
-    try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
-  }
-
-  function scNetLoad() {
-    var n = scReadJSON(NET_KEY, null);
-    if (n && typeof n === 'object') {
-      for (var k in net) if (net.hasOwnProperty(k) && typeof n[k] === typeof net[k]) net[k] = n[k];
-    }
-    friends = scReadJSON(FRIEND_KEY, []);
-    if (!Array.isArray(friends)) friends = [];
-    peers = scReadJSON(PEER_KEY, {});
-    if (!peers || typeof peers !== 'object') peers = {};
-    posts = scReadJSON(POST_KEY, []);
-    if (!Array.isArray(posts)) posts = [];
-  }
-  function scNetSave() { scWriteJSON(NET_KEY, net); }
-
-  /* crypto, never Math.random. The key is the only thing between your
-     code — which you hand out on purpose — and somebody posting as
-     you, and a browser's Math.random is a fast PRNG seeded per page,
-     not a source of secrets.
-
-     Both alphabets divide 256 exactly (32 and 16), so the modulo is
-     uniform. An alphabet of, say, 36 would bias the first four letters
-     upward, which is the sort of thing that is invisible and stays
-     wrong. */
-  var CODE_A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';   /* no I, O, 0, 1 */
-  var HEX_A = '0123456789abcdef';
-  function scRand(n, alphabet) {
-    var a = new Uint8Array(n);
-    crypto.getRandomValues(a);
-    var out = '';
-    for (var i = 0; i < n; i++) out += alphabet.charAt(a[i] % alphabet.length);
-    return out;
-  }
-
-  /* Every request in the app goes through here, and the first line is
-     the promise: no URL, no request. */
-  function scApi(path, opts, done) {
-    done = done || function () {};
-    if (!net.url) return done(null, 'off');
-    var o = opts || {};
-    var h = {};
-    if (o.auth) h.Authorization = 'Bearer ' + net.key;
-    if (o.json) h['Content-Type'] = 'application/json';
-    if (o.bin) h['Content-Type'] = 'application/octet-stream';
-    fetch(net.url + path, { method: o.method || 'GET', headers: h, body: o.body })
-      .then(function (r) {
-        return r.json().then(
-          function (j) { done(r.ok ? j : null, r.status); },
-          function () { done(null, r.status); });
-      }, function () { done(null, 'offline'); });
-  }
-
-  function scImgURL(id) { return net.url ? net.url + '/v1/img/' + id : ''; }
-
-  /* ── joining ──
-     The client draws its own code and key and claims the code. A 409
-     is a collision on a 32^8 space rather than an error worth showing
-     anybody, so it retries; anything else is the URL being wrong,
-     which is the one thing the person in front of it can fix. */
-  function scJoin(url, name, done) {
-    net.url = String(url || '').trim().replace(/\/+$/, '');
-    /* EMPTY, never 'You'. It defaulted to 'You' and pushed it, so
-       every person who had not set a name was literally CALLED "You"
-       on the server — add one and the board reads "You" twice, which
-       is what this cost. "You" is a label for your own row and is
-       decided when the row is drawn; it is not a name and must not
-       leave the browser. */
-    net.name = String(name || '').trim().slice(0, 24);
-    var tries = 0;
-    var go = function () {
-      var code = scRand(8, CODE_A), key = scRand(32, HEX_A);
-      scApi('/v1/claim', {
-        method: 'POST', json: true,
-        body: JSON.stringify({ code: code, key: key })
-      }, function (okd, status) {
-        if (okd) {
-          net.code = code; net.key = key; net.on = true;
-          scNetSave();
-          scPushNow();
-          return done(true);
-        }
-        if (status === 409 && ++tries < 4) return go();
-        /* The URL is cleared on the way out. Left set, every later
-           call would keep firing at a host that is not the server —
-           which is a page quietly making requests off its origin, the
-           exact thing the rest of this file is careful about. */
-        net.url = '';
-        done(false, status);
-      });
-    };
-    go();
-  }
-
-  /* Off, and it means off. The record and the write key are deleted
-     server-side, then everything about it goes from this browser.
-     Nothing else in this app deletes without a bin; a bin protects a
-     record you cannot rebuild, and this is somebody asking to be off a
-     server — the copy that matters never left. */
-  function scLeave(done) {
-    var after = function () {
-      net = { url: '', code: '', key: '', name: '', pic: '', on: false };
-      friends = []; peers = {}; posts = [];
-      scNetSave();
-      scWriteJSON(FRIEND_KEY, friends);
-      scWriteJSON(PEER_KEY, peers);
-      scWriteJSON(POST_KEY, posts);
-      done();
-    };
-    if (!net.on || !net.code) return after();
-    scApi('/v1/rec/' + net.code, { method: 'DELETE', auth: true }, after);
-  }
-
-  /* ── pushing ──
-     The whole record at a time, debounced. Ticking five boxes in ten
-     seconds is one write rather than five, which is the difference
-     between a free tier that lasts and one that does not. */
-  var pushT = null;
-  /* ═══════════════════════════════════════════════════════════
-     WHAT YOU SHARE
-
-     THIS REVERSES THE OLDEST RULE IN THIS APP, and it is written down
-     as a reversal rather than slipped in. The line was that a COUNT
-     may leave and a LIST never may — "a count says you showed up and
-     a list says what your day is, and the second is the thing this
-     app exists not to send". Books, sessions and objectives are all
-     lists, so a profile worth opening cannot be built under it.
-
-     What replaces it is narrower than "anything goes" and wider than
-     what it replaces: NOTHING LEAVES UNLESS YOU TURNED IT ON. One
-     switch per thing, every switch OFF until you touch it, and all of
-     them on one screen — so what you are sharing is something you can
-     read in one go rather than infer from four places.
-
-     AND TWO THINGS STILL HAVE NO SWITCH, because a switch would imply
-     they are on the table. The WEEK never leaves: it is the shape of
-     your life and it is the one record this app has never sent. And
-     the NOTE on a Mind entry never leaves — the title is what you
-     read, the note is what you thought, and only the first of those
-     is a fact about a book. */
-  var SHARE_KEY = 'sched.share.v1';
-  /* Every one OFF. A default that shares is a default nobody chose,
-     and the whole of what makes this a decision is that it starts at
-     nothing. */
-  var SHARE_DEF = { bio: '', up: 0, work: 0, mind: 0 };
-  var share = {};
-  /* The switches, and the sentence under each says what LEAVES rather
-     than what the section is called — "Workouts" is the name of a
-     screen, and what you are agreeing to is the list of sessions. */
-  var SHARE_ROWS = [
-    ['up', 'Showing up', 'A year of days you kept something, and your streak.'],
-    ['work', 'Workouts', 'Which sessions you do and how many of each.'],
-    ['mind', 'Reading', 'Books and shows by name. Never your notes on them.']
-  ];
-  /* 53 weeks, so the almanac's grid is full columns of seven with no
-     ragged end. */
-  var YEAR_DAYS = 371;
-
-  function scShareLoad() {
-    var v = scReadJSON(SHARE_KEY, null);
-    share = {};
-    Object.keys(SHARE_DEF).forEach(function (k) {
-      share[k] = (v && v[k] != null) ? v[k] : SHARE_DEF[k];
-    });
-    share.bio = String(share.bio || '').slice(0, 140);
-  }
-  function scShareSave() { scWriteJSON(SHARE_KEY, share); }
-
-  /* ── A YEAR AS A STRING OF DIGITS, NOT A MAP OF OBJECTS ──
-     371 days written as `{ "2026-09-04": { t: 3, b: 5 } }` is about
-     nine kilobytes of JSON for a picture that needs one number a day;
-     as one character each it is 371 bytes, and the record has a 96KB
-     ceiling it shares with thirty logs. Oldest first, so the grid
-     reads left to right the way it is drawn. Capped at 9 because a
-     day has to be one character, and nobody keeps ten things. */
-  function scShareYear() {
-    var s = '';
-    for (var i = YEAR_DAYS - 1; i >= 0; i--) {
-      var d = scDayBack(i);
-      var t = tickLog[d] ? Object.keys(tickLog[d]).length : 0;
-      var b = blockLog[d] ? Object.keys(blockLog[d]).length : 0;
-      s += String(Math.min(9, t + b));
-    }
-    return s;
-  }
-
-  /* Which sessions and how many, over the same 91 days the Workouts
-     screen counts — so a friend sees the panel you see rather than a
-     second arithmetic that can disagree with it.
-
-     THE COLOUR TRAVELS WITH IT, for the reason the accent already
-     does: a hue that says WHICH has to be the same hue on their phone
-     as on yours, and these nine are literals precisely because they
-     do not follow a theme. */
-  function scShareWork() {
-    var by = {};
-    scWorkAll().forEach(function (h) {
-      var k = scWorkSig(h);
-      if (!by[k]) {
-        var w0 = scWorkoutsOf(k)[0];
-        by[k] = { n: scWorkName(k), c: String((w0 && w0.c) || ''), v: 0 };
-      }
-      by[k].v++;
-    });
-    return Object.keys(by).map(function (k) { return by[k]; })
-      .sort(function (a, b) { return b.v - a.v; }).slice(0, 6);
-  }
-
-  /* Title, who it is by, the jacket's address and the kind — never
-     the note. The cover is a public URL on somebody else's server,
-     the same one from every phone, so it says nothing about you that
-     the title has not already said.
-
-     AN ENTRY WITH NO TITLE IS SKIPPED. A walk and a journal have none
-     by design, and a shelf with blank spines in it is a worse picture
-     than a shorter shelf. */
-  function scShareMind() {
-    return scMindEntries().filter(function (e) { return e.r && e.r.t; })
-      .slice(0, 12).map(function (e) {
-        return { t: String(e.r.t).slice(0, 60),
-                 a: String(e.r.a || '').slice(0, 40),
-                 c: String(e.r.c || '').slice(0, 300),
-                 k: String(e.r.k || '').slice(0, 8) };
-      });
-  }
-
-  /* THE BIO HAS NO SWITCH, and that is the one place a switch would
-     be furniture: it is a sentence that exists only to be read by
-     somebody else, so writing one IS the decision and clearing it is
-     how you take it back. A field that does nothing until you also
-     find a toggle is two controls for one intention. */
-  function scShareBio() { return String(share.bio || '').slice(0, 140); }
-
-  function scPush() {
-    if (!net.on || !net.code) return;
-    clearTimeout(pushT);
-    pushT = setTimeout(scPushNow, 1500);
-  }
-
-  function scPushNow() {
-    if (!net.on || !net.code) return;
-    clearTimeout(pushT);
-    var cs = getComputedStyle(document.documentElement);
-    scApi('/v1/rec/' + net.code, {
-      method: 'PUT', auth: true, json: true,
-      body: JSON.stringify({
-        name: net.name,
-        /* The two colours, so a friend's face and crown are drawn in
-           THEIR palette on your screen. Sending the theme's id instead
-           would mean this app could never gain a theme without every
-           friend's copy going grey until they updated. */
-        acc: cs.getPropertyValue('--me').trim(),
-        ink: cs.getPropertyValue('--on-red').trim(),
-        pic: net.pic || '',
-        days: scMyDays(),
-        /* Each one gated by its own switch, and an OFF switch sends
-           the empty shape rather than omitting the key — a reader
-           cannot tell a field somebody turned off from a field this
-           build did not have yet, and the first of those has to
-           overwrite what was there before. */
-        bio: scShareBio(),
-        year: share.up ? scShareYear() : '',
-        /* `goals` went with the objectives. It is not sent as an empty
-           list either: a switch nobody has any more is not a switch
-           somebody turned off, and a reader on an older build draws
-           nothing for a key that is absent. */
-        work: share.work ? scShareWork() : [],
-        mind: share.mind ? scShareMind() : [],
-        /* `local` is stripped HERE, and the first version did not do
-           it. A post carries the full data URL of its own photograph so
-           your own feed draws instantly and still draws with no signal
-           — that is a second copy of the picture, base64, and base64 is
-           a third bigger again. Pushed whole it went up inside the JSON
-           beside the id of the very same image, and two photographs
-           would have put the record past the worker's 96KB ceiling and
-           started failing every write with a 413.
-           The comment on the field said "this is never sent". That is
-           the second time today a comment has been the only place an
-           intention existed. */
-        logs: posts.slice(-30).map(function (q) {
-          return { id: q.id, at: q.at, day: q.day, item: q.item, cap: q.cap, img: q.img };
-        }),
-        at: Date.now()
-      })
-    });
-  }
-
-  function scPullAll(done) {
-    done = done || function () {};
-    if (!net.url || !friends.length) return done();
-    var left = friends.length;
-    friends.forEach(function (f) {
-      scApi('/v1/rec/' + f.code, {}, function (rec) {
-        /* A failed fetch keeps the cached copy. Blanking a friend
-           because the train went into a tunnel would empty the board
-           and read as them having stopped. */
-        if (rec) peers[f.code] = rec;
-        if (!--left) { scWriteJSON(PEER_KEY, peers); done(); }
-      });
-    });
-  }
-
-  /* ── an invitation is a LINK, and the link carries the server ──
-     The code alone is not portable. It names a row in one KV namespace,
-     so handing somebody `K7PQ2M4X` is only an invitation if they are
-     already pointed at the same worker — and the app they open has no
-     way to know that they are. It worked here because every copy of
-     this app shares one HOME, which is a coincidence of there being one
-     deployment rather than a property of the design. Deploy a second
-     one and every code becomes ambiguous with no error to show for it:
-     the read simply misses and says "nobody has that code".
-
-     So the invitation is a URL that carries both, and `at` is written
-     ONLY when the server is not HOME — a link that names the default
-     is a link that goes stale the day the default moves, and pinning
-     every invitation to today's address is how a rename becomes a
-     broken link in everybody's messages.
-
-     IT IS THE HASH, not a query string. Both survive GitHub Pages, but
-     a query is sent to the server in the request line and a fragment
-     never leaves the browser. A friend code in somebody's access log
-     is a small thing that this app has spent every other decision not
-     doing. */
-  function scLinkFor(code) {
-    var at = net.url || HOME;
-    /* From href rather than origin + pathname: opened off the disk,
-       `location.origin` is the string "null" and the link comes out as
-       nonsense rather than as nothing. */
-    var base = location.href.replace(/[#?].*$/, '');
-    return base + '#add=' + code
-      + (at && at !== HOME ? '&at=' + encodeURIComponent(at) : '');
-  }
-
-  /* One reader for both doors: what the URL was opened with, and what
-     somebody pasted into `Theirs`. They take the same strings for the
-     same reason — a person handed a link pastes the link, and a person
-     told a code over a table types the code. Refusing either would be
-     a field that knows which half of the exchange you had. */
-  function scInviteIn(s) {
-    s = String(s || '').trim();
-    if (!s) return null;
-    /* Case-insensitive on the parameter names: `Theirs` is set to
-       autocapitalize for the code, which is what somebody typing one
-       wants, and it reaches a pasted link's `add=` on the way past. */
-    var m = /[#?&]add=([A-Za-z0-9]{4,12})/i.exec(s);
-    if (m) {
-      var at = /[#?&]at=([^&\s]+)/i.exec(s);
-      var url = '';
-      try { url = at ? decodeURIComponent(at[1]) : ''; } catch (e) { url = ''; }
-      /* Only http(s), and only ever as the address of an API. A link is
-         a thing strangers send you, so the one field in it that becomes
-         a fetch target is the one field worth being strict about. */
-      if (!/^https?:\/\/[^\s]+$/.test(url)) url = '';
-      return { code: m[1].toUpperCase(), at: url.replace(/\/+$/, '') };
-    }
-    if (/^[A-Za-z0-9]{4,12}$/.test(s)) return { code: s.toUpperCase(), at: '' };
-    return null;
-  }
-
-  /* Read at boot, redeemed on arrival at the tab, and cleared either
-     way. It is deliberately NOT acted on where it is read: the app
-     makes no request until somebody is on the friends screen, and an
-     invitation that joined a server from the wiring would be the one
-     hole in that. */
-  var invite = null;
-
-  function scAddFriend(code, done) {
-    var inv = scInviteIn(code);
-    if (!inv) return done(false, 'that is not a code');
-    if (inv.at && net.url && inv.at !== net.url)
-      return done(false, 'that link is for another server');
-    code = inv.code;
-    if (code === net.code) return done(false, 'that one is yours');
-    if (friends.some(function (f) { return f.code === code; }))
-      return done(false, 'already on your list');
-    scApi('/v1/rec/' + code, {}, function (rec) {
-      if (!rec) return done(false, 'nobody has that code');
-      friends.push({ code: code, name: rec.name || code });
-      peers[code] = rec;
-      scWriteJSON(FRIEND_KEY, friends);
-      scWriteJSON(PEER_KEY, peers);
-      done(true, rec.name || code);
-    });
-  }
-
-  function scDropFriend(code) {
-    friends = friends.filter(function (f) { return f.code !== code; });
-    delete peers[code];
-    scWriteJSON(FRIEND_KEY, friends);
-    scWriteJSON(PEER_KEY, peers);
-  }
-
-  /* ── counting, once, for everybody ──
-     Mine used to be counted by walking tickLog and a peer's would have
-     been counted by walking their record: two implementations of "how
-     many ticks in thirty days" on the same leaderboard. The day they
-     disagree the board is simply wrong and nothing on it says so. One
-     function, and my own days are shaped into the same object a peer
-     sends before it is asked. */
-  /* ── what a day of yours looks like to a friend ──
-     TWO COUNTS AND NOTHING ELSE: how many of the five you ticked, and
-     how many of your blocks you kept. Never which five and never which
-     blocks — a count says you showed up, a list says what your day is,
-     and the second is the thing this app exists not to send. The
-     schedule itself has never left and does not now.
-
-     `b` is the addition. Before it a friend could see you ticked three
-     of the five and had no way to know whether you trained. */
-  function scMyDays() {
-    var days = {};
-    for (var i = 0; i < 30; i++) {
-      var d = scDayBack(i);
-      var t = tickLog[d] ? Object.keys(tickLog[d]).length : 0;
-      var b = blockLog[d] ? Object.keys(blockLog[d]).length : 0;
-      if (t || b) days[d] = { t: t, b: b };
-    }
-    return days;
-  }
-
-  /* A day out of anybody's record, old shape or new. Every record
-     written before blocks were sent carries a bare NUMBER — the tally
-     count on its own — and those records are on the server right now
-     with up to thirty days left to live. Reading one as an object
-     gives NaN in every figure it feeds, so the shape is normalised on
-     the way in rather than migrated on the way out: there is nothing
-     here to migrate, because the writer is the phone that owns it and
-     it will overwrite itself on the next push. */
-  function scDayOf(v) {
-    if (typeof v === 'number') return { t: v, b: 0 };
-    return { t: (v && +v.t) || 0, b: (v && +v.b) || 0 };
-  }
-
-  /* Ticks over a rolling window, never all-time — all-time means
-     whoever started first wins permanently and nobody new can catch
-     up. */
-  function scCount(days, n) {
-    var t = 0;
-    for (var i = 0; i < n; i++) t += scDayOf(days && days[scDayBack(i)]).t;
-    return t;
-  }
-
-  function scBlocksIn(days, n) {
-    var t = 0;
-    for (var i = 0; i < n; i++) t += scDayOf(days && days[scDayBack(i)]).b;
-    return t;
-  }
-
-  /* Days you logged ANYTHING, running back from today. Today not being
-     logged yet does not break it — at nine in the morning it has not
-     failed, it has not happened, and a streak that resets every
-     midnight is a streak nobody keeps. */
-  function scRunOf(days) {
-    var n = 0;
-    for (var i = 0; i < 3650; i++) {
-      /* A day you did ANYTHING — a tick or a block. It counted ticks
-         alone, which was the only thing recorded; a day you kept every
-         block and touched none of the five was a day off. */
-      var v = scDayOf(days && days[scDayBack(i)]);
-      if (v.t || v.b) n++;
-      else if (i > 0) break;
-    }
-    return n;
-  }
-
-  function scStreak() { return scRunOf(scMyDays()); }
-  function scTicksIn(n) { return scCount(scMyDays(), n); }
-
-  /* ── a friend's colour on your page ──
-     Their accent was chosen against THEIR ground and is about to be
-     drawn on yours. Thirteen themes each way is 169 pairings and
-     nobody has looked at any of them: the crown was measured over four
-     rounds, and every one of those measurements was of your own accent
-     on your own page, which is the one case that cannot go wrong.
-
-     So it is mixed toward your ink, one step at a time, and stops at
-     the first step that clears 3:1 — the bar for a graphic, WCAG
-     1.4.11. On a pairing that already clears it, which is most of
-     them, nothing moves and it is exactly their colour.
-
-     THE GROUND HERE IS AN APPROXIMATION and that is said out loud,
-     because this app has been wrong about precisely this before, on
-     precisely this glyph: reasoning about a colour against a token
-     instead of against the pixel cost four rounds. --g0 is the flat
-     base and the page draws three washes over it, so what the eye gets
-     is always a little worse than what this arithmetic says.
-
-     So all 169 were measured on composited pixels rather than argued
-     about. Aiming at a bare 3.0 here, 26 of them come out UNDER 3:1 on
-     screen — worst 2.92:1, solar's amber on five different grounds.
-     Aiming at 3.4, none do: the worst measured is 3.25:1 and 97 of the
-     169 never move at all, which is the point. It dilutes only as far
-     as the page forces. */
-  var CROWN_MIN = 3.4;   /* 3:1 plus the 0.4 the washes were measured to take */
-
-  function scRGB(c) {
-    c = String(c || '').trim();
-    var m = c.match(/^#([0-9a-f]{3})$/i);
-    if (m) return [0, 1, 2].map(function (i) {
-      return parseInt(m[1].charAt(i) + m[1].charAt(i), 16);
-    });
-    m = c.match(/^#([0-9a-f]{6})$/i);
-    if (m) return [0, 2, 4].map(function (i) { return parseInt(m[1].substr(i, 2), 16); });
-    /* getComputedStyle hands back `rgb(255, 0, 0)`, never a hex — and a
-       hex-only reader silently returned NaN for it once, which fell
-       through to solid ink and looked like a deliberate choice. */
-    m = c.match(/^rgba?\(([^)]+)\)/);
-    if (m) {
-      var p = m[1].split(/[\s,\/]+/).filter(Boolean).slice(0, 3).map(parseFloat);
-      if (p.length === 3 && p.every(function (x) { return !isNaN(x); })) {
-        /* `color(srgb .5 .2 .1)` and modern rgb() both serialise 0–1 in
-           some browsers. Anything with no channel above 1 is that. */
-        var unit = p.every(function (x) { return x <= 1; });
-        return p.map(function (x) { return Math.round(unit ? x * 255 : x); });
-      }
-    }
-    return null;
-  }
-
-  function scLum(rgb) {
-    var f = function (c) {
-      c /= 255;
-      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-    };
-    return 0.2126 * f(rgb[0]) + 0.7152 * f(rgb[1]) + 0.0722 * f(rgb[2]);
-  }
-
-  function scRatio(a, b) {
-    var x = scLum(a), y = scLum(b);
-    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
-  }
-
-  function scCrown(hex) {
-    var acc = scRGB(hex);
-    if (!acc) return 'var(--red)';
-    var cs = getComputedStyle(document.documentElement);
-    var ground = scRGB(cs.getPropertyValue('--g0'));
-    var ink = scRGB(cs.getPropertyValue('--ink'));
-    if (!ground || !ink) return hex;
-    /* THE CROWN SITS ON A CARD, NOT ON THE PAGE. The row is a wash of
-       white over the ground now, and a crown solved against --g0
-       measured 2.82:1 on the row it is actually drawn on. The card's
-       own alpha is composited over the ground here, so the arithmetic
-       knows about the surface it is being read off. */
-    var cm = String(cs.getPropertyValue('--card')).match(
-      /rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*(?:,\s*([\d.]+))?\)/);
-    if (cm) {
-      var ca = cm[4] === undefined ? 1 : +cm[4];
-      ground = ground.map(function (g, i) { return Math.round(g + (+cm[i + 1] - g) * ca); });
-    }
-    for (var t = 0; t <= 1.0001; t += 0.05) {
-      var mix = acc.map(function (c, i) { return Math.round(c + (ink[i] - c) * t); });
-      if (scRatio(mix, ground) >= CROWN_MIN)
-        return 'rgb(' + mix[0] + ', ' + mix[1] + ', ' + mix[2] + ')';
-    }
-    /* Their accent and your ink both invisible on your ground is not a
-       thing any pair of these themes produces, but falling through to
-       your own accent is a colour that certainly reads, and a crown
-       that reads in the wrong palette beats one that does not read. */
-    return 'var(--red)';
-  }
-
-  /* ── the two seams the screen paints from ── */
-  /* A name a peer never chose. 'You' was this app's own default and it
-     went to the server, so records out there carry it — and a friend
-     called "You" beside your own row called "You" is a board that
-     names nobody. It is read as unset and falls through to the code,
-     which is unique and is the string you typed to add them. Nobody
-     picks "You" as a nickname; the one person it could belong to is
-     the one row that is not drawn from this. */
-  function scPeerName(n) {
-    n = String(n || '').trim();
-    return (!n || n.toLowerCase() === 'you') ? '' : n;
-  }
-
-  function scFriendsPeers() {
-    return friends.map(function (f) {
-      var r = peers[f.code] || null;
-      return {
-        code: f.code,
-        name: scPeerName(r && r.name) || scPeerName(f.name) || f.code,
-        ticks: r ? scCount(r.days, 30) : 0,
-        blocks: r ? scBlocksIn(r.days, 30) : 0,
-        streak: r ? scRunOf(r.days) : 0,
-        acc: r && r.acc, ink: r && r.ink, pic: r && r.pic,
-        cold: !r
-      };
-    });
-  }
-
-  function scFeedItems() {
-    var out = posts.map(function (p) { return { p: p, who: net.name || 'You', me: true }; });
-    friends.forEach(function (f) {
-      var r = peers[f.code];
-      if (!r || !Array.isArray(r.logs)) return;
-      r.logs.forEach(function (p) {
-        out.push({ p: p, code: f.code,
-                   who: scPeerName(r.name) || scPeerName(f.name) || f.code,
-                   acc: r.acc, ink: r.ink, pic: r.pic });
-      });
-    });
-    return out.sort(function (a, b) { return (b.p.at || 0) - (a.p.at || 0); });
-  }
-
-  /* ── the screen ── */
-  function scPaintFriends() {
-    var me = {
-      name: net.on ? (net.name || 'You') : 'You',
-      me: true, ticks: scTicksIn(30), streak: scStreak()
-    };
-    var all = [me].concat(net.on ? scFriendsPeers() : [])
-      .sort(function (a, b) { return b.ticks - a.ticks; });
-
-    var list = $('scFriendList');
-    list.textContent = '';
-    all.forEach(function (p, i) {
-      var li = scEl('li', 'fr-row' + (p.me ? ' is-me' : ''));
-      li.appendChild(scEl('span', 'fr-rank', String(i + 1)));
-      li.appendChild(scPicOf(38, p));
-      var n = scEl('span');
-      var nm = scEl('span', 'fr-n', p.name);
-      /* The crown, on whoever leads, in their own accent. With one row
-         it is yours — which is not a trophy, it is the mark saying who
-         is top, and it would be strange for it to appear only once
-         somebody else arrives. */
-      if (i === 0) {
-        var c = scEl('span', 'fr-crown');
-        /* ── THE CROWN IS GOLD, WHOEVER IS WEARING IT ──
-           It used to be the leader's OWN colour, run through scCrown
-           to clear 3:1 on your page. That was a lot of arithmetic for
-           a mark whose whole job is to say FIRST — and a crown in
-           somebody's chosen violet says which person rather than which
-           place, which the name beside it already says. Gold is what a
-           first place is, and it is the same gold on every board.
-
-           scCrown stays: the week of discs under a friend's name is
-           still drawn in THEIR colour, and that is where a colour
-           saying which person belongs. */
-        c.innerHTML = '<svg viewBox="0 0 24 20" aria-hidden="true">'
-          + '<path d="M2 6l4.6 3.6L12 2l5.4 7.6L22 6l-1.8 11H3.8L2 6z"/></svg>';
-        var w = scEl('span', 'fr-nw');
-        w.appendChild(nm); w.appendChild(c);
-        n.appendChild(w);
-      } else n.appendChild(nm);
-      n.appendChild(scEl('span', 'fr-s', p.cold
-        ? 'not fetched yet'
-        : p.streak + (p.streak === 1 ? ' day' : ' days') + ' showing up'));
-      li.appendChild(n);
-      li.appendChild(scEl('span', 'fr-t', String(p.ticks)));
-      /* EVERY row opens something, including your own — it opens YOU,
-         which is where your name is set. It used to be friends only, on
-         the rule that a name you can press which opens nothing is worse
-         than a name you cannot; your own row was the one that opened
-         nothing, and the setting it needed was three taps away behind a
-         link called "Your code". A board that says "You" twice is
-         somebody who could not find the place to fix it. */
-      {
-        li.classList.add('is-tap');
-        li.setAttribute('role', 'button');
-        li.tabIndex = 0;
-        /* Your own row opens your PROFILE now rather than the code
-           sheet: what somebody presses their own name to change is
-           what a friend can see, and the code is a thing you show
-           once. Turning it off still lives behind Your code. */
-        var open = p.me ? scProfileSheet : function () { scFriendSheet(p); };
-        li.addEventListener('click', open);
-        li.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
-        });
-      }
-      list.appendChild(li);
-    });
-
-    /* ── the two quiet actions ──
-       These were a filled accent button and a bordered one, side by
-       side, directly under a three-row list. Two blocks of solid colour
-       for things you do about once a week each, louder than the board
-       they were about. A line of type at the foot of the list is the
-       same tap and does not compete with anything. */
-    var add = $('scFriendAdd');
-    add.textContent = '';
-    if (net.on) {
-      /* The action first, because arriving here already did the setting
-         up. The sentence under it is what the turn-on sheet used to
-         say — it stays on the board rather than being shown once and
-         pressed through, since nobody presses through it any more. */
-      /* ── A PROFILE FIRST, AND IT IS THE ONLY THING OFFERED ──
-         Before a nickname there is nothing to add anybody TO: your row
-         says "You", which is a label rather than a name, and a friend
-         who adds you back sees a code. Offering both was offering a
-         choice that has one right answer, so Add a friend is not drawn
-         at all until there is a profile to add them to — and it stops
-         being offered the moment it is done, because a permanent
-         "create a profile" on a screen where you already have one is a
-         task you can never finish.
-
-         The line under it says WHY the other action is missing rather
-         than describing the field the sheet is about to show. Three
-         sentences of explanation under two actions is a screen that
-         reads as instructions for itself. */
-      if (!net.name) {
-        add.appendChild(scLink('Create a profile', scNameSheet));
-        add.appendChild(scEl('p', 'fr-note', 'Create a profile to add a friend.'));
-      } else {
-        add.appendChild(scLink('Add a friend', scAddSheet));
-      }
-      /* ── AND THE PROMISE STAYS ──
-         It used to be on the turn-on sheet, on the argument that a
-         paragraph you press through is a decision and one you merely
-         arrive at is a disclaimer. With that sheet gone the argument
-         inverts and it lives here, where nobody presses past it. It is
-         one line rather than two now — what leaves, and how to stop it
-         — but it is not a description of a control and it does not go
-         with them. */
-      add.appendChild(scEl('p', 'fr-note',
-        'Your ticks and logs are on the server. Remove yourself in Settings.'));
-    } else if (joining) {
-      add.appendChild(scEl('p', 'fr-note', 'Setting up…'));
-    } else {
-      /* Only reached when the claim could not be made — offline, or a
-         server that is not there. The manual sheet is still the way to
-         point it somewhere else. */
-      add.appendChild(scEl('p', 'fr-note',
-        'Could not reach the server. Nothing has left this browser.'));
-      add.appendChild(scLink('Try again', function () {
-        joining = false; scArriveFriends(); scPaintFriends();
-      }));
-      add.appendChild(scLink('Use another server', scNetSheet));
-    }
-
-    var feed = $('scFeed');
-    feed.textContent = '';
-    var items = net.on ? scFeedItems() : [];
-    if (!net.on) {
-      feed.appendChild(scEl('p', 'fr-note',
-        'A log is a photograph and a line about one of the five — yours and '
-        + 'your friends’ together. It arrives when you turn friends on.'));
-    } else {
-      feed.appendChild(scLink('Write one', scLogSheet));
-      if (!items.length) {
-        feed.appendChild(scEl('p', 'fr-note',
-          'Nothing logged yet. A photograph and a line about one of the five.'));
-      } else {
-        items.slice(0, 40).forEach(function (it) { feed.appendChild(scPost(it)); });
-      }
-    }
-  }
-
-  /* A line of type that is a button. The glyph is drawn rather than
-     typed, so it lines up with the label's cap height at any size and
-     cannot be selected as part of the text.
-
-     TWO GLYPHS, and the difference carries meaning. A `+` is for the
-     three that make something exist — a friend, a log, an account on a
-     server. `Your code` makes nothing; it shows you a string you
-     already have. Given the plus as well it read as a fourth thing to
-     create, on a row directly under the one that adds people.
-
-     It still gets a glyph rather than none, because the label has to
-     start where the others do — a bare line of text sitting 21px left
-     of the two above it looks like a different kind of control. */
-  function scLink(label, fn, glyph) {
-    var b = scEl('button', 'fr-link');
-    b.type = 'button';
-    b.innerHTML = '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="'
-      + (glyph === 'go' ? 'M5 2l5 5-5 5' : 'M7 2v10M2 7h10') + '"/></svg>';
-    b.appendChild(document.createTextNode(label));
-    b.addEventListener('click', fn);
-    return b;
-  }
-
-  /* ── which stop ──
-     Remembered, and in its own key. The schedule is the record and this
-     is a preference about looking at it, which is the same argument
-     `sched.view.v1` already makes for itself — and folding a preference
-     into the record is how a damaged one takes the other down. */
-  var FRSTOP_KEY = 'sched.fr.v1';
-  var frStop = 'board';
-
-  function scFrStop(v, save) {
-    frStop = v === 'feed' ? 'feed' : 'board';
-    $('scFrPane').hidden = frStop !== 'board';
-    $('scFeed').hidden = frStop !== 'feed';
-    [].forEach.call(document.querySelectorAll('[data-stop]'), function (t) {
-      var on = t.dataset.stop === frStop;
-      t.classList.toggle('on', on);
-      t.setAttribute('aria-current', on ? 'page' : 'false');
-    });
-    if (save) { try { localStorage.setItem(FRSTOP_KEY, frStop); } catch (e) {} }
-  }
-
-  /* ── refreshing ──
-     THIS IS NOT IN scPaintFriends, and the first version was. A paint
-     that fetches and a fetch that repaints is a loop, and it did not
-     even need a server to close it: with nobody on your list scPullAll
-     has nothing to wait for and calls back SYNCHRONOUSLY, so the first
-     paint recursed until the stack went. The screen came out with its
-     buttons and no rows, which reads as an empty leaderboard rather
-     than as a crash.
-
-     So arriving at the screen fetches, and drawing it only draws. The
-     board is painted from the cache first either way — a spinner over
-     figures that are a minute old would be showing you less than the
-     figures do. */
-  var pulling = false;
-  function scFriendsRefresh() {
-    if (pulling || !net.on || !friends.length) return;
-    pulling = true;
-    scPullAll(function () {
-      pulling = false;
-      if (view === 'friends') scPaintFriends();
-    });
-  }
-
-  /* ── arriving at the friends tab ──
-     A code is claimed here rather than behind a button. Somebody sent a
-     link, and being handed a `.workers.dev` address to type before
-     anything works is the wrong first minute — the code and key are
-     generated on the device either way, and neither is a decision
-     anybody can make a better version of by being asked.
-
-     WHAT LEAVES STAYS ON THE SCREEN. The old flow put that on the sheet
-     you pressed through, on the argument that a paragraph you merely
-     arrive at is a disclaimer while one on a sheet is a decision. With
-     the sheet gone the sentence has to live on the board, where it is
-     visible every time rather than once.
-
-     One attempt per visit: a claim that fails offline must not fire
-     again on every repaint, and the manual sheet is still there under
-     it for a URL that needs correcting. */
-  function scArriveFriends() {
-    /* A server chosen by hand outranks the built-in one. Without that,
-       "Use another server" would be overruled by HOME on the next
-       visit, and the sheet would look like it had done nothing.
-
-       An invitation outranks both, but ONLY for somebody who has not
-       joined yet. A link is how you reach a server you were never
-       going to type, so on a first open it decides; once you are on
-       one, your own record and your existing friends are there and a
-       link cannot move you off it without silently orphaning them. */
-    var where = (!net.on && invite && invite.at) || net.url || HOME;
-    if (net.on) return scRedeem(scFriendsRefresh);
-    if (!where || joining) return scFriendsRefresh();
-    joining = true;
-    scJoin(where, net.name, function (okd) {
-      joining = false;
-      if (!okd) { if (view === 'friends') scPaintFriends(); return; }
-      scRedeem(function () {
-        if (view === 'friends') scPaintFriends();
-        scFriendsRefresh();
-      });
-    });
-  }
-
-  /* ── redeeming the link you arrived on ──
-     One attempt, and the invitation is spent BEFORE the request rather
-     than in the callback: a fetch that fails offline must not leave a
-     pending add that fires again on the next repaint, and adding the
-     same person twice is a thing `scAddFriend` refuses politely enough
-     that the second attempt would look like it worked.
-
-     It says what happened either way. An add that succeeds silently is
-     indistinguishable from a link that did nothing, and the whole
-     point of this is that the person tapping it never had to
-     understand what it was. */
-  function scRedeem(done) {
-    done = done || function () {};
-    var inv = invite;
-    if (!inv || !net.on) return done();
-    invite = null;
-    scAddFriend(inv.code, function (okd, msg) {
-      scToast(okd ? msg + ' added' : msg, false);
-      if (view === 'friends') scPaintFriends();
-      done();
-    });
-  }
-
-  function scPost(it, bare) {
-    var p = it.p;
-    var card = scEl('article', 'po' + (bare ? ' is-bare' : ''));
-    var head = scEl('div', 'po-h');
-    head.appendChild(scPicOf(26, it));
-    var who = scEl('span');
-    who.appendChild(scEl('span', 'po-n', it.who));
-    var it2 = scItemOf(p.item);
-    who.appendChild(scEl('span', 'po-s',
-      (it2 ? it2.n + ' · ' : '') + scAgo(p.at)));
-    head.appendChild(who);
-    /* ── ONLY ON YOURS ──
-       There is nothing to press on somebody else's, so nothing is
-       drawn on it: a control that exists and refuses is worse than one
-       that is not there. */
-    if (it.me) {
-      var rm = scEl('button', 'po-x');
-      rm.setAttribute('aria-label', 'Delete this log');
-      rm.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
-        + '<path d="M6 6l12 12M18 6L6 18"/></svg>';
-      rm.addEventListener('click', function () { scPostGone(p); });
-      head.appendChild(rm);
-    }
-    card.appendChild(head);
-    /* ── THE CAPTION LEADS ──
-       It sat under the photograph, which is where a caption goes on a
-       printed page and the wrong way round here: the picture is a
-       square, so on a phone the words were most of a screen below the
-       name that owns them and you read the image with nothing to read
-       it AGAINST. Above, it is a sentence somebody said and then the
-       thing they said it about. */
-    if (p.cap) card.appendChild(scEl('p', 'po-c', p.cap));
-    if (p.img) {
-      /* ── AND THE PICTURE OPENS ──
-         The card crops to a square, so a tall photograph is mostly
-         not on the screen — which is what makes this a real control
-         rather than a flourish. A BUTTON, not a listener on the
-         wrapper: it is focusable, it is named, and it is reachable
-         from a keyboard, and the post's own delete is a sibling
-         rather than an ancestor so nothing nests. */
-      var wrap = scEl('button', 'po-img');
-      wrap.type = 'button';
-      wrap.setAttribute('aria-label',
-        p.cap ? 'See the full picture: ' + p.cap : 'See the full picture');
-      var im = document.createElement('img');
-      im.src = it.me && p.local ? p.local : scImgURL(p.img);
-      im.alt = p.cap || '';
-      /* No loading="lazy" — this can render inside a `.sheet` via
-         scPostSheet, and a `.sheet` rests off-screen by transform
-         until it opens. scMindArt carries the full reasoning. */
-      wrap.appendChild(im);
-      wrap.addEventListener('click', function () {
-        scPhoto(im.src, p.cap || '');
-      });
-      card.appendChild(wrap);
-    }
-    return card;
-  }
-
-  /* ── THE WHOLE PICTURE ──
-     Built and REMOVED rather than hidden, which is this file's
-     `[hidden]` trap answered by not having the trap: a surface that
-     takes a `display` and is put away with the attribute has broken
-     six times in this app, most of them invisibly. An element that is
-     not in the document cannot be a full-screen press target sitting
-     over the app.
-
-     `contain`, not `cover`: the card crops to a square and this is
-     the screen that does not, which is the whole reason to open it. */
-  var photoOn = null;
-  function scPhoto(src, cap) {
-    scPhotoClose();
-    var v = scEl('div', 'ph');
-    v.setAttribute('role', 'dialog');
-    v.setAttribute('aria-modal', 'true');
-    v.setAttribute('aria-label', cap || 'Full picture');
-    v.tabIndex = -1;
-    var im = document.createElement('img');
-    im.src = src;
-    im.alt = cap || '';
-    v.appendChild(im);
-    if (cap) v.appendChild(scEl('p', 'ph-c', cap));
-    /* Tap anywhere closes, the picture included — a photograph you
-       have finished looking at is one you want gone rather than one
-       you want to hunt a cross on, which is the history veil's own
-       rule and the reason it has no cross either. */
-    v.addEventListener('click', scPhotoClose);
-    document.body.appendChild(v);
-    photoOn = v;
-    requestAnimationFrame(function () { v.classList.add('is-open'); v.focus(); });
-  }
-  function scPhotoClose() {
-    if (!photoOn) return;
-    var v = photoOn;
-    photoOn = null;
-    v.remove();
-  }
-
-  /* ── one post, on its own ──
-     Opened from a tile on somebody's profile. The sheet is one at a
-     time in this app, so it REPLACES the profile — which is why it
-     carries the way back: without it, closing lands you on the board
-     and the profile you were reading is two presses away again. */
-  function scPostSheet(it, back) {
-    scSheet(it.who, function (body) {
-      body.appendChild(scPost(it, true));
-      if (back) {
-        body.appendChild(scEl('div', 'menu-rule'));
-        var b = scEl('button', 'menu-item');
-        b.appendChild(document.createTextNode('Back to ' + it.who));
-        b.addEventListener('click', back);
-        body.appendChild(b);
-      }
-    });
-  }
-
-  /* ── deleting one, and it ASKS ──
-     This app's rule is that nothing deletes without a way back, and
-     the one exception written down is the reminders — because a bin
-     protects a record you cannot rebuild and a reminder you have dealt
-     with is not a record of anything. A log is the other way round: it
-     is a photograph and a line about a day, and the photograph is the
-     part you cannot get back. There is no bin on this screen to put it
-     in, so the ask is what stands in for one.
-
-     The push is the whole record, so removing it here removes it from
-     the server and out of every friend's feed on their next fetch.
-
-     Nothing sweeps the picture and nothing needs to: the worker puts
-     every image under a TTL two days past its own window, so a blob
-     nothing points at expires by itself. The local data URL is inside
-     the post and goes when the post does. */
-  function scPostGone(p) {
-    scSheet('Delete this log?', function (body) {
-      body.appendChild(scEl('p', 'hint', p.img
-        ? 'It goes from here and from your friends’ feeds, and the '
-          + 'photograph with it. There is no bin for logs.'
-        : 'It goes from here and from your friends’ feeds. There is no '
-          + 'bin for logs.'));
-      var go = scBtn('go', 'Delete it', function () {
-        posts = posts.filter(function (q) { return q.id !== p.id; });
-        scWriteJSON(POST_KEY, posts);
-        scPushNow();
-        scClose();
-        scPaintFriends();
-        scToast('Deleted', false);
-      });
-      var row = scEl('div', 'lg-row');
-      row.appendChild(scBtn('', 'Keep it', scClose));
-      row.appendChild(go);
-      body.appendChild(row);
-    });
-  }
-
-  /* Relative, and it stops at the day. "3 weeks ago" is a number
-     nobody reads as a duration; past a week the date is the useful
-     thing and this is a feed, not a diary. */
-  function scAgo(at) {
-    if (!at) return '';
-    var s = Math.max(0, Math.round((Date.now() - at) / 1000));
-    if (s < 90) return 'just now';
-    var m = Math.round(s / 60);
-    if (m < 60) return m + 'm ago';
-    var h = Math.round(m / 60);
-    if (h < 24) return h + 'h ago';
-    var d = Math.round(h / 24);
-    if (d < 8) return d + 'd ago';
-    return new Date(at).toDateString().slice(4, 10);
-  }
-
-  /* ── your name, and it is the whole profile ──
-     One place, because there are two ways in: this settings sheet, and
-     the board itself before you have set one. Two copies of a field
-     that writes the same key is two places for it to drift. */
-  /* ── YOUR OWN PROFILE ──
-     The bio and the four switches, on one screen, because what you
-     are sharing has to be readable in one go. It is reached from your
-     own row on the board, which is where somebody looking to fix what
-     a friend can see would go first. */
-  function scProfileSheet() {
-    scSheet('Your profile', function (body) {
-      body.appendChild(scEl('span', 'label', 'Name'));
-      var nm = scEl('button', 'menu-item');
-      nm.appendChild(document.createTextNode(net.name || 'Set a name'));
-      nm.addEventListener('click', scNameSheet);
-      body.appendChild(nm);
-
-      /* THE BIO IS ITS OWN SWITCH. A sentence that exists only to be
-         read by somebody else is shared by being written, and taken
-         back by being cleared — a field that does nothing until you
-         also find a toggle is two controls for one intention. */
-      body.appendChild(scEl('span', 'label', 'Bio'));
-      var bio = scEl('textarea', 'field');
-      bio.rows = 2;
-      bio.maxLength = 140;
-      bio.placeholder = 'A line about you. Leave it empty to share nothing.';
-      bio.value = share.bio || '';
-      body.appendChild(bio);
-
-      body.appendChild(scEl('span', 'label', 'What friends can see'));
-      SHARE_ROWS.forEach(function (row) {
-        var k = row[0];
-        var b = scEl('button', 'pv-row');
-        b.type = 'button';
-        b.setAttribute('role', 'switch');
-        var t = scEl('span', 'pv-t');
-        t.appendChild(scEl('b', null, row[1]));
-        t.appendChild(scEl('span', null, row[2]));
-        b.appendChild(t);
-        var sw = scEl('span', 'pv-sw');
-        sw.appendChild(scEl('i'));
-        b.appendChild(sw);
-        var paint = function () {
-          b.setAttribute('aria-checked', share[k] ? 'true' : 'false');
-          b.classList.toggle('is-on', !!share[k]);
-        };
-        paint();
-        b.addEventListener('click', function () {
-          share[k] = share[k] ? 0 : 1;
-          paint();
-          scShareSave();
-          scPushNow();
-        });
-        body.appendChild(b);
-      });
-
-      /* ── AND A WAY TO GO AND LOOK ──
-         Under the switches rather than above them, because it is the
-         answer to what they add up to. It draws through the friend
-         sheet's own body, so what you see here is what they see. */
-      var see = scEl('button', 'menu-item');
-      see.appendChild(document.createTextNode('See it as a friend does'));
-      see.addEventListener('click', scProfileMine);
-      body.appendChild(see);
-
-      var acts = scEl('div', 'acts');
-      acts.appendChild(scBtn('off', 'Not now', scClose));
-      acts.appendChild(scBtn('go', 'Save', function () {
-        share.bio = String(bio.value || '').trim().slice(0, 140);
-        scShareSave();
-        scPushNow();
-        scClose();
-        scToast('Profile saved', false);
-      }));
-      body.appendChild(acts);
-    });
-  }
-
-  function scNameSheet() {
-    scTextSheet('Your name', 'Name', net.name, function (v) {
-      net.name = (v || '').slice(0, 24);
-      scNetSave();
-      scPushNow();
-      scPaintFriends();
-    });
-  }
-
-  /* ── turning it on ── */
-  function scNetSheet() {
-    scSheet(net.on ? 'Friends' : 'Turn on friends', function (body) {
-      if (!net.on) {
-        body.appendChild(scEl('p', 'hint',
-          'This is the only part of the app that reaches a network, and it is '
-          + 'off until you do this. It needs a server of your own — the '
-          + 'worker in this project, on your own Cloudflare account. Paste its '
-          + 'address.'));
-        var u = scEl('input', 'field');
-        u.type = 'url';
-        u.placeholder = 'https://sched.you.workers.dev';
-        u.value = net.url || '';
-        body.appendChild(scEl('span', 'label', 'Your server'));
-        body.appendChild(u);
-        var nf = scEl('input', 'field');
-        nf.type = 'text';
-        nf.placeholder = 'What your friends call you';
-        nf.maxLength = 24;
-        nf.value = net.name || '';
-        body.appendChild(scEl('span', 'label', 'Name'));
-        body.appendChild(nf);
-
-        /* Said plainly and in full, on the screen where it starts. A
-           sentence about privacy under a button that has already been
-           pressed is a disclaimer; here it is a decision. */
-        body.appendChild(scEl('p', 'hint',
-          'What goes: your name, your accent and your ink, your picture, how many '
-          + 'of the five you ticked on each of the last thirty days, and any log '
-          + 'you write — photograph and caption. What never goes: your week, '
-          + 'your blocks, and the numbers behind Steps, Fuel and Water. Your '
-          + 'friend list stays on this phone; the server is never told who you '
-          + 'have added.'));
-
-        var acts = scEl('div', 'acts');
-        acts.appendChild(scBtn('off', 'Not now', scClose));
-        var join = scBtn('go', 'Turn it on', function () {
-          if (!/^https?:\/\/.+/.test(u.value.trim())) {
-            scToast('That does not look like an address', false); return;
-          }
-          join.disabled = true;
-          join.textContent = 'Asking…';
-          scJoin(u.value, nf.value, function (okd, status) {
-            if (!okd) {
-              join.disabled = false;
-              join.textContent = 'Turn it on';
-              scToast(status === 'offline'
-                ? 'Could not reach that address'
-                : 'That address did not answer as the worker', false);
-              return;
-            }
-            scClose();
-            scPaintFriends();
-            scToast('On. Your code is ' + net.code, false);
-          });
-        });
-        acts.appendChild(join);
-        body.appendChild(acts);
-        return;
-      }
-
-      /* Here it is a reference, not the thing you came for — the copy
-         button lives on Add a friend, which is where a code is
-         actually wanted. This is the settings page: it says what your
-         code is because that is a thing you might come looking for,
-         and then it gets out of the way. */
-      body.appendChild(scEl('span', 'label', 'Your code'));
-      body.appendChild(scEl('p', 'fr-code', net.code));
-
-      body.appendChild(scEl('div', 'menu-rule'));
-      var nm = scEl('button', 'menu-item');
-      nm.appendChild(document.createTextNode('Name'));
-      nm.appendChild(scEl('span', 'sub-note', net.name || 'not set'));
-      nm.addEventListener('click', scNameSheet);
-      body.appendChild(nm);
-
-      var off = scEl('button', 'menu-item bad');
-      off.appendChild(document.createTextNode('Turn friends off'));
-      off.appendChild(scEl('span', 'sub-note',
-        'Deletes your record and your logs from the server. This one is final.'));
-      off.addEventListener('click', function () {
-        scSheet('Turn friends off?', function (b2) {
-          b2.appendChild(scEl('p', 'hint',
-            'Your record, your logs and your pictures are deleted from the '
-            + 'server, and the code goes back in the pool. Your week, your '
-            + 'ticks and your streak are untouched — they never left. '
-            + 'There is no bin for this, because the copy that matters is the '
-            + 'one still here.'));
-          var a4 = scEl('div', 'acts');
-          a4.appendChild(scBtn('off', 'Stay on', scClose));
-          a4.appendChild(scBtn('bad', 'Turn it off', function () {
-            scLeave(function () {
-              scClose();
-              scPaintFriends();
-              scToast('Off. Nothing of yours is up there.', false);
-            });
-          }));
-          b2.appendChild(a4);
-        });
-      });
-      body.appendChild(off);
-    });
-  }
-
-  /* ── the swap ──
-     Both codes, in the one place the exchange actually happens. `Your
-     code` used to be its own row on the board, directly under `Add a
-     friend` — two rows for the two halves of a single act, and the
-     board carrying a control that is only ever wanted while you are
-     adding somebody. Adding a friend IS the swap: you give them
-     yours, they give you theirs.
-
-     It leaves the board with exactly one action on it, and the friends
-     settings — your name, and turning it off — move to the app's own
-     settings, where Rename and the backup already live. */
-  function scAddSheet() {
-    scSheet('Add a friend', function (body) {
-      body.appendChild(scEl('span', 'label', 'Yours'));
-      var row = scEl('div', 'fr-swap');
-      row.appendChild(scEl('span', 'fr-code', net.code));
-      /* SHARE, not Copy, and what goes is the link — the code is still
-         printed beside it because a code is what you say out loud
-         across a table, and that is a different exchange from sending
-         somebody a message.
-
-         The share sheet first where there is one: on the phone this app
-         is for, `Copy` means finding the thread yourself afterwards.
-         It resolves on cancel as well as on send and there is no
-         difference visible to us, so neither one toasts — a "Link
-         copied" after somebody backed out of the share sheet is the app
-         claiming something that did not happen. */
-      row.appendChild(scBtn('off', 'Share', function () {
-        var link = scLinkFor(net.code);
-        if (navigator.share) {
-          try {
-            navigator.share({ title: 'Daily Process', text: link })
-              .then(function () {}, function () {});
-            return;
-          } catch (e) {}
-        }
-        var done = function () { scToast('Link copied', false); };
-        if (navigator.clipboard && navigator.clipboard.writeText)
-          navigator.clipboard.writeText(link).then(done, done);
-        else done();
-      }));
-      body.appendChild(row);
-      /* No caption under it. `Yours` over a code beside a button that
-         says Copy is a sentence already, and the paragraph explaining
-         that a code reads and never writes belongs where somebody is
-         deciding whether to turn this on — not on the sheet they open
-         forty times to swap one. */
-      body.appendChild(scEl('span', 'label', 'Theirs'));
-      var f = scEl('input', 'field');
-      f.type = 'text';
-      f.autocapitalize = 'characters';
-      f.spellcheck = false;
-      /* It takes a pasted LINK as readily as a code, because half the
-         people using this sheet were sent one. A field that accepts
-         only the code makes somebody edit a URL down by hand on a
-         phone, having been given exactly the thing it needs. */
-      f.placeholder = 'Their code, or a link they sent';
-      body.appendChild(f);
-      var acts = scEl('div', 'acts');
-      acts.appendChild(scBtn('off', 'Cancel', scClose));
-      acts.appendChild(scBtn('go', 'Add', function () {
-        scAddFriend(f.value, function (okd, msg) {
-          if (!okd) { scToast(msg, false); return; }
-          scClose();
-          scPaintFriends();
-          scToast(msg + ' added', false);
-        });
-      }));
-      body.appendChild(acts);
-      setTimeout(function () { f.focus(); }, 260);
-    });
-  }
-
-  /* ── a friend ──
-     Their seven days, their board figures, and everything they have
-     logged. The strip is the one thing here the leaderboard cannot
-     say: a total of 97 is the same number whether it came from a
-     fortnight of everything or thirty days of one. */
-  function scFriendSheet(p) {
-    scSheet(p.name, function (body) {
-      scProfileBody(body, p, peers[p.code] || {}, true);
-    });
-  }
-
-  /* ── ONE DRAWING, TWO CALLERS ──
-     A friend's profile and the preview of your own go through THIS,
-     or they drift — and a preview that has drifted is worse than none,
-     because the whole of what it is for is being true. The only thing
-     the caller decides is whether `Remove` is on the end, which is the
-     one control a preview must not have. */
-  function scProfileBody(body, p, r, real) {
-
-      /* TWO FIGURES, not one hero and a caption. The total was 30px
-         with `ticks in thirty days · 20 days showing up` running under
-         it as one sentence — which put the two numbers you came to
-         compare at different sizes, one of them inside prose. They are
-         the same kind of thing, so they get the same treatment and sit
-         side by side.
-
-         The face went with it. The sheet's own title is their name, so
-         a 60px portrait under it was the third time in six inches that
-         the screen said who this is. */
-      /* ── THE ALMANAC ──
-         Chosen from ten treatments rendered over the real app at
-         390x844 and read at 1:1. What settled it is that a YEAR of
-         days answers "are they actually doing this" in a way no
-         figure can: two people with the same streak look nothing
-         alike over twelve months, and the shape is the thing you came
-         to read.
-
-         TIME FIRST, and everything else hangs under it. The two 26px
-         figures that used to open this sheet are one line now — they
-         are a summary of the picture directly below them, and a
-         summary above the thing it summarises is the duplication this
-         project keeps taking back out. */
-      if (r.bio) {
-        var bio = scEl('p', 'pf-bio', String(r.bio).slice(0, 140));
-        body.appendChild(bio);
-      }
-
-      var year = typeof r.year === 'string' ? r.year : '';
-      if (year) {
-        var sline = scEl('div', 'pf-sub');
-        sline.appendChild(scEl('span', null,
-          p.streak + (p.streak === 1 ? ' day streak' : ' day streak')));
-        sline.appendChild(scEl('span', null, p.blocks + ' blocks kept'));
-        body.appendChild(sline);
-
-        /* Twelve labels for 53 columns: the grid is not months and
-           cannot be, so these are markers rather than headings — the
-           point is that the sweep is a year, not that column 14 is
-           November. */
-        var mrow = scEl('div', 'pf-mn');
-        var now = new Date();
-        for (var m = 11; m >= 0; m--) {
-          var d0 = new Date(now.getFullYear(), now.getMonth() - m, 1);
-          mrow.appendChild(scEl('span', null, MON[d0.getMonth()]));
-        }
-        body.appendChild(mrow);
-
-        var grid = scEl('div', 'pf-yr');
-        grid.setAttribute('role', 'img');
-        var lit = 0;
-        for (var y = 0; y < year.length; y++) if (year.charAt(y) !== '0') lit++;
-        grid.setAttribute('aria-label',
-          lit + ' of the last ' + year.length + ' days had something on them.');
-        for (var q = 0; q < year.length; q++) {
-          var v = +year.charAt(q) || 0;
-          var cell = scEl('i');
-          /* ── LIT OR NOT, AND NO RAMP ──
-             This drew the count as OPACITY first, which is precisely
-             the mistake the month strip's own note was written
-             against: size was chosen over opacity there because a
-             diluted accent measured 1.30:1, and "diluting a colour
-             that already fails only makes the number worse".
-
-             The strip could answer that by varying SIZE. A year grid
-             cannot — every cell is the same box, and at four pixels
-             a five-step ramp is invisible anyway. So the mark is
-             binary and every lit day is drawn at the one strength
-             scCrown has already solved to clear 3:1 on YOUR page.
-
-             What that costs is real: the grid says whether, not how
-             much. Over a year that is the question anyway — the
-             figures above it carry how much. */
-          if (v && p.acc) cell.style.background = scCrown(p.acc);
-          grid.appendChild(cell);
-        }
-        body.appendChild(grid);
-      }
-
-      /* ── THE SHELF ──
-         Real jackets, at a size you can recognise one. A cover that
-         fails to load falls through to the drawn one underneath,
-         which is scMindArt's own rule and the reason a blocked image
-         costs a picture rather than a hole.
-
-         SIX ACROSS AND NO MORE, and it does not scroll: nothing in
-         this app moves sideways except one approved exception, and a
-         shelf whose end is off the screen is a shelf you have to go
-         looking for. The count beside the heading says the real
-         total. */
-      var mind = Array.isArray(r.mind) ? r.mind : [];
-      if (mind.length) {
-        var mh = scEl('div', 'fp-kh');
-        mh.appendChild(scEl('span', 'label fp-k', 'Reading'));
-        mh.appendChild(scEl('em', null, String(mind.length)));
-        body.appendChild(mh);
-        var shelf = scEl('div', 'pf-shelf');
-        mind.slice(0, 6).forEach(function (m) {
-          var j = scMindArt({ t: m.t, c: m.c, k: m.k }, 'pf-jk');
-          j.title = m.t + (m.a ? ' · ' + m.a : '');
-          shelf.appendChild(j);
-        });
-        body.appendChild(shelf);
-      }
-
-      /* ── TRAINING AND LISTENING, AS TWO COLUMNS ──
-         Side by side because they are the same kind of thing — a list
-         of names with a count — and one under the other would make
-         the page a third register taller for no reading it buys. */
-      var work = Array.isArray(r.work) ? r.work.slice(0, 5) : [];
-      var pods = mind.filter(function (m) { return m.k === 'pod'; }).slice(0, 4);
-      if (work.length || pods.length) {
-        var cols = scEl('div', 'pf-cols');
-        var col = function (label, rows) {
-          var c = scEl('div', 'pf-col');
-          c.appendChild(scEl('span', 'label fp-k', label));
-          rows.forEach(function (x) {
-            var rr = scEl('div', 'pf-lrow');
-            var sw = scEl('i');
-            if (x.c) sw.style.background = x.c;
-            else if (x.h != null) sw.style.setProperty('--mh', String(x.h));
-            rr.appendChild(sw);
-            rr.appendChild(scEl('b', null, x.n));
-            if (x.v != null) rr.appendChild(scEl('em', null, String(x.v)));
-            c.appendChild(rr);
-          });
-          cols.appendChild(c);
-        };
-        if (work.length) col('Training', work);
-        /* The swatch takes the same hue the cover is drawn from, so
-           a show is the same colour on the shelf and in this column
-           — scMindHue rather than a second table, which is how the
-           two would drift. */
-        if (pods.length) col('Listening', pods.map(function (m) {
-          return { n: m.t, h: scMindHue(m.t) };
-        }));
-        body.appendChild(cols);
-      }
-
-      /* ── WHAT THEY HAVE POSTED, AS A WALL ──
-         It was every log drawn out in full, one under another, which
-         made the profile a second feed — and the feed is a stop of its
-         own two taps away. A profile wants the SHAPE of what somebody
-         has done: a grid you take in at a glance, and one of them
-         opens if you want the words.
-
-         A log with no photograph still gets a tile, carrying its own
-         first line. Dropping it would make the grid a photo album
-         rather than a record of what they did, and the two are
-         different claims about somebody. */
-      var logs = (Array.isArray(r.logs) ? r.logs : []).slice().reverse();
-      var lh = scEl('div', 'fp-kh');
-      lh.appendChild(scEl('span', 'label fp-k', logs.length ? 'What they have posted' : 'Nothing posted yet'));
-      if (logs.length) lh.appendChild(scEl('em', null, String(logs.length)));
-      body.appendChild(lh);
-      if (logs.length) {
-        var grid = scEl('div', 'fp-grid');
-        logs.slice(0, 24).forEach(function (q) {
-          var t = scEl('button', 'fp-t' + (q.img ? '' : ' is-words'));
-          t.setAttribute('aria-label', (q.cap || 'A log') + ', ' + scAgo(q.at)
-            + '. Open it.');
-          if (q.img) {
-            var im = document.createElement('img');
-            im.src = scImgURL(q.img);
-            im.alt = '';
-            /* No loading="lazy" — scFriendSheet builds this wall
-               inside a `.sheet`, which rests off-screen by transform
-               until it opens. scMindArt carries the full reasoning. */
-            t.appendChild(im);
-          } else {
-            t.appendChild(scEl('span', null, q.cap || ''));
-          }
-          t.addEventListener('click', function () {
-            scPostSheet({ p: q, who: p.name, acc: p.acc, ink: p.ink, pic: p.pic },
-              function () { scFriendSheet(p); });
-          });
-          grid.appendChild(t);
-        });
-        body.appendChild(grid);
-      }
-
-      /* `Remove`, and nothing else. It carried a two-line explanation
-         of what removing does — on a sheet you opened to look at
-         somebody, about the one control there you are least likely to
-         press. Removing a friend takes them off a list; it is not the
-         kind of delete that needs warning about, and the sheet says so
-         by not saying anything. */
-      if (!real) return;
-      body.appendChild(scEl('div', 'menu-rule'));
-      var rm = scEl('button', 'menu-item bad fp-rm');
-      rm.appendChild(document.createTextNode('Remove'));
-      rm.addEventListener('click', function () {
-        scDropFriend(p.code);
-        scClose();
-        scPaintFriends();
-        scToast(p.name + ' removed', false);
-      });
-      body.appendChild(rm);
-  }
-
-  /* ── YOUR OWN PROFILE, AS A FRIEND SEES IT ──
-     Built from the SAME builders the push uses, gated by the same
-     switches — so this is not a rendering of your record, it is a
-     rendering of the payload. Turn a switch off and the section is
-     gone here too, which is the only way a preview can be worth
-     opening: it answers "what do they actually see" rather than
-     "what would this look like".
-
-     It reads `share` directly rather than the last thing pushed,
-     because the last push may not have happened yet — you flick a
-     switch and look, and a preview that waited on the network would
-     be showing you the answer to the previous question. */
-  function scProfileMine() {
-    var cs = getComputedStyle(document.documentElement);
-    var rec = {
-      bio: scShareBio(),
-      year: share.up ? scShareYear() : '',
-      work: share.work ? scShareWork() : [],
-      mind: share.mind ? scShareMind() : [],
-      logs: posts.slice(-30).map(function (q) {
-        return { id: q.id, at: q.at, day: q.day, item: q.item, cap: q.cap, img: q.img };
-      })
-    };
-    var days = scMyDays();
-    var me = {
-      code: net.code, name: net.name || 'You', me: false,
-      acc: cs.getPropertyValue('--me').trim(),
-      ink: cs.getPropertyValue('--on-red').trim(),
-      pic: net.pic || '',
-      streak: scRunOf(days),
-      blocks: scBlocksIn(days, 30),
-      ticks: scCount(days, 30)
-    };
-    scSheet('As a friend sees you', function (body) {
-      scProfileBody(body, me, rec, false);
-      /* Somebody who has turned nothing on gets a sheet with nothing
-         drawn on it, which is the honest answer and reads as broken
-         without a line saying so. */
-      if (!rec.bio && !rec.year && !rec.work.length && !rec.mind.length) {
-        body.appendChild(scEl('p', 'hint',
-          'Nothing is turned on, so a friend sees your name and your '
-          + 'streak on the board and nothing else.'));
-      }
-      body.appendChild(scEl('div', 'menu-rule'));
-      var b = scEl('button', 'menu-item');
-      b.appendChild(document.createTextNode('Back to your profile'));
-      b.addEventListener('click', scProfileSheet);
-      body.appendChild(b);
-    });
-  }
-
-  /* ── writing one ── */
-  function scLogSheet() {
-    scSheet('Write a log', function (body) {
-      var chosen = '';
-      var shot = null;      /* the data URL, for the preview and the upload */
-
-      var prev = scEl('div', 'lg-prev');
-      prev.hidden = true;
-      body.appendChild(prev);
-
-      var file = scEl('input', 'pic-file');
-      file.type = 'file';
-      file.accept = 'image/*';
-      file.addEventListener('change', function () {
-        var f = file.files && file.files[0];
-        if (!f) return;
-        scShot(f, function (url) {
-          if (!url) { scToast('That image could not be read', false); return; }
-          shot = url;
-          prev.textContent = '';
-          var im = document.createElement('img');
-          im.src = url; im.alt = '';
-          prev.appendChild(im);
-          prev.hidden = false;
-        });
-      });
-      body.appendChild(file);
-
-      body.appendChild(scEl('span', 'label', 'About'));
-      var row = scEl('div', 'lg-row');
-      scItems().forEach(function (t) {
-        var b = scEl('button', 'lg-c');
-        b.type = 'button';
-        b.textContent = t.n;
-        b.addEventListener('click', function () {
-          chosen = chosen === t.id ? '' : t.id;
-          [].forEach.call(row.querySelectorAll('.lg-c'), function (c) {
-            c.classList.toggle('on', c === b && chosen === t.id);
-          });
-        });
-        row.appendChild(b);
-      });
-      body.appendChild(row);
-
-      body.appendChild(scEl('span', 'label', 'Caption'));
-      var cap = scEl('textarea', 'field');
-      cap.rows = 3;
-      cap.maxLength = 240;
-      body.appendChild(cap);
-
-      var acts = scEl('div', 'acts');
-      acts.appendChild(scBtn('off', 'Add a photo', function () { file.click(); }));
-      var post = scBtn('go', 'Post it', function () {
-        var text = cap.value.trim();
-        if (!text && !shot) { scToast('A photograph or a line, at least', false); return; }
-        post.disabled = true;
-        post.textContent = 'Posting…';
-        var finish = function (imgId) {
-          posts.push({
-            id: scRand(10, HEX_A), at: Date.now(), day: scDay(),
-            item: chosen, cap: text, img: imgId || '',
-            /* The local copy, so your own post draws instantly and
-               still draws with no signal. The id is what a friend
-               fetches; this is never sent. */
-            local: imgId ? shot : ''
-          });
-          posts = posts.slice(-30);
-          scWriteJSON(POST_KEY, posts);
-          scPushNow();
-          scClose();
-          scPaintFriends();
-          scToast('Posted', false);
-        };
-        if (!shot) return finish('');
-        scUpload(shot, function (id) {
-          if (!id) {
-            post.disabled = false;
-            post.textContent = 'Post it';
-            scToast('The picture would not upload', false);
-            return;
-          }
-          finish(id);
-        });
-      });
-      acts.appendChild(post);
-      body.appendChild(acts);
-      setTimeout(function () { cap.focus(); }, 260);
-    });
-  }
-
-  /* 900px square at 0.78, which lands well inside the worker's 400KB
-     ceiling for anything a phone camera produces. Bigger is not free:
-     it is a photograph going up a mobile connection to be looked at in
-     a 350px column. */
-  function scShot(file, done) {
-    var fr = new FileReader();
-    fr.onerror = function () { done(null); };
-    fr.onload = function () {
-      var img = new Image();
-      img.onerror = function () { done(null); };
-      img.onload = function () {
-        var S = 900, c = document.createElement('canvas');
-        c.width = S; c.height = S;
-        var side = Math.min(img.width, img.height);
-        c.getContext('2d').drawImage(img,
-          (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, S, S);
-        try { done(c.toDataURL('image/jpeg', 0.78)); } catch (e) { done(null); }
-      };
-      img.src = fr.result;
-    };
-    fr.readAsDataURL(file);
-  }
-
-  /* A data URL is base64 text; the worker wants the bytes. Decoded
-     here rather than posted as a string, because base64 is a third
-     bigger and the 400KB ceiling is on what arrives. */
-  function scUpload(dataURL, done) {
-    var bin;
-    try {
-      var b64 = dataURL.slice(dataURL.indexOf(',') + 1);
-      var raw = atob(b64);
-      bin = new Uint8Array(raw.length);
-      for (var i = 0; i < raw.length; i++) bin[i] = raw.charCodeAt(i);
-    } catch (e) { return done(null); }
-    scApi('/v1/img?code=' + net.code, { method: 'POST', auth: true, bin: true, body: bin },
-      function (r) { done(r && r.id); });
-  }
 
   /* Which view is up, remembered. Its own key: the schedule is the
      record and this is a preference about looking at it, and folding a
@@ -7171,12 +5568,12 @@
      across the stops — measured at 372px against the 358 a 390px
      phone has — where the bar's own tabs are flex:1 and simply
      divide, so the bar was the arrangement that cost nothing. */
-  var VIEWS = ['list', 'tally', 'friends', 'notes', 'cal'];
+  var VIEWS = ['list', 'tally', 'notes', 'cal'];
 
   function scSetView(v, save) {
     var from = view;
     view = VIEWS.indexOf(v) >= 0 ? v : 'list';
-    var tal = view === 'tally', fr = view === 'friends', nt = view === 'notes',
+    var tal = view === 'tally', nt = view === 'notes',
         cal = view === 'cal';
     /* ── ARRIVING IS WHAT OFFERS A CARD, AND LEAVING TAKES IT ──
        Coming BACK to a screen is a new visit, so a card closed with
@@ -7231,7 +5628,6 @@
     scCloseHist();
 
     $('scTally').hidden = !tal;
-    $('scFriends').hidden = !fr;
     $('scNotes').hidden = !nt;
     $('scCal').hidden = !cal;
     /* Only where there are blocks to edit. `[hidden]` is said out
@@ -7245,8 +5641,8 @@
        has cost this app the rail, the dots, the toast and the intro,
        each in turn, so the check measures the BOX rather than the
        attribute. */
-    $('scWeek').hidden = tal || fr || nt || cal;
-    $('scEmpty').hidden = tal || fr || nt || cal || state.items.length > 0;
+    $('scWeek').hidden = tal || nt || cal;
+    $('scEmpty').hidden = tal || nt || cal || state.items.length > 0;
     /* The head is the day's on the week and the screen's elsewhere. */
     scDate();
 
@@ -7264,10 +5660,6 @@
     if (save) { try { localStorage.setItem(VIEW_KEY, view); } catch (e) {} }
 
     if (tal) { scPaintTally(); scTyStop(tyStop, false); }
-    /* ARRIVING claims, drawing only draws — the same split the refresh
-       already keeps. A paint that fetched would recurse the first time
-       it ran, which is a bug this file has already had once. */
-    else if (fr) { scPaintFriends(); scFrStop(frStop, false); scArriveFriends(); }
     else if (nt) scPaintNotes();
     /* ── AND THIS ARM WENT IN BEFORE THE `else`, NEVER OVER IT ──
        Deleting or shadowing the first arm of an if/else chain is not
@@ -8390,15 +6782,23 @@
      and Log still files it. That is the covers' rule one level down,
      and it is why the failure path says what still works rather than
      that something broke. */
+  /* ── THE ONE THING LEFT THAT KNOWS THE WORKER'S ADDRESS ──
+     It was the friends server and it is a feed reader now. A podcast
+     feed is XML served by whoever hosts the show, almost never with a
+     CORS header, so a browser cannot read one — which is the whole
+     reason this route exists and the only reason the worker survived
+     the friends half going.
+
+     It carries no code, no key and nothing about you: a numeric show
+     id goes out and a handful of parsed fields come back. Deploying
+     your own copy means changing this line and nothing else. */
+  var HOME = 'https://sched.nikorapullin.workers.dev';
+
   var mindEpSeq = 0;
   function scMindEps(id, cb) {
     var mine = ++mindEpSeq;
     if (!/^\d{1,12}$/.test(String(id || ''))) { cb(mine, 'off', null); return mine; }
-    /* The server you are ON if you have joined one, and the build's
-       own otherwise. A feed lookup is not personal, but there is no
-       reason to talk to a second machine when you are already talking
-       to one. */
-    var base = (net && net.url) || HOME;
+    var base = HOME;
     var done = false;
     var bail = setTimeout(function () {
       if (done) return;
@@ -10165,32 +8565,6 @@
        + '</g></g>'
     },
     {
-      k: 'friends',
-      t: 'Compete with friends',
-      s: 'Add a friend and see who shows up most. Nothing else leaves '
-       + 'your phone.',
-      /* The board's own crown, landing on the tallest column. A crown
-         alone says RANK and says nothing about there being anybody to
-         rank; three columns under it are what make it a leaderboard.
-
-         The placement is on an OUTER g and the animation on an inner
-         one. Keyframes naming a transform replace the resting one
-         outright, so a single element would be flung to the origin the
-         instant the animation started, which is the deck's fan bug in
-         a smaller box. */
-      i: '<g fill="currentColor" stroke="none">'
-       + '<rect x="3.2" y="20.4" width="17.6" height="2.2" rx="1.1" opacity=".45"/>'
-       + '<rect x="4.6" y="14.6" width="4" height="5.2" rx="1.3" opacity=".55"/>'
-       + '<rect x="10" y="11.4" width="4" height="8.4" rx="1.3"/>'
-       + '<rect x="15.4" y="16.2" width="4" height="3.6" rx="1.3" opacity=".55"/>'
-       + '</g>'
-       + '<g transform="translate(6.5 1.3) scale(.46)">'
-       + '<g class="tr-crown">'
-       + '<path d="M3 8.8l4.5 3.5L12 4.4l4.5 7.9L21 8.8L19.3 19H4.7L3 8.8z"'
-       + ' stroke-width="3.7" stroke-linejoin="round"/>'
-       + '</g></g>'
-    },
-    {
       k: 'back',
       t: 'Look back',
       /* ── AND IT NAMES ONE DOOR NOW, NOT TWO ──
@@ -10905,7 +9279,7 @@
   var PIC_KEY = 'sched.pic.v1';
   var myPic = null;
 
-  function scFaceIn(px, acc, ink) {
+  function scFace(px) {
     var NS = 'http://www.w3.org/2000/svg';
     var mk = function (n, a) {
       var e = document.createElementNS(NS, n);
@@ -10924,10 +9298,9 @@
        nobody chose — and this app's rule is that colour says WHICH.
        With nothing left to say, it is the flat neutral.
 
-       `acc` is still ACCEPTED and ignored here: a friend's record
-       carries one, and records written before this are on the server
-       right now. Dropping the parameter would be a signature change
-       for a value nothing reads. */
+       IT TOOK A COLOUR AND AN INK once, for a friend's record drawn
+       on your page. Both were already ignored here before friends
+       went; the parameters went with the records that carried them. */
     var cs = getComputedStyle(document.documentElement);
     /* The one pair the whole app already uses for a mark on a neutral
        surface. Measured rather than picked: 3.26:1 on the dark face
@@ -10949,25 +9322,17 @@
     return w;
   }
 
-  function scFace(px) { return scFaceIn(px, null, null); }
-
-  /* One person's picture at one size: the photograph if there is one,
-     the face out of their palette if there is not. */
-  function scPicIn(px, src, acc, ink) {
-    if (!src) return scFaceIn(px, acc, ink);
+  /* Your picture at one size, or the face where there is none. It
+     took a person as well, because a friend's row drew theirs the
+     same way; there is one person left, so there is one picture. */
+  function scPic(px) {
+    if (!myPic) return scFace(px);
     var w = scEl('span', 'pic');
     w.style.width = px + 'px'; w.style.height = px + 'px';
     var i = document.createElement('img');
-    i.src = src; i.alt = '';
+    i.src = myPic; i.alt = '';
     w.appendChild(i);
     return w;
-  }
-
-  function scPic(px) { return scPicIn(px, myPic, null, null); }
-
-  function scPicOf(px, p) {
-    if (p.me) return scPic(px);
-    return scPicIn(px, p.pic ? scImgURL(p.pic) : '', p.acc, p.ink);
   }
 
 
@@ -11004,18 +9369,6 @@
         st.transaction.oncomplete = function () { done && done(); };
       });
     } catch (e) { done && done(); }
-    /* The copy your friends see is a separate upload, and only if you
-       have friends on. Taking the photograph away clears the id rather
-       than leaving the old one up: the face is what a cleared id draws,
-       and it is the answer you just chose. */
-    if (!net.on) return;
-    if (!v) { net.pic = ''; scNetSave(); scPush(); return; }
-    scUpload(v, function (id) {
-      if (!id) return;
-      net.pic = id;
-      scNetSave();
-      scPushNow();
-    });
   }
 
   function scPicSheet() {
@@ -11105,7 +9458,7 @@
       pr.appendChild(scPic(38));
       var pl = scEl('span');
       pl.appendChild(document.createTextNode('Your picture'));
-      pl.appendChild(scEl('span', 'sub-note', myPic ? 'A photo' : 'Drawn from your colour'));
+      pl.appendChild(scEl('span', 'sub-note', myPic ? 'A photo' : 'A silhouette'));
       pr.appendChild(pl);
       pr.addEventListener('click', scPicSheet);
       body.appendChild(pr);
@@ -11217,13 +9570,6 @@
       var rule = scEl('div', 'menu-rule');
       body.appendChild(rule);
 
-      /* Friends, where the app's other settings are. It used to be
-         reached from a row on the board itself, which put a control
-         you want about once a month directly under the leaderboard —
-         and the one thing anybody actually opened it for, your code,
-         is now on Add a friend where the swap happens. */
-      item('Friends', net.on ? 'On \u00b7 ' + net.code : 'Off', '', scNetSheet);
-
       item('Rename', state.title, '', function () {
         scTextSheet('Rename', 'Title', state.title, function (v) { state.title = v || 'Schedule'; });
       });
@@ -11232,7 +9578,7 @@
          from here — a first-run screen you can destroy in one press
          and never get back is a one-time gift, and this app does not
          give any others. */
-      item('Show the intro', 'Four cards on what this app does', '', function () {
+      item('Show the intro', 'Two cards on what this app does', '', function () {
         scClose();
         scTourOpen();
       });
@@ -14987,7 +13333,27 @@
     return out;
   }
 
-  function scPaintCal() { calFig = scCalCount(); scCalMonth($('scCalPane')); scDate(); }
+  function scPaintCal() {
+    calFig = scCalCount();
+    /* The month fills the pane and the list scrolls it, which are two
+       different boxes rather than two ways of filling one — so the
+       pane is told which it is holding rather than the grid trying to
+       be both. */
+    $('scCalPane').classList.toggle('is-grid', calMode !== 'list');
+    /* ── THE HEAD IS WRITTEN FIRST, AND THAT IS `scDeckFit`'S OWN
+       LESSON ──
+       `scDate` puts the figure under the title, which is a register
+       the head does not have until it does — so on the first paint of
+       this screen the grid was measured against a head about to grow
+       and a pane about to lose eighteen pixels. `scCalFit` then kept
+       one pill more than the row could hold, and it came back 1.4px
+       past a foot it had just been measured as clearing. A repaint
+       with the head already there cut it correctly, which is the
+       whole tell: the fit was right and the geometry was a frame
+       early. */
+    scDate();
+    scCalMonth($('scCalPane'));
+  }
 
   /* How many days of the month on screen carry anything at all — a
      block kept, a tick, a session. It is the one figure the month row
@@ -15154,21 +13520,29 @@
                Logged line, which is one press away; what a month gets
                instead is the thing you came to it for, which is what
                you actually did. */
+            /* ── EVERY PILL IS BUILT; WHAT FITS IS DECIDED AFTER ──
+               It was `pills.slice(0, 2)`, which was the right number
+               for a 54px cell and is a CONSTANT written where it
+               cannot see the row height, the type scale or the number
+               of weeks in the month. With the grid filling the pane a
+               row is about 118px and holds four — and a six-week month
+               is shorter than a five-week one, so there is no single
+               figure that is right.
+
+               So the cap is not predicted at all: the stack is given
+               the room and `scCalFit` takes back whatever did not fit,
+               which is the only version that is exact at any row count
+               on any phone. */
             var pills = scCalPills(c);
             if (pills.length) {
               var pw = scEl('span', 'cl-ps');
-              pills.slice(0, 2).forEach(function (o) {
+              pills.forEach(function (o) {
                 var pi = scEl('span', 'cl-p', o.n);
                 if (o.tg) pi.style.setProperty('--tg', o.tg);
                 else pi.classList.add('is-off');
                 pw.appendChild(pi);
               });
               b.appendChild(pw);
-              /* Appended to the CELL rather than the stack, because it
-                 is positioned against the cell's own top-left. */
-              if (pills.length > 2) {
-                b.appendChild(scEl('span', 'cl-more', '+' + (pills.length - 2)));
-              }
             }
             /* A day with NOTHING TO SAY draws no rule at all. That
                reverses the day-off dot's rule about never leaving a
@@ -15203,8 +13577,58 @@
             grid.appendChild(b);
           }(n2));
         }
+        /* ── AND THE MONTH IS A WHOLE RECTANGLE ──
+           The days before the 1st were already drawn as ruled cells
+           and the ones after the last were not, so the grid ended
+           ragged — four empty columns beside the 30th with no rules
+           on them at all. That is invisible on a 54px row and is the
+           loudest thing on the sheet at 118: a table missing the
+           right-hand end of its last row reads as a drawing that
+           failed rather than as a month that ended. */
+        var tail = (7 - ((lead + days) % 7)) % 7;
+        for (var t2 = 0; t2 < tail; t2++) grid.appendChild(scEl('span', 'cl-c is-pad'));
         body.appendChild(grid);
+        scCalFit(grid);
       }
+  }
+
+  /* ── WHAT FITS IS MEASURED, NEVER PREDICTED ──
+     The stack is a flex child at `1 1 0`, so it reports the room the
+     row actually gave it; a pill whose foot is past that room is
+     taken out and counted. Read after ONE layout — every figure here
+     comes off `offsetTop`, which is relative to the cell, so nothing
+     forces a second flush.
+
+     TAKEN OUT RATHER THAN HIDDEN. `[hidden]` works on a pill only
+     because nothing declares a `display` for one, and that is the
+     attribute this app has had break on it eight times. A pill that
+     is not in the document cannot be drawn by a rule added later.
+
+     AND THE COUNT IS BUILT HERE, so it can never disagree with what
+     is on screen — which is what a predicted cap and a separately
+     predicted `+n` would eventually do. */
+  function scCalFit(grid) {
+    [].forEach.call(grid.querySelectorAll('.cl-ps'), function (st) {
+      /* RECTS, NOT `offsetTop`. Those round to whole pixels and a row
+         here is `1fr` of a fractional height, so a pill whose true
+         foot was .4 of a pixel past the stack measured as fitting and
+         was drawn over the kept rule — present, counted as fitting,
+         and past the box it was given. The check measures composited
+         boxes, so the fit has to as well or the two disagree by the
+         rounding alone. */
+      var foot = st.getBoundingClientRect().bottom, cut = [], i;
+      for (i = 0; i < st.children.length; i++) {
+        var k = st.children[i];
+        /* A tenth of a pixel of slack: a pill that lands exactly on
+           the foot is one that fits. */
+        if (k.getBoundingClientRect().bottom > foot + 0.1) cut.push(k);
+      }
+      for (i = 0; i < cut.length; i++) st.removeChild(cut[i]);
+      if (!cut.length) return;
+      /* Appended to the CELL rather than the stack, because it is
+         positioned against the cell's own top-left. */
+      st.parentNode.appendChild(scEl('span', 'cl-more', '+' + cut.length));
+    });
   }
 
   /* ── THE MONTH AS A LIST, WHERE A NAME READS WHOLE ──
@@ -15313,7 +13737,15 @@
                day still ahead has not been missed, it has not come. */
             if (off) { st.textContent = 'Off'; st.classList.add('is-todo'); }
             else if (done) { st.textContent = 'Completed'; st.classList.add('is-ok'); }
-            else if (open < scDay()) { st.textContent = 'Missed'; st.classList.add('is-bad'); }
+            /* ── THE WORD SURVIVES HERE AND THE COLOUR DOES NOT ──
+               The week's row drops the word entirely, because that row
+               is dimmed and its check is open and the hour has
+               visibly passed. These rows are none of those things: it
+               is a flat read-back of a day that has been, so the word
+               is the only thing carrying it. Neutral, with Off and
+               Not yet, because all three are the absence of a claim
+               about doing something rather than three kinds of it. */
+            else if (open < scDay()) { st.textContent = 'Missed'; st.classList.add('is-todo'); }
             else { st.textContent = 'Not yet'; st.classList.add('is-todo'); }
             r.appendChild(st);
             if (done && scIsTrain(b)) {
@@ -15389,42 +13821,9 @@
   scNoteLoad();
 
   try {
-    var fs2 = localStorage.getItem(FRSTOP_KEY);
-    if (fs2 === 'board' || fs2 === 'feed') frStop = fs2;
     var ts2 = localStorage.getItem(TYSTOP_KEY);
     if (TYSTOPS.indexOf(ts2) >= 0) tyStop = ts2;
   } catch (e) {}
-
-  /* Whether friends are on, and who is on your list. Reading it makes
-     no request — with no URL stored, scApi returns before it builds
-     one — so an app nobody has turned this on for behaves exactly as
-     it did before any of this existed. */
-  scShareLoad();
-  scNetLoad();
-
-  /* ── the link somebody was sent ──
-     Read here and NOT acted on here. Reading a hash costs nothing and
-     reaches nothing; the join and the add happen on arrival at the
-     friends tab, through the same path every other visit takes, so the
-     rule that this app makes no request until you are on that screen
-     holds for an invitation exactly as it does for an ordinary open.
-
-     The hash is stripped the moment it is read. Left in the address
-     bar it is redeemed again on every reload — spent, so it adds
-     nothing, but it also means a bookmark of this page is somebody
-     else's invitation forever. `replaceState` rather than assigning
-     `location.hash`, which would push a history entry and make Back
-     into a no-op that looks broken. */
-  var hash = location.hash || '';
-  if (hash) {
-    invite = scInviteIn(hash);
-    if (invite) {
-      view = 'friends';
-      try {
-        history.replaceState(null, '', location.href.replace(/#.*$/, ''));
-      } catch (e) {}
-    }
-  }
 
   /* The picture is read asynchronously and nothing waits for it: the
      face is a complete answer on its own, so a photograph arriving a
@@ -15442,11 +13841,12 @@
        Removed rather than ignored, the way the two view keys were. */
     localStorage.removeItem(ACCENT_KEY);
     /* A preference for a control that no longer exists is a second
-     record of a decision nothing can act on — the same answer the
-     stored palette name, the subtitle key and the Now colour all
-     got. */
-  localStorage.removeItem(ME_KEY);
-  localStorage.removeItem(THEME_KEY);
+       record of a decision nothing can act on — the same answer the
+       stored palette name, the subtitle key and the Now colour all
+       got. The face's own colour joined them when friends went: its
+       only readers were the push and the profile. */
+    localStorage.removeItem('sched.me.v1');
+    localStorage.removeItem(THEME_KEY);
     /* The Now colour is fixed rather than chosen, and the row that let
        you pick one is gone with it — a key nothing reads any more is a
        second record of a decision that no longer exists. */
@@ -15470,18 +13870,6 @@
     t.addEventListener('click', function () { scTyStop(t.dataset.tystop, true); });
   });
 
-  /* ── SCOPED BY THE DATA ATTRIBUTE, NOT BY THE CLASS ──
-     Today's two stops wear .fr-stop as well, because they are the same
-     control and a second set of classes drawn to look identical is two
-     places to keep one thing in step. So this selector claimed them
-     too: pressing Workouts also ran scFrStop with an undefined stop,
-     which fell through to 'board' and cleared aria-current from every
-     .fr-stop on the page — including the one you had just pressed. The
-     panes still switched, so the only visible symptom was a screen
-     reader being told nothing was current. */
-  [].forEach.call(document.querySelectorAll('[data-stop]'), function (t) {
-    t.addEventListener('click', function () { scFrStop(t.dataset.stop, true); });
-  });
   $('scTabYou').addEventListener('click', scMenuSheet);
 
   /* The face in the You tab is redrawn whenever the palette moves,
@@ -15523,11 +13911,16 @@
      the wrong one every time. */
   document.addEventListener('keydown', function (ev) {
     if (ev.key !== 'Escape') return;
-    /* The picture is on top of everything, so it takes Escape first —
-       closing the sheet underneath while a full-screen photograph
-       stays up is the wrong one every time, which is the rule the
-       history already keeps one layer down. */
-    if (photoOn) { ev.preventDefault(); scPhotoClose(); return; }
+    /* ── THE PHOTO VIEWER'S ARM WENT WITH THE FEED, AND TOOK ESCAPE
+           WITH IT FOR ONE RUN ──
+       A friend's post opened full-screen over everything, so it took
+       Escape first. Both `photoOn` and `scPhotoClose` were in the
+       friends half; deleting them left this line throwing a
+       ReferenceError on EVERY Escape press, before the history's own
+       branch could run — so the tally's history panel stopped closing
+       and the next press landed on the veil. `node --check` is happy
+       with it, and the suite reported it as a dblclick timing out
+       forty assertions later. */
     if (!$('scTyVeil').hidden) { ev.preventDefault(); scCloseHist(); return; }
     if (sheetOpen) { ev.preventDefault(); scClose(); }
   });

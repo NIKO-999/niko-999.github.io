@@ -212,24 +212,9 @@ const SAID = [
        { d: 6, s: 1275, e: 1305, r: '', n: 'Read' }]
     ),
   };
-  /* ── this page is pointed AWAY from the real server ──
-     The app now carries the address of a live worker and claims a code
-     the moment the Friends tab is opened. This page visits that tab
-     several times, so without this it would create a record on a real
-     server on every run — which it did, once, before this line existed.
-
-     Same-origin on purpose rather than a blocked host: the claim 404s,
-     friends stays off, and the "nothing leaves this origin" count below
-     stays exactly as strict as it was. The friends half is exercised on
-     its own page further down, against a worker running in this
-     process. */
-  await page.addInitScript(([w, nowhere]) => {
+  await page.addInitScript(([w]) => {
     if (!localStorage.getItem('sched.v1')) {
       localStorage.setItem('sched.v1', JSON.stringify(w));
-    }
-    if (!localStorage.getItem('sched.net.v1')) {
-      localStorage.setItem('sched.net.v1', JSON.stringify({
-        url: nowhere, code: '', key: '', name: '', pic: '', on: false }));
     }
     /* ── THE INTRO IS MARKED SEEN FOR EVERY OTHER SECTION ──
        It opens over the whole app on a first visit, which is every
@@ -254,18 +239,7 @@ const SAID = [
       localStorage.setItem('sched.hint2.v1', '1');
       localStorage.setItem('sched.hintw.v1', '1');
     }
-  }, [WEEK, `${BASE}/schedule/nofriends`]);
-  /* Answered here rather than left to the static server, and answered
-     with 200. Left to the server a POST gets 405; answered with 404 it
-     is still a failed fetch, and Chromium logs any failed fetch as a
-     console error — which the last assertion in this file counts, and
-     which carries no URL in its text, so it cannot be filtered by path
-     either. A 200 makes the claim succeed against a stand-in, so this
-     page also exercises the board in its ON state rather than only its
-     failure state. The real worker is exercised properly further down,
-     against the actual worker file running in this process. */
-  await page.route(`${BASE}/schedule/nofriends/**`, (route) => route.fulfill({
-    status: 200, contentType: 'application/json', body: '{"ok":true}' }));
+  }, [WEEK]);
 
   /* ── every request, counted ── */
   const asked = [];
@@ -1144,8 +1118,6 @@ const SAID = [
       delete window.webkitSpeechRecognition;
       ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
         .forEach((k) => localStorage.setItem(k, '1'));
-      localStorage.setItem('sched.net.v1',
-        JSON.stringify({ on: false, url: '', code: '' }));
       /* A morning Train, PUSHED first, and an evening one pushed
          after it — the array's own order, which is the only thing
          the fix reads. */
@@ -1203,8 +1175,6 @@ const SAID = [
       delete window.webkitSpeechRecognition;
       ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
         .forEach((k) => localStorage.setItem(k, '1'));
-      localStorage.setItem('sched.net.v1',
-        JSON.stringify({ on: false, url: '', code: '' }));
       /* One Walk, on WEDNESDAY -- tomorrow, from a Tuesday.
 
          SEEDED ONLY WHEN ABSENT. addInitScript runs on every
@@ -1313,8 +1283,6 @@ const SAID = [
       delete window.webkitSpeechRecognition;
       ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
         .forEach((k) => localStorage.setItem(k, '1'));
-      localStorage.setItem('sched.net.v1',
-        JSON.stringify({ on: false, url: '', code: '' }));
       /* Walk every day, 07:45-08:30 -- its own 45-minute length is
          the fact the check holds onto after the move. */
       if (!localStorage.getItem('sched.v1')) {
@@ -1424,8 +1392,6 @@ const SAID = [
       delete window.webkitSpeechRecognition;
       ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
         .forEach((k) => localStorage.setItem(k, '1'));
-      localStorage.setItem('sched.net.v1',
-        JSON.stringify({ on: false, url: '', code: '' }));
       /* Tuesday has one training block, Wednesday two (Train and its
          own Gym synonym) and Monday none — the three answers "rest
          day" has to give. */
@@ -1535,8 +1501,6 @@ const SAID = [
       delete window.webkitSpeechRecognition;
       ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
         .forEach((k) => localStorage.setItem(k, '1'));
-      localStorage.setItem('sched.net.v1',
-        JSON.stringify({ on: false, url: '', code: '' }));
       /* Wake is stored as a moment — `e === s` — so this is the
          stored shape coming back through scClean as well as the row
          drawing it. That gate read `e > s` for as long as every block
@@ -2462,10 +2426,10 @@ const SAID = [
   })();
   ok(`a bar label clears 4.5:1 on its own ground (worst ${swept.low}:1 on ${
     swept.worst && swept.worst.lab})`,
-    swept.rows.length === 5 && swept.rows.every((q) => q.r >= 4.5), swept);
+    swept.rows.length === 4 && swept.rows.every((q) => q.r >= 4.5), swept);
   /* Two grounds, because the lit tab sits on the pill's own card and
-     the other four sit on the page — one ground would mean the sweep
-     had looked at one surface five times. */
+     the other three sit on the page — one ground would mean the sweep
+     had looked at one surface four times. */
   ok('...on both of the two grounds the bar has', swept.grounds === 2, swept);
   /* AND NOTHING CAN PASS BEHIND IT, which is what retired the sweep
      this replaced. Stated as the measurement, so a pane that goes back
@@ -2529,7 +2493,7 @@ const SAID = [
     return { week, today };
   })();
   ok('the bar draws thinner than the target it hands a thumb',
-    slim.week.tabs.length === 5 && slim.week.tabs.every((t) => t.drawn <= 42)
+    slim.week.tabs.length === 4 && slim.week.tabs.every((t) => t.drawn <= 42)
     && slim.week.prime >= 44 && slim.week.prime <= slim.week.pill
     && slim.week.bar <= 70, slim.week);
   ok('...and every tab still OWNS the 44px floor',
@@ -2586,11 +2550,11 @@ const SAID = [
     for (let i = 0; i < 3; i++) {
       const at = await page.evaluate(() => ({
         tally: !document.getElementById('scTally').hidden,
-        friends: !document.getElementById('scFriends').hidden,
+        notes: !document.getElementById('scNotes').hidden,
         rail: !document.getElementById('scWeek').hidden,
       }));
       if ((v === 'tally' && at.tally)
-          || (v === 'friends' && at.friends) || (v === 'list' && at.rail)) return;
+          || (v === 'notes' && at.notes) || (v === 'list' && at.rail)) return;
       await page.evaluate((want) => {
         const t = document.querySelector('.tab[data-view="' + want + '"]');
         if (t) t.click();
@@ -2661,7 +2625,7 @@ const SAID = [
     return out;
   });
   ok('every view has its own tab and lights only that one',
-    tabs.length === 5 && tabs.every((t) => t.lit.length === 1 && t.lit[0] === t.want), tabs);
+    tabs.length === 4 && tabs.every((t) => t.lit.length === 1 && t.lit[0] === t.want), tabs);
   /* NAMED, not counted. `tabs.length === 3` and a joined string of
      three labels were both written when there were three, and the day
      Goals landed they failed together while the bar was perfectly
@@ -2669,12 +2633,12 @@ const SAID = [
      SUITE list and the flight-pause rule's list of layers. The order
      is asserted because it is a decision: Calendar sits third, after
      the two stops that are about a DAY, because it is the same record
-     one step out — and before Notes and Friends, which are not about
-     time at all. */
+     one step out — and before Notes, which is not about time at all.
+     Friends was a fifth and went with the half it named. */
   ok('and each one is labelled, in the order they were chosen',
     await page.$$eval('.tab span:last-child',
       (e) => e.map((x) => x.textContent).join(' '))
-      === 'Week Today Calendar Notes Friends');
+      === 'Week Today Calendar Notes');
 
   /* The ground is a gradient the palette can reach, which on the
      shipped palette resolves to the flat white page it has always been.
@@ -2943,9 +2907,15 @@ const SAID = [
                      return [+(b.x - h).toFixed(2), +(b.y - h).toFixed(2),
                              +(b.x + b.width + h).toFixed(2),
                              +(b.y + b.height + h).toFixed(2)]; })(),
-      /* The ring became the circle check beside the card — a sibling,
-         because a button inside a button is invalid. */
-      ring: !!c.parentElement.querySelector('.chk'),
+      /* ── AND THE GLYPH WEARS THE ITEM'S OWN COLOUR ──
+         It was `--spent` on every card, so six tiles of one grey and
+         the only way to tell them apart was to read the word. The
+         hue is what makes a card findable unread, and it is the one
+         thing a colour is allowed to say on this screen: WHICH.
+         Read as a computed value rather than a token name, so it
+         survives either one being changed. */
+      hue: getComputedStyle(c.querySelector('.ic')).stroke,
+      nameHue: getComputedStyle(c.querySelector('.ty-nm')).color,
       label: c.getAttribute('aria-label'),
       sub: c.querySelector('.props .pill').textContent,
     })));
@@ -2956,7 +2926,15 @@ const SAID = [
   ok('and Steps is a pair of them',
     marks.find((m) => m.item === 'p').paths === 2,
     marks.map((m) => m.item + ':' + m.paths).join());
-  ok('and every one of them has a check beside it', marks.every((m) => m.ring));
+  /* SIX DISTINCT, and the name wears the same one: a build that put
+     the hue on the glyph alone leaves a grey word beside a coloured
+     mark, which reads as the mark belonging to something else. And
+     "they are coloured" passes on six cards sharing one hue, which
+     is the grey this replaced with extra steps. */
+  ok('every glyph wears its item\'s own colour, and its name wears the same one',
+    new Set(marks.map((m) => m.hue)).size === 6
+    && marks.every((m) => m.nameHue === m.hue),
+    marks.map((m) => m.item + ':' + m.hue).join(' '));
   /* THE CLIPPING CHECK. Steps sat half a stroke above its own viewBox
      and the ring cut a flat line across the top print — visible, and
      invisible to every other assertion here, because the element was
@@ -2971,10 +2949,11 @@ const SAID = [
      DOES and the item's own name follows it. Asserted as that exact
      shape rather than as "the name appears somewhere", which passes on
      a label that has stopped saying what the control is for. */
-  /* BY `data-item`, never by position: the tall tile is hoisted to
-     second so it starts the right-hand column at the top, so the grid's
-     order is not the item list's — and a check keyed to position reads
-     a different card the day that order moves, silently. */
+  /* BY `data-item`, never by position: this grid has been reordered
+     twice — the numbers led, then the ticks did, and the tall tile
+     was spliced to an odd cursor slot for as long as there were two
+     columns — and a check keyed to position reads a different card
+     the day that order moves, silently. */
   ok('and every card still SAYS its name, after what pressing it does',
     [['t', 'Train'], ['m', 'Mind'], ['p', 'Steps'], ['f', 'Fuel'], ['w', 'Water']]
       .every((x) => new RegExp('^(Log|Unlog) ' + x[1] + '\\b')
@@ -3147,11 +3126,12 @@ const SAID = [
       low.r >= 3 && low.measured === 6, JSON.stringify(low));
   }
 
-  /* THE LIST IS CODE, NOT DATA. It is what makes a leaderboard over it
-     mean anything, so the storage must not carry it — a list that round
-     -trips through localStorage is a list a damaged record can change,
-     and the whole argument for these five is that they are the same
-     five for everyone. */
+  /* THE LIST IS CODE, NOT DATA. The storage must not carry it — a
+     list that round-trips through localStorage is a list a damaged
+     record can change, and the whole argument for these five is that
+     they are the same five every time. It was written when a board
+     had to count everybody the same way; the board went and the
+     reason did not. */
   /* THE CHECK LOGS AND THE CARD OPENS THE RECORD. Both used to log,
      with the strip beside them opening the history; the strip went with
      the tile, so the two remaining controls each took one job. */
@@ -3479,8 +3459,8 @@ const SAID = [
      screen; then it was the third cell of a 250px panel with a heading
      of its own. It is the third figure on the heading line now, which
      keeps every word of the complaint that moved it — one place, one
-     size — and hands the mosaic under it the two hundred and fifty
-     pixels that make the day fit on one screen.
+     size — and hands the grid under it two hundred and fifty pixels,
+     which is what the charts are drawn in.
 
      The foot still carries the one thing the line cannot: what to do
      when there is no run at all. */
@@ -3634,18 +3614,26 @@ const SAID = [
      would have been two targets for one action on a 145px tile, which
      is the arrangement this screen removed once already.
 
-     `pointer-events: none` is asserted beside the markup, because a
-     span still swallows the press that lands on it and the press that
-     lands on it is the one aimed at the mark saying what it will do. */
+     ── AND THE CIRCLE IS GONE, WHICH LEAVES ONE STATEMENT ──
+     The tile said it three times: `2 / 7`, a seven-mark strip with two
+     lit, and a filled circle in the corner. The strip is the only part
+     that says WHICH days and the fraction is the only part that can
+     say two, so the circle is the one that goes — it repeated the
+     fraction on a card where the fraction is already the largest
+     thing.
+
+     IT COST NO CONTROL, and that is the half worth asserting: the
+     mark was `aria-hidden` with `pointer-events: none`, so the tile
+     is exactly the button it already was. Asserted as the node being
+     ABSENT rather than not drawn, because a rule that merely hid it
+     leaves a span still swallowing the press that lands on it. */
   const rows = await page.evaluate(() => {
     const r = [...document.querySelectorAll('.ty-row')];
     return {
       n: r.length,
       nested: r.some((x) => x.querySelector('button button')),
       cards: r.every((x) => !!x.querySelector(':scope > .ty-card')),
-      chkTag: [...new Set(r.map((x) => x.querySelector('.chk').tagName))],
-      chkDead: r.every((x) =>
-        getComputedStyle(x.querySelector('.chk')).pointerEvents === 'none'),
+      chk: r.filter((x) => x.querySelector('.chk')).length,
       taps: r.map((x) => {
         const a = x.querySelector('.ty-card').getBoundingClientRect();
         return Math.round(Math.min(a.width, a.height));
@@ -3660,8 +3648,8 @@ const SAID = [
   });
   ok('six tiles, each one card', rows.n === 6 && rows.cards, rows);
   ok('and nothing on a tile is a button inside a button', !rows.nested, rows);
-  ok('the circle is drawn rather than pressed',
-    rows.chkTag.join('') === 'SPAN' && rows.chkDead, rows);
+  ok('and no tile draws a circle, because the figure already says it',
+    rows.chk === 0, rows);
   ok('the card clears 44px for a thumb', rows.taps.every((a) => a >= 44), rows.taps);
   /* The card IS the toggle, so it says what a press does and carries
      the state — and it still speaks the figure, because "logged" alone
@@ -3682,11 +3670,17 @@ const SAID = [
     const g = (id) => document.querySelector('.ty-row[data-item="' + id + '"]');
     const steps = g('p'), water = g('w'), train = g('t');
     return {
-      /* THE LABEL IS A LABEL AND THE FIGURE IS THE TILE. It was a
-         13.5px name over a 22px chip; the name is 11px small caps now
-         and the figure is what you read. Asserted as the RELATIONSHIP,
-         so a change to the type scale moves both and the check still
-         means what it says. */
+      /* ── THE NAME IS A NAME AGAIN, AND THE FIGURE IS STILL THE TILE ──
+         It was 11px uppercase `--spent`: six tiles of one grey, where
+         the only way to tell a card apart was to read the word — the
+         exact wall the app's tag system exists to remove. It is
+         sentence case in the item's own colour now, which is how a
+         card is titled everywhere it is not a label naming a control.
+
+         THE RELATIONSHIP IS WHAT IS ASSERTED, so a change to the type
+         scale moves both and the check still means what it says. And
+         the CASE beside it, because "it is smaller" passes on the
+         uppercase label this replaced. */
       lab: px(steps.querySelector('.ty-nm'), 'fontSize'),
       labCase: getComputedStyle(steps.querySelector('.ty-nm')).textTransform,
       val: px(steps.querySelector('.props .val'), 'fontSize'),
@@ -3709,13 +3703,31 @@ const SAID = [
         x.style.minHeight = '';
         return [at, grown];
       }),
-      /* A NUMBER DRAWS AN AREA WITH ITS DAYS DATED. The dated ticks
-         are what say these are four readings rather than a continuous
-         line, which is the whole of what makes an area honest on a
-         daily count. */
-      area: !!steps.querySelector('.ty-ch .ty-ar .f')
-        && !!steps.querySelector('.ty-ch .ty-ar .s'),
-      dates: [...steps.querySelectorAll('.ty-ch .ty-ax > span')].map((x) => x.textContent),
+      /* ── A NUMBER DRAWS SEVEN BARS, AND IT DREW A FOUR-POINT AREA ──
+         The area normalised each day to the window's best on a
+         ZERO-BASED axis and filled to the floor, so a real steps week
+         of 6,200 to 9,011 never put a point below .69 and 74% of the
+         drawing was constant fill. Asserted as SEPARATE marks with
+         different heights: a build that went back to a filled curve
+         has one element where this has seven, and one that drew seven
+         bars all the same height has stopped reading the record.
+
+         AND THE TALLEST IS 100%, which is what makes the shape the
+         week's own rather than a share of an aim the item may not
+         have — and is the half a normalisation bug loses silently. */
+      bars: [...steps.querySelectorAll('.ty-ch .ty-bars > i')]
+        .map((x) => Math.round(parseFloat(x.style.height))),
+      /* TODAY IS THE INK AND THE OTHER SIX ARE THE ITEM'S HUE: the
+         figure printed above the chart is the mark you are looking
+         for, and the rest is what makes a card findable unread. */
+      barToday: [...steps.querySelectorAll('.ty-ch .ty-bars > i')]
+        .map((x) => x.classList.contains('is-today')),
+      /* ── THE AXIS NAMES THE TOP AND THE END ──
+         Four dated ticks were what said these were readings rather
+         than a curve; separate bars say that by being separate. What
+         a bar chart cannot draw is what its tallest mark is WORTH,
+         so that is what the axis carries. */
+      axis: [...steps.querySelectorAll('.ty-ch .ty-ax > span')].map((x) => x.textContent),
       /* A TICK DRAWS ITS WEEK, Monday to Sunday, seven marks. */
       week: train.querySelectorAll('.ty-ch .ty-wk > i').length,
       weekAx: [...train.querySelectorAll('.ty-ch .ty-ax > span')].map((x) => x.textContent),
@@ -3723,9 +3735,19 @@ const SAID = [
          Asserted as the BOX rather than the class: a rule that set the
          class and no longer spanned would pass on the name alone. */
       tall: r.filter((x) => x.classList.contains('is-tall')).map((x) => x.dataset.item),
-      tallH: Math.round(water.getBoundingClientRect().height),
-      shortH: Math.round(steps.getBoundingClientRect().height),
+      /* ── THE GAUGE LIES DOWN ──
+         It was a 6px vertical track with `100% / 50% / 0%` stacked
+         beside it at their own heights, which on the real screen is a
+         hairline with three unattached captions — and per cent is not
+         the unit anybody checks water in. Asserted as the FILL being
+         a width rather than a height, because a rule that turned the
+         rail sideways and left the fill growing upward draws an empty
+         rail on a day you have drunk something. */
       gauge: !!water.querySelector('.ty-ch .ty-gt > i'),
+      gaugeAxis: [...water.querySelectorAll('.ty-ch .ty-gm > span')]
+        .map((x) => x.textContent),
+      gaugeFill: (water.querySelector('.ty-ch .ty-gt > i').style.width || '') !== ''
+        && !water.querySelector('.ty-ch .ty-gt > i').style.height,
       /* THE STEPPER IS THREE SIBLINGS OF THE CARD, never children:
          a button inside a button is invalid and collapses to one press
          while looking exactly right. */
@@ -3738,58 +3760,202 @@ const SAID = [
       }),
     };
   });
-  ok('the name is a small-caps label and the figure is the tile',
-    tile.lab < tile.val * 0.6 && tile.labCase === 'uppercase', tile);
+  ok('the name is sentence case and the figure is still the tile',
+    tile.lab < tile.val * 0.8 && tile.labCase === 'none', tile);
   ok('every tile carries a chart, and it sits on the foot',
     tile.charts === 6
     && tile.feet.every((f) => f[0] === f[1] && f[0] < 20), tile);
-  ok('a number draws an area with its four days dated',
-    tile.area && tile.dates.length === 4
-    && tile.dates.every((d) => /^\d+ [A-Z][a-z]{2}$/.test(d)), tile.dates);
+  ok('a number draws seven bars, the best of them full, and today in the ink',
+    tile.bars.length === 7 && Math.max(...tile.bars) === 100
+    && new Set(tile.bars).size > 1
+    && tile.barToday.join() === 'false,false,false,false,false,false,true',
+    tile);
+  ok('...and the axis names what the tallest is worth, and where today is',
+    tile.axis.length === 2 && / best$/.test(tile.axis[0])
+    && /\d/.test(tile.axis[0]) && tile.axis[1] === 'Today', tile.axis);
   ok('and a tick draws its week, Monday to Sunday',
     tile.week === 7 && tile.weekAx.join() === 'Mon,Sun', tile);
-  /* SPANS TWO ROWS, measured. A tall tile that had stopped spanning
-     would still carry the class and still draw the gauge — squashed
-     into one row's height, which is the regression this catches. */
-  ok('exactly one tile is tall, it is the one you add to, and it spans two',
-    tile.tall.join() === 'w' && tile.gauge
-    && tile.tallH > tile.shortH * 1.8, tile);
+  /* THE GAUGE IS HORIZONTAL AND MARKED IN LITRES, both halves: a
+     rail turned sideways whose fill still grew upward draws empty on
+     a day you have drunk something, and one marked in per cent
+     answers a question nobody asks of a water tracker. */
+  ok('exactly one tile is the one you add to, and its gauge lies down in litres',
+    tile.tall.join() === 'w' && tile.gauge && tile.gaugeFill
+    && tile.gaugeAxis.join('|') === '0|3 L', tile);
   ok('and its stepper is three siblings of the card, each a real target',
     tile.step.length === 3 && !tile.stepIn
     && /^Take 0\.3 L/.test(tile.step[0]) && /^Log an exact/.test(tile.step[1])
     && /^Add 0\.3 L/.test(tile.step[2])
     && tile.stepTap.every((n) => n >= 38), tile);
 
-  /* ══ THE MOSAIC ══
-     Five whole-screen replacements were drawn over the real app at
-     390x844 and this is the one that was picked. It is not a grid of
-     equal tiles: the tall one takes two rows of the right-hand column,
-     one takes the full width, and the rest pair off beside them.
+  /* ══ ONE RING, AND THREE WOULD BE A COSTUME ══
+     Activity's three rings work because Move, Exercise and Stand are
+     three goals in three different units with three targets. This
+     screen asks ONE question — how many of today's items you kept —
+     so three would be the idiom worn as decoration rather than used.
 
-     MEASURED AS BOXES, never as classes. A rule that set `is-wide` and
-     no longer spanned would pass on the name alone, which is the
-     mistake the tall tile's own check already guards against. */
+     AND AN UNMET DAY IS AN OPEN RING, NEVER A RED ONE, which is the
+     same conclusion the week reached when the Missed tag lost its
+     colour. The track is the flat neutral and the arc is the ink,
+     which is what every other mark of the record already wears.
+
+     ── ASSERTED AS THE ARC TRACKING THE FIGURE, AT TWO STATES ──
+     One reading cannot say this: on a day where everything is kept
+     the arc is a full circle, and a build that drew a full circle
+     unconditionally passes. So a tick is toggled and both states are
+     matched against the caption's own fraction, with the two
+     required to DIFFER — which is the whole claim in one line.
+
+     Train, because unticking a tick is one press with no sheet
+     behind it; the record is captured and put back, since a check
+     that changes the state of the app is a check that breaks the
+     next one. */
+  {
+    const readRing = () => page.evaluate(() => {
+      const cap = document.getElementById('scTallyCap');
+      const sv = cap.querySelector('.ty-ring');
+      if (!sv) throw new Error('no ring in the tally caption');
+      const a = sv.querySelector('.a'), t = sv.querySelector('.t');
+      if (!a || !t) throw new Error('the ring has no arc or no track');
+      const C = +a.getAttribute('stroke-dasharray');
+      const off = +a.getAttribute('stroke-dashoffset');
+      const fig = cap.querySelector('.ty-fig > i.is-n');
+      const n = parseInt(fig.firstChild.textContent, 10);
+      const all = parseInt(fig.querySelector('s').textContent.replace(/\D/g, ''), 10);
+      /* A TOKEN THROUGH A PROBE, never a string compare: `--ink` is a
+         hex and a computed `stroke` is an `rgb()`, so a digit match
+         reads one as nothing. This file has met that three times. */
+      const probe = document.createElement('span');
+      document.body.appendChild(probe);
+      const tok = (v) => { probe.style.color = 'var(' + v + ')';
+                           return getComputedStyle(probe).color; };
+      const ink = tok('--ink'), dead = tok('--tick-off');
+      probe.remove();
+      return {
+        /* ROUNDED TO TWO, because the offset is written to one
+           decimal of a 97-unit circumference: a sixth came back .166
+           against a fraction of .167 on arithmetic that is exact. */
+        arc: +(1 - off / C).toFixed(2),
+        frac: +(n / all).toFixed(2),
+        n, all,
+        arcIsInk: getComputedStyle(a).stroke === ink,
+        trackIsNeutral: getComputedStyle(t).stroke === dead,
+        /* Never red on a day you did not finish: the one thing a
+           ring must not do on this screen is grade you. */
+        arcCol: getComputedStyle(a).stroke,
+        /* Inside the caption, which is already the one control that
+           opens the week — a ring that was a second press would be
+           two doors to one room. */
+        inCap: sv.parentElement.id === 'scTallyCap',
+        press: sv.closest('button') === cap,
+        hidden: sv.getAttribute('aria-hidden'),
+        rings: cap.querySelectorAll('.ty-ring').length,
+      };
+    });
+    /* ── SEEDED, NOT CLICKED ──
+       Pressing a tile is the obvious way to move the figure and it
+       cannot be relied on here: a Train tile that is OFF opens the
+       workout deck and a number opens the dial, so the tick lands
+       only once the sheet is committed — and Escape leaves the count
+       exactly where it was. A check whose two states can come back
+       equal is a check that reports a working build as broken.
+
+       Written straight into the record and reloaded, twice, at two
+       fractions that are neither nought nor whole: the arc has
+       somewhere to be wrong in both. */
+    const was = await page.evaluate(() => localStorage.getItem('sched.tick.v1'));
+    /* AND PUT BACK UNSET, or the assertion three hundred lines down
+       that USING the gesture retires the card is vacuous — it would
+       be reading a key this block wrote. The card only comes up on a
+       reload or a fresh visit to the stop, and nothing between here
+       and there does either, so the last word on the key is the
+       state the section above actually left. */
+    const hintWas = await page.evaluate(() => localStorage.getItem('sched.hint2.v1'));
+    const plant = async (rec) => {
+      await page.evaluate((r) => {
+        const d = new Date();
+        const pad = (n) => (n < 10 ? '0' : '') + n;
+        const k = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+        localStorage.setItem('sched.tick.v1', JSON.stringify({ [k]: r }));
+        localStorage.setItem('sched.view.v1', 'tally');
+        localStorage.setItem('sched.ty.v1', 'up');
+        /* ── AND THE TEACHING CARD HAS TO BE MARKED SEEN ──
+           The section above it ends on "Got it", which is for THIS
+           VISIT and deliberately writes no key — so the next reload
+           brings a full-screen modal back over the app, and every
+           press after it lands on the scrim. It took the file down
+           three hundred lines later on a click that was correct.
+           Every context seeds this for the same reason; a section
+           that reloads is a context. */
+        localStorage.setItem('sched.hint2.v1', '1');
+      }, rec);
+      await page.reload({ waitUntil: 'networkidle' });
+      await page.waitForTimeout(260);
+    };
+    await plant({ t: 1 });
+    const one = await readRing();
+    await plant({ t: 1, m: 1, p: '5000' });
+    const two = await readRing();
+    await page.evaluate((w) => {
+      if (w === null) localStorage.removeItem('sched.tick.v1');
+      else localStorage.setItem('sched.tick.v1', w);
+      localStorage.setItem('sched.hint2.v1', '1');
+    }, was);
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(260);
+    await page.evaluate((h) => {
+      if (h === null) localStorage.removeItem('sched.hint2.v1');
+      else localStorage.setItem('sched.hint2.v1', h);
+    }, hintWas);
+    ok('the caption carries one ring, inside the control, hidden from a reader',
+      one.rings === 1 && one.inCap && one.press && one.hidden === 'true', one);
+    ok('and its arc is the fraction the line beside it prints, at two states',
+      one.arc === one.frac && two.arc === two.frac && one.n !== two.n
+      && one.arc !== two.arc
+      /* Neither reading is nought or whole, so a ring stuck at either
+         end fails rather than matching a fraction by luck. */
+      && [one, two].every((x) => x.arc > 0 && x.arc < 1), { one, two });
+    ok('...drawn in the ink over the flat neutral, and never a red for a day you missed',
+      one.arcIsInk && one.trackIsNeutral && two.arcIsInk, { one, two });
+  }
+
+  /* ══ ONE COLUMN, AND IT WAS A MOSAIC ══
+     Five whole-screen replacements were drawn at 390x844 and the
+     mosaic was picked off them: the tall tile taking two rows of the
+     right-hand column, one tile full width, the rest paired beside
+     them. It fitted the whole day on one screen and it could not
+     carry a CHART — seven bars in 150px are marks twenty pixels
+     wide, and the four-point area it drew instead was a slab for
+     arithmetic reasons written up beside `scTyBars`.
+
+     So the screen scrolls now, deliberately, and the cost is stated
+     rather than hidden: the fold buys a chart you can read.
+
+     MEASURED AS BOXES, never as classes. The placement arithmetic is
+     GONE rather than computing a class nothing places — a tile is no
+     longer spliced to an odd cursor slot and none is marked wide —
+     so this asserts what one column actually means: every tile at
+     one left edge, at one width, each below the last. */
   const mos = await page.evaluate(() => {
     const r = [...document.querySelectorAll('.ty-row')];
     const b = (x) => x.getBoundingClientRect();
     const grid = document.querySelector('.ty-grid').getBoundingClientRect();
-    const half = grid.width * 0.55;
+    const read = r.map((x) => b(x)).sort((a, c) => a.top - c.top);
     return {
       n: r.length,
-      wide: r.filter((x) => b(x).width > half).map((x) => x.dataset.item),
-      tall: r.filter((x) => x.classList.contains('is-tall')).map((x) => x.dataset.item),
-      /* The wide one runs the whole track, and the halves are halves. */
-      wideW: Math.round(b(r.find((x) => x.classList.contains('is-wide'))).width),
+      lefts: [...new Set(r.map((x) => Math.round(b(x).left)))],
+      widths: [...new Set(r.map((x) => Math.round(b(x).width)))],
       gridW: Math.round(grid.width),
-      /* TWO COLUMNS: every tile that is not the wide one starts at one
-         of exactly two left edges. */
-      lefts: [...new Set(r.filter((x) => b(x).width <= half)
-        .map((x) => Math.round(b(x).left)))].sort((a, c) => a - c),
+      /* Each below the last, which is what a column IS — two tiles
+         at one left edge could still be stacked in two tracks. */
+      stacked: read.every((x, i) => i === 0 || x.top >= read[i - 1].bottom - 1),
+      wide: r.filter((x) => x.classList.contains('is-wide')).length,
     };
   });
-  ok('the tiles are a mosaic: two columns, one tall, one full width',
-    mos.n === 6 && mos.tall.join() === 'w' && mos.wide.join() === 's'
-    && Math.abs(mos.wideW - mos.gridW) <= 1 && mos.lefts.length === 2, mos);
+  ok('the tiles are one column: one edge, one width, each below the last',
+    mos.n === 6 && mos.lefts.length === 1 && mos.widths.length === 1
+    && Math.abs(mos.widths[0] - mos.gridW) <= 1 && mos.stacked
+    && mos.wide === 0, mos);
 
   /* == THE TICKS LEAD ==
      Train and Mind are the two things you DO, and the four numbers are
@@ -3817,98 +3983,75 @@ const SAID = [
     return {
       seq: read.map((x) => (x.tick ? 'd' : 'n')).join(''),
       ticks: read.filter((x) => x.tick).length,
-      /* AND THE TALL ONE STILL STARTS THE RIGHT-HAND COLUMN, which is
-         a property of the CURSOR rather than of an index: a two-column
-         grid places left then right, so the tall tile lands on the
-         right only when an odd number of half tiles precede it. It sat
-         at index 1, which was true by accident of the numbers leading
-         -- reorder without re-solving it and Water drops into the left
-         column with nothing else on screen looking wrong. */
-      tallL: read.filter((x) => x.tall).map((x) => x.l),
-      right: lefts[lefts.length - 1],
+      /* THE CURSOR SOLVE WENT WITH THE SECOND COLUMN. The tall tile
+         used to be spliced to the first ODD slot so it began the
+         right-hand column; one column has no cursor, so the order is
+         the record's own and Water sits where the item list puts it.
+         Asserted as the tall tile NOT having been moved, because a
+         splice left standing would reorder the numbers for a
+         placement that no longer happens. */
+      tall: read.findIndex((x) => x.tall),
+      lefts: lefts.length,
     };
   });
-  ok('the ticks lead the grid, and the tall tile still starts the right column',
+  ok('the ticks lead the grid, and nothing is spliced past them',
     lead.ticks === 2 && /^d+n+$/.test(lead.seq)
-    && lead.tallL.join() === String(lead.right), lead);
+    && lead.lefts === 1 && lead.tall === 4, lead);
 
-  /* ══ THE PLOT SITS IN A WELL, AND ONLY THE PLOT ══
-     A curve with no edge is a smear on the card. This is NOT the frame
-     inside a frame this project keeps removing — that rule is about a
-     panel drawn round a list of objects, and a well is the area the
-     marks are measured inside. The gauge and the week strip get none,
-     because a filled track and seven blocks are already their own
-     shape, and a check that only looked at the area would pass on a
-     build that put a well round all three. */
+  /* ══ THE WELL IS A BOX, AND IT LOST ITS GROUND ══
+     A plot area needs an edge when the plot is an AREA — a filled
+     curve on a card is a smear without one, which is why the well was
+     given its own ground and a check requiring it. Seven separate
+     bars are their own shape, the way the week strip beside them
+     already is, so the wash under them became a second rectangle
+     saying nothing and went.
+
+     THE BOX IS WHAT STAYS, and it is the half that was never about
+     the look: an `<svg viewBox="0 0 100 38">` at `width: 100%`
+     carries an intrinsic RATIO, so in flow its height resolves to
+     38% of the tile, becomes the row's content height, and the grid
+     sizes every row to it — measured at 238px a row against the 108
+     asked for, with nothing in the stylesheet looking wrong. The
+     marks are out of flow and the well is what gives them a height.
+
+     Both halves are asserted and they fail apart: a build that put
+     the wash back passes the geometry, and one that put the bars
+     back in flow passes the ground. */
   const well = await page.evaluate(() => {
     const g = (id) => document.querySelector('.ty-row[data-item="' + id + '"]');
-    const ar = g('p').querySelector('.ty-ar');
-    const cs = getComputedStyle(ar);
-    const wb = ar.parentElement.getBoundingClientRect();
+    const bars = g('p').querySelector('.ty-bars');
+    const cs = getComputedStyle(bars);
+    const w = bars.parentElement;
+    const alpha = (c) => +((c.match(/[\d.]+\s*\)$/) || ['1)'])[0].replace(/[^\d.]/g, ''));
     return {
-      inWell: ar.parentElement.classList.contains('ty-well'),
-      /* ── ITS OWN GROUND, AND NOT MERELY A DIFFERENT ONE ──
-         Written as `wellBg !== cardBg` this passed on `background:
-         none`, which computes to a transparent black that differs
-         from the card by every channel — a well with no ground at all
-         sailing through the check that exists to require one. Proved
-         by breaking it and watching nothing fail. The ALPHA is the
-         claim: a plot area has to be painted. */
-      wellBg: getComputedStyle(ar.parentElement).backgroundColor,
-      wellA: +((getComputedStyle(ar.parentElement).backgroundColor
-        .match(/[\d.]+\s*\)$/) || ['1)'])[0].replace(/[^\d.]/g, '')),
-      cardBg: getComputedStyle(g('p')).backgroundColor,
+      inWell: w.classList.contains('ty-well'),
+      /* NOT MERELY DIFFERENT FROM THE CARD: `background: none`
+         computes to a transparent black, which differs from the card
+         on every channel — a well with no ground at all sailed
+         through the check that used to exist to require one. The
+         ALPHA is the claim, and here the claim is the other way
+         round. */
+      wellA: alpha(getComputedStyle(w).backgroundColor),
+      pos: cs.position,
+      wellH: Math.round(w.getBoundingClientRect().height),
+      /* The gauge and the week strip are not plots and never had one. */
       gaugeWell: !!g('w').querySelector('.ty-well'),
       weekWell: !!g('t').querySelector('.ty-well'),
-      /* ── AND THE DRAWING IS OUT OF FLOW ──
-         An `<svg viewBox="0 0 100 38">` at `width: 100%` carries an
-         intrinsic RATIO, so in flow its height resolves to 38% of the
-         tile. As a flex item that becomes the row's content height and
-         the grid sizes every row to it: measured at 238px a row
-         against the 108 asked for, with nothing in the stylesheet
-         looking wrong.
-
-         THE POSITION IS THE PROVEN HALF, and the row height is NOT:
-         said plainly, because a clause that cannot fail is worse than
-         none — it is what makes the rest of a claim sound verified.
-
-         Two measurements were tried and neither discriminates. The
-         well's own height stretched to .36 of its width against an
-         intrinsic .38, which is a threshold that has to be wrong one
-         way or the other. The row was then held to the grid's own
-         declared floor — and with the svg put back in flow it came
-         back 169 against a ceiling of 194, well inside, because the
-         grid row it sits in is already being stretched by something
-         else. The 238px rows the bug actually produced needed a
-         different combination of this file than either break could
-         reach.
-
-         So both are carried in the PAYLOAD, where they name the shape
-         of a failure when one happens, and neither is asserted. */
-      pos: cs.position,
-      rowH: Math.round(g('p').getBoundingClientRect().height),
-      /* The track is `minmax(108px, 1fr)` and that is what computes,
-         so the floor has to be pulled OUT of it — `parseFloat` on the
-         whole string is NaN, which the check read as 0 and then
-         compared against happily. */
-      floor: +((getComputedStyle(document.querySelector('.ty-grid'))
-        .gridAutoRows.match(/([\d.]+)px/) || [0, 0])[1]),
     };
   });
-  ok('the area sits in a well of its own, and the gauge and the week do not',
-    well.inWell && well.wellA > 0 && well.wellBg !== well.cardBg
+  ok('the bars sit in a box of their own, and it paints nothing',
+    well.inWell && well.wellA === 0
     && !well.gaugeWell && !well.weekWell, well);
-  ok('and the drawing is out of flow, so the row sizes the chart and not the reverse',
-    well.pos === 'absolute', well);
+  ok('and the marks are out of flow, so the box sizes the chart and not the reverse',
+    well.pos === 'absolute' && well.wellH > 40, well);
 
-  /* THREE MARKS ON THE GAUGE, and the foot is the one that was
-     missing: a scale labelled at the top and the middle and left bare
-     at the bottom reads as one that runs out rather than one that
-     starts at nought, which is the end a person checks a water
-     tracker against. */
-  ok('the gauge is marked at the top, the middle and the foot',
+  /* TWO MARKS ON THE GAUGE, AND THEY ARE LITRES. It was `100% / 50%
+     / 0%` stacked beside a vertical hairline: labels not on the
+     track, in a unit nobody checks water in. You do not ask what
+     fraction of three litres you have had. */
+  ok('the gauge is marked at nought and at the aim, in the item\'s own unit',
     (await page.$$eval('.ty-row[data-item="w"] .ty-gm > span',
-      (m) => m.map((x) => x.textContent).join('|'))) === '100%|50%|0%');
+      (m) => m.map((x) => x.textContent).join('|'))) === '0|3 L');
 
   /* AND THE ARROWS ACTUALLY MOVE THE RECORD, both ways and never below
      nought. A stepper that draws and does nothing passes every check
@@ -3924,7 +4067,7 @@ const SAID = [
     };
     const val = () => document.querySelector('.ty-row[data-item="w"] .props .val').textContent;
     const fill = () => parseFloat(
-      document.querySelector('.ty-row[data-item="w"] .ty-gt > i').style.height);
+      document.querySelector('.ty-row[data-item="w"] .ty-gt > i').style.width);
     const start = { v: val(), f: fill() };
     await press(2); await press(2);
     const up = { v: val(), f: fill() };
@@ -4127,41 +4270,66 @@ const SAID = [
   ok('and the blurred copies are painted behind the solid marks',
     glow.lastIsSolid, glow);
 
-  /* ── ONE MARK, THREE SIZES, ONE COLOUR ──
-     The ring, the strip beside it and the calendar it opens are the
-     same claim drawn at three scales, so they move together or the
-     screen says one thing in two colours. It was --ink at all three,
-     which on a page whose ink is white made a kept day and a piece of
-     type the same object.
+  /* ── ONE MARK, TWO SIZES, ONE COLOUR — AND THE COLOUR IS THE
+     ITEM'S ──
+     The tile's seven-day strip and the half-year it opens are the
+     same claim drawn at two scales, so they move together or the
+     screen says one thing in two colours. Three things have stood in
+     this list: a circle check on the tile, which went when the
+     fraction beside it made it a third statement of one figure; the
+     strip; and the calendar. Both survivors were the ACCENT while
+     every glyph on the grid was one grey — and with the tile in the
+     item's own hue the calendar had to follow it, or opening Train's
+     record hands you a sheet drawn in a colour Train has never worn.
 
-     Asked for as the RESOLVED accent rather than a literal — the wheel
-     turns it to anything — and the unlit mark is measured in the same
-     breath, because a rule that painted everything the accent would
-     pass a check that only looked at the lit ones. Losing the misses
-     is the one thing a record of showing up must never do. */
+     RESOLVED THROUGH A PROBE rather than compared as strings: the
+     hue is a token and a computed fill is an `rgb()`, and this file
+     has read a hex as nothing three times.
+
+     The unlit mark is measured in the same breath, because a rule
+     that painted everything the item's colour would pass a check
+     that only looked at the lit ones. Losing the misses is the one
+     thing a record of showing up must never do. */
   const tyMark = await page.evaluate(() => {
-    const cs = getComputedStyle(document.documentElement);
-    const hex = (k) => cs.getPropertyValue(k).trim().toLowerCase();
-    const rgb = (h) => 'rgb(' + h.replace('#', '').match(/\w\w/g)
-      .map((x) => parseInt(x, 16)).join(', ') + ')';
-    /* The ring is the circle check, filled on a kept item, and the
-       row's own strip is gone with the tile — so the calendar in the
-       history sheet is the whole of the record this measures. */
-    const a1 = document.querySelector('.ty-row.is-on > .chk');
+    const probe = document.createElement('span');
+    document.body.appendChild(probe);
+    const tok = (v) => { probe.style.color = v; return getComputedStyle(probe).color; };
     const c1 = document.querySelector('.ty-cal');
-    if (!a1 || !c1) return { probe: [!!a1, !!c1] };
-    const arc = getComputedStyle(a1).backgroundColor;
-    const cal = [...c1.querySelectorAll(':scope > rect')].map((r) => r.getAttribute('fill'));
-    return { red: rgb(hex('--red')), off: rgb(hex('--tick-off')), arc,
-      calLit: cal.filter((f) => f === 'var(--red)').length,
-      calOff: cal.filter((f) => f === 'var(--tick-off)').length,
-      other: cal.filter((f) => f !== 'var(--red)' && f !== 'var(--tick-off)') };
+    const s1 = document.querySelector('.ty-row[data-item="t"] .ty-wk > i.is-on');
+    if (!c1 || !s1) { probe.remove(); return { probe: [!!c1, !!s1] }; }
+    /* The sheet that is open is Steps', so the calendar's colour is
+       read from the panel that actually carries it. */
+    const panel = c1.closest('#scTyPanel');
+    const raw = getComputedStyle(panel).getPropertyValue('--tc').trim();
+    const want = tok(raw);
+    const cal = [...c1.querySelectorAll(':scope > rect')]
+      .map((r) => tok(r.getAttribute('fill').replace('var(--tc, var(--red))', raw)));
+    const off = tok('var(--tick-off)');
+    /* AND THE SHEET'S COLOUR IS THE CARD'S: read off the glyph on the
+       grid behind it, found by the title the sheet prints, so the two
+       cannot be the same token by coincidence of the fixture. */
+    const who = document.getElementById('scTyTitle').textContent;
+    const card = [...document.querySelectorAll('.ty-card')]
+      .find((c) => (c.querySelector('.ty-nm') || {}).textContent === who);
+    const cardHue = card ? getComputedStyle(card.querySelector('.ic')).stroke : null;
+    /* Train's own strip, which is the same mark one size down — and a
+       DIFFERENT item, so "they agree" cannot pass on one colour. */
+    const strip = getComputedStyle(s1).backgroundColor;
+    const trainHue = getComputedStyle(
+      document.querySelector('.ty-card[data-item="t"] .ic')).stroke;
+    probe.remove();
+    return { want, off, cardHue, who, strip, trainHue,
+      calLit: cal.filter((f) => f === want).length,
+      calOff: cal.filter((f) => f === off).length,
+      other: cal.filter((f) => f !== want && f !== off) };
   });
-  ok('the check and the calendar both draw a kept day in the accent',
-    tyMark.arc === tyMark.red && tyMark.calLit > 0
-    && tyMark.other.length === 0, tyMark);
-  ok('...and a missed one is still drawn, in neither',
-    tyMark.calOff > 0 && tyMark.red !== tyMark.off, tyMark);
+  ok('the calendar draws a kept day in the item\'s own colour, and nothing else',
+    tyMark.calLit > 0 && tyMark.other.length === 0
+    && tyMark.want !== tyMark.off && tyMark.want === tyMark.cardHue, tyMark);
+  ok('...and the strip on the tile is the same mark in the same colour, one size down',
+    tyMark.strip === tyMark.trainHue && tyMark.trainHue !== tyMark.want, tyMark);
+  ok('...and a missed one is still drawn, in the flat neutral',
+    tyMark.calOff > 0, tyMark);
 
   /* ── weeks across, weekdays DOWN ──
      Without the first day's own weekday as a column offset, every
@@ -4246,9 +4414,15 @@ const SAID = [
       const rects = [...cal.querySelectorAll(':scope > rect')];
       const w = rects.map((r) => +(+r.getAttribute('width')).toFixed(2));
       const full = Math.max(...w);
+      /* A LIT DAY IS THE ITEM'S OWN COLOUR NOW, so the fill is read as
+         "not the neutral" rather than against the accent it used to
+         be. Written as a literal it counted nought on a calendar
+         drawing 78 of them, which is a zero shaped exactly like a
+         pass on the two assertions under it. */
+      const LIT = 'var(--tc, var(--red))';
       return {
         cells: rects.length,
-        lit: rects.filter((r) => r.getAttribute('fill') === 'var(--red)').length,
+        lit: rects.filter((r) => r.getAttribute('fill') === LIT).length,
         miss: rects.filter((r) => r.getAttribute('fill') === 'var(--tick-off)'
           && +r.getAttribute('width') === full).length,
         skip: rects.filter((r) => r.getAttribute('fill') === 'var(--tick-off)'
@@ -4256,7 +4430,7 @@ const SAID = [
         /* Every small mark is the NEUTRAL. A third state drawn in a
            third colour would be the app inventing a judgement for the
            one state that is not one. */
-        smallLit: rects.filter((r) => r.getAttribute('fill') === 'var(--red)'
+        smallLit: rects.filter((r) => r.getAttribute('fill') === LIT
           && +r.getAttribute('width') < full).length,
         figs: [...document.querySelectorAll('.ty-stats b')].map((b) => b.textContent),
         hint: document.querySelector('.ty-hint').textContent,
@@ -4269,6 +4443,10 @@ const SAID = [
        sevenths of the window, and none of them is lit. */
     ok(`a day it was never on is drawn small and neutral (${three.skip} of ${three.cells})`,
       three.cells === 182 && three.skip > 90 && three.skip < 115
+      /* AND SOME OF THEM ARE LIT, because the two counts under this
+         are differences and a calendar drawing nothing at all gives
+         the same answer as one drawing the wrong thing. */
+      && three.lit > 0
       && three.lit + three.miss + three.skip === 182 && three.smallLit === 0, three);
     /* The strip beside the row drew the same three states and is gone
        with the tile, so the calendar is the only place they are drawn
@@ -4954,7 +5132,6 @@ const SAID = [
              marks: el.querySelectorAll('svg circle, svg path').length,
              tile: el.querySelector('svg rect').getAttribute('fill'),
              on: el.querySelector('svg circle').getAttribute('fill'),
-             me: getComputedStyle(document.documentElement).getPropertyValue('--me').trim(),
              dim: getComputedStyle(document.documentElement)
                .getPropertyValue('--tick-off').trim(),
              fig: getComputedStyle(document.documentElement)
@@ -4975,12 +5152,17 @@ const SAID = [
      is that colour says WHICH; with nothing left to say it takes the
      neutral pair every other mark on a neutral surface uses.
 
-     Asserted as NOT --me as well as as the neutral, because "it is
-     grey" passes on a build where --me happens to be grey. */
+     IT ALSO ASSERTED "not --me", on the grounds that "it is grey"
+     passes on a build where that colour happens to be grey. `--me`
+     went with the push that was its only reader, so the clause had
+     no subject left — and left reading a field the payload no longer
+     carries it threw a TypeError and took the file down forty
+     assertions early rather than failing. What is left is the
+     stronger half anyway: BOTH marks are asserted against the exact
+     token each is supposed to be, which no other colour passes. */
   ok('drawn in the flat neutral, and not in any colour of yours',
     pic.tile.toLowerCase() === pic.dim.toLowerCase()
-    && pic.on.toLowerCase() === pic.fig.toLowerCase()
-    && pic.tile.toLowerCase() !== pic.me.toLowerCase(), pic);
+    && pic.on.toLowerCase() === pic.fig.toLowerCase(), pic);
 
   /* MOVED, because the line above passes on a face painted with the
      shipped hex typed in as a literal. */
@@ -5086,12 +5268,18 @@ const SAID = [
   ok('danger is visibly not the accent', tone.bad !== tone.red, tone);
 
   /* ══════════════════════════════════════════════════════
-     THE TWO THINGS YOU CHOOSE A COLOUR FOR
+     THE ONE THING LEFT WITH A COLOUR OF ITS OWN
 
      The accent went and the chrome went neutral with it, which left
-     two objects that turn out to have a WHICH after all: your face,
-     which is which PERSON, and the Now chip, which is the one thing
-     happening. Both are set from a row of eight swatches.
+     two objects with a WHICH after all: your face, which is which
+     PERSON, and the Now chip, which is the one thing happening.
+
+     YOUR FACE LOST ITS COLOUR WHEN FRIENDS WENT, and that is the
+     point rather than a tidy-up: it was the one setting here that
+     TRAVELLED — pushed with your record, so a friend's board drew you
+     in it. Its only two readers were the push and the profile, so
+     with no board to be drawn on it was a token written on every
+     paint and read by nothing. The Now chip is what is left.
 
      THE DISCIPLINE IS THAT NOTHING ELSE READS THEM. This is one press
      away from being the wheel again under another name, and the only
@@ -5104,21 +5292,24 @@ const SAID = [
     const g = (k) => cs.getPropertyValue(k).trim().toLowerCase();
     return { me: g('--me'), live: g('--live'), red: g('--red'), ink: g('--ink') };
   });
-  ok('the two chosen colours exist and neither is the ink',
-    /^#[0-9a-f]{6}$/.test(pick.me) && /^#[0-9a-f]{6}$/.test(pick.live)
-    && pick.me !== pick.ink && pick.live !== pick.ink, pick);
-  /* A COLOUR EACH, which is the whole reason there are two tokens. One
-     shared token passes every check written about either one on its
-     own, and the bug it hides is the two moving together. */
-  ok('...and they are two settings, not one', pick.me !== pick.live, pick);
+  ok('the one chosen colour exists and is not the ink',
+    /^#[0-9a-f]{6}$/.test(pick.live) && pick.live !== pick.ink, pick);
+  /* ── AND `--me` IS GONE RATHER THAN LEFT AT A DEFAULT ──
+     A token written on every paint and read by nothing is a dead rule
+     that still cascades, one language over. Asserted as the EMPTY
+     string, because a token that merely resolves to the ink would
+     pass any check written as "it is not a colour". */
+  ok('...and the colour that only ever travelled is gone with the push',
+    pick.me === '', pick);
   ok('and the chrome is still neutral', pick.red === pick.ink, pick);
 
   /* ── AND THEY ARE DRAWN WHERE THEY ARE SET ──
      A token nothing consumes is a setting you can get wrong and never
-     see. Both are read off what is actually PAINTED: the chip's own
-     background, and the face's own fill attribute, which is written by
-     scFaceIn at build time rather than styled — so a repaint does not
-     reach it and a check reading a stylesheet would not either. */
+     see, which is exactly what `--me` became. The chip is read off its
+     own painted background, and the face off its own fill attribute,
+     which scFace writes at build time rather than styling — so a
+     repaint does not reach it and a check reading a stylesheet would
+     not either. */
   const drawnIn = await page.evaluate(() => {
     const cs = getComputedStyle(document.documentElement);
     const hex = (k) => cs.getPropertyValue(k).trim().toLowerCase();
@@ -5145,15 +5336,16 @@ const SAID = [
              sameLead: got ? lead(got) === lead(live) : false,
              moved: got ? got.some((v, i) => Math.abs(v - bg[i]) > 6) : false,
              face: face ? face.getAttribute('fill').toLowerCase() : null,
-             wantFace: hex('--me') };
+             off: hex('--tick-off').toLowerCase() };
   });
   ok('the Now chip carries the colour set for it, and is not bare page',
     drawnIn.chip !== null && drawnIn.sameLead && drawnIn.moved, drawnIn);
-  /* Your face is the flat neutral now and makes no colour claim, so
-     what is asserted is that it is NOT drawn in either of the two
-     colours this screen still has. */
-  ok('...and your face is in neither of them',
-    drawnIn.face !== null && drawnIn.face !== drawnIn.wantFace, drawnIn);
+  /* Your face is the flat neutral and makes no colour claim at all.
+     Asserted as the neutral ITSELF rather than as "not the chip's
+     colour" — the second passes on a face drawn in any of a hundred
+     hues that happen not to be that one. */
+  ok('...and your face is the flat neutral, which is not a claim',
+    drawnIn.face !== null && drawnIn.face === drawnIn.off, drawnIn);
 
   /* ── AND THERE IS NO COLOUR TO PICK AT ALL ──
      One row of eight swatches was left, `Your colour`, drawing your
@@ -5206,28 +5398,6 @@ const SAID = [
      What the pair-per-face lesson was FOR survives one screen over:
      the tags are still nine hexes doubled for the two faces, and are
      still measured that way below. */
-
-  /* ── AND A NAME THIS BUILD DOES NOT HAVE FALLS THROUGH ──
-     What is stored is the swatch's NAME, so it can resolve to a
-     different hex on each face — and a name outlives the code that
-     wrote it, the way sched.view.v1 and sched.ty.v1 both do. A colour
-     that resolves to nothing is a blank chip and an invisible face. */
-  /* Nothing writes this key any more and boot removes it, so what is
-     asserted is the one thing that still matters about it: --me
-     resolves to a real hex whatever is in storage. It is still pushed
-     with your record, so a peer drawing you from a token that came
-     back empty would draw you as nothing at all. */
-  await page.evaluate(() => {
-    localStorage.setItem('sched.me.v1', 'chartreuse');
-  });
-  await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForTimeout(420);
-  const fell = await page.evaluate(() => {
-    const c = getComputedStyle(document.documentElement);
-    return { me: c.getPropertyValue('--me').trim() };
-  });
-  ok('the colour your record carries resolves to a real hex regardless',
-    /^#[0-9a-f]{6}$/i.test(fell.me), fell);
 
   /* ── A KEY NOTHING READS ANY MORE IS SWEPT, NOT LEFT ──
      The same rule the old palette name and the stored theme key keep:
@@ -5823,18 +5993,18 @@ const SAID = [
     off.pressed === 'false' && off.pencils === 0, off);
 
   /* IT IS THE WEEK'S CONTROL. There are no blocks on Today, Notes or
-     Friends, so a control offering to edit one is a control that
+     the calendar, so a control offering to edit one is a control that
      cannot do anything. Measured as the BOX, which is the seventh time
      in this app that reading the attribute would have missed it. */
   const edViews = {};
-  for (const v of ['tally', 'notes', 'friends', 'list']) {
+  for (const v of ['tally', 'notes', 'cal', 'list']) {
     await page.evaluate((vv) => document.querySelector(`.tab[data-view="${vv}"]`).click(), v);
     await page.waitForTimeout(340);
     edViews[v] = await page.evaluate(() =>
       document.getElementById('scHdEd').getBoundingClientRect().width > 0);
   }
   ok('the edit control is drawn on the week and nowhere else',
-    edViews.list && !edViews.tally && !edViews.notes && !edViews.friends, edViews);
+    edViews.list && !edViews.tally && !edViews.notes && !edViews.cal, edViews);
 
   /* AND LEAVING THE WEEK PUTS IT AWAY. Arming, walking off and coming
      back must not find the week still armed — that is a decision the
@@ -6090,8 +6260,15 @@ const SAID = [
 
      Not yet is the one that must stay neutral. A tag takes a hue when
      it names something that happened, and a thing you have not got to
-     has not happened; Missed is the reversal that was asked for, and
-     it is the only red tag in the app. */
+     has not happened.
+
+     AND MISSED IS ASSERTED AS ABSENT, in two halves. It was the one
+     red tag in this app and it is gone: a real morning drew five of
+     them in a column, which is the judgement the rule it reversed was
+     written against. `is-bad` must dress nothing — asserted as the
+     class landing on the SAME colour a bare tag has, because a rule
+     deleted and a rule that happens not to match look identical from
+     the outside — and no row behind you may draw a tag at all. */
   const dress = await page.evaluate(() => {
     const r = document.querySelector('.week.is-today .row[data-id]');
     const t = r.querySelector('.st');
@@ -6106,10 +6283,11 @@ const SAID = [
     const lead = (c) => { const v = num(c); return v.indexOf(Math.max(...v)); };
     const was = t.className;
     const out = {};
-    ['is-ok', 'is-now', 'is-bad', 'is-todo'].forEach((k) => {
-      t.className = 'st ' + k;
+    ['is-ok', 'is-now', 'is-bad', 'is-todo', ''].forEach((k) => {
+      t.className = ('st ' + k).trim();
       const g = getComputedStyle(t);
-      out[k] = { spread: Math.round(spread(g.color)), lead: lead(g.color) };
+      out[k || 'bare'] = { spread: Math.round(spread(g.color)), lead: lead(g.color),
+        col: g.color };
     });
     t.className = was;
     out.badLead = lead(paint(cs.getPropertyValue('--bad').trim()));
@@ -6118,12 +6296,107 @@ const SAID = [
   });
   ok('Not yet is a grey with no channel standing out',
     dress['is-todo'].spread <= 12, dress);
-  ok('Completed is green, and Missed is the app\u2019s own red',
-    dress['is-ok'].spread >= 14 && dress['is-ok'].lead === dress.okLead
-    && dress['is-bad'].spread >= 14 && dress['is-bad'].lead === dress.badLead
-    && dress['is-bad'].lead !== dress['is-ok'].lead, dress);
+  ok('Completed is green', dress['is-ok'].spread >= 14
+    && dress['is-ok'].lead === dress.okLead, dress);
+  /* Against the BARE tag rather than against a hue: "it is not red"
+     passes on a rule that dressed it any other colour at all, and the
+     claim is that the class does nothing. */
+  /* Against the BARE tag, never against a hue: "it is not red" passes
+     on a rule that dressed it any other colour at all, and the claim
+     is that the class does nothing.
+
+     AND NOT AGAINST --bad's LEAD CHANNEL, which is what the first cut
+     of this asserted and what made it fail on a correct build. A bare
+     tag is white, so every channel ties and `indexOf(max)` returns 0;
+     --bad is a pale red, which also leads on 0. The two coincided by
+     arithmetic rather than by the rule being back. `is-ok` differing
+     from bare is the guard that belongs here instead — it proves the
+     measurement can tell a dressed class from an undressed one. */
+  ok('...and Missed has no dress left — is-bad colours nothing',
+    dress['is-bad'].col === dress.bare.col
+    && dress['is-ok'].col !== dress.bare.col, dress);
   ok('...and In progress is a colour of its own too',
     dress['is-now'].spread >= 14, dress);
+
+  /* ── AND THE WORD IS GONE FROM THE WEEK, IN THREE CLOCK-PROOF
+         HALVES ──
+     The behaviour itself is not: `gone` needs is-past, which scLive
+     sets on TODAY's rows alone, so a check that waited for a real
+     block to be behind you would pass vacuously all morning and only
+     mean something at night. This file has recorded that shape six
+     times. So what is asserted is what holds at every hour.
+
+     `.st:empty` being undrawn is the LOAD-BEARING half — it is the
+     whole mechanism the absence rides on, it is what a day off
+     already uses, and one stylesheet tidy takes it away and leaves
+     empty pills down the card. Planted and restored inside one
+     evaluate, so nothing is left on the page.
+
+     And the count of tags drawn is asserted beside the word, because
+     "no tag says Missed" is vacuously true of a week that draws no
+     tags at all. */
+  const readTags = () => page.evaluate(() => {
+    const tags = [...document.querySelectorAll('.week .row .st')];
+    return { n: tags.length,
+      drawn: tags.filter((x) => x.getClientRects().length > 0).length,
+      words: [...new Set(tags.map((x) => x.textContent.trim()).filter(Boolean))] };
+  });
+  /* ── THE ALIVE HALF HAS TO MAKE A TAG, NOT WAIT FOR ONE ──
+     Two clock traps here, and the second only turned up under a probe.
+     `is-past` is set on TODAY's rows alone, so after the last block of
+     the day every row on today's card is gone and draws nothing. And
+     the tag is written by scLive, which walks `.week.is-today .row` —
+     so ANOTHER day's card draws no tag at any hour either, which is
+     not what this file's own note about "Not yet whatever the hour"
+     reads like. Measured at 23:09: today 0 drawn, another day 0 drawn.
+
+     So there is no day and no hour where a tag can be relied on to be
+     there already. Ticking a block MAKES one — Completed is written on
+     the spot, at every hour — which is the only version of this guard
+     that cannot pass vacuously. Unticked again immediately, because a
+     check that changes the state of the app is a check that breaks the
+     next one. */
+  const missAlive = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll('.week.is-today .row[data-id]')];
+    const r = rows.find((x) => !/train/i.test((x.querySelector('.n b') || {}).textContent || '')
+      && !x.classList.contains('is-done'));
+    if (!r) throw new Error('no untrained, unticked row on today to tick');
+    r.parentElement.querySelector('.chk').click();
+    return { id: r.dataset.id };
+  });
+  await page.waitForTimeout(420);
+  const missTick = await page.evaluate((id) => {
+    const r = document.querySelector('.week.is-today .row[data-id="' + id + '"]');
+    const t = r && r.querySelector('.st');
+    return { word: t ? t.textContent.trim() : null,
+      drawn: !!(t && t.getClientRects().length > 0) };
+  }, missAlive.id);
+  await page.evaluate((id) => {
+    const r = document.querySelector('.week.is-today .row[data-id="' + id + '"]');
+    if (r) r.parentElement.querySelector('.chk').click();
+  }, missAlive.id);
+  await page.waitForTimeout(420);
+  const missWords = await page.evaluate(() => {
+    const tags = [...document.querySelectorAll('.week .row .st')];
+    return { n: tags.length, back: document.querySelectorAll('.week .row.is-done').length,
+      words: [...new Set(tags.map((x) => x.textContent.trim()).filter(Boolean))] };
+  });
+  const emptied = await page.evaluate(() => {
+    const t = document.querySelector('.week .row .st');
+    if (!t) throw new Error('no state tag on the week');
+    const was = t.textContent;
+    t.textContent = '';
+    const drawn = t.getClientRects().length > 0;
+    t.textContent = was;
+    return { drawn, restored: t.textContent === was };
+  });
+  ok('ticking a block draws its tag, so the tag system is demonstrably alive',
+    missTick.drawn && missTick.word === 'Completed', missTick);
+  ok('...and with it unticked again, no tag on the week says Missed',
+    missWords.n > 2 && missWords.words.indexOf('Missed') < 0
+    && missWords.back === 0, missWords);
+  ok('...and an emptied tag draws nothing, which is what absence rides on',
+    emptied.drawn === false && emptied.restored, emptied);
 
   console.log('\n── the thumb ──');
   await dblRow('.week.is-today .row[data-id]');
@@ -6156,1563 +6429,6 @@ const SAID = [
     await page.evaluate(() => ['ledger.v1', 'habits.v1', 'reminders.v1', 'backtest.v1', 'checkin.v1']
       .every((k) => localStorage.getItem(k) === null)));
 
-  /* ═══════════════════════════════════════════════════════════
-     FRIENDS
-
-     Driven against the REAL worker. Playwright answers every request
-     to the fake host by calling `worker.fetch` with a Map for KV, so
-     the app talks to the code that will be deployed and the round trip
-     is genuine — no account, no network, no wrangler.
-
-     ON ITS OWN PAGE, deliberately. The section above counts every
-     request the main page makes and fails on one that leaves the
-     origin, and that assertion is the app's whole promise. Turning
-     friends on here would poison it, and relaxing its filter to let
-     this through would quietly relax it for everything else too. The
-     promise is "off until you turn it on", so the page that never
-     turns it on is the one that has to prove it.
-
-     BOTH CLOCKS ARE FROZEN to the same instant. The page files a day
-     under its own local date and the worker trims to a window from its
-     own clock; freezing only one of the two measures a five-day skew
-     rather than the app, and the first run of this reported an empty
-     board for exactly that reason. */
-  console.log('\n── friends ──');
-  {
-    const worker = (await import('file://' + require('path')
-      .resolve(__dirname, '..', 'worker', 'index.js'))).default;
-
-    const FROZEN = new Date('2026-09-01T09:30:00').getTime();
-    const RealDate = Date;
-    globalThis.Date = class extends RealDate {
-      constructor(...a) { super(...(a.length ? a : [FROZEN])); }
-      static now() { return FROZEN; }
-    };
-
-    const store = new Map();
-    const env = { SCHED: {
-      async get(k, type) {
-        if (!store.has(k)) return null;
-        const v = store.get(k);
-        if (type === 'arrayBuffer') return v;
-        return typeof v === 'string' ? v : new TextDecoder().decode(new Uint8Array(v));
-      },
-      async put(k, v) { store.set(k, v); },
-      async delete(k) { store.delete(k); },
-    } };
-
-    const HOST = 'https://sched.test.workers.dev';
-    const day = (off) => {
-      const d = new Date(FROZEN);
-      d.setDate(d.getDate() - off);
-      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
-        + '-' + String(d.getDate()).padStart(2, '0');
-    };
-
-    /* Somebody already on the server, so adding a friend is a real
-       fetch of a real record rather than a fixture handed to the page. */
-    /* Two counts a day now: how many of the five they ticked, and how
-       many of their blocks they kept. Never which five and never which
-       blocks — the schedule itself has still never left a phone. */
-    const days = {};
-    for (let i = 0; i < 12; i++) days[day(i)] = { t: (i % 5) + 1, b: (i % 4) + 1 };
-    store.set('key:JADE2K7P', 'x'.repeat(64));
-    store.set('rec:JADE2K7P', JSON.stringify({
-      code: 'JADE2K7P', name: 'Rae', acc: '#0F6E6A', ink: '#ffffff', pic: '',
-      days, at: FROZEN - 60000,
-      logs: [{ id: 'a1', at: FROZEN - 3600e3, day: day(0), item: 'm',
-               cap: 'Eight miles before the light came up.', img: '' }],
-    }));
-
-    const fp = await browser.newPage({ ...PHONE });
-    const ferrs = [];
-    fp.on('pageerror', (e) => ferrs.push(String(e)));
-    fp.on('console', (m) => { if (m.type() === 'error') ferrs.push(m.text()); });
-    await jackets(fp);
-    const paths = [];
-    await fp.route(HOST + '/**', async (route) => {
-      const r = route.request();
-      paths.push(r.method() + ' ' + new URL(r.url()).pathname);
-      const res = await worker.fetch(new Request(r.url(), {
-        method: r.method(), headers: r.headers(),
-        body: ['GET', 'HEAD'].includes(r.method()) ? undefined : r.postDataBuffer(),
-      }), env);
-      await route.fulfill({ status: res.status,
-        headers: Object.fromEntries(res.headers),
-        body: Buffer.from(await res.arrayBuffer()) });
-    });
-    await fp.addInitScript((host) => {
-      const F = new Date('2026-09-01T09:30:00').getTime(), R = Date;
-      window.Date = class extends R {
-        constructor(...a) { super(...(a.length ? a : [F])); }
-        static now() { return F; }
-      };
-      delete window.SpeechRecognition;
-      delete window.webkitSpeechRecognition;
-      /* The intro is marked seen here too: it is a full-screen
-         surface on a first visit and this page presses things. */
-      if (!localStorage.getItem('sched.tour.v1')) {
-        localStorage.setItem('sched.tour.v1', '1');
-        localStorage.setItem('sched.hint2.v1', '1');
-        localStorage.setItem('sched.hintw.v1', '1');
-      localStorage.setItem('sched.hintw.v1', '1');
-      /* AND THE GESTURE CARD, for the intro's own reason: it comes up
-         over Showing up on a first visit, dims the whole app behind it
-         and takes every press. Left unset, half this file would be
-         measuring pixels through a 62% wash and clicking a surface
-         rather than a tile. The section that is about it clears the
-         key and reloads. */
-      localStorage.setItem('sched.hint2.v1', '1');
-      localStorage.setItem('sched.hintw.v1', '1');
-      }
-      /* Pointed at the worker running in THIS process, not the live one
-         the app ships with. Everything below is a real round trip
-         through the real worker file, and none of it touches a server
-         anybody else can see.
-
-         ONLY IF ABSENT. An init script runs on every navigation, and
-         this page reloads halfway through — written unconditionally it
-         put the record back to on:false with no code, throwing away the
-         claim the test had just made, and the failure surfaced four
-         hundred lines later as a log post that never landed. */
-      if (!localStorage.getItem('sched.net.v1')) {
-        localStorage.setItem('sched.net.v1', JSON.stringify({
-          url: host, code: '', key: '', name: 'Niko', pic: '', on: false }));
-      }
-      /* A share sheet that records instead of opening one. Chromium has
-         no navigator.share, so without this the button falls to the
-         clipboard branch and the link is only readable through a
-         permission grant — and the branch a phone takes goes untested,
-         which is the one that matters. */
-      window.__shared = [];
-      navigator.share = function (d) { window.__shared.push(d); return Promise.resolve(); };
-    }, HOST);
-    const fetched = [];
-    fp.on('request', (r) => fetched.push(r.url()));
-    await fp.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
-    await fp.evaluate(async () => { await document.fonts.ready; });
-
-    const tab = async (v) => {
-      await fp.click(`.tab[data-view="${v}"]`);
-      await fp.waitForTimeout(220);
-    };
-    /* The board and the feed are two stops now, so a test that wants
-       the feed has to go to it. Driven by name rather than by counting
-       presses — the same reason the view helper above exists. */
-    const stop = async (v) => {
-      await fp.click(`.fr-stop[data-stop="${v}"]`);
-      await fp.waitForTimeout(240);
-    };
-
-    /* Two ticks of your own, so the board has a real figure on it
-       rather than a zero that any code path would produce. */
-    await tab('tally');
-    /* BY ITEM, not by position. A row is two buttons now — the card
-       logs and the strip beside it opens the history — so `#scTally
-       button >> nth=1` is Train's STRIP rather than Mind's card, and
-       the panel it opens then swallows every click after it. */
-    await fp.click('.ty-card[data-item="t"]');
-    await fp.waitForTimeout(500);
-    /* Train now asks what you trained, so the deck is up over the
-       tally and its scrim takes every press after it. Dismissed
-       rather than answered: this section is about the board's
-       figures, and the answer is not one of them. */
-    await fp.keyboard.press('Escape');
-    await fp.waitForTimeout(360);
-    /* ── AND MIND IS DISMISSED THE WAY TRAIN IS, TWO LINES UP ──
-       Mind asks what you read, so its picker comes up over the tally
-       and takes every press after it. This waited 220ms and pressed
-       on — which is UNDER the 260 the double tap deferred a first
-       press by at the time, so the press had not landed yet and the
-       sheet opened later, over whatever was pressed next. It survived
-       on that race: the sheet was reliably late enough to miss the
-       click behind it, and any change that moved either number by
-       forty milliseconds broke it. The window is 380 now, so the wait
-       is sized against that rather than left level with the old
-       number. Waited out and dismissed, like the deck above. */
-    await fp.click('.ty-card[data-item="m"]');
-    await fp.waitForTimeout(700);
-    await fp.keyboard.press('Escape');
-    await fp.waitForTimeout(360);
-    /* A number nothing else in the app could produce, DRAGGED into
-       Steps — the sheet is a dial now and there is no field to type
-       into. The tick means YOU LOGGED IT and never what it was, and
-       the only way to hold that claim is to go looking for the figure
-       afterwards. 18,400 rather than 18,437 because the track's grain
-       is a hundred steps: a fixture has to be a value the control can
-       actually produce, or it is testing a number nobody could enter. */
-    await fp.click('.ty-card[data-item="p"]');
-    await fp.waitForTimeout(400);
-    await fp.evaluate(() => {
-      const d = document.querySelector('.nm-dial');
-      d.value = 18400;
-      d.dispatchEvent(new Event('input', { bubbles: true }));
-    });
-    await fp.click('.sheet .btn.go');
-    await fp.waitForTimeout(400);
-
-    /* Scoped to ONE pane. Both halves stay in the DOM — the stop hides
-       them with display:none — so an unscoped query returns the feed's
-       actions alongside the board's whichever stop is up. */
-    const glyphs = (where) => fp.$$eval(where + ' .fr-link', (b) => b.map((x) =>
-      x.textContent.trim() + '|' + (x.querySelector('path').getAttribute('d')
-        .indexOf('M7 2v10') === 0 ? 'plus' : 'go')).join(' '));
-
-    /* ── nothing has left, and the tab has not been opened ──
-       This used to read "friends is off out of the box", and off meant
-       a person had to be told a .workers.dev address and type it in
-       before anything worked. That is gone: the build carries a server
-       and arriving at the tab claims a code.
-
-       What survives is the half that was actually the promise — the
-       week and the tally reach nothing at all. So the check
-       moves to WHEN rather than whether, and it is stricter for it: a
-       single request off this origin before the Friends tab is opened
-       fails, and that is the line the app must not cross. */
-    ok('the week and the tally have asked for nothing off origin',
-      fetched.every((u) => u.startsWith(BASE) || u.startsWith('data:')
-        || u.startsWith('blob:') || isArt(u)),
-      fetched.filter((u) => !u.startsWith(BASE) && !isArt(u)));
-    ok('and nothing has been claimed yet',
-      await fp.evaluate(() => {
-        const n = JSON.parse(localStorage.getItem('sched.net.v1') || 'null');
-        return !n || !n.on;
-      }));
-
-    await tab('friends');
-    await fp.waitForTimeout(900);
-
-    /* ── arriving turns it on ── */
-    ok('opening the tab claims a code, with nothing to type',
-      paths.includes('POST /v1/claim'), paths);
-    ok('you are on the board, out of your own ticks',
-      await fp.$$eval('.fr-row', (r) => r.length) === 1);
-    /* ── A PROFILE FIRST ──
-       On a fresh claim there is no nickname, so the thing to do first
-       is offered first: your row says "You", which is a label rather
-       than a name, and a friend who adds you back sees a code. Setting
-       one has to take the offer away — a "create a profile" that never
-       leaves is a task you can never finish — so both states are
-       measured here rather than only the empty one. */
-    ok('and the action waiting is Add a friend',
-      (await glyphs('#scFrPane')) === 'Add a friend|plus', await glyphs('#scFrPane'));
-    ok('...with the board calling you by the name you set, not "You"',
-      await fp.$eval('.fr-row.is-me .fr-n', (e) => e.textContent) === 'Niko');
-
-    /* ── A PROFILE FIRST, when there is no name yet ──
-       This fixture arrives already named, so the unnamed state is
-       reached by taking the name away rather than by assuming it: on a
-       fresh claim your row says "You", which is a label rather than a
-       name, and a friend who adds you back sees a code. The thing to
-       do first is offered first — and setting it has to take the offer
-       away, because a "create a profile" that never leaves is a task
-       you can never finish. Both states, because each passes on the
-       other's bug. */
-    const setName = async (v) => {
-      await fp.evaluate((n) => {
-        const r = JSON.parse(localStorage.getItem('sched.net.v1'));
-        r.name = n;
-        localStorage.setItem('sched.net.v1', JSON.stringify(r));
-      }, v);
-      await fp.reload({ waitUntil: 'networkidle' });
-      await fp.waitForTimeout(700);
-    };
-    await setName('');
-    /* ── A PROFILE FIRST, AND IT IS THE ONLY THING OFFERED ──
-       Both used to be drawn, which is offering a choice that has one
-       right answer: before a nickname there is nothing to add anybody
-       TO — your row says "You" and a friend who adds you back sees a
-       code. Add a friend is not on the screen at all until there is a
-       profile, and the line under it says WHY the other action is
-       missing rather than describing the field the sheet will show. */
-    ok('...and with no name yet, a profile is the only thing offered',
-      (await glyphs('#scFrPane')) === 'Create a profile|plus',
-      await glyphs('#scFrPane'));
-    ok('...with one line saying why the other action is not there',
-      /^Create a profile to add a friend\.$/.test(
-        await fp.$eval('#scFriendAdd .fr-note', (e) => e.textContent.trim())),
-      await fp.$eval('#scFriendAdd .fr-note', (e) => e.textContent));
-    ok('...and your row falls back to the label until you pick one',
-      await fp.$eval('.fr-row.is-me .fr-n', (e) => e.textContent) === 'You');
-    /* Put it back, because everything below this was written under it. */
-    await setName('Niko');
-    ok('...and setting one takes the offer away again',
-      (await glyphs('#scFrPane')) === 'Add a friend|plus', await glyphs('#scFrPane'));
-    /* The turn-on sheet used to carry the sentence about what leaves,
-       on the argument that a paragraph you press through is a decision.
-       Nobody presses through anything now, so it has to be on the board
-       — visible every time rather than once. */
-    /* ONE NOTE, NOT THREE. The board carried a description under each
-       action as well, which is a screen reading as instructions for
-       itself. What survives is the promise — it is not a description
-       of a control, and it is the one sentence nobody may press past. */
-    ok('and the board says what is on the server, in one line',
-      await fp.$$eval('#scFriendAdd .fr-note', (e) => e.length) === 1
-      && /ticks.+logs.+server.+Settings/i.test(
-        await fp.$eval('#scFriendAdd .fr-note', (e) => e.textContent)),
-      await fp.$eval('#scFriendAdd .fr-note', (e) => e.textContent));
-
-    /* ── two stops, one screen ──
-       The board and the feed were stacked under two letterspaced
-       capital headings with a filled accent button under each. Only
-       one is on screen now, and the control that reaches a half IS the
-       heading for it — a label naming a section beside the thing that
-       takes you there is the same word twice. */
-    ok('only one half is on screen at a time',
-      await fp.evaluate(() => document.getElementById('scFrPane').hidden
-        !== document.getElementById('scFeed').hidden));
-    ok('the board is the stop you arrive at',
-      await fp.evaluate(() => !document.getElementById('scFrPane').hidden));
-    /* SCOPED TO THE FRIENDS SECTION. Today wears the same .fr-stop —
-       it is the same control and a second set of classes drawn to look
-       identical is two places to keep one thing in step — and its two
-       come FIRST in the document, so a bare selector reads "Showing
-       up" and asks it which friends stop it is. */
-    ok('and the lit stop says which one it is',
-      await fp.$eval('.friends .fr-stop.on', (e) => e.dataset.stop) === 'board');
-    await stop('feed');
-    ok('the feed stop puts the feed up and the board away',
-      await fp.evaluate(() => document.getElementById('scFrPane').hidden
-        && !document.getElementById('scFeed').hidden));
-    /* Remembered, and in its own key: the schedule is the record and
-       this is a preference about looking at it, which is the same
-       argument sched.view.v1 already makes for itself. */
-    await fp.reload({ waitUntil: 'networkidle' });
-    await fp.waitForTimeout(340);
-    ok('and which stop you were on outlives a reload',
-      await fp.evaluate(() => !document.getElementById('scFeed').hidden));
-    await stop('board');
-
-    /* Nothing on this screen is a filled block any more. Two solid
-       rectangles for things done about once a week each, sitting under
-       a three-row list, were louder than the board they were about. */
-    ok('no action on the screen is a filled button',
-      await fp.$$eval('.friends .btn', (b) => b.length) === 0);
-    /* SCOPED TO THE PANE THAT IS UP. Both halves stay in the DOM and
-       the stop hides one with display:none, so an unscoped query picks
-       up the feed's own action at zero height and reports it as a
-       control too small to press. It passed before only because friends
-       were off and the feed had no action in it. */
-    /* ── WHAT IT OWNS, NOT WHAT IT DRAWS ──
-       The stops draw 28 and own 44 through a box that paints nothing,
-       which is this app's own split — so a check on the rect measures
-       the drawing and fails on the correct build. Walked out from the
-       element's own centre with `elementFromPoint`, never with a driven
-       tap: Chromium snaps a touch to a nearby target inside a slop
-       region, so a tap reads identically at 28 and at 44. The walk
-       stops on the first pixel that is NOT the element, so a box of N
-       reads N-1 and the count adds it back. */
-    const frReach = await fp.$$eval('#scFrPane .fr-link, .friends .fr-stop', (b) => b.map((t) => {
-      const r = t.getBoundingClientRect(), cx = r.left + r.width / 2;
-      const mine = (y) => { const e = document.elementFromPoint(cx, y);
-        return !!e && (e === t || t.contains(e)); };
-      let top = r.top + r.height / 2, bot = top;
-      while (top > 1 && mine(top - 1)) top--;
-      while (bot < innerHeight - 1 && mine(bot + 1)) bot++;
-      return { drawn: Math.round(r.height), owns: Math.round(bot - top) + 1 };
-    }));
-    ok('and every one of them still clears 44px',
-      frReach.length > 0 && frReach.every((x) => x.owns >= 44), frReach);
-    const mine = await fp.evaluate(() => JSON.parse(localStorage.getItem('sched.net.v1')));
-    ok('it claims a code', /^[A-Z0-9]{8}$/.test(mine.code || ''), mine.code);
-    /* I, O, 0 and 1 are out of the alphabet on purpose: this is a
-       string somebody reads down a phone. */
-    ok('and the code cannot contain a character anyone would mishear',
-      !/[IO01]/.test(mine.code), mine.code);
-    ok('the write key is 32 hex and is not the code',
-      /^[a-f0-9]{32}$/.test(mine.key || '') && mine.key !== mine.code);
-    ok('the server stored the key HASHED, never as itself',
-      store.get('key:' + mine.code) !== mine.key
-      && String(store.get('key:' + mine.code)).length === 64);
-
-    /* WITH NOBODY ON YOUR LIST, and that is the case this exists for.
-       The first version fetched from inside the paint and repainted
-       from inside the fetch — and with no friends the fetch calls back
-       synchronously, so the very first paint recursed until the stack
-       went. It came out as a board with its buttons and no rows, which
-       reads as an empty leaderboard rather than as a crash. */
-    ok('turning it on with nobody added still leaves you on the board',
-      await fp.$$eval('.fr-row', (r) => r.length) === 1);
-    ok('nothing threw doing it', ferrs.length === 0, ferrs);
-
-    const rec = () => JSON.parse(store.get('rec:' + mine.code));
-    ok('your record went up', !!store.get('rec:' + mine.code));
-    ok('it carries the day COUNT, not which of the five',
-      rec().days[day(0)].t === 3, JSON.stringify(rec().days));
-    /* And the blocks the same way. A count says you showed up; a list
-       says what your day is, and the second is the thing this app
-       exists not to send. */
-    ok('...and how many blocks were kept, never which ones',
-      typeof rec().days[day(0)].b === 'number'
-      && !/\bWake\b|\bTrading\b/.test(store.get('rec:' + mine.code)),
-      JSON.stringify(rec().days[day(0)]));
-    /* The tally holds Steps, Fuel and Water as numbers you set. The
-       tick means you logged it and never what it was, which is what
-       keeps the quantities off the wire. */
-    ok('the Steps figure is on this phone and nowhere in the record',
-      (await fp.evaluate((d) => (JSON.parse(localStorage.getItem('sched.tick.v1'))
-        || {})[d].p, day(0))) === '18400'
-      && !JSON.stringify(rec()).includes('18400'), JSON.stringify(rec()));
-    /* TWO NUMBERS AND NOTHING ELSE. It was one number, and the claim
-       was that a day is a count rather than a shape — which still
-       holds, it is just two counts now. Written as "every value is a
-       number" it would pass on a day carrying a list of block names
-       beside them, so what is asserted is the exact set of keys. */
-    ok('and a day is two counts, never a shape',
-      Object.values(rec().days).every((v) =>
-        Object.keys(v).sort().join() === 'b,t'
-        && typeof v.t === 'number' && v.t <= 5
-        && typeof v.b === 'number'),
-      JSON.stringify(rec().days));
-    ok('it carries the two colours a friend draws you with',
-      /^#/.test(rec().acc) && /^#/.test(rec().ink), rec().acc + ' ' + rec().ink);
-    ok('it does not carry your week',
-      !JSON.stringify(rec()).includes('Trading'));
-
-    /* ── adding somebody ── */
-    await fp.click('text=Add a friend');
-    await fp.waitForTimeout(420);
-    await fp.fill('.sheet input[type=text]', 'jade2k7p');
-    await fp.click('.sheet .btn.go');
-    await fp.waitForTimeout(900);
-    ok('a code typed in lower case still finds them',
-      await fp.$$eval('.fr-n', (n) => n.map((x) => x.textContent)).then((n) => n.includes('Rae')));
-    ok('and the board ranks on ticks, not on who is you',
-      await fp.$$eval('.fr-n', (n) => n[0].textContent) === 'Rae');
-
-    /* THE GRAPH NEVER LEAVES. There is no endpoint that would return
-       your people and this is what refuses one being added: everything
-       the page has asked for is a record by code, an image, or the
-       claim. */
-    ok('the server was never told who is on your list',
-      paths.every((p) => /^(POST \/v1\/claim|PUT \/v1\/rec\/|GET \/v1\/rec\/|POST \/v1\/img|GET \/v1\/img\/|DELETE \/v1\/rec\/)/.test(p)),
-      paths.filter((p) => !/^(POST|PUT|GET|DELETE) \/v1\/(claim|rec|img)/.test(p)));
-    ok('and your friend list is in this browser',
-      await fp.evaluate(() => (JSON.parse(localStorage.getItem('sched.friends.v1')) || [])
-        .map((f) => f.code).join() === 'JADE2K7P'));
-
-    /* A `+` is for the actions that make something exist. `Your code`
-       makes nothing — it shows you a string you already have — and
-       given the plus as well it read as a fourth thing to create, on
-       the row directly under the one that adds people. */
-    /* ONE action on the board. `Your code` used to sit directly under
-       this as a second row — two rows for the two halves of a single
-       act. Adding a friend IS the swap, so both codes live on that
-       sheet, and the friends settings moved to the app's own settings
-       where Rename and the backup already are. */
-    ok('the board carries one action and it is the + that adds somebody',
-      await glyphs('#scFrPane') === 'Add a friend|plus', await glyphs('#scFrPane'));
-    ok('and the composer keeps the +',
-      await glyphs('#scFeed') === 'Write one|plus', await glyphs('#scFeed'));
-
-    /* Both codes on one sheet, because that is the exchange. */
-    await fp.click('text=Add a friend');
-    await fp.waitForTimeout(460);
-    ok('yours is on the sheet where you take theirs',
-      await fp.$eval('.fr-swap .fr-code', (e) => e.textContent) === mine.code);
-    /* Two assertions, not one `&&`. As a single line it reported a
-       failure without saying which half, which is a check you cannot
-       act on. */
-    const swapBtn = await fp.$$eval('.fr-swap .btn', (b) => b.map((x) => x.textContent));
-    const actBtn = await fp.$$eval('.sheet .acts .btn', (b) => b.map((x) => x.textContent));
-    ok('...with the button that shares it beside the code', swapBtn.join() === 'Share', swapBtn);
-    ok('...and the action row below belongs to adding THEM',
-      actBtn.join() === 'Cancel,Add', actBtn);
-
-    /* ── what Share actually hands over ──
-       Read off the share sheet rather than the clipboard: it is the
-       branch a phone takes, and it is the one place the link exists as
-       a string before it goes to somebody. */
-    await fp.click('.fr-swap .btn');
-    await fp.waitForTimeout(260);
-    const shared = await fp.evaluate(() => (window.__shared || []).slice());
-    const link = (shared[0] || {}).text || '';
-    ok('sharing hands over a link, not a bare code',
-      shared.length === 1 && /^https?:\/\/.+#add=/.test(link), link);
-    ok('...carrying your code', link.includes('#add=' + mine.code), link);
-    ok('...and the server it is on, because a code alone names nothing',
-      link.includes('&at=' + encodeURIComponent(HOST)), link);
-    /* The whole reason the link exists: a code is a row in ONE KV
-       namespace. Handed to somebody pointed elsewhere it is not wrong,
-       it is absent — the read misses and the app says "nobody has that
-       code". */
-    ok('...and it is the fragment that carries them, never the query',
-      link.indexOf('#') < link.indexOf('add=') && !/\?/.test(link), link);
-    await fp.keyboard.press('Escape');
-    await fp.waitForTimeout(420);
-
-    /* And the settings for it are where the app's other settings are. */
-    await fp.click('#scTabYou');
-    await fp.waitForTimeout(460);
-    ok('the settings menu says whether friends are on, and under what code',
-      (await fp.$$eval('.menu-item', (b) => b.map((x) => x.textContent).join('\n')))
-        .includes('Friends' + 'On \u00b7 ' + mine.code));
-    await fp.keyboard.press('Escape');
-    await fp.waitForTimeout(420);
-
-    /* ── THE CROWN IS GOLD, WHOEVER IS WEARING IT ──
-       It used to be the leader's OWN colour, solved through scCrown to
-       clear 3:1 on your page. A crown in somebody's chosen violet says
-       which PERSON, which the name beside it already says; gold says
-       which PLACE, which is the only thing a crown is for.
-
-       Asked of the page rather than written as a hex, and asserted as
-       NOT the leader's colour as well — a build that had simply kept
-       the old behaviour would pass "it is a colour" on its own. */
-    const crown = await fp.$eval('.fr-crown', (e) => {
-      const cs = getComputedStyle(document.documentElement);
-      const paint = (h) => { const d = document.createElement('div');
-        d.style.color = h; document.body.appendChild(d);
-        const c = getComputedStyle(d).color; d.remove(); return c; };
-      return { set: e.style.getPropertyValue('--crown'),
-               fill: getComputedStyle(e.querySelector('svg')).fill,
-               gold: paint(cs.getPropertyValue('--gold').trim()),
-               theirs: paint('#0F6E6A') };
-    });
-    ok('the crown is gold, not the leader\u2019s own colour',
-      crown.fill === crown.gold && crown.fill !== crown.theirs
-      && crown.set === '', JSON.stringify(crown));
-    /* ── AND SO DOES THEIR FACE, WHICH IT DID NOT ──
-       A friend's face was drawn in the colour THEY chose, which was
-       the whole reason `acc` travels with a record. There is no
-       choosing one any more: the default avatar is the same
-       silhouette for everybody, which is what a picture of somebody
-       who has not set one should be.
-
-       So it is asserted as the flat neutral AND as not their colour —
-       "it is grey" on its own passes on a build where their accent
-       happens to be grey, and this fixture's is a teal. Their colour
-       has not stopped travelling: it is still what the almanac's lit
-       days are drawn in, which is checked further down. */
-    const faceFill = await fp.$eval('.fr-row .pic svg rect', (e) => e.getAttribute('fill'));
-    const neutral = await fp.evaluate(() => getComputedStyle(document.documentElement)
-      .getPropertyValue('--tick-off').trim());
-    ok('their face is the same silhouette as everybody\u2019s, not their own colour',
-      faceFill.toLowerCase() === neutral.toLowerCase()
-      && faceFill.toLowerCase() !== '#0f6e6a', { faceFill, neutral });
-
-    /* Measured on composited pixels, not argued from the token. Every
-       one of the 169 reader-against-leader pairings was measured when
-       this was written: aiming at a bare 3:1 puts 26 of them under it
-       on screen, worst 2.92:1, because the page draws three washes over
-       --g0 and the arithmetic only knows about --g0. The 3.4 the code
-       aims at leaves the worst at 3.25:1 and leaves 97 of the 169
-       exactly their own accent.
-
-       THE SQUARE IS A LINE NOW. Thirteen reader pages became one, so
-       what varies is the peer's accent and — through --g1 alone — the
-       hue of the page it lands on. The readers below are hues rather
-       than names, and that is a repair rather than a rename: this list
-       said slate, blush, mist and linen, which were LIGHT palettes
-       deleted a year before the wheel was. scTheme fell back to the
-       first entry on every one of them, so all six pairings had been
-       measuring the same page for a year. A name nothing matches is a
-       check that has stopped running, and this file already says so
-       about a skip keyed to a deleted id.
-
-       Drop CROWN_MIN to 3.0 and this section is what says so. */
-    {
-      const { PNG } = require('pngjs');
-      const WORST = [[124, '#FF6FA5'], [340, '#FF6FA5'], [124, '#5CC8F8'],
-                     [200, '#0F6E6A'], [42, '#FFB020'], [340, '#FF8A5B']];
-      let low = { r: 99 };
-      for (const [reader, acc] of WORST) {
-        /* THE SERVER'S COPY TOO, and the first version only wrote the
-           cache. Arriving at the screen refreshes from the worker, so
-           the planted accent was overwritten by the seeded one before
-           a single pixel was read: all six pairings measured the same
-           colour and dropping CROWN_MIN to 3.0 sailed through. */
-        const seeded = JSON.parse(store.get('rec:JADE2K7P'));
-        seeded.acc = acc;
-        store.set('rec:JADE2K7P', JSON.stringify(seeded));
-        await fp.evaluate(([t, a]) => {
-          localStorage.setItem('sched.accent.v1', String(t));
-          const c = JSON.parse(localStorage.getItem('sched.peer.v1'));
-          c.JADE2K7P.acc = a;
-          localStorage.setItem('sched.peer.v1', JSON.stringify(c));
-          localStorage.setItem('sched.view.v1', 'friends');
-        }, [reader, acc]);
-        await fp.reload({ waitUntil: 'networkidle' });
-        await fp.evaluate(async () => { await document.fonts.ready; });
-        await fp.waitForTimeout(160);
-        const box = await fp.$eval('.fr-crown', (e) => {
-          const r = e.getBoundingClientRect();
-          return { x: r.x, y: r.y, w: r.width, h: r.height };
-        });
-        const png = PNG.sync.read(await fp.screenshot());
-        const at = (x, y) => {
-          const i = (png.width * Math.round(y * 2) + Math.round(x * 2)) << 2;
-          return [png.data[i], png.data[i + 1], png.data[i + 2]];
-        };
-        const lum = ([r, g, b]) => {
-          const f = (c) => { c /= 255; return c <= .03928 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4; };
-          return .2126 * f(r) + .7152 * f(g) + .0722 * f(b);
-        };
-        const ratio = (a, b) => {
-          const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m);
-          return (x + .05) / (y + .05);
-        };
-        /* The ground is sampled 26px clear of the box, because the halo
-           reaches 7px past it and is the same colour as the glyph.
-           Sampling inside it would compare the mark against itself. */
-        const ground = at(box.x + box.w + 26, box.y + box.h / 2);
-        const px = [];
-        for (let x = 3; x < box.w - 3; x++)
-          for (let y = 3; y < box.h - 3; y++) px.push(at(box.x + x, box.y + y));
-        const gl = lum(ground);
-        px.sort((m, n) => Math.abs(lum(n) - gl) - Math.abs(lum(m) - gl));
-        const mark = px.slice(0, 12)
-          .reduce((s, q) => q.map((c, i) => s[i] + c), [0, 0, 0]).map((c) => c / 12);
-        const r = +ratio(mark, ground).toFixed(2);
-        if (r < low.r) low = { r, reader, acc };
-      }
-      ok('a friend’s crown clears 3:1 on your page, measured on pixels',
-        low.r >= 3, JSON.stringify(low));
-    }
-
-    /* ── the smallest disc, and the unlit stop ──
-       Two claims that only pixels can settle. The disc is the one that
-       was WRONG: varying their accent's alpha put solar's amber at
-       1.30:1 on the white page, and the pass that found it also found
-       that opacity was never the lever — the amber is about 1.9:1 on
-       white at full strength. Size carries the count now and every
-       disc is the colour scCrown already solved.
-
-       Measured POLARITY-AGNOSTICALLY, from the most common pixel in
-       the box outward. The first version of the stop measurement took
-       the 3rd percentile as ink and the 90th as ground, which assumes
-       dark type on a light track — seven of the thirteen themes are
-       dark, so on those it compared the track against itself and
-       reported 1.05:1 for a control that actually measures 7.6:1. */
-    {
-      const { PNG } = require('pngjs');
-      const lum = ([r, g, b]) => {
-        const f = (c) => { c /= 255; return c <= .03928 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4; };
-        return .2126 * f(r) + .7152 * f(g) + .0722 * f(b);
-      };
-      const ratio = (a, b) => {
-        const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m);
-        return (x + .05) / (y + .05);
-      };
-      let lowD = { r: 99 }, lowS = { r: 99 };
-      for (const [reader, acc] of [[124, '#FFB020'], [340, '#FF6FA5'],
-                                   [264, '#5CC8F8'], [42, '#FFB020']]) {
-        const seeded = JSON.parse(store.get('rec:JADE2K7P'));
-        seeded.acc = acc;
-        /* Every day exactly ONE tick, so what is measured is the
-           faintest mark this profile can draw. */
-        seeded.days = {};
-        for (let i = 0; i < 7; i++) seeded.days[day(i)] = { t: 1, b: 1 };
-        /* A YEAR, because the profile is the almanac now and the
-           check reads a cell of it. Every day lit at ONE, which is
-           the faintest a lit day gets — and it is the same colour as
-           a day with five on it, because the grid is binary. */
-        seeded.year = '1'.repeat(371);
-        store.set('rec:JADE2K7P', JSON.stringify(seeded));
-        await fp.evaluate((t) => {
-          localStorage.setItem('sched.accent.v1', String(t));
-          localStorage.setItem('sched.view.v1', 'friends');
-          localStorage.setItem('sched.fr.v1', 'board');
-        }, reader);
-        await fp.reload({ waitUntil: 'networkidle' });
-        await fp.evaluate(async () => { await document.fonts.ready; });
-        await fp.waitForTimeout(220);
-
-        const png0 = PNG.sync.read(await fp.screenshot());
-        const at0 = (x, y) => {
-          const i = (png0.width * Math.round(y * 2) + Math.round(x * 2)) << 2;
-          return [png0.data[i], png0.data[i + 1], png0.data[i + 2]];
-        };
-        const sb = await fp.$eval('#scFrFeed', (e) => {
-          const r = e.getBoundingClientRect();
-          return { x: r.x, y: r.y, w: r.width, h: r.height };
-        });
-        const sp = [];
-        for (let x = 10; x < sb.w - 10; x++)
-          for (let y = 8; y < sb.h - 8; y++) sp.push(at0(sb.x + x, sb.y + y));
-        const bag = {};
-        sp.forEach((q) => { const k = q.join(); bag[k] = (bag[k] || 0) + 1; });
-        const track = Object.entries(bag).sort((a, c) => c[1] - a[1])[0][0].split(',').map(Number);
-        const tl = lum(track);
-        const far = sp.slice().sort((m, n) => Math.abs(lum(n) - tl) - Math.abs(lum(m) - tl)).slice(0, 40);
-        const glyph = far.reduce((z, q) => q.map((c, i) => z[i] + c), [0, 0, 0]).map((c) => c / 40);
-        const rs = +ratio(glyph, track).toFixed(2);
-        if (rs < lowS.r) lowS = { r: rs, reader };
-
-        await fp.click('.fr-row.is-tap');
-        await fp.waitForTimeout(540);
-        /* A LIT cell of the almanac, not any cell. An unlit day is
-           deliberately the flat neutral — "a day with none is never a
-           red one" — so it makes no colour claim, and holding it to
-           3:1 measures a mark that is not breaking the rule. That is
-           how this once reported 1.18:1 against a design that was
-           correct.
-
-           It measured the thirty-day strip until the profile became a
-           year; the claim is unchanged and the drawing moved, so the
-           check moved with it rather than being deleted. The cells
-           are about four pixels, so the sample is the centre. */
-        const db = await fp.$$eval('.pf-yr i', (all) => {
-          const e = all.filter((x) => x.style.background)[0];
-          if (!e) return null;
-          const r = e.getBoundingClientRect();
-          return { x: r.x, y: r.y, w: r.width, h: r.height };
-        });
-        if (!db) throw new Error('no lit day in the almanac to measure');
-        const png = PNG.sync.read(await fp.screenshot());
-        const at = (x, y) => {
-          const i = (png.width * Math.round(y * 2) + Math.round(x * 2)) << 2;
-          return [png.data[i], png.data[i + 1], png.data[i + 2]];
-        };
-        /* ── THE GROUND IS THE GAP, NOT THE ROW ABOVE ──
-           This sampled 14px above the cell, which on this sheet lands
-           on the MONTH LABELS — it read [140,140,148], which is
-           --spent, so it measured the mark against a text colour and
-           reported 1.28:1 on a mark drawn at the full accent. A check
-           can be wrong about WHERE it looks as easily as about what it
-           looks for, and the two are indistinguishable from the
-           output; the Pattern axis made this exact mistake once
-           already. The 2.5px gap between two cells is the sheet's own
-           ground showing through and is five device pixels wide, so
-           its centre is clean. */
-        const rd = +ratio(at(db.x + db.w / 2, db.y + db.h / 2),
-                          at(db.x + db.w + 1.25, db.y + db.h / 2)).toFixed(2);
-        if (rd < lowD.r) lowD = { r: rd, reader, acc };
-        await fp.keyboard.press('Escape');
-        await fp.waitForTimeout(380);
-      }
-      ok('a lit day of the almanac clears 3:1 on your page, measured on pixels',
-        lowD.r >= 3, JSON.stringify(lowD));
-      ok('and the stop you are NOT on is still readable type',
-        lowS.r >= 4.5, JSON.stringify(lowS));
-    }
-    {
-      const seeded = JSON.parse(store.get('rec:JADE2K7P'));
-      seeded.acc = '#0F6E6A';
-      seeded.days = {};
-      for (let i = 0; i < 12; i++) seeded.days[day(i)] = { t: (i % 5) + 1, b: (i % 4) + 1 };
-      store.set('rec:JADE2K7P', JSON.stringify(seeded));
-    }
-    {
-      const seeded = JSON.parse(store.get('rec:JADE2K7P'));
-      seeded.acc = '#0F6E6A';
-      store.set('rec:JADE2K7P', JSON.stringify(seeded));
-    }
-    await fp.evaluate(() => localStorage.removeItem('sched.accent.v1'));
-    await fp.reload({ waitUntil: 'networkidle' });
-    await fp.waitForTimeout(300);
-
-    /* ── their page ── */
-    await fp.click('.fr-row.is-tap');
-    await fp.waitForTimeout(520);
-    /* A YEAR, where this was thirty days and before that seven. The
-       claim is unchanged — their page draws their record — and only
-       the drawing moved, so the check moved with it rather than being
-       deleted. 371 is 53 weeks, which is what makes the grid full
-       columns of seven with no ragged end. */
-    ok('their page shows a year of days',
-      await fp.$$eval('.pf-yr i', (d) => d.length) === 371);
-    /* Height says how many of the five and colour never says whether —
-       the habits screen's rule. A day with nothing is the same shape,
-       only shorter. */
-    /* SIZE says how many, and every disc is drawn at full strength.
-       The first cut varied the alpha of their accent instead and
-       measured 1.30:1 on the white page for solar's amber — and
-       opacity could never have fixed that, because the amber is about
-       1.9:1 on white at FULL strength. Diluting a colour that already
-       fails only makes the number worse. */
-    /* ── AN OLD RECORD STILL READS ──
-       Every record written before blocks were sent carries a bare
-       NUMBER where this now expects two counts, and those records are
-       on the server right now with up to thirty days left to live.
-       Read as an object they give NaN in every figure they feed, so
-       the shape is normalised on the way in — proven against a record
-       in the old shape rather than trusted. */
-    {
-      const was = JSON.parse(store.get('rec:JADE2K7P'));
-      const old2 = JSON.parse(JSON.stringify(was));
-      old2.days = {};
-      for (let i = 0; i < 5; i++) old2.days[day(i)] = 2;
-      store.set('rec:JADE2K7P', JSON.stringify(old2));
-      await fp.keyboard.press('Escape');
-      await fp.waitForTimeout(200);
-      await fp.reload({ waitUntil: 'networkidle' });
-      await fp.waitForTimeout(800);
-      const shown = await fp.$eval('.fr-row:not(.is-me) .fr-t', (e) => e.textContent);
-      ok('a record from before blocks were sent still reads as a number',
-        shown === '10', shown);
-      store.set('rec:JADE2K7P', JSON.stringify(was));
-      await fp.reload({ waitUntil: 'networkidle' });
-      await fp.waitForTimeout(800);
-      await fp.click('.fr-row.is-tap');
-      await fp.waitForTimeout(540);
-    }
-
-    /* HEIGHT, now the strip is a month. A disc's diameter is bounded
-       by the cell's width, and at thirty across a phone that is about
-       four pixels — the smallest one measured 1.18:1 on the white page
-       with nothing wrong but antialiasing. A bar's height is free of
-       the count, so it can hold its colour at any width. */
-    /* ── LIT OR NOT, AND NO RAMP ──
-       The strip could say HOW MANY by height, because a bar's height
-       is free of the count. A year grid cannot: every cell is the same
-       box, and at four pixels across a phone a five-step ramp is
-       invisible.
-
-       It went in as an opacity ramp — which is exactly the mistake the
-       paragraph above was written against, arriving again in the one
-       drawing that cannot use the lever that replaced it. So the mark
-       is binary: every lit day at the one strength scCrown solved to
-       clear 3:1 on YOUR page, and an unlit one the flat neutral.
-
-       Both halves, because "every cell is the same colour" is
-       vacuously true of a grid with nothing lit in it. */
-    const cells = await fp.$$eval('.pf-yr i', (b) => b.map((x) => ({
-      bg: getComputedStyle(x).backgroundColor,
-      o: getComputedStyle(x).opacity,
-      lit: !!x.style.background })));
-    const litSet = new Set(cells.filter((c) => c.lit).map((c) => c.bg));
-    const dimSet = new Set(cells.filter((c) => !c.lit).map((c) => c.bg));
-    ok('every lit day is the same colour at full strength, never a ramp',
-      litSet.size === 1 && cells.every((c) => c.o === '1')
-      && cells.filter((c) => c.lit).length > 30,
-      { lit: [...litSet], op: [...new Set(cells.map((c) => c.o))] });
-    ok('...and a day with nothing on it is one flat neutral, never a colour',
-      dimSet.size <= 1, [...dimSet]);
-    /* The day letters are GONE and the strip is thirty days. Two
-       characters do not go in the nine pixels a month leaves per cell,
-       and they were answering "which day is this" — a question about a
-       week. Each cell still carries its own date in a title, which is
-       what the letters were standing in for. Asserted as absence plus
-       the thing that replaced it, because "no letters" alone passes on
-       a strip that lost its cells too. */
-    ok('a month has no room for day letters, and says the date instead',
-      await fp.$$eval('.fp-w', (w) => w.length) === 0
-      && await fp.$$eval('.fp-d', (d) =>
-        d.every((x) => /^\d{4}-\d{2}-\d{2} · \d+ tick/.test(x.title))));
-    /* ── WHAT THEY HAVE POSTED, AS A WALL ──
-       It was every log drawn out in full one under another, which made
-       the profile a second feed — and the feed is its own stop two taps
-       away. A profile wants the shape of what somebody has done, so it
-       is a grid, and the words are one press in. */
-    ok('their posts are a wall of tiles rather than a second feed',
-      await fp.$$eval('.sheet .fp-t', (t) => t.length) === 1
-      && await fp.$$eval('.sheet .po', (p) => p.length) === 0);
-
-    /* ── and one of them opens ── */
-    await fp.click('.sheet .fp-t');
-    await fp.waitForTimeout(320);
-    const opened = await fp.evaluate(() => ({
-      title: document.getElementById('scSheetTitle').textContent,
-      posts: document.querySelectorAll('.sheet .po').length,
-      cap: (document.querySelector('.sheet .po-c') || {}).textContent,
-      /* A post is a card in the feed, where a stack of photographs
-         needs a boundary; in a sheet the frame IS the sheet, and a
-         bordered card inside one is the frame-inside-a-frame this
-         project keeps taking out. Measured as the drawn border. */
-      bare: parseFloat(getComputedStyle(
-        document.querySelector('.sheet .po')).borderTopWidth) === 0,
-      /* Nothing to press on somebody else's log: a control that exists
-         and refuses is worse than one that is not there. */
-      mine: document.querySelectorAll('.sheet .po .po-x').length,
-      /* The sheet is one at a time in this app, so opening a post
-         REPLACES the profile — and without a way back, closing lands
-         on the board and the profile is two presses away again. */
-      back: [...document.querySelectorAll('.sheet .menu-item')]
-        .some((b) => /^Back to /.test(b.textContent)),
-    }));
-    ok('pressing a tile opens that post, bare and with no delete on it',
-      opened.posts === 1 && opened.bare && opened.mine === 0
-      && /light came up/.test(opened.cap || ''), opened);
-    ok('...and it carries the way back to the profile it replaced',
-      opened.title === 'Rae' && opened.back, opened);
-    await fp.click('.sheet .menu-item');
-    await fp.waitForTimeout(320);
-    ok('...which really goes back to it',
-      await fp.$$eval('.sheet .fp-t', (t) => t.length) === 1);
-    /* `.label` is 9px accent capitals at .2em, which is right where a
-       sheet is a form and is the only thing separating one field from
-       the next. Here the headings sit over a figure and a row of discs
-       that separate themselves, so the same treatment reads as two
-       small alarms. Scoped to this sheet — restyling .label itself
-       would quietly have changed every other sheet in the app.
-
-       `.sheet .fp-k` and not `.fp-k`, and that shipped wrong for one
-       round: .label and .menu-item are defined further down the file,
-       so at equal specificity they win however the new rule is
-       written. The sheet came out with two red capital headings and a
-       hairline under Remove, with the new classes on the elements
-       doing nothing at all. */
-    const heads = await fp.$$eval('.sheet .fp-k', (e) => e.map((x) => {
-      const cs = getComputedStyle(x);
-      return { t: cs.textTransform, ls: cs.letterSpacing, size: cs.fontSize };
-    }));
-    /* EVERY heading on the sheet rather than a count of two. It was
-       pinned to the two the old body happened to draw, and the
-       profile has sections now that come and go with what somebody
-       shared — a number here would have to be edited every time one
-       is added, which is a check that tracks the code rather than the
-       claim. At least one, because "none are letterspaced" is
-       vacuously true of a sheet with no headings. */
-    ok('the sheet\u2019s headings are not letterspaced capitals',
-      heads.length >= 1 && heads.every((h) => h.t === 'none'
-        && parseFloat(h.ls) <= 0 && parseFloat(h.size) >= 11), JSON.stringify(heads));
-    ok('and Remove carries no hairline and no paragraph',
-      await fp.$eval('.fp-rm', (e) => getComputedStyle(e).borderBottomWidth === '0px'
-        && !e.querySelector('.sub-note')));
-    await fp.keyboard.press('Escape');
-    await fp.waitForTimeout(420);
-
-    /* ── writing one ── */
-    await stop('feed');
-    await fp.click('text=Write one');
-    await fp.waitForTimeout(420);
-    await fp.evaluate(() => {
-      const c = document.createElement('canvas');
-      c.width = c.height = 1200;
-      const g = c.getContext('2d');
-      const grd = g.createLinearGradient(0, 0, 1200, 1200);
-      grd.addColorStop(0, '#0f7b6c'); grd.addColorStop(1, '#e2231a');
-      g.fillStyle = grd; g.fillRect(0, 0, 1200, 1200);
-      return new Promise((res) => c.toBlob((bl) => {
-        const dt = new DataTransfer();
-        dt.items.add(new File([bl], 'shot.jpg', { type: 'image/jpeg' }));
-        const f = document.querySelector('.sheet .pic-file');
-        f.files = dt.files;
-        f.dispatchEvent(new Event('change', { bubbles: true }));
-        res();
-      }, 'image/jpeg', 0.9));
-    });
-    await fp.waitForTimeout(800);
-    ok('the photograph previews before you commit to it',
-      await fp.$eval('.lg-prev', (e) => !e.hidden));
-    await fp.click('.lg-c:has-text("Mind")');
-    await fp.fill('.sheet textarea', 'Walked the long way round.');
-    await fp.click('text=Post it');
-    await fp.waitForTimeout(1400);
-
-    ok('the picture went up as bytes', [...store.keys()].filter((k) => k.startsWith('img:')).length === 1);
-    const post = rec().logs[rec().logs.length - 1];
-    ok('the log names the picture by id', /^[a-f0-9]{24}$/.test(post.img || ''), post.img);
-    /* A post keeps the whole data URL locally so your own feed draws
-       instantly and still draws with no signal. Pushed whole that is a
-       second copy of the picture, base64, and base64 is a third bigger
-       again — two of them and the record is past the worker's 96KB
-       ceiling and every write comes back 413. The comment on the field
-       said it was never sent; for one round that was the only place
-       that was true. */
-    ok('and the record carries no copy of the picture itself',
-      !JSON.stringify(rec()).includes('data:image')
-      && JSON.stringify(rec()).length < 4096, JSON.stringify(rec()).length);
-    ok('both logs are in the feed, newest first',
-      await fp.$$eval('#scFeed .po .po-n', (n) => n.map((x) => x.textContent).join())
-        === 'Niko,Rae');
-
-    /* ── THE CAPTION LEADS, AND THE PICTURE OPENS ──
-       The caption sat UNDER the photograph, which is where one goes on
-       a printed page and the wrong way round here: the card crops to a
-       square, so on a phone the words were most of a screen below the
-       name that owns them and you read the picture with nothing to
-       read it against.
-
-       Measured as BOXES rather than source order, because a rule that
-       reordered them visually would pass any check on the DOM — and
-       the reverse, an element moved in the source and then pushed back
-       by CSS, is the same bug from the other side. */
-    const lead = await fp.evaluate(() => {
-      const c = [...document.querySelectorAll('#scFeed .po')]
-        .find((x) => x.querySelector('.po-img') && x.querySelector('.po-c'));
-      if (!c) throw new Error('no feed post with both a caption and a picture');
-      const cap = c.querySelector('.po-c').getBoundingClientRect();
-      const img = c.querySelector('.po-img').getBoundingClientRect();
-      const head = c.querySelector('.po-h').getBoundingClientRect();
-      return { cap: cap.top, img: img.top, head: head.bottom,
-               tag: c.querySelector('.po-img').tagName,
-               named: !!c.querySelector('.po-img').getAttribute('aria-label') };
-    });
-    ok('the caption sits under the name and above the picture',
-      lead.cap > lead.head && lead.cap < lead.img, lead);
-    /* A real BUTTON, not a listener on the wrapper: focusable, named,
-       and reachable from a keyboard. The post's delete is a sibling
-       rather than an ancestor, so nothing nests — a button inside a
-       button is invalid and collapses to one press. */
-    ok('...and the picture is a real control, named for what it does',
-      lead.tag === 'BUTTON' && lead.named, lead);
-
-    await fp.click('#scFeed .po .po-img');
-    await fp.waitForTimeout(420);
-    const shown = await fp.evaluate(() => {
-      const v = document.querySelector('.ph');
-      if (!v) return null;
-      const r = v.getBoundingClientRect();
-      const im = v.querySelector('img');
-      return { w: Math.round(r.width), h: Math.round(r.height),
-               z: +getComputedStyle(v).zIndex,
-               fit: getComputedStyle(im).objectFit,
-               role: v.getAttribute('role'), modal: v.getAttribute('aria-modal'),
-               cap: !!v.querySelector('.ph-c') };
-    });
-    /* CONTAIN, not cover. The card crops to a square and this is the
-       screen that does not, which is the entire reason to press it —
-       a viewer that crops the same way shows you nothing new. */
-    ok('pressing it opens the whole picture, over everything, uncropped',
-      shown && shown.w === 390 && shown.h === 844 && shown.fit === 'contain'
-      && shown.z > 60 && shown.role === 'dialog' && shown.modal === 'true'
-      && shown.cap, shown);
-
-    /* ── AND IT IS REMOVED, NOT HIDDEN ──
-       A full-screen surface put away with the `hidden` attribute has
-       broken six times in this app — the rail, the dots, the toast,
-       the intro, the objectives row — every one of them invisibly,
-       because an author `display` outranks the browser's own rule and
-       the attribute goes on being set correctly the whole time. An
-       element that is not in the document cannot swallow a press.
-       Asserted as the node being GONE rather than not drawn. */
-    await fp.keyboard.press('Escape');
-    await fp.waitForTimeout(360);
-    ok('Escape takes the picture away, and takes it out of the document',
-      await fp.evaluate(() => document.querySelectorAll('.ph').length === 0));
-    /* Escape reached the picture and NOT the sheet under it, which is
-       the history veil's own rule one layer up. */
-    await fp.click('#scFeed .po .po-img');
-    await fp.waitForTimeout(420);
-    await fp.click('.ph');
-    await fp.waitForTimeout(360);
-    ok('...and so does a tap anywhere on it',
-      await fp.evaluate(() => document.querySelectorAll('.ph').length === 0));
-
-    /* ══════════════════════════════════════════════════════
-       WHAT YOU SHARE
-
-       This is the reversal of the app's oldest rule, so it is the
-       part of the suite worth the most: the old line was that a COUNT
-       may leave and a LIST never may, and books, sessions and
-       objectives are all lists. What replaces it is NOTHING LEAVES
-       UNLESS YOU TURNED IT ON — which is only a promise if every
-       switch starts off and an off switch genuinely sends nothing. */
-    await stop('board');
-    /* ── A SHEET LEFT OPEN EATS THE NEXT PRESS ──
-       Pressing a switch does NOT close the profile — it is a setting,
-       not an answer — so the sheet is still up when the next step
-       reaches for the row underneath it, and Playwright reports it as
-       exactly that: the sheet's subtree intercepts pointer events.
-       This file has already recorded the rule twice (the bar's
-       contrast sweep, the Popular episode block) and it caught me a
-       third time. Idempotent, so it is safe wherever it is called. */
-    const openMe = async () => {
-      await fp.keyboard.press('Escape');
-      await fp.waitForTimeout(360);
-      await fp.click('.fr-row.is-me');
-      await fp.waitForTimeout(520);
-    };
-    await openMe();
-    const pv = await fp.evaluate(() => ({
-      title: (document.getElementById('scSheetTitle') || {}).textContent,
-      rows: [...document.querySelectorAll('.pv-row')].map((b) => ({
-        on: b.getAttribute('aria-checked'),
-        role: b.getAttribute('role'),
-        name: (b.querySelector('.pv-t b') || {}).textContent,
-      })),
-      bio: document.querySelectorAll('.sheet textarea').length,
-      stored: localStorage.getItem('sched.share.v1'),
-    }));
-    /* ── YOUR OWN ROW OPENS YOUR PROFILE ──
-       It opened the code sheet. What somebody presses their own name
-       to change is what a friend can SEE; the code is a thing you
-       show once, and it is still behind Your code. */
-    ok('your own row opens your profile, with a switch for each thing',
-      pv.title === 'Your profile' && pv.rows.length === 3
-      && pv.bio === 1
-      && pv.rows.map((r) => r.name).join('|')
-         === 'Showing up|Workouts|Reading', pv);
-    /* A real role="switch" with aria-checked, not a styled div: a
-       control whose whole job is to say on or off has to say it to a
-       screen reader too. */
-    ok('...and every one of them is a switch, and every one starts OFF',
-      pv.rows.every((r) => r.role === 'switch' && r.on === 'false'), pv.rows);
-
-    /* Push with everything still off, and read what actually left. */
-    await fp.click('.sheet .btn.go');
-    await fp.waitForTimeout(900);
-    const bare = rec();
-    /* `goals` COMES BACK AS [] AND THAT IS THE WORKER, NOT THE APP.
-       The objectives went and the app stopped sending the field; the
-       worker still normalises it, because records pushed before the
-       removal have up to thirty days left on the server and a reader
-       that dropped an unknown key would take the day with it. So the
-       claim here is that nothing arrives in it — which is what it was
-       before, and the switch it belonged to is gone from the row count
-       three assertions above. */
-    ok('with every switch off, a push carries none of it',
-      bare.year === '' && !(bare.goals || []).length
-      && Array.isArray(bare.work) && bare.work.length === 0
-      && Array.isArray(bare.mind) && bare.mind.length === 0,
-      { year: bare.year, goals: bare.goals, work: bare.work, mind: bare.mind });
-    /* AND THE COUNTS STILL GO, which is the half that would pass on a
-       build where the push had simply broken. */
-    ok('...while the board still gets what it always got',
-      !!bare.days && Object.keys(bare.days).length > 0
-      && typeof bare.name === 'string', Object.keys(bare.days || {}).length);
-
-    /* ── ONE SWITCH SENDS ONE THING ──
-       Asserted per switch rather than by turning them all on, because
-       "everything arrives" passes on a build where any switch sends
-       everything — which is the bug this whole screen exists to make
-       impossible. */
-    await openMe();
-    await fp.click('.pv-row >> nth=0');          /* Showing up */
-    await fp.waitForTimeout(800);
-    const one = rec();
-    ok('turning ONE on sends that one and still nothing else',
-      typeof one.year === 'string' && one.year.length === 371
-      && one.work.length === 0 && one.mind.length === 0,
-      { len: (one.year || '').length,
-        work: one.work.length, mind: one.mind.length });
-    /* A year as one digit a day: 371 days written as a map of objects
-       is about nine kilobytes of a record that shares a 96KB ceiling
-       with thirty logs. */
-    ok('...and the year is one digit a day, not a map of objects',
-      /^[0-9]{371}$/.test(one.year || ''), (one.year || '').slice(0, 24));
-
-    await fp.click('.pv-row >> nth=2');          /* Reading */
-    await fp.waitForTimeout(800);
-    const two = rec();
-    ok('a second switch adds only its own',
-      two.year.length === 371 && Array.isArray(two.mind)
-      && two.work.length === 0,
-      { mind: two.mind.length, work: two.work.length });
-
-    /* ── AND SWITCHING ONE BACK OFF TAKES IT DOWN ──
-       An off switch has to send the EMPTY shape rather than omit the
-       key: a reader cannot tell a field somebody turned off from a
-       field this build did not have, and the first has to overwrite
-       what is already on the server. Asserted on the stored record,
-       because that is the copy a friend reads. */
-    await fp.click('.pv-row >> nth=0');
-    await fp.waitForTimeout(800);
-    ok('switching one back off takes it off the server, not just off your screen',
-      rec().year === '', rec().year);
-
-    /* ── THE TWO THINGS WITH NO SWITCH ──
-       The week and the note on a Mind entry. A
-       switch for these would imply they are on the table. Checked
-       against the WHOLE record rather than a field, because "the key
-       is absent" passes on a build that smuggles them somewhere else.
-
-       The tokens are ones no title or name can contain, which is the
-       lesson the note check already learned: its first version looked
-       for the word "indexed", which is a word the test itself types
-       into a search box, so it matched the app working correctly. */
-    /* BY STATE, never by index: these were written when Objectives sat
-       at nth=1, and an index is a reference nothing type-checks — the
-       row it names moves the day a switch is added or removed and the
-       check goes on passing while measuring a different one. */
-    await fp.evaluate(() => [...document.querySelectorAll('.pv-row')]
-      .forEach((r) => { if (r.getAttribute('aria-checked') !== 'true') r.click(); }));
-    await fp.waitForTimeout(900);
-    const all = JSON.stringify(rec());
-    ok('the week and your notes never leave — with everything on',
-      !/WEEKONLYZQX|NOTEONLYZQX/.test(all)
-      && !/"items"/.test(all), all.slice(0, 200));
-
-    /* ── THE BIO IS ITS OWN SWITCH ──
-       A sentence that exists only to be read by somebody else is
-       shared by being written and taken back by being cleared. Both
-       directions, because "a bio arrives" passes on a build with no
-       way to remove one. */
-    await openMe();
-    await fp.fill('.sheet textarea', 'Chasing a 5k PB.');
-    await fp.click('.sheet .btn.go');
-    await fp.waitForTimeout(900);
-    ok('writing a bio shares it', rec().bio === 'Chasing a 5k PB.', rec().bio);
-    await openMe();
-    await fp.fill('.sheet textarea', '');
-    await fp.click('.sheet .btn.go');
-    await fp.waitForTimeout(900);
-    ok('...and clearing it takes it back down', rec().bio === '', rec().bio);
-    /* ══════════════════════════════════════════════════════
-       AND A WAY TO GO AND LOOK
-
-       A row of switches tells you what you have agreed to; it does not
-       tell you what somebody SEES. The preview draws through the
-       friend sheet's own body — the same function, with the same
-       payload the push builds — so it cannot drift from the thing it
-       is a preview of, and that is the only way one is worth opening.
-
-       Asserted as the switches DECIDING it, not merely as a screen
-       that draws: turn two on and two off, and the two that are off
-       have to be absent here. */
-    await openMe();
-    /* Showing up ON and everything else OFF, set from the state each
-       row reports rather than from where it happens to sit. */
-    await fp.evaluate(() => [...document.querySelectorAll('.pv-row')]
-      .forEach((r, i) => {
-        const on = r.getAttribute('aria-checked') === 'true';
-        if (on !== (i === 0)) r.click();
-      }));
-    await fp.waitForTimeout(700);
-    await fp.click('.sheet >> text=See it as a friend does');
-    await fp.waitForTimeout(700);
-    const seen = await fp.evaluate(() => ({
-      title: (document.getElementById('scSheetTitle') || {}).textContent,
-      yr: document.querySelectorAll('.pf-yr i').length,
-      shelf: document.querySelectorAll('.pf-shelf').length,
-      cols: document.querySelectorAll('.pf-cols').length,
-      /* THE ONE CONTROL A PREVIEW MUST NOT HAVE. Removing yourself
-         from your own preview is not a thing that can mean anything,
-         and a control that exists and refuses is worse than one that
-         is not there. */
-      rm: document.querySelectorAll('.fp-rm').length,
-      back: [...document.querySelectorAll('.sheet .menu-item')]
-        .some((b) => /Back to your profile/.test(b.textContent)),
-    }));
-    ok('you can see your own profile the way a friend does',
-      seen.title === 'As a friend sees you' && seen.yr === 371
-      && seen.rm === 0 && seen.back, seen);
-    /* Reading and Workouts are still off, so they are not drawn — the
-       preview is of the PAYLOAD rather than of the record. */
-    ok('...and what you have not turned on is not in it',
-      seen.shelf === 0 && seen.cols === 0, seen);
-    /* The way back is a level, not a close: without it, shutting the
-       preview lands you on the board and the switches are two presses
-       away again. */
-    await fp.click('.sheet >> text=Back to your profile');
-    await fp.waitForTimeout(600);
-    ok('...and the way back returns to the switches rather than closing',
-      await fp.evaluate(() =>
-        (document.getElementById('scSheetTitle') || {}).textContent === 'Your profile'
-        && document.querySelectorAll('.pv-row').length === 3));
-
-    /* And this block puts the app back the way it found it, which is
-       the whole of what went wrong above. */
-    await fp.keyboard.press('Escape');
-    await fp.waitForTimeout(360);
-
-    /* ══════════════════════════════════════════════════════
-       READING ONE: THE ALMANAC
-
-       The other half, and each passes on the other's bug — a profile
-       that draws everything passes any check about what is sent, and
-       a push that sends everything passes any check about what is
-       drawn. This plants a peer record directly, because what is
-       asserted here is the DRAWING rather than the round trip, and
-       the round trip is what the section above is for. */
-    const FULL = {
-      code: 'ZZPROF01', name: 'Sam Okafor', acc: '#5FA8FF', ink: '#0C0C0E',
-      bio: 'Training for a half in April.', logs: [], at: Date.now(),
-      year: '5'.repeat(200) + '0'.repeat(100) + '3'.repeat(71),
-      /* A record still carrying `goals` — the friends half has to keep
-         reading one, because every phone that pushed before the
-         objectives went has up to thirty days left on the server and
-         a reader that threw on an unknown key would lose the day with
-         it. What it must NOT do any more is draw them. */
-      goals: ['20k steps a day', 'Read 12 books', 'Sub-90 half'],
-      work: [{ n: 'Push', c: '#e6412f', v: 14 }, { n: 'Pull', c: '#2f7fe6', v: 12 }],
-      mind: [{ t: 'Atomic Habits', a: 'James Clear', c: '', k: 'read' },
-             { t: 'Deep Work', a: 'Cal Newport', c: '', k: 'read' },
-             { t: 'The Daily Stoic', a: 'Ryan Holiday', c: '', k: 'pod' }],
-      days: {},
-    };
-    const plant = async (peer) => {
-      /* ── INTO THE SERVER TOO, NOT JUST THE CACHE ──
-         A friend on the list whose record is not on the stub is a
-         friend the app then GOES AND FETCHES — and the worker answers
-         404, which Chromium logs as a console error and the last
-         assertion in this section counts. Three of them, from two
-         plants across two reloads.
-
-         Seeding both is also the more honest fixture: it exercises
-         the real pull rather than only the copy kept for painting
-         offline. */
-      store.set('rec:' + peer.code, JSON.stringify(peer));
-      await fp.evaluate((pr) => {
-        const f = JSON.parse(localStorage.getItem('sched.friends.v1') || '[]')
-          .filter((x) => x.code !== pr.code);
-        f.push({ code: pr.code, name: pr.name });
-        localStorage.setItem('sched.friends.v1', JSON.stringify(f));
-        const ps = JSON.parse(localStorage.getItem('sched.peer.v1') || '{}');
-        ps[pr.code] = pr;
-        localStorage.setItem('sched.peer.v1', JSON.stringify(ps));
-      }, peer);
-      await fp.reload({ waitUntil: 'networkidle' });
-      await fp.waitForTimeout(600);
-      await stop('board');
-      await fp.evaluate((c) => {
-        const r = [...document.querySelectorAll('.fr-row')]
-          .find((x) => (x.textContent || '').includes(c));
-        if (!r) throw new Error('no row for ' + c);
-        r.click();
-      }, peer.name);
-      await fp.waitForTimeout(600);
-    };
-    await plant(FULL);
-    const prof = await fp.evaluate(() => {
-      const cell = [...document.querySelectorAll('.pf-yr i')];
-      const cs = cell.length ? getComputedStyle(cell[0]) : null;
-      const grid = document.querySelector('.pf-yr');
-      return {
-        title: (document.getElementById('scSheetTitle') || {}).textContent,
-        bio: (document.querySelector('.pf-bio') || {}).textContent,
-        cells: cell.length,
-        /* Laid down the column and across, which is what makes a row
-           one weekday and a column one week. Written as a plain grid
-           it fills across and a year reads as noise. */
-        flow: grid ? getComputedStyle(grid).gridAutoFlow : null,
-        rows: grid ? getComputedStyle(grid).gridTemplateRows.split(' ').length : 0,
-        label: grid ? grid.getAttribute('aria-label') : null,
-        role: grid ? grid.getAttribute('role') : null,
-        goals: document.querySelectorAll('.pf-gt').length,
-        shelf: document.querySelectorAll('.pf-shelf .mn-art').length,
-        cols: [...document.querySelectorAll('.pf-col .fp-k')].map((k) => k.textContent),
-        train: [...document.querySelectorAll('.pf-col')][0]
-          ? [...document.querySelectorAll('.pf-col')][0]
-              .querySelectorAll('.pf-lrow').length : 0,
-      };
-    });
-    ok('a friend’s profile is a year of days, a shelf and two columns',
-      prof.title === 'Sam Okafor'
-      && prof.bio === 'Training for a half in April.'
-      && prof.cells === 371 && prof.flow === 'column' && prof.rows === 7
-      && prof.cols.join('|') === 'Training|Listening' && prof.train === 2, prof);
-    /* AND THE GOALS ON IT ARE NOT DRAWN. The fixture carries three,
-       which is what a record pushed before the objectives went looks
-       like; a reader that still drew them would be showing a section
-       this app no longer has, from a key nothing writes. */
-    ok('...and a legacy record’s objectives are read without being drawn',
-      prof.goals === 0, prof.goals);
-    /* role="img" with a written label: the grid is the only fact up
-       there that nothing else repeats, so hiding it from a screen
-       reader throws it away. */
-    ok('...and the year is spoken as one picture rather than 371 marks',
-      prof.role === 'img' && /\d+ of the last 371 days/.test(prof.label || ''),
-      prof.label);
-
-    /* ── A DAY WITH NOTHING ON IT IS NEVER A RED ONE ──
-       The habits screen's rule and its reason: a wash of colour
-       across a month somebody missed is a judgement about them. The
-       COUNT moves the strength; the hue never moves at all. Measured
-       on composited pixels, and the unlit cell is held to being a
-       grey with no channel standing out. */
-    const yr = await fp.evaluate(() => {
-      const c = [...document.querySelectorAll('.pf-yr i')];
-      const px = (e) => getComputedStyle(e).backgroundColor;
-      return { lit: px(c[0]), unlit: px(c[210]),
-               litOp: getComputedStyle(c[0]).opacity };
-    });
-    const chan = (s) => (s.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
-    const spread = (s) => { const n = chan(s); return Math.max(...n) - Math.min(...n); };
-    ok('a day with nothing on it is a flat grey, never a colour',
-      spread(yr.unlit) < 12 && spread(yr.lit) > 20, yr);
-
-    /* ── AND A SECTION THEY DID NOT SHARE IS NOT DRAWN ──
-       Not drawn empty, not drawn as a heading over nothing. Both
-       directions in one pass, because "it draws what is there"
-       passes on a build that draws every section always. */
-    await fp.keyboard.press('Escape');
-    await fp.waitForTimeout(400);
-    await plant({ code: 'ZZPROF02', name: 'Quiet Pat', acc: '#8B72FF',
-      ink: '#0C0C0E', bio: '', year: '', work: [], mind: [],
-      logs: [], days: {}, at: Date.now() });
-    const quiet = await fp.evaluate(() => ({
-      title: (document.getElementById('scSheetTitle') || {}).textContent,
-      bio: document.querySelectorAll('.pf-bio').length,
-      yr: document.querySelectorAll('.pf-yr').length,
-      shelf: document.querySelectorAll('.pf-shelf').length,
-      cols: document.querySelectorAll('.pf-cols').length,
-      /* The sheet is still a sheet: their name and the way out. */
-      rm: document.querySelectorAll('.fp-rm').length,
-    }));
-    ok('somebody who shares nothing draws nothing, and the sheet still works',
-      quiet.title === 'Quiet Pat' && quiet.bio === 0 && quiet.yr === 0
-      && quiet.shelf === 0 && quiet.cols === 0
-      && quiet.rm === 1, quiet);
-    await fp.keyboard.press('Escape');
-    await fp.waitForTimeout(400);
-
-    /* ── leaving ── */
-    await stop('board');
-    await fp.click('#scTabYou');
-    await fp.waitForTimeout(460);
-    await fp.click('.sheet >> text=Friends');
-    await fp.waitForTimeout(460);
-    ok('your code is on the friends settings too, as a reference',
-      (await fp.$eval('.fr-code', (e) => e.textContent)) === mine.code);
-    await fp.click('text=Turn friends off');
-    await fp.waitForTimeout(420);
-    await fp.click('.sheet .btn.bad');
-    await fp.waitForTimeout(900);
-    ok('leaving deletes your record from the server', !store.get('rec:' + mine.code));
-    ok('and the write key with it', !store.get('key:' + mine.code));
-    ok('and clears the friend list out of this browser',
-      await fp.evaluate(() => localStorage.getItem('sched.friends.v1') === '[]'));
-    /* Your week, your ticks and your streak never left, so leaving
-       cannot take them. */
-    ok('your own ticks are untouched — they were never up there',
-      await fp.evaluate(() => {
-        const t = JSON.parse(localStorage.getItem('sched.tick.v1') || '{}');
-        return Object.keys(t.ticks || t).length > 0;
-      }));
-    ok('and the board still has you on it', await fp.$$eval('.fr-row', (r) => r.length) === 1);
-
-    ok('no page errors through any of the friends half', ferrs.length === 0, ferrs);
-    await fp.close();
-
-    /* ═══ the other phone ═══
-       Everything above is one device that was seeded with the server's
-       address. This is the person it was sent TO: a fresh context, a
-       browser that has never heard of this app, nothing in
-       localStorage, and one link.
-
-       It is the only assertion that can hold the feature, because every
-       part of it is invisible from inside the sending phone — the hash
-       being read, the server coming out of the link rather than out of
-       the build, the add happening without anybody typing, and the URL
-       being clean afterwards.
-
-       THE LIVE SERVER IS ROUTED TO A REFUSAL, not left to the network.
-       If the link is not read, `HOME` is the fallback and this test
-       would quietly make a real request to the deployed worker — which
-       is a test that reaches production and, worse, one that could pass
-       while doing it. Aborted and counted, so the fallback is a
-       failure rather than a round trip. */
-    {
-      const gp = await browser.newPage({ ...PHONE });
-      const gerrs = [];
-      gp.on('pageerror', (e) => gerrs.push(String(e)));
-      gp.on('console', (m) => { if (m.type() === 'error') gerrs.push(m.text()); });
-
-      const live = [];
-      await gp.route('https://sched.nikorapullin.workers.dev/**', (route) => {
-        live.push(route.request().url());
-        return route.abort();
-      });
-      await gp.route(HOST + '/**', async (route) => {
-        const r = route.request();
-        const res = await worker.fetch(new Request(r.url(), {
-          method: r.method(), headers: r.headers(),
-          body: ['GET', 'HEAD'].includes(r.method()) ? undefined : r.postDataBuffer(),
-        }), env);
-        await route.fulfill({ status: res.status,
-          headers: Object.fromEntries(res.headers),
-          body: Buffer.from(await res.arrayBuffer()) });
-      });
-      /* NOTHING about FRIENDS is seeded. No net record, no url — the
-         point is that the link is the only thing this browser is told.
-         The intro is a different question: it is a full-screen surface
-         on a first visit and this page presses a tab, so it is marked
-         seen the same way every other page here marks it. */
-      await gp.addInitScript(() => {
-        localStorage.setItem('sched.tour.v1', '1');
-        localStorage.setItem('sched.hint2.v1', '1');
-        localStorage.setItem('sched.hintw.v1', '1');
-      localStorage.setItem('sched.hintw.v1', '1');
-      /* AND THE GESTURE CARD, for the intro's own reason: it comes up
-         over Showing up on a first visit, dims the whole app behind it
-         and takes every press. Left unset, half this file would be
-         measuring pixels through a 62% wash and clicking a surface
-         rather than a tile. The section that is about it clears the
-         key and reloads. */
-      localStorage.setItem('sched.hint2.v1', '1');
-      localStorage.setItem('sched.hintw.v1', '1');
-        const F = new Date('2026-09-01T09:30:00').getTime(), R = Date;
-        window.Date = class extends R {
-          constructor(...a) { super(...(a.length ? a : [F])); }
-          static now() { return F; }
-        };
-        delete window.SpeechRecognition;
-        delete window.webkitSpeechRecognition;
-      });
-
-      /* Rae is back on the server — the phone above deleted its own
-         record on the way out, not hers. */
-      const url = `${BASE}/schedule/#add=JADE2K7P&at=${encodeURIComponent(HOST)}`;
-      await gp.goto(url, { waitUntil: 'networkidle' });
-      await gp.waitForTimeout(1400);
-
-      ok('a link opens the app on the friends screen, with nothing pressed',
-        !(await gp.$eval('#scFriends', (e) => e.hidden)));
-      ok('...and the address it was sent to came out of the link',
-        (await gp.evaluate(() =>
-          (JSON.parse(localStorage.getItem('sched.net.v1') || '{}')).url)) === HOST, HOST);
-      ok('...so the built-in server was never asked', live.length === 0, live);
-      ok('...it claimed a code of its own on the way',
-        await gp.evaluate(() => {
-          const n = JSON.parse(localStorage.getItem('sched.net.v1') || '{}');
-          return !!(n.on && /^[A-Z0-9]{8}$/.test(n.code));
-        }));
-      ok('...and the person who sent it is on the list, untyped',
-        (await gp.evaluate(() => (JSON.parse(localStorage.getItem('sched.friends.v1')) || [])
-          .map((f) => f.code).join())) === 'JADE2K7P');
-      ok('...showing on the board by name',
-        (await gp.$$eval('.fr-n', (n) => n.map((x) => x.textContent))).includes('Rae'));
-
-      /* Left in the bar it is redeemed again on every reload — spent, so
-         it adds nothing, but a bookmark of this page is then somebody
-         else's invitation for as long as it exists. */
-      ok('the link is taken out of the address bar once it is spent',
-        !(await gp.evaluate(() => location.hash)));
-
-      /* It is one invitation, not a standing instruction. The reload is
-         the real test of that: `invite` is cleared before the request
-         rather than in its callback, so a second pass cannot re-add. */
-      await gp.reload({ waitUntil: 'networkidle' });
-      await gp.waitForTimeout(900);
-      ok('and reloading does not add them a second time',
-        (await gp.evaluate(() => (JSON.parse(localStorage.getItem('sched.friends.v1')) || [])
-          .length)) === 1);
-
-      /* The other door into the same reader. Somebody who was sent a
-         link and pasted the whole thing gets the same result as
-         somebody who was told the code across a table. */
-      await gp.evaluate(() => {
-        localStorage.setItem('sched.friends.v1', '[]');
-        localStorage.setItem('sched.peer.v1', '{}');
-        /* A NICKNAME FIRST, because Add a friend is not on the screen
-           until there is one — before a profile there is nothing to
-           add anybody to. This phone got here through a LINK, which
-           needs no profile and added its friend untyped; typing a code
-           in is the other door, and that one asks you to exist first. */
-        const n = JSON.parse(localStorage.getItem('sched.net.v1') || '{}');
-        n.name = 'Sent';
-        localStorage.setItem('sched.net.v1', JSON.stringify(n));
-      });
-      await gp.reload({ waitUntil: 'networkidle' });
-      await gp.waitForTimeout(700);
-      await gp.click('.tab[data-view="friends"]');
-      await gp.waitForTimeout(400);
-      await gp.click('text=Add a friend');
-      await gp.waitForTimeout(460);
-      await gp.fill('.sheet input[type=text]', url);
-      await gp.click('.sheet .btn.go');
-      await gp.waitForTimeout(900);
-      ok('a whole link pasted into the field works as well as a code',
-        (await gp.evaluate(() => (JSON.parse(localStorage.getItem('sched.friends.v1')) || [])
-          .map((f) => f.code).join())) === 'JADE2K7P');
-
-      /* A link naming a server you are not on is refused rather than
-         followed. Following it would point an app with a record and a
-         friend list on one server at another, orphaning both — and the
-         read would then miss on every code already on the list. */
-      await gp.click('text=Add a friend');
-      await gp.waitForTimeout(460);
-      await gp.fill('.sheet input[type=text]',
-        `${BASE}/schedule/#add=QQQQ2222&at=${encodeURIComponent('https://elsewhere.example')}`);
-      await gp.click('.sheet .btn.go');
-      await gp.waitForTimeout(700);
-      ok('...but a link to a different server is refused, not followed',
-        (await gp.$eval('#scToast', (e) => e.textContent)).includes('another server')
-        && (await gp.evaluate(() =>
-          (JSON.parse(localStorage.getItem('sched.net.v1') || '{}')).url)) === HOST,
-        await gp.$eval('#scToast', (e) => e.textContent));
-
-      ok('no page errors on the phone that was sent the link',
-        gerrs.length === 0, gerrs);
-      await gp.close();
-    }
-
-    globalThis.Date = RealDate;
-  }
-
   /* ── the same app on a 12-hour phone ──
      A format that follows the device cannot be checked on one device.
      Its own context at en-US, seeded and frozen exactly as the main
@@ -7743,8 +6459,6 @@ const SAID = [
          key and reloads. */
       localStorage.setItem('sched.hint2.v1', '1');
       localStorage.setItem('sched.hintw.v1', '1');
-      localStorage.setItem('sched.net.v1', JSON.stringify({
-        url: 'about:blank', code: '', key: '', name: '', pic: '', on: false }));
       const R = Date;
       // eslint-disable-next-line no-global-assign
       Date = class extends R {
@@ -9060,8 +7774,6 @@ const SAID = [
     ipage.on('pageerror', (e) => ierrs.push(String(e)));
     ipage.on('console', (m) => { if (m.type() === 'error') ierrs.push(m.text()); });
     await ipage.addInitScript(() => {
-      localStorage.setItem('sched.net.v1',
-        JSON.stringify({ on: false, url: '', code: '' }));
     });
 
     const fresh = async () => {
@@ -9112,18 +7824,22 @@ const SAID = [
 
     ok('the intro opens on a first visit', await drawn());
 
-    /* ── THREE CARDS, AND THE ORDER IS THE DESIGN ──
+    /* ── TWO CARDS, AND THE ORDER IS THE DESIGN ──
        It went in at six and two of them were the same card wearing
-       different verbs; it was four until Pattern went, and the card
-       about rating a day went with the screen that read the ratings.
+       different verbs; it was four until Pattern went, three until
+       friends went, and each time the card that went named a screen
+       that no longer exists. A card teaching a mechanism this app
+       does not have is worse than no card, because the person then
+       goes looking for it — this file has recorded that three times
+       and the count coming down is what it looks like being kept.
        Both the count and the order are asserted because both are one
        line to change and neither would throw. */
     const first = await card();
-    ok('three cards, in their order, the two hidden doors last',
-      first.n === 3
+    ok('two cards, in their order, the hidden doors last',
+      first.n === 2
       && [...await ipage.evaluate(() =>
           [...document.querySelectorAll('.tr-slide')].map((s) => s.dataset.card))]
-        .join('|') === 'week|friends|back', first);
+        .join('|') === 'week|back', first);
 
     /* ── ONE CARD ON SCREEN, AND THE OTHERS OUT OF REACH ──
        A track that moves rather than a scroller leaves the other three
@@ -9132,9 +7848,9 @@ const SAID = [
        which looks exactly like the page having scrolled sideways. */
     ok('exactly one card is on screen, and it is the first',
       first.lit.length === 1 && first.lit[0] === 'week'
-      && first.live.join('') === 'week' && first.inert === 2, first);
+      && first.live.join('') === 'week' && first.inert === 1, first);
     ok('...and the button says Continue on it, not the last word',
-      first.go === 'Continue' && first.step === 'Step 1 of 3', first);
+      first.go === 'Continue' && first.step === 'Step 1 of 2', first);
 
     /* ── THE LAST CARD IS THE TWO HIDDEN DOORS ──
        It was the objectives one, and the row of cards on the day
@@ -9143,14 +7859,22 @@ const SAID = [
        pair you cannot find by pressing around, which is the last card
        for the reason the objectives were — it is the one still on
        screen when the intro ends. */
-    for (let i = 0; i < 2; i++) {
+    /* ── ONCE, NOT TWICE, AND THAT WAS A CRASH RATHER THAN A FAIL ──
+       It advanced twice when there were three cards. With two, the
+       second press is the LAST card's button — which starts the week
+       and takes the intro off the screen, so `card()` then read
+       elements that were gone and threw, taking the file down rather
+       than failing here. Driven off the count instead of a literal,
+       so the day a card is added or removed this walks to the end of
+       whatever is there. */
+    for (let i = 0; i < first.n - 1; i++) {
       await ipage.evaluate(() => document.querySelector('.tr-go').click());
       await ipage.waitForTimeout(400);
     }
     const last = await card();
     ok('the last card is the two hidden doors, and it starts the week',
       last.live.join('') === 'back' && last.go === 'Start the week'
-      && last.step === 'Step 3 of 3', last);
+      && last.step === 'Step 2 of 2', last);
 
     /* ── THE POINTER IS GONE, AND SO IS WHAT IT POINTED AT ──
        That card drew a day card at its real proportions with the turn
@@ -9187,11 +7911,11 @@ const SAID = [
                  n: a.length, run: a.filter((x) => x === 'running').length };
       }));
     ok('every card’s icon is a scene that moves',
-      anim.length === 3 && anim.every((a) => a.n > 0), anim);
+      anim.length === 2 && anim.every((a) => a.n > 0), anim);
     /* ── AND ONLY THE ONE ON SCREEN IS RUNNING ──
-       Three of the four are laid out off the side at all times, and a
-       loop on one of them is a compositor pass a frame to draw what
-       nobody can see. The rule is written on the SUBTREE rather than
+       The other card is laid out off the side at all times, and a
+       loop on it is a compositor pass a frame to draw what nobody can
+       see. The rule is written on the SUBTREE rather than
        on a list of the elements in it, so the next scene added here is
        covered on the day it is added. */
     ok('...and the two off the side are paused',
@@ -9262,7 +7986,7 @@ const SAID = [
     const again = await card();
     ok('Settings plays it again, from the first card',
       row && await drawn() && again.live.join('') === 'week'
-      && again.step === 'Step 1 of 3', again);
+      && again.step === 'Step 1 of 2', again);
 
     /* A swipe moves it, which is what the dots promise. */
     const box = await ipage.$eval('.tr-win', (e) => {
@@ -9274,7 +7998,7 @@ const SAID = [
     await ipage.mouse.move(box.l, box.y, { steps: 8 });
     await ipage.mouse.up();
     await ipage.waitForTimeout(420);
-    ok('a swipe moves it on a card', (await card()).live.join('') === 'friends');
+    ok('a swipe moves it on a card', (await card()).live.join('') === 'back');
 
     /* ── THE COPY IS PLAIN, AND THAT INCLUDES HAVING NO DASHES ──
        It went in written the way the notes beside the code are
@@ -9368,8 +8092,6 @@ const SAID = [
       Object.assign({}, PHONE, { reducedMotion: 'reduce' }));
     const rpage = await rctx.newPage();
     await rpage.addInitScript(() => {
-      localStorage.setItem('sched.net.v1',
-        JSON.stringify({ on: false, url: '', code: '' }));
       localStorage.removeItem('sched.tour.v1');
     });
     await rpage.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
@@ -9448,17 +8170,28 @@ const SAID = [
       localStorage.setItem('sched.hint2.v1', '1');
       localStorage.setItem('sched.hintw.v1', '1');
       localStorage.setItem('sched.view.v1', 'list');
-      localStorage.setItem('sched.net.v1',
-        JSON.stringify({ on: false, url: '', code: '' }));
+      /* ── TWENTY, AND IT WAS FOURTEEN ──
+         Fourteen was chosen when a row behind you carried a Missed
+         tag and stood about 55px. The tag went, the row went to its
+         44px floor, and fourteen of them stopped overflowing the card
+         at all — `max` came back 0, so a check about a day that
+         scrolls had nothing to scroll and the fade under it had
+         nothing to bite on. The BAR is untouched at `max > 100`; what
+         moved is how many blocks it takes to get there, which is a
+         fact about the row rather than about the feature.
+
+         The step is 45 rather than 60 because twenty of those from
+         06:00 runs past midnight, and this record is one day a row. */
       const names = ['Wake', 'Train', 'Shower', 'Commute', 'Work', 'Coffee',
                      'Meeting', 'Lunch', 'Work', 'Walk', 'Shop', 'Cook',
-                     'Read', 'Down'].slice(0, rows);
+                     'Emails', 'Calls', 'Errands', 'Stretch', 'Plan',
+                     'Journal', 'Read', 'Down'].slice(0, rows);
       const items = []; let id = 1;
       for (let d = 0; d < 7; d++) {
         let t = 360;
         for (const nm of names) {
-          items.push({ id: 'b' + (id++), d, s: t, e: t + 45, r: '', n: nm });
-          t += 60;
+          items.push({ id: 'b' + (id++), d, s: t, e: t + 40, r: '', n: nm });
+          t += 45;
         }
       }
       localStorage.setItem('sched.v1',
@@ -9492,7 +8225,7 @@ const SAID = [
       }, sel);
     };
 
-    await heavy(14);
+    await heavy(20);
     await spage.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
     await spage.waitForTimeout(650);
 
@@ -9516,7 +8249,7 @@ const SAID = [
       ctl.top > 60, ctl);
 
     const long = await dragUp('.day-card');
-    ok(`...and it scrolls a day with fourteen blocks on it `
+    ok(`...and it scrolls a day with twenty blocks on it `
       + `(${long.top} of ${long.max}px)`,
       long.max > 100 && long.top >= Math.min(long.max - 2, 300), long);
 
@@ -9677,13 +8410,9 @@ const SAID = [
     const lpage = await lctx.newPage();
     const lerrs = [];
     lpage.on('pageerror', (e) => lerrs.push(String(e)));
-    await lpage.addInitScript(([w, nowhere]) => {
+    await lpage.addInitScript(([w]) => {
       if (!localStorage.getItem('sched.v1')) {
         localStorage.setItem('sched.v1', JSON.stringify(w));
-      }
-      if (!localStorage.getItem('sched.net.v1')) {
-        localStorage.setItem('sched.net.v1', JSON.stringify({
-          url: nowhere, code: '', key: '', name: '', pic: '', on: false }));
       }
       if (!localStorage.getItem('sched.tour.v1')) {
         localStorage.setItem('sched.tour.v1', '1');
@@ -9699,9 +8428,7 @@ const SAID = [
       localStorage.setItem('sched.hint2.v1', '1');
       localStorage.setItem('sched.hintw.v1', '1');
       }
-    }, [WEEK, `${BASE}/schedule/nofriends`]);
-    await lpage.route(`${BASE}/schedule/nofriends/**`, (route) => route.fulfill({
-      status: 200, contentType: 'application/json', body: '{"ok":true}' }));
+    }, [WEEK]);
     await lpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
     await lpage.waitForTimeout(300);
 
@@ -9928,8 +8655,6 @@ const SAID = [
         .forEach((k) => localStorage.setItem(k, '1'));
       localStorage.setItem('sched.view.v1', 'tally');
       localStorage.setItem('sched.ty.v1', 'up');
-      localStorage.setItem('sched.net.v1',
-        JSON.stringify({ on: false, url: '', code: '' }));
     });
     await hp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
     await hp.waitForTimeout(500);
@@ -9942,8 +8667,8 @@ const SAID = [
        AND IT IS NOT A TILE. The grid's rows carry a floor so an eighth
        habit cannot compress every tile into a strip of labels, and a
        41px control sitting in one of those rows was drawn at 168 —
-       a whole tile's worth of the one screen this layout exists to fit
-       inside. Measured as its own box rather than as its parent, since
+       a whole tile's worth of a screen that was built to hold six.
+       Measured as its own box rather than as its parent, since
        a control moved out of the grid and still given a tile's height
        would pass any check on the markup alone. */
     ok('the way in is under the grid, and it does not take a tile',
@@ -10033,23 +8758,30 @@ const SAID = [
       && added.names.indexOf('Cold plunge') === added.kinds.lastIndexOf('d')
       && added.cap === '0/ 7' && /of 7 today/.test(added.capAll), added);
 
-    /* ── AND THE WIDE TILE IS ARITHMETIC, NOT A NAME ──
-       The tall one takes two cells of a two-column grid, so six items
-       occupy seven and something has to be full width. Seven items
-       occupy eight, which pair — so nothing is wide at all, and the
-       rule re-solves instead of stranding itself on six.
+    /* ── AND A SEVENTH TAKES THE COLUMN LIKE ANY OTHER ──
+       This used to be the half that could not be checked on the main
+       fixture: the tall tile took two cells of a two-column grid, so
+       six items occupied seven and one had to be full width — and
+       seven items occupied eight, which pair, so nothing was. The
+       grid is one column now and the arithmetic is gone with it, so
+       what is left to assert is that a habit of yours is a tile of
+       the same width as the six, at the same edge, and that the
+       cursor's splice really did go rather than reordering it.
 
-       This is the half that could not be checked on the main fixture,
-       which is always six. Measured as boxes for the reason the six
-       are: a rule that set the class and no longer spanned would pass
-       on the name alone. */
-    ok('...and with seven the cells pair, so nothing is full width',
+       Measured as boxes for the reason the six are: a rule that set
+       a class and no longer placed anything would pass on the name
+       alone. */
+    ok('...and a seventh is a tile like the six, at one edge and one width',
       await hp.evaluate(() => {
         const r = [...document.querySelectorAll('.ty-row')];
-        const w = document.querySelector('.ty-grid').getBoundingClientRect().width;
+        const b = (x) => x.getBoundingClientRect();
+        const w = Math.round(document.querySelector('.ty-grid').getBoundingClientRect().width);
         return r.length === 7
-          && !r.some((x) => x.getBoundingClientRect().width > w * 0.55)
-          && r.filter((x) => x.classList.contains('is-tall')).length === 1;
+          && new Set(r.map((x) => Math.round(b(x).left))).size === 1
+          && [...new Set(r.map((x) => Math.round(b(x).width)))]
+            .every((v) => Math.abs(v - w) <= 1)
+          && r.filter((x) => x.classList.contains('is-tall')).length === 1
+          && r.filter((x) => x.classList.contains('is-wide')).length === 0;
       }));
 
     /* ── AND IT LOGS LIKE ANY OTHER ──
@@ -10202,10 +8934,6 @@ const SAID = [
       if (!localStorage.getItem('sched.v1')) {
         localStorage.setItem('sched.v1', JSON.stringify(wk));
       }
-      if (!localStorage.getItem('sched.net.v1')) {
-        localStorage.setItem('sched.net.v1',
-          JSON.stringify({ on: false, url: '', code: '' }));
-      }
     }, WEEK);
     await ap.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
     await ap.waitForTimeout(500);
@@ -10262,7 +8990,10 @@ const SAID = [
 
        Notes, a two-section note   last line 913, 73 of 147 reachable
        Showing up, seven habits    .ty-foot 1013, 169 of 247 reachable
-       Friends, nine rows          .friends 990, 146 of 224 reachable
+
+     A third was measured on the friends board at 990, 146 of 224.
+     That tab is gone; the rule it proved is not, and the calendar
+     took its place in the loop.
 
      ITS OWN CONTEXT, at the foot of the file, for the sideways check's
      own reason: it presses every tab and seeds a fixture long enough
@@ -10274,8 +9005,6 @@ const SAID = [
     const bpage = await bctx.newPage();
     const berrs = [];
     bpage.on('pageerror', (e) => berrs.push(String(e)));
-    await bpage.route(`${BASE}/schedule/nofriends/**`, (route) => route.fulfill({
-      status: 200, contentType: 'application/json', body: '{"ok":true}' }));
     await bpage.addInitScript((wk) => {
       ['sched.tour.v1', 'sched.hint2.v1'].forEach((k) => localStorage.setItem(k, '1'));
       if (!localStorage.getItem('sched.v1')) localStorage.setItem('sched.v1', JSON.stringify(wk));
@@ -10283,16 +9012,7 @@ const SAID = [
          condition: "nothing is under the bar" is vacuously true of a
          screen that fits, so the panes are asserted to be scrolling
          beside it. */
-      if (!localStorage.getItem('sched.net.v1')) {
-        localStorage.setItem('sched.net.v1', JSON.stringify({
-          on: true, url: location.origin + '/schedule/nofriends',
-          code: 'AAAA1111', key: 'k'.repeat(32) }));
-        localStorage.setItem('sched.me.v1', JSON.stringify({ name: 'Me' }));
-        const fr = [];
-        for (let i = 0; i < 9; i++) {
-          fr.push({ code: 'C' + i + '000000', name: 'Friend ' + i, acc: '#8a4fe0', days: {}, up: 0 });
-        }
-        localStorage.setItem('sched.friends.v1', JSON.stringify(fr));
+      if (!localStorage.getItem('sched.habit.v1')) {
         localStorage.setItem('sched.habit.v1', JSON.stringify(
           ['Cold plunge', 'Charting', 'Journalling', 'Stretching', 'Sunlight', 'Vitamins', 'Calls']
             .map((n, i) => ({ id: 'h' + i, n: n, k: 'tick', unit: '', c: 'blue', aim: 5, on: 1 }))));
@@ -10313,7 +9033,7 @@ const SAID = [
 
     console.log('\n── nothing is under the bar ──');
     const floors = {};
-    for (const v of ['list', 'tally', 'notes', 'friends']) {
+    for (const v of ['list', 'tally', 'notes', 'cal']) {
       await bpage.evaluate((vv) =>
         document.querySelector(`.tab[data-view="${vv}"]`).click(), v);
       await bpage.waitForTimeout(420);
@@ -10391,7 +9111,7 @@ const SAID = [
     const opage = await octx.newPage();
     const oerrs = [];
     opage.on('pageerror', (e) => oerrs.push(String(e)));
-    await opage.addInitScript(([w, nowhere, note]) => {
+    await opage.addInitScript(([w, note]) => {
       if (!localStorage.getItem('sched.v1')) localStorage.setItem('sched.v1', JSON.stringify(w));
       /* A note to open, because the edit-mode half below needs one —
          seeded only when ABSENT, like everything else here: an init
@@ -10399,14 +9119,10 @@ const SAID = [
       if (!localStorage.getItem('sched.note.v1')) {
         localStorage.setItem('sched.note.v1', JSON.stringify(note));
       }
-      if (!localStorage.getItem('sched.net.v1')) {
-        localStorage.setItem('sched.net.v1', JSON.stringify({
-          url: nowhere, code: '', key: '', name: '', pic: '', on: false }));
-      }
       if (!localStorage.getItem('sched.tour.v1')) localStorage.setItem('sched.tour.v1', '1');
       if (!localStorage.getItem('sched.hint2.v1')) localStorage.setItem('sched.hint2.v1', '1');
       if (!localStorage.getItem('sched.hintw.v1')) localStorage.setItem('sched.hintw.v1', '1');
-    }, [WEEK, `${BASE}/schedule/nofriends`, { list: [
+    }, [WEEK, { list: [
       /* A line long enough to wrap and a bracket reserving the gutter,
          so a note that DID overflow would have something to overflow
          with rather than passing by being short. */
@@ -10414,8 +9130,6 @@ const SAID = [
         { i: 'o1', h: 1, c: 'red', x: 'Negative energy', y: 'What takes from me', m: 0 },
         { i: 'o2', h: 0, c: '', x: 'Listening to music inside of car instead of educational', m: 1 },
         { i: 'o3', h: 0, c: '', x: 'Skipping backtesting', m: 2 } ] } ] }]);
-    await opage.route(`${BASE}/schedule/nofriends/**`, (route) => route.fulfill({
-      status: 200, contentType: 'application/json', body: '{"ok":true}' }));
     await opage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
     await opage.waitForTimeout(420);
 
@@ -10439,7 +9153,7 @@ const SAID = [
        that only visited the week would pass on a Today pane three
        columns wide. */
     for (const [name, sel] of [['week', '#scTabWeek'], ['today', '#scTabTally'],
-                               ['notes', '#scTabNotes'], ['friends', '#scTabFriends']]) {
+                               ['notes', '#scTabNotes'], ['calendar', '#scTabCal']]) {
       const hit = await opage.evaluate((s) => {
         const b = document.querySelector(s);
         if (!b) return false;
@@ -10554,8 +9268,7 @@ const SAID = [
     const robbed = [];
     let seenCtrls = 0;
     for (const [name, sel] of [['week', '#scTabWeek'], ['today', '#scTabTally'],
-                               ['calendar', '#scTabCal'], ['notes', '#scTabNotes'],
-                               ['friends', '#scTabFriends']]) {
+                               ['calendar', '#scTabCal'], ['notes', '#scTabNotes']]) {
       const hit = await opage.evaluate((q) => {
         const b = document.querySelector(q);
         if (!b) return false;
@@ -10669,7 +9382,6 @@ const SAID = [
     const mAsked = [];
     mpage.on('request', (r) => mAsked.push(r.url()));
     await mpage.addInitScript(() => {
-      localStorage.setItem('sched.net.v1', JSON.stringify({ on: false, url: '', code: '' }));
       localStorage.setItem('sched.tour.v1', '1');
       localStorage.setItem('sched.hint2.v1', '1');
       localStorage.setItem('sched.hintw.v1', '1');
@@ -10815,8 +9527,9 @@ const SAID = [
         [...document.querySelectorAll('.mn-res .mn-hit b')].some((b) => b.textContent === 'Atomic Habits')));
 
     /* ── THE PROMISE, AND IT IS THE WHOLE POINT OF THE SECTION ──
-       This app reaches nothing off origin except the friends half.
-       Mind adds one more door and it must stay SHUT until you
+       This app reaches nothing off origin at all now that friends
+       are gone: two jacket shapes, and the worker's feed reader.
+       Mind is that door and it must stay SHUT until you
        actually search: not on boot, not on a render, and not on
        OPENING the sheet. Measured after the sheet is up and before a
        single key is typed.
@@ -11038,7 +9751,8 @@ const SAID = [
        second is the thing this app exists not to send. Both halves,
        because each passes on the other's bug — nothing may be sent
        when you write one, and a push that happens for some other
-       reason must not be carrying it. */
+       reason must not be carrying it. The second half is now the
+       absence of a push at all, asserted where Notes is. */
     /* The token has to be one no SEARCH TERM can contain, or the
        filter matches the app working correctly: the first version
        looked for "indexed", which is a word in the query the test
@@ -11423,8 +10137,6 @@ const SAID = [
     await pp.addInitScript(() => {
       ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
         .forEach((k) => localStorage.setItem(k, '1'));
-      localStorage.setItem('sched.net.v1',
-        JSON.stringify({ on: false, url: '', code: '' }));
     });
     await pp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
     await pp.waitForTimeout(500);
@@ -11531,35 +10243,6 @@ const SAID = [
     ok('every control on the week answers a press, and there are some',
       missed.n > 6 && missed.out.length === 0, missed);
 
-    /* ── INCLUDING THE ONE THAT IS NOT A BUTTON ──
-       The friends board's row was the only thing in the app the first
-       cut of this check could not see, because it presses buttons and
-       the row is an <li>. Both halves: the net has to reach it, and it
-       has to be there to be reached. */
-    await pp.evaluate(() => document.querySelector('#scTabFriends').click());
-    await pp.waitForTimeout(700);
-    const fr = await press();
-    const nonBtn = await pp.evaluate(() => {
-      const li = document.querySelector('.fr-row.is-tap');
-      if (!li) return null;
-      const sp = li.querySelector('.fr-n') || li.firstElementChild;
-      const r = sp.getBoundingClientRect();
-      sp.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true,
-        clientX: r.left + 2, clientY: r.top + 2 }));
-      const rp = document.querySelector('.rp');
-      const host = rp && rp.parentElement;
-      /* Pressed on a CHILD, and it has to resolve to the row rather
-         than washing a 29px span in the middle of it. */
-      const ok = !!host && host === li;
-      document.querySelectorAll('.rp').forEach((e) => e.remove());
-      return { ok, tag: li.tagName, host: host && host.className };
-    });
-    ok('the friends board answers too, row and all', fr.out.length === 0, fr);
-    ok('...and its row is an <li>, pressed anywhere inside it',
-      nonBtn && nonBtn.ok && nonBtn.tag === 'LI', nonBtn);
-    await pp.evaluate(() => document.querySelector('#scTabWeek').click());
-    await pp.waitForTimeout(500);
-
     /* ── AND THE RULE MUST NOT OVER-REACH ──
        This was about the deck: the pair fanned behind a workout card
        showed an edge each and CANNOT be pressed, and they carried
@@ -11643,8 +10326,6 @@ const SAID = [
     await rp.addInitScript(() => {
       ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
         .forEach((k) => localStorage.setItem(k, '1'));
-      localStorage.setItem('sched.net.v1',
-        JSON.stringify({ on: false, url: '', code: '' }));
     });
     await rp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
     await rp.waitForTimeout(500);
@@ -11683,8 +10364,6 @@ const SAID = [
       await cp.addInitScript(() => {
         ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
           .forEach((k) => localStorage.setItem(k, '1'));
-        localStorage.setItem('sched.net.v1',
-          JSON.stringify({ on: false, url: '', code: '' }));
       });
       await cp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
       await cp.waitForTimeout(500);
@@ -11779,8 +10458,6 @@ const SAID = [
         .forEach((k) => localStorage.setItem(k, '1'));
       localStorage.setItem('sched.view.v1', 'tally');
       localStorage.setItem('sched.ty.v1', 'up');
-      localStorage.setItem('sched.net.v1',
-        JSON.stringify({ on: false, url: '', code: '' }));
     });
     await dp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
     await dp.waitForTimeout(500);
@@ -12151,10 +10828,6 @@ const SAID = [
          and the note beside it says so. */
       [['sched.view.v1', 'tally'], ['sched.ty.v1', 'up']]
         .forEach(([k, v]) => { if (!localStorage.getItem(k)) localStorage.setItem(k, v); });
-      if (!localStorage.getItem('sched.net.v1')) {
-        localStorage.setItem('sched.net.v1',
-          JSON.stringify({ on: false, url: '', code: '' }));
-      }
     });
     await rp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
     await rp.waitForTimeout(500);
@@ -12506,8 +11179,6 @@ const SAID = [
     await kp.addInitScript(() => {
       ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
         .forEach((k) => localStorage.setItem(k, '1'));
-      localStorage.setItem('sched.net.v1',
-        JSON.stringify({ on: false, url: '', code: '' }));
     });
     await kp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
     await kp.waitForTimeout(500);
@@ -12844,8 +11515,6 @@ const SAID = [
       await tp.addInitScript(() => {
         ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
           .forEach((k) => localStorage.setItem(k, '1'));
-        localStorage.setItem('sched.net.v1',
-          JSON.stringify({ on: false, url: '', code: '' }));
       });
       await tp.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
       await tp.waitForTimeout(520);
@@ -12863,11 +11532,11 @@ const SAID = [
          is 6.6. A colour and the pixels it is compared against have to
          come from the same frame. */
       let worst = { r: 99 };
-      for (const cls of ['is-todo', 'is-ok', 'is-now', 'is-bad']) {
+      for (const cls of ['is-todo', 'is-ok', 'is-now']) {
         const s = await tp.evaluate((c) => {
           const e = document.querySelector('.row .st');
           if (!e) throw new Error('no state tag on the week');
-          ['is-todo', 'is-ok', 'is-now', 'is-bad'].forEach((k) => e.classList.remove(k));
+          ['is-todo', 'is-ok', 'is-now'].forEach((k) => e.classList.remove(k));
           e.classList.add(c);
           const r = e.getBoundingClientRect();
           return { fg: getComputedStyle(e).color,
@@ -12970,10 +11639,6 @@ const SAID = [
 
     await npage.addInitScript((wk) => {
       if (!localStorage.getItem('sched.v1')) localStorage.setItem('sched.v1', JSON.stringify(wk));
-      if (!localStorage.getItem('sched.net.v1')) {
-        localStorage.setItem('sched.net.v1',
-          JSON.stringify({ on: false, url: '', code: '' }));
-      }
       if (!localStorage.getItem('sched.tour.v1')) {
         localStorage.setItem('sched.tour.v1', '1');
         localStorage.setItem('sched.hint2.v1', '1');
@@ -12998,8 +11663,6 @@ const SAID = [
         ] }));
       }
     }, WEEK);
-    await npage.route(`${BASE}/schedule/nofriends/**`, (route) => route.fulfill({
-      status: 200, contentType: 'application/json', body: '{"ok":true}' }));
     await npage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
     await npage.waitForTimeout(500);
 
@@ -13025,9 +11688,9 @@ const SAID = [
     /* ── EXACTLY ONE SECTION IS DRAWN, MEASURED AS THE BOX ──
        `[hidden]` has to be said out loud once a thing takes a display,
        and reading the attribute is what missed that six times running.
-       Friends is left out of the loop on purpose: pressing it CLAIMS a
-       code, which is the one request this page is allowed to make and
-       would fail the count this whole section is built around. */
+       The calendar is left out of the loop because this section is
+       about Notes being a section of its own; what the loop has to
+       prove is that pressing one tab leaves exactly one box drawn. */
     const drawn = (id) => {
       const e = document.getElementById(id);
       const r = e.getBoundingClientRect();
@@ -13039,7 +11702,7 @@ const SAID = [
       await npage.waitForTimeout(320);
       nboxes[v] = await npage.evaluate((d) => {
         const f = new Function('id', 'return (' + d + ')(id)');
-        return ['scWeek', 'scTally', 'scNotes', 'scFriends'].filter(f);
+        return ['scWeek', 'scTally', 'scNotes', 'scCal'].filter(f);
       }, drawn.toString());
     }
     ok('Notes is a section of its own, and exactly one is ever drawn',
@@ -13798,8 +12461,6 @@ const SAID = [
       await dpage.addInitScript(() => {
         localStorage.setItem('sched.tour.v1', '1');
         localStorage.setItem('sched.hint2.v1', '1');
-        localStorage.setItem('sched.net.v1',
-          JSON.stringify({ on: false, url: '', code: '' }));
         if (!localStorage.getItem('sched.note.v1')) {
           localStorage.setItem('sched.note.v1', JSON.stringify({ list: [
             { id: 'nD', t: 'Damaged', u: 1756900000000, l: [
@@ -13845,18 +12506,20 @@ const SAID = [
     ok('the notes screen reaches nothing off this origin',
       noteOff.length === 0, noteOff.slice(0, 4));
 
+    /* ── AND THERE IS NO SECOND HALF ANY MORE, WHICH IS STRONGER ──
+       This read `scPushNow`'s body out of the source and required it
+       to carry no note and nothing that reads one: the check that was
+       missing the two times a comment reading "this is never sent"
+       was the only place the intention lived. Friends went and the
+       push went with them, so the claim is not "the one thing that
+       sends is not sending this" but "there is nothing in this app
+       that sends at all". Asserted as the ABSENCE of the function, so
+       a build that quietly brings one back fails here rather than
+       passing a check written about a body that no longer exists. */
     const src = await npage.evaluate(() => fetch('./app.js').then((r) => r.text()));
-    const pi = src.indexOf('function scPushNow');
-    let depth = 0, pend = pi;
-    for (let i = src.indexOf('{', pi); i < src.length; i++) {
-      if (src[i] === '{') depth++;
-      else if (src[i] === '}') { depth--; if (!depth) { pend = i; break; } }
-    }
-    const push = src.slice(pi, pend);
-    ok('the push function was found at all', push.length > 200 && pi > 0, push.length);
-    ok('...and it carries no note record and nothing that reads one',
-      push.indexOf('sched.note') < 0 && push.indexOf('scNote') < 0
-      && push.indexOf('notes') < 0, push.slice(0, 140));
+    ok('there is no push in the app at all',
+      src.indexOf('function scPushNow') < 0 && src.indexOf('function scPush') < 0
+      && src.indexOf('function scApi') < 0, src.length);
 
     /* ── AND THE HEADING'S CLAUSE IS THE THING NOTHING WOULD MEASURE ──
        11.5px at 72% of a hue toward the ink, on the page rather than
@@ -13937,8 +12600,6 @@ const SAID = [
         localStorage.setItem('sched.tour.v1', '1');
         localStorage.setItem('sched.hint2.v1', '1');
         localStorage.setItem('sched.hintw.v1', '1');
-        localStorage.setItem('sched.net.v1',
-          JSON.stringify({ on: false, url: '', code: '' }));
         if (!localStorage.getItem('sched.v1')) {
           localStorage.setItem('sched.v1', JSON.stringify(w));
         }
@@ -13975,8 +12636,6 @@ const SAID = [
         { id: 'kX', t: 'From another build', k: 'ledger', u: 1756600000000, l: [
           { i: 'x1', h: 1, c: 'green', x: 'Kept', y: '', m: 0 } ] }
       ] }]);
-      await lypage.route(`${BASE}/schedule/nofriends/**`, (route) => route.fulfill({
-        status: 200, contentType: 'application/json', body: '{"ok":true}' }));
       await lypage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
       await lypage.waitForTimeout(520);
 
@@ -15132,10 +13791,6 @@ const SAID = [
             l: [{ i: 'b1', h: 0, c: '', x: 'Water, then the desk', y: '', m: 0, w: [] }] }
         ] }));
       }
-      if (!localStorage.getItem('sched.net.v1')) {
-        localStorage.setItem('sched.net.v1',
-          JSON.stringify({ on: false, url: '', code: '' }));
-      }
       if (!localStorage.getItem('sched.tour.v1')) {
         localStorage.setItem('sched.tour.v1', '1');
         localStorage.setItem('sched.hint2.v1', '1');
@@ -15435,7 +14090,18 @@ const SAID = [
                blocks are all before noon cannot tell a colour that
                says which from a colour that says nothing. */
             B('ev4', 4, 1200, 1260, 'Wind down'),
-            B('wake5', 5, 360, 390, 'Wake'), B('wk5', 5, 780, 1020, 'Work')
+            B('wake5', 5, 360, 390, 'Wake'), B('wk5', 5, 780, 1020, 'Work'),
+            /* ── AND A SATURDAY WITH TWELVE BLOCKS ON IT ──
+               The cap is measured rather than predicted now, so there
+               has to be a day no cell can hold: every other day here
+               fits whole, and a fixture that always fits cannot tell
+               a fit that works from one that never runs. */
+            B('s0', 6, 360, 390, 'B1'), B('s1', 6, 400, 430, 'B2'),
+            B('s2', 6, 440, 470, 'B3'), B('s3', 6, 480, 510, 'B4'),
+            B('s4', 6, 520, 550, 'B5'), B('s5', 6, 560, 590, 'B6'),
+            B('s6', 6, 600, 630, 'B7'), B('s7', 6, 640, 670, 'B8'),
+            B('s8', 6, 680, 710, 'B9'), B('s9', 6, 720, 750, 'B10'),
+            B('s10', 6, 760, 790, 'B11'), B('s11', 6, 800, 830, 'B12')
           ] }));
         /* Wednesday has nothing on it at all, which is what makes
            "a day that asked nothing" testable rather than stated. */
@@ -15449,24 +14115,14 @@ const SAID = [
              nothing there is ever drawn too wide to fit. */
           '2026-09-03': { ev4: 1 },
           '2026-09-10': { wake4: 1, tr4: 1, ev4: 1 },
-          '2026-09-11': { wake5: 1, wk5: 1 }
+          '2026-09-11': { wake5: 1, wk5: 1 },
+          '2026-09-05': { s0: 1, s1: 1, s2: 1, s3: 1, s4: 1, s5: 1,
+                          s6: 1, s7: 1, s8: 1, s9: 1, s10: 1, s11: 1 }
         }));
         localStorage.setItem('sched.tick.v1', JSON.stringify({
           '2026-09-10': { t: 1, p: '8420' } }));
         localStorage.setItem('sched.train.v1', JSON.stringify({
           '2026-09-10': { tr4: { k: 'ppl.push', e: 'Hard', m: 60 } } }));
-      }
-      /* ── POINTED AT A DEAD END ON THIS ORIGIN ──
-         The door check visits Friends to prove the date is not a
-         control there, and arriving at that tab CLAIMS a code — so
-         with no url the app falls back to its own deployed worker and
-         the section makes the one request this whole file exists to
-         forbid. A check that has to break the app's central promise in
-         order to run is a check that has to be narrower. */
-      if (!localStorage.getItem('sched.net.v1')) {
-        localStorage.setItem('sched.net.v1', JSON.stringify({
-          on: false, url: window.location.origin + '/schedule/nofriends',
-          code: '' }));
       }
       if (!localStorage.getItem('sched.tour.v1')) {
         localStorage.setItem('sched.tour.v1', '1');
@@ -15474,8 +14130,6 @@ const SAID = [
       }
       localStorage.setItem('sched.view.v1', 'list');
     });
-    await clpage.route(`${BASE}/schedule/nofriends/**`, (r) => r.fulfill({
-      status: 200, contentType: 'application/json', body: '{"ok":true}' }));
     await clpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
     await clpage.waitForTimeout(460);
 
@@ -15524,7 +14178,7 @@ const SAID = [
          `display`, and this app has had that bug eight times with the
          attribute set correctly throughout. */
       out.boxes = {};
-      ['scWeek', 'scTally', 'scFriends', 'scNotes', 'scCal'].forEach((id) => {
+      ['scWeek', 'scTally', 'scNotes', 'scCal'].forEach((id) => {
         const e = document.getElementById(id);
         out.boxes[id] = e ? Math.round(e.getBoundingClientRect().height) : -1;
       });
@@ -15533,14 +14187,14 @@ const SAID = [
     });
     ok('the month is a stop on the bar, named, and over the 44px floor',
       clDoor.stop.name === 'Calendar' && clDoor.stop.cut === false
-      && clDoor.stop.w >= 44 && clDoor.stop.owns >= 44 && clDoor.stops === 5,
+      && clDoor.stop.w >= 44 && clDoor.stop.owns >= 44 && clDoor.stops === 4,
       clDoor.stop);
     ok('...and the head’s date is a date again, not an invisible door',
       clDoor.tag === 'P', clDoor.tag);
     ok('...and exactly one section is drawn on it',
       clDoor.head === 'Calendar' && clDoor.boxes.scCal > 100
       && clDoor.boxes.scWeek === 0 && clDoor.boxes.scTally === 0
-      && clDoor.boxes.scFriends === 0 && clDoor.boxes.scNotes === 0,
+      && clDoor.boxes.scNotes === 0,
       clDoor.boxes);
 
     await clpage.waitForTimeout(120);
@@ -15592,10 +14246,90 @@ const SAID = [
           grid: parseFloat(getComputedStyle(
             document.querySelector('.cl-grid')).borderTopWidth) };
       })();
+      /* ── THE MONTH FILLS THE SCREEN ──
+         Measured at 390x844 before this pass: the grid ended at 436
+         with the bar's pill at 767, so 348px of a screen whose whole
+         job is a month was empty, and a 54px cell held two pills and
+         hid up to five behind a count.
+
+         BOTH DIRECTIONS, because "as large as possible" quietly
+         becomes "one pixel into the tab bar" — which is the deck's own
+         lesson, in the one place left that is a grid. It has to reach
+         the pane's own foot AND it has to leave the painted bar
+         alone, and neither half catches the other. */
+      const pane = document.getElementById('scCalPane');
+      const pr = pane.getBoundingClientRect();
+      const all = [...document.querySelectorAll('.cl-c')];
+      const lastRow = all.slice(-7);
+      const fit = (() => {
+        /* The dense Saturday: twelve blocks kept, which no cell holds.
+           Drawn plus the count has to be the whole twelve — a cap
+           that predicted a number and a count that predicted another
+           would eventually disagree, and this is the one reading that
+           cannot. */
+        const c = cells.find((x) => x.dataset.day === '2026-09-05');
+        if (!c) return null;
+        const st = c.querySelector('.cl-ps');
+        const ps = [...st.querySelectorAll('.cl-p')];
+        const sr = st.getBoundingClientRect();
+        return {
+          drawn: ps.length,
+          more: +((c.querySelector('.cl-more') || { textContent: '+0' })
+            .textContent.replace('+', '')),
+          /* NOT SQUASHED. A flex item shrinks by default, so fourteen
+             pills in a 91px stack came back five pixels tall each —
+             every one of them present, none of them past the foot,
+             and not one readable. A check that counts pills cannot
+             see that at all. */
+          minH: Math.min(...ps.map((p3) => Math.round(
+            p3.getBoundingClientRect().height))),
+          /* AND NONE OF THEM PAST THE ROOM IT WAS GIVEN. */
+          past: ps.filter((p3) =>
+            p3.getBoundingClientRect().bottom > sr.bottom + 0.6).length,
+        };
+      })();
+      /* Resolved through a probe the browser has actually styled: a
+         token is a hex and a computed colour is an `rgb()`, and this
+         file has read one as nothing three times. */
+      const pb = document.createElement('span');
+      document.body.appendChild(pb);
+      const tok = (v) => { pb.style.color = 'var(' + v + ')';
+        return getComputedStyle(pb).color; };
+      const nowI = document.querySelector('.cl-c.is-now > i');
+      const todayMark = {
+        ink: tok('--ink'), paper: tok('--paper'),
+        fg: getComputedStyle(nowI).color,
+        bg: getComputedStyle(nowI).backgroundColor,
+        plain: getComputedStyle(cells.find((x) => x.dataset.day === '2026-09-10')
+          .querySelector('i')).backgroundColor,
+      };
+      pb.remove();
       return {
         title: (document.querySelector('.cl-head > b') || {}).textContent,
         cells: cells.length,
         pads: document.querySelectorAll('.cl-c.is-pad').length,
+        grid: {
+          /* The pane is a flex column in month mode and a scroller in
+             list mode, so "it fills" is the grid's foot against the
+             pane's foot rather than against the viewport. */
+          slack: Math.round(pr.bottom - all[all.length - 1]
+            .getBoundingClientRect().bottom),
+          scroll: pane.scrollHeight - pane.clientHeight,
+          clear: Math.round(document.querySelector('.tabs')
+            .getBoundingClientRect().top
+            - all[all.length - 1].getBoundingClientRect().bottom),
+          cellH: Math.round(all[0].getBoundingClientRect().height),
+          total: all.length,
+          /* A WHOLE RECTANGLE. The days before the 1st were ruled and
+             the days after the last were not there at all, so the
+             grid ended ragged — invisible on a 54px row and the
+             loudest thing on the sheet at 118. */
+          lastRow: lastRow.length,
+          lastTops: [...new Set(lastRow.map((x) =>
+            Math.round(x.getBoundingClientRect().top)))].length,
+        },
+        fit: fit,
+        todayMark: todayMark,
         now: (document.querySelector('.cl-c.is-now') || {}).dataset,
         kept: fill('2026-09-07'), half: fill('2026-09-08'),
         none: fill('2026-09-09'), ahead: fill('2026-09-20'),
@@ -15606,8 +14340,24 @@ const SAID = [
       };
     });
     ok('the date opens the month it is in, Monday first',
-      clMonth.title === 'September 2026' && clMonth.cells === 30
-      && clMonth.pads === 1, clMonth);
+      clMonth.title === 'September 2026' && clMonth.cells === 30, clMonth);
+    /* ── THE MONTH FILLS THE SCREEN, AND IT IS A WHOLE RECTANGLE ──
+       348px of an 844px phone were empty under a 54px cell. Both
+       directions: the grid has to reach the pane's own foot AND it
+       has to leave the painted bar alone, because "as large as
+       possible" quietly becomes "one pixel into the tab bar".
+
+       And the last row is seven cells at one top: the leading pads
+       were ruled and the trailing ones were not drawn at all, so a
+       month ending mid-week ended ragged. */
+    ok('...and the grid fills the pane without reaching the bar',
+      clMonth.grid.slack <= 2 && clMonth.grid.scroll <= 1
+      && clMonth.grid.clear > 8 && clMonth.grid.cellH > 90,
+      clMonth.grid);
+    ok('...and the month is a whole rectangle, trailing days ruled too',
+      clMonth.grid.total % 7 === 0 && clMonth.grid.lastRow === 7
+      && clMonth.grid.lastTops === 1
+      && clMonth.pads === clMonth.grid.total - 30, clMonth.grid);
     ok('...and today is the one cell marked today',
       clMonth.now && clMonth.now.day === '2026-09-12', clMonth.now);
     /* ── A CALENDAR IS THE ONE LIST IN THIS APP THAT IS RULED ──
@@ -15655,14 +14405,46 @@ const SAID = [
       clMonth.kept11.pills.map((p2) => p2.n).join(',') === 'Wake,Work'
       && clMonth.kept11.pills[0].bg !== clMonth.kept11.pills[1].bg,
       clMonth.kept11);
-    /* ── TWO, AND THE REST IS A COUNT ──
-       Three blocks kept on the 10th and a 50px cell holds two, so the
-       third is a figure rather than a clipped pill — and it rides the
-       DATE's line, because the foot of the cell already belongs to the
-       kept-rule and the two drew over one another when it did not. */
-    ok('...and a third is a count, never a third pill',
-      clMonth.kept10.pills.length === 2
-      && clMonth.kept10.more === '+1', clMonth.kept10);
+    /* ── WHAT FITS IS MEASURED, AND THE REST IS A COUNT ──
+       It was `pills.slice(0, 2)` and a `+n` off the same figure: two
+       predictions of one number, in a constant written where it
+       cannot see the row height, the type scale or whether the month
+       runs to five weeks or six. With the grid filling the pane a row
+       holds four or more, and three kept blocks on the 10th are now
+       three pills and no count at all.
+
+       THE CLAIM IS THE ARITHMETIC, on the one day no cell can hold:
+       twelve kept, and what is drawn plus what the count says has to
+       be the whole twelve. A cap and a count that each predicted a
+       figure would eventually disagree; these cannot, because the
+       count is built from what was actually taken out.
+
+       AND A DRAWN PILL IS NOT SQUASHED. A flex item shrinks by
+       default, so fourteen of them in a 91px stack came back FIVE
+       PIXELS tall each — all present, none past the foot, not one
+       readable, and invisible to any check that counts pills. */
+    ok('...and a day that fits draws every pill, with no count at all',
+      clMonth.kept10.pills.length === 3 && clMonth.kept10.more === '',
+      clMonth.kept10);
+    ok('...and a day that does not fit is cut, counted, and never squashed',
+      clMonth.fit && clMonth.fit.drawn + clMonth.fit.more === 12
+      && clMonth.fit.drawn >= 3 && clMonth.fit.more > 0
+      && clMonth.fit.minH >= 11 && clMonth.fit.past === 0, clMonth.fit);
+    /* ── TODAY IS THE APP'S OWN FILLED MARK ──
+       It was weight alone, under a note calling a second mark
+       "concentric with the ring" — and the ring went with the
+       treatment this grid replaced, so there was no first mark and
+       today was one bold number in a corner against four coloured
+       pills. The ink with the paper on it, which is the filled state
+       every other two-state control here already wears.
+
+       Asserted against the OTHER dates in the same breath, because "it
+       has a background" passes on a build that gave one to all
+       thirty. */
+    ok('...and today wears the ink with the paper on it, alone',
+      clMonth.todayMark.bg === clMonth.todayMark.ink
+      && clMonth.todayMark.fg === clMonth.todayMark.paper
+      && /, 0\)$/.test(clMonth.todayMark.plain), clMonth.todayMark);
     /* ── AND WHAT A CELL CANNOT HOLD, IT CUTS ──
        Seven columns is 50px and a block can be called "Wind down", so
        something has to give — and the grid is not where a name reads
@@ -15722,6 +14504,31 @@ const SAID = [
       && clDay.rows.length === 3
       && clDay.rows[0].t === '06:00' && clDay.rows[0].st === 'Completed'
       && clDay.rows[1].wo === 'Push', clDay);
+    /* ── AND MISSED KEEPS ITS WORD HERE AND LOSES ITS COLOUR ──
+       The week's row drops the word entirely, because that row is
+       dimmed with its check open and the hour has visibly passed.
+       These rows are none of those things — a flat read-back of a day
+       that has been — so the word is the only thing carrying it, and
+       it is neutral with Off and Not yet.
+
+       Read off a PLANTED class rather than waiting for a day with a
+       missed block on it, and compared against Not yet's own colour:
+       "it is not red" passes on any other hue, and the claim is that
+       the two states are dressed the same. */
+    const clMiss = await clpage.evaluate(() => {
+      const r = document.querySelector('.cl-r .st');
+      if (!r) throw new Error('no state tag in the day sheet');
+      const was = r.className;
+      const read = (c) => { r.className = 'st ' + c;
+        const g = getComputedStyle(r);
+        return { col: g.color, bg: g.backgroundColor }; };
+      const todo = read('is-todo'), ok2 = read('is-ok');
+      r.className = was;
+      return { todo, ok2, classes: was };
+    });
+    ok('...and a missed block in the day sheet wears Not yet\u2019s own neutral',
+      clMiss.todo.col !== clMiss.ok2.col
+      && /is-todo|is-ok/.test(clMiss.classes), clMiss);
     ok('...and it says what you logged by name, not only how many',
       /3 of 3 kept/.test(clDay.sum)
       && clDay.labels.indexOf('Logged') >= 0
@@ -15849,8 +14656,11 @@ const SAID = [
         .getAttribute('aria-pressed');
       return out;
     });
+    /* Three, and it was two: the cap is what the row measures now
+       rather than a constant, and a 118px cell holds the 10th whole.
+       A figure typed into a check is a second copy of a number. */
     ok('Tasks and Workouts are two records of one month',
-      clStop.task.pills.join(',') === 'Wake,Train'
+      clStop.task.pills.join(',') === 'Wake,Train,Wind down'
       && clStop.work.pills.join(',') === 'Push'
       && clStop.task.on === 'task' && clStop.work.on === 'work', clStop);
     /* ── AND THE KEPT RULE IS TASKS' ALONE ──
@@ -15968,10 +14778,6 @@ const SAID = [
         const wed = new Date(mon); wed.setDate(wed.getDate() + 2);
         put(wed, 'h1');
         localStorage.setItem('sched.tick.v1', JSON.stringify(log));
-      }
-      if (!localStorage.getItem('sched.net.v1')) {
-        localStorage.setItem('sched.net.v1',
-          JSON.stringify({ on: false, url: '', code: '' }));
       }
       if (!localStorage.getItem('sched.tour.v1')) {
         localStorage.setItem('sched.tour.v1', '1');
@@ -16173,10 +14979,6 @@ const SAID = [
         localStorage.setItem('sched.tour.v1', '1');
         localStorage.setItem('sched.hint2.v1', '1');
       }
-      if (!localStorage.getItem('sched.net.v1')) {
-        localStorage.setItem('sched.net.v1',
-          JSON.stringify({ on: false, url: '', code: '' }));
-      }
     });
     await nbpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
     await nbpage.waitForTimeout(460);
@@ -16273,10 +15075,6 @@ const SAID = [
       if (!localStorage.getItem('sched.tour.v1')) {
         localStorage.setItem('sched.tour.v1', '1');
         localStorage.setItem('sched.hint2.v1', '1');
-      }
-      if (!localStorage.getItem('sched.net.v1')) {
-        localStorage.setItem('sched.net.v1',
-          JSON.stringify({ on: false, url: '', code: '' }));
       }
     });
     await nbpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
@@ -16381,10 +15179,6 @@ const SAID = [
         localStorage.setItem('sched.v1', JSON.stringify({ title: 'W', sub: '', items: [
           { id: 'wv1', d: 1, s: 390, e: 480, r: '', n: 'Train', k: [], nt: [] },
           { id: 'wv2', d: 6, s: 390, e: 480, r: '', n: 'Train', k: [], nt: [] }] }));
-      }
-      if (!localStorage.getItem('sched.net.v1')) {
-        localStorage.setItem('sched.net.v1',
-          JSON.stringify({ on: false, url: '', code: '' }));
       }
       if (!localStorage.getItem('sched.tour.v1')) {
         localStorage.setItem('sched.tour.v1', '1');
@@ -17204,9 +15998,11 @@ const SAID = [
        written about than anything else on it. Two halves, because
        each passes on the other's bug: pressing around the whole of
        both screens makes no request at all, AND a push that happens
-       for some other reason is not carrying one. That second one is
+       for some other reason is not carrying one. That second one was
        the check that was missing the two times a comment reading
-       "this is never sent" was the only place the intention lived. */
+       "this is never sent" was the only place the intention lived —
+       and it is now the absence of a push anywhere in the app, held
+       where Notes is, because a leak needs somewhere to leak TO. */
     ok('nothing about the budget has left the origin',
       bOff().length === 0, bOff().slice(0, 4).map((r) => r.u));
     await bgctx.close();
@@ -17828,86 +16624,6 @@ const SAID = [
     await dvCtx.close();
   }
 
-  /* ── AND A PUSH THAT HAPPENS FOR SOME OTHER REASON IS NOT CARRYING
-     ONE ── Its own context, because the one above asserts that NO
-     request leaves and this one has to make one. The friends half is
-     turned on against a stand-in, a tick is logged to force the push,
-     and the whole body is read for any trace of the budget: a
-     category name, an amount in cents, an amount in dollars, and the
-     two keys. Pressing around and seeing nothing leave is the easy
-     half; this is the half that was missing the two times a comment
-     reading "this is never sent" was the only place the intention
-     ever existed. */
-  {
-    const bpctx = await browser.newContext({ ...PHONE });
-    const bppage = await bpctx.newPage();
-    const bperrs = [];
-    const posts = [];
-    bppage.on('pageerror', (e) => bperrs.push(String(e)));
-    await bppage.route(`${BASE}/schedule/nobudget/**`, (route) => {
-      posts.push(route.request().postData() || '');
-      return route.fulfill({ status: 200, contentType: 'application/json',
-        body: '{"ok":true}' });
-    });
-    await bppage.addInitScript(([bud, where]) => {
-      const FROZEN = new Date('2026-09-01T09:30:00').getTime();
-      const R = Date;
-      // eslint-disable-next-line no-global-assign
-      Date = class extends R {
-        constructor(...a) { super(...(a.length ? a : [FROZEN])); }
-        static now() { return FROZEN; }
-      };
-      delete window.SpeechRecognition;
-      delete window.webkitSpeechRecognition;
-      ['sched.tour.v1', 'sched.hint2.v1', 'sched.hintw.v1']
-        .forEach((k) => localStorage.setItem(k, '1'));
-      if (!localStorage.getItem('sched.net.v1')) {
-        localStorage.setItem('sched.net.v1', JSON.stringify({
-          url: where, code: 'ZQX7PM4K', key: 'a'.repeat(32),
-          name: 'Reader', pic: '', on: true }));
-      }
-      if (!localStorage.getItem('sched.note.v1')) {
-        localStorage.setItem('sched.note.v1', JSON.stringify({ list: [bud] }));
-      }
-      if (!localStorage.getItem('sched.bspend.v1')) {
-        localStorage.setItem('sched.bspend.v1', JSON.stringify({
-          nbud: { '2026-08-25': [{ i: 'p1', r: 'vf', a: 8525, t: FROZEN }] } }));
-      }
-      localStorage.setItem('sched.view.v1', 'week');
-    }, [BUD, `${BASE}/schedule/nobudget`]);
-    await bppage.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
-    await bppage.waitForTimeout(460);
-    /* ── A BLOCK'S OWN CHECK, AND 1500ms OF DEBOUNCE ──
-       A tick is what forces a push, so this drives the real path
-       rather than calling a function by hand. Two things had to be
-       right and neither was: every tile on Showing up opens a SHEET
-       on a press — the workout deck, the Mind picker, the number dial
-       — so not one of them completes a tick in one click, and a week
-       row's check does. And `scPush` waits **1500ms** before it
-       fires, so a 900ms wait measured a push that had not left yet.
-       It reported `pushes: 0`, which the check refuses to pass on
-       rather than reading as "nothing leaked". */
-    const bgcard = await bppage.$('.chk');
-    if (bgcard) { await bgcard.click(); await bppage.waitForTimeout(2400); }
-    const bgbody = posts.join(' ');
-    /* ── EVERY TOKEN HAS TO BE ONE THE PAYLOAD CANNOT CONTAIN BY
-       ACCIDENT ── `1800`, `bud` and `inc` were in this list and all
-       three are loose enough to match a timestamp or an innocent key,
-       which would report a leak on a build that is working. That is
-       the note-token lesson: a filter that can match correct
-       behaviour is worse than no filter. What is left is a name
-       nothing else uses, the category names, the figures in both
-       cents and dollars, and the keys quoted. */
-    const traces = ['BUDONLYZQX', 'Groceries', 'Insurance', 'Savings', 'Food',
-      'Rent', 'Power', '180000', '42145', '421.45', '8525', '85.25', '30000',
-      'bspend', '"cs"', '"inc"', '"bk"', '"mk"', '"src"']
-      .filter((t2) => bgbody.indexOf(t2) >= 0);
-    ok('a push carries no trace of the budget at all',
-      posts.length > 0 && traces.length === 0,
-      { pushes: posts.length, traces: traces, body: bgbody.slice(0, 220) });
-    ok('nothing threw while the push was made', bperrs.length === 0, bperrs.slice(0, 3));
-    await bpctx.close();
-  }
 
   /* ══════════════════════════════════════════════════════════════
      A GOAL OR A PROCESS CAN CARRY A METRIC

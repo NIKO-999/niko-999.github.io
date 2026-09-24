@@ -12495,3 +12495,725 @@ earlier — so the answer there was to change nothing and say so. A
 pick that agrees with the build is still worth confirming out loud,
 because the alternative is quietly doing nothing and letting it read
 as having been missed.
+
+## Friends is gone, and the worker is a feed reader
+
+The tab, the leaderboard, the feed, a friend's profile, the almanac,
+the invitation link, the four sharing switches and the push. Out on
+request, in one pass: **1,727 lines of `app.js`, 351 of `app.css`, 36
+of markup, 221 of the worker and 1,556 of its tests.**
+
+**A FEATURE IS NOT THE CODE THAT DRAWS IT, and that is the whole of
+what made this a surgery rather than a delete.** The friends region
+was 1,963 contiguous lines and taking it out was the easy half. What
+took the work is that four things OUTSIDE it were reading into it,
+and three things INSIDE it were not about friends at all.
+
+**Three helpers came home rather than going.** `scReadJSON` and
+`scWriteJSON` lived there because friends were the first four keys
+that needed them — habits, workouts, Mind and Notes all came to use
+them, so they moved to STORE, which is where a helper the whole store
+shares belonged anyway. `scAgo` was written for a feed and a note
+card still asks the same question. And `scStreak` is written up in
+this file as living with the counting in FRIENDS "because the
+leaderboard has to count everybody the same way and there were about
+to be two implementations of it" — that argument was exactly right
+and it expired with the second implementation, so it is back beside
+the log it reads.
+
+**`HOME` SURVIVED, AND IT IS WHY THE WORKER DID.** `scMindEps` read
+`(net && net.url) || HOME` — the friends server if you were on one,
+the build's own otherwise — so deleting `net` took the podcast
+lookup's address with it. A feed is XML served by whoever hosts the
+show, almost never with a CORS header, so a browser cannot read one:
+that route is the one thing in `worker/` that is not about a person,
+and it is the only reason the worker still exists. It is `var base =
+HOME` now, declared beside its one caller.
+
+**THE WORKER KEPT ONE ROUTE AND LOST EVERY OTHER.** No `claim`, no
+`rec`, no `img`, no write key, no thirty-day window, no profile
+clamps, no leave. `Access-Control-Allow-Methods` went from
+`GET,PUT,POST,DELETE,OPTIONS` to `GET,OPTIONS` and the
+`Authorization` header went with them, because nothing writes any
+more. **The records already on the KV are not walked and deleted**:
+every one carried a thirty-day expiry from the day it was written, so
+they age out on their own — which is the same argument the leave
+route already made about images it did not chase.
+
+**AND `tests/worker.js` ASSERTS THE DOORS ARE NOT THERE.** It had that
+check already, for the endpoint that would put the social graph on
+somebody else's machine; it is now eight routes that all used to
+exist. A write path with no caller is a write path anybody can still
+call, and the way a removal like this half-happens is one of them
+being left behind.
+
+### What the removal killed that nothing had noticed
+
+**`--me` HAD EXACTLY TWO READERS AND BOTH WERE IN THE FRIENDS HALF.**
+Your face's colour is written up here as the one setting in this app
+that TRAVELS — pushed with your record, so a friend's board draws you
+in it — and that was the whole argument for it existing. With no
+board it became a token computed on every paint and read by nothing,
+which is *a dead rule that still cascades* one language over. The
+token, its key, its default and `scPickHex` all went; `--live` and
+`scPickDflt` stay, because the Now chip still reads one.
+
+The check moved rather than went: it asserted the two colours were
+different, which is a claim about a pair. It asserts `--me` resolves
+to the EMPTY STRING now — because a token left at a default would
+pass any check written as "it is not a colour", and the failure this
+is about is the token still being written.
+
+**AND THE FACE IS ASSERTED AS THE NEUTRAL ITSELF**, not as "not the
+chip's colour". The second passes on a face drawn in any of a hundred
+hues that happen not to be that one.
+
+### The intro lost a card, which is the third time
+
+"Compete with friends" named a screen that no longer exists. This
+file has now recorded that fault three times — "Seven day cards"
+described a deck that had become a strip, "Flip for objectives"
+described a mechanism that had been deleted, and this. **A card
+teaching a gesture or a screen the app does not have is worse than no
+card, because the person then goes looking for it.**
+
+Three cards to two, and the count is asserted beside the order for
+the reason it always was: both are one line to change and neither
+would throw. The crown's own keyframes went with the scene, or they
+would be a `@keyframes` block nothing names.
+
+### Two stale captions, and only a render could find them
+
+*Your picture — drawn from your colour* named a swatch row deleted
+before this change; *Show the intro — four cards* named a count this
+change made wrong. Both are a screen away from anything I edited, and
+both came back off one screenshot of Settings. **That is the whole
+argument for opening a screen other than the one you changed**, and
+it is the second time in this file that a caption outlived the
+control it described.
+
+### The checks that had to move rather than go
+
+**The suite counted every request the main page made and failed on one
+that left the origin** — the app's central promise, and the reason the
+friends half ran on its own page. That page is gone and the assertion
+is not: the strict count stays exactly as strict, and what changed is
+that it no longer has to be pointed away from a live server. **Thirty-
+two `sched.net.v1` seeds and six `nofriends` routes** existed only so
+the app could not reach the deployed worker on a run; with nothing
+left that claims a code, all of it is scaffolding for a fault that
+cannot happen.
+
+**THE NOTES PUSH SCAN BECAME THE ABSENCE OF A PUSH.** It read
+`scPushNow`'s body out of the source and required it to carry no note
+and nothing that reads one — the check that was missing the two times
+a comment reading "this is never sent" was the only place the
+intention lived. The claim is stronger now and is asserted as such:
+not "the one thing that sends is not sending this" but **there is no
+`scPush`, no `scPushNow` and no `scApi` in the file at all.** The
+budget's own push-body section went entirely, because a leak needs
+somewhere to leak to.
+
+**And three sweeps had five views and now have four.** The sideways
+check, the reach check and the "exactly one section is drawn" check
+each named Friends in a list; the calendar took its place in two of
+them, which is the more useful visit anyway — it is the one view where
+a 44px control sits directly beneath the stops.
+
+**The press sweep lost its non-button case**, and that is a real cost
+written down rather than hidden: the friends board's row was an `<li>`
+and was the only thing in the app the first cut of that check could
+not see. The RULE it proved survives in the code — a press resolves to
+the outermost box carrying `cursor: pointer` — and there is no longer
+an element to prove it on.
+
+### The tab bar is four, and the stop count with it
+
+`Week · Today · Calendar · Notes`, each `flex: 1`, so the four simply
+divide what five did. The calendar's own `clDoor.stops` assertion went
+from 5 to 4 with them — a figure that would have passed silently as a
+count of whatever is there.
+
+### The removal's own bug, and the check that now catches it
+
+**`photoOn` AND `scPhotoClose` WERE THE FULL-SCREEN PHOTO VIEWER, and
+the Escape handler still called them.** One line survived the cut:
+
+    if (photoOn) { ev.preventDefault(); scPhotoClose(); return; }
+
+So Escape threw a ReferenceError before reaching the history's own
+branch — the tally's history panel stopped closing, and the next
+`dblclick` landed on the veil instead of the tile. It surfaced a
+hundred seconds and forty assertions later as a Playwright timeout
+with `no summary`, which is the greenest-looking failure there is.
+
+**`node --check` IS PERFECTLY HAPPY WITH IT**, which is the whole
+shape of this class: a missing function is a runtime fault, nothing
+throws until the line runs, and the symptom lands wherever that
+happens to be. **The scan that should have caught it printed both
+names** — a list of 27, with `photoOn 1` and `scPhotoClose 1` in it,
+and I read past those two rows.
+
+**So it is a static check now.** `tests/names.js` holds every `scFoo(`
+an app CALLS to being one it DECLARES. Scoped to the `sc` prefix
+deliberately: a real undefined-variable analysis needs scope tracking
+and every browser global, where this asks one narrow question with an
+exact answer — by the convention this whole file already follows,
+every `scFoo(` is one of its own functions, so a call to one nothing
+declares is a bug with no second reading. Proved to bite by putting
+the line back: `scPhotoClose() at schedule/app.js:8693 is called and
+never declared`, in a tenth of a second, where the browser took a
+hundred seconds to say a dblclick timed out.
+
+**The duplicate-name check is the same question from the other side**
+and would have caught neither this nor `gl` outliving its rename —
+one asks whether a name is declared twice, this asks whether it is
+declared at all.
+
+### Three counts of five where there are four
+
+The bar-label contrast sweep required `rows.length === 5`, the slim-bar
+check `tabs.length === 5`, and the tab check `tabs.length === 5`. Every
+ratio and every measurement in all three payloads was correct; only the
+count was stale — which is exactly why the count is asserted beside the
+measurement rather than trusted to follow it.
+
+### And `pkill -f` matched its own shell, twice in one command
+
+`pkill -f "http.server 8931"` put the pattern in the running shell's
+own argv and killed it before `node` started — exit 144, no output, and
+this file already had that written down. Then `pgrep -f "tests/run.js"`
+did the same thing one step quieter: it matched the shell asking the
+question and reported RUNNING for a process that had never been
+launched. **A `-f` pattern is matched against the command line you are
+typing it on.**
+
+## There is no red on a block any more
+
+`Missed` was the one red tag in this app, and the argument for it is
+written up above: a block whose hour has been and gone without a tick
+is a FACT about the day rather than a verdict on you, and it is the
+state you would most want to catch without reading. That argument is
+about ONE tag.
+
+**RENDERED AND LOOKED AT, A REAL MORNING DRAWS FIVE OF THEM.** A
+column of red down the one screen you open the app on, saying what you
+did not do — which is exactly the judgement the rule it reversed was
+written against. *Nothing is ever coloured to say you failed* had been
+eaten by its own exception, and the count is the whole of what
+changed: the reasoning was right about one and wrong about five.
+
+**WHAT REPLACES IT IS ABSENCE, NOT A QUIETER WORD.** The obvious fix
+is to take the tag to the flat neutral and keep the word. On the week
+that is a grey chip on a row that is ALREADY grey: `is-past` dims the
+glyph, the time and the name to `--spent` and leaves the check open,
+so the row says it three times before a tag opens its mouth. The word
+went instead.
+
+**AND IT NEEDED NO MECHANISM.** `.st:empty` is `display: none`
+already — it is how a day off draws no tag — so an empty word is a
+tag that is not there. Two lines of behaviour and one deleted rule.
+
+**THE DAY SHEET KEEPS THE WORD AND LOSES THE COLOUR**, and that is one
+rule rather than two answers. Those rows are not dimmed, their checks
+are not drawn and the hour has not visibly passed: it is a flat
+read-back of a day that has been, so the word is the only thing
+carrying it. Neutral, with Off and Not yet, because all three are the
+absence of a claim about doing something rather than three kinds of
+it. **A missed block is never coloured, and it keeps its word only
+where nothing else on the row already says so.**
+
+**`--bad` STAYS AND IS STILL MEASURED.** It dresses one thing now: a
+budget category gone over. That one is about money rather than about
+you, which is the whole of why it survives a rule this one could not.
+
+### The alive guard had to MAKE a tag, and two clock traps said so
+
+"No tag says Missed" is vacuously true of a week that draws no tags at
+all, so the count of tags drawn is asserted beside the word. Finding a
+tag to count turned out to be the hard half, and both failures were
+the shape this file has now recorded seven times.
+
+**TODAY'S CARD DRAWS NONE AFTER THE LAST BLOCK.** `is-past` is set on
+today's rows alone, so at 23:09 every row on it is gone and the card
+is bare. A guard read there passes all morning and fails at night.
+
+**AND ANOTHER DAY DRAWS NONE AT ANY HOUR.** This was the surprise, and
+only a probe found it: the tag is written by `scLive`, which walks
+`.week.is-today .row` — so no other day has ever drawn one. The note
+above reading *a block on another day is "Not yet" whatever the hour*
+describes what `gone` EVALUATES to, not what is on screen. Measured:
+today 0 drawn, another day 0 drawn.
+
+So there is no day and no hour where a tag can be relied on to be
+there already. **Ticking a block MAKES one** — `Completed` is written
+on the spot, at every hour — which is the only version of this guard
+that cannot pass vacuously. Unticked again immediately, because a
+check that changes the state of the app is a check that breaks the
+next one.
+
+**And `is-bad` is asserted against the BARE tag**, never against a
+hue: "it is not red" passes on a rule that dressed it any other colour
+at all, and the claim is that the class does nothing. Proved by
+putting both halves back — `words: ["Missed"]` on the behaviour, and
+`is-bad` computing `color(srgb 1 0.791 0.791)` against a bare tag's
+white on the dress — then restored by the inverse and hashed.
+
+**What it costs is the void, and that is said rather than hidden.**
+The rows lost a line, so the week's list now ends about 54% up the
+screen where it ended at 45%. That is the next plate's problem and it
+is worse for this one having shipped.
+
+### And the row fell under the floor when the tag went
+
+Taking the Missed tag off a block behind you took a LINE off the row
+with it, and `row is-past` measured **39px** — under the 44 every press
+target in this app holds to, on the most-pressed object on the screen
+you open the app to. The suite caught it, and four other failures were
+all downstream of the same pixel: a fourteen-block day stopped
+overflowing the card, so there was nothing to scroll and nothing under
+the fold for the fade to bite on, and the gutter's own press target
+fell with the row.
+
+**Said as a floor on the row rather than as padding.** A row's height
+is CONTENT — one line, two, or three with a progress track under it —
+and a padding big enough to hold the shortest to 44 is too much for
+every other row on the card.
+
+**A REMOVAL THAT TAKES A LINE OFF A ROW IS A REMOVAL THAT CAN TAKE IT
+UNDER THE FLOOR**, and nothing about the change said so: it was a
+string going empty in one branch of a ternary. The check that found it
+is the one that walks every control on every view.
+
+### The long-day fixture said fourteen because the row was taller
+
+`heavy(14)` was chosen when a row behind you carried a tag and stood
+about 55px. At 44 they no longer overflow the card at all — `max` came
+back **0**, so a check about a day that scrolls had nothing to scroll.
+
+**The BAR is untouched at `max > 100`.** What moved is how many blocks
+it takes to get there, which is a fact about the row rather than about
+the feature: the day card still scrolls and its foot still fades, and
+both are still asserted at the same threshold. Twenty blocks measures
+`max: 289`. The step went 60 to 45 with it, because twenty of the old
+ones from 06:00 runs past midnight and this record is one day a row.
+
+Worth writing down because *the test failed so I changed the test* is
+usually the wrong move. It is the right one only when the claim and
+its threshold both survive and the fixture was calibrated to something
+that moved — which is exactly what a row height is.
+
+### And `indexOf(max)` on white is 0, which is also red's lead
+
+The `is-bad` check asserted the class's lead CHANNEL differed from
+`--bad`'s. A bare tag is white, so every channel ties and
+`indexOf(max)` returns 0; `--bad` is a pale red, which leads on 0 as
+well. **The two coincided by arithmetic rather than by the rule being
+back**, so the assertion failed on a correct build.
+
+What belongs there is that `is-ok` differs from BARE — which proves
+the measurement can tell a dressed class from an undressed one, and is
+the vacuity guard the lead clause was pretending to be. Same shape as
+every other lesson in this file about a check that is wrong about what
+it is looking at rather than about the thing.
+
+## Showing up, the way Apple would draw it
+
+Asked what Apple would change about that screen, then asked to make
+all of it. What came back was one finding rather than a list: **the
+screen was a dashboard of tiles and Health is a stack of CARDS**, and
+every other difference falls out of that. So the mosaic went — two
+columns, one tall tile spanning two rows, one marked wide to fill the
+odd cell — and with it the arithmetic that placed them.
+
+**THE COST IS THE FOLD, AND IT IS THE POINT.** Two-up put the whole
+day on one screen and it did: six tiles ended at 679px with the bar at
+784, a hundred spare. What it could not do is carry a CHART. Seven
+days across 150px is seven marks twenty pixels wide, which is why the
+tile drew four points and not seven, and four points on a 38px area
+was the slab below. The screen scrolls now, deliberately — Health's
+does — and the trade is a fold against a chart you can read.
+
+**THE PLACEMENT ARITHMETIC IS GONE, NOT LEFT COMPUTING A CLASS.** The
+tall tile was spliced to the first ODD slot so it began the right-hand
+column, and the last tile was marked `is-wide` because six items in a
+grid where one spans two cells occupy seven and seven cannot pair.
+One column has no cursor and no orphan. `is-wide` went entirely;
+`is-tall` stays because it answers a question the layout did not ask
+— which item you add to through the day — and the gauge, the stepper
+and the room for it are all written against it.
+
+### The area was a slab by ARITHMETIC, not by taste
+
+This is the finding worth keeping and it is not about the drawing. The
+chart normalised each day to the window's best and plotted it on a
+**zero-based** axis, filled to the floor. A real steps week of 6,200
+to 9,011 never puts a point below **.69**, so the line had 10 of 38
+units to move in and the other **74% was constant fill** — a grey slab
+with a slightly wavy top. Sleep is worse: 6.2 to 8.1 hours never
+leaves the top fifth.
+
+**ANY COUNT WHOSE RANGE IS SMALL NEXT TO ITS MAGNITUDE DRAWS ONE**,
+which is most of what a person logs. It was never a width problem and
+widening the tile would not have fixed it.
+
+**FITTING THE AXIS IS THE TEMPTING FIX AND IT IS A LIE.** It buys 3.2x
+the visible variation and puts the week's worst day flat on the floor
+— 6,180 steps drawn as a day you did not walk. On a count you read
+against nought, the base has to be nought.
+
+**BARS SURVIVE THE ZERO BASE AN AREA CANNOT**, because you read them
+against each OTHER by height rather than reading one line against a
+fill: seven marks at 69%, 82% and 100% are plainly three different
+days where one curve across the same three values is flat. Seven
+rather than four, which is the window every other figure on the screen
+already uses — `days on this week`, the strip beside a tick — so the
+chart and the fraction above it are finally about the same seven days.
+
+**ELEMENTS RATHER THAN AN SVG**, which is the week strip's own idiom
+one tile over: a stretched `viewBox` turns a 1px corner radius into an
+ellipse, and there is no `non-scaling-stroke` for `rx`.
+
+**A FLOOR OF 2%**, so a day you logged something small is a mark
+rather than nothing — the day-off dot's rule, that a thing which
+happened is never drawn as a thing that did not. A day with NO reading
+keeps the empty track, because nothing recorded is not nought.
+
+**AND THE AREA SURVIVES FOR THE ONE PLACE IT IS HONEST.** A goal's
+fourteen-day sparkline is a TREND on a number you are pushing up,
+where the shape you read is the slope rather than a comparison between
+days. `tests/names.js` is what said so out loud: deleting `scTyArea`
+left `scMetPanel` calling a function that no longer existed — a
+runtime `ReferenceError` on the one screen a goal's metric draws,
+which `node --check` is perfectly happy with. Named in a tenth of a
+second.
+
+**THE AXIS NAMES THE TOP AND THE END.** Four dated ticks were what
+said these were readings rather than a curve; separate bars say that
+by being separate. What a bar chart cannot draw is what its tallest
+mark is WORTH, so that is what the axis carries — `10,885 best` and
+`Today`, which is Health's own answer.
+
+**AND THE WELL LOST ITS GROUND.** A plot area needs an edge when the
+plot is an AREA. Seven separate bars are already their own shape, so
+the wash under them was a second rectangle saying nothing. The BOX
+stays, and it was never about the look: an `<svg viewBox="0 0 100
+38">` at `width: 100%` carries an intrinsic RATIO, so in flow its
+height resolves to 38% of the tile, becomes the row's content height,
+and the grid sizes every row to it. The marks are out of flow and the
+box is what gives them a height.
+
+**62px, BECAUSE A BAR HAS TO BE TALLER THAN IT IS WIDE.** Seven across
+306px are about 38 each; at the 52 this started on they came out very
+nearly square and read as blocks rather than as a chart — the eye
+compares HEIGHTS and a square has none to compare.
+
+### Colour says WHICH, and six tiles of one grey said nothing
+
+Every glyph was `--spent`. Six tiles of one grey, and the only way to
+tell a card apart was to read the word on it — which is the wall the
+whole app's tag system exists to remove. The glyph and the name wear
+the item's own hue now, and the bars wear it at 70%.
+
+**TODAY IS THE INK.** It is the figure printed above the chart and the
+one mark you are looking for; the other six are the hue, which is what
+makes a card findable unread.
+
+**IT IS THE ONE THING A COLOUR IS ALLOWED TO SAY HERE.** Not whether,
+which is the rule this screen has kept since it was a strip of pips
+and is why there is still no red anywhere on it.
+
+**Both halves are asserted, because each passes on the other's bug**:
+six DISTINCT hues, since "they are coloured" passes on six cards
+sharing one; and the name matching the glyph, since a hue on the glyph
+alone leaves a grey word beside a coloured mark and reads as the mark
+belonging to something else.
+
+### The gauge lies down
+
+It was a 6px vertical track with `100% / 50% / 0%` stacked beside it at
+their own heights, which on the real screen reads as a hairline with
+three unattached captions. **And per cent is not the unit anybody
+checks water in** — you do not ask what fraction of three litres you
+have had, you ask how many litres.
+
+Horizontal, so the marks sit UNDER the figures they name and the rail
+can be thick enough to be a vessel. The divisions are drawn ON the
+rail rather than captioned off it, which is what makes it a scale
+rather than a bar with numbers nearby — one a whole unit, up to four,
+past which they are closer together than the rail is thick.
+
+**AND THE END OF THE RAIL IS `scTyAim` RAW.** Through `scTyNum` it
+printed `3.0 L` directly under a line reading `of 3 L` — one figure
+drawn twice in two formats on one card.
+
+**Asserted as the FILL being a width**, because a rule that turned the
+rail sideways and left the fill growing upward draws an empty rail on
+a day you have drunk something.
+
+### The circle went, which leaves one statement
+
+The tile said it three times: `2 / 7`, a seven-mark strip with two lit,
+and a filled circle in the corner. The strip is the only part that says
+WHICH days and the fraction is the only part that can say two, so the
+circle is the one that goes — it repeated the fraction on a card where
+the fraction is already the largest thing.
+
+**IT COST NO CONTROL**, and that is the half worth asserting: the mark
+was `aria-hidden` with `pointer-events: none`, so the tile is exactly
+the button it already was. Asserted as the node being ABSENT rather
+than not drawn, because a rule that merely hid it leaves a span still
+swallowing the press that lands on it.
+
+### One ring, and three would be a costume
+
+Activity's three work because Move, Exercise and Stand are three goals
+in three different units with three targets. This screen asks ONE
+question — how many of today's items you kept — so three would be the
+idiom worn as decoration rather than used.
+
+**AN UNMET DAY IS AN OPEN RING, NEVER A RED ONE**, which is the same
+conclusion the week reached when the Missed tag lost its colour, and
+it is the whole of why a ring is worth having here: it says how far
+round you got without saying anything about you. The track is the flat
+neutral and the arc is the ink.
+
+**INSIDE the caption**, because that line is already the one control
+that opens the week and a ring beside it would be two doors to one
+room. `aria-hidden`, because the caption's own label already says `6
+of 6 today`.
+
+**ASSERTED AT TWO STATES, OR IT CANNOT FAIL.** On a day where
+everything is kept the arc is a full circle, and a build that drew a
+full circle unconditionally passes a single reading. Two fractions,
+each matched against the caption's own figure, required to differ and
+required to be neither nought nor whole.
+
+**SEEDED, NOT CLICKED.** Pressing a tile is the obvious way to move
+the figure and cannot be relied on: a Train tile that is OFF opens the
+workout deck and a number opens the dial, so the tick lands only once
+the sheet is committed and Escape leaves the count exactly where it
+was. **A check whose two states can come back equal is a check that
+reports a working build as broken.**
+
+**AND THE TOKEN GOES THROUGH A PROBE**, never a string compare:
+`--ink` is a hex and a computed `stroke` is an `rgb()`, so a digit
+match reads one as nothing. This file has now met that three times —
+a `color-mix` result, a `box-shadow` serialised as `color(srgb …)`,
+and this.
+
+### What was NOT done, and why
+
+Three things Apple would plainly do were left, and each is a decision
+rather than an omission.
+
+**A COLLAPSING LARGE TITLE.** Health's `Summary` is 34px and shrinks
+into the nav bar as you scroll. This app's head is shared by four
+tabs and carries the day, the date and the clock; making it collapse
+is a change to the app's chrome rather than to this screen, and it
+would want its own round.
+
+**THE TIMESTAMP ON A CARD.** Health prints `23:25` in the corner of
+every reading, and **this record has no sample time** — `tickLog`
+holds one total a day. Drawing an hour there would be inventing one.
+It is a schema change, not a layout one.
+
+**MOVING WATER'S STEPPER OFF THE CARD.** Health has no inline
+controls; you tap through to add. Taking the arrows off would remove
+the one thing that makes a running total addable in a press, which is
+a feature removal wearing a design argument.
+
+### The tile's strip and the calendar had to move together
+
+`tests/schedule.js` failed the pass with three assertions, and all
+three were the same rule being kept rather than broken.
+
+**ONE MARK, TWO SIZES, ONE COLOUR.** The strip beside a tick and the
+half-year it opens are the same claim at two scales. They were both
+the accent while every glyph on the grid was one grey; with the tile
+in the item's own hue the calendar had to follow, or opening Train's
+record hands you a sheet drawn in a colour Train has never worn.
+`scCalSvg` fills through `var(--tc, var(--red))` and `scOpenHistIn`
+sets `--tc` on the panel, so anything else that draws a calendar is
+untouched.
+
+**AND THE STRIP WENT TO FULL STRENGTH**, which was a 78% wash for one
+render: a wash is a different colour whatever it is mixed from, and
+the two sizes are the same mark or they are not.
+
+**THE CHECK COUNTED BY THE LITERAL `var(--red)`** and came back
+`lit: 0` on a calendar drawing seventy-eight of them — a zero shaped
+exactly like a pass on the two counts under it, which are
+DIFFERENCES. It reads "not the neutral" now, and `lit > 0` is
+asserted beside them.
+
+**A THIRD STATEMENT WENT WITH THE CIRCLE.** The rule was written as
+one mark at THREE sizes; the third was the tile's own check, which
+went when the fraction beside it made it a third drawing of one
+figure. The rule is shorter rather than weaker.
+
+### Four breaks in one run, and each fired its own assertion
+
+- `scTyBars` writing `100%` on every bar → *a number draws seven
+  bars* fails on `new Set(bars).size > 1`, reading
+  `[100,100,100,100,100,100,100]`.
+- the arc's `stroke-dashoffset` pinned to `0` → *its arc is the
+  fraction the line beside it prints* fails at `arc: 1, frac: 0.17`,
+  which is the build a single reading cannot catch.
+- the gauge's fill written as a `height` → *its gauge lies down in
+  litres* fails, and takes the stepper's own *the gauge fills with
+  it* with it, correctly.
+- `.ty-card .ic` back to `var(--spent)` → *every glyph wears its
+  item's own colour* fails with six readings of `rgb(140, 140, 148)`.
+
+Restored by the script's own inverse and hashed back to the
+known-good sha1.
+
+## The month fills the screen
+
+Asked for the calendar's own Apple pass. Measured at 390x844 before
+anything moved, and one number is the whole finding: **the grid ended
+at 436 with the bar's pill at 767, so THREE HUNDRED AND FORTY-EIGHT
+pixels of a screen whose only job is a month were empty.** A cell was
+54px, which holds two pills and hides up to five behind a `+n`.
+
+**THE ROOM WAS ALREADY BEING USED FOR EXACTLY THIS, once a day was
+pressed.** The day sheet comes up over the bottom half and the grid
+sits above it — which is the reference's own month-above / day-below
+layout, arriving by accident and only while a modal is open. The rest
+of the time it was a third of a screen of calendar over two thirds of
+nothing.
+
+`1fr` rows take it back. A row is **120px** where it was 54, a cell
+holds seven pills rather than two, and on a real month the `+n` is not
+drawn at all.
+
+**BOTH DIRECTIONS ARE ASSERTED**, because *as large as possible*
+quietly becomes *one pixel into the tab bar* — the deck's own lesson,
+in the one place left on this app that is a grid. The grid has to
+reach the pane's own foot AND leave the painted pill alone, and
+neither half catches the other.
+
+**AND THE PANE'S 40px OF SCROLL ROOM GOES WITH IT.** That is a reading
+decision about a LIST whose last line would otherwise stop dead on the
+edge; a grid that fills its box has no last line to protect, and the
+poster already ends nineteen pixels clear of the pill.
+
+**WHAT IT COSTS IS THE WORKOUTS STOP, and that is paid rather than
+solved.** One session a day in a 120px cell is a month that is mostly
+air. The alternative is rows sized to content, and it is refused for
+the reason a calendar is a calendar: **the two stops have to draw the
+same grid, or pressing Workouts re-lays the month and the 9th moves.**
+A cell you find by counting across and down cannot change size with
+how busy the week was.
+
+### What fits is MEASURED, never predicted
+
+It was `pills.slice(0, 2)` with a `+n` off the same figure — two
+predictions of one number, in a constant written where it cannot see
+the row height, the type scale, or whether the month runs to five
+weeks or six. With the grid filling the pane there is no single figure
+that is right.
+
+So the cap is not predicted at all: every pill is built, the stack is
+given the room, and `scCalFit` takes back whatever did not fit and
+builds the count **from what it actually removed**. A cap and a count
+that each predicted a figure would eventually disagree; these cannot.
+
+**TAKEN OUT RATHER THAN HIDDEN.** `[hidden]` works on a pill only
+because nothing declares a `display` for one, and that is the
+attribute this app has had break on it eight times. A pill that is not
+in the document cannot be drawn by a rule added later.
+
+**AND A PILL KEEPS ITS OWN HEIGHT, which is what made the first cut
+do nothing at all.** A flex item shrinks by default, so a cell with
+fourteen blocks on it squashed all fourteen to **five pixels each**
+rather than overflowing: every one present, none past the foot,
+`scCalFit` with nothing to take back, and not one of them readable.
+**Invisible to any check that counts pills rather than measuring
+one** — so the check holds a drawn pill to a real height beside the
+arithmetic. `flex: 0 0 auto`, scoped to the STACK: the same pill wraps
+in a row in the List, where shrinking is what lets a long name
+ellipsise instead of running out of the line.
+
+### Two measurement bugs, and both were the fit reading a stale box
+
+**`1fr` IS `minmax(auto, 1fr)`, so the row grew to hold the pills the
+fit was about to remove.** Twelve unshrinkable pills inflated the row,
+the stack was measured against that inflated box, seven were kept —
+and the row collapsed back to its share the moment the other five
+went, leaving the seventh **1.4px past a foot it had just been
+measured as clearing**. `minmax(0, 1fr)` makes the row the pane's
+share and nothing else, so the room a stack reports is the room it
+keeps.
+
+**AND `offsetTop` ROUNDS WHERE THE CHECK DOES NOT.** The fit read
+offsets and the check reads composited boxes, so a pill whose true
+foot was four tenths of a pixel past measured as fitting. The fit
+reads rects now: **a fit and the check on it have to measure in the
+same units or they disagree by the rounding alone.**
+
+**AND THE HEAD IS WRITTEN BEFORE THE GRID — `scDeckFit`'s own lesson,
+in a second place.** `scDate` puts the figure under the title, which
+is a register the head does not have until it does. On the FIRST paint
+of this screen the grid was measured against a head about to grow and
+a pane about to lose eighteen pixels, so the fit kept one pill more
+than the row could hold. A repaint with the head already there cut it
+correctly, which is the whole tell: **the fit was right and the
+geometry was a frame early.**
+
+### The month is a whole rectangle
+
+The days before the 1st were drawn as ruled cells and the days after
+the last were not drawn at all, so the grid ended ragged — four empty
+columns beside the 30th with no rules on them. That is invisible on a
+54px row and is the loudest thing on the sheet at 120: **a table
+missing the right-hand end of its last row reads as a drawing that
+failed rather than as a month that ended.**
+
+Asserted as the arithmetic rather than as a count — every row is seven
+cells at one top — because a figure typed into a check is a second
+copy of a number.
+
+### Today is the app's own filled mark, and that reverses a rule
+
+It was weight alone, under a note reading *"not a second mark: a ring
+round the date is already the mark and a concentric one is two marks
+answering different questions in one drawing."* **That argument was
+correct and its subject is gone** — the ring went with the treatment
+this grid replaced, so there is no first mark for a second one to be
+concentric with, and today was one bold number in a corner against
+seven coloured pills.
+
+The ink with the paper on it, which is the filled state every other
+two-state control in this app already wears — the head's Edit tile, a
+picked chip. Nothing invented and no colour: a hue here would say
+WHICH, and which day it is, is not that question.
+
+**Asserted against the other dates in the same breath**, because *it
+has a background* passes on a build that gave one to all thirty.
+
+### Four breaks, each firing its own assertion
+
+- `grid-auto-rows: 52px` → *the grid fills the pane* reads
+  `slack: 342, cellH: 52` — the hole, back to the pixel.
+- the trailing pads removed → *a whole rectangle* reads
+  `total: 31, lastTops: 2`.
+- `.cl-ps .cl-p` back to `flex: 0 1 auto` → *never squashed* reads
+  `minH: 2`, which is a two-pixel pill on a build every other check
+  passes.
+- today back to weight alone → *the ink with the paper on it* reads
+  `bg: rgba(0, 0, 0, 0)`.
+
+Restored by the script's own inverse and hashed back to the known-good
+sha1.
+
+### And two stale figures in the suite, both of them counts
+
+`pads === 1` and `kept10.more === '+1'` were correct for a 54px cell
+and are facts about the cap rather than about the feature. The first
+became the arithmetic; the second became *a day that fits draws every
+pill, with no count at all*, with the cutting asserted on a day no
+cell can hold — a Saturday of twelve blocks added to the fixture,
+because **a fixture that always fits cannot tell a fit that works from
+one that never runs.**
