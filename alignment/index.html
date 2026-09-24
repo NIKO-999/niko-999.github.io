@@ -269,13 +269,14 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   /* THE BAR WIDENS RATHER THAN THE TABS NARROWING, and this is the
      third time. Three tabs sat at 93px either side; four needed 60,
      where a tab owns 64; five needed 40, where it owns 59. Six at 40
-     would be 49 each, over the 44 floor by five pixels — at 20 the row
-     is 350 and a tab owns 57. Seven owns 48, over the floor by four,
-     which is the cost of Kept and is measured rather than argued. The
-     bar cannot widen again without leaving the screen, so an eighth tab
-     is the one that takes a stop under the floor. Named here rather
-     than discovered. */
-  position: fixed; left: 20px; right: 20px; z-index: 30;
+     would be 49 each, over the 44 floor by five pixels, and seven owned
+     48. THE BAR IS BACK TO THREE AND SO ARE THE INSETS. The inset is
+     the thing that was widened to buy room for a fourth, a fifth and a
+     seventh mark, so it is the thing that comes back when the room is
+     given up: left at 20 the row is 350 and a tab owns 116, which is a
+     press target four fingers wide and a pill running the width of the
+     phone for three glyphs. */
+  position: fixed; left: 93px; right: 93px; z-index: 30;
   bottom: calc(var(--v4) + env(safe-area-inset-bottom, 0px));
   height: 58px; border-radius: var(--r-pill);
   background: rgba(24,21,17,.62);
@@ -328,26 +329,6 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   <div class="al-pane" id="alBooksPane"></div>
 </section>
 
-<section class="al-view" id="alMindset">
-  <div class="al-head"><h1 class="al-disp-s">Mindset</h1><span class="al-count"></span></div>
-  <div class="al-pane" id="alMindsetPane"></div>
-</section>
-
-<section class="al-view" id="alInternal">
-  <div class="al-head"><h1 class="al-disp-s">Internal</h1><span class="al-count"></span></div>
-  <div class="al-pane" id="alInternalPane"></div>
-</section>
-
-<section class="al-view" id="alExternal">
-  <div class="al-head"><h1 class="al-disp-s">External</h1><span class="al-count"></span></div>
-  <div class="al-pane" id="alExternalPane"></div>
-</section>
-
-<section class="al-view" id="alKarmic">
-  <div class="al-head"><h1 class="al-disp-s">Karmic</h1><span class="al-count"></span></div>
-  <div class="al-pane" id="alKarmicPane"></div>
-</section>
-
 <section class="al-view" id="alKept">
   <div class="al-head"><h1 class="al-disp-s">Kept</h1><span class="al-count"></span></div>
   <div class="al-stops" id="alKeptStops">
@@ -370,18 +351,6 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   </button>
   <button class="al-tab" data-v="books" aria-label="The Books">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.2v13M12 7.2C10.6 5.6 8.4 4.8 5.2 4.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c3.2 0 5.4.8 6.8 2.4M12 7.2c1.4-1.6 3.6-2.4 6.8-2.4a1 1 0 0 1 1 1v11.6a1 1 0 0 1-1 1c-3.2 0-5.4.8-6.8 2.4"/></svg>
-  </button>
-  <button class="al-tab" data-v="mindset" aria-label="Mindset">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15.2 20.5v-2.9a5 5 0 0 1 1.5-3.4 7 7 0 1 0-11.2-1.8"/><path d="M12.6 4.4 14 9.3l-2.4 1.1 1.3 2.5"/></svg>
-  </button>
-  <button class="al-tab" data-v="internal" aria-label="Internal">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="3.1" fill="currentColor" stroke="none"/></svg>
-  </button>
-  <button class="al-tab" data-v="external" aria-label="External">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M13.5 4.5H19.5V10.5M19.5 4.5 12.5 11.5M18 14v4.5a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2H10"/></svg>
-  </button>
-  <button class="al-tab" data-v="karmic" aria-label="Karmic">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19.6 9.4A8.2 8.2 0 0 0 5.2 7.6M4.4 14.6a8.2 8.2 0 0 0 14.4 1.8"/><path d="M19.9 4.6v4.9h-4.9M4.1 19.4v-4.9h4.9"/></svg>
   </button>
   <button class="al-tab" data-v="kept" aria-label="Kept">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.8 3.4h10.4a1.4 1.4 0 0 1 1.4 1.4v15.8L12 16.1l-6.6 4.5V4.8a1.4 1.4 0 0 1 1.4-1.4Z"/></svg>
@@ -1567,23 +1536,6 @@ function paintIndex(kind) {
   mask(p);
 }
 
-/* ONE PAINTER, TWO AXES — the same screen reading the same list through
-   one field, grouped by the figure it came from, so a lesson is never
-   stranded from the thing that is evidence for it. */
-function paintAxis(ax) {
-  var p = $('#al' + ax.charAt(0).toUpperCase() + ax.slice(1) + 'Pane');
-  p.textContent = '';
-  SRC.forEach(function (x) {
-    var rows = themesOf(x.i, ax);
-    if (!rows.length) return;
-    var h = el('div', 'al-grp al-caps', x.n);
-    h.setAttribute('data-x', ax);
-    p.appendChild(h);
-    rows.forEach(function (t) { p.appendChild(card(t)); });
-  });
-  mask(p);
-}
-
 function paintSource(id) {
   var x = srcOf(id); if (!x) return;
   var p = $('#alSourcePane'); p.textContent = '';
@@ -1634,7 +1586,12 @@ function paintKept() {
   mask(p);
 }
 
-var VIEWS = ['open', 'figures', 'books', 'mindset', 'internal', 'external', 'karmic', 'kept', 'source'];
+/* A STORED VIEW OUTLIVES THE CODE THAT WROTE IT. Four names left this
+   list in one pass, so a phone that was last on Karmic has to open on
+   the figures rather than on a bar with nothing above it — which is
+   what view()'s own fall-through already does, and why the list is
+   written out rather than derived. */
+var VIEWS = ['open', 'figures', 'books', 'kept', 'source'];
 function view(v) {
   if (VIEWS.indexOf(v) < 0) v = 'figures';
   document.documentElement.setAttribute('data-view', v);
@@ -1649,13 +1606,7 @@ function view(v) {
   });
   $('#alFigures').querySelector('.al-count').textContent = SRC.filter(function (x) { return x.k === 'figure'; }).length;
   $('#alBooks').querySelector('.al-count').textContent = SRC.filter(function (x) { return x.k === 'book'; }).length;
-  for (var a in AXIS) {
-    var sec = $('#al' + a.charAt(0).toUpperCase() + a.slice(1));
-    sec.querySelector('.al-count').textContent =
-      TH.filter(function (t) { return t.x === sec.id.slice(2).toLowerCase(); }).length;
-  }
   if (v === 'figures' || v === 'books') paintIndex(v);
-  if (AXIS[v]) paintAxis(v);
   if (v === 'kept') paintKept();
   if (v !== 'source') { st.last = v; save(); }
 }
