@@ -2839,7 +2839,7 @@
     '--s-m': '#F2B950', '--s-a': '#5FA8FF', '--s-e': '#B98BFF',
     '--t-train': '#E0574B', '--t-walk': '#4FBE87', '--t-read': '#5FA8FF',
     '--t-steps': '#F2B950', '--t-fuel': '#E0C15A', '--t-water': '#48C3CC',
-    '--st-ok': '#43B96C', '--gold': '#FFC83D',
+    '--st-ok': '#43B96C', '--gold': '#E3B341',
     '--w-red': '#e6412f', '--w-blue': '#2f7fe6', '--w-teal': '#14a2a2',
     '--w-green': '#17a06b', '--w-violet': '#8a4fe0',
     '--w-orange': '#e0761a', '--w-amber': '#e08a12',
@@ -2854,7 +2854,7 @@
     '--s-m': '#8A5000', '--s-a': '#1668C7', '--s-e': '#6B3FC4',
     '--t-train': '#B3382E', '--t-walk': '#1C7A4E', '--t-read': '#1668C7',
     '--t-steps': '#8A5000', '--t-fuel': '#7A6200', '--t-water': '#0E6E76',
-    '--st-ok': '#19733F', '--gold': '#8A6100',
+    '--st-ok': '#19733F', '--gold': '#8A5D00',
     /* ── THE WORKOUT HUES, SOLVED FOR A LIGHT PAGE ──
        The card's own nine are grounds for one fixed dark card and the
        card does not follow the theme, deliberately. A TAG does: it is

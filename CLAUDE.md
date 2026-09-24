@@ -13538,6 +13538,85 @@ switching to it afterwards repaints either way. And the fixture had
 to be given ticks on today for any of it to mean anything: a day with
 nothing on it reads the same figure both sides of a reset.
 
+### The mark is gold, and gold says WHICH
+
+Asked for in two words after the neutral version shipped, and shown
+before it was shipped: four treatments rendered over the real month at
+390x844 and read at 1:1.
+
+**A MEDAL ON AN ORDINARY DAY, A RING ON THE DAY IT IS ALSO TODAY.** A
+filled gold date is the strongest mark here and the one that reads as
+DAY ONE unread — and on the single day the start is also today it EATS
+today's own pill, which breaks the rule the drawing rests on: today is
+a FILL, which says which square, and this is a LIGHT, which says what
+the square is. Two fills would be one control answering two questions.
+So the fill is the medal every ordinary day and steps back to a ring
+and a bloom on that one.
+
+**`.is-start.is-now` IS (0,3,1) AGAINST `.is-now`'s (0,2,1)**, so it
+wins the shadow on its own specificity and today keeps the ground.
+Unlike the ink version, this pair does not depend on source order —
+which is one fewer thing for somebody to break by moving a rule.
+
+**WHAT WAS DRAWN AND DROPPED.** A gold ring with an ink numeral, which
+is correct everywhere and says nothing about being first on an ordinary
+day; a plain gold fill, which is the medal and eats today's mark; and
+gold EVERYTHING — ring, bloom and numeral — where the numeral loses its
+edge against the ring and the two blur into one gold blob, measured at
+**1.95:1** on the overlap day.
+
+**GOLD IS ALLOWED BECAUSE IT SAYS WHICH.** The chrome went neutral
+because one accent carrying eight meanings said none of them; day one
+is one square out of a year, and no other square is it. The precedent
+is in this file already, from a feature since removed: *a crown in
+somebody's chosen violet says which PERSON, which the name beside it
+already says. Gold says which PLACE.*
+
+**AND `--gold` WAS ALREADY THERE, DEAD.** It dressed that crown and
+outlived it as a token nothing read — the dead rule this file keeps
+removing, one language over. Giving it a reader again beats adding a
+second gold: this app has one gold and it means first.
+
+**BOTH VALUES MOVED WITH THE READER.** `#FFC83D` is a yellow at this
+size, and the light face was `#8A6100`, which puts `--paper` on it at
+**5.18:1** — a rounding error above the 5.15 floor rather than a
+margin, which is the mistake this file has recorded three times. It is
+`#E3B341` and `#8A5D00`, measured **10.04:1** and **5.38:1**.
+
+**A PALE GOLD FAILS THE OTHER WAY**, and that is why the light one is
+nearly a bronze: `#F2C94C` gives the numeral 12:1 and leaves the fill
+itself at **1.50:1** against the page — a faint yellow blob rather
+than a mark.
+
+**AND THE LIGHT FACE IS MEASURED NOW, WHICH REVERSES THE NOTE BELOW.**
+The bloom needed no light-face check because it was ONE declaration in
+`var(--ink)`, and the note under it says so. A fill is not that: it is
+a PAIR of literals, which is the exact case this app has been bitten by
+three times — and here the light half is the WEAK one rather than the
+strong one, at 5.4:1 against 10:1. The reasoning did not change; its
+subject did.
+
+**THE PALETTE IS WRITTEN DOWN TWICE AND THE SECOND COPY IS IN
+`app.js`.** The token was changed in `app.css`, the fingerprint was
+refreshed, and the page still drew `#FFC83D` — because `scPaint` writes
+its own copy onto the root and outranks the stylesheet. It reads as a
+caching bug for as long as it takes to grep. The suite already holds
+the two copies token for token, which is the only reason that is a
+footnote.
+
+**AND IT CAUGHT ITSELF AGAIN AN HOUR LATER.** The break written to
+prove the light-face ratio bites changed `--gold` in the STYLESHEET
+and reported `STILL PASSES` — the page went on drawing `#8A5D00`,
+because the copy in `app.js` is the one that wins. The break is aimed
+there now. **A break that cannot reach the value it is breaking is a
+break that proves the check does not bite**, and it is the same hazard
+twice in one change: once as a bug and once as a bad proof.
+
+**Two of the four breaks overlap the same three lines**, so run
+separately or the second refuses and the verdicts of the ones after it
+are read off a file broken by the first. Measured that way the first
+pass reported `litegold FAILS` against a fill that was simply absent.
+
 ### The glow hangs off the date, not the cell
 
 **NINE TREATMENTS WERE RENDERED OVER THE REAL MONTH** at 390x844 and

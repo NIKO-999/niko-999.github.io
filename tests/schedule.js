@@ -17637,21 +17637,19 @@ const SAID = [
       await bctx.close();
     }
 
-    /* ── AND THE GLOW IS DRAWN, MEASURED ON COMPOSITED PIXELS ──
-       Against the neighbour in its OWN ROW, so the row's own ground
-       is the ground — a sample taken a row above lands on another
-       cell, which is the mistake the Pattern axis and the almanac's
-       own check each made once. The dark face is the weak half by
-       arithmetic: a white bloom on a near-black ground moves a
-       region's mean about a third as much as a dark bloom on white,
-       so holding the phone's own face is holding the harder one.
+    /* ── THE MEDAL, MEASURED ON COMPOSITED PIXELS ──
+       An ordinary day's date is FILLED in gold with a bloom outside
+       it; the one day it is also today it steps back to a ring, which
+       the section above holds. Read against the neighbour in its OWN
+       ROW, so the row's own ground is the ground — a sample taken a
+       row above lands on another cell, which is the mistake the
+       Pattern axis and the almanac's own check each made once.
 
-       BOTH HALVES. The delta alone passes on a build that drew
-       anything at all in that corner — a fill, a colour, a second
-       pill — so the mark is also held to being a SHADOW with a ring
-       and a bloom in it, which is the treatment rather than the
-       reaction. .009 is what this app measured as "a day you cannot
-       see you missed"; this is measured at about .076. */
+       THREE HALVES, because each passes on the others' bug. The delta
+       alone passes on anything at all drawn in that corner. The fill
+       alone passes on a mark with no light around it. And the colour
+       alone passes on a mark nobody can see. .009 is what this app
+       measured as "a day you cannot see you missed". */
     {
       const gctx = await browser.newContext({ ...PHONE });
       const gpage = await gctx.newPage();
@@ -17667,8 +17665,23 @@ const SAID = [
         const R = (e) => { const r = e.getBoundingClientRect();
           return { x: Math.round(r.right) - 40, y: Math.round(r.top) + 1 }; };
         const i = getComputedStyle(s.querySelector('i'));
-        return { s: R(s), n: R(n), shadow: i.boxShadow,
-          plain: getComputedStyle(n.querySelector('i')).boxShadow };
+        /* Through an element the browser has actually styled, never a
+           digit match on the token's own text: a computed colour comes
+           back `rgb()` where a token is a hex, and that has reported
+           three correct builds broken in this file. */
+        const probe = document.createElement('span');
+        probe.style.color = 'var(--gold)';
+        document.body.appendChild(probe);
+        const gold = getComputedStyle(probe).color;
+        probe.style.color = 'var(--ink)';
+        const ink = getComputedStyle(probe).color;
+        probe.style.color = 'var(--paper)';
+        const paper = getComputedStyle(probe).color;
+        probe.remove();
+        return { s: R(s), n: R(n), shadow: i.boxShadow, bg: i.backgroundColor,
+          fg: i.color, gold, ink, paper,
+          plain: getComputedStyle(n.querySelector('i')).boxShadow,
+          plainBg: getComputedStyle(n.querySelector('i')).backgroundColor };
       });
       const { PNG: JPNG } = require('pngjs');
       const gshot = await gpage.screenshot({ clip: { x: 0, y: 0, width: 390, height: 844 } });
@@ -17680,21 +17693,89 @@ const SAID = [
           sum += lum([gpng.data[i], gpng.data[i + 1], gpng.data[i + 2]]); n++; }
         return sum / n; };
       const delta = Math.abs(meanL(boxes.s) - meanL(boxes.n));
-      /* A RING AND A BLOOM, not one or the other. The ring is what
-         stops the bloom reading as a pill: a non-inset shadow paints
-         outside the border box, so on the light face the hole in the
-         middle is the page showing through and reads as a white
-         mark this calendar does not have. Told apart by the ring
-         having no blur and the bloom having one. */
-      const parts = (boxes.shadow || '').split(/,(?![^(]*\))/).map((p) => p.trim());
-      const ring = parts.some((p) => /0px 0px 0px [\d.]+px/.test(p));
+      /* A BLOOM, told from a ring by having a blur radius. The medal
+         carries one and only one: the ring is the OVERLAP day's, and
+         a fill that also wore a hairline ring would be the two
+         treatments at once. */
+      const parts = (boxes.shadow || '').split(/,(?![^(]*\)]?)/).map((p) => p.trim()).filter(Boolean);
       const bloom = parts.some((p) => /0px 0px (?!0px)[\d.]+px/.test(p));
-      ok('the day you began glows, and it is a ring with a bloom outside it',
-        delta > 0.03 && parts.length === 2 && ring && bloom
+      ok('an ordinary day you began is a gold medal with a bloom outside it',
+        delta > 0.03 && bloom && parts.length === 1
+        && boxes.bg === boxes.gold && boxes.fg === boxes.paper
         && boxes.plain === 'none',
-        { delta: +delta.toFixed(4), parts, ring, bloom, plain: boxes.plain });
+        { delta: +delta.toFixed(4), parts, bloom, bg: boxes.bg, gold: boxes.gold,
+          fg: boxes.fg, paper: boxes.paper, plain: boxes.plain });
+
+      /* ── AND THE GOLD IS NOT THE INK ──
+         The mark was neutral for one release and the whole of this
+         change is that it is not. "It has a background" passes on a
+         build that filled it in the ink, which is today's own mark in
+         the wrong square — so the two are asserted DIFFERENT, and the
+         neighbour is asserted to have no fill at all, since "the
+         start is gold" is vacuous on a grid that filled every date. */
+      ok('...and the gold is a colour of its own, on that square alone',
+        boxes.gold !== boxes.ink
+        && boxes.plainBg !== boxes.gold
+        && /^rgba?\(0, 0, 0, 0\)$/.test(boxes.plainBg),
+        { gold: boxes.gold, ink: boxes.ink, plainBg: boxes.plainBg });
       ok('nothing threw drawing it', gerrs.length === 0, gerrs);
       await gctx.close();
+    }
+
+    /* ── AND THE LIGHT FACE IS THE TIGHT ONE, SO IT IS MEASURED ──
+       The bloom needed no light-face check: it is one declaration in
+       `var(--ink)`, so the two faces cannot disagree about anything
+       but which way it runs. A FILL is not that — it is a PAIR of
+       literals, which is the exact case this app has been bitten by
+       three times (eight swatches written once for two faces, nine
+       workout hexes that needed twins, a tag solved against one
+       ground). And the light half is the weak one here rather than
+       the strong one: `--paper` on the gold measures about 5.4:1 by
+       day against 10:1 by night.
+
+       Held to 4.5, because the numeral is 11px semibold and WCAG's
+       larger-text allowance does not start until 18.66px bold. The
+       ground is the most common pixel INSIDE the pill, never a fixed
+       offset — sampled below the date it lands on the first block
+       pill, which read rgb(62,50,28), the Wake tint, and reported
+       every ratio against a pill. */
+    {
+      const lgctx = await browser.newContext({ ...PHONE, colorScheme: 'light' });
+      const lgpage = await lgctx.newPage();
+      const lgerrs = [];
+      lgpage.on('pageerror', (e) => lgerrs.push(String(e)));
+      await jSeed(lgpage, '2026-09-14');
+      await lgpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+      await lgpage.waitForTimeout(460);
+      const lgeo = await lgpage.evaluate(() => {
+        const i = document.querySelector('.cl-c.is-start > i');
+        if (!i) throw new Error('no start cell on the light face');
+        const r = i.getBoundingClientRect();
+        return { l: Math.round(r.left), r: Math.round(r.right),
+          mid: Math.round(r.top + r.height / 2),
+          mode: document.documentElement.dataset.mode };
+      });
+      const { PNG: LPNG } = require('pngjs');
+      const lpng = LPNG.sync.read(await lgpage.screenshot({
+        clip: { x: 0, y: 0, width: 390, height: 844 } }));
+      const ldpr = lpng.width / 390;
+      const lat = (x, y) => { const i = (Math.round(y * ldpr) * lpng.width + Math.round(x * ldpr)) * 4;
+        return [lpng.data[i], lpng.data[i + 1], lpng.data[i + 2]]; };
+      const inBox = [];
+      for (let y = lgeo.mid - 5; y <= lgeo.mid + 5; y++)
+        for (let x = lgeo.l + 2; x < lgeo.r - 2; x++) inBox.push(lat(x, y));
+      const t = new Map();
+      for (const q of inBox) { const k = q.join(','); t.set(k, (t.get(k) || 0) + 1); }
+      const fill = t.size ? [...t].sort((x, y) => y[1] - x[1])[0][0].split(',').map(Number) : null;
+      let glyph = fill, gd = -1;
+      for (const q of inBox) { const d = Math.abs(lum(q) - lum(fill)); if (d > gd) { gd = d; glyph = q; } }
+      const lr = fill ? ratio(glyph, fill) : 0;
+      ok('the light face has its own gold, and the numeral clears the bar on it',
+        lgeo.mode === 'light' && inBox.length > 0 && lr >= 4.5,
+        { mode: lgeo.mode, ratio: +lr.toFixed(2),
+          fill: fill && `rgb(${fill.join(',')})`, glyph: `rgb(${glyph.join(',')})` });
+      ok('nothing threw on the light face', lgerrs.length === 0, lgerrs);
+      await lgctx.close();
     }
 
     /* ── STARTING AGAIN CLEARS THE RECORD, NOT THE WEEK ──

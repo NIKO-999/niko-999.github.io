@@ -257,9 +257,20 @@
      progress is the one exception, because it is the mark the whole
      screen is oriented around and it is already a setting. */
   --st-ok: #43B96C;
-  /* First place, and the same on every board — see app.js for why the
-     crown stopped being the leader's own colour. */
-  --gold: #FFC83D;
+  /* ── FIRST, AND THE ONE THING IN THIS APP THAT IS GOLD ──
+     It dressed the friends board's crown and outlived it as a token
+     nothing read — which is the dead rule this file keeps removing,
+     one language over. The day you began is the same claim the crown
+     made: a colour here says WHICH, and day one is one square out of
+     a year. `a crown in somebody's chosen violet says which PERSON,
+     which the name beside it already says. Gold says which PLACE.`
+
+     A PAIR, like every other WHICH colour here. The value moved with
+     the reader: #FFC83D is a yellow at this size, and the light face
+     was #8A6100, which puts `--paper` on it at 5.18:1 — a rounding
+     error above the 5.15 floor rather than a margin, which is the
+     mistake this file has now recorded three times. */
+  --gold: #E3B341;
   /* The seven hues a workout tag can be. The CARD keeps its own
      literal hex and does not follow the theme; a tag does, so it needs
      a token per face — see app.js for the light face's numbers. */
@@ -338,7 +349,7 @@
   --t-train: #B3382E; --t-walk: #1C7A4E; --t-read: #1668C7;
   --t-steps: #8A5000; --t-fuel: #7A6200; --t-water: #0E6E76;
   --st-ok: #19733F;
-  --gold: #8A6100;
+  --gold: #8A5D00;
   --w-red: #d83d2c; --w-blue: #2c76d6; --w-teal: #108383;
   --w-green: #14885b; --w-violet: #8a4fe0;
   --w-orange: #b56015; --w-amber: #a8670d;
@@ -7082,15 +7093,35 @@ body {
   border-radius: 999px;
   text-align: center;
 }
-/* BEFORE `.cl-c.is-now > i`, and that is load-bearing. The two are the
-   same specificity, so on the day you press Begin — the one day a cell
-   is both — source order is the whole of what decides which surface
-   wins. Today takes the ground and this keeps the ring and the bloom
-   around it. */
-.cl-c.is-start > i {
-  color: var(--ink);
-  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--ink) 55%, transparent),
-              0 0 14px 4px color-mix(in srgb, var(--ink) 62%, transparent);
+/* ── A MEDAL ON AN ORDINARY DAY, A RING ON THE DAY IT IS ALSO TODAY ──
+   A filled gold date is the strongest mark there is here and the one
+   that reads as DAY ONE unread — and on the single day the start is
+   also today it eats today's own pill, which breaks the rule the whole
+   drawing rests on: today is a FILL, which says which square, and this
+   is a LIGHT, which says what the square is. Two fills would be one
+   control answering two questions.
+
+   So the fill is the medal every ordinary day and steps back to a ring
+   and a bloom on that one. `.is-start.is-now` is (0,3,1) against
+   `.is-now`'s (0,2,1), so it wins the shadow on its own specificity
+   and today keeps the ground — this pair does not depend on source
+   order the way the ink version did.
+
+   Four treatments were rendered over the real month at 390x844 and
+   read at 1:1: the ink mark this replaces, a gold ring with an ink
+   numeral, a plain gold fill, and this. A fifth — ring, bloom and
+   numeral all gold — was drawn and dropped, because the numeral loses
+   its edge against the ring and the two blur into one gold blob: it
+   measured 1.95:1 on the overlap day. */
+.cl-c.is-start:not(.is-now) > i {
+  color: var(--paper);
+  font-weight: 700;
+  background: var(--gold);
+  box-shadow: 0 0 14px 4px color-mix(in srgb, var(--gold) 68%, transparent);
+}
+.cl-c.is-start.is-now > i {
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--gold) 88%, transparent),
+              0 0 14px 4px color-mix(in srgb, var(--gold) 76%, transparent);
 }
 /* ── TODAY IS THE APP'S OWN FILLED MARK, AND THAT REVERSES A RULE ──
    It was weight alone, under a note reading "not a second mark: a
