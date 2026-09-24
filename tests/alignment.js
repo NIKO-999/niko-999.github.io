@@ -105,7 +105,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
       out.push(...[...document.querySelectorAll(id + ' .al-f[data-src]')].map(n => n.getAttribute('data-src'))); });
     return out;
   });
-  ok('twenty-five sources across the two indexes', srcs.length === 25, srcs.length);
+  ok('twenty-four sources across the two indexes', srcs.length === 24, srcs.length);
 
   /* Every source opens, names itself, and carries four sections of at
      least three, with both paragraphs of real length on every card. A
@@ -113,11 +113,12 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
      a card, it still draws, and half of it is missing.
 
      THREE IS A FLOOR HERE TOO, and the count is read off the sections
-     rather than pinned at twelve: one source is deliberately deeper
-     than the rest and a hard twelve would make the suite fail on the
-     feature. What still cannot pass is a section coming up short, or
-     the four sections disagreeing with the cards drawn under them —
-     which is the half a loosened count could have thrown away. */
+     rather than pinned at twelve. One source used to run deeper and the
+     count is still not pinned, because what this is actually for is a
+     section coming up short, or the four sections disagreeing with the
+     cards drawn under them — neither of which a fixed twelve tests. The
+     upper bound is the app's own boot rule, and the suite asserts it
+     boots. */
   const bad = await page.evaluate((ids) => {
     const out = [];
     ids.forEach(id => {
@@ -172,18 +173,6 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   }, srcs);
   ok('the description counts what is actually there',
      said.said.length === 3 && said.said.join() === said.real.join(), said);
-
-  /* AND EXACTLY ONE OF THEM IS DEEPER, asserted as a count rather than by
-     name: "some source has more than twelve" passes on a build where the
-     flag leaked onto all of them, and naming the id makes it a check on
-     the fixture rather than on the rule. */
-  const deep = await page.evaluate((ids) => ids.map(id => {
-    window.alDrive.openSource(id);
-    return document.querySelectorAll('#alSourcePane .al-th').length;
-  }), srcs);
-  ok('exactly one source runs deeper than twelve',
-     deep.filter(n => n > 12).length === 1 && deep.filter(n => n === 12).length === srcs.length - 1,
-     deep);
 
   /* ── THE FOUR HUES ─────────────────────────────────────────────── */
 
