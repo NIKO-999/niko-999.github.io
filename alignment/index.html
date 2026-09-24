@@ -206,11 +206,13 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 /* ---- THE FOOT ---- */
 .al-foot {
   /* THE BAR WIDENS RATHER THAN THE TABS NARROWING, and this is the
-     second time. Three tabs sat at 93px either side; four needed 60,
-     where the row is 270 and a tab owns 64. Five at 60 would be 51
-     each, which clears the 44 floor only because the glyph is 20 — at
-     40 the row is 310 and a tab owns 59. */
-  position: fixed; left: 40px; right: 40px; z-index: 30;
+     third time. Three tabs sat at 93px either side; four needed 60,
+     where a tab owns 64; five needed 40, where it owns 59. Six at 40
+     would be 49 each, over the 44 floor by five pixels — at 20 the row
+     is 350 and a tab owns 57. The bar is nearly the width of the
+     screen now, which is the cost of the sixth stop and is named here
+     rather than discovered. */
+  position: fixed; left: 20px; right: 20px; z-index: 30;
   bottom: calc(var(--v4) + env(safe-area-inset-bottom, 0px));
   height: 58px; border-radius: var(--r-pill);
   background: rgba(24,21,17,.62);
@@ -248,14 +250,19 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   <div class="al-mark" role="img" aria-label="Alignment">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v20M5 8l7-6 7 6M5 16l7 6 7-6"/></svg>
   </div>
-  <h1 class="al-disp" id="alOpenT">Ten people, read for what they actually did.</h1>
-  <p class="al-note" id="alOpenN">A hundred and twenty themes taken from ten real careers, split four ways: the model they ran on, what they were actually like, what the world did, and what came back. What the story does, and what it leaves you with.</p>
+  <h1 class="al-disp" id="alOpenT">Ten people and eight books.</h1>
+  <p class="al-note" id="alOpenN">Two hundred and sixteen themes, from ten real careers and eight books, split four ways: the model they ran on, what they were actually like, what the world did, and what came back. What the story does, and what it leaves you with.</p>
   <button class="al-pill" id="alOpenB">Begin</button>
 </section>
 
 <section class="al-view" id="alFigures">
   <div class="al-head"><h1 class="al-disp-s">The Figures</h1><span class="al-count"></span></div>
   <div class="al-pane" id="alFiguresPane"></div>
+</section>
+
+<section class="al-view" id="alBooks">
+  <div class="al-head"><h1 class="al-disp-s">The Books</h1><span class="al-count"></span></div>
+  <div class="al-pane" id="alBooksPane"></div>
 </section>
 
 <section class="al-view" id="alMindset">
@@ -278,16 +285,19 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   <div class="al-pane" id="alKarmicPane"></div>
 </section>
 
-<section class="al-view" id="alFigure">
-  <button class="al-round al-x" id="alFigureX" aria-label="Close">
+<section class="al-view" id="alSource">
+  <button class="al-round al-x" id="alSourceX" aria-label="Close">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
   </button>
-  <div class="al-pane" id="alFigurePane"></div>
+  <div class="al-pane" id="alSourcePane"></div>
 </section>
 
 <nav class="al-foot" id="alFoot">
   <button class="al-tab" data-v="figures" aria-current="true" aria-label="The Figures">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="7" width="13" height="13" rx="2.4"/><path d="M8 4h11a2 2 0 0 1 2 2v11"/></svg>
+  </button>
+  <button class="al-tab" data-v="books" aria-label="The Books">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.2v13M12 7.2C10.6 5.6 8.4 4.8 5.2 4.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c3.2 0 5.4.8 6.8 2.4M12 7.2c1.4-1.6 3.6-2.4 6.8-2.4a1 1 0 0 1 1 1v11.6a1 1 0 0 1-1 1c-3.2 0-5.4.8-6.8 2.4"/></svg>
   </button>
   <button class="al-tab" data-v="mindset" aria-label="Mindset">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15.2 20.5v-2.9a5 5 0 0 1 1.5-3.4 7 7 0 1 0-11.2-1.8"/><path d="M12.6 4.4 14 9.3l-2.4 1.1 1.3 2.5"/></svg>
@@ -315,7 +325,20 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 var KEY = 'align.v1';
 
-/* THE FIGURE IS THE EVIDENCE AND THE LESSON IS WHAT IT LEAVES YOU.
+/* THE SOURCE IS THE EVIDENCE AND THE LESSON IS WHAT IT LEAVES YOU.
+   There are two kinds of source and they take the same four axes. A
+   FIGURE is a real person and the theme is something they actually did.
+   A BOOK is a system somebody wrote down and the theme is what the book
+   actually claims — not a paraphrase of the blurb, and not a lesson
+   invented and hung on a famous title. Where an idea belongs to the
+   author's wider work rather than to that one volume, it says so.
+
+   The books came in without anything coming out. Nothing about the
+   figures changed.
+
+   THE ORIGINAL NOTE FOLLOWS, and it is about the figures.
+
+   THE FIGURE IS THE EVIDENCE AND THE LESSON IS WHAT IT LEAVES YOU.
    These were films and shows first — Get Rich or Die Tryin', Power,
    Paid in Full, Snowfall, and six that had nothing to do with any of
    it. Every one of those was a dramatisation of people who are
@@ -365,16 +388,24 @@ var KEY = 'align.v1';
 var AXIS = { mindset: 'Mindset', internal: 'Internal', external: 'External', karmic: 'Karmic' };
 
 var SRC = [
-  { i: "fifty", n: "50 Cent", p: "Queens, New York" },
-  { i: "hov", n: "Jay-Z", p: "Marcy, Brooklyn" },
-  { i: "nip", n: "Nipsey Hussle", p: "Crenshaw, Los Angeles" },
-  { i: "meech", n: "Big Meech", p: "Detroit, then Atlanta" },
-  { i: "frick", n: "Freeway Rick Ross", p: "South Central, Los Angeles" },
-  { i: "lucas", n: "Frank Lucas", p: "Harlem, New York" },
-  { i: "mastp", n: "Master P", p: "Calliope, New Orleans" },
-  { i: "gucci", n: "Gucci Mane", p: "Bessemer, then Atlanta" },
-  { i: "meek", n: "Meek Mill", p: "North Philadelphia" },
-  { i: "suge", n: "Suge Knight", p: "Compton, California" },
+  { i: "fifty", n: "50 Cent", p: "Queens, New York", k: "figure" },
+  { i: "hov", n: "Jay-Z", p: "Marcy, Brooklyn", k: "figure" },
+  { i: "nip", n: "Nipsey Hussle", p: "Crenshaw, Los Angeles", k: "figure" },
+  { i: "meech", n: "Big Meech", p: "Detroit, then Atlanta", k: "figure" },
+  { i: "frick", n: "Freeway Rick Ross", p: "South Central, Los Angeles", k: "figure" },
+  { i: "lucas", n: "Frank Lucas", p: "Harlem, New York", k: "figure" },
+  { i: "mastp", n: "Master P", p: "Calliope, New Orleans", k: "figure" },
+  { i: "gucci", n: "Gucci Mane", p: "Bessemer, then Atlanta", k: "figure" },
+  { i: "meek", n: "Meek Mill", p: "North Philadelphia", k: "figure" },
+  { i: "suge", n: "Suge Knight", p: "Compton, California", k: "figure" },
+  { i: "devil", n: "Outwitting the Devil", p: "Napoleon Hill", k: "book" },
+  { i: "tagr", n: "Think and Grow Rich", p: "Napoleon Hill", k: "book" },
+  { i: "mdh", n: "Million Dollar Habits", p: "Brian Tracy", k: "book" },
+  { i: "surf", n: "Reality Transurfing", p: "Vadim Zeland", k: "book" },
+  { i: "para", n: "Change Your Paradigm", p: "Bob Proctor", k: "book" },
+  { i: "feel", n: "Feeling Is the Secret", p: "Neville Goddard", k: "book" },
+  { i: "sogr", n: "The Science of Getting Rich", p: "Wallace Wattles", k: "book" },
+  { i: "cyb", n: "Psycho-Cybernetics", p: "Maxwell Maltz", k: "book" },
 ];
 
 var TH = [
@@ -738,6 +769,294 @@ var TH = [
   { s: "suge", x: "mindset", n: "Fear Is Cheaper", b: "The Shortcut Around Being Worth Staying For",
     t: "Building something people want to stay inside is slow and expensive. Making leaving frightening is immediate and free, and he took that option every time it was offered.",
     l: "Every shortcut around the slow work of being worth choosing takes you further from ever having to do it. That compounds, and you find out the size of it on the one day the shortcut stops working." },
+  { s: "devil", x: "mindset", n: "Definiteness of Purpose", b: "The Only Antidote",
+    t: "The Devil's confession in the book is that he cannot enter a mind occupied by a definite major purpose. Hill makes it the single defence: not effort, not intelligence, not luck. One aim, written, with a plan and a deadline attached.",
+    l: "Almost nobody can state in one sentence what they are for. Without that sentence every hour is available to whatever is loudest, which is why the days feel full and the years feel empty. Vagueness is the vulnerability." },
+  { s: "devil", x: "mindset", n: "The Two Per Cent", b: "Most People Are Not Deciding",
+    t: "The Devil claims ninety-eight per cent of people as drifters and says he owns them because they never made a decision. The other two per cent are not smarter. They decided something and held it.",
+    l: "The line is not between talented and untalented. It is between people who have decided and people who are still gathering information, and you are on one side of it right now and you know which." },
+  { s: "devil", x: "mindset", n: "Adversity Carries the Seed", b: "Every Setback Is a Delivery",
+    t: "The book insists every adversity carries the seed of an equivalent benefit, and that the seed is only available to somebody actively looking for it. Hill's own ruin is the frame the whole thing is written from.",
+    l: "A setback is neutral until you go looking. The seed is not automatic and it is not consolation. It has to be extracted deliberately, while you are still angry, which is exactly when nobody does it." },
+  { s: "devil", x: "internal", n: "Drifting", b: "Going Along With Whatever Comes",
+    t: "The Devil's chief instrument. A drifter lets circumstances and other people set the direction, does not know what they want, and moves with the weather. Hill says drifters cannot be reached by argument.",
+    l: "Drifting does not feel like drifting. It feels like being reasonable, staying open, keeping your options. Check whether you have genuinely decided anything this year, or reacted fast enough that it looked like deciding." },
+  { s: "devil", x: "internal", n: "The Six Basic Fears", b: "What Is Actually Running the Decision",
+    t: "Poverty, criticism, ill health, loss of love, old age and death. Hill's claim is that nearly every irrational decision traces to one of the six, usually criticism, and that they operate below the level you can argue with.",
+    l: "Name which of the six is running the decision you are avoiding. It will be one of them and it will almost certainly be criticism. You are not weighing options, you are managing a fear, and those are different problems." },
+  { s: "devil", x: "internal", n: "Mastery Over Self", b: "The Only Thing You Hold",
+    t: "The second of Hill's seven principles of freedom: discipline over thought, emotion and habit, on the argument that you control almost nothing else and therefore it is the only place the leverage sits.",
+    l: "Your circumstances are mostly other people's decisions. What goes into your head, what you do with your hands and what you do with your hours is the whole of what is yours. Spending any of it on the rest is the waste." },
+  { s: "devil", x: "external", n: "Environmental Influence", b: "The Room Is Doing the Work",
+    t: "The fourth principle of freedom is control of environmental influence: who you are around, what you read, what you listen to. Hill treats it as a mechanism rather than as advice.",
+    l: "You are being written on continuously by whatever you are near, and it does not require your consent. Choosing the room is most of the work that looks like discipline from outside." },
+  { s: "devil", x: "external", n: "It Works Through Other People", b: "Most Discouragement Is Second Hand",
+    t: "In the book the Devil's access to a person is mostly through the people around them — family, friends, teachers — who pass on fear and drift without knowing they are doing it.",
+    l: "Almost nobody discouraging you is doing it deliberately. They are transmitting their own fear accurately and it arrives sounding like concern, which is what makes it effective and why arguing never works." },
+  { s: "devil", x: "external", n: "Time", b: "It Is Compounding Something Already",
+    t: "Hill's fifth principle is time: using it to convert experience into wisdom rather than letting it merely pass, with the claim that drifting compounds at exactly the rate purpose does.",
+    l: "Time is not neutral. It is making you more of whatever you already are, at a rate you did not set. The question is never whether it compounds but what it has been compounding." },
+  { s: "devil", x: "karmic", n: "Hypnotic Rhythm", b: "Nature Makes Permanent What You Repeat",
+    t: "The book's central mechanism. Hypnotic rhythm is nature's method of fixing any habit by repetition, and the claim is that it locks the drifter and the purposeful in with equal force and no preference.",
+    l: "The same law is running on you right now whichever direction you are facing, and nothing is being held in reserve. Whatever you did this week is being made harder to stop, at exactly the same rate either way." },
+  { s: "devil", x: "karmic", n: "Nothing for Nothing", b: "The Price Is Fixed",
+    t: "Hill returns constantly to the claim that nature charges for everything, and that trying to get around the price is itself the trap.",
+    l: "Every version of the shortcut has a price larger than the one you were avoiding. The bill is arithmetic rather than moral, and looking for the version without one is what costs the decade." },
+  { s: "devil", x: "karmic", n: "The Extra Mile", b: "Service Beyond the Payment",
+    t: "Hill's law of increasing returns: render more and better service than you are paid for and it comes back with interest, usually from a direction that has nothing to do with who you did it for.",
+    l: "This is slow, unrewarded while it happens, and the only thing that reliably compounds in a career. The return not coming from the person you did it for is precisely why people stop." },
+  { s: "tagr", x: "mindset", n: "A Definite Sum, a Date, a Price", b: "Six Steps, Written",
+    t: "Hill's six steps require an exact sum, what you intend to give for it, a definite date, a written plan, and the whole thing read aloud twice a day. The specificity is the mechanism rather than the motivation.",
+    l: "A wish has no number, no date and no price. Writing all three turns it into a problem with a shape, which is the only kind you can work on. Most people will not do it because the number makes the gap real." },
+  { s: "tagr", x: "mindset", n: "Thoughts Are Things", b: "What You Dwell On Organises the Rest",
+    t: "The book opens on it and never leaves: sustained thought mixed with definiteness of purpose organises itself into its physical equivalent through the actions and attention it produces.",
+    l: "You need believe nothing mystical for this to hold. What occupies your attention decides what you notice, who you talk to and what you say yes to, and that is most of what a decade is made of." },
+  { s: "tagr", x: "mindset", n: "Specialised Knowledge", b: "Know Where to Get It",
+    t: "Hill is blunt that general education is not the asset. Ford's answer to the charge of ignorance is that he has a row of buttons and can summon anybody who knows. What counts is specialised knowledge organised toward one end.",
+    l: "You do not need to know it. You need to know exactly what you need and where to get it. Collecting knowledge with no plan attached is a hobby that feels like preparation." },
+  { s: "tagr", x: "internal", n: "Burning Desire", b: "Wanting Is Not Enough",
+    t: "Hill separates wishing, wanting and burning desire and says only the third produces anything. His image is Cortés burning the ships: desire made unconditional by removing the way back.",
+    l: "Almost everything you say you want, you want conditionally. Find out by asking what you have already given up for it. If the honest answer is nothing, you are wishing, and wishing has never produced anything." },
+  { s: "tagr", x: "internal", n: "Decision", b: "The Habit of Not Making One",
+    t: "Hill studied people who had failed and found procrastination near the top of the list. His successful subjects decided quickly and changed slowly; the failures decided slowly and changed fast.",
+    l: "Notice which direction you run. Taking a week to choose and then abandoning it within a month is the exact signature of the second group, and it feels like being careful and then being adaptable." },
+  { s: "tagr", x: "internal", n: "Three Feet From Gold", b: "Where Quitting Happens",
+    t: "Darby abandons a mine three feet from the vein and the man who buys his equipment takes millions out of it. Hill uses it structurally: most quitting happens near the result, because near the result is where it is hardest.",
+    l: "The moment it becomes unbearable is statistically the moment before it moves, because everybody else stopped there too. That is not encouragement. It is the reason the return exists at all." },
+  { s: "tagr", x: "external", n: "The Master Mind", b: "Two Minds Make a Third",
+    t: "Hill's claim that a group working in harmony toward one definite purpose creates something greater than the sum, and that no large fortune in his study was built without one. Carnegie's group of about fifty is the model.",
+    l: "You are attempting alone what nobody in the book did alone. Find two or three people aimed at the same thing and meet regularly and specifically, because the alternative is your own head as the only source of ideas." },
+  { s: "tagr", x: "external", n: "Organized Planning", b: "Replace the Plan, Not the Aim",
+    t: "Hill treats plan failure as ordinary and expected — Edison's thousands of attempts — and identifies the real failure as abandoning the aim rather than the method.",
+    l: "When something does not work, find out whether the aim or the method failed. People almost always conclude the first and it is almost always the second. A new plan is cheap; a new aim costs the years already spent." },
+  { s: "tagr", x: "external", n: "Negative Influences", b: "Whose Opinion You Have Agreed to Take",
+    t: "Hill closes on the six ghosts of fear and on negative influence — the claim that other people's fear is transmitted continuously and that most people have no defence built against it.",
+    l: "Decide in advance whose opinion you will take, and on what. Without that list the loudest and nearest person becomes your board of directors by default, and they never applied for the job." },
+  { s: "tagr", x: "karmic", n: "Autosuggestion", b: "You Are Instructing Yourself Already",
+    t: "The principle that repeated, emotionalised statements reach the subconscious, and that you are doing this to yourself every day whether or not you chose the content.",
+    l: "There is no neutral setting. Whatever you say about yourself in your own head is being installed by repetition, and the default content was written by somebody else years ago." },
+  { s: "tagr", x: "karmic", n: "Temporary Defeat", b: "The Interval Is the Variable",
+    t: "Hill's distinction: temporary defeat is a condition and failure is the decision to treat it as permanent. The whole book is a study of people who lost everything at least once.",
+    l: "Everybody gets the defeat. What varies is the interval between it and the next attempt, and that interval is the only thing that has ever separated the two groups." },
+  { s: "tagr", x: "karmic", n: "Persistence Pays From Elsewhere", b: "The Return Is Not From the Same Door",
+    t: "Hill's repeated observation that the reward for holding on rarely arrives through the route it was being pursued down — it comes through a person, an offer or an idea that had nothing to do with the plan.",
+    l: "Stop judging whether it is working by whether the specific route is moving. The return almost always arrives through a door you were not watching, and only people still in the building get it." },
+  { s: "mdh", x: "mindset", n: "Success Is Predictable", b: "Cause and Effect, Not Luck",
+    t: "Tracy's founding claim: everything happens for a reason, success leaves tracks, and doing what people who succeeded did produces the same results eventually. He treats it as a law rather than as encouragement.",
+    l: "If you believe outcomes are mostly luck there is no reason to change anything, and you will not. Treating them as caused is not optimism, it is the only stance that makes the next decision worth taking seriously." },
+  { s: "mdh", x: "mindset", n: "You Become What You Think About", b: "Attention Is the Input",
+    t: "Tracy's version of the oldest claim in the genre: dominant thoughts determine actions, actions determine results, so the intervention point is what is allowed to occupy your mind.",
+    l: "Audit what you actually thought about this week rather than what you intended to. That list is a forecast, and it is far more accurate than any plan you have written down." },
+  { s: "mdh", x: "mindset", n: "Clarity Is the Starting Point", b: "Fewer Than Three Per Cent Write It",
+    t: "Tracy's repeated finding is that almost no adults have written goals, and that those who do outperform everybody by an enormous margin. The writing itself is the mechanism, not the intention behind it.",
+    l: "A goal you have not written is a mood. It cannot be broken into steps, it cannot be checked, and it quietly reorganises itself to match how you feel today. Ten minutes with a pen is the highest-return thing on the list." },
+  { s: "mdh", x: "internal", n: "Ninety-Five Per Cent Is Habit", b: "You Are Running on Rails",
+    t: "Tracy's core number: almost everything you do, think and feel is automatic and already established. New behaviour is therefore not a question of will but of deliberately installing a replacement rail.",
+    l: "Willpower is what you spend for the few weeks it takes to build the rail, and then you stop needing it. People who rely on it permanently are the ones who conclude they have none." },
+  { s: "mdh", x: "internal", n: "Self-Discipline", b: "Doing It Whether You Feel Like It",
+    t: "Tracy defines it flatly as doing what you should do, when you should do it, whether or not you feel like it, and treats it as the single habit that makes every other one possible.",
+    l: "You are waiting to feel like it and it has never once arrived on schedule. The feeling follows the action in almost every case, which means the order most people are using is backwards." },
+  { s: "mdh", x: "internal", n: "An Hour a Day", b: "Your Income Follows Your Input",
+    t: "Tracy's prescription is an hour of reading in your field daily, audio in the car and regular courses, on the claim that skill improvement is the most reliable lever there is on earnings.",
+    l: "An hour a day is about three hundred hours a year, which is a qualification nobody assigned you. The only reason this is not universal is that it pays out too late to feel like progress." },
+  { s: "mdh", x: "external", n: "The Law of Correspondence", b: "Your Outer Life Is a Readout",
+    t: "Tracy's claim that relationships, health, finances and work are an outward picture of what is happening inside, and are therefore diagnostic rather than arbitrary.",
+    l: "Look at the part of your life you are least happy with and ask what it is accurately reporting. It is unwelcome and usually right, and the alternative is fixing the symptom for another five years." },
+  { s: "mdh", x: "external", n: "The Law of Compensation", b: "You Are Paid for Contribution",
+    t: "Emerson's essay by way of Tracy: you are paid in exact proportion to the value of your contribution as other people evaluate it, so earning more means becoming worth more to somebody.",
+    l: "Asking how to earn more is the wrong question. The question is what you could become worth to somebody within a year, because that is the only variable the market is actually reading." },
+  { s: "mdh", x: "external", n: "Eighty Twenty", b: "Most of What You Do Does Not Matter",
+    t: "Tracy applies Pareto everywhere: a fifth of your tasks produce most of your value, and that fifth is almost always the part you least want to begin.",
+    l: "You already know which two tasks matter this week. The reason you are doing the other eight is that they are easier and they generate the feeling of work. Do the two first, badly if necessary." },
+  { s: "mdh", x: "karmic", n: "Sowing and Reaping Has a Lag", b: "The Delay Is Where People Quit",
+    t: "Tracy's law of cause and effect always includes a time lag between the action and the result, and he treats that lag as the reason most people never see the law operate on themselves.",
+    l: "The gap between what you do and what it produces is long enough that it will not feel connected. That is the whole difficulty, and nothing about compounding is visible from inside the period it happens in." },
+  { s: "mdh", x: "karmic", n: "Go First", b: "Reward Follows Contribution",
+    t: "Tracy's repeated instruction to add value first and consistently, on the claim that reward always follows contribution and never precedes it.",
+    l: "Everybody is trying to get paid before delivering, because that is what being careful looks like. The people who go first, repeatedly, become the ones somebody is looking for, and that position cannot be bought." },
+  { s: "mdh", x: "karmic", n: "Your Habits Are Deciding Your Thirties", b: "Small Entries, Compounded",
+    t: "The premise of the whole book: a habit is small enough to be invisible in any single instance and large enough across a decade to constitute an entire life.",
+    l: "Nothing you did today mattered. Everything you do most days is the whole thing. The size of a decision is never visible on the day you take it, which is exactly why they are so easy to take badly." },
+  { s: "surf", x: "mindset", n: "Choose the Reel", b: "Outer Intention, Not Force",
+    t: "Zeland's central image: reality is a film already present in the variations space, and you are not changing the frame you are standing in, you are selecting which reel you move onto. Inner intention pushes at the current frame; outer intention selects a different one.",
+    l: "Most effort goes into forcing the situation you are already in. The alternative is to stop arguing with it and act as the person already in the one you want, which is a completely different set of daily actions." },
+  { s: "surf", x: "mindset", n: "Importance Is the Enemy", b: "Excess Potential",
+    t: "Caring too much about anything creates what Zeland calls excess potential, a distortion the balancing forces move to eliminate, usually by producing the opposite of what was wanted. The more it matters, the more reliably it is taken.",
+    l: "Whatever you have made enormous is the thing you will handle worst. Reduce its importance rather than your effort: the interview, the trade, the conversation goes well in exact proportion to how survivable you have decided the failure is." },
+  { s: "surf", x: "mindset", n: "Coordination of Intention", b: "Treat Everything as Favourable",
+    t: "Zeland's practice of deliberately assuming every event is working in your favour, especially the ones that look like setbacks, because the interpretation decides which line you move onto next.",
+    l: "You have no way of knowing what a setback is for, and you are going to assign it a meaning either way. Assigning the favourable one costs nothing and changes what you do next, which is the only part you control." },
+  { s: "surf", x: "internal", n: "The Soul and the Mind Must Agree", b: "Wanting What You Say You Want",
+    t: "Zeland's condition for anything working at all: the mind's stated goal and the soul's actual feeling have to be the same thing. Most goals are the mind's, borrowed and respectable, and the soul is silent about them.",
+    l: "Check whether the thing you are pursuing produces any feeling at all when you imagine already having it. If it does not, you took it from somebody else, and no amount of discipline makes a borrowed goal work." },
+  { s: "surf", x: "internal", n: "Frailing", b: "Stop Asking, Start Giving",
+    t: "The technique of moving attention entirely off what you want from a person and onto what they want. Zeland's claim is that this releases the potential which was blocking it in the first place.",
+    l: "Whatever you want badly from another person is what your presence is currently demanding, and they can feel it. Turn the whole of your attention onto what they need and the thing you wanted becomes available." },
+  { s: "surf", x: "internal", n: "The Watcher", b: "Never Fully Absorbed",
+    t: "Zeland's instruction to keep part of your attention as an observer, so that you are never completely inside the role you are playing. Absorption is how pendulums take hold.",
+    l: "You can act with full commitment and still keep a piece of yourself watching. That piece is the whole of what lets you stop mid-argument, mid-spiral, mid-trade. Without it you find out what you did afterwards." },
+  { s: "surf", x: "external", n: "Pendulums", b: "Structures That Feed on Attention",
+    t: "Zeland's name for any structure — a movement, a company, an argument, a fandom — that exists by absorbing the energy of its adherents and grows by provoking reactions. It is not conscious and it does not care about you. It needs attention.",
+    l: "Anything designed to provoke a reaction from you is a structure feeding. The tell is that responding feels urgent and important. You do not win by arguing better, you win by failing to show up." },
+  { s: "surf", x: "external", n: "The Balancing Forces", b: "Nature Removes Every Distortion",
+    t: "Any excess potential — idolising, despising, desperate wanting, contempt — creates an imbalance, and the balancing forces act to remove it, generally by handing you the opposite of what you were holding.",
+    l: "Whenever something is going too well in your own telling of it, check what you have inflated. Reality has no opinion about you and it does level, and it does it at the least convenient moment by design." },
+  { s: "surf", x: "external", n: "The Wave of Fortune", b: "Momentum Is Real and It Is Fragile",
+    t: "Zeland describes a line where things begin going well, and the ordinary human reaction — pointing it out, growing suspicious, waiting for the catch — is exactly what knocks you off it.",
+    l: "When a run starts, the most dangerous thing you can do is comment on it. Notice, accept, continue. Most good runs are ended by the person having them deciding it cannot last." },
+  { s: "surf", x: "karmic", n: "You Cannot Take a Line You Do Not Match", b: "Become It First",
+    t: "Zeland's rule that you only move onto a line whose parameters match what you are radiating, so the sequence is always inner change first and outer arrival second, never the reverse.",
+    l: "The thing you want will not arrive to the person you currently are, not because you are unworthy but because the two do not fit together. Find out what that person does on an ordinary Tuesday and do that." },
+  { s: "surf", x: "karmic", n: "Pendulums Punish Their Own", b: "What You Join Owns You",
+    t: "Zeland's warning that a pendulum rewards adherence and turns on anybody who stops feeding it, and that the people who serve it hardest are consumed first.",
+    l: "Anything that offers you an identity in exchange for loyalty is charging you, and the bill is your attention for the rest of your life. Find out what happens to the people who try to leave." },
+  { s: "surf", x: "karmic", n: "The Borrowed Goal", b: "It Cost the Decade",
+    t: "Zeland's claim that most people spend their lives on a goal imposed by a pendulum, and that arriving at it produces nothing at all, which is the return on an aim that was never theirs.",
+    l: "Getting somebody else's goal is worse than missing your own, because you spent the years and cannot say what went wrong. Work out whose idea it was, honestly, before you spend another one." },
+  { s: "para", x: "mindset", n: "Results Are the Paradigm Speaking", b: "Not Your Desire, Not Your Will",
+    t: "Proctor's central claim: your results are an exact expression of your conditioning rather than of what you want. It is why people return to the same income, the same weight and the same kind of relationship repeatedly.",
+    l: "Read your results as a readout rather than as a verdict. They are telling you what is installed. Fighting them with effort while the programme is unchanged is why the same year keeps happening." },
+  { s: "para", x: "mindset", n: "The Stick Person", b: "Conscious, Subconscious, Body",
+    t: "Proctor's diagram: the conscious mind chooses, the subconscious accepts without judgement whatever is impressed on it, and the body acts it out. Nothing reaches the body except through the middle layer.",
+    l: "You cannot install anything by deciding it once. That middle layer accepts by repetition and emotion only, which is why every plan that relied on a single moment of clarity was gone by the Wednesday." },
+  { s: "para", x: "mindset", n: "A Worthy Ideal", b: "Pick the One You Cannot See the Path To",
+    t: "Proctor separates three kinds of goal: the one you know how to reach, the one you think you can reach, and the one you have no idea how to reach. He insists only the third changes anything about you.",
+    l: "A goal you know how to hit is a schedule, and it will leave you exactly as you are. Pick the one where you genuinely cannot see the route, because the not knowing is the entire mechanism." },
+  { s: "para", x: "internal", n: "The Terror Barrier", b: "The Wall Just Before the Change",
+    t: "Proctor's name for the point where you move toward the new result and the paradigm produces fear, doubt and the urge to return to what is familiar. He says almost everybody bounces off it and calls it common sense.",
+    l: "The fear arriving is the signal that you are at the edge, not the signal that you were wrong. It feels identical to good judgement, it comes with reasons, and everybody who got through describes it the same way." },
+  { s: "para", x: "internal", n: "It Was Installed Before You Could Object", b: "Most of It Is Not Yours",
+    t: "Proctor's position is that the paradigm is largely formed in early childhood out of the surrounding environment, and therefore contains the beliefs of people who never consulted you about any of it.",
+    l: "Most of what you assume about money, work and what is possible for somebody like you was put there by people doing their best in a different decade. None of it was chosen and all of it is still running." },
+  { s: "para", x: "internal", n: "Repetition, or an Emotional Event", b: "The Only Two Doors",
+    t: "Proctor says a paradigm changes in exactly two ways: a significant emotional event, or constant spaced repetition. You cannot schedule the first one.",
+    l: "The only available lever is repetition, done daily, for long enough to be boring. Everybody wants the emotional event because it is fast, and waiting for one is how a decade passes unchanged." },
+  { s: "para", x: "external", n: "You Will Recreate the Circumstances", b: "The Environment Reflects the Programme",
+    t: "Proctor's claim that people who change their circumstances without changing the paradigm return to equivalent ones: the lottery winner, the weight regained, the same argument with a different person.",
+    l: "If a problem has followed you through three jobs or three relationships it is not the jobs. That is unwelcome and it is also the best news available, because the part you can reach is the part causing it." },
+  { s: "para", x: "external", n: "Money Is an Effect", b: "Go at the Cause",
+    t: "Proctor, following Wattles, treats money as an effect of service rendered and of the mind that produced it, which makes going directly at the money going at the wrong end of the chain.",
+    l: "The income is downstream of the value and the value is downstream of what you are. Going at the number directly is why so much effort produces so little, and the order of the chain is not negotiable." },
+  { s: "para", x: "external", n: "Proximity Reinstalls It", b: "Everybody Near You Holds the Old Programme",
+    t: "Proctor's insistence that the people around you carry the conditioning you are trying to leave, and will restate it daily without any malice at all.",
+    l: "The reinstallation is continuous and nobody is doing it on purpose. You do not need to leave anybody, but you do need deliberate hours somewhere else, or every gain is overwritten by an ordinary week." },
+  { s: "para", x: "karmic", n: "You Get What You Are", b: "Not What You Want",
+    t: "Proctor's version of attraction has no mysticism he will not explain: what you consistently are in thought and feeling produces the actions and the perception that produce the results. Wanting has no mechanism at all.",
+    l: "Wanting is not an input to anything. Being is, because being decides what you notice, what you attempt and what you agree to, and those three make the whole outcome." },
+  { s: "para", x: "karmic", n: "The Same Year, Repeated", b: "Effort Inside an Unchanged Programme",
+    t: "Proctor's most confronting point: a person can work extremely hard for thirty years inside an unchanged paradigm and arrive precisely where the paradigm always said they would.",
+    l: "Effort inside an unchanged programme produces a more exhausting version of the same result. Before you add hours, find out whether hours were ever the constraint, because they usually are not." },
+  { s: "para", x: "karmic", n: "Impressed, Then Expressed", b: "The Return Arrives as Circumstance",
+    t: "The lineage claim running from Haanel through Hill to Proctor: whatever is impressed on the subconscious is expressed as events, and the return arrives looking like luck and circumstance.",
+    l: "You are impressing something every day whether or not you chose the content. It returns later, dressed as circumstance, and by then the connection is invisible. Choose the content now, while it is cheap." },
+  { s: "feel", x: "mindset", n: "Think From the End", b: "Not Of It",
+    t: "Neville's distinction, and the one everything else rests on. Thinking OF a thing keeps you outside it and confirms you do not have it. Thinking FROM it means assuming the state of already having it and looking at the world from there.",
+    l: "Almost all visualising is done from outside, watching yourself get it, which is a rehearsal of absence. The shift is to ask what you would be noticing, saying and doing if it were already done, and then do that." },
+  { s: "feel", x: "mindset", n: "Assumption Precedes Evidence", b: "The Order Is Not Negotiable",
+    t: "The claim is that the state is assumed first and the facts rearrange to match, never the reverse, and that waiting for evidence before assuming is the whole of why nothing moves.",
+    l: "You are waiting to feel like the person before you behave like them, and the order runs the other way. Your current evidence is not a reason, it is a record of the previous assumption." },
+  { s: "feel", x: "mindset", n: "A Controlled Imagination", b: "And a Well-Sustained Attention",
+    t: "Neville calls this the great secret in plain words. Not effort, not affirmation: the capacity to hold one scene and one feeling without drifting, deliberately and repeatedly.",
+    l: "The scarce thing is attention held on one object for more than about forty seconds. It is trainable and almost nobody trains it, which is why this technique is simultaneously public and rare." },
+  { s: "feel", x: "internal", n: "Feeling Is the Secret", b: "The Subconscious Does Not Read Words",
+    t: "The title and the mechanism. The subconscious accepts what is felt as true rather than what is stated, so an affirmation repeated without the corresponding feeling impresses nothing at all.",
+    l: "Saying it is not doing it. The test is whether the statement produces any physical change in you when you make it. If it does not, you have been talking, and talking has no route in." },
+  { s: "feel", x: "internal", n: "Your Habitual Mood", b: "The State You Drift Back To",
+    t: "Neville's instruction to catch the mood you habitually return to, because he treats habitual mood rather than occasional effort as the actual creative agent, and it is usually one nobody chose.",
+    l: "Whatever state you spend the most hours in is what is being impressed, and it is almost always the one you drift back to rather than the one you visit on purpose. That is the number worth changing." },
+  { s: "feel", x: "internal", n: "The Chief Delusion", b: "Nothing Outside Is the Cause",
+    t: "Neville's hardest line: that man's chief delusion is his conviction that there are causes other than his own state of consciousness. Every external explanation is, in his frame, an evasion.",
+    l: "This is uncomfortable and it is useful even taken only as a discipline. Every time you locate the cause outside yourself you have also located the solution outside yourself, and you cannot reach it there." },
+  { s: "feel", x: "external", n: "Sleep Is the Doorway", b: "The Drowsy State",
+    t: "Neville's practical instruction: the state on the edge of sleep, where the conscious mind is quiet, is when the assumption should be held. The last thing in mind before sleep is the impression that takes.",
+    l: "You are already doing this every night with whatever was last on your mind, which for most people is a screen or an argument. That slot is a mechanism whether or not you use it deliberately." },
+  { s: "feel", x: "external", n: "Prayer Is a State", b: "Asking Confirms Absence",
+    t: "Neville redefines prayer as the assumption of the wish already fulfilled, held in a state akin to sleep, and points out that petitioning confirms the thing is not had, which is the state actually being impressed.",
+    l: "Whatever form your asking takes, it restates the absence every time. Notice how much of your inner life is spent confirming, in detail, that you do not yet have it." },
+  { s: "feel", x: "external", n: "The World Is the Report", b: "Circumstance Is Not an Authority",
+    t: "In Neville's frame the outer world is the printed record of states already held: a report rather than a verdict, and therefore never a reason to change the assumption.",
+    l: "Whether or not you accept the metaphysics, treating your circumstances as data about what you have been rather than as a ruling on what you can be is a strictly better position to act from." },
+  { s: "feel", x: "karmic", n: "What Is Impressed Is Expressed", b: "There Is No Filter",
+    t: "Neville's mechanism runs both ways. The subconscious does not evaluate, it forms, and whatever is felt as true is brought into being, including the things nobody would choose.",
+    l: "There is no filter on the input. The fear you rehearse in detail is receiving exactly the same treatment as the goal you visualise for five minutes, and one of those is getting far more hours." },
+  { s: "feel", x: "karmic", n: "The Interval", b: "Remaining Faithful With No Evidence",
+    t: "Neville's repeated point that between the assumption and its appearance there is a period in which nothing confirms it, and that abandoning the state during that period is the only real failure available.",
+    l: "That gap exists in every version of this, secular or not. What you do in the stretch where there is no evidence is the entire difference, and it is the part no technique can do for you." },
+  { s: "feel", x: "karmic", n: "Today Is Last Year Arriving", b: "Read It as a Return",
+    t: "Neville's claim that the present is the harvest of states previously held, which makes today a report on last year rather than an accident that happened to you.",
+    l: "Read your current life as the return on what you were consistently being twelve months ago. Whether or not the mechanism is what he says it is, the correlation is strong enough to act on." },
+  { s: "sogr", x: "mindset", n: "The Creative Mind", b: "Not the Competitive One",
+    t: "Wattles' core distinction. The competitive mind sees a fixed supply to be fought over; the creative mind brings something into being that was not there. He argues nothing held on the competitive plane is secure, because it can be taken the same way it was got.",
+    l: "Ask honestly whether you are trying to take a share or to make something new. The first is a fight with everybody and the second has no competitors at all, and most people never notice which one they are doing." },
+  { s: "sogr", x: "mindset", n: "A Certain Way", b: "The Method Is the Asset",
+    t: "Wattles insists that getting rich has nothing to do with the business you are in, the place you live or your talent, and everything to do with doing things in a certain way, which is learnable and repeatable.",
+    l: "You are probably in a good enough field. The variable is how you operate inside it, and that is the part you can improve this week. Changing the field is usually a way of avoiding changing the method." },
+  { s: "sogr", x: "mindset", n: "Gratitude Is a Mechanism", b: "Not a Sentiment",
+    t: "Wattles gives it a chapter and treats it functionally: gratitude holds the mind on what is working, and a mind fixed on lack produces the actions of lack.",
+    l: "It is not about being pleasant. The direction of your attention decides what you look for, and a person cataloguing what is missing behaves completely differently from one cataloguing what is there." },
+  { s: "sogr", x: "internal", n: "Hold the Picture, Not the Method", b: "Do Not Supply the How",
+    t: "Wattles says to form a clear mental image, hold it with purpose and faith, and specifically not to concern yourself with the route by which it arrives. The how is not yours to provide.",
+    l: "Most planning is anxiety wearing a spreadsheet. Be precise about the outcome and loose about the route, because insisting on a route you can already see limits you to what you can currently imagine." },
+  { s: "sogr", x: "internal", n: "Act in Your Present Business", b: "Start From Where You Are",
+    t: "Wattles is blunt that you act now, in the job and the place you are already in, doing everything you can do each day, and that waiting for better circumstances is the commonest failure of all.",
+    l: "There is no better starting position coming. The actions available today, done completely, are the whole mechanism, and the search for a better starting point is the thing consuming the years." },
+  { s: "sogr", x: "internal", n: "Efficient Action", b: "Do Not Hurry and Do Not Skip",
+    t: "His instruction is to do each day's work efficiently and completely rather than rushing at tomorrow's, because hurried action is inefficient action and incomplete days accumulate.",
+    l: "Doing today's work completely is unglamorous and it is the whole of it. Rushing is a way of feeling productive while leaving a trail of half-finished things that each cost double later." },
+  { s: "sogr", x: "external", n: "Give More in Use Value Than You Take", b: "The Increase",
+    t: "Wattles' central mechanism: everybody you deal with should be better off for having dealt with you, and the business is built out of that rather than out of extraction.",
+    l: "Make sure the person on the other side of every transaction genuinely gained. It is slower, it produces a reputation that works while you sleep, and it removes the need to keep finding new people." },
+  { s: "sogr", x: "external", n: "There Is No Shortage", b: "Supply Is Not the Constraint",
+    t: "Wattles argues the supply of everything worth having is effectively unlimited, and that acting from scarcity produces exactly the results scarcity predicts.",
+    l: "Whether or not the metaphysics holds, check what you are assuming about the size of the opportunity. Almost everybody is operating on an estimate they inherited and have never once tested." },
+  { s: "sogr", x: "external", n: "You Are Not Competing", b: "Nobody Else Winning Costs You",
+    t: "His claim that there is no need to take from anyone, drive a hard bargain or cheat, because the creative plane has room and the competitive plane is where the fear lives.",
+    l: "The feeling that somebody else winning costs you something is almost always false and always expensive. It changes who you are willing to help, and that is the most valuable thing you have to trade." },
+  { s: "sogr", x: "karmic", n: "The Increase Comes Back", b: "From Somewhere Else",
+    t: "Wattles ties the system together here: the person who consistently gives more than they take becomes the one everybody wants to deal with, and the return is structural rather than moral.",
+    l: "The return does not come from the transaction it was given in. It comes from the ones that happen because of it, later, which is exactly why the practice looks unrewarded for so long." },
+  { s: "sogr", x: "karmic", n: "Thought Held Long Enough", b: "Wavering Undoes It",
+    t: "Wattles' mechanism requires sustained impression over time and he is explicit that wavering cancels it. Alternating between the picture and the doubt is what produces nothing at all.",
+    l: "Alternating between the plan and the doubt is worse than either, because nothing ever accumulates. Pick one and give it long enough to report back, and let the report be the only thing that changes it." },
+  { s: "sogr", x: "karmic", n: "The Plane You Left", b: "What the Shortcut Actually Costs",
+    t: "Wattles' warning that the moment you move to taking, you have left the plane on which making was possible, and that everything gained on the other one is insecure by construction.",
+    l: "Every shortcut that takes from somebody also removes you from the position where you were building. The loss is not the ethics of it, it is that you can no longer see the other set of moves." },
+  { s: "cyb", x: "mindset", n: "You Cannot Outperform the Self-Image", b: "The Ceiling Is Internal",
+    t: "Maltz's founding observation from plastic surgery: patients whose faces were corrected often did not change at all, because the picture they held of themselves had not. The self-image governs everything downstream.",
+    l: "You have a number in your head for what somebody like you gets, and your performance keeps arriving near it. Raising that ceiling is a different job from working harder underneath it, and only one of the two works." },
+  { s: "cyb", x: "mindset", n: "A Goal-Striving Mechanism", b: "Give It a Target",
+    t: "Maltz's cybernetic model: the brain works like a guidance system that self-corrects toward a target, but only once a target has actually been set. With none, it has nothing to correct toward.",
+    l: "Most people are steering constantly with no destination and calling it being busy. Set one target clearly enough to be wrong about, and the correcting starts happening without you having to manage it." },
+  { s: "cyb", x: "mindset", n: "Imagination Is the Same Input", b: "Rehearsal Counts",
+    t: "Maltz's claim, later borne out in sports psychology, that the nervous system does not fully distinguish a vividly imagined experience from a real one, which is why mental rehearsal produces measurable improvement.",
+    l: "You are rehearsing something every day already, usually the conversation going badly. Spend the same minutes rehearsing it going well, in detail, and the system updates on that exactly the same way." },
+  { s: "cyb", x: "internal", n: "The Theatre of the Mind", b: "Thirty Minutes, Vividly",
+    t: "Maltz's prescribed exercise: half an hour a day alone, seeing yourself acting as the person you intend to be, in detail, with the feelings included rather than described.",
+    l: "It is the same instruction the whole genre gives and Maltz supplies the reason: the input is what the mechanism steers by. Half an hour is the price, and almost nobody pays it because nothing visible happens for weeks." },
+  { s: "cyb", x: "internal", n: "Emotional Scars", b: "A Defence That Outlived the Danger",
+    t: "Maltz treats emotional scarring the way he treated the physical kind: something that once protected you and now prevents ordinary contact. The guard stays up long after the threat has gone.",
+    l: "Whatever you built to protect yourself at nineteen is still running and it is now the thing stopping you. It was correct then. Check whether the situation it was built for still exists." },
+  { s: "cyb", x: "internal", n: "Try Softer", b: "Effort Jams the Mechanism",
+    t: "Maltz gives a great deal of the book to relaxation, on the model that excessive effort and anxiety interfere with the servo-mechanism's own corrections.",
+    l: "Past a point, effort degrades performance rather than improving it, and the feeling of straining is the signal. The correction happens on its own if you stop interfering, which is the hardest instruction here to follow." },
+  { s: "cyb", x: "external", n: "Twenty-One Days", b: "Nothing Is Reporting Yet",
+    t: "Maltz observed that patients took roughly three weeks to stop seeing the old face in the mirror, and generalised it: a new mental image takes about that long to settle.",
+    l: "Whatever you are installing, nothing is decided in the first three weeks and almost everybody quits inside them. Treat that stretch as a cost rather than as a test, because it is not reporting anything yet." },
+  { s: "cyb", x: "external", n: "The Failure Mechanism", b: "A Warning Light, Not a Verdict",
+    t: "Maltz lists the signature: frustration, aggressiveness, insecurity, loneliness, uncertainty, resentment, emptiness. He treats the set as a system fault rather than as a statement about character.",
+    l: "Those feelings are diagnostic rather than descriptive. When several arrive together you are not a worse person that month, you are a system with a bad input, and the input is findable." },
+  { s: "cyb", x: "external", n: "It Was the Sentence, Not the Event", b: "How the Image Got Built",
+    t: "Maltz is clear that the self-image is built out of interpreted experience, including what people said, and that what got stored was the interpretation rather than the event.",
+    l: "The thing shaping you was never what happened, it was the sentence you wrote about it afterwards. That sentence is editable in a way the event is not, and almost nobody goes back to read it." },
+  { s: "cyb", x: "karmic", n: "The Loop Makes Its Own Evidence", b: "Self-Confirming by Design",
+    t: "Maltz's mechanism is circular on purpose: the image produces the behaviour, the behaviour produces the results, and the results confirm the image. It reinforces in both directions equally well.",
+    l: "Your evidence about yourself was generated by the belief it is now supporting. That is why arguing with the evidence never works, and why changing the input at the top is the only place the loop can break." },
+  { s: "cyb", x: "karmic", n: "You Are Practising Something Daily", b: "Count the Hours Honestly",
+    t: "Because the nervous system does not distinguish the source, the worry you run in full detail trains the same mechanism as the rehearsal you do deliberately, and there is far more of the first.",
+    l: "You are practising something every single day. Count the hours honestly and the overwhelming majority went into rehearsing the thing you are afraid of, in high definition, with the feelings included." },
+  { s: "cyb", x: "karmic", n: "The Scar Charges Rent", b: "Only You Are Paying It",
+    t: "Maltz treats a held injury as an ongoing cost carried by the holder: the emotional scar keeps the wound live and keeps the behaviour it produced in place for decades.",
+    l: "Whatever you are still carrying is charging you daily and the other person is not being billed at all. Putting it down is not a favour to them and it is not a moral act. It is a repossession." },
 ];
 
 var $ = function (s) { return document.querySelector(s); };
@@ -808,9 +1127,13 @@ function card(t) {
   return d;
 }
 
-function paintFigures() {
-  var p = $('#alFiguresPane'); p.textContent = '';
-  SRC.forEach(function (x) {
+/* ONE INDEX PAINTER, TWO LISTS. Figures and Books are the same screen
+   reading the same table through one field, for the reason the axis
+   lists are: a second construction of one object is how the two come
+   to disagree. */
+function paintIndex(kind) {
+  var p = $('#al' + kind.charAt(0).toUpperCase() + kind.slice(1) + 'Pane'); p.textContent = '';
+  SRC.filter(function (x) { return x.k + 's' === kind; }).forEach(function (x) {
     var b = el('button', 'al-th al-f');
     b.setAttribute('data-src', x.i);
     b.appendChild(el('h3', 'al-tn', x.n));
@@ -835,9 +1158,9 @@ function paintAxis(ax) {
   mask(p);
 }
 
-function paintFigure(id) {
+function paintSource(id) {
   var x = srcOf(id); if (!x) return;
-  var p = $('#alFigurePane'); p.textContent = '';
+  var p = $('#alSourcePane'); p.textContent = '';
   var lead = el('div', 'al-lead');
   lead.appendChild(el('h1', 'al-disp', x.n));
   lead.appendChild(el('div', 'al-caps', x.p));
@@ -853,7 +1176,7 @@ function paintFigure(id) {
   p.scrollTop = 0; mask(p);
 }
 
-var VIEWS = ['open', 'figures', 'mindset', 'internal', 'external', 'karmic', 'figure'];
+var VIEWS = ['open', 'figures', 'books', 'mindset', 'internal', 'external', 'karmic', 'source'];
 function view(v) {
   if (VIEWS.indexOf(v) < 0) v = 'figures';
   document.documentElement.setAttribute('data-view', v);
@@ -861,43 +1184,44 @@ function view(v) {
     var n = $('#al' + x.charAt(0).toUpperCase() + x.slice(1));
     if (n) n.classList.toggle('is-on', x === v);
   });
-  $('#alFoot').hidden = (v === 'open' || v === 'figure');
-  $('#alFigureX').hidden = (v !== 'figure');
+  $('#alFoot').hidden = (v === 'open' || v === 'source');
+  $('#alSourceX').hidden = (v !== 'source');
   document.querySelectorAll('.al-tab').forEach(function (b) {
     b.setAttribute('aria-current', b.getAttribute('data-v') === v ? 'true' : 'false');
   });
-  $('#alFigures').querySelector('.al-count').textContent = SRC.length;
+  $('#alFigures').querySelector('.al-count').textContent = SRC.filter(function (x) { return x.k === 'figure'; }).length;
+  $('#alBooks').querySelector('.al-count').textContent = SRC.filter(function (x) { return x.k === 'book'; }).length;
   for (var a in AXIS) {
     var sec = $('#al' + a.charAt(0).toUpperCase() + a.slice(1));
     sec.querySelector('.al-count').textContent =
       TH.filter(function (t) { return t.x === sec.id.slice(2).toLowerCase(); }).length;
   }
-  if (v === 'figures') paintFigures();
+  if (v === 'figures' || v === 'books') paintIndex(v);
   if (AXIS[v]) paintAxis(v);
-  if (v !== 'figure') { st.last = v; save(); }
+  if (v !== 'source') { st.last = v; save(); }
 }
 
-var figureBack = 'figures';
-function openFigure(id) {
+var sourceBack = 'figures';
+function openSource(id) {
   if (!srcOf(id)) return;
   var now = document.documentElement.getAttribute('data-view');
-  if (now !== 'figure' && now !== 'open') figureBack = now;
-  paintFigure(id);
-  view('figure');
+  if (now !== 'source' && now !== 'open') sourceBack = now;
+  paintSource(id);
+  view('source');
 }
 
 document.addEventListener('click', function (e) {
-  var t = e.target.closest ? e.target.closest('.al-tab, .al-pill, .al-f, #alOpenB, #alFigureX') : null;
+  var t = e.target.closest ? e.target.closest('.al-tab, .al-pill, .al-f, #alOpenB, #alSourceX') : null;
   if (!t) return;
-  if (t.id === 'alOpenB') return view(VIEWS.indexOf(st.last) > 0 && st.last !== 'figure' ? st.last : 'figures');
-  if (t.id === 'alFigureX') return view(figureBack);
+  if (t.id === 'alOpenB') return view(VIEWS.indexOf(st.last) > 0 && st.last !== 'source' ? st.last : 'figures');
+  if (t.id === 'alSourceX') return view(sourceBack);
   var id = t.getAttribute && t.getAttribute('data-src');
-  if (id) return openFigure(id);
+  if (id) return openSource(id);
   if (t.classList.contains('al-tab')) return view(t.getAttribute('data-v'));
 });
 
 view('open');
-window.alDrive = { view: view, openFigure: openFigure };
+window.alDrive = { view: view, openSource: openSource };
 
 }());
 </script>
