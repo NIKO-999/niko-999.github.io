@@ -147,7 +147,21 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
                    mask-image: linear-gradient(180deg, #000 calc(100% - 86px), transparent 100%); }
 .al-pane.is-end { -webkit-mask-image: none; mask-image: none; }
 
+/* THE HEADING CARRIES THE AXIS, AT FULL STRENGTH. It was flat --dim
+   on every list — the source name on an axis list, the axis name on a
+   source page — which is the one register on the screen that was
+   saying nothing. The hue it takes is the one that already means that
+   axis, so on Mindset every heading is violet and on a figure's own
+   page the four sections are four colours.
+
+   FULL STRENGTH, WHICH IS MEASURED RATHER THAN CHOSEN. The lesson
+   label had been mixed 66% toward the ink and read washed. At 100% on
+   this ground the worst of the four is 6.36:1 against the card and
+   6.29 against the page, so nothing had to be diluted to clear the
+   4.5 bar — and this repo has shipped 4.7 five times believing that
+   was a margin. */
 .al-grp { padding: var(--v5) 2px var(--v2); }
+.al-grp[data-x] { color: var(--tg); }
 
 .al-lead { padding: var(--v4) 0; }
 /* The title runs at line-height 1.00, so its last line box ends level
@@ -188,11 +202,17 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .al-tl { margin: var(--v4) 0 var(--v1); }
 .al-tb { font-size: 15px; line-height: 1.5; color: var(--dim); }
 .al-tb.is-les { color: var(--ink); }
-.al-tl.is-les { color: color-mix(in srgb, var(--tg) 66%, var(--ink)); }
-.al-th[data-x="mindset"]  { --tg: #9C8AC9; }
-.al-th[data-x="internal"] { --tg: #C9A227; }
-.al-th[data-x="external"] { --tg: #7E9AA6; }
-.al-th[data-x="karmic"]   { --tg: #D2603A; }
+.al-tl.is-les { color: var(--tg); }
+
+/* Four hues, set on whatever carries the axis — a card or a heading.
+   They were a washed violet, gold, blue-grey and rust; the blue-grey
+   in particular was barely a colour at all. Worst pair now measures
+   dE 49.6 in Lab against the 12 this repo holds two colours on one
+   screen to. */
+.al-th[data-x="mindset"],  .al-grp[data-x="mindset"]  { --tg: #9B7BFF; }
+.al-th[data-x="internal"], .al-grp[data-x="internal"] { --tg: #F0B429; }
+.al-th[data-x="external"], .al-grp[data-x="external"] { --tg: #3FC3D6; }
+.al-th[data-x="karmic"],   .al-grp[data-x="karmic"]   { --tg: #FF6B3D; }
 
 /* A FIGURE IN THE INDEX IS A PRESS TARGET AND THE REST ARE NOT. The same
    card, with no second drawing — only the row that opens something
@@ -1152,7 +1172,9 @@ function paintAxis(ax) {
   SRC.forEach(function (x) {
     var rows = themesOf(x.i, ax);
     if (!rows.length) return;
-    p.appendChild(el('div', 'al-grp al-caps', x.n));
+    var h = el('div', 'al-grp al-caps', x.n);
+    h.setAttribute('data-x', ax);
+    p.appendChild(h);
     rows.forEach(function (t) { p.appendChild(card(t)); });
   });
   mask(p);
@@ -1169,7 +1191,9 @@ function paintSource(id) {
   for (var a in AXIS) {
     var rows = themesOf(id, a);
     if (!rows.length) continue;
-    sh.appendChild(el('div', 'al-grp al-caps', AXIS[a]));
+    var h = el('div', 'al-grp al-caps', AXIS[a]);
+    h.setAttribute('data-x', a);
+    sh.appendChild(h);
     rows.forEach(function (t) { sh.appendChild(card(t)); });
   }
   p.appendChild(sh);
