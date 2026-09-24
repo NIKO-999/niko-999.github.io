@@ -142,6 +142,37 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   }, srcs);
   ok('every source carries four sections of at least three', bad.length === 0, bad);
 
+  /* THE DESCRIPTION IS A COUNT OF THE DATA, so it is read off the data.
+     It shipped saying 288 themes and sixteen figures on a build carrying
+     305 and seventeen -- a caption that outlived the thing it described,
+     which this repo has now recorded three times, and the only one of
+     the three that is served to somebody who has not opened the app.
+     Asserted as the three figures MATCHING rather than as the string,
+     because the sentence is allowed to be rewritten and the numbers in
+     it are not allowed to be wrong. The totals come off the panes and
+     off the cards actually drawn -- a document-wide query counts both
+     index panes at once, which read 48 sources for 24 once already. */
+  const said = await page.evaluate((ids) => {
+    const m = document.querySelector('meta[name="description"]');
+    const n = (m ? m.getAttribute('content') : '').match(/\d+/g) || [];
+    window.alDrive.view('figures'); window.alDrive.view('books');
+    let themes = 0;
+    ids.forEach(id => {
+      window.alDrive.openSource(id);
+      themes += document.querySelectorAll('#alSourcePane .al-th').length;
+    });
+    return {
+      said: n.map(Number),
+      real: [
+        themes,
+        document.querySelectorAll('#alFiguresPane .al-f[data-src]').length,
+        document.querySelectorAll('#alBooksPane .al-f[data-src]').length
+      ]
+    };
+  }, srcs);
+  ok('the description counts what is actually there',
+     said.said.length === 3 && said.said.join() === said.real.join(), said);
+
   /* AND EXACTLY ONE OF THEM IS DEEPER, asserted as a count rather than by
      name: "some source has more than twelve" passes on a build where the
      flag leaked onto all of them, and naming the id makes it a check on
