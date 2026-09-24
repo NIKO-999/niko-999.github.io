@@ -187,11 +187,16 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 
 /* A THEME IS A CARD AND THE LESSON IS THE PAYLOAD. The theme is the
-   evidence, so it reads at the quieter weight; the lesson is what you
-   came for and takes the ink. The axis hue sits on the lesson's own
-   label and nowhere else — the group heading already names it, and a
-   colour repeating a word directly above it is saying which of
-   something that was never in question. */
+   evidence, so its paragraph reads at the quieter weight; the lesson
+   is what you came for and takes the ink. That is the whole of what
+   separates the two halves.
+
+   BOTH LABELS TAKE THE AXIS HUE. Key theme was flat --dim and the
+   lesson's label carried the colour, which made one half of every
+   card look like chrome and the other like content. They are the two
+   section marks on one object and they belong to the same axis, so
+   they are the same colour — and the card then reads as one coloured
+   thing rather than as a grey card with a coloured line in it. */
 .al-th {
   position: relative; display: block; width: 100%; text-align: left;
   border-radius: var(--r-card); padding: var(--v4); margin-bottom: var(--v3);
@@ -199,10 +204,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 }
 .al-tn { font-size: 19px; font-weight: 600; line-height: 1.26; letter-spacing: -.016em; }
 .al-tsub { margin-top: 3px; font-size: 13px; font-weight: 450; color: var(--dim); }
-.al-tl { margin: var(--v4) 0 var(--v1); }
+.al-tl { margin: var(--v4) 0 var(--v1); color: var(--tg); }
 .al-tb { font-size: 15px; line-height: 1.5; color: var(--dim); }
 .al-tb.is-les { color: var(--ink); }
-.al-tl.is-les { color: var(--tg); }
 
 /* Four hues, set on whatever carries the axis — a card or a heading.
    They were a washed violet, gold, blue-grey and rust; the blue-grey
