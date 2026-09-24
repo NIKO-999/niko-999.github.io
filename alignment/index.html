@@ -208,6 +208,43 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .al-tb { font-size: 15px; line-height: 1.5; color: var(--dim); }
 .al-tb.is-les { color: var(--ink); }
 
+/* TWO MARKS, BECAUSE THEY ARE TWO CLAIMS. A highlight is liberal: the
+   lines that landed, and over 288 of them there will be a lot. A pin is
+   scarce — the handful you are actually working from this month. One
+   mark doing both is a list you stop opening, because the thing you are
+   on is buried under everything that ever struck you. They are
+   independent, so a card can be both and then appears under both stops,
+   which is two true statements rather than one card drawn twice. */
+.al-acts { display: flex; gap: var(--v2); margin-top: var(--v4); }
+.al-mk {
+  position: relative; height: 34px; padding: 0 13px; border-radius: var(--r-pill);
+  font-size: 13px; font-weight: 500; color: var(--dim);
+  background: rgba(255,255,255,.09);
+}
+/* 34 DRAWN, 44 REACHABLE, and the inset is VERTICAL ONLY. Reaching
+   sideways would put one chip's band inside the other's, and a press
+   aimed at Pin landing on Highlight is a control doing the wrong thing
+   rather than nothing. Both chips are wider than 44 on their own. */
+.al-mk::before { content: ''; position: absolute; inset: -5px 0; }
+.al-mk[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+
+/* TWO STOPS, SO THE TWO LISTS ARE NEVER ON SCREEN TOGETHER AND THE
+   CONTROL IS THE HEADING. A label naming a section beside the thing
+   that takes you to that section is the same word twice. */
+.al-stops { flex: none; display: flex; gap: var(--v1); margin: 0 var(--gut-list) var(--v3); }
+.al-stop {
+  position: relative; flex: 1; height: 34px; border-radius: var(--r-pill);
+  font-size: 13px; font-weight: 500; color: var(--dim);
+  background: rgba(255,255,255,.06);
+}
+.al-stop::before { content: ''; position: absolute; inset: -5px 0; }
+.al-stop[aria-current="true"] { background: rgba(255,255,255,.14); color: var(--ink); }
+
+/* --dim, not --spent. The lighter token measures a rounding error above
+   4.5:1 on this page rather than a margin, which is a mistake this repo
+   has now shipped three times in another app under exactly that name. */
+.al-empty { padding: var(--v3) 2px; font-size: 15px; line-height: 1.5; color: var(--dim); }
+
 /* Four hues, set on whatever carries the axis — a card or a heading.
    They were a washed violet, gold, blue-grey and rust; the blue-grey
    in particular was barely a colour at all. Worst pair now measures
@@ -233,9 +270,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
      third time. Three tabs sat at 93px either side; four needed 60,
      where a tab owns 64; five needed 40, where it owns 59. Six at 40
      would be 49 each, over the 44 floor by five pixels — at 20 the row
-     is 350 and a tab owns 57. The bar is nearly the width of the
-     screen now, which is the cost of the sixth stop and is named here
-     rather than discovered. */
+     is 350 and a tab owns 57. Seven owns 48, over the floor by four,
+     which is the cost of Kept and is measured rather than argued. The
+     bar cannot widen again without leaving the screen, so an eighth tab
+     is the one that takes a stop under the floor. Named here rather
+     than discovered. */
   position: fixed; left: 20px; right: 20px; z-index: 30;
   bottom: calc(var(--v4) + env(safe-area-inset-bottom, 0px));
   height: 58px; border-radius: var(--r-pill);
@@ -309,6 +348,15 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   <div class="al-pane" id="alKarmicPane"></div>
 </section>
 
+<section class="al-view" id="alKept">
+  <div class="al-head"><h1 class="al-disp-s">Kept</h1><span class="al-count"></span></div>
+  <div class="al-stops" id="alKeptStops">
+    <button class="al-stop" data-st="pin" aria-current="true">Pinned</button>
+    <button class="al-stop" data-st="hi">Highlighted</button>
+  </div>
+  <div class="al-pane" id="alKeptPane"></div>
+</section>
+
 <section class="al-view" id="alSource">
   <button class="al-round al-x" id="alSourceX" aria-label="Close">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
@@ -334,6 +382,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   </button>
   <button class="al-tab" data-v="karmic" aria-label="Karmic">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19.6 9.4A8.2 8.2 0 0 0 5.2 7.6M4.4 14.6a8.2 8.2 0 0 0 14.4 1.8"/><path d="M19.9 4.6v4.9h-4.9M4.1 19.4v-4.9h4.9"/></svg>
+  </button>
+  <button class="al-tab" data-v="kept" aria-label="Kept">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.8 3.4h10.4a1.4 1.4 0 0 1 1.4 1.4v15.8L12 16.1l-6.6 4.5V4.8a1.4 1.4 0 0 1 1.4-1.4Z"/></svg>
   </button>
 </nav>
 
@@ -1319,11 +1370,86 @@ var el = function (t, c, x) { var n = document.createElement(t); if (c) n.classN
 /* st.last is a view, and the build before this one stored 'dark' or
    'lessons' — names VIEWS no longer has. It falls through to the first
    list, the way any stored key in this repo has to. */
-var st = { last: null };
+/* A MARK HAS TO OUTLIVE AN EDIT TO THE THING IT MARKS. Keyed by the
+   theme's NAME, renaming a line silently throws every pin on it away —
+   an identifier nothing type-checks, failing green, which is this repo's
+   oldest trap. The key is the source, the axis and which of the three it
+   is, all asserted elsewhere at boot, so it survives every edit except
+   reordering inside a bucket.
+
+   IT HAS TO RUN BEFORE st IS READ. themesOf and srcOf are function
+   declarations and hoist; the data does not. */
+SRC.forEach(function (x) {
+  for (var a in AXIS) themesOf(x.i, a).forEach(function (t, i) { t.k = x.i + ':' + a + ':' + i; });
+});
+(function () {
+  var keys = {};
+  TH.forEach(function (t) {
+    if (!t.k) throw new Error('no key for ' + t.n);
+    if (keys[t.k]) throw new Error('two themes keyed ' + t.k);
+    keys[t.k] = true;
+  });
+}());
+
+var STOPS = ['pin', 'hi'];
+function thOf(k) { return TH.filter(function (t) { return t.k === k; })[0]; }
+
+/* A MARK POINTING AT NOTHING IS DROPPED AND THE REST OF THE LIST IS NOT.
+   The marks are the one thing in here you cannot get back, so a damaged
+   entry costs itself and never the record. Written BACK rather than
+   repaired in memory: a repair that only runs at boot is redone every
+   boot and lost the moment anything else writes the key, which the
+   schedule app in this repo shipped four separate times. */
+function keepKeys(a) {
+  if (!a || !a.length) return [];
+  return a.filter(function (k) { return typeof k === 'string' && thOf(k); });
+}
+
+/* THE KEYS HAVE TO EXIST BEFORE THIS LINE, and the guard is on this line
+   rather than further down for the reason the bug had. Minted below it,
+   st reads the record first, every stored key resolves to nothing, and
+   the repair that exists to protect the marks deletes all of them and
+   writes the deletion back. Nothing throws and the session is correct
+   throughout — pressing a chip works, the lists draw — and the marks are
+   gone on the next open. A guard in the boot pass would not have caught
+   it: by then the keys are there either way. */
+if (!TH[0].k) throw new Error('marks read before the keys were minted');
+
+var st = { last: null, stop: 'pin', pin: [], hi: [] };
+var stale = false;
 try { var raw = localStorage.getItem(KEY); if (raw) { var o = JSON.parse(raw); if (o && typeof o === 'object') {
   st.last = typeof o.last === 'string' ? o.last : null;
+  /* A stored stop outlives the code that wrote it, so a value this build
+     no longer has means the first list rather than a bar with nothing
+     above it — the same rule the stored view already keeps. */
+  st.stop = STOPS.indexOf(o.stop) >= 0 ? o.stop : 'pin';
+  STOPS.forEach(function (m) {
+    st[m] = keepKeys(o[m]);
+    if (o[m] && o[m].length !== st[m].length) stale = true;
+  });
 } } } catch (e) {}
 var save = function () { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+if (stale) save();
+
+function marked(m, k) { return st[m].indexOf(k) >= 0; }
+
+function mark(m, k) {
+  var i = st[m].indexOf(k);
+  if (i < 0) st[m].push(k); else st[m].splice(i, 1);
+  save();
+  /* Every copy of the control rather than the one that was pressed, and
+     this is DEFENCE rather than a bug being fixed: every pane repaints
+     on navigation today, so no second copy is currently reachable while
+     stale. The source pane is the one that is only ever repainted by
+     openSource, so it is one view() away from being the exception — and
+     a chip saying the opposite of the record is the worst thing this
+     screen could do. Said plainly because the check next door cannot
+     tell the two apart: it passes on the single-chip version too. */
+  var on = marked(m, k) ? 'true' : 'false';
+  [].forEach.call(document.querySelectorAll('[data-mk="' + m + '"][data-k="' + k + '"]'),
+    function (b) { b.setAttribute('aria-pressed', on); });
+  if (document.documentElement.getAttribute('data-view') === 'kept') paintKept();
+}
 
 
 
@@ -1394,7 +1520,26 @@ function card(t) {
   d.appendChild(el('p', 'al-tb', t.t));
   d.appendChild(el('div', 'al-caps al-tl is-les', 'The spiritual lesson'));
   d.appendChild(el('p', 'al-tb is-les', t.l));
+  /* AT THE FOOT, WHICH IS WHERE YOU ARE WHEN YOU HAVE READ IT. In the
+     corner it would need the title to carry a max-width against it, and
+     two controls in the corner of every one of 288 cards is louder than
+     the thing they are about. You decide after reading, not before. */
+  var a = el('div', 'al-acts');
+  a.appendChild(mkBtn('pin', 'Pin', t.k));
+  a.appendChild(mkBtn('hi', 'Highlight', t.k));
+  d.appendChild(a);
   return d;
+}
+
+/* The state is the GROUND, never a second word: a chip reading "Pinned"
+   where it read "Pin" reflows the row under your finger on the very
+   press that moved it, and aria-pressed already carries it in full. */
+function mkBtn(m, label, k) {
+  var b = el('button', 'al-mk', label);
+  b.setAttribute('data-mk', m);
+  b.setAttribute('data-k', k);
+  b.setAttribute('aria-pressed', marked(m, k) ? 'true' : 'false');
+  return b;
 }
 
 /* ONE INDEX PAINTER, TWO LISTS. Figures and Books are the same screen
@@ -1459,7 +1604,37 @@ function paintSource(id) {
   p.scrollTop = 0; mask(p);
 }
 
-var VIEWS = ['open', 'figures', 'books', 'mindset', 'internal', 'external', 'karmic', 'source'];
+/* ONE PAINTER FOR BOTH STOPS, grouped by source in the app's own order,
+   because a lesson stranded from the thing that is evidence for it is
+   what every other list here is arranged to avoid. The heading takes no
+   hue: a pane that mixes four axes has no axis for a colour to be about,
+   which is the figures index's own rule seen from the other side. */
+function paintKept() {
+  var p = $('#alKeptPane'); p.textContent = '';
+  var list = st[st.stop].map(thOf).filter(Boolean);
+  $('#alKept').querySelector('.al-count').textContent = list.length;
+  [].forEach.call(document.querySelectorAll('#alKeptStops .al-stop'), function (b) {
+    b.setAttribute('aria-current', b.getAttribute('data-st') === st.stop ? 'true' : 'false');
+  });
+  if (!list.length) {
+    /* An empty stop says what the stop is FOR. It is not a caption under
+       a control — the control is on every card, one tab away — it is the
+       screen saying which of the two lists you are looking at none of. */
+    p.appendChild(el('p', 'al-empty', st.stop === 'pin'
+      ? 'Nothing pinned. A pin is the short list you are working from now, so keep it short.'
+      : 'Nothing highlighted. A highlight is a line that landed, and there is no limit on those.'));
+    mask(p); return;
+  }
+  SRC.forEach(function (x) {
+    var rows = list.filter(function (t) { return t.s === x.i; });
+    if (!rows.length) return;
+    p.appendChild(el('div', 'al-grp al-caps', x.n));
+    rows.forEach(function (t) { p.appendChild(card(t)); });
+  });
+  mask(p);
+}
+
+var VIEWS = ['open', 'figures', 'books', 'mindset', 'internal', 'external', 'karmic', 'kept', 'source'];
 function view(v) {
   if (VIEWS.indexOf(v) < 0) v = 'figures';
   document.documentElement.setAttribute('data-view', v);
@@ -1481,6 +1656,7 @@ function view(v) {
   }
   if (v === 'figures' || v === 'books') paintIndex(v);
   if (AXIS[v]) paintAxis(v);
+  if (v === 'kept') paintKept();
   if (v !== 'source') { st.last = v; save(); }
 }
 
@@ -1494,8 +1670,13 @@ function openSource(id) {
 }
 
 document.addEventListener('click', function (e) {
-  var t = e.target.closest ? e.target.closest('.al-tab, .al-pill, .al-f, #alOpenB, #alSourceX') : null;
+  var t = e.target.closest
+    ? e.target.closest('.al-tab, .al-pill, .al-f, .al-stop, .al-mk, #alOpenB, #alSourceX') : null;
   if (!t) return;
+  var m = t.getAttribute && t.getAttribute('data-mk');
+  if (m) return mark(m, t.getAttribute('data-k'));
+  var stop = t.getAttribute && t.getAttribute('data-st');
+  if (stop) { st.stop = stop; save(); return paintKept(); }
   if (t.id === 'alOpenB') return view(VIEWS.indexOf(st.last) > 0 && st.last !== 'source' ? st.last : 'figures');
   if (t.id === 'alSourceX') return view(sourceBack);
   var id = t.getAttribute && t.getAttribute('data-src');
@@ -1504,7 +1685,12 @@ document.addEventListener('click', function (e) {
 });
 
 view('open');
-window.alDrive = { view: view, openSource: openSource };
+/* views() rather than a list the probes keep their own copy of: two of
+   them drove view('light') and view('lessons') for months — names
+   renamed out from under them, which view() falls through to 'figures'
+   on — so one screen was measured three times and reported a pass. */
+window.alDrive = { view: view, openSource: openSource, mark: mark, st: st, thOf: thOf,
+                   views: function () { return VIEWS.slice(); } };
 
 }());
 </script>
