@@ -189,6 +189,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .al-tb { font-size: 15px; line-height: 1.5; color: var(--dim); }
 .al-tb.is-les { color: var(--ink); }
 .al-tl.is-les { color: color-mix(in srgb, var(--tg) 66%, var(--ink)); }
+.al-th[data-x="mindset"]  { --tg: #9C8AC9; }
 .al-th[data-x="internal"] { --tg: #C9A227; }
 .al-th[data-x="external"] { --tg: #7E9AA6; }
 .al-th[data-x="karmic"]   { --tg: #D2603A; }
@@ -204,11 +205,12 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 /* ---- THE FOOT ---- */
 .al-foot {
-  /* FOUR TABS, SO THE BAR WIDENS RATHER THAN THE TABS NARROWING. At
-     93px either side the row is 204 wide, which is 49 a tab once the
-     padding is out — under the 44 a press target owns only because the
-     glyph is 20. Measured: at 60 the row is 270 and a tab owns 64. */
-  position: fixed; left: 60px; right: 60px; z-index: 30;
+  /* THE BAR WIDENS RATHER THAN THE TABS NARROWING, and this is the
+     second time. Three tabs sat at 93px either side; four needed 60,
+     where the row is 270 and a tab owns 64. Five at 60 would be 51
+     each, which clears the 44 floor only because the glyph is 20 — at
+     40 the row is 310 and a tab owns 59. */
+  position: fixed; left: 40px; right: 40px; z-index: 30;
   bottom: calc(var(--v4) + env(safe-area-inset-bottom, 0px));
   height: 58px; border-radius: var(--r-pill);
   background: rgba(24,21,17,.62);
@@ -247,13 +249,18 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v20M5 8l7-6 7 6M5 16l7 6 7-6"/></svg>
   </div>
   <h1 class="al-disp" id="alOpenT">Ten people, read for what they actually did.</h1>
-  <p class="al-note" id="alOpenN">Ninety themes taken from ten real careers, split into what happens inside you and what happens out there. What the story does, and what it leaves you with.</p>
+  <p class="al-note" id="alOpenN">A hundred and twenty themes taken from ten real careers, split four ways: the model they ran on, what they were actually like, what the world did, and what came back. What the story does, and what it leaves you with.</p>
   <button class="al-pill" id="alOpenB">Begin</button>
 </section>
 
 <section class="al-view" id="alFigures">
   <div class="al-head"><h1 class="al-disp-s">The Figures</h1><span class="al-count"></span></div>
   <div class="al-pane" id="alFiguresPane"></div>
+</section>
+
+<section class="al-view" id="alMindset">
+  <div class="al-head"><h1 class="al-disp-s">Mindset</h1><span class="al-count"></span></div>
+  <div class="al-pane" id="alMindsetPane"></div>
 </section>
 
 <section class="al-view" id="alInternal">
@@ -281,6 +288,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 <nav class="al-foot" id="alFoot">
   <button class="al-tab" data-v="figures" aria-current="true" aria-label="The Figures">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="7" width="13" height="13" rx="2.4"/><path d="M8 4h11a2 2 0 0 1 2 2v11"/></svg>
+  </button>
+  <button class="al-tab" data-v="mindset" aria-label="Mindset">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15.2 20.5v-2.9a5 5 0 0 1 1.5-3.4 7 7 0 1 0-11.2-1.8"/><path d="M12.6 4.4 14 9.3l-2.4 1.1 1.3 2.5"/></svg>
   </button>
   <button class="al-tab" data-v="internal" aria-label="Internal">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="3.1" fill="currentColor" stroke="none"/></svg>
@@ -331,16 +341,28 @@ var KEY = 'align.v1';
    kind would be one to cut rather than one to pad. Asserted at boot
    in both directions. */
 
-/* THREE AXES, AND KARMIC IS NOT A TIDIER NAME FOR EXTERNAL. Internal
-   is the mechanism running inside you. External is the world not
-   caring what you think about it. Karmic is the account BETWEEN the
-   two over time — what you put out arriving back, on a delay long
-   enough that it does not feel connected to what opened it. Five
-   entries that were filed external turned out to be that: the
-   retaliation cycle, Rico, the product coming home, the suit falling
-   on Brock, the North remembering. They moved rather than being
-   copied, and external was written back up to three. */
-var AXIS = { internal: 'Internal', external: 'External', karmic: 'Karmic' };
+/* FOUR AXES, AND EACH ONE IS A DIFFERENT QUESTION. MINDSET is the
+   model they run on — what they believe about how the world works,
+   which is portable and is the only one of the four you can adopt
+   outright. INTERNAL is what they are actually like: the state, the
+   appetite, the need, the thing they do to themselves. EXTERNAL is how
+   the world actually works, whatever anybody believes about it.
+   KARMIC is the account between the two over time, arriving back on a
+   delay long enough that it does not feel connected to what opened it.
+   Five entries filed external turned out to be that last one and were
+   moved: the retaliation cycle, Rico, the product coming home, the
+   suit falling on Brock, the North remembering.
+
+   MINDSET AND INTERNAL ARE THE PAIR THAT CAN COLLAPSE, so the test is
+   whether an entry is a belief you could pick up and use (mindset) or
+   a fact about that person (internal). Every mindset entry is anchored
+   to documented behaviour rather than to a quotable line, because a
+   quote is what somebody said and behaviour is what they believed.
+
+   Mindset comes first because it is the frame the other three are read
+   through. Nothing in the list duplicates anything in another axis,
+   and that is asserted by name at boot rather than trusted. */
+var AXIS = { mindset: 'Mindset', internal: 'Internal', external: 'External', karmic: 'Karmic' };
 
 var SRC = [
   { i: "fifty", n: "50 Cent", p: "Queens, New York" },
@@ -626,6 +648,96 @@ var TH = [
   { s: "suge", x: "karmic", n: "He Is Still Inside", b: "Nothing Self-Corrects",
     t: "He is serving twenty-eight years for a killing in 2015. Decades after the label, the way of handling a situation had not changed at all.",
     l: "Nothing self-corrects with time. A way of handling things you have never deliberately changed will still be there in twenty years, at the same setting, waiting for one more situation to apply itself to." },
+  { s: "fifty", x: "mindset", n: "Attention Is the Inventory", b: "What You Are Actually Selling",
+    t: "The feuds, the trolling, the villain role in every story he is in: he manufactures public attention deliberately and then points it at whatever he is selling that quarter.",
+    l: "Whatever your trade, you are also in the business of being looked at, and most people leave that part entirely to chance. Attention can be manufactured, and it is the only asset that makes every other one you own worth more." },
+  { s: "fifty", x: "mindset", n: "He Assumes He Is Recorded", b: "Operating in Public",
+    t: "Everything he does is built on the assumption that it will be seen, quoted and replayed. There is no private version of the persona and there has not been one for twenty years.",
+    l: "Assume everything you do is on the record, because increasingly it is. That is a design constraint rather than paranoia, and once you accept it you stop needing two versions of yourself, which is where most of the energy was going." },
+  { s: "fifty", x: "mindset", n: "Losing Is Data", b: "Nothing Is a Verdict",
+    t: "Dropped by a label, shot, bankrupted, outsold by Kanye in a bet he made publicly. Each one is treated as an event with a next move rather than as a statement about what he is.",
+    l: "An outcome is information about a decision, never a description of you. People who cannot separate those two spend their thirties defending their twenties." },
+  { s: "hov", x: "mindset", n: "Think in Decades", b: "The Unit Is Not the Year",
+    t: "Roc-A-Fella, Def Jam, Roc Nation, Tidal, the champagne, the art. Each move only makes sense as part of a position built across thirty years rather than as a deal that year.",
+    l: "Most people optimise a year at a time and then wonder why nothing compounds. Pick a unit longer than you are comfortable with and judge each decision by where it leaves you at the end of that, rather than at the end of this one." },
+  { s: "hov", x: "mindset", n: "The Gap Is Information", b: "Not Knowing Is Not Not Able",
+    t: "He has said repeatedly that the wealth gap is a knowledge gap — that what separated him from people with money was not ability but what they had been told and he had not.",
+    l: "Most of what is stopping you is something somebody could explain in an afternoon. Go and find out what the people already doing it know. They are not smarter, they simply arrived at the information earlier." },
+  { s: "hov", x: "mindset", n: "The Product Has to Survive the Marketing", b: "Credibility Is the Asset",
+    t: "Thirty years of output that still has to be defensible, because the deals, the brands and the trust are all priced off whether the core thing is any good.",
+    l: "Every bit of leverage you build sits on top of one thing actually being good. The moment you let that slide in order to feed the rest, the rest starts repricing, and it reprices far faster than it was built." },
+  { s: "nip", x: "mindset", n: "Buy Back the Block", b: "Money Is for Converting",
+    t: "Every dollar went into property, the store, the plaza, the co-working space. Income was raw material for ownership rather than a result to enjoy.",
+    l: "Income that is never converted into something that produces is just a faster treadmill. Decide the percentage that becomes an asset before you have an opinion about what else it could be." },
+  { s: "nip", x: "mindset", n: "Stay Dangerous", b: "Do Not Soften as It Improves",
+    t: "One of his phrases, and it is about not going soft as the circumstances change — keeping the edge that got him there once the conditions that produced it are gone.",
+    l: "Success quietly removes the conditions that produced it, on a schedule. Whatever you were doing when you had nothing is the thing to keep doing, and you will be handed a hundred good reasons to stop." },
+  { s: "nip", x: "mindset", n: "Information Is the Advantage", b: "Learn What Nobody in the Room Knows",
+    t: "He read about business, economics and technology constantly, in a scene where almost nobody was. Vector90 exists because he thought access to that was the actual bottleneck.",
+    l: "In every room you are in there is a body of knowledge nobody there has. Go and get it. It is almost always public, almost always boring, and it is the cheapest edge available to anybody." },
+  { s: "meech", x: "mindset", n: "The Life Is the Advertising", b: "Selling the Feeling",
+    t: "BMF sold an idea of a life — the cars, the parties, the entourage — and everything else followed from people wanting to be near it. The product itself was rarely the point.",
+    l: "People buy the version of themselves your thing makes possible. That holds whether you are selling a service, a track or a strategy, and it is the part almost everybody leaves to chance while perfecting the thing itself." },
+  { s: "meech", x: "mindset", n: "Move Like a Company", b: "Structure Beats Improvisation",
+    t: "Territories, roles, logistics and a chain of command across dozens of cities. It ran on organisation rather than on nerve, which is exactly why it got as large as it did.",
+    l: "Anything that works twice should be written down and handed to somebody else. The ceiling on almost everything is not effort or talent, it is how much of it exists only inside one person's head." },
+  { s: "meech", x: "mindset", n: "He Believed He Was Untouchable", b: "A Long Run Feels Like Being Right",
+    t: "The visibility, the scale and the years without consequence produced a genuine conviction that it would keep working. Everybody around him has described the same thing.",
+    l: "A long run without consequences feels identical to being right. It is the most dangerous state available, because nothing about it looks like risk from inside and every month that passes makes it stronger." },
+  { s: "frick", x: "mindset", n: "Price Is a Weapon", b: "Compete Where Nobody Wants To",
+    t: "He undercut everybody deliberately and took the volume. It was a chosen strategy, held for years, rather than a circumstance he found himself in.",
+    l: "Most people compete on the dimension everybody else has already chosen. Find the one they are ignoring because it looks unglamorous, and take the whole of it." },
+  { s: "frick", x: "mindset", n: "Reinvest Everything", b: "Nothing Is for Showing",
+    t: "In the early years almost nothing went on display. It went back in, which is why the operation compounded past people who were earning the same and spending it.",
+    l: "Two people earning identically for five years end up in completely different places, and the only variable is what they did with it. The spending is invisible at the time and it is the whole of the difference." },
+  { s: "frick", x: "mindset", n: "Learn the Thing You Are Ashamed Of", b: "Pay That Price Once",
+    t: "He sat down in his thirties, in prison, and learned to read — a thing every adult around him could already do. He has said it was the hardest thing he ever did.",
+    l: "The gap you are most embarrassed about has the highest return and you are least likely to close it, because closing it means admitting it in front of somebody. Pay that price once and it is gone." },
+  { s: "lucas", x: "mindset", n: "Consistency Is the Brand", b: "Being the Same Every Time",
+    t: "Blue Magic worked because the quality and the price did not vary. In a market where everybody cut differently, being predictable was the entire proposition.",
+    l: "Being the same every time is undervalued because it is boring to execute and invisible when it works. It is also what people are actually paying for, in every field, and almost nobody delivers it." },
+  { s: "lucas", x: "mindset", n: "He Studied the Man Above Him", b: "Proximity Is the Wage",
+    t: "By his own account he drove for and worked alongside Bumpy Johnson for years — a claim some of Johnson's associates have disputed — and treated it as an apprenticeship rather than a job.",
+    l: "Put yourself next to somebody already doing it and treat the proximity as the pay. Most people take the job for the money and leave with nothing else, which is the most expensive way to spend those years." },
+  { s: "lucas", x: "mindset", n: "Difficulty Is the Moat", b: "The Margin Nobody Will Work For",
+    t: "Going to Southeast Asia himself was dangerous, slow and complicated, which is precisely why nobody else was doing it and why it held for as long as it did.",
+    l: "The advantage sits behind whatever is annoying enough that everybody routes around it. If the thing were easy the margin would already be gone, and the discomfort is the price of the position." },
+  { s: "mastp", x: "mindset", n: "Nobody Is Coming", b: "Start the Worse Version",
+    t: "No label, no distribution, no radio. He built the shop, the label, the distribution deal and the marketing himself before anybody in the industry knew his name.",
+    l: "Whatever you are waiting to be given, assume it is not coming and start the worse version now. The worse version done by you is worth more than the good version you are still waiting for." },
+  { s: "mastp", x: "mindset", n: "Independence Is a Number", b: "Know Your Split",
+    t: "He knew exactly what a major label deal paid an artist and exactly what a distribution deal paid, and chose on the arithmetic rather than on the prestige.",
+    l: "Every arrangement you are in has a number attached that you could go and find out today. Independence and ownership are not attitudes, they are percentages, and most people never once check theirs." },
+  { s: "mastp", x: "mindset", n: "Serve Who Nobody Is Serving", b: "Go Where the Attention Is Not",
+    t: "The South was not where the industry was looking. He built an audience in places the majors had no interest in, and owned it completely by the time they noticed.",
+    l: "Being the only serious person serving an overlooked group beats being the tenth good one in a crowded room, and that position is available right now, in whatever you do, to anybody willing to look unfashionable." },
+  { s: "gucci", x: "mindset", n: "The Body Is the Foundation", b: "Physical First",
+    t: "Sobriety and the gym came before any of the business decisions. He has been explicit that everything else was downstream of getting the body and the chemistry right.",
+    l: "You cannot think your way out of a state you are physically in. Sleep, food, training and what you put in are not adjacent to the work, they are the substrate, and every plan built on a wrecked one fails for reasons that look like discipline." },
+  { s: "gucci", x: "mindset", n: "Guard the Calendar", b: "Who Gets to Put Things In It",
+    t: "The years after prison are conspicuously structured, with far fewer people in them. Most of the chaos he removed was other people's access to his time.",
+    l: "Most of what wrecks a year is somebody else's emergency that you agreed to. The question is not how to be more productive. It is who is allowed to put anything in your calendar at all." },
+  { s: "gucci", x: "mindset", n: "You Can Restart at Any Point", b: "The Past Has No Vote",
+    t: "He came out at thirty-six with a decade of reputation against him and rebuilt all of it. Nothing about the previous version was treated as binding on the next one.",
+    l: "Your history has no vote on what you do next, and the only thing it actually costs is the time it takes people to believe you. That is a fixed cost, paid once, and far smaller than the story you are telling yourself about it." },
+  { s: "meek", x: "mindset", n: "Speak While It Is Happening", b: "An Account From Inside",
+    t: "He talked publicly about the probation, the judge, the conditions and the cost throughout, rather than waiting until it was over and safe to describe.",
+    l: "The account given while you are still inside it is the only one with weight. Afterwards it is a story, and a story can be argued with. Say it now, while it still costs you something to say." },
+  { s: "meek", x: "mindset", n: "Anger Has to Be Converted", b: "Fuel Is Not Direction",
+    t: "A decade of genuine unfairness produced an enormous amount of anger and he has been open about it. What changed anything was putting it into legislation rather than into the people responsible.",
+    l: "Anger is real fuel and it has no steering. It will move you at speed toward whatever is nearest, which is almost always a person. Point it at a structure instead and it becomes the most productive thing you own." },
+  { s: "meek", x: "mindset", n: "Dreams and Nightmares", b: "Both Are True at Once",
+    t: "The defining record of his career holds the ascent and the dread in one thing, and he has never separated the two in public since.",
+    l: "You do not have to choose between what is going well and what is frightening. People who insist on only the first are not convincing, and people who only say the second stop being listened to. Say both." },
+  { s: "suge", x: "mindset", n: "He Thought He Was the Company", b: "Confusing Yourself With the Asset",
+    t: "Death Row's value was the people inside it, and he behaved throughout as though the value was him. Every decision he took follows from that one belief.",
+    l: "Find out honestly what people are actually here for, because if the answer is not you then acting as though it is will empty the room. It is the cheapest thing in the world to check and almost nobody checks it." },
+  { s: "suge", x: "mindset", n: "Respect Was the Objective", b: "Playing for the Wrong Prize",
+    t: "A great deal of what he did makes no business sense at all and complete sense if the thing being chased was deference rather than money.",
+    l: "Work out what you are actually playing for, because it explains every decision of yours that looks irrational from outside. If the real prize is being respected, you will trade enormous amounts of the stated prize for it without ever noticing." },
+  { s: "suge", x: "mindset", n: "Fear Is Cheaper", b: "The Shortcut Around Being Worth Staying For",
+    t: "Building something people want to stay inside is slow and expensive. Making leaving frightening is immediate and free, and he took that option every time it was offered.",
+    l: "Every shortcut around the slow work of being worth choosing takes you further from ever having to do it. That compounds, and you find out the size of it on the one day the shortcut stops working." },
 ];
 
 var $ = function (s) { return document.querySelector(s); };
@@ -658,6 +770,13 @@ var save = function () { try { localStorage.setItem(KEY, JSON.stringify(st)); } 
   SRC.forEach(function (x) {
     for (var a in AXIS) if (themesOf(x.i, a).length !== 3)
       throw new Error(x.n + ' has ' + themesOf(x.i, a).length + ' ' + a);
+  });
+  /* Four axes over one life will collapse into each other unless
+     something refuses it, and the cheapest refusal is the name. */
+  var names = {};
+  TH.forEach(function (t) {
+    if (names[t.n]) throw new Error('two themes called ' + t.n);
+    names[t.n] = true;
   });
 }());
 
@@ -734,7 +853,7 @@ function paintFigure(id) {
   p.scrollTop = 0; mask(p);
 }
 
-var VIEWS = ['open', 'figures', 'internal', 'external', 'karmic', 'figure'];
+var VIEWS = ['open', 'figures', 'mindset', 'internal', 'external', 'karmic', 'figure'];
 function view(v) {
   if (VIEWS.indexOf(v) < 0) v = 'figures';
   document.documentElement.setAttribute('data-view', v);
