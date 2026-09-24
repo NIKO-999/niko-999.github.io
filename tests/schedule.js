@@ -17404,6 +17404,395 @@ const SAID = [
     }
   }
 
+
+  /* ══════════════════════════════════════════════════════════════
+     THE DAY YOU BEGAN
+
+     A start date you set, a reset that clears the record and stamps
+     day one again, and a glow on that square in the month so you can
+     find it at a glance.
+
+     What fails silently here: a stored date ahead of today draws a
+     mark on a square the grid calls quiet and counts a NEGATIVE day
+     number; a reset that reaches `state` takes the week with the
+     record and the screen still looks right afterwards; and the two
+     marks on one cell are the day you press Begin, where a cascade
+     order decides which surface wins and nothing throws either way.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    /* Frozen, because every figure here is a COUNT of days from a
+       date — the same reason the calendar's own context freezes, and
+       the fixture's clock and the page's have to be the one clock or
+       the day number is a fact about when the suite ran. */
+    const jSeed = (pg, start, extra) => pg.addInitScript(`(() => {
+      const FROZEN = new Date('2026-09-24T10:00:00').getTime();
+      const R = Date;
+      Date = class extends R {
+        constructor(...a) { super(...(a.length ? a : [FROZEN])); }
+        static now() { return FROZEN; }
+      };
+      localStorage.setItem('sched.tour.v1', '1');
+      localStorage.setItem('sched.hint2.v1', '1');
+      if (!localStorage.getItem('sched.v1')) {
+        const B = (id, d, s, e, n) => ({ id, d, s, e, r: '', n });
+        localStorage.setItem('sched.v1', JSON.stringify({
+          title: 'Daily Process', sub: '', items: [
+            B('wake4', 4, 360, 390, 'Wake'), B('tr4', 4, 390, 480, 'Train'),
+            B('ev4', 4, 1200, 1260, 'Wind down'),
+            B('wake1', 1, 360, 390, 'Wake'), B('tr1', 1, 390, 480, 'Train')
+          ] }));
+        localStorage.setItem('sched.log.v1', JSON.stringify({
+          '2026-09-10': { wake4: 1, tr4: 1 },
+          '2026-09-17': { wake4: 1, tr4: 1, ev4: 1 },
+          '2026-09-24': { wake4: 1 }
+        }));
+        /* TODAY CARRIES TICKS OF ITS OWN, and that is the fixture
+           doing work rather than decoration: the repaint half reads
+           Today's own caption either side of the reset, and a day
+           with nothing on it reads the same figure both times — a
+           check that cannot fail. */
+        localStorage.setItem('sched.tick.v1', JSON.stringify({
+          '2026-09-17': { t: 1, p: '8420' },
+          '2026-09-24': { t: 1, p: '9110' } }));
+        localStorage.setItem('sched.train.v1', JSON.stringify({
+          '2026-09-17': { tr4: { k: 'ppl.push', e: 'Hard', m: 60 } } }));
+        /* A LIST UNDER ITS OWN KEY, which is the shape this record
+           actually holds — a bare array is repaired on the way in and
+           written straight back, so a fixture that guesses the shape
+           measures the repair rather than the feature. (And no
+           backtick in here: this whole seed is a template literal,
+           so a comment quoting one closes it, which is the CSS
+           comment's own trap one language over.) */
+        localStorage.setItem('sched.note.v1', JSON.stringify({ list: [
+          { id: 'nj', k: 'note', a: 'blue', t: 'Kept through a reset',
+            l: [{ i: 'l0', h: 0, c: '', x: 'Still here', y: '', m: 0, w: [] }] }] }));
+      }
+      /* SEEDED ONLY WHEN ABSENT, and that is not tidiness: an init
+         script runs on EVERY navigation, so written unconditionally
+         it puts this key back between a test planting a value and the
+         reload that test is making — which is exactly what happened,
+         and the vacuity guard beside the damaged cases is the only
+         reason it was not read as a pass. */
+      ${start === null ? '' : `if (!localStorage.getItem('sched.start.v1')) {
+        localStorage.setItem('sched.start.v1', ${JSON.stringify(start)}); }`}
+      localStorage.setItem('sched.view.v1', 'cal');
+      ${extra || ''}
+    })()`);
+
+    /* One door, opened the one way, because a check that changes the
+       state of the app is a check that breaks the next one. */
+    const jMenu = async (pg) => {
+      await pg.evaluate(() => document.getElementById('scTabYou').click());
+      await pg.waitForTimeout(340);
+      return pg.evaluate(() => [...document.querySelectorAll('.sheet .menu-item')]
+        .map((b) => ({ label: b.firstChild ? String(b.firstChild.textContent).trim() : '',
+          note: b.querySelector('.sub-note') ? b.querySelector('.sub-note').textContent : '' })));
+    };
+    const jShut = async (pg) => { await pg.keyboard.press('Escape');
+      await pg.waitForTimeout(260); };
+    const jPress = async (pg, label) => {
+      const hit = await pg.evaluate((want) => {
+        const b = [...document.querySelectorAll('.sheet .menu-item')]
+          .find((x) => x.firstChild && String(x.firstChild.textContent).trim().indexOf(want) === 0);
+        if (!b) return false; b.click(); return true;
+      }, label);
+      if (!hit) throw new Error(`no Settings row starting "${label}"`);
+      await pg.waitForTimeout(320);
+    };
+
+    /* ── A STORED SHAPE HAS TO FALL THROUGH, AND A FUTURE DATE IS ONE ──
+       `sched.start.v1` outlives the code that wrote it. A junk string
+       is the ordinary case; a date AHEAD of today is the one nobody
+       writes on purpose and the one that breaks quietly — the grid
+       calls a future square quiet, so the mark lands on a cell drawn
+       as nothing, and `scStartNo` counts backwards into negatives
+       under a Settings row reading "Day -3".
+
+       All three states in one context because each is a reload of the
+       same page: three contexts would measure three browsers. */
+    {
+      const rctx = await browser.newContext({ ...PHONE });
+      const rpage = await rctx.newPage();
+      const rerrs = [];
+      rpage.on('pageerror', (e) => rerrs.push(String(e)));
+      rpage.on('console', (m) => { if (m.type() === 'error') rerrs.push(m.text()); });
+      await jSeed(rpage, 'not-a-date');
+      await rpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+      await rpage.waitForTimeout(420);
+      const junk = { cells: await rpage.evaluate(() =>
+        document.querySelectorAll('.cl-c.is-start').length),
+        rows: (await jMenu(rpage)).map((r) => r.label) };
+      await jShut(rpage);
+
+      /* IN THIS MONTH, and that is measured rather than tidy. A future
+         date in another month draws no cell whatever the repair does
+         — the grid is showing September — so `ahead.cells === 0` was
+         true of the broken build too. On the 28th the broken build
+         draws one. */
+      await rpage.evaluate(() => localStorage.setItem('sched.start.v1', '2026-09-28'));
+      await rpage.reload({ waitUntil: 'networkidle' });
+      await rpage.waitForTimeout(420);
+      const ahead = { cells: await rpage.evaluate(() =>
+        document.querySelectorAll('.cl-c.is-start').length),
+        rows: (await jMenu(rpage)).map((r) => r.label) };
+      await jShut(rpage);
+
+      await rpage.evaluate(() => localStorage.setItem('sched.start.v1', '2026-09-14'));
+      await rpage.reload({ waitUntil: 'networkidle' });
+      await rpage.waitForTimeout(420);
+      const good = { cells: await rpage.evaluate(() =>
+        document.querySelectorAll('.cl-c.is-start').length),
+        rows: (await jMenu(rpage)).map((r) => r.label) };
+      await jShut(rpage);
+
+      ok('a damaged start reads as unset, and so does one ahead of today',
+        junk.cells === 0 && ahead.cells === 0
+        && junk.rows.some((l) => l === 'Begin the journey')
+        && ahead.rows.some((l) => l === 'Begin the journey')
+        && !junk.rows.some((l) => /^Day /.test(l))
+        && !ahead.rows.some((l) => /^Day /.test(l)),
+        { junk, ahead });
+      /* The positive half, because "no mark" passes on a build that
+         never draws one at all. */
+      ok('...and a real one draws exactly one mark and counts from it',
+        good.cells === 1 && good.rows.some((l) => l === 'Day 11'), good);
+      ok('nothing threw reading a damaged start', rerrs.length === 0, rerrs);
+      await rctx.close();
+    }
+
+    /* ── DAY ONE IS THE DAY YOU PRESSED IT ──
+       Not the day after. Nobody counts the morning they started as
+       day nought, and an off-by-one is the figure the whole feature
+       is about. Asserted through the CONTROL rather than by reading
+       the key, because the key being right under a row that says
+       "Day 0" is the bug.
+
+       And the offer stops: a "begin" that is still on the screen
+       after you have begun is a task you can never finish. Both
+       states are read off one sheet re-opened, since "the row
+       changed" passes on a build that drew both. */
+    {
+      const bctx = await browser.newContext({ ...PHONE });
+      const bpage = await bctx.newPage();
+      const berrs = [];
+      bpage.on('pageerror', (e) => berrs.push(String(e)));
+      const bnet = [];
+      bpage.on('request', (r) => bnet.push(r.url()));
+      await jSeed(bpage, null);
+      await bpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+      await bpage.waitForTimeout(420);
+
+      const before = await jMenu(bpage);
+      await jPress(bpage, 'Begin the journey');
+      const after = await jMenu(bpage);
+      const stored = await bpage.evaluate(() => ({
+        key: localStorage.getItem('sched.start.v1'),
+        today: document.querySelector('.cl-c.is-now').dataset.day,
+        both: !!document.querySelector('.cl-c.is-now.is-start'),
+        marks: document.querySelectorAll('.cl-c.is-start').length }));
+      await jShut(bpage);
+
+      ok('pressing Begin makes today day one, and the offer stops',
+        before.some((r) => r.label === 'Begin the journey')
+        && after.some((r) => r.label === 'Day 1')
+        && !after.some((r) => r.label === 'Begin the journey')
+        && stored.key === stored.today,
+        { before: before.map((r) => r.label), after: after.map((r) => r.label), stored });
+
+      /* ── TWO MARKS ON ONE CELL, AND THE FILL WINS ──
+         The day you press Begin is the one day a square is both, and
+         which surface it takes is decided by source order alone —
+         the two selectors are the same specificity, so a rule moved
+         below the other silently turns today's date into white on
+         white. Read as the COMPUTED ground and the shadow together,
+         because each passes on the other's bug: today's fill with no
+         bloom is a build where the glow was overridden, and a bloom
+         with no fill is one where today's mark was. */
+      const two = await bpage.evaluate(() => {
+        const c = document.querySelector('.cl-c.is-now.is-start');
+        if (!c) return { none: true };
+        const i = c.querySelector('i');
+        const g = getComputedStyle(i);
+        const probe = document.createElement('span');
+        probe.style.color = 'var(--ink)';
+        document.body.appendChild(probe);
+        const ink = getComputedStyle(probe).color;
+        probe.style.color = 'var(--paper)';
+        const paper = getComputedStyle(probe).color;
+        probe.remove();
+        return { bg: g.backgroundColor, fg: g.color, ink, paper,
+          layers: (g.boxShadow.match(/(rgb|color)\(/g) || []).length,
+          aria: c.getAttribute('aria-label') };
+      });
+      ok('...and on that one square today keeps the fill while the glow stays',
+        two.bg === two.ink && two.fg === two.paper && two.layers === 2, two);
+      /* A glow is a graphic and a graphic says nothing at all to a
+         screen reader — the tally strip's own rule about a shape. */
+      ok('...and the square says out loud that it is the day you began',
+        /the day you began/.test(two.aria || ''), two.aria);
+
+      const boff = bnet.filter((u) => !u.startsWith(BASE));
+      ok('beginning the journey reaches nothing off origin', boff.length === 0, boff);
+      ok('nothing threw beginning it', berrs.length === 0, berrs);
+      await bctx.close();
+    }
+
+    /* ── AND THE GLOW IS DRAWN, MEASURED ON COMPOSITED PIXELS ──
+       Against the neighbour in its OWN ROW, so the row's own ground
+       is the ground — a sample taken a row above lands on another
+       cell, which is the mistake the Pattern axis and the almanac's
+       own check each made once. The dark face is the weak half by
+       arithmetic: a white bloom on a near-black ground moves a
+       region's mean about a third as much as a dark bloom on white,
+       so holding the phone's own face is holding the harder one.
+
+       BOTH HALVES. The delta alone passes on a build that drew
+       anything at all in that corner — a fill, a colour, a second
+       pill — so the mark is also held to being a SHADOW with a ring
+       and a bloom in it, which is the treatment rather than the
+       reaction. .009 is what this app measured as "a day you cannot
+       see you missed"; this is measured at about .076. */
+    {
+      const gctx = await browser.newContext({ ...PHONE });
+      const gpage = await gctx.newPage();
+      const gerrs = [];
+      gpage.on('pageerror', (e) => gerrs.push(String(e)));
+      await jSeed(gpage, '2026-09-14');
+      await gpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+      await gpage.waitForTimeout(460);
+      const boxes = await gpage.evaluate(() => {
+        const s = document.querySelector('.cl-c.is-start');
+        const n = s.nextElementSibling || s.previousElementSibling;
+        if (!s || !n) throw new Error('no start cell and neighbour to measure');
+        const R = (e) => { const r = e.getBoundingClientRect();
+          return { x: Math.round(r.right) - 40, y: Math.round(r.top) + 1 }; };
+        const i = getComputedStyle(s.querySelector('i'));
+        return { s: R(s), n: R(n), shadow: i.boxShadow,
+          plain: getComputedStyle(n.querySelector('i')).boxShadow };
+      });
+      const { PNG: JPNG } = require('pngjs');
+      const gshot = await gpage.screenshot({ clip: { x: 0, y: 0, width: 390, height: 844 } });
+      const gpng = JPNG.sync.read(gshot);
+      const gdpr = gpng.width / 390;
+      const meanL = (b) => { let sum = 0, n = 0;
+        for (let y = b.y; y < b.y + 24; y++) for (let x = b.x; x < b.x + 38; x++) {
+          const i = (Math.round(y * gdpr) * gpng.width + Math.round(x * gdpr)) * 4;
+          sum += lum([gpng.data[i], gpng.data[i + 1], gpng.data[i + 2]]); n++; }
+        return sum / n; };
+      const delta = Math.abs(meanL(boxes.s) - meanL(boxes.n));
+      /* A RING AND A BLOOM, not one or the other. The ring is what
+         stops the bloom reading as a pill: a non-inset shadow paints
+         outside the border box, so on the light face the hole in the
+         middle is the page showing through and reads as a white
+         mark this calendar does not have. Told apart by the ring
+         having no blur and the bloom having one. */
+      const parts = (boxes.shadow || '').split(/,(?![^(]*\))/).map((p) => p.trim());
+      const ring = parts.some((p) => /0px 0px 0px [\d.]+px/.test(p));
+      const bloom = parts.some((p) => /0px 0px (?!0px)[\d.]+px/.test(p));
+      ok('the day you began glows, and it is a ring with a bloom outside it',
+        delta > 0.03 && parts.length === 2 && ring && bloom
+        && boxes.plain === 'none',
+        { delta: +delta.toFixed(4), parts, ring, bloom, plain: boxes.plain });
+      ok('nothing threw drawing it', gerrs.length === 0, gerrs);
+      await gctx.close();
+    }
+
+    /* ── STARTING AGAIN CLEARS THE RECORD, NOT THE WEEK ──
+       The split is the one the app draws everywhere else: the RECORD
+       is what happened and the WEEK is the shape you built. Clearing
+       the shape too hands you day one with nothing to do on it, which
+       is the opposite of beginning.
+
+       BOTH HALVES, because each passes on the other's bug — a reset
+       that clears everything passes "the ticks are gone" and a reset
+       that clears nothing passes "the week is still there". And the
+       keys are read off the STORE rather than off the screen: this
+       app has four times shipped a repair held only in memory, and
+       every one of them was found by asking the record. */
+    {
+      const sctx = await browser.newContext({ ...PHONE });
+      const spage = await sctx.newPage();
+      const serrs = [];
+      spage.on('pageerror', (e) => serrs.push(String(e)));
+      await jSeed(spage, '2026-09-14');
+      await spage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+      await spage.waitForTimeout(420);
+      const rd = () => spage.evaluate(() => {
+        const g = (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null'); }
+          catch (e) { return 'BROKEN'; } };
+        const st = g('sched.v1');
+        return { log: Object.keys(g('sched.log.v1') || {}).length,
+          tick: Object.keys(g('sched.tick.v1') || {}).length,
+          train: Object.keys(g('sched.train.v1') || {}).length,
+          blocks: st ? st.items.length : -1,
+          title: st ? st.title : '',
+          notes: ((g('sched.note.v1') || {}).list || []).map((n) => n.t).join('|'),
+          start: localStorage.getItem('sched.start.v1') };
+      });
+      const was = await rd();
+
+      /* ── STANDING ON TODAY WHEN IT IS PRESSED ──
+         Settings opens from any tab, so this is a real place to press
+         it — and Today's tiles are drawn from the same `tickLog` the
+         reset empties. Read here rather than after, because switching
+         to the tab afterwards repaints it either way and would pass
+         on the build this catches: six tiles carrying figures for a
+         record that no longer exists. */
+      const tyWas = await spage.evaluate(async () => {
+        document.querySelector('.tab[data-view="tally"]').click();
+        await new Promise((z) => setTimeout(z, 440));
+        return { cap: (document.querySelector('#scTallyCap .ty-fig') || {}).textContent || '',
+          vals: [...document.querySelectorAll('.ty-card .pill.val')]
+            .map((v) => v.textContent.trim()).join('|') };
+      });
+
+      await jMenu(spage);
+      await jPress(spage, 'Day ');
+      const asks = await spage.evaluate(() => ({
+        title: (document.querySelector('.sheet h3, .sheet .sheet-t') || {}).textContent || '',
+        said: (document.querySelector('.sheet .hint') || {}).textContent || '',
+        buttons: [...document.querySelectorAll('.sheet .acts .btn')].map((b) => b.textContent.trim())
+      }));
+      /* THE ONE DELETE HERE WITH NO BIN, so it says what goes AND what
+         stays — the half that stays is the surprising one and finding
+         out afterwards is not a way to find out. */
+      ok('starting again asks first, and names both halves',
+        /week/i.test(asks.said) && /note/i.test(asks.said)
+        && asks.buttons.length === 2 && /Keep going/.test(asks.buttons[0]), asks);
+
+      await spage.click('.sheet .acts .btn.bad');
+      await spage.waitForTimeout(460);
+      const tyNow = await spage.evaluate(() => ({
+        cap: (document.querySelector('#scTallyCap .ty-fig') || {}).textContent || '',
+        vals: [...document.querySelectorAll('.ty-card .pill.val')]
+          .map((v) => v.textContent.trim()).join('|'),
+        up: document.querySelector('.tab[data-view="tally"]').classList.contains('on') }));
+      const now = await rd();
+      const rows = (await jMenu(spage)).map((r) => r.label);
+      await jShut(spage);
+
+      ok('...and it clears the record while the week, the notes and the title stay',
+        was.log > 0 && was.tick > 0 && was.train > 0
+        && now.log === 0 && now.tick === 0 && now.train === 0
+        && now.blocks === was.blocks && now.title === was.title
+        && now.notes === was.notes && now.notes !== '', { was, now });
+      /* AND IT STAMPS DAY ONE AGAIN, which is what makes it a start
+         rather than an erase. */
+      ok('...and today is day one again',
+        now.start === '2026-09-24' && rows.some((l) => l === 'Day 1'),
+        { start: now.start, rows });
+
+      /* Both halves: the figures moved, AND there were figures to
+         move. "They differ" passes on a tally that failed to draw
+         either time. */
+      ok('...and the tiles you are standing on are repainted, not left stale',
+        tyNow.up && tyWas.cap !== '' && tyNow.cap !== tyWas.cap,
+        { was: tyWas, now: tyNow });
+      ok('nothing threw starting again', serrs.length === 0, serrs);
+      await sctx.close();
+    }
+  }
+
   ok('no page errors through any of it', errs.length === 0, errs);
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);

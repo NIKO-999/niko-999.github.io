@@ -3521,6 +3521,87 @@
   }
 
   /* ══════════════════════════════════════════════════════════
+     THE DAY YOU BEGAN
+
+     Every other date in this app is DERIVED — the calendar starts at
+     the first thing you ever logged, a streak counts back from today,
+     a month is a month. None of that can say when you DECIDED, and
+     the day you decided is the one you go looking for: the record has
+     a first entry, and a first entry is where you happened to open
+     the app rather than where you started.
+
+     ONE ISO DATE AND NOTHING ELSE. A start with a note on it, or a
+     list of them, is a journal — and this app already has one of
+     those, two tabs over. What it is for is a single mark on a single
+     square, so a single string is the whole of it.
+
+     A DATE AHEAD OF TODAY READS AS UNSET. A journey that has not
+     begun is a state nothing on the grid can draw: the mark would
+     land on a square the month calls quiet, under a Settings row
+     counting backwards into "Day -3".
+
+     AND THE REPAIR IS NOT WRITTEN BACK, which reverses what this app
+     has had to learn four times — and the reason is that the thing
+     making a date look wrong here may be the CLOCK rather than the
+     record. A device an hour behind, or a timezone crossed, puts a
+     real start date briefly in the future; clearing it then is the
+     one thing you cannot undo, where reading it as unset for an hour
+     costs a mark on a square. The other four repairs were shapes
+     that could only be damage. This one is a date, and a date has a
+     second way of being wrong.
+
+     Nothing diverges for it: `scStartSet` overwrites the key
+     outright, so there is no half-repaired state for a later write
+     to lose.
+     ═══════════════════════════════════════════════════════════ */
+  var START_KEY = 'sched.start.v1';
+  var startDay = '';
+  function scStartLoad() {
+    var v = '';
+    try { v = localStorage.getItem(START_KEY) || ''; } catch (e) { v = ''; }
+    startDay = (/^\d{4}-\d{2}-\d{2}$/.test(v) && v <= scDay()) ? v : '';
+  }
+  function scStartSet(d) {
+    startDay = d || '';
+    try {
+      if (startDay) localStorage.setItem(START_KEY, startDay);
+      else localStorage.removeItem(START_KEY);
+    } catch (e) {}
+  }
+  /* DAY ONE IS THE DAY YOU PRESSED IT, not the day after. Nobody
+     counts the morning they started as day nought, and an off-by-one
+     here is the figure the whole feature is about. */
+  function scStartNo(day) {
+    if (!startDay) return 0;
+    return scDayNum(day || scDay()) - scDayNum(startDay) + 1;
+  }
+
+  /* ── AND STARTING AGAIN CLEARS THE RECORD, NOT THE WEEK ──
+     What a reset means is the thing this had to decide, and the split
+     is the one the app already draws everywhere else: the RECORD is
+     what happened and the WEEK is the shape you built. Clearing the
+     shape too would hand you day one with nothing to do on it, which
+     is the opposite of beginning.
+
+     So the ticks, the blocks you kept, the sub-items, the days off,
+     the sessions and what you read all go; the schedule, your habits,
+     your notes and your pictures stay. It is said in full on the
+     sheet that asks, because this is the one delete in the app with
+     no bin behind it and nothing else to rebuild it from — which is
+     exactly the case this file's own rule still gives a sentence to.
+
+     NOT THROUGH `scMark`. That snapshots `state`, and none of these
+     keys is in it, so an Undo toast beside this would offer to put
+     back the one thing that had not gone. */
+  function scStartAgain() {
+    tickLog = {}; blockLog = {}; kidLog = {}; offLog = {};
+    scTickSave();
+    trainLog = {}; scTrainSave();
+    mindLog = {}; scMindSave();
+    scStartSet(scDay());
+  }
+
+  /* ══════════════════════════════════════════════════════════
      A DAY OFF
 
      The week is a template and that is what makes it a shape — every
@@ -9772,6 +9853,26 @@
       var rule = scEl('div', 'menu-rule');
       body.appendChild(rule);
 
+      /* ── THE JOURNEY, FIRST OF THE RECORD ──
+         Above Rename because it is not about the app's names: it is
+         the record's own beginning, and everything under it here is
+         about the record. One row in two states rather than two rows,
+         because "begin" and "start again" are the same press asked
+         at two moments — and a Begin control that stays on the screen
+         after you have begun is a task you can never finish, which is
+         the profile sheet's own rule about an offer that does not
+         stop. */
+      if (!startDay) {
+        item('Begin the journey', 'Marks today as day one', '', function () {
+          scStartSet(scDay());
+          scClose();
+          scPaintCal();
+          scToast('Day one.', false);
+        });
+      } else {
+        item('Day ' + scStartNo(), 'Began ' + scStartWhen(), '', scStartSheet);
+      }
+
       item('Rename', state.title, '', function () {
         scTextSheet('Rename', 'Title', state.title, function (v) { state.title = v || 'Schedule'; });
       });
@@ -9810,6 +9911,53 @@
           b2.appendChild(acts);
         });
       });
+    });
+  }
+
+  /* The date a person reads, never the ISO the record keeps: the
+     head's own line is "Thursday 24 Sep" and a start that printed
+     2026-09-24 beside it would be two spellings of a date on one
+     app. */
+  function scStartWhen() {
+    if (!startDay) return '';
+    var q = String(startDay).split('-');
+    var d = new Date(+q[0], +q[1] - 1, +q[2]);
+    return FULL[d.getDay()] + ' ' + d.getDate() + ' ' + MON[d.getMonth()];
+  }
+
+  /* ── THE ONE DELETE HERE WITH NO BIN, SO IT SAYS WHAT GOES ──
+     A hint paragraph describing a control is the thing this app
+     stopped writing; a sentence naming what an irreversible action is
+     about to take is one of the two kinds that still gets one, and
+     this is that kind. It names both halves — what goes and what
+     stays — because the half that stays is the surprising one and
+     finding out afterwards is not a way to find out. */
+  function scStartSheet() {
+    scSheet('Start again?', function (b2) {
+      b2.appendChild(scEl('p', 'hint',
+        'Day one becomes today. Everything you have logged goes with it — '
+        + 'the ticks, the blocks you kept, the sessions and what you read. '
+        + 'Your week, your habits and your notes stay exactly as they are.'));
+      var acts = scEl('div', 'acts');
+      acts.appendChild(scBtn('off', 'Keep going', scClose));
+      acts.appendChild(scBtn('bad', 'Start again', function () {
+        scStartAgain();
+        scClose();
+        /* ── `scRender` IS WHAT REPAINTS TODAY, AND THAT IS WHY THERE
+           IS NO THIRD CALL HERE ──
+           Settings opens from any tab, so this can be pressed while
+           Today is up, and Today's tiles are drawn from the same
+           `tickLog` just emptied. A line repainting the tally went in
+           for that and came straight back out: `scRender` ends in
+           `scLive`, and `scLive` repaints whichever half of Today is
+           up before it returns. The bug it was written for does not
+           exist, and the probe that read the caption either side of
+           the reset is the only thing that would have said so. */
+        scRender();
+        scPaintCal();
+        scToast('Day one.', false);
+      }));
+      b2.appendChild(acts);
     });
   }
 
@@ -10448,16 +10596,23 @@
      than by a wrapper element, so nothing has to be grouped: the rows
      stay flat, the tools strip still slots in beside any of them, and
      a run is a fact worked out at render rather than a shape stored. */
-  /* ── THE CYCLE, AS A COUNT OF DAYS ──
+  /* ── A DAY AS A COUNT OF DAYS ──
      Both ends are plain ISO dates with no time on them, so they are
      compared as day NUMBERS rather than as timestamps: a difference
      in milliseconds loses or gains a day across a daylight-saving
-     boundary, which is the goal countdown's own lesson. */
-  function scBudNum(iso) {
+     boundary, which is the goal countdown's own lesson.
+
+     NAMED FOR THE QUESTION RATHER THAN FOR THE SCREEN. It was
+     `scBudNum`, which was honest while the budget's cycle was the
+     only thing counting days — and the day the journey's own day one
+     needed the same arithmetic, a prefix naming one screen would have
+     been the next person's wrong turn. `scObjDay` became `scWeekDate`
+     and `scPatMid` became `scFig` for exactly this. */
+  function scDayNum(iso) {
     var q = String(iso).split('-');
     return Math.round(Date.UTC(+q[0], +q[1] - 1, +q[2]) / 864e5);
   }
-  function scBudISO(num) {
+  function scDayISO(num) {
     var d = new Date(num * 864e5);
     return d.getUTCFullYear() + '-' + scPad(d.getUTCMonth() + 1)
       + '-' + scPad(d.getUTCDate());
@@ -10469,7 +10624,7 @@
      rule about both ends. */
   function scBudBack(n) {
     if (!n || !n.cs) return 0;
-    var d = scBudNum(scDay()) - scBudNum(n.cs);
+    var d = scDayNum(scDay()) - scDayNum(n.cs);
     return d > 0 ? Math.floor(d / scBudLen(n)) : 0;
   }
   /* The cycle `back` cycles ago, 0 being the one you are in. `frac`
@@ -10480,12 +10635,12 @@
     var len = scBudLen(n);
     if (!n || !n.cs) return { iso: '', len: len, dayIn: 0, frac: 0, end: '' };
     back = Math.max(0, Math.min(scBudBack(n), back | 0));
-    var a = scBudNum(n.cs) + (scBudBack(n) - back) * len;
-    var today = scBudNum(scDay());
+    var a = scDayNum(n.cs) + (scBudBack(n) - back) * len;
+    var today = scDayNum(scDay());
     var inDays = today - a;
     return {
-      iso: scBudISO(a),
-      end: scBudISO(a + len - 1),
+      iso: scDayISO(a),
+      end: scDayISO(a + len - 1),
       len: len,
       dayIn: Math.max(0, Math.min(len, inDays + 1)),
       frac: back > 0 ? 1 : Math.max(0, Math.min(1, (inDays + 1) / len))
@@ -13685,7 +13840,18 @@
                the same neutral drawn short rather than a hole in the
                grid or a third colour inventing a judgement. */
             var quiet = day > today || day < from || !c.on.length;
+            /* ── AND THE DAY YOU BEGAN GLOWS ──
+               It is a SECOND mark on a cell that may already carry
+               today's, and that is the design rather than a collision
+               to guard against: the day you press Begin, both are the
+               same square. They can sit together because they are in
+               different registers — today is a FILL on the numeral,
+               which says which square, and this is a BLOOM behind it,
+               which says what the square is. Two fills would be one
+               control answering two questions; a fill and a light are
+               not. */
             var b = scEl('button', 'cl-c' + (day === today ? ' is-now' : '')
+              + (day === startDay ? ' is-start' : '')
               + (quiet ? ' is-quiet' : ''));
             b.type = 'button';
             b.dataset.day = day;
@@ -13769,8 +13935,12 @@
                cell draws at most two and a "+2", and a screen reader
                handed that is handed the clipping rather than the
                record. */
+            /* SPOKEN, because a glow is a graphic and a graphic says
+               nothing at all to a screen reader — which is the tally
+               strip's own rule about a shape. */
             b.setAttribute('aria-label', FULL[c.dow] + ' ' + n3 + ' '
               + MONTH_FULL[m]
+              + (day === startDay ? ', the day you began' : '')
               + (quiet || calWhat !== 'task' ? ''
                 : ', ' + c.kept + ' of ' + c.on.length + ' kept')
               + (pills.length ? ', ' + pills.map(function (o) { return o.n; }).join(', ') : '')
@@ -14020,6 +14190,7 @@
   scHabitLoad();
   scTrainLoad();
   scMindLoad();
+  scStartLoad();
   scNoteLoad();
 
   try {

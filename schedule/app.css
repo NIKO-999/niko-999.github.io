@@ -7035,6 +7035,63 @@ body {
   font-variant-numeric: tabular-nums;
   line-height: 1.2;
 }
+/* ── THE DAY YOU BEGAN CASTS ──
+   A glow so you can find day one in a month at a glance, and it hangs
+   off the DATE rather than off the cell: the date's corner is the one
+   part of a cell pills never cover, and a bloom behind the pills is a
+   smudge across the words. Nine treatments were rendered over the real
+   month at 390x844 and read at 1:1 — a pip, a ring round the cell, a
+   wash, a lit left edge, a lit top edge, a frame, a corner halo and
+   two strengths of cast.
+
+   A BARE <i> IS `align-self: stretch`, so a shadow on it blooms along
+   the whole top of the cell rather than round the number — on the
+   light face a white bar with a grey edge, which is what the first
+   cast actually drew. It takes the pill's own box first.
+
+   AND THE RING IS WHAT STOPS IT READING AS A PILL. A non-inset
+   box-shadow paints outside the border box, so a bloom on its own
+   leaves the cell's ground showing through the middle: on the light
+   face that hole reads as a white pill, which is a mark this calendar
+   does not have. A hairline ring defines the edge, and ring-against-
+   fill is the two-state idiom this app already uses everywhere else.
+
+   MEASURED ON COMPOSITED PIXELS, and the dark face is the weak half —
+   a white bloom on a near-black ground moves the region's mean
+   luminance about a third as much as a dark bloom on white. Measured
+   on the shipped mark against the neighbour in its own row, it is
+   .076 dark against .186 light, where this file's own floor for "a
+   day you cannot see you missed" is .009.
+
+   `.cl-c` is `overflow: hidden`, so the bloom is cut at the cell's own
+   edges. Judged at 1:1, which is the size it is drawn: the clip is a
+   hard edge only under magnification, and the two ways out are worse —
+   `overflow: visible` lets that cell's pills run over the day beside
+   it, and insetting the date 5px takes it out of the column you count
+   along to find the 9th. */
+.cl-c.is-start > i,
+.cl-c.is-now > i {
+  /* ONE BOX, TWO SKINS. The two marks have to be the same size or a
+     row carrying both reads as two different objects — and on the one
+     day they land on the same cell there is only one box to get right.
+     Written as two they come out a pixel apart, which is the day
+     card's own lesson at a smaller size. */
+  align-self: flex-end;
+  min-width: 17px;
+  padding: 1px 4px;
+  border-radius: 999px;
+  text-align: center;
+}
+/* BEFORE `.cl-c.is-now > i`, and that is load-bearing. The two are the
+   same specificity, so on the day you press Begin — the one day a cell
+   is both — source order is the whole of what decides which surface
+   wins. Today takes the ground and this keeps the ring and the bloom
+   around it. */
+.cl-c.is-start > i {
+  color: var(--ink);
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--ink) 55%, transparent),
+              0 0 14px 4px color-mix(in srgb, var(--ink) 62%, transparent);
+}
 /* ── TODAY IS THE APP'S OWN FILLED MARK, AND THAT REVERSES A RULE ──
    It was weight alone, under a note reading "not a second mark: a
    ring round the date is already the mark and a concentric one is two
@@ -7052,11 +7109,6 @@ body {
   color: var(--paper);
   font-weight: 700;
   background: var(--ink);
-  border-radius: 999px;
-  align-self: flex-end;
-  min-width: 17px;
-  padding: 1px 4px;
-  text-align: center;
 }
 /* Inset, because an outline outside a ruled cell draws over its
    neighbours rather than round itself. */

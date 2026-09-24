@@ -13436,3 +13436,203 @@ still worth the two lines. The ORIGINAL chip is pressed to restore it
 rather than the new one: on an existing block the picker is
 single-select, so pressing the same chip twice turns the day OFF
 rather than putting it back.
+
+## The day you began
+
+Asked for as one thing in one line — a **begin journey**, a **reset**,
+and a **glow on that day in the calendar so you can clearly see when
+you started**.
+
+**EVERY OTHER DATE IN THIS APP IS DERIVED.** The calendar starts at the
+first thing you ever logged, a streak counts back from today, a month
+is a month. None of that can say when you DECIDED — a first entry is
+where you happened to open the app, not where you started — and the day
+you decided is the one you go looking for.
+
+**ONE ISO DATE AND NOTHING ELSE.** `sched.start.v1`. A start with a note
+on it, or a list of them, is a journal, and this app has one of those
+two tabs over. What it is for is a single mark on a single square, so a
+single string is the whole of it.
+
+**DAY ONE IS THE DAY YOU PRESSED IT**, not the day after. Nobody counts
+the morning they started as day nought, and an off-by-one is the figure
+the whole feature is about. Asserted through the CONTROL rather than by
+reading the key, because the key being right under a row saying *Day 0*
+is the bug.
+
+**A DATE AHEAD OF TODAY READS AS UNSET**, and it is the repair worth
+writing down. A junk string is the ordinary damaged case; a FUTURE date
+is the one nobody writes on purpose and the one that breaks quietly —
+the grid calls a day still ahead quiet, so the mark lands on a square
+drawn as nothing, under a Settings row counting backwards into *Day -3*.
+
+**AND IT IS NOT WRITTEN BACK, which reverses the lesson this app has
+learned four times.** The thing making a date look wrong here may be
+the CLOCK rather than the record: a device an hour behind, or a
+timezone crossed, puts a real start date briefly in the future, and
+clearing it then is the one thing you cannot undo — where reading it
+as unset for an hour costs a mark on a square. The other four repairs
+were shapes that could only be damage. **A date has a second way of
+being wrong**, and that is the whole of the difference. Nothing
+diverges for it either, because the setter overwrites the key outright
+rather than merging into it.
+
+**ONE ROW IN TWO STATES, AND THE OFFER STOPS.** *Begin the journey*
+until you have, then *Day 11 · Began Monday 14 Sep*. A begin control
+still on the screen after you have begun is a task you can never
+finish, which is the profile sheet's own rule. Both states are read off
+one sheet re-opened, because "the row changed" passes on a build that
+drew both.
+
+### Starting again clears the record, not the week
+
+What a reset MEANS is the thing this had to decide, and the split is
+the one the app already draws everywhere else: the RECORD is what
+happened and the WEEK is the shape you built. Clearing the shape too
+hands you day one with nothing to do on it, which is the opposite of
+beginning.
+
+So the ticks, the blocks you kept, the sub-items, the days off, the
+sessions and what you read all go; the schedule, your habits, your
+notes and your pictures stay. **Both halves are asserted**, because
+each passes on the other's bug — a reset that clears everything passes
+*the ticks are gone* and one that clears nothing passes *the week is
+still there* — and the keys are read off the STORE rather than off the
+screen, which is how all four of this app's in-memory repairs were
+found.
+
+**NOT THROUGH `scMark`.** That snapshots `state`, and none of these
+keys is in it, so an Undo toast beside this would offer to put back the
+one thing that had not gone.
+
+**IT SAYS WHAT GOES AND WHAT STAYS.** This is the one delete in the app
+with no bin behind it and nothing else to rebuild it from, which is
+exactly the case this file's rule about a new `.hint` still gives a
+sentence to. It names both halves because the half that STAYS is the
+surprising one, and finding that out afterwards is not a way to find
+out.
+
+**And it stamps day one again**, which is what makes it a start rather
+than an erase.
+
+**AND A FIX WENT IN FOR A BUG THAT DOES NOT EXIST.** Settings opens
+from any tab, so the reset can be pressed while Today is up, and
+Today's tiles are drawn from the same `tickLog` it empties —
+reasoning which says the handler must repaint the tally, and which is
+wrong. `scRender` ends in `scLive`, and `scLive` repaints whichever
+half of Today is up before it returns. The line was written, it was
+correct, and it did nothing.
+
+**WHAT FOUND IT WAS THE BREAK FAILING TO BREAK ANYTHING.** Removing
+the line left the caption moving exactly as before — so the check
+written for it passed on the build it was supposed to reject, which
+is the shape this file calls *a check that cannot fail*. The line is
+gone and the comment in its place says why, so the next person
+reasoning the same way stops before writing it again.
+
+**The check stayed, because the CLAIM is real** — after a reset the
+screen you are standing on shows the new record — and the break that
+inverts it is removing `scRender` from the handler rather than the
+line that never mattered. **Measured with Today ALREADY up**, since
+switching to it afterwards repaints either way. And the fixture had
+to be given ticks on today for any of it to mean anything: a day with
+nothing on it reads the same figure both sides of a reset.
+
+### The glow hangs off the date, not the cell
+
+**NINE TREATMENTS WERE RENDERED OVER THE REAL MONTH** at 390x844 and
+read at 1:1 — a pip, a ring round the cell, a wash, a lit left edge, a
+lit top edge, a frame, a corner halo and two strengths of cast. The
+finding is that **the date's corner is the one part of a cell that
+pills never cover**: on a real month a cell holds up to seven of them,
+so every treatment that lights the CELL is a smudge behind the words.
+
+**A BARE `<i>` IS `align-self: stretch`.** So the obvious cast — a
+box-shadow on the numeral — blooms along the whole top of the cell
+rather than round the number, which on the light face is a white bar
+with a grey edge. It takes today's own pill geometry first.
+
+**AND THE RING IS WHAT STOPS IT READING AS A PILL.** A non-inset
+box-shadow paints outside the border box, so a bloom on its own leaves
+the cell's ground showing through the middle — on the light face that
+hole reads as a white pill, a mark this calendar does not have. A
+hairline ring defines the edge, and ring-against-fill is the two-state
+idiom this app already uses everywhere else.
+
+**MEASURED ON COMPOSITED PIXELS, AND THE DARK FACE IS THE WEAK HALF.**
+A white bloom on a near-black ground moves the region's mean luminance
+about a third as much as a dark bloom on white: **.076 dark against
+.186 light**, where this file's own floor for *a day you cannot see you
+missed* is **.009**. Held against the neighbour in its OWN ROW, because
+a ground sampled a row above lands on another cell — which is the
+mistake the Pattern axis and the almanac's own check each made once.
+
+**AND THE DARK FACE IS THE ONE THE SUITE HOLDS, WHICH IS A DECISION
+RATHER THAN AN OMISSION.** This file's own rule is that the face
+nobody develops on is the one that breaks — and every time that has
+bitten here, the cause was a SECOND VALUE: eight swatches written once
+for two faces, nine workout hexes that needed light-face twins, a tag
+solved against one ground. There is no second value in this mark. It
+is one declaration in `var(--ink)`, so the two faces cannot disagree
+about anything except which way the bloom runs, and the dark face is
+the weaker of the two by measurement — hold it and the light one is
+held with room to spare. The light figure above is a probe rather than
+a check, and that is said out loud rather than left to look measured.
+
+**`.cl-c` IS `overflow: hidden`, SO THE BLOOM IS CUT AT THE CELL'S
+EDGES.** Judged at 1:1, which is the size it is drawn: the clip is a
+hard edge only under magnification, and both ways out are worse —
+`overflow: visible` lets that cell's pills run over the day beside it,
+which is the shut card's own bug, and insetting the date 5px takes it
+out of the column you count along to find the 9th.
+
+**TWO MARKS ON ONE CELL IS THE DESIGN, not a collision to guard
+against.** The day you press Begin, both land on the same square, and
+they can sit together because they are in different registers: today is
+a FILL on the numeral, which says which square, and this is a light
+around it, which says what the square is. Two fills would be one
+control answering two questions; a fill and a light are not.
+
+**WHICH IS DECIDED BY SOURCE ORDER ALONE.** `.cl-c.is-start > i` and
+`.cl-c.is-now > i` are the same specificity, so the start's rule is
+written FIRST and today takes the ground. A rule moved below the other
+turns today's date white on white, silently — the fifth time in this
+file that a cascade order has been the whole mechanism. Asserted as the
+computed ground AND the shadow together, because each passes on the
+other's bug.
+
+**ONE BOX, TWO SKINS.** The two marks share their geometry and differ
+only in surface, or a row carrying both reads as two different objects
+— and written as two boxes they come out a pixel apart, which is the
+day card's own lesson at a smaller size.
+
+**AND THE FIRST BREAK WRITTEN TO PROVE THAT DID NOT INVERT IT.** It
+inserted a copy of `.cl-c.is-now > i` ABOVE the start's rule — which
+changes nothing, because the ORIGINAL is-now rule still sits below
+both and wins anyway. Measured on the real page with the break
+applied, the date was still `--paper` on `--ink`: the assertion would
+have passed and the break would have read as *the check does not
+bite*. Only `tests/names.js` fired, on the duplicate. The break that
+inverts it appends the start's rule BELOW is-now, and then the date
+computes to `--ink` on `--ink`, which is the white-on-white the
+comment is about. **A break has to be measured doing the thing, not
+assumed to** — and a probe reading the two computed values the
+assertion reads is thirty seconds where the suite is ten minutes.
+
+**SPOKEN, because a glow is a graphic** and a graphic says nothing at
+all to a screen reader. The cell's `aria-label` carries *, the day you
+began*.
+
+### `scBudNum` is `scDayNum`
+
+Two helpers turn an ISO date into a day NUMBER and back, so a span is
+compared as days rather than as milliseconds — an hour of daylight
+saving inside a window otherwise rounds a whole day off the answer.
+They were `scBudNum` and `scBudISO`, which was honest while the
+budget's cycle was the only thing counting days.
+
+**A PREFIX NAMING ONE SCREEN IS THE NEXT PERSON'S WRONG TURN** the day
+a second screen needs the same arithmetic. `scObjDay` became
+`scWeekDate` and `scPatMid` became `scFig` for exactly this, and the
+rule is the same one every time: name a helper for the QUESTION rather
+than for the caller that happened to ask it first.
