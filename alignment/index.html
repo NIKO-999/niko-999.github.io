@@ -1,0 +1,1740 @@
+<!doctype html>
+<html lang="en" data-view="open">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0A08">
+<title>Alignment</title>
+<!-- A PAGE ON THE WEB ANSWERS THE REQUEST THE BROWSER MAKES ANYWAY.
+     Without these Chromium asks for /favicon.ico on every load and the
+     server answers 404 — a console error on every open, which is noise
+     the one check that counts console errors then has to be taught to
+     ignore. The apple-touch-icon and the standalone meta are what make
+     Add to Home Screen open this full-screen rather than in a browser
+     with a URL bar over the head. -->
+<link rel="icon" href="../icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alignment">
+<meta name="description" content="288 themes and lessons from sixteen figures and eight books.">
+<link rel="preload" href="../arc/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face { font-family: 'Inter'; font-weight: 100 900; font-display: swap;
+  src: url('../arc/fonts/Inter.woff2') format('woff2'); }
+
+/*
+  ALIGNMENT. Its own ground, its own type, its own everything — it reads
+  none of the other keys and takes none of the shared shell.
+
+  THE FOURTEEN PHOTOGRAPHS WENT WITH THE STORIES. Every screen was a
+  picture in a frame with the interface living in the material around
+  it, under a per-image brightness beneath one shared grade — measured,
+  the set spanned 235 degrees of hue, and no single transfer function
+  pulls a mixed library into one family. There is no image in this app
+  now, so the grade token, the brightness token and both rules that
+  read them are gone rather than left to cascade at nothing.
+*/
+
+:root {
+  --paper: #0B0A08;
+  --ink: #FFFFFF;
+  --dim: rgba(255,255,255,.72);
+  --spent: rgba(255,255,255,.46);
+  --hair: rgba(255,255,255,.14);
+  --glass: rgba(255,255,255,.10);
+
+  /* Chrome sits on a PLATE, not on glass. A 10% white wash over a lit
+     photograph put the info glyph at 2.50:1 against the 3 a graphic
+     needs. The photographs have gone and the plate stays, because a
+     control is still told from the page by its own ground. */
+  --plate: rgba(11,10,8,.56);
+
+  --card: #1A1611;
+  --card-edge: rgba(255,255,255,.08);
+
+  --r-card: 26px;
+  --r-in: 18px;
+  --r-sq: 14px;
+  --r-pill: 999px;
+
+  /* Six vertical steps. The first build shipped eleven — 8 10 12 14 18
+     20 22 24 26 34 38 — which is this repo's own runaway-scale fault in
+     a third dimension after thirty type sizes and thirteen leadings. */
+  --v1: 6px;  --v2: 10px; --v3: 16px;
+  --v4: 22px; --v5: 34px; --v6: 52px;
+
+  --gut: 22px;
+  --round: 40px;   /* drawn; the 44 it OWNS is the ::before square */
+  --gut-list: 18px;
+  --tap: 44px;
+
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body { height: 100%; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+[hidden] { display: none !important; }
+
+.al-disp   { font-size: 38px; font-weight: 450; line-height: 1.00; letter-spacing: -.03em; }
+.al-disp-s { font-size: 28px; font-weight: 450; line-height: 1.02; letter-spacing: -.024em; }
+.al-caps   { font-size: 10px; font-weight: 600; letter-spacing: .5em; text-transform: uppercase; color: var(--dim); }
+.al-note   { font-size: 13px; font-weight: 450; line-height: 1.45; color: var(--dim); }
+
+.al-view { position: relative; z-index: 1; height: 100%; display: none; flex-direction: column; }
+.al-view.is-on { display: flex; }
+
+#alOpen { justify-content: flex-end; padding: 0 var(--gut-list) var(--v5); }
+#alOpen .al-mark { margin-bottom: var(--v3); }
+.al-mark { display: flex; align-items: center; gap: 9px; }
+.al-mark svg { width: 20px; height: 20px; display: block; }
+.al-mark b { font-size: 13px; font-weight: 500; letter-spacing: 1.2em; text-transform: uppercase; }
+#alOpen .al-disp { margin-bottom: var(--v2); max-width: 7.2em; }
+#alOpen .al-note { margin-bottom: var(--v4); max-width: 20em; }
+
+/* A PILL IS SIZED TO ITS CONTENT. Not one of the four reference pills
+   spans the screen — they measure 217, 148, 187 and 134 CSS px, all
+   43 to 50 tall. A full-bleed primary was the widest object on the
+   open screen and read as a form submit. */
+.al-pill {
+  display: inline-flex; align-items: center; justify-content: center;
+  align-self: flex-start;
+  min-height: 48px; padding: 0 30px; border-radius: var(--r-pill);
+  background: var(--ink); color: #14120E;
+  font-size: 16px; font-weight: 500; letter-spacing: -.01em;
+}
+
+.al-head { padding: calc(var(--v4) + env(safe-area-inset-top, 0px)) var(--gut-list) var(--v3); display: flex; align-items: center; gap: 12px; flex: none; }
+.al-head .al-disp-s { flex: 1; }
+.al-head .al-count { flex: none; }
+
+/* A COUNT IS A FIGURE, NOT A LABEL. It wore .al-caps, which is 10px at
+   half an em of tracking — right for a word and wrong for a number:
+   24 drew as "2 4", two digits with a space between them. It carries
+   its own rule rather than overriding .al-caps, because the two are
+   equal specificity and this repo has lost that race five times. */
+.al-count { font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--dim); }
+
+/* 44 OWNED, 40 DRAWN — and an inset cannot say that here. An
+   absolutely positioned box resolves against its host's PADDING box,
+   and .al-round carries a 1px border under a border-box reset, so its
+   padding box is 38 and inset:-2px reached 42 rather than the 44 the
+   declaration reads as. Two real controls sat under the floor and the
+   arithmetic was invisible in the source. Centring an explicit --tap
+   square is immune to the host's border, padding and drawn size alike,
+   and it is what makes the token load-bearing rather than decorative. */
+.al-round {
+  width: var(--round); height: var(--round); flex: none; border-radius: var(--r-pill);
+  background: var(--plate); border: 1px solid var(--hair);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  display: grid; place-items: center; position: relative;
+}
+.al-round::before {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: var(--tap); height: var(--tap); transform: translate(-50%, -50%);
+}
+.al-round svg { width: 17px; height: 17px; display: block; }
+
+.al-pane { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  padding: 0 var(--gut-list) calc(118px + env(safe-area-inset-bottom, 0px)); }
+.al-pane::-webkit-scrollbar { display: none; }
+
+/* A MASK, NEVER A GRADIENT LAID OVER THE CONTENT. It was written when
+   the ground was a photograph and a --paper overlay was a near-match
+   that read as a smudge somewhere on the set; over one flat ground a
+   gradient would do, and a mask is still the version with no colour
+   to get wrong. Off again at the end of the travel: a
+   soft edge over nothing is the same lie in the other direction. */
+.al-pane { -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 86px), transparent 100%);
+                   mask-image: linear-gradient(180deg, #000 calc(100% - 86px), transparent 100%); }
+.al-pane.is-end { -webkit-mask-image: none; mask-image: none; }
+
+/* THE HEADING CARRIES THE AXIS, AT FULL STRENGTH. It was flat --dim
+   on every list — the source name on an axis list, the axis name on a
+   source page — which is the one register on the screen that was
+   saying nothing. The hue it takes is the one that already means that
+   axis, so on Mindset every heading is violet and on a figure's own
+   page the four sections are four colours.
+
+   FULL STRENGTH, WHICH IS MEASURED RATHER THAN CHOSEN. The lesson
+   label had been mixed 66% toward the ink and read washed. At 100% on
+   this ground the worst of the four is 6.36:1 against the card and
+   6.29 against the page, so nothing had to be diluted to clear the
+   4.5 bar — and this repo has shipped 4.7 five times believing that
+   was a margin. */
+.al-grp { padding: var(--v5) 2px var(--v2); }
+.al-grp[data-x] { color: var(--tg); }
+
+.al-lead { padding: var(--v4) 0; }
+/* The title runs at line-height 1.00, so its last line box ends level
+   with the ink and a descender prints into whatever is next. Six
+   pixels, which is also what makes the pair read as two registers
+   rather than one wrapped line. */
+.al-lead .al-caps { margin: var(--v1) 0 var(--v2); }
+/* THE TITLE HAS TO CLEAR THE CLOSE BUTTON, AND 9em DID NOT. The X is
+   fixed at the viewport's own right edge, so the room the title has is
+   a number of PIXELS and an em measure cannot see it: at 38px, 9em is
+   342 and the button's left edge is 330. Twenty of fifty-seven titles
+   ran into it and twelve overlapped it outright — and the one this was
+   first looked at on was among the thirty-seven that clear, which is
+   what a single screenshot is worth as a check. Derived from the two
+   gutters and the button rather than written as 304px, so the day a
+   token moves the title moves with it. */
+.al-lead .al-disp { max-width: calc(100% - (var(--round) + var(--gut) - var(--gut-list) + 8px)); }
+
+/* Nothing to travel with any more: the ground under the words is the
+   page. The whole class of contrast failure that MOVES with the scroll
+   went out with the photograph. */
+.al-sheet { padding-bottom: var(--v6); }
+
+
+/* A THEME IS A CARD AND THE LESSON IS THE PAYLOAD. The theme is the
+   evidence, so its paragraph reads at the quieter weight; the lesson
+   is what you came for and takes the ink. That is the whole of what
+   separates the two halves.
+
+   BOTH LABELS TAKE THE AXIS HUE. Key theme was flat --dim and the
+   lesson's label carried the colour, which made one half of every
+   card look like chrome and the other like content. They are the two
+   section marks on one object and they belong to the same axis, so
+   they are the same colour — and the card then reads as one coloured
+   thing rather than as a grey card with a coloured line in it. */
+.al-th {
+  position: relative; display: block; width: 100%; text-align: left;
+  border-radius: var(--r-card); padding: var(--v4); margin-bottom: var(--v3);
+  background: var(--card); box-shadow: inset 0 1px 0 var(--card-edge);
+}
+.al-tn { font-size: 19px; font-weight: 600; line-height: 1.26; letter-spacing: -.016em; }
+.al-tsub { margin-top: 3px; font-size: 13px; font-weight: 450; color: var(--dim); }
+.al-tl { margin: var(--v4) 0 var(--v1); color: var(--tg); }
+.al-tb { font-size: 15px; line-height: 1.5; color: var(--dim); }
+.al-tb.is-les { color: var(--ink); }
+
+/* TWO MARKS, BECAUSE THEY ARE TWO CLAIMS. A highlight is liberal: the
+   lines that landed, and over 288 of them there will be a lot. A pin is
+   scarce — the handful you are actually working from this month. One
+   mark doing both is a list you stop opening, because the thing you are
+   on is buried under everything that ever struck you. They are
+   independent, so a card can be both and then appears under both stops,
+   which is two true statements rather than one card drawn twice. */
+.al-acts { display: flex; gap: var(--v2); margin-top: var(--v4); }
+.al-mk {
+  position: relative; height: 34px; padding: 0 13px; border-radius: var(--r-pill);
+  font-size: 13px; font-weight: 500; color: var(--dim);
+  background: rgba(255,255,255,.09);
+}
+/* 34 DRAWN, 44 REACHABLE, and the inset is VERTICAL ONLY. Reaching
+   sideways would put one chip's band inside the other's, and a press
+   aimed at Pin landing on Highlight is a control doing the wrong thing
+   rather than nothing. Both chips are wider than 44 on their own. */
+.al-mk::before { content: ''; position: absolute; inset: -5px 0; }
+.al-mk[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+
+/* TWO STOPS, SO THE TWO LISTS ARE NEVER ON SCREEN TOGETHER AND THE
+   CONTROL IS THE HEADING. A label naming a section beside the thing
+   that takes you to that section is the same word twice. */
+.al-stops { flex: none; display: flex; gap: var(--v1); margin: 0 var(--gut-list) var(--v3); }
+.al-stop {
+  position: relative; flex: 1; height: 34px; border-radius: var(--r-pill);
+  font-size: 13px; font-weight: 500; color: var(--dim);
+  background: rgba(255,255,255,.06);
+}
+.al-stop::before { content: ''; position: absolute; inset: -5px 0; }
+.al-stop[aria-current="true"] { background: rgba(255,255,255,.14); color: var(--ink); }
+
+/* --dim, not --spent. The lighter token measures a rounding error above
+   4.5:1 on this page rather than a margin, which is a mistake this repo
+   has now shipped three times in another app under exactly that name. */
+.al-empty { padding: var(--v3) 2px; font-size: 15px; line-height: 1.5; color: var(--dim); }
+
+/* Four hues, set on whatever carries the axis — a card or a heading.
+   They were a washed violet, gold, blue-grey and rust; the blue-grey
+   in particular was barely a colour at all. Worst pair now measures
+   dE 49.6 in Lab against the 12 this repo holds two colours on one
+   screen to. */
+.al-th[data-x="mindset"],  .al-grp[data-x="mindset"]  { --tg: #9B7BFF; }
+.al-th[data-x="internal"], .al-grp[data-x="internal"] { --tg: #F0B429; }
+.al-th[data-x="external"], .al-grp[data-x="external"] { --tg: #3FC3D6; }
+.al-th[data-x="karmic"],   .al-grp[data-x="karmic"]   { --tg: #FF6B3D; }
+
+/* A FIGURE IN THE INDEX IS A PRESS TARGET AND THE REST ARE NOT. The same
+   card, with no second drawing — only the row that opens something
+   takes the reach. */
+.al-f::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 50%;
+  height: 100%; min-height: var(--tap); transform: translateY(-50%);
+}
+
+
+/* ---- THE FOOT ---- */
+.al-foot {
+  /* THE BAR WIDENS RATHER THAN THE TABS NARROWING, and this is the
+     third time. Three tabs sat at 93px either side; four needed 60,
+     where a tab owns 64; five needed 40, where it owns 59. Six at 40
+     would be 49 each, over the 44 floor by five pixels, and seven owned
+     48. THE BAR IS BACK TO THREE AND SO ARE THE INSETS. The inset is
+     the thing that was widened to buy room for a fourth, a fifth and a
+     seventh mark, so it is the thing that comes back when the room is
+     given up: left at 20 the row is 350 and a tab owns 116, which is a
+     press target four fingers wide and a pill running the width of the
+     phone for three glyphs. */
+  position: fixed; left: 93px; right: 93px; z-index: 30;
+  bottom: calc(var(--v4) + env(safe-area-inset-bottom, 0px));
+  height: 58px; border-radius: var(--r-pill);
+  background: rgba(24,21,17,.62);
+  backdrop-filter: blur(26px) saturate(1.5); -webkit-backdrop-filter: blur(26px) saturate(1.5);
+  border: 1px solid var(--hair);
+  display: grid; grid-auto-flow: column; align-items: center;
+  padding: 0 var(--v1);
+}
+.al-tab { height: 46px; border-radius: var(--r-pill); display: grid; place-items: center; color: var(--dim); }
+.al-tab svg { width: 20px; height: 20px; display: block; }
+.al-tab[aria-current="true"] { background: rgba(255,255,255,.12); color: var(--ink); }
+
+/* GLASS OVER A PHOTOGRAPH WAS A MATERIAL. GLASS OVER A SENTENCE IS A
+   SMEAR. This is the one round control that sits over running body
+   text, fixed, while the pane scrolls under it — and .al-round's own
+   --plate is 56%, which dims a word without removing it. Measured on
+   composited pixels, a letter behind the disc survived as a 44-point
+   luminance ghost and the screenshot read "you will b✕". At 94% the
+   ghost is 6 and the backdrop pass is drawing nothing anybody can
+   see, so it stops being glass either way: --card is the app's own
+   object material, the ghost is 0, and the disc reads as a thing ON
+   the page rather than a hole punched in it. The glyph costs nothing
+   — 19.3:1 on the old plate, 19.8 on this one. Both X's take it;
+   both sit over a pane of text. It is LATER in the file than
+   .al-round and the two are equal specificity, so source order is
+   what makes it win — the computed value is read back rather than
+   trusted. */
+.al-x { position: fixed; top: calc(18px + env(safe-area-inset-top, 0px)); right: var(--gut); z-index: 30;
+  background: var(--card); backdrop-filter: none; -webkit-backdrop-filter: none; }
+</style>
+</head>
+<body>
+
+<section class="al-view is-on" id="alOpen">
+  <div class="al-mark" role="img" aria-label="Alignment">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v20M5 8l7-6 7 6M5 16l7 6 7-6"/></svg>
+  </div>
+  <h1 class="al-disp" id="alOpenT">Seventeen people and eight books.</h1>
+  <p class="al-note" id="alOpenN">Three hundred and five themes, from seventeen real careers and eight books, split four ways: the model they ran on, what they were actually like, what the world did, and what came back. What the story does, and what it leaves you with.</p>
+  <button class="al-pill" id="alOpenB">Begin</button>
+</section>
+
+<section class="al-view" id="alFigures">
+  <div class="al-head"><h1 class="al-disp-s">The Figures</h1><span class="al-count"></span></div>
+  <div class="al-pane" id="alFiguresPane"></div>
+</section>
+
+<section class="al-view" id="alBooks">
+  <div class="al-head"><h1 class="al-disp-s">The Books</h1><span class="al-count"></span></div>
+  <div class="al-pane" id="alBooksPane"></div>
+</section>
+
+<section class="al-view" id="alKept">
+  <div class="al-head"><h1 class="al-disp-s">Kept</h1><span class="al-count"></span></div>
+  <div class="al-stops" id="alKeptStops">
+    <button class="al-stop" data-st="pin" aria-current="true">Pinned</button>
+    <button class="al-stop" data-st="hi">Highlighted</button>
+  </div>
+  <div class="al-pane" id="alKeptPane"></div>
+</section>
+
+<section class="al-view" id="alSource">
+  <button class="al-round al-x" id="alSourceX" aria-label="Close">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+  <div class="al-pane" id="alSourcePane"></div>
+</section>
+
+<nav class="al-foot" id="alFoot">
+  <button class="al-tab" data-v="figures" aria-current="true" aria-label="The Figures">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="7" width="13" height="13" rx="2.4"/><path d="M8 4h11a2 2 0 0 1 2 2v11"/></svg>
+  </button>
+  <button class="al-tab" data-v="books" aria-label="The Books">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.2v13M12 7.2C10.6 5.6 8.4 4.8 5.2 4.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c3.2 0 5.4.8 6.8 2.4M12 7.2c1.4-1.6 3.6-2.4 6.8-2.4a1 1 0 0 1 1 1v11.6a1 1 0 0 1-1 1c-3.2 0-5.4.8-6.8 2.4"/></svg>
+  </button>
+  <button class="al-tab" data-v="kept" aria-label="Kept">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.8 3.4h10.4a1.4 1.4 0 0 1 1.4 1.4v15.8L12 16.1l-6.6 4.5V4.8a1.4 1.4 0 0 1 1.4-1.4Z"/></svg>
+  </button>
+</nav>
+
+<script>
+(function () {
+'use strict';
+
+/*
+  ONE WRAPPER. Nothing escapes it. The other apps in this repo learned
+  that the hard way — a top-level name here does not throw when it
+  collides, it replaces, and the symptom turns up screens away.
+*/
+
+var KEY = 'align.v1';
+
+/* THE SOURCE IS THE EVIDENCE AND THE LESSON IS WHAT IT LEAVES YOU.
+   There are two kinds of source and they take the same four axes. A
+   FIGURE is a real person and the theme is something they actually did.
+   A BOOK is a system somebody wrote down and the theme is what the book
+   actually claims — not a paraphrase of the blurb, and not a lesson
+   invented and hung on a famous title. Where an idea belongs to the
+   author's wider work rather than to that one volume, it says so.
+
+   The books came in without anything coming out. Nothing about the
+   figures changed.
+
+   THE ORIGINAL NOTE FOLLOWS, and it is about the figures.
+
+   THE FIGURE IS THE EVIDENCE AND THE LESSON IS WHAT IT LEAVES YOU.
+   These were films and shows first — Get Rich or Die Tryin', Power,
+   Paid in Full, Snowfall, and six that had nothing to do with any of
+   it. Every one of those was a dramatisation of people who are
+   actually here, so the films came out and the people went in.
+
+   WHICH TIGHTENS THE CONSTRAINT RATHER THAN RELAXING IT. A script can
+   be quoted; a life has to be sourced. Every theme is a documented
+   fact — the Chapter 11 filing and the exit, the Glacéau stake, the
+   hundred copies of Crenshaw at a hundred dollars each, the 85/15
+   distribution deal, the chinchilla coat at Ali and Frazier, thirty
+   years on a conspiracy count — and anything reported rather than
+   established says so inside the theme: Blandón and the Contra
+   network, the coffins, Ghetto Qu'ran.
+
+   AND THE LESSON IS WRITTEN TO LAND, NOT TO SUMMARISE. A paraphrase
+   with a moral on the end is the version everybody has already read.
+   Each one names the uncomfortable half — the thing you are currently
+   doing that the fact is about — because a lesson you can agree with
+   and walk away from has not been written yet.
+
+   Three internal, three external and three karmic for each, which is
+   a shape rather than a quota: a figure that only yielded two of one
+   kind would be one to cut rather than one to pad. Asserted at boot
+   in both directions. */
+
+/* FOUR AXES, AND EACH ONE IS A DIFFERENT QUESTION. MINDSET is the
+   model they run on — what they believe about how the world works,
+   which is portable and is the only one of the four you can adopt
+   outright. INTERNAL is what they are actually like: the state, the
+   appetite, the need, the thing they do to themselves. EXTERNAL is how
+   the world actually works, whatever anybody believes about it.
+   KARMIC is the account between the two over time, arriving back on a
+   delay long enough that it does not feel connected to what opened it.
+   Five entries filed external turned out to be that last one and were
+   moved: the retaliation cycle, Rico, the product coming home, the
+   suit falling on Brock, the North remembering.
+
+   MINDSET AND INTERNAL ARE THE PAIR THAT CAN COLLAPSE, so the test is
+   whether an entry is a belief you could pick up and use (mindset) or
+   a fact about that person (internal). Every mindset entry is anchored
+   to documented behaviour rather than to a quotable line, because a
+   quote is what somebody said and behaviour is what they believed.
+
+   Mindset comes first because it is the frame the other three are read
+   through. Nothing in the list duplicates anything in another axis,
+   and that is asserted by name at boot rather than trusted. */
+var AXIS = { mindset: 'Mindset', internal: 'Internal', external: 'External', karmic: 'Karmic' };
+
+/* A GROUP HEADING ONLY WHERE THE LIST IS MADE OF MORE THAN ONE KIND OF
+   THING. The books are one group, so a heading over them would be the
+   pane's own title said again a register down, which is the duplication
+   this project keeps having to take back out. The figures are two, and a
+   founder sitting between Frank Lucas and Big Meech with nothing saying
+   so reads as a mistake in the list rather than as a second kind. */
+var GROUP = { street: "The street", built: "The builders", game: "The game" };
+
+var SRC = [
+  { i: "fifty", n: "50 Cent", p: "Queens, New York", k: "figure", g: "street" },
+  { i: "hov", n: "Jay-Z", p: "Marcy, Brooklyn", k: "figure", g: "street" },
+  { i: "nip", n: "Nipsey Hussle", p: "Crenshaw, Los Angeles", k: "figure", g: "street" },
+  { i: "meech", n: "Big Meech", p: "Detroit, then Atlanta", k: "figure", g: "street" },
+  { i: "frick", n: "Freeway Rick Ross", p: "South Central, Los Angeles", k: "figure", g: "street" },
+  { i: "lucas", n: "Frank Lucas", p: "Harlem, New York", k: "figure", g: "street" },
+  { i: "mastp", n: "Master P", p: "Calliope, New Orleans", k: "figure", g: "street" },
+  { i: "gucci", n: "Gucci Mane", p: "Bessemer, then Atlanta", k: "figure", g: "street" },
+  { i: "meek", n: "Meek Mill", p: "North Philadelphia", k: "figure", g: "street" },
+  { i: "suge", n: "Suge Knight", p: "Compton, California", k: "figure", g: "street" },
+  { i: "bloom", n: "Greg LaVecchia", p: "Bloom Nutrition", k: "figure", g: "built" },
+  { i: "gymsh", n: "Ben Francis", p: "Gymshark", k: "figure", g: "built" },
+  { i: "hormo", n: "Alex Hormozi", p: "Gym Launch, Acquisition.com", k: "figure", g: "built" },
+  { i: "spanx", n: "Sara Blakely", p: "Spanx", k: "figure", g: "built" },
+  { i: "mchmp", n: "Ben Chestnut", p: "Mailchimp", k: "figure", g: "built" },
+  { i: "sigs", n: "Jason Fried", p: "37signals", k: "figure", g: "built" },
+  /* THE ONE SOURCE THAT IS NOT TWELVE, and `deep` is what says so in the
+     data rather than in a comment. A teacher is a different kind of figure
+     from a career: what is documented about him IS the published method —
+     the footage, the argument, the positions held in the open for years —
+     so the mindset half is where the evidence actually is, and the shape
+     follows the evidence rather than a row in a table. */
+  { i: "goldie", n: "God Game Goldie", p: "London", k: "figure", g: "game", deep: true },
+  { i: "devil", n: "Outwitting the Devil", p: "Napoleon Hill", k: "book", g: "book" },
+  { i: "tagr", n: "Think and Grow Rich", p: "Napoleon Hill", k: "book", g: "book" },
+  { i: "mdh", n: "Million Dollar Habits", p: "Brian Tracy", k: "book", g: "book" },
+  { i: "surf", n: "Reality Transurfing", p: "Vadim Zeland", k: "book", g: "book" },
+  { i: "para", n: "Change Your Paradigm", p: "Bob Proctor", k: "book", g: "book" },
+  { i: "feel", n: "Feeling Is the Secret", p: "Neville Goddard", k: "book", g: "book" },
+  { i: "sogr", n: "The Science of Getting Rich", p: "Wallace Wattles", k: "book", g: "book" },
+  { i: "cyb", n: "Psycho-Cybernetics", p: "Maxwell Maltz", k: "book", g: "book" },
+];
+
+var TH = [
+  { s: "fifty", x: "internal", n: "\"I'm Not a Rapper\"", b: "Identity Decides the Moves",
+    t: "He has said it for twenty years and it is neither modesty nor a boast, it is the strategy. Music is one product line. The water, the books, the films, the television, the boxing promotion: none of that is a rapper diversifying. It is a man who never accepted the job title in the first place.",
+    l: "What you call yourself decides which moves are even available to you. Take the narrow title people hand you and you inherit its ceiling with it, and nobody is going to offer you a wider one later. Name the thing you are before you have earned the name." },
+  { s: "fifty", x: "internal", n: "He Was Never Insulted", b: "Attack as Material",
+    t: "Every feud he has been in, he escalated deliberately. Ja Rule, the 2007 sales bet against Kanye, twenty years of it. He is not being provoked in any of them. He picks the fight, sets the terms and sells the tickets.",
+    l: "What you treat as an insult decides whether it costs you or pays you. Most of what happens to you is neutral material until you decide to be wounded by it, and being wounded is the expensive option every single time." },
+  { s: "fifty", x: "internal", n: "The Bankruptcy Was a Filing", b: "Not Feeling What You Are Told to Feel",
+    t: "He filed Chapter 11 in 2015 after a court judgment, kept working straight through it, and came out in 2017. He treated it as a legal instrument with a defined process rather than as the end of a story about him.",
+    l: "Most events arrive with an emotion already attached that somebody else decided on. Separating what a thing IS from what you are supposed to feel about it is most of what composure actually is, and it is a skill rather than a temperament." },
+  { s: "fifty", x: "external", n: "The Mixtapes", b: "Build the Audience Before the Deal",
+    t: "Dropped by Columbia and untouchable after the shooting, he put out 50 Cent Is the Future, Guess Who's Back and No Mercy No Fear for nothing. By the time Eminem and Dre came, the demand already existed and he was not asking anybody for anything.",
+    l: "Leverage is built before you need it, and it is usually built by giving things away. Anybody negotiating from a position where they need the deal has already lost it. Make the thing so well that the room has to come to you." },
+  { s: "fifty", x: "external", n: "Vitamin Water", b: "Take the Equity, Not the Fee",
+    t: "He took a stake in Glacéau instead of an endorsement cheque. Coca-Cola bought the company in 2007, and that one decision paid more than any fee he could have negotiated for the same work.",
+    l: "A fee ends when the work ends. A share keeps paying while you sleep, and it is far more often available than people think, simply by asking for it instead of the money. The only cost is being paid nothing for a while, which is the whole test." },
+  { s: "fifty", x: "external", n: "From Talent to Owner", b: "Own the Thing You Appear In",
+    t: "Power, then Power Book II, III and IV, then BMF. He moved from being cast in things to producing them, and the production company rather than the performance is where the durable money sits.",
+    l: "Being the talent means somebody else decides whether there is any more of it. Get your name ON the thing rather than in it. That move is almost always available a level earlier than the people who eventually make it take it." },
+  { s: "fifty", x: "karmic", n: "Ghetto Qu'ran", b: "What You Put Out Has an Address",
+    t: "In 2000 he recorded a track naming real figures from the Queens drug trade. Months later he was shot nine times outside his grandmother's house and the industry stopped returning calls. He has spoken since about the connection between the two.",
+    l: "Everything you put out is addressed to somebody, whether or not you were thinking about them while you made it. The account opens the moment it leaves your hands, and it is settled on a timetable you do not get to set." },
+  { s: "fifty", x: "karmic", n: "The Ja Rule War", b: "Winning Defines You Too",
+    t: "He ended Murder Inc commercially and it worked completely. Twenty years later it is still one of the first things anybody says about him, and the years he spent on it are years of his own output that went into somebody else.",
+    l: "You become the thing you fight, in the eyes of everybody watching, whether or not you win. The cost of a war is not the risk of losing it. It is the years, and the description of you that outlives the result." },
+  { s: "fifty", x: "karmic", n: "Everything He Gave Away", b: "The Return Arrives Late and in Another Shape",
+    t: "The free mixtapes sold the album: 872,000 copies in its first week. And the persona built on that block is, twenty years later, the business — a television operation selling that exact world back to an audience the street had already built for him.",
+    l: "What you give away is not gone, it is placed. The return comes late and rarely in the shape you expected, which is why the people who calculate it never receive it and the people who simply keep putting things out do." },
+  { s: "hov", x: "internal", n: "He Never Signed", b: "Refusing the Only Door",
+    t: "Turned down by every label in New York, he did not keep knocking. He started Roc-A-Fella with Dame Dash and Kareem Burke and sold Reasonable Doubt out of the boot of a car, because the only deal on offer was a bad one.",
+    l: "When the only door offered is a bad door, the choice is not between that and nothing. It is between that and the years it takes to build your own, and almost everybody takes the bad door because the years are invisible from here." },
+  { s: "hov", x: "internal", n: "The Retirement That Was Not One", b: "Knowing What It Is For",
+    t: "The Black Album was billed as the last one and he was back within three years. He has said plainly that he had run out of things to say rather than out of ability.",
+    l: "Work out what you are actually doing this for, because the answer decides when to stop and when to start again. Somebody in it for the output stops when the output is empty. Somebody in it for the position never can." },
+  { s: "hov", x: "internal", n: "Nobody Was Told", b: "Not Explaining Yourself",
+    t: "Almost nothing about the business is announced before it is done. The Tidal purchase, the Armand de Brignac stake, the D'Ussé build: each one surfaced as a fact rather than as a plan.",
+    l: "Telling people what you are going to do pays out a little of the feeling of having done it, and it hands you a hundred opinions you then have to carry. Say it afterwards. The only person who needs the plan is you." },
+  { s: "hov", x: "external", n: "The Masters", b: "Own the Catalogue",
+    t: "Roc-A-Fella was his own label, so he kept what artists signed elsewhere did not. Roc Nation, Tidal, the champagne, the cognac: all of it is the same move made larger.",
+    l: "In almost every field the person doing the work and the person owning the work are two different people, and the second one is richer. Find out which you are, what it would take to be the other, and then why you have not." },
+  { s: "hov", x: "external", n: "Def Jam and Back", b: "A Job Is a Position, Not an Identity",
+    t: "He ran Def Jam as president for three years and then left. The job was a vantage point on the industry rather than the destination, and he treated it that way the whole time he held it.",
+    l: "Take a role for what it shows you rather than for what it makes you. The people who get trapped are the ones who let the title become the answer to who they are, and it is almost always the title they were proudest of." },
+  { s: "hov", x: "external", n: "The Champagne", b: "Buy the Thing You Advertise",
+    t: "He named Cristal in songs for years, and when Louis Roederer's managing director made a dismissive remark about the association he stopped, then eventually took over Armand de Brignac outright and later sold half of it to LVMH.",
+    l: "If you are the reason something sells, you are being paid in the wrong currency. The value you generate for somebody else is a measurement of what you could generate for yourself, and it is usually the only proof anybody will give you." },
+  { s: "hov", x: "karmic", n: "Dame", b: "What the Partnership Costs",
+    t: "Roc-A-Fella was three people and it ended badly. Dame Dash, who was there when nobody would sign him, is not there now, and both men have been talking about it for twenty years.",
+    l: "The people who are there at the start are not automatically the people for the end, and deciding that is the hardest thing in any of this. Whatever you do, do it in the open, because the version told in your absence is the one that survives." },
+  { s: "hov", x: "karmic", n: "The Verse You Cannot Take Back", b: "Everything Is Kept",
+    t: "Thirty years of recorded material is thirty years of positions, boasts and shots that are still playable. He has spent his entire adult life answering for things said in his twenties.",
+    l: "Everything you publish is kept and will be read back to you by somebody with a reason. That is not an argument for saying nothing. It is an argument for meaning it when you say it." },
+  { s: "hov", x: "karmic", n: "Marcy to the Barclays", b: "Going Back Is Not a Gift",
+    t: "He put money into the Nets and the arena went up near where he grew up. The neighbourhood did not simply benefit from it, he has been criticised for it by people from there, and he has not resolved that publicly.",
+    l: "Returning to the place you came from is not automatically a gift to it. What you bring changes the price of being there, and the people it prices out are the people you left. There is no clean version, and pretending otherwise is the only real mistake." },
+  { s: "nip", x: "internal", n: "The Marathon", b: "A Pace You Can Hold for a Decade",
+    t: "He named everything after it: the mixtape series, the store, the company. Ten years of independent releases before the album that got the Grammy nomination, and he was dead four months after it came out.",
+    l: "Pick a pace you can hold for ten years rather than one you can hold for ten weeks. Almost nobody is outworked, they are outlasted, and the difference is decided at the start by what you chose to sustain." },
+  { s: "nip", x: "internal", n: "He Stayed", b: "There Is No Free Version of Staying",
+    t: "He had the money to live anywhere and kept the store on Slauson and Crenshaw, in the parking lot he had hustled in, and he was killed there.",
+    l: "Staying is a decision with a real cost, and the people who take it are not naive about the cost. They have priced it and paid it anyway. Know which of those two you are doing." },
+  { s: "nip", x: "internal", n: "Proud2Pay", b: "Charge What It Is Worth",
+    t: "He sold a hundred copies of Crenshaw at a hundred dollars each and Jay-Z bought a hundred of them. The point was never the ten thousand dollars. It was refusing the price the market had set for a mixtape.",
+    l: "The price of your work is a claim about its value and people believe the claim. Underpricing is not humility. It is a statement about yourself that everybody then repeats back to you." },
+  { s: "nip", x: "external", n: "Buying the Block", b: "Own the Ground, Not the Unit",
+    t: "He bought the plaza his store was in, with Dave Gross, rather than renting a unit in it. Vector90 and the work around Destination Crenshaw came out of the same idea.",
+    l: "Renting means somebody else can end it. Every improvement you make to a thing you do not own is a gift to whoever does, and they will take it at precisely the moment it is worth the most." },
+  { s: "nip", x: "external", n: "All Money In", b: "Cut Out Whoever Is Between You and the Buyer",
+    t: "His own label, sold directly, priced by him. He only did a distribution deal with Atlantic once he had the leverage to set the terms of it.",
+    l: "Every layer between you and the person paying takes a cut and a piece of the relationship. Remove them one at a time, starting with the easiest to replace, and never sign one back in for convenience." },
+  { s: "nip", x: "external", n: "The Neighbourhood Was the Business", b: "Your Ground Is Your Distribution",
+    t: "The customers were the people he grew up with and he built for them first. The store, the co-working space, the STEM centre: the same hundred streets were the market and the mission at once.",
+    l: "Serve the people already near you before you try to reach anybody else. It is cheaper, it compounds, and the people who know you are the only ones who will forgive the early version." },
+  { s: "nip", x: "karmic", n: "Killed Where He Stood", b: "The Cost of Not Moving",
+    t: "He was shot outside his own store by somebody from the same neighbourhood, over words. Everything he had built, and what ended it was proximity.",
+    l: "The risk of staying does not go down because your position improves. Sometimes the account is presented by the world you came from precisely because you did not leave it, and nothing about that is fair or avoidable by being good." },
+  { s: "nip", x: "karmic", n: "What He Left Open", b: "Build What Can Be Carried",
+    t: "Destination Crenshaw was built. The properties are held. The Grammy came after. His brother and his partners carried all of it forward, because it had been structured so that it could be carried.",
+    l: "Build things that can outlive your attention, because one day they will have to. A business that only works while you are standing in it is a job, and a job ends when you do." },
+  { s: "nip", x: "karmic", n: "Ten Years of Free", b: "Nothing Given Away Was Lost",
+    t: "A decade of mixtapes given away is what made a hundred-dollar tape sellable and a major-label deal negotiable on his terms. None of it was a loss. It was deposits.",
+    l: "What you give away early is placed rather than lost, and it is the only way to build the thing that makes you unignorable later. The return arrives in a form you cannot see from the start, which is why almost nobody keeps depositing." },
+  { s: "meech", x: "internal", n: "The Brand Before the Business", b: "A Real Talent, Aimed Wrong",
+    t: "BMF was a distribution organisation that behaved like a record label. Billboards, magazine spreads, a fleet, parties everybody in Atlanta wanted into. He understood attention better than most people in music at the time.",
+    l: "A genuine talent applied to the wrong object is still the talent. Know what you are actually good at separately from what you are currently doing with it, because the first is portable and the second usually is not." },
+  { s: "meech", x: "internal", n: "He Wanted to Be Seen", b: "The Want That Overrides the Plan",
+    t: "The whole operation depended on not being noticed and he built it to be noticed. Everybody around him has said so since. The visibility was not a flaw in the plan, it was what he was there for.",
+    l: "Work out what you actually want, because it will override the plan when the two conflict and it will not ask you first. If what you want is to be seen, build something that survives being seen." },
+  { s: "meech", x: "internal", n: "Southwest T", b: "Two People, Two Appetites",
+    t: "His brother Terry ran it quieter and eventually wanted out of the Atlanta scene entirely. The split between them is the split between a business and a performance.",
+    l: "When two people build a thing and only one of them wants the attention, that is not a style difference. It is a disagreement about what the thing is for. Settle it in words early or it settles itself later, expensively." },
+  { s: "meech", x: "external", n: "Fifty Cities", b: "Scale Multiplies Exposure",
+    t: "The organisation reached across the country, hundreds of people, hundreds of millions moved. Every new city was more revenue and one more set of people who could eventually talk.",
+    l: "Growth does not only multiply the upside. Every person added is another point where the whole thing can be entered, and almost nobody counts the second number while the first one is going up." },
+  { s: "meech", x: "external", n: "The Indictment", b: "Somebody Is Building a File",
+    t: "The federal case took years to assemble: wiretaps, cooperators, a conspiracy charge that made everybody's actions everybody's problem. It was being built quietly while the parties were still running.",
+    l: "While you are having a good year, somebody with more patience than you is assembling something. Assume the file exists. It changes what you write down, who you speak to, and how much you enjoy being obvious." },
+  { s: "meech", x: "external", n: "Thirty Years", b: "The Structure Sets the Number",
+    t: "He was sentenced to thirty. The length had less to do with any single act than with conspiracy law, the scale of it, and how much the government could attach to his name.",
+    l: "The size of a consequence is decided by a structure you did not design and have almost certainly not read. Find out what the rules actually are before you are being sentenced under them." },
+  { s: "meech", x: "karmic", n: "Everybody Talked", b: "A Hundred People Is a Hundred Doors",
+    t: "The case was built substantially on cooperation from inside. The same reach that made it work at scale is what made it collapsible at scale.",
+    l: "Anything that needs a large number of people to hold a line will eventually meet the one who does not. Design on the assumption that the least committed person in the room is the one who decides." },
+  { s: "meech", x: "karmic", n: "The Brand Outlived the Man", b: "What You Make Can Outlast the Vehicle",
+    t: "BMF is a television show, a phrase, a whole look that outlasted the organisation by decades. He built something culturally permanent inside something legally temporary.",
+    l: "What you make can easily outlive the vehicle you made it in, and that cuts both ways. Worth asking which of the two you are actually building before you give it a decade." },
+  { s: "meech", x: "karmic", n: "The Family Paid", b: "Count Who Is Standing There",
+    t: "His brother, his parents, his associates, the people who worked in it: the case reached all of them. The consequence was distributed a long way past the two names on it.",
+    l: "Almost nothing you do lands only on you. Count the people who will be standing inside the consequence, because that count is the real size of what you are deciding." },
+  { s: "frick", x: "internal", n: "He Could Not Read", b: "The Gap Nobody Sees",
+    t: "He got through school and built a multi-million dollar operation while functionally illiterate. He learned to read in federal prison, in his thirties.",
+    l: "You can be extremely capable and still be missing one ordinary thing that is quietly setting your ceiling. Find out what yours is. It is almost never the exciting weakness, and almost always the boring one you have routed around for years." },
+  { s: "frick", x: "internal", n: "Volume Over Margin", b: "How You Earn Decides What You Learn",
+    t: "He undercut everybody and moved enormous quantity rather than taking a fat cut on a little. That was a deliberate business decision and it is why he scaled past everyone around him.",
+    l: "How you make the money decides what you become. Small margins at volume force you to build systems, and systems are the transferable skill. Fat margins on a few deals teach you nothing you can use anywhere else." },
+  { s: "frick", x: "internal", n: "He Rebuilt at Fifty", b: "Being a Beginner in Public",
+    t: "Out after twenty years, in his fifties, he started again legitimately: speaking, books, property, under his own name. Nothing from the first life was available to him.",
+    l: "A complete restart is survivable, and it is mostly a question of whether you can stand being a beginner where people can see you. That is the actual barrier. It is not the money and it is not the time." },
+  { s: "frick", x: "external", n: "The Supply Was Political", b: "You Cannot See the Whole Board",
+    t: "His supplier Danilo Blandón was tied to the Contra funding network, reported in Gary Webb's Dark Alliance and later partly addressed in a CIA inspector general report. Ross did not know what he was part of.",
+    l: "You are almost never the biggest thing in your own situation. Before you commit, find out who is above the person you deal with and what they are getting, because that is where the decisions that end you are taken." },
+  { s: "frick", x: "external", n: "Blandón Testified", b: "Your Supplier Is Not Your Friend",
+    t: "The man who supplied him became a government informant and set up the deal he was convicted on. The relationship that built it is the one that ended it.",
+    l: "Any relationship where one side has more to lose will break in one direction, and it is never the direction you were worried about. Ask what happens to each of you if this goes wrong, and ask it out loud." },
+  { s: "frick", x: "external", n: "Three Strikes", b: "The Rule Was Written Before You Arrived",
+    t: "He was given life under sentencing laws that had nothing to do with the particulars of his case. It was reduced on appeal, but the original number was a function of legislation rather than of him.",
+    l: "The rules you operate under were written by people who never met you, for reasons unconnected to your situation, and they apply anyway. Read them before they are being read to you." },
+  { s: "frick", x: "karmic", n: "What It Did to South Central", b: "The Damage Has an Address",
+    t: "The crack economy he was central to ran through the neighbourhood he was from. He has spoken about it directly since, and about what it cost the people around him.",
+    l: "There is no downstream. Every cost lands on somebody specific, and if you cannot name who, that means you have not looked. Being one step removed from the harm is not the same as not having caused it." },
+  { s: "frick", x: "karmic", n: "He Paid It Forward", b: "Closing an Account Is Something You Do",
+    t: "Since release he has spent most of his public life on literacy, sentencing reform and talking to young people about exactly what he did. Nobody made him. It is repayment on an account nobody was collecting.",
+    l: "Some accounts can only be closed by you, deliberately, over years, with nobody keeping score. That is the difference between having got away with something and having actually finished it." },
+  { s: "frick", x: "karmic", n: "The Name Was Taken", b: "What You Build Gets Used",
+    t: "A rapper took the name and built a career on it, and the lawsuit failed. The reputation he generated ended up monetised by somebody else entirely.",
+    l: "Whatever you build a reputation for, somebody will eventually use it and it will not always be you. Register it, own it, or accept that the value you created is going to whoever has better paperwork." },
+  { s: "lucas", x: "internal", n: "Quiet Is a Method", b: "Invisibility Costs You Only the Applause",
+    t: "He spent years driving an ordinary car and looking like nobody, deliberately, while running one of the largest heroin operations in Harlem. He described it afterwards as policy.",
+    l: "Being unremarkable is a strategy with real returns and it costs you nothing but the credit. The people who cannot afford it are the ones who were doing the whole thing for the credit in the first place." },
+  { s: "lucas", x: "internal", n: "The Coat at the Fight", b: "One Hour of Wanting Credit",
+    t: "He wore a chinchilla coat to Ali and Frazier in 1971, sat where the cameras were, and has said that photograph is what put detectives onto him. Years of discipline against one evening.",
+    l: "A decade of discipline can be undone by one hour of wanting the credit, and the urge does not go away because you have a rule about it. Decide in advance which rooms you do not walk into." },
+  { s: "lucas", x: "internal", n: "He Talked", b: "Know Your Answer Before the Room",
+    t: "After conviction he cooperated extensively and dozens of cases came out of it. It cut his sentence substantially, and it is the part of his story he is most argued about.",
+    l: "Everybody has a price and most people find out what theirs is in a room they did not plan to be in. Work out now what you will and will not do, because you will not be composing that answer when the moment arrives." },
+  { s: "lucas", x: "external", n: "Cutting Out the Middleman", b: "Go to the Source",
+    t: "Blue Magic worked because he sourced directly out of Southeast Asia rather than through the networks everybody else used. The purity and the price were both a function of removing layers.",
+    l: "Every intermediary takes a margin and owns the relationship. Going to the source is harder, slower and almost always where the entire advantage is. Most people never even find out who the source is." },
+  { s: "lucas", x: "external", n: "The Product Was the Marketing", b: "A Better Thing Needs Less Persuasion",
+    t: "He branded it, kept the quality consistent and sold it cheaper. People came to him because it was actually better, which is a rare and unglamorous reason for a business to work.",
+    l: "Persuasion is the most expensive thing you can buy. Before you spend on getting attention, find out honestly whether the thing deserves it, because a genuinely better product needs a fraction of the noise." },
+  { s: "lucas", x: "external", n: "Everyone Was Family", b: "Trust Does Not Scale",
+    t: "He brought relatives up from North Carolina to run it, because he could not verify anybody else. It worked, until a federal case turned every one of them into a potential witness.",
+    l: "Using trust as your control system works up to roughly the number of people you actually know. Past that you need structure, and most things come apart at exactly the point where the founder refused to build one." },
+  { s: "lucas", x: "karmic", n: "The Coffins", b: "What You Boast About Is Kept Longest",
+    t: "His account was that product came back from Southeast Asia in the same transport as dead American servicemen. Whether or not every detail of it holds, he told it himself, as a boast.",
+    l: "What you are prepared to use in order to win becomes the description of you, permanently, and you will have been the one who supplied it. Nothing gets forgotten, and boasts are kept longest of all." },
+  { s: "lucas", x: "karmic", n: "Harlem Paid", b: "The Better You Are, the Larger the Number",
+    t: "The scale of the operation and the purity of the product are the same fact as the scale of the addiction on the blocks he was from. Those two numbers cannot be separated.",
+    l: "When the thing you are good at works, ask who is on the other end of it. The better you get, the larger that number becomes, and nobody is ever going to report it to you." },
+  { s: "lucas", x: "karmic", n: "Nothing Held", b: "Money You Cannot Keep Is a Score",
+    t: "Tens of millions at the peak, by his own account, and effectively none of it left at the end. Seized, spent, lost: none of it survived the life that produced it.",
+    l: "Money made in a way that cannot be held is not money, it is a score. If it cannot be put somewhere that survives you being wrong, you have not built anything yet." },
+  { s: "mastp", x: "internal", n: "He Started With a Settlement", b: "What You Do With the First Sum",
+    t: "He put a malpractice settlement, reported at around ten thousand dollars, into a record shop in Richmond, California, rather than into anything else. Everything after that came out of one decision.",
+    l: "Most people get one clean sum at some point and almost nobody turns it into something that produces. What you do with the first money you did not work for predicts more than what you do with the money you did." },
+  { s: "mastp", x: "internal", n: "He Learned From Customers", b: "Proximity to the Buyer",
+    t: "Running the shop taught him what people actually bought: which regional records moved, at what price, how fast. No Limit was built on that rather than on taste.",
+    l: "Standing where the money changes hands is the cheapest education available and almost nobody takes it. Do that before you spend a year building what you assume people want." },
+  { s: "mastp", x: "internal", n: "He Kept It Cheap", b: "Not Spending Once You Have It",
+    t: "Fast releases, in-house production, recognisable covers, low costs, long after he could have afforded the expensive version of all of it.",
+    l: "The hardest discipline is not spending once the money is there. Costs rise to meet income by default, and the only thing that stops them is a decision you keep making at a point where nobody would question you for stopping." },
+  { s: "mastp", x: "external", n: "The 85/15 Deal", b: "Buy Only the Service You Need",
+    t: "He signed a distribution deal with Priority that reportedly left around 85 per cent with No Limit, because what he needed was distribution rather than a label. He knew the difference and most artists did not.",
+    l: "Work out precisely which service you actually need and buy only that. People sell you a bundle because the bundle is where they take the ownership, and the unbundled version is nearly always available if you ask." },
+  { s: "mastp", x: "external", n: "He Owned the Masters", b: "Find the Thing That Keeps Paying",
+    t: "No Limit kept its recordings, which is why a run of late-nineties output is an asset rather than a memory.",
+    l: "In every field there is one thing that keeps paying after the work stops and everything else is a wage. Identify it early, because it is usually what people will happily let you have in exchange for something that feels bigger now." },
+  { s: "mastp", x: "external", n: "Volume Beat Polish", b: "Shipping Is a Strategy",
+    t: "No Limit put out an enormous number of records at pace. Not all of them were good. The catalogue and the market share were built by the rate rather than by any one of them.",
+    l: "Output at a rate beats output at a standard nobody set. You cannot tell in advance which thing will work, and the only reliable way to find out is to have shipped enough that the market gets a vote." },
+  { s: "mastp", x: "karmic", n: "Everybody Got Paid", b: "Being the One Who Pays",
+    t: "He brought artists in, gave several of them ownership positions and made people wealthy who had nothing. The reputation for actually paying is part of why the roster existed at all.",
+    l: "Being the person who pays is a durable advantage that almost nobody takes, because the gain is slow and the saving is immediate. It compounds in what people bring you and who takes your call." },
+  { s: "mastp", x: "karmic", n: "The Roster Left", b: "Speed Acquires, It Does Not Hold",
+    t: "The label eventually came apart, artists moved on and disputes followed. The same speed that built it had not built anything that kept people.",
+    l: "What you grew quickly you will keep only if you built something worth staying for. Speed is a way of acquiring and never a way of holding, and the two need completely different work." },
+  { s: "mastp", x: "karmic", n: "He Passed It On", b: "The Second Generation Is the Return",
+    t: "His children have their own careers, and he has spent years on youth work, food brands and money back into New Orleans. What he actually built is a family starting from a position he never had.",
+    l: "The point of the first generation is that the second one begins somewhere else. That is the whole return, it is invisible the entire time you are earning it, and it is the only one that cannot be taken back." },
+  { s: "gucci", x: "internal", n: "Prison Was the Turn", b: "The Stop You Did Not Choose",
+    t: "He went into federal custody in 2014 at his heaviest and most chaotic and came out in 2016 sober, in shape and organised. He has been explicit that the sentence is what did it.",
+    l: "A stop you did not choose is the only time most people can see the shape of what they were doing. If life has handed you one, use it before you are comfortable enough to forget what it showed you." },
+  { s: "gucci", x: "internal", n: "He Admitted It Plainly", b: "No Version That Protects You",
+    t: "The autobiography names the drug use, the violence and the people he hurt, and builds no version in which he was misunderstood. He has said the honesty was the point of writing it.",
+    l: "A story about yourself that protects you is one you then have to defend for the rest of your life. Naming it plainly costs you the story once, and nothing at all after that." },
+  { s: "gucci", x: "internal", n: "The Routine Held", b: "Boring Is the Mechanism",
+    t: "Sobriety, gym, business, output. The years after are conspicuously unremarkable next to the years before, and that is the entirety of what changed.",
+    l: "Whatever turns it around is never interesting enough to tell anybody about. It is the same small set of actions, repeated well past the point where you get any credit for them." },
+  { s: "gucci", x: "external", n: "The Mixtape Volume", b: "Rate Beats Polish",
+    t: "An enormous number of releases across a decade and a half, far past anything a label would have scheduled. The ubiquity is the career.",
+    l: "In any attention market, rate beats polish. You cannot predict which thing lands, and whoever ships constantly gets more attempts at exactly the luck everybody else is waiting for." },
+  { s: "gucci", x: "external", n: "He Built the Next Ones", b: "Be the Route, Not the Destination",
+    t: "Migos, Young Thug, Waka Flocka and others came through him. Being the person the next wave has to pass through is a structural position rather than a talent one.",
+    l: "There is more durable value in being the route than in being the destination. Whoever the new people have to come through takes a share of everything that happens after, and almost nobody competes for that role." },
+  { s: "gucci", x: "external", n: "Atlanta Was the Ground", b: "Be Unignorable Somewhere Small",
+    t: "He was the sound of a city long before he was anything nationally, and the city carried him through every period in which the industry did not.",
+    l: "Be unignorable somewhere small before you try to be noticed everywhere. A local base does not abandon you during a bad year. A national audience does it immediately." },
+  { s: "gucci", x: "karmic", n: "What the Chaos Cost", b: "You Pay in Years",
+    t: "Arrests, cases, feuds and the years lost to all of it. The talent was never in question at any point. The bill was paid in time.",
+    l: "You rarely pay for chaos in a catastrophe. You pay in years, deducted quietly, and the only place it ever shows up is in what somebody with the same ability got done over the same period." },
+  { s: "gucci", x: "karmic", n: "He Came Back to Debts", b: "Serving It Is Not Settling It",
+    t: "The people hurt, the relationships broken, the things said: none of it was cancelled by the sentence being served. He has spent the years since addressing it, publicly and privately.",
+    l: "Serving a consequence is not the same as settling an account. The formal punishment closes the legal file and leaves every other one open, and only you can work through those." },
+  { s: "gucci", x: "karmic", n: "The Comeback Is the Proof", b: "A Year of It Beats a Statement",
+    t: "Nobody had to take the change seriously. What made it credible was years of consistent behaviour afterwards with no dramatic event attached to any of it.",
+    l: "Nobody believes a statement about change and everybody believes a year of it. You do not get to shorten that, and you should not want to, because the time is what makes it real to you as well." },
+  { s: "meek", x: "internal", n: "The Sentence for Nothing", b: "Two True Things at Once",
+    t: "A 2008 case followed him for over a decade, with violations for things like popping a wheelie and an airport altercation. In 2017 he was given two to four years on the back of them.",
+    l: "Some of what is done to you is genuinely unfair, and there is no version where being angry about it improves your position. Both are true at the same time, and holding both is the skill." },
+  { s: "meek", x: "internal", n: "He Used the Platform", b: "Stop Needing Them to Agree",
+    t: "Rather than only fighting his own case he became the public face of probation reform, and co-founded REFORM Alliance with Jay-Z, Michael Rubin and others.",
+    l: "A wrong done to you is either a story you tell or a thing you go and change. The second one requires you to stop needing people to agree that it was unfair, and that is the actual cost of it." },
+  { s: "meek", x: "internal", n: "He Was Beaten in Public", b: "The Silence Ends Careers",
+    t: "The 2015 exchange with Drake went badly for him in public and became the defining joke about him for years. He kept releasing anyway.",
+    l: "A public loss is survivable and most people do not survive it, because they stop shipping. What ends a career is not the humiliation. It is the eighteen months of silence that follow it." },
+  { s: "meek", x: "external", n: "Probation Is a System", b: "Learn It Before You Are In It",
+    t: "Ten years of supervision on a single case, under a judge whose conduct became the subject of its own controversy. The outcome was a function of how the system is built rather than of any one decision.",
+    l: "You will spend part of your life inside structures designed by people who will never know your name. Learn how they actually work before you are inside one, because from inside there is no time to read." },
+  { s: "meek", x: "external", n: "REFORM", b: "Change the Rule, Not the Case",
+    t: "The organisation has worked on legislation in multiple states. Winning his own appeal helped one person. Changing the statute reaches everybody inside it.",
+    l: "Fixing your instance of a problem is a day's work with no compounding. Fixing the rule that produces it is years of unglamorous work that keeps paying after you stop. Almost everybody picks the first." },
+  { s: "meek", x: "external", n: "Who Turned Up", b: "Built Years Before You Need It",
+    t: "The campaign around his case pulled in Jay-Z, Rubin, athletes, owners and press. None of that was luck. It was built by who he had been around and what he had already been doing.",
+    l: "Whoever turns up for you on the worst day was built years earlier, in ordinary weeks. You cannot assemble it during the emergency, which is precisely when everybody tries." },
+  { s: "meek", x: "karmic", n: "The Feud Cost Years", b: "Attacking Is a Transfer",
+    t: "The period spent on the Drake exchange is a period of his own output that went into somebody else, and it did not go well for him.",
+    l: "Energy spent on a rival is not energy, it is a transfer. Whether or not you win, the time came out of the thing you were supposed to be building, and none of it comes back." },
+  { s: "meek", x: "karmic", n: "Philadelphia Held Him", b: "The Ground Runs Both Ways",
+    t: "The city turned out for him at every stage, and he has put money and attention back into it since. Neither direction of that was contractual.",
+    l: "Where you are from is an account that runs both ways for your whole life. Most people only notice it when they need a withdrawal, which is the one occasion it will not be there." },
+  { s: "meek", x: "karmic", n: "One Case, One Life", b: "A Small Entry Compounds",
+    t: "Everything — the violations, the returns to prison, the years — traces back to a single arrest as a teenager. A minor entry nobody would have predicted would still be running a decade later.",
+    l: "A small consequence entered early into a system that compounds is not a small consequence. You cannot judge the size of a decision by what it costs you on the day you take it." },
+  { s: "suge", x: "internal", n: "Fear as a Business Model", b: "It Holds and Then It Is Worthless",
+    t: "The founding stories around Death Row, and how contracts were obtained and renegotiated, are about intimidation as a method. For a period it produced results nobody else could match.",
+    l: "Anything that works through fear is borrowing against the day it stops, and it does not degrade gradually. It holds completely and then it is worth nothing, and by then you have no other instrument." },
+  { s: "suge", x: "internal", n: "He Could Not Stop Escalating", b: "One Move Used on Everything",
+    t: "Every dispute got larger. There is no point in the story at which he takes an exit, and several were available at several times.",
+    l: "Somebody with one move will use it on everything, including the situations where it is catastrophic. The number of responses you actually have is the real measure of your position." },
+  { s: "suge", x: "internal", n: "The Room Emptied", b: "Compliance Is Not Loyalty",
+    t: "Dre left. Snoop left. The talent that built the label went, and the label did not survive it. Nobody had been held by anything except for as long as it suited them.",
+    l: "Compliance is not loyalty and it gives no warning before it ends. If the only reason somebody is still here is that leaving is difficult, you do not have a team. You have a temporary condition." },
+  { s: "suge", x: "external", n: "The Roster Was the Company", b: "What Is Left After Everybody Resigns",
+    t: "Death Row's value was Dre, Snoop and Tupac. Once people could leave, nothing about the catalogue or the imprint held the business up.",
+    l: "A business made of people who can walk has no floor. Whatever you build, ask what is left the morning everybody resigns, because that number is the only part you actually own." },
+  { s: "suge", x: "external", n: "The Legal Costs Compounded", b: "Cases Are a Tax on Every Hour",
+    t: "Lawsuits, probation, incarceration, seizures. Continuous legal exposure consumed the money and the attention the business needed in order to survive.",
+    l: "Ongoing legal trouble is not an event, it is a tax on every hour and every pound for years. It is the most expensive thing available and it almost never appears in anybody's plan." },
+  { s: "suge", x: "external", n: "Everything in One Place", b: "Concentration Builds and Does Not Keep",
+    t: "One label, one city, one sound, one set of relationships. When the sound moved and the relationships broke, there was nothing else underneath any of it.",
+    l: "Concentration is how you build and it is not how you keep. There is a point at which the focus that made you stops being an advantage and becomes the only way you can be taken apart." },
+  { s: "suge", x: "karmic", n: "1996", b: "Everybody Nearby Is Inside It",
+    t: "He was in the car in Las Vegas the night Tupac was shot. The retaliations around that period, in both directions, reached people who were not principals in any of it.",
+    l: "Once an account is open between two sides, neither can close it without appearing to lose, and everybody standing nearby is inside it. The only cheap moment to stop was before the first entry." },
+  { s: "suge", x: "karmic", n: "Everyone Who Left Did Better", b: "The Measurement Nobody Runs on Themselves",
+    t: "Dre built Aftermath and then Beats. Snoop built a thirty-year career. What they did once they were out of it is the clearest verdict available on the arrangement.",
+    l: "If people do better after leaving you, that is information and it is not about them. It is the plainest measurement of what you were adding, and it is the one nobody ever runs on themselves." },
+  { s: "suge", x: "karmic", n: "He Is Still Inside", b: "Nothing Self-Corrects",
+    t: "He is serving twenty-eight years for a killing in 2015. Decades after the label, the way of handling a situation had not changed at all.",
+    l: "Nothing self-corrects with time. A way of handling things you have never deliberately changed will still be there in twenty years, at the same setting, waiting for one more situation to apply itself to." },
+  { s: "fifty", x: "mindset", n: "Attention Is the Inventory", b: "What You Are Actually Selling",
+    t: "The feuds, the trolling, the villain role in every story he is in: he manufactures public attention deliberately and then points it at whatever he is selling that quarter.",
+    l: "Whatever your trade, you are also in the business of being looked at, and most people leave that part entirely to chance. Attention can be manufactured, and it is the only asset that makes every other one you own worth more." },
+  { s: "fifty", x: "mindset", n: "He Assumes He Is Recorded", b: "Operating in Public",
+    t: "Everything he does is built on the assumption that it will be seen, quoted and replayed. There is no private version of the persona and there has not been one for twenty years.",
+    l: "Assume everything you do is on the record, because increasingly it is. That is a design constraint rather than paranoia, and once you accept it you stop needing two versions of yourself, which is where most of the energy was going." },
+  { s: "fifty", x: "mindset", n: "Losing Is Data", b: "Nothing Is a Verdict",
+    t: "Dropped by a label, shot, bankrupted, outsold by Kanye in a bet he made publicly. Each one is treated as an event with a next move rather than as a statement about what he is.",
+    l: "An outcome is information about a decision, never a description of you. People who cannot separate those two spend their thirties defending their twenties." },
+  { s: "hov", x: "mindset", n: "Think in Decades", b: "The Unit Is Not the Year",
+    t: "Roc-A-Fella, Def Jam, Roc Nation, Tidal, the champagne, the art. Each move only makes sense as part of a position built across thirty years rather than as a deal that year.",
+    l: "Most people optimise a year at a time and then wonder why nothing compounds. Pick a unit longer than you are comfortable with and judge each decision by where it leaves you at the end of that, rather than at the end of this one." },
+  { s: "hov", x: "mindset", n: "The Gap Is Information", b: "Not Knowing Is Not Not Able",
+    t: "He has said repeatedly that the wealth gap is a knowledge gap — that what separated him from people with money was not ability but what they had been told and he had not.",
+    l: "Most of what is stopping you is something somebody could explain in an afternoon. Go and find out what the people already doing it know. They are not smarter, they simply arrived at the information earlier." },
+  { s: "hov", x: "mindset", n: "The Product Has to Survive the Marketing", b: "Credibility Is the Asset",
+    t: "Thirty years of output that still has to be defensible, because the deals, the brands and the trust are all priced off whether the core thing is any good.",
+    l: "Every bit of leverage you build sits on top of one thing actually being good. The moment you let that slide in order to feed the rest, the rest starts repricing, and it reprices far faster than it was built." },
+  { s: "nip", x: "mindset", n: "Buy Back the Block", b: "Money Is for Converting",
+    t: "Every dollar went into property, the store, the plaza, the co-working space. Income was raw material for ownership rather than a result to enjoy.",
+    l: "Income that is never converted into something that produces is just a faster treadmill. Decide the percentage that becomes an asset before you have an opinion about what else it could be." },
+  { s: "nip", x: "mindset", n: "Stay Dangerous", b: "Do Not Soften as It Improves",
+    t: "One of his phrases, and it is about not going soft as the circumstances change — keeping the edge that got him there once the conditions that produced it are gone.",
+    l: "Success quietly removes the conditions that produced it, on a schedule. Whatever you were doing when you had nothing is the thing to keep doing, and you will be handed a hundred good reasons to stop." },
+  { s: "nip", x: "mindset", n: "Information Is the Advantage", b: "Learn What Nobody in the Room Knows",
+    t: "He read about business, economics and technology constantly, in a scene where almost nobody was. Vector90 exists because he thought access to that was the actual bottleneck.",
+    l: "In every room you are in there is a body of knowledge nobody there has. Go and get it. It is almost always public, almost always boring, and it is the cheapest edge available to anybody." },
+  { s: "meech", x: "mindset", n: "The Life Is the Advertising", b: "Selling the Feeling",
+    t: "BMF sold an idea of a life — the cars, the parties, the entourage — and everything else followed from people wanting to be near it. The product itself was rarely the point.",
+    l: "People buy the version of themselves your thing makes possible. That holds whether you are selling a service, a track or a strategy, and it is the part almost everybody leaves to chance while perfecting the thing itself." },
+  { s: "meech", x: "mindset", n: "Move Like a Company", b: "Structure Beats Improvisation",
+    t: "Territories, roles, logistics and a chain of command across dozens of cities. It ran on organisation rather than on nerve, which is exactly why it got as large as it did.",
+    l: "Anything that works twice should be written down and handed to somebody else. The ceiling on almost everything is not effort or talent, it is how much of it exists only inside one person's head." },
+  { s: "meech", x: "mindset", n: "He Believed He Was Untouchable", b: "A Long Run Feels Like Being Right",
+    t: "The visibility, the scale and the years without consequence produced a genuine conviction that it would keep working. Everybody around him has described the same thing.",
+    l: "A long run without consequences feels identical to being right. It is the most dangerous state available, because nothing about it looks like risk from inside and every month that passes makes it stronger." },
+  { s: "frick", x: "mindset", n: "Price Is a Weapon", b: "Compete Where Nobody Wants To",
+    t: "He undercut everybody deliberately and took the volume. It was a chosen strategy, held for years, rather than a circumstance he found himself in.",
+    l: "Most people compete on the dimension everybody else has already chosen. Find the one they are ignoring because it looks unglamorous, and take the whole of it." },
+  { s: "frick", x: "mindset", n: "Reinvest Everything", b: "Nothing Is for Showing",
+    t: "In the early years almost nothing went on display. It went back in, which is why the operation compounded past people who were earning the same and spending it.",
+    l: "Two people earning identically for five years end up in completely different places, and the only variable is what they did with it. The spending is invisible at the time and it is the whole of the difference." },
+  { s: "frick", x: "mindset", n: "Learn the Thing You Are Ashamed Of", b: "Pay That Price Once",
+    t: "He sat down in his thirties, in prison, and learned to read — a thing every adult around him could already do. He has said it was the hardest thing he ever did.",
+    l: "The gap you are most embarrassed about has the highest return and you are least likely to close it, because closing it means admitting it in front of somebody. Pay that price once and it is gone." },
+  { s: "lucas", x: "mindset", n: "Consistency Is the Brand", b: "Being the Same Every Time",
+    t: "Blue Magic worked because the quality and the price did not vary. In a market where everybody cut differently, being predictable was the entire proposition.",
+    l: "Being the same every time is undervalued because it is boring to execute and invisible when it works. It is also what people are actually paying for, in every field, and almost nobody delivers it." },
+  { s: "lucas", x: "mindset", n: "He Studied the Man Above Him", b: "Proximity Is the Wage",
+    t: "By his own account he drove for and worked alongside Bumpy Johnson for years — a claim some of Johnson's associates have disputed — and treated it as an apprenticeship rather than a job.",
+    l: "Put yourself next to somebody already doing it and treat the proximity as the pay. Most people take the job for the money and leave with nothing else, which is the most expensive way to spend those years." },
+  { s: "lucas", x: "mindset", n: "Difficulty Is the Moat", b: "The Margin Nobody Will Work For",
+    t: "Going to Southeast Asia himself was dangerous, slow and complicated, which is precisely why nobody else was doing it and why it held for as long as it did.",
+    l: "The advantage sits behind whatever is annoying enough that everybody routes around it. If the thing were easy the margin would already be gone, and the discomfort is the price of the position." },
+  { s: "mastp", x: "mindset", n: "Nobody Is Coming", b: "Start the Worse Version",
+    t: "No label, no distribution, no radio. He built the shop, the label, the distribution deal and the marketing himself before anybody in the industry knew his name.",
+    l: "Whatever you are waiting to be given, assume it is not coming and start the worse version now. The worse version done by you is worth more than the good version you are still waiting for." },
+  { s: "mastp", x: "mindset", n: "Independence Is a Number", b: "Know Your Split",
+    t: "He knew exactly what a major label deal paid an artist and exactly what a distribution deal paid, and chose on the arithmetic rather than on the prestige.",
+    l: "Every arrangement you are in has a number attached that you could go and find out today. Independence and ownership are not attitudes, they are percentages, and most people never once check theirs." },
+  { s: "mastp", x: "mindset", n: "Serve Who Nobody Is Serving", b: "Go Where the Attention Is Not",
+    t: "The South was not where the industry was looking. He built an audience in places the majors had no interest in, and owned it completely by the time they noticed.",
+    l: "Being the only serious person serving an overlooked group beats being the tenth good one in a crowded room, and that position is available right now, in whatever you do, to anybody willing to look unfashionable." },
+  { s: "gucci", x: "mindset", n: "The Body Is the Foundation", b: "Physical First",
+    t: "Sobriety and the gym came before any of the business decisions. He has been explicit that everything else was downstream of getting the body and the chemistry right.",
+    l: "You cannot think your way out of a state you are physically in. Sleep, food, training and what you put in are not adjacent to the work, they are the substrate, and every plan built on a wrecked one fails for reasons that look like discipline." },
+  { s: "gucci", x: "mindset", n: "Guard the Calendar", b: "Who Gets to Put Things In It",
+    t: "The years after prison are conspicuously structured, with far fewer people in them. Most of the chaos he removed was other people's access to his time.",
+    l: "Most of what wrecks a year is somebody else's emergency that you agreed to. The question is not how to be more productive. It is who is allowed to put anything in your calendar at all." },
+  { s: "gucci", x: "mindset", n: "You Can Restart at Any Point", b: "The Past Has No Vote",
+    t: "He came out at thirty-six with a decade of reputation against him and rebuilt all of it. Nothing about the previous version was treated as binding on the next one.",
+    l: "Your history has no vote on what you do next, and the only thing it actually costs is the time it takes people to believe you. That is a fixed cost, paid once, and far smaller than the story you are telling yourself about it." },
+  { s: "meek", x: "mindset", n: "Speak While It Is Happening", b: "An Account From Inside",
+    t: "He talked publicly about the probation, the judge, the conditions and the cost throughout, rather than waiting until it was over and safe to describe.",
+    l: "The account given while you are still inside it is the only one with weight. Afterwards it is a story, and a story can be argued with. Say it now, while it still costs you something to say." },
+  { s: "meek", x: "mindset", n: "Anger Has to Be Converted", b: "Fuel Is Not Direction",
+    t: "A decade of genuine unfairness produced an enormous amount of anger and he has been open about it. What changed anything was putting it into legislation rather than into the people responsible.",
+    l: "Anger is real fuel and it has no steering. It will move you at speed toward whatever is nearest, which is almost always a person. Point it at a structure instead and it becomes the most productive thing you own." },
+  { s: "meek", x: "mindset", n: "Dreams and Nightmares", b: "Both Are True at Once",
+    t: "The defining record of his career holds the ascent and the dread in one thing, and he has never separated the two in public since.",
+    l: "You do not have to choose between what is going well and what is frightening. People who insist on only the first are not convincing, and people who only say the second stop being listened to. Say both." },
+  { s: "suge", x: "mindset", n: "He Thought He Was the Company", b: "Confusing Yourself With the Asset",
+    t: "Death Row's value was the people inside it, and he behaved throughout as though the value was him. Every decision he took follows from that one belief.",
+    l: "Find out honestly what people are actually here for, because if the answer is not you then acting as though it is will empty the room. It is the cheapest thing in the world to check and almost nobody checks it." },
+  { s: "suge", x: "mindset", n: "Respect Was the Objective", b: "Playing for the Wrong Prize",
+    t: "A great deal of what he did makes no business sense at all and complete sense if the thing being chased was deference rather than money.",
+    l: "Work out what you are actually playing for, because it explains every decision of yours that looks irrational from outside. If the real prize is being respected, you will trade enormous amounts of the stated prize for it without ever noticing." },
+  { s: "suge", x: "mindset", n: "Fear Is Cheaper", b: "The Shortcut Around Being Worth Staying For",
+    t: "Building something people want to stay inside is slow and expensive. Making leaving frightening is immediate and free, and he took that option every time it was offered.",
+    l: "Every shortcut around the slow work of being worth choosing takes you further from ever having to do it. That compounds, and you find out the size of it on the one day the shortcut stops working." },
+  { s: "devil", x: "mindset", n: "Definiteness of Purpose", b: "The Only Antidote",
+    t: "The Devil's confession in the book is that he cannot enter a mind occupied by a definite major purpose. Hill makes it the single defence: not effort, not intelligence, not luck. One aim, written, with a plan and a deadline attached.",
+    l: "Almost nobody can state in one sentence what they are for. Without that sentence every hour is available to whatever is loudest, which is why the days feel full and the years feel empty. Vagueness is the vulnerability." },
+  { s: "devil", x: "mindset", n: "The Two Per Cent", b: "Most People Are Not Deciding",
+    t: "The Devil claims ninety-eight per cent of people as drifters and says he owns them because they never made a decision. The other two per cent are not smarter. They decided something and held it.",
+    l: "The line is not between talented and untalented. It is between people who have decided and people who are still gathering information, and you are on one side of it right now and you know which." },
+  { s: "devil", x: "mindset", n: "Adversity Carries the Seed", b: "Every Setback Is a Delivery",
+    t: "The book insists every adversity carries the seed of an equivalent benefit, and that the seed is only available to somebody actively looking for it. Hill's own ruin is the frame the whole thing is written from.",
+    l: "A setback is neutral until you go looking. The seed is not automatic and it is not consolation. It has to be extracted deliberately, while you are still angry, which is exactly when nobody does it." },
+  { s: "devil", x: "internal", n: "Drifting", b: "Going Along With Whatever Comes",
+    t: "The Devil's chief instrument. A drifter lets circumstances and other people set the direction, does not know what they want, and moves with the weather. Hill says drifters cannot be reached by argument.",
+    l: "Drifting does not feel like drifting. It feels like being reasonable, staying open, keeping your options. Check whether you have genuinely decided anything this year, or reacted fast enough that it looked like deciding." },
+  { s: "devil", x: "internal", n: "The Six Basic Fears", b: "What Is Actually Running the Decision",
+    t: "Poverty, criticism, ill health, loss of love, old age and death. Hill's claim is that nearly every irrational decision traces to one of the six, usually criticism, and that they operate below the level you can argue with.",
+    l: "Name which of the six is running the decision you are avoiding. It will be one of them and it will almost certainly be criticism. You are not weighing options, you are managing a fear, and those are different problems." },
+  { s: "devil", x: "internal", n: "Mastery Over Self", b: "The Only Thing You Hold",
+    t: "The second of Hill's seven principles of freedom: discipline over thought, emotion and habit, on the argument that you control almost nothing else and therefore it is the only place the leverage sits.",
+    l: "Your circumstances are mostly other people's decisions. What goes into your head, what you do with your hands and what you do with your hours is the whole of what is yours. Spending any of it on the rest is the waste." },
+  { s: "devil", x: "external", n: "Environmental Influence", b: "The Room Is Doing the Work",
+    t: "The fourth principle of freedom is control of environmental influence: who you are around, what you read, what you listen to. Hill treats it as a mechanism rather than as advice.",
+    l: "You are being written on continuously by whatever you are near, and it does not require your consent. Choosing the room is most of the work that looks like discipline from outside." },
+  { s: "devil", x: "external", n: "It Works Through Other People", b: "Most Discouragement Is Second Hand",
+    t: "In the book the Devil's access to a person is mostly through the people around them — family, friends, teachers — who pass on fear and drift without knowing they are doing it.",
+    l: "Almost nobody discouraging you is doing it deliberately. They are transmitting their own fear accurately and it arrives sounding like concern, which is what makes it effective and why arguing never works." },
+  { s: "devil", x: "external", n: "Time", b: "It Is Compounding Something Already",
+    t: "Hill's fifth principle is time: using it to convert experience into wisdom rather than letting it merely pass, with the claim that drifting compounds at exactly the rate purpose does.",
+    l: "Time is not neutral. It is making you more of whatever you already are, at a rate you did not set. The question is never whether it compounds but what it has been compounding." },
+  { s: "devil", x: "karmic", n: "Hypnotic Rhythm", b: "Nature Makes Permanent What You Repeat",
+    t: "The book's central mechanism. Hypnotic rhythm is nature's method of fixing any habit by repetition, and the claim is that it locks the drifter and the purposeful in with equal force and no preference.",
+    l: "The same law is running on you right now whichever direction you are facing, and nothing is being held in reserve. Whatever you did this week is being made harder to stop, at exactly the same rate either way." },
+  { s: "devil", x: "karmic", n: "Nothing for Nothing", b: "The Price Is Fixed",
+    t: "Hill returns constantly to the claim that nature charges for everything, and that trying to get around the price is itself the trap.",
+    l: "Every version of the shortcut has a price larger than the one you were avoiding. The bill is arithmetic rather than moral, and looking for the version without one is what costs the decade." },
+  { s: "devil", x: "karmic", n: "The Extra Mile", b: "Service Beyond the Payment",
+    t: "Hill's law of increasing returns: render more and better service than you are paid for and it comes back with interest, usually from a direction that has nothing to do with who you did it for.",
+    l: "This is slow, unrewarded while it happens, and the only thing that reliably compounds in a career. The return not coming from the person you did it for is precisely why people stop." },
+  { s: "tagr", x: "mindset", n: "A Definite Sum, a Date, a Price", b: "Six Steps, Written",
+    t: "Hill's six steps require an exact sum, what you intend to give for it, a definite date, a written plan, and the whole thing read aloud twice a day. The specificity is the mechanism rather than the motivation.",
+    l: "A wish has no number, no date and no price. Writing all three turns it into a problem with a shape, which is the only kind you can work on. Most people will not do it because the number makes the gap real." },
+  { s: "tagr", x: "mindset", n: "Thoughts Are Things", b: "What You Dwell On Organises the Rest",
+    t: "The book opens on it and never leaves: sustained thought mixed with definiteness of purpose organises itself into its physical equivalent through the actions and attention it produces.",
+    l: "You need believe nothing mystical for this to hold. What occupies your attention decides what you notice, who you talk to and what you say yes to, and that is most of what a decade is made of." },
+  { s: "tagr", x: "mindset", n: "Specialised Knowledge", b: "Know Where to Get It",
+    t: "Hill is blunt that general education is not the asset. Ford's answer to the charge of ignorance is that he has a row of buttons and can summon anybody who knows. What counts is specialised knowledge organised toward one end.",
+    l: "You do not need to know it. You need to know exactly what you need and where to get it. Collecting knowledge with no plan attached is a hobby that feels like preparation." },
+  { s: "tagr", x: "internal", n: "Burning Desire", b: "Wanting Is Not Enough",
+    t: "Hill separates wishing, wanting and burning desire and says only the third produces anything. His image is Cortés burning the ships: desire made unconditional by removing the way back.",
+    l: "Almost everything you say you want, you want conditionally. Find out by asking what you have already given up for it. If the honest answer is nothing, you are wishing, and wishing has never produced anything." },
+  { s: "tagr", x: "internal", n: "Decision", b: "The Habit of Not Making One",
+    t: "Hill studied people who had failed and found procrastination near the top of the list. His successful subjects decided quickly and changed slowly; the failures decided slowly and changed fast.",
+    l: "Notice which direction you run. Taking a week to choose and then abandoning it within a month is the exact signature of the second group, and it feels like being careful and then being adaptable." },
+  { s: "tagr", x: "internal", n: "Three Feet From Gold", b: "Where Quitting Happens",
+    t: "Darby abandons a mine three feet from the vein and the man who buys his equipment takes millions out of it. Hill uses it structurally: most quitting happens near the result, because near the result is where it is hardest.",
+    l: "The moment it becomes unbearable is statistically the moment before it moves, because everybody else stopped there too. That is not encouragement. It is the reason the return exists at all." },
+  { s: "tagr", x: "external", n: "The Master Mind", b: "Two Minds Make a Third",
+    t: "Hill's claim that a group working in harmony toward one definite purpose creates something greater than the sum, and that no large fortune in his study was built without one. Carnegie's group of about fifty is the model.",
+    l: "You are attempting alone what nobody in the book did alone. Find two or three people aimed at the same thing and meet regularly and specifically, because the alternative is your own head as the only source of ideas." },
+  { s: "tagr", x: "external", n: "Organized Planning", b: "Replace the Plan, Not the Aim",
+    t: "Hill treats plan failure as ordinary and expected — Edison's thousands of attempts — and identifies the real failure as abandoning the aim rather than the method.",
+    l: "When something does not work, find out whether the aim or the method failed. People almost always conclude the first and it is almost always the second. A new plan is cheap; a new aim costs the years already spent." },
+  { s: "tagr", x: "external", n: "Negative Influences", b: "Whose Opinion You Have Agreed to Take",
+    t: "Hill closes on the six ghosts of fear and on negative influence — the claim that other people's fear is transmitted continuously and that most people have no defence built against it.",
+    l: "Decide in advance whose opinion you will take, and on what. Without that list the loudest and nearest person becomes your board of directors by default, and they never applied for the job." },
+  { s: "tagr", x: "karmic", n: "Autosuggestion", b: "You Are Instructing Yourself Already",
+    t: "The principle that repeated, emotionalised statements reach the subconscious, and that you are doing this to yourself every day whether or not you chose the content.",
+    l: "There is no neutral setting. Whatever you say about yourself in your own head is being installed by repetition, and the default content was written by somebody else years ago." },
+  { s: "tagr", x: "karmic", n: "Temporary Defeat", b: "The Interval Is the Variable",
+    t: "Hill's distinction: temporary defeat is a condition and failure is the decision to treat it as permanent. The whole book is a study of people who lost everything at least once.",
+    l: "Everybody gets the defeat. What varies is the interval between it and the next attempt, and that interval is the only thing that has ever separated the two groups." },
+  { s: "tagr", x: "karmic", n: "Persistence Pays From Elsewhere", b: "The Return Is Not From the Same Door",
+    t: "Hill's repeated observation that the reward for holding on rarely arrives through the route it was being pursued down — it comes through a person, an offer or an idea that had nothing to do with the plan.",
+    l: "Stop judging whether it is working by whether the specific route is moving. The return almost always arrives through a door you were not watching, and only people still in the building get it." },
+  { s: "mdh", x: "mindset", n: "Success Is Predictable", b: "Cause and Effect, Not Luck",
+    t: "Tracy's founding claim: everything happens for a reason, success leaves tracks, and doing what people who succeeded did produces the same results eventually. He treats it as a law rather than as encouragement.",
+    l: "If you believe outcomes are mostly luck there is no reason to change anything, and you will not. Treating them as caused is not optimism, it is the only stance that makes the next decision worth taking seriously." },
+  { s: "mdh", x: "mindset", n: "You Become What You Think About", b: "Attention Is the Input",
+    t: "Tracy's version of the oldest claim in the genre: dominant thoughts determine actions, actions determine results, so the intervention point is what is allowed to occupy your mind.",
+    l: "Audit what you actually thought about this week rather than what you intended to. That list is a forecast, and it is far more accurate than any plan you have written down." },
+  { s: "mdh", x: "mindset", n: "Clarity Is the Starting Point", b: "Fewer Than Three Per Cent Write It",
+    t: "Tracy's repeated finding is that almost no adults have written goals, and that those who do outperform everybody by an enormous margin. The writing itself is the mechanism, not the intention behind it.",
+    l: "A goal you have not written is a mood. It cannot be broken into steps, it cannot be checked, and it quietly reorganises itself to match how you feel today. Ten minutes with a pen is the highest-return thing on the list." },
+  { s: "mdh", x: "internal", n: "Ninety-Five Per Cent Is Habit", b: "You Are Running on Rails",
+    t: "Tracy's core number: almost everything you do, think and feel is automatic and already established. New behaviour is therefore not a question of will but of deliberately installing a replacement rail.",
+    l: "Willpower is what you spend for the few weeks it takes to build the rail, and then you stop needing it. People who rely on it permanently are the ones who conclude they have none." },
+  { s: "mdh", x: "internal", n: "Self-Discipline", b: "Doing It Whether You Feel Like It",
+    t: "Tracy defines it flatly as doing what you should do, when you should do it, whether or not you feel like it, and treats it as the single habit that makes every other one possible.",
+    l: "You are waiting to feel like it and it has never once arrived on schedule. The feeling follows the action in almost every case, which means the order most people are using is backwards." },
+  { s: "mdh", x: "internal", n: "An Hour a Day", b: "Your Income Follows Your Input",
+    t: "Tracy's prescription is an hour of reading in your field daily, audio in the car and regular courses, on the claim that skill improvement is the most reliable lever there is on earnings.",
+    l: "An hour a day is about three hundred hours a year, which is a qualification nobody assigned you. The only reason this is not universal is that it pays out too late to feel like progress." },
+  { s: "mdh", x: "external", n: "The Law of Correspondence", b: "Your Outer Life Is a Readout",
+    t: "Tracy's claim that relationships, health, finances and work are an outward picture of what is happening inside, and are therefore diagnostic rather than arbitrary.",
+    l: "Look at the part of your life you are least happy with and ask what it is accurately reporting. It is unwelcome and usually right, and the alternative is fixing the symptom for another five years." },
+  { s: "mdh", x: "external", n: "The Law of Compensation", b: "You Are Paid for Contribution",
+    t: "Emerson's essay by way of Tracy: you are paid in exact proportion to the value of your contribution as other people evaluate it, so earning more means becoming worth more to somebody.",
+    l: "Asking how to earn more is the wrong question. The question is what you could become worth to somebody within a year, because that is the only variable the market is actually reading." },
+  { s: "mdh", x: "external", n: "Eighty Twenty", b: "Most of What You Do Does Not Matter",
+    t: "Tracy applies Pareto everywhere: a fifth of your tasks produce most of your value, and that fifth is almost always the part you least want to begin.",
+    l: "You already know which two tasks matter this week. The reason you are doing the other eight is that they are easier and they generate the feeling of work. Do the two first, badly if necessary." },
+  { s: "mdh", x: "karmic", n: "Sowing and Reaping Has a Lag", b: "The Delay Is Where People Quit",
+    t: "Tracy's law of cause and effect always includes a time lag between the action and the result, and he treats that lag as the reason most people never see the law operate on themselves.",
+    l: "The gap between what you do and what it produces is long enough that it will not feel connected. That is the whole difficulty, and nothing about compounding is visible from inside the period it happens in." },
+  { s: "mdh", x: "karmic", n: "Go First", b: "Reward Follows Contribution",
+    t: "Tracy's repeated instruction to add value first and consistently, on the claim that reward always follows contribution and never precedes it.",
+    l: "Everybody is trying to get paid before delivering, because that is what being careful looks like. The people who go first, repeatedly, become the ones somebody is looking for, and that position cannot be bought." },
+  { s: "mdh", x: "karmic", n: "Your Habits Are Deciding Your Thirties", b: "Small Entries, Compounded",
+    t: "The premise of the whole book: a habit is small enough to be invisible in any single instance and large enough across a decade to constitute an entire life.",
+    l: "Nothing you did today mattered. Everything you do most days is the whole thing. The size of a decision is never visible on the day you take it, which is exactly why they are so easy to take badly." },
+  { s: "surf", x: "mindset", n: "Choose the Reel", b: "Outer Intention, Not Force",
+    t: "Zeland's central image: reality is a film already present in the variations space, and you are not changing the frame you are standing in, you are selecting which reel you move onto. Inner intention pushes at the current frame; outer intention selects a different one.",
+    l: "Most effort goes into forcing the situation you are already in. The alternative is to stop arguing with it and act as the person already in the one you want, which is a completely different set of daily actions." },
+  { s: "surf", x: "mindset", n: "Importance Is the Enemy", b: "Excess Potential",
+    t: "Caring too much about anything creates what Zeland calls excess potential, a distortion the balancing forces move to eliminate, usually by producing the opposite of what was wanted. The more it matters, the more reliably it is taken.",
+    l: "Whatever you have made enormous is the thing you will handle worst. Reduce its importance rather than your effort: the interview, the trade, the conversation goes well in exact proportion to how survivable you have decided the failure is." },
+  { s: "surf", x: "mindset", n: "Coordination of Intention", b: "Treat Everything as Favourable",
+    t: "Zeland's practice of deliberately assuming every event is working in your favour, especially the ones that look like setbacks, because the interpretation decides which line you move onto next.",
+    l: "You have no way of knowing what a setback is for, and you are going to assign it a meaning either way. Assigning the favourable one costs nothing and changes what you do next, which is the only part you control." },
+  { s: "surf", x: "internal", n: "The Soul and the Mind Must Agree", b: "Wanting What You Say You Want",
+    t: "Zeland's condition for anything working at all: the mind's stated goal and the soul's actual feeling have to be the same thing. Most goals are the mind's, borrowed and respectable, and the soul is silent about them.",
+    l: "Check whether the thing you are pursuing produces any feeling at all when you imagine already having it. If it does not, you took it from somebody else, and no amount of discipline makes a borrowed goal work." },
+  { s: "surf", x: "internal", n: "Frailing", b: "Stop Asking, Start Giving",
+    t: "The technique of moving attention entirely off what you want from a person and onto what they want. Zeland's claim is that this releases the potential which was blocking it in the first place.",
+    l: "Whatever you want badly from another person is what your presence is currently demanding, and they can feel it. Turn the whole of your attention onto what they need and the thing you wanted becomes available." },
+  { s: "surf", x: "internal", n: "The Watcher", b: "Never Fully Absorbed",
+    t: "Zeland's instruction to keep part of your attention as an observer, so that you are never completely inside the role you are playing. Absorption is how pendulums take hold.",
+    l: "You can act with full commitment and still keep a piece of yourself watching. That piece is the whole of what lets you stop mid-argument, mid-spiral, mid-trade. Without it you find out what you did afterwards." },
+  { s: "surf", x: "external", n: "Pendulums", b: "Structures That Feed on Attention",
+    t: "Zeland's name for any structure — a movement, a company, an argument, a fandom — that exists by absorbing the energy of its adherents and grows by provoking reactions. It is not conscious and it does not care about you. It needs attention.",
+    l: "Anything designed to provoke a reaction from you is a structure feeding. The tell is that responding feels urgent and important. You do not win by arguing better, you win by failing to show up." },
+  { s: "surf", x: "external", n: "The Balancing Forces", b: "Nature Removes Every Distortion",
+    t: "Any excess potential — idolising, despising, desperate wanting, contempt — creates an imbalance, and the balancing forces act to remove it, generally by handing you the opposite of what you were holding.",
+    l: "Whenever something is going too well in your own telling of it, check what you have inflated. Reality has no opinion about you and it does level, and it does it at the least convenient moment by design." },
+  { s: "surf", x: "external", n: "The Wave of Fortune", b: "Momentum Is Real and It Is Fragile",
+    t: "Zeland describes a line where things begin going well, and the ordinary human reaction — pointing it out, growing suspicious, waiting for the catch — is exactly what knocks you off it.",
+    l: "When a run starts, the most dangerous thing you can do is comment on it. Notice, accept, continue. Most good runs are ended by the person having them deciding it cannot last." },
+  { s: "surf", x: "karmic", n: "You Cannot Take a Line You Do Not Match", b: "Become It First",
+    t: "Zeland's rule that you only move onto a line whose parameters match what you are radiating, so the sequence is always inner change first and outer arrival second, never the reverse.",
+    l: "The thing you want will not arrive to the person you currently are, not because you are unworthy but because the two do not fit together. Find out what that person does on an ordinary Tuesday and do that." },
+  { s: "surf", x: "karmic", n: "Pendulums Punish Their Own", b: "What You Join Owns You",
+    t: "Zeland's warning that a pendulum rewards adherence and turns on anybody who stops feeding it, and that the people who serve it hardest are consumed first.",
+    l: "Anything that offers you an identity in exchange for loyalty is charging you, and the bill is your attention for the rest of your life. Find out what happens to the people who try to leave." },
+  { s: "surf", x: "karmic", n: "The Borrowed Goal", b: "It Cost the Decade",
+    t: "Zeland's claim that most people spend their lives on a goal imposed by a pendulum, and that arriving at it produces nothing at all, which is the return on an aim that was never theirs.",
+    l: "Getting somebody else's goal is worse than missing your own, because you spent the years and cannot say what went wrong. Work out whose idea it was, honestly, before you spend another one." },
+  { s: "para", x: "mindset", n: "Results Are the Paradigm Speaking", b: "Not Your Desire, Not Your Will",
+    t: "Proctor's central claim: your results are an exact expression of your conditioning rather than of what you want. It is why people return to the same income, the same weight and the same kind of relationship repeatedly.",
+    l: "Read your results as a readout rather than as a verdict. They are telling you what is installed. Fighting them with effort while the programme is unchanged is why the same year keeps happening." },
+  { s: "para", x: "mindset", n: "The Stick Person", b: "Conscious, Subconscious, Body",
+    t: "Proctor's diagram: the conscious mind chooses, the subconscious accepts without judgement whatever is impressed on it, and the body acts it out. Nothing reaches the body except through the middle layer.",
+    l: "You cannot install anything by deciding it once. That middle layer accepts by repetition and emotion only, which is why every plan that relied on a single moment of clarity was gone by the Wednesday." },
+  { s: "para", x: "mindset", n: "A Worthy Ideal", b: "Pick the One You Cannot See the Path To",
+    t: "Proctor separates three kinds of goal: the one you know how to reach, the one you think you can reach, and the one you have no idea how to reach. He insists only the third changes anything about you.",
+    l: "A goal you know how to hit is a schedule, and it will leave you exactly as you are. Pick the one where you genuinely cannot see the route, because the not knowing is the entire mechanism." },
+  { s: "para", x: "internal", n: "The Terror Barrier", b: "The Wall Just Before the Change",
+    t: "Proctor's name for the point where you move toward the new result and the paradigm produces fear, doubt and the urge to return to what is familiar. He says almost everybody bounces off it and calls it common sense.",
+    l: "The fear arriving is the signal that you are at the edge, not the signal that you were wrong. It feels identical to good judgement, it comes with reasons, and everybody who got through describes it the same way." },
+  { s: "para", x: "internal", n: "It Was Installed Before You Could Object", b: "Most of It Is Not Yours",
+    t: "Proctor's position is that the paradigm is largely formed in early childhood out of the surrounding environment, and therefore contains the beliefs of people who never consulted you about any of it.",
+    l: "Most of what you assume about money, work and what is possible for somebody like you was put there by people doing their best in a different decade. None of it was chosen and all of it is still running." },
+  { s: "para", x: "internal", n: "Repetition, or an Emotional Event", b: "The Only Two Doors",
+    t: "Proctor says a paradigm changes in exactly two ways: a significant emotional event, or constant spaced repetition. You cannot schedule the first one.",
+    l: "The only available lever is repetition, done daily, for long enough to be boring. Everybody wants the emotional event because it is fast, and waiting for one is how a decade passes unchanged." },
+  { s: "para", x: "external", n: "You Will Recreate the Circumstances", b: "The Environment Reflects the Programme",
+    t: "Proctor's claim that people who change their circumstances without changing the paradigm return to equivalent ones: the lottery winner, the weight regained, the same argument with a different person.",
+    l: "If a problem has followed you through three jobs or three relationships it is not the jobs. That is unwelcome and it is also the best news available, because the part you can reach is the part causing it." },
+  { s: "para", x: "external", n: "Money Is an Effect", b: "Go at the Cause",
+    t: "Proctor, following Wattles, treats money as an effect of service rendered and of the mind that produced it, which makes going directly at the money going at the wrong end of the chain.",
+    l: "The income is downstream of the value and the value is downstream of what you are. Going at the number directly is why so much effort produces so little, and the order of the chain is not negotiable." },
+  { s: "para", x: "external", n: "Proximity Reinstalls It", b: "Everybody Near You Holds the Old Programme",
+    t: "Proctor's insistence that the people around you carry the conditioning you are trying to leave, and will restate it daily without any malice at all.",
+    l: "The reinstallation is continuous and nobody is doing it on purpose. You do not need to leave anybody, but you do need deliberate hours somewhere else, or every gain is overwritten by an ordinary week." },
+  { s: "para", x: "karmic", n: "You Get What You Are", b: "Not What You Want",
+    t: "Proctor's version of attraction has no mysticism he will not explain: what you consistently are in thought and feeling produces the actions and the perception that produce the results. Wanting has no mechanism at all.",
+    l: "Wanting is not an input to anything. Being is, because being decides what you notice, what you attempt and what you agree to, and those three make the whole outcome." },
+  { s: "para", x: "karmic", n: "The Same Year, Repeated", b: "Effort Inside an Unchanged Programme",
+    t: "Proctor's most confronting point: a person can work extremely hard for thirty years inside an unchanged paradigm and arrive precisely where the paradigm always said they would.",
+    l: "Effort inside an unchanged programme produces a more exhausting version of the same result. Before you add hours, find out whether hours were ever the constraint, because they usually are not." },
+  { s: "para", x: "karmic", n: "Impressed, Then Expressed", b: "The Return Arrives as Circumstance",
+    t: "The lineage claim running from Haanel through Hill to Proctor: whatever is impressed on the subconscious is expressed as events, and the return arrives looking like luck and circumstance.",
+    l: "You are impressing something every day whether or not you chose the content. It returns later, dressed as circumstance, and by then the connection is invisible. Choose the content now, while it is cheap." },
+  { s: "feel", x: "mindset", n: "Think From the End", b: "Not Of It",
+    t: "Neville's distinction, and the one everything else rests on. Thinking OF a thing keeps you outside it and confirms you do not have it. Thinking FROM it means assuming the state of already having it and looking at the world from there.",
+    l: "Almost all visualising is done from outside, watching yourself get it, which is a rehearsal of absence. The shift is to ask what you would be noticing, saying and doing if it were already done, and then do that." },
+  { s: "feel", x: "mindset", n: "Assumption Precedes Evidence", b: "The Order Is Not Negotiable",
+    t: "The claim is that the state is assumed first and the facts rearrange to match, never the reverse, and that waiting for evidence before assuming is the whole of why nothing moves.",
+    l: "You are waiting to feel like the person before you behave like them, and the order runs the other way. Your current evidence is not a reason, it is a record of the previous assumption." },
+  { s: "feel", x: "mindset", n: "A Controlled Imagination", b: "And a Well-Sustained Attention",
+    t: "Neville calls this the great secret in plain words. Not effort, not affirmation: the capacity to hold one scene and one feeling without drifting, deliberately and repeatedly.",
+    l: "The scarce thing is attention held on one object for more than about forty seconds. It is trainable and almost nobody trains it, which is why this technique is simultaneously public and rare." },
+  { s: "feel", x: "internal", n: "Feeling Is the Secret", b: "The Subconscious Does Not Read Words",
+    t: "The title and the mechanism. The subconscious accepts what is felt as true rather than what is stated, so an affirmation repeated without the corresponding feeling impresses nothing at all.",
+    l: "Saying it is not doing it. The test is whether the statement produces any physical change in you when you make it. If it does not, you have been talking, and talking has no route in." },
+  { s: "feel", x: "internal", n: "Your Habitual Mood", b: "The State You Drift Back To",
+    t: "Neville's instruction to catch the mood you habitually return to, because he treats habitual mood rather than occasional effort as the actual creative agent, and it is usually one nobody chose.",
+    l: "Whatever state you spend the most hours in is what is being impressed, and it is almost always the one you drift back to rather than the one you visit on purpose. That is the number worth changing." },
+  { s: "feel", x: "internal", n: "The Chief Delusion", b: "Nothing Outside Is the Cause",
+    t: "Neville's hardest line: that man's chief delusion is his conviction that there are causes other than his own state of consciousness. Every external explanation is, in his frame, an evasion.",
+    l: "This is uncomfortable and it is useful even taken only as a discipline. Every time you locate the cause outside yourself you have also located the solution outside yourself, and you cannot reach it there." },
+  { s: "feel", x: "external", n: "Sleep Is the Doorway", b: "The Drowsy State",
+    t: "Neville's practical instruction: the state on the edge of sleep, where the conscious mind is quiet, is when the assumption should be held. The last thing in mind before sleep is the impression that takes.",
+    l: "You are already doing this every night with whatever was last on your mind, which for most people is a screen or an argument. That slot is a mechanism whether or not you use it deliberately." },
+  { s: "feel", x: "external", n: "Prayer Is a State", b: "Asking Confirms Absence",
+    t: "Neville redefines prayer as the assumption of the wish already fulfilled, held in a state akin to sleep, and points out that petitioning confirms the thing is not had, which is the state actually being impressed.",
+    l: "Whatever form your asking takes, it restates the absence every time. Notice how much of your inner life is spent confirming, in detail, that you do not yet have it." },
+  { s: "feel", x: "external", n: "The World Is the Report", b: "Circumstance Is Not an Authority",
+    t: "In Neville's frame the outer world is the printed record of states already held: a report rather than a verdict, and therefore never a reason to change the assumption.",
+    l: "Whether or not you accept the metaphysics, treating your circumstances as data about what you have been rather than as a ruling on what you can be is a strictly better position to act from." },
+  { s: "feel", x: "karmic", n: "What Is Impressed Is Expressed", b: "There Is No Filter",
+    t: "Neville's mechanism runs both ways. The subconscious does not evaluate, it forms, and whatever is felt as true is brought into being, including the things nobody would choose.",
+    l: "There is no filter on the input. The fear you rehearse in detail is receiving exactly the same treatment as the goal you visualise for five minutes, and one of those is getting far more hours." },
+  { s: "feel", x: "karmic", n: "The Interval", b: "Remaining Faithful With No Evidence",
+    t: "Neville's repeated point that between the assumption and its appearance there is a period in which nothing confirms it, and that abandoning the state during that period is the only real failure available.",
+    l: "That gap exists in every version of this, secular or not. What you do in the stretch where there is no evidence is the entire difference, and it is the part no technique can do for you." },
+  { s: "feel", x: "karmic", n: "Today Is Last Year Arriving", b: "Read It as a Return",
+    t: "Neville's claim that the present is the harvest of states previously held, which makes today a report on last year rather than an accident that happened to you.",
+    l: "Read your current life as the return on what you were consistently being twelve months ago. Whether or not the mechanism is what he says it is, the correlation is strong enough to act on." },
+  { s: "sogr", x: "mindset", n: "The Creative Mind", b: "Not the Competitive One",
+    t: "Wattles' core distinction. The competitive mind sees a fixed supply to be fought over; the creative mind brings something into being that was not there. He argues nothing held on the competitive plane is secure, because it can be taken the same way it was got.",
+    l: "Ask honestly whether you are trying to take a share or to make something new. The first is a fight with everybody and the second has no competitors at all, and most people never notice which one they are doing." },
+  { s: "sogr", x: "mindset", n: "A Certain Way", b: "The Method Is the Asset",
+    t: "Wattles insists that getting rich has nothing to do with the business you are in, the place you live or your talent, and everything to do with doing things in a certain way, which is learnable and repeatable.",
+    l: "You are probably in a good enough field. The variable is how you operate inside it, and that is the part you can improve this week. Changing the field is usually a way of avoiding changing the method." },
+  { s: "sogr", x: "mindset", n: "Gratitude Is a Mechanism", b: "Not a Sentiment",
+    t: "Wattles gives it a chapter and treats it functionally: gratitude holds the mind on what is working, and a mind fixed on lack produces the actions of lack.",
+    l: "It is not about being pleasant. The direction of your attention decides what you look for, and a person cataloguing what is missing behaves completely differently from one cataloguing what is there." },
+  { s: "sogr", x: "internal", n: "Hold the Picture, Not the Method", b: "Do Not Supply the How",
+    t: "Wattles says to form a clear mental image, hold it with purpose and faith, and specifically not to concern yourself with the route by which it arrives. The how is not yours to provide.",
+    l: "Most planning is anxiety wearing a spreadsheet. Be precise about the outcome and loose about the route, because insisting on a route you can already see limits you to what you can currently imagine." },
+  { s: "sogr", x: "internal", n: "Act in Your Present Business", b: "Start From Where You Are",
+    t: "Wattles is blunt that you act now, in the job and the place you are already in, doing everything you can do each day, and that waiting for better circumstances is the commonest failure of all.",
+    l: "There is no better starting position coming. The actions available today, done completely, are the whole mechanism, and the search for a better starting point is the thing consuming the years." },
+  { s: "sogr", x: "internal", n: "Efficient Action", b: "Do Not Hurry and Do Not Skip",
+    t: "His instruction is to do each day's work efficiently and completely rather than rushing at tomorrow's, because hurried action is inefficient action and incomplete days accumulate.",
+    l: "Doing today's work completely is unglamorous and it is the whole of it. Rushing is a way of feeling productive while leaving a trail of half-finished things that each cost double later." },
+  { s: "sogr", x: "external", n: "Give More in Use Value Than You Take", b: "The Increase",
+    t: "Wattles' central mechanism: everybody you deal with should be better off for having dealt with you, and the business is built out of that rather than out of extraction.",
+    l: "Make sure the person on the other side of every transaction genuinely gained. It is slower, it produces a reputation that works while you sleep, and it removes the need to keep finding new people." },
+  { s: "sogr", x: "external", n: "There Is No Shortage", b: "Supply Is Not the Constraint",
+    t: "Wattles argues the supply of everything worth having is effectively unlimited, and that acting from scarcity produces exactly the results scarcity predicts.",
+    l: "Whether or not the metaphysics holds, check what you are assuming about the size of the opportunity. Almost everybody is operating on an estimate they inherited and have never once tested." },
+  { s: "sogr", x: "external", n: "You Are Not Competing", b: "Nobody Else Winning Costs You",
+    t: "His claim that there is no need to take from anyone, drive a hard bargain or cheat, because the creative plane has room and the competitive plane is where the fear lives.",
+    l: "The feeling that somebody else winning costs you something is almost always false and always expensive. It changes who you are willing to help, and that is the most valuable thing you have to trade." },
+  { s: "sogr", x: "karmic", n: "The Increase Comes Back", b: "From Somewhere Else",
+    t: "Wattles ties the system together here: the person who consistently gives more than they take becomes the one everybody wants to deal with, and the return is structural rather than moral.",
+    l: "The return does not come from the transaction it was given in. It comes from the ones that happen because of it, later, which is exactly why the practice looks unrewarded for so long." },
+  { s: "sogr", x: "karmic", n: "Thought Held Long Enough", b: "Wavering Undoes It",
+    t: "Wattles' mechanism requires sustained impression over time and he is explicit that wavering cancels it. Alternating between the picture and the doubt is what produces nothing at all.",
+    l: "Alternating between the plan and the doubt is worse than either, because nothing ever accumulates. Pick one and give it long enough to report back, and let the report be the only thing that changes it." },
+  { s: "sogr", x: "karmic", n: "The Plane You Left", b: "What the Shortcut Actually Costs",
+    t: "Wattles' warning that the moment you move to taking, you have left the plane on which making was possible, and that everything gained on the other one is insecure by construction.",
+    l: "Every shortcut that takes from somebody also removes you from the position where you were building. The loss is not the ethics of it, it is that you can no longer see the other set of moves." },
+  { s: "cyb", x: "mindset", n: "You Cannot Outperform the Self-Image", b: "The Ceiling Is Internal",
+    t: "Maltz's founding observation from plastic surgery: patients whose faces were corrected often did not change at all, because the picture they held of themselves had not. The self-image governs everything downstream.",
+    l: "You have a number in your head for what somebody like you gets, and your performance keeps arriving near it. Raising that ceiling is a different job from working harder underneath it, and only one of the two works." },
+  { s: "cyb", x: "mindset", n: "A Goal-Striving Mechanism", b: "Give It a Target",
+    t: "Maltz's cybernetic model: the brain works like a guidance system that self-corrects toward a target, but only once a target has actually been set. With none, it has nothing to correct toward.",
+    l: "Most people are steering constantly with no destination and calling it being busy. Set one target clearly enough to be wrong about, and the correcting starts happening without you having to manage it." },
+  { s: "cyb", x: "mindset", n: "Imagination Is the Same Input", b: "Rehearsal Counts",
+    t: "Maltz's claim, later borne out in sports psychology, that the nervous system does not fully distinguish a vividly imagined experience from a real one, which is why mental rehearsal produces measurable improvement.",
+    l: "You are rehearsing something every day already, usually the conversation going badly. Spend the same minutes rehearsing it going well, in detail, and the system updates on that exactly the same way." },
+  { s: "cyb", x: "internal", n: "The Theatre of the Mind", b: "Thirty Minutes, Vividly",
+    t: "Maltz's prescribed exercise: half an hour a day alone, seeing yourself acting as the person you intend to be, in detail, with the feelings included rather than described.",
+    l: "It is the same instruction the whole genre gives and Maltz supplies the reason: the input is what the mechanism steers by. Half an hour is the price, and almost nobody pays it because nothing visible happens for weeks." },
+  { s: "cyb", x: "internal", n: "Emotional Scars", b: "A Defence That Outlived the Danger",
+    t: "Maltz treats emotional scarring the way he treated the physical kind: something that once protected you and now prevents ordinary contact. The guard stays up long after the threat has gone.",
+    l: "Whatever you built to protect yourself at nineteen is still running and it is now the thing stopping you. It was correct then. Check whether the situation it was built for still exists." },
+  { s: "cyb", x: "internal", n: "Try Softer", b: "Effort Jams the Mechanism",
+    t: "Maltz gives a great deal of the book to relaxation, on the model that excessive effort and anxiety interfere with the servo-mechanism's own corrections.",
+    l: "Past a point, effort degrades performance rather than improving it, and the feeling of straining is the signal. The correction happens on its own if you stop interfering, which is the hardest instruction here to follow." },
+  { s: "cyb", x: "external", n: "Twenty-One Days", b: "Nothing Is Reporting Yet",
+    t: "Maltz observed that patients took roughly three weeks to stop seeing the old face in the mirror, and generalised it: a new mental image takes about that long to settle.",
+    l: "Whatever you are installing, nothing is decided in the first three weeks and almost everybody quits inside them. Treat that stretch as a cost rather than as a test, because it is not reporting anything yet." },
+  { s: "cyb", x: "external", n: "The Failure Mechanism", b: "A Warning Light, Not a Verdict",
+    t: "Maltz lists the signature: frustration, aggressiveness, insecurity, loneliness, uncertainty, resentment, emptiness. He treats the set as a system fault rather than as a statement about character.",
+    l: "Those feelings are diagnostic rather than descriptive. When several arrive together you are not a worse person that month, you are a system with a bad input, and the input is findable." },
+  { s: "cyb", x: "external", n: "It Was the Sentence, Not the Event", b: "How the Image Got Built",
+    t: "Maltz is clear that the self-image is built out of interpreted experience, including what people said, and that what got stored was the interpretation rather than the event.",
+    l: "The thing shaping you was never what happened, it was the sentence you wrote about it afterwards. That sentence is editable in a way the event is not, and almost nobody goes back to read it." },
+  { s: "cyb", x: "karmic", n: "The Loop Makes Its Own Evidence", b: "Self-Confirming by Design",
+    t: "Maltz's mechanism is circular on purpose: the image produces the behaviour, the behaviour produces the results, and the results confirm the image. It reinforces in both directions equally well.",
+    l: "Your evidence about yourself was generated by the belief it is now supporting. That is why arguing with the evidence never works, and why changing the input at the top is the only place the loop can break." },
+  { s: "cyb", x: "karmic", n: "You Are Practising Something Daily", b: "Count the Hours Honestly",
+    t: "Because the nervous system does not distinguish the source, the worry you run in full detail trains the same mechanism as the rehearsal you do deliberately, and there is far more of the first.",
+    l: "You are practising something every single day. Count the hours honestly and the overwhelming majority went into rehearsing the thing you are afraid of, in high definition, with the feelings included." },
+  { s: "cyb", x: "karmic", n: "The Scar Charges Rent", b: "Only You Are Paying It",
+    t: "Maltz treats a held injury as an ongoing cost carried by the holder: the emotional scar keeps the wound live and keeps the behaviour it produced in place for decades.",
+    l: "Whatever you are still carrying is charging you daily and the other person is not being billed at all. Putting it down is not a favour to them and it is not a moral act. It is a repossession." },
+  { s: "bloom", x: "mindset", n: "The Audience Came First", b: "Build the Room Before the Product",
+    t: "Mari Llewellyn documented a transformation publicly for years before there was anything to sell, and Greg ran the business side from the start. By the time Bloom launched, the people who would buy it already existed and already trusted her.",
+    l: "Most people build the thing and then go looking for who wants it, which is the expensive order. An audience built first is a launch with demand already in it, and it costs nothing but years of showing up before there is any reason to." },
+  { s: "bloom", x: "mindset", n: "A Boring Category, Executed Better", b: "You Do Not Need a New Idea",
+    t: "Greens powder was not a new product and the shelf was not empty. What was different was how it tasted, how it looked and who was holding it.",
+    l: "You do not need an idea nobody has had. You need an existing thing somebody is doing badly and a reason people would switch. The search for originality is usually a way of not starting." },
+  { s: "bloom", x: "mindset", n: "Keep It Yours", b: "No Outside Money Until the Terms Are",
+    t: "Reported as launched on their own money in the low tens of thousands and run without institutional investment through the growth, which is why the eventual sale happened on their terms.",
+    l: "Money taken early is bought at the worst price you will ever get, and it buys somebody else a vote on everything afterwards. If the thing can be started small, start it small." },
+  { s: "bloom", x: "internal", n: "She Posted Before It Was Working", b: "The Unflattering Part",
+    t: "The following came from documenting the beginning of a transformation rather than the end of one. The early material is the part most people delete.",
+    l: "The audience is built during the stretch you are embarrassed by. Nobody follows a finished result, they follow a process they can see themselves inside, and a finished result has no room for anybody." },
+  { s: "bloom", x: "internal", n: "Two People, Two Jobs", b: "Knowing Which One Is Yours",
+    t: "One built the audience and the brand, the other ran operations and the business. Neither attempted both.",
+    l: "Most partnerships fail on the overlap rather than on the gap. Work out precisely which half is yours, say it out loud, and then stop having an opinion about the other one." },
+  { s: "bloom", x: "internal", n: "The Flat Stretch", b: "Years Before Anything Moved",
+    t: "The audience took years and the business took more. Nothing about the timeline was fast from the inside, and every retelling compresses all of it into a sentence.",
+    l: "Every overnight thing you have seen had a flat stretch in front of it that nobody filmed. You are currently in yours and it looks exactly like nothing working." },
+  { s: "bloom", x: "external", n: "Seeding Beats Advertising", b: "Get It Into Hands",
+    t: "The growth came from putting product in front of creators and letting them use it rather than from buying attention outright, and the platforms did the rest.",
+    l: "A recommendation from somebody people already listen to is worth far more than the same money spent shouting. Work out who your buyers already trust and make their life easier." },
+  { s: "bloom", x: "external", n: "Retail Is a Different Business", b: "Shelf Space Has Its Own Rules",
+    t: "National retail is not a bigger version of selling online. It is different terms, different margins, forecasting and real downside if you are wrong about volume.",
+    l: "Every channel you add is a new business with its own physics. Growth usually means learning a second trade rather than doing more of the first one." },
+  { s: "bloom", x: "external", n: "A Clean Company Can Be Bought", b: "Structure Decides the Exit",
+    t: "A profitable, owner-controlled brand with an uncomplicated ownership structure is a straightforward thing for somebody to acquire. That is structural rather than lucky.",
+    l: "How you build decides whether anybody can ever buy it. Every shortcut in the structure \u2014 the unclear ownership, the handshake, the missing paperwork \u2014 becomes a discount or a dealbreaker years later." },
+  { s: "bloom", x: "karmic", n: "The Transformation Was Real First", b: "You Cannot Fake the Origin",
+    t: "The brand sits on top of something she actually did, with a public record of it, made before there was any commercial reason to make it.",
+    l: "What you build on has to be true, because the thing you built will eventually be examined. A story constructed for the launch has nothing underneath it and everybody finds out at once." },
+  { s: "bloom", x: "karmic", n: "Everything Posted Is Kept", b: "The Invoice for Building in Public",
+    t: "A business built on a public personal history means every early post, opinion and version of yourself is still there and still attached to it.",
+    l: "Building in public is the cheapest distribution there is and the invoice is permanence. Say things you will still stand behind, because you are the only person who can decide that now." },
+  { s: "bloom", x: "karmic", n: "The People Who Bought First", b: "They Made It and They Remember",
+    t: "The early customers came from the free content and are the reason any of it worked. Brands that forget that are found out at exactly the moment they need them again.",
+    l: "Whoever showed up before it was obvious is owed something real, and that account stays open for as long as the thing exists. Nothing repays it except continuing to be worth it." },
+  { s: "gymsh", x: "mindset", n: "A Sewing Machine and a Screen Printer", b: "Start With What You Can Reach",
+    t: "Gymshark began with a screen printer and a sewing machine, bought with money from fitness apps he had built, making clothing at his parents' house in Birmingham while delivering pizzas at night.",
+    l: "The first version is made with whatever you can already reach. Nobody is coming to fund the good version, and the good version is not what proves anything anyway." },
+  { s: "gymsh", x: "mindset", n: "He Was the Customer", b: "Build for Who You Already Are",
+    t: "He was nineteen, he lifted, and he could not find clothing that fit the way he wanted it to. Every early product decision was solving his own problem.",
+    l: "The cheapest research available is being the customer. You know what is wrong with the current options without asking anybody, and you can tell immediately whether your fix is real." },
+  { s: "gymsh", x: "mindset", n: "He Stepped Back From CEO", b: "When You Are the Constraint",
+    t: "He moved out of the top job while the company scaled, worked in other roles inside it, and returned as chief executive in 2021 once that version of the job was one he wanted.",
+    l: "Your ego and the company's needs are two different things and they come apart at some size. Being honest about which jobs you are currently bad at is the rarest thing a founder ever does." },
+  { s: "gymsh", x: "internal", n: "Delivering Pizzas Until Two", b: "The Overlap Period",
+    t: "For a long stretch it was a night job, a degree and a business at the same time. None of that was optional and none of it was glamorous.",
+    l: "Almost every version of this starts in an overlap where you are doing two things badly and sleeping less. That period is the price and it does not get a montage." },
+  { s: "gymsh", x: "internal", n: "The Black Friday Crash", b: "What You Build in the Six Months After",
+    t: "The site went down on the biggest trading day of the year and the business was publicly broken for hours. He has described it as the lowest point and as the thing that forced everything afterwards to be built properly.",
+    l: "You will have one public failure that everybody sees. What it costs is decided entirely by what you rebuild in the six months after it, and almost nobody uses those six months." },
+  { s: "gymsh", x: "internal", n: "He Never Left the Gym", b: "Distance From the Product",
+    t: "The product decisions stayed close to the person using them because he never stopped being one, which is unusual at that size and is deliberate.",
+    l: "The day you stop using the thing you make, you start guessing. Distance from the product looks like seniority and it is the beginning of the decline." },
+  { s: "gymsh", x: "external", n: "He Sent It to the YouTubers", b: "Before Anybody Called It That",
+    t: "In 2012 and 2013 he posted product to fitness creators with audiences, with no commercial arrangements in place. It was not a strategy anybody had a name for yet.",
+    l: "The channel that works is the one nobody is competing in, and it is usually the one that looks unserious. By the time it has a name and an agency attached, it has a price." },
+  { s: "gymsh", x: "external", n: "BodyPower", b: "One Room, One Weekend",
+    t: "The stand at BodyPower in 2013 is the point it became real: the product in front of the exact audience, in person, all at once.",
+    l: "One room containing the people you are for is worth months of broadcasting at everybody. Find where they already gather and physically go." },
+  { s: "gymsh", x: "external", n: "The Stake Taken at a Billion", b: "Raise From Strength or Not at All",
+    t: "General Atlantic took a minority position in 2020 at a billion-pound valuation, after eight years with no outside investment at all. The terms were what they were because the company did not need it.",
+    l: "The only good time to take money is when you do not have to. Everything about the price and the control is decided by whether you could walk away, and that is set years earlier." },
+  { s: "gymsh", x: "karmic", n: "The Creators Who Took the Free Product", b: "Built With, Not Bought",
+    t: "The early athletes came up alongside the brand and several are still associated with it a decade on. The relationship was not transactional at the start because there was nothing to transact with.",
+    l: "What you build with people who backed you before it was obvious is a different thing from what you buy later. The first kind lasts and the second kind is renegotiated annually." },
+  { s: "gymsh", x: "karmic", n: "Learned in Public", b: "A Very Long Record",
+    t: "The mistakes, the crash, the stepping back and the returning all happened where people could see, and he has spoken about most of it since.",
+    l: "Building in public means the failures are public too, and that is the cost of the distribution. What it buys is that nobody can ever surprise you with your own history." },
+  { s: "gymsh", x: "karmic", n: "He Stayed in Birmingham", b: "Where You Build Compounds",
+    t: "The company is still headquartered there rather than in London, which was a decision rather than an accident of inertia.",
+    l: "Where you build is a choice with compounding consequences: the cost base, the people you can hire, what the culture becomes. Defaulting to where everybody goes is a decision you did not make." },
+  { s: "hormo", x: "mindset", n: "Give It All Away", b: "The Book Costs Less Than the Printing",
+    t: "$100M Offers and $100M Leads are priced at effectively nothing and the content is published free at enormous volume. The stated model is that attention is the asset and everything else is downstream of it.",
+    l: "What you charge at the entry decides how many people ever get in. If the real money is further down the line, the front of it should cost as close to nothing as you can stand." },
+  { s: "hormo", x: "mindset", n: "Volume Negates Luck", b: "You Are Under-Sampled",
+    t: "His repeated point is that most people never do enough of the thing for the odds to work: not enough calls, not enough posts, not enough offers made.",
+    l: "You are not unlucky, you are under-sampled. Almost every plateau is somebody doing ten of something that needs a thousand, and concluding from the ten that it does not work." },
+  { s: "hormo", x: "mindset", n: "Fix the Offer Before the Traffic", b: "The Grand Slam Offer",
+    t: "His central commercial argument: the problem is almost never the price or the volume of attention, it is that the offer is ordinary. Stack the value, remove the risk, make it specific.",
+    l: "Before you spend anything on getting more attention, check whether what you are offering could convert the attention you already have. It usually cannot, and that is far cheaper to fix." },
+  { s: "hormo", x: "internal", n: "He Lost It Twice", b: "Down to Almost Nothing",
+    t: "He has been open about periods of being effectively broke and in debt, after the gyms and again later, and about what those stretches did to him.",
+    l: "You will be wrong in a way that costs everything at least once. Knowing that in advance changes what you put at risk and how quickly you get back up, and almost nobody plans for it." },
+  { s: "hormo", x: "internal", n: "He Married the Operator", b: "Give Away the Half You Avoid",
+    t: "He and Leila run it as two distinct functions: he is public-facing and offer-focused, she runs operations. He has said the company would not work with two of him in it.",
+    l: "Most founders try to be both halves and are quietly terrible at one of them. Find the person who is good at the part you avoid, and then actually hand it over." },
+  { s: "hormo", x: "internal", n: "He Publishes Every Day", b: "Repetition Is the Mechanism",
+    t: "The output is constant and mostly unglamorous: the same ideas, restated, across every format, for years without a gap.",
+    l: "Almost nobody is beaten on ideas. They are beaten on the number of times they said it. Repetition feels like a failure of imagination and it is the whole of what works." },
+  { s: "hormo", x: "external", n: "Sell to People Who Already Have a Business", b: "Pick a Buyer Who Can Pay",
+    t: "Gym Launch sold to gym owners: people with revenue, a problem they could name, and an immediate reason to pay for a fix. Not to consumers.",
+    l: "Who you sell to matters more than what you sell. A customer with money and an urgent expensive problem makes an ordinary product viable, and the reverse kills a good one." },
+  { s: "hormo", x: "external", n: "Own the Thing That Owns the Things", b: "There Is a Level Above Operating",
+    t: "The structure moved from running businesses to holding them: a portfolio, with the operating work done by the companies rather than by him.",
+    l: "There is a level above running the thing and it is available earlier than people take it. Ask what you would have to build so that your own time stops being the input." },
+  { s: "hormo", x: "external", n: "He Sold the Majority and Kept Working", b: "An Exit Is Not an Ending",
+    t: "Reported as selling around two thirds of Gym Launch and Prestige Labs in 2021, and then immediately building the next structure rather than stopping.",
+    l: "An exit is a liquidity event, not a finish line, and people who treat it as one spend the following year discovering there is nothing on the other side of it." },
+  { s: "hormo", x: "karmic", n: "The Free Content Is Why Anybody Calls", b: "Placed, Not Lost",
+    t: "Years of free material produced the audience that makes every subsequent business easier to start, and none of it paid anything at the time.",
+    l: "What you give away is placed rather than lost, and the return arrives as people already knowing who you are at the moment you need them to. That cannot be bought later at any price." },
+  { s: "hormo", x: "karmic", n: "He Says What He Said When He Was Broke", b: "Consistency Is Checkable",
+    t: "The material from the early years and the material now make the same arguments, which is unusual and is most of why anybody takes it seriously.",
+    l: "Everything you say is kept and will be compared against everything else you said. The only sustainable position is one you would still hold if it stopped being profitable." },
+  { s: "hormo", x: "karmic", n: "What the Gyms Cost Him", b: "The Tuition Was Paid in Advance",
+    t: "The failed and nearly-failed years are where the offer knowledge came from. None of it was theoretical and every part of it was paid for.",
+    l: "The expensive years are the only ones that produce something you can sell later. That does not make them pleasant and it does mean they were not wasted." },
+  { s: "spanx", x: "mindset", n: "What Did You Fail At This Week", b: "Failure as the Metric",
+    t: "Her father asked it at dinner every week and was disappointed when the answer was nothing. She has said it removed the fear of trying things that turn out not to work.",
+    l: "If nothing you tried this week failed, you attempted nothing with a real chance of not working. Track the attempts rather than the outcomes, because only one of those is under your control." },
+  { s: "spanx", x: "mindset", n: "She Told Nobody for a Year", b: "Protect It While It Is Fragile",
+    t: "She kept Spanx secret for about a year, including from friends and family, because she did not want the idea talked out of her before it existed.",
+    l: "Early ideas are fragile and other people's opinions arrive long before the thing can defend itself. Tell nobody until it is real enough to survive the conversation." },
+  { s: "spanx", x: "mindset", n: "She Wrote the Patent Herself", b: "Find Out What It Actually Involves",
+    t: "Quoted around three thousand dollars by attorneys against savings of five thousand, she bought a textbook and wrote it herself, paying a lawyer only for the claims.",
+    l: "A great deal of what gets outsourced at the start could be learned in a fortnight. Find out what the expensive thing actually involves before you pay somebody to do it badly." },
+  { s: "spanx", x: "internal", n: "Seven Years of Fax Machines", b: "Which Skill Is It Teaching",
+    t: "She sold office equipment door to door for seven years and was regularly thrown out of buildings. Everything about how Spanx was eventually sold came out of that stretch.",
+    l: "An unglamorous run of work that teaches one transferable skill is not a wasted run. The question is which skill, and if the honest answer is none, that is the problem." },
+  { s: "spanx", x: "internal", n: "She Cut the Feet Off", b: "Be the Prototype",
+    t: "The first product was a pair of her own hosiery with the feet cut off, worn under white trousers to a party. The problem was hers and she solved it for herself first.",
+    l: "The best starting point is a problem you personally have, because you can test the fix on yourself tonight and you will know immediately whether it worked." },
+  { s: "spanx", x: "internal", n: "Every Mill Said No", b: "Until One Man Asked His Daughters",
+    t: "She cold-called hosiery mills in North Carolina and was turned down repeatedly. One owner called back after his daughters tried the idea and liked it.",
+    l: "Almost nothing changes about the pitch between the twentieth refusal and the yes. What changed is that you were still asking, and the person had a reason you could never have predicted." },
+  { s: "spanx", x: "external", n: "She Walked It Into Neiman Marcus", b: "Go to the One Buyer",
+    t: "She got a meeting with a buyer, changed in the bathroom to demonstrate the difference in person, and came out with seven stores.",
+    l: "The meeting that matters is almost always with one specific person and is almost always gettable. A demonstration they can see beats a document they will skim." },
+  { s: "spanx", x: "external", n: "Oprah", b: "You Cannot Make the Break, Only Deserve It",
+    t: "Being named a favourite thing in 2000 changed the scale of the business overnight. It happened because the product was genuinely good and somebody found it.",
+    l: "You cannot manufacture the break, but you can make certain the thing is worth breaking. Almost everybody optimises for being found rather than for being worth finding." },
+  { s: "spanx", x: "external", n: "No Advertising, No Investors", b: "She Owned All of It",
+    t: "Spanx grew for years with no advertising spend and no outside investment, which is why she still owned one hundred per cent when the Blackstone deal happened.",
+    l: "What you own at the end was decided by what you gave up at the start. Every round and every bought customer is a claim on the thing, and the alternative is slower and entirely yours." },
+  { s: "spanx", x: "karmic", n: "Ten Thousand Each", b: "What the Exit Was For",
+    t: "On the sale she gave every employee ten thousand dollars and two first-class tickets to anywhere in the world.",
+    l: "What you do at the moment you finally have it is the truest statement you will ever make about the whole thing. Everybody who was there remembers, and so do you." },
+  { s: "spanx", x: "karmic", n: "She Gave Before It Was Comfortable", b: "The Timing Is the Test",
+    t: "She started the Sara Blakely Foundation in 2006 and signed the Giving Pledge in 2013, committing at least half of her wealth away. All of it began years before there was an exit to give out of.",
+    l: "Generosity that begins when it is easy is a different thing from generosity that begins when it costs. Only one of them changes you and it is the earlier one." },
+  { s: "spanx", x: "karmic", n: "Seven Years of Deposits", b: "Nothing Came Back at the Time",
+    t: "The fax years, the rejected mills, the year of silence: none of it produced anything while it was happening and all of it is why the rest worked.",
+    l: "You are depositing during the period when nothing is coming back. That is not a metaphor about patience, it is a description of the mechanism and of why almost nobody reaches the payout." },
+  { s: "mchmp", x: "mindset", n: "Twenty Years of Saying No", b: "To Every Investor Who Asked",
+    t: "They were approached repeatedly across two decades and refused every time, then sold to Intuit in 2021 in what was reported as the largest acquisition of a bootstrapped company ever.",
+    l: "The compounding on ownership is invisible until the end and then it is the entire thing. Every point you keep is worth more the longer it runs, which is exactly backwards to how it feels early." },
+  { s: "mchmp", x: "mindset", n: "It Was a Side Project", b: "Nobody Started a Company",
+    t: "Mailchimp ran alongside a web design agency and was not the main business. It became the main business because it kept growing while the other thing paid for the years.",
+    l: "You do not have to quit in order to start. The thing that works is often the side project that will not go away, and the job is what buys it the time it needs." },
+  { s: "mchmp", x: "mindset", n: "Serve the Customer Nobody Wants", b: "The Market Everyone Skipped",
+    t: "They aimed at very small businesses, the customers the enterprise companies had no interest in, and built something that did not require anybody to be technical.",
+    l: "The market everybody ignores for being too small is where you get to learn in peace. It also grows, and the people you helped when they were nobody do not forget it." },
+  { s: "mchmp", x: "internal", n: "They Were Not Trying to Be Big", b: "Growth Was Not the Aim",
+    t: "The stated posture for years was to build something good and sustainable rather than to chase scale. The scale arrived as a consequence of that rather than as the target.",
+    l: "Chasing growth directly changes every decision underneath it and most of those changes are bad. Making the thing genuinely good is slower and is the only version you never have to defend." },
+  { s: "mchmp", x: "internal", n: "A Salon and a Small Business", b: "Where the Model Came From",
+    t: "He has talked about his mother's hair salon as the origin of how he thinks about small business: the customer is a person you actually see.",
+    l: "What you watched work before you knew anything is a model you are still running. Go and find out which one it is, because it explains more of your decisions than any framework does." },
+  { s: "mchmp", x: "internal", n: "Freemium Was a Real Risk", b: "It Looked Like a Mistake for a Year",
+    t: "Introducing a free tier in 2009 meant giving up immediate revenue on a bet that volume would follow. Users went from around eighty-five thousand to roughly four hundred and fifty thousand in a year.",
+    l: "The decision that changes the trajectory usually looks like giving something away and feels wrong for about a year. It is only obvious afterwards, which is exactly why it was still available." },
+  { s: "mchmp", x: "external", n: "Free at the Front", b: "Volume Over Margin",
+    t: "Free at the bottom, paid as you grow, and a business built on the fact that a great many small customers eventually become medium ones.",
+    l: "Where you set the entry price decides the entire shape of the business. Free at the front is not generosity, it is a decision to be paid later by a far larger number of people." },
+  { s: "mchmp", x: "external", n: "Serial", b: "One Sponsorship, Years of Brand",
+    t: "The podcast sponsorship in 2014, and the mispronounced name that came with it, put Mailchimp in front of an enormous audience with no prior reason to know it existed.",
+    l: "One correctly chosen place, early, before the price has risen, beats a large budget spread thinly everywhere. A channel is cheap precisely while nobody has proved it works." },
+  { s: "mchmp", x: "external", n: "Atlanta, Not San Francisco", b: "Outside the Machine",
+    t: "They built it away from the venture ecosystem, which is a large part of why refusing money stayed easy for twenty years.",
+    l: "Your environment sets the default assumptions about how a thing is supposed to be done. Being outside it costs you the network and buys you the ability to ignore the consensus." },
+  { s: "mchmp", x: "karmic", n: "Twenty Years Is the Whole Story", b: "There Is No Shortcut Inside It",
+    t: "There is no single moment in the Mailchimp story that explains it. It is two decades of compounding with no outside money accelerating anything at any point.",
+    l: "The thing that looks like a twelve billion dollar event was a twenty year process with almost nothing dramatic in it. Stories compress time and you are living in the uncompressed version." },
+  { s: "mchmp", x: "karmic", n: "Nobody Had Equity", b: "What Bootstrapping Cost the Staff",
+    t: "Because there had never been funding rounds there were never option pools, so employees held no stake when the sale happened. Reporting described bonuses, and also described staff who felt they had not shared in it.",
+    l: "Owning all of it means nobody else is owed anything, and that is structural rather than moral until the day somebody decides. Choose early and deliberately what the people building it with you get." },
+  { s: "mchmp", x: "karmic", n: "The Small Businesses Built It", b: "Slowly, Then Uncatchably",
+    t: "The base was assembled out of people running tiny operations over twenty years, and that base is what the valuation was measured against.",
+    l: "Serving people nobody else wants to serve is slow and it accumulates into something that cannot be taken. The advantage is that your competitors will not want it until far too late." },
+  { s: "sigs", x: "mindset", n: "Profitable From the First Customer", b: "Charge Money for the Thing",
+    t: "Basecamp charged from launch in 2004. There was no free growth phase funded by somebody else and no plan that required a later round in order to work.",
+    l: "A business that makes money from the first customer is a business you control. One that needs scale before it works has handed its timetable to whoever is funding the gap." },
+  { s: "sigs", x: "mindset", n: "Growth Is a Choice", b: "Nobody Made It Compulsory",
+    t: "They have stayed deliberately small for two decades, refused to chase scale, and written at length about why. There were no growth targets.",
+    l: "Nobody made growth compulsory. It is a decision with costs attached and people accept it by default because everybody around them did. Decide what size is enough and say it out loud." },
+  { s: "sigs", x: "mindset", n: "Work Should Be Calm", b: "If It Needs Heroics the Plan Is Wrong",
+    t: "Forty hour weeks, thirty-two in summer, and no expectation of nights or weekends. It Doesn't Have to Be Crazy at Work argues that overwork is a management failure rather than a virtue.",
+    l: "If the plan requires heroics to work, the plan is wrong. A sustainable pace is not a comfort, it is what lets you still be doing this in ten years, which is the only variable that compounds." },
+  { s: "sigs", x: "internal", n: "They Built It for Themselves", b: "Basecamp Was an Internal Tool",
+    t: "Basecamp was built to run their own client projects at the design firm, and only sold afterwards. The first user was the company.",
+    l: "Something you built because you needed it has a customer already proven, and you can tell whether it works without asking anybody. Most products fail on a question this one has answered." },
+  { s: "sigs", x: "internal", n: "Saying No Is the Job", b: "Features, Customers, Money",
+    t: "A constant theme across twenty years of their writing: most of the work is refusing. Refusing features, refusing customers who want it to be something else, refusing investment.",
+    l: "What you decline defines the thing far more than what you accept. Every yes adds surface you maintain forever, and almost nobody counts that cost at the moment of saying it." },
+  { s: "sigs", x: "internal", n: "They Published Their Opinions", b: "And Paid for Some of Them",
+    t: "The books and the blog built the audience that sells the software, and in 2021 a policy decision was publicly contested and roughly a third of the staff left.",
+    l: "Taking public positions is what makes you findable and it is the same thing that makes you liable. You do not get the first without the second, and pretending otherwise is how people are surprised." },
+  { s: "sigs", x: "external", n: "The Writing Is the Marketing", b: "An Argument Travels Further Than an Ad",
+    t: "Rework, Remote and the rest built an audience that was never bought. The software sits downstream of people agreeing with the argument.",
+    l: "An argument people want to repeat travels further than any advertisement and costs nothing except having something to say. The hard part is having a position rather than a campaign." },
+  { s: "sigs", x: "external", n: "They Gave Rails Away", b: "Open Source as Distribution",
+    t: "Ruby on Rails was extracted from Basecamp and released free in 2004. It became one of the most used web frameworks there is and made the company enormously credible.",
+    l: "Giving away the thing underneath your product can be worth more than selling it. It puts your thinking permanently inside other people's work, and nobody competes with free." },
+  { s: "sigs", x: "external", n: "One Outside Stake, Once", b: "A Share of the Upside, Not a Vote",
+    t: "Jeff Bezos took a minority, non-controlling position in 2006. There was never another round and control never moved.",
+    l: "There is a difference between money that buys a share of the upside and money that buys a vote on your decisions. Find out precisely which is on the table before the number distracts you." },
+  { s: "sigs", x: "karmic", n: "Twenty Years of the Same Argument", b: "The Interval Is the Price",
+    t: "The position they took in 2004 about small, profitable, calm software is the position now, and the company is still here while most of the ones that mocked it are not.",
+    l: "A position held long enough stops being contrarian and becomes obvious, and whoever held it owns the credit. The interval where you look wrong is the entire price of it." },
+  { s: "sigs", x: "karmic", n: "The Staff Who Left", b: "Entitled and Costly Are Different Questions",
+    t: "The 2021 policy change was contested in the open and about a third of employees took the severance and went. All of it is on the record.",
+    l: "A decision you are entitled to make is still a decision with a bill, and the bill is usually paid in the people who go. Being within your rights and being right are separate questions." },
+  { s: "sigs", x: "karmic", n: "Nobody Owns Them", b: "What Two Decades of No Bought",
+    t: "No board, no acquisition, no obligation to grow. They can change the product, the price or the company's name whenever they decide to, and have.",
+    l: "Autonomy is not a feeling, it is a structural position, and it is bought by everything you refused along the way. You will not notice you have it until somebody tries to tell you what to do." },
+  { s: "goldie", x: "mindset", n: "The Name Is the Claim", b: "You Decide What You Are First",
+    t: "The whole thing is called God Game. He did not build a following on a technique with a name, he built it on a claim about who he is, made before anybody had agreed to it, and then spent years on camera making it expensive to argue with.",
+    l: "You are going to be wrong about yourself in one direction or the other, and nobody is coming to correct you kindly either way. Decide upward and then go and make it hard to contradict. The men waiting to feel worthy before they act are waiting on a feeling that only the acting produces." },
+  { s: "goldie", x: "mindset", n: "Reps, Not Lines", b: "Volume Is the Method",
+    t: "The method on the channel is not a script. It is going out, repeatedly, and starting conversations with people who did not ask you to, hundreds of times, most of which go nowhere in particular.",
+    l: "You are not looking for the thing to say. You are building a nervous system that does not spike when a stranger looks at you, and nothing reaches that except the reps. Every man hunting for the perfect opener is buying a way out of the hundred boring attempts that would have fixed it." },
+  { s: "goldie", x: "mindset", n: "You Cannot Outperform What You Think You Are Worth", b: "Inner Before Outer",
+    t: "The material returns to one point across years of it: a man who does not believe he is worth talking to will sabotage any script handed to him, in the tone, in the timing, in the second he folds.",
+    l: "Technique sits on top of self-concept and can never rise above it. That is why the advice fails hardest for the man who needs it most, and why the only real fix is slow, unglamorous and internal, which is exactly the part nobody wants to hear." },
+  { s: "goldie", x: "mindset", n: "Discipline Is the Day You Feel Worst", b: "State Is Not a Prerequisite",
+    t: "The discipline the work actually asks for is going out cold, tired and already turned down twice. The days you felt good were never the part that was hard.",
+    l: "Motivation is a passenger. If you only move when you feel like moving you have handed your life to a mood, and a mood has no interest in what you were planning to become. Go on the bad day and the good days stop being load-bearing." },
+  { s: "goldie", x: "mindset", n: "The Fear Is Outlasted, Not Removed", b: "It Does Not Leave",
+    t: "The honest version in the material is that approach anxiety does not go away. It gets smaller relative to a man who has done it thousands of times, which is a different claim from it going.",
+    l: "You are waiting for the nerves to stop so you can begin. They will not. What changes is that you stop reading the feeling as a verdict and start reading it as weather, and that only happens on the far side of having done it afraid." },
+  { s: "goldie", x: "mindset", n: "A Standard Is a Refusal", b: "What You Will Not Accept",
+    t: "Abundance, stated plainly rather than as a slogan, is not that you get more. It is that you stop accepting less, and the stopping comes first.",
+    l: "Most people treat a standard as a reward you are issued once you have options. It is the cause, not the effect. You hold the line while you have nothing, and that is what produces something, which is precisely the order that makes it difficult." },
+  { s: "goldie", x: "internal", n: "He Films the Rejections", b: "The Part Everybody Else Cuts",
+    t: "The footage keeps the ones that do not work: the walk-off, the conversation that dies in four seconds, the flat no. On a channel where he is the product, the misses stay in.",
+    l: "What you will let people watch you fail at is the entire measure of how much of you is performance. Everybody's highlight reel looks the same; the man who publishes the misses is the only one telling you what the work costs." },
+  { s: "goldie", x: "internal", n: "The Persona Is Built, Not Found", b: "A Character You Can Stand Behind",
+    t: "The gold, the name, the way he presents \u2014 none of it is accidental and none of it pretends to be. It is a constructed version of a man, made deliberately and worn in public for years.",
+    l: "The choice is not between being authentic and being a character. It is whether you build the character on purpose or let one accumulate out of your worst habits. You are a version of yourself either way and only one of them was chosen." },
+  { s: "goldie", x: "internal", n: "The Silence Between Attempts", b: "Nobody Is Watching the Practice",
+    t: "The visible part is a four-minute clip. What produced it is hours on a street, mostly alone, mostly not filming, with nothing happening.",
+    l: "What you see of anybody is the fraction that was worth showing. You are comparing your own dead hours against somebody else's edit, losing, and then concluding something about yourself from a comparison that was never on offer." },
+  { s: "goldie", x: "internal", n: "Being Bad in Front of People", b: "The Only Way Through",
+    t: "A bootcamp means approaching while a coach and a camera watch you do it badly, in public, sober, with witnesses, at the start.",
+    l: "Almost every adult stops learning new things at exactly the point where they would have to be visibly incompetent. That is the ceiling, and it is not made of talent. Whoever can stand being bad in front of people for longer keeps improving after everybody else has quietly stopped." },
+  { s: "goldie", x: "external", n: "Four Seconds Decide the Next Four Minutes", b: "The Open Is the Trade",
+    t: "The material is specific about the opening: how you arrive, the pace, whether your feet are planted, what your face is doing. The part before a word has landed does most of the work.",
+    l: "In any first contact the frame is set before there is content to judge, and almost nobody prepares for the half that decides it. Whatever you rehearsed all week is the least of what is being read." },
+  { s: "goldie", x: "external", n: "You Are Interrupting, So Own It", b: "Do Not Apologise for Existing",
+    t: "An approach is an interruption of somebody who did not ask for one, and the answer in the material is never to disguise that. It is to be direct about it and be worth the interruption.",
+    l: "The apology in the voice is what turns it into an imposition. Hedging does not lower the cost of asking, it adds a second thing to be embarrassed about. Ask plainly and carry the answer either way." },
+  { s: "goldie", x: "external", n: "Most of It Is a No, by Design", b: "A Rate, Not a Verdict",
+    t: "The footage makes it plain that the large majority of attempts end in nothing at all. That is not the method failing. That is the shape the method has.",
+    l: "You are running a rate and treating every single trial as a referendum on you. One no contains no information worth having, and a man who reads it as one stops running the rate, which was the only thing that was ever going to work." },
+  { s: "goldie", x: "external", n: "He Went Where the People Are", b: "Proximity Is Half the Strategy",
+    t: "The work happens on busy streets in one of the largest cities in Europe, and that is not incidental: the method needs volume, and volume needs density.",
+    l: "You can be perfectly prepared standing somewhere the thing cannot happen. A great deal of what gets called luck is being in the room where the outcome is possible, repeatedly, for years." },
+  { s: "goldie", x: "karmic", n: "Somebody Is on the Other Side", b: "A Rep Count Is Not a Person",
+    t: "The footage is of real people going about their day, and the material draws a line where an offer turns into pressure.",
+    l: "A skill that treats other people as a number rots into something else while you are still calling it practice. Whatever you are getting good at, somebody is on the receiving end of it, and the day you stop noticing that is the day it stops being worth having." },
+  { s: "goldie", x: "karmic", n: "He Published the Method", b: "Given Away, Not Sold as a Secret",
+    t: "The bulk of it is free and public: the argument, the footage, the reasoning, years of it. What is paid for is time and attention rather than access to something hidden.",
+    l: "Nothing worth knowing has ever been kept secret by the person who actually had it. What gets sold as hidden knowledge is usually sold that way because it does not survive being tested in the open." },
+  { s: "goldie", x: "karmic", n: "Years of the Same Claim", b: "Consistency Is the Only Audit",
+    t: "The position taken years ago about self-belief, volume and standards is the position now, argued in public throughout, where anybody can go back and check.",
+    l: "There is no certificate for teaching confidence and no way to audit it except the length of the record. Whatever you are claiming, the only evidence you will ever have is that you were still saying it in the years it paid nothing." },
+];
+
+var $ = function (s) { return document.querySelector(s); };
+var el = function (t, c, x) { var n = document.createElement(t); if (c) n.className = c; if (x != null) n.textContent = x; return n; };
+
+/* st.last is a view, and the build before this one stored 'dark' or
+   'lessons' — names VIEWS no longer has. It falls through to the first
+   list, the way any stored key in this repo has to. */
+/* A MARK HAS TO OUTLIVE AN EDIT TO THE THING IT MARKS. Keyed by the
+   theme's NAME, renaming a line silently throws every pin on it away —
+   an identifier nothing type-checks, failing green, which is this repo's
+   oldest trap. The key is the source, the axis and which of the three it
+   is, all asserted elsewhere at boot, so it survives every edit except
+   reordering inside a bucket.
+
+   IT HAS TO RUN BEFORE st IS READ. themesOf and srcOf are function
+   declarations and hoist; the data does not. */
+SRC.forEach(function (x) {
+  for (var a in AXIS) themesOf(x.i, a).forEach(function (t, i) { t.k = x.i + ':' + a + ':' + i; });
+});
+(function () {
+  var keys = {};
+  TH.forEach(function (t) {
+    if (!t.k) throw new Error('no key for ' + t.n);
+    if (keys[t.k]) throw new Error('two themes keyed ' + t.k);
+    keys[t.k] = true;
+  });
+}());
+
+var STOPS = ['pin', 'hi'];
+function thOf(k) { return TH.filter(function (t) { return t.k === k; })[0]; }
+
+/* A MARK POINTING AT NOTHING IS DROPPED AND THE REST OF THE LIST IS NOT.
+   The marks are the one thing in here you cannot get back, so a damaged
+   entry costs itself and never the record. Written BACK rather than
+   repaired in memory: a repair that only runs at boot is redone every
+   boot and lost the moment anything else writes the key, which the
+   schedule app in this repo shipped four separate times. */
+function keepKeys(a) {
+  if (!a || !a.length) return [];
+  return a.filter(function (k) { return typeof k === 'string' && thOf(k); });
+}
+
+/* THE KEYS HAVE TO EXIST BEFORE THIS LINE, and the guard is on this line
+   rather than further down for the reason the bug had. Minted below it,
+   st reads the record first, every stored key resolves to nothing, and
+   the repair that exists to protect the marks deletes all of them and
+   writes the deletion back. Nothing throws and the session is correct
+   throughout — pressing a chip works, the lists draw — and the marks are
+   gone on the next open. A guard in the boot pass would not have caught
+   it: by then the keys are there either way. */
+if (!TH[0].k) throw new Error('marks read before the keys were minted');
+
+var st = { last: null, stop: 'pin', pin: [], hi: [] };
+var stale = false;
+try { var raw = localStorage.getItem(KEY); if (raw) { var o = JSON.parse(raw); if (o && typeof o === 'object') {
+  st.last = typeof o.last === 'string' ? o.last : null;
+  /* A stored stop outlives the code that wrote it, so a value this build
+     no longer has means the first list rather than a bar with nothing
+     above it — the same rule the stored view already keeps. */
+  st.stop = STOPS.indexOf(o.stop) >= 0 ? o.stop : 'pin';
+  STOPS.forEach(function (m) {
+    st[m] = keepKeys(o[m]);
+    if (o[m] && o[m].length !== st[m].length) stale = true;
+  });
+} } } catch (e) {}
+var save = function () { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+if (stale) save();
+
+function marked(m, k) { return st[m].indexOf(k) >= 0; }
+
+function mark(m, k) {
+  var i = st[m].indexOf(k);
+  if (i < 0) st[m].push(k); else st[m].splice(i, 1);
+  save();
+  /* Every copy of the control rather than the one that was pressed, and
+     this is DEFENCE rather than a bug being fixed: every pane repaints
+     on navigation today, so no second copy is currently reachable while
+     stale. The source pane is the one that is only ever repainted by
+     openSource, so it is one view() away from being the exception — and
+     a chip saying the opposite of the record is the worst thing this
+     screen could do. Said plainly because the check next door cannot
+     tell the two apart: it passes on the single-chip version too. */
+  var on = marked(m, k) ? 'true' : 'false';
+  [].forEach.call(document.querySelectorAll('[data-mk="' + m + '"][data-k="' + k + '"]'),
+    function (b) { b.setAttribute('aria-pressed', on); });
+  if (document.documentElement.getAttribute('data-view') === 'kept') paintKept();
+}
+
+
+
+
+
+
+/* A FIGURE WITH NO THEMES, OR A THEME POINTING AT A FIGURE WHO IS NOT
+   THERE, IS SILENT RATHER THAN BROKEN: the list simply comes out short
+   and nothing says so. Both directions, at boot. */
+(function () {
+  var seen = {};
+  TH.forEach(function (t) {
+    if (!SRC.filter(function (x) { return x.i === t.s; })[0]) throw new Error('no figure for ' + t.n);
+    if (!AXIS[t.x]) throw new Error('bad axis for ' + t.n);
+    seen[t.s] = true;
+  });
+  /* THREE IS A FLOOR AND ONLY A DECLARED SOURCE MAY PASS IT. Written as
+     `!== 3` this described the data rather than protecting anything, so the
+     day one source earned more the invariant was simply in the way. What it
+     was really holding is that no axis comes out short and no source is
+     lopsided by ACCIDENT — so the exception is named in the record, which is
+     this repo's own rule about an exception being raised rather than a check
+     being relaxed. A source without `deep` that grows a fourth theme still
+     throws, which is the half that catches a duplicated row. */
+  SRC.forEach(function (x) {
+    for (var a in AXIS) {
+      var n = themesOf(x.i, a).length;
+      if (n < 3) throw new Error(x.n + ' has only ' + n + ' ' + a);
+      if (n > 3 && !x.deep) throw new Error(x.n + ' has ' + n + ' ' + a + ' and is not deep');
+    }
+  });
+  /* And a source that says it is deep has to actually be — otherwise the flag
+     is a permission nobody spent, sitting on a row that looks like every
+     other one. */
+  SRC.forEach(function (x) {
+    if (!x.deep) return;
+    var most = 0;
+    for (var a in AXIS) most = Math.max(most, themesOf(x.i, a).length);
+    if (most <= 3) throw new Error(x.n + ' is marked deep and is not');
+  });
+  /* Four axes over one life will collapse into each other unless
+     something refuses it, and the cheapest refusal is the name. */
+  /* The index draws a heading per run of one group, so a kind holding
+     more than one needs a label for each, and the runs have to be
+     contiguous or the same heading is drawn twice. A missing label is a
+     blank heading, which reads as a rendering fault rather than a group. */
+  ['figure', 'book'].forEach(function (k) {
+    var gs = [], last = null;
+    SRC.filter(function (x) { return x.k === k; }).forEach(function (x) {
+      if (!x.g) throw new Error('no group for ' + x.n);
+      if (x.g === last) return;
+      if (gs.indexOf(x.g) >= 0) throw new Error('group ' + x.g + ' is split');
+      gs.push(x.g); last = x.g;
+    });
+    if (gs.length > 1) gs.forEach(function (g) {
+      if (!GROUP[g]) throw new Error('no label for group ' + g);
+    });
+  });
+  var names = {};
+  TH.forEach(function (t) {
+    if (names[t.n]) throw new Error('two themes called ' + t.n);
+    names[t.n] = true;
+  });
+}());
+
+function mask(p) {
+  var f = function () {
+    p.classList.toggle('is-end', p.scrollTop + p.clientHeight >= p.scrollHeight - 2);
+  };
+  if (!p.alMask) { p.alMask = f; p.addEventListener('scroll', f, { passive: true }); }
+  p.alMask();
+}
+
+
+function srcOf(id) { return SRC.filter(function (x) { return x.i === id; })[0]; }
+function themesOf(id, ax) { return TH.filter(function (t) { return t.s === id && t.x === ax; }); }
+
+/* ONE CARD, DRAWN ONCE. It is built the same on a figure's own page and
+   in the two axis lists, because two constructions of one object is how
+   the two come to disagree — this repo has written that down already
+   about a question asked in two places and a tag built twice. */
+function card(t) {
+  var d = el('div', 'al-th');
+  d.setAttribute('data-x', t.x);
+  d.appendChild(el('h3', 'al-tn', t.n));
+  d.appendChild(el('div', 'al-tsub', t.b));
+  d.appendChild(el('div', 'al-caps al-tl', 'Key theme'));
+  d.appendChild(el('p', 'al-tb', t.t));
+  d.appendChild(el('div', 'al-caps al-tl is-les', 'The spiritual lesson'));
+  d.appendChild(el('p', 'al-tb is-les', t.l));
+  /* AT THE FOOT, WHICH IS WHERE YOU ARE WHEN YOU HAVE READ IT. In the
+     corner it would need the title to carry a max-width against it, and
+     two controls in the corner of every one of 288 cards is louder than
+     the thing they are about. You decide after reading, not before. */
+  var a = el('div', 'al-acts');
+  a.appendChild(mkBtn('pin', 'Pin', t.k));
+  a.appendChild(mkBtn('hi', 'Highlight', t.k));
+  d.appendChild(a);
+  return d;
+}
+
+/* The state is the GROUND, never a second word: a chip reading "Pinned"
+   where it read "Pin" reflows the row under your finger on the very
+   press that moved it, and aria-pressed already carries it in full. */
+function mkBtn(m, label, k) {
+  var b = el('button', 'al-mk', label);
+  b.setAttribute('data-mk', m);
+  b.setAttribute('data-k', k);
+  b.setAttribute('aria-pressed', marked(m, k) ? 'true' : 'false');
+  return b;
+}
+
+/* ONE INDEX PAINTER, TWO LISTS. Figures and Books are the same screen
+   reading the same table through one field, for the reason the axis
+   lists are: a second construction of one object is how the two come
+   to disagree. */
+function paintIndex(kind) {
+  var p = $('#al' + kind.charAt(0).toUpperCase() + kind.slice(1) + 'Pane'); p.textContent = '';
+  var rows = SRC.filter(function (x) { return x.k + 's' === kind; });
+  var gs = [], last = null;
+  rows.forEach(function (x) { if (gs.indexOf(x.g) < 0) gs.push(x.g); });
+  rows.forEach(function (x) {
+    /* No data-x on it: a coloured heading means an axis everywhere else
+       in this app, and this one names a kind of person. */
+    if (gs.length > 1 && x.g !== last) {
+      p.appendChild(el('div', 'al-grp al-caps', GROUP[x.g]));
+      last = x.g;
+    }
+    var b = el('button', 'al-th al-f');
+    b.setAttribute('data-src', x.i);
+    b.appendChild(el('h3', 'al-tn', x.n));
+    b.appendChild(el('div', 'al-tsub', x.p));
+    p.appendChild(b);
+  });
+  mask(p);
+}
+
+function paintSource(id) {
+  var x = srcOf(id); if (!x) return;
+  var p = $('#alSourcePane'); p.textContent = '';
+  var lead = el('div', 'al-lead');
+  lead.appendChild(el('h1', 'al-disp', x.n));
+  lead.appendChild(el('div', 'al-caps', x.p));
+  p.appendChild(lead);
+  var sh = el('div', 'al-sheet');
+  for (var a in AXIS) {
+    var rows = themesOf(id, a);
+    if (!rows.length) continue;
+    var h = el('div', 'al-grp al-caps', AXIS[a]);
+    h.setAttribute('data-x', a);
+    sh.appendChild(h);
+    rows.forEach(function (t) { sh.appendChild(card(t)); });
+  }
+  p.appendChild(sh);
+  p.scrollTop = 0; mask(p);
+}
+
+/* ONE PAINTER FOR BOTH STOPS, grouped by source in the app's own order,
+   because a lesson stranded from the thing that is evidence for it is
+   what every other list here is arranged to avoid. The heading takes no
+   hue: a pane that mixes four axes has no axis for a colour to be about,
+   which is the figures index's own rule seen from the other side. */
+function paintKept() {
+  var p = $('#alKeptPane'); p.textContent = '';
+  var list = st[st.stop].map(thOf).filter(Boolean);
+  $('#alKept').querySelector('.al-count').textContent = list.length;
+  [].forEach.call(document.querySelectorAll('#alKeptStops .al-stop'), function (b) {
+    b.setAttribute('aria-current', b.getAttribute('data-st') === st.stop ? 'true' : 'false');
+  });
+  if (!list.length) {
+    /* An empty stop says what the stop is FOR. It is not a caption under
+       a control — the control is on every card, one tab away — it is the
+       screen saying which of the two lists you are looking at none of. */
+    p.appendChild(el('p', 'al-empty', st.stop === 'pin'
+      ? 'Nothing pinned. A pin is the short list you are working from now, so keep it short.'
+      : 'Nothing highlighted. A highlight is a line that landed, and there is no limit on those.'));
+    mask(p); return;
+  }
+  SRC.forEach(function (x) {
+    var rows = list.filter(function (t) { return t.s === x.i; });
+    if (!rows.length) return;
+    p.appendChild(el('div', 'al-grp al-caps', x.n));
+    rows.forEach(function (t) { p.appendChild(card(t)); });
+  });
+  mask(p);
+}
+
+/* A STORED VIEW OUTLIVES THE CODE THAT WROTE IT. Four names left this
+   list in one pass, so a phone that was last on Karmic has to open on
+   the figures rather than on a bar with nothing above it — which is
+   what view()'s own fall-through already does, and why the list is
+   written out rather than derived. */
+var VIEWS = ['open', 'figures', 'books', 'kept', 'source'];
+function view(v) {
+  if (VIEWS.indexOf(v) < 0) v = 'figures';
+  document.documentElement.setAttribute('data-view', v);
+  VIEWS.forEach(function (x) {
+    var n = $('#al' + x.charAt(0).toUpperCase() + x.slice(1));
+    if (n) n.classList.toggle('is-on', x === v);
+  });
+  $('#alFoot').hidden = (v === 'open' || v === 'source');
+  $('#alSourceX').hidden = (v !== 'source');
+  document.querySelectorAll('.al-tab').forEach(function (b) {
+    b.setAttribute('aria-current', b.getAttribute('data-v') === v ? 'true' : 'false');
+  });
+  $('#alFigures').querySelector('.al-count').textContent = SRC.filter(function (x) { return x.k === 'figure'; }).length;
+  $('#alBooks').querySelector('.al-count').textContent = SRC.filter(function (x) { return x.k === 'book'; }).length;
+  if (v === 'figures' || v === 'books') paintIndex(v);
+  if (v === 'kept') paintKept();
+  if (v !== 'source') { st.last = v; save(); }
+}
+
+var sourceBack = 'figures';
+function openSource(id) {
+  if (!srcOf(id)) return;
+  var now = document.documentElement.getAttribute('data-view');
+  if (now !== 'source' && now !== 'open') sourceBack = now;
+  paintSource(id);
+  view('source');
+}
+
+document.addEventListener('click', function (e) {
+  var t = e.target.closest
+    ? e.target.closest('.al-tab, .al-pill, .al-f, .al-stop, .al-mk, #alOpenB, #alSourceX') : null;
+  if (!t) return;
+  var m = t.getAttribute && t.getAttribute('data-mk');
+  if (m) return mark(m, t.getAttribute('data-k'));
+  var stop = t.getAttribute && t.getAttribute('data-st');
+  if (stop) { st.stop = stop; save(); return paintKept(); }
+  if (t.id === 'alOpenB') return view(VIEWS.indexOf(st.last) > 0 && st.last !== 'source' ? st.last : 'figures');
+  if (t.id === 'alSourceX') return view(sourceBack);
+  var id = t.getAttribute && t.getAttribute('data-src');
+  if (id) return openSource(id);
+  if (t.classList.contains('al-tab')) return view(t.getAttribute('data-v'));
+});
+
+view('open');
+/* views() rather than a list the probes keep their own copy of: two of
+   them drove view('light') and view('lessons') for months — names
+   renamed out from under them, which view() falls through to 'figures'
+   on — so one screen was measured three times and reported a pass. */
+window.alDrive = { view: view, openSource: openSource, mark: mark, st: st, thOf: thOf,
+                   views: function () { return VIEWS.slice(); } };
+
+}());
+</script>
+</body>
+</html>
