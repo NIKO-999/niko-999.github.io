@@ -274,8 +274,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   <div class="al-mark" role="img" aria-label="Alignment">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v20M5 8l7-6 7 6M5 16l7 6 7-6"/></svg>
   </div>
-  <h1 class="al-disp" id="alOpenT">Ten people and eight books.</h1>
-  <p class="al-note" id="alOpenN">Two hundred and sixteen themes, from ten real careers and eight books, split four ways: the model they ran on, what they were actually like, what the world did, and what came back. What the story does, and what it leaves you with.</p>
+  <h1 class="al-disp" id="alOpenT">Sixteen people and eight books.</h1>
+  <p class="al-note" id="alOpenN">Two hundred and eighty-eight themes, from sixteen real careers and eight books, split four ways: the model they ran on, what they were actually like, what the world did, and what came back. What the story does, and what it leaves you with.</p>
   <button class="al-pill" id="alOpenB">Begin</button>
 </section>
 
@@ -411,25 +411,39 @@ var KEY = 'align.v1';
    and that is asserted by name at boot rather than trusted. */
 var AXIS = { mindset: 'Mindset', internal: 'Internal', external: 'External', karmic: 'Karmic' };
 
+/* A GROUP HEADING ONLY WHERE THE LIST IS MADE OF MORE THAN ONE KIND OF
+   THING. The books are one group, so a heading over them would be the
+   pane's own title said again a register down, which is the duplication
+   this project keeps having to take back out. The figures are two, and a
+   founder sitting between Frank Lucas and Big Meech with nothing saying
+   so reads as a mistake in the list rather than as a second kind. */
+var GROUP = { street: "The street", built: "The builders" };
+
 var SRC = [
-  { i: "fifty", n: "50 Cent", p: "Queens, New York", k: "figure" },
-  { i: "hov", n: "Jay-Z", p: "Marcy, Brooklyn", k: "figure" },
-  { i: "nip", n: "Nipsey Hussle", p: "Crenshaw, Los Angeles", k: "figure" },
-  { i: "meech", n: "Big Meech", p: "Detroit, then Atlanta", k: "figure" },
-  { i: "frick", n: "Freeway Rick Ross", p: "South Central, Los Angeles", k: "figure" },
-  { i: "lucas", n: "Frank Lucas", p: "Harlem, New York", k: "figure" },
-  { i: "mastp", n: "Master P", p: "Calliope, New Orleans", k: "figure" },
-  { i: "gucci", n: "Gucci Mane", p: "Bessemer, then Atlanta", k: "figure" },
-  { i: "meek", n: "Meek Mill", p: "North Philadelphia", k: "figure" },
-  { i: "suge", n: "Suge Knight", p: "Compton, California", k: "figure" },
-  { i: "devil", n: "Outwitting the Devil", p: "Napoleon Hill", k: "book" },
-  { i: "tagr", n: "Think and Grow Rich", p: "Napoleon Hill", k: "book" },
-  { i: "mdh", n: "Million Dollar Habits", p: "Brian Tracy", k: "book" },
-  { i: "surf", n: "Reality Transurfing", p: "Vadim Zeland", k: "book" },
-  { i: "para", n: "Change Your Paradigm", p: "Bob Proctor", k: "book" },
-  { i: "feel", n: "Feeling Is the Secret", p: "Neville Goddard", k: "book" },
-  { i: "sogr", n: "The Science of Getting Rich", p: "Wallace Wattles", k: "book" },
-  { i: "cyb", n: "Psycho-Cybernetics", p: "Maxwell Maltz", k: "book" },
+  { i: "fifty", n: "50 Cent", p: "Queens, New York", k: "figure", g: "street" },
+  { i: "hov", n: "Jay-Z", p: "Marcy, Brooklyn", k: "figure", g: "street" },
+  { i: "nip", n: "Nipsey Hussle", p: "Crenshaw, Los Angeles", k: "figure", g: "street" },
+  { i: "meech", n: "Big Meech", p: "Detroit, then Atlanta", k: "figure", g: "street" },
+  { i: "frick", n: "Freeway Rick Ross", p: "South Central, Los Angeles", k: "figure", g: "street" },
+  { i: "lucas", n: "Frank Lucas", p: "Harlem, New York", k: "figure", g: "street" },
+  { i: "mastp", n: "Master P", p: "Calliope, New Orleans", k: "figure", g: "street" },
+  { i: "gucci", n: "Gucci Mane", p: "Bessemer, then Atlanta", k: "figure", g: "street" },
+  { i: "meek", n: "Meek Mill", p: "North Philadelphia", k: "figure", g: "street" },
+  { i: "suge", n: "Suge Knight", p: "Compton, California", k: "figure", g: "street" },
+  { i: "bloom", n: "Greg LaTrenta", p: "Bloom Nutrition", k: "figure", g: "built" },
+  { i: "gymsh", n: "Ben Francis", p: "Gymshark", k: "figure", g: "built" },
+  { i: "hormo", n: "Alex Hormozi", p: "Gym Launch, Acquisition.com", k: "figure", g: "built" },
+  { i: "spanx", n: "Sara Blakely", p: "Spanx", k: "figure", g: "built" },
+  { i: "mchmp", n: "Ben Chestnut", p: "Mailchimp", k: "figure", g: "built" },
+  { i: "sigs", n: "Jason Fried", p: "37signals", k: "figure", g: "built" },
+  { i: "devil", n: "Outwitting the Devil", p: "Napoleon Hill", k: "book", g: "book" },
+  { i: "tagr", n: "Think and Grow Rich", p: "Napoleon Hill", k: "book", g: "book" },
+  { i: "mdh", n: "Million Dollar Habits", p: "Brian Tracy", k: "book", g: "book" },
+  { i: "surf", n: "Reality Transurfing", p: "Vadim Zeland", k: "book", g: "book" },
+  { i: "para", n: "Change Your Paradigm", p: "Bob Proctor", k: "book", g: "book" },
+  { i: "feel", n: "Feeling Is the Secret", p: "Neville Goddard", k: "book", g: "book" },
+  { i: "sogr", n: "The Science of Getting Rich", p: "Wallace Wattles", k: "book", g: "book" },
+  { i: "cyb", n: "Psycho-Cybernetics", p: "Maxwell Maltz", k: "book", g: "book" },
 ];
 
 var TH = [
@@ -1081,6 +1095,222 @@ var TH = [
   { s: "cyb", x: "karmic", n: "The Scar Charges Rent", b: "Only You Are Paying It",
     t: "Maltz treats a held injury as an ongoing cost carried by the holder: the emotional scar keeps the wound live and keeps the behaviour it produced in place for decades.",
     l: "Whatever you are still carrying is charging you daily and the other person is not being billed at all. Putting it down is not a favour to them and it is not a moral act. It is a repossession." },
+  { s: "bloom", x: "mindset", n: "The Audience Came First", b: "Build the Room Before the Product",
+    t: "Mari Llewellyn documented a transformation publicly for years before there was anything to sell, and Greg ran the business side from the start. By the time Bloom launched, the people who would buy it already existed and already trusted her.",
+    l: "Most people build the thing and then go looking for who wants it, which is the expensive order. An audience built first is a launch with demand already in it, and it costs nothing but years of showing up before there is any reason to." },
+  { s: "bloom", x: "mindset", n: "A Boring Category, Executed Better", b: "You Do Not Need a New Idea",
+    t: "Greens powder was not a new product and the shelf was not empty. What was different was how it tasted, how it looked and who was holding it.",
+    l: "You do not need an idea nobody has had. You need an existing thing somebody is doing badly and a reason people would switch. The search for originality is usually a way of not starting." },
+  { s: "bloom", x: "mindset", n: "Keep It Yours", b: "No Outside Money Until the Terms Are",
+    t: "Reported as launched on their own money in the low tens of thousands and run without institutional investment through the growth, which is why the eventual sale happened on their terms.",
+    l: "Money taken early is bought at the worst price you will ever get, and it buys somebody else a vote on everything afterwards. If the thing can be started small, start it small." },
+  { s: "bloom", x: "internal", n: "She Posted Before It Was Working", b: "The Unflattering Part",
+    t: "The following came from documenting the beginning of a transformation rather than the end of one. The early material is the part most people delete.",
+    l: "The audience is built during the stretch you are embarrassed by. Nobody follows a finished result, they follow a process they can see themselves inside, and a finished result has no room for anybody." },
+  { s: "bloom", x: "internal", n: "Two People, Two Jobs", b: "Knowing Which One Is Yours",
+    t: "One built the audience and the brand, the other ran operations and the business. Neither attempted both.",
+    l: "Most partnerships fail on the overlap rather than on the gap. Work out precisely which half is yours, say it out loud, and then stop having an opinion about the other one." },
+  { s: "bloom", x: "internal", n: "The Flat Stretch", b: "Years Before Anything Moved",
+    t: "The audience took years and the business took more. Nothing about the timeline was fast from the inside, and every retelling compresses all of it into a sentence.",
+    l: "Every overnight thing you have seen had a flat stretch in front of it that nobody filmed. You are currently in yours and it looks exactly like nothing working." },
+  { s: "bloom", x: "external", n: "Seeding Beats Advertising", b: "Get It Into Hands",
+    t: "The growth came from putting product in front of creators and letting them use it rather than from buying attention outright, and the platforms did the rest.",
+    l: "A recommendation from somebody people already listen to is worth far more than the same money spent shouting. Work out who your buyers already trust and make their life easier." },
+  { s: "bloom", x: "external", n: "Retail Is a Different Business", b: "Shelf Space Has Its Own Rules",
+    t: "National retail is not a bigger version of selling online. It is different terms, different margins, forecasting and real downside if you are wrong about volume.",
+    l: "Every channel you add is a new business with its own physics. Growth usually means learning a second trade rather than doing more of the first one." },
+  { s: "bloom", x: "external", n: "A Clean Company Can Be Bought", b: "Structure Decides the Exit",
+    t: "A profitable, owner-controlled brand with an uncomplicated ownership structure is a straightforward thing for somebody to acquire. That is structural rather than lucky.",
+    l: "How you build decides whether anybody can ever buy it. Every shortcut in the structure \u2014 the unclear ownership, the handshake, the missing paperwork \u2014 becomes a discount or a dealbreaker years later." },
+  { s: "bloom", x: "karmic", n: "The Transformation Was Real First", b: "You Cannot Fake the Origin",
+    t: "The brand sits on top of something she actually did, with a public record of it, made before there was any commercial reason to make it.",
+    l: "What you build on has to be true, because the thing you built will eventually be examined. A story constructed for the launch has nothing underneath it and everybody finds out at once." },
+  { s: "bloom", x: "karmic", n: "Everything Posted Is Kept", b: "The Invoice for Building in Public",
+    t: "A business built on a public personal history means every early post, opinion and version of yourself is still there and still attached to it.",
+    l: "Building in public is the cheapest distribution there is and the invoice is permanence. Say things you will still stand behind, because you are the only person who can decide that now." },
+  { s: "bloom", x: "karmic", n: "The People Who Bought First", b: "They Made It and They Remember",
+    t: "The early customers came from the free content and are the reason any of it worked. Brands that forget that are found out at exactly the moment they need them again.",
+    l: "Whoever showed up before it was obvious is owed something real, and that account stays open for as long as the thing exists. Nothing repays it except continuing to be worth it." },
+  { s: "gymsh", x: "mindset", n: "A Sewing Machine and a Screen Printer", b: "Start With What You Can Reach",
+    t: "Gymshark began with a screen printer and a sewing machine, bought with money from fitness apps he had built, making clothing at his parents' house in Birmingham while delivering pizzas at night.",
+    l: "The first version is made with whatever you can already reach. Nobody is coming to fund the good version, and the good version is not what proves anything anyway." },
+  { s: "gymsh", x: "mindset", n: "He Was the Customer", b: "Build for Who You Already Are",
+    t: "He was nineteen, he lifted, and he could not find clothing that fit the way he wanted it to. Every early product decision was solving his own problem.",
+    l: "The cheapest research available is being the customer. You know what is wrong with the current options without asking anybody, and you can tell immediately whether your fix is real." },
+  { s: "gymsh", x: "mindset", n: "He Stepped Back From CEO", b: "When You Are the Constraint",
+    t: "He moved out of the top job while the company scaled, worked in other roles inside it, and returned as chief executive in 2021 once that version of the job was one he wanted.",
+    l: "Your ego and the company's needs are two different things and they come apart at some size. Being honest about which jobs you are currently bad at is the rarest thing a founder ever does." },
+  { s: "gymsh", x: "internal", n: "Delivering Pizzas Until Two", b: "The Overlap Period",
+    t: "For a long stretch it was a night job, a degree and a business at the same time. None of that was optional and none of it was glamorous.",
+    l: "Almost every version of this starts in an overlap where you are doing two things badly and sleeping less. That period is the price and it does not get a montage." },
+  { s: "gymsh", x: "internal", n: "The Black Friday Crash", b: "What You Build in the Six Months After",
+    t: "The site went down on the biggest trading day of the year and the business was publicly broken for hours. He has described it as the lowest point and as the thing that forced everything afterwards to be built properly.",
+    l: "You will have one public failure that everybody sees. What it costs is decided entirely by what you rebuild in the six months after it, and almost nobody uses those six months." },
+  { s: "gymsh", x: "internal", n: "He Never Left the Gym", b: "Distance From the Product",
+    t: "The product decisions stayed close to the person using them because he never stopped being one, which is unusual at that size and is deliberate.",
+    l: "The day you stop using the thing you make, you start guessing. Distance from the product looks like seniority and it is the beginning of the decline." },
+  { s: "gymsh", x: "external", n: "He Sent It to the YouTubers", b: "Before Anybody Called It That",
+    t: "In 2012 and 2013 he posted product to fitness creators with audiences, with no commercial arrangements in place. It was not a strategy anybody had a name for yet.",
+    l: "The channel that works is the one nobody is competing in, and it is usually the one that looks unserious. By the time it has a name and an agency attached, it has a price." },
+  { s: "gymsh", x: "external", n: "BodyPower", b: "One Room, One Weekend",
+    t: "The stand at BodyPower in 2013 is the point it became real: the product in front of the exact audience, in person, all at once.",
+    l: "One room containing the people you are for is worth months of broadcasting at everybody. Find where they already gather and physically go." },
+  { s: "gymsh", x: "external", n: "The Stake Taken at a Billion", b: "Raise From Strength or Not at All",
+    t: "General Atlantic took a minority position in 2020 at a billion-pound valuation, after eight years with no outside investment at all. The terms were what they were because the company did not need it.",
+    l: "The only good time to take money is when you do not have to. Everything about the price and the control is decided by whether you could walk away, and that is set years earlier." },
+  { s: "gymsh", x: "karmic", n: "The Creators Who Took the Free Product", b: "Built With, Not Bought",
+    t: "The early athletes came up alongside the brand and several are still associated with it a decade on. The relationship was not transactional at the start because there was nothing to transact with.",
+    l: "What you build with people who backed you before it was obvious is a different thing from what you buy later. The first kind lasts and the second kind is renegotiated annually." },
+  { s: "gymsh", x: "karmic", n: "Learned in Public", b: "A Very Long Record",
+    t: "The mistakes, the crash, the stepping back and the returning all happened where people could see, and he has spoken about most of it since.",
+    l: "Building in public means the failures are public too, and that is the cost of the distribution. What it buys is that nobody can ever surprise you with your own history." },
+  { s: "gymsh", x: "karmic", n: "He Stayed in Birmingham", b: "Where You Build Compounds",
+    t: "The company is still headquartered there rather than in London, which was a decision rather than an accident of inertia.",
+    l: "Where you build is a choice with compounding consequences: the cost base, the people you can hire, what the culture becomes. Defaulting to where everybody goes is a decision you did not make." },
+  { s: "hormo", x: "mindset", n: "Give It All Away", b: "The Book Costs Less Than the Printing",
+    t: "$100M Offers and $100M Leads are priced at effectively nothing and the content is published free at enormous volume. The stated model is that attention is the asset and everything else is downstream of it.",
+    l: "What you charge at the entry decides how many people ever get in. If the real money is further down the line, the front of it should cost as close to nothing as you can stand." },
+  { s: "hormo", x: "mindset", n: "Volume Negates Luck", b: "You Are Under-Sampled",
+    t: "His repeated point is that most people never do enough of the thing for the odds to work: not enough calls, not enough posts, not enough offers made.",
+    l: "You are not unlucky, you are under-sampled. Almost every plateau is somebody doing ten of something that needs a thousand, and concluding from the ten that it does not work." },
+  { s: "hormo", x: "mindset", n: "Fix the Offer Before the Traffic", b: "The Grand Slam Offer",
+    t: "His central commercial argument: the problem is almost never the price or the volume of attention, it is that the offer is ordinary. Stack the value, remove the risk, make it specific.",
+    l: "Before you spend anything on getting more attention, check whether what you are offering could convert the attention you already have. It usually cannot, and that is far cheaper to fix." },
+  { s: "hormo", x: "internal", n: "He Lost It Twice", b: "Down to Almost Nothing",
+    t: "He has been open about periods of being effectively broke and in debt, after the gyms and again later, and about what those stretches did to him.",
+    l: "You will be wrong in a way that costs everything at least once. Knowing that in advance changes what you put at risk and how quickly you get back up, and almost nobody plans for it." },
+  { s: "hormo", x: "internal", n: "He Married the Operator", b: "Give Away the Half You Avoid",
+    t: "He and Leila run it as two distinct functions: he is public-facing and offer-focused, she runs operations. He has said the company would not work with two of him in it.",
+    l: "Most founders try to be both halves and are quietly terrible at one of them. Find the person who is good at the part you avoid, and then actually hand it over." },
+  { s: "hormo", x: "internal", n: "He Publishes Every Day", b: "Repetition Is the Mechanism",
+    t: "The output is constant and mostly unglamorous: the same ideas, restated, across every format, for years without a gap.",
+    l: "Almost nobody is beaten on ideas. They are beaten on the number of times they said it. Repetition feels like a failure of imagination and it is the whole of what works." },
+  { s: "hormo", x: "external", n: "Sell to People Who Already Have a Business", b: "Pick a Buyer Who Can Pay",
+    t: "Gym Launch sold to gym owners: people with revenue, a problem they could name, and an immediate reason to pay for a fix. Not to consumers.",
+    l: "Who you sell to matters more than what you sell. A customer with money and an urgent expensive problem makes an ordinary product viable, and the reverse kills a good one." },
+  { s: "hormo", x: "external", n: "Own the Thing That Owns the Things", b: "There Is a Level Above Operating",
+    t: "The structure moved from running businesses to holding them: a portfolio, with the operating work done by the companies rather than by him.",
+    l: "There is a level above running the thing and it is available earlier than people take it. Ask what you would have to build so that your own time stops being the input." },
+  { s: "hormo", x: "external", n: "He Sold the Majority and Kept Working", b: "An Exit Is Not an Ending",
+    t: "Reported as selling around two thirds of Gym Launch and Prestige Labs in 2021, and then immediately building the next structure rather than stopping.",
+    l: "An exit is a liquidity event, not a finish line, and people who treat it as one spend the following year discovering there is nothing on the other side of it." },
+  { s: "hormo", x: "karmic", n: "The Free Content Is Why Anybody Calls", b: "Placed, Not Lost",
+    t: "Years of free material produced the audience that makes every subsequent business easier to start, and none of it paid anything at the time.",
+    l: "What you give away is placed rather than lost, and the return arrives as people already knowing who you are at the moment you need them to. That cannot be bought later at any price." },
+  { s: "hormo", x: "karmic", n: "He Says What He Said When He Was Broke", b: "Consistency Is Checkable",
+    t: "The material from the early years and the material now make the same arguments, which is unusual and is most of why anybody takes it seriously.",
+    l: "Everything you say is kept and will be compared against everything else you said. The only sustainable position is one you would still hold if it stopped being profitable." },
+  { s: "hormo", x: "karmic", n: "What the Gyms Cost Him", b: "The Tuition Was Paid in Advance",
+    t: "The failed and nearly-failed years are where the offer knowledge came from. None of it was theoretical and every part of it was paid for.",
+    l: "The expensive years are the only ones that produce something you can sell later. That does not make them pleasant and it does mean they were not wasted." },
+  { s: "spanx", x: "mindset", n: "What Did You Fail At This Week", b: "Failure as the Metric",
+    t: "Her father asked it at dinner every week and was disappointed when the answer was nothing. She has said it removed the fear of trying things that turn out not to work.",
+    l: "If nothing you tried this week failed, you attempted nothing with a real chance of not working. Track the attempts rather than the outcomes, because only one of those is under your control." },
+  { s: "spanx", x: "mindset", n: "She Told Nobody for a Year", b: "Protect It While It Is Fragile",
+    t: "She kept Spanx secret for about a year, including from friends and family, because she did not want the idea talked out of her before it existed.",
+    l: "Early ideas are fragile and other people's opinions arrive long before the thing can defend itself. Tell nobody until it is real enough to survive the conversation." },
+  { s: "spanx", x: "mindset", n: "She Wrote the Patent Herself", b: "Find Out What It Actually Involves",
+    t: "Quoted around three thousand dollars by attorneys against savings of five thousand, she bought a textbook and wrote it herself, paying a lawyer only for the claims.",
+    l: "A great deal of what gets outsourced at the start could be learned in a fortnight. Find out what the expensive thing actually involves before you pay somebody to do it badly." },
+  { s: "spanx", x: "internal", n: "Seven Years of Fax Machines", b: "Which Skill Is It Teaching",
+    t: "She sold office equipment door to door for seven years and was regularly thrown out of buildings. Everything about how Spanx was eventually sold came out of that stretch.",
+    l: "An unglamorous run of work that teaches one transferable skill is not a wasted run. The question is which skill, and if the honest answer is none, that is the problem." },
+  { s: "spanx", x: "internal", n: "She Cut the Feet Off", b: "Be the Prototype",
+    t: "The first product was a pair of her own hosiery with the feet cut off, worn under white trousers to a party. The problem was hers and she solved it for herself first.",
+    l: "The best starting point is a problem you personally have, because you can test the fix on yourself tonight and you will know immediately whether it worked." },
+  { s: "spanx", x: "internal", n: "Every Mill Said No", b: "Until One Man Asked His Daughters",
+    t: "She cold-called hosiery mills in North Carolina and was turned down repeatedly. One owner called back after his daughters tried the idea and liked it.",
+    l: "Almost nothing changes about the pitch between the twentieth refusal and the yes. What changed is that you were still asking, and the person had a reason you could never have predicted." },
+  { s: "spanx", x: "external", n: "She Walked It Into Neiman Marcus", b: "Go to the One Buyer",
+    t: "She got a meeting with a buyer, changed in the bathroom to demonstrate the difference in person, and came out with seven stores.",
+    l: "The meeting that matters is almost always with one specific person and is almost always gettable. A demonstration they can see beats a document they will skim." },
+  { s: "spanx", x: "external", n: "Oprah", b: "You Cannot Make the Break, Only Deserve It",
+    t: "Being named a favourite thing in 2000 changed the scale of the business overnight. It happened because the product was genuinely good and somebody found it.",
+    l: "You cannot manufacture the break, but you can make certain the thing is worth breaking. Almost everybody optimises for being found rather than for being worth finding." },
+  { s: "spanx", x: "external", n: "No Advertising, No Investors", b: "She Owned All of It",
+    t: "Spanx grew for years with no advertising spend and no outside investment, which is why she still owned one hundred per cent when the Blackstone deal happened.",
+    l: "What you own at the end was decided by what you gave up at the start. Every round and every bought customer is a claim on the thing, and the alternative is slower and entirely yours." },
+  { s: "spanx", x: "karmic", n: "Ten Thousand Each", b: "What the Exit Was For",
+    t: "On the sale she gave every employee ten thousand dollars and two first-class tickets to anywhere in the world.",
+    l: "What you do at the moment you finally have it is the truest statement you will ever make about the whole thing. Everybody who was there remembers, and so do you." },
+  { s: "spanx", x: "karmic", n: "She Gave Before It Was Comfortable", b: "The Timing Is the Test",
+    t: "She started the Sara Blakely Foundation in 2006 and signed the Giving Pledge in 2013, committing at least half of her wealth away. All of it began years before there was an exit to give out of.",
+    l: "Generosity that begins when it is easy is a different thing from generosity that begins when it costs. Only one of them changes you and it is the earlier one." },
+  { s: "spanx", x: "karmic", n: "Seven Years of Deposits", b: "Nothing Came Back at the Time",
+    t: "The fax years, the rejected mills, the year of silence: none of it produced anything while it was happening and all of it is why the rest worked.",
+    l: "You are depositing during the period when nothing is coming back. That is not a metaphor about patience, it is a description of the mechanism and of why almost nobody reaches the payout." },
+  { s: "mchmp", x: "mindset", n: "Twenty Years of Saying No", b: "To Every Investor Who Asked",
+    t: "They were approached repeatedly across two decades and refused every time, then sold to Intuit in 2021 in what was reported as the largest acquisition of a bootstrapped company ever.",
+    l: "The compounding on ownership is invisible until the end and then it is the entire thing. Every point you keep is worth more the longer it runs, which is exactly backwards to how it feels early." },
+  { s: "mchmp", x: "mindset", n: "It Was a Side Project", b: "Nobody Started a Company",
+    t: "Mailchimp ran alongside a web design agency and was not the main business. It became the main business because it kept growing while the other thing paid for the years.",
+    l: "You do not have to quit in order to start. The thing that works is often the side project that will not go away, and the job is what buys it the time it needs." },
+  { s: "mchmp", x: "mindset", n: "Serve the Customer Nobody Wants", b: "The Market Everyone Skipped",
+    t: "They aimed at very small businesses, the customers the enterprise companies had no interest in, and built something that did not require anybody to be technical.",
+    l: "The market everybody ignores for being too small is where you get to learn in peace. It also grows, and the people you helped when they were nobody do not forget it." },
+  { s: "mchmp", x: "internal", n: "They Were Not Trying to Be Big", b: "Growth Was Not the Aim",
+    t: "The stated posture for years was to build something good and sustainable rather than to chase scale. The scale arrived as a consequence of that rather than as the target.",
+    l: "Chasing growth directly changes every decision underneath it and most of those changes are bad. Making the thing genuinely good is slower and is the only version you never have to defend." },
+  { s: "mchmp", x: "internal", n: "A Salon and a Small Business", b: "Where the Model Came From",
+    t: "He has talked about his mother's hair salon as the origin of how he thinks about small business: the customer is a person you actually see.",
+    l: "What you watched work before you knew anything is a model you are still running. Go and find out which one it is, because it explains more of your decisions than any framework does." },
+  { s: "mchmp", x: "internal", n: "Freemium Was a Real Risk", b: "It Looked Like a Mistake for a Year",
+    t: "Introducing a free tier in 2009 meant giving up immediate revenue on a bet that volume would follow. Users went from around eighty-five thousand to roughly four hundred and fifty thousand in a year.",
+    l: "The decision that changes the trajectory usually looks like giving something away and feels wrong for about a year. It is only obvious afterwards, which is exactly why it was still available." },
+  { s: "mchmp", x: "external", n: "Free at the Front", b: "Volume Over Margin",
+    t: "Free at the bottom, paid as you grow, and a business built on the fact that a great many small customers eventually become medium ones.",
+    l: "Where you set the entry price decides the entire shape of the business. Free at the front is not generosity, it is a decision to be paid later by a far larger number of people." },
+  { s: "mchmp", x: "external", n: "Serial", b: "One Sponsorship, Years of Brand",
+    t: "The podcast sponsorship in 2014, and the mispronounced name that came with it, put Mailchimp in front of an enormous audience with no prior reason to know it existed.",
+    l: "One correctly chosen place, early, before the price has risen, beats a large budget spread thinly everywhere. A channel is cheap precisely while nobody has proved it works." },
+  { s: "mchmp", x: "external", n: "Atlanta, Not San Francisco", b: "Outside the Machine",
+    t: "They built it away from the venture ecosystem, which is a large part of why refusing money stayed easy for twenty years.",
+    l: "Your environment sets the default assumptions about how a thing is supposed to be done. Being outside it costs you the network and buys you the ability to ignore the consensus." },
+  { s: "mchmp", x: "karmic", n: "Twenty Years Is the Whole Story", b: "There Is No Shortcut Inside It",
+    t: "There is no single moment in the Mailchimp story that explains it. It is two decades of compounding with no outside money accelerating anything at any point.",
+    l: "The thing that looks like a twelve billion dollar event was a twenty year process with almost nothing dramatic in it. Stories compress time and you are living in the uncompressed version." },
+  { s: "mchmp", x: "karmic", n: "Nobody Had Equity", b: "What Bootstrapping Cost the Staff",
+    t: "Because there had never been funding rounds there were never option pools, so employees held no stake when the sale happened. Reporting described bonuses, and also described staff who felt they had not shared in it.",
+    l: "Owning all of it means nobody else is owed anything, and that is structural rather than moral until the day somebody decides. Choose early and deliberately what the people building it with you get." },
+  { s: "mchmp", x: "karmic", n: "The Small Businesses Built It", b: "Slowly, Then Uncatchably",
+    t: "The base was assembled out of people running tiny operations over twenty years, and that base is what the valuation was measured against.",
+    l: "Serving people nobody else wants to serve is slow and it accumulates into something that cannot be taken. The advantage is that your competitors will not want it until far too late." },
+  { s: "sigs", x: "mindset", n: "Profitable From the First Customer", b: "Charge Money for the Thing",
+    t: "Basecamp charged from launch in 2004. There was no free growth phase funded by somebody else and no plan that required a later round in order to work.",
+    l: "A business that makes money from the first customer is a business you control. One that needs scale before it works has handed its timetable to whoever is funding the gap." },
+  { s: "sigs", x: "mindset", n: "Growth Is a Choice", b: "Nobody Made It Compulsory",
+    t: "They have stayed deliberately small for two decades, refused to chase scale, and written at length about why. There were no growth targets.",
+    l: "Nobody made growth compulsory. It is a decision with costs attached and people accept it by default because everybody around them did. Decide what size is enough and say it out loud." },
+  { s: "sigs", x: "mindset", n: "Work Should Be Calm", b: "If It Needs Heroics the Plan Is Wrong",
+    t: "Forty hour weeks, thirty-two in summer, and no expectation of nights or weekends. It Doesn't Have to Be Crazy at Work argues that overwork is a management failure rather than a virtue.",
+    l: "If the plan requires heroics to work, the plan is wrong. A sustainable pace is not a comfort, it is what lets you still be doing this in ten years, which is the only variable that compounds." },
+  { s: "sigs", x: "internal", n: "They Built It for Themselves", b: "Basecamp Was an Internal Tool",
+    t: "Basecamp was built to run their own client projects at the design firm, and only sold afterwards. The first user was the company.",
+    l: "Something you built because you needed it has a customer already proven, and you can tell whether it works without asking anybody. Most products fail on a question this one has answered." },
+  { s: "sigs", x: "internal", n: "Saying No Is the Job", b: "Features, Customers, Money",
+    t: "A constant theme across twenty years of their writing: most of the work is refusing. Refusing features, refusing customers who want it to be something else, refusing investment.",
+    l: "What you decline defines the thing far more than what you accept. Every yes adds surface you maintain forever, and almost nobody counts that cost at the moment of saying it." },
+  { s: "sigs", x: "internal", n: "They Published Their Opinions", b: "And Paid for Some of Them",
+    t: "The books and the blog built the audience that sells the software, and in 2021 a policy decision was publicly contested and roughly a third of the staff left.",
+    l: "Taking public positions is what makes you findable and it is the same thing that makes you liable. You do not get the first without the second, and pretending otherwise is how people are surprised." },
+  { s: "sigs", x: "external", n: "The Writing Is the Marketing", b: "An Argument Travels Further Than an Ad",
+    t: "Rework, Remote and the rest built an audience that was never bought. The software sits downstream of people agreeing with the argument.",
+    l: "An argument people want to repeat travels further than any advertisement and costs nothing except having something to say. The hard part is having a position rather than a campaign." },
+  { s: "sigs", x: "external", n: "They Gave Rails Away", b: "Open Source as Distribution",
+    t: "Ruby on Rails was extracted from Basecamp and released free in 2004. It became one of the most used web frameworks there is and made the company enormously credible.",
+    l: "Giving away the thing underneath your product can be worth more than selling it. It puts your thinking permanently inside other people's work, and nobody competes with free." },
+  { s: "sigs", x: "external", n: "One Outside Stake, Once", b: "A Share of the Upside, Not a Vote",
+    t: "Jeff Bezos took a minority, non-controlling position in 2006. There was never another round and control never moved.",
+    l: "There is a difference between money that buys a share of the upside and money that buys a vote on your decisions. Find out precisely which is on the table before the number distracts you." },
+  { s: "sigs", x: "karmic", n: "Twenty Years of the Same Argument", b: "The Interval Is the Price",
+    t: "The position they took in 2004 about small, profitable, calm software is the position now, and the company is still here while most of the ones that mocked it are not.",
+    l: "A position held long enough stops being contrarian and becomes obvious, and whoever held it owns the credit. The interval where you look wrong is the entire price of it." },
+  { s: "sigs", x: "karmic", n: "The Staff Who Left", b: "Entitled and Costly Are Different Questions",
+    t: "The 2021 policy change was contested in the open and about a third of employees took the severance and went. All of it is on the record.",
+    l: "A decision you are entitled to make is still a decision with a bill, and the bill is usually paid in the people who go. Being within your rights and being right are separate questions." },
+  { s: "sigs", x: "karmic", n: "Nobody Owns Them", b: "What Two Decades of No Bought",
+    t: "No board, no acquisition, no obligation to grow. They can change the product, the price or the company's name whenever they decide to, and have.",
+    l: "Autonomy is not a feeling, it is a structural position, and it is bought by everything you refused along the way. You will not notice you have it until somebody tries to tell you what to do." },
 ];
 
 var $ = function (s) { return document.querySelector(s); };
@@ -1116,6 +1346,22 @@ var save = function () { try { localStorage.setItem(KEY, JSON.stringify(st)); } 
   });
   /* Four axes over one life will collapse into each other unless
      something refuses it, and the cheapest refusal is the name. */
+  /* The index draws a heading per run of one group, so a kind holding
+     more than one needs a label for each, and the runs have to be
+     contiguous or the same heading is drawn twice. A missing label is a
+     blank heading, which reads as a rendering fault rather than a group. */
+  ['figure', 'book'].forEach(function (k) {
+    var gs = [], last = null;
+    SRC.filter(function (x) { return x.k === k; }).forEach(function (x) {
+      if (!x.g) throw new Error('no group for ' + x.n);
+      if (x.g === last) return;
+      if (gs.indexOf(x.g) >= 0) throw new Error('group ' + x.g + ' is split');
+      gs.push(x.g); last = x.g;
+    });
+    if (gs.length > 1) gs.forEach(function (g) {
+      if (!GROUP[g]) throw new Error('no label for group ' + g);
+    });
+  });
   var names = {};
   TH.forEach(function (t) {
     if (names[t.n]) throw new Error('two themes called ' + t.n);
@@ -1157,7 +1403,16 @@ function card(t) {
    to disagree. */
 function paintIndex(kind) {
   var p = $('#al' + kind.charAt(0).toUpperCase() + kind.slice(1) + 'Pane'); p.textContent = '';
-  SRC.filter(function (x) { return x.k + 's' === kind; }).forEach(function (x) {
+  var rows = SRC.filter(function (x) { return x.k + 's' === kind; });
+  var gs = [], last = null;
+  rows.forEach(function (x) { if (gs.indexOf(x.g) < 0) gs.push(x.g); });
+  rows.forEach(function (x) {
+    /* No data-x on it: a coloured heading means an axis everywhere else
+       in this app, and this one names a kind of person. */
+    if (gs.length > 1 && x.g !== last) {
+      p.appendChild(el('div', 'al-grp al-caps', GROUP[x.g]));
+      last = x.g;
+    }
     var b = el('button', 'al-th al-f');
     b.setAttribute('data-src', x.i);
     b.appendChild(el('h3', 'al-tn', x.n));
