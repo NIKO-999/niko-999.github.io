@@ -2420,15 +2420,24 @@
      one control up. */
   var LEN_MARKS = [15, 30, 60, 120];
   var LEN_STEP = 5;
-  function scLenBar(box, len, at) {
+  /* `say` is where the figure goes, and passing one is what STOPS the
+     big readout being drawn. Inside a grouped list the row's own value
+     already prints the length, so a 22px copy of it directly under the
+     row would be the same figure twice — and hiding it with a rule
+     would leave a dead element the function still builds. A caller that
+     wants the figure somewhere else says so, and gets it there. */
+  function scLenBar(box, len, at, say) {
     /* The ceiling grows to hold a block that is already longer than
        it — a shift can be ten hours and a bar that could not express
        what is already saved would rewrite it on the way past. */
     var max = Math.max(480, Math.ceil(len / 60) * 60);
-    var read = scEl('div', 'nm-read');
-    var big = scEl('b');
-    read.appendChild(big);
-    box.appendChild(read);
+    var big = null;
+    if (!say) {
+      var read = scEl('div', 'nm-read');
+      big = scEl('b');
+      read.appendChild(big);
+      box.appendChild(read);
+    }
     var sub = scEl('div', 'nm-sub');
     box.appendChild(sub);
 
@@ -2478,7 +2487,8 @@
 
     function paint() {
       var v = +dial.value;
-      big.textContent = scLenLong(v);
+      if (big) big.textContent = scLenLong(v);
+      if (say) say(scLenLong(v));
       dial.style.setProperty('--fill', (max ? (v / max) * 100 : 0) + '%');
       dial.setAttribute('aria-valuetext', scLenLong(v));
       markBtns.forEach(function (mb) {
@@ -8823,6 +8833,125 @@
      THE EDIT SHEET
      ═══════════════════════════════════════════════════════════ */
 
+  /* ═══════════════════════════════════════════════════════════
+     A FORM IS A GROUPED LIST
+
+     The editor was six tracked uppercase labels, each on its own line
+     above a full-width bordered field — 1,058px of form in a 742px
+     sheet, where the SHOUTING was the only thing telling one control
+     from the next and a value could not be scanned at all.
+
+     A grouped list is the other arrangement: one surface, the rows
+     ruled inside it, the label on the left and the value on the right.
+     What it buys is measured rather than claimed — five facts in the
+     height three labelled boxes took — and what it costs is that a
+     control wider than a row has to be DISCLOSED rather than always
+     drawn, which is the one thing these three helpers are for.
+
+     EVERY ROW IS THE SAME BOX. A value row is a <div>, a disclosure is
+     a <button> and a push is a <button>, and all three take `.gl-r`,
+     because the moment they are three boxes they come out a pixel
+     apart and the right-hand column stops being a column.
+     ═══════════════════════════════════════════════════════════ */
+
+  function scGlDown() {
+    /* Down at rest and 180° when open, which is this repo's own rule
+       for a folding panel — 90° lays a chevron on its side. A RIGHT
+       chevron would be a lie here: it says the row pushes to another
+       screen, and these open underneath. */
+    return '<svg class="gl-c" viewBox="0 0 13 8" aria-hidden="true">'
+      + '<path d="M1 1l5.5 6L12 1"/></svg>';
+  }
+  function scGlGo() {
+    /* And this one IS a push — the workout picker is its own sheet. */
+    return '<svg class="gl-c gl-go" viewBox="0 0 8 13" aria-hidden="true">'
+      + '<path d="M1 1l5.5 5.5L1 12"/></svg>';
+  }
+
+  /* A row whose value is a field you type into: the input keeps
+     `.field`, so the 16px floor and the appearance reset that hands
+     Safari its box back both come with it, and every reader of this
+     sheet still finds an input by that name. */
+  function scGlField(g, label, f) {
+    var r = scEl('div', 'gl-r');
+    r.appendChild(scEl('span', 'gl-l', label));
+    f.classList.add('gl-f');
+    /* The label is a <span> rather than a <label>, so without this the
+       field is announced as an unnamed input — which is exactly what
+       the start time was before it was given one. */
+    f.setAttribute('aria-label', label);
+    r.appendChild(f);
+    g.appendChild(r);
+    return r;
+  }
+
+  /* A row that opens a control underneath it. The value says what the
+     control is currently set to, so the row reads without opening —
+     which is the whole of why the control can be put away at all. */
+  function scGlOpen(g, label, value) {
+    var r = scEl('button', 'gl-r');
+    r.type = 'button';
+    var v = scEl('span', 'gl-v', value);
+    var p = scEl('div', 'gl-p');
+    /* `[hidden]` HAS TO BE SAID OUT LOUD ONCE A THING TAKES A DISPLAY,
+       and `.gl-p` does the moment anything inside it lays out. Said in
+       `app.css` beside the rule; set here. */
+    p.hidden = true;
+    p.id = 'scGl' + scId();
+    r.setAttribute('aria-expanded', 'false');
+    r.setAttribute('aria-controls', p.id);
+    r.appendChild(scEl('span', 'gl-l', label));
+    r.appendChild(v);
+    r.insertAdjacentHTML('beforeend', scGlDown());
+    r.addEventListener('click', function () {
+      var open = p.hidden;
+      p.hidden = !open;
+      r.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    g.appendChild(r);
+    g.appendChild(p);
+    return { row: r, panel: p, set: function (t) { v.textContent = t; } };
+  }
+
+  /* A row that pushes to a sheet of its own. */
+  function scGlPush(g, label, value, go) {
+    var r = scEl('button', 'gl-r');
+    r.type = 'button';
+    r.appendChild(scEl('span', 'gl-l', label));
+    r.appendChild(scEl('span', 'gl-v', value));
+    r.insertAdjacentHTML('beforeend', scGlGo());
+    r.addEventListener('click', go);
+    g.appendChild(r);
+    return r;
+  }
+
+  /* WHAT IS INSIDE IT AND WHAT IT IS ABOUT, by NAME rather than by
+     count. "3 things" is a figure you have to open the row to read;
+     the names are the thing itself, and `.gl-v` ellipsises whatever
+     does not fit, which is the honest end of a list too long for a
+     line. */
+  function scGlKids(list) {
+    return list.length ? list.map(function (k) { return k.n; }).join(', ') : 'None';
+  }
+  function scGlNotes(ids) {
+    var t = ids.map(function (q) {
+      var n = scNoteById(q);
+      return n ? scNoteTitle(n) : null;
+    }).filter(Boolean);
+    return t.length ? t.join(', ') : 'None';
+  }
+
+  /* WHICH DAYS, IN THE FEWEST WORDS THAT ARE STILL TRUE. One day is
+     named in full, because a row saying MON when the card behind it
+     says Monday is the app using two words for one thing. */
+  function scGlDays(picked) {
+    var on = scWeek().filter(function (d) { return picked[d]; });
+    if (!on.length) return 'None';
+    if (on.length === 7) return 'Every day';
+    if (on.length === 1) return FULL[on[0]];
+    return on.map(function (d) { return ABBR[d].charAt(0) + ABBR[d].slice(1).toLowerCase(); }).join(', ');
+  }
+
   function scEditSheet(item, day) {
     var isNew = !item;
     scSheet(isNew ? 'New block' : 'Edit', function (body) {
@@ -8853,9 +8982,14 @@
           if (!isNew) { picked = {}; picks.querySelectorAll('.pick').forEach(function (o) { o.setAttribute('aria-pressed', 'false'); }); }
           picked[d] = picked[d] ? 0 : 1;
           b.setAttribute('aria-pressed', picked[d] ? 'true' : 'false');
+          /* The row above the panel says which days, so it has to be
+             written back — a summary that only tells the truth until
+             you touch the control under it is worse than none. */
+          if (dayRow) dayRow.set(scGlDays(picked));
         });
         picks.appendChild(b);
       });
+      var dayRow = null;
 
       /* ── A START AND A LENGTH, NOT TWO CLOCK TIMES ──
          The end field is gone and the bar below replaces it. Three
@@ -8905,15 +9039,31 @@
 
       var room = scEl('input', 'field');
       room.type = 'text';
-      room.placeholder = 'Where, if it matters';
+      /* A PLACEHOLDER IN THE VALUE SLOT, so it reads as the absence of
+         an answer rather than as an instruction: the row's own label
+         is what says what the field is for, and a sentence in the
+         right-hand column would be the caption this pass removed. */
+      room.placeholder = 'None';
       room.value = item ? item.r : '';
 
-      body.appendChild(scEl('span', 'label', 'What'));
-      body.appendChild(name);
-      body.appendChild(scEl('span', 'label', isNew ? 'Days' : 'Day'));
-      body.appendChild(picks);
-      body.appendChild(scEl('span', 'label', 'Starts at'));
-      body.appendChild(t1);
+      /* ── ONE GROUP, FIVE FACTS ──
+         Name, Day, Starts, Lasts, Where — the whole of what a block
+         IS, on five rows of one surface. It was five caps labels over
+         five bordered boxes plus a seven-chip row and a dial, and the
+         two controls that are wider than a row are the two that are
+         put away: the row says what they are set to, which is the only
+         reason a control can be hidden and the screen still read.
+
+         WHICH TWO IS DECIDED BY WIDTH, not by how often you change
+         them. Seven day chips and a dial with four marks under it
+         cannot be a right-hand column at 390px; a name, a clock and a
+         room can. */
+      var g1 = scEl('div', 'glist');
+      scGlField(g1, 'Name', name);
+      dayRow = scGlOpen(g1, isNew ? 'Days' : 'Day', scGlDays(picked));
+      dayRow.panel.appendChild(picks);
+      scGlField(g1, 'Starts', t1);
+      var lenRow = scGlOpen(g1, 'Lasts', '');
       /* ── AND HOW LONG, IF IT IS ANYTHING ──
          A NEW BLOCK OPENS AT A MOMENT, which is the whole of what was
          asked for: everything starts as a thing you can just log, and
@@ -8921,18 +9071,15 @@
          was an hour, invented so the row had a span to draw, and on
          Wake it was an hour of nothing.
 
-         An existing block opens at whatever it already is, so the bar
-         is a readout of the block as much as a control on it. */
-      body.appendChild(scEl('span', 'label', 'How long'));
-      /* Straight into the body rather than into a box of its own, the
-         way the number dial's parts are: every rule these carry is on
-         the `.nm-*` classes themselves, so a wrapper would be a class
-         with no rule behind it and one more thing between the control
-         and the sheet that could move it. */
-      var lenBar = scLenBar(body, item ? Math.max(0, item.e - item.s) : 0,
-        function () { return scFromHHMM(t1.value); });
-      body.appendChild(scEl('span', 'label', 'Where'));
-      body.appendChild(room);
+         An existing block opens at whatever it already is, so the row
+         is a readout of the block as much as a way to a control on it.
+         `lenRow.set` is passed as the bar's own `say`, which is what
+         stops it drawing a 22px copy of the figure the row above it
+         has just printed. */
+      var lenBar = scLenBar(lenRow.panel, item ? Math.max(0, item.e - item.s) : 0,
+        function () { return scFromHHMM(t1.value); }, lenRow.set);
+      scGlField(g1, 'Where', room);
+      body.appendChild(g1);
 
       /* ── AND WHAT YOU DO DURING IT ──
          Held here rather than on the row, because these are part of the
@@ -8943,6 +9090,7 @@
          it before the block exists is a form asking about a thing that
          does not. */
       var kidList = (item && Array.isArray(item.k)) ? item.k.slice() : [];
+      var kidsRow = null;
       var kidBox = scEl('div', 'kid-edit');
       var kidAdd = scEl('input', 'field');
       kidAdd.type = 'text';
@@ -8965,6 +9113,10 @@
         kidAdd.disabled = kidList.length >= 8;
         kidAdd.placeholder = kidList.length >= 8
           ? 'Eight is the most a row can hold' : 'Lunch, trading content, emails…';
+        /* Written back on every repaint rather than on the two presses
+           that change the list: a summary kept in step by its callers
+           is one that goes stale the day somebody adds a third. */
+        if (kidsRow) kidsRow.set(scGlKids(kidList));
       }
       /* ── ONE LINE, COMMAS ──
          "lunch, trading content, emails" is one field for a whole
@@ -9000,12 +9152,18 @@
         addKid();
       });
       if (!isNew) {
-        body.appendChild(scEl('span', 'label', 'During it'));
-        body.appendChild(kidBox);
+        /* ── A SECOND GROUP, BECAUSE THESE ARE ABOUT A BLOCK'S PARTS ──
+           The first group is what the block IS; this is what is inside
+           it and what it is about. Two surfaces rather than one long
+           one, which is the only thing a group heading would otherwise
+           be needed to say. */
+        var g2 = scEl('div', 'glist');
+        kidsRow = scGlOpen(g2, 'During it', scGlKids(kidList));
+        kidsRow.panel.appendChild(kidBox);
         var kidRow = scEl('div', 'kid-new');
         kidRow.appendChild(kidAdd);
         kidRow.appendChild(scBtn('off', 'Add', addKid));
-        body.appendChild(kidRow);
+        kidsRow.panel.appendChild(kidRow);
         paintKids();
 
         /* ── AND WHICH NOTE IT IS ABOUT ──
@@ -9020,13 +9178,13 @@
            attach one before you have written any is a control that
            can only refuse. */
         if (notes.length) {
-          body.appendChild(scEl('span', 'label', 'About'));
           /* ── SEVERAL, AND THE CHIPS TOGGLE ──
              A goal, the process for it and a note about it are three
              different records about one morning. There is no None
              chip any more: pressing a chip that is on takes it off,
              which is the same control answering one question instead
              of two. */
+          var ntRow = scGlOpen(g2, 'About', scGlNotes(noteSel));
           var nrow = scEl('div', 'nt-pick');
           notes.slice().sort(function (a, b2) { return b2.u - a.u; }).forEach(function (q) {
             var on = noteSel.indexOf(q.id) >= 0;
@@ -9046,21 +9204,47 @@
               var now = noteSel.indexOf(q.id) >= 0;
               b.classList.toggle('is-on', now);
               b.setAttribute('aria-pressed', now ? 'true' : 'false');
+              ntRow.set(scGlNotes(noteSel));
             });
             nrow.appendChild(b);
           });
-          body.appendChild(nrow);
+          ntRow.panel.appendChild(nrow);
         }
+        body.appendChild(g2);
+      }
+
+      /* ── DELETE IS NOT A PEER OF SAVE, and that is one line of this
+         function and a whole change to what the sheet says ──
+         It sat in a red outline at the same weight as Save, side by
+         side at the foot: the one press on this form you cannot undo,
+         drawn as the other half of a pair and sitting where a thumb
+         lands on the way to filing an edit. It is a row at the END of
+         the list now — plain red type on its own surface, past
+         everything the form is actually for — which is where a
+         destructive action goes and is the only thing that stops it
+         being a fifty-fifty.
+
+         Cancel stays a button, because it is not destructive and it
+         is the other half of a genuine pair: on a NEW block there is
+         nothing to go back to and the scrim is the only other way
+         out. On an edit there is nothing to cancel — Escape and the
+         scrim both leave it alone — so Save has the row to itself. */
+      var del = null;
+      if (!isNew) {
+        del = scEl('div', 'glist');
+        var delBtn = scEl('button', 'gl-r gl-del', 'Delete this block');
+        delBtn.type = 'button';
+        delBtn.addEventListener('click', function () {
+          scMark();
+          state.items = state.items.filter(function (o) { return o.id !== item.id; });
+          scClose();
+          scCommit('Removed');
+        });
+        del.appendChild(delBtn);
       }
 
       var acts = scEl('div', 'acts');
-      if (!isNew) acts.appendChild(scBtn('bad', 'Delete', function () {
-        scMark();
-        state.items = state.items.filter(function (o) { return o.id !== item.id; });
-        scClose();
-        scCommit('Removed');
-      }));
-      else acts.appendChild(scBtn('off', 'Cancel', scClose));
+      if (isNew) acts.appendChild(scBtn('off', 'Cancel', scClose));
 
       acts.appendChild(scBtn('go', 'Save', function () {
         var s = scFromHHMM(t1.value);
@@ -9115,7 +9299,24 @@
         var oDay = scWeekDate(day);
         var canDone = !!bDay && scTallyOpen(bDay);
         var canOff = scOffOpen(oDay);
-        if (canDone || canOff) body.appendChild(scEl('span', 'label', 'This day'));
+        /* ── AND THE THREE ONE-DATE FACTS ARE ONE GROUP ──
+           `.label` stays here and nowhere else on this sheet, because
+           this one names a GROUP rather than a field: everything above
+           edits the block for every week there will ever be, and
+           everything in here is about one date. That is a distinction
+           a row's own left-hand label cannot make, which is exactly
+           what an inset list's header is for.
+
+           TRAINED JOINED IT, and its own caps label went. It was a
+           seventh label over a lone button directly under a grouped
+           list, which is the stack of boxes seen from the side — and
+           it is the same kind of fact as the two above it, filed
+           against the same date through the same window. The rule it
+           was written to keep still holds and is why the heading is
+           "This day": Off must not sit under a heading reading
+           TRAINED, and under this one it does not. */
+        var g3 = (canDone || canOff) ? scEl('div', 'glist') : null;
+        if (g3) body.appendChild(scEl('span', 'label', 'This day'));
 
         /* ── the other direction ──
            The tally ticks Train and the week agrees. This is the same
@@ -9148,6 +9349,7 @@
           tog.insertAdjacentHTML('beforeend',
             '<svg viewBox="0 0 24 24" aria-hidden="true">'
             + '<path d="M4.5 12.8l5.2 5.2L19.5 6"/></svg>');
+          tog.classList.add('gl-r');
           tog.setAttribute('aria-pressed', done ? 'true' : 'false');
           tog.addEventListener('click', function () {
             scSetBlockDone(bDay, item, day, !done);
@@ -9161,7 +9363,7 @@
             scToast(done ? 'Unmarked'
               : fed ? 'Counted toward ' + fed : 'Marked done', false);
           });
-          body.appendChild(tog);
+          g3.appendChild(tog);
         }
 
         /* ── AND THE OPPOSITE CLAIM, DIRECTLY UNDER IT ──
@@ -9183,6 +9385,7 @@
           otog.insertAdjacentHTML('beforeend',
             '<svg viewBox="0 0 24 24" aria-hidden="true">'
             + '<path d="M5 12h14"/></svg>');
+          otog.classList.add('gl-r');
           otog.setAttribute('aria-pressed', isOff ? 'true' : 'false');
           otog.addEventListener('click', function () {
             scSetOff(oDay, item, day, !isOff);
@@ -9191,7 +9394,7 @@
             if (view === 'tally') scPaintTally(); else scRender();
             scToast(isOff ? 'Back on' : 'Off for the day', false);
           });
-          body.appendChild(otog);
+          g3.appendChild(otog);
         }
 
         /* ── the deck's OTHER door, and it is the one that matters ──
@@ -9206,20 +9409,19 @@
         if (canDone && scIsTrain(item)) {
           var gr = scTrainOf(bDay, item.id);
           var got = gr && scWorkName(gr.k);
-          var wob = scEl('button', 'mark' + (got ? ' is-on' : ''));
-          wob.type = 'button';
-          wob.appendChild(document.createTextNode(got || 'Pick a workout'));
-          wob.insertAdjacentHTML('beforeend',
-            '<svg viewBox="0 0 24 24" aria-hidden="true">'
-            + '<path d="M9 5.5l6.5 6.5L9 18.5"/></svg>');
-          wob.addEventListener('click', function () {
+          /* A PUSH, so it takes the row's own right chevron rather
+             than the tick every other `.mark` carries: this one does
+             not toggle anything, it opens the picker. The label says
+             what the row is and the value says what is on it, which
+             is the seventh caps label paid back as two words. */
+          scGlPush(g3, 'Trained', got || 'Not yet', function () {
             scTrainAsk(item, day, bDay);
           });
-          body.appendChild(scEl('span', 'label', 'Trained'));
-          body.appendChild(wob);
         }
+        if (g3) body.appendChild(g3);
       }
 
+      if (del) body.appendChild(del);
       body.appendChild(acts);
 
       if (isNew) setTimeout(function () { name.focus(); }, 340);

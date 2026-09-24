@@ -73,6 +73,28 @@ const deltaE = (a, b) => {
   return Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]);
 };
 
+/* ── OPENING A DISCLOSURE ROW IN A GROUPED LIST ──
+   The editor's two widest controls — the seven day chips and the
+   length dial — are put away behind the row that says what they are
+   set to, so anything measuring or driving them has to press that
+   row first. Takes any page, because three contexts need it.
+
+   It THROWS on a label it cannot find rather than returning: a
+   selector that matches nothing filters to an empty list, and an
+   empty list passes `every` and fails a count identically to a
+   broken feature. This repo has recorded that three times. */
+const openGl = async (pg, label) => {
+  const hit = await pg.evaluate((want) => {
+    const r = [...document.querySelectorAll('.gl-r[aria-expanded]')]
+      .find((x) => (x.querySelector('.gl-l') || {}).textContent === want);
+    if (!r) return null;
+    if (r.getAttribute('aria-expanded') !== 'true') r.click();
+    return true;
+  }, label);
+  if (!hit) throw new Error('no grouped-list row named ' + label);
+  await pg.waitForTimeout(240);
+};
+
 /* A phone, and a real one — the app has no other layout.
 
    THE LOCALE IS PINNED, and that is not tidiness. Every printed time
@@ -1562,15 +1584,28 @@ const SAID = [
       if (!(await qp.$('#scWeek .row[data-id="q1"]'))) return false;
       await qp.click('#scWeek .row[data-id="q1"]');
       await qp.waitForTimeout(300);
+      /* ── THE BAR LIVES BEHIND THE ROW THAT SAYS ITS FIGURE ──
+         The form is a grouped list and the dial is one of its two
+         disclosed controls, so everything below has to press `Lasts`
+         before it can read or drive it. */
+      await openGl(qp, 'Lasts');
       return true;
     };
+    /* And the FIGURE is read off the row rather than off `.nm-read`:
+       `scLenBar` is handed a `say` here and draws no readout of its
+       own, because the row above it has just printed the same words
+       at a sixth of the size. */
+    const qsaid = () => qp.evaluate(() => {
+      const r = [...document.querySelectorAll('#scSheetBody .gl-r[aria-expanded]')]
+        .find((x) => (x.querySelector('.gl-l') || {}).textContent === 'Lasts');
+      return r ? r.querySelector('.gl-v').textContent : null;
+    });
     const qhas = await qopen();
     const qed = !qhas ? null : await qp.evaluate(() => ({
       times: document.querySelectorAll('#scSheetBody input[type=time]').length,
       dial: document.querySelector('#scSheetBody .nm-dial')
         ? +document.querySelector('#scSheetBody .nm-dial').value : null,
-      read: document.querySelector('#scSheetBody .nm-read b')
-        ? document.querySelector('#scSheetBody .nm-read b').textContent : null,
+      read: document.querySelectorAll('#scSheetBody .nm-read').length,
       sub: document.querySelector('#scSheetBody .nm-sub')
         ? document.querySelector('#scSheetBody .nm-sub').textContent : null,
       marks: [...document.querySelectorAll('#scSheetBody .nm-mark')].map((x) => x.textContent),
@@ -1583,9 +1618,13 @@ const SAID = [
       qed && qed.times === 1, qed);
     /* IT IS THE NUMBER DIAL'S OWN CONTROL, down to its classes, so
        there is one set of rules for what a bar in this app looks
-       like. Asserted as the classes being found at all. */
+       like. Asserted as the classes being found at all — and as the
+       readout NOT being one of them, because the row above prints the
+       figure and a 22px copy of it directly underneath would be the
+       duplication this project keeps taking back out. */
     ok('...and the length is the number dial\'s bar, opened at the moment',
-      qed && qed.dial === 0 && qed.read === 'A moment', qed);
+      qed && qed.dial === 0 && qed.read === 0
+      && (await qsaid()) === 'A moment', qed);
     /* NOUGHT IS AN ANSWER HERE, where every other dial's nought means
        "nothing yet" — so the readout says it in words rather than
        printing a length nobody's morning had. */
@@ -1598,10 +1637,8 @@ const SAID = [
     const qmark = !qhas ? null : await (async () => {
       await qp.click('#scSheetBody .nm-mark >> nth=1');
       await qp.waitForTimeout(120);
-      return qp.evaluate(() => ({
-        read: document.querySelector('#scSheetBody .nm-read b').textContent,
-        sub: document.querySelector('#scSheetBody .nm-sub').textContent,
-      }));
+      return { read: await qsaid(), sub: await qp.evaluate(() =>
+        document.querySelector('#scSheetBody .nm-sub').textContent) };
     })();
     ok('pressing a mark sets the bar, and the readout names the end it makes',
       qmark && qmark.read === '30 min' && qmark.sub === 'ends 07:30', qmark);
@@ -3200,19 +3237,32 @@ const SAID = [
   const hasToggle = await page.evaluate(() => {
     const m = document.querySelector('.sheet .mark');
     const r = m && m.getBoundingClientRect();
-    const f = document.querySelector('.sheet .field').getBoundingClientRect();
-    return m ? { text: m.textContent.trim(), on: m.classList.contains('is-on'),
+    /* ── THE SAME BOX AS A ROW OF THE LIST IT IS IN ──
+       It used to be measured against `.sheet .field`, because the form
+       was a stack of full-width bordered boxes and the toggle was one
+       more of them — as an scBtn it carried flex:1 outside a flex
+       parent and drew 156px wide beside two 172px buttons, which is
+       the fault that assertion was written for.
+
+       The form is a grouped list now, so the claim moves with it: a
+       toggle inside a group is a ROW of that group, at the same width
+       and the same 44px every other row is. Measured against a row in
+       ANOTHER group, because a row in its own would match a build
+       where the whole group came out the wrong size. */
+    const other = document.querySelector('.glist .gl-r');
+    const f = other && other.getBoundingClientRect();
+    return m && f ? { text: m.textContent.trim(), on: m.classList.contains('is-on'),
                  pressed: m.getAttribute('aria-pressed'),
-                 /* Same box as every other control on the form. As an
-                    scBtn it carried flex:1 outside a flex parent and
-                    drew 156px wide beside two 172px buttons. */
+                 row: !!m.closest('.glist'), mine: m.closest('.glist') === other.closest('.glist'),
+                 w: Math.round(r.width), h: Math.round(r.height),
                  sameWidth: Math.round(r.width) === Math.round(f.width),
                  sameHeight: Math.round(r.height) === Math.round(f.height) } : null;
   });
   ok('a block that feeds one of the five can be marked done in its editor',
     hasToggle && /Done today/.test(hasToggle.text), hasToggle);
-  ok('and the toggle is the same box as the fields above it',
-    hasToggle && hasToggle.sameWidth && hasToggle.sameHeight, hasToggle);
+  ok('and the toggle is a row of the list, at the same box as the rows above it',
+    hasToggle && hasToggle.row && !hasToggle.mine
+    && hasToggle.sameWidth && hasToggle.sameHeight && hasToggle.h === 44, hasToggle);
   /* ── A FILLED CONTROL IS WHITE, AND SO IS THE BUTTON UNDER IT ──
      The accent is for the RECORD — a done block on its row, a done
      objective, a kept day on the tally. A form control is chrome, and
@@ -3246,6 +3296,255 @@ const SAID = [
     ok('Done today, Save and the day chips are one white fill',
       onLook.bg === onLook.ink && onLook.chip === onLook.ink
       && onLook.go === onLook.ink && onLook.accent === onLook.ink, onLook);
+
+  /* ═══════════════════════════════════════════════════════════
+     A FORM IS A GROUPED LIST
+
+     The editor was six tracked uppercase labels, each on its own line
+     above a full-width bordered field: 1,058px of form in a 742px
+     sheet, where the only thing telling one control from the next was
+     which caps word was SHOUTING above it and no value could be
+     scanned at all. Measured on the build that was reported, Save
+     ended 119px under the bottom of the screen.
+
+     What replaces it is the arrangement Settings and Calendar have
+     used for fifteen years, and the reason to prefer it is not that it
+     is theirs: label left, value right, one surface with the rows
+     ruled inside it, and every value on ONE right edge so the form can
+     be read down a column instead of being taken a box at a time.
+     ═══════════════════════════════════════════════════════════ */
+  console.log('\n── the editor is a grouped list ──');
+  const glShape = await page.evaluate(() => {
+    const sh = document.getElementById('scSheet');
+    const rows = [...sh.querySelectorAll('.gl-r')];
+    const val = [...sh.querySelectorAll('.gl-v, .gl-f')];
+    return {
+      groups: sh.querySelectorAll('.glist').length,
+      rows: rows.length,
+      /* EVERY ROW THE SAME BOX. A value row is a <div>, a disclosure a
+         <button> and a push a <button>, and the moment they are three
+         boxes the right-hand column stops being a column. */
+      heights: [...new Set(rows.map((r) => Math.round(r.getBoundingClientRect().height)))],
+      /* ── ONE RIGHT EDGE ──
+         The chevron is out of the flow and every row reserves its
+         gutter, so a row that has one and a row that does not end
+         their value in the same place. Written as two numbers that
+         have to agree they came out 18px apart, which is a right-hand
+         column that is not one. */
+      right: [...new Set(val.map((e) => Math.round(e.getBoundingClientRect().right)))],
+      /* AND THE VALUE STOPS BEFORE THE CHEVRON. One edge on its own is
+         passed by a build with no gutter at all, where every value
+         simply runs under the mark — which is the same column and a
+         worse row. */
+      clear: rows.every((r) => {
+        const c = r.querySelector('.gl-c');
+        const v = r.querySelector('.gl-v, .gl-f');
+        if (!c || !v) return true;
+        return v.getBoundingClientRect().right
+          <= c.getBoundingClientRect().left + 0.5;
+      }),
+      /* THE LABEL AND THE VALUE ARE ON ONE LINE, which is the whole
+         of what this replaces — asserted as boxes rather than as
+         source order, because a rule that stacked them visually would
+         pass any check on the DOM. */
+      inline: rows.every((r) => {
+        const l = r.querySelector('.gl-l');
+        const v = r.querySelector('.gl-v, .gl-f');
+        if (!l || !v) return true;
+        const a = l.getBoundingClientRect(), b = v.getBoundingClientRect();
+        return a.right <= b.left + 0.5 && Math.abs(a.top - b.top) < 12;
+      }),
+      /* A caps label above a GROUP is an inset list's header and
+         stays; a caps label above a single FIELD is the line this
+         pass took out, and there were six of them. */
+      labels: [...sh.querySelectorAll('.label')].map((l) => l.textContent),
+      /* A FIELD IS EITHER A ROW'S VALUE OR A CONTROL INSIDE A PANEL,
+         and never loose in the sheet body — which is what the six
+         labelled boxes were. The sub-item field is the second kind: it
+         has an Add button beside it and is a place you type a list
+         into, not the answer to a row's question. */
+      fields: [...sh.querySelectorAll('.field')]
+        .map((f) => !!(f.closest('.gl-r') || f.closest('.gl-p'))),
+      loose: [...sh.querySelectorAll('.field')]
+        .filter((f) => !f.closest('.gl-r') && !f.closest('.gl-p'))
+        .map((f) => f.className),
+      body: document.getElementById('scSheetBody').scrollHeight,
+      sheet: Math.round(sh.getBoundingClientRect().height),
+      /* THE LENGTH BAR DRAWS NO SECOND COPY OF ITS OWN FIGURE. The row
+         above it prints it, so `scLenBar` is handed a `say` and skips
+         the 22px readout — and the number dial, which is handed none,
+         still draws one. */
+      read: sh.querySelectorAll('.nm-read').length,
+      dial: sh.querySelectorAll('.nm-dial').length };
+  });
+  ok('the editor is groups of rows, every one of them 44px',
+    glShape.groups >= 3 && glShape.rows >= 8
+    && glShape.heights.join() === '44', glShape);
+  ok('...with the label and the value on one line, down one right edge',
+    glShape.inline && glShape.right.length === 1 && glShape.clear, glShape);
+  ok('...and the only caps label left is the one that names a GROUP',
+    glShape.labels.join('|') === 'This day'
+    && glShape.fields.length > 0 && glShape.loose.length === 0, glShape);
+  /* THE MEASUREMENT IS THE POINT, and both halves of it: the form has
+     to fit the sheet it is in, and a check on the height alone passes
+     on a build that simply drew fewer rows. */
+  ok('...which fits the sheet, where the stack of boxes did not',
+    glShape.body < glShape.sheet && glShape.rows >= 8, glShape);
+  ok('...and the length bar draws no second copy of the figure its row prints',
+    glShape.read === 0 && glShape.dial === 1, glShape);
+
+  /* ── A DISCLOSURE SAYS WHAT IT IS SET TO ──
+     Which is the only reason a control can be put away at all: a row
+     that opened onto seven chips and said nothing until you pressed it
+     would be a form you have to take apart to read. */
+  const glOpen = await page.evaluate(async () => {
+    const row = [...document.querySelectorAll('.gl-r[aria-expanded]')]
+      .find((r) => r.querySelector('.gl-l').textContent === 'Day');
+    if (!row) throw new Error('no Day row in the editor');
+    const v = () => row.querySelector('.gl-v').textContent;
+    const panel = document.getElementById(row.getAttribute('aria-controls'));
+    const shut = { said: v(), exp: row.getAttribute('aria-expanded'),
+      box: panel.getBoundingClientRect().height };
+    row.click();
+    await new Promise((z) => setTimeout(z, 260));
+    const open = { exp: row.getAttribute('aria-expanded'),
+      box: Math.round(panel.getBoundingClientRect().height),
+      chips: panel.querySelectorAll('.pick').length,
+      /* 180°, never 90° — this repo's own rule for a folding panel,
+         and read off the computed matrix rather than off the class. */
+      turn: getComputedStyle(row.querySelector('.gl-c')).transform };
+    /* AND PRESSING THE CONTROL REWRITES THE ROW. A summary that only
+       tells the truth until you touch the thing under it is worse
+       than none.
+
+       PUT BACK AFTERWARDS, because a check that changes the state of
+       the app is a check that breaks the next one — and this file has
+       recorded that five times. The original chip is pressed rather
+       than the new one: on an existing block the picker is
+       single-select, so pressing the same chip twice turns the day
+       OFF rather than restoring it. */
+    const chips = [...panel.querySelectorAll('.pick')];
+    const was = chips.find((c) => c.getAttribute('aria-pressed') === 'true');
+    chips.find((c) => c !== was).click();
+    await new Promise((z) => setTimeout(z, 120));
+    const after = v();
+    was.click();
+    await new Promise((z) => setTimeout(z, 120));
+    const back = v();
+    row.click();
+    await new Promise((z) => setTimeout(z, 240));
+    return { shut, open, after, back,
+      exp: row.getAttribute('aria-expanded'),
+      gone: document.getElementById(row.getAttribute('aria-controls'))
+        .getBoundingClientRect().height };
+  });
+  ok('a disclosure row is shut, says what it is set to, and opens underneath',
+    glOpen.shut.exp === 'false' && glOpen.shut.box === 0
+    && /^[A-Z]/.test(glOpen.shut.said)
+    && glOpen.open.exp === 'true' && glOpen.open.box > 40
+    && glOpen.open.chips === 7, glOpen);
+  /* Measured as the BOX on the way back too, because reading the
+     attribute is what missed `[hidden]` five times in this app. */
+  ok('...and it shuts again, with the chevron turned a half rather than a quarter',
+    glOpen.exp === 'false' && glOpen.gone === 0
+    && /matrix\(-1,\s*0,\s*0,\s*-1/.test(glOpen.open.turn), glOpen);
+  ok('...and pressing a chip rewrites the row that names it, both ways',
+    glOpen.after !== glOpen.shut.said && glOpen.after.length > 0
+    && glOpen.back === glOpen.shut.said, glOpen);
+
+  /* ── DELETE IS NOT A PEER OF SAVE ──
+     It sat in a red outline at the same weight as Save, side by side
+     at the foot: the one press on this form you cannot undo, drawn as
+     the other half of a pair and sitting where a thumb lands on the
+     way to filing an edit. Three halves, because each passes on the
+     others' bug — it is not in the row Save is in, it is BELOW it in
+     layout, and it is still findable. */
+  const glDel = await page.evaluate(() => {
+    const sh = document.getElementById('scSheet');
+    const d = sh.querySelector('.gl-del');
+    const go = sh.querySelector('.acts .btn.go');
+    /* ── AND IT IS MEASURED AGAINST A ROW, NEVER AGAINST SAVE ──
+       The first cut read Save's own colour and asked Delete to differ
+       from it. Save is the white-filled control, so its TEXT is
+       `--paper` — and white Delete differs from black just as happily
+       as red does. It passed cleanly on the one build it exists to
+       reject, which is the check this repo has had to write down more
+       than any other: `.glist .gl-r` sets the ink at two classes, so a
+       one-class `.gl-del` after it loses however it is written.
+
+       The claim is that Delete IS `--bad` and is NOT the ink every
+       other row on the sheet takes. Both halves, because "it is red"
+       passes on a page whose ink went red, and "it is not the ink"
+       passes on any colour at all. Resolved through an element the
+       browser has actually styled rather than by reading the token's
+       own text: a computed colour comes back `rgb()` and a token is a
+       hex, and a digit match on the two has reported three correct
+       builds broken in this file. */
+    const pr = document.createElement('span');
+    pr.style.color = 'var(--bad)';
+    sh.appendChild(pr);
+    const bad = getComputedStyle(pr).color;
+    pr.remove();
+    const row = sh.querySelector('.gl-r:not(.gl-del)');
+    return d && go && row ? {
+      bad, rowInk: getComputedStyle(row).color,
+      acts: sh.querySelectorAll('.acts .btn').length,
+      inActs: !!d.closest('.acts'),
+      /* NOT `bad`, which is the colour two lines up — one object
+         carrying a name twice keeps the second and this file's oldest
+         bug is a name declared once too often. */
+      badBtns: sh.querySelectorAll('.acts .btn.bad').length,
+      text: d.textContent.trim(),
+      /* ABOVE Save in the list and below every row the form is
+         actually for — the last thing on the surface rather than the
+         right-hand half of the foot. */
+      above: Math.round(d.getBoundingClientRect().bottom) <= Math.round(go.getBoundingClientRect().top),
+      last: d.closest('.glist') === [...sh.querySelectorAll('.glist')].pop(),
+      col: getComputedStyle(d).color } : null;
+  });
+  ok('Delete is a row at the foot of the list, never the other half of Save',
+    glDel && glDel.acts === 1 && !glDel.inActs && glDel.badBtns === 0
+    && glDel.above && glDel.last && /Delete/.test(glDel.text)
+    && glDel.col === glDel.bad && glDel.col !== glDel.rowInk, glDel);
+
+  /* ── AND THE COLUMN IS LEGIBLE, MEASURED ON COMPOSITED PIXELS ──
+     A value slot is 16px body type, so it is held to 4.5:1 — and
+     `--spent` over a card measured 4.30:1 on the LIGHT face, which is
+     under the bar and is this file's own oldest colour mistake for the
+     fourth time. The chevron is a graphic and is held to 3, because
+     what it carries is which rows open rather than the fact itself.
+
+     The ground is the group's MOST COMMON pixel rather than a sample
+     at an offset: a fixed offset lands on a label, a hairline or the
+     row above it, and this repo has reported four correct builds
+     broken for exactly that. */
+  const glPix = await (async () => {
+    const at = await page.evaluate(() => {
+      const sh = document.getElementById('scSheet');
+      const g = sh.querySelector('.glist').getBoundingClientRect();
+      const one = (q) => { const e = sh.querySelector(q); return e ? getComputedStyle(e)[
+        q === '.gl-c' ? 'stroke' : 'color'] : null; };
+      return { g: { x: g.left, y: g.top, w: g.width, h: g.height },
+        v: one('.gl-v'), c: one('.gl-c'), d: one('.gl-del') };
+    });
+    const png = PNG.sync.read(await page.screenshot());
+    const tally = {};
+    for (let y = at.g.y + 2; y < at.g.y + at.g.h - 2; y += 2) {
+      for (let x = at.g.x + 2; x < at.g.x + at.g.w - 2; x += 2) {
+        const i = (png.width * Math.round(y * dpr) + Math.round(x * dpr)) << 2;
+        const k = png.data[i] + ',' + png.data[i + 1] + ',' + png.data[i + 2];
+        tally[k] = (tally[k] || 0) + 1;
+      }
+    }
+    const ground = Object.keys(tally).sort((a, b) => tally[b] - tally[a])[0]
+      .split(',').map(Number);
+    return { ground,
+      v: +ratio(rgbOf(at.v), ground).toFixed(2),
+      c: +ratio(rgbOf(at.c), ground).toFixed(2),
+      d: +ratio(rgbOf(at.d), ground).toFixed(2) };
+  })();
+  ok('the value column clears 4.5, the chevron 3, and Delete reads as red',
+    glPix.v >= 4.5 && glPix.c >= 3 && glPix.d >= 4.5, glPix);
 
   /* ── the asset queries are the assets' own fingerprints ──
      A layout fix was reported still broken twice after it shipped, and
@@ -4563,19 +4862,37 @@ const SAID = [
     await page.waitForTimeout(300);
 
     await open('Train');
-    const sheet = await page.evaluate(() => ({
-      order: [...document.querySelectorAll('.sheet .mark')].map((m) => m.textContent.trim()),
-      /* A control's HEADING is part of what it says. It went in below
-         the workout picker once, under a label reading TRAINED, and
-         read as a second thing to train. */
-      heads: [...document.querySelectorAll('.sheet .label')].map((l) => l.textContent),
-      /* Not a tick. Every tick in this app is the accent and they all
-         say one thing — this happened. A day off is the only state on
-         the screen that is not a claim about doing anything. */
-      bar: document.querySelector('.sheet .mark-off svg path').getAttribute('d') }));
+    const sheet = await page.evaluate(() => {
+      const g = [...document.querySelectorAll('.sheet .glist')]
+        .find((x) => x.querySelector('.mark'));
+      return {
+        order: [...document.querySelectorAll('.sheet .mark')].map((m) => m.textContent.trim()),
+        /* ── A CONTROL'S HEADING IS PART OF WHAT IT SAYS ──
+           Off went in below the workout picker once, under a label
+           reading TRAINED, and read as a second thing to train. The
+           fix was to put it under the day's own heading, and the
+           assertion was written as Off sitting ABOVE a second label
+           reading Trained — a shape that only existed while every
+           control on this sheet carried a caps label of its own.
+
+           The three are one GROUP now, under one heading, with Trained
+           as a row of it rather than a seventh label over a lone
+           button. The rule it was written for is unchanged and is
+           asserted more directly than the old ordering could: all
+           three sit under "This day", and no heading on the sheet
+           reads Trained. */
+        rows: g ? [...g.children].map((r) => (r.querySelector('.gl-l') || r).textContent.trim()) : [],
+        heads: [...document.querySelectorAll('.sheet .label')].map((l) => l.textContent),
+        /* Not a tick. Every tick in this app is the accent and they all
+           say one thing — this happened. A day off is the only state on
+           the screen that is not a claim about doing anything. */
+        bar: document.querySelector('.sheet .mark-off svg path').getAttribute('d') };
+    });
     ok('Off sits under the day\u2019s own heading, beside Done and above Trained',
       sheet.order[0] === 'Done today' && sheet.order[1] === 'Off this day'
-      && sheet.heads.indexOf('This day') < sheet.heads.indexOf('Trained')
+      && sheet.rows.join('|') === 'Done today|Off this day|Trained'
+      && sheet.heads.indexOf('This day') === 0
+      && sheet.heads.indexOf('Trained') < 0
       && !/l\d/.test(sheet.bar), sheet);
 
     await page.click('.sheet .mark-off');
@@ -5941,13 +6258,22 @@ const SAID = [
   ok('every block on the day opens the editor, not two of them',
     wholeDay.length >= 3 && wholeDay.every((r) => r.opened),
     wholeDay.filter((r) => !r.opened).concat([{ of: wholeDay.length }]));
-  /* BOTH HALVES. "Save is on screen" passes on any sheet short enough
-     not to scroll, and the editor is not one height — a Train block
-     carries a workout picker the others do not. Measured on the build
-     that was reported, Save ended 119px under the screen on an
-     ordinary block and 202px under on Train. */
+  /* ── AND THE VACUITY GUARD HAD TO INVERT, WHICH IS THE OUTCOME ──
+     This read `some(r => r.over > 0)`: Save being on screen is passed
+     by any sheet short enough not to scroll, so the claim was only
+     worth making about an editor that DID scroll. Measured on the
+     build that was reported, Save ended 119px under the screen on an
+     ordinary block and 202px under on Train, off 1,058px of form.
+
+     The form is a grouped list now and measures 609px in a 742px
+     sheet, so nothing overflows and the old guard can never be met.
+     The honest replacement is the stronger claim — Save is on screen
+     because there is no longer anything to scroll past — and the
+     sticky foot stays behind it as what catches a block with eight
+     sub-items and three note tags on a shorter phone. Both are
+     asserted: the sheet fits, AND Save is inside it on every row. */
   ok('...and the control that files the edit is on screen on every one',
-    wholeDay.some((r) => r.over > 0) && wholeDay.every((r) => r.saveIn),
+    wholeDay.every((r) => r.saveIn && r.over === 0),
     wholeDay.map((r) => ({ n: r.n, over: r.over, saveBot: r.saveBot })));
 
   /* ── AND TURNING IT OFF PUTS THE TICK BACK ──
@@ -6399,9 +6725,45 @@ const SAID = [
     emptied.drawn === false && emptied.restored, emptied);
 
   console.log('\n── the thumb ──');
-  await dblRow('.week.is-today .row[data-id]');
-  ok('the edit sheet is up to be measured',
-    await page.$$eval('.pick', (p) => p.length) === 7);
+  /* ── AND IT WAS OPENING THE EDITOR WITH A GESTURE THE APP NO LONGER
+        HAS, ON A SHEET THAT WAS NOT THERE ──
+     This read `dblRow` and then counted seven `.pick` chips, which
+     passed — and both halves of it were false. The double tap that
+     opened the editor went when Edit became a MODE in the head, so two
+     taps on a row are now a tick and an untick; and `scClose` hides
+     the sheet without emptying `#scSheetBody`, so the chips it counted
+     were the DOM of a sheet closed several sections earlier.
+
+     A closed sheet's leftovers report a count and no boxes, so the
+     44px sweep under it filtered every one of them out on `h > 0` and
+     reported clean without ever having looked at a chip. **A zero
+     shaped exactly like a pass**, which is the shape this file has now
+     recorded five times, and here it was hiding a check that had
+     stopped measuring the thing it names.
+
+     Opened the way the app actually opens it, with the sheet asserted
+     UP before anything is counted. */
+  const edUp = await page.evaluate(async () => {
+    const b = document.getElementById('scHdEd');
+    if (b.getAttribute('aria-pressed') !== 'true') {
+      b.click();
+      await new Promise((z) => setTimeout(z, 280));
+    }
+    const r = document.querySelector('.week.is-today .row[data-id]');
+    if (!r) throw new Error('no row on today to open the editor on');
+    r.click();
+    await new Promise((z) => setTimeout(z, 560));
+    const sh = document.getElementById('scSheet');
+    return { open: !sh.hidden,
+      title: (document.getElementById('scSheetTitle') || {}).textContent };
+  });
+  await openGl(page, 'Day');
+  const chips = await page.$$eval('.pick', (p) => p.length);
+  const chipsUp = await page.$$eval('.pick', (p) =>
+    p.filter((c) => c.getBoundingClientRect().height > 0).length);
+  ok('the edit sheet is up to be measured, with its day chips drawn',
+    edUp.open && /Edit/.test(edUp.title || '') && chips === 7 && chipsUp === 7,
+    { edUp, chips, chipsUp });
   /* `.theme` is in this list because a hardcoded list of what to
      measure silently skips what is not in it, and this repo has been
      bitten by that twice — a test file the suite never ran, and a
@@ -6411,6 +6773,16 @@ const SAID = [
     .map((e) => ({ c: e.className, h: e.getBoundingClientRect().height }))
     .filter((e) => e.h > 0 && e.h < 44));
   ok('every control clears 44px', small.length === 0, small);
+  /* AND PUT BACK: this is the first thing here that leaves a sheet
+     open and the week armed, and a check that changes the state of the
+     app is a check that breaks the next one. */
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(340);
+  await page.evaluate(() => {
+    const b = document.getElementById('scHdEd');
+    if (b.getAttribute('aria-pressed') === 'true') b.click();
+  });
+  await page.waitForTimeout(240);
 
   /* ── the promise ── */
   console.log('\n── nothing leaves ──');
@@ -8519,6 +8891,51 @@ const SAID = [
     ok(`and a pill's figure clears 4.5:1 there (${rowInk.dim
       ? ratioL(rgbL(rowInk.dim), cardPx).toFixed(2) : 'no time drawn'}:1)`,
       rowInk.dim !== null && ratioL(rgbL(rowInk.dim), cardPx) >= 4.5, { rowInk, cardPx });
+
+    /* ── AND THE EDITOR'S VALUE COLUMN ON THIS FACE ──
+       `--spent` over a card measures 4.30:1 here and 5.21 on the dark
+       one, so a value slot left at the quieter token was under the bar
+       on exactly the face nobody develops on — and passed every check
+       written about it, because the only one that looked was reading
+       the other face. The value is `--dim` for that measurement, and
+       the chevron keeps `--spent` because a graphic's bar is 3. */
+    const lgl = await (async () => {
+      await lpage.evaluate(() => document.getElementById('scHdEd').click());
+      await lpage.waitForTimeout(280);
+      const at = await lpage.evaluate(async () => {
+        const r = document.querySelector('.week .row[data-id]');
+        if (!r) throw new Error('no row to open the editor on');
+        r.click();
+        await new Promise((z) => setTimeout(z, 520));
+        const sh = document.getElementById('scSheet');
+        const g = sh.querySelector('.glist');
+        if (!g) throw new Error('the editor is not a grouped list');
+        const b = g.getBoundingClientRect();
+        const col = (q, k) => { const e = sh.querySelector(q);
+          return e ? getComputedStyle(e)[k] : null; };
+        return { g: { x: b.left, y: b.top, w: b.width, h: b.height },
+          v: col('.gl-v', 'color'), c: col('.gl-c', 'stroke'), d: col('.gl-del', 'color') };
+      });
+      const png = PNGL.sync.read(await lpage.screenshot());
+      const tally = {};
+      for (let y = at.g.y + 2; y < at.g.y + at.g.h - 2; y += 2) {
+        for (let x = at.g.x + 2; x < at.g.x + at.g.w - 2; x += 2) {
+          const i = (png.width * Math.round(y * dprL) + Math.round(x * dprL)) << 2;
+          const k = png.data[i] + ',' + png.data[i + 1] + ',' + png.data[i + 2];
+          tally[k] = (tally[k] || 0) + 1;
+        }
+      }
+      const ground = Object.keys(tally).sort((a, b) => tally[b] - tally[a])[0]
+        .split(',').map(Number);
+      await lpage.keyboard.press('Escape');
+      await lpage.waitForTimeout(340);
+      return { ground,
+        v: +ratioL(rgbL(at.v), ground).toFixed(2),
+        c: +ratioL(rgbL(at.c), ground).toFixed(2),
+        d: +ratioL(rgbL(at.d), ground).toFixed(2) };
+    })();
+    ok(`the editor's value column clears 4.5 on the light face (${lgl.v}:1)`,
+      lgl.v >= 4.5 && lgl.c >= 3 && lgl.d >= 4.5, lgl);
 
     /* THE CHIP BEATS THE DEVICE. */
     await lpage.evaluate(() => localStorage.setItem('sched.mode.v1', 'dark'));
@@ -11426,6 +11843,7 @@ const SAID = [
 
     await kp.evaluate(() => document.querySelectorAll('.row-ed')[1].click());
     await kp.waitForTimeout(560);
+    await openGl(kp, 'During it');
     await kp.fill('.kid-new .field', 'Watch trading content');
     await kp.click('.kid-new .btn');
     await kp.waitForTimeout(260);
@@ -11471,6 +11889,7 @@ const SAID = [
     };
     await kp.evaluate(() => document.querySelectorAll('.row-ed')[1].click());
     await kp.waitForTimeout(560);
+    await openGl(kp, 'During it');
     await kp.evaluate(() => {
       [...document.querySelectorAll('.kid-x')].forEach((x) => x.click());
     });

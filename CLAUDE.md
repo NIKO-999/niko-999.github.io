@@ -13217,3 +13217,222 @@ pill, with no count at all*, with the cutting asserted on a day no
 cell can hold — a Saturday of twelve blocks added to the fixture,
 because **a fixture that always fits cannot tell a fit that works from
 one that never runs.**
+
+## The editor is a grouped list
+
+Picked off a whole-app critique as the one thing to change, and it is
+the one finding there that was about STRUCTURE rather than about a
+colour or a count. The block editor was **eight tracked uppercase
+labels, each on its own line above its own full-width control** —
+measured on the seeded week at 390x844, **1,023px of form in a 743px
+sheet**, where the only thing telling one control from the next was
+which caps word was shouting above it, and no value could be scanned
+at all. Nothing was visibly broken, because the sticky foot fixed that
+a pass earlier: what it cost was that the form never fitted the sheet
+it was in.
+
+It is groups of rows now: label left, value right, one surface with
+the rows ruled inside it. **609px in a 684px sheet**, ten rows, eight
+caps labels down to one. On a Train block, which carries a row the
+others do not, **1,106px to 653**.
+
+**LABEL AND VALUE ON ONE LINE IS THE WHOLE OF IT.** Everything else
+here falls out of that — the caps label goes because the row says what
+it is, the box goes because the group is the surface, and the value
+becomes scannable because there is a column for it to be in. Asserted
+as BOXES rather than as source order, because a rule that stacked them
+visually would pass any check on the DOM.
+
+**A CAPS LABEL ABOVE A GROUP STAYS; ONE ABOVE A FIELD DOES NOT.**
+That is the precise cut, and it is why `.label` is still in this
+sheet exactly once. *This day* names a GROUP — everything above it
+edits the block for every week there will ever be and everything
+inside it is about one date, which is a distinction no row's own
+left-hand label can make. *What*, *Day*, *Starts at*, *How long*,
+*Where*, *During it*, *About* and *Trained* all named one control
+each, and a row can say that itself in the space it already has.
+
+**ONE RIGHT EDGE, BY CONSTRUCTION RATHER THAN BY ARITHMETIC.** The
+chevron is out of the flow and every row reserves its gutter, so a row
+that has one and a row that does not end their value in the same
+place. Written the obvious way — a padding on one kind of row, a
+chevron plus a gap on the other — they came out **18px apart**, which
+is a right-hand column that is not one, and it is two numbers that
+have to agree for ever. There is nothing left to drift.
+
+**EVERY ROW IS THE SAME BOX AND THE RULE IS WRITTEN ONCE.** A value
+row is a `<div>`, a disclosure is a `<button>` and a push is a
+`<button>`, and all three take `.gl-r` — the moment they are three
+rules they come out a pixel apart across and three down, which is what
+the old day card's two faces already taught this file. Measured: ten
+rows, every one of them 44.
+
+**THE WHOLE ROW IS AT THE 16px FIELD FLOOR, and that is a claim rather
+than a stray.** Anything smaller zooms the page on focus in iOS, so a
+row carrying an input has to be 16 — and a label at 15 beside a value
+at 16 is a one-pixel mismatch on every line of a form whose whole
+point is that the pair reads as one row. **A grouped-list row is a
+field row.** It is the named exception extended honestly rather than a
+seventh step on the type scale.
+
+### The two widest controls are put away, and the row says what they are set to
+
+Which is the only reason a control can be hidden and the screen still
+read. **Width decides which, never how often you change them**: seven
+day chips and a dial with four marks under it cannot be a right-hand
+column at 390px; a name, a clock and a room can.
+
+**THE CHEVRON POINTS DOWN AND TURNS 180°**, which is this repo's own
+rule for a folding panel — 90° lays it on its side. A RIGHT chevron
+would be a lie: it says the row pushes to another screen, and these
+open underneath. The one row that genuinely does push — *Trained*,
+into the workout picker — is the one that gets a right chevron, and
+that is the difference being drawn rather than a second icon for the
+same job.
+
+**AND THE SUMMARY IS WRITTEN BACK ON EVERY PRESS.** A row that only
+tells the truth until you touch the thing under it is worse than one
+that says nothing. The chips write the day back, `paintKids` writes
+the list back on every repaint rather than from the two presses that
+change it, and the length bar's own `say` writes the figure.
+
+**`say` IS WHAT STOPS THE BAR DRAWING A SECOND COPY OF ITS FIGURE.**
+`scLenBar` built a 22px readout, which inside a disclosure is the
+number the row above it has just printed, at four times the size.
+Hiding it with a rule would leave a dead element the function still
+builds, so passing a `say` skips it instead: a caller that wants the
+figure somewhere else says so and gets it there. The number dial,
+which passes none, still draws one — asserted as both halves, because
+a check on the editor alone passes on a build that took the readout
+off every sheet in the app.
+
+### Delete is not a peer of Save
+
+It sat in a red outline at the same weight as Save, side by side at
+the foot: the one press on this form you cannot undo, drawn as the
+other half of a pair and sitting where a thumb lands on the way to
+filing an edit. It is **a row at the END of the list** now — plain red
+type on its own surface, past everything the form is actually for.
+
+**Cancel stays a button**, because it is not destructive and it is the
+other half of a genuine pair: on a NEW block there is nothing to go
+back to and the scrim is the only other way out. On an edit there is
+nothing to cancel — Escape and the scrim both leave it alone — so Save
+has the row to itself.
+
+**Three halves, because each passes on the others' bug**: it is not in
+the row Save is in, it is BELOW Save in layout, and it is still
+findable as the last thing on the last group.
+
+**AND `.glist .gl-del`, NOT `.gl-del` — the sixth time in this file.**
+The row rule that gives every row its box also sets `color:
+var(--ink)` at two classes, so a one-class rule after it loses however
+it is written. Delete shipped one render as white type that read as a
+second Save, and a screenshot caught it where the cascade did not.
+
+### A toggle in a group is a row, and it KEEPS its fill
+
+`.mark` keeps its class — every check that reads *Done today* still
+finds it, and its tick, its `aria-pressed` and its behaviour are
+untouched. What it loses is its own BOX.
+
+**What it does NOT lose is the fill, and that was decided rather than
+skipped.** An inverted row inside a grouped list is a slab, and the
+first cut took it off on exactly that argument. It is back because
+this app's own line is that *every filled control is white* and *Done
+today* is one of the five it names by name: dropping it would be
+reversing a written, measured decision for a look, which is not an
+argument. It has to be said again in a scoped rule only because
+`.glist .gl-r` sets `background: none` at the same specificity and
+later in the file.
+
+**AND TRAINED JOINED THE GROUP.** It was a seventh caps label over a
+lone button directly under a grouped list, which is the stack of boxes
+seen from the side — and it is the same kind of fact as the two above
+it, filed against the same date through the same window. The rule its
+own label was written to keep still holds and is why the heading says
+*This day*: Off must not sit under a heading reading TRAINED, and
+under this one it does not.
+
+### The value column was `--spent`, and that is the fourth time
+
+A value slot is 16px body type, so it is held to 4.5:1 — and `--spent`
+over a card measures **4.30:1 on the LIGHT face** against 5.21 on the
+dark. Under the bar, shipped for one render, and passed every check
+written about it because the only one that looked was reading the
+other face. `--dim` measures **8.42:1 and 6.61:1**.
+
+The chevron keeps `--spent` and is held to **3**, because what it
+carries is which rows open where the value beside it carries the fact
+— and it being quieter than the value is the order the two are read
+in. 5.21 and 4.30.
+
+**The ground is the group's MOST COMMON pixel**, never a sample at an
+offset: a fixed offset lands on a label, a hairline or the row above
+it, and this repo has reported four correct builds broken for exactly
+that.
+
+### And the vacuity guard inverted, which IS the outcome
+
+*Save is on screen* passes on any sheet short enough not to scroll, so
+the claim was only worth making about an editor that DID scroll —
+`wholeDay.some(r => r.over > 0)` was the guard, and it was written for
+the build where Save ended a hundred and seventy-two pixels under the
+phone, which is the report the sticky foot answered.
+
+The form fits now, so that guard can never be met again. The honest
+replacement is the stronger claim — **Save is on screen because there
+is no longer anything to scroll past** — with the sticky foot left
+behind it as what catches a block carrying eight sub-items and three
+note tags on a shorter phone. Both are asserted together: the sheet
+fits AND Save is inside it, on every row of the day.
+
+### And the Delete check passed on the build it exists to reject
+
+The bite proof is what found it, four breaks in one run: three fired
+exactly the assertion they were aimed at and `.gl-del` fired nothing.
+**The check read SAVE's own colour and asked Delete to differ from
+it** — and Save is the white-filled control, so its TEXT is `--paper`.
+White Delete differs from black just as happily as red does. It was
+measuring a pair that can never be equal.
+
+It asks the two questions that were meant: Delete IS `--bad`, and it
+is NOT the ink every other row on the sheet takes. Both halves,
+because *it is red* passes on a page whose ink went red and *it is not
+the ink* passes on any colour at all. Measured: shipped it reads
+`rgb(255, 122, 122)` against a row's `rgb(255, 255, 255)`; with the
+rule back to one class it reads `rgb(255, 255, 255)` and both halves
+go false.
+
+**And the colour is resolved through an element the browser has
+actually styled**, never off the token's own text: a computed colour
+comes back `rgb()` and a token is a hex, and a digit match on the two
+has reported three correct builds broken in this file.
+
+**The object carried `bad` twice on the way there** — the colour and a
+count of `.btn.bad` — and an object literal keeps the second. That is
+this repo's oldest bug in the smallest possible space, caught by
+reading the diff rather than by a run.
+
+### Three checks had their subject moved under them
+
+**THE DAY CHIPS HAD TO BE OPENED TO BE MEASURED.** The 44px sweep
+filters on `h > 0`, and a chip behind a shut disclosure reports zero —
+so it would have reported clean without ever having looked at seven
+controls. **A zero shaped exactly like a pass**, which is the shape
+this file has now recorded five times. `openGl` presses the row first
+and throws on a label it cannot find, because a selector matching
+nothing filters to an empty list and an empty list passes `every`.
+
+**AND THE TOGGLE WAS MEASURED AGAINST `.sheet .field`.** That was the
+right comparison while the form was a stack of full-width boxes and
+the toggle was one more of them. It is measured against a ROW now, in
+another group — a row in its own would match a build where that whole
+group came out the wrong size.
+
+**AND THE DAY-CHIP PRESS IS PUT BACK.** A check that changes the state
+of the app is a check that breaks the next one, and the fifth time is
+still worth the two lines. The ORIGINAL chip is pressed to restore it
+rather than the new one: on an existing block the picker is
+single-select, so pressing the same chip twice turns the day OFF
+rather than putting it back.
