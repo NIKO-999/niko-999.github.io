@@ -4287,10 +4287,11 @@ No title, no folders — the date is the heading, it can be ahead, and
 the only mark is IMPORTANT, which is what puts a note on the calendar.
 Delete asks, because there is no bin and a note is only what you typed.
 
-**THREE MARKS ON A MONTH CELL, THREE SHAPES.** A goal met rings the
-date in gold, the workout rides under it by NAME in its kind's colour,
-an important note is a diamond in the corner. Shape tells them apart
-before colour has to. Cells stack from the top, because centred a day
+**TWO MARKS ON A MONTH CELL, TWO SHAPES.** The workout rides under the
+date by NAME in its kind's colour, an important note is a diamond in the
+corner. A gold ring for a goal met shipped for one round and was taken
+off on request, with its key, its count in the caption and its section
+on the day sheet: goals are read on the habits screen, not the month. Cells stack from the top, because centred a day
 with a workout and one without put one row's dates at two heights.
 Ahead opens only when something is waiting there.
 

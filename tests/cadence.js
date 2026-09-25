@@ -450,7 +450,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.click('.cd-tab[data-v="mon"]');
     ok('the month is September, and the line above it is the year', (await page.textContent('#cdMonT')) === 'September'
       && (await page.textContent('#cdMonK')) === '2026');
-    ok('it counts the days completed and the goals achieved', (await page.textContent('#cdMonCap')) === '4 days completed · 0 goals achieved', await page.textContent('#cdMonCap'));
+    ok('it counts the days completed and the goals achieved', (await page.textContent('#cdMonCap')) === '4 days completed', await page.textContent('#cdMonCap'));
     ok('it draws thirty days', (await page.$$eval('.cd-mc[data-day]', (cs) => cs.length)) === 30);
     ok('the grid is a whole rectangle', (await page.$$eval('.cd-mgrid > *', (cs) => cs.length)) % 7 === 0);
     ok('a month still to come cannot be opened', await page.$eval('#cdMonN', (b) => b.disabled));
@@ -463,7 +463,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('each habit hit that day is a dot in its own colour', M['25'].h.includes('rgb(242, 161, 132)') && M['25'].h.includes('rgb(125, 207, 216)') && new Set(M['25'].h).size === M['25'].h.length, { 25: M['25'], onToday });
     ok('and a day before the record draws none', M['10'].h.length === 0, M['10']);
     const legend = await page.$$eval('#cdMonL span', (ss) => ss.map((s) => s.textContent));
-    ok('the legend names the habits, not the kinds of training', legend.join('|') === 'Goal met|Note|Train|Mind|Steps|Fuel|Water|Sleep|Cold plunge', legend);
+    ok('the legend names the habits, not the kinds of training', legend.join('|') === 'Note|Train|Mind|Steps|Fuel|Water|Sleep|Cold plunge', legend);
     ok('there is no Training tab', !(await page.$('.cd-tab[data-v="lift"]')) && (await page.$$('.cd-tab')).length === 4);
     ok('a day still to come draws no dot yet', !M['27'].k && M['27'].st === 'future', M['27']);
     const mc = await inkFloor(page, '.cd-mc[data-day] b');
@@ -525,17 +525,12 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const M = await page.$$eval('.cd-mc[data-day]', (cs) => Object.fromEntries(cs.map((c) => [c.dataset.day.slice(8), {
       goal: c.classList.contains('is-goal'), note: c.classList.contains('has-note'),
       w: c.querySelector('.cd-mw') && c.querySelector('.cd-mw').textContent, wc: c.querySelector('.cd-mw') && getComputedStyle(c.querySelector('.cd-mw')).color }])));
-    ok('20,000 steps rings the day it happened in gold', M['24'].goal, M['24']);
-    ok('the week goal rings the day it got there, and not the days before', M['23'].goal && !M['22'].goal, { 22: M['22'], 23: M['23'] });
-    ok('the task rings the day it was done', M['25'].goal, M['25']);
-    ok('a day nothing was met on is not ringed', !M['21'].goal, M['21']);
+    ok('goals met are not drawn on the calendar', Object.values(M).every((m) => !m.goal), M['24']);
     ok('a workout rides its day by name, in its kind\'s colour', M['23'].w === 'Push' && M['22'].w === 'Pull' && M['23'].wc === 'rgb(242, 161, 132)' && !M['24'].w, { 22: M['22'], 23: M['23'] });
-    ok('the caption counts the goals met', /· 3 goals achieved$/.test(await page.textContent('#cdMonCap')), await page.textContent('#cdMonCap'));
-    const ring = await page.$eval('.cd-mc[data-day="2026-09-24"] b', (b) => getComputedStyle(b).boxShadow);
-    ok('the ring is gold', /245, 211, 122/.test(ring) || /0\.96\d* 0\.82\d* 0\.47/.test(ring), ring);
+    ok('the caption does not count goals', !/goal/.test(await page.textContent('#cdMonCap')), await page.textContent('#cdMonCap'));
     await page.click('.cd-mc[data-day="2026-09-24"]');
     await sheetUp(page);
-    ok('the day reads back which goal it met', /Goals met/.test(await page.textContent('#cdShB')) && /20,000 steps/.test(await page.textContent('#cdShB')));
+    ok('and the day sheet does not list them', !/Goals met/.test(await page.textContent('#cdShB')));
     await closeSheet(page);
 
     /* Notes: a line to a day, marked important to reach the calendar. */
