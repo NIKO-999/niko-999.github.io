@@ -6,6 +6,9 @@ Single-file apps that share a design system:
   backtesting, resources and the check-in
 - `days/index.html` — habits and reminders
 - `orrery/index.html` — the star chart over an Obsidian vault
+- `cadence/index.html` — the day, habits, month and training log as a
+  paper notebook: its own build of `schedule/`'s mechanisms, not a skin
+  over them
 - `shell.css` + `shell.js` at the root — the shared shell they all
   consume. A rule that only two of them need belongs in the two, not
   in the file every one of them loads.
@@ -4078,6 +4081,40 @@ native clear emptied the box without touching `state.q`, leaving the
 map filtered by a word no longer on screen with no visible way to clear
 it. Enter cancels the pending `orSearch` debounce for the same reason —
 without it the filter lands 140ms later carrying the whole question.
+
+## Cadence is schedule's mechanisms in another hand
+
+Asked for as the same daily task and workout calendar, built fresh and
+not looking like `schedule/`. **What carries over is behaviour**: a
+weekly template of blocks, a tick per date open for the two days
+behind, a day off written forward, a sentence parser, a session asked
+for when a training block is finished, rest exclusive both ways,
+habits fed by the blocks, a month read back, a training summary.
+**None of the code, and none of the look.**
+
+**The day is a rail, and the gaps are drawn.** Open time between two
+blocks, thirty minutes or more, is a measured line — "45m open" —
+because the gaps are the part of a schedule you actually spend. A
+running block carries the countdown, so the red now-line is drawn only
+BETWEEN blocks; both at once is one fact said twice.
+
+**Paper and ink, serif for the subject, mono for every figure.** No
+webfont: system serif and system mono, so the app stays one file with
+nothing to preload.
+
+**`[hidden] { display: none !important }` is said once, globally**, so
+the bug `schedule/` recorded eight times cannot happen here by
+construction.
+
+**The backup carries every key**, which is the gap `schedule/`'s own
+notes admit to, and restoring asks for nothing but a paste.
+
+**`cad.mode.v1` is a bare word, not JSON**, because the pre-paint
+script reads it raw. It shipped read through `JSON.parse` for one run
+and the chip did nothing — the suite caught it.
+
+`tests/cadence.js` freezes the clock at Friday 25 September 2026, 10:20,
+so which block is running is a fact about the fixture, not the hour.
 
 ## Git
 

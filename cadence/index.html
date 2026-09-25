@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<!-- maximum-scale=1: iOS zooms the page when a field under 16px takes
+     focus. Every field here is 16px, and the cap covers the next one. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#F2EDE3" />
+<meta name="description" content="A notebook for the day: what is on it, what you kept, and what you trained." />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Cadence" />
+<title>Cadence</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23F2EDE3'/%3E%3Cpath d='M18 14v36M18 22h18M18 32h26M18 42h12' stroke='%231B1916' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='46' cy='42' r='5' fill='%23B5391A'/%3E%3C/svg%3E" />
+<!-- The face is decided before the stylesheet applies, so a phone set to
+     dark never paints one frame of paper first. Same key the app keeps;
+     nothing escapes the wrapper. -->
+<script>
+(function () {
+  var m = 'auto';
+  try { m = localStorage.getItem('cad.mode.v1') || 'auto'; } catch (e) {}
+  if (m !== 'light' && m !== 'dark') {
+    m = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  document.documentElement.setAttribute('data-mode', m);
+})();
+</script>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   CADENCE — a field notebook for the day.
+
+   Paper and ink rather than glass and cards: the day is a RAIL with
+   the open time between blocks drawn as a measured gap, because the
+   gaps are the part of a schedule you actually spend. Serif for the
+   thing you are looking at, monospace for every figure, a sans for
+   everything that is merely a label.
+   ═══════════════════════════════════════════════════════════════ */
+:root, :root[data-mode="light"] {
+  --paper: #F2EDE3;
+  --sheet: #FBF8F2;
+  --ink: #1B1916;
+  --ink2: #5E574C;
+  --ink3: #6E665A;
+  --rule: #D9D1C3;
+  --rule2: #E7E0D3;
+  --accent: #B5391A;
+  --on-accent: #FFF8F0;
+  /* Colour says WHICH part of life a block is, never whether you kept it. */
+  --c-body: #B5391A;
+  --c-mind: #1F6F78;
+  --c-work: #8A5E0A;
+  --c-rest: #56662A;
+  --c-none: #6E665A;
+  --k-weights: #B5391A;
+  --k-run: #2D5DA8;
+  --k-recovery: #56662A;
+  --k-rest: #6E665A;
+  --scrim: rgba(27, 25, 22, .38);
+  --lift: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 10px 30px -18px rgba(27, 25, 22, .5);
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, sans-serif;
+}
+:root[data-mode="dark"] {
+  --paper: #15130F;
+  --sheet: #1E1B16;
+  --ink: #F1EBDF;
+  --ink2: #B3AA9A;
+  --ink3: #8C8474;
+  --rule: #36312A;
+  --rule2: #2A2620;
+  --accent: #FF7A50;
+  --on-accent: #1B1310;
+  --c-body: #FF7A50;
+  --c-mind: #5FC2CB;
+  --c-work: #E0B04A;
+  --c-rest: #A7BA6A;
+  --c-none: #8C8474;
+  --k-weights: #FF7A50;
+  --k-run: #7FA7E8;
+  --k-recovery: #A7BA6A;
+  --k-rest: #8C8474;
+  --scrim: rgba(0, 0, 0, .55);
+  --lift: 0 1px 0 rgba(255, 255, 255, .05) inset, 0 12px 30px -16px rgba(0, 0, 0, .8);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+/* Said once, for every element: an author `display` outranks the
+   browser's own [hidden] rule, and that has broken a view, a toast and
+   an overlay in this repo's other app. One line removes the class. */
+[hidden] { display: none !important; }
+
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  height: 100dvh;
+  background: var(--paper);
+  color: var(--ink);
+  font: 15px/1.35 var(--sans);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; touch-action: manipulation; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.cd-app { display: flex; flex-direction: column; height: 100dvh; max-width: 560px; margin: 0 auto; }
+
+/* ── the masthead ── */
+.cd-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: calc(env(safe-area-inset-top) + 6px) 18px 0;
+  flex: none;
+}
+.cd-mark { font: 600 11px/1 var(--mono); letter-spacing: .28em; text-transform: uppercase; color: var(--ink3); }
+.cd-mark b { color: var(--accent); font-weight: 600; }
+.cd-iconbtn { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: var(--ink2); }
+.cd-iconbtn svg { width: 20px; height: 20px; }
+
+.cd-main { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0 18px calc(env(safe-area-inset-bottom) + 120px); }
+
+/* ── the week ribbon: seven columns, each filled by what you kept ── */
+.cd-ribbon { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 4px 0 18px; }
+.cd-rb {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 6px 0 8px; border-radius: 10px; min-height: 76px;
+}
+.cd-rb-l { font: 600 10px/1 var(--mono); letter-spacing: .12em; color: var(--ink3); }
+.cd-rb-n { font: 500 15px/1 var(--mono); color: var(--ink); }
+.cd-rb-bar { width: 6px; height: 26px; border-radius: 3px; background: var(--rule2); position: relative; overflow: hidden; }
+.cd-rb-bar i { position: absolute; left: 0; right: 0; bottom: 0; background: var(--ink); border-radius: 3px; }
+.cd-rb[aria-pressed="true"] { background: var(--ink); }
+.cd-rb[aria-pressed="true"] .cd-rb-l,
+.cd-rb[aria-pressed="true"] .cd-rb-n { color: var(--paper); }
+.cd-rb[aria-pressed="true"] .cd-rb-bar { background: color-mix(in srgb, var(--paper) 25%, transparent); }
+.cd-rb[aria-pressed="true"] .cd-rb-bar i { background: var(--paper); }
+.cd-rb.is-today .cd-rb-l { color: var(--accent); }
+
+/* ── the day's title ── */
+.cd-title { font: 400 38px/1 var(--serif); letter-spacing: -.01em; margin: 0; }
+.cd-title em { font-style: italic; color: var(--ink2); font-size: 22px; margin-left: 8px; }
+.cd-sub { font: 500 12px/1.4 var(--mono); color: var(--ink2); margin: 8px 0 22px; letter-spacing: .02em; }
+
+/* ── the rail ── */
+.cd-agenda { list-style: none; margin: 0; padding: 0; position: relative; }
+.cd-it { display: grid; grid-template-columns: 52px 22px 1fr; column-gap: 8px; position: relative; }
+.cd-time { font: 500 12px/1 var(--mono); color: var(--ink2); padding-top: 16px; text-align: right; }
+.cd-node { position: relative; }
+.cd-node::before { content: ""; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: var(--rule); }
+.cd-it:first-child .cd-node::before { top: 18px; }
+.cd-it:last-child .cd-node::before { bottom: calc(100% - 18px); }
+.cd-node b {
+  position: absolute; left: 5px; top: 13px; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--paper); border: 2px solid var(--cat, var(--c-none));
+}
+.cd-it.is-done .cd-node b { background: var(--cat, var(--c-none)); }
+.cd-node s {
+  position: absolute; left: 10px; top: 25px; width: 2px; height: 0; background: var(--accent); text-decoration: none;
+}
+
+.cd-tk { display: flex; align-items: stretch; gap: 4px; margin: 4px 0 8px; min-height: 52px; }
+.cd-tk-b {
+  flex: 1; min-width: 0; text-align: left;
+  background: var(--sheet); border: 1px solid var(--rule2); border-radius: 12px;
+  padding: 9px 12px 10px; box-shadow: var(--lift);
+  border-left: 4px solid var(--cat, var(--c-none));
+}
+.cd-tk-n { display: flex; align-items: center; gap: 8px; font: 600 16px/1.2 var(--sans); }
+.cd-tk-n span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cd-tk-n svg { width: 18px; height: 18px; flex: none; color: var(--cat, var(--c-none)); }
+.cd-tk-m { font: 500 12px/1.3 var(--mono); color: var(--ink2); margin-top: 4px; }
+.cd-tk-m i { font-style: normal; color: var(--accent); font-weight: 600; }
+.cd-tk-w { display: inline-block; font: 600 10px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border-radius: 5px; margin-top: 7px; color: var(--ink); background: color-mix(in srgb, var(--kc, var(--ink3)) 22%, transparent); }
+
+.cd-stamp { width: 52px; flex: none; display: grid; place-items: center; border-radius: 12px; }
+.cd-stamp span {
+  width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--ink3);
+  display: grid; place-items: center; color: transparent;
+}
+.cd-stamp svg { width: 16px; height: 16px; }
+.cd-it.is-done .cd-stamp span { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.cd-stamp:disabled { cursor: default; }
+.cd-stamp:disabled span { border-style: dashed; opacity: .55; }
+
+.cd-it.is-past:not(.is-done) .cd-tk-n { color: var(--ink2); }
+.cd-it.is-off .cd-tk-n span { text-decoration: line-through; color: var(--ink3); }
+.cd-it.is-off .cd-stamp { visibility: hidden; }
+.cd-it.is-now .cd-tk-b { border-color: var(--accent); border-left-color: var(--accent); }
+
+/* A gap on the rail is time nobody has claimed yet. */
+.cd-gap { display: grid; grid-template-columns: 52px 22px 1fr; column-gap: 8px; min-height: 34px; }
+.cd-gap .cd-node::before { background: none; border-left: 2px dotted var(--rule); width: 0; }
+.cd-gap p { margin: 0; align-self: center; font: 500 11px/1 var(--mono); color: var(--ink3); letter-spacing: .06em; }
+
+.cd-nowline { display: grid; grid-template-columns: 52px 22px 1fr; column-gap: 8px; align-items: center; height: 18px; }
+.cd-nowline span { font: 700 11px/1 var(--mono); color: var(--accent); text-align: right; }
+.cd-nowline i { display: block; height: 2px; background: var(--accent); grid-column: 2 / 4; border-radius: 1px; position: relative; }
+.cd-nowline i::before { content: ""; position: absolute; left: 5px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+
+.cd-empty { font: 400 20px/1.35 var(--serif); font-style: italic; color: var(--ink2); padding: 30px 0; }
+.cd-link { color: var(--accent); font: 600 14px/1 var(--sans); min-height: 44px; display: inline-flex; align-items: center; }
+
+/* ── section heads, used on every view ── */
+.cd-h2 { font: 400 30px/1.05 var(--serif); margin: 6px 0 4px; }
+.cd-cap { font: 500 12px/1.4 var(--mono); color: var(--ink2); margin: 0 0 18px; }
+.cd-lbl { font: 600 10px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--ink3); margin: 22px 0 10px; }
+
+/* ── habits: a ledger, each line with its own fortnight ── */
+.cd-hb { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.cd-hr { display: grid; grid-template-columns: 1fr auto; align-items: center; border-bottom: 1px solid var(--rule); }
+.cd-hr-b { display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 10px; min-height: 64px; padding: 10px 0; text-align: left; }
+.cd-hr-b svg { width: 20px; height: 20px; color: var(--hc, var(--ink2)); }
+.cd-hr-n { font: 600 15px/1.2 var(--sans); }
+.cd-hr-s { font: 500 11px/1.3 var(--mono); color: var(--ink2); margin-top: 3px; }
+.cd-hr-v { font: 500 20px/1 var(--mono); text-align: right; }
+.cd-hr-v small { font-size: 11px; color: var(--ink2); margin-left: 3px; }
+.cd-hr-v.is-nil { color: var(--ink3); font-size: 13px; }
+.cd-tape { display: flex; gap: 3px; grid-column: 1 / -1; padding: 0 0 12px 40px; }
+.cd-tape i { flex: 1; height: 8px; border-radius: 2px; background: var(--rule2); }
+.cd-tape i.on { background: var(--hc, var(--ink)); }
+.cd-tape i.is-t { outline: 1px solid var(--ink2); outline-offset: 1px; }
+.cd-hr-more { width: 44px; height: 44px; display: grid; place-items: center; color: var(--ink3); border-radius: 50%; }
+.cd-hr-more svg { width: 18px; height: 18px; }
+
+/* ── month ── */
+.cd-mhead { display: flex; align-items: center; justify-content: space-between; margin: 6px 0 12px; }
+.cd-mhead h2 { font: 400 30px/1 var(--serif); margin: 0; }
+.cd-mhead div { display: flex; }
+.cd-mhead button { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: var(--ink); }
+.cd-mhead button:disabled { color: var(--rule); cursor: default; }
+.cd-mhead svg { width: 18px; height: 18px; }
+.cd-dows { display: grid; grid-template-columns: repeat(7, 1fr); font: 600 10px/1 var(--mono); letter-spacing: .12em; color: var(--ink3); text-align: center; margin-bottom: 6px; }
+.cd-mgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cd-mc {
+  aspect-ratio: 1 / 1.25; min-height: 48px; border-radius: 10px;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  padding: 5px 0 6px; background: var(--sheet); border: 1px solid var(--rule2);
+}
+.cd-mc b { font: 500 12px/1 var(--mono); }
+.cd-mc svg { width: 24px; height: 24px; }
+.cd-mc .ring-t { stroke: var(--rule); }
+.cd-mc .ring-v { stroke: var(--ink); }
+.cd-mc em { display: block; width: 18px; height: 4px; border-radius: 2px; background: var(--kc, transparent); }
+.cd-mc.is-pad { background: none; border-color: transparent; }
+.cd-mc.is-future { background: none; }
+.cd-mc.is-future b { color: var(--ink3); }
+.cd-mc.is-today { border: 2px solid var(--accent); }
+.cd-mc.is-today b { color: var(--accent); font-weight: 700; }
+.cd-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 16px; font: 500 11px/1 var(--mono); color: var(--ink2); }
+.cd-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.cd-legend i { width: 14px; height: 4px; border-radius: 2px; background: var(--kc); }
+
+/* ── lifts ── */
+.cd-figs { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); margin-bottom: 8px; }
+.cd-figs div { padding: 14px 0; }
+.cd-figs div + div { border-left: 1px solid var(--rule); padding-left: 14px; }
+.cd-figs b { display: block; font: 500 26px/1 var(--mono); }
+.cd-figs span { font: 600 10px/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink3); }
+.cd-weeks { display: flex; align-items: flex-end; gap: 5px; height: 90px; border-bottom: 1px solid var(--rule); }
+.cd-weeks i { flex: 1; background: var(--ink); border-radius: 3px 3px 0 0; min-height: 2px; }
+.cd-weeks i.is-zero { background: var(--rule); }
+.cd-weeks i.is-this { background: var(--accent); }
+.cd-wax { display: flex; justify-content: space-between; font: 500 10px/1 var(--mono); color: var(--ink3); margin-top: 6px; }
+.cd-kinds { list-style: none; margin: 0; padding: 0; }
+.cd-kinds li { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 10px 0; border-bottom: 1px solid var(--rule2); }
+.cd-kinds b { font: 600 15px/1.2 var(--sans); }
+.cd-kinds span { font: 500 12px/1.2 var(--mono); color: var(--ink2); text-align: right; }
+.cd-kinds em { grid-column: 1 / -1; display: block; height: 4px; border-radius: 2px; background: var(--rule2); position: relative; }
+.cd-kinds em i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px; background: var(--kc, var(--ink)); }
+.cd-recent { list-style: none; margin: 0; padding: 0; }
+.cd-recent li { display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--rule2); align-items: baseline; }
+.cd-recent time { font: 500 12px/1 var(--mono); color: var(--ink2); }
+.cd-recent b { font: 600 14px/1.25 var(--sans); }
+.cd-recent span { font: 500 12px/1 var(--mono); color: var(--ink2); }
+
+/* ── the dock ── */
+.cd-dock {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(env(safe-area-inset-bottom) + 14px);
+  display: flex; align-items: center; gap: 8px;
+  z-index: 20;
+}
+.cd-tabs {
+  display: flex; background: var(--ink); border-radius: 16px; padding: 4px; box-shadow: 0 14px 30px -14px rgba(0, 0, 0, .55);
+}
+.cd-tab {
+  min-width: 64px; height: 44px; padding: 0 10px; border-radius: 12px;
+  font: 600 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--paper) 72%, var(--ink));
+}
+.cd-tab[aria-current="page"] { background: var(--paper); color: var(--ink); }
+.cd-add {
+  width: 52px; height: 52px; border-radius: 16px; background: var(--accent); color: var(--on-accent);
+  display: grid; place-items: center; box-shadow: 0 14px 30px -14px rgba(0, 0, 0, .55);
+}
+.cd-add svg { width: 22px; height: 22px; }
+
+/* ── the sheet ── */
+.cd-scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 40; opacity: 0; transition: opacity .2s; }
+.cd-scrim.is-open { opacity: 1; }
+.cd-sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+  max-width: 560px; margin: 0 auto; max-height: 90dvh; overflow-y: auto; overflow-x: hidden;
+  background: var(--paper); border-radius: 22px 22px 0 0;
+  transform: translateY(100%); transition: transform .24s cubic-bezier(.2, .8, .2, 1);
+  padding: 0 18px calc(env(safe-area-inset-bottom) + 18px);
+}
+.cd-sheet.is-open { transform: none; }
+.cd-sh-hd { display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--paper); padding: 14px 0 6px; z-index: 2; }
+.cd-sh-hd h2 { font: 400 26px/1.1 var(--serif); margin: 0; }
+.cd-foot { position: sticky; bottom: calc(-18px - env(safe-area-inset-bottom)); background: var(--paper); padding: 12px 0 18px; margin-top: 16px; display: flex; gap: 8px; border-top: 1px solid var(--rule2); }
+
+.cd-btn {
+  flex: 1; min-height: 48px; border-radius: 12px; border: 1.5px solid var(--ink);
+  font: 600 15px/1 var(--sans); padding: 0 16px;
+}
+.cd-btn.go { background: var(--ink); color: var(--paper); }
+.cd-btn.warn { border-color: var(--accent); color: var(--accent); }
+
+.cd-field {
+  width: 100%; font: 16px/1.3 var(--sans); color: var(--ink);
+  background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px;
+  padding: 12px 12px; min-height: 48px;
+  -webkit-appearance: none; appearance: none;
+}
+textarea.cd-field { min-height: 110px; font-family: var(--mono); font-size: 16px; }
+.cd-say { font: 400 20px/1.3 var(--serif); }
+.cd-prev { margin: 10px 0 0; font: 500 12px/1.4 var(--mono); color: var(--ink2); min-height: 17px; }
+.cd-prev b { color: var(--ink); font-weight: 600; }
+.cd-prev.is-need { color: var(--accent); }
+
+.cd-rows { border-top: 1px solid var(--rule); }
+.cd-row { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 10px; min-height: 52px; border-bottom: 1px solid var(--rule); padding: 4px 0; }
+.cd-row > span { font: 600 10px/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink3); }
+.cd-row .cd-field { background: none; border: 0; padding: 10px 0; min-height: 44px; border-radius: 0; }
+
+.cd-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.cd-chip {
+  min-height: 44px; min-width: 44px; padding: 0 12px; border-radius: 10px;
+  border: 1px solid var(--rule); background: var(--sheet);
+  font: 600 13px/1 var(--sans);
+}
+.cd-chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.cd-chip.kc[aria-pressed="true"] { background: var(--kc); border-color: var(--kc); color: var(--on-accent); }
+.cd-chips.days .cd-chip { flex: 1; padding: 0; font-family: var(--mono); font-size: 12px; }
+
+.cd-range { width: 100%; height: 44px; margin: 0; background: none; -webkit-appearance: none; appearance: none; }
+.cd-range::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: var(--rule); }
+.cd-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); margin-top: -9px; border: 3px solid var(--paper); }
+.cd-range::-moz-range-track { height: 4px; border-radius: 2px; background: var(--rule); }
+.cd-range::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--ink); border: 3px solid var(--paper); }
+.cd-len { font: 500 13px/1 var(--mono); color: var(--ink2); }
+
+.cd-toggle { display: flex; align-items: center; justify-content: space-between; min-height: 52px; width: 100%; border-bottom: 1px solid var(--rule); text-align: left; font: 600 15px/1.2 var(--sans); }
+.cd-toggle i { width: 44px; height: 26px; border-radius: 13px; background: var(--rule); position: relative; flex: none; }
+.cd-toggle i::after { content: ""; position: absolute; left: 3px; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--sheet); transition: left .15s; }
+.cd-toggle[aria-pressed="true"] i { background: var(--ink); }
+.cd-toggle[aria-pressed="true"] i::after { left: 21px; background: var(--paper); }
+
+.cd-grp { margin-bottom: 14px; }
+.cd-grp h3 { font: 600 10px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--kc, var(--ink3)); margin: 16px 0 8px; }
+
+.cd-num { font: 500 44px/1 var(--mono); text-align: center; margin: 10px 0 2px; }
+.cd-num small { font-size: 16px; color: var(--ink2); margin-left: 4px; }
+.cd-numcap { text-align: center; font: 500 12px/1 var(--mono); color: var(--ink2); margin-bottom: 8px; }
+
+.cd-day-l { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.cd-day-l li { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--rule2); }
+.cd-day-l svg { width: 18px; height: 18px; color: var(--cat, var(--ink3)); }
+.cd-day-l b { font: 600 14px/1.2 var(--sans); }
+.cd-day-l span { font: 500 12px/1 var(--mono); color: var(--ink2); }
+
+.cd-note { font: 400 14px/1.45 var(--sans); color: var(--ink2); margin: 10px 0 0; }
+
+/* ── toast ── */
+.cd-toast {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(env(safe-area-inset-bottom) + 84px); z-index: 60;
+  display: flex; align-items: center; gap: 12px;
+  background: var(--sheet); color: var(--ink); border: 1px solid var(--rule);
+  border-radius: 12px; padding: 4px 6px 4px 14px; box-shadow: var(--lift);
+  font: 500 13px/1.3 var(--sans); max-width: calc(100vw - 36px);
+}
+.cd-toast button { min-height: 40px; padding: 0 12px; font: 700 13px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cd-sheet, .cd-scrim { transition: none; }
+}
+</style>
+</head>
+<body>
+<div class="cd-app">
+  <header class="cd-top">
+    <p class="cd-mark">Cad<b>·</b>ence</p>
+    <button class="cd-iconbtn" id="cdGear" aria-label="Settings" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+    </button>
+  </header>
+
+  <main class="cd-main" id="cdMain">
+    <section id="cdVDay" aria-label="Day">
+      <div class="cd-ribbon" id="cdRibbon"></div>
+      <h1 class="cd-title" id="cdTitle"></h1>
+      <p class="cd-sub" id="cdSub"></p>
+      <ol class="cd-agenda" id="cdAgenda"></ol>
+    </section>
+    <section id="cdVHab" aria-label="Habits" hidden>
+      <h2 class="cd-h2">Habits</h2>
+      <p class="cd-cap" id="cdHabCap"></p>
+      <ul class="cd-hb" id="cdHab"></ul>
+      <button class="cd-link" id="cdHabAdd" type="button">+ A habit of your own</button>
+    </section>
+    <section id="cdVMon" aria-label="Month" hidden>
+      <div class="cd-mhead">
+        <h2 id="cdMonT"></h2>
+        <div>
+          <button id="cdMonP" aria-label="Previous month" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <button id="cdMonN" aria-label="Next month" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></button>
+        </div>
+      </div>
+      <p class="cd-cap" id="cdMonCap"></p>
+      <div class="cd-dows"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+      <div class="cd-mgrid" id="cdMonG"></div>
+      <div class="cd-legend" id="cdMonL"></div>
+    </section>
+    <section id="cdVLift" aria-label="Lifts" hidden>
+      <h2 class="cd-h2">Training</h2>
+      <p class="cd-cap">The last thirty days, and twelve weeks of sessions.</p>
+      <div id="cdLift"></div>
+    </section>
+  </main>
+
+  <nav class="cd-dock" aria-label="Views">
+    <div class="cd-tabs">
+      <button class="cd-tab" data-v="day" type="button">Day</button>
+      <button class="cd-tab" data-v="hab" type="button">Habits</button>
+      <button class="cd-tab" data-v="mon" type="button">Month</button>
+      <button class="cd-tab" data-v="lift" type="button">Lifts</button>
+    </div>
+    <button class="cd-add" id="cdAdd" aria-label="Add a block" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </nav>
+</div>
+
+<div class="cd-scrim" id="cdScrim" hidden></div>
+<div class="cd-sheet" id="cdSheet" role="dialog" aria-modal="true" aria-labelledby="cdShT" hidden>
+  <div class="cd-sh-hd">
+    <h2 id="cdShT"></h2>
+    <button class="cd-iconbtn" id="cdShX" aria-label="Close" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div id="cdShB"></div>
+</div>
+<div class="cd-toast" id="cdToast" role="status" hidden><span id="cdToastT"></span><button id="cdToastU" type="button">Undo</button></div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ═══ STORE ═══
+     Everything lives in this browser. Each record is its own key, so a
+     damaged one costs itself and nothing beside it. */
+  var K = {
+    week: 'cad.week.v1', log: 'cad.log.v1', off: 'cad.off.v1',
+    hab: 'cad.hab.v1', train: 'cad.train.v1', defs: 'cad.defs.v1', mode: 'cad.mode.v1'
+  };
+  function cdRead(k, dflt) {
+    try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? dflt : v; }
+    catch (e) { return dflt; }
+  }
+  function cdWrite(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { cdToast('Could not save — storage is full.'); } }
+  var isObj = function (v) { return v && typeof v === 'object' && !Array.isArray(v); };
+
+  /* ═══ DATES ═══ Monday is day 0. Dates are local ISO strings. */
+  function cdISO(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function cdDate(iso) { var p = iso.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function cdDow(iso) { return (cdDate(iso).getDay() + 6) % 7; }
+  function cdAddDays(iso, n) { var d = cdDate(iso); d.setDate(d.getDate() + n); return cdISO(d); }
+  function cdToday() { return cdISO(new Date()); }
+  function cdNowMin() { var d = new Date(); return d.getHours() * 60 + d.getMinutes(); }
+  /* Counted between DATES, so a daylight-saving hour cannot round a day away. */
+  function cdDiff(a, b) { return Math.round((Date.UTC.apply(null, dparts(a)) - Date.UTC.apply(null, dparts(b))) / 864e5); }
+  function dparts(iso) { var p = iso.split('-'); return [+p[0], +p[1] - 1, +p[2]]; }
+  var DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  var DOWL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  var MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  function cdHM(m) { m = Math.max(0, Math.min(1439, Math.round(m))); return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
+  function cdLen(m) {
+    if (!(m > 0)) return 'a moment';
+    var h = Math.floor(m / 60), r = m % 60;
+    return h ? (r ? h + 'h ' + r + 'm' : h + 'h') : r + 'm';
+  }
+  /* A block can be ticked on the day and on the two behind it. Further
+     back is a record you would be rewriting, and ahead has not happened. */
+  function cdOpenDay(iso) { var d = cdDiff(cdToday(), iso); return d >= 0 && d <= 2; }
+
+  /* ═══ WHAT A BLOCK IS ═══
+     One table decides a block's glyph, its part of life, and whether
+     finishing it asks what you trained. First hit wins, so the longer
+     phrase is always listed before the word inside it. */
+  var KW = [
+    ['wake', /\b(wake up|wake|rise|alarm)\b/],
+    ['run', /\b(run|running|jog|tempo|intervals|5k|10k)\b/],
+    ['train', /\b(work out|workout|gym|train|training|lift|lifting|weights|push day|pull day|leg day|legs|upper|lower|full body|crossfit|hiit|pilates|boxing|strength)\b/],
+    ['stretch', /\b(stretch|stretching|yoga|mobility|recovery|sauna|plunge)\b/],
+    ['walk', /\b(walk the dog|walk|hike|steps)\b/],
+    ['read', /\b(read|reading|book)\b/],
+    ['study', /\b(study|learn|course|class|lecture|revise|practice)\b/],
+    ['calm', /\b(meditate|meditation|breathe|breathwork|journal|pray)\b/],
+    ['chart', /\b(trade|trading|chart|charting|market|markets)\b/],
+    ['move', /\b(commute|drive|bus|travel|flight|school run)\b/],
+    ['work', /\b(deep work|work|office|shift|meeting|emails?|call|admin|focus)\b/],
+    ['eat', /\b(meal prep|eat|lunch|breakfast|dinner|meal|cook|snack)\b/],
+    ['coffee', /\b(coffee|tea)\b/],
+    ['sleep', /\b(wind down|sleep|bed|nap)\b/]
+  ];
+  var CAT = { train: 'body', run: 'body', stretch: 'body', walk: 'body', read: 'mind', study: 'mind', calm: 'mind', chart: 'work', move: 'work', work: 'work', wake: 'rest', eat: 'rest', coffee: 'rest', sleep: 'rest', dot: 'none' };
+  var TRAINING = { train: 1, run: 1, stretch: 1 };
+  function cdKind(name) {
+    var s = String(name || '').toLowerCase();
+    for (var i = 0; i < KW.length; i++) if (KW[i][1].test(s)) return KW[i][0];
+    return 'dot';
+  }
+  var G = {
+    wake: 'M3 18h18M7 18a5 5 0 0 1 10 0M12 7v2M5.6 10.6l1.4 1.4M18.4 10.6 17 12',
+    train: 'M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12',
+    run: 'M5 7l5 5-5 5M12 7l5 5-5 5',
+    walk: 'M8 4c2 0 3 2 3 5s-1 4-3 4-3-1-3-4 1-5 3-5zM15 11c2 0 3 2 3 5s-1 4-3 4-3-1-3-4 1-5 3-5z',
+    stretch: 'M3 12c3-5 6-5 9 0s6 5 9 0',
+    read: 'M3 6c3-1 6-1 9 1v12c-3-2-6-2-9-1zM21 6c-3-1-6-1-9 1v12c3-2 6-2 9-1z',
+    study: 'M4 20l4-1 11-11-3-3L5 16zM14 7l3 3',
+    calm: 'M12 5a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM12 11v2',
+    chart: 'M7 4v16M5 8h4v6H5zM17 4v16M15 7h4v7h-4z',
+    move: 'M4 12h15M14 7l5 5-5 5',
+    work: 'M4 8h16v11H4zM9 8V5h6v3M4 13h16',
+    eat: 'M7 3v18M5 3v5a2 2 0 0 0 4 0V3M17 3c-2 1-3 4-3 7h3v11',
+    coffee: 'M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5zM16 11h2a2 2 0 0 1 0 4h-2M8 3v3M12 3v3',
+    sleep: 'M20 14A8 8 0 1 1 10 4a6 6 0 0 0 10 10z',
+    fuel: 'M12 3c3 4 6 6 6 10a6 6 0 0 1-12 0c0-3 2-5 3-7 1 2 2 3 3 3 0-2 0-4 0-6z',
+    water: 'M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11z',
+    tick: 'M5 12.5l4.5 4.5L19 7.5',
+    more: 'M9 5l7 7-7 7',
+    dot: 'M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z'
+  };
+  function cdG(k, w) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (w || 1.8)
+      + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" data-g="' + k + '"><path d="' + (G[k] || G.dot) + '"/></svg>';
+  }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  /* ═══ THE WEEK ═══ a template: every Monday is the same shape. */
+  var SEED = [
+    ['Wake up', [0, 1, 2, 3, 4, 5, 6], 420, 420],
+    ['Gym', [0, 2, 4], 450, 510],
+    ['Easy run', [1, 3], 450, 495],
+    ['Deep work', [0, 1, 2, 3, 4], 540, 720],
+    ['Lunch', [0, 1, 2, 3, 4], 750, 795],
+    ['Emails and calls', [0, 1, 2, 3, 4], 840, 900],
+    ['Long walk', [5, 6], 600, 690],
+    ['Meal prep', [6], 960, 1020],
+    ['Read', [0, 1, 2, 3, 4, 5, 6], 1290, 1320],
+    ['Wind down', [0, 1, 2, 3, 4, 5, 6], 1350, 1350]
+  ];
+  var idc = 0;
+  function cdId() { return 'b' + Date.now().toString(36) + (idc++).toString(36); }
+  /* The shape of a block is written HERE and every writer goes through
+     it, so a block made by the parser and one made by hand cannot come
+     out with different fields. */
+  function cdBlock(o) {
+    var s = Math.max(0, Math.min(1439, Math.round(+o.s || 0)));
+    var e = Math.max(s, Math.min(1440, Math.round(+o.e || s)));
+    var d = (Array.isArray(o.d) ? o.d : []).filter(function (x) { return x >= 0 && x <= 6; });
+    return { id: typeof o.id === 'string' && o.id ? o.id : cdId(), n: String(o.n || '').slice(0, 60) || 'Block', d: d.filter(function (x, i) { return d.indexOf(x) === i; }).sort(), s: s, e: e, p: String(o.p || '').slice(0, 40) };
+  }
+  function cdLoadWeek() {
+    var raw = cdRead(K.week, null);
+    if (!Array.isArray(raw)) {
+      var w = SEED.map(function (r, i) { return cdBlock({ id: 's' + i, n: r[0], d: r[1], s: r[2], e: r[3] }); });
+      cdWrite(K.week, w);
+      return w;
+    }
+    /* Repaired, not discarded, and the repair is written back so it is
+       a fact about the record rather than about this page view. */
+    var clean = raw.filter(isObj).map(cdBlock).filter(function (b) { return b.d.length; });
+    if (JSON.stringify(clean) !== JSON.stringify(raw)) cdWrite(K.week, clean);
+    return clean;
+  }
+  function cdLoadMap(k) {
+    var raw = cdRead(k, {});
+    if (!isObj(raw)) { cdWrite(k, {}); return {}; }
+    var out = {}, bad = false;
+    Object.keys(raw).forEach(function (d) {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(d) && isObj(raw[d])) out[d] = raw[d]; else bad = true;
+    });
+    if (bad) cdWrite(k, out);
+    return out;
+  }
+
+  var S = {
+    week: cdLoadWeek(),
+    log: cdLoadMap(K.log),
+    off: cdLoadMap(K.off),
+    hab: cdLoadMap(K.hab),
+    train: cdLoadMap(K.train),
+    defs: (function () {
+      var r = cdRead(K.defs, []);
+      return Array.isArray(r) ? r.filter(function (x) { return isObj(x) && x.id && x.n; }) : [];
+    })()
+  };
+  function cdSave(which) { cdWrite(K[which], S[which]); }
+
+  function cdOn(iso) {
+    var dw = cdDow(iso);
+    return S.week.filter(function (b) { return b.d.indexOf(dw) >= 0; })
+      .sort(function (a, b) { return a.s - b.s || a.e - b.e || (a.n < b.n ? -1 : 1); });
+  }
+  var cdDone = function (iso, id) { return !!(S.log[iso] && S.log[iso][id]); };
+  var cdIsOff = function (iso, id) { return !!(S.off[iso] && S.off[iso][id]); };
+  function cdSetFlag(map, iso, id, on) {
+    var m = S[map];
+    if (on) { (m[iso] = m[iso] || {})[id] = 1; }
+    else if (m[iso]) { delete m[iso][id]; if (!Object.keys(m[iso]).length) delete m[iso]; }
+    cdSave(map);
+  }
+  function cdTally(iso) {
+    var on = cdOn(iso).filter(function (b) { return !cdIsOff(iso, b.id); });
+    var kept = on.filter(function (b) { return cdDone(iso, b.id); }).length;
+    var mins = on.reduce(function (t, b) { return t + (b.e - b.s); }, 0);
+    return { on: on.length, kept: kept, mins: mins };
+  }
+  /* The record begins at the first thing you ever logged. A day before
+     that is not a day you missed. */
+  function cdFirst() {
+    var ks = [].concat(Object.keys(S.log), Object.keys(S.hab), Object.keys(S.train)).sort();
+    return ks[0] || cdToday();
+  }
+
+  /* ═══ TRAINING ═══ */
+  var LIFT = [
+    { g: 'weights', n: 'Weights', items: [['push', 'Push'], ['pull', 'Pull'], ['legs', 'Legs'], ['upper', 'Upper'], ['lower', 'Lower'], ['full', 'Full body'], ['core', 'Core']] },
+    { g: 'run', n: 'Run', items: [['easy', 'Easy'], ['tempo', 'Tempo'], ['intervals', 'Intervals'], ['long', 'Long']] },
+    { g: 'recovery', n: 'Recovery', items: [['mobility', 'Mobility'], ['yoga', 'Yoga'], ['sauna', 'Sauna']] },
+    { g: 'rest', n: 'Rest', items: [['rest', 'Rest day']] }
+  ];
+  var LIFTN = {};
+  LIFT.forEach(function (g) { g.items.forEach(function (it) { LIFTN[g.g + '.' + it[0]] = { n: it[1], g: g.g }; }); });
+  var EFFORT = ['Light', 'Moderate', 'Hard'];
+  var MINS = [15, 20, 30, 45, 60, 75, 90, 120];
+  var DAYKEY = '~day';
+  function cdSess(v) {
+    if (!isObj(v) || !Array.isArray(v.k)) return null;
+    var k = v.k.filter(function (x) { return LIFTN[x]; });
+    if (!k.length) return null;
+    return { k: k, e: EFFORT.indexOf(v.e) >= 0 ? v.e : '', m: +v.m > 0 ? Math.round(+v.m) : 0 };
+  }
+  var cdRestOnly = function (s) { return s.k.every(function (k) { return LIFTN[k].g === 'rest'; }); };
+  function cdSessName(s) { return s.k.map(function (k) { return LIFTN[k].n; }).join(' + '); }
+  function cdSessions(iso) {
+    var day = S.train[iso] || {};
+    return Object.keys(day).map(function (id) { var s = cdSess(day[id]); return s && { id: id, s: s }; }).filter(Boolean);
+  }
+
+  /* ═══ HABITS ═══
+     The six are code rather than data, so a new one always arrives and
+     the order is always this one. Yours are appended from their own key. */
+  var HABITS = [
+    { id: 'train', n: 'Train', g: 'train', k: 'tick', from: ['train', 'run', 'stretch'], hc: '--c-body' },
+    { id: 'mind', n: 'Mind', g: 'read', k: 'tick', from: ['read', 'study', 'calm'], hc: '--c-mind' },
+    { id: 'steps', n: 'Steps', g: 'walk', k: 'num', unit: 'steps', step: 500, max: 30000, marks: [5000, 8000, 10000, 15000], hc: '--c-body' },
+    { id: 'fuel', n: 'Fuel', g: 'fuel', k: 'num', unit: 'kcal', step: 50, max: 5000, marks: [1800, 2200, 2600, 3000], bump: [300, 600], hc: '--c-work' },
+    { id: 'water', n: 'Water', g: 'water', k: 'num', unit: 'L', step: 0.25, max: 6, marks: [1, 2, 3, 4], bump: [0.25, 0.5], hc: '--c-mind' },
+    { id: 'sleep', n: 'Sleep', g: 'sleep', k: 'num', unit: 'h', step: 0.25, max: 12, marks: [6, 7, 8, 9], hc: '--c-rest' }
+  ];
+  function cdHabits() {
+    return HABITS.concat(S.defs.map(function (d) {
+      return d.k === 'num'
+        ? { id: d.id, n: d.n, g: cdKind(d.n), k: 'num', unit: d.unit || '', step: 1, max: 100, marks: [], mine: true, hc: '--c-' + CAT[cdKind(d.n)] }
+        : { id: d.id, n: d.n, g: cdKind(d.n), k: 'tick', from: [], mine: true, hc: '--c-' + CAT[cdKind(d.n)] };
+    }));
+  }
+  function cdHabVal(iso, h) { return S.hab[iso] ? S.hab[iso][h.id] : undefined; }
+  /* A tick is kept by pressing it, OR by the blocks that feed it, OR —
+     for Train — by a session filed that day. One claim, three doors. */
+  function cdKeptBy(iso, h) {
+    if (h.k !== 'tick') return null;
+    if (h.id === 'train' && cdSessions(iso).length) return 'session';
+    var b = cdOn(iso).filter(function (x) { return h.from.indexOf(cdKind(x.n)) >= 0 && cdDone(iso, x.id); })[0];
+    if (b) return b.n;
+    return cdHabVal(iso, h) ? 'you' : null;
+  }
+  function cdHabOn(iso, h) { return h.k === 'tick' ? !!cdKeptBy(iso, h) : +cdHabVal(iso, h) > 0; }
+  function cdFmtNum(v, h) {
+    if (h.unit === 'L' || h.unit === 'h') return (Math.round(v * 100) / 100).toString();
+    return Math.round(v).toLocaleString('en-GB');
+  }
+  function cdStreak(h) {
+    var d = cdToday(), n = 0;
+    if (!cdHabOn(d, h)) d = cdAddDays(d, -1);
+    while (cdHabOn(d, h) && n < 999) { n++; d = cdAddDays(d, -1); }
+    return n;
+  }
+
+  /* ═══ VIEW STATE ═══ */
+  var view = 'day';
+  var sel = cdToday();
+  var monthAt = cdToday().slice(0, 7);
+
+  function cdGo(v) {
+    view = v;
+    try { sessionStorage.setItem('cad.view', v); } catch (e) {}
+    $('cdVDay').hidden = v !== 'day';
+    $('cdVHab').hidden = v !== 'hab';
+    $('cdVMon').hidden = v !== 'mon';
+    $('cdVLift').hidden = v !== 'lift';
+    document.querySelectorAll('.cd-tab').forEach(function (t) {
+      if (t.dataset.v === v) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
+    });
+    $('cdMain').scrollTop = 0;
+    cdPaint();
+  }
+  function cdPaint() {
+    if (view === 'day') cdPaintDay();
+    else if (view === 'hab') cdPaintHab();
+    else if (view === 'mon') cdPaintMon();
+    else cdPaintLift();
+  }
+
+  /* ═══ DAY ═══ */
+  function cdWeekStart(iso) { return cdAddDays(iso, -cdDow(iso)); }
+  function cdPaintDay() {
+    var today = cdToday();
+    var ws = cdWeekStart(today);
+    var rb = '';
+    for (var i = 0; i < 7; i++) {
+      var d = cdAddDays(ws, i), t = cdTally(d);
+      var past = d <= today;
+      var pct = past && t.on ? Math.round(t.kept / t.on * 100) : 0;
+      rb += '<button type="button" class="cd-rb' + (d === today ? ' is-today' : '') + '" data-d="' + d + '" aria-pressed="' + (d === sel) + '"'
+        + ' aria-label="' + DOWL[i] + ', ' + (past ? t.kept + ' of ' + t.on + ' kept' : t.on + ' planned') + '">'
+        + '<span class="cd-rb-l">' + DOW[i].slice(0, 2).toUpperCase() + '</span>'
+        + '<span class="cd-rb-n">' + cdDate(d).getDate() + '</span>'
+        + '<span class="cd-rb-bar" aria-hidden="true"><i style="height:' + pct + '%"></i></span></button>';
+    }
+    $('cdRibbon').innerHTML = rb;
+
+    var dt = cdDate(sel);
+    var rel = sel === today ? 'today' : sel === cdAddDays(today, -1) ? 'yesterday' : sel === cdAddDays(today, 1) ? 'tomorrow' : '';
+    $('cdTitle').innerHTML = esc(DOWL[cdDow(sel)]) + (rel ? '<em>' + rel + '</em>' : '');
+    var tl = cdTally(sel);
+    $('cdSub').textContent = dt.getDate() + ' ' + MON[dt.getMonth()] + ' · '
+      + (sel > today ? tl.on + ' planned' : tl.kept + ' of ' + tl.on + ' kept') + ' · ' + cdLen(tl.mins) + ' committed';
+
+    var list = cdOn(sel);
+    var ag = $('cdAgenda');
+    if (!list.length) {
+      ag.innerHTML = '<li class="cd-empty">Nothing on this day yet. <button type="button" class="cd-link" data-act="add">Add a block</button></li>';
+      return;
+    }
+    var now = cdNowMin(), isT = sel === today, open = cdOpenDay(sel);
+    /* A running block already says where now is — with a countdown and a
+       line down the rail — so the red rule is drawn only between blocks. */
+    var running = isT && list.some(function (b) { return !cdIsOff(sel, b.id) && b.e > b.s && now >= b.s && now < b.e; });
+    var html = '', reach = -1, nowDrawn = !isT || running;
+    list.forEach(function (b) {
+      if (reach >= 0 && b.s - reach >= 30) {
+        html += '<li class="cd-gap" aria-hidden="true"><span></span><span class="cd-node"></span><p>' + cdLen(b.s - reach) + ' open</p></li>';
+      }
+      if (!nowDrawn && now < b.s) { html += cdNowRow(now); nowDrawn = true; }
+      html += cdTicket(b, isT, now, open);
+      reach = Math.max(reach, b.e);
+    });
+    if (!nowDrawn) html += cdNowRow(now);
+    ag.innerHTML = html;
+  }
+  function cdNowRow(now) { return '<li class="cd-nowline" id="cdNowL"><span>' + cdHM(now) + '</span><i></i></li>'; }
+  function cdTicket(b, isT, now, open) {
+    var kind = cdKind(b.n), cat = CAT[kind];
+    var done = cdDone(sel, b.id), off = cdIsOff(sel, b.id);
+    var running = isT && !off && b.e > b.s && now >= b.s && now < b.e;
+    var past = (isT && (b.e > b.s ? now >= b.e : now > b.s)) || sel < cdToday();
+    var meta = b.e > b.s ? cdHM(b.s) + '–' + cdHM(b.e) + ' · ' + cdLen(b.e - b.s) : cdHM(b.s);
+    if (running) meta = cdHM(b.s) + '–' + cdHM(b.e) + ' · <i>' + cdLen(b.e - now) + ' left</i>';
+    if (off) meta += ' · off today';
+    if (b.p) meta += ' · ' + esc(b.p);
+    var sess = (S.train[sel] && cdSess(S.train[sel][b.id])) || null;
+    var tag = sess ? '<span class="cd-tk-w" style="--kc:var(--k-' + LIFTN[sess.k[0]].g + ')">' + esc(cdSessName(sess)) + (sess.m ? ' · ' + sess.m + 'm' : '') + '</span>' : '';
+    var prog = running ? Math.round((now - b.s) / (b.e - b.s) * 100) : 0;
+    var cls = 'cd-it' + (done ? ' is-done' : '') + (off ? ' is-off' : '') + (running ? ' is-now' : '') + (past ? ' is-past' : '');
+    return '<li class="' + cls + '" data-id="' + b.id + '" style="--cat:var(--c-' + cat + ')">'
+      + '<span class="cd-time">' + cdHM(b.s) + '</span>'
+      + '<span class="cd-node" aria-hidden="true"><b></b>' + (running ? '<s style="height:calc(' + prog + '% - 25px)"></s>' : '') + '</span>'
+      + '<div class="cd-tk">'
+      + '<button type="button" class="cd-tk-b" data-act="edit" aria-label="' + esc(b.n) + ', ' + cdHM(b.s) + (b.e > b.s ? ' to ' + cdHM(b.e) : '') + '. Open">'
+      + '<span class="cd-tk-n">' + cdG(kind) + '<span>' + esc(b.n) + '</span></span>'
+      + '<span class="cd-tk-m">' + meta + '</span>' + tag + '</button>'
+      + '<button type="button" class="cd-stamp" data-act="tick" aria-pressed="' + done + '"' + (open ? '' : ' disabled')
+      + ' aria-label="' + (done ? 'Done' : 'Mark done') + ': ' + esc(b.n) + '"><span>' + cdG('tick', 2.6) + '</span></button>'
+      + '</div></li>';
+  }
+
+  function cdTick(id) {
+    if (!cdOpenDay(sel)) return;
+    var b = S.week.filter(function (x) { return x.id === id; })[0];
+    if (!b) return;
+    var was = cdDone(sel, id);
+    cdSetFlag('log', sel, id, !was);
+    if (!was) cdSetFlag('off', sel, id, false);
+    else if (S.train[sel] && S.train[sel][id]) { delete S.train[sel][id]; if (!Object.keys(S.train[sel]).length) delete S.train[sel]; cdSave('train'); }
+    cdPaint();
+    /* Finishing a training block is the moment to ask what it was. */
+    if (!was && TRAINING[cdKind(b.n)]) cdLiftSheet(sel, id, b.n);
+  }
+
+  $('cdAgenda').addEventListener('click', function (ev) {
+    var btn = ev.target.closest('[data-act]');
+    if (!btn) return;
+    if (btn.dataset.act === 'add') { cdEdit(null); return; }
+    var li = btn.closest('.cd-it');
+    if (!li) return;
+    if (btn.dataset.act === 'tick') cdTick(li.dataset.id);
+    else cdEdit(li.dataset.id);
+  });
+  $('cdRibbon').addEventListener('click', function (ev) {
+    var b = ev.target.closest('.cd-rb');
+    if (!b) return;
+    sel = b.dataset.d;
+    cdPaintDay();
+  });
+
+  /* ═══ THE SENTENCE ═══
+     "Gym mon wed fri 6:30 to 8", "walk weekdays 7:45 for 30 mins",
+     "read now", "stretch after gym". What it cannot place, it leaves in
+     the name — a sentence it does not understand costs nothing. */
+  var DAYW = [['monday', 'mon'], ['tuesday', 'tues', 'tue'], ['wednesday', 'wed'], ['thursday', 'thurs', 'thu'], ['friday', 'fri'], ['saturday', 'sat'], ['sunday', 'sun']];
+  function cdClock(h, m, mer) {
+    h = +h; m = +(m || 0);
+    if (mer === 'pm' && h < 12) h += 12;
+    if (mer === 'am' && h === 12) h = 0;
+    if (h > 23 || m > 59) return null;
+    return h * 60 + m;
+  }
+  function cdParse(text, weekFor) {
+    var src = ' ' + String(text || '').toLowerCase().replace(/[.,!]/g, ' ') + ' ';
+    var used = src;
+    var eat = function (m) { used = used.replace(m, function (x) { return ' '.repeat(x.length); }); };
+    var out = { days: [], s: null, e: null, len: null, after: null };
+    var m;
+
+    if ((m = used.match(/\b(every ?day|daily)\b/))) { out.days = [0, 1, 2, 3, 4, 5, 6]; eat(m[0]); }
+    if ((m = used.match(/\bweekdays?\b/))) { out.days = out.days.concat([0, 1, 2, 3, 4]); eat(m[0]); }
+    if ((m = used.match(/\bweekends?\b/))) { out.days = out.days.concat([5, 6]); eat(m[0]); }
+    if ((m = used.match(/\btoday\b/))) { out.days.push(cdDow(cdToday())); eat(m[0]); }
+    if ((m = used.match(/\btomorrow\b/))) { out.days.push(cdDow(cdAddDays(cdToday(), 1))); eat(m[0]); }
+    DAYW.forEach(function (ws, i) {
+      var re = new RegExp('\\b(?:on\\s+|every\\s+)?(' + ws.join('|') + ')s?\\b', 'g');
+      var hit = used.match(re);
+      if (hit) { out.days.push(i); hit.forEach(eat); }
+    });
+    used = used.replace(/\b(and|&)\b/g, function (x) { return ' '.repeat(x.length); });
+
+    var range = used.match(/\b(?:from\s+|at\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*(?:-|–|to|until|till)\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/);
+    if (range) {
+      var s = cdClock(range[1], range[2], range[3] || (range[6] === 'pm' && +range[1] < +range[4] ? 'pm' : ''));
+      var e = cdClock(range[4], range[5], range[6]);
+      if (s != null && e != null) {
+        if (e <= s && !range[6] && e + 720 > s && e < 720) e += 720;
+        if (e > s) { out.s = s; out.e = e; eat(range[0]); }
+      }
+    }
+    if ((m = used.match(/\bfor\s+(an?|half an|\d+(?:\.\d+)?)\s*(h|hr|hrs|hour|hours|m|min|mins|minute|minutes)\b/))) {
+      var q = m[1] === 'half an' ? 0.5 : /^an?$/.test(m[1]) ? 1 : +m[1];
+      out.len = Math.round(/^h/.test(m[2]) ? q * 60 : q);
+      eat(m[0]);
+    }
+    if ((m = used.match(/\bin\s+(\d+)\s*(m|min|mins|minutes|h|hr|hrs|hours?)\b/))) {
+      var off = /^h/.test(m[2]) ? +m[1] * 60 : +m[1];
+      var at = cdNowMin() + off;
+      if (at < 1440 && out.s == null) out.s = at;
+      eat(m[0]);
+      if (!out.days.length) out.days.push(cdDow(cdToday()));
+    }
+    if ((m = used.match(/\bnow\b/))) {
+      if (out.s == null) out.s = Math.round(cdNowMin() / 5) * 5;
+      eat(m[0]);
+      if (!out.days.length) out.days.push(cdDow(cdToday()));
+    }
+    if (out.s == null) {
+      var clk = used.match(/\b(?:at\s+)?(\d{1,2}):(\d{2})\s*(am|pm)?\b/) || used.match(/\b(?:at\s+)?(\d{1,2})()\s*(am|pm)\b/) || used.match(/\bat\s+(\d{1,2})()()\b/);
+      if (clk) { var c = cdClock(clk[1], clk[2], clk[3]); if (c != null) { out.s = c; eat(clk[0]); } }
+    }
+    /* "after the gym": the other thing already has a time; this starts
+       where it ends. Through the keyword table, so "after training"
+       finds a block nobody called Training. Only struck out if it
+       resolves — otherwise the words stay in the name. */
+    var aft = used.match(/\b(after|before)\s+(?:the\s+|my\s+)?([a-z][a-z ]*?)\s*$/) || used.match(/\b(after|before)\s+(?:the\s+|my\s+)?([a-z]+)\b/);
+    if (aft && out.s == null) {
+      var probeDay = out.days.length ? out.days[0] : cdDow(cdToday());
+      var phrase = aft[2].trim(), pk = cdKind(phrase);
+      var pool = (weekFor || S.week).filter(function (b) { return b.d.indexOf(probeDay) >= 0; }).sort(function (a, b) { return a.s - b.s; });
+      var hit2 = pool.filter(function (b) { var n = b.n.toLowerCase(); return n.indexOf(phrase) >= 0 || (phrase.length >= 3 && phrase.indexOf(n) >= 0); })[0]
+        || (pk !== 'dot' && pool.filter(function (b) { return cdKind(b.n) === pk; })[0]);
+      if (hit2) {
+        out.after = hit2.n;
+        var L = out.len != null ? out.len : 0;
+        out.s = aft[1] === 'after' ? hit2.e : Math.max(0, hit2.s - (L || 0));
+        eat(aft[0]);
+      }
+    }
+    if (out.s != null && out.e == null) out.e = Math.min(1440, out.s + (out.len || 0));
+    if (!out.days.length && out.s != null) out.days = [cdDow(cdToday())];
+
+    var name = used.replace(/\b(at|from|on|every|for|the|a|an|my)\b/g, ' ').replace(/\s+/g, ' ').trim();
+    out.n = name ? name.charAt(0).toUpperCase() + name.slice(1) : '';
+    out.days = out.days.filter(function (x, i) { return out.days.indexOf(x) === i; }).sort();
+    return out;
+  }
+
+  /* ═══ THE SHEET ═══ one at a time; opening one replaces the last. */
+  var shOnClose = null;
+  function cdSheet(title, body, onClose) {
+    $('cdShT').textContent = title;
+    var b = $('cdShB');
+    b.innerHTML = '';
+    if (typeof body === 'string') b.innerHTML = body; else b.appendChild(body);
+    shOnClose = onClose || null;
+    var sh = $('cdSheet'), sc = $('cdScrim');
+    sh.hidden = false; sc.hidden = false;
+    sh.scrollTop = 0;
+    requestAnimationFrame(function () { sh.classList.add('is-open'); sc.classList.add('is-open'); });
+    return b;
+  }
+  var shTimer = 0;
+  function cdClose() {
+    var sh = $('cdSheet'), sc = $('cdScrim');
+    if (sh.hidden) return;
+    sh.classList.remove('is-open'); sc.classList.remove('is-open');
+    clearTimeout(shTimer);
+    shTimer = setTimeout(function () { sh.hidden = true; sc.hidden = true; }, 240);
+    var f = shOnClose; shOnClose = null;
+    if (f) f();
+  }
+  function cdSheetOpen() { return !$('cdSheet').hidden && $('cdSheet').classList.contains('is-open'); }
+  $('cdShX').addEventListener('click', cdClose);
+  $('cdScrim').addEventListener('click', cdClose);
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !$('cdSheet').hidden) { ev.preventDefault(); cdClose(); } });
+
+  function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+
+  /* ═══ ADD AND EDIT ═══ one form. A new block also gets the sentence. */
+  function cdEdit(id) {
+    var b = id ? S.week.filter(function (x) { return x.id === id; })[0] : null;
+    var f = b ? { n: b.n, d: b.d.slice(), s: b.s, len: b.e - b.s, p: b.p }
+      : { n: '', d: [cdDow(sel)], s: Math.min(1380, Math.ceil(cdNowMin() / 15) * 15), len: 30, p: '' };
+    var root = el('div');
+
+    if (!b) {
+      var say = el('input', 'cd-field cd-say');
+      say.id = 'cdSay'; say.type = 'text'; say.autocomplete = 'off';
+      say.placeholder = 'Gym mon wed fri 6:30 to 8';
+      say.setAttribute('aria-label', 'Say it in a sentence');
+      var prev = el('p', 'cd-prev'); prev.id = 'cdPrev';
+      root.appendChild(say); root.appendChild(prev);
+      say.addEventListener('input', function () {
+        var r = cdParse(say.value);
+        if (r.n) f.n = r.n;
+        if (r.days.length) f.d = r.days;
+        if (r.s != null) { f.s = r.s; f.len = r.e - r.s; }
+        sync();
+        var miss = [];
+        if (!r.n) miss.push('what');
+        if (r.s == null) miss.push('what time');
+        prev.className = 'cd-prev' + (miss.length && say.value.trim() ? ' is-need' : '');
+        prev.innerHTML = !say.value.trim() ? '' : miss.length ? 'Still needs ' + miss.join(' and ')
+          : '<b>' + esc(r.n) + '</b> · ' + (r.days.length === 7 ? 'every day' : r.days.map(function (x) { return DOW[x]; }).join(' ')) + ' · '
+            + cdHM(r.s) + (r.e > r.s ? '–' + cdHM(r.e) : '') + (r.after ? ' · after ' + esc(r.after) : '');
+      });
+      root.appendChild(el('p', 'cd-lbl', 'Or set it by hand'));
+    } else {
+      /* This day: what happened to the block on the date you are looking at. */
+      root.appendChild(el('p', 'cd-lbl', esc(DOWL[cdDow(sel)]) + ' ' + cdDate(sel).getDate() + ' ' + MON[cdDate(sel).getMonth()].slice(0, 3)));
+      var canDo = cdOpenDay(sel);
+      var tDone = el('button', 'cd-toggle', '<span>Done</span><i></i>');
+      tDone.type = 'button'; tDone.id = 'cdTDone';
+      tDone.setAttribute('aria-pressed', cdDone(sel, b.id));
+      tDone.disabled = !canDo;
+      tDone.addEventListener('click', function () { cdClose(); cdTick(b.id); });
+      var tOff = el('button', 'cd-toggle', '<span>Off this day</span><i></i>');
+      tOff.type = 'button'; tOff.id = 'cdTOff';
+      tOff.setAttribute('aria-pressed', cdIsOff(sel, b.id));
+      /* A day off is written forward, so it is the one record open ahead. */
+      tOff.disabled = cdDiff(cdToday(), sel) > 2;
+      tOff.addEventListener('click', function () {
+        var on = !cdIsOff(sel, b.id);
+        cdSetFlag('off', sel, b.id, on);
+        if (on) cdSetFlag('log', sel, b.id, false);
+        tOff.setAttribute('aria-pressed', on);
+        tDone.setAttribute('aria-pressed', cdDone(sel, b.id));
+        cdPaint();
+      });
+      root.appendChild(tDone); root.appendChild(tOff);
+      if (TRAINING[cdKind(b.n)] && canDo) {
+        var lg = el('button', 'cd-link', 'Log what you trained →');
+        lg.type = 'button';
+        lg.addEventListener('click', function () { cdLiftSheet(sel, b.id, b.n); });
+        root.appendChild(lg);
+      }
+      root.appendChild(el('p', 'cd-lbl', 'Every week'));
+    }
+
+    var rows = el('div', 'cd-rows');
+    var nm = el('input', 'cd-field'); nm.type = 'text'; nm.id = 'cdFN'; nm.placeholder = 'Name';
+    var st = el('input', 'cd-field'); st.type = 'time'; st.id = 'cdFS'; st.step = 300;
+    var pl = el('input', 'cd-field'); pl.type = 'text'; pl.id = 'cdFP'; pl.placeholder = 'Optional';
+    var rg = el('input', 'cd-range'); rg.type = 'range'; rg.min = 0; rg.max = 240; rg.step = 5; rg.id = 'cdFL';
+    rg.setAttribute('aria-label', 'How long');
+    var lenOut = el('span', 'cd-len');
+    var dayBox = el('div', 'cd-chips days');
+    DOW.forEach(function (d, i) {
+      var c = el('button', 'cd-chip', d.slice(0, 2)); c.type = 'button'; c.dataset.i = i;
+      c.setAttribute('aria-label', DOWL[i]);
+      c.addEventListener('click', function () {
+        var k = f.d.indexOf(i);
+        if (k >= 0) f.d.splice(k, 1); else f.d.push(i);
+        sync();
+      });
+      dayBox.appendChild(c);
+    });
+    function row(lbl, node) { var r = el('div', 'cd-row'); r.appendChild(el('span', '', lbl)); r.appendChild(node); rows.appendChild(r); }
+    row('What', nm); row('Starts', st);
+    var lenWrap = el('div'); lenWrap.appendChild(rg); lenWrap.appendChild(lenOut); row('How long', lenWrap);
+    row('Where', pl);
+    root.appendChild(rows);
+    root.appendChild(el('p', 'cd-lbl', 'Days'));
+    root.appendChild(dayBox);
+
+    function sync() {
+      nm.value = f.n; st.value = cdHM(f.s); pl.value = f.p;
+      if (+rg.max < f.len) rg.max = Math.ceil(f.len / 60) * 60;
+      rg.value = f.len;
+      lenOut.textContent = f.len > 0 ? cdLen(f.len) + ' · ends ' + cdHM(Math.min(1440, f.s + f.len)) : 'A moment';
+      dayBox.querySelectorAll('.cd-chip').forEach(function (c) { c.setAttribute('aria-pressed', f.d.indexOf(+c.dataset.i) >= 0); });
+    }
+    nm.addEventListener('input', function () { f.n = nm.value; });
+    pl.addEventListener('input', function () { f.p = pl.value; });
+    st.addEventListener('input', function () {
+      var p = st.value.split(':');
+      if (p.length === 2) { f.s = +p[0] * 60 + +p[1]; lenOut.textContent = f.len > 0 ? cdLen(f.len) + ' · ends ' + cdHM(Math.min(1440, f.s + f.len)) : 'A moment'; }
+    });
+    rg.addEventListener('input', function () {
+      f.len = +rg.value;
+      lenOut.textContent = f.len > 0 ? cdLen(f.len) + ' · ends ' + cdHM(Math.min(1440, f.s + f.len)) : 'A moment';
+    });
+    sync();
+
+    var foot = el('div', 'cd-foot');
+    if (b) {
+      var del = el('button', 'cd-btn warn', 'Delete'); del.type = 'button'; del.id = 'cdFDel';
+      del.addEventListener('click', function () {
+        var at = S.week.indexOf(b);
+        S.week.splice(at, 1); cdSave('week'); cdClose(); cdPaint();
+        cdToast('Deleted ' + b.n, function () { S.week.splice(at, 0, b); cdSave('week'); cdPaint(); });
+      });
+      foot.appendChild(del);
+    }
+    var save = el('button', 'cd-btn go', b ? 'Save' : 'Add'); save.type = 'button'; save.id = 'cdFSave';
+    save.addEventListener('click', function () {
+      if (!f.n.trim()) { cdToast('Give it a name.'); nm.focus(); return; }
+      if (!f.d.length) { cdToast('Pick at least one day.'); return; }
+      if (f.s + f.len > 1440) { cdToast('It has to finish by midnight.'); return; }
+      var nb = cdBlock({ id: b ? b.id : null, n: f.n.trim(), d: f.d, s: f.s, e: f.s + f.len, p: f.p.trim() });
+      if (b) S.week[S.week.indexOf(b)] = nb; else S.week.push(nb);
+      cdSave('week'); cdClose();
+      if (!b && nb.d.indexOf(cdDow(sel)) < 0) {
+        /* Land on the day it went on, or it looks like nothing happened. */
+        var t = cdToday(), ws = cdWeekStart(t);
+        sel = cdAddDays(ws, nb.d[0]);
+      }
+      if (view !== 'day') cdGo('day'); else cdPaint();
+      cdToast((b ? 'Saved ' : 'Added ') + nb.n);
+    });
+    foot.appendChild(save);
+    root.appendChild(foot);
+    cdSheet(b ? b.n : 'New block', root);
+    var sayEl = root.querySelector('.cd-say');
+    if (sayEl) setTimeout(function () { sayEl.focus(); }, 60);
+  }
+
+  /* ═══ WHAT YOU TRAINED ═══ */
+  function cdLiftSheet(iso, key, label) {
+    var cur = (S.train[iso] && cdSess(S.train[iso][key])) || { k: [], e: '', m: 0 };
+    var pick = cur.k.slice(), eff = cur.e, min = cur.m;
+    var root = el('div');
+    var boards = el('div');
+    LIFT.forEach(function (g) {
+      var box = el('div', 'cd-grp'); box.style.setProperty('--kc', 'var(--k-' + g.g + ')');
+      box.appendChild(el('h3', '', g.n));
+      var cs = el('div', 'cd-chips');
+      g.items.forEach(function (it) {
+        var k = g.g + '.' + it[0];
+        var c = el('button', 'cd-chip kc', it[1]); c.type = 'button'; c.dataset.k = k;
+        c.style.setProperty('--kc', 'var(--k-' + g.g + ')');
+        c.addEventListener('click', function () {
+          var at = pick.indexOf(k);
+          if (at >= 0) pick.splice(at, 1);
+          /* You cannot half-rest: Rest clears the rest, and anything else clears Rest. */
+          else if (g.g === 'rest') pick = [k];
+          else { pick = pick.filter(function (x) { return LIFTN[x].g !== 'rest'; }); pick.push(k); }
+          draw();
+        });
+        cs.appendChild(c);
+      });
+      box.appendChild(cs); boards.appendChild(box);
+    });
+    root.appendChild(boards);
+    var more = el('div');
+    more.appendChild(el('p', 'cd-lbl', 'How hard'));
+    var ef = el('div', 'cd-chips');
+    EFFORT.forEach(function (w) {
+      var c = el('button', 'cd-chip', w); c.type = 'button'; c.dataset.e = w;
+      c.addEventListener('click', function () { eff = eff === w ? '' : w; draw(); });
+      ef.appendChild(c);
+    });
+    more.appendChild(ef);
+    more.appendChild(el('p', 'cd-lbl', 'How long'));
+    var mn = el('div', 'cd-chips');
+    MINS.forEach(function (x) {
+      var c = el('button', 'cd-chip', x + 'm'); c.type = 'button'; c.dataset.m = x;
+      c.addEventListener('click', function () { min = min === x ? 0 : x; draw(); });
+      mn.appendChild(c);
+    });
+    more.appendChild(mn);
+    root.appendChild(more);
+    var foot = el('div', 'cd-foot');
+    var skip = el('button', 'cd-btn', cur.k.length ? 'Take it off' : 'Not now'); skip.type = 'button';
+    skip.addEventListener('click', function () {
+      if (cur.k.length && S.train[iso]) { delete S.train[iso][key]; if (!Object.keys(S.train[iso]).length) delete S.train[iso]; cdSave('train'); }
+      cdClose(); cdPaint();
+    });
+    var go = el('button', 'cd-btn go', 'Log'); go.type = 'button'; go.id = 'cdLiftGo';
+    go.addEventListener('click', function () {
+      if (!pick.length) return;
+      var rest = pick.every(function (k) { return LIFTN[k].g === 'rest'; });
+      (S.train[iso] = S.train[iso] || {})[key] = rest ? { k: pick } : { k: pick, e: eff, m: min };
+      cdSave('train');
+      if (key !== DAYKEY && !cdDone(iso, key)) cdSetFlag('log', iso, key, true);
+      cdClose(); cdPaint();
+      cdToast('Logged ' + pick.map(function (k) { return LIFTN[k].n; }).join(' + '));
+    });
+    foot.appendChild(skip); foot.appendChild(go);
+    root.appendChild(foot);
+    function draw() {
+      root.querySelectorAll('[data-k]').forEach(function (c) { c.setAttribute('aria-pressed', pick.indexOf(c.dataset.k) >= 0); });
+      root.querySelectorAll('[data-e]').forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.e === eff); });
+      root.querySelectorAll('[data-m]').forEach(function (c) { c.setAttribute('aria-pressed', +c.dataset.m === min); });
+      var rest = pick.length && pick.every(function (k) { return LIFTN[k].g === 'rest'; });
+      /* A rest day is not asked how hard or how long: absent, not disabled. */
+      more.hidden = !!rest;
+      go.disabled = !pick.length;
+      go.textContent = pick.length ? 'Log ' + pick.map(function (k) { return LIFTN[k].n; }).join(' + ') : 'Pick a session';
+    }
+    draw();
+    cdSheet('What did you train?', root);
+    $('cdShT').title = label || '';
+  }
+
+  /* ═══ HABITS VIEW ═══ */
+  function cdPaintHab() {
+    var today = cdToday(), hs = cdHabits();
+    var kept = hs.filter(function (h) { return cdHabOn(today, h); }).length;
+    $('cdHabCap').textContent = kept + ' of ' + hs.length + ' kept today';
+    var html = '';
+    hs.forEach(function (h) {
+      var v = cdHabVal(today, h), on = cdHabOn(today, h);
+      var sub, val;
+      if (h.k === 'tick') {
+        var by = cdKeptBy(today, h), st = cdStreak(h);
+        sub = by && by !== 'you' ? (by === 'session' ? 'Kept by a session' : 'Kept by ' + esc(by)) : (st > 1 ? st + '-day streak' : 'Tap to keep');
+        if (by === 'you' && st > 1) sub = st + '-day streak';
+        val = on ? '<span class="cd-hr-v">✓</span>' : '<span class="cd-hr-v is-nil">not yet</span>';
+      } else {
+        var wk = 0, n = 0;
+        for (var i = 1; i <= 7; i++) { var x = +cdHabVal(cdAddDays(today, -i), h); if (x > 0) { wk += x; n++; } }
+        sub = n ? 'Last 7 days avg ' + cdFmtNum(wk / n, h) + ' ' + esc(h.unit) : 'Tap to log';
+        val = on ? '<span class="cd-hr-v">' + cdFmtNum(v, h) + '<small>' + esc(h.unit) + '</small></span>' : '<span class="cd-hr-v is-nil">—</span>';
+      }
+      var tape = '';
+      for (var j = 13; j >= 0; j--) { var d = cdAddDays(today, -j); tape += '<i class="' + (cdHabOn(d, h) ? 'on' : '') + (j === 0 ? ' is-t' : '') + '"></i>'; }
+      html += '<li class="cd-hr" data-h="' + h.id + '" style="--hc:var(' + h.hc + ')">'
+        + '<button type="button" class="cd-hr-b" data-act="log" aria-label="' + esc(h.n) + ', ' + (on ? 'kept' : 'not yet') + '">' + cdG(h.g) + '<span><span class="cd-hr-n">' + esc(h.n) + '</span><span class="cd-hr-s" style="display:block">' + sub + '</span></span>' + val + '</button>'
+        + '<button type="button" class="cd-hr-more" data-act="hist" aria-label="' + esc(h.n) + ' history">' + cdG('more') + '</button>'
+        + '<span class="cd-tape" aria-hidden="true">' + tape + '</span></li>';
+    });
+    $('cdHab').innerHTML = html;
+  }
+  $('cdHab').addEventListener('click', function (ev) {
+    var btn = ev.target.closest('[data-act]'); if (!btn) return;
+    var h = cdHabits().filter(function (x) { return x.id === btn.closest('.cd-hr').dataset.h; })[0];
+    if (!h) return;
+    if (btn.dataset.act === 'hist') { cdHabHist(h); return; }
+    var today = cdToday();
+    if (h.id === 'train') {
+      var tb = cdOn(today).filter(function (b) { return TRAINING[cdKind(b.n)] && !cdIsOff(today, b.id); });
+      var free = tb.filter(function (b) { return !(S.train[today] && S.train[today][b.id]); })[0];
+      cdLiftSheet(today, free ? free.id : tb.length ? tb[0].id : DAYKEY, 'Train');
+      return;
+    }
+    if (h.k === 'tick') {
+      var by = cdKeptBy(today, h);
+      if (by && by !== 'you') { cdToast('Kept by ' + by + ' — untick it on the day.'); return; }
+      var m = S.hab[today] = S.hab[today] || {};
+      if (m[h.id]) delete m[h.id]; else m[h.id] = 1;
+      if (!Object.keys(m).length) delete S.hab[today];
+      cdSave('hab'); cdPaintHab();
+      return;
+    }
+    cdNumSheet(h, today);
+  });
+
+  function cdNumSheet(h, iso) {
+    var v = +cdHabVal(iso, h) || 0;
+    var root = el('div');
+    var big = el('p', 'cd-num'); big.id = 'cdNumV';
+    var cap = el('p', 'cd-numcap', 'today');
+    var max = h.max;
+    if (h.mine) { var best = 0; Object.keys(S.hab).forEach(function (d) { best = Math.max(best, +S.hab[d][h.id] || 0); }); max = best ? Math.ceil(best * 1.5) : 100; }
+    var rg = el('input', 'cd-range'); rg.type = 'range'; rg.min = 0; rg.max = max; rg.step = h.step; rg.value = v; rg.id = 'cdNumR';
+    rg.setAttribute('aria-label', h.n);
+    root.appendChild(big); root.appendChild(cap); root.appendChild(rg);
+    var marks = el('div', 'cd-chips');
+    (h.marks || []).forEach(function (x) {
+      var c = el('button', 'cd-chip', cdFmtNum(x, h)); c.type = 'button';
+      c.addEventListener('click', function () { v = x; paint(); });
+      marks.appendChild(c);
+    });
+    (h.bump || []).forEach(function (x) {
+      var c = el('button', 'cd-chip', '+' + cdFmtNum(x, h)); c.type = 'button';
+      c.addEventListener('click', function () { v = Math.min(max, +(v + x).toFixed(2)); paint(); });
+      marks.appendChild(c);
+    });
+    if (marks.children.length) root.appendChild(marks);
+    function paint() { rg.value = v; big.innerHTML = cdFmtNum(v, h) + '<small>' + esc(h.unit) + '</small>'; }
+    rg.addEventListener('input', function () { v = +rg.value; paint(); });
+    paint();
+    var foot = el('div', 'cd-foot');
+    var clr = el('button', 'cd-btn', +cdHabVal(iso, h) > 0 ? 'Clear' : 'Cancel'); clr.type = 'button';
+    clr.addEventListener('click', function () { set(0); });
+    var go = el('button', 'cd-btn go', 'Save'); go.type = 'button'; go.id = 'cdNumGo';
+    go.addEventListener('click', function () { set(v); });
+    function set(x) {
+      var m = S.hab[iso] = S.hab[iso] || {};
+      if (x > 0) m[h.id] = +(+x).toFixed(2); else delete m[h.id];
+      if (!Object.keys(m).length) delete S.hab[iso];
+      cdSave('hab'); cdClose(); cdPaint();
+    }
+    foot.appendChild(clr); foot.appendChild(go);
+    root.appendChild(foot);
+    cdSheet(h.n, root);
+  }
+
+  function cdHabHist(h) {
+    var today = cdToday(), root = el('div');
+    var n30 = 0, n90 = 0;
+    for (var i = 0; i < 90; i++) { if (cdHabOn(cdAddDays(today, -i), h)) { n90++; if (i < 30) n30++; } }
+    root.appendChild(el('div', 'cd-figs', '<div><b>' + n30 + '</b><span>of 30 days</span></div><div><b>' + n90 + '</b><span>of 90 days</span></div><div><b>' + (h.k === 'tick' ? cdStreak(h) : '—') + '</b><span>streak</span></div>'));
+    var ul = el('ul', 'cd-day-l');
+    for (var j = 0; j < 14; j++) {
+      var d = cdAddDays(today, -j), on = cdHabOn(d, h), v = cdHabVal(d, h);
+      ul.appendChild(el('li', '', '<span></span><b>' + DOW[cdDow(d)] + ' ' + cdDate(d).getDate() + ' ' + MON[cdDate(d).getMonth()].slice(0, 3) + '</b><span>'
+        + (on ? (h.k === 'num' ? cdFmtNum(v, h) + ' ' + esc(h.unit) : 'kept') : '—') + '</span>'));
+    }
+    root.appendChild(el('p', 'cd-lbl', 'Last fourteen days'));
+    root.appendChild(ul);
+    if (h.mine) {
+      var foot = el('div', 'cd-foot');
+      var rm = el('button', 'cd-btn warn', 'Remove this habit'); rm.type = 'button';
+      rm.addEventListener('click', function () {
+        var at = -1; S.defs.forEach(function (x, i) { if (x.id === h.id) at = i; });
+        var was = S.defs.splice(at, 1)[0]; cdSave('defs'); cdClose(); cdPaint();
+        cdToast('Removed ' + h.n, function () { S.defs.splice(at, 0, was); cdSave('defs'); cdPaint(); });
+      });
+      foot.appendChild(rm); root.appendChild(foot);
+    }
+    cdSheet(h.n, root);
+  }
+
+  $('cdHabAdd').addEventListener('click', function () {
+    var root = el('div'), kind = 'tick';
+    var nm = el('input', 'cd-field'); nm.type = 'text'; nm.placeholder = 'Cold plunge, Pages read…'; nm.id = 'cdHN';
+    nm.setAttribute('aria-label', 'Habit name');
+    var un = el('input', 'cd-field'); un.type = 'text'; un.placeholder = 'Unit, like pages'; un.id = 'cdHU';
+    un.setAttribute('aria-label', 'Unit');
+    var ks = el('div', 'cd-chips');
+    [['tick', 'A tick'], ['num', 'A number']].forEach(function (k) {
+      var c = el('button', 'cd-chip', k[1]); c.type = 'button'; c.dataset.k = k[0];
+      c.addEventListener('click', function () { kind = k[0]; paint(); });
+      ks.appendChild(c);
+    });
+    function paint() { ks.querySelectorAll('.cd-chip').forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.k === kind); }); un.hidden = kind !== 'num'; }
+    root.appendChild(nm); root.appendChild(el('p', 'cd-lbl', 'Kept as'));
+    root.appendChild(ks); root.appendChild(el('div', '', '')).appendChild(un);
+    un.style.marginTop = '10px';
+    paint();
+    var foot = el('div', 'cd-foot');
+    var go = el('button', 'cd-btn go', 'Add habit'); go.type = 'button'; go.id = 'cdHGo';
+    go.addEventListener('click', function () {
+      if (!nm.value.trim()) { nm.focus(); return; }
+      S.defs.push({ id: 'h' + cdId(), n: nm.value.trim().slice(0, 30), k: kind, unit: kind === 'num' ? un.value.trim().slice(0, 12) : '' });
+      cdSave('defs'); cdClose(); cdPaint();
+    });
+    foot.appendChild(go); root.appendChild(foot);
+    cdSheet('A habit of your own', root);
+  });
+
+  /* ═══ MONTH ═══ a ring per day for what you kept, a bar for what you trained. */
+  function cdPaintMon() {
+    var today = cdToday(), first = cdFirst();
+    var y = +monthAt.slice(0, 4), mo = +monthAt.slice(5, 7) - 1;
+    $('cdMonT').textContent = MON[mo] + ' ' + y;
+    var start = cdISO(new Date(y, mo, 1));
+    var days = new Date(y, mo + 1, 0).getDate();
+    var pad = cdDow(start);
+    var html = '', kept = 0, trained = 0;
+    for (var p = 0; p < pad; p++) html += '<span class="cd-mc is-pad" aria-hidden="true"></span>';
+    for (var d = 1; d <= days; d++) {
+      var iso = cdISO(new Date(y, mo, d));
+      var fut = iso > today, t = cdTally(iso);
+      var inRec = iso >= first && !fut;
+      var pct = inRec && t.on ? t.kept / t.on : 0;
+      if (inRec && t.kept) kept++;
+      var ss = cdSessions(iso);
+      var real = ss.filter(function (x) { return !cdRestOnly(x.s); });
+      if (real.length) trained++;
+      var kc = ss.length ? 'var(--k-' + LIFTN[ss[0].s.k[0]].g + ')' : 'transparent';
+      var C = 2 * Math.PI * 9;
+      var ring = inRec && t.on ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle class="ring-t" cx="12" cy="12" r="9" fill="none" stroke-width="3"/>'
+        + '<circle class="ring-v" cx="12" cy="12" r="9" fill="none" stroke-width="3" stroke-linecap="round" transform="rotate(-90 12 12)" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + (C * (1 - pct)).toFixed(2) + '"' + (pct ? '' : ' opacity="0"') + '/></svg>'
+        : '<svg viewBox="0 0 24 24" aria-hidden="true"></svg>';
+      html += '<button type="button" class="cd-mc' + (iso === today ? ' is-today' : '') + (fut ? ' is-future' : '') + '" data-day="' + iso + '"'
+        + ' aria-label="' + d + ' ' + MON[mo] + (inRec ? ', ' + t.kept + ' of ' + t.on + ' kept' : '') + (ss.length ? ', ' + esc(cdSessName(ss[0].s)) : '') + '">'
+        + '<b>' + d + '</b>' + ring + '<em style="--kc:' + kc + '"></em></button>';
+    }
+    var cells = pad + days;
+    for (var q = cells; q % 7; q++) html += '<span class="cd-mc is-pad" aria-hidden="true"></span>';
+    $('cdMonG').innerHTML = html;
+    $('cdMonCap').textContent = kept + ' days with something kept · ' + trained + ' trained';
+    $('cdMonN').disabled = monthAt >= today.slice(0, 7);
+    $('cdMonP').disabled = monthAt <= first.slice(0, 7);
+    $('cdMonL').innerHTML = ['weights', 'run', 'recovery'].map(function (g) {
+      return '<span><i style="--kc:var(--k-' + g + ')"></i>' + g.charAt(0).toUpperCase() + g.slice(1) + '</span>';
+    }).join('');
+  }
+  function cdShiftMonth(n) {
+    var y = +monthAt.slice(0, 4), m = +monthAt.slice(5, 7) - 1 + n;
+    var d = new Date(y, m, 1);
+    monthAt = cdISO(d).slice(0, 7);
+    cdPaintMon();
+  }
+  $('cdMonP').addEventListener('click', function () { cdShiftMonth(-1); });
+  $('cdMonN').addEventListener('click', function () { cdShiftMonth(1); });
+  $('cdMonG').addEventListener('click', function (ev) {
+    var c = ev.target.closest('[data-day]'); if (!c) return;
+    cdDaySheet(c.dataset.day);
+  });
+
+  /* A day read back. Not a second editor: "Open this day" goes to the one that is. */
+  function cdDaySheet(iso) {
+    var root = el('div'), t = cdTally(iso), fut = iso > cdToday();
+    root.appendChild(el('p', 'cd-cap', fut ? t.on + ' planned' : t.kept + ' of ' + t.on + ' kept · ' + cdLen(t.mins) + ' committed'));
+    var ul = el('ul', 'cd-day-l');
+    cdOn(iso).forEach(function (b) {
+      var k = cdKind(b.n), st = cdIsOff(iso, b.id) ? 'off' : cdDone(iso, b.id) ? 'kept' : fut ? 'planned' : 'not kept';
+      var li = el('li', '', cdG(k) + '<b>' + esc(b.n) + '</b><span>' + cdHM(b.s) + ' · ' + st + '</span>');
+      li.style.setProperty('--cat', 'var(--c-' + CAT[k] + ')');
+      ul.appendChild(li);
+    });
+    root.appendChild(ul);
+    var ss = cdSessions(iso);
+    if (ss.length) {
+      root.appendChild(el('p', 'cd-lbl', 'Trained'));
+      var tu = el('ul', 'cd-day-l');
+      ss.forEach(function (x) { tu.appendChild(el('li', '', cdG('train') + '<b>' + esc(cdSessName(x.s)) + '</b><span>' + (x.s.m ? x.s.m + 'm' : '') + (x.s.e ? ' · ' + x.s.e : '') + '</span>')); });
+      root.appendChild(tu);
+    }
+    var hs = cdHabits().filter(function (h) { return cdHabOn(iso, h); });
+    if (hs.length) {
+      root.appendChild(el('p', 'cd-lbl', 'Habits'));
+      root.appendChild(el('p', 'cd-note', hs.map(function (h) { return esc(h.n) + (h.k === 'num' ? ' ' + cdFmtNum(cdHabVal(iso, h), h) + ' ' + esc(h.unit) : ''); }).join(' · ')));
+    }
+    var foot = el('div', 'cd-foot');
+    var go = el('button', 'cd-btn go', 'Open this day'); go.type = 'button';
+    go.addEventListener('click', function () { sel = iso; cdClose(); cdGo('day'); });
+    foot.appendChild(go); root.appendChild(foot);
+    var d = cdDate(iso);
+    cdSheet(DOWL[cdDow(iso)] + ' ' + d.getDate() + ' ' + MON[d.getMonth()], root);
+  }
+
+  /* ═══ LIFTS ═══ */
+  function cdPaintLift() {
+    var today = cdToday(), all = [];
+    Object.keys(S.train).sort().reverse().forEach(function (d) { cdSessions(d).forEach(function (x) { all.push({ d: d, s: x.s }); }); });
+    var m30 = all.filter(function (x) { return cdDiff(today, x.d) < 30 && !cdRestOnly(x.s); });
+    var box = $('cdLift');
+    if (!all.length) {
+      box.innerHTML = '<p class="cd-empty">No sessions yet. Tick a gym, run or yoga block on the day and it will ask what you trained.</p>';
+      return;
+    }
+    var mins = m30.filter(function (x) { return x.s.m; });
+    var avg = mins.length ? Math.round(mins.reduce(function (t, x) { return t + x.s.m; }, 0) / mins.length) : 0;
+    var days = {}; m30.forEach(function (x) { days[x.d] = 1; });
+    var html = '<div class="cd-figs"><div><b>' + m30.length + '</b><span>sessions</span></div><div><b>' + Object.keys(days).length + '</b><span>days trained</span></div><div><b>' + (avg ? avg + 'm' : '—') + '</b><span>avg length</span></div></div>';
+    /* Twelve weeks, the one in progress last and in the accent. */
+    var ws = cdWeekStart(today), cols = [], top = 1;
+    for (var w = 11; w >= 0; w--) {
+      var a = cdAddDays(ws, -7 * w), b = cdAddDays(a, 7);
+      var n = all.filter(function (x) { return x.d >= a && x.d < b && !cdRestOnly(x.s); }).length;
+      cols.push(n); top = Math.max(top, n);
+    }
+    html += '<p class="cd-lbl">Sessions a week</p><div class="cd-weeks" role="img" aria-label="Sessions per week for twelve weeks: ' + cols.join(', ') + '">'
+      + cols.map(function (n, i) { return '<i class="' + (n ? '' : 'is-zero') + (i === 11 ? ' is-this' : '') + '" style="height:' + Math.max(2, n / top * 100) + '%"></i>'; }).join('')
+      + '</div><div class="cd-wax"><span>12 weeks ago</span><span>this week</span></div>';
+    var by = {};
+    m30.forEach(function (x) {
+      var nm = cdSessName(x.s);
+      var r = by[nm] = by[nm] || { n: 0, m: 0, mc: 0, g: LIFTN[x.s.k[0]].g, e: {} };
+      r.n++; if (x.s.m) { r.m += x.s.m; r.mc++; } if (x.s.e) r.e[x.s.e] = (r.e[x.s.e] || 0) + 1;
+    });
+    var kinds = Object.keys(by).sort(function (a, b) { return by[b].n - by[a].n; });
+    if (kinds.length) {
+      var mx = by[kinds[0]].n;
+      html += '<p class="cd-lbl">What, this month</p><ul class="cd-kinds">' + kinds.map(function (k) {
+        var r = by[k], ef = Object.keys(r.e).sort(function (a, b) { return r.e[b] - r.e[a]; })[0];
+        return '<li style="--kc:var(--k-' + r.g + ')"><b>' + esc(k) + '</b><span>' + r.n + '× ' + (r.mc ? '· ' + Math.round(r.m / r.mc) + 'm' : '') + (ef ? ' · ' + ef : '') + '</span><em><i style="width:' + (r.n / mx * 100) + '%"></i></em></li>';
+      }).join('') + '</ul>';
+    }
+    html += '<p class="cd-lbl">Recent</p><ul class="cd-recent">' + all.slice(0, 8).map(function (x) {
+      var d = cdDate(x.d);
+      return '<li><time>' + DOW[cdDow(x.d)] + ' ' + d.getDate() + '</time><b>' + esc(cdSessName(x.s)) + '</b><span>' + (x.s.m ? x.s.m + 'm' : '') + (x.s.e ? ' · ' + x.s.e : '') + '</span></li>';
+    }).join('') + '</ul>';
+    box.innerHTML = html;
+  }
+
+  /* ═══ SETTINGS ═══ */
+  $('cdGear').addEventListener('click', function () {
+    var root = el('div');
+    root.appendChild(el('p', 'cd-lbl', 'Appearance'));
+    var md = el('div', 'cd-chips'), cur = cdMode.get();
+    [['auto', 'Follow phone'], ['light', 'Paper'], ['dark', 'Night']].forEach(function (x) {
+      var c = el('button', 'cd-chip', x[1]); c.type = 'button'; c.dataset.m = x[0];
+      c.setAttribute('aria-pressed', cur === x[0]);
+      c.addEventListener('click', function () {
+        try { localStorage.setItem(K.mode, x[0]); } catch (e) {}
+        cdMode();
+        md.querySelectorAll('.cd-chip').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.m === x[0]); });
+      });
+      md.appendChild(c);
+    });
+    root.appendChild(md);
+    root.appendChild(el('p', 'cd-lbl', 'Backup'));
+    /* Every key this app keeps, not one of them: a record with no export
+       is the kind of gap you only discover once. */
+    var cp = el('button', 'cd-btn', 'Copy a backup'); cp.type = 'button'; cp.id = 'cdBak';
+    cp.addEventListener('click', function () {
+      var txt = JSON.stringify(cdBackup());
+      var done = function () { cdToast('Backup copied'); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, function () { ta.value = txt; ta.select(); });
+      else { ta.value = txt; ta.select(); }
+    });
+    root.appendChild(cp);
+    var ta = el('textarea', 'cd-field'); ta.id = 'cdRestore'; ta.placeholder = 'Paste a backup here to restore it';
+    ta.setAttribute('aria-label', 'Backup to restore');
+    ta.style.marginTop = '12px';
+    root.appendChild(ta);
+    root.appendChild(el('p', 'cd-note', 'Restoring replaces everything on this phone with what you paste.'));
+    var foot = el('div', 'cd-foot');
+    var rs = el('button', 'cd-btn', 'Restore'); rs.type = 'button'; rs.id = 'cdRestoreGo';
+    rs.addEventListener('click', function () {
+      var o; try { o = JSON.parse(ta.value); } catch (e) { cdToast('That is not a backup.'); return; }
+      if (!isObj(o) || o.app !== 'cadence') { cdToast('That is not a Cadence backup.'); return; }
+      Object.keys(K).forEach(function (k) { if (k !== 'mode' && o[k] !== undefined) cdWrite(K[k], o[k]); });
+      location.reload();
+    });
+    foot.appendChild(rs); root.appendChild(foot);
+    cdSheet('Settings', root);
+  });
+  function cdBackup() {
+    var o = { app: 'cadence', at: new Date().toISOString() };
+    Object.keys(K).forEach(function (k) { if (k !== 'mode') o[k] = S[k]; });
+    return o;
+  }
+  cdMode.get = function () { try { return localStorage.getItem(K.mode) || 'auto'; } catch (e) { return 'auto'; } };
+  function cdMode() {
+    /* Stored as the bare word, because the pre-paint script in the head
+       reads it raw. */
+    var m = cdMode.get();
+    if (m !== 'light' && m !== 'dark') m = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-mode', m);
+    var tc = document.querySelector('meta[name="theme-color"]');
+    if (tc) tc.setAttribute('content', m === 'dark' ? '#15130F' : '#F2EDE3');
+  }
+  if (window.matchMedia) {
+    var mq = matchMedia('(prefers-color-scheme: dark)');
+    if (mq.addEventListener) mq.addEventListener('change', cdMode);
+  }
+
+  /* ═══ TOAST ═══ */
+  var toastT = 0, toastUndo = null;
+  function cdToast(msg, undo) {
+    $('cdToastT').textContent = msg;
+    toastUndo = undo || null;
+    $('cdToastU').hidden = !undo;
+    $('cdToast').hidden = false;
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { $('cdToast').hidden = true; toastUndo = null; }, undo ? 5000 : 2200);
+  }
+  $('cdToastU').addEventListener('click', function () { var f = toastUndo; $('cdToast').hidden = true; toastUndo = null; if (f) f(); });
+
+  /* ═══ WIRING ═══ */
+  document.querySelectorAll('.cd-tab').forEach(function (t) { t.addEventListener('click', function () { cdGo(t.dataset.v); }); });
+  $('cdAdd').addEventListener('click', function () { cdEdit(null); });
+
+  /* The clock moves the now line and the countdown; nothing animates,
+     it steps on the half minute. A day that has rolled over moves too. */
+  var lastDay = cdToday();
+  setInterval(function () {
+    var t = cdToday();
+    if (t !== lastDay) { if (sel === lastDay) sel = t; lastDay = t; }
+    if (!cdSheetOpen()) cdPaint();
+  }, 30000);
+
+  var sv = 'day';
+  try { sv = sessionStorage.getItem('cad.view') || 'day'; } catch (e) {}
+  cdGo(['day', 'hab', 'mon', 'lift'].indexOf(sv) >= 0 ? sv : 'day');
+
+  /* Exposed for the test suite only: the parser is the one piece worth
+     asserting as a function rather than through the page. */
+  window.cadence = { parse: cdParse, kind: cdKind };
+})();
+</script>
+</body>
+</html>
