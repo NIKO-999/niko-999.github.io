@@ -142,8 +142,16 @@ html, body { height: 100%; background: #3E5361; }
    the colour of the gap: the canvas takes the foot of whichever sky is
    up. Every other view's sky already ends on this slate; the open
    screen's dawn ends on silver, so on that view the canvas is silver,
-   and the seam has nothing on either side of it to show. */
-html[data-view="open"] { background: #C3C9CD; }
+   and the seam has nothing on either side of it to show.
+
+   AND IT IS BODY'S COLOUR iOS READS, NOT THE ROOT'S. The band was the
+   same slate in every screenshot, before any of this and after the root
+   went silver — and in a Safari tab the toolbar was tinted that slate
+   too. iOS samples body's background-color and paints the strip with
+   it itself. Silvering only the root changed nothing on the phone. Body
+   is covered edge to edge by the open screen's own sky, so its colour
+   is never seen on the page; it only ever speaks through that strip. */
+html[data-view="open"], html[data-view="open"] body { background-color: #C3C9CD; }
 body {
   position: fixed; inset: 0;
   background-color: #3E5361;

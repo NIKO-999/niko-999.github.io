@@ -222,7 +222,9 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     const rgb = (h) => { const n = parseInt(h.slice(1), 16); return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`; };
     const foot = (tok) => { const all = getComputedStyle(root).getPropertyValue(tok).match(/#[0-9a-f]{6}/gi) || []; return all.length ? rgb(all[all.length - 1]) : null; };
     const at = (v) => { root.setAttribute('data-view', v); return getComputedStyle(root).backgroundColor; };
-    const out = { open: at('open'), figures: at('figures'), dawn: foot('--dawn'), sky: foot('--sky') };
+    const bodyAt = (v) => { root.setAttribute('data-view', v); return getComputedStyle(document.body).backgroundColor; };
+    const out = { open: at('open'), figures: at('figures'), bodyOpen: bodyAt('open'), bodyFigures: bodyAt('figures'),
+                  dawn: foot('--dawn'), sky: foot('--sky') };
     root.setAttribute('data-view', was);
     return out;
   });
@@ -230,6 +232,11 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
      !!canvas.dawn && canvas.open === canvas.dawn, canvas);
   ok('and under every other view it is the foot of the sky',
      !!canvas.sky && canvas.figures === canvas.sky && canvas.open !== canvas.figures, canvas);
+  /* BODY TOO, because body's colour is the one iOS samples to paint the
+     strip under the home indicator. Silvering the root alone changed
+     nothing on the phone; the band stayed body's slate. */
+  ok("body's own colour is the same foot on both, since that is what iOS paints the strip with",
+     canvas.bodyOpen === canvas.dawn && canvas.bodyFigures === canvas.sky, canvas);
 
   /* ── THE FOUR HUES ─────────────────────────────────────────────── */
 
