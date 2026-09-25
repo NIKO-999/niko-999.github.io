@@ -423,8 +423,20 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const head = await page.$$eval('#cdHabDots i', (is) => is.map((i) => i.classList.contains('is-on') ? getComputedStyle(i).backgroundColor : ''));
     ok('and under it is a dot a habit, each lit in its own colour as it is kept',
       head.length === 6 && head.filter(Boolean).length === 3 && head[0] === 'rgb(242, 161, 132)' && head[1] === 'rgb(183, 165, 255)' && head[2] === 'rgb(125, 207, 216)', head);
-    await page.click('.cd-hr[data-h="steps"] .cd-hr-n');
-    ok('the name opens the habit\'s record', (await sheetUp(page)) && (await page.textContent('#cdShT')) === 'Steps');
+    /* A tap anywhere on the row logs; a hold opens the record. Both are
+       asked of the same row, because each passes on the other's bug. */
+    await page.click('.cd-hr[data-h="fuel"] .cd-hr-n');
+    ok('a tap on the name logs, it does not open the record', (await sheetUp(page)) && (await page.textContent('#cdShT')) === 'Fuel' && !!(await page.$('#cdNumV')));
+    await closeSheet(page);
+    const nb = await page.$eval('.cd-hr[data-h="steps"] .cd-hr-n', (b) => { const r = b.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+    await page.mouse.move(nb.x, nb.y); await page.mouse.down(); await page.waitForTimeout(650); await page.mouse.up();
+    await page.waitForTimeout(80);
+    ok('a long press opens the habit\'s record', (await sheetUp(page)) && (await page.textContent('#cdShT')) === 'Steps' && !(await page.$('#cdNumV')));
+    await closeSheet(page);
+    ok('and the hold did not log anything as well', (await store(page, 'cad.hab.v1'))['2026-09-25'].steps === 10000);
+    await page.focus('.cd-hr[data-h="steps"] .cd-hr-h');
+    await page.keyboard.press('Enter');
+    ok('a keyboard reaches the record through its own button', (await sheetUp(page)) && (await page.textContent('#cdShT')) === 'Steps' && !(await page.$('#cdNumV')));
     await closeSheet(page);
 
     await page.click('#cdHabAdd');
@@ -438,16 +450,22 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.click('.cd-tab[data-v="mon"]');
     ok('the month is September, and the line above it is the year', (await page.textContent('#cdMonT')) === 'September'
       && (await page.textContent('#cdMonK')) === '2026');
-    ok('it counts the days kept and the days trained', (await page.textContent('#cdMonCap')) === '4 days completed · 2 trained');
+    const goalDots = await page.$$eval('.cd-mh', (is) => is.length);
+    ok('it counts the days completed and the goals achieved', (await page.textContent('#cdMonCap')) === '4 days completed · ' + goalDots + ' goals achieved' && goalDots > 0, await page.textContent('#cdMonCap'));
     ok('it draws thirty days', (await page.$$eval('.cd-mc[data-day]', (cs) => cs.length)) === 30);
     ok('the grid is a whole rectangle', (await page.$$eval('.cd-mgrid > *', (cs) => cs.length)) % 7 === 0);
     ok('a month still to come cannot be opened', await page.$eval('#cdMonN', (b) => b.disabled));
     ok('today is marked', await page.$eval('.cd-mc[data-day="2026-09-25"]', (e) => e.classList.contains('is-today')));
     const M = await page.$$eval('.cd-mc[data-day]', (cs) => Object.fromEntries(cs.map((c) => [c.dataset.day.slice(8), {
-      st: c.dataset.state, k: !!c.querySelector('.cd-mk'), s: c.querySelector('.cd-ms') && getComputedStyle(c.querySelector('.cd-ms')).backgroundColor }])));
+      st: c.dataset.state, k: !!c.querySelector('.cd-mk'), h: [...c.querySelectorAll('.cd-mh')].map((i) => getComputedStyle(i).backgroundColor) }])));
     ok('a day before the record draws no dot at all: it is not a day you missed', !M['10'].k && M['10'].st === 'quiet', M['10']);
     ok('a day in the record draws the week\'s own dot', M['21'].st === 'part' && M['22'].st === 'none' && M['23'].st === 'whole' && M['22'].k, { 21: M['21'], 22: M['22'], 23: M['23'] });
-    ok('a day you ran carries a second dot, in the run colour', M['24'].s === 'rgb(125, 207, 216)' && M['25'].s === 'rgb(242, 161, 132)' && !M['23'].s, { 24: M['24'], 25: M['25'] });
+    const onToday = await page.evaluate(() => JSON.parse(localStorage.getItem('cad.hab.v1'))['2026-09-25']);
+    ok('each habit hit that day is a dot in its own colour', M['25'].h.includes('rgb(242, 161, 132)') && M['25'].h.includes('rgb(125, 207, 216)') && new Set(M['25'].h).size === M['25'].h.length, { 25: M['25'], onToday });
+    ok('and a day before the record draws none', M['10'].h.length === 0, M['10']);
+    const legend = await page.$$eval('#cdMonL span', (ss) => ss.map((s) => s.textContent));
+    ok('the legend names the habits, not the kinds of training', legend.join('|') === 'Train|Mind|Steps|Fuel|Water|Sleep|Cold plunge', legend);
+    ok('there is no Training tab', !(await page.$('.cd-tab[data-v="lift"]')) && (await page.$$('.cd-tab')).length === 3);
     ok('a day still to come draws no dot yet', !M['27'].k && M['27'].st === 'future', M['27']);
     const mc = await inkFloor(page, '.cd-mc[data-day] b');
     ok('every date holds 4.5:1 on what is behind it', mc.n === 30 && mc.worst.r >= 4.5, mc);
@@ -456,22 +474,6 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const ds = await page.textContent('#cdShB');
     ok('a pressed day reads itself back', /Thursday 24 September/.test(await page.textContent('#cdShT')) && /Easy/.test(ds) && /2 of/.test(ds), ds.slice(0, 120));
     await closeSheet(page);
-
-    await page.click('.cd-tab[data-v="lift"]');
-    ok('the figure is the sessions in thirty days', (await page.textContent('#cdLiftT')) === '2' && (await page.textContent('#cdLiftS')) === 'sessions');
-    const lr = await page.$$eval('#cdLiftStrip i', (is) => is.map((i) => i.classList.contains('is-lit') ? getComputedStyle(i).backgroundColor : ''));
-    ok('under it, thirty dots, a day each, lit in the colour of what was trained on it',
-      lr.length === 30 && lr.filter(Boolean).length === 2 && lr[28] === 'rgb(125, 207, 216)' && lr[29] === 'rgb(242, 161, 132)', lr.slice(26));
-    ok('and the dots say it to a screen reader', (await page.getAttribute('#cdLiftStrip', 'aria-label')) === '2 sessions in the last thirty days');
-    const figs = await page.$$eval('.cd-figs b', (bs) => bs.map((b) => b.textContent));
-    ok('the figures are days trained, the average length and this week', figs.join('|') === '2|53m|2', figs);
-    ok('the line under the dots names the last session', (await page.textContent('#cdLiftK')) === 'Last · Legs · Fri 25');
-    const cols = await page.$$eval('.cd-weeks > span', (ss) => ss.map((s) => ({ n: +s.dataset.n, dots: s.children.length, cls: s.className })));
-    ok('twelve weeks, a dot a session, the week in progress last',
-      cols.length === 12 && cols[11].n === 2 && cols[11].dots === 2 && /is-this/.test(cols[11].cls), cols.slice(9));
-    ok('and a week with none is one hollow dot, not an empty space', /is-zero/.test(cols[0].cls) && cols[0].dots === 1, cols[0]);
-    const kinds = await page.$$eval('.cd-kinds b', (bs) => bs.map((b) => b.textContent));
-    ok('what you trained, by name', kinds.includes('Legs') && kinds.includes('Easy'), kinds);
 
     ok('habits, month and training make no request off this origin', off.length === 0, off);
     ok('no page errors across the views', errs.length === 0, errs);
@@ -489,10 +491,9 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const WORDS = {
       day: '.cd-tab, .cd-wl, #cdHeroK, #cdHeroN, #cdHeroS, .cd-tcap, #cdThenN, .cd-rn, .cd-rt',
       hab: '#cdVHab .cd-hcap, #cdHabT, #cdHabCap, .cd-hr-t, .cd-hr-v, .cd-hr-s > span:last-child, #cdHabAdd',
-      mon: '#cdMonK, #cdMonT, #cdMonCap, .cd-dows span, .cd-legend span, .cd-mc b',
-      lift: '#cdVLift .cd-hcap, #cdLiftT, #cdLiftS, #cdLiftK, .cd-figs b, .cd-figs span, .cd-lbl, .cd-wax span, .cd-kinds b, .cd-kinds span, .cd-recent b, .cd-recent span, .cd-recent time'
+      mon: '#cdMonK, #cdMonT, #cdMonCap, .cd-dows span, .cd-legend span, .cd-mc b'
     };
-    for (const v of ['day', 'hab', 'mon', 'lift']) {
+    for (const v of ['day', 'hab', 'mon']) {
       await page.click(`.cd-tab[data-v="${v}"]`);
       await page.waitForTimeout(80);
       const drawn = await page.$$eval('main > section', (ss) => ss.filter((s) => s.getBoundingClientRect().height > 0).length);

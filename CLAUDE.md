@@ -4249,6 +4249,27 @@ sessions drawn as nothing; add made a second white round; and the pane's
 room for the check taken away. Every one failed the check aimed at it.
 
 
+### A tap logs, a hold opens the record, and Training is gone
+
+**A habit row was two targets and the big one was the rare one**: the
+name opened the history and only a 44px dot logged. Reported as wanting
+the row to log. The whole row logs now; a 500ms hold with a 10px move
+guard opens the record, and a real button, off the screen until it has
+focus, is the same door for a keyboard.
+
+**AND THE HOLD'S FLAG HAD TO CLEAR ITSELF.** The click that ends a hold
+lands on the sheet it just opened, not the row, so nothing reset the
+flag and the NEXT tap on a habit was eaten. The keyboard check found it
+by failing, because Enter was that next click. It clears on the press's
+own pointerup now.
+
+**The Training tab is gone** and the question it read back is not: a
+gym block still asks what you trained and the day still says it. **The
+month's second dot went with it** — one small dot a habit hit that day,
+in the habit's own colour, with the legend naming the habits and the
+caption counting goals achieved. It says WHICH, never whether: a day
+with none draws none, never a red one.
+
 ### The site is the app, photographed
 
 `cadence/about/` is one static page in the app's own sky and type, and
