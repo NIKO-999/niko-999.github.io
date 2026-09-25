@@ -4353,6 +4353,74 @@ Delete asks.
 object URLs as leaving. A blob URL cannot leave the browser, so it is
 excluded beside `data:`.
 
+### The sweep, and what it found
+
+Asked for as *make sure nothing is clipping or leaking out of its
+areas*. The probe drove every screen and sheet at 390x844, 375x667,
+360x740, 320x568 and 430x932: the day, a Monday, a Sunday, the habits,
+a history, the month, a day sheet, the notes, a note page, the add
+sheet typed and untyped, the goal forms, the dial, the training
+picker, settings, a toast, the empty first open and the site. Every
+state was also shot and read at 1:1 on contact sheets, because two of
+the faults below were in no measurement.
+
+**What it measured**: the page or an element running off the side,
+text cut by an ancestor that clips it, a scroller the finger has to
+move sideways, one control drawn over another, a word run into the
+next, and a line of type printed on the line above it.
+
+**Fixed, and each one was real on the phone:**
+
+- **A place was being CUT IN THE DATA.** `cdClean` capped it at 40
+  while the field took more, so the rest was thrown away on save and
+  nothing on screen looked clipped. The field caps and the repair caps
+  agree now: 60 for a name, 80 for a place.
+- **The seven day chips ran out of the sheet at 360.** A grid of seven
+  `minmax(0, 1fr)` columns, each chip at most 44 and allowed to shrink.
+- **`1fr` is `minmax(auto, 1fr)`**, so the top bar, the month head,
+  the day letters, the month grid and the note's style row each let
+  their widest child grow its track. All `minmax(0, 1fr)`.
+- **At 320 the four tab words did not go across**, and the month name
+  pushed its next arrow off the side. A small-phone block tightens
+  both.
+- **A word with no spaces ran straight out of its box.** `body` breaks
+  long words, and the big figure breaks anywhere.
+- **"7of 30 days"**: `.cd-figs` had no CSS at all, so three figures and
+  their captions ran together as one line of text.
+- **The note page's date was the browser's `mm/dd/yyyy` field**, cut at
+  the header's edge. It reads as the day it is now, with the real date
+  field laid transparent over it.
+- **The day sheet's note leaked past the sheet.** It is the list's own
+  preview now, as a button that opens the note.
+- **The toast wrapped at half the screen.** A fixed box at `left: 50%`
+  shrinks to fit the room from its left edge to the screen's right,
+  which is half the phone. `width: max-content`.
+- **Mono captions at `line-height: 1` printed their second line on the
+  first** when they wrapped at 320. So did a foot button's label.
+- **The length ladder wrapped 4, 3 and a lone 120m.** A four-column
+  grid: two even rows at every width.
+- **A sticky head and foot cut the rows passing under them with no
+  edge**, which reads as clipped. A hairline on each.
+
+**Held in `tests/cadence.js` at 320, each proved by breaking it**:
+nothing runs off the side on any tab, the month's cells fit the grid,
+a wrapped caption keeps its leading, the day chips fit the sheet, the
+toast is one line, the ladder is two rows of four, and a foot button
+keeps its leading.
+
+**Two of the fixes bite on nothing, said rather than hidden.** Taking
+the month grid back to `1fr`, or the dot row back to `nowrap`, fails no
+check on the fixture: the dots are flex items that shrink before they
+overflow, and nothing in a cell has a min-content wider than its
+track. Both stay as defence, and the check that guards the claim —
+seven cells inside the grid — bites the moment a cell grows.
+
+**The wrap check has to count LINES, not rects.** A small unit beside
+a large figure is a second rect on the same line, and the first cut
+reported 179 faults, none real. Rects clustered at half the font size
+are lines; two lines closer than 1.08em are type printed on type.
+Display type at 30px and over sets its own leading and is skipped.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

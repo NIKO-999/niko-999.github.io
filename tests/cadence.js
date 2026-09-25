@@ -48,7 +48,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
   const browser = await chromium.launch({ executablePath: chrome(), args: ['--no-sandbox'] });
 
   async function ctx(opts = {}) {
-    const c = await browser.newContext(PHONE);
+    const c = await browser.newContext(opts.vp ? { ...PHONE, viewport: opts.vp } : PHONE);
     await c.addInitScript(freeze(opts.at || '2026-09-25T10:20:00'));
     if (opts.init) await c.addInitScript(opts.init);
     const page = await c.newPage();
@@ -821,6 +821,86 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.waitForTimeout(150);
     ok('restoring writes it back', (await page.$$eval('.cd-rn', (ns) => ns.map((n) => n.textContent))).includes('Restored'));
     ok('no page errors in the record', errs.length === 0, errs);
+    await c.close();
+  }
+
+  console.log('\n── nothing leaks on a small phone ──');
+  {
+    /* The layout sweep found these by driving every screen at five sizes;
+       these are the ones worth holding for ever, at the width that broke
+       them. */
+    /* A day carrying the most a cell can: every habit hit and the longest
+       session name, so a cell that cannot hold it shows. */
+    const init = `(() => { if (localStorage.getItem('cad.hab.v1')) return;
+      localStorage.setItem('cad.hab.v1', JSON.stringify({ '2026-09-24': { train: 1, mind: 1, steps: 30000, fuel: 2400, water: 4, sleep: 9 } }));
+      localStorage.setItem('cad.train.v1', JSON.stringify({ '2026-09-24': { '~day': { k: ['weights.full'], e: 'Hard', m: 60 } } }));
+    })();`;
+    const { c, page, errs } = await ctx({ vp: { width: 320, height: 568 }, init });
+    /* Lines, not rects: a unit beside a figure is a second rect on the SAME
+       line, so rects are clustered at half the font size first. */
+    const lines = (sel) => page.$eval(sel, (e) => {
+      const fs = parseFloat(getComputedStyle(e).fontSize);
+      const r = document.createRange(); r.selectNodeContents(e);
+      const bs = [...r.getClientRects()].filter((q) => q.width > 1).map((q) => q.bottom).sort((a, b) => a - b);
+      const ls = []; bs.forEach((t) => { if (!ls.length || t - ls[ls.length - 1] > fs * .5) ls.push(t); });
+      let gap = Infinity; for (let i = 1; i < ls.length; i++) gap = Math.min(gap, (ls[i] - ls[i - 1]) / fs);
+      return { n: ls.length, gap: +gap.toFixed(2), lh: +(parseFloat(getComputedStyle(e).lineHeight) / fs).toFixed(2) };
+    });
+    for (const v of ['day', 'hab', 'mon', 'note']) {
+      await page.click(`.cd-tab[data-v="${v}"]`);
+      await page.waitForTimeout(120);
+      const w = await page.evaluate(() => [document.documentElement.scrollWidth, innerWidth]);
+      ok(`${v}: nothing runs off the side at 320`, w[0] <= w[1], w);
+    }
+
+    /* `1fr` is `minmax(auto, 1fr)`: a date's circle made its column grow. */
+    await page.click('.cd-tab[data-v="mon"]');
+    /* Equal is not enough: seven cells that all grew to 60px are equal and
+       run off the grid. So the row has to fit, and nothing a cell draws may
+       reach past its own box. */
+    const mg = await page.$eval('.cd-mgrid', (g) => {
+      const gr = g.getBoundingClientRect(), cs = [...g.children];
+      const w = cs.slice(0, 7).map((x) => x.getBoundingClientRect().width);
+      const spill = cs.filter((x) => { const r = x.getBoundingClientRect(); return [...x.querySelectorAll('*')].some((d) => { const q = d.getBoundingClientRect(); return q.width && (q.left < r.left - .5 || q.right > r.right + .5); }); }).length;
+      return { w, fits: cs.every((x) => x.getBoundingClientRect().right <= gr.right + .5), spill };
+    });
+    ok('the fullest cell is carrying something to hold', await page.$eval('.cd-mc[data-day="2026-09-24"]', (x) => x.querySelectorAll('.cd-mh').length >= 4 && !!x.querySelector('.cd-mw')));
+    ok('the month keeps seven equal columns inside the grid', Math.max(...mg.w) - Math.min(...mg.w) < 0.6 && mg.fits && mg.spill === 0, mg);
+
+    /* A caption set at line-height 1 prints its second line on its first. */
+    await page.click('.cd-mc[data-day="2026-09-25"]');
+    await sheetUp(page);
+    const cap = await lines('#cdSheet .cd-cap');
+    ok('a wrapped caption does not print on itself', cap.lh >= 1.1 && (cap.n < 2 || cap.gap >= 1.08), cap);
+    await closeSheet(page);
+
+    /* The toast sits at left 50%, so without max-content it wraps at half
+       the screen. */
+    await page.click('.cd-tab[data-v="day"]');
+    await page.click('.cd-it[data-id] .cd-rb');
+    await sheetUp(page);
+    const dayR = await page.$eval('#cdSheet', (sh) => { const r = sh.getBoundingClientRect(); return [...sh.querySelectorAll('.cd-chips.days .cd-chip')].map((b) => b.getBoundingClientRect()).filter((b) => b.width).every((b) => b.left >= r.left && b.right <= r.right + .5); });
+    ok('seven day chips fit inside the sheet', dayR);
+    await page.fill('#cdFN', 'Meal prep');
+    await page.click('#cdFSave');
+    await page.waitForTimeout(320);
+    await page.click('.cd-it[data-id] .cd-rb');
+    await sheetUp(page);
+    await page.click('#cdFDel');
+    await page.waitForTimeout(320);
+    const t = await lines('#cdToastT');
+    ok('the toast says it on one line', t.n === 1, t);
+    await page.click('#cdToastU');
+
+    /* Eight rungs are a ladder of two even rows, never 4, 3 and one. */
+    await page.click('.cd-it[data-id="s1"] .cd-dot');
+    if (!(await sheetUp(page))) { await page.click('.cd-it[data-id="s1"] .cd-dot'); await sheetUp(page); }
+    await page.click('[data-k="weights.push"]');
+    const rows = await page.$$eval('[data-m]', (bs) => { const m = {}; bs.forEach((b) => { const k = Math.round(b.getBoundingClientRect().top); m[k] = (m[k] || 0) + 1; }); return Object.values(m); });
+    ok('the length ladder is two rows of four', rows.join() === '4,4', rows);
+    const go = await lines('#cdLiftGo');
+    ok('a foot button that wraps keeps its leading', go.lh >= 1.1, go);
+    ok('no page errors on a small phone', errs.length === 0, errs);
     await c.close();
   }
 
