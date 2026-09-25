@@ -4098,10 +4098,10 @@ because the gaps are the part of a schedule you actually spend. A
 running block carries the countdown, so the red now-line is drawn only
 BETWEEN blocks; both at once is one fact said twice.
 
-**Warm paper, white cards, one accent.** Space Grotesk for what you are
-looking at (the day, a figure, a title) and Inter for what you read,
-both shipped with the repo so the phone and the suite draw the same
-letters. Figures are tabular so a column of times lines up.
+**Space Grotesk for what you are looking at** (the day, a figure, a
+title) and Inter for what you read, both shipped with the repo so the
+phone and the suite draw the same letters. Figures are tabular so a
+column of times lines up.
 
 **The first look was taken back out on one line of feedback: it did not
 look good.** Mono on every figure read as a terminal; a block said its
@@ -4109,7 +4109,9 @@ category three times (a coloured edge, a node, an icon); the week was
 seven tall boxes; the month was thirty empty boxes; the dock was a black
 slab. What replaced each: two faces, category said once by a tinted icon
 tile, the week as one card of dates, a ring round each day of the month,
-and a plain tab bar with the add button raised in the middle.
+and a plain tab bar with the add button raised in the middle. That
+second look's warm paper is what the photograph below replaced; the
+rest of it stands.
 
 **`[hidden] { display: none !important }` is said once, globally**, so
 the bug `schedule/` recorded eight times cannot happen here by
@@ -4124,6 +4126,61 @@ and the chip did nothing — the suite caught it.
 
 `tests/cadence.js` freezes the clock at Friday 25 September 2026, 10:20,
 so which block is running is a fact about the fixture, not the hour.
+
+### The page is a photograph: sky, limb, earth
+
+Given as a reference image — a sunset seen from altitude, navy sky
+paling to steel, a band of amber, the curved limb of the Earth burning
+orange, and dark ground under it. It replaced warm paper, and it is
+the structure rather than a tint: **the sky is the page, the limb is
+the horizon everything you read stops above, and the earth is what the
+tab bar stands on.** Every colour on the screen comes off the
+photograph — orange for the body, amber for work, the upper sky's blue
+for the mind, and the violet a sunset leaves above it for rest.
+
+**The limb is an ellipse's own shadow.** 1400px wide against a 390px
+screen, so its top drops about fourteen pixels edge to edge, which is
+the curvature in the photograph at the photograph's scale; the glow is
+five stacked box-shadows on that ellipse, so every layer follows the
+curve without a line of geometry. Fixed and never moved — drawn once,
+with the scroller composited over it. A pseudo-element rather than
+`background-attachment: fixed`, which iOS ignores.
+
+**THE DAY ENDS AT THE HORIZON RATHER THAN RUNNING UNDER IT.** The
+scroller stops `--hz` above the foot and its last 28px fade out, so no
+row, time or label is ever drawn over the fire. The alternative is a
+text column sliding across a band that goes from navy to orange, and
+a contrast figure that depends on where you have scrolled is not a
+contrast figure.
+
+**The sky is three stops and every one of them is a ground.** The
+greys and the category colours are held to 4.5:1 against all three and
+against a card, because text sits at the top of the sky and at the
+bottom of it. Measured on composited pixels as well: the limb is fire
+(red over blue by more than 120) and the sky is a gradient, sampled in
+the gutter the cards never reach.
+
+**The tab bar draws no ground of its own**, so its labels are read on
+the earth and have tokens of their own — `--dock-ink`, `--dock-acc` —
+that are the same on both faces, because the planet is. **The add
+button is the sun just gone below it**: the one bright object on the
+dark side of the line, under the brightest point of the limb. **This
+is not the black dock the first look lost**: that was a flat slab
+bolted to the foot of a paper page, and this is ground seen past a
+horizon — curved, lit along its edge, and the same on both faces
+because the ground is the one part of the picture the sky's colour
+does not change.
+
+**The limb clears the tab row at both edges.** An ellipse's top sits
+lower the further out you go, so the line is measured where it is
+lowest — at the screen's edges — against the top of the tabs. Proved to
+bite along with the rest by five scripted breaks: the scroller let run
+to the foot, the limb in blue, a flat sky, dark tab labels, and the
+earth pushed down into the tabs.
+
+**The light face is the day side of the same picture**: the high sky
+before the glow, pale steel going paler, with the same planet and the
+same fire at the bottom. The mode chip reads Daylight and Night.
 
 ## Git
 

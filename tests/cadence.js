@@ -6,6 +6,7 @@
    fixture rather than about the hour the suite happens to run.
    ═══════════════════════════════════════════════════════════════ */
 const { chromium, chrome, BASE } = require('./lib.js');
+const { PNG } = require('pngjs');
 
 let pass = 0, fail = 0;
 const ok = (name, cond, extra) => {
@@ -288,12 +289,43 @@ const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) +
     const cols = await page.evaluate(() => {
       const probe = (v) => { const d = document.createElement('div'); d.style.color = `var(${v})`; document.body.appendChild(d);
         const c = getComputedStyle(d).color; d.remove(); return c.match(/[\d.]+/g).slice(0, 3).map(Number); };
-      return ['--bg', '--card', '--ink', '--ink2', '--ink3', '--accent', '--c-body', '--c-mind', '--c-work', '--c-rest'].reduce((o, k) => (o[k] = probe(k), o), {});
+      return ['--bg', '--card', '--ink', '--ink2', '--ink3', '--accent', '--c-body', '--c-mind', '--c-work', '--c-rest',
+        '--sky-t', '--sky-m', '--sky-b', '--earth', '--dock-ink', '--dock-acc', '--sun', '--on-sun'].reduce((o, k) => (o[k] = probe(k), o), {});
     });
-    const worst = Math.min(...['--ink2', '--ink3'].flatMap((t) => [ratio(cols[t], cols['--bg']), ratio(cols[t], cols['--card'])]));
-    ok(`${scheme}: the two greys hold 4.5:1 on the page and on a card`, worst >= 4.5, worst.toFixed(2));
-    const cat = Math.min(...['--c-body', '--c-mind', '--c-work', '--c-rest', '--accent'].map((t) => ratio(cols[t], cols['--bg'])));
-    ok(`${scheme}: every category colour holds 4.5:1 on the page`, cat >= 4.5, cat.toFixed(2));
+    /* The page is a sky, not one colour: every stop of it is a ground
+       something is read on, so the greys are held against all three. */
+    const grounds = ['--bg', '--card', '--sky-t', '--sky-m', '--sky-b'];
+    const worst = Math.min(...['--ink2', '--ink3'].flatMap((t) => grounds.map((g) => ratio(cols[t], cols[g]))));
+    ok(`${scheme}: the two greys hold 4.5:1 on every stop of the sky and on a card`, worst >= 4.5, worst.toFixed(2));
+    const cat = Math.min(...['--c-body', '--c-mind', '--c-work', '--c-rest', '--accent'].flatMap((t) => ['--sky-t', '--sky-m', '--sky-b'].map((g) => ratio(cols[t], cols[g]))));
+    ok(`${scheme}: every category colour holds 4.5:1 on every stop of the sky`, cat >= 4.5, cat.toFixed(2));
+    /* The tab bar draws no ground: its labels are read on the planet. */
+    const dock = Math.min(ratio(cols['--dock-ink'], cols['--earth']), ratio(cols['--dock-acc'], cols['--earth']), ratio(cols['--on-sun'], cols['--sun']));
+    ok(`${scheme}: the tab labels hold 4.5:1 on the earth, and the plus on the sun`, dock >= 4.5, dock.toFixed(2));
+
+    /* Nothing you read is drawn over the horizon: the scroller ends above
+       the limb, and the limb clears the tab row at both edges of the
+       screen, so the line never runs behind a label. */
+    await page.click('.cd-tab[data-v="day"]');
+    await page.waitForTimeout(80);
+    const hz = await page.evaluate(() => {
+      const m = document.getElementById('cdMain').getBoundingClientRect();
+      const e = document.querySelector('.cd-earth').getBoundingClientRect();
+      const d = document.querySelector('.cd-tabs').getBoundingClientRect();
+      const a = e.width / 2, b = e.height / 2, cx = e.left + a;
+      const at = (x) => e.top + b * (1 - Math.sqrt(1 - ((x - cx) / a) ** 2));
+      return { mainBottom: m.bottom, apex: e.top, edge: Math.max(at(0), at(innerWidth)), dockTop: d.top };
+    });
+    ok(`${scheme}: the day stops above the horizon`, hz.mainBottom <= hz.apex, hz);
+    ok(`${scheme}: the limb clears the tab row at both edges`, hz.edge < hz.dockTop, hz);
+    /* And it is fire on composited pixels, above a sky that is a gradient:
+       sampled in the gutter the cards never reach. */
+    const shot = PNG.sync.read(await page.screenshot());
+    const px = (x, y) => { const i = (Math.round(y * 2) * shot.width + Math.round(x * 2)) * 4; return [shot.data[i], shot.data[i + 1], shot.data[i + 2]]; };
+    const fire = px(195, hz.apex - 2);
+    ok(`${scheme}: the limb is drawn in fire`, fire[0] - fire[2] > 120 && fire[0] > 200, fire);
+    const skyTop = px(6, 60), skyLow = px(6, hz.mainBottom - 40);
+    ok(`${scheme}: the sky is a gradient, not one colour`, Math.abs(skyTop[2] - skyLow[2]) + Math.abs(skyTop[0] - skyLow[0]) > 12, { skyTop, skyLow });
     ok(`${scheme}: the face follows the phone`, (await page.getAttribute('html', 'data-mode')) === scheme);
     ok(`${scheme}: no page errors`, errs.length === 0, errs);
     await c.close();
