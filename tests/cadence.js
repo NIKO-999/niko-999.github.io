@@ -223,25 +223,21 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.click('.cd-it .cd-dot');
     const strk = await page.$$eval('.cd-it', (ls) => ls.map((l) => ({ done: l.classList.contains('is-done'),
       s: getComputedStyle(l.querySelector('.cd-rn')).textDecorationLine,
-      tk: getComputedStyle(l.querySelector('.cd-dot i'), '::after').content })));
-    /* A kept row carries a tick, and it is drawn: pixels inside the round
-       that stand 3:1 off its own fill. Read off the screen rather than the
-       rule, because a tick the colour of the fill is a rule that draws
-       nothing. */
-    const tkb = await page.$eval('.cd-it.is-done .cd-dot i', (e) => { const r = e.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
+      tk: !!l.querySelector('.cd-rn .cd-tk') })));
+    /* A kept row carries a tick beside its name, and it is drawn: pixels
+       in its box that stand 3:1 off the sky beside the name. Read off the
+       screen, because a tick the colour of the sky draws nothing. */
+    /* Read defensively: a build with no tick must fail this check by name,
+       not take the file down on a missing element. */
+    const tkb = (await page.$$eval('.cd-it.is-done .cd-tk', (es) => es.map((e) => { const r = e.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; })))[0] || { x: 0, y: 0, w: 0, h: 0 };
     const tkp = PNG.sync.read(await page.screenshot());
     const tget = (x, y) => { const i = (y * tkp.width + x) * 4; return [tkp.data[i], tkp.data[i + 1], tkp.data[i + 2]]; };
-    const tfill = tget(Math.round((tkb.x + 2.5) * DPR), Math.round((tkb.y + tkb.h / 2) * DPR));
+    const tsky = tget(Math.round((tkb.x + tkb.w + 14) * DPR), Math.round((tkb.y + tkb.h / 2) * DPR));
     let tdark = 0;
     for (let y = Math.floor(tkb.y * DPR); y < Math.ceil((tkb.y + tkb.h) * DPR); y++)
-      for (let x = Math.floor(tkb.x * DPR); x < Math.ceil((tkb.x + tkb.w) * DPR); x++) {
-        /* Inside the round only: its corners are sky, which stands off the
-           fill too and would count a tick that is not there. */
-        const dx = x / DPR - (tkb.x + tkb.w / 2), dy = y / DPR - (tkb.y + tkb.h / 2);
-        if (Math.hypot(dx, dy) <= tkb.w / 2 - 2 && ratio(tget(x, y), tfill) >= 3) tdark++;
-      }
-    ok('a kept row draws a small tick in its dot, and only a kept row does',
-      strk.every((x) => (x.tk !== 'none' && x.tk !== 'normal') === x.done) && tdark >= 6 * DPR * DPR, { strk, tdark, tfill, tkb });
+      for (let x = Math.floor(tkb.x * DPR); x < Math.ceil((tkb.x + tkb.w) * DPR); x++) if (ratio(tget(x, y), tsky) >= 3) tdark++;
+    ok('a kept row draws a small tick beside its name, and only a kept row does',
+      strk.every((x) => x.tk === x.done) && tdark >= 6 * DPR, { strk, tdark, tsky, tkb });
     await page.click('.cd-it.is-done .cd-dot');
     /* A missed name is dark grey: under the 4.5 every other word holds, and
        still over the 3:1 a mark is held to. */

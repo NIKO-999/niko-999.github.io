@@ -4315,14 +4315,13 @@ on the day's list.
 session".** The row already names the block; who did the keeping is
 the day's business.
 
-**A kept block's dot opens into a round with a tick in it.** The fill
-was already the block's colour; the tick is what says done without
-reading a colour, so kept and missed tell apart by shape. `--on` on the
-fill, the dark ink every filled mark here takes. 16px drawn inside the
-same 44px press target. The check counts pixels INSIDE the round that
-stand 3:1 off its own fill: counted over the box, the sky in its corners
-passed with the tick deleted, and a tick drawn in the fill's colour
-passed too.
+**A kept block carries a small tick after its name**, in the block's
+own colour. It went in first inside the dot, which grew to 16px to hold
+it, and was taken back out on sight: the tick belongs on the task, and
+the dot stays the dot. Asserted on pixels in the tick's own box against
+the sky beside the name, so a tick drawn in a colour that does not show
+fails, and read defensively so a build with no tick fails by name rather
+than crashing the file.
 
 ### Goals are gone
 
