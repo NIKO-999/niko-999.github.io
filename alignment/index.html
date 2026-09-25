@@ -324,12 +324,14 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 
 /* THE CLOSE IS AN OBJECT, NOT GLASS. It sits over running text while the
    pane scrolls under it, and a translucent disc over a sentence is a
-   smear — a letter behind it survived as a ghost at 56%. Solid, with the
-   hairline every surface here draws, so it reads as a thing on the page
-   rather than a hole in it. */
+   smear — a letter behind it survived as a ghost at 56%. Solid, and it is
+   the open screen's own white control rather than a black disc: with the
+   sky behind every page, a dark round was the one black thing left on
+   it. */
 .al-round {
   width: var(--round); height: var(--round); flex: none; border-radius: var(--r-pill);
-  background: #12151B; border: 1px solid var(--hair);
+  background: #FFFFFF; color: #0B0E13;
+  box-shadow: 0 8px 22px rgba(8,14,22,.22), 0 1px 0 rgba(255,255,255,.9) inset;
   display: grid; place-items: center; position: relative;
 }
 .al-round::before {
