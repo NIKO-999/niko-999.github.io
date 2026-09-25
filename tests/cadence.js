@@ -224,6 +224,11 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const strk = await page.$$eval('.cd-it', (ls) => ls.map((l) => ({ done: l.classList.contains('is-done'),
       s: getComputedStyle(l.querySelector('.cd-rn')).textDecorationLine })));
     await page.click('.cd-it.is-done .cd-dot');
+    /* A missed name is dark grey: under the 4.5 every other word holds, and
+       still over the 3:1 a mark is held to. */
+    const mg = await inkFloor(page, '.cd-it.is-past:not(.is-done) .cd-rn');
+    ok('a missed name is the dark grey, fainter than every other, and still 3:1 on the sky',
+      mg.n > 0 && mg.worst.r >= 3 && mg.worst.r < 4.5, mg);
     ok('a block behind you that was missed is struck through, and a kept one is not',
       strk.some((x) => !x.done) && strk.some((x) => x.done) && strk.every((x) => (x.s === 'line-through') === !x.done), strk);
     ok('yesterday can still be ticked', await page.$$eval('.cd-dot', (bs) => bs.length > 0 && bs.every((b) => !b.disabled)));
@@ -732,7 +737,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       localStorage.setItem('cad.train.v1', JSON.stringify({ '2026-09-24': { s2: { k: ['run.easy'], e: 'Light', m: 45 } } }));
       localStorage.setItem('cad.note.v1', JSON.stringify([{ id: 'n1', t: 'Race day, pack gels', d: '2026-09-28', i: 1, at: 1 }, { id: 'n2', t: 'Legs felt heavy', d: '2026-09-24', i: 0, at: 2 }]));` });
     const WORDS = {
-      day: '.cd-tab, .cd-wl, #cdHeroK, #cdHeroN, #cdHeroS, .cd-tcap, #cdThenN, .cd-rn, .cd-rt',
+      day: '.cd-tab, .cd-wl, #cdHeroK, #cdHeroN, #cdHeroS, .cd-tcap, #cdThenN, .cd-it:not(.is-past) .cd-rn, .cd-it.is-done .cd-rn, .cd-rt',
       hab: '#cdVHab .cd-hcap, #cdHabT, #cdHabCap, .cd-hr-t, .cd-hr-v, .cd-hr-s > span:last-child, #cdHabAdd',
       mon: '#cdMonK, #cdMonT, #cdMonCap, .cd-dows span, .cd-legend span, .cd-mc b, .cd-mw',
       note: '#cdVNote .cd-hcap, #cdNoteT, #cdNoteCap, .cd-ng > .cd-lbl, .cd-nt, #cdNoteImp'
@@ -866,7 +871,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       /* The quiet label is the tightest pair on the screen: a THEN, the
          week's letters, the times down the list. Read on composited pixels
          over whatever the sky is doing behind them at this hour. */
-      const ink = await inkFloor(page, '.cd-rt, .cd-wl, .cd-cap, .cd-rn');
+      const ink = await inkFloor(page, '.cd-rt, .cd-wl, .cd-cap, .cd-it:not(.is-past) .cd-rn, .cd-it.is-done .cd-rn');
       ok(`${ph.sky}: every quiet word still holds 4.5:1 on the sky`, ink.n > 4 && ink.worst.r >= 4.5, ink);
       ok(`${ph.sky}: and the foot, where the list scrolls, holds it too`,
         ratio(over([243, 245, 247, .62], foot), foot) >= 4.5, { foot, r: +ratio(over([243, 245, 247, .62], foot), foot).toFixed(2) });

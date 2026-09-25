@@ -234,7 +234,11 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
    glance it was missed, and it is struck in the quiet ink, never red,
    because nothing here says you failed. A day off is struck too, and
    tells itself apart by saying Off where the time goes. */
-.cd-it.is-past:not(.is-done) .cd-rn { color: var(--dim); text-decoration: line-through; text-decoration-thickness: 1px; }
+/* And in the faint grey, which is the one piece of type in the app held
+   under 4.5: it is a record of something that did not happen, struck and
+   dimmed on purpose, and the name is still there for anyone who looks.
+   It is held to 3:1, the graphic floor, instead. */
+.cd-it.is-past:not(.is-done) .cd-rn { color: var(--faint); text-decoration: line-through; text-decoration-thickness: 1px; }
 .cd-it.is-off .cd-rn { color: var(--quiet); text-decoration: line-through; }
 
 /* THE CHECK. White while the block is waiting for you, and lit in the

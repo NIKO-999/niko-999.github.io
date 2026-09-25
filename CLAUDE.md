@@ -4304,6 +4304,13 @@ already struck; it still says Off where the time goes, which is what
 tells the two apart. Asserted both ways on one day with one block
 ticked, and as nothing struck on a day still to come.
 
+**And the missed name is the faint grey**, asked for on top of the
+strike: the one piece of type in the app held under 4.5:1, on purpose,
+because it is a record of something that did not happen. It is held to
+the 3:1 a mark gets instead, and taken out of every 4.5 sweep by its
+own selector rather than by relaxing the sweep. Only the name, and only
+on the day's list.
+
 **A habit kept by something else says Complete, not "Completed by a
 session".** The row already names the block; who did the keeping is
 the day's business.
