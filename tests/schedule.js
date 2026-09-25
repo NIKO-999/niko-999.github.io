@@ -14442,10 +14442,17 @@ const SAID = [
        heading throws the photograph away, where reading it as a picture
        costs a word somebody can type again. The days are what you
        cannot get back, one screen over, for the same reason. */
+    await picPut('picH');
     const picBoth = await picpage.evaluate(() => {
       const raw = JSON.parse(localStorage.getItem('sched.note.v1'));
+      /* ITS OWN KEY, and that is not tidiness. Pointed at `picA` this
+         line SHARED a blob with the captioned picture above it — so
+         deleting that one dropped a picture this one still names, and
+         the sweep then had nothing to find. Two lines never share a
+         key in the app, because one is minted per attach; a fixture
+         that breaks that measures a state the app cannot reach. */
       raw.list[0].l.push({ i: 'q9', h: 1, c: 'teal', x: 'HEAD',
-        p: 'picA', pw: 4, ph: 3 });
+        p: 'picH', pw: 4, ph: 3 });
       localStorage.setItem('sched.note.v1', JSON.stringify(raw));
       return true;
     });
@@ -14457,7 +14464,7 @@ const SAID = [
       return { h: q.h, p: q.p, x: q.x };
     });
     ok('a line carrying a picture AND a heading keeps the picture',
-      picKept.p === 'picA' && !picKept.h && picKept.x === '', [picBoth, picKept]);
+      picKept.p === 'picH' && !picKept.h && picKept.x === '', [picBoth, picKept]);
 
     /* ── THE BLOB GOES WITH THE LINE ──
        Backspace at the head of an empty caption, which is every other
@@ -14488,8 +14495,8 @@ const SAID = [
     const picLeft = await picKeys();
     ok('backspace on an empty caption takes the picture and its blob with it',
       picDel.before === 4 && picDel.after === 3
-      && picDel.rec === 'x,picB,picGone,x,picA'
-      && picLeft.join(',') === 'picA,picB', { picDel, picLeft });
+      && picDel.rec === 'x,picB,picGone,x,picH'
+      && picLeft.join(',') === 'picB,picH', { picDel, picLeft });
 
     /* Return puts a line AFTER the picture, so attaching one and
        carrying on writing is one key rather than a trip to the foot. */
@@ -14538,7 +14545,7 @@ const SAID = [
     const picSwept = await picKeys();
     ok('a blob no line names is swept at boot, and the face is not',
       picSwept.indexOf('picGhost') < 0 && picSwept.indexOf('me') >= 0
-      && picSwept.indexOf('picA') >= 0, picSwept);
+      && picSwept.indexOf('picB') >= 0, picSwept);
 
     /* ── THE VIEWER IS BUILT AND REMOVED, NEVER HIDDEN ──
        Asserted as the NODE being gone rather than as not drawn: a rule
@@ -14591,8 +14598,8 @@ const SAID = [
            falls to, and a fixture that could not tell the two apart
            would pass on a build that never read the image at all. */
         buffer: Buffer.from(
-          'iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAIAAAB7QOjdAAAAEklEQVR4nGP8z4'
-          + 'AKmBhwiQAAP5YCLp/l1oAAAAAASUVORK5CYII=', 'base64') });
+          'iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAIAAAB7QOjdAAAAD0lEQVR42mM4'
+          + 'YaShkXICAAhZAndtxTFaAAAAAElFTkSuQmCC', 'base64') });
       await picpage.waitForTimeout(1100);
     }
     const picNew = await picpage.evaluate(() => {
