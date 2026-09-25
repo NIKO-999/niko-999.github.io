@@ -127,11 +127,25 @@
    every view to know how tall it is; a flex child simply takes its room
    and hands the rest down, and a view that hides it gets the whole
    height without being told. */
-html, body { height: 100%; }
+html, body { height: 100%; background: #3E5361; }
+/* `100%` ON BODY IS THE VIEWPORT AT THE MOMENT IT LOADS, NOT THE ONE THE
+   PHONE ACTUALLY DRAWS. On an iPhone in standalone mode the safe-area
+   strip behind the home indicator is not always inside that percentage,
+   so the box stopped short of it — and what showed below was neither the
+   sky nor its own slate floor, because nothing of body's box reached
+   that far to paint either one. It read as a flat black band with the
+   white home-indicator pill sitting on it. `100dvh`, set on `body`
+   below alongside its other declarations, is measured against the real
+   drawn viewport, safe area included, so the box now reaches the
+   bottom whatever the toolbar is doing; unsupported browsers keep the
+   `100%` above it, which is why both stay. `html`'s own background is
+   the same slate as the floor beneath, so a gap anywhere is a colour
+   this page already uses rather than the browser's bare black. */
 /* THE SKY IS THE CANVAS'S, and its foot colour is the sky's own foot. On a phone
    the page can end above the home indicator, and what showed there was
    the old flat black under a sky that had stopped. */
 body {
+  height: 100dvh;
   background-color: #3E5361;
   background-image: var(--sky);
   background-repeat: no-repeat;
