@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
-   CADENCE — the day as one line of time, the habits, the month and
-   the training log, lit by the hour you are in.
+   CADENCE — the day as a dial, the habits, the month and the training
+   log, every one of them drawn as rings.
 
    The clock is frozen at Friday 25 September 2026, 10:20, so which
    block is running and which are behind you is a fact about the
@@ -76,7 +76,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const items = await page.$$eval(sel, (es) => es.map((e) => {
       const r = e.getBoundingClientRect(), p = e.closest('.cd-pane'), pr = p && p.getBoundingClientRect();
       return { x: r.left, y: r.top, w: r.width, h: r.height, c: getComputedStyle(e).color, t: e.textContent.trim().slice(0, 24),
-        faded: pr ? (r.top < pr.top + 10 || r.bottom > pr.bottom - 64) : false };
+        faded: pr ? (r.top < pr.top + 10 || r.bottom > pr.bottom - 30) : false };
     }).filter((i) => i.w > 0 && i.h > 0 && !i.faded && i.y + i.h < innerHeight));
     const png = PNG.sync.read(await page.screenshot());
     let worst = { r: 99 };
@@ -110,146 +110,122 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     return { n: items.length, worst };
   }
 
-  console.log('\n── the day, as one line of time ──');
+  /* Where every mark on the dial points, read off the DRAWING rather than
+     off the numbers that made it: each path's own end points, turned back
+     into minutes about the dial's centre. A round cap reaches half the
+     stroke past a path's end, so what is drawn is that far outside it. */
+  const readDial = (page) => page.evaluate(() => {
+    const C = 150, R = 108, CAPM = 6 / R / (2 * Math.PI) * 1440;
+    const toMin = (x, y) => { let a = Math.atan2(x - C, C - y); if (a < 0) a += 2 * Math.PI; return a / (2 * Math.PI) * 1440; };
+    const svg = document.getElementById('cdDialSvg'), box = svg.getBoundingClientRect();
+    const arcs = [...svg.querySelectorAll('.cd-a')].map((p) => {
+      const L = p.getTotalLength(), a = p.getPointAtLength(0), b = p.getPointAtLength(L), m = p.getPointAtLength(L / 2);
+      return { id: p.dataset.id, cls: p.getAttribute('class').replace('cd-a ', ''), s: toMin(a.x, a.y) - CAPM, e: toMin(b.x, b.y) + CAPM,
+        mid: toMin(m.x, m.y), mx: box.left + m.x, my: box.top + m.y, r: [Math.hypot(a.x - C, a.y - C), Math.hypot(b.x - C, b.y - C)],
+        stroke: getComputedStyle(p).stroke, filter: getComputedStyle(p).filter };
+    });
+    const dots = [...svg.querySelectorAll('.cd-m')].map((d) => ({ id: d.dataset.id, cls: d.getAttribute('class').replace('cd-m ', ''),
+      m: toMin(+d.getAttribute('cx'), +d.getAttribute('cy')), r: Math.hypot(d.getAttribute('cx') - C, d.getAttribute('cy') - C),
+      fill: getComputedStyle(d).fill, filter: getComputedStyle(d).filter }));
+    const h = svg.querySelector('.cd-hand circle');
+    const labels = Object.fromEntries([...svg.querySelectorAll('.cd-dl')].map((t) => [t.textContent, { x: +t.getAttribute('x') - C, y: +t.getAttribute('y') - C }]));
+    return { arcs, dots, hand: h && toMin(+h.getAttribute('cx'), +h.getAttribute('cy')), labels, box: { l: box.left, t: box.top } };
+  });
+  const midOf = (page) => page.evaluate(() => ['cdMidK', 'cdMidT', 'cdMidN', 'cdMidS'].map((id) => document.getElementById(id).textContent));
+
+  console.log('\n── the day, as a dial ──');
   {
     const { c, page, errs, off } = await ctx();
-    const names = await page.$$eval('.cd-it .cd-tk-n', (ns) => ns.map((n) => n.textContent));
-    ok('Friday draws its seven blocks in time order',
+    const names = await page.$$eval('.cd-it .cd-rn', (ns) => ns.map((n) => n.textContent));
+    ok('Friday lists its seven blocks in time order',
       names.join('|') === 'Wake up|Gym|Deep work|Lunch|Emails and calls|Read|Wind down', names);
-    ok('the title says today, and the line above it says which day and the clock',
-      (await page.textContent('#cdTitle')) === 'Today'
-      && (await page.textContent('#cdDayK')) === 'Friday 25 September · 10:20');
-    const sub = await page.textContent('#cdSub');
-    ok('the line under it says how much is kept and how much is committed', sub === '0 of 7 kept · 6h 15m committed', sub);
+    ok('the top says which day it is', (await page.textContent('#cdDate')) === 'Friday 25 Sep');
+    const mid = await midOf(page);
+    ok('the middle of the dial is the clock, the block it is inside, and what is left of it',
+      mid.join('|') === 'Today|10:20|Deep work|1h 40m left', mid);
+    ok('and the block is named in its own colour', (await page.$eval('#cdMidN', (e) => getComputedStyle(e).color)) === 'rgb(232, 198, 124)');
+    const sum = await page.evaluate(() => ['cdSumK', 'cdSumP'].map((id) => document.getElementById(id).textContent));
+    ok('the line under it counts what is kept and what is planned', sum.join('|') === '0 of 7 kept|6h 15m planned', sum);
+    ok('the dial is one picture with a written label, never hidden from a screen reader',
+      (await page.getAttribute('#cdDial', 'role')) === 'img'
+      && (await page.getAttribute('#cdDial', 'aria-label')) === 'Friday 25 September, 0 of 7 kept. Now: Deep work, 1h 40m left');
 
-    /* THE GEOMETRY. Every row's line of time is the scale's own width, and
-       a block's bar starts at its own minute on that line. A mapping from
-       minutes to pixels is solved off two bars and every other mark on the
-       screen — bars, dots, gaps, the scale's figures, the clock — has to
-       land on the same one. A row that drew its bar anywhere else, or a
-       scale that disagreed with the rows, would be a Gantt that lies. */
-    const geo = await page.evaluate(() => {
-      const box = (e) => { const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom, w: r.width }; };
-      const rows = [...document.querySelectorAll('.cd-it')].map((li) => ({
-        n: li.querySelector('.cd-tk-n').textContent, seg: box(li.querySelector('.cd-seg')),
-        dot: li.querySelector('.cd-seg').classList.contains('is-dot'), track: box(li.querySelector('.cd-track')),
-        name: box(li.querySelector('.cd-tk-n')), now: li.querySelector('.cd-tnow') && box(li.querySelector('.cd-tnow')),
-        words: [...li.querySelectorAll('.cd-tk-n, .cd-tk-m, .cd-tk-w')].map(box)
-      }));
-      const labels = [...document.querySelectorAll('#cdScale span')].map((s) => ({ t: s.textContent, x: (box(s).l + box(s).r) / 2, l: box(s).l }));
-      const badge = document.getElementById('cdNowT');
-      const gaps = [...document.querySelectorAll('.cd-gap')].map((g) => ({ b: box(g.querySelector('b')), p: box(g.querySelector('p')), t: g.querySelector('p').textContent }));
-      const run = document.querySelector('.cd-it.is-now .cd-seg');
-      return { rows, labels, scale: box(document.getElementById('cdScale')), badge: badge && { t: badge.textContent, x: (box(badge).l + box(badge).r) / 2 }, gaps,
-        fill: run && run.firstElementChild.getBoundingClientRect().width / run.getBoundingClientRect().width };
-    });
-    const R = Object.fromEntries(geo.rows.map((r) => [r.n, r]));
-    const k = (R['Deep work'].seg.l - R['Gym'].seg.l) / (540 - 450), x0 = R['Gym'].seg.l - k * 450;
-    const at = (m) => x0 + k * m;
-    ok('every row\'s line of time is exactly the scale\'s width',
-      geo.rows.every((r) => Math.abs(r.track.l - geo.scale.l) < 1 && Math.abs(r.track.r - geo.scale.r) < 1), { scale: geo.scale, t: geo.rows.map((r) => [r.track.l, r.track.r]) });
-    ok('and the span is the hour before the first block to the hour after the last',
-      Math.abs(at(420) - geo.scale.l) < 1 && Math.abs(at(1380) - geo.scale.r) < 1, { l: at(420), r: at(1380), scale: geo.scale });
-    const starts = { 'Lunch': 750, 'Emails and calls': 840, 'Read': 1290 };
-    ok('every other bar starts at its own minute on the same line',
-      Object.keys(starts).every((n) => Math.abs(R[n].seg.l - at(starts[n])) < 1), Object.keys(starts).map((n) => [n, R[n].seg.l, at(starts[n])]));
-    ok('and is as long as the block is', Math.abs(R['Deep work'].seg.w - 4 * R['Lunch'].seg.w) < 1.5, [R['Deep work'].seg.w, R['Lunch'].seg.w]);
-    ok('a moment is a dot at its minute, not a bar',
-      R['Wake up'].dot && R['Wind down'].dot && Math.abs((R['Wind down'].seg.l + R['Wind down'].seg.r) / 2 - at(1350)) < 1,
-      { dot: R['Wind down'].seg, want: at(1350) });
-    const l13 = geo.labels.find((l) => l.t === '13:00');
-    ok('the scale\'s figures sit over the minutes they name', l13 && Math.abs(l13.x - at(780)) < 1.5, { l13, want: at(780) });
-    ok('there is no time gutter: every name starts where its line of time does',
-      geo.rows.every((r) => Math.abs(r.name.l - r.track.l) < 1), geo.rows.map((r) => [r.name.l, r.track.l]));
+    /* THE GEOMETRY. Midnight at the top and the day running clockwise, and
+       every block an arc that starts and stops on its own minutes — with the
+       two minutes a side that leave a hairline between two blocks that meet. */
+    const g = await readDial(page);
+    const L = g.labels;
+    ok('the hours run clockwise from midnight at the top',
+      L['00'].y < -100 && Math.abs(L['00'].x) < 1 && L['06'].x > 100 && L['12'].y > 100 && L['18'].x < -100, L);
+    const A = Object.fromEntries(g.arcs.filter((a) => a.cls.indexOf('is-lit') < 0).map((a) => [a.id, a]));
+    const want = { s1: [450, 510], s3: [540, 720], s4: [750, 795], s5: [840, 900] };
+    ok('every block is an arc that starts and stops on its own minutes',
+      Object.keys(want).every((id) => A[id] && Math.abs(A[id].s - (want[id][0] + 2)) < 1 && Math.abs(A[id].e - (want[id][1] - 2)) < 1),
+      Object.keys(want).map((id) => [id, A[id] && +A[id].s.toFixed(1), A[id] && +A[id].e.toFixed(1)]));
+    ok('a block too short for its own caps is a dot on its middle, never an arc drawn backwards',
+      A.s8 && /is-short/.test(A.s8.cls) && Math.abs(A.s8.mid - 1305) < 1, A.s8);
+    const D = Object.fromEntries(g.dots.map((d) => [d.id, d]));
+    ok('a moment is a dot at its minute', D.s0 && D.s9 && Math.abs(D.s0.m - 420) < .5 && Math.abs(D.s9.m - 1350) < .5, D);
+    ok('every mark sits on the one ring', g.arcs.every((a) => a.r.every((r) => Math.abs(r - 108) < .5)) && g.dots.every((d) => Math.abs(d.r - 108) < .5));
+    ok('the hand points at now', Math.abs(g.hand - 620) < .5, g.hand);
+    const lit = g.arcs.find((a) => a.cls.indexOf('is-lit') >= 0);
+    ok('the block running now is lit as far as the clock and dim for the rest',
+      lit && lit.id === 's3' && Math.abs(lit.s - 542) < 1 && Math.abs(lit.e - 620) < 1 && A.s3.cls === 'is-ahead', { lit, s3: A.s3 && A.s3.cls });
+    ok('a block behind you and not kept is the neutral, and one still to come is dim',
+      A.s1.cls === 'is-miss' && D.s0.cls === 'is-miss' && A.s4.cls === 'is-ahead' && A.s5.cls === 'is-ahead' && D.s9.cls === 'is-ahead',
+      [A.s1.cls, D.s0.cls, A.s4.cls, D.s9.cls]);
+    ok('colour says which part of life: the lit arc is work\'s gold', !!lit && rgbaOf(lit.stroke).slice(0, 3).join() === '232,198,124', lit && lit.stroke);
+    const missed = rgbaOf(A.s1.stroke);
+    ok('and a missed block is a grey with no channel standing out — never a red',
+      Math.max(...missed.slice(0, 3)) - Math.min(...missed.slice(0, 3)) < 6, A.s1.stroke);
 
-    /* THE CLOCK is a mark on every track, one x down the whole page, and
-       the scale's badge says it. It is never drawn over a word. */
-    const nx = geo.rows.map((r) => r.now && (r.now.l + r.now.r) / 2);
-    ok('every line of time carries the clock, at one x', nx.every((x) => x != null && Math.abs(x - nx[0]) < .5), nx);
-    ok('and that x is 10:20 on the scale', Math.abs(nx[0] - at(620)) < 1 && geo.badge && geo.badge.t === '10:20' && Math.abs(geo.badge.x - nx[0]) < 1, { nx: nx[0], want: at(620), badge: geo.badge });
-    const hit = (a, b) => a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b;
-    ok('and the clock never crosses a word', geo.rows.every((r) => r.words.every((w) => !hit(w, r.now))),
-      geo.rows.filter((r) => r.words.some((w) => hit(w, r.now))).map((r) => r.n));
-    ok('the scale does not print an hour under the clock\'s own figure',
-      geo.labels.every((l) => Math.abs(l.x - geo.badge.x) > 30), geo.labels.map((l) => l.t));
-
-    /* Every state of a bar is a graphic, held to 3:1 against its own row's
-       ground on composited pixels: kept, behind you and not kept, running,
-       and still ahead. Read at its far end, which on a running bar is the
-       half still to come — once now and once after the gym is kept. */
-    /* Read at two scroll positions, and only where the pane is not fading
-       a row out, so the bars further down the day are measured too. */
-    const readBars = async () => {
-      const out = [];
-      for (const st of [0, 320]) {
-        await page.$eval('#cdDayPane', (p, st) => { p.scrollTop = st; }, st);
-        const segs = await page.$$eval('.cd-it .cd-seg:not(.is-dot)', (ss) => {
-          const pr = document.getElementById('cdDayPane').getBoundingClientRect();
-          return ss.map((s) => {
-            const r = s.getBoundingClientRect(), t = s.parentElement.getBoundingClientRect(), li = s.closest('.cd-it');
-            return { n: li.querySelector('.cd-tk-n').textContent, st: li.className.replace('cd-it', '').trim() || 'ahead',
-              x: r.right - Math.min(3, r.width / 2), y: (r.top + r.bottom) / 2, gx: r.left - t.left > 40 ? t.left + 4 : t.right - 4, gy: t.top - 5 };
-          }).filter((s) => s.gy > pr.top + 12 && s.y < pr.bottom - 30);
-        });
-        const px = await shoot(page);
-        segs.forEach((s) => out.push({ n: s.n, st: s.st, r: +ratio(px(s.x, s.y), px(s.gx, s.gy)).toFixed(2) }));
-      }
-      await page.$eval('#cdDayPane', (p) => { p.scrollTop = 0; });
-      return out;
+    /* Every state of an arc is a graphic, held to 3:1 on composited pixels
+       against the sky just outside the ring at the same hour. */
+    const arcRatios = async () => {
+      const d = await readDial(page), px = await shoot(page);
+      return d.arcs.filter((a) => a.cls.indexOf('is-short') < 0).map((a) => {
+        const t = a.mid / 1440 * 2 * Math.PI;
+        const gx = d.box.l + 150 + 119 * Math.sin(t), gy = d.box.t + 150 - 119 * Math.cos(t);
+        return { id: a.id, st: a.cls, r: +ratio(px(a.mx, a.my), px(gx, gy)).toFixed(2) };
+      });
     };
-    const barsAtLoad = await readBars();
+    const arcsAtLoad = await arcRatios();
 
-    /* A running block counts down, and its bar is filled to the minute. */
-    const run = await page.$eval('.cd-it.is-now', (e) => e.textContent);
-    ok('the running block counts down', /Deep work/.test(run) && /1h 40m left/.test(run), run);
-    ok('and its bar is filled as far as the clock', Math.abs(geo.fill - (620 - 540) / 180) < .02, geo.fill);
-
-    /* The gaps are the time nobody has claimed, drawn as exactly that stretch. */
-    const gaps = geo.gaps.map((g) => g.t);
-    ok('open time between blocks is measured', gaps.includes('30m free') && gaps.includes('45m free'), gaps);
-    const g1 = geo.gaps[1];
-    ok('a gap is drawn across exactly the stretch it measures', Math.abs(g1.b.l - at(510)) < 1 && Math.abs(g1.b.r - at(540)) < 1, { b: g1.b, l: at(510), r: at(540) });
-    ok('and its figure sits beside the line, never on it', geo.gaps.every((g) => g.p.l >= g.b.r || g.p.r <= g.b.l), geo.gaps.map((g) => [g.b.l, g.b.r, g.p.l, g.p.r]));
-
-    const past = await page.$$eval('.cd-it.is-past', (ls) => ls.length);
-    ok('the blocks behind you are marked past', past === 2, past);
-    const cats = await page.$$eval('.cd-it', (ls) => ls.map((l) => l.style.getPropertyValue('--cat')));
-    ok('colour says which part of life: body, work, mind, rest',
-      cats[1] === 'var(--c-body)' && cats[2] === 'var(--c-work)' && cats[5] === 'var(--c-mind)' && cats[0] === 'var(--c-rest)', cats);
-
-    /* The check tile ticks and the tick survives a reload. It carries no
-       word either way; what changes is the ground, and kept is the block's
-       own colour — Wake up is rest. */
-    const stampBg = () => page.$eval('.cd-it[data-id="s0"] .cd-stamp', (s) => ({ t: s.textContent.trim(), bg: getComputedStyle(s).backgroundColor, svg: !!s.querySelector('svg') }));
-    const before = await stampBg();
-    await page.click('.cd-it[data-id="s0"] .cd-stamp');
-    const after = await stampBg();
-    ok('a check tile ticks its block', await page.$eval('.cd-it[data-id="s0"]', (e) => e.classList.contains('is-done')));
-    ok('and says so with its ground, not a word', before.t === '' && after.t === '' && before.svg && before.bg !== after.bg, { before, after });
-    ok('and kept is the block\'s own colour', after.bg === 'rgb(79, 209, 165)', after.bg);
-    /* THE BEAT under the title: one segment per block the day asks of you,
-       lit in that block's colour once it is kept. */
-    const beat = await page.$$eval('#cdBeat i', (is) => is.map((i) => i.classList.contains('on') ? getComputedStyle(i).backgroundColor : ''));
-    ok('the beat under the title is one segment a block, lit in the block\'s colour once kept',
-      beat.length === 7 && beat.filter(Boolean).length === 1 && beat[0] === 'rgb(79, 209, 165)', beat);
+    /* The dot ticks, the tick survives a reload, and the dial agrees. */
+    const dotOf = () => page.$eval('.cd-it[data-id="s0"] .cd-dot', (b) => ({ p: b.getAttribute('aria-pressed'), bg: getComputedStyle(b.firstElementChild).backgroundColor, t: b.textContent.trim() }));
+    const before = await dotOf();
+    await page.click('.cd-it[data-id="s0"] .cd-dot');
+    const after = await dotOf();
+    ok('the dot is the check: pressing it keeps the block', await page.$eval('.cd-it[data-id="s0"]', (e) => e.classList.contains('is-done')));
+    ok('and says so by filling, not with a word', before.t === '' && after.t === '' && before.p === 'false' && after.p === 'true' && before.bg !== after.bg, { before, after });
+    ok('and it fills with the block\'s own colour', after.bg === 'rgb(125, 207, 216)', after.bg);
+    const k0 = (await readDial(page)).dots.find((d) => d.id === 's0');
+    ok('the dial agrees: the moment is filled and it glows', k0.cls === 'is-kept' && rgbaOf(k0.fill).slice(0, 3).join() === '125,207,216' && /cdGl/.test(k0.filter), k0);
     ok('the tick is filed under the date', (await store(page, 'cad.log.v1'))['2026-09-25'].s0 === 1);
     await page.reload(); await page.waitForTimeout(150);
     ok('and survives a reload', await page.$eval('.cd-it[data-id="s0"]', (e) => e.classList.contains('is-done')));
-    ok('the summary counts it', /1 of 7 kept/.test(await page.textContent('#cdSub')));
+    ok('the summary counts it', (await page.textContent('#cdSumK')) === '1 of 7 kept');
+    const todayRing = await page.$eval('.cd-wd[data-d="2026-09-25"]', (b) => ({ p: b.dataset.p, dash: b.querySelector('.cd-wr-a') && b.querySelector('.cd-wr-a').getAttribute('stroke-dasharray') }));
+    ok('and today\'s ring in the week closes by a seventh', todayRing.p === '14.29' && todayRing.dash === '14.29 100', todayRing);
 
-    /* Future days refuse a tick; the week moves the day. */
+    /* Another day: the middle says how much of it was kept, and the ring has
+       no hand, because the clock is not on it. */
+    await page.click('.cd-wd[data-d="2026-09-24"]');
+    ok('yesterday is named, and its middle is what it kept', (await midOf(page)).join('|') === 'Yesterday|0/7||kept · 24 September', await midOf(page));
+    const y = await readDial(page);
+    ok('a day behind you has no hand, and every block on it is behind you', y.hand == null && y.arcs.every((a) => a.cls.indexOf('is-miss') >= 0) && y.arcs.length > 3, y.arcs.map((a) => a.cls));
+    ok('yesterday can still be ticked', await page.$$eval('.cd-dot', (bs) => bs.length > 0 && bs.every((b) => !b.disabled)));
     await page.click('.cd-wd[data-d="2026-09-26"]');
-    ok('tomorrow is named, and the line above it carries the weekday',
-      (await page.textContent('#cdTitle')) === 'Tomorrow' && (await page.textContent('#cdDayK')) === 'Saturday 26 September');
+    ok('tomorrow says what is planned', (await midOf(page)).join('|') === 'Tomorrow|4||planned · 26 September', await midOf(page));
+    ok('and the line under it counts blocks rather than kept', (await page.textContent('#cdSumK')) === '4 blocks');
+    ok('a day ahead cannot be ticked', await page.$$eval('.cd-dot', (bs) => bs.length > 0 && bs.every((b) => b.disabled)));
+    ok('and every arc on it is still to come', (await readDial(page)).arcs.every((a) => a.cls.indexOf('is-ahead') >= 0));
     await page.click('.cd-wd[data-d="2026-09-27"]');
-    ok('any other day is its weekday, and the line above does not repeat it',
-      (await page.textContent('#cdTitle')) === 'Sunday' && (await page.textContent('#cdDayK')) === '27 September');
-    ok('a day ahead cannot be ticked', await page.$$eval('.cd-stamp', (bs) => bs.length > 0 && bs.every((b) => b.disabled)));
-    ok('and a day that is not today carries no clock', !(await page.$('.cd-tnow')) && !(await page.$('#cdNowT')));
+    ok('any other day is its weekday', (await page.textContent('#cdMidK')) === 'Sunday');
     await page.click('.cd-wd[data-d="2026-09-25"]');
 
     /* Finishing a training block asks what it was. */
-    await page.click('.cd-it[data-id="s1"] .cd-stamp');
+    await page.click('.cd-it[data-id="s1"] .cd-dot');
     ok('ticking the gym asks what you trained', await sheetUp(page));
     await page.click('[data-k="weights.push"]');
     await page.click('[data-k="rest.rest"]');
@@ -268,15 +244,18 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.waitForTimeout(320);
     const tr = (await store(page, 'cad.train.v1'))['2026-09-25'].s1;
     ok('the session is filed against the block', tr && tr.k.join() === 'weights.push,weights.core' && tr.e === 'Hard' && tr.m === 60, tr);
-    ok('and the row wears it', /Push \+ Core · 60m/.test(await page.textContent('.cd-it[data-id="s1"] .cd-tk-w')));
+    ok('and the row wears it, in the session\'s colour', (await page.textContent('.cd-it[data-id="s1"] .cd-rs')) === 'Push + Core · 60m'
+      && (await page.$eval('.cd-it[data-id="s1"] .cd-rw', (e) => getComputedStyle(e).color)) === 'rgb(242, 161, 132)');
+    const kept = (await readDial(page)).arcs.find((a) => a.id === 's1');
+    ok('and its arc is kept, and glows', kept.cls === 'is-kept' && /cdGl/.test(kept.filter), kept);
 
-    const sr = barsAtLoad.concat(await readBars());
-    const states = new Set(sr.map((s) => s.st));
-    ok('every bar holds 3:1 on its row, whatever state it is in',
-      ['is-past', 'is-now', 'ahead', 'is-done is-past'].every((st) => states.has(st)) && sr.every((s) => s.r >= 3), sr);
+    const ar = arcsAtLoad.concat(await arcRatios());
+    const states = new Set(ar.map((a) => a.st));
+    ok('every arc holds 3:1 against the sky beside it, whatever state it is in',
+      ['is-miss', 'is-ahead', 'is-lit', 'is-kept'].every((st) => states.has(st)) && ar.every((a) => a.r >= 3), ar);
 
     /* Unticking a training block takes its session with it. */
-    await page.click('.cd-it[data-id="s1"] .cd-stamp');
+    await page.click('.cd-it[data-id="s1"] .cd-dot');
     ok('unticking takes the session off', !((await store(page, 'cad.train.v1'))['2026-09-25'] || {}).s1);
 
     ok('the day makes no request off this origin', off.length === 0, off);
@@ -284,31 +263,26 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await c.close();
   }
 
-  console.log('\n── the clock in a gap ──');
+  console.log('\n── the middle, between blocks and at the ends ──');
   {
     const { c, page } = await ctx({ at: '2026-09-25T12:15:00' });
-    const g = await page.evaluate(() => {
-      const x = (e) => { const r = e.getBoundingClientRect(); return { l: r.left, r: r.right }; };
-      const row = (n) => [...document.querySelectorAll('.cd-it')].find((l) => l.querySelector('.cd-tk-n').textContent === n);
-      const t = document.querySelector('.cd-tnow');
-      return { deep: x(row('Deep work').querySelector('.cd-seg')), lunch: x(row('Lunch').querySelector('.cd-seg')), now: t && (x(t).l + x(t).r) / 2,
-        badge: document.getElementById('cdNowT').textContent, running: document.querySelectorAll('.cd-it.is-now').length };
-    });
-    ok('between two blocks, the clock sits in the space between their bars', g.now > g.deep.r && g.now < g.lunch.l, g);
-    ok('and the scale says the time', g.badge === '12:15', g.badge);
-    ok('and nothing is running', g.running === 0, g.running);
+    const g = await readDial(page);
+    const A = Object.fromEntries(g.arcs.map((a) => [a.id + (a.cls.indexOf('is-lit') >= 0 ? '+' : ''), a]));
+    ok('between two blocks the middle says the next one and how soon', (await midOf(page)).join('|') === 'Today|12:15|Lunch|In 15m', await midOf(page));
+    ok('and the hand sits in the space between their arcs', g.hand > A.s3.e && g.hand < A.s4.s, { hand: g.hand, deep: A.s3.e, lunch: A.s4.s });
+    ok('and nothing is running', !g.arcs.some((a) => a.cls.indexOf('is-lit') >= 0) && !(await page.$('.cd-it.is-now')));
     await c.close();
   }
   {
-    /* Near an end the badge is pinned to that end and reaches inward, so
-       the hour beside it is further along than it is in the middle. */
     const { c, page } = await ctx({ at: '2026-09-25T06:40:00' });
-    const s = await page.evaluate(() => {
-      const b = document.getElementById('cdNowT').getBoundingClientRect();
-      const ls = [...document.querySelectorAll('#cdScale span')].map((x) => { const r = x.getBoundingClientRect(); return { t: x.textContent, l: r.left, r: r.right }; });
-      return { b: { l: b.left, r: b.right }, ls };
-    });
-    ok('at dawn no hour is printed under the clock\'s figure', s.ls.length >= 4 && s.ls.every((l) => l.r < s.b.l - 4 || l.l > s.b.r + 4), s);
+    ok('before the first block, the middle says it is next', (await midOf(page)).join('|') === 'Today|06:40|Wake up|In 20m', await midOf(page));
+    await c.close();
+  }
+  {
+    const { c, page } = await ctx({ at: '2026-09-25T23:10:00' });
+    const m = await midOf(page);
+    ok('after the last, the middle says so and names nothing', m.join('|') === 'Today|23:10||Nothing left today'
+      && (await page.$eval('#cdMidN', (e) => e.getBoundingClientRect().height)) === 0, m);
     await c.close();
   }
 
@@ -350,10 +324,10 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const wk = await store(page, 'cad.week.v1');
     const j = wk.find((b) => b.n === 'Journal');
     ok('the new block is written in full', j && j.d.length === 7 && j.s === 1260 && j.e === 1280 && typeof j.id === 'string' && j.p === '', j);
-    ok('and drawn on the day', (await page.$$eval('.cd-tk-n', (ns) => ns.map((n) => n.textContent))).includes('Journal'));
+    ok('and drawn on the day', (await page.$$eval('.cd-rn', (ns) => ns.map((n) => n.textContent))).includes('Journal'));
 
     /* Delete has a way back. */
-    await page.click(`.cd-it[data-id="${j.id}"] .cd-tk-b`);
+    await page.click(`.cd-it[data-id="${j.id}"] .cd-rb`);
     await sheetUp(page);
     await page.click('#cdFDel');
     await page.waitForTimeout(320);
@@ -361,18 +335,16 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.click('#cdToastU');
     ok('and undo puts it back', (await store(page, 'cad.week.v1')).some((b) => b.n === 'Journal'));
 
-    /* Off this day strikes the row, takes its bar away, and leaves its
-       hour free. */
-    await page.click('.cd-it[data-id="s3"] .cd-tk-b');
+    /* Off this day strikes the row and leaves its hours empty on the ring. */
+    await page.click('.cd-it[data-id="s3"] .cd-rb');
     await sheetUp(page);
     await page.click('#cdTOff');
     ok('off this day is filed for the date', (await store(page, 'cad.off.v1'))['2026-09-25'].s3 === 1);
     await closeSheet(page);
     ok('and the row is struck', await page.$eval('.cd-it[data-id="s3"]', (e) => e.classList.contains('is-off')));
-    ok('an off block draws no bar', await page.$eval('.cd-it[data-id="s3"] .cd-seg', (e) => e.getBoundingClientRect().width === 0));
-    const gp = await page.$$eval('.cd-gap p', (ps) => ps.map((p) => p.textContent));
-    ok('and its time is counted as free', gp.includes('4h free'), gp);
-    ok('an off block leaves the count', /of 7 kept/.test(await page.textContent('#cdSub')));
+    ok('and says Off where its hours were', (await page.textContent('.cd-it[data-id="s3"] .cd-rt')) === 'Off');
+    ok('an off block leaves its hours empty on the dial', !(await page.$('#cdDialSvg [data-id="s3"]')) && !!(await page.$('#cdDialSvg [data-id="s4"]')));
+    ok('an off block leaves the count', (await page.textContent('#cdSumK')) === '0 of 7 kept');
     ok('no page errors in the sentence', errs.length === 0, errs);
     await c.close();
   }
@@ -391,20 +363,25 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     } })();`;
     const { c, page, errs, off } = await ctx({ init: seed });
 
-    /* Under each date the same beat in fifths, because ten segments do not
-       fit under a figure: lit to the nearest fifth, and all five only when
-       the whole day was. Six of seven on the 22nd is four, not five. */
-    const fifths = await page.$$eval('.cd-wd', (ws) => Object.fromEntries(ws.map((w) => [w.dataset.d.slice(8), w.querySelectorAll('.cd-wd-b i.on').length])));
-    ok('the week draws each day\'s beat in fifths, whole only when the day was',
-      fifths['21'] === 2 && fifths['22'] === 4 && fifths['23'] === 5 && fifths['24'] === 1 && fifths['26'] === 0, fifths);
+    /* Every date in the week is a small ring closed by the share of its day
+       that was kept: three of seven on the 21st, six on the 22nd, all of the
+       23rd — which is the one drawn whole and lit — and nothing on a day
+       still to come. The drawn arc is read back, not the number it came from. */
+    const wk = await page.$$eval('.cd-wd', (ws) => Object.fromEntries(ws.map((w) => {
+      const a = w.querySelector('.cd-wr-a');
+      return [w.dataset.d.slice(8), { p: w.dataset.p, dash: a && a.getAttribute('stroke-dasharray'), whole: !!(a && a.classList.contains('is-whole')), f: a && getComputedStyle(a).filter }];
+    })));
+    ok('the week is seven rings, each closed by the share of its day that was kept',
+      wk['21'].dash === '42.86 100' && wk['22'].dash === '85.71 100' && wk['24'].dash === '28.57 100' && !wk['26'].dash && wk['26'].p === '0', wk);
+    ok('and only a whole day is a whole ring, and lit', wk['23'].whole && !wk['23'].dash && /drop-shadow/.test(wk['23'].f) && !wk['22'].whole, wk['23']);
 
     await page.click('.cd-tab[data-v="hab"]');
     const train = await page.$eval('.cd-hr[data-h="train"]', (e) => ({ t: e.textContent, on: e.classList.contains('is-on') }));
     ok('Train is kept by the session filed today', /Kept by a session/.test(train.t) && train.on, train);
-    const hues = await page.$$eval('.cd-hr .cd-hr-n', (ns) => ns.map((n) => getComputedStyle(n, '::before').backgroundColor));
-    ok('six habits, six colours: colour says which', new Set(hues).size === 6, hues);
-    const tapes = await page.$$eval('.cd-tape', (ts) => ts.map((t) => t.children.length));
-    ok('every habit carries a fortnight', tapes.every((n) => n === 14), tapes);
+    const hues = await page.$$eval('.cd-hr .cd-hr-n b', (ns) => ns.map((n) => getComputedStyle(n, '::before').backgroundColor));
+    ok('six habits, six colours: colour says which', hues.length === 6 && new Set(hues).size === 6, hues);
+    const rings = await page.$$eval('.cd-hr-b', (bs) => bs.map((b) => b.querySelectorAll('.cd-sg').length));
+    ok('every habit is a fortnight round its own ring', rings.length === 6 && rings.every((n) => n === 14), rings);
     await page.click('.cd-hr[data-h="mind"] .cd-hr-b');
     ok('Mind ticks on a press', (await store(page, 'cad.hab.v1'))['2026-09-25'].mind === 1);
     await page.click('.cd-hr[data-h="steps"] .cd-hr-b');
@@ -414,19 +391,20 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.click('#cdNumGo');
     await page.waitForTimeout(320);
     ok('the figure is saved', (await store(page, 'cad.hab.v1'))['2026-09-25'].steps === 10000);
-    ok('and drawn', /10,000/.test(await page.textContent('.cd-hr[data-h="steps"] .cd-hr-v')));
-    const bar = await page.$eval('.cd-hr[data-h="steps"] .cd-tape i:last-child', (i) => ({ on: i.classList.contains('on'), h: i.getBoundingClientRect().height }));
-    ok('and today stands full in its fortnight', bar.on && bar.h === 16, bar);
+    ok('and drawn in the middle of its ring', /10,000/.test(await page.textContent('.cd-hr[data-h="steps"] .cd-hr-v')));
+    const seg = await page.$eval('.cd-hr[data-h="steps"] .cd-sg:last-of-type', (p) => ({ lit: p.classList.contains('is-lit'), s: getComputedStyle(p).stroke }));
+    ok('and today, the last part of its fortnight, is lit in the habit\'s colour', seg.lit && seg.s === 'rgb(125, 207, 216)', seg);
     await page.click('.cd-hr[data-h="water"] .cd-hr-b');
     await sheetUp(page);
     await page.click('#cdShB .cd-chip >> text="+0.5"');
     await page.click('#cdShB .cd-chip >> text="+0.25"');
     ok('the bumps add, without float drift', (await page.textContent('#cdNumV')).startsWith('0.75'));
     await closeSheet(page);
-    ok('the caption counts today', /3 of 6 kept today/.test(await page.textContent('#cdHabCap')));
-    const hbeat = await page.$$eval('#cdHabBeat i', (is) => is.map((i) => i.classList.contains('on')));
-    ok('and the beat over it is one segment a habit, lit as it is kept',
-      hbeat.length === 6 && hbeat.filter(Boolean).length === 3 && hbeat[0] && hbeat[1] && hbeat[2], hbeat);
+    ok('the ring at the top counts today', (await page.textContent('#cdHabT')) === '3/6'
+      && (await page.getAttribute('#cdHabRing', 'aria-label')) === '3 of 6 habits kept today');
+    const head = await page.$$eval('#cdHabSvg .cd-sg', (ps) => ps.map((p) => p.classList.contains('is-lit') ? getComputedStyle(p).stroke : ''));
+    ok('and is cut into a part a habit, each lit in its own colour as it is kept',
+      head.length === 6 && head.filter(Boolean).length === 3 && head[0] === 'rgb(242, 161, 132)' && head[1] === 'rgb(183, 165, 255)' && head[2] === 'rgb(125, 207, 216)', head);
 
     /* A habit of your own joins the list. */
     await page.click('#cdHabAdd');
@@ -435,6 +413,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.click('#cdHGo');
     await page.waitForTimeout(320);
     ok('a habit of yours is added at the foot', (await page.$$eval('.cd-hr', (h) => h.map((x) => x.dataset.h))).length === 7);
+    ok('and the ring at the top takes a seventh part', (await page.$$eval('#cdHabSvg .cd-sg', (ps) => ps.length)) === 7);
 
     await page.click('.cd-tab[data-v="mon"]');
     ok('the month is September, and the line above it is the year', (await page.textContent('#cdMonT')) === 'September'
@@ -444,22 +423,20 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('the grid is a whole rectangle', (await page.$$eval('.cd-mgrid > *', (cs) => cs.length)) % 7 === 0);
     ok('a month still to come cannot be opened', await page.$eval('#cdMonN', (b) => b.disabled));
     ok('today is marked', await page.$eval('.cd-mc[data-day="2026-09-25"]', (e) => e.classList.contains('is-today')));
-    const kc = await page.$eval('.cd-mc[data-day="2026-09-24"] em', (e) => e.style.getPropertyValue('--kc'));
-    ok('a day you ran wears the run colour', kc === 'var(--k-run)', kc);
-    const lv = await page.$$eval('.cd-mc[data-day]', (cs) => Object.fromEntries(cs.map((c) => [c.dataset.day.slice(8), c.className.replace('cd-mc', '').trim()])));
-    ok('a day before the record is quiet, not a day you missed', lv['10'] === 'is-quiet', lv['10']);
-    ok('a day is lit by how much of it was kept, in steps',
-      lv['24'] === 'is-l1' && lv['21'] === 'is-l2' && lv['22'] === 'is-l3' && lv['23'] === 'is-l4', { d21: lv['21'], d22: lv['22'], d23: lv['23'], d24: lv['24'] });
-    /* The disc grows with the share kept, and only a whole day is solid. */
-    const disc = await page.$$eval('.cd-mc[data-day] i', (is) => Object.fromEntries(is.map((i) => [i.parentElement.dataset.day.slice(8),
-      { w: i.getBoundingClientRect().width, bg: getComputedStyle(i).backgroundColor }])));
-    ok('a day\'s disc grows with how much of it was kept',
-      disc['10'].w === 0 && disc['24'].w < disc['21'].w && disc['21'].w < disc['22'].w && disc['22'].w < disc['23'].w,
-      [disc['10'].w, disc['24'].w, disc['21'].w, disc['22'].w, disc['23'].w]);
-    ok('and only a whole day is solid', disc['23'].bg === 'rgb(244, 245, 247)' && rgbaOf(disc['22'].bg)[3] < 1, [disc['23'].bg, disc['22'].bg]);
-    /* Every date's figure is read on composited pixels, on its disc or not. */
+    const bead = await page.$eval('.cd-mc[data-day="2026-09-24"] .cd-bead', (e) => ({ kc: e.style.getPropertyValue('--kc'), f: getComputedStyle(e).fill }));
+    ok('a day you ran wears a bead in the run colour at the top of its ring', bead.kc === 'var(--k-run)' && bead.f === 'rgb(125, 207, 216)', bead);
+    const mr = await page.$$eval('.cd-mc[data-day]', (cs) => Object.fromEntries(cs.map((c) => {
+      const a = c.querySelector('.cd-mr-a');
+      return [c.dataset.day.slice(8), { cls: c.className.replace('cd-mc', '').trim(), ring: !!c.querySelector('svg'), dash: a && a.getAttribute('stroke-dasharray'), whole: !!(a && a.classList.contains('is-whole')) }];
+    })));
+    ok('a day before the record draws no ring at all: it is not a day you missed', mr['10'].cls === 'is-quiet' && !mr['10'].ring, mr['10']);
+    ok('every day is a ring closed by how much of it was kept',
+      mr['24'].dash === '28.57 100' && mr['21'].dash === '42.86 100' && mr['22'].dash === '85.71 100', { d21: mr['21'], d22: mr['22'], d24: mr['24'] });
+    ok('and only a whole day is whole, and lit', mr['23'].whole && mr['23'].cls === 'is-whole' && !mr['22'].whole, mr['23']);
+    ok('a day still to come is not a ring yet', mr['27'].cls === 'is-future' && !mr['27'].ring, mr['27']);
+    /* Every date's figure is read on composited pixels, inside its ring. */
     const mc = await inkFloor(page, '.cd-mc[data-day] b');
-    ok('every date holds 4.5:1 on its own disc, at every level', mc.n === 30 && mc.worst.r >= 4.5, mc);
+    ok('every date holds 4.5:1 on what is behind it', mc.n === 30 && mc.worst.r >= 4.5, mc);
     await page.click('.cd-mc[data-day="2026-09-24"]');
     await sheetUp(page);
     const ds = await page.textContent('#cdShB');
@@ -467,9 +444,14 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await closeSheet(page);
 
     await page.click('.cd-tab[data-v="lift"]');
+    ok('the ring counts the sessions in thirty days', (await page.textContent('#cdLiftT')) === '2'
+      && (await page.getAttribute('#cdLiftRing', 'aria-label')) === '2 sessions in the last thirty days');
+    const lr = await page.$$eval('#cdLiftSvg .cd-sg', (ps) => ps.map((p) => p.classList.contains('is-lit') ? getComputedStyle(p).stroke : ''));
+    ok('thirty parts, a day each, lit in the colour of what was trained on it',
+      lr.length === 30 && lr.filter(Boolean).length === 2 && lr[28] === 'rgb(125, 207, 216)' && lr[29] === 'rgb(242, 161, 132)', lr.slice(26));
     const figs = await page.$$eval('.cd-figs b', (bs) => bs.map((b) => b.textContent));
-    ok('training counts the thirty days', figs[0] === '2' && figs[1] === '2' && figs[2] === '53m', figs);
-    ok('the head names the last session', (await page.textContent('#cdLiftK')) === 'Last · Legs · Fri 25');
+    ok('the figures are days trained, the average length and this week', figs.join('|') === '2|53m|2', figs);
+    ok('the line under the ring names the last session', (await page.textContent('#cdLiftK')) === 'Last · Legs · Fri 25');
     ok('the week in progress is the last column', await page.$eval('.cd-weeks i:last-child', (i) => i.classList.contains('is-this')));
     const kinds = await page.$$eval('.cd-kinds b', (bs) => bs.map((b) => b.textContent));
     ok('what you trained, by name', kinds.includes('Legs') && kinds.includes('Easy'), kinds);
@@ -484,10 +466,10 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const { c, page, errs } = await ctx({ init: `localStorage.setItem('cad.hab.v1', JSON.stringify({ '2026-09-24': { steps: 8000, mind: 1 } }));
       localStorage.setItem('cad.train.v1', JSON.stringify({ '2026-09-24': { s2: { k: ['run.easy'], e: 'Light', m: 45 } } }));` });
     const WORDS = {
-      day: '.cd-tab, #cdDayK, #cdTitle, #cdSub, .cd-wd-l, .cd-wd-n, .cd-scale span, .cd-tk-n, .cd-tk-m, .cd-gap p, #cdAdd span',
-      hab: '#cdHabK, #cdHabCap, .cd-hr-n, .cd-hr-s, .cd-hr-v, #cdHabAdd',
-      mon: '#cdMonK, #cdMonT, #cdMonCap, .cd-dows span, .cd-legend span',
-      lift: '.cd-figs b, .cd-figs span, .cd-lbl, .cd-wax span, .cd-kinds b, .cd-kinds span, .cd-recent b, .cd-recent span, .cd-recent time'
+      day: '.cd-tab, #cdDate, .cd-wd-l, .cd-wd-r b, #cdMidK, #cdMidT, #cdMidN, #cdMidS, .cd-sum span, .cd-rn, .cd-rt, .cd-rs',
+      hab: '#cdDate, #cdVHab .cd-mid-k, #cdHabT, #cdHabCap, .cd-hr-n b, .cd-hr-s, .cd-hr-v, #cdHabAdd',
+      mon: '#cdMonK, #cdMonT, #cdMonCap, .cd-dows span, .cd-legend span, .cd-mc b',
+      lift: '#cdLiftT, #cdLiftK, .cd-figs b, .cd-figs span, .cd-lbl, .cd-wax span, .cd-kinds b, .cd-kinds span, .cd-recent b, .cd-recent span, .cd-recent time'
     };
     for (const v of ['day', 'hab', 'mon', 'lift']) {
       await page.click(`.cd-tab[data-v="${v}"]`);
@@ -507,52 +489,33 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
          the light at the top, a tile, a disc. */
       const ink = await inkFloor(page, WORDS[v]);
       ok(`${v}: every word holds 4.5:1 on what is behind it`, ink.n > 4 && ink.worst.r >= 4.5, ink);
-      /* A pane ends where the sentence bar begins, so no row runs under it. */
+      /* A pane ends where the nav begins, so no row runs under the words. */
       const pb = await page.$eval(`section:not([hidden]) .cd-pane`, (p) => p.getBoundingClientRect().bottom);
-      const bt = await page.$eval('.cd-say-bar', (b) => b.getBoundingClientRect().top);
-      ok(`${v}: the pane stops above the sentence bar`, pb <= bt + .5, { pb, bt });
+      const nt = await page.$eval('.cd-nav', (b) => b.getBoundingClientRect().top);
+      ok(`${v}: the pane stops above the nav`, pb <= nt + .5, { pb, nt });
     }
 
     await page.click('.cd-tab[data-v="day"]');
     await page.waitForTimeout(80);
     const px = await shoot(page);
-    const head = await page.evaluate(() => {
-      const h = document.querySelector('#cdVDay .cd-head').getBoundingClientRect(), row = document.querySelector('.cd-it').getBoundingClientRect();
-      const nav = document.querySelector('.cd-nav').getBoundingClientRect(), bar = document.querySelector('.cd-say-bar').getBoundingClientRect();
-      return { t: h.top, nav: nav.bottom, row: row.top, rowL: row.left, bar: bar.bottom,
-        tide: document.documentElement.dataset.tide, acc: getComputedStyle(document.querySelector('.cd-sayb i')).backgroundColor,
-        badge: getComputedStyle(document.getElementById('cdNowT')).backgroundColor };
+    const lay = await page.evaluate(() => {
+      const r = (e) => e.getBoundingClientRect(), plus = document.getElementById('cdAdd'), cs = getComputedStyle(plus);
+      return { nav: r(document.querySelector('.cd-nav')).bottom, plus: { t: r(plus).top, r: r(plus).right, w: r(plus).width, bg: cs.backgroundColor, rad: cs.borderRadius },
+        week: r(document.getElementById('cdRibbon')).top, dial: r(document.getElementById('cdDial')).top };
     });
-    /* THE LIGHT TELLS THE TIME. At twenty past ten it is day: a sky-blue
-       light at the top, and that same hue is the one accent — the clock's
-       figure and the button that files. It has faded to the bare page by
-       the first row, so no row is ever read on it. */
-    const top = px(195, 16), under = px(head.rowL - 6, head.row + 4);
-    ok('at twenty past ten the light is day, and it is blue', head.tide === 'day' && top[2] - top[0] > 30, { tide: head.tide, top });
-    ok('the accent is the light\'s own hue', head.acc === 'rgb(124, 196, 255)' && head.badge === head.acc, head);
-    ok('and it has faded to the bare page by the first row', Math.max(...under.map((c, i) => Math.abs(c - [10, 12, 16][i]))) <= 4, under);
-    ok('the nav is at the top, above the title', head.nav <= head.t, head);
-    ok('the sentence bar is the foot of the screen', head.bar >= 844 - 12, head);
-    ok('there is one face, and it is dark',
+    /* THE SKY is the ground on every screen and carries no colour of its
+       own: near-black at the top, a slate night at the foot. */
+    const top = px(195, 4), foot = px(195, 836);
+    ok('the ground is the sky: near-black at the top, a slate night at the foot',
+      Math.max(...top) < 16 && lum(foot) > lum(top) * 3 && foot[2] > foot[0], { top, foot });
+    ok('the one white control is the add, round, at the top right',
+      lay.plus.bg === 'rgb(243, 245, 247)' && lay.plus.rad === '50%' && lay.plus.t < 70 && lay.plus.r > 360 && lay.plus.w === 44, lay.plus);
+    ok('the four words are the foot of the screen', lay.nav >= 844 - 12, lay);
+    ok('the week sits above the dial', lay.week < lay.dial, lay);
+    ok('there is one face, and it is dark, and no hour changes it',
       (await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme)) === 'dark'
-      && !(await page.getAttribute('html', 'data-mode')));
+      && !(await page.getAttribute('html', 'data-mode')) && !(await page.getAttribute('html', 'data-tide')));
     ok('no page errors', errs.length === 0, errs);
-    await c.close();
-  }
-
-  console.log('\n── the tide ──');
-  {
-    /* The hours the light turns: five, ten, four and half past eight. */
-    const { c, page, errs } = await ctx({ at: '2026-09-25T18:30:00' });
-    const T = await page.evaluate(() => [299, 300, 599, 600, 959, 960, 1229, 1230].map(window.cadence.tide));
-    ok('night until five, dawn until ten, day until four, dusk until half eight',
-      T.join() === 'night,dawn,dawn,day,day,dusk,dusk,night', T);
-    const px = await shoot(page);
-    const top = px(195, 16);
-    const d = await page.evaluate(() => ({ tide: document.documentElement.dataset.tide, acc: getComputedStyle(document.querySelector('.cd-sayb i')).backgroundColor }));
-    ok('at half past six it is dusk: a rose light, and a rose accent',
-      d.tide === 'dusk' && d.acc === 'rgb(255, 143, 168)' && top[0] - top[2] > 10, { d, top });
-    ok('no page errors at dusk', errs.length === 0, errs);
     await c.close();
   }
 
@@ -583,7 +546,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.fill('#cdRestore', JSON.stringify(bak));
     await Promise.all([page.waitForNavigation(), page.click('#cdRestoreGo')]);
     await page.waitForTimeout(150);
-    ok('restoring writes it back', (await page.$$eval('.cd-tk-n', (ns) => ns.map((n) => n.textContent))).includes('Restored'));
+    ok('restoring writes it back', (await page.$$eval('.cd-rn', (ns) => ns.map((n) => n.textContent))).includes('Restored'));
     ok('no page errors in the record', errs.length === 0, errs);
     await c.close();
   }
