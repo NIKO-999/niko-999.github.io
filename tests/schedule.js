@@ -14174,6 +14174,480 @@ const SAID = [
   }
 
   /* ══════════════════════════════════════════════════════════════
+     A PICTURE IN A NOTE
+
+     Asked for as "be able to attach image inside of notes, should look
+     how it would look in the Apple notes". Four treatments were
+     rendered over the real note at 390x844 and read at 1:1; full width
+     shipped, and the CARD shipped beside it as an option, asked for in
+     those words. The caption is what decides between them, which is
+     one decision instead of two and is what stops a card existing as a
+     frame around nothing.
+
+     EVERY ONE OF THESE FAILS SILENTLY. A picture in localStorage takes
+     the schedule down with it the day it is too big. A box with no
+     aspect on it is a note that jumps as you read it, and the blob is
+     always late. A blob left behind by a deleted line is one nothing
+     will ever look at again. And a viewer put away with `hidden` goes
+     on taking every press while the attribute is still being set
+     correctly — which has happened in this app nine times.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    const pictx = await browser.newContext(PHONE);
+    const picpage = await pictx.newPage();
+    const picerrs = [];
+    picpage.on('pageerror', (e) => picerrs.push(String(e)));
+    picpage.on('console', (m) => { if (m.type() === 'error') picerrs.push(m.text()); });
+    const picasked = [];
+    picpage.on('request', (r) => picasked.push(r.url()));
+
+    /* A 1x1 gif as a data URL: this is a check about the RECORD and the
+       drawing, and the only thing a real photograph would add is time.
+       The dimensions are carried by `pw`/`ph` rather than by the blob,
+       which is the whole point — so a one-pixel gif in a 800x600 box is
+       the reserve working rather than a fixture cheating. */
+    const PICPX = 'data:image/gif;base64,'
+      + 'R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
+    await picpage.addInitScript((px) => {
+      localStorage.setItem('sched.tour.v1', '1');
+      localStorage.setItem('sched.hint2.v1', '1');
+      localStorage.setItem('sched.hintw.v1', '1');
+      if (!localStorage.getItem('sched.note.v1')) {
+        localStorage.setItem('sched.note.v1', JSON.stringify({ list: [{
+          id: 'pN', t: 'Kit', u: 1756900000000, k: 'note', a: 'teal',
+          l: [
+            { i: 'q1', h: 0, x: 'Pin height four, not five.' },
+            /* Captioned, so it draws the card. */
+            { i: 'q2', h: 0, p: 'picA', pw: 800, ph: 600, pc: 'Rack at pin four' },
+            /* Bare, so it draws the picture and nothing else. */
+            { i: 'q3', h: 0, p: 'picB', pw: 450, ph: 700, pc: '' },
+            /* A key nothing ever wrote — the blob never arrives, which
+               is how the RESERVE is measured without racing it. */
+            { i: 'q4', h: 0, p: 'picGone', pw: 4000, ph: 200, pc: '' },
+            { i: 'q5', h: 0, x: 'Belt is in the left locker.' }
+          ]
+        }] }));
+      }
+      window.__picpx = px;
+    }, PICPX);
+    await picpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await picpage.waitForTimeout(420);
+
+    /* Two blobs planted straight into the store the app reads, because
+       what is being checked below is the DRAWING and the sweep rather
+       than the file input — which has its own assertion further down. */
+    const picPut = (k) => picpage.evaluate(([key, u]) => new Promise((done) => {
+      const q = indexedDB.open('schedPic', 1);
+      q.onsuccess = () => {
+        const t = q.result.transaction('pic', 'readwrite');
+        t.objectStore('pic').put(u, key);
+        t.oncomplete = () => done(true);
+        t.onerror = () => done(false);
+      };
+      q.onerror = () => done(false);
+    }), [k, PICPX]);
+    const picKeys = () => picpage.evaluate(() => new Promise((done) => {
+      const q = indexedDB.open('schedPic', 1);
+      q.onsuccess = () => {
+        const g = q.result.transaction('pic').objectStore('pic').getAllKeys();
+        g.onsuccess = () => done(g.result.slice().sort());
+        g.onerror = () => done([]);
+      };
+      q.onerror = () => done([]);
+    }));
+    await picPut('picA');
+    await picPut('picB');
+
+    const picOpen = async (edit) => {
+      await picpage.evaluate(async (want) => {
+        if (document.querySelector('.tab[data-view="notes"]')
+            .getAttribute('aria-current') !== 'page') {
+          document.querySelector('.tab[data-view="notes"]').click();
+          await new Promise((z) => setTimeout(z, 300));
+        }
+        const c = document.querySelector('.nt-card');
+        if (c) { c.click(); await new Promise((z) => setTimeout(z, 320)); }
+        const b = document.getElementById('scNtEd');
+        if ((b.getAttribute('aria-pressed') === 'true') !== want) {
+          b.click();
+          await new Promise((z) => setTimeout(z, 320));
+        }
+      }, edit);
+      await picpage.waitForTimeout(160);
+    };
+    await picOpen(false);
+
+    /* ── THE BOX IS RESERVED FROM THE RECORD ──
+       The blob is in IndexedDB and arrives a frame or more late, so an
+       <img> with no aspect on it has no height until it does — and
+       every picture on the note then reflows as it loads, which is the
+       jank the tools strip was measured and moved for.
+
+       Measured on the one whose blob NEVER ARRIVES, because that is
+       the reserve on its own rather than the reserve racing the fetch:
+       a box that is right there is right before any picture lands. */
+    const picBox = await picpage.evaluate(() => {
+      const rows = [...document.querySelectorAll('.nt-row.is-pic')];
+      return rows.map((r) => {
+        const im = r.querySelector('img');
+        const b = im.getBoundingClientRect();
+        const cs = getComputedStyle(im);
+        const rs = getComputedStyle(r);
+        return {
+          w: Math.round(b.width * 10) / 10, h: Math.round(b.height * 10) / 10,
+          src: !!im.getAttribute('src'),
+          cap: r.classList.contains('is-cap'),
+          gone: r.classList.contains('is-gone'),
+          off: r.querySelector('.nt-pb').disabled,
+          btn: Math.round(r.querySelector('.nt-pb').getBoundingClientRect().height),
+          rad: parseFloat(cs.borderTopLeftRadius),
+          rowRad: parseFloat(rs.borderTopLeftRadius),
+          rowBg: rs.backgroundColor,
+          text: (r.querySelector('.nt-pc') || {}).textContent || ''
+        };
+      });
+    });
+    const picRatio = (b) => Math.round((b.w / b.h) * 1000) / 1000;
+    ok('a picture is drawn at its own aspect, and the one whose blob never '
+      + 'arrives is drawn at it too',
+      picBox.length === 3
+      && Math.abs(picRatio(picBox[0]) - 800 / 600) < 0.02
+      && Math.abs(picRatio(picBox[1]) - 450 / 700) < 0.02
+      && picBox[2].gone && !picBox[2].src
+      && Math.abs(picRatio(picBox[2]) - 4000 / 200) < 0.4, picBox);
+    /* A control that exists and refuses is worse than one that is not
+       there, so a picture that has gone is not pressable. */
+    ok('...and a picture that has gone leaves its box and stops being a press',
+      picBox[2].off === true && picBox[0].off === false, picBox.map((b) => b.off));
+    /* 17px of picture in a 44px target: the extra is dead button rather
+       than a distorted photograph, which is `.row-ed`'s own split
+       between what is DRAWN and what is REACHABLE. */
+    ok('...and the press target clears 44 even where the picture does not',
+      picBox.every((b) => b.btn >= 44) && picBox[2].h < 44, picBox.map((b) => [b.btn, b.h]));
+
+    /* ── THE CAPTION IS THE SWITCH, AND BOTH DIRECTIONS ARE MEASURED ──
+       "It is in a card" passes on a build that puts every picture in
+       one, which is the treatment that was NOT chosen. The radius
+       nests, 14 outside and 8 in, because two rounded rectangles at one
+       radius read as a mistake. */
+    ok('a picture with a caption is a card and one without is bare',
+      picBox[0].cap && picBox[0].rowRad === 14 && picBox[0].rad === 8
+      && /^rgba?\(/.test(picBox[0].rowBg) && !/, 0\)$/.test(picBox[0].rowBg)
+      && picBox[0].text === 'Rack at pin four'
+      && !picBox[1].cap && picBox[1].rad === 12
+      && picBox[1].text === '' && /, 0\)$/.test(picBox[1].rowBg),
+      [picBox[0], picBox[1]]);
+
+    /* ── AND NOTHING SIDEWAYS, WHICH A FULL-WIDTH PICTURE IS THE ONE
+           THING ON THIS SCREEN THAT COULD DO ──
+       The global sweep visits Notes, and its fixture has no pictures
+       on it — so the one element in this app wide enough to push the
+       pane would have gone unlooked at. Measured as the PANE's own
+       scrollable width, which is the question that means a finger has
+       to move. */
+    const picWide = await picpage.evaluate(() => {
+      const p = document.getElementById('scNotePane');
+      const r = p.getBoundingClientRect();
+      return { over: p.scrollWidth - p.clientWidth,
+        widest: Math.max(...[...document.querySelectorAll('.nt-row.is-pic')]
+          .map((q) => q.getBoundingClientRect().right)) - r.right };
+    });
+    ok('...and a full-width picture does not push the pane sideways',
+      picWide.over <= 1 && picWide.widest <= 1, picWide);
+
+    /* ── THE CAPTION IS ONE SIZE IN BOTH MODES ──
+       Reading draws it as text and editing draws it into a field, which
+       is two drawings of one thing — and a mode switch that re-wraps a
+       caption is the note looking like it changed. Under the 16px
+       floor with the viewport cap behind it, which is where the two
+       heading fields already sit: at 16 a caption is the size of the
+       sentences it is a caption FOR. */
+    const picCap = await picpage.evaluate(async () => {
+      const ed = async (want) => {
+        const b = document.getElementById('scNtEd');
+        if ((b.getAttribute('aria-pressed') === 'true') !== want) b.click();
+        await new Promise((z) => setTimeout(z, 320));
+      };
+      const px = (sel) => {
+        const e = document.querySelector(sel);
+        if (!e) throw new Error('nothing drawn for ' + sel);
+        return parseFloat(getComputedStyle(e).fontSize);
+      };
+      await ed(false);
+      const read = px('.nt-pc');
+      await ed(true);
+      const write = px('.nt-cap');
+      await ed(false);
+      return { read, write,
+        cap: (document.querySelector('meta[name="viewport"]') || {}).content || '' };
+    });
+    ok('a caption reads the size it writes, and the cap is what lets it be under the floor',
+      picCap.read === picCap.write && picCap.read < 16
+      && /maximum-scale\s*=\s*1\b/.test(picCap.cap), picCap);
+
+    /* THE PICTURE IS NEVER IN THE RECORD. A data URL in localStorage
+       shares a 5MB budget with the schedule, so the day it is too big
+       it does not fail by itself — it takes the week with it. */
+    const picStore = await picpage.evaluate(() => ({
+      note: localStorage.getItem('sched.note.v1') || '',
+      keys: JSON.parse(localStorage.getItem('sched.note.v1')).list[0].l
+        .map((L) => L.p || '')
+    }));
+    ok('the record holds a key and never the picture',
+      picStore.note.indexOf('data:image') < 0
+      && picStore.note.indexOf('base64') < 0
+      && picStore.keys.join(',') === ',picA,picB,picGone,', picStore.keys);
+
+    /* A PICTURE IS NOT A LINE. Counted as one, "5 lines" is a figure the
+       card cannot show you five of — and a note that is one photograph
+       and nothing else previews as empty, which reads as a note with
+       nothing in it. */
+    const picFigs = await picpage.evaluate(async () => {
+      document.querySelector('.nt-back').click();
+      await new Promise((z) => setTimeout(z, 340));
+      return document.querySelector('.nt-meta').textContent;
+    });
+    ok('the card counts the pictures, and does not count them as lines',
+      /(^|·\s)2 lines(\s|·|$)/.test(picFigs) && /3 pictures/.test(picFigs), picFigs);
+
+    /* ── AND THE STRIP IS NOT BUILT FOR A PICTURE ──
+       Its caption takes focus like any other field, so without a guard
+       the strip came up over a photograph offering Heading, Tab,
+       Bracket, Dot and Weight. Heading was the dangerous one: pressed,
+       the line was read back as a heading on the next load and the
+       picture was SWEPT. Found by rendering the screen rather than by
+       reading the diff.
+
+       Asserted beside a line that DOES get one, or "the strip is
+       hidden" passes on a build where it never appears at all. */
+    await picOpen(true);
+    const picStrip = await picpage.evaluate(async () => {
+      const look = async (sel) => {
+        const f = document.querySelector(sel);
+        if (!f) throw new Error('nothing to focus for ' + sel);
+        f.focus();
+        await new Promise((z) => setTimeout(z, 280));
+        const t = document.querySelector('.nt-tools');
+        return { up: !!t && !t.hidden && t.getBoundingClientRect().height > 0,
+          chips: t ? t.querySelectorAll('.nt-tool').length : 0 };
+      };
+      return { pic: await look('.nt-cap'), line: await look('.nt-row .nt-in') };
+    });
+    ok('a picture gets no tools strip, and a line still does',
+      picStrip.pic.up === false && picStrip.line.up === true
+      && picStrip.line.chips > 0, picStrip);
+
+    /* ── A LINE CARRYING BOTH IS READ AS A PICTURE ──
+       Damage either way, and the order is the repair: reading it as a
+       heading throws the photograph away, where reading it as a picture
+       costs a word somebody can type again. The days are what you
+       cannot get back, one screen over, for the same reason. */
+    const picBoth = await picpage.evaluate(() => {
+      const raw = JSON.parse(localStorage.getItem('sched.note.v1'));
+      raw.list[0].l.push({ i: 'q9', h: 1, c: 'teal', x: 'HEAD',
+        p: 'picA', pw: 4, ph: 3 });
+      localStorage.setItem('sched.note.v1', JSON.stringify(raw));
+      return true;
+    });
+    await picpage.reload({ waitUntil: 'networkidle' });
+    await picpage.waitForTimeout(500);
+    const picKept = await picpage.evaluate(() => {
+      const L = JSON.parse(localStorage.getItem('sched.note.v1')).list[0].l;
+      const q = L[L.length - 1];
+      return { h: q.h, p: q.p, x: q.x };
+    });
+    ok('a line carrying a picture AND a heading keeps the picture',
+      picKept.p === 'picA' && !picKept.h && picKept.x === '', [picBoth, picKept]);
+
+    /* ── THE BLOB GOES WITH THE LINE ──
+       Backspace at the head of an empty caption, which is every other
+       line's own delete rather than a control of its own: a remove
+       button on every picture is the column of furniture this screen
+       has none of. Asserted as the STORE rather than as the screen —
+       a row that stopped drawing while the blob stayed would pass any
+       check written the other way round. */
+    await picOpen(true);
+    const picDel = await picpage.evaluate(async () => {
+      const before = [...document.querySelectorAll('.nt-row.is-pic')].length;
+      const f = document.querySelector('.nt-cap');
+      f.focus();
+      await new Promise((z) => setTimeout(z, 220));
+      /* The captioned one is emptied first, because the delete is the
+         head of an EMPTY caption — which is also the caption coming off
+         and the card going with it. */
+      f.value = '';
+      f.dispatchEvent(new Event('input', { bubbles: true }));
+      await new Promise((z) => setTimeout(z, 650));
+      f.dispatchEvent(new KeyboardEvent('keydown',
+        { key: 'Backspace', bubbles: true, cancelable: true }));
+      await new Promise((z) => setTimeout(z, 520));
+      return { before, after: [...document.querySelectorAll('.nt-row.is-pic')].length,
+        rec: JSON.parse(localStorage.getItem('sched.note.v1')).list[0].l
+          .map((L) => L.p || 'x').join(',') };
+    });
+    const picLeft = await picKeys();
+    ok('backspace on an empty caption takes the picture and its blob with it',
+      picDel.before === 4 && picDel.after === 3
+      && picDel.rec === 'x,picB,picGone,x,picA'
+      && picLeft.join(',') === 'picA,picB', { picDel, picLeft });
+
+    /* Return puts a line AFTER the picture, so attaching one and
+       carrying on writing is one key rather than a trip to the foot. */
+    const picRet = await picpage.evaluate(async () => {
+      const f = document.querySelector('.nt-cap');
+      f.focus();
+      await new Promise((z) => setTimeout(z, 220));
+      f.dispatchEvent(new KeyboardEvent('keydown',
+        { key: 'Enter', bubbles: true, cancelable: true }));
+      await new Promise((z) => setTimeout(z, 480));
+      return JSON.parse(localStorage.getItem('sched.note.v1')).list[0].l
+        .map((L) => L.p ? 'PIC' : JSON.stringify(L.x)).join(',');
+    });
+    ok('...and return in a caption puts a line after the picture',
+      picRet === '"Pin height four, not five.",PIC,"",PIC,"Belt is in the left locker.",PIC',
+      picRet);
+
+    /* A line backspacing onto a PICTURE has nowhere to put its words,
+       which is the heading's own rule: it only deletes itself when it
+       is empty, and it never merges. */
+    const picMerge = await picpage.evaluate(async () => {
+      const f = [...document.querySelectorAll('.nt-row .nt-in')]
+        .find((e) => e.value.indexOf('Belt') === 0);
+      if (!f) throw new Error('no Belt line to backspace');
+      f.focus();
+      f.setSelectionRange(0, 0);
+      await new Promise((z) => setTimeout(z, 200));
+      f.dispatchEvent(new KeyboardEvent('keydown',
+        { key: 'Backspace', bubbles: true, cancelable: true }));
+      await new Promise((z) => setTimeout(z, 420));
+      return JSON.parse(localStorage.getItem('sched.note.v1')).list[0].l
+        .map((L) => L.p ? 'PIC:' + (L.x || '') : JSON.stringify(L.x)).join(',');
+    });
+    ok('...and a line backspacing onto a picture does not merge into it',
+      /PIC:,"Belt is in the left locker\."/.test(picMerge), picMerge);
+
+    /* ── A KEY NOTHING NAMES IS SWEPT AT BOOT ──
+       The delete above is the ordinary path; this is what covers one
+       that failed, or a notes key restored from a backup. `me` is the
+       avatar and survives, which is the half that says the sweep knows
+       what it is looking at. */
+    await picPut('picGhost');
+    await picPut('me');
+    await picpage.reload({ waitUntil: 'networkidle' });
+    await picpage.waitForTimeout(5400);
+    const picSwept = await picKeys();
+    ok('a blob no line names is swept at boot, and the face is not',
+      picSwept.indexOf('picGhost') < 0 && picSwept.indexOf('me') >= 0
+      && picSwept.indexOf('picA') >= 0, picSwept);
+
+    /* ── THE VIEWER IS BUILT AND REMOVED, NEVER HIDDEN ──
+       Asserted as the NODE being gone rather than as not drawn: a rule
+       that merely hid it leaves a full-screen surface at z-index 80
+       taking every press on the app behind it, which is the fault this
+       app has shipped nine times with the attribute set correctly
+       throughout. `contain` is the other half — a viewer that cropped
+       the way the column does would show you nothing you could not
+       already see. */
+    await picOpen(false);
+    const picView = await picpage.evaluate(async () => {
+      document.querySelector('.nt-row.is-pic .nt-pb').click();
+      await new Promise((z) => setTimeout(z, 380));
+      const v = document.querySelector('.nt-pv');
+      const im = v && v.querySelector('img');
+      return { on: !!v,
+        z: v ? +getComputedStyle(v).zIndex : 0,
+        fit: im ? getComputedStyle(im).objectFit : '',
+        full: v ? Math.round(v.getBoundingClientRect().width) : 0 };
+    });
+    await picpage.keyboard.press('Escape');
+    await picpage.waitForTimeout(280);
+    const picShut = await picpage.evaluate(() => ({
+      node: !!document.querySelector('.nt-pv'),
+      sheet: !!document.querySelector('.sheet:not([hidden])')
+    }));
+    ok('pressing a picture opens a viewer over everything, and escape removes the node',
+      picView.on && picView.z >= 70 && picView.fit === 'contain'
+      && picView.full === 390 && picShut.node === false, { picView, picShut });
+
+    /* ── AND THE FILE INPUT IS THE ONLY WAY ONE ARRIVES ──
+       The blob lands BEFORE the line does: a line pointing at a key
+       nothing wrote is a reserved box with nothing in it, and the
+       record would then say there is a picture there. The dimensions
+       come back with the picture rather than from the file, so the
+       reserved box and what is in it cannot disagree. */
+    await picOpen(true);
+    const picAdd = await picpage.evaluate(async () => {
+      const b = [...document.querySelectorAll('.nt-add')]
+        .find((x) => /Photo/.test(x.textContent));
+      return !!b && b.nextElementSibling
+        && b.nextElementSibling.classList.contains('pic-file');
+    });
+    const picIn = await picpage.$('.nt-add.is-pic + .pic-file');
+    ok('the foot adds a picture beside the line and the section', picAdd, picAdd);
+    if (picIn) {
+      await picIn.setInputFiles({ name: 'shot.png', mimeType: 'image/png',
+        /* A 2x1 PNG, so the aspect it comes back with is a fact about
+           the file rather than a default: 4:3 is what a DAMAGED record
+           falls to, and a fixture that could not tell the two apart
+           would pass on a build that never read the image at all. */
+        buffer: Buffer.from(
+          'iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAIAAAB7QOjdAAAAEklEQVR4nGP8z4'
+          + 'AKmBhwiQAAP5YCLp/l1oAAAAAASUVORK5CYII=', 'base64') });
+      await picpage.waitForTimeout(1100);
+    }
+    const picNew = await picpage.evaluate(() => {
+      const L = JSON.parse(localStorage.getItem('sched.note.v1')).list[0].l;
+      const q = L[L.length - 1];
+      return { p: !!q.p, pw: q.pw, ph: q.ph, x: q.x, pc: q.pc, h: q.h };
+    });
+    const picHas = await picKeys();
+    ok('...and it files the blob before the line, with the aspect it came back with',
+      picNew.p && picNew.pw === 2 && picNew.ph === 1 && picNew.x === ''
+      && picNew.pc === '' && !picNew.h
+      && picHas.length >= 3, { picNew, picHas });
+
+    /* ── AND EVERY LAYOUT DRAWS ONE ──
+       The record keeps a picture whatever `n.k` is, because the layout
+       changes the drawing and never the record. A BUDGET is the one
+       that does not draw it: its reading faces are arithmetic over
+       priced rows and there is nowhere for a photograph to be — but it
+       is still drawn in EDIT there, because a row you cannot reach is a
+       picture you cannot delete. */
+    const picLay = await picpage.evaluate(async () => {
+      const ed = async (want) => {
+        const b = document.getElementById('scNtEd');
+        if ((b.getAttribute('aria-pressed') === 'true') !== want) b.click();
+        await new Promise((z) => setTimeout(z, 320));
+      };
+      const out = {};
+      for (const k of ['note', 'proc', 'goal', 'chk', 'bud']) {
+        await ed(true);
+        const c = document.querySelector('.nt-lb[data-k="' + k + '"]');
+        if (!c) throw new Error('no ' + k + ' chip in the picker');
+        c.click();
+        await new Promise((z) => setTimeout(z, 340));
+        const edit = document.querySelectorAll('.nt-row.is-pic').length;
+        await ed(false);
+        out[k] = { read: document.querySelectorAll('.nt-row.is-pic').length, edit };
+      }
+      return out;
+    });
+    ok('every layout draws a picture, and a budget draws it only where you can delete it',
+      ['note', 'proc', 'goal', 'chk'].every((k) => picLay[k].read > 0 && picLay[k].edit > 0)
+      && picLay.bud.read === 0 && picLay.bud.edit > 0, picLay);
+
+    /* NOTHING ABOUT THIS LEAVES THE PHONE, and it cannot: a data URL is
+       not a request. Counted anyway, because the claim is about the
+       screen rather than about the mechanism — and this is the screen
+       the promise was written for. */
+    const picOff = picasked.filter((u) => !u.startsWith(BASE));
+    ok('and a note full of pictures reaches nothing off this origin',
+      picOff.length === 0, picOff.slice(0, 4));
+    ok('nothing threw through any of it', picerrs.length === 0, picerrs.slice(0, 4));
+    await pictx.close();
+  }
+
+  /* ══════════════════════════════════════════════════════════════
      NOTE TAKING IS ONE OF THE FIVE
 
      Mind asked what you read and what you listened to and had no

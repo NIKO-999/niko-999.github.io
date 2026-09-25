@@ -13892,3 +13892,190 @@ a second screen needs the same arithmetic. `scObjDay` became
 `scWeekDate` and `scPatMid` became `scFig` for exactly this, and the
 rule is the same one every time: name a helper for the QUESTION rather
 than for the caller that happened to ask it first.
+
+## A picture in a note
+
+Asked for as *be able to attach image inside of notes, should look how
+it would look in the Apple notes*. **Four treatments were rendered over
+the real note at 390x844 and read at 1:1**, and what was picked is
+**full width** — one picture a line, the text column's own width, its
+own aspect — with the **card** shipped beside it as an option, asked
+for in those words.
+
+**WHAT THE OTHER THREE COST.** A GRID of squares is what Apple Notes
+actually does with several at once, and it CROPS: a portrait receipt
+loses its ends until you open it, and a run of adjacent picture lines
+is the bracket's own machinery for a drawing that throws away the
+thing you attached. A THUMBNAIL beside a filename costs the least
+height of the four and tells you nothing about the picture, which is
+most of why you attached it — a note of those reads as a file list. And
+the CARD, on its own, is a card inside a note: the frame-inside-a-frame
+this project keeps taking back out.
+
+**THE CAPTION IS THE SWITCH, and that is what makes the card
+affordable.** A picture with something to say sits in a card that holds
+it; one with nothing to say is bare. One decision instead of two — no
+style toggle to keep in step with a caption field — and it is what
+stops a card ever existing as a frame around nothing. Both directions
+are asserted, because "it is in a card" passes on the build that puts
+every picture in one, which is the treatment that was not chosen.
+
+**THE RADIUS NESTS**, 14 outside and 8 in, because two rounded
+rectangles at one radius read as a mistake. **A border and never a
+shadow**: the photograph is IN the card, so the card only has to be an
+edge — the feed post's own argument, and the rows either side of it are
+flat.
+
+### The store already existed, and it is not localStorage
+
+`schedPic` / `pic` is keyed by a string and holds your face under `me`,
+so a note's picture is the same store under a minted key. A second
+database for the same kind of thing is a second thing to open, upgrade
+and fail at.
+
+**NEVER localStorage, which is written down above `scPicDB` and is why
+that store exists at all**: a picture there shares a 5MB budget with
+the schedule, so the day it is too big it does not fail by itself — it
+takes the week with it. Asserted as the RECORD, which may hold a key
+and may never hold a `data:` URL.
+
+**THE RECORD HOLDS THE ASPECT, AND THAT IS THE LOAD-BEARING HALF.** The
+blob is in IndexedDB and arrives a frame or more late, so an `<img>`
+with no aspect on it has no height until it does — and every picture on
+the note then reflows as it loads, which is exactly the jank the tools
+strip was measured and moved for. `pw`/`ph` are the dimensions of what
+was STORED rather than of what was chosen, so the reserved box and the
+picture in it cannot disagree. Damaged, they fall to 4:3 rather than to
+nothing: a box of no height IS the jump this prevents.
+
+**Measured on a picture whose blob NEVER ARRIVES**, which is the
+reserve on its own rather than the reserve racing the fetch: a box that
+is right there is right before any picture lands. That check doubles as
+the missing-blob case — the row keeps its shape and the press is
+disabled, because a control that exists and refuses is worse than one
+that is not there.
+
+**A PICTURE THAT ARRIVES LATE FILLS THE IMAGE ALREADY DRAWN.**
+Repainting instead takes the caret with it in edit mode — the search
+field's own lesson, reported there as *it cancels out my writing* — and
+it would repaint once per picture on a note that has several.
+
+**IT FITS RATHER THAN CROPS, and `scPicCrop` could not serve.** That
+one takes a square because a face is drawn in a circle at 26px; crop a
+note's picture and you throw away the half of a whiteboard photograph
+you attached it for. 1280 on the long edge is a 354px column at three
+times the density with margin, and a phone camera's four megapixels
+kept whole is several megabytes in a database to be drawn at 354. **One
+reader, two draws** — the FileReader, the Image and the two failure
+paths are identical, and written twice they are two places to get a
+broken file wrong.
+
+**AND THE BLOB LANDS BEFORE THE LINE DOES.** A line pointing at a key
+nothing wrote is a reserved box with nothing in it, and the record
+would then say there is a picture there.
+
+### The caption field is the picture's only control
+
+A picture line has no words, so focus can never land on it and the
+tools strip can never be built for it — which is why the caption cannot
+live there the way every other decision about a line does. It is a
+field on the row, and it IS the switch. **Backspace at the head of an
+empty one takes the picture away**, which is every other line's own
+delete rather than a control of its own: a remove button on every
+picture is the column of furniture this screen has none of. Return puts
+a line after it, so attaching a picture and carrying on writing is one
+key.
+
+**AND THE STRIP HAD TO BE REFUSED FOR IT, which a render found and a
+diff would not.** The caption takes focus like any other field, so the
+strip came up over a photograph offering Heading, Tab, Bracket, Dot and
+Weight — five controls that mean nothing on a row with no words.
+**Heading was the dangerous one**: pressed, it set `h` on the line, the
+line was read back as a heading on the next load, and the picture was
+then SWEPT. A control that does nothing is a nuisance; one that quietly
+deletes a photograph is not. Asserted beside a line that DOES get a
+strip, or "the strip is hidden" passes on a build where it never
+appears at all.
+
+**A LINE CARRYING BOTH IS READ AS A PICTURE**, and the order is the
+repair rather than a tie-break: reading it as a heading throws the
+photograph away, where reading it as a picture costs a word somebody
+can type again. The days are what you cannot get back, one screen over,
+for the same reason.
+
+**A line backspacing onto a PICTURE has nowhere to put its words**, so
+it only deletes itself when it is empty — the heading's own rule, and
+one line.
+
+### The blob goes with the line, and a key nothing names is swept
+
+Deleting a line deletes its picture on the spot, and removing a note
+deletes all of them. That is the ordinary path. **The sweep at boot is
+what covers a delete that failed while the database was busy, or a
+notes key restored from a backup** — nothing else would ever look at
+that blob again, so it would sit there for the life of the browser.
+`me` is the face and every other key in this store is a note's, so what
+no line names is an orphan; the check asserts the face SURVIVES, which
+is the half that says the sweep knows what it is looking at.
+
+**A damaged notes key reads as an empty one, and sweeping is still
+right there**: the notes are already gone, so their pictures point at
+nothing either way.
+
+**Deferred four seconds, because it is housekeeping** — a walk of every
+key in the store has no business competing with the first paint.
+
+### The viewer is built and removed, never hidden
+
+A full-screen surface put away with the `hidden` attribute has broken
+in this app **nine times**: the attribute works only because of the
+browser's own `[hidden] { display: none }`, and any author `display`
+outranks it — so the surface goes on taking every press while the
+property is still being set correctly. **An element that is not in the
+document cannot swallow a press**, which is why this is asserted as the
+node being GONE rather than as not drawn.
+
+**CONTAIN RATHER THAN COVER**, which is the entire reason a viewer
+exists: a tall picture is drawn small in a text column, and one that
+cropped the way the column does would show you nothing you could not
+already see. z-index 80, over the sheet at 50, the toast at 60 and the
+intro at 70 — so it takes Escape FIRST, for the reason the history
+already takes it before a sheet.
+
+**NO `loading="lazy"`, and `tests/names.js` refuses it statically.** An
+image inside a surface resting off-screen by TRANSFORM can be judged
+not-near and never fetched at all, which reported as *titles not
+showing* once already, from three call sites at once.
+
+### The foot adds it, and the layout never eats it
+
+**NOT THE TOOLS STRIP.** That strip is what belongs to the LINE you are
+on — its heading, its mark, its colour — and inserting a new line is
+not a property of the current one. The foot is already this screen's
+*add something*, so a picture is a third thing of that kind and it is
+APPENDED, which is what `+ Line` already does: no new rule about where
+a thing you add goes.
+
+**EVERY LAYOUT DRAWS ONE, AND A BUDGET DRAWS IT ONLY IN EDIT.** The
+record keeps a picture whatever `n.k` is, because the layout changes
+the drawing and never the record. A budget's reading faces are
+arithmetic over priced rows and there is nowhere for a photograph to
+be — but the row is still drawn while you are editing, because **a row
+you cannot reach is a picture you cannot delete.**
+
+**A PICTURE IS NOT A LINE.** Counted as one, "5 lines" is a figure the
+card cannot show you five of — and a note that is one photograph and
+nothing else previews as empty, which reads as a note with nothing in
+it. Its own figure is what says so. **And it is not a STATEMENT
+either**: the statement IS a goal's first line, which is what makes the
+marker the thing you wrote rather than the first plain line it can
+find, so a goal that opens on a picture has none yet.
+
+**The press target clears 44 even where the picture does not.** A very
+wide short photograph is 17px tall in this column, and the extra is
+dead button rather than a distorted picture — `.row-ed`'s own split
+between what is DRAWN and what is REACHABLE, for the seventh time.
+
+**And the sentence before the delete had to say so.** Removing a note
+is this app's one delete with no bin behind it, and it now names what
+goes: *everything in it, pictures included*.
