@@ -171,11 +171,11 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const go = await page.$eval('#cdGo', (b) => { const r = b.getBoundingClientRect(), cs = getComputedStyle(b);
       return { w: r.width, cx: r.left + r.width / 2, b: r.bottom, bg: cs.backgroundColor, rad: cs.borderRadius, l: b.getAttribute('aria-label'), p: b.getAttribute('aria-pressed') }; });
     ok('the one white control is a round check at the foot of the screen', go.w === 64 && Math.abs(go.cx - 195) < 1 && go.b > 780 && go.bg === 'rgb(243, 245, 247)' && go.rad === '50%', go);
-    ok('and it is named for the block it ticks', go.l === 'Mark Deep work kept' && go.p === 'false', go);
+    ok('and it is named for the block it ticks', go.l === 'Mark Deep work completed' && go.p === 'false', go);
     await page.click('#cdGo');
     ok('pressing it keeps the block you are in', (await store(page, 'cad.log.v1'))['2026-09-25'].s3 === 1);
     const kept = await page.$eval('#cdGo', (b) => ({ p: b.getAttribute('aria-pressed'), l: b.getAttribute('aria-label'), bg: getComputedStyle(b).backgroundColor }));
-    ok('and it lights in the block\'s own colour, and says so', kept.p === 'true' && kept.l === 'Deep work kept. Untick' && kept.bg === 'rgb(232, 198, 124)', kept);
+    ok('and it lights in the block\'s own colour, and says so', kept.p === 'true' && kept.l === 'Deep work completed. Untick' && kept.bg === 'rgb(232, 198, 124)', kept);
     ok('today\'s dot in the week fills part way', (await page.getAttribute('.cd-wd[data-d="2026-09-25"]', 'data-state')) === 'part');
     await page.click('#cdGo');
     ok('pressing it again unticks it', !((await store(page, 'cad.log.v1'))['2026-09-25'] || {}).s3
@@ -209,7 +209,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
 
     /* Another day has no clock on it: the middle is what that day kept. */
     await page.click('.cd-wd[data-d="2026-09-24"]');
-    ok('yesterday is named, and its middle is what it kept', (await heroOf(page)).join('|') === 'Yesterday · 24 Sep|0 of 7|kept · 6h planned|', await heroOf(page));
+    ok('yesterday is named, and its middle is what it kept', (await heroOf(page)).join('|') === 'Yesterday · 24 Sep|0 of 7|completed · 6h planned|', await heroOf(page));
     ok('and with no clock there is no check, no line and no next', !(await shown(page, '#cdGo')) && !(await shown(page, '#cdBar')) && !(await shown(page, '#cdThen')));
     ok('every block of that day is in the list, and every one is behind you',
       (await page.$$eval('.cd-it', (ls) => ls.length === 7 && ls.every((l) => l.classList.contains('is-past')))));
@@ -273,7 +273,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const { c, page } = await ctx({ at: '2026-09-25T12:15:00' });
     ok('between two blocks the middle is the next one and how soon', (await heroOf(page)).join('|') === 'Next · Rest · 12:15|Lunch|in 15m · at 12:30|Emails and calls at 14:00', await heroOf(page));
     ok('and with nothing running there is no line of how far through', !(await shown(page, '#cdBar')));
-    ok('the check ticks the next one', (await page.getAttribute('#cdGo', 'aria-label')) === 'Mark Lunch kept');
+    ok('the check ticks the next one', (await page.getAttribute('#cdGo', 'aria-label')) === 'Mark Lunch completed');
     ok('and the list leaves out the two in the middle', (await listOf(page)).join() === 's0,s1,s3,s8,s9', await listOf(page));
     ok('today with nothing kept yet makes no claim in the week: it is not over',
       (await page.getAttribute('.cd-wd[data-d="2026-09-25"]', 'data-state')) === 'quiet');
@@ -294,7 +294,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
   }
   {
     const { c, page } = await ctx({ at: '2026-09-25T23:10:00' });
-    ok('after the last, the middle is what today kept', (await heroOf(page)).join('|') === 'Today · 23:10|0 of 7|kept · nothing left today|', await heroOf(page));
+    ok('after the last, the middle is what today kept', (await heroOf(page)).join('|') === 'Today · 23:10|0 of 7|completed · nothing left today|', await heroOf(page));
     ok('with no check and nothing to open', !(await shown(page, '#cdGo')) && (await page.$eval('#cdHeroN', (b) => b.disabled)));
     ok('and every block is back in the list', (await listOf(page)).length === 7);
     await c.close();
@@ -395,7 +395,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
 
     await page.click('.cd-tab[data-v="hab"]');
     const train = await page.$eval('.cd-hr[data-h="train"]', (e) => ({ t: e.textContent, on: e.classList.contains('is-on') }));
-    ok('Train is kept by the session filed today', /Kept by a session/.test(train.t) && train.on, train);
+    ok('Train is kept by the session filed today', /Completed by a session/.test(train.t) && train.on, train);
     const hues = await page.$$eval('.cd-hr .cd-hr-b i', (ns) => ns.map((n) => getComputedStyle(n).boxShadow.match(/rgba?\([^)]+\)/)[0]));
     ok('six habits, six colours: colour says which', hues.length === 6 && new Set(hues).size === 6, hues);
     const fns = await page.$$eval('.cd-hr .cd-fn', (fs) => fs.map((f) => f.children.length));
@@ -419,7 +419,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('the bumps add, without float drift', (await page.textContent('#cdNumV')).startsWith('0.75'));
     await closeSheet(page);
     ok('the figure at the top counts today', (await page.textContent('#cdHabT')) === '3 of 6'
-      && (await page.getAttribute('#cdHabDots', 'aria-label')) === '3 of 6 habits kept today');
+      && (await page.getAttribute('#cdHabDots', 'aria-label')) === '3 of 6 habits completed today');
     const head = await page.$$eval('#cdHabDots i', (is) => is.map((i) => i.classList.contains('is-on') ? getComputedStyle(i).backgroundColor : ''));
     ok('and under it is a dot a habit, each lit in its own colour as it is kept',
       head.length === 6 && head.filter(Boolean).length === 3 && head[0] === 'rgb(242, 161, 132)' && head[1] === 'rgb(183, 165, 255)' && head[2] === 'rgb(125, 207, 216)', head);
@@ -438,7 +438,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.click('.cd-tab[data-v="mon"]');
     ok('the month is September, and the line above it is the year', (await page.textContent('#cdMonT')) === 'September'
       && (await page.textContent('#cdMonK')) === '2026');
-    ok('it counts the days kept and the days trained', (await page.textContent('#cdMonCap')) === '4 days kept · 2 trained');
+    ok('it counts the days kept and the days trained', (await page.textContent('#cdMonCap')) === '4 days completed · 2 trained');
     ok('it draws thirty days', (await page.$$eval('.cd-mc[data-day]', (cs) => cs.length)) === 30);
     ok('the grid is a whole rectangle', (await page.$$eval('.cd-mgrid > *', (cs) => cs.length)) % 7 === 0);
     ok('a month still to come cannot be opened', await page.$eval('#cdMonN', (b) => b.disabled));

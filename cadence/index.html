@@ -765,7 +765,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     for (var i = 0; i < 7; i++) {
       var d = cdAddDays(ws, i), t = cdTally(d), st = cdDayState(d);
       rb += '<button type="button" class="cd-wd' + (d === today ? ' is-today' : '') + '" data-d="' + d + '" data-state="' + st + '" aria-pressed="' + (d === sel) + '"'
-        + ' aria-label="' + DOWL[i] + ' ' + cdDate(d).getDate() + ', ' + (d > today ? t.on + ' planned' : t.kept + ' of ' + t.on + ' kept') + '">'
+        + ' aria-label="' + DOWL[i] + ' ' + cdDate(d).getDate() + ', ' + (d > today ? t.on + ' planned' : t.kept + ' of ' + t.on + ' completed') + '">'
         + '<i></i><span class="cd-wl">' + DOW[i].charAt(0) + '</span></button>';
     }
     $('cdRibbon').innerHTML = rb;
@@ -791,7 +791,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       cap = hero.mode === 'done' ? 'Today · ' + cdHM(now) : at;
       if (!tl.on) { name = 'Nothing on'; sub = ''; }
       else if (hero.mode === 'plan') { name = tl.on + (tl.on === 1 ? ' block' : ' blocks'); sub = 'planned · ' + cdLen(tl.mins); }
-      else { name = tl.kept + ' of ' + tl.on; sub = 'kept · ' + (hero.mode === 'done' ? 'nothing left today' : cdLen(tl.mins) + ' planned'); }
+      else { name = tl.kept + ' of ' + tl.on; sub = 'completed · ' + (hero.mode === 'done' ? 'nothing left today' : cdLen(tl.mins) + ' planned'); }
     }
     $('cdHeroK').textContent = cap;
     $('cdHeroN').textContent = name;
@@ -815,7 +815,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       var done = cdDone(sel, b.id);
       go.style.setProperty('--c', 'var(--c-' + CAT[cdKind(b.n)] + ')');
       go.setAttribute('aria-pressed', done);
-      go.setAttribute('aria-label', done ? b.n + ' kept. Untick' : 'Mark ' + b.n + ' kept');
+      go.setAttribute('aria-label', done ? b.n + ' completed. Untick' : 'Mark ' + b.n + ' completed');
     }
 
     var ag = $('cdAgenda');
@@ -840,7 +840,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var cls = 'cd-it' + (done ? ' is-done' : '') + (off ? ' is-off' : '') + (past ? ' is-past' : '');
     return '<li class="' + cls + '" data-id="' + b.id + '" style="--c:var(--c-' + cat + ')">'
       + '<button type="button" class="cd-dot" data-act="tick" aria-pressed="' + done + '"' + (open && !off ? '' : ' disabled')
-      + ' aria-label="' + (done ? 'Kept' : 'Mark kept') + ': ' + esc(b.n) + '"><i></i></button>'
+      + ' aria-label="' + (done ? 'Completed' : 'Mark completed') + ': ' + esc(b.n) + '"><i></i></button>'
       + '<button type="button" class="cd-rb" data-act="edit" aria-label="' + esc(b.n) + ', ' + cdHM(b.s) + (b.e > b.s ? ' to ' + cdHM(b.e) : '') + (off ? ', off this day' : '') + '. Open">'
       + '<span class="cd-rn">' + esc(b.n) + rw + '</span><span class="cd-rt">' + time + '</span>'
       + (b.p ? '<span class="cd-rs">' + esc(b.p) + '</span>' : '') + '</button></li>';
@@ -1227,11 +1227,11 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var today = cdToday(), hs = cdHabits();
     var kept = hs.filter(function (h) { return cdHabOn(today, h); });
     $('cdHabT').textContent = kept.length + ' of ' + hs.length;
-    $('cdHabCap').textContent = 'habits kept';
+    $('cdHabCap').textContent = 'habits completed';
     $('cdHabDots').innerHTML = hs.map(function (h) {
       return '<i class="' + (cdHabOn(today, h) ? 'is-on' : '') + '" style="--hc:var(' + h.hc + ')"></i>';
     }).join('');
-    $('cdHabDots').setAttribute('aria-label', kept.length + ' of ' + hs.length + ' habits kept today');
+    $('cdHabDots').setAttribute('aria-label', kept.length + ' of ' + hs.length + ' habits completed today');
     var ds = [];
     for (var j = 13; j >= 0; j--) ds.push(cdAddDays(today, -j));
     var html = '';
@@ -1240,8 +1240,8 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       var sub, val;
       if (h.k === 'tick') {
         var by = cdKeptBy(today, h), st = cdStreak(h);
-        sub = by && by !== 'you' ? (by === 'session' ? 'Kept by a session' : 'Kept by ' + esc(by)) : (st > 1 ? st + '-day streak' : on ? 'Kept today' : 'Not yet');
-        val = on ? '<span class="cd-hr-v">Kept</span>' : '<span class="cd-hr-v is-nil">—</span>';
+        sub = by && by !== 'you' ? (by === 'session' ? 'Completed by a session' : 'Completed by ' + esc(by)) : (st > 1 ? st + '-day streak' : on ? 'Completed today' : 'Not yet');
+        val = on ? '<span class="cd-hr-v">Completed</span>' : '<span class="cd-hr-v is-nil">—</span>';
       } else {
         var wk = 0, n = 0;
         for (var i = 1; i <= 7; i++) { var x = +cdHabVal(cdAddDays(today, -i), h); if (x > 0) { wk += x; n++; } }
@@ -1252,7 +1252,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       /* The dot logs and the name opens the record: two siblings, never
          one inside the other. */
       html += '<li class="cd-hr' + (on ? ' is-on' : '') + '" data-h="' + h.id + '" style="--hc:var(' + h.hc + ')">'
-        + '<button type="button" class="cd-hr-b" data-act="log" aria-pressed="' + on + '" aria-label="' + esc(h.n) + ', ' + (on ? 'kept' : 'not yet') + '. Log"><i></i></button>'
+        + '<button type="button" class="cd-hr-b" data-act="log" aria-pressed="' + on + '" aria-label="' + esc(h.n) + ', ' + (on ? 'completed' : 'not yet') + '. Log"><i></i></button>'
         + '<button type="button" class="cd-hr-n" data-act="hist" aria-label="' + esc(h.n) + ' history">'
         + '<span class="cd-hr-t">' + esc(h.n) + '</span>' + val
         + '<span class="cd-hr-s"><span class="cd-fn" aria-hidden="true">' + fn + '</span><span>' + sub + '</span></span></button></li>';
@@ -1273,7 +1273,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     }
     if (h.k === 'tick') {
       var by = cdKeptBy(today, h);
-      if (by && by !== 'you') { cdToast('Kept by ' + by + ' — untick it on the day.'); return; }
+      if (by && by !== 'you') { cdToast('Completed by ' + by + ' — untick it on the day.'); return; }
       var m = S.hab[today] = S.hab[today] || {};
       if (m[h.id]) delete m[h.id]; else m[h.id] = 1;
       if (!Object.keys(m).length) delete S.hab[today];
@@ -1333,7 +1333,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     for (var j = 0; j < 14; j++) {
       var d = cdAddDays(today, -j), on = cdHabOn(d, h), v = cdHabVal(d, h);
       var hl = ul.appendChild(el('li', '', '<i></i><b>' + DOW[cdDow(d)] + ' ' + cdDate(d).getDate() + ' ' + MON[cdDate(d).getMonth()].slice(0, 3) + '</b><span>'
-        + (on ? (h.k === 'num' ? cdFmtNum(v, h) + ' ' + esc(h.unit) : 'kept') : '—') + '</span>'));
+        + (on ? (h.k === 'num' ? cdFmtNum(v, h) + ' ' + esc(h.unit) : 'completed') : '—') + '</span>'));
       hl.style.setProperty('--cat', on ? 'var(' + h.hc + ')' : 'var(--quiet)');
     }
     root.appendChild(el('p', 'cd-lbl', 'Last fourteen days'));
@@ -1364,7 +1364,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       ks.appendChild(c);
     });
     function paint() { ks.querySelectorAll('.cd-chip').forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.k === kind); }); un.hidden = kind !== 'num'; }
-    root.appendChild(nm); root.appendChild(el('p', 'cd-lbl', 'Kept as'));
+    root.appendChild(nm); root.appendChild(el('p', 'cd-lbl', 'Track as'));
     root.appendChild(ks); root.appendChild(el('div', '', '')).appendChild(un);
     un.style.marginTop = '10px';
     paint();
@@ -1409,12 +1409,12 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
         + (shown ? '<i class="cd-ms" style="--kc:var(--k-' + LIFTN[shown.s.k[0]].g + ')"></i>' : '') + '</span>' : '';
       html += '<button type="button" class="cd-mc' + (fut ? ' is-future' : inRec ? '' : ' is-quiet') + (iso === today ? ' is-today' : '') + '"'
         + ' data-day="' + iso + '" data-state="' + st + '"'
-        + ' aria-label="' + d + ' ' + MON[mo] + (inRec ? ', ' + t.kept + ' of ' + t.on + ' kept' : '') + (shown ? ', ' + esc(cdSessName(shown.s)) : '') + '">'
+        + ' aria-label="' + d + ' ' + MON[mo] + (inRec ? ', ' + t.kept + ' of ' + t.on + ' completed' : '') + (shown ? ', ' + esc(cdSessName(shown.s)) : '') + '">'
         + '<b>' + d + '</b>' + dots + '</button>';
     }
     for (var q = pad + days; q % 7; q++) html += '<span class="cd-mc is-pad" aria-hidden="true"></span>';
     $('cdMonG').innerHTML = html;
-    $('cdMonCap').textContent = kept + ' days kept · ' + trained + ' trained';
+    $('cdMonCap').textContent = kept + ' days completed · ' + trained + ' trained';
     $('cdMonN').disabled = monthAt >= today.slice(0, 7);
     $('cdMonP').disabled = monthAt <= first.slice(0, 7);
     $('cdMonL').innerHTML = [['weights', 'Weights'], ['run', 'Run'], ['recovery', 'Recovery']].map(function (g) {
@@ -1437,10 +1437,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   /* A day read back. Not a second editor: "Open this day" goes to the one that is. */
   function cdDaySheet(iso) {
     var root = el('div'), t = cdTally(iso), fut = iso > cdToday();
-    root.appendChild(el('p', 'cd-cap', fut ? t.on + ' planned' : t.kept + ' of ' + t.on + ' kept · ' + cdLen(t.mins) + ' committed'));
+    root.appendChild(el('p', 'cd-cap', fut ? t.on + ' planned' : t.kept + ' of ' + t.on + ' completed · ' + cdLen(t.mins) + ' committed'));
     var ul = el('ul', 'cd-day-l');
     cdOn(iso).forEach(function (b) {
-      var k = cdKind(b.n), st = cdIsOff(iso, b.id) ? 'off' : cdDone(iso, b.id) ? 'kept' : fut ? 'planned' : 'not kept';
+      var k = cdKind(b.n), st = cdIsOff(iso, b.id) ? 'off' : cdDone(iso, b.id) ? 'completed' : fut ? 'planned' : 'not completed';
       var li = el('li', '', '<i></i><b>' + esc(b.n) + '</b><span>' + cdHM(b.s) + ' · ' + st + '</span>');
       li.style.setProperty('--cat', 'var(--c-' + CAT[k] + ')');
       ul.appendChild(li);
@@ -1490,7 +1490,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var box = $('cdLift');
     $('cdLiftK').textContent = all.length ? 'Last · ' + cdSessName(all[0].s) + ' · ' + DOW[cdDow(all[0].d)] + ' ' + cdDate(all[0].d).getDate() : 'Nothing logged yet';
     if (!all.length) {
-      box.innerHTML = '<p class="cd-empty">No sessions yet. Mark a gym, run or yoga block kept on the day and it asks what you trained.</p>';
+      box.innerHTML = '<p class="cd-empty">No sessions yet. Mark a gym, run or yoga block completed on the day and it asks what you trained.</p>';
       return;
     }
     var mins = m30.filter(function (x) { return x.s.m; });
