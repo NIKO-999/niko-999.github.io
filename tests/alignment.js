@@ -105,7 +105,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
       out.push(...[...document.querySelectorAll(id + ' .al-f[data-src]')].map(n => n.getAttribute('data-src'))); });
     return out;
   });
-  ok('twenty-five sources across the two indexes', srcs.length === 25, srcs.length);
+  ok('twenty-four sources across the two indexes', srcs.length === 24, srcs.length);
 
   /* Every source opens, names itself, and carries four sections of at
      least three, with both paragraphs of real length on every card. A
@@ -113,11 +113,12 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
      a card, it still draws, and half of it is missing.
 
      THREE IS A FLOOR HERE TOO, and the count is read off the sections
-     rather than pinned at twelve: one source is deliberately deeper
-     than the rest and a hard twelve would make the suite fail on the
-     feature. What still cannot pass is a section coming up short, or
-     the four sections disagreeing with the cards drawn under them —
-     which is the half a loosened count could have thrown away. */
+     rather than pinned at twelve. One source used to run deeper and the
+     count is still not pinned, because what this is actually for is a
+     section coming up short, or the four sections disagreeing with the
+     cards drawn under them — neither of which a fixed twelve tests. The
+     upper bound is the app's own boot rule, and the suite asserts it
+     boots. */
   const bad = await page.evaluate((ids) => {
     const out = [];
     ids.forEach(id => {
@@ -142,17 +143,71 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   }, srcs);
   ok('every source carries four sections of at least three', bad.length === 0, bad);
 
-  /* AND EXACTLY ONE OF THEM IS DEEPER, asserted as a count rather than by
-     name: "some source has more than twelve" passes on a build where the
-     flag leaked onto all of them, and naming the id makes it a check on
-     the fixture rather than on the rule. */
-  const deep = await page.evaluate((ids) => ids.map(id => {
-    window.alDrive.openSource(id);
-    return document.querySelectorAll('#alSourcePane .al-th').length;
-  }), srcs);
-  ok('exactly one source runs deeper than twelve',
-     deep.filter(n => n > 12).length === 1 && deep.filter(n => n === 12).length === srcs.length - 1,
-     deep);
+  /* ── A THEME IS A ROW THAT OPENS ─────────────────────────────── */
+  /* Shut on arrival, one press opens that one and no other, a second
+     shuts it — each half passes on a build that breaks the other, so all
+     three are asserted. Heights rather than attributes throughout, since
+     the attribute and the body can disagree and only one of them is what
+     somebody sees. And the button is INSIDE the heading: a heading inside
+     a button is invalid and loses the heading for a screen reader. */
+  const acc = await page.evaluate(() => {
+    window.alDrive.openSource('fifty');
+    const rows = [...document.querySelectorAll('#alSourcePane .al-row')];
+    const bodyOf = r => r.closest('.al-th').querySelector('.al-body');
+    const h = r => bodyOf(r).getBoundingClientRect().height;
+    const shut = rows.every(r => r.getAttribute('aria-expanded') === 'false' && h(r) === 0);
+    const b = rows[2];
+    b.click();
+    const opened = b.getAttribute('aria-expanded') === 'true' && h(b) > 40;
+    const others = rows.filter(r => r !== b).every(r => h(r) === 0);
+    b.click();
+    const again = b.getAttribute('aria-expanded') === 'false' && h(b) === 0;
+    const valid = rows.every(r => r.parentElement.tagName === 'H3' && !r.querySelector('h1,h2,h3,h4,h5,h6'));
+    const owns = rows.every(r => document.getElementById(r.getAttribute('aria-controls')) === bodyOf(r));
+    return { n: rows.length, shut, opened, others, again, valid, owns };
+  });
+  ok('a source opens with every theme shut', acc.n > 0 && acc.shut, acc);
+  ok('pressing a theme opens that one and no other', acc.opened && acc.others, acc);
+  ok('and pressing it again shuts it', acc.again, acc);
+  ok('the button is inside the heading and controls its own body', acc.valid && acc.owns, acc);
+
+  /* THE DESCRIPTION IS A COUNT OF THE DATA, so it is read off the data.
+     It shipped saying 288 themes and sixteen figures on a build carrying
+     305 and seventeen -- a caption that outlived the thing it described,
+     which this repo has now recorded three times, and the only one of
+     the three that is served to somebody who has not opened the app.
+     Asserted as the three figures MATCHING rather than as the string,
+     because the sentence is allowed to be rewritten and the numbers in
+     it are not allowed to be wrong. The totals come off the panes and
+     off the cards actually drawn -- a document-wide query counts both
+     index panes at once, which read 48 sources for 24 once already. */
+  const said = await page.evaluate((ids) => {
+    const m = document.querySelector('meta[name="description"]');
+    const n = (m ? m.getAttribute('content') : '').match(/\d+/g) || [];
+    window.alDrive.view('figures'); window.alDrive.view('books');
+    let themes = 0;
+    ids.forEach(id => {
+      window.alDrive.openSource(id);
+      themes += document.querySelectorAll('#alSourcePane .al-th').length;
+    });
+    return {
+      said: n.map(Number),
+      real: [
+        themes,
+        document.querySelectorAll('#alFiguresPane .al-f[data-src]').length,
+        document.querySelectorAll('#alBooksPane .al-f[data-src]').length
+      ]
+    };
+  }, srcs);
+  /* THE FIRST SCREEN'S FIGURES TOO. They were a title and a paragraph
+     typed by hand, and said seventeen and three hundred and five for a
+     day after a source came out while every check here was green. */
+  const openSaid = await page.evaluate(() =>
+    (document.querySelector('#alOpenK').textContent.match(/\d+/g) || []).map(Number));
+  ok('the first screen counts what is actually there',
+     openSaid.join() === [said.real[1], said.real[2], said.real[0]].join(), { openSaid, real: said.real });
+  ok('the description counts what is actually there',
+     said.said.length === 3 && said.said.join() === said.real.join(), said);
 
   /* ── THE FOUR HUES ─────────────────────────────────────────────── */
 
@@ -345,7 +400,8 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     await page.waitForTimeout(250);
     const r = await walk(); per[v] = r.seen; shapes.push(...r.out);
   }
-  await page.evaluate(() => window.alDrive.openSource('gymsh'));
+  await page.evaluate(() => { window.alDrive.openSource('gymsh');
+    document.querySelector('#alSourcePane .al-row').click(); });
   await page.waitForTimeout(300);
   { const r = await walk(); per.source = r.seen; shapes.push(...r.out); }
   /* Kept with something on it, or its two stops are the whole of what
@@ -356,6 +412,15 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   });
   await page.waitForTimeout(300);
   { const r = await walk(); per.kept1 = r.seen; shapes.push(...r.out); }
+  /* KEPT OPENS EVERY ROW, because everything on it is something you
+     chose to read again — a press per line to get back to what you
+     kept is the list working against you. Measured as the BODY'S box,
+     since aria-expanded can say true over a body that is still hidden. */
+  ok('Kept draws every row open', await page.evaluate(() => {
+    const r = [...document.querySelectorAll('#alKeptPane .al-row')];
+    return r.length > 0 && r.every(b => b.getAttribute('aria-expanded') === 'true'
+      && b.closest('.al-th').querySelector('.al-body').getBoundingClientRect().height > 40);
+  }));
 
   /* A CHECK THAT LOOKS AT NOTHING MUST NOT PASS, and per view rather
      than in total: one pane with forty controls hides four with none. */
@@ -485,11 +550,25 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   await page.waitForTimeout(300); await sweep('kept-pin');
   await page.evaluate(() => document.querySelector('[data-st="hi"]').click());
   await page.waitForTimeout(300); await sweep('kept-hi');
+  /* OPENED BY THE ROW'S OWN CONTROL, EVERY ONE, BEFORE A PIXEL IS READ.
+     A theme shut draws its title and nothing else, and this sweep
+     measures what is DRAWN — so the day the themes became rows that
+     open, it fell from 1479 elements to 814 and stayed green, with every
+     paragraph on every source page unmeasured. That is the second time
+     this file has watched its coverage collapse without a word, so the
+     count of bodies actually drawn is asserted against the data. */
+  let bodiesDrawn = 0;
   for (const id of srcs) {
     await page.evaluate(x => window.alDrive.openSource(x), id);
+    bodiesDrawn += await page.evaluate(() => {
+      document.querySelectorAll('#alSourcePane .al-row[aria-expanded="false"]').forEach(b => b.click());
+      return [...document.querySelectorAll('#alSourcePane .al-body')]
+        .filter(b => b.getBoundingClientRect().height > 0).length;
+    });
     await page.waitForTimeout(220);
     await sweep('src:' + id);
   }
+  ok('every theme was open when its page was swept', bodiesDrawn === said.real[0], { bodiesDrawn, themes: said.real[0] });
 
   const under = shots.filter(x => !x.pass);
   const byView = {};

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0B0A08">
+<meta name="theme-color" content="#07080B">
 <title>Alignment</title>
 <!-- A PAGE ON THE WEB ANSWERS THE REQUEST THE BROWSER MAKES ANYWAY.
      Without these Chromium asks for /favicon.ico on every load and the
@@ -17,50 +17,70 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Alignment">
-<meta name="description" content="288 themes and lessons from sixteen figures and eight books.">
+<meta name="description" content="288 themes and lessons from 16 figures and 8 books.">
 <link rel="preload" href="../arc/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/GeistMono.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 @font-face { font-family: 'Inter'; font-weight: 100 900; font-display: swap;
   src: url('../arc/fonts/Inter.woff2') format('woff2'); }
+@font-face { font-family: 'Geist Mono'; font-weight: 100 900; font-display: swap;
+  src: url('fonts/GeistMono.woff2') format('woff2'); }
 
 /*
   ALIGNMENT. Its own ground, its own type, its own everything — it reads
   none of the other keys and takes none of the shared shell.
 
-  THE FOURTEEN PHOTOGRAPHS WENT WITH THE STORIES. Every screen was a
-  picture in a frame with the interface living in the material around
-  it, under a per-image brightness beneath one shared grade — measured,
-  the set spanned 235 degrees of hue, and no single transfer function
-  pulls a mixed library into one family. There is no image in this app
-  now, so the grade token, the brightness token and both rules that
-  read them are gone rather than left to cascade at nothing.
+  THE LOOK IS A SKY, A THIN FACE AND A MONOSPACE, taken from a reference
+  that was three phones of a finance app, and what it does is the
+  opposite of what this did on every count. The ground was one flat warm
+  black; it is a cool black with the colour living in gradients — a dawn
+  behind the first screen, a dusk behind every title. Display type was
+  Inter at 450 to 600; it is 300, because a large thin face reads as
+  confident where a large heavy one reads as loud. Every label was
+  tracked-out caps at half an em; it is a monospace, which is what makes
+  a label read as a LABEL rather than as a heading someone shrank.
+
+  AND THE MONOSPACE IS SHIPPED, NOT ASKED FOR. The system mono on this
+  machine is DejaVu and on the phone it is SF Mono, so a screenshot judged
+  here would have been a picture of a different app. Geist Mono, 23KB,
+  OFL, beside the file that uses it — the same arrangement Inter already
+  has, and not a CDN: nothing is fetched from anywhere but this origin.
 */
 
 :root {
-  --paper: #0B0A08;
-  --ink: #FFFFFF;
-  --dim: rgba(255,255,255,.72);
-  --spent: rgba(255,255,255,.46);
-  --hair: rgba(255,255,255,.14);
-  --glass: rgba(255,255,255,.10);
+  --paper: #07080B;
+  --ink: #F3F5F7;
+  --dim: rgba(243,245,247,.72);
+  /* The quietest thing that is still WORDS. The reference's sub-lines are
+     dimmer than this and on a white-on-black face that is where 4.5:1
+     goes — .46 measured 4.4 on this ground, which is the rounding error
+     this repo keeps shipping as a margin. At .56 it is 5.9. */
+  --quiet: rgba(243,245,247,.56);
+  --hair: rgba(243,245,247,.10);
+  --lift: rgba(243,245,247,.07);
 
-  /* Chrome sits on a PLATE, not on glass. A 10% white wash over a lit
-     photograph put the info glyph at 2.50:1 against the 3 a graphic
-     needs. The photographs have gone and the plate stays, because a
-     control is still told from the page by its own ground. */
-  --plate: rgba(11,10,8,.56);
+  --sans: 'Inter', -apple-system, system-ui, sans-serif;
+  --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
-  --card: #1A1611;
-  --card-edge: rgba(255,255,255,.08);
+  /* TWO SKIES, AND WHERE THE WORDS SIT ON THEM IS PART OF THE DRAWING.
+     Dawn runs from night to silver, and the sentence sits in the teal
+     middle where white clears 9:1; the silver is under the button, which
+     carries its own ground. Dusk runs night to a peach GLOW that rises
+     through the lower third, and nothing is written in it — white on
+     that peach is about 2:1, so the padding under the title is the room
+     the light takes rather than slack. It went in as a radial glow and
+     drew a hard HORIZON along the foot; the reference's is a plain
+     vertical blend, which is what makes it read as sky rather than as a
+     planet. */
+  --dawn: radial-gradient(90% 55% at 50% 38%, rgba(64,110,132,.28), transparent 70%),
+          linear-gradient(180deg, #03060A 0%, #07131D 18%, #122736 40%, #28404F 58%,
+                                  #62737E 78%, #A9B2B8 94%, #C3C9CD 100%);
+  --dusk: linear-gradient(180deg, #0B1220 0%, #15233A 36%, #3A4459 64%, #87717A 86%, #D29A84 100%);
 
-  --r-card: 26px;
-  --r-in: 18px;
-  --r-sq: 14px;
+  --r-card: 22px;
   --r-pill: 999px;
 
-  /* Six vertical steps. The first build shipped eleven — 8 10 12 14 18
-     20 22 24 26 34 38 — which is this repo's own runaway-scale fault in
-     a third dimension after thirty type sizes and thirteen leadings. */
+  /* Six vertical steps. The first build shipped eleven. */
   --v1: 6px;  --v2: 10px; --v3: 16px;
   --v4: 22px; --v5: 34px; --v6: 52px;
 
@@ -69,306 +89,285 @@
   --gut-list: 18px;
   --tap: 44px;
 
+  /* FOUR HUES, AND THEY ARE THE SKY'S. The axis colours were a violet,
+     a gold, a cyan and an orange at full saturation — the only saturated
+     things in a reference that has none. They are the same four ideas
+     taken toward the light: lavender, sand, sea-glass, peach, and the
+     peach is the one in the dusk. Held to dE 12 apart by the suite, on
+     composited labels rather than on these hexes. */
+  --ax-mindset:  #B7A5FF;
+  --ax-internal: #E8C67C;
+  --ax-external: #7DCFD8;
+  --ax-karmic:   #F2A184;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+/* THE PAGE IS A COLUMN AND THE NAV IS ITS FIRST CHILD. A fixed bar needs
+   every view to know how tall it is; a flex child simply takes its room
+   and hands the rest down, and a view that hides it gets the whole
+   height without being told. */
 html, body { height: 100%; }
 body {
   background: var(--paper);
   color: var(--ink);
-  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-family: var(--sans);
   font-size: 16px;
   line-height: 1.5;
   overflow: hidden;
   overscroll-behavior: none;
+  display: flex; flex-direction: column;
 }
 
-button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; text-align: left; }
 [hidden] { display: none !important; }
 
-.al-disp   { font-size: 38px; font-weight: 450; line-height: 1.00; letter-spacing: -.03em; }
-.al-disp-s { font-size: 28px; font-weight: 450; line-height: 1.02; letter-spacing: -.024em; }
-.al-caps   { font-size: 10px; font-weight: 600; letter-spacing: .5em; text-transform: uppercase; color: var(--dim); }
-.al-note   { font-size: 13px; font-weight: 450; line-height: 1.45; color: var(--dim); }
+/* THE LABEL REGISTER. One size, one tracking, one face — a label that
+   comes in three sizes is three labels. */
+.al-caps { font: 500 10.5px/1.35 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--quiet); }
 
-.al-view { position: relative; z-index: 1; height: 100%; display: none; flex-direction: column; }
+.al-disp   { font-size: 34px; font-weight: 300; line-height: 1.04; letter-spacing: -.03em; text-wrap: balance; }
+.al-disp-s { font-size: 30px; font-weight: 300; line-height: 1.04; letter-spacing: -.028em; }
+
+.al-view { position: relative; z-index: 1; flex: 1; min-height: 0; display: none; flex-direction: column; }
 .al-view.is-on { display: flex; }
 
-#alOpen { justify-content: flex-end; padding: 0 var(--gut-list) var(--v5); }
-#alOpen .al-mark { margin-bottom: var(--v3); }
-.al-mark { display: flex; align-items: center; gap: 9px; }
-.al-mark svg { width: 20px; height: 20px; display: block; }
-.al-mark b { font-size: 13px; font-weight: 500; letter-spacing: 1.2em; text-transform: uppercase; }
-#alOpen .al-disp { margin-bottom: var(--v2); max-width: 7.2em; }
-#alOpen .al-note { margin-bottom: var(--v4); max-width: 20em; }
+/* ---- THE NAV ---- */
+/* AT THE TOP, AND IT IS THREE MARKS AND A LINE. It was a glass pill at
+   the foot, 58px tall with a lit lozenge in it — the heaviest object on
+   every list, holding three glyphs. The reference's nav is the quietest
+   thing on its screen: the marks at the ink's quietest step, the one you
+   are on at full strength with a hairline under it. The line is what
+   says which, so no ground is needed, and nothing sits over the list at
+   the foot any more.
 
-/* A PILL IS SIZED TO ITS CONTENT. Not one of the four reference pills
-   spans the screen — they measure 217, 148, 187 and 134 CSS px, all
-   43 to 50 tall. A full-bleed primary was the widest object on the
-   open screen and read as a form submit. */
-.al-pill {
-  display: inline-flex; align-items: center; justify-content: center;
-  align-self: flex-start;
-  min-height: 48px; padding: 0 30px; border-radius: var(--r-pill);
-  background: var(--ink); color: #14120E;
-  font-size: 16px; font-weight: 500; letter-spacing: -.01em;
-}
+   Each mark owns 52x44 and draws 18; the three are adjacent, so nothing
+   reaches into a neighbour. */
+.al-nav { flex: none; position: relative; z-index: 2; display: flex; justify-content: center; gap: 2px;
+  padding: calc(4px + env(safe-area-inset-top, 0px)) 0 0; }
+.al-tab { position: relative; width: 52px; height: 44px; display: grid; place-items: center; color: var(--quiet); }
+.al-tab svg { width: 18px; height: 18px; display: block; }
+.al-tab::after { content: ''; position: absolute; left: 50%; bottom: 7px; width: 16px; height: 1px;
+  margin-left: -8px; background: var(--ink); opacity: 0; }
+.al-tab[aria-current="true"] { color: var(--ink); }
+.al-tab[aria-current="true"]::after { opacity: 1; }
 
-.al-head { padding: calc(var(--v4) + env(safe-area-inset-top, 0px)) var(--gut-list) var(--v3); display: flex; align-items: center; gap: 12px; flex: none; }
-.al-head .al-disp-s { flex: 1; }
-.al-head .al-count { flex: none; }
+/* ---- THE OPEN SCREEN ---- */
+/* THE REFERENCE'S MIDDLE PHONE: a sentence on a sky, and one round
+   control at the foot. It was a left-aligned title over a paragraph on
+   flat black with a pill under it, which is a form. What changed is
+   what is FIRST — the figures are a line of type now, and what you read
+   first is what the app is for. */
+#alOpen { background: var(--dawn); align-items: center; justify-content: center; text-align: center;
+  padding: calc(var(--v5) + env(safe-area-inset-top, 0px)) 30px calc(120px + env(safe-area-inset-bottom, 0px)); }
+.al-mark { position: absolute; top: calc(var(--v4) + env(safe-area-inset-top, 0px)); left: 0; right: 0;
+  display: flex; align-items: center; justify-content: center; gap: 9px; color: var(--ink); }
+.al-mark svg { width: 16px; height: 16px; display: block; }
+.al-mark b { font: 500 10.5px/1 var(--mono); letter-spacing: .32em; text-transform: uppercase; }
+.al-open-k { margin-bottom: var(--v3); color: var(--dim); }
+/* BALANCED, or the sentence ends on one word alone — it did, on "back." */
+.al-open-t { font-size: 23px; font-weight: 300; line-height: 1.34; letter-spacing: -.012em; max-width: 15.5em; text-wrap: balance; }
 
-/* A COUNT IS A FIGURE, NOT A LABEL. It wore .al-caps, which is 10px at
-   half an em of tracking — right for a word and wrong for a number:
-   24 drew as "2 4", two digits with a space between them. It carries
-   its own rule rather than overriding .al-caps, because the two are
-   equal specificity and this repo has lost that race five times. */
-.al-count { font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--dim); }
+/* THE BUTTON CARRIES ITS OWN GROUND, which is what lets it sit on the
+   silver. White on the lightest part of the sky, with a shadow to lift
+   it off — the reference's own control, and the one press on a screen
+   whose only job is to be pressed through. */
+.al-go { position: absolute; left: 50%; bottom: calc(var(--v5) + env(safe-area-inset-bottom, 0px));
+  width: 62px; height: 62px; margin-left: -31px; border-radius: var(--r-pill);
+  background: #FFFFFF; color: #0B0E13; display: grid; place-items: center;
+  box-shadow: 0 10px 28px rgba(8,14,22,.22), 0 1px 0 rgba(255,255,255,.9) inset; }
+.al-go svg { width: 20px; height: 20px; display: block; }
 
-/* 44 OWNED, 40 DRAWN — and an inset cannot say that here. An
-   absolutely positioned box resolves against its host's PADDING box,
-   and .al-round carries a 1px border under a border-box reset, so its
-   padding box is 38 and inset:-2px reached 42 rather than the 44 the
-   declaration reads as. Two real controls sat under the floor and the
-   arithmetic was invisible in the source. Centring an explicit --tap
-   square is immune to the host's border, padding and drawn size alike,
-   and it is what makes the token load-bearing rather than decorative. */
+/* ---- A LIST'S HEAD ---- */
+/* A TITLE ON A DUSK. The reference puts one gradient card at the top of
+   a list and nothing else coloured on the screen, and this is that card:
+   what the list is, and the figures for it in the label register above
+   the name. Outside the pane, so the list scrolls under nothing. */
+.al-head { flex: none; margin: var(--v1) 12px var(--v2); padding: 18px 20px 34px;
+  border-radius: var(--r-card); background: var(--dusk); }
+.al-kick { color: rgba(243,245,247,.74); }
+.al-head .al-disp-s { margin-top: 9px; }
+.al-count { font-variant-numeric: tabular-nums; }
+
+/* THE STOPS ARE THE NAV'S OWN IDIOM ONE LEVEL DOWN: words, and a line
+   under the one you are on. They were two filled pills. 40 drawn, and
+   the reach takes each to 44 tall and past 44 wide. */
+.al-stops { flex: none; display: flex; gap: 24px; margin: 0 var(--gut-list); border-bottom: 1px solid var(--hair); }
+.al-stop { position: relative; height: 40px; }
+.al-stop::before { content: ''; position: absolute; inset: -2px -10px; }
+.al-stop[aria-current="true"] { color: var(--ink); }
+.al-stop[aria-current="true"]::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px;
+  height: 1px; background: var(--ink); }
+
+.al-pane { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  padding: 0 var(--gut-list) calc(56px + env(safe-area-inset-bottom, 0px)); }
+.al-pane::-webkit-scrollbar { display: none; }
+
+/* A MASK, NEVER A GRADIENT LAID OVER THE CONTENT: a mask has no colour
+   to get wrong. Off again at the end of the travel — a soft edge over
+   nothing is the same lie in the other direction. */
+.al-pane { -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 72px), transparent 100%);
+                   mask-image: linear-gradient(180deg, #000 calc(100% - 72px), transparent 100%); }
+.al-pane.is-end { -webkit-mask-image: none; mask-image: none; }
+
+/* ---- ROWS ---- */
+/* HAIRLINES, NOT CARDS. Every row was a filled 26px-radius slab, so a
+   list of sixteen names was sixteen objects of equal weight on a page
+   that had nothing else on it. The reference's list is rows on the
+   ground with a line between them, and a line costs no height and says
+   exactly one thing. The heading draws the line above the first row. */
+.al-grp { display: flex; justify-content: space-between; align-items: baseline;
+  padding: var(--v5) 2px var(--v2); border-bottom: 1px solid var(--hair); }
+.al-grp[data-x] { color: var(--tg); }
+.al-n { font-variant-numeric: tabular-nums; }
+
+/* A ROW SAYS ITS NAME IN THE MONOSPACE, and that is the reference's
+   boldest move rather than its oddest: the content of its list is set in
+   the label face, bright over dim, so a row reads as an ENTRY rather
+   than as a heading. Two registers of one face, which is quieter than a
+   sans name over a mono place and still tells the two lines apart. */
+.al-rt { display: block; min-width: 0; }
+.al-tn { display: block; font: 500 12.5px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink); }
+.al-tsub { display: block; margin-top: 4px; font: 400 10.5px/1.35 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--quiet); }
+.al-chev { flex: none; width: 15px; height: 15px; color: var(--quiet); transition: transform .22s ease; }
+.al-chev svg { width: 100%; height: 100%; display: block; }
+
+.al-f { display: flex; align-items: center; gap: 14px; width: 100%;
+  padding: 16px 2px; border-bottom: 1px solid var(--hair); }
+.al-f .al-rt { flex: 1; }
+.al-pane > .al-f:first-child { border-top: 1px solid var(--hair); }
+
+/* ---- A THEME ---- */
+/* A THEME IS A ROW THAT OPENS. It was a card with both paragraphs always
+   drawn, so a source page was twelve full cards and about six thousand
+   pixels — a document you scrolled rather than a list you read from.
+   Shut, the twelve are one screen of titles; open, the one you chose is
+   the only prose on it. The chevrons are the reference's own.
+
+   A BUTTON INSIDE THE HEADING, never a heading inside a button: the
+   second is invalid and loses the heading for a screen reader. Which rows
+   are open is NOT stored — it is a position on a screen you are looking
+   at, and one restored from last week opens on a theme you have moved
+   past. Kept opens them all, because everything on it you chose to
+   read again. */
+.al-th { border-bottom: 1px solid var(--hair); }
+.al-th-h { font: inherit; }
+.al-row { display: flex; align-items: center; gap: 14px; width: 100%; padding: 16px 2px; }
+.al-row .al-rt { flex: 1; }
+.al-row[aria-expanded="true"] .al-chev { transform: rotate(180deg); color: var(--ink); }
+
+.al-body { padding: 2px 2px 24px; }
+.al-tl { margin: var(--v3) 0 var(--v1); color: var(--tg); }
+.al-body .al-tl:first-child { margin-top: 4px; }
+.al-tb { font-size: 14.5px; line-height: 1.55; color: var(--dim); }
+/* THE LESSON IS THE MIDDLE PHONE'S SENTENCE: larger, thinner, the ink.
+   The evidence above it stays at the reading size in the quieter step,
+   so what separates the two halves is register rather than a box. */
+.al-tb.is-les { font-size: 18px; font-weight: 300; line-height: 1.46; letter-spacing: -.006em; color: var(--ink); }
+
+/* TWO MARKS, BECAUSE THEY ARE TWO CLAIMS. A highlight is liberal; a pin
+   is the handful you are working from. The state is the GROUND — the ink
+   with the paper on it — never a second word, which would reflow the row
+   under the press that moved it. 32 drawn; the reach is vertical only,
+   or Pin's band lands in Highlight's. */
+.al-acts { display: flex; gap: 8px; margin-top: var(--v4); }
+.al-mk { position: relative; height: 32px; padding: 0 15px; border-radius: var(--r-pill);
+  font: 500 10.5px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--dim); background: var(--lift); }
+.al-mk::before { content: ''; position: absolute; inset: -6px 0; }
+.al-mk[aria-pressed="true"] { background: var(--ink); color: #0B0E13; }
+
+.al-empty { padding: var(--v4) 2px; font-size: 15px; line-height: 1.5; color: var(--dim); }
+
+.al-th[data-x="mindset"],  .al-grp[data-x="mindset"]  { --tg: var(--ax-mindset); }
+.al-th[data-x="internal"], .al-grp[data-x="internal"] { --tg: var(--ax-internal); }
+.al-th[data-x="external"], .al-grp[data-x="external"] { --tg: var(--ax-external); }
+.al-th[data-x="karmic"],   .al-grp[data-x="karmic"]   { --tg: var(--ax-karmic); }
+
+/* ---- A SOURCE ---- */
+/* The right phone: a dusk card with the name on it, then the list. The
+   card is IN the pane, so it scrolls away and the twelve rows get the
+   screen — a list's head stays because you move between lists, and a
+   source is one thing you are reading down. */
+#alSource .al-pane { padding-top: calc(var(--v2) + env(safe-area-inset-top, 0px)); }
+.al-lead { margin: 0 -6px var(--v1); padding: 20px 22px 56px; border-radius: var(--r-card); background: var(--dusk); }
+.al-lead .al-kick { margin-bottom: 10px; }
+/* THE TITLE HAS TO CLEAR THE CLOSE BUTTON, which is fixed at the
+   viewport's own right edge — so the room is a number of PIXELS and an
+   em measure cannot see it. Derived from the button and the gutters. */
+.al-lead .al-disp { max-width: calc(100% - (var(--round) + var(--gut) - var(--gut-list) + 8px)); }
+.al-sheet { padding-bottom: var(--v6); }
+
+/* THE CLOSE IS AN OBJECT, NOT GLASS. It sits over running text while the
+   pane scrolls under it, and a translucent disc over a sentence is a
+   smear — a letter behind it survived as a ghost at 56%. Solid, with the
+   hairline every surface here draws, so it reads as a thing on the page
+   rather than a hole in it. */
 .al-round {
   width: var(--round); height: var(--round); flex: none; border-radius: var(--r-pill);
-  background: var(--plate); border: 1px solid var(--hair);
-  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  background: #12151B; border: 1px solid var(--hair);
   display: grid; place-items: center; position: relative;
 }
 .al-round::before {
   content: ''; position: absolute; top: 50%; left: 50%;
   width: var(--tap); height: var(--tap); transform: translate(-50%, -50%);
 }
-.al-round svg { width: 17px; height: 17px; display: block; }
-
-.al-pane { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
-  padding: 0 var(--gut-list) calc(118px + env(safe-area-inset-bottom, 0px)); }
-.al-pane::-webkit-scrollbar { display: none; }
-
-/* A MASK, NEVER A GRADIENT LAID OVER THE CONTENT. It was written when
-   the ground was a photograph and a --paper overlay was a near-match
-   that read as a smudge somewhere on the set; over one flat ground a
-   gradient would do, and a mask is still the version with no colour
-   to get wrong. Off again at the end of the travel: a
-   soft edge over nothing is the same lie in the other direction. */
-.al-pane { -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 86px), transparent 100%);
-                   mask-image: linear-gradient(180deg, #000 calc(100% - 86px), transparent 100%); }
-.al-pane.is-end { -webkit-mask-image: none; mask-image: none; }
-
-/* THE HEADING CARRIES THE AXIS, AT FULL STRENGTH. It was flat --dim
-   on every list — the source name on an axis list, the axis name on a
-   source page — which is the one register on the screen that was
-   saying nothing. The hue it takes is the one that already means that
-   axis, so on Mindset every heading is violet and on a figure's own
-   page the four sections are four colours.
-
-   FULL STRENGTH, WHICH IS MEASURED RATHER THAN CHOSEN. The lesson
-   label had been mixed 66% toward the ink and read washed. At 100% on
-   this ground the worst of the four is 6.36:1 against the card and
-   6.29 against the page, so nothing had to be diluted to clear the
-   4.5 bar — and this repo has shipped 4.7 five times believing that
-   was a margin. */
-.al-grp { padding: var(--v5) 2px var(--v2); }
-.al-grp[data-x] { color: var(--tg); }
-
-.al-lead { padding: var(--v4) 0; }
-/* The title runs at line-height 1.00, so its last line box ends level
-   with the ink and a descender prints into whatever is next. Six
-   pixels, which is also what makes the pair read as two registers
-   rather than one wrapped line. */
-.al-lead .al-caps { margin: var(--v1) 0 var(--v2); }
-/* THE TITLE HAS TO CLEAR THE CLOSE BUTTON, AND 9em DID NOT. The X is
-   fixed at the viewport's own right edge, so the room the title has is
-   a number of PIXELS and an em measure cannot see it: at 38px, 9em is
-   342 and the button's left edge is 330. Twenty of fifty-seven titles
-   ran into it and twelve overlapped it outright — and the one this was
-   first looked at on was among the thirty-seven that clear, which is
-   what a single screenshot is worth as a check. Derived from the two
-   gutters and the button rather than written as 304px, so the day a
-   token moves the title moves with it. */
-.al-lead .al-disp { max-width: calc(100% - (var(--round) + var(--gut) - var(--gut-list) + 8px)); }
-
-/* Nothing to travel with any more: the ground under the words is the
-   page. The whole class of contrast failure that MOVES with the scroll
-   went out with the photograph. */
-.al-sheet { padding-bottom: var(--v6); }
-
-
-/* A THEME IS A CARD AND THE LESSON IS THE PAYLOAD. The theme is the
-   evidence, so its paragraph reads at the quieter weight; the lesson
-   is what you came for and takes the ink. That is the whole of what
-   separates the two halves.
-
-   BOTH LABELS TAKE THE AXIS HUE. Key theme was flat --dim and the
-   lesson's label carried the colour, which made one half of every
-   card look like chrome and the other like content. They are the two
-   section marks on one object and they belong to the same axis, so
-   they are the same colour — and the card then reads as one coloured
-   thing rather than as a grey card with a coloured line in it. */
-.al-th {
-  position: relative; display: block; width: 100%; text-align: left;
-  border-radius: var(--r-card); padding: var(--v4); margin-bottom: var(--v3);
-  background: var(--card); box-shadow: inset 0 1px 0 var(--card-edge);
-}
-.al-tn { font-size: 19px; font-weight: 600; line-height: 1.26; letter-spacing: -.016em; }
-.al-tsub { margin-top: 3px; font-size: 13px; font-weight: 450; color: var(--dim); }
-.al-tl { margin: var(--v4) 0 var(--v1); color: var(--tg); }
-.al-tb { font-size: 15px; line-height: 1.5; color: var(--dim); }
-.al-tb.is-les { color: var(--ink); }
-
-/* TWO MARKS, BECAUSE THEY ARE TWO CLAIMS. A highlight is liberal: the
-   lines that landed, and over 288 of them there will be a lot. A pin is
-   scarce — the handful you are actually working from this month. One
-   mark doing both is a list you stop opening, because the thing you are
-   on is buried under everything that ever struck you. They are
-   independent, so a card can be both and then appears under both stops,
-   which is two true statements rather than one card drawn twice. */
-.al-acts { display: flex; gap: var(--v2); margin-top: var(--v4); }
-.al-mk {
-  position: relative; height: 34px; padding: 0 13px; border-radius: var(--r-pill);
-  font-size: 13px; font-weight: 500; color: var(--dim);
-  background: rgba(255,255,255,.09);
-}
-/* 34 DRAWN, 44 REACHABLE, and the inset is VERTICAL ONLY. Reaching
-   sideways would put one chip's band inside the other's, and a press
-   aimed at Pin landing on Highlight is a control doing the wrong thing
-   rather than nothing. Both chips are wider than 44 on their own. */
-.al-mk::before { content: ''; position: absolute; inset: -5px 0; }
-.al-mk[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
-
-/* TWO STOPS, SO THE TWO LISTS ARE NEVER ON SCREEN TOGETHER AND THE
-   CONTROL IS THE HEADING. A label naming a section beside the thing
-   that takes you to that section is the same word twice. */
-.al-stops { flex: none; display: flex; gap: var(--v1); margin: 0 var(--gut-list) var(--v3); }
-.al-stop {
-  position: relative; flex: 1; height: 34px; border-radius: var(--r-pill);
-  font-size: 13px; font-weight: 500; color: var(--dim);
-  background: rgba(255,255,255,.06);
-}
-.al-stop::before { content: ''; position: absolute; inset: -5px 0; }
-.al-stop[aria-current="true"] { background: rgba(255,255,255,.14); color: var(--ink); }
-
-/* --dim, not --spent. The lighter token measures a rounding error above
-   4.5:1 on this page rather than a margin, which is a mistake this repo
-   has now shipped three times in another app under exactly that name. */
-.al-empty { padding: var(--v3) 2px; font-size: 15px; line-height: 1.5; color: var(--dim); }
-
-/* Four hues, set on whatever carries the axis — a card or a heading.
-   They were a washed violet, gold, blue-grey and rust; the blue-grey
-   in particular was barely a colour at all. Worst pair now measures
-   dE 49.6 in Lab against the 12 this repo holds two colours on one
-   screen to. */
-.al-th[data-x="mindset"],  .al-grp[data-x="mindset"]  { --tg: #9B7BFF; }
-.al-th[data-x="internal"], .al-grp[data-x="internal"] { --tg: #F0B429; }
-.al-th[data-x="external"], .al-grp[data-x="external"] { --tg: #3FC3D6; }
-.al-th[data-x="karmic"],   .al-grp[data-x="karmic"]   { --tg: #FF6B3D; }
-
-/* A FIGURE IN THE INDEX IS A PRESS TARGET AND THE REST ARE NOT. The same
-   card, with no second drawing — only the row that opens something
-   takes the reach. */
-.al-f::before {
-  content: ''; position: absolute; left: 0; right: 0; top: 50%;
-  height: 100%; min-height: var(--tap); transform: translateY(-50%);
-}
-
-
-/* ---- THE FOOT ---- */
-.al-foot {
-  /* THE BAR WIDENS RATHER THAN THE TABS NARROWING, and this is the
-     third time. Three tabs sat at 93px either side; four needed 60,
-     where a tab owns 64; five needed 40, where it owns 59. Six at 40
-     would be 49 each, over the 44 floor by five pixels, and seven owned
-     48. THE BAR IS BACK TO THREE AND SO ARE THE INSETS. The inset is
-     the thing that was widened to buy room for a fourth, a fifth and a
-     seventh mark, so it is the thing that comes back when the room is
-     given up: left at 20 the row is 350 and a tab owns 116, which is a
-     press target four fingers wide and a pill running the width of the
-     phone for three glyphs. */
-  position: fixed; left: 93px; right: 93px; z-index: 30;
-  bottom: calc(var(--v4) + env(safe-area-inset-bottom, 0px));
-  height: 58px; border-radius: var(--r-pill);
-  background: rgba(24,21,17,.62);
-  backdrop-filter: blur(26px) saturate(1.5); -webkit-backdrop-filter: blur(26px) saturate(1.5);
-  border: 1px solid var(--hair);
-  display: grid; grid-auto-flow: column; align-items: center;
-  padding: 0 var(--v1);
-}
-.al-tab { height: 46px; border-radius: var(--r-pill); display: grid; place-items: center; color: var(--dim); }
-.al-tab svg { width: 20px; height: 20px; display: block; }
-.al-tab[aria-current="true"] { background: rgba(255,255,255,.12); color: var(--ink); }
-
-/* GLASS OVER A PHOTOGRAPH WAS A MATERIAL. GLASS OVER A SENTENCE IS A
-   SMEAR. This is the one round control that sits over running body
-   text, fixed, while the pane scrolls under it — and .al-round's own
-   --plate is 56%, which dims a word without removing it. Measured on
-   composited pixels, a letter behind the disc survived as a 44-point
-   luminance ghost and the screenshot read "you will b✕". At 94% the
-   ghost is 6 and the backdrop pass is drawing nothing anybody can
-   see, so it stops being glass either way: --card is the app's own
-   object material, the ghost is 0, and the disc reads as a thing ON
-   the page rather than a hole punched in it. The glyph costs nothing
-   — 19.3:1 on the old plate, 19.8 on this one. Both X's take it;
-   both sit over a pane of text. It is LATER in the file than
-   .al-round and the two are equal specificity, so source order is
-   what makes it win — the computed value is read back rather than
-   trusted. */
-.al-x { position: fixed; top: calc(18px + env(safe-area-inset-top, 0px)); right: var(--gut); z-index: 30;
-  background: var(--card); backdrop-filter: none; -webkit-backdrop-filter: none; }
+.al-round svg { width: 16px; height: 16px; display: block; }
+.al-x { position: fixed; top: calc(18px + env(safe-area-inset-top, 0px)); right: var(--gut); z-index: 30; }
 </style>
+
 </head>
 <body>
 
+<nav class="al-nav" id="alNav" hidden>
+  <button class="al-tab" data-v="figures" aria-current="true" aria-label="The Figures">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="7" width="13" height="13" rx="2.4"/><path d="M8 4h11a2 2 0 0 1 2 2v11"/></svg>
+  </button>
+  <button class="al-tab" data-v="books" aria-label="The Books">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.2v13M12 7.2C10.6 5.6 8.4 4.8 5.2 4.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c3.2 0 5.4.8 6.8 2.4M12 7.2c1.4-1.6 3.6-2.4 6.8-2.4a1 1 0 0 1 1 1v11.6a1 1 0 0 1-1 1c-3.2 0-5.4.8-6.8 2.4"/></svg>
+  </button>
+  <button class="al-tab" data-v="kept" aria-label="Kept">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.8 3.4h10.4a1.4 1.4 0 0 1 1.4 1.4v15.8L12 16.1l-6.6 4.5V4.8a1.4 1.4 0 0 1 1.4-1.4Z"/></svg>
+  </button>
+</nav>
+
 <section class="al-view is-on" id="alOpen">
-  <div class="al-mark" role="img" aria-label="Alignment">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 2v20M5 8l7-6 7 6M5 16l7 6 7-6"/></svg>
+  <div class="al-mark">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M5 8l7-6 7 6M5 16l7 6 7-6"/></svg>
+    <b>Alignment</b>
   </div>
-  <h1 class="al-disp" id="alOpenT">Seventeen people and eight books.</h1>
-  <p class="al-note" id="alOpenN">Three hundred and five themes, from seventeen real careers and eight books, split four ways: the model they ran on, what they were actually like, what the world did, and what came back. What the story does, and what it leaves you with.</p>
-  <button class="al-pill" id="alOpenB">Begin</button>
+  <p class="al-caps al-open-k" id="alOpenK"></p>
+  <h1 class="al-open-t" id="alOpenT">The model they ran on, what they were really like, what the world did, and what came back.</h1>
+  <button class="al-go" id="alOpenB" aria-label="Begin">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  </button>
 </section>
 
 <section class="al-view" id="alFigures">
-  <div class="al-head"><h1 class="al-disp-s">The Figures</h1><span class="al-count"></span></div>
+  <div class="al-head"><p class="al-caps al-kick"><span class="al-count"></span> <span class="al-kick-r"></span></p><h1 class="al-disp-s">The Figures</h1></div>
   <div class="al-pane" id="alFiguresPane"></div>
 </section>
 
 <section class="al-view" id="alBooks">
-  <div class="al-head"><h1 class="al-disp-s">The Books</h1><span class="al-count"></span></div>
+  <div class="al-head"><p class="al-caps al-kick"><span class="al-count"></span> <span class="al-kick-r"></span></p><h1 class="al-disp-s">The Books</h1></div>
   <div class="al-pane" id="alBooksPane"></div>
 </section>
 
 <section class="al-view" id="alKept">
-  <div class="al-head"><h1 class="al-disp-s">Kept</h1><span class="al-count"></span></div>
+  <div class="al-head"><p class="al-caps al-kick"><span class="al-count"></span> <span class="al-kick-r"></span></p><h1 class="al-disp-s">Kept</h1></div>
   <div class="al-stops" id="alKeptStops">
-    <button class="al-stop" data-st="pin" aria-current="true">Pinned</button>
-    <button class="al-stop" data-st="hi">Highlighted</button>
+    <button class="al-stop al-caps" data-st="pin" aria-current="true">Pinned</button>
+    <button class="al-stop al-caps" data-st="hi">Highlighted</button>
   </div>
   <div class="al-pane" id="alKeptPane"></div>
 </section>
 
 <section class="al-view" id="alSource">
   <button class="al-round al-x" id="alSourceX" aria-label="Close">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
   </button>
   <div class="al-pane" id="alSourcePane"></div>
 </section>
-
-<nav class="al-foot" id="alFoot">
-  <button class="al-tab" data-v="figures" aria-current="true" aria-label="The Figures">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="7" width="13" height="13" rx="2.4"/><path d="M8 4h11a2 2 0 0 1 2 2v11"/></svg>
-  </button>
-  <button class="al-tab" data-v="books" aria-label="The Books">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.2v13M12 7.2C10.6 5.6 8.4 4.8 5.2 4.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c3.2 0 5.4.8 6.8 2.4M12 7.2c1.4-1.6 3.6-2.4 6.8-2.4a1 1 0 0 1 1 1v11.6a1 1 0 0 1-1 1c-3.2 0-5.4.8-6.8 2.4"/></svg>
-  </button>
-  <button class="al-tab" data-v="kept" aria-label="Kept">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.8 3.4h10.4a1.4 1.4 0 0 1 1.4 1.4v15.8L12 16.1l-6.6 4.5V4.8a1.4 1.4 0 0 1 1.4-1.4Z"/></svg>
-  </button>
-</nav>
 
 <script>
 (function () {
@@ -450,7 +449,7 @@ var AXIS = { mindset: 'Mindset', internal: 'Internal', external: 'External', kar
    this project keeps having to take back out. The figures are two, and a
    founder sitting between Frank Lucas and Big Meech with nothing saying
    so reads as a mistake in the list rather than as a second kind. */
-var GROUP = { street: "The street", built: "The builders", game: "The game" };
+var GROUP = { street: "The street", built: "The builders" };
 
 var SRC = [
   { i: "fifty", n: "50 Cent", p: "Queens, New York", k: "figure", g: "street" },
@@ -469,13 +468,6 @@ var SRC = [
   { i: "spanx", n: "Sara Blakely", p: "Spanx", k: "figure", g: "built" },
   { i: "mchmp", n: "Ben Chestnut", p: "Mailchimp", k: "figure", g: "built" },
   { i: "sigs", n: "Jason Fried", p: "37signals", k: "figure", g: "built" },
-  /* THE ONE SOURCE THAT IS NOT TWELVE, and `deep` is what says so in the
-     data rather than in a comment. A teacher is a different kind of figure
-     from a career: what is documented about him IS the published method —
-     the footage, the argument, the positions held in the open for years —
-     so the mindset half is where the evidence actually is, and the shape
-     follows the evidence rather than a row in a table. */
-  { i: "goldie", n: "God Game Goldie", p: "London", k: "figure", g: "game", deep: true },
   { i: "devil", n: "Outwitting the Devil", p: "Napoleon Hill", k: "book", g: "book" },
   { i: "tagr", n: "Think and Grow Rich", p: "Napoleon Hill", k: "book", g: "book" },
   { i: "mdh", n: "Million Dollar Habits", p: "Brian Tracy", k: "book", g: "book" },
@@ -1351,57 +1343,6 @@ var TH = [
   { s: "sigs", x: "karmic", n: "Nobody Owns Them", b: "What Two Decades of No Bought",
     t: "No board, no acquisition, no obligation to grow. They can change the product, the price or the company's name whenever they decide to, and have.",
     l: "Autonomy is not a feeling, it is a structural position, and it is bought by everything you refused along the way. You will not notice you have it until somebody tries to tell you what to do." },
-  { s: "goldie", x: "mindset", n: "The Name Is the Claim", b: "You Decide What You Are First",
-    t: "The whole thing is called God Game. He did not build a following on a technique with a name, he built it on a claim about who he is, made before anybody had agreed to it, and then spent years on camera making it expensive to argue with.",
-    l: "You are going to be wrong about yourself in one direction or the other, and nobody is coming to correct you kindly either way. Decide upward and then go and make it hard to contradict. The men waiting to feel worthy before they act are waiting on a feeling that only the acting produces." },
-  { s: "goldie", x: "mindset", n: "Reps, Not Lines", b: "Volume Is the Method",
-    t: "The method on the channel is not a script. It is going out, repeatedly, and starting conversations with people who did not ask you to, hundreds of times, most of which go nowhere in particular.",
-    l: "You are not looking for the thing to say. You are building a nervous system that does not spike when a stranger looks at you, and nothing reaches that except the reps. Every man hunting for the perfect opener is buying a way out of the hundred boring attempts that would have fixed it." },
-  { s: "goldie", x: "mindset", n: "You Cannot Outperform What You Think You Are Worth", b: "Inner Before Outer",
-    t: "The material returns to one point across years of it: a man who does not believe he is worth talking to will sabotage any script handed to him, in the tone, in the timing, in the second he folds.",
-    l: "Technique sits on top of self-concept and can never rise above it. That is why the advice fails hardest for the man who needs it most, and why the only real fix is slow, unglamorous and internal, which is exactly the part nobody wants to hear." },
-  { s: "goldie", x: "mindset", n: "Discipline Is the Day You Feel Worst", b: "State Is Not a Prerequisite",
-    t: "The discipline the work actually asks for is going out cold, tired and already turned down twice. The days you felt good were never the part that was hard.",
-    l: "Motivation is a passenger. If you only move when you feel like moving you have handed your life to a mood, and a mood has no interest in what you were planning to become. Go on the bad day and the good days stop being load-bearing." },
-  { s: "goldie", x: "mindset", n: "The Fear Is Outlasted, Not Removed", b: "It Does Not Leave",
-    t: "The honest version in the material is that approach anxiety does not go away. It gets smaller relative to a man who has done it thousands of times, which is a different claim from it going.",
-    l: "You are waiting for the nerves to stop so you can begin. They will not. What changes is that you stop reading the feeling as a verdict and start reading it as weather, and that only happens on the far side of having done it afraid." },
-  { s: "goldie", x: "mindset", n: "A Standard Is a Refusal", b: "What You Will Not Accept",
-    t: "Abundance, stated plainly rather than as a slogan, is not that you get more. It is that you stop accepting less, and the stopping comes first.",
-    l: "Most people treat a standard as a reward you are issued once you have options. It is the cause, not the effect. You hold the line while you have nothing, and that is what produces something, which is precisely the order that makes it difficult." },
-  { s: "goldie", x: "internal", n: "He Films the Rejections", b: "The Part Everybody Else Cuts",
-    t: "The footage keeps the ones that do not work: the walk-off, the conversation that dies in four seconds, the flat no. On a channel where he is the product, the misses stay in.",
-    l: "What you will let people watch you fail at is the entire measure of how much of you is performance. Everybody's highlight reel looks the same; the man who publishes the misses is the only one telling you what the work costs." },
-  { s: "goldie", x: "internal", n: "The Persona Is Built, Not Found", b: "A Character You Can Stand Behind",
-    t: "The gold, the name, the way he presents \u2014 none of it is accidental and none of it pretends to be. It is a constructed version of a man, made deliberately and worn in public for years.",
-    l: "The choice is not between being authentic and being a character. It is whether you build the character on purpose or let one accumulate out of your worst habits. You are a version of yourself either way and only one of them was chosen." },
-  { s: "goldie", x: "internal", n: "The Silence Between Attempts", b: "Nobody Is Watching the Practice",
-    t: "The visible part is a four-minute clip. What produced it is hours on a street, mostly alone, mostly not filming, with nothing happening.",
-    l: "What you see of anybody is the fraction that was worth showing. You are comparing your own dead hours against somebody else's edit, losing, and then concluding something about yourself from a comparison that was never on offer." },
-  { s: "goldie", x: "internal", n: "Being Bad in Front of People", b: "The Only Way Through",
-    t: "A bootcamp means approaching while a coach and a camera watch you do it badly, in public, sober, with witnesses, at the start.",
-    l: "Almost every adult stops learning new things at exactly the point where they would have to be visibly incompetent. That is the ceiling, and it is not made of talent. Whoever can stand being bad in front of people for longer keeps improving after everybody else has quietly stopped." },
-  { s: "goldie", x: "external", n: "Four Seconds Decide the Next Four Minutes", b: "The Open Is the Trade",
-    t: "The material is specific about the opening: how you arrive, the pace, whether your feet are planted, what your face is doing. The part before a word has landed does most of the work.",
-    l: "In any first contact the frame is set before there is content to judge, and almost nobody prepares for the half that decides it. Whatever you rehearsed all week is the least of what is being read." },
-  { s: "goldie", x: "external", n: "You Are Interrupting, So Own It", b: "Do Not Apologise for Existing",
-    t: "An approach is an interruption of somebody who did not ask for one, and the answer in the material is never to disguise that. It is to be direct about it and be worth the interruption.",
-    l: "The apology in the voice is what turns it into an imposition. Hedging does not lower the cost of asking, it adds a second thing to be embarrassed about. Ask plainly and carry the answer either way." },
-  { s: "goldie", x: "external", n: "Most of It Is a No, by Design", b: "A Rate, Not a Verdict",
-    t: "The footage makes it plain that the large majority of attempts end in nothing at all. That is not the method failing. That is the shape the method has.",
-    l: "You are running a rate and treating every single trial as a referendum on you. One no contains no information worth having, and a man who reads it as one stops running the rate, which was the only thing that was ever going to work." },
-  { s: "goldie", x: "external", n: "He Went Where the People Are", b: "Proximity Is Half the Strategy",
-    t: "The work happens on busy streets in one of the largest cities in Europe, and that is not incidental: the method needs volume, and volume needs density.",
-    l: "You can be perfectly prepared standing somewhere the thing cannot happen. A great deal of what gets called luck is being in the room where the outcome is possible, repeatedly, for years." },
-  { s: "goldie", x: "karmic", n: "Somebody Is on the Other Side", b: "A Rep Count Is Not a Person",
-    t: "The footage is of real people going about their day, and the material draws a line where an offer turns into pressure.",
-    l: "A skill that treats other people as a number rots into something else while you are still calling it practice. Whatever you are getting good at, somebody is on the receiving end of it, and the day you stop noticing that is the day it stops being worth having." },
-  { s: "goldie", x: "karmic", n: "He Published the Method", b: "Given Away, Not Sold as a Secret",
-    t: "The bulk of it is free and public: the argument, the footage, the reasoning, years of it. What is paid for is time and attention rather than access to something hidden.",
-    l: "Nothing worth knowing has ever been kept secret by the person who actually had it. What gets sold as hidden knowledge is usually sold that way because it does not survive being tested in the open." },
-  { s: "goldie", x: "karmic", n: "Years of the Same Claim", b: "Consistency Is the Only Audit",
-    t: "The position taken years ago about self-belief, volume and standards is the position now, argued in public throughout, where anybody can go back and check.",
-    l: "There is no certificate for teaching confidence and no way to audit it except the length of the record. Whatever you are claiming, the only evidence you will ever have is that you were still saying it in the years it paid nothing." },
 ];
 
 var $ = function (s) { return document.querySelector(s); };
@@ -1432,6 +1373,7 @@ SRC.forEach(function (x) {
 }());
 
 var STOPS = ['pin', 'hi'];
+function themesOfSrc(i) { return TH.filter(function (t) { return t.s === i; }); }
 function thOf(k) { return TH.filter(function (t) { return t.k === k; })[0]; }
 
 /* A MARK POINTING AT NOTHING IS DROPPED AND THE REST OF THE LIST IS NOT.
@@ -1506,30 +1448,48 @@ function mark(m, k) {
     if (!AXIS[t.x]) throw new Error('bad axis for ' + t.n);
     seen[t.s] = true;
   });
-  /* THREE IS A FLOOR AND ONLY A DECLARED SOURCE MAY PASS IT. Written as
-     `!== 3` this described the data rather than protecting anything, so the
-     day one source earned more the invariant was simply in the way. What it
-     was really holding is that no axis comes out short and no source is
-     lopsided by ACCIDENT — so the exception is named in the record, which is
-     this repo's own rule about an exception being raised rather than a check
-     being relaxed. A source without `deep` that grows a fourth theme still
-     throws, which is the half that catches a duplicated row. */
+  /* THREE, AND THE TWO WAYS PAST IT ARE DIFFERENT FAULTS. This was one
+     `!== 3`, then a floor with a `deep` flag on the one row that ran
+     deeper. He is gone and the flag went with him: a permission nobody
+     spends is a mechanism somebody will edit, and the first thing they
+     would find is that nothing holds it. What survives is the two
+     MESSAGES, which is what `!== 3` never had — coming up short and
+     being lopsided by a duplicated row are not the same mistake, and a
+     check that cannot say which is a check you have to go and read the
+     data to understand. */
   SRC.forEach(function (x) {
     for (var a in AXIS) {
       var n = themesOf(x.i, a).length;
       if (n < 3) throw new Error(x.n + ' has only ' + n + ' ' + a);
-      if (n > 3 && !x.deep) throw new Error(x.n + ' has ' + n + ' ' + a + ' and is not deep');
+      if (n > 3) throw new Error(x.n + ' has ' + n + ' ' + a + ', which is one too many');
     }
   });
-  /* And a source that says it is deep has to actually be — otherwise the flag
-     is a permission nobody spent, sitting on a row that looks like every
-     other one. */
-  SRC.forEach(function (x) {
-    if (!x.deep) return;
-    var most = 0;
-    for (var a in AXIS) most = Math.max(most, themesOf(x.i, a).length);
-    if (most <= 3) throw new Error(x.n + ' is marked deep and is not');
-  });
+  /* A SOURCE'S OWN NAME, WRITTEN INTO ITS OWN PROSE, HAS TO MATCH THE
+     ROW. One shipped with its name REVERSED in the row and again in the
+     one theme that was about the name -- the worst place for it to be
+     wrong and the easiest to read past, because the sentence parses
+     either way round. Two names have now gone out misspelt, so this is
+     a rule rather than a third correction.
+     Asserted as the reversed adjacent PAIR, which is the whole of the
+     fault: a scrambled name is a permutation, and a permutation of two
+     words is the one somebody actually types. Stop words and short
+     words are dropped first, or "the Devil the author describes" reads
+     as a reversal of "Outwitting the Devil". */
+  (function () {
+    var stop = { the: 1, and: 1, for: 1, his: 1, her: 1, its: 1, was: 1 };
+    SRC.forEach(function (x) {
+      var w = x.n.split(' ').filter(function (q) {
+        return q.length >= 3 && !stop[q.toLowerCase()];
+      });
+      for (var j = 1; j < w.length; j++) {
+        var back = (w[j] + ' ' + w[j - 1]).toLowerCase();
+        themesOfSrc(x.i).forEach(function (t) {
+          if ((t.t + ' ' + t.l).toLowerCase().indexOf(back) >= 0)
+            throw new Error(x.n + ' is written backwards as "' + back + '" in ' + t.n);
+        });
+      }
+    });
+  }());
   /* Four axes over one life will collapse into each other unless
      something refuses it, and the cheapest refusal is the name. */
   /* The index draws a heading per run of one group, so a kind holding
@@ -1567,33 +1527,69 @@ function mask(p) {
 function srcOf(id) { return SRC.filter(function (x) { return x.i === id; })[0]; }
 function themesOf(id, ax) { return TH.filter(function (t) { return t.s === id && t.x === ax; }); }
 
-/* ONE CARD, DRAWN ONCE. It is built the same on a figure's own page and
-   in the two axis lists, because two constructions of one object is how
-   the two come to disagree — this repo has written that down already
-   about a question asked in two places and a tag built twice. */
-function card(t) {
+var CHEV = {
+  down:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+  right: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>'
+};
+function chev(d) { var n = el('span', 'al-chev'); n.setAttribute('aria-hidden', 'true'); n.innerHTML = CHEV[d]; return n; }
+
+/* The two lines of a row, bright over dim. One builder for the index
+   and the themes, so a row is one object wherever it is drawn. */
+function rowText(a, b) {
+  var t = el('span', 'al-rt');
+  t.appendChild(el('span', 'al-tn', a));
+  t.appendChild(el('span', 'al-tsub', b));
+  return t;
+}
+
+/* ONE THEME, DRAWN ONCE, on a source page and on Kept alike — two
+   constructions of one object is how the two come to disagree.
+
+   THE BODY IS BUILT WHETHER OR NOT IT IS OPEN, and put away with
+   `hidden`. Built only when opened, the prose would not be in the
+   document for anything that reads it — and the chips on it are the
+   same chips mark() finds by key to keep every copy in step. The id is
+   prefixed by the pane it is in, because both panes stay painted and one
+   theme can be on both at once. */
+function card(t, ctx, open) {
   var d = el('div', 'al-th');
   d.setAttribute('data-x', t.x);
-  d.appendChild(el('h3', 'al-tn', t.n));
-  d.appendChild(el('div', 'al-tsub', t.b));
-  d.appendChild(el('div', 'al-caps al-tl', 'Key theme'));
-  d.appendChild(el('p', 'al-tb', t.t));
-  d.appendChild(el('div', 'al-caps al-tl is-les', 'The spiritual lesson'));
-  d.appendChild(el('p', 'al-tb is-les', t.l));
-  /* AT THE FOOT, WHICH IS WHERE YOU ARE WHEN YOU HAVE READ IT. In the
-     corner it would need the title to carry a max-width against it, and
-     two controls in the corner of every one of 288 cards is louder than
-     the thing they are about. You decide after reading, not before. */
+  var id = 'al-' + ctx + '-' + t.k.replace(/:/g, '-');
+  var h = el('h3', 'al-th-h');
+  var b = el('button', 'al-row');
+  b.setAttribute('aria-expanded', open ? 'true' : 'false');
+  b.setAttribute('aria-controls', id);
+  b.appendChild(rowText(t.n, t.b));
+  b.appendChild(chev('down'));
+  h.appendChild(b);
+  d.appendChild(h);
+  var body = el('div', 'al-body');
+  body.id = id;
+  body.hidden = !open;
+  body.appendChild(el('div', 'al-caps al-tl', 'Key theme'));
+  body.appendChild(el('p', 'al-tb', t.t));
+  body.appendChild(el('div', 'al-caps al-tl is-les', 'The spiritual lesson'));
+  body.appendChild(el('p', 'al-tb is-les', t.l));
+  /* AT THE FOOT, which is where you are when you have read it. */
   var a = el('div', 'al-acts');
   a.appendChild(mkBtn('pin', 'Pin', t.k));
   a.appendChild(mkBtn('hi', 'Highlight', t.k));
-  d.appendChild(a);
+  body.appendChild(a);
+  d.appendChild(body);
   return d;
 }
 
-/* The state is the GROUND, never a second word: a chip reading "Pinned"
-   where it read "Pin" reflows the row under your finger on the very
-   press that moved it, and aria-pressed already carries it in full. */
+/* Opening a row changes how tall the pane's content is, so whether the
+   foot's fade is owed changes with it. */
+function toggle(b) {
+  var open = b.getAttribute('aria-expanded') !== 'true';
+  b.setAttribute('aria-expanded', open ? 'true' : 'false');
+  var body = b.closest('.al-th').querySelector('.al-body');
+  if (body) body.hidden = !open;
+  var p = b.closest('.al-pane');
+  if (p) mask(p);
+}
+
 function mkBtn(m, label, k) {
   var b = el('button', 'al-mk', label);
   b.setAttribute('data-mk', m);
@@ -1602,10 +1598,19 @@ function mkBtn(m, label, k) {
   return b;
 }
 
-/* ONE INDEX PAINTER, TWO LISTS. Figures and Books are the same screen
-   reading the same table through one field, for the reason the axis
-   lists are: a second construction of one object is how the two come
-   to disagree. */
+/* A list's head says what the list is in the label register: the figure,
+   then what it counts. Written from the data every time, because the
+   same count written by hand went stale three times in one afternoon. */
+function kick(sel, n, rest) {
+  var h = $(sel + ' .al-head');
+  h.querySelector('.al-count').textContent = n;
+  h.querySelector('.al-kick-r').textContent = rest;
+}
+
+/* ONE INDEX PAINTER, TWO LISTS. A row that opens a page carries a
+   chevron pointing where it goes; a row that opens in place points down.
+   Spans inside the button rather than a heading, because a heading
+   inside a button is invalid and a row in an index is not a heading. */
 function paintIndex(kind) {
   var p = $('#al' + kind.charAt(0).toUpperCase() + kind.slice(1) + 'Pane'); p.textContent = '';
   var rows = SRC.filter(function (x) { return x.k + 's' === kind; });
@@ -1615,13 +1620,16 @@ function paintIndex(kind) {
     /* No data-x on it: a coloured heading means an axis everywhere else
        in this app, and this one names a kind of person. */
     if (gs.length > 1 && x.g !== last) {
-      p.appendChild(el('div', 'al-grp al-caps', GROUP[x.g]));
+      var g = el('div', 'al-grp al-caps');
+      g.appendChild(el('span', null, GROUP[x.g]));
+      g.appendChild(el('span', 'al-n', rows.filter(function (r) { return r.g === x.g; }).length));
+      p.appendChild(g);
       last = x.g;
     }
-    var b = el('button', 'al-th al-f');
+    var b = el('button', 'al-f');
     b.setAttribute('data-src', x.i);
-    b.appendChild(el('h3', 'al-tn', x.n));
-    b.appendChild(el('div', 'al-tsub', x.p));
+    b.appendChild(rowText(x.n, x.p));
+    b.appendChild(chev('right'));
     p.appendChild(b);
   });
   mask(p);
@@ -1631,8 +1639,8 @@ function paintSource(id) {
   var x = srcOf(id); if (!x) return;
   var p = $('#alSourcePane'); p.textContent = '';
   var lead = el('div', 'al-lead');
+  lead.appendChild(el('div', 'al-caps al-kick', x.p));
   lead.appendChild(el('h1', 'al-disp', x.n));
-  lead.appendChild(el('div', 'al-caps', x.p));
   p.appendChild(lead);
   var sh = el('div', 'al-sheet');
   for (var a in AXIS) {
@@ -1641,28 +1649,23 @@ function paintSource(id) {
     var h = el('div', 'al-grp al-caps', AXIS[a]);
     h.setAttribute('data-x', a);
     sh.appendChild(h);
-    rows.forEach(function (t) { sh.appendChild(card(t)); });
+    rows.forEach(function (t) { sh.appendChild(card(t, 'src', false)); });
   }
   p.appendChild(sh);
   p.scrollTop = 0; mask(p);
 }
 
-/* ONE PAINTER FOR BOTH STOPS, grouped by source in the app's own order,
-   because a lesson stranded from the thing that is evidence for it is
-   what every other list here is arranged to avoid. The heading takes no
-   hue: a pane that mixes four axes has no axis for a colour to be about,
-   which is the figures index's own rule seen from the other side. */
+/* ONE PAINTER FOR BOTH STOPS, grouped by source in the app's own order.
+   The heading takes no hue: a pane that mixes four axes has no axis for
+   a colour to be about. */
 function paintKept() {
   var p = $('#alKeptPane'); p.textContent = '';
   var list = st[st.stop].map(thOf).filter(Boolean);
-  $('#alKept').querySelector('.al-count').textContent = list.length;
+  kick('#alKept', list.length, st.stop === 'pin' ? 'pinned' : 'highlighted');
   [].forEach.call(document.querySelectorAll('#alKeptStops .al-stop'), function (b) {
     b.setAttribute('aria-current', b.getAttribute('data-st') === st.stop ? 'true' : 'false');
   });
   if (!list.length) {
-    /* An empty stop says what the stop is FOR. It is not a caption under
-       a control — the control is on every card, one tab away — it is the
-       screen saying which of the two lists you are looking at none of. */
     p.appendChild(el('p', 'al-empty', st.stop === 'pin'
       ? 'Nothing pinned. A pin is the short list you are working from now, so keep it short.'
       : 'Nothing highlighted. A highlight is a line that landed, and there is no limit on those.'));
@@ -1672,7 +1675,7 @@ function paintKept() {
     var rows = list.filter(function (t) { return t.s === x.i; });
     if (!rows.length) return;
     p.appendChild(el('div', 'al-grp al-caps', x.n));
-    rows.forEach(function (t) { p.appendChild(card(t)); });
+    rows.forEach(function (t) { p.appendChild(card(t, 'kept', true)); });
   });
   mask(p);
 }
@@ -1683,6 +1686,8 @@ function paintKept() {
    what view()'s own fall-through already does, and why the list is
    written out rather than derived. */
 var VIEWS = ['open', 'figures', 'books', 'kept', 'source'];
+var COUNT = { figure: 0, book: 0, figureTh: 0, bookTh: 0 };
+SRC.forEach(function (x) { COUNT[x.k]++; COUNT[x.k + 'Th'] += themesOfSrc(x.i).length; });
 function view(v) {
   if (VIEWS.indexOf(v) < 0) v = 'figures';
   document.documentElement.setAttribute('data-view', v);
@@ -1690,13 +1695,13 @@ function view(v) {
     var n = $('#al' + x.charAt(0).toUpperCase() + x.slice(1));
     if (n) n.classList.toggle('is-on', x === v);
   });
-  $('#alFoot').hidden = (v === 'open' || v === 'source');
+  $('#alNav').hidden = (v === 'open' || v === 'source');
   $('#alSourceX').hidden = (v !== 'source');
   document.querySelectorAll('.al-tab').forEach(function (b) {
     b.setAttribute('aria-current', b.getAttribute('data-v') === v ? 'true' : 'false');
   });
-  $('#alFigures').querySelector('.al-count').textContent = SRC.filter(function (x) { return x.k === 'figure'; }).length;
-  $('#alBooks').querySelector('.al-count').textContent = SRC.filter(function (x) { return x.k === 'book'; }).length;
+  kick('#alFigures', COUNT.figure, 'people · ' + COUNT.figureTh + ' themes');
+  kick('#alBooks', COUNT.book, 'books · ' + COUNT.bookTh + ' themes');
   if (v === 'figures' || v === 'books') paintIndex(v);
   if (v === 'kept') paintKept();
   if (v !== 'source') { st.last = v; save(); }
@@ -1713,18 +1718,26 @@ function openSource(id) {
 
 document.addEventListener('click', function (e) {
   var t = e.target.closest
-    ? e.target.closest('.al-tab, .al-pill, .al-f, .al-stop, .al-mk, #alOpenB, #alSourceX') : null;
+    ? e.target.closest('.al-tab, .al-f, .al-stop, .al-mk, .al-row, #alOpenB, #alSourceX') : null;
   if (!t) return;
   var m = t.getAttribute && t.getAttribute('data-mk');
   if (m) return mark(m, t.getAttribute('data-k'));
   var stop = t.getAttribute && t.getAttribute('data-st');
   if (stop) { st.stop = stop; save(); return paintKept(); }
+  if (t.classList.contains('al-row')) return toggle(t);
   if (t.id === 'alOpenB') return view(VIEWS.indexOf(st.last) > 0 && st.last !== 'source' ? st.last : 'figures');
   if (t.id === 'alSourceX') return view(sourceBack);
   var id = t.getAttribute && t.getAttribute('data-src');
   if (id) return openSource(id);
   if (t.classList.contains('al-tab')) return view(t.getAttribute('data-v'));
 });
+
+/* THE FIGURES ON THE FIRST SCREEN ARE WRITTEN FROM THE DATA. The title
+   and the paragraph under it said "seventeen" and "three hundred and
+   five" by hand, and were wrong for a day after a source came out —
+   nothing read them. A line of figures in the label register is what the
+   reference does with a number anyway, and digits a check can read. */
+$('#alOpenK').textContent = COUNT.figure + ' figures · ' + COUNT.book + ' books · ' + TH.length + ' themes';
 
 view('open');
 /* views() rather than a list the probes keep their own copy of: two of
