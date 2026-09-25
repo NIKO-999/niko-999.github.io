@@ -466,6 +466,15 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
         const cb = clip ? clip.getBoundingClientRect() : { top: 0, bottom: innerHeight };
         const top = Math.max(0, cb.top), bot = Math.min(innerHeight, cb.bottom);
         if (bb.bottom <= top + 1 || bb.top >= bot - 1) return;
+        /* THE FADE IS DRAWN, NOT A FAULT. A pane that is not at its end
+           masks its last 72px so the list dissolves into the sky, and a
+           chip in that band has its own ground faded under a colour the
+           sweep reads as declared: it measured a pressed Pin at 1.47:1
+           that nobody sees at full strength. Anything reaching into the
+           band is left to a scroll position where it sits above it, which
+           the overlapping sweep below guarantees. */
+        if (clip && clip.classList.contains('al-pane') && !clip.classList.contains('is-end')
+            && bb.bottom > Math.min(innerHeight, cb.bottom) - 72) return;
         const cs = getComputedStyle(n);
         const raw = cs.color;
         let m;
@@ -519,7 +528,20 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
         .find(n => n.offsetParent && n.scrollHeight > n.clientHeight + 4);
       return p ? p.scrollHeight - p.clientHeight : 0;
     });
-    for (let t = 0; ; t += 700) {
+    /* OVERLAPPING WINDOWS, NEVER A FIXED STRIDE. It stepped 700px down a
+       pane that is 515px tall now the lists end above the glow, so a band
+       of every long page was never on screen at any stop and was never
+       measured. A window less the fade and the tallest paragraph, so every
+       element is wholly above the fade at one stop or another. */
+    const step = await page.evaluate(() => {
+      const p = [...document.querySelectorAll('.al-pane')]
+        .find(n => n.offsetParent && n.scrollHeight > n.clientHeight + 4);
+      if (!p) return 700;
+      const tall = Math.max(0, ...[...p.querySelectorAll('*')].map(n => n.getBoundingClientRect().height)
+        .filter(h => h < p.clientHeight - 100));
+      return Math.max(80, Math.floor(p.clientHeight - 72 - Math.min(tall, 240)));
+    });
+    for (let t = 0; ; t += step) {
       const y = Math.min(t, max);
       await page.evaluate(v => { const p = [...document.querySelectorAll('.al-pane')]
         .find(n => n.offsetParent && n.scrollHeight > n.clientHeight + 4); if (p) p.scrollTop = v; }, y);

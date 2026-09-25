@@ -1851,8 +1851,13 @@ function mark(m, k) {
 }());
 
 function mask(p) {
+  /* AT THE END MEANS NOTHING BUT PADDING IS LEFT BELOW. Kept with one card
+     overflows by its own foot padding alone, so the fade stayed on and
+     the only card on the screen was drawn half dissolved, as if there
+     were more to scroll to. */
   var f = function () {
-    p.classList.toggle('is-end', p.scrollTop + p.clientHeight >= p.scrollHeight - 2);
+    var pad = parseFloat(getComputedStyle(p).paddingBottom) || 0;
+    p.classList.toggle('is-end', p.scrollTop + p.clientHeight >= p.scrollHeight - pad - 2);
   };
   if (!p.alMask) { p.alMask = f; p.addEventListener('scroll', f, { passive: true }); }
   p.alMask();
