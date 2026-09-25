@@ -4304,6 +4304,15 @@ already struck; it still says Off where the time goes, which is what
 tells the two apart. Asserted both ways on one day with one block
 ticked, and as nothing struck on a day still to come.
 
+**Today, only half an hour after it ends.** A row that struck itself
+out the minute its end ticked past was calling a block missed while you
+were still finishing it. `MISS_AFTER` is 30 minutes past the end (past
+the start for a moment); any earlier day is behind you whole. Asserted
+at 12:29 and 12:30 on a block ending at noon, because a build that never
+strikes passes one side and one that strikes on the minute passes the
+other. The list already repaints every thirty seconds, so the row turns
+over on its own.
+
 **And the missed name is the faint grey**, asked for on top of the
 strike: the one piece of type in the app held under 4.5:1, on purpose,
 because it is a record of something that did not happen. It is held to

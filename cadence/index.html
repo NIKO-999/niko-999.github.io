@@ -1083,9 +1083,15 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      rest opens the block. A button inside a button collapses to one press
      while looking exactly right. The dot is drawn at seven pixels and
      owns forty-four. */
+  var MISS_AFTER = 30;
   function cdRow(b, isT, now, open) {
     var cat = CAT[cdKind(b.n)], done = cdDone(sel, b.id), off = cdIsOff(sel, b.id);
-    var past = !off && ((isT && (b.e > b.s ? now >= b.e : now > b.s)) || sel < cdToday());
+    /* Today a block is only struck as missed half an hour after it ends:
+       finishing a little late is not missing it, and a row that crosses
+       itself out the minute its end ticks past is the screen grading you
+       while you are still doing the thing. Any earlier day is behind you
+       whole. */
+    var past = !off && ((isT && now >= Math.max(b.e, b.s) + MISS_AFTER) || sel < cdToday());
     var time = off ? 'Off' : cdHM(b.s);
     var sess = (S.train[sel] && cdSess(S.train[sel][b.id])) || null;
     var rw = sess ? '<span class="cd-rw" style="--kc:var(--k-' + LIFTN[sess.k[0]].g + ')"> · ' + esc(cdSessName(sess)) + '</span>' : '';

@@ -852,6 +852,24 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await c.close();
   }
 
+  console.log('\n── a block is missed half an hour after it ends ──');
+  {
+    /* Deep work ends at 12:00. At 12:29 it is late, not missed: no strike.
+       At 12:30 the half hour is up and it is struck. Read at both sides of
+       the line, because a build that never strikes passes the first and
+       one that strikes on the minute passes the second. */
+    const at = async (t) => {
+      const { c, page } = await ctx({ at: '2026-09-25T' + t + ':00' });
+      const r = await page.$$eval('.cd-it', (ls) => ls.map((l) => ({ n: l.querySelector('.cd-rn').textContent, past: l.classList.contains('is-past'),
+        s: getComputedStyle(l.querySelector('.cd-rn')).textDecorationLine })).find((x) => x.n === 'Deep work') || null);
+      await c.close();
+      return r;
+    };
+    const late = await at('12:29'), gone = await at('12:30');
+    ok('a block 29 minutes past its end is not yet struck as missed', !!late && !late.past && late.s === 'none', late);
+    ok('and at half an hour past it is', !!gone && gone.past && gone.s === 'line-through', gone);
+  }
+
   console.log('\n── clearing the whole week ──');
   {
     /* One press empties the template, and it asks first. Both exits are
