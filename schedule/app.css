@@ -6221,6 +6221,93 @@ body {
   background: var(--c);
 }
 
+/* ── A PICTURE IN A NOTE ──
+   Full width, its own aspect, and the box reserved from the RECORD
+   rather than from the picture: the blob is in IndexedDB and arrives a
+   frame or more late, so an <img> with no aspect on it is a note that
+   jumps as you read it. `aspect-ratio` with a definite width and an
+   auto height gives a definite height before there is a `src`, which is
+   the whole of the reserve and needs no wrapper to hold it.
+
+   A press target, so it clears 44 even where the picture does not: a
+   very wide short photograph is 17px tall in this column, and the extra
+   is dead button rather than a distorted picture. */
+.nt-row.is-pic { padding: 8px 0; }
+.nt-pb {
+  display: flex; align-items: center;
+  width: 100%; min-height: 44px;
+  padding: 0; border: 0; background: none;
+  cursor: pointer;
+}
+.nt-pb img {
+  display: block; width: 100%; height: auto; max-width: 100%;
+  border-radius: 12px;
+  /* So the reserved box is a shape rather than a hole while the blob is
+     on its way, and so a picture that has gone leaves one. */
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+}
+.nt-pb:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.nt-row.is-pic.is-gone .nt-pb { cursor: default; }
+
+/* ── AND THE CAPTION IS THE SWITCH ──
+   A picture with something to say sits in a card that holds it; one
+   with nothing to say is bare. The radius NESTS — 14 outside, 8 in —
+   because two rounded rectangles at one radius read as a mistake, and
+   the inner border comes off because the card is already the edge.
+
+   A BORDER AND NEVER A SHADOW: the photograph is IN the card, so the
+   card only has to be an edge — the feed post's own argument, and the
+   rows either side of this one are flat. */
+.nt-row.is-pic.is-cap {
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+  border-radius: 14px;
+  padding: 6px 6px 2px;
+}
+.nt-row.is-pic.is-cap .nt-pb img { border-radius: 8px; border: 0; }
+/* 13px on the scale, and `--dim` rather than `--spent`: a caption is
+   body-sized type, and `--spent` over a card measures 4.30:1 on the
+   light face — which is the grouped list's own finding, one screen
+   over. Read and written at the same size, or a mode switch re-wraps
+   the caption. */
+.nt-pc, .nt-cap {
+  font-size: 13px; line-height: 1.35; color: var(--dim);
+  padding: 6px 4px 7px;
+}
+.nt-cap {
+  display: block; width: 100%;
+  border: 0; background: none;
+  font-family: inherit; font-weight: 500;
+}
+.nt-cap::placeholder { color: var(--spent); }
+.nt-cap:focus { outline: none; }
+/* The spine draws its bead against `is-step`, which a picture does not
+   carry — and a picture in a process still sits in the text column
+   rather than out in the rail. */
+.nt-sp .nt-row.is-pic { padding-left: 0; }
+.nt-body.is-drag .nt-row.is-pic { transition: transform 160ms ease; }
+
+/* ── THE VIEWER IS ABOVE EVERYTHING, AND IT CONTAINS ──
+   z-index 80, over the sheet at 50, the toast at 60 and the intro at
+   70: it is the thing on top, so it is what Escape closes first.
+   `contain` rather than `cover`, which is the entire reason it exists —
+   a viewer that cropped the way the column does would show you nothing
+   you could not already see. */
+.nt-pv {
+  position: fixed; inset: 0; z-index: 80;
+  display: grid; place-items: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, .94);
+}
+.nt-pv img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.nt-pv-x {
+  position: absolute;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  right: 16px;
+  font-size: 11px; color: var(--dim);
+}
+
 /* Both gutter marks sit OUTSIDE the words rather than behind them, so
    they are the highlights that cost the line no contrast at all — and
    the field's own marked rule must not strike or fade them. */
@@ -6242,7 +6329,7 @@ body {
    `.rowwrap > .chk` and `.ty-row > .chk` each own their own context
    instead of one selector trying to fit every row shape.
    ═══════════════════════════════════════════════════════════════ */
-.nt-body.is-chk .nt-row:not(.is-head) { padding-right: 34px; }
+.nt-body.is-chk .nt-row:not(.is-head):not(.is-pic) { padding-right: 34px; }
 .nt-body.is-chk .nt-row > .chk { left: auto; right: 2px; }
 /* Struck and dropped to the quiet grey — the goal's own "ruled out"
    recipe, because a checked-off line and a ruled-out one are both a
@@ -6267,7 +6354,7 @@ body {
 /* A name and a figure read across, so the row is two columns. The
    well is a normal-flow child of it and keeps its own box, which is
    the whole reason the mirror was moved into one. */
-.nt-body.is-bud .nt-row:not(.is-head) {
+.nt-body.is-bud .nt-row:not(.is-head):not(.is-pic) {
   display: grid; grid-template-columns: 1fr 84px;
   gap: 10px; align-items: start;
 }

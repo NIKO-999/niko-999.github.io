@@ -9798,23 +9798,178 @@
      sitting in a database to be drawn at 26 pixels. 256 is twice what
      the largest use needs, which is the margin a retina screen wants
      and nothing more. */
-  function scPicCrop(file, done) {
+  /* ONE READER, TWO DRAWS. The avatar crops to a square and a note's
+     picture fits inside a box, which is two `drawImage` calls over
+     identical scaffolding: a FileReader, an Image, and the same two
+     failure paths. Written twice they are two places to get a broken
+     file wrong, which is `scMindDur` and `scMindFmtMin`'s own lesson. */
+  function scPicImg(file, done) {
     var fr = new FileReader();
     fr.onerror = function () { done(null); };
     fr.onload = function () {
       var img = new Image();
       img.onerror = function () { done(null); };
-      img.onload = function () {
-        var S = 256, c = document.createElement('canvas');
-        c.width = S; c.height = S;
-        var side = Math.min(img.width, img.height);
-        c.getContext('2d').drawImage(img,
-          (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, S, S);
-        try { done(c.toDataURL('image/jpeg', 0.82)); } catch (e) { done(null); }
-      };
+      img.onload = function () { done(img); };
       img.src = fr.result;
     };
     fr.readAsDataURL(file);
+  }
+  function scPicCrop(file, done) {
+    scPicImg(file, function (img) {
+      if (!img) return done(null);
+      var S = 256, c = document.createElement('canvas');
+      c.width = S; c.height = S;
+      var side = Math.min(img.width, img.height);
+      c.getContext('2d').drawImage(img,
+        (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, S, S);
+      try { done(c.toDataURL('image/jpeg', 0.82)); } catch (e) { done(null); }
+    });
+  }
+
+  /* ── A NOTE'S PICTURE FITS, IT DOES NOT CROP ──
+     The crop above takes a square because a face is drawn in a circle
+     at 26px. A picture in a note is drawn at the text column's own
+     width and whatever height its aspect gives, so cropping it would
+     throw away the half of a whiteboard photograph you attached it
+     for. 1280 on the long edge is a 354px column at three times the
+     density with margin left over, and a phone camera's four
+     megapixels kept whole is several megabytes in a database to be
+     drawn at 354.
+
+     AND THE SCALED DIMENSIONS COME BACK WITH IT, which is the whole of
+     what lets the box be reserved before the blob arrives. They are
+     the dimensions of what was STORED rather than of what was chosen,
+     so the reserved box and the picture in it cannot disagree. */
+  var PIC_MAX = 1280;
+  function scPicFit(file, done) {
+    scPicImg(file, function (img) {
+      if (!img || !img.width || !img.height) return done(null);
+      var k = Math.min(1, PIC_MAX / Math.max(img.width, img.height));
+      var w = Math.max(1, Math.round(img.width * k));
+      var h = Math.max(1, Math.round(img.height * k));
+      var c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      try { done({ u: c.toDataURL('image/jpeg', 0.82), w: w, h: h }); }
+      catch (e) { done(null); }
+    });
+  }
+
+  /* ── A NOTE'S PICTURES LIVE IN THE STORE THE FACE ALREADY USES ──
+     `schedPic` is keyed by a string and holds the avatar under `me`, so
+     a note's picture is the same store under a minted key. A second
+     database for the same kind of thing is a second thing to open,
+     upgrade and fail at. And never localStorage, for the reason
+     written above `scPicDB`: a picture there shares a 5MB budget with
+     the schedule, so the day it is too big it takes the week with it.
+
+     THE CACHE IS WHAT STOPS A REPAINT RE-READING THE DATABASE for
+     every picture on the note — and a picture that arrives LATE fills
+     the <img> already in the document rather than repainting, because
+     a repaint in edit mode takes the caret with it. That is the search
+     field's own lesson, which reported as "it cancels out my writing". */
+  var ntPicC = {};
+  function scNtPicPut(key, url, done) {
+    ntPicC[key] = url;
+    try {
+      scPicDB(function (db) {
+        if (!db) return done(false);
+        var st = db.transaction('pic', 'readwrite').objectStore('pic');
+        st.put(url, key);
+        st.transaction.oncomplete = function () { done(true); };
+        st.transaction.onerror = function () { done(false); };
+      });
+    } catch (e) { done(false); }
+  }
+  function scNtPicGet(key, fn) {
+    if (ntPicC[key] !== undefined) { fn(ntPicC[key]); return; }
+    try {
+      scPicDB(function (db) {
+        if (!db) return fn(null);
+        var q = db.transaction('pic').objectStore('pic').get(key);
+        q.onsuccess = function () { ntPicC[key] = q.result || null; fn(ntPicC[key]); };
+        q.onerror = function () { fn(null); };
+      });
+    } catch (e) { fn(null); }
+  }
+  /* THE BLOB GOES WITH THE LINE, on the spot. Nothing else points at
+     it, so a picture whose line is gone is a picture nothing will ever
+     look at again. */
+  function scNtPicDrop(keys) {
+    keys.forEach(function (k) { delete ntPicC[k]; });
+    try {
+      scPicDB(function (db) {
+        if (!db) return;
+        var st = db.transaction('pic', 'readwrite').objectStore('pic');
+        keys.forEach(function (k) { st.delete(k); });
+      });
+    } catch (e) {}
+  }
+  /* ── AND A KEY NOTHING NAMES IS SWEPT AT BOOT ──
+     The delete above is the ordinary path. A delete that failed while
+     the database was busy, or a notes key restored from a backup, both
+     leave a picture with nothing pointing at it — and no other code
+     would ever look at it again, so it would sit there for the life of
+     the browser. Run once a load off the notes that actually came
+     back: `me` is the avatar and every other key in this store is a
+     note's, so what no line names is an orphan.
+
+     A damaged notes key reads as an empty one, and sweeping is still
+     right there: the notes are already gone, so their pictures point
+     at nothing either way. */
+  function scNtPicSweep() {
+    var live = { me: 1 };
+    notes.forEach(function (n) {
+      n.l.forEach(function (L) { if (L.p) live[L.p] = 1; });
+    });
+    try {
+      scPicDB(function (db) {
+        if (!db) return;
+        var st = db.transaction('pic', 'readwrite').objectStore('pic');
+        if (!st.getAllKeys) return;
+        var q = st.getAllKeys();
+        q.onsuccess = function () {
+          (q.result || []).forEach(function (k) { if (!live[k]) st.delete(k); });
+        };
+      });
+    } catch (e) {}
+  }
+
+  /* ── THE VIEWER IS BUILT AND REMOVED, NEVER HIDDEN ──
+     A full-screen surface put away with the `hidden` attribute has
+     broken in this app nine times: the attribute works only because of
+     the browser's own `[hidden] { display: none }`, and any author
+     `display` outranks it — so the surface goes on taking every press
+     while the property is still being set correctly. An element that
+     is not in the document cannot swallow a press, which is why this
+     is asserted as the node being GONE rather than as not drawn.
+
+     CONTAIN RATHER THAN COVER, and that is the whole reason a viewer
+     exists: a tall picture is drawn small in a text column, and one
+     that cropped the same way the card does would show you nothing you
+     could not already see. */
+  var picView = null;
+  function scPicViewClose() {
+    if (!picView) return;
+    if (picView.parentNode) picView.parentNode.removeChild(picView);
+    picView = null;
+  }
+  function scPicViewOpen(key, label) {
+    scPicViewClose();
+    scNtPicGet(key, function (url) {
+      if (!url) { scToast('That picture is gone', false); return; }
+      var v = scEl('div', 'nt-pv');
+      v.setAttribute('role', 'dialog');
+      v.setAttribute('aria-label', label || 'Picture');
+      var im = scEl('img');
+      im.alt = label || '';
+      im.src = url;
+      v.appendChild(im);
+      v.appendChild(scEl('span', 'nt-pv-x', 'tap anywhere to close'));
+      v.addEventListener('click', scPicViewClose);
+      picView = v;
+      document.body.appendChild(v);
+    });
   }
 
   function scMenuSheet() {
@@ -10388,7 +10543,22 @@
     for (var i = 0; i < src.length && n.l.length < NOTE_LINES; i++) {
       var r = src[i];
       if (!r || typeof r !== 'object') continue;
-      var head = !!r.h;
+      /* ── A PICTURE IS A LINE WITH NO WORDS ──
+         `p` is the key its blob sits under in `schedPic`, and a line
+         carrying one is a picture: no words, no mark, no pen, and never
+         a heading. The picture itself is NOT in this record — a data
+         URL in localStorage shares a 5MB budget with the schedule.
+         Zeroed rather than kept, unlike `y`, because a picture line is
+         built as one and was never a line of text to be lossless
+         about. */
+      var pic = (typeof r.p === 'string' && r.p) ? r.p.slice(0, 40) : '';
+      /* THE PICTURE WINS OVER THE HEADING, and the order is the
+         repair: a line carrying both is damage either way, and reading
+         it as a heading throws the photograph away while reading it as
+         a picture costs a word somebody can type again. The days are
+         what you cannot get back, one screen over, for the same
+         reason. */
+      var head = !!r.h && !pic;
       n.l.push({
         i: typeof r.i === 'string' && r.i ? r.i : scNtId(),
         h: head ? 1 : 0,
@@ -10397,7 +10567,26 @@
            under. Stored on the line as well would be a second record
            of one decision. */
         c: head ? scNtHue(r.c) : '',
-        x: typeof r.x === 'string' ? r.x.slice(0, 300) : '',
+        x: (pic || typeof r.x !== 'string') ? '' : r.x.slice(0, 300),
+        p: pic,
+        /* ── AND `pw`/`ph` ARE WHY THE NOTE DOES NOT JUMP ──
+           The blob is in IndexedDB and arrives a frame or more late, so
+           the box has to be reserved at the right height before it
+           does: without them every picture on the note reflows as it
+           loads, which is exactly the jank the tools strip was measured
+           and moved for. Damaged, they fall to 4:3 rather than to
+           nothing — a box of no height IS the jump this prevents. */
+        pw: pic ? ((typeof r.pw === 'number' && r.pw > 0)
+          ? Math.min(20000, Math.round(r.pw)) : 4) : 0,
+        ph: pic ? ((typeof r.ph === 'number' && r.ph > 0)
+          ? Math.min(20000, Math.round(r.ph)) : 3) : 0,
+        /* ── THE CAPTION IS THE SWITCH ──
+           A picture with one is drawn in a card that holds it and a
+           picture without one is drawn bare, so there is ONE decision
+           rather than two — and it is what stops a card existing as a
+           frame around nothing, which is the frame-inside-a-frame this
+           project keeps taking back out. */
+        pc: (pic && typeof r.pc === 'string') ? r.pc.slice(0, 140) : '',
         /* On a heading this is the clause; on a step in a daily
            process it is the note under it. Kept on any line rather
            than only on headings, because a layout that is not drawing
@@ -10411,7 +10600,7 @@
            to the swipe rather than to nothing: a line somebody marked
            is a line they marked, and a build that does not know the
            style still has to draw it. */
-        m: (!head && r.m) ? (r.m === 2 ? 2 : r.m === 3 ? 3 : 1) : 0,
+        m: (!head && !pic && r.m) ? (r.m === 2 ? 2 : r.m === 3 ? 3 : 1) : 0,
         /* ── AND THE PEN, WHICH MARKS WORDS RATHER THAN THE LINE ──
            WORD INDICES, never character offsets: an offset moves when
            anything before it is typed, and a word index only moves
@@ -10447,7 +10636,7 @@
            figure, which on $400 is $25. */
         mk: (!head && typeof r.mk === 'number' && r.mk > 0)
           ? Math.min(1e8, Math.round(r.mk)) : 0,
-        w: (!head && !r.m && Array.isArray(r.w))
+        w: (!head && !pic && !r.m && Array.isArray(r.w))
           ? r.w.filter(function (k, q, a) {
               return typeof k === 'number' && k >= 0 && k < 300
                 && (k | 0) === k && a.indexOf(k) === q;
@@ -10544,6 +10733,10 @@
        next write". Only when something actually changed, so an intact
        record costs no write on every open. */
     if (JSON.stringify({ list: notes }) !== before) scNoteSave();
+    /* Housekeeping rather than part of the load, so it never competes
+       with the first paint — and off the notes that actually came back
+       rather than off the record it was asked to read. */
+    setTimeout(scNtPicSweep, 4000);
   }
 
   function scNoteById(id) {
@@ -10563,12 +10756,17 @@
   }
   function scNoteTitle(n) { return n.t || 'Untitled'; }
   function scNoteCount(n) {
-    var lines = 0, marked = 0, heads = 0;
+    var lines = 0, marked = 0, heads = 0, pics = 0;
     n.l.forEach(function (L) {
       if (L.h) { heads++; return; }
+      /* A PICTURE IS NOT A LINE. Counted as one, "3 lines" is a figure
+         the card cannot show you three of — and a note that is one
+         photograph and nothing else previews as empty, which reads as a
+         note with nothing in it. Its own figure is what says so. */
+      if (L.p) { pics++; return; }
       lines++; if (L.m) marked++;
     });
-    return { lines: lines, marked: marked, heads: heads };
+    return { lines: lines, marked: marked, heads: heads, pics: pics };
   }
 
   /* ── A GOAL'S ONE FIGURE ──
@@ -10593,7 +10791,11 @@
      invented a second text field would be the one kind you could not
      switch away from without losing something. */
   function scNoteStmt(n) {
-    return (n.l.length && !n.l[0].h) ? n.l[0] : null;
+    /* A PICTURE IS NOT A STATEMENT. The statement IS the first line —
+       that is what makes a goal's marker the thing you wrote rather
+       than the first plain line it can find — so a goal that opens on a
+       picture has none yet. */
+    return (n.l.length && !n.l[0].h && !n.l[0].p) ? n.l[0] : null;
   }
 
   /* ── THE FIGURES SPEAK EACH KIND'S OWN LANGUAGE ──
@@ -10603,8 +10805,12 @@
      what that layout is about. */
   function scNoteFigs(n) {
     var c = scNoteCount(n);
+    /* Second, after however many lines there are: a picture is a thing
+       in the note rather than the note's own shape. Drawn only when
+       there is one, so nothing says "0 pictures". */
+    var pf = c.pics ? [c.pics + (c.pics === 1 ? ' picture' : ' pictures')] : [];
     if (n.k === 'proc') {
-      return [c.lines + (c.lines === 1 ? ' step' : ' steps')]
+      return [c.lines + (c.lines === 1 ? ' step' : ' steps')].concat(pf)
         .concat(c.heads ? [c.heads + (c.heads === 1 ? ' session' : ' sessions')] : []);
     }
     /* ── THE CARD SHOWS WHAT IS LIVE, AND FALLS BACK TO WHAT IS PRICED ──
@@ -10628,16 +10834,16 @@
     }
     if (n.k === 'goal') {
       var d = scNoteDays(n);
-      if (d === null) return [c.lines + (c.lines === 1 ? ' line' : ' lines')];
+      if (d === null) return [c.lines + (c.lines === 1 ? ' line' : ' lines')].concat(pf);
       if (d < 0) return [-d + (d === -1 ? ' day over' : ' days over'), 'was ' + scNoteDue(n)];
       if (d === 0) return ['due today', scNoteDue(n)];
       return [d + (d === 1 ? ' day left' : ' days left'), 'due ' + scNoteDue(n)];
     }
     if (n.k === 'chk') {
-      return [c.lines + (c.lines === 1 ? ' item' : ' items')]
+      return [c.lines + (c.lines === 1 ? ' item' : ' items')].concat(pf)
         .concat(c.marked ? [c.marked + ' done'] : []);
     }
-    return [c.lines + (c.lines === 1 ? ' line' : ' lines')]
+    return [c.lines + (c.lines === 1 ? ' line' : ' lines')].concat(pf)
       .concat(c.marked ? [c.marked + ' marked'] : []);
   }
   /* The first thing you actually wrote, headings skipped — a preview
@@ -11982,6 +12188,65 @@
     });
   }
 
+  /* ── A PICTURE IS THE COLUMN'S OWN WIDTH, AND ITS CAPTION IS THE
+         SWITCH BETWEEN THE TWO TREATMENTS ──
+     Four were rendered over the real note at 390x844 and read at 1:1.
+     FULL WIDTH keeps its aspect and is the only one where a photograph
+     of a whiteboard is legible without opening it. A grid of squares is
+     what Apple Notes does with several at once and it CROPS, so a
+     portrait loses its ends. A thumbnail beside a filename costs the
+     least height and tells you nothing about the picture, which is most
+     of why you attached it.
+
+     The CARD was the fourth, and it is here as an option rather than as
+     the default — asked for in those words. What decides which you get
+     is the caption: a picture with something to say sits in a card that
+     holds it, and one with nothing to say is bare. One decision instead
+     of two, and a card can then never exist as a frame around nothing.
+
+     THE BOX IS RESERVED FROM THE RECORD, never from the picture. The
+     blob is in IndexedDB and arrives a frame or more late, so an <img>
+     with no aspect on it is a note that jumps as you read it — which is
+     the same jank the tools strip was measured and moved for.
+
+     The radius NESTS, 14 outside and 8 in, because two rounded
+     rectangles at one radius read as a mistake. A border and never a
+     shadow: the photograph is IN the card, so the card only has to be
+     an edge — the feed post's own argument, and the rows either side of
+     it are flat.
+
+     ONE DRAWING, FIVE CALLERS. Written per layout it would be five
+     places for the aspect, the reserve and the late fill to drift. */
+  function scNtPicRow(n, L) {
+    var cap = (L.pc || '').trim();
+    var row = scEl('div', 'nt-row is-pic' + (cap ? ' is-cap' : ''));
+    var b = scEl('button', 'nt-pb');
+    b.type = 'button';
+    b.setAttribute('aria-label', cap ? 'Picture: ' + cap : 'Picture');
+    var im = scEl('img');
+    im.alt = cap || '';
+    /* NO `loading="lazy"`, and `tests/names.js` refuses it statically.
+       An image inside a surface resting off-screen by TRANSFORM can be
+       judged not-near and never fetched at all — which reported as
+       "titles not showing" once already, from three call sites. */
+    im.style.aspectRatio = (L.pw || 4) + ' / ' + (L.ph || 3);
+    b.appendChild(im);
+    b.addEventListener('click', function () { scPicViewOpen(L.p, cap); });
+    row.appendChild(b);
+    if (cap) row.appendChild(scEl('div', 'nt-pc', cap));
+    /* A PICTURE THAT ARRIVES LATE FILLS THE IMAGE ALREADY DRAWN.
+       Repainting instead would take the caret with it in edit mode, and
+       it would repaint once per picture on a note that has several.
+       A blob that is gone leaves the reserved box and disables the
+       press: a control that exists and refuses is worse than one that
+       is not there. */
+    scNtPicGet(L.p, function (url) {
+      if (url) im.src = url;
+      else { row.classList.add('is-gone'); b.disabled = true; }
+    });
+    return row;
+  }
+
   /* ═══════════════════════════
      THE LIST
      ═══════════════════════════ */
@@ -12235,7 +12500,7 @@
              written in it yet. One empty line is added, and that is
              the one thing a layout switch may do to the record: it
              takes no word away, it makes room for one. */
-          if (K.k === 'goal' && (!n.l.length || n.l[0].h)
+          if (K.k === 'goal' && (!n.l.length || n.l[0].h || n.l[0].p)
               && n.l.length < NOTE_LINES) {
             n.l.unshift({ i: scNtId(), h: 0, c: '', x: '', y: '', m: 0, w: [] });
           }
@@ -12568,6 +12833,10 @@
         scMetBody(body, n);
         var sp2 = scEl('div', 'nt-sp');
         n.l.forEach(function (L) {
+          /* No node on it, because a picture is not a step: `is-step`
+             is what the spine draws a bead against, and this row does
+             not carry it. */
+          if (L.p) { sp2.appendChild(scNtPicRow(n, L)); return; }
           if (L.h) {
             var sh = scEl('div', 'nt-sh');
             sh.appendChild(scEl('b', null, L.x));
@@ -12603,6 +12872,7 @@
          up's tile rather than behind a gesture. */
       if (n.k === 'chk') {
         n.l.forEach(function (L) {
+          if (L.p) { body.appendChild(scNtPicRow(n, L)); return; }
           if (L.h) {
             /* The heading itself is a small-caps label in the note's
                own colour, `.nt-gh` reused whole from the goal — the
@@ -12661,6 +12931,7 @@
         scMetBody(body, n);
         n.l.forEach(function (L, idx) {
           if (st0 && idx === 0) return;
+          if (L.p) { body.appendChild(scNtPicRow(n, L)); return; }
           if (L.h) { body.appendChild(scEl('div', 'nt-gh', L.x)); return; }
           body.appendChild(scEl('div', 'nt-gl' + (L.m ? ' is-cut' : ''), L.x));
         });
@@ -12672,6 +12943,7 @@
       }
 
       n.l.forEach(function (L, idx) {
+        if (L.p) { body.appendChild(scNtPicRow(n, L)); return; }
         if (L.h) {
           var h = scEl('div', 'nt-row is-head');
           h.style.setProperty('--c', scNtVar(L.c));
@@ -13035,6 +13307,23 @@
       }
     }
     function show(idx, row) {
+      /* ── AND A PICTURE GETS NO STRIP AT ALL ──
+         Its caption field takes focus like any other, so without this
+         the strip came up over a picture offering Heading, Tab,
+         Bracket, Dot and Weight — five controls that mean nothing on a
+         row with no words, which is exactly what this app refuses
+         everywhere else. Rendered and seen, rather than reasoned about.
+
+         Heading was the dangerous one: pressed, it set `h` on the line,
+         and the picture was then read back as a heading on the next
+         load and SWEPT. A control that does nothing is a nuisance; one
+         that quietly deletes a photograph is not.
+
+         Hidden rather than merely not filled, because the strip up for
+         the line before it would otherwise sit over this one. */
+      if (n.l[idx] && n.l[idx].p) {
+        live = -1; liveRow = null; tools.hidden = true; return;
+      }
       live = idx;
       liveRow = row;
       fill();
@@ -13058,6 +13347,63 @@
 
     var rows = [];
     n.l.forEach(function (L, idx) {
+      /* ── THE CAPTION FIELD IS THE PICTURE'S ONLY CONTROL ──
+         A picture line has no words, so focus can never land on it and
+         the tools strip can never be built for it — which is why the
+         caption cannot live there the way every other decision about a
+         line does. It is a field on the row instead, and it IS the
+         switch: type in it and the picture is in a card, clear it and
+         the picture is bare. Nothing to toggle, and no second state
+         that could disagree with what is drawn.
+
+         Backspace at the head of an empty one takes the picture away,
+         which is every other line's own delete rather than a control of
+         its own — a remove button on every picture is the column of
+         furniture this screen has none of. Return adds a line after it,
+         so attaching a picture and carrying on writing is one key.
+
+         DRAWN IN EVERY LAYOUT HERE, including a budget, where the
+         reading faces do not draw one: a row you cannot reach is a
+         picture you cannot delete. */
+      if (!L.h && L.p) {
+        var pr = scNtPicRow(n, L);
+        pr.classList.add('is-edit');
+        var cf = scEl('input', 'nt-cap');
+        cf.type = 'text';
+        cf.value = L.pc || '';
+        cf.placeholder = 'Caption';
+        cf.setAttribute('aria-label', 'Caption for this picture');
+        cf.addEventListener('input', function () {
+          L.pc = cf.value.slice(0, 140); n.u = Date.now(); scNoteSaveSoon();
+        });
+        cf.addEventListener('keydown', function (ev) {
+          if (ev.key === 'Enter') {
+            ev.preventDefault();
+            if (n.l.length >= NOTE_LINES) return;
+            var nx = { i: scNtId(), h: 0, c: '', x: '', y: '', m: 0, w: [] };
+            n.l.splice(idx + 1, 0, nx);
+            n.u = Date.now(); scNoteFlush(); redraw(nx.i, 0);
+            return;
+          }
+          if (ev.key === 'Backspace' && !cf.value) {
+            ev.preventDefault();
+            var bye = L.p;
+            n.l.splice(idx, 1);
+            scNtPicDrop([bye]);
+            n.u = Date.now(); scNoteFlush();
+            redraw(n.l[idx - 1] ? n.l[idx - 1].i : null, null);
+          }
+        });
+        cf.addEventListener('focus', function () { show(idx, pr); });
+        pr.appendChild(cf);
+        /* Pushed at its own index, because the section drag pairs
+           `body.querySelectorAll('.nt-row')` with `n.l` position for
+           position — a row missing from that walk moves the wrong
+           lines. */
+        rows.push(pr);
+        host.appendChild(pr);
+        return;
+      }
       /* The mark is one claim drawn three ways, and in EDIT there is a
          field on top of it — so the row carries the state and the
          layout's own rule decides what it looks like. Written on the
@@ -13214,13 +13560,14 @@
               && f.selectionEnd === 0 && idx > 0) {
             var pr = n.l[idx - 1];
             /* Merging into a HEADING would put a sentence inside a
-               section name, so a line backspacing onto one only
-               deletes itself when it is empty. */
-            if (pr.h && f.value) return;
+               section name, and merging into a PICTURE has nowhere to
+               put the words at all — so a line backspacing onto either
+               only deletes itself when it is empty. */
+            if ((pr.h || pr.p) && f.value) return;
             ev.preventDefault();
-            var join = pr.h ? (pr.y || '').length : pr.x.length;
-            if (!pr.h) pr.x = (pr.x + f.value).slice(0, 300);
-            else if (f.value) pr.y = ((pr.y || '') + f.value).slice(0, 300);
+            var join = pr.h ? (pr.y || '').length : (pr.p ? 0 : pr.x.length);
+            if (pr.h) { if (f.value) pr.y = ((pr.y || '') + f.value).slice(0, 300); }
+            else if (!pr.p) pr.x = (pr.x + f.value).slice(0, 300);
             n.l.splice(idx, 1);
             n.u = Date.now(); scNoteFlush(); redraw(pr.i, join);
           }
@@ -13406,6 +13753,47 @@
       n.u = Date.now(); scNoteFlush(); redraw(H.i, 0);
     });
     foot.appendChild(sec);
+
+    /* ── THE PICTURE IS ADDED WHERE THE OTHER TWO ARE ──
+       The foot is already this screen's "add something" — a line, a
+       section — and a picture is a third thing of that kind. NOT on the
+       tools strip: that strip is what belongs to the LINE you are on,
+       and inserting a new line is not a property of the current one.
+       Appended, which is what `+ Line` already does, so there is no new
+       rule about where a thing you add goes. */
+    var ph = scEl('button', 'nt-add is-pic');
+    ph.type = 'button';
+    ph.textContent = '+  Photo';
+    var pf = scEl('input', 'pic-file');
+    pf.type = 'file';
+    pf.accept = 'image/*';
+    pf.addEventListener('change', function () {
+      var f0 = pf.files && pf.files[0];
+      /* Cleared before anything else, so choosing the same file twice
+         still fires a change — and so a failed read cannot leave the
+         input holding a file the next press would silently re-use. */
+      pf.value = '';
+      if (!f0 || n.l.length >= NOTE_LINES) return;
+      scPicFit(f0, function (got) {
+        if (!got) { scToast('That image could not be read', false); return; }
+        /* THE BLOB LANDS BEFORE THE LINE DOES. A line pointing at a key
+           that was never written is a reserved box with nothing in it,
+           and the record would then say there is a picture there. */
+        var key = scNtId();
+        scNtPicPut(key, got.u, function (okd) {
+          if (!okd) { scToast('That picture could not be saved', false); return; }
+          var L2 = { i: scNtId(), h: 0, c: '', x: '', y: '', m: 0, w: [],
+            p: key, pw: got.w, ph: got.h, pc: '' };
+          n.l.push(L2); n.u = Date.now(); scNoteFlush();
+          /* Focus lands on its caption, which is the one thing you might
+             want to say next — and it is the only control the row has. */
+          redraw(L2.i, 0);
+        });
+      });
+    });
+    ph.addEventListener('click', function () { pf.click(); });
+    foot.appendChild(ph);
+    foot.appendChild(pf);
     pane.appendChild(foot);
 
     var rm = scEl('button', 'nt-rm');
@@ -13591,9 +13979,16 @@
   function scNoteRemove(n) {
     scSheet('Remove this note?', function (body) {
       body.appendChild(scEl('p', 'hint',
-        'It goes with everything written in it, and there is no bin for '
-        + 'notes. Any block pointing at it loses its tag.'));
+        'It goes with everything in it, pictures included, and there is '
+        + 'no bin for notes. Any block pointing at it loses its tag.'));
       var go = scBtn('go', 'Remove it', function () {
+        /* AND ITS PICTURES GO WITH IT. Nothing else points at them, so
+           a blob left behind is one nothing will ever look at again —
+           the boot sweep is the belt behind this rather than the
+           mechanism. */
+        var gone = [];
+        n.l.forEach(function (q) { if (q.p) gone.push(q.p); });
+        if (gone.length) scNtPicDrop(gone);
         notes = notes.filter(function (q) { return q.id !== n.id; });
         /* A block naming a note that is gone would draw an empty tag
            for ever, and the block is not the record of the note. */
@@ -14386,6 +14781,11 @@
        and the next press landed on the veil. `node --check` is happy
        with it, and the suite reported it as a dblclick timing out
        forty assertions later. */
+    /* And the picture viewer takes it before either, for the reason the
+       history takes it before a sheet: it is the thing on top, and
+       closing what is underneath while it stays up is the wrong one
+       every time. */
+    if (picView) { ev.preventDefault(); scPicViewClose(); return; }
     if (!$('scTyVeil').hidden) { ev.preventDefault(); scCloseHist(); return; }
     if (sheetOpen) { ev.preventDefault(); scClose(); }
   });
