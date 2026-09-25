@@ -128,26 +128,22 @@
    and hands the rest down, and a view that hides it gets the whole
    height without being told. */
 html, body { height: 100%; background: #3E5361; }
-/* NEITHER `100%` NOR `100dvh` CAN BE TRUSTED TO REACH THE REAL FLOOR IN
-   STANDALONE MODE. `100%` is the viewport at the moment the page loads;
-   `100dvh` was tried next and measured no better on the device this was
-   reported from, on a Home Screen icon specifically — the safe-area
-   strip behind the home indicator sat outside body's box either way,
-   and what showed below was a hard-edged band of whatever colour body's
-   OWN background happened to be, with the white home-indicator pill
-   sitting on the seam. Both are a HEIGHT, computed once against
-   whichever viewport figure the engine hands over, and that figure is
-   exactly the thing this bug is about being wrong.
+/* THE STRIP BEHIND THE HOME INDICATOR IS THE CANVAS, AND IT IS PAINTED
+   TO MATCH RATHER THAN COVERED. On a Home Screen icon the page's box
+   stops short of the physical floor, and what shows in the strip below
+   it is the root element's own background. It read as a hard-edged
+   slate band under the open screen, whose sky ends in silver.
 
-   `position: fixed; inset: 0` asks nothing to be computed and nothing
-   to be trusted: a fixed box is placed directly against the real
-   viewport by definition, safe area included since `viewport-fit=cover`
-   is on, and there is no percentage or dvh reading in between to be
-   stale, unsupported, or off by the home indicator's own height. It is
-   why the deck's own window in `schedule/` is a transform against a
-   track rather than a scroller doing arithmetic on `scrollLeft` — a
-   box defined directly against the thing it needs to match beats one
-   computed from a number that might not be it. */
+   Three ways of making the box reach were shipped and each measured
+   exactly the same band on the phone: `100%`, `100dvh`, and `position:
+   fixed; inset: 0`. Identical results from three different sizing
+   mechanisms mean the engine is not handing over the real floor to ANY
+   of them, so no sizing rule can close the gap. What CAN be decided is
+   the colour of the gap: the canvas takes the foot of whichever sky is
+   up. Every other view's sky already ends on this slate; the open
+   screen's dawn ends on silver, so on that view the canvas is silver,
+   and the seam has nothing on either side of it to show. */
+html[data-view="open"] { background: #C3C9CD; }
 body {
   position: fixed; inset: 0;
   background-color: #3E5361;

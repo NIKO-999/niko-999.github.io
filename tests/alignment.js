@@ -209,6 +209,28 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   ok('the description counts what is actually there',
      said.said.length === 3 && said.said.join() === said.real.join(), said);
 
+  /* THE CANVAS TAKES THE FOOT OF WHICHEVER SKY IS UP. On a Home Screen
+     icon the page stops short of the physical floor and the strip under
+     the home indicator shows the root element's own background; three
+     sizing fixes measured the same band on the phone, so the colour is
+     what closes the seam. This browser has no inset and cannot draw the
+     strip, so the claim is read as colours: each view's canvas against
+     the LAST stop of its own sky, parsed from the token rather than
+     typed here, so a re-tuned sky cannot quietly reopen the seam. */
+  const canvas = await page.evaluate(() => {
+    const root = document.documentElement, was = root.getAttribute('data-view');
+    const rgb = (h) => { const n = parseInt(h.slice(1), 16); return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`; };
+    const foot = (tok) => { const all = getComputedStyle(root).getPropertyValue(tok).match(/#[0-9a-f]{6}/gi) || []; return all.length ? rgb(all[all.length - 1]) : null; };
+    const at = (v) => { root.setAttribute('data-view', v); return getComputedStyle(root).backgroundColor; };
+    const out = { open: at('open'), figures: at('figures'), dawn: foot('--dawn'), sky: foot('--sky') };
+    root.setAttribute('data-view', was);
+    return out;
+  });
+  ok('the canvas under the open screen is the foot of its own dawn',
+     !!canvas.dawn && canvas.open === canvas.dawn, canvas);
+  ok('and under every other view it is the foot of the sky',
+     !!canvas.sky && canvas.figures === canvas.sky && canvas.open !== canvas.figures, canvas);
+
   /* ── THE FOUR HUES ─────────────────────────────────────────────── */
 
   await page.evaluate(() => window.alDrive.openSource('fifty'));
