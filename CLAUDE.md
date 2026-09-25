@@ -13583,6 +13583,37 @@ its callers — the sheet reads `item.id`, `item.n` and `day` and
 nothing else. It went with the gate, because a parameter that must be
 passed and ignored is the next person's wrong turn.
 
+### And the bite proof broke itself twice, on two lessons already here
+
+Both are written down in this file already, and both bit anyway, which
+is the only reason they are worth a second entry.
+
+**AN EMPTY STRING IS NOT AN ANCHOR — and the break that needed one was
+a REMOVAL.** The `noclear` break deletes a line, so its replacement was
+`''`, so the INVERSE searched for `''` and matched **686,400 times**.
+The assertion refused, nothing was written, and the file was left with
+the break still in it: `scTrainSet(day, TRAIN_DAY, '')` gone from the
+untick path, on a tree the commit hook was meanwhile asking to push.
+Recovered with `git checkout HEAD -- schedule/app.js` and hashed back.
+A removal's inverse is an INSERTION, so the break writes a placeholder
+comment rather than nothing, and `swap` now refuses either side shorter
+than twenty characters.
+
+**AND A CHECK THAT CRASHES IS NOT A CHECK THAT FAILS.** The helper that
+files a session threw when no picker opened, so `onegate` — whose whole
+point is that the picker does not open — took the FILE down at that
+line and reported **no summary**, the greenest-looking failure there
+is. The two assertions under it never ran, so one break proved one
+claim where it should have proved three. Every step returns now.
+
+**WHICH MEANS THE FIRST PROOF PROVED LESS THAN IT LOOKED.** It printed
+two red lines and read as a break biting cleanly; what it actually did
+was die three assertions in. **A break that kills the file is
+indistinguishable from a break that works, in the output** — so the
+runner's own tell is the one to read: no summary means no count, and no
+count means the assertions after the crash are unmeasured rather than
+passing.
+
 ## The day you began
 
 Asked for as one thing in one line — a **begin journey**, a **reset**,
