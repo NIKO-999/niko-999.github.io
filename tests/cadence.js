@@ -174,12 +174,17 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('and it is named for the block it ticks', go.l === 'Mark Deep work completed' && go.p === 'false', go);
     await page.click('#cdGo');
     ok('pressing it keeps the block you are in', (await store(page, 'cad.log.v1'))['2026-09-25'].s3 === 1);
-    const kept = await page.$eval('#cdGo', (b) => ({ p: b.getAttribute('aria-pressed'), l: b.getAttribute('aria-label'), bg: getComputedStyle(b).backgroundColor }));
-    ok('and it lights in the block\'s own colour, and says so', kept.p === 'true' && kept.l === 'Deep work completed. Untick' && kept.bg === 'rgb(232, 198, 124)', kept);
+    /* Finished early is finished: the middle moves on and the kept block
+       goes back into the list, where its own dot unticks it. */
+    ok('and the middle moves on to what is next', (await heroOf(page)).join('|') === 'Next · Rest · 10:20|Lunch|in 2h 10m · at 12:30|Emails and calls at 14:00', await heroOf(page));
+    ok('with the kept block back in the list, ticked', (await listOf(page)).includes('s3')
+      && await page.$eval('.cd-it[data-id="s3"]', (e) => e.classList.contains('is-done')));
     ok('today\'s dot in the week fills part way', (await page.getAttribute('.cd-wd[data-d="2026-09-25"]', 'data-state')) === 'part');
-    await page.click('#cdGo');
-    ok('pressing it again unticks it', !((await store(page, 'cad.log.v1'))['2026-09-25'] || {}).s3
-      && (await page.getAttribute('#cdGo', 'aria-pressed')) === 'false');
+    const toast = await page.$eval('#cdToast', (t) => ({ txt: document.getElementById('cdToastT').textContent, undo: !document.getElementById('cdToastU').hidden }));
+    ok('it says so, with a way back', toast.txt === 'Completed Deep work' && toast.undo, toast);
+    await page.click('#cdToastU');
+    ok('Undo puts the block back in the middle, unticked', !((await store(page, 'cad.log.v1'))['2026-09-25'] || {}).s3
+      && (await page.textContent('#cdHeroN')) === 'Deep work' && (await page.getAttribute('#cdGo', 'aria-pressed')) === 'false');
 
     /* The name opens the block, and so does the line after it. */
     await page.click('#cdHeroN');
@@ -819,7 +824,10 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.fill('#cdRestore', JSON.stringify(bak));
     await Promise.all([page.waitForNavigation(), page.click('#cdRestoreGo')]);
     await page.waitForTimeout(150);
-    ok('restoring writes it back', (await page.$$eval('.cd-rn', (ns) => ns.map((n) => n.textContent))).includes('Restored'));
+    /* Read off the store AND the screen: with the running block kept, the screen
+       has moved on and it is drawn in the middle rather than in the list. */
+    ok('restoring writes it back', (await store(page, 'cad.week.v1')).some((x) => x.n === 'Restored')
+      && [...(await page.$$eval('.cd-rn', (ns) => ns.map((n) => n.textContent))), await page.textContent('#cdHeroN'), (await page.textContent('#cdThenN')).replace(/ at .*$/, '')].includes('Restored'));
     ok('no page errors in the record', errs.length === 0, errs);
     await c.close();
   }
@@ -884,6 +892,12 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.fill('#cdFN', 'Meal prep');
     await page.click('#cdFSave');
     await page.waitForTimeout(320);
+    /* A toast with no Undo is the words alone, and they get the same room
+       on the right as on the left: the padding was written for a toast
+       whose right end is a button. */
+    const bare = await page.$eval('#cdToast', (t) => { const r = t.getBoundingClientRect(), q = document.createRange(); q.selectNodeContents(document.getElementById('cdToastT'));
+      const w = q.getBoundingClientRect(); return { txt: t.textContent.trim(), l: Math.round(w.left - r.left), r: Math.round(r.right - w.right) }; });
+    ok('a toast with nothing to undo keeps its words off both edges', /(Added|Saved) Meal prep/.test(bare.txt) && bare.r >= 14 && Math.abs(bare.l - bare.r) <= 2, bare);
     await page.click('.cd-it[data-id] .cd-rb');
     await sheetUp(page);
     await page.click('#cdFDel');

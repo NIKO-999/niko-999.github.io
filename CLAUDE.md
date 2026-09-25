@@ -4421,6 +4421,37 @@ reported 179 faults, none real. Rects clustered at half the font size
 are lines; two lines closer than 1.08em are type printed on type.
 Display type at 30px and over sets its own leading and is skipped.
 
+### The check finishes the block, and the toast was only half padded
+
+Reported off the phone with two screenshots: the check on a running
+block lit up and nothing else moved — *33m left* stood under a block
+you had just said you were done with — and *Saved Trading* ran into
+the right-hand end of its own pill.
+
+**A KEPT BLOCK NEVER HOLDS THE MIDDLE.** You press the check because
+you are done, and finishing early is still finishing. `cdHeroOf`
+chooses the running and the next block from the ones you have NOT
+kept, so the screen moves on to what is next and the kept one goes
+back into the list, where its own dot unticks it. The check therefore
+never draws a kept state, and its lit rule went rather than cascading
+at nothing.
+
+**AND IT SAYS SO, WITH AN UNDO.** A press that moves the screen is a
+press you cannot take back from where you are looking, so *Completed
+Deep work* comes up with a way back that puts it in the middle again.
+A training block gets the sheet asking what it was instead, because
+that sheet is the answer to the press.
+
+**THE TOAST'S PADDING WAS WRITTEN FOR A TOAST WHOSE RIGHT END IS A
+BUTTON.** 18px on the left and 4 on the right is right beside Undo and
+wrong without it. `is-bare` gives the words the same room both sides.
+Asserted as the two insets being equal, measured off the text range.
+
+**The probe learned the shape.** `PILL-PAD` looks for any rounded,
+painted pill whose words sit within 6px of one edge and more than 8px
+off the other. It found one more: the keyboard-only history button
+drew its dots against the left of its own circle while focused.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

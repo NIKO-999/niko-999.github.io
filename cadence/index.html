@@ -220,7 +220,6 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
   box-shadow: 0 18px 40px -10px rgba(0, 0, 0, .6);
 }
 .cd-go svg { width: 24px; height: 24px; display: block; }
-.cd-go[aria-pressed="true"] { background: var(--c); box-shadow: 0 0 26px color-mix(in srgb, var(--c) 55%, transparent), 0 18px 40px -10px rgba(0, 0, 0, .6); }
 
 .cd-empty { padding: 22px 0; list-style: none; font: 400 15px/1.45 var(--sans); color: var(--dim); text-align: center; }
 .cd-link { min-height: 44px; display: inline-flex; align-items: center; font: 500 15px/1 var(--sans); color: var(--ink); }
@@ -236,7 +235,7 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
    off the screen until it has focus. */
 .cd-hr-h { position: absolute; left: -9999px; top: 0; width: 44px; height: 44px; }
 /* Focused, it sits over the row's own dot, the one spot on the row with no words to draw over. */
-.cd-hr-h:focus { left: 0; right: auto; top: 50%; margin-top: -22px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--hair); color: var(--ink); }
+.cd-hr-h:focus { left: 0; right: auto; top: 50%; margin-top: -22px; display: grid; place-items: center; padding: 0; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--hair); color: var(--ink); }
 .cd-hr::before { content: ""; position: absolute; left: 18.5px; right: 0; top: 0; height: 1px; background: var(--hair); }
 .cd-hr:last-child::after { content: ""; position: absolute; left: 18.5px; right: 0; bottom: 0; height: 1px; background: var(--hair); }
 .cd-hr-b { width: 44px; height: 44px; display: grid; place-items: center; }
@@ -521,6 +520,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   font: 500 14px/1.3 var(--sans); background: #13212C; color: var(--ink);
   box-shadow: inset 0 0 0 1px var(--hair), 0 14px 30px -12px rgba(0, 0, 0, .7); transform: translateX(-50%);
 }
+.cd-toast.is-bare { padding-right: 18px; min-height: 40px; }
 .cd-toast button { min-height: 40px; padding: 0 14px; font: 600 14px/1 var(--sans); color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 
 /* A 320px phone. Four spaced-out tab words do not go across 208px, and
@@ -988,12 +988,18 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      much of that day was kept, and every block is in the list. */
   var heroId = null, thenId = null;
   function cdHeroOf(list, now) {
-    var live = list.filter(function (b) { return !cdIsOff(sel, b.id); });
+    /* A block you have ticked is finished, whatever the clock says: you
+       press the check because you are done, and an early finish is still
+       a finish. So a kept block never holds the middle — the screen moves
+       on to what is next, and the kept one goes back into the list, where
+       its own dot unticks it. */
+    var all = list.filter(function (b) { return !cdIsOff(sel, b.id); });
+    var live = all.filter(function (b) { return !cdDone(sel, b.id); });
     var run = live.filter(function (b) { return b.e > b.s && now >= b.s && now < b.e; })[0] || null;
     var ahead = live.filter(function (b) { return b !== run && b.s >= now; });
     if (run) return { mode: 'now', b: run, then: ahead[0] || null };
     if (ahead.length) return { mode: 'next', b: ahead[0], then: ahead[1] || null };
-    return { mode: live.length ? 'done' : 'empty', b: null, then: null };
+    return { mode: all.length ? 'done' : 'empty', b: null, then: null };
   }
 
   function cdPaintDay() {
@@ -1105,7 +1111,18 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     if (btn.dataset.act === 'tick') cdTick(li.dataset.id);
     else cdEdit(li.dataset.id);
   });
-  $('cdGo').addEventListener('click', function () { if (heroId) cdTick(heroId); });
+  /* The check always FINISHES the block in the middle, so it says so and
+     offers the way back: the block has just left the middle, and a press
+     that moves the screen with no Undo is a press you cannot take back
+     from where you are looking. A training block asks what it was
+     instead, and that sheet is the answer to the press. */
+  $('cdGo').addEventListener('click', function () {
+    var id = heroId, day = sel;
+    if (!id) return;
+    var b = S.week.filter(function (x) { return x.id === id; })[0];
+    cdTick(id);
+    if (b && cdDone(day, id) && !TRAINING[cdKind(b.n)]) cdToast('Completed ' + b.n, function () { if (cdDone(day, id)) { sel = day; cdTick(id); } });
+  });
   $('cdHeroN').addEventListener('click', function () { if (heroId) cdEdit(heroId); });
   $('cdThen').addEventListener('click', function () { if (thenId) cdEdit(thenId); });
   $('cdRibbon').addEventListener('click', function (ev) {
@@ -2496,6 +2513,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     $('cdToastT').textContent = msg;
     toastUndo = undo || null;
     $('cdToastU').hidden = !undo;
+    $('cdToast').classList.toggle('is-bare', !undo);
     $('cdToast').hidden = false;
     clearTimeout(toastT);
     toastT = setTimeout(function () { $('cdToast').hidden = true; toastUndo = null; }, undo ? 5000 : 2200);
