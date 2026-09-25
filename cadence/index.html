@@ -6,7 +6,7 @@
      focus. Every field here is 16px, and the cap covers the next one. -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#03060A" />
-<meta name="description" content="The day as a twenty-four hour dial." />
+<meta name="description" content="The block you are in, and the rest of the day." />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -17,27 +17,27 @@
 <link rel="preload" href="fonts/GeistMono.woff2" as="font" type="font/woff2" crossorigin />
 <style>
 /* ═══════════════════════════════════════════════════════════════
-   CADENCE — the day as a dial.
+   CADENCE — the block you are in.
 
-   Five looks came out before this one and every one was turned down,
-   the last in four words. The sixth was CHOSEN rather than argued: four
-   day screens were rendered over the same fixture — the block happening
-   now as the whole screen, a column of time, a dial, and the day
-   written out as a sentence — and the dial was the one picked.
+   Six looks came out before this one. The dial was the fifth to be
+   built and the first to be picked; it shipped, and the answer came
+   back as a screenshot of a different mockup with four words: "I like
+   this more". This is that mockup, made into the app.
 
-   · THE DAY IS A WATCH FACE. Twenty-four hours round one ring, and
-     every block an arc at its own hours: a kept arc glows, one still to
-     come is dim, one behind you and unkept is the flat neutral, and a
-     hand points at now. The whole day is one shape read at a glance,
-     and there is no column of times in a gutter anywhere — which is
-     the drawing the other app is made of.
-   · EVERY SCREEN IS RINGS. The week is seven small rings, each closed
-     by how much of its day was kept; a habit is a fortnight round a
-     ring; the month is a ring a day; training is thirty days round one.
+   · THE DAY IS THE BLOCK YOU ARE IN. Its name is the biggest thing on
+     the screen, with what is left of it, a thin line saying how far
+     through you are, and the one after it underneath. Everything else
+     on the day is a quiet list of hairlines below.
+   · ONE WHITE CONTROL, AND IT TICKS THAT BLOCK. You never go looking
+     for the row you are in: the screen already knows.
+   · EVERY SCREEN IS A FIGURE AND DOTS. The week is seven dots, a habit
+     is a fortnight of dots, the month is a dot a day, and training is
+     thirty. A dot filled is a thing kept; hollow is a thing missed;
+     faint is a day that makes no claim.
    · The alignment app's language rather than its pieces: the night sky,
      Inter in its light weights for the one figure a screen is about,
-     Geist Mono in tracked capitals for every label, hairlines where
-     there would be cards, and one white round control.
+     Geist Mono in tracked capitals for every label, and hairlines where
+     there would be cards.
    ═══════════════════════════════════════════════════════════════ */
 @font-face { font-family: 'Inter'; font-weight: 100 900; font-display: swap;
   src: url('../arc/fonts/Inter.woff2') format('woff2'); }
@@ -55,7 +55,10 @@
   --hair: rgba(243, 245, 247, .10);
   --lift: rgba(243, 245, 247, .07);
   --lift2: rgba(243, 245, 247, .13);
-  --track: rgba(243, 245, 247, .08);
+  --track: rgba(243, 245, 247, .14);
+  /* A day that makes no claim: still to come, or before the record
+     began. Drawn, so the week keeps its shape, and deliberately faint. */
+  --nil: rgba(243, 245, 247, .18);
   /* Behind you and not kept. A graphic, so it is held to 3:1 against the
      sky beside it — and never a red: nothing here says you failed. */
   --miss: rgba(243, 245, 247, .40);
@@ -75,11 +78,13 @@
   --h-sleep: #E9A6D0;
   --bad: #FF9C8F;
 
-  /* THE SKY. Near-black at the top, a slate night by the foot, with one
-     soft lift behind the dial. It is the ground on every screen and it
-     never carries colour: colour is what the rings are for. */
-  --sky: radial-gradient(90% 50% at 50% 34%, rgba(64, 110, 132, .16), transparent 70%),
-         linear-gradient(180deg, #03060A 0%, #07131D 16%, #102433 42%, #18303F 78%, #2B4252 100%);
+  /* THE SKY. Near-black at the top, a slate night by the foot, and one
+     soft lift behind the block you are in. It never carries colour:
+     colour is what a block and a habit are for. The foot stops short of
+     the mockup's horizon, because a list scrolls down there and a quiet
+     label over #50636F measures 3.6:1. */
+  --sky: radial-gradient(90% 45% at 50% 34%, rgba(64, 110, 132, .30), transparent 70%),
+         linear-gradient(180deg, #03060A 0%, #07131D 18%, #122736 44%, #1B3140 70%, #22394A 88%, #2A4050 100%);
 
   --sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
@@ -109,178 +114,184 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .cd-row .cd-field:focus-visible { outline: none; }
 
 /* Every label in the app is the same voice: tracked mono capitals. */
-.cd-cap, .cd-date, .cd-mid-k, .cd-sum, .cd-lbl, .cd-tab, .cd-dows, .cd-mcap, .cd-ringcap, .cd-legend {
+.cd-cap, .cd-hcap, .cd-tcap, .cd-lbl, .cd-tab, .cd-wl, .cd-dows, .cd-mcap, .cd-legend, .cd-last {
   font: 500 10.5px/1 var(--mono); text-transform: uppercase;
 }
-.cd-cap, .cd-mid-k, .cd-lbl, .cd-ringcap { letter-spacing: .18em; color: var(--quiet); }
+.cd-cap, .cd-tcap, .cd-lbl, .cd-last { letter-spacing: .18em; color: var(--quiet); }
 
 .cd-app { display: flex; flex-direction: column; height: 100%; max-width: 560px; margin: 0 auto; }
 
-/* ── the top: the date, and the one white control ── */
-.cd-top { flex: none; display: flex; align-items: center; gap: 2px; padding: calc(10px + env(safe-area-inset-top)) 16px 0 var(--gut); }
-.cd-date { flex: 1; letter-spacing: .18em; color: var(--dim); }
-.cd-gear { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: var(--quiet); }
+/* ── the top: settings, the four words, and add ── */
+.cd-top { flex: none; display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; padding: calc(8px + env(safe-area-inset-top)) 12px 0; }
+.cd-gear, .cd-plus { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; }
+.cd-gear { color: var(--quiet); }
 .cd-gear svg { width: 19px; height: 19px; display: block; }
-.cd-plus { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: var(--ink); color: var(--on); box-shadow: 0 12px 28px -10px rgba(0, 0, 0, .7); }
-.cd-plus svg { width: 18px; height: 18px; display: block; }
+/* Add is a glyph, the way settings is: the one drawn control on the day
+   is the check at its foot, and a second round at the top would be a
+   second answer to "what do I press". It is the ink where settings is
+   quiet, because it is the one you reach for. */
+.cd-plus { color: var(--ink); }
+.cd-plus svg { width: 20px; height: 20px; display: block; }
+
+.cd-nav { display: flex; justify-content: center; gap: 4px; }
+.cd-tab { position: relative; min-width: 44px; min-height: 44px; padding: 0 8px; text-align: center; letter-spacing: .18em; color: var(--quiet); }
+.cd-tab::after { content: ""; position: absolute; left: 50%; bottom: 5px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--ink); opacity: 0; }
+.cd-tab[aria-current="page"] { color: var(--ink); }
+.cd-tab[aria-current="page"]::after { opacity: 1; }
 
 .cd-main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .cd-main > section { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .cd-pane {
   flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
-  padding: 8px var(--gut) 30px; scrollbar-width: none;
+  padding: 0 var(--gut) calc(30px + env(safe-area-inset-bottom)); scrollbar-width: none;
   -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 10px, #000 calc(100% - 28px), transparent 100%);
           mask-image: linear-gradient(180deg, transparent 0, #000 10px, #000 calc(100% - 28px), transparent 100%);
 }
 .cd-pane::-webkit-scrollbar { display: none; }
+/* The day's pane clears the check that floats over its foot. */
+#cdDayPane { padding-bottom: calc(118px + env(safe-area-inset-bottom)); }
 
-/* ── the nav: four words at the foot ── */
-.cd-nav { flex: none; display: flex; justify-content: center; gap: 6px; padding: 2px 0 calc(6px + env(safe-area-inset-bottom)); }
-.cd-tab { position: relative; min-height: 44px; padding: 0 10px; letter-spacing: .18em; color: var(--dim); }
-.cd-tab::after { content: ""; position: absolute; left: 50%; bottom: 6px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--ink); opacity: 0; }
-.cd-tab[aria-current="page"] { color: var(--ink); }
-.cd-tab[aria-current="page"]::after { opacity: 1; }
+/* ── the week: a dot over a letter, seven of them ── */
+.cd-week { flex: none; display: grid; grid-template-columns: repeat(7, 44px); justify-content: center; margin: 8px 0 0; }
+.cd-wd { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; min-height: 48px; }
+.cd-wd i { width: 5px; height: 5px; border-radius: 50%; background: var(--nil); }
+.cd-wd[data-state="part"] i { background: var(--quiet); }
+.cd-wd[data-state="whole"] i { background: var(--ink); box-shadow: 0 0 7px rgba(243, 245, 247, .6); }
+/* Filled is kept and hollow is missed, which is the habits screen's own
+   rule: no colour says whether. */
+.cd-wd[data-state="none"] i { background: none; box-shadow: inset 0 0 0 1.2px var(--miss); }
+.cd-wd[aria-pressed="true"] i { outline: 3px solid rgba(243, 245, 247, .16); }
+.cd-wl { letter-spacing: .1em; color: var(--quiet); }
+.cd-wd.is-today .cd-wl { color: var(--ink); }
 
-/* ── the week: seven small rings, each closed by what its day kept ── */
-.cd-week { flex: none; display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin: 8px 12px 0; }
-.cd-wd { display: flex; flex-direction: column; align-items: center; gap: 6px; min-height: 66px; padding: 8px 0 7px; border-radius: 18px; }
-.cd-wd-l { font: 500 10px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--quiet); }
-.cd-wd.is-today .cd-wd-l { color: var(--ink); }
-.cd-wd-r { position: relative; width: 36px; height: 36px; display: grid; place-items: center; }
-.cd-wd-r svg { position: absolute; inset: 0; width: 36px; height: 36px; overflow: visible; }
-.cd-wd-r b { position: relative; font: 500 13px/1 var(--sans); font-variant-numeric: tabular-nums; color: var(--dim); }
-.cd-wd[aria-pressed="true"] { background: var(--lift); }
-.cd-wd[aria-pressed="true"] b { color: var(--ink); }
-.cd-wr-t, .cd-mr-t { fill: none; stroke: var(--track); }
-.cd-wr-t, .cd-wr-a { stroke-width: 2.5; }
-.cd-wr-a, .cd-mr-a { fill: none; stroke: var(--ink); stroke-linecap: round; }
-.cd-wr-a.is-whole, .cd-mr-a.is-whole { filter: drop-shadow(0 0 3px rgba(243, 245, 247, .6)); }
+/* ── the block you are in ── */
+.cd-hero { margin-top: 56px; text-align: center; }
+.cd-hero.is-sub { margin-top: 26px; }
+.cd-hcap { letter-spacing: .18em; color: var(--c, var(--quiet)); }
+.cd-big { display: block; margin: 16px auto 0; font: 300 46px/1.05 var(--sans); letter-spacing: -.02em; text-align: center; font-variant-numeric: tabular-nums; }
+/* The name is a press target — it opens the block — and wraps to two
+   lines before it is cut, because a name is the whole of what it says. */
+.cd-hn { max-width: 100%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
+.cd-hn:disabled { cursor: default; }
+.cd-hs { margin-top: 12px; font: 400 16px/1.3 var(--sans); color: var(--dim); font-variant-numeric: tabular-nums; }
+.cd-hs b { font-weight: 500; color: var(--ink); }
+.cd-bar { position: relative; width: 210px; height: 2px; margin: 22px auto 0; border-radius: 1px; background: var(--track); }
+.cd-bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 1px; background: var(--c); box-shadow: 0 0 10px color-mix(in srgb, var(--c) 70%, transparent); }
+.cd-then { display: block; min-width: 44px; min-height: 44px; margin: 26px auto 0; padding: 4px 12px; text-align: center; }
+.cd-then b { display: block; margin-top: 9px; font: 300 21px/1.2 var(--sans); color: var(--dim); }
 
-/* ── the dial ── */
-.cd-dial { position: relative; width: 300px; height: 300px; margin: 2px auto 0; }
-.cd-dial > svg { display: block; width: 300px; height: 300px; overflow: visible; }
-.cd-dt { fill: none; stroke: var(--track); stroke-width: 12; }
-.cd-tk { stroke: rgba(243, 245, 247, .24); stroke-width: 1; }
-.cd-tk.is-six { stroke: rgba(243, 245, 247, .5); stroke-width: 1.4; }
-.cd-dl { font: 500 10px var(--mono); letter-spacing: .08em; fill: var(--quiet); }
-/* A block is an arc at its own hours. Round caps, and the path is drawn
-   a cap short at each end, so what you SEE starts and stops on the minute. */
-.cd-a { fill: none; stroke: var(--c); stroke-width: 12; stroke-linecap: round; }
-.cd-a.is-ahead { stroke: color-mix(in srgb, var(--c) 52%, transparent); }
-.cd-a.is-miss { stroke: var(--miss); }
-.cd-a.is-kept, .cd-m.is-kept { filter: url(#cdGl); }
-.cd-m { fill: transparent; stroke: var(--c); stroke-width: 1.8; }
-.cd-m.is-kept { fill: var(--c); }
-.cd-m.is-miss { stroke: var(--miss); }
-.cd-hand line { stroke: var(--ink); stroke-width: 1.6; stroke-linecap: round; }
-.cd-hand circle { fill: var(--ink); filter: url(#cdGl); }
-
-/* The middle of a ring says the one figure that ring is about. */
-.cd-dial .cd-mid, .cd-ring .cd-mid { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; pointer-events: none; }
-.cd-mid-t { margin-top: 10px; font: 200 50px/1 var(--sans); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-.cd-mid-n { max-width: 160px; margin-top: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 14px/1.3 var(--sans); color: var(--c, var(--dim)); }
-.cd-mid-n:empty { display: none; }
-.cd-mid-s { margin-top: 3px; font: 400 13px/1.3 var(--sans); color: var(--dim); }
-
-.cd-sum { display: flex; justify-content: space-between; gap: 12px; margin: 16px 0 8px; letter-spacing: .14em; color: var(--quiet); }
-.cd-sum b { font-weight: 500; color: var(--ink); }
-
-/* ── the day's list: a hairline a row, and the dot is the check ── */
-.cd-list { list-style: none; margin: 0; padding: 0; }
-.cd-it { position: relative; display: grid; grid-template-columns: 44px 1fr; align-items: center; margin: 0 calc(-1 * var(--gut)); padding: 0 var(--gut) 0 calc(var(--gut) - 17px); }
-.cd-it::before { content: ""; position: absolute; left: var(--gut); right: var(--gut); top: 0; height: 1px; background: var(--hair); }
+/* ── the rest of the day: a hairline a row, and the dot is the check ── */
+.cd-list { list-style: none; margin: 44px 0 0; padding: 0; }
+.cd-it { position: relative; display: grid; grid-template-columns: 44px 1fr; align-items: center; margin-left: -18.5px; }
+.cd-it::before { content: ""; position: absolute; left: 18.5px; right: 0; top: 0; height: 1px; background: var(--hair); }
+.cd-it:last-child::after { content: ""; position: absolute; left: 18.5px; right: 0; bottom: 0; height: 1px; background: var(--hair); }
 .cd-dot { width: 44px; height: 44px; display: grid; place-items: center; }
-.cd-dot i { width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1.6px var(--c); }
+.cd-dot i { width: 7px; height: 7px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--c); }
 .cd-dot:disabled { cursor: default; }
-.cd-it.is-done .cd-dot i { background: var(--c); box-shadow: 0 0 9px var(--c); }
-.cd-it.is-past:not(.is-done) .cd-dot i { box-shadow: inset 0 0 0 1.6px var(--miss); }
+.cd-it.is-done .cd-dot i { background: var(--c); box-shadow: 0 0 8px var(--c); }
+.cd-it.is-past:not(.is-done) .cd-dot i { box-shadow: inset 0 0 0 1.5px var(--miss); }
 .cd-it.is-off .cd-dot { visibility: hidden; }
-.cd-rb { display: grid; grid-template-columns: 1fr auto; align-items: baseline; column-gap: 12px; row-gap: 3px; min-height: 48px; padding: 14px 0 13px; }
-.cd-rn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 15px/1.2 var(--sans); }
-.cd-rt { font: 500 11px/1 var(--mono); letter-spacing: .06em; color: var(--quiet); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cd-rb { display: grid; grid-template-columns: 1fr auto; align-items: baseline; column-gap: 12px; row-gap: 4px; min-height: 44px; padding: 14px 0 13px; }
+.cd-rn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 15px/1.1 var(--sans); }
+.cd-rt { font: 500 11px/1 var(--mono); letter-spacing: .08em; color: var(--quiet); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .cd-rs { grid-column: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 12.5px/1.3 var(--sans); color: var(--quiet); }
-.cd-rw { font-weight: 500; color: var(--kc); }
+/* What you trained rides the name's own line, in the session's colour. */
+.cd-rw { color: var(--kc); }
 .cd-it.is-done .cd-rn { color: var(--quiet); }
 .cd-it.is-past:not(.is-done) .cd-rn { color: var(--dim); }
 .cd-it.is-off .cd-rn { color: var(--quiet); text-decoration: line-through; }
-/* The block happening now carries a wash of its own colour, full bleed. */
-.cd-it.is-now { background: linear-gradient(90deg, color-mix(in srgb, var(--c) 15%, transparent), transparent 82%); }
-.cd-it.is-now .cd-rt { color: var(--ink); }
 
-.cd-empty { padding: 22px 0; list-style: none; font: 400 15px/1.45 var(--sans); color: var(--dim); }
+/* THE CHECK. White while the block is waiting for you, and lit in the
+   block's own colour once it is kept — the row's dot, at the size of
+   the one thing you came to do. */
+.cd-go {
+  position: fixed; left: 50%; bottom: calc(34px + env(safe-area-inset-bottom)); z-index: 30;
+  width: 64px; height: 64px; margin-left: -32px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--ink); color: var(--on);
+  box-shadow: 0 18px 40px -10px rgba(0, 0, 0, .6);
+}
+.cd-go svg { width: 24px; height: 24px; display: block; }
+.cd-go[aria-pressed="true"] { background: var(--c); box-shadow: 0 0 26px color-mix(in srgb, var(--c) 55%, transparent), 0 18px 40px -10px rgba(0, 0, 0, .6); }
+
+.cd-empty { padding: 22px 0; list-style: none; font: 400 15px/1.45 var(--sans); color: var(--dim); text-align: center; }
 .cd-link { min-height: 44px; display: inline-flex; align-items: center; font: 500 15px/1 var(--sans); color: var(--ink); }
-.cd-empty .cd-link { display: flex; margin-top: 4px; }
+.cd-empty .cd-link { display: flex; justify-content: center; width: 100%; margin-top: 4px; }
 
-/* ── rings that are made of segments: habits, training ── */
-.cd-ring { position: relative; margin: 4px auto 0; }
-.cd-ring > span > svg, .cd-hr-b > svg { display: block; width: 100%; height: 100%; overflow: visible; }
-.cd-ring > span { position: absolute; inset: 0; }
-.cd-sg { fill: none; stroke: var(--track); }
-.cd-sg.is-lit { stroke: var(--hc); }
-.cd-ring.is-hab { width: 180px; height: 180px; }
-.cd-ring.is-lift { width: 200px; height: 200px; }
-.cd-ring .cd-mid-t { margin-top: 8px; font-size: 44px; }
-.cd-ringcap { margin: 12px 0 0; text-align: center; }
-
-/* ── habits: a fortnight round a ring, three across ── */
-.cd-hb { list-style: none; margin: 18px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 4px; }
-.cd-hr { display: flex; flex-direction: column; align-items: center; }
-.cd-hr-b { position: relative; width: 96px; height: 96px; display: grid; place-items: center; border-radius: 50%; }
-.cd-hr-b > svg { position: absolute; inset: 0; }
-.cd-hr-v { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; font: 300 19px/1 var(--sans); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.cd-hr-v small { font: 500 9.5px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--quiet); }
+/* ── habits: a dot a habit, and a fortnight of dots under each ── */
+.cd-hdots { display: flex; justify-content: center; gap: 12px; margin-top: 22px; }
+.cd-hdots i { width: 7px; height: 7px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--hc); }
+.cd-hdots i.is-on { background: var(--hc); box-shadow: 0 0 8px var(--hc); }
+.cd-hb { list-style: none; margin: 34px 0 0; padding: 0; }
+.cd-hr { position: relative; display: grid; grid-template-columns: 44px 1fr; align-items: center; margin-left: -18.5px; }
+.cd-hr::before { content: ""; position: absolute; left: 18.5px; right: 0; top: 0; height: 1px; background: var(--hair); }
+.cd-hr:last-child::after { content: ""; position: absolute; left: 18.5px; right: 0; bottom: 0; height: 1px; background: var(--hair); }
+.cd-hr-b { width: 44px; height: 44px; display: grid; place-items: center; }
+.cd-hr-b i { width: 7px; height: 7px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--hc); }
+.cd-hr.is-on .cd-hr-b i { background: var(--hc); box-shadow: 0 0 8px var(--hc); }
+.cd-hr-n { display: grid; grid-template-columns: 1fr auto; align-items: baseline; column-gap: 12px; row-gap: 8px; min-height: 44px; padding: 14px 0 13px; }
+.cd-hr-t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 15px/1.1 var(--sans); }
+.cd-hr-v { font: 400 15px/1.1 var(--sans); color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cd-hr-v small { margin-left: 5px; font: 500 9.5px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--quiet); }
 .cd-hr-v.is-nil { color: var(--quiet); }
-.cd-hr-v svg { width: 22px; height: 22px; display: block; color: var(--hc); }
-.cd-hr-n { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; width: 100%; min-height: 44px; padding: 4px 2px; text-align: center; }
-.cd-hr-n b { display: flex; align-items: center; gap: 6px; font: 500 14px/1.2 var(--sans); }
-.cd-hr-n b::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--hc); }
-.cd-hr-n svg { flex: none; width: 10px; height: 10px; color: var(--quiet); }
-.cd-hr-s { font: 400 12px/1.25 var(--sans); color: var(--quiet); }
+.cd-hr-s { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; min-width: 0; font: 400 12.5px/1.2 var(--sans); color: var(--quiet); }
+.cd-hr-s > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cd-fn { flex: none; display: flex; gap: 3px; }
+.cd-fn i { width: 4px; height: 4px; border-radius: 50%; background: var(--nil); }
+.cd-fn i.is-on { background: var(--hc); }
 .cd-pane > .cd-link { margin-top: 14px; }
 
-/* ── month: a ring a day ── */
-.cd-mhead { flex: none; display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; margin: 10px var(--gut) 0; text-align: center; }
-.cd-mon-t { margin-top: 8px; font: 300 30px/1 var(--sans); letter-spacing: -.01em; }
+/* ── month: a figure a day, and a dot under it ── */
+.cd-mhead { flex: none; display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; margin: 22px var(--gut) 0; text-align: center; }
+.cd-mhead .cd-big { margin-top: 14px; }
 .cd-mhead button { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); box-shadow: inset 0 0 0 1px var(--hair); }
 .cd-mhead button:disabled { color: rgba(243, 245, 247, .28); box-shadow: none; cursor: default; }
 .cd-mhead svg { width: 16px; height: 16px; }
-.cd-mcap { flex: none; margin: 12px var(--gut) 0; text-align: center; letter-spacing: .14em; color: var(--quiet); }
-.cd-dows { display: grid; grid-template-columns: repeat(7, 1fr); padding: 8px 0 6px; text-align: center; letter-spacing: .1em; color: var(--quiet); }
-.cd-mgrid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 4px; }
-.cd-mc { position: relative; min-height: 48px; display: grid; place-items: center; }
-.cd-mc svg { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; overflow: visible; }
-.cd-mr-t, .cd-mr-a { stroke-width: 3; }
-.cd-bead { fill: var(--kc); stroke: var(--bg); stroke-width: 1.5; }
-.cd-mc b { position: relative; font: 500 13px/1 var(--sans); font-variant-numeric: tabular-nums; }
+.cd-mcap { flex: none; margin: 14px var(--gut) 0; text-align: center; letter-spacing: .14em; color: var(--quiet); }
+.cd-dows { display: grid; grid-template-columns: repeat(7, 1fr); padding: 18px 0 8px; text-align: center; letter-spacing: .1em; color: var(--quiet); }
+.cd-mgrid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 2px; }
+.cd-mc { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 50px; }
+.cd-mc b { font: 400 14px/1 var(--sans); font-variant-numeric: tabular-nums; }
 .cd-mc.is-quiet b, .cd-mc.is-future b { color: var(--quiet); }
 .cd-mc.is-today b { font-weight: 700; }
-.cd-mc.is-today::after { content: ""; position: absolute; left: 50%; bottom: 0; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--ink); }
+.cd-md { display: flex; gap: 3px; height: 5px; }
+.cd-md i { width: 5px; height: 5px; border-radius: 50%; }
+.cd-mk { background: var(--nil); }
+.cd-mc[data-state="part"] .cd-mk { background: var(--quiet); }
+.cd-mc[data-state="whole"] .cd-mk { background: var(--ink); box-shadow: 0 0 6px rgba(243, 245, 247, .55); }
+.cd-mc[data-state="none"] .cd-mk { background: none; box-shadow: inset 0 0 0 1.2px var(--miss); }
+.cd-mc.is-today .cd-mk { outline: 3px solid rgba(243, 245, 247, .16); }
+.cd-ms { background: var(--kc); }
 .cd-mc.is-pad { visibility: hidden; }
 .cd-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; margin: 18px 0 0; letter-spacing: .14em; color: var(--quiet); }
 .cd-legend span { display: inline-flex; align-items: center; gap: 7px; }
-.cd-legend i { width: 7px; height: 7px; border-radius: 50%; background: var(--kc); }
+.cd-legend i { width: 5px; height: 5px; border-radius: 50%; background: var(--kc); }
 
-/* ── training ── */
-.cd-figs { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 22px; border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+/* ── training: thirty days of dots, and a column of dots a week ── */
+.cd-strip { display: flex; justify-content: space-between; max-width: 330px; margin: 22px auto 0; }
+.cd-strip i { width: 5px; height: 5px; border-radius: 50%; background: var(--nil); }
+.cd-strip i.is-lit { background: var(--kc); box-shadow: 0 0 6px var(--kc); }
+.cd-last { margin-top: 20px; }
+.cd-figs { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 30px; border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
 .cd-figs div { padding: 14px 0 13px; text-align: center; }
 .cd-figs div + div { box-shadow: inset 1px 0 0 var(--hair); }
 .cd-figs b { display: block; font: 300 26px/1 var(--sans); font-variant-numeric: tabular-nums; }
 .cd-figs span { display: block; margin-top: 9px; font: 500 10px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--quiet); }
-.cd-lbl { margin: 24px 0 10px; }
-.cd-weeks { display: flex; align-items: flex-end; justify-content: space-between; gap: 6px; height: 72px; }
-.cd-weeks i { flex: 1; max-width: 12px; min-height: 3px; border-radius: 6px; background: rgba(243, 245, 247, .3); }
-.cd-weeks i.is-zero { background: var(--track); }
-.cd-weeks i.is-this { background: var(--ink); box-shadow: 0 0 10px rgba(243, 245, 247, .35); }
-.cd-wax { display: flex; justify-content: space-between; margin-top: 10px; font: 500 10px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--quiet); }
+.cd-lbl { margin: 26px 0 12px; }
+.cd-weeks { display: flex; align-items: flex-end; justify-content: space-between; height: 70px; padding: 0 3px; }
+.cd-weeks > span { display: flex; flex-direction: column-reverse; align-items: center; gap: 4px; width: 12px; }
+.cd-weeks i { width: 6px; height: 6px; border-radius: 50%; background: var(--quiet); }
+.cd-weeks > span.is-this i { background: var(--ink); box-shadow: 0 0 6px rgba(243, 245, 247, .5); }
+.cd-weeks > span.is-zero i { background: none; box-shadow: inset 0 0 0 1.2px var(--miss); }
+.cd-wax { display: flex; justify-content: space-between; margin-top: 12px; font: 500 10px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--quiet); }
 .cd-kinds, .cd-recent, .cd-day-l { list-style: none; margin: 0; padding: 0; }
 .cd-kinds li, .cd-recent li, .cd-day-l li { box-shadow: inset 0 1px 0 var(--hair); }
-.cd-kinds li { display: grid; grid-template-columns: 1fr auto; gap: 9px 10px; padding: 13px 0 12px; }
+.cd-kinds li { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 14px 0 13px; }
 .cd-kinds b, .cd-recent b, .cd-day-l b { font: 400 15px/1.3 var(--sans); }
 .cd-kinds span, .cd-recent span, .cd-day-l span, .cd-recent time { font: 500 11px/1.3 var(--mono); letter-spacing: .06em; color: var(--quiet); font-variant-numeric: tabular-nums; }
 .cd-kinds span, .cd-recent span, .cd-day-l span { text-align: right; }
 .cd-kinds em { grid-column: 1 / -1; height: 2px; border-radius: 1px; background: var(--track); overflow: hidden; }
 .cd-kinds em i { display: block; height: 100%; border-radius: 1px; background: var(--kc, var(--ink)); }
-.cd-recent li { display: grid; grid-template-columns: 56px 1fr auto; gap: 10px; align-items: baseline; padding: 13px 0 12px; }
+.cd-recent li { display: grid; grid-template-columns: 56px 1fr auto; gap: 10px; align-items: baseline; padding: 14px 0 13px; }
 
 /* ── the sheet ── */
 .cd-scrim { position: fixed; inset: 0; z-index: 40; background: rgba(2, 4, 7, .66); opacity: 0; transition: opacity .2s; }
@@ -360,7 +371,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 
 /* ── toast ── */
 .cd-toast {
-  position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 70px); z-index: 60;
+  position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 112px); z-index: 60;
   display: flex; align-items: center; gap: 6px; max-width: calc(100vw - 32px);
   padding: 4px 4px 4px 18px; border-radius: 22px;
   font: 500 14px/1.3 var(--sans); background: #13212C; color: var(--ink);
@@ -376,37 +387,38 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 <body>
 <div class="cd-app">
   <header class="cd-top">
-    <p class="cd-date" id="cdDate"></p>
     <button class="cd-gear" id="cdGear" type="button" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 8h9M17 8h3M4 16h3M11 16h9"/><circle cx="15" cy="8" r="2"/><circle cx="9" cy="16" r="2"/></svg></button>
-    <button class="cd-plus" id="cdAdd" type="button" aria-label="Add a block"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+    <nav class="cd-nav" aria-label="Views">
+      <button class="cd-tab" data-v="day" type="button">Day</button>
+      <button class="cd-tab" data-v="hab" type="button">Habits</button>
+      <button class="cd-tab" data-v="mon" type="button">Month</button>
+      <button class="cd-tab" data-v="lift" type="button">Training</button>
+    </nav>
+    <button class="cd-plus" id="cdAdd" type="button" aria-label="Add a block"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
   </header>
 
   <main class="cd-main" id="cdMain">
     <section id="cdVDay" aria-label="Day">
       <div class="cd-week" id="cdRibbon"></div>
       <div class="cd-pane" id="cdDayPane">
-        <div class="cd-dial" id="cdDial" role="img">
-          <svg id="cdDialSvg" viewBox="0 0 300 300" aria-hidden="true"></svg>
-          <div class="cd-mid" aria-hidden="true">
-            <p class="cd-mid-k" id="cdMidK"></p>
-            <p class="cd-mid-t" id="cdMidT"></p>
-            <p class="cd-mid-n" id="cdMidN"></p>
-            <p class="cd-mid-s" id="cdMidS"></p>
-          </div>
+        <div class="cd-hero" id="cdHero">
+          <p class="cd-hcap" id="cdHeroK"></p>
+          <button class="cd-big cd-hn" id="cdHeroN" type="button"></button>
+          <p class="cd-hs" id="cdHeroS"></p>
+          <div class="cd-bar" id="cdBar" aria-hidden="true"><i id="cdBarI"></i></div>
+          <button class="cd-then" id="cdThen" type="button"><span class="cd-tcap">Then</span><b id="cdThenN"></b></button>
         </div>
-        <div class="cd-sum"><span id="cdSumK"></span><span id="cdSumP"></span></div>
         <ol class="cd-list" id="cdAgenda"></ol>
       </div>
+      <button class="cd-go" id="cdGo" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
     </section>
     <section id="cdVHab" aria-label="Habits" hidden>
       <div class="cd-pane">
-        <div class="cd-ring is-hab" id="cdHabRing" role="img">
-          <span id="cdHabSvg" aria-hidden="true"></span>
-          <div class="cd-mid" aria-hidden="true">
-            <p class="cd-mid-k">Today</p>
-            <p class="cd-mid-t" id="cdHabT"></p>
-            <p class="cd-mid-s" id="cdHabCap"></p>
-          </div>
+        <div class="cd-hero is-sub">
+          <p class="cd-hcap">Today</p>
+          <p class="cd-big" id="cdHabT"></p>
+          <p class="cd-hs" id="cdHabCap"></p>
+          <div class="cd-hdots" id="cdHabDots" role="img"></div>
         </div>
         <ul class="cd-hb" id="cdHab"></ul>
         <button class="cd-link" id="cdHabAdd" type="button">+ A habit of your own</button>
@@ -415,7 +427,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     <section id="cdVMon" aria-label="Month" hidden>
       <div class="cd-mhead">
         <button id="cdMonP" type="button" aria-label="Previous month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
-        <div><p class="cd-mid-k" id="cdMonK"></p><h1 class="cd-mon-t" id="cdMonT"></h1></div>
+        <div><p class="cd-hcap" id="cdMonK"></p><h1 class="cd-big" id="cdMonT"></h1></div>
         <button id="cdMonN" type="button" aria-label="Next month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
       </div>
       <p class="cd-mcap" id="cdMonCap"></p>
@@ -427,26 +439,17 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     </section>
     <section id="cdVLift" aria-label="Training" hidden>
       <div class="cd-pane">
-        <div class="cd-ring is-lift" id="cdLiftRing" role="img">
-          <span id="cdLiftSvg" aria-hidden="true"></span>
-          <div class="cd-mid" aria-hidden="true">
-            <p class="cd-mid-k">30 days</p>
-            <p class="cd-mid-t" id="cdLiftT"></p>
-            <p class="cd-mid-s">sessions</p>
-          </div>
+        <div class="cd-hero is-sub">
+          <p class="cd-hcap">Last 30 days</p>
+          <p class="cd-big" id="cdLiftT"></p>
+          <p class="cd-hs" id="cdLiftS"></p>
+          <div class="cd-strip" id="cdLiftStrip" role="img"></div>
+          <p class="cd-last" id="cdLiftK"></p>
         </div>
-        <p class="cd-ringcap" id="cdLiftK"></p>
         <div id="cdLift"></div>
       </div>
     </section>
   </main>
-
-  <nav class="cd-nav" aria-label="Views">
-    <button class="cd-tab" data-v="day" type="button">Day</button>
-    <button class="cd-tab" data-v="hab" type="button">Habits</button>
-    <button class="cd-tab" data-v="mon" type="button">Month</button>
-    <button class="cd-tab" data-v="lift" type="button">Training</button>
-  </nav>
 </div>
 
 <div class="cd-scrim" id="cdScrim" hidden></div>
@@ -710,8 +713,6 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     cdPaint();
   }
   function cdPaint() {
-    var t = cdDate(cdToday());
-    $('cdDate').textContent = DOWL[cdDow(cdToday())] + ' ' + t.getDate() + ' ' + MON[t.getMonth()].slice(0, 3);
     if (view === 'day') cdPaintDay();
     else if (view === 'hab') cdPaintHab();
     else if (view === 'mon') cdPaintMon();
@@ -722,156 +723,126 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     return (withDay ? DOWL[cdDow(iso)] + ' ' : '') + d.getDate() + ' ' + MON[d.getMonth()];
   }
   function cdWeekStart(iso) { return cdAddDays(iso, -cdDow(iso)); }
-
-  /* ═══ THE DIAL ═══
-     Twenty-four hours round one ring, midnight at the top and the day
-     running clockwise, the way a watch does. The whole day rather than
-     the hours you are awake: a dial that starts at seven is a dial whose
-     top moves, and the empty night is part of the shape. */
-  var DC = 150, DR = 108;
-  /* A round cap reaches half the stroke past the end of the path, so the
-     path is drawn that much short at each end and what you SEE starts and
-     stops on the minute. Two minutes more each side leaves a hairline
-     between two blocks that meet. */
-  var CAPM = 6 / DR / (2 * Math.PI) * 1440, EDGE = 2;
+  var CATN = { body: 'Body', mind: 'Mind', work: 'Work', rest: 'Rest', none: 'Other' };
   var f2 = function (v) { return Math.round(v * 100) / 100; };
-  function cdPt(m, r) { var a = m / 1440 * 2 * Math.PI; return [f2(DC + r * Math.sin(a)), f2(DC - r * Math.cos(a))]; }
-  /* In halves past twelve hours, so no single arc is ever ambiguous
-     about which way round it goes. */
-  function cdArcD(s, e, r) {
-    var p0 = cdPt(s, r), d = 'M' + p0[0] + ' ' + p0[1], n = e - s > 700 ? 2 : 1;
-    for (var i = 1; i <= n; i++) { var p = cdPt(s + (e - s) * i / n, r); d += 'A' + r + ' ' + r + ' 0 0 1 ' + p[0] + ' ' + p[1]; }
-    return d;
+  var TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+
+  /* How much of a day was kept, as the one word a dot can say. Filled
+     for whole, a quieter fill for part, hollow for none — and a day that
+     makes no claim (still to come, before the record, or today with
+     nothing done YET) is the faint dot, never a hollow one. */
+  function cdDayState(iso) {
+    var today = cdToday(), t = cdTally(iso);
+    if (iso > today) return 'future';
+    if (iso < cdFirst() || !t.on) return 'quiet';
+    if (t.kept >= t.on) return 'whole';
+    if (t.kept) return 'part';
+    return iso === today ? 'quiet' : 'none';
   }
-  /* A block too short for its own caps is drawn as the cap alone: a dot
-     centred on its middle, never an arc drawn backwards. */
-  function cdSegD(a, b, cls, attr) {
-    var x = a + CAPM, y = b - CAPM, d;
-    if (y - x < 1) { var m = (a + b) / 2, p0 = cdPt(m - .5, DR), p1 = cdPt(m + .5, DR); d = 'M' + p0.join(' ') + 'L' + p1.join(' '); cls += ' is-short'; }
-    else d = cdArcD(x, y, DR);
-    return '<path class="' + cls + '" d="' + d + '"' + attr + '/>';
-  }
-  /* The glow's region is the whole dial, in the dial's own units. A region
-     measured off each arc's box is a few pixels round a short block, and
-     the blur is cut square at its edge. */
-  var GLOW = '<defs><filter id="cdGl" filterUnits="userSpaceOnUse" x="-20" y="-20" width="340" height="340"><feGaussianBlur stdDeviation="3" result="b"/>'
-    + '<feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
-  function cdDialSvg(list, isT, now) {
-    var today = cdToday(), h = GLOW + '<circle class="cd-dt" cx="' + DC + '" cy="' + DC + '" r="' + DR + '"/>';
-    for (var hr = 0; hr < 24; hr++) {
-      var six = hr % 6 === 0, a = cdPt(hr * 60, DR + 16), b = cdPt(hr * 60, DR + (six ? 24 : 20));
-      h += '<line class="cd-tk' + (six ? ' is-six' : '') + '" x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] + '"/>';
-    }
-    [0, 6, 12, 18].forEach(function (x) {
-      var p = cdPt(x * 60, DR + 36);
-      h += '<text class="cd-dl" x="' + p[0] + '" y="' + p[1] + '" dy="3.5" text-anchor="middle">' + String(x).padStart(2, '0') + '</text>';
-    });
-    var arcs = '', dots = '';
-    list.forEach(function (b) {
-      /* A block taken off for the day leaves its hours empty on the ring. */
-      if (cdIsOff(sel, b.id)) return;
-      var done = cdDone(sel, b.id);
-      var running = isT && b.e > b.s && now >= b.s && now < b.e;
-      var past = sel < today || (isT && (b.e > b.s ? now >= b.e : now > b.s));
-      var st = done ? 'is-kept' : past ? 'is-miss' : 'is-ahead';
-      var attr = ' data-id="' + b.id + '" style="--c:var(--c-' + CAT[cdKind(b.n)] + ')"';
-      if (b.e <= b.s) { var p = cdPt(b.s, DR); dots += '<circle class="cd-m ' + st + '" cx="' + p[0] + '" cy="' + p[1] + '" r="5"' + attr + '/>'; return; }
-      arcs += cdSegD(b.s + EDGE, b.e - EDGE, 'cd-a ' + st, attr);
-      /* The block happening now is lit as far as the clock and dim for
-         the rest, so the ring says how much of it is left. */
-      if (running && !done) arcs += cdSegD(b.s + EDGE, now, 'cd-a is-lit', attr);
-    });
-    h += arcs + dots;
-    if (isT) {
-      var p0 = cdPt(now, DR - 22), p1 = cdPt(now, DR);
-      h += '<g class="cd-hand" data-m="' + now + '"><line x1="' + p0[0] + '" y1="' + p0[1] + '" x2="' + p1[0] + '" y2="' + p1[1] + '"/><circle cx="' + p1[0] + '" cy="' + p1[1] + '" r="4.5"/></g>';
-    }
-    return h;
+
+  /* ═══ THE BLOCK YOU ARE IN ═══
+     Today the screen is about one block: the one running, or the next one
+     if nothing is. It is the biggest thing on the screen, the white check
+     ticks it, and the one after it sits underneath. Neither is repeated in
+     the list below — a thing said twice on one screen is said once too
+     many. Any other day there is no clock on it, so the middle is how
+     much of that day was kept, and every block is in the list. */
+  var heroId = null, thenId = null;
+  function cdHeroOf(list, now) {
+    var live = list.filter(function (b) { return !cdIsOff(sel, b.id); });
+    var run = live.filter(function (b) { return b.e > b.s && now >= b.s && now < b.e; })[0] || null;
+    var ahead = live.filter(function (b) { return b !== run && b.s >= now; });
+    if (run) return { mode: 'now', b: run, then: ahead[0] || null };
+    if (ahead.length) return { mode: 'next', b: ahead[0], then: ahead[1] || null };
+    return { mode: live.length ? 'done' : 'empty', b: null, then: null };
   }
 
   function cdPaintDay() {
     var today = cdToday(), ws = cdWeekStart(today);
-    /* THE WEEK, seven small rings. Each is closed by the share of its day
-       that was kept, whole and lit only when all of it was; a day still to
-       come is an empty ring, because it has not happened. */
     var rb = '';
     for (var i = 0; i < 7; i++) {
-      var d = cdAddDays(ws, i), t = cdTally(d), past = d <= today;
-      var whole = past && t.on > 0 && t.kept >= t.on, p = past && t.on ? Math.round(t.kept / t.on * 10000) / 100 : 0;
-      var ring = '<svg viewBox="0 0 36 36" aria-hidden="true"><circle class="cd-wr-t" cx="18" cy="18" r="15"/>'
-        + (whole ? '<circle class="cd-wr-a is-whole" cx="18" cy="18" r="15"/>'
-          : p > 0 ? '<circle class="cd-wr-a" cx="18" cy="18" r="15" pathLength="100" stroke-dasharray="' + p + ' 100" transform="rotate(-90 18 18)"/>' : '')
-        + '</svg>';
-      rb += '<button type="button" class="cd-wd' + (d === today ? ' is-today' : '') + '" data-d="' + d + '" data-p="' + (whole ? 100 : p) + '" aria-pressed="' + (d === sel) + '"'
-        + ' aria-label="' + DOWL[i] + ', ' + (past ? t.kept + ' of ' + t.on + ' kept' : t.on + ' planned') + '">'
-        + '<span class="cd-wd-l">' + DOW[i] + '</span><span class="cd-wd-r">' + ring + '<b>' + cdDate(d).getDate() + '</b></span></button>';
+      var d = cdAddDays(ws, i), t = cdTally(d), st = cdDayState(d);
+      rb += '<button type="button" class="cd-wd' + (d === today ? ' is-today' : '') + '" data-d="' + d + '" data-state="' + st + '" aria-pressed="' + (d === sel) + '"'
+        + ' aria-label="' + DOWL[i] + ' ' + cdDate(d).getDate() + ', ' + (d > today ? t.on + ' planned' : t.kept + ' of ' + t.on + ' kept') + '">'
+        + '<i></i><span class="cd-wl">' + DOW[i].charAt(0) + '</span></button>';
     }
     $('cdRibbon').innerHTML = rb;
 
     var now = cdNowMin(), isT = sel === today, open = cdOpenDay(sel), fut = sel > today;
     var list = cdOn(sel), tl = cdTally(sel);
-    $('cdDialSvg').innerHTML = cdDialSvg(list, isT, now);
-
-    /* THE MIDDLE. Today it is the clock and what the clock is inside: the
-       block running and how long it has left, or the next one and how
-       soon. Any other day it is how much of that day was kept. */
+    var hero = isT ? cdHeroOf(list, now) : { mode: fut ? 'plan' : 'back', b: null, then: null };
+    var b = hero.b, cap, name, sub;
     var rel = isT ? 'Today' : sel === cdAddDays(today, -1) ? 'Yesterday' : sel === cdAddDays(today, 1) ? 'Tomorrow' : DOWL[cdDow(sel)];
-    var mt, mn = '', ms, mc = '';
-    if (isT) {
-      var run = null, next = null;
-      list.forEach(function (b) {
-        if (cdIsOff(sel, b.id)) return;
-        if (!run && b.e > b.s && now >= b.s && now < b.e) run = b;
-        if (!next && b.s > now) next = b;
-      });
-      mt = cdHM(now);
-      if (run) { mn = run.n; mc = CAT[cdKind(run.n)]; ms = cdLen(run.e - now) + ' left'; }
-      else if (next) { mn = next.n; mc = CAT[cdKind(next.n)]; ms = 'In ' + cdLen(next.s - now); }
-      else ms = tl.on ? 'Nothing left today' : 'Nothing on today';
+    var at = rel + ' · ' + cdDate(sel).getDate() + ' ' + MON[cdDate(sel).getMonth()].slice(0, 3);
+    heroId = b ? b.id : null;
+    thenId = hero.then ? hero.then.id : null;
+    if (b) {
+      var cat = CAT[cdKind(b.n)];
+      $('cdHero').style.setProperty('--c', 'var(--c-' + cat + ')');
+      cap = (hero.mode === 'now' ? 'Now' : 'Next') + ' · ' + CATN[cat] + ' · ' + cdHM(now);
+      name = b.n;
+      sub = hero.mode === 'now'
+        ? '<b>' + cdLen(b.e - now) + ' left</b> · until ' + cdHM(b.e)
+        : '<b>' + (b.s > now ? 'in ' + cdLen(b.s - now) : 'now') + '</b> · at ' + cdHM(b.s);
     } else {
-      mt = fut || !tl.on ? String(tl.on) : tl.kept + '/' + tl.on;
-      ms = (fut ? 'planned · ' : tl.on ? 'kept · ' : 'on · ') + cdLongDate(sel, false);
+      $('cdHero').style.removeProperty('--c');
+      cap = hero.mode === 'done' ? 'Today · ' + cdHM(now) : at;
+      if (!tl.on) { name = 'Nothing on'; sub = ''; }
+      else if (hero.mode === 'plan') { name = tl.on + (tl.on === 1 ? ' block' : ' blocks'); sub = 'planned · ' + cdLen(tl.mins); }
+      else { name = tl.kept + ' of ' + tl.on; sub = 'kept · ' + (hero.mode === 'done' ? 'nothing left today' : cdLen(tl.mins) + ' planned'); }
     }
-    $('cdMidK').textContent = rel;
-    $('cdMidT').textContent = mt;
-    $('cdMidN').textContent = mn;
-    if (mc) $('cdMidN').style.setProperty('--c', 'var(--c-' + mc + ')'); else $('cdMidN').style.removeProperty('--c');
-    $('cdMidS').textContent = ms;
-    $('cdDial').setAttribute('aria-label', cdLongDate(sel, true) + ', ' + (fut ? tl.on + ' planned' : tl.kept + ' of ' + tl.on + ' kept')
-      + (mn ? '. ' + (isT && ms.slice(-4) === 'left' ? 'Now: ' : 'Next: ') + mn + ', ' + ms : ''));
+    $('cdHeroK').textContent = cap;
+    $('cdHeroN').textContent = name;
+    $('cdHeroN').disabled = !b;
+    $('cdHeroN').setAttribute('aria-label', b ? b.n + ', ' + cdHM(b.s) + (b.e > b.s ? ' to ' + cdHM(b.e) : '') + '. Open' : name);
+    $('cdHeroS').innerHTML = sub;
+    $('cdHeroS').hidden = !sub;
+    /* How far through, as a line: the one fact a figure of minutes left
+       cannot show you at a glance. Only while a block is running. */
+    $('cdBar').hidden = hero.mode !== 'now';
+    if (hero.mode === 'now') $('cdBarI').style.width = f2((now - b.s) / (b.e - b.s) * 100) + '%';
+    $('cdThen').hidden = !hero.then;
+    if (hero.then) {
+      $('cdThenN').textContent = hero.then.n + ' at ' + cdHM(hero.then.s);
+      $('cdThen').setAttribute('aria-label', 'Then ' + hero.then.n + ' at ' + cdHM(hero.then.s) + '. Open');
+    }
 
-    $('cdSumK').innerHTML = fut ? '<b>' + tl.on + '</b> ' + (tl.on === 1 ? 'block' : 'blocks') : '<b>' + tl.kept + '</b> of ' + tl.on + ' kept';
-    $('cdSumP').innerHTML = tl.mins ? '<b>' + cdLen(tl.mins) + '</b> planned' : '';
+    var go = $('cdGo');
+    go.hidden = !b || !open;
+    if (b) {
+      var done = cdDone(sel, b.id);
+      go.style.setProperty('--c', 'var(--c-' + CAT[cdKind(b.n)] + ')');
+      go.setAttribute('aria-pressed', done);
+      go.setAttribute('aria-label', done ? b.n + ' kept. Untick' : 'Mark ' + b.n + ' kept');
+    }
 
     var ag = $('cdAgenda');
+    var rest = list.filter(function (x) { return x.id !== heroId && x.id !== thenId; });
     if (!list.length) {
       ag.innerHTML = '<li class="cd-empty">Nothing on this day yet.<button type="button" class="cd-link" data-act="add">+ Add a block</button></li>';
       return;
     }
-    ag.innerHTML = list.map(function (b) { return cdRow(b, isT, now, open); }).join('');
+    ag.innerHTML = rest.map(function (x) { return cdRow(x, isT, now, open); }).join('');
   }
 
   /* A ROW is two press targets, and they are siblings: the dot ticks, the
      rest opens the block. A button inside a button collapses to one press
-     while looking exactly right. The dot is drawn at ten pixels and owns
-     forty-four. */
+     while looking exactly right. The dot is drawn at seven pixels and
+     owns forty-four. */
   function cdRow(b, isT, now, open) {
     var cat = CAT[cdKind(b.n)], done = cdDone(sel, b.id), off = cdIsOff(sel, b.id);
-    var running = isT && !off && b.e > b.s && now >= b.s && now < b.e;
     var past = !off && ((isT && (b.e > b.s ? now >= b.e : now > b.s)) || sel < cdToday());
-    var time = off ? 'Off' : b.e > b.s ? cdHM(b.s) + '–' + cdHM(b.e) : cdHM(b.s);
-    var sess = (S.train[sel] && cdSess(S.train[sel][b.id])) || null, sub = [];
-    if (sess) sub.push('<span class="cd-rw" style="--kc:var(--k-' + LIFTN[sess.k[0]].g + ')">' + esc(cdSessName(sess)) + (sess.m ? ' · ' + sess.m + 'm' : '') + '</span>');
-    if (b.p) sub.push(esc(b.p));
-    var cls = 'cd-it' + (done ? ' is-done' : '') + (off ? ' is-off' : '') + (running ? ' is-now' : '') + (past ? ' is-past' : '');
+    var time = off ? 'Off' : cdHM(b.s);
+    var sess = (S.train[sel] && cdSess(S.train[sel][b.id])) || null;
+    var rw = sess ? '<span class="cd-rw" style="--kc:var(--k-' + LIFTN[sess.k[0]].g + ')"> · ' + esc(cdSessName(sess)) + '</span>' : '';
+    var cls = 'cd-it' + (done ? ' is-done' : '') + (off ? ' is-off' : '') + (past ? ' is-past' : '');
     return '<li class="' + cls + '" data-id="' + b.id + '" style="--c:var(--c-' + cat + ')">'
       + '<button type="button" class="cd-dot" data-act="tick" aria-pressed="' + done + '"' + (open && !off ? '' : ' disabled')
       + ' aria-label="' + (done ? 'Kept' : 'Mark kept') + ': ' + esc(b.n) + '"><i></i></button>'
       + '<button type="button" class="cd-rb" data-act="edit" aria-label="' + esc(b.n) + ', ' + cdHM(b.s) + (b.e > b.s ? ' to ' + cdHM(b.e) : '') + (off ? ', off this day' : '') + '. Open">'
-      + '<span class="cd-rn">' + esc(b.n) + '</span><span class="cd-rt">' + time + '</span>'
-      + (sub.length ? '<span class="cd-rs">' + sub.join(' · ') + '</span>' : '') + '</button></li>';
+      + '<span class="cd-rn">' + esc(b.n) + rw + '</span><span class="cd-rt">' + time + '</span>'
+      + (b.p ? '<span class="cd-rs">' + esc(b.p) + '</span>' : '') + '</button></li>';
   }
-  var TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 
   function cdTick(id) {
     if (!cdOpenDay(sel)) return;
@@ -895,10 +866,14 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     if (btn.dataset.act === 'tick') cdTick(li.dataset.id);
     else cdEdit(li.dataset.id);
   });
+  $('cdGo').addEventListener('click', function () { if (heroId) cdTick(heroId); });
+  $('cdHeroN').addEventListener('click', function () { if (heroId) cdEdit(heroId); });
+  $('cdThen').addEventListener('click', function () { if (thenId) cdEdit(thenId); });
   $('cdRibbon').addEventListener('click', function (ev) {
     var b = ev.target.closest('.cd-wd');
     if (!b) return;
     sel = b.dataset.d;
+    $('cdDayPane').scrollTop = 0;
     cdPaintDay();
   });
 
@@ -1240,39 +1215,21 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     $('cdShT').title = label || '';
   }
 
-  /* ═══ RINGS OF SEGMENTS ═══
-     The habits and the training log draw the same object the day does,
-     cut into equal parts: one per habit, one per day of a fortnight, one
-     per day of a month. A lit part is that thing's own colour; an unlit
-     one is the ring's bare track. Butt ends, so a part is exactly its
-     share of the circle and the gaps between them are all one width. */
-  function cdArcDeg(c, r, a0, a1) {
-    var p = function (a) { a = a * Math.PI / 180; return f2(c + r * Math.sin(a)) + ' ' + f2(c - r * Math.cos(a)); };
-    return 'M' + p(a0) + 'A' + r + ' ' + r + ' 0 ' + (a1 - a0 > 180 ? 1 : 0) + ' 1 ' + p(a1);
-  }
-  function cdSegRing(size, r, w, n, part, gap) {
-    var c = size / 2, span = 360 / n, g = Math.min(gap, span * .4), out = '';
-    for (var i = 0; i < n; i++) {
-      var q = part(i) || {};
-      out += '<path class="cd-sg' + (q.lit ? ' is-lit' : '') + '" d="' + cdArcDeg(c, r, i * span + g / 2, (i + 1) * span - g / 2) + '" stroke-width="' + w + '"'
-        + (q.lit ? ' style="--hc:' + q.c + '"' : '') + '/>';
-    }
-    return '<svg viewBox="0 0 ' + size + ' ' + size + '">' + out + '</svg>';
-  }
-
   /* ═══ HABITS VIEW ═══
-     Today is one ring cut into a part per habit, lit as each is kept.
-     Under it every habit is a fortnight round its own ring, oldest at the
-     top and today the last part before it comes round again. Colour says
-     WHICH habit, never whether. */
-  var CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+     The figure is how many of today's habits are kept, and under it a dot
+     a habit, lit in its own colour. Every habit is then a hairline row:
+     its dot logs it, the rest opens its record, and under the name is a
+     fortnight of dots with today last. Colour says WHICH habit, never
+     whether. */
   function cdPaintHab() {
     var today = cdToday(), hs = cdHabits();
     var kept = hs.filter(function (h) { return cdHabOn(today, h); });
-    $('cdHabT').textContent = kept.length + '/' + hs.length;
-    $('cdHabCap').textContent = 'kept';
-    $('cdHabSvg').innerHTML = cdSegRing(180, 76, 10, hs.length, function (i) { return { lit: cdHabOn(today, hs[i]), c: 'var(' + hs[i].hc + ')' }; }, 5);
-    $('cdHabRing').setAttribute('aria-label', kept.length + ' of ' + hs.length + ' habits kept today');
+    $('cdHabT').textContent = kept.length + ' of ' + hs.length;
+    $('cdHabCap').textContent = 'habits kept';
+    $('cdHabDots').innerHTML = hs.map(function (h) {
+      return '<i class="' + (cdHabOn(today, h) ? 'is-on' : '') + '" style="--hc:var(' + h.hc + ')"></i>';
+    }).join('');
+    $('cdHabDots').setAttribute('aria-label', kept.length + ' of ' + hs.length + ' habits kept today');
     var ds = [];
     for (var j = 13; j >= 0; j--) ds.push(cdAddDays(today, -j));
     var html = '';
@@ -1282,19 +1239,21 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       if (h.k === 'tick') {
         var by = cdKeptBy(today, h), st = cdStreak(h);
         sub = by && by !== 'you' ? (by === 'session' ? 'Kept by a session' : 'Kept by ' + esc(by)) : (st > 1 ? st + '-day streak' : on ? 'Kept today' : 'Not yet');
-        val = on ? '<span class="cd-hr-v is-tick">' + TICK + '</span>' : '<span class="cd-hr-v is-nil">—</span>';
+        val = on ? '<span class="cd-hr-v">Kept</span>' : '<span class="cd-hr-v is-nil">—</span>';
       } else {
         var wk = 0, n = 0;
         for (var i = 1; i <= 7; i++) { var x = +cdHabVal(cdAddDays(today, -i), h); if (x > 0) { wk += x; n++; } }
         sub = n ? '7-day avg ' + cdFmtNum(wk / n, h) : 'Not yet';
         val = on ? '<span class="cd-hr-v">' + cdFmtNum(v, h) + '<small>' + esc(h.unit) + '</small></span>' : '<span class="cd-hr-v is-nil">—</span>';
       }
-      var ring = cdSegRing(96, 40, 5, 14, function (k) { return { lit: cdHabOn(ds[k], h), c: 'var(' + h.hc + ')' }; }, 6);
-      /* The ring logs and the name opens the record: two siblings, never
+      var fn = ds.map(function (d) { return '<i' + (cdHabOn(d, h) ? ' class="is-on"' : '') + '></i>'; }).join('');
+      /* The dot logs and the name opens the record: two siblings, never
          one inside the other. */
       html += '<li class="cd-hr' + (on ? ' is-on' : '') + '" data-h="' + h.id + '" style="--hc:var(' + h.hc + ')">'
-        + '<button type="button" class="cd-hr-b" data-act="log" aria-label="' + esc(h.n) + ', ' + (on ? 'kept' : 'not yet') + '. Log">' + ring + val + '</button>'
-        + '<button type="button" class="cd-hr-n" data-act="hist" aria-label="' + esc(h.n) + ' history"><b>' + esc(h.n) + CHEV + '</b><span class="cd-hr-s">' + sub + '</span></button></li>';
+        + '<button type="button" class="cd-hr-b" data-act="log" aria-pressed="' + on + '" aria-label="' + esc(h.n) + ', ' + (on ? 'kept' : 'not yet') + '. Log"><i></i></button>'
+        + '<button type="button" class="cd-hr-n" data-act="hist" aria-label="' + esc(h.n) + ' history">'
+        + '<span class="cd-hr-t">' + esc(h.n) + '</span>' + val
+        + '<span class="cd-hr-s"><span class="cd-fn" aria-hidden="true">' + fn + '</span><span>' + sub + '</span></span></button></li>';
     });
     $('cdHab').innerHTML = html;
   }
@@ -1419,10 +1378,12 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   });
 
   /* ═══ MONTH ═══
-     A ring a day, closed by how much of the day was kept, and whole and
-     lit only when all of it was. What you trained is a bead at the top of
-     that day's ring, in the session's colour. A day before the record
-     began draws no ring at all: it is not a day you missed. */
+     A figure a day with a dot under it: the week's own dot, filled by how
+     much of the day was kept. A day you trained carries a second dot
+     beside it in the session's colour, so the two questions — did you
+     keep it, and what did you do — are two marks rather than one mark
+     asked to answer both. A day before the record began carries no dot
+     at all: it is not a day you missed. */
   function cdPaintMon() {
     var today = cdToday(), first = cdFirst();
     var y = +monthAt.slice(0, 4), mo = +monthAt.slice(5, 7) - 1;
@@ -1437,21 +1398,17 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       var iso = cdISO(new Date(y, mo, d));
       var fut = iso > today, t = cdTally(iso);
       var inRec = iso >= first && !fut;
-      var whole = inRec && t.on > 0 && t.kept >= t.on;
-      var pct = inRec && t.on ? Math.round(t.kept / t.on * 10000) / 100 : 0;
+      var st = inRec ? cdDayState(iso) : fut ? 'future' : 'quiet';
       if (inRec && t.kept) kept++;
       var ss = cdSessions(iso), lift = ss.filter(function (x) { return !cdRestOnly(x.s); })[0];
       if (lift) trained++;
       var shown = lift || ss[0];
-      var ring = inRec ? '<svg viewBox="0 0 40 40" aria-hidden="true"><circle class="cd-mr-t" cx="20" cy="20" r="17"/>'
-        + (whole ? '<circle class="cd-mr-a is-whole" cx="20" cy="20" r="17"/>'
-          : pct > 0 ? '<circle class="cd-mr-a" cx="20" cy="20" r="17" pathLength="100" stroke-dasharray="' + pct + ' 100" transform="rotate(-90 20 20)"/>' : '')
-        + (shown ? '<circle class="cd-bead" cx="20" cy="3" r="3.5" style="--kc:var(--k-' + LIFTN[shown.s.k[0]].g + ')"/>' : '')
-        + '</svg>' : '';
-      html += '<button type="button" class="cd-mc' + (fut ? ' is-future' : inRec ? (whole ? ' is-whole' : '') : ' is-quiet') + (iso === today ? ' is-today' : '') + '"'
-        + ' data-day="' + iso + '"' + (inRec ? ' data-p="' + (whole ? 100 : pct) + '"' : '')
+      var dots = inRec ? '<span class="cd-md" aria-hidden="true"><i class="cd-mk"></i>'
+        + (shown ? '<i class="cd-ms" style="--kc:var(--k-' + LIFTN[shown.s.k[0]].g + ')"></i>' : '') + '</span>' : '';
+      html += '<button type="button" class="cd-mc' + (fut ? ' is-future' : inRec ? '' : ' is-quiet') + (iso === today ? ' is-today' : '') + '"'
+        + ' data-day="' + iso + '" data-state="' + st + '"'
         + ' aria-label="' + d + ' ' + MON[mo] + (inRec ? ', ' + t.kept + ' of ' + t.on + ' kept' : '') + (shown ? ', ' + esc(cdSessName(shown.s)) : '') + '">'
-        + ring + '<b>' + d + '</b></button>';
+        + '<b>' + d + '</b>' + dots + '</button>';
     }
     for (var q = pad + days; q % 7; q++) html += '<span class="cd-mc is-pad" aria-hidden="true"></span>';
     $('cdMonG').innerHTML = html;
@@ -1511,23 +1468,23 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   }
 
   /* ═══ LIFTS ═══
-     Thirty days round one ring, a part a day, lit in the colour of what
-     you trained on it. The middle counts the sessions; a rest day lights
-     its part in the neutral and is not one of them. */
+     The figure is the sessions in thirty days, and under it thirty dots, a
+     day each, lit in the colour of what you trained on it. A rest day
+     lights its dot in the neutral and is not a session. */
   function cdPaintLift() {
     var today = cdToday(), all = [];
     Object.keys(S.train).sort().reverse().forEach(function (d) { cdSessions(d).forEach(function (x) { all.push({ d: d, s: x.s }); }); });
     var m30 = all.filter(function (x) { return cdDiff(today, x.d) < 30 && !cdRestOnly(x.s); });
-    var d30 = [];
-    for (var i = 29; i >= 0; i--) d30.push(cdAddDays(today, -i));
-    $('cdLiftSvg').innerHTML = cdSegRing(200, 84, 10, 30, function (k) {
-      var ss = cdSessions(d30[k]);
-      if (!ss.length) return null;
+    var strip = '';
+    for (var i = 29; i >= 0; i--) {
+      var ss = cdSessions(cdAddDays(today, -i));
       var s = ss.filter(function (x) { return !cdRestOnly(x.s); })[0] || ss[0];
-      return { lit: true, c: 'var(--k-' + LIFTN[s.s.k[0]].g + ')' };
-    }, 2.4);
+      strip += s ? '<i class="is-lit" style="--kc:var(--k-' + LIFTN[s.s.k[0]].g + ')"></i>' : '<i></i>';
+    }
+    $('cdLiftStrip').innerHTML = strip;
+    $('cdLiftStrip').setAttribute('aria-label', m30.length + ' sessions in the last thirty days');
     $('cdLiftT').textContent = String(m30.length);
-    $('cdLiftRing').setAttribute('aria-label', m30.length + ' sessions in the last thirty days');
+    $('cdLiftS').textContent = m30.length === 1 ? 'session' : 'sessions';
     var box = $('cdLift');
     $('cdLiftK').textContent = all.length ? 'Last · ' + cdSessName(all[0].s) + ' · ' + DOW[cdDow(all[0].d)] + ' ' + cdDate(all[0].d).getDate() : 'Nothing logged yet';
     if (!all.length) {
@@ -1540,15 +1497,20 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var ws = cdWeekStart(today);
     var wk = all.filter(function (x) { return x.d >= ws && !cdRestOnly(x.s); }).length;
     var html = '<div class="cd-figs"><div><b>' + Object.keys(days).length + '</b><span>days</span></div><div><b>' + (avg ? avg + 'm' : '—') + '</b><span>avg length</span></div><div><b>' + wk + '</b><span>this week</span></div></div>';
-    /* Twelve weeks, the one in progress last and in the ink. */
-    var cols = [], top = 1;
+    /* Twelve weeks, a column of dots each — a dot a session, the week in
+       progress last and in the ink. A week with none is one hollow dot:
+       it is a week you did not train, which the record has to show. Seven
+       is as tall as a column goes; the label carries the real count. */
+    var cols = [];
     for (var w = 11; w >= 0; w--) {
       var a = cdAddDays(ws, -7 * w), b = cdAddDays(a, 7);
-      var n = all.filter(function (x) { return x.d >= a && x.d < b && !cdRestOnly(x.s); }).length;
-      cols.push(n); top = Math.max(top, n);
+      cols.push(all.filter(function (x) { return x.d >= a && x.d < b && !cdRestOnly(x.s); }).length);
     }
     html += '<p class="cd-lbl">Sessions a week</p><div class="cd-weeks" role="img" aria-label="Sessions per week for twelve weeks: ' + cols.join(', ') + '">'
-      + cols.map(function (n, i) { return '<i class="' + (n ? '' : 'is-zero') + (i === 11 ? ' is-this' : '') + '" style="height:' + Math.max(4, n / top * 100) + '%"></i>'; }).join('')
+      + cols.map(function (n, i) {
+        var dots = ''; for (var k = 0; k < Math.max(1, Math.min(7, n)); k++) dots += '<i></i>';
+        return '<span class="' + (n ? '' : 'is-zero') + (i === 11 ? ' is-this' : '') + '" data-n="' + n + '">' + dots + '</span>';
+      }).join('')
       + '</div><div class="cd-wax"><span>12 weeks ago</span><span>This week</span></div>';
     var by = {};
     m30.forEach(function (x) {
@@ -1623,9 +1585,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   document.querySelectorAll('.cd-tab').forEach(function (t) { t.addEventListener('click', function () { cdGo(t.dataset.v); }); });
   $('cdAdd').addEventListener('click', function () { cdEdit(null); });
 
-  /* The clock moves the hand, the middle of the dial and the row that is
-     running; nothing animates, it steps on the half minute. A day that has
-     rolled over moves too. */
+  /* The clock moves the block you are in, what is left of it and the line
+     under it; nothing animates, it steps on the half minute. A day that
+     has rolled over moves too. */
   var lastDay = cdToday();
   setInterval(function () {
     var t = cdToday();

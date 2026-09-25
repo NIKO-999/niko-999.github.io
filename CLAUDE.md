@@ -7,8 +7,9 @@ Single-file apps that share a design system:
 - `days/index.html` — habits and reminders
 - `orrery/index.html` — the star chart over an Obsidian vault
 - `cadence/index.html` — the day, habits, month and training log, the
-  day drawn as a twenty-four hour dial and every other screen as rings:
-  its own build of `schedule/`'s mechanisms, not a skin over them
+  day drawn as the block you are in and every other screen as a figure
+  and dots: its own build of `schedule/`'s mechanisms, not a skin over
+  them
 - `shell.css` + `shell.js` at the root — the shared shell they all
   consume. A rule that only two of them need belongs in the two, not
   in the file every one of them loads.
@@ -4102,7 +4103,7 @@ notes admit to, and restoring asks for nothing but a paste.
 `tests/cadence.js` freezes the clock at Friday 25 September 2026, 10:20,
 so which block is running is a fact about the fixture, not the hour.
 
-### Six looks, and the sixth was picked rather than argued
+### Seven looks, and the one picked was not the one liked
 
 Mono on everything with heavy tickets and a black dock; then warm paper,
 white cards, a ring, a raised add button; then a sunset photograph as
@@ -4118,126 +4119,134 @@ app's premise and made its own parts — the hour's light as the one
 accent, a bold italic face, a row of beats, every block a tile on one
 line of time — and came back in four words: **no, don't like that.**
 
-**Five rounds of building a whole look blind is five guesses.** The
-sixth was chosen instead: four DAY screens were rendered over the same
-fixture at 390x844 — the block happening now as the whole screen, a
-column of time, a dial, the day written out as a sentence — and put up
-side by side. The dial was picked. What that settles that no round of
-building could is the idea; the rest of the app follows it.
+**Five rounds of building a whole look blind is five guesses**, so the
+sixth was chosen instead: four DAY screens rendered over the same
+fixture at 390x844 and put up side by side — the block happening now as
+the whole screen, a column of time, a dial, the day written as a
+sentence. The dial was picked, built across every screen, tested and
+shipped.
+
+**And the answer to the shipped dial was a screenshot of a different
+mockup** — the block happening now — with four words: *I like this
+more.* Nothing was wrong with the dial as built. What changed is that
+the pick was made off four stills, and the dial had to exist as an app
+before the other one could be seen for what it was. **A choice between
+mockups is a choice made before any of them was lived with**, so the
+losing sheets are worth keeping: the seventh look was built straight
+off its mockup, because the mockup was still there to build from.
 
 **A mockup page needs its own viewport meta.** Without one, mobile
 emulation lays it out at 980px and scales it down, and the first sheet
 of four came back at about forty per cent: every one of them judged
 small, which is the particle sheet's half-scale lesson in a new place.
 
-### The day is a dial
+### The day is the block you are in
 
-**Twenty-four hours round one ring**, midnight at the top and clockwise,
-the way a watch reads. The whole day rather than the waking hours: a
-dial that starts at seven is a dial whose top moves, and the empty night
-is part of the shape. Every block is an arc at its own hours; a moment
-is a dot; a hand points at now.
+**Its name is the biggest thing on the screen**, at 46px in Inter's
+light weight, and the suite holds it to being the largest type drawn.
+Over it, in the block's own colour, what part of life it is and the
+clock; under it, what is left and when it ends. A name wraps to two
+lines before it is cut, because the name is the whole of what it says.
 
-**The state is the arc's strength.** Kept is the block's colour at full
-strength with a glow; still to come is that colour at 52%; behind you
-and not kept is the flat neutral — a grey with no channel standing out,
-never a red; a block off for the day draws nothing, and its hours are
-empty on the ring. The one running now is lit as far as the clock and
-dim for the rest, so the ring says how much of it is left. Every state
-is a graphic held to 3:1 against the sky just outside the ring at the
-same hour, on composited pixels. The weakest measured is 3.69, a dim
-cyan still to come.
+**A line says how far through**, two pixels by 210, lit in the block's
+colour: the one fact a figure of minutes left cannot show at a glance.
+It is drawn only while a block runs, and the suite reads its width off
+the drawing — 80 of Deep work's 180 minutes at 10:20.
 
-**A round cap reaches half the stroke past the end of the path**, so an
-arc drawn from its block's first minute to its last is drawn thirteen
-minutes too long at each end: two blocks that meet overlap, and the dial
-lies by a quarter of an hour. Each path is drawn a cap short, plus two
-minutes a side for a hairline between blocks that meet, and the suite
-reads each path's own end points back into minutes. **A block shorter
-than its own two caps** is drawn as the cap alone, a dot on its middle,
-never an arc with its ends crossed.
+**Then the one after it**, and neither is repeated in the list below: a
+thing said twice on one screen is said once too many. Asserted as the
+ids the list carries, so a build that listed every block and also drew
+the middle fails. **Both open their block**, because nothing else on
+the screen can: the name is a button, and so is the line after it.
 
-**A glow's filter region measured off each arc's box cuts the blur
-square.** The default region is the element's bounding box plus half
-again, which round a short arc is a few pixels, so a kept hour-long
-block glowed inside a visible rectangle. The region is the whole dial in
-the dial's own units.
+**Between blocks the middle is the next one** and how soon; after the
+last it is what today kept, with nothing to tick; a day with nothing on
+says so and offers the way to put something there. **Any other day has
+no clock on it**, so the middle is how much of that day was kept, or how
+much is planned, and every block is in the list.
 
-**The middle is the one figure the day is about.** Today it is the
-clock, the block the clock is inside and how long it has left — or the
-next one and how soon, or nothing left. Any other day it is how much of
-that day was kept, or how much is planned. The dial is `role="img"` with
-a written label saying the same, never `aria-hidden`.
+**ONE WHITE CONTROL, AND IT TICKS THAT BLOCK.** A round check at the
+foot of the day, named for the block it will keep. You never go looking
+for the row you are in, because the screen already knows which it is.
+Kept, it lights in the block's own colour — the row's dot, at the size
+of the one thing you came to do — and a second press unticks. It is not
+drawn when there is nothing to tick or the day is shut. Ticking a
+training block through it asks what you trained, the same as the row.
 
-**The list under it is the dial read as words**, one hairline a row: a
-dot, the name, and the hours in mono. **The dot is the check** — ten
-pixels drawn inside a forty-four pixel button, a sibling of the button
-that opens the block, because a button inside a button collapses to one
-press. It fills with the block's colour when kept, and the arc on the
-ring fills with it. What you trained rides the row as a second line in
-the session's colour.
+**The pane clears it**, and that is asserted on a long day and only once
+the pane has actually moved: on a day short enough to fit, "the last
+row stops above the check" is true of any padding at all.
 
-**The week is seven small rings above the dial**, each closed by the
-share of its day that was kept, and whole and lit only when all of it
-was. Six of seven is not a whole ring, and the suite plants that day.
+**The mockup had no add and no settings**, so they went either side of
+the four words at the top, and both are glyphs. Add is the ink where
+settings is quiet — and not a second white round, because two white
+rounds on one screen are two answers to *what do I press*. The suite
+holds the white fill to exactly one button on the day.
 
-### Every screen is rings
+**What you trained rides the row's own line** in the session's colour,
+as the mockup drew it: *Gym · Push + Core*. A place stays on a second
+line under the name.
 
-**Habits**: today is one ring cut into a part per habit, lit in each
-habit's colour as it is kept, with the count in its middle. Under it
-every habit is a fortnight round its own ring, three across, oldest at
-the top and today the last part before it comes round again; today's
-figure or a tick sits in the middle. The ring logs and the name opens
-the record — siblings, never one inside the other. Six colours for six
-habits, the alignment app's four plus a blue and a pink.
+### A dot says how much was kept
 
-**The month is a ring a day**, closed by how much of the day was kept,
-whole and lit only when all of it was. What you trained is a bead at the
-top of that day's ring in the session's colour. A day before the record
-began draws no ring at all — not an empty one — because it is not a day
-you missed; a day still to come draws none either.
+**The week is a dot over a letter.** Filled for a whole day, a quieter
+fill for part of one, hollow for a day in the record where nothing was
+kept — the habits screen's rule, that filled is kept and hollow is
+missed, and no colour says whether. **A day that makes no claim is the
+faint dot**: a day still to come, a day before the record began, and
+today while nothing is kept yet, because today is not over. Every claim
+is held to 3:1 at its strongest pixel against the sky beside it, and a
+day to come is asserted fainter than any of them.
 
-**Training** is thirty days round one ring, a part a day, lit in the
-colour of what was trained on it, with the sessions counted in the
-middle. Three figures under it, twelve weeks as columns, what you
-trained by name.
+**The mockup's week was 26 pixels a day and a press target is 44**, so
+the week is 308 wide where the mockup's was 152. That is the cost of
+the rule, paid rather than argued.
 
-**The language is the alignment app's, not its pieces**: the night sky
-as the ground on every screen, carrying no colour of its own; Inter in
-its light weights for the one figure a screen is about; Geist Mono in
-tracked capitals for every label; hairlines where there would be cards;
-one white round control, the add, at the top right. Geist Mono is copied
-into `cadence/fonts/` with its licence, and Archivo went.
+**The month is the same dot under each date**, and a day you trained
+carries a second dot beside it in the session's colour: did you keep
+the day and what did you do are two questions, so they are two marks
+rather than one mark asked to answer both. A day before the record
+draws no dot at all.
 
-**Every label shares one rule and the static check refused it.** The
-mono capitals went in as one group rule, then eight selectors overrode
-its colour or its tracking in rules of their own — which is the
-duplicate `tests/names.js` exists to find, whichever order the two are
-written in. The group now sets only the face; every label states its own
-tracking and colour.
+**Habits**: the figure is how many of today's are kept, and under it a
+dot a habit, lit in its own colour. Each habit is a hairline row whose
+dot logs it and whose name opens its record — siblings, never one
+inside the other — with a fortnight of dots under the name and today
+last. **Training** is thirty dots, a day each, lit in the colour of what
+was trained; twelve weeks as columns of dots, a dot a session, seven at
+most, and a week with none as one hollow dot, because a week you did not
+train is a fact the record has to show.
 
-### Twelve scripted breaks
+### The sky stops short of the mockup's horizon
 
-Each undone by its own inverse and hashed back: the cap inset removed;
-the dial run anticlockwise; the running block drawn unlit; a missed arc
-painted red; the dim arcs thinned to 30%; six of seven counted a whole
-day; a kept dot filled white; the month drawing rings before the record;
-the hand thirty minutes out; every habit's part lit in one colour; the
-thirty days reversed; and the middle's "In" changed to "Next". Every one
-failed the check aimed at it.
+The mockup's gradient ran to `#50636F`, and a quiet label over it
+measures 3.6:1 — a list scrolls down there on every screen but the day.
+It stops at `#2A4050`, where the same label clears 4.9.
 
-**One took the file down instead of failing**, and that is the finding
-worth keeping: with the lit arc gone, the colour check read `.stroke`
-off undefined and the run reported **0 assertions** — the
-greenest-looking failure there is. It reads defensively now and fails
-with a name.
+### A grey is measured as what it adds
 
-**And one reading is not what it looks like.** The dim remainder of the
-running block measures 6.97:1, well above the other dim arcs, because
-its midpoint is ten minutes from the hand and the hand's glow brightens
-the sample. The check is carried by the other dim arcs, which read 3.69
-and 3.84; the figure is written down so nobody tunes the dim strength
-against it.
+**A missed dot is white at forty per cent laid over a blue night**, so
+its composited pixel is blue — `[111, 125, 135]` — and a check asking
+the bare pixel for a grey fails a dot that is exactly right. What the
+dot ADDS to the sky under it is the claim: a neutral adds about the same
+to every channel, a hue does not. Painted in `--bad` it adds
+`[232, 111, 83]`, which is what the check exists to catch.
+
+**And a glow's colour is not an `rgb()`.** A box-shadow mixed with
+`color-mix` serialises as `color(srgb …)`, so it is read through the
+parser; a pattern match reported a glow in exactly the right colour as
+wrong.
+
+### Fourteen scripted breaks
+
+Each undone by its own inverse and hashed back: the list repeating the
+middle; the line drawing what is left instead of what is gone; the check
+ticking the next block; a kept check left white; "in" changed to
+"soon"; a hollow week dot drawn faint; a missed dot painted red; today
+drawn as missed before it is over; a fortnight run backwards; the month
+drawing dots before the record; the thirty days reversed; a week with no
+sessions drawn as nothing; add made a second white round; and the pane's
+room for the check taken away. Every one failed the check aimed at it.
 
 ## Git
 
