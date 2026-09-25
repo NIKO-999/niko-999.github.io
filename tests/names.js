@@ -54,6 +54,8 @@ const APPS = [
   ['alignment/index.html'],
   /* cadence/ joined the day it shipped: one file, its own :root. */
   ['cadence/index.html'],
+  /* cadence/about/ is the app's site: a static page, its own :root. */
+  ['cadence/about/index.html'],
 ];
 const NAMED = (app) => app[0];
 const MARKUP = (app) => app.filter(f => f.endsWith('.html'));
@@ -334,7 +336,7 @@ for (const app of APPS.concat([['shell.js']])) {
 
   for (const f of ['shell.css', 'schedule/app.css', 'trading/index.html',
                    'days/index.html', 'jade/index.html', 'orrery/index.html',
-                   'cadence/index.html']) {
+                   'cadence/index.html', 'cadence/about/index.html']) {
     const s = flatten(styleOf(f));
     const by = new Map();
     for (const m of s.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
@@ -413,7 +415,7 @@ for (const app of APPS.concat([['shell.js']])) {
   /* alignment/ is the same case again — its own :root, no shell.css. */
   const SRC = ['shell.css', 'trading/index.html', 'days/index.html',
                'jade/index.html', 'orrery/index.html', 'schedule/app.css',
-               'alignment/index.html', 'cadence/index.html'];
+               'alignment/index.html', 'cadence/index.html', 'cadence/about/index.html'];
   const text = SRC.map(f => read(f)).join('\n');
   /* Defined anywhere: a stylesheet, an inline style attribute, or a
      template literal that sets one. All three are legitimate. */
@@ -456,7 +458,7 @@ for (const app of APPS.concat([['shell.js']])) {
 {
   const CSSFILES = ['shell.css', 'schedule/app.css'];
   const HTMLFILES = ['trading/index.html', 'days/index.html',
-                     'jade/index.html', 'orrery/index.html', 'cadence/index.html'];
+                     'jade/index.html', 'orrery/index.html', 'cadence/index.html', 'cadence/about/index.html'];
   const faults = [];
   const scan = (f, s, base) => {
     let i = 0, ln = base, open = 0, inC = false;

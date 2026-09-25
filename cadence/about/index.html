@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Cadence</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#03060A" />
+<meta name="description" content="A day planner that shows the block you are in, and the rest of the day." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2307131D'/%3E%3Ccircle cx='32' cy='32' r='19' fill='none' stroke='%23F3F5F7' stroke-opacity='.16' stroke-width='6'/%3E%3Cpath d='M32 13a19 19 0 0 1 18 25' fill='none' stroke='%23E8C67C' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E" />
+<link rel="preload" href="../../arc/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin />
+<style>
+/* The site for Cadence, in the app's own sky and type. Every picture on
+   it is the real app over an invented week, so nothing here is a claim
+   the app cannot make. */
+@font-face { font-family: 'Inter'; font-weight: 100 900; font-display: swap;
+  src: url('../../arc/fonts/Inter.woff2') format('woff2'); }
+@font-face { font-family: 'Geist Mono'; font-weight: 100 900; font-display: swap;
+  src: url('../fonts/GeistMono.woff2') format('woff2'); }
+
+:root {
+  color-scheme: dark;
+  --ink: #F3F5F7;
+  --on: #07080B;
+  --dim: rgba(243, 245, 247, .72);
+  --quiet: rgba(243, 245, 247, .62);
+  --hair: rgba(243, 245, 247, .10);
+  --c-body: #F2A184;
+  --c-mind: #B7A5FF;
+  --c-work: #E8C67C;
+  --c-rest: #7DCFD8;
+  --sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --mono: 'Geist Mono', ui-monospace, monospace;
+}
+* { box-sizing: border-box; margin: 0; }
+html { background: #03060A; }
+body {
+  min-height: 100vh;
+  font-family: var(--sans);
+  color: var(--ink);
+  background:
+    radial-gradient(70% 38% at 50% 18%, rgba(64, 110, 132, .26), transparent 70%),
+    linear-gradient(180deg, #03060A 0%, #07131D 14%, #122736 40%, #1B3140 70%, #22394A 90%, #2A4050 100%);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { color: inherit; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+
+.top {
+  display: flex; align-items: center; justify-content: space-between;
+  min-height: 72px;
+}
+.mark {
+  font: 500 12px/1 var(--mono); letter-spacing: .28em; text-decoration: none;
+}
+.go {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 0 22px; border-radius: 999px;
+  font: 500 15px/1 var(--sans); text-decoration: none;
+  background: var(--ink); color: var(--on);
+}
+.go.is-sm { min-height: 44px; padding: 0 18px; font-size: 14px; }
+.go:focus-visible, .mark:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+.hero {
+  display: grid; gap: 48px; align-items: center;
+  grid-template-columns: 1fr;
+  padding: 40px 0 72px;
+  text-align: center;
+}
+.cap {
+  font: 500 11px/1 var(--mono); letter-spacing: .22em; text-transform: uppercase;
+  color: var(--c-work);
+}
+.hero h1 {
+  margin: 18px 0 16px;
+  font-weight: 300; font-size: clamp(44px, 9vw, 76px); line-height: 1.02;
+  letter-spacing: -.02em;
+}
+.hero p { max-width: 30em; margin: 0 auto 28px; font-size: 17px; line-height: 1.5; color: var(--dim); }
+
+.phone {
+  width: min(300px, 78vw); margin: 0 auto;
+  border-radius: 38px; padding: 8px;
+  background: #05090E;
+  box-shadow: 0 0 0 1px var(--hair), 0 30px 80px rgba(0, 0, 0, .55);
+}
+.phone img {
+  display: block; width: 100%; height: auto; aspect-ratio: 390 / 844;
+  border-radius: 30px;
+}
+
+.feat {
+  display: grid; gap: 32px; align-items: center;
+  grid-template-columns: 1fr;
+  padding: 56px 0;
+  border-top: 1px solid var(--hair);
+}
+.feat h2 {
+  margin: 14px 0 12px;
+  font-weight: 300; font-size: clamp(30px, 5vw, 42px); line-height: 1.1;
+  letter-spacing: -.01em;
+}
+.feat p { max-width: 28em; font-size: 16px; line-height: 1.55; color: var(--dim); }
+.feat .cap.is-body { color: var(--c-body); }
+.feat .cap.is-mind { color: var(--c-mind); }
+.feat .cap.is-rest { color: var(--c-rest); }
+.say {
+  display: inline-block; margin-top: 18px; padding: 12px 16px;
+  border: 1px solid var(--hair); border-radius: 14px;
+  font: 400 15px/1.3 var(--mono); color: var(--ink);
+}
+
+.plain {
+  display: grid; gap: 28px; grid-template-columns: 1fr;
+  padding: 56px 0; border-top: 1px solid var(--hair);
+}
+.plain h3 { font-weight: 500; font-size: 17px; margin-bottom: 8px; }
+.plain p { font-size: 15px; line-height: 1.55; color: var(--dim); }
+
+.end {
+  padding: 72px 0 96px; text-align: center; border-top: 1px solid var(--hair);
+}
+.end h2 { font-weight: 300; font-size: clamp(32px, 6vw, 48px); margin-bottom: 24px; }
+.foot {
+  padding: 24px 0 40px; font: 400 11px/1.6 var(--mono); letter-spacing: .12em;
+  text-transform: uppercase; color: var(--quiet); text-align: center;
+}
+
+@media (min-width: 820px) {
+  .hero { grid-template-columns: 1.1fr .9fr; text-align: left; padding: 72px 0 96px; }
+  .hero p { margin-left: 0; }
+  .feat { grid-template-columns: 1fr 1fr; gap: 64px; padding: 80px 0; }
+  .feat.is-flip .phone { order: -1; }
+  .plain { grid-template-columns: repeat(3, 1fr); gap: 40px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="mark" href="./">CADENCE</a>
+    <a class="go is-sm" href="../">Open Cadence</a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <p class="cap">Now · 10:20</p>
+        <h1>The block you are in.</h1>
+        <p>Cadence is a day planner that shows one thing: what you are doing right now, how much of it is left, and what comes next.</p>
+        <a class="go" href="../">Open Cadence</a>
+      </div>
+      <div class="phone"><img src="shots/day.jpg" alt="The day screen, showing Deep work with 1h 40m left and lunch next" width="390" height="844" /></div>
+    </section>
+
+    <section class="feat">
+      <div>
+        <p class="cap is-mind">Plan in a sentence</p>
+        <h2>Type it the way you would say it.</h2>
+        <p>Cadence reads the days, the times and the length, then files the block on every day you named. You can still set it by hand if you want to.</p>
+        <p class="say">gym mon wed fri 6:30 to 8</p>
+      </div>
+      <div class="phone"><img src="shots/say.jpg" alt="Adding a block by typing a sentence" width="390" height="844" /></div>
+    </section>
+
+    <section class="feat is-flip">
+      <div>
+        <p class="cap is-rest">Habits</p>
+        <h2>Six habits, two weeks each.</h2>
+        <p>Each habit gets its own colour and a fortnight of dots. A colour tells you which habit it is. It never tells you whether you did it, and a day you missed is never painted red.</p>
+      </div>
+      <div class="phone"><img src="shots/hab.jpg" alt="The habits screen, with a dot for each habit and two weeks under each" width="390" height="844" /></div>
+    </section>
+
+    <section class="feat">
+      <div>
+        <p class="cap">One check</p>
+        <h2>A dot for every day you kept.</h2>
+        <p>The white check on the day screen always ticks the block you are in, so you never go looking for it. Each tick fills that day's dot, and the month is those dots under every date, with a second dot on the days you trained.</p>
+      </div>
+      <div class="phone"><img src="shots/mon.jpg" alt="The month screen, with a kept dot under each date" width="390" height="844" /></div>
+    </section>
+
+    <section class="feat is-flip">
+      <div>
+        <p class="cap is-body">Training</p>
+        <h2>It asks what you trained.</h2>
+        <p>Tick a gym, run or yoga block and Cadence asks what the session was, how hard it felt and how long it took. Thirty days of that becomes a picture of what you actually do.</p>
+      </div>
+      <div class="phone"><img src="shots/lift-sheet.jpg" alt="The training sheet asking what you trained, how hard and how long" width="390" height="844" /></div>
+    </section>
+
+    <section class="plain">
+      <div>
+        <h3>No account</h3>
+        <p>There is nothing to sign up for. Open it and start.</p>
+      </div>
+      <div>
+        <h3>Stays in your browser</h3>
+        <p>Your week, your ticks and your sessions are saved on your own device. Cadence sends none of it anywhere.</p>
+      </div>
+      <div>
+        <h3>Yours to move</h3>
+        <p>Copy a backup of everything in one press, and paste it back to restore it on another phone.</p>
+      </div>
+    </section>
+
+    <section class="end">
+      <h2>Start with today.</h2>
+      <a class="go" href="../">Open Cadence</a>
+    </section>
+  </main>
+
+  <footer class="foot">Cadence · works on any phone browser</footer>
+</div>
+</body>
+</html>

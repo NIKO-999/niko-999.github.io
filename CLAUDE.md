@@ -4248,6 +4248,17 @@ drawing dots before the record; the thirty days reversed; a week with no
 sessions drawn as nothing; add made a second white round; and the pane's
 room for the check taken away. Every one failed the check aimed at it.
 
+
+### The site is the app, photographed
+
+`cadence/about/` is one static page in the app's own sky and type, and
+every picture on it is the real app at 390x844 over an invented week —
+this repo is public, so nothing real can be a screenshot. It claims only
+what the app does: no account, nothing leaves the browser, a backup you
+can paste back. **It does not say offline**, because there is no service
+worker behind that word. The images are eager rather than lazy: a
+full-page capture of a lazy page is a column of blank phones.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
