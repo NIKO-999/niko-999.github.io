@@ -161,11 +161,12 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const glow = rgbaOf(bar.sh);
     ok('drawn in the block\'s colour, and lit', bar.bg === 'rgb(232, 198, 124)' && !!glow && Math.hypot(glow[0] - 232, glow[1] - 198, glow[2] - 124) < 2, bar);
 
-    /* The block in the middle and the one after it are said once. */
-    ok('the list is the rest of the day, in time order — the block you are in and the next are not said twice',
-      (await listOf(page)).join() === 's0,s1,s5,s8,s9', await listOf(page));
+    /* The list is the whole day, the block in the middle and the next one
+       included: it is where the day is read top to bottom. */
+    ok('the list is the whole day in time order, the block you are in and the next included',
+      (await listOf(page)).join() === 's0,s1,s3,s4,s5,s8,s9', await listOf(page));
     const times = await page.$$eval('.cd-it .cd-rt', (ts) => ts.map((t) => t.textContent));
-    ok('every row carries its start', times.join() === '07:00,07:30,14:00,21:30,22:30', times);
+    ok('every row carries its start', times.join() === '07:00,07:30,09:00,12:30,14:00,21:30,22:30', times);
 
     /* THE CHECK. One white round control, and it ticks the block in the middle. */
     const go = await page.$eval('#cdGo', (b) => { const r = b.getBoundingClientRect(), cs = getComputedStyle(b);
@@ -312,7 +313,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('between two blocks the middle is the next one and how soon', (await heroOf(page)).join('|') === 'Next · Rest · 12:15|Lunch|in 15m · at 12:30|Emails and calls at 14:00', await heroOf(page));
     ok('and with nothing running there is no line of how far through', !(await shown(page, '#cdBar')));
     ok('the check ticks the next one', (await page.getAttribute('#cdGo', 'aria-label')) === 'Mark Lunch completed');
-    ok('and the list leaves out the two in the middle', (await listOf(page)).join() === 's0,s1,s3,s8,s9', await listOf(page));
+    ok('and the list still carries the two in the middle', (await listOf(page)).join() === 's0,s1,s3,s4,s5,s8,s9', await listOf(page));
     ok('today with nothing kept yet makes no claim in the week: it is not over',
       (await page.getAttribute('.cd-wd[data-d="2026-09-25"]', 'data-state')) === 'quiet');
     await c.close();

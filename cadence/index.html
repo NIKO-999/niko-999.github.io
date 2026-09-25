@@ -1071,7 +1071,11 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     }
 
     var ag = $('cdAgenda');
-    var rest = list.filter(function (x) { return x.id !== heroId && x.id !== thenId; });
+    /* The list is the whole day, the block in the middle and the next one
+       included. They were left out as said twice; the list is where you
+       read the day top to bottom and tick things, and a day missing its
+       two most important rows reads as a list with holes in it. */
+    var rest = list;
     if (!list.length) {
       ag.innerHTML = '<li class="cd-empty">Nothing on this day yet.<button type="button" class="cd-link" data-act="add">+ Add a block</button></li>';
       return;

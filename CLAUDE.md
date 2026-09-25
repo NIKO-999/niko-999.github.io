@@ -4159,6 +4159,12 @@ ids the list carries, so a build that listed every block and also drew
 the middle fails. **Both open their block**, because nothing else on
 the screen can: the name is a button, and so is the line after it.
 
+**AND THEN THE LIST TOOK THEM BACK, on report.** Left out as said twice,
+the two read from the phone as holes: the list is where the day is read
+top to bottom and ticked, and a day missing its running and next rows is
+not the day. The list is every block now, and the checks that held the
+absence hold the presence, at the running hour and between blocks.
+
 **Between blocks the middle is the next one** and how soon; after the
 last it is what today kept, with nothing to tick; a day with nothing on
 says so and offers the way to put something there. **Any other day has
