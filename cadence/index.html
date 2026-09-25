@@ -5,13 +5,15 @@
 <!-- maximum-scale=1: iOS zooms the page when a field under 16px takes
      focus. Every field here is 16px, and the cap covers the next one. -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#F2EDE3" />
+<meta name="theme-color" content="#F5F2EC" />
 <meta name="description" content="A notebook for the day: what is on it, what you kept, and what you trained." />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-title" content="Cadence" />
 <title>Cadence</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23F2EDE3'/%3E%3Cpath d='M18 14v36M18 22h18M18 32h26M18 42h12' stroke='%231B1916' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='46' cy='42' r='5' fill='%23B5391A'/%3E%3C/svg%3E" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23F5F2EC'/%3E%3Cpath d='M18 14v36M18 22h18M18 32h26M18 42h12' stroke='%231B1916' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='46' cy='42' r='5' fill='%23B5391A'/%3E%3C/svg%3E" />
+<link rel="preload" href="fonts/SpaceGrotesk.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="../arc/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin />
 <!-- The face is decided before the stylesheet applies, so a phone set to
      dark never paints one frame of paper first. Same key the app keeps;
      nothing escapes the wrapper. -->
@@ -27,61 +29,81 @@
 </script>
 <style>
 /* ═══════════════════════════════════════════════════════════════
-   CADENCE — a field notebook for the day.
+   CADENCE — the day as a rail of cards on warm paper.
 
-   Paper and ink rather than glass and cards: the day is a RAIL with
-   the open time between blocks drawn as a measured gap, because the
-   gaps are the part of a schedule you actually spend. Serif for the
-   thing you are looking at, monospace for every figure, a sans for
-   everything that is merely a label.
+   One display face for what you are looking at (Space Grotesk: the
+   day, a figure, a title) and one text face for everything you read
+   (Inter). Both ship with the repo, so the phone and the suite draw
+   the same letters. Figures are tabular so a column of times lines up.
+
+   It went in first as mono on everything with heavy tickets and a
+   black dock, and was reported in one line: it does not look good.
+   What that version got wrong is kept here so it is not repeated:
+   a monospace everywhere reads as a terminal, a colour said three
+   times (edge, node, icon) is noise, and an empty box per day is a
+   month that looks unfinished rather than one that is quiet.
    ═══════════════════════════════════════════════════════════════ */
+@font-face { font-family: 'Space Grotesk'; font-weight: 300 700; font-display: swap;
+  src: url('fonts/SpaceGrotesk.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-weight: 100 900; font-display: swap;
+  src: url('../arc/fonts/Inter.woff2') format('woff2'); }
+
 :root, :root[data-mode="light"] {
-  --paper: #F2EDE3;
-  --sheet: #FBF8F2;
-  --ink: #1B1916;
-  --ink2: #5E574C;
-  --ink3: #6E665A;
-  --rule: #D9D1C3;
-  --rule2: #E7E0D3;
+  --bg: #F5F2EC;
+  --card: #FFFFFF;
+  --card2: #EFEBE3;
+  --ink: #1C1A17;
+  --ink2: #5F5A52;
+  --ink3: #6B655C;
+  --line: #E4DED3;
+  --line2: #EEE9E0;
+  --edge: #CFC8BC;
   --accent: #B5391A;
-  --on-accent: #FFF8F0;
+  --on-accent: #FFFFFF;
+  --bad: #B42318;
+  --toast-acc: #FF9166;
   /* Colour says WHICH part of life a block is, never whether you kept it. */
   --c-body: #B5391A;
-  --c-mind: #1F6F78;
-  --c-work: #8A5E0A;
-  --c-rest: #56662A;
-  --c-none: #6E665A;
+  --c-mind: #16707A;
+  --c-work: #8A600A;
+  --c-rest: #4F6B2F;
+  --c-none: #6B655C;
   --k-weights: #B5391A;
-  --k-run: #2D5DA8;
-  --k-recovery: #56662A;
-  --k-rest: #6E665A;
-  --scrim: rgba(27, 25, 22, .38);
-  --lift: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 10px 30px -18px rgba(27, 25, 22, .5);
-  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
-  --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, monospace;
-  --sans: -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, sans-serif;
+  --k-run: #2F5FA8;
+  --k-recovery: #4F6B2F;
+  --k-rest: #6B655C;
+  --scrim: rgba(28, 26, 23, .32);
+  --shadow: 0 1px 2px rgba(28, 26, 23, .05), 0 6px 18px -10px rgba(28, 26, 23, .22);
+  color-scheme: light;
+  --disp: 'Space Grotesk', ui-rounded, -apple-system, system-ui, sans-serif;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', Roboto, sans-serif;
 }
 :root[data-mode="dark"] {
-  --paper: #15130F;
-  --sheet: #1E1B16;
-  --ink: #F1EBDF;
-  --ink2: #B3AA9A;
-  --ink3: #8C8474;
-  --rule: #36312A;
-  --rule2: #2A2620;
-  --accent: #FF7A50;
-  --on-accent: #1B1310;
-  --c-body: #FF7A50;
-  --c-mind: #5FC2CB;
-  --c-work: #E0B04A;
-  --c-rest: #A7BA6A;
-  --c-none: #8C8474;
-  --k-weights: #FF7A50;
-  --k-run: #7FA7E8;
-  --k-recovery: #A7BA6A;
-  --k-rest: #8C8474;
+  color-scheme: dark;
+  --bg: #121110;
+  --card: #1D1B19;
+  --card2: #26231F;
+  --ink: #F3EFE8;
+  --ink2: #ABA59B;
+  --ink3: #928C82;
+  --line: #2E2B27;
+  --line2: #262320;
+  --edge: #48433C;
+  --accent: #FF7B50;
+  --on-accent: #1A120E;
+  --bad: #FF7A70;
+  --toast-acc: #B5391A;
+  --c-body: #FF7B50;
+  --c-mind: #5CC4CE;
+  --c-work: #E3B34E;
+  --c-rest: #A9C270;
+  --c-none: #928C82;
+  --k-weights: #FF7B50;
+  --k-run: #86ABEF;
+  --k-recovery: #A9C270;
+  --k-rest: #928C82;
   --scrim: rgba(0, 0, 0, .55);
-  --lift: 0 1px 0 rgba(255, 255, 255, .05) inset, 0 12px 30px -16px rgba(0, 0, 0, .8);
+  --shadow: 0 0 0 1px rgba(255, 255, 255, .035), 0 8px 20px -12px rgba(0, 0, 0, .9);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -94,303 +116,339 @@ html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
   height: 100dvh;
-  background: var(--paper);
+  background: var(--bg);
   color: var(--ink);
-  font: 15px/1.35 var(--sans);
+  font: 400 15px/1.35 var(--sans);
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
 }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; touch-action: manipulation; }
-button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* A field is focused because you are typing in it, so the ring sits ON
+   its edge rather than floating outside a card that already has one. */
+.cd-field:focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; }
+.cd-row .cd-field:focus-visible { outline: none; }
 
 .cd-app { display: flex; flex-direction: column; height: 100dvh; max-width: 560px; margin: 0 auto; }
 
-/* ── the masthead ── */
+/* ── the top line: which day, and the settings ── */
 .cd-top {
   display: flex; align-items: center; justify-content: space-between;
-  padding: calc(env(safe-area-inset-top) + 6px) 18px 0;
+  padding: calc(env(safe-area-inset-top) + 4px) 8px 0 20px; min-height: 48px;
   flex: none;
 }
-.cd-mark { font: 600 11px/1 var(--mono); letter-spacing: .28em; text-transform: uppercase; color: var(--ink3); }
-.cd-mark b { color: var(--accent); font-weight: 600; }
+.cd-eyebrow { margin: 0; font: 600 12px/1 var(--sans); letter-spacing: .07em; text-transform: uppercase; color: var(--ink3); }
 .cd-iconbtn { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: var(--ink2); }
-.cd-iconbtn svg { width: 20px; height: 20px; }
+.cd-iconbtn svg { width: 22px; height: 22px; }
 
-.cd-main { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0 18px calc(env(safe-area-inset-bottom) + 120px); }
+.cd-main { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0 20px calc(env(safe-area-inset-bottom) + 110px); }
 
-/* ── the week ribbon: seven columns, each filled by what you kept ── */
-.cd-ribbon { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 4px 0 18px; }
-.cd-rb {
-  display: flex; flex-direction: column; align-items: center; gap: 5px;
-  padding: 6px 0 8px; border-radius: 10px; min-height: 76px;
+/* ── the day's head: its name, what is left of it, and a ring ── */
+.cd-dhead { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 0 0 18px; }
+.cd-title { margin: 0; font: 600 34px/1.05 var(--disp); letter-spacing: -.025em; }
+.cd-sub { margin: 6px 0 0; font: 500 14px/1.3 var(--sans); color: var(--ink2); font-variant-numeric: tabular-nums; }
+.cd-ring { position: relative; width: 58px; height: 58px; flex: none; }
+.cd-ring svg { width: 58px; height: 58px; transform: rotate(-90deg); }
+.cd-ring .rt { stroke: var(--line); }
+.cd-ring .rv { stroke: var(--accent); transition: stroke-dashoffset .4s ease; }
+.cd-ring b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 600 15px/1 var(--disp); font-variant-numeric: tabular-nums; }
+.cd-ring b small { font-size: 12px; color: var(--ink3); font-weight: 500; }
+
+/* ── the week: seven days on one card ── */
+.cd-ribbon {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+  margin: 0 0 22px; padding: 8px 6px 9px;
+  background: var(--card); border-radius: 18px; box-shadow: var(--shadow);
 }
-.cd-rb-l { font: 600 10px/1 var(--mono); letter-spacing: .12em; color: var(--ink3); }
-.cd-rb-n { font: 500 15px/1 var(--mono); color: var(--ink); }
-.cd-rb-bar { width: 6px; height: 26px; border-radius: 3px; background: var(--rule2); position: relative; overflow: hidden; }
-.cd-rb-bar i { position: absolute; left: 0; right: 0; bottom: 0; background: var(--ink); border-radius: 3px; }
-.cd-rb[aria-pressed="true"] { background: var(--ink); }
-.cd-rb[aria-pressed="true"] .cd-rb-l,
-.cd-rb[aria-pressed="true"] .cd-rb-n { color: var(--paper); }
-.cd-rb[aria-pressed="true"] .cd-rb-bar { background: color-mix(in srgb, var(--paper) 25%, transparent); }
-.cd-rb[aria-pressed="true"] .cd-rb-bar i { background: var(--paper); }
+.cd-rb { display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 66px; padding: 2px 0; border-radius: 12px; }
+.cd-rb-l { font: 600 11px/1 var(--sans); letter-spacing: .04em; color: var(--ink3); }
+.cd-rb-n {
+  width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  font: 600 16px/1 var(--disp); font-variant-numeric: tabular-nums;
+}
+.cd-rb-bar { width: 16px; height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.cd-rb-bar i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
+.cd-rb.is-future .cd-rb-bar { visibility: hidden; }
 .cd-rb.is-today .cd-rb-l { color: var(--accent); }
-
-/* ── the day's title ── */
-.cd-title { font: 400 38px/1 var(--serif); letter-spacing: -.01em; margin: 0; }
-.cd-title em { font-style: italic; color: var(--ink2); font-size: 22px; margin-left: 8px; }
-.cd-sub { font: 500 12px/1.4 var(--mono); color: var(--ink2); margin: 8px 0 22px; letter-spacing: .02em; }
+.cd-rb.is-today .cd-rb-n { color: var(--accent); }
+.cd-rb[aria-pressed="true"] .cd-rb-n { background: var(--ink); color: var(--bg); }
 
 /* ── the rail ── */
-.cd-agenda { list-style: none; margin: 0; padding: 0; position: relative; }
-.cd-it { display: grid; grid-template-columns: 52px 22px 1fr; column-gap: 8px; position: relative; }
-.cd-time { font: 500 12px/1 var(--mono); color: var(--ink2); padding-top: 16px; text-align: right; }
+.cd-agenda { list-style: none; margin: 0; padding: 0; }
+.cd-it { display: grid; grid-template-columns: 42px 16px 1fr; column-gap: 8px; }
+.cd-time { padding-top: 24px; text-align: right; font: 600 13px/1 var(--sans); font-variant-numeric: tabular-nums; color: var(--ink); }
+.cd-it.is-past .cd-time { color: var(--ink3); }
 .cd-node { position: relative; }
-.cd-node::before { content: ""; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: var(--rule); }
-.cd-it:first-child .cd-node::before { top: 18px; }
-.cd-it:last-child .cd-node::before { bottom: calc(100% - 18px); }
+.cd-node::before { content: ""; position: absolute; left: 7px; top: 0; bottom: 0; width: 2px; border-radius: 1px; background: var(--line); }
+.cd-it:first-child .cd-node::before { top: 26px; }
+.cd-it:last-child .cd-node::before { bottom: calc(100% - 26px); }
 .cd-node b {
-  position: absolute; left: 5px; top: 13px; width: 12px; height: 12px; border-radius: 50%;
-  background: var(--paper); border: 2px solid var(--cat, var(--c-none));
+  position: absolute; left: 3px; top: 22px; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--bg); border: 2px solid var(--cat, var(--c-none));
 }
 .cd-it.is-done .cd-node b { background: var(--cat, var(--c-none)); }
-.cd-node s {
-  position: absolute; left: 10px; top: 25px; width: 2px; height: 0; background: var(--accent); text-decoration: none;
-}
 
-.cd-tk { display: flex; align-items: stretch; gap: 4px; margin: 4px 0 8px; min-height: 52px; }
-.cd-tk-b {
-  flex: 1; min-width: 0; text-align: left;
-  background: var(--sheet); border: 1px solid var(--rule2); border-radius: 12px;
-  padding: 9px 12px 10px; box-shadow: var(--lift);
-  border-left: 4px solid var(--cat, var(--c-none));
+.cd-tk {
+  position: relative; display: flex; align-items: stretch; min-height: 62px; margin: 5px 0;
+  background: var(--card); border-radius: 16px; box-shadow: var(--shadow); overflow: hidden;
 }
-.cd-tk-n { display: flex; align-items: center; gap: 8px; font: 600 16px/1.2 var(--sans); }
-.cd-tk-n span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cd-tk-n svg { width: 18px; height: 18px; flex: none; color: var(--cat, var(--c-none)); }
-.cd-tk-m { font: 500 12px/1.3 var(--mono); color: var(--ink2); margin-top: 4px; }
-.cd-tk-m i { font-style: normal; color: var(--accent); font-weight: 600; }
-.cd-tk-w { display: inline-block; font: 600 10px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: 4px 6px; border-radius: 5px; margin-top: 7px; color: var(--ink); background: color-mix(in srgb, var(--kc, var(--ink3)) 22%, transparent); }
-
-.cd-stamp { width: 52px; flex: none; display: grid; place-items: center; border-radius: 12px; }
+.cd-tk-b { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 12px 2px 12px 12px; text-align: left; }
+.cd-ic {
+  width: 36px; height: 36px; flex: none; border-radius: 11px; display: grid; place-items: center;
+  color: var(--cat, var(--c-none)); background: color-mix(in srgb, var(--cat, var(--c-none)) 13%, transparent);
+}
+.cd-ic svg { width: 19px; height: 19px; }
+.cd-tk-t { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+.cd-tk-n { max-width: 100%; font: 600 16px/1.2 var(--sans); letter-spacing: -.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cd-tk-m { font: 500 13px/1.25 var(--sans); color: var(--ink2); font-variant-numeric: tabular-nums; }
+.cd-tk-m i { font-style: normal; font-weight: 600; color: var(--accent); }
+.cd-tk-w {
+  margin-top: 3px; padding: 3px 8px; border-radius: 999px;
+  font: 600 11.5px/1.2 var(--sans); color: var(--ink);
+  background: color-mix(in srgb, var(--kc, var(--ink3)) 15%, transparent);
+}
+.cd-stamp { width: 56px; flex: none; display: grid; place-items: center; }
 .cd-stamp span {
-  width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--ink3);
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--edge);
+  display: grid; place-items: center; color: transparent; transition: background .15s, border-color .15s;
+}
+.cd-stamp svg { width: 15px; height: 15px; }
+.cd-stamp:disabled { cursor: default; }
+.cd-stamp:disabled span { border-style: dashed; opacity: .6; }
+.cd-prog { position: absolute; left: 0; bottom: 0; height: 3px; background: var(--accent); }
+
+.cd-it.is-done .cd-stamp span { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.cd-it.is-done .cd-tk-n { color: var(--ink2); }
+.cd-it.is-off .cd-tk { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+.cd-it.is-off .cd-tk-n { color: var(--ink3); text-decoration: line-through; }
+.cd-it.is-off .cd-stamp { visibility: hidden; }
+.cd-it.is-now .cd-tk { box-shadow: inset 0 0 0 1.5px var(--accent), var(--shadow); }
+
+/* Time nobody has claimed yet, measured. */
+.cd-gap { display: grid; grid-template-columns: 42px 16px 1fr; column-gap: 8px; min-height: 30px; }
+.cd-gap .cd-node::before { background: repeating-linear-gradient(to bottom, var(--edge) 0 3px, transparent 3px 7px); }
+.cd-gap p { margin: 0; align-self: center; padding-left: 4px; font: 500 12px/1 var(--sans); color: var(--ink3); }
+
+.cd-nowline { display: grid; grid-template-columns: 42px 16px 1fr; column-gap: 8px; align-items: center; height: 24px; }
+.cd-nowline span {
+  justify-self: end; padding: 3px 6px; border-radius: 999px;
+  font: 700 11px/1 var(--sans); font-variant-numeric: tabular-nums;
+  background: var(--accent); color: var(--on-accent);
+}
+.cd-nowline i { grid-column: 2 / 4; height: 2px; border-radius: 1px; background: var(--accent); position: relative; }
+.cd-nowline i::before { content: ""; position: absolute; left: 3px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+
+.cd-empty { padding: 36px 8px; text-align: center; font: 500 16px/1.4 var(--sans); color: var(--ink2); list-style: none; }
+.cd-empty .cd-link { display: flex; margin: 6px auto 0; justify-content: center; }
+.cd-link { min-height: 44px; display: inline-flex; align-items: center; font: 600 15px/1 var(--sans); color: var(--accent); }
+
+/* ── shared by every view ── */
+.cd-h2 { margin: 0 0 6px; font: 600 34px/1.05 var(--disp); letter-spacing: -.025em; }
+.cd-h2-solo { margin-bottom: 18px; }
+.cd-cap { margin: 0 0 18px; font: 500 14px/1.35 var(--sans); color: var(--ink2); }
+.cd-lbl { margin: 24px 4px 8px; font: 600 12px/1 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--ink3); }
+.cd-card { background: var(--card); border-radius: 18px; box-shadow: var(--shadow); }
+
+/* ── habits: one card, a row each, a fortnight under every row ── */
+.cd-hb { list-style: none; margin: 0; padding: 0; }
+.cd-hr { position: relative; display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 0 4px 0 14px; }
+.cd-hr + .cd-hr::before { content: ""; position: absolute; left: 62px; right: 0; top: 0; height: 1px; background: var(--line2); }
+.cd-hr-b { display: grid; grid-template-columns: 36px 1fr auto; align-items: center; gap: 12px; min-height: 60px; padding: 12px 0 8px; text-align: left; }
+.cd-hr-n { display: block; font: 600 16px/1.2 var(--sans); letter-spacing: -.01em; }
+.cd-hr-s { display: block; margin-top: 2px; font: 500 13px/1.25 var(--sans); color: var(--ink2); }
+.cd-hr-v { font: 600 18px/1 var(--disp); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.cd-hr-v small { margin-left: 3px; font: 500 12px/1 var(--sans); color: var(--ink2); }
+.cd-hr-v.is-nil { font: 500 15px/1 var(--sans); color: var(--ink3); }
+.cd-chk {
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--edge);
   display: grid; place-items: center; color: transparent;
 }
-.cd-stamp svg { width: 16px; height: 16px; }
-.cd-it.is-done .cd-stamp span { background: var(--ink); border-color: var(--ink); color: var(--paper); }
-.cd-stamp:disabled { cursor: default; }
-.cd-stamp:disabled span { border-style: dashed; opacity: .55; }
-
-.cd-it.is-past:not(.is-done) .cd-tk-n { color: var(--ink2); }
-.cd-it.is-off .cd-tk-n span { text-decoration: line-through; color: var(--ink3); }
-.cd-it.is-off .cd-stamp { visibility: hidden; }
-.cd-it.is-now .cd-tk-b { border-color: var(--accent); border-left-color: var(--accent); }
-
-/* A gap on the rail is time nobody has claimed yet. */
-.cd-gap { display: grid; grid-template-columns: 52px 22px 1fr; column-gap: 8px; min-height: 34px; }
-.cd-gap .cd-node::before { background: none; border-left: 2px dotted var(--rule); width: 0; }
-.cd-gap p { margin: 0; align-self: center; font: 500 11px/1 var(--mono); color: var(--ink3); letter-spacing: .06em; }
-
-.cd-nowline { display: grid; grid-template-columns: 52px 22px 1fr; column-gap: 8px; align-items: center; height: 18px; }
-.cd-nowline span { font: 700 11px/1 var(--mono); color: var(--accent); text-align: right; }
-.cd-nowline i { display: block; height: 2px; background: var(--accent); grid-column: 2 / 4; border-radius: 1px; position: relative; }
-.cd-nowline i::before { content: ""; position: absolute; left: 5px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
-
-.cd-empty { font: 400 20px/1.35 var(--serif); font-style: italic; color: var(--ink2); padding: 30px 0; }
-.cd-link { color: var(--accent); font: 600 14px/1 var(--sans); min-height: 44px; display: inline-flex; align-items: center; }
-
-/* ── section heads, used on every view ── */
-.cd-h2 { font: 400 30px/1.05 var(--serif); margin: 6px 0 4px; }
-.cd-cap { font: 500 12px/1.4 var(--mono); color: var(--ink2); margin: 0 0 18px; }
-.cd-lbl { font: 600 10px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--ink3); margin: 22px 0 10px; }
-
-/* ── habits: a ledger, each line with its own fortnight ── */
-.cd-hb { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
-.cd-hr { display: grid; grid-template-columns: 1fr auto; align-items: center; border-bottom: 1px solid var(--rule); }
-.cd-hr-b { display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 10px; min-height: 64px; padding: 10px 0; text-align: left; }
-.cd-hr-b svg { width: 20px; height: 20px; color: var(--hc, var(--ink2)); }
-.cd-hr-n { font: 600 15px/1.2 var(--sans); }
-.cd-hr-s { font: 500 11px/1.3 var(--mono); color: var(--ink2); margin-top: 3px; }
-.cd-hr-v { font: 500 20px/1 var(--mono); text-align: right; }
-.cd-hr-v small { font-size: 11px; color: var(--ink2); margin-left: 3px; }
-.cd-hr-v.is-nil { color: var(--ink3); font-size: 13px; }
-.cd-tape { display: flex; gap: 3px; grid-column: 1 / -1; padding: 0 0 12px 40px; }
-.cd-tape i { flex: 1; height: 8px; border-radius: 2px; background: var(--rule2); }
+.cd-chk svg { width: 15px; height: 15px; }
+.cd-chk.is-on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.cd-hr-more { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: var(--ink3); }
+.cd-hr-more svg { width: 16px; height: 16px; }
+.cd-tape { grid-column: 1 / -1; display: flex; gap: 4px; padding: 0 12px 14px 48px; }
+.cd-tape i { flex: 1; height: 6px; border-radius: 3px; background: var(--line); }
 .cd-tape i.on { background: var(--hc, var(--ink)); }
-.cd-tape i.is-t { outline: 1px solid var(--ink2); outline-offset: 1px; }
-.cd-hr-more { width: 44px; height: 44px; display: grid; place-items: center; color: var(--ink3); border-radius: 50%; }
-.cd-hr-more svg { width: 18px; height: 18px; }
 
-/* ── month ── */
-.cd-mhead { display: flex; align-items: center; justify-content: space-between; margin: 6px 0 12px; }
-.cd-mhead h2 { font: 400 30px/1 var(--serif); margin: 0; }
-.cd-mhead div { display: flex; }
-.cd-mhead button { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: var(--ink); }
-.cd-mhead button:disabled { color: var(--rule); cursor: default; }
+/* ── month: a ring round each day, a dot for what you trained ── */
+.cd-mhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 4px; }
+.cd-mhead .cd-h2 { margin: 0; }
+.cd-mhead div { display: flex; gap: 6px; flex: none; }
+.cd-mhead button {
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--card); box-shadow: var(--shadow); color: var(--ink);
+}
+.cd-mhead button:disabled { background: transparent; box-shadow: none; color: var(--edge); cursor: default; }
 .cd-mhead svg { width: 18px; height: 18px; }
-.cd-dows { display: grid; grid-template-columns: repeat(7, 1fr); font: 600 10px/1 var(--mono); letter-spacing: .12em; color: var(--ink3); text-align: center; margin-bottom: 6px; }
-.cd-mgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-.cd-mc {
-  aspect-ratio: 1 / 1.25; min-height: 48px; border-radius: 10px;
-  display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-  padding: 5px 0 6px; background: var(--sheet); border: 1px solid var(--rule2);
-}
-.cd-mc b { font: 500 12px/1 var(--mono); }
-.cd-mc svg { width: 24px; height: 24px; }
-.cd-mc .ring-t { stroke: var(--rule); }
-.cd-mc .ring-v { stroke: var(--ink); }
-.cd-mc em { display: block; width: 18px; height: 4px; border-radius: 2px; background: var(--kc, transparent); }
-.cd-mc.is-pad { background: none; border-color: transparent; }
-.cd-mc.is-future { background: none; }
-.cd-mc.is-future b { color: var(--ink3); }
-.cd-mc.is-today { border: 2px solid var(--accent); }
-.cd-mc.is-today b { color: var(--accent); font-weight: 700; }
-.cd-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 16px; font: 500 11px/1 var(--mono); color: var(--ink2); }
+.cd-cal { padding: 14px 8px 10px; }
+.cd-dows { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 6px; text-align: center; font: 600 11px/1 var(--sans); letter-spacing: .04em; color: var(--ink3); }
+.cd-mgrid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 4px; }
+.cd-mc { display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 52px; padding: 3px 0 2px; border-radius: 12px; }
+.cd-mr { position: relative; width: 36px; height: 36px; display: grid; place-items: center; }
+.cd-mr svg { position: absolute; inset: 0; width: 36px; height: 36px; transform: rotate(-90deg); }
+.cd-mr b { position: relative; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font: 600 13px/1 var(--disp); font-variant-numeric: tabular-nums; }
+.cd-mc .ring-t { stroke: var(--line); }
+.cd-mc .ring-v { stroke: var(--accent); }
+.cd-mc em { width: 6px; height: 6px; border-radius: 50%; background: var(--kc, transparent); }
+.cd-mc.is-pad { visibility: hidden; }
+.cd-mc.is-future b { color: var(--ink3); font-weight: 500; }
+.cd-mc.is-today b { background: var(--ink); color: var(--bg); }
+.cd-legend { display: flex; flex-wrap: wrap; gap: 16px; margin: 14px 4px 0; font: 500 12px/1 var(--sans); color: var(--ink2); }
 .cd-legend span { display: inline-flex; align-items: center; gap: 6px; }
-.cd-legend i { width: 14px; height: 4px; border-radius: 2px; background: var(--kc); }
+.cd-legend i { width: 8px; height: 8px; border-radius: 50%; background: var(--kc); }
 
-/* ── lifts ── */
-.cd-figs { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); margin-bottom: 8px; }
-.cd-figs div { padding: 14px 0; }
-.cd-figs div + div { border-left: 1px solid var(--rule); padding-left: 14px; }
-.cd-figs b { display: block; font: 500 26px/1 var(--mono); }
-.cd-figs span { font: 600 10px/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink3); }
-.cd-weeks { display: flex; align-items: flex-end; gap: 5px; height: 90px; border-bottom: 1px solid var(--rule); }
-.cd-weeks i { flex: 1; background: var(--ink); border-radius: 3px 3px 0 0; min-height: 2px; }
-.cd-weeks i.is-zero { background: var(--rule); }
+/* ── training ── */
+.cd-figs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.cd-figs div { padding: 14px 14px 13px; background: var(--card); border-radius: 16px; box-shadow: var(--shadow); }
+.cd-figs b { display: block; margin-bottom: 6px; font: 600 26px/1 var(--disp); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.cd-figs span { font: 500 12px/1.25 var(--sans); color: var(--ink2); }
+.cd-chart { padding: 16px 16px 12px; }
+.cd-weeks { display: flex; align-items: flex-end; gap: 6px; height: 104px; }
+.cd-weeks i { flex: 1; min-height: 3px; border-radius: 4px 4px 2px 2px; background: color-mix(in srgb, var(--ink) 78%, transparent); }
+.cd-weeks i.is-zero { background: var(--line); }
 .cd-weeks i.is-this { background: var(--accent); }
-.cd-wax { display: flex; justify-content: space-between; font: 500 10px/1 var(--mono); color: var(--ink3); margin-top: 6px; }
-.cd-kinds { list-style: none; margin: 0; padding: 0; }
-.cd-kinds li { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 10px 0; border-bottom: 1px solid var(--rule2); }
+.cd-wax { display: flex; justify-content: space-between; margin-top: 8px; font: 500 11px/1 var(--sans); color: var(--ink3); }
+.cd-kinds, .cd-recent { list-style: none; margin: 0; padding: 2px 16px; }
+.cd-kinds li { display: grid; grid-template-columns: 1fr auto; gap: 7px 10px; padding: 13px 0; }
+.cd-kinds li + li, .cd-recent li + li { border-top: 1px solid var(--line2); }
 .cd-kinds b { font: 600 15px/1.2 var(--sans); }
-.cd-kinds span { font: 500 12px/1.2 var(--mono); color: var(--ink2); text-align: right; }
-.cd-kinds em { grid-column: 1 / -1; display: block; height: 4px; border-radius: 2px; background: var(--rule2); position: relative; }
-.cd-kinds em i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 2px; background: var(--kc, var(--ink)); }
-.cd-recent { list-style: none; margin: 0; padding: 0; }
-.cd-recent li { display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--rule2); align-items: baseline; }
-.cd-recent time { font: 500 12px/1 var(--mono); color: var(--ink2); }
-.cd-recent b { font: 600 14px/1.25 var(--sans); }
-.cd-recent span { font: 500 12px/1 var(--mono); color: var(--ink2); }
+.cd-kinds span { font: 500 13px/1.2 var(--sans); color: var(--ink2); text-align: right; font-variant-numeric: tabular-nums; }
+.cd-kinds em { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: var(--line2); overflow: hidden; }
+.cd-kinds em i { display: block; height: 100%; border-radius: 3px; background: var(--kc, var(--ink)); }
+.cd-recent li { display: grid; grid-template-columns: 58px 1fr auto; gap: 10px; align-items: baseline; padding: 13px 0; }
+.cd-recent time { font: 600 13px/1 var(--sans); color: var(--ink3); font-variant-numeric: tabular-nums; }
+.cd-recent b { font: 600 15px/1.25 var(--sans); }
+.cd-recent span { font: 500 13px/1 var(--sans); color: var(--ink2); font-variant-numeric: tabular-nums; }
 
-/* ── the dock ── */
+/* ── the tab bar: four places and the one thing you add ── */
 .cd-dock {
-  position: fixed; left: 50%; transform: translateX(-50%);
-  bottom: calc(env(safe-area-inset-bottom) + 14px);
-  display: flex; align-items: center; gap: 8px;
-  z-index: 20;
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  padding: 4px 8px calc(env(safe-area-inset-bottom) + 4px);
+  background: color-mix(in srgb, var(--card) 90%, transparent);
+  -webkit-backdrop-filter: saturate(1.4) blur(16px); backdrop-filter: saturate(1.4) blur(16px);
+  border-top: 1px solid var(--line);
 }
-.cd-tabs {
-  display: flex; background: var(--ink); border-radius: 16px; padding: 4px; box-shadow: 0 14px 30px -14px rgba(0, 0, 0, .55);
-}
+.cd-tabs { display: grid; grid-template-columns: 1fr 1fr 72px 1fr 1fr; align-items: center; max-width: 520px; margin: 0 auto; }
 .cd-tab {
-  min-width: 64px; height: 44px; padding: 0 10px; border-radius: 12px;
-  font: 600 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase;
-  color: color-mix(in srgb, var(--paper) 72%, var(--ink));
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  min-height: 52px; font: 600 10.5px/1 var(--sans); color: var(--ink3);
 }
-.cd-tab[aria-current="page"] { background: var(--paper); color: var(--ink); }
+.cd-tab svg { width: 23px; height: 23px; }
+.cd-tab[aria-current="page"] { color: var(--accent); }
 .cd-add {
-  width: 52px; height: 52px; border-radius: 16px; background: var(--accent); color: var(--on-accent);
-  display: grid; place-items: center; box-shadow: 0 14px 30px -14px rgba(0, 0, 0, .55);
+  justify-self: center; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--accent); color: var(--on-accent); transform: translateY(-12px);
+  box-shadow: 0 10px 22px -10px color-mix(in srgb, var(--accent) 80%, transparent), 0 0 0 5px var(--bg);
 }
 .cd-add svg { width: 22px; height: 22px; }
 
 /* ── the sheet ── */
-.cd-scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 40; opacity: 0; transition: opacity .2s; }
+.cd-scrim { position: fixed; inset: 0; z-index: 40; background: var(--scrim); opacity: 0; transition: opacity .2s; }
 .cd-scrim.is-open { opacity: 1; }
 .cd-sheet {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
-  max-width: 560px; margin: 0 auto; max-height: 90dvh; overflow-y: auto; overflow-x: hidden;
-  background: var(--paper); border-radius: 22px 22px 0 0;
-  transform: translateY(100%); transition: transform .24s cubic-bezier(.2, .8, .2, 1);
-  padding: 0 18px calc(env(safe-area-inset-bottom) + 18px);
+  max-width: 560px; max-height: 90dvh; margin: 0 auto; overflow-y: auto; overflow-x: hidden;
+  padding: 0 16px calc(env(safe-area-inset-bottom) + 16px);
+  background: var(--bg); border-radius: 24px 24px 0 0;
+  transform: translateY(100%); transition: transform .26s cubic-bezier(.2, .8, .2, 1);
 }
 .cd-sheet.is-open { transform: none; }
-.cd-sh-hd { display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--paper); padding: 14px 0 6px; z-index: 2; }
-.cd-sh-hd h2 { font: 400 26px/1.1 var(--serif); margin: 0; }
-.cd-foot { position: sticky; bottom: calc(-18px - env(safe-area-inset-bottom)); background: var(--paper); padding: 12px 0 18px; margin-top: 16px; display: flex; gap: 8px; border-top: 1px solid var(--rule2); }
-
-.cd-btn {
-  flex: 1; min-height: 48px; border-radius: 12px; border: 1.5px solid var(--ink);
-  font: 600 15px/1 var(--sans); padding: 0 16px;
+.cd-sh-hd { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; padding: 20px 0 10px 4px; background: var(--bg); }
+.cd-sh-hd::before { content: ""; position: absolute; left: 50%; top: 7px; width: 36px; height: 5px; margin-left: -18px; border-radius: 3px; background: var(--edge); }
+.cd-sh-hd h2 { margin: 0; font: 600 22px/1.15 var(--disp); letter-spacing: -.02em; }
+.cd-x { background: radial-gradient(circle, var(--card2) 15px, transparent 15.5px); }
+.cd-x svg { width: 16px; height: 16px; }
+.cd-foot {
+  position: sticky; bottom: calc(-16px - env(safe-area-inset-bottom)); z-index: 2;
+  display: flex; gap: 10px; margin-top: 18px; padding: 12px 0 16px; background: var(--bg);
 }
-.cd-btn.go { background: var(--ink); color: var(--paper); }
-.cd-btn.warn { border-color: var(--accent); color: var(--accent); }
+
+.cd-btn { flex: 1; min-height: 52px; padding: 0 16px; border-radius: 14px; background: var(--card2); font: 600 16px/1 var(--sans); }
+.cd-btn.go { background: var(--ink); color: var(--bg); }
+.cd-btn.go:disabled { opacity: .45; cursor: default; }
+.cd-btn.warn { background: color-mix(in srgb, var(--bad) 12%, transparent); color: var(--bad); }
 
 .cd-field {
-  width: 100%; font: 16px/1.3 var(--sans); color: var(--ink);
-  background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px;
-  padding: 12px 12px; min-height: 48px;
+  width: 100%; min-height: 50px; padding: 13px 14px;
+  font: 400 16px/1.3 var(--sans); color: var(--ink);
+  background: var(--card); border: 1px solid var(--line); border-radius: 14px;
   -webkit-appearance: none; appearance: none;
 }
-textarea.cd-field { min-height: 110px; font-family: var(--mono); font-size: 16px; }
-.cd-say { font: 400 20px/1.3 var(--serif); }
-.cd-prev { margin: 10px 0 0; font: 500 12px/1.4 var(--mono); color: var(--ink2); min-height: 17px; }
-.cd-prev b { color: var(--ink); font-weight: 600; }
+textarea.cd-field { min-height: 110px; resize: vertical; }
+.cd-say { font-weight: 500; font-size: 18px; box-shadow: var(--shadow); border-color: transparent; }
+.cd-prev { min-height: 18px; margin: 10px 4px 0; font: 500 13px/1.4 var(--sans); color: var(--ink2); font-variant-numeric: tabular-nums; }
+.cd-prev b { font-weight: 600; color: var(--ink); }
 .cd-prev.is-need { color: var(--accent); }
 
-.cd-rows { border-top: 1px solid var(--rule); }
-.cd-row { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 10px; min-height: 52px; border-bottom: 1px solid var(--rule); padding: 4px 0; }
-.cd-row > span { font: 600 10px/1.2 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink3); }
-.cd-row .cd-field { background: none; border: 0; padding: 10px 0; min-height: 44px; border-radius: 0; }
+.cd-rows { padding: 0 14px; background: var(--card); border-radius: 16px; box-shadow: var(--shadow); }
+.cd-row { display: grid; grid-template-columns: 88px 1fr; align-items: center; gap: 10px; min-height: 52px; padding: 4px 0; }
+.cd-row + .cd-row { border-top: 1px solid var(--line2); }
+.cd-row > span { font: 500 15px/1.2 var(--sans); color: var(--ink2); }
+.cd-row .cd-field { min-height: 44px; padding: 10px 0; background: none; border: 0; border-radius: 0; }
 
-.cd-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.cd-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .cd-chip {
-  min-height: 44px; min-width: 44px; padding: 0 12px; border-radius: 10px;
-  border: 1px solid var(--rule); background: var(--sheet);
-  font: 600 13px/1 var(--sans);
+  min-width: 44px; min-height: 44px; padding: 0 15px; border-radius: 12px;
+  font: 600 14px/1 var(--sans); background: var(--card); box-shadow: inset 0 0 0 1px var(--line);
 }
-.cd-chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
-.cd-chip.kc[aria-pressed="true"] { background: var(--kc); border-color: var(--kc); color: var(--on-accent); }
-.cd-chips.days .cd-chip { flex: 1; padding: 0; font-family: var(--mono); font-size: 12px; }
+.cd-chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); box-shadow: none; }
+.cd-chip.kc[aria-pressed="true"] { background: var(--kc); color: var(--on-accent); }
+.cd-chips.days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.cd-chips.days .cd-chip { padding: 0; border-radius: 50%; aspect-ratio: 1; }
 
 .cd-range { width: 100%; height: 44px; margin: 0; background: none; -webkit-appearance: none; appearance: none; }
-.cd-range::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: var(--rule); }
-.cd-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); margin-top: -9px; border: 3px solid var(--paper); }
-.cd-range::-moz-range-track { height: 4px; border-radius: 2px; background: var(--rule); }
-.cd-range::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--ink); border: 3px solid var(--paper); }
-.cd-len { font: 500 13px/1 var(--mono); color: var(--ink2); }
+.cd-range::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: var(--line); }
+.cd-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; margin-top: -10px; border-radius: 50%; background: var(--card); box-shadow: 0 0 0 1px var(--edge), 0 2px 6px rgba(0, 0, 0, .18); }
+.cd-range::-moz-range-track { height: 4px; border-radius: 2px; background: var(--line); }
+.cd-range::-moz-range-thumb { width: 24px; height: 24px; border: 0; border-radius: 50%; background: var(--card); box-shadow: 0 0 0 1px var(--edge), 0 2px 6px rgba(0, 0, 0, .18); }
+.cd-len { display: block; margin-top: -4px; font: 500 13px/1.2 var(--sans); color: var(--ink2); font-variant-numeric: tabular-nums; }
 
-.cd-toggle { display: flex; align-items: center; justify-content: space-between; min-height: 52px; width: 100%; border-bottom: 1px solid var(--rule); text-align: left; font: 600 15px/1.2 var(--sans); }
-.cd-toggle i { width: 44px; height: 26px; border-radius: 13px; background: var(--rule); position: relative; flex: none; }
-.cd-toggle i::after { content: ""; position: absolute; left: 3px; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--sheet); transition: left .15s; }
-.cd-toggle[aria-pressed="true"] i { background: var(--ink); }
-.cd-toggle[aria-pressed="true"] i::after { left: 21px; background: var(--paper); }
+.cd-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 52px; text-align: left; font: 500 16px/1.2 var(--sans); }
+.cd-toggle + .cd-toggle { border-top: 1px solid var(--line2); }
+.cd-toggle:disabled { color: var(--ink3); cursor: default; }
+.cd-toggle i { position: relative; flex: none; width: 48px; height: 29px; border-radius: 15px; background: var(--card2); box-shadow: inset 0 0 0 1px var(--line); transition: background .15s; }
+.cd-toggle i::after { content: ""; position: absolute; left: 2px; top: 2px; width: 25px; height: 25px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); transition: left .15s; }
+.cd-toggle[aria-pressed="true"] i { background: var(--accent); box-shadow: none; }
+.cd-toggle[aria-pressed="true"] i::after { left: 21px; }
 
-.cd-grp { margin-bottom: 14px; }
-.cd-grp h3 { font: 600 10px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--kc, var(--ink3)); margin: 16px 0 8px; }
+.cd-grp { margin-bottom: 6px; }
+.cd-grp h3 { margin: 18px 4px 8px; font: 600 12px/1 var(--sans); letter-spacing: .06em; text-transform: uppercase; color: var(--kc, var(--ink3)); }
 
-.cd-num { font: 500 44px/1 var(--mono); text-align: center; margin: 10px 0 2px; }
-.cd-num small { font-size: 16px; color: var(--ink2); margin-left: 4px; }
-.cd-numcap { text-align: center; font: 500 12px/1 var(--mono); color: var(--ink2); margin-bottom: 8px; }
+.cd-num { margin: 8px 0 2px; text-align: center; font: 600 48px/1 var(--disp); font-variant-numeric: tabular-nums; letter-spacing: -.03em; }
+.cd-num small { margin-left: 5px; font: 500 16px/1 var(--sans); color: var(--ink2); letter-spacing: 0; }
+.cd-numcap { margin-bottom: 8px; text-align: center; font: 500 13px/1 var(--sans); color: var(--ink2); }
 
-.cd-day-l { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
-.cd-day-l li { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--rule2); }
+.cd-day-l { list-style: none; margin: 0; padding: 2px 14px; background: var(--card); border-radius: 16px; box-shadow: var(--shadow); }
+.cd-day-l li { display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 12px; padding: 12px 0; }
+.cd-day-l li + li { border-top: 1px solid var(--line2); }
 .cd-day-l svg { width: 18px; height: 18px; color: var(--cat, var(--ink3)); }
-.cd-day-l b { font: 600 14px/1.2 var(--sans); }
-.cd-day-l span { font: 500 12px/1 var(--mono); color: var(--ink2); }
+.cd-day-l b { font: 600 15px/1.2 var(--sans); }
+.cd-day-l span { font: 500 13px/1 var(--sans); color: var(--ink2); font-variant-numeric: tabular-nums; }
 
-.cd-note { font: 400 14px/1.45 var(--sans); color: var(--ink2); margin: 10px 0 0; }
+#cdShB > .cd-lbl:first-child { margin-top: 4px; }
+.cd-note { margin: 10px 4px 0; font: 400 14px/1.45 var(--sans); color: var(--ink2); }
 
 /* ── toast ── */
 .cd-toast {
-  position: fixed; left: 50%; transform: translateX(-50%);
-  bottom: calc(env(safe-area-inset-bottom) + 84px); z-index: 60;
-  display: flex; align-items: center; gap: 12px;
-  background: var(--sheet); color: var(--ink); border: 1px solid var(--rule);
-  border-radius: 12px; padding: 4px 6px 4px 14px; box-shadow: var(--lift);
-  font: 500 13px/1.3 var(--sans); max-width: calc(100vw - 36px);
+  position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 84px); z-index: 60;
+  display: flex; align-items: center; gap: 8px; max-width: calc(100vw - 32px);
+  padding: 4px 4px 4px 16px; border-radius: 14px;
+  font: 500 14px/1.3 var(--sans); background: var(--ink); color: var(--bg);
+  box-shadow: 0 14px 30px -14px rgba(0, 0, 0, .5); transform: translateX(-50%);
 }
-.cd-toast button { min-height: 40px; padding: 0 12px; font: 700 13px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.cd-toast button { min-height: 40px; padding: 0 14px; font: 700 14px/1 var(--sans); color: var(--toast-acc); }
 
 @media (prefers-reduced-motion: reduce) {
-  .cd-sheet, .cd-scrim { transition: none; }
+  .cd-sheet, .cd-scrim, .cd-ring .rv { transition: none; }
 }
 </style>
 </head>
 <body>
 <div class="cd-app">
   <header class="cd-top">
-    <p class="cd-mark">Cad<b>·</b>ence</p>
+    <p class="cd-eyebrow" id="cdEyebrow"></p>
     <button class="cd-iconbtn" id="cdGear" aria-label="Settings" type="button">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
     </button>
@@ -398,47 +456,54 @@ textarea.cd-field { min-height: 110px; font-family: var(--mono); font-size: 16px
 
   <main class="cd-main" id="cdMain">
     <section id="cdVDay" aria-label="Day">
+      <div class="cd-dhead">
+        <div>
+          <h1 class="cd-title" id="cdTitle"></h1>
+          <p class="cd-sub" id="cdSub"></p>
+        </div>
+        <div class="cd-ring" id="cdRing" role="img">
+          <svg viewBox="0 0 58 58" aria-hidden="true"><circle class="rt" cx="29" cy="29" r="25" fill="none" stroke-width="5"/><circle class="rv" id="cdRingV" cx="29" cy="29" r="25" fill="none" stroke-width="5" stroke-linecap="round" stroke-dasharray="157.08" stroke-dashoffset="157.08"/></svg>
+          <b id="cdRingN"></b>
+        </div>
+      </div>
       <div class="cd-ribbon" id="cdRibbon"></div>
-      <h1 class="cd-title" id="cdTitle"></h1>
-      <p class="cd-sub" id="cdSub"></p>
       <ol class="cd-agenda" id="cdAgenda"></ol>
     </section>
     <section id="cdVHab" aria-label="Habits" hidden>
       <h2 class="cd-h2">Habits</h2>
       <p class="cd-cap" id="cdHabCap"></p>
-      <ul class="cd-hb" id="cdHab"></ul>
+      <ul class="cd-hb cd-card" id="cdHab"></ul>
       <button class="cd-link" id="cdHabAdd" type="button">+ A habit of your own</button>
     </section>
     <section id="cdVMon" aria-label="Month" hidden>
       <div class="cd-mhead">
-        <h2 id="cdMonT"></h2>
+        <h2 class="cd-h2" id="cdMonT"></h2>
         <div>
-          <button id="cdMonP" aria-label="Previous month" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
-          <button id="cdMonN" aria-label="Next month" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          <button id="cdMonP" aria-label="Previous month" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <button id="cdMonN" aria-label="Next month" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
         </div>
       </div>
       <p class="cd-cap" id="cdMonCap"></p>
-      <div class="cd-dows"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
-      <div class="cd-mgrid" id="cdMonG"></div>
+      <div class="cd-card cd-cal">
+        <div class="cd-dows"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+        <div class="cd-mgrid" id="cdMonG"></div>
+      </div>
       <div class="cd-legend" id="cdMonL"></div>
     </section>
-    <section id="cdVLift" aria-label="Lifts" hidden>
-      <h2 class="cd-h2">Training</h2>
-      <p class="cd-cap">The last thirty days, and twelve weeks of sessions.</p>
+    <section id="cdVLift" aria-label="Training" hidden>
+      <h2 class="cd-h2 cd-h2-solo">Training</h2>
       <div id="cdLift"></div>
     </section>
   </main>
 
   <nav class="cd-dock" aria-label="Views">
     <div class="cd-tabs">
-      <button class="cd-tab" data-v="day" type="button">Day</button>
-      <button class="cd-tab" data-v="hab" type="button">Habits</button>
-      <button class="cd-tab" data-v="mon" type="button">Month</button>
-      <button class="cd-tab" data-v="lift" type="button">Lifts</button>
+      <button class="cd-tab" data-v="day" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01" stroke-width="3"/></svg>Day</button>
+      <button class="cd-tab" data-v="hab" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.8 2.8L16.2 9.8"/></svg>Habits</button>
+      <button class="cd-add" id="cdAdd" aria-label="Add a block" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button class="cd-tab" data-v="mon" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Month</button>
+      <button class="cd-tab" data-v="lift" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg>Training</button>
     </div>
-    <button class="cd-add" id="cdAdd" aria-label="Add a block" type="button">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-    </button>
   </nav>
 </div>
 
@@ -446,8 +511,8 @@ textarea.cd-field { min-height: 110px; font-family: var(--mono); font-size: 16px
 <div class="cd-sheet" id="cdSheet" role="dialog" aria-modal="true" aria-labelledby="cdShT" hidden>
   <div class="cd-sh-hd">
     <h2 id="cdShT"></h2>
-    <button class="cd-iconbtn" id="cdShX" aria-label="Close" type="button">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    <button class="cd-iconbtn cd-x" id="cdShX" aria-label="Close" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></svg>
     </button>
   </div>
   <div id="cdShB"></div>
@@ -722,7 +787,16 @@ textarea.cd-field { min-height: 110px; font-family: var(--mono); font-size: 16px
     $('cdMain').scrollTop = 0;
     cdPaint();
   }
+  /* The line above the title says WHEN the screen is about, so the title
+     itself can be the one word that matters. */
+  function cdEyebrow() {
+    var t = cdToday(), d = view === 'day' ? sel : t, dt = cdDate(d);
+    var rel = view === 'day' && (d === t || d === cdAddDays(t, -1) || d === cdAddDays(t, 1));
+    $('cdEyebrow').textContent = view === 'mon' ? monthAt.slice(0, 4) : view === 'lift' ? 'Last 30 days'
+      : (rel || view !== 'day' ? DOWL[cdDow(d)] + ' ' : '') + dt.getDate() + ' ' + MON[dt.getMonth()];
+  }
   function cdPaint() {
+    cdEyebrow();
     if (view === 'day') cdPaintDay();
     else if (view === 'hab') cdPaintHab();
     else if (view === 'mon') cdPaintMon();
@@ -739,35 +813,40 @@ textarea.cd-field { min-height: 110px; font-family: var(--mono); font-size: 16px
       var d = cdAddDays(ws, i), t = cdTally(d);
       var past = d <= today;
       var pct = past && t.on ? Math.round(t.kept / t.on * 100) : 0;
-      rb += '<button type="button" class="cd-rb' + (d === today ? ' is-today' : '') + '" data-d="' + d + '" aria-pressed="' + (d === sel) + '"'
+      rb += '<button type="button" class="cd-rb' + (d === today ? ' is-today' : '') + (past ? '' : ' is-future') + '" data-d="' + d + '" aria-pressed="' + (d === sel) + '"'
         + ' aria-label="' + DOWL[i] + ', ' + (past ? t.kept + ' of ' + t.on + ' kept' : t.on + ' planned') + '">'
-        + '<span class="cd-rb-l">' + DOW[i].slice(0, 2).toUpperCase() + '</span>'
+        + '<span class="cd-rb-l">' + DOW[i].charAt(0) + '</span>'
         + '<span class="cd-rb-n">' + cdDate(d).getDate() + '</span>'
-        + '<span class="cd-rb-bar" aria-hidden="true"><i style="height:' + pct + '%"></i></span></button>';
+        + '<span class="cd-rb-bar" aria-hidden="true"><i style="width:' + pct + '%"></i></span></button>';
     }
     $('cdRibbon').innerHTML = rb;
 
-    var dt = cdDate(sel);
-    var rel = sel === today ? 'today' : sel === cdAddDays(today, -1) ? 'yesterday' : sel === cdAddDays(today, 1) ? 'tomorrow' : '';
-    $('cdTitle').innerHTML = esc(DOWL[cdDow(sel)]) + (rel ? '<em>' + rel + '</em>' : '');
-    var tl = cdTally(sel);
-    $('cdSub').textContent = dt.getDate() + ' ' + MON[dt.getMonth()] + ' · '
-      + (sel > today ? tl.on + ' planned' : tl.kept + ' of ' + tl.on + ' kept') + ' · ' + cdLen(tl.mins) + ' committed';
+    var rel = sel === today ? 'Today' : sel === cdAddDays(today, -1) ? 'Yesterday' : sel === cdAddDays(today, 1) ? 'Tomorrow' : '';
+    $('cdTitle').textContent = rel || DOWL[cdDow(sel)];
+    var tl = cdTally(sel), fut = sel > today;
+    $('cdSub').textContent = (fut ? tl.on + ' planned' : tl.kept + ' of ' + tl.on + ' kept') + ' · ' + cdLen(tl.mins) + ' committed';
+    /* The ring is the same fact as the line beside it, drawn: how far round
+       the day you have got. An unmet day is an open ring, never a red one. */
+    var C = 2 * Math.PI * 25, frac = tl.on ? tl.kept / tl.on : 0;
+    $('cdRingV').setAttribute('stroke-dashoffset', (C * (1 - frac)).toFixed(2));
+    $('cdRingV').style.opacity = frac ? 1 : 0;
+    $('cdRingN').innerHTML = tl.kept + '<small>/' + tl.on + '</small>';
+    $('cdRing').setAttribute('aria-label', tl.kept + ' of ' + tl.on + ' kept');
 
     var list = cdOn(sel);
     var ag = $('cdAgenda');
     if (!list.length) {
-      ag.innerHTML = '<li class="cd-empty">Nothing on this day yet. <button type="button" class="cd-link" data-act="add">Add a block</button></li>';
+      ag.innerHTML = '<li class="cd-empty">Nothing on this day yet.<button type="button" class="cd-link" data-act="add">Add a block</button></li>';
       return;
     }
     var now = cdNowMin(), isT = sel === today, open = cdOpenDay(sel);
     /* A running block already says where now is — with a countdown and a
-       line down the rail — so the red rule is drawn only between blocks. */
+       line along its foot — so the rule is drawn only between blocks. */
     var running = isT && list.some(function (b) { return !cdIsOff(sel, b.id) && b.e > b.s && now >= b.s && now < b.e; });
     var html = '', reach = -1, nowDrawn = !isT || running;
     list.forEach(function (b) {
       if (reach >= 0 && b.s - reach >= 30) {
-        html += '<li class="cd-gap" aria-hidden="true"><span></span><span class="cd-node"></span><p>' + cdLen(b.s - reach) + ' open</p></li>';
+        html += '<li class="cd-gap" aria-hidden="true"><span></span><span class="cd-node"></span><p>' + cdLen(b.s - reach) + ' free</p></li>';
       }
       if (!nowDrawn && now < b.s) { html += cdNowRow(now); nowDrawn = true; }
       html += cdTicket(b, isT, now, open);
@@ -782,23 +861,29 @@ textarea.cd-field { min-height: 110px; font-family: var(--mono); font-size: 16px
     var done = cdDone(sel, b.id), off = cdIsOff(sel, b.id);
     var running = isT && !off && b.e > b.s && now >= b.s && now < b.e;
     var past = (isT && (b.e > b.s ? now >= b.e : now > b.s)) || sel < cdToday();
-    var meta = b.e > b.s ? cdHM(b.s) + '–' + cdHM(b.e) + ' · ' + cdLen(b.e - b.s) : cdHM(b.s);
-    if (running) meta = cdHM(b.s) + '–' + cdHM(b.e) + ' · <i>' + cdLen(b.e - now) + ' left</i>';
-    if (off) meta += ' · off today';
-    if (b.p) meta += ' · ' + esc(b.p);
+    /* The start is in the gutter, so the card says the length and the end.
+       A moment says nothing about time at all: the gutter already has. */
+    var bits = [];
+    if (running) bits.push('<i>' + cdLen(b.e - now) + ' left</i>', 'until ' + cdHM(b.e));
+    else if (b.e > b.s) bits.push(cdLen(b.e - b.s), 'until ' + cdHM(b.e));
+    if (off) bits = ['Off today'];
+    if (b.p) bits.push(esc(b.p));
+    var meta = bits.join(' · ');
     var sess = (S.train[sel] && cdSess(S.train[sel][b.id])) || null;
     var tag = sess ? '<span class="cd-tk-w" style="--kc:var(--k-' + LIFTN[sess.k[0]].g + ')">' + esc(cdSessName(sess)) + (sess.m ? ' · ' + sess.m + 'm' : '') + '</span>' : '';
     var prog = running ? Math.round((now - b.s) / (b.e - b.s) * 100) : 0;
     var cls = 'cd-it' + (done ? ' is-done' : '') + (off ? ' is-off' : '') + (running ? ' is-now' : '') + (past ? ' is-past' : '');
     return '<li class="' + cls + '" data-id="' + b.id + '" style="--cat:var(--c-' + cat + ')">'
       + '<span class="cd-time">' + cdHM(b.s) + '</span>'
-      + '<span class="cd-node" aria-hidden="true"><b></b>' + (running ? '<s style="height:calc(' + prog + '% - 25px)"></s>' : '') + '</span>'
+      + '<span class="cd-node" aria-hidden="true"><b></b></span>'
       + '<div class="cd-tk">'
       + '<button type="button" class="cd-tk-b" data-act="edit" aria-label="' + esc(b.n) + ', ' + cdHM(b.s) + (b.e > b.s ? ' to ' + cdHM(b.e) : '') + '. Open">'
-      + '<span class="cd-tk-n">' + cdG(kind) + '<span>' + esc(b.n) + '</span></span>'
-      + '<span class="cd-tk-m">' + meta + '</span>' + tag + '</button>'
+      + '<span class="cd-ic">' + cdG(kind) + '</span>'
+      + '<span class="cd-tk-t"><span class="cd-tk-n">' + esc(b.n) + '</span>'
+      + (meta ? '<span class="cd-tk-m">' + meta + '</span>' : '') + tag + '</span></button>'
       + '<button type="button" class="cd-stamp" data-act="tick" aria-pressed="' + done + '"' + (open ? '' : ' disabled')
       + ' aria-label="' + (done ? 'Done' : 'Mark done') + ': ' + esc(b.n) + '"><span>' + cdG('tick', 2.6) + '</span></button>'
+      + (running ? '<i class="cd-prog" style="width:' + prog + '%" aria-hidden="true"></i>' : '')
       + '</div></li>';
   }
 
@@ -1001,7 +1086,9 @@ textarea.cd-field { min-height: 110px; font-family: var(--mono); font-size: 16px
         tDone.setAttribute('aria-pressed', cdDone(sel, b.id));
         cdPaint();
       });
-      root.appendChild(tDone); root.appendChild(tOff);
+      var tg = el('div', 'cd-rows');
+      tg.appendChild(tDone); tg.appendChild(tOff);
+      root.appendChild(tg);
       if (TRAINING[cdKind(b.n)] && canDo) {
         var lg = el('button', 'cd-link', 'Log what you trained →');
         lg.type = 'button';
@@ -1180,17 +1267,20 @@ textarea.cd-field { min-height: 110px; font-family: var(--mono); font-size: 16px
         var by = cdKeptBy(today, h), st = cdStreak(h);
         sub = by && by !== 'you' ? (by === 'session' ? 'Kept by a session' : 'Kept by ' + esc(by)) : (st > 1 ? st + '-day streak' : 'Tap to keep');
         if (by === 'you' && st > 1) sub = st + '-day streak';
-        val = on ? '<span class="cd-hr-v">✓</span>' : '<span class="cd-hr-v is-nil">not yet</span>';
+        /* The same check the day's blocks wear, so a kept thing looks kept
+           wherever it is. */
+        val = '<span class="cd-chk' + (on ? ' is-on' : '') + '">' + cdG('tick', 2.6) + '</span>';
       } else {
         var wk = 0, n = 0;
         for (var i = 1; i <= 7; i++) { var x = +cdHabVal(cdAddDays(today, -i), h); if (x > 0) { wk += x; n++; } }
-        sub = n ? 'Last 7 days avg ' + cdFmtNum(wk / n, h) + ' ' + esc(h.unit) : 'Tap to log';
+        sub = n ? '7-day avg ' + cdFmtNum(wk / n, h) : 'Tap to log';
         val = on ? '<span class="cd-hr-v">' + cdFmtNum(v, h) + '<small>' + esc(h.unit) + '</small></span>' : '<span class="cd-hr-v is-nil">—</span>';
       }
       var tape = '';
-      for (var j = 13; j >= 0; j--) { var d = cdAddDays(today, -j); tape += '<i class="' + (cdHabOn(d, h) ? 'on' : '') + (j === 0 ? ' is-t' : '') + '"></i>'; }
-      html += '<li class="cd-hr" data-h="' + h.id + '" style="--hc:var(' + h.hc + ')">'
-        + '<button type="button" class="cd-hr-b" data-act="log" aria-label="' + esc(h.n) + ', ' + (on ? 'kept' : 'not yet') + '">' + cdG(h.g) + '<span><span class="cd-hr-n">' + esc(h.n) + '</span><span class="cd-hr-s" style="display:block">' + sub + '</span></span>' + val + '</button>'
+      for (var j = 13; j >= 0; j--) { var d = cdAddDays(today, -j); tape += '<i' + (cdHabOn(d, h) ? ' class="on"' : '') + '></i>'; }
+      html += '<li class="cd-hr" data-h="' + h.id + '" style="--hc:var(' + h.hc + ');--cat:var(' + h.hc + ')">'
+        + '<button type="button" class="cd-hr-b" data-act="log" aria-label="' + esc(h.n) + ', ' + (on ? 'kept' : 'not yet') + '">'
+        + '<span class="cd-ic">' + cdG(h.g) + '</span><span><span class="cd-hr-n">' + esc(h.n) + '</span><span class="cd-hr-s">' + sub + '</span></span>' + val + '</button>'
         + '<button type="button" class="cd-hr-more" data-act="hist" aria-label="' + esc(h.n) + ' history">' + cdG('more') + '</button>'
         + '<span class="cd-tape" aria-hidden="true">' + tape + '</span></li>';
     });
@@ -1319,7 +1409,8 @@ textarea.cd-field { min-height: 110px; font-family: var(--mono); font-size: 16px
   function cdPaintMon() {
     var today = cdToday(), first = cdFirst();
     var y = +monthAt.slice(0, 4), mo = +monthAt.slice(5, 7) - 1;
-    $('cdMonT').textContent = MON[mo] + ' ' + y;
+    $('cdMonT').textContent = MON[mo];
+    cdEyebrow();
     var start = cdISO(new Date(y, mo, 1));
     var days = new Date(y, mo + 1, 0).getDate();
     var pad = cdDow(start);
@@ -1335,13 +1426,13 @@ textarea.cd-field { min-height: 110px; font-family: var(--mono); font-size: 16px
       var real = ss.filter(function (x) { return !cdRestOnly(x.s); });
       if (real.length) trained++;
       var kc = ss.length ? 'var(--k-' + LIFTN[ss[0].s.k[0]].g + ')' : 'transparent';
-      var C = 2 * Math.PI * 9;
-      var ring = inRec && t.on ? '<svg viewBox="0 0 24 24" aria-hidden="true"><circle class="ring-t" cx="12" cy="12" r="9" fill="none" stroke-width="3"/>'
-        + '<circle class="ring-v" cx="12" cy="12" r="9" fill="none" stroke-width="3" stroke-linecap="round" transform="rotate(-90 12 12)" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + (C * (1 - pct)).toFixed(2) + '"' + (pct ? '' : ' opacity="0"') + '/></svg>'
-        : '<svg viewBox="0 0 24 24" aria-hidden="true"></svg>';
+      var C = 2 * Math.PI * 16;
+      var ring = inRec && t.on ? '<svg viewBox="0 0 36 36" aria-hidden="true"><circle class="ring-t" cx="18" cy="18" r="16" fill="none" stroke-width="2.5"/>'
+        + '<circle class="ring-v" cx="18" cy="18" r="16" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="' + C.toFixed(2) + '" stroke-dashoffset="' + (C * (1 - pct)).toFixed(2) + '"' + (pct ? '' : ' opacity="0"') + '/></svg>'
+        : '<svg viewBox="0 0 36 36" aria-hidden="true"></svg>';
       html += '<button type="button" class="cd-mc' + (iso === today ? ' is-today' : '') + (fut ? ' is-future' : '') + '" data-day="' + iso + '"'
         + ' aria-label="' + d + ' ' + MON[mo] + (inRec ? ', ' + t.kept + ' of ' + t.on + ' kept' : '') + (ss.length ? ', ' + esc(cdSessName(ss[0].s)) : '') + '">'
-        + '<b>' + d + '</b>' + ring + '<em style="--kc:' + kc + '"></em></button>';
+        + '<span class="cd-mr">' + ring + '<b>' + d + '</b></span><em style="--kc:' + kc + '"></em></button>';
     }
     var cells = pad + days;
     for (var q = cells; q % 7; q++) html += '<span class="cd-mc is-pad" aria-hidden="true"></span>';
@@ -1405,7 +1496,7 @@ textarea.cd-field { min-height: 110px; font-family: var(--mono); font-size: 16px
     var m30 = all.filter(function (x) { return cdDiff(today, x.d) < 30 && !cdRestOnly(x.s); });
     var box = $('cdLift');
     if (!all.length) {
-      box.innerHTML = '<p class="cd-empty">No sessions yet. Tick a gym, run or yoga block on the day and it will ask what you trained.</p>';
+      box.innerHTML = '<div class="cd-card cd-empty">No sessions yet. Tick a gym, run or yoga block on the day and it asks what you trained.</div>';
       return;
     }
     var mins = m30.filter(function (x) { return x.s.m; });
@@ -1419,9 +1510,9 @@ textarea.cd-field { min-height: 110px; font-family: var(--mono); font-size: 16px
       var n = all.filter(function (x) { return x.d >= a && x.d < b && !cdRestOnly(x.s); }).length;
       cols.push(n); top = Math.max(top, n);
     }
-    html += '<p class="cd-lbl">Sessions a week</p><div class="cd-weeks" role="img" aria-label="Sessions per week for twelve weeks: ' + cols.join(', ') + '">'
+    html += '<p class="cd-lbl">Sessions a week</p><div class="cd-card cd-chart"><div class="cd-weeks" role="img" aria-label="Sessions per week for twelve weeks: ' + cols.join(', ') + '">'
       + cols.map(function (n, i) { return '<i class="' + (n ? '' : 'is-zero') + (i === 11 ? ' is-this' : '') + '" style="height:' + Math.max(2, n / top * 100) + '%"></i>'; }).join('')
-      + '</div><div class="cd-wax"><span>12 weeks ago</span><span>this week</span></div>';
+      + '</div><div class="cd-wax"><span>12 weeks ago</span><span>This week</span></div></div>';
     var by = {};
     m30.forEach(function (x) {
       var nm = cdSessName(x.s);
@@ -1431,12 +1522,12 @@ textarea.cd-field { min-height: 110px; font-family: var(--mono); font-size: 16px
     var kinds = Object.keys(by).sort(function (a, b) { return by[b].n - by[a].n; });
     if (kinds.length) {
       var mx = by[kinds[0]].n;
-      html += '<p class="cd-lbl">What, this month</p><ul class="cd-kinds">' + kinds.map(function (k) {
+      html += '<p class="cd-lbl">What, this month</p><ul class="cd-kinds cd-card">' + kinds.map(function (k) {
         var r = by[k], ef = Object.keys(r.e).sort(function (a, b) { return r.e[b] - r.e[a]; })[0];
-        return '<li style="--kc:var(--k-' + r.g + ')"><b>' + esc(k) + '</b><span>' + r.n + '× ' + (r.mc ? '· ' + Math.round(r.m / r.mc) + 'm' : '') + (ef ? ' · ' + ef : '') + '</span><em><i style="width:' + (r.n / mx * 100) + '%"></i></em></li>';
+        return '<li style="--kc:var(--k-' + r.g + ')"><b>' + esc(k) + '</b><span>' + r.n + '×' + (r.mc ? ' · ' + Math.round(r.m / r.mc) + 'm' : '') + (ef ? ' · ' + ef : '') + '</span><em><i style="width:' + (r.n / mx * 100) + '%"></i></em></li>';
       }).join('') + '</ul>';
     }
-    html += '<p class="cd-lbl">Recent</p><ul class="cd-recent">' + all.slice(0, 8).map(function (x) {
+    html += '<p class="cd-lbl">Recent</p><ul class="cd-recent cd-card">' + all.slice(0, 8).map(function (x) {
       var d = cdDate(x.d);
       return '<li><time>' + DOW[cdDow(x.d)] + ' ' + d.getDate() + '</time><b>' + esc(cdSessName(x.s)) + '</b><span>' + (x.s.m ? x.s.m + 'm' : '') + (x.s.e ? ' · ' + x.s.e : '') + '</span></li>';
     }).join('') + '</ul>';
@@ -1499,7 +1590,7 @@ textarea.cd-field { min-height: 110px; font-family: var(--mono); font-size: 16px
     if (m !== 'light' && m !== 'dark') m = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     document.documentElement.setAttribute('data-mode', m);
     var tc = document.querySelector('meta[name="theme-color"]');
-    if (tc) tc.setAttribute('content', m === 'dark' ? '#15130F' : '#F2EDE3');
+    if (tc) tc.setAttribute('content', m === 'dark' ? '#121110' : '#F5F2EC');
   }
   if (window.matchMedia) {
     var mq = matchMedia('(prefers-color-scheme: dark)');

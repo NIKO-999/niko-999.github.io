@@ -4098,9 +4098,18 @@ because the gaps are the part of a schedule you actually spend. A
 running block carries the countdown, so the red now-line is drawn only
 BETWEEN blocks; both at once is one fact said twice.
 
-**Paper and ink, serif for the subject, mono for every figure.** No
-webfont: system serif and system mono, so the app stays one file with
-nothing to preload.
+**Warm paper, white cards, one accent.** Space Grotesk for what you are
+looking at (the day, a figure, a title) and Inter for what you read,
+both shipped with the repo so the phone and the suite draw the same
+letters. Figures are tabular so a column of times lines up.
+
+**The first look was taken back out on one line of feedback: it did not
+look good.** Mono on every figure read as a terminal; a block said its
+category three times (a coloured edge, a node, an icon); the week was
+seven tall boxes; the month was thirty empty boxes; the dock was a black
+slab. What replaced each: two faces, category said once by a tinted icon
+tile, the week as one card of dates, a ring round each day of the month,
+and a plain tab bar with the add button raised in the middle.
 
 **`[hidden] { display: none !important }` is said once, globally**, so
 the bug `schedule/` recorded eight times cannot happen here by

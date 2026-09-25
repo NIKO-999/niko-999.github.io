@@ -55,11 +55,14 @@ const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) +
   console.log('\n── the day ──');
   {
     const { c, page, errs, off } = await ctx();
-    const names = await page.$$eval('.cd-it .cd-tk-n > span', (ns) => ns.map((n) => n.textContent));
+    const names = await page.$$eval('.cd-it .cd-tk-n', (ns) => ns.map((n) => n.textContent));
     ok('Friday draws its seven blocks in time order',
       names.join('|') === 'Wake up|Gym|Deep work|Lunch|Emails and calls|Read|Wind down', names);
-    ok('the title is the day, and says it is today',
-      (await page.textContent('#cdTitle')) === 'Fridaytoday');
+    ok('the title says today, and the line above it says which day',
+      (await page.textContent('#cdTitle')) === 'Today'
+      && (await page.textContent('#cdEyebrow')) === 'Friday 25 September');
+    const ring = await page.getAttribute('#cdRing', 'aria-label');
+    ok('the ring says how far round the day you are', ring === '0 of 7 kept', ring);
 
     /* A running block carries the countdown, and then there is no second
        statement of "now" as a rule across the rail. */
@@ -69,7 +72,7 @@ const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) +
 
     /* The gaps are the time nobody has claimed. */
     const gaps = await page.$$eval('.cd-gap p', (ps) => ps.map((p) => p.textContent));
-    ok('open time between blocks is measured', gaps.includes('30m open') && gaps.includes('45m open'), gaps);
+    ok('open time between blocks is measured', gaps.includes('30m free') && gaps.includes('45m free'), gaps);
 
     const past = await page.$$eval('.cd-it.is-past', (ls) => ls.length);
     ok('the blocks behind you are marked past', past === 2, past);
@@ -128,7 +131,7 @@ const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) +
   {
     const { c, page } = await ctx({ at: '2026-09-25T12:15:00' });
     const order = await page.$$eval('#cdAgenda > li', (ls) => ls.map((l) =>
-      l.id === 'cdNowL' ? 'NOW' : l.classList.contains('cd-gap') ? 'gap' : l.querySelector('.cd-tk-n > span').textContent));
+      l.id === 'cdNowL' ? 'NOW' : l.classList.contains('cd-gap') ? 'gap' : l.querySelector('.cd-tk-n').textContent));
     const i = order.indexOf('NOW');
     ok('in a gap, the now-line sits just before the next block', i > 0 && order[i + 1] === 'Lunch' && order[i - 1] === 'gap', order);
     ok('and says the time', (await page.textContent('#cdNowL')).trim() === '12:15');
@@ -173,7 +176,7 @@ const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) +
     const wk = await store(page, 'cad.week.v1');
     const j = wk.find((b) => b.n === 'Journal');
     ok('the new block is written in full', j && j.d.length === 7 && j.s === 1260 && j.e === 1280 && typeof j.id === 'string' && j.p === '', j);
-    ok('and drawn on the day', (await page.$$eval('.cd-tk-n > span', (ns) => ns.map((n) => n.textContent))).includes('Journal'));
+    ok('and drawn on the day', (await page.$$eval('.cd-tk-n', (ns) => ns.map((n) => n.textContent))).includes('Journal'));
 
     /* Delete has a way back. */
     await page.click(`.cd-it[data-id="${j.id}"] .cd-tk-b`);
@@ -207,8 +210,8 @@ const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) +
     const { c, page, errs, off } = await ctx({ init: seed });
 
     await page.click('.cd-tab[data-v="hab"]');
-    const train = await page.$eval('.cd-hr[data-h="train"]', (e) => e.textContent);
-    ok('Train is kept by the session filed today', /Kept by a session/.test(train) && /✓/.test(train), train);
+    const train = await page.$eval('.cd-hr[data-h="train"]', (e) => ({ t: e.textContent, on: !!e.querySelector('.cd-chk.is-on') }));
+    ok('Train is kept by the session filed today', /Kept by a session/.test(train.t) && train.on, train);
     await page.click('.cd-hr[data-h="mind"] .cd-hr-b');
     ok('Mind ticks on a press', (await store(page, 'cad.hab.v1'))['2026-09-25'].mind === 1);
     await page.click('.cd-hr[data-h="steps"] .cd-hr-b');
@@ -236,7 +239,8 @@ const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) +
     ok('a habit of yours is added at the foot', (await page.$$eval('.cd-hr', (h) => h.map((x) => x.dataset.h))).length === 7);
 
     await page.click('.cd-tab[data-v="mon"]');
-    ok('the month is September', (await page.textContent('#cdMonT')) === 'September 2026');
+    ok('the month is September, and the line above it is the year', (await page.textContent('#cdMonT')) === 'September'
+      && (await page.textContent('#cdEyebrow')) === '2026');
     const cells = await page.$$eval('.cd-mc[data-day]', (cs) => cs.length);
     ok('it draws thirty days', cells === 30, cells);
     ok('the grid is a whole rectangle', (await page.$$eval('.cd-mgrid > *', (cs) => cs.length)) % 7 === 0);
@@ -284,12 +288,12 @@ const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) +
     const cols = await page.evaluate(() => {
       const probe = (v) => { const d = document.createElement('div'); d.style.color = `var(${v})`; document.body.appendChild(d);
         const c = getComputedStyle(d).color; d.remove(); return c.match(/[\d.]+/g).slice(0, 3).map(Number); };
-      return ['--paper', '--sheet', '--ink', '--ink2', '--ink3', '--accent', '--c-body', '--c-mind', '--c-work', '--c-rest'].reduce((o, k) => (o[k] = probe(k), o), {});
+      return ['--bg', '--card', '--ink', '--ink2', '--ink3', '--accent', '--c-body', '--c-mind', '--c-work', '--c-rest'].reduce((o, k) => (o[k] = probe(k), o), {});
     });
-    const worst = Math.min(...['--ink2', '--ink3'].flatMap((t) => [ratio(cols[t], cols['--paper']), ratio(cols[t], cols['--sheet'])]));
-    ok(`${scheme}: the two greys hold 4.5:1 on paper and on a ticket`, worst >= 4.5, worst.toFixed(2));
-    const cat = Math.min(...['--c-body', '--c-mind', '--c-work', '--c-rest', '--accent'].map((t) => ratio(cols[t], cols['--paper'])));
-    ok(`${scheme}: every category colour holds 4.5:1 on paper`, cat >= 4.5, cat.toFixed(2));
+    const worst = Math.min(...['--ink2', '--ink3'].flatMap((t) => [ratio(cols[t], cols['--bg']), ratio(cols[t], cols['--card'])]));
+    ok(`${scheme}: the two greys hold 4.5:1 on the page and on a card`, worst >= 4.5, worst.toFixed(2));
+    const cat = Math.min(...['--c-body', '--c-mind', '--c-work', '--c-rest', '--accent'].map((t) => ratio(cols[t], cols['--bg'])));
+    ok(`${scheme}: every category colour holds 4.5:1 on the page`, cat >= 4.5, cat.toFixed(2));
     ok(`${scheme}: the face follows the phone`, (await page.getAttribute('html', 'data-mode')) === scheme);
     ok(`${scheme}: no page errors`, errs.length === 0, errs);
     await c.close();
@@ -319,7 +323,7 @@ const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) +
     await page.fill('#cdRestore', JSON.stringify(bak));
     await Promise.all([page.waitForNavigation(), page.click('#cdRestoreGo')]);
     await page.waitForTimeout(150);
-    ok('restoring writes it back', (await page.$$eval('.cd-tk-n > span', (ns) => ns.map((n) => n.textContent))).includes('Restored'));
+    ok('restoring writes it back', (await page.$$eval('.cd-tk-n', (ns) => ns.map((n) => n.textContent))).includes('Restored'));
 
     /* The chosen face beats the phone. */
     await page.click('#cdGear');
