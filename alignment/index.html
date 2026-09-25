@@ -314,14 +314,16 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
    screen — a list's head stays because you move between lists, and a
    source is one thing you are reading down. */
 #alSource .al-pane { padding-top: calc(var(--v2) + env(safe-area-inset-top, 0px)); }
-/* THE GLOW STAYS IN THE PADDING, whatever height the summary makes the
-   card. --dusk puts its stops in percent, so a card grown by four lines
-   drags the peach up under the words, and white on that peach is about
-   2:1. Here the stops are measured from the foot: everything above the
-   last 80px is at most #3A4459, where the summary clears 6.6:1. */
-.al-lead { margin: 0 -6px var(--v1); padding: 20px 22px 80px; border-radius: var(--r-card);
-  background: linear-gradient(180deg, #0B1220 0%, #15233A 30%, #3A4459 calc(100% - 80px),
-                                      #87717A calc(100% - 34px), #D29A84 100%); }
+/* THE CARD ENDS SHORTLY AFTER THE LAST SENTENCE, and the glow is its lit
+   edge. 80px of padding held a peach band under the words and was
+   reported as empty space, which it was: room kept for a colour. The
+   stops are measured from the foot, so whatever height the summary gives
+   the card, the ground under the last line is at most #4E5268, where the
+   summary clears 5.4:1, and the peach lives in the last 28px. White on
+   that peach is about 2:1, so nothing is written there. */
+.al-lead { margin: 0 -6px var(--v1); padding: 20px 22px 28px; border-radius: var(--r-card);
+  background: linear-gradient(180deg, #0B1220 0%, #15233A 30%, #3A4459 calc(100% - 70px),
+                                      #4E5268 calc(100% - 28px), #87717A calc(100% - 12px), #D29A84 100%); }
 .al-sum { margin-top: 12px; font-size: 15px; line-height: 1.45; color: rgba(243,245,247,.82); text-wrap: pretty; }
 .al-lead .al-kick { margin-bottom: 10px; }
 /* THE TITLE HAS TO CLEAR THE CLOSE BUTTON, which is fixed at the
