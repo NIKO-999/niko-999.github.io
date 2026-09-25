@@ -18062,15 +18062,26 @@ const SAID = [
     });
     /* Pick the first workout on the board and file it, so the record
        is written the way a person writes it rather than planted. */
+    /* NO THROW ON A BUILD THAT DOES NOT OPEN THE PICKER. A break that
+       shuts this door would otherwise take the whole FILE down here
+       rather than failing the assertion it is aimed at — which is
+       exactly what the first proof of the gate did: it reported "no
+       summary", the greenest-looking failure there is, and the two
+       checks under it never ran at all. Every step returns instead,
+       and the empty record downstream fails by name. */
     const file = (page) => page.evaluate(async () => {
       const sheet = document.querySelector('.sheet:not([hidden])');
-      sheet.querySelector('.wb-t').click();
+      if (!sheet) return false;
+      const t = sheet.querySelector('.wb-t');
+      if (!t) return false;
+      t.click();
       await new Promise((r) => setTimeout(r, 400));
       const go = [...sheet.querySelectorAll('button')]
         .find((b) => /^Log /.test((b.textContent || '').trim()));
-      if (!go) throw new Error('no Log button on the picker');
+      if (!go) return false;
       go.click();
       await new Promise((r) => setTimeout(r, 500));
+      return true;
     });
 
     /* ── A DAY WITH NO TRAINING BLOCK AT ALL ──
