@@ -4295,6 +4295,19 @@ on the day sheet: goals are read on the habits screen, not the month. Cells stac
 with a workout and one without put one row's dates at two heights.
 Ahead opens only when something is waiting there.
 
+### A missed block is struck through, and a kept habit just says so
+
+Reported off two screenshots. **A block behind you that was never kept
+is struck through**, in the quiet ink rather than red, so a missed one
+reads at a glance without the screen grading you. A day off was
+already struck; it still says Off where the time goes, which is what
+tells the two apart. Asserted both ways on one day with one block
+ticked, and as nothing struck on a day still to come.
+
+**A habit kept by something else says Complete, not "Completed by a
+session".** The row already names the block; who did the keeping is
+the day's business.
+
 ### Goals are gone
 
 Out on request: the section on the habits screen, its sheet, the three

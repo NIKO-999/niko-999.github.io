@@ -230,7 +230,11 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 /* What you trained rides the name's own line, in the session's colour. */
 .cd-rw { color: var(--kc); }
 .cd-it.is-done .cd-rn { color: var(--quiet); }
-.cd-it.is-past:not(.is-done) .cd-rn { color: var(--dim); }
+/* A block behind you and not kept is struck through: you can see at a
+   glance it was missed, and it is struck in the quiet ink, never red,
+   because nothing here says you failed. A day off is struck too, and
+   tells itself apart by saying Off where the time goes. */
+.cd-it.is-past:not(.is-done) .cd-rn { color: var(--dim); text-decoration: line-through; text-decoration-thickness: 1px; }
 .cd-it.is-off .cd-rn { color: var(--quiet); text-decoration: line-through; }
 
 /* THE CHECK. White while the block is waiting for you, and lit in the
@@ -1489,7 +1493,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       var sub, val;
       if (h.k === 'tick') {
         var by = cdKeptBy(today, h), st = cdStreak(h);
-        sub = by && by !== 'you' ? (by === 'session' ? 'Completed by a session' : 'Completed by ' + esc(by)) : (st > 1 ? st + '-day streak' : on ? 'Completed today' : 'Not yet');
+        /* Just the word: what kept it is the day's business, and the row
+           already said which block that was. */
+        sub = by && by !== 'you' ? 'Complete' : (st > 1 ? st + '-day streak' : on ? 'Complete' : 'Not yet');
         val = on ? '<span class="cd-hr-v">Completed</span>' : '<span class="cd-hr-v is-nil">—</span>';
       } else {
         var wk = 0, n = 0;

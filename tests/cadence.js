@@ -218,8 +218,17 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('and with no clock there is no check, no line and no next', !(await shown(page, '#cdGo')) && !(await shown(page, '#cdBar')) && !(await shown(page, '#cdThen')));
     ok('every block of that day is in the list, and every one is behind you',
       (await page.$$eval('.cd-it', (ls) => ls.length === 7 && ls.every((l) => l.classList.contains('is-past')))));
+    /* One kept and the rest missed, so the rule is seen both ways; the
+       tick is taken back after, or the week dots below read a kept day. */
+    await page.click('.cd-it .cd-dot');
+    const strk = await page.$$eval('.cd-it', (ls) => ls.map((l) => ({ done: l.classList.contains('is-done'),
+      s: getComputedStyle(l.querySelector('.cd-rn')).textDecorationLine })));
+    await page.click('.cd-it.is-done .cd-dot');
+    ok('a block behind you that was missed is struck through, and a kept one is not',
+      strk.some((x) => !x.done) && strk.some((x) => x.done) && strk.every((x) => (x.s === 'line-through') === !x.done), strk);
     ok('yesterday can still be ticked', await page.$$eval('.cd-dot', (bs) => bs.length > 0 && bs.every((b) => !b.disabled)));
     await page.click('.cd-wd[data-d="2026-09-26"]');
+    ok('a day still to come strikes nothing through', await page.$$eval('.cd-it .cd-rn', (ns) => ns.length > 0 && ns.every((n) => getComputedStyle(n).textDecorationLine === 'none')));
     ok('tomorrow says what is planned', (await heroOf(page)).join('|') === 'Tomorrow · 26 Sep|4 blocks|planned · 2h|', await heroOf(page));
     ok('a day ahead cannot be ticked', await page.$$eval('.cd-dot', (bs) => bs.length > 0 && bs.every((b) => b.disabled)));
     await page.click('.cd-wd[data-d="2026-09-27"]');
@@ -404,7 +413,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
 
     await page.click('.cd-tab[data-v="hab"]');
     const train = await page.$eval('.cd-hr[data-h="train"]', (e) => ({ t: e.textContent, on: e.classList.contains('is-on') }));
-    ok('Train is kept by the session filed today', /Completed by a session/.test(train.t) && train.on, train);
+    ok('Train is kept by the session filed today, and just says so', /Complete/.test(train.t) && !/Completed by/.test(train.t) && train.on, train);
     const hues = await page.$$eval('.cd-hr .cd-hr-b i', (ns) => ns.map((n) => getComputedStyle(n).boxShadow.match(/rgba?\([^)]+\)/)[0]));
     ok('six habits, six colours: colour says which', hues.length === 6 && new Set(hues).size === 6, hues);
     const fns = await page.$$eval('.cd-hr .cd-fn', (fs) => fs.map((f) => f.children.length));
