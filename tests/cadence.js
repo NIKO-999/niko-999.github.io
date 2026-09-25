@@ -222,7 +222,26 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
        tick is taken back after, or the week dots below read a kept day. */
     await page.click('.cd-it .cd-dot');
     const strk = await page.$$eval('.cd-it', (ls) => ls.map((l) => ({ done: l.classList.contains('is-done'),
-      s: getComputedStyle(l.querySelector('.cd-rn')).textDecorationLine })));
+      s: getComputedStyle(l.querySelector('.cd-rn')).textDecorationLine,
+      tk: getComputedStyle(l.querySelector('.cd-dot i'), '::after').content })));
+    /* A kept row carries a tick, and it is drawn: pixels inside the round
+       that stand 3:1 off its own fill. Read off the screen rather than the
+       rule, because a tick the colour of the fill is a rule that draws
+       nothing. */
+    const tkb = await page.$eval('.cd-it.is-done .cd-dot i', (e) => { const r = e.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; });
+    const tkp = PNG.sync.read(await page.screenshot());
+    const tget = (x, y) => { const i = (y * tkp.width + x) * 4; return [tkp.data[i], tkp.data[i + 1], tkp.data[i + 2]]; };
+    const tfill = tget(Math.round((tkb.x + 2.5) * DPR), Math.round((tkb.y + tkb.h / 2) * DPR));
+    let tdark = 0;
+    for (let y = Math.floor(tkb.y * DPR); y < Math.ceil((tkb.y + tkb.h) * DPR); y++)
+      for (let x = Math.floor(tkb.x * DPR); x < Math.ceil((tkb.x + tkb.w) * DPR); x++) {
+        /* Inside the round only: its corners are sky, which stands off the
+           fill too and would count a tick that is not there. */
+        const dx = x / DPR - (tkb.x + tkb.w / 2), dy = y / DPR - (tkb.y + tkb.h / 2);
+        if (Math.hypot(dx, dy) <= tkb.w / 2 - 2 && ratio(tget(x, y), tfill) >= 3) tdark++;
+      }
+    ok('a kept row draws a small tick in its dot, and only a kept row does',
+      strk.every((x) => (x.tk !== 'none' && x.tk !== 'normal') === x.done) && tdark >= 6 * DPR * DPR, { strk, tdark, tfill, tkb });
     await page.click('.cd-it.is-done .cd-dot');
     /* A missed name is dark grey: under the 4.5 every other word holds, and
        still over the 3:1 a mark is held to. */

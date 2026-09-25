@@ -4315,6 +4315,15 @@ on the day's list.
 session".** The row already names the block; who did the keeping is
 the day's business.
 
+**A kept block's dot opens into a round with a tick in it.** The fill
+was already the block's colour; the tick is what says done without
+reading a colour, so kept and missed tell apart by shape. `--on` on the
+fill, the dark ink every filled mark here takes. 16px drawn inside the
+same 44px press target. The check counts pixels INSIDE the round that
+stand 3:1 off its own fill: counted over the box, the sky in its corners
+passed with the tick deleted, and a tick drawn in the fill's colour
+passed too.
+
 ### Goals are gone
 
 Out on request: the section on the habits screen, its sheet, the three
