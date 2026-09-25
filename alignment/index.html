@@ -85,12 +85,17 @@
      lists, and the lists END above it, so nothing is ever written in the
      light. #1E3544 is the lightest ground the quiet label clears 4.8:1
      on, and it is where the pane stops. The glow in the middle is the
-     dawn's own, at .16, where .28 would lift the ground past that. */
-  --glow: 118px;
+     dawn's own, at .16, where .28 would lift the ground past that.
+
+     AND THE LIGHT IS SLIGHT. It ran to the dawn's own silver across the
+     last 118px and was reported as far too much: a white band under every
+     list. It lifts only as far as a slate now, over the last 64px, so the
+     foot of the screen is a hint of the dawn rather than a second one. */
+  --glow: 64px;
   --sky: radial-gradient(90% 55% at 50% 38%, rgba(64,110,132,.16), transparent 70%),
          linear-gradient(180deg, #03060A 0%, #07131D 16%, #122736 42%,
-                                 #1E3544 calc(100% - var(--glow)), #3D5563 calc(100% - 80px),
-                                 #7F8E97 calc(100% - 36px), #C3C9CD 100%);
+                                 #1E3544 calc(100% - var(--glow)), #2B4150 calc(100% - 28px),
+                                 #3E5361 100%);
 
   --r-card: 22px;
   --r-pill: 999px;
@@ -123,11 +128,11 @@
    and hands the rest down, and a view that hides it gets the whole
    height without being told. */
 html, body { height: 100%; }
-/* THE SKY IS THE CANVAS'S, and its foot colour is the silver. On a phone
+/* THE SKY IS THE CANVAS'S, and its foot colour is the sky's own foot. On a phone
    the page can end above the home indicator, and what showed there was
    the old flat black under a sky that had stopped. */
 body {
-  background-color: #C3C9CD;
+  background-color: #3E5361;
   background-image: var(--sky);
   background-repeat: no-repeat;
   background-size: 100% 100%;
