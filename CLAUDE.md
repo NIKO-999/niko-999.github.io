@@ -4295,6 +4295,22 @@ on the day sheet: goals are read on the habits screen, not the month. Cells stac
 with a workout and one without put one row's dates at two heights.
 Ahead opens only when something is waiting there.
 
+### Goals are gone
+
+Out on request: the section on the habits screen, its sheet, the three
+shapes, `cdGoalClean`, `cdPaintGoals`, `cdHabById`, the `.cd-gr` and
+`.cd-gbar` rules and `--gold`, which had nothing left to dress. A dated
+task was the one thing besides an important note that held the months
+ahead open on the calendar; that went with it.
+
+**`cad.goal.v1` IS NOT SWEPT**, on `schedule/`'s objectives precedent:
+a main task is a sentence somebody wrote, and deleting those is not a
+tidy-up. It sits on the phone, read by nothing, and the backup no longer
+carries it because the backup is built from `K`. Asserted in both
+directions: the planted list is byte-for-byte what it was after a load,
+and the habits screen has no section, no door and not the word, since an
+emptied list still draws its heading.
+
 ### The site is the app, photographed
 
 `cadence/about/` is one static page in the app's own sky and type, and
