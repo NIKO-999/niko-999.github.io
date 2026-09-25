@@ -404,10 +404,74 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cd-nstar { width: 44px; height: 46px; display: grid; place-items: center; }
 .cd-nstar i { width: 6px; height: 6px; transform: rotate(45deg); box-shadow: inset 0 0 0 1.4px var(--quiet); }
 .cd-ni.is-imp .cd-nstar i { background: var(--ink); box-shadow: 0 0 8px rgba(243, 245, 247, .55); }
-.cd-nt { min-height: 44px; padding: 13px 0 12px; font: 400 15px/1.4 var(--sans); color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; }
+.cd-nt { min-height: 44px; padding: 13px 0 12px; font: 400 15px/1.4 var(--sans); color: var(--ink); text-align: left; }
+/* The clamp is on the words alone, so the picture count under them is
+   never the line it cuts. */
+.cd-ntx { white-space: pre-wrap; overflow-wrap: anywhere; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; }
 .cd-nstrip { display: flex; justify-content: center; gap: 6px; margin-top: 22px; }
 .cd-nstrip i { width: 5px; height: 5px; border-radius: 50%; background: var(--nil); }
 .cd-nstrip i.is-on { background: var(--ink); box-shadow: 0 0 6px rgba(243, 245, 247, .5); }
+
+.cd-nt b { font-weight: 600; }
+.cd-nt small { display: block; margin-top: 4px; font: 500 10.5px/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--quiet); }
+
+/* ── a note, opened: the whole page, the way a note opens in Notes ── */
+.cd-doc {
+  position: fixed; inset: 0; z-index: 35; overflow-y: auto; overflow-x: hidden;
+  background: var(--bg); opacity: 0; transform: translateY(12px); transition: opacity .2s, transform .24s cubic-bezier(.2, .8, .2, 1);
+}
+.cd-doc.is-open { opacity: 1; transform: none; }
+.cd-doc-top { position: sticky; top: 0; z-index: 2; max-width: 560px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 6px) var(--gut) 8px; background: var(--bg); box-shadow: 0 1px 0 var(--hair); }
+.cd-doc-hd { display: flex; align-items: center; gap: 6px; }
+.cd-doc-back { display: flex; align-items: center; gap: 2px; min-height: 44px; padding: 0 10px 0 0; margin-right: auto; font: 500 16px/1 var(--sans); color: var(--ink); }
+.cd-doc-back svg { width: 22px; height: 22px; margin-left: -6px; }
+.cd-doc-rm { width: 44px; height: 44px; display: grid; place-items: center; color: var(--dim); }
+.cd-doc-rm svg { width: 20px; height: 20px; }
+.cd-nstar.is-imp i { background: var(--ink); box-shadow: 0 0 8px rgba(243, 245, 247, .55); }
+/* Five styles as one segmented row: the one the caret is in is filled. */
+.cd-doc-ks { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-top: 4px; padding: 3px; border-radius: 24px; box-shadow: inset 0 0 0 1px var(--hair); }
+.cd-doc-ks button { min-height: 38px; border-radius: 19px; text-align: center; font: 500 12.5px/1 var(--sans); color: var(--dim); position: relative; }
+.cd-doc-ks button::before { content: ""; position: absolute; left: 0; right: 0; top: -3px; bottom: -3px; }
+.cd-doc-ks button[aria-pressed="true"] { background: var(--ink); color: var(--on); }
+.cd-doc-hl { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+.cd-doc-hl button, .cd-doc-pic { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; }
+.cd-doc-hl button i { width: 22px; height: 22px; border-radius: 50%; background: color-mix(in srgb, var(--hc) 28%, transparent); box-shadow: inset 0 0 0 1.5px var(--hc); }
+.cd-doc-hl button[aria-pressed="true"] i { background: var(--hc); box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--hc); }
+.cd-doc-hl .hl-o { --hc: var(--c-body); }
+.cd-doc-hl .hl-p { --hc: var(--h-sleep); }
+.cd-doc-hl .hl-y { --hc: var(--c-work); }
+.cd-doc-hl .hl-b { --hc: var(--h-water); }
+.cd-doc-hl .hl-v { --hc: var(--c-mind); }
+.cd-doc-hl .hl-x i { background: linear-gradient(135deg, transparent 46%, var(--quiet) 46%, var(--quiet) 54%, transparent 54%); box-shadow: inset 0 0 0 1.5px var(--quiet); }
+.cd-doc-pic { color: var(--ink); cursor: pointer; }
+.cd-doc-pic svg { width: 24px; height: 24px; }
+.cd-doc-pic input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+/* 16px and up everywhere a caret can go, or iOS zooms the page. */
+.cd-doc-ed { max-width: 560px; min-height: calc(100dvh - 180px); margin: 0 auto; padding: 18px var(--gut) 120px; outline: none; font: 400 16px/1.5 var(--sans); color: var(--ink); overflow-wrap: anywhere; caret-color: var(--ink); }
+.cd-nb { min-height: 1.5em; }
+.cd-nb.k-t { margin: 4px 0 10px; font: 700 28px/1.2 var(--sans); letter-spacing: -.01em; }
+.cd-nb.k-h { margin: 22px 0 6px; font: 700 21px/1.3 var(--sans); }
+.cd-nb.k-s { margin: 14px 0 4px; font: 600 17px/1.35 var(--sans); }
+.cd-nb.k-t:first-child, .cd-nb.k-h:first-child, .cd-nb.k-s:first-child { margin-top: 0; }
+/* A quote is the bar down the left that groups the lines under a
+   heading, which is how the notes this was asked from hold a section. */
+.cd-nb.k-q { position: relative; padding-left: 16px; color: var(--dim); }
+.cd-nb.k-q::before { content: ""; position: absolute; left: 2px; top: 0; bottom: 0; width: 3px; border-radius: 2px; background: var(--miss); }
+.cd-nb.k-q + .cd-nb.k-q::before { top: -1px; }
+/* A highlight is the colour on the words and a wash behind them, never
+   the wash alone: a tint without the ink is a smudge on a dark page. */
+.cd-nb mark { color: var(--hc); background: color-mix(in srgb, var(--hc) 20%, transparent); border-radius: 4px; padding: 1px 0; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.cd-nb mark[data-c="o"] { --hc: var(--c-body); }
+.cd-nb mark[data-c="p"] { --hc: var(--h-sleep); }
+.cd-nb mark[data-c="y"] { --hc: var(--c-work); }
+.cd-nb mark[data-c="b"] { --hc: var(--h-water); }
+.cd-nb mark[data-c="v"] { --hc: var(--c-mind); }
+.cd-nb.k-h mark, .cd-nb.k-t mark { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+.cd-nb-i { position: relative; margin: 12px 0; user-select: none; -webkit-user-select: none; }
+.cd-nb-i img { display: block; width: 100%; height: auto; border-radius: 12px; background: var(--lift); }
+.cd-nb-x { position: absolute; top: 6px; right: 6px; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: var(--ink); }
+.cd-nb-x svg { width: 30px; height: 30px; padding: 7px; border-radius: 50%; background: rgba(3, 6, 10, .6); }
 
 /* ── toast ── */
 .cd-toast {
@@ -666,11 +730,48 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     }
     return null;
   }
+  /* A note is a list of BLOCKS: a title, a heading, a sub-heading, a
+     line of body, a quote, or a picture. A line of text is a list of
+     runs, [words, highlight], so a colour can sit on three words of it
+     rather than on the whole line. `t` is the plain text worked out from
+     the blocks on every write, for everything that only reads a note (the
+     list, the day sheet), so it cannot drift from them. A note written
+     before blocks existed is its `t`, a body line a line. */
+  var NB_K = { t: 1, h: 1, s: 1, p: 1, q: 1, i: 1 };
+  var NB_HL = ['o', 'p', 'y', 'b', 'v'];
+  function cdNbClean(b) {
+    if (!isObj(b) || !NB_K[b.k]) return null;
+    if (b.k === 'i') {
+      var w = Math.round(+b.w), h = Math.round(+b.h);
+      if (typeof b.p !== 'string' || !/^p[a-z0-9]{2,40}$/.test(b.p)) return null;
+      /* Damaged, the aspect falls to 4:3 rather than to nothing: a box
+         of no height is the page jumping when the picture lands. */
+      if (!(w > 0 && w < 20000 && h > 0 && h < 20000)) { w = 4; h = 3; }
+      return { k: 'i', p: b.p, w: w, h: h };
+    }
+    var r = [];
+    (Array.isArray(b.r) ? b.r : []).forEach(function (x) {
+      if (!Array.isArray(x)) return;
+      var t = String(x[0] == null ? '' : x[0]).replace(/[\r\n]+/g, ' '), c = NB_HL.indexOf(x[1]) >= 0 ? x[1] : '';
+      if (!t) return;
+      if (r.length && r[r.length - 1][1] === c) r[r.length - 1][0] += t; else r.push([t, c]);
+    });
+    return { k: b.k, r: r };
+  }
+  function cdNbText(b) { return b.k === 'i' ? '' : b.r.map(function (x) { return x[0]; }).join(''); }
   function cdNoteClean(n) {
-    if (!isObj(n) || typeof n.id !== 'string' || !n.id) return null;
-    var t = String(n.t || '').slice(0, 2000);
-    if (!t.trim() || !ISO.test(n.d)) return null;
-    return { id: n.id, t: t, d: n.d, i: n.i ? 1 : 0, at: +n.at || 0 };
+    if (!isObj(n) || typeof n.id !== 'string' || !n.id || !ISO.test(n.d)) return null;
+    var bs = Array.isArray(n.b) ? n.b.map(cdNbClean).filter(Boolean)
+      : String(n.t || '').split('\n').map(function (l) { return { k: 'p', r: l ? [[l, '']] : [] }; });
+    bs = bs.slice(0, 400);
+    var room = 20000;
+    bs.forEach(function (b) {
+      if (b.k === 'i') return;
+      b.r = b.r.filter(function (x) { x[0] = x[0].slice(0, Math.max(0, room)); room -= x[0].length; return x[0]; });
+    });
+    var t = bs.filter(function (b) { return b.k !== 'i'; }).map(cdNbText).join('\n');
+    if (!t.trim() && !bs.some(function (b) { return b.k === 'i'; })) return null;
+    return { id: n.id, t: t, b: bs, d: n.d, i: n.i ? 1 : 0, at: +n.at || 0 };
   }
 
   var S = {
@@ -1860,10 +1961,19 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       return '<div class="cd-ng"><p class="cd-lbl">' + esc(cdNoteDay(d)) + '</p><ul class="cd-nl">' + ns.map(function (n) {
         return '<li class="cd-ni' + (n.i ? ' is-imp' : '') + '" data-n="' + n.id + '">'
           + '<button type="button" class="cd-nstar" data-act="imp" aria-pressed="' + !!n.i + '" aria-label="Important"><i></i></button>'
-          + '<button type="button" class="cd-nt" data-act="open">' + esc(n.t) + '</button></li>';
+          + '<button type="button" class="cd-nt" data-act="open">' + cdNotePrev(n) + '</button></li>';
       }).join('') + '</ul></div>';
     }).join('');
     $('cdNotes').innerHTML = html || '<p class="cd-empty">Nothing written yet.</p>';
+  }
+  /* The list shows a note's opening lines, its first line in weight when
+     it is a heading, and how many pictures it carries: the picture
+     itself is one press away, on the page. */
+  function cdNotePrev(n) {
+    var txt = n.b.filter(function (b) { return b.k !== 'i' && cdNbText(b).trim(); });
+    var pics = n.b.filter(function (b) { return b.k === 'i'; }).length;
+    var h = txt.map(function (b, i) { var t = esc(cdNbText(b)); return i === 0 && b.k !== 'p' && b.k !== 'q' ? '<b>' + t + '</b>' : t; }).join('\n');
+    return '<span class="cd-ntx">' + h + '</span>' + (pics ? '<small>' + pics + (pics === 1 ? ' picture' : ' pictures') + '</small>' : '');
   }
   function cdNoteSync() { $('cdNoteGo').disabled = !$('cdNoteIn').value.trim(); }
   $('cdNoteIn').addEventListener('input', function () {
@@ -1884,50 +1994,403 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var n = S.note.filter(function (x) { return x.id === btn.closest('.cd-ni').dataset.n; })[0];
     if (!n) return;
     if (btn.dataset.act === 'imp') { n.i = n.i ? 0 : 1; cdSave('note'); cdPaintNotes(); return; }
-    cdNoteSheet(n);
+    cdNoteOpen(n);
   });
-  function cdNoteSheet(n) {
-    var f = { t: n.t, d: n.d, i: n.i };
-    var root = el('div');
-    var ta = el('textarea', 'cd-field'); ta.id = 'cdNE'; ta.value = f.t; ta.setAttribute('aria-label', 'The note');
-    ta.addEventListener('input', function () { f.t = ta.value; save.disabled = !f.t.trim(); });
-    root.appendChild(ta);
-    var rows = el('div', 'cd-rows'); rows.style.marginTop = '14px';
-    var r = el('label', 'cd-row', '<span>Day</span>');
-    var dd = el('input', 'cd-field'); dd.type = 'date'; dd.value = f.d; dd.id = 'cdNED';
-    dd.addEventListener('input', function () { if (ISO.test(dd.value)) f.d = dd.value; });
-    r.appendChild(dd); rows.appendChild(r);
-    var tg = el('button', 'cd-toggle', 'Important<i></i>'); tg.type = 'button'; tg.id = 'cdNEI';
-    tg.setAttribute('aria-pressed', !!f.i);
-    tg.addEventListener('click', function () { f.i = f.i ? 0 : 1; tg.setAttribute('aria-pressed', !!f.i); });
-    rows.appendChild(tg);
-    root.appendChild(rows);
-    var foot = el('div', 'cd-foot'); root.appendChild(foot);
-    var save = el('button', 'cd-btn go', 'Save'); save.type = 'button'; save.id = 'cdNEGo';
-    save.addEventListener('click', function () {
-      var rec = cdNoteClean({ id: n.id, t: f.t, d: f.d, i: f.i, at: n.at });
-      if (!rec) return;
-      S.note = S.note.map(function (x) { return x.id === n.id ? rec : x; });
-      cdSave('note'); cdClose(); cdPaint();
-    });
-    function plainFoot() {
-      foot.innerHTML = ''; foot.style.flexWrap = '';
-      var rm = el('button', 'cd-btn warn', 'Delete'); rm.type = 'button'; rm.id = 'cdNERm';
-      rm.addEventListener('click', function () {
-        /* No bin: a note is only ever what you typed, so it asks. */
-        foot.innerHTML = ''; foot.style.flexWrap = 'wrap';
-        foot.appendChild(el('p', 'cd-note', 'This note goes for good.'));
-        var keep = el('button', 'cd-btn', 'Keep it'); keep.type = 'button';
-        keep.addEventListener('click', plainFoot);
-        var yes = el('button', 'cd-btn warn', 'Delete it'); yes.type = 'button'; yes.id = 'cdNERmYes';
-        yes.addEventListener('click', function () { S.note = S.note.filter(function (x) { return x.id !== n.id; }); cdSave('note'); cdClose(); cdPaint(); });
-        foot.appendChild(keep); foot.appendChild(yes);
-      });
-      foot.appendChild(rm); foot.appendChild(save);
-    }
-    plainFoot();
-    cdSheet(cdNoteDay(n.d), root);
+  /* ═══ A NOTE, OPENED ═══
+     The list is a line to a day; pressing one opens the whole page, the
+     way a note opens in Notes. One surface of words, not a field a line:
+     a selection runs across lines and a colour sits on the words you
+     chose. Everything structural (Return, a Backspace that joins two
+     lines, a paste, a style, a colour) goes through the block list and
+     is drawn again, so the page can never hold markup the record cannot
+     say. Typing inside one line is left to the browser, which is what
+     keeps a keyboard's own composing and correcting working. */
+  /* Subhead, not Subheading: five across a phone is 66px a style, and the
+     long word ran into its neighbour. */
+  var NB_NAME = { t: 'Title', h: 'Heading', s: 'Subhead', p: 'Body', q: 'Quote' };
+  var NB_HUE = { o: 'Orange', p: 'Pink', y: 'Yellow', b: 'Blue', v: 'Violet' };
+  var D = null, picURL = {};
+
+  /* Pictures live in IndexedDB, never localStorage: a photograph there
+     shares 5MB with the week, and the day it is too big it takes the
+     week with it. */
+  var picDB = null;
+  function cdPicDB(cb) {
+    if (picDB) return cb(picDB);
+    try {
+      var rq = indexedDB.open('cad.pic', 1);
+      rq.onupgradeneeded = function () { rq.result.createObjectStore('p'); };
+      rq.onsuccess = function () { picDB = rq.result; cb(picDB); };
+      rq.onerror = function () { cb(null); };
+    } catch (e) { cb(null); }
   }
+  function cdPicTx(mode, fn, done) {
+    cdPicDB(function (db) {
+      if (!db) return done && done(null);
+      try { var tx = db.transaction('p', mode), st = tx.objectStore('p'), rq = fn(st);
+        tx.oncomplete = function () { if (done) done(rq ? rq.result : true); };
+        tx.onerror = function () { if (done) done(null); };
+      } catch (e) { if (done) done(null); }
+    });
+  }
+  function cdPicGet(k, cb) { cdPicTx('readonly', function (st) { return st.get(k); }, cb); }
+  function cdPicPut(k, blob, cb) { cdPicTx('readwrite', function (st) { return st.put(blob, k); }, cb); }
+  /* A key no note names is swept: a picture whose line was deleted, or a
+     note that went, would otherwise sit in the database for ever. */
+  function cdPicSweep() {
+    var used = {};
+    S.note.forEach(function (n) { n.b.forEach(function (b) { if (b.k === 'i') used[b.p] = 1; }); });
+    if (D) D.bs.forEach(function (b) { if (b.k === 'i') used[b.p] = 1; });
+    cdPicTx('readwrite', function (st) {
+      var rq = st.openKeyCursor ? st.openKeyCursor() : st.openCursor();
+      rq.onsuccess = function () { var c = rq.result; if (!c) return; if (!used[c.key]) st.delete(c.key); c.continue(); };
+      return null;
+    });
+  }
+  setTimeout(cdPicSweep, 4000);
+  /* Fitted to 1280 on the long edge rather than cropped: a note's picture
+     is a whiteboard or a receipt, and its edges are what you took it for. */
+  function cdPicFit(file, cb) {
+    var fr = new FileReader();
+    fr.onerror = function () { cb(null); };
+    fr.onload = function () {
+      var im = new Image();
+      im.onerror = function () { cb(null); };
+      im.onload = function () {
+        var sc = Math.min(1, 1280 / Math.max(im.width, im.height)), w = Math.max(1, Math.round(im.width * sc)), h = Math.max(1, Math.round(im.height * sc));
+        var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(im, 0, 0, w, h);
+        cv.toBlob(function (bl) { cb(bl ? { blob: bl, w: w, h: h } : null); }, 'image/jpeg', .85);
+      };
+      im.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  }
+
+  function cdNbHTML(b) {
+    if (b.k === 'i') return '<figure class="cd-nb cd-nb-i" contenteditable="false" data-p="' + b.p + '" data-w="' + b.w + '" data-h="' + b.h + '">'
+      + '<img alt="A picture" style="aspect-ratio:' + b.w + ' / ' + b.h + '">'
+      + '<button type="button" class="cd-nb-x" aria-label="Remove this picture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M17 7L7 17M7 7l10 10"/></svg></button></figure>';
+    var inner = b.r.map(function (x) { return x[1] ? '<mark data-c="' + x[1] + '">' + esc(x[0]) + '</mark>' : esc(x[0]); }).join('');
+    return '<div class="cd-nb k-' + b.k + '" data-k="' + b.k + '">' + (inner || '<br>') + '</div>';
+  }
+  function cdNbPics(ed) {
+    Array.prototype.forEach.call(ed.querySelectorAll('.cd-nb-i'), function (f) {
+      var k = f.dataset.p, img = f.querySelector('img');
+      if (picURL[k]) { img.src = picURL[k]; return; }
+      cdPicGet(k, function (bl) { if (bl) { picURL[k] = URL.createObjectURL(bl); img.src = picURL[k]; } });
+    });
+  }
+  /* The page read back into blocks. Anything the browser put there that
+     the record has no word for (a styled span from a join, a nested div
+     from a paste) is read as its words, and `odd` says the page has to be
+     drawn again. */
+  function cdNbParse(ed) {
+    var out = [], odd = false;
+    Array.prototype.forEach.call(ed.childNodes, function (nd) {
+      if (nd.nodeType === 3) { if (nd.data.trim()) out.push({ k: 'p', r: [[nd.data, '']] }); odd = true; return; }
+      if (nd.nodeType !== 1) return;
+      if (nd.tagName === 'FIGURE' && nd.dataset.p) { out.push({ k: 'i', p: nd.dataset.p, w: +nd.dataset.w, h: +nd.dataset.h }); return; }
+      var k = nd.tagName === 'DIV' && NB_NAME[nd.dataset.k] ? nd.dataset.k : 'p';
+      if (!(nd.tagName === 'DIV' && NB_NAME[nd.dataset.k])) odd = true;
+      var r = [];
+      (function walk(x, c) {
+        Array.prototype.forEach.call(x.childNodes, function (y) {
+          if (y.nodeType === 3) { r.push([y.data, c]); return; }
+          if (y.nodeType !== 1) return;
+          if (y.tagName === 'BR') return;
+          var cc = c;
+          if (y.tagName === 'MARK' && NB_HL.indexOf(y.dataset.c) >= 0 && !c) cc = y.dataset.c; else odd = true;
+          walk(y, cc);
+        });
+      })(nd, '');
+      out.push({ k: k, r: r });
+    });
+    return { bs: out.map(cdNbClean).filter(Boolean), odd: odd };
+  }
+
+  /* A place in the note is [block, character]; the range is two of them. */
+  function cdSelPt(ed, node, off) {
+    if (node === ed) {
+      if (off >= ed.children.length) { var l = ed.children.length - 1; return [l, l >= 0 ? ed.children[l].textContent.length : 0]; }
+      return [off, 0];
+    }
+    var blk = node; while (blk && blk.parentNode !== ed) blk = blk.parentNode;
+    if (!blk) return null;
+    var rg = document.createRange(); rg.selectNodeContents(blk);
+    try { rg.setEnd(node, off); } catch (e) { return null; }
+    return [Array.prototype.indexOf.call(ed.children, blk), rg.toString().length];
+  }
+  function cdSelGet() {
+    var ed = $('cdDocEd'), s = getSelection();
+    if (!ed || !s.rangeCount) return null;
+    var rg = s.getRangeAt(0);
+    if (!ed.contains(rg.startContainer) || !ed.contains(rg.endContainer)) return null;
+    var a = cdSelPt(ed, rg.startContainer, rg.startOffset), b = cdSelPt(ed, rg.endContainer, rg.endOffset);
+    return a && b ? { a: a, b: b } : null;
+  }
+  function cdSelNode(ed, p) {
+    var blk = ed.children[p[0]];
+    if (!blk) return [ed, ed.children.length];
+    if (blk.tagName === 'FIGURE') return [ed, p[0]];
+    var left = p[1], w = document.createTreeWalker(blk, NodeFilter.SHOW_TEXT), t, last = null;
+    while ((t = w.nextNode())) { last = t; if (left <= t.data.length) return [t, left]; left -= t.data.length; }
+    return last ? [last, last.data.length] : [blk, 0];
+  }
+  function cdSelSet(a, b) {
+    var ed = $('cdDocEd'); if (!ed) return;
+    var pa = cdSelNode(ed, a), pb = cdSelNode(ed, b || a), rg = document.createRange(), s = getSelection();
+    try { rg.setStart(pa[0], pa[1]); rg.setEnd(pb[0], pb[1]); } catch (e) { return; }
+    s.removeAllRanges(); s.addRange(rg);
+    D.sel = { a: a.slice(), b: (b || a).slice() };
+  }
+
+  function cdExp(b) { var t = '', c = []; b.r.forEach(function (x) { t += x[0]; for (var i = 0; i < x[0].length; i++) c.push(x[1]); }); return { t: t, c: c }; }
+  function cdImp(k, t, c) {
+    var r = [];
+    for (var i = 0; i < t.length; i++) { if (r.length && r[r.length - 1][1] === c[i]) r[r.length - 1][0] += t[i]; else r.push([t[i], c[i] || '']); }
+    return { k: k, r: r };
+  }
+  function cdPtCmp(x, y) { return x[0] - y[0] || x[1] - y[1]; }
+  /* Takes the range out and returns where the caret lands. A picture
+     inside the range goes with it. */
+  function cdEdCut(sel) {
+    var a = sel.a, b = sel.b, bs = D.bs;
+    if (cdPtCmp(a, b) > 0) { var t = a; a = b; b = t; }
+    if (!cdPtCmp(a, b)) return a.slice();
+    if (bs[a[0]] && bs[a[0]].k === 'i') { bs.splice(a[0], 0, { k: 'p', r: [] }); b = [b[0] + 1, b[1]]; a = [a[0], 0]; }
+    var A = cdExp(bs[a[0]]);
+    var tail = { t: '', c: [] };
+    if (bs[b[0]] && bs[b[0]].k !== 'i') { var B = cdExp(bs[b[0]]); tail = { t: B.t.slice(b[1]), c: B.c.slice(b[1]) }; }
+    bs[a[0]] = cdImp(bs[a[0]].k, A.t.slice(0, a[1]) + tail.t, A.c.slice(0, a[1]).concat(tail.c));
+    bs.splice(a[0] + 1, Math.min(b[0], bs.length - 1) - a[0]);
+    return a.slice();
+  }
+  function cdEdInsert(p, text) {
+    var lines = String(text).replace(/\r\n?/g, '\n').split('\n'), bs = D.bs, b = bs[p[0]];
+    if (!b || b.k === 'i') { bs.splice(p[0] + (b ? 1 : 0), 0, { k: 'p', r: [] }); p = [p[0] + (b ? 1 : 0), 0]; b = bs[p[0]]; }
+    var E = cdExp(b), head = E.t.slice(0, p[1]), headC = E.c.slice(0, p[1]), tail = E.t.slice(p[1]), tailC = E.c.slice(p[1]);
+    var hue = p[1] > 0 ? E.c[p[1] - 1] : '';
+    function fill(s) { return s.split('').map(function () { return hue; }); }
+    if (lines.length === 1) { bs[p[0]] = cdImp(b.k, head + lines[0] + tail, headC.concat(fill(lines[0]), tailC)); return [p[0], p[1] + lines[0].length]; }
+    var made = [cdImp(b.k, head + lines[0], headC.concat(fill(lines[0])))];
+    for (var i = 1; i < lines.length - 1; i++) made.push(cdImp('p', lines[i], fill(lines[i])));
+    var last = lines[lines.length - 1];
+    made.push(cdImp('p', last + tail, fill(last).concat(tailC)));
+    bs.splice.apply(bs, [p[0], 1].concat(made));
+    return [p[0] + made.length - 1, last.length];
+  }
+  function cdEdDraw(a, b) {
+    var ed = $('cdDocEd');
+    if (!D.bs.length) D.bs.push({ k: 'p', r: [] });
+    ed.innerHTML = D.bs.map(cdNbHTML).join('');
+    cdNbPics(ed);
+    if (a) { ed.focus({ preventScroll: true }); cdSelSet(a, b); }
+    cdEdSave(); cdEdTools();
+  }
+  function cdEdSave() {
+    var rec = cdNoteClean({ id: D.n.id, b: D.bs, d: D.n.d, i: D.n.i, at: D.n.at });
+    var had = S.note.some(function (x) { return x.id === D.n.id; });
+    if (rec) S.note = had ? S.note.map(function (x) { return x.id === rec.id ? rec : x; }) : S.note.concat([rec]);
+    else if (had) S.note = S.note.filter(function (x) { return x.id !== D.n.id; });
+    clearTimeout(D.tm);
+    D.tm = setTimeout(function () { cdSave('note'); }, 300);
+  }
+  function cdEdSync() {
+    var ed = $('cdDocEd'), p = cdNbParse(ed);
+    D.bs = p.bs;
+    if (p.odd) { var s = cdSelGet(); cdEdDraw(s ? s.a : null, s ? s.b : null); return; }
+    cdEdSave();
+  }
+  function cdEdStyle(k) {
+    var s = D.sel; if (!s) return;
+    var lo = Math.min(s.a[0], s.b[0]), hi = Math.max(s.a[0], s.b[0]), txt = [];
+    for (var i = lo; i <= hi; i++) if (D.bs[i] && D.bs[i].k !== 'i') txt.push(D.bs[i]);
+    if (!txt.length) return;
+    /* Pressing the style a line already wears puts it back to body. */
+    var all = txt.every(function (b) { return b.k === k; });
+    txt.forEach(function (b) { b.k = all ? 'p' : k; });
+    cdEdDraw(s.a, s.b);
+  }
+  function cdEdHue(c) {
+    var s = D.sel; if (!s) return;
+    var a = s.a, b = s.b;
+    if (cdPtCmp(a, b) > 0) { var t = a; a = b; b = t; }
+    var spans = [];
+    if (!cdPtCmp(a, b)) { if (D.bs[a[0]] && D.bs[a[0]].k !== 'i') spans.push([a[0], 0, cdNbText(D.bs[a[0]]).length]); }
+    else for (var i = a[0]; i <= b[0]; i++) {
+      var bl = D.bs[i]; if (!bl || bl.k === 'i') continue;
+      var len = cdNbText(bl).length;
+      spans.push([i, i === a[0] ? a[1] : 0, i === b[0] ? b[1] : len]);
+    }
+    /* A caret colours its whole line; a selection colours what it holds.
+       Either way, pressing the colour that is already there takes it off. */
+    var on = c && spans.every(function (sp) { var E = cdExp(D.bs[sp[0]]); return E.c.slice(sp[1], sp[2]).every(function (x) { return x === c; }); });
+    spans.forEach(function (sp) {
+      var E = cdExp(D.bs[sp[0]]);
+      for (var j = sp[1]; j < sp[2]; j++) E.c[j] = on ? '' : c;
+      D.bs[sp[0]] = cdImp(D.bs[sp[0]].k, E.t, E.c);
+    });
+    cdEdDraw(s.a, s.b);
+  }
+  function cdEdSplit(s) {
+    var p = cdEdCut(s), b = D.bs[p[0]];
+    if (!b || b.k === 'i') { D.bs.splice(p[0] + 1, 0, { k: 'p', r: [] }); return cdEdDraw([p[0] + 1, 0]); }
+    var E = cdExp(b);
+    /* Return on an empty quote leaves the quote, the way a list ends. */
+    if (b.k === 'q' && !E.t) { b.k = 'p'; return cdEdDraw(p); }
+    var next = b.k === 'q' ? 'q' : 'p';
+    D.bs.splice(p[0], 1, cdImp(b.k, E.t.slice(0, p[1]), E.c.slice(0, p[1])), cdImp(next, E.t.slice(p[1]), E.c.slice(p[1])));
+    cdEdDraw([p[0] + 1, 0]);
+  }
+  function cdEdBack(p) {
+    var bs = D.bs, b = bs[p[0]];
+    if (p[0] === 0) { if (b && b.k !== 'p') { b.k = 'p'; cdEdDraw(p); } return; }
+    var prev = bs[p[0] - 1];
+    if (prev.k === 'i') { bs.splice(p[0] - 1, 1); return cdEdDraw([p[0] - 1, 0]); }
+    var P = cdExp(prev), C = cdExp(b);
+    bs.splice(p[0] - 1, 2, cdImp(prev.k, P.t + C.t, P.c.concat(C.c)));
+    cdEdDraw([p[0] - 1, P.t.length]);
+  }
+  function cdEdFwd(p) {
+    var bs = D.bs, nx = bs[p[0] + 1];
+    if (!nx) return;
+    if (nx.k === 'i') { bs.splice(p[0] + 1, 1); return cdEdDraw(p); }
+    var A = cdExp(bs[p[0]]), N = cdExp(nx);
+    bs.splice(p[0], 2, cdImp(bs[p[0]].k, A.t + N.t, A.c.concat(N.c)));
+    cdEdDraw(p);
+  }
+  function cdEdTools() {
+    if (!D) return;
+    var s = D.sel, b = s && D.bs[s.a[0]], k = b && b.k !== 'i' ? b.k : '';
+    Array.prototype.forEach.call(document.querySelectorAll('#cdDocKs button'), function (x) { x.setAttribute('aria-pressed', x.dataset.k === k); });
+    var c = '';
+    if (b && b.k !== 'i') { var E = cdExp(b), i = Math.max(0, Math.min(s.a[1], E.c.length) - (s.a[1] > 0 ? 1 : 0)); c = E.c[i] || ''; }
+    Array.prototype.forEach.call(document.querySelectorAll('#cdDocHl button[data-c]'), function (x) { x.setAttribute('aria-pressed', !!x.dataset.c && x.dataset.c === c); });
+  }
+
+  function cdNoteOpen(n) {
+    cdNoteClose(true);
+    D = { n: { id: n.id, d: n.d, i: n.i, at: n.at }, bs: JSON.parse(JSON.stringify(n.b)), sel: null, tm: 0 };
+    var wrap = el('div');
+    var ks = Object.keys(NB_NAME).map(function (k) { return '<button type="button" data-k="' + k + '" aria-pressed="false">' + NB_NAME[k] + '</button>'; }).join('');
+    var hl = NB_HL.map(function (c) { return '<button type="button" class="hl-' + c + '" data-c="' + c + '" aria-pressed="false" aria-label="' + NB_HUE[c] + ' highlight"><i></i></button>'; }).join('');
+    wrap.innerHTML = '<div class="cd-doc" id="cdDoc" role="dialog" aria-label="Note"><div class="cd-doc-top">'
+      + '<div class="cd-doc-hd"><button type="button" class="cd-doc-back" id="cdDocBack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>Notes</button>'
+      + '<input class="cd-ndate" id="cdDocD" type="date" aria-label="The day it is about">'
+      + '<button type="button" class="cd-nstar" id="cdDocImp" aria-label="Important"><i></i></button>'
+      + '<button type="button" class="cd-doc-rm" id="cdDocRm" aria-label="Delete this note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg></button></div>'
+      + '<div class="cd-doc-ks" id="cdDocKs">' + ks + '</div>'
+      + '<div class="cd-doc-hl" id="cdDocHl">' + hl
+      + '<button type="button" class="hl-x" data-c="" aria-label="No highlight"><i></i></button>'
+      + '<label class="cd-doc-pic" aria-label="Add a picture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><circle cx="9" cy="10.5" r="1.6"/><path d="M4.5 17l5-4.5 3.5 3 2.5-2 4 3.5"/></svg><input type="file" id="cdDocFile" accept="image/*" multiple></label></div>'
+      + '</div><div class="cd-doc-ed" id="cdDocEd" contenteditable="true" role="textbox" aria-multiline="true" aria-label="The note" spellcheck="true"></div></div>';
+    var dv = wrap.firstChild;
+    document.body.appendChild(dv);
+    var ed = $('cdDocEd');
+    $('cdDocD').value = D.n.d;
+    $('cdDocImp').setAttribute('aria-pressed', !!D.n.i);
+    if (D.n.i) $('cdDocImp').classList.add('is-imp');
+    cdEdDraw();
+
+    $('cdDocBack').addEventListener('click', function () { cdNoteClose(); });
+    $('cdDocD').addEventListener('input', function () { if (ISO.test($('cdDocD').value)) { D.n.d = $('cdDocD').value; cdEdSave(); } });
+    $('cdDocImp').addEventListener('click', function () {
+      D.n.i = D.n.i ? 0 : 1; this.setAttribute('aria-pressed', !!D.n.i); this.classList.toggle('is-imp', !!D.n.i); cdEdSave();
+    });
+    $('cdDocRm').addEventListener('click', function () {
+      /* No bin: a note is only ever what you typed, so it asks. */
+      var root = el('div');
+      root.appendChild(el('p', 'cd-note', 'This note goes for good, pictures included.'));
+      var foot = el('div', 'cd-foot');
+      var keep = el('button', 'cd-btn', 'Keep it'); keep.type = 'button'; keep.addEventListener('click', cdClose);
+      var yes = el('button', 'cd-btn warn', 'Delete it'); yes.type = 'button'; yes.id = 'cdNERmYes';
+      yes.addEventListener('click', function () {
+        var id = D.n.id; D.bs = []; cdClose();
+        S.note = S.note.filter(function (x) { return x.id !== id; }); cdSave('note');
+        cdNoteClose(true); cdPaint(); cdPicSweep();
+      });
+      foot.appendChild(keep); foot.appendChild(yes); root.appendChild(foot);
+      cdSheet('Delete this note?', root);
+    });
+    /* A press on the tools must not take the caret away from the words,
+       or a style lands on nothing. The range is kept as well, for a
+       browser that moves focus anyway. */
+    dv.querySelector('.cd-doc-top').addEventListener('mousedown', function (ev) { if (ev.target.closest('#cdDocKs, #cdDocHl') && !ev.target.closest('.cd-doc-pic')) ev.preventDefault(); });
+    $('cdDocKs').addEventListener('click', function (ev) { var x = ev.target.closest('button'); if (x) cdEdStyle(x.dataset.k); });
+    $('cdDocHl').addEventListener('click', function (ev) { var x = ev.target.closest('button[data-c]'); if (x) cdEdHue(x.dataset.c); });
+    $('cdDocFile').addEventListener('change', function () {
+      var fs = Array.prototype.slice.call(this.files || []); this.value = '';
+      var at = D.sel ? Math.max(D.sel.a[0], D.sel.b[0]) : D.bs.length - 1;
+      (function next() {
+        var f = fs.shift(); if (!f) return;
+        cdPicFit(f, function (r) {
+          if (!r || !D) { cdToast('That picture could not be read'); return next(); }
+          var key = 'p' + cdId();
+          cdPicPut(key, r.blob, function (ok) {
+            if (!ok || !D) { cdToast('No room to keep that picture'); return next(); }
+            picURL[key] = URL.createObjectURL(r.blob);
+            /* The blob lands before the line does: a line naming a key
+               nothing wrote is a box with nothing in it. */
+            var cur = D.bs[at];
+            var pos = cur && cur.k !== 'i' && !cdNbText(cur) ? at : at + 1;
+            if (pos === at) D.bs.splice(at, 1, { k: 'i', p: key, w: r.w, h: r.h });
+            else D.bs.splice(pos, 0, { k: 'i', p: key, w: r.w, h: r.h });
+            if (!D.bs[pos + 1] || D.bs[pos + 1].k === 'i') D.bs.splice(pos + 1, 0, { k: 'p', r: [] });
+            at = pos + 1;
+            cdEdDraw([pos + 1, 0]);
+            next();
+          });
+        });
+      })();
+    });
+    ed.addEventListener('click', function (ev) {
+      var x = ev.target.closest('.cd-nb-x'); if (!x) return;
+      var f = x.closest('.cd-nb-i'), i = Array.prototype.indexOf.call(ed.children, f);
+      if (i < 0) return;
+      D.bs.splice(i, 1);
+      cdEdDraw([Math.max(0, Math.min(i, D.bs.length - 1)), 0]);
+    });
+    ed.addEventListener('beforeinput', function (ev) {
+      var t = ev.inputType || '', s = cdSelGet();
+      if (!s || t === 'insertCompositionText') return;
+      var coll = !cdPtCmp(s.a, s.b), multi = s.a[0] !== s.b[0];
+      if (t === 'insertParagraph' || t === 'insertLineBreak') { ev.preventDefault(); cdEdSplit(s); return; }
+      if (t.indexOf('delete') === 0) {
+        if (multi) { ev.preventDefault(); cdEdDraw(cdEdCut(s)); return; }
+        if (coll && /Backward/.test(t) && s.a[1] === 0) { ev.preventDefault(); cdEdBack(s.a); return; }
+        if (coll && /Forward/.test(t) && D.bs[s.a[0]] && s.a[1] === cdNbText(D.bs[s.a[0]]).length) { ev.preventDefault(); cdEdFwd(s.a); return; }
+        return;
+      }
+      if ((t === 'insertText' || t === 'insertReplacementText') && multi) {
+        ev.preventDefault();
+        var txt = ev.data != null ? ev.data : (ev.dataTransfer ? ev.dataTransfer.getData('text/plain') : '');
+        cdEdDraw(cdEdInsert(cdEdCut(s), txt || ''));
+      }
+    });
+    ed.addEventListener('paste', function (ev) {
+      ev.preventDefault();
+      var s = cdSelGet(); if (!s) return;
+      var txt = (ev.clipboardData && ev.clipboardData.getData('text/plain')) || '';
+      cdEdDraw(cdEdInsert(cdEdCut(s), txt));
+    });
+    ed.addEventListener('input', function () { cdEdSync(); var s = cdSelGet(); if (s) D.sel = s; cdEdTools(); });
+    requestAnimationFrame(function () { dv.classList.add('is-open'); });
+  }
+  document.addEventListener('selectionchange', function () { if (!D) return; var s = cdSelGet(); if (s) { D.sel = s; cdEdTools(); } });
+  /* Built and removed, never hidden: a full-screen surface put away with
+     the hidden attribute goes on taking presses the day a rule gives it a
+     display. An element that is not in the document cannot. */
+  function cdNoteClose(quiet) {
+    var dv = $('cdDoc');
+    if (!dv) return;
+    if (D) { clearTimeout(D.tm); cdSave('note'); }
+    D = null;
+    dv.remove();
+    if (!quiet) { cdPaint(); cdPicSweep(); }
+  }
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && $('cdDoc') && $('cdSheet').hidden) { ev.preventDefault(); cdNoteClose(); } });
+  window.addEventListener('pagehide', function () { if (D) { clearTimeout(D.tm); cdSave('note'); } });
 
   /* ═══ SETTINGS ═══ */
   $('cdGear').addEventListener('click', function () {

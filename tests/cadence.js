@@ -55,7 +55,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const errs = [], off = [];
     page.on('pageerror', (e) => errs.push(String(e)));
     page.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); });
-    page.on('request', (r) => { if (!r.url().startsWith(BASE) && !r.url().startsWith('data:')) off.push(r.url()); });
+    page.on('request', (r) => { if (!r.url().startsWith(BASE) && !/^(data|blob):/.test(r.url())) off.push(r.url()); });
     await page.goto(URL, { waitUntil: 'load' });
     await page.waitForTimeout(150);
     return { c, page, errs, off };
@@ -563,15 +563,161 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.click('.cd-ni:has-text("Felt strong") .cd-nstar');
     ok('the diamond marks a note important', (await store(page, 'cad.note.v1')).filter((n) => /Felt/.test(n.t))[0].i === 1);
     await page.click('.cd-ni:has-text("Felt strong") .cd-nt');
+    await page.waitForSelector('#cdDoc');
+    await page.click('#cdDocRm');
     await sheetUp(page);
-    await page.click('#cdNERm');
     ok('deleting asks first, saying it is for good', /for good/.test(await page.textContent('#cdShB')) && (await store(page, 'cad.note.v1')).length === 2);
     await page.click('#cdNERmYes');
     await page.waitForTimeout(320);
-    ok('and then the note is gone', (await store(page, 'cad.note.v1')).length === 1);
+    ok('and then the note is gone, and so is its page', (await store(page, 'cad.note.v1')).length === 1 && !(await page.$('#cdDoc')));
 
     ok('goals and notes make no request off this origin', off.length === 0, off);
     ok('no page errors across goals and notes', errs.length === 0, errs);
+    await c.close();
+  }
+
+  console.log('\n── a note, opened ──');
+  {
+    /* A note written before blocks existed, one with a damaged block among
+       good ones, and nothing else. */
+    const init = `(() => { if (!sessionStorage.getItem('planted')) { sessionStorage.setItem('planted', 1);
+      localStorage.setItem('cad.note.v1', JSON.stringify([
+        { id: 'old', t: 'First line\\nSecond line', d: '2026-09-24', i: 0, at: 1 },
+        { id: 'dmg', d: '2026-09-23', i: 0, at: 2, b: [{ k: 'h', r: [['Kept heading', 'o']] }, { k: 'zz', r: [] }, 7, { k: 'p', r: [['kept body', 'nope']] }] }
+      ]));
+    } })();`;
+    const { c, page, errs, off } = await ctx({ init });
+    const notes = await store(page, 'cad.note.v1');
+    const old = notes.filter((n) => n.id === 'old')[0], dmg = notes.filter((n) => n.id === 'dmg')[0];
+    ok('a note from before blocks reads as a body line a line', JSON.stringify(old.b) === '[{"k":"p","r":[["First line",""]]},{"k":"p","r":[["Second line",""]]}]', old.b);
+    ok('a damaged block costs itself and the colour nobody has, never the note', JSON.stringify(dmg.b) === '[{"k":"h","r":[["Kept heading","o"]]},{"k":"p","r":[["kept body",""]]}]' && dmg.t === 'Kept heading\nkept body', dmg);
+
+    await page.click('.cd-tab[data-v="note"]');
+    ok('the list leads with a heading in weight', (await page.$eval('.cd-ni[data-n="dmg"] .cd-nt b', (b) => b.textContent).catch(() => null)) === 'Kept heading');
+    await page.click('.cd-ni[data-n="old"] .cd-nt');
+    await page.waitForSelector('#cdDoc.is-open');
+    await page.waitForTimeout(320);
+    const box = await page.$eval('#cdDoc', (d) => { const r = d.getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; });
+    ok('pressing a note opens its whole page', box.join() === '0,0,390,844', box);
+    ok('its lines are the note', (await page.$$eval('#cdDocEd .cd-nb', (b) => b.map((x) => x.textContent))).join('|') === 'First line|Second line');
+
+    /* Everything from here is typed, the way a person would. */
+    const ed = '#cdDocEd';
+    const rec = async () => (await store(page, 'cad.note.v1')).filter((n) => n.id === 'old')[0].b;
+    const settle = () => page.waitForTimeout(380);
+    await page.click(`${ed} .cd-nb >> nth=0`);
+    await page.keyboard.press('Home');
+    await page.click('#cdDocKs [data-k="t"]');
+    ok('a style lands on the line the caret is in', (await page.$eval(`${ed} .cd-nb`, (b) => b.dataset.k)) === 't'
+      && (await page.getAttribute('#cdDocKs [data-k="t"]', 'aria-pressed')) === 'true');
+    await page.keyboard.press('End');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('Toilet checks');
+    await settle();
+    let b = await rec();
+    ok('Return after a title is a body line, not a second title', b[1].k === 'p' && b[1].r[0][0] === 'Toilet checks' && b[2].r[0][0] === 'Second line', b);
+    await page.click('#cdDocKs [data-k="h"]');
+    await page.click('#cdDocHl [data-c="o"]');
+    await settle();
+    b = await rec();
+    ok('a caret colours its whole line', b[1].k === 'h' && JSON.stringify(b[1].r) === '[["Toilet checks","o"]]', b[1]);
+    await page.click('#cdDocHl [data-c="o"]');
+    await settle();
+    ok('and the same colour again takes it off', JSON.stringify((await rec())[1].r) === '[["Toilet checks",""]]');
+    await page.click('#cdDocHl [data-c="o"]');
+
+    /* A selection colours exactly what it holds. */
+    await page.click(`${ed} .cd-nb >> nth=2`);
+    await page.keyboard.press('End');
+    for (let i = 0; i < 4; i++) await page.keyboard.press('Shift+ArrowLeft');
+    await page.click('#cdDocHl [data-c="p"]');
+    await settle();
+    b = await rec();
+    ok('a selection colours only the words it holds', JSON.stringify(b[2].r) === '[["Second ",""],["line","p"]]', b[2]);
+    /* Collapsed first: the browser's own selection is blue, and read behind
+       the words it is a ground the note never draws. */
+    await page.keyboard.press('End');
+    const hl = await inkFloor(page, '.cd-nb mark');
+    ok('highlighted words hold 4.5:1 on their own wash', hl.n >= 2 && hl.worst.r >= 4.5, hl);
+
+    /* A quote continues on Return and an empty one ends it. */
+    await page.keyboard.press('End');
+    await page.keyboard.press('Enter');
+    await page.click('#cdDocKs [data-k="q"]');
+    await page.keyboard.type('Grab rail loose');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('Cord tied up');
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('After');
+    await settle();
+    b = await rec();
+    ok('a quote runs on and an empty one ends it', b.map((x) => x.k).join('') === 'thpqqp' && b[5].r[0][0] === 'After', b.map((x) => x.k + ':' + (x.r[0] || [''])[0]));
+    const bar = await page.$eval(`${ed} .cd-nb.k-q`, (e) => getComputedStyle(e, '::before').width);
+    ok('a quote draws its bar', bar === '3px', bar);
+
+    /* Backspace at the head of a line joins it to the one above. */
+    await page.keyboard.press('Home');
+    await page.keyboard.press('Backspace');
+    await settle();
+    b = await rec();
+    ok('Backspace at the start of a line joins it up', b.length === 5 && b[4].r.map((x) => x[0]).join('') === 'Cord tied upAfter', b.map((x) => x.k));
+    ok('and the join leaves nothing on the page the record cannot say', (await page.$$eval(`${ed} *`, (es) => es.filter((e) => !/^(DIV|MARK|BR|FIGURE|IMG|BUTTON|svg|path)$/.test(e.tagName)).length)) === 0);
+
+    /* A paste is words, split into lines, and never markup. */
+    await page.keyboard.press('End');
+    await page.evaluate(() => {
+      const dt = new DataTransfer(); dt.setData('text/plain', ' one\ntwo\nthree'); dt.setData('text/html', '<b style="color:red">one</b>');
+      document.getElementById('cdDocEd').dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+    });
+    await settle();
+    b = await rec();
+    ok('a paste is its words, a line a line', b.length === 7 && b[4].r.map((x) => x[0]).join('') === 'Cord tied upAfter one' && b[5].r[0][0] === 'two' && b[6].r[0][0] === 'three', b.map((x) => x.r.map((y) => y[0]).join('')));
+    ok('and brings no markup with it', !(await page.$(`${ed} b`)));
+
+    /* A picture: in IndexedDB, never localStorage, with its shape kept. */
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAYAAAD0In+KAAAAEUlEQVR42mNk+M9QzwAEjDAGACCDAv8cI7IoAAAAAElFTkSuQmCC', 'base64');
+    await page.setInputFiles('#cdDocFile', { name: 'a.png', mimeType: 'image/png', buffer: png });
+    await page.waitForSelector(`${ed} .cd-nb-i`);
+    await settle();
+    b = await rec();
+    const pic = b.filter((x) => x.k === 'i')[0];
+    ok('a picture is a line naming its key and its shape', !!pic && /^p/.test(pic.p) && pic.w === 2 && pic.h === 1, pic);
+    ok('and localStorage never holds the picture', !/data:image/.test(await page.evaluate(() => localStorage.getItem('cad.note.v1'))));
+    const held = await page.evaluate((k) => new Promise((res) => { const rq = indexedDB.open('cad.pic', 1); rq.onsuccess = () => { const g = rq.result.transaction('p').objectStore('p').get(k); g.onsuccess = () => res(g.result ? g.result.size : 0); }; }), pic.p);
+    ok('the picture is in the database', held > 0, held);
+    ok('a picture is followed by a line to keep writing on', b[b.indexOf(pic) + 1] && b[b.indexOf(pic) + 1].k === 'p');
+
+    await page.click('#cdDocBack');
+    await page.waitForTimeout(200);
+    ok('Back takes the page out of the document, not just out of sight', !(await page.$('#cdDoc')));
+    ok('the list says the note carries a picture', /1 picture/.test(await page.textContent('.cd-ni[data-n="old"] .cd-nt')));
+
+    await page.reload(); await page.waitForTimeout(200);
+    await page.click('.cd-tab[data-v="note"]');
+    await page.click('.cd-ni[data-n="old"] .cd-nt');
+    await page.waitForSelector('#cdDoc.is-open');
+    await page.waitForFunction(() => { const i = document.querySelector('.cd-nb-i img'); return i && i.naturalWidth > 0; }, null, { timeout: 3000 }).catch(() => {});
+    const im = await page.$eval('.cd-nb-i img', (i) => ({ nw: i.naturalWidth, ar: getComputedStyle(i).aspectRatio }));
+    ok('the picture comes back after a reload, in its own shape', im.nw === 2 && /2 \/ 1/.test(im.ar), im);
+    await page.click('.cd-nb-x');
+    await settle();
+    ok('its cross takes the picture out', !(await rec()).some((x) => x.k === 'i'));
+
+    /* A note emptied of everything goes when you leave it. */
+    await page.click('#cdDocBack'); await page.waitForTimeout(200);
+    await page.click('.cd-ni[data-n="dmg"] .cd-nt');
+    await page.waitForSelector('#cdDoc.is-open');
+    await page.click(ed);
+    await page.keyboard.press('Control+A');
+    await page.keyboard.press('Backspace');
+    await page.keyboard.press('Backspace');
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(400);
+    ok('a note emptied of everything goes when you leave it', !(await store(page, 'cad.note.v1')).some((n) => n.id === 'dmg') && !(await page.$('#cdDoc')));
+
+    ok('a note makes no request off this origin', off.length === 0, off);
+    ok('no page errors in a note', errs.length === 0, errs);
     await c.close();
   }
 

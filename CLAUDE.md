@@ -4305,6 +4305,54 @@ can paste back. **It does not say offline**, because there is no service
 worker behind that word. The images are eager rather than lazy: a
 full-page capture of a lazy page is a column of blank phones.
 
+### A note opens into a page
+
+Asked for off a screenshot of Apple Notes: press a note and it opens,
+with headings, sub-headings, colour highlights and pictures. The list
+stays a line to a day; the page is the whole note.
+
+**A NOTE IS A LIST OF BLOCKS.** Title, heading, subhead, body, quote or
+picture, and a text block is a list of runs, `[words, colour]`, so a
+colour can sit on three words rather than on the whole line. `t` is
+worked out from the blocks on every write, for the list and the day
+sheet, so it cannot drift from them. A note from before is its `t`, a
+body line a line, and a damaged block costs itself and never the note.
+
+**ONE SURFACE OF WORDS, NOT A FIELD A LINE.** It is `contenteditable`,
+which `schedule/` refused. The difference is that nothing structural is
+left to the browser. Return, a Backspace that joins lines, a forward
+delete, a cut across lines, a paste, a style and a colour all go
+through the block list and are drawn again. Typing inside one line is
+the browser's, which is what keeps a keyboard's composing and
+correcting working. Anything the browser leaves that the record has no
+word for (a styled span from a join, a nested div) is read as its words
+and the page is redrawn.
+
+**THAT REDRAW IS THE REAL GUARD, AND THE BITE PROOF SAID SO.** Taking
+out the Backspace handler alone failed nothing: a native join in
+Chromium normalises into the same record. With the redraw also gone,
+Chromium leaves a span behind and the check names it.
+
+**A caret colours its whole line; a selection colours what it holds.**
+The same colour again takes it off. A highlight is the colour on the
+words and a wash behind them, never the wash alone. A quote is the grey
+bar that groups lines under a heading, as in the screenshot; Return
+continues it and an empty one ends it.
+
+**PICTURES ARE IN INDEXEDDB (`cad.pic`), NEVER LOCALSTORAGE**, fitted to
+1280 on the long edge rather than cropped, and the line keeps the
+aspect so the box is reserved before the blob arrives. A key no note
+names is swept at boot and when a note closes. Pictures are not in the
+backup, which copies localStorage alone: known, and not solved here.
+
+**The page is built and removed, never hidden**, the lesson this repo
+has paid for nine times. An emptied note goes when you leave it, and
+Delete asks.
+
+**`blob:` is not off origin.** The request filter counted the page's own
+object URLs as leaving. A blob URL cannot leave the browser, so it is
+excluded beside `data:`.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
