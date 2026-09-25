@@ -6,9 +6,9 @@ Single-file apps that share a design system:
   backtesting, resources and the check-in
 - `days/index.html` — habits and reminders
 - `orrery/index.html` — the star chart over an Obsidian vault
-- `cadence/index.html` — the day, habits, month and training log as a
-  paper notebook: its own build of `schedule/`'s mechanisms, not a skin
-  over them
+- `cadence/index.html` — the day, habits, month and training log, the
+  day drawn as one line of time in the alignment app's language: its own
+  build of `schedule/`'s mechanisms, not a skin over them
 - `shell.css` + `shell.js` at the root — the shared shell they all
   consume. A rule that only two of them need belongs in the two, not
   in the file every one of them loads.
@@ -4092,27 +4092,6 @@ for when a training block is finished, rest exclusive both ways,
 habits fed by the blocks, a month read back, a training summary.
 **None of the code, and none of the look.**
 
-**The day is a rail, and the gaps are drawn.** Open time between two
-blocks, thirty minutes or more, is a measured line — "45m open" —
-because the gaps are the part of a schedule you actually spend. A
-running block carries the countdown, so the red now-line is drawn only
-BETWEEN blocks; both at once is one fact said twice.
-
-**Space Grotesk for what you are looking at** (the day, a figure, a
-title) and Inter for what you read, both shipped with the repo so the
-phone and the suite draw the same letters. Figures are tabular so a
-column of times lines up.
-
-**The first look was taken back out on one line of feedback: it did not
-look good.** Mono on every figure read as a terminal; a block said its
-category three times (a coloured edge, a node, an icon); the week was
-seven tall boxes; the month was thirty empty boxes; the dock was a black
-slab. What replaced each: two faces, category said once by a tinted icon
-tile, the week as one card of dates, a ring round each day of the month,
-and a plain tab bar with the add button raised in the middle. That
-second look's warm paper is what the photograph below replaced; the
-rest of it stands.
-
 **`[hidden] { display: none !important }` is said once, globally**, so
 the bug `schedule/` recorded eight times cannot happen here by
 construction.
@@ -4120,67 +4099,110 @@ construction.
 **The backup carries every key**, which is the gap `schedule/`'s own
 notes admit to, and restoring asks for nothing but a paste.
 
-**`cad.mode.v1` is a bare word, not JSON**, because the pre-paint
-script reads it raw. It shipped read through `JSON.parse` for one run
-and the chip did nothing — the suite caught it.
-
 `tests/cadence.js` freezes the clock at Friday 25 September 2026, 10:20,
 so which block is running is a fact about the fixture, not the hour.
 
-### The page is a photograph: sky, limb, earth
+### Three looks came out, and the third said why
 
-Given as a reference image — a sunset seen from altitude, navy sky
-paling to steel, a band of amber, the curved limb of the Earth burning
-orange, and dark ground under it. It replaced warm paper, and it is
-the structure rather than a tint: **the sky is the page, the limb is
-the horizon everything you read stops above, and the earth is what the
-tab bar stands on.** Every colour on the screen comes off the
-photograph — orange for the body, amber for work, the upper sky's blue
-for the mind, and the violet a sunset leaves above it for rest.
+Mono on everything with heavy tickets and a black dock; then warm paper,
+white cards, a ring, a raised add button; then a sunset photograph as
+the page, a burning limb and dark earth. Each was reported in one line,
+and the third report named the fault the second had as well: **it looked
+too much like the daily-process app.** A column of rows with a time on
+the left, a name, and a check on the right IS that app's drawing,
+whatever it is painted in. Repainting it three times was three answers
+to the wrong question.
 
-**The limb is an ellipse's own shadow.** 1400px wide against a 390px
-screen, so its top drops about fourteen pixels edge to edge, which is
-the curvature in the photograph at the photograph's scale; the glow is
-five stacked box-shadows on that ellipse, so every layer follows the
-curve without a line of geometry. Fixed and never moved — drawn once,
-with the scroller composited over it. A pseudo-element rather than
-`background-attachment: fixed`, which iOS ignores.
+### The language is the alignment app's, taken whole
 
-**THE DAY ENDS AT THE HORIZON RATHER THAN RUNNING UNDER IT.** The
-scroller stops `--hz` above the foot and its last 28px fade out, so no
-row, time or label is ever drawn over the fire. The alternative is a
-text column sliding across a band that goes from navy to orange, and
-a contrast figure that depends on where you have scrolled is not a
-contrast figure.
+Asked for by name. A cool black ground with the colour living in
+gradients — a sky that ends on a hint of dusk, and a dusk under every
+screen's title — Inter at 300 for the one thing a screen is about, Geist
+Mono uppercase for every label and every entry, hairlines where there
+were cards, pills whose pressed state is the ink with the paper on it,
+the nav as four marks and a line at the TOP, and **one white round
+control per screen**. Geist Mono is copied into `cadence/fonts/` with
+its licence, so the phone and the suite draw the same letters.
 
-**The sky is three stops and every one of them is a ground.** The
-greys and the category colours are held to 4.5:1 against all three and
-against a card, because text sits at the top of the sky and at the
-bottom of it. Measured on composited pixels as well: the limb is fire
-(red over blue by more than 120) and the sky is a gradient, sampled in
-the gutter the cards never reach.
+**ONE FACE, AND IT IS DARK.** The light face, the mode chip, the
+pre-paint script and `cdMode` all went: the look is a night sky and a
+day side of it was a second design to keep in step. `cad.mode.v1` is
+swept on boot rather than left, which the suite plants and asserts GONE.
 
-**The tab bar draws no ground of its own**, so its labels are read on
-the earth and have tokens of their own — `--dock-ink`, `--dock-acc` —
-that are the same on both faces, because the planet is. **The add
-button is the sun just gone below it**: the one bright object on the
-dark side of the line, under the brightest point of the limb. **This
-is not the black dock the first look lost**: that was a flat slab
-bolted to the foot of a paper page, and this is ground seen past a
-horizon — curved, lit along its edge, and the same on both faces
-because the ground is the one part of the picture the sky's colour
-does not change.
+**The words are read on the pixels they sit on**, not on a token: the
+ground is the commonest pixel in the element's own box once anything
+near the ink has been taken out, because on a gradient every ground
+pixel is a slightly different colour and every fully-inked one is
+identical — a bare mode picked the ink and reported the title at 1:1.
+A pane ends a glow's height above the foot and fades into it through a
+mask, so nothing is ever read on the light, and a label on the dusk
+sits above its last 26px, where the peach is.
 
-**The limb clears the tab row at both edges.** An ellipse's top sits
-lower the further out you go, so the line is measured where it is
-lowest — at the screen's edges — against the top of the tabs. Proved to
-bite along with the rest by five scripted breaks: the scroller let run
-to the foot, the limb in blue, a flat sky, dark tab labels, and the
-earth pushed down into the tabs.
+### The day is one line of time, drawn once per block
 
-**The light face is the day side of the same picture**: the high sky
-before the glow, pale steel going paler, with the same planet and the
-same fire at the bottom. The mode chip reads Daylight and Night.
+**The new drawing, and the only thing here that is not borrowed.** Every
+row is the block's name and what is true of it, and under that the
+whole span of the day with the block's own bar at its own place on it.
+Read down, the bars fall from left to right — the cadence of the day as
+a shape — and the space between them is literal. **There is no time
+gutter**: when a block happens is where its bar is, so the column that
+made the old rows the other app's rows has nothing left to do.
+
+**The span is the hour before the first block to the hour after the
+last**, never midnight to midnight, which would spend half the width on
+the night. Today it also holds the clock, and it is never under four
+hours, or a day with one block on it is a single bar across the page.
+The scale above the rows is drawn off the same arithmetic, and the
+suite solves the minutes-to-pixels line off two bars and holds every
+other mark to it — bars, dots, the gaps, the scale's figures and the
+clock. A scale that disagreed with its rows would be a Gantt that lies.
+
+**A moment is a dot.** Waking up has no length, and a bar of no width
+is nothing at all.
+
+**THE CLOCK IS A TICK ON EVERY TRACK, NOT ONE LINE DOWN THE PAGE.** It
+went in as a single rule crossing every row, which is a line drawn
+through every name and every countdown at the same x. The ticks read
+down the page as the same line, broken exactly where there is type, and
+the suite asserts no tick's box meets a word's. Not through the gaps
+either — their figure sits on that line as often as not. The scale
+carries the time as a badge and prints no hour underneath it.
+
+**Gaps are dimension lines**, drawn across exactly the stretch nobody
+has claimed and measured beside it, on whichever side has room. A block
+taken off for the day leaves its hour free.
+
+**The state is the ground.** The stamp says Kept both ways; not yet is
+the pill on a lift, kept is the ink with the paper on it. A bar is its
+category at 55% ahead of you, at full strength with a glow once kept,
+filled to the minute while it runs, and the flat neutral once it is
+behind you unkept — never a red. Every one of those states is a graphic
+held to 3:1 on its own row, which is why the neutral is .36 and not the
+.22 it went in at.
+
+### The rest of the screens
+
+**Habits** are hairline rows with a dot in the habit's own colour and a
+fortnight under each as a pulse: a tick stands full on a day it was
+kept, a number as tall as its share of the fortnight's best. Six colours
+for six habits — steps took the sea-glass and water and sleep got two
+of their own, because body and mind were each wearing two.
+
+**The month is a square a day, lit by how much of it was kept**: four
+steps and a whole one, which is the only square that turns white.
+Steps rather than a ramp, because a 16px figure has to stay 4.5:1 on
+every one of them — asserted on composited pixels across all thirty,
+with a fixture that plants every level. Today is an outline, so it
+still shows round a square that has turned white.
+
+**Training** is three figures in the thin face with hairlines between
+them, a bar a week for twelve weeks, and what you trained by name.
+
+**Seven scripted breaks proved the checks bite**, each undone by its
+own inverse and hashed back: bars shifted half an hour, the clock tick
+stretched through the words, the quiet grey thinned, the neutral bar
+faded, the third month step brightened, a gap's figure laid on its line,
+and the sweep aimed at the wrong key.
 
 ## Git
 
