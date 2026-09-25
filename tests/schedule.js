@@ -14437,35 +14437,6 @@ const SAID = [
       picStrip.pic.up === false && picStrip.line.up === true
       && picStrip.line.chips > 0, picStrip);
 
-    /* ── A LINE CARRYING BOTH IS READ AS A PICTURE ──
-       Damage either way, and the order is the repair: reading it as a
-       heading throws the photograph away, where reading it as a picture
-       costs a word somebody can type again. The days are what you
-       cannot get back, one screen over, for the same reason. */
-    await picPut('picH');
-    const picBoth = await picpage.evaluate(() => {
-      const raw = JSON.parse(localStorage.getItem('sched.note.v1'));
-      /* ITS OWN KEY, and that is not tidiness. Pointed at `picA` this
-         line SHARED a blob with the captioned picture above it — so
-         deleting that one dropped a picture this one still names, and
-         the sweep then had nothing to find. Two lines never share a
-         key in the app, because one is minted per attach; a fixture
-         that breaks that measures a state the app cannot reach. */
-      raw.list[0].l.push({ i: 'q9', h: 1, c: 'teal', x: 'HEAD',
-        p: 'picH', pw: 4, ph: 3 });
-      localStorage.setItem('sched.note.v1', JSON.stringify(raw));
-      return true;
-    });
-    await picpage.reload({ waitUntil: 'networkidle' });
-    await picpage.waitForTimeout(500);
-    const picKept = await picpage.evaluate(() => {
-      const L = JSON.parse(localStorage.getItem('sched.note.v1')).list[0].l;
-      const q = L[L.length - 1];
-      return { h: q.h, p: q.p, x: q.x };
-    });
-    ok('a line carrying a picture AND a heading keeps the picture',
-      picKept.p === 'picH' && !picKept.h && picKept.x === '', [picBoth, picKept]);
-
     /* ── THE BLOB GOES WITH THE LINE ──
        Backspace at the head of an empty caption, which is every other
        line's own delete rather than a control of its own: a remove
@@ -14494,9 +14465,9 @@ const SAID = [
     });
     const picLeft = await picKeys();
     ok('backspace on an empty caption takes the picture and its blob with it',
-      picDel.before === 4 && picDel.after === 3
-      && picDel.rec === 'x,picB,picGone,x,picH'
-      && picLeft.join(',') === 'picB,picH', { picDel, picLeft });
+      picDel.before === 3 && picDel.after === 2
+      && picDel.rec === 'x,picB,picGone,x'
+      && picLeft.join(',') === 'picB', { picDel, picLeft });
 
     /* Return puts a line AFTER the picture, so attaching one and
        carrying on writing is one key rather than a trip to the foot. */
@@ -14511,7 +14482,7 @@ const SAID = [
         .map((L) => L.p ? 'PIC' : JSON.stringify(L.x)).join(',');
     });
     ok('...and return in a caption puts a line after the picture',
-      picRet === '"Pin height four, not five.",PIC,"",PIC,"Belt is in the left locker.",PIC',
+      picRet === '"Pin height four, not five.",PIC,"",PIC,"Belt is in the left locker."',
       picRet);
 
     /* A line backspacing onto a PICTURE has nowhere to put its words,
@@ -14652,6 +14623,60 @@ const SAID = [
       picOff.length === 0, picOff.slice(0, 4));
     ok('nothing threw through any of it', picerrs.length === 0, picerrs.slice(0, 4));
     await pictx.close();
+
+    /* ── A LINE CARRYING BOTH IS READ AS A PICTURE ──
+       Damage either way, and the order is the repair: reading it as a
+       heading throws the photograph away, where reading it as a picture
+       costs a word somebody can type again. The days are what you
+       cannot get back, one screen over, for the same reason.
+
+       ITS OWN CONTEXT, SEEDED AT BOOT, and that is not tidiness — it is
+       this file's own rule arriving for the third time. The app flushes
+       what it is holding over `sched.note.v1` on `pagehide`, which
+       fires on ANY navigation away including a reload — so a check that
+       writes the key and reloads has its damage written straight back
+       over by the copy the app was already holding. Measured: the
+       planted line simply was not there, and the two checks counting
+       pictures after it failed for want of it rather than for anything
+       they were about.
+
+       An init script runs BEFORE the app has anything in memory to
+       flush, which is the only moment a damaged shape can be planted. */
+    {
+      const pbctx = await browser.newContext(PHONE);
+      const pbpage = await pbctx.newPage();
+      const pberrs = [];
+      pbpage.on('pageerror', (e) => pberrs.push(String(e)));
+      await pbpage.addInitScript(() => {
+        localStorage.setItem('sched.tour.v1', '1');
+        localStorage.setItem('sched.hint2.v1', '1');
+        localStorage.setItem('sched.hintw.v1', '1');
+        /* Only when absent: an init script runs on every navigation, so
+           written unconditionally it puts the damage back after the
+           repair it is measuring. That exact bug cost four hundred
+           lines of chasing once already. */
+        if (!localStorage.getItem('sched.note.v1')) {
+          localStorage.setItem('sched.note.v1', JSON.stringify({ list: [{
+            id: 'pB', t: 'Damaged', u: 1756900000000, k: 'note', a: 'teal',
+            l: [{ i: 'b1', h: 1, c: 'teal', x: 'HEAD', p: 'picH', pw: 4, ph: 3 },
+                { i: 'b2', h: 0, x: 'An ordinary line.' }]
+          }] }));
+        }
+      });
+      await pbpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+      await pbpage.waitForTimeout(520);
+      const pbKept = await pbpage.evaluate(() => {
+        const L = JSON.parse(localStorage.getItem('sched.note.v1'))
+          .list.find((q) => q.id === 'pB').l;
+        return { h: L[0].h, p: L[0].p, x: L[0].x, c: L[0].c, rest: L.length };
+      });
+      ok('a line carrying a picture AND a heading keeps the picture',
+        pbKept.p === 'picH' && !pbKept.h && pbKept.x === '' && pbKept.rest === 2,
+        pbKept);
+      ok('nothing threw reading a line that carried both', pberrs.length === 0,
+        pberrs.slice(0, 3));
+      await pbctx.close();
+    }
   }
 
   /* ══════════════════════════════════════════════════════════════
