@@ -4452,6 +4452,54 @@ painted pill whose words sit within 6px of one edge and more than 8px
 off the other. It found one more: the keyboard-only history button
 drew its dots against the left of its own circle while focused.
 
+### The sky follows the clock
+
+Asked for as *when it's dark the app goes dark with it*, a day look by
+day and at night a dark blue at the bottom with stars. The sky was one
+fixed gradient, a slate night at every hour.
+
+**FOUR PHASES AND THE HOUR BETWEEN THEM.** Night, dawn, day and dusk, each
+six stops top to foot, and `cdSky` interpolates the two either side of
+the time on the half-minute pass the clock already runs. A change takes
+an hour and a half, so at thirty-second steps it is never seen to move.
+`data-sky` on the root names the nearer phase, which is what the tests
+read and what gates the twinkle.
+
+**NO LOCATION, SO AN ORDINARY SUN.** Up by half seven, down by half
+eight, by the phone's own hours. Working out a real sunrise needs to know
+where you are, and a sky is not a reason for this app to ask.
+
+**THE SKY MOVES IN HUE, NEVER IN HOW MUCH LIGHT IT GIVES THE WORDS.**
+The ink is white on every screen and stays white. So "day" cannot be a
+bright sky: every stop of every phase is held to no lighter than the
+fixed sky's stop at the same height, where a quiet label cleared 4.9:1 at
+the foot. Day is a clear saturated blue, the lightest at the TOP because
+a day sky is; night is near-black running down to a deep navy. The blue
+is cheap: it carries almost no luminance, so a sky can be much bluer at
+the same depth. A true light face, dark words on a pale sky, is a second
+set of every token and every hue measured again, and is not this.
+
+**AND THE GLOW HAD TO COME DOWN FOR IT.** The lift behind the block you
+are in went in brighter by day and the suite caught two words under 4.5
+at the middle of the screen, a date on the month at 4.45 and a category
+word at 4.33. Only the glow moved.
+
+**THE STARS ARE ONE LAYER, FADED, NEVER BUILT AND REMOVED.** Ninety of
+them from a fixed seed, so the same sky every night. They sit in the top
+half only, and under two pixels across where the smallest dot the app
+draws is five, because a star beside the week's row must never read as
+one more day. Percentages, not a stretched viewBox, or every star is an
+ellipse the shape of the phone. A few twinkle and only at night: an
+animation on a layer at zero opacity is a compositor pass for nothing.
+Reduced motion keeps them and stops the twinkle.
+
+**THE MISSED-DOT CHECK WAS READING THE SKY, NOT THE DOT.** It asked what
+the dot adds to each channel and wanted the three about equal. A white at
+40% adds 40% of the ROOM each channel has left, so over a saturated blue
+it adds much more to red than to blue and a correct grey read as red. It
+reads coverage now, the addition over the room, which is equal on any
+sky for a neutral and uneven for a hue.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

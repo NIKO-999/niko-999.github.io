@@ -234,10 +234,14 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       has('is-done') && has('is-past') && dots.some((d) => d.st.indexOf('is-past') < 0 && d.st.indexOf('is-done') < 0) && dots.every((d) => d.r >= 3), dots);
     /* Read as what the dot ADDS to the sky under it: a translucent grey laid
        over a blue night carries the blue through, so the bare pixel is not
-       the dot's colour. A neutral adds about the same to every channel; a
-       hue does not. */
+       the dot's colour. What it adds to each channel is its COVERAGE of the
+       room that channel had left — a white at 40% takes every channel 40%
+       of the way to white, whatever the sky under it is. Read as a raw
+       difference, the saturated day blue has far less room left in its
+       blue than its red, and a correct grey read as red. A hue covers its
+       channels unevenly on any sky; a neutral never does. */
     const miss = dots.find((d) => d.st.indexOf('is-past') >= 0 && d.st.indexOf('is-done') < 0);
-    const add = miss && miss.px.map((v, i) => v - miss.g[i]);
+    const add = miss && miss.px.map((v, i) => (v - miss.g[i]) / Math.max(1, 243 - miss.g[i]));
     ok('and a missed dot is a grey, never a red', !!add && (Math.max(...add) - Math.min(...add)) / Math.max(...add) < .25, { miss, add });
     const bpx = await dotRatios(page, '#cdBarI', 120);
     ok('the line of how far through holds 3:1 against the sky', bpx.length === 1 && bpx[0].r >= 3, bpx);
@@ -783,16 +787,21 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
         gear: { l: r(gear).left, t: r(gear).top }, week: r(document.getElementById('cdRibbon')).top, hero: r(document.getElementById('cdHeroN')).top, white };
     });
     const top = px(195, 4), foot = px(195, 836);
-    ok('the ground is the sky: near-black at the top, a slate night at the foot',
-      Math.max(...top) < 16 && lum(foot) > lum(top) * 3 && foot[2] > foot[0], { top, foot });
+    /* 10:20 is DAY, so the sky is a clear blue from top to foot. The night
+       half of this is measured in its own section below. */
+    ok('the ground is the sky, and at 10:20 it is a day blue from top to foot',
+      (await page.getAttribute('html', 'data-sky')) === 'day' && top[2] > top[0] + 40 && foot[2] > foot[0] + 40, { top, foot });
     ok('the four words are the top of the screen, between settings and add',
       lay.nav.top < 60 && lay.gear.l < 30 && lay.plus.r > 360 && lay.plus.t < 60 && lay.gear.t < 60, lay);
     ok('add is a glyph in the ink, not a second white round', lay.plus.bg === 'rgba(0, 0, 0, 0)' && lay.plus.c === 'rgb(243, 245, 247)', lay.plus);
     ok('and the one white control on the day is the check', lay.white.join() === 'cdGo', lay.white);
     ok('the week sits between the words and the block you are in', lay.nav.bottom < lay.week && lay.week < lay.hero, lay);
-    ok('there is one face, and it is dark, and no hour changes it',
+    /* The hour moves the SKY and nothing else: there is still one face,
+       white on a dark ground, so no token a word is drawn in ever changes. */
+    ok('there is one face, and it is dark: the hour moves the sky and never the ink',
       (await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme)) === 'dark'
-      && !(await page.getAttribute('html', 'data-mode')) && !(await page.getAttribute('html', 'data-tide')));
+      && !(await page.getAttribute('html', 'data-mode'))
+      && (await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--ink').trim())) === '#F3F5F7');
     ok('no page errors', errs.length === 0, errs);
     await c.close();
   }
@@ -830,6 +839,83 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       && [...(await page.$$eval('.cd-rn', (ns) => ns.map((n) => n.textContent))), await page.textContent('#cdHeroN'), (await page.textContent('#cdThenN')).replace(/ at .*$/, '')].includes('Restored'));
     ok('no page errors in the record', errs.length === 0, errs);
     await c.close();
+  }
+
+  console.log('\n── the sky follows the clock ──');
+  {
+    /* Four phases, each shot at its own frozen hour. What is held: which
+       phase the root says it is in, what colour the foot actually is on
+       screen, whether there are stars, and — at every phase — that a
+       quiet label still clears its bar, because the sky may move in hue
+       and never in how much light it gives the words on it. */
+    const PHASES = [
+      { at: '2026-09-25T06:00:00', sky: 'dawn' },
+      { at: '2026-09-25T10:20:00', sky: 'day' },
+      { at: '2026-09-25T19:00:00', sky: 'dusk' },
+      { at: '2026-09-25T22:30:00', sky: 'night' }
+    ];
+    const seen = {};
+    for (const ph of PHASES) {
+      const { c, page, errs } = await ctx({ at: ph.at });
+      const st = await page.evaluate(() => {
+        const L = document.getElementById('cdStars'), cs = [...L.querySelectorAll('circle')];
+        const tw = L.querySelector('.tw');
+        return { sky: document.documentElement.dataset.sky, op: +getComputedStyle(L).opacity,
+          n: cs.length, low: cs.filter((e) => parseFloat(e.getAttribute('cy')) > 50).length,
+          big: cs.filter((e) => +e.getAttribute('r') > .9).length,
+          tw: tw ? getComputedStyle(tw).animationPlayState : null,
+          meta: document.querySelector('meta[name="theme-color"]').content };
+      });
+      const px = await shoot(page);
+      const top = px(4, 2), foot = px(4, 840);
+      seen[ph.sky] = { top, foot, op: st.op };
+      ok(`${ph.sky}: the root says which part of the day it is`, st.sky === ph.sky, st);
+      ok(`${ph.sky}: the browser's own bar wears the top of the sky`,
+        /^rgb/.test(st.meta) && st.meta.match(/\d+/g).map(Number).every((v, i) => Math.abs(v - top[i]) <= 3), { meta: st.meta, top });
+      /* The quiet label is the tightest pair on the screen: a THEN, the
+         week's letters, the times down the list. Read on composited pixels
+         over whatever the sky is doing behind them at this hour. */
+      const ink = await inkFloor(page, '.cd-rt, .cd-wl, .cd-cap, .cd-rn');
+      ok(`${ph.sky}: every quiet word still holds 4.5:1 on the sky`, ink.n > 4 && ink.worst.r >= 4.5, ink);
+      ok(`${ph.sky}: and the foot, where the list scrolls, holds it too`,
+        ratio(over([243, 245, 247, .62], foot), foot) >= 4.5, { foot, r: +ratio(over([243, 245, 247, .62], foot), foot).toFixed(2) });
+      ok(`${ph.sky}: no star sits under the list, and none is big enough to read as a day's dot`, st.n >= 60 && st.low === 0 && st.big === 0, st);
+      if (ph.sky === 'night') {
+        ok('night: the stars are out', st.op > .95, st);
+        ok('night: near-black at the top, a deep blue at the foot',
+          Math.max(...top) < 12 && foot[2] > foot[0] * 2.5 && foot[2] > foot[1] * 1.6 && lum(foot) > lum(top) * 3, { top, foot });
+        ok('night: and a few of them twinkle', st.tw === 'running', st.tw);
+      }
+      if (ph.sky === 'day') {
+        ok('day: no stars, and nothing animating behind the app', st.op === 0 && st.tw === 'paused', st);
+      }
+      if (ph.sky === 'dusk' || ph.sky === 'dawn') {
+        ok(`${ph.sky}: a warm horizon — the foot leans red, where day and night lean blue`, foot[0] > foot[2], foot);
+      }
+      ok(`${ph.sky}: no page errors`, errs.length === 0, errs);
+      await c.close();
+    }
+    ok('the day is the lightest sky at the top, and night the darkest',
+      lum(seen.day.top) > lum(seen.dawn.top) && lum(seen.day.top) > lum(seen.dusk.top) && lum(seen.night.top) <= Math.min(lum(seen.dawn.top), lum(seen.dusk.top)), seen);
+
+    /* The phases meet by degrees: halfway between day and dusk is a sky
+       between the two, never a snap from one to the other. */
+    {
+      const { c, page } = await ctx({ at: '2026-09-25T18:15:00' });
+      const px = await shoot(page), mid = px(4, 840);
+      const d = seen.day.foot, k = seen.dusk.foot;
+      ok('between two phases the sky is between them too', [0, 1, 2].every((i) => mid[i] >= Math.min(d[i], k[i]) - 2 && mid[i] <= Math.max(d[i], k[i]) + 2)
+        && mid.some((v, i) => Math.abs(v - d[i]) > 4) && mid.some((v, i) => Math.abs(v - k[i]) > 4), { day: d, mid, dusk: k });
+      await c.close();
+    }
+    /* Reduced motion keeps the stars and stops the twinkle. */
+    {
+      const { c, page } = await ctx({ at: '2026-09-25T22:30:00' });
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      const r = await page.evaluate(() => ({ an: getComputedStyle(document.querySelector('#cdStars .tw')).animationName, op: +getComputedStyle(document.getElementById('cdStars')).opacity }));
+      ok('reduced motion: the stars stay and nothing twinkles', r.an === 'none' && r.op > .95, r);
+      await c.close();
+    }
   }
 
   console.log('\n── nothing leaks on a small phone ──');
