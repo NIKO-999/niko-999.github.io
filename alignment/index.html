@@ -128,24 +128,28 @@
    and hands the rest down, and a view that hides it gets the whole
    height without being told. */
 html, body { height: 100%; background: #3E5361; }
-/* `100%` ON BODY IS THE VIEWPORT AT THE MOMENT IT LOADS, NOT THE ONE THE
-   PHONE ACTUALLY DRAWS. On an iPhone in standalone mode the safe-area
-   strip behind the home indicator is not always inside that percentage,
-   so the box stopped short of it — and what showed below was neither the
-   sky nor its own slate floor, because nothing of body's box reached
-   that far to paint either one. It read as a flat black band with the
-   white home-indicator pill sitting on it. `100dvh`, set on `body`
-   below alongside its other declarations, is measured against the real
-   drawn viewport, safe area included, so the box now reaches the
-   bottom whatever the toolbar is doing; unsupported browsers keep the
-   `100%` above it, which is why both stay. `html`'s own background is
-   the same slate as the floor beneath, so a gap anywhere is a colour
-   this page already uses rather than the browser's bare black. */
-/* THE SKY IS THE CANVAS'S, and its foot colour is the sky's own foot. On a phone
-   the page can end above the home indicator, and what showed there was
-   the old flat black under a sky that had stopped. */
+/* NEITHER `100%` NOR `100dvh` CAN BE TRUSTED TO REACH THE REAL FLOOR IN
+   STANDALONE MODE. `100%` is the viewport at the moment the page loads;
+   `100dvh` was tried next and measured no better on the device this was
+   reported from, on a Home Screen icon specifically — the safe-area
+   strip behind the home indicator sat outside body's box either way,
+   and what showed below was a hard-edged band of whatever colour body's
+   OWN background happened to be, with the white home-indicator pill
+   sitting on the seam. Both are a HEIGHT, computed once against
+   whichever viewport figure the engine hands over, and that figure is
+   exactly the thing this bug is about being wrong.
+
+   `position: fixed; inset: 0` asks nothing to be computed and nothing
+   to be trusted: a fixed box is placed directly against the real
+   viewport by definition, safe area included since `viewport-fit=cover`
+   is on, and there is no percentage or dvh reading in between to be
+   stale, unsupported, or off by the home indicator's own height. It is
+   why the deck's own window in `schedule/` is a transform against a
+   track rather than a scroller doing arithmetic on `scrollLeft` — a
+   box defined directly against the thing it needs to match beats one
+   computed from a number that might not be it. */
 body {
-  height: 100dvh;
+  position: fixed; inset: 0;
   background-color: #3E5361;
   background-image: var(--sky);
   background-repeat: no-repeat;
