@@ -356,6 +356,7 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .cd-btn.go { background: var(--ink); color: var(--on); box-shadow: none; }
 .cd-btn.go:disabled { opacity: .4; cursor: default; }
 .cd-btn.warn { color: var(--bad); }
+.cd-btn.warn:disabled { opacity: .4; cursor: default; }
 
 .cd-field {
   width: 100%; min-height: 50px; padding: 13px 16px; border: 0; border-radius: 14px;
@@ -2259,7 +2260,30 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   /* ═══ SETTINGS ═══ */
   $('cdGear').addEventListener('click', function () {
     var root = el('div');
-    root.appendChild(el('p', 'cd-lbl', 'Backup'));
+    /* Starting the week over is one press, not one delete per block. It
+       asks first and then offers Undo, because every block on every day
+       goes at once. The record of what you kept is left alone: a tick is
+       a fact about a day that happened, not about the template. */
+    root.appendChild(el('p', 'cd-lbl', 'Your week'));
+    var clr = el('button', 'cd-btn warn', 'Clear all blocks'); clr.type = 'button'; clr.id = 'cdWkClr';
+    clr.disabled = !S.week.length;
+    clr.addEventListener('click', function () {
+      var ask = el('div'), n = S.week.length;
+      ask.appendChild(el('p', 'cd-note', 'All ' + n + ' block' + (n === 1 ? '' : 's') + ' go from every day of the week. What you have already kept stays in the record.'));
+      var foot = el('div', 'cd-foot');
+      var keep = el('button', 'cd-btn', 'Keep them'); keep.type = 'button'; keep.addEventListener('click', cdClose);
+      var yes = el('button', 'cd-btn warn', 'Clear all'); yes.type = 'button'; yes.id = 'cdClrYes';
+      yes.addEventListener('click', function () {
+        var was = S.week.slice();
+        S.week = []; cdSave('week'); cdClose(); cdPaint();
+        cdToast('Cleared ' + was.length + ' block' + (was.length === 1 ? '' : 's'), function () { S.week = was; cdSave('week'); cdPaint(); });
+      });
+      foot.appendChild(keep); foot.appendChild(yes); ask.appendChild(foot);
+      cdSheet('Clear all blocks?', ask);
+    });
+    root.appendChild(clr);
+    var bl = el('p', 'cd-lbl', 'Backup'); bl.style.marginTop = '24px';
+    root.appendChild(bl);
     /* Every key this app keeps, not one of them: a record with no export
        is the kind of gap you only discover once. */
     var cp = el('button', 'cd-btn', 'Copy a backup'); cp.type = 'button'; cp.id = 'cdBak';

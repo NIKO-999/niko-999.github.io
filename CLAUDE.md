@@ -4323,6 +4323,22 @@ the sky beside the name, so a tick drawn in a colour that does not show
 fails, and read defensively so a build with no tick fails by name rather
 than crashing the file.
 
+### The whole week clears in one press
+
+Settings carries **Clear all blocks**, because starting the template over
+was one delete per block. It asks first, saying how many go, and then
+offers Undo on the toast: every block on every day goes at once, and a
+mis-press there is the week. **The record is left alone**: a tick is a
+fact about a day that happened, not about the template. An emptied week
+is stored as `[]` and stays empty across a reload, because the starter
+week is only seeded when nothing is stored at all; asserted, since
+seeding on an empty list would undo the clear on the next open. With
+nothing to clear the control is disabled.
+
+**The check presses the control through the DOM after Undo**, because a
+broken Undo leaves it disabled and a Playwright click on a disabled
+button hangs the file rather than failing the assertion that names why.
+
 ### Goals are gone
 
 Out on request: the section on the habits screen, its sheet, the three

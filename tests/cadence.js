@@ -852,6 +852,46 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await c.close();
   }
 
+  console.log('\n── clearing the whole week ──');
+  {
+    /* One press empties the template, and it asks first. Both exits are
+       read off the STORE: Keep leaves every block, Clear leaves none, Undo
+       puts all of them back, and an empty week stays empty across a
+       reload rather than being re-seeded with the starter week. */
+    const { c, page, errs } = await ctx({});
+    const before = (await store(page, 'cad.week.v1')).length;
+    const logBefore = JSON.stringify(await store(page, 'cad.log.v1'));
+    await page.click('#cdGear'); await sheetUp(page);
+    await page.click('#cdWkClr'); await sheetUp(page);
+    await page.click('#cdShB .cd-btn:not(.warn)');
+    await page.waitForTimeout(250);
+    ok('keeping them keeps every block', before > 0 && (await store(page, 'cad.week.v1')).length === before, before);
+    await page.click('#cdGear'); await sheetUp(page);
+    await page.click('#cdWkClr'); await sheetUp(page);
+    await page.click('#cdClrYes');
+    await page.waitForTimeout(250);
+    ok('clearing takes every block off every day, and the list with them',
+      (await store(page, 'cad.week.v1')).length === 0 && (await page.$$('.cd-it')).length === 0);
+    ok('and what was already kept stays in the record', JSON.stringify(await store(page, 'cad.log.v1')) === logBefore);
+    ok('it offers Undo', !(await page.$eval('#cdToastU', (u) => u.hidden)));
+    await page.click('#cdToastU');
+    await page.waitForTimeout(250);
+    ok('and Undo puts every block back', (await store(page, 'cad.week.v1')).length === before);
+    /* Pressed through the DOM rather than by Playwright: after a broken
+       Undo the control is disabled, and a click on it would hang the file
+       rather than fail the check that names the fault. */
+    await page.click('#cdGear'); await sheetUp(page);
+    await page.evaluate(() => document.getElementById('cdWkClr').click());
+    await page.waitForTimeout(250);
+    await page.evaluate(() => { const y = document.getElementById('cdClrYes'); if (y) y.click(); });
+    await page.reload(); await page.waitForTimeout(300);
+    ok('an empty week stays empty after a reload, not re-seeded', (await store(page, 'cad.week.v1')).length === 0);
+    await page.click('#cdGear'); await sheetUp(page);
+    ok('and with nothing left to clear, the control is off', await page.$eval('#cdWkClr', (b) => b.disabled));
+    ok('no page errors clearing the week', errs.length === 0, errs);
+    await c.close();
+  }
+
   console.log('\n── the sky follows the clock ──');
   {
     /* Four phases, each shot at its own frozen hour. What is held: which
