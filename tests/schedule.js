@@ -18011,6 +18011,221 @@ const SAID = [
     await wctx.close();
   }
 
+  /* ══════════════════════════════════════════════════════════════
+     THE TILE ASKS WHATEVER THE TIMETABLE HAS ON IT
+
+     Reported a second time, after the table was widened: pressing
+     Train on Showing up still only ticked. The name was never the
+     whole of it — the door also refused unless EXACTLY ONE block fed
+     the item, so a day with none ticked in silence and so did a day
+     with two. Both read from outside as the picker being broken, and
+     the silent one is worse than a refusal, because the tile comes
+     back marked done.
+
+     FOUR CASES, and each passes on another's bug: none, one, two, and
+     the untick. A build that asks only when it can name a block fails
+     the first; one that files every session against the date fails
+     the third; one that never clears fails the fourth.
+     ══════════════════════════════════════════════════════════════ */
+  {
+    const TDAY = '~day';
+    const seed = (page, items, view) => page.addInitScript(([its, v]) => {
+      const D = new Date().getDay();
+      localStorage.setItem('sched.tour.v1', '1');
+      localStorage.setItem('sched.hint2.v1', '1');
+      localStorage.setItem('sched.hintw.v1', '1');
+      if (!localStorage.getItem('sched.v1')) {
+        localStorage.setItem('sched.v1', JSON.stringify({
+          title: 'Daily Process', sub: '',
+          items: its.map((b) => ({ id: b[0], d: D, s: b[1], e: b[2], r: '', n: b[3] })) }));
+      }
+      localStorage.setItem('sched.view.v1', v);
+    }, [items, view]);
+    /* The tile's own press, past the double-tap deferral that holds
+       the first tap — waited PAST rather than level with, or the
+       check is decided by whichever of the two wins the frame. */
+    const press = (page) => page.evaluate(async () => {
+      const c = document.querySelector('.ty-card[data-item="t"]');
+      if (!c) throw new Error('no Train tile on Showing up');
+      c.click();
+      await new Promise((r) => setTimeout(r, 700));
+      const sheet = document.querySelector('.sheet:not([hidden])');
+      return {
+        picker: !!(sheet && sheet.querySelector('.wb-t')),
+        says: ((sheet || {}).querySelector ? (sheet.querySelector('.wc-sub') || {}).textContent : '') || ''
+      };
+    });
+    const train = (page) => page.evaluate(() => {
+      const d = new Date();
+      const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      return JSON.parse(localStorage.getItem('sched.train.v1') || '{}')[day] || {};
+    });
+    /* Pick the first workout on the board and file it, so the record
+       is written the way a person writes it rather than planted. */
+    /* NO THROW ON A BUILD THAT DOES NOT OPEN THE PICKER. A break that
+       shuts this door would otherwise take the whole FILE down here
+       rather than failing the assertion it is aimed at — which is
+       exactly what the first proof of the gate did: it reported "no
+       summary", the greenest-looking failure there is, and the two
+       checks under it never ran at all. Every step returns instead,
+       and the empty record downstream fails by name. */
+    const file = (page) => page.evaluate(async () => {
+      const sheet = document.querySelector('.sheet:not([hidden])');
+      if (!sheet) return false;
+      const t = sheet.querySelector('.wb-t');
+      if (!t) return false;
+      t.click();
+      await new Promise((r) => setTimeout(r, 400));
+      const go = [...sheet.querySelectorAll('button')]
+        .find((b) => /^Log /.test((b.textContent || '').trim()));
+      if (!go) return false;
+      go.click();
+      await new Promise((r) => setTimeout(r, 500));
+      return true;
+    });
+
+    /* ── A DAY WITH NO TRAINING BLOCK AT ALL ──
+       The case the record could not express: trainLog is keyed by
+       block id, so a day with no block had nowhere to file and the
+       tile ticked in silence. It files against the DATE now. */
+    const nctx = await browser.newContext({ ...PHONE });
+    const npage = await nctx.newPage();
+    const nerrs = [];
+    npage.on('pageerror', (e) => nerrs.push(String(e)));
+    await seed(npage, [['cof', 600, 660, 'Coffee'], ['lun', 720, 780, 'Lunch']], 'tally');
+    await npage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await npage.waitForTimeout(600);
+    const none = await press(npage);
+    ok('a day with no training block on it still asks what you trained',
+      none.picker, none);
+    /* And the sentence does not name a block, because there is none to
+       name: "it goes on ." is the copy reading off an empty name. */
+    ok('...and the sheet does not name a block it has not got',
+      none.picker && none.says.indexOf('goes on') < 0 && /\S/.test(none.says), none);
+    await file(npage);
+    const nrec = await train(npage);
+    ok('...and the session files against the date, under a key no block id can be',
+      Object.keys(nrec).length === 1 && Object.keys(nrec)[0] === TDAY, nrec);
+    /* THE UNTICK, which is the half that fails on its own: a session
+       filed on a day with no block must not outlive the tick that
+       asked for it. */
+    await npage.evaluate(async () => {
+      document.querySelector('.ty-card[data-item="t"]').click();
+      await new Promise((r) => setTimeout(r, 700));
+    });
+    const ngone = await train(npage);
+    ok('...and unticking Train takes it away again',
+      !Object.keys(ngone).length, ngone);
+    ok('nothing threw on a day with no training block', nerrs.length === 0, nerrs);
+    await nctx.close();
+
+    /* ── A DAY WITH TWO ──
+       It refused outright, on the argument that asking twice for one
+       press is worse than not asking. That was right about asking
+       twice and wrong about refusing: it asks ONCE, about the block
+       with no session on it yet, and the sheet names which. */
+    const dctx = await browser.newContext({ ...PHONE });
+    const dpage = await dctx.newPage();
+    const derrs = [];
+    dpage.on('pageerror', (e) => derrs.push(String(e)));
+    await seed(dpage, [['am', 390, 450, 'Gym'], ['pm', 1080, 1140, 'Weights']], 'tally');
+    await dpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await dpage.waitForTimeout(600);
+    const two = await press(dpage);
+    ok('a day with two training blocks asks once rather than refusing',
+      two.picker, two);
+    ok('...and the sheet names which of the two it is about',
+      two.says.indexOf('Gym') >= 0, two);
+    await file(dpage);
+    const drec = await train(dpage);
+    ok('...and it lands on one block, never on the date',
+      Object.keys(drec).length === 1 && Object.keys(drec)[0] === 'am', drec);
+    ok('nothing threw on a day with two', derrs.length === 0, derrs);
+    await dctx.close();
+
+    /* ── AND THE SPLIT NAMES REACH IT ──
+       Nine of this app's OWN workout names placed nowhere, so a block
+       called "Legs" drew the blank glyph and fed nothing. Asserted
+       beside a name the table must still NOT claim: "Trading session"
+       was `train` before this, on `session` alone, which would have
+       made it a phantom second feeder on the author's own week. */
+    const lctx = await browser.newContext({ ...PHONE });
+    const lpage = await lctx.newPage();
+    const lerrs = [];
+    lpage.on('pageerror', (e) => lerrs.push(String(e)));
+    await seed(lpage, [['leg', 390, 450, 'Legs'], ['trd', 780, 900, 'Trading session']], 'tally');
+    await lpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await lpage.waitForTimeout(600);
+    const legs = await press(lpage);
+    ok('a block called Legs feeds Train and opens the picker',
+      legs.picker && legs.says.indexOf('Legs') >= 0, legs);
+    await file(lpage);
+    const lrec = await train(lpage);
+    /* READ OFF WHAT WENT GREEN, not off where the session landed. With
+       `session` back in the train row the day has TWO feeders and the
+       record still lands on `leg`, because Legs is the earlier of the
+       two — so an assertion on the session alone passes on the false
+       feed it exists to catch. What a phantom feeder actually does is
+       tick somebody's trading block. */
+    const lgreen = await lpage.evaluate(() => {
+      const d = new Date();
+      const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      return Object.keys(JSON.parse(localStorage.getItem('sched.log.v1') || '{}')[day] || {});
+    });
+    ok('...and "Trading session" is not swept up with it',
+      Object.keys(lrec).length === 1 && Object.keys(lrec)[0] === 'leg'
+      && lgreen.length === 1 && lgreen[0] === 'leg', { lrec, lgreen });
+    ok('nothing threw on the split names', lerrs.length === 0, lerrs);
+    await lctx.close();
+
+    /* ── THE TWO WORDS THE PERSON ACTUALLY TYPES ──
+       Asked for in their own words: whether the block says "Workout"
+       or "Training", pressing Train has to open the picker. Both were
+       ALREADY in the table before any of this, which is exactly what
+       says the name was never the bug and the gate was. Held by name
+       regardless — a word somebody has told you they rely on earns an
+       assertion of its own rather than a place in a list.
+
+       AND THE PHANTOM SITS BESIDE IT. "London session" resolved to
+       `train` on `session` alone, so a week carrying one of those and
+       a real gym block had TWO feeders and the tile refused in
+       silence, which is the likeliest shape of the report. Asserted
+       as the picker opening AND the session landing on the workout
+       rather than on the block that only read like one. */
+    for (const word of ['Workout', 'Training']) {
+      const yctx = await browser.newContext({ ...PHONE });
+      const ypage = await yctx.newPage();
+      const yerrs = [];
+      ypage.on('pageerror', (e) => yerrs.push(String(e)));
+      await seed(ypage, [['w', 390, 450, word],
+                         ['ses', 780, 900, 'London session']], 'tally');
+      await ypage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+      await ypage.waitForTimeout(600);
+      const y = await press(ypage);
+      ok(`a block called "${word}" opens the picker from Showing up`,
+        y.picker && y.says.indexOf(word) >= 0, { word, ...y });
+      await file(ypage);
+      const yrec = await train(ypage);
+      ok(`...and it lands on "${word}", never on a block that only reads like one`,
+        Object.keys(yrec).length === 1 && Object.keys(yrec)[0] === 'w', { word, yrec });
+      /* AND THE SESSION BLOCK IS NOT TICKED WITH IT, which is the half
+         the record alone cannot catch: with `session` back in the
+         train row the workout still sorts first, so the session lands
+         on the right block and every assertion above passes. What a
+         phantom feeder actually DOES is mark somebody's trading hours
+         done because they pressed Train. */
+      const ygreen = await ypage.evaluate(() => {
+        const d = new Date();
+        const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        return Object.keys(JSON.parse(localStorage.getItem('sched.log.v1') || '{}')[day] || {});
+      });
+      ok(`...and pressing Train does not tick a "session" block as well`,
+        ygreen.length === 1 && ygreen[0] === 'w', { word, ygreen });
+      ok(`nothing threw on "${word}"`, yerrs.length === 0, yerrs);
+      await yctx.close();
+    }
+  }
+
   ok('no page errors through any of it', errs.length === 0, errs);
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);

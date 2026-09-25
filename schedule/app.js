@@ -1729,10 +1729,35 @@
   var ICON_MATCH = [
     ['pet', ['walk the dog', 'the dog', 'dog', 'cat', 'puppy', 'pet', 'vet']],
     ['garden', ['water plants', 'plants', 'garden', 'gardening', 'allotment', 'yard']],
-    ['drive', ['school run', 'commute', 'drive', 'driving', 'car', 'taxi', 'lift']],
+    ['drive', ['school run', 'commute', 'drive', 'driving', 'car', 'taxi']],
     ['cook', ['meal prep', 'food prep', 'cook', 'cooking', 'bake', 'baking', 'kitchen']],
-    ['train', ['gym', 'work out', 'workout', 'weights', 'lifting', 'train', 'training',
-               'session', 'exercise', 'crossfit', 'boxing']],
+    /* THE GYM'S OWN VOCABULARY, AND THE SPLITS ARE PART OF IT.
+       Nine of this app's own workout names -- push, pull, legs, chest,
+       back, shoulders, arms, abs, core -- reached nothing at all, so a
+       block called "Legs" drew the blank glyph AND did not feed Train,
+       which is the picker refusing to open on the one screen that is
+       named after it. Long forms first, which is this table's own rule.
+
+       AND THE AMBIGUOUS ONES ARE DECIDED RATHER THAN GUESSED, which is
+       what "Train is the gym, not the railway" already settled once.
+       `back`, `push`, `pull` and `core` each mean something ordinary in
+       a week -- back from a trip, push a release, a pull request, core
+       hours -- so they are claimed only in their day forms. `lift` goes
+       the other way and moves off `drive`: a lift is still reached by
+       commute, car and taxi, and in a training app the weight wins.
+       `session` was claimed here and should not have been -- it is too
+       generic, and this author's other app is full of trading ones. */
+    ['train', ['gym session', 'training session', 'weight training',
+               'leg day', 'push day', 'pull day', 'back day', 'chest day',
+               'upper body', 'lower body', 'full body', 'bro split',
+               'gym', 'work out', 'workout', 'weights', 'lifting', 'lift',
+               'train', 'training', 'exercise', 'crossfit', 'boxing',
+               'hyrox', 'calisthenics', 'strength', 'conditioning',
+               'cardio', 'hiit', 'bootcamp', 'ppl', 'legs', 'chest',
+               'abs', 'shoulders', 'arms', 'biceps', 'triceps', 'quads',
+               'glutes', 'hamstrings', 'calves', 'deadlift', 'deadlifts',
+               'squat', 'squats', 'bench', 'barbell', 'dumbbell',
+               'kettlebell']],
     ['work', ['deep work', 'desk', 'office', 'admin', 'work', 'focus', 'shift']],
     ['run', ['run', 'running', 'jog', 'jogging', 'sprint', 'marathon', '5k', '10k']],
     ['walk', ['walk', 'walking', 'stroll', 'hike', 'hiking', 'steps']],
@@ -2070,7 +2095,7 @@
                block again under a sheet asking about that same block
                is the sentence and the picture this project keeps
                having to take back out. */
-            if (!was && scIsTrain(it)) { scTrainAsk(it, d, bd); return; }
+            if (!was && scIsTrain(it)) { scTrainAsk(it, bd); return; }
             scToast(was ? it.n + ' unticked' : it.n + ' done', false);
         };
         /* ── A TAP TICKS, AND EDIT ARMS ONE PRESS ──
@@ -5212,7 +5237,12 @@
          same as unticking the block itself: a record about a session
          must not outlive the session being marked done. */
       var fed = item.from ? scBlocksFor(item, new Date(day + 'T12:00:00').getDay()) : [];
-      if (!on) fed.forEach(function (b) { scTrainSet(day, b.id, ''); });
+      if (!on) {
+        fed.forEach(function (b) { scTrainSet(day, b.id, ''); });
+        /* The day's own record goes the same way, or a session filed
+           on a day with no block outlives the tick that asked for it. */
+        if (scItemTrains(item)) scTrainSet(day, TRAIN_DAY, '');
+      }
       /* Same claim, same rule: a record about what you put in your
          head must not outlive the tick it hangs off. */
       if (!on && item.id === 'm') scMindSet(day, null);
@@ -5221,19 +5251,16 @@
       /* ── the deck's third door, and the most literal one ──
          "Press Train and it asks what you trained" is the whole
          feature said in one sentence, and this card is where somebody
-         actually presses Train.
-
-         ONE BLOCK ONLY. This tick marks every block of that name on
-         the day, so a week with two sessions on a Tuesday has two
-         records and no way to say which card the answer is about —
-         and asking twice in a row for one press is worse than not
-         asking. Two sessions are picked from their own rows, where
-         the question has an answer. */
-      var only = fed.filter(scIsTrain);
-      if (on && only.length === 1) { scTrainAsk(only[0], only[0].d, day); return; }
+         actually presses Train. It asks on every day now, whatever
+         the timetable has on it — see scTrainTarget for which block
+         the answer lands on, and why a day with none still has one. */
+      if (on && scItemTrains(item)) {
+        scTrainAsk(scTrainTarget(fed, day), day);
+        return;
+      }
       /* ── AND MIND ASKS FROM HERE, WITH NO SUCH CONDITION ──
-         Train's record is per BLOCK, so it needs one block to be
-         about and refuses when the day has two. Mind's is per DAY —
+         Train's record is per BLOCK, so it needs one to be about and
+         resolves which. Mind's is per DAY —
          it is one of the five things on this screen rather than a
          property of a line in the timetable — so there is nothing to
          be ambiguous about and the question is always askable. That
@@ -6501,6 +6528,42 @@
     scTrainSave();
   }
   function scTrainSave() { scWriteJSON(TRAIN_KEY, trainLog); }
+
+  /* THE TILE ASKS WHATEVER THE TIMETABLE SAYS.
+     "Press Train and it asks what you trained" is the feature in one
+     sentence, and the tile is where somebody presses Train. It asked
+     only when exactly ONE block fed the item, so a day with no
+     training block on it ticked in silence and so did a day with two.
+     Both were reported as the picker being broken, which from outside
+     is exactly what they are -- and the silent one is worse than a
+     refusal, because the tile comes back marked done.
+
+     The record stays per BLOCK: two sessions in a day are two things
+     and the Workouts panel counts them apart. What changed is that
+     the tile RESOLVES which block instead of refusing when the answer
+     is not obvious -- the first with no session on it yet, because
+     the tick has just marked them all done and the one you mean is
+     the one you have not answered for. The sheet names it, so the
+     choice is visible rather than assumed, and a row is still how you
+     correct any other block.
+
+     A day with NO training block files against the DATE. Nothing that
+     reads this key resolves an id back to a block -- scWorkAll walks
+     the keys -- so a reserved one is a session with no row to sit on
+     rather than a second shape to defend against. `~` can never begin
+     a block id: scId mints 'c' and base36. */
+  var TRAIN_DAY = '~day';
+  function scItemTrains(item) {
+    return !!item && !!item.from && item.from.some(function (n) {
+      return scIconFor(n) === 'train';
+    });
+  }
+  function scTrainTarget(fed, day) {
+    var mine = fed.filter(scIsTrain);
+    if (!mine.length) return { id: TRAIN_DAY, n: '' };
+    var open = mine.filter(function (b) { return !scTrainOf(day, b.id); });
+    return open.length ? open[0] : mine[0];
+  }
 
   function scTrainOf(day, id) {
     return (trainLog[day] && scTrainRec(trainLog[day][id])) || null;
@@ -7998,7 +8061,7 @@
      in it. The two BEHAVIOURS the deck carried do survive whole: a
      session can be more than one thing, and rest is exclusive.
      ═══════════════════════════════════════════════════════════ */
-  function scTrainAsk(item, dow, day) {
+  function scTrainAsk(item, day) {
     var rec = scTrainOf(day, item.id);
     /* ── WHAT IS ALREADY ON THE BLOCK, AS A SELECTION ──
        Order is press order, so "Pull + Abs" reads the way it was
@@ -8018,8 +8081,9 @@
       /* "What you did", not "one": a session can be a lift and one
          small thing, and copy that says pick ONE is the app telling
          you the answer has to be a lie. */
-      body.appendChild(scEl('p', 'wc-sub',
-        'Pick what you did and it goes on ' + item.n + '.'));
+      body.appendChild(scEl('p', 'wc-sub', item.n
+        ? 'Pick what you did and it goes on ' + item.n + '.'
+        : 'Pick what you did.'));
 
       var board = scEl('div', 'wb');
       var howHard = scEl('div', 'wc-eff');
@@ -9465,7 +9529,7 @@
             if (done) scTrainSet(bDay, item.id, '');
             scClose();
             if (view === 'tally') scPaintTally(); else scRender();
-            if (!done && scIsTrain(item)) { scTrainAsk(item, day, bDay); return; }
+            if (!done && scIsTrain(item)) { scTrainAsk(item, bDay); return; }
             /* Only name what it fed when it fed something. Dropping the
                gate without this leaves "Counted toward " with nothing
                after it on every block that feeds nothing. */
@@ -9524,7 +9588,7 @@
              what the row is and the value says what is on it, which
              is the seventh caps label paid back as two words. */
           scGlPush(g3, 'Trained', got || 'Not yet', function () {
-            scTrainAsk(item, day, bDay);
+            scTrainAsk(item, bDay);
           });
         }
         if (g3) body.appendChild(g3);

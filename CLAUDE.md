@@ -13518,12 +13518,101 @@ break on it cannot bite. The over-wide break is a genuinely over-wide
 MATCH instead, and Coffee goes green with it. Said out loud rather
 than left looking proven.
 
-**WHAT IS STILL NOT FIXED, and is the design rather than the bug**: a
-day with TWO training blocks refuses at the tile, because `trainLog`
-is keyed by block and one press has no way to say which session the
-answer is about — the rows are where that question has an answer. And
-a day with NO training block has nowhere to file a session at all.
-Neither is what was reported, and neither has a row to press either.
+### And the name was never the whole of it
+
+Reported again after the table was widened: pressing Train on Showing
+up still only ticked. The door had a SECOND gate, and it was the one
+written up here as *not fixed, and the design rather than the bug* —
+it asked only when **exactly one** block fed the item, so a day with
+none ticked in silence and so did a day with two.
+
+**A SILENT TICK IS WORSE THAN A REFUSAL**, which is why both read from
+outside as the picker being broken rather than as a limitation: the
+tile comes back marked done, so the app has recorded the one thing it
+could not ask about.
+
+**THE RECORD STAYS PER BLOCK.** Two sessions in a day are two things
+and the Workouts panel counts them apart, so moving Train to per-date
+the way Mind went would throw that away. What changed is that the tile
+RESOLVES which block instead of refusing when the answer is not
+obvious — the first with no session on it yet, because the tick has
+just marked them all done and the one you mean is the one you have not
+answered for. The sheet already named the block, so the choice is
+visible rather than assumed, and a row is still how you correct any
+other one.
+
+**A DAY WITH NO TRAINING BLOCK FILES AGAINST THE DATE.** Nothing that
+reads `trainLog` resolves an id back to a block — `scWorkAll` walks
+the keys — so a reserved key is a session with no row to sit on rather
+than a second shape to defend against at every read. `~day`, because
+`~` can never begin a block id: `scId` mints `c` and base36.
+
+**AND THE GYM'S OWN VOCABULARY WAS NOT IN THE TABLE.** Measured over
+the names people actually give a gym block, **thirteen of forty-two**
+reached `train`. Nine of the misses are **this app's own workout
+names** — push, pull, legs, chest, back, shoulders, arms, abs, core —
+so a block called "Legs" drew the blank glyph AND fed nothing, which is
+the picker refusing to open on the one screen named after it. Thirty-
+eight of thirty-eight reach it now, with twenty-two ordinary words
+asserted NOT to.
+
+**THE AMBIGUOUS ONES ARE DECIDED IN THE OPEN**, which is *Train is the
+gym, not the railway* arriving a second time. `back`, `push`, `pull`
+and `core` each mean something ordinary in a week — back from a trip,
+push a release, a pull request, core hours — so they are claimed only
+in their day forms. `lift` goes the other way and moves OFF `drive`: a
+lift is still reached by commute, car and taxi, and in a training app
+the weight wins.
+
+**AND `session` WAS CLAIMED HERE AND SHOULD NOT HAVE BEEN.** It sat in
+the `train` row, which is checked before `trading` — so **"Trading
+session" resolved to `train`**, drew a dumbbell, and fed the Train
+tile. That is a phantom second block on the one week this author
+actually keeps, which is the two-block gate closing in silence: the
+report could have been the table feeding the item something that was
+never a session at all. It is too generic to claim, and the compound
+forms are already covered by `gym` and `training`.
+
+**FOUR CASES, AND EACH PASSES ON ANOTHER'S BUG**: none, one, two, and
+the untick. A build that asks only when it can name a block fails the
+first; one that files everything against the date fails the third; one
+that never clears fails the fourth.
+
+**`dow` WAS A DEAD PARAMETER** on `scTrainAsk`, through all three of
+its callers — the sheet reads `item.id`, `item.n` and `day` and
+nothing else. It went with the gate, because a parameter that must be
+passed and ignored is the next person's wrong turn.
+
+### And the bite proof broke itself twice, on two lessons already here
+
+Both are written down in this file already, and both bit anyway, which
+is the only reason they are worth a second entry.
+
+**AN EMPTY STRING IS NOT AN ANCHOR — and the break that needed one was
+a REMOVAL.** The `noclear` break deletes a line, so its replacement was
+`''`, so the INVERSE searched for `''` and matched **686,400 times**.
+The assertion refused, nothing was written, and the file was left with
+the break still in it: `scTrainSet(day, TRAIN_DAY, '')` gone from the
+untick path, on a tree the commit hook was meanwhile asking to push.
+Recovered with `git checkout HEAD -- schedule/app.js` and hashed back.
+A removal's inverse is an INSERTION, so the break writes a placeholder
+comment rather than nothing, and `swap` now refuses either side shorter
+than twenty characters.
+
+**AND A CHECK THAT CRASHES IS NOT A CHECK THAT FAILS.** The helper that
+files a session threw when no picker opened, so `onegate` — whose whole
+point is that the picker does not open — took the FILE down at that
+line and reported **no summary**, the greenest-looking failure there
+is. The two assertions under it never ran, so one break proved one
+claim where it should have proved three. Every step returns now.
+
+**WHICH MEANS THE FIRST PROOF PROVED LESS THAN IT LOOKED.** It printed
+two red lines and read as a break biting cleanly; what it actually did
+was die three assertions in. **A break that kills the file is
+indistinguishable from a break that works, in the output** — so the
+runner's own tell is the one to read: no summary means no count, and no
+count means the assertions after the crash are unmeasured rather than
+passing.
 
 ## The day you began
 
