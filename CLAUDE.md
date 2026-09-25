@@ -4367,6 +4367,15 @@ timer then hid the new sheet. `cdSheet` clears it now. Both halves are
 bite-proved: skipping the ask fails the ask checks, and dropping the
 clear fails the training check.
 
+**AND THE ASK DREW TWO LINES OVER NOTHING.** Its body is only the
+foot, so the head's own hairline and the foot's top rule sat 22px apart
+with nothing between them: the reported *what are those lines*. A foot
+that is the whole body is `is-only`, with no margin and no rule. And the
+two answers were already the same 168x50 box. Not yet read as the smaller
+one because a hairline outline beside a solid fill looks smaller at an
+identical size, so it is a quiet fill (`soft`) now. Both are asserted:
+the box and the fill, because the width alone was never what was wrong.
+
 ### The whole week clears in one press
 
 Settings carries **Clear all blocks**, because starting the template over

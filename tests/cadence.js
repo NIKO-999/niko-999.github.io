@@ -177,6 +177,16 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     /* It asks first, and the ask on its own keeps nothing. */
     ok('pressing it asks before it completes anything', (await sheetUp(page)) && (await page.textContent('#cdShT')) === 'Complete Deep work?'
       && !(((await store(page, 'cad.log.v1')) || {})['2026-09-25'] || {}).s3);
+    /* One rule under the head and none over the answers; the two answers
+       the same box, and both drawn as a fill so neither reads smaller. */
+    const ask = await page.evaluate(() => {
+      const f = document.querySelector('#cdShB .cd-foot'), cs = f ? getComputedStyle(f) : null;
+      const bs = [...document.querySelectorAll('#cdShB .cd-btn')].map((b) => { const r = b.getBoundingClientRect(), c = getComputedStyle(b); return { w: r.width, h: r.height, bg: c.backgroundColor, sh: c.boxShadow }; });
+      return { rule: cs ? cs.boxShadow : 'missing', mt: cs ? cs.marginTop : 'missing', bs };
+    });
+    ok('the ask draws no second rule over its answers', ask.rule === 'none' && ask.mt === '0px', ask);
+    ok('and Not yet and Complete are the same box, both filled', ask.bs.length === 2 && ask.bs[0].w === ask.bs[1].w && ask.bs[0].h === ask.bs[1].h
+      && ask.bs.every((b) => b.bg !== 'rgba(0, 0, 0, 0)' && b.sh === 'none'), ask.bs);
     await page.evaluate(() => document.getElementById('cdGoNo') && document.getElementById('cdGoNo').click());
     await page.waitForTimeout(350);
     ok('and Not yet leaves the block as it was', !(await page.$eval('#cdSheet', (e) => e.classList.contains('is-open'))) && !(((await store(page, 'cad.log.v1')) || {})['2026-09-25'] || {}).s3
