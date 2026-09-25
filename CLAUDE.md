@@ -4270,6 +4270,30 @@ in the habit's own colour, with the legend naming the habits and the
 caption counting goals achieved. It says WHICH, never whether: a day
 with none draws none, never a red one.
 
+### Goals, notes, and a calendar that says what mattered
+
+**A GOAL IS A LINE IN ITS OWN KEY, AND WHETHER IT WAS MET IS WORKED
+OUT, NEVER STORED.** Asked for as needing "a back end", and it does
+not: `cad.goal.v1` holds what you aim at and every day's answer comes
+off the record already here, so the goal and the log can never
+disagree. Three shapes — a figure in a day (20,000 steps), times a
+week (a habit, one workout, or any of a kind), a main task done on a
+date. A week goal is met ONCE, on the day its count arrived, or the
+calendar rings every day after it too.
+
+**NOTES ARE A LINE TO A DAY, NOT A DOCUMENT.** `schedule/`'s notes are
+titled pages with layouts and marks; this is the opposite on purpose.
+No title, no folders — the date is the heading, it can be ahead, and
+the only mark is IMPORTANT, which is what puts a note on the calendar.
+Delete asks, because there is no bin and a note is only what you typed.
+
+**THREE MARKS ON A MONTH CELL, THREE SHAPES.** A goal met rings the
+date in gold, the workout rides under it by NAME in its kind's colour,
+an important note is a diamond in the corner. Shape tells them apart
+before colour has to. Cells stack from the top, because centred a day
+with a workout and one without put one row's dates at two heights.
+Ahead opens only when something is waiting there.
+
 ### The site is the app, photographed
 
 `cadence/about/` is one static page in the app's own sky and type, and

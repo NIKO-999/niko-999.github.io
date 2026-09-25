@@ -79,6 +79,9 @@
   --h-water: #8FB8FF;
   --h-sleep: #E9A6D0;
   --bad: #FF9C8F;
+  /* Achievement: a goal met. The one warm metal on the sky, and it says
+     a thing happened — never that one did not. */
+  --gold: #F5D37A;
 
   /* THE SKY. Near-black at the top, a slate night by the foot, and one
      soft lift behind the block you are in. It never carries colour:
@@ -255,7 +258,9 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .cd-mcap { flex: none; margin: 14px var(--gut) 0; text-align: center; letter-spacing: .14em; color: var(--quiet); }
 .cd-dows { display: grid; grid-template-columns: repeat(7, 1fr); padding: 18px 0 8px; text-align: center; letter-spacing: .1em; color: var(--quiet); }
 .cd-mgrid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 2px; }
-.cd-mc { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 50px; }
+/* From the top, not centred: a day with a workout on it is taller than one
+   without, and centred the dates in one row would sit at two heights. */
+.cd-mc { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px; min-height: 50px; padding: 4px 0 6px; }
 .cd-mc b { font: 400 14px/1 var(--sans); font-variant-numeric: tabular-nums; }
 .cd-mc.is-quiet b, .cd-mc.is-future b { color: var(--quiet); }
 .cd-mc.is-today b { font-weight: 700; }
@@ -357,6 +362,57 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cd-note { margin: 12px 0 0; font: 400 14px/1.5 var(--sans); color: var(--dim); }
 .cd-cap { margin: 0 0 16px; }
 
+/* ── goals: set on the habits screen, met on the calendar ── */
+.cd-sec { margin: 30px 0 0; }
+.cd-sec + .cd-hb { margin-top: 12px; }
+.cd-gr { position: relative; display: grid; grid-template-columns: 44px 1fr; align-items: center; margin-left: -18.5px; }
+.cd-gr::before { content: ""; position: absolute; left: 18.5px; right: 0; top: 0; height: 1px; background: var(--hair); }
+.cd-gr:last-child::after { content: ""; position: absolute; left: 18.5px; right: 0; bottom: 0; height: 1px; background: var(--hair); }
+.cd-gr.is-on .cd-hr-b i { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+.cd-gr .cd-hr-v.is-won { color: var(--gold); }
+/* How far there, a hairline in the goal's own colour. Not drawn for a
+   task: a task is done or it is not, and a half-full bar would be a
+   figure nobody measured. */
+.cd-gbar { grid-column: 1 / -1; position: relative; height: 2px; border-radius: 1px; background: var(--track); overflow: hidden; }
+.cd-gbar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 1px; background: var(--hc); }
+.cd-gr.is-on .cd-gbar i { background: var(--gold); }
+
+/* ── the calendar's important things ── */
+.cd-mc { position: relative; }
+/* A goal met rings the date in gold; the workout rides under it by name;
+   an important note is a small diamond in the corner. Three marks, three
+   different shapes, so none of them has to be read to be told apart. */
+.cd-mc b { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; }
+.cd-mc.is-goal b { box-shadow: inset 0 0 0 1.5px var(--gold), 0 0 12px rgba(245, 211, 122, .45); }
+.cd-mc.has-note::after { content: ""; position: absolute; top: 5px; right: 6px; width: 5px; height: 5px; background: var(--ink); transform: rotate(45deg); }
+.cd-mw { max-width: calc(100% - 4px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 2px 4px; border-radius: 4px; font: 500 9.5px/1.2 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--kc); background: color-mix(in srgb, var(--kc) 16%, transparent); }
+.cd-legend i.is-ring { background: none; box-shadow: inset 0 0 0 1.5px var(--gold); width: 9px; height: 9px; }
+.cd-legend i.is-dia { border-radius: 0; background: var(--ink); transform: rotate(45deg); }
+
+/* ── notes: a line to a day, not a document ── */
+.cd-nw { margin-top: 26px; }
+.cd-nw .cd-field { min-height: 60px; resize: none; }
+.cd-nw-r { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.cd-nw-r .go { margin-left: auto; background: var(--ink); color: var(--on); box-shadow: none; }
+.cd-nw-r .go:disabled { opacity: .4; cursor: default; }
+/* 16px, or iOS zooms the page when the date is pressed. */
+.cd-ndate { flex: 0 1 150px; min-width: 44px; max-width: 150px; min-height: 44px; padding: 0 12px; border: 0; border-radius: 22px; font: 400 16px/1 var(--sans); color: var(--dim); background: none; box-shadow: inset 0 0 0 1px var(--hair); -webkit-appearance: none; appearance: none; }
+.cd-ndate::-webkit-calendar-picker-indicator { filter: invert(1); opacity: .6; }
+.cd-ng { margin-top: 28px; }
+.cd-ng > .cd-lbl { margin-bottom: 6px; }
+.cd-nl { list-style: none; margin: 0; padding: 0; }
+.cd-ni { position: relative; display: grid; grid-template-columns: 44px 1fr; align-items: start; margin-left: -18.5px; }
+.cd-ni::before { content: ""; position: absolute; left: 18.5px; right: 0; top: 0; height: 1px; background: var(--hair); }
+.cd-ni:last-child::after { content: ""; position: absolute; left: 18.5px; right: 0; bottom: 0; height: 1px; background: var(--hair); }
+.cd-nstar { width: 44px; height: 46px; display: grid; place-items: center; }
+.cd-nstar i { width: 6px; height: 6px; transform: rotate(45deg); box-shadow: inset 0 0 0 1.4px var(--quiet); }
+.cd-ni.is-imp .cd-nstar i { background: var(--ink); box-shadow: 0 0 8px rgba(243, 245, 247, .55); }
+.cd-nt { min-height: 44px; padding: 13px 0 12px; font: 400 15px/1.4 var(--sans); color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; }
+.cd-nstrip { display: flex; justify-content: center; gap: 6px; margin-top: 22px; }
+.cd-nstrip i { width: 5px; height: 5px; border-radius: 50%; background: var(--nil); }
+.cd-nstrip i.is-on { background: var(--ink); box-shadow: 0 0 6px rgba(243, 245, 247, .5); }
+.cd-dl-gold li > i { background: var(--gold); }
+
 /* ── toast ── */
 .cd-toast {
   position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 112px); z-index: 60;
@@ -380,6 +436,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       <button class="cd-tab" data-v="day" type="button">Day</button>
       <button class="cd-tab" data-v="hab" type="button">Habits</button>
       <button class="cd-tab" data-v="mon" type="button">Month</button>
+      <button class="cd-tab" data-v="note" type="button">Notes</button>
     </nav>
     <button class="cd-plus" id="cdAdd" type="button" aria-label="Add a block"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
   </header>
@@ -407,6 +464,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
           <p class="cd-hs" id="cdHabCap"></p>
           <div class="cd-hdots" id="cdHabDots" role="img"></div>
         </div>
+        <p class="cd-lbl cd-sec">Goals</p>
+        <ul class="cd-hb" id="cdGoals"></ul>
+        <button class="cd-link" id="cdGoalAdd" type="button">+ A goal</button>
+        <p class="cd-lbl cd-sec">Habits</p>
         <ul class="cd-hb" id="cdHab"></ul>
         <button class="cd-link" id="cdHabAdd" type="button">+ A habit of your own</button>
       </div>
@@ -422,6 +483,25 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
         <div class="cd-dows"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
         <div class="cd-mgrid" id="cdMonG"></div>
         <div class="cd-legend" id="cdMonL"></div>
+      </div>
+    </section>
+    <section id="cdVNote" aria-label="Notes" hidden>
+      <div class="cd-pane">
+        <div class="cd-hero is-sub">
+          <p class="cd-hcap">This month</p>
+          <p class="cd-big" id="cdNoteT"></p>
+          <p class="cd-hs" id="cdNoteCap"></p>
+          <div class="cd-nstrip" id="cdNoteStrip" role="img"></div>
+        </div>
+        <div class="cd-nw">
+          <textarea class="cd-field" id="cdNoteIn" rows="2" placeholder="Write it down" aria-label="A new note"></textarea>
+          <div class="cd-nw-r">
+            <button class="cd-chip" id="cdNoteImp" type="button" aria-pressed="false">Important</button>
+            <input class="cd-ndate" id="cdNoteD" type="date" aria-label="The day it is about">
+            <button class="cd-chip go" id="cdNoteGo" type="button" disabled>Add</button>
+          </div>
+        </div>
+        <div id="cdNotes"></div>
       </div>
     </section>
   </main>
@@ -449,7 +529,8 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      damaged one costs itself and nothing beside it. */
   var K = {
     week: 'cad.week.v1', log: 'cad.log.v1', off: 'cad.off.v1',
-    hab: 'cad.hab.v1', train: 'cad.train.v1', defs: 'cad.defs.v1'
+    hab: 'cad.hab.v1', train: 'cad.train.v1', defs: 'cad.defs.v1',
+    goal: 'cad.goal.v1', note: 'cad.note.v1'
   };
   /* There is one face now, so the key that chose between two is swept
      rather than left: a preference for a control that no longer exists
@@ -565,6 +646,37 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     return out;
   }
 
+  /* A list of records, each repaired or dropped on its own, and the
+     repair written back: held only in memory it is redone every open and
+     lost the moment anything else writes the key. */
+  function cdLoadList(k, clean) {
+    var raw = cdRead(k, []);
+    var out = (Array.isArray(raw) ? raw : []).map(clean).filter(Boolean);
+    if (!Array.isArray(raw) || JSON.stringify(out) !== JSON.stringify(raw)) cdWrite(k, out);
+    return out;
+  }
+  var ISO = /^\d{4}-\d{2}-\d{2}$/;
+  /* A goal is one of three shapes. A figure in a day: a numeric habit at
+     or over v. Times a week: a habit, a workout or a kind of workout, v
+     times Monday to Sunday. A main task: a sentence, done on a date. */
+  function cdGoalClean(g) {
+    if (!isObj(g) || typeof g.id !== 'string' || !g.id) return null;
+    var v = +g.v;
+    if (g.t === 'num') return typeof g.h === 'string' && v > 0 ? { id: g.id, t: 'num', h: g.h, v: v } : null;
+    if (g.t === 'week') return typeof g.w === 'string' && v >= 1 ? { id: g.id, t: 'week', w: g.w, v: Math.min(7 * 3, Math.round(v)) } : null;
+    if (g.t === 'task') {
+      var n = String(g.n || '').trim().slice(0, 80);
+      return n ? { id: g.id, t: 'task', n: n, d: ISO.test(g.d) ? g.d : '', done: ISO.test(g.done) ? g.done : '' } : null;
+    }
+    return null;
+  }
+  function cdNoteClean(n) {
+    if (!isObj(n) || typeof n.id !== 'string' || !n.id) return null;
+    var t = String(n.t || '').slice(0, 2000);
+    if (!t.trim() || !ISO.test(n.d)) return null;
+    return { id: n.id, t: t, d: n.d, i: n.i ? 1 : 0, at: +n.at || 0 };
+  }
+
   var S = {
     week: cdLoadWeek(),
     log: cdLoadMap(K.log),
@@ -574,7 +686,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     defs: (function () {
       var r = cdRead(K.defs, []);
       return Array.isArray(r) ? r.filter(function (x) { return isObj(x) && x.id && x.n; }) : [];
-    })()
+    })(),
+    goal: cdLoadList(K.goal, cdGoalClean),
+    note: cdLoadList(K.note, cdNoteClean)
   };
   function cdSave(which) { cdWrite(K[which], S[which]); }
 
@@ -680,6 +794,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     $('cdVDay').hidden = v !== 'day';
     $('cdVHab').hidden = v !== 'hab';
     $('cdVMon').hidden = v !== 'mon';
+    $('cdVNote').hidden = v !== 'note';
     document.querySelectorAll('.cd-tab').forEach(function (t) {
       if (t.dataset.v === v) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
     });
@@ -688,8 +803,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   }
   function cdPaint() {
     if (view === 'day') cdPaintDay();
-    else if (view === 'hab') cdPaintHab();
-    else cdPaintMon();
+    else if (view === 'hab') { cdPaintHab(); cdPaintGoals(); }
+    else if (view === 'mon') cdPaintMon();
+    else cdPaintNotes();
   }
   function cdLongDate(iso, withDay) {
     var d = cdDate(iso);
@@ -1379,6 +1495,231 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     cdSheet('A habit of your own', root);
   });
 
+  /* ═══ GOALS ═══
+     What you are aiming at, set by you and kept on this phone like every
+     other record. Nothing here needs a server: a goal is a line in its
+     own key, and whether it was met on a day is worked out from the
+     record that is already here, so the two can never disagree. */
+  function cdHabById(id) { return cdHabits().filter(function (h) { return h.id === id; })[0]; }
+  function cdGoalWhat(w) {
+    if (w.indexOf('h:') === 0) { var h = cdHabById(w.slice(2)); return h ? h.n : ''; }
+    if (w.indexOf('g:') === 0) { var g = LIFT.filter(function (x) { return x.g === w.slice(2); })[0]; return g ? g.n : ''; }
+    return LIFTN[w] ? LIFTN[w].n : '';
+  }
+  function cdGoalName(g) {
+    if (g.t === 'num') {
+      var h = cdHabById(g.h); if (!h) return 'A goal';
+      var fig = cdFmtNum(g.v, h);
+      return h.unit === 'steps' ? fig + ' steps' : h.n + ' ' + fig + (h.unit ? ' ' + h.unit : '');
+    }
+    if (g.t === 'week') return (cdGoalWhat(g.w) || 'Something') + ' ' + g.v + '× a week';
+    return g.n;
+  }
+  function cdGoalHue(g) {
+    if (g.t === 'num') { var h = cdHabById(g.h); return h ? h.hc : '--c-none'; }
+    if (g.t === 'week') {
+      if (g.w.indexOf('h:') === 0) { var hh = cdHabById(g.w.slice(2)); return hh ? hh.hc : '--c-none'; }
+      return '--k-' + (g.w.indexOf('g:') === 0 ? g.w.slice(2) : (LIFTN[g.w] ? LIFTN[g.w].g : 'rest'));
+    }
+    return '--gold';
+  }
+  /* How many times a times-a-week goal happened on one day. A habit is
+     once a day at most; a workout is every session that day carrying it. */
+  function cdGoalCount(g, iso) {
+    if (g.w.indexOf('h:') === 0) { var h = cdHabById(g.w.slice(2)); return h && cdHabOn(iso, h) ? 1 : 0; }
+    var ss = cdSessions(iso);
+    if (g.w.indexOf('g:') === 0) { var grp = g.w.slice(2); return ss.filter(function (x) { return x.s.k.some(function (k) { return LIFTN[k].g === grp; }); }).length; }
+    return ss.filter(function (x) { return x.s.k.indexOf(g.w) >= 0; }).length;
+  }
+  function cdWeekCount(g, iso) {
+    var n = 0;
+    for (var d = cdWeekStart(iso); d <= iso; d = cdAddDays(d, 1)) n += cdGoalCount(g, d);
+    return n;
+  }
+  /* Met ON this day: a figure the day reached, the day a week's count
+     arrived at its number, or the day a task was done. A week goal is met
+     once a week, on the day it got there, never on every day after. */
+  function cdGoalHit(g, iso) {
+    if (iso > cdToday()) return false;
+    if (g.t === 'num') { var h = cdHabById(g.h); return !!h && +cdHabVal(iso, h) >= g.v; }
+    if (g.t === 'week') { var c = cdWeekCount(g, iso); return c >= g.v && c - cdGoalCount(g, iso) < g.v; }
+    return g.done === iso;
+  }
+  function cdGoalsMet(iso) { return S.goal.filter(function (g) { return cdGoalHit(g, iso); }); }
+
+  function cdPaintGoals() {
+    var today = cdToday(), m0 = today.slice(0, 7) + '-01';
+    var html = '';
+    S.goal.forEach(function (g) {
+      var on = false, val = '', sub = '', frac = -1;
+      if (g.t === 'num') {
+        var h = cdHabById(g.h), v = h ? +cdHabVal(today, h) || 0 : 0;
+        on = !!h && v >= g.v;
+        frac = Math.min(1, v / g.v);
+        var n = 0; for (var d = m0; d <= today; d = cdAddDays(d, 1)) if (cdGoalHit(g, d)) n++;
+        val = on ? 'Achieved' : h && v ? cdFmtNum(v, h) : '—';
+        sub = n ? 'Met ' + n + (n === 1 ? ' time' : ' times') + ' this month' : 'Not met yet this month';
+      } else if (g.t === 'week') {
+        var c = cdWeekCount(g, today);
+        on = c >= g.v; frac = Math.min(1, c / g.v);
+        val = on ? 'Achieved' : c + ' / ' + g.v;
+        sub = on ? c + ' this week' : (g.v - c) + ' to go this week';
+      } else {
+        on = !!g.done;
+        val = on ? 'Achieved' : '';
+        if (on) sub = 'On ' + cdLongDate(g.done, false);
+        else if (g.d) { var left = cdDiff(g.d, today); sub = 'By ' + cdLongDate(g.d, false) + ' · ' + (left > 1 ? left + ' days' : left === 1 ? 'tomorrow' : left === 0 ? 'today' : Math.abs(left) + (left === -1 ? ' day' : ' days') + ' past'); }
+        else sub = 'No date';
+      }
+      var name = cdGoalName(g);
+      /* A task is ticked here; a figure or a week is met by the record, so
+         its mark is a readout rather than a second place to log. */
+      var mark = g.t === 'task'
+        ? '<button type="button" class="cd-hr-b" data-act="done" aria-pressed="' + on + '" aria-label="' + esc(name) + ', ' + (on ? 'achieved. Undo' : 'not yet. Mark achieved') + '"><i></i></button>'
+        : '<span class="cd-hr-b" aria-hidden="true"><i></i></span>';
+      html += '<li class="cd-gr' + (on ? ' is-on' : '') + '" data-g="' + g.id + '" style="--hc:var(' + cdGoalHue(g) + ')">' + mark
+        + '<button type="button" class="cd-hr-n" data-act="edit" aria-label="' + esc(name) + ', ' + esc(val || 'not yet') + ', ' + esc(sub) + '. Edit">'
+        + '<span class="cd-hr-t">' + esc(name) + '</span><span class="cd-hr-v' + (on ? ' is-won' : val === '—' ? ' is-nil' : '') + '">' + esc(val) + '</span>'
+        + (frac >= 0 ? '<span class="cd-gbar" aria-hidden="true"><i style="width:' + (frac * 100) + '%"></i></span>' : '')
+        + '<span class="cd-hr-s"><span>' + esc(sub) + '</span></span></button></li>';
+    });
+    $('cdGoals').innerHTML = html || '<li class="cd-empty">No goals yet. Set one, and the days you meet it light up on the calendar.</li>';
+  }
+  $('cdGoals').addEventListener('click', function (ev) {
+    var btn = ev.target.closest('[data-act]'); if (!btn) return;
+    var g = S.goal.filter(function (x) { return x.id === btn.closest('.cd-gr').dataset.g; })[0];
+    if (!g) return;
+    if (btn.dataset.act === 'edit') { cdGoalSheet(g); return; }
+    g.done = g.done ? '' : cdToday();
+    cdSave('goal'); cdPaintGoals();
+    if (g.done) cdToast('Achieved: ' + g.n);
+  });
+  $('cdGoalAdd').addEventListener('click', function () { cdGoalSheet(null); });
+
+  function cdGoalSheet(g) {
+    var f = g ? JSON.parse(JSON.stringify(g)) : { t: 'num', h: 'steps', v: 10000, w: 'h:train', n: '', d: '' };
+    if (!f.h) f.h = 'steps';
+    if (!f.w) f.w = 'h:train';
+    if (f.t !== 'num' && !g) f.v = 10000;
+    var root = el('div');
+    var kinds = el('div', 'cd-chips');
+    [['num', 'A figure in a day'], ['week', 'Times a week'], ['task', 'A main task']].forEach(function (k) {
+      var c = el('button', 'cd-chip', k[1]); c.type = 'button'; c.dataset.t = k[0];
+      c.addEventListener('click', function () {
+        if (f.t === k[0]) return;
+        f.t = k[0];
+        f.v = k[0] === 'num' ? (cdHabById(f.h) ? (cdHabById(f.h).marks[2] || 10) : 10000) : k[0] === 'week' ? 3 : f.v;
+        paint();
+      });
+      kinds.appendChild(c);
+    });
+    root.appendChild(kinds);
+    var body = el('div'); root.appendChild(body);
+    var foot = el('div', 'cd-foot'); root.appendChild(foot);
+    function chip(label, pressed, on, kc) {
+      var c = el('button', 'cd-chip' + (kc ? ' kc' : ''), label); c.type = 'button';
+      c.setAttribute('aria-pressed', pressed);
+      if (kc) c.style.setProperty('--kc', 'var(' + kc + ')');
+      c.addEventListener('click', on);
+      return c;
+    }
+    function valid() {
+      if (f.t === 'num') return !!cdHabById(f.h) && +f.v > 0;
+      if (f.t === 'week') return !!cdGoalWhat(f.w) && +f.v >= 1;
+      return !!String(f.n || '').trim();
+    }
+    function paint() {
+      kinds.querySelectorAll('.cd-chip').forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.t === f.t); });
+      body.innerHTML = '';
+      if (f.t === 'num') {
+        body.appendChild(el('p', 'cd-lbl cd-sec', 'Which'));
+        var hc = el('div', 'cd-chips');
+        cdHabits().filter(function (h) { return h.k === 'num'; }).forEach(function (h) {
+          hc.appendChild(chip(h.n, f.h === h.id, function () { f.h = h.id; f.v = h.marks[2] || f.v; paint(); }, h.hc));
+        });
+        body.appendChild(hc);
+        var h = cdHabById(f.h);
+        body.appendChild(el('p', 'cd-lbl cd-sec', 'At least' + (h && h.unit ? ' · ' + esc(h.unit) : '')));
+        var fld = el('input', 'cd-field'); fld.id = 'cdGV'; fld.type = 'number'; fld.inputMode = 'decimal'; fld.min = '0';
+        fld.value = f.v; fld.setAttribute('aria-label', 'Target');
+        fld.addEventListener('input', function () { f.v = +fld.value; sync(); });
+        body.appendChild(fld);
+        if (h) {
+          var qs = el('div', 'cd-chips'); qs.style.marginTop = '10px';
+          var ms = h.marks.concat(h.id === 'steps' ? [20000] : []);
+          ms.forEach(function (m) { qs.appendChild(chip(cdFmtNum(m, h), +f.v === m, function () { f.v = m; paint(); })); });
+          body.appendChild(qs);
+        }
+      } else if (f.t === 'week') {
+        body.appendChild(el('p', 'cd-lbl cd-sec', 'Which'));
+        var grp = el('div', 'cd-grp');
+        grp.appendChild(el('h3', '', 'Habits'));
+        var tc = el('div', 'cd-chips');
+        cdHabits().filter(function (x) { return x.k === 'tick'; }).forEach(function (x) {
+          tc.appendChild(chip(x.n, f.w === 'h:' + x.id, function () { f.w = 'h:' + x.id; paint(); }, x.hc));
+        });
+        grp.appendChild(tc); body.appendChild(grp);
+        LIFT.filter(function (x) { return x.g !== 'rest'; }).forEach(function (L) {
+          var gg = el('div', 'cd-grp'); gg.style.setProperty('--kc', 'var(--k-' + L.g + ')');
+          gg.appendChild(el('h3', '', L.n));
+          var cc = el('div', 'cd-chips');
+          cc.appendChild(chip('Any ' + L.n.toLowerCase(), f.w === 'g:' + L.g, function () { f.w = 'g:' + L.g; paint(); }, '--k-' + L.g));
+          L.items.forEach(function (it) {
+            var key = L.g + '.' + it[0];
+            cc.appendChild(chip(it[1], f.w === key, function () { f.w = key; paint(); }, '--k-' + L.g));
+          });
+          gg.appendChild(cc); body.appendChild(gg);
+        });
+        body.appendChild(el('p', 'cd-lbl cd-sec', 'Times a week'));
+        var nc = el('div', 'cd-chips days');
+        for (var i = 1; i <= 7; i++) (function (i) { nc.appendChild(chip(String(i), +f.v === i, function () { f.v = i; paint(); })); })(i);
+        body.appendChild(nc);
+      } else {
+        body.appendChild(el('p', 'cd-lbl cd-sec', 'What'));
+        var nm = el('input', 'cd-field'); nm.id = 'cdGN'; nm.type = 'text'; nm.maxLength = 80; nm.autocomplete = 'off';
+        nm.placeholder = 'Run a half marathon'; nm.value = f.n || ''; nm.setAttribute('aria-label', 'The main task');
+        nm.addEventListener('input', function () { f.n = nm.value; sync(); });
+        body.appendChild(nm);
+        body.appendChild(el('p', 'cd-lbl cd-sec', 'By'));
+        var dd = el('input', 'cd-field'); dd.id = 'cdGD'; dd.type = 'date'; dd.value = f.d || ''; dd.setAttribute('aria-label', 'By when');
+        dd.addEventListener('input', function () { f.d = dd.value; });
+        body.appendChild(dd);
+      }
+      sync();
+    }
+    var save = el('button', 'cd-btn go', g ? 'Save' : 'Set goal'); save.type = 'button'; save.id = 'cdGGo';
+    function sync() { save.disabled = !valid(); }
+    save.addEventListener('click', function () {
+      if (!valid()) return;
+      var rec = cdGoalClean({ id: g ? g.id : cdId(), t: f.t, h: f.h, w: f.w, v: f.v, n: f.n, d: f.d, done: g && g.t === 'task' && f.t === 'task' ? g.done : '' });
+      if (!rec) return;
+      if (g) S.goal = S.goal.map(function (x) { return x.id === g.id ? rec : x; }); else S.goal.push(rec);
+      cdSave('goal'); cdClose(); cdPaint();
+    });
+    function plainFoot() {
+      foot.innerHTML = '';
+      if (g) {
+        var rm = el('button', 'cd-btn warn', 'Remove'); rm.type = 'button'; rm.id = 'cdGRm';
+        rm.addEventListener('click', function () {
+          /* No bin behind this, so it says what goes first. */
+          foot.innerHTML = '';
+          foot.appendChild(el('p', 'cd-note', 'The goal goes for good. What you logged stays.'));
+          var keep = el('button', 'cd-btn', 'Keep it'); keep.type = 'button';
+          keep.addEventListener('click', plainFoot);
+          var yes = el('button', 'cd-btn warn', 'Remove it'); yes.type = 'button'; yes.id = 'cdGRmYes';
+          yes.addEventListener('click', function () { S.goal = S.goal.filter(function (x) { return x.id !== g.id; }); cdSave('goal'); cdClose(); cdPaint(); });
+          foot.style.flexWrap = 'wrap';
+          foot.appendChild(keep); foot.appendChild(yes);
+        });
+        foot.appendChild(rm);
+      }
+      foot.appendChild(save);
+    }
+    plainFoot();
+    paint();
+    cdSheet(g ? 'Goal' : 'A goal', root);
+  }
+
   /* ═══ MONTH ═══
      A figure a day with dots under it: the week's own dot, filled by how
      much of the day was completed, then one small dot for each habit hit
@@ -1395,6 +1736,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var days = new Date(y, mo + 1, 0).getDate();
     var pad = cdDow(start);
     var html = '', kept = 0, goals = 0, hs = cdHabits();
+    /* Important notes are the one thing here that can be dated ahead. */
+    var noted = {};
+    S.note.forEach(function (n) { if (n.i) noted[n.d] = (noted[n.d] || 0) + 1; });
     for (var p = 0; p < pad; p++) html += '<span class="cd-mc is-pad" aria-hidden="true"></span>';
     for (var d = 1; d <= days; d++) {
       var iso = cdISO(new Date(y, mo, d));
@@ -1405,20 +1749,30 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       /* The habits you hit that day, each in its own colour: which
          goals were met, never whether the day was good. */
       var hit = inRec ? hs.filter(function (h) { return cdHabOn(iso, h); }) : [];
-      goals += hit.length;
+      var met = cdGoalsMet(iso);
+      goals += met.length;
+      /* The workout by name, in its kind's colour: the one thing a dot
+         cannot say. The first real session, never a rest day. */
+      var lift = cdSessions(iso).filter(function (x) { return !cdRestOnly(x.s); })[0];
+      var pill = lift ? '<span class="cd-mw" style="--kc:var(--k-' + LIFTN[lift.s.k[0]].g + ')">' + esc(LIFTN[lift.s.k[0]].n) + '</span>' : '';
       var dots = inRec ? '<span class="cd-md" aria-hidden="true"><i class="cd-mk"></i>'
         + hit.map(function (h) { return '<i class="cd-mh" style="--kc:var(' + h.hc + ')"></i>'; }).join('') + '</span>' : '';
-      html += '<button type="button" class="cd-mc' + (fut ? ' is-future' : inRec ? '' : ' is-quiet') + (iso === today ? ' is-today' : '') + '"'
+      html += '<button type="button" class="cd-mc' + (fut ? ' is-future' : inRec ? '' : ' is-quiet') + (iso === today ? ' is-today' : '') + (met.length ? ' is-goal' : '') + (noted[iso] ? ' has-note' : '') + '"'
         + ' data-day="' + iso + '" data-state="' + st + '"'
-        + ' aria-label="' + d + ' ' + MON[mo] + (inRec ? ', ' + t.kept + ' of ' + t.on + ' completed' : '') + (hit.length ? ', ' + hit.map(function (h) { return esc(h.n); }).join(', ') : '') + '">'
-        + '<b>' + d + '</b>' + dots + '</button>';
+        + ' aria-label="' + d + ' ' + MON[mo] + (inRec ? ', ' + t.kept + ' of ' + t.on + ' completed' : '') + (met.length ? ', goal met: ' + met.map(function (g) { return esc(cdGoalName(g)); }).join(', ') : '') + (lift ? ', ' + esc(cdSessName(lift.s)) : '') + (hit.length ? ', ' + hit.map(function (h) { return esc(h.n); }).join(', ') : '') + (noted[iso] ? ', important note' : '') + '">'
+        + '<b>' + d + '</b>' + pill + dots + '</button>';
     }
     for (var q = pad + days; q % 7; q++) html += '<span class="cd-mc is-pad" aria-hidden="true"></span>';
     $('cdMonG').innerHTML = html;
     $('cdMonCap').textContent = kept + (kept === 1 ? ' day' : ' days') + ' completed · ' + goals + (goals === 1 ? ' goal' : ' goals') + ' achieved';
-    $('cdMonN').disabled = monthAt >= today.slice(0, 7);
+    /* Ahead is closed unless something is waiting there: an important
+       note, or a task with a date. */
+    var ahead = today.slice(0, 7);
+    S.note.forEach(function (n) { if (n.i && n.d.slice(0, 7) > ahead) ahead = n.d.slice(0, 7); });
+    S.goal.forEach(function (g) { if (g.t === 'task' && !g.done && g.d && g.d.slice(0, 7) > ahead) ahead = g.d.slice(0, 7); });
+    $('cdMonN').disabled = monthAt >= ahead;
     $('cdMonP').disabled = monthAt <= first.slice(0, 7);
-    $('cdMonL').innerHTML = hs.map(function (h) {
+    $('cdMonL').innerHTML = '<span><i class="is-ring"></i>Goal met</span><span><i class="is-dia"></i>Note</span>' + hs.map(function (h) {
       return '<span><i style="--kc:var(' + h.hc + ')"></i>' + esc(h.n) + '</span>';
     }).join('');
   }
@@ -1439,6 +1793,19 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   function cdDaySheet(iso) {
     var root = el('div'), t = cdTally(iso), fut = iso > cdToday();
     root.appendChild(el('p', 'cd-cap', fut ? t.on + ' planned' : t.kept + ' of ' + t.on + ' completed · ' + cdLen(t.mins) + ' committed'));
+    var met = cdGoalsMet(iso);
+    if (met.length) {
+      root.appendChild(el('p', 'cd-lbl', 'Goals met'));
+      var gu = el('ul', 'cd-day-l cd-dl-gold');
+      met.forEach(function (g) { gu.appendChild(el('li', '', '<i></i><b>' + esc(cdGoalName(g)) + '</b><span>achieved</span>')); });
+      root.appendChild(gu);
+    }
+    var ns = S.note.filter(function (n) { return n.d === iso; }).sort(function (a, b) { return b.i - a.i || b.at - a.at; });
+    if (ns.length) {
+      root.appendChild(el('p', 'cd-lbl', 'Notes'));
+      ns.forEach(function (n) { var p = root.appendChild(el('p', 'cd-note', (n.i ? '◆ ' : '') + esc(n.t))); p.style.whiteSpace = 'pre-wrap'; });
+    }
+    if (met.length || ns.length) { var bl = root.appendChild(el('p', 'cd-lbl', 'Blocks')); bl.style.margin = '26px 0 4px'; }
     var ul = el('ul', 'cd-day-l');
     cdOn(iso).forEach(function (b) {
       var k = cdKind(b.n), st = cdIsOff(iso, b.id) ? 'off' : cdDone(iso, b.id) ? 'completed' : fut ? 'planned' : 'not completed';
@@ -1468,6 +1835,112 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     foot.appendChild(go); root.appendChild(foot);
     var d = cdDate(iso);
     cdSheet(DOWL[cdDow(iso)] + ' ' + d.getDate() + ' ' + MON[d.getMonth()], root);
+  }
+
+  /* ═══ NOTES ═══
+     A line to a day, not a document. Each note belongs to a date — today
+     unless you say otherwise, and it can be ahead — and any one of them
+     can be marked important, which puts it on the calendar. No titles,
+     no folders: the day IS the heading. */
+  var noteImp = false;
+  function cdNoteDay(iso) {
+    var t = cdToday(), d = cdDiff(iso, t);
+    var base = DOW[cdDow(iso)] + ' ' + cdDate(iso).getDate() + ' ' + MON[cdDate(iso).getMonth()].slice(0, 3);
+    if (d === 0) return 'Today';
+    if (d === -1) return 'Yesterday';
+    if (d === 1) return 'Tomorrow';
+    return d > 0 ? 'Coming up · ' + base : base;
+  }
+  function cdPaintNotes() {
+    var today = cdToday(), m = today.slice(0, 7);
+    var inMonth = S.note.filter(function (n) { return n.d.slice(0, 7) === m; });
+    var imp = inMonth.filter(function (n) { return n.i; }).length;
+    $('cdNoteT').textContent = String(inMonth.length);
+    $('cdNoteCap').textContent = (inMonth.length === 1 ? 'note' : 'notes') + (imp ? ' · ' + imp + ' important' : '');
+    var strip = '', lit = 0;
+    for (var i = 13; i >= 0; i--) {
+      var d = cdAddDays(today, -i), on = S.note.some(function (n) { return n.d === d; });
+      if (on) lit++;
+      strip += '<i' + (on ? ' class="is-on"' : '') + '></i>';
+    }
+    $('cdNoteStrip').innerHTML = strip;
+    $('cdNoteStrip').setAttribute('aria-label', 'Notes on ' + lit + ' of the last fourteen days');
+    if (!$('cdNoteD').value) $('cdNoteD').value = today;
+    $('cdNoteImp').setAttribute('aria-pressed', noteImp);
+    var days = {};
+    S.note.forEach(function (n) { (days[n.d] = days[n.d] || []).push(n); });
+    var html = Object.keys(days).sort().reverse().map(function (d) {
+      var ns = days[d].sort(function (a, b) { return b.i - a.i || b.at - a.at; });
+      return '<div class="cd-ng"><p class="cd-lbl">' + esc(cdNoteDay(d)) + '</p><ul class="cd-nl">' + ns.map(function (n) {
+        return '<li class="cd-ni' + (n.i ? ' is-imp' : '') + '" data-n="' + n.id + '">'
+          + '<button type="button" class="cd-nstar" data-act="imp" aria-pressed="' + !!n.i + '" aria-label="Important"><i></i></button>'
+          + '<button type="button" class="cd-nt" data-act="open">' + esc(n.t) + '</button></li>';
+      }).join('') + '</ul></div>';
+    }).join('');
+    $('cdNotes').innerHTML = html || '<p class="cd-empty">Nothing written yet.</p>';
+  }
+  function cdNoteSync() { $('cdNoteGo').disabled = !$('cdNoteIn').value.trim(); }
+  $('cdNoteIn').addEventListener('input', function () {
+    var t = $('cdNoteIn'); t.style.height = 'auto'; t.style.height = Math.max(60, t.scrollHeight) + 'px';
+    cdNoteSync();
+  });
+  $('cdNoteImp').addEventListener('click', function () { noteImp = !noteImp; $('cdNoteImp').setAttribute('aria-pressed', noteImp); });
+  $('cdNoteGo').addEventListener('click', function () {
+    var t = $('cdNoteIn').value;
+    var n = cdNoteClean({ id: cdId(), t: t, d: $('cdNoteD').value || cdToday(), i: noteImp, at: Date.now() });
+    if (!n) return;
+    S.note.push(n); cdSave('note');
+    $('cdNoteIn').value = ''; $('cdNoteIn').style.height = ''; noteImp = false; $('cdNoteD').value = cdToday();
+    cdNoteSync(); cdPaintNotes();
+  });
+  $('cdNotes').addEventListener('click', function (ev) {
+    var btn = ev.target.closest('[data-act]'); if (!btn) return;
+    var n = S.note.filter(function (x) { return x.id === btn.closest('.cd-ni').dataset.n; })[0];
+    if (!n) return;
+    if (btn.dataset.act === 'imp') { n.i = n.i ? 0 : 1; cdSave('note'); cdPaintNotes(); return; }
+    cdNoteSheet(n);
+  });
+  function cdNoteSheet(n) {
+    var f = { t: n.t, d: n.d, i: n.i };
+    var root = el('div');
+    var ta = el('textarea', 'cd-field'); ta.id = 'cdNE'; ta.value = f.t; ta.setAttribute('aria-label', 'The note');
+    ta.addEventListener('input', function () { f.t = ta.value; save.disabled = !f.t.trim(); });
+    root.appendChild(ta);
+    var rows = el('div', 'cd-rows'); rows.style.marginTop = '14px';
+    var r = el('label', 'cd-row', '<span>Day</span>');
+    var dd = el('input', 'cd-field'); dd.type = 'date'; dd.value = f.d; dd.id = 'cdNED';
+    dd.addEventListener('input', function () { if (ISO.test(dd.value)) f.d = dd.value; });
+    r.appendChild(dd); rows.appendChild(r);
+    var tg = el('button', 'cd-toggle', 'Important<i></i>'); tg.type = 'button'; tg.id = 'cdNEI';
+    tg.setAttribute('aria-pressed', !!f.i);
+    tg.addEventListener('click', function () { f.i = f.i ? 0 : 1; tg.setAttribute('aria-pressed', !!f.i); });
+    rows.appendChild(tg);
+    root.appendChild(rows);
+    var foot = el('div', 'cd-foot'); root.appendChild(foot);
+    var save = el('button', 'cd-btn go', 'Save'); save.type = 'button'; save.id = 'cdNEGo';
+    save.addEventListener('click', function () {
+      var rec = cdNoteClean({ id: n.id, t: f.t, d: f.d, i: f.i, at: n.at });
+      if (!rec) return;
+      S.note = S.note.map(function (x) { return x.id === n.id ? rec : x; });
+      cdSave('note'); cdClose(); cdPaint();
+    });
+    function plainFoot() {
+      foot.innerHTML = ''; foot.style.flexWrap = '';
+      var rm = el('button', 'cd-btn warn', 'Delete'); rm.type = 'button'; rm.id = 'cdNERm';
+      rm.addEventListener('click', function () {
+        /* No bin: a note is only ever what you typed, so it asks. */
+        foot.innerHTML = ''; foot.style.flexWrap = 'wrap';
+        foot.appendChild(el('p', 'cd-note', 'This note goes for good.'));
+        var keep = el('button', 'cd-btn', 'Keep it'); keep.type = 'button';
+        keep.addEventListener('click', plainFoot);
+        var yes = el('button', 'cd-btn warn', 'Delete it'); yes.type = 'button'; yes.id = 'cdNERmYes';
+        yes.addEventListener('click', function () { S.note = S.note.filter(function (x) { return x.id !== n.id; }); cdSave('note'); cdClose(); cdPaint(); });
+        foot.appendChild(keep); foot.appendChild(yes);
+      });
+      foot.appendChild(rm); foot.appendChild(save);
+    }
+    plainFoot();
+    cdSheet(cdNoteDay(n.d), root);
   }
 
   /* ═══ SETTINGS ═══ */
@@ -1520,7 +1993,12 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 
   /* ═══ WIRING ═══ */
   document.querySelectorAll('.cd-tab').forEach(function (t) { t.addEventListener('click', function () { cdGo(t.dataset.v); }); });
-  $('cdAdd').addEventListener('click', function () { cdEdit(null); });
+  /* The plus makes the thing the screen is about: a line on Notes, a
+     block everywhere else. */
+  $('cdAdd').addEventListener('click', function () {
+    if (view === 'note') { $('cdVNote').querySelector('.cd-pane').scrollTop = 0; $('cdNoteIn').focus(); return; }
+    cdEdit(null);
+  });
 
   /* The clock moves the block you are in, what is left of it and the line
      under it; nothing animates, it steps on the half minute. A day that
@@ -1534,7 +2012,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 
   var sv = 'day';
   try { sv = sessionStorage.getItem('cad.view') || 'day'; } catch (e) {}
-  cdGo(['day', 'hab', 'mon'].indexOf(sv) >= 0 ? sv : 'day');
+  cdGo(['day', 'hab', 'mon', 'note'].indexOf(sv) >= 0 ? sv : 'day');
 
   /* Exposed for the test suite only: the parser and the keyword table are
      the pieces worth asserting as functions rather than through the page. */

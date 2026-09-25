@@ -450,8 +450,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.click('.cd-tab[data-v="mon"]');
     ok('the month is September, and the line above it is the year', (await page.textContent('#cdMonT')) === 'September'
       && (await page.textContent('#cdMonK')) === '2026');
-    const goalDots = await page.$$eval('.cd-mh', (is) => is.length);
-    ok('it counts the days completed and the goals achieved', (await page.textContent('#cdMonCap')) === '4 days completed · ' + goalDots + ' goals achieved' && goalDots > 0, await page.textContent('#cdMonCap'));
+    ok('it counts the days completed and the goals achieved', (await page.textContent('#cdMonCap')) === '4 days completed · 0 goals achieved', await page.textContent('#cdMonCap'));
     ok('it draws thirty days', (await page.$$eval('.cd-mc[data-day]', (cs) => cs.length)) === 30);
     ok('the grid is a whole rectangle', (await page.$$eval('.cd-mgrid > *', (cs) => cs.length)) % 7 === 0);
     ok('a month still to come cannot be opened', await page.$eval('#cdMonN', (b) => b.disabled));
@@ -464,8 +463,8 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('each habit hit that day is a dot in its own colour', M['25'].h.includes('rgb(242, 161, 132)') && M['25'].h.includes('rgb(125, 207, 216)') && new Set(M['25'].h).size === M['25'].h.length, { 25: M['25'], onToday });
     ok('and a day before the record draws none', M['10'].h.length === 0, M['10']);
     const legend = await page.$$eval('#cdMonL span', (ss) => ss.map((s) => s.textContent));
-    ok('the legend names the habits, not the kinds of training', legend.join('|') === 'Train|Mind|Steps|Fuel|Water|Sleep|Cold plunge', legend);
-    ok('there is no Training tab', !(await page.$('.cd-tab[data-v="lift"]')) && (await page.$$('.cd-tab')).length === 3);
+    ok('the legend names the habits, not the kinds of training', legend.join('|') === 'Goal met|Note|Train|Mind|Steps|Fuel|Water|Sleep|Cold plunge', legend);
+    ok('there is no Training tab', !(await page.$('.cd-tab[data-v="lift"]')) && (await page.$$('.cd-tab')).length === 4);
     ok('a day still to come draws no dot yet', !M['27'].k && M['27'].st === 'future', M['27']);
     const mc = await inkFloor(page, '.cd-mc[data-day] b');
     ok('every date holds 4.5:1 on what is behind it', mc.n === 30 && mc.worst.r >= 4.5, mc);
@@ -480,6 +479,107 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await c.close();
   }
 
+  console.log('\n── goals, notes, and what the calendar says ──');
+  {
+    /* 20,500 steps on Thursday, a Push session on Wednesday, and a Pull
+       on Tuesday: a figure goal, a workout goal and a week goal each have
+       one day they should light, and a day they should not. */
+    const init = `(() => { if (!sessionStorage.getItem('planted')) { sessionStorage.setItem('planted', 1);
+      localStorage.setItem('cad.hab.v1', JSON.stringify({ '2026-09-24': { steps: 20500 }, '2026-09-22': { steps: 9000 } }));
+      localStorage.setItem('cad.train.v1', JSON.stringify({ '2026-09-23': { '~day': { k: ['weights.push'], e: 'Hard', m: 60 } }, '2026-09-22': { '~day': { k: ['weights.pull'], e: 'Moderate', m: 45 } } }));
+      localStorage.setItem('cad.goal.v1', JSON.stringify([{ id: 'gw', t: 'week', w: 'g:weights', v: 2 }, 5, { id: 'bad', t: 'num', v: -1 }]));
+    } })();`;
+    const { c, page, errs, off } = await ctx({ init });
+    ok('a damaged goal list keeps its good goal, and writes the repair back', JSON.stringify(await store(page, 'cad.goal.v1')) === '[{"id":"gw","t":"week","w":"g:weights","v":2}]', await store(page, 'cad.goal.v1'));
+
+    await page.click('.cd-tab[data-v="hab"]');
+    const gw = await page.$eval('.cd-gr[data-g="gw"]', (r) => ({ t: r.querySelector('.cd-hr-t').textContent, v: r.querySelector('.cd-hr-v').textContent, on: r.classList.contains('is-on') }));
+    ok('a week goal reads its own count', gw.t === 'Weights 2× a week' && gw.v === 'Achieved' && gw.on, gw);
+
+    /* A figure goal, set through the sheet. */
+    await page.click('#cdGoalAdd');
+    await sheetUp(page);
+    await page.click('#cdShB .cd-chip >> text="Steps"');
+    await page.click('#cdShB .cd-chip >> text="20,000"');
+    await page.click('#cdGGo');
+    await page.waitForTimeout(320);
+    const gs = await store(page, 'cad.goal.v1');
+    const steps = gs.filter((g) => g.t === 'num')[0];
+    ok('a figure goal is set from the sheet', steps && steps.h === 'steps' && steps.v === 20000, gs);
+    ok('and named as the figure', (await page.$eval(`.cd-gr[data-g="${steps.id}"] .cd-hr-t`, (e) => e.textContent)) === '20,000 steps');
+
+    /* A main task, ticked. */
+    await page.click('#cdGoalAdd');
+    await sheetUp(page);
+    await page.click('#cdShB .cd-chip >> text="A main task"');
+    ok('a task cannot be set without a sentence', await page.$eval('#cdGGo', (b) => b.disabled));
+    await page.fill('#cdGN', 'Run a half marathon');
+    await page.click('#cdGGo');
+    await page.waitForTimeout(320);
+    const task = (await store(page, 'cad.goal.v1')).filter((g) => g.t === 'task')[0];
+    ok('a task is set', task && task.n === 'Run a half marathon' && !task.done, task);
+    await page.click(`.cd-gr[data-g="${task.id}"] [data-act="done"]`);
+    ok('ticking it files today', (await store(page, 'cad.goal.v1')).filter((g) => g.t === 'task')[0].done === '2026-09-25');
+
+    await page.click('.cd-tab[data-v="mon"]');
+    const M = await page.$$eval('.cd-mc[data-day]', (cs) => Object.fromEntries(cs.map((c) => [c.dataset.day.slice(8), {
+      goal: c.classList.contains('is-goal'), note: c.classList.contains('has-note'),
+      w: c.querySelector('.cd-mw') && c.querySelector('.cd-mw').textContent, wc: c.querySelector('.cd-mw') && getComputedStyle(c.querySelector('.cd-mw')).color }])));
+    ok('20,000 steps rings the day it happened in gold', M['24'].goal, M['24']);
+    ok('the week goal rings the day it got there, and not the days before', M['23'].goal && !M['22'].goal, { 22: M['22'], 23: M['23'] });
+    ok('the task rings the day it was done', M['25'].goal, M['25']);
+    ok('a day nothing was met on is not ringed', !M['21'].goal, M['21']);
+    ok('a workout rides its day by name, in its kind\'s colour', M['23'].w === 'Push' && M['22'].w === 'Pull' && M['23'].wc === 'rgb(242, 161, 132)' && !M['24'].w, { 22: M['22'], 23: M['23'] });
+    ok('the caption counts the goals met', /· 3 goals achieved$/.test(await page.textContent('#cdMonCap')), await page.textContent('#cdMonCap'));
+    const ring = await page.$eval('.cd-mc[data-day="2026-09-24"] b', (b) => getComputedStyle(b).boxShadow);
+    ok('the ring is gold', /245, 211, 122/.test(ring) || /0\.96\d* 0\.82\d* 0\.47/.test(ring), ring);
+    await page.click('.cd-mc[data-day="2026-09-24"]');
+    await sheetUp(page);
+    ok('the day reads back which goal it met', /Goals met/.test(await page.textContent('#cdShB')) && /20,000 steps/.test(await page.textContent('#cdShB')));
+    await closeSheet(page);
+
+    /* Notes: a line to a day, marked important to reach the calendar. */
+    await page.click('.cd-tab[data-v="note"]');
+    ok('there are four tabs and Notes is one', (await page.$$('.cd-tab')).length === 4 && (await page.getAttribute('.cd-tab[data-v="note"]', 'aria-current')) === 'page');
+    ok('Add waits for words', await page.$eval('#cdNoteGo', (b) => b.disabled));
+    await page.fill('#cdNoteIn', 'Race day, pack gels');
+    await page.fill('#cdNoteD', '2026-09-28');
+    await page.click('#cdNoteImp');
+    await page.click('#cdNoteGo');
+    await page.fill('#cdNoteIn', 'Felt strong on the run');
+    await page.click('#cdNoteGo');
+    const ns = await store(page, 'cad.note.v1');
+    ok('two notes are written, one important and dated ahead', ns.length === 2 && ns.some((n) => n.d === '2026-09-28' && n.i === 1) && ns.some((n) => n.d === '2026-09-25' && n.i === 0), ns);
+    const groups = await page.$$eval('.cd-ng > .cd-lbl', (ls) => ls.map((l) => l.textContent));
+    ok('the day is the heading, the one ahead first', groups.join('|') === 'Coming up · Mon 28 Sep|Today', groups);
+    ok('the composer clears and goes back to today', (await page.inputValue('#cdNoteIn')) === '' && (await page.inputValue('#cdNoteD')) === '2026-09-25');
+
+    await page.click('.cd-tab[data-v="mon"]');
+    const N = await page.$$eval('.cd-mc[data-day]', (cs) => Object.fromEntries(cs.map((c) => [c.dataset.day.slice(8), c.classList.contains('has-note')])));
+    ok('an important note marks its day, even one still to come', N['28'], N['28']);
+    ok('an ordinary note does not', !N['25']);
+    await page.click('.cd-mc[data-day="2026-09-28"]');
+    await sheetUp(page);
+    ok('and the day reads it back', /Race day, pack gels/.test(await page.textContent('#cdShB')));
+    await closeSheet(page);
+
+    /* Marking from the list, and deleting from the sheet, which asks. */
+    await page.click('.cd-tab[data-v="note"]');
+    await page.click('.cd-ni:has-text("Felt strong") .cd-nstar');
+    ok('the diamond marks a note important', (await store(page, 'cad.note.v1')).filter((n) => /Felt/.test(n.t))[0].i === 1);
+    await page.click('.cd-ni:has-text("Felt strong") .cd-nt');
+    await sheetUp(page);
+    await page.click('#cdNERm');
+    ok('deleting asks first, saying it is for good', /for good/.test(await page.textContent('#cdShB')) && (await store(page, 'cad.note.v1')).length === 2);
+    await page.click('#cdNERmYes');
+    await page.waitForTimeout(320);
+    ok('and then the note is gone', (await store(page, 'cad.note.v1')).length === 1);
+
+    ok('goals and notes make no request off this origin', off.length === 0, off);
+    ok('no page errors across goals and notes', errs.length === 0, errs);
+    await c.close();
+  }
+
   console.log('\n── layout, on every view ──');
   {
     /* A long day, so the day's pane has somewhere to scroll to. */
@@ -487,13 +587,16 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       .map((n, i) => ({ id: 'L' + i, n, d: [0, 1, 2, 3, 4, 5, 6], s: 360 + i * 75, e: 360 + i * 75 + 45 })));
     const { c, page, errs } = await ctx({ init: `localStorage.setItem('cad.week.v1', '${long}');
       localStorage.setItem('cad.hab.v1', JSON.stringify({ '2026-09-24': { steps: 8000, mind: 1 } }));
-      localStorage.setItem('cad.train.v1', JSON.stringify({ '2026-09-24': { s2: { k: ['run.easy'], e: 'Light', m: 45 } } }));` });
+      localStorage.setItem('cad.train.v1', JSON.stringify({ '2026-09-24': { s2: { k: ['run.easy'], e: 'Light', m: 45 } } }));
+      localStorage.setItem('cad.goal.v1', JSON.stringify([{ id: 'g1', t: 'num', h: 'steps', v: 8000 }, { id: 'g2', t: 'task', n: 'Book the race', d: '2026-10-11', done: '' }]));
+      localStorage.setItem('cad.note.v1', JSON.stringify([{ id: 'n1', t: 'Race day, pack gels', d: '2026-09-28', i: 1, at: 1 }, { id: 'n2', t: 'Legs felt heavy', d: '2026-09-24', i: 0, at: 2 }]));` });
     const WORDS = {
       day: '.cd-tab, .cd-wl, #cdHeroK, #cdHeroN, #cdHeroS, .cd-tcap, #cdThenN, .cd-rn, .cd-rt',
       hab: '#cdVHab .cd-hcap, #cdHabT, #cdHabCap, .cd-hr-t, .cd-hr-v, .cd-hr-s > span:last-child, #cdHabAdd',
-      mon: '#cdMonK, #cdMonT, #cdMonCap, .cd-dows span, .cd-legend span, .cd-mc b'
+      mon: '#cdMonK, #cdMonT, #cdMonCap, .cd-dows span, .cd-legend span, .cd-mc b, .cd-mw',
+      note: '#cdVNote .cd-hcap, #cdNoteT, #cdNoteCap, .cd-ng > .cd-lbl, .cd-nt, #cdNoteImp'
     };
-    for (const v of ['day', 'hab', 'mon']) {
+    for (const v of ['day', 'hab', 'mon', 'note']) {
       await page.click(`.cd-tab[data-v="${v}"]`);
       await page.waitForTimeout(80);
       const drawn = await page.$$eval('main > section', (ss) => ss.filter((s) => s.getBoundingClientRect().height > 0).length);
@@ -570,7 +673,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.evaluate(() => { navigator.clipboard.writeText = (t) => { window.__copied = t; return Promise.resolve(); }; });
     await page.click('#cdBak');
     const bak = JSON.parse(await page.evaluate(() => window.__copied));
-    ok('a backup carries every record', bak.app === 'cadence' && ['week', 'log', 'off', 'hab', 'train', 'defs'].every((k) => k in bak), Object.keys(bak));
+    ok('a backup carries every record', bak.app === 'cadence' && ['week', 'log', 'off', 'hab', 'train', 'defs', 'goal', 'note'].every((k) => k in bak), Object.keys(bak));
     bak.week.push({ id: 'x3', n: 'Restored', d: [4], s: 800, e: 830 });
     await page.fill('#cdRestore', JSON.stringify(bak));
     await Promise.all([page.waitForNavigation(), page.click('#cdRestoreGo')]);
