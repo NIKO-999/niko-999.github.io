@@ -17,7 +17,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Alignment">
-<meta name="description" content="360 themes and lessons from 17 figures and 13 books.">
+<meta name="description" content="372 themes and lessons from 18 figures and 13 books.">
 <link rel="preload" href="../arc/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/GeistMono.woff2" as="font" type="font/woff2" crossorigin>
 <style>
@@ -449,9 +449,10 @@ var AXIS = { mindset: 'Mindset', internal: 'Internal', external: 'External', kar
    this project keeps having to take back out. The figures are two, and a
    speaker sitting between two founders with nothing saying so reads as
    a mistake in the list rather than as a second kind. */
-var GROUP = { built: "The builders", teach: "The teachers" };
+var GROUP = { street: "The street", built: "The builders", teach: "The teachers" };
 
 var SRC = [
+  { i: "lucas", n: "Frank Lucas", p: "Harlem, New York", k: "figure", g: "street" },
   { i: "fifty", n: "50 Cent", p: "G-Unit, Vitaminwater", k: "figure", g: "built" },
   { i: "bloom", n: "Greg LaVecchia", p: "Bloom Nutrition", k: "figure", g: "built" },
   { i: "gymsh", n: "Ben Francis", p: "Gymshark", k: "figure", g: "built" },
@@ -1025,6 +1026,42 @@ var TH = [
   { s: "sigs", x: "karmic", n: "Nobody Owns Them", b: "What Two Decades of No Bought",
     t: "No board, no acquisition, no obligation to grow. They can change the product, the price or the company's name whenever they decide to, and have.",
     l: "Autonomy is not a feeling, it is a structural position, and it is bought by everything you refused along the way. You will not notice you have it until somebody tries to tell you what to do." },
+  { s: "lucas", x: "internal", n: "Quiet Is a Method", b: "Invisibility Costs You Only the Applause",
+    t: "He spent years driving an ordinary car and looking like nobody, deliberately, while running one of the largest heroin operations in Harlem. He described it afterwards as policy.",
+    l: "Being unremarkable is a strategy with real returns and it costs you nothing but the credit. The people who cannot afford it are the ones who were doing the whole thing for the credit in the first place." },
+  { s: "lucas", x: "internal", n: "The Coat at the Fight", b: "One Hour of Wanting Credit",
+    t: "He wore a chinchilla coat to Ali and Frazier in 1971, sat where the cameras were, and has said that photograph is what put detectives onto him. Years of discipline against one evening.",
+    l: "A decade of discipline can be undone by one hour of wanting the credit, and the urge does not go away because you have a rule about it. Decide in advance which rooms you do not walk into." },
+  { s: "lucas", x: "internal", n: "He Talked", b: "Know Your Answer Before the Room",
+    t: "After conviction he cooperated extensively and dozens of cases came out of it. It cut his sentence substantially, and it is the part of his story he is most argued about.",
+    l: "Everybody has a price and most people find out what theirs is in a room they did not plan to be in. Work out now what you will and will not do, because you will not be composing that answer when the moment arrives." },
+  { s: "lucas", x: "external", n: "Cutting Out the Middleman", b: "Go to the Source",
+    t: "Blue Magic worked because he sourced directly out of Southeast Asia rather than through the networks everybody else used. The purity and the price were both a function of removing layers.",
+    l: "Every intermediary takes a margin and owns the relationship. Going to the source is harder, slower and almost always where the entire advantage is. Most people never even find out who the source is." },
+  { s: "lucas", x: "external", n: "The Product Was the Marketing", b: "A Better Thing Needs Less Persuasion",
+    t: "He branded it, kept the quality consistent and sold it cheaper. People came to him because it was actually better, which is a rare and unglamorous reason for a business to work.",
+    l: "Persuasion is the most expensive thing you can buy. Before you spend on getting attention, find out honestly whether the thing deserves it, because a genuinely better product needs a fraction of the noise." },
+  { s: "lucas", x: "external", n: "Everyone Was Family", b: "Trust Does Not Scale",
+    t: "He brought relatives up from North Carolina to run it, because he could not verify anybody else. It worked, until a federal case turned every one of them into a potential witness.",
+    l: "Using trust as your control system works up to roughly the number of people you actually know. Past that you need structure, and most things come apart at exactly the point where the founder refused to build one." },
+  { s: "lucas", x: "karmic", n: "The Coffins", b: "What You Boast About Is Kept Longest",
+    t: "His account was that product came back from Southeast Asia in the same transport as dead American servicemen. Whether or not every detail of it holds, he told it himself, as a boast.",
+    l: "What you are prepared to use in order to win becomes the description of you, permanently, and you will have been the one who supplied it. Nothing gets forgotten, and boasts are kept longest of all." },
+  { s: "lucas", x: "karmic", n: "Harlem Paid", b: "The Better You Are, the Larger the Number",
+    t: "The scale of the operation and the purity of the product are the same fact as the scale of the addiction on the blocks he was from. Those two numbers cannot be separated.",
+    l: "When the thing you are good at works, ask who is on the other end of it. The better you get, the larger that number becomes, and nobody is ever going to report it to you." },
+  { s: "lucas", x: "karmic", n: "Nothing Held", b: "Money You Cannot Keep Is a Score",
+    t: "Tens of millions at the peak, by his own account, and effectively none of it left at the end. Seized, spent, lost: none of it survived the life that produced it.",
+    l: "Money made in a way that cannot be held is not money, it is a score. If it cannot be put somewhere that survives you being wrong, you have not built anything yet." },
+  { s: "lucas", x: "mindset", n: "Consistency Is the Brand", b: "Being the Same Every Time",
+    t: "Blue Magic worked because the quality and the price did not vary. In a market where everybody cut differently, being predictable was the entire proposition.",
+    l: "Being the same every time is undervalued because it is boring to execute and invisible when it works. It is also what people are actually paying for, in every field, and almost nobody delivers it." },
+  { s: "lucas", x: "mindset", n: "He Studied the Man Above Him", b: "Proximity Is the Wage",
+    t: "By his own account he drove for and worked alongside Bumpy Johnson for years — a claim some of Johnson's associates have disputed — and treated it as an apprenticeship rather than a job.",
+    l: "Put yourself next to somebody already doing it and treat the proximity as the pay. Most people take the job for the money and leave with nothing else, which is the most expensive way to spend those years." },
+  { s: "lucas", x: "mindset", n: "Difficulty Is the Moat", b: "The Margin Nobody Will Work For",
+    t: "Going to Southeast Asia himself was dangerous, slow and complicated, which is precisely why nobody else was doing it and why it held for as long as it did.",
+    l: "The advantage sits behind whatever is annoying enough that everybody routes around it. If the thing were easy the margin would already be gone, and the discomfort is the price of the position." },
   { s: "rohn", x: "mindset", n: "Work Harder on Yourself", b: "Than You Do on Your Job",
     t: "His best-known teaching is that you should work harder on yourself than you do on your job, because your income tends to follow your own growth.",
     l: "Your pay rarely rises faster than you do. Put the hours into becoming more valuable and the job, the pay and the opportunities catch up with you." },
