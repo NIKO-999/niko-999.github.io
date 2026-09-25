@@ -174,7 +174,17 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('the one white control is a round check at the foot of the screen', go.w === 64 && Math.abs(go.cx - 195) < 1 && go.b > 780 && go.bg === 'rgb(243, 245, 247)' && go.rad === '50%', go);
     ok('and it is named for the block it ticks', go.l === 'Mark Deep work completed' && go.p === 'false', go);
     await page.click('#cdGo');
-    ok('pressing it keeps the block you are in', (await store(page, 'cad.log.v1'))['2026-09-25'].s3 === 1);
+    /* It asks first, and the ask on its own keeps nothing. */
+    ok('pressing it asks before it completes anything', (await sheetUp(page)) && (await page.textContent('#cdShT')) === 'Complete Deep work?'
+      && !(((await store(page, 'cad.log.v1')) || {})['2026-09-25'] || {}).s3);
+    await page.evaluate(() => document.getElementById('cdGoNo') && document.getElementById('cdGoNo').click());
+    await page.waitForTimeout(350);
+    ok('and Not yet leaves the block as it was', !(await page.$eval('#cdSheet', (e) => e.classList.contains('is-open'))) && !(((await store(page, 'cad.log.v1')) || {})['2026-09-25'] || {}).s3
+      && (await page.textContent('#cdHeroN')) === 'Deep work');
+    await page.click('#cdGo');
+    await page.evaluate(() => document.getElementById('cdGoYes') && document.getElementById('cdGoYes').click());
+    await page.waitForTimeout(350);
+    ok('confirming keeps the block you are in', (((await store(page, 'cad.log.v1')) || {})['2026-09-25'] || {}).s3 === 1);
     /* Finished early is finished: the middle moves on and the kept block
        goes back into the list, where its own dot unticks it. */
     ok('and the middle moves on to what is next', (await heroOf(page)).join('|') === 'Next · Rest · 10:20|Lunch|in 2h 10m · at 12:30|Emails and calls at 14:00', await heroOf(page));
@@ -183,8 +193,8 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('today\'s dot in the week fills part way', (await page.getAttribute('.cd-wd[data-d="2026-09-25"]', 'data-state')) === 'part');
     const toast = await page.$eval('#cdToast', (t) => ({ txt: document.getElementById('cdToastT').textContent, undo: !document.getElementById('cdToastU').hidden }));
     ok('it says so, with a way back', toast.txt === 'Completed Deep work' && toast.undo, toast);
-    await page.click('#cdToastU');
-    ok('Undo puts the block back in the middle, unticked', !((await store(page, 'cad.log.v1'))['2026-09-25'] || {}).s3
+    await page.evaluate(() => document.getElementById('cdToastU').click());
+    ok('Undo puts the block back in the middle, unticked', !(((await store(page, 'cad.log.v1')) || {})['2026-09-25'] || {}).s3
       && (await page.textContent('#cdHeroN')) === 'Deep work' && (await page.getAttribute('#cdGo', 'aria-pressed')) === 'false');
 
     /* The name opens the block, and so does the line after it. */
@@ -327,7 +337,9 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const { c, page } = await ctx({ at: '2026-09-25T07:40:00' });
     ok('while the gym runs it is the middle of the screen', (await heroOf(page)).join('|') === 'Now · Body · 07:40|Gym|50m left · until 08:30|Deep work at 09:00', await heroOf(page));
     await page.click('#cdGo');
-    ok('and the check asks what you trained', (await sheetUp(page)) && (await page.textContent('#cdShT')) === 'What did you train?');
+    await page.evaluate(() => document.getElementById('cdGoYes') && document.getElementById('cdGoYes').click());
+    await page.waitForTimeout(350);
+    ok('and the check, confirmed, asks what you trained', (await sheetUp(page)) && (await page.textContent('#cdShT')) === 'What did you train?');
     ok('having kept it', (await store(page, 'cad.log.v1'))['2026-09-25'].s1 === 1);
     await c.close();
   }

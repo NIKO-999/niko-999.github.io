@@ -1129,12 +1129,26 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      that moves the screen with no Undo is a press you cannot take back
      from where you are looking. A training block asks what it was
      instead, and that sheet is the answer to the press. */
+  /* IT ASKS FIRST. The check is the biggest thing on the screen and sits
+     where a thumb rests, so a press on the way to something else was
+     finishing a block you were still in. One sheet, two answers; the id
+     and the day are taken at the press, so a clock turning over while the
+     sheet is up cannot change which block the answer is about. */
   $('cdGo').addEventListener('click', function () {
     var id = heroId, day = sel;
     if (!id) return;
     var b = S.week.filter(function (x) { return x.id === id; })[0];
-    cdTick(id);
-    if (b && cdDone(day, id) && !TRAINING[cdKind(b.n)]) cdToast('Completed ' + b.n, function () { if (cdDone(day, id)) { sel = day; cdTick(id); } });
+    if (!b) return;
+    var ask = el('div'), foot = el('div', 'cd-foot');
+    var no = el('button', 'cd-btn', 'Not yet'); no.type = 'button'; no.id = 'cdGoNo'; no.addEventListener('click', cdClose);
+    var yes = el('button', 'cd-btn go', 'Complete'); yes.type = 'button'; yes.id = 'cdGoYes';
+    yes.addEventListener('click', function () {
+      cdClose();
+      sel = day; cdTick(id);
+      if (cdDone(day, id) && !TRAINING[cdKind(b.n)]) cdToast('Completed ' + b.n, function () { if (cdDone(day, id)) { sel = day; cdTick(id); } });
+    });
+    foot.appendChild(no); foot.appendChild(yes); ask.appendChild(foot);
+    cdSheet('Complete ' + b.n + '?', ask);
   });
   $('cdHeroN').addEventListener('click', function () { if (heroId) cdEdit(heroId); });
   $('cdThen').addEventListener('click', function () { if (thenId) cdEdit(thenId); });
@@ -1242,6 +1256,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     b.innerHTML = '';
     if (typeof body === 'string') b.innerHTML = body; else b.appendChild(body);
     shOnClose = onClose || null;
+    /* A sheet opened straight after one was closed (the confirm, then what
+       you trained) must not be put away by the close's own timer. */
+    clearTimeout(shTimer);
     var sh = $('cdSheet'), sc = $('cdScrim');
     sh.hidden = false; sc.hidden = false;
     sh.scrollTop = 0;

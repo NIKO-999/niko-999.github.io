@@ -4349,6 +4349,24 @@ on the goals' precedent, and the backup no longer carries it because
 the backup is built from `K`. Asserted as the toggle and the word being
 absent, proved by putting the words back and watching it fail.
 
+### The check asks before it completes
+
+Asked for in one line. The white check is the largest control on the day
+and sits where a thumb rests, so a press on the way to something else
+finished a block you were still in. It opens *Complete Deep work?* with
+**Not yet** and **Complete**; the Undo on the toast stays, because a
+confirm is not a way back. The block and the day are taken at the press,
+so a clock turning over while the sheet is up cannot change which block
+the answer is about. Only the foot check asks: a row's own dot is small,
+aimed and already the correction path.
+
+**A SHEET OPENED RIGHT AFTER A CLOSE WAS BEING PUT AWAY.** `cdClose`
+hides the sheet on a 240ms timer, and confirming a training block closes
+the confirm and opens *What did you train?* in the same tick, so the
+timer then hid the new sheet. `cdSheet` clears it now. Both halves are
+bite-proved: skipping the ask fails the ask checks, and dropping the
+clear fails the training check.
+
 ### The whole week clears in one press
 
 Settings carries **Clear all blocks**, because starting the template over
