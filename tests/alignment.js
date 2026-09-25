@@ -105,7 +105,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
       out.push(...[...document.querySelectorAll(id + ' .al-f[data-src]')].map(n => n.getAttribute('data-src'))); });
     return out;
   });
-  ok('thirty-four sources across the two indexes', srcs.length === 34, srcs.length);
+  ok('thirty sources across the two indexes', srcs.length === 30, srcs.length);
 
   /* Every source opens, names itself, and carries four sections of at
      least three, with both paragraphs of real length on every card. A
