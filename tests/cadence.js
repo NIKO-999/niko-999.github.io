@@ -394,16 +394,13 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.click('#cdToastU');
     ok('and undo puts it back', (await store(page, 'cad.week.v1')).some((b) => b.n === 'Journal'));
 
-    /* Off this day takes the block you are in out of the middle: the next
-       one takes its place, and it is struck in the list below. */
+    /* There is no day off: the editor offers Done and nothing else, and
+       a row never draws the word Off where its time goes. */
     await page.click('#cdHeroN');
     await sheetUp(page);
-    await page.click('#cdTOff');
-    ok('off this day is filed for the date', (await store(page, 'cad.off.v1'))['2026-09-25'].s3 === 1);
+    ok('the editor has no Off this day toggle', !(await page.$('#cdTOff')) && !(await page.textContent('#cdShB')).includes('Off this day'));
     await closeSheet(page);
-    ok('a block off for the day leaves the middle, and the next one takes it', (await heroOf(page))[1] === 'Lunch', await heroOf(page));
-    ok('and it is struck in the list', await page.$eval('.cd-it[data-id="s3"]', (e) => e.classList.contains('is-off')));
-    ok('and says Off where its time was', (await page.textContent('.cd-it[data-id="s3"] .cd-rt')) === 'Off');
+    ok('and no row says Off', (await page.$$eval('.cd-it .cd-rt', (ts) => ts.every((t) => t.textContent !== 'Off'))) && !(await page.$('.cd-it.is-off')));
     ok('no page errors in the sentence', errs.length === 0, errs);
     await c.close();
   }
@@ -840,7 +837,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.evaluate(() => { navigator.clipboard.writeText = (t) => { window.__copied = t; return Promise.resolve(); }; });
     await page.click('#cdBak');
     const bak = JSON.parse(await page.evaluate(() => window.__copied));
-    ok('a backup carries every record', bak.app === 'cadence' && ['week', 'log', 'off', 'hab', 'train', 'defs', 'note'].every((k) => k in bak) && !('goal' in bak), Object.keys(bak));
+    ok('a backup carries every record', bak.app === 'cadence' && ['week', 'log', 'hab', 'train', 'defs', 'note'].every((k) => k in bak) && !('goal' in bak) && !('off' in bak), Object.keys(bak));
     bak.week.push({ id: 'x3', n: 'Restored', d: [4], s: 800, e: 830 });
     await page.fill('#cdRestore', JSON.stringify(bak));
     await Promise.all([page.waitForNavigation(), page.click('#cdRestoreGo')]);

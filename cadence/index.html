@@ -227,7 +227,6 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
    every font. */
 .cd-tk { display: inline-block; width: 4px; height: 8px; margin: 0 0 1px 8px; border: solid var(--c); border-width: 0 1.8px 1.8px 0; transform: rotate(45deg); vertical-align: middle; }
 .cd-it.is-past:not(.is-done) .cd-dot i { box-shadow: inset 0 0 0 1.5px var(--miss); }
-.cd-it.is-off .cd-dot { visibility: hidden; }
 .cd-rb { display: grid; grid-template-columns: 1fr auto; align-items: baseline; column-gap: 12px; row-gap: 4px; min-height: 44px; padding: 14px 0 13px; }
 .cd-rn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 15px/1.1 var(--sans); }
 .cd-rt { font: 500 11px/1 var(--mono); letter-spacing: .08em; color: var(--quiet); font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -237,14 +236,12 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .cd-it.is-done .cd-rn { color: var(--quiet); }
 /* A block behind you and not kept is struck through: you can see at a
    glance it was missed, and it is struck in the quiet ink, never red,
-   because nothing here says you failed. A day off is struck too, and
-   tells itself apart by saying Off where the time goes. */
+   because nothing here says you failed. */
 /* And in the faint grey, which is the one piece of type in the app held
    under 4.5: it is a record of something that did not happen, struck and
    dimmed on purpose, and the name is still there for anyone who looks.
    It is held to 3:1, the graphic floor, instead. */
 .cd-it.is-past:not(.is-done) .cd-rn { color: var(--faint); text-decoration: line-through; text-decoration-thickness: 1px; }
-.cd-it.is-off .cd-rn { color: var(--quiet); text-decoration: line-through; }
 
 /* THE CHECK. White while the block is waiting for you, and lit in the
    block's own colour once it is kept — the row's dot, at the size of
@@ -662,7 +659,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      Everything lives in this browser. Each record is its own key, so a
      damaged one costs itself and nothing beside it. */
   var K = {
-    week: 'cad.week.v1', log: 'cad.log.v1', off: 'cad.off.v1',
+    week: 'cad.week.v1', log: 'cad.log.v1',
     hab: 'cad.hab.v1', train: 'cad.train.v1', defs: 'cad.defs.v1',
     note: 'cad.note.v1'
   };
@@ -840,7 +837,6 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   var S = {
     week: cdLoadWeek(),
     log: cdLoadMap(K.log),
-    off: cdLoadMap(K.off),
     hab: cdLoadMap(K.hab),
     train: cdLoadMap(K.train),
     defs: (function () {
@@ -857,7 +853,6 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       .sort(function (a, b) { return a.s - b.s || a.e - b.e || (a.n < b.n ? -1 : 1); });
   }
   var cdDone = function (iso, id) { return !!(S.log[iso] && S.log[iso][id]); };
-  var cdIsOff = function (iso, id) { return !!(S.off[iso] && S.off[iso][id]); };
   function cdSetFlag(map, iso, id, on) {
     var m = S[map];
     if (on) { (m[iso] = m[iso] || {})[id] = 1; }
@@ -865,7 +860,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     cdSave(map);
   }
   function cdTally(iso) {
-    var on = cdOn(iso).filter(function (b) { return !cdIsOff(iso, b.id); });
+    var on = cdOn(iso);
     var kept = on.filter(function (b) { return cdDone(iso, b.id); }).length;
     var mins = on.reduce(function (t, b) { return t + (b.e - b.s); }, 0);
     return { on: on.length, kept: kept, mins: mins };
@@ -1002,7 +997,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
        a finish. So a kept block never holds the middle — the screen moves
        on to what is next, and the kept one goes back into the list, where
        its own dot unticks it. */
-    var all = list.filter(function (b) { return !cdIsOff(sel, b.id); });
+    var all = list;
     var live = all.filter(function (b) { return !cdDone(sel, b.id); });
     var run = live.filter(function (b) { return b.e > b.s && now >= b.s && now < b.e; })[0] || null;
     var ahead = live.filter(function (b) { return b !== run && b.s >= now; });
@@ -1089,21 +1084,21 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      owns forty-four. */
   var MISS_AFTER = 30;
   function cdRow(b, isT, now, open) {
-    var cat = CAT[cdKind(b.n)], done = cdDone(sel, b.id), off = cdIsOff(sel, b.id);
+    var cat = CAT[cdKind(b.n)], done = cdDone(sel, b.id);
     /* Today a block is only struck as missed half an hour after it ends:
        finishing a little late is not missing it, and a row that crosses
        itself out the minute its end ticks past is the screen grading you
        while you are still doing the thing. Any earlier day is behind you
        whole. */
-    var past = !off && ((isT && now >= Math.max(b.e, b.s) + MISS_AFTER) || sel < cdToday());
-    var time = off ? 'Off' : cdHM(b.s);
+    var past = (isT && now >= Math.max(b.e, b.s) + MISS_AFTER) || sel < cdToday();
+    var time = cdHM(b.s);
     var sess = (S.train[sel] && cdSess(S.train[sel][b.id])) || null;
     var rw = sess ? '<span class="cd-rw" style="--kc:var(--k-' + LIFTN[sess.k[0]].g + ')"> · ' + esc(cdSessName(sess)) + '</span>' : '';
-    var cls = 'cd-it' + (done ? ' is-done' : '') + (off ? ' is-off' : '') + (past ? ' is-past' : '');
+    var cls = 'cd-it' + (done ? ' is-done' : '') + (past ? ' is-past' : '');
     return '<li class="' + cls + '" data-id="' + b.id + '" style="--c:var(--c-' + cat + ')">'
-      + '<button type="button" class="cd-dot" data-act="tick" aria-pressed="' + done + '"' + (open && !off ? '' : ' disabled')
+      + '<button type="button" class="cd-dot" data-act="tick" aria-pressed="' + done + '"' + (open ? '' : ' disabled')
       + ' aria-label="' + (done ? 'Completed' : 'Mark completed') + ': ' + esc(b.n) + '"><i></i></button>'
-      + '<button type="button" class="cd-rb" data-act="edit" aria-label="' + esc(b.n) + ', ' + cdHM(b.s) + (b.e > b.s ? ' to ' + cdHM(b.e) : '') + (off ? ', off this day' : '') + '. Open">'
+      + '<button type="button" class="cd-rb" data-act="edit" aria-label="' + esc(b.n) + ', ' + cdHM(b.s) + (b.e > b.s ? ' to ' + cdHM(b.e) : '') + '. Open">'
       + '<span class="cd-rn">' + esc(b.n) + rw + (done ? '<span class="cd-tk" aria-hidden="true"></span>' : '') + '</span><span class="cd-rt">' + time + '</span>'
       + (b.p ? '<span class="cd-rs">' + esc(b.p) + '</span>' : '') + '</button></li>';
   }
@@ -1114,8 +1109,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     if (!b) return;
     var was = cdDone(sel, id);
     cdSetFlag('log', sel, id, !was);
-    if (!was) cdSetFlag('off', sel, id, false);
-    else if (S.train[sel] && S.train[sel][id]) { delete S.train[sel][id]; if (!Object.keys(S.train[sel]).length) delete S.train[sel]; cdSave('train'); }
+    if (was && S.train[sel] && S.train[sel][id]) { delete S.train[sel][id]; if (!Object.keys(S.train[sel]).length) delete S.train[sel]; cdSave('train'); }
     cdPaint();
     /* Finishing a training block is the moment to ask what it was. */
     if (!was && TRAINING[cdKind(b.n)]) cdLiftSheet(sel, id, b.n);
@@ -1309,21 +1303,8 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       tDone.setAttribute('aria-pressed', cdDone(sel, b.id));
       tDone.disabled = !canDo;
       tDone.addEventListener('click', function () { cdClose(); cdTick(b.id); });
-      var tOff = el('button', 'cd-toggle', '<span>Off this day</span><i></i>');
-      tOff.type = 'button'; tOff.id = 'cdTOff';
-      tOff.setAttribute('aria-pressed', cdIsOff(sel, b.id));
-      /* A day off is written forward, so it is the one record open ahead. */
-      tOff.disabled = cdDiff(cdToday(), sel) > 2;
-      tOff.addEventListener('click', function () {
-        var on = !cdIsOff(sel, b.id);
-        cdSetFlag('off', sel, b.id, on);
-        if (on) cdSetFlag('log', sel, b.id, false);
-        tOff.setAttribute('aria-pressed', on);
-        tDone.setAttribute('aria-pressed', cdDone(sel, b.id));
-        cdPaint();
-      });
       var tg = el('div', 'cd-rows');
-      tg.appendChild(tDone); tg.appendChild(tOff);
+      tg.appendChild(tDone);
       root.appendChild(tg);
       if (TRAINING[cdKind(b.n)] && canDo) {
         var lg = el('button', 'cd-link', 'Log what you trained →');
@@ -1570,7 +1551,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     if (btn.dataset.act === 'hist') { cdHabHist(h); return; }
     var today = cdToday();
     if (h.id === 'train') {
-      var tb = cdOn(today).filter(function (b) { return TRAINING[cdKind(b.n)] && !cdIsOff(today, b.id); });
+      var tb = cdOn(today).filter(function (b) { return TRAINING[cdKind(b.n)]; });
       var free = tb.filter(function (b) { return !(S.train[today] && S.train[today][b.id]); })[0];
       cdLiftSheet(today, free ? free.id : tb.length ? tb[0].id : DAYKEY, 'Train');
       return;
@@ -1767,7 +1748,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     if (ns.length) { var bl = root.appendChild(el('p', 'cd-lbl', 'Blocks')); bl.style.margin = '26px 0 4px'; }
     var ul = el('ul', 'cd-day-l');
     cdOn(iso).forEach(function (b) {
-      var k = cdKind(b.n), st = cdIsOff(iso, b.id) ? 'off' : cdDone(iso, b.id) ? 'completed' : fut ? 'planned' : 'not completed';
+      var k = cdKind(b.n), st = cdDone(iso, b.id) ? 'completed' : fut ? 'planned' : 'not completed';
       var li = el('li', '', '<i></i><b>' + esc(b.n) + '</b><span>' + cdHM(b.s) + ' · ' + st + '</span>');
       li.style.setProperty('--cat', 'var(--c-' + CAT[k] + ')');
       ul.appendChild(li);

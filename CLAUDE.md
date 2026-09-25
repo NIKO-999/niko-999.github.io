@@ -4338,6 +4338,17 @@ the sky beside the name, so a tick drawn in a colour that does not show
 fails, and read defensively so a build with no tick fails by name rather
 than crashing the file.
 
+### There is no day off
+
+Out on request: the *Off this day* toggle in the editor, the struck row
+that said Off where its time went, and every read of the record behind
+it. **The whole feature, not just the button**: with the toggle gone a
+block already marked off would have stayed struck, with its dot hidden,
+and no way left on screen to take it back. `cad.off.v1` is not swept,
+on the goals' precedent, and the backup no longer carries it because
+the backup is built from `K`. Asserted as the toggle and the word being
+absent, proved by putting the words back and watching it fail.
+
 ### The whole week clears in one press
 
 Settings carries **Clear all blocks**, because starting the template over
