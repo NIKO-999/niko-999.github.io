@@ -314,7 +314,15 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
    screen — a list's head stays because you move between lists, and a
    source is one thing you are reading down. */
 #alSource .al-pane { padding-top: calc(var(--v2) + env(safe-area-inset-top, 0px)); }
-.al-lead { margin: 0 -6px var(--v1); padding: 20px 22px 56px; border-radius: var(--r-card); background: var(--dusk); }
+/* THE GLOW STAYS IN THE PADDING, whatever height the summary makes the
+   card. --dusk puts its stops in percent, so a card grown by four lines
+   drags the peach up under the words, and white on that peach is about
+   2:1. Here the stops are measured from the foot: everything above the
+   last 80px is at most #3A4459, where the summary clears 6.6:1. */
+.al-lead { margin: 0 -6px var(--v1); padding: 20px 22px 80px; border-radius: var(--r-card);
+  background: linear-gradient(180deg, #0B1220 0%, #15233A 30%, #3A4459 calc(100% - 80px),
+                                      #87717A calc(100% - 34px), #D29A84 100%); }
+.al-sum { margin-top: 12px; font-size: 15px; line-height: 1.45; color: rgba(243,245,247,.82); text-wrap: pretty; }
 .al-lead .al-kick { margin-bottom: 10px; }
 /* THE TITLE HAS TO CLEAR THE CLOSE BUTTON, which is fixed at the
    viewport's own right edge — so the room is a number of PIXELS and an
@@ -510,6 +518,44 @@ var SRC = [
   { i: "bab", n: "The Richest Man in Babylon", p: "George S. Clason", k: "book", g: "book" },
   { i: "life", n: "The Game of Life and How to Play It", p: "Florence Scovel Shinn", k: "book", g: "book" },
 ];
+
+/* WHO THEY ARE, FOR SOMEBODY WHO DOES NOT KNOW. A sentence or two on the
+   card under the name, and nothing the themes below say better. Kept
+   beside SRC rather than on each row so the rows stay one line each; a
+   source with no summary, or a summary with no source, throws at boot. */
+var SUM = {
+  lucas: "A Harlem heroin trafficker of the late sixties and early seventies who reportedly bought direct from Southeast Asia and cut out the middlemen. Convicted in 1976, he later cooperated with investigators, and his story became the film American Gangster.",
+  fifty: "Curtis Jackson, a rapper from South Jamaica, Queens, who survived being shot nine times in 2000 and broke through with Get Rich or Die Tryin' in 2003. He turned the fame into business: an early stake in Vitaminwater and the Power television franchise.",
+  bloom: "Co-founded Bloom Nutrition with Mari Llewellyn in 2019. Its greens and energy drinks grew mostly through social media into one of the fastest-growing supplement brands in America.",
+  gymsh: "Started Gymshark in 2012 as a teenager in Birmingham, England, making gym wear in his parents' garage while delivering pizzas. It grew through fitness creators online and was valued at over a billion pounds in 2020.",
+  hormo: "Built a chain of gyms, then Gym Launch, and sold his companies before founding Acquisition.com with his wife Leila. He invests in businesses and writes books like $100M Offers.",
+  spanx: "Started Spanx in 2000 with $5,000 of savings while selling fax machines door to door. In 2012 Forbes named her the youngest self-made woman billionaire.",
+  mchmp: "Co-founded Mailchimp in Atlanta in 2001 as a side project of a web design agency. It never took outside investment, and Intuit bought it in 2021 for about $12 billion.",
+  sigs: "Co-founder of 37signals, the company behind Basecamp and Ruby on Rails, and co-author of Rework. He argues for small, profitable, calm companies over growth at any cost.",
+  patag: "A climber who taught himself blacksmithing to make gear, then founded Patagonia in 1973. In 2022 he gave the company away to a trust and a nonprofit fighting climate change.",
+  chob: "A Kurdish immigrant from Turkey who bought a closed yogurt factory in upstate New York in 2005 and built Chobani into America's best-selling Greek yogurt, known for hiring refugees.",
+  cane: "Opened the first Raising Cane's near LSU in Baton Rouge in 1996 after the banks turned him down. It sells chicken fingers and little else, and has grown to hundreds of restaurants.",
+  fubu: "Co-founded FUBU in Hollis, Queens, in the early nineties, starting with hats sewn at home, and grew it into a major clothing brand. Now best known as an investor on Shark Tank.",
+  lvls: "A Dutch developer who builds and runs profitable online products on his own, including Nomad List, Remote OK and Photo AI, and publishes his revenue openly.",
+  rohn: "An American business philosopher who went from broke to wealthy through direct sales, then spent four decades teaching personal development. He mentored a young Tony Robbins.",
+  night: "A radio broadcaster and Pearl Harbor survivor whose 1956 recording The Strangest Secret sold over a million copies. He co-founded Nightingale-Conant, the personal development publisher.",
+  zig: "A salesman from Mississippi who became one of America's best-known motivational speakers. His first book, See You at the Top, was turned down by publishers and went on to sell over a million copies.",
+  tony: "An American coach and speaker known for huge seminars, firewalks and books like Unlimited Power and Awaken the Giant Within. He started out promoting Jim Rohn's seminars as a teenager.",
+  lesb: "A speaker from Miami who was labelled a slow learner at school, worked his way into radio and served in the Ohio legislature before becoming known for his talks on hunger and possibility.",
+  devil: "Napoleon Hill's imagined interview with the Devil, written in 1938 and held back for decades, about fear, drifting and the habits that keep people from what they want. Published in 2011.",
+  tagr: "Napoleon Hill's 1937 study of how successful people thought, built on desire, faith, persistence and a definite purpose. One of the best-selling self-help books ever written.",
+  mdh: "Brian Tracy on the daily habits behind high earners: clear goals, managing time, learning for life and doing the most important task first.",
+  surf: "Vadim Zeland's Russian series from the early 2000s. Reality is a field of possibilities, and you move between them through intention, calm and letting go of excess importance.",
+  para: "Bob Proctor's teaching that your results come from your paradigm, the habits of thought held in the subconscious, and that changing results means changing that first.",
+  feel: "Neville Goddard's short 1944 book: assume the feeling of the wish already fulfilled, and that feeling is how it becomes real.",
+  sogr: "Wallace Wattles' 1910 book treating wealth as the result of thinking and acting in a certain way. It inspired The Secret.",
+  cyb: "Plastic surgeon Maxwell Maltz's 1960 book on self-image: you act in line with how you see yourself, and changing that picture changes the results.",
+  subc: "Joseph Murphy's 1963 book: the subconscious accepts what you believe and acts on it, with simple techniques such as affirmations before sleep.",
+  atmt: "James Allen's short 1903 essay on how your thoughts shape your character, your circumstances and your health.",
+  big: "David J. Schwartz's 1959 book on confidence, action and aiming higher, full of practical habits for thinking larger than your circumstances.",
+  bab: "George S. Clason's 1926 parables set in ancient Babylon, teaching the basics of money: keep a part of all you earn, control your spending and make your savings work.",
+  life: "Florence Scovel Shinn's 1925 book treating life as a game of giving and receiving, where your words, expectations and forgiveness shape what comes back.",
+};
 
 var TH = [
   { s: "fifty", x: "internal", n: "\"I'm Not a Rapper\"", b: "Identity Decides the Moves",
@@ -1681,6 +1727,8 @@ function keepKeys(a) {
    gone on the next open. A guard in the boot pass would not have caught
    it: by then the keys are there either way. */
 if (!TH[0].k) throw new Error('marks read before the keys were minted');
+SRC.forEach(function (x) { if (!SUM[x.i]) throw new Error('no summary for ' + x.n); });
+Object.keys(SUM).forEach(function (k) { if (!SRC.some(function (x) { return x.i === k; })) throw new Error('a summary for nobody: ' + k); });
 
 var st = { last: null, stop: 'pin', pin: [], hi: [] };
 var stale = false;
@@ -1926,6 +1974,7 @@ function paintSource(id) {
   var lead = el('div', 'al-lead');
   lead.appendChild(el('div', 'al-caps al-kick', x.p));
   lead.appendChild(el('h1', 'al-disp', x.n));
+  lead.appendChild(el('p', 'al-sum', SUM[x.i]));
   p.appendChild(lead);
   var sh = el('div', 'al-sheet');
   for (var a in AXIS) {
