@@ -77,6 +77,21 @@
                                   #62737E 78%, #A9B2B8 94%, #C3C9CD 100%);
   --dusk: linear-gradient(180deg, #0B1220 0%, #15233A 36%, #3A4459 64%, #87717A 86%, #D29A84 100%);
 
+  /* THE DAWN BEHIND EVERY SCREEN, WITH ITS LIGHT HELD TO THE FOOT. The
+     open screen's sky has room for words in its top half and nowhere
+     else: the quiet label is under 4.5:1 from about 58% down, where the
+     teal turns to slate, and a list scrolls through all of it. So this
+     is the same sky with the silver compressed into a band under the
+     lists, and the lists END above it, so nothing is ever written in the
+     light. #1E3544 is the lightest ground the quiet label clears 4.8:1
+     on, and it is where the pane stops. The glow in the middle is the
+     dawn's own, at .16, where .28 would lift the ground past that. */
+  --glow: 118px;
+  --sky: radial-gradient(90% 55% at 50% 38%, rgba(64,110,132,.16), transparent 70%),
+         linear-gradient(180deg, #03060A 0%, #07131D 16%, #122736 42%,
+                                 #1E3544 calc(100% - var(--glow)), #3D5563 calc(100% - 80px),
+                                 #7F8E97 calc(100% - 36px), #C3C9CD 100%);
+
   --r-card: 22px;
   --r-pill: 999px;
 
@@ -108,8 +123,14 @@
    and hands the rest down, and a view that hides it gets the whole
    height without being told. */
 html, body { height: 100%; }
+/* THE SKY IS THE CANVAS'S, and its foot colour is the silver. On a phone
+   the page can end above the home indicator, and what showed there was
+   the old flat black under a sky that had stopped. */
 body {
-  background: var(--paper);
+  background-color: #C3C9CD;
+  background-image: var(--sky);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
   color: var(--ink);
   font-family: var(--sans);
   font-size: 16px;
@@ -199,8 +220,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .al-stop[aria-current="true"]::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px;
   height: 1px; background: var(--ink); }
 
+/* A PANE ENDS WHERE THE LIGHT BEGINS. The glow under it is sky with
+   nothing written on it, so the home indicator sits in the light rather
+   than on the last row, and the mask below dissolves the list into it. */
 .al-pane { flex: 1; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
-  padding: 0 var(--gut-list) calc(56px + env(safe-area-inset-bottom, 0px)); }
+  margin-bottom: var(--glow); padding: 0 var(--gut-list) 28px; }
 .al-pane::-webkit-scrollbar { display: none; }
 
 /* A MASK, NEVER A GRADIENT LAID OVER THE CONTENT: a mask has no colour
