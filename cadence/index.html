@@ -5,98 +5,93 @@
 <!-- maximum-scale=1: iOS zooms the page when a field under 16px takes
      focus. Every field here is 16px, and the cap covers the next one. -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#03050A" />
-<meta name="description" content="The day as one line of time: what is on it, what you kept, and what you trained." />
+<meta name="theme-color" content="#0A0C10" />
+<meta name="description" content="The day as one line of time, lit by the hour you are in." />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Cadence" />
 <title>Cadence</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B1220'/%3E%3Cpath d='M12 20h14M22 32h18M34 44h18' stroke-width='5' stroke-linecap='round' stroke='%23F2A184'/%3E%3C/svg%3E" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230A0C10'/%3E%3Cg fill='%237CC4FF'%3E%3Crect x='12' y='22' width='10' height='20' rx='5'/%3E%3Crect x='27' y='14' width='10' height='36' rx='5'/%3E%3Crect x='42' y='26' width='10' height='12' rx='5'/%3E%3C/g%3E%3C/svg%3E" />
 <link rel="preload" href="../arc/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="preload" href="fonts/GeistMono.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="fonts/Archivo-700i.woff2" as="font" type="font/woff2" crossorigin />
 <style>
 /* ═══════════════════════════════════════════════════════════════
-   CADENCE — the day as one line of time, under a night sky.
+   CADENCE — the day as one line of time, lit by the hour you are in.
 
-   The language is the alignment app's, taken whole and then given its
-   own drawings: a cool black ground with the colour living in
-   gradients, a thin display face that reads as confident rather than
-   loud, a monospace for every label and every entry, hairlines where
-   there were cards, and one white round control per screen.
+   Three looks came out before this one, and the fourth was the
+   alignment app's own language taken whole — its tokens, its mono
+   labels, its dusk under every title — which was reported in one line:
+   make your own twist, not a copy. What is kept from it is the premise
+   rather than the pieces: a dark ground, colour that arrives as LIGHT
+   rather than as paint, and restraint everywhere else.
 
-   Two looks came before this and both were reported in one line. The
-   first was mono on everything with heavy tickets and a black dock;
-   the second was warm paper, white cards and a raised add button, and
-   it read as the daily-process app in another colour. What that second
-   one got wrong is the thing this one is built against: a column of
-   rows, each with a time on the left, a name, and a check on the right,
-   is THAT app's drawing whatever it is painted in.
-
-   So the day is not a list of rows. Every block is drawn on the same
-   line of time, at its own place on it, and the rows together fall
-   from top left to bottom right — the cadence of the day, as a shape.
+   What is Cadence's own:
+   · THE LIGHT TELLS THE TIME. One glow at the top of the page, and its
+     hue is the part of the day you are in — apricot before ten, sky
+     until four, rose until half eight, iris through the night. The same
+     hue is the one accent: the clock's own mark and the button that
+     files. A screen opened at dusk looks like dusk.
+   · A FORWARD-LEANING FACE. Archivo in bold italic for the things you
+     are looking at — the day, a figure, a title — because a calendar of
+     training and routine is about momentum. Inter for what you read.
+   · THE BEAT. A day is a row of beats, one per block, lit as each is
+     kept — under the title, and in miniature under every date of the
+     week. It is the one mark that means "how much of it you kept", at
+     two sizes.
+   · THE LINE OF TIME. Every block is drawn at its own place on the
+     day's span, so the rows fall from left to right, and there is no
+     time gutter — the drawing the other app is made of.
+   · SAY IT. The add control is the sentence field, pinned at the foot:
+     a block is something you type the way you would say it.
    ═══════════════════════════════════════════════════════════════ */
 @font-face { font-family: 'Inter'; font-weight: 100 900; font-display: swap;
   src: url('../arc/fonts/Inter.woff2') format('woff2'); }
-@font-face { font-family: 'Geist Mono'; font-weight: 100 900; font-display: swap;
-  src: url('fonts/GeistMono.woff2') format('woff2'); }
+@font-face { font-family: 'Archivo'; font-style: italic; font-weight: 700; font-display: swap;
+  src: url('fonts/Archivo-700i.woff2') format('woff2'); }
 
 :root {
   color-scheme: dark;
-  --ink: #F3F5F7;
-  --on-ink: #0B0E13;
-  /* The quietest step that is still WORDS: .58 clears 5.4:1 on the
-     lightest ground a pane ever puts text on, where .50 is a rounding
-     error above the bar. */
-  --dim: rgba(243, 245, 247, .74);
-  --quiet: rgba(243, 245, 247, .58);
-  --hair: rgba(243, 245, 247, .10);
-  --lift: rgba(243, 245, 247, .07);
-  --lift2: rgba(243, 245, 247, .12);
-  --card-ink: rgba(243, 245, 247, .82);
+  --bg: #0A0C10;
+  --ink: #F4F5F7;
+  --on: #0A0C10;
+  --dim: rgba(244, 245, 247, .72);
+  --quiet: rgba(244, 245, 247, .60);
+  --tile: rgba(255, 255, 255, .045);
+  --tile2: rgba(255, 255, 255, .085);
+  --edge: rgba(255, 255, 255, .06);
+  --rule: rgba(255, 255, 255, .08);
 
-  /* THE SKY, AND THE THREE STOPS WORDS ARE ALLOWED ON. A pane ends a
-     glow's height above the foot, so --g-low is the lightest ground any
-     label sits on; what is under it is light with nothing written in it.
-     The foot is a hint of dusk rather than the alignment app's slate:
-     this one ends on the sunset it was once asked to be. */
-  --g-top: #03050A;
-  --g-mid: #0F1B29;
-  --g-low: #182638;
-  --glow: 56px;
-  --sky: radial-gradient(70% 36% at 90% 3%, rgba(140, 168, 206, .10), transparent 70%),
-         linear-gradient(180deg, var(--g-top) 0%, #080F19 18%, var(--g-mid) 46%,
-                                 var(--g-low) calc(100% - var(--glow)), #2E2C3D calc(100% - 26px), #5A424A 100%);
-  /* A title on a dusk. The light is measured from the FOOT, so whatever
-     height the words give the card, the ground under the last line is no
-     lighter than #4E5268 and the peach lives in the last 26px, where
-     nothing is written. */
-  --dusk: linear-gradient(180deg, #0B1220 0%, #15233A 32%, #3A4459 calc(100% - 62px),
-                                  #4E5268 calc(100% - 26px), #8C727B calc(100% - 11px), #D99B83 100%);
+  /* THE TIDE. Four parts of the day, each a glow and the solid it
+     comes from. The solid is light enough that the ground's own colour
+     reads on it, so a filled control is --on over --tide at every hour. */
+  --tide: #7CC4FF;
+  --aura: rgba(79, 168, 255, .30);
 
-  /* FOUR HUES, AND THEY ARE THE SKY'S: peach, lavender, sand and
-     sea-glass. Colour says WHICH part of life a block is, never whether
-     you kept it — kept is the ground, the ink with the paper on it. */
-  --c-body: #F2A184;
-  --c-mind: #B7A5FF;
-  --c-work: #E8C67C;
-  --c-rest: #7DCFD8;
-  --c-none: #9AA2AA;
-  --k-weights: #F2A184;
-  --k-run: #7DCFD8;
-  --k-recovery: #B7A5FF;
-  --k-rest: #9AA2AA;
-  /* Six habits to tell apart, so two more of the same register. */
-  --h-water: #8DB6F0;
-  --h-sleep: #E7A3C0;
-  --bad: #FF9A8C;
+  /* Which part of life a block is. Saturated where the tide is soft, so
+     the two never read as one system. */
+  --c-body: #FF8A5C;
+  --c-mind: #A993FF;
+  --c-work: #F5C04A;
+  --c-rest: #4FD1A5;
+  --c-none: #9BA3AD;
+  --k-weights: #FF8A5C;
+  --k-run: #5CC8F0;
+  --k-recovery: #A993FF;
+  --k-rest: #9BA3AD;
+  --h-water: #5CC8F0;
+  --h-sleep: #F28DC0;
+  --bad: #FF8F80;
 
   --sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
-  --r-card: 22px;
+  --disp: 'Archivo', 'Inter', system-ui, sans-serif;
   --gut: 18px;
+  --inset: 16px;
 }
+:root[data-tide="dawn"]  { --tide: #FFB27E; --aura: rgba(255, 158, 107, .30); }
+:root[data-tide="day"]   { --tide: #7CC4FF; --aura: rgba(79, 168, 255, .30); }
+:root[data-tide="dusk"]  { --tide: #FF8FA8; --aura: rgba(255, 111, 145, .30); }
+:root[data-tide="night"] { --tide: #A99BFF; --aura: rgba(124, 107, 255, .28); }
 
 *, *::before, *::after { box-sizing: border-box; }
 /* Said once, for every element: an author `display` outranks the
@@ -105,326 +100,310 @@
 [hidden] { display: none !important; }
 
 html { -webkit-text-size-adjust: 100%; }
-/* The strip under the home indicator is body's own colour on iOS, so it
-   takes the foot of the sky rather than showing a band of something else. */
-html, body { height: 100%; background-color: #5A424A; }
+html, body { height: 100%; background-color: var(--bg); }
 body {
   position: fixed; inset: 0; margin: 0; overflow: hidden; overscroll-behavior: none;
-  background-image: var(--sky); background-repeat: no-repeat; background-size: 100% 100%;
+  /* The light is ON the page, fixed, and the lists scroll under nothing:
+     it sits behind the title and has faded to the ground by the time the
+     first row starts, so no row is ever read on it. */
+  background-image: radial-gradient(95% 40% at 50% -4%, var(--aura), transparent 100%);
+  background-repeat: no-repeat;
   color: var(--ink);
-  font: 400 15px/1.4 var(--sans);
+  font: 500 15px/1.4 var(--sans);
   -webkit-tap-highlight-color: transparent;
   -webkit-font-smoothing: antialiased;
 }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; touch-action: manipulation; }
-button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-.cd-field:focus-visible { outline: 1px solid var(--dim); outline-offset: -1px; }
+button:focus-visible { outline: 2px solid var(--tide); outline-offset: 2px; }
+.cd-field:focus-visible { outline: 1px solid var(--tide); outline-offset: -1px; }
 .cd-row .cd-field:focus-visible { outline: none; }
-
-/* THE LABEL REGISTER. One size, one tracking, one face: a label that
-   comes in three sizes is three labels. */
-.cd-caps { margin: 0; font: 500 10.5px/1.35 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--quiet); }
 
 .cd-app { display: flex; flex-direction: column; height: 100%; max-width: 560px; margin: 0 auto; }
 
-/* ── the nav: four marks and a line, at the TOP ──
-   The quietest thing on the screen. The one you are on is the ink with
-   a hairline under it; the line is what says which, so no ground. */
-.cd-nav { position: relative; flex: none; display: flex; justify-content: center; gap: 2px; padding: calc(4px + env(safe-area-inset-top)) 0 0; }
-.cd-tab { position: relative; width: 52px; height: 44px; display: grid; place-items: center; color: var(--quiet); }
-.cd-tab svg { width: 18px; height: 18px; display: block; }
-.cd-tab::after { content: ""; position: absolute; left: 50%; bottom: 7px; width: 16px; height: 1px; margin-left: -8px; background: var(--ink); opacity: 0; }
+/* ── the nav: four words ── A tab bar of icons is a row you have to
+   learn; four words are read once. The one you are on is the ink with a
+   drop of the tide under it. */
+.cd-nav { flex: none; display: flex; align-items: center; gap: 2px; padding: calc(4px + env(safe-area-inset-top)) 6px 0 8px; }
+.cd-tab { position: relative; min-height: 44px; padding: 0 10px; display: flex; align-items: center; font: 600 15px/1 var(--sans); color: var(--quiet); }
+.cd-tab::after { content: ""; position: absolute; left: 50%; bottom: 6px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--tide); opacity: 0; }
 .cd-tab[aria-current="page"] { color: var(--ink); }
 .cd-tab[aria-current="page"]::after { opacity: 1; }
-.cd-gear { position: absolute; right: 6px; bottom: 0; width: 44px; height: 44px; display: grid; place-items: center; color: var(--quiet); }
-.cd-gear svg { width: 18px; height: 18px; display: block; }
+.cd-gear { margin-left: auto; width: 44px; height: 44px; display: grid; place-items: center; color: var(--quiet); }
+.cd-gear svg { width: 20px; height: 20px; display: block; }
 
 .cd-main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .cd-main > section { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 
-/* ── a screen's head: a title on a dusk ── Outside the pane, so the list
-   scrolls under nothing and the head is there to move between. */
-.cd-head { position: relative; flex: none; margin: 6px 12px 10px; padding: 18px 20px 36px; border-radius: var(--r-card); background: var(--dusk); }
-.cd-kick { color: var(--card-ink); }
-.cd-disp { margin: 8px 0 0; max-width: calc(100% - 52px); font: 300 34px/1.04 var(--sans); letter-spacing: -.03em; }
-.cd-headsub { margin-top: 10px; font-variant-numeric: tabular-nums; }
+/* ── a screen's head: straight on the light, no card round it ── */
+.cd-head { position: relative; flex: none; padding: 12px var(--gut) 4px; }
+.cd-kick { margin: 0; font: 500 13px/1.3 var(--sans); color: var(--dim); font-variant-numeric: tabular-nums; }
+.cd-disp { margin: 4px 0 0; font: italic 700 44px/1 var(--disp); letter-spacing: -.01em; }
+.cd-sub { margin: 10px 0 0; font: 500 13px/1.3 var(--sans); color: var(--dim); font-variant-numeric: tabular-nums; }
 
-/* THE ONE WHITE THING ON A SCREEN. It carries its own ground, so it can
-   sit on any part of the sky; the alignment app's own control. */
-.cd-round {
-  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; flex: none;
-  background: #FFFFFF; color: var(--on-ink);
-  box-shadow: 0 8px 22px rgba(4, 8, 14, .32), inset 0 1px 0 rgba(255, 255, 255, .9);
-}
-.cd-round svg { width: 18px; height: 18px; display: block; }
-.cd-head > .cd-round { position: absolute; top: 14px; right: 14px; }
+/* THE BEAT: one segment per thing the day asked of you, lit in its own
+   colour when kept. */
+.cd-beat { display: flex; gap: 4px; margin-top: 14px; }
+.cd-beat i { flex: 1; height: 6px; border-radius: 3px; background: var(--tile2); }
+.cd-beat i.on { background: var(--bc); }
 
-/* ── the week: seven dates, the one you are on is the ground ── */
-.cd-week { flex: none; display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin: 0 12px; }
-.cd-wd { display: flex; flex-direction: column; align-items: center; gap: 5px; min-height: 60px; padding: 8px 0 9px; border-radius: 14px; }
-.cd-wd-l { font: 500 10px/1 var(--mono); letter-spacing: .08em; color: var(--quiet); }
-.cd-wd-n { font: 300 20px/1 var(--sans); letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--dim); }
-.cd-wd-k { width: 18px; height: 2px; border-radius: 1px; background: var(--hair); overflow: hidden; }
-.cd-wd-k i { display: block; height: 100%; background: var(--ink); }
-.cd-wd.is-today .cd-wd-l { color: var(--ink); }
-.cd-wd.is-future .cd-wd-k { visibility: hidden; }
-.cd-wd[aria-pressed="true"] { background: var(--lift2); }
-.cd-wd[aria-pressed="true"] .cd-wd-n { color: var(--ink); font-weight: 400; }
+/* ── the week: seven dates, each with its own small beat ── */
+.cd-week { flex: none; display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin: 14px 12px 0; }
+.cd-wd { display: flex; flex-direction: column; align-items: center; gap: 6px; min-height: 66px; padding: 9px 0 10px; border-radius: 16px; }
+.cd-wd-l { font: 600 11px/1 var(--sans); color: var(--quiet); }
+.cd-wd-n { font: 600 18px/1 var(--sans); font-variant-numeric: tabular-nums; color: var(--dim); }
+.cd-wd-b { display: flex; gap: 2px; width: 26px; }
+.cd-wd-b i { flex: 1; height: 3px; border-radius: 2px; background: var(--tile2); }
+.cd-wd-b i.on { background: var(--ink); }
+.cd-wd.is-today .cd-wd-n { color: var(--tide); }
+.cd-wd[aria-pressed="true"] { background: var(--tile2); }
+.cd-wd[aria-pressed="true"] .cd-wd-n { color: var(--ink); }
+.cd-wd.is-today[aria-pressed="true"] .cd-wd-n { color: var(--tide); }
 
-/* ── the scale: the hours every row below is drawn against ── */
-.cd-scale { position: relative; flex: none; height: 26px; margin: 10px var(--gut) 0; border-bottom: 1px solid var(--hair); }
-.cd-scale span { position: absolute; bottom: 7px; transform: translateX(-50%); font: 500 9.5px/1 var(--mono); letter-spacing: .06em; color: var(--quiet); font-variant-numeric: tabular-nums; }
+/* ── the scale: the hours every row is drawn against ── */
+.cd-scale { position: relative; flex: none; height: 26px; margin: 12px calc(var(--gut) + var(--inset)) -4px; }
+.cd-scale span { position: absolute; bottom: 6px; transform: translateX(-50%); font: 600 11px/1 var(--sans); color: var(--quiet); font-variant-numeric: tabular-nums; }
 .cd-scale span.is-first { transform: none; }
 .cd-scale span.is-last { transform: translateX(-100%); }
-.cd-scale b { position: absolute; bottom: 3px; z-index: 1; transform: translateX(-50%); padding: 3px 6px; border-radius: 6px; font: 600 9.5px/1 var(--mono); letter-spacing: .04em; background: var(--ink); color: var(--on-ink); font-variant-numeric: tabular-nums; }
+.cd-scale b { position: absolute; bottom: 2px; z-index: 1; transform: translateX(-50%); padding: 4px 7px; border-radius: 8px; font: 700 11px/1 var(--sans); background: var(--tide); color: var(--on); font-variant-numeric: tabular-nums; }
 
-/* A PANE ENDS WHERE THE LIGHT BEGINS, and a mask — never a gradient laid
-   over the words — dissolves the list into it. */
 .cd-pane {
   flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
-  margin-bottom: var(--glow); padding: 0 var(--gut) 34px; scrollbar-width: none;
-  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 8px, #000 calc(100% - 60px), transparent 100%);
-          mask-image: linear-gradient(180deg, transparent 0, #000 8px, #000 calc(100% - 60px), transparent 100%);
+  padding: 12px var(--gut) 28px; scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 10px, #000 calc(100% - 28px), transparent 100%);
+          mask-image: linear-gradient(180deg, transparent 0, #000 10px, #000 calc(100% - 28px), transparent 100%);
 }
 .cd-pane::-webkit-scrollbar { display: none; }
 
-/* ── the day: every block on one line of time ──
-   A row is the block's name and what is true of it, and under that the
-   whole span of the day with the block drawn at its own place. Read
-   down, the segments fall from left to right; the gaps between them are
-   literal space, and one hairline crosses every row at the clock. */
+/* ── the day: a tile per block, each carrying the whole span ── */
 .cd-agenda { position: relative; list-style: none; margin: 0; padding: 0; }
-/* NO RULE BETWEEN ROWS: each row's own line of time is what ends it, and
-   a border under that was two lines saying one thing. */
-.cd-it { position: relative; }
-.cd-tk-b { display: block; width: 100%; padding: 14px 68px 12px 0; }
-.cd-tk-n { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 12.5px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink); }
-.cd-tk-m { display: block; margin-top: 3px; font: 400 10.5px/1.35 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--quiet); font-variant-numeric: tabular-nums; }
+.cd-it { position: relative; margin-bottom: 8px; border-radius: 18px; background: var(--tile); box-shadow: inset 0 1px 0 var(--edge); }
+.cd-tk-b { display: block; width: 100%; padding: 14px var(--inset) 14px; }
+.cd-tk-n, .cd-tk-m, .cd-tk-w { margin-right: 52px; }
+.cd-tk-n { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 16px/1.3 var(--sans); }
+.cd-tk-m { display: block; margin-top: 2px; font: 500 13px/1.35 var(--sans); color: var(--dim); font-variant-numeric: tabular-nums; }
 .cd-tk-m i { font-style: normal; color: var(--ink); }
-.cd-tk-w { display: block; margin-top: 5px; font: 500 10.5px/1.35 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--kc, var(--dim)); }
-/* The track runs under the stamp too: every row's line of time is the
-   same width as the scale and the now line, or the picture lies. */
-.cd-track { position: relative; display: block; height: 7px; margin: 11px -68px 0 0; }
-.cd-track::before { content: ""; position: absolute; left: 0; right: 0; top: 3px; height: 1px; background: var(--hair); }
-.cd-seg { position: absolute; top: 1px; height: 5px; min-width: 5px; border-radius: 3px; background: color-mix(in srgb, var(--cat) 55%, transparent); }
-.cd-seg.is-dot { width: 7px; min-width: 0; height: 7px; top: 0; margin-left: -3.5px; border-radius: 50%; }
+.cd-tk-w { display: block; margin-top: 4px; font: 600 13px/1.35 var(--sans); color: var(--kc, var(--dim)); }
+.cd-track { position: relative; display: block; height: 8px; margin-top: 12px; }
+.cd-track::before { content: ""; position: absolute; left: 0; right: 0; top: 3px; height: 2px; border-radius: 1px; background: var(--rule); }
+.cd-seg { position: absolute; top: 1px; height: 6px; min-width: 6px; border-radius: 3px; background: color-mix(in srgb, var(--cat) 62%, transparent); }
+.cd-seg.is-dot { width: 8px; min-width: 0; height: 8px; top: 0; margin-left: -4px; border-radius: 50%; }
 .cd-seg > i { display: block; height: 100%; border-radius: inherit; background: var(--cat); }
-.cd-it.is-done .cd-seg { background: var(--cat); box-shadow: 0 0 10px color-mix(in srgb, var(--cat) 55%, transparent); }
-/* Behind you and not kept is the flat neutral, never a red: the bar says
-   when it was, and the row says nothing about you. Every state of the bar
-   is a graphic held to 3:1, which is why the neutral is not fainter. */
-.cd-it.is-past:not(.is-done) .cd-seg { background: rgba(243, 245, 247, .36); }
+.cd-it.is-done .cd-seg { background: var(--cat); box-shadow: 0 0 12px color-mix(in srgb, var(--cat) 55%, transparent); }
+/* Behind you and not kept is the flat neutral, never a red. Every state
+   of the bar is a graphic held to 3:1, which is why it is not fainter. */
+.cd-it.is-past:not(.is-done) .cd-seg { background: rgba(244, 245, 247, .38); }
 .cd-it.is-off .cd-seg { display: none; }
-.cd-it.is-past .cd-tk-n { color: var(--dim); }
 .cd-it.is-off .cd-tk-n { color: var(--quiet); text-decoration: line-through; }
+.cd-it.is-past .cd-tk-n { color: var(--dim); }
+/* The block happening now is ringed in the hour's own colour. */
+.cd-it.is-now { background: var(--tile2); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tide) 55%, transparent); }
 
-/* THE STATE IS THE GROUND, never a second word: KEPT on the lift is not
-   yet, KEPT on the ink is done, and nothing reflows under the press. */
-.cd-stamp { position: absolute; top: 7px; right: 0; width: 64px; height: 44px; display: flex; align-items: center; justify-content: flex-end; }
-.cd-stamp span, .cd-chk {
-  display: grid; place-items: center; height: 28px; padding: 0 11px; border-radius: 999px;
-  font: 500 10px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase;
-  color: var(--dim); background: var(--lift2);
-}
-.cd-stamp[aria-pressed="true"] span, .cd-chk.is-on { background: var(--ink); color: var(--on-ink); }
-.cd-stamp:disabled { cursor: default; }
-.cd-stamp:disabled span { opacity: .38; }
+/* The clock is a mark on every line of time, never one line down the
+   page — a single rule crossed every name at the same x. */
+.cd-tnow { position: absolute; top: -4px; width: 2px; height: 16px; margin-left: -1px; border-radius: 1px; background: var(--tide); pointer-events: none; }
+
+/* THE STATE IS A FILL IN THE BLOCK'S OWN COLOUR. Not yet is a tile with
+   the tick drawn quiet; kept is the colour with the ground's ink on it. */
+.cd-stamp { position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 14px; background: var(--tile2); color: var(--quiet); }
+.cd-stamp svg { width: 20px; height: 20px; display: block; }
+.cd-stamp[aria-pressed="true"] { background: var(--cat); color: var(--on); }
+.cd-stamp:disabled { cursor: default; opacity: .38; }
 .cd-it.is-off .cd-stamp { visibility: hidden; }
 
 /* Time nobody has claimed, drawn as a dimension line across exactly the
    stretch it covers, and measured beside it rather than over it. */
-.cd-gap { position: relative; height: 24px; }
+.cd-gap { height: 26px; margin: -2px 0 6px; padding: 0 var(--inset); }
+.cd-gap-in { position: relative; display: block; height: 100%; }
 .cd-gap b { position: absolute; top: 12px; height: 1px; background: var(--quiet); }
 .cd-gap b::before, .cd-gap b::after { content: ""; position: absolute; top: -3px; width: 1px; height: 7px; background: var(--quiet); }
 .cd-gap b::before { left: 0; }
 .cd-gap b::after { right: 0; }
-.cd-gap p { position: absolute; top: 7px; margin: 0; white-space: nowrap; font: 400 9.5px/1 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--quiet); }
+.cd-gap p { position: absolute; top: 6px; margin: 0; white-space: nowrap; font: 600 11px/1 var(--sans); color: var(--quiet); }
 
-/* THE CLOCK IS A MARK ON EVERY LINE OF TIME, NOT ONE LINE THROUGH THE
-   PAGE. A single rule crossed every name and every countdown at the same
-   x, which is a line drawn through the words you are trying to read; a
-   tick on each track reads down the page as the same line, broken
-   exactly where there is type. Not through the gaps either: their own
-   figure sits on that line as often as not. */
-.cd-tnow { position: absolute; top: -4px; width: 1px; height: 15px; margin-left: -.5px; background: var(--ink); pointer-events: none; }
+.cd-empty { padding: 24px 2px; list-style: none; font: 500 16px/1.45 var(--sans); color: var(--dim); }
+.cd-link { min-height: 44px; display: inline-flex; align-items: center; font: 600 15px/1 var(--sans); color: var(--tide); }
+.cd-empty .cd-link { display: flex; margin-top: 6px; }
+.cd-lbl { margin: 22px 2px 10px; font: 600 13px/1.3 var(--sans); color: var(--quiet); }
 
-.cd-empty { padding: 30px 2px; list-style: none; font: 300 19px/1.4 var(--sans); letter-spacing: -.01em; color: var(--dim); }
-.cd-empty .cd-link { display: flex; margin-top: 8px; }
-.cd-link { min-height: 44px; display: inline-flex; align-items: center; font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink); }
+/* ── say it: the add control is the sentence field, at the foot ── */
+.cd-say-bar { flex: none; padding: 8px var(--gut) calc(10px + env(safe-area-inset-bottom)); }
+.cd-sayb { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 54px; padding: 0 18px 0 11px; border-radius: 27px; background: var(--tile2); box-shadow: inset 0 1px 0 var(--edge); color: var(--quiet); font: 500 15px/1.2 var(--sans); }
+.cd-sayb i { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--tide); color: var(--on); font-style: normal; }
+.cd-sayb i svg { width: 16px; height: 16px; display: block; }
+.cd-sayb span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* ── shared by every pane ── */
-.cd-sec { display: flex; justify-content: space-between; align-items: baseline; margin: 0; padding: 26px 2px 10px; border-bottom: 1px solid var(--hair); }
-.cd-lbl { margin: 24px 2px 10px; }
-
-/* ── habits: hairline rows, and a fortnight as a pulse under each ── */
-.cd-hb { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--hair); }
-.cd-hr { position: relative; border-bottom: 1px solid var(--hair); }
-.cd-hr-b { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 14px 46px 10px 0; }
-.cd-hr-n { display: flex; align-items: center; gap: 9px; font: 500 12.5px/1.4 var(--mono); letter-spacing: .06em; text-transform: uppercase; }
-.cd-hr-n::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--hc); }
-.cd-hr-s { display: block; margin-top: 3px; padding-left: 15px; font: 400 10.5px/1.35 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--quiet); }
-.cd-hr-v { font: 300 24px/1 var(--sans); letter-spacing: -.02em; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
-.cd-hr-v small { margin-left: 4px; font: 500 10px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--quiet); }
+/* ── habits: two across, each with its fortnight as beats ── */
+.cd-hb { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cd-hr { position: relative; border-radius: 18px; background: var(--tile); box-shadow: inset 0 1px 0 var(--edge); }
+.cd-hr-b { display: flex; flex-direction: column; width: 100%; height: 100%; min-height: 138px; padding: 14px 14px 12px; }
+.cd-hr-n { display: flex; align-items: center; gap: 8px; margin-right: 30px; font: 600 14px/1.25 var(--sans); }
+.cd-hr-n::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--hc); }
+.cd-hr-v { display: block; margin-top: 12px; font: italic 700 28px/1 var(--disp); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cd-hr-v small { margin-left: 5px; font: 600 12px/1 var(--sans); color: var(--quiet); }
 .cd-hr-v.is-nil { color: var(--quiet); }
-.cd-hr-more { position: absolute; top: 12px; right: -8px; width: 44px; height: 44px; display: grid; place-items: center; color: var(--quiet); }
-.cd-hr-more svg { width: 14px; height: 14px; }
-/* Fourteen marks, a day each: a tick stands full when kept, a number
-   stands as tall as its share of the fortnight's best. */
-.cd-tape { display: flex; align-items: flex-end; gap: 4px; height: 26px; padding: 0 0 12px 15px; }
-.cd-tape i { width: 3px; height: 3px; border-radius: 1.5px; background: var(--hair); }
+.cd-hr-s { display: block; margin-top: 6px; font: 500 12px/1.3 var(--sans); color: var(--quiet); }
+.cd-tape { display: flex; align-items: flex-end; gap: 3px; height: 18px; margin-top: auto; padding-top: 12px; }
+.cd-tape i { flex: 1; height: 3px; border-radius: 2px; background: var(--tile2); }
 .cd-tape i.on { background: var(--hc); }
-.cd-pane > .cd-link { margin-top: 6px; }
+.cd-hr-more { position: absolute; top: 4px; right: 4px; width: 44px; height: 44px; display: grid; place-items: center; color: var(--quiet); }
+.cd-hr-more svg { width: 14px; height: 14px; }
+.cd-pane > .cd-link { margin-top: 10px; }
 
-/* ── month: a luminous grid, as bright as the day was kept ── */
-.cd-mnav { position: absolute; top: 12px; right: 12px; display: flex; gap: 4px; }
-.cd-mnav button { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); background: rgba(243, 245, 247, .1); }
-.cd-mnav button:disabled { color: rgba(243, 245, 247, .28); background: transparent; cursor: default; }
+/* ── month: a disc a day, as large as the day was kept ── */
+.cd-mhead { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.cd-mnav { display: flex; gap: 6px; padding-bottom: 2px; }
+.cd-mnav button { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); background: var(--tile2); }
+.cd-mnav button:disabled { color: rgba(244, 245, 247, .3); background: transparent; cursor: default; }
 .cd-mnav svg { width: 16px; height: 16px; }
-#cdVMon .cd-disp { max-width: calc(100% - 96px); }
-.cd-dows { display: grid; grid-template-columns: repeat(7, 1fr); padding: 6px 0 10px; text-align: center; }
-.cd-mgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-.cd-mc { position: relative; min-height: 44px; aspect-ratio: 1; border-radius: 12px; display: grid; place-items: center; text-align: center;
-  font: 300 16px/1 var(--sans); font-variant-numeric: tabular-nums; color: var(--ink); background: var(--lift); }
-.cd-mc.is-quiet, .cd-mc.is-future { background: transparent; color: var(--quiet); }
-.cd-mc.is-l1 { background: rgba(243, 245, 247, .15); }
-.cd-mc.is-l2 { background: rgba(243, 245, 247, .25); }
-.cd-mc.is-l3 { background: rgba(243, 245, 247, .37); }
-.cd-mc.is-l4 { background: #F3F5F7; color: var(--on-ink); font-weight: 400; box-shadow: 0 0 18px rgba(243, 245, 247, .22); }
-/* An outline rather than an inset ring, so it still shows round the one
-   square that has turned white. */
-.cd-mc.is-today { outline: 1px solid var(--ink); outline-offset: 2px; }
-.cd-mc em { position: absolute; left: 50%; bottom: 6px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--kc, transparent); }
+.cd-dows { display: grid; grid-template-columns: repeat(7, 1fr); padding: 8px 0 8px; text-align: center; font: 600 11px/1 var(--sans); color: var(--quiet); }
+.cd-mgrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.cd-mc { position: relative; min-height: 44px; aspect-ratio: 1; display: grid; place-items: center; }
+.cd-mc b { position: relative; z-index: 1; font: 600 14px/1 var(--sans); font-variant-numeric: tabular-nums; }
+.cd-mc i { position: absolute; left: 50%; top: 50%; width: 0; height: 0; border-radius: 50%; transform: translate(-50%, -50%); }
+/* Four steps and a whole one: the disc grows with the share kept, and
+   only a whole day is solid, which is the one square the figure turns
+   dark on. Steps rather than a ramp, so the figure holds 4.5:1 on each. */
+.cd-mc.is-l1 i { width: 20px; height: 20px; background: rgba(244, 245, 247, .14); }
+.cd-mc.is-l2 i { width: 28px; height: 28px; background: rgba(244, 245, 247, .22); }
+.cd-mc.is-l3 i { width: 36px; height: 36px; background: rgba(244, 245, 247, .32); }
+.cd-mc.is-l4 i { width: 40px; height: 40px; background: var(--ink); box-shadow: 0 0 16px rgba(244, 245, 247, .22); }
+.cd-mc.is-l4 b { color: var(--on); }
+.cd-mc.is-quiet b, .cd-mc.is-future b { color: var(--quiet); }
+.cd-mc.is-today::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: inset 0 0 0 2px var(--tide); }
+.cd-mc em { position: absolute; top: 3px; right: 3px; width: 6px; height: 6px; border-radius: 50%; background: var(--kc, transparent); }
 .cd-mc.is-pad { visibility: hidden; }
-.cd-legend { display: flex; flex-wrap: wrap; gap: 18px; margin: 18px 2px 0; }
+.cd-legend { display: flex; flex-wrap: wrap; gap: 18px; margin: 18px 2px 0; font: 600 12px/1 var(--sans); color: var(--quiet); }
 .cd-legend span { display: inline-flex; align-items: center; gap: 7px; }
-.cd-legend i { width: 6px; height: 6px; border-radius: 50%; background: var(--kc); }
+.cd-legend i { width: 7px; height: 7px; border-radius: 50%; background: var(--kc); }
 
-/* ── training: figures in the thin face, hairlines between ── */
-.cd-figs { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
-.cd-figs div { padding: 16px 0 14px 14px; }
-.cd-figs div:first-child { padding-left: 2px; }
-.cd-figs div + div { border-left: 1px solid var(--hair); }
-.cd-figs b { display: block; font: 300 32px/1 var(--sans); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
-.cd-figs span { display: block; margin-top: 9px; font: 500 10px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--quiet); }
-.cd-weeks { display: flex; align-items: flex-end; gap: 7px; height: 96px; margin-top: 18px; }
-.cd-weeks i { flex: 1; min-height: 2px; border-radius: 3px 3px 1px 1px; background: rgba(243, 245, 247, .26); }
-.cd-weeks i.is-zero { background: var(--hair); }
-.cd-weeks i.is-this { background: var(--ink); }
-.cd-wax { display: flex; justify-content: space-between; margin-top: 10px; }
-.cd-kinds, .cd-recent, .cd-day-l { list-style: none; margin: 0; padding: 0; }
-.cd-kinds li { display: grid; grid-template-columns: 1fr auto; gap: 9px 10px; padding: 14px 2px; border-bottom: 1px solid var(--hair); }
-.cd-kinds b, .cd-recent b, .cd-day-l b { font: 500 12px/1.3 var(--mono); letter-spacing: .06em; text-transform: uppercase; }
-.cd-kinds span, .cd-recent span, .cd-day-l span, .cd-recent time { font: 400 10.5px/1.3 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--quiet); font-variant-numeric: tabular-nums; }
+/* ── training: figures on tiles, the weeks as columns ── */
+.cd-figs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.cd-figs div { padding: 14px; border-radius: 18px; background: var(--tile); box-shadow: inset 0 1px 0 var(--edge); }
+.cd-figs b { display: block; font: italic 700 30px/1 var(--disp); font-variant-numeric: tabular-nums; }
+.cd-figs span { display: block; margin-top: 8px; font: 600 12px/1.3 var(--sans); color: var(--quiet); }
+.cd-weeks { display: flex; align-items: flex-end; gap: 6px; height: 96px; }
+.cd-weeks i { flex: 1; min-height: 3px; border-radius: 6px 6px 2px 2px; background: rgba(244, 245, 247, .24); }
+.cd-weeks i.is-zero { background: var(--tile2); }
+.cd-weeks i.is-this { background: var(--tide); }
+.cd-wax { display: flex; justify-content: space-between; margin-top: 10px; font: 600 11px/1 var(--sans); color: var(--quiet); }
+.cd-kinds, .cd-recent, .cd-day-l { list-style: none; margin: 0; padding: 4px 16px; border-radius: 18px; background: var(--tile); box-shadow: inset 0 1px 0 var(--edge); }
+.cd-kinds li { display: grid; grid-template-columns: 1fr auto; gap: 8px 10px; padding: 12px 0; }
+.cd-kinds li + li, .cd-recent li + li, .cd-day-l li + li { box-shadow: inset 0 1px 0 var(--rule); }
+.cd-kinds b, .cd-recent b, .cd-day-l b { font: 600 15px/1.3 var(--sans); }
+.cd-kinds span, .cd-recent span, .cd-day-l span, .cd-recent time { font: 500 13px/1.3 var(--sans); color: var(--quiet); font-variant-numeric: tabular-nums; }
 .cd-kinds span, .cd-recent span, .cd-day-l span { text-align: right; }
-.cd-kinds em { grid-column: 1 / -1; height: 3px; border-radius: 2px; background: var(--hair); overflow: hidden; }
+.cd-kinds em { grid-column: 1 / -1; height: 4px; border-radius: 2px; background: var(--tile2); overflow: hidden; }
 .cd-kinds em i { display: block; height: 100%; border-radius: 2px; background: var(--kc, var(--ink)); }
-.cd-recent li { display: grid; grid-template-columns: 62px 1fr auto; gap: 10px; align-items: baseline; padding: 14px 2px; border-bottom: 1px solid var(--hair); }
+.cd-recent li { display: grid; grid-template-columns: 54px 1fr auto; gap: 10px; align-items: baseline; padding: 12px 0; }
 
 /* ── the sheet ── */
-.cd-scrim { position: fixed; inset: 0; z-index: 40; background: rgba(2, 4, 8, .62); opacity: 0; transition: opacity .2s; }
+.cd-scrim { position: fixed; inset: 0; z-index: 40; background: rgba(4, 5, 8, .64); opacity: 0; transition: opacity .2s; }
 .cd-scrim.is-open { opacity: 1; }
 .cd-sheet {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
   max-width: 560px; max-height: 90dvh; margin: 0 auto; overflow-y: auto; overflow-x: hidden;
   padding: 0 var(--gut) calc(env(safe-area-inset-bottom) + 16px);
-  background: #0D1420; border-radius: 26px 26px 0 0;
-  box-shadow: inset 0 1px 0 rgba(243, 245, 247, .08), 0 -24px 60px rgba(0, 0, 0, .5);
+  background: #12151B; border-radius: 28px 28px 0 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), 0 -24px 60px rgba(0, 0, 0, .5);
   transform: translateY(100%); transition: transform .28s cubic-bezier(.2, .8, .2, 1);
 }
 .cd-sheet.is-open { transform: none; }
-.cd-sh-hd { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 24px 0 14px 2px; background: #0D1420; }
-.cd-sh-hd::before { content: ""; position: absolute; left: 50%; top: 8px; width: 36px; height: 4px; margin-left: -18px; border-radius: 2px; background: rgba(243, 245, 247, .18); }
-.cd-sh-hd h2 { margin: 0; font: 300 26px/1.1 var(--sans); letter-spacing: -.025em; }
-.cd-foot { position: sticky; bottom: calc(-16px - env(safe-area-inset-bottom)); z-index: 2; display: flex; gap: 10px; margin-top: 22px; padding: 12px 0 16px; background: #0D1420; }
+.cd-sh-hd { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 22px 0 12px 2px; background: #12151B; }
+.cd-sh-hd::before { content: ""; position: absolute; left: 50%; top: 8px; width: 36px; height: 4px; margin-left: -18px; border-radius: 2px; background: rgba(244, 245, 247, .18); }
+.cd-sh-hd h2 { margin: 0; font: italic 700 26px/1.1 var(--disp); }
+.cd-x { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--tile2); color: var(--ink); }
+.cd-x svg { width: 18px; height: 18px; display: block; }
+.cd-foot { position: sticky; bottom: calc(-16px - env(safe-area-inset-bottom)); z-index: 2; display: flex; gap: 10px; margin-top: 22px; padding: 12px 0 16px; background: #12151B; }
 
-.cd-btn { flex: 1; min-height: 52px; padding: 0 18px; border-radius: 999px; text-align: center; font: 500 11.5px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink); background: var(--lift2); }
-.cd-btn.go { background: #FFFFFF; color: var(--on-ink); box-shadow: 0 8px 22px rgba(0, 0, 0, .35); }
-.cd-btn.go:disabled { opacity: .4; cursor: default; }
-.cd-btn.warn { color: var(--bad); background: rgba(255, 154, 140, .1); }
+.cd-btn { flex: 1; min-height: 52px; padding: 0 18px; border-radius: 16px; text-align: center; font: 600 15px/1 var(--sans); color: var(--ink); background: var(--tile2); }
+.cd-btn.go { background: var(--tide); color: var(--on); }
+.cd-btn.go:disabled { opacity: .45; cursor: default; }
+.cd-btn.warn { color: var(--bad); background: rgba(255, 143, 128, .1); }
 
 .cd-field {
   width: 100%; min-height: 50px; padding: 13px 16px; border: 0; border-radius: 14px;
-  font: 400 16px/1.3 var(--sans); color: var(--ink); background: var(--lift);
+  font: 500 16px/1.3 var(--sans); color: var(--ink); background: var(--tile2);
   -webkit-appearance: none; appearance: none;
 }
-.cd-field::placeholder { color: rgba(243, 245, 247, .42); }
+.cd-field::placeholder { color: rgba(244, 245, 247, .42); }
 textarea.cd-field { min-height: 110px; resize: vertical; }
-.cd-say { min-height: 60px; font-weight: 300; font-size: 20px; letter-spacing: -.01em; background: var(--lift2); }
-.cd-prev { min-height: 18px; margin: 12px 2px 0; font: 400 10.5px/1.5 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--quiet); font-variant-numeric: tabular-nums; }
-.cd-prev b { font-weight: 500; color: var(--ink); }
-.cd-prev.is-need { color: var(--c-body); }
+.cd-say { min-height: 60px; font-size: 18px; }
+.cd-prev { min-height: 18px; margin: 12px 2px 0; font: 500 13px/1.5 var(--sans); color: var(--quiet); font-variant-numeric: tabular-nums; }
+.cd-prev b { font-weight: 700; color: var(--ink); }
+.cd-prev.is-need { color: var(--tide); }
 
-.cd-rows { border-top: 1px solid var(--hair); }
-.cd-row { display: grid; grid-template-columns: 92px 1fr; align-items: center; gap: 10px; min-height: 54px; padding: 4px 0; border-bottom: 1px solid var(--hair); }
-.cd-row > span { font: 500 10.5px/1.35 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--quiet); }
+.cd-rows { border-radius: 16px; background: var(--tile); overflow: hidden; }
+.cd-row { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 10px; min-height: 54px; padding: 4px 14px; }
+.cd-row + .cd-row { box-shadow: inset 0 1px 0 var(--rule); }
+.cd-row > span { font: 600 13px/1.3 var(--sans); color: var(--quiet); }
 .cd-row .cd-field { min-height: 44px; padding: 10px 0; background: none; border-radius: 0; }
 
 .cd-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.cd-chip { min-width: 44px; min-height: 44px; padding: 0 16px; border-radius: 999px; text-align: center; font: 500 11px/1 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--dim); background: var(--lift); }
-.cd-chip[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
-.cd-chip.kc[aria-pressed="true"] { background: var(--kc); color: var(--on-ink); }
+.cd-chip { min-width: 44px; min-height: 44px; padding: 0 16px; border-radius: 12px; text-align: center; font: 600 14px/1 var(--sans); color: var(--dim); background: var(--tile2); }
+.cd-chip[aria-pressed="true"] { background: var(--ink); color: var(--on); }
+.cd-chip.kc[aria-pressed="true"] { background: var(--kc); color: var(--on); }
 .cd-chips.days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
 .cd-chips.days .cd-chip { padding: 0; aspect-ratio: 1; }
 
 .cd-range { width: 100%; height: 44px; margin: 0; background: none; -webkit-appearance: none; appearance: none; }
-.cd-range::-webkit-slider-runnable-track { height: 2px; border-radius: 1px; background: rgba(243, 245, 247, .2); }
-.cd-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; margin-top: -10px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 4px 12px rgba(0, 0, 0, .45); }
-.cd-range::-moz-range-track { height: 2px; border-radius: 1px; background: rgba(243, 245, 247, .2); }
-.cd-range::-moz-range-thumb { width: 22px; height: 22px; border: 0; border-radius: 50%; background: #FFFFFF; box-shadow: 0 4px 12px rgba(0, 0, 0, .45); }
-.cd-len { display: block; margin-top: -4px; font: 400 10.5px/1.3 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--quiet); font-variant-numeric: tabular-nums; }
+.cd-range::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: rgba(244, 245, 247, .18); }
+.cd-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; margin-top: -9px; border-radius: 50%; background: var(--tide); box-shadow: 0 4px 12px rgba(0, 0, 0, .45); }
+.cd-range::-moz-range-track { height: 4px; border-radius: 2px; background: rgba(244, 245, 247, .18); }
+.cd-range::-moz-range-thumb { width: 22px; height: 22px; border: 0; border-radius: 50%; background: var(--tide); box-shadow: 0 4px 12px rgba(0, 0, 0, .45); }
+.cd-len { display: block; margin-top: -4px; font: 500 13px/1.3 var(--sans); color: var(--quiet); font-variant-numeric: tabular-nums; }
 
-.cd-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 54px; border-bottom: 1px solid var(--hair); font: 400 16px/1.2 var(--sans); }
+.cd-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 54px; padding: 0 14px; font: 500 16px/1.2 var(--sans); }
+.cd-toggle + .cd-toggle { box-shadow: inset 0 1px 0 var(--rule); }
 .cd-toggle:disabled { color: var(--quiet); cursor: default; }
-.cd-toggle i { position: relative; flex: none; width: 48px; height: 28px; border-radius: 14px; background: var(--lift2); transition: background .15s; }
-.cd-toggle i::after { content: ""; position: absolute; left: 3px; top: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); transition: left .15s, background .15s; }
-.cd-toggle[aria-pressed="true"] i { background: var(--ink); }
-.cd-toggle[aria-pressed="true"] i::after { left: 23px; background: var(--on-ink); }
+.cd-toggle i { position: relative; flex: none; width: 50px; height: 30px; border-radius: 15px; background: var(--tile2); transition: background .15s; }
+.cd-toggle i::after { content: ""; position: absolute; left: 3px; top: 3px; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); transition: left .15s; }
+.cd-toggle[aria-pressed="true"] i { background: var(--tide); }
+.cd-toggle[aria-pressed="true"] i::after { left: 23px; }
 
 .cd-grp { margin-bottom: 4px; }
-.cd-grp h3 { margin: 20px 2px 10px; font: 500 10.5px/1.35 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--kc, var(--quiet)); }
+.cd-grp h3 { margin: 20px 2px 10px; font: 600 13px/1.3 var(--sans); color: var(--kc, var(--quiet)); }
 
-.cd-num { margin: 10px 0 2px; text-align: center; font: 200 60px/1 var(--sans); letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
-.cd-num small { margin-left: 6px; font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--quiet); }
-.cd-numcap { margin-bottom: 10px; text-align: center; }
+.cd-num { margin: 10px 0 2px; text-align: center; font: italic 700 60px/1 var(--disp); font-variant-numeric: tabular-nums; }
+.cd-num small { margin-left: 6px; font: 600 14px/1 var(--sans); color: var(--quiet); }
+.cd-numcap { margin: 0 0 10px; text-align: center; font: 500 13px/1.3 var(--sans); color: var(--quiet); }
 
-.cd-day-l { border-top: 1px solid var(--hair); }
-.cd-day-l li { display: grid; grid-template-columns: 6px 1fr auto; align-items: center; gap: 12px; padding: 13px 2px; border-bottom: 1px solid var(--hair); }
-.cd-day-l li > i { width: 6px; height: 6px; border-radius: 50%; background: var(--cat, var(--quiet)); }
-.cd-note { margin: 12px 2px 0; font: 400 14px/1.5 var(--sans); color: var(--dim); }
-.cd-cap { margin: 0 2px 16px; }
+.cd-day-l li { display: grid; grid-template-columns: 8px 1fr auto; align-items: center; gap: 12px; padding: 12px 0; }
+.cd-day-l li > i { width: 8px; height: 8px; border-radius: 50%; background: var(--cat, var(--quiet)); }
+.cd-note { margin: 12px 2px 0; font: 500 14px/1.5 var(--sans); color: var(--dim); }
+.cd-cap { margin: 0 2px 16px; font: 500 13px/1.3 var(--sans); color: var(--dim); }
 
 /* ── toast ── */
 .cd-toast {
-  position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + var(--glow) + 8px); z-index: 60;
+  position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 84px); z-index: 60;
   display: flex; align-items: center; gap: 6px; max-width: calc(100vw - 32px);
-  padding: 4px 4px 4px 18px; border-radius: 999px;
-  font: 500 13px/1.3 var(--sans); background: #FFFFFF; color: var(--on-ink);
-  box-shadow: 0 14px 30px -12px rgba(0, 0, 0, .6); transform: translateX(-50%);
+  padding: 4px 4px 4px 18px; border-radius: 16px;
+  font: 600 14px/1.3 var(--sans); background: #1F232C; color: var(--ink);
+  box-shadow: 0 14px 30px -12px rgba(0, 0, 0, .7); transform: translateX(-50%);
 }
-.cd-toast button { min-height: 40px; padding: 0 14px; font: 600 10.5px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.cd-toast button { min-height: 40px; padding: 0 14px; font: 700 14px/1 var(--sans); color: var(--tide); }
 
 @media (prefers-reduced-motion: reduce) {
-  .cd-sheet, .cd-scrim { transition: none; }
+  .cd-sheet, .cd-scrim, .cd-toggle i, .cd-toggle i::after { transition: none; }
 }
 </style>
 </head>
 <body>
 <div class="cd-app">
   <nav class="cd-nav" aria-label="Views">
-    <button class="cd-tab" data-v="day" type="button" aria-label="Day"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 6h6M8 12h8M14 18h7"/></svg></button>
-    <button class="cd-tab" data-v="hab" type="button" aria-label="Habits"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 19v-5M9.5 19V9M14 19v-7M18.5 19V5"/></svg></button>
-    <button class="cd-tab" data-v="mon" type="button" aria-label="Month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.8"/></svg></button>
-    <button class="cd-tab" data-v="lift" type="button" aria-label="Training"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg></button>
-    <button class="cd-gear" id="cdGear" type="button" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 8h9M17 8h3M4 16h3M11 16h9"/><circle cx="15" cy="8" r="2"/><circle cx="9" cy="16" r="2"/></svg></button>
+    <button class="cd-tab" data-v="day" type="button">Day</button>
+    <button class="cd-tab" data-v="hab" type="button">Habits</button>
+    <button class="cd-tab" data-v="mon" type="button">Month</button>
+    <button class="cd-tab" data-v="lift" type="button">Training</button>
+    <button class="cd-gear" id="cdGear" type="button" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 8h9M17 8h3M4 16h3M11 16h9"/><circle cx="15" cy="8" r="2"/><circle cx="9" cy="16" r="2"/></svg></button>
   </nav>
 
   <main class="cd-main" id="cdMain">
     <section id="cdVDay" aria-label="Day">
       <header class="cd-head">
-        <p class="cd-caps cd-kick" id="cdDayK"></p>
+        <p class="cd-kick" id="cdDayK"></p>
         <h1 class="cd-disp" id="cdTitle"></h1>
-        <p class="cd-caps cd-kick cd-headsub" id="cdSub"></p>
-        <button class="cd-round" id="cdAdd" type="button" aria-label="Add a block"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        <div class="cd-beat" id="cdBeat" aria-hidden="true"></div>
+        <p class="cd-sub" id="cdSub"></p>
       </header>
       <div class="cd-week" id="cdRibbon"></div>
       <div class="cd-scale" id="cdScale" aria-hidden="true"></div>
@@ -432,9 +411,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     </section>
     <section id="cdVHab" aria-label="Habits" hidden>
       <header class="cd-head">
-        <p class="cd-caps cd-kick" id="cdHabK"></p>
+        <p class="cd-kick" id="cdHabK"></p>
         <h1 class="cd-disp">Habits</h1>
-        <p class="cd-caps cd-kick cd-headsub" id="cdHabCap"></p>
+        <div class="cd-beat" id="cdHabBeat" aria-hidden="true"></div>
+        <p class="cd-sub" id="cdHabCap"></p>
       </header>
       <div class="cd-pane">
         <ul class="cd-hb" id="cdHab"></ul>
@@ -443,42 +423,49 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     </section>
     <section id="cdVMon" aria-label="Month" hidden>
       <header class="cd-head">
-        <p class="cd-caps cd-kick" id="cdMonK"></p>
-        <h1 class="cd-disp" id="cdMonT"></h1>
-        <p class="cd-caps cd-kick cd-headsub" id="cdMonCap"></p>
-        <div class="cd-mnav">
-          <button id="cdMonP" type="button" aria-label="Previous month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
-          <button id="cdMonN" type="button" aria-label="Next month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+        <p class="cd-kick" id="cdMonK"></p>
+        <div class="cd-mhead">
+          <h1 class="cd-disp" id="cdMonT"></h1>
+          <div class="cd-mnav">
+            <button id="cdMonP" type="button" aria-label="Previous month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button id="cdMonN" type="button" aria-label="Next month"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
         </div>
+        <p class="cd-sub" id="cdMonCap"></p>
       </header>
       <div class="cd-pane">
-        <div class="cd-dows cd-caps"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+        <div class="cd-dows"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
         <div class="cd-mgrid" id="cdMonG"></div>
-        <div class="cd-legend cd-caps" id="cdMonL"></div>
+        <div class="cd-legend" id="cdMonL"></div>
       </div>
     </section>
     <section id="cdVLift" aria-label="Training" hidden>
       <header class="cd-head">
-        <p class="cd-caps cd-kick">Last 30 days</p>
+        <p class="cd-kick">Last 30 days</p>
         <h1 class="cd-disp">Training</h1>
-        <p class="cd-caps cd-kick cd-headsub" id="cdLiftK"></p>
+        <p class="cd-sub" id="cdLiftK"></p>
       </header>
       <div class="cd-pane" id="cdLift"></div>
     </section>
   </main>
+
+  <div class="cd-say-bar">
+    <button class="cd-sayb" id="cdAdd" type="button" aria-label="Add a block"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></i><span>Gym mon wed 6:30 to 8</span></button>
+  </div>
 </div>
 
 <div class="cd-scrim" id="cdScrim" hidden></div>
 <div class="cd-sheet" id="cdSheet" role="dialog" aria-modal="true" aria-labelledby="cdShT" hidden>
   <div class="cd-sh-hd">
     <h2 id="cdShT"></h2>
-    <button class="cd-round" id="cdShX" aria-label="Close" type="button">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M17 7L7 17M7 7l10 10"/></svg>
+    <button class="cd-x" id="cdShX" aria-label="Close" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 7L7 17M7 7l10 10"/></svg>
     </button>
   </div>
   <div id="cdShB"></div>
 </div>
 <div class="cd-toast" id="cdToast" role="status" hidden><span id="cdToastT"></span><button id="cdToastU" type="button">Undo</button></div>
+
 <script>
 (function () {
   'use strict';
@@ -526,6 +513,11 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   /* A block can be ticked on the day and on the two behind it. Further
      back is a record you would be rewriting, and ahead has not happened. */
   function cdOpenDay(iso) { var d = cdDiff(cdToday(), iso); return d >= 0 && d <= 2; }
+  /* THE TIDE: which part of the day it is. Five in the morning is dawn,
+     ten is day, four is dusk and half past eight is night — the hours the
+     light outside actually turns, give or take a season. */
+  function cdTide(m) { return m < 300 ? 'night' : m < 600 ? 'dawn' : m < 960 ? 'day' : m < 1230 ? 'dusk' : 'night'; }
+  function cdSetTide() { document.documentElement.dataset.tide = cdTide(cdNowMin()); }
 
   /* ═══ WHAT A BLOCK IS ═══
      One table decides a block's part of life and whether finishing it
@@ -728,6 +720,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     cdPaint();
   }
   function cdPaint() {
+    cdSetTide();
     if (view === 'day') cdPaintDay();
     else if (view === 'hab') cdPaintHab();
     else if (view === 'mon') cdPaintMon();
@@ -758,18 +751,26 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   function cdPct(sp, m) { return Math.round((m - sp.a) / (sp.b - sp.a) * 10000) / 100; }
   var cdHour = function (m) { return m >= 1440 ? '24:00' : cdHM(m); };
 
+  /* THE BEAT: one segment per block the day asked of you, lit in its own
+     colour once it is kept. Under a date there is no room for ten of
+     them, so the week draws the same figure in fifths — lit to the nearest
+     fifth, and all five only when the whole day was. */
+  function cdFifths(t) {
+    if (!t.on || !t.kept) return 0;
+    return t.kept >= t.on ? 5 : Math.max(1, Math.min(4, Math.round(t.kept / t.on * 5)));
+  }
   function cdPaintDay() {
     var today = cdToday(), ws = cdWeekStart(today);
     var rb = '';
     for (var i = 0; i < 7; i++) {
       var d = cdAddDays(ws, i), t = cdTally(d);
-      var past = d <= today;
-      var pct = past && t.on ? Math.round(t.kept / t.on * 100) : 0;
+      var past = d <= today, lit = past ? cdFifths(t) : 0, beats = '';
+      for (var k = 0; k < 5; k++) beats += k < lit ? '<i class="on"></i>' : '<i></i>';
       rb += '<button type="button" class="cd-wd' + (d === today ? ' is-today' : '') + (past ? '' : ' is-future') + '" data-d="' + d + '" aria-pressed="' + (d === sel) + '"'
         + ' aria-label="' + DOWL[i] + ', ' + (past ? t.kept + ' of ' + t.on + ' kept' : t.on + ' planned') + '">'
-        + '<span class="cd-wd-l">' + DOW[i].toUpperCase() + '</span>'
+        + '<span class="cd-wd-l">' + DOW[i] + '</span>'
         + '<span class="cd-wd-n">' + cdDate(d).getDate() + '</span>'
-        + '<span class="cd-wd-k" aria-hidden="true"><i style="width:' + pct + '%"></i></span></button>';
+        + '<span class="cd-wd-b" aria-hidden="true">' + beats + '</span></button>';
     }
     $('cdRibbon').innerHTML = rb;
 
@@ -781,6 +782,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     $('cdSub').textContent = (fut ? tl.on + ' planned' : tl.kept + ' of ' + tl.on + ' kept') + (tl.mins ? ' · ' + cdLen(tl.mins) + ' committed' : '');
 
     var list = cdOn(sel), ag = $('cdAgenda');
+    $('cdBeat').innerHTML = list.filter(function (b) { return !cdIsOff(sel, b.id); }).map(function (b) {
+      return cdDone(sel, b.id) ? '<i class="on" style="--bc:var(--c-' + CAT[cdKind(b.n)] + ')"></i>' : '<i></i>';
+    }).join('');
     var sp = cdSpan(list, isT, now);
     cdPaintScale(sp, isT, now);
     if (!list.length) {
@@ -809,20 +813,32 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var h = '';
     for (var m = sp.a; m <= sp.b; m += step * 60) {
       var p = cdPct(sp, m);
-      /* An hour under the clock's own label is two figures on one spot. */
-      if (Math.abs(p - np) < 10) continue;
       h += '<span' + (m === sp.a ? ' class="is-first"' : m === sp.b ? ' class="is-last"' : '') + ' style="left:' + p + '%">' + cdHour(m) + '</span>';
     }
     if (isT) h += '<b id="cdNowT" style="left:' + np + '%' + (np < 7 ? ';transform:none' : np > 93 ? ';transform:translateX(-100%)' : '') + '">' + cdHM(now) + '</b>';
-    $('cdScale').innerHTML = h;
+    var sc = $('cdScale');
+    sc.innerHTML = h;
+    /* An hour under the clock's own figure is two figures on one spot, so
+       whatever the badge touches goes. MEASURED, never guessed: near an end
+       the badge is pinned to that end and reaches a whole badge inward, and
+       a distance in per cent that was right in the middle let "06:40" sit
+       on top of the next hour at dawn. */
+    if (isT) {
+      var bb = $('cdNowT').getBoundingClientRect();
+      [].slice.call(sc.querySelectorAll('span')).forEach(function (s) {
+        var r = s.getBoundingClientRect();
+        if (r.right > bb.left - 6 && r.left < bb.right + 6) s.remove();
+      });
+    }
   }
   function cdGapRow(sp, a, b) {
     var l = cdPct(sp, a), r = cdPct(sp, b);
     /* Beside the line, on whichever side has the room. */
     var lab = r > 70 ? 'right:calc(' + Math.round((100 - l) * 100) / 100 + '% + 8px)' : 'left:calc(' + r + '% + 8px)';
-    return '<li class="cd-gap" aria-hidden="true"><b style="left:' + l + '%;width:' + Math.round((r - l) * 100) / 100 + '%"></b>'
-      + '<p style="' + lab + '">' + cdLen(b - a) + ' free</p></li>';
+    return '<li class="cd-gap" aria-hidden="true"><span class="cd-gap-in"><b style="left:' + l + '%;width:' + Math.round((r - l) * 100) / 100 + '%"></b>'
+      + '<p style="' + lab + '">' + cdLen(b - a) + ' free</p></span></li>';
   }
+  var TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
   function cdTicket(b, sp, isT, now, open, nowMark) {
     var kind = cdKind(b.n), cat = CAT[kind];
     var done = cdDone(sel, b.id), off = cdIsOff(sel, b.id);
@@ -850,7 +866,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       + '<span class="cd-tk-m">' + bits.join(' · ') + '</span>' + tag
       + '<span class="cd-track" aria-hidden="true">' + seg + (nowMark || '') + '</span></button>'
       + '<button type="button" class="cd-stamp" data-act="tick" aria-pressed="' + done + '"' + (open ? '' : ' disabled')
-      + ' aria-label="' + (done ? 'Kept' : 'Mark kept') + ': ' + esc(b.n) + '"><span>Kept</span></button>'
+      + ' aria-label="' + (done ? 'Kept' : 'Mark kept') + ': ' + esc(b.n) + '">' + TICK + '</button>'
       + '</li>';
   }
 
@@ -1030,10 +1046,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
           : '<b>' + esc(r.n) + '</b> · ' + (r.days.length === 7 ? 'every day' : r.days.map(function (x) { return DOW[x]; }).join(' ')) + ' · '
             + cdHM(r.s) + (r.e > r.s ? '–' + cdHM(r.e) : '') + (r.after ? ' · after ' + esc(r.after) : '');
       });
-      root.appendChild(el('p', 'cd-caps cd-lbl', 'Or set it by hand'));
+      root.appendChild(el('p', 'cd-lbl', 'Or set it by hand'));
     } else {
       /* This day: what happened to the block on the date you are looking at. */
-      root.appendChild(el('p', 'cd-caps cd-lbl', esc(DOWL[cdDow(sel)]) + ' ' + cdDate(sel).getDate() + ' ' + MON[cdDate(sel).getMonth()].slice(0, 3)));
+      root.appendChild(el('p', 'cd-lbl', esc(DOWL[cdDow(sel)]) + ' ' + cdDate(sel).getDate() + ' ' + MON[cdDate(sel).getMonth()].slice(0, 3)));
       var canDo = cdOpenDay(sel);
       var tDone = el('button', 'cd-toggle', '<span>Done</span><i></i>');
       tDone.type = 'button'; tDone.id = 'cdTDone';
@@ -1062,7 +1078,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
         lg.addEventListener('click', function () { cdLiftSheet(sel, b.id, b.n); });
         root.appendChild(lg);
       }
-      root.appendChild(el('p', 'cd-caps cd-lbl', 'Every week'));
+      root.appendChild(el('p', 'cd-lbl', 'Every week'));
     }
 
     var rows = el('div', 'cd-rows');
@@ -1088,7 +1104,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var lenWrap = el('div'); lenWrap.appendChild(rg); lenWrap.appendChild(lenOut); row('How long', lenWrap);
     row('Where', pl);
     root.appendChild(rows);
-    root.appendChild(el('p', 'cd-caps cd-lbl', 'Days'));
+    root.appendChild(el('p', 'cd-lbl', 'Days'));
     root.appendChild(dayBox);
 
     function sync() {
@@ -1171,7 +1187,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     });
     root.appendChild(boards);
     var more = el('div');
-    more.appendChild(el('p', 'cd-caps cd-lbl', 'How hard'));
+    more.appendChild(el('p', 'cd-lbl', 'How hard'));
     var ef = el('div', 'cd-chips');
     EFFORT.forEach(function (w) {
       var c = el('button', 'cd-chip', w); c.type = 'button'; c.dataset.e = w;
@@ -1179,7 +1195,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       ef.appendChild(c);
     });
     more.appendChild(ef);
-    more.appendChild(el('p', 'cd-caps cd-lbl', 'How long'));
+    more.appendChild(el('p', 'cd-lbl', 'How long'));
     var mn = el('div', 'cd-chips');
     MINS.forEach(function (x) {
       var c = el('button', 'cd-chip', x + 'm'); c.type = 'button'; c.dataset.m = x;
@@ -1222,25 +1238,24 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   }
 
   /* ═══ HABITS VIEW ═══
-     A row each, and under it a fortnight as a pulse: a tick stands full
-     on a day it was kept, a number stands as tall as its share of the
-     fortnight's best. Colour says WHICH habit, never whether. */
-  var CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+     Two across, and under each a fortnight of beats: a tick stands full on
+     a day it was kept, a number as tall as its share of the fortnight's
+     best. Colour says WHICH habit, never whether. */
+  var CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
   function cdPaintHab() {
     var today = cdToday(), hs = cdHabits();
-    var kept = hs.filter(function (h) { return cdHabOn(today, h); }).length;
+    var kept = hs.filter(function (h) { return cdHabOn(today, h); });
     $('cdHabK').textContent = cdLongDate(today, true);
-    $('cdHabCap').textContent = kept + ' of ' + hs.length + ' kept today';
+    $('cdHabCap').textContent = kept.length + ' of ' + hs.length + ' kept today';
+    $('cdHabBeat').innerHTML = hs.map(function (h) { return cdHabOn(today, h) ? '<i class="on" style="--bc:var(' + h.hc + ')"></i>' : '<i></i>'; }).join('');
     var html = '';
     hs.forEach(function (h) {
       var v = cdHabVal(today, h), on = cdHabOn(today, h);
       var sub, val;
       if (h.k === 'tick') {
         var by = cdKeptBy(today, h), st = cdStreak(h);
-        sub = by && by !== 'you' ? (by === 'session' ? 'Kept by a session' : 'Kept by ' + esc(by)) : (st > 1 ? st + '-day streak' : 'Tap to keep');
-        /* The same pill the day's blocks wear, so a kept thing looks kept
-           wherever it is. */
-        val = '<span class="cd-chk' + (on ? ' is-on' : '') + '">Kept</span>';
+        sub = by && by !== 'you' ? (by === 'session' ? 'Kept by a session' : 'Kept by ' + esc(by)) : (st > 1 ? st + '-day streak' : on ? 'Kept today' : 'Tap to keep');
+        val = on ? '<span class="cd-hr-v">Kept</span>' : '<span class="cd-hr-v is-nil">Not yet</span>';
       } else {
         var wk = 0, n = 0;
         for (var i = 1; i <= 7; i++) { var x = +cdHabVal(cdAddDays(today, -i), h); if (x > 0) { wk += x; n++; } }
@@ -1254,11 +1269,14 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
         var ht = h.k === 'tick' ? 16 : Math.max(4, Math.round((+cdHabVal(d, h) || 0) / (top || 1) * 16));
         return '<i class="on" style="height:' + ht + 'px"></i>';
       }).join('');
-      html += '<li class="cd-hr" data-h="' + h.id + '" style="--hc:var(' + h.hc + ')">'
+      /* The fortnight is inside the press target, so the whole tile logs;
+         the history is its own button, a sibling, because a button inside
+         a button collapses to one press. */
+      html += '<li class="cd-hr' + (on ? ' is-on' : '') + '" data-h="' + h.id + '" style="--hc:var(' + h.hc + ')">'
         + '<button type="button" class="cd-hr-b" data-act="log" aria-label="' + esc(h.n) + ', ' + (on ? 'kept' : 'not yet') + '">'
-        + '<span><span class="cd-hr-n">' + esc(h.n) + '</span><span class="cd-hr-s">' + sub + '</span></span>' + val + '</button>'
-        + '<button type="button" class="cd-hr-more" data-act="hist" aria-label="' + esc(h.n) + ' history">' + CHEV + '</button>'
-        + '<span class="cd-tape" aria-hidden="true">' + tape + '</span></li>';
+        + '<span class="cd-hr-n">' + esc(h.n) + '</span>' + val + '<span class="cd-hr-s">' + sub + '</span>'
+        + '<span class="cd-tape" aria-hidden="true">' + tape + '</span></button>'
+        + '<button type="button" class="cd-hr-more" data-act="hist" aria-label="' + esc(h.n) + ' history">' + CHEV + '</button></li>';
     });
     $('cdHab').innerHTML = html;
   }
@@ -1337,9 +1355,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       var d = cdAddDays(today, -j), on = cdHabOn(d, h), v = cdHabVal(d, h);
       var hl = ul.appendChild(el('li', '', '<i></i><b>' + DOW[cdDow(d)] + ' ' + cdDate(d).getDate() + ' ' + MON[cdDate(d).getMonth()].slice(0, 3) + '</b><span>'
         + (on ? (h.k === 'num' ? cdFmtNum(v, h) + ' ' + esc(h.unit) : 'kept') : '—') + '</span>'));
-      hl.style.setProperty('--cat', on ? 'var(' + h.hc + ')' : 'var(--hair)');
+      hl.style.setProperty('--cat', on ? 'var(' + h.hc + ')' : 'var(--quiet)');
     }
-    root.appendChild(el('p', 'cd-caps cd-lbl', 'Last fourteen days'));
+    root.appendChild(el('p', 'cd-lbl', 'Last fourteen days'));
     root.appendChild(ul);
     if (h.mine) {
       var foot = el('div', 'cd-foot');
@@ -1367,7 +1385,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       ks.appendChild(c);
     });
     function paint() { ks.querySelectorAll('.cd-chip').forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.k === kind); }); un.hidden = kind !== 'num'; }
-    root.appendChild(nm); root.appendChild(el('p', 'cd-caps cd-lbl', 'Kept as'));
+    root.appendChild(nm); root.appendChild(el('p', 'cd-lbl', 'Kept as'));
     root.appendChild(ks); root.appendChild(el('div', '', '')).appendChild(un);
     un.style.marginTop = '10px';
     paint();
@@ -1383,10 +1401,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   });
 
   /* ═══ MONTH ═══
-     A square a day, and the square is as LIT as the day was kept: four
-     steps and a whole one, which is the only square that turns white.
-     Steps rather than a ramp, because a 16px figure has to stay readable
-     on every one of them. The dot is what you trained. */
+     A disc a day, as large as the day was kept: three sizes and a whole
+     one, which is the only disc that is solid. Steps rather than a ramp,
+     so the figure stays readable on every one. The dot is what you
+     trained. */
   function cdPaintMon() {
     var today = cdToday(), first = cdFirst();
     var y = +monthAt.slice(0, 4), mo = +monthAt.slice(5, 7) - 1;
@@ -1409,7 +1427,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       var lvl = pct >= 1 ? 4 : pct > .67 ? 3 : pct > .34 ? 2 : pct > 0 ? 1 : 0;
       html += '<button type="button" class="cd-mc' + (fut ? ' is-future' : inRec ? ' is-l' + lvl : ' is-quiet') + (iso === today ? ' is-today' : '') + '" data-day="' + iso + '"'
         + ' aria-label="' + d + ' ' + MON[mo] + (inRec ? ', ' + t.kept + ' of ' + t.on + ' kept' : '') + (ss.length ? ', ' + esc(cdSessName(ss[0].s)) : '') + '">'
-        + d + '<em style="--kc:' + kc + '"></em></button>';
+        + '<i></i><b>' + d + '</b><em style="--kc:' + kc + '"></em></button>';
     }
     for (var q = pad + days; q % 7; q++) html += '<span class="cd-mc is-pad" aria-hidden="true"></span>';
     $('cdMonG').innerHTML = html;
@@ -1436,7 +1454,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   /* A day read back. Not a second editor: "Open this day" goes to the one that is. */
   function cdDaySheet(iso) {
     var root = el('div'), t = cdTally(iso), fut = iso > cdToday();
-    root.appendChild(el('p', 'cd-caps cd-cap', fut ? t.on + ' planned' : t.kept + ' of ' + t.on + ' kept · ' + cdLen(t.mins) + ' committed'));
+    root.appendChild(el('p', 'cd-cap', fut ? t.on + ' planned' : t.kept + ' of ' + t.on + ' kept · ' + cdLen(t.mins) + ' committed'));
     var ul = el('ul', 'cd-day-l');
     cdOn(iso).forEach(function (b) {
       var k = cdKind(b.n), st = cdIsOff(iso, b.id) ? 'off' : cdDone(iso, b.id) ? 'kept' : fut ? 'planned' : 'not kept';
@@ -1447,7 +1465,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     root.appendChild(ul);
     var ss = cdSessions(iso);
     if (ss.length) {
-      root.appendChild(el('p', 'cd-caps cd-lbl', 'Trained'));
+      root.appendChild(el('p', 'cd-lbl', 'Trained'));
       var tu = el('ul', 'cd-day-l');
       ss.forEach(function (x) {
         var li = tu.appendChild(el('li', '', '<i></i><b>' + esc(cdSessName(x.s)) + '</b><span>' + (x.s.m ? x.s.m + 'm' : '') + (x.s.e ? ' · ' + x.s.e : '') + '</span>'));
@@ -1457,7 +1475,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     }
     var hs = cdHabits().filter(function (h) { return cdHabOn(iso, h); });
     if (hs.length) {
-      root.appendChild(el('p', 'cd-caps cd-lbl', 'Habits'));
+      root.appendChild(el('p', 'cd-lbl', 'Habits'));
       root.appendChild(el('p', 'cd-note', hs.map(function (h) { return esc(h.n) + (h.k === 'num' ? ' ' + cdFmtNum(cdHabVal(iso, h), h) + ' ' + esc(h.unit) : ''); }).join(' · ')));
     }
     var foot = el('div', 'cd-foot');
@@ -1490,9 +1508,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       var n = all.filter(function (x) { return x.d >= a && x.d < b && !cdRestOnly(x.s); }).length;
       cols.push(n); top = Math.max(top, n);
     }
-    html += '<p class="cd-caps cd-lbl">Sessions a week</p><div class="cd-weeks" role="img" aria-label="Sessions per week for twelve weeks: ' + cols.join(', ') + '">'
+    html += '<p class="cd-lbl">Sessions a week</p><div class="cd-weeks" role="img" aria-label="Sessions per week for twelve weeks: ' + cols.join(', ') + '">'
       + cols.map(function (n, i) { return '<i class="' + (n ? '' : 'is-zero') + (i === 11 ? ' is-this' : '') + '" style="height:' + Math.max(2, n / top * 100) + '%"></i>'; }).join('')
-      + '</div><div class="cd-wax cd-caps"><span>12 weeks ago</span><span>This week</span></div>';
+      + '</div><div class="cd-wax"><span>12 weeks ago</span><span>This week</span></div>';
     var by = {};
     m30.forEach(function (x) {
       var nm = cdSessName(x.s);
@@ -1502,12 +1520,12 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var kinds = Object.keys(by).sort(function (a, b) { return by[b].n - by[a].n; });
     if (kinds.length) {
       var mx = by[kinds[0]].n;
-      html += '<p class="cd-caps cd-lbl">What, this month</p><ul class="cd-kinds">' + kinds.map(function (k) {
+      html += '<p class="cd-lbl">What, this month</p><ul class="cd-kinds">' + kinds.map(function (k) {
         var r = by[k], ef = Object.keys(r.e).sort(function (a, b) { return r.e[b] - r.e[a]; })[0];
         return '<li style="--kc:var(--k-' + r.g + ')"><b>' + esc(k) + '</b><span>' + r.n + '×' + (r.mc ? ' · ' + Math.round(r.m / r.mc) + 'm' : '') + (ef ? ' · ' + ef : '') + '</span><em><i style="width:' + (r.n / mx * 100) + '%"></i></em></li>';
       }).join('') + '</ul>';
     }
-    html += '<p class="cd-caps cd-lbl">Recent</p><ul class="cd-recent">' + all.slice(0, 8).map(function (x) {
+    html += '<p class="cd-lbl">Recent</p><ul class="cd-recent">' + all.slice(0, 8).map(function (x) {
       var d = cdDate(x.d);
       return '<li><time>' + DOW[cdDow(x.d)] + ' ' + d.getDate() + '</time><b>' + esc(cdSessName(x.s)) + '</b><span>' + (x.s.m ? x.s.m + 'm' : '') + (x.s.e ? ' · ' + x.s.e : '') + '</span></li>';
     }).join('') + '</ul>';
@@ -1517,7 +1535,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   /* ═══ SETTINGS ═══ */
   $('cdGear').addEventListener('click', function () {
     var root = el('div');
-    root.appendChild(el('p', 'cd-caps cd-lbl', 'Backup'));
+    root.appendChild(el('p', 'cd-lbl', 'Backup'));
     /* Every key this app keeps, not one of them: a record with no export
        is the kind of gap you only discover once. */
     var cp = el('button', 'cd-btn', 'Copy a backup'); cp.type = 'button'; cp.id = 'cdBak';
@@ -1566,12 +1584,14 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   document.querySelectorAll('.cd-tab').forEach(function (t) { t.addEventListener('click', function () { cdGo(t.dataset.v); }); });
   $('cdAdd').addEventListener('click', function () { cdEdit(null); });
 
-  /* The clock moves the now line and the countdown; nothing animates,
-     it steps on the half minute. A day that has rolled over moves too. */
+  /* The clock moves the now mark, the countdown and the light; nothing
+     animates, it steps on the half minute. A day that has rolled over
+     moves too. */
   var lastDay = cdToday();
   setInterval(function () {
     var t = cdToday();
     if (t !== lastDay) { if (sel === lastDay) sel = t; lastDay = t; }
+    cdSetTide();
     if (!cdSheetOpen()) cdPaint();
   }, 30000);
 
@@ -1579,9 +1599,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   try { sv = sessionStorage.getItem('cad.view') || 'day'; } catch (e) {}
   cdGo(['day', 'hab', 'mon', 'lift'].indexOf(sv) >= 0 ? sv : 'day');
 
-  /* Exposed for the test suite only: the parser is the one piece worth
-     asserting as a function rather than through the page. */
-  window.cadence = { parse: cdParse, kind: cdKind };
+  /* Exposed for the test suite only: the parser and the tide are the
+     pieces worth asserting as functions rather than through the page. */
+  window.cadence = { parse: cdParse, kind: cdKind, tide: cdTide };
 })();
 </script>
 </body>

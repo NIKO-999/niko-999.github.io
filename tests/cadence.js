@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════
    CADENCE — the day as one line of time, the habits, the month and
-   the training log, under a night sky.
+   the training log, lit by the hour you are in.
 
    The clock is frozen at Friday 25 September 2026, 10:20, so which
    block is running and which are behind you is a fact about the
@@ -177,14 +177,25 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
        ground on composited pixels: kept, behind you and not kept, running,
        and still ahead. Read at its far end, which on a running bar is the
        half still to come — once now and once after the gym is kept. */
+    /* Read at two scroll positions, and only where the pane is not fading
+       a row out, so the bars further down the day are measured too. */
     const readBars = async () => {
-      const segs = await page.$$eval('.cd-it .cd-seg:not(.is-dot)', (ss) => ss.map((s) => {
-        const r = s.getBoundingClientRect(), t = s.parentElement.getBoundingClientRect(), li = s.closest('.cd-it');
-        return { n: li.querySelector('.cd-tk-n').textContent, st: li.className.replace('cd-it', '').trim() || 'ahead',
-          x: r.right - Math.min(3, r.width / 2), y: (r.top + r.bottom) / 2, gx: r.left - t.left > 40 ? t.left + 4 : t.right - 4, gy: t.top - 5 };
-      }).filter((s) => s.y < innerHeight - 120));
-      const px = await shoot(page);
-      return segs.map((s) => ({ n: s.n, st: s.st, r: +ratio(px(s.x, s.y), px(s.gx, s.gy)).toFixed(2) }));
+      const out = [];
+      for (const st of [0, 320]) {
+        await page.$eval('#cdDayPane', (p, st) => { p.scrollTop = st; }, st);
+        const segs = await page.$$eval('.cd-it .cd-seg:not(.is-dot)', (ss) => {
+          const pr = document.getElementById('cdDayPane').getBoundingClientRect();
+          return ss.map((s) => {
+            const r = s.getBoundingClientRect(), t = s.parentElement.getBoundingClientRect(), li = s.closest('.cd-it');
+            return { n: li.querySelector('.cd-tk-n').textContent, st: li.className.replace('cd-it', '').trim() || 'ahead',
+              x: r.right - Math.min(3, r.width / 2), y: (r.top + r.bottom) / 2, gx: r.left - t.left > 40 ? t.left + 4 : t.right - 4, gy: t.top - 5 };
+          }).filter((s) => s.gy > pr.top + 12 && s.y < pr.bottom - 30);
+        });
+        const px = await shoot(page);
+        segs.forEach((s) => out.push({ n: s.n, st: s.st, r: +ratio(px(s.x, s.y), px(s.gx, s.gy)).toFixed(2) }));
+      }
+      await page.$eval('#cdDayPane', (p) => { p.scrollTop = 0; });
+      return out;
     };
     const barsAtLoad = await readBars();
 
@@ -206,14 +217,21 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('colour says which part of life: body, work, mind, rest',
       cats[1] === 'var(--c-body)' && cats[2] === 'var(--c-work)' && cats[5] === 'var(--c-mind)' && cats[0] === 'var(--c-rest)', cats);
 
-    /* The stamp ticks and the tick survives a reload. The word is the same
-       both ways; what changes is the ground. */
-    const stampBg = () => page.$eval('.cd-it[data-id="s0"] .cd-stamp span', (s) => ({ t: s.textContent, bg: getComputedStyle(s).backgroundColor }));
+    /* The check tile ticks and the tick survives a reload. It carries no
+       word either way; what changes is the ground, and kept is the block's
+       own colour — Wake up is rest. */
+    const stampBg = () => page.$eval('.cd-it[data-id="s0"] .cd-stamp', (s) => ({ t: s.textContent.trim(), bg: getComputedStyle(s).backgroundColor, svg: !!s.querySelector('svg') }));
     const before = await stampBg();
     await page.click('.cd-it[data-id="s0"] .cd-stamp');
     const after = await stampBg();
-    ok('a stamp ticks its block', await page.$eval('.cd-it[data-id="s0"]', (e) => e.classList.contains('is-done')));
-    ok('and says so with its ground, not a second word', before.t === 'Kept' && after.t === 'Kept' && before.bg !== after.bg, { before, after });
+    ok('a check tile ticks its block', await page.$eval('.cd-it[data-id="s0"]', (e) => e.classList.contains('is-done')));
+    ok('and says so with its ground, not a word', before.t === '' && after.t === '' && before.svg && before.bg !== after.bg, { before, after });
+    ok('and kept is the block\'s own colour', after.bg === 'rgb(79, 209, 165)', after.bg);
+    /* THE BEAT under the title: one segment per block the day asks of you,
+       lit in that block's colour once it is kept. */
+    const beat = await page.$$eval('#cdBeat i', (is) => is.map((i) => i.classList.contains('on') ? getComputedStyle(i).backgroundColor : ''));
+    ok('the beat under the title is one segment a block, lit in the block\'s colour once kept',
+      beat.length === 7 && beat.filter(Boolean).length === 1 && beat[0] === 'rgb(79, 209, 165)', beat);
     ok('the tick is filed under the date', (await store(page, 'cad.log.v1'))['2026-09-25'].s0 === 1);
     await page.reload(); await page.waitForTimeout(150);
     ok('and survives a reload', await page.$eval('.cd-it[data-id="s0"]', (e) => e.classList.contains('is-done')));
@@ -279,6 +297,18 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('between two blocks, the clock sits in the space between their bars', g.now > g.deep.r && g.now < g.lunch.l, g);
     ok('and the scale says the time', g.badge === '12:15', g.badge);
     ok('and nothing is running', g.running === 0, g.running);
+    await c.close();
+  }
+  {
+    /* Near an end the badge is pinned to that end and reaches inward, so
+       the hour beside it is further along than it is in the middle. */
+    const { c, page } = await ctx({ at: '2026-09-25T06:40:00' });
+    const s = await page.evaluate(() => {
+      const b = document.getElementById('cdNowT').getBoundingClientRect();
+      const ls = [...document.querySelectorAll('#cdScale span')].map((x) => { const r = x.getBoundingClientRect(); return { t: x.textContent, l: r.left, r: r.right }; });
+      return { b: { l: b.left, r: b.right }, ls };
+    });
+    ok('at dawn no hour is printed under the clock\'s figure', s.ls.length >= 4 && s.ls.every((l) => l.r < s.b.l - 4 || l.l > s.b.r + 4), s);
     await c.close();
   }
 
@@ -361,8 +391,15 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     } })();`;
     const { c, page, errs, off } = await ctx({ init: seed });
 
+    /* Under each date the same beat in fifths, because ten segments do not
+       fit under a figure: lit to the nearest fifth, and all five only when
+       the whole day was. Six of seven on the 22nd is four, not five. */
+    const fifths = await page.$$eval('.cd-wd', (ws) => Object.fromEntries(ws.map((w) => [w.dataset.d.slice(8), w.querySelectorAll('.cd-wd-b i.on').length])));
+    ok('the week draws each day\'s beat in fifths, whole only when the day was',
+      fifths['21'] === 2 && fifths['22'] === 4 && fifths['23'] === 5 && fifths['24'] === 1 && fifths['26'] === 0, fifths);
+
     await page.click('.cd-tab[data-v="hab"]');
-    const train = await page.$eval('.cd-hr[data-h="train"]', (e) => ({ t: e.textContent, on: !!e.querySelector('.cd-chk.is-on') }));
+    const train = await page.$eval('.cd-hr[data-h="train"]', (e) => ({ t: e.textContent, on: e.classList.contains('is-on') }));
     ok('Train is kept by the session filed today', /Kept by a session/.test(train.t) && train.on, train);
     const hues = await page.$$eval('.cd-hr .cd-hr-n', (ns) => ns.map((n) => getComputedStyle(n, '::before').backgroundColor));
     ok('six habits, six colours: colour says which', new Set(hues).size === 6, hues);
@@ -387,6 +424,9 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('the bumps add, without float drift', (await page.textContent('#cdNumV')).startsWith('0.75'));
     await closeSheet(page);
     ok('the caption counts today', /3 of 6 kept today/.test(await page.textContent('#cdHabCap')));
+    const hbeat = await page.$$eval('#cdHabBeat i', (is) => is.map((i) => i.classList.contains('on')));
+    ok('and the beat over it is one segment a habit, lit as it is kept',
+      hbeat.length === 6 && hbeat.filter(Boolean).length === 3 && hbeat[0] && hbeat[1] && hbeat[2], hbeat);
 
     /* A habit of your own joins the list. */
     await page.click('#cdHabAdd');
@@ -410,11 +450,16 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('a day before the record is quiet, not a day you missed', lv['10'] === 'is-quiet', lv['10']);
     ok('a day is lit by how much of it was kept, in steps',
       lv['24'] === 'is-l1' && lv['21'] === 'is-l2' && lv['22'] === 'is-l3' && lv['23'] === 'is-l4', { d21: lv['21'], d22: lv['22'], d23: lv['23'], d24: lv['24'] });
-    const whole = await page.$eval('.cd-mc[data-day="2026-09-23"]', (e) => getComputedStyle(e).backgroundColor);
-    ok('and only a whole day turns white', whole === 'rgb(243, 245, 247)', whole);
-    /* Every square's figure is read on composited pixels, lit or not. */
-    const mc = await inkFloor(page, '.cd-mc[data-day]');
-    ok('every date holds 4.5:1 on its own square, at every level', mc.n === 30 && mc.worst.r >= 4.5, mc);
+    /* The disc grows with the share kept, and only a whole day is solid. */
+    const disc = await page.$$eval('.cd-mc[data-day] i', (is) => Object.fromEntries(is.map((i) => [i.parentElement.dataset.day.slice(8),
+      { w: i.getBoundingClientRect().width, bg: getComputedStyle(i).backgroundColor }])));
+    ok('a day\'s disc grows with how much of it was kept',
+      disc['10'].w === 0 && disc['24'].w < disc['21'].w && disc['21'].w < disc['22'].w && disc['22'].w < disc['23'].w,
+      [disc['10'].w, disc['24'].w, disc['21'].w, disc['22'].w, disc['23'].w]);
+    ok('and only a whole day is solid', disc['23'].bg === 'rgb(244, 245, 247)' && rgbaOf(disc['22'].bg)[3] < 1, [disc['23'].bg, disc['22'].bg]);
+    /* Every date's figure is read on composited pixels, on its disc or not. */
+    const mc = await inkFloor(page, '.cd-mc[data-day] b');
+    ok('every date holds 4.5:1 on its own disc, at every level', mc.n === 30 && mc.worst.r >= 4.5, mc);
     await page.click('.cd-mc[data-day="2026-09-24"]');
     await sheetUp(page);
     const ds = await page.textContent('#cdShB');
@@ -439,8 +484,8 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const { c, page, errs } = await ctx({ init: `localStorage.setItem('cad.hab.v1', JSON.stringify({ '2026-09-24': { steps: 8000, mind: 1 } }));
       localStorage.setItem('cad.train.v1', JSON.stringify({ '2026-09-24': { s2: { k: ['run.easy'], e: 'Light', m: 45 } } }));` });
     const WORDS = {
-      day: '#cdDayK, #cdTitle, #cdSub, .cd-wd-l, .cd-wd-n, .cd-scale span, .cd-tk-n, .cd-tk-m, .cd-gap p, .cd-stamp span',
-      hab: '#cdHabK, #cdHabCap, .cd-hr-n, .cd-hr-s, .cd-hr-v, .cd-chk, #cdHabAdd',
+      day: '.cd-tab, #cdDayK, #cdTitle, #cdSub, .cd-wd-l, .cd-wd-n, .cd-scale span, .cd-tk-n, .cd-tk-m, .cd-gap p, #cdAdd span',
+      hab: '#cdHabK, #cdHabCap, .cd-hr-n, .cd-hr-s, .cd-hr-v, #cdHabAdd',
       mon: '#cdMonK, #cdMonT, #cdMonCap, .cd-dows span, .cd-legend span',
       lift: '.cd-figs b, .cd-figs span, .cd-lbl, .cd-wax span, .cd-kinds b, .cd-kinds span, .cd-recent b, .cd-recent span, .cd-recent time'
     };
@@ -459,35 +504,55 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
         || [...document.querySelectorAll('*')].some((e) => e.scrollWidth > e.clientWidth + 1 && /auto|scroll/.test(getComputedStyle(e).overflowX)));
       ok(`${v}: nothing scrolls sideways`, !wide);
       /* Every word on the screen, on the pixels it is actually drawn over:
-         the sky, the dusk under a title, a pill. */
+         the light at the top, a tile, a disc. */
       const ink = await inkFloor(page, WORDS[v]);
       ok(`${v}: every word holds 4.5:1 on what is behind it`, ink.n > 4 && ink.worst.r >= 4.5, ink);
-      /* A pane ends where the light begins, so nothing is read on the glow. */
+      /* A pane ends where the sentence bar begins, so no row runs under it. */
       const pb = await page.$eval(`section:not([hidden]) .cd-pane`, (p) => p.getBoundingClientRect().bottom);
-      ok(`${v}: the pane stops above the glow`, pb <= 844 - 56 + .5, pb);
+      const bt = await page.$eval('.cd-say-bar', (b) => b.getBoundingClientRect().top);
+      ok(`${v}: the pane stops above the sentence bar`, pb <= bt + .5, { pb, bt });
     }
 
     await page.click('.cd-tab[data-v="day"]');
     await page.waitForTimeout(80);
     const px = await shoot(page);
     const head = await page.evaluate(() => {
-      const h = document.querySelector('#cdVDay .cd-head').getBoundingClientRect(), s = document.getElementById('cdSub').getBoundingClientRect();
-      const nav = document.querySelector('.cd-nav').getBoundingClientRect(), add = getComputedStyle(document.getElementById('cdAdd')).backgroundColor;
-      return { l: h.left, r: h.right, t: h.top, b: h.bottom, sub: s.bottom, nav: nav.bottom, add };
+      const h = document.querySelector('#cdVDay .cd-head').getBoundingClientRect(), row = document.querySelector('.cd-it').getBoundingClientRect();
+      const nav = document.querySelector('.cd-nav').getBoundingClientRect(), bar = document.querySelector('.cd-say-bar').getBoundingClientRect();
+      return { t: h.top, nav: nav.bottom, row: row.top, rowL: row.left, bar: bar.bottom,
+        tide: document.documentElement.dataset.tide, acc: getComputedStyle(document.querySelector('.cd-sayb i')).backgroundColor,
+        badge: getComputedStyle(document.getElementById('cdNowT')).backgroundColor };
     });
-    /* The colour lives in gradients: a dusk at the foot of the title card,
-       and a sky that ends on the same warm light. */
-    const dusk = px((head.l + head.r) / 2, head.b - 3), card = px(head.l + 30, head.t + 20);
-    ok('the title sits on a dusk: night at the top of its card, peach at the foot', dusk[0] - dusk[2] > 50 && card[2] >= card[0], { dusk, card });
-    ok('and no word is written on the peach', head.sub < head.b - 26, head);
-    const skyTop = px(6, 30), skyFoot = px(195, 841);
-    ok('the page is a sky, and it ends warm', skyFoot[0] > skyFoot[2] && skyTop[2] >= skyTop[0] && Math.abs(skyTop[0] - skyFoot[0]) > 20, { skyTop, skyFoot });
+    /* THE LIGHT TELLS THE TIME. At twenty past ten it is day: a sky-blue
+       light at the top, and that same hue is the one accent — the clock's
+       figure and the button that files. It has faded to the bare page by
+       the first row, so no row is ever read on it. */
+    const top = px(195, 16), under = px(head.rowL - 6, head.row + 4);
+    ok('at twenty past ten the light is day, and it is blue', head.tide === 'day' && top[2] - top[0] > 30, { tide: head.tide, top });
+    ok('the accent is the light\'s own hue', head.acc === 'rgb(124, 196, 255)' && head.badge === head.acc, head);
+    ok('and it has faded to the bare page by the first row', Math.max(...under.map((c, i) => Math.abs(c - [10, 12, 16][i]))) <= 4, under);
     ok('the nav is at the top, above the title', head.nav <= head.t, head);
-    ok('the add control is the one white thing', head.add === 'rgb(255, 255, 255)', head.add);
+    ok('the sentence bar is the foot of the screen', head.bar >= 844 - 12, head);
     ok('there is one face, and it is dark',
       (await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme)) === 'dark'
       && !(await page.getAttribute('html', 'data-mode')));
     ok('no page errors', errs.length === 0, errs);
+    await c.close();
+  }
+
+  console.log('\n── the tide ──');
+  {
+    /* The hours the light turns: five, ten, four and half past eight. */
+    const { c, page, errs } = await ctx({ at: '2026-09-25T18:30:00' });
+    const T = await page.evaluate(() => [299, 300, 599, 600, 959, 960, 1229, 1230].map(window.cadence.tide));
+    ok('night until five, dawn until ten, day until four, dusk until half eight',
+      T.join() === 'night,dawn,dawn,day,day,dusk,dusk,night', T);
+    const px = await shoot(page);
+    const top = px(195, 16);
+    const d = await page.evaluate(() => ({ tide: document.documentElement.dataset.tide, acc: getComputedStyle(document.querySelector('.cd-sayb i')).backgroundColor }));
+    ok('at half past six it is dusk: a rose light, and a rose accent',
+      d.tide === 'dusk' && d.acc === 'rgb(255, 143, 168)' && top[0] - top[2] > 10, { d, top });
+    ok('no page errors at dusk', errs.length === 0, errs);
     await c.close();
   }
 

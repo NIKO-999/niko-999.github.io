@@ -7,7 +7,7 @@ Single-file apps that share a design system:
 - `days/index.html` — habits and reminders
 - `orrery/index.html` — the star chart over an Obsidian vault
 - `cadence/index.html` — the day, habits, month and training log, the
-  day drawn as one line of time in the alignment app's language: its own
+  day drawn as one line of time and lit by the hour you are in: its own
   build of `schedule/`'s mechanisms, not a skin over them
 - `shell.css` + `shell.js` at the root — the shared shell they all
   consume. A rule that only two of them need belongs in the two, not
@@ -4102,7 +4102,7 @@ notes admit to, and restoring asks for nothing but a paste.
 `tests/cadence.js` freezes the clock at Friday 25 September 2026, 10:20,
 so which block is running is a fact about the fixture, not the hour.
 
-### Three looks came out, and the third said why
+### Four looks came out, and the third and fourth said why
 
 Mono on everything with heavy tickets and a black dock; then warm paper,
 white cards, a ring, a raised add button; then a sunset photograph as
@@ -4113,96 +4113,138 @@ the left, a name, and a check on the right IS that app's drawing,
 whatever it is painted in. Repainting it three times was three answers
 to the wrong question.
 
-### The language is the alignment app's, taken whole
+The fourth took the alignment app's language whole, as asked — its
+tokens, its Geist Mono caps on every label, a dusk under every title,
+the nav as marks and a line, one white round control a screen — and it
+came back in one line too: **make your own twist, not a complete copy.**
+A reference is a premise to answer rather than a set of parts to lift:
+what that app is about is a dark ground with the colour arriving as
+LIGHT rather than as paint, and restraint everywhere else. That is what
+stayed. Every part went, the mono face and its font file with it.
 
-Asked for by name. A cool black ground with the colour living in
-gradients — a sky that ends on a hint of dusk, and a dusk under every
-screen's title — Inter at 300 for the one thing a screen is about, Geist
-Mono uppercase for every label and every entry, hairlines where there
-were cards, pills whose pressed state is the ink with the paper on it,
-the nav as four marks and a line at the TOP, and **one white round
-control per screen**. Geist Mono is copied into `cadence/fonts/` with
-its licence, so the phone and the suite draw the same letters.
+### The light tells the time
 
-**ONE FACE, AND IT IS DARK.** The light face, the mode chip, the
-pre-paint script and `cdMode` all went: the look is a night sky and a
-day side of it was a second design to keep in step. `cad.mode.v1` is
-swept on boot rather than left, which the suite plants and asserts GONE.
+**One glow at the top of the page, and its hue is the part of the day
+you are in**: apricot from five, sky from ten, rose from four, iris from
+half past eight. The same hue is the ONE accent — the clock's figure on
+the scale, its tick on every track, the running tile's ring, the button
+that files, the plus in the sentence bar. A screen opened at dusk looks
+like dusk. `cdTide` is a function of the minute and nothing else, set on
+every paint and again on the half-minute pass, so the light turns while
+the app is open.
 
-**The words are read on the pixels they sit on**, not on a token: the
-ground is the commonest pixel in the element's own box once anything
-near the ink has been taken out, because on a gradient every ground
-pixel is a slightly different colour and every fully-inked one is
-identical — a bare mode picked the ink and reported the title at 1:1.
-A pane ends a glow's height above the foot and fades into it through a
-mask, so nothing is ever read on the light, and a label on the dusk
-sits above its last 26px, where the peach is.
+**The four solids are light enough that the ground reads on them**, so a
+filled control is the ground's own colour on the tide at every hour and
+there is no second ink to keep in step. The suite holds the boundaries
+of the function one minute either side, the accent's value at two hours,
+and the glow's pixels — blue at twenty past ten, rose at half past six.
+
+**It has faded to the bare page by the first row.** The glow is on the
+page, fixed, and it ends above where the rows begin, so no row, time or
+figure is ever read on it: asserted as the pixel beside the first tile
+being the page's own colour within four levels.
+
+**A forward-leaning face**: Archivo in bold italic for the thing a screen
+is about — the day, a figure, a title — because a calendar of training
+and routine is about momentum. Inter for everything read. The Archivo
+cut is copied into `cadence/fonts/` from `routine/fonts/` with its
+licence. **The nav is four words**: a row of icons is a row you have to
+learn, and four words are read once.
+
+### The beat
+
+**One segment per thing the day asked of you, lit in its own colour when
+it is kept** — under the day's title, and under Habits' title as one a
+habit. It is the one mark here that means how much of it you kept.
+
+**Under a date there is no room for ten of them**, so the week draws the
+same figure in FIFTHS: lit to the nearest fifth, at least one if
+anything was kept, and all five only when the whole day was. Six of
+seven rounds to five and would claim a whole day that was not; it is
+held at four, and the suite plants that exact day. A bite with `ceil`
+reads it as five.
 
 ### The day is one line of time, drawn once per block
 
-**The new drawing, and the only thing here that is not borrowed.** Every
-row is the block's name and what is true of it, and under that the
-whole span of the day with the block's own bar at its own place on it.
-Read down, the bars fall from left to right — the cadence of the day as
-a shape — and the space between them is literal. **There is no time
+**The new drawing, and the one thing the fourth look kept.** Every row
+is the block's name and what is true of it, and under that the whole
+span of the day with the block's own bar at its own place on it. Read
+down, the bars fall from left to right — the cadence of the day as a
+shape — and the space between them is literal. **There is no time
 gutter**: when a block happens is where its bar is, so the column that
 made the old rows the other app's rows has nothing left to do.
+
+**Each row is a tile**, and the scale above them is inset by the tile's
+own padding, so a track and the scale are one width and one x. The
+suite solves the minutes-to-pixels line off two bars and holds every
+other mark to it — bars, dots, the gaps, the scale's figures and the
+clock. A scale that disagreed with its rows would be a Gantt that lies.
 
 **The span is the hour before the first block to the hour after the
 last**, never midnight to midnight, which would spend half the width on
 the night. Today it also holds the clock, and it is never under four
 hours, or a day with one block on it is a single bar across the page.
-The scale above the rows is drawn off the same arithmetic, and the
-suite solves the minutes-to-pixels line off two bars and holds every
-other mark to it — bars, dots, the gaps, the scale's figures and the
-clock. A scale that disagreed with its rows would be a Gantt that lies.
 
 **A moment is a dot.** Waking up has no length, and a bar of no width
 is nothing at all.
 
-**THE CLOCK IS A TICK ON EVERY TRACK, NOT ONE LINE DOWN THE PAGE.** It
-went in as a single rule crossing every row, which is a line drawn
-through every name and every countdown at the same x. The ticks read
-down the page as the same line, broken exactly where there is type, and
-the suite asserts no tick's box meets a word's. Not through the gaps
-either — their figure sits on that line as often as not. The scale
-carries the time as a badge and prints no hour underneath it.
+**THE CLOCK IS A TICK ON EVERY TRACK, NOT ONE LINE DOWN THE PAGE.** A
+single rule crossing every row is a line drawn through every name and
+every countdown at the same x. The ticks read down the page as the same
+line, broken exactly where there is type, and the suite asserts no
+tick's box meets a word's.
+
+**An hour under the clock's own figure is removed by MEASURING, never by
+a distance.** It went in as "skip any hour within ten per cent", which
+was right in the middle of the scale and wrong at either end: there the
+badge is pinned to the end and reaches a whole badge inward, and at
+twenty to seven "06:40" sat on top of the next hour, reading "06:40 00".
+Each label's box is tested against the badge's now, and the suite has a
+dawn fixture for exactly that end.
 
 **Gaps are dimension lines**, drawn across exactly the stretch nobody
 has claimed and measured beside it, on whichever side has room. A block
 taken off for the day leaves its hour free.
 
-**The state is the ground.** The stamp says Kept both ways; not yet is
-the pill on a lift, kept is the ink with the paper on it. A bar is its
-category at 55% ahead of you, at full strength with a glow once kept,
-filled to the minute while it runs, and the flat neutral once it is
-behind you unkept — never a red. Every one of those states is a graphic
-held to 3:1 on its own row, which is why the neutral is .36 and not the
-.22 it went in at.
+**The state is a fill in the block's own colour.** The check is a tile
+with no word on it: not yet is a quiet tick on a lifted square, kept is
+the block's colour with the ground's ink on it. A bar is its category at
+62% ahead of you, at full strength with a glow once kept, filled to the
+minute while it runs, and the flat neutral once it is behind you unkept
+— never a red. Every one of those states is a graphic held to 3:1 on its
+own tile, read at two scroll positions so the bars further down the day
+are measured too.
+
+**Say it**: the add control is the sentence field pinned at the foot of
+every screen — a block is something you type the way you would say it,
+and the pane stops above the bar so no row runs under it.
 
 ### The rest of the screens
 
-**Habits** are hairline rows with a dot in the habit's own colour and a
-fortnight under each as a pulse: a tick stands full on a day it was
-kept, a number as tall as its share of the fortnight's best. Six colours
-for six habits — steps took the sea-glass and water and sleep got two
-of their own, because body and mind were each wearing two.
+**Habits** are tiles two across: a dot in the habit's own colour, the
+figure in the display face — Kept, a number with its unit, or a quiet
+dash — and a fortnight of beats at the foot, a tick standing full on a
+day it was kept, a number as tall as its share of the fortnight's best.
+The fortnight is inside the press target so the whole tile logs; the
+history is a sibling button, never a child. Six colours for six habits.
 
-**The month is a square a day, lit by how much of it was kept**: four
-steps and a whole one, which is the only square that turns white.
-Steps rather than a ramp, because a 16px figure has to stay 4.5:1 on
-every one of them — asserted on composited pixels across all thirty,
-with a fixture that plants every level. Today is an outline, so it
-still shows round a square that has turned white.
+**The month is a disc a day, as large as the day was kept**: three sizes
+and a whole one, which is the only solid disc and the only square whose
+figure turns dark. Steps rather than a ramp, because the figure has to
+stay 4.5:1 on every one — asserted on composited pixels across all
+thirty, with a fixture that plants every level. Today is a ring in the
+hour's colour, so it still shows round a solid disc.
 
-**Training** is three figures in the thin face with hairlines between
-them, a bar a week for twelve weeks, and what you trained by name.
+**Training** is three figures on tiles, a bar a week for twelve weeks
+with the week in progress in the hour's colour, and what you trained by
+name.
 
-**Seven scripted breaks proved the checks bite**, each undone by its
-own inverse and hashed back: bars shifted half an hour, the clock tick
-stretched through the words, the quiet grey thinned, the neutral bar
-faded, the third month step brightened, a gap's figure laid on its line,
-and the sweep aimed at the wrong key.
+**Eight scripted breaks proved the new checks bite**, each undone by
+its own inverse and hashed back: the fifths rounded up, a tide boundary
+moved forty minutes, the kept check left grey, the glow let run down
+into the rows, the beat lit in one colour for every block, two disc
+sizes made equal, the accent written as a literal blue, and the badge's
+measurement switched off.
 
 ## Git
 
