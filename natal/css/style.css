@@ -31,12 +31,12 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   /* matches the sky and the horizon planet's surface, so no strip ever shows at the bottom */
-  background: linear-gradient(180deg, #0a1520 0%, #25506c 55%, #3a6a88 70%, #30343b 86%, #2e333b 100%) fixed, #2e333b;
+  background: #2e333b; /* solid: iOS Safari mis-paints long pages with fixed backgrounds */
   color: var(--text);
   font-family: var(--sans);
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 input, select { font: inherit; color: inherit; }
@@ -114,8 +114,8 @@ input, select { font: inherit; color: inherit; }
 }
 .tabs.disabled button { opacity: 0.35; pointer-events: none; }
 
-.view { animation: fade 0.45s ease both; }
-@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.view { animation: view-in 0.35s ease-out backwards; }
+@keyframes view-in { from { opacity: 0; } to { opacity: 1; } }
 
 /* ---------------- typography ---------------- */
 .hero { text-align: center; padding: 36px 0 26px; }
