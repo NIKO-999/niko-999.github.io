@@ -35,6 +35,7 @@
     chart: null,
     tab: "chart",
     aspectFilter: "all",
+    transitRange: store.get("trange", "day"),
     focus: null,
   };
 
@@ -617,6 +618,18 @@
       </button>`;
     });
     html += `</div><p class="note">Orb = distance from exact. Applying aspects are still building and tend to feel stronger.</p>`;
+    if (c.parallels && c.parallels.length) {
+      html += `<div class="section-label">Declination aspects · ${c.parallels.length}</div><div class="list">`;
+      c.parallels.forEach((a, i) => {
+        const X = ASPECTS[a.type];
+        html += `<button class="row" data-open="parallel:${i}">
+          <span class="dot" style="color:${X.color}"></span>
+          <span class="main"><div class="title">${esc(pShort(a.a))} <span class="sym" style="color:${X.color};font-size:.85em">${X.glyph}</span> ${esc(pShort(a.b))}</div>
+          <div class="sub">${esc(X.name)}</div></span>
+          <span class="end"><div class="pos">${orbStr(a.orb)}</div></span></button>`;
+      });
+      html += `</div><p class="note">Parallels and contra-parallels compare how far north or south of the celestial equator each planet sits (declination), within a 1° orb.</p>`;
+    }
     return html;
   }
 
@@ -814,7 +827,10 @@
         case "sign": return ELEMENT_COLOR()[SIGNS[arg].element];
         case "element": return K.ELEMENTS[arg].color;
         case "aspect": return ASPECTS[c.aspects[+arg].type].color;
+        case "parallel": return ASPECTS[c.parallels[+arg].type].color;
         case "transit": return PLANETS[computeTransits().list[+arg].t].color;
+        case "tevent": return PLANETS[state._period.events[+arg].t].color;
+        case "tpevent": return PLANETS[state._period.events[+arg].key].color;
         case "area": return LIFE_AREAS[arg].color;
         case "phase": return PLANETS.moon.color;
         case "house": {
@@ -1141,6 +1157,29 @@
       case "house": html = sheetHouse(+arg); break;
       case "aspect": html = sheetAspect(+arg); break;
       case "transit": html = sheetTransit(+arg); break;
+      case "tpevent": html = sheetPeriodEvent(+arg); break;
+      case "tevent": {
+        const ev = state._period.events[+arg];
+        state.transitDate = ev.time.getTime();
+        state._nowPin = null;
+        const T = computeTransits();
+        const idx = T.list.findIndex((x) => x.t === ev.t && x.n === ev.n && x.type === ev.type);
+        html = idx >= 0 ? sheetTransit(idx) : sheetSimple("Transit", `${esc(pShort(ev.t))} ${ASPECTS[ev.type].glyph} ${esc(pShort(ev.n))}`, fmtDayYear(ev.time), [aspectText({ a: ev.t, b: ev.n, type: ev.type, nature: "tension" })]);
+        break;
+      }
+      case "parallel": {
+        const a = c.parallels[+arg], X = ASPECTS[a.type];
+        const pa = c.get(a.a), pb = c.get(a.b);
+        const dA = deepAspect(a.a, a.b);
+        const dec = (p) => `${Math.abs(p.dec).toFixed(2)}° ${p.dec >= 0 ? "N" : "S"}`;
+        html = `<section class="hero"><div class="eyebrow">${esc(X.name)} · declination</div>
+          <h2 class="display">${esc(pShort(a.a))} <span class="sym" style="color:${X.color}">${X.glyph}</span> ${esc(pShort(a.b))}</h2>
+          <div class="subline">orb ${orbStr(a.orb)}</div></section>`;
+        html += facts([[pName(a.a), dec(pa)], [pName(a.b), dec(pb)], ["Acts like", a.type === "parallel" ? "Conjunction" : "Opposition"], ["Strength", `${Math.round(a.strength * 100)}%`]]);
+        html += paras([X.desc]);
+        if (dA) html += sec(`${pName(a.a)} and ${pName(a.b)}`, [dA.theme, a.type === "parallel" ? dA.fusion : dA.tension]);
+        break;
+      }
       case "tplanet": html = sheetTransitPlanet(arg); break;
       case "element": {
         const X = K.ELEMENTS[arg], list = d.elements[arg], B = deepBalance(arg);
@@ -1546,7 +1585,239 @@
     ].filter(Boolean).join(" ");
   }
 
+  /* ------------------------------------------------------------------ */
+  /* TRANSITS: week and month views                                     */
+  /* ------------------------------------------------------------------ */
+  const RANGES = ["day", "week", "month"];
+  const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const P_KEYS = ["sun", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron", "northNode"];
+  const PHASE_NAMES = [[0, "New Moon"], [90, "First Quarter"], [180, "Full Moon"], [270, "Last Quarter"]];
+
+  function periodBounds(range, anchor) {
+    const a = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate());
+    if (range === "week") {
+      const dow = (a.getDay() + 6) % 7; // Monday = 0
+      const start = new Date(a.getFullYear(), a.getMonth(), a.getDate() - dow);
+      return { start, end: new Date(start.getFullYear(), start.getMonth(), start.getDate() + 7) };
+    }
+    const start = new Date(a.getFullYear(), a.getMonth(), 1);
+    return { start, end: new Date(a.getFullYear(), a.getMonth() + 1, 1) };
+  }
+
+  /** Exact transit hits, sign changes, stations and lunar phases between start and end. */
+  function computePeriod(range) {
+    const c = state.chart;
+    const { start, end } = periodBounds(range, transitDate());
+    const key = range + start.getTime() + JSON.stringify(state.settings) + (state.record && state.record.id);
+    if (state._period && state._period.key === key) return state._period;
+    const opts = { nodeType: state.settings.nodeType, zodiac: state.settings.zodiac };
+    const lon = (k, ms) => E.lonAt(k, new Date(ms), opts);
+    const HOUR = 3600000, STEP = 12 * HOUR;
+    const t0 = start.getTime() - STEP, t1 = end.getTime() + STEP;
+    const n = Math.ceil((t1 - t0) / STEP);
+    const events = [];
+    const inRange = (ms) => ms >= start.getTime() && ms < end.getTime();
+    // refine a root of f between a and b (f(a) and f(b) have opposite signs)
+    const bisect = (f, a, b) => {
+      let fa = f(a);
+      for (let i = 0; i < 26; i++) {
+        const m = (a + b) / 2, fm = f(m);
+        if (Math.sign(fm) === Math.sign(fa)) { a = m; fa = fm; } else b = m;
+      }
+      return (a + b) / 2;
+    };
+
+    for (const k of P_KEYS) {
+      const L = [];
+      for (let i = 0; i <= n; i++) L.push(lon(k, t0 + i * STEP));
+      // aspects to natal points
+      for (const nk of N_KEYS) {
+        const np = c.get(nk);
+        if (!np) continue;
+        for (const asp of T_ASPECTS) {
+          const targets = asp.angle === 0 ? [np.lon] : asp.angle === 180 ? [E.norm(np.lon + 180)] : [E.norm(np.lon + asp.angle), E.norm(np.lon - asp.angle)];
+          for (const tg of targets) {
+            for (let i = 0; i < n; i++) {
+              const g1 = E.diff(tg, L[i]), g2 = E.diff(tg, L[i + 1]);
+              if (g1 === 0 || Math.sign(g1) === Math.sign(g2) || Math.abs(g1 - g2) > 90) continue;
+              const te = bisect((ms) => E.diff(tg, lon(k, ms)), t0 + i * STEP, t0 + (i + 1) * STEP);
+              if (!inRange(te)) continue;
+              const retro = E.diff(lon(k, te - HOUR), lon(k, te + HOUR)) < 0;
+              events.push({ kind: "aspect", t: k, n: nk, type: asp.key, time: new Date(te), retro, weight: T_RANK[k] });
+            }
+          }
+        }
+      }
+      // sign changes
+      for (let i = 0; i < n; i++) {
+        const s1 = Math.floor(L[i] / 30), s2 = Math.floor(L[i + 1] / 30);
+        if (s1 === s2) continue;
+        const forward = E.diff(L[i], L[i + 1]) > 0;
+        const boundary = forward ? s2 * 30 : s1 * 30;
+        const te = bisect((ms) => E.diff(boundary, lon(k, ms)), t0 + i * STEP, t0 + (i + 1) * STEP);
+        if (inRange(te)) events.push({ kind: "ingress", key: k, sign: SIGN_KEYS[forward ? s2 : s1 === 0 ? 11 : s1 - 1] , time: new Date(te), retro: !forward, weight: T_RANK[k] });
+      }
+      // stations (retrograde / direct)
+      if (k !== "sun" && k !== "northNode") {
+        for (let i = 1; i < n; i++) {
+          const v1 = E.diff(L[i - 1], L[i]), v2 = E.diff(L[i], L[i + 1]);
+          if (Math.sign(v1) === Math.sign(v2) || v1 === 0) continue;
+          const speed = (ms) => E.diff(lon(k, ms - HOUR), lon(k, ms + HOUR));
+          const te = bisect(speed, t0 + (i - 1) * STEP, t0 + (i + 1) * STEP);
+          if (inRange(te)) events.push({ kind: "station", key: k, dir: v2 < 0 ? "retrograde" : "direct", time: new Date(te), weight: T_RANK[k] });
+        }
+      }
+    }
+    // lunar phases
+    const ph = (ms) => E.norm(lon("moon", ms) - lon("sun", ms));
+    const PSTEP = 6 * HOUR, pn = Math.ceil((t1 - t0) / PSTEP);
+    let prev = ph(t0);
+    for (let i = 1; i <= pn; i++) {
+      const cur = ph(t0 + i * PSTEP);
+      for (const [ang, name] of PHASE_NAMES) {
+        const g1 = E.diff(ang, prev), g2 = E.diff(ang, cur);
+        if (Math.sign(g1) !== Math.sign(g2) && Math.abs(g1 - g2) < 90) {
+          const te = bisect((ms) => E.diff(ang, ph(ms)), t0 + (i - 1) * PSTEP, t0 + i * PSTEP);
+          if (inRange(te)) events.push({ kind: "phase", name, angle: ang, key: "moon", time: new Date(te), sign: signOf(lon("moon", te)), weight: 2 });
+        }
+      }
+      prev = cur;
+    }
+    events.sort((a, b) => a.time - b.time);
+    state._period = { key, range, start, end, events };
+    return state._period;
+  }
+
+  const fmtClock = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const dayKey = (d) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+
+  function eventRow(ev, i) {
+    if (ev.kind === "aspect") {
+      const X = ASPECTS[ev.type];
+      return `<button class="row" data-open="tevent:${i}">
+        <span class="dot" style="color:${PLANETS[ev.t].color}"></span>
+        <span class="main"><div class="title">${esc(pShort(ev.t))} <span class="sym" style="color:${X.color};font-size:.85em">${X.glyph}</span> ${esc(ev.n === "asc" || ev.n === "mc" ? pName(ev.n) : "natal " + pShort(ev.n))}</div>
+        <div class="sub">${esc(X.name)}${ev.retro ? " · ℞" : ""}</div></span>
+        <span class="end"><div class="pos">${esc(fmtShort(ev.time).toUpperCase())}</div><div class="pos-sub">${fmtClock(ev.time)}</div></span></button>`;
+    }
+    const P = PLANETS[ev.key];
+    const title = ev.kind === "phase" ? `${ev.name} in ${SIGNS[ev.sign].name}` : ev.kind === "ingress" ? `${pName(ev.key)} enters ${SIGNS[ev.sign].name}` : `${pName(ev.key)} turns ${ev.dir}`;
+    const sub = ev.kind === "phase" ? "Lunar phase" : ev.kind === "ingress" ? (ev.retro ? "Sign change · ℞" : "Sign change") : "Station";
+    return `<button class="row" data-open="tpevent:${i}">
+      <span class="dot ${ev.kind === "phase" && ev.angle === 0 ? "hollow" : ""}" style="color:${P.color}"></span>
+      <span class="glyph" style="color:${P.color}">${ev.kind === "ingress" ? signGlyph(ev.sign) : P.glyph}</span>
+      <span class="main"><div class="title">${esc(title)}</div><div class="sub">${esc(sub)}</div></span>
+      <span class="end"><div class="pos">${esc(fmtShort(ev.time).toUpperCase())}</div><div class="pos-sub">${fmtClock(ev.time)}</div></span></button>`;
+  }
+
+  function rangeChips(range) {
+    return `<div class="chips seg">${RANGES.map((r) => `<button class="chip" data-act="trange:${r}" aria-pressed="${range === r}">${cap(r)}</button>`).join("")}</div>`;
+  }
+
+  function navChips(range, isNow) {
+    const unit = cap(range);
+    return `<div class="chips" style="margin-top:6px">
+      <button class="chip" data-act="tprev" aria-label="Previous ${range}">‹ ${unit}</button>
+      <button class="chip" data-act="tnow" aria-pressed="${isNow}">Now</button>
+      <button class="chip" data-act="tnext" aria-label="Next ${range}">${unit} ›</button>
+    </div>`;
+  }
+
+  function renderPeriod(range) {
+    const P = computePeriod(range);
+    const { start, end, events } = P;
+    const isNow = !state.transitDate || (Date.now() >= start.getTime() && Date.now() < end.getTime());
+    const aspects = events.filter((e) => e.kind === "aspect");
+    const moonPh = events.filter((e) => e.kind === "phase");
+    const lastDay = new Date(end.getTime() - 86400000);
+    const title = range === "month" ? MONTHS_LONG[start.getMonth()] : `${start.getDate()} ${MONTHS[start.getMonth()]} – ${lastDay.getDate()} ${MONTHS[lastDay.getMonth()]}`;
+    const newMoon = moonPh.find((e) => e.angle === 0), fullMoon = moonPh.find((e) => e.angle === 180);
+    let html = `<section class="hero">
+      <div class="eyebrow">Transits<span class="sep">·</span>${range === "month" ? "Month" : "Week"}<span class="sep">·</span>${start.getFullYear()}</div>
+      <h1 class="display${range === "week" ? " sm" : ""}">${esc(title)}</h1>
+      <div class="subline"><strong>${aspects.length}</strong> exact transit${aspects.length === 1 ? "" : "s"}${newMoon ? ` · New Moon ${fmtShort(newMoon.time)}` : ""}${fullMoon ? ` · Full Moon ${fmtShort(fullMoon.time)}` : ""}</div>
+    </section>${rangeChips(range)}${navChips(range, isNow)}`;
+
+    // calendar grid (month) / day strip (week)
+    const byDay = {};
+    events.forEach((e, i) => { (byDay[dayKey(e.time)] = byDay[dayKey(e.time)] || []).push(i); });
+    const today = new Date();
+    const cells = [];
+    const lead = range === "month" ? (start.getDay() + 6) % 7 : 0;
+    for (let i = 0; i < lead; i++) cells.push(`<div class="cal-cell empty"></div>`);
+    for (let d = new Date(start); d < end; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) {
+      const list = (byDay[dayKey(d)] || []).map((i) => events[i]);
+      const hits = list.filter((e) => e.kind === "aspect").sort((a, b) => b.weight - a.weight).slice(0, 5);
+      const phase = list.find((e) => e.kind === "phase");
+      const isToday = d.toDateString() === today.toDateString();
+      cells.push(`<button class="cal-cell${isToday ? " today" : ""}${list.length ? " busy" : ""}" data-act="tday:${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}">
+        ${phase ? `<span class="cal-phase ${phase.angle === 180 ? "full" : phase.angle === 0 ? "new" : "quarter"}" title="${esc(phase.name)}"></span>` : ""}
+        <span class="cal-num">${d.getDate()}</span>
+        <span class="cal-dots">${hits.map((e) => `<i style="background:${PLANETS[e.t].color}"></i>`).join("")}</span>
+      </button>`);
+    }
+    html += `<div class="cal"><div class="cal-head">${["M", "T", "W", "T", "F", "S", "S"].map((x) => `<span>${x}</span>`).join("")}</div><div class="cal-grid">${cells.join("")}</div></div>
+      <p class="note">Dots mark exact transits to your chart. Tap a day to see it in full.</p>`;
+
+    if (range === "week") {
+      // grouped by day
+      for (let d = new Date(start); d < end; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) {
+        const idx = byDay[dayKey(d)] || [];
+        html += `<div class="section-label left">${esc(fmtDay(d))}</div>`;
+        html += idx.length ? `<div class="list">${idx.map((i) => eventRow(events[i], i)).join("")}</div>` : `<p class="note" style="text-align:left;margin:0">A quiet day: no exact transits, sign changes or lunar phases.</p>`;
+      }
+    } else {
+      const section = (label, filter) => {
+        const idx = events.map((e, i) => [e, i]).filter(([e]) => filter(e));
+        if (!idx.length) return "";
+        return `<div class="section-label">${esc(label)} · ${idx.length}</div><div class="list">${idx.map(([e, i]) => eventRow(e, i)).join("")}</div>`;
+      };
+      html += section("Major transits", (e) => e.kind === "aspect" && SLOW_T.has(e.t));
+      html += section("Personal planet transits", (e) => e.kind === "aspect" && !SLOW_T.has(e.t));
+      html += section("Moon phases", (e) => e.kind === "phase");
+      html += section("Sign changes", (e) => e.kind === "ingress");
+      html += section("Stations", (e) => e.kind === "station");
+    }
+    html += `<p class="note">Week and month views list the moment each transit is exact. The Moon's own aspects move too fast to list here; see them in the Day view.</p>`;
+    return html;
+  }
+
+  function sheetPeriodEvent(i) {
+    const ev = state._period.events[i];
+    const P = PLANETS[ev.key];
+    const d = ev.time;
+    let title, body = [];
+    if (ev.kind === "phase") {
+      title = `${ev.name} in ${SIGNS[ev.sign].name}`;
+      const house = state.chart.timeKnown ? houseOfLon(E.lonAt("moon", d, { zodiac: state.settings.zodiac })) : null;
+      body = [
+        { "New Moon": "A New Moon starts a fresh lunar cycle: a good moment to set intentions and begin things quietly.", "First Quarter": "The First Quarter is a moment of action and decision: obstacles show you what needs effort.", "Full Moon": "A Full Moon brings things to light and to a head: completion, clarity and heightened feelings.", "Last Quarter": "The Last Quarter is for review and release: let go of what did not work this cycle." }[ev.name],
+        `It falls in ${SIGNS[ev.sign].name}${house ? `, in your ${ord(house)} house of ${HOUSES[house].areas}` : ""}, so ${SIGNS[ev.sign].name} themes${house ? " and that area of life" : ""} are highlighted.`,
+      ];
+    } else if (ev.kind === "ingress") {
+      title = `${P.name} enters ${SIGNS[ev.sign].name}`;
+      const TP = (D().transitPlanets || {})[ev.key];
+      body = [`${P.name} moves ${ev.retro ? "back " : ""}into ${SIGNS[ev.sign].name}${TP ? `, where it stays ${TP.timescale.replace(/^about /, "about ")}` : ""}. ${SIGNS[ev.sign].essence}`, TP ? TP.brings : ""];
+    } else {
+      title = `${P.name} turns ${ev.dir}`;
+      body = [ev.dir === "retrograde"
+        ? `${P.name} appears to stop and move backwards. Its themes (${P.keywords.join(", ")}) turn inward for a while: a time to review, revisit and reconsider rather than push ahead.`
+        : `${P.name} appears to stop and move forward again. What was under review in its themes (${P.keywords.join(", ")}) can now move ahead.`,
+        "Planets are especially strong around a station, when they seem to stand still in the sky."];
+    }
+    let html = `<section class="hero"><div class="eyebrow">${esc(fmtDayYear(d))} · ${fmtClock(d)}</div><h2 class="display">${esc(title)}</h2></section>`;
+    html += paras(body);
+    html += `<div class="list"><button class="row" data-act="tday:${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}"><span class="dot" style="color:var(--theme)"></span><span class="main"><div class="title">See this day</div><div class="sub">All transits for ${esc(fmtDay(d))}</div></span></button></div>`;
+    return html;
+  }
+
   function renderToday() {
+    const range = state.transitRange || "day";
+    if (range !== "day") return renderPeriod(range);
+    return renderDay();
+  }
+
+  function renderDay() {
     const c = state.chart;
     const T = computeTransits();
     const d = T.date;
@@ -1558,11 +1829,7 @@
       <h1 class="display sm">${top ? `${esc(pShort(top.t))} <span class="sym" style="color:${ASPECTS[top.type].color}">${ASPECTS[top.type].glyph}</span> ${esc(pShort(top.n))}` : "A quiet sky"}</h1>
       <div class="subline">Moon in <strong>${SIGNS[moon.sign].name}</strong>${moon.natalHouse ? ` · your ${ord(moon.natalHouse)} house` : ""} · ${esc(T.phase.name)}</div>
     </section>
-    <div class="chips" style="margin-top:0">
-      <button class="chip" data-act="tprev" aria-label="Previous day">‹ Day</button>
-      <button class="chip" data-act="tnow" aria-pressed="${isNow}">Now</button>
-      <button class="chip" data-act="tnext" aria-label="Next day">Day ›</button>
-    </div>
+    ${rangeChips("day")}${navChips("day", isNow)}
     <div class="field" style="border-top:1px solid var(--line);margin-top:14px"><label for="t-date">Date</label><input type="date" id="t-date" value="${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}"></div>`;
 
     const personal = T.list.filter((x) => x.t !== "moon");
@@ -1688,6 +1955,8 @@
         ${opt("houseSystem", "equal", "Equal", "30° from the Ascendant")}
         ${opt("houseSystem", "porphyry", "Porphyry", "Trisected quadrants")}
         ${opt("houseSystem", "regiomontanus", "Regiomontanus", "Horary favourite")}
+        ${opt("houseSystem", "topocentric", "Topocentric", "Polich-Page · close to Placidus")}
+        ${opt("houseSystem", "campanus", "Campanus", "Prime vertical divisions")}
       </div>
       <h4>Zodiac</h4><div class="opt-list">
         ${opt("zodiac", "tropical", "Tropical", "Western · season-based")}
@@ -1945,7 +2214,7 @@
     }
     if ($("#timeline")) setTimeout(fillTimeline, 30);
     if (state.tab === "today") {
-      fillTransitWindows();
+      if ((state.transitRange || "day") === "day") fillTransitWindows();
       const td = $("#t-date");
       if (td) td.addEventListener("change", () => {
         if (!td.value) return;
@@ -1975,9 +2244,21 @@
       if (a === "edit") { state.editing = state.record; state.chart = null; closeSheet(); render(); }
       if (a === "share") share();
       if (a === "tnow") { state.transitDate = null; state._nowPin = null; render(); }
+      if (a.startsWith("trange:")) { state.transitRange = a.slice(7); store.set("trange", state.transitRange); render(); }
+      if (a.startsWith("tday:")) {
+        const [y, m, dd] = a.slice(5).split("-").map(Number);
+        const now = new Date();
+        state.transitRange = "day"; store.set("trange", "day");
+        state.transitDate = (y === now.getFullYear() && m === now.getMonth() + 1 && dd === now.getDate()) ? null : new Date(y, m - 1, dd, 12, 0).getTime();
+        state._nowPin = null;
+        closeSheet();
+        render();
+        window.scrollTo({ top: 0 });
+      }
       if (a === "tprev" || a === "tnext") {
-        const base = transitDate();
-        const dd = new Date(base.getFullYear(), base.getMonth(), base.getDate() + (a === "tnext" ? 1 : -1), 12, 0);
+        const base = transitDate(), dir = a === "tnext" ? 1 : -1, r = state.transitRange || "day";
+        const dd = r === "month" ? new Date(base.getFullYear(), base.getMonth() + dir, 1, 12, 0)
+          : new Date(base.getFullYear(), base.getMonth(), base.getDate() + dir * (r === "week" ? 7 : 1), 12, 0);
         const now = new Date();
         state.transitDate = dd.toDateString() === now.toDateString() ? null : dd.getTime();
         render();

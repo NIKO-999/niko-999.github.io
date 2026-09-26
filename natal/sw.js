@@ -1,5 +1,5 @@
 /* Natal service worker: offline app shell + cached fonts. Bump VERSION when files change. */
-const VERSION = "natal-v20";
+const VERSION = "natal-v22";
 const SHELL = [
   "./",
   "index.html",
@@ -12,6 +12,7 @@ const SHELL = [
   "icons/icon.svg",
   "vendor/astronomy.browser.min.js",
   "js/chiron-data.js",
+  "js/lilith-data.js",
   "js/engine.js",
   "js/content.js",
   "js/deep-big-three.js",
