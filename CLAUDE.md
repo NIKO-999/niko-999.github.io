@@ -5182,6 +5182,12 @@ so the forty-first kind is checked the day it is added. Thirty common
 names are asserted by kind. Proved by breaking warm-up's phrase and by
 giving shop the fallback's drawing.
 
+**Then sixty.** Hikes, fishing, news, ideas, art, photos, filming
+content, flights, the car, a baby's bottle, drinks out, bins, packing,
+repairs, a haircut, self care, birthdays and tickets. Driving left the
+commute's arrow for a car of its own and hiking left the walk for a
+mountain; *watch* is the screen, so *watch a show* is not a gig.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

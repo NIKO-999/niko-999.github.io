@@ -692,7 +692,11 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       'Bike ride': 'cycle', 'Tennis': 'sport', 'Feed the dog': 'pet', 'Water plants': 'plant', 'Drink water': 'water', 'Podcast': 'listen',
       'Guitar': 'music', 'Coding': 'code', 'Journal': 'write', 'Sunlight': 'sun', 'Standup': 'talk', 'Budget': 'money', 'Plan the week': 'plan',
       'Meal prep': 'cook', 'Groceries': 'shop', 'Laundry': 'laundry', 'Clean kitchen': 'clean', 'Shower': 'shower', 'Vitamins': 'meds',
-      'Dentist': 'health', 'Family': 'people', 'Netflix': 'screen', 'Gaming': 'game', 'Kmart': 'dot', 'Putting room together': 'dot' };
+      'Dentist': 'health', 'Family': 'people', 'Netflix': 'screen', 'Gaming': 'game', 'Hike': 'hike', 'Fishing': 'fish', 'Morning news': 'news', 'Brainstorm': 'idea', 'Sketch': 'art', 'Edit photos': 'photo',
+      'Film content': 'film', 'Fly to Sydney': 'fly', 'Drive to work': 'car', 'Feed the baby': 'baby', 'Drinks with mates': 'drink',
+      'Take out the bins': 'bin', 'Pack for trip': 'pack', 'Fix the sink': 'fix', 'Haircut': 'cut', 'Self care': 'heart', 'Birthday': 'gift',
+      'Concert': 'ticket', 'Watch a show': 'screen',
+      'Kmart': 'dot', 'Putting room together': 'dot' };
     const got = {};
     for (const n of Object.keys(common)) got[n] = await K(n);
     ok('common task names reach their own kind, and the unplaceable stay plain', Object.keys(common).every((n) => got[n] === common[n]), got);
@@ -704,7 +708,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       const cat = src.match(/var CAT = \{([\s\S]*?)\};/)[1];
       const vals = Object.values(glyph);
       ok('every kind has a glyph and a colour, and no two kinds draw the same glyph',
-        kinds.length > 30 && kinds.every((k) => glyph[k] && new RegExp('\\b' + k + ': \'').test(cat)) && new Set(vals).size === vals.length,
+        kinds.length > 55 && kinds.every((k) => glyph[k] && new RegExp('\\b' + k + ': \'').test(cat)) && new Set(vals).size === vals.length,
         { kinds: kinds.length, missing: kinds.filter((k) => !glyph[k]) });
     }
 
