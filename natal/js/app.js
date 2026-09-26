@@ -828,37 +828,76 @@
     }
   }
 
-  function openSheet(html, theme) {
+  /* Detail pages: full-screen pages with a back arrow. Opening a page from
+     inside a page stacks it; back (arrow, edge swipe, Escape or the system back)
+     returns one step at a time. */
+  const pageStack = [];
+  let historyOK = false;
+  function setPage(html, theme) {
     if (theme) sheet.style.setProperty("--theme", theme);
     else sheet.style.removeProperty("--theme");
     sheetBody.innerHTML = html;
-    sheet.hidden = false;
-    backdrop.hidden = false;
     sheetBody.scrollTop = 0;
-    document.body.style.overflow = "hidden";
+    sheet.classList.remove("page-in");
+    void sheet.offsetWidth;
+    sheet.classList.add("page-in");
   }
-  function closeSheet() {
+  function openSheet(html, theme) {
+    const opening = sheet.hidden;
+    if (!opening) pageStack.push({ html: sheetBody.innerHTML, theme: sheet.style.getPropertyValue("--theme"), scroll: sheetBody.scrollTop });
+    setPage(html, theme);
+    if (opening) {
+      sheet.hidden = false;
+      document.body.classList.add("detail-open");
+    }
+    try { history.pushState({ natalPage: pageStack.length + 1 }, ""); historyOK = true; } catch (e) { historyOK = false; }
+  }
+  function hideSheet() {
     sheet.hidden = true;
     backdrop.hidden = true;
-    document.body.style.overflow = "";
+    document.body.classList.remove("detail-open");
   }
-  backdrop.addEventListener("click", closeSheet);
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheet(); });
-  // swipe down to close
+  function popPage() {
+    if (sheet.hidden) return;
+    if (pageStack.length) {
+      const p = pageStack.pop();
+      setPage(p.html, p.theme);
+      sheetBody.scrollTop = p.scroll;
+    } else {
+      hideSheet();
+    }
+  }
+  function goBack() {
+    if (historyOK && history.state && history.state.natalPage) history.back();
+    else popPage();
+  }
+  // close every open page at once (used when leaving the chart)
+  function closeSheet() {
+    if (sheet.hidden) return;
+    const depth = pageStack.length + 1;
+    pageStack.length = 0;
+    hideSheet();
+    if (historyOK) { try { history.go(-depth); } catch (e) { /* ignore */ } }
+  }
+  window.addEventListener("popstate", () => popPage());
+  $("#sheet-back").addEventListener("click", goBack);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !sheet.hidden) goBack(); });
+  // swipe right from the left edge to go back, like a native app
   (function () {
-    let y0 = null;
-    sheet.addEventListener("touchstart", (e) => { if (sheetBody.scrollTop <= 0) y0 = e.touches[0].clientY; }, { passive: true });
+    let x0 = null, y0 = 0;
+    sheet.addEventListener("touchstart", (e) => { const t = e.touches[0]; if (t.clientX < 28) { x0 = t.clientX; y0 = t.clientY; } }, { passive: true });
     sheet.addEventListener("touchmove", (e) => {
-      if (y0 === null) return;
-      const dy = e.touches[0].clientY - y0;
-      if (dy > 0) sheet.style.transform = `translateY(${dy}px)`;
+      if (x0 === null) return;
+      const t = e.touches[0], dx = t.clientX - x0;
+      if (Math.abs(t.clientY - y0) > 60 && dx < 30) { x0 = null; sheet.style.transform = ""; return; }
+      if (dx > 0) sheet.style.transform = `translateX(${dx}px)`;
     }, { passive: true });
     sheet.addEventListener("touchend", (e) => {
-      if (y0 === null) return;
-      const dy = e.changedTouches[0].clientY - y0;
+      if (x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0;
+      x0 = null;
       sheet.style.transform = "";
-      y0 = null;
-      if (dy > 110) closeSheet();
+      if (dx > 90) goBack();
     });
   })();
 
@@ -1697,11 +1736,11 @@
       <div class="meta">planets · houses · nodes · aspects · karma</div>
     </section>
     <form class="form" id="birth-form" autocomplete="off">
-      <div class="field"><label for="f-name">Name</label><input type="text" id="f-name" placeholder="Optional" maxlength="40" value="${r ? esc(r.name || "") : ""}"></div>
+      <div class="field"><label for="f-name">Name</label><input type="text" id="f-name" maxlength="40" value="${r ? esc(r.name || "") : ""}"></div>
       <div class="field"><label for="f-date">Date</label><input type="date" id="f-date" required min="1850-01-01" max="2149-12-31" value="${r ? `${r.y}-${pad(r.mo)}-${pad(r.d)}` : ""}"></div>
       <div class="field"><label for="f-time">Time</label><input type="time" id="f-time" value="${r && r.timeKnown ? `${pad(r.h)}:${pad(r.mi)}` : ""}">
         <label class="toggle" style="width:auto"><input type="checkbox" id="f-unknown" ${r && !r.timeKnown ? "checked" : ""}> Unknown</label></div>
-      <div class="field" id="place-field"><label for="f-place">Place</label><input type="text" id="f-place" placeholder="Search AU or NZ city" value="${r ? esc(r.place.name) : ""}"><div class="results" id="results" hidden></div></div>
+      <div class="field" id="place-field"><label for="f-place">Place</label><input type="text" id="f-place" placeholder="Search city" value="${r ? esc(r.place.name) : ""}"><div class="results" id="results" hidden></div></div>
       <div class="place-meta" id="place-meta">${r ? placeMeta(r.place) : ""}</div>
       <div class="advanced" id="advanced" hidden>
         <div class="field"><label for="f-lat">Lat</label><input type="number" id="f-lat" step="0.0001" min="-90" max="90" placeholder="-36.8485" value="${r ? r.place.lat : ""}"></div>

@@ -107,8 +107,11 @@
     ctx.globalAlpha = 1;
   }
 
+  // pause the twinkle while scrolling so the phone can spend its time painting the page
+  let scrollingUntil = 0;
+  window.addEventListener("scroll", () => { scrollingUntil = performance.now() + 180; }, { passive: true });
   function loop(t) {
-    draw(t);
+    if (t >= scrollingUntil) draw(t);
     requestAnimationFrame(loop);
   }
 

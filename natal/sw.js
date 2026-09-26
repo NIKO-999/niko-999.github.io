@@ -1,5 +1,5 @@
 /* Natal service worker: offline app shell + cached fonts. Bump VERSION when files change. */
-const VERSION = "natal-v8";
+const VERSION = "natal-v20";
 const SHELL = [
   "./",
   "index.html",
@@ -40,7 +40,7 @@ self.addEventListener("install", (e) => {
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION && k !== "natal-fonts").map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION && k !== "natal-fonts" && k !== "natal-sky").map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
