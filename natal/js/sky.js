@@ -19,7 +19,7 @@
     const count = Math.round((w * h) / 1500);
     stars = Array.from({ length: count }, () => ({
       x: Math.random() * w,
-      y: Math.random() * h,
+      y: Math.pow(Math.random(), 1.35) * h * 0.8,
       r: Math.random() < 0.04 ? 0.9 + Math.random() * 0.6 : 0.3 + Math.random() * 0.55,
       a: 0.18 + Math.random() * 0.45,
       s: 0.4 + Math.random() * 1.6,
@@ -34,7 +34,7 @@
     for (const s of stars) {
       const tw = reduce ? 1 : 0.55 + 0.45 * Math.sin(t / 1000 * s.s + s.p);
       ctx.globalAlpha = s.a * tw;
-      ctx.fillStyle = s.warm ? "#f0fff8" : "#d8efe6";
+      ctx.fillStyle = s.warm ? "#fff1e0" : "#dfe9f2";
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
       ctx.fill();
