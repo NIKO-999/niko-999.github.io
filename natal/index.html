@@ -36,11 +36,6 @@
         <radialGradient id="hz-body" cx="520" cy="520" r="440" gradientUnits="userSpaceOnUse">
           <stop offset=".78" stop-color="#2a3039"/><stop offset=".9" stop-color="#30313a"/><stop offset=".955" stop-color="#3f3632"/><stop offset=".985" stop-color="#6a4028"/><stop offset="1" stop-color="#9a4a22"/>
         </radialGradient>
-        <filter id="hz-tex" x="0" y="0" width="100%" height="100%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="4" seed="3" result="n"/>
-          <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.16  0 0 0 0 0.13  0 0 0 0 0.12  0 0 0 0.9 -0.4"/>
-          <feComposite in2="SourceGraphic" operator="in"/>
-        </filter>
       </defs>
     </svg>
 
@@ -49,7 +44,6 @@
       <svg viewBox="0 0 1040 1040">
         <circle cx="520" cy="520" r="520" fill="url(#hz-glow)"/>
         <circle cx="520" cy="520" r="440" fill="url(#hz-body)"/>
-        <circle cx="520" cy="520" r="440" fill="#000" filter="url(#hz-tex)" opacity=".3"/>
         <circle cx="520" cy="520" r="440" fill="none" stroke="#ff8a3d" stroke-opacity=".55" stroke-width=".6"/>
       </svg>
     </div>
