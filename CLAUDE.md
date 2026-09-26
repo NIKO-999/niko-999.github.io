@@ -4975,6 +4975,29 @@ the protocol's own answers and are filtered out of "no page errors".
 production. A Git-connected worker redeploys itself when `main` moves.
 Until then sync says it cannot reach the server and changes nothing.
 
+### And you can choose the code
+
+Asked for straight after the code shipped. **A code you choose is a
+password**, and there is no account behind it to tell two people
+apart, so whoever types the same words opens the same vault. It is held
+to twelve letters or numbers at least. `Use this code` stays disabled
+below that, which states the rule without a caption. `Suggest one`
+fills the field with sixteen random characters for anyone who would
+rather not choose.
+
+**READ AS ITS LETTERS AND NUMBERS ALONE, IN LOWER CASE.** "Rex and the
+morning run" and "rex AND the morning-run" are one code, because a
+phone keyboard capitalises and spaces as it likes, and a code that
+fails on a capital is a code nobody can type twice. It is shown back
+the way you typed it.
+
+**AND A CODE SOMEBODY ALREADY HAS IS REFUSED.** Creating is a write on
+base 0, so on a vault that exists the worker answers 409. Taking the
+code would have handed this device somebody else's record. What the
+refusal costs is that it confirms the code is in use. At twelve
+characters and a deliberately slow derivation, that is the right side
+of the trade.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

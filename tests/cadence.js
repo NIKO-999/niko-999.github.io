@@ -1454,7 +1454,8 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const vaultRec = () => { for (const [k, v] of m) if (k.startsWith('vault:')) return { k, v: JSON.parse(v) }; return null; };
     const openVault = async (code) => {
       const enc = new TextEncoder();
-      const base = await crypto.subtle.importKey('raw', enc.encode(code), 'PBKDF2', false, ['deriveBits']);
+      const norm = code.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+      const base = await crypto.subtle.importKey('raw', enc.encode(norm), 'PBKDF2', false, ['deriveBits']);
       const b = new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: enc.encode('cadence.sync.v1'), iterations: 150000, hash: 'SHA-256' }, base, 512));
       const id = Buffer.from(b.slice(32, 48)).toString('hex');
       const key = await crypto.subtle.importKey('raw', b.slice(0, 32), 'AES-GCM', false, ['decrypt']);
@@ -1481,6 +1482,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await pp.click('#cdGear'); await sheetUp(pp);
     ok('sync is off until you turn it on, and nothing has left', !!(await pp.$('#cdSyncOn')) && phone.off.length === before && m.size === 0, { off: phone.off });
     await pp.click('#cdSyncOn'); await pp.waitForTimeout(350);
+    await pp.click('#cdSyncSuggest');
     await pp.click('#cdSyncMake');
     await pp.waitForSelector('#cdSyncCodeShow', { timeout: 15000 });
     const shown = (await pp.textContent('#cdSyncCodeShow')).trim();
@@ -1496,7 +1498,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('the server holds ciphertext: not one block name is readable in it', !seen(v1.v).includes(blockName) && !JSON.stringify(v1.v).includes(blockName), blockName);
     const o1 = await openVault(code);
     ok('the code alone opens the vault, and it is the whole backup', o1 && o1.data.app === 'cadence' && Array.isArray(o1.data.week) && o1.data.week.length > 0);
-    ok('the code itself never leaves: it is not in what the server stores', !JSON.stringify(v1.v).includes(code), '');
+    ok('the code itself never leaves: it is not in what the server stores', !JSON.stringify(v1.v).toLowerCase().includes(code.toLowerCase()), '');
     await closeSheet(pp);
 
     /* A change on the phone is pushed without being asked. */
@@ -1566,6 +1568,36 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const real = (e) => e.filter((t) => !/status of (409|404)/.test(t));
     ok('no page errors while syncing', real(phone.errs).length === 0 && real(desk.errs).length === 0, { p: phone.errs, d: desk.errs });
     await phone.c.close(); await desk.c.close();
+
+    /* A code you choose: long enough, typed any way, and never one
+       somebody already has — taking it would hand you their record. */
+    const setup = async (page) => { await page.click('#cdGear'); await sheetUp(page); await page.click('#cdSyncOn'); await page.waitForTimeout(350); };
+    const A = await ctx(); await wire(A.c);
+    await setup(A.page);
+    await A.page.fill('#cdSyncMine', 'short code');
+    const shortOff = await A.page.$eval('#cdSyncMake', (b) => b.disabled);
+    await A.page.fill('#cdSyncMine', 'Rex and the morning run');
+    const longOn = !(await A.page.$eval('#cdSyncMake', (b) => b.disabled));
+    ok('a chosen code under twelve letters cannot be used, and a long one can', shortOff && longOn, { shortOff, longOn });
+    await A.page.click('#cdSyncMake');
+    await A.page.waitForSelector('#cdSyncCodeShow', { timeout: 15000 });
+    const mineShown = (await A.page.textContent('#cdSyncCodeShow')).trim();
+    ok('a chosen code is shown the way you typed it, and opens the vault',
+      mineShown === 'Rex and the morning run' && !!(await openVault('Rex and the morning run')), mineShown);
+    const B2 = await ctx({ desk: { width: 1280, height: 800 } }); await wire(B2.c);
+    await setup(B2.page);
+    await B2.page.fill('#cdSyncCode', 'rex AND the morning-run');
+    await Promise.all([B2.page.waitForEvent('load', { timeout: 15000 }), B2.page.click('#cdSyncJoin')]);
+    const joined = await B2.page.evaluate(() => JSON.parse(localStorage.getItem('cad.sync.v1') || 'null'));
+    ok('it is joined however the capitals, spaces and dashes fall', joined && joined.code === 'rexandthemorningrun', joined);
+    const C3 = await ctx(); await wire(C3.c);
+    await setup(C3.page);
+    await C3.page.fill('#cdSyncMine', 'REX and the Morning Run!');
+    await C3.page.click('#cdSyncMake');
+    const taken = await until(async () => { const t = await C3.page.textContent('#cdToastT'); return /already in use/.test(t) && t; });
+    ok('a code somebody already has is refused rather than taken', !!taken && !(await C3.page.evaluate(() => localStorage.getItem('cad.sync.v1'))), taken);
+    ok('no page errors choosing a code', real(A.errs).length === 0 && real(B2.errs).length === 0 && real(C3.errs).length === 0, { a: A.errs, b: B2.errs, c: C3.errs });
+    await A.c.close(); await B2.c.close(); await C3.c.close();
   }
 
   await browser.close();

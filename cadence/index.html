@@ -2598,7 +2598,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 
   /* ═══ SYNC ═══
      One record on two devices, and the worker that carries it cannot
-     read it. A sync code is shown once; from it the device derives an
+     read it. A sync code, chosen or made, is the key; from it the device derives an
      AES key, a vault id and a write token (PBKDF2, 150,000 rounds). The
      id and the token go to the worker; the KEY NEVER LEAVES THE DEVICE,
      so what is stored is the backup sealed with AES-GCM and nothing on
@@ -2627,17 +2627,26 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   var SYNC_URL = 'https://sched.nikorapullin.workers.dev';
   var SYNC_K = 'cad.sync.v1', SYNC_ABC = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
   var SY = cdSyncLoad(), syKeys = null, syTimer = 0, syBusy = false, syGen = 0, syApplying = false, syErr = '', syStEl = null;
+  /* A CODE YOU CHOOSE IS A PASSWORD, and it is held to being a long one.
+     Whoever else types the same words opens the same vault: there is no
+     account behind it to tell two people apart. Twelve letters or
+     numbers is the floor, and the key derivation is slow on purpose so
+     guessing at one is slow too. The code is read as its letters and
+     numbers alone, in lower case: "Rex and the morning run" and "rex
+     and the morning-run" are one code, because a phone's keyboard
+     capitalises and spaces as it likes and a code that fails on a
+     capital is a code nobody can type twice. */
+  var SYNC_MIN = 12;
   function cdSyncNorm(c) {
-    var t = String(c || '').toUpperCase().replace(/[^0-9A-Z]/g, '');
-    if (t.length !== 16) return '';
-    for (var i = 0; i < t.length; i++) if (SYNC_ABC.indexOf(t[i]) < 0) return '';
-    return t;
+    var t = String(c || '').normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+    return t.length >= SYNC_MIN && t.length <= 128 ? t : '';
   }
-  function cdSyncFmt(c) { return c.match(/.{4}/g).join('-'); }
+  function cdSyncFmt(c) { return c.toUpperCase().match(/.{1,4}/g).join('-'); }
+  function cdSyncShown() { return SY && (SY.show || cdSyncFmt(SY.code)); }
   function cdSyncLoad() {
     var o; try { o = JSON.parse(localStorage.getItem(SYNC_K)); } catch (e) { o = null; }
     if (!isObj(o) || !cdSyncNorm(o.code)) return null;
-    return { code: cdSyncNorm(o.code), rev: Math.max(0, o.rev | 0), dirty: !!o.dirty, at: +o.at || 0 };
+    return { code: cdSyncNorm(o.code), show: typeof o.show === 'string' ? o.show.slice(0, 160) : '', rev: Math.max(0, o.rev | 0), dirty: !!o.dirty, at: +o.at || 0 };
   }
   function cdSyncStore() { try { if (SY) localStorage.setItem(SYNC_K, JSON.stringify(SY)); else localStorage.removeItem(SYNC_K); } catch (e) {} }
   /* Rejection sampling, so every character is equally likely: 256 is not
@@ -2825,25 +2834,45 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   function cdSyncSetup() {
     var root = el('div');
     root.appendChild(el('p', 'cd-note', 'Your whole record is locked on this device with a sync code before it is sent, so the server keeps only scrambled text it cannot read. Pictures in notes stay on each device. Keep the code somewhere safe: it cannot be recovered.'));
-    var mk = el('button', 'cd-btn go', 'Create a sync code'); mk.type = 'button'; mk.id = 'cdSyncMake';
-    mk.style.marginTop = '16px'; mk.style.width = '100%';
+    /* Choose your own, or have one made. Either way it is the only key
+       there is, so the made one is sixteen random characters and a
+       chosen one is held to twelve at least. Use this code stays
+       disabled until what is typed would be accepted, which says the
+       rule without a caption describing it. */
+    var cl = el('p', 'cd-lbl', 'Choose a sync code'); cl.style.marginTop = '22px';
+    root.appendChild(cl);
+    var mine = el('input', 'cd-field'); mine.id = 'cdSyncMine'; mine.type = 'text';
+    mine.setAttribute('autocapitalize', 'none'); mine.setAttribute('autocomplete', 'off'); mine.setAttribute('spellcheck', 'false');
+    mine.placeholder = 'At least ' + SYNC_MIN + ' letters or numbers'; mine.setAttribute('aria-label', 'Your sync code');
+    mine.style.marginTop = '10px';
+    root.appendChild(mine);
+    var row = el('div', 'cd-syrow');
+    var sug = el('button', 'cd-btn', 'Suggest one'); sug.type = 'button'; sug.id = 'cdSyncSuggest';
+    var mk = el('button', 'cd-btn go', 'Use this code'); mk.type = 'button'; mk.id = 'cdSyncMake';
+    var ready = function () { mk.disabled = !cdSyncNorm(mine.value); };
+    mine.addEventListener('input', ready); ready();
+    sug.addEventListener('click', function () { mine.value = cdSyncFmt(cdSyncNew().toLowerCase()); ready(); });
     mk.addEventListener('click', function () {
+      var code = cdSyncNorm(mine.value), show = mine.value.trim().slice(0, 160);
+      if (!code) return;
       mk.disabled = true;
-      var code = cdSyncNew();
       cdSyncDerive(code).then(function (k) {
         return cdSyncSeal(k, cdBackup()).then(function (sealed) { return cdSyncFetch(k, 'PUT', { iv: sealed.iv, ct: sealed.ct, base: 0 }); });
       }).then(function (r) {
+        /* Base 0 on a vault that exists is a 409: somebody already has
+           this code, and taking it would hand this device their record. */
+        if (r.status === 409) { mk.disabled = false; cdToast('That code is already in use. Choose another.'); return; }
         if (r.status !== 200) throw new Error(r.status);
-        SY = { code: code, rev: r.body.rev, dirty: false, at: Date.now() }; cdSyncStore();
+        SY = { code: code, show: show, rev: r.body.rev, dirty: false, at: Date.now() }; cdSyncStore();
         cdSyncCodeSheet(true);
       }).catch(function () { mk.disabled = false; cdToast('Could not reach the sync server'); });
     });
-    root.appendChild(mk);
+    row.appendChild(sug); row.appendChild(mk); root.appendChild(row);
     var jl = el('p', 'cd-lbl', 'Already have a code'); jl.style.marginTop = '26px';
     root.appendChild(jl);
     var f = el('input', 'cd-field'); f.id = 'cdSyncCode'; f.type = 'text';
-    f.setAttribute('autocapitalize', 'characters'); f.setAttribute('autocomplete', 'off'); f.setAttribute('spellcheck', 'false');
-    f.placeholder = 'XXXX-XXXX-XXXX-XXXX'; f.setAttribute('aria-label', 'Sync code from your other device');
+    f.setAttribute('autocapitalize', 'none'); f.setAttribute('autocomplete', 'off'); f.setAttribute('spellcheck', 'false');
+    f.placeholder = 'Your code from the other device'; f.setAttribute('aria-label', 'Sync code from your other device');
     f.style.marginTop = '10px';
     root.appendChild(f);
     root.appendChild(el('p', 'cd-note', 'Joining replaces everything on this device with the synced copy.'));
@@ -2851,14 +2880,14 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var join = el('button', 'cd-btn', 'Join'); join.type = 'button'; join.id = 'cdSyncJoin';
     join.addEventListener('click', function () {
       var code = cdSyncNorm(f.value);
-      if (!code) { cdToast('A sync code is sixteen letters and numbers'); return; }
+      if (!code) { cdToast('A sync code is at least ' + SYNC_MIN + ' letters or numbers'); return; }
       join.disabled = true;
       cdSyncDerive(code).then(function (k) {
         return cdSyncFetch(k, 'GET').then(function (g) {
           if (g.status === 404) { cdToast('Nothing is synced with that code'); join.disabled = false; return; }
           if (g.status !== 200) throw new Error(g.status);
           return cdSyncOpen(k, g.body).then(function (remote) {
-            SY = { code: code, rev: 0, dirty: false, at: 0 };
+            SY = { code: code, show: f.value.trim().slice(0, 160), rev: 0, dirty: false, at: 0 };
             cdSyncApply(remote, g.body.rev, false);
           });
         });
@@ -2871,12 +2900,12 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     if (!SY) return;
     var root = el('div');
     root.appendChild(el('p', 'cd-note', fresh ? 'On your other device, open Settings, choose Sync with another device, and enter this code.' : 'Enter this on another device to sync it.'));
-    var c = el('p', 'cd-sycode', cdSyncFmt(SY.code)); c.id = 'cdSyncCodeShow';
+    var c = el('p', 'cd-sycode', esc(cdSyncShown())); c.id = 'cdSyncCodeShow';
     root.appendChild(c);
     var foot = el('div', 'cd-foot');
     var cp = el('button', 'cd-btn', 'Copy'); cp.type = 'button';
     cp.addEventListener('click', function () {
-      var t = cdSyncFmt(SY.code);
+      var t = cdSyncShown();
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { cdToast('Code copied'); }, function () {});
     });
     var dn = el('button', 'cd-btn go', 'Done'); dn.type = 'button'; dn.addEventListener('click', cdClose);
