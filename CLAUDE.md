@@ -5313,6 +5313,27 @@ feeding the baby.
 each is a session you did, and leaving them out was a day of surfing
 counting as a day off.
 
+### Nine more, and three words moved to the kind they are
+
+A bath (and a spa, a massage, a float), a tooth, a balloon for a
+party, a yarn ball on needles for craft, a puzzle piece, a board with a
+chart for a presentation, a hammock for a rest day, a ballot box, and a
+star for a night outside. Eighty kinds now.
+
+**Three words left a kind that had been standing in for them.**
+Massage left stretch, the dentist left the cross, and a party left
+people: each was the nearest thing when there was no glyph for it, and
+a stand-in stops being right the moment the real one exists.
+
+**Order decided four of them.** Party sits above baby so *baby shower*
+is a party; teeth and bath sit above shower so *brush teeth* is not a
+wash; the star sits above everything so *meteor shower* is the sky;
+and *democracy sausage* is a vote rather than a BBQ.
+
+**Craft went in as a ball of yarn with a strand off it and read as a
+magnifying glass over a basketball; vote went in as a box with a slot
+and read as a printer.** Both redrawn, both judged again at 18px.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

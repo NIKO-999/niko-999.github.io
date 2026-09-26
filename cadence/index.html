@@ -892,6 +892,8 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      phrase is always listed before the word inside it. */
   var KW = [
     ['wake', /\b(wake up|get up|wake|rise|alarm)\b/],
+    ['star', /\b(stargazing|star gazing|astronomy|telescope|night sky|meteor shower|milky way)\b/],
+    ['vote', /\b(vote|voting|election|polling booth|polling|democracy sausage)\b/],
     ['fish', /\b(fishing|fly fishing|crabbing|prawning)\b/],
     ['warm', /\b(warm up|warm-up|warmup|cool down|cool-down|cooldown)\b/],
     ['grocery', /\b(groceries|grocery|grocery shop|food shop|supermarket|coles|woolies|woolworths|aldi|iga|costco|harris farm|foodworks|butcher|fruit shop|greengrocer|farmers markets?|fruit and veg)\b/],
@@ -905,7 +907,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     ['surf', /\b(surf|surfing|kayak|kayaking|paddle board|paddleboard|sup|sail|sailing|rowing|bodyboard|boogie board|jet ski|boat|boating)\b/],
     ['ski', /\b(ski|skiing|snowboard|snowboarding|thredbo|perisher|falls creek|mt buller|the snow)\b/],
     ['train', /\b(work out|workout|gym|train|training|lift|lifting|weights|push day|pull day|leg day|legs|upper|lower|full body|crossfit|hiit|pilates|boxing|strength|f45|orangetheory|bootcamp|boot camp|anytime fitness|reformer)\b/],
-    ['stretch', /\b(stretch|stretching|yoga|mobility|recovery|sauna|plunge|foam roll|massage)\b/],
+    ['stretch', /\b(stretch|stretching|yoga|mobility|recovery|sauna|plunge|foam roll)\b/],
     ['hike', /\b(hike|hiking|trail|trek|mountain|bushwalk|bushwalking|bush walk|national park|lookout)\b/],
     ['walk', /\b(walk the dog|walk|steps)\b/],
     ['pet', /\b(feed the dog|feed the cat|dog|dogs|cat|cats|pets?|vet|dog park|dog wash|groomer)\b/],
@@ -919,6 +921,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     ['study', /\b(study|studying|learn|learning|course|class|lecture|revise|revision|homework|practice|exam|duolingo|language|spanish|french|japanese|uni|tafe|tutorial|tute|assignment|lab)\b/],
     ['write', /\b(journal|journaling|write|writing|blog|draft|essay|diary|gratitude|affirmations)\b/],
     ['idea', /\b(brainstorm|brainstorming|ideas?|think|thinking|strategy|reflect|reflection)\b/],
+    ['craft', /\b(knit|knitting|crochet|sew|sewing|craft|crafts|crafting|pottery|ceramics|woodwork|scrapbook|scrapbooking|embroidery|candle making)\b/],
     ['art', /\b(draw|drawing|paint|painting|sketch|sketching|art|design)\b/],
     ['photo', /\b(photo|photos|photography|camera|edit photos)\b/],
     ['film', /\b(filming|film content|record|recording|vlog|content|edit video|editing|reels|tiktok|instagram|socials|social media|post)\b/],
@@ -931,12 +934,14 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     ['move', /\b(commute|bus|travel|school run|pick up|drop off|uber|ferry|tram|light rail|metro|opal|myki|train station)\b/],
     ['mail', /\b(emails?|inbox|mail|newsletter)\b/],
     ['phone', /\b(phone call|calls?|phone|facetime|call mum|call dad)\b/],
+    ['present', /\b(presentation|present|pitch|slides|keynote|speech|demo|webinar|workshop|pitch deck)\b/],
     ['talk', /\b(meeting|meetings|standup|stand-up|stand up|1:1|one on one|sync|interview|catch up|catch-up|coffee chat)\b/],
     ['money', /\b(budget|budgeting|bills|finances|finance|invoice|invoices|taxes|tax|bank|banking|pay rent|rent|centrelink|mygov|my gov|ato|tax return|super|superannuation|commbank|westpac|nab|anz)\b/],
     ['plan', /\b(weekly review|plan|planning|plan the day|review|schedule|agenda|goals|to do|todo)\b/],
     ['work', /\b(deep work|work|office|shift|admin|focus|project|client|clients)\b/],
     ['bbq', /\b(bbq|barbie|barbecue|barby|snags|sausage sizzle|bunnings sausage|grill|grilling)\b/],
     ['cook', /\b(meal prep|cook|cooking|bake|baking|prep food)\b/],
+    ['party', /\b(party|parties|celebration|celebrate|wedding|engagement|hens|bucks|hens night|bucks night|christening|baby shower|gender reveal|housewarming|nye|new years)\b/],
     ['baby', /\b(baby|feed the baby|bottle feed|bottle feeding|nappy|nappies|diaper|newborn)\b/],
     ['eat', /\b(eat|eat out|lunch|breakfast|brunch|dinner|supper|meal|snack|smoothie|protein shake|takeaway|restaurant|dessert|brekkie|maccas|hungry jacks|kfc|subway|uber eats|menulog|doordash|fish and chips|pie|servo pie|parma|pub feed|yum cha)\b/],
     ['drink', /\b(drinks|pub|bar|wine|beer|cocktails|happy hour|bottle-o|bottle o|bottle shop|bottlo|winery|wine tasting|brewery|rsl|bowlo|schooner)\b/],
@@ -952,14 +957,18 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     ['fix', /\b(fix|repair|repairs|diy|maintenance|plumber|bunnings|hardware|mitre 10|total tools|handyman)\b/],
     ['clean', /\b(clean|cleaning|tidy|tidy up|vacuum|hoover|dishes|declutter|chores|mop|make the bed|make bed|clean the pool|pool clean|bond clean|clean the car)\b/],
     ['cut', /\b(haircut|hair cut|barber|hairdresser|nails|manicure|trim|spray tan|lashes|brows|waxing)\b/],
-    ['shower', /\b(shower|bath|skincare|skin care|shave|brush teeth|teeth|floss|get ready|hygiene)\b/],
+    ['teeth', /\b(dentist|orthodontist|brush teeth|teeth|floss|flossing|invisalign)\b/],
+    ['bath', /\b(bath|bubble bath|spa|day spa|massage|facial|float tank|hot tub|hot springs|epsom)\b/],
+    ['shower', /\b(shower|skincare|skin care|shave|get ready|hygiene)\b/],
     ['meds', /\b(meds|medication|medicine|vitamins|supplements|pills|creatine|chemist|chemist warehouse|pharmacy|script|prescription)\b/],
-    ['health', /\b(doctor|dentist|physio|therapy|therapist|gp|checkup|check-up|appointment|hospital|chiro|medicare|bulk bill|blood test|pathology|bloods|optometrist|eye test|skin check)\b/],
+    ['health', /\b(doctor|physio|therapy|therapist|gp|checkup|check-up|appointment|hospital|chiro|medicare|bulk bill|blood test|pathology|bloods|optometrist|eye test|skin check)\b/],
     ['heart', /\b(self care|self-care|volunteer|volunteering|charity|donate|me time|donate blood|blood donation|red cross|lifeblood)\b/],
     ['gift', /\b(birthday|gift|gifts|presents|wrap presents|anniversary)\b/],
-    ['people', /\b(family|friends|date night|date|social|party|dinner with|visit|hang out)\b/],
+    ['people', /\b(family|friends|date night|date|social|dinner with|visit|hang out)\b/],
+    ['relax', /\b(relax|relaxing|chill|chill out|rest day|lie in|sleep in|day off|down time|downtime|lazy day|hammock|unwind)\b/],
     ['screen', /\b(watch|tv show|tv|netflix|movie|movies|film|youtube|series|anime|cinema|hoyts|event cinemas|stan|binge|kayo|foxtel)\b/],
     ['ticket', /\b(concert|gig|festival|theatre|theater|show|event|tickets|comedy|zoo|aquarium|museum|gallery|art gallery|theme park|dreamworld|movie world|luna park|the races|melbourne cup|footy game|trivia|pub trivia|comedy club)\b/],
+    ['puzzle', /\b(puzzle|puzzles|jigsaw|crossword|sudoku|wordle|lego)\b/],
     ['game', /\b(game|games|gaming|video games|chess|xbox|playstation|ps5)\b/],
     ['sleep', /\b(wind down|sleep|bed|bedtime|nap)\b/]
   ];
@@ -967,7 +976,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     read: 'mind', study: 'mind', calm: 'mind', write: 'mind', listen: 'mind', music: 'mind',
     chart: 'work', move: 'work', work: 'work', code: 'work', mail: 'work', phone: 'work', talk: 'work', money: 'work', plan: 'work',
     wake: 'rest', eat: 'rest', coffee: 'rest', sleep: 'rest', cook: 'rest', water: 'rest', sun: 'rest', shower: 'rest', meds: 'rest', health: 'rest',
-    shop: 'rest', hike: 'body', fish: 'rest', news: 'mind', idea: 'mind', art: 'mind', photo: 'mind', film: 'work', fly: 'work', car: 'work', baby: 'rest', drink: 'rest', bin: 'rest', pack: 'rest', fix: 'rest', cut: 'rest', heart: 'rest', gift: 'rest', ticket: 'rest', laundry: 'rest', clean: 'rest', pet: 'rest', grocery: 'rest', bbq: 'rest', camp: 'rest', kids: 'rest', furniture: 'rest', home: 'rest', trip: 'rest', beach: 'rest', plant: 'rest', people: 'rest', screen: 'rest', game: 'rest', dot: 'none' };
+    shop: 'rest', hike: 'body', fish: 'rest', news: 'mind', idea: 'mind', art: 'mind', photo: 'mind', film: 'work', fly: 'work', car: 'work', baby: 'rest', drink: 'rest', bin: 'rest', pack: 'rest', fix: 'rest', cut: 'rest', heart: 'rest', gift: 'rest', ticket: 'rest', laundry: 'rest', clean: 'rest', pet: 'rest', bath: 'rest', teeth: 'rest', party: 'rest', relax: 'rest', vote: 'rest', star: 'rest', craft: 'mind', puzzle: 'mind', present: 'work', grocery: 'rest', bbq: 'rest', camp: 'rest', kids: 'rest', furniture: 'rest', home: 'rest', trip: 'rest', beach: 'rest', plant: 'rest', people: 'rest', screen: 'rest', game: 'rest', dot: 'none' };
   var TRAINING = { train: 1, run: 1, stretch: 1 };
   function cdKind(name) {
     var s = String(name || '').toLowerCase();
@@ -1050,6 +1059,15 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     camp: '<path d="M2 20.5h20M3.5 20.5L12 4l8.5 16.5M12 11.5l-2.8 9M12 11.5l2.8 9"/>',
     ski: '<circle cx="15.5" cy="4.5" r="1.8"/><path d="M3 16.5l18 5M8.5 12l4-3.5 3 3-2 4.5M12.5 8.5l-2 5.5 4 1.5"/>',
     kids: '<path d="M4 8h8v5h8a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6zM12 8a8 8 0 0 1 8 5M2 6h2"/><circle cx="8" cy="21" r="1.2"/><circle cx="16" cy="21" r="1.2"/>',
+    bath: '<path d="M3 12h18v2.5a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5zM6 12V5.5a2 2 0 0 1 4 0M7 19.5l-1 2M17 19.5l1 2"/>',
+    teeth: '<path d="M12 5.5C10.5 4 8.5 3.5 6.5 4 4.5 4.7 3.8 7 4.3 9.5c.5 2.5 1.2 4 1.7 7 .4 2.5 1.2 4 2.2 4 1.5 0 1.5-4.5 3.8-4.5s2.3 4.5 3.8 4.5c1 0 1.8-1.5 2.2-4 .5-3 1.2-4.5 1.7-7 .5-2.5-.2-4.8-2.2-5.5-2-.5-4 0-5.5 1.5z"/>',
+    party: '<path d="M12 3a5.5 6.5 0 0 1 5.5 6.5c0 3.8-2.8 6.5-5.5 6.5s-5.5-2.7-5.5-6.5A5.5 6.5 0 0 1 12 3zM12 16l-1.2 1.6h2.4zM12 17.6c0 2.2-2.5 1.8-2.5 3.9"/>',
+    craft: '<circle cx="12" cy="15.5" r="5.5"/><path d="M4 3l8.5 9.5M20 3l-8.5 9.5M7.2 13c2.5 1.2 7 1.2 9.6 0M6.8 17.5c2.5 1.3 7.5 1.3 10.4 0"/>',
+    puzzle: '<path d="M4 8h4a2 2 0 1 1 4 0h4v4a2 2 0 1 1 0 4v4h-4a2 2 0 1 0-4 0H4v-4a2 2 0 1 0 0-4z"/>',
+    present: '<rect x="3" y="3.5" width="18" height="11.5" rx="1"/><path d="M12 15v3M8 21l4-3 4 3M7 11.5l3-3 2.5 2L17 6.5"/>',
+    relax: '<path d="M3 5v15M21 5v15M3 8.5c3 6.5 15 6.5 18 0"/><circle cx="9" cy="10" r="1.6"/>',
+    vote: '<rect x="4" y="12" width="16" height="8.5" rx="1"/><path d="M8 16h8M9.8 12L8.3 5.2l6.8-1.5 1.8 8.3"/>',
+    star: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z"/>',
     dot: '<rect x="7" y="7" width="10" height="10" rx="2.5"/>'
   };
   function cdGlyph(k) { return '<span class="cd-rg" data-g="' + k + '" aria-hidden="true"><svg viewBox="0 0 24 24">' + (GLYPH[k] || GLYPH.dot) + '</svg></span>'; }

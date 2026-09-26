@@ -739,7 +739,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       'Bike ride': 'cycle', 'Tennis': 'sport', 'Feed the dog': 'pet', 'Water plants': 'plant', 'Drink water': 'water', 'Podcast': 'listen',
       'Guitar': 'music', 'Coding': 'code', 'Journal': 'write', 'Sunlight': 'sun', 'Standup': 'talk', 'Budget': 'money', 'Plan the week': 'plan',
       'Meal prep': 'cook', 'Groceries': 'grocery', 'Laundry': 'laundry', 'Clean kitchen': 'clean', 'Shower': 'shower', 'Vitamins': 'meds',
-      'Dentist': 'health', 'Family': 'people', 'Netflix': 'screen', 'Gaming': 'game', 'Hike': 'hike', 'Fishing': 'fish', 'Morning news': 'news', 'Brainstorm': 'idea', 'Sketch': 'art', 'Edit photos': 'photo',
+      'Dentist': 'teeth', 'Family': 'people', 'Netflix': 'screen', 'Gaming': 'game', 'Hike': 'hike', 'Fishing': 'fish', 'Morning news': 'news', 'Brainstorm': 'idea', 'Sketch': 'art', 'Edit photos': 'photo',
       'Film content': 'film', 'Fly to Sydney': 'fly', 'Drive to work': 'car', 'Feed the baby': 'baby', 'Drinks with mates': 'drink',
       'Take out the bins': 'bin', 'Pack for trip': 'pack', 'Fix the sink': 'fix', 'Haircut': 'cut', 'Self care': 'heart', 'Birthday': 'gift',
       'Concert': 'ticket', 'Watch a show': 'screen',
@@ -749,6 +749,8 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       'Check markets': 'chart', 'Bunnings run': 'fix', 'Parkrun': 'run', 'Footy': 'sport', 'BBQ': 'bbq', 'Camping': 'camp', 'Thredbo': 'ski',
       'School run': 'kids', 'Daycare pickup': 'kids', 'Tip run': 'bin', 'Coffee run': 'coffee', 'Bottle-o': 'drink', 'Maccas': 'eat', 'Rego': 'car',
       'Centrelink': 'money', 'Medicare': 'health', 'Chemist': 'meds', 'Uni': 'study', 'Zoo': 'ticket', 'Bushwalk': 'hike', 'Ferry': 'move',
+      'Bubble bath': 'bath', 'Massage': 'bath', 'Brush teeth': 'teeth', 'Wedding': 'party', 'Birthday party': 'party', 'Baby shower': 'party',
+      'Knitting': 'craft', 'Crossword': 'puzzle', 'Client presentation': 'present', 'Rest day': 'relax', 'Vote': 'vote', 'Stargazing': 'star',
       'Book club at Dave\'s': 'read', 'Qwerty': 'dot' };
     const got = {};
     for (const n of Object.keys(common)) got[n] = await K(n);
