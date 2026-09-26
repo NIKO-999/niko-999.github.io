@@ -2,8 +2,11 @@
 (function (global) {
   "use strict";
   const C = 300;
-  const R = { out: 294, zin: 262, tick: 255, planet: 228, deg: 205, min: 193, houseNum: 132, asp: 120 };
-  const WHEEL_POINTS = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "northNode", "southNode", "chiron", "lilith"];
+  const RS = { out: 294, zin: 262, tick: 255, planet: 228, deg: 205, min: 193, houseNum: 132, asp: 120 };
+  // bi-wheel: the second chart sits in the outer ring, the natal chart inside it
+  const RB = { out: 294, zin: 262, tick: 255, planet: 232, deg: 213, min: 203, ring: 192, planet2: 172, deg2: 153, min2: 143, houseNum: 118, asp: 106 };
+  const ASTEROIDS = ["ceres", "pallas", "juno", "vesta"];
+  const WHEEL_POINTS = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "northNode", "southNode", "chiron", "lilith", "ceres", "pallas", "juno", "vesta"];
   const ELEMENT_OF = ["fire", "earth", "air", "water"];
 
   function pos(lon, r, rot) {
@@ -37,6 +40,7 @@
 
   function render(chart, opts) {
     opts = opts || {};
+    const R = opts.outer ? RB : RS;
     const { SIGNS, PLANETS, ASPECTS } = global.AstroContent;
     const keys = global.AstroEngine.SIGN_KEYS;
     const rot = chart.timeKnown ? chart.asc : 0;
@@ -55,6 +59,7 @@
     out.push(`<circle cx="${C}" cy="${C}" r="${R.zin}" class="w-ring"/>`);
     out.push(`<circle cx="${C}" cy="${C}" r="${R.tick}" class="w-ring faint"/>`);
     out.push(`<circle cx="${C}" cy="${C}" r="${R.asp}" fill="url(#wg-core)" class="w-ring"/>`);
+    if (opts.outer) out.push(`<circle cx="${C}" cy="${C}" r="${R.ring}" class="w-ring faint"/>`);
 
     // zodiac band
     for (let i = 0; i < 12; i++) {
@@ -80,7 +85,7 @@
       for (let h = 1; h <= 12; h++) {
         const lon = chart.houses[h];
         const angle = h === 1 || h === 4 || h === 7 || h === 10;
-        const [x0, y0] = pos(lon, angle ? R.out + 6 : R.tick, rot), [x1, y1] = pos(lon, R.asp, rot);
+        const [x0, y0] = pos(lon, angle ? R.out + 6 : opts.outer ? R.ring : R.tick, rot), [x1, y1] = pos(lon, R.asp, rot);
         out.push(`<line x1="${f(x0)}" y1="${f(y0)}" x2="${f(x1)}" y2="${f(y1)}" class="w-cusp${angle ? " angle" : ""}"/>`);
         const next = chart.houses[h === 12 ? 1 : h + 1];
         const mid = lon + (((next - lon) % 360) + 360) % 360 / 2;
@@ -97,27 +102,39 @@
     // aspects
     const shown = chart.points.filter((p) => WHEEL_POINTS.includes(p.key));
     const lonOf = Object.fromEntries(chart.points.map((p) => [p.key, p.lon]));
-    for (const a of chart.aspects) {
+    if (opts.outer) {
+      // aspects between the two charts: natal key a, outer key b
+      const lonO = Object.fromEntries(opts.outer.points.map((p) => [p.key, p.lon]));
+      for (const a of opts.outer.aspects || []) {
+        if (a.type === "conjunction" || !(a.a in lonOf) || !(a.b in lonO)) continue;
+        const [x0, y0] = pos(lonOf[a.a], R.asp, rot), [x1, y1] = pos(lonO[a.b], R.asp, rot);
+        const op = (0.25 + 0.65 * a.strength).toFixed(2);
+        out.push(`<line class="w-asp ${a.major ? "" : "minor"}" x1="${f(x0)}" y1="${f(y0)}" x2="${f(x1)}" y2="${f(y1)}" stroke="${ASPECTS[a.type].color}" stroke-opacity="${op}"/>`);
+      }
+    }
+    for (const a of opts.outer ? [] : chart.aspects) {
       if (!(a.a in lonOf) || !(a.b in lonOf)) continue;
       if (a.type === "conjunction") continue;
       if (!WHEEL_POINTS.includes(a.a) && a.a !== "asc" && a.a !== "mc") continue;
       if (!WHEEL_POINTS.includes(a.b) && a.b !== "asc" && a.b !== "mc") continue;
+      if (ASTEROIDS.includes(a.a) || ASTEROIDS.includes(a.b)) continue;
       const [x0, y0] = pos(lonOf[a.a], R.asp, rot), [x1, y1] = pos(lonOf[a.b], R.asp, rot);
       const op = (0.25 + 0.65 * a.strength).toFixed(2);
       out.push(`<line class="w-asp ${a.major ? "" : "minor"}" data-a="${a.a}" data-b="${a.b}" x1="${f(x0)}" y1="${f(y0)}" x2="${f(x1)}" y2="${f(y1)}" stroke="${ASPECTS[a.type].color}" stroke-opacity="${op}"/>`);
     }
 
     // planets
-    const placed = spread(shown, 7.2);
+    const ring = (list, rr, tick, cls) => {
+    const placed = spread(list, 7.2);
     for (const p of placed) {
       const P = PLANETS[p.key];
-      const [tx0, ty0] = pos(p.lon, R.tick, rot), [tx1, ty1] = pos(p.lon, R.tick - 4, rot);
-      const [cx1, cy1] = pos(p.d, R.planet + 12, rot);
-      const [gx, gy] = pos(p.d, R.planet, rot);
-      const [dx, dy] = pos(p.d, R.deg, rot);
-      const [mx, my] = pos(p.d, R.min, rot);
+      const [tx0, ty0] = pos(p.lon, tick, rot), [tx1, ty1] = pos(p.lon, tick - 4, rot);
+      const [cx1, cy1] = pos(p.d, rr.planet + 12, rot);
+      const [gx, gy] = pos(p.d, rr.planet, rot);
+      const [dx, dy] = pos(p.d, rr.deg, rot);
+      const [mx, my] = pos(p.d, rr.min, rot);
       const [ax, ay] = pos(p.lon, R.asp, rot);
-      out.push(`<g class="w-planet" data-key="${p.key}" tabindex="0" role="button" aria-label="${P.name}">`);
+      out.push(`<g class="w-planet${cls}${ASTEROIDS.includes(p.key) ? " minor-body" : ""}" data-key="${p.key}" tabindex="0" role="button" aria-label="${P.name}">`);
       out.push(`<circle cx="${f(gx)}" cy="${f(gy)}" r="13" class="w-hit"/>`);
       out.push(`<line x1="${f(tx0)}" y1="${f(ty0)}" x2="${f(tx1)}" y2="${f(ty1)}" class="w-ptick" stroke="${P.color}"/>`);
       out.push(`<line x1="${f(tx1)}" y1="${f(ty1)}" x2="${f(cx1)}" y2="${f(cy1)}" class="w-connector"/>`);
@@ -127,6 +144,12 @@
       out.push(`<text x="${f(mx)}" y="${f(my)}" class="w-min">${String(p.min).padStart(2, "0")}′${p.retro ? "℞" : ""}</text>`);
       out.push(`</g>`);
     }
+    };
+    if (opts.outer) {
+      const main = (p) => WHEEL_POINTS.includes(p.key) && !ASTEROIDS.includes(p.key);
+      ring(opts.outer.points.filter(main), R, R.tick, " outer");
+      ring(shown.filter(main), { planet: R.planet2, deg: R.deg2, min: R.min2 }, R.ring, "");
+    } else ring(shown, R, R.tick, "");
     out.push(`</svg>`);
     return out.join("");
   }

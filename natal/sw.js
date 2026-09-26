@@ -1,5 +1,5 @@
 /* Natal service worker: offline app shell + cached fonts. Bump VERSION when files change. */
-const VERSION = "natal-v22";
+const VERSION = "natal-v23";
 const SHELL = [
   "./",
   "index.html",
@@ -12,6 +12,7 @@ const SHELL = [
   "icons/icon.svg",
   "vendor/astronomy.browser.min.js",
   "js/chiron-data.js",
+  "js/asteroid-data.js",
   "js/lilith-data.js",
   "js/engine.js",
   "js/content.js",
@@ -27,6 +28,10 @@ const SHELL = [
   "js/deep-extra.js",
   "js/deep-transits.js",
   "js/deep-transit-houses.js",
+  "js/deep-asteroids.js",
+  "js/deep-synastry.js",
+  "js/deep-overlays.js",
+  "js/deep-cycles.js",
   "js/cities.js",
   "js/wheel.js",
   "js/sky.js",

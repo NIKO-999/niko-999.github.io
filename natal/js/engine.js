@@ -100,8 +100,8 @@
     const xp = a * (Math.cos(E) - e), yp = a * Math.sqrt(1 - e * e) * Math.sin(E);
     return [xp * Px + yp * Qx, xp * Py + yp * Qy, xp * Pz + yp * Qz];
   }
-  function chironHelioEcl(date) {
-    const tbl = global.CHIRON_TABLE;
+  function chironHelioEcl(date, tbl) {
+    tbl = tbl || global.CHIRON_TABLE;
     const yf = date.getUTCFullYear() + date.getUTCMonth() / 12;
     let y = Math.round(yf);
     y = Math.max(tbl.start, Math.min(tbl.start + tbl.rows.length - 1, y));
@@ -110,7 +110,7 @@
     return keplerPropagate(tbl.rows[y - tbl.start], dt);
   }
   let ROT_ECL_EQJ = null, ROT_EQJ_ECL = null;
-  function chironLonLat(date) {
+  function chironLonLat(date, tbl) {
     if (!ROT_ECL_EQJ) {
       ROT_ECL_EQJ = A.Rotation_ECL_EQJ();
       ROT_EQJ_ECL = A.Rotation_EQJ_ECL();
@@ -118,11 +118,15 @@
     const t = A.MakeTime(date);
     const earthEqj = A.HelioVector(A.Body.Earth, t);
     const earth = A.RotateVector(ROT_EQJ_ECL, earthEqj);
-    let p = chironHelioEcl(date);
+    let p = chironHelioEcl(date, tbl);
     // one light-time iteration
     const dist = Math.hypot(p[0] - earth.x, p[1] - earth.y, p[2] - earth.z);
-    p = chironHelioEcl(new Date(date.getTime() - (dist / 173.1446) * 86400000));
-    const geoEcl = new A.Vector(p[0] - earth.x, p[1] - earth.y, p[2] - earth.z, t);
+    p = chironHelioEcl(new Date(date.getTime() - (dist / 173.1446) * 86400000), tbl);
+    // annual aberration: shift the direction by the Earth's velocity times the light-time
+    const ev = A.HelioState(A.Body.Earth, t);
+    const vel = A.RotateVector(ROT_EQJ_ECL, new A.Vector(ev.vx, ev.vy, ev.vz, t));
+    const lt = dist / 173.1446;
+    const geoEcl = new A.Vector(p[0] - earth.x + vel.x * lt, p[1] - earth.y + vel.y * lt, p[2] - earth.z + vel.z * lt, t);
     const geoEqj = A.RotateVector(ROT_ECL_EQJ, geoEcl);
     const ecl = A.Ecliptic(geoEqj);
     return { lon: norm(ecl.elon), lat: ecl.elat };
@@ -153,6 +157,8 @@
         return { lon: meanLilith(date), lat: 0 };
       case "chiron":
         return chironLonLat(date);
+      case "ceres": case "pallas": case "juno": case "vesta":
+        return chironLonLat(date, global.ASTEROID_TABLE[key]);
       default: {
         const v = A.GeoVector(A.Body[BODY[key]], date, true);
         const e = A.Ecliptic(v);
@@ -368,7 +374,8 @@
     { key: "biquintile", angle: 144, orb: 1.5, major: false, nature: "creative" },
   ];
   const LIGHTS = new Set(["sun", "moon"]);
-  const MINOR_POINTS = new Set(["northNode", "southNode", "chiron", "lilith", "fortune", "vertex"]);
+  const ASTEROIDS = ["ceres", "pallas", "juno", "vesta"];
+  const MINOR_POINTS = new Set(["northNode", "southNode", "chiron", "lilith", "fortune", "vertex"].concat(ASTEROIDS));
   const ANGLES = new Set(["asc", "mc"]);
 
   function orbFor(asp, a, b, orbScale) {
@@ -473,6 +480,7 @@
   const POINT_ORDER = [
     "sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn",
     "uranus", "neptune", "pluto", "northNode", "southNode", "chiron", "lilith",
+    "ceres", "pallas", "juno", "vesta",
   ];
 
   /**
@@ -480,7 +488,7 @@
    * opts:  { houseSystem, nodeType, zodiac, minorAspects, orbScale }
    */
   function computeChart(input, opts) {
-    opts = Object.assign({ houseSystem: "placidus", nodeType: "mean", zodiac: "tropical", minorAspects: true, orbScale: 1 }, opts);
+    opts = Object.assign({ houseSystem: "placidus", nodeType: "mean", zodiac: "tropical", minorAspects: true, orbScale: 1, asteroids: true }, opts);
     const date = input.utc;
     const timeKnown = input.timeKnown !== false;
     const eps = trueObliquity(date);
@@ -489,7 +497,8 @@
 
     const points = [];
     for (const key of POINT_ORDER) {
-      if (key === "chiron" && !chironInRange(date)) continue;
+      if ((key === "chiron" || ASTEROIDS.includes(key)) && !chironInRange(date)) continue;
+      if (ASTEROIDS.includes(key) && (!opts.asteroids || !global.ASTEROID_TABLE)) continue;
       const now = rawLonLat(key, date, opts);
       const before = rawLonLat(key, new Date(date.getTime() - 43200000), opts);
       const after = rawLonLat(key, new Date(date.getTime() + 43200000), opts);
@@ -501,7 +510,8 @@
 
     // angles & houses
     const gast = A.SiderealTime(date); // hours
-    const ramc = norm(gast * 15 + input.lon);
+    // a progressed chart passes its own (solar-arc) RAMC
+    const ramc = typeof input.ramc === "number" ? norm(input.ramc) : norm(gast * 15 + input.lon);
     const hs = computeHouses(opts.houseSystem, ramc, input.lat, eps);
     const cusps = hs.cusps.map((c) => (c === undefined ? c : shift(c)));
     const asc = shift(hs.asc), mc = shift(hs.mc);
@@ -583,6 +593,49 @@
     return out;
   }
 
+  /** Right ascension of an ecliptic longitude on the ecliptic (latitude 0). */
+  function raOfLon(lon, eps) {
+    return norm(atan2d(sind(lon) * cosd(eps), cosd(lon)));
+  }
+
+  const YEAR = 365.242199;
+  /**
+   * Secondary progressions (a day for a year). Angles advance by the solar arc in right ascension,
+   * so progressed houses move with the progressed Sun.
+   */
+  function progressedChart(natal, target, opts) {
+    const birth = natal.input.utc;
+    const ageYears = (target.getTime() - birth.getTime()) / 86400000 / YEAR;
+    const progUtc = new Date(birth.getTime() + ageYears * 86400000);
+    const sunLon = (d) => rawLonLat("sun", d, {}).lon;
+    const epsN = trueObliquity(birth), epsP = trueObliquity(progUtc);
+    const arcRA = diff(raOfLon(sunLon(birth), epsN), raOfLon(sunLon(progUtc), epsP));
+    const pc = computeChart(Object.assign({}, natal.input, { utc: progUtc, ramc: natal.ramc + arcRA }), opts);
+    pc.progUtc = progUtc;
+    pc.ageYears = ageYears;
+    pc.solarArc = diff(natal.get("sun").lon, pc.get("sun").lon);
+    return pc;
+  }
+  /** Real date when the progressed chart reaches a given progressed moment. */
+  function progToReal(natal, progDate) {
+    const birth = natal.input.utc.getTime();
+    return new Date(birth + ((progDate.getTime() - birth) / 86400000) * YEAR * 86400000);
+  }
+
+  /** The moment the Sun returns to its natal longitude in (or around the birthday of) a given year. */
+  function solarReturnTime(natal, year, opts) {
+    const b = natal.input.utc;
+    const target = natal.get("sun").lon;
+    let lo = Date.UTC(year, b.getUTCMonth(), b.getUTCDate()) - 3 * 86400000, hi = lo + 6 * 86400000;
+    const f = (ms) => diff(target, lonAt("sun", new Date(ms), opts));
+    let flo = f(lo);
+    for (let i = 0; i < 50; i++) {
+      const m = (lo + hi) / 2, fm = f(m);
+      if (Math.sign(fm) === Math.sign(flo)) { lo = m; flo = fm; } else hi = m;
+    }
+    return new Date((lo + hi) / 2);
+  }
+
   /** Longitude (tropical, or sidereal when opts.zodiac === "sidereal") of a body at a date. */
   function lonAt(key, date, opts) {
     opts = opts || {};
@@ -591,7 +644,7 @@
   }
 
   global.AstroEngine = {
-    lonAt,
+    lonAt, progressedChart, progToReal, solarReturnTime, ASTEROIDS,
     computeChart, zonedToUtc, tzOffsetMinutes, findReturns, splitLon, norm, diff,
     SIGN_KEYS, ASPECTS, POINT_ORDER, _test: { ascFor, mcFor, placidus, computeHouses, meanNode, trueNode, meanLilith, chironLonLat },
   };

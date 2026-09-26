@@ -253,6 +253,30 @@
       focus: "your natural luck and ease", core: "your good fortune",
       desc: "The Part of Fortune blends Sun, Moon and Ascendant. It shows where happiness and material well-being come most naturally.",
     },
+    ceres: {
+      name: "Ceres", glyph: "⚳" + VS, color: "#c8d88c", cycle: "4.6 years",
+      keywords: ["nurture", "self-care", "loss and return", "nourishment"],
+      focus: "how you nurture and need to be nurtured", core: "your nurturing instinct",
+      desc: "Ceres, the largest body in the asteroid belt, is the great mother of harvest and grief. She shows how you care for others, how you need to be cared for, and how you move through loss and return.",
+    },
+    pallas: {
+      name: "Pallas", glyph: "⚴" + VS, color: "#9ec4ea", cycle: "4.6 years",
+      keywords: ["wisdom", "strategy", "pattern recognition", "creative intelligence"],
+      focus: "your strategic, pattern-seeing intelligence", core: "your creative intelligence",
+      desc: "Pallas Athena is the warrior of wisdom. She shows how you see patterns, solve problems and fight for what is fair with your mind rather than force.",
+    },
+    juno: {
+      name: "Juno", glyph: "⚵" + VS, color: "#eaa8c8", cycle: "4.4 years",
+      keywords: ["commitment", "partnership", "loyalty", "equality"],
+      focus: "what you need in committed partnership", core: "your need for committed partnership",
+      desc: "Juno, the wife of Jupiter, rules committed partnership. She shows what you need to feel an equal in a long-term bond, and where issues of loyalty, jealousy and power arise.",
+    },
+    vesta: {
+      name: "Vesta", glyph: "⚶" + VS, color: "#f1b37c", cycle: "3.6 years",
+      keywords: ["devotion", "focus", "the sacred flame", "dedication"],
+      focus: "what you devote yourself to", core: "your sacred focus",
+      desc: "Vesta, keeper of the hearth flame, shows what you give yourself to wholeheartedly, where you need solitude to stay focused, and how you keep your inner fire alight.",
+    },
     vertex: {
       name: "Vertex", glyph: "Vx", color: "#b8c3dd",
       keywords: ["fate", "encounters", "turning points"],
