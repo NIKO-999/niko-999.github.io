@@ -4829,6 +4829,30 @@ words it stays. Bite-proved by drawing the row at rest and by taking
 the shut away. The first run fell on this file's oldest test trap: a
 `const opened` already declared four hundred lines down.
 
+### A long name steps down instead of wrapping
+
+Reported off a screenshot: *Putting room together* at 46px took two
+lines and pushed the day down the screen. The middle's name is fitted
+now — `cdHeroFit` measures it on one line against the hero's own
+content width and steps down 2px at a time until it fits, floored at
+28, which is still the largest type drawn. Past the floor it wraps to
+two lines rather than being cut, because the name is the whole of what
+the middle says.
+
+**Measured against the PARENT, never the button.** The button is
+shrink-to-fit, so its own box always fits its words and a scrollWidth
+check on it can never fail. It runs on every paint of the hero and on
+resize, and returns when the view is hidden, since a hidden pane
+reports no width.
+
+**And "cut" had to be asked of the words, not the box.** The first
+check read `scrollHeight > clientHeight` and failed a name that fits:
+at 1.05 leading the font's content area sits 2px taller than its line
+box at any size, the full 46 included. The claim is that the words sit
+inside the hero, so the check reads the text range against it.
+Bite-proved by taking the fit loop out: the name comes back at 46 over
+two lines.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

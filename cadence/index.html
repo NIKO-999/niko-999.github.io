@@ -1123,6 +1123,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     }
     $('cdHeroK').textContent = cap;
     $('cdHeroN').textContent = name;
+    cdHeroFit();
     $('cdHeroN').disabled = !b;
     $('cdHeroN').setAttribute('aria-label', b ? b.n + ', ' + cdHM(b.s) + (b.e > b.s ? ' to ' + cdHM(b.e) : '') + '. Open' : name);
     $('cdHeroS').innerHTML = sub;
@@ -1938,6 +1939,23 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var body = txt.slice(1).map(function (b) { return esc(cdNbText(b)); }).join('\n');
     return hd + (body ? '<span class="cd-ntx">' + body + '</span>' : '') + (pics ? '<small>' + pics + (pics === 1 ? ' picture' : ' pictures') + '</small>' : '');
   }
+  /* A name too long for one line steps DOWN until it fits, rather than
+     wrapping or being cut: two lines of 46px pushed the rest of the day
+     down the screen, and the clamp's ellipsis cut a name that is the whole
+     of what the middle says. Floored at 28, which is still the largest
+     type drawn; past that it wraps to two lines at the floor, because a
+     name is never cut. Measured against the pane's own width, since the
+     button is shrink-to-fit and its own box always fits its words. */
+  function cdHeroFit() {
+    var el = $('cdHeroN'), pc = getComputedStyle(el.parentNode), room = el.parentNode.clientWidth - parseFloat(pc.paddingLeft) - parseFloat(pc.paddingRight);
+    el.style.fontSize = '';
+    if (!(room > 0)) return;
+    el.style.whiteSpace = 'nowrap';
+    var fs = parseFloat(getComputedStyle(el).fontSize);
+    while (el.scrollWidth > room && fs > 28) { fs -= 2; el.style.fontSize = fs + 'px'; }
+    el.style.whiteSpace = '';
+  }
+  window.addEventListener('resize', function () { if (view === 'day') cdHeroFit(); });
   function cdNoteSync() { $('cdNoteGo').disabled = !$('cdNoteIn').value.trim(); }
   /* Open while a caret or a press is inside it, and while it holds anything
      you would lose by it shutting: words, Important, or a date that is not

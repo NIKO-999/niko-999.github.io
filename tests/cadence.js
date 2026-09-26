@@ -395,6 +395,22 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await c.close();
   }
   {
+    /* A running name too long for one line steps down until it fits on
+       one, never cut; a short one keeps the full 46. */
+    const { c, page } = await ctx({ init: `localStorage.setItem('cad.week.v1', JSON.stringify([{ id: 'r1', n: 'Putting room together', d: [4], s: 600, e: 660 }]));` });
+    const fit = await page.evaluate(() => {
+      const el = document.getElementById('cdHeroN'), r = el.getBoundingClientRect(), fs = parseFloat(getComputedStyle(el).fontSize), lh = parseFloat(getComputedStyle(el).lineHeight);
+      return { t: el.textContent, fs, lines: Math.round(r.height / lh), cut: (() => { const g = document.createRange(); g.selectNodeContents(el); const t = g.getBoundingClientRect(), p = el.parentNode.getBoundingClientRect(); return t.left < p.left - .5 || t.right > p.right + .5 || t.right > r.right + .5; })(), inside: r.left >= 0 && r.right <= innerWidth };
+    });
+    ok('a long running name shrinks to one line rather than wrapping or cutting', /Putting room together/.test(fit.t) && fit.fs < 46 && fit.fs >= 28 && fit.lines === 1 && !fit.cut && fit.inside, fit);
+    await c.close();
+  }
+  {
+    const { c, page } = await ctx({});
+    ok('a short one keeps the full size', parseFloat(await page.$eval('#cdHeroN', (e) => getComputedStyle(e).fontSize)) === 46);
+    await c.close();
+  }
+  {
     const { c, page } = await ctx({ init: `localStorage.setItem('cad.week.v1', JSON.stringify([{ id: 'm1', n: 'Gym', d: [0], s: 420, e: 480 }]));` });
     ok('a day with nothing on says so', (await heroOf(page)).join('|') === 'Today · 25 Sep|Nothing on||', await heroOf(page));
     ok('and offers the way to put something on it', !(await shown(page, '#cdGo')) && /Add a block/.test(await page.textContent('#cdAgenda')));
