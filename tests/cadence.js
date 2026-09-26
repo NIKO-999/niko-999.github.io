@@ -1639,6 +1639,148 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await A.c.close(); await B2.c.close(); await C3.c.close();
   }
 
+  /* ── reminders: sent at the minute, sealed on the phone ──
+     iOS lets a page show a notification and never schedule one, so the
+     worker sends them. The whole claim is that it can do that without
+     reading them: the test is the phone's own push keys, generated HERE,
+     so the queue is decrypted in this process the way the phone's
+     browser would and nowhere else. The push service itself is faked at
+     the page (headless Chromium has none) and at the worker's fetch. */
+  {
+    const path = require('path'), fs = require('fs');
+    const worker = (await import('file://' + path.resolve(__dirname, '..', 'worker', 'index.js'))).default;
+    const m = new Map();
+    const env = { SCHED: { async get(k) { return m.has(k) ? m.get(k) : null; }, async put(k, v) { m.set(k, v); }, async delete(k) { m.delete(k); } } };
+    const SYNC = 'https://sched.nikorapullin.workers.dev', EP = 'https://web.push.apple.com/QTEST';
+    /* The page is frozen at 10:20 on the 25th and the worker throws
+       away anything already gone by ITS clock, so the two are frozen
+       together — the sync section's own rule. */
+    const F = new Date('2026-09-25T10:20:00').getTime(), realNow = Date.now;
+    Date.now = () => F;
+    const ua = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
+    const uaPub = new Uint8Array(await crypto.subtle.exportKey('raw', ua.publicKey)), auth = crypto.getRandomValues(new Uint8Array(16));
+    const init = `(() => {
+      const pub = new Uint8Array(${JSON.stringify(Array.from(uaPub))}).buffer, au = new Uint8Array(${JSON.stringify(Array.from(auth))}).buffer;
+      window.__subOpts = null; window.__unsub = 0;
+      if (window.Notification) Notification.requestPermission = () => Promise.resolve('granted');
+      if (window.PushManager) {
+        PushManager.prototype.subscribe = function (o) { window.__subOpts = { uv: o.userVisibleOnly, k: Array.from(new Uint8Array(o.applicationServerKey)) };
+          window.__sub = { endpoint: '${EP}', getKey: (n) => n === 'p256dh' ? pub : au, unsubscribe: () => { window.__unsub++; window.__sub = null; return Promise.resolve(true); } };
+          return Promise.resolve(window.__sub); };
+        PushManager.prototype.getSubscription = function () { return Promise.resolve(window.__sub || null); };
+      }
+    })();`;
+    const P = await ctx({ init });
+    const pushReqs = [];
+    await P.c.route(SYNC + '/**', async (route) => {
+      const q = route.request();
+      pushReqs.push(q.method() + ' ' + new globalThis.URL(q.url()).pathname);
+      const res = await worker.fetch(new Request(q.url(), { method: q.method(), headers: q.headers(), body: q.postData() || undefined }), env);
+      const h = {}; res.headers.forEach((v, k) => { h[k] = v; });
+      await route.fulfill({ status: res.status, headers: h, body: await res.text() });
+    });
+    const page = P.page;
+    const until = async (fn, ms = 15000) => { const t = realNow(); while (realNow() - t < ms) { const v = await fn(); if (v) return v; await new Promise((r) => setTimeout(r, 150)); } return null; };
+    const queueKey = () => [...m.keys()].find((k) => /^push:[0-9a-f]{32}$/.test(k));
+
+    await page.waitForTimeout(1800);
+    ok('reminders are off until you turn them on, and nothing has asked the server', pushReqs.length === 0 && !queueKey()
+      && !(await page.evaluate(() => localStorage.getItem('cad.push.v1'))), pushReqs);
+    await page.click('#cdGear'); await sheetUp(page);
+    ok('Settings has a reminders switch, off', (await page.getAttribute('#cdPushOn', 'aria-pressed')) === 'false');
+    await page.click('#cdPushOn');
+    await page.waitForTimeout(350);
+    const consent = await page.evaluate(() => ({ t: document.getElementById('cdShT').textContent, n: (document.querySelector('#cdShB .cd-note') || {}).textContent || '' }));
+    ok('turning it on first says what leaves: the times, and nothing the server can read',
+      /Remind me/.test(consent.t) && /times your blocks start/.test(consent.n) && /cannot read/.test(consent.n) && pushReqs.length === 0, consent);
+    await page.click('#cdPushGo');
+    const qk = await until(() => queueKey());
+    ok('Turn on queues the next two weeks on the server', !!qk, [...m.keys()]);
+    const toastT = await until(async () => { const t = await page.textContent('#cdToastT'); return /Reminders on/.test(t) && t; });
+    ok('and says so', !!toastT, toastT);
+
+    const keyRes = await worker.fetch(new Request(SYNC + '/v1/push/key'), env);
+    const vapidPub = (await keyRes.json()).key;
+    const u8 = (t) => new Uint8Array(Buffer.from(t.replace(/-/g, '+').replace(/_/g, '/'), 'base64'));
+    const so = await page.evaluate(() => window.__subOpts);
+    ok('it subscribes with the worker\'s own signing key, for visible notifications only',
+      !!so && so.uv === true && Buffer.from(so.k).equals(Buffer.from(u8(vapidPub))), so);
+
+    const rec = qk ? JSON.parse(m.get(qk)) : { q: [] };
+    const week = await store(page, 'cad.week.v1');
+    const raw = qk ? m.get(qk) : '';
+    /* Read THROUGH the base64: base64 of plain JSON hides a name from a
+       string search exactly as well as encryption does, which is the
+       sync check's own lesson. */
+    const plain = raw + rec.q.map((x) => Buffer.from(x.b.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('latin1')).join('');
+    const leaked = week.map((b) => b.n).filter((n) => plain.includes(n));
+    ok('the queue carries no block name the server could read', rec.ep === EP && rec.q.length > 0 && leaked.length === 0, { leaked, n: rec.q.length });
+
+    /* RFC 8291, undone the way the phone's browser would. */
+    const hk = async (salt, ikm, info, len) => new Uint8Array(await crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt, info },
+      await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']), len * 8));
+    const open = async (b64) => {
+      const b = u8(b64), salt = b.slice(0, 16), idlen = b[20], asPub = b.slice(21, 21 + idlen), ct = b.slice(21 + idlen);
+      const ecdh = new Uint8Array(await crypto.subtle.deriveBits({ name: 'ECDH', public: await crypto.subtle.importKey('raw', asPub, { name: 'ECDH', namedCurve: 'P-256' }, false, []) }, ua.privateKey, 256));
+      const te = new TextEncoder(), cat = (...a) => { const o = new Uint8Array(a.reduce((n, x) => n + x.length, 0)); let at = 0; a.forEach((x) => { o.set(x, at); at += x.length; }); return o; };
+      const ikm = await hk(auth, ecdh, cat(te.encode('WebPush: info\0'), uaPub, asPub), 32);
+      const cek = await hk(salt, ikm, te.encode('Content-Encoding: aes128gcm\0'), 16), nonce = await hk(salt, ikm, te.encode('Content-Encoding: nonce\0'), 12);
+      const pt = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce }, await crypto.subtle.importKey('raw', cek, 'AES-GCM', false, ['decrypt']), ct));
+      let end = pt.length - 1; while (end > 0 && pt[end] === 0) end--;
+      return pt[end] === 2 ? JSON.parse(Buffer.from(pt.slice(0, end)).toString()) : null;
+    };
+    const first = rec.q[0] ? await open(rec.q[0].b).catch(() => null) : null;
+    const lunchAt = await page.evaluate(() => new Date(2026, 8, 25, 12, 30).getTime());
+    ok('the first reminder is the next block to start, at its minute, and only this phone can read it',
+      !!first && first.t === 'Lunch' && /^Now · until \d\d:\d\d/.test(first.b) && rec.q[0].t === lunchAt, { first, t: rec.q[0] && rec.q[0].t, lunchAt });
+    const want = await page.evaluate((F) => {
+      const wk = JSON.parse(localStorage.getItem('cad.week.v1')); let n = 0;
+      for (let i = 0; i < 14; i++) { const d = new Date(2026, 8, 25 + i), dw = (d.getDay() + 6) % 7;
+        wk.forEach((b) => { if (b.d.includes(dw) && new Date(2026, 8, 25 + i, 0, b.s).getTime() > F + 30e3) n++; }); }
+      return n;
+    }, F);
+    ok('and there is one for every block start in the fourteen days', rec.q.length === want, { got: rec.q.length, want });
+
+    /* The minute timer, at Lunch: the sealed bytes go to the push
+       service, and they open to Lunch. */
+    const realFetch = globalThis.fetch, sent = [];
+    globalThis.fetch = async (u, o) => { sent.push({ u: String(u), b: new Uint8Array(o.body) }); return new Response('', { status: 201 }); };
+    await worker.scheduled({ scheduledTime: lunchAt + 5000 }, env, { waitUntil() {} });
+    globalThis.fetch = realFetch;
+    const got = sent[0] ? await open(Buffer.from(sent[0].b).toString('base64')).catch(() => null) : null;
+    ok('at 12:30 the worker sends it to the phone\'s push service, still sealed, and it opens to Lunch',
+      sent.length === 1 && sent[0].u === EP && !!got && got.t === 'Lunch', { n: sent.length, got });
+
+    /* A change to the week re-queues it, within a couple of seconds. */
+    await closeSheet(page);
+    await page.click('#cdAdd'); await sheetUp(page);
+    await page.fill('.cd-say', 'stretch today 15:15 for 10 mins');
+    await page.click('#cdFSave');
+    const redone = await until(async () => { const r = JSON.parse(m.get(qk) || '{"q":[]}'); for (const x of r.q) { const o = await open(x.b).catch(() => null); if (o && o.t === 'Stretch') return x; } return null; }, 8000);
+    const stretchAt = await page.evaluate(() => new Date(2026, 8, 25, 15, 15).getTime());
+    ok('a block added to the week is queued without being asked', !!redone && redone.t === stretchAt, redone && redone.t);
+
+    /* Off takes the queue off the server and the subscription off the phone. */
+    await page.click('#cdGear'); await sheetUp(page);
+    ok('the switch shows reminders on', (await page.getAttribute('#cdPushOn', 'aria-pressed')) === 'true');
+    await page.click('#cdPushOn');
+    const gone = await until(async () => !m.has(qk) && (await page.evaluate(() => window.__unsub)) === 1 && !(await page.evaluate(() => localStorage.getItem('cad.push.v1'))));
+    ok('turning it off deletes the queue and unsubscribes this phone', !!gone && !(qk.slice(5) in JSON.parse(m.get('push:ix') || '{}')));
+    /* K is the list the backup and the vault are both built from, so a
+       subscription in it would copy one phone's address to another. */
+    const kBlock = (fs.readFileSync(path.resolve(__dirname, '..', 'cadence', 'index.html'), 'utf8').match(/var K = \{[\s\S]*?\};/) || [''])[0];
+    ok('and the subscription is this phone\'s alone: it is not in K, so neither backed up nor synced', /cad\.week\.v1/.test(kBlock) && !/cad\.push/.test(kBlock), kBlock);
+
+    /* The service worker only answers pushes. One with a fetch handler
+       is a cache, and a cache is how schedule/ ran yesterday's app. */
+    const sw = fs.readFileSync(path.resolve(__dirname, '..', 'cadence', 'sw.js'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    ok('the service worker shows pushes and never intercepts a request',
+      /addEventListener\('push'/.test(sw) && /showNotification/.test(sw) && /addEventListener\('notificationclick'/.test(sw) && !/addEventListener\('fetch'/.test(sw));
+    ok('no page errors with reminders', P.errs.length === 0, P.errs);
+    Date.now = realNow;
+    await P.c.close();
+  }
+
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);

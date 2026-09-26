@@ -38,5 +38,10 @@ workers_dev = true
 binding = "SCHED"
 id = "e924044bdaf14d5b96c8c27da74e1503"
 
+# The minute timer that sends reminders. It reads one KV key a minute
+# when nothing is due, which is 1,440 of the free tier's 100,000.
+[triggers]
+crons = ["* * * * *"]
+
 [observability]
 enabled = true

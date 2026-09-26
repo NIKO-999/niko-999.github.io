@@ -5038,6 +5038,81 @@ the iPhone one, with `vibrate` removed. That proves the right door is
 knocked on, never that a phone buzzes. Bite-proved by moving the tap
 onto Not yet and by taking the label click out.
 
+### Reminders are sent sealed, at the minute
+
+Asked for straight after the tap. **iOS lets a web page SHOW a
+notification and never lets it SCHEDULE one**: there is no local timer
+that survives the app being shut. So a reminder has to be sent by a
+server at the minute, and the worker that holds the sync vault does it.
+
+**IT IS HANDED THE LEAST THAT CAN WORK.** The times the next fourteen
+days of blocks start, and for each a message the phone has already
+sealed with its OWN push keys (RFC 8291, aes128gcm). The worker posts
+the sealed bytes to Apple or Google and forgets them: it carries a
+block's name without being able to read it, which is the vault's rule
+for the vault's reason. What it cannot help knowing is WHEN, and the
+turn-on sheet says exactly that, once, because that is the moment
+something first leaves the phone for this.
+
+**FOURTEEN DAYS, REFILLED ON OPEN.** A server holding the template
+could remind you for ever, and would then be holding the template,
+which is the half of the week this worker never sees. It is refilled
+on boot, on coming back to the front, and two seconds after the week
+changes; a fortnight away from the app is the one way it runs dry.
+
+**THE SIGNING KEY IS MADE BY THE WORKER AND NEVER LEAVES KV.** Web push
+needs a VAPID key the push services check the sender against, and this
+repository is public. Rather than a secret somebody pastes into a
+dashboard, the worker mints its own on first ask and hands out only the
+public half. Its one race is two first asks at once minting two keys,
+which costs a subscription made in that instant. Said rather than
+locked against.
+
+**THE ENDPOINT IS A PUSH SERVICE OR NOTHING.** A subscription is a URL
+the phone supplies and the worker POSTs to later, so it is an SSRF the
+moment it can be any URL. Apple, Google, Mozilla and Windows, by host,
+over https, on no port. Asserted with a metadata address, an http one,
+a lookalike host and a port, and proved by deleting the check.
+
+**ONE KV READ A MINUTE.** The timer reads `push:ix`, the next-due time
+per queue, and opens a queue only when it is due. That is 1,440 reads a
+day of the free tier's 100,000. A reminder more than ten minutes late is
+dropped rather than sent, so a phone that was off does not get an hour
+of them at once. A 404 or 410 from the service deletes the queue,
+because that is the only word the worker gets that a phone turned
+reminders off without saying.
+
+**THIS PHONE'S OWN, NEVER SYNCED.** `cad.push.v1` is not in K, so it is
+in neither the backup nor the vault: a subscription is one device's
+address, and copying it would send one phone's reminders into
+another's queue. Asserted against K's own text.
+
+**THE SERVICE WORKER ONLY ANSWERS PUSHES.** `cadence/sw.js` has no
+fetch handler, because a service worker that intercepts requests is a
+cache, and a cache is how `schedule/` ran yesterday's app. That is why
+the About page still does not claim offline. Asserted on the file.
+
+**ASKED INSIDE THE PRESS.** iOS answers a permission request only from a
+real gesture, and anything awaited before it spends the gesture, so
+`requestPermission` is the first thing Turn on does. On a phone that is
+not running Cadence from the Home Screen there is no PushManager at
+all, and the switch says to add it there rather than failing quietly.
+
+**THE TEST IS THE PHONE'S OWN KEYS, MADE IN THE TEST.** Headless
+Chromium has no push service, so `PushManager.subscribe` is faked at
+the page with keys generated in the test process. The queue is then
+decrypted there, the way the phone's browser would, and the worker's
+timer is run at 12:30 to show what it posts opens to Lunch. The leak
+check reads THROUGH the base64, the sync check's own lesson. Bite-
+proved by sending plaintext (four checks fall), by dropping the
+re-queue on a week change, by deleting the endpoint check and by
+dropping the lateness rule.
+
+**Chromium cannot show the notification**, so nothing here proves a
+phone buzzes. It proves the right bytes reach the right door at the
+right minute. **The worker has to be redeployed**, with its new minute
+trigger, before any of it works.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

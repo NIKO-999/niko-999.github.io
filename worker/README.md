@@ -1,7 +1,9 @@
 # The worker
 
-Two routes now: a podcast feed reader for `schedule/`, and the **sync
-vault** for `cadence/`. The vault stores one sealed blob per sync code —
+Three routes now: a podcast feed reader for `schedule/`, the **sync
+vault** for `cadence/`, and Cadence's **reminders**, which a minute
+timer (`[triggers]` in `wrangler.toml`) sends as messages the phone
+sealed with its own push keys, so the worker never reads them. The vault stores one sealed blob per sync code —
 the app encrypts its record on the device before sending it, so this
 worker holds ciphertext it cannot open, plus the SHA-256 of a write
 token. It has no idea whose it is. Redeploy after pulling this change

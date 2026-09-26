@@ -22,9 +22,16 @@
    under an id derived from the same code. There is still no account,
    no email and no name, and nothing here could decrypt what it holds.
 
+   AND REMINDERS, WHICH IT SENDS WITHOUT READING. See PUSH below — a
+   phone hands over the times its blocks start and, for each, a message
+   already encrypted to that phone's own push keys. At the minute, this
+   worker posts the sealed message to Apple or Google and forgets it.
+
    ── storage ──
    One KV namespace, holding parsed feeds under `pod:<id>` with a six
-   hour TTL, and sealed vaults under `vault:<id>`. Records written by the friends half are
+   hour TTL, sealed vaults under `vault:<id>`, push queues under
+   `push:<id>` with their next-due times in `push:ix`, and this
+   worker's own push signing key under `push:vapid`. Records written by the friends half are
    not read by anything here any more; every one of them carried a
    thirty-day expiry from the day it was written, so they age out on
    their own rather than being walked and deleted.
@@ -72,6 +79,109 @@ const json = (req, body, status = 200) =>
    in Node, because the suite executes this file there. */
 
 const VAULT_BYTES = 2 * 1024 * 1024;   /* ciphertext, base64 */
+
+/* ══════════════════════════════════════════════════════
+   PUSH
+
+   iOS will not let a web page schedule its own notification, so a
+   reminder has to come from a server at the minute. What this worker
+   is given is the least that can do that: WHEN, and a message already
+   sealed on the phone with the phone's own push keys (RFC 8291), so the
+   words — a block's name, its time — are ciphertext here exactly as a
+   vault is. What it cannot help learning is the times themselves.
+
+   ── THE ENDPOINT IS A LIST OF PUSH SERVICES, NEVER ANY URL ──
+   A subscription is a URL the phone hands over and this worker POSTs
+   to later, which is an SSRF the moment it is anything but a push
+   service. Apple, Google, Mozilla and Windows, by host, over https. */
+const PUSH_HOST = /^(web\.push\.apple\.com|fcm\.googleapis\.com|updates\.push\.services\.mozilla\.com|[a-z0-9-]+\.notify\.windows\.com)$/;
+const PUSH_MAX = 200;          /* two weeks of a busy schedule */
+const PUSH_BODY = 1024;        /* one sealed message, base64; a real one is ~250 */
+const PUSH_AHEAD = 16 * 864e5; /* the phone queues fourteen days */
+const PUSH_STALE = 10 * 60e3;  /* a reminder more than ten minutes late is dropped, not sent */
+
+function pushOk(u) {
+  let x; try { x = new URL(u); } catch (e) { return false; }
+  return x.protocol === 'https:' && !x.port && PUSH_HOST.test(x.hostname);
+}
+const b64u = (u8) => btoa(String.fromCharCode.apply(null, u8)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+function unb64(t) {
+  const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')), u = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i);
+  return u;
+}
+
+/* THE SIGNING KEY IS MADE HERE AND NEVER LEAVES KV. A VAPID key the
+   push services check a sender against has to be a secret somewhere,
+   and the repository is public — so rather than a key somebody has to
+   paste into a dashboard, the worker mints its own the first time it is
+   asked and keeps it. Only the public half is ever sent. */
+async function vapid(env) {
+  const hit = await env.SCHED.get('push:vapid');
+  if (hit) {
+    const v = JSON.parse(hit);
+    const priv = await crypto.subtle.importKey('jwk', v.jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
+    return { pub: v.pub, priv };
+  }
+  const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+  const pub = b64u(new Uint8Array(await crypto.subtle.exportKey('raw', kp.publicKey)));
+  const jwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
+  await env.SCHED.put('push:vapid', JSON.stringify({ pub, jwk }));
+  return { pub, priv: kp.privateKey };
+}
+
+/* RFC 8292. WebCrypto signs ECDSA in the raw r||s form a JWT wants, so
+   there is nothing to convert. */
+async function vapidAuth(env, endpoint, now) {
+  const v = await vapid(env);
+  const enc = (o) => b64u(new TextEncoder().encode(JSON.stringify(o)));
+  const head = enc({ typ: 'JWT', alg: 'ES256' });
+  const body = enc({ aud: new URL(endpoint).origin, exp: Math.floor(now / 1000) + 12 * 3600, sub: 'https://niko-999.github.io/cadence/' });
+  const sig = new Uint8Array(await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, v.priv, new TextEncoder().encode(head + '.' + body)));
+  return 'vapid t=' + head + '.' + body + '.' + b64u(sig) + ', k=' + v.pub;
+}
+
+async function pushIndex(env) {
+  const t = await env.SCHED.get('push:ix');
+  let o; try { o = JSON.parse(t); } catch (e) { o = null; }
+  return o && typeof o === 'object' ? o : {};
+}
+
+/* Every minute: read the index, and only the queues it says are due.
+   One KV read a minute when nothing is, which is what keeps this inside
+   the free tier with room to spare. */
+async function pushTick(env, now) {
+  const ix = await pushIndex(env);
+  let ixDirty = false;
+  for (const id of Object.keys(ix)) {
+    if (!(ix[id] <= now)) continue;
+    const raw = await env.SCHED.get('push:' + id);
+    if (!raw) { delete ix[id]; ixDirty = true; continue; }
+    const rec = JSON.parse(raw);
+    const due = rec.q.filter((x) => x.t <= now), rest = rec.q.filter((x) => x.t > now);
+    let gone = false;
+    for (const x of due) {
+      if (now - x.t > PUSH_STALE || gone) continue;
+      try {
+        const res = await fetch(rec.ep, {
+          method: 'POST',
+          headers: { TTL: '600', Urgency: 'high', 'Content-Encoding': 'aes128gcm', 'Content-Type': 'application/octet-stream', Authorization: await vapidAuth(env, rec.ep, now) },
+          body: unb64(x.b),
+        });
+        /* The service saying the subscription is gone is the only
+           signal this worker gets that a phone turned reminders off
+           without telling it, so it is final. */
+        if (res.status === 404 || res.status === 410) gone = true;
+      } catch (e) {}
+    }
+    if (gone) { await env.SCHED.delete('push:' + id); delete ix[id]; ixDirty = true; continue; }
+    rec.q = rest;
+    await env.SCHED.put('push:' + id, JSON.stringify(rec));
+    if (rest.length) ix[id] = rest[0].t; else delete ix[id];
+    ixDirty = true;
+  }
+  if (ixDirty) await env.SCHED.put('push:ix', JSON.stringify(ix));
+}
 
 async function sha256hex(t) {
   const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t));
@@ -340,6 +450,62 @@ export default {
       }
     }
 
+    /* ══════════════════════════════════════════════════════
+       PUSH — see the block above VAULT_BYTES for what this holds and
+       why it cannot read it. The key is public; a queue is written by
+       whoever holds its token, and the token is kept as its hash. */
+    if (p === '/v1/push/key' && req.method === 'GET') {
+      const v = await vapid(env);
+      return json(req, { key: v.pub });
+    }
+    const push = p.match(/^\/v1\/push\/([0-9a-f]{32})$/);
+    if (push) {
+      const pk = 'push:' + push[1];
+      const auth = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/, '');
+      if (!/^[0-9a-f]{32}$/.test(auth)) return json(req, { error: 'no token' }, 401);
+      const wh = await sha256hex(auth);
+      const cur = await env.SCHED.get(pk);
+      const rec = cur ? JSON.parse(cur) : null;
+      if (rec && rec.wh !== wh) return json(req, { error: 'wrong token' }, 403);
+      const ix = await pushIndex(env);
+
+      if (req.method === 'DELETE') {
+        if (rec) await env.SCHED.delete(pk);
+        if (push[1] in ix) { delete ix[push[1]]; await env.SCHED.put('push:ix', JSON.stringify(ix)); }
+        return json(req, { ok: true });
+      }
+
+      if (req.method === 'PUT') {
+        let body;
+        try { body = JSON.parse(await readCapped({ body: req.body, text: () => req.text() }, PUSH_MAX * (PUSH_BODY + 64) + 4096)); }
+        catch (e) { return json(req, { error: 'not json' }, 400); }
+        if (!body || typeof body.ep !== 'string' || !Array.isArray(body.q)) return json(req, { error: 'bad shape' }, 400);
+        if (!pushOk(body.ep)) return json(req, { error: 'not a push service' }, 400);
+        if (body.q.length > PUSH_MAX) return json(req, { error: 'too many' }, 413);
+        const now = Date.now();
+        const q = [];
+        for (const x of body.q) {
+          if (!x || typeof x.b !== 'string' || x.b.length > PUSH_BODY || !/^[A-Za-z0-9_-]+$/.test(x.b)) return json(req, { error: 'bad reminder' }, 400);
+          const t = Math.round(+x.t);
+          if (!(t > now - 60e3 && t < now + PUSH_AHEAD)) continue;
+          q.push({ t, b: x.b });
+        }
+        q.sort((a, b) => a.t - b.t);
+        await env.SCHED.put(pk, JSON.stringify({ wh, ep: body.ep, q }));
+        if (q.length) ix[push[1]] = q[0].t; else delete ix[push[1]];
+        await env.SCHED.put('push:ix', JSON.stringify(ix));
+        return json(req, { ok: true, n: q.length });
+      }
+    }
+
     return json(req, { error: 'no such thing' }, 404);
+  },
+
+  /* The minute timer. `scheduledTime` rather than Date.now(), so the
+     suite can hand it a moment. */
+  async scheduled(ev, env, ctx) {
+    const run = pushTick(env, (ev && ev.scheduledTime) || Date.now());
+    if (ctx && ctx.waitUntil) ctx.waitUntil(run);
+    await run;
   },
 };

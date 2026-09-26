@@ -838,6 +838,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   function cdWrite(k, v) {
     try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { cdToast('Could not save — storage is full.'); return; }
     cdSyncDirty(k);
+    if (k === K.week) cdPushSoon();
   }
   var isObj = function (v) { return v && typeof v === 'object' && !Array.isArray(v); };
 
@@ -2590,6 +2591,11 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var rfRows = el('div', 'cd-rows'); rfRows.style.marginTop = '10px';
     rfRows.appendChild(rfOn);
     root.appendChild(rfRows);
+    var pl = el('p', 'cd-lbl', 'Reminders'); pl.style.marginTop = '24px';
+    root.appendChild(pl);
+    var pRows = el('div', 'cd-rows'); pRows.style.marginTop = '10px';
+    pRows.appendChild(cdPushToggle());
+    root.appendChild(pRows);
     var wl = el('p', 'cd-lbl', 'Your week'); wl.style.marginTop = '24px';
     root.appendChild(wl);
     var clr = el('button', 'cd-btn warn', 'Clear all blocks'); clr.type = 'button'; clr.id = 'cdWkClr';
@@ -3153,6 +3159,168 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     if (!cdSheetOpen()) cdPaint();
   }, 30000);
 
+  /* ═══ REMINDERS ═══
+     iOS lets a web page show a notification and never lets it schedule
+     one, so a reminder has to be SENT, at the minute, by a server. The
+     worker that already holds the sync vault does it, and it is handed
+     the least that can work: the times the next fourteen days of blocks
+     start, and for each a message SEALED HERE with this phone's own push
+     keys (RFC 8291). It carries the words without being able to read
+     them, the vault's rule for the vault's reason. What it cannot help
+     knowing is when.
+
+     THE QUEUE IS FOURTEEN DAYS AND IT IS REFILLED WHENEVER YOU OPEN THE
+     APP. A server holding the template could go on for ever, and it
+     would then be holding the template, which is the half of the week
+     this worker never sees. Fourteen days of times is the price, and a
+     fortnight away from the app is the one way reminders stop.
+
+     THIS PHONE'S OWN, NEVER SYNCED. `cad.push.v1` is not in K, so it is
+     in neither the backup nor the vault: a subscription is an address
+     for one device, and copying it to a second would send one phone's
+     reminders to another's queue. */
+  var PUSH_K = 'cad.push.v1', PUSH_DAYS = 14;
+  var PU = (function () { var o; try { o = JSON.parse(localStorage.getItem(PUSH_K)); } catch (e) { o = null; } return o && /^[0-9a-f]{32}$/.test(o.id || '') && o.ep ? o : null; })();
+  var puTm = 0, puBusy = null;
+  function cdPushStore() { try { if (PU) localStorage.setItem(PUSH_K, JSON.stringify(PU)); else localStorage.removeItem(PUSH_K); } catch (e) {} }
+  function cdPushCan() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+  function cdB64u(u8) { return cdSyncB64(new Uint8Array(u8)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  function cdUnB64u(t) { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; return cdSyncUnB64(t); }
+  function cdCat() {
+    var n = 0, i; for (i = 0; i < arguments.length; i++) n += arguments[i].length;
+    var o = new Uint8Array(n), at = 0;
+    for (i = 0; i < arguments.length; i++) { o.set(arguments[i], at); at += arguments[i].length; }
+    return o;
+  }
+  function cdHkdf(salt, ikm, info, len) {
+    return crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits'])
+      .then(function (k) { return crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt: salt, info: info }, k, len * 8); })
+      .then(function (b) { return new Uint8Array(b); });
+  }
+  /* RFC 8291, aes128gcm: a fresh key pair and salt per message, one
+     record, and the whole body is the header and the ciphertext. The
+     browser at the other end undoes it before the service worker sees
+     it; nothing between here and there can. */
+  function cdPushSeal(obj) {
+    var te = new TextEncoder(), ua = cdUnB64u(PU.pk), auth = cdUnB64u(PU.au);
+    var salt = crypto.getRandomValues(new Uint8Array(16)), asPub;
+    return crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']).then(function (kp) {
+      return crypto.subtle.exportKey('raw', kp.publicKey).then(function (raw) {
+        asPub = new Uint8Array(raw);
+        return crypto.subtle.importKey('raw', ua, { name: 'ECDH', namedCurve: 'P-256' }, false, []);
+      }).then(function (uaKey) { return crypto.subtle.deriveBits({ name: 'ECDH', public: uaKey }, kp.privateKey, 256); });
+    }).then(function (ecdh) {
+      return cdHkdf(auth, new Uint8Array(ecdh), cdCat(te.encode('WebPush: info\x00'), ua, asPub), 32);
+    }).then(function (ikm) {
+      return Promise.all([cdHkdf(salt, ikm, te.encode('Content-Encoding: aes128gcm\x00'), 16), cdHkdf(salt, ikm, te.encode('Content-Encoding: nonce\x00'), 12)]);
+    }).then(function (kn) {
+      return crypto.subtle.importKey('raw', kn[0], 'AES-GCM', false, ['encrypt']).then(function (k) {
+        return crypto.subtle.encrypt({ name: 'AES-GCM', iv: kn[1] }, k, cdCat(te.encode(JSON.stringify(obj)), new Uint8Array([2])));
+      });
+    }).then(function (ct) {
+      return cdB64u(cdCat(salt, new Uint8Array([0, 0, 16, 0, 65]), asPub, new Uint8Array(ct)));
+    });
+  }
+  /* Every block start from now to fourteen days out. A moment says Now;
+     a span says when it ends, the thing you plan against once it has
+     begun; a place rides after. */
+  function cdPushList() {
+    var out = [], now = Date.now(), today = cdToday();
+    for (var i = 0; i < PUSH_DAYS; i++) {
+      var iso = cdAddDays(today, i), p = dparts(iso);
+      cdOn(iso).forEach(function (b) {
+        var t = new Date(p[0], p[1], p[2], 0, b.s).getTime();
+        if (t <= now + 30e3) return;
+        var body = b.e > b.s ? 'Now · until ' + cdHM(b.e) : 'Now';
+        if (b.p) body += ' · ' + b.p;
+        out.push({ t: t, m: { t: b.n, b: body, g: iso + '.' + b.id } });
+      });
+    }
+    return out;
+  }
+  /* Sent when what it would send has changed, or on a new day, which
+     keeps the queue two weeks deep. `force` is the turn-on. */
+  function cdPushSend(force) {
+    if (!PU) return Promise.resolve(false);
+    var fp = cdToday() + JSON.stringify(S.week.map(function (b) { return [b.id, b.n, b.d, b.s, b.e, b.p]; }));
+    if (!force && PU.fp === fp) return Promise.resolve(true);
+    if (puBusy) return puBusy;
+    var list = cdPushList();
+    puBusy = Promise.all(list.map(function (x) { return cdPushSeal(x.m).then(function (b) { return { t: x.t, b: b }; }); }))
+      .then(function (q) {
+        return fetch(SYNC_URL + '/v1/push/' + PU.id, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + PU.tok },
+          body: JSON.stringify({ ep: PU.ep, q: q })
+        });
+      }).then(function (r) {
+        if (!r.ok) return false;
+        if (PU) { PU.fp = fp; cdPushStore(); }
+        return true;
+      }).catch(function () { return false; })
+      .then(function (v) { puBusy = null; return v; });
+    return puBusy;
+  }
+  function cdPushSoon() { if (!PU) return; clearTimeout(puTm); puTm = setTimeout(function () { cdPushSend(); }, 2000); }
+
+  function cdPushToggle() {
+    var t = el('button', 'cd-toggle', '<span>When a block starts</span><i></i>');
+    t.type = 'button'; t.id = 'cdPushOn';
+    t.setAttribute('aria-pressed', String(!!PU));
+    t.addEventListener('click', function () {
+      if (PU) { cdPushOff(); t.setAttribute('aria-pressed', 'false'); cdToast('Reminders off'); return; }
+      if (!cdPushCan()) {
+        cdToast(/iPhone|iPad/.test(navigator.userAgent) && !navigator.standalone
+          ? 'Add Cadence to your Home Screen, then turn reminders on there.' : 'This browser cannot show reminders.');
+        return;
+      }
+      cdPushConsent();
+    });
+    return t;
+  }
+  /* The moment something first leaves the phone for this, so it says
+     what leaves in full, once, here. */
+  function cdPushConsent() {
+    var root = el('div');
+    root.appendChild(el('p', 'cd-note', 'Reminders are sent by the sync server, so it gets the times your blocks start over the next two weeks. What each one says is locked on this phone first, and the server cannot read it. Opening the app keeps the next two weeks queued.'));
+    var foot = el('div', 'cd-foot');
+    var no = el('button', 'cd-btn soft', 'Not now'); no.type = 'button'; no.addEventListener('click', cdClose);
+    var go = el('button', 'cd-btn go', 'Turn on'); go.type = 'button'; go.id = 'cdPushGo';
+    /* Permission is asked FIRST inside the press: iOS answers a request
+       for it only from a real gesture, and anything awaited before it
+       spends the gesture. */
+    go.addEventListener('click', function () {
+      go.disabled = true;
+      Promise.resolve(Notification.requestPermission()).then(function (perm) {
+        if (perm !== 'granted') { cdClose(); cdToast('Notifications are off for Cadence in Settings.'); return; }
+        return navigator.serviceWorker.register('sw.js').then(function () { return navigator.serviceWorker.ready; }).then(function (reg) {
+          return fetch(SYNC_URL + '/v1/push/key').then(function (r) { return r.json(); }).then(function (k) {
+            return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: cdUnB64u(k.key) });
+          });
+        }).then(function (sub) {
+          var hex = function () { return cdSyncHex(crypto.getRandomValues(new Uint8Array(16))); };
+          PU = { id: hex(), tok: hex(), ep: sub.endpoint, pk: cdB64u(new Uint8Array(sub.getKey('p256dh'))), au: cdB64u(new Uint8Array(sub.getKey('auth'))) };
+          cdPushStore();
+          return cdPushSend(true);
+        }).then(function (sent) {
+          cdClose();
+          cdToast(sent ? 'Reminders on' : 'Reminders are on, but the server could not be reached. It will try again.');
+        });
+      }).catch(function () { cdClose(); cdToast('Reminders could not be turned on.'); });
+    });
+    foot.appendChild(no); foot.appendChild(go); root.appendChild(foot);
+    cdSheet('Remind me when a block starts?', root);
+  }
+  /* Off takes the queue off the server and the subscription off the
+     phone. Either can fail on its own and neither is worth keeping the
+     other for. */
+  function cdPushOff() {
+    var was = PU; PU = null; cdPushStore(); clearTimeout(puTm);
+    if (was) fetch(SYNC_URL + '/v1/push/' + was.id, { method: 'DELETE', headers: { Authorization: 'Bearer ' + was.tok } }).catch(function () {});
+    if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(function (reg) {
+      return reg && reg.pushManager.getSubscription().then(function (s) { return s && s.unsubscribe(); });
+    }).catch(function () {});
+  }
+
   /* Sync asks the other device's copy once the screen is up, whenever
      the app comes back to the front, and once a minute while it is
      looked at — never on a render. */
@@ -3163,6 +3331,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     else if (SY.dirty) cdSyncPush(true);
   });
   setInterval(function () { if (SY && document.visibilityState === 'visible') cdSyncPull(); }, 60000);
+  /* Reminders refill their fortnight on open and on coming back. */
+  if (PU) setTimeout(function () { cdPushSend(); }, 1500);
+  document.addEventListener('visibilitychange', function () { if (PU && document.visibilityState === 'visible') cdPushSend(); });
 
   var sv = 'day';
   try { sv = sessionStorage.getItem('cad.view') || 'day'; } catch (e) {}

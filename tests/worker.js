@@ -155,6 +155,97 @@ const kv = () => {
       r.headers.get('Access-Control-Allow-Methods') + ' / ' + r.headers.get('Access-Control-Allow-Headers'));
   }
 
+  /* ── push: reminders sent at the minute, without being read ──
+     The phone hands over a push endpoint and a queue of messages it has
+     already sealed with its own push keys. Everything here fails
+     silently in production: an endpoint that is any URL is an SSRF, a
+     timer that sends early or twice is a phone buzzing wrongly, and a
+     subscription the service says is gone must stop costing a read. */
+  {
+    const ID = '1123456789abcdef0123456789abcdef', TOK = 'd'.repeat(32), BAD = 'c'.repeat(32);
+    const P = '/v1/push/' + ID, EP = 'https://web.push.apple.com/QXYZ';
+    const T0 = Date.now() + 3600e3;
+    const good = { ep: EP, q: [{ t: T0, b: 'AAAA' }, { t: T0 + 60e3, b: 'BBBB' }, { t: T0 + 864e5, b: 'CCCC' }] };
+
+    r = await hit('GET', '/v1/push/key');
+    const k1 = (await r.json()).key;
+    r = await hit('GET', '/v1/push/key');
+    const k2 = (await r.json()).key;
+    ok('the worker hands out one public signing key, and the same one twice',
+      /^[A-Za-z0-9_-]{87}$/.test(k1) && k1 === k2, k1 + ' / ' + k2);
+    ok('and never the private half', !JSON.stringify(k1).includes('"d"') && !(await (await hit('GET', '/v1/push/key')).text()).includes('jwk'));
+
+    r = await hit('PUT', P, { body: good });
+    ok('a queue with no token is refused', r.status === 401, r.status);
+    for (const ep of ['http://web.push.apple.com/x', 'https://169.254.169.254/latest', 'https://evil.example/push',
+                      'https://web.push.apple.com.evil.example/x', 'https://web.push.apple.com:8443/x']) {
+      r = await hit('PUT', P, { key: TOK, body: { ep, q: good.q } });
+      ok('an endpoint that is not a push service is refused: ' + ep, r.status === 400 && !env.SCHED.m.has('push:' + ID), r.status);
+    }
+    r = await hit('PUT', P, { key: TOK, body: { ep: EP, q: Array.from({ length: 201 }, (_, i) => ({ t: T0 + i * 60e3, b: 'AAAA' })) } });
+    ok('a queue is capped', r.status === 413, r.status);
+    r = await hit('PUT', P, { key: TOK, body: { ep: EP, q: [{ t: T0, b: 'A'.repeat(1025) }] } });
+    ok('and so is one message', r.status === 400, r.status);
+    r = await hit('PUT', P, { key: TOK, body: { ep: EP, q: [{ t: T0, b: 'not base64!' }] } });
+    ok('and a message is base64url or nothing', r.status === 400, r.status);
+
+    r = await hit('PUT', P, { key: TOK, body: { ep: EP, q: good.q.concat([{ t: Date.now() - 3600e3, b: 'OLD0' }, { t: Date.now() + 30 * 864e5, b: 'FAR0' }]) } });
+    const put = await r.json();
+    const rec = JSON.parse(env.SCHED.m.get('push:' + ID));
+    ok('a queue is stored, sorted, with times already gone and times too far ahead dropped',
+      r.status === 200 && put.n === 3 && rec.q.map((x) => x.b).join() === 'AAAA,BBBB,CCCC', JSON.stringify(put) + ' ' + JSON.stringify(rec.q));
+    ok('the token is kept only as its hash', !env.SCHED.m.get('push:' + ID).includes(TOK) && /^[0-9a-f]{64}$/.test(rec.wh));
+    ok('and the index names when it is next due', JSON.parse(env.SCHED.m.get('push:ix'))[ID] === T0, env.SCHED.m.get('push:ix'));
+    r = await hit('PUT', P, { key: BAD, body: good });
+    ok('a queue with the wrong token is refused', r.status === 403, r.status);
+
+    const real = globalThis.fetch, sent = [];
+    let answer = 201;
+    globalThis.fetch = async (u, o) => { sent.push({ u: String(u), o }); return new Response('', { status: answer }); };
+    const tick = (t) => worker.scheduled({ scheduledTime: t }, env, { waitUntil() {} });
+
+    await tick(T0 - 60e3);
+    ok('a minute before, nothing is sent', sent.length === 0, sent.length);
+    await tick(T0 + 1000);
+    ok('at the minute, the one reminder due is sent, and only it', sent.length === 1 && sent[0].u === EP, JSON.stringify(sent.map((x) => x.u)));
+    const h = sent[0].o.headers, body = new Uint8Array(sent[0].o.body);
+    ok('as the sealed bytes the phone gave, marked aes128gcm with a lifetime',
+      Buffer.from(body).toString('base64').replace(/=+$/, '') === 'AAAA' && h['Content-Encoding'] === 'aes128gcm' && +h.TTL > 0, JSON.stringify(h));
+    const m = /^vapid t=([^.]+)\.([^.]+)\.([^,]+), k=(.+)$/.exec(h.Authorization || '');
+    const u8 = (t) => new Uint8Array(Buffer.from(t.replace(/-/g, '+').replace(/_/g, '/'), 'base64'));
+    let verified = false, claims = {};
+    if (m) {
+      const pub = await crypto.subtle.importKey('raw', u8(m[4]), { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
+      verified = await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, pub, u8(m[3]), new TextEncoder().encode(m[1] + '.' + m[2]));
+      claims = JSON.parse(Buffer.from(u8(m[2])).toString());
+    }
+    ok('signed with the key the worker hands out, for the push service\'s own origin',
+      !!m && m[4] === k1 && verified && claims.aud === 'https://web.push.apple.com' && claims.exp * 1000 > T0 && /^https:|^mailto:/.test(claims.sub), JSON.stringify({ m: !!m, verified, claims }));
+    ok('and what was sent leaves the queue', JSON.parse(env.SCHED.m.get('push:' + ID)).q.map((x) => x.b).join() === 'BBBB,CCCC'
+      && JSON.parse(env.SCHED.m.get('push:ix'))[ID] === T0 + 60e3);
+    await tick(T0 + 1000);
+    ok('a second tick in the same minute sends nothing twice', sent.length === 1, sent.length);
+
+    /* A phone that was off for an hour must not get an hour of reminders
+       at once, all of them late. */
+    await tick(T0 + 60e3 + 11 * 60e3);
+    ok('a reminder more than ten minutes late is dropped rather than sent', sent.length === 1
+      && JSON.parse(env.SCHED.m.get('push:' + ID)).q.map((x) => x.b).join() === 'CCCC', sent.length);
+
+    answer = 410;
+    await tick(T0 + 864e5 + 1000);
+    ok('a subscription the service says is gone is deleted, index and all',
+      sent.length === 2 && !env.SCHED.m.has('push:' + ID) && !(ID in JSON.parse(env.SCHED.m.get('push:ix'))), sent.length);
+    globalThis.fetch = real;
+
+    await hit('PUT', P, { key: TOK, body: good });
+    r = await hit('DELETE', P, { key: BAD });
+    ok('a delete with the wrong token is refused', r.status === 403 && env.SCHED.m.has('push:' + ID), r.status);
+    r = await hit('DELETE', P, { key: TOK });
+    ok('the right token deletes the queue and its place in the index',
+      r.status === 200 && !env.SCHED.m.has('push:' + ID) && !(ID in JSON.parse(env.SCHED.m.get('push:ix'))), r.status);
+  }
+
   /* ── the deployment config, parsed rather than eyeballed ──
      wrangler.toml is the other half of this worker and nothing here
      used to look at it. It cost a real bug: `workers_dev = true` was
@@ -190,6 +281,8 @@ const kv = () => {
     ok('and the KV binding is the name index.js actually reads',
       tables.kv_namespaces && tables.kv_namespaces.binding === 'SCHED',
       JSON.stringify(tables.kv_namespaces));
+    ok('and the minute timer that sends reminders is on',
+      (tables.triggers || {}).crons === '["* * * * *"]', JSON.stringify(tables.triggers));
     ok('and it names a namespace rather than the placeholder',
       /^[a-f0-9]{32}$/.test((tables.kv_namespaces || {}).id || ''),
       JSON.stringify(tables.kv_namespaces));
