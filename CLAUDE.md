@@ -4798,6 +4798,12 @@ on a Title with the caret in it and a quiet `Title` placeholder drawn by
 so a page left blank leaves nothing behind. The plus is named `New note`
 there and `Add a block` everywhere else.
 
+**AND 15 OVER 13 WAS NOT ENOUGH, reported the same day** as the
+heading still looking like the body. Two pixels and a weight step is a
+difference you can measure and not one you see at a glance on a phone.
+The name is 18/700 now, five pixels over the body, and the check holds
+the gap to four with the weight at 700, so the shipped 15/600 fails it.
+
 Both bite-proved: the body back at 15px in the ink fails the size check,
 and the plus back on the composer fails by name, not by timing the file
 out — the first proof did time out, so the open is awaited with a short

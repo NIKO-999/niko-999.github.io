@@ -850,7 +850,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       return { id, h: h.textContent, b: b.textContent, hf: f(h), bf: f(b), hw: +getComputedStyle(h).fontWeight, ha: a(h), ba: a(b) };
     }));
     ok('a note\'s name leads, its body under it', prev[0] && prev[0].h === 'Kept heading' && prev[0].b === 'kept body' && prev[1] && prev[1].h === 'First line' && prev[1].b === 'Second line', prev);
-    ok('the body is clearly smaller than the name, and quieter', prev.every((p) => p && p.hf - p.bf >= 2 && p.hw >= 600 && p.ba < p.ha), prev);
+    ok('the body is clearly smaller than the name, and quieter', prev.every((p) => p && p.hf - p.bf >= 4 && p.hw >= 700 && p.ba < p.ha), prev);
     await page.click('.cd-ni[data-n="old"] .cd-nt');
     await page.waitForSelector('#cdDoc.is-open');
     await page.waitForTimeout(320);
