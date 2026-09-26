@@ -238,7 +238,9 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
    every font. */
 .cd-tk { display: inline-block; width: 4px; height: 8px; margin: 0 0 1px 8px; border: solid var(--c); border-width: 0 1.8px 1.8px 0; transform: rotate(45deg); vertical-align: middle; }
 .cd-it.is-past:not(.is-done) .cd-dot i { box-shadow: inset 0 0 0 1.5px var(--miss); }
-.cd-rb { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; align-items: baseline; column-gap: 12px; row-gap: 4px; min-height: 44px; padding: 14px 0 13px; }
+.cd-it.is-lift .cd-rb { background: color-mix(in srgb, var(--c) 12%, transparent); border-radius: 12px; }
+.cd-it.is-lift .cd-rt { color: var(--ink); font-size: 13px; }
+.cd-rb { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; align-items: baseline; column-gap: 12px; row-gap: 4px; min-height: 44px; padding: 14px 0 13px; }
 /* A GLYPH SAYS WHAT KIND OF THING THE BLOCK IS, and the dot beside it
    stays the dot: the dot is the check and says whether, the glyph says
    what, and one mark cannot say both. Drawn in the dot's own thin line
@@ -412,6 +414,8 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cd-row + .cd-row { box-shadow: inset 0 1px 0 var(--hair); }
 .cd-row > span { font: 500 10.5px/1.3 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--quiet); }
 .cd-row .cd-field { min-height: 44px; padding: 10px 0; background: none; border-radius: 0; }
+.cd-qt { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px; }
+.cd-qt > span { font: 500 10.5px/1.3 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--quiet); }
 
 .cd-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .cd-chip { min-width: 44px; min-height: 44px; padding: 0 16px; border-radius: 22px; text-align: center; font: 500 14px/1 var(--sans); color: var(--dim); box-shadow: inset 0 0 0 1px var(--hair); }
@@ -852,7 +856,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   function cdWrite(k, v) {
     try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { cdToast('Could not save — storage is full.'); return; }
     cdSyncDirty(k);
-    if (k === K.week) cdPushSoon();
+    if (k === K.week || k === K.log) cdPushSoon();
   }
   var isObj = function (v) { return v && typeof v === 'object' && !Array.isArray(v); };
 
@@ -1432,6 +1436,69 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     if (!was && TRAINING[cdKind(b.n)]) cdLiftSheet(sel, id, b.n);
   }
 
+  /* ═══ HOLD AND DRAG TO MOVE ═══
+     Hold a row still for a moment and it lifts; drag it up or down and
+     its start moves five minutes for every eight pixels, keeping its
+     length; let go and it is saved, with Undo. The row stays where it is
+     while you drag and only the time changes, because in a list its
+     place is its ORDER, not its hour — a row that followed the finger
+     would promise a position the list does not have. On letting go the
+     day is drawn again in order.
+
+     HELD, NOT GRABBED. A handle on every row is a column of furniture,
+     and a drag that starts at once would fight every scroll of the day
+     that began on a row. A move before the hold ends is a scroll and
+     cancels it; once lifted, the page is held still so the drag is
+     yours. It changes the block for every week, the way the editor
+     does, and the editor's own time field is the route for a keyboard. */
+  var DRAG_HOLD = 380, DRAG_PX = 8, drg = null;
+  function cdDragEnd(save) {
+    var d = drg; drg = null;
+    if (!d) return;
+    clearTimeout(d.tm);
+    if (!d.lift) return;
+    d.li.classList.remove('is-lift');
+    var b = S.week.filter(function (x) { return x.id === d.id; })[0];
+    if (!save || !b || d.s === b.s) { cdPaint(); return; }
+    var was = { s: b.s, e: b.e }, len = b.e - b.s;
+    b.s = d.s; b.e = d.s + len;
+    cdSave('week'); cdPaint();
+    cdToast(b.n + ' now starts at ' + cdHM(b.s), function () { b.s = was.s; b.e = was.e; cdSave('week'); cdPaint(); });
+  }
+  $('cdAgenda').addEventListener('pointerdown', function (ev) {
+    var rb = ev.target.closest('.cd-rb');
+    if (!rb || ev.button > 0) return;
+    var li = rb.closest('.cd-it'), b = li && S.week.filter(function (x) { return x.id === li.dataset.id; })[0];
+    if (!b) return;
+    drg = { id: b.id, li: li, y0: ev.clientY, x0: ev.clientX, s0: b.s, s: b.s, len: b.e - b.s, lift: false, done: false };
+    drg.tm = setTimeout(function () {
+      if (!drg) return;
+      drg.lift = true; li.classList.add('is-lift');
+      if (typeof navigator.vibrate === 'function') { try { navigator.vibrate(8); } catch (e) {} }
+    }, DRAG_HOLD);
+  });
+  window.addEventListener('pointermove', function (ev) {
+    if (!drg) return;
+    var dy = ev.clientY - drg.y0;
+    if (!drg.lift) { if (Math.abs(dy) > 10 || Math.abs(ev.clientX - drg.x0) > 10) cdDragEnd(false); return; }
+    var s2 = Math.max(0, Math.min(1440 - drg.len, drg.s0 + Math.round(dy / DRAG_PX) * 5));
+    if (s2 === drg.s) return;
+    drg.s = s2;
+    var t = drg.li.querySelector('.cd-rt');
+    if (t) t.textContent = cdHM(s2);
+  });
+  /* No click has to be swallowed after a drop, and one was, for a round:
+     a lifted press always ends by drawing the day again, so the row it
+     started on is gone before its click arrives and nothing opens.
+     Proved by taking the swallowing out and watching the drop-back check
+     still pass; the check stays, since the redraw is what it holds. */
+  window.addEventListener('pointerup', function () { if (drg) cdDragEnd(true); });
+  window.addEventListener('pointercancel', function () { cdDragEnd(false); });
+  /* Held still means held still: while a row is lifted the page does not
+     scroll under the drag. Non-passive, or the browser ignores it. */
+  document.addEventListener('touchmove', function (ev) { if (drg && drg.lift) ev.preventDefault(); }, { passive: false });
+  $('cdAgenda').addEventListener('contextmenu', function (ev) { if (ev.target.closest('.cd-rb')) ev.preventDefault(); });
+
   $('cdAgenda').addEventListener('click', function (ev) {
     var btn = ev.target.closest('[data-act]');
     if (!btn) return;
@@ -1463,9 +1530,11 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var l = $('cdBuzz');
     if (l) l.click();
   }
-  $('cdGo').addEventListener('click', function () {
-    var id = heroId, day = sel;
-    if (!id) return;
+  $('cdGo').addEventListener('click', function () { if (heroId) cdAskDone(heroId, sel); });
+  /* The ask itself, reached from the check and from a reminder asking
+     whether you did a block: the same sheet, so the two can never
+     disagree about what Complete does. */
+  function cdAskDone(id, day) {
     var b = S.week.filter(function (x) { return x.id === id; })[0];
     if (!b) return;
     var ask = el('div'), foot = el('div', 'cd-foot is-only');
@@ -1482,7 +1551,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     });
     foot.appendChild(no); foot.appendChild(yes); ask.appendChild(foot);
     cdSheet('Complete ' + b.n + '?', ask);
-  });
+  }
   $('cdHeroN').addEventListener('click', function () { if (heroId) cdEdit(heroId); });
   $('cdThen').addEventListener('click', function () { if (thenId) cdEdit(thenId); });
   $('cdRibbon').addEventListener('click', function (ev) {
@@ -2754,6 +2823,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var pRows = el('div', 'cd-rows'); pRows.style.marginTop = '10px';
     pRows.appendChild(cdPushToggle());
     root.appendChild(pRows);
+    root.appendChild(cdPushMore());
     var wl = el('p', 'cd-lbl', 'Your week'); wl.style.marginTop = '24px';
     root.appendChild(wl);
     /* The glyphs are on by default and a switch takes them off. The dot
@@ -3352,7 +3422,8 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      for one device, and copying it to a second would send one phone's
      reminders to another's queue. */
   var PUSH_K = 'cad.push.v1', PUSH_DAYS = 14;
-  var PU = (function () { var o; try { o = JSON.parse(localStorage.getItem(PUSH_K)); } catch (e) { o = null; } return o && /^[0-9a-f]{32}$/.test(o.id || '') && o.ep ? o : null; })();
+  var PU = (function () { var o; try { o = JSON.parse(localStorage.getItem(PUSH_K)); } catch (e) { o = null; } if (o && o.qh && !(Array.isArray(o.qh) && o.qh.length === 2 && o.qh.every(function (x) { return x >= 0 && x < 1440; }))) o.qh = null;
+    return o && /^[0-9a-f]{32}$/.test(o.id || '') && o.ep ? o : null; })();
   var puTm = 0, puBusy = null;
   function cdPushStore() { try { if (PU) localStorage.setItem(PUSH_K, JSON.stringify(PU)); else localStorage.removeItem(PUSH_K); } catch (e) {} }
   function cdPushCan() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
@@ -3398,27 +3469,62 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      the thing you plan against once it has begun; a place rides after.
      Early, it says how soon and at what time instead, because "Now" ten
      minutes before is a notification that lies about the clock. */
+  /* WHAT A PHONE ASKED FOR, and every part of it is this device's: the
+     whole object is PU, which is not in K. Undefined reads as the
+     default, so a phone that turned reminders on before these existed
+     gets them as they ship. */
+  var PUSH_MAX = 400, ASK_AFTER = 15;
+  function cdPushAsk() { return !PU || PU.ask !== false; }
+  function cdPushTh() { return !PU || PU.th !== false; }
+  function cdPushQuiet(t) {
+    if (!PU || !PU.qh) return false;
+    var d = new Date(t), m = d.getHours() * 60 + d.getMinutes(), a = PU.qh[0], z = PU.qh[1];
+    return a === z ? false : a < z ? m >= a && m < z : m >= a || m < z;
+  }
+  /* A NUDGE IS CANCELLED BY THE TICK, NOT BY THE SERVER. The worker
+     cannot read what it carries, so it cannot know you did the thing;
+     ticking re-queues the fortnight without it, which is why the log is
+     in the fingerprint. A tick made with no signal leaves the nudge
+     standing, and a nudge for something you already did costs one tap. */
   function cdPushList() {
     var out = [], now = Date.now(), today = cdToday();
     for (var i = 0; i < PUSH_DAYS; i++) {
-      var iso = cdAddDays(today, i), p = dparts(iso);
+      var iso = cdAddDays(today, i), p = dparts(iso), first = null;
       cdOn(iso).forEach(function (b) {
         var r = b.r || 0;
         if (r < 0) return;
         var t = new Date(p[0], p[1], p[2], 0, b.s - r).getTime();
-        if (t <= now + 30e3) return;
         var body = r ? 'In ' + r + ' min · at ' + cdHM(b.s) : b.e > b.s ? 'Now · until ' + cdHM(b.e) : 'Now';
         if (b.p) body += ' · ' + b.p;
-        out.push({ t: t, m: { t: b.n, b: body, g: iso + '.' + b.id } });
+        var m = { t: b.n, b: body, g: iso + '.' + b.id };
+        if (t > now + 30e3 && !cdPushQuiet(t)) { out.push({ t: t, m: m }); if (!first) first = m; }
+        if (cdPushAsk() && !cdDone(iso, b.id)) {
+          var at = new Date(p[0], p[1], p[2], 0, Math.max(b.e, b.s) + ASK_AFTER).getTime();
+          if (at > now + 30e3 && !cdPushQuiet(at)) out.push({ t: at, m: { t: b.n, b: 'Did you do it? · ' + (b.e > b.s ? 'ended ' + cdHM(b.e) : 'at ' + cdHM(b.s)), g: iso + '.' + b.id + '.ask', u: '#tick=' + iso + '.' + b.id } });
+        }
       });
+      /* THE THOUGHT RIDES THE DAY'S FIRST REMINDER rather than coming as
+         a second notification in the same minute. It is worked out from
+         the date, so a fortnight of them is known today. A day whose
+         blocks all stay quiet gets it on its own at eight. */
+      if (cdPushTh()) {
+        var q = cdReflQ(iso)[1];
+        if (first) first.b += '\n' + q;
+        else {
+          var t8 = new Date(p[0], p[1], p[2], 8, 0).getTime();
+          if (t8 > now + 30e3 && !cdPushQuiet(t8)) out.push({ t: t8, m: { t: 'Today', b: q, g: iso + '.th' } });
+        }
+      }
     }
-    return out;
+    /* Soonest first, and capped where the server caps: a week busier than
+       the cap loses its last days rather than the whole queue. */
+    return out.sort(function (x, y) { return x.t - y.t; }).slice(0, PUSH_MAX);
   }
   /* Sent when what it would send has changed, or on a new day, which
      keeps the queue two weeks deep. `force` is the turn-on. */
   function cdPushSend(force) {
     if (!PU) return Promise.resolve(false);
-    var fp = cdToday() + JSON.stringify(S.week.map(function (b) { return [b.id, b.n, b.d, b.s, b.e, b.p, b.r]; }));
+    var fp = cdToday() + JSON.stringify([S.week.map(function (b) { return [b.id, b.n, b.d, b.s, b.e, b.p, b.r]; }), S.log[cdToday()] || 0, cdPushAsk(), cdPushTh(), PU.qh || 0]);
     if (!force && PU.fp === fp) return Promise.resolve(true);
     if (puBusy) return puBusy;
     var list = cdPushList();
@@ -3443,7 +3549,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     t.type = 'button'; t.id = 'cdPushOn';
     t.setAttribute('aria-pressed', String(!!PU));
     t.addEventListener('click', function () {
-      if (PU) { cdPushOff(); t.setAttribute('aria-pressed', 'false'); cdToast('Reminders off'); return; }
+      if (PU) { cdPushOff(); t.setAttribute('aria-pressed', 'false'); var mo = document.querySelector('.cd-pmore'); if (mo) mo.hidden = true; cdToast('Reminders off'); return; }
       if (!cdPushCan()) {
         cdToast(/iPhone|iPad/.test(navigator.userAgent) && !navigator.standalone
           ? 'Add Cadence to your Home Screen, then turn reminders on there.' : 'This browser cannot show reminders.');
@@ -3452,6 +3558,37 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       cdPushConsent();
     });
     return t;
+  }
+  /* WHAT THE REMINDERS SAY, drawn only while they are on: a switch for
+     a thing this phone does not do is a control whose effect you cannot
+     see. Every change re-queues, so it takes on the next minute. */
+  function cdPushMore() {
+    var box = el('div', 'cd-rows cd-pmore'); box.id = 'cdPushMore'; box.style.marginTop = '8px';
+    if (!PU) { box.hidden = true; return box; }
+    function sw(id, label, on, flip) {
+      var t = el('button', 'cd-toggle', '<span>' + label + '</span><i></i>');
+      t.type = 'button'; t.id = id; t.setAttribute('aria-pressed', String(on));
+      t.addEventListener('click', function () { var v = flip(); t.setAttribute('aria-pressed', String(v)); cdPushStore(); cdPushSoon(); });
+      box.appendChild(t);
+      return t;
+    }
+    sw('cdPushAsk', 'Ask if I did it', cdPushAsk(), function () { PU.ask = !cdPushAsk(); return PU.ask; });
+    sw('cdPushTh', "Today's thought", cdPushTh(), function () { PU.th = !cdPushTh(); return PU.th; });
+    var times = el('div', 'cd-row'); times.id = 'cdQuietT';
+    var qa = el('input', 'cd-field'), qb = el('input', 'cd-field');
+    [qa, qb].forEach(function (x, i) { x.type = 'time'; x.step = 300; x.id = i ? 'cdQuietB' : 'cdQuietA'; x.setAttribute('aria-label', i ? 'Quiet until' : 'Quiet from'); });
+    var tw = el('div', 'cd-qt'); tw.appendChild(qa); tw.appendChild(el('span', '', 'to')); tw.appendChild(qb);
+    times.appendChild(el('span', '', 'From')); times.appendChild(tw);
+    function paintQ() { times.hidden = !PU.qh; if (PU.qh) { qa.value = cdHM(PU.qh[0]); qb.value = cdHM(PU.qh[1]); } }
+    sw('cdQuiet', 'Quiet hours', !!PU.qh, function () { PU.qh = PU.qh ? null : [1320, 420]; paintQ(); return !!PU.qh; });
+    function readQ() {
+      var v = [qa.value, qb.value].map(function (x) { var p = x.split(':'); return p.length === 2 ? +p[0] * 60 + +p[1] : null; });
+      if (v[0] == null || v[1] == null || !PU.qh) return;
+      PU.qh = v; cdPushStore(); cdPushSoon();
+    }
+    qa.addEventListener('change', readQ); qb.addEventListener('change', readQ);
+    box.appendChild(times); paintQ();
+    return box;
   }
   /* The moment something first leaves the phone for this, so it says
      what leaves in full, once, here. */
@@ -3511,13 +3648,31 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   if (PU) setTimeout(function () { cdPushSend(); }, 1500);
   document.addEventListener('visibilitychange', function () { if (PU && document.visibilityState === 'visible') cdPushSend(); });
 
+  /* A "did you do it?" reminder opens the ask for its block. It arrives
+     as a hash on a cold open and as a message when the app is already
+     up; the hash is spent the moment it is read, so a reload does not
+     ask again. Only while that day can still be ticked, and only if it
+     is not done already: an answered question asked twice is noise. */
+  function cdTickFrom(tag) {
+    var m = /^(\d{4}-\d\d-\d\d)\.(.+)$/.exec(tag || '');
+    if (!m || !cdOpenDay(m[1]) || cdDone(m[1], m[2]) || !S.week.some(function (b) { return b.id === m[2]; })) return;
+    sel = m[1]; cdGo('day');
+    setTimeout(function () { cdAskDone(m[2], m[1]); }, 60);
+  }
+  var bootTick = /^#tick=(.+)$/.exec(location.hash);
+  if (bootTick) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} }
+  if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', function (e) {
+    if (e.data && typeof e.data.tick === 'string') cdTickFrom(e.data.tick);
+  });
+
   var sv = 'day';
   try { sv = sessionStorage.getItem('cad.view') || 'day'; } catch (e) {}
   cdGo(['day', 'hab', 'mon', 'note'].indexOf(sv) >= 0 ? sv : 'day');
   /* The first open of a date shows its thought, after the screen has
      painted so the card comes up over the day rather than over nothing. */
   var rt = cdToday();
-  if (!S.rfoff && !(S.refl[rt] && S.refl[rt].s)) setTimeout(function () { if (!cdSheetOpen()) cdReflect(rt); }, 450);
+  if (bootTick) setTimeout(function () { cdTickFrom(decodeURIComponent(bootTick[1])); }, 300);
+  else if (!S.rfoff && !(S.refl[rt] && S.refl[rt].s)) setTimeout(function () { if (!cdSheetOpen()) cdReflect(rt); }, 450);
 
   /* Exposed for the test suite only: the parser and the keyword table are
      the pieces worth asserting as functions rather than through the page. */

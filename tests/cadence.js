@@ -195,6 +195,53 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('two kinds never share a glyph, and one kind is always the same glyph',
       Object.values(bySvg).every((ks) => ks.size === 1) && Object.keys(bySvg).length === new Set(gl.map((x) => x.k)).size, Object.values(bySvg).map((s) => [...s]));
     ok('every name starts at the same x, whatever its glyph', new Set(gl.map((x) => Math.round(x.nx))).size === 1, gl.map((x) => x.nx));
+
+    /* HOLD AND DRAG MOVES A BLOCK. Held still, the row lifts; dragged
+       down 48px it is thirty minutes later, its length kept, the editor
+       not opened, and Undo puts it back. A drag that starts at once is a
+       scroll, and moves nothing. */
+    {
+      const wk0 = await store(page, 'cad.week.v1');
+      const lunch = wk0.find((b) => b.n === 'Lunch');
+      const box = await page.$eval(`.cd-it[data-id="${lunch.id}"] .cd-rb`, (e) => { const r = e.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+      await page.mouse.move(box.x, box.y); await page.mouse.down();
+      await page.mouse.move(box.x, box.y + 48, { steps: 6 });
+      await page.mouse.up();
+      await page.waitForTimeout(300);
+      const quick = (await store(page, 'cad.week.v1')).find((b) => b.id === lunch.id);
+      await closeSheet(page);
+      ok('a drag that starts at once is a scroll, and moves nothing', quick.s === lunch.s);
+      await page.mouse.move(box.x, box.y); await page.mouse.down();
+      await page.waitForTimeout(520);
+      const lifted = await page.$eval(`.cd-it[data-id="${lunch.id}"]`, (e) => e.classList.contains('is-lift'));
+      await page.mouse.move(box.x, box.y + 24, { steps: 3 });
+      const mid = await page.textContent(`.cd-it[data-id="${lunch.id}"] .cd-rt`);
+      await page.mouse.move(box.x, box.y + 48, { steps: 3 });
+      await page.mouse.up();
+      await page.waitForTimeout(250);
+      const moved = (await store(page, 'cad.week.v1')).find((b) => b.id === lunch.id);
+      const sheet = await page.$('#cdSheet.is-open');
+      const toast = await page.textContent('#cdToastT');
+      ok('held, the row lifts and its time follows the finger in five-minute steps', lifted && mid === '12:45', { lifted, mid });
+      ok('let go, it starts thirty minutes later with its length kept, and the editor stays shut',
+        moved.s === lunch.s + 30 && moved.e - moved.s === lunch.e - lunch.s && !sheet && toast === 'Lunch now starts at 13:00', { moved, toast, sheet: !!sheet });
+      await page.click('#cdToastU');
+      const back = (await store(page, 'cad.week.v1')).find((b) => b.id === lunch.id);
+      ok('and Undo puts it back', back.s === lunch.s && back.e === lunch.e);
+      /* Lifted and dropped back where it started: nothing changes, and
+         the press that ends it is not a tap that opens the editor. */
+      await page.waitForTimeout(3500);
+      await page.mouse.move(box.x, box.y); await page.mouse.down();
+      await page.waitForTimeout(520);
+      await page.mouse.move(box.x, box.y + 24, { steps: 3 });
+      await page.mouse.move(box.x, box.y, { steps: 3 });
+      await page.mouse.up();
+      await page.waitForTimeout(300);
+      const same = (await store(page, 'cad.week.v1')).find((b) => b.id === lunch.id);
+      const opened = !!(await page.$('#cdSheet.is-open'));
+      if (opened) await closeSheet(page);
+      ok('lifted and put back where it was, nothing changes and the editor stays shut', same.s === lunch.s && !opened, { s: same.s, opened });
+    }
     /* The glyph wears the dot's colour: a row still ahead is the block's
        own hue, a missed one is the same quiet grey its dot goes to. */
     ok('a glyph is its block\'s own colour, and a missed one goes grey with its dot',
@@ -1801,7 +1848,10 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
        string search exactly as well as encryption does, which is the
        sync check's own lesson. */
     const plain = raw + rec.q.map((x) => Buffer.from(x.b.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('latin1')).join('');
-    const leaked = week.map((b) => b.n).filter((n) => plain.includes(n));
+    /* Quoted, the way a name would sit in the JSON if it went out
+       unsealed. Bare, a three-letter name like Gym turns up by chance in
+       a hundred and seventy messages of random bytes. */
+    const leaked = week.map((b) => b.n).filter((n) => plain.includes(JSON.stringify(n)));
     ok('the queue carries no block name the server could read', rec.ep === EP && rec.q.length > 0 && leaked.length === 0, { leaked, n: rec.q.length });
 
     /* RFC 8291, undone the way the phone's browser would. */
@@ -1817,17 +1867,25 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       let end = pt.length - 1; while (end > 0 && pt[end] === 0) end--;
       return pt[end] === 2 ? JSON.parse(Buffer.from(pt.slice(0, end)).toString()) : null;
     };
-    const first = rec.q[0] ? await open(rec.q[0].b).catch(() => null) : null;
+    /* Every message opened, the way the phone would, each with its time.
+       Tags say what a message is: `date.id` a block starting, `.ask` the
+       question after it ends, `.th` a thought on a day with no reminder
+       to ride. */
+    const openAll = async () => { const r = JSON.parse(m.get(qk) || '{"q":[]}'); const out = []; for (const x of r.q) { const o = await open(x.b).catch(() => null); if (o) out.push(Object.assign({ at: x.t }, o)); } return out; };
+    const all0 = await openAll();
+    const isStart = (o) => /^\d{4}-\d\d-\d\d\.[^.]+$/.test(o.g);
+    const firstStart = all0.find(isStart);
     const lunchAt = await page.evaluate(() => new Date(2026, 8, 25, 12, 30).getTime());
-    ok('the first reminder is the next block to start, at its minute, and only this phone can read it',
-      !!first && first.t === 'Lunch' && /^Now · until \d\d:\d\d/.test(first.b) && rec.q[0].t === lunchAt, { first, t: rec.q[0] && rec.q[0].t, lunchAt });
+    ok('the first block reminder is the next block to start, at its minute, and only this phone can read it',
+      all0.length === rec.q.length && !!firstStart && firstStart.t === 'Lunch' && /^Now · until \d\d:\d\d/.test(firstStart.b) && firstStart.at === lunchAt, { firstStart, lunchAt });
+    ok('and the queue is soonest first, which is how the server reads it', rec.q.every((x, i) => !i || rec.q[i - 1].t <= x.t));
     const want = await page.evaluate((F) => {
       const wk = JSON.parse(localStorage.getItem('cad.week.v1')); let n = 0;
       for (let i = 0; i < 14; i++) { const d = new Date(2026, 8, 25 + i), dw = (d.getDay() + 6) % 7;
         wk.forEach((b) => { if (b.d.includes(dw) && new Date(2026, 8, 25 + i, 0, b.s).getTime() > F + 30e3) n++; }); }
       return n;
     }, F);
-    ok('and there is one for every block start in the fourteen days', rec.q.length === want, { got: rec.q.length, want });
+    ok('and there is one for every block start in the fourteen days', all0.filter(isStart).length === want, { got: all0.filter(isStart).length, want });
 
     /* The minute timer, at Lunch: the sealed bytes go to the push
        service, and they open to Lunch. */
@@ -1876,11 +1934,62 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const at1220 = await page.evaluate(() => new Date(2026, 8, 25, 12, 20).getTime());
     const lead10 = await until(async () => { const l = await findLunch(); return l.length && l[0].t === at1220 ? l : null; }, 8000);
     ok('ten minutes early is queued ten minutes early, and says how soon and at what time',
-      early && !!lead10 && lead10[0].b === 'In 10 min · at 12:30' && (await store(page, 'cad.week.v1')).find((b) => b.n === 'Lunch').r === 10, lead10);
+      early && !!lead10 && /^In 10 min · at 12:30(\n|$)/.test(lead10[0].b) && (await store(page, 'cad.week.v1')).find((b) => b.n === 'Lunch').r === 10, lead10);
     const off = await setLead(-1);
     const noLunch = await until(async () => (await findLunch()).length === 0 ? true : null, 8000);
     ok('and Off queues nothing for that block', off && !!noLunch);
     await setLead(0);
+    await until(async () => { const l = await findLunch(); return l.length && l[0].t === lunchAt ? l : null; }, 8000);
+
+    /* A BLOCK THAT ENDS UNTICKED ASKS, fifteen minutes on, and the tick
+       takes the question back. Deep work runs to noon, so it asks at
+       12:15 and carries the block it is about for the tap to open. */
+    const wk2 = await store(page, 'cad.week.v1');
+    const deep = wk2.find((b) => b.n === 'Deep work');
+    const askAt = await page.evaluate(() => new Date(2026, 8, 25, 12, 15).getTime());
+    const asks = (await openAll()).filter((o) => o.g === '2026-09-25.' + deep.id + '.ask');
+    ok('a block that ends unticked asks fifteen minutes on, and carries the block to open',
+      asks.length === 1 && asks[0].at === askAt && asks[0].t === 'Deep work' && asks[0].b === 'Did you do it? · ended 12:00' && asks[0].u === '#tick=2026-09-25.' + deep.id, asks);
+    await closeSheet(page);
+    await page.click(`.cd-it[data-id="${deep.id}"] .cd-dot`);
+    const unasked = await until(async () => (await openAll()).some((o) => o.g === '2026-09-25.' + deep.id + '.ask') ? null : true, 8000);
+    ok('and ticking it takes the question back off the queue', !!unasked);
+    await page.click(`.cd-it[data-id="${deep.id}"] .cd-dot`);
+    await until(async () => (await openAll()).some((o) => o.g === '2026-09-25.' + deep.id + '.ask') || null, 8000);
+
+    /* The thought rides the first reminder of each day. Tomorrow's is
+       worked out from tomorrow's date, so it is in the queue today. */
+    const tomQ = await page.evaluate(() => window.cadence.reflect('2026-09-26'));
+    const tomFirst = (await openAll()).filter((o) => /^2026-09-26\./.test(o.g))[0];
+    ok("tomorrow's first reminder carries tomorrow's thought, as one notification rather than two",
+      !!tomFirst && isStart(tomFirst) && tomFirst.b.split('\n')[1] === tomQ && (await openAll()).filter((o) => (o.b || '').includes(tomQ)).length === 1, { tomFirst, tomQ });
+
+    await page.click('#cdGear'); await sheetUp(page);
+    ok('with reminders on, Settings offers what they say, all on to start',
+      (await page.getAttribute('#cdPushAsk', 'aria-pressed')) === 'true' && (await page.getAttribute('#cdPushTh', 'aria-pressed')) === 'true'
+      && (await page.getAttribute('#cdQuiet', 'aria-pressed')) === 'false' && !(await page.isVisible('#cdQuietT')));
+    await page.click('#cdPushTh');
+    const noTh = await until(async () => (await openAll()).some((o) => (o.b || '').includes(tomQ)) ? null : true, 8000);
+    ok("Today's thought off takes it out of every reminder", !!noTh);
+    await page.click('#cdPushTh');
+    await page.click('#cdPushAsk');
+    const noAsk = await until(async () => { const a = await openAll(); return a.length && !a.some((o) => /\.ask$/.test(o.g)) ? true : null; }, 8000);
+    ok('Ask if I did it off queues no questions at all', !!noAsk);
+    await page.click('#cdPushAsk');
+
+    /* Quiet hours drop what would land inside them, across midnight too. */
+    await page.click('#cdQuiet');
+    const mins = (t) => { const d = new Date(t); return d.getHours() * 60 + d.getMinutes(); };
+    const quiet = await until(async () => { const a = await openAll(); return a.length && !a.some((o) => mins(o.at) >= 1320 || mins(o.at) < 420) ? a : null; }, 8000);
+    ok('quiet hours start at 22:00 to 07:00 and nothing lands inside them', (await page.isVisible('#cdQuietT')) && !!quiet
+      && (await page.inputValue('#cdQuietA')) === '22:00' && (await page.inputValue('#cdQuietB')) === '07:00');
+    await page.fill('#cdQuietA', '12:00'); await page.dispatchEvent('#cdQuietA', 'change');
+    await page.fill('#cdQuietB', '13:00'); await page.dispatchEvent('#cdQuietB', 'change');
+    const noon = await until(async () => { const a = await openAll(); return a.length && !a.some((o) => mins(o.at) >= 720 && mins(o.at) < 780) && a.some((o) => mins(o.at) >= 1320) ? a : null; }, 8000);
+    ok('and moving them moves what is dropped: noon to one, and the night is back', !!noon);
+    await page.click('#cdQuiet');
+    await closeSheet(page);
+
 
     /* Off takes the queue off the server and the subscription off the phone. */
     await page.click('#cdGear'); await sheetUp(page);
@@ -1888,6 +1997,15 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.click('#cdPushOn');
     const gone = await until(async () => !m.has(qk) && (await page.evaluate(() => window.__unsub)) === 1 && !(await page.evaluate(() => localStorage.getItem('cad.push.v1'))));
     ok('turning it off deletes the queue and unsubscribes this phone', !!gone && !(qk.slice(5) in JSON.parse(m.get('push:ix') || '{}')));
+    ok('and what the reminders say is put away with them', !(await page.isVisible('#cdPushAsk')));
+    /* A tap on the question opens the app on the ask for that block.
+       After Off, because a reload takes the faked subscription with it. */
+    /* A query as well as the hash, or goto is a same-page jump and boot never reads it. */
+    await page.goto(BASE + '/cadence/?from=push#tick=2026-09-25.' + deep.id);
+    const askUp = await sheetUp(page);
+    ok('opening from the question lands on Complete for that block, and spends the hash',
+      askUp && (await page.textContent('#cdShT')) === 'Complete Deep work?' && (await page.evaluate(() => location.hash)) === '', await page.evaluate(() => location.hash));
+    await closeSheet(page);
     /* K is the list the backup and the vault are both built from, so a
        subscription in it would copy one phone's address to another. */
     const kBlock = (fs.readFileSync(path.resolve(__dirname, '..', 'cadence', 'index.html'), 'utf8').match(/var K = \{[\s\S]*?\};/) || [''])[0];
@@ -1898,6 +2016,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const sw = fs.readFileSync(path.resolve(__dirname, '..', 'cadence', 'sw.js'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
     ok('the service worker shows pushes and never intercepts a request',
       /addEventListener\('push'/.test(sw) && /showNotification/.test(sw) && /addEventListener\('notificationclick'/.test(sw) && !/addEventListener\('fetch'/.test(sw));
+    ok('and a tap on a question hands its block to the app, open or not', /postMessage\(\{ tick:/.test(sw) && /openWindow\('\.\/' \+ u\)/.test(sw));
     ok('no page errors with reminders', P.errs.length === 0, P.errs);
     Date.now = realNow;
     await P.c.close();

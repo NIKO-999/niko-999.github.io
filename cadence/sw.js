@@ -18,15 +18,22 @@ self.addEventListener('push', function (e) {
     body: d.b || '',
     tag: d.g || undefined,
     icon: 'icon-192.png',
-    data: { u: './' }
+    data: { u: d.u || '' }
   }));
 });
 
-/* A tap opens the app, or brings the open one to the front. */
+/* A tap opens the app, or brings the open one to the front. A "did you
+   do it?" reminder carries the block it is about, handed over as a
+   message to an open app and as a hash to a cold one, so either way the
+   press lands on the ask for that block. */
 self.addEventListener('notificationclick', function (e) {
   e.notification.close();
+  var u = (e.notification.data && e.notification.data.u) || '', tick = /^#tick=(.+)$/.exec(u);
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (ws) {
-    for (var i = 0; i < ws.length; i++) if ('focus' in ws[i]) return ws[i].focus();
-    return self.clients.openWindow ? self.clients.openWindow('./') : null;
+    for (var i = 0; i < ws.length; i++) if ('focus' in ws[i]) {
+      if (tick) ws[i].postMessage({ tick: decodeURIComponent(tick[1]) });
+      return ws[i].focus();
+    }
+    return self.clients.openWindow ? self.clients.openWindow('./' + u) : null;
   }));
 });

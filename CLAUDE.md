@@ -5213,6 +5213,51 @@ effect you cannot see is worse than none; the figure stays on the
 block either way. Asserted both ways, and proved by a queue that
 ignored the lead and one that ignored Off.
 
+### Reminders ask, carry the thought, and keep quiet
+
+**A block that ends unticked asks** fifteen minutes on — *Did you do
+it? · ended 12:00* — and a tap opens the app on that block's own
+Complete sheet: a message to an app already open, a `#tick=` hash to a
+cold one, spent the moment it is read. **The tick takes the question
+back**, because the worker cannot read what it carries and so cannot
+know you did the thing: ticking re-queues the fortnight without it,
+which is why the day's log is in the queue's fingerprint. A tick made
+with no signal leaves it standing, and a question about something done
+costs one tap.
+
+**The thought rides the day's first reminder** as a second line rather
+than coming as its own notification in the same minute. It is worked
+out from the date, so a fortnight of them is known today; a day whose
+blocks all stay quiet gets it alone at eight.
+
+**Quiet hours drop, never defer.** A reminder held until seven for a
+block at six is a reminder for something already over. Across midnight
+by default, 22:00 to 07:00.
+
+**All three live on `cad.push.v1`**, this phone's own and never synced,
+and undefined reads as on so a phone that turned reminders on earlier
+gets them as they ship. Drawn only while reminders are on.
+
+**The queue doubled, so the cap did.** A start and a question for
+every block is two messages where there was one, and the worker's 200
+would refuse a busy fortnight outright — every reminder gone rather
+than the last few days. 400 on both sides, the list sorted soonest
+first and cut there, so a week busier than the cap loses its tail.
+
+### Hold a row and drag to move it
+
+Held still for a moment it lifts; dragged, its start moves five minutes
+every eight pixels with its length kept; let go and it saves with Undo.
+**The row stays put and only its time changes**, because a row's place
+in the list is its order, not its hour. **A move before the hold is a
+scroll** and cancels it. Once lifted the page is held still by a
+non-passive `touchmove`.
+
+**No click is swallowed after a drop, and one was.** A lifted press
+always ends by drawing the day again, so the row it started on is gone
+before its click can arrive. Proved by taking the swallowing out and
+watching the drop-back check still pass, then deleted as dead code.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

@@ -95,7 +95,7 @@ const VAULT_BYTES = 2 * 1024 * 1024;   /* ciphertext, base64 */
    to later, which is an SSRF the moment it is anything but a push
    service. Apple, Google, Mozilla and Windows, by host, over https. */
 const PUSH_HOST = /^(web\.push\.apple\.com|fcm\.googleapis\.com|updates\.push\.services\.mozilla\.com|[a-z0-9-]+\.notify\.windows\.com)$/;
-const PUSH_MAX = 200;          /* two weeks of a busy schedule */
+const PUSH_MAX = 400;          /* two weeks of a busy schedule, a start and a "did you do it?" for each */
 const PUSH_BODY = 1024;        /* one sealed message, base64; a real one is ~250 */
 const PUSH_AHEAD = 16 * 864e5; /* the phone queues fourteen days */
 const PUSH_STALE = 10 * 60e3;  /* a reminder more than ten minutes late is dropped, not sent */

@@ -182,7 +182,7 @@ const kv = () => {
       r = await hit('PUT', P, { key: TOK, body: { ep, q: good.q } });
       ok('an endpoint that is not a push service is refused: ' + ep, r.status === 400 && !env.SCHED.m.has('push:' + ID), r.status);
     }
-    r = await hit('PUT', P, { key: TOK, body: { ep: EP, q: Array.from({ length: 201 }, (_, i) => ({ t: T0 + i * 60e3, b: 'AAAA' })) } });
+    r = await hit('PUT', P, { key: TOK, body: { ep: EP, q: Array.from({ length: 401 }, (_, i) => ({ t: T0 + i * 60e3, b: 'AAAA' })) } });
     ok('a queue is capped', r.status === 413, r.status);
     r = await hit('PUT', P, { key: TOK, body: { ep: EP, q: [{ t: T0, b: 'A'.repeat(1025) }] } });
     ok('and so is one message', r.status === 400, r.status);
