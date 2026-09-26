@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#3a2961" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Natal" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png" />
+  <meta name="description" content="Natal birth chart: planets, houses, aspects, nodes and karmic astrology." />
+  <title>Natal · Birth Chart</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png" />
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Symbols:wght@400;500&family=Noto+Sans+Symbols+2&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- cosmic backdrop -->
+  <div class="sky" aria-hidden="true">
+    <canvas id="stars"></canvas>
+    <div class="nebula"></div>
+    <svg width="0" height="0" style="position:absolute">
+      <defs>
+        <filter id="tex-big" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.028" numOctaves="4" seed="7" result="n"/>
+          <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.22  0 0 0 0 0.15  0 0 0 0 0.33  0 0 0 1.5 -0.52"/>
+          <feComposite in2="SourceGraphic" operator="in"/>
+        </filter>
+        <filter id="tex-small" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="3" seed="2" result="n"/>
+          <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.3  0 0 0 0 0.22  0 0 0 0 0.42  0 0 0 0.9 -0.35"/>
+          <feComposite in2="SourceGraphic" operator="in"/>
+        </filter>
+        <radialGradient id="g-big" cx="42%" cy="30%" r="78%">
+          <stop offset="0" stop-color="#806d9f"/><stop offset="0.55" stop-color="#65518a"/><stop offset="1" stop-color="#4a396b"/>
+        </radialGradient>
+        <radialGradient id="g-shade" cx="70%" cy="78%" r="70%">
+          <stop offset="0" stop-color="#2c1f4d" stop-opacity="0.35"/><stop offset="1" stop-color="#2c1f4d" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="g-small" cx="40%" cy="35%" r="75%">
+          <stop offset="0" stop-color="#8d7aa9"/><stop offset="1" stop-color="#5d4a7e"/>
+        </radialGradient>
+        <clipPath id="ring-front"><rect x="0" y="60" width="260" height="80"/></clipPath>
+      </defs>
+    </svg>
+    <div class="planet planet-big">
+      <svg viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r="98" fill="url(#g-big)"/>
+        <circle cx="100" cy="100" r="98" fill="#000" filter="url(#tex-big)"/>
+        <circle cx="100" cy="100" r="98" fill="url(#g-shade)"/>
+        <circle cx="100" cy="100" r="97" fill="none" stroke="#c4b3e0" stroke-opacity="0.22" stroke-width="1.2"/>
+      </svg>
+    </div>
+    <div class="planet planet-moon">
+      <svg viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="48" fill="url(#g-small)"/>
+        <circle cx="50" cy="50" r="48" fill="#000" filter="url(#tex-small)"/>
+        <circle cx="50" cy="50" r="47" fill="none" stroke="#c4b3e0" stroke-opacity="0.2"/>
+      </svg>
+    </div>
+    <div class="planet planet-ringed">
+      <svg viewBox="0 0 210 120">
+        <g transform="rotate(-14 150 60)" fill="none" stroke="#cbbbe6" stroke-opacity="0.5">
+          <ellipse cx="150" cy="60" rx="112" ry="25" stroke-width="1.4"/>
+          <ellipse cx="150" cy="60" rx="100" ry="21" stroke-width="3" stroke-opacity="0.28"/>
+          <ellipse cx="150" cy="60" rx="86" ry="17.5" stroke-width="1.2"/>
+        </g>
+        <circle cx="150" cy="60" r="46" fill="url(#g-small)"/>
+        <circle cx="150" cy="60" r="46" fill="#000" filter="url(#tex-small)"/>
+        <g transform="rotate(-14 150 60)" fill="none" stroke="#cbbbe6" stroke-opacity="0.5" clip-path="url(#ring-front)">
+          <ellipse cx="150" cy="60" rx="112" ry="25" stroke-width="1.4"/>
+          <ellipse cx="150" cy="60" rx="100" ry="21" stroke-width="3" stroke-opacity="0.28"/>
+          <ellipse cx="150" cy="60" rx="86" ry="17.5" stroke-width="1.2"/>
+        </g>
+      </svg>
+    </div>
+    <svg class="sparkle s1" viewBox="0 0 16 16"><path d="M8 0 L9.1 6.9 L16 8 L9.1 9.1 L8 16 L6.9 9.1 L0 8 L6.9 6.9Z" fill="#eadff8"/></svg>
+    <svg class="sparkle s2" viewBox="0 0 16 16"><path d="M8 0 L9.1 6.9 L16 8 L9.1 9.1 L8 16 L6.9 9.1 L0 8 L6.9 6.9Z" fill="#eadff8" transform="rotate(45 8 8)"/></svg>
+    <svg class="sparkle s3" viewBox="0 0 16 16"><path d="M8 0 L9.1 6.9 L16 8 L9.1 9.1 L8 16 L6.9 9.1 L0 8 L6.9 6.9Z" fill="#eadff8" transform="rotate(45 8 8)"/></svg>
+  </div>
+
+  <div class="app">
+    <header class="topbar">
+      <button class="icon-btn" id="btn-settings" aria-label="Chart settings">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 8h16M4 16h16"/><circle cx="15" cy="8" r="2.2" fill="var(--bg-deep)"/><circle cx="9" cy="16" r="2.2" fill="var(--bg-deep)"/></svg>
+      </button>
+      <nav class="tabs" id="tabs" role="tablist">
+        <button role="tab" data-tab="chart">Chart</button>
+        <button role="tab" data-tab="today">Today</button>
+        <button role="tab" data-tab="planets">Planets</button>
+        <button role="tab" data-tab="houses">Houses</button>
+        <button role="tab" data-tab="aspects">Aspects</button>
+        <button role="tab" data-tab="karmic">Karmic</button>
+      </nav>
+      <button class="icon-btn" id="btn-new" aria-label="New chart">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 4v16M4 12h16"/></svg>
+      </button>
+    </header>
+
+    <main id="view" class="view"></main>
+  </div>
+
+  <!-- bottom sheet for details -->
+  <div class="sheet-backdrop" id="sheet-backdrop" hidden></div>
+  <section class="sheet" id="sheet" aria-modal="true" role="dialog" hidden>
+    <div class="sheet-sky" aria-hidden="true"><div class="planet planet-sheet"><div class="body"></div></div></div>
+    <div class="sheet-grip"></div>
+    <div class="sheet-body" id="sheet-body"></div>
+  </section>
+
+  <script src="vendor/astronomy.browser.min.js"></script>
+  <script src="js/chiron-data.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/content.js"></script>
+  <script src="js/deep-big-three.js"></script>
+  <script src="js/deep-planet-signs-1.js"></script>
+  <script src="js/deep-planet-signs-2.js"></script>
+  <script src="js/deep-houses-1.js"></script>
+  <script src="js/deep-houses-2.js"></script>
+  <script src="js/deep-aspects-1.js"></script>
+  <script src="js/deep-aspects-2.js"></script>
+  <script src="js/deep-signs.js"></script>
+  <script src="js/deep-houses-axes.js"></script>
+  <script src="js/deep-extra.js"></script>
+  <script src="js/deep-transits.js"></script>
+  <script src="js/deep-transit-houses.js"></script>
+  <script src="js/cities.js"></script>
+  <script src="js/wheel.js"></script>
+  <script src="js/sky.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
