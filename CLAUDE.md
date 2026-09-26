@@ -4853,6 +4853,18 @@ inside the hero, so the check reads the text range against it.
 Bite-proved by taking the fit loop out: the name comes back at 46 over
 two lines.
 
+**THEN IT WAS TOO SMALL, reported the same day.** Two faults, and the
+bigger one was not the arithmetic. The fit ran on the first paint,
+before the real face had loaded, so it measured the wider fallback and
+settled a size or more under what Inter needed; nothing measured again
+once the face arrived. It now re-fits on `document.fonts.ready`, which
+is the one proved by breaking it: without it the name stops at 32.5
+where 33 fits. The other half is the step: 2px at a time could leave a
+name two pixels short of its room, so the size is solved from the
+measured width and then settled to the half pixel both ways. Asserted
+as the fit being SNUG — half a pixel more no longer fits on one line —
+because "it fits" passes on a name drawn at the floor.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

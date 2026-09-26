@@ -1951,11 +1951,27 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     el.style.fontSize = '';
     if (!(room > 0)) return;
     el.style.whiteSpace = 'nowrap';
-    var fs = parseFloat(getComputedStyle(el).fontSize);
-    while (el.scrollWidth > room && fs > 28) { fs -= 2; el.style.fontSize = fs + 'px'; }
+    /* Solved rather than stepped: type scales linearly with its size, so
+       the size that fits is the full one times room over width, taken
+       down to the half pixel. Stepping 2px at a time overshot by up to
+       two whole pixels, which is a name drawn visibly smaller than the
+       room it had. The two nudges after it settle the last half pixel either way. */
+    var fs = parseFloat(getComputedStyle(el).fontSize), w = el.scrollWidth;
+    if (w > room) {
+      fs = Math.max(28, Math.floor(fs * room / w * 2) / 2);
+      el.style.fontSize = fs + 'px';
+      while (el.scrollWidth > room && fs > 28) { fs -= .5; el.style.fontSize = fs + 'px'; }
+      /* Width is not quite linear in size — the button's own padding does
+         not scale — so the estimate lands a step or two short. Climb back
+         while the next half pixel still fits. */
+      while (fs < 46) { el.style.fontSize = (fs + .5) + 'px'; if (el.scrollWidth > room) { el.style.fontSize = fs + 'px'; break; } fs += .5; }
+    }
     el.style.whiteSpace = '';
   }
   window.addEventListener('resize', function () { if (view === 'day') cdHeroFit(); });
+  /* The first paint measures the fallback face, which is wider, so the
+     fit is taken again once the real one has arrived. */
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (view === 'day') cdHeroFit(); });
   function cdNoteSync() { $('cdNoteGo').disabled = !$('cdNoteIn').value.trim(); }
   /* Open while a caret or a press is inside it, and while it holds anything
      you would lose by it shutting: words, Important, or a date that is not

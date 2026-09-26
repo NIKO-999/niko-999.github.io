@@ -402,6 +402,17 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       const el = document.getElementById('cdHeroN'), r = el.getBoundingClientRect(), fs = parseFloat(getComputedStyle(el).fontSize), lh = parseFloat(getComputedStyle(el).lineHeight);
       return { t: el.textContent, fs, lines: Math.round(r.height / lh), cut: (() => { const g = document.createRange(); g.selectNodeContents(el); const t = g.getBoundingClientRect(), p = el.parentNode.getBoundingClientRect(); return t.left < p.left - .5 || t.right > p.right + .5 || t.right > r.right + .5; })(), inside: r.left >= 0 && r.right <= innerWidth };
     });
+    /* And only as far as it has to: half a pixel bigger and it would no
+       longer fit on one line. */
+    const snug = await page.evaluate(() => {
+      const el = document.getElementById('cdHeroN'), fs = parseFloat(el.style.fontSize), pc = getComputedStyle(el.parentNode);
+      const room = el.parentNode.clientWidth - parseFloat(pc.paddingLeft) - parseFloat(pc.paddingRight);
+      el.style.whiteSpace = 'nowrap'; el.style.fontSize = (fs + .5) + 'px';
+      const over = el.scrollWidth > room;
+      el.style.fontSize = fs + 'px'; el.style.whiteSpace = '';
+      return { fs, over };
+    });
+    ok('it shrinks only as far as it must: half a pixel more would not fit', snug.fs > 28 && snug.over, snug);
     ok('a long running name shrinks to one line rather than wrapping or cutting', /Putting room together/.test(fit.t) && fit.fs < 46 && fit.fs >= 28 && fit.lines === 1 && !fit.cut && fit.inside, fit);
     await c.close();
   }
