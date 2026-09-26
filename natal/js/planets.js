@@ -1,6 +1,7 @@
 /*
  * Procedurally rendered sky: per-pixel shaded planets.
- *  - Horizon planet: layered atmosphere, dawn-lit
+ *  - (The horizon planet is a plain CSS gradient; see .horizon in style.css.)
+ *  - Former horizon shader kept below for reference: layered atmosphere, dawn-lit
  *    clouds near the limb, faint city lights on the night side.
  *  - Gas giant: domain-warped bands, festoons, ovals, storm, polar cyclones;
  *    rings with gaps, ringlets, translucency and mutual shadows.
@@ -441,42 +442,11 @@
     return paint(canvas, kind, null, px, px).then(() => { canvas.style.opacity = "1"; });
   }
 
-  let horizonCanvas = null;
-  function mountHorizon() {
-    const sky = document.querySelector(".sky");
-    const svgHost = document.querySelector(".horizon");
-    if (!sky || !svgHost) return Promise.resolve();
-    const sr = sky.getBoundingClientRect(), hr = svgHost.getBoundingClientRect();
-    const Rg = hr.width / 2;
-    const Rb = (Rg * 440) / 520;
-    const T = Rg - Rb;
-    const top = hr.top - sr.top;
-    const W = sr.width, H = sr.height - top;
-    if (H <= 0) return Promise.resolve();
-    const geo = { W, H, cx: hr.left - sr.left + Rg, cy: top + Rg, Rb, T, top };
-    const canvas = document.createElement("canvas");
-    canvas.className = "horizon-canvas";
-    canvas.style.cssText = `position:absolute;left:0;top:${top}px;width:${W}px;height:${H}px;opacity:0;transition:opacity 1.2s ease`;
-    const s = scaleFor("horizon");
-    return paint(canvas, "horizon", geo, Math.round(W * s), Math.round(H * s)).then(() => {
-      if (horizonCanvas && horizonCanvas.parentNode) horizonCanvas.parentNode.removeChild(horizonCanvas);
-      sky.insertBefore(canvas, svgHost.nextSibling);
-      horizonCanvas = canvas;
-      requestAnimationFrame(() => { canvas.style.opacity = "1"; svgHost.style.transition = "opacity 1.2s ease"; svgHost.style.opacity = "0"; });
-    });
-  }
 
   function start() {
     // one after another, so a phone is never asked to do everything at once
-    const jobs = [() => mountHorizon(), () => mountSquare(".planet-moon", "moon"), () => mountSquare(".planet-far", "far"), () => mountSquare(".planet-giant", "giant")];
+    const jobs = [() => mountSquare(".planet-moon", "moon"), () => mountSquare(".planet-far", "far"), () => mountSquare(".planet-giant", "giant")];
     jobs.reduce((p, job) => p.then(() => job()).catch((e) => { if (window.console) console.warn("sky render failed", e); }), Promise.resolve());
-    let lastW = window.innerWidth, timer = null;
-    window.addEventListener("resize", () => {
-      if (Math.abs(window.innerWidth - lastW) < 2) return;
-      lastW = window.innerWidth;
-      clearTimeout(timer);
-      timer = setTimeout(() => { mountHorizon().catch(() => {}); }, 400);
-    });
   }
   // start after the page has painted
   const kick = () => setTimeout(start, 120);

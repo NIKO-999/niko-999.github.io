@@ -52,7 +52,7 @@ input, select { font: inherit; color: inherit; }
 }
 #stars { position: absolute; inset: 0; }
 .nebula {
-  position: absolute; inset: -20%;
+  position: absolute; inset: 0;
   background:
     radial-gradient(45% 30% at 80% 16%, rgba(90, 140, 180, 0.16), transparent 70%),
     radial-gradient(40% 28% at 12% 62%, rgba(240, 150, 90, 0.12), transparent 70%),
@@ -61,8 +61,18 @@ input, select { font: inherit; color: inherit; }
 .planet { position: absolute; }
 .planet svg { width: 100%; height: 100%; display: block; overflow: visible; }
 /* the horizon: a vast dark planet whose limb glows with sunrise */
-.horizon { position: absolute; left: 50%; top: calc(78lvh + env(safe-area-inset-top, 0px)); width: 320vw; max-width: 5200px; aspect-ratio: 1; transform: translateX(-50%); }
-.horizon svg { width: 100%; height: 100%; display: block; }
+.horizon {
+  /* one screen-wide strip: the planet's limb as a single radial gradient (tiny memory footprint on iOS) */
+  --hzR: 160vw;
+  position: absolute; left: 0; right: 0; bottom: 0; top: calc(78lvh + env(safe-area-inset-top, 0px));
+  background: radial-gradient(circle var(--hzR) at 50% var(--hzR),
+    #2a3039 calc(var(--hzR) * 0.66), #30313a calc(var(--hzR) * 0.762), #3f3632 calc(var(--hzR) * 0.808),
+    #6a4028 calc(var(--hzR) * 0.834), #9a4a22 calc(var(--hzR) * 0.846),
+    #d84a1c calc(var(--hzR) * 0.851), #f06a27 calc(var(--hzR) * 0.858), #f58d3c calc(var(--hzR) * 0.868),
+    rgba(244, 169, 94, 0.9) calc(var(--hzR) * 0.882), rgba(233, 185, 142, 0.55) calc(var(--hzR) * 0.902),
+    rgba(159, 180, 194, 0.22) calc(var(--hzR) * 0.93), rgba(111, 147, 171, 0.06) calc(var(--hzR) * 0.97),
+    rgba(111, 147, 171, 0) var(--hzR));
+}
 /* a thin layer of atmosphere over the planet surface so the bottom never goes flat black */
 .horizon-mist { position: absolute; left: 0; right: 0; bottom: 0; height: 26%;
   background: linear-gradient(180deg, rgba(120, 140, 160, 0) 0%, rgba(120, 140, 160, 0.10) 35%, rgba(92, 112, 136, 0.22) 100%); }
@@ -78,7 +88,7 @@ input, select { font: inherit; color: inherit; }
 @keyframes sparkle { 0%, 100% { opacity: 0.3; transform: scale(0.85); } 50% { opacity: 0.85; transform: scale(1.05); } }
 @media (prefers-reduced-motion: reduce) { .planet, .sparkle { animation: none !important; } }
 @media (min-width: 900px) {
-  .horizon { width: 240vw; top: 76%; }
+  .horizon { --hzR: 120vw; top: calc(76lvh + env(safe-area-inset-top, 0px)); }
   .planet-giant { width: 480px; height: 480px; right: -150px; }
   .planet-moon { width: 100px; height: 100px; }
 }
