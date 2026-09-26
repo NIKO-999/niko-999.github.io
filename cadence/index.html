@@ -487,6 +487,13 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 /* ── notes: a line to a day, not a document ── */
 .cd-nw { margin-top: 26px; }
 .cd-nw .cd-field { min-height: 60px; resize: none; }
+/* At rest the composer is one line and nothing else: a box two lines deep
+   over a row of three controls was a form standing on the screen before
+   anything was written. The controls come out when the line is touched and
+   go back once it is left empty, so the list starts a hundred pixels
+   higher and writing is still one press. */
+.cd-nw:not(.is-open) .cd-field { min-height: 44px; height: 44px; padding-top: 11px; padding-bottom: 11px; border-radius: 22px; overflow: hidden; }
+.cd-nw:not(.is-open) .cd-nw-r { display: none; }
 .cd-nw-r { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
 .cd-nw-r .go { margin-left: auto; background: var(--ink); color: var(--on); box-shadow: none; }
 .cd-nw-r .go:disabled { opacity: .4; cursor: default; }
@@ -693,7 +700,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
           <div class="cd-nstrip" id="cdNoteStrip" role="img"></div>
         </div>
         <div class="cd-nw">
-          <textarea class="cd-field" id="cdNoteIn" rows="2" placeholder="Write it down" aria-label="A new note"></textarea>
+          <textarea class="cd-field" id="cdNoteIn" rows="1" placeholder="Write it down" aria-label="A new note"></textarea>
           <div class="cd-nw-r">
             <button class="cd-chip" id="cdNoteImp" type="button" aria-pressed="false">Important</button>
             <input class="cd-ndate" id="cdNoteD" type="date" aria-label="The day it is about">
@@ -1932,6 +1939,18 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     return hd + (body ? '<span class="cd-ntx">' + body + '</span>' : '') + (pics ? '<small>' + pics + (pics === 1 ? ' picture' : ' pictures') + '</small>' : '');
   }
   function cdNoteSync() { $('cdNoteGo').disabled = !$('cdNoteIn').value.trim(); }
+  /* Open while a caret or a press is inside it, and while it holds anything
+     you would lose by it shutting: words, Important, or a date that is not
+     today. Read after the focus has landed, because a press on Important
+     blurs the line on its way to the button. */
+  function cdNwFit() {
+    var w = $('cdNoteIn').parentNode, t = $('cdNoteIn');
+    var open = w.contains(document.activeElement) || !!t.value.trim() || noteImp || ($('cdNoteD').value && $('cdNoteD').value !== cdToday());
+    w.classList.toggle('is-open', open);
+    if (!open) t.style.height = '';
+  }
+  $('cdNoteIn').parentNode.addEventListener('focusin', cdNwFit);
+  $('cdNoteIn').parentNode.addEventListener('focusout', function () { setTimeout(cdNwFit, 0); });
   $('cdNoteIn').addEventListener('input', function () {
     var t = $('cdNoteIn'); t.style.height = 'auto'; t.style.height = Math.max(60, t.scrollHeight) + 'px';
     cdNoteSync();

@@ -748,6 +748,24 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     /* Notes: a line to a day, marked important to reach the calendar. */
     await page.click('.cd-tab[data-v="note"]');
     ok('there are four tabs and Notes is one', (await page.$$('.cd-tab')).length === 4 && (await page.getAttribute('.cd-tab[data-v="note"]', 'aria-current')) === 'page');
+    /* At rest the composer is one line with nothing under it; touched, it
+       opens; left empty, it shuts; left holding words, it stays open. */
+    const nw = () => page.evaluate(() => ({ h: document.getElementById('cdNoteIn').getBoundingClientRect().height,
+      row: !!document.querySelector('.cd-nw-r').getClientRects().length }));
+    const nwRest = await nw();
+    ok('the composer rests as one line with no controls under it', nwRest.h <= 46 && !nwRest.row, nwRest);
+    await page.focus('#cdNoteIn');
+    const nwOpen = await nw();
+    ok('touching it opens it, controls and all', nwOpen.h >= 58 && nwOpen.row, nwOpen);
+    await page.$eval('#cdNoteIn', (t) => t.blur());
+    await page.waitForTimeout(40);
+    const nwShut = await nw();
+    ok('left empty, it shuts again', nwShut.h <= 46 && !nwShut.row, nwShut);
+    await page.fill('#cdNoteIn', 'half a thought');
+    await page.$eval('#cdNoteIn', (t) => t.blur());
+    await page.waitForTimeout(40);
+    ok('left holding words, it stays open', (await nw()).row);
+    await page.fill('#cdNoteIn', '');
     ok('Add waits for words', await page.$eval('#cdNoteGo', (b) => b.disabled));
     await page.fill('#cdNoteIn', 'Race day, pack gels');
     await page.fill('#cdNoteD', '2026-09-28');

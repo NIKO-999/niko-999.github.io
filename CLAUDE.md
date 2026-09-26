@@ -4809,6 +4809,26 @@ and the plus back on the composer fails by name, not by timing the file
 out — the first proof did time out, so the open is awaited with a short
 timeout and the rest of the block skipped when it does not come.
 
+### The composer is one line until you touch it
+
+Reported off a screenshot of the composer: a two-line box over a row of
+Important, a date and Add, standing on the screen before a word was
+written. **A form at rest is chrome at rest.** It is one line now, a
+44px pill reading *Write it down*, and the row comes out the moment a
+caret or a press lands inside it.
+
+**IT STAYS OPEN FOR ANYTHING YOU WOULD LOSE BY IT SHUTTING**: words,
+Important pressed, or a date that is not today. Read after focus lands
+rather than on blur, because a press on Important takes the focus off
+the line on its way to the button, and a composer that shut on that
+blur would swallow the press it was about to receive.
+
+Asserted as four states, because each passes on another's bug: at rest
+one line with no row, touched it opens, left empty it shuts, left with
+words it stays. Bite-proved by drawing the row at rest and by taking
+the shut away. The first run fell on this file's oldest test trap: a
+`const opened` already declared four hundred lines down.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
