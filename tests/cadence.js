@@ -48,7 +48,8 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
   const browser = await chromium.launch({ executablePath: chrome(), args: ['--no-sandbox'] });
 
   async function ctx(opts = {}) {
-    const c = await browser.newContext(opts.vp ? { ...PHONE, viewport: opts.vp } : PHONE);
+    const c = await browser.newContext(opts.desk ? { ...PHONE, viewport: opts.desk, isMobile: false, hasTouch: false }
+      : opts.vp ? { ...PHONE, viewport: opts.vp } : PHONE);
     await c.addInitScript(freeze(opts.at || '2026-09-25T10:20:00'));
     /* The day's reflection comes up over the app on the first open of a
        date, which is every fresh context — so every section but its own
@@ -1386,6 +1387,48 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('a foot button that wraps keeps its leading', go.lh >= 1.1, go);
     ok('no page errors on a small phone', errs.length === 0, errs);
     await c.close();
+  }
+
+  /* ── the desktop: the figure on the left, the list on the right ── */
+  {
+    const { c, page, errs } = await ctx({ desk: { width: 1440, height: 900 } });
+    const box = (sel) => page.$eval(sel, (e) => { const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom, w: r.width, h: r.height }; });
+    const hero = await box('#cdHero'), list = await box('#cdAgenda'), go = await box('#cdGo'), sec = await box('#cdVDay');
+    ok('on a desktop the day is two columns, the figure left of the list', hero.r <= list.l && hero.b > list.t && list.w > 400, { hero, list });
+    ok('the check sits under the figure, not under the list', Math.abs((go.l + go.r) / 2 - (hero.l + hero.r) / 2) <= 2 && go.r < list.l, { go, hero });
+    /* The figure stays where it is while the list scrolls past it. */
+    await page.evaluate(() => { const L = document.getElementById('cdAgenda'); for (let i = 0; i < 3; i++) L.appendChild(L.lastElementChild.cloneNode(true)); for (let i = 0; i < 12; i++) L.appendChild(L.children[i % 7].cloneNode(true)); });
+    await page.$eval('#cdDayPane', (p) => { p.scrollTop = 400; });
+    await page.waitForTimeout(100);
+    const hero2 = await box('#cdHero'), sc = await page.$eval('#cdDayPane', (p) => p.scrollTop);
+    ok('the figure holds still while the list scrolls', sc > 200 && Math.abs(hero2.t - hero.t) <= 1, { sc, before: hero.t, after: hero2.t });
+    await page.click('.cd-tab[data-v="hab"]');
+    const ht = await box('#cdVHab .cd-hero'), hl = await box('#cdHab');
+    ok('habits are two columns too', ht.r <= hl.l && ht.b > hl.t, { ht, hl });
+    await page.click('.cd-tab[data-v="note"]');
+    const nt = await box('#cdVNote .cd-hero'), nw = await box('#cdVNote .cd-nw'), nl = await box('#cdNotes');
+    ok('the composer sits under the notes figure, left of the notes', nw.t >= nt.b && nw.t - nt.b < 60 && nw.r <= nl.l, { nt, nw, nl });
+    await page.click('.cd-tab[data-v="mon"]');
+    const mg = await box('#cdMonG');
+    ok('the month keeps one column and gains room', mg.w >= 700 && mg.w <= 860, mg);
+    const wide = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+    ok('nothing runs off the side of a desktop', wide <= 0, wide);
+    /* A sheet from the foot of a tall screen is a long reach for a
+       pointer: here it is a dialog in the middle. */
+    await page.click('.cd-tab[data-v="day"]');
+    await page.click('#cdAdd');
+    await sheetUp(page); await page.waitForTimeout(350);
+    const sh = await box('#cdSheet');
+    ok('a sheet is a dialog in the middle of a desktop', Math.abs((sh.t + sh.b) / 2 - 450) <= 2 && sh.b < 900 - 20 && Math.abs((sh.l + sh.r) / 2 - 720) <= 1, sh);
+    await closeSheet(page);
+    ok('no page errors on a desktop', errs.length === 0, errs);
+    await c.close();
+
+    /* And the phone is untouched: the list still runs under the figure. */
+    const ph = await ctx();
+    const h = await ph.page.$eval('#cdHero', (e) => e.getBoundingClientRect()), l = await ph.page.$eval('#cdAgenda', (e) => e.getBoundingClientRect());
+    ok('on a phone the list still runs under the figure', l.top >= h.bottom, { h: h.bottom, l: l.top });
+    await ph.c.close();
   }
 
   await browser.close();

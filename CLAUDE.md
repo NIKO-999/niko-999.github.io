@@ -4865,6 +4865,42 @@ measured width and then settled to the half pixel both ways. Asserted
 as the fit being SNUG — half a pixel more no longer fits on one line —
 because "it fits" passes on a name drawn at the floor.
 
+### From 960 up it is two columns
+
+Asked for as a desktop version. A 560px phone column in the middle of a
+1440px screen is a strip with two walls of sky beside it. So from 960
+up, each screen puts its figure on the left and its list on the right,
+and the figure stays where it is while the list scrolls past it.
+
+**It is one app at two widths, not two apps.** The change is pure layout
+in one media query. Nothing is drawn differently, no screen gains a
+control, and the phone is asserted untouched. 960 is a width, not a
+device class: a tablet on its side is as wide as a laptop and wants the
+same thing.
+
+**The check sits at a quarter of the section, and that is arithmetic.**
+The two columns are equal, and the pane's padding is half the gap. That
+puts the left column's middle at exactly 25% of the section. Hanging the
+check off the middle of the screen would put it on the list.
+
+**The sticky figure's `top` equals its own margin.** Set to 0, it slid
+up 108px before it stuck, which is a figure that moves once and then
+stops. The check scrolls the list and holds the figure to the pixel.
+
+**Notes gives up the stickiness.** A sticky box is held inside its own
+grid area, so the figure and the composer could only stick separately.
+A composer drifting loose from the figure it belongs to reads as a
+fault.
+
+**The month keeps one column.** It is one picture, not a figure and a
+list, so it gains room instead: 860px and taller cells.
+
+**A sheet is a dialog in the middle.** A sheet rising from the foot of
+a 900px screen is a long reach for a pointer, and its grab bar goes,
+because nothing here is dragged.
+
+Bite-proved by moving the breakpoint out of reach: seven checks fail.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

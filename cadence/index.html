@@ -620,6 +620,67 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cd-toast.is-bare { padding-right: 18px; min-height: 40px; }
 .cd-toast button { min-height: 40px; padding: 0 14px; font: 600 14px/1 var(--sans); color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 
+/* THE DESKTOP. A phone column in the middle of a 1440px screen is a
+   strip with two walls of sky beside it, so from 960 up each screen puts
+   its figure on the left and its list on the right: the figure you came
+   to read stays where it is while the list scrolls past it. Pure layout,
+   nothing is drawn differently and no screen gains a control, so the phone
+   and the desktop are one app at two widths rather than two apps to keep
+   in step. 960, not a device class: a tablet on its side is as wide as a
+   laptop and wants the same thing. */
+@media (min-width: 960px) {
+  .cd-app { max-width: 1120px; }
+  .cd-top { padding-left: 28px; padding-right: 28px; }
+  .cd-nav { gap: 14px; }
+  /* Two equal columns with a padding half the gap, so the left column's
+     middle is exactly a quarter of the section's width. The check hangs
+     off that quarter instead of off the middle of the screen, where it
+     would sit on the list. */
+  .cd-main > section > .cd-pane {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 80px;
+    grid-template-rows: auto auto auto 1fr; align-content: start; padding-left: 40px; padding-right: 40px;
+  }
+  .cd-main > section > .cd-pane > .cd-hero {
+    grid-column: 1; grid-row: 1 / span 4; align-self: start;
+    position: sticky; top: 12vh; margin-top: 12vh;
+  }
+  .cd-main > section > .cd-pane > * { grid-column: 2; }
+  #cdVDay { position: relative; }
+  #cdDayPane { padding-bottom: 60px; }
+  #cdDayPane .cd-list { margin-top: 12vh; }
+  .cd-go { position: absolute; left: 25%; bottom: 12vh; }
+  #cdVHab .cd-sec { margin-top: 12vh; }
+  /* Notes: the composer is the other half of the figure — the place you
+     write — so it sits under it on the left, and the notes are the list.
+     The figure gives up its stickiness here: a sticky box is held inside
+     its own grid area, so the two could only stick apart, and a composer
+     drifting loose from the figure it belongs to reads as a fault. */
+  #cdVNote .cd-pane > .cd-hero { grid-row: 1; position: static; }
+  #cdVNote .cd-nw { grid-column: 1; grid-row: 2; align-self: start; }
+  #cdNotes { grid-row: 1 / span 4; margin-top: 12vh; }
+  /* The month is one picture rather than a figure and a list, so it keeps
+     one column and gains room: taller cells, so a day's workout name and
+     dots have somewhere to be. */
+  #cdVMon { width: 100%; max-width: 860px; margin: 0 auto; }
+  #cdVMon > .cd-pane { display: block; }
+  .cd-mc { min-height: 86px; padding-top: 8px; }
+  .cd-mc b { width: 32px; height: 32px; font-size: 16px; }
+  /* A sheet from the foot of a 900px-tall screen is a long reach for a
+     pointer and a wide strip of scrim. On the desktop it is a dialog in
+     the middle; the grab bar goes, because nothing here is dragged. */
+  .cd-sheet {
+    top: 50%; bottom: auto; max-width: 540px; max-height: 86vh;
+    border-radius: 24px; padding-bottom: 20px; opacity: 0;
+    transform: translateY(calc(-50% + 24px)); transition: transform .24s cubic-bezier(.2, .8, .2, 1), opacity .2s;
+  }
+  .cd-sheet.is-open { opacity: 1; transform: translateY(-50%); }
+  .cd-sh-hd::before { display: none; }
+  .cd-doc-top, .cd-doc-ed { max-width: 720px; }
+}
+@media (hover: hover) {
+  .cd-tab:hover, .cd-gear:hover { color: var(--ink); }
+  .cd-rb:hover .cd-rn, .cd-hr-n:hover .cd-hr-t, .cd-nt:hover .cd-nth { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+}
 /* A 320px phone. Four spaced-out tab words do not go across 208px, and
    `1fr` is `minmax(auto, 1fr)`, so the middle grew and pushed Add off the
    side; the month's next arrow went the same way under "September". The
