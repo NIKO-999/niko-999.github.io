@@ -721,3 +721,11 @@ body.detail-open .sheet-backdrop { display: none; }
 .cal-phase.full { background: #eef2f6; box-shadow: 0 0 6px rgba(238, 242, 246, 0.6); }
 .cal-phase.new { border: 1px solid rgba(238, 242, 246, 0.7); }
 .cal-phase.quarter { background: linear-gradient(90deg, #eef2f6 50%, transparent 50%); border: 1px solid rgba(238, 242, 246, 0.5); }
+
+/* asteroids and bi-wheels */
+.wheel .w-planet.minor-body .w-glyph { font-size: 12.5px; }
+.wheel .w-planet.outer .w-glyph { opacity: 0.95; }
+.wheel .w-planet.outer .w-deg { fill: var(--muted); }
+.wheel-wrap.static .w-planet { pointer-events: none; }
+.wheel-key { display: flex; justify-content: center; gap: 16px; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 6px 0 0; }
+.wheel-key b { font-weight: 500; color: var(--text); }

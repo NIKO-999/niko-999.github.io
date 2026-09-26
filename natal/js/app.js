@@ -24,7 +24,7 @@
     },
   };
 
-  const DEFAULT_SETTINGS = { v: 2, houseSystem: "placidus", nodeType: "mean", zodiac: "tropical", minorAspects: true, orbScale: 1 };
+  const DEFAULT_SETTINGS = { v: 2, houseSystem: "placidus", nodeType: "mean", zodiac: "tropical", minorAspects: true, orbScale: 1, asteroids: true };
   const storedSettings = store.get("settings", {});
   // v2 made the mean node the default (matching Astro-Seek); drop the old default from earlier saves
   if (!storedSettings.v) delete storedSettings.nodeType;
@@ -36,6 +36,7 @@
     tab: "chart",
     aspectFilter: "all",
     transitRange: store.get("trange", "day"),
+    partnerId: store.get("partner", null),
     focus: null,
   };
 
@@ -310,6 +311,7 @@
     const k = x + "|" + y;
     return (d.aspects1 && d.aspects1[k]) || (d.aspects2 && d.aspects2[k]) || null;
   }
+  const deepAsteroid = (k) => (D().asteroids && D().asteroids[k]) || null;
   const deepSign = (k) => (D().signs && D().signs[k]) || null;
   const deepHouse = (h) => (D().houses && D().houses[h]) || null;
   const deepAxis = (nnSign) => (D().nodeAxes && D().nodeAxes[nnSign]) || null;
@@ -333,14 +335,14 @@
   }
 
   function render() {
-    tabs.classList.toggle("disabled", !state.chart);
-    if (!state.chart) view.style.removeProperty("--theme");
-    if (!state.chart) {
+    tabs.classList.toggle("disabled", !state.chart || !!state.partnerMode);
+    if (!state.chart || state.partnerMode) view.style.removeProperty("--theme");
+    if (!state.chart || state.partnerMode) {
       for (const b of tabs.querySelectorAll("button")) b.setAttribute("aria-selected", "false");
       view.innerHTML = renderForm();
       bindForm();
     } else {
-      const fn = { chart: renderChart, today: renderToday, planets: renderPlanets, houses: renderHouses, aspects: renderAspects, karmic: renderKarmic }[state.tab];
+      const fn = { chart: renderChart, today: renderToday, progressed: renderProgressed, "return": renderReturn, synastry: renderSynastry, planets: renderPlanets, houses: renderHouses, aspects: renderAspects, karmic: renderKarmic }[state.tab];
       if (TAB_THEME[state.tab]) view.style.setProperty("--theme", TAB_THEME[state.tab]);
       else view.style.removeProperty("--theme");
       view.innerHTML = fn();
@@ -446,7 +448,7 @@
     // signature stats
     html += `<div class="section-label">Chart signature</div><div class="split">`;
     if (d.chartRuler) html += stat("Chart ruler", `${sym(pGlyph(d.chartRuler))} ${pName(d.chartRuler)}`, `in ${SIGNS[c.get(d.chartRuler).sign].name} · H${c.get(d.chartRuler).house}`, `point:${d.chartRuler}`);
-    html += stat("Dominant planet", `${sym(pGlyph(d.domPlanet))} ${pName(d.domPlanet)}`, `in ${SIGNS[c.get(d.domPlanet).sign].name}`, `point:${d.domPlanet}`);
+    html += stat("Dominant planet", `${sym(pGlyph(d.domPlanet))} ${pName(d.domPlanet)}`, `in ${SIGNS[c.get(d.domPlanet).sign].name} · breakdown`, "dominants");
     html += stat("Dominant sign", `${signGlyph(d.domSign)} ${SIGNS[d.domSign].name}`, `${cap(SIGNS[d.domSign].element)} · ${cap(SIGNS[d.domSign].mode)}`, `sign:${d.domSign}`);
     html += stat("Signature", `${cap(d.domMode)} ${cap(d.domEl)}`, d.lackEl.length ? `No ${d.lackEl.join(", ")}` : "All elements present", `element:${d.domEl}`);
     html += stat("Chart shape", (window.AstroDeep && AstroDeep.shapes ? AstroDeep.shapes[d.shape.type].name : cap(d.shape.type)), d.shape.handle ? `Handle: ${pName(d.shape.handle)}` : d.shape.leader ? `Leading: ${pName(d.shape.leader)}` : "Planetary pattern", "hemi");
@@ -485,7 +487,7 @@
   function groupBySign() {
     const g = {};
     for (const p of state.chart.points) {
-      if (!PLANETS[p.key] || ["asc", "mc", "fortune", "vertex", "southNode"].includes(p.key)) continue;
+      if (!PLANETS[p.key] || ["asc", "mc", "fortune", "vertex", "southNode"].includes(p.key) || E.ASTEROIDS.includes(p.key)) continue;
       (g[p.sign] = g[p.sign] || []).push(p.key);
     }
     return g;
@@ -501,7 +503,8 @@
       <div class="eyebrow">Planetary positions<span class="sep">·</span>${c.points.length} points</div>
       <h1 class="display">${esc(pName(d.domPlanet))}</h1>
       <div class="subline">dominant planet · <strong>${retro}</strong> retrograde</div>
-    </section>`;
+    </section>
+    <div class="chips" style="margin-top:0"><button class="chip" data-open="dominants">Dominants breakdown</button></div>`;
     html += `<div class="section-label">Luminaries & personal planets</div><div class="list">`;
     for (const k of ["sun", "moon", "mercury", "venus", "mars"]) html += pointRow(c.get(k));
     html += `</div><div class="section-label">Social & outer planets</div><div class="list">`;
@@ -509,6 +512,11 @@
     html += `</div><div class="section-label">Points & bodies</div><div class="list">`;
     for (const k of ["northNode", "southNode", "chiron", "lilith", "fortune", "vertex"]) if (c.get(k)) html += pointRow(c.get(k));
     html += `</div>`;
+    if (c.get("ceres")) {
+      html += `<div class="section-label">Asteroids</div><div class="list">`;
+      for (const k of E.ASTEROIDS) if (c.get(k)) html += pointRow(c.get(k), { endSub: esc(PLANETS[k].keywords[0]) });
+      html += `</div>`;
+    }
     if (c.timeKnown) {
       html += `<div class="section-label">Angles</div><div class="list">`;
       html += pointRow(c.get("asc"), { title: "Ascendant" });
@@ -580,7 +588,7 @@
     </section>`;
 
     // grid
-    const keys = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "northNode", "chiron", "lilith"].filter((k) => c.get(k));
+    const keys = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "northNode", "chiron", "lilith", "ceres", "pallas", "juno", "vesta"].filter((k) => c.get(k));
     if (c.timeKnown) keys.push("asc", "mc");
     const idx = {};
     all.forEach((a, i) => { idx[a.a + "|" + a.b] = i; idx[a.b + "|" + a.a] = i; });
@@ -814,7 +822,7 @@
   /* SHEET                                                              */
   /* ------------------------------------------------------------------ */
   const sheet = $("#sheet"), sheetBody = $("#sheet-body"), backdrop = $("#sheet-backdrop");
-  const TAB_THEME = { today: "#afc8ee", karmic: "#b99cf2" };
+  const TAB_THEME = { today: "#afc8ee", progressed: "#9fd8c6", "return": "#f3c86b", synastry: "#eea8c4", karmic: "#b99cf2" };
   const ELEMENT_COLOR = () => Object.fromEntries(Object.entries(K.ELEMENTS).map(([k, v]) => [k, v.color]));
 
   /** Heading colour for a detail sheet, matched to its subject. Pearl is the default. */
@@ -831,6 +839,14 @@
         case "transit": return PLANETS[computeTransits().list[+arg].t].color;
         case "tevent": return PLANETS[state._period.events[+arg].t].color;
         case "tpevent": return PLANETS[state._period.events[+arg].key].color;
+        case "prog": case "srp": return PLANETS[arg].color;
+        case "paspect": return ASPECTS[computeProg().list[+arg].type].color;
+        case "syn": return ASPECTS[computeSyn().list[+arg].type].color;
+        case "synscore": return CAT_META[arg].color;
+        case "ovl": return PLANETS[spec.split(":")[2]].color;
+        case "pmoon": case "pphase": return PLANETS.moon.color;
+        case "psun": return PLANETS.sun.color;
+        case "dominants": return PLANETS[dominants().planetPct[0].key].color;
         case "area": return LIFE_AREAS[arg].color;
         case "phase": return PLANETS.moon.color;
         case "house": {
@@ -982,6 +998,12 @@
       if (ds) html += sec("Using the gift", signText(p));
     } else if (key === "lilith") {
       html += sec(`In ${S.name}`, [ds ? ds.lilith : signText(p)], elColor(p.sign));
+    } else if (deepAsteroid(key)) {
+      const da = deepAsteroid(key);
+      html += sec("Meaning", da.overview);
+      html += sec(`In ${S.name}`, da.signs[p.sign], elColor(p.sign));
+      html += chips("Gifts", da.gifts, "green") + chips("Challenges", da.challenges, "");
+      html += advice(da.advice);
     } else if (dp) {
       html += sec(`In ${S.name}`, [dp.text, ...extra], elColor(p.sign));
       if (dp.love) html += sec("In love", dp.love);
@@ -1002,6 +1024,8 @@
         const nh = deepNodeHouse(key === "northNode" ? p.house : ((p.house + 5) % 12) + 1);
         html += sec(`In the ${ord(p.house)} house`, [K.HOUSE_NODE[key === "northNode" ? p.house : ((p.house + 5) % 12) + 1], nh && nh.story]);
         if (nh) html += advice(nh.practice);
+      } else if (deepAsteroid(key)) {
+        html += sec(`In the ${ord(p.house)} house · ${HOUSES[p.house].title}`, deepAsteroid(key).houses[p.house]);
       } else if (dh) {
         html += sec(`In the ${ord(p.house)} house · ${HOUSES[p.house].title}`, dh.text) + advice(dh.advice);
       } else {
@@ -1130,7 +1154,8 @@
       html += paras([dA.theme]);
       html += sec(`As a ${X.name.toLowerCase()}`, [body, X.desc + (a.major ? "" : " As a minor aspect, it acts in the background and is felt more in specific moments than as a constant theme.")]);
     } else {
-      html += paras([aspectText(a)]);
+      const da = deepAsteroid(a.a) || deepAsteroid(a.b);
+      html += paras([aspectText(a), da && da.aspects ? da.aspects[a.nature] : ""]);
     }
     const strength = a.orb < 1 ? "At under 1° this aspect is very tight and a defining feature of your chart." : a.orb < 3 ? "This is a close, strongly felt aspect." : "This is a wider aspect: present, but more in the background.";
     const motion = a.applying ? "It is applying, still building toward exact, which tends to feel urgent and forward-moving." : "It is separating, already past exact, which tends to feel familiar and integrated.";
@@ -1158,6 +1183,41 @@
       case "aspect": html = sheetAspect(+arg); break;
       case "transit": html = sheetTransit(+arg); break;
       case "tpevent": html = sheetPeriodEvent(+arg); break;
+      case "dominants": html = sheetDominants(); break;
+      case "prog": html = sheetProg(arg); break;
+      case "paspect": html = sheetProgAspect(+arg); break;
+      case "pphase": {
+        const P = computeProg(), PR = D().progressions || {};
+        html = sheetSimple(`Progressed lunation · ${fmtDayYear(P.target)}`, esc(P.phase.name), `${Math.round(P.phaseAngle)}° between the progressed Sun and Moon`, [PR.phases && PR.phases[P.phase.name], "The progressed lunation cycle lasts about 29.5 years, and each of its eight phases about three and a half years. It describes the longer rhythm of your inner life: seeding, growing, culminating and letting go."]);
+        break;
+      }
+      case "pintro": html = sheetSimple("Progressions", "How it works", "", [(D().progressions || {}).intro, `Your Sun has progressed ${computeProg().pc.solarArc.toFixed(2)}° since birth. That distance, the solar arc, is also how far your progressed Ascendant and Midheaven have moved.`]); break;
+      case "pmoon": {
+        const ev = progTimeline().moon[+arg], PR = D().progressions || {};
+        html = ev.kind === "sign"
+          ? sheetSimple(`Progressed Moon · ${fmtMonthYear(ev.time)}`, `Moon enters ${esc(SIGNS[ev.sign].name)}`, `Age ${Math.floor(age(ev.time))}`, [PR.moonSigns && PR.moonSigns[ev.sign]])
+          : sheetSimple(`Progressed Moon · ${fmtMonthYear(ev.time)}`, `Moon enters your ${ord(ev.house)} house`, esc(HOUSES[ev.house].title), [PR.moonHouses && PR.moonHouses[ev.house]]);
+        break;
+      }
+      case "psun": html = sheetSimple("Progressed Sun", `Sun in ${esc(SIGNS[arg].name)}`, "A chapter of about 30 years", [((D().progressions || {}).sunSigns || {})[arg]]); break;
+      case "pstation": {
+        const st = progTimeline().stations[+arg];
+        html = sheetSimple(`By progression · ${fmtMonthYear(st.time)}`, `${esc(pName(st.key))} turns ${st.dir}`, `Age ${Math.floor(age(st.time))}`, [(D().progressions || {}).stations, st.dir === "direct" ? `From this point ${PLANETS[st.key].focus} can move outward more freely: what was reviewed inwardly for years starts to find direct expression.` : `From this point ${PLANETS[st.key].focus} turns inward for many years: a long period of reflection, reworking and doing things your own way.`, K.RETRO_KARMIC[st.key]]);
+        break;
+      }
+      case "srtheme": html = sheetSRTheme(arg); break;
+      case "srp": html = sheetSRPlanet(arg); break;
+      case "srintro": html = sheetSimple("Solar return", "The year ahead", "", [(D().solarReturn || {}).intro]); break;
+      case "sraspect": {
+        const a = state._srAspects[+arg], X = ASPECTS[a.type];
+        const dA = deepAspect(a.a, a.b);
+        html = sheetSimple(`Solar return ${computeSR().year} · ${X.name}`, `${esc(pShort(a.a))} <span class="sym" style="color:${X.color}">${X.glyph}</span> ${esc(pShort(a.b))}`, `orb ${orbStr(a.orb)}`,
+          [dA ? dA.theme : aspectText(a), dA ? (a.type === "conjunction" ? dA.fusion : FLOW_TYPES.has(a.type) ? dA.flow : dA.tension) : "", "In a solar return chart this describes a theme that colours the year rather than a lifelong trait."]);
+        break;
+      }
+      case "syn": html = sheetSyn(+arg); break;
+      case "ovl": html = sheetOverlay(arg, arg2); break;
+      case "synscore": html = sheetSynScore(arg); break;
       case "tevent": {
         const ev = state._period.events[+arg];
         state.transitDate = ev.time.getTime();
@@ -1943,6 +2003,681 @@
   /* ------------------------------------------------------------------ */
   /* settings                                                           */
   /* ------------------------------------------------------------------ */
+  /* ------------------------------------------------------------------ */
+  /* shared helpers for the extra chart types                           */
+  /* ------------------------------------------------------------------ */
+  const YEAR_MS = 365.242199 * 86400000;
+  const MAJOR_T = [
+    { key: "conjunction", angle: 0, nature: "fusion" }, { key: "opposition", angle: 180, nature: "tension" },
+    { key: "trine", angle: 120, nature: "harmony" }, { key: "square", angle: 90, nature: "tension" },
+    { key: "sextile", angle: 60, nature: "harmony" },
+  ];
+  function houseIn(lon, cusps) {
+    for (let h = 1; h <= 12; h++) {
+      const start = cusps[h], end = cusps[h === 12 ? 1 : h + 1];
+      if (E.norm(lon - start) < E.norm(end - start)) return h;
+    }
+    return 1;
+  }
+  function fmtInTz(d, tz, withYear) {
+    try {
+      return new Intl.DateTimeFormat("en-NZ", { timeZone: tz, day: "numeric", month: "short", year: withYear === false ? undefined : "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(d).replace(",", " ·");
+    } catch (e) {
+      return fmtDayYear(d);
+    }
+  }
+  const age = (d) => (d.getTime() - state.chart.input.utc.getTime()) / YEAR_MS;
+  const natureName = (n) => ({ harmony: "Harmonious", tension: "Challenging", fusion: "Blending", adjust: "Adjusting", creative: "Creative" }[n]);
+  function wheelBlock(html, key) {
+    return `<div class="wheel-wrap static">${html}</div>${key ? `<div class="wheel-key">${key}</div>` : ""}`;
+  }
+  function barRow(label, color, pct, open, val) {
+    return `<button class="bar-row" ${open ? `data-open="${open}"` : ""}><span class="lab"><i style="background:${color}"></i>${esc(label)}</span>
+      <span class="track"><b style="width:${Math.max(2, pct)}%;background:${color}"></b></span><span class="val">${val === undefined ? Math.round(pct) + "%" : val}</span></button>`;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* DOMINANTS                                                          */
+  /* ------------------------------------------------------------------ */
+  function dominants() {
+    const c = state.chart, d = c.derived;
+    const get = (k) => c.get(k);
+    const planets = PLANET_KEYS.map(get);
+    const parts = {};
+    for (const p of planets) {
+      const r = { base: p.key === "sun" || p.key === "moon" ? 2 : 1, ruler: 0, dignity: 0, angular: 0, aspects: 0, rulership: 0 };
+      if (p.key === d.chartRuler) r.ruler = 4;
+      if (p.dignity === "domicile") r.dignity = 3;
+      if (p.dignity === "exaltation") r.dignity = 2;
+      if (c.timeKnown && [1, 4, 7, 10].includes(p.house)) r.angular = 2.5 + (p.house === 1 ? 1 : 0);
+      for (const a of c.aspects) if ((a.a === p.key || a.b === p.key) && a.major) r.aspects += 0.4 + a.strength * 0.6;
+      if (rulerOf(get("sun").sign) === p.key) r.rulership += 2;
+      if (rulerOf(get("moon").sign) === p.key) r.rulership += 1.5;
+      for (const q of planets) if (q !== p && rulerOf(q.sign) === p.key) r.rulership += 0.5;
+      parts[p.key] = r;
+    }
+    const total = (r) => r.base + r.ruler + r.dignity + r.angular + r.aspects + r.rulership;
+    const sumP = PLANET_KEYS.reduce((s, k) => s + total(parts[k]), 0);
+    const planetPct = PLANET_KEYS.map((k) => ({ key: k, score: total(parts[k]), pct: (total(parts[k]) / sumP) * 100, parts: parts[k] })).sort((a, b) => b.score - a.score);
+    const w = (k) => (k === "sun" || k === "moon" ? 3 : ["mercury", "venus", "mars"].includes(k) ? 2 : 1);
+    const signS = Object.fromEntries(SIGN_KEYS.map((k) => [k, 0]));
+    for (const p of planets) signS[p.sign] += w(p.key);
+    if (c.timeKnown) { signS[get("asc").sign] += 3; signS[get("mc").sign] += 1; }
+    const sumS = Object.values(signS).reduce((a, b) => a + b, 0);
+    const signPct = SIGN_KEYS.map((k) => ({ key: k, pct: (signS[k] / sumS) * 100 })).sort((a, b) => b.pct - a.pct);
+    let housePct = null;
+    if (c.timeKnown) {
+      const hs = {};
+      for (let h = 1; h <= 12; h++) hs[h] = 0;
+      for (const p of planets) hs[p.house] += w(p.key);
+      // the house ruled by the chart ruler and the houses of the angles' rulers add a little weight
+      hs[get(d.chartRuler).house] += 1;
+      const sumH = Object.values(hs).reduce((a, b) => a + b, 0);
+      housePct = Object.keys(hs).map((h) => ({ key: +h, pct: (hs[h] / sumH) * 100 })).sort((a, b) => b.pct - a.pct);
+    }
+    const el = { fire: 0, earth: 0, air: 0, water: 0 }, md = { cardinal: 0, fixed: 0, mutable: 0 };
+    for (const s of SIGN_KEYS) { el[SIGNS[s].element] += signS[s]; md[SIGNS[s].mode] += signS[s]; }
+    return { planetPct, signPct, housePct, el, md, sumS };
+  }
+
+  function sheetDominants() {
+    const c = state.chart;
+    const X = dominants();
+    const DD = D().dominants || {};
+    const top = X.planetPct[0], low = X.planetPct[X.planetPct.length - 1];
+    let html = `<section class="hero"><div class="eyebrow">Dominants</div><h2 class="display">${esc(pName(top.key))}</h2>
+      <div class="subline">${Math.round(top.pct)}% of the chart's planetary weight · then ${esc(pName(X.planetPct[1].key))} and ${esc(pName(X.planetPct[2].key))}</div></section>`;
+    if (DD.intro) html += paras([DD.intro]);
+    html += `<h4>Planets</h4><div class="bars">`;
+    for (const p of X.planetPct) html += barRow(pShort(p.key), PLANETS[p.key].color, (p.pct / X.planetPct[0].pct) * 100, `point:${p.key}`, `${p.pct.toFixed(1)}%`);
+    html += `</div>`;
+    html += sec(`${pName(top.key)} leads`, [DD.planets && DD.planets[top.key], PLANETS[top.key].desc], PLANETS[top.key].color);
+    for (const p of X.planetPct.slice(1, 3)) html += sec(`Then ${pName(p.key)}`, firstPara(DD.planets && DD.planets[p.key]) || PLANETS[p.key].desc, PLANETS[p.key].color);
+    if (DD.weak && DD.weak[low.key]) html += sec(`Quietest: ${pName(low.key)}`, DD.weak[low.key], PLANETS[low.key].color);
+    // how the scores are built
+    const LAB = { base: "Base", ruler: "Chart ruler", dignity: "Dignity", angular: "Angular house", aspects: "Aspects", rulership: "Rules other planets" };
+    html += `<h4>How the top scores are built</h4>`;
+    for (const p of X.planetPct.slice(0, 3)) {
+      const rows = Object.entries(p.parts).filter(([, v]) => v > 0).map(([k, v]) => [LAB[k], `+${v.toFixed(1)}`]);
+      rows.push(["Total", `<strong>${p.score.toFixed(1)}</strong>`]);
+      html += `<p class="minihead"><span class="sym" style="color:${PLANETS[p.key].color}">${pGlyph(p.key)}</span> ${esc(pName(p.key))}</p>` + facts(rows);
+    }
+    html += `<h4>Signs</h4><div class="bars">`;
+    for (const s of X.signPct.filter((s) => s.pct > 0)) html += barRow(SIGNS[s.key].name, K.ELEMENTS[SIGNS[s.key].element].color, (s.pct / X.signPct[0].pct) * 100, `sign:${s.key}`, `${s.pct.toFixed(1)}%`);
+    html += `</div>`;
+    if (X.housePct) {
+      html += `<h4>Houses</h4><div class="bars">`;
+      for (const h of X.housePct.filter((h) => h.pct > 0)) html += barRow(`House ${h.key}`, "var(--text-2)", (h.pct / X.housePct[0].pct) * 100, `house:${h.key}`, `${h.pct.toFixed(1)}%`);
+      html += `</div>`;
+      const th = X.housePct[0].key;
+      if (DD.houses && DD.houses[th]) html += sec(`Emphasis on the ${ord(th)} house · ${HOUSES[th].title}`, DD.houses[th]);
+    }
+    html += `<h4>Elements</h4><div class="bars">`;
+    for (const k of ELEMENT_KEYS) html += barRow(K.ELEMENTS[k].name, K.ELEMENTS[k].color, (X.el[k] / X.sumS) * 100, `element:${k}`);
+    html += `</div><h4>Modes</h4><div class="bars">`;
+    for (const k of MODE_KEYS) html += barRow(K.MODES[k].name, "var(--text-2)", (X.md[k] / X.sumS) * 100, `mode:${k}`);
+    html += `</div><p class="note">Signs, elements and modes are weighted: Sun, Moon and Ascendant 3, Mercury, Venus and Mars 2, the other planets 1${c.timeKnown ? ", Midheaven 1" : ""}.</p>`;
+    return html;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* PROGRESSIONS                                                       */
+  /* ------------------------------------------------------------------ */
+  const PROG_KEYS = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "northNode", "chiron"];
+  function progTarget() { return state.progDate ? new Date(state.progDate) : new Date(); }
+  function progUtcFor(real) {
+    const b = state.chart.input.utc.getTime();
+    return new Date(b + ((real.getTime() - b) / YEAR_MS) * 86400000);
+  }
+  function computeProg() {
+    const c = state.chart;
+    const target = progTarget();
+    const key = target.toDateString() + JSON.stringify(state.settings) + state.record.id;
+    if (state._prog && state._prog.key === key) return state._prog;
+    const pc = E.progressedChart(c, target, state.settings);
+    const sunV = pc.get("sun").speed;
+    const PK = ["sun", "moon", "mercury", "venus", "mars"].concat(c.timeKnown ? ["asc", "mc"] : []);
+    const NK = PLANET_KEYS.concat(["northNode", "chiron"]).concat(c.timeKnown ? ["asc", "mc"] : []);
+    const list = [];
+    for (const pk of PK) {
+      const p = pc.get(pk);
+      const v = pk === "asc" || pk === "mc" ? sunV : p.speed; // degrees per year of life
+      for (const nk of NK) {
+        const n = c.get(nk);
+        if (!n || (pk === nk && (pk === "asc" || pk === "mc"))) continue;
+        const sep = Math.abs(E.diff(p.lon, n.lon));
+        for (const asp of MAJOR_T) {
+          const orb = Math.abs(sep - asp.angle);
+          if (orb > 1) continue;
+          const later = Math.abs(Math.abs(E.diff(p.lon + v * 0.1, n.lon)) - asp.angle);
+          const applying = later < orb;
+          const rate = Math.abs(later - orb) / 0.1; // orb change per year
+          const exact = rate > 0 ? new Date(target.getTime() + (applying ? 1 : -1) * (orb / rate) * YEAR_MS) : null;
+          list.push({ a: nk, b: pk, type: asp.key, angle: asp.angle, nature: asp.nature, major: true, orb, strength: 1 - orb, applying, exact });
+        }
+      }
+    }
+    list.sort((x, y) => x.orb - y.orb);
+    const phaseAngle = E.norm(pc.get("moon").lon - pc.get("sun").lon);
+    const phase = K.MOON_PHASES.slice().reverse().find((ph) => phaseAngle >= ph.from);
+    state._prog = { key, target, pc, list, phaseAngle, phase, timeline: null };
+    return state._prog;
+  }
+
+  /** Coming progressed Moon sign and house changes, progressed Sun sign changes and progressed stations. */
+  function progTimeline() {
+    const P = computeProg();
+    if (P.timeline) return P.timeline;
+    const c = state.chart, opts = { nodeType: state.settings.nodeType, zodiac: state.settings.zodiac };
+    const birth = c.input.utc.getTime();
+    const lonReal = (k, ms) => E.lonAt(k, progUtcFor(new Date(ms)), opts);
+    const bisect = (f, a, b) => { let fa = f(a); for (let i = 0; i < 30; i++) { const m = (a + b) / 2, fm = f(m); if (Math.sign(fm) === Math.sign(fa)) { a = m; fa = fm; } else b = m; } return (a + b) / 2; };
+    const moon = [];
+    const MONTH = YEAR_MS / 12;
+    const t0 = P.target.getTime() - YEAR_MS * 2.5, t1 = P.target.getTime() + YEAR_MS * 10;
+    let prevLon = lonReal("moon", t0);
+    for (let t = t0 + MONTH; t <= t1; t += MONTH) {
+      const lon = lonReal("moon", t);
+      const s1 = Math.floor(prevLon / 30), s2 = Math.floor(lon / 30);
+      if (s1 !== s2) {
+        const b = s2 * 30;
+        const te = bisect((ms) => E.diff(b, lonReal("moon", ms)), t - MONTH, t);
+        moon.push({ kind: "sign", sign: SIGN_KEYS[s2], time: new Date(te) });
+      }
+      if (c.timeKnown) {
+        const h1 = houseOfLon(prevLon), h2 = houseOfLon(lon);
+        if (h1 !== h2) {
+          const cusp = c.houses[h2];
+          const te = bisect((ms) => E.diff(cusp, lonReal("moon", ms)), t - MONTH, t);
+          moon.push({ kind: "house", house: h2, time: new Date(te) });
+        }
+      }
+      prevLon = lon;
+    }
+    moon.sort((a, b) => a.time - b.time);
+    // progressed Sun: sign changes over a 100-year life, and planets turning by progression
+    const sun = [], stations = [];
+    const spd = (k, ms) => E.diff(E.lonAt(k, progUtcFor(new Date(ms - YEAR_MS * 0.5)), opts), E.lonAt(k, progUtcFor(new Date(ms + YEAR_MS * 0.5)), opts));
+    let sPrev = lonReal("sun", birth);
+    const vPrev = { mercury: spd("mercury", birth), venus: spd("venus", birth), mars: spd("mars", birth) };
+    for (let y = 1; y <= 100; y++) {
+      const t = birth + y * YEAR_MS;
+      const s = lonReal("sun", t);
+      if (Math.floor(s / 30) !== Math.floor(sPrev / 30)) {
+        const b = Math.floor(s / 30) * 30;
+        sun.push({ sign: signOf(s), time: new Date(bisect((ms) => E.diff(b, lonReal("sun", ms)), t - YEAR_MS, t)) });
+      }
+      sPrev = s;
+      for (const k of ["mercury", "venus", "mars"]) {
+        const v = spd(k, t);
+        if (Math.sign(v) !== Math.sign(vPrev[k])) {
+          const te = bisect((ms) => spd(k, ms), t - YEAR_MS, t);
+          stations.push({ key: k, dir: v < 0 ? "retrograde" : "direct", time: new Date(te) });
+        }
+        vPrev[k] = v;
+      }
+    }
+    stations.sort((a, b) => a.time - b.time);
+    P.timeline = { moon, sun, stations };
+    return P.timeline;
+  }
+
+  function progNav() {
+    const t = progTarget();
+    const isNow = !state.progDate;
+    const iso = `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}`;
+    return `<div class="field" style="border-top:1px solid var(--line);margin-top:14px"><label for="p-date">Date</label><input type="date" id="p-date" value="${iso}"></div>
+      <div class="chips" style="margin-top:6px">
+      <button class="chip" data-act="pprev">‹ Year</button>
+      <button class="chip" data-act="pnow" aria-pressed="${isNow}">Now</button>
+      <button class="chip" data-act="pnext">Year ›</button></div>`;
+  }
+
+  function renderProgressed() {
+    const c = state.chart;
+    const P = computeProg(), pc = P.pc;
+    const sun = pc.get("sun"), moon = pc.get("moon");
+    const parts = [`<strong>${sym(PLANETS.sun.glyph)} ${SIGNS[sun.sign].name}</strong>`, `${sym(PLANETS.moon.glyph)} ${SIGNS[moon.sign].name}`];
+    if (c.timeKnown) parts.push(`↑ ${SIGNS[pc.get("asc").sign].name}`);
+    let html = `<section class="hero">
+      <div class="eyebrow">Progressions<span class="sep">·</span>Age ${Math.floor(pc.ageYears)}<span class="sep">·</span>${esc(fmtDayYear(P.target))}</div>
+      <h1 class="display">Progressed</h1>
+      <div class="subline">${parts.join(' <span style="opacity:.6">·</span> ')}</div>
+    </section>${progNav()}`;
+    html += wheelBlock(window.AstroWheel.render(c, { outer: { points: pc.points, aspects: P.list } }), `<span>Inner <b>natal</b></span><span>Outer <b>progressed</b></span>`);
+
+    html += `<div class="split">`;
+    html += stat("Progressed Sun", `${sym(PLANETS.sun.glyph)} ${SIGNS[sun.sign].name}`, `${degStr(sun)}${c.timeKnown ? ` · natal H${houseOfLon(sun.lon)}` : ""}`, "prog:sun");
+    html += stat("Progressed Moon", `${sym(PLANETS.moon.glyph)} ${SIGNS[moon.sign].name}`, `${degStr(moon)}${c.timeKnown ? ` · natal H${houseOfLon(moon.lon)}` : ""}`, "prog:moon");
+    if (c.timeKnown) {
+      const pa = pc.get("asc"), pm = pc.get("mc");
+      html += stat("Progressed ASC", `${signGlyph(pa.sign)} ${SIGNS[pa.sign].name}`, degStr(pa), "prog:asc");
+      html += stat("Progressed MC", `${signGlyph(pm.sign)} ${SIGNS[pm.sign].name}`, degStr(pm), "prog:mc");
+    }
+    html += stat("Lunation phase", P.phase.name, `${Math.round(P.phaseAngle)}° progressed Sun–Moon`, "pphase");
+    html += stat("Solar arc", `${pc.solarArc.toFixed(2)}°`, "How far the Sun has progressed", "pintro");
+    html += `</div>`;
+
+    // aspects
+    html += `<div class="section-label">Progressed aspects · within 1°</div>`;
+    if (P.list.length) {
+      html += `<div class="list">${P.list.map((a, i) => {
+        const X = ASPECTS[a.type];
+        return `<button class="row" data-open="paspect:${i}"><span class="dot" style="color:${X.color}"></span>
+          <span class="main"><div class="title">P. ${esc(pShort(a.b))} <span class="sym" style="color:${X.color};font-size:.85em">${X.glyph}</span> ${esc(a.a === "asc" || a.a === "mc" ? pName(a.a) : "natal " + pShort(a.a))}</div>
+          <div class="sub">${esc(X.name)} · ${a.applying ? "applying" : "separating"}${a.exact ? ` · exact ${esc(fmtMonthYear(a.exact))}` : ""}</div></span>
+          <span class="end"><div class="pos">${orbStr(a.orb)}</div></span></button>`;
+      }).join("")}</div>`;
+    } else html += `<p class="note" style="text-align:left">No progressed aspects are within 1° right now: a quieter stretch for inner development.</p>`;
+
+    // timeline
+    html += `<div class="section-label">Progressed Moon timeline</div><div class="list" id="prog-timeline"><div class="row"><span class="main"><div class="sub">Working out the dates…</div></span></div></div>`;
+    html += `<div class="section-label">Life chapters · progressed Sun</div><div class="list" id="prog-sun"></div>`;
+
+    // positions
+    html += `<div class="section-label">Progressed positions</div><div class="list">`;
+    for (const k of PROG_KEYS) {
+      const p = pc.get(k);
+      if (!p) continue;
+      const n = c.get(k);
+      const moved = E.diff(n.lon, p.lon);
+      html += `<button class="row" data-open="prog:${k}"><span class="dot" style="color:${PLANETS[k].color}"></span><span class="glyph" style="color:${PLANETS[k].color}">${pGlyph(k)}</span>
+        <span class="main"><div class="title">${esc(pName(k))}</div><div class="sub">${esc(SIGNS[p.sign].name)}${c.timeKnown ? ` · natal H${houseOfLon(p.lon)}` : ""}${p.retro ? " · ℞" : ""}</div></span>
+        <span class="end"><div class="pos">${degStr(p)}${signGlyph(p.sign)}</div><div class="pos-sub">${moved >= 0 ? "+" : "−"}${Math.abs(moved).toFixed(1)}°</div></span></button>`;
+    }
+    html += `</div><p class="note">Secondary progressions: each day after birth stands for a year of life. Angles move by the solar arc in right ascension. Progressed planets are placed in your natal houses.</p>`;
+    return html;
+  }
+
+  function fillProgTimeline() {
+    const el = $("#prog-timeline");
+    if (!el) return;
+    const T = progTimeline();
+    const now = progTarget().getTime();
+    const moonRows = T.moon.filter((e) => e.time.getTime() > now - YEAR_MS * 2.5).slice(0, 8);
+    el.innerHTML = moonRows.map((e, i) => {
+      const past = e.time.getTime() < now;
+      const title = e.kind === "sign" ? `Moon enters ${SIGNS[e.sign].name}` : `Moon enters your ${ord(e.house)} house`;
+      return `<button class="row" data-open="pmoon:${T.moon.indexOf(e)}"><span class="dot ${past ? "hollow" : ""}" style="color:${PLANETS.moon.color}"></span>
+        <span class="glyph" style="color:${PLANETS.moon.color}">${e.kind === "sign" ? signGlyph(e.sign) : e.house}</span>
+        <span class="main"><div class="title ${past ? "dim" : ""}">${esc(title)}</div><div class="sub">${e.kind === "sign" ? "New emotional chapter" : HOUSES[e.house].title}</div></span>
+        <span class="end"><div class="pos">${esc(fmtMonthYear(e.time))}</div><div class="pos-sub">Age ${Math.floor(age(e.time))}</div></span></button>`;
+    }).join("") || `<div class="row"><span class="main"><div class="sub">No changes in this period.</div></span></div>`;
+    const sunEl = $("#prog-sun");
+    const c = state.chart;
+    const chapters = [{ sign: c.get("sun").sign, time: c.input.utc }].concat(T.sun);
+    let html = chapters.map((e, i) => {
+      const next = chapters[i + 1];
+      const current = e.time.getTime() <= now && (!next || next.time.getTime() > now);
+      return `<button class="row" data-open="psun:${e.sign}"><span class="dot ${current ? "" : "hollow"}" style="color:${PLANETS.sun.color}"></span>
+        <span class="glyph" style="color:${PLANETS.sun.color}">${signGlyph(e.sign)}</span>
+        <span class="main"><div class="title ${current ? "" : "dim"}">${esc(SIGNS[e.sign].name)}${current ? " · now" : ""}</div><div class="sub">${i === 0 ? "From birth" : `From ${fmtMonthYear(e.time)}`}</div></span>
+        <span class="end"><div class="pos">Age ${Math.floor(age(e.time))}</div></span></button>`;
+    }).join("");
+    html += T.stations.map((s) => `<button class="row" data-open="pstation:${T.stations.indexOf(s)}"><span class="dot" style="color:${PLANETS[s.key].color}"></span>
+      <span class="glyph" style="color:${PLANETS[s.key].color}">${pGlyph(s.key)}</span>
+      <span class="main"><div class="title">${esc(pName(s.key))} turns ${s.dir}</div><div class="sub">By progression · ${esc(fmtMonthYear(s.time))}</div></span>
+      <span class="end"><div class="pos">Age ${Math.floor(age(s.time))}</div></span></button>`).join("");
+    sunEl.innerHTML = html;
+  }
+
+  function sheetProg(key) {
+    const c = state.chart;
+    const P = computeProg(), p = P.pc.get(key), n = c.get(key);
+    const PR = D().progressions || {};
+    const S = SIGNS[p.sign];
+    const h = c.timeKnown && key !== "asc" && key !== "mc" ? houseOfLon(p.lon) : null;
+    const title = key === "asc" ? `Progressed ${S.name} Rising` : key === "mc" ? `Progressed Midheaven in ${S.name}` : `Progressed ${pName(key)} in ${S.name}`;
+    let html = `<section class="hero"><div class="eyebrow">Progressed · ${esc(fmtDayYear(P.target))}</div><h2 class="display">${esc(title)}</h2>
+      <div class="subline"><span class="sym" style="color:${PLANETS[key].color}">${pGlyph(key)}</span> ${degFull(p)} ${signGlyph(p.sign)}${p.retro ? ' <span class="retro">℞</span>' : ""}</div></section>`;
+    html += facts([
+      ["Natal", `${degStr(n)} ${signGlyph(n.sign)} ${SIGNS[n.sign].name}`],
+      ["Moved", `${E.diff(n.lon, p.lon).toFixed(2)}°`],
+      h ? ["Natal house", `${ord(h)} · ${HOUSES[h].title}`] : null,
+      p.speed !== undefined && key !== "asc" && key !== "mc" ? ["Pace", `${Math.abs(p.speed).toFixed(3)}° a year${p.retro ? " · retrograde" : ""}`] : null,
+    ]);
+    if (key === "moon") {
+      html += sec(`In ${S.name}`, PR.moonSigns && PR.moonSigns[p.sign], elColor(p.sign));
+      if (h && PR.moonHouses) html += sec(`Through your ${ord(h)} house`, PR.moonHouses[h]);
+    } else if (key === "sun") {
+      html += sec(`In ${S.name}`, PR.sunSigns && PR.sunSigns[p.sign], elColor(p.sign));
+      if (h) html += sec(`In your ${ord(h)} house`, `Your sense of purpose is currently being worked out through ${HOUSES[h].areas}. ${HOUSES[h].desc}`);
+    } else {
+      html += sec(`In ${S.name}`, [PR.planets && PR.planets[key], signText(Object.assign({}, p, { key: key === "northNode" ? "jupiter" : key }))], elColor(p.sign));
+      if (p.sign !== n.sign) html += sec("A new sign", `${pName(key)} has progressed from ${SIGNS[n.sign].name} into ${S.name} since birth, so its style has slowly shifted: ${PLANETS[key].focus} now leans ${S.how}.`);
+      if (p.retro !== n.retro) html += sec("Change of direction", [`${pName(key)} was ${n.retro ? "retrograde" : "direct"} at birth and is now ${p.retro ? "retrograde" : "direct"} by progression.`, PR.stations]);
+      if (h) html += sec(`In your ${ord(h)} house`, houseText(Object.assign({}, p, { house: h })));
+    }
+    const asp = P.list.filter((a) => a.b === key);
+    if (asp.length) {
+      html += `<h4>Aspects to your natal chart</h4><div class="list">` + asp.map((a) => {
+        const X = ASPECTS[a.type];
+        return `<button class="row" data-open="paspect:${P.list.indexOf(a)}"><span class="dot" style="color:${X.color}"></span>
+          <span class="main"><div class="title"><span class="sym" style="color:${X.color}">${X.glyph}</span> natal ${esc(pName(a.a))}</div><div class="sub">${esc(X.name)}${a.exact ? ` · exact ${esc(fmtMonthYear(a.exact))}` : ""}</div></span>
+          <span class="end"><div class="pos">${orbStr(a.orb)}</div></span></button>`;
+      }).join("") + `</div>`;
+    }
+    return html;
+  }
+
+  function sheetProgAspect(i) {
+    const P = computeProg(), a = P.list[i];
+    const X = ASPECTS[a.type];
+    const PR = D().progressions || {};
+    const dA = deepAspect(a.b === "asc" || a.b === "mc" ? a.b : a.b, a.a);
+    const body = dA ? (a.type === "conjunction" ? dA.fusion : FLOW_TYPES.has(a.type) ? dA.flow : dA.tension) : aspectText({ a: a.b, b: a.a, type: a.type, nature: a.nature });
+    let html = `<section class="hero"><div class="eyebrow">Progressed aspect · ${esc(X.name)}</div>
+      <h2 class="display">P. ${esc(pShort(a.b))} <span class="sym" style="color:${X.color}">${X.glyph}</span> ${esc(pShort(a.a))}</h2>
+      <div class="subline">orb ${orbStr(a.orb)} · ${a.applying ? "applying" : "separating"}${a.exact ? ` · exact ${esc(fmtMonthYear(a.exact))}` : ""}</div></section>`;
+    html += paras([PR.planets && PR.planets[a.b], `Your progressed ${pName(a.b)} is making a ${X.name.toLowerCase()} to your natal ${pName(a.a)}. Progressed aspects build slowly and stay active for about a year either side of exact (the Moon's for a couple of months), so they describe a season of inner development rather than a single event.`]);
+    html += sec("The theme", [dA && dA.theme, body]);
+    html += sec("What to do with it", a.nature === "tension" ? "Use the pressure. Tension aspects by progression tend to push a change you have been putting off. Name what is being asked of you and take one deliberate step toward it." : a.nature === "fusion" ? "A new chapter is being seeded. Notice what starts around the exact date: it tends to set the tone for years." : "Doors open more easily now. Flowing progressed aspects reward effort, so act on the opportunities they bring rather than waiting.");
+    return html;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* SOLAR RETURN                                                       */
+  /* ------------------------------------------------------------------ */
+  function srDefaultYear() {
+    const now = new Date(), y = now.getFullYear();
+    return E.solarReturnTime(state.chart, y, state.settings) <= now ? y : y - 1;
+  }
+  function srPlace() {
+    return state.srPlace || state.chart.record.place;
+  }
+  function computeSR() {
+    const c = state.chart;
+    const year = state.srYear || srDefaultYear();
+    const place = srPlace();
+    const key = year + JSON.stringify(state.settings) + state.record.id + place.lat + "," + place.lon;
+    if (state._sr && state._sr.key === key) return state._sr;
+    const t = E.solarReturnTime(c, year, state.settings);
+    const sr = E.computeChart({ utc: t, lat: place.lat, lon: place.lon, timeKnown: true }, Object.assign({}, state.settings, { asteroids: false }));
+    const angles = [["Ascendant", sr.asc], ["Descendant", E.norm(sr.asc + 180)], ["Midheaven", sr.mc], ["IC", E.norm(sr.mc + 180)]];
+    const angular = [];
+    for (const k of PLANET_KEYS) {
+      const p = sr.get(k);
+      for (const [name, lon] of angles) { const o = Math.abs(E.diff(p.lon, lon)); if (o <= 6) angular.push({ key: k, angle: name, orb: o }); }
+    }
+    state._sr = { key, year, t, place, sr, angular, next: E.solarReturnTime(c, year + 1, state.settings) };
+    return state._sr;
+  }
+  function srPlaceSelect(place) {
+    const birth = state.chart.record.place;
+    const cur = state.srPlace ? `${state.srPlace.lat},${state.srPlace.lon}` : "";
+    const opts = [`<option value="">Birthplace · ${esc(birth.name)}</option>`].concat(window.ASTRO_CITIES.map((c) => {
+      const v = `${c[2]},${c[3]}`;
+      return `<option value="${v}" ${v === cur ? "selected" : ""}>${esc(c[0])} · ${esc(c[1].replace(", Australia", "").replace(", New Zealand", " NZ"))}</option>`;
+    }));
+    return `<div class="field" style="border-top:1px solid var(--line);margin-top:14px"><label for="sr-place">Place</label><select id="sr-place">${opts.join("")}</select></div>`;
+  }
+  function renderReturn() {
+    const c = state.chart;
+    const R = computeSR(), sr = R.sr;
+    const SRD = D().solarReturn || {};
+    const asc = sr.get("asc"), sun = sr.get("sun"), moon = sr.get("moon");
+    let html = `<section class="hero">
+      <div class="eyebrow">Solar return<span class="sep">·</span>Age ${Math.round(age(R.t))}</div>
+      <h1 class="display">${R.year}–${String(R.year + 1).slice(2)}</h1>
+      <div class="subline"><strong>${esc(fmtInTz(R.t, R.place.tz))}</strong></div>
+      <div class="meta">${esc(R.place.name)} · ${fmtCoord(R.place.lat, R.place.lon)} · runs until ${esc(fmtInTz(R.next, R.place.tz))}</div>
+      ${!c.timeKnown ? `<p class="note">Birth time unknown: the natal Sun is taken at noon, so the return time may be several hours out and the return Ascendant and houses are uncertain.</p>` : ""}
+    </section>
+    <div class="chips" style="margin-top:0">
+      <button class="chip" data-act="srprev">‹ Year</button>
+      <button class="chip" data-act="srnow" aria-pressed="${!state.srYear || state.srYear === srDefaultYear()}">Current</button>
+      <button class="chip" data-act="srnext">Year ›</button></div>
+    ${srPlaceSelect(R.place)}`;
+    html += wheelBlock(window.AstroWheel.render(sr));
+
+    html += `<div class="section-label">Themes of the year</div><div class="list">`;
+    const row = (open, color, glyph, title, sub) => `<button class="row" data-open="${open}"><span class="dot" style="color:${color}"></span><span class="glyph" style="color:${color}">${glyph}</span>
+      <span class="main"><div class="title">${title}</div><div class="sub">${esc(sub)}</div></span></button>`;
+    html += row("srtheme:asc", elColor(asc.sign), signGlyph(asc.sign), `${esc(SIGNS[asc.sign].name)} Rising`, `Tone of the year${c.timeKnown ? ` · falls in your natal ${ord(houseOfLon(asc.lon))} house` : ""}`);
+    html += row("srtheme:sun", PLANETS.sun.color, pGlyph("sun"), `Sun in the ${ord(sun.house)} house`, `Main focus · ${HOUSES[sun.house].title}`);
+    html += row("srtheme:moon", PLANETS.moon.color, pGlyph("moon"), `Moon in ${esc(SIGNS[moon.sign].name)} · ${ord(moon.house)} house`, "Feelings and needs this year");
+    const ruler = rulerOf(asc.sign), rp = sr.get(ruler);
+    html += row(`srp:${ruler}`, PLANETS[ruler].color, pGlyph(ruler), `Year ruler: ${esc(pName(ruler))}`, `In ${SIGNS[rp.sign].name} · ${ord(rp.house)} house`);
+    for (const a of R.angular) html += row(`srp:${a.key}`, PLANETS[a.key].color, pGlyph(a.key), `${esc(pName(a.key))} on the ${esc(a.angle)}`, `Angular · orb ${orbStr(a.orb)}`);
+    html += `</div>`;
+    if (SRD.intro) html += `<p class="note" style="text-align:left">${esc(firstPara(SRD.intro))} <button class="link-btn" data-open="srintro">More</button></p>`;
+
+    html += `<div class="section-label">Planets this year</div><div class="list">`;
+    for (const k of PLANET_KEYS.concat(["northNode", "chiron"])) {
+      const p = sr.get(k);
+      if (!p) continue;
+      html += `<button class="row" data-open="srp:${k}"><span class="dot" style="color:${PLANETS[k].color}"></span><span class="glyph" style="color:${PLANETS[k].color}">${pGlyph(k)}</span>
+        <span class="main"><div class="title">${esc(pName(k))}</div><div class="sub">${esc(SIGNS[p.sign].name)} · House ${p.house}${p.retro ? " · ℞" : ""}</div></span>
+        <span class="end"><div class="pos">${degStr(p)}${signGlyph(p.sign)}</div><div class="pos-sub">${esc(HOUSES[p.house].title)}</div></span></button>`;
+    }
+    html += `</div>`;
+    const asp = sr.aspects.filter((a) => a.major && PLANET_KEYS.includes(a.a) && PLANET_KEYS.includes(a.b)).slice(0, 12);
+    state._srAspects = asp;
+    if (asp.length) {
+      html += `<div class="section-label">Key aspects this year</div><div class="list">` + asp.map((a, i) => {
+        const X = ASPECTS[a.type];
+        return `<button class="row" data-open="sraspect:${i}"><span class="dot" style="color:${X.color}"></span>
+          <span class="main"><div class="title">${esc(pShort(a.a))} <span class="sym" style="color:${X.color};font-size:.85em">${X.glyph}</span> ${esc(pShort(a.b))}</div><div class="sub">${esc(X.name)}</div></span>
+          <span class="end"><div class="pos">${orbStr(a.orb)}</div></span></button>`;
+      }).join("") + `</div>`;
+    }
+    html += `<p class="note">A solar return chart is cast for the exact moment the Sun returns to its birth position, at the place you spend your birthday. Change the place above if you were elsewhere.</p>`;
+    return html;
+  }
+
+  function sheetSRTheme(which) {
+    const R = computeSR(), sr = R.sr, c = state.chart;
+    const SRD = D().solarReturn || {};
+    if (which === "asc") {
+      const a = sr.get("asc");
+      const nh = c.timeKnown ? houseOfLon(a.lon) : null;
+      return sheetSimple(`Solar return ${R.year}`, `${esc(SIGNS[a.sign].name)} Rising`, `${degStr(a)} ${signGlyph(a.sign)}`,
+        [SRD.asc && SRD.asc[a.sign], nh ? `The return Ascendant falls in your natal ${ord(nh)} house, so ${HOUSES[nh].areas} set the backdrop for the whole year.` : ""]);
+    }
+    if (which === "sun") {
+      const s = sr.get("sun");
+      return sheetSimple(`Solar return ${R.year}`, `Sun in the ${ord(s.house)} house`, esc(HOUSES[s.house].title), [SRD.sunHouse && SRD.sunHouse[s.house]]);
+    }
+    const m = sr.get("moon");
+    return sheetSimple(`Solar return ${R.year}`, `Moon in ${esc(SIGNS[m.sign].name)}`, `${ord(m.house)} house · ${esc(HOUSES[m.house].title)}`,
+      [SRD.moonSign && SRD.moonSign[m.sign], SRD.moonHouse && SRD.moonHouse[m.house]]);
+  }
+  function sheetSRPlanet(key) {
+    const R = computeSR(), p = R.sr.get(key);
+    const SRD = D().solarReturn || {};
+    const S = SIGNS[p.sign], P = PLANETS[key];
+    const ang = R.angular.filter((a) => a.key === key);
+    let html = `<section class="hero"><div class="eyebrow">Solar return ${R.year}</div><h2 class="display">${esc(P.name)} in the ${ord(p.house)} house</h2>
+      <div class="subline"><span class="sym" style="color:${P.color}">${P.glyph}</span> ${degStr(p)} ${signGlyph(p.sign)} ${esc(S.name)}${p.retro ? ' <span class="retro">℞</span>' : ""}</div></section>`;
+    if (key === rulerOf(R.sr.get("asc").sign)) html += sec("Ruler of the year", `As ruler of the return Ascendant, ${P.name} steers the whole year. Its house (${HOUSES[p.house].areas}) and condition say a great deal about where the year's story unfolds.`);
+    if (ang.length && SRD.angular && SRD.angular[key]) html += sec(`On the ${ang[0].angle}`, SRD.angular[key]);
+    if (key === "sun" && SRD.sunHouse) html += sec("This year's focus", SRD.sunHouse[p.house]);
+    else if (key === "moon" && SRD.moonHouse) html += sec("This year's feelings", [SRD.moonHouse[p.house], SRD.moonSign && SRD.moonSign[p.sign]]);
+    else html += sec(`In the ${ord(p.house)} house · ${HOUSES[p.house].title}`, [`This year ${P.focus} ${isPlural(P.focus) ? "are" : "is"} drawn into ${HOUSES[p.house].areas}.`, HOUSES[p.house].desc]);
+    html += sec(`In ${S.name}`, [`${P.lead || `Your ${P.name}`} ${S.how} this year.`, `The gifts to use: ${S.gifts}. The trap to avoid: ${S.shadow}.`], elColor(p.sign));
+    if (p.retro) html += sec("Retrograde this year", K.RETRO_KARMIC[key] || `${P.name} is retrograde in this year's chart, so its themes turn inward: review and revisit before pushing ahead.`);
+    return html;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* SYNASTRY                                                           */
+  /* ------------------------------------------------------------------ */
+  const SYN_KEYS = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "northNode", "chiron", "asc"];
+  const SYN_PERSONAL = new Set(["sun", "moon", "mercury", "venus", "mars", "asc"]);
+  const SYN_ORB = { conjunction: 8, opposition: 8, trine: 7, square: 7, sextile: 5 };
+  const OVL_KEYS = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "northNode", "chiron"];
+  const pairKey = (a, b) => (SYN_KEYS.indexOf(a) <= SYN_KEYS.indexOf(b) ? a + "-" + b : b + "-" + a);
+  const has = (a, b, x, y) => (a === x && b === y) || (a === y && b === x);
+  const CAT_META = {
+    attraction: { name: "Attraction", color: "#f29a8a" },
+    emotional: { name: "Emotional", color: "#c9d5e4" },
+    communication: { name: "Mind", color: "#9ecfe0" },
+    stability: { name: "Stability", color: "#d9c28c" },
+    growth: { name: "Growth", color: "#a9d99a" },
+    challenge: { name: "Friction", color: "#e88a6f" },
+  };
+  function synCats(a, b, nature) {
+    const cats = [];
+    const any = (k) => a === k || b === k;
+    if (has(a, b, "venus", "mars") || has(a, b, "sun", "venus") || has(a, b, "sun", "mars") || has(a, b, "mars", "mars") || has(a, b, "venus", "venus") || has(a, b, "venus", "pluto") || has(a, b, "mars", "pluto") || has(a, b, "moon", "mars") || has(a, b, "venus", "asc") || has(a, b, "mars", "asc") || has(a, b, "venus", "uranus")) cats.push("attraction");
+    if (any("moon")) cats.push("emotional");
+    if (any("mercury")) cats.push("communication");
+    if ((any("saturn") && (SYN_PERSONAL.has(a) || SYN_PERSONAL.has(b))) || has(a, b, "sun", "moon") || has(a, b, "sun", "sun") || has(a, b, "moon", "moon")) cats.push("stability");
+    if (any("jupiter") || any("northNode") || any("chiron")) cats.push("growth");
+    if (nature === "tension" && (any("mars") || any("saturn") || any("pluto") || any("uranus") || (SYN_PERSONAL.has(a) && SYN_PERSONAL.has(b)))) cats.push("challenge");
+    return cats;
+  }
+  function partnerRec() {
+    return state.saved.find((s) => s.id === state.partnerId && s.id !== state.record.id) || null;
+  }
+  function computeSyn() {
+    const me = state.chart, rec = partnerRec();
+    if (!rec) return null;
+    const key = rec.id + JSON.stringify(state.settings) + state.record.id + JSON.stringify(rec);
+    if (state._syn && state._syn.key === key) return state._syn;
+    const them = compute(rec);
+    const list = [];
+    for (const a of SYN_KEYS) {
+      const p = me.get(a);
+      if (!p) continue;
+      for (const b of SYN_KEYS) {
+        const q = them.get(b);
+        if (!q || (!SYN_PERSONAL.has(a) && !SYN_PERSONAL.has(b))) continue;
+        const sep = Math.abs(E.diff(p.lon, q.lon));
+        for (const asp of MAJOR_T) {
+          let lim = SYN_ORB[asp.key] + ((a === "sun" || a === "moon" || b === "sun" || b === "moon") ? 1 : 0);
+          if (["northNode", "chiron", "asc"].includes(a) || ["northNode", "chiron", "asc"].includes(b)) lim = Math.min(lim, 5);
+          const orb = Math.abs(sep - asp.angle);
+          if (orb <= lim) list.push({ a, b, type: asp.key, angle: asp.angle, nature: asp.nature, major: true, orb, strength: 1 - orb / lim });
+        }
+      }
+    }
+    list.sort((x, y) => x.orb - y.orb);
+    const sums = Object.fromEntries(Object.keys(CAT_META).map((k) => [k, 0]));
+    const members = Object.fromEntries(Object.keys(CAT_META).map((k) => [k, []]));
+    list.forEach((x, i) => {
+      for (const cat of synCats(x.a, x.b, x.nature)) {
+        const wgt = cat === "challenge" ? x.strength : x.strength * (x.nature === "harmony" ? 1 : x.nature === "fusion" ? 0.9 : 0.45);
+        sums[cat] += wgt;
+        members[cat].push(i);
+      }
+    });
+    // saturating scale: a couple of close supportive contacts ≈ 50%, many ≈ 80–90%
+    const scores = Object.fromEntries(Object.entries(sums).map(([k, v]) => [k, Math.round(100 * (1 - Math.exp(-v / ({ growth: 3.6, challenge: 6 }[k] || 2.6))))]));
+    state._synSums = sums;
+    const inMine = me.timeKnown ? OVL_KEYS.filter((k) => them.get(k)).map((k) => ({ key: k, house: houseIn(them.get(k).lon, me.houses) })) : null;
+    const inTheirs = them.timeKnown ? OVL_KEYS.filter((k) => me.get(k)).map((k) => ({ key: k, house: houseIn(me.get(k).lon, them.houses) })) : null;
+    state._syn = { key, rec, them, list, scores, members, inMine, inTheirs };
+    return state._syn;
+  }
+  const myName = () => state.record.name || "You";
+  const theirName = (rec) => rec.name || "Them";
+
+  function renderSynastry() {
+    const others = state.saved.filter((s) => s.id !== state.record.id);
+    const Y = computeSyn();
+    if (!Y) {
+      let html = `<section class="hero"><div class="eyebrow">Synastry</div><h1 class="display">Compare</h1>
+        <div class="subline">See how your chart meets someone else's</div></section>`;
+      if (others.length) {
+        html += `<div class="section-label">Choose a person</div><div class="list">` + others.map((s) => `<button class="row" data-act="partner:${s.id}">
+          <span class="dot" style="color:${TAB_THEME.synastry}"></span><span class="main"><div class="title">${esc(s.name || "Untitled")}</div><div class="sub">${esc(fmtDate(s))} · ${esc(s.timeKnown ? fmtTime(s) : "time unknown")} · ${esc(s.place.name)}</div></span></button>`).join("") + `</div>`;
+      }
+      html += `<div class="chips" style="margin-top:28px"><button class="chip" data-act="addpartner">+ Add a person</button></div>`;
+      if (D().synastry && D().synastry.intro) html += paras([D().synastry.intro]);
+      return html;
+    }
+    const me = state.chart, them = Y.them, rec = Y.rec;
+    const flow = Y.list.filter((x) => x.nature === "harmony").length, dyn = Y.list.filter((x) => x.nature === "tension").length;
+    let html = `<section class="hero"><div class="eyebrow">Synastry</div>
+      <h1 class="display sm">${esc(myName())} <span style="opacity:.55">&amp;</span> ${esc(theirName(rec))}</h1>
+      <div class="subline"><strong>${Y.list.length}</strong> contacts · ${flow} flowing · ${dyn} dynamic · ${Y.list.length - flow - dyn} conjunctions</div></section>
+      <div class="chips" style="margin-top:0"><button class="chip" data-act="changepartner">Change person</button></div>`;
+    html += wheelBlock(window.AstroWheel.render(me, { outer: { points: them.points, aspects: Y.list } }), `<span>Inner <b>${esc(myName())}</b></span><span>Outer <b>${esc(theirName(rec))}</b></span>`);
+
+    html += `<div class="section-label">Compatibility</div><div class="bars">`;
+    for (const [k, m] of Object.entries(CAT_META)) html += barRow(m.name, m.color, Y.scores[k], `synscore:${k}`);
+    html += `</div>`;
+
+    const rowOf = (x) => {
+      const i = Y.list.indexOf(x), X = ASPECTS[x.type];
+      return `<button class="row" data-open="syn:${i}"><span class="dot" style="color:${X.color}"></span>
+        <span class="main"><div class="title">${esc(pShort(x.a))} <span class="sym" style="color:${X.color};font-size:.85em">${X.glyph}</span> ${esc(pShort(x.b))}</div>
+        <div class="sub">${esc(myName() === "You" ? "Your" : myName() + "'s")} ${esc(pShort(x.a))} · ${esc(theirName(rec))}'s ${esc(pShort(x.b))}</div></span>
+        <span class="end"><div class="pos">${orbStr(x.orb)}</div><div class="pos-sub">${esc(X.name)}</div></span></button>`;
+    };
+    html += `<div class="section-label">Strongest contacts</div><div class="list">${Y.list.slice(0, 6).map(rowOf).join("")}</div>`;
+    if (Y.list.length > 6) html += `<div class="section-label">All contacts · ${Y.list.length}</div><div class="list">${Y.list.slice(6).map(rowOf).join("")}</div>`;
+
+    const ovl = (arr, dir, owner) => arr.map((o) => `<button class="row" data-open="ovl:${dir}:${o.key}"><span class="dot" style="color:${PLANETS[o.key].color}"></span><span class="glyph" style="color:${PLANETS[o.key].color}">${pGlyph(o.key)}</span>
+      <span class="main"><div class="title">${esc(pName(o.key))} in house ${o.house}</div><div class="sub">${esc(HOUSES[o.house].title)} · ${esc(owner)}</div></span></button>`).join("");
+    if (Y.inMine) html += `<div class="section-label">${esc(theirName(rec))}'s planets in your houses</div><div class="list">${ovl(Y.inMine, "in", "your " + "house")}</div>`;
+    if (Y.inTheirs) html += `<div class="section-label">Your planets in ${esc(theirName(rec))}'s houses</div><div class="list">${ovl(Y.inTheirs, "out", theirName(rec) + "'s house")}</div>`;
+    if (!me.timeKnown || !them.timeKnown) html += `<p class="note">House overlays need a birth time. ${!me.timeKnown ? "Your" : esc(theirName(rec)) + "'s"} birth time is unknown, so ${!me.timeKnown && !them.timeKnown ? "no" : "only one set of"} overlays are shown and the Ascendant is left out.</p>`;
+    html += `<p class="note">Orbs: 8° for conjunctions and oppositions, 7° for trines and squares, 5° for sextiles, 1° more with the Sun or Moon, and at most 5° for the Node, Chiron and Ascendant.</p>`;
+    return html;
+  }
+
+  function sheetSyn(i) {
+    const Y = computeSyn(), x = Y.list[i], X = ASPECTS[x.type];
+    const S = D().synastry || {};
+    const pk = pairKey(x.a, x.b);
+    const d = S.pairs && S.pairs[pk];
+    const body = d ? (x.type === "conjunction" ? d.fusion : x.nature === "harmony" ? d.harmony : d.tension) : "";
+    const mine = state.chart.get(x.a), theirs = Y.them.get(x.b);
+    const [first, second] = pk.split("-");
+    const roleOf = (k) => (k === x.a ? myName() : theirName(Y.rec));
+    let html = `<section class="hero"><div class="eyebrow">Synastry · ${esc(X.name)}${d ? " · " + esc(d.theme) : ""}</div>
+      <h2 class="display">${esc(pShort(x.a))} <span class="sym" style="color:${X.color}">${X.glyph}</span> ${esc(pShort(x.b))}</h2>
+      <div class="subline">orb ${orbStr(x.orb)} · ${natureName(x.nature)}</div></section>`;
+    html += facts([
+      [`${myName()}'s ${pName(x.a)}`, `${degStr(mine)} ${signGlyph(mine.sign)} ${SIGNS[mine.sign].name}`],
+      [`${theirName(Y.rec)}'s ${pName(x.b)}`, `${degStr(theirs)} ${signGlyph(theirs.sign)} ${SIGNS[theirs.sign].name}`],
+      ["Strength", `${Math.round(x.strength * 100)}%`],
+    ]);
+    if (d) {
+      html += paras([d.text]);
+      html += sec(`As a ${X.name.toLowerCase()}`, [body, X.desc]);
+      if (first !== second) html += `<p class="note" style="text-align:left">Here ${esc(roleOf(first))} is the ${esc(pName(first))} person and ${esc(roleOf(second))} is the ${esc(pName(second))} person.</p>`;
+    } else {
+      html += paras([`${myName()}'s ${pName(x.a)} (${PLANETS[x.a].core}) ${ASPECTS[x.type].verb} ${theirName(Y.rec)}'s ${pName(x.b)} (${PLANETS[x.b].core}). ${X.desc}`, K.NATURE[x.nature]]);
+    }
+    html += sec("The planets", [PLANETS[x.a].desc, x.a !== x.b ? PLANETS[x.b].desc : ""]);
+    return html;
+  }
+  function sheetOverlay(dir, key) {
+    const Y = computeSyn();
+    const S = D().synastry || {};
+    const rec = Y.rec;
+    const inMine = dir === "in";
+    const o = (inMine ? Y.inMine : Y.inTheirs).find((z) => z.key === key);
+    const owner = inMine ? myName() : theirName(rec), guest = inMine ? theirName(rec) : myName();
+    const title = `${inMine ? theirName(rec) + "'s" : myName() === "You" ? "Your" : myName() + "'s"} ${pName(key)} in ${inMine ? (myName() === "You" ? "your" : myName() + "'s") : theirName(rec) + "'s"} ${ord(o.house)} house`;
+    const txt = S.overlays && S.overlays[key] && S.overlays[key][o.house];
+    let html = `<section class="hero"><div class="eyebrow">House overlay · ${esc(HOUSES[o.house].title)}</div><h2 class="display sm">${esc(title)}</h2></section>`;
+    if (!inMine) html += `<p class="note" style="text-align:left">Written from ${esc(owner)}'s side: read "you" as ${esc(owner)} and "their" as ${esc(guest)}.</p>`;
+    html += paras([txt || `${guest}'s ${pName(key)} brings ${PLANETS[key].focus} into ${owner}'s ${ord(o.house)} house of ${HOUSES[o.house].areas}.`]);
+    html += sec(`The ${ord(o.house)} house`, HOUSES[o.house].desc);
+    return html;
+  }
+  function sheetSynScore(cat) {
+    const Y = computeSyn();
+    const S = D().synastry || {};
+    const m = CAT_META[cat];
+    let html = `<section class="hero"><div class="eyebrow">Synastry · compatibility</div><h2 class="display">${esc(m.name)}</h2><div class="subline"><strong>${Y.scores[cat]}%</strong></div></section>`;
+    html += paras([S.categories && S.categories[cat], cat === "challenge" ? "A higher score means more friction. Some friction keeps a relationship alive; a lot asks for conscious work." : "The score grows with the number and closeness of supportive contacts in this area. Tense contacts count for less, but they still count: they bind people together."]);
+    const idx = Y.members[cat];
+    if (idx.length) {
+      html += `<h4>Contacts in this area</h4><div class="list">` + idx.map((i) => {
+        const x = Y.list[i], X = ASPECTS[x.type];
+        return `<button class="row" data-open="syn:${i}"><span class="dot" style="color:${X.color}"></span>
+          <span class="main"><div class="title">${esc(pShort(x.a))} <span class="sym" style="color:${X.color};font-size:.85em">${X.glyph}</span> ${esc(pShort(x.b))}</div><div class="sub">${esc(X.name)}</div></span>
+          <span class="end"><div class="pos">${orbStr(x.orb)}</div></span></button>`;
+      }).join("") + `</div>`;
+    } else html += `<p class="note" style="text-align:left">No close contacts in this area.</p>`;
+    return html;
+  }
+
   function openSettings() {
     const s = state.settings;
     const opt = (group, value, label, sub) =>
@@ -1970,6 +2705,10 @@
         ${opt("minorAspects", "true", "Major + minor", "Adds quincunx, semi-sextile, quintiles…")}
         ${opt("minorAspects", "false", "Major only", "Conjunction, opposition, trine, square, sextile")}
       </div>
+      <h4>Asteroids</h4><div class="opt-list">
+        ${opt("asteroids", "true", "Show", "Ceres, Pallas, Juno and Vesta")}
+        ${opt("asteroids", "false", "Hide", "Planets and main points only")}
+      </div>
       <h4>Orbs</h4><div class="opt-list">
         ${opt("orbScale", "0.75", "Tight", "×0.75")}
         ${opt("orbScale", "1", "Standard", "8° majors · +2° for Sun & Moon")}
@@ -1980,7 +2719,7 @@
 
   function applySetting(group, val) {
     let v = val;
-    if (group === "minorAspects") v = val === "true";
+    if (group === "minorAspects" || group === "asteroids") v = val === "true";
     if (group === "orbScale") v = parseFloat(val);
     state.settings[group] = v;
     store.set("settings", state.settings);
@@ -1999,11 +2738,15 @@
     const r = state.editing || null;
     formPlace = r ? r.place : null;
     const saved = state.saved;
-    let html = `<section class="hero">
+    let html = state.partnerMode ? `<section class="hero">
+      <h1 class="display brand">Add a person</h1>
+      <div class="subline brand-sub">For synastry with ${esc(myName())}</div>
+    </section>` : `<section class="hero">
       <h1 class="display brand">Natal Chart</h1>
       <div class="subline brand-sub">Your sky, at birth</div>
       <div class="meta">planets · houses · nodes · aspects · karma</div>
-    </section>
+    </section>`;
+    html += `
     <form class="form" id="birth-form" autocomplete="off">
       <div class="field"><label for="f-name">Name</label><input type="text" id="f-name" maxlength="40" value="${r ? esc(r.name || "") : ""}"></div>
       <div class="field"><label for="f-date">Date</label><input type="date" id="f-date" required min="1850-01-01" max="2149-12-31" value="${r ? `${r.y}-${pad(r.mo)}-${pad(r.d)}` : ""}"></div>
@@ -2023,6 +2766,7 @@
       </button>
       <div class="error" id="form-error"></div>
     </form>`;
+    if (state.partnerMode) return html + `<div class="chips"><button class="chip" data-act="cancelpartner">Cancel</button></div>`;
     // quick way back to the most recently entered chart
     const lastId = store.get("last", null);
     const last = saved.find((x) => x.id === lastId) || saved[0];
@@ -2150,6 +2894,17 @@
         name: $("#f-name").value.trim(), y, mo, d, h, mi, timeKnown: !unknown, place,
       };
       if (offRaw !== "") rec.offsetOverride = Math.round(parseFloat(offRaw) * 60);
+      if (state.partnerMode) {
+        try { compute(rec); } catch (e2) { err.textContent = "Could not calculate this chart. Check the date, time and place."; return; }
+        // keep the current chart first in the saved list, and add the new person
+        state.saved = [state.record].concat(state.saved, [rec]).filter((s, i, arr) => arr.findIndex((z) => z.id === s.id) === i).slice(0, 30);
+        store.set("saved", state.saved);
+        state.partnerId = rec.id;
+        store.set("partner", rec.id);
+        state.partnerMode = false;
+        setTab("synastry");
+        return;
+      }
       openRecord(rec, true);
     });
   }
@@ -2178,7 +2933,7 @@
   /* event wiring                                                       */
   /* ------------------------------------------------------------------ */
   function bindView() {
-    const wheel = view.querySelector(".wheel");
+    const wheel = view.querySelector("#wheel-wrap .wheel");
     if (wheel) {
       const hint = $("#wheel-hint");
       const clearFocus = () => {
@@ -2213,6 +2968,24 @@
       });
     }
     if ($("#timeline")) setTimeout(fillTimeline, 30);
+    if ($("#prog-timeline")) setTimeout(fillProgTimeline, 30);
+    const pd = $("#p-date");
+    if (pd) pd.addEventListener("change", () => {
+      if (!pd.value) return;
+      const [y, m, dd] = pd.value.split("-").map(Number);
+      state.progDate = new Date(y, m - 1, dd, 12).toDateString() === new Date().toDateString() ? null : new Date(y, m - 1, dd, 12).getTime();
+      render();
+    });
+    const sp = $("#sr-place");
+    if (sp) sp.addEventListener("change", () => {
+      if (!sp.value) state.srPlace = null;
+      else {
+        const [lat, lon] = sp.value.split(",").map(Number);
+        const ct = window.ASTRO_CITIES.find((x) => x[2] === lat && x[3] === lon);
+        state.srPlace = { name: ct[0], region: ct[1], lat, lon, tz: ct[4] };
+      }
+      render();
+    });
     if (state.tab === "today") {
       if ((state.transitRange || "day") === "day") fillTransitWindows();
       const td = $("#t-date");
@@ -2243,6 +3016,14 @@
       const a = act.dataset.act;
       if (a === "edit") { state.editing = state.record; state.chart = null; closeSheet(); render(); }
       if (a === "share") share();
+      if (a === "pnow") { state.progDate = null; render(); }
+      if (a === "pprev" || a === "pnext") { const t = progTarget(); state.progDate = new Date(t.getFullYear() + (a === "pnext" ? 1 : -1), t.getMonth(), t.getDate(), 12).getTime(); render(); }
+      if (a === "srnow") { state.srYear = null; render(); }
+      if (a === "srprev" || a === "srnext") { state.srYear = computeSR().year + (a === "srnext" ? 1 : -1); render(); }
+      if (a.startsWith("partner:")) { state.partnerId = a.slice(8); store.set("partner", state.partnerId); render(); }
+      if (a === "changepartner") { state.partnerId = null; render(); }
+      if (a === "addpartner") { state.partnerMode = true; state.editing = null; closeSheet(); render(); window.scrollTo({ top: 0 }); }
+      if (a === "cancelpartner") { state.partnerMode = false; render(); }
       if (a === "tnow") { state.transitDate = null; state._nowPin = null; render(); }
       if (a.startsWith("trange:")) { state.transitRange = a.slice(7); store.set("trange", state.transitRange); render(); }
       if (a.startsWith("tday:")) {
