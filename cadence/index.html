@@ -505,12 +505,15 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cd-nt { min-height: 44px; padding: 13px 0 12px; font: 400 15px/1.4 var(--sans); color: var(--ink); text-align: left; }
 /* The clamp is on the words alone, so the picture count under them is
    never the line it cuts. */
-.cd-ntx { white-space: pre-wrap; overflow-wrap: anywhere; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; }
+.cd-ntx { white-space: pre-wrap; overflow-wrap: anywhere; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; margin-top: 3px; font-size: 13px; line-height: 1.4; color: var(--dim); }
+/* The first line is the note's name, the way Notes draws one: full size
+   and in weight, with the rest a step down and quieter under it, so a
+   heading and the line after it never read as the same thing. */
+.cd-nth { font-weight: 600; overflow-wrap: anywhere; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .cd-nstrip { display: flex; justify-content: center; gap: 6px; margin-top: 22px; }
 .cd-nstrip i { width: 5px; height: 5px; border-radius: 50%; background: var(--nil); }
 .cd-nstrip i.is-on { background: var(--ink); box-shadow: 0 0 6px rgba(243, 245, 247, .5); }
 
-.cd-nt b { font-weight: 600; }
 .cd-nt small { display: block; margin-top: 4px; font: 500 10.5px/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--quiet); }
 
 /* ── a note, opened: the whole page, the way a note opens in Notes ── */
@@ -571,6 +574,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cd-nb.k-t { margin: 4px 0 10px; font: 700 28px/1.2 var(--sans); letter-spacing: -.01em; }
 .cd-nb.k-h { margin: 22px 0 6px; font: 700 21px/1.3 var(--sans); }
 .cd-nb.k-s { margin: 14px 0 4px; font: 600 17px/1.35 var(--sans); }
+.cd-doc-ed > .cd-nb.k-t:only-child:has(> br:only-child)::before { content: "Title"; position: absolute; color: var(--quiet); pointer-events: none; }
 .cd-nb.k-t:first-child, .cd-nb.k-h:first-child, .cd-nb.k-s:first-child { margin-top: 0; }
 /* A quote is the bar down the left that groups the lines under a
    heading, which is how the notes this was asked from hold a section. */
@@ -1022,6 +1026,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       if (t.dataset.v === v) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
     });
     document.querySelectorAll('.cd-pane').forEach(function (p) { p.scrollTop = 0; });
+    $('cdAdd').setAttribute('aria-label', v === 'note' ? 'New note' : 'Add a block');
     cdPaint();
   }
   function cdPaint() {
@@ -1916,14 +1921,15 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     }).join('');
     $('cdNotes').innerHTML = html || '<p class="cd-empty">Nothing written yet.</p>';
   }
-  /* The list shows a note's opening lines, its first line in weight when
-     it is a heading, and how many pictures it carries: the picture
+  /* The list shows a note's first line as its name and the next few
+     under it, smaller, and how many pictures it carries: the picture
      itself is one press away, on the page. */
   function cdNotePrev(n) {
     var txt = n.b.filter(function (b) { return b.k !== 'i' && cdNbText(b).trim(); });
     var pics = n.b.filter(function (b) { return b.k === 'i'; }).length;
-    var h = txt.map(function (b, i) { var t = esc(cdNbText(b)); return i === 0 && b.k !== 'p' && b.k !== 'q' ? '<b>' + t + '</b>' : t; }).join('\n');
-    return '<span class="cd-ntx">' + h + '</span>' + (pics ? '<small>' + pics + (pics === 1 ? ' picture' : ' pictures') + '</small>' : '');
+    var hd = txt.length ? '<b class="cd-nth">' + esc(cdNbText(txt[0])) + '</b>' : '';
+    var body = txt.slice(1).map(function (b) { return esc(cdNbText(b)); }).join('\n');
+    return hd + (body ? '<span class="cd-ntx">' + body + '</span>' : '') + (pics ? '<small>' + pics + (pics === 1 ? ' picture' : ' pictures') + '</small>' : '');
   }
   function cdNoteSync() { $('cdNoteGo').disabled = !$('cdNoteIn').value.trim(); }
   $('cdNoteIn').addEventListener('input', function () {
@@ -2371,6 +2377,13 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   /* Built and removed, never hidden: a full-screen surface put away with
      the hidden attribute goes on taking presses the day a rule gives it a
      display. An element that is not in the document cannot. */
+  /* A blank page, today's, opening on a title with the caret in it.
+     cdEdSave keeps it only once it has words, so leaving it empty leaves
+     nothing behind. */
+  function cdNoteNew() {
+    cdNoteOpen({ id: cdId(), d: cdToday(), i: 0, at: Date.now(), b: [{ k: 't', r: [] }] });
+    cdEdDraw([0, 0], [0, 0]);
+  }
   function cdNoteClose(quiet) {
     var dv = $('cdDoc');
     if (!dv) return;
@@ -2549,10 +2562,12 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 
   /* ═══ WIRING ═══ */
   document.querySelectorAll('.cd-tab').forEach(function (t) { t.addEventListener('click', function () { cdGo(t.dataset.v); }); });
-  /* The plus makes the thing the screen is about: a line on Notes, a
-     block everywhere else. */
+  /* The plus makes the thing the screen is about: a whole page on Notes,
+     a block everywhere else. The line at the top of the list is for a
+     sentence; a note with headings and pictures in it wants the page from
+     the start, and it is only kept once something is written on it. */
   $('cdAdd').addEventListener('click', function () {
-    if (view === 'note') { $('cdVNote').querySelector('.cd-pane').scrollTop = 0; $('cdNoteIn').focus(); return; }
+    if (view === 'note') { cdNoteNew(); return; }
     cdEdit(null);
   });
 

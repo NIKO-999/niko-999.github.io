@@ -783,6 +783,41 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.waitForTimeout(320);
     ok('and then the note is gone, and so is its page', (await store(page, 'cad.note.v1')).length === 1 && !(await page.$('#cdDoc')));
 
+    /* The plus on Notes opens a blank page rather than the line at the
+       top: a caret in a title, kept only once something is written. */
+    ok('on Notes the plus says it makes a note', (await page.getAttribute('#cdAdd', 'aria-label')) === 'New note');
+    await page.click('#cdAdd');
+    /* A build where the plus does not open a page fails here by name
+       rather than timing the file out. */
+    const opened = await page.waitForSelector('#cdDoc.is-open', { timeout: 2000 }).then(() => true, () => false);
+    ok('the plus on Notes opens a page', opened);
+    if (opened) {
+    const blank = await page.evaluate(() => {
+      const ed = document.getElementById('cdDocEd'), s = getSelection();
+      return { ks: [...ed.querySelectorAll('.cd-nb')].map((b) => b.dataset.k).join(), caret: ed.contains(s.anchorNode) && document.activeElement === ed,
+        ph: getComputedStyle(ed.querySelector('.cd-nb'), '::before').content };
+    });
+    ok('it opens a blank page on a title, with the caret in it', blank.ks === 't' && blank.caret, blank);
+    ok('and the empty title says what it is', blank.ph === '"Title"', blank.ph);
+    ok('and the line composer is not what it focused', await page.evaluate(() => document.activeElement.id !== 'cdNoteIn'));
+    await page.click('#cdDocBack');
+    await page.waitForTimeout(80);
+    ok('a page left blank leaves nothing behind', (await store(page, 'cad.note.v1')).length === 1);
+    await page.click('#cdAdd');
+    await page.waitForSelector('#cdDoc.is-open');
+    await page.keyboard.type('Long run plan');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('Easy for the first hour');
+    await page.waitForTimeout(80);
+    ok('the title loses its placeholder once written', (await page.$eval('#cdDocEd .cd-nb', (b) => getComputedStyle(b, '::before').content)) === 'none');
+    await page.click('#cdDocBack');
+    await page.waitForTimeout(80);
+    const made = (await store(page, 'cad.note.v1')).filter((n) => /Long run/.test(n.t))[0];
+    ok('a page written on is a note, today\'s, titled', made && made.d === '2026-09-25' && made.b[0].k === 't' && made.b[0].r[0][0] === 'Long run plan' && made.b.length === 2, made);
+    }
+    await page.click('.cd-tab[data-v="day"]');
+    ok('everywhere else the plus still adds a block', (await page.getAttribute('#cdAdd', 'aria-label')) === 'Add a block');
+
     ok('notes make no request off this origin', off.length === 0, off);
     ok('no page errors across notes', errs.length === 0, errs);
     await c.close();
@@ -806,6 +841,16 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
 
     await page.click('.cd-tab[data-v="note"]');
     ok('the list leads with a heading in weight', (await page.$eval('.cd-ni[data-n="dmg"] .cd-nt b', (b) => b.textContent).catch(() => null)) === 'Kept heading');
+    /* The body is a step down from the name and quieter, so the two never
+       read as one size, whichever kind of line the name was. */
+    const prev = await page.evaluate(() => ['dmg', 'old'].map((id) => {
+      const c = document.querySelector('.cd-ni[data-n="' + id + '"]'), h = c.querySelector('.cd-nth'), b = c.querySelector('.cd-ntx');
+      if (!h || !b) return null;
+      const f = (e) => parseFloat(getComputedStyle(e).fontSize), a = (e) => { const m = getComputedStyle(e).color.match(/[\d.]+/g); return m.length > 3 ? +m[3] : 1; };
+      return { id, h: h.textContent, b: b.textContent, hf: f(h), bf: f(b), hw: +getComputedStyle(h).fontWeight, ha: a(h), ba: a(b) };
+    }));
+    ok('a note\'s name leads, its body under it', prev[0] && prev[0].h === 'Kept heading' && prev[0].b === 'kept body' && prev[1] && prev[1].h === 'First line' && prev[1].b === 'Second line', prev);
+    ok('the body is clearly smaller than the name, and quieter', prev.every((p) => p && p.hf - p.bf >= 2 && p.hw >= 600 && p.ba < p.ha), prev);
     await page.click('.cd-ni[data-n="old"] .cd-nt');
     await page.waitForSelector('#cdDoc.is-open');
     await page.waitForTimeout(320);

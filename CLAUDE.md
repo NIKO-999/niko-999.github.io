@@ -4781,6 +4781,28 @@ across a reload, and bite-proved by making the boot ignore it; the
 first proof crashed on a thought covering the gear, so the check puts
 a stray card away before the next press rather than timing out.
 
+### A note's first line is its name, and the plus opens a page
+
+Reported off the Notes list: the body under "Trade taken" read at nearly
+the heading's own size. **The first line is the name, the way Notes draws
+one** — 15px in weight — and the rest sits under it at 13px in `--dim`,
+whichever kind of line the first one was, because a note that opens on a
+body line still has a name and the list was drawing it as more body.
+
+**THE PLUS ON NOTES OPENS A BLANK PAGE.** It used to scroll up and focus
+the line composer, which made the one press that says *add* a second
+door to a field already on screen. The composer stays for a sentence; a
+note with headings and pictures wants the page from the start. It opens
+on a Title with the caret in it and a quiet `Title` placeholder drawn by
+`:has(> br:only-child)`, and `cdEdSave` keeps it only once it has words,
+so a page left blank leaves nothing behind. The plus is named `New note`
+there and `Add a block` everywhere else.
+
+Both bite-proved: the body back at 15px in the ink fails the size check,
+and the plus back on the composer fails by name, not by timing the file
+out — the first proof did time out, so the open is awaited with a short
+timeout and the rest of the block skipped when it does not come.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
