@@ -433,10 +433,17 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cd-dnote.is-imp .cd-ntx::before { content: "◆ "; color: var(--ink); }
 .cd-dnote small { display: block; margin-top: 4px; font: 500 10.5px/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--quiet); }
 .cd-note { margin: 12px 0 0; font: 400 14px/1.5 var(--sans); color: var(--dim); }
-/* THE DAY'S QUESTION is the largest words on its sheet and the answer is
-   yours to type or leave: a reflection nobody has to fill in. */
-.cd-rq { margin: 6px 0 18px; font: 300 24px/1.3 var(--sans); letter-spacing: -.01em; color: var(--ink); }
-.cd-ra { margin: 8px 0 0; font: 400 14px/1.5 var(--sans); color: var(--dim); white-space: pre-wrap; }
+/* THE DAY'S THOUGHT is a card in the MIDDLE, not a sheet from the foot:
+   a sheet is something you pulled up to work in, and this arrived on its
+   own and asks for a moment. Nothing to fill in — it is read and put away. */
+.cd-rf { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 24px var(--gut); background: rgba(2, 4, 7, .66); animation: cdRfIn .22s ease-out; }
+.cd-rf-c { width: 100%; max-width: 360px; padding: 26px 24px 18px; border-radius: 28px; background: var(--sheet); box-shadow: inset 0 1px 0 var(--hair), 0 24px 60px rgba(0, 0, 0, .55); text-align: center; animation: cdRfCard .26s cubic-bezier(.2, .8, .2, 1); }
+.cd-rf-k { margin: 0; font: 500 11px/1.3 var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--quiet); }
+.cd-rq { margin: 16px 0 22px; font: 300 24px/1.3 var(--sans); letter-spacing: -.01em; color: var(--ink); }
+.cd-rf-c .cd-btn { width: 100%; }
+@keyframes cdRfIn { from { opacity: 0; } }
+@keyframes cdRfCard { from { opacity: 0; transform: scale(.94); } }
+@media (prefers-reduced-motion: reduce) { .cd-rf, .cd-rf-c { animation: none; } }
 /* Centred between the head's rule and the next one: equal padding and no
    margin, so whatever follows (a row's own hairline, or the foot's rule on
    an empty day) starts exactly as far below the words as the head ends
@@ -1827,12 +1834,6 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       });
       root.appendChild(tu);
     }
-    var rf = S.refl[iso];
-    if (rf && rf.a) {
-      root.appendChild(el('p', 'cd-lbl', 'Reflection'));
-      root.appendChild(el('p', 'cd-note', esc(cdReflQ(iso))));
-      root.appendChild(el('p', 'cd-ra', esc(rf.a)));
-    }
     var hs = cdHabits().filter(function (h) { return cdHabOn(iso, h); });
     if (hs.length) {
       root.appendChild(el('p', 'cd-lbl', 'Habits'));
@@ -2361,9 +2362,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
        asks first and then offers Undo, because every block on every day
        goes at once. The record of what you kept is left alone: a tick is
        a fact about a day that happened, not about the template. */
-    root.appendChild(el('p', 'cd-lbl', 'Reflection'));
-    var rb = el('button', 'cd-btn', 'Today\u2019s reflection'); rb.type = 'button'; rb.id = 'cdReflOpen';
-    rb.addEventListener('click', function () { cdReflect(cdToday()); });
+    root.appendChild(el('p', 'cd-lbl', 'Today'));
+    var rb = el('button', 'cd-btn', 'Today\u2019s thought'); rb.type = 'button'; rb.id = 'cdReflOpen';
+    rb.addEventListener('click', function () { cdClose(); cdReflect(cdToday()); });
     root.appendChild(rb);
     var wl = el('p', 'cd-lbl', 'Your week'); wl.style.marginTop = '24px';
     root.appendChild(wl);
@@ -2418,81 +2419,80 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     return o;
   }
 
-  /* ═══ THE DAY'S REFLECTION ═══
-     One question a day, the same one all day and a new one tomorrow. It
-     comes up the first time the app is opened on a date and never again
-     that day: a question asked on every open stops being a question and
-     becomes a door you have to get past. Worked out from the DATE rather
-     than stored, so there is nothing to keep in step, and walked in order
-     through the list so no two days in a row ever share one. */
+  /* ═══ THE DAY'S THOUGHT ═══
+     One a day, the same all day and a new one tomorrow: a question to sit
+     with or a piece of advice to carry. It comes up the first time the app
+     is opened on a date and never again that day — a card on every open
+     stops being a thought and becomes a door you have to get past. Worked
+     out from the DATE rather than stored, so there is nothing to keep in
+     step, and walked in order so no two days in a row share one. The two
+     kinds are interleaved in the list, so the days alternate. */
   var REFLECT = [
-    'What would your higher self do today?',
-    'What is one thing you are avoiding, and why?',
-    'What would make today a good day, even if nothing else went right?',
-    'Where did you hold back yesterday that you did not need to?',
-    'What are you grateful for that you usually overlook?',
-    'If today was repeated for a year, where would you end up?',
-    'What is the one task that makes everything else easier?',
-    'What story are you telling yourself that might not be true?',
-    'What would you do today if you were not afraid of looking foolish?',
-    'Who do you want to be by the end of this week?',
-    'What drained your energy recently, and what gave it back?',
-    'What is a small promise you can keep to yourself today?',
-    'What are you proud of that nobody else saw?',
-    'What would the person you admire most do in your position?',
-    'Where are you choosing comfort over growth right now?',
-    'What does future you need you to start today?',
-    'What habit is quietly shaping your life the most?',
-    'What would you tell a friend who was in your situation?',
-    'What is worth letting go of today?',
-    'When did you last feel fully present, and what were you doing?',
-    'What is one thing you can do today that your future self will thank you for?',
-    'What are you tolerating that you should not be?',
-    'What does discipline look like for you today?',
-    'What did you learn from your last mistake?',
-    'What would it look like to do today with total focus?',
-    'What matters most to you right now, and does your day reflect it?',
-    'What fear is running the show, and what would you do without it?',
-    'How can you make someone else\u2019s day better today?',
-    'What does rest mean for you, and are you getting enough of it?',
-    'What would you do differently if nobody was watching?',
-    'What win, however small, can you celebrate from yesterday?',
-    'What is the hardest thing you will do today, and when will you do it?',
-    'What are you ready to stop waiting for permission on?',
-    'What would a calm, patient version of you do next?',
-    'Which of your values did you live out yesterday?',
-    'What do you need to hear today?'
+    ['Reflect', 'What would your higher self do today?'],
+    ['Advice', 'Anchor your morning. The first hour sets the tone for the rest of the day.'],
+    ['Reflect', 'What is one thing you are avoiding, and why?'],
+    ['Advice', 'Do the hardest thing first, before the day gets a vote.'],
+    ['Reflect', 'What would make today a good day, even if nothing else went right?'],
+    ['Advice', 'Leave your phone alone for the first thirty minutes you are awake.'],
+    ['Reflect', 'If today was repeated for a year, where would you end up?'],
+    ['Advice', 'Make your bed. Start the day with one thing already finished.'],
+    ['Reflect', 'What story are you telling yourself that might not be true?'],
+    ['Advice', 'Get outside and see daylight before you see a screen.'],
+    ['Reflect', 'Who do you want to be by the end of this week?'],
+    ['Advice', 'Drink a glass of water before your first coffee.'],
+    ['Reflect', 'What would you do today if you were not afraid of looking foolish?'],
+    ['Advice', 'Plan tomorrow tonight, so the morning is for doing rather than deciding.'],
+    ['Reflect', 'What are you proud of that nobody else saw?'],
+    ['Advice', 'Move your body before noon, even for ten minutes.'],
+    ['Reflect', 'Where are you choosing comfort over growth right now?'],
+    ['Advice', 'Pick one thing that matters today. Everything else is extra.'],
+    ['Reflect', 'What would you tell a friend who was in your situation?'],
+    ['Advice', 'Keep a small promise to yourself early. Momentum is built, not found.'],
+    ['Reflect', 'What is worth letting go of today?'],
+    ['Advice', 'Protect your sleep. Tomorrow\u2019s discipline is decided tonight.'],
+    ['Reflect', 'What habit is quietly shaping your life the most?'],
+    ['Advice', 'Breathe slowly for one minute before you start. Calm is a skill.'],
+    ['Reflect', 'What fear is running the show, and what would you do without it?'],
+    ['Advice', 'Start before you feel ready. Motivation follows action.'],
+    ['Reflect', 'What does future you need you to start today?'],
+    ['Advice', 'Write down three things you are grateful for before the day begins.'],
+    ['Reflect', 'What are you tolerating that you should not be?'],
+    ['Advice', 'Say no to one thing today so you can say yes to what matters.'],
+    ['Reflect', 'When did you last feel fully present, and what were you doing?'],
+    ['Advice', 'Eat a real breakfast. Fuel the day you are asking of yourself.'],
+    ['Reflect', 'Which of your values did you live out yesterday?'],
+    ['Advice', 'Keep the first thing you do the same every morning. Rituals remove friction.'],
+    ['Reflect', 'What win, however small, can you celebrate from yesterday?'],
+    ['Advice', 'Be patient with yourself. Consistency beats intensity.']
   ];
   function cdReflQ(iso) {
     var n = REFLECT.length, i = cdDiff(iso, '2026-01-01');
     return REFLECT[((i % n) + n) % n];
   }
+  /* Built and removed, never hidden: a full-screen surface put away with
+     the `hidden` attribute has taken presses meant for the app behind it
+     in this repo more than once. Seen the moment it is shown, so closing
+     it is the whole of the answer. */
+  function cdReflClose() { var r = $('cdRf'); if (r) r.remove(); }
   function cdReflect(iso) {
-    /* Seen the moment it is shown, so a Later is still an answer to
-       whether it comes back today. */
     var rec = S.refl[iso] || {};
     if (!rec.s) { rec.s = 1; S.refl[iso] = rec; cdSave('refl'); }
-    var root = el('div');
-    var d = cdDate(iso);
-    root.appendChild(el('p', 'cd-cap', DOWL[cdDow(iso)] + ' ' + d.getDate() + ' ' + MON[d.getMonth()]));
-    var q = root.appendChild(el('p', 'cd-rq')); q.id = 'cdReflQ'; q.textContent = cdReflQ(iso);
-    var ta = el('textarea', 'cd-field'); ta.id = 'cdReflA'; ta.maxLength = 2000;
-    ta.placeholder = 'Your thoughts'; ta.setAttribute('aria-label', 'Your thoughts');
-    ta.value = rec.a || '';
-    root.appendChild(ta);
-    var foot = el('div', 'cd-foot');
-    var later = el('button', 'cd-btn soft', rec.a ? 'Close' : 'Later'); later.type = 'button'; later.id = 'cdReflLater';
-    later.addEventListener('click', cdClose);
-    var save = el('button', 'cd-btn go', 'Save'); save.type = 'button'; save.id = 'cdReflSave';
-    save.addEventListener('click', function () {
-      var a = ta.value.trim().slice(0, 2000), r = S.refl[iso] || { s: 1 };
-      if (a) r.a = a; else delete r.a;
-      S.refl[iso] = r; cdSave('refl'); cdClose();
-      cdToast(a ? 'Reflection saved' : 'Reflection cleared');
-    });
-    foot.appendChild(later); foot.appendChild(save); root.appendChild(foot);
-    cdSheet('Today\u2019s reflection', root);
+    cdReflClose();
+    var q = cdReflQ(iso);
+    var box = el('div');
+    box.innerHTML = '<div class="cd-rf" id="cdRf" role="dialog" aria-modal="true" aria-labelledby="cdReflQ"><div class="cd-rf-c">'
+      + '<p class="cd-rf-k">' + (q[0] === 'Advice' ? 'Today\u2019s advice' : 'Today\u2019s reflection') + '</p>'
+      + '<p class="cd-rq" id="cdReflQ">' + esc(q[1]) + '</p>'
+      + '<button type="button" class="cd-btn go" id="cdReflOk">Got it</button></div></div>';
+    var wrap = box.firstChild;
+    document.body.appendChild(wrap);
+    $('cdReflOk').addEventListener('click', cdReflClose);
+    wrap.addEventListener('click', function (ev) { if (ev.target === wrap) cdReflClose(); });
+    /* Not focused on arrival: a programmatic focus on a page nobody has
+       touched draws the keyboard ring round Got it, a second outline on a
+       card whose whole job is one line of words. Escape still closes it. */
   }
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && $('cdRf')) { ev.preventDefault(); ev.stopImmediatePropagation(); cdReflClose(); } }, true);
 
   /* ═══ TOAST ═══ */
   var toastT = 0, toastUndo = null;
@@ -2589,14 +2589,14 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   var sv = 'day';
   try { sv = sessionStorage.getItem('cad.view') || 'day'; } catch (e) {}
   cdGo(['day', 'hab', 'mon', 'note'].indexOf(sv) >= 0 ? sv : 'day');
-  /* The first open of a date asks its question, after the screen has
-     painted so the sheet rises over the day rather than over nothing. */
+  /* The first open of a date shows its thought, after the screen has
+     painted so the card comes up over the day rather than over nothing. */
   var rt = cdToday();
   if (!(S.refl[rt] && S.refl[rt].s)) setTimeout(function () { if (!cdSheetOpen()) cdReflect(rt); }, 450);
 
   /* Exposed for the test suite only: the parser and the keyword table are
      the pieces worth asserting as functions rather than through the page. */
-  window.cadence = { parse: cdParse, kind: cdKind, reflect: cdReflQ, questions: REFLECT.length };
+  window.cadence = { parse: cdParse, reflect: function (iso) { return cdReflQ(iso)[1]; }, kind: cdKind, questions: REFLECT.length };
 })();
 </script>
 </body>

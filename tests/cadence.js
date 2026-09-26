@@ -401,51 +401,50 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await c.close();
   }
 
-  console.log('\n── the day\u2019s reflection ──');
+  console.log('\n── the day\u2019s thought ──');
   {
     const { c, page, errs } = await ctx({ reflect: true });
-    await page.waitForTimeout(700);
-    const rUp = await sheetUp(page);
-    ok('the first open of a day asks its question', rUp && (await page.textContent('#cdShT')) === 'Today\u2019s reflection');
-    /* A build that never asks has no sheet to press through, so it is
-       opened the other way rather than letting a missing field hang the file. */
+    const rUp = await page.waitForSelector('#cdRf', { timeout: 2000 }).then(() => true, () => false);
+    ok('the first open of a day shows its thought', rUp);
+    /* A build that never shows it is opened from Settings rather than
+       left to hang the file on a missing card. */
     if (!rUp) { await page.click('#cdGear'); await sheetUp(page); await page.click('#cdReflOpen'); await page.waitForTimeout(320); }
-    const q1 = await page.textContent('#cdReflQ');
-    ok('it is the question worked out for the date', q1 === await page.evaluate(() => window.cadence.reflect('2026-09-25')), q1);
+    const q1 = await page.textContent('#cdReflQ').catch(() => null);
+    ok('it is the thought worked out for the date', q1 === await page.evaluate(() => window.cadence.reflect('2026-09-25')), q1);
+    /* In the MIDDLE and read, never a sheet and never a field. */
+    const geo = await page.evaluate(() => {
+      const c = document.querySelector('.cd-rf-c'); if (!c) return null;
+      const r = c.getBoundingClientRect();
+      return { mid: Math.abs((r.top + r.bottom) / 2 - innerHeight / 2), fields: document.querySelectorAll('#cdRf textarea, #cdRf input').length,
+        sheet: !document.getElementById('cdSheet').hidden };
+    });
+    ok('it is a card in the middle with nothing to type in', geo && geo.mid < 40 && geo.fields === 0 && !geo.sheet, geo);
     const qs = await page.evaluate(() => {
       const out = []; for (let i = 0; i < 40; i++) { const d = new Date(2026, 8, 25 + i); out.push(window.cadence.reflect(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'))); }
       return { n: window.cadence.questions, qs: out };
     });
     ok('there are at least twenty-five, and no two days in a row share one', qs.n >= 25 && qs.qs.every((q, i) => i === 0 || q !== qs.qs[i - 1]) && new Set(qs.qs).size === qs.n, qs.n);
     ok('the first open marks today seen', (await store(page, 'cad.refl.v1'))['2026-09-25'].s === 1);
-    await page.fill('#cdReflA', 'Finish the hard thing before lunch.');
-    await page.click('#cdReflSave');
-    await page.waitForTimeout(320);
-    ok('Save files the answer against the date', (await store(page, 'cad.refl.v1'))['2026-09-25'].a === 'Finish the hard thing before lunch.');
+    if (await page.$('#cdReflOk')) await page.click('#cdReflOk');
+    ok('Got it takes it out of the page', !(await page.$('#cdRf')));
     await page.reload(); await page.waitForTimeout(700);
-    ok('and it does not come back the same day', !(await sheetUp(page)));
-    /* Reached again from Settings, carrying what was written. */
+    ok('and it does not come back the same day', !(await page.$('#cdRf')));
     await page.click('#cdGear'); await sheetUp(page);
     await page.click('#cdReflOpen'); await page.waitForTimeout(320);
-    ok('Settings reopens it with the answer in it', (await page.inputValue('#cdReflA')) === 'Finish the hard thing before lunch.');
-    await closeSheet(page);
-    /* The month's day sheet reads it back. */
-    await page.click('.cd-tab[data-v="mon"]'); await page.waitForTimeout(250);
-    await page.click('.cd-mc[data-day="2026-09-25"]'); await sheetUp(page);
-    const dsh = await page.textContent('#cdShB');
-    ok('the day sheet carries the question and the answer', dsh.includes(q1) && dsh.includes('Finish the hard thing before lunch.'));
-    ok('no page errors in the reflection', errs.length === 0, errs);
+    ok('Settings shows it again', (await page.textContent('#cdReflQ').catch(() => null)) === q1);
+    await page.keyboard.press('Escape'); await page.waitForTimeout(100);
+    ok('Escape puts it away', !(await page.$('#cdRf')));
+    ok('no page errors in the thought', errs.length === 0, errs);
     await c.close();
   }
   {
-    /* A new date asks a new question, whatever the last one was. */
-    const { c, page } = await ctx({ reflect: true, at: '2026-09-26T08:00:00', init: `localStorage.setItem('cad.refl.v1', JSON.stringify({ '2026-09-25': { s: 1, a: 'x' } }));` });
-    await page.waitForTimeout(700);
-    ok('the next day opens on the next question', await sheetUp(page)
+    /* A new date shows the next one, whatever the last one was. */
+    const { c, page } = await ctx({ reflect: true, at: '2026-09-26T08:00:00', init: `localStorage.setItem('cad.refl.v1', JSON.stringify({ '2026-09-25': { s: 1 } }));` });
+    const up = await page.waitForSelector('#cdRf', { timeout: 2000 }).then(() => true, () => false);
+    ok('the next day opens on the next thought', up
       && (await page.textContent('#cdReflQ')) === await page.evaluate(() => window.cadence.reflect('2026-09-26')));
-    if (await page.$('#cdReflLater')) { await page.click('#cdReflLater'); await page.waitForTimeout(320); }
-    const r26 = (await store(page, 'cad.refl.v1'))['2026-09-26'];
-    ok('Later puts it away and files nothing', !!r26 && !r26.a && !(await sheetUp(page)), r26);
+    await page.mouse.click(195, 40); await page.waitForTimeout(100);
+    ok('a press outside the card puts it away', !(await page.$('#cdRf')));
     await c.close();
   }
 

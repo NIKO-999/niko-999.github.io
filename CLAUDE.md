@@ -4689,32 +4689,41 @@ inside 44px boxes, so nothing drawn comes near the edge, and every
 control keeps its 44. Narrower than that the boxes give ground rather
 than running off the side.
 
-### A question a day
+### A thought a day, in the middle
 
-Asked for as a pop-up with a daily reflection — *what would your higher
-self do* — a new one each day, asked when you first open the app. Thirty-
-six questions, and the one for a date is WORKED OUT from the date rather
-than stored: the day number since 1 January 2026 walks the list in order,
-so it is the same all day, new tomorrow, and no two days in a row can
-share one. Nothing to keep in step and nothing to go stale.
+One card a day on the first open, the same all day and new tomorrow:
+thirty-six of them, alternating between a question to sit with (*what
+would your higher self do today?*) and advice for anchoring a morning
+(*do the hardest thing first, before the day gets a vote*). Which one is
+WORKED OUT from the date — the day number since 1 January 2026 walks the
+list in order — so nothing is stored but whether today's has been seen,
+and no two days in a row share one.
 
-**IT ASKS ONCE A DAY, ON THE FIRST OPEN, AND NEVER AGAIN THAT DAY.** A
-question on every open stops being a question and becomes a door you
-have to get past. It is marked seen the moment it is shown, so Later is
-still an answer to whether it comes back. Settings reopens it, carrying
-what you wrote, and the month's day sheet reads a written answer back
-under its question.
+**IT WENT IN AS A SHEET WITH A TEXT BOX AND CAME BACK THE SAME DAY.**
+*I don't want there to be a text box, just something that you see — and
+not from the bottom, in the middle.* A sheet from the foot is this app's
+surface for something you pulled up to work in; this arrived on its own
+and asks for a moment, so it is a card in the middle of a scrim, the
+double-tap card's own conclusion in `schedule/`. The answer field, its
+day-sheet read-back and the stored `a` went with it.
 
-**THE ANSWER IS YOURS TO LEAVE.** A field and Save; an empty Save clears
-it. `cad.refl.v1` is its own key in `K`, so the backup carries it — an
-answer is something you wrote and cannot rebuild.
+**BUILT AND REMOVED, NEVER HIDDEN**, for the reason this repo keeps
+paying for: a full-screen surface put away with `hidden` goes on taking
+presses. Got it, Escape and a press outside the card all remove the node,
+asserted as the node being GONE. Settings shows today's again.
 
-**Every other section of the suite marks today seen**, only when the key
-is ABSENT — the intro's rule in `schedule/`, for the same reason: a sheet
-over the app on every fresh context is a surface every other check would
-be pressing through. Bite-proved by never asking (the section reopens it
-through Settings rather than hanging on a missing field) and by one
-question for every day.
+**SEEN THE MOMENT IT IS SHOWN**, so closing it is the whole answer and it
+never comes back that day. Every other section of the suite marks today
+seen, only when the key is ABSENT, because a card over the app on every
+fresh context is a surface every other check would press through.
+
+**NOT FOCUSED ON ARRIVAL.** A programmatic focus on a page nobody has
+touched draws the keyboard ring round Got it — seen in the first render
+as a second outline round the only button on the card.
+
+**Bite-proved**: placed at the foot (the middle check reads 278px off
+centre), faded rather than removed (Got it, Escape and the outside press
+all fail), one thought for every day, and never shown.
 
 ## Git
 
