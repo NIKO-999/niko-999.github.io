@@ -4689,6 +4689,33 @@ inside 44px boxes, so nothing drawn comes near the edge, and every
 control keeps its 44. Narrower than that the boxes give ground rather
 than running off the side.
 
+### A question a day
+
+Asked for as a pop-up with a daily reflection — *what would your higher
+self do* — a new one each day, asked when you first open the app. Thirty-
+six questions, and the one for a date is WORKED OUT from the date rather
+than stored: the day number since 1 January 2026 walks the list in order,
+so it is the same all day, new tomorrow, and no two days in a row can
+share one. Nothing to keep in step and nothing to go stale.
+
+**IT ASKS ONCE A DAY, ON THE FIRST OPEN, AND NEVER AGAIN THAT DAY.** A
+question on every open stops being a question and becomes a door you
+have to get past. It is marked seen the moment it is shown, so Later is
+still an answer to whether it comes back. Settings reopens it, carrying
+what you wrote, and the month's day sheet reads a written answer back
+under its question.
+
+**THE ANSWER IS YOURS TO LEAVE.** A field and Save; an empty Save clears
+it. `cad.refl.v1` is its own key in `K`, so the backup carries it — an
+answer is something you wrote and cannot rebuild.
+
+**Every other section of the suite marks today seen**, only when the key
+is ABSENT — the intro's rule in `schedule/`, for the same reason: a sheet
+over the app on every fresh context is a surface every other check would
+be pressing through. Bite-proved by never asking (the section reopens it
+through Settings rather than hanging on a missing field) and by one
+question for every day.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

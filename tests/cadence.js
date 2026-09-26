@@ -50,6 +50,13 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
   async function ctx(opts = {}) {
     const c = await browser.newContext(opts.vp ? { ...PHONE, viewport: opts.vp } : PHONE);
     await c.addInitScript(freeze(opts.at || '2026-09-25T10:20:00'));
+    /* The day's reflection comes up over the app on the first open of a
+       date, which is every fresh context — so every section but its own
+       marks today seen. Only when ABSENT: an init script runs on every
+       navigation, and a check that clears the key would get it back. */
+    if (!opts.reflect) await c.addInitScript(`(() => { if (localStorage.getItem('cad.refl.v1')) return;
+      const d = new Date(), k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      localStorage.setItem('cad.refl.v1', JSON.stringify({ [k]: { s: 1 } })); })();`);
     if (opts.init) await c.addInitScript(opts.init);
     const page = await c.newPage();
     const errs = [], off = [];
@@ -391,6 +398,54 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const { c, page } = await ctx({ init: `localStorage.setItem('cad.week.v1', JSON.stringify([{ id: 'm1', n: 'Gym', d: [0], s: 420, e: 480 }]));` });
     ok('a day with nothing on says so', (await heroOf(page)).join('|') === 'Today · 25 Sep|Nothing on||', await heroOf(page));
     ok('and offers the way to put something on it', !(await shown(page, '#cdGo')) && /Add a block/.test(await page.textContent('#cdAgenda')));
+    await c.close();
+  }
+
+  console.log('\n── the day\u2019s reflection ──');
+  {
+    const { c, page, errs } = await ctx({ reflect: true });
+    await page.waitForTimeout(700);
+    const rUp = await sheetUp(page);
+    ok('the first open of a day asks its question', rUp && (await page.textContent('#cdShT')) === 'Today\u2019s reflection');
+    /* A build that never asks has no sheet to press through, so it is
+       opened the other way rather than letting a missing field hang the file. */
+    if (!rUp) { await page.click('#cdGear'); await sheetUp(page); await page.click('#cdReflOpen'); await page.waitForTimeout(320); }
+    const q1 = await page.textContent('#cdReflQ');
+    ok('it is the question worked out for the date', q1 === await page.evaluate(() => window.cadence.reflect('2026-09-25')), q1);
+    const qs = await page.evaluate(() => {
+      const out = []; for (let i = 0; i < 40; i++) { const d = new Date(2026, 8, 25 + i); out.push(window.cadence.reflect(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'))); }
+      return { n: window.cadence.questions, qs: out };
+    });
+    ok('there are at least twenty-five, and no two days in a row share one', qs.n >= 25 && qs.qs.every((q, i) => i === 0 || q !== qs.qs[i - 1]) && new Set(qs.qs).size === qs.n, qs.n);
+    ok('the first open marks today seen', (await store(page, 'cad.refl.v1'))['2026-09-25'].s === 1);
+    await page.fill('#cdReflA', 'Finish the hard thing before lunch.');
+    await page.click('#cdReflSave');
+    await page.waitForTimeout(320);
+    ok('Save files the answer against the date', (await store(page, 'cad.refl.v1'))['2026-09-25'].a === 'Finish the hard thing before lunch.');
+    await page.reload(); await page.waitForTimeout(700);
+    ok('and it does not come back the same day', !(await sheetUp(page)));
+    /* Reached again from Settings, carrying what was written. */
+    await page.click('#cdGear'); await sheetUp(page);
+    await page.click('#cdReflOpen'); await page.waitForTimeout(320);
+    ok('Settings reopens it with the answer in it', (await page.inputValue('#cdReflA')) === 'Finish the hard thing before lunch.');
+    await closeSheet(page);
+    /* The month's day sheet reads it back. */
+    await page.click('.cd-tab[data-v="mon"]'); await page.waitForTimeout(250);
+    await page.click('.cd-mc[data-day="2026-09-25"]'); await sheetUp(page);
+    const dsh = await page.textContent('#cdShB');
+    ok('the day sheet carries the question and the answer', dsh.includes(q1) && dsh.includes('Finish the hard thing before lunch.'));
+    ok('no page errors in the reflection', errs.length === 0, errs);
+    await c.close();
+  }
+  {
+    /* A new date asks a new question, whatever the last one was. */
+    const { c, page } = await ctx({ reflect: true, at: '2026-09-26T08:00:00', init: `localStorage.setItem('cad.refl.v1', JSON.stringify({ '2026-09-25': { s: 1, a: 'x' } }));` });
+    await page.waitForTimeout(700);
+    ok('the next day opens on the next question', await sheetUp(page)
+      && (await page.textContent('#cdReflQ')) === await page.evaluate(() => window.cadence.reflect('2026-09-26')));
+    if (await page.$('#cdReflLater')) { await page.click('#cdReflLater'); await page.waitForTimeout(320); }
+    const r26 = (await store(page, 'cad.refl.v1'))['2026-09-26'];
+    ok('Later puts it away and files nothing', !!r26 && !r26.a && !(await sheetUp(page)), r26);
     await c.close();
   }
 
@@ -934,7 +989,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.evaluate(() => { navigator.clipboard.writeText = (t) => { window.__copied = t; return Promise.resolve(); }; });
     await page.click('#cdBak');
     const bak = JSON.parse(await page.evaluate(() => window.__copied));
-    ok('a backup carries every record', bak.app === 'cadence' && ['week', 'log', 'hab', 'train', 'defs', 'note'].every((k) => k in bak) && !('goal' in bak) && !('off' in bak), Object.keys(bak));
+    ok('a backup carries every record', bak.app === 'cadence' && ['week', 'log', 'hab', 'train', 'defs', 'note', 'refl'].every((k) => k in bak) && !('goal' in bak) && !('off' in bak), Object.keys(bak));
     bak.week.push({ id: 'x3', n: 'Restored', d: [4], s: 800, e: 830 });
     await page.fill('#cdRestore', JSON.stringify(bak));
     await Promise.all([page.waitForNavigation(), page.click('#cdRestoreGo')]);
