@@ -1230,8 +1230,19 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       out.len = Math.round(/^h/.test(m[2]) ? q * 60 : q);
       eat(m[0]);
     }
-    if ((m = used.match(/\bin\s+(\d+)\s*(m|min|mins|minutes|h|hr|hrs|hours?)\b/))) {
-      var off = /^h/.test(m[2]) ? +m[1] * 60 : +m[1];
+    /* The clock is read BEFORE "in" and "now": somebody who says both
+       is correcting themselves, and the digits are the correction. */
+    if (out.s == null) {
+      var clk = used.match(/\b(?:at\s+)?(\d{1,2}):(\d{2})\s*(am|pm)?\b/) || used.match(/\b(?:at\s+)?(\d{1,2})()\s*(am|pm)\b/) || used.match(/\bat\s+(\d{1,2})()()\b/);
+      if (clk) { var c = cdClock(clk[1], clk[2], clk[3]); if (c != null) { out.s = c; eat(clk[0]); } }
+    }
+    /* "in an hour", "in half an hour", "in 10 mins": counted from now.
+       The words are how people say it, so "an" and "half an" are read
+       the way "for" already reads them. Past midnight is refused, not
+       clamped: this record is one day a row. */
+    if ((m = used.match(/\bin\s+(an?|half an|\d+(?:\.\d+)?)\s*(m|min|mins|minutes?|h|hr|hrs|hours?)\b/))) {
+      var iq = m[1] === 'half an' ? 0.5 : /^an?$/.test(m[1]) ? 1 : +m[1];
+      var off = Math.round(/^h/.test(m[2]) ? iq * 60 : iq);
       var at = cdNowMin() + off;
       if (at < 1440 && out.s == null) out.s = at;
       eat(m[0]);
@@ -1241,10 +1252,6 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       if (out.s == null) out.s = Math.round(cdNowMin() / 5) * 5;
       eat(m[0]);
       if (!out.days.length) out.days.push(cdDow(cdToday()));
-    }
-    if (out.s == null) {
-      var clk = used.match(/\b(?:at\s+)?(\d{1,2}):(\d{2})\s*(am|pm)?\b/) || used.match(/\b(?:at\s+)?(\d{1,2})()\s*(am|pm)\b/) || used.match(/\bat\s+(\d{1,2})()()\b/);
-      if (clk) { var c = cdClock(clk[1], clk[2], clk[3]); if (c != null) { out.s = c; eat(clk[0]); } }
     }
     /* "after the gym": the other thing already has a time; this starts
        where it ends. Through the keyword table, so "after training"

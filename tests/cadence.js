@@ -410,6 +410,16 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('"now" is the clock, rounded to five', r.n === 'Read' && r.s === 620, r);
     r = await P('call mum in 20 mins');
     ok('"in 20 mins" counts from now', r.s === 640 && r.n === 'Call mum', r);
+    r = await P('Backtest charts in an hour');
+    ok('"in an hour" counts from now, today, and leaves no word behind', r.s === 680 && r.e === 680 && r.n === 'Backtest charts' && r.days.join() === '4', r);
+    r = await P('stretch in half an hour for 10 mins');
+    ok('"in half an hour" is thirty minutes, and a stated length still counts', r.s === 650 && r.e === 660 && r.n === 'Stretch', r);
+    r = await P('read in 2 hours');
+    ok('"in 2 hours" is two hours on', r.s === 740 && r.n === 'Read', r);
+    r = await P('read in an hour at 3pm');
+    ok('an explicit clock beats "in"', r.s === 900 && r.n === 'Read', r);
+    r = await P('gym in 20 hours');
+    ok('"in" past midnight is refused, not clamped', r.s === null && r.n === 'Gym', r);
     r = await P('stretch after training for 15 minutes');
     ok('"after training" finds the gym through the keyword table', r.s === 510 && r.e === 525 && r.n === 'Stretch' && r.after === 'Gym', r);
     r = await P('lunch after the concert');

@@ -4646,6 +4646,21 @@ it adds much more to red than to blue and a correct grey read as red. It
 reads coverage now, the addition over the room, which is equal on any
 sky for a neutral and uneven for a hue.
 
+### "In an hour" is a time
+
+Reported off the add sheet: *Backtest charts in an hour* came back
+*Still needs what time*, with *Backtest charts in hour* by hand. The
+"in" pattern took digits only, so "an" fell through to the name strip,
+which ate the article and left the stranded "in". It reads `an`, `a`
+and `half an` now, the way "for" already did, and strikes the whole
+phrase. Counted from now, today when no day is said, a moment unless a
+length is stated, and refused past midnight rather than clamped.
+
+**The clock is read BEFORE "in" and "now".** It was read after, only
+when nothing had set a start, so "read in an hour at 3pm" landed an
+hour out and dropped the correction. Somebody who says both is
+correcting themselves, and the digits are the correction.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
