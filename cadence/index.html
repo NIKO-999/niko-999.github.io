@@ -327,6 +327,14 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .cd-mhead button { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); box-shadow: inset 0 0 0 1px var(--hair); }
 .cd-mhead button:disabled { color: rgba(243, 245, 247, .28); box-shadow: none; cursor: default; }
 .cd-mhead svg { width: 16px; height: 16px; }
+/* The habits screen says which day it is logging, and steps back through
+   the fortnight its rows already draw. Two arrows either side of the
+   caption the screen always had, so nothing is added but the way back. */
+.cd-hday { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; }
+.cd-hday button { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); box-shadow: inset 0 0 0 1px var(--hair); }
+.cd-hday button:disabled { color: rgba(243, 245, 247, .28); box-shadow: none; cursor: default; }
+.cd-hday svg { width: 16px; height: 16px; }
+.cd-fn i.is-at { outline: 2px solid rgba(243, 245, 247, .35); outline-offset: 1px; }
 .cd-mcap { flex: none; margin: 14px var(--gut) 0; text-align: center; letter-spacing: .14em; color: var(--quiet); }
 .cd-dows { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); padding: 18px 0 8px; text-align: center; letter-spacing: .1em; color: var(--quiet); }
 .cd-mgrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); row-gap: 2px; }
@@ -775,7 +783,11 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     <section id="cdVHab" aria-label="Habits" hidden>
       <div class="cd-pane">
         <div class="cd-hero is-sub">
-          <p class="cd-hcap">Today</p>
+          <div class="cd-hday">
+            <button id="cdHabP" type="button" aria-label="Previous day"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <p class="cd-hcap" id="cdHabDay" aria-live="polite">Today</p>
+            <button id="cdHabN" type="button" aria-label="Next day"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
           <p class="cd-big" id="cdHabT"></p>
           <p class="cd-hs" id="cdHabCap"></p>
           <div class="cd-hdots" id="cdHabDots" role="img"></div>
@@ -1312,8 +1324,30 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   var view = 'day';
   var sel = cdToday();
   var monthAt = cdToday().slice(0, 7);
+  var habAt = cdToday();
+  var HAB_BACK = 13;
+  /* Clamped on every read, so a screen left open past midnight rolls
+     forward with the clock rather than pointing at a day that has gone
+     out of reach. */
+  function cdHabDay() {
+    var t = cdToday(), lo = cdAddDays(t, -HAB_BACK);
+    if (!habAt || habAt > t) habAt = t;
+    if (habAt < lo) habAt = lo;
+    return habAt;
+  }
+  function cdRelDay(iso) {
+    var t = cdToday();
+    if (iso === t) return 'Today';
+    if (iso === cdAddDays(t, -1)) return 'Yesterday';
+    return DOWL[cdDow(iso)] + ' ' + cdDate(iso).getDate() + ' ' + MON[cdDate(iso).getMonth()].slice(0, 3);
+  }
 
   function cdGo(v) {
+    /* Which day the habits screen is logging is a position on a screen
+       you are looking at, never stored: arriving at it is arriving at
+       today, so a day you stepped back to yesterday cannot quietly take
+       this morning's ticks. */
+    if (v === 'hab' && view !== 'hab') habAt = cdToday();
     view = v;
     try { sessionStorage.setItem('cad.view', v); } catch (e) {}
     $('cdVDay').hidden = v !== 'day';
@@ -1976,16 +2010,19 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      fortnight of dots with today last. Colour says WHICH habit, never
      whether. */
   function cdPaintHab() {
-    var today = cdToday(), hs = cdHabits();
+    var now = cdToday(), today = cdHabDay(), hs = cdHabits();
+    $('cdHabDay').textContent = cdRelDay(today);
+    $('cdHabP').disabled = today <= cdAddDays(now, -HAB_BACK);
+    $('cdHabN').disabled = today >= now;
     var kept = hs.filter(function (h) { return cdHabOn(today, h); });
     $('cdHabT').textContent = kept.length + ' of ' + hs.length;
     $('cdHabCap').textContent = 'habits completed';
     $('cdHabDots').innerHTML = hs.map(function (h) {
       return '<i class="' + (cdHabOn(today, h) ? 'is-on' : '') + '" style="--hc:var(' + h.hc + ')"></i>';
     }).join('');
-    $('cdHabDots').setAttribute('aria-label', kept.length + ' of ' + hs.length + ' habits completed today');
+    $('cdHabDots').setAttribute('aria-label', kept.length + ' of ' + hs.length + ' habits completed ' + (today === now ? 'today' : cdRelDay(today)));
     var ds = [];
-    for (var j = 13; j >= 0; j--) ds.push(cdAddDays(today, -j));
+    for (var j = HAB_BACK; j >= 0; j--) ds.push(cdAddDays(now, -j));
     var html = '';
     hs.forEach(function (h) {
       var v = cdHabVal(today, h), on = cdHabOn(today, h);
@@ -2002,7 +2039,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
         sub = n ? '7-day avg ' + cdFmtNum(wk / n, h) : 'Not yet';
         val = on ? '<span class="cd-hr-v">' + cdFmtNum(v, h) + '<small>' + esc(h.unit) + '</small></span>' : '<span class="cd-hr-v is-nil">—</span>';
       }
-      var fn = ds.map(function (d) { return '<i' + (cdHabOn(d, h) ? ' class="is-on"' : '') + '></i>'; }).join('');
+      var fn = ds.map(function (d) {
+        var c = (cdHabOn(d, h) ? 'is-on' : '') + (d === today && d !== now ? ' is-at' : '');
+        return '<i' + (c ? ' class="' + c.trim() + '"' : '') + '></i>';
+      }).join('');
       /* The whole row logs; holding it opens the record. The dot and the
          name are two siblings, never one inside the other, and the
          record has its own button for a keyboard. */
@@ -2047,7 +2087,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var h = cdHabits().filter(function (x) { return x.id === btn.closest('.cd-hr').dataset.h; })[0];
     if (!h) return;
     if (btn.dataset.act === 'hist') { cdHabHist(h); return; }
-    var today = cdToday();
+    var today = cdHabDay();
     if (h.id === 'train') {
       var tb = cdOn(today).filter(function (b) { return TRAINING[cdKind(b.n)]; });
       var free = tb.filter(function (b) { return !(S.train[today] && S.train[today][b.id]); })[0];
@@ -2070,7 +2110,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var v = +cdHabVal(iso, h) || 0;
     var root = el('div');
     var big = el('p', 'cd-num'); big.id = 'cdNumV';
-    var cap = el('p', 'cd-numcap', 'today');
+    var cap = el('p', 'cd-numcap', /^(Today|Yesterday)$/.test(cdRelDay(iso)) ? cdRelDay(iso).toLowerCase() : cdRelDay(iso));
     var max = h.max;
     if (h.mine) { var best = 0; Object.keys(S.hab).forEach(function (d) { best = Math.max(best, +S.hab[d][h.id] || 0); }); max = best ? Math.ceil(best * 1.5) : 100; }
     var rg = el('input', 'cd-range'); rg.type = 'range'; rg.min = 0; rg.max = max; rg.step = h.step; rg.value = v; rg.id = 'cdNumR';
@@ -2134,6 +2174,8 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     cdSheet(h.n, root);
   }
 
+  $('cdHabP').addEventListener('click', function () { habAt = cdAddDays(cdHabDay(), -1); cdPaintHab(); });
+  $('cdHabN').addEventListener('click', function () { habAt = cdAddDays(cdHabDay(), 1); cdPaintHab(); });
   $('cdHabAdd').addEventListener('click', function () {
     var root = el('div'), kind = 'tick';
     var nm = el('input', 'cd-field'); nm.type = 'text'; nm.placeholder = 'Cold plunge, Pages read…'; nm.id = 'cdHN'; nm.maxLength = 30;

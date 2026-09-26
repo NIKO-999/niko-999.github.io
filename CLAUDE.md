@@ -5431,6 +5431,35 @@ rather than the alarm. Judged at 18px beside wake, sleep and plan: the
 sun is small enough not to read as the day's own `sun`, and the list is
 what tells both apart from the sunrise and the moon they borrow from.
 
+### A habit can be logged on a day you forgot
+
+Asked for as *allow me to edit previous day habits, as I did forget to
+log.* The habits screen logged today and only today, so a missed
+evening was a missed day for good.
+
+**THE CAPTION THE SCREEN ALREADY HAD STEPS BACK.** *Today* sits between
+two arrows now and walks back through the fortnight the rows already
+draw. A press on a row logs THAT day, the figure and the dots at the top
+count it, and its mark in the fortnight gets a ring. Nothing else on
+the screen is new.
+
+**A FORTNIGHT, WHICH IS WHAT THE SCREEN SHOWS.** The two-day window
+that bounds a block's tick is about the schedule's own record. A habit
+you forgot to log a week ago is still a habit you kept, and the
+fortnight of dots under each name is the range you can see is missing.
+Further back than you can see is further back than you can check.
+
+**NOT STORED, AND ARRIVING IS TODAY.** Which day the screen is on is a
+position on a screen you are looking at. If it came back as yesterday,
+this morning's tick would land on the wrong day with nothing to say
+so. It is also clamped on every read, so a screen left open past
+midnight follows the clock.
+
+Asserted both ways: the tick lands on yesterday AND today is left
+alone, because a build that logged today whatever the caption said
+passes any check that only reads the caption. Bite-proved by pointing
+the press back at the real today.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

@@ -871,6 +871,28 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('a keyboard reaches the record through its own button', (await sheetUp(page)) && (await page.textContent('#cdShT')) === 'Steps' && !(await page.$('#cdNumV')));
     await closeSheet(page);
 
+    /* A day you forgot is a day you can still log: the caption steps back
+       through the fortnight the rows draw, and a press lands on THAT day.
+       Both halves, because a build that logged today whatever the caption
+       said passes any check that only reads the caption. */
+    const hd0 = await page.evaluate(() => ({ cap: document.getElementById('cdHabDay').textContent, next: document.getElementById('cdHabN').disabled, prev: document.getElementById('cdHabP').disabled }));
+    ok('the habits screen is on today, and cannot step into tomorrow', hd0.cap === 'Today' && hd0.next && !hd0.prev, hd0);
+    const todayMind = !!((await store(page, 'cad.hab.v1'))['2026-09-25'] || {}).mind;
+    await page.click('#cdHabP');
+    ok('a press back names yesterday', (await page.textContent('#cdHabDay')) === 'Yesterday');
+    await page.click('.cd-hr[data-h="mind"] .cd-hr-b');
+    const hb = await store(page, 'cad.hab.v1');
+    ok('and a tick there lands on yesterday, leaving today alone', (hb['2026-09-24'] || {}).mind === 1 && !!((hb['2026-09-25'] || {}).mind) === todayMind, hb);
+    const at = await page.$$eval('.cd-hr[data-h="mind"] .cd-fn i', (is) => is.map((i) => i.className));
+    ok('the fortnight marks the day being logged, lit', at[at.length - 2] === 'is-on is-at', at.slice(-3));
+    await page.click('.cd-hr[data-h="mind"] .cd-hr-b');
+    ok('a second press takes it off again', !((await store(page, 'cad.hab.v1'))['2026-09-24'] || {}).mind);
+    for (let i = 0; i < 12; i++) await page.click('#cdHabP');
+    ok('it reaches back a fortnight and no further', await page.$eval('#cdHabP', (b) => b.disabled) && /^\w+day 12 Sep$/.test(await page.textContent('#cdHabDay')), await page.textContent('#cdHabDay'));
+    await page.click('.cd-tab[data-v="day"]');
+    await page.click('.cd-tab[data-v="hab"]');
+    ok('leaving the screen puts it back on today', (await page.textContent('#cdHabDay')) === 'Today');
+
     await page.click('#cdHabAdd');
     await sheetUp(page);
     await page.fill('#cdHN', 'Cold plunge');
