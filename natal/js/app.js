@@ -1701,7 +1701,7 @@
       <div class="field"><label for="f-date">Date</label><input type="date" id="f-date" required min="1850-01-01" max="2149-12-31" value="${r ? `${r.y}-${pad(r.mo)}-${pad(r.d)}` : ""}"></div>
       <div class="field"><label for="f-time">Time</label><input type="time" id="f-time" value="${r && r.timeKnown ? `${pad(r.h)}:${pad(r.mi)}` : ""}">
         <label class="toggle" style="width:auto"><input type="checkbox" id="f-unknown" ${r && !r.timeKnown ? "checked" : ""}> Unknown</label></div>
-      <div class="field" id="place-field"><label for="f-place">Place</label><input type="text" id="f-place" placeholder="Search AU or NZ city" value="${r ? esc(r.place.name) : ""}"><div class="results" id="results" hidden></div></div>
+      <div class="field" id="place-field"><label for="f-place">Place</label><input type="text" id="f-place" placeholder="Search city" value="${r ? esc(r.place.name) : ""}"><div class="results" id="results" hidden></div></div>
       <div class="place-meta" id="place-meta">${r ? placeMeta(r.place) : ""}</div>
       <div class="advanced" id="advanced" hidden>
         <div class="field"><label for="f-lat">Lat</label><input type="number" id="f-lat" step="0.0001" min="-90" max="90" placeholder="-36.8485" value="${r ? r.place.lat : ""}"></div>
