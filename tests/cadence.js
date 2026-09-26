@@ -195,8 +195,19 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('the ask draws no second rule over its answers', ask.rule === 'none' && ask.mt === '0px', ask);
     ok('and Not yet and Complete are the same box, both filled', ask.bs.length === 2 && ask.bs[0].w === ask.bs[1].w && ask.bs[0].h === ask.bs[1].h
       && ask.bs.every((b) => b.bg !== 'rgba(0, 0, 0, 0)' && b.sh === 'none'), ask.bs);
+    /* THE TAP. Chromium has navigator.vibrate, so a recorder stands in
+       for it; the switch's own flips are counted beside it, which is the
+       iOS path. Recorded from before Not yet, because a tap on every
+       press is the build this exists to refuse. */
+    await page.evaluate(() => {
+      window.__vib = []; window.__flip = 0;
+      Object.defineProperty(navigator, 'vibrate', { configurable: true, value: (ms) => { window.__vib.push(ms); return true; } });
+      const sw = document.querySelector('#cdBuzz input'); if (sw) sw.addEventListener('change', () => { window.__flip++; });
+    });
+    const buzzOf = () => page.evaluate(() => ({ vib: window.__vib.slice(), flip: window.__flip }));
     await page.evaluate(() => document.getElementById('cdGoNo') && document.getElementById('cdGoNo').click());
     await page.waitForTimeout(350);
+    ok('Not yet does not tap the phone', JSON.stringify(await buzzOf()) === '{"vib":[],"flip":0}', await buzzOf());
     ok('and Not yet leaves the block as it was', !(await page.$eval('#cdSheet', (e) => e.classList.contains('is-open'))) && !(((await store(page, 'cad.log.v1')) || {})['2026-09-25'] || {}).s3
       && (await page.textContent('#cdHeroN')) === 'Deep work');
     await page.click('#cdGo');
@@ -204,6 +215,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.evaluate(() => document.getElementById('cdGoYes') && document.getElementById('cdGoYes').click());
     await page.waitForTimeout(350);
     ok('confirming keeps the block you are in', (((await store(page, 'cad.log.v1')) || {})['2026-09-25'] || {}).s3 === 1);
+    ok('and Complete taps the phone once, through vibrate where there is one', JSON.stringify(await buzzOf()) === '{"vib":[12],"flip":0}', await buzzOf());
     /* Finished early is finished: the middle moves on and the kept block
        goes back into the list, where its own dot unticks it. */
     ok('and the middle moves on to what is next', (await heroOf(page)).join('|') === 'Next · Rest · 10:20|Lunch|in 2h 10m · at 12:30|Emails and calls at 14:00', await heroOf(page));
@@ -215,6 +227,25 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.evaluate(() => document.getElementById('cdToastU').click());
     ok('Undo puts the block back in the middle, unticked', !(((await store(page, 'cad.log.v1')) || {})['2026-09-25'] || {}).s3
       && (await page.textContent('#cdHeroN')) === 'Deep work' && (await page.getAttribute('#cdGo', 'aria-pressed')) === 'false');
+
+    /* WITH NO vibrate, WHICH IS AN IPHONE, the switch flips instead. And
+       the switch is not a control: off screen, out of the tab order and
+       out of the accessibility tree, or it is a checkbox nobody asked
+       for sitting in the page. */
+    await page.evaluate(() => { Object.defineProperty(navigator, 'vibrate', { configurable: true, value: undefined }); });
+    await page.click('#cdGo');
+    await page.evaluate(() => document.getElementById('cdGoYes') && document.getElementById('cdGoYes').click());
+    await page.waitForTimeout(350);
+    ok('without vibrate, Complete flips the hidden switch instead', JSON.stringify(await buzzOf()) === '{"vib":[12],"flip":1}', await buzzOf());
+    const sw = await page.evaluate(() => {
+      const l = document.getElementById('cdBuzz'), i = l && l.querySelector('input'), r = l ? l.getBoundingClientRect() : null;
+      return l ? { sw: i.hasAttribute('switch'), type: i.type, tab: i.tabIndex, aria: l.getAttribute('aria-hidden'), off: r.right <= 0 || r.bottom <= 0 || getComputedStyle(l).opacity === '0',
+        pe: getComputedStyle(l).pointerEvents, shown: getComputedStyle(l).display !== 'none' } : null;
+    });
+    ok('the switch is a switch, off screen, unreachable and unannounced, but still laid out', !!sw && sw.sw && sw.type === 'checkbox' && sw.tab === -1
+      && sw.aria === 'true' && sw.off && sw.pe === 'none' && sw.shown, sw);
+    await page.evaluate(() => document.getElementById('cdToastU').click());
+    ok('and Undo puts it back again', !(((await store(page, 'cad.log.v1')) || {})['2026-09-25'] || {}).s3 && (await page.textContent('#cdHeroN')) === 'Deep work');
 
     /* The name opens the block, and so does the line after it. */
     await page.click('#cdHeroN');
@@ -230,6 +261,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.click('.cd-it[data-id="s0"] .cd-dot');
     const after = await dotOf();
     ok('a row\'s dot is its check: pressing it keeps the block', await page.$eval('.cd-it[data-id="s0"]', (e) => e.classList.contains('is-done')));
+    ok('and a row\'s dot does not tap the phone', JSON.stringify(await buzzOf()) === '{"vib":[12],"flip":1}', await buzzOf());
     ok('and says so by filling, not with a word', before.t === '' && after.t === '' && before.p === 'false' && after.p === 'true' && before.bg !== after.bg, { before, after });
     ok('and it fills with the block\'s own colour', after.bg === 'rgb(125, 207, 216)', after.bg);
     await page.reload(); await page.waitForTimeout(150);

@@ -265,6 +265,13 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 }
 .cd-go svg { width: 24px; height: 24px; display: block; }
 .cd-go-t { display: none; }
+  /* The haptic. iOS gives web pages no vibration call, but since iOS 18
+     a checkbox with the switch attribute taps the phone when it flips,
+     and a label click flips it. So a switch sits off screen and the one
+     press that deserves a tap clicks its label. Not display: none, which
+     takes it out of the page the tap comes from; not reachable, because
+     it is not a control. */
+  .cd-buzz { position: fixed; left: -9999px; top: 0; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
 
 .cd-empty { padding: 22px 0; list-style: none; font: 400 15px/1.45 var(--sans); color: var(--dim); text-align: center; }
 .cd-link { min-height: 44px; display: inline-flex; align-items: center; font: 500 15px/1 var(--sans); color: var(--ink); }
@@ -745,6 +752,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
         <ol class="cd-list" id="cdAgenda"></ol>
       </div>
       <button class="cd-go" id="cdGo" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="cd-go-t" aria-hidden="true">Complete</span></button>
+      <label class="cd-buzz" id="cdBuzz" aria-hidden="true"><input type="checkbox" switch tabindex="-1" /></label>
     </section>
     <section id="cdVHab" aria-label="Habits" hidden>
       <div class="cd-pane">
@@ -1301,6 +1309,18 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      finishing a block you were still in. One sheet, two answers; the id
      and the day are taken at the press, so a clock turning over while the
      sheet is up cannot change which block the answer is about. */
+  /* ONE TAP, AND ONLY ON COMPLETE. Android has navigator.vibrate and
+     takes that; iOS has none and takes the switch above. It has to run
+     inside the press, since both only answer a real gesture. Not on Not
+     yet and not on a row's own dot: a tap that comes with every press is
+     noise, and this is the one press the whole screen exists for. On an
+     iPhone older than iOS 18 the switch flips silently and nothing else
+     happens. */
+  function cdBuzz() {
+    if (typeof navigator.vibrate === 'function') { try { navigator.vibrate(12); } catch (e) {} return; }
+    var l = $('cdBuzz');
+    if (l) l.click();
+  }
   $('cdGo').addEventListener('click', function () {
     var id = heroId, day = sel;
     if (!id) return;
@@ -1313,6 +1333,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var train = !!TRAINING[cdKind(b.n)];
     var yes = el('button', 'cd-btn go', train ? 'Completed · log session' : 'Complete'); yes.type = 'button'; yes.id = 'cdGoYes';
     yes.addEventListener('click', function () {
+      cdBuzz();
       cdClose();
       sel = day; cdTick(id);
       if (cdDone(day, id) && !train) cdToast('Completed ' + b.n, function () { if (cdDone(day, id)) { sel = day; cdTick(id); } });

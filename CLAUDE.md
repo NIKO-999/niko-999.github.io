@@ -5012,6 +5012,32 @@ control you hover to understand. **Desktop only**: the phone keeps its
 round button at the thumb, with no word, and that is asserted as well.
 Bite-proved by leaving `top` unwritten, which reads a 124px gap.
 
+### Complete taps the phone
+
+Asked for off a list of iPhone improvements. **iOS gives a web page no
+vibration call**, so the tap comes from a side door: since iOS 18 a
+checkbox carrying the `switch` attribute taps the phone when it flips,
+and clicking its label flips it. One sits off screen and the confirm's
+Complete clicks its label. Android has `navigator.vibrate` and takes
+that instead. On an iPhone before iOS 18 the switch flips silently and
+nothing else happens.
+
+**ONLY ON COMPLETE.** Not on Not yet, and not on a row's own dot: a tap
+on every press is noise, and this is the one press the screen exists
+for. Both refusals are asserted, because a build that taps on
+everything passes any check that only watches Complete.
+
+**NOT `display: none`**, which takes it out of the page the tap comes
+from; off screen, out of the tab order and `aria-hidden`, because it is
+not a control. It has to fire inside the press itself, since both routes
+only answer a real gesture.
+
+**Chromium cannot feel it**, so the check records instead: a stand-in
+`vibrate` for the Android path and the switch's own `change` events for
+the iPhone one, with `vibrate` removed. That proves the right door is
+knocked on, never that a phone buzzes. Bite-proved by moving the tap
+onto Not yet and by taking the label click out.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
