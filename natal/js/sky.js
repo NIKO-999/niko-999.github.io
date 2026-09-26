@@ -34,7 +34,7 @@
     for (const s of stars) {
       const tw = reduce ? 1 : 0.55 + 0.45 * Math.sin(t / 1000 * s.s + s.p);
       ctx.globalAlpha = s.a * tw;
-      ctx.fillStyle = s.warm ? "#f6e6ff" : "#e4d8f6";
+      ctx.fillStyle = s.warm ? "#f0fff8" : "#d8efe6";
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
       ctx.fill();
