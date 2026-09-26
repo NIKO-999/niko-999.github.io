@@ -700,3 +700,24 @@ body.detail-open .sheet-backdrop { display: none; }
   -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 18px, #000 100%);
   mask-image: linear-gradient(180deg, transparent 0, #000 18px, #000 100%);
 }
+
+
+/* ---------------- transit calendar ---------------- */
+.chips.seg { gap: 0; margin: 4px auto 0; width: max-content; border: 1px solid var(--line-2); border-radius: 999px; padding: 3px; }
+.chips.seg .chip { border: 0; padding: 6px 14px; }
+.cal { margin-top: 18px; }
+.cal-head, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+.cal-head span { text-align: center; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.2em; color: var(--muted); padding-bottom: 8px; }
+.cal-cell { position: relative; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 9px 0 8px; border-radius: 10px; min-height: 52px; }
+.cal-cell.empty { pointer-events: none; }
+.cal-cell:hover { background: rgba(255, 255, 255, 0.04); }
+.cal-num { font-family: var(--mono); font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.cal-cell.busy .cal-num { color: var(--text); }
+.cal-cell.today .cal-num { color: var(--text); font-weight: 600; }
+.cal-cell.today::after { content: ""; position: absolute; bottom: 3px; width: 4px; height: 4px; border-radius: 50%; background: var(--text); }
+.cal-dots { display: flex; gap: 3px; min-height: 5px; }
+.cal-dots i { width: 5px; height: 5px; border-radius: 50%; display: block; }
+.cal-phase { position: absolute; top: 5px; right: 18%; width: 7px; height: 7px; border-radius: 50%; }
+.cal-phase.full { background: #eef2f6; box-shadow: 0 0 6px rgba(238, 242, 246, 0.6); }
+.cal-phase.new { border: 1px solid rgba(238, 242, 246, 0.7); }
+.cal-phase.quarter { background: linear-gradient(90deg, #eef2f6 50%, transparent 50%); border: 1px solid rgba(238, 242, 246, 0.5); }
