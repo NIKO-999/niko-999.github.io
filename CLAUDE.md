@@ -5415,6 +5415,22 @@ failing check. It returns 0 now, and the steps after a picture that
 never went up fail by name instead of waiting out every step on an
 undefined key.
 
+### A morning routine is its own kind, and so is the evening one
+
+*Morning routine* drew the plain square: nothing in it was a word the
+table knew, and "routine" alone is too generic to claim — *skincare
+routine* is a wash and stays one. So the table claims the PHRASE, not
+the word: a morning routine, an AM routine, a morning ritual or
+checklist is a small sun over a list, and an evening, night, bedtime or
+PM routine is the same list under a crescent. **Two kinds rather than
+one**, because a sun on a routine you do at ten at night is the glyph
+being confidently wrong.
+
+**First in the table**, above wake, so *wake up routine* is the routine
+rather than the alarm. Judged at 18px beside wake, sleep and plan: the
+sun is small enough not to read as the day's own `sun`, and the list is
+what tells both apart from the sunrise and the moon they borrow from.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

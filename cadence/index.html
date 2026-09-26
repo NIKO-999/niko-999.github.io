@@ -891,6 +891,8 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      dot. First hit wins, so the longer
      phrase is always listed before the word inside it. */
   var KW = [
+    ['routine', /\b(morning routine|am routine|a\.m\. routine|morning ritual|morning checklist|morning habits|morning stack|miracle morning)\b/],
+    ['nightly', /\b(evening routine|night routine|nighttime routine|night-time routine|bedtime routine|pm routine|evening ritual|night ritual)\b/],
     ['wake', /\b(wake up|get up|wake|rise|alarm)\b/],
     ['star', /\b(stargazing|star gazing|astronomy|telescope|night sky|meteor shower|milky way)\b/],
     ['vote', /\b(vote|voting|election|polling booth|polling|democracy sausage)\b/],
@@ -975,7 +977,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   var CAT = { train: 'body', run: 'body', stretch: 'body', walk: 'body', warm: 'body', swim: 'body', cycle: 'body', sport: 'body', dance: 'body', surf: 'body', ski: 'body',
     read: 'mind', study: 'mind', calm: 'mind', write: 'mind', listen: 'mind', music: 'mind',
     chart: 'work', move: 'work', work: 'work', code: 'work', mail: 'work', phone: 'work', talk: 'work', money: 'work', plan: 'work',
-    wake: 'rest', eat: 'rest', coffee: 'rest', sleep: 'rest', cook: 'rest', water: 'rest', sun: 'rest', shower: 'rest', meds: 'rest', health: 'rest',
+    routine: 'rest', nightly: 'rest', wake: 'rest', eat: 'rest', coffee: 'rest', sleep: 'rest', cook: 'rest', water: 'rest', sun: 'rest', shower: 'rest', meds: 'rest', health: 'rest',
     shop: 'rest', hike: 'body', fish: 'rest', news: 'mind', idea: 'mind', art: 'mind', photo: 'mind', film: 'work', fly: 'work', car: 'work', baby: 'rest', drink: 'rest', bin: 'rest', pack: 'rest', fix: 'rest', cut: 'rest', heart: 'rest', gift: 'rest', ticket: 'rest', laundry: 'rest', clean: 'rest', pet: 'rest', bath: 'rest', teeth: 'rest', party: 'rest', relax: 'rest', vote: 'rest', star: 'rest', craft: 'mind', puzzle: 'mind', present: 'work', grocery: 'rest', bbq: 'rest', camp: 'rest', kids: 'rest', furniture: 'rest', home: 'rest', trip: 'rest', beach: 'rest', plant: 'rest', people: 'rest', screen: 'rest', game: 'rest', dot: 'none' };
   var TRAINING = { train: 1, run: 1, stretch: 1 };
   function cdKind(name) {
@@ -1003,6 +1005,8 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     eat: '<path d="M6.5 3v6.5a2 2 0 0 0 4 0V3M8.5 11.5V21M17 3c-2.2 2.2-2.2 7.5 0 9.5V21"/>',
     coffee: '<path d="M4 9.5h12v4.5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM16 11h1.5a2.5 2.5 0 0 1 0 5H16M8.5 3.5v3M12 3.5v3"/>',
     sleep: '<path d="M19.5 14.5A8 8 0 1 1 9.5 4.5a6.5 6.5 0 0 0 10 10z"/>',
+    routine: '<circle cx="7" cy="7.5" r="2.6"/><path d="M7 2.2v1M1.7 7.5h1M3.3 3.8l.7.7M10.7 3.8l-.7.7M14 7.5h7M3 14h18M3 19h18"/>',
+    nightly: '<path d="M9.5 3.2a4.3 4.3 0 1 0 1.3 7.9A3.6 3.6 0 0 1 9.5 3.2z"/><path d="M14 7.5h7M3 14h18M3 19h18"/>',
     warm: '<path d="M12 3c1 3.5 5.5 5.5 5.5 10.5a5.5 5.5 0 0 1-11 0c0-2.5 1.5-4 2.5-5 .3 2 1.3 3 2.3 3.2C11.8 9 11 6 12 3z"/>',
     swim: '<path d="M2.5 9.5c2.4-2 4.8-2 7.1 0s4.8 2 7.1 0 3.4-1.4 4.8-.9M2.5 15.5c2.4-2 4.8-2 7.1 0s4.8 2 7.1 0 3.4-1.4 4.8-.9"/>',
     cycle: '<circle cx="6" cy="16" r="3.5"/><circle cx="18" cy="16" r="3.5"/><path d="M6 16l4-7h6l2 7M10 9l3 7h-7M9 6h3"/>',
