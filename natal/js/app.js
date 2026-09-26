@@ -231,10 +231,10 @@
       case "chiron": return S.chiron;
       case "southNode": {
         const opp = SIGNS[opposite(p.sign)];
-        return `Your comfort zone and past-life mastery lie in ${S.name} territory — ${S.gifts}. These come naturally, but leaning on them too hard (${S.shadow}) keeps you circling the familiar. Offer them in service of your North Node in ${opp.name}.`;
+        return `Your comfort zone and past-life mastery lie in ${S.name} territory: ${S.gifts}. These come naturally, but leaning on them too hard (${S.shadow}) keeps you circling the familiar. Offer them in service of your North Node in ${opp.name}.`;
       }
       case "lilith":
-        return `The exiled, untamed part of you expresses ${S.how}. At some point, the ${S.name} themes of ${S.keywords[0]} and ${S.keywords[1]} may have been shamed or suppressed. Reclaiming them as raw, sovereign power — without apology — is the work. Denied, Lilith can surface as ${S.shadow}.`;
+        return `The exiled, untamed part of you expresses ${S.how}. At some point, the ${S.name} themes of ${S.keywords[0]} and ${S.keywords[1]} may have been shamed or suppressed. Reclaiming them as raw, sovereign power, without apology, is the work. Denied, Lilith can surface as ${S.shadow}.`;
       case "fortune":
         return `Joy and prosperity come most easily when you live ${S.how}, drawing on ${S.gifts}.`;
       case "vertex":
@@ -386,8 +386,8 @@
       <h1 class="display">${esc(r.name || "Your Chart")}</h1>
       <div class="subline">${parts.join(' <span style="opacity:.6">·</span> ')}</div>
       <div class="meta">${esc(r.place.name)} · ${fmtCoord(r.place.lat, r.place.lon)} · ${fmtOffset(c.offset)}<br>${esc(K.HOUSE_SYSTEMS[c.houseSystemUsed])} · ${state.settings.zodiac === "sidereal" ? "Sidereal (Lahiri)" : "Tropical"} · ${state.settings.nodeType === "true" ? "True" : "Mean"} node</div>
-      ${!c.timeKnown ? `<p class="note">Birth time unknown — the chart is cast for local noon. Houses, Ascendant and Midheaven are hidden and the Moon may be up to ±7° off.</p>` : ""}
-      ${c.timeKnown && c.houseSystemUsed !== state.settings.houseSystem ? `<p class="note">${esc(K.HOUSE_SYSTEMS[state.settings.houseSystem])} houses are undefined at this latitude — Porphyry is used instead.</p>` : ""}
+      ${!c.timeKnown ? `<p class="note">Birth time unknown: the chart is cast for local noon. Houses, Ascendant and Midheaven are hidden and the Moon may be up to ±7° off.</p>` : ""}
+      ${c.timeKnown && c.houseSystemUsed !== state.settings.houseSystem ? `<p class="note">${esc(K.HOUSE_SYSTEMS[state.settings.houseSystem])} houses are undefined at this latitude: Porphyry is used instead.</p>` : ""}
     </section>`;
 
     html += `<div class="wheel-wrap" id="wheel-wrap">${window.AstroWheel.render(c)}</div>
@@ -569,7 +569,7 @@
         <div class="pos-sub">${inside.length ? inside.map((p) => `<span class="sym" style="color:${PLANETS[p.key].color};font-size:14px">${pGlyph(p.key)}</span>`).join(" ") : "Empty"}</div></span>
       </button>`;
     }
-    html += `</div><p class="note">Change the house system from the settings icon. Empty houses are not inactive — they are read through the sign on the cusp and the placement of its ruler.</p>`;
+    html += `</div><p class="note">Change the house system from the settings icon. Empty houses are not inactive: they are read through the sign on the cusp and the placement of its ruler.</p>`;
     return html;
   }
 
@@ -674,7 +674,7 @@
       [ax ? ax.story : SIGNS[nn.sign].nn, c.timeKnown ? (nhd ? nhd.story : K.HOUSE_NODE[nn.house]) : ""]);
     const snd = deepSign(sn.sign);
     html += karmicCard("southNode", "Past lives · South Node", `${SIGNS[sn.sign].name}${sn.house ? ` · ${ord(sn.house)} house` : ""}`, [snd ? snd.southNode : signText(sn)]);
-    if (ax) html += `<div class="card"><div class="card-k">Staying on path</div><div class="prose"><p><strong>The trap.</strong> ${esc(ax.trap)}</p><p><strong>The medicine.</strong> ${esc(ax.medicine)}</p></div>${steps("Three steps", (deepSign(nn.sign) || {}).northNodeSteps)}${nhd ? advice(nhd.practice) : ""}</div>`;
+    if (ax) html += `<div class="card"><div class="card-k">Staying on path</div><div class="prose"><p><strong>The trap.</strong> ${esc(ax.trap)}</p><p><strong>The medicine.</strong> ${esc(ax.medicine)}</p></div>${steps("Three steps", (deepSign(nn.sign) || {}).northNodeSteps)}</div>`;
     // ruler of the North Node
     const nnRuler = rulerOf(nn.sign), nr = c.get(nnRuler);
     html += `<div class="card"><div class="card-head"><div class="glyph" style="color:${PLANETS[nnRuler].color}">${pGlyph(nnRuler)}</div>
@@ -953,9 +953,6 @@
   function steps(title, list) {
     return list && list.length ? `<h4>${esc(title)}</h4><ol class="steps">${list.map((t) => `<li>${esc(t)}</li>`).join("")}</ol>` : "";
   }
-  function advice(text) {
-    return text ? `<div class="advice"><span>Working with it</span>${esc(text)}</div>` : "";
-  }
   const firstPara = (t) => (t ? String(t).split(/\n\n+/)[0] : "");
 
   function sheetPoint(key) {
@@ -1003,14 +1000,12 @@
       html += sec("Meaning", da.overview);
       html += sec(`In ${S.name}`, da.signs[p.sign], elColor(p.sign));
       html += chips("Gifts", da.gifts, "green") + chips("Challenges", da.challenges, "");
-      html += advice(da.advice);
     } else if (dp) {
       html += sec(`In ${S.name}`, [dp.text, ...extra], elColor(p.sign));
       if (dp.love) html += sec("In love", dp.love);
       if (dp.work) html += sec("At work", dp.work);
       if (dp.shadow) html += sec("Shadow", dp.shadow);
       html += chips("Strengths", dp.strengths, "green") + chips("Challenges", dp.challenges, "");
-      html += advice(dp.advice);
     } else {
       html += sec(`In ${S.name}`, [signText(p), ...extra], elColor(p.sign));
     }
@@ -1023,11 +1018,10 @@
       if (key === "northNode" || key === "southNode") {
         const nh = deepNodeHouse(key === "northNode" ? p.house : ((p.house + 5) % 12) + 1);
         html += sec(`In the ${ord(p.house)} house`, [K.HOUSE_NODE[key === "northNode" ? p.house : ((p.house + 5) % 12) + 1], nh && nh.story]);
-        if (nh) html += advice(nh.practice);
       } else if (deepAsteroid(key)) {
         html += sec(`In the ${ord(p.house)} house · ${HOUSES[p.house].title}`, deepAsteroid(key).houses[p.house]);
       } else if (dh) {
-        html += sec(`In the ${ord(p.house)} house · ${HOUSES[p.house].title}`, dh.text) + advice(dh.advice);
+        html += sec(`In the ${ord(p.house)} house · ${HOUSES[p.house].title}`, dh.text);
       } else {
         html += sec(`In the ${ord(p.house)} house`, houseText(p));
       }
@@ -1247,13 +1241,12 @@
           list.length ? `${list.map(pName).join(", ")}.` : "",
           list.length >= 4 ? (B ? B.strong : X.strong) : list.length <= 1 ? (B ? B.weak : X.weak) : `${X.strong} With ${list.length} placements, this is a moderate influence.`,
         ]);
-        if (B) html += sec(list.length >= 4 ? "When it runs strong" : "What it brings", B.strong) + (list.length <= 1 ? "" : sec("If it were missing", B.weak)) + advice(B.remedy);
+        if (B) html += sec(list.length >= 4 ? "When it runs strong" : "What it brings", B.strong) + (list.length <= 1 ? "" : sec("If it were missing", B.weak));
         break;
       }
       case "mode": {
         const X = K.MODES[arg], list = d.modes[arg], B = deepBalance(arg);
         html = sheetSimple("Modality", X.name, `${list.length} placement${list.length === 1 ? "" : "s"}`, [list.map(pName).join(", ") + (list.length ? "." : ""), list.length <= 1 ? (B ? B.weak : X.weak) : (B ? B.strong : X.strong)]);
-        if (B) html += advice(B.remedy);
         break;
       }
       case "area":
@@ -1264,7 +1257,7 @@
         const ang = c.moonPhaseAngle;
         const illum = Math.round(((1 - Math.cos((ang * Math.PI) / 180)) / 2) * 100);
         html = sheetSimple("Moon phase at birth", d.phase.name, `${Math.round(ang)}° from Sun to Moon · ${illum}% lit · ${ang < 180 ? "waxing" : "waning"}`, [ph ? ph.text : d.phase.desc]);
-        if (ph) html += chips("Gifts", ph.gifts, "green") + chips("Challenges", ph.challenges, "") + advice(ph.advice);
+        if (ph) html += chips("Gifts", ph.gifts, "green") + chips("Challenges", ph.challenges, "");
         html += sec("How it's measured", `The phase is the angle the Moon has travelled ahead of the Sun: 0° is the New Moon, 180° the Full Moon. ${ang < 180 ? "A waxing Moon is building, and people born in this half of the cycle tend to be oriented toward creating and becoming." : "A waning Moon is releasing, and people born in this half of the cycle tend to be oriented toward meaning, sharing and completing."}`);
         break;
       }
@@ -1335,7 +1328,7 @@
         const txt = {
           north: `${P.name} conjunct the North Node: ${P.core} is bound up with your destiny. Developing this planet consciously is part of what you came here to do, and people or events tied to it often feel fated.`,
           south: `${P.name} conjunct the South Node: ${P.core} carries a strong past-life imprint. It is a gift you arrive with, but it can also be a habit that pulls you backward. Use it to serve your North Node.`,
-          bend: `${P.name} square the nodes sits at the "bending" point of the nodal axis — traditionally a skipped step. Lessons around ${P.core} were left unfinished and must be integrated before the North Node path fully opens.`,
+          bend: `${P.name} square the nodes sits at the "bending" point of the nodal axis, traditionally a skipped step. Lessons around ${P.core} were left unfinished and must be integrated before the North Node path fully opens.`,
         }[arg2];
         html = sheetSimple("Nodal contact", P.name, "", [txt, P.desc]);
         break;
@@ -1506,7 +1499,7 @@
         html += areaSection("Energy and drive", placementBlock("mars"));
         {
           const d = c.derived, B = deepBalance(d.domEl);
-          if (B) html += areaSection(`Your ${d.domEl} emphasis`, paras([B.strong]) + advice(B.remedy));
+          if (B) html += areaSection(`Your ${d.domEl} emphasis`, paras([B.strong]));
         }
         html += `<p class="note" style="text-align:left">Astrology describes tendencies, not medical conditions. See a health professional for anything that concerns you.</p>`;
         break;
@@ -1790,7 +1783,7 @@
     const aspects = events.filter((e) => e.kind === "aspect");
     const moonPh = events.filter((e) => e.kind === "phase");
     const lastDay = new Date(end.getTime() - 86400000);
-    const title = range === "month" ? MONTHS_LONG[start.getMonth()] : `${start.getDate()} ${MONTHS[start.getMonth()]} – ${lastDay.getDate()} ${MONTHS[lastDay.getMonth()]}`;
+    const title = range === "month" ? MONTHS_LONG[start.getMonth()] : `${start.getDate()} ${MONTHS[start.getMonth()]} to ${lastDay.getDate()} ${MONTHS[lastDay.getMonth()]}`;
     const newMoon = moonPh.find((e) => e.angle === 0), fullMoon = moonPh.find((e) => e.angle === 180);
     let html = `<section class="hero">
       <div class="eyebrow">Transits<span class="sep">·</span>${range === "month" ? "Month" : "Week"}<span class="sep">·</span>${start.getFullYear()}</div>
@@ -1962,8 +1955,8 @@
       [`Natal ${pShort(tr.n)}`, `${degStr(np)} ${signGlyph(np.sign)}${np.house ? ` · H${np.house}` : ""}`],
       ["Orb", `${orbStr(tr.orb)} · ${tr.applying ? "applying" : "separating"}`],
       ["Exact", w.exacts.length ? w.exacts.map((e) => tr.t === "moon" ? `${pad(e.getHours())}:${pad(e.getMinutes())}` : fmtDayYear(e)).join(", ") : w.start && w.end ? `Doesn't reach exact: ${pName(tr.t)} changes direction first` : "Beyond the search window"],
-      w.start || w.end ? ["In orb", `${w.start ? fmtDayYear(w.start) : "before"} – ${w.end ? fmtDayYear(w.end) : "later"}`] : null,
-      [`${pShort(tr.t)} timescale`, ((D().transitPlanets || {})[tr.t] || {}).timescale || "—"],
+      w.start || w.end ? ["In orb", `${w.start ? fmtDayYear(w.start) : "before"} to ${w.end ? fmtDayYear(w.end) : "later"}`] : null,
+      [`${pShort(tr.t)} timescale`, ((D().transitPlanets || {})[tr.t] || {}).timescale || "Varies"],
     ]);
     html += paras([transitText(tr, field)]);
     if (w.exacts.length > 1) html += sec("Multiple passes", `Because ${pName(tr.t)} turns retrograde, this transit is exact ${w.exacts.length} times. The first pass tends to raise the theme, the middle pass reviews it, and the last pass settles it.`);
@@ -1994,7 +1987,7 @@
       TP ? ["Timescale", TP.timescale] : null,
     ]);
     if (TP) html += paras([TP.brings]);
-    if (p.natalHouse) html += sec(`Through your ${ord(p.natalHouse)} house`, TH ? TH.text : `${pName(key)} is highlighting ${HOUSES[p.natalHouse].areas}.`) + (TH && TH.advice ? advice(TH.advice) : "");
+    if (p.natalHouse) html += sec(`Through your ${ord(p.natalHouse)} house`, TH ? TH.text : `${pName(key)} is highlighting ${HOUSES[p.natalHouse].areas}.`);
     const mine = T.list.map((tr, i) => [tr, i]).filter(([tr]) => tr.t === key);
     if (mine.length) html += `<h4>Aspects to your chart</h4><div class="list">${mine.map(([tr, i]) => transitRow(tr, i)).join("")}</div>`;
     return html;
@@ -2371,7 +2364,6 @@
       <div class="subline">orb ${orbStr(a.orb)} · ${a.applying ? "applying" : "separating"}${a.exact ? ` · exact ${esc(fmtMonthYear(a.exact))}` : ""}</div></section>`;
     html += paras([PR.planets && PR.planets[a.b], `Your progressed ${pName(a.b)} is making a ${X.name.toLowerCase()} to your natal ${pName(a.a)}. Progressed aspects build slowly and stay active for about a year either side of exact (the Moon's for a couple of months), so they describe a season of inner development rather than a single event.`]);
     html += sec("The theme", [dA && dA.theme, body]);
-    html += sec("What to do with it", a.nature === "tension" ? "Use the pressure. Tension aspects by progression tend to push a change you have been putting off. Name what is being asked of you and take one deliberate step toward it." : a.nature === "fusion" ? "A new chapter is being seeded. Notice what starts around the exact date: it tends to set the tone for years." : "Doors open more easily now. Flowing progressed aspects reward effort, so act on the opportunities they bring rather than waiting.");
     return html;
   }
 
