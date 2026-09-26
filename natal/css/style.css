@@ -691,8 +691,8 @@ body.detail-open .sheet-backdrop { display: none; }
 .sheet { background: linear-gradient(180deg, rgba(8, 16, 26, 0) 0%, rgba(8, 16, 26, 0.18) 45%, rgba(8, 16, 26, 0.55) 80%, rgba(8, 16, 26, 0.7) 100%); }
 /* detail pages: soften the sky behind the text */
 .sheet {
-  -webkit-backdrop-filter: blur(3.5px);
-  backdrop-filter: blur(3.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+  backdrop-filter: blur(1.5px);
   background: linear-gradient(180deg, rgba(8, 16, 26, 0.22) 0%, rgba(8, 16, 26, 0.28) 45%, rgba(8, 16, 26, 0.55) 80%, rgba(8, 16, 26, 0.7) 100%);
 }
 /* text scrolling up under the Back bar fades out instead of being sliced */
