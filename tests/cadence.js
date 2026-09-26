@@ -490,6 +490,40 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await c.close();
   }
 
+  {
+    /* A switch in Settings stops it arriving; the button beside it still
+       shows today's. Both directions, because each passes on the other's
+       bug: a switch that never stops it, and one that stops it for good. */
+    const { c, page } = await ctx({ reflect: true, at: '2026-09-26T08:00:00' });
+    await page.waitForSelector('#cdRf', { timeout: 2000 }).catch(() => {});
+    await page.click('#cdReflOk').catch(() => {}); await page.waitForTimeout(100);
+    await page.click('#cdGear'); await sheetUp(page);
+    const on0 = await page.getAttribute('#cdRfOn', 'aria-pressed');
+    ok('the morning thought is on until you turn it off', on0 === 'true', on0);
+    await page.click('#cdRfOn');
+    ok('the switch turns it off and says so', (await page.getAttribute('#cdRfOn', 'aria-pressed')) === 'false'
+      && (await store(page, 'cad.rfoff.v1')) === true);
+    await closeSheet(page);
+    /* A new date, so the only thing keeping it away is the switch. */
+    await page.evaluate(() => localStorage.setItem('cad.refl.v1', '{}'));
+    await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(800);
+    ok('turned off, a new open does not show it', !(await page.$('#cdRf')));
+    /* On a build where it came up anyway, put it away so the next press
+       reaches the gear: a check that crashes is not a check that fails. */
+    if (await page.$('#cdRf')) { await page.click('#cdReflOk'); await page.waitForTimeout(100); }
+    await page.click('#cdGear'); await sheetUp(page);
+    await page.click('#cdReflOpen'); await page.waitForTimeout(200);
+    ok('turned off, Today\u2019s thought still shows it on request', !!(await page.$('#cdRf')));
+    await page.click('#cdReflOk'); await page.waitForTimeout(100);
+    await page.click('#cdGear'); await sheetUp(page);
+    await page.click('#cdRfOn');
+    await closeSheet(page);
+    await page.evaluate(() => localStorage.setItem('cad.refl.v1', '{}'));
+    await page.reload({ waitUntil: 'load' });
+    ok('turned back on, it comes back', await page.waitForSelector('#cdRf', { timeout: 2000 }).then(() => true, () => false));
+    await c.close();
+  }
+
   console.log('\n── the sentence ──');
   {
     const { c, page, errs } = await ctx();

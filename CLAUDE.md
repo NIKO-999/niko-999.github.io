@@ -4767,6 +4767,20 @@ colour does not flip back while the sheet is still sliding away.
 Asserted both ways, the sheet's colour while it is up and the sky's
 foot once it has gone.
 
+### The thought can be turned off
+
+Asked for as an off and on. **A switch under Today's thought in
+Settings, `Show each morning`**, on by default: off stops the card
+arriving on the first open, and the button above it still shows
+today's whenever you ask, because turning off the interruption is not
+the same as never wanting the line. `cad.rfoff.v1` stores OFF and only
+off: anything that is not exactly `true` reads as on, so a damaged key
+keeps the thought rather than losing it, and the backup carries it
+because the backup is built from `K`. Asserted in both directions
+across a reload, and bite-proved by making the boot ignore it; the
+first proof crashed on a thought covering the gear, so the check puts
+a stray card away before the next press rather than timing out.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

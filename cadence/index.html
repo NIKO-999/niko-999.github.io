@@ -725,7 +725,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   var K = {
     week: 'cad.week.v1', log: 'cad.log.v1',
     hab: 'cad.hab.v1', train: 'cad.train.v1', defs: 'cad.defs.v1',
-    note: 'cad.note.v1', refl: 'cad.refl.v1'
+    note: 'cad.note.v1', refl: 'cad.refl.v1', rfoff: 'cad.rfoff.v1'
   };
   /* There is one face now, so the key that chose between two is swept
      rather than left: a preference for a control that no longer exists
@@ -909,7 +909,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       return Array.isArray(r) ? r.filter(function (x) { return isObj(x) && x.id && x.n; }) : [];
     })(),
     note: cdLoadList(K.note, cdNoteClean),
-    refl: cdLoadMap(K.refl)
+    refl: cdLoadMap(K.refl),
+    /* Off is the one stored state: anything that is not exactly true reads
+       as on, so a damaged key keeps the thought rather than losing it. */
+    rfoff: cdRead(K.rfoff, false) === true
   };
   function cdSave(which) { cdWrite(K[which], S[which]); }
 
@@ -2390,6 +2393,19 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var rb = el('button', 'cd-btn', 'Today\u2019s thought'); rb.type = 'button'; rb.id = 'cdReflOpen';
     rb.addEventListener('click', function () { cdClose(); cdReflect(cdToday()); });
     root.appendChild(rb);
+    /* Off stops it arriving on the first open; the button above still
+       shows today's whenever you ask. A switch rather than a second
+       button, because it is a state you leave set. */
+    var rfOn = el('button', 'cd-toggle', '<span>Show each morning</span><i></i>');
+    rfOn.type = 'button'; rfOn.id = 'cdRfOn';
+    rfOn.setAttribute('aria-pressed', String(!S.rfoff));
+    rfOn.addEventListener('click', function () {
+      S.rfoff = !S.rfoff; cdSave('rfoff');
+      rfOn.setAttribute('aria-pressed', String(!S.rfoff));
+    });
+    var rfRows = el('div', 'cd-rows'); rfRows.style.marginTop = '10px';
+    rfRows.appendChild(rfOn);
+    root.appendChild(rfRows);
     var wl = el('p', 'cd-lbl', 'Your week'); wl.style.marginTop = '24px';
     root.appendChild(wl);
     var clr = el('button', 'cd-btn warn', 'Clear all blocks'); clr.type = 'button'; clr.id = 'cdWkClr';
@@ -2617,7 +2633,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   /* The first open of a date shows its thought, after the screen has
      painted so the card comes up over the day rather than over nothing. */
   var rt = cdToday();
-  if (!(S.refl[rt] && S.refl[rt].s)) setTimeout(function () { if (!cdSheetOpen()) cdReflect(rt); }, 450);
+  if (!S.rfoff && !(S.refl[rt] && S.refl[rt].s)) setTimeout(function () { if (!cdSheetOpen()) cdReflect(rt); }, 450);
 
   /* Exposed for the test suite only: the parser and the keyword table are
      the pieces worth asserting as functions rather than through the page. */
