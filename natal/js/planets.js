@@ -231,7 +231,7 @@
           // an irregular outline, so each reads as a rock rather than a ball
           const k = 5 + Math.floor(rnd() * 3), shape = [];
           for (let j = 0; j < k; j++) shape.push(0.55 + rnd() * 0.45);
-          list.push({ r, th: rnd() * TAU, size: 0.0011 + Math.pow(rnd(), 3) * 0.0022, w: Math.pow(1.6 / r, 1.5), tone: rnd(), shape, spin: rnd() * TAU, tumble: (rnd() - 0.5) * 2 });
+          list.push({ r, th: rnd() * TAU, size: 0.0024 + Math.pow(rnd(), 3) * 0.0042, w: Math.pow(1.6 / r, 1.5), tone: rnd(), shape, spin: rnd() * TAU, tumble: (rnd() - 0.5) * 2 });
         }
         return list;
       }
