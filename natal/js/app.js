@@ -1715,6 +1715,15 @@
       </button>
       <div class="error" id="form-error"></div>
     </form>`;
+    // quick way back to the most recently entered chart
+    const lastId = store.get("last", null);
+    const last = saved.find((x) => x.id === lastId) || saved[0];
+    if (last) {
+      html += `<div class="last-entered"><button class="last-pill" data-load="${last.id}">
+        <span class="last-k">Last entered</span>
+        <span class="last-v">${esc(last.name || "Untitled")} · ${esc(fmtDate(last))} · ${esc(last.place.name)}</span>
+      </button></div>`;
+    }
     if (saved.length) {
       html += `<div class="section-label">Saved charts</div><div class="list">`;
       for (const s of saved) {
@@ -1724,8 +1733,6 @@
           <button class="saved-del" data-del="${s.id}" aria-label="Delete">✕</button></div>`;
       }
       html += `</div>`;
-    } else {
-      html += `<div class="chips" style="margin-top:34px"><button class="chip" data-act="sample">Try a sample chart</button></div>`;
     }
     return html;
   }
@@ -1926,7 +1933,6 @@
     const act = e.target.closest("[data-act]");
     if (act) {
       const a = act.dataset.act;
-      if (a === "sample") openRecord({ id: "sample", name: "Sample", y: 1994, mo: 3, d: 14, h: 8, mi: 12, timeKnown: true, place: { name: "Auckland", region: "Auckland, New Zealand", lat: -36.8485, lon: 174.7633, tz: "Pacific/Auckland" } }, false);
       if (a === "edit") { state.editing = state.record; state.chart = null; closeSheet(); render(); }
       if (a === "share") share();
       if (a === "tnow") { state.transitDate = null; state._nowPin = null; render(); }
