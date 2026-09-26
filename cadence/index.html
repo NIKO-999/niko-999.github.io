@@ -509,8 +509,16 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cd-doc-ks button { min-height: 38px; border-radius: 19px; text-align: center; font: 500 12.5px/1 var(--sans); color: var(--dim); position: relative; }
 .cd-doc-ks button::before { content: ""; position: absolute; left: 0; right: 0; top: -3px; bottom: -3px; }
 .cd-doc-ks button[aria-pressed="true"] { background: var(--ink); color: var(--on); }
-.cd-doc-hl { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+.cd-doc-hl { display: flex; align-items: center; justify-content: space-between; margin: 4px -4px 0; }
 .cd-doc-hl button, .cd-doc-pic { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; }
+/* Eight across is 352px, four more than the column at 390: the row
+   reaches 4px into each gutter, which the drawn marks (22px inside each
+   44) never come near. Narrower than that it gives ground rather than
+   running off the side. */
+.cd-doc-hl > * { flex: 0 1 44px; min-width: 34px; }
+.cd-doc-u { color: var(--dim); font: 600 17px/1 var(--sans); text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+.cd-doc-u[aria-pressed="true"] { background: var(--ink); color: var(--on); }
+.cd-nb u { text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
 .cd-doc-hl button i { width: 22px; height: 22px; border-radius: 50%; background: color-mix(in srgb, var(--hc) 28%, transparent); box-shadow: inset 0 0 0 1.5px var(--hc); }
 .cd-doc-hl button[aria-pressed="true"] i { background: var(--hc); box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--hc); }
 .cd-doc-hl .hl-o { --hc: var(--c-body); }
@@ -814,7 +822,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   var ISO = /^\d{4}-\d{2}-\d{2}$/;
   /* A note is a list of BLOCKS: a title, a heading, a sub-heading, a
      line of body, a quote, or a picture. A line of text is a list of
-     runs, [words, highlight], so a colour can sit on three words of it
+     runs, [words, highlight, underlined], so a colour can sit on three words of it
      rather than on the whole line. `t` is the plain text worked out from
      the blocks on every write, for everything that only reads a note (the
      list, the day sheet), so it cannot drift from them. A note written
@@ -834,9 +842,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var r = [];
     (Array.isArray(b.r) ? b.r : []).forEach(function (x) {
       if (!Array.isArray(x)) return;
-      var t = String(x[0] == null ? '' : x[0]).replace(/[\r\n]+/g, ' '), c = NB_HL.indexOf(x[1]) >= 0 ? x[1] : '';
+      var t = String(x[0] == null ? '' : x[0]).replace(/[\r\n]+/g, ' '), c = NB_HL.indexOf(x[1]) >= 0 ? x[1] : '', u = x[2] === 1;
       if (!t) return;
-      if (r.length && r[r.length - 1][1] === c) r[r.length - 1][0] += t; else r.push([t, c]);
+      var L = r[r.length - 1];
+      if (L && L[1] === c && (L[2] === 1) === u) L[0] += t; else r.push(u ? [t, c, 1] : [t, c]);
     });
     return { k: b.k, r: r };
   }
@@ -1973,7 +1982,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     if (b.k === 'i') return '<figure class="cd-nb cd-nb-i" contenteditable="false" data-p="' + b.p + '" data-w="' + b.w + '" data-h="' + b.h + '">'
       + '<img alt="A picture" style="aspect-ratio:' + b.w + ' / ' + b.h + '">'
       + '<button type="button" class="cd-nb-x" aria-label="Remove this picture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M17 7L7 17M7 7l10 10"/></svg></button></figure>';
-    var inner = b.r.map(function (x) { return x[1] ? '<mark data-c="' + x[1] + '">' + esc(x[0]) + '</mark>' : esc(x[0]); }).join('');
+    var inner = b.r.map(function (x) { var w = x[2] ? '<u>' + esc(x[0]) + '</u>' : esc(x[0]); return x[1] ? '<mark data-c="' + x[1] + '">' + w + '</mark>' : w; }).join('');
     return '<div class="cd-nb k-' + b.k + '" data-k="' + b.k + '">' + (inner || '<br>') + '</div>';
   }
   function cdNbPics(ed) {
@@ -1996,16 +2005,18 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       var k = nd.tagName === 'DIV' && NB_NAME[nd.dataset.k] ? nd.dataset.k : 'p';
       if (!(nd.tagName === 'DIV' && NB_NAME[nd.dataset.k])) odd = true;
       var r = [];
-      (function walk(x, c) {
+      (function walk(x, c, u) {
         Array.prototype.forEach.call(x.childNodes, function (y) {
-          if (y.nodeType === 3) { r.push([y.data, c]); return; }
+          if (y.nodeType === 3) { r.push(u ? [y.data, c, 1] : [y.data, c]); return; }
           if (y.nodeType !== 1) return;
           if (y.tagName === 'BR') return;
-          var cc = c;
-          if (y.tagName === 'MARK' && NB_HL.indexOf(y.dataset.c) >= 0 && !c) cc = y.dataset.c; else odd = true;
-          walk(y, cc);
+          var cc = c, uu = u;
+          if (y.tagName === 'MARK' && NB_HL.indexOf(y.dataset.c) >= 0 && !c) cc = y.dataset.c;
+          else if (y.tagName === 'U' && !u) uu = true;
+          else odd = true;
+          walk(y, cc, uu);
         });
-      })(nd, '');
+      })(nd, '', false);
       out.push({ k: k, r: r });
     });
     return { bs: out.map(cdNbClean).filter(Boolean), odd: odd };
@@ -2047,10 +2058,19 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     D.sel = { a: a.slice(), b: (b || a).slice() };
   }
 
-  function cdExp(b) { var t = '', c = []; b.r.forEach(function (x) { t += x[0]; for (var i = 0; i < x[0].length; i++) c.push(x[1]); }); return { t: t, c: c }; }
+  /* Per character, a code: the highlight's letter, and a "u" after it
+     when the character is underlined. No highlight letter is a "u". */
+  function cdExp(b) { var t = '', c = []; b.r.forEach(function (x) { t += x[0]; for (var i = 0; i < x[0].length; i++) c.push(x[1] + (x[2] ? 'u' : '')); }); return { t: t, c: c }; }
+  function cdHueOf(code) { return (code || '').replace('u', ''); }
+  function cdUOf(code) { return (code || '').indexOf('u') >= 0; }
   function cdImp(k, t, c) {
-    var r = [];
-    for (var i = 0; i < t.length; i++) { if (r.length && r[r.length - 1][1] === c[i]) r[r.length - 1][0] += t[i]; else r.push([t[i], c[i] || '']); }
+    var r = [], last = null;
+    for (var i = 0; i < t.length; i++) {
+      var code = c[i] || '';
+      if (r.length && last === code) r[r.length - 1][0] += t[i];
+      else r.push(cdUOf(code) ? [t[i], cdHueOf(code), 1] : [t[i], cdHueOf(code)]);
+      last = code;
+    }
     return { k: k, r: r };
   }
   function cdPtCmp(x, y) { return x[0] - y[0] || x[1] - y[1]; }
@@ -2127,10 +2147,31 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     }
     /* A caret colours its whole line; a selection colours what it holds.
        Either way, pressing the colour that is already there takes it off. */
-    var on = c && spans.every(function (sp) { var E = cdExp(D.bs[sp[0]]); return E.c.slice(sp[1], sp[2]).every(function (x) { return x === c; }); });
+    var on = c && spans.every(function (sp) { var E = cdExp(D.bs[sp[0]]); return E.c.slice(sp[1], sp[2]).every(function (x) { return cdHueOf(x) === c; }); });
     spans.forEach(function (sp) {
       var E = cdExp(D.bs[sp[0]]);
-      for (var j = sp[1]; j < sp[2]; j++) E.c[j] = on ? '' : c;
+      for (var j = sp[1]; j < sp[2]; j++) E.c[j] = (on ? '' : c) + (cdUOf(E.c[j]) ? 'u' : '');
+      D.bs[sp[0]] = cdImp(D.bs[sp[0]].k, E.t, E.c);
+    });
+    cdEdDraw(s.a, s.b);
+  }
+  /* Underline is the highlight's own reach: a caret takes the whole line,
+     a selection takes what it holds, and pressing it again takes it off.
+     It keeps the colour the words already wear. */
+  function cdEdUnder() {
+    var s = D.sel; if (!s) return;
+    var a = s.a, b = s.b;
+    if (cdPtCmp(a, b) > 0) { var t = a; a = b; b = t; }
+    var spans = [];
+    if (!cdPtCmp(a, b)) { if (D.bs[a[0]] && D.bs[a[0]].k !== 'i') spans.push([a[0], 0, cdNbText(D.bs[a[0]]).length]); }
+    else for (var i = a[0]; i <= b[0]; i++) {
+      var bl = D.bs[i]; if (!bl || bl.k === 'i') continue;
+      spans.push([i, i === a[0] ? a[1] : 0, i === b[0] ? b[1] : cdNbText(bl).length]);
+    }
+    var on = spans.length && spans.every(function (sp) { var E = cdExp(D.bs[sp[0]]); return E.c.slice(sp[1], sp[2]).every(cdUOf); });
+    spans.forEach(function (sp) {
+      var E = cdExp(D.bs[sp[0]]);
+      for (var j = sp[1]; j < sp[2]; j++) E.c[j] = cdHueOf(E.c[j]) + (on ? '' : 'u');
       D.bs[sp[0]] = cdImp(D.bs[sp[0]].k, E.t, E.c);
     });
     cdEdDraw(s.a, s.b);
@@ -2167,8 +2208,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var s = D.sel, b = s && D.bs[s.a[0]], k = b && b.k !== 'i' ? b.k : '';
     Array.prototype.forEach.call(document.querySelectorAll('#cdDocKs button'), function (x) { x.setAttribute('aria-pressed', x.dataset.k === k); });
     var c = '';
-    if (b && b.k !== 'i') { var E = cdExp(b), i = Math.max(0, Math.min(s.a[1], E.c.length) - (s.a[1] > 0 ? 1 : 0)); c = E.c[i] || ''; }
-    Array.prototype.forEach.call(document.querySelectorAll('#cdDocHl button[data-c]'), function (x) { x.setAttribute('aria-pressed', !!x.dataset.c && x.dataset.c === c); });
+    if (b && b.k !== 'i') { var E = cdExp(b), i = Math.max(0, Math.min(s.a[1], E.c.length) - (s.a[1] > 0 && !cdPtCmp(s.a, s.b) ? 1 : 0)); c = E.c[i] || ''; }
+    Array.prototype.forEach.call(document.querySelectorAll('#cdDocHl button[data-c]'), function (x) { x.setAttribute('aria-pressed', !!x.dataset.c && x.dataset.c === cdHueOf(c)); });
+    if ($('cdDocU')) $('cdDocU').setAttribute('aria-pressed', cdUOf(c));
   }
 
   function cdNoteOpen(n) {
@@ -2185,6 +2227,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       + '<div class="cd-doc-ks" id="cdDocKs">' + ks + '</div>'
       + '<div class="cd-doc-hl" id="cdDocHl">' + hl
       + '<button type="button" class="hl-x" data-c="" aria-label="No highlight"><i></i></button>'
+      + '<button type="button" class="cd-doc-u" id="cdDocU" aria-pressed="false" aria-label="Underline">U</button>'
       + '<label class="cd-doc-pic" aria-label="Add a picture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><circle cx="9" cy="10.5" r="1.6"/><path d="M4.5 17l5-4.5 3.5 3 2.5-2 4 3.5"/></svg><input type="file" id="cdDocFile" accept="image/*" multiple></label></div>'
       + '</div><div class="cd-doc-ed" id="cdDocEd" contenteditable="true" role="textbox" aria-multiline="true" aria-label="The note" spellcheck="true"></div></div>';
     var dv = wrap.firstChild;
@@ -2223,7 +2266,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
        browser that moves focus anyway. */
     dv.querySelector('.cd-doc-top').addEventListener('mousedown', function (ev) { if (ev.target.closest('#cdDocKs, #cdDocHl') && !ev.target.closest('.cd-doc-pic')) ev.preventDefault(); });
     $('cdDocKs').addEventListener('click', function (ev) { var x = ev.target.closest('button'); if (x) cdEdStyle(x.dataset.k); });
-    $('cdDocHl').addEventListener('click', function (ev) { var x = ev.target.closest('button[data-c]'); if (x) cdEdHue(x.dataset.c); });
+    $('cdDocHl').addEventListener('click', function (ev) {
+      if (ev.target.closest('#cdDocU')) return cdEdUnder();
+      var x = ev.target.closest('button[data-c]'); if (x) cdEdHue(x.dataset.c);
+    });
     $('cdDocFile').addEventListener('change', function () {
       var fs = Array.prototype.slice.call(this.files || []); this.value = '';
       var at = D.sel ? Math.max(D.sel.a[0], D.sel.b[0]) : D.bs.length - 1;

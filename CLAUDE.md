@@ -4653,13 +4653,41 @@ Reported off the add sheet: *Backtest charts in an hour* came back
 "in" pattern took digits only, so "an" fell through to the name strip,
 which ate the article and left the stranded "in". It reads `an`, `a`
 and `half an` now, the way "for" already did, and strikes the whole
-phrase. Counted from now, today when no day is said, a moment unless a
+phrase, and a number run into its unit ("in 1hr", "in 45mins") reads
+the same. Counted from now, today when no day is said, a moment unless a
 length is stated, and refused past midnight rather than clamped.
 
 **The clock is read BEFORE "in" and "now".** It was read after, only
 when nothing had set a start, so "read in an hour at 3pm" landed an
 hour out and dropped the correction. Somebody who says both is
 correcting themselves, and the digits are the correction.
+
+### Underline is a third mark on a run
+
+A run is `[words, highlight]`, and an underlined one carries a third
+element, `1` — absent rather than `0` when off, so every note written
+before this reads back byte for byte. Inside the editor each character
+carries one code: the highlight's letter, then `u` when underlined. No
+highlight letter is a `u`, so the two never collide, and a run break is
+simply a change of code.
+
+**It reaches the way a colour does** — a caret takes the line, a
+selection takes what it holds, a second press takes it off — **and it
+keeps the colour it lands on**, in both directions: a highlight pressed
+over underlined words leaves the underline, and the reverse. Drawn as
+`<u>` inside the `<mark>`, and the read-back accepts either nesting,
+since a browser's own join is free to swap them.
+
+**The pressed state reads the FIRST character of a selection**, not the
+one before it. That rule is right for a caret, where the character
+before is what typing continues; on a selection it read the space in
+front of the words and said the underline was off while it was on.
+
+**Eight across the tool row is 352px against a 346px column at 390**,
+so the row reaches 4px into each gutter. The marks are 22px drawn
+inside 44px boxes, so nothing drawn comes near the edge, and every
+control keeps its 44. Narrower than that the boxes give ground rather
+than running off the side.
 
 ## Git
 

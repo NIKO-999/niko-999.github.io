@@ -414,6 +414,10 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('"in an hour" counts from now, today, and leaves no word behind', r.s === 680 && r.e === 680 && r.n === 'Backtest charts' && r.days.join() === '4', r);
     r = await P('stretch in half an hour for 10 mins');
     ok('"in half an hour" is thirty minutes, and a stated length still counts', r.s === 650 && r.e === 660 && r.n === 'Stretch', r);
+    r = await P('backtest charts in 1hr');
+    ok('"in 1hr", run together, is an hour on', r.s === 680 && r.n === 'Backtest charts', r);
+    r = await P('backtest charts in 45mins');
+    ok('"in 45mins" is forty-five minutes on', r.s === 665 && r.n === 'Backtest charts', r);
     r = await P('read in 2 hours');
     ok('"in 2 hours" is two hours on', r.s === 740 && r.n === 'Read', r);
     r = await P('read in an hour at 3pm');
@@ -730,6 +734,28 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const hl = await inkFloor(page, '.cd-nb mark');
     ok('highlighted words hold 4.5:1 on their own wash', hl.n >= 2 && hl.worst.r >= 4.5, hl);
 
+    /* Underline is its own mark: it reaches the way a colour does and
+       keeps whatever colour the words already wear. */
+    await page.keyboard.press('Home');
+    for (let i = 0; i < 6; i++) await page.keyboard.press('Shift+ArrowRight');
+    await page.click('#cdDocU');
+    await settle();
+    b = await rec();
+    ok('underline takes exactly the words selected', JSON.stringify(b[2].r) === '[["Second","",1],[" ",""],["line","p"]]', b[2]);
+    const ul = await page.$eval(`${ed} .cd-nb >> nth=2`, (e) => { const u = e.querySelector('u'); return u && { t: u.textContent, d: getComputedStyle(u).textDecorationLine }; }).catch(() => null);
+    ok('and it is drawn as an underline', ul && ul.t === 'Second' && /underline/.test(ul.d), ul);
+    await page.keyboard.press('End');
+    for (let i = 0; i < 4; i++) await page.keyboard.press('Shift+ArrowLeft');
+    await page.click('#cdDocU');
+    await settle();
+    ok('it keeps the colour it lands on', JSON.stringify((await rec())[2].r) === '[["Second","",1],[" ",""],["line","p",1]]', (await rec())[2]);
+    ok('and says it is on', (await page.getAttribute('#cdDocU', 'aria-pressed')) === 'true');
+    await page.click('#cdDocU');
+    await settle();
+    ok('pressed again it comes off and the colour stays', JSON.stringify((await rec())[2].r) === '[["Second","",1],[" ",""],["line","p"]]', (await rec())[2]);
+    const hlRow = await page.$$eval('#cdDocHl > *', (xs) => xs.map((x) => x.getBoundingClientRect()).map((r) => [Math.round(r.left), Math.round(r.right), Math.round(r.height)]));
+    ok('the tool row still fits the phone with every control at 44', hlRow.length === 8 && hlRow.every((r) => r[0] >= 0 && r[1] <= 390 && r[1] - r[0] >= 44 && r[2] >= 44), hlRow);
+
     /* A quote continues on Return and an empty one ends it. */
     await page.keyboard.press('End');
     await page.keyboard.press('Enter');
@@ -752,7 +778,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await settle();
     b = await rec();
     ok('Backspace at the start of a line joins it up', b.length === 5 && b[4].r.map((x) => x[0]).join('') === 'Cord tied upAfter', b.map((x) => x.k));
-    ok('and the join leaves nothing on the page the record cannot say', (await page.$$eval(`${ed} *`, (es) => es.filter((e) => !/^(DIV|MARK|BR|FIGURE|IMG|BUTTON|svg|path)$/.test(e.tagName)).length)) === 0);
+    ok('and the join leaves nothing on the page the record cannot say', (await page.$$eval(`${ed} *`, (es) => es.filter((e) => !/^(DIV|MARK|U|BR|FIGURE|IMG|BUTTON|svg|path)$/.test(e.tagName)).length)) === 0);
 
     /* A paste is words, split into lines, and never markup. */
     await page.keyboard.press('End');
