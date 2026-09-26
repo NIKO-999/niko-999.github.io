@@ -1212,7 +1212,7 @@
   /* ------------------------------------------------------------------ */
   const sName = (p) => SIGNS[p.sign].name;
   const LIFE_AREAS = {
-    self: { title: "Self & identity", color: "#ece6f6", keys: ["sun", "moon", "asc"],
+    self: { title: "Self & identity", color: "#e8f3ee", keys: ["sun", "moon", "asc"],
       sub: (c) => `${sName(c.get("sun"))} Sun · ${sName(c.get("moon"))} Moon${c.timeKnown ? ` · ${sName(c.get("asc"))} rising` : ""}` },
     mind: { title: "Mind & voice", color: "#7fd6cf", keys: ["mercury"],
       sub: (c) => `Mercury in ${sName(c.get("mercury"))}${c.get("mercury").retro ? " ℞" : ""}` },

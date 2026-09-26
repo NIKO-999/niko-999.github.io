@@ -44,8 +44,8 @@
     out.push(`<svg class="wheel" viewBox="-34 -34 668 668" role="img" aria-label="Natal chart wheel">`);
     out.push(`<defs>
       <radialGradient id="wg-core" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stop-color="#5a4486" stop-opacity=".5"/>
-        <stop offset="100%" stop-color="#2c1f4d" stop-opacity=".15"/>
+        <stop offset="0%" stop-color="#2f6a5c" stop-opacity=".5"/>
+        <stop offset="100%" stop-color="#0d2622" stop-opacity=".15"/>
       </radialGradient>
       <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
     </defs>`);
