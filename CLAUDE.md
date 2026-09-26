@@ -5155,6 +5155,33 @@ Asserted as the name's x moving by the column and its gap, as every
 dot surviving, and across a reload. Bite-proved by a switch that
 stored off and went on drawing.
 
+### Forty kinds, because a grey square is the table not knowing
+
+Reported off a real day: half the rows drew the fallback square. The
+table knew fourteen kinds and a week is made of more than that. It knows
+forty-one now: backtesting is charts, a warm-up is its own flame, and
+swim, bike, sport, pets, plants, water, podcasts, music, code, writing,
+sunlight, email, calls, meetings, money, planning, cooking, shopping,
+laundry, cleaning, a shower, meds, the doctor, people, a screen and a
+game each have a glyph of their own.
+
+**A BRAND IS NOT A KIND.** Kmart and *Putting room together* stay the
+plain square, as asked: a guess drawn confidently is worse than the
+square that says the table does not know.
+
+**Order is still the mechanism.** Chart comes before run so *market
+run* is not a jog, *coffee chat* is a meeting before it is a coffee,
+email before calls so *Emails and calls* is one thing, cooking before
+eating. Journal moved from calm to write, and Mind's habit reads write
+and listen as well, so nothing that fed it stopped. Swim, bike, sport
+and warm-up feed Train.
+
+**Held from the source**: every kind the table can return has a glyph
+and a colour, and no two glyphs are the same drawing, read off the file
+so the forty-first kind is checked the day it is added. Thirty common
+names are asserted by kind. Proved by breaking warm-up's phrase and by
+giving shop the fallback's drawing.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

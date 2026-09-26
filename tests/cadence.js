@@ -189,7 +189,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     }));
     ok('every row keeps its dot and draws a glyph of its own kind between the dot and the name',
       gl.length === 7 && gl.every((x) => x.dot && x.gw === 18 && x.order && !x.inName)
-      && gl.map((x) => x.k).join() === 'wake,train,work,eat,work,read,sleep', gl);
+      && gl.map((x) => x.k).join() === 'wake,train,work,eat,mail,read,sleep', gl);
     const bySvg = {};
     gl.forEach((x) => { (bySvg[x.svg] = bySvg[x.svg] || new Set()).add(x.k); });
     ok('two kinds never share a glyph, and one kind is always the same glyph',
@@ -685,6 +685,28 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const K = (n) => page.evaluate((n) => window.cadence.kind(n), n);
     ok('"work out" is training, not work', (await K('Work out')) === 'train' && (await K('Deep work')) === 'work');
     ok('"walk the dog" is a walk', (await K('Walk the dog')) === 'walk');
+    /* The table reaches the names people actually type. Backtesting is
+       charts and a warm-up is its own flame; a brand or a sentence the
+       table cannot place stays the plain square rather than a guess. */
+    const common = { 'Backtest charts': 'chart', 'Warm up': 'warm', 'Emails and calls': 'mail', 'Call mum': 'phone', 'Swim': 'swim',
+      'Bike ride': 'cycle', 'Tennis': 'sport', 'Feed the dog': 'pet', 'Water plants': 'plant', 'Drink water': 'water', 'Podcast': 'listen',
+      'Guitar': 'music', 'Coding': 'code', 'Journal': 'write', 'Sunlight': 'sun', 'Standup': 'talk', 'Budget': 'money', 'Plan the week': 'plan',
+      'Meal prep': 'cook', 'Groceries': 'shop', 'Laundry': 'laundry', 'Clean kitchen': 'clean', 'Shower': 'shower', 'Vitamins': 'meds',
+      'Dentist': 'health', 'Family': 'people', 'Netflix': 'screen', 'Gaming': 'game', 'Kmart': 'dot', 'Putting room together': 'dot' };
+    const got = {};
+    for (const n of Object.keys(common)) got[n] = await K(n);
+    ok('common task names reach their own kind, and the unplaceable stay plain', Object.keys(common).every((n) => got[n] === common[n]), got);
+    {
+      const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'cadence', 'index.html'), 'utf8');
+      const kinds = [...src.match(/var KW = \[([\s\S]*?)\n  \];/)[1].matchAll(/\['(\w+)',/g)].map((m) => m[1]);
+      const gsrc = src.match(/var GLYPH = \{([\s\S]*?)\n  \};/)[1];
+      const glyph = Object.fromEntries([...gsrc.matchAll(/^\s+(\w+): '(.*)',?$/gm)].map((m) => [m[1], m[2]]));
+      const cat = src.match(/var CAT = \{([\s\S]*?)\};/)[1];
+      const vals = Object.values(glyph);
+      ok('every kind has a glyph and a colour, and no two kinds draw the same glyph',
+        kinds.length > 30 && kinds.every((k) => glyph[k] && new RegExp('\\b' + k + ': \'').test(cat)) && new Set(vals).size === vals.length,
+        { kinds: kinds.length, missing: kinds.filter((k) => !glyph[k]) });
+    }
 
     /* Through the sheet: the sentence fills the form, Add files the shape. */
     await page.click('#cdAdd');
