@@ -5263,8 +5263,8 @@ watching the drop-back check still pass, then deleted as dead code.
 Asked for straight after the brand rule, on the one phrase it had held
 back. *Putting room together* stayed the square because nothing in it
 was a word the table knew; it is a sofa now, and so is assembling,
-flat pack, IKEA, a sofa, shelves and decorating. **Kmart stays the
-square**: a shop you go to is not a kind of thing you do there.
+flat pack, IKEA, a sofa, shelves and decorating. Kmart stayed the
+square for one round, which the next section reverses.
 
 **Assemble and IKEA left the wrench.** A spanner says something broke,
 and a new desk did not. The furniture row sits directly before fix, so
@@ -5276,6 +5276,42 @@ surf and beach. **Surf was a board and read as a leaf at 18px; beach was
 an umbrella and read as a lamp.** Both were redrawn as the thing around
 them, a wave curling over a line and an umbrella leant into sand, and
 judged again at the size a row draws them.
+
+### A shop is where you go, and that is a kind
+
+Reversed on request: *Kmart and retail should come up as something
+too.* The brand rule was that a name you go to is not a thing you do,
+and it was wrong about the one kind of place whose name IS the errand:
+nobody writes *Kmart* on their week for any reason but to go to Kmart.
+So the Australian retailers are a bag (`shop`), and the supermarkets
+are a CART (`grocery`) — a big shop and a quick trip to Myer are
+different errands, and one glyph for both said neither.
+
+**They are an early entry, ahead of `chart`**, because *farmers market*
+and *weekend markets* would otherwise be trading. A bare `markets` is
+left to `chart`, so *Check markets* is still charts. The generic
+`shopping` stays where it was, below `coffee`, so *coffee shop* is still
+a coffee.
+
+**Four new glyphs for what is done here and had none**: a kettle BBQ, a
+tent, a skier and a pram for daycare, kindy and the school run. The
+tent went in with a triangular door inside a triangle and read as a
+triforce at 18px; it is a flap now.
+
+**And a hundred-odd words into the kinds that already existed**:
+parkrun, footy, AFL, NRL, bushwalk, brekkie, Maccas, the bottle-o,
+rego, the servo, Centrelink, myGov, Medicare, the chemist, uni, TAFE,
+the tip, Bunnings (the wrench), the ferry and Opal, the zoo, pub trivia.
+
+**`run` refuses what a run is not.** *School run*, *tip run*, *coffee
+run*, *Kmart run* and a dozen like them are errands, so the pattern
+carries a lookbehind for them rather than each kind being moved above
+it. And *baby* gave up a bare `bottle`, which had sent *Bottle-o* to
+feeding the baby.
+
+**Dance, surf and ski feed Train now**, beside swim, cycle and sport:
+each is a session you did, and leaving them out was a day of surfing
+counting as a day off.
 
 ## Git
 

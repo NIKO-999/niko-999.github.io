@@ -733,19 +733,23 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('"work out" is training, not work', (await K('Work out')) === 'train' && (await K('Deep work')) === 'work');
     ok('"walk the dog" is a walk', (await K('Walk the dog')) === 'walk');
     /* The table reaches the names people actually type. Backtesting is
-       charts and a warm-up is its own flame; a brand or a sentence the
+       charts and a warm-up is its own flame; a word the
        table cannot place stays the plain square rather than a guess. */
     const common = { 'Backtest charts': 'chart', 'Warm up': 'warm', 'Emails and calls': 'mail', 'Call mum': 'phone', 'Swim': 'swim',
       'Bike ride': 'cycle', 'Tennis': 'sport', 'Feed the dog': 'pet', 'Water plants': 'plant', 'Drink water': 'water', 'Podcast': 'listen',
       'Guitar': 'music', 'Coding': 'code', 'Journal': 'write', 'Sunlight': 'sun', 'Standup': 'talk', 'Budget': 'money', 'Plan the week': 'plan',
-      'Meal prep': 'cook', 'Groceries': 'shop', 'Laundry': 'laundry', 'Clean kitchen': 'clean', 'Shower': 'shower', 'Vitamins': 'meds',
+      'Meal prep': 'cook', 'Groceries': 'grocery', 'Laundry': 'laundry', 'Clean kitchen': 'clean', 'Shower': 'shower', 'Vitamins': 'meds',
       'Dentist': 'health', 'Family': 'people', 'Netflix': 'screen', 'Gaming': 'game', 'Hike': 'hike', 'Fishing': 'fish', 'Morning news': 'news', 'Brainstorm': 'idea', 'Sketch': 'art', 'Edit photos': 'photo',
       'Film content': 'film', 'Fly to Sydney': 'fly', 'Drive to work': 'car', 'Feed the baby': 'baby', 'Drinks with mates': 'drink',
       'Take out the bins': 'bin', 'Pack for trip': 'pack', 'Fix the sink': 'fix', 'Haircut': 'cut', 'Self care': 'heart', 'Birthday': 'gift',
       'Concert': 'ticket', 'Watch a show': 'screen',
       'Putting room together': 'furniture', 'Assemble IKEA desk': 'furniture', 'New sofa delivered': 'furniture', 'Move house': 'home',
       'Holiday': 'trip', 'Dance class': 'dance', 'Surf': 'surf', 'Beach day': 'beach',
-      'Kmart': 'dot' };
+      'Kmart': 'shop', 'Big W': 'shop', 'Westfield': 'shop', 'Op shop': 'shop', 'Coles': 'grocery', 'Woolies': 'grocery', 'Farmers market': 'grocery',
+      'Check markets': 'chart', 'Bunnings run': 'fix', 'Parkrun': 'run', 'Footy': 'sport', 'BBQ': 'bbq', 'Camping': 'camp', 'Thredbo': 'ski',
+      'School run': 'kids', 'Daycare pickup': 'kids', 'Tip run': 'bin', 'Coffee run': 'coffee', 'Bottle-o': 'drink', 'Maccas': 'eat', 'Rego': 'car',
+      'Centrelink': 'money', 'Medicare': 'health', 'Chemist': 'meds', 'Uni': 'study', 'Zoo': 'ticket', 'Bushwalk': 'hike', 'Ferry': 'move',
+      'Book club at Dave\'s': 'read', 'Qwerty': 'dot' };
     const got = {};
     for (const n of Object.keys(common)) got[n] = await K(n);
     ok('common task names reach their own kind, and the unplaceable stay plain', Object.keys(common).every((n) => got[n] === common[n]), got);
