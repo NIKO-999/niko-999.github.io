@@ -1087,7 +1087,16 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     ['Wind down', [0, 1, 2, 3, 4, 5, 6], 1350, 1350]
   ];
   var idc = 0;
-  function cdId() { return 'b' + Date.now().toString(36) + (idc++).toString(36); }
+  /* The clock and a counter are unique on ONE device, and sync made
+     there be two: a note written at the desk and one on the phone in the
+     same millisecond — or on two devices whose counters both start at
+     nought — came out with one id, the merge kept both, and editing one
+     wrote over the other. Four random characters make that a collision
+     nobody will live to see. */
+  function cdId() {
+    var r = crypto.getRandomValues(new Uint32Array(1))[0].toString(36).slice(0, 4);
+    return 'b' + Date.now().toString(36) + (idc++).toString(36) + r;
+  }
   /* The shape of a block is written HERE and every writer goes through
      it, so a block made by the parser and one made by hand cannot come
      out with different fields. */
@@ -2906,11 +2915,24 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     /* Every key this app keeps, not one of them: a record with no export
        is the kind of gap you only discover once. */
     var cp = el('button', 'cd-btn', 'Copy a backup'); cp.type = 'button'; cp.id = 'cdBak';
+    /* The pictures are read out of IndexedDB first, which is a wait —
+       and iOS only lets the clipboard be written inside the press. A
+       ClipboardItem handed a PROMISE is written inside it and filled
+       when the promise lands; writeText after the wait is the fallback,
+       and the field underneath is the last one. */
     cp.addEventListener('click', function () {
-      var txt = JSON.stringify(cdBackup());
+      var full = cdBackupFull().then(function (o) { return JSON.stringify(o); });
       var done = function () { cdToast('Backup copied'); };
-      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, function () { ta.value = txt; ta.select(); });
-      else { ta.value = txt; ta.select(); }
+      var field = function () { full.then(function (t) { ta.value = t; ta.select(); }); };
+      var text = function () {
+        if (navigator.clipboard && navigator.clipboard.writeText) full.then(function (t) { return navigator.clipboard.writeText(t); }).then(done, field);
+        else field();
+      };
+      if (navigator.clipboard && navigator.clipboard.write && window.ClipboardItem) {
+        try {
+          navigator.clipboard.write([new ClipboardItem({ 'text/plain': full.then(function (t) { return new Blob([t], { type: 'text/plain' }); }) })]).then(done, text);
+        } catch (e) { text(); }
+      } else text();
     });
     root.appendChild(cp);
     var ta = el('textarea', 'cd-field'); ta.id = 'cdRestore'; ta.placeholder = 'Paste a backup here to restore it';
@@ -2923,8 +2945,11 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     rs.addEventListener('click', function () {
       var o; try { o = JSON.parse(ta.value); } catch (e) { cdToast('That is not a backup.'); return; }
       if (!isObj(o) || o.app !== 'cadence') { cdToast('That is not a Cadence backup.'); return; }
-      Object.keys(K).forEach(function (k) { if (o[k] !== undefined) cdWrite(K[k], o[k]); });
-      location.reload();
+      rs.disabled = true;
+      cdRestorePics(o.pic).then(function () {
+        Object.keys(K).forEach(function (k) { if (o[k] !== undefined) cdWrite(K[k], o[k]); });
+        location.reload();
+      });
     });
     foot.appendChild(rs); root.appendChild(foot);
     cdSheet('Settings', root);
@@ -2933,6 +2958,48 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var o = { app: 'cadence', at: new Date().toISOString() };
     Object.keys(K).forEach(function (k) { o[k] = S[k]; });
     return o;
+  }
+  /* THE PICTURES GO IN THE BACKUP, as data URLs under `pic`. They live in
+     IndexedDB rather than beside the keys, which is why the backup left
+     them out; but a backup that restores a note as an empty box where a
+     photograph was is a backup of half the note. Only the pictures a
+     note still names — the sweep's own rule for what is kept. */
+  function cdPicUsed() {
+    var u = {};
+    S.note.forEach(function (n) { n.b.forEach(function (b) { if (b.k === 'i') u[b.p] = 1; }); });
+    if (D) D.bs.forEach(function (b) { if (b.k === 'i') u[b.p] = 1; });
+    return Object.keys(u);
+  }
+  var PIC_KEY = /^p[0-9a-z]{2,40}$/;
+  function cdBackupFull() {
+    var o = cdBackup(), keys = cdPicUsed();
+    o.pic = {};
+    return Promise.all(keys.map(function (k) {
+      return new Promise(function (res) {
+        cdPicGet(k, function (bl) {
+          if (!bl) return res();
+          var fr = new FileReader();
+          fr.onload = function () { o.pic[k] = fr.result; res(); };
+          fr.onerror = function () { res(); };
+          fr.readAsDataURL(bl);
+        });
+      });
+    })).then(function () { return o; });
+  }
+  /* Restoring puts every picture back before the keys go in, so the note
+     that names one never loads without it. A value that is not an image
+     is skipped rather than refusing the backup: the record is what
+     matters most, and it is in the keys. */
+  function cdRestorePics(pic) {
+    if (!isObj(pic)) return Promise.resolve();
+    return Promise.all(Object.keys(pic).map(function (k) {
+      var v = pic[k], m = typeof v === 'string' && /^data:(image\/[a-z+.-]+);base64,([A-Za-z0-9+/=]+)$/.exec(v);
+      if (!PIC_KEY.test(k) || !m) return null;
+      return new Promise(function (res) {
+        var bl; try { bl = new Blob([cdSyncUnB64(m[2])], { type: m[1] }); } catch (e) { return res(); }
+        cdPicPut(k, bl, function () { res(); });
+      });
+    }));
   }
 
   /* ═══ SYNC ═══
@@ -2945,9 +3012,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      the code is the whole of it, and losing it loses the synced copy
      rather than the record on this phone.
 
-     WHAT GOES IS THE BACKUP, every key `K` names. Pictures in a note
-     live in IndexedDB and are not in it — the same gap the backup
-     already has, and said out loud rather than discovered.
+     WHAT GOES IS THE BACKUP, every key `K` names. Pictures in a note go
+     BESIDE it, each sealed on its own with the same key (see cdSyncPics):
+     in the record they would take it past its cap in a dozen photographs
+     and ride every pull.
 
      TWO DEVICES EDITING is the one race. A write names the revision it
      was built on; a 409 means the other device moved first, and the two
@@ -3018,6 +3086,77 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var iv = crypto.getRandomValues(new Uint8Array(12));
     return crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, k.key, new TextEncoder().encode(JSON.stringify(obj)))
       .then(function (ct) { return { iv: cdSyncB64(iv), ct: cdSyncB64(new Uint8Array(ct)) }; });
+  }
+  function cdSyncSealBytes(k, u8) {
+    var iv = crypto.getRandomValues(new Uint8Array(12));
+    return crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, k.key, u8)
+      .then(function (ct) { return { iv: cdSyncB64(iv), ct: cdSyncB64(new Uint8Array(ct)) }; });
+  }
+  function cdSyncOpenBytes(k, rec) {
+    return crypto.subtle.decrypt({ name: 'AES-GCM', iv: cdSyncUnB64(rec.iv) }, k.key, cdSyncUnB64(rec.ct));
+  }
+  /* ── PICTURES, ONE SEALED BLOB EACH ──
+     After the record is settled: a picture a note names that this device
+     has and has not sent goes up; one it names and this device lacks
+     comes down; one this device put there that no note names any more is
+     taken off. Which ones this device has sent is its own list, per
+     vault, and never synced — it is a fact about this phone. Only what
+     THIS device sent or fetched is ever deleted, so a picture another
+     device added and this one has not yet heard about is left alone. */
+  var PICUP_K = 'cad.picup.v1', syPics = false;
+  function cdPicUpLoad(id) {
+    var o; try { o = JSON.parse(localStorage.getItem(PICUP_K)); } catch (e) { o = null; }
+    var out = {};
+    if (isObj(o) && o.id === id && Array.isArray(o.k)) o.k.forEach(function (x) { if (PIC_KEY.test(x)) out[x] = 1; });
+    return out;
+  }
+  function cdPicUpSave(id, set) { try { localStorage.setItem(PICUP_K, JSON.stringify({ id: id, k: Object.keys(set) })); } catch (e) {} }
+  function cdSyncPicFetch(k, pk, method, body) {
+    return fetch(SYNC_URL + '/v1/vault/' + k.id + '/p/' + pk, {
+      method: method,
+      headers: Object.assign({ 'Content-Type': 'application/json' }, method === 'GET' ? {} : { Authorization: 'Bearer ' + k.tok }),
+      body: body ? JSON.stringify(body) : undefined
+    }).then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { status: r.status, body: j }; }); });
+  }
+  function cdSyncPics(k) {
+    if (syPics || !SY) return Promise.resolve();
+    syPics = true;
+    var used = cdPicUsed(), set = cdPicUpLoad(k.id), usedSet = {}, got = [];
+    used.forEach(function (x) { usedSet[x] = 1; });
+    var chain = used.reduce(function (p, pk) {
+      return p.then(function () {
+        return new Promise(function (res) { cdPicGet(pk, res); }).then(function (bl) {
+          if (bl) {
+            if (set[pk]) return;
+            return bl.arrayBuffer().then(function (buf) { return cdSyncSealBytes(k, new Uint8Array(buf)); })
+              .then(function (sd) { return cdSyncPicFetch(k, pk, 'PUT', sd); })
+              .then(function (r) { if (r.status === 200) set[pk] = 1; });
+          }
+          return cdSyncPicFetch(k, pk, 'GET').then(function (r) {
+            if (r.status !== 200) return;
+            return cdSyncOpenBytes(k, r.body).then(function (buf) {
+              return new Promise(function (res) {
+                cdPicPut(pk, new Blob([buf], { type: 'image/jpeg' }), function (ok) { if (ok) { set[pk] = 1; got.push(pk); } res(); });
+              });
+            });
+          });
+        });
+      });
+    }, Promise.resolve());
+    return chain.then(function () {
+      return Object.keys(set).filter(function (pk) { return !usedSet[pk]; }).reduce(function (p, pk) {
+        return p.then(function () { return cdSyncPicFetch(k, pk, 'DELETE').then(function (r) { if (r.status === 200) delete set[pk]; }); });
+      }, Promise.resolve());
+    }).catch(function () {}).then(function () {
+      cdPicUpSave(k.id, set);
+      syPics = false;
+      /* A picture that arrived fills the box already drawn for it. */
+      got.forEach(function (pk) {
+        Array.prototype.forEach.call(document.querySelectorAll('.cd-nb-i[data-p="' + pk + '"] img'), function (img) {
+          cdPicGet(pk, function (bl) { if (bl) { picURL[pk] = picURL[pk] || URL.createObjectURL(bl); img.src = picURL[pk]; } });
+        });
+      });
+    });
   }
   function cdSyncOpen(k, rec) {
     return crypto.subtle.decrypt({ name: 'AES-GCM', iv: cdSyncUnB64(rec.iv) }, k.key, cdSyncUnB64(rec.ct))
@@ -3097,6 +3236,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
           syErr = ''; SY.rev = r.body.rev; SY.at = Date.now();
           if (gen === syGen) SY.dirty = false; else { clearTimeout(syTimer); syTimer = setTimeout(cdSyncPush, 2500); }
           cdSyncStore();
+          cdSyncPics(k);
         } else if (r.status === 409) {
           /* The other device moved first. Merged only on an idle screen:
              the merge is applied by reloading. Otherwise it waits, still
@@ -3125,7 +3265,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
         if (g.status === 404) { if (SY.rev > 0) cdSyncGone(); else after = cdSyncPush; return; }
         if (g.status !== 200) { syErr = 'The sync server said no (' + g.status + ')'; return; }
         syErr = '';
-        if (g.body.rev <= SY.rev) { SY.at = Date.now(); cdSyncStore(); if (SY.dirty) after = cdSyncPush; return; }
+        if (g.body.rev <= SY.rev) { SY.at = Date.now(); cdSyncStore(); if (SY.dirty) after = cdSyncPush; else cdSyncPics(k); return; }
         if (!cdSyncIdle()) return;
         return cdSyncOpen(k, g.body).then(function (remote) {
           var next = SY.dirty ? cdSyncMerge(cdBackup(), remote) : remote;
@@ -3175,7 +3315,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   /* The moment of consent, so it says what leaves in full, once, here. */
   function cdSyncSetup() {
     var root = el('div');
-    root.appendChild(el('p', 'cd-note', 'Your whole record is locked on this device with a sync code before it is sent, so the server keeps only scrambled text it cannot read. Pictures in notes stay on each device. Keep the code somewhere safe: it cannot be recovered.'));
+    root.appendChild(el('p', 'cd-note', 'Your whole record, pictures in notes included, is locked on this device with a sync code before it is sent, so the server keeps only scrambled data it cannot read. Keep the code somewhere safe: it cannot be recovered.'));
     /* Choose your own, or have one made. Either way it is the only key
        there is, so the made one is sixteen random characters and a
        chosen one is held to twelve at least. Use this code stays
@@ -3673,6 +3813,15 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(function (reg) {
       return reg && reg.pushManager.getSubscription().then(function (s) { return s && s.unsubscribe(); });
     }).catch(function () {});
+  }
+
+  /* The service worker is registered on every open, not only when
+     reminders are turned on: it is what opens the app with no signal.
+     Once the page has loaded, so it never competes with the first paint;
+     over http(s) only, because a file off the disk has no worker. */
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    var swGo = function () { navigator.serviceWorker.register('sw.js').catch(function () {}); };
+    if (document.readyState === 'complete') swGo(); else window.addEventListener('load', swGo);
   }
 
   /* Sync asks the other device's copy once the screen is up, whenever

@@ -5334,6 +5334,87 @@ and *democracy sausage* is a vote rather than a BBQ.
 magnifying glass over a basketball; vote went in as a box with a slot
 and read as a printer.** Both redrawn, both judged again at 18px.
 
+### Pictures go with the backup and the sync, and it opens with no signal
+
+The two gaps the notes above admitted to: *pictures are not in the
+backup, which copies localStorage alone*, and *it does not say offline,
+because there is no service worker behind that word.* Both closed.
+
+**THE BACKUP CARRIES THEM AS DATA URLs UNDER `pic`**, only the ones a
+note still names — the sweep's own rule for what is kept. Restoring
+puts every picture back in IndexedDB BEFORE the keys go in, so a note
+never loads naming a picture that is not there yet. A value that is not
+an image is skipped rather than refusing the whole backup: the record is
+in the keys and is the half you cannot rebuild.
+
+**THE CLIPBOARD HAS TO BE WRITTEN INSIDE THE PRESS**, and reading the
+pictures out of IndexedDB is a wait. iOS refuses `writeText` once the
+gesture is spent, so a `ClipboardItem` is handed a PROMISE — written
+inside the press and filled when the promise lands — with `writeText`
+after the wait as the fallback and the field underneath as the last one.
+The suite stubs both, because Chromium takes the first.
+
+**SYNC SEALS EACH PICTURE ON ITS OWN, BESIDE THE RECORD, NOT IN IT.** In
+the record a dozen photographs take the 2 MB vault past its cap, and
+every pull once a minute would carry all of them. `/v1/vault/:id/p/:key`
+holds one AES-GCM blob per picture, read by the vault's id and written
+with its token — and never into a vault that does not exist, because the
+token can only be checked against a vault's own hash. The vault keeps an
+index of its pictures (`vpix:`), which is what lets deleting it take
+every one with it and caps it at 400; KV's `list` is not used, so the
+fake KV in both test files stays a Map.
+
+**WHICH PICTURES THIS DEVICE HAS SENT IS ITS OWN LIST**, per vault,
+`cad.picup.v1`, and never synced. After the record settles, a picture a
+note names and this device has but has not sent goes up; one it names
+and lacks comes down and fills the box already drawn for it; one this
+device sent or fetched that no note names any more is taken off. **Only
+what THIS device knows about is ever deleted**, so a picture another
+device added and this one has not heard of yet is left alone.
+
+**THE FETCH HANDLER IS NETWORK FIRST, AND THAT IS THE WHOLE DESIGN.**
+`schedule/`'s document was cache first and every deploy landed one open
+late. Here the network is always asked first and the cache is only what
+answers when it cannot be reached — so with a signal this is exactly the
+app with no service worker, and without one it is the last copy that
+loaded. Same origin and GET only: a stale answer from the sync server is
+a wrong answer. Filled on install as well, so the FIRST open with no
+signal works, and matched with the query ignored, because a reminder
+opens `./?from=push#tick=…`. Registered on every open now rather than
+only when reminders are turned on, since it is what opens the app. The
+About page says so, and says what sync sends.
+
+**Asserted by behaviour, not by the file alone**: offline the app opens
+on the day, cold from a reminder too; and with a signal a route serving
+a different page is what loads — which fails the moment the worker
+answers from its cache first.
+
+### Two devices minted one id
+
+Found by the picture check, not by looking for it. `cdId` was
+`'b' + Date.now() + counter` — unique on ONE device, and sync made two.
+On the suite's frozen clock both counters start at nought, so the note
+written at the desk and the one written on the phone came out with one
+id; the merge kept both, and editing one wrote over the other, which
+deleted *Phone second* from the record with nothing thrown. Off the
+test clock it needs one millisecond and one counter to coincide, which
+is rare and is not never. Four random characters on the end. Asserted as
+every note id after the merge being distinct, and proved by taking the
+suffix off.
+
+**The existing merge check passed through it** because it read the
+record the instant the merge landed, when both notes were still there
+under their one id. The loss only happened on the NEXT edit — a check
+that stops at the moment something looks right has not seen what it
+does next.
+
+**And a poll that reads a page mid-reload throws.** The other device
+reloads to apply what it pulled, so `evaluate` inside an `until` lost
+its context and took the file down — reported as a crash rather than a
+failing check. It returns 0 now, and the steps after a picture that
+never went up fail by name instead of waiting out every step on an
+undefined key.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

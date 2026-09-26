@@ -1,15 +1,52 @@
-/* Cadence's reminders, and nothing else.
+/* Cadence's reminders, and the app with no signal.
 
    A push arrives already decrypted by the browser: the phone sealed it
    with this device's own push keys before it went to the server, so
    the server carried words it could not read. This shows it.
 
-   THERE IS NO fetch HANDLER, ON PURPOSE. A service worker that
-   intercepts requests is a cache, and a cache is a way for the phone to
-   run yesterday's app. schedule/ shipped exactly that bug. This one
-   only answers pushes. */
-self.addEventListener('install', function () { self.skipWaiting(); });
-self.addEventListener('activate', function (e) { e.waitUntil(self.clients.claim()); });
+   THE FETCH HANDLER IS NETWORK FIRST, AND THAT IS THE WHOLE OF THE
+   DESIGN. schedule/ served its document cache first and every deploy
+   landed one open late — you opened the app, got yesterday's markup,
+   and the fresh copy went into the cache for next time. Here the
+   network is always asked first and the cache is only what answers when
+   it cannot be reached, so with a signal this is exactly the app with
+   no service worker at all, and without one it is the last copy that
+   loaded. Same origin and GET only: the sync server is never cached,
+   because a stale answer from it is a wrong answer. */
+var CACHE = 'cadence-v1';
+var SHELL = ['./', 'manifest.json', 'icon.svg', 'icon-180.png', 'icon-192.png', 'fonts/GeistMono.woff2', '../arc/fonts/Inter.woff2'];
+self.addEventListener('install', function (e) {
+  self.skipWaiting();
+  /* Filled on install so the first open without a signal works, not only
+     the second. One missing file must not stop the rest being kept. */
+  e.waitUntil(caches.open(CACHE).then(function (c) {
+    return Promise.all(SHELL.map(function (u) { return c.add(u).catch(function () {}); }));
+  }));
+});
+self.addEventListener('activate', function (e) {
+  e.waitUntil(caches.keys().then(function (ks) {
+    return Promise.all(ks.filter(function (k) { return k.indexOf('cadence-') === 0 && k !== CACHE; }).map(function (k) { return caches.delete(k); }));
+  }).then(function () { return self.clients.claim(); }));
+});
+self.addEventListener('fetch', function (e) {
+  var req = e.request;
+  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
+  e.respondWith(fetch(req).then(function (res) {
+    if (res && res.ok && res.type === 'basic') {
+      var copy = res.clone();
+      caches.open(CACHE).then(function (c) { return c.put(req, copy); }).catch(function () {});
+    }
+    return res;
+  }).catch(function () {
+    /* A push opens ./?from=push#tick=…, so the document is matched with
+       its query ignored, and './' and './index.html' are one page. */
+    return caches.match(req, { ignoreSearch: req.mode === 'navigate' }).then(function (hit) {
+      if (hit) return hit;
+      if (req.mode === 'navigate') return caches.match('./').then(function (h) { return h || caches.match('./index.html'); });
+      return Response.error();
+    });
+  }));
+});
 
 self.addEventListener('push', function (e) {
   var d = {};

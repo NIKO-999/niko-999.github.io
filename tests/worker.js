@@ -155,6 +155,44 @@ const kv = () => {
       r.headers.get('Access-Control-Allow-Methods') + ' / ' + r.headers.get('Access-Control-Allow-Headers'));
   }
 
+  /* ── a picture in a note: sealed on its own, under its vault ──
+     Written with the vault's own token, capped, indexed so deleting the
+     vault takes every picture with it, and never writable into a vault
+     that does not exist — the token can only be checked against one. */
+  {
+    const ID = '1123456789abcdef0123456789abcdef', TOK = 'f'.repeat(32), BAD = 'e'.repeat(32);
+    const V = '/v1/vault/' + ID, P = V + '/p/pbabc12';
+    r = await hit('PUT', P, { key: TOK, body: { iv: 'i', ct: 'c' } });
+    ok('a picture cannot be written into a vault that does not exist', r.status === 404, r.status);
+    await hit('PUT', V, { key: TOK, body: { iv: 'aaa', ct: 'bbb', base: 0 } });
+    r = await hit('PUT', P, { body: { iv: 'i', ct: 'c' } });
+    ok('a picture with no token is refused', r.status === 401, r.status);
+    r = await hit('PUT', P, { key: BAD, body: { iv: 'i', ct: 'c' } });
+    ok('a picture with the wrong token is refused', r.status === 403 && !env.SCHED.m.has('vpic:' + ID + ':pbabc12'), r.status);
+    r = await hit('PUT', P, { key: TOK, body: { iv: 'i', ct: 'sealedbytes' } });
+    ok('the vault\'s own token writes a picture', r.status === 200, r.status);
+    r = await hit('GET', P);
+    const gp = await r.json();
+    ok('a read hands the sealed picture back', r.status === 200 && gp.ct === 'sealedbytes' && gp.iv === 'i', JSON.stringify(gp));
+    r = await hit('GET', V + '/p/pnothere');
+    ok('a picture nobody wrote is a 404', r.status === 404, r.status);
+    r = await hit('PUT', V + '/p/NOT_A_KEY', { key: TOK, body: { iv: 'i', ct: 'c' } });
+    ok('a key that is not a picture key names nothing', r.status === 404, r.status);
+    r = await hit('PUT', V + '/p/pbig', { key: TOK, body: { iv: 'i', ct: 'z'.repeat(1536 * 1024 + 10) } });
+    ok('a picture is capped', (r.status === 413 || r.status === 400) && !env.SCHED.m.has('vpic:' + ID + ':pbig'), r.status);
+    await hit('PUT', V + '/p/pbtwo', { key: TOK, body: { iv: 'i', ct: 'c2' } });
+    r = await hit('DELETE', V + '/p/pbtwo', { key: TOK });
+    ok('the token deletes one picture and the index forgets it',
+      r.status === 200 && !env.SCHED.m.has('vpic:' + ID + ':pbtwo') && JSON.parse(env.SCHED.m.get('vpix:' + ID)).join() === 'pbabc12', env.SCHED.m.get('vpix:' + ID));
+    env.SCHED.m.set('vpix:' + ID, JSON.stringify(Array.from({ length: 400 }, (_, i) => 'px' + i)));
+    r = await hit('PUT', V + '/p/pbfull', { key: TOK, body: { iv: 'i', ct: 'c' } });
+    ok('a vault holds only so many pictures', r.status === 413 && !env.SCHED.m.has('vpic:' + ID + ':pbfull'), r.status);
+    env.SCHED.m.set('vpix:' + ID, JSON.stringify(['pbabc12']));
+    r = await hit('DELETE', V, { key: TOK });
+    ok('deleting the vault takes its pictures with it',
+      r.status === 200 && ![...env.SCHED.m.keys()].some((k) => k.includes(ID)), [...env.SCHED.m.keys()]);
+  }
+
   /* ── push: reminders sent at the minute, without being read ──
      The phone hands over a push endpoint and a queue of messages it has
      already sealed with its own push keys. Everything here fails

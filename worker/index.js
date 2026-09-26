@@ -79,6 +79,8 @@ const json = (req, body, status = 200) =>
    in Node, because the suite executes this file there. */
 
 const VAULT_BYTES = 2 * 1024 * 1024;   /* ciphertext, base64 */
+const PIC_BYTES = 1536 * 1024;        /* one sealed picture, base64: a 1280px JPEG with room */
+const PIC_MAX = 400;                 /* pictures one vault may hold */
 
 /* ══════════════════════════════════════════════════════
    PUSH
@@ -415,6 +417,49 @@ export default {
        The route is reachable by anyone, so what one write can put here
        is bounded: 2 MB of ciphertext is years of a daily record and
        nowhere near a bill. */
+    /* ── A PICTURE IN A NOTE IS SEALED ON ITS OWN ──
+       The record names a picture by key; the picture itself would take
+       the 2 MB record past its cap in a dozen photographs, and every
+       pull would carry all of them. So each is its own sealed blob under
+       the vault, read by the same id and written with the same token,
+       and a device fetches only the ones it does not have. A picture
+       cannot be written to a vault that does not exist — the token is
+       only checkable against a vault's own hash — and the vault keeps an
+       index of its pictures so deleting it takes every one with it. */
+    const vpic = p.match(/^\/v1\/vault\/([0-9a-f]{32})\/p\/(p[0-9a-z]{2,40})$/);
+    if (vpic) {
+      const pk = 'vpic:' + vpic[1] + ':' + vpic[2], ixk = 'vpix:' + vpic[1];
+      if (req.method === 'GET') {
+        const cur = await env.SCHED.get(pk);
+        if (!cur) return json(req, { error: 'no such picture' }, 404);
+        return json(req, JSON.parse(cur));
+      }
+      const auth = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/, '');
+      if (!/^[0-9a-f]{32}$/.test(auth)) return json(req, { error: 'no token' }, 401);
+      const vcur = await env.SCHED.get('vault:' + vpic[1]);
+      if (!vcur) return json(req, { error: 'no such vault' }, 404);
+      if (JSON.parse(vcur).wh !== await sha256hex(auth)) return json(req, { error: 'wrong token' }, 403);
+      const ix = JSON.parse((await env.SCHED.get(ixk)) || '[]');
+      if (req.method === 'DELETE') {
+        await env.SCHED.delete(pk);
+        const at = ix.indexOf(vpic[2]);
+        if (at >= 0) { ix.splice(at, 1); await env.SCHED.put(ixk, JSON.stringify(ix)); }
+        return json(req, { ok: true });
+      }
+      if (req.method === 'PUT') {
+        let body;
+        try { body = JSON.parse(await readCapped({ body: req.body, text: () => req.text() }, PIC_BYTES + 256)); }
+        catch (e) { return json(req, { error: 'not json' }, 400); }
+        if (!body || typeof body.ct !== 'string' || typeof body.iv !== 'string') return json(req, { error: 'bad shape' }, 400);
+        if (body.ct.length > PIC_BYTES || body.iv.length > 64) return json(req, { error: 'too large' }, 413);
+        if (ix.indexOf(vpic[2]) < 0) {
+          if (ix.length >= PIC_MAX) return json(req, { error: 'too many' }, 413);
+          ix.push(vpic[2]); await env.SCHED.put(ixk, JSON.stringify(ix));
+        }
+        await env.SCHED.put(pk, JSON.stringify({ iv: body.iv, ct: body.ct }));
+        return json(req, { ok: true });
+      }
+    }
     const vault = p.match(/^\/v1\/vault\/([0-9a-f]{32})$/);
     if (vault) {
       const vk = 'vault:' + vault[1];
@@ -433,6 +478,9 @@ export default {
 
       if (req.method === 'DELETE') {
         if (rec) await env.SCHED.delete(vk);
+        const ix = JSON.parse((await env.SCHED.get('vpix:' + vault[1])) || '[]');
+        for (const k of ix) await env.SCHED.delete('vpic:' + vault[1] + ':' + k);
+        await env.SCHED.delete('vpix:' + vault[1]);
         return json(req, { ok: true });
       }
 

@@ -1212,6 +1212,31 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.waitForFunction(() => { const i = document.querySelector('.cd-nb-i img'); return i && i.naturalWidth > 0; }, null, { timeout: 3000 }).catch(() => {});
     const im = await page.$eval('.cd-nb-i img', (i) => ({ nw: i.naturalWidth, ar: getComputedStyle(i).aspectRatio }));
     ok('the picture comes back after a reload, in its own shape', im.nw === 2 && /2 \/ 1/.test(im.ar), im);
+
+    /* The backup carries the picture, and restoring puts it back in the
+       database before the note that names it loads. The blob is deleted
+       first, so a restore that skipped the pictures leaves an empty box. */
+    await page.click('#cdDocBack'); await page.waitForTimeout(200);
+    await page.click('#cdGear'); await sheetUp(page);
+    await page.evaluate(() => {
+      navigator.clipboard.writeText = (t) => { window.__copied = t; return Promise.resolve(); };
+      navigator.clipboard.write = (items) => items[0].getType('text/plain').then((b) => b.text()).then((t) => { window.__copied = t; });
+    });
+    await page.click('#cdBak');
+    await page.waitForFunction(() => !!window.__copied, null, { timeout: 3000 }).catch(() => {});
+    const pbak = JSON.parse((await page.evaluate(() => window.__copied)) || '{}');
+    ok('a backup carries the pictures a note names, as images', !!pbak.pic && /^data:image\//.test(pbak.pic[pic.p] || '') && Object.keys(pbak.pic).length === 1, Object.keys(pbak.pic || {}));
+    await page.evaluate((k) => new Promise((res) => { const rq = indexedDB.open('cad.pic', 1); rq.onsuccess = () => { const tx = rq.result.transaction('p', 'readwrite'); tx.objectStore('p').delete(k); tx.oncomplete = res; }; }), pic.p);
+    await page.fill('#cdRestore', JSON.stringify(pbak));
+    await Promise.all([page.waitForNavigation(), page.click('#cdRestoreGo')]);
+    await page.waitForTimeout(200);
+    const back = await page.evaluate((k) => new Promise((res) => { const rq = indexedDB.open('cad.pic', 1); rq.onsuccess = () => { const g = rq.result.transaction('p').objectStore('p').get(k); g.onsuccess = () => res(g.result ? g.result.size : 0); }; }), pic.p);
+    ok('and restoring puts the picture back in the database', back > 0, back);
+    await page.click('.cd-tab[data-v="note"]');
+    await page.click('.cd-ni[data-n="old"] .cd-nt');
+    await page.waitForSelector('#cdDoc.is-open');
+    await page.waitForFunction(() => { const i = document.querySelector('.cd-nb-i img'); return i && i.naturalWidth > 0; }, null, { timeout: 3000 }).catch(() => {});
+    ok('so the restored note draws it', (await page.$eval('.cd-nb-i img', (i) => i.naturalWidth)) === 2);
     await page.click('.cd-nb-x');
     await settle();
     ok('its cross takes the picture out', !(await rec()).some((x) => x.k === 'i'));
@@ -1327,8 +1352,12 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.click('#cdGear');
     await sheetUp(page);
     ok('settings no longer offers a face to choose', !(await page.$('#cdShB [data-m]')));
-    await page.evaluate(() => { navigator.clipboard.writeText = (t) => { window.__copied = t; return Promise.resolve(); }; });
+    await page.evaluate(() => {
+      navigator.clipboard.writeText = (t) => { window.__copied = t; return Promise.resolve(); };
+      navigator.clipboard.write = (items) => items[0].getType('text/plain').then((b) => b.text()).then((t) => { window.__copied = t; });
+    });
     await page.click('#cdBak');
+    await page.waitForFunction(() => !!window.__copied, null, { timeout: 3000 }).catch(() => {});
     const bak = JSON.parse(await page.evaluate(() => window.__copied));
     ok('a backup carries every record', bak.app === 'cadence' && ['week', 'log', 'hab', 'train', 'defs', 'note', 'refl'].every((k) => k in bak) && !('goal' in bak) && !('off' in bak), Object.keys(bak));
     bak.week.push({ id: 'x3', n: 'Restored', d: [4], s: 800, e: 830 });
@@ -1722,6 +1751,42 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       !!merged && phoneNotes.includes('Desk second') && phoneNotes.includes('Phone second') && phoneNotes.includes('Written at the desk'),
       { rev: merged && merged.rev, phone: phoneNotes.slice(0, 200) });
 
+    /* A picture goes beside the record, sealed on its own, and the other
+       device fetches it; taking the picture out of the note takes it off
+       the server. Read through the base64: a JPEG begins FF D8. */
+    const idbHas = (page, k) => page.evaluate((k) => new Promise((res) => { const rq = indexedDB.open('cad.pic', 1); rq.onupgradeneeded = () => rq.result.createObjectStore('p'); rq.onsuccess = () => { const g = rq.result.transaction('p').objectStore('p').get(k); g.onsuccess = () => res(g.result ? g.result.size : 0); }; }), k).catch(() => 0);
+    const picRecs = () => [...m.keys()].filter((k) => k.startsWith('vpic:'));
+    await pp.click('.cd-tab[data-v="note"]');
+    await pp.click('.cd-ni .cd-nt');
+    await pp.waitForSelector('#cdDoc.is-open');
+    const png2 = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAYAAAD0In+KAAAAEUlEQVR42mNk+M9QzwAEjDAGACCDAv8cI7IoAAAAAElFTkSuQmCC', 'base64');
+    await pp.setInputFiles('#cdDocFile', { name: 'a.png', mimeType: 'image/png', buffer: png2 });
+    await pp.waitForSelector('#cdDoc .cd-nb-i');
+    await pp.click('#cdDocBack'); await pp.waitForTimeout(200);
+    const upKey = await until(() => picRecs()[0]);
+    const pk = upKey && upKey.split(':')[2];
+    const sealedPic = upKey && JSON.parse(m.get(upKey));
+    ok('a picture in a note goes to the server on its own', !!upKey && /^p/.test(pk) && JSON.parse(m.get('vpix:' + upKey.split(':')[1])).includes(pk), picRecs());
+    ok('...sealed: what the server holds is not a picture', !!sealedPic && Buffer.from(sealedPic.ct, 'base64')[0] !== 0xff && !(await notesOf(pp)).includes(sealedPic.ct.slice(0, 40)));
+    ok('...and the record the vault holds names it without carrying it', !!pk && !JSON.stringify(vaultRec().v).includes(sealedPic.ct.slice(0, 40)));
+    /* A picture that never went up leaves nothing for the rest to measure:
+       fail by name rather than wait out every step on an undefined key. */
+    if (pk) {
+    await until(async () => { const o = await openVault(code); return o && JSON.stringify(o.data.note).includes(pk); });
+    await dp.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+    const deskPic = await until(async () => (await idbHas(dp, pk)) || false, 20000);
+    ok('the other device fetches the picture and keeps it', deskPic > 0, deskPic);
+    await pp.click('.cd-ni .cd-nt');
+    await pp.waitForSelector('#cdDoc.is-open');
+    await pp.click('#cdDoc .cd-nb-x');
+    await pp.click('#cdDocBack'); await pp.waitForTimeout(200);
+    const gonePic = await until(() => !picRecs().length);
+    ok('taking the picture out of the note takes it off the server', !!gonePic, picRecs());
+    } else ok('the other device fetches the picture, and deleting it takes it off the server', false, 'nothing went up');
+
+    const ids = JSON.parse(await notesOf(pp)).map((n) => n.id);
+    ok('two devices never mint one id, even on one frozen clock', ids.length === new Set(ids).size, ids);
+
     /* A code nobody has used is refused by name, and changes nothing. */
     const other = await ctx(); await wire(other.c);
     const op = other.page;
@@ -1739,7 +1804,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await pp.click('#cdSyncOffAll');
     await until(async () => !vaultRec() && !(await pp.evaluate(() => localStorage.getItem('cad.sync.v1'))));
     ok('deleting the synced copy removes it from the server', !vaultRec() && !(await pp.evaluate(() => localStorage.getItem('cad.sync.v1'))));
-    ok('...and this device keeps everything it had', (await notesOf(pp)).includes('Phone second'));
+    ok('...and this device keeps everything it had', (await notesOf(pp)).includes('Phone second'), JSON.parse(await notesOf(pp)).map((n) => n.id + ':' + n.t.slice(0, 20)));
     await dp.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
     const let_go = await until(async () => !(await dp.evaluate(() => localStorage.getItem('cad.sync.v1'))));
     ok('the other device notices and turns sync off, keeping its record', !!let_go && (await notesOf(dp)).includes('Desk second'));
@@ -2019,15 +2084,42 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const kBlock = (fs.readFileSync(path.resolve(__dirname, '..', 'cadence', 'index.html'), 'utf8').match(/var K = \{[\s\S]*?\};/) || [''])[0];
     ok('and the subscription is this phone\'s alone: it is not in K, so neither backed up nor synced', /cad\.week\.v1/.test(kBlock) && !/cad\.push/.test(kBlock), kBlock);
 
-    /* The service worker only answers pushes. One with a fetch handler
-       is a cache, and a cache is how schedule/ ran yesterday's app. */
+    /* The service worker shows pushes, and its fetch handler asks the
+       network FIRST: a cache-first document is how schedule/ ran
+       yesterday's app. The sync server is never answered from it. */
     const sw = fs.readFileSync(path.resolve(__dirname, '..', 'cadence', 'sw.js'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
-    ok('the service worker shows pushes and never intercepts a request',
-      /addEventListener\('push'/.test(sw) && /showNotification/.test(sw) && /addEventListener\('notificationclick'/.test(sw) && !/addEventListener\('fetch'/.test(sw));
+    const swFetch = (sw.split("addEventListener('fetch'")[1] || '').split("addEventListener('push'")[0];
+    ok('the service worker shows pushes', /addEventListener\('push'/.test(sw) && /showNotification/.test(sw) && /addEventListener\('notificationclick'/.test(sw));
+    ok('and its fetch handler goes to the network first, for this origin\'s GETs only',
+      /respondWith\(fetch\(req\)/.test(swFetch) && /\.catch\([\s\S]*caches\.match/.test(swFetch) && /method !== 'GET'/.test(swFetch) && /origin !== self\.location\.origin/.test(swFetch), swFetch.slice(0, 200));
     ok('and a tap on a question hands its block to the app, open or not', /postMessage\(\{ tick:/.test(sw) && /openWindow\('\.\/' \+ u\)/.test(sw));
     ok('no page errors with reminders', P.errs.length === 0, P.errs);
     Date.now = realNow;
     await P.c.close();
+  }
+
+  /* ── no signal: the last copy that loaded opens ──
+     The worker is registered on every open. Online it goes to the network
+     first, so a changed page is served at once rather than an open late;
+     offline the cached copy answers, the query a push opens with included. */
+  {
+    const O = await ctx();
+    const ctl = await O.page.waitForFunction(() => navigator.serviceWorker && navigator.serviceWorker.controller, null, { timeout: 10000 }).then(() => true, () => false);
+    ok('the service worker is registered and controls the app, with reminders off', ctl && !(await O.page.evaluate(() => localStorage.getItem('cad.push.v1'))));
+    await O.page.reload(); await O.page.waitForTimeout(300);
+    await O.c.setOffline(true);
+    await O.page.reload(); await O.page.waitForTimeout(400);
+    const hero = await O.page.$eval('#cdHeroN', (e) => e.textContent.trim()).catch(() => '');
+    ok('with no signal the app still opens on the day', hero === 'Deep work', hero);
+    await O.page.goto(URL + '?from=push', { waitUntil: 'load' }).catch(() => {});
+    await O.page.waitForTimeout(300);
+    ok('and a cold open from a reminder does too', (await O.page.$eval('#cdHeroN', (e) => e.textContent.trim()).catch(() => '')) === 'Deep work');
+    await O.c.setOffline(false);
+    await O.c.route('**/cadence/', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><p id="swFresh">new build</p>' }));
+    await O.page.goto(URL, { waitUntil: 'load' });
+    ok('with a signal the network answers first, so a new build is never an open late', !!(await O.page.$('#swFresh')));
+    await O.c.unroute('**/cadence/');
+    await O.c.close();
   }
 
   await browser.close();
