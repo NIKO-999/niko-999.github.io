@@ -401,6 +401,20 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await c.close();
   }
 
+  console.log('\n── the page under the sky ──');
+  {
+    const { c, page } = await ctx({});
+    /* Whatever the phone draws below the body shows the html's colour, so
+       it has to be the sky's own foot rather than the black at its top. */
+    const foot = await page.evaluate(() => {
+      const sky = getComputedStyle(document.documentElement).getPropertyValue('--sky');
+      const stops = sky.match(/rgb\([^)]*\)/g) || [];
+      return { html: getComputedStyle(document.documentElement).backgroundColor, last: stops[stops.length - 1] };
+    });
+    ok('the page under the body is the colour of the sky\u2019s foot', !!foot.last && foot.html === foot.last, foot);
+    await c.close();
+  }
+
   console.log('\n── the day\u2019s thought ──');
   {
     const { c, page, errs } = await ctx({ reflect: true });
@@ -433,6 +447,17 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
          mid-entrance is the transform rather than the layout. */
       return { text: b.textContent.trim(), name: b.getAttribute('aria-label'), svg: !!b.querySelector('svg'), w: b.offsetWidth, h: b.offsetHeight };
     });
+    /* On the sky, not on a slab: the overlay is the hour's own gradient,
+       the card draws no ground, and the arrow is a ring rather than a fill. */
+    const look = await page.evaluate(() => {
+      const rf = document.getElementById('cdRf'), c = document.querySelector('.cd-rf-c'), b = document.getElementById('cdReflOk');
+      if (!rf || !c || !b) return null;
+      const ring = getComputedStyle(b, '::before');
+      return { sky: /gradient/.test(getComputedStyle(rf).backgroundImage), card: getComputedStyle(c).backgroundColor,
+        fill: ring.backgroundColor, ring: ring.boxShadow };
+    });
+    ok('the thought sits on the sky with no card of its own, and the arrow is a ring',
+      look && look.sky && /rgba\(0, 0, 0, 0\)|transparent/.test(look.card) && /rgba\(0, 0, 0, 0\)|transparent/.test(look.fill) && /inset/.test(look.ring), look);
     ok('it is put away by an arrow, named and at least 44px', go && go.text === '' && !!go.name && go.svg && go.w >= 44 && go.h >= 44, go);
     if (await page.$('#cdReflOk')) await page.click('#cdReflOk');
     ok('the arrow takes it out of the page', !(await page.$('#cdRf')));

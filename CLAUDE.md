@@ -4738,6 +4738,25 @@ putting the word back beside the arrow.
 at 18, inside a 44px button. The drawing shrank and the target did
 not, which is `.row-ed`'s own split.
 
+### The thought is drawn on the sky, and the page's ground is its foot
+
+Reported as not matching the rest of the app. It was a dark slab under
+a black scrim, the one surface here that was neither the sky nor a
+sheet, so it read as a dialog from another app. **The overlay is the
+hour's own sky now**: the card has no ground of its own, the question
+is 30px in Inter's light weight like the day's own name, and the arrow
+is a hairline ring. It is never a white fill, because on the day screen
+white means the one control that keeps a block.
+
+**A black band showed at the foot of the screen.** `html` carried
+`--bg`, the near-black at the TOP of the sky. Whatever the phone draws
+below the body shows the html's colour, so that strip was black under
+a navy foot. It is `--sky-foot` now, and `cdSky` moves it with the
+hour's last stop. Asserted as the html's computed colour matching the
+sky's own last stop. **This machine cannot draw the phone's bottom
+strip**, so the check guards the colour and not the band itself. If
+the band survives on the device, the next step is a probe there.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

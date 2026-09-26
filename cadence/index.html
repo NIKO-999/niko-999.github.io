@@ -65,6 +65,8 @@
      sky beside it — and never a red: nothing here says you failed. */
   --miss: rgba(243, 245, 247, .40);
   --sheet: #0B1621;
+  /* The sky's last stop; cdSky moves it with the hour. */
+  --sky-foot: #2A4050;
 
   /* Which part of life a block is: the alignment app's four hues. */
   --c-body: #F2A184;
@@ -99,9 +101,14 @@
    an overlay in this repo's other app. One line removes the class. */
 [hidden] { display: none !important; }
 
-html { -webkit-text-size-adjust: 100%; }
-html, body { height: 100%; background-color: var(--bg); }
+/* The page's own ground is the FOOT of the sky, never the black at its
+   top. Anything the phone draws below the body — the strip under the home
+   bar, a toolbar that stops short of the edge — shows the html's colour,
+   and --bg there was a black band across the bottom of a navy screen.
+   cdSky keeps --sky-foot on the hour's last stop, so the join is seamless. */
+html { -webkit-text-size-adjust: 100%; height: 100%; background-color: var(--sky-foot); }
 body {
+  height: 100%;
   position: fixed; inset: 0; margin: 0; overflow: hidden; overscroll-behavior: none;
   background: var(--sky);
   color: var(--ink);
@@ -435,18 +442,23 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cd-note { margin: 12px 0 0; font: 400 14px/1.5 var(--sans); color: var(--dim); }
 /* THE DAY'S THOUGHT is a card in the MIDDLE, not a sheet from the foot:
    a sheet is something you pulled up to work in, and this arrived on its
-   own and asks for a moment. Nothing to fill in — it is read and put away. */
-.cd-rf { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 24px var(--gut); background: rgba(2, 4, 7, .66); animation: cdRfIn .22s ease-out; }
-.cd-rf-c { width: 100%; max-width: 360px; padding: 26px 24px 18px; border-radius: 28px; background: var(--sheet); box-shadow: inset 0 1px 0 var(--hair), 0 24px 60px rgba(0, 0, 0, .55); text-align: center; animation: cdRfCard .26s cubic-bezier(.2, .8, .2, 1); }
+   own and asks for a moment. Nothing to fill in — it is read and put away.
+   It is drawn ON THE SKY, not on a slab: a dark card under a black scrim
+   was the one surface in the app that was neither the sky nor a sheet,
+   and it read as somebody else's dialog. The thought is the day screen's
+   own language instead — light type on the hour's sky, a mono caption. */
+.cd-rf { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 24px var(--gut); background: var(--sky); background-color: var(--bg); animation: cdRfIn .22s ease-out; }
+.cd-rf-c { width: 100%; max-width: 360px; padding: 0 8px; text-align: center; animation: cdRfCard .26s cubic-bezier(.2, .8, .2, 1); }
 .cd-rf-k { margin: 0; font: 500 11px/1.3 var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--quiet); }
-.cd-rq { margin: 16px 0 22px; font: 300 24px/1.3 var(--sans); letter-spacing: -.01em; color: var(--ink); }
+.cd-rq { margin: 18px 0 30px; font: 300 30px/1.25 var(--sans); letter-spacing: -.015em; color: var(--ink); }
 /* Put away by an arrow rather than a word: the card is read, not
-   answered, and a word on a button reads as a reply to it. A round quiet
-   fill, the app's own soft control. */
+   answered, and a word on a button reads as a reply to it. A hairline
+   ring, the app's own quiet control — never a white fill, which on the
+   day screen means the one thing you press to keep a block. */
 .cd-rf-go { position: relative; width: 44px; height: 44px; margin: 0 auto; display: grid; place-items: center; border-radius: 50%; background: none; color: var(--ink); }
 /* Drawn at 34 inside a 44 box: smaller on request, and the box a thumb
    reaches stays the floor every other press target here holds to. */
-.cd-rf-go::before { content: ''; position: absolute; inset: 5px; border-radius: 50%; background: rgba(243, 245, 247, .09); }
+.cd-rf-go::before { content: ''; position: absolute; inset: 5px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--hair); }
 .cd-rf-go svg { position: relative; width: 18px; height: 18px; display: block; }
 @keyframes cdRfIn { from { opacity: 0; } }
 @keyframes cdRfCard { from { opacity: 0; transform: scale(.94); } }
@@ -2561,6 +2573,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     root.style.setProperty('--sky', 'radial-gradient(90% 45% at 50% 34%, rgba(' + k.g.join(', ') + '), transparent 70%), linear-gradient(180deg, ' +
       k.s.map(function (c, i) { return c + ' ' + SKY_STOPS[i] + '%'; }).join(', ') + ')');
     root.style.setProperty('--stars', k.st);
+    root.style.setProperty('--sky-foot', k.s[k.s.length - 1]);
     root.setAttribute('data-sky', k.name);
     var m = document.querySelector('meta[name="theme-color"]');
     if (m) m.setAttribute('content', k.s[0]);
