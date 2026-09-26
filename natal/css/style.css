@@ -26,12 +26,12 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; background: #2e333b; }
+html { -webkit-text-size-adjust: 100%; background: #353e4a; }
 body {
   min-height: 100vh;
   min-height: 100dvh;
   /* matches the sky and the horizon planet's surface, so no strip ever shows at the bottom */
-  background: #2e333b; /* solid: iOS Safari mis-paints long pages with fixed backgrounds */
+  background: #353e4a; /* solid, and the exact colour at the foot of the sky: iOS Safari mis-paints long pages with fixed backgrounds */
   color: var(--text);
   font-family: var(--sans);
   font-weight: 400;
@@ -47,10 +47,13 @@ input, select { font: inherit; color: inherit; }
   /* taller than the viewport: iOS home-screen apps can leave the bottom safe area uncovered */
   position: fixed; top: calc(-1 * env(safe-area-inset-top, 0px)); left: 0; right: 0;
   height: calc(100lvh + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px) + 60px);
-  z-index: 0; pointer-events: none; overflow: hidden;
+  z-index: 0; pointer-events: none; overflow-x: clip; overflow-y: visible;
   background: linear-gradient(180deg, #0a1520 0%, #10202f 14%, #183349 32%, #25506c 52%, #3a6a88 66%, #5d88a3 76%, #8fa6b3 82%, #d49a6e 86%, #3a3439 89%, #2e333b 100%); /* below the horizon the sky is the planet colour, so no pale strip can ever show */
 }
 #stars { position: absolute; inset: 0; }
+/* The planet's surface carries on below the sky. iOS Safari can shift fixed layers up when the
+   toolbar collapses at the bottom of a long page; this keeps the uncovered strip the same colour. */
+.sky-floor { position: absolute; left: 0; right: 0; top: 100%; height: 100lvh; background: #353e4a; }
 .nebula {
   position: absolute; inset: 0;
   background:
