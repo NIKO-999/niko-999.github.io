@@ -667,6 +667,18 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.waitForTimeout(320);
     const box = await page.$eval('#cdDoc', (d) => { const r = d.getBoundingClientRect(); return [r.left, r.top, r.width, r.height]; });
     ok('pressing a note opens its whole page', box.join() === '0,0,390,844', box);
+    /* A note is a page of the app, so it wears the app's sky rather than a
+       flat ground: the same gradient body draws, and on pixels the foot of
+       the page lighter than just under its head — which a flat ground can
+       never be. The head is a slice of the same sky. */
+    const dsky = await page.evaluate(() => {
+      const bi = (e) => getComputedStyle(e).backgroundImage;
+      return { body: bi(document.body), doc: bi(document.getElementById('cdDoc')), top: bi(document.querySelector('.cd-doc-top')) };
+    });
+    const dpx = await shoot(page);
+    const hb = await page.$eval('.cd-doc-top', (e) => e.getBoundingClientRect().bottom);
+    const lum = (c) => c[0] + c[1] + c[2];
+    ok('an open note has the same sky as the other pages', dsky.doc === dsky.body && dsky.top.indexOf(dsky.body) === 0 && lum(dpx(4, 836)) > lum(dpx(4, hb + 6)) + 12, { dsky, top: dpx(4, hb + 6), foot: dpx(4, 836) });
     ok('its lines are the note', (await page.$$eval('#cdDocEd .cd-nb', (b) => b.map((x) => x.textContent))).join('|') === 'First line|Second line');
 
     /* Everything from here is typed, the way a person would. */

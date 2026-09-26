@@ -482,10 +482,17 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 /* ── a note, opened: the whole page, the way a note opens in Notes ── */
 .cd-doc {
   position: fixed; inset: 0; z-index: 35; overflow-y: auto; overflow-x: hidden;
-  background: var(--bg); opacity: 0; transform: translateY(12px); transition: opacity .2s, transform .24s cubic-bezier(.2, .8, .2, 1);
+  /* The app's own sky, not a flat ground: a note is a page of the app, and
+     a scroller's background does not scroll with its content, so on this
+     viewport-sized box the gradient lands exactly where body draws it. */
+  background: var(--sky); background-color: var(--bg); opacity: 0; transform: translateY(12px); transition: opacity .2s, transform .24s cubic-bezier(.2, .8, .2, 1);
 }
 .cd-doc.is-open { opacity: 1; transform: none; }
-.cd-doc-top { position: sticky; top: 0; z-index: 2; max-width: 560px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 6px) var(--gut) 8px; background: var(--bg); box-shadow: 0 1px 0 var(--hair); }
+.cd-doc-top { position: sticky; top: 0; z-index: 2; max-width: 560px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 6px) var(--gut) 8px; background: var(--sky) center top / 100vw 100vh no-repeat, var(--bg); box-shadow: 0 1px 0 var(--hair); }
+/* The head is a slice of the same sky, sized to the viewport and pinned to
+   its own top edge — which is the viewport's top whenever it is stuck — so
+   the rows scrolling under it are covered by the picture behind them
+   rather than by a band of flat colour. */
 .cd-doc-hd { display: flex; align-items: center; gap: 6px; }
 .cd-doc-back { display: flex; align-items: center; gap: 2px; min-height: 44px; padding: 0 10px 0 0; margin-right: auto; font: 500 16px/1 var(--sans); color: var(--ink); }
 .cd-doc-back svg { width: 22px; height: 22px; margin-left: -6px; }
@@ -530,7 +537,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cd-nb.k-q + .cd-nb.k-q::before { top: -1px; }
 /* A highlight is the colour on the words and a wash behind them, never
    the wash alone: a tint without the ink is a smudge on a dark page. */
-.cd-nb mark { color: var(--hc); background: color-mix(in srgb, var(--hc) 20%, transparent); border-radius: 4px; padding: 1px 0; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+/* Measured against the sky's lightest stop, since a note now sits on it:
+   the hue at full strength over a 20% wash of itself was 3.8:1 at the
+   foot, so the words take a quarter of the ink and the wash is thinner. */
+.cd-nb mark { color: color-mix(in srgb, var(--hc) 75%, var(--ink)); background: color-mix(in srgb, var(--hc) 16%, transparent); border-radius: 4px; padding: 1px 0; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .cd-nb mark[data-c="o"] { --hc: var(--c-body); }
 .cd-nb mark[data-c="p"] { --hc: var(--h-sleep); }
 .cd-nb mark[data-c="y"] { --hc: var(--c-work); }

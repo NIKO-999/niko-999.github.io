@@ -4486,6 +4486,19 @@ Delete asks.
 object URLs as leaving. A blob URL cannot leave the browser, so it is
 excluded beside `data:`.
 
+**AN OPEN NOTE WEARS THE SKY.** It was a flat `--bg`, so opening a
+note dropped you off the app's own picture onto a different ground.
+The page is viewport-sized and a scroller's background does not scroll
+with its content, so `var(--sky)` there lands exactly where body draws
+it; the sticky head is a slice of the same sky sized to the viewport
+and pinned to its own top edge, so rows pass under the picture rather
+than under a band of colour. **And the highlight had to be solved again
+for it**: the hue at full strength over a 20% wash of itself measured
+3.8:1 at the sky's lightest stop, so the words take a quarter of the ink
+and the wash is 16%. Asserted as the same gradient as body and as the
+foot of the page lighter than just under the head, which a flat ground
+can never be.
+
 ### The sweep, and what it found
 
 Asked for as *make sure nothing is clipping or leaking out of its
