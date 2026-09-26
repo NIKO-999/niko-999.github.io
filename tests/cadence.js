@@ -425,8 +425,16 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     });
     ok('there are at least twenty-five, and no two days in a row share one', qs.n >= 25 && qs.qs.every((q, i) => i === 0 || q !== qs.qs[i - 1]) && new Set(qs.qs).size === qs.n, qs.n);
     ok('the first open marks today seen', (await store(page, 'cad.refl.v1'))['2026-09-25'].s === 1);
+    /* An arrow, not a word: a glyph with no text drawn, still NAMED,
+       and a box a thumb reaches. */
+    const go = await page.evaluate(() => {
+      const b = document.getElementById('cdReflOk'); if (!b) return null;
+      const r = b.getBoundingClientRect();
+      return { text: b.textContent.trim(), name: b.getAttribute('aria-label'), svg: !!b.querySelector('svg'), w: r.width, h: r.height };
+    });
+    ok('it is put away by an arrow, named and at least 44px', go && go.text === '' && !!go.name && go.svg && go.w >= 44 && go.h >= 44, go);
     if (await page.$('#cdReflOk')) await page.click('#cdReflOk');
-    ok('Got it takes it out of the page', !(await page.$('#cdRf')));
+    ok('the arrow takes it out of the page', !(await page.$('#cdRf')));
     await page.reload(); await page.waitForTimeout(700);
     ok('and it does not come back the same day', !(await page.$('#cdRf')));
     await page.click('#cdGear'); await sheetUp(page);

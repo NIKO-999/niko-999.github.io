@@ -4725,6 +4725,15 @@ as a second outline round the only button on the card.
 centre), faded rather than removed (Got it, Escape and the outside press
 all fail), one thought for every day, and never shown.
 
+### The thought is put away by an arrow
+
+Asked for in one line: not *Got it*, an arrow. A word on the only
+button reads as a REPLY to the card, and the card asks for nothing
+back. A 48px round soft fill with the arrow drawn in the ink, centred
+under the words, named *Continue* for a screen reader. Asserted as no
+text drawn, an `aria-label`, an svg and a 44px box, and proved by
+putting the word back beside the arrow.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
