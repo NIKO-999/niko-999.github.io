@@ -7,14 +7,14 @@
  *    rings with gaps, ringlets, translucency and mutual shadows.
  *  - Moon: power-law craters, central peaks, a ray crater, lunar photometry.
  *  - A small cloudy world.
- * The moon, gas giant and small world turn slowly: the worker keeps a surface map of
- * each and redraws only the lit disk a few times a second (paused while scrolling).
+ * The moon and small world turn slowly and the gas giant's rings orbit it: the worker
+ * keeps a map of each moving surface and redraws only what moves (paused while scrolling).
  * Rendering runs in a Web Worker so scrolling never stalls, and finished
  * images are cached so later launches show them instantly.
  */
 (function () {
   "use strict";
-  const SKY_VERSION = "sky-5";
+  const SKY_VERSION = "sky-6";
 
   /* Everything the worker needs lives inside SKYLIB, so its source can be
      shipped to a Worker via toString(). No DOM access in here. */
@@ -162,7 +162,9 @@
           const c = rRing * rRing - 1;
           const shadowed = b * b - c > 0 && -b - Math.sqrt(b * b - c) > 0;
           const lit = shadowed ? 0.06 : 0.5 + 0.5 * Math.abs(NL);
-          ring = { col: mix3(SKY, ringTint(rRing), lit), a: dens * 0.92 };
+          // position around the ring, measured in the ring plane
+          const th = Math.atan2(y * Math.sin(open) - zr * Math.cos(open), x);
+          ring = { col: mix3(SKY, ringTint(rRing), lit), a0: dens * 0.92, r: rRing, th };
         }
         if (rr < (1 + edge) * (1 + edge)) {
           const z = Math.sqrt(Math.max(0, 1 - rr));
@@ -180,24 +182,39 @@
           }
           const limb = Math.pow(1 - z, 3.5) * 0.35 * smooth(-0.3, 0.4, ndl);
           const rim = Math.pow(1 - z, 3) * smooth(-0.2, 0.6, ndl);
-          const front = ring && zr > z ? ring : null;
           // everything after the surface colour is affine in it: out = A * col + B
           const compose = (col) => {
-            let c = mix3(SKY, col, lightAmt);
+            const c = mix3(SKY, col, lightAmt);
             // bluish high haze at the limb and a warm rim where the sunrise grazes it
-            c = mix3(c, [120, 150, 180], limb);
-            c = [c[0] + rim * 110, c[1] + rim * 55, c[2] + rim * 20];
-            if (front) c = mix3(c, front.col, front.a);
-            return c;
+            const h = mix3(c, [120, 150, 180], limb);
+            return [h[0] + rim * 110, h[1] + rim * 55, h[2] + rim * 20];
           };
           const B = compose([0, 0, 0]);
-          let a = clamp((1 - Math.sqrt(rr)) / edge, 0, 1);
-          if (front) a = clamp(a + front.a, 0, 1);
-          return { lat, lon, A: compose([1, 1, 1])[0] - B[0], B, a: a * 255 };
+          const a = clamp((1 - Math.sqrt(rr)) / edge, 0, 1);
+          return { lat, lon, A: compose([1, 1, 1])[0] - B[0], B, a: a * 255, ring: ring && zr > z ? ring : null };
         }
-        return ring ? { rgba: [ring.col[0], ring.col[1], ring.col[2], ring.a * 255] } : null;
+        return ring ? { ring } : null;
       }
-      return { R, pixel, albedo, rowOf: (lat) => lat };
+      /** Clumps and streaks in the rings: narrow across the ring, drawn out along it, so their orbit shows. */
+      function ringMod(r, th) {
+        const c = Math.cos(th), s = Math.sin(th);
+        const v = fbm(r * 48, c * 1.4, s * 1.4, 3) * 1.6 + noise(r * 170, c * 5, s * 5) * 0.35;
+        return clamp(0.5 + v, 0, 1);
+      }
+      /** Final pixel from the planet colour (if the planet is here) and the ring modulation. */
+      function finish(px, planetCol, m) {
+        let c = null, a = 0;
+        if (planetCol) { c = [px.A * planetCol[0] + px.B[0], px.A * planetCol[1] + px.B[1], px.A * planetCol[2] + px.B[2]]; a = px.a / 255; }
+        const ring = px.ring;
+        if (ring) {
+          const ra = clamp(ring.a0 * (0.62 + 0.76 * m), 0, 1);
+          const k = 0.8 + 0.4 * m;
+          const rc = [ring.col[0] * k, ring.col[1] * k, ring.col[2] * k];
+          if (c) { c = mix3(c, rc, ra); a = clamp(a + ra, 0, 1); } else { c = rc; a = ra; }
+        }
+        return [c[0], c[1], c[2], a * 255];
+      }
+      return { R, pixel, albedo, ringMod, finish, RIN, ROUT };
     }
 
     /* ================= moon ================= */
@@ -407,8 +424,14 @@
           const fx = (col + 0.5) / W, fy = (row + 0.5) / H;
           const px = parts.pixel(fx, fy, W);
           if (!px) continue;
-          const c = px.rgba || colourOf(parts, px, parts.albedo(px.lat, px.lon));
-          const a = px.rgba ? px.rgba[3] : px.a;
+          let c, a;
+          if (kind === "giant") {
+            c = parts.finish(px, px.lat !== undefined ? parts.albedo(px.lat, px.lon) : null, px.ring ? parts.ringMod(px.ring.r, px.ring.th) : 0);
+            a = c[3];
+          } else {
+            c = px.rgba || colourOf(parts, px, parts.albedo(px.lat, px.lon));
+            a = px.rgba ? px.rgba[3] : px.a;
+          }
           const i = (row * W + col) * 4;
           d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2];
           d[i + 3] = masked ? a * fadeMask(fx, fy) : a;
@@ -419,7 +442,7 @@
 
     /* ---------- slow axial spin (runs inside the worker) ---------- */
     // seconds per full turn
-    const PERIOD = { giant: 420, moon: 300, far: 150 };
+    const PERIOD = { ring: 80, moon: 100, far: 60 };
     let paused = false;
     function buildMap(kind, parts, W) {
       const r = parts.R * W;
@@ -468,7 +491,78 @@
       }
       return out;
     }
+    /* The gas giant itself stays still; its rings orbit, inner edge faster than outer (Kepler). */
+    function ringMap(parts) {
+      const MR = 384, MT = 1536, m = new Float32Array(MR * MT);
+      for (let j = 0; j < MR; j++) {
+        const r = parts.RIN + ((j + 0.5) / MR) * (parts.ROUT - parts.RIN);
+        for (let i = 0; i < MT; i++) m[j * MT + i] = parts.ringMod(r, -Math.PI + ((i + 0.5) / MT) * TAU);
+      }
+      return { MR, MT, m };
+    }
+    function sampleRing(map, parts, r, th) {
+      const { MR, MT, m } = map;
+      let u = ((th + Math.PI) / TAU) * MT - 0.5;
+      u -= MT * Math.floor(u / MT);
+      let v = ((r - parts.RIN) / (parts.ROUT - parts.RIN)) * MR - 0.5;
+      v = v < 0 ? 0 : v > MR - 1 ? MR - 1 : v;
+      const i0 = Math.floor(u), j0 = Math.floor(v), fu = u - i0, fv = v - j0;
+      const i1 = (i0 + 1) % MT, j1 = j0 + 1 < MR ? j0 + 1 : j0;
+      const top = m[j0 * MT + i0] + (m[j0 * MT + i1] - m[j0 * MT + i0]) * fu;
+      const bot = m[j1 * MT + i0] + (m[j1 * MT + i1] - m[j1 * MT + i0]) * fu;
+      return top + (bot - top) * fv;
+    }
+    function spinRings(canvas, W, post) {
+      const parts = giantParts();
+      const map = ringMap(parts);
+      const ctx = canvas.getContext("2d");
+      const img = new ImageData(W, W), d = img.data;
+      const live = [];
+      let x0 = W, y0 = W, x1 = 0, y1 = 0;
+      for (let row = 0; row < W; row++) {
+        for (let col = 0; col < W; col++) {
+          const fx = (col + 0.5) / W, fy = (row + 0.5) / W;
+          const px = parts.pixel(fx, fy, W);
+          if (!px) continue;
+          const i = (row * W + col) * 4;
+          px.fm = fadeMask(fx, fy);
+          px.pc = px.lat !== undefined ? parts.albedo(px.lat, px.lon) : null;
+          if (!px.ring) {
+            const c = parts.finish(px, px.pc, 0);
+            d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = c[3] * px.fm;
+            continue;
+          }
+          px.i = i;
+          px.w = Math.pow(1.6 / px.ring.r, 1.5); // relative angular speed
+          live.push(px);
+          if (col < x0) x0 = col; if (col > x1) x1 = col; if (row < y0) y0 = row; if (row > y1) y1 = row;
+        }
+      }
+      let turn = 0; // radians turned at the reference radius
+      const frame = (full) => {
+        for (let n = 0; n < live.length; n++) {
+          const px = live[n];
+          const c = parts.finish(px, px.pc, sampleRing(map, parts, px.ring.r, px.ring.th - turn * px.w));
+          d[px.i] = c[0]; d[px.i + 1] = c[1]; d[px.i + 2] = c[2]; d[px.i + 3] = c[3] * px.fm;
+        }
+        if (full) ctx.putImageData(img, 0, 0);
+        else ctx.putImageData(img, 0, 0, x0, y0, x1 - x0 + 1, y1 - y0 + 1);
+      };
+      frame(true);
+      post({ type: "spinReady", kind: "giant" });
+      let last = Date.now();
+      setInterval(() => {
+        const now = Date.now();
+        if (!paused) {
+          turn += ((now - last) / 1000 / PERIOD.ring) * TAU;
+          frame(false);
+        }
+        last = now;
+      }, 50);
+    }
+
     async function spin(canvas, kind, W, key, post) {
+      if (kind === "giant") return spinRings(canvas, W, post);
       const parts = PARTS[kind]();
       let map = await loadMap(key);
       if (!map || map.MW * map.MH * 3 !== map.m.length) {
