@@ -663,3 +663,29 @@ table.agrid td.cell { font-size: 11.5px; }
 .last-pill:hover { border-color: var(--accent); }
 .last-pill .last-k { font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
 .last-pill .last-v { font-size: 13.5px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 78vw; }
+
+
+/* ---------------- detail pages: full screen, back arrow ---------------- */
+.sheet {
+  inset: 0; top: 0; bottom: 0; max-width: none; max-height: none; height: 100%; height: 100dvh;
+  margin: 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; overflow: hidden;
+  animation: none;
+}
+.sheet.page-in { animation: page-in 0.32s cubic-bezier(0.2, 0.9, 0.25, 1) both; }
+@keyframes page-in { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+.sheet .sheet-sky, .sheet .sheet-grip { display: none; }
+.sheet-head {
+  flex: 0 0 auto; display: flex; align-items: center; width: 100%; max-width: 640px; margin: 0 auto;
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) var(--gutter) 4px;
+}
+.back-btn { display: inline-flex; align-items: center; gap: 4px; height: 38px; padding: 0 10px 0 2px; margin-left: -6px; border-radius: 999px; color: var(--text);
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase; }
+.back-btn:hover { background: rgba(255, 255, 255, 0.06); }
+.back-btn svg { width: 22px; height: 22px; }
+.sheet-body { flex: 1 1 auto; width: 100%; max-width: 640px; margin: 0 auto; padding: 0 var(--gutter) calc(env(safe-area-inset-bottom, 0px) + 40px); }
+.sheet .hero { padding-top: 8px; }
+body.detail-open { overflow: hidden; }
+body.detail-open .app { visibility: hidden; }
+body.detail-open .sheet-backdrop { display: none; }
+/* keep long text readable over the horizon glow on detail pages */
+.sheet { background: linear-gradient(180deg, rgba(8, 16, 26, 0) 0%, rgba(8, 16, 26, 0.18) 45%, rgba(8, 16, 26, 0.55) 80%, rgba(8, 16, 26, 0.7) 100%); }
