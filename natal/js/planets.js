@@ -14,7 +14,7 @@
  */
 (function () {
   "use strict";
-  const SKY_VERSION = "sky-6";
+  const SKY_VERSION = "sky-7";
 
   /* Everything the worker needs lives inside SKYLIB, so its source can be
      shipped to a Worker via toString(). No DOM access in here. */
@@ -228,8 +228,16 @@
         // power-law sizes: many small, a few large
         craters.push({ c: [rr * Math.cos(th), u, rr * Math.sin(th)], r: 0.012 + Math.pow(rnd(), 5) * 0.25 });
       }
-      const ray = { c: norm3([-0.35, -0.25, 0.9]), r: 0.05 }; // a young, bright ray crater
-      craters.push(ray);
+      // landmarks spread all the way round, so every side looks different as it turns
+      const at = (latDeg, lonDeg) => { const la = (latDeg * Math.PI) / 180, lo = (lonDeg * Math.PI) / 180; return [Math.cos(la) * Math.sin(lo), Math.sin(la), Math.cos(la) * Math.cos(lo)]; };
+      const ray = { c: norm3([-0.35, -0.25, 0.9]), r: 0.05 }; // a young, bright ray crater on the side you see first
+      const RAYS = [ray, { c: at(32, 105), r: 0.045 }, { c: at(-38, 195), r: 0.06 }, { c: at(8, 285), r: 0.04 }];
+      // great impact basins with dark, lava-filled floors
+      const BASINS = [{ c: at(22, 150), r: 0.32 }, { c: at(-28, 65), r: 0.22 }, { c: at(46, 245), r: 0.26 }, { c: at(-12, 320), r: 0.18 }, { c: at(-55, 130), r: 0.2 }];
+      for (const k of RAYS) craters.push(k);
+      for (const k of BASINS) craters.push(k);
+      // a chain of craters across the far side
+      for (let i = 0; i < 7; i++) craters.push({ c: at(-8 + i * 4.5, 200 + i * 7), r: 0.03 + (i % 3) * 0.008 });
       const height = (p) => {
         let h = fbm(p[0] * 3, p[1] * 3, p[2] * 3, 5) * 0.035 + fbm(p[0] * 24, p[1] * 24, p[2] * 24, 3) * 0.005 + noise(p[0] * 90, p[1] * 90, p[2] * 90) * 0.0012;
         for (const k of craters) {
@@ -245,14 +253,29 @@
         }
         return h;
       };
-      const maria = (p) => smooth(0.04, 0.32, fbm(p[0] * 1.3 + 4, p[1] * 1.3, p[2] * 1.3, 3));
+      const maria = (p) => {
+        let m = smooth(0.04, 0.32, fbm(p[0] * 1.3 + 4, p[1] * 1.3, p[2] * 1.3, 3));
+        for (const k of BASINS) {
+          const dx = p[0] - k.c[0], dy = p[1] - k.c[1], dz = p[2] - k.c[2];
+          const d = Math.sqrt(dx * dx + dy * dy + dz * dz) / k.r;
+          if (d < 1.1) m = Math.max(m, smooth(1.05, 0.75, d) * (0.8 + 0.2 * noise(p[0] * 9, p[1] * 9, p[2] * 9)));
+        }
+        return m;
+      };
       const rays = (p) => {
-        const dx = p[0] - ray.c[0], dy = p[1] - ray.c[1], dz = p[2] - ray.c[2];
-        const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        if (d > 0.9) return 0;
-        const ang = Math.atan2(dy, dx);
-        const streak = Math.pow(Math.max(0, noise(ang * 5, 1.3, 0.2) + 0.25), 2.2);
-        return streak * Math.max(0, 1 - d / 0.9) * 0.9;
+        let sum = 0;
+        RAYS.forEach((k, n) => {
+          const dx = p[0] - k.c[0], dy = p[1] - k.c[1], dz = p[2] - k.c[2];
+          const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+          if (d > 0.9) return;
+          // direction around the crater, measured on the surface
+          const c = k.c, cl = Math.hypot(c[0], c[2]) || 1;
+          const E = [c[2] / cl, 0, -c[0] / cl], N = [E[1] * c[2] - E[2] * c[1], E[2] * c[0] - E[0] * c[2], E[0] * c[1] - E[1] * c[0]];
+          const ang = Math.atan2(dx * N[0] + dy * N[1] + dz * N[2], dx * E[0] + dy * E[1] + dz * E[2]);
+          const streak = Math.pow(Math.max(0, noise(Math.cos(ang) * 2.5, Math.sin(ang) * 2.5, 1.3 + n * 3.7) + 0.25), 2.2);
+          sum += streak * Math.max(0, 1 - d / 0.9) * 0.9 + Math.exp(-(d * d) / (k.r * k.r * 2)) * 0.5;
+        });
+        return sum;
       };
       const pointOf = (lat, lon) => { const cl = Math.sqrt(Math.max(0, 1 - lat * lat)); return [cl * Math.sin(lon), lat, cl * Math.cos(lon)]; };
       const basis = (lat, lon) => {
@@ -310,8 +333,12 @@
       function albedo(lat, lon) {
         const cl = Math.sqrt(Math.max(0, 1 - lat * lat));
         const x = cl * Math.sin(lon), y = lat, z = cl * Math.cos(lon);
-        const cloud = fbm(x * 1.4 + 2, y * 3.2, z * 1.4, 3);
-        return mix3([40, 96, 150], [190, 214, 236], smooth(0.05, 0.4, cloud));
+        // oceans and continents, polar ice, and swirling cloud bands, different on every side
+        const land = smooth(0.02, 0.1, fbm(x * 1.9 + 7, y * 1.9, z * 1.9, 4));
+        let col = mix3([30, 78, 138], mix3([74, 102, 100], [124, 120, 106], smooth(0, 0.3, fbm(x * 5, y * 5, z * 5 + 3, 3))), land);
+        col = mix3(col, [220, 232, 242], smooth(0.72, 0.84, Math.abs(y) + fbm(x * 4, y * 4, z * 4, 2) * 0.1));
+        const cloud = fbm(x * 1.6 + fbm(x * 3, y * 3, z * 3, 2) * 1.2 + 2, y * 4.2, z * 1.6, 4);
+        return mix3(col, [214, 228, 242], smooth(0.08, 0.36, cloud) * 0.85);
       }
       function pixel(fx, fy, W) {
         const x = (fx - 0.5) / R, y = -(fy - 0.5) / R;
