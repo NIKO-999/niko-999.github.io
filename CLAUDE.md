@@ -5460,6 +5460,15 @@ alone, because a build that logged today whatever the caption said
 passes any check that only reads the caption. Bite-proved by pointing
 the press back at the real today.
 
+### Cardio is its own kind
+
+*Cardio* drew the square. It is not a run: a treadmill, a rower, a
+stair climber and zone 2 are the machine half of a gym session. So it
+is its own kind, drawn as a pulse line so it cannot be mistaken for the
+heart glyph self care already has. It sits above `run` and `surf`,
+because *rowing machine* is not a boat. It feeds Train and asks what
+you trained, like a gym block does.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

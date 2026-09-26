@@ -751,7 +751,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       'Centrelink': 'money', 'Medicare': 'health', 'Chemist': 'meds', 'Uni': 'study', 'Zoo': 'ticket', 'Bushwalk': 'hike', 'Ferry': 'move',
       'Bubble bath': 'bath', 'Massage': 'bath', 'Brush teeth': 'teeth', 'Wedding': 'party', 'Birthday party': 'party', 'Baby shower': 'party',
       'Knitting': 'craft', 'Crossword': 'puzzle', 'Client presentation': 'present', 'Rest day': 'relax', 'Vote': 'vote', 'Stargazing': 'star',
-      'Book club at Dave\'s': 'read', 'Morning routine': 'routine', 'AM routine': 'routine', 'Evening routine': 'nightly', 'Skincare routine': 'shower', 'Wake up': 'wake', 'Qwerty': 'dot' };
+      'Book club at Dave\'s': 'read', 'Morning routine': 'routine', 'AM routine': 'routine', 'Evening routine': 'nightly', 'Skincare routine': 'shower', 'Wake up': 'wake', 'Cardio': 'cardio', 'Treadmill': 'cardio', 'Rowing machine': 'cardio', 'Rowing': 'surf', 'Morning run': 'run', 'Qwerty': 'dot' };
     const got = {};
     for (const n of Object.keys(common)) got[n] = await K(n);
     ok('common task names reach their own kind, and the unplaceable stay plain', Object.keys(common).every((n) => got[n] === common[n]), got);

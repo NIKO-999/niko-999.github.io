@@ -905,6 +905,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   var KW = [
     ['routine', /\b(morning routine|am routine|a\.m\. routine|morning ritual|morning checklist|morning habits|morning stack|miracle morning)\b/],
     ['nightly', /\b(evening routine|night routine|nighttime routine|night-time routine|bedtime routine|pm routine|evening ritual|night ritual)\b/],
+    /* Cardio is the machine half of a gym: a treadmill is not a run and a
+       rowing machine is not a boat, so this sits above both. */
+    ['cardio', /\b(cardio|treadmill|stairmaster|stair master|stair climber|stepmill|elliptical|cross trainer|rowing machine|rower|erg|ski erg|zone 2|zone two|conditioning|assault bike|air bike|jump rope|skipping rope|skipping)\b/],
     ['wake', /\b(wake up|get up|wake|rise|alarm)\b/],
     ['star', /\b(stargazing|star gazing|astronomy|telescope|night sky|meteor shower|milky way)\b/],
     ['vote', /\b(vote|voting|election|polling booth|polling|democracy sausage)\b/],
@@ -986,12 +989,12 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     ['game', /\b(game|games|gaming|video games|chess|xbox|playstation|ps5)\b/],
     ['sleep', /\b(wind down|sleep|bed|bedtime|nap)\b/]
   ];
-  var CAT = { train: 'body', run: 'body', stretch: 'body', walk: 'body', warm: 'body', swim: 'body', cycle: 'body', sport: 'body', dance: 'body', surf: 'body', ski: 'body',
+  var CAT = { cardio: 'body', train: 'body', run: 'body', stretch: 'body', walk: 'body', warm: 'body', swim: 'body', cycle: 'body', sport: 'body', dance: 'body', surf: 'body', ski: 'body',
     read: 'mind', study: 'mind', calm: 'mind', write: 'mind', listen: 'mind', music: 'mind',
     chart: 'work', move: 'work', work: 'work', code: 'work', mail: 'work', phone: 'work', talk: 'work', money: 'work', plan: 'work',
     routine: 'rest', nightly: 'rest', wake: 'rest', eat: 'rest', coffee: 'rest', sleep: 'rest', cook: 'rest', water: 'rest', sun: 'rest', shower: 'rest', meds: 'rest', health: 'rest',
     shop: 'rest', hike: 'body', fish: 'rest', news: 'mind', idea: 'mind', art: 'mind', photo: 'mind', film: 'work', fly: 'work', car: 'work', baby: 'rest', drink: 'rest', bin: 'rest', pack: 'rest', fix: 'rest', cut: 'rest', heart: 'rest', gift: 'rest', ticket: 'rest', laundry: 'rest', clean: 'rest', pet: 'rest', bath: 'rest', teeth: 'rest', party: 'rest', relax: 'rest', vote: 'rest', star: 'rest', craft: 'mind', puzzle: 'mind', present: 'work', grocery: 'rest', bbq: 'rest', camp: 'rest', kids: 'rest', furniture: 'rest', home: 'rest', trip: 'rest', beach: 'rest', plant: 'rest', people: 'rest', screen: 'rest', game: 'rest', dot: 'none' };
-  var TRAINING = { train: 1, run: 1, stretch: 1 };
+  var TRAINING = { train: 1, cardio: 1, run: 1, stretch: 1 };
   function cdKind(name) {
     var s = String(name || '').toLowerCase();
     for (var i = 0; i < KW.length; i++) if (KW[i][1].test(s)) return KW[i][0];
@@ -1061,6 +1064,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     pack: '<path d="M3.5 7.5L12 3.5l8.5 4v9L12 20.5l-8.5-4zM3.5 7.5L12 11.5l8.5-4M12 11.5v9"/>',
     fix: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/>',
     cut: '<circle cx="6" cy="6.5" r="2.5"/><circle cx="6" cy="17.5" r="2.5"/><path d="M8 8l12 10M8 16l12-10"/>',
+    cardio: '<path d="M2.5 12.5h4l2-5 3.5 10 3-7 1.5 2h5"/>',
     heart: '<path d="M12 20s-8-4.8-8-10.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.5C20 15.2 12 20 12 20z"/>',
     gift: '<rect x="3.5" y="8.5" width="17" height="4" rx="1"/><path d="M5 12.5v8h14v-8M12 8.5v12M12 8.5C10.5 4.5 7 4 7 6.5 7 8 9 8.5 12 8.5zM12 8.5c1.5-4 5-4.5 5-2 0 1.5-2 2-5 2z"/>',
     ticket: '<path d="M3 7.5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1V10a2 2 0 0 0 0 4v2.5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V14a2 2 0 0 0 0-4zM14 6.5v2M14 11v2M14 15.5v2"/>',
@@ -1284,7 +1288,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      The six are code rather than data, so a new one always arrives and
      the order is always this one. Yours are appended from their own key. */
   var HABITS = [
-    { id: 'train', n: 'Train', k: 'tick', from: ['train', 'run', 'stretch', 'warm', 'swim', 'cycle', 'sport', 'dance', 'surf', 'ski'], hc: '--c-body' },
+    { id: 'train', n: 'Train', k: 'tick', from: ['train', 'cardio', 'run', 'stretch', 'warm', 'swim', 'cycle', 'sport', 'dance', 'surf', 'ski'], hc: '--c-body' },
     { id: 'mind', n: 'Mind', k: 'tick', from: ['read', 'study', 'calm', 'write', 'listen'], hc: '--c-mind' },
     { id: 'steps', n: 'Steps', k: 'num', unit: 'steps', step: 500, max: 30000, marks: [5000, 8000, 10000, 15000], hc: '--c-rest' },
     { id: 'fuel', n: 'Fuel', k: 'num', unit: 'kcal', step: 50, max: 5000, marks: [1800, 2200, 2600, 3000], bump: [300, 600], hc: '--c-work' },
