@@ -1735,6 +1735,11 @@ const _galTex = (function () {
 
 // ── STAR FIELD (background, inside a rotating group) ─────────────────────
 const starGroup = new THREE.Group();
+// Pushed out so every planet (the furthest sits ~185 behind the diagram)
+// is inside the shell and the stars stay behind them. Scaling the group
+// keeps every star, cloud and galaxy at the same size on screen: points
+// are sized in pixels, sprites grow with the distance they moved.
+starGroup.scale.setScalar(2.9);
 scene.add(starGroup);
 _ambientOnlyObjects.push(starGroup); // background field + dust clouds — decorative only
 
@@ -1972,9 +1977,43 @@ let _skyUniforms = null;
 // resolutions that is seconds of arithmetic, so it runs in a Worker and
 // each body fades in when its maps arrive — the page never waits for it.
 //
-// Placed by where they land on SCREEN and re-placed on resize; every body
-// sits inside r=65, so the whole star shell is behind it.
-const _SUN = new THREE.Vector3(0.78, 0.30, 0.55).normalize();
+// ── The placement is a model, not a set of positions ──
+//
+// DEPTH. Each body is given a real distance, from 45 to 185 units, not one
+// shared shell. That is what makes the far ones read as far: they are
+// smaller, they shift less than the near ones when the camera drifts or
+// flies, they sit BEHIND the nebulae (which wash over them) and in front
+// of nothing, and the near giant can pass in front of the scene's depth.
+//
+// SIZE. Apparent size is physical radius over distance, with the radii in
+// Earth radii (giant 11.2, ringed 9.4, ice 3.9, Earth 1). The radii are
+// compressed to the power 0.7 — at true ratios the Earth-like world is a
+// four-pixel speck — so the order and the proportions survive but every
+// body is still something you can see. One scale for all of them, set so
+// the giant fills the share of the screen it was composed for.
+//
+// LIGHT. There is one sun, a point off-screen to the upper right and a
+// little toward the viewer, and every body is lit from where the sun is
+// relative to IT. So phases are consistent rather than painted: a body
+// further round the scene shows more night, and brightness falls with
+// distance from the sun (inverse-square, compressed to the first power so
+// the outermost is dimmer rather than black).
+//
+// MOONS ORBIT. Each moon circles its planet in the planet's equatorial
+// plane and passes in front of and behind it, depth-sorted for real. When
+// one crosses the sunlight it casts a shadow on the planet, and the planet
+// eclipses it in turn.
+//
+// COMPOSITION. Each body has an anchor — which part of the screen it
+// belongs to — and a rule: its disc must clear the diagram. If it would
+// not, it is pushed straight out, away from the middle, until it does.
+// So the corners are used and the diagram is never sat on, on a phone or
+// a monitor alike. Re-solved on resize.
+//
+// The star shell is pushed out (starGroup scale, below) so that every body
+// is inside it and the stars stay behind the planets.
+const _SUN_POS = new THREE.Vector3(0.78, 0.30, 0.55).normalize().multiplyScalar(420);
+const _SUN = _SUN_POS.clone().normalize();   // for anything that just wants a direction
 
 // Pure generator, runs in the worker (and on the main thread only if a
 // worker cannot be made). Returns two RGBA maps, rows SOUTH FIRST so a
@@ -2308,6 +2347,9 @@ const _PLANET_FS = `
   uniform vec3  uAurora;
   uniform float uTime;
   uniform vec3  uSun;
+  uniform float uDim;
+  uniform vec3  uOccC;
+  uniform float uOccR;
   uniform vec3  uAtmo;
   uniform float uAtmoK;
   uniform float uAmb;
@@ -2357,6 +2399,17 @@ const _PLANET_FS = `
       }
     }
 
+    // Eclipse: the moon's shadow on its planet, or the planet's on its moon.
+    if (uOccR > 0.0) {
+      vec3 oc = uOccC - vW;
+      float bo = dot(oc, uSun);
+      if (bo > 0.0) {
+        float d2 = dot(oc, oc) - bo * bo;
+        sh *= mix(0.10, 1.0, smoothstep(uOccR * uOccR * 0.55, uOccR * uOccR * 1.25, d2));
+      }
+    }
+    lit *= uDim;
+
     vec3 surf = A.rgb;
     vec3 col;
     if (uEarth > 0.5) {
@@ -2367,7 +2420,7 @@ const _PLANET_FS = `
       vec3 ground = surf * (1.0 - 0.45 * cshadow * (1.0 - cloud));
       vec3 R = reflect(-uSun, N);
       float glint = pow(max(dot(R, V), 0.0), 60.0) * B.b * (1.0 - cloud) * 0.9;
-      col = mix(ground, vec3(0.97), cloud) * (uAmb + lit * 1.05) * limb;
+      col = mix(ground, vec3(0.97), cloud) * (uAmb + lit * 1.05 * sh) * limb;
       col += vec3(1.0, 0.92, 0.78) * glint * clamp(ndl * 3.0, 0.0, 1.0);
       // City lights on the night side, dimmed under cloud
       float night = smoothstep(0.08, -0.18, ndlS);
@@ -2460,7 +2513,10 @@ function buildPlanets() {
         uEarth:   { value: o.kind === 'earth' ? 1 : 0 },
         uAurora:  { value: new THREE.Color(o.aurora || 0x000000) },
         uTime:    { value: 0 },
-        uSun:     { value: _SUN },
+        uSun:     { value: new THREE.Vector3().copy(_SUN) },
+        uDim:     { value: 1 },
+        uOccC:    { value: new THREE.Vector3() },
+        uOccR:    { value: 0 },
         uAtmo:    { value: new THREE.Color(o.atmo) },
         uAtmoK:   { value: o.atmoK },
         uAmb:     { value: 0.035 },
@@ -2486,7 +2542,7 @@ function buildPlanets() {
         new THREE.ShaderMaterial({
           uniforms: {
             uRingTex: { value: ringTex },
-            uSun:     { value: _SUN },
+            uSun:     { value: new THREE.Vector3().copy(_SUN) },
             uRingN:   { value: new THREE.Vector3(0, 1, 0) },
             uCenter:  { value: new THREE.Vector3() },
             uR:       { value: 1 },
@@ -2523,20 +2579,22 @@ function buildPlanets() {
     return body;
   }
 
-  // nx, ny: where on the fitted screen the centre lands (−1…1).
-  // z: world depth. k: radius as a share of the half-height there.
+  // nx, ny: the anchor — where on the fitted screen the centre belongs.
+  // dist: distance behind the diagram's plane. rE: radius in Earth radii.
+  // Moons: orbit (parent), a (orbit radius in parent radii), period (s),
+  // rel (radius as a share of the parent's — moons are drawn, not to scale).
   planet({ name: 'giant',  kind: 'giant',  atmo: 0xffd9a8, atmoK: 0.55, haloK: 0.30, bump: 0.35, aurora: 0x6a4cff,
-           nx: -0.70, ny:  0.56, z: -34, k: 0.26,  tilt: [0.05, 0.05], spin: 0.010 });
+           nx: -0.70, ny:  0.56, dist: 45,  rE: 11.2, tilt: [0.18, 0.08], spin: 0.010 });
   planet({ name: 'moon',   kind: 'moon',   atmo: 0x000000, atmoK: 0.0, haloK: 0, bump: 2.6,
-           orbit: 'giant', off: [1.75, -1.05, 0.9], rel: 0.18, tilt: [0.1, 0], spin: 0.004 });
-  planet({ name: 'ringed', kind: 'ringed', atmo: 0xffe7b8, atmoK: 0.40, haloK: 0.22, bump: 0.25, ring: true,
-           nx:  0.70, ny: -0.62, z: -40, k: 0.12,  tilt: [0.42, -0.36], spin: 0.013 });
-  planet({ name: 'titan',  kind: 'haze',   atmo: 0xffa24a, atmoK: 1.1, haloK: 0.45,
-           orbit: 'ringed', off: [-2.9, 0.6, 0.6], rel: 0.16, tilt: [0.1, 0], spin: 0.003 });
-  planet({ name: 'ice',    kind: 'ice',    atmo: 0x9cc4ff, atmoK: 0.85, haloK: 0.35, bump: 0.2,
-           nx:  0.52, ny:  0.70, z: -52, k: 0.045, tilt: [0.2, 0.5], spin: 0.009 });
+           orbit: 'giant', a: 1.85, period: 95, phase: 0.35, rel: 0.17, tilt: [0.1, 0], spin: 0.004 });
   planet({ name: 'earth',  kind: 'earth',  atmo: 0x6fa8ff, atmoK: 1.0, haloK: 0.40, bump: 1.4,
-           nx: -0.60, ny: -0.58, z: -46, k: 0.06,  tilt: [0.41, 0.2], spin: 0.02 });
+           nx: -0.58, ny: -0.60, dist: 70,  rE: 1.0,  tilt: [0.41, 0.2], spin: 0.02 });
+  planet({ name: 'ringed', kind: 'ringed', atmo: 0xffe7b8, atmoK: 0.40, haloK: 0.22, bump: 0.25, ring: true,
+           nx:  0.68, ny: -0.60, dist: 115, rE: 9.4,  tilt: [0.42, -0.36], spin: 0.013 });
+  planet({ name: 'titan',  kind: 'haze',   atmo: 0xffa24a, atmoK: 1.1, haloK: 0.45,
+           orbit: 'ringed', a: 3.1, period: 150, phase: 2.6, rel: 0.15, tilt: [0.1, 0], spin: 0.003 });
+  planet({ name: 'ice',    kind: 'ice',    atmo: 0x9cc4ff, atmoK: 0.85, haloK: 0.35, bump: 0.2,
+           nx:  0.40, ny:  0.74, dist: 185, rE: 3.9,  tilt: [0.2, 0.5], spin: 0.009 });
 
   placePlanets();
 
@@ -2587,73 +2645,141 @@ function buildPlanets() {
 
 function placePlanets() {
   const tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-  const byName = {};
-  // A share of the screen's HEIGHT is right on landscape and far too large
-  // on a portrait phone: scale by the aspect, floored so they stay planets.
+  const cam = new THREE.Vector3(0, 0, baseCamZ);
+  const roots = _planetBodies.filter(b => !b.orbit);
+  // On a portrait phone the height is twice the width: the same share of
+  // the height would make the giant wider than half the screen.
   const fit = Math.max(0.5, Math.min(1, camera.aspect / 1.3));
-  _planetBodies.forEach(b => {
-    if (b.orbit) return;
-    const dist = baseCamZ - b.z;
+  const comp = r => Math.pow(r, 0.7);
+
+  // One physical scale for every body, fixed by the giant filling 26% of
+  // the half-height at its own distance.
+  const g = roots.find(b => b.name === 'giant');
+  const gDist = baseCamZ + g.dist;
+  const unit = 0.26 * gDist * tanH * fit / comp(g.rE);
+
+  // The diagram's box on screen, in NDC: the diamond's nodes sit at ±3.7
+  // and their labels a little outside, so ±4.3 at z = 0. Not the fit
+  // extent (5.5): that includes the decorative orbit rings, which a
+  // planet may sit behind, and on a monitor it is the full height — a
+  // rule that treated the rings as the diagram could only push planets
+  // off the side of the screen.
+  const DIAGRAM = 4.3;
+  const halfH0 = baseCamZ * tanH, halfW0 = halfH0 * camera.aspect;
+  const boxX = DIAGRAM / halfW0, boxY = DIAGRAM / halfH0;
+  const MARGIN = 0.04;
+
+  roots.forEach(b => {
+    const dist = baseCamZ + b.dist;
     const halfH = dist * tanH, halfW = halfH * camera.aspect;
-    b.R = b.k * halfH * fit;
-    b.pos.set(b.nx * halfW, b.ny * halfH, b.z);
-    byName[b.name] = b;
+    b.R = unit * comp(b.rE);
+    // Its disc in NDC, ring included, so a ringed planet clears with its rings
+    const reach = b.R * (b.ring ? 2.3 : 1);
+    const rx = reach / halfW, ry = reach / halfH;
+    let nx = b.nx, ny = b.ny;
+    // Clear the diagram: push straight out along one axis. Prefer the push
+    // that leaves the whole disc on screen; between two that both do (or
+    // both do not), the shorter one.
+    const needX = boxX + MARGIN + rx - Math.abs(nx);
+    const needY = boxY + MARGIN + ry - Math.abs(ny);
+    if (needX > 0 && needY > 0) {
+      const overX = Math.max(0, Math.abs(nx) + needX + rx - 1);
+      const overY = Math.max(0, Math.abs(ny) + needY + ry - 1);
+      const useY = overY !== overX ? overY < overX : needY <= needX;
+      if (useY) ny = Math.sign(ny || 1) * (Math.abs(ny) + needY);
+      else      nx = Math.sign(nx || 1) * (Math.abs(nx) + needX);
+    }
+    // And keep the anchor's own disc on screen where the anchor allowed it
+    nx = Math.sign(nx) * Math.min(Math.abs(nx), Math.max(Math.abs(b.nx), 1 - rx));
+    ny = Math.sign(ny) * Math.min(Math.abs(ny), Math.max(Math.abs(b.ny), 1 - ry));
+    b.pos.set(nx * halfW, ny * halfH, -b.dist);
   });
   _planetBodies.forEach(b => {
     if (!b.orbit) return;
-    const p = byName[b.orbit];
-    b.R = p.R * b.rel;
-    b.pos.set(p.pos.x + p.R * b.off[0], p.pos.y + p.R * b.off[1], p.pos.z + p.R * b.off[2]);
+    b.parent = _planetBodies.find(p => p.name === b.orbit);
+    b.R = b.parent.R * b.rel;
   });
-  // A sphere off the axis of a 50° lens projects as an ellipse stretched
-  // away from the centre by 1/cos of its angle — 15% in a corner, which
-  // reads as an egg. The frame squashes it by cos along that screen-radial
-  // direction, so what lands on screen is a disc. Solved against the
-  // fitted camera; parallax and pan are small beside it.
-  const cam = new THREE.Vector3(0, 0, baseCamZ);
+  // Eclipse pairs: each moon shadows its planet and is shadowed by it.
+  _planetBodies.forEach(b => { if (b.parent) { b.occ = b.parent; b.parent.occ = b; } });
   _planetBodies.forEach(b => {
-    const rel = b.pos.clone().sub(cam);
-    const c = -rel.z / rel.length();
-    const L = Math.hypot(rel.x, rel.y);
-    const dx = L > 1e-6 ? rel.x / L : 0, dy = L > 1e-6 ? rel.y / L : 0;
-    const f = c - 1;
-    b.frame.matrix.set(
-      1 + f*dx*dx, f*dx*dy,     0, b.pos.x,
-      f*dx*dy,     1 + f*dy*dy, 0, b.pos.y,
-      0,           0,           1, b.pos.z,
-      0,           0,           0, 1);
-    b.frame.matrixWorldNeedsUpdate = true;
     b.pivot.scale.setScalar(b.R);
-    b.frame.updateMatrixWorld(true);
-    // Halo behind the body along the camera ray, nudged toward the sun: the
-    // disc hides everything inside the limb, the lit side carries the glow.
-    const back = 1 + b.R * 1.2 / rel.length();
-    b.halo.position.copy(cam).addScaledVector(rel, back).addScaledVector(_SUN, b.R * 0.08 * back);
-    b.halo.scale.setScalar(b.R * 2.9 * back);
-    const u = b.mesh.material.uniforms;
-    u.uCenter.value.copy(b.pos);
     if (b.ring) {
-      const n = new THREE.Vector3(0, 1, 0).applyQuaternion(b.pivot.quaternion).normalize();
-      u.uRingN.value.copy(n);
+      const u = b.mesh.material.uniforms;
       u.uRingIn.value = b.ring.userData.rIn * b.R;
       u.uRingOut.value = b.ring.userData.rOut * b.R;
-      const ru = b.ring.material.uniforms;
-      ru.uRingN.value.copy(n);
-      ru.uCenter.value.copy(b.pos);
-      ru.uR.value = b.R;
+      b.ring.material.uniforms.uR.value = b.R;
     }
   });
+  _refRange = _SUN_POS.distanceTo(g.pos);
+  _planetBodies.forEach(b => _orbitAndFrame(b, _planetTime));
+}
+
+let _planetTime = 0, _refRange = 1;
+
+// Moves a moon along its orbit, then — for every body — rebuilds the frame
+// that cancels the lens stretch and re-aims its light at the sun.
+function _orbitAndFrame(b, t) {
+  const cam = new THREE.Vector3(0, 0, baseCamZ);
+  if (b.parent) {
+    const p = b.parent;
+    const q = p.pivot.quaternion;
+    const e1 = new THREE.Vector3(1, 0, 0).applyQuaternion(q);
+    const e2 = new THREE.Vector3(0, 0, 1).applyQuaternion(q);
+    const an = b.phase + (_reduceMotion ? 0 : t * Math.PI * 2 / b.period);
+    const r = p.R * b.a;
+    b.pos.copy(p.pos).addScaledVector(e1, Math.cos(an) * r).addScaledVector(e2, Math.sin(an) * r);
+  }
+  // A sphere off the axis of a 50° lens projects stretched away from the
+  // centre by 1/cos of its angle: squash by cos along that direction.
+  const rel = b.pos.clone().sub(cam);
+  const c = -rel.z / rel.length();
+  const Lxy = Math.hypot(rel.x, rel.y);
+  const dx = Lxy > 1e-6 ? rel.x / Lxy : 0, dy = Lxy > 1e-6 ? rel.y / Lxy : 0;
+  const f = c - 1;
+  b.frame.matrix.set(
+    1 + f*dx*dx, f*dx*dy,     0, b.pos.x,
+    f*dx*dy,     1 + f*dy*dy, 0, b.pos.y,
+    0,           0,           1, b.pos.z,
+    0,           0,           0, 1);
+  b.frame.matrixWorldNeedsUpdate = true;
+  b.frame.updateMatrixWorld(true);
+
+  // Light from where the sun actually is, relative to this body
+  const toSun = _SUN_POS.clone().sub(b.pos);
+  const range = toSun.length();
+  toSun.divideScalar(range);
+  const u = b.mesh.material.uniforms;
+  u.uSun.value.copy(toSun);
+  u.uDim.value = Math.max(0.45, Math.min(1.1, _refRange / range));
+  u.uCenter.value.copy(b.pos);
+  if (b.occ) { u.uOccC.value.copy(b.occ.pos); u.uOccR.value = b.occ.R; }
+  if (b.ring) {
+    const n = new THREE.Vector3(0, 1, 0).applyQuaternion(b.pivot.quaternion).normalize();
+    u.uRingN.value.copy(n);
+    const ru = b.ring.material.uniforms;
+    ru.uRingN.value.copy(n);
+    ru.uCenter.value.copy(b.pos);
+    ru.uSun.value.copy(toSun);
+  }
+  // Halo behind the body along the camera ray, nudged toward the sun.
+  const back = 1 + b.R * 1.2 / rel.length();
+  b.halo.position.copy(cam).addScaledVector(rel, back).addScaledVector(toSun, b.R * 0.08 * back);
+  b.halo.scale.setScalar(b.R * 2.9 * back);
 }
 
 window._planetUpdate = function(t) {
   const dark = _theme === 'dark';
   if (!_planetsBuilt) { if (dark) buildPlanets(); return; }
+  _planetTime = t;
   _planetBodies.forEach(b => {
     const on = dark && b.ready;
     b.frame.visible = on;
     b.halo.visible = on && b.haloK > 0;
     if (!on) return;
     const u = b.mesh.material.uniforms;
+    // Moons move, so their frame, light and shadows follow them; the moon
+    // also moves its planet's shadow source, which reads b.occ.pos.
+    if (b.parent || b.occ) _orbitAndFrame(b, t);
     u.uFade.value = b.fade;
     u.uTime.value = _reduceMotion ? 0 : t;
     if (!_reduceMotion) b.mesh.rotation.y = t * b.spin;
