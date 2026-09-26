@@ -45,8 +45,8 @@
           <feComposite in2="SourceGraphic" operator="in"/>
         </filter>
         <radialGradient id="gg-shade" cx="0.22" cy="0.92" r="1.05">
-          <stop offset="0" stop-color="#050a12" stop-opacity="0"/><stop offset="0.45" stop-color="#050a12" stop-opacity="0.08"/>
-          <stop offset="0.72" stop-color="#050a12" stop-opacity="0.62"/><stop offset="1" stop-color="#050a12" stop-opacity="0.95"/>
+          <stop offset="0" stop-color="#13263a" stop-opacity="0"/><stop offset="0.45" stop-color="#13263a" stop-opacity="0.06"/>
+          <stop offset="0.75" stop-color="#13263a" stop-opacity="0.45"/><stop offset="1" stop-color="#13263a" stop-opacity="0.72"/>
         </radialGradient>
         <linearGradient id="gg-rim" x1="0" y1="1" x2="1" y2="0">
           <stop offset="0" stop-color="#ff9a55" stop-opacity=".75"/><stop offset=".45" stop-color="#ff9a55" stop-opacity="0"/>
@@ -62,7 +62,7 @@
           <feComposite in2="SourceGraphic" operator="in"/>
         </filter>
         <radialGradient id="mn-crater" cx=".58" cy=".62" r=".6"><stop offset="0" stop-color="#4c535c" stop-opacity=".55"/><stop offset=".75" stop-color="#6d747d" stop-opacity=".25"/><stop offset="1" stop-color="#e6eaee" stop-opacity=".35"/></radialGradient>
-        <radialGradient id="mn-shade" cx=".35" cy="1" r="1.05"><stop offset="0" stop-color="#050a12" stop-opacity="0"/><stop offset=".55" stop-color="#050a12" stop-opacity=".2"/><stop offset=".85" stop-color="#050a12" stop-opacity=".8"/><stop offset="1" stop-color="#050a12" stop-opacity=".95"/></radialGradient>
+        <radialGradient id="mn-shade" cx=".35" cy="1" r="1.05"><stop offset="0" stop-color="#16293c" stop-opacity="0"/><stop offset=".55" stop-color="#16293c" stop-opacity=".15"/><stop offset=".85" stop-color="#16293c" stop-opacity=".55"/><stop offset="1" stop-color="#16293c" stop-opacity=".72"/></radialGradient>
 
         <!-- horizon planet and atmosphere -->
         <radialGradient id="hz-glow" cx="520" cy="520" r="520" gradientUnits="userSpaceOnUse">
@@ -72,7 +72,7 @@
           <stop offset=".97" stop-color="#6f93ab" stop-opacity=".06"/><stop offset="1" stop-color="#6f93ab" stop-opacity="0"/>
         </radialGradient>
         <radialGradient id="hz-body" cx="520" cy="520" r="440" gradientUnits="userSpaceOnUse">
-          <stop offset=".9" stop-color="#0f0d0c"/><stop offset=".985" stop-color="#1c1714"/><stop offset="1" stop-color="#2e1d14"/>
+          <stop offset=".78" stop-color="#2a3039"/><stop offset=".9" stop-color="#30313a"/><stop offset=".955" stop-color="#3f3632"/><stop offset=".985" stop-color="#6a4028"/><stop offset="1" stop-color="#9a4a22"/>
         </radialGradient>
         <filter id="hz-tex" x="0" y="0" width="100%" height="100%">
           <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="4" seed="3" result="n"/>
@@ -87,10 +87,12 @@
       <svg viewBox="0 0 1040 1040">
         <circle cx="520" cy="520" r="520" fill="url(#hz-glow)"/>
         <circle cx="520" cy="520" r="440" fill="url(#hz-body)"/>
-        <circle cx="520" cy="520" r="440" fill="#000" filter="url(#hz-tex)" opacity=".7"/>
+        <circle cx="520" cy="520" r="440" fill="#000" filter="url(#hz-tex)" opacity=".3"/>
         <circle cx="520" cy="520" r="440" fill="none" stroke="#ff8a3d" stroke-opacity=".55" stroke-width=".6"/>
       </svg>
     </div>
+
+    <div class="horizon-mist"></div>
 
     <div class="planet planet-giant">
       <svg viewBox="0 0 300 300">
