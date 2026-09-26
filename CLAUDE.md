@@ -5113,6 +5113,33 @@ phone buzzes. It proves the right bytes reach the right door at the
 right minute. **The worker has to be redeployed**, with its new minute
 trigger, before any of it works.
 
+### A task carries a glyph, and the dot stays the dot
+
+Asked for in one line, with the condition that the dot is never
+replaced. **The dot is the check and says WHETHER; the glyph says
+WHAT**, and one mark cannot say both, so the row carries two: the dot
+where it was, the glyph in its own 18px column between it and the name.
+One glyph a kind, off the same keyword table that already decides the
+block's colour, so nothing is set twice and a new word in the table
+reaches the glyph the same day.
+
+**Drawn in the dot's own thin line and the block's own colour**, so the
+pair read as one row rather than two ornaments, and a missed block's
+glyph goes to the same quiet grey its dot does. A block the table
+cannot place gets a small square rather than a second circle, because a
+circle beside the dot is two dots. Judged at 18px on the real list:
+the first walk glyph was two footprints and read as "0 0" at that size,
+so it is a trail.
+
+**Its own column, so every name starts at the same x** whatever the
+glyph is. Asserted as the dot being present beside it (a build that
+drew the glyph instead of the dot passes every glyph check), the order
+dot, glyph, name in layout, one glyph per kind and never two kinds
+sharing one, the colour matching the dot's, and 3:1 on composited
+pixels. Bite-proved twice: the glyph in `--hair` fails the colour and
+the contrast, and the dot taken out fails the dot half and the four
+older dot checks.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

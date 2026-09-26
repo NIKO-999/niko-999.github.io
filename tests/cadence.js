@@ -176,6 +176,44 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const times = await page.$$eval('.cd-it .cd-rt', (ts) => ts.map((t) => t.textContent));
     ok('every row carries its start', times.join() === '07:00,07:30,09:00,12:30,14:00,21:30,22:30', times);
 
+    /* A GLYPH SAYS WHAT KIND OF THING A BLOCK IS, and the dot stays the
+       dot. Asserted as both: a build that drew the glyph INSTEAD of the
+       dot passes every glyph check, and one that drew neither passes none. */
+    const gl = await page.$$eval('.cd-it', (ls) => ls.map((l) => {
+      const d = l.querySelector('.cd-dot i'), g = l.querySelector('.cd-rb .cd-rg'), n = l.querySelector('.cd-rn');
+      const r = (e) => e ? e.getBoundingClientRect() : null, dr = r(d), gr = r(g), nr = r(n);
+      return { k: g ? g.dataset.g : null, svg: g ? g.innerHTML : '', dot: !!d && dr.width > 0, gw: gr ? gr.width : 0,
+        order: !!(dr && gr && nr) && dr.right <= gr.left && gr.right <= nr.left, nx: nr ? nr.left : 0,
+        gc: g ? getComputedStyle(g).color : '', dc: d ? getComputedStyle(d).boxShadow : '', past: l.classList.contains('is-past') && !l.classList.contains('is-done'),
+        inName: !!n.querySelector('.cd-rg') };
+    }));
+    ok('every row keeps its dot and draws a glyph of its own kind between the dot and the name',
+      gl.length === 7 && gl.every((x) => x.dot && x.gw === 18 && x.order && !x.inName)
+      && gl.map((x) => x.k).join() === 'wake,train,work,eat,work,read,sleep', gl);
+    const bySvg = {};
+    gl.forEach((x) => { (bySvg[x.svg] = bySvg[x.svg] || new Set()).add(x.k); });
+    ok('two kinds never share a glyph, and one kind is always the same glyph',
+      Object.values(bySvg).every((ks) => ks.size === 1) && Object.keys(bySvg).length === new Set(gl.map((x) => x.k)).size, Object.values(bySvg).map((s) => [...s]));
+    ok('every name starts at the same x, whatever its glyph', new Set(gl.map((x) => Math.round(x.nx))).size === 1, gl.map((x) => x.nx));
+    /* The glyph wears the dot's colour: a row still ahead is the block's
+       own hue, a missed one is the same quiet grey its dot goes to. */
+    ok('a glyph is its block\'s own colour, and a missed one goes grey with its dot',
+      gl.filter((x) => !x.past).every((x) => x.dc.indexOf(x.gc) >= 0) && gl.some((x) => x.past)
+      && gl.filter((x) => x.past).every((x) => x.gc === 'rgba(243, 245, 247, 0.4)'), gl.map((x) => [x.k, x.past, x.gc, x.dc]));
+    /* A glyph is a graphic, held to 3:1 on the sky beside it — read off
+       composited pixels, because a hue that draws nothing passes the rest. */
+    const gbx = await page.$$eval('.cd-it:not(.is-past) .cd-rg', (es) => es.map((e) => { const r = e.getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; }).filter((b) => b.y + b.h < innerHeight));
+    const gpng = PNG.sync.read(await page.screenshot());
+    const gget = (x, y) => { const i = (y * gpng.width + x) * 4; return [gpng.data[i], gpng.data[i + 1], gpng.data[i + 2]]; };
+    const gr3 = gbx.map((b) => {
+      const sky = gget(Math.round((b.x - 6) * DPR), Math.round((b.y + b.h / 2) * DPR));
+      let best = 1;
+      for (let y = Math.floor(b.y * DPR); y < Math.ceil((b.y + b.h) * DPR); y++)
+        for (let x = Math.floor(b.x * DPR); x < Math.ceil((b.x + b.w) * DPR); x++) best = Math.max(best, ratio(gget(x, y), sky));
+      return +best.toFixed(2);
+    });
+    ok('every glyph holds 3:1 against the sky beside it', gr3.length >= 3 && gr3.every((r) => r >= 3), gr3);
+
     /* THE CHECK. One white round control, and it ticks the block in the middle. */
     const go = await page.$eval('#cdGo', (b) => { const r = b.getBoundingClientRect(), cs = getComputedStyle(b);
       return { w: r.width, cx: r.left + r.width / 2, b: r.bottom, bg: cs.backgroundColor, rad: cs.borderRadius, l: b.getAttribute('aria-label'), p: b.getAttribute('aria-pressed') }; });
