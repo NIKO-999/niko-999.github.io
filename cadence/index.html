@@ -2625,7 +2625,11 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      note you are halfway through must never be pulled out from under
      you. */
   var SYNC_URL = 'https://sched.nikorapullin.workers.dev';
-  var SYNC_K = 'cad.sync.v1', SYNC_ABC = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
+  /* SYNC_MIN is read by cdSyncLoad on the very next line, so it is
+     declared here rather than beside cdSyncNorm: a hoisted `var` is
+     undefined until its line runs, every length compares false against
+     it, and sync switched itself off on every reload with nothing said. */
+  var SYNC_K = 'cad.sync.v1', SYNC_ABC = '23456789ABCDEFGHJKMNPQRSTUVWXYZ', SYNC_MIN = 12;
   var SY = cdSyncLoad(), syKeys = null, syTimer = 0, syBusy = false, syGen = 0, syApplying = false, syErr = '', syStEl = null;
   /* A CODE YOU CHOOSE IS A PASSWORD, and it is held to being a long one.
      Whoever else types the same words opens the same vault: there is no
@@ -2636,7 +2640,6 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      and the morning-run" are one code, because a phone's keyboard
      capitalises and spaces as it likes and a code that fails on a
      capital is a code nobody can type twice. */
-  var SYNC_MIN = 12;
   function cdSyncNorm(c) {
     var t = String(c || '').normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
     return t.length >= SYNC_MIN && t.length <= 128 ? t : '';
