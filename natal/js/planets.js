@@ -68,10 +68,10 @@
           d[i] = px[0]; d[i + 1] = px[1]; d[i + 2] = px[2]; d[i + 3] = px[3];
         }
       }
-      if (row < W) requestAnimationFrame(step);
+      if (row < W) setTimeout(step, 0);
       else { ctx.putImageData(img, 0, 0); done && done(); }
     };
-    requestAnimationFrame(step);
+    setTimeout(step, 0);
   }
 
   /* ---------- gas giant ---------- */
@@ -259,9 +259,10 @@
   }
 
   function start() {
-    mount(".planet-far", farShader());
-    mount(".planet-moon", moonShader());
-    mount(".planet-giant", giantShader());
+    // each planet is independent: a failure in one never stops the others
+    for (const [sel, make] of [[".planet-far", farShader], [".planet-moon", moonShader], [".planet-giant", giantShader]]) {
+      try { mount(sel, make()); } catch (e) { if (window.console) console.warn("planet render failed", sel, e); }
+    }
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
   else setTimeout(start, 0);
