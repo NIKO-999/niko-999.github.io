@@ -4729,10 +4729,14 @@ all fail), one thought for every day, and never shown.
 
 Asked for in one line: not *Got it*, an arrow. A word on the only
 button reads as a REPLY to the card, and the card asks for nothing
-back. A 48px round soft fill with the arrow drawn in the ink, centred
+back. A round soft fill with the arrow drawn in the ink, centred
 under the words, named *Continue* for a screen reader. Asserted as no
 text drawn, an `aria-label`, an svg and a 44px box, and proved by
 putting the word back beside the arrow.
+
+**Then smaller, on request**: the circle is drawn at 34 and the arrow
+at 18, inside a 44px button. The drawing shrank and the target did
+not, which is `.row-ed`'s own split.
 
 ## Git
 

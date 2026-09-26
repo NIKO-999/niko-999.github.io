@@ -429,8 +429,9 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
        and a box a thumb reaches. */
     const go = await page.evaluate(() => {
       const b = document.getElementById('cdReflOk'); if (!b) return null;
-      const r = b.getBoundingClientRect();
-      return { text: b.textContent.trim(), name: b.getAttribute('aria-label'), svg: !!b.querySelector('svg'), w: r.width, h: r.height };
+      /* offsetWidth, not the rect: the card scales in, and a box read
+         mid-entrance is the transform rather than the layout. */
+      return { text: b.textContent.trim(), name: b.getAttribute('aria-label'), svg: !!b.querySelector('svg'), w: b.offsetWidth, h: b.offsetHeight };
     });
     ok('it is put away by an arrow, named and at least 44px', go && go.text === '' && !!go.name && go.svg && go.w >= 44 && go.h >= 44, go);
     if (await page.$('#cdReflOk')) await page.click('#cdReflOk');

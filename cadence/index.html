@@ -442,9 +442,12 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cd-rq { margin: 16px 0 22px; font: 300 24px/1.3 var(--sans); letter-spacing: -.01em; color: var(--ink); }
 /* Put away by an arrow rather than a word: the card is read, not
    answered, and a word on a button reads as a reply to it. A round quiet
-   fill, the app's own soft control, at the 48px a thumb finds first time. */
-.cd-rf-go { width: 48px; height: 48px; margin: 0 auto; display: grid; place-items: center; border-radius: 50%; background: rgba(243, 245, 247, .09); color: var(--ink); }
-.cd-rf-go svg { width: 22px; height: 22px; display: block; }
+   fill, the app's own soft control. */
+.cd-rf-go { position: relative; width: 44px; height: 44px; margin: 0 auto; display: grid; place-items: center; border-radius: 50%; background: none; color: var(--ink); }
+/* Drawn at 34 inside a 44 box: smaller on request, and the box a thumb
+   reaches stays the floor every other press target here holds to. */
+.cd-rf-go::before { content: ''; position: absolute; inset: 5px; border-radius: 50%; background: rgba(243, 245, 247, .09); }
+.cd-rf-go svg { position: relative; width: 18px; height: 18px; display: block; }
 @keyframes cdRfIn { from { opacity: 0; } }
 @keyframes cdRfCard { from { opacity: 0; transform: scale(.94); } }
 @media (prefers-reduced-motion: reduce) { .cd-rf, .cd-rf-c { animation: none; } }
