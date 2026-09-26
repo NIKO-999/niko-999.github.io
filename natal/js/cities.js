@@ -86,7 +86,7 @@ window.ASTRO_CITIES = [
   ["Darwin", "Northern Territory, Australia", -12.4634, 130.8456, "Australia/Darwin"],
   ["Alice Springs", "Northern Territory, Australia", -23.6980, 133.8807, "Australia/Darwin"],
   ["Katherine", "Northern Territory, Australia", -14.4652, 132.2635, "Australia/Darwin"],
-  // New Zealand — North Island
+  // New Zealand: North Island
   ["Auckland", "Auckland, New Zealand", -36.8485, 174.7633, "Pacific/Auckland"],
   ["Hamilton", "Waikato, New Zealand", -37.7870, 175.2793, "Pacific/Auckland"],
   ["Tauranga", "Bay of Plenty, New Zealand", -37.6878, 176.1651, "Pacific/Auckland"],
@@ -111,7 +111,7 @@ window.ASTRO_CITIES = [
   ["Lower Hutt", "Wellington, New Zealand", -41.2092, 174.9081, "Pacific/Auckland"],
   ["Upper Hutt", "Wellington, New Zealand", -41.1244, 175.0708, "Pacific/Auckland"],
   ["Wellington", "Wellington, New Zealand", -41.2865, 174.7762, "Pacific/Auckland"],
-  // New Zealand — South Island
+  // New Zealand: South Island
   ["Christchurch", "Canterbury, New Zealand", -43.5321, 172.6362, "Pacific/Auckland"],
   ["Ashburton", "Canterbury, New Zealand", -43.9030, 171.7300, "Pacific/Auckland"],
   ["Timaru", "Canterbury, New Zealand", -44.3970, 171.2550, "Pacific/Auckland"],
