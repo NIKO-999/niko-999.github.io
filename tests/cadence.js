@@ -1431,6 +1431,143 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await ph.c.close();
   }
 
+  /* ── sync: one record on two devices, sealed before it leaves ──
+     The real worker file runs here against a Map, and both contexts'
+     requests to its URL are answered by it, so the round trip is the
+     shipped client against the shipped server with nothing in between
+     but a fake KV. The vault is decrypted HERE with the code alone —
+     which proves the id and the key come from the code the way the app
+     says, and that nothing else is needed to read it. */
+  {
+    const path = require('path');
+    const worker = (await import('file://' + path.resolve(__dirname, '..', 'worker', 'index.js'))).default;
+    const m = new Map();
+    const env = { SCHED: { async get(k) { return m.has(k) ? m.get(k) : null; }, async put(k, v) { m.set(k, v); }, async delete(k) { m.delete(k); } } };
+    const SYNC = 'https://sched.nikorapullin.workers.dev';
+    const wire = async (c) => c.route(SYNC + '/**', async (route) => {
+      const q = route.request();
+      const res = await worker.fetch(new Request(q.url(), { method: q.method(), headers: q.headers(), body: q.postData() || undefined }), env);
+      const h = {}; res.headers.forEach((v, k) => { h[k] = v; });
+      await route.fulfill({ status: res.status, headers: h, body: await res.text() });
+    });
+    const until = async (fn, ms = 15000) => { const t = Date.now(); while (Date.now() - t < ms) { const v = await fn(); if (v) return v; await new Promise((r) => setTimeout(r, 150)); } return null; };
+    const vaultRec = () => { for (const [k, v] of m) if (k.startsWith('vault:')) return { k, v: JSON.parse(v) }; return null; };
+    const openVault = async (code) => {
+      const enc = new TextEncoder();
+      const base = await crypto.subtle.importKey('raw', enc.encode(code), 'PBKDF2', false, ['deriveBits']);
+      const b = new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: enc.encode('cadence.sync.v1'), iterations: 150000, hash: 'SHA-256' }, base, 512));
+      const id = Buffer.from(b.slice(32, 48)).toString('hex');
+      const key = await crypto.subtle.importKey('raw', b.slice(0, 32), 'AES-GCM', false, ['decrypt']);
+      const raw = m.get('vault:' + id); if (!raw) return null;
+      const rec = JSON.parse(raw);
+      /* A vault that does not decrypt FAILS the check that asked, never
+         takes the file down: a throw here would read as a broken build. */
+      try {
+        const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: Buffer.from(rec.iv, 'base64') }, key, Buffer.from(rec.ct, 'base64'));
+        return { rev: rec.rev, data: JSON.parse(new TextDecoder().decode(pt)) };
+      } catch (e) { return null; }
+    };
+    const notesOf = (page) => page.evaluate(() => localStorage.getItem('cad.note.v1') || '');
+    const addNote = async (page, text) => {
+      await page.click('.cd-tab[data-v="note"]');
+      await page.fill('#cdNoteIn', text);
+      await page.click('#cdNoteGo');
+      await page.evaluate(() => document.activeElement && document.activeElement.blur());
+    };
+
+    const phone = await ctx(); await wire(phone.c);
+    const pp = phone.page;
+    const before = phone.off.length;
+    await pp.click('#cdGear'); await sheetUp(pp);
+    ok('sync is off until you turn it on, and nothing has left', !!(await pp.$('#cdSyncOn')) && phone.off.length === before && m.size === 0, { off: phone.off });
+    await pp.click('#cdSyncOn'); await pp.waitForTimeout(350);
+    await pp.click('#cdSyncMake');
+    await pp.waitForSelector('#cdSyncCodeShow', { timeout: 15000 });
+    const shown = (await pp.textContent('#cdSyncCodeShow')).trim();
+    const code = shown.replace(/-/g, '');
+    ok('turning it on shows a sixteen-character code in fours', /^[2-9A-HJKMNP-Z]{4}(-[2-9A-HJKMNP-Z]{4}){3}$/.test(shown), shown);
+    const v1 = vaultRec();
+    ok('the first copy lands as revision 1', v1 && v1.v.rev === 1, v1 && v1.v.rev);
+    const plain = JSON.stringify(await pp.evaluate(() => localStorage.getItem('cad.week.v1')));
+    const blockName = JSON.parse(JSON.parse(plain))[0].n;
+    /* Read through the base64, because base64 of plain JSON hides a
+       name from a string search as well as encryption does. */
+    const seen = (v) => Buffer.from(v.ct, 'base64').toString('latin1');
+    ok('the server holds ciphertext: not one block name is readable in it', !seen(v1.v).includes(blockName) && !JSON.stringify(v1.v).includes(blockName), blockName);
+    const o1 = await openVault(code);
+    ok('the code alone opens the vault, and it is the whole backup', o1 && o1.data.app === 'cadence' && Array.isArray(o1.data.week) && o1.data.week.length > 0);
+    ok('the code itself never leaves: it is not in what the server stores', !JSON.stringify(v1.v).includes(code), '');
+    await closeSheet(pp);
+
+    /* A change on the phone is pushed without being asked. */
+    await pp.click('#cdGear'); await sheetUp(pp);
+    await pp.click('#cdRfOn');
+    await closeSheet(pp);
+    const r2 = await until(() => { const v = vaultRec(); return v && v.v.rev >= 2 && v.v.rev; });
+    ok('a change is pushed by itself', r2 === 2, r2);
+
+    /* The desktop joins with the code and gets the phone's record. */
+    const desk = await ctx({ desk: { width: 1440, height: 900 } }); await wire(desk.c);
+    const dp = desk.page;
+    await dp.click('#cdGear'); await sheetUp(dp);
+    await dp.click('#cdSyncOn'); await dp.waitForTimeout(350);
+    await dp.fill('#cdSyncCode', shown.toLowerCase());
+    await Promise.all([dp.waitForEvent('load', { timeout: 15000 }), dp.click('#cdSyncJoin')]);
+    await dp.waitForTimeout(300);
+    const deskRf = await dp.evaluate(() => localStorage.getItem('cad.rfoff.v1'));
+    const same = await dp.evaluate(() => localStorage.getItem('cad.week.v1')) === await pp.evaluate(() => localStorage.getItem('cad.week.v1'));
+    ok('joining on the desktop brings the phone\'s record, typed in any case', deskRf === 'true' && same, { deskRf, same });
+
+    /* The desktop writes; the phone picks it up when it comes back to the front. */
+    await addNote(dp, 'Written at the desk');
+    const r3 = await until(() => { const v = vaultRec(); return v && v.v.rev >= 3 && v.v.rev; });
+    ok('the desktop\'s note is pushed', r3 === 3, r3);
+    ok('...and it is sealed too', !seen(vaultRec().v).includes('Written at the desk'));
+    await Promise.all([pp.waitForEvent('load', { timeout: 15000 }), pp.evaluate(() => document.dispatchEvent(new Event('visibilitychange')))]);
+    await pp.waitForTimeout(300);
+    ok('the phone picks it up when it comes back to the front', (await notesOf(pp)).includes('Written at the desk'));
+
+    /* Both write before either has seen the other: merged, not lost. */
+    await addNote(dp, 'Desk second');
+    await until(() => vaultRec().v.rev >= 4);
+    await addNote(pp, 'Phone second');
+    await pp.waitForEvent('load', { timeout: 20000 }).catch(() => null);
+    const merged = await until(async () => { const o = await openVault(code); const t = o && JSON.stringify(o.data.note); return t && t.includes('Desk second') && t.includes('Phone second') && o; }, 20000);
+    const phoneNotes = await notesOf(pp);
+    ok('two devices writing at once are merged rather than one thrown away',
+      !!merged && phoneNotes.includes('Desk second') && phoneNotes.includes('Phone second') && phoneNotes.includes('Written at the desk'),
+      { rev: merged && merged.rev, phone: phoneNotes.slice(0, 200) });
+
+    /* A code nobody has used is refused by name, and changes nothing. */
+    const other = await ctx(); await wire(other.c);
+    const op = other.page;
+    await op.click('#cdGear'); await sheetUp(op);
+    await op.click('#cdSyncOn'); await op.waitForTimeout(350);
+    await op.fill('#cdSyncCode', 'ABCD-EFGH-JKMN-PQRS');
+    await op.click('#cdSyncJoin');
+    const said = await until(async () => { const t = await op.textContent('#cdToastT'); return /Nothing is synced/.test(t) && t; });
+    ok('a code nobody has used says so and changes nothing', !!said && !(await op.evaluate(() => localStorage.getItem('cad.sync.v1'))), said);
+    await other.c.close();
+
+    /* Deleting the synced copy takes it off the server, and the other device lets go. */
+    await pp.click('#cdGear'); await sheetUp(pp);
+    await pp.click('#cdSyncOff'); await pp.waitForTimeout(350);
+    await pp.click('#cdSyncOffAll');
+    await until(async () => !vaultRec() && !(await pp.evaluate(() => localStorage.getItem('cad.sync.v1'))));
+    ok('deleting the synced copy removes it from the server', !vaultRec() && !(await pp.evaluate(() => localStorage.getItem('cad.sync.v1'))));
+    ok('...and this device keeps everything it had', (await notesOf(pp)).includes('Phone second'));
+    await dp.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+    const let_go = await until(async () => !(await dp.evaluate(() => localStorage.getItem('cad.sync.v1'))));
+    ok('the other device notices and turns sync off, keeping its record', !!let_go && (await notesOf(dp)).includes('Desk second'));
+    /* A 409 is the protocol saying the other device moved first and a
+       404 is a vault that was deleted — both are answers the client acts
+       on, and Chromium logs any non-2xx as a console error with no URL
+       in it. Those two, and only those, are the sync's own. */
+    const real = (e) => e.filter((t) => !/status of (409|404)/.test(t));
+    ok('no page errors while syncing', real(phone.errs).length === 0 && real(desk.errs).length === 0, { p: phone.errs, d: desk.errs });
+    await phone.c.close(); await desk.c.close();
+  }
+
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);

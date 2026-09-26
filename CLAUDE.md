@@ -4901,6 +4901,80 @@ because nothing here is dragged.
 
 Bite-proved by moving the breakpoint out of reach: seven checks fail.
 
+### Sync is a code, and the server holds what it cannot read
+
+Asked for as a login, so the phone and the desktop stop being two
+records typed in twice. Three shapes were put to the person who owns
+the app: email and password, a one-off transfer with no server, and a
+sync code with the record sealed on the device. The code was chosen.
+
+**THERE IS NO ACCOUNT.** A sixteen-character code is shown once, and
+PBKDF2 over it (150,000 rounds) gives three things: an AES-GCM key, a
+vault id, and a write token. The id and the token go to the worker.
+**The key never leaves the device**, so the worker stores ciphertext it
+has no way to open, and the token only as its SHA-256. Nothing is
+emailed, reset or recovered. Losing the code loses the synced copy,
+never the record on either device, and the turn-on sheet says so in
+full, once, because it is the moment something first leaves the phone.
+
+**THIS REVERSES "NOTHING LEAVES THE BROWSER" FOR CADENCE, and only when
+you turn it on.** With sync off there is no request. That is asserted,
+and the worker cannot read what arrives when it is on. The shape of the
+promise changed from "never leaves" to "never leaves readable". The
+tests decrypt the vault with the code alone, which proves nothing else
+is needed.
+
+**WHAT GOES IS THE BACKUP**: every key `K` names, the same object
+`Copy a backup` already produces. Pictures in notes live in IndexedDB,
+which the backup has never carried, so they stay on each device.
+
+**A write names the revision it was built on**, and a 409 means the
+other device moved first. The two records are then MERGED, never one
+thrown away: maps are unioned two levels deep, lists of things with ids
+are unioned by id, and this device wins a clash. The cost is that a
+delete made on the other device in the same minute comes back, which is
+the right way round for a record. KV is eventually consistent, so this
+is a guard rather than a lock, and for one person on two devices that
+is the right size.
+
+**A remote change is applied by reloading, and only on an idle
+screen.** S is read once at boot, so writing the keys and reloading is
+the one path that cannot leave memory and the store disagreeing. It
+waits while a sheet, a note, the thought card or a field is open,
+because a thing you are halfway through must never be pulled out from
+under you. Writes that came FROM the vault are not marked dirty, or
+every pull would echo straight back as a push.
+
+**Pulled on open, on coming back to the front, and once a minute while
+looked at; pushed 2.5 seconds after the last write.** Never on a
+render. `cdWrite` is the one door every save goes through, so it is the
+one place that marks the record dirty.
+
+**The tests run the real worker file in the test process** and answer
+both browser contexts' requests with it, so the round trip is the
+shipped client against the shipped server. A phone creates, a desktop
+joins, each writes, both write at once and are merged, a wrong code is
+refused, and deleting the synced copy lets the other device go.
+Bite-proved three ways: plaintext sent instead of ciphertext fails the
+two sealed-copy checks by name, a merge that keeps only the remote copy
+fails the at-once check, and a worker that skips the token check fails
+two writes that must be refused.
+
+**THE CIPHERTEXT CHECK READS THROUGH THE BASE64.** Base64 of plain JSON
+hides a block name from a string search exactly as well as encryption
+does, so the first version of the check could not have failed. The
+first bite proof also crashed the file instead of failing, because the
+test's own decrypt threw. It returns null now, which fails the check
+that asked.
+
+**A 409 and a 404 are logged by Chromium as console errors**, with no
+URL in the text. In the sync section, and only there, those two are
+the protocol's own answers and are filtered out of "no page errors".
+
+**The worker has to be redeployed** for any of this to work in
+production. A Git-connected worker redeploys itself when `main` moves.
+Until then sync says it cannot reach the server and changes nothing.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

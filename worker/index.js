@@ -1,7 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════
    THE WORKER
 
-   ONE ROUTE, AND IT IS NOT ABOUT A PERSON. This was the whole server
+   ONE ROUTE THAT IS NOT ABOUT A PERSON, AND ONE THAT CANNOT READ WHAT
+   IT HOLDS (the vault, below). This was the whole server
    for the friends half of the schedule app — records, avatars, a
    write key hashed so a dump of the store could not post as anybody.
    Friends went, and all of it went with them: there is no `rec`, no
@@ -15,9 +16,15 @@
    handful of parsed fields come back, and nothing in the request says
    who asked.
 
+   AND ONE ROUTE THAT HOLDS WHAT IT CANNOT READ: the sync vault. See
+   VAULT below — the app encrypts its whole record on the device with a
+   key derived from a sync code, and this worker stores the ciphertext
+   under an id derived from the same code. There is still no account,
+   no email and no name, and nothing here could decrypt what it holds.
+
    ── storage ──
    One KV namespace, holding parsed feeds under `pod:<id>` with a six
-   hour TTL and nothing else. Records written by the friends half are
+   hour TTL, and sealed vaults under `vault:<id>`. Records written by the friends half are
    not read by anything here any more; every one of them carried a
    thirty-day expiry from the day it was written, so they age out on
    their own rather than being walked and deleted.
@@ -45,8 +52,8 @@ function cors(req) {
   const allow = allowed(o) ? o : ORIGIN;
   return {
     'Access-Control-Allow-Origin': allow,
-    'Access-Control-Allow-Methods': 'GET,OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET,PUT,DELETE,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Max-Age': '86400',
     Vary: 'Origin',
   };
@@ -63,6 +70,13 @@ const json = (req, body, status = 200) =>
 
    Everything below is deliberately dependency-free and runs unchanged
    in Node, because the suite executes this file there. */
+
+const VAULT_BYTES = 2 * 1024 * 1024;   /* ciphertext, base64 */
+
+async function sha256hex(t) {
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t));
+  return Array.from(new Uint8Array(b), (x) => x.toString(16).padStart(2, '0')).join('');
+}
 
 const FEED_BYTES = 1024 * 1024;   /* a feed is text; a megabyte is hundreds of episodes */
 const FEED_MS = 8000;
@@ -259,6 +273,71 @@ export default {
       if (!out) return json(req, { error: 'no such show' }, 404);
       await env.SCHED.put(ck, JSON.stringify(out), { expirationTtl: 21600 });
       return json(req, out);
+    }
+
+    /* ══════════════════════════════════════════════════════
+       VAULT
+
+       One person's whole Cadence record, SEALED ON THEIR DEVICE. The
+       app derives three things from a sync code it shows you once —
+       an AES key, this id, and a write token — and only the id and the
+       token ever arrive here. The key never does, so what is stored is
+       ciphertext this worker has no way to open, and a dump of the KV
+       is a dump of noise.
+
+       ── THE ID IS NOT A SECRET, THE TOKEN IS ──
+       Anybody who guesses an id can read a blob they cannot decrypt.
+       Writing is the dangerous half, because an overwrite destroys a
+       record — so a write must carry the token, and the token is kept
+       only as its SHA-256. The friends server's own rule, for the
+       friends server's own reason: a dump of the store cannot be used
+       to write as anybody.
+
+       ── A WRITE NAMES THE REVISION IT WAS BUILT ON ──
+       Two devices editing is the one race this has, and last-writer-
+       wins would silently throw one device's day away. A PUT carries
+       `base`; if the vault has moved past it the answer is 409 with
+       the current revision, and the app merges and tries again. KV is
+       eventually consistent, so this is a guard rather than a lock —
+       for one person on two devices it is the right size.
+
+       ── CAPPED, BECAUSE THE WORKER IS PUBLIC ──
+       The route is reachable by anyone, so what one write can put here
+       is bounded: 2 MB of ciphertext is years of a daily record and
+       nowhere near a bill. */
+    const vault = p.match(/^\/v1\/vault\/([0-9a-f]{32})$/);
+    if (vault) {
+      const vk = 'vault:' + vault[1];
+      const auth = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/, '');
+      const cur = await env.SCHED.get(vk);
+      const rec = cur ? JSON.parse(cur) : null;
+
+      if (req.method === 'GET') {
+        if (!rec) return json(req, { error: 'no such vault' }, 404);
+        return json(req, { rev: rec.rev, iv: rec.iv, ct: rec.ct, at: rec.at });
+      }
+
+      if (!/^[0-9a-f]{32}$/.test(auth)) return json(req, { error: 'no token' }, 401);
+      const wh = await sha256hex(auth);
+      if (rec && rec.wh !== wh) return json(req, { error: 'wrong token' }, 403);
+
+      if (req.method === 'DELETE') {
+        if (rec) await env.SCHED.delete(vk);
+        return json(req, { ok: true });
+      }
+
+      if (req.method === 'PUT') {
+        let body;
+        try { body = JSON.parse(await readCapped({ body: req.body, text: () => req.text() }, VAULT_BYTES + 1)); }
+        catch (e) { return json(req, { error: 'not json' }, 400); }
+        if (!body || typeof body.ct !== 'string' || typeof body.iv !== 'string') return json(req, { error: 'bad shape' }, 400);
+        if (body.ct.length > VAULT_BYTES || body.iv.length > 64) return json(req, { error: 'too large' }, 413);
+        const base = rec ? rec.rev : 0;
+        if ((body.base | 0) !== base) return json(req, { error: 'moved', rev: base }, 409);
+        const next = { rev: base + 1, iv: body.iv, ct: body.ct, at: Date.now(), wh };
+        await env.SCHED.put(vk, JSON.stringify(next));
+        return json(req, { rev: next.rev, at: next.at });
+      }
     }
 
     return json(req, { error: 'no such thing' }, 404);

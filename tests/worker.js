@@ -113,6 +113,48 @@ const kv = () => {
   ok('the origin is varied on, so a cache cannot serve one to another',
     (r.headers.get('Vary') || '').includes('Origin'));
 
+  /* ── the vault: a sealed record, and the worker never holds the key ──
+     Everything here fails SILENTLY in production: a write accepted with
+     no token overwrites somebody's year, and a stale write accepted
+     throws a whole device's day away while both phones say "synced". */
+  {
+    const ID = '0123456789abcdef0123456789abcdef', TOK = 'f'.repeat(32), BAD = 'e'.repeat(32);
+    const V = '/v1/vault/' + ID;
+    r = await hit('GET', V);
+    ok('a vault nobody has written is a 404', r.status === 404, r.status);
+    r = await hit('PUT', V, { body: { iv: 'aaa', ct: 'bbb', base: 0 } });
+    ok('a write with no token is refused', r.status === 401, r.status);
+    r = await hit('PUT', V, { key: TOK, body: { iv: 'aaa', ct: 'bbb', base: 0 } });
+    const w1 = await r.json();
+    ok('the first write makes revision 1', r.status === 200 && w1.rev === 1, JSON.stringify(w1));
+    r = await hit('GET', V);
+    const g1 = await r.json();
+    ok('a read hands back the ciphertext and its revision, never the token',
+      g1.rev === 1 && g1.ct === 'bbb' && g1.iv === 'aaa' && !('wh' in g1) && !JSON.stringify(g1).includes(TOK), JSON.stringify(g1));
+    const stored = env.SCHED.m.get('vault:' + ID);
+    ok('the token is kept only as its hash', !stored.includes(TOK) && /"wh":"[0-9a-f]{64}"/.test(stored), stored.slice(0, 120));
+    r = await hit('PUT', V, { key: BAD, body: { iv: 'x', ct: 'y', base: 1 } });
+    ok('a write with the wrong token is refused', r.status === 403, r.status);
+    r = await hit('DELETE', V, { key: BAD });
+    ok('...and so is a delete', r.status === 403 && env.SCHED.m.has('vault:' + ID), r.status);
+    r = await hit('PUT', V, { key: TOK, body: { iv: 'x', ct: 'stale', base: 0 } });
+    const w409 = await r.json();
+    ok('a write built on an old revision is a 409 naming the current one',
+      r.status === 409 && w409.rev === 1 && (await (await hit('GET', V)).json()).ct === 'bbb', r.status + ' ' + JSON.stringify(w409));
+    r = await hit('PUT', V, { key: TOK, body: { iv: 'x', ct: 'ccc', base: 1 } });
+    ok('a write on the current revision moves it on', (await r.json()).rev === 2);
+    r = await hit('PUT', V, { key: TOK, body: { iv: 'x', ct: 'z'.repeat(2 * 1024 * 1024 + 10), base: 2 } });
+    ok('a vault is capped', r.status === 413 || r.status === 400, r.status);
+    r = await hit('PUT', '/v1/vault/NOT-AN-ID', { key: TOK, body: { iv: 'x', ct: 'y', base: 0 } });
+    ok('an id that is not 32 hex characters names nothing', r.status === 404, r.status);
+    r = await hit('DELETE', V, { key: TOK });
+    ok('the right token deletes it', r.status === 200 && !env.SCHED.m.has('vault:' + ID), r.status);
+    r = await hit('OPTIONS', V);
+    ok('a preflight allows the write and its token',
+      /PUT/.test(r.headers.get('Access-Control-Allow-Methods')) && /Authorization/i.test(r.headers.get('Access-Control-Allow-Headers')),
+      r.headers.get('Access-Control-Allow-Methods') + ' / ' + r.headers.get('Access-Control-Allow-Headers'));
+  }
+
   /* ── the deployment config, parsed rather than eyeballed ──
      wrangler.toml is the other half of this worker and nothing here
      used to look at it. It cost a real bug: `workers_dev = true` was

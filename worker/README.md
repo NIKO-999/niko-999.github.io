@@ -1,6 +1,16 @@
 # The worker
 
-The server for the friends half of `schedule/`. Everything else in this
+Two routes now: a podcast feed reader for `schedule/`, and the **sync
+vault** for `cadence/`. The vault stores one sealed blob per sync code —
+the app encrypts its record on the device before sending it, so this
+worker holds ciphertext it cannot open, plus the SHA-256 of a write
+token. It has no idea whose it is. Redeploy after pulling this change
+(a Git-connected worker redeploys itself when `main` moves; otherwise
+`npx wrangler deploy` from this folder), or Cadence's sync reports that
+it cannot reach the server.
+
+What follows was written when this was the server for the friends half
+of `schedule/`. Everything else in this
 repository runs in your browser and sends nothing anywhere. This does
 not, which is the whole reason it is a separate folder with its own
 README rather than a file somewhere in the app.
