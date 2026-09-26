@@ -41,28 +41,35 @@
   /* ---------- lunar points (Meeus, Astronomical Algorithms ch. 47) ---------- */
   function meanNode(date) {
     const T = centuries(date);
-    return norm(125.0445479 - 1934.1362891 * T + 0.0020754 * T * T + (T * T * T) / 467441 - (T ** 4) / 60616000);
+    let n = norm(125.0445479 - 1934.1362891 * T + 0.0020754 * T * T + (T * T * T) / 467441 - (T ** 4) / 60616000);
+    const C = global.NODE_CORR; // small table aligning with the Swiss Ephemeris mean node
+    if (C) {
+      const f = (julianDay(date) - C.jd0) / C.step, i = Math.floor(f);
+      if (i >= 0 && i < C.v.length - 1) n = norm(n + (C.v[i] + (C.v[i + 1] - C.v[i]) * (f - i)) / 6000);
+    }
+    return n;
   }
+  /** True (osculating) node: where the Moon's instantaneous orbital plane crosses the ecliptic of date. */
   function trueNode(date) {
-    const T = centuries(date);
-    const D = 297.8501921 + 445267.1114034 * T;
-    const M = 357.5291092 + 35999.0502909 * T;
-    const Mp = 134.9633964 + 477198.8675055 * T;
-    const F = 93.272095 + 483202.0175233 * T;
-    return norm(
-      meanNode(date) -
-        1.4979 * sind(2 * (D - F)) -
-        0.15 * sind(M) -
-        0.1226 * sind(2 * D) +
-        0.1176 * sind(2 * F) -
-        0.0801 * sind(2 * (Mp - F))
-    );
+    const t = A.MakeTime(date);
+    const st = A.GeoMoonState(t);
+    const rot = A.Rotation_EQJ_ECT(t);
+    const r = A.RotateVector(rot, new A.Vector(st.x, st.y, st.z, t));
+    const v = A.RotateVector(rot, new A.Vector(st.vx, st.vy, st.vz, t));
+    const hx = r.y * v.z - r.z * v.y, hy = r.z * v.x - r.x * v.z;
+    return norm(Math.atan2(hx, -hy) * R2D);
   }
   /** Mean Black Moon Lilith = mean lunar apogee. */
   function meanLilith(date) {
     const T = centuries(date);
     const perigee = 83.3532465 + 4069.0137287 * T - 0.01032 * T * T - (T ** 3) / 80053 + (T ** 4) / 18999000;
-    return norm(perigee + 180);
+    let lil = norm(perigee + 180);
+    const C = global.LILITH_CORR;
+    if (C) {
+      const f = (julianDay(date) - C.jd0) / C.step, i = Math.floor(f);
+      if (i >= 0 && i < C.v.length - 1) lil = norm(lil + (C.v[i] + (C.v[i + 1] - C.v[i]) * (f - i)) / 6000);
+    }
+    return lil;
   }
 
   /* ---------- Chiron from integrated state table ---------- */
@@ -235,6 +242,18 @@
     };
   }
 
+  // Topocentric (Polich-Page) and Campanus, as in Swiss Ephemeris houses.c
+  function topocentric(ramc, lat, eps) {
+    const f1 = Math.atan(tand(lat) / 3) * R2D, f2 = Math.atan((tand(lat) * 2) / 3) * R2D;
+    return { 11: asc1(ramc + 30, f1, eps), 12: asc1(ramc + 60, f2, eps), 2: asc1(ramc + 120, f2, eps), 3: asc1(ramc + 150, f1, eps) };
+  }
+  function campanus(ramc, lat, eps) {
+    const f1 = asind(sind(lat) / 2), f2 = asind((Math.sqrt(3) / 2) * sind(lat));
+    const c = cosd(lat);
+    const x1 = Math.atan(Math.sqrt(3) / c) * R2D, x2 = Math.atan(1 / Math.sqrt(3) / c) * R2D;
+    return { 11: asc1(ramc + 90 - x1, f1, eps), 12: asc1(ramc + 90 - x2, f2, eps), 2: asc1(ramc + 90 + x2, f2, eps), 3: asc1(ramc + 90 + x1, f1, eps) };
+  }
+
   function computeHouses(system, ramc, lat, eps) {
     let asc = ascFor(ramc, lat, eps);
     const mc = mcFor(ramc, eps);
@@ -246,6 +265,8 @@
     if (system === "placidus") q = placidus(ramc, lat, eps);
     else if (system === "koch") q = koch(ramc, lat, eps, mc);
     else if (system === "regiomontanus") q = regiomontanus(ramc, lat, eps);
+    else if (system === "topocentric") q = topocentric(ramc, lat, eps);
+    else if (system === "campanus") q = campanus(ramc, lat, eps);
 
     if ((system === "placidus" || system === "koch") && !q) used = "porphyry";
 
@@ -485,7 +506,10 @@
     const cusps = hs.cusps.map((c) => (c === undefined ? c : shift(c)));
     const asc = shift(hs.asc), mc = shift(hs.mc);
     const vtxLat = input.lat >= 0 ? 90 - input.lat : -90 - input.lat;
-    const vertex = shift(asc1(ramc - 90, vtxLat, eps));
+    let vertexRaw = asc1(ramc - 90, vtxLat, eps);
+    // the Vertex always falls in the western half, within 90 degrees of the Descendant
+    if (Math.abs(diff(hs.asc + 180, vertexRaw)) > 90) vertexRaw = norm(vertexRaw + 180);
+    const vertex = shift(vertexRaw);
 
     const sun = points.find((p) => p.key === "sun");
     const moon = points.find((p) => p.key === "moon");
@@ -508,11 +532,25 @@
     }
 
     const aspects = findAspects(points, { minorAspects: opts.minorAspects, orbScale: opts.orbScale, timeKnown });
+    // declination aspects, as listed by Astro-Seek: parallel (same declination) and contra-parallel (mirror image)
+    const DEC_KEYS = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron"];
+    const decPts = points.filter((p) => DEC_KEYS.includes(p.key) && typeof p.dec === "number");
+    const parallels = [];
+    for (let i = 0; i < decPts.length; i++) {
+      for (let j = i + 1; j < decPts.length; j++) {
+        const a = decPts[i], b = decPts[j];
+        const par = Math.abs(a.dec - b.dec), con = Math.abs(a.dec + b.dec);
+        const orb = 1 * (opts.orbScale || 1);
+        if (par <= orb) parallels.push({ a: a.key, b: b.key, type: "parallel", orb: par, strength: 1 - par / orb });
+        else if (con <= orb) parallels.push({ a: a.key, b: b.key, type: "contraparallel", orb: con, strength: 1 - con / orb });
+      }
+    }
+    parallels.sort((x, y) => x.orb - y.orb);
     const patterns = findPatterns(aspects, points);
     const moonPhaseAngle = norm(moon.lon - sun.lon);
 
     return {
-      input, opts, timeKnown, points, aspects, patterns,
+      input, opts, timeKnown, points, aspects, patterns, parallels,
       houses: timeKnown ? cusps : null,
       houseSystemUsed: hs.used,
       asc, mc, vertex, fortune, ramc, eps, ayanamsa: ayan, isDay, moonPhaseAngle,

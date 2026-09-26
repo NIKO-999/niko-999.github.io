@@ -322,6 +322,10 @@
       desc: "A sesquiquadrate (135°) is a minor stress aspect that tends to trigger sudden adjustments." },
     quintile: { name: "Quintile", glyph: "Q", verb: "inspires", color: "#c7a8f2",
       desc: "A quintile (72°) is a creative aspect of talent and style — a signature gift you develop with practice." },
+    parallel: { name: "Parallel", glyph: "∥", verb: "is parallel to", color: "#e6c98f",
+      desc: "A parallel means both planets sit at the same declination, the same distance north or south of the celestial equator. It works much like a conjunction: the two energies blend and strengthen each other." },
+    contraparallel: { name: "Contra-parallel", glyph: "⋕", verb: "is contra-parallel to", color: "#e2a08b",
+      desc: "A contra-parallel means the planets sit at equal declination on opposite sides of the celestial equator. It works much like an opposition: awareness through contrast and the need for balance." },
     biquintile: { name: "Bi-quintile", glyph: "bQ", verb: "sparks", color: "#c7a8f2",
       desc: "A bi-quintile (144°) is a subtle creative link that often shows in unusual talents." },
   };
@@ -408,6 +412,7 @@
 
   const HOUSE_SYSTEMS = {
     placidus: "Placidus", koch: "Koch", regiomontanus: "Regiomontanus", porphyry: "Porphyry", equal: "Equal", whole: "Whole Sign",
+    topocentric: "Topocentric", campanus: "Campanus",
   };
 
   global.AstroContent = {

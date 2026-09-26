@@ -617,6 +617,18 @@
       </button>`;
     });
     html += `</div><p class="note">Orb = distance from exact. Applying aspects are still building and tend to feel stronger.</p>`;
+    if (c.parallels && c.parallels.length) {
+      html += `<div class="section-label">Declination aspects · ${c.parallels.length}</div><div class="list">`;
+      c.parallels.forEach((a, i) => {
+        const X = ASPECTS[a.type];
+        html += `<button class="row" data-open="parallel:${i}">
+          <span class="dot" style="color:${X.color}"></span>
+          <span class="main"><div class="title">${esc(pShort(a.a))} <span class="sym" style="color:${X.color};font-size:.85em">${X.glyph}</span> ${esc(pShort(a.b))}</div>
+          <div class="sub">${esc(X.name)}</div></span>
+          <span class="end"><div class="pos">${orbStr(a.orb)}</div></span></button>`;
+      });
+      html += `</div><p class="note">Parallels and contra-parallels compare how far north or south of the celestial equator each planet sits (declination), within a 1° orb.</p>`;
+    }
     return html;
   }
 
@@ -814,6 +826,7 @@
         case "sign": return ELEMENT_COLOR()[SIGNS[arg].element];
         case "element": return K.ELEMENTS[arg].color;
         case "aspect": return ASPECTS[c.aspects[+arg].type].color;
+        case "parallel": return ASPECTS[c.parallels[+arg].type].color;
         case "transit": return PLANETS[computeTransits().list[+arg].t].color;
         case "area": return LIFE_AREAS[arg].color;
         case "phase": return PLANETS.moon.color;
@@ -1141,6 +1154,19 @@
       case "house": html = sheetHouse(+arg); break;
       case "aspect": html = sheetAspect(+arg); break;
       case "transit": html = sheetTransit(+arg); break;
+      case "parallel": {
+        const a = c.parallels[+arg], X = ASPECTS[a.type];
+        const pa = c.get(a.a), pb = c.get(a.b);
+        const dA = deepAspect(a.a, a.b);
+        const dec = (p) => `${Math.abs(p.dec).toFixed(2)}° ${p.dec >= 0 ? "N" : "S"}`;
+        html = `<section class="hero"><div class="eyebrow">${esc(X.name)} · declination</div>
+          <h2 class="display">${esc(pShort(a.a))} <span class="sym" style="color:${X.color}">${X.glyph}</span> ${esc(pShort(a.b))}</h2>
+          <div class="subline">orb ${orbStr(a.orb)}</div></section>`;
+        html += facts([[pName(a.a), dec(pa)], [pName(a.b), dec(pb)], ["Acts like", a.type === "parallel" ? "Conjunction" : "Opposition"], ["Strength", `${Math.round(a.strength * 100)}%`]]);
+        html += paras([X.desc]);
+        if (dA) html += sec(`${pName(a.a)} and ${pName(a.b)}`, [dA.theme, a.type === "parallel" ? dA.fusion : dA.tension]);
+        break;
+      }
       case "tplanet": html = sheetTransitPlanet(arg); break;
       case "element": {
         const X = K.ELEMENTS[arg], list = d.elements[arg], B = deepBalance(arg);
@@ -1688,6 +1714,8 @@
         ${opt("houseSystem", "equal", "Equal", "30° from the Ascendant")}
         ${opt("houseSystem", "porphyry", "Porphyry", "Trisected quadrants")}
         ${opt("houseSystem", "regiomontanus", "Regiomontanus", "Horary favourite")}
+        ${opt("houseSystem", "topocentric", "Topocentric", "Polich-Page · close to Placidus")}
+        ${opt("houseSystem", "campanus", "Campanus", "Prime vertical divisions")}
       </div>
       <h4>Zodiac</h4><div class="opt-list">
         ${opt("zodiac", "tropical", "Tropical", "Western · season-based")}
