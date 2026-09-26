@@ -469,7 +469,7 @@
 
     /* ---------- slow axial spin (runs inside the worker) ---------- */
     // seconds per full turn
-    const PERIOD = { ring: 80, moon: 100, far: 60 };
+    const PERIOD = { ring: 40, moon: 40, far: 25 };
     let paused = false;
     function buildMap(kind, parts, W) {
       const r = parts.R * W;
@@ -632,7 +632,7 @@
       frame(true);
       post({ type: "spinReady", kind });
       let last = Date.now();
-      const step = 1000 / (kind === "far" ? 4 : 10);
+      const step = 1000 / (kind === "far" ? 12 : 20);
       setInterval(() => {
         const now = Date.now();
         if (!paused) {
