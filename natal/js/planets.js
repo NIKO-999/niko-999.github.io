@@ -14,7 +14,7 @@
  */
 (function () {
   "use strict";
-  const SKY_VERSION = "sky-8";
+  const SKY_VERSION = "sky-9";
 
   /* Everything the worker needs lives inside SKYLIB, so its source can be
      shipped to a Worker via toString(). No DOM access in here. */
@@ -164,7 +164,7 @@
           const lit = shadowed ? 0.06 : 0.5 + 0.5 * Math.abs(NL);
           // position around the ring, measured in the ring plane
           const th = Math.atan2(y * Math.sin(open) - zr * Math.cos(open), x);
-          ring = { tint: ringTint(rRing), lit, a0: dens * 0.92, r: rRing, th };
+          ring = { col: mix3(SKY, ringTint(rRing), lit), a0: dens * 0.92, r: rRing, th };
         }
         if (rr < (1 + edge) * (1 + edge)) {
           const z = Math.sqrt(Math.max(0, 1 - rr));
@@ -195,54 +195,26 @@
         }
         return ring ? { ring } : null;
       }
-      /** Clumps and streaks in the rings, narrow across the ring and drawn out along it so their orbit
-          shows: m is the density, o the amount of rusty orange material. */
+      /** Clumps and streaks in the rings: narrow across the ring, drawn out along it, so their orbit shows. */
       function ringMod(r, th) {
         const c = Math.cos(th), s = Math.sin(th);
         const v = fbm(r * 48, c * 1.4, s * 1.4, 3) * 1.6 + noise(r * 170, c * 5, s * 5) * 0.35;
-        const o = smooth(0.06, 0.34, fbm(r * 22 + 5, c * 1.7 + 1, s * 1.7, 3) + noise(r * 90, c * 6, s * 6 + 2) * 0.25);
-        return [clamp(0.5 + v, 0, 1), o];
+        return clamp(0.5 + v, 0, 1);
       }
-      const ORANGE = [246, 138, 58];
       /** Final pixel from the planet colour (if the planet is here) and the ring modulation. */
-      function finish(px, planetCol, m, o) {
+      function finish(px, planetCol, m) {
         let c = null, a = 0;
         if (planetCol) { c = [px.A * planetCol[0] + px.B[0], px.A * planetCol[1] + px.B[1], px.A * planetCol[2] + px.B[2]]; a = px.a / 255; }
         const ring = px.ring;
         if (ring) {
-          const ra = clamp(ring.a0 * (0.62 + 0.76 * m + 0.25 * o), 0, 1);
+          const ra = clamp(ring.a0 * (0.62 + 0.76 * m), 0, 1);
           const k = 0.8 + 0.4 * m;
-          const base = mix3([ring.tint[0] * k, ring.tint[1] * k, ring.tint[2] * k], ORANGE, o * 0.8);
-          const rc = mix3(SKY, base, ring.lit);
+          const rc = [ring.col[0] * k, ring.col[1] * k, ring.col[2] * k];
           if (c) { c = mix3(c, rc, ra); a = clamp(a + ra, 0, 1); } else { c = rc; a = ra; }
         }
         return [c[0], c[1], c[2], a * 255];
       }
-      /** Rocks orbiting within the rings: returns what to draw for each at a given turn. */
-      function rocks() {
-        let sd = 4242;
-        const rnd = () => ((sd = (sd * 16807) % 2147483647) / 2147483647);
-        const list = [];
-        while (list.length < 120) {
-          const r = 1.3 + rnd() * 0.95;
-          if (r > 1.95 && r < 2.03) continue; // keep the gap clear
-          list.push({ r, th: rnd() * TAU, size: 0.0014 + Math.pow(rnd(), 4) * 0.0042, w: Math.pow(1.6 / r, 1.5), tone: rnd() });
-        }
-        return list;
-      }
-      /** Where a ring-plane point lands on the canvas (fx, fy), its depth, and whether it is in shadow or hidden. */
-      function place(r, th) {
-        const x = r * Math.cos(th), y = r * Math.sin(th) * Math.sin(open), z = -r * Math.sin(th) * Math.cos(open);
-        const hidden = z < 0 && x * x + y * y < 1;
-        const b = x * LIGHT[0] + y * LIGHT[1] + z * LIGHT[2], c = r * r - 1;
-        const shadowed = b * b - c > 0 && -b - Math.sqrt(b * b - c) > 0;
-        const sx = x * cr - y * sr, sy = x * sr + y * cr;
-        return { fx: 0.5 + sx * R, fy: 0.5 - sy * R, hidden, shadowed };
-      }
-      // the sunrise light's direction on the canvas, for lighting the rocks
-      const lsx = LIGHT[0] * cr - LIGHT[1] * sr, lsy = -(LIGHT[0] * sr + LIGHT[1] * cr);
-      const ll = Math.hypot(lsx, lsy) || 1;
-      return { R, pixel, albedo, ringMod, finish, RIN, ROUT, rocks, place, lightDir: [lsx / ll, lsy / ll] };
+      return { R, pixel, albedo, ringMod, finish, RIN, ROUT };
     }
 
     /* ================= moon ================= */
@@ -481,8 +453,7 @@
           if (!px) continue;
           let c, a;
           if (kind === "giant") {
-            const mo = px.ring ? parts.ringMod(px.ring.r, px.ring.th) : [0, 0];
-            c = parts.finish(px, px.lat !== undefined ? parts.albedo(px.lat, px.lon) : null, mo[0], mo[1]);
+            c = parts.finish(px, px.lat !== undefined ? parts.albedo(px.lat, px.lon) : null, px.ring ? parts.ringMod(px.ring.r, px.ring.th) : 0);
             a = c[3];
           } else {
             c = px.rgba || colourOf(parts, px, parts.albedo(px.lat, px.lon));
@@ -549,17 +520,14 @@
     }
     /* The gas giant itself stays still; its rings orbit, inner edge faster than outer (Kepler). */
     function ringMap(parts) {
-      const MR = 384, MT = 1536, m = new Float32Array(MR * MT * 2);
+      const MR = 384, MT = 1536, m = new Float32Array(MR * MT);
       for (let j = 0; j < MR; j++) {
         const r = parts.RIN + ((j + 0.5) / MR) * (parts.ROUT - parts.RIN);
-        for (let i = 0; i < MT; i++) {
-          const v = parts.ringMod(r, -Math.PI + ((i + 0.5) / MT) * TAU);
-          m[(j * MT + i) * 2] = v[0]; m[(j * MT + i) * 2 + 1] = v[1];
-        }
+        for (let i = 0; i < MT; i++) m[j * MT + i] = parts.ringMod(r, -Math.PI + ((i + 0.5) / MT) * TAU);
       }
       return { MR, MT, m };
     }
-    function sampleRing(map, parts, r, th, out) {
+    function sampleRing(map, parts, r, th) {
       const { MR, MT, m } = map;
       let u = ((th + Math.PI) / TAU) * MT - 0.5;
       u -= MT * Math.floor(u / MT);
@@ -567,12 +535,9 @@
       v = v < 0 ? 0 : v > MR - 1 ? MR - 1 : v;
       const i0 = Math.floor(u), j0 = Math.floor(v), fu = u - i0, fv = v - j0;
       const i1 = (i0 + 1) % MT, j1 = j0 + 1 < MR ? j0 + 1 : j0;
-      const a = (j0 * MT + i0) * 2, b = (j0 * MT + i1) * 2, c = (j1 * MT + i0) * 2, d = (j1 * MT + i1) * 2;
-      for (let k = 0; k < 2; k++) {
-        const top = m[a + k] + (m[b + k] - m[a + k]) * fu, bot = m[c + k] + (m[d + k] - m[c + k]) * fu;
-        out[k] = top + (bot - top) * fv;
-      }
-      return out;
+      const top = m[j0 * MT + i0] + (m[j0 * MT + i1] - m[j0 * MT + i0]) * fu;
+      const bot = m[j1 * MT + i0] + (m[j1 * MT + i1] - m[j1 * MT + i0]) * fu;
+      return top + (bot - top) * fv;
     }
     function spinRings(canvas, W, post) {
       const parts = giantParts();
@@ -590,7 +555,7 @@
           px.fm = fadeMask(fx, fy);
           px.pc = px.lat !== undefined ? parts.albedo(px.lat, px.lon) : null;
           if (!px.ring) {
-            const c = parts.finish(px, px.pc, 0, 0);
+            const c = parts.finish(px, px.pc, 0);
             d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = c[3] * px.fm;
             continue;
           }
@@ -600,40 +565,15 @@
           if (col < x0) x0 = col; if (col > x1) x1 = col; if (row < y0) y0 = row; if (row > y1) y1 = row;
         }
       }
-      x0 = Math.max(0, x0 - 8); y0 = Math.max(0, y0 - 8); x1 = Math.min(W - 1, x1 + 8); y1 = Math.min(W - 1, y1 + 8);
-      const ROCKS = parts.rocks();
-      const [ldx, ldy] = parts.lightDir;
-      const mo = [0, 0];
       let turn = 0; // radians turned at the reference radius
       const frame = (full) => {
         for (let n = 0; n < live.length; n++) {
           const px = live[n];
-          sampleRing(map, parts, px.ring.r, px.ring.th - turn * px.w, mo);
-          const c = parts.finish(px, px.pc, mo[0], mo[1]);
+          const c = parts.finish(px, px.pc, sampleRing(map, parts, px.ring.r, px.ring.th - turn * px.w));
           d[px.i] = c[0]; d[px.i + 1] = c[1]; d[px.i + 2] = c[2]; d[px.i + 3] = c[3] * px.fm;
         }
         if (full) ctx.putImageData(img, 0, 0);
         else ctx.putImageData(img, 0, 0, x0, y0, x1 - x0 + 1, y1 - y0 + 1);
-        // rocks, lit on the side facing the sunrise, hidden when they pass behind the planet
-        for (const k of ROCKS) {
-          const q = parts.place(k.r, k.th + turn * k.w);
-          if (q.hidden) continue;
-          const cx = q.fx * W, cy = q.fy * W, rad = k.size * W;
-          const fm = fadeMask(q.fx, q.fy);
-          const g = ctx.createRadialGradient(cx + ldx * rad * 0.45, cy + ldy * rad * 0.45, rad * 0.1, cx, cy, rad);
-          if (q.shadowed) {
-            g.addColorStop(0, "rgba(70,74,84," + fm + ")"); g.addColorStop(1, "rgba(24,32,42," + fm + ")");
-          } else {
-            const warm = k.tone > 0.5;
-            g.addColorStop(0, warm ? "rgba(250,176,116," + fm + ")" : "rgba(222,210,194," + fm + ")");
-            g.addColorStop(0.6, warm ? "rgba(150,98,66," + fm + ")" : "rgba(128,118,108," + fm + ")");
-            g.addColorStop(1, "rgba(44,44,50," + fm * 0.8 + ")");
-          }
-          ctx.fillStyle = g;
-          ctx.beginPath();
-          ctx.arc(cx, cy, rad, 0, TAU);
-          ctx.fill();
-        }
       };
       frame(true);
       post({ type: "spinReady", kind: "giant" });
