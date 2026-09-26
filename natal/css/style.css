@@ -85,14 +85,12 @@ input, select { font: inherit; color: inherit; }
 /* ---------------- layout ---------------- */
 .app { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; padding: 0 var(--gutter) 120px; }
 .topbar {
-  position: sticky; top: 0; z-index: 20;
+  position: relative; z-index: 20;
   display: flex; align-items: center; gap: 6px;
   padding: calc(env(safe-area-inset-top, 0px) + 18px) 0 14px;
   margin: 0 calc(var(--gutter) * -1);
   padding-left: calc(var(--gutter) - 8px); padding-right: calc(var(--gutter) - 8px);
-  background: linear-gradient(180deg, rgba(12, 26, 38, 0.92) 0%, rgba(12, 26, 38, 0.65) 70%, rgba(12, 26, 38, 0) 100%);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: none;
 }
 .icon-btn { width: 44px; height: 44px; display: grid; place-items: center; flex: 0 0 auto; color: var(--text); border-radius: 50%; opacity: 0.9; }
 .icon-btn:hover { background: rgba(255, 255, 255, 0.06); }
@@ -645,3 +643,12 @@ table.agrid td.cell { font-size: 11.5px; }
 .gold-btn { width: 112px; height: 38px; border-radius: 999px; margin-top: 30px;
   box-shadow: 0 0 0 4px rgba(236, 241, 246, 0.06), 0 6px 18px rgba(236, 241, 246, 0.18); }
 .gold-btn svg { width: 17px; height: 17px; stroke-width: 1.5; }
+
+
+/* "Last entered" shortcut on the entry page */
+.last-entered { display: flex; justify-content: center; margin-top: 18px; }
+.last-pill { display: flex; flex-direction: column; align-items: center; gap: 3px; max-width: 100%;
+  padding: 9px 18px; border-radius: 999px; border: 1px solid var(--line-2); background: rgba(10, 22, 33, 0.25); }
+.last-pill:hover { border-color: var(--accent); }
+.last-pill .last-k { font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
+.last-pill .last-v { font-size: 13.5px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 78vw; }
