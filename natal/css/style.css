@@ -48,7 +48,7 @@ input, select { font: inherit; color: inherit; }
   position: fixed; top: calc(-1 * env(safe-area-inset-top, 0px)); left: 0; right: 0;
   height: calc(100lvh + env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px) + 60px);
   z-index: 0; pointer-events: none; overflow: hidden;
-  background: linear-gradient(180deg, #0a1520 0%, #10202f 14%, #183349 32%, #25506c 52%, #3a6a88 66%, #5d88a3 76%, #8fa6b3 84%, #b3a597 92%, #c9a488 100%);
+  background: linear-gradient(180deg, #0a1520 0%, #10202f 14%, #183349 32%, #25506c 52%, #3a6a88 66%, #5d88a3 76%, #8fa6b3 82%, #d49a6e 86%, #3a3439 89%, #2e333b 100%); /* below the horizon the sky is the planet colour, so no pale strip can ever show */
 }
 #stars { position: absolute; inset: 0; }
 .nebula {
