@@ -5258,6 +5258,25 @@ always ends by drawing the day again, so the row it started on is gone
 before its click can arrive. Proved by taking the swallowing out and
 watching the drop-back check still pass, then deleted as dead code.
 
+### Putting a room together is furniture, and sixty-six kinds
+
+Asked for straight after the brand rule, on the one phrase it had held
+back. *Putting room together* stayed the square because nothing in it
+was a word the table knew; it is a sofa now, and so is assembling,
+flat pack, IKEA, a sofa, shelves and decorating. **Kmart stays the
+square**: a shop you go to is not a kind of thing you do there.
+
+**Assemble and IKEA left the wrench.** A spanner says something broke,
+and a new desk did not. The furniture row sits directly before fix, so
+*Fix the sink* is still a repair.
+
+Five more with it: home (moving, an inspection, a renovation), trip (a
+suitcase, listed after pack so *Pack for trip* is still packing), dance,
+surf and beach. **Surf was a board and read as a leaf at 18px; beach was
+an umbrella and read as a lamp.** Both were redrawn as the thing around
+them, a wave curling over a line and an umbrella leant into sand, and
+judged again at the size a row draws them.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

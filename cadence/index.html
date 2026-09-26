@@ -899,6 +899,8 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     ['swim', /\b(swim|swimming|laps|pool)\b/],
     ['cycle', /\b(cycle|cycling|bike|biking|spin class|spin|peloton)\b/],
     ['sport', /\b(tennis|football|soccer|basketball|netball|rugby|golf|padel|squash|badminton|cricket|hockey|volleyball|climbing|bouldering|martial arts|jiu jitsu|bjj|sport|match)\b/],
+    ['dance', /\b(dance|dancing|zumba|ballet|salsa|barre)\b/],
+    ['surf', /\b(surf|surfing|kayak|kayaking|paddle board|paddleboard|sup|sail|sailing|rowing)\b/],
     ['train', /\b(work out|workout|gym|train|training|lift|lifting|weights|push day|pull day|leg day|legs|upper|lower|full body|crossfit|hiit|pilates|boxing|strength)\b/],
     ['stretch', /\b(stretch|stretching|yoga|mobility|recovery|sauna|plunge|foam roll|massage)\b/],
     ['hike', /\b(hike|hiking|trail|trek|mountain)\b/],
@@ -921,6 +923,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     ['sun', /\b(sunlight|morning light|sunshine|sun|get outside|outside|fresh air)\b/],
     ['fly', /\b(flight|fly|flying|airport|plane)\b/],
     ['car', /\b(drive|driving|car|car wash|petrol|fuel up|oil change|service the car)\b/],
+    ['home', /\b(move house|moving house|moving|house hunting|house inspection|inspection|open home|real estate|renovate|renovation|landlord|new place)\b/],
     ['move', /\b(commute|bus|travel|school run|pick up|drop off|uber)\b/],
     ['mail', /\b(emails?|inbox|mail|newsletter)\b/],
     ['phone', /\b(phone call|calls?|phone|facetime|call mum|call dad)\b/],
@@ -937,7 +940,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     ['laundry', /\b(laundry|washing|ironing|fold clothes)\b/],
     ['bin', /\b(bins|bin|trash|rubbish|recycling|garbage)\b/],
     ['pack', /\b(pack|packing|unpack|parcel|parcels|post office|delivery|returns)\b/],
-    ['fix', /\b(fix|repair|repairs|diy|maintenance|assemble|ikea|plumber)\b/],
+    ['trip', /\b(holiday|holidays|vacation|trip|getaway|weekend away|road trip|hotel)\b/],
+    ['beach', /\b(beach|the coast|seaside|lake|picnic)\b/],
+    ['furniture', /\b(put(?:ting)? (?:the |a |my |our )?(?:room|furniture|desk|shelf|shelves|wardrobe|table|drawers|bed frame)(?: together)?|room together|furniture|assemble|flat ?pack|ikea|sofa|couch|wardrobe|shelves|rearrange|decorate|decorating)\b/],
+    ['fix', /\b(fix|repair|repairs|diy|maintenance|plumber)\b/],
     ['clean', /\b(clean|cleaning|tidy|tidy up|vacuum|hoover|dishes|declutter|chores|mop|make the bed|make bed)\b/],
     ['cut', /\b(haircut|hair cut|barber|hairdresser|nails|manicure|trim)\b/],
     ['shower', /\b(shower|bath|skincare|skin care|shave|brush teeth|teeth|floss|get ready|hygiene)\b/],
@@ -951,11 +957,11 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     ['game', /\b(game|games|gaming|video games|chess|xbox|playstation|ps5)\b/],
     ['sleep', /\b(wind down|sleep|bed|bedtime|nap)\b/]
   ];
-  var CAT = { train: 'body', run: 'body', stretch: 'body', walk: 'body', warm: 'body', swim: 'body', cycle: 'body', sport: 'body',
+  var CAT = { train: 'body', run: 'body', stretch: 'body', walk: 'body', warm: 'body', swim: 'body', cycle: 'body', sport: 'body', dance: 'body', surf: 'body',
     read: 'mind', study: 'mind', calm: 'mind', write: 'mind', listen: 'mind', music: 'mind',
     chart: 'work', move: 'work', work: 'work', code: 'work', mail: 'work', phone: 'work', talk: 'work', money: 'work', plan: 'work',
     wake: 'rest', eat: 'rest', coffee: 'rest', sleep: 'rest', cook: 'rest', water: 'rest', sun: 'rest', shower: 'rest', meds: 'rest', health: 'rest',
-    shop: 'rest', hike: 'body', fish: 'rest', news: 'mind', idea: 'mind', art: 'mind', photo: 'mind', film: 'work', fly: 'work', car: 'work', baby: 'rest', drink: 'rest', bin: 'rest', pack: 'rest', fix: 'rest', cut: 'rest', heart: 'rest', gift: 'rest', ticket: 'rest', laundry: 'rest', clean: 'rest', pet: 'rest', plant: 'rest', people: 'rest', screen: 'rest', game: 'rest', dot: 'none' };
+    shop: 'rest', hike: 'body', fish: 'rest', news: 'mind', idea: 'mind', art: 'mind', photo: 'mind', film: 'work', fly: 'work', car: 'work', baby: 'rest', drink: 'rest', bin: 'rest', pack: 'rest', fix: 'rest', cut: 'rest', heart: 'rest', gift: 'rest', ticket: 'rest', laundry: 'rest', clean: 'rest', pet: 'rest', furniture: 'rest', home: 'rest', trip: 'rest', beach: 'rest', plant: 'rest', people: 'rest', screen: 'rest', game: 'rest', dot: 'none' };
   var TRAINING = { train: 1, run: 1, stretch: 1 };
   function cdKind(name) {
     var s = String(name || '').toLowerCase();
@@ -1027,6 +1033,12 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     heart: '<path d="M12 20s-8-4.8-8-10.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.5C20 15.2 12 20 12 20z"/>',
     gift: '<rect x="3.5" y="8.5" width="17" height="4" rx="1"/><path d="M5 12.5v8h14v-8M12 8.5v12M12 8.5C10.5 4.5 7 4 7 6.5 7 8 9 8.5 12 8.5zM12 8.5c1.5-4 5-4.5 5-2 0 1.5-2 2-5 2z"/>',
     ticket: '<path d="M3 7.5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1V10a2 2 0 0 0 0 4v2.5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V14a2 2 0 0 0 0-4zM14 6.5v2M14 11v2M14 15.5v2"/>',
+    furniture: '<path d="M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3M3 13a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v5H3zM5 18v2.5M19 18v2.5"/>',
+    home: '<path d="M3.5 11L12 4l8.5 7M6 9.5V20h12V9.5M10 20v-5h4v5"/>',
+    trip: '<rect x="6" y="6.5" width="12" height="13" rx="2"/><path d="M10 6.5V4h4v2.5M10 10v6M14 10v6M8.5 19.5v1.5M15.5 19.5v1.5"/>',
+    dance: '<circle cx="12" cy="4.5" r="1.8"/><path d="M6.5 5.5L12 9l5.5-3.5M12 9v4.5M12 13.5L8 20.5M12 13.5l4 7M9.5 17h5"/>',
+    surf: '<path d="M2.5 17.5c2.5 0 3.5-2 5-4.5S11.5 7 15 7c3 0 5 2.2 5 4.8 0 2-1.5 3.2-3.2 3.2-2 0-2.8-1.8-1.6-3.3M2.5 20.5h19"/>',
+    beach: '<path d="M4 10.5a8.5 8.5 0 0 1 15.8-4.3zM11.9 8.4l3.6 12.1M3 20.5h18"/>',
     dot: '<rect x="7" y="7" width="10" height="10" rx="2.5"/>'
   };
   function cdGlyph(k) { return '<span class="cd-rg" data-g="' + k + '" aria-hidden="true"><svg viewBox="0 0 24 24">' + (GLYPH[k] || GLYPH.dot) + '</svg></span>'; }

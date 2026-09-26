@@ -743,7 +743,9 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       'Film content': 'film', 'Fly to Sydney': 'fly', 'Drive to work': 'car', 'Feed the baby': 'baby', 'Drinks with mates': 'drink',
       'Take out the bins': 'bin', 'Pack for trip': 'pack', 'Fix the sink': 'fix', 'Haircut': 'cut', 'Self care': 'heart', 'Birthday': 'gift',
       'Concert': 'ticket', 'Watch a show': 'screen',
-      'Kmart': 'dot', 'Putting room together': 'dot' };
+      'Putting room together': 'furniture', 'Assemble IKEA desk': 'furniture', 'New sofa delivered': 'furniture', 'Move house': 'home',
+      'Holiday': 'trip', 'Dance class': 'dance', 'Surf': 'surf', 'Beach day': 'beach',
+      'Kmart': 'dot' };
     const got = {};
     for (const n of Object.keys(common)) got[n] = await K(n);
     ok('common task names reach their own kind, and the unplaceable stay plain', Object.keys(common).every((n) => got[n] === common[n]), got);
