@@ -4998,6 +4998,20 @@ refusal costs is that it confirms the code is in use. At twelve
 characters and a deliberately slow derivation, that is the right side
 of the trade.
 
+### On a desktop the check is a pill under the block
+
+Reported off a photo of the desktop: the check sat at the foot of the
+left column, half a screen below the name it acts on, so it read as a
+control for the page rather than for that block. It hangs 28px under
+the figure now. `cdGoPlace` writes `top` off the figure's own foot,
+because the figure is a different height with and without its bar and
+its Then line, and a constant would float the pill or put it on the
+words. It is a pill with the word Complete beside the tick, because a
+pointer has room for a word and a lone glyph on a wide screen is a
+control you hover to understand. **Desktop only**: the phone keeps its
+round button at the thumb, with no word, and that is asserted as well.
+Bite-proved by leaving `top` unwritten, which reads a 124px gap.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

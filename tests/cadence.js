@@ -1396,6 +1396,11 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const hero = await box('#cdHero'), list = await box('#cdAgenda'), go = await box('#cdGo'), sec = await box('#cdVDay');
     ok('on a desktop the day is two columns, the figure left of the list', hero.r <= list.l && hero.b > list.t && list.w > 400, { hero, list });
     ok('the check sits under the figure, not under the list', Math.abs((go.l + go.r) / 2 - (hero.l + hero.r) / 2) <= 2 && go.r < list.l, { go, hero });
+    /* Close under the block it keeps, not parked at the foot of the
+       column half a screen away from the name it acts on. */
+    const goT = await page.$eval('#cdGo .cd-go-t', (t) => ({ shown: t.getBoundingClientRect().width > 0, txt: t.textContent }));
+    ok('on a desktop the check hangs just under the figure', go.t - hero.b >= 12 && go.t - hero.b <= 48, { gap: go.t - hero.b });
+    ok('...and it is a pill with a word in it', go.w > go.h * 2 && go.h >= 44 && goT.shown && goT.txt === 'Complete', { go, goT });
     /* The figure stays where it is while the list scrolls past it. */
     await page.evaluate(() => { const L = document.getElementById('cdAgenda'); for (let i = 0; i < 3; i++) L.appendChild(L.lastElementChild.cloneNode(true)); for (let i = 0; i < 12; i++) L.appendChild(L.children[i % 7].cloneNode(true)); });
     await page.$eval('#cdDayPane', (p) => { p.scrollTop = 400; });
@@ -1428,6 +1433,8 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const ph = await ctx();
     const h = await ph.page.$eval('#cdHero', (e) => e.getBoundingClientRect()), l = await ph.page.$eval('#cdAgenda', (e) => e.getBoundingClientRect());
     ok('on a phone the list still runs under the figure', l.top >= h.bottom, { h: h.bottom, l: l.top });
+    const pg = await ph.page.$eval('#cdGo', (b) => { const r = b.getBoundingClientRect(), t = b.querySelector('.cd-go-t').getBoundingClientRect(); return { w: r.width, h: r.height, t: t.width, bot: innerHeight - r.bottom }; });
+    ok('on a phone the check is still the round button at the thumb, with no word', Math.abs(pg.w - pg.h) < 1 && pg.t === 0 && pg.bot < 60, pg);
     await ph.c.close();
   }
 

@@ -264,6 +264,7 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
   box-shadow: 0 18px 40px -10px rgba(0, 0, 0, .6);
 }
 .cd-go svg { width: 24px; height: 24px; display: block; }
+.cd-go-t { display: none; }
 
 .cd-empty { padding: 22px 0; list-style: none; font: 400 15px/1.45 var(--sans); color: var(--dim); text-align: center; }
 .cd-link { min-height: 44px; display: inline-flex; align-items: center; font: 500 15px/1 var(--sans); color: var(--ink); }
@@ -652,7 +653,22 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   #cdVDay { position: relative; }
   #cdDayPane { padding-bottom: 60px; }
   #cdDayPane .cd-list { margin-top: 12vh; }
-  .cd-go { position: absolute; left: 25%; bottom: 12vh; }
+  /* ON A DESKTOP THE CHECK IS A PILL UNDER THE BLOCK IT KEEPS. Parked at
+     the foot of the column it sat half a screen below the name it acts
+     on, so it read as a control for the page rather than for that
+     block. `top` is written by cdGoPlace off the figure's own foot,
+     because the figure is a different height with and without its bar
+     and its Then line. A word beside the tick, because a pointer has
+     room for one and a lone glyph on a wide screen is a control you
+     hover to understand. The phone keeps its round button at the thumb. */
+  .cd-go {
+    position: absolute; left: 25%; bottom: auto; top: 60%;
+    width: auto; height: 48px; margin-left: 0; padding: 0 22px 0 18px; border-radius: 24px;
+    display: flex; align-items: center; gap: 8px; transform: translateX(-50%);
+    box-shadow: 0 12px 30px -12px rgba(0, 0, 0, .55);
+  }
+  .cd-go svg { width: 18px; height: 18px; }
+  .cd-go-t { display: inline; font: 600 15px/1 var(--sans); }
   #cdVHab .cd-sec { margin-top: 12vh; }
   /* Notes: the composer is the other half of the figure — the place you
      write — so it sits under it on the left, and the notes are the list.
@@ -728,7 +744,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
         </div>
         <ol class="cd-list" id="cdAgenda"></ol>
       </div>
-      <button class="cd-go" id="cdGo" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+      <button class="cd-go" id="cdGo" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="cd-go-t" aria-hidden="true">Complete</span></button>
     </section>
     <section id="cdVHab" aria-label="Habits" hidden>
       <div class="cd-pane">
@@ -1214,6 +1230,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       go.setAttribute('aria-pressed', done);
       go.setAttribute('aria-label', done ? b.n + ' completed. Untick' : 'Mark ' + b.n + ' completed');
     }
+    cdGoPlace();
 
     var ag = $('cdAgenda');
     /* The list is the whole day, the block in the middle and the next one
@@ -2035,6 +2052,18 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       while (fs < 46) { el.style.fontSize = (fs + .5) + 'px'; if (el.scrollWidth > room) { el.style.fontSize = fs + 'px'; break; } fs += .5; }
     }
     el.style.whiteSpace = '';
+    cdGoPlace();
+  }
+  /* The desktop pill hangs off the figure's foot, measured, so a name on
+     two lines or a Then line coming and going cannot leave it floating
+     or sitting on the words. On a phone it is the fixed round button and
+     this clears whatever a wide window left behind. */
+  function cdGoPlace() {
+    var go = $('cdGo');
+    if (go.hidden || !window.matchMedia('(min-width: 960px)').matches) { go.style.top = ''; return; }
+    var h = $('cdHero').getBoundingClientRect(), sec = $('cdVDay').getBoundingClientRect();
+    if (!(h.height > 0)) return;
+    go.style.top = Math.round(h.bottom - sec.top + 28) + 'px';
   }
   window.addEventListener('resize', function () { if (view === 'day') cdHeroFit(); });
   /* The first paint measures the fallback face, which is wider, so the
