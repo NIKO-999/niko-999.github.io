@@ -1053,8 +1053,14 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     /* The caps here are the fields' own maxLength, said again. A cap only
        the save knew about took "by the window" to "by the wi" with nothing on
        screen to say it would. */
-    return { id: typeof o.id === 'string' && o.id ? o.id : cdId(), n: String(o.n || '').slice(0, 60) || 'Block', d: d.filter(function (x, i) { return d.indexOf(x) === i; }).sort(), s: s, e: e, p: String(o.p || '').slice(0, 80) };
+    return { id: typeof o.id === 'string' && o.id ? o.id : cdId(), n: String(o.n || '').slice(0, 60) || 'Block', d: d.filter(function (x, i) { return d.indexOf(x) === i; }).sort(), s: s, e: e, p: String(o.p || '').slice(0, 80), r: REMIND.indexOf(+o.r) >= 0 ? +o.r : 0 };
   }
+  /* How long before a block starts its reminder comes, per block. 0 is
+     at the start, which is what every block did before this existed, so
+     a record with no `r` reads as that; -1 is off. A figure this build
+     does not offer falls back to 0 rather than to off: a reminder you
+     set is one you meant to get. */
+  var REMIND = [-1, 0, 5, 10, 15, 30];
   function cdLoadWeek() {
     var raw = cdRead(K.week, null);
     if (!Array.isArray(raw)) {
@@ -1620,8 +1626,8 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   /* ═══ ADD AND EDIT ═══ one form. A new block also gets the sentence. */
   function cdEdit(id) {
     var b = id ? S.week.filter(function (x) { return x.id === id; })[0] : null;
-    var f = b ? { n: b.n, d: b.d.slice(), s: b.s, len: b.e - b.s, p: b.p }
-      : { n: '', d: [cdDow(sel)], s: Math.min(1380, Math.ceil(cdNowMin() / 15) * 15), len: 30, p: '' };
+    var f = b ? { n: b.n, d: b.d.slice(), s: b.s, len: b.e - b.s, p: b.p, r: b.r || 0 }
+      : { n: '', d: [cdDow(sel)], s: Math.min(1380, Math.ceil(cdNowMin() / 15) * 15), len: 30, p: '', r: 0 };
     var root = el('div');
 
     if (!b) {
@@ -1692,6 +1698,22 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     root.appendChild(rows);
     root.appendChild(el('p', 'cd-lbl', 'Days'));
     root.appendChild(dayBox);
+    /* ONLY WHILE REMINDERS ARE ON. A choice of when a reminder comes on
+       a phone that sends none is a control whose effect you cannot see.
+       The figure is kept on the block either way, so turning reminders
+       on later finds it where you left it. */
+    var remBox = null;
+    if (PU) {
+      root.appendChild(el('p', 'cd-lbl', 'Remind me'));
+      remBox = el('div', 'cd-chips'); remBox.id = 'cdFR';
+      REMIND.forEach(function (r) {
+        var c = el('button', 'cd-chip', r < 0 ? 'Off' : r === 0 ? 'At start' : r + ' min'); c.type = 'button'; c.dataset.r = r;
+        c.setAttribute('aria-label', r < 0 ? 'No reminder' : r === 0 ? 'When it starts' : r + ' minutes before');
+        c.addEventListener('click', function () { f.r = r; sync(); });
+        remBox.appendChild(c);
+      });
+      root.appendChild(remBox);
+    }
 
     function sync() {
       nm.value = f.n; st.value = cdHM(f.s); pl.value = f.p;
@@ -1699,6 +1721,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       rg.value = f.len;
       lenOut.textContent = f.len > 0 ? cdLen(f.len) + ' · ends ' + cdHM(Math.min(1440, f.s + f.len)) : 'A moment';
       dayBox.querySelectorAll('.cd-chip').forEach(function (c) { c.setAttribute('aria-pressed', f.d.indexOf(+c.dataset.i) >= 0); });
+      if (remBox) remBox.querySelectorAll('.cd-chip').forEach(function (c) { c.setAttribute('aria-pressed', +c.dataset.r === f.r); });
     }
     nm.addEventListener('input', function () { f.n = nm.value; });
     pl.addEventListener('input', function () { f.p = pl.value; });
@@ -1727,7 +1750,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       if (!f.n.trim()) { cdToast('Give it a name.'); nm.focus(); return; }
       if (!f.d.length) { cdToast('Pick at least one day.'); return; }
       if (f.s + f.len > 1440) { cdToast('It has to finish by midnight.'); return; }
-      var nb = cdBlock({ id: b ? b.id : null, n: f.n.trim(), d: f.d, s: f.s, e: f.s + f.len, p: f.p.trim() });
+      var nb = cdBlock({ id: b ? b.id : null, n: f.n.trim(), d: f.d, s: f.s, e: f.s + f.len, p: f.p.trim(), r: f.r });
       if (b) S.week[S.week.indexOf(b)] = nb; else S.week.push(nb);
       cdSave('week'); cdClose();
       if (!b && nb.d.indexOf(cdDow(sel)) < 0) {
@@ -3370,17 +3393,21 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       return cdB64u(cdCat(salt, new Uint8Array([0, 0, 16, 0, 65]), asPub, new Uint8Array(ct)));
     });
   }
-  /* Every block start from now to fourteen days out. A moment says Now;
-     a span says when it ends, the thing you plan against once it has
-     begun; a place rides after. */
+  /* Every block start from now to fourteen days out, moved earlier by
+     the block's own lead. A moment says Now; a span says when it ends,
+     the thing you plan against once it has begun; a place rides after.
+     Early, it says how soon and at what time instead, because "Now" ten
+     minutes before is a notification that lies about the clock. */
   function cdPushList() {
     var out = [], now = Date.now(), today = cdToday();
     for (var i = 0; i < PUSH_DAYS; i++) {
       var iso = cdAddDays(today, i), p = dparts(iso);
       cdOn(iso).forEach(function (b) {
-        var t = new Date(p[0], p[1], p[2], 0, b.s).getTime();
+        var r = b.r || 0;
+        if (r < 0) return;
+        var t = new Date(p[0], p[1], p[2], 0, b.s - r).getTime();
         if (t <= now + 30e3) return;
-        var body = b.e > b.s ? 'Now · until ' + cdHM(b.e) : 'Now';
+        var body = r ? 'In ' + r + ' min · at ' + cdHM(b.s) : b.e > b.s ? 'Now · until ' + cdHM(b.e) : 'Now';
         if (b.p) body += ' · ' + b.p;
         out.push({ t: t, m: { t: b.n, b: body, g: iso + '.' + b.id } });
       });
@@ -3391,7 +3418,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      keeps the queue two weeks deep. `force` is the turn-on. */
   function cdPushSend(force) {
     if (!PU) return Promise.resolve(false);
-    var fp = cdToday() + JSON.stringify(S.week.map(function (b) { return [b.id, b.n, b.d, b.s, b.e, b.p]; }));
+    var fp = cdToday() + JSON.stringify(S.week.map(function (b) { return [b.id, b.n, b.d, b.s, b.e, b.p, b.r]; }));
     if (!force && PU.fp === fp) return Promise.resolve(true);
     if (puBusy) return puBusy;
     var list = cdPushList();

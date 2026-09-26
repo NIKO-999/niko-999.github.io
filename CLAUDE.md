@@ -5191,6 +5191,28 @@ mountain; *watch* is the screen, so *watch a show* is not a gig.
 **The walk is a figure in stride**, on request. The trail it replaced
 was an S with a dot on it, which said path rather than walking.
 
+### A block says how early it reminds you
+
+Asked for off a list of what reminders now make possible. **Per
+block**, because Wake at the minute and Gym fifteen minutes out are
+both right: Off, At start, 5, 10, 15 or 30 minutes before, stored as
+`r` on the block and written by `cdBlock` like every other field.
+
+**A block with no `r` reads as at the start**, which is what every
+block did before this, so nothing already on a phone changes. A
+figure this build does not offer falls back to at the start rather
+than to off: a reminder you set is one you meant to get.
+
+**Early, the words change.** "Now" ten minutes before is a
+notification that lies about the clock, so it reads *In 10 min · at
+12:30*. The lead is in the queue's fingerprint, so changing it
+re-queues like any other edit to the week.
+
+**The choice is only drawn while reminders are on.** A control whose
+effect you cannot see is worse than none; the figure stays on the
+block either way. Asserted both ways, and proved by a queue that
+ignored the lead and one that ignored Off.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

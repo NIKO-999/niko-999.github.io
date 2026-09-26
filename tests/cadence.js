@@ -717,6 +717,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await sheetUp(page);
     await page.fill('.cd-say', 'journal daily 21:00 for 20 mins');
     ok('the preview says what it read', /Journal · every day · 21:00–21:20/.test(await page.textContent('#cdPrev')));
+    ok('with reminders off the editor offers no reminder choice', !(await page.$('#cdFR')));
     ok('and the form below follows it', (await page.inputValue('#cdFN')) === 'Journal' && (await page.inputValue('#cdFS')) === '21:00');
     await page.click('#cdFSave');
     await page.waitForTimeout(320);
@@ -1846,6 +1847,40 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const redone = await until(async () => { const r = JSON.parse(m.get(qk) || '{"q":[]}'); for (const x of r.q) { const o = await open(x.b).catch(() => null); if (o && o.t === 'Stretch') return x; } return null; }, 8000);
     const stretchAt = await page.evaluate(() => new Date(2026, 8, 25, 15, 15).getTime());
     ok('a block added to the week is queued without being asked', !!redone && redone.t === stretchAt, redone && redone.t);
+
+    /* Each block says how early its reminder comes. Lunch set to ten
+       minutes early is queued at 12:20 and says so; set to Off it is not
+       queued at all. Both halves, because a build that ignored the
+       setting passes neither and one that could only switch it off
+       passes the second alone. */
+    const lunchRow = async () => (await page.$$('.cd-it')).length && page.evaluate(() => {
+      const it = [...document.querySelectorAll('.cd-it')].find((x) => x.querySelector('.cd-rn') && x.querySelector('.cd-rn').textContent === 'Lunch');
+      return it ? it.dataset.id : null;
+    });
+    const findLunch = async () => { const r = JSON.parse(m.get(qk) || '{"q":[]}'); const out = []; for (const x of r.q) { const o = await open(x.b).catch(() => null); if (o && o.t === 'Lunch') out.push({ t: x.t, b: o.b }); } return out; };
+    const setLead = async (lead) => {
+      const lid = await lunchRow();
+      if (!lid) return false;
+      await page.click(`.cd-it[data-id="${lid}"] .cd-rb`); await sheetUp(page);
+      if (!(await page.$(`#cdFR [data-r="${lead}"]`))) { await closeSheet(page); return false; }
+      await page.click(`#cdFR [data-r="${lead}"]`);
+      const pressed = await page.getAttribute(`#cdFR [data-r="${lead}"]`, 'aria-pressed');
+      await page.click('#cdFSave');
+      return pressed === 'true';
+    };
+    const chips = await (async () => { const lid = await lunchRow(); if (!lid) return null; await page.click(`.cd-it[data-id="${lid}"] .cd-rb`); await sheetUp(page);
+      const c = await page.$$eval('#cdFR .cd-chip', (cs) => cs.map((x) => x.textContent + ':' + x.getAttribute('aria-pressed'))); await closeSheet(page); return c; })();
+    ok('the editor offers when to be reminded, and an old block reads as at the start',
+      !!chips && chips.join('|') === 'Off:false|At start:true|5 min:false|10 min:false|15 min:false|30 min:false', chips);
+    const early = await setLead(10);
+    const at1220 = await page.evaluate(() => new Date(2026, 8, 25, 12, 20).getTime());
+    const lead10 = await until(async () => { const l = await findLunch(); return l.length && l[0].t === at1220 ? l : null; }, 8000);
+    ok('ten minutes early is queued ten minutes early, and says how soon and at what time',
+      early && !!lead10 && lead10[0].b === 'In 10 min · at 12:30' && (await store(page, 'cad.week.v1')).find((b) => b.n === 'Lunch').r === 10, lead10);
+    const off = await setLead(-1);
+    const noLunch = await until(async () => (await findLunch()).length === 0 ? true : null, 8000);
+    ok('and Off queues nothing for that block', off && !!noLunch);
+    await setLead(0);
 
     /* Off takes the queue off the server and the subscription off the phone. */
     await page.click('#cdGear'); await sheetUp(page);
