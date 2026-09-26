@@ -192,6 +192,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('and Not yet leaves the block as it was', !(await page.$eval('#cdSheet', (e) => e.classList.contains('is-open'))) && !(((await store(page, 'cad.log.v1')) || {})['2026-09-25'] || {}).s3
       && (await page.textContent('#cdHeroN')) === 'Deep work');
     await page.click('#cdGo');
+    ok('an ordinary block is answered with Complete', (await page.textContent('#cdGoYes')) === 'Complete');
     await page.evaluate(() => document.getElementById('cdGoYes') && document.getElementById('cdGoYes').click());
     await page.waitForTimeout(350);
     ok('confirming keeps the block you are in', (((await store(page, 'cad.log.v1')) || {})['2026-09-25'] || {}).s3 === 1);
@@ -347,6 +348,9 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const { c, page } = await ctx({ at: '2026-09-25T07:40:00' });
     ok('while the gym runs it is the middle of the screen', (await heroOf(page)).join('|') === 'Now · Body · 07:40|Gym|50m left · until 08:30|Deep work at 09:00', await heroOf(page));
     await page.click('#cdGo');
+    /* The press ticks AND opens the session sheet, so the answer says both. */
+    const gyes = await page.evaluate(() => { const e = document.getElementById('cdGoYes'); return e ? { t: e.textContent, h: e.getBoundingClientRect().height, lh: parseFloat(getComputedStyle(e).lineHeight) || 0 } : null; });
+    ok('a training block is answered with Completed · log session, on one line', !!gyes && gyes.t === 'Completed · log session' && gyes.h <= 60, gyes);
     await page.evaluate(() => document.getElementById('cdGoYes') && document.getElementById('cdGoYes').click());
     await page.waitForTimeout(350);
     ok('and the check, confirmed, asks what you trained', (await sheetUp(page)) && (await page.textContent('#cdShT')) === 'What did you train?');

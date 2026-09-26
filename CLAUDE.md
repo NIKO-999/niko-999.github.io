@@ -4376,6 +4376,13 @@ one because a hairline outline beside a solid fill looks smaller at an
 identical size, so it is a quiet fill (`soft`) now. Both are asserted:
 the box and the fill, because the width alone was never what was wrong.
 
+**A TRAINING BLOCK IS ANSWERED WITH *Completed · log session*.** The
+press does two things there — it keeps the block and opens *What did
+you train?* — so the button says both, and nothing about the sheet that
+follows is a surprise. Every other block still reads *Complete*. It fits
+one line at 320, and the pair stays one box. Both labels are asserted,
+and the bite proof is putting *Complete* back on the gym.
+
 ### The whole week clears in one press
 
 Settings carries **Clear all blocks**, because starting the template over

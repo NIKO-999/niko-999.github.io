@@ -1148,11 +1148,14 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     if (!b) return;
     var ask = el('div'), foot = el('div', 'cd-foot is-only');
     var no = el('button', 'cd-btn soft', 'Not yet'); no.type = 'button'; no.id = 'cdGoNo'; no.addEventListener('click', cdClose);
-    var yes = el('button', 'cd-btn go', 'Complete'); yes.type = 'button'; yes.id = 'cdGoYes';
+    /* A training block's answer opens the session sheet, so the button
+       says both halves of what the press does. */
+    var train = !!TRAINING[cdKind(b.n)];
+    var yes = el('button', 'cd-btn go', train ? 'Completed · log session' : 'Complete'); yes.type = 'button'; yes.id = 'cdGoYes';
     yes.addEventListener('click', function () {
       cdClose();
       sel = day; cdTick(id);
-      if (cdDone(day, id) && !TRAINING[cdKind(b.n)]) cdToast('Completed ' + b.n, function () { if (cdDone(day, id)) { sel = day; cdTick(id); } });
+      if (cdDone(day, id) && !train) cdToast('Completed ' + b.n, function () { if (cdDone(day, id)) { sel = day; cdTick(id); } });
     });
     foot.appendChild(no); foot.appendChild(yes); ask.appendChild(foot);
     cdSheet('Complete ' + b.n + '?', ask);
