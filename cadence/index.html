@@ -433,7 +433,12 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cd-dnote.is-imp .cd-ntx::before { content: "◆ "; color: var(--ink); }
 .cd-dnote small { display: block; margin-top: 4px; font: 500 10.5px/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--quiet); }
 .cd-note { margin: 12px 0 0; font: 400 14px/1.5 var(--sans); color: var(--dim); }
-.cd-cap { margin: 0 0 16px; line-height: 1.4; }
+/* Centred between the head's rule and the next one: equal padding and no
+   margin, so whatever follows (a row's own hairline, or the foot's rule on
+   an empty day) starts exactly as far below the words as the head ends
+   above them. */
+.cd-cap { margin: 0; padding: 14px 0; line-height: 1.4; }
+.cd-cap + .cd-foot { margin-top: 0; }
 
 .cd-sec { margin: 30px 0 0; }
 .cd-sec + .cd-hb { margin-top: 12px; }
@@ -1780,7 +1785,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       li.style.setProperty('--cat', 'var(--c-' + CAT[k] + ')');
       ul.appendChild(li);
     });
-    root.appendChild(ul);
+    if (ul.children.length) root.appendChild(ul);
     var ss = cdSessions(iso);
     if (ss.length) {
       root.appendChild(el('p', 'cd-lbl', 'Trained'));

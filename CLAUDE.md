@@ -4383,6 +4383,19 @@ follows is a surprise. Every other block still reads *Complete*. It fits
 one line at 320, and the pair stays one box. Both labels are asserted,
 and the bite proof is putting *Complete* back on the gym.
 
+### The day sheet's caption sits between its rules
+
+Reported off a screenshot: *0 of 0 completed* hugged the head's hairline
+with the next rule far below it. It carried a bottom margin and no top
+one. It is equal padding and no margin now, so whatever follows starts
+as far below the words as the head ends above them: a row's own
+hairline, or the foot's rule on an empty day. **An empty day drew an
+empty list**, whose collapsed margin pushed the foot further down; the
+list is only built when it has rows, and a foot straight after the
+caption drops its own margin. Measured off the words' text box against
+both rules, on a full day and an empty one, and bite-proved by putting
+the old margin back.
+
 ### The whole week clears in one press
 
 Settings carries **Clear all blocks**, because starting the template over

@@ -339,6 +339,29 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       (await page.getAttribute('.cd-wd[data-d="2026-09-25"]', 'data-state')) === 'quiet');
     await c.close();
   }
+  /* The day sheet's caption sits centred between the head's rule and the
+     next one, on a day with rows and on an empty one, where the next rule
+     is the foot's. Measured off the words' own box, never the paragraph's. */
+  {
+    const capMid = (page) => page.evaluate(() => {
+      const cap = document.querySelector('#cdShB .cd-cap'); if (!cap) return null;
+      const rg = document.createRange(); rg.selectNodeContents(cap); const t = rg.getBoundingClientRect();
+      const above = document.querySelector('#cdSheet .cd-sh-hd').getBoundingClientRect().bottom;
+      const nx = cap.nextElementSibling; if (!nx) return null;
+      const below = nx.getBoundingClientRect().top;
+      return { up: +(t.top - above).toFixed(1), down: +(below - t.bottom).toFixed(1), next: nx.className };
+    });
+    for (const empty of [false, true]) {
+      const { c, page } = await ctx(empty ? { init: () => localStorage.setItem('cad.week.v1', '[]') } : {});
+      await page.click('.cd-tab[data-v="mon"]');
+      await page.click('.cd-mc[data-day="2026-09-25"]');
+      await sheetUp(page);
+      await page.waitForTimeout(300);
+      const m = await capMid(page);
+      ok('the day caption is centred between its rules' + (empty ? ', on an empty day' : ''), !!m && m.up > 4 && Math.abs(m.up - m.down) <= 1.5, m);
+      await c.close();
+    }
+  }
   {
     const { c, page } = await ctx({ at: '2026-09-25T06:40:00' });
     ok('before the first block, the middle says it is next', (await heroOf(page)).join('|') === 'Next · Rest · 06:40|Wake up|in 20m · at 07:00|Gym at 07:30', await heroOf(page));
