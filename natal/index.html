@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#12332d" />
+  <meta name="theme-color" content="#0f1e2c" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Natal" />
@@ -26,62 +26,120 @@
     <div class="nebula"></div>
     <svg width="0" height="0" style="position:absolute">
       <defs>
-        <filter id="tex-big" x="0" y="0" width="100%" height="100%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.028" numOctaves="4" seed="7" result="n"/>
-          <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.08  0 0 0 0 0.22  0 0 0 0 0.18  0 0 0 1.5 -0.52"/>
+        <!-- gas giant: warped cloud bands, lit from the sunrise below-left -->
+        <linearGradient id="gg-bands" x1="0" y1="0" x2="0" y2="1" gradientTransform="rotate(-16 .5 .5)">
+          <stop offset="0" stop-color="#3a4656"/><stop offset=".07" stop-color="#6d5a4a"/><stop offset=".12" stop-color="#c7a37c"/>
+          <stop offset=".18" stop-color="#e6cfae"/><stop offset=".23" stop-color="#a8754c"/><stop offset=".29" stop-color="#d9b88f"/>
+          <stop offset=".34" stop-color="#f0dcbc"/><stop offset=".40" stop-color="#b98457"/><stop offset=".45" stop-color="#8a5c3e"/>
+          <stop offset=".50" stop-color="#e2c29a"/><stop offset=".56" stop-color="#c79468"/><stop offset=".62" stop-color="#ecd6b4"/>
+          <stop offset=".68" stop-color="#9c6a45"/><stop offset=".74" stop-color="#d6b089"/><stop offset=".80" stop-color="#b58a64"/>
+          <stop offset=".87" stop-color="#6f5a4c"/><stop offset=".94" stop-color="#4a4e58"/><stop offset="1" stop-color="#2f3a48"/>
+        </linearGradient>
+        <filter id="gg-warp" x="-10%" y="-10%" width="120%" height="120%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.006 0.045" numOctaves="4" seed="11" result="t"/>
+          <feDisplacementMap in="SourceGraphic" in2="t" scale="16" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+        <filter id="gg-grain" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4" result="n"/>
+          <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.2  0 0 0 0 0.14  0 0 0 0 0.1  0 0 0 0.9 -0.45"/>
           <feComposite in2="SourceGraphic" operator="in"/>
         </filter>
-        <filter id="tex-small" x="0" y="0" width="100%" height="100%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="3" seed="2" result="n"/>
-          <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.12  0 0 0 0 0.3  0 0 0 0 0.25  0 0 0 0.9 -0.35"/>
+        <radialGradient id="gg-shade" cx="0.22" cy="0.92" r="1.05">
+          <stop offset="0" stop-color="#050a12" stop-opacity="0"/><stop offset="0.45" stop-color="#050a12" stop-opacity="0.08"/>
+          <stop offset="0.72" stop-color="#050a12" stop-opacity="0.62"/><stop offset="1" stop-color="#050a12" stop-opacity="0.95"/>
+        </radialGradient>
+        <linearGradient id="gg-rim" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0" stop-color="#ff9a55" stop-opacity=".75"/><stop offset=".45" stop-color="#ff9a55" stop-opacity="0"/>
+        </linearGradient>
+        <clipPath id="gg-clip"><circle cx="150" cy="150" r="92"/></clipPath>
+        <clipPath id="gg-front"><rect x="-60" y="150" width="420" height="200"/></clipPath>
+
+        <!-- cratered moon -->
+        <radialGradient id="mn-base" cx=".45" cy=".6" r=".7"><stop offset="0" stop-color="#c6ccd2"/><stop offset=".7" stop-color="#8b939c"/><stop offset="1" stop-color="#5b636d"/></radialGradient>
+        <filter id="mn-tex" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="4" seed="21" result="n"/>
+          <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.25  0 0 0 0 0.26  0 0 0 0 0.29  0 0 0 1.3 -0.5"/>
           <feComposite in2="SourceGraphic" operator="in"/>
         </filter>
-        <radialGradient id="g-big" cx="42%" cy="30%" r="78%">
-          <stop offset="0" stop-color="#5f8f82"/><stop offset="0.55" stop-color="#46786b"/><stop offset="1" stop-color="#2f5a4f"/>
+        <radialGradient id="mn-crater" cx=".58" cy=".62" r=".6"><stop offset="0" stop-color="#4c535c" stop-opacity=".55"/><stop offset=".75" stop-color="#6d747d" stop-opacity=".25"/><stop offset="1" stop-color="#e6eaee" stop-opacity=".35"/></radialGradient>
+        <radialGradient id="mn-shade" cx=".35" cy="1" r="1.05"><stop offset="0" stop-color="#050a12" stop-opacity="0"/><stop offset=".55" stop-color="#050a12" stop-opacity=".2"/><stop offset=".85" stop-color="#050a12" stop-opacity=".8"/><stop offset="1" stop-color="#050a12" stop-opacity=".95"/></radialGradient>
+
+        <!-- horizon planet and atmosphere -->
+        <radialGradient id="hz-glow" cx="520" cy="520" r="520" gradientUnits="userSpaceOnUse">
+          <stop offset=".846" stop-color="#9e2c12"/><stop offset=".851" stop-color="#d84a1c"/><stop offset=".858" stop-color="#f06a27"/>
+          <stop offset=".868" stop-color="#f58d3c"/><stop offset=".882" stop-color="#f4a95e" stop-opacity=".9"/>
+          <stop offset=".902" stop-color="#e9b98e" stop-opacity=".55"/><stop offset=".93" stop-color="#9fb4c2" stop-opacity=".22"/>
+          <stop offset=".97" stop-color="#6f93ab" stop-opacity=".06"/><stop offset="1" stop-color="#6f93ab" stop-opacity="0"/>
         </radialGradient>
-        <radialGradient id="g-shade" cx="70%" cy="78%" r="70%">
-          <stop offset="0" stop-color="#0d2622" stop-opacity="0.35"/><stop offset="1" stop-color="#0d2622" stop-opacity="0"/>
+        <radialGradient id="hz-body" cx="520" cy="520" r="440" gradientUnits="userSpaceOnUse">
+          <stop offset=".9" stop-color="#0f0d0c"/><stop offset=".985" stop-color="#1c1714"/><stop offset="1" stop-color="#2e1d14"/>
         </radialGradient>
-        <radialGradient id="g-small" cx="40%" cy="35%" r="75%">
-          <stop offset="0" stop-color="#6c9c8e"/><stop offset="1" stop-color="#3f6b5f"/>
-        </radialGradient>
-        <clipPath id="ring-front"><rect x="0" y="60" width="260" height="80"/></clipPath>
+        <filter id="hz-tex" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="4" seed="3" result="n"/>
+          <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.16  0 0 0 0 0.13  0 0 0 0 0.12  0 0 0 0.9 -0.4"/>
+          <feComposite in2="SourceGraphic" operator="in"/>
+        </filter>
       </defs>
     </svg>
-    <div class="planet planet-big">
-      <svg viewBox="0 0 200 200">
-        <circle cx="100" cy="100" r="98" fill="url(#g-big)"/>
-        <circle cx="100" cy="100" r="98" fill="#000" filter="url(#tex-big)"/>
-        <circle cx="100" cy="100" r="98" fill="url(#g-shade)"/>
-        <circle cx="100" cy="100" r="97" fill="none" stroke="#b6dccd" stroke-opacity="0.22" stroke-width="1.2"/>
+
+    <div class="horizon-haze"></div>
+    <div class="horizon">
+      <svg viewBox="0 0 1040 1040">
+        <circle cx="520" cy="520" r="520" fill="url(#hz-glow)"/>
+        <circle cx="520" cy="520" r="440" fill="url(#hz-body)"/>
+        <circle cx="520" cy="520" r="440" fill="#000" filter="url(#hz-tex)" opacity=".7"/>
+        <circle cx="520" cy="520" r="440" fill="none" stroke="#ff8a3d" stroke-opacity=".55" stroke-width=".6"/>
       </svg>
     </div>
+
+    <div class="planet planet-giant">
+      <svg viewBox="0 0 300 300">
+        <g transform="rotate(-16 150 150)" fill="none">
+          <ellipse cx="150" cy="150" rx="146" ry="30" stroke="#d9c3a2" stroke-opacity=".28" stroke-width="7"/>
+          <ellipse cx="150" cy="150" rx="132" ry="27" stroke="#ecd9bb" stroke-opacity=".45" stroke-width="3"/>
+          <ellipse cx="150" cy="150" rx="122" ry="25" stroke="#bfa27f" stroke-opacity=".35" stroke-width="5"/>
+          <ellipse cx="150" cy="150" rx="110" ry="22.5" stroke="#e7d2b0" stroke-opacity=".3" stroke-width="1.2"/>
+        </g>
+        <g clip-path="url(#gg-clip)">
+          <rect x="40" y="40" width="220" height="220" fill="url(#gg-bands)" filter="url(#gg-warp)"/>
+          <ellipse cx="118" cy="176" rx="11" ry="6" fill="#c9774a" opacity=".55" filter="url(#gg-warp)"/>
+          <circle cx="150" cy="150" r="92" fill="#000" filter="url(#gg-grain)" opacity=".35"/>
+          <circle cx="150" cy="150" r="92" fill="url(#gg-shade)"/>
+        </g>
+        <circle cx="150" cy="150" r="91.5" fill="none" stroke="url(#gg-rim)" stroke-width="1.6"/>
+        <g transform="rotate(-16 150 150)" fill="none" clip-path="url(#gg-front)">
+          <ellipse cx="150" cy="150" rx="146" ry="30" stroke="#d9c3a2" stroke-opacity=".32" stroke-width="7"/>
+          <ellipse cx="150" cy="150" rx="132" ry="27" stroke="#ecd9bb" stroke-opacity=".55" stroke-width="3"/>
+          <ellipse cx="150" cy="150" rx="122" ry="25" stroke="#bfa27f" stroke-opacity=".42" stroke-width="5"/>
+          <ellipse cx="150" cy="150" rx="110" ry="22.5" stroke="#e7d2b0" stroke-opacity=".36" stroke-width="1.2"/>
+        </g>
+      </svg>
+    </div>
+
     <div class="planet planet-moon">
       <svg viewBox="0 0 100 100">
-        <circle cx="50" cy="50" r="48" fill="url(#g-small)"/>
-        <circle cx="50" cy="50" r="48" fill="#000" filter="url(#tex-small)"/>
-        <circle cx="50" cy="50" r="47" fill="none" stroke="#b6dccd" stroke-opacity="0.2"/>
+        <circle cx="50" cy="50" r="48" fill="url(#mn-base)"/>
+        <circle cx="50" cy="50" r="48" fill="#000" filter="url(#mn-tex)" opacity=".8"/>
+        <circle cx="36" cy="40" r="9" fill="url(#mn-crater)"/>
+        <circle cx="62" cy="30" r="6" fill="url(#mn-crater)"/>
+        <circle cx="58" cy="62" r="11" fill="url(#mn-crater)"/>
+        <circle cx="30" cy="66" r="5" fill="url(#mn-crater)"/>
+        <circle cx="74" cy="50" r="4" fill="url(#mn-crater)"/>
+        <circle cx="46" cy="80" r="3.5" fill="url(#mn-crater)"/>
+        <circle cx="50" cy="50" r="48" fill="url(#mn-shade)"/>
+        <circle cx="50" cy="50" r="47.6" fill="none" stroke="#ffb27a" stroke-opacity=".35" stroke-width=".8" stroke-dasharray="90 400" stroke-dashoffset="-120"/>
       </svg>
     </div>
-    <div class="planet planet-ringed">
-      <svg viewBox="0 0 210 120">
-        <g transform="rotate(-14 150 60)" fill="none" stroke="#bfe3d4" stroke-opacity="0.5">
-          <ellipse cx="150" cy="60" rx="112" ry="25" stroke-width="1.4"/>
-          <ellipse cx="150" cy="60" rx="100" ry="21" stroke-width="3" stroke-opacity="0.28"/>
-          <ellipse cx="150" cy="60" rx="86" ry="17.5" stroke-width="1.2"/>
-        </g>
-        <circle cx="150" cy="60" r="46" fill="url(#g-small)"/>
-        <circle cx="150" cy="60" r="46" fill="#000" filter="url(#tex-small)"/>
-        <g transform="rotate(-14 150 60)" fill="none" stroke="#bfe3d4" stroke-opacity="0.5" clip-path="url(#ring-front)">
-          <ellipse cx="150" cy="60" rx="112" ry="25" stroke-width="1.4"/>
-          <ellipse cx="150" cy="60" rx="100" ry="21" stroke-width="3" stroke-opacity="0.28"/>
-          <ellipse cx="150" cy="60" rx="86" ry="17.5" stroke-width="1.2"/>
-        </g>
+
+    <div class="planet planet-far">
+      <svg viewBox="0 0 20 20">
+        <defs><radialGradient id="far-g" cx=".35" cy=".75" r=".8"><stop offset="0" stop-color="#bfe0f0"/><stop offset=".55" stop-color="#4f86a8"/><stop offset="1" stop-color="#132536"/></radialGradient></defs>
+        <circle cx="10" cy="10" r="9" fill="url(#far-g)"/>
       </svg>
     </div>
-    <svg class="sparkle s1" viewBox="0 0 16 16"><path d="M8 0 L9.1 6.9 L16 8 L9.1 9.1 L8 16 L6.9 9.1 L0 8 L6.9 6.9Z" fill="#e2f4ec"/></svg>
-    <svg class="sparkle s2" viewBox="0 0 16 16"><path d="M8 0 L9.1 6.9 L16 8 L9.1 9.1 L8 16 L6.9 9.1 L0 8 L6.9 6.9Z" fill="#e2f4ec" transform="rotate(45 8 8)"/></svg>
-    <svg class="sparkle s3" viewBox="0 0 16 16"><path d="M8 0 L9.1 6.9 L16 8 L9.1 9.1 L8 16 L6.9 9.1 L0 8 L6.9 6.9Z" fill="#e2f4ec" transform="rotate(45 8 8)"/></svg>
+
+    <svg class="sparkle s1" viewBox="0 0 16 16"><path d="M8 0 L9.1 6.9 L16 8 L9.1 9.1 L8 16 L6.9 9.1 L0 8 L6.9 6.9Z" fill="#f2e6d8"/></svg>
+    <svg class="sparkle s2" viewBox="0 0 16 16"><path d="M8 0 L9.1 6.9 L16 8 L9.1 9.1 L8 16 L6.9 9.1 L0 8 L6.9 6.9Z" fill="#f2e6d8" transform="rotate(45 8 8)"/></svg>
   </div>
 
   <div class="app">
