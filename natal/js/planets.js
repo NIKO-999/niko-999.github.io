@@ -1,6 +1,6 @@
 /*
  * Procedurally rendered sky: per-pixel shaded planets.
- *  - Horizon planet: layered atmosphere with a green airglow line, dawn-lit
+ *  - Horizon planet: layered atmosphere, dawn-lit
  *    clouds near the limb, faint city lights on the night side.
  *  - Gas giant: domain-warped bands, festoons, ovals, storm, polar cyclones;
  *    rings with gaps, ringlets, translucency and mutual shadows.
@@ -11,7 +11,7 @@
  */
 (function () {
   "use strict";
-  const SKY_VERSION = "sky-3";
+  const SKY_VERSION = "sky-4";
 
   /* Everything the worker needs lives inside SKYLIB, so its source can be
      shipped to a Worker via toString(). No DOM access in here. */
@@ -297,12 +297,7 @@
           // fine horizontal striations in the glow, like layered haze
           // very soft variation along the limb so the glow is not perfectly uniform
           const v = 1 + 0.035 * noise(dx * 0.006, h * 0.02, 0.5);
-          let col = [a[0] * v, a[1] * v, a[2] * v], alpha = clamp(a[3] * sunward, 0, 1);
-          // thin green airglow layer high above the limb, as seen from orbit
-          const ag = Math.exp(-Math.pow((h / T - 0.64) / 0.018, 2)) * (0.8 + 0.2 * noise(dx * 0.02, 0.3, 0.9));
-          col = mix3(col, [150, 214, 160], ag * 0.55);
-          alpha = Math.max(alpha, ag * 0.35);
-          return [col[0], col[1], col[2], alpha * 255];
+          return [a[0] * v, a[1] * v, a[2] * v, clamp(a[3] * sunward, 0, 1) * 255];
         }
         // on the surface: orthographic sphere coordinates
         const nx = dx / Rb, ny = -dy / Rb;
@@ -312,8 +307,7 @@
         const wx = fbm(nx * 18, ny * 18, nz * 18, 3);
         const cl = fbm(nx * 46 + wx * 1.6, ny * 46, nz * 46 + wx, 5);
         const cl2 = fbm(nx * 140 + cl, ny * 140, nz * 140, 3);
-        const cl3 = noise(nx * 420 + cl2 * 2, ny * 420, nz * 420);
-        const cloud = smooth(0.12, 0.42, cl + cl2 * 0.3 + cl3 * 0.06) * 0.85;
+        const cloud = smooth(0.12, 0.42, cl + cl2 * 0.3) * 0.85;
         const twilight = Math.exp(-depth / (T * 0.28));
         let c = [32, 36, 44]; // night surface, dusky rather than black
         c = mix3(c, [48, 54, 66], cloud * 0.55); // clouds faintly visible in skyglow
