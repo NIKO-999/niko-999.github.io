@@ -1736,7 +1736,7 @@
       <div class="meta">planets · houses · nodes · aspects · karma</div>
     </section>
     <form class="form" id="birth-form" autocomplete="off">
-      <div class="field"><label for="f-name">Name</label><input type="text" id="f-name" placeholder="Optional" maxlength="40" value="${r ? esc(r.name || "") : ""}"></div>
+      <div class="field"><label for="f-name">Name</label><input type="text" id="f-name" maxlength="40" value="${r ? esc(r.name || "") : ""}"></div>
       <div class="field"><label for="f-date">Date</label><input type="date" id="f-date" required min="1850-01-01" max="2149-12-31" value="${r ? `${r.y}-${pad(r.mo)}-${pad(r.d)}` : ""}"></div>
       <div class="field"><label for="f-time">Time</label><input type="time" id="f-time" value="${r && r.timeKnown ? `${pad(r.h)}:${pad(r.mi)}` : ""}">
         <label class="toggle" style="width:auto"><input type="checkbox" id="f-unknown" ${r && !r.timeKnown ? "checked" : ""}> Unknown</label></div>
