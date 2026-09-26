@@ -412,6 +412,14 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       return { html: getComputedStyle(document.documentElement).backgroundColor, last: stops[stops.length - 1] };
     });
     ok('the page under the body is the colour of the sky\u2019s foot', !!foot.last && foot.html === foot.last, foot);
+    /* With a sheet up the foot of the screen is the sheet, so the strip
+       under the body has to be the sheet's colour — and go back after. */
+    await page.click('#cdGear'); await sheetUp(page);
+    const shFoot = await page.evaluate(() => ({ html: getComputedStyle(document.documentElement).backgroundColor, sheet: getComputedStyle(document.getElementById('cdSheet')).backgroundColor }));
+    ok('with a sheet up the page under the body is the sheet\u2019s colour', shFoot.html === shFoot.sheet, shFoot);
+    await page.keyboard.press('Escape'); await page.waitForTimeout(400);
+    const back = await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor);
+    ok('and it goes back to the sky\u2019s foot once the sheet is put away', back === foot.last, { back, last: foot.last });
     await c.close();
   }
 

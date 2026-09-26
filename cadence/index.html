@@ -107,6 +107,10 @@
    and --bg there was a black band across the bottom of a navy screen.
    cdSky keeps --sky-foot on the hour's last stop, so the join is seamless. */
 html { -webkit-text-size-adjust: 100%; height: 100%; background-color: var(--sky-foot); }
+/* While a sheet is up, the foot of the screen IS the sheet, so the strip
+   below the body takes the sheet's colour — the sky's blue under a dark
+   sheet is the same band in another colour. */
+html.is-sheet { background-color: var(--sheet); }
 body {
   height: 100%;
   position: fixed; inset: 0; margin: 0; overflow: hidden; overscroll-behavior: none;
@@ -1334,6 +1338,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var sh = $('cdSheet'), sc = $('cdScrim');
     sh.hidden = false; sc.hidden = false;
     sh.scrollTop = 0;
+    document.documentElement.classList.add('is-sheet');
     requestAnimationFrame(function () { sh.classList.add('is-open'); sc.classList.add('is-open'); });
     return b;
   }
@@ -1343,7 +1348,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     if (sh.hidden) return;
     sh.classList.remove('is-open'); sc.classList.remove('is-open');
     clearTimeout(shTimer);
-    shTimer = setTimeout(function () { sh.hidden = true; sc.hidden = true; }, 240);
+    shTimer = setTimeout(function () { sh.hidden = true; sc.hidden = true; document.documentElement.classList.remove('is-sheet'); }, 240);
     var f = shOnClose; shOnClose = null;
     if (f) f();
   }

@@ -4757,6 +4757,16 @@ sky's own last stop. **This machine cannot draw the phone's bottom
 strip**, so the check guards the colour and not the band itself. If
 the band survives on the device, the next step is a probe there.
 
+**AND A SHEET HAS A FOOT OF ITS OWN.** Taking the page's ground to the
+sky's last stop fixed the band on the day and moved it: open any sheet
+and the strip under it was the sky's blue below a near-black sheet, the
+same band in another colour. While a sheet is up the foot of the screen
+IS the sheet, so `cdSheet` puts `is-sheet` on the root and the html
+takes `--sheet`; the class comes off with the close's own timer, so the
+colour does not flip back while the sheet is still sliding away.
+Asserted both ways, the sheet's colour while it is up and the sky's
+foot once it has gone.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
