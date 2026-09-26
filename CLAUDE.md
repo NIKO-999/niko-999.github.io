@@ -5140,6 +5140,21 @@ pixels. Bite-proved twice: the glyph in `--hair` fails the colour and
 the contrast, and the dot taken out fails the dot half and the four
 older dot checks.
 
+### And a switch takes them off
+
+Asked for straight after. **Show task glyphs** under Your week in
+Settings, on by default. `cad.glyphoff.v1` stores OFF and only off,
+the thought's own rule, so a damaged key keeps the glyphs; it is in
+`K`, so the backup and sync carry it. **The dot is not part of it**:
+it is the check, and a row without it cannot be ticked.
+
+**Off gives the column back.** Leaving the 18px column empty would put
+every name after a gap for a mark that is not there, so the list takes
+`no-g` and the names move to where they sat before glyphs existed.
+Asserted as the name's x moving by the column and its gap, as every
+dot surviving, and across a reload. Bite-proved by a switch that
+stored off and went on drawing.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

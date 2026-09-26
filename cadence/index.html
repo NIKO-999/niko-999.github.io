@@ -248,6 +248,11 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .cd-rg { grid-column: 1; grid-row: 1; align-self: center; width: 18px; height: 18px; color: var(--c); }
 .cd-rg svg { display: block; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .cd-it.is-past:not(.is-done) .cd-rg { color: var(--miss); }
+/* Glyphs off gives the column back, so a name starts where it did before
+   they existed rather than after an empty eighteen pixels. */
+.cd-list.no-g .cd-rb { grid-template-columns: minmax(0, 1fr) auto; }
+.cd-list.no-g .cd-rn, .cd-list.no-g .cd-rs { grid-column: 1; }
+.cd-list.no-g .cd-rt { grid-column: 2; }
 .cd-rn { grid-column: 2; grid-row: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 15px/1.1 var(--sans); }
 .cd-rt { grid-column: 3; grid-row: 1; font: 500 11px/1 var(--mono); letter-spacing: .08em; color: var(--quiet); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .cd-rs { grid-column: 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 12.5px/1.3 var(--sans); color: var(--quiet); }
@@ -834,7 +839,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   var K = {
     week: 'cad.week.v1', log: 'cad.log.v1',
     hab: 'cad.hab.v1', train: 'cad.train.v1', defs: 'cad.defs.v1',
-    note: 'cad.note.v1', refl: 'cad.refl.v1', rfoff: 'cad.rfoff.v1'
+    note: 'cad.note.v1', refl: 'cad.refl.v1', rfoff: 'cad.rfoff.v1', glyphoff: 'cad.glyphoff.v1'
   };
   /* There is one face now, so the key that chose between two is swept
      rather than left: a preference for a control that no longer exists
@@ -1048,7 +1053,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     refl: cdLoadMap(K.refl),
     /* Off is the one stored state: anything that is not exactly true reads
        as on, so a damaged key keeps the thought rather than losing it. */
-    rfoff: cdRead(K.rfoff, false) === true
+    rfoff: cdRead(K.rfoff, false) === true,
+    /* Stored as OFF and only off, the thought's own rule: anything that
+       is not exactly true reads as on, so a damaged key keeps the glyphs. */
+    glyphoff: cdRead(K.glyphoff, false) === true
   };
   function cdSave(which) { cdWrite(K[which], S[which]); }
 
@@ -1283,6 +1291,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       ag.innerHTML = '<li class="cd-empty">Nothing on this day yet.<button type="button" class="cd-link" data-act="add">+ Add a block</button></li>';
       return;
     }
+    ag.classList.toggle('no-g', S.glyphoff);
     ag.innerHTML = rest.map(function (x) { return cdRow(x, isT, now, open); }).join('');
   }
 
@@ -1307,7 +1316,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       + '<button type="button" class="cd-dot" data-act="tick" aria-pressed="' + done + '"' + (open ? '' : ' disabled')
       + ' aria-label="' + (done ? 'Completed' : 'Mark completed') + ': ' + esc(b.n) + '"><i></i></button>'
       + '<button type="button" class="cd-rb" data-act="edit" aria-label="' + esc(b.n) + ', ' + cdHM(b.s) + (b.e > b.s ? ' to ' + cdHM(b.e) : '') + '. Open">'
-      + cdGlyph(kind) + '<span class="cd-rn">' + esc(b.n) + rw + (done ? '<span class="cd-tk" aria-hidden="true"></span>' : '') + '</span><span class="cd-rt">' + time + '</span>'
+      + (S.glyphoff ? '' : cdGlyph(kind)) + '<span class="cd-rn">' + esc(b.n) + rw + (done ? '<span class="cd-tk" aria-hidden="true"></span>' : '') + '</span><span class="cd-rt">' + time + '</span>'
       + (b.p ? '<span class="cd-rs">' + esc(b.p) + '</span>' : '') + '</button></li>';
   }
 
@@ -2630,6 +2639,20 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     root.appendChild(pRows);
     var wl = el('p', 'cd-lbl', 'Your week'); wl.style.marginTop = '24px';
     root.appendChild(wl);
+    /* The glyphs are on by default and a switch takes them off. The dot
+       is never part of this: it is the check, and a row without it has
+       no way to be ticked. */
+    var gOn = el('button', 'cd-toggle', '<span>Show task glyphs</span><i></i>');
+    gOn.type = 'button'; gOn.id = 'cdGlyphOn';
+    gOn.setAttribute('aria-pressed', String(!S.glyphoff));
+    gOn.addEventListener('click', function () {
+      S.glyphoff = !S.glyphoff; cdSave('glyphoff');
+      gOn.setAttribute('aria-pressed', String(!S.glyphoff));
+      cdPaint();
+    });
+    var gRows = el('div', 'cd-rows'); gRows.style.margin = '10px 0 14px';
+    gRows.appendChild(gOn);
+    root.appendChild(gRows);
     var clr = el('button', 'cd-btn warn', 'Clear all blocks'); clr.type = 'button'; clr.id = 'cdWkClr';
     clr.disabled = !S.week.length;
     clr.addEventListener('click', function () {

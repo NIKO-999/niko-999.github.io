@@ -214,6 +214,29 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     });
     ok('every glyph holds 3:1 against the sky beside it', gr3.length >= 3 && gr3.every((r) => r >= 3), gr3);
 
+    /* AND THEY CAN BE TURNED OFF, and the dot never can. On by default;
+       off takes every glyph away, keeps every dot, and gives the column
+       back so the names move left rather than sitting after a gap. Held
+       across a reload, then turned back on so the rest of the file reads
+       the day it was written against. */
+    const rowSnap = () => page.$$eval('.cd-it', (ls) => ls.map((l) => ({ g: !!l.querySelector('.cd-rg'), d: !!l.querySelector('.cd-dot i'), x: l.querySelector('.cd-rn').getBoundingClientRect().left })));
+    await page.click('#cdGear'); await sheetUp(page);
+    const gOn0 = await page.getAttribute('#cdGlyphOn', 'aria-pressed');
+    await page.click('#cdGlyphOn'); await page.waitForTimeout(80);
+    const gOff = await rowSnap();
+    ok('glyphs are on until you turn them off, and off keeps every dot and takes every glyph',
+      gOn0 === 'true' && (await page.getAttribute('#cdGlyphOn', 'aria-pressed')) === 'false' && (await store(page, 'cad.glyphoff.v1')) === true
+      && gOff.length === 7 && gOff.every((r) => r.d && !r.g), { gOn0, gOff });
+    ok('and the names move into the glyph\'s column rather than leaving a gap', gOff.every((r) => Math.abs(r.x - (gl[0].nx - 30)) < 1), { was: gl[0].nx, now: gOff.map((r) => r.x) });
+    await closeSheet(page);
+    await page.reload({ waitUntil: 'load' }); await page.waitForTimeout(200);
+    ok('off stays off across a reload', (await rowSnap()).every((r) => r.d && !r.g));
+    await page.click('#cdGear'); await sheetUp(page);
+    await page.click('#cdGlyphOn'); await page.waitForTimeout(80);
+    const gBack = await rowSnap();
+    ok('and on again brings every glyph back beside its dot', (await store(page, 'cad.glyphoff.v1')) === false && gBack.every((r) => r.d && r.g && Math.abs(r.x - gl[0].nx) < 1), gBack);
+    await closeSheet(page);
+
     /* THE CHECK. One white round control, and it ticks the block in the middle. */
     const go = await page.$eval('#cdGo', (b) => { const r = b.getBoundingClientRect(), cs = getComputedStyle(b);
       return { w: r.width, cx: r.left + r.width / 2, b: r.bottom, bg: cs.backgroundColor, rad: cs.borderRadius, l: b.getAttribute('aria-label'), p: b.getAttribute('aria-pressed') }; });
