@@ -5188,6 +5188,9 @@ repairs, a haircut, self care, birthdays and tickets. Driving left the
 commute's arrow for a car of its own and hiking left the walk for a
 mountain; *watch* is the screen, so *watch a show* is not a gig.
 
+**The walk is a figure in stride**, on request. The trail it replaced
+was an S with a dot on it, which said path rather than walking.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
