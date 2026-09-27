@@ -1,5 +1,5 @@
 /* Natal service worker: offline app shell + cached fonts. Bump VERSION when files change. */
-const VERSION = "natal-v38";
+const VERSION = "natal-v42";
 const SHELL = [
   "./",
   "index.html",
@@ -32,6 +32,7 @@ const SHELL = [
   "js/deep-synastry.js",
   "js/deep-overlays.js",
   "js/deep-cycles.js",
+  "js/deep-points.js",
   "js/cities.js",
   "js/wheel.js",
   "js/sky.js",

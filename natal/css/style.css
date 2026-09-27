@@ -786,3 +786,9 @@ body.detail-open .sheet-backdrop { display: none; }
   .planet-far { left: 58%; top: 12%; }
   .view:has(#birth-form) { max-width: 620px; }
 }
+
+/* short fact lists on detail pages ("In your chart") */
+.bullets { margin: 0 0 12px; padding-left: 18px; color: var(--text-2); font-size: 16px; line-height: 1.6; }
+.bullets li { margin: 4px 0; }
+.bullets li::marker { color: var(--theme, var(--muted)); }
+.bullets strong { color: var(--text); font-weight: 500; }

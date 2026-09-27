@@ -72,7 +72,8 @@
   const orbStr = (o) => `${Math.floor(o)}°${pad(Math.floor((o % 1) * 60))}′`;
   const signOf = (lon) => SIGN_KEYS[Math.floor(E.norm(lon) / 30)];
   const opposite = (k) => SIGN_KEYS[(SIGN_KEYS.indexOf(k) + 6) % 12];
-  const isPlural = (phrase) => / and |, /.test(phrase);
+  // "your drive, courage and desire" takes "are"; "your need for freedom and change" or "how you…" takes "is"
+  const isPlural = (phrase) => !/^(your )?(capacity|need|sense)\b|^(how|what) /.test(phrase) && / and |, /.test(phrase);
   const PLANET_KEYS = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"];
   const ELEMENT_KEYS = ["fire", "earth", "air", "water"];
   const MODE_KEYS = ["cardinal", "fixed", "mutable"];
@@ -259,11 +260,11 @@
     }
   }
 
-  function houseText(p) {
+  function houseText(p, withDesc) {
     if (!p.house || p.key === "asc" || p.key === "mc") return "";
     const H = HOUSES[p.house];
     const P = PLANETS[p.key];
-    return `With ${P.name} in the ${ord(p.house)} house, ${P.focus} ${isPlural(P.focus) ? "are" : "is"} channelled into ${H.areas}. ${H.desc}`;
+    return `With ${P.name} in the ${ord(p.house)} house, ${P.focus} ${isPlural(P.focus) ? "are" : "is"} channelled into ${H.areas}.${withDesc === false ? "" : " " + H.desc}`;
   }
 
   function aspectText(a) {
@@ -359,6 +360,7 @@
       if (TAB_THEME[state.tab]) view.style.setProperty("--theme", TAB_THEME[state.tab]);
       else view.style.removeProperty("--theme");
       view.innerHTML = fn();
+      dedupe(view);
       layoutForDesktop();
       bindView();
     }
@@ -568,11 +570,12 @@
     for (const k of PLANET_KEYS) {
       const p = c.get(k);
       const dec = Math.abs(p.dec);
-      html += `<div class="row"><span class="dot" style="color:${PLANETS[k].color}"></span><span class="glyph" style="color:${PLANETS[k].color}">${pGlyph(k)}</span>
-        <span class="main"><div class="title dim">${pName(k)}</div>${p.oob ? '<div class="sub" style="color:#f6a58c">Out of bounds</div>' : ""}</span>
-        <span class="end"><div class="pos">${Math.floor(dec)}°${pad(Math.floor((dec % 1) * 60))}′ ${p.dec >= 0 ? "N" : "S"}</div></span></div>`;
+      const pars = (c.parallels || []).filter((x) => x.a === k || x.b === k).length;
+      html += `<button class="row" data-open="decl:${k}"><span class="dot" style="color:${PLANETS[k].color}"></span><span class="glyph" style="color:${PLANETS[k].color}">${pGlyph(k)}</span>
+        <span class="main"><div class="title">${pName(k)}</div><div class="sub"${p.oob ? ' style="color:#f6a58c"' : ""}>${p.oob ? "Out of bounds" : dec > c.eps - 1.5 ? "Near the edge" : dec < 5 ? "Near the equator" : "In bounds"}${pars ? ` · ${pars} parallel${pars === 1 ? "" : "s"}` : ""}</div></span>
+        <span class="end"><div class="pos">${Math.floor(dec)}°${pad(Math.floor((dec % 1) * 60))}′ ${p.dec >= 0 ? "N" : "S"}</div></span></button>`;
     }
-    html += `</div><p class="note">Out-of-bounds planets travel beyond the Sun's maximum declination (${c.eps.toFixed(2)}°) and tend to act in unconventional, uncontained ways.</p>`;
+    html += `</div><p class="note">Declination is how far north or south of the celestial equator a planet sits. Out-of-bounds planets travel beyond the Sun's maximum (${c.eps.toFixed(2)}°). Tap a planet for more.</p>`;
     return html;
   }
 
@@ -879,7 +882,7 @@
         case "transit": return PLANETS[computeTransits().list[+arg].t].color;
         case "tevent": return PLANETS[state._period.events[+arg].t].color;
         case "tpevent": return PLANETS[state._period.events[+arg].key].color;
-        case "prog": case "srp": return PLANETS[arg].color;
+        case "prog": case "srp": case "decl": return PLANETS[arg].color;
         case "paspect": return ASPECTS[computeProg().list[+arg].type].color;
         case "syn": return ASPECTS[computeSyn().list[+arg].type].color;
         case "synscore": return CAT_META[arg].color;
@@ -905,10 +908,36 @@
      returns one step at a time. */
   const pageStack = [];
   let historyOK = false;
+  /** Removes any sentence already shown higher up the same page, and headings left with nothing under them. */
+  function dedupe(root) {
+    const seen = new Set();
+    for (const p of [...root.querySelectorAll("p")]) {
+      if (p.children.length || p.classList.contains("minihead")) continue;
+      const parts = p.textContent.match(/[^.!?]+(?:[.!?]+["”’)]*|$)\s*/g) || [];
+      const kept = parts.filter((t) => {
+        const k = t.trim().toLowerCase();
+        if (k.length < 30) return true;
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
+      if (kept.length !== parts.length) {
+        const text = kept.join("").trim();
+        if (text) p.textContent = text;
+        else p.remove();
+      }
+    }
+    for (const prose of [...root.querySelectorAll(".prose")]) if (!prose.textContent.trim()) prose.remove();
+    for (const h of [...root.querySelectorAll("h4")]) {
+      const next = h.nextElementSibling;
+      if (!next || next.tagName === "H4") h.remove();
+    }
+  }
   function setPage(html, theme) {
     if (theme) sheet.style.setProperty("--theme", theme);
     else sheet.style.removeProperty("--theme");
     sheetBody.innerHTML = html;
+    dedupe(sheetBody);
     sheetBody.scrollTop = 0;
     sheet.classList.remove("page-in");
     void sheet.offsetWidth;
@@ -1037,6 +1066,8 @@
       if (ds) html += sec("Using the gift", signText(p));
     } else if (key === "lilith") {
       html += sec(`In ${S.name}`, [ds ? ds.lilith : signText(p)], elColor(p.sign));
+    } else if ((key === "fortune" || key === "vertex") && D()[key]) {
+      html += sec(`In ${S.name}`, D()[key].signs[p.sign], elColor(p.sign));
     } else if (deepAsteroid(key)) {
       const da = deepAsteroid(key);
       html += sec("Meaning", da.overview);
@@ -1060,6 +1091,8 @@
       if (key === "northNode" || key === "southNode") {
         const nh = deepNodeHouse(key === "northNode" ? p.house : ((p.house + 5) % 12) + 1);
         html += sec(`In the ${ord(p.house)} house`, [K.HOUSE_NODE[key === "northNode" ? p.house : ((p.house + 5) % 12) + 1], nh && nh.story]);
+      } else if ((key === "fortune" || key === "vertex") && D()[key]) {
+        html += sec(`In the ${ord(p.house)} house · ${HOUSES[p.house].title}`, D()[key].houses[p.house]);
       } else if (deepAsteroid(key)) {
         html += sec(`In the ${ord(p.house)} house · ${HOUSES[p.house].title}`, deepAsteroid(key).houses[p.house]);
       } else if (dh) {
@@ -1159,7 +1192,7 @@
       html += `<h4>Planets in this house</h4>`;
       for (const p of inside) {
         const d = deepPlanetHouse(p.key, h);
-        html += `<p class="minihead"><span class="sym" style="color:${PLANETS[p.key].color}">${pGlyph(p.key)}</span> ${esc(pName(p.key))} in ${esc(SIGNS[p.sign].name)}</p>` + paras([d ? d.text : houseText(p)]);
+        html += `<p class="minihead"><span class="sym" style="color:${PLANETS[p.key].color}">${pGlyph(p.key)}</span> ${esc(pName(p.key))} in ${esc(SIGNS[p.sign].name)}</p>` + paras([d ? d.text : houseText(p, false)]);
       }
       html += `<div class="list">${inside.map((p) => pointRow(p)).join("")}</div>`;
     } else if (dh) {
@@ -1203,6 +1236,45 @@
     return html;
   }
 
+  // how each planet tends to behave when it is out of bounds
+  const OOB_TEXT = {
+    moon: "An out-of-bounds Moon gives feelings that run wide and deep. Your emotional responses can be unusual, intense or hard for others to predict, and you may have learned early to look after yourself in your own way. It often brings strong intuition and a need for emotional freedom.",
+    mercury: "An out-of-bounds Mercury thinks outside the lines. Your mind is original, restless and often ahead of or apart from the people around you, and you may learn or communicate in ways that do not fit standard methods. It is common in inventors, writers and people who see what others miss.",
+    venus: "An out-of-bounds Venus loves and values on its own terms. Your taste, style and way of relating can be unconventional or ahead of its time, and you may feel that ordinary rules about relationships do not quite fit you. It can bring striking artistic gifts.",
+    mars: "An out-of-bounds Mars acts without a template. Your drive can come in intense bursts, you may take risks others would not, and you tend to fight for things in your own way. Channelled well, it is courage that breaks new ground.",
+    jupiter: "An out-of-bounds Jupiter seeks meaning beyond the familiar. Your beliefs, generosity and appetite for growth can be larger than life or unorthodox, and luck often arrives through unusual routes.",
+    saturn: "An out-of-bounds Saturn builds its own rules. Your sense of duty and structure may not follow tradition, and you can end up creating the framework you could not find. The lessons are unusual but lasting.",
+    uranus: "An out-of-bounds Uranus is rare, and doubles the planet's independence. Change and originality come through in unexpected ways.",
+    neptune: "An out-of-bounds Neptune is rare, and heightens imagination and sensitivity beyond the usual range.",
+    pluto: "An out-of-bounds Pluto is uncommon and generational: it marks a period when collective power and transformation moved beyond familiar bounds, and it colours how intensely you feel those themes.",
+  };
+  function sheetDecl(key) {
+    const c = state.chart, p = c.get(key), P = PLANETS[key];
+    const dec = Math.abs(p.dec), dir = p.dec >= 0 ? "north" : "south";
+    const dms = (v) => `${Math.floor(v)}°${pad(Math.floor((v % 1) * 60))}′`;
+    let html = `<section class="hero"><div class="eyebrow">Declination</div><h2 class="display">${esc(P.name)}</h2>
+      <div class="subline"><span class="sym" style="color:${P.color}">${P.glyph}</span> ${dms(dec)} ${dir === "north" ? "N" : "S"}${p.oob ? ' · <span style="color:#f6a58c">out of bounds</span>' : ""}</div></section>`;
+    html += facts([
+      ["Declination", `${dms(dec)} ${dir}`],
+      ["The Sun's limit", `${c.eps.toFixed(2)}°`],
+      ["Status", p.oob ? `Out of bounds by ${dms(dec - c.eps)}` : `In bounds, ${dms(c.eps - dec)} inside the limit`],
+      ["Longitude", `${degStr(p)} ${signGlyph(p.sign)} ${SIGNS[p.sign].name}`],
+    ]);
+    html += sec("What declination is", `Signs and degrees measure a planet's position along the zodiac. Declination measures something different: how far north or south of the celestial equator the planet sits. The Sun never goes beyond about ${c.eps.toFixed(1)}° either way, which sets the natural boundary for the rest of the chart. Declination adds a second layer to your chart: planets at the same declination are linked even when they do not aspect each other by sign.`);
+    if (p.oob) html += sec("Out of bounds", [OOB_TEXT[key], `An out-of-bounds planet works outside the Sun's reach, so it is less governed by the rest of the chart. ${P.name}'s themes (${P.keywords.join(", ")}) tend to be expressed in an original, extreme or independent way, for better and for worse.`], "#f6a58c");
+    else if (dec > c.eps - 1.5) html += sec("Near the edge", `${P.name} sits close to the Sun's limit without crossing it, so its themes (${P.keywords.join(", ")}) have a strong, emphatic quality while still working within the rest of the chart.`);
+    else if (dec < 5) html += sec("Near the equator", `${P.name} sits close to the celestial equator, a balanced, central position. Its themes tend to be moderate and easily integrated with the rest of the chart.`);
+    else html += sec("In bounds", `${P.name} sits comfortably within the Sun's range, so its themes (${P.keywords.join(", ")}) are expressed in a way that is integrated with the rest of your chart.`);
+    const pars = (c.parallels || []).map((x, i) => [x, i]).filter(([x]) => x.a === key || x.b === key);
+    if (pars.length) {
+      html += `<h4>Parallels</h4><p class="note" style="text-align:left;margin:0 0 8px">A parallel (same declination) works like a conjunction; a contra-parallel (mirror declination) works like an opposition.</p><div class="list">` + pars.map(([x, i]) => {
+        const X = ASPECTS[x.type], o = x.a === key ? x.b : x.a;
+        return `<button class="row" data-open="parallel:${i}"><span class="dot" style="color:${X.color}"></span><span class="main"><div class="title"><span class="sym" style="color:${X.color}">${X.glyph}</span> ${esc(pName(o))}</div><div class="sub">${esc(X.name)}</div></span><span class="end"><div class="pos">${orbStr(x.orb)}</div></span></button>`;
+      }).join("") + `</div>`;
+    } else html += sec("Parallels", `${P.name} does not share a declination (within 1°) with another planet, so its declination works on its own.`);
+    return html + natalSnippet(key);
+  }
+
   function sheetSimple(eyebrow, title, subline, body) {
     return `<section class="hero"><div class="eyebrow">${esc(eyebrow)}</div><h2 class="display">${title}</h2>${subline ? `<div class="subline">${subline}</div>` : ""}</section>${paras(body)}`;
   }
@@ -1233,15 +1305,28 @@
         html = ev.kind === "sign"
           ? sheetSimple(`Progressed Moon · ${fmtMonthYear(ev.time)}`, `Moon enters ${esc(SIGNS[ev.sign].name)}`, `Age ${Math.floor(age(ev.time))}`, [PR.moonSigns && PR.moonSigns[ev.sign]])
           : sheetSimple(`Progressed Moon · ${fmtMonthYear(ev.time)}`, `Moon enters your ${ord(ev.house)} house`, esc(HOUSES[ev.house].title), [PR.moonHouses && PR.moonHouses[ev.house]]);
+        // what else is true of the progressed Moon at that moment: its house (for a sign change) or its sign (for a house change)
+        const ml = E.lonAt("moon", progUtcFor(new Date(ev.time.getTime() + 86400000 * 3)), { nodeType: state.settings.nodeType, zodiac: state.settings.zodiac });
+        if (ev.kind === "sign" && c.timeKnown) { const h = houseOfLon(ml); html += sec(`At the same time: your ${ord(h)} house`, PR.moonHouses && PR.moonHouses[h]); }
+        if (ev.kind === "house") { const sg = signOf(ml); html += sec(`At the same time: in ${SIGNS[sg].name}`, PR.moonSigns && PR.moonSigns[sg], elColor(sg)); }
         break;
       }
-      case "psun": html = sheetSimple("Progressed Sun", `Sun in ${esc(SIGNS[arg].name)}`, "A chapter of about 30 years", [((D().progressions || {}).sunSigns || {})[arg]]); break;
+      case "psun": {
+        html = sheetSimple("Progressed Sun", `Sun in ${esc(SIGNS[arg].name)}`, "A chapter of about 30 years", [((D().progressions || {}).sunSigns || {})[arg]]);
+        const T = progTimeline(), idx = T.sun.findIndex((e) => e.sign === arg);
+        const start = idx >= 0 ? T.sun[idx].time : c.input.utc, end = idx >= 0 ? T.sun[idx + 1] && T.sun[idx + 1].time : T.sun[0] && T.sun[0].time;
+        html += sec("The chapter", `${idx >= 0 ? `It begins in ${fmtMonthYear(start)}, at age ${Math.floor(age(start))}` : "It runs from birth"}${end ? ` and lasts until ${fmtMonthYear(end)}, at age ${Math.floor(age(end))}` : ""}. Your sense of identity takes on ${SIGNS[arg].name} qualities (${SIGNS[arg].keywords.slice(0, 3).join(", ")}) without replacing your natal Sun.`);
+        html += natalSnippet("sun", "Your natal Sun");
+        break;
+      }
       case "pstation": {
         const st = progTimeline().stations[+arg];
         html = sheetSimple(`By progression · ${fmtMonthYear(st.time)}`, `${esc(pName(st.key))} turns ${st.dir}`, `Age ${Math.floor(age(st.time))}`, [(D().progressions || {}).stations, st.dir === "direct" ? `From this point ${PLANETS[st.key].focus} can move outward more freely: what was reviewed inwardly for years starts to find direct expression.` : `From this point ${PLANETS[st.key].focus} turns inward for many years: a long period of reflection, reworking and doing things your own way.`, K.RETRO_KARMIC[st.key]]);
+        html += natalSnippet(st.key);
         break;
       }
       case "srtheme": html = sheetSRTheme(arg); break;
+      case "decl": html = sheetDecl(arg); break;
       case "srp": html = sheetSRPlanet(arg); break;
       case "srintro": html = sheetSimple("Solar return", "The year ahead", "", [(D().solarReturn || {}).intro]); break;
       case "sraspect": {
@@ -1249,6 +1334,15 @@
         const dA = deepAspect(a.a, a.b);
         html = sheetSimple(`Solar return ${computeSR().year} · ${X.name}`, `${esc(pShort(a.a))} <span class="sym" style="color:${X.color}">${X.glyph}</span> ${esc(pShort(a.b))}`, `orb ${orbStr(a.orb)}`,
           [dA ? dA.theme : aspectText(a), dA ? (a.type === "conjunction" ? dA.fusion : FLOW_TYPES.has(a.type) ? dA.flow : dA.tension) : "", "In a solar return chart this describes a theme that colours the year rather than a lifelong trait."]);
+        {
+          const sr = computeSR().sr, pa = sr.get(a.a), pb = sr.get(a.b);
+          const natal = c.aspects.find((x) => (x.a === a.a && x.b === a.b) || (x.a === a.b && x.b === a.a));
+          html += sec("This year", [
+            `${pName(a.a)} sits in the return chart's ${ord(pa.house)} house (${HOUSES[pa.house].areas}) and ${pName(a.b)} in the ${ord(pb.house)} (${HOUSES[pb.house].areas}), so the theme plays out between those parts of life.`,
+            natal ? (natal.type === a.type ? `Your birth chart has the same ${X.name.toLowerCase()}, so this year echoes and strengthens a lifelong pattern.` : `At birth these two form a ${ASPECTS[natal.type].name.toLowerCase()}; this year the relationship between them shifts to a ${X.name.toLowerCase()}.`)
+              : "These two do not aspect each other in your birth chart, so this is a theme particular to this year.",
+          ]);
+        }
         break;
       }
       case "syn": html = sheetSyn(+arg); break;
@@ -1279,16 +1373,20 @@
       case "tplanet": html = sheetTransitPlanet(arg); break;
       case "element": {
         const X = K.ELEMENTS[arg], list = d.elements[arg], B = deepBalance(arg);
-        html = sheetSimple("Element", X.name, `${list.length} placement${list.length === 1 ? "" : "s"}`, [
-          list.length ? `${list.map(pName).join(", ")}.` : "",
-          list.length >= 4 ? (B ? B.strong : X.strong) : list.length <= 1 ? (B ? B.weak : X.weak) : `${X.strong} With ${list.length} placements, this is a moderate influence.`,
-        ]);
-        if (B) html += sec(list.length >= 4 ? "When it runs strong" : "What it brings", B.strong) + (list.length <= 1 ? "" : sec("If it were missing", B.weak));
+        const lead = list.length >= 4 ? (B ? B.strong : X.strong) : list.length <= 1 ? (B ? B.weak : X.weak) : `${X.strong} With ${list.length} placements, this is a moderate influence.`;
+        html = sheetSimple("Element", X.name, `${list.length} placement${list.length === 1 ? "" : "s"}`, [list.length ? `${list.map(pName).join(", ")}.` : "", lead]);
+        // the other side of the element, without repeating the paragraph above
+        if (B && list.length >= 2 && list.length <= 3) html += sec("What it brings", B.strong);
+        if (B && list.length >= 2) html += sec("If it were missing", B.weak);
+        if (B && list.length <= 1) html += sec("When it runs strong", B.strong);
         break;
       }
       case "mode": {
         const X = K.MODES[arg], list = d.modes[arg], B = deepBalance(arg);
         html = sheetSimple("Modality", X.name, `${list.length} placement${list.length === 1 ? "" : "s"}`, [list.map(pName).join(", ") + (list.length ? "." : ""), list.length <= 1 ? (B ? B.weak : X.weak) : (B ? B.strong : X.strong)]);
+        if (B && list.length >= 2) html += sec("If it were missing", B.weak);
+        if (B && list.length <= 1) html += sec("When it runs strong", B.strong);
+        if (list.length) html += `<div class="list">${list.map((k) => c.get(k) ? pointRow(c.get(k)) : "").join("")}</div>`;
         break;
       }
       case "area":
@@ -1357,11 +1455,18 @@
       case "pattern": case "kpattern": {
         const pt = kind === "pattern" ? state._patterns[+arg] : c.patterns[+arg];
         const info = K.PATTERNS[pt.type];
+        const DP = (D().patterns || {})[pt.type];
         html = sheetSimple("Aspect pattern", info.name, pt.members.map((k) => `<span class="sym" style="color:${PLANETS[k].color}">${pGlyph(k)}</span>`).join(" "), [
-          info.desc,
-          `Involves ${pt.members.map((k) => `${pName(k)} in ${SIGNS[c.get(k).sign].name}`).join(", ")}.`,
-          pt.apex ? `The apex is ${pName(pt.apex)}: ${PLANETS[pt.apex].desc}` : "",
+          DP ? DP.text : info.desc,
+          `Involves ${pt.members.map((k) => `${pName(k)} in ${SIGNS[c.get(k).sign].name}${c.get(k).house ? ` (${ord(c.get(k).house)} house)` : ""}`).join(", ")}.`,
         ]);
+        if (pt.type === "stellium" && pt.where) {
+          const w = pt.where;
+          html += sec(w.kind === "sign" ? `Concentrated in ${SIGNS[w.where].name}` : `Concentrated in your ${ord(w.where)} house`, [DP && DP.focal, w.kind === "sign" ? `${SIGNS[w.where].essence}` : `${HOUSES[w.where].desc}`], w.kind === "sign" ? elColor(w.where) : null);
+        } else if (pt.apex) {
+          html += sec(`The apex: ${pName(pt.apex)}`, [DP && DP.focal, PLANETS[pt.apex].desc], PLANETS[pt.apex].color);
+        } else if (DP) html += sec("The planets involved", DP.focal);
+        if (DP) html += chips("Gifts", DP.gifts, "green") + chips("Challenges", DP.challenges, "") + sec("Over a lifetime", DP.growth);
         html += `<div class="list">${pt.members.map((k) => pointRow(c.get(k))).join("")}</div>`;
         break;
       }
@@ -1373,6 +1478,9 @@
           bend: `${P.name} square the nodes sits at the "bending" point of the nodal axis, traditionally a skipped step. Lessons around ${P.core} were left unfinished and must be integrated before the North Node path fully opens.`,
         }[arg2];
         html = sheetSimple("Nodal contact", P.name, "", [txt, P.desc]);
+        html += natalSnippet(arg);
+        const nn = c.get("northNode"), ax = deepAxis(nn.sign);
+        if (ax) html += sec(`Your nodal axis: ${SIGNS[nn.sign].name} and ${SIGNS[opposite(nn.sign)].name}`, firstPara(ax.story), PLANETS.northNode.color);
         break;
       }
       default: return;
@@ -1668,15 +1776,11 @@
     const X = D().transitAspects;
     const d = X && X[tr.t + "|" + tr.n];
     if (d) return d[field];
-    const TP = (D().transitPlanets || {})[tr.t];
-    const pair = deepAspect(tr.t, tr.n);
     return [
       `Transiting ${pName(tr.t)} ${T_VERB[tr.type]} your natal ${pName(tr.n)}, touching ${PLANETS[tr.n].core}.`,
       field === "conj" ? "A conjunction concentrates the transit's energy directly on this part of you." :
         field === "soft" ? "A flowing aspect: doors open more easily here if you take the initiative." :
           "A challenging aspect: pressure builds until something shifts, and effort now pays off later.",
-      TP ? TP.brings : "",
-      pair ? pair.theme : "",
     ].filter(Boolean).join(" ");
   }
 
@@ -1859,7 +1963,7 @@
       for (let d = new Date(start); d < end; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) {
         const idx = byDay[dayKey(d)] || [];
         html += `<div class="section-label left">${esc(fmtDay(d))}</div>`;
-        html += idx.length ? `<div class="list">${idx.map((i) => eventRow(events[i], i)).join("")}</div>` : `<p class="note" style="text-align:left;margin:0">A quiet day: no exact transits, sign changes or lunar phases.</p>`;
+        html += idx.length ? `<div class="list">${idx.map((i) => eventRow(events[i], i)).join("")}</div>` : `<p class="note" style="text-align:left;margin:0">A quiet day, nothing exact.</p>`;
       }
     } else {
       const section = (label, filter) => {
@@ -1881,7 +1985,7 @@
     const ev = state._period.events[i];
     const P = PLANETS[ev.key];
     const d = ev.time;
-    let title, body = [];
+    let title, body = [], extra = "";
     if (ev.kind === "phase") {
       title = `${ev.name} in ${SIGNS[ev.sign].name}`;
       const house = state.chart.timeKnown ? houseOfLon(E.lonAt("moon", d, { zodiac: state.settings.zodiac })) : null;
@@ -1889,19 +1993,27 @@
         { "New Moon": "A New Moon starts a fresh lunar cycle: a good moment to set intentions and begin things quietly.", "First Quarter": "The First Quarter is a moment of action and decision: obstacles show you what needs effort.", "Full Moon": "A Full Moon brings things to light and to a head: completion, clarity and heightened feelings.", "Last Quarter": "The Last Quarter is for review and release: let go of what did not work this cycle." }[ev.name],
         `It falls in ${SIGNS[ev.sign].name}${house ? `, in your ${ord(house)} house of ${HOUSES[house].areas}` : ""}, so ${SIGNS[ev.sign].name} themes${house ? " and that area of life" : ""} are highlighted.`,
       ];
+      // the lunation's degree, and any birth planets it lands on or opposes
+      const lon = E.lonAt("moon", d, { zodiac: state.settings.zodiac });
+      const hits = state.chart.points.filter((q) => PLANETS[q.key] && !["southNode", "fortune", "vertex"].includes(q.key) && !E.ASTEROIDS.includes(q.key)).map((q) => ({ q, o: Math.abs(E.diff(lon, q.lon)) })).filter((x) => x.o <= 5 || Math.abs(x.o - 180) <= 5);
+      extra = sec(`${SIGNS[ev.sign].name} themes`, SIGNS[ev.sign].essence, elColor(ev.sign)) +
+        (house ? sec(`Your ${ord(house)} house`, HOUSES[house].desc) : "") +
+        sec("In your chart", hits.length ? hits.map((x) => `It ${x.o <= 5 ? "lands on" : "opposes"} your natal ${pName(x.q.key)} (within ${orbStr(x.o <= 5 ? x.o : Math.abs(x.o - 180))}), so ${PLANETS[x.q.key].core} ${x.o <= 5 ? "is directly lit up" : "is pulled into the spotlight from the other side"} this time.`) : `It does not land close to any of your birth planets, so it works mainly through the ${house ? "house and " : ""}sign above.`);
     } else if (ev.kind === "ingress") {
       title = `${P.name} enters ${SIGNS[ev.sign].name}`;
       const TP = (D().transitPlanets || {})[ev.key];
       body = [`${P.name} moves ${ev.retro ? "back " : ""}into ${SIGNS[ev.sign].name}${TP ? `, where it stays ${TP.timescale.replace(/^about /, "about ")}` : ""}. ${SIGNS[ev.sign].essence}`, TP ? TP.brings : ""];
+      if (state.chart.timeKnown) { const h = houseOfLon(SIGN_KEYS.indexOf(ev.sign) * 30 + 15); extra = sec(`In your chart: ${SIGNS[ev.sign].name} is in your ${ord(h)} house`, [`So ${P.name} spends this stay in your ${ord(h)} house of ${HOUSES[h].areas}.`, houseVisit(ev.key, h)]); }
     } else {
       title = `${P.name} turns ${ev.dir}`;
       body = [ev.dir === "retrograde"
         ? `${P.name} appears to stop and move backwards. Its themes (${P.keywords.join(", ")}) turn inward for a while: a time to review, revisit and reconsider rather than push ahead.`
         : `${P.name} appears to stop and move forward again. What was under review in its themes (${P.keywords.join(", ")}) can now move ahead.`,
         "Planets are especially strong around a station, when they seem to stand still in the sky."];
+      if (state.chart.timeKnown) { const h = houseOfLon(E.lonAt(ev.key, d, { nodeType: state.settings.nodeType, zodiac: state.settings.zodiac })); extra = sec(`In your chart: your ${ord(h)} house`, [`${P.name} stations in your ${ord(h)} house of ${HOUSES[h].areas}, so that part of life is where the ${ev.dir === "retrograde" ? "review" : "renewed momentum"} shows up.`, houseVisit(ev.key, h)]); }
     }
     let html = `<section class="hero"><div class="eyebrow">${esc(fmtDayYear(d))} · ${fmtClock(d)}</div><h2 class="display">${esc(title)}</h2></section>`;
-    html += paras(body);
+    html += paras(body) + extra;
     html += `<div class="list"><button class="row" data-act="tday:${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}"><span class="dot" style="color:var(--theme)"></span><span class="main"><div class="title">See this day</div><div class="sub">All transits for ${esc(fmtDay(d))}</div></span></button></div>`;
     return html;
   }
@@ -2376,12 +2488,21 @@
       if (h && PR.moonHouses) html += sec(`Through your ${ord(h)} house`, PR.moonHouses[h]);
     } else if (key === "sun") {
       html += sec(`In ${S.name}`, PR.sunSigns && PR.sunSigns[p.sign], elColor(p.sign));
-      if (h) html += sec(`In your ${ord(h)} house`, `Your sense of purpose is currently being worked out through ${HOUSES[h].areas}. ${HOUSES[h].desc}`);
+      if (h) html += sec(`In your ${ord(h)} house`, `Your sense of purpose is currently being worked out through ${HOUSES[h].areas}.`);
     } else {
-      html += sec(`In ${S.name}`, [PR.planets && PR.planets[key], signText(Object.assign({}, p, { key: key === "northNode" ? "jupiter" : key }))], elColor(p.sign));
+      // the slow planets barely move by progression, and their sign readings describe a whole generation
+      const personal = ["mercury", "venus", "mars", "asc", "mc"].includes(key);
+      html += sec(`In ${S.name}`, [PR.planets && PR.planets[key], personal ? signText(p) : ""], elColor(p.sign));
+      if (!personal) {
+        const moved = Math.abs(E.diff(n.lon, p.lon));
+        html += sec(moved < 3 ? "Barely moved" : "A slow shift", moved < 3
+          ? `${pName(key)} has moved only ${moved.toFixed(2)}° since you were born. The slow planets hardly move by progression, so your birth-chart reading for ${pName(key)} still describes it.`
+          : `${pName(key)} has moved ${moved.toFixed(1)}° since you were born${p.sign !== n.sign ? "" : `, still within ${SIGNS[n.sign].name}`}. The slow planets change little by progression, so your birth-chart reading for ${pName(key)} remains the foundation; any aspects it makes below are where it is active now.`);
+        html += natalSnippet(key, `Your natal ${pName(key)}, still in effect`);
+      }
       if (p.sign !== n.sign) html += sec("A new sign", `${pName(key)} has progressed from ${SIGNS[n.sign].name} into ${S.name} since birth, so its style has slowly shifted: ${PLANETS[key].focus} now leans ${S.how}.`);
       if (p.retro !== n.retro) html += sec("Change of direction", [`${pName(key)} was ${n.retro ? "retrograde" : "direct"} at birth and is now ${p.retro ? "retrograde" : "direct"} by progression.`, PR.stations]);
-      if (h) html += sec(`In your ${ord(h)} house`, houseText(Object.assign({}, p, { house: h })));
+      if (h) html += sec(`In your ${ord(h)} house`, houseText(Object.assign({}, p, { house: h }), false));
     }
     const asp = P.list.filter((a) => a.b === key);
     if (asp.length) {
@@ -2391,6 +2512,9 @@
           <span class="main"><div class="title"><span class="sym" style="color:${X.color}">${X.glyph}</span> natal ${esc(pName(a.a))}</div><div class="sub">${esc(X.name)}${a.exact ? ` · exact ${esc(fmtMonthYear(a.exact))}` : ""}</div></span>
           <span class="end"><div class="pos">${orbStr(a.orb)}</div></span></button>`;
       }).join("") + `</div>`;
+    }
+    if (PLANETS[key] && !["asc", "mc"].includes(key)) {
+      html += `<div class="list" style="margin-top:18px"><button class="row" data-open="point:${key}"><span class="dot" style="color:${PLANETS[key].color}"></span><span class="glyph" style="color:${PLANETS[key].color}">${pGlyph(key)}</span><span class="main"><div class="title">Your natal ${esc(pName(key))}</div><div class="sub">${esc(SIGNS[n.sign].name)}${n.house ? ` · ${ord(n.house)} house` : ""} · open the birth-chart reading</div></span></button></div>`;
     }
     return html;
   }
@@ -2510,12 +2634,51 @@
     }
     if (which === "sun") {
       const s = sr.get("sun");
-      return sheetSimple(`Solar return ${R.year}`, `Sun in the ${ord(s.house)} house`, esc(HOUSES[s.house].title), [SRD.sunHouse && SRD.sunHouse[s.house]]);
+      let html = sheetSimple(`Solar return ${R.year}`, `Sun in the ${ord(s.house)} house`, esc(HOUSES[s.house].title), [SRD.sunHouse && SRD.sunHouse[s.house]]);
+      const asp = sr.aspects.filter((a) => (a.a === "sun" || a.b === "sun") && a.orb <= 5 && ASP_WORD[a.type] && !["dsc", "ic"].includes(a.a === "sun" ? a.b : a.a));
+      if (asp.length) html += sec("The Sun's aspects this year", asp.map((a) => { const o = a.a === "sun" ? a.b : a.a; return `${cap(ASP_WORD[a.type])} ${pName(o)} (${orbStr(a.orb)}): ${a.nature === "harmony" ? "a supportive link" : a.nature === "fusion" ? "a merging of energies" : "a source of pressure and drive"} between your purpose this year and ${PLANETS[o].core}.`; }));
+      return html + natalSnippet("sun", "Your natal Sun");
     }
     const m = sr.get("moon");
     return sheetSimple(`Solar return ${R.year}`, `Moon in ${esc(SIGNS[m.sign].name)}`, `${ord(m.house)} house · ${esc(HOUSES[m.house].title)}`,
       [SRD.moonSign && SRD.moonSign[m.sign], SRD.moonHouse && SRD.moonHouse[m.house]]);
   }
+  const ASP_WORD = { conjunction: "conjunct", opposition: "opposite", trine: "trine", square: "square", sextile: "sextile" };
+  /** A short reminder of a natal placement, with a link to its full reading. */
+  function natalSnippet(key, heading) {
+    const c = state.chart, n = c.get(key), P = PLANETS[key];
+    if (!n || !P) return "";
+    const dp = deepPlanetSign(key, n.sign);
+    const text = firstPara(dp ? dp.text : signText(n));
+    return sec(heading || `Your natal ${P.name}`, text, P.color) +
+      `<div class="list"><button class="row" data-open="point:${key}"><span class="dot" style="color:${P.color}"></span><span class="glyph" style="color:${P.color}">${P.glyph}</span><span class="main"><div class="title">${esc(P.name)} in ${esc(SIGNS[n.sign].name)}${n.house ? ` · ${ord(n.house)} house` : ""}</div><div class="sub">Open the birth-chart reading</div></span></button></div>`;
+  }
+  /** What a planet tends to bring while it moves through one of your houses (shared by solar returns and transits). */
+  const houseVisit = (key, h) => (((D().transitHouses || {})[key] || {})[h] || {}).text || "";
+  /** How a planet in a solar return or progressed chart relates to the birth chart, with a way back to it. */
+  function inYourChart(key, p, chart2, when) {
+    const c = state.chart, n = c.get(key), P = PLANETS[key];
+    const items = [];
+    if (c.timeKnown && key !== "asc" && key !== "mc") {
+      const nh = houseOfLon(p.lon);
+      items.push(`Falls in your natal <strong>${ord(nh)} house</strong>, linking it to ${esc(HOUSES[nh].areas)}.`);
+    }
+    if (key !== "sun" && n) {
+      const gap = Math.abs(E.diff(n.lon, p.lon));
+      if (gap < 3) items.push(`<strong>Back at its birth position</strong>, within ${orbStr(gap)}: the ${esc(P.name)} themes of your birth chart come back into focus ${when}.`);
+      else if (n.sign === p.sign) items.push(`In the same sign as at your birth (${esc(SIGNS[n.sign].name)}).`);
+      else items.push(`At birth it was in ${esc(SIGNS[n.sign].name)}${n.house ? ` in your ${ord(n.house)} house` : ""}; ${when} it is in ${esc(SIGNS[p.sign].name)}.`);
+    }
+    if (chart2) {
+      const tight = chart2.aspects.filter((a) => (a.a === key || a.b === key) && a.orb <= 3 && ASP_WORD[a.type] && !["dsc", "ic"].includes(a.a === key ? a.b : a.a));
+      if (tight.length) items.push(`Tight aspects ${when}: ${tight.map((a) => `<strong>${ASP_WORD[a.type]} ${esc(pName(a.a === key ? a.b : a.a))}</strong> (${orbStr(a.orb)})`).join(", ")}.`);
+    }
+    if (p.speed !== undefined && !["asc", "mc"].includes(key)) items.push(p.retro ? "Moving retrograde." : "Moving direct.");
+    if (!items.length) return "";
+    return `<h4>In your chart</h4><ul class="bullets">${items.map((t) => `<li>${t}</li>`).join("")}</ul>` +
+      (n && PLANETS[key] ? `<div class="list"><button class="row" data-open="point:${key}"><span class="dot" style="color:${P.color}"></span><span class="glyph" style="color:${P.color}">${P.glyph}</span><span class="main"><div class="title">Your natal ${esc(P.name)}</div><div class="sub">${esc(SIGNS[n.sign].name)}${n.house ? ` · ${ord(n.house)} house` : ""} · open the birth-chart reading</div></span></button></div>` : "");
+  }
+
   function sheetSRPlanet(key) {
     const R = computeSR(), p = R.sr.get(key);
     const SRD = D().solarReturn || {};
@@ -2527,9 +2690,12 @@
     if (ang.length && SRD.angular && SRD.angular[key]) html += sec(`On the ${ang[0].angle}`, SRD.angular[key]);
     if (key === "sun" && SRD.sunHouse) html += sec("This year's focus", SRD.sunHouse[p.house]);
     else if (key === "moon" && SRD.moonHouse) html += sec("This year's feelings", [SRD.moonHouse[p.house], SRD.moonSign && SRD.moonSign[p.sign]]);
-    else html += sec(`In the ${ord(p.house)} house · ${HOUSES[p.house].title}`, [`This year ${P.focus} ${isPlural(P.focus) ? "are" : "is"} drawn into ${HOUSES[p.house].areas}.`, HOUSES[p.house].desc]);
-    html += sec(`In ${S.name}`, [`${P.lead || `Your ${P.name}`} ${S.how} this year.`, `The gifts to use: ${S.gifts}. The trap to avoid: ${S.shadow}.`], elColor(p.sign));
+    else html += sec(`In the ${ord(p.house)} house · ${HOUSES[p.house].title}`, [`This year ${P.focus} ${isPlural(P.focus) ? "are" : "is"} drawn into ${HOUSES[p.house].areas}.`, houseVisit(key, p.house)]);
+    // the sign only says something about the year for the fast planets (the Sun always returns to its birth sign,
+    // and the Moon's sign is covered above); slow planets stay in a sign for years
+    if (["mercury", "venus", "mars"].includes(key)) html += sec(`In ${S.name}`, [`${P.lead} ${S.how} this year.`, `The gifts to use: ${S.gifts}. The trap to avoid: ${S.shadow}.`], elColor(p.sign));
     if (p.retro) html += sec("Retrograde this year", K.RETRO_KARMIC[key] || `${P.name} is retrograde in this year's chart, so its themes turn inward: review and revisit before pushing ahead.`);
+    html += inYourChart(key, p, R.sr, "this year");
     return html;
   }
 
@@ -2692,6 +2858,10 @@
     if (!inMine) html += `<p class="note" style="text-align:left">Written from ${esc(owner)}'s side: read "you" as ${esc(owner)} and "their" as ${esc(guest)}.</p>`;
     html += paras([txt || `${guest}'s ${pName(key)} brings ${PLANETS[key].focus} into ${owner}'s ${ord(o.house)} house of ${HOUSES[o.house].areas}.`]);
     html += sec(`The ${ord(o.house)} house`, HOUSES[o.house].desc);
+    const guestChart = inMine ? Y.them : state.chart, gp = guestChart.get(key);
+    html += sec(`${guest === "You" ? "Your" : guest + "'s"} ${pName(key)}`, `${guest === "You" ? "Your" : guest + "'s"} ${pName(key)} is in ${SIGNS[gp.sign].name}, so it arrives in this house ${SIGNS[gp.sign].how}.`, PLANETS[key].color);
+    const contacts = Y.list.map((x, i) => [x, i]).filter(([x]) => (inMine ? x.b : x.a) === key);
+    if (contacts.length) html += `<h4>Contacts it makes</h4><div class="list">` + contacts.map(([x, i]) => { const X = ASPECTS[x.type]; return `<button class="row" data-open="syn:${i}"><span class="dot" style="color:${X.color}"></span><span class="main"><div class="title">${esc(pShort(x.a))} <span class="sym" style="color:${X.color};font-size:.85em">${X.glyph}</span> ${esc(pShort(x.b))}</div><div class="sub">${esc(X.name)}</div></span><span class="end"><div class="pos">${orbStr(x.orb)}</div></span></button>`; }).join("") + `</div>`;
     return html;
   }
   function sheetSynScore(cat) {
@@ -2708,6 +2878,9 @@
           <span class="main"><div class="title">${esc(pShort(x.a))} <span class="sym" style="color:${X.color};font-size:.85em">${X.glyph}</span> ${esc(pShort(x.b))}</div><div class="sub">${esc(X.name)}</div></span>
           <span class="end"><div class="pos">${orbStr(x.orb)}</div></span></button>`;
       }).join("") + `</div>`;
+      const top = Y.list[idx.slice().sort((i, j) => Y.list[i].orb - Y.list[j].orb)[0]];
+      const pd = ((D().synastry || {}).pairs || {})[pairKey(top.a, top.b)];
+      if (pd) html += sec(`Strongest here: ${pName(top.a)} ${ASPECTS[top.type].name.toLowerCase()} ${pName(top.b)}`, [firstPara(pd.text), top.type === "conjunction" ? pd.fusion : top.nature === "harmony" ? pd.harmony : pd.tension]);
     } else html += `<p class="note" style="text-align:left">No close contacts in this area.</p>`;
     return html;
   }
@@ -3119,7 +3292,16 @@
 
   /* offline support when installed as an app (not inside embedded previews) */
   if ("serviceWorker" in navigator && !window.NATAL_EMBED && (location.protocol === "https:" || location.hostname === "localhost")) {
-    window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+    const hadController = !!navigator.serviceWorker.controller;
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (!hadController || reloaded) return; // first install: nothing old to replace
+      reloaded = true;
+      location.reload();
+    });
+    window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").then((reg) => {
+      document.addEventListener("visibilitychange", () => { if (!document.hidden) reg.update().catch(() => {}); });
+    }).catch(() => {}));
   }
 
   /* boot */
