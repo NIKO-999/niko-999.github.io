@@ -14,7 +14,7 @@
  */
 (function () {
   "use strict";
-  const SKY_VERSION = "sky-11";
+  const SKY_VERSION = "sky-12";
 
   /* Everything the worker needs lives inside SKYLIB, so its source can be
      shipped to a Worker via toString(). No DOM access in here. */
@@ -507,7 +507,8 @@
     let paused = false, slow = false;
     function buildMap(kind, parts, W) {
       const r = parts.R * W;
-      const MW = Math.max(64, Math.ceil((TAU * r) / 8) * 8), MH = Math.max(32, Math.ceil(2 * r));
+      // two texels per screen pixel, so sampling it stays as sharp as the still picture
+      const MW = Math.max(128, Math.ceil((TAU * r * 2) / 8) * 8), MH = Math.max(64, Math.ceil(4 * r));
       const m = new Float32Array(MW * MH * 3);
       for (let j = 0; j < MH; j++) {
         const lat = -1 + ((j + 0.5) / MH) * 2;
@@ -842,7 +843,7 @@
   function startSpin(m) {
     const w = getWorker();
     if (!m || !w || reduceMotion) return;
-    const N = m.kind === "moon" ? 96 : 48, M = N / 2;
+    const N = m.kind === "moon" ? 240 : 96, M = N / 2; // enough frames that each blend moves under a pixel, so it stays sharp
     framesReady[m.kind] = ({ sheet, period }) => {
       framesReady[m.kind] = null;
       const W = m.px, size = W * W * 4, cols = Math.ceil(Math.sqrt(M)), rows = Math.ceil(M / cols);
