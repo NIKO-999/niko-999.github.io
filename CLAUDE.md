@@ -5612,6 +5612,21 @@ proved by putting the decimal back: three fail by name, not by a hang
 — the first proof hung on a chip pressed by its words, so it is
 pressed by position.
 
+### Cardio is not asked what you trained
+
+Reported off the editor: *Log what you trained* on a Cardio block. The
+sheet it opens is lifts, runs and recovery, and a treadmill session
+has no answer on it, so the question had one honest reply and it was
+not on the list. Cardio left `TRAINING`, which is the one set every
+door reads: the tick, the confirm's label, the editor's link and the
+Train tile's choice of block. **It still keeps the Train habit**,
+because that comes through the habit's own `from`, which is a
+different question from what the sheet can file. This reverses the
+line under *Cardio is its own kind* that said it asks. Asserted as a
+tick that raises no sheet, a tick that is still kept, and an editor
+with no link; proved by putting cardio back, which fails the first
+and the third by name.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

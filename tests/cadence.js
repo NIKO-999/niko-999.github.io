@@ -577,6 +577,22 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await c.close();
   }
 
+  {
+    /* Cardio keeps the Train habit and is never asked what it trained:
+       the sheet has no answer for a treadmill. */
+    const { c, page } = await ctx({ init: `localStorage.setItem('cad.week.v1', JSON.stringify([{ id: 'k1', n: 'Cardio', d: [4], s: 540, e: 560 }]));` });
+    await page.click('.cd-it[data-id="k1"] .cd-dot');
+    ok('ticking cardio does not ask what you trained', !(await sheetUp(page)));
+    ok('and the tick is kept', !!(((await store(page, 'cad.log.v1')) || {})['2026-09-25'] || {}).k1);
+    /* A build that asks leaves a sheet over the row: put it away, so the
+       next press fails an assertion by name rather than timing out. */
+    if (await page.$('#cdSheet.is-open')) await closeSheet(page);
+    await page.click('.cd-it[data-id="k1"] .cd-rb');
+    await sheetUp(page);
+    ok('its editor offers no workout to log', !(await page.$('#cdShB .cd-link')) && /Cardio/.test(await page.textContent('#cdShT')));
+    await c.close();
+  }
+
   console.log('\n── the page under the sky ──');
   {
     const { c, page } = await ctx({});
