@@ -463,6 +463,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cd-num { margin: 10px 0 2px; text-align: center; font: 200 60px/1 var(--sans); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .cd-numin { outline: none; caret-color: var(--ink); -webkit-user-select: text; user-select: text; }
 .cd-num small { margin-left: 8px; font: 500 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--quiet); }
+.cd-num small:empty, .cd-hr-v small:empty { display: none; }
 .cd-numcap { margin: 6px 0 10px; text-align: center; font: 500 10.5px/1 var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--quiet); }
 
 /* A habit's record opens on three figures side by side: the same box
@@ -1400,9 +1401,29 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     return cdHabVal(iso, h) ? 'you' : null;
   }
   function cdHabOn(iso, h) { return h.k === 'tick' ? !!cdKeptBy(iso, h) : +cdHabVal(iso, h) > 0; }
+  /* Hours are read as a clock, never as a decimal: 6.75 h is a figure
+     nobody says, and 6h 45m is the same night. The record stays hours,
+     so the dial, the average and every sum are untouched; only the
+     words change, and they carry their own units, so cdUnit is empty. */
   function cdFmtNum(v, h) {
-    if (h.unit === 'L' || h.unit === 'h') return (Math.round(v * 100) / 100).toString();
+    if (h.unit === 'h') {
+      var mins = Math.round(v * 60), hh = Math.floor(mins / 60), mm = mins % 60;
+      return hh && mm ? hh + 'h ' + mm + 'm' : hh ? hh + 'h' : mm + 'm';
+    }
+    if (h.unit === 'L') return (Math.round(v * 100) / 100).toString();
     return Math.round(v).toLocaleString('en-GB');
+  }
+  function cdUnit(h) { return h.unit === 'h' ? '' : h.unit; }
+  /* A typed figure, for hours as a clock too: 6:45, 6h45, 6h 45m and 45m
+     all read, and a bare 6.75 is still hours. */
+  function cdParseNum(t, h) {
+    t = String(t).toLowerCase().replace(/,/g, '.');
+    if (h.unit === 'h') {
+      var c = t.match(/^\s*(\d+)\s*(?::|h)\s*(\d{1,2})?\s*m?\s*$/) || t.match(/^\s*()(\d+)\s*m\s*$/);
+      if (c) return (+(c[1] || 0)) + (+(c[2] || 0)) / 60;
+    }
+    var x = parseFloat(t.replace(/[^0-9.]/g, ''));
+    return isFinite(x) ? x : 0;
   }
   function cdStreak(h) {
     var d = cdToday(), n = 0;
@@ -2154,7 +2175,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
         var wk = 0, n = 0;
         for (var i = 1; i <= 7; i++) { var x = +cdHabVal(cdAddDays(today, -i), h); if (x > 0) { wk += x; n++; } }
         sub = n ? '7-day avg ' + cdFmtNum(wk / n, h) : 'Not yet';
-        val = on ? '<span class="cd-hr-v">' + cdFmtNum(v, h) + '<small>' + esc(h.unit) + '</small></span>' : '<span class="cd-hr-v is-nil">—</span>';
+        val = on ? '<span class="cd-hr-v">' + cdFmtNum(v, h) + '<small>' + esc(cdUnit(h)) + '</small></span>' : '<span class="cd-hr-v is-nil">—</span>';
       }
       var fn = ds.map(function (d) {
         var c = (cdHabOn(d, h) ? 'is-on' : '') + (d === today && d !== now ? ' is-at' : '');
@@ -2250,9 +2271,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
        press it and the keyboard comes up. A figure past the track's end
        takes the track with it rather than being cut back to it. */
     var fig = el('span', 'cd-numin'); fig.id = 'cdNumE';
-    fig.contentEditable = 'true'; fig.setAttribute('inputmode', 'decimal'); fig.setAttribute('enterkeyhint', 'done');
+    fig.contentEditable = 'true'; fig.setAttribute('inputmode', h.unit === 'h' ? 'text' : 'decimal'); fig.setAttribute('enterkeyhint', 'done');
     fig.setAttribute('role', 'textbox'); fig.setAttribute('aria-label', h.n + ', type a figure');
-    var unit = el('small', '', esc(h.unit));
+    var unit = el('small', '', esc(cdUnit(h)));
     big.appendChild(fig); big.appendChild(unit);
     function paint() { rg.value = v; if (document.activeElement !== fig) fig.textContent = cdFmtNum(v, h); }
     /* Arriving selects the whole figure, so what you type replaces it.
@@ -2261,7 +2282,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
        the middle of the old figure. */
     var fresh = false;
     function selAll() { var r = document.createRange(); r.selectNodeContents(fig); var sl = getSelection(); sl.removeAllRanges(); sl.addRange(r); }
-    fig.addEventListener('focus', function () { fig.textContent = v ? String(+v.toFixed(2)) : ''; fresh = true; selAll(); });
+    fig.addEventListener('focus', function () { fig.textContent = !v ? '' : h.unit === 'h' ? Math.floor(Math.round(v * 60) / 60) + ':' + ('0' + Math.round(v * 60) % 60).slice(-2) : String(+v.toFixed(2)); fresh = true; selAll(); });
     /* The re-select waits a tick for the press to finish placing its
        caret, and a key typed in that tick cancels it: otherwise the first
        character is selected again and replaced by the second. */
@@ -2269,8 +2290,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     fig.addEventListener('pointerup', function () { if (fresh) { fresh = false; selT = setTimeout(selAll, 0); } });
     fig.addEventListener('keydown', function () { fresh = false; clearTimeout(selT); });
     fig.addEventListener('input', function () {
-      var t = fig.textContent.replace(/,/g, '.').replace(/[^0-9.]/g, '');
-      var x = parseFloat(t); v = isFinite(x) && x > 0 ? Math.min(+x.toFixed(2), 999999) : 0;
+      var x = cdParseNum(fig.textContent, h); v = isFinite(x) && x > 0 ? Math.min(+x.toFixed(2), 999999) : 0;
       if (v > +rg.max) rg.max = Math.ceil(v * 1.5);
       rg.value = v;
     });
@@ -2303,7 +2323,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     for (var j = 0; j < 14; j++) {
       var d = cdAddDays(today, -j), on = cdHabOn(d, h), v = cdHabVal(d, h);
       var hl = ul.appendChild(el('li', '', '<i></i><b>' + DOW[cdDow(d)] + ' ' + cdDate(d).getDate() + ' ' + MON[cdDate(d).getMonth()].slice(0, 3) + '</b><span>'
-        + (on ? (h.k === 'num' ? cdFmtNum(v, h) + ' ' + esc(h.unit) : 'completed') : '—') + '</span>'));
+        + (on ? (h.k === 'num' ? (cdFmtNum(v, h) + ' ' + esc(cdUnit(h))).trim() : 'completed') : '—') + '</span>'));
       hl.style.setProperty('--cat', on ? 'var(' + h.hc + ')' : 'var(--quiet)');
     }
     root.appendChild(el('p', 'cd-lbl', 'Last fourteen days'));
@@ -2454,7 +2474,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var hs = cdHabits().filter(function (h) { return cdHabOn(iso, h); });
     if (hs.length) {
       root.appendChild(el('p', 'cd-lbl', 'Habits'));
-      root.appendChild(el('p', 'cd-note', hs.map(function (h) { return esc(h.n) + (h.k === 'num' ? ' ' + cdFmtNum(cdHabVal(iso, h), h) + ' ' + esc(h.unit) : ''); }).join(' · ')));
+      root.appendChild(el('p', 'cd-note', hs.map(function (h) { return esc(h.n) + (h.k === 'num' ? (' ' + cdFmtNum(cdHabVal(iso, h), h) + ' ' + esc(cdUnit(h))).trimEnd() : ''); }).join(' · ')));
     }
     var foot = el('div', 'cd-foot');
     var go = el('button', 'cd-btn go', 'Open this day'); go.type = 'button';

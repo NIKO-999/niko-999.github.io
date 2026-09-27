@@ -906,6 +906,32 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.waitForTimeout(320);
     await stray();
     ok('a figure between the dial\'s steps is saved as typed', ((await store(page, 'cad.hab.v1'))['2026-09-25'] || {}).water === 1.8);
+    /* Sleep is a clock, never a decimal: 6.75 h is a figure nobody says.
+       The record stays hours, the words carry their own units, and a
+       typed 6:45 lands as the same night a typed 6.75 does. */
+    await page.click('.cd-hr[data-h="sleep"] .cd-hr-b');
+    await sheetUp(page);
+    const chipsS = await page.$$eval('#cdShB .cd-chip', (cs) => cs.map((c) => c.textContent));
+    ok('sleep\'s marks name their hours', chipsS.join('|') === '6h|7h|8h|9h', chipsS);
+    await page.click('#cdShB .cd-chip >> nth=1');
+    await page.$eval('#cdNumR', (r) => { r.value = '6.75'; r.dispatchEvent(new Event('input', { bubbles: true })); });
+    const sl = await page.evaluate(() => ({ fig: document.getElementById('cdNumE').textContent, unit: document.querySelector('#cdNumV small').textContent }));
+    ok('sleep reads as hours and minutes, with no decimal and no stray unit', sl.fig === '6h 45m' && sl.unit === '', sl);
+    await page.click('#cdNumE');
+    const onFocus = await page.textContent('#cdNumE');
+    await page.keyboard.type('7:20');
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(320);
+    await stray();
+    const slept = ((await store(page, 'cad.hab.v1'))['2026-09-25'] || {}).sleep;
+    ok('a typed 7:20 is saved as hours', onFocus === '6:45' && slept === 7.33, { onFocus, slept });
+    ok('and the row reads it as a clock', (await page.textContent('.cd-hr[data-h="sleep"] .cd-hr-v')) === '7h 20m');
+    /* Put it back: later checks count today's kept habits. */
+    await page.click('.cd-hr[data-h="sleep"] .cd-hr-b');
+    await sheetUp(page);
+    await page.click('#cdShB .cd-foot .cd-btn:not(.go)');
+    await page.waitForTimeout(320);
+    ok('and Clear takes the night off again', !('sleep' in ((await store(page, 'cad.hab.v1'))['2026-09-25'] || {})));
     await page.click('.cd-hr[data-h="water"] .cd-hr-b');
     await sheetUp(page);
     ok('and it reads back formatted, as the dial draws it', (await page.textContent('#cdNumE')) === '1.8');

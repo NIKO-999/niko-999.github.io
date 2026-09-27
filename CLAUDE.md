@@ -5592,6 +5592,26 @@ plants one and reads every word on every block at 4.5:1 on composited
 pixels. Bite-proved by drawing the dot in the ink and the time in the
 bare hue: both checks fall.
 
+### Sleep is a clock
+
+Reported off the sheet reading **6.75 H** over chips reading 6 7 8 9:
+a decimal hour is a figure nobody says. It reads **6h 45m** now, on
+the sheet, its marks (6h to 9h), the row, the history and the day
+sheet. **The record stays hours**, so the dial, the 15-minute grain,
+the seven-day average and every sum are untouched; only the words
+change. They carry their own units, so the `h` label beside them is
+empty and `:empty` puts it away rather than leaving its margin to push
+the figure off centre.
+
+**Typed as a clock too.** Focus shows `6:45`, and `7:20`, `7h20`,
+`45m` and a bare `6.75` all read; the field asks for a text keyboard
+on hours, because the decimal one has no colon. Asserted as the marks,
+the figure, a typed `7:20` saved as 7.33 and the row reading `7h 20m`,
+then cleared, since later checks count today's kept habits. Bite-
+proved by putting the decimal back: three fail by name, not by a hang
+— the first proof hung on a chip pressed by its words, so it is
+pressed by position.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
