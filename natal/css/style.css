@@ -813,8 +813,9 @@ body.detail-open .sheet-backdrop { display: none; }
 /* cancel the orbit's turn and the ring's tilt, so each rock stays round and lit from the same side */
 /* plain numbers (1 / sin 14deg, and the 16deg tilt): Safari only hands keyframes without variables to the compositor */
 @keyframes rk-upright { from { transform: rotate(0deg) scaleY(4.1336) rotate(-16deg); } to { transform: rotate(360deg) scaleY(4.1336) rotate(-16deg); } }
-/* the moon and small world turn as a cross-fade of pre-rendered frames, also run by the compositor */
+/* the moon and small world turn through pre-rendered frames, blended by the compositor */
 .spinstack { position: absolute; inset: 0; }
-.spinframe { opacity: 0; animation-timing-function: linear; animation-iteration-count: infinite; }
-.sky-paused .ringband, .sky-paused .rk-orbit, .sky-paused .rk, .sky-paused .spinframe { animation-play-state: paused; }
-@media (prefers-reduced-motion: reduce) { .ringband, .rk-orbit, .rk, .spinframe { animation: none; } }
+.spinclip { position: absolute; inset: 0; overflow: hidden; }
+.spinsheet { position: absolute; left: 0; top: 0; display: block; }
+.sky-paused .ringband, .sky-paused .rk-orbit, .sky-paused .rk, .sky-paused .spinclip, .sky-paused .spinsheet { animation-play-state: paused !important; }
+@media (prefers-reduced-motion: reduce) { .ringband, .rk-orbit, .rk, .spinclip, .spinsheet { animation: none !important; } }
