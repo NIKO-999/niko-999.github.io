@@ -570,11 +570,12 @@
     for (const k of PLANET_KEYS) {
       const p = c.get(k);
       const dec = Math.abs(p.dec);
-      html += `<div class="row"><span class="dot" style="color:${PLANETS[k].color}"></span><span class="glyph" style="color:${PLANETS[k].color}">${pGlyph(k)}</span>
-        <span class="main"><div class="title dim">${pName(k)}</div>${p.oob ? '<div class="sub" style="color:#f6a58c">Out of bounds</div>' : ""}</span>
-        <span class="end"><div class="pos">${Math.floor(dec)}°${pad(Math.floor((dec % 1) * 60))}′ ${p.dec >= 0 ? "N" : "S"}</div></span></div>`;
+      const pars = (c.parallels || []).filter((x) => x.a === k || x.b === k).length;
+      html += `<button class="row" data-open="decl:${k}"><span class="dot" style="color:${PLANETS[k].color}"></span><span class="glyph" style="color:${PLANETS[k].color}">${pGlyph(k)}</span>
+        <span class="main"><div class="title">${pName(k)}</div><div class="sub"${p.oob ? ' style="color:#f6a58c"' : ""}>${p.oob ? "Out of bounds" : dec > c.eps - 1.5 ? "Near the edge" : dec < 5 ? "Near the equator" : "In bounds"}${pars ? ` · ${pars} parallel${pars === 1 ? "" : "s"}` : ""}</div></span>
+        <span class="end"><div class="pos">${Math.floor(dec)}°${pad(Math.floor((dec % 1) * 60))}′ ${p.dec >= 0 ? "N" : "S"}</div></span></button>`;
     }
-    html += `</div><p class="note">Out-of-bounds planets travel beyond the Sun's maximum declination (${c.eps.toFixed(2)}°) and tend to act in unconventional, uncontained ways.</p>`;
+    html += `</div><p class="note">Declination is how far north or south of the celestial equator a planet sits. Out-of-bounds planets travel beyond the Sun's maximum (${c.eps.toFixed(2)}°). Tap a planet for more.</p>`;
     return html;
   }
 
@@ -881,7 +882,7 @@
         case "transit": return PLANETS[computeTransits().list[+arg].t].color;
         case "tevent": return PLANETS[state._period.events[+arg].t].color;
         case "tpevent": return PLANETS[state._period.events[+arg].key].color;
-        case "prog": case "srp": return PLANETS[arg].color;
+        case "prog": case "srp": case "decl": return PLANETS[arg].color;
         case "paspect": return ASPECTS[computeProg().list[+arg].type].color;
         case "syn": return ASPECTS[computeSyn().list[+arg].type].color;
         case "synscore": return CAT_META[arg].color;
@@ -1235,6 +1236,45 @@
     return html;
   }
 
+  // how each planet tends to behave when it is out of bounds
+  const OOB_TEXT = {
+    moon: "An out-of-bounds Moon gives feelings that run wide and deep. Your emotional responses can be unusual, intense or hard for others to predict, and you may have learned early to look after yourself in your own way. It often brings strong intuition and a need for emotional freedom.",
+    mercury: "An out-of-bounds Mercury thinks outside the lines. Your mind is original, restless and often ahead of or apart from the people around you, and you may learn or communicate in ways that do not fit standard methods. It is common in inventors, writers and people who see what others miss.",
+    venus: "An out-of-bounds Venus loves and values on its own terms. Your taste, style and way of relating can be unconventional or ahead of its time, and you may feel that ordinary rules about relationships do not quite fit you. It can bring striking artistic gifts.",
+    mars: "An out-of-bounds Mars acts without a template. Your drive can come in intense bursts, you may take risks others would not, and you tend to fight for things in your own way. Channelled well, it is courage that breaks new ground.",
+    jupiter: "An out-of-bounds Jupiter seeks meaning beyond the familiar. Your beliefs, generosity and appetite for growth can be larger than life or unorthodox, and luck often arrives through unusual routes.",
+    saturn: "An out-of-bounds Saturn builds its own rules. Your sense of duty and structure may not follow tradition, and you can end up creating the framework you could not find. The lessons are unusual but lasting.",
+    uranus: "An out-of-bounds Uranus is rare, and doubles the planet's independence. Change and originality come through in unexpected ways.",
+    neptune: "An out-of-bounds Neptune is rare, and heightens imagination and sensitivity beyond the usual range.",
+    pluto: "An out-of-bounds Pluto is uncommon and generational: it marks a period when collective power and transformation moved beyond familiar bounds, and it colours how intensely you feel those themes.",
+  };
+  function sheetDecl(key) {
+    const c = state.chart, p = c.get(key), P = PLANETS[key];
+    const dec = Math.abs(p.dec), dir = p.dec >= 0 ? "north" : "south";
+    const dms = (v) => `${Math.floor(v)}°${pad(Math.floor((v % 1) * 60))}′`;
+    let html = `<section class="hero"><div class="eyebrow">Declination</div><h2 class="display">${esc(P.name)}</h2>
+      <div class="subline"><span class="sym" style="color:${P.color}">${P.glyph}</span> ${dms(dec)} ${dir === "north" ? "N" : "S"}${p.oob ? ' · <span style="color:#f6a58c">out of bounds</span>' : ""}</div></section>`;
+    html += facts([
+      ["Declination", `${dms(dec)} ${dir}`],
+      ["The Sun's limit", `${c.eps.toFixed(2)}°`],
+      ["Status", p.oob ? `Out of bounds by ${dms(dec - c.eps)}` : `In bounds, ${dms(c.eps - dec)} inside the limit`],
+      ["Longitude", `${degStr(p)} ${signGlyph(p.sign)} ${SIGNS[p.sign].name}`],
+    ]);
+    html += sec("What declination is", `Signs and degrees measure a planet's position along the zodiac. Declination measures something different: how far north or south of the celestial equator the planet sits. The Sun never goes beyond about ${c.eps.toFixed(1)}° either way, which sets the natural boundary for the rest of the chart. Declination adds a second layer to your chart: planets at the same declination are linked even when they do not aspect each other by sign.`);
+    if (p.oob) html += sec("Out of bounds", [OOB_TEXT[key], `An out-of-bounds planet works outside the Sun's reach, so it is less governed by the rest of the chart. ${P.name}'s themes (${P.keywords.join(", ")}) tend to be expressed in an original, extreme or independent way, for better and for worse.`], "#f6a58c");
+    else if (dec > c.eps - 1.5) html += sec("Near the edge", `${P.name} sits close to the Sun's limit without crossing it, so its themes (${P.keywords.join(", ")}) have a strong, emphatic quality while still working within the rest of the chart.`);
+    else if (dec < 5) html += sec("Near the equator", `${P.name} sits close to the celestial equator, a balanced, central position. Its themes tend to be moderate and easily integrated with the rest of the chart.`);
+    else html += sec("In bounds", `${P.name} sits comfortably within the Sun's range, so its themes (${P.keywords.join(", ")}) are expressed in a way that is integrated with the rest of your chart.`);
+    const pars = (c.parallels || []).map((x, i) => [x, i]).filter(([x]) => x.a === key || x.b === key);
+    if (pars.length) {
+      html += `<h4>Parallels</h4><p class="note" style="text-align:left;margin:0 0 8px">A parallel (same declination) works like a conjunction; a contra-parallel (mirror declination) works like an opposition.</p><div class="list">` + pars.map(([x, i]) => {
+        const X = ASPECTS[x.type], o = x.a === key ? x.b : x.a;
+        return `<button class="row" data-open="parallel:${i}"><span class="dot" style="color:${X.color}"></span><span class="main"><div class="title"><span class="sym" style="color:${X.color}">${X.glyph}</span> ${esc(pName(o))}</div><div class="sub">${esc(X.name)}</div></span><span class="end"><div class="pos">${orbStr(x.orb)}</div></span></button>`;
+      }).join("") + `</div>`;
+    } else html += sec("Parallels", `${P.name} does not share a declination (within 1°) with another planet, so its declination works on its own.`);
+    return html + natalSnippet(key);
+  }
+
   function sheetSimple(eyebrow, title, subline, body) {
     return `<section class="hero"><div class="eyebrow">${esc(eyebrow)}</div><h2 class="display">${title}</h2>${subline ? `<div class="subline">${subline}</div>` : ""}</section>${paras(body)}`;
   }
@@ -1286,6 +1326,7 @@
         break;
       }
       case "srtheme": html = sheetSRTheme(arg); break;
+      case "decl": html = sheetDecl(arg); break;
       case "srp": html = sheetSRPlanet(arg); break;
       case "srintro": html = sheetSimple("Solar return", "The year ahead", "", [(D().solarReturn || {}).intro]); break;
       case "sraspect": {
@@ -3251,7 +3292,16 @@
 
   /* offline support when installed as an app (not inside embedded previews) */
   if ("serviceWorker" in navigator && !window.NATAL_EMBED && (location.protocol === "https:" || location.hostname === "localhost")) {
-    window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+    const hadController = !!navigator.serviceWorker.controller;
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (!hadController || reloaded) return; // first install: nothing old to replace
+      reloaded = true;
+      location.reload();
+    });
+    window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").then((reg) => {
+      document.addEventListener("visibilitychange", () => { if (!document.hidden) reg.update().catch(() => {}); });
+    }).catch(() => {}));
   }
 
   /* boot */
