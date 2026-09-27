@@ -14,7 +14,7 @@
  */
 (function () {
   "use strict";
-  const SKY_VERSION = "sky-12";
+  const SKY_VERSION = "sky-13";
 
   /* Everything the worker needs lives inside SKYLIB, so its source can be
      shipped to a Worker via toString(). No DOM access in here. */
@@ -625,52 +625,59 @@
     }
 
     /**
-     * One full turn of the moon or small world, rendered once as N still frames stacked in a
-     * single sheet. The page cross-fades them with compositor animations, so the turning carries
-     * on while the page scrolls (iPhone holds back canvas redraws during a scroll).
+     * The moon and small world as globes the page turns in 3D (a compositor rotation, like the
+     * rings, so it carries on while the page scrolls). The worker supplies the unlit surface as
+     * a longitude/latitude map, and the fixed lighting as an overlay: the lit colour is
+     * SKY * (1 - L) + surface * L, which is the surface under SKY at alpha 1 - L.
      */
-    async function spinFrames(kind, W, key, N) {
+    function globeLayers(kind, W, haveMap) {
       const parts = PARTS[kind]();
-      let map = await loadMap(key);
-      if (!map || map.MW * map.MH * 3 !== map.m.length) {
-        map = buildMap(kind, parts, W);
-        saveMap(key, map);
+      const RW = parts.R * W;
+      const TW = Math.ceil((TAU * RW * 1.5) / 8) * 8, TH = TW / 2;
+      const tex = new Uint8ClampedArray(haveMap ? 0 : TW * TH * 4); // the page keeps the map from last time
+      const lx = LIGHT[0], ly = LIGHT[1], lz = LIGHT[2];
+      for (let j = 0; j < (haveMap ? 0 : TH); j++) {
+        const phi = Math.PI / 2 - ((j + 0.5) / TH) * Math.PI, sl = Math.sin(phi);
+        for (let i = 0; i < TW; i++) {
+          const lon = -Math.PI + ((i + 0.5) / TW) * TAU;
+          const s = parts.albedo(sl, lon);
+          let c;
+          if (kind === "moon") {
+            // relief shading baked in, as lit from the sun's side of the moon
+            const relief = clamp(1 + (0.7 * (s[1] * lx + s[2] * ly)) / lz, 0.35, 1.7);
+            c = [178 * s[0] * relief, 181 * s[0] * relief, 186 * s[0] * relief];
+          } else c = s;
+          const k = (j * TW + i) * 4;
+          tex[k] = c[0]; tex[k + 1] = c[1]; tex[k + 2] = c[2]; tex[k + 3] = 255;
+        }
       }
-      const size = W * W * 4, sheet = new Uint8ClampedArray(size * N), base = new Uint8ClampedArray(size);
-      const masked = kind === "giant" || kind === "moon";
-      const live = [];
+      const light = new Uint8ClampedArray(W * W * 4);
       for (let row = 0; row < W; row++) {
         for (let col = 0; col < W; col++) {
           const fx = (col + 0.5) / W, fy = (row + 0.5) / W;
           const px = parts.pixel(fx, fy, W);
           if (!px) continue;
           const i = (row * W + col) * 4;
-          const fm = masked ? fadeMask(fx, fy) : 1;
-          if (px.rgba) {
-            base[i] = px.rgba[0]; base[i + 1] = px.rgba[1]; base[i + 2] = px.rgba[2]; base[i + 3] = px.rgba[3] * fm;
-            continue;
-          }
-          px.i = i;
-          base[i + 3] = px.a * fm;
-          live.push(px);
+          if (px.rgba) { light[i] = px.rgba[0]; light[i + 1] = px.rgba[1]; light[i + 2] = px.rgba[2]; light[i + 3] = px.rgba[3]; continue; }
+          let L, extra = [0, 0, 0];
+          if (kind === "moon") {
+            const p = px.p, mu0 = p[0] * lx + p[1] * ly + p[2] * lz, mu = Math.max(p[2], 0.05);
+            const ls = mu0 > 0 ? (2 * mu0) / (mu0 + mu) : 0;
+            L = clamp((0.65 * ls + 0.35 * Math.max(mu0, 0)) * smooth(-0.03, 0.08, mu0) * 0.95, 0, 1);
+            const shine = (1 - smooth(-0.2, 0.05, mu0)) * 0.08 * 0.85, rim = Math.pow(1 - p[2], 4) * smooth(0, 0.6, mu0);
+            extra = [60 * shine + rim * 60, 76 * shine + rim * 30, 96 * shine + rim * 10];
+          } else L = clamp(px.A, 0, 1);
+          const al = Math.max(1 - L, 0.004);
+          light[i] = (SKY[0] * (1 - L) + extra[0]) / al; light[i + 1] = (SKY[1] * (1 - L) + extra[1]) / al; light[i + 2] = (SKY[2] * (1 - L) + extra[2]) / al;
+          light[i + 3] = (1 - L) * 255;
         }
       }
-      const s = [0, 0, 0];
-      for (let f = 0; f < N; f++) {
-        const phase = (f / N) * TAU, d = sheet.subarray(f * size, (f + 1) * size);
-        d.set(base);
-        for (let n = 0; n < live.length; n++) {
-          const px = live[n];
-          const c = colourOf(parts, px, sample(map, px.lat, px.lon - phase, s));
-          d[px.i] = c[0]; d[px.i + 1] = c[1]; d[px.i + 2] = c[2];
-        }
-      }
-      return sheet;
+      return { tex, TW, TH, light, R: parts.R };
     }
     const setPaused = (v) => { paused = !!v; };
     const setSlow = (v) => { slow = !!v; };
 
-    return { renderBuffer, spinFrames, setPaused, setSlow, ringLayers, PERIOD };
+    return { renderBuffer, globeLayers, setPaused, setSlow, ringLayers, PERIOD };
   }
 
   /* ---------- worker plumbing ---------- */
@@ -683,7 +690,7 @@
     try {
       const src = "const LIB = (" + SKYLIB.toString() + ")();" +
         "onmessage = (e) => { const m = e.data;" +
-        " if (m.type === 'frames') { LIB.spinFrames(m.kind, m.W, m.key, m.N).then((sheet) => postMessage({ type: 'frames', kind: m.kind, sheet, period: LIB.PERIOD[m.kind] }, [sheet.buffer])).catch(() => {}); return; }" +
+        " if (m.type === 'globe') { const g = LIB.globeLayers(m.kind, m.W, m.haveMap); postMessage(Object.assign({ type: 'globe', kind: m.kind, period: LIB.PERIOD[m.kind] }, g), [g.tex.buffer, g.light.buffer]); return; }" +
         " if (m.type === 'rings') { const r = LIB.ringLayers(m.W); postMessage(Object.assign({ type: 'rings' }, r), [r.planet.buffer, r.shade.buffer, r.tex.buffer]); return; }" +
         " if (m.type === 'pause') { LIB.setPaused(m.value); return; }" +
         " if (m.type === 'slow') { LIB.setSlow(m.value); return; }" +
@@ -693,7 +700,7 @@
       worker = new Worker(URL.createObjectURL(new Blob([src], { type: "text/javascript" })));
       worker.onmessage = (e) => {
         if (e.data.type === "spinReady") { const f = spinReady[e.data.kind]; if (f) f(); return; }
-        if (e.data.type === "frames") { const f = framesReady[e.data.kind]; if (f) f(e.data); return; }
+        if (e.data.type === "globe") { const f = framesReady[e.data.kind]; if (f) f(e.data); return; }
         if (e.data.type === "rings") { if (ringsReady) ringsReady(e.data); return; }
         const job = pending.get(e.data.id);
         pending.delete(e.data.id);
@@ -833,65 +840,68 @@
     w.postMessage({ type: "rings", W: m.px });
   }
 
-  let spinStyle = null;
-  /* Every frame of a full turn, stepped through by compositor animations (no blending, so
-     nothing doubles up; with this many frames each step moves the surface about a pixel).
-     iPhone splits any layer over ~2000 pixels into tiles that it paints lazily, which made
-     one big sheet flicker, so the frames go into sheets under that size. The sheets are
-     stacked earliest on top: each one waits underneath, already painted and holding its
-     first frame, and is revealed when the sheet above it switches off. */
+  /* A globe of small tiles, each tangent to the sphere and showing its patch of the surface
+     map, inside a round clip. One rotation turns the whole globe; tiles on the far side face
+     away and are hidden. The lighting stays put on top, so the day side stays where the sun is. */
   function startSpin(m) {
     const w = getWorker();
     if (!m || !w || reduceMotion) return;
-    const W = m.px, per = Math.max(1, Math.floor(1990 / W)), P = per * per;
-    const N = m.kind === "moon" ? Math.max(P, Math.round(240 / P) * P) : Math.min(96, P);
-    framesReady[m.kind] = ({ sheet, period }) => {
+    const mapKey = new URL(`./__sky/${SKY_VERSION}/globe-${m.kind}-${m.px}.png`, location.href).href;
+    let saved = null;
+    framesReady[m.kind] = (G) => {
       framesReady[m.kind] = null;
-      const size = W * W * 4, S = Math.ceil(N / P), eps = 0.004;
-      const pc = (slot) => ((slot / N) * 100).toFixed(4) + "%";
-      let css = "";
-      const stack = document.createElement("div");
-      stack.className = "spinstack";
-      stack.style.visibility = "hidden";
-      for (let n = S - 1; n >= 0; n--) {
-        const first = n * P, last = Math.min(N, first + P) - 1, count = last - first + 1;
-        const cols = Math.ceil(Math.sqrt(count)), rows = Math.ceil(count / cols);
-        const at = (j) => `transform:translate(${((-100 * (j % cols)) / cols).toFixed(4)}%,${((-100 * Math.floor(j / cols)) / rows).toFixed(4)}%)`;
-        const c = document.createElement("canvas");
-        c.width = cols * W; c.height = rows * W;
-        const g = c.getContext("2d");
-        for (let j = 0; j < count; j++) {
-          const f = first + j;
-          g.putImageData(new ImageData(sheet.subarray(f * size, (f + 1) * size), W, W), (j % cols) * W, Math.floor(j / cols) * W);
-        }
-        c.className = "spinsheet";
-        c.style.width = cols * 100 + "%";
-        c.style.height = rows * 100 + "%";
-        // hold the first frame until this sheet's turn, step through, then hold the last
-        let k = `@keyframes sp-${m.kind}-${n}{0%{${at(0)}}`;
-        for (let j = 1; j < count; j++) k += `${pc(first + j - eps)}{${at(j - 1)}}${pc(first + j)}{${at(j)}}`;
-        css += k + `100%{${at(count - 1)}}}`;
-        c.style.animation = `sp-${m.kind}-${n} ${period}s linear infinite`;
+      const withMap = (blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const size = m.host.getBoundingClientRect().width, R = G.R * size; // CSS px
+        const K = m.kind === "moon" ? 12 : 8, NL = m.kind === "moon" ? 24 : 16;
+        const TAU = Math.PI * 2, dPhi = Math.PI / K, dLam = TAU / NL, over = m.kind === "moon" ? 0.7 : 0.5; // px of overlap hides seams
+        const globe = document.createElement("div");
+        globe.className = "globe" + (m.kind === "moon" ? " faded" : "");
         const clip = document.createElement("div");
-        clip.className = "spinclip";
-        clip.appendChild(c);
-        if (n < S - 1) {
-          // switch off once the turn moves past this sheet, back on as the turn starts again
-          css += `@keyframes sp-${m.kind}-${n}-on{0%,${pc(last + 1 - eps)}{opacity:1}${pc(last + 1)},100%{opacity:0}}`;
-          clip.style.animation = `sp-${m.kind}-${n}-on ${period}s linear infinite`;
+        clip.className = "globe-clip";
+        clip.style.cssText = `width:${2 * R}px;height:${2 * R}px;margin:${-R}px 0 0 ${-R}px`;
+        const spin = document.createElement("div");
+        spin.className = "globe-spin";
+        spin.style.animationDuration = G.period + "s";
+        let html = "";
+        for (let k = 0; k < K; k++) {
+          const phi0 = Math.PI / 2 - (k + 1) * dPhi, phiC = phi0 + dPhi / 2;
+          const wide = Math.cos(Math.min(Math.abs(phi0), Math.abs(phi0 + dPhi)) * (phi0 < 0 && phi0 + dPhi > 0 ? 0 : 1));
+          const h = R * dPhi + over, wd = R * wide * dLam + over;
+          // the map drawn at the scale of this band's widest edge
+          const bw = (wd - over) / dLam * TAU, bh = (h - over) / dPhi * Math.PI;
+          for (let j = 0; j < NL; j++) {
+            const lam0 = -Math.PI + j * dLam, lamC = lam0 + dLam / 2;
+            const bx = -((lam0 + Math.PI) / TAU) * bw + over / 2, by = -(k * dPhi / Math.PI) * bh + over / 2;
+            html += `<i style="width:${wd.toFixed(2)}px;height:${h.toFixed(2)}px;margin:${(-h / 2).toFixed(2)}px 0 0 ${(-wd / 2).toFixed(2)}px;` +
+              `background-size:${bw.toFixed(2)}px ${bh.toFixed(2)}px;background-position:${bx.toFixed(2)}px ${by.toFixed(2)}px;` +
+              `transform:rotateY(${((lamC * 180) / Math.PI).toFixed(3)}deg) rotateX(${((phiC * 180) / Math.PI).toFixed(3)}deg) translateZ(${(R * Math.cos(dLam / 2) * Math.cos(Math.min(dPhi / 2, 0.3))).toFixed(2)}px)"></i>`;
+          }
         }
-        stack.appendChild(clip);
-      }
-      if (!spinStyle) { spinStyle = document.createElement("style"); document.head.appendChild(spinStyle); }
-      spinStyle.textContent += css;
-      m.host.appendChild(stack);
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        stack.style.visibility = "visible";
-        m.canvas.style.visibility = "hidden";
-      }));
+        spin.innerHTML = html;
+        spin.style.setProperty("--globe-map", `url(${url})`);
+        clip.appendChild(spin);
+        const light = layer(imgCanvas(G.light, m.px, m.px));
+        globe.append(clip, light);
+        globe.style.visibility = "hidden";
+        m.host.appendChild(globe);
+        const img = new Image();
+        img.onload = () => requestAnimationFrame(() => requestAnimationFrame(() => {
+          globe.style.visibility = "visible";
+          m.canvas.style.visibility = "hidden";
+        }));
+        img.src = url;
+      };
+      if (saved) return withMap(saved);
+      imgCanvas(G.tex, G.TW, G.TH).toBlob((blob) => {
+        withMap(blob);
+        if (blob && "caches" in window) caches.open("natal-sky").then((c) => c.put(mapKey, new Response(blob, { headers: { "Content-Type": "image/png" } }))).catch(() => {});
+      });
     };
-    const key = new URL(`./__sky/${SKY_VERSION}/map-${m.kind}-${m.px}.bin`, location.href).href;
-    w.postMessage({ type: "frames", kind: m.kind, W: m.px, key, N });
+    const ask = () => w.postMessage({ type: "globe", kind: m.kind, W: m.px, haveMap: !!saved });
+    if (!("caches" in window)) return ask();
+    caches.open("natal-sky").then((c) => c.match(mapKey)).then((res) => (res ? res.blob() : null)).then((b) => { saved = b; }, () => {}).then(ask);
   }
   // pause in the background or behind a detail page; while scrolling, keep turning at half the frame rate
   let pausedNow = false, slowNow = false, scrollUntil = 0, scrollTimer = null;

@@ -813,9 +813,14 @@ body.detail-open .sheet-backdrop { display: none; }
 /* cancel the orbit's turn and the ring's tilt, so each rock stays round and lit from the same side */
 /* plain numbers (1 / sin 14deg, and the 16deg tilt): Safari only hands keyframes without variables to the compositor */
 @keyframes rk-upright { from { transform: rotate(0deg) scaleY(4.1336) rotate(-16deg); } to { transform: rotate(360deg) scaleY(4.1336) rotate(-16deg); } }
-/* the moon and small world step through pre-rendered frames, run by the compositor */
-.spinstack { position: absolute; inset: 0; }
-.spinclip { position: absolute; inset: 0; overflow: hidden; }
-.spinsheet { position: absolute; left: 0; top: 0; display: block; }
-.sky-paused .ringband, .sky-paused .rk-orbit, .sky-paused .rk, .sky-paused .spinclip, .sky-paused .spinsheet { animation-play-state: paused !important; }
-@media (prefers-reduced-motion: reduce) { .ringband, .rk-orbit, .rk, .spinclip, .spinsheet { animation: none !important; } }
+/* the moon and small world are small 3D globes turned by the compositor */
+.globe { position: absolute; inset: 0; pointer-events: none; }
+.globe.faded { -webkit-mask-image: radial-gradient(circle at 42% 58%, #000 52%, rgba(0, 0, 0, 0.55) 72%, rgba(0, 0, 0, 0.2) 100%);
+  mask-image: radial-gradient(circle at 42% 58%, #000 52%, rgba(0, 0, 0, 0.55) 72%, rgba(0, 0, 0, 0.2) 100%); }
+.globe-clip { position: absolute; left: 50%; top: 50%; border-radius: 50%; overflow: hidden; -webkit-mask-image: -webkit-radial-gradient(white, black); }
+.globe-spin { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; animation: globe-turn 40s linear infinite; }
+.globe-spin i { position: absolute; left: 0; top: 0; background-image: var(--globe-map); background-repeat: no-repeat;
+  -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+@keyframes globe-turn { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
+.sky-paused .ringband, .sky-paused .rk-orbit, .sky-paused .rk, .sky-paused .globe-spin { animation-play-state: paused !important; }
+@media (prefers-reduced-motion: reduce) { .ringband, .rk-orbit, .rk, .globe-spin { animation: none !important; } }
