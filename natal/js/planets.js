@@ -834,36 +834,56 @@
   }
 
   let spinStyle = null;
-  /* One layer holding every frame of a full turn in a sheet, stepped through by a single
-     compositor animation. No blending, so nothing can double up, and with this many frames
-     each step moves the surface by about a pixel, which reads as a smooth turn. */
+  /* Every frame of a full turn, stepped through by compositor animations (no blending, so
+     nothing doubles up; with this many frames each step moves the surface about a pixel).
+     iPhone splits any layer over ~2000 pixels into tiles that it paints lazily, which made
+     one big sheet flicker, so the frames go into sheets under that size. The sheets are
+     stacked earliest on top: each one waits underneath, already painted and holding its
+     first frame, and is revealed when the sheet above it switches off. */
   function startSpin(m) {
     const w = getWorker();
     if (!m || !w || reduceMotion) return;
-    const N = m.kind === "moon" ? 240 : 96;
+    const W = m.px, per = Math.max(1, Math.floor(1990 / W)), P = per * per;
+    const N = m.kind === "moon" ? Math.max(P, Math.round(240 / P) * P) : Math.min(96, P);
     framesReady[m.kind] = ({ sheet, period }) => {
       framesReady[m.kind] = null;
-      const W = m.px, size = W * W * 4, cols = Math.ceil(Math.sqrt(N)), rows = Math.ceil(N / cols);
-      const pc = (slot) => ((slot / N) * 100).toFixed(4) + "%", eps = 0.004;
-      const at = (j) => `transform:translate(${((-100 * (j % cols)) / cols).toFixed(4)}%,${((-100 * Math.floor(j / cols)) / rows).toFixed(4)}%)`;
-      const c = document.createElement("canvas");
-      c.width = cols * W; c.height = rows * W;
-      const g = c.getContext("2d");
-      for (let f = 0; f < N; f++) g.putImageData(new ImageData(sheet.subarray(f * size, (f + 1) * size), W, W), (f % cols) * W, Math.floor(f / cols) * W);
-      c.className = "spinsheet";
-      c.style.width = cols * 100 + "%";
-      c.style.height = rows * 100 + "%";
-      // each frame held for its slot, then an (almost) instant jump to the next
-      let k = `@keyframes sp-${m.kind}{0%{${at(0)}}`;
-      for (let f = 1; f < N; f++) k += `${pc(f - eps)}{${at(f - 1)}}${pc(f)}{${at(f)}}`;
-      k += `100%{${at(N - 1)}}}`;
-      if (!spinStyle) { spinStyle = document.createElement("style"); document.head.appendChild(spinStyle); }
-      spinStyle.textContent += k;
-      c.style.animation = `sp-${m.kind} ${period}s linear infinite`;
+      const size = W * W * 4, S = Math.ceil(N / P), eps = 0.004;
+      const pc = (slot) => ((slot / N) * 100).toFixed(4) + "%";
+      let css = "";
       const stack = document.createElement("div");
-      stack.className = "spinstack spinclip";
+      stack.className = "spinstack";
       stack.style.visibility = "hidden";
-      stack.appendChild(c);
+      for (let n = S - 1; n >= 0; n--) {
+        const first = n * P, last = Math.min(N, first + P) - 1, count = last - first + 1;
+        const cols = Math.ceil(Math.sqrt(count)), rows = Math.ceil(count / cols);
+        const at = (j) => `transform:translate(${((-100 * (j % cols)) / cols).toFixed(4)}%,${((-100 * Math.floor(j / cols)) / rows).toFixed(4)}%)`;
+        const c = document.createElement("canvas");
+        c.width = cols * W; c.height = rows * W;
+        const g = c.getContext("2d");
+        for (let j = 0; j < count; j++) {
+          const f = first + j;
+          g.putImageData(new ImageData(sheet.subarray(f * size, (f + 1) * size), W, W), (j % cols) * W, Math.floor(j / cols) * W);
+        }
+        c.className = "spinsheet";
+        c.style.width = cols * 100 + "%";
+        c.style.height = rows * 100 + "%";
+        // hold the first frame until this sheet's turn, step through, then hold the last
+        let k = `@keyframes sp-${m.kind}-${n}{0%{${at(0)}}`;
+        for (let j = 1; j < count; j++) k += `${pc(first + j - eps)}{${at(j - 1)}}${pc(first + j)}{${at(j)}}`;
+        css += k + `100%{${at(count - 1)}}}`;
+        c.style.animation = `sp-${m.kind}-${n} ${period}s linear infinite`;
+        const clip = document.createElement("div");
+        clip.className = "spinclip";
+        clip.appendChild(c);
+        if (n < S - 1) {
+          // switch off once the turn moves past this sheet, back on as the turn starts again
+          css += `@keyframes sp-${m.kind}-${n}-on{0%,${pc(last + 1 - eps)}{opacity:1}${pc(last + 1)},100%{opacity:0}}`;
+          clip.style.animation = `sp-${m.kind}-${n}-on ${period}s linear infinite`;
+        }
+        stack.appendChild(clip);
+      }
+      if (!spinStyle) { spinStyle = document.createElement("style"); document.head.appendChild(spinStyle); }
+      spinStyle.textContent += css;
       m.host.appendChild(stack);
       requestAnimationFrame(() => requestAnimationFrame(() => {
         stack.style.visibility = "visible";
