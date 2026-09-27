@@ -751,7 +751,7 @@
       [ax ? ax.story : SIGNS[nn.sign].nn, c.timeKnown ? (nhd ? nhd.story : K.HOUSE_NODE[nn.house]) : ""]);
     const snd = deepSign(sn.sign);
     html += karmicCard("southNode", "Past lives · South Node", `${SIGNS[sn.sign].name}${sn.house ? ` · ${ord(sn.house)} house` : ""}`, [snd ? snd.southNode : signText(sn)]);
-    if (ax) html += `<div class="card"><div class="card-k">Staying on path</div><div class="prose"><p><strong>The trap.</strong> ${esc(ax.trap)}</p><p><strong>The medicine.</strong> ${esc(ax.medicine)}</p></div>${steps("Three steps", (deepSign(nn.sign) || {}).northNodeSteps)}</div>`;
+    if (ax) html += `<div class="card"><div class="card-k">Staying on path</div><div class="prose"><p><strong>The trap.</strong> ${esc(ax.trap)}</p><p><strong>The medicine.</strong> ${esc(ax.medicine)}</p></div></div>`;
     // ruler of the North Node
     const nnRuler = rulerOf(nn.sign), nr = c.get(nnRuler);
     html += `<div class="card"><div class="card-head"><div class="glyph" style="color:${PLANETS[nnRuler].color}">${pGlyph(nnRuler)}</div>
@@ -1056,9 +1056,6 @@
   function chips(label, list, cls) {
     return list && list.length ? `<div class="chip-row"><span class="chip-label">${esc(label)}</span>${list.map((t) => `<span class="tag ${cls}">${esc(t)}</span>`).join("")}</div>` : "";
   }
-  function steps(title, list) {
-    return list && list.length ? `<h4>${esc(title)}</h4><ol class="steps">${list.map((t) => `<li>${esc(t)}</li>`).join("")}</ol>` : "";
-  }
   const firstPara = (t) => (t ? String(t).split(/\n\n+/)[0] : "");
 
   function sheetPoint(key) {
@@ -1095,7 +1092,6 @@
       const ax = deepAxis(p.sign);
       html += sec(`In ${S.name}`, [S.nn, ax && ax.story], elColor(p.sign));
       if (ax) html += sec("The comfort-zone trap", ax.trap) + sec("What brings you back", ax.medicine);
-      if (ds) html += steps("Steps toward your North Node", ds.northNodeSteps);
     } else if (key === "southNode") {
       html += sec(`In ${S.name}`, [ds ? ds.southNode : signText(p)], elColor(p.sign));
       if (ds) html += sec("Using the gift", signText(p));
@@ -1276,15 +1272,14 @@
       ["Nature", { harmony: "Harmonious", tension: "Challenging", fusion: "Blending", adjust: "Adjusting", creative: "Creative" }[a.nature]],
       ["Strength", `${Math.round(a.strength * 100)}%`],
     ]);
-    if (R) {
-      html += paras([R.theme]);
-      html += sec(`As a ${X.name.toLowerCase()}`, [R.body, a.major ? "" : "This is a minor aspect, so you feel it in particular moments rather than as a constant theme."]);
-    } else {
-      const da = deepAsteroid(a.a) || deepAsteroid(a.b);
-      html += paras([aspectText(a), da && da.aspects ? da.aspects[a.nature] : ""]);
-    }
     html += sec("In your chart", aspectInChart(a, pa, pb));
     html += sec("The points involved", [PLANETS[a.a].desc, PLANETS[a.b].desc]);
+    const minor = a.major ? "" : "This is a minor aspect, so you feel it in particular moments rather than as a constant theme.";
+    if (R) html += sec(`As a ${X.name.toLowerCase()}`, [R.theme, R.body, minor]);
+    else {
+      const da = deepAsteroid(a.a) || deepAsteroid(a.b);
+      html += sec(`As a ${X.name.toLowerCase()}`, [aspectText(a), da && da.aspects ? da.aspects[a.nature] : "", minor]);
+    }
     return html;
   }
 
@@ -1439,17 +1434,16 @@
       case "sraspect": {
         const a = state._srAspects[+arg], X = ASPECTS[a.type];
         const dA = deepAspect(a.a, a.b);
-        html = sheetSimple(`Solar return ${computeSR().year} · ${X.name}`, `${esc(pShort(a.a))} <span class="sym" style="color:${X.color}">${X.glyph}</span> ${esc(pShort(a.b))}`, `orb ${orbStr(a.orb)}`,
-          [dA ? dA.theme : aspectText(a), dA ? (a.type === "conjunction" ? dA.fusion : FLOW_TYPES.has(a.type) ? dA.flow : dA.tension) : "", "In your return chart this is a theme that colours your year, not a lifelong trait."]);
-        {
-          const sr = computeSR().sr, pa = sr.get(a.a), pb = sr.get(a.b);
-          const natal = c.aspects.find((x) => (x.a === a.a && x.b === a.b) || (x.a === a.b && x.b === a.a));
-          html += sec("This year", [
-            `${pName(a.a)} sits in the return chart's ${ord(pa.house)} house (${HOUSES[pa.house].areas}) and ${pName(a.b)} in the ${ord(pb.house)} (${HOUSES[pb.house].areas}), so the theme plays out between those parts of life.`,
-            natal ? (natal.type === a.type ? `Your birth chart has the same ${X.name.toLowerCase()}, so this year echoes and strengthens a lifelong pattern.` : `At birth these two form a ${ASPECTS[natal.type].name.toLowerCase()}; this year the relationship between them shifts to a ${X.name.toLowerCase()}.`)
-              : "These two do not aspect each other in your birth chart, so this is a theme particular to this year.",
-          ]);
-        }
+        const sr = computeSR().sr, pa = sr.get(a.a), pb = sr.get(a.b);
+        const natal = c.aspects.find((x) => (x.a === a.a && x.b === a.b) || (x.a === a.b && x.b === a.a));
+        html = sheetSimple(`Solar return ${computeSR().year} · ${X.name}`, `${esc(pShort(a.a))} <span class="sym" style="color:${X.color}">${X.glyph}</span> ${esc(pShort(a.b))}`, `orb ${orbStr(a.orb)}`, []);
+        html += sec("In your chart this year", [
+          `Your ${pName(a.a)} sits in your return chart's ${ord(pa.house)} house, about ${HOUSES[pa.house].areas}, and your ${pName(a.b)} in its ${ord(pb.house)}, about ${HOUSES[pb.house].areas}, so the theme plays out for you between those parts of life.`,
+          natal ? (natal.type === a.type ? `Your birth chart has the same ${X.name.toLowerCase()}, so this year echoes and strengthens a lifelong pattern in you.` : `At your birth these two form a ${ASPECTS[natal.type].name.toLowerCase()}; this year the relationship between them shifts to a ${X.name.toLowerCase()}.`)
+            : "These two do not aspect each other in your birth chart, so this is a theme particular to this year.",
+        ]);
+        html += sec("The points involved", [PLANETS[a.a].desc, PLANETS[a.b].desc]);
+        html += sec(`As a ${X.name.toLowerCase()}`, [dA ? dA.theme : aspectText(a), dA ? (a.type === "conjunction" ? dA.fusion : FLOW_TYPES.has(a.type) ? dA.flow : dA.tension) : "", "In your return chart this is a theme that colours your year, not a lifelong trait."]);
         break;
       }
       case "syn": html = sheetSyn(+arg); break;
@@ -1473,8 +1467,9 @@
           <h2 class="display">${esc(pShort(a.a))} <span class="sym" style="color:${X.color}">${X.glyph}</span> ${esc(pShort(a.b))}</h2>
           <div class="subline">orb ${orbStr(a.orb)}</div></section>`;
         html += facts([[pName(a.a), dec(pa)], [pName(a.b), dec(pb)], ["Acts like", a.type === "parallel" ? "Conjunction" : "Opposition"], ["Strength", `${Math.round(a.strength * 100)}%`]]);
-        html += paras([X.desc]);
-        if (dA) html += sec(`${pName(a.a)} and ${pName(a.b)}`, [dA.theme, a.type === "parallel" ? dA.fusion : dA.tension]);
+        html += sec("In your chart", [`Your ${pName(a.a)} sits at ${dec(pa)} and your ${pName(a.b)} at ${dec(pb)} of declination, ${a.type === "parallel" ? "the same distance from the celestial equator on the same side" : "the same distance from the celestial equator on opposite sides"}.`, X.desc]);
+        html += sec("The points involved", [PLANETS[a.a].desc, PLANETS[a.b].desc]);
+        if (dA) html += sec(a.type === "parallel" ? "Working like a conjunction" : "Working like an opposition", [dA.theme, a.type === "parallel" ? dA.fusion : dA.tension]);
         break;
       }
       case "tplanet": html = sheetTransitPlanet(arg); break;
@@ -2238,17 +2233,14 @@
       w.start || w.end ? ["In orb", `${w.start ? fmtDayYear(w.start) : "before"} to ${w.end ? fmtDayYear(w.end) : "later"}`] : null,
       [`${pShort(tr.t)} timescale`, (tPlanet(tr.t) || {}).timescale || "Varies"],
     ]);
-    html += paras([transitText(tr, field)]);
-    if (w.exacts.length > 1) html += sec("Multiple passes", `Because ${pName(tr.t)} turns retrograde, this transit is exact ${w.exacts.length} times. The first pass tends to raise the theme, the middle pass reviews it, and the last pass settles it.`);
     if (c.timeKnown && tp.natalHouse && np.house) {
-      html += sec("Where it lands", np.house
+      html += sec("In your chart", np.house
         ? `${pName(tr.t)} is moving through your ${ord(tp.natalHouse)} house, the part of your life about ${HOUSES[tp.natalHouse].areas}, and it is touching your ${pName(tr.n)}, which lives in your ${ord(np.house)}, about ${HOUSES[np.house].areas}. ${tp.natalHouse === np.house ? "Both are in the same area, so that is where you feel this most." : "This is where you are most likely to feel it: something happening in one of these areas stirs up the other."}`
         : `${pName(tr.t)} is moving through your ${ord(tp.natalHouse)} house, the part of your life about ${HOUSES[tp.natalHouse].areas}, so that is where you are most likely to feel it.`);
     }
-    const pair = deepAspect(tr.t, tr.n);
-    if (pair) html += sec(`${pName(tr.t)} and ${pName(tr.n)}`, pair.theme);
     const TP = tPlanet(tr.t);
-    if (TP) html += sec(`What ${pName(tr.t)} brings`, TP.brings);
+    html += sec("The points involved", [TP && TP.brings ? TP.brings : PLANETS[tr.t].desc, PLANETS[tr.n].desc]);
+    html += sec(`As a ${X.name.toLowerCase()}`, [transitText(tr, field), w.exacts.length > 1 ? `Because ${pName(tr.t)} turns retrograde, this transit is exact ${w.exacts.length} times: the first pass raises the theme for you, the middle pass reviews it, and the last pass settles it.` : ""]);
     html += `<div class="list"><button class="row" data-open="point:${tr.n}"><span class="dot" style="color:${PLANETS[tr.n].color}"></span><span class="main"><div class="title">Your natal ${esc(pName(tr.n))}</div><div class="sub">Open the birth-chart reading</div></span></button></div>`;
     return html;
   }
@@ -2661,8 +2653,10 @@
     let html = `<section class="hero"><div class="eyebrow">Progressed aspect · ${esc(X.name)}</div>
       <h2 class="display">P. ${esc(pShort(a.b))} <span class="sym" style="color:${X.color}">${X.glyph}</span> ${esc(pShort(a.a))}</h2>
       <div class="subline">orb ${orbStr(a.orb)} · ${a.applying ? "applying" : "separating"}${a.exact ? ` · exact ${esc(fmtMonthYear(a.exact))}` : ""}</div></section>`;
-    html += paras([PR.planets && PR.planets[a.b], `Your progressed ${pName(a.b)} is making a ${X.name.toLowerCase()} to your natal ${pName(a.a)}. Progressed aspects build slowly and stay active for about a year either side of exact (the Moon's for a couple of months), so they describe a season of inner development rather than a single event.`]);
-    html += sec("The theme", [dA && dA.theme, body]);
+    const np = state.chart.get(a.a);
+    html += sec("In your chart", `Your progressed ${pName(a.b)} is making a ${X.name.toLowerCase()} to your natal ${pName(a.a)}${np && np.house ? `, which sits in your ${ord(np.house)} house of ${HOUSES[np.house].areas}` : ""}. Progressed aspects build slowly and stay active for about a year either side of exact (the Moon's for a couple of months), so this describes a season of your inner development rather than a single event.`);
+    html += sec("The points involved", [PR.planets && PR.planets[a.b] ? PR.planets[a.b] : PLANETS[a.b].desc, PLANETS[a.a].desc]);
+    html += sec(`As a ${X.name.toLowerCase()}`, [dA && dA.theme, body]);
     return html;
   }
 
@@ -2972,14 +2966,16 @@
       [`${theirName(Y.rec)}'s ${pName(x.b)}`, `${degStr(theirs)} ${signGlyph(theirs.sign)} ${SIGNS[theirs.sign].name}`],
       ["Strength", `${Math.round(x.strength * 100)}%`],
     ]);
-    if (d) {
-      html += paras([d.text]);
-      html += sec(`As a ${X.name.toLowerCase()}`, [body]);
-      if (first !== second) html += `<p class="note" style="text-align:left">Here ${esc(roleOf(first))} is the ${esc(pName(first))} person and ${esc(roleOf(second))} is the ${esc(pName(second))} person.</p>`;
-    } else {
-      html += paras([`${myName()}'s ${pName(x.a)} (${PLANETS[x.a].core}) ${ASPECTS[x.type].verb} ${theirName(Y.rec)}'s ${pName(x.b)} (${PLANETS[x.b].core}). ${X.desc}`, K.NATURE[x.nature]]);
-    }
+    // where each planet sits: in your chart and in theirs
+    const mineH = state.chart.timeKnown && mine.house, theirsH = Y.them.timeKnown && theirs.house;
+    const me = myName() === "You" ? "Your" : `${myName()}'s`, them = `${theirName(Y.rec)}'s`;
+    html += sec("In your charts", [
+      `${me} ${pName(x.a)} is in ${SIGNS[mine.sign].name}${mineH ? `, in the ${ord(mine.house)} house of ${HOUSES[mine.house].areas}` : ""}, and ${them} ${pName(x.b)} is in ${SIGNS[theirs.sign].name}${theirsH ? `, in the ${ord(theirs.house)} house of ${HOUSES[theirs.house].areas}` : ""}. ${x.orb < 1 ? "At under 1°, this is one of the strongest links between you." : x.orb < 3 ? "It is a close contact, so you both feel it often." : "It is a wider contact, felt in particular moments more than every day."}`,
+      d && first !== second ? `Here ${roleOf(first) === "You" ? "you are" : roleOf(first) + " is"} the ${pName(first)} person and ${roleOf(second) === "You" ? "you are" : roleOf(second) + " is"} the ${pName(second)} person.` : "",
+    ]);
     html += sec("The points involved", [PLANETS[x.a].desc, x.a !== x.b ? PLANETS[x.b].desc : ""]);
+    if (d) html += sec(`As a ${X.name.toLowerCase()}`, [d.text, body]);
+    else html += sec(`As a ${X.name.toLowerCase()}`, [`${myName()}'s ${pName(x.a)} (${PLANETS[x.a].core}) ${ASPECTS[x.type].verb} ${theirName(Y.rec)}'s ${pName(x.b)} (${PLANETS[x.b].core}).`, K.NATURE[x.nature]]);
     return html;
   }
   function sheetOverlay(dir, key) {
@@ -3111,7 +3107,7 @@
       <div class="error" id="form-error"></div>
     </form>`;
     if (state.partnerMode) return html + `<div class="chips"><button class="chip" data-act="cancelpartner">Cancel</button></div>`;
-    html += `<p class="learn-link"><a href="${window.NATAL_EMBED ? "https://niko-999.github.io/natal/learn/" : "learn/"}">New to astrology? Learn how to read a chart</a></p>`;
+    html += `<p class="learn-link"><a href="${window.NATAL_EMBED ? "https://niko-999.github.io/natal/learn/" : "learn/"}">New to astrology: learn how to read a chart</a></p>`;
     // quick way back to the most recently entered chart
     const lastId = store.get("last", null);
     const last = saved.find((x) => x.id === lastId) || saved[0];

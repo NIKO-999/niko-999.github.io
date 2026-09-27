@@ -12,11 +12,6 @@ window.AstroDeep.signs = {
     saturn: "Saturn in Aries tests your right to act on your own behalf. Early on, you may have hesitated to assert yourself, or sensed that anger and ambition were dangerous things to show. Sometimes the pattern flips into forcing things through with rigid will. The lesson is disciplined courage: acting decisively without recklessness, and leading without needing to win every round. Over time this builds a steady, earned confidence that others come to rely on.",
     lilith: "Lilith in Aries points to anger, ambition and raw self-interest that were shamed early, perhaps labelled selfish or aggressive. Suppressed, this energy tends to erupt as sudden rage, reckless risk-taking or cold defiance over small things. You may also swing into passivity and quietly resent those who take what they want. Owned, this placement becomes fierce autonomy: the ability to say no, to fight cleanly and to put yourself first without apology.",
     southNode: "Symbolically, a South Node in Aries suggests a past self who lived by the sword or the frontier: a warrior, scout or settler who survived by acting alone and trusting instinct. That self may have learned that hesitation was dangerous and that no one would come to help. The mastery lingers as quick reflexes, physical courage and a knack for handling crisis. The habit that follows you now is going it alone, reacting before listening and treating relationships as a contest. The old self knew how to fight. The present life asks you to learn how to partner.",
-    northNodeSteps: [
-      "Make one decision this week without polling friends first, then notice how it feels afterwards.",
-      "Name your own preference early in conversations, before adjusting to what others seem to want.",
-      "Start a small solo project that belongs only to you, and let it be imperfect."
-    ],
     strengths: ["Natural courage", "Quick decisive action", "Honest directness", "Infectious enthusiasm"],
     challenges: ["Impatience with process", "Quick temper", "Starting without finishing", "Overlooking others' needs"]
   },
@@ -32,11 +27,6 @@ window.AstroDeep.signs = {
     saturn: "Saturn in Taurus tests your relationship with security, money and your own body. You may have felt early scarcity, or a lingering fear that there would never be quite enough. That fear can show up as over-saving, overwork or clinging to possessions long after they serve you. The lesson is building real stability patiently, and learning that worth and wealth are separate things. Mastery brings grounded resourcefulness and a calm, practical authority.",
     lilith: "Lilith in Taurus points to sensuality, bodily pleasure and material desire that may have been shamed as greedy, lazy or indulgent. Suppressed, it can erupt as compulsive spending, bingeing, possessiveness or an immovable refusal to budge. You might also deny yourself comfort to prove you need nothing at all. Owned, this becomes sovereign embodiment: trusting your senses, enjoying pleasure without guilt and knowing your value without asking anyone's permission.",
     southNode: "Told as a symbolic past-life story, a South Node in Taurus suggests someone who tended land, kept the stores or crafted beautiful objects, a person whose world was shaped by the seasons and by what could be held in the hand. That self may have mastered patience, loyalty and the art of making resources last through lean years. The wisdom remains as a calm, practical core. The habit that follows you is holding on: to routines, to possessions, to people who no longer fit. Comfort can quietly turn into stagnation. This life invites intensity, shared risk and transformation in.",
-    northNodeSteps: [
-      "Build one simple daily routine, such as a morning walk, and keep it for a month.",
-      "Before reacting to a crisis, eat, breathe and touch something solid, then decide what matters.",
-      "Set a modest savings goal from your own earnings and track it without judging yourself."
-    ],
     strengths: ["Steady persistence", "Sensual appreciation", "Deep loyalty", "Practical resourcefulness"],
     challenges: ["Stubborn resistance", "Possessive attachment", "Choosing comfort over growth", "Slow to forgive"]
   },
@@ -52,11 +42,6 @@ window.AstroDeep.signs = {
     saturn: "Saturn in Gemini tests your confidence in your own mind and voice. You may have felt slow, misunderstood or criticised when speaking or learning as a child. That can lead to anxious overthinking, or rigid, overly careful speech that hides what you really mean. The lesson is disciplined learning and responsible communication. Through practice, you often become a clear, credible thinker whose words carry weight precisely because you chose them with care.",
     lilith: "Lilith in Gemini points to a voice or mind that was dismissed, silenced or called too much. Perhaps your questions were unwelcome at the dinner table, or your truth-telling got you into trouble. Suppressed, this can erupt as cutting words, gossip, compulsive talking or sudden secrecy. Owned, it becomes a fearless intelligence: the right to ask awkward questions, to say what others will not and to change your mind freely.",
     southNode: "Symbolically, a South Node in Gemini evokes a past self who lived by wit and information: a scribe, trader, messenger or storyteller moving between towns and carrying news from one place to the next. That self may have mastered language, adaptability and the art of reading a room. Those skills remain as quick thinking and social ease. The habit that follows you now is gathering endless facts while avoiding a deeper truth, or talking around your feelings. You may keep every option open to stay safe. This life asks you to commit to meaning, belief and a larger vision.",
-    northNodeSteps: [
-      "Ask three genuine questions in your next conversation before sharing any opinion of your own.",
-      "Take a short course in something practical and finish every single lesson.",
-      "When certain you are right, find one credible source that disagrees and read it fully."
-    ],
     strengths: ["Quick adaptable mind", "Gift for communication", "Playful humour", "Connecting people and ideas"],
     challenges: ["Restless scattering", "Surface over depth", "Overthinking feelings", "Inconsistent follow-through"]
   },
@@ -72,11 +57,6 @@ window.AstroDeep.signs = {
     saturn: "Saturn in Cancer tests emotional security and belonging. You may have grown up in a home where feelings were restrained, responsibilities came early or care felt conditional. That can leave you guarded, self-reliant to a fault or overly dutiful toward family. The lesson is learning to parent yourself with both warmth and structure. With maturity, you often become a steady emotional anchor for others, with healthy boundaries intact.",
     lilith: "Lilith in Cancer points to needs, dependency and emotional hunger that were shamed or ignored. Perhaps you learned to mother others while no one really mothered you. Suppressed, this can erupt as smothering, emotional manipulation, sulking or sudden coldness toward those closest to you. Owned, it becomes fierce protective power: the right to need, to set limits on caretaking and to define family entirely on your own terms.",
     southNode: "As a symbolic past-life story, a South Node in Cancer suggests someone who kept the hearth: a mother, healer, clan elder or guardian of a household, whose life was measured by who was fed and kept safe through winter. That self may have mastered emotional attunement and loyalty. The gift remains as a deep instinct to protect. The habit that follows you now is retreating into the familiar, taking care of everyone and avoiding public risk. Old wounds may be tended long after they could have healed. This life calls you toward purpose and responsibility beyond the home.",
-    northNodeSteps: [
-      "Each evening, name one feeling you had today and say it aloud to someone you trust.",
-      "Let a friend help with something practical, even when you could manage it yourself.",
-      "Schedule one unhurried meal at home each week with no talk of work at all."
-    ],
     strengths: ["Deep emotional intelligence", "Protective loyalty", "Nurturing instinct", "Strong memory"],
     challenges: ["Changeable moods", "Holding grudges", "Caretaking to exhaustion", "Retreating when hurt"]
   },
@@ -92,11 +72,6 @@ window.AstroDeep.signs = {
     saturn: "Saturn in Leo tests your right to be seen and to express yourself fully. You may have felt overlooked as a child, or learned that creativity and play had to be earned. That can produce stage fright, harsh self-judgement or a controlling need for respect. The lesson is steady, authentic self-expression built through practice and courage. Mastery brings dignified leadership and creative work that endures because it comes straight from the heart.",
     lilith: "Lilith in Leo points to a need for attention, pride and creative self-display that was mocked or suppressed. You may have been told you were showing off or asking for too much. Suppressed, it can erupt as dramatic outbursts, jealousy toward anyone in the spotlight or brittle arrogance. Owned, this becomes unapologetic presence: the freedom to take up space, create boldly and be adored without shrinking yourself to fit.",
     southNode: "Symbolically, a South Node in Leo tells of a past self who stood at the centre: a ruler, performer or favoured child whose worth was measured in applause and loyalty. That self may have mastered charisma, creative courage and the art of commanding a room. Those gifts linger as natural confidence and warmth. The habit that follows you now is needing to feel special, taking things personally and expecting admiration as your due. Pride can quietly block collaboration. This life invites you to put your light to work for a group or a cause larger than yourself.",
-    northNodeSteps: [
-      "Share a piece of your creative work publicly this month, even if it feels unfinished.",
-      "When you feel proud of something, say so plainly instead of deflecting the compliment.",
-      "Spend one hour each week on play that has no purpose beyond your own enjoyment."
-    ],
     strengths: ["Generous warmth", "Creative confidence", "Loyal heart", "Natural leadership"],
     challenges: ["Need for recognition", "Wounded pride", "Dramatic reactions", "Sharing the spotlight"]
   },
@@ -112,11 +87,6 @@ window.AstroDeep.signs = {
     saturn: "Saturn in Virgo tests your relationship with work, health and competence. You may carry a fear of making mistakes, or a belief that rest must always be earned. That can lead to anxious perfectionism, overwork or nervous tension held in the body. The lesson is building steady, sustainable routines and realistic standards. Mastery brings genuine expertise, sound daily habits and the ability to serve others without depleting yourself.",
     lilith: "Lilith in Virgo points to an untamed, messy or instinctive side that was shamed into neatness. You may have learned that bodily needs, imperfection or refusing to help were unacceptable. Suppressed, this can erupt as obsessive control, harsh criticism, health anxiety or a sudden refusal to help anyone at all. Owned, it becomes sovereign discernment: honouring your body, choosing whom you serve and trusting your own standards over anyone else's.",
     southNode: "As a symbolic past-life story, a South Node in Virgo suggests someone who served: a healer, clerk, monastery worker or skilled artisan, whose days were shaped by duty, craft and careful ritual. That self may have mastered precision, humility and practical care. Those gifts remain as quiet competence. The habit that follows you now is over-analysing, worrying and trying to earn your place through usefulness. Control can crowd out faith, and fixing can crowd out feeling. This life asks you to trust the unseen, soften the rules and let compassion lead.",
-    northNodeSteps: [
-      "Choose one small daily habit, such as a ten-minute tidy, and track it for a month.",
-      "Break a vague dream into three concrete tasks and complete the first one this week.",
-      "Offer practical help to someone in a specific way, alongside your usual sympathy."
-    ],
     strengths: ["Attention to detail", "Practical helpfulness", "Analytical clarity", "Dedicated craftsmanship"],
     challenges: ["Harsh self-criticism", "Paralysing perfectionism", "Worry and overthinking", "Difficulty resting"]
   },
@@ -132,11 +102,6 @@ window.AstroDeep.signs = {
     saturn: "Saturn in Libra, where it is exalted, tests fairness and commitment in relationships. You may have witnessed early imbalances between the adults around you, or felt that love came with heavy duties. That can lead to a fear of commitment, or to staying too long in unequal arrangements. The lesson is building partnerships on clear agreements and mutual respect. Mastery brings wise judgement, mature relating and a reputation for integrity.",
     lilith: "Lilith in Libra points to anger, self-interest or disagreement that was shamed as unattractive or impolite. You may have learned to smile through injustice and keep everyone comfortable. Suppressed, this can erupt as passive aggression, sudden relationship ruptures or a cold withdrawal of charm. Owned, it becomes sovereign equality: the right to name imbalance, refuse unfair deals and define partnership on your own terms.",
     southNode: "Symbolically, a South Node in Libra evokes a past self who lived through others: a courtier, consort, diplomat or artist dependent on a patron, whose safety rested on keeping people pleased. That self may have mastered grace, tact and the fine art of partnership. Those skills remain as social ease and charm. The habit that follows you now is deferring, avoiding conflict and defining yourself by who you are with. Decisions may stall while you wait for approval that never quite arrives. This life asks you to act on your own instincts and trust your individual courage.",
-    northNodeSteps: [
-      "Before acting on a decision, ask one affected person how they see it and listen fully.",
-      "Practise pausing for three breaths when irritated, then respond with a question.",
-      "Plan one shared project with a partner or friend where both roles carry equal weight."
-    ],
     strengths: ["Diplomatic grace", "Strong sense of fairness", "Aesthetic sense", "Relationship skill"],
     challenges: ["Chronic indecision", "Pleasing people first", "Conflict avoidance", "Dependence on approval"]
   },
@@ -152,11 +117,6 @@ window.AstroDeep.signs = {
     saturn: "Saturn in Scorpio tests your relationship with power, intimacy and loss. You may have faced early experiences of control, betrayal or taboo that taught you to guard yourself closely. That can lead to secrecy, fear of vulnerability or controlling behaviour when you feel exposed. The lesson is facing your depths with honesty and discipline. Mastery brings emotional resilience, psychological insight and the steadiness to support others through crisis.",
     lilith: "Lilith in Scorpio points to sexuality, rage or psychic intensity that was shamed as dangerous or taboo. You may have learned to hide your power to keep others comfortable. Suppressed, this can erupt as jealousy, vengeance, manipulation or self-destructive episodes. Owned, it becomes sovereign depth: the capacity to hold your own power, name hidden truths and turn pain into regeneration.",
     southNode: "As a symbolic past-life story, a South Node in Scorpio suggests someone who lived close to life and death: a healer, occultist, spy or keeper of dangerous secrets, used to crisis and binding loyalties. That self may have mastered survival, strategy and emotional endurance under pressure. Those gifts linger as courage and sharp perception. The habit that follows you now is expecting betrayal, seeking drama or controlling situations to feel safe. Intensity can feel like home, even when it exhausts you. This life invites you to find peace in simple, steady pleasures and shared ease.",
-    northNodeSteps: [
-      "Share one fear with someone you trust instead of handling it quietly on your own.",
-      "Let go of one possession or habit you keep only because it feels comfortable.",
-      "Discuss one shared financial or emotional commitment openly and honestly with your partner."
-    ],
     strengths: ["Emotional depth", "Perceptive insight", "Deep resilience", "Fierce loyalty"],
     challenges: ["Jealous suspicion", "Guarded secrecy", "Controlling tendencies", "Holding onto hurt"]
   },
@@ -172,11 +132,6 @@ window.AstroDeep.signs = {
     saturn: "Saturn in Sagittarius tests your beliefs, education and faith. You may have met rigid dogma early, at school or in religion, or doubted your right to a philosophy of your own. That can lead to cynicism, or to clinging to fixed opinions for safety. The lesson is developing a grounded worldview through patient study and lived experience. Mastery brings earned wisdom, credible teaching and ethical leadership that others respect.",
     lilith: "Lilith in Sagittarius points to a wild, free, questioning spirit that was shamed as irresponsible or heretical. You may have been punished for doubting accepted truths. Suppressed, this can erupt as reckless escapes, self-righteous preaching or sudden abandonment of commitments. Owned, it becomes sovereign freedom: the right to seek your own truth, roam widely and speak candidly without apology or permission.",
     southNode: "Symbolically, a South Node in Sagittarius evokes a past self who was a wanderer, preacher, scholar or explorer, free to roam and quick to pass judgement. That self may have mastered faith, broad knowledge and the art of seeing the larger picture. Those gifts remain as optimism and vision. The habit that follows you now is preaching, assuming you already know and skipping the details. Restlessness may pull you away from local, everyday connection with the people nearby. This life asks you to listen closely, keep learning and communicate with genuine curiosity.",
-    northNodeSteps: [
-      "Choose one belief you hold and write a page on why it genuinely matters to you.",
-      "Plan a trip or course that stretches your worldview, then commit and book it.",
-      "When you catch yourself gathering more facts, stop and decide what you actually think."
-    ],
     strengths: ["Infectious optimism", "Philosophical vision", "Honest candour", "Adventurous spirit"],
     challenges: ["Chronic restlessness", "Promising too much", "Tactless bluntness", "Avoiding the details"]
   },
@@ -192,11 +147,6 @@ window.AstroDeep.signs = {
     saturn: "Saturn in Capricorn is in its own sign, doubling the emphasis on duty, ambition and authority. You may have felt heavy expectations early, or feared you would never quite measure up. That can lead to overwork, rigidity or chronic self-doubt hidden behind competence. The lesson is building authority through integrity and patience. Mastery brings real accomplishment, trustworthy leadership and the kind of respect that grows with age.",
     lilith: "Lilith in Capricorn points to ambition, authority or a hunger for power that was shamed or blocked. You may have been told, in words or silence, to know your place. Suppressed, this can erupt as ruthless control, bitterness toward authority or workaholic self-punishment. Owned, it becomes sovereign authority: the right to lead, build your own structures and succeed on your own terms, without apology.",
     southNode: "As a symbolic past-life story, a South Node in Capricorn suggests someone who carried authority: a magistrate, head of a family line or builder of institutions, whose life was defined by duty and reputation. That self may have mastered discipline, strategy and responsibility. Those gifts remain as competence under pressure. The habit that follows you now is putting achievement ahead of feeling and controlling situations instead of trusting others. Status may still feel like the only real safety. This life invites you to soften, nurture and let yourself be cared for.",
-    northNodeSteps: [
-      "Set one clear long-term goal and write down the first three measurable steps toward it.",
-      "Take responsibility for a decision you usually leave to others, and see it through.",
-      "When emotions run high, name the practical outcome you want before you respond."
-    ],
     strengths: ["Disciplined ambition", "Rock-solid reliability", "Strategic patience", "Dry wit"],
     challenges: ["Work before rest", "Emotional reserve", "Fear of failure", "Rigid expectations"]
   },
@@ -212,11 +162,6 @@ window.AstroDeep.signs = {
     saturn: "Saturn in Aquarius, one of its traditional homes, tests your relationship with groups, belonging and individuality. You may have felt like an outsider early, or come under pressure to conform. That can lead to rigid ideals, defensive detachment or a lonely sense of standing apart. The lesson is giving innovation a responsible structure. Mastery brings practical vision, the ability to lead reform and a steady, dependable commitment to community.",
     lilith: "Lilith in Aquarius points to eccentricity, rebellion or radical thinking that was shamed or excluded. You may have been pushed out of groups for being different, or learned to hide your stranger ideas. Suppressed, this can erupt as cold detachment, sudden rebellion or contempt for the mainstream. Owned, it becomes sovereign individuality: the freedom to be unusual, think radically and belong without conforming.",
     southNode: "Symbolically, a South Node in Aquarius evokes a past self who belonged to a movement, collective or society of thinkers, perhaps a reformer, scientist or rebel who always put the group first. That self may have mastered objectivity, invention and idealism. Those gifts remain as a wide, clear perspective. The habit that follows you now is emotional detachment, intellectualising and hiding in the crowd. Personal creativity and heartfelt self-expression may feel risky or even self-indulgent. This life invites you to step forward, be seen and express your heart openly.",
-    northNodeSteps: [
-      "Join a group or cause that matters to you and attend regularly for three months.",
-      "Share credit for a success publicly, naming everyone who contributed to the result.",
-      "Try one idea that feels unconventional to you, and ask friends for honest feedback."
-    ],
     strengths: ["Original thinking", "Humanitarian ideals", "Loyal friendship", "Fierce independence"],
     challenges: ["Emotional detachment", "Stubborn convictions", "Cool aloofness", "Rebellion for its own sake"]
   },
@@ -232,11 +177,6 @@ window.AstroDeep.signs = {
     saturn: "Saturn in Pisces tests your faith, boundaries and ability to face reality. You may have felt early confusion, loss or a fear of chaos, perhaps in a home where things were never quite clear. That can lead to escapism, or to rigid control of your feelings. The lesson is giving form to compassion and imagination. Mastery brings grounded spirituality, disciplined creativity and the ability to serve without sacrificing yourself.",
     lilith: "Lilith in Pisces points to mystical, psychic or deeply sensitive parts that were shamed as unreal or weak. You may have been told you were too emotional or too dreamy. Suppressed, this can erupt as escapism, victimhood, addictive patterns or sudden disappearance from people's lives. Owned, it becomes sovereign mysticism: trusting your intuition, honouring your sensitivity and channelling it into art or healing.",
     southNode: "As a symbolic past-life story, a South Node in Pisces suggests someone devoted to the spiritual or artistic: a mystic, monastic, healer or poet, living on the margins and serving others quietly. That self may have mastered compassion, intuition and surrender. Those gifts remain as empathy and a vivid imagination. The habit that follows you now is escapism, confusion or losing yourself in other people's needs. Practical matters may feel foreign or even beneath you. This life asks you to ground your gifts through useful, organised service in the everyday world.",
-    northNodeSteps: [
-      "Spend ten minutes daily in silence, prayer or meditation without trying to fix anything.",
-      "Let one small task stay imperfect this week and notice what actually happens.",
-      "Make art, music or writing purely for its own sake, with no plan to improve it."
-    ],
     strengths: ["Deep compassion", "Creative imagination", "Intuitive sensitivity", "Forgiving nature"],
     challenges: ["Escaping into fantasy", "Weak boundaries", "Self-sacrificing martyrdom", "Confusion under stress"]
   }
