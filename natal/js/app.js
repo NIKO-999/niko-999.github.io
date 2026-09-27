@@ -1193,7 +1193,6 @@
       ["Planets", inside.length ? inside.map((p) => pShort(p.key)).join(", ") : "None"],
     ]);
     html += paras([dh ? dh.overview : H.desc]);
-    if (dh) html += steps("Questions this house asks", dh.questions);
     const cf = CUSP_FIELD[h] && deepSign(cusp.sign);
     html += sec(`${S.name} on the cusp`, [`You approach ${H.areas} ${S.how}.`, cf ? cf[CUSP_FIELD[h][0]] : ""], elColor(cusp.sign));
     html += sec(`Its ruler, ${pName(ruler)}`, [
@@ -1269,7 +1268,7 @@
       title: "Saturn return", every: "about every 29.5 years",
       text: "Saturn takes about 29 and a half years to travel around the zodiac, so it comes back to the exact place it held when you were born at roughly 29, 58 and 88. Each return is a reckoning with time and maturity. Structures that no longer fit tend to strain or fall away, and what you have built on honest foundations tends to hold. It rarely feels light, but it is one of the most constructive passages in a life: you find out what you are actually committed to.",
       nth: {
-        1: "The first return, around 29 to 30, marks the real start of adulthood. Choices made to please others or to meet expectations get tested, and many people change career, commit or end a relationship, move, or take on serious responsibility for the first time. The question is: what life are you willing to be accountable for?",
+        1: "The first return, around 29 to 30, marks the real start of adulthood. Choices made to please others or to meet expectations get tested, and many people change career, commit or end a relationship, move, or take on serious responsibility for the first time. It sorts the commitments that are truly yours from the ones you took on to fit in.",
         2: "The second return, in the late fifties, reviews what the first one built. It often brings a change of role at work, a new relationship to your body and time, and a clear sense of what you want the next decades to be for. Authority and experience become assets to use deliberately.",
         3: "The third return, in the late eighties, is a harvest and a letting go. It asks what you want to pass on, and it often brings a quiet clarity about what mattered.",
       },
@@ -3054,6 +3053,7 @@
       <div class="error" id="form-error"></div>
     </form>`;
     if (state.partnerMode) return html + `<div class="chips"><button class="chip" data-act="cancelpartner">Cancel</button></div>`;
+    html += `<p class="learn-link"><a href="${window.NATAL_EMBED ? "https://niko-999.github.io/natal/learn/" : "learn/"}">New to astrology? Learn how to read a chart</a></p>`;
     // quick way back to the most recently entered chart
     const lastId = store.get("last", null);
     const last = saved.find((x) => x.id === lastId) || saved[0];

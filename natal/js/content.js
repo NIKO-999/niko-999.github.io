@@ -357,7 +357,7 @@
     semisquare: { name: "Semi-square", glyph: "∠", verb: "irritates", color: "#e2a08b",
       desc: "A semi-square (45°) is a minor friction: a low-grade tension that prompts action." },
     sesquiquadrate: { name: "Sesquiquadrate", glyph: "⚼" + VS, verb: "unsettles", color: "#e2a08b",
-      desc: "A sesquiquadrate (135°) is a minor stress aspect that tends to trigger sudden adjustments." },
+      desc: "A sesquiquadrate (135°) is a minor stress aspect that triggers sudden adjustments." },
     quintile: { name: "Quintile", glyph: "Q", verb: "inspires", color: "#c7a8f2",
       desc: "A quintile (72°) is a creative aspect of talent and style: a signature gift you develop with practice." },
     parallel: { name: "Parallel", glyph: "∥", verb: "is parallel to", color: "#e6c98f",
