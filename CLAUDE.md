@@ -5575,6 +5575,23 @@ its figure a tick after the press that focused it, and a key typed in
 that tick was selected and replaced: `1.8` came out `.8`. A keystroke
 cancels the re-select now.
 
+### A plan block is a card and a dot
+
+Reported as not liked, and chosen off a sheet of eight rendered over a
+real week at 1440x900: a mix of the card-with-a-dot and the light type.
+The tinted slab with a coloured left edge made a full week a wall of
+eight colours, and spaced capitals on every name read as a spreadsheet.
+
+**The card is one grey for every kind and the kind is a 6px dot** before
+the name, so colour says WHICH in the smallest mark that can. The name
+is 14px light Inter in sentence case; what it is and when sit under it
+in small mono lifted 70% toward the kind's colour, so the dot and the
+line under it read as one mark. The legend's squares went to the same
+dot. **Life is `--faint`**, the weakest of the eight, so the check
+plants one and reads every word on every block at 4.5:1 on composited
+pixels. Bite-proved by drawing the dot in the ink and the time in the
+bare hue: both checks fall.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

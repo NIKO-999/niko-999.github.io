@@ -1783,6 +1783,19 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       const plN = (await store(page, 'cad.plan.v1')).length;
       await page.click('#cdToastU'); await page.waitForTimeout(200);
       ok('delete takes it off and Undo puts it back', plN === 2 && (await store(page, 'cad.plan.v1')).length === 3);
+      /* A block is a quiet card and its kind is a dot, never a wash with a
+         coloured edge; the name is light sentence case, not spaced capitals.
+         Life is the faintest of the eight, so one is planted to be read. */
+      if (await plMake(3, 600, 690)) { await page.fill('#cdPlN', 'Family'); await page.fill('#cdPlT', 'Park'); await page.click('#cdPlC [data-c="life"]'); await page.click('#cdPlSave'); await page.waitForTimeout(320); }
+      const plLook = await page.$$eval('.pl-b', (bs) => bs.map((b) => {
+        const cs = getComputedStyle(b), dot = getComputedStyle(b, '::before'), n = getComputedStyle(b.querySelector('b'));
+        const probe = document.createElement('i'); probe.style.color = cs.getPropertyValue('--pc'); b.appendChild(probe); const pc = getComputedStyle(probe).color; probe.remove();
+        return { wash: cs.backgroundColor,
+          dot: dot.content !== 'none' && dot.width === dot.height && dot.backgroundColor === pc, caps: n.textTransform, w: n.fontWeight };
+      }));
+      ok('a block is a card with its kind as a dot, the name in light sentence case', plLook.length >= 4 && plLook.every((l) => l.dot && l.caps === 'none' && l.w === '300') && new Set(plLook.map((l) => l.wash)).size === 1, plLook);
+      const plInk = await inkFloor(page, '.pl-b b, .pl-b i, .pl-b em');
+      ok('every word on a block reads at 4.5:1, the faintest kind included', plInk.n >= 8 && plInk.worst.r >= 4.5, plInk);
       /* The plan is not the week: nothing on the Day screen came from it. */
       ok('the plan is its own record, the week untouched by it', !(await store(page, 'cad.week.v1')).some((b) => b.n === 'Live trading' || b.n === 'Meal'));
       const plWide = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
