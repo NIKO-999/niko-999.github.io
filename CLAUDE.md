@@ -5471,7 +5471,7 @@ you trained, like a gym block does.
 
 ### Chest, back and shoulders, and the length is worked out
 
-Weights carries Chest, Back and Shoulders as sessions of their own,
+Weights carries Chest, Back, Shoulders and Arms as sessions of their own,
 beside Push, Pull and Legs: a split is what somebody actually trains,
 and filing a chest day under Push says a different thing.
 

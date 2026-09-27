@@ -532,8 +532,8 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
        spliced over the nearest rung so the ladder stays eight. */
     const ran = await page.$$eval('[data-m]', (bs) => ({ on: bs.filter((b) => b.getAttribute('aria-pressed') === 'true').map((b) => b.dataset.m), n: bs.length }));
     ok('and it is already set to how long the session ran', ran.on.join() === '10' && ran.n === 8, ran);
-    ok('chest, back and shoulders are each a session of their own',
-      (await page.$$eval('[data-k^="weights."]', (bs) => bs.map((b) => b.textContent))).join() === 'Push,Pull,Legs,Chest,Back,Shoulders,Upper,Lower,Full body,Core');
+    ok('chest, back, shoulders and arms are each a session of their own',
+      (await page.$$eval('[data-k^="weights."]', (bs) => bs.map((b) => b.textContent))).join() === 'Push,Pull,Legs,Chest,Back,Shoulders,Arms,Upper,Lower,Full body,Core');
     await c.close();
   }
   {
