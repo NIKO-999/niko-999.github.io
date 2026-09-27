@@ -30,10 +30,15 @@
   if (!storedSettings.v) delete storedSettings.nodeType;
   // v3 matched Astro-Seek's aspect defaults: major aspects only, Astro-Seek orbs
   if (!storedSettings.v || storedSettings.v < 3) { delete storedSettings.minorAspects; delete storedSettings.orbScale; }
-  // saved charts pick up corrected city coordinates (e.g. Whangārei now matches Astro-Seek's)
+  /** Round to the nearest arc-minute, as Astro-Seek does with a city's coordinates before casting a chart. */
+  const toMinute = (v) => +(Math.round(v * 60) / 60).toFixed(4);
+  // saved charts pick up corrected city coordinates (e.g. Whangārei now matches Astro-Seek's);
+  // places picked from search are rounded to the minute, typed-in coordinates are left as they are
   function refreshPlace(rec) {
-    const ct = (window.ASTRO_CITIES || []).find((c) => rec && rec.place && c[0] === rec.place.name && Math.abs(c[2] - rec.place.lat) < 0.03 && Math.abs(c[3] - rec.place.lon) < 0.03);
-    if (ct && (ct[2] !== rec.place.lat || ct[3] !== rec.place.lon)) rec.place = Object.assign({}, rec.place, { lat: ct[2], lon: ct[3] });
+    if (!rec || !rec.place) return rec;
+    const ct = (window.ASTRO_CITIES || []).find((c) => c[0] === rec.place.name && Math.abs(c[2] - rec.place.lat) < 0.03 && Math.abs(c[3] - rec.place.lon) < 0.03);
+    if (ct) { if (ct[2] !== rec.place.lat || ct[3] !== rec.place.lon) rec.place = Object.assign({}, rec.place, { lat: ct[2], lon: ct[3] }); }
+    else if (rec.place.region) rec.place = Object.assign({}, rec.place, { lat: toMinute(rec.place.lat), lon: toMinute(rec.place.lon) });
     return rec;
   }
   const state = {
@@ -2889,7 +2894,7 @@
           if (!res.ok || lastQuery !== q) return;
           const data = await res.json();
           const remote = (data.results || []).filter((r) => r.timezone && ALLOWED_COUNTRIES.includes(r.country_code)).map((r) => ({
-            name: r.name, region: [r.admin1, r.country].filter(Boolean).join(", "), lat: +r.latitude.toFixed(4), lon: +r.longitude.toFixed(4), tz: r.timezone,
+            name: r.name, region: [r.admin1, r.country].filter(Boolean).join(", "), lat: toMinute(r.latitude), lon: toMinute(r.longitude), tz: r.timezone,
           }));
           const merged = local.slice();
           for (const r of remote) if (!merged.some((m) => Math.abs(m.lat - r.lat) < 0.2 && Math.abs(m.lon - r.lon) < 0.2)) merged.push(r);
