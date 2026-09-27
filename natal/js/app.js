@@ -339,7 +339,7 @@
     const d = D();
     const [x, y] = ASPECT_ORDER.indexOf(a) < ASPECT_ORDER.indexOf(b) ? [a, b] : [b, a];
     const k = x + "|" + y;
-    return (d.aspectsRich && d.aspectsRich[k]) || null;
+    return (d.aspectsRich && (d.aspectsRich[k] || d.aspectsRich[y + "|" + x])) || null;
   }
   /* The reading for an aspect of a given type. The Descendant and IC sit opposite the Ascendant
      and Midheaven, so an aspect to one is the matching aspect to the other: a planet on your
@@ -1073,6 +1073,7 @@
     return list && list.length ? `<div class="chip-row"><span class="chip-label">${esc(label)}</span>${list.map((t) => `<span class="tag ${cls}">${esc(t)}</span>`).join("")}</div>` : "";
   }
   const firstPara = (t) => (t ? String(t).split(/\n\n+/)[0] : "");
+  const firstSentences = (t, n) => (t ? String(t).split(/(?<=[.!])\s+(?=[A-Z])/).slice(0, n).join(" ") : "");
 
   function sheetPoint(key) {
     const c = state.chart;
@@ -1152,10 +1153,11 @@
     // rulership links
     if (rules.length && p.house) {
       const own = rules.filter((h) => h === p.house), away = rules.filter((h) => h !== p.house);
+      const TIE_LINES = ["events in one tend to set off the other", "a change in one soon shows up in the other", "the two rise and fall together", "each shapes how the other plays out", "what moves in one stirs the other"];
       const houseList = (hs) => listJoin(hs.map(ord)) + (hs.length > 1 ? " houses" : " house");
       html += sec("Houses it rules", [
         own.length ? `Your ${P.name} rules your ${ord(p.house)} house and sits inside it, so ${HOUSES[p.house].areas} are a self-directed, strongly emphasised part of your life.` : "",
-        away.length ? `${own.length ? "It also rules" : `Your ${P.name} rules`} your ${houseList(away)}${own.length ? "" : ` and sits in your ${ord(p.house)}`}, so what happens in ${away.map((h) => HOUSES[h].areas).join(", and in ")}${away.length > 1 ? "," : ""} is tied to ${HOUSES[p.house].areas}: events in one tend to set off the other.` : "",
+        away.length ? `${own.length ? "It also rules" : `Your ${P.name} rules`} your ${houseList(away)}${own.length ? "" : ` and sits in your ${ord(p.house)}`}, so what happens in ${away.map((h) => HOUSES[h].areas).join(", and in ")}${away.length > 1 ? "," : ""} is tied to ${HOUSES[p.house].areas}${own.length ? "" : `: ${TIE_LINES[PLANET_KEYS.indexOf(key) % TIE_LINES.length] || TIE_LINES[0]}`}.` : "",
       ]);
     }
     if (p.retro && K.RETRO_KARMIC[key]) html += sec("Retrograde", K.RETRO_KARMIC[key]);
@@ -1441,8 +1443,8 @@
           : sheetSimple(`Progressed Moon · ${fmtMonthYear(ev.time)}`, `Moon enters your ${ord(ev.house)} house`, esc(HOUSES[ev.house].title), [PR.moonHouses && PR.moonHouses[ev.house]]);
         // what else is true of the progressed Moon at that moment: its house (for a sign change) or its sign (for a house change)
         const ml = E.lonAt("moon", progUtcFor(new Date(ev.time.getTime() + 86400000 * 3)), { nodeType: state.settings.nodeType, zodiac: state.settings.zodiac });
-        if (ev.kind === "sign" && c.timeKnown) { const h = houseOfLon(ml); html += sec(`At the same time: your ${ord(h)} house`, PR.moonHouses && PR.moonHouses[h]); }
-        if (ev.kind === "house") { const sg = signOf(ml); html += sec(`At the same time: in ${SIGNS[sg].name}`, PR.moonSigns && PR.moonSigns[sg], elColor(sg)); }
+        if (ev.kind === "sign" && c.timeKnown) { const h = houseOfLon(ml); html += sec(`At the same time: your ${ord(h)} house`, firstSentences(PR.moonHouses && PR.moonHouses[h], 2)); }
+        if (ev.kind === "house") { const sg = signOf(ml); html += sec(`At the same time: in ${SIGNS[sg].name}`, firstSentences(PR.moonSigns && PR.moonSigns[sg], 2), elColor(sg)); }
         break;
       }
       case "psun": {
@@ -2311,7 +2313,7 @@
         : `${cap(theP(tr.t))} is moving through your ${ord(tp.natalHouse)} house, the part of your life about ${HOUSES[tp.natalHouse].areas}, so that is where you are most likely to feel it.`);
     }
     const TP = tPlanet(tr.t);
-    html += sec("The points involved", [TP && TP.brings ? TP.brings : PLANETS[tr.t].desc, PLANETS[tr.n].desc]);
+    html += sec("The points involved", [TP && TP.brings ? firstSentences(TP.brings, 2) : PLANETS[tr.t].desc, PLANETS[tr.n].desc]);
     const turns = `Because ${theP(tr.t)} ${tr.t === "northNode" ? "wobbles back and forth" : "turns retrograde"}, this transit is exact`;
     html += sec(`As ${/^[aeiou]/i.test(X.name) ? "an" : "a"} ${X.name.toLowerCase()}`, [transitText(tr, field),
       w.exacts.length === 2 ? `${turns} twice: the first pass raises the theme for you, and the second brings it back to be worked through.`
@@ -2811,7 +2813,7 @@
       <span class="main"><div class="title">${title}</div><div class="sub">${esc(sub)}</div></span></button>`;
     html += row("srtheme:asc", elColor(asc.sign), signGlyph(asc.sign), `${esc(SIGNS[asc.sign].name)} Rising`, `Tone of the year${c.timeKnown ? ` · falls in your natal ${ord(houseOfLon(asc.lon))} house` : ""}`);
     html += row("srtheme:sun", PLANETS.sun.color, pGlyph("sun"), `Sun in the ${ord(sun.house)} house`, `Main focus · ${HOUSES[sun.house].title}`);
-    html += row("srtheme:moon", PLANETS.moon.color, pGlyph("moon"), `Moon in ${esc(SIGNS[moon.sign].name)} · ${ord(moon.house)} house`, "Feelings and needs this year");
+    html += row("srp:moon", PLANETS.moon.color, pGlyph("moon"), `Moon in ${esc(SIGNS[moon.sign].name)} · ${ord(moon.house)} house`, "Feelings and needs this year");
     const ruler = rulerOf(asc.sign), rp = sr.get(ruler);
     html += row(`srp:${ruler}`, PLANETS[ruler].color, pGlyph(ruler), `Year ruler: ${esc(pName(ruler))}`, `In ${SIGNS[rp.sign].name} · ${ord(rp.house)} house`);
     for (const a of R.angular) html += row(`srp:${a.key}`, PLANETS[a.key].color, pGlyph(a.key), `${esc(pName(a.key))} on the ${esc(a.angle)}`, `Angular · orb ${orbStr(a.orb)}`);
@@ -3046,6 +3048,33 @@
     return html;
   }
 
+  // the other person's points, described in the third person ({N} is their name with 's)
+  const THEIR_DESC = {
+    "sun": "{N} Sun is the part of them that has to shine for life to feel worth living. It shows what makes them feel most themselves, the work or role that lights them up, and the identity they keep growing into over the years.",
+    "moon": "{N} Moon is how they feel before they think: the moods and habits that calm them. It shows what they need to feel safe, what they learned about care as a child, and how they now look after others.",
+    "mercury": "{N} Mercury is how their mind works and how they talk. It shows how they learn, how they explain things to people, and the way their thoughts turn into words.",
+    "venus": "{N} Venus shows what they find beautiful and how they want to be loved. It colours their taste in people, how they enjoy pleasure and money, and what they refuse to live without.",
+    "mars": "{N} Mars is their engine: how they go after what they want, how they compete and how their anger comes out. It shows the kind of action that leaves them energised rather than drained, and what makes them push back.",
+    "jupiter": "{N} Jupiter is where life opens doors for them and where they grow by saying yes. It shows what gives them meaning and faith, where luck and generosity find them, and where they are inclined to overdo it.",
+    "saturn": "{N} Saturn is where they meet limits, fear and responsibility, often early and often alone. Progress there is slow and hard won, but what they build through that effort lasts, and in time they become the authority on it.",
+    "uranus": "{N} Uranus is where they refuse to be ordinary and where life surprises them. Its sign is shared with their whole generation, while its house and aspects show where they break the rules, change suddenly and think like nobody else.",
+    "neptune": "{N} Neptune is where they dream, feel for everyone and long for something beyond the everyday. It shows where they idealise people or plans, and where a dream drifts into fog unless they see it with clear eyes.",
+    "pluto": "{N} Pluto is where life asks them to let go of control and come back changed. It shows where they meet power, obsession and loss, and where each ending they survive leaves them stronger and more truthful than before.",
+    "northNode": "{N} North Node points to the unfamiliar direction they are growing towards in this life: awkward at first, and more fulfilling with every step they take.",
+    "southNode": "{N} South Node holds the talents and habits they already know by heart, as if carried over from before. It is their comfort zone, and leaning on it too heavily keeps them circling instead of growing.",
+    "chiron": "{N} Chiron marks an early, tender hurt that never fully closes. The same place becomes their deepest wisdom, because what they have lived through there lets them help others with a rare gentleness.",
+    "lilith": "{N} Black Moon Lilith marks the parts of them that were pushed out: raw desire, anger, the refusal to obey. Owned instead of hidden, those parts turn into personal power.",
+    "fortune": "{N} Part of Fortune shows where happiness and ease come to them most naturally, the place where they feel lucky simply by being themselves.",
+    "ceres": "{N} Ceres shows how they look after people and how they need to be looked after in return, and how they grieve, let go and find their way back to nourishment after loss.",
+    "pallas": "{N} Pallas shows how their mind spots patterns and solves problems, the way they fight for what is fair with strategy rather than force, and the kind of intelligence people come to them for.",
+    "juno": "{N} Juno shows what they need to feel an equal in a long-term commitment, where loyalty, jealousy and power come up in their closest bond, and the kind of partner they are willing to promise themselves to.",
+    "vesta": "{N} Vesta shows what they devote themselves to completely, the work or practice they guard with focus, and how they keep their inner fire burning when life gets noisy.",
+    "vertex": "{N} Vertex lights up at fated meetings and turning points. When it is triggered, people and events arrive that feel beyond their control and change the direction of their life.",
+    "asc": "{N} Ascendant shapes their body, their first impression on people and the lens they meet life through, right down to the way they walk into a room.",
+    "dsc": "{N} Descendant describes the qualities they are drawn to in close partners, and the ones they meet head on in rivals, often traits they have yet to own themselves.",
+    "ic": "{N} IC shows their home, family and ancestry, and the private self they return to when nobody is watching.",
+    "mc": "{N} Midheaven shows their vocation, their reputation and the legacy they build: the version of them the wider world recognises and remembers."
+  };
   function sheetSyn(i) {
     const Y = computeSyn(), x = Y.list[i], X = ASPECTS[x.type];
     const S = D().synastry || {};
@@ -3070,7 +3099,9 @@
       `${me} ${pName(x.a)} is in ${SIGNS[mine.sign].name}${mineH ? `, in the ${ord(mine.house)} house of ${HOUSES[mine.house].areas}` : ""}, and ${them} ${pName(x.b)} is in ${SIGNS[theirs.sign].name}${theirsH ? `, in the ${ord(theirs.house)} house of ${HOUSES[theirs.house].areas}` : ""}. ${x.orb < 1 ? "At under 1°, this is one of the strongest links between you." : x.orb < 3 ? "It is a close contact, so you both feel it often." : "It is a wider contact, felt in particular moments more than every day."}`,
       d && first !== second ? `Here ${roleOf(first) === "You" ? "you are" : roleOf(first) + " is"} the ${pName(first)} person and ${roleOf(second) === "You" ? "you are" : roleOf(second) + " is"} the ${pName(second)} person.` : "",
     ]);
-    html += sec("The points involved", [PLANETS[x.a].desc, x.a !== x.b ? PLANETS[x.b].desc : ""]);
+    const mineDesc = myName() === "You" ? PLANETS[x.a].desc : (THEIR_DESC[x.a] || PLANETS[x.a].desc).replace("{N}", `${myName()}'s`);
+    const theirDesc = (THEIR_DESC[x.b] || PLANETS[x.b].desc).replace("{N}", them);
+    html += sec("The points involved", [mineDesc, theirDesc]);
     if (d) html += sec(`As ${/^[aeiou]/i.test(X.name) ? "an" : "a"} ${X.name.toLowerCase()}`, [d.text, body]);
     else html += sec(`As ${/^[aeiou]/i.test(X.name) ? "an" : "a"} ${X.name.toLowerCase()}`, [`${myName()}'s ${pName(x.a)} (${PLANETS[x.a].core}) ${ASPECTS[x.type].verb} ${theirName(Y.rec)}'s ${pName(x.b)} (${PLANETS[x.b].core}).`, K.NATURE[x.nature]]);
     return html;
@@ -3099,7 +3130,7 @@
     const S = D().synastry || {};
     const m = CAT_META[cat];
     let html = `<section class="hero"><div class="eyebrow">Synastry · compatibility</div><h2 class="display">${esc(m.name)}</h2><div class="subline"><strong>${Y.scores[cat]}%</strong></div></section>`;
-    html += paras([S.categories && S.categories[cat], cat === "challenge" ? "A higher score means more friction between you. Some friction keeps a relationship alive; a lot asks both of you to work at it on purpose." : "Your score grows with the number and closeness of supportive contacts between your charts in this area. Tense contacts count for less, but they still count: they are part of what binds you together."]);
+    html += paras([S.categories && S.categories[cat], cat === "challenge" ? "A higher score means more friction between you. Some friction keeps a relationship alive; a lot asks both of you to work at it on purpose." : "The score rises with the number and closeness of supportive contacts between you here."]);
     const idx = Y.members[cat];
     if (idx.length) {
       html += `<h4>Contacts in this area</h4><div class="list">` + idx.map((i) => {
@@ -3110,7 +3141,7 @@
       }).join("") + `</div>`;
       const top = Y.list[idx.slice().sort((i, j) => Y.list[i].orb - Y.list[j].orb)[0]];
       const pd = (D().synPairsRich || {})[pairKey(top.a, top.b)] || ((D().synastry || {}).pairs || {})[pairKey(top.a, top.b)];
-      if (pd) html += sec(`Strongest here: ${pName(top.a)} ${ASPECTS[top.type].name.toLowerCase()} ${pName(top.b)}`, [firstPara(pd.text), top.type === "conjunction" ? pd.fusion : top.nature === "harmony" ? pd.harmony : pd.tension]);
+      if (pd) html += sec(`Strongest here: ${pName(top.a)} ${ASPECTS[top.type].name.toLowerCase()} ${pName(top.b)}`, [firstPara(pd.text)]);
     } else html += `<p class="note" style="text-align:left">No close contacts in this area.</p>`;
     return html;
   }
