@@ -24,10 +24,12 @@
     },
   };
 
-  const DEFAULT_SETTINGS = { v: 2, houseSystem: "placidus", nodeType: "mean", zodiac: "tropical", minorAspects: true, orbScale: 1, asteroids: true };
+  const DEFAULT_SETTINGS = { v: 3, houseSystem: "placidus", nodeType: "mean", zodiac: "tropical", minorAspects: false, orbScale: 1, asteroids: true };
   const storedSettings = store.get("settings", {});
   // v2 made the mean node the default (matching Astro-Seek); drop the old default from earlier saves
   if (!storedSettings.v) delete storedSettings.nodeType;
+  // v3 matched Astro-Seek's aspect defaults: major aspects only, Astro-Seek orbs
+  if (!storedSettings.v || storedSettings.v < 3) { delete storedSettings.minorAspects; delete storedSettings.orbScale; }
   // saved charts pick up corrected city coordinates (e.g. Whangārei now matches Astro-Seek's)
   function refreshPlace(rec) {
     const ct = (window.ASTRO_CITIES || []).find((c) => rec && rec.place && c[0] === rec.place.name && Math.abs(c[2] - rec.place.lat) < 0.03 && Math.abs(c[3] - rec.place.lon) < 0.03);
@@ -35,7 +37,7 @@
     return rec;
   }
   const state = {
-    settings: Object.assign({}, DEFAULT_SETTINGS, storedSettings, { v: 2 }),
+    settings: Object.assign({}, DEFAULT_SETTINGS, storedSettings, { v: 3 }),
     saved: store.get("saved", []).map(refreshPlace),
     record: null,
     chart: null,
@@ -2729,8 +2731,8 @@
         ${opt("nodeType", "true", "True node", "Actual osculating position")}
       </div>
       <h4>Aspects</h4><div class="opt-list">
+        ${opt("minorAspects", "false", "Major only", "Astro-Seek default · conjunction, opposition, trine, square, sextile")}
         ${opt("minorAspects", "true", "Major + minor", "Adds quincunx, semi-sextile, quintiles…")}
-        ${opt("minorAspects", "false", "Major only", "Conjunction, opposition, trine, square, sextile")}
       </div>
       <h4>Asteroids</h4><div class="opt-list">
         ${opt("asteroids", "true", "Show", "Ceres, Pallas, Juno and Vesta")}
@@ -2738,7 +2740,7 @@
       </div>
       <h4>Orbs</h4><div class="opt-list">
         ${opt("orbScale", "0.75", "Tight", "×0.75")}
-        ${opt("orbScale", "1", "Standard", "8° majors · +2° for Sun & Moon")}
+        ${opt("orbScale", "1", "Standard", "As Astro-Seek · 7°, or 10° with Sun or Moon · sextile 5° (6°)")}
         ${opt("orbScale", "1.25", "Wide", "×1.25")}
       </div>`;
     openSheet(html);

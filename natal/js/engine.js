@@ -376,13 +376,19 @@
   const LIGHTS = new Set(["sun", "moon"]);
   const ASTEROIDS = ["ceres", "pallas", "juno", "vesta"];
   const MINOR_POINTS = new Set(["northNode", "southNode", "chiron", "lilith", "fortune", "vertex"].concat(ASTEROIDS));
-  const ANGLES = new Set(["asc", "mc"]);
+  const ANGLES = new Set(["asc", "mc", "dsc", "ic"]);
+  const IS_ASTEROID = new Set(ASTEROIDS);
 
+  /**
+   * Orbs as on Astro-Seek: conjunction, opposition, trine and square 10° with the Sun or Moon and
+   * 7° otherwise; sextile 6° with the Sun or Moon and 5° otherwise. The nodes, Lilith, Chiron,
+   * Part of Fortune, Vertex and angles take the same orbs as planets. Asteroids (not shown by
+   * Astro-Seek by default) keep tight orbs.
+   */
   function orbFor(asp, a, b, orbScale) {
-    let orb = asp.orb;
-    if (LIGHTS.has(a) || LIGHTS.has(b)) orb += asp.major ? 2 : 0.5;
-    if (MINOR_POINTS.has(a) || MINOR_POINTS.has(b)) orb = Math.min(orb, asp.major ? 4 : 1);
-    if (ANGLES.has(a) || ANGLES.has(b)) orb = Math.min(orb, asp.major ? 6 : 1.5);
+    const lum = LIGHTS.has(a) || LIGHTS.has(b);
+    let orb = asp.major ? (asp.key === "sextile" ? (lum ? 6 : 5) : (lum ? 10 : 7)) : asp.orb + (lum ? 0.5 : 0);
+    if (IS_ASTEROID.has(a) || IS_ASTEROID.has(b)) orb = Math.min(orb, asp.major ? 3 : 1);
     return orb * orbScale;
   }
 
@@ -393,7 +399,8 @@
       for (let j = i + 1; j < usable.length; j++) {
         const p = usable[i], q = usable[j];
         if (ANGLES.has(p.key) && ANGLES.has(q.key)) continue;
-        if (MINOR_POINTS.has(p.key) && MINOR_POINTS.has(q.key)) continue;
+        // asteroids only aspect the planets and luminaries
+        if ((IS_ASTEROID.has(p.key) && (MINOR_POINTS.has(q.key) || ANGLES.has(q.key))) || (IS_ASTEROID.has(q.key) && (MINOR_POINTS.has(p.key) || ANGLES.has(p.key)))) continue;
         const sep = Math.abs(diff(p.lon, q.lon));
         let best = null;
         for (const asp of ASPECTS) {
@@ -544,7 +551,9 @@
       p.oob = p.dec !== undefined && Math.abs(p.dec) > eps && ["moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"].includes(p.key);
     }
 
-    const aspects = findAspects(points, { minorAspects: opts.minorAspects, orbScale: opts.orbScale, timeKnown });
+    // the Descendant and IC aspect in their own right, as on Astro-Seek (not listed as chart points)
+    const axis = timeKnown ? [["dsc", norm(asc + 180)], ["ic", norm(mc + 180)]].map(([key, lon]) => Object.assign({ key, lon, speed: 360.98, retro: false, house: houseOf(lon, cusps) }, splitLon(lon))) : [];
+    const aspects = findAspects(points.concat(axis), { minorAspects: opts.minorAspects, orbScale: opts.orbScale, timeKnown });
     // declination aspects, as listed by Astro-Seek: parallel (same declination) and contra-parallel (mirror image)
     const DEC_KEYS = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron"];
     const decPts = points.filter((p) => DEC_KEYS.includes(p.key) && typeof p.dec === "number");
@@ -567,7 +576,7 @@
       houses: timeKnown ? cusps : null,
       houseSystemUsed: hs.used,
       asc, mc, vertex, fortune, ramc, eps, ayanamsa: ayan, isDay, moonPhaseAngle,
-      get(key) { return points.find((p) => p.key === key); },
+      get(key) { return points.find((p) => p.key === key) || axis.find((p) => p.key === key); },
     };
   }
 

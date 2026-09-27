@@ -9,7 +9,7 @@ Open `index.html` through any static server, e.g. `python3 -m http.server` from 
 - **Asteroids**: Ceres, Pallas, Juno and Vesta (can be hidden in settings).
 - **Chiron and the asteroids** come from `js/chiron-data.js` and `js/asteroid-data.js`: yearly state vectors (1850–2150) taken from the Swiss Ephemeris, with Kepler propagation, light-time and aberration between them. **Lilith** and the **mean node** get small correction tables (`js/lilith-data.js`) that align them with the Swiss Ephemeris; the **true node** is the osculating node of the Moon's orbit.
 - **Houses**: Placidus, Koch, Regiomontanus, Topocentric, Campanus, Porphyry, Equal and Whole Sign, including intercepted signs. Polar latitudes fall back to Porphyry.
-- **Aspects**: major and minor, with orbs, applying/separating and a grid, plus parallels and contra-parallels of declination. Patterns detected: Grand Trine, T-Square, Grand Cross, Yod and stelliums.
+- **Aspects**: Astro-Seek's defaults (major aspects; 10° with the Sun or Moon and 7° otherwise, sextiles 6°/5°; the Descendant and IC aspect in their own right), with orbs, applying/separating and a grid. Minor aspects can be switched on in settings. Also parallels and contra-parallels of declination. Patterns detected: Grand Trine, T-Square, Grand Cross, Yod and stelliums.
 - **Karmic**: the nodal axis by sign and house, planets on the nodes, Saturn, Chiron, Pluto, Lilith, retrograde planets, the 4th, 8th and 12th houses, and a timeline of nodal, Saturn and Chiron returns.
 - **Dominants**: planets, signs, houses, elements and modes, with how each planet's score is built.
 - **Transits**: day, week and month views, with exact transit dates, lunar phases, sign changes and stations.
@@ -23,7 +23,7 @@ Charts are saved in localStorage and can be shared as a link.
 
 ## Accuracy check
 `node test/check.js` compares a reference chart (8 May 2002, 13:00, Whangārei NZ) against Astro-Seek.
-Planets, Chiron and the MC match to the arc-minute. The mean node, Lilith and Ascendant are within 1–2′.
+Every position, house cusp, daily speed and aspect (orb and applying/separating) of the reference chart matches Astro-Seek exactly.
 
 ## Install as an app (PWA)
 The folder is a Progressive Web App: `manifest.webmanifest`, a service worker (`sw.js`) that caches the whole app for offline use, and icons in `icons/`.

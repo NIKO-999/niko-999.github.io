@@ -289,6 +289,20 @@
       focus: "your outward approach", core: "your outward self",
       desc: "The Ascendant is the sign rising on the eastern horizon at birth: your body, first impressions and the lens through which you meet life.",
     },
+    dsc: {
+      name: "Descendant", short: "DSC", glyph: "DC", color: "#ffffff",
+      keywords: ["partnership", "others", "attraction"],
+      lead: "What you seek in others shows",
+      focus: "what you meet in partners", core: "your partnerships",
+      desc: "The Descendant, opposite the Ascendant, is the cusp of the 7th house: the qualities you look for, and meet, in close partners and open rivals.",
+    },
+    ic: {
+      name: "IC", short: "IC", glyph: "IC", color: "#ffffff",
+      keywords: ["roots", "home", "private self"],
+      lead: "Your roots and private life show",
+      focus: "your roots and private foundations", core: "your roots",
+      desc: "The IC (Imum Coeli), opposite the Midheaven, is the lowest point of the chart: home, family, ancestry and the private self you return to.",
+    },
     mc: {
       name: "Midheaven", short: "MC", glyph: "MC", color: "#ffffff",
       keywords: ["career", "reputation", "calling"],
