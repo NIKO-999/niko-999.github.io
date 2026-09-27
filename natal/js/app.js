@@ -588,7 +588,9 @@
       return `<section class="hero"><div class="eyebrow">Houses</div><h1 class="display sm">Time needed</h1>
         <div class="subline">Houses depend on the exact birth time and place.</div>
         <p class="note">Add a birth time to unlock houses, the Ascendant and the Midheaven.</p>
-        <div class="chips"><button class="chip" data-act="edit">Add birth time</button></div></section>`;
+        <div class="chips"><button class="chip" data-act="edit">Add birth time</button></div></section>
+        <div class="prose"><p>The twelve houses divide the sky around your birthplace into areas of life: self, money, communication, home, creativity, work, partnership, intimacy, belief, career, community and the unseen. Which sign sits on each house, and which planets fall inside it, depends on the Earth's rotation, so it changes every few minutes. Without a birth time the planets' signs and aspects are still accurate, but the houses, the Ascendant and the Midheaven cannot be placed.</p>
+        <p>Even an approximate time helps: a birth certificate, a hospital record or a parent's memory of "morning" or "just after lunch" narrows it down, and you can compare how the Ascendant reads to decide.</p></div>`;
     }
     const counts = {};
     for (const k of PLANET_KEYS) counts[c.get(k).house] = (counts[c.get(k).house] || 0) + 1;
@@ -599,11 +601,23 @@
       <div class="eyebrow">Houses<span class="sep">·</span>${esc(K.HOUSE_SYSTEMS[c.houseSystemUsed])}</div>
       <h1 class="display">${SIGNS[asc.sign].name}</h1>
       <div class="subline">rising · MC in <strong>${SIGNS[mc.sign].name}</strong> · most planets in the ${ord(+busiest)}</div>
-    </section><div class="list">`;
+    </section>`;
+    // the four angles
+    const angle = (label, lon, open) => { const a = E.splitLon(lon); return stat(label, `${signGlyph(a.sign)} ${SIGNS[a.sign].name}`, `${a.deg}°${pad(a.min)}′`, open); };
+    html += `<div class="split">${angle("Ascendant · self", c.asc, "point:asc")}${angle("IC · roots", E.norm(c.mc + 180), "house:4")}${angle("Descendant · others", E.norm(c.asc + 180), "house:7")}${angle("Midheaven · calling", c.mc, "point:mc")}</div>`;
+    // where the planets gather
+    const d = c.derived, q = d.quadrants;
+    const QN = { 1: "Self · houses 1–3", 2: "Expression · houses 4–6", 3: "Others · houses 7–9", 4: "World · houses 10–12" };
+    const qmax = Math.max(1, ...[1, 2, 3, 4].map((i) => q[i].length));
+    html += `<div class="section-label">Where your planets gather</div><div class="bars">` +
+      [1, 2, 3, 4].map((i) => barRow(QN[i].split(" · ")[0], "var(--text-2)", (q[i].length / qmax) * 100, "hemi", String(q[i].length))).join("") +
+      `</div><p class="note">${d.above} planets above the horizon, ${d.below} below; ${d.east} in the east, ${d.west} in the west. Tap for what that means.</p>`;
+    html += `<div class="section-label">The twelve houses</div><div class="list">`;
     for (let h = 1; h <= 12; h++) {
       const cusp = E.splitLon(c.houses[h]);
       const inside = c.points.filter((p) => p.house === h && PLANETS[p.key] && !["asc", "mc", "fortune", "vertex"].includes(p.key));
-      const sub = [`Ruler ${pName(rulerOf(cusp.sign))}`];
+      const ruler = rulerOf(cusp.sign), rp = c.get(ruler);
+      const sub = [`${SIGNS[cusp.sign].name} · ${pShort(ruler)} ${rp.house === h ? "here" : "in " + ord(rp.house)}`];
       if (inter[h]) sub.push(`Intercepted ${inter[h].map((s) => SIGNS[s].name).join(", ")}`);
       html += `<button class="row" data-open="house:${h}">
         <span class="num">${pad(h)}</span>
@@ -855,9 +869,10 @@
       let cls = past ? "past" : "";
       if (!past && !nextMarked) { cls = "next"; nextMarked = true; }
       const P = PLANETS[ev.key];
-      return `<div class="row ${cls}"><span class="dot ${past ? "hollow" : ""}" style="color:${P.color}"></span>
+      const nth = events.filter((e) => e.key === ev.key && e.date <= ev.date).length;
+      return `<button class="row ${cls}" data-open="cycle:${ev.key}:${ev.date.getTime()}:${nth}"><span class="dot ${past ? "hollow" : ""}" style="color:${P.color}"></span>
         <span class="main"><div class="title">${esc(ev.label)}</div><div class="sub">Age ${age.toFixed(1)}${cls === "next" ? " · next" : ""}</div></span>
-        <span class="end"><div class="pos">${fmtMonthYear(ev.date).toUpperCase()}</div></span></div>`;
+        <span class="end"><div class="pos">${fmtMonthYear(ev.date).toUpperCase()}</div></span></button>`;
     }).join("");
   }
 
@@ -882,7 +897,7 @@
         case "transit": return PLANETS[computeTransits().list[+arg].t].color;
         case "tevent": return PLANETS[state._period.events[+arg].t].color;
         case "tpevent": return PLANETS[state._period.events[+arg].key].color;
-        case "prog": case "srp": case "decl": return PLANETS[arg].color;
+        case "prog": case "srp": case "decl": case "cycle": return PLANETS[arg].color;
         case "paspect": return ASPECTS[computeProg().list[+arg].type].color;
         case "syn": return ASPECTS[computeSyn().list[+arg].type].color;
         case "synscore": return CAT_META[arg].color;
@@ -1248,6 +1263,60 @@
     neptune: "An out-of-bounds Neptune is rare, and heightens imagination and sensitivity beyond the usual range.",
     pluto: "An out-of-bounds Pluto is uncommon and generational: it marks a period when collective power and transformation moved beyond familiar bounds, and it colours how intensely you feel those themes.",
   };
+  // life cycles on the Karmic timeline
+  const CYCLES = {
+    saturn: {
+      title: "Saturn return", every: "about every 29.5 years",
+      text: "Saturn takes about 29 and a half years to travel around the zodiac, so it comes back to the exact place it held when you were born at roughly 29, 58 and 88. Each return is a reckoning with time and maturity. Structures that no longer fit tend to strain or fall away, and what you have built on honest foundations tends to hold. It rarely feels light, but it is one of the most constructive passages in a life: you find out what you are actually committed to.",
+      nth: {
+        1: "The first return, around 29 to 30, marks the real start of adulthood. Choices made to please others or to meet expectations get tested, and many people change career, commit or end a relationship, move, or take on serious responsibility for the first time. The question is: what life are you willing to be accountable for?",
+        2: "The second return, in the late fifties, reviews what the first one built. It often brings a change of role at work, a new relationship to your body and time, and a clear sense of what you want the next decades to be for. Authority and experience become assets to use deliberately.",
+        3: "The third return, in the late eighties, is a harvest and a letting go. It asks what you want to pass on, and it often brings a quiet clarity about what mattered.",
+      },
+    },
+    chiron: {
+      title: "Chiron return", every: "about every 50 years",
+      text: "Chiron takes about 50 years to return to its birth position, so the Chiron return arrives around 49 to 51. It reopens the tender place Chiron marks in your chart, not to wound you again, but so it can be understood from the far side of half a life. Many people find this is when an old hurt finally turns into wisdom they can offer others, through teaching, mentoring, healing work or simply the way they show up. It often coincides with a shift in purpose: less proving, more meaning.",
+      nth: {},
+    },
+    northNode: {
+      title: "Nodal return", every: "about every 18.6 years",
+      text: "The lunar nodes circle the zodiac in about 18 and a half years, so the North Node returns to its birth position at roughly 18 to 19, 37, 56, 74 and 93. Each nodal return is a checkpoint on your soul's direction. Doors tend to open toward your North Node themes, and people or events arrive that feel strangely fated. It is a good time to recommit to the path that stretches you rather than the one that simply feels familiar.",
+      nth: {
+        1: "The first nodal return, at about 18 or 19, often coincides with leaving home or choosing a direction for the first time.",
+        2: "The second, at about 37, frequently brings a mid-course correction: a sense that life should be more your own.",
+        3: "The third, in the mid fifties, tends to clarify what you are here to contribute in the years ahead.",
+      },
+    },
+    southNode: {
+      title: "Nodal reversal", every: "about every 18.6 years, halfway between nodal returns",
+      text: "Halfway between nodal returns, the transiting North Node sits on your natal South Node and the South Node on your North Node. This nodal reversal, at roughly 9, 28, 46, 65 and 83, pulls you back toward old, familiar patterns and past-life gifts. It can feel like a season of endings, clearing out or revisiting what you already know. Used well, it is a chance to release what no longer serves the direction you are growing toward, and to reclaim the gifts of the South Node in service of the North.",
+      nth: {},
+    },
+  };
+  function sheetCycle(key, ms, nth) {
+    const c = state.chart, C = CYCLES[key], P = PLANETS[key];
+    const d = new Date(ms), ageAt = (ms - c.input.utc.getTime()) / (365.2422 * 86400000);
+    const past = ms < Date.now();
+    const years = Math.abs(ms - Date.now()) / (365.2422 * 86400000);
+    let html = `<section class="hero"><div class="eyebrow">Life cycle · ${esc(C.every)}</div><h2 class="display">${esc(C.title)}</h2>
+      <div class="subline">${fmtMonthYear(d)} · age ${ageAt.toFixed(1)}</div></section>`;
+    const n = c.get(key);
+    html += facts([
+      ["When", `${fmtMonthYear(d)}`],
+      ["Your age", ageAt.toFixed(1)],
+      ["Status", past ? `${years < 1 ? "Within the last year" : `${Math.round(years)} year${Math.round(years) === 1 ? "" : "s"} ago`}` : `${years < 1 ? "Within the next year" : `In about ${Math.round(years)} year${Math.round(years) === 1 ? "" : "s"}`}`],
+      n ? [key === "southNode" ? "Your South Node" : `Your natal ${P.name}`, `${degStr(n)} ${signGlyph(n.sign)} ${SIGNS[n.sign].name}${n.house ? ` · ${ord(n.house)} house` : ""}`] : null,
+    ]);
+    html += paras([C.text, C.nth[nth]]);
+    if (n && n.house) {
+      html += sec("In your chart", key === "southNode"
+        ? `The North Node passes over your South Node in the ${ord(n.house)} house (${HOUSES[n.house].areas}), so that is where old patterns resurface and ask to be released.`
+        : `The return happens in your ${ord(n.house)} house, where your natal ${P.name} sits, so ${HOUSES[n.house].areas} are where this cycle is most visible.`);
+    }
+    return html + natalSnippet(key === "southNode" ? "southNode" : key);
+  }
+
   function sheetDecl(key) {
     const c = state.chart, p = c.get(key), P = PLANETS[key];
     const dec = Math.abs(p.dec), dir = p.dec >= 0 ? "north" : "south";
@@ -1327,6 +1396,7 @@
       }
       case "srtheme": html = sheetSRTheme(arg); break;
       case "decl": html = sheetDecl(arg); break;
+      case "cycle": html = sheetCycle(arg, +arg2, +spec.split(":")[3]); break;
       case "srp": html = sheetSRPlanet(arg); break;
       case "srintro": html = sheetSimple("Solar return", "The year ahead", "", [(D().solarReturn || {}).intro]); break;
       case "sraspect": {
@@ -2013,6 +2083,11 @@
       if (state.chart.timeKnown) { const h = houseOfLon(E.lonAt(ev.key, d, { nodeType: state.settings.nodeType, zodiac: state.settings.zodiac })); extra = sec(`In your chart: your ${ord(h)} house`, [`${P.name} stations in your ${ord(h)} house of ${HOUSES[h].areas}, so that part of life is where the ${ev.dir === "retrograde" ? "review" : "renewed momentum"} shows up.`, houseVisit(ev.key, h)]); }
     }
     let html = `<section class="hero"><div class="eyebrow">${esc(fmtDayYear(d))} · ${fmtClock(d)}</div><h2 class="display">${esc(title)}</h2></section>`;
+    if (ev.kind !== "phase") {
+      const sg = ev.kind === "ingress" ? ev.sign : signOf(E.lonAt(ev.key, d, { nodeType: state.settings.nodeType, zodiac: state.settings.zodiac }));
+      const here = state.chart.points.filter((q) => q.sign === sg && PLANET_KEYS.concat(["northNode", "chiron", "asc", "mc"]).includes(q.key));
+      if (here.length) extra += sec(`Your planets in ${SIGNS[sg].name}`, `${SIGNS[sg].name} holds your natal ${here.map((q) => pName(q.key)).join(", ")}, so this ${ev.kind === "ingress" ? "stay" : "station"} is personal for you: ${P.name} ${ev.kind === "ingress" ? "will pass over" : "is working on"} ${here.length === 1 ? "that point" : "those points"} and the themes ${here.length === 1 ? "it carries" : "they carry"} in your chart.`);
+    }
     html += paras(body) + extra;
     html += `<div class="list"><button class="row" data-act="tday:${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}"><span class="dot" style="color:var(--theme)"></span><span class="main"><div class="title">See this day</div><div class="sub">All transits for ${esc(fmtDay(d))}</div></span></button></div>`;
     return html;
@@ -2142,8 +2217,13 @@
     ]);
     if (TP) html += paras([TP.brings]);
     if (p.natalHouse) html += sec(`Through your ${ord(p.natalHouse)} house`, TH ? TH.text : `${pName(key)} is highlighting ${HOUSES[p.natalHouse].areas}.`);
+    const natalHere = state.chart.points.filter((q) => q.sign === p.sign && PLANET_KEYS.concat(["northNode", "chiron", "asc", "mc"]).includes(q.key));
+    html += sec(`In ${SIGNS[p.sign].name}`, [SIGNS[p.sign].essence, natalHere.length
+      ? `${SIGNS[p.sign].name} holds your natal ${natalHere.map((q) => pName(q.key)).join(", ")}, so ${pName(key)}'s passage through this sign is personal for you: it passes over ${natalHere.length === 1 ? "that point" : "those points"} during its stay.`
+      : `None of your natal planets sits in ${SIGNS[p.sign].name}, so ${pName(key)} works through your chart mainly by the aspects it makes.`], elColor(p.sign));
     const mine = T.list.map((tr, i) => [tr, i]).filter(([tr]) => tr.t === key);
     if (mine.length) html += `<h4>Aspects to your chart</h4><div class="list">${mine.map(([tr, i]) => transitRow(tr, i)).join("")}</div>`;
+    else html += sec("Aspects to your chart", `${pName(key)} is not making a close aspect to your birth chart today.`);
     return html;
   }
 
