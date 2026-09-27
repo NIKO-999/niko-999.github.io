@@ -1261,7 +1261,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 
   /* ═══ TRAINING ═══ */
   var LIFT = [
-    { g: 'weights', n: 'Weights', items: [['push', 'Push'], ['pull', 'Pull'], ['legs', 'Legs'], ['upper', 'Upper'], ['lower', 'Lower'], ['full', 'Full body'], ['core', 'Core']] },
+    { g: 'weights', n: 'Weights', items: [['push', 'Push'], ['pull', 'Pull'], ['legs', 'Legs'], ['chest', 'Chest'], ['back', 'Back'], ['shoulders', 'Shoulders'], ['upper', 'Upper'], ['lower', 'Lower'], ['full', 'Full body'], ['core', 'Core']] },
     { g: 'run', n: 'Run', items: [['easy', 'Easy'], ['tempo', 'Tempo'], ['intervals', 'Intervals'], ['long', 'Long']] },
     { g: 'recovery', n: 'Recovery', items: [['mobility', 'Mobility'], ['yoga', 'Yoga'], ['sauna', 'Sauna']] },
     { g: 'rest', n: 'Rest', items: [['rest', 'Rest day']] }
@@ -1930,9 +1930,31 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   }
 
   /* ═══ WHAT YOU TRAINED ═══ */
+  /* How long the session was, worked out from the block rather than asked:
+     completed today while it runs, or up to half an hour past its end,
+     it is the time since it started, to five minutes; completed any
+     later, or on a day behind you, it is the block's own length, because
+     twelve hours since a 6:30 gym is not a session. Nothing to go on is
+     nought, which asks. */
+  function cdLiftLen(iso, key) {
+    var b = S.week.filter(function (x) { return x.id === key; })[0];
+    if (!b) return 0;
+    var now = cdNowMin(), len = b.e - b.s;
+    if (iso === cdToday() && now >= b.s && now <= Math.max(b.e, b.s) + 30) len = Math.round((now - b.s) / 5) * 5;
+    return len > 0 ? Math.min(len, 240) : 0;
+  }
   function cdLiftSheet(iso, key, label) {
     var cur = (S.train[iso] && cdSess(S.train[iso][key])) || { k: [], e: '', m: 0 };
-    var pick = cur.k.slice(), eff = cur.e, min = cur.m;
+    var pick = cur.k.slice(), eff = cur.e, min = cur.m || cdLiftLen(iso, key);
+    /* The length it ran is spliced in over the nearest rung rather than
+       added, so the ladder stays two rows of four and the figure it
+       pre-selects is always one you can see pressed. */
+    var mins = MINS.slice();
+    if (min && mins.indexOf(min) < 0) {
+      var near = 0;
+      mins.forEach(function (x, i) { if (Math.abs(x - min) < Math.abs(mins[near] - min)) near = i; });
+      mins[near] = min; mins.sort(function (x, y) { return x - y; });
+    }
     var root = el('div');
     var boards = el('div');
     LIFT.forEach(function (g) {
@@ -1967,7 +1989,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     more.appendChild(ef);
     more.appendChild(el('p', 'cd-lbl', 'How long'));
     var mn = el('div', 'cd-chips ladder');
-    MINS.forEach(function (x) {
+    mins.forEach(function (x) {
       var c = el('button', 'cd-chip', x + 'm'); c.type = 'button'; c.dataset.m = x;
       c.addEventListener('click', function () { min = min === x ? 0 : x; draw(); });
       mn.appendChild(c);

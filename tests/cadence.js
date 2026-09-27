@@ -459,7 +459,9 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('and picking a lift clears rest', back.join() === 'weights.push', back);
     await page.click('[data-k="weights.core"]');
     await page.click('[data-e="Hard"]');
-    await page.click('[data-m="60"]');
+    /* Completed long after it ended, the length is the block's own hour,
+       not the hours since it started. */
+    ok('a session ticked after its block is its block\'s length', await page.getAttribute('[data-m="60"]', 'aria-pressed') === 'true');
     ok('the foot names what it will file', (await page.textContent('#cdLiftGo')) === 'Log Push + Core');
     await page.click('#cdLiftGo');
     await page.waitForTimeout(320);
@@ -526,6 +528,12 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.waitForTimeout(350);
     ok('and the check, confirmed, asks what you trained', (await sheetUp(page)) && (await page.textContent('#cdShT')) === 'What did you train?');
     ok('having kept it', (await store(page, 'cad.log.v1'))['2026-09-25'].s1 === 1);
+    /* Completed ten minutes in, the length is the ten minutes it ran,
+       spliced over the nearest rung so the ladder stays eight. */
+    const ran = await page.$$eval('[data-m]', (bs) => ({ on: bs.filter((b) => b.getAttribute('aria-pressed') === 'true').map((b) => b.dataset.m), n: bs.length }));
+    ok('and it is already set to how long the session ran', ran.on.join() === '10' && ran.n === 8, ran);
+    ok('chest, back and shoulders are each a session of their own',
+      (await page.$$eval('[data-k^="weights."]', (bs) => bs.map((b) => b.textContent))).join() === 'Push,Pull,Legs,Chest,Back,Shoulders,Upper,Lower,Full body,Core');
     await c.close();
   }
   {

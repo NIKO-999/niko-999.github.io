@@ -5469,6 +5469,23 @@ heart glyph self care already has. It sits above `run` and `surf`,
 because *rowing machine* is not a boat. It feeds Train and asks what
 you trained, like a gym block does.
 
+### Chest, back and shoulders, and the length is worked out
+
+Weights carries Chest, Back and Shoulders as sessions of their own,
+beside Push, Pull and Legs: a split is what somebody actually trains,
+and filing a chest day under Push says a different thing.
+
+**THE LENGTH IS PRE-SET FROM THE BLOCK, NOT ASKED FROM NOTHING.**
+Completed while it runs, or up to half an hour past its end, it is the
+time since the block started, to five minutes; completed later, or on
+a day behind you, it is the block's own length, because twelve hours
+since a 6:30 gym is not a session. A stored length wins, and a press
+still changes it. **Spliced over the nearest rung rather than added**,
+so the ladder stays two rows of four and the figure it pre-selects is
+always one you can see pressed. Asserted at 07:40 on a 07:30 gym (10)
+and at 10:20 on one that ended at 08:30 (60); proved by dropping the
+default, which fails both and the filed-session check.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
