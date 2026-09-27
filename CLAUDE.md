@@ -5627,6 +5627,33 @@ tick that raises no sheet, a tick that is still kept, and an editor
 with no link; proved by putting cardio back, which fails the first
 and the third by name.
 
+
+### A day in a habit's record opens
+
+Asked for off a screenshot of Train's fourteen days. **Every row is a
+disclosure, on every habit**: a button with `aria-expanded` and
+`aria-controls`, shut by default, the chevron turning 180° when open,
+and the detail underneath rather than in a second sheet — the fortnight
+is the thing being read, and a sheet over it hides the other thirteen.
+
+**What it says is that day's own record**: for Train the session, how
+hard and how long, and which training block was kept; for a tick every
+block that feeds it that day, kept or not, and whether you ticked it
+yourself; for a number the figure logged. And one change, the one the
+habits screen already allows on that day: *Change the session* or *Log
+a session*, *Change* or *Log it*, *Mark done* or *Take it off*. A tick
+kept by a block offers nothing, because untick it on the day is the
+only honest route. The tick toggle and Train's door became
+`cdHabToggle` and `cdTrainAt`, shared with the row, so the two cannot
+disagree.
+
+Asserted on Steps, Train and Mind: fourteen shut 44px rows, a press
+that opens with the right figure and a second that shuts it, Train's
+two sessions read on the days they were filed, and *Mark done* landing
+on that day rather than today. Bite-proved by a panel that never opens
+and by the detail reading today: six fall. The action is pressed
+through the DOM, because the first proof hung on a hidden button.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

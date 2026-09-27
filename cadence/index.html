@@ -474,6 +474,17 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cd-figs b { font: 200 34px/1 var(--sans); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .cd-figs span { font: 500 10.5px/1.3 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--quiet); }
 .cd-day-l li { display: grid; grid-template-columns: 8px 1fr auto; align-items: center; gap: 12px; padding: 13px 0 12px; }
+.cd-hd { list-style: none; margin: 0; padding: 0; }
+.cd-hd li { box-shadow: inset 0 1px 0 var(--hair); }
+.cd-hd-b { width: 100%; min-height: 44px; display: grid; grid-template-columns: 8px 1fr auto 16px; align-items: center; gap: 12px; padding: 13px 0 12px; text-align: left; color: var(--ink); }
+.cd-hd-b > i { width: 8px; height: 8px; border-radius: 50%; background: var(--cat, var(--quiet)); }
+.cd-hd-b b { font: 400 15px/1.3 var(--sans); }
+.cd-hd-b span { font: 500 11px/1.3 var(--mono); letter-spacing: .06em; color: var(--quiet); font-variant-numeric: tabular-nums; text-align: right; }
+.cd-hd-b svg { width: 16px; height: 16px; color: var(--quiet); transition: transform .2s; }
+.cd-hd-b[aria-expanded="true"] svg { transform: rotate(180deg); }
+.cd-hd-x { padding: 0 0 14px 20px; }
+.cd-hd-x p { margin: 0 0 6px; font: 400 14px/1.35 var(--sans); color: var(--dim); }
+.cd-hd-x .cd-btn { flex: none; min-height: 44px; margin-top: 6px; }
 .cd-day-l li > i { width: 8px; height: 8px; border-radius: 50%; background: var(--cat, var(--quiet)); }
 .cd-dnote { display: block; width: 100%; min-height: 44px; padding: 10px 0; text-align: left; font: 400 14px/1.45 var(--sans); color: var(--dim); }
 .cd-dnote + .cd-dnote { box-shadow: inset 0 1px 0 var(--hair); }
@@ -2229,23 +2240,24 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     if (!h) return;
     if (btn.dataset.act === 'hist') { cdHabHist(h); return; }
     var today = cdHabDay();
-    if (h.id === 'train') {
-      var tb = cdOn(today).filter(function (b) { return TRAINING[cdKind(b.n)]; });
-      var free = tb.filter(function (b) { return !(S.train[today] && S.train[today][b.id]); })[0];
-      cdLiftSheet(today, free ? free.id : tb.length ? tb[0].id : DAYKEY, 'Train');
-      return;
-    }
-    if (h.k === 'tick') {
-      var by = cdKeptBy(today, h);
-      if (by && by !== 'you') { cdToast('Completed by ' + by + ' — untick it on the day.'); return; }
-      var m = S.hab[today] = S.hab[today] || {};
-      if (m[h.id]) delete m[h.id]; else m[h.id] = 1;
-      if (!Object.keys(m).length) delete S.hab[today];
-      cdSave('hab'); cdPaintHab();
-      return;
-    }
+    if (h.id === 'train') { cdTrainAt(today); return; }
+    if (h.k === 'tick') { cdHabToggle(today, h); cdPaintHab(); return; }
     cdNumSheet(h, today);
   });
+  function cdTrainAt(iso) {
+    var tb = cdOn(iso).filter(function (b) { return TRAINING[cdKind(b.n)]; });
+    var free = tb.filter(function (b) { return !(S.train[iso] && S.train[iso][b.id]); })[0];
+    cdLiftSheet(iso, free ? free.id : tb.length ? tb[0].id : DAYKEY, 'Train');
+  }
+  function cdHabToggle(iso, h) {
+    var by = cdKeptBy(iso, h);
+    if (by && by !== 'you') { cdToast('Completed by ' + by + ' — untick it on the day.'); return false; }
+    var m = S.hab[iso] = S.hab[iso] || {};
+    if (m[h.id]) delete m[h.id]; else m[h.id] = 1;
+    if (!Object.keys(m).length) delete S.hab[iso];
+    cdSave('hab');
+    return true;
+  }
 
   function cdNumSheet(h, iso) {
     var v = +cdHabVal(iso, h) || 0;
@@ -2322,13 +2334,8 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var n30 = 0, n90 = 0;
     for (var i = 0; i < 90; i++) { if (cdHabOn(cdAddDays(today, -i), h)) { n90++; if (i < 30) n30++; } }
     root.appendChild(el('div', 'cd-figs', '<div><b>' + n30 + '</b><span>of 30 days</span></div><div><b>' + n90 + '</b><span>of 90 days</span></div><div><b>' + (h.k === 'tick' ? cdStreak(h) : '—') + '</b><span>streak</span></div>'));
-    var ul = el('ul', 'cd-day-l');
-    for (var j = 0; j < 14; j++) {
-      var d = cdAddDays(today, -j), on = cdHabOn(d, h), v = cdHabVal(d, h);
-      var hl = ul.appendChild(el('li', '', '<i></i><b>' + DOW[cdDow(d)] + ' ' + cdDate(d).getDate() + ' ' + MON[cdDate(d).getMonth()].slice(0, 3) + '</b><span>'
-        + (on ? (h.k === 'num' ? (cdFmtNum(v, h) + ' ' + esc(cdUnit(h))).trim() : 'completed') : '—') + '</span>'));
-      hl.style.setProperty('--cat', on ? 'var(' + h.hc + ')' : 'var(--quiet)');
-    }
+    var ul = el('ul', 'cd-hd');
+    for (var j = 0; j < 14; j++) ul.appendChild(cdHabHistRow(h, cdAddDays(today, -j), j));
     root.appendChild(el('p', 'cd-lbl', 'Last fourteen days'));
     root.appendChild(ul);
     if (h.mine) {
@@ -2342,6 +2349,56 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       foot.appendChild(rm); root.appendChild(foot);
     }
     cdSheet(h.n, root);
+  }
+
+  /* Every day in the fortnight opens underneath to say what that day
+     was: which session, which block kept it, the figure — and offers
+     the one change the habits screen already allows on that day. A
+     disclosure rather than a second sheet, because the fortnight is the
+     thing being read and a sheet on top of it hides the other thirteen. */
+  function cdHabHistRow(h, d, j) {
+    var on = cdHabOn(d, h), v = cdHabVal(d, h), li = el('li', on ? 'is-on' : '');
+    li.style.setProperty('--cat', on ? 'var(' + h.hc + ')' : 'var(--quiet)');
+    var id = 'cdHd' + j, b = el('button', 'cd-hd-b', '<i></i><b>' + DOW[cdDow(d)] + ' ' + cdDate(d).getDate() + ' ' + MON[cdDate(d).getMonth()].slice(0, 3) + '</b><span>'
+      + (on ? (h.k === 'num' ? (cdFmtNum(v, h) + ' ' + esc(cdUnit(h))).trim() : 'completed') : '—') + '</span>'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>');
+    b.type = 'button'; b.setAttribute('aria-expanded', 'false'); b.setAttribute('aria-controls', id);
+    var x = el('div', 'cd-hd-x'); x.id = id; x.hidden = true;
+    b.addEventListener('click', function () {
+      var open = x.hidden; x.hidden = !open; b.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open) cdHabDayDetail(h, d, x);
+    });
+    li.appendChild(b); li.appendChild(x);
+    return li;
+  }
+  function cdHabDayDetail(h, d, x) {
+    x.textContent = '';
+    var lines = [];
+    if (h.k === 'num') {
+      var v = +cdHabVal(d, h) || 0;
+      lines.push(v > 0 ? (cdFmtNum(v, h) + ' ' + esc(cdUnit(h))).trim() + ' logged' : 'Nothing logged');
+    } else {
+      if (h.id === 'train') cdSessions(d).forEach(function (o) {
+        lines.push(cdRestOnly(o.s) ? 'Rest day' : [esc(cdSessName(o.s)), o.s.e, o.s.m ? o.s.m + ' min' : ''].filter(Boolean).join(' · '));
+      });
+      var feed = cdOn(d).filter(function (bl) { return h.from.indexOf(cdKind(bl.n)) >= 0 || (h.id === 'train' && TRAINING[cdKind(bl.n)]); });
+      feed.forEach(function (bl) { lines.push(esc(bl.n) + ' · ' + (cdDone(d, bl.id) ? 'kept' : 'not kept')); });
+      if (cdHabVal(d, h)) lines.push('Ticked on the habits screen');
+      if (!lines.length) lines.push('Nothing logged');
+    }
+    lines.forEach(function (t) { x.appendChild(el('p', '', t)); });
+    var by = h.k === 'tick' ? cdKeptBy(d, h) : null;
+    var label = h.id === 'train' ? (cdSessions(d).length ? 'Change the session' : 'Log a session')
+      : h.k === 'num' ? (+cdHabVal(d, h) > 0 ? 'Change' : 'Log it')
+      : by === 'you' ? 'Take it off' : by ? '' : 'Mark done';
+    if (!label) return;
+    var act = el('button', 'cd-btn soft', label); act.type = 'button';
+    act.addEventListener('click', function () {
+      if (h.id === 'train') { cdTrainAt(d); return; }
+      if (h.k === 'num') { cdNumSheet(h, d); return; }
+      if (cdHabToggle(d, h)) { cdPaint(); cdHabHist(h); }
+    });
+    x.appendChild(act);
   }
 
   $('cdHabP').addEventListener('click', function () { habAt = cdAddDays(cdHabDay(), -1); cdPaintHab(); });

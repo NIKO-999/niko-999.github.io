@@ -976,6 +976,46 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.focus('.cd-hr[data-h="steps"] .cd-hr-h');
     await page.keyboard.press('Enter');
     ok('a keyboard reaches the record through its own button', (await sheetUp(page)) && (await page.textContent('#cdShT')) === 'Steps' && !(await page.$('#cdNumV')));
+
+    /* Every day in a habit's fortnight is a disclosure: shut by default,
+       one press opens it underneath with that day's detail, the chevron
+       turns 180°, and a second press shuts it. Asked of every habit, so a
+       number, a plain tick and Train are each read. */
+    const hd = await page.$$eval('.cd-hd-b', (bs) => bs.map((b) => ({ ex: b.getAttribute('aria-expanded'), ctl: b.getAttribute('aria-controls'), h: b.getBoundingClientRect().height,
+      hid: document.getElementById(b.getAttribute('aria-controls')).hidden })));
+    ok('a habit\'s fourteen days are fourteen shut disclosures, each a 44px press', hd.length === 14 && hd.every((r) => r.ex === 'false' && r.hid && r.h >= 44), hd.slice(0, 2));
+    await page.click('.cd-hd-b >> nth=0');
+    const st0 = await page.evaluate(() => { const b = document.querySelector('.cd-hd-b'), x = document.getElementById(b.getAttribute('aria-controls'));
+      return { ex: b.getAttribute('aria-expanded'), vis: !x.hidden && x.getBoundingClientRect().height > 0, t: x.textContent, rot: getComputedStyle(b.querySelector('svg')).transform }; });
+    ok('a press opens that day underneath, with the figure it logged', st0.ex === 'true' && st0.vis && /10,000 steps logged/.test(st0.t), st0);
+    await page.waitForTimeout(260);
+    const rot0 = await page.$eval('.cd-hd-b svg', (s) => getComputedStyle(s).transform);
+    ok('and its chevron turns half a turn', /^matrix\(-1, [-0.]+, [-0.]+, -1/.test(rot0), rot0);
+    await page.click('.cd-hd-b >> nth=0');
+    ok('a second press shuts it', await page.$eval('.cd-hd-b', (b) => b.getAttribute('aria-expanded') === 'false' && document.getElementById(b.getAttribute('aria-controls')).hidden));
+    await closeSheet(page);
+
+    await page.focus('.cd-hr[data-h="train"] .cd-hr-h'); await page.keyboard.press('Enter'); await sheetUp(page);
+    await page.click('.cd-hd-b >> nth=0'); await page.click('.cd-hd-b >> nth=1');
+    const trx = await page.$$eval('.cd-hd-x', (xs) => xs.slice(0, 2).map((x) => x.textContent));
+    ok('Train opens on the session it was, how hard and how long', /Legs · Hard · 60 min/.test(trx[0]) && /Easy · Light · 45 min/.test(trx[1]), trx);
+    ok('and offers the session to change rather than a tick', /Change the session/.test(trx[0]));
+    await closeSheet(page);
+
+    await page.focus('.cd-hr[data-h="mind"] .cd-hr-h'); await page.keyboard.press('Enter'); await sheetUp(page);
+    const mindWas = !!((await store(page, 'cad.hab.v1'))['2026-09-22'] || {}).mind;
+    await page.click('.cd-hd-b >> nth=3');
+    const mx = await page.$eval('.cd-hd-x >> nth=3', (x) => ({ t: x.textContent, btn: !!x.querySelector('button') }));
+    ok('a day nothing kept says so, and offers to mark it done', !mindWas && /Mark done/.test(mx.t) && mx.btn, mx);
+    /* Pressed through the DOM: a build whose panel never opens would
+       otherwise hang the file on a hidden button rather than fail. */
+    const pressAct = () => page.evaluate(() => { const b = document.querySelectorAll('.cd-hd-x')[3].querySelector('button'); if (b) b.click(); });
+    await pressAct();
+    ok('marking it done logs that day, not today', ((await store(page, 'cad.hab.v1'))['2026-09-22'] || {}).mind === 1);
+    ok('and the fortnight redraws it as completed', /completed/.test(await page.textContent('.cd-hd-b >> nth=3')));
+    await page.click('.cd-hd-b >> nth=3');
+    await pressAct();
+    ok('and the same row takes it off again', !((await store(page, 'cad.hab.v1'))['2026-09-22'] || {}).mind);
     await closeSheet(page);
 
     /* A day you forgot is a day you can still log: the caption steps back
