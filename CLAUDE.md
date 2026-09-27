@@ -5510,6 +5510,16 @@ where Enter does nothing leaves the sheet over the next row**, which
 hung the file rather than failing it, so the check puts a stray sheet
 away before it presses on.
 
+### Every tick says its streak the same way
+
+Reported off a screenshot: Mind read *2-day streak* and Train read
+*Complete*. Train was kept by a session, and the line gave the word
+instead of the streak whenever something other than a press kept it.
+One rule for every tick now: a streak once the run passes a day,
+otherwise Complete or Not yet. Who kept it was never what the line was
+for. Asserted off each row's own fortnight of dots rather than a typed
+figure, and bite-proved by putting the keeper's branch back.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

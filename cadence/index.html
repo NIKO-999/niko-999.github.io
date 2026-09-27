@@ -2055,10 +2055,11 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       var v = cdHabVal(today, h), on = cdHabOn(today, h);
       var sub, val;
       if (h.k === 'tick') {
-        var by = cdKeptBy(today, h), st = cdStreak(h);
-        /* Just the word: what kept it is the day's business, and the row
-           already said which block that was. */
-        sub = by && by !== 'you' ? 'Complete' : (st > 1 ? st + '-day streak' : on ? 'Complete' : 'Not yet');
+        /* One rule for every tick, whoever kept it: a streak once there
+           is one, otherwise just the word. Train kept by a session reads
+           the same as Mind kept by a press. */
+        var st = cdStreak(h);
+        sub = st > 1 ? st + '-day streak' : on ? 'Complete' : 'Not yet';
         val = on ? '<span class="cd-hr-v">Completed</span>' : '<span class="cd-hr-v is-nil">—</span>';
       } else {
         var wk = 0, n = 0;

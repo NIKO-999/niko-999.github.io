@@ -836,6 +836,16 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.click('.cd-tab[data-v="hab"]');
     const train = await page.$eval('.cd-hr[data-h="train"]', (e) => ({ t: e.textContent, on: e.classList.contains('is-on') }));
     ok('Train is kept by the session filed today, and just says so', /Complete/.test(train.t) && !/Completed by/.test(train.t) && train.on, train);
+    /* Every tick's line follows one rule, read off its own fortnight:
+       a streak once the run is past one day, otherwise Complete or Not yet. A
+       build that let the keeper decide passes the line above only. */
+    const subs = await page.$$eval('.cd-hr[data-h="train"], .cd-hr[data-h="mind"]', (rs) => rs.map((r) => {
+      const is = [...r.querySelectorAll('.cd-fn i')]; let n = 0;
+      for (let i = is.length - 1; i >= 0 && is[i].classList.contains('is-on'); i--) n++;
+      return { h: r.dataset.h, n, sub: r.querySelector('.cd-hr-s > span:last-child').textContent };
+    }));
+    ok('Train and Mind say their streak the same way', subs.length === 2 && subs.some((x) => x.n > 1)
+      && subs.every((x) => x.sub === (x.n > 1 ? x.n + '-day streak' : x.n ? 'Complete' : 'Not yet')), subs);
     const hues = await page.$$eval('.cd-hr .cd-hr-b i', (ns) => ns.map((n) => getComputedStyle(n).boxShadow.match(/rgba?\([^)]+\)/)[0]));
     ok('six habits, six colours: colour says which', hues.length === 6 && new Set(hues).size === 6, hues);
     const fns = await page.$$eval('.cd-hr .cd-fn', (fs) => fs.map((f) => f.children.length));
