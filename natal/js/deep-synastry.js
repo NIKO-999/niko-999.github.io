@@ -72,7 +72,7 @@ window.AstroDeep.synastry.pairs = {
     theme: "Dreamlike idealism",
     text: "This contact brings a romantic, spiritual or artistic glow. The Neptune person tends to see the Sun person through a flattering haze, and the Sun person feels inspired and gently enchanted. There can be real compassion, creativity and a sense of soul recognition.\n\nThe danger is illusion. One or both of you may see what you want to see, avoid awkward truths or slide into rescuing and being rescued. The contact stays beautiful when you keep checking the dream against what is actually happening, and when kindness includes honesty.",
     fusion: "The Neptune person idealises the Sun person strongly, bringing deep tenderness along with a real risk of disappointment if the fantasy is never tested.",
-    harmony: "There is gentle inspiration and shared imagination here, often expressed through art, music or spiritual interests.",
+    harmony: "There is gentle inspiration and shared imagination here, often expressed through creativity, beauty or a shared sense of the sacred.",
     tension: "Confusion, unmet expectations or quiet deception can creep in. Say clearly what you mean and ask what the other person means, rather than filling the gaps."
   },
   "sun-pluto": {
@@ -196,7 +196,7 @@ window.AstroDeep.synastry.pairs = {
   },
   "mercury-venus": {
     theme: "Sweet talk",
-    text: "The Mercury person tends to express themselves in a way the Venus person finds charming, and the Venus person makes the Mercury person's words feel appreciated. There is often pleasant, affectionate conversation, shared taste in books, music or ideas, and a knack for saying kind things to each other.\n\nThis contact softens disagreements, because you tend to be diplomatic with each other. It is a gentle link rather than a deep one, but it adds grace to how you communicate and helps you enjoy simply being together.",
+    text: "The Mercury person tends to express themselves in a way the Venus person finds charming, and the Venus person makes the Mercury person's words feel appreciated. There is often pleasant, affectionate conversation, a shared taste in ideas and beauty, and a knack for saying kind things to each other.\n\nThis contact softens disagreements, because you tend to be diplomatic with each other. It is a gentle link rather than a deep one, but it adds grace to how you communicate and helps you enjoy simply being together.",
     fusion: "The Mercury person's words land sweetly with the Venus person, and conversation often carries warmth and a little flirtation.",
     harmony: "You speak kindly to each other and enjoy sharing ideas, beauty and culture.",
     tension: "The Mercury person may say things bluntly that the Venus person finds unkind, or the Venus person may avoid honest discussion to keep the peace. Choose words with care."
@@ -231,7 +231,7 @@ window.AstroDeep.synastry.pairs = {
   },
   "mercury-neptune": {
     theme: "Poetic understanding",
-    text: "The Neptune person brings imagination, intuition and softness to the Mercury person's words. You may communicate through images, music or unspoken understanding, and there can be a lovely creative or spiritual quality to your conversations.\n\nThe shadow is confusion. Messages may be misunderstood, promises remembered differently, or hard truths blurred into something vaguer. This contact rewards writing important things down and checking in regularly, so the poetry never replaces clarity.",
+    text: "The Neptune person brings imagination, intuition and softness to the Mercury person's words. You may communicate through feeling, imagery and unspoken understanding, and there can be a lovely creative or spiritual quality to your conversations.\n\nThe shadow is confusion. Messages may be misunderstood, promises remembered differently, or hard truths blurred into something vaguer. This contact rewards writing important things down and checking in regularly, so the poetry never replaces clarity.",
     fusion: "The Neptune person seems to understand the Mercury person intuitively, but details can easily get lost in the haze.",
     harmony: "You share imaginative, gentle conversation and a sense of understanding beyond words.",
     tension: "Misunderstandings, vagueness or evasive answers can build mistrust. Be clear, be specific and ask questions when unsure."
@@ -245,7 +245,7 @@ window.AstroDeep.synastry.pairs = {
   },
   "mercury-northNode": {
     theme: "Meaningful messages",
-    text: "The Mercury person tends to say things that help the Node person understand their path. Conversations may feel significant, as though the Mercury person brings the right idea or piece of information at the right time.\n\nThis contact is excellent for mentorship, study and teaching, and it often shows two people who help each other think more clearly about the future. Its lessons tend to come through words, books and ideas shared between you.",
+    text: "The Mercury person tends to say things that help the Node person understand their path. Conversations may feel significant, as though the Mercury person brings the right idea or piece of information at the right time.\n\nThis contact is excellent for mentorship, study and teaching, and it often shows two people who help each other think more clearly about the future. Its lessons tend to come through the words, insights and ideas shared between you.",
     fusion: "The Mercury person's ideas speak directly to the Node person's growth, and conversations often feel fated.",
     harmony: "The Mercury person helps the Node person think clearly about direction, and learning flows easily between you.",
     tension: "The Mercury person's advice may pull the Node person toward old ways of thinking. Keep asking whether ideas point forward or back."
@@ -266,7 +266,7 @@ window.AstroDeep.synastry.pairs = {
   },
   "venus-venus": {
     theme: "Shared tastes",
-    text: "When your Venuses connect, your ways of loving, enjoying and valuing things meet. This shows whether you like the same pleasures, spend money in similar ways and express affection in a language the other understands. A good Venus link makes dates, holidays, homes and gifts feel easy to agree on.\n\nWhere the contact is hard, you may love each other genuinely yet disagree about what a good time, a beautiful room or a fair spend looks like. Neither taste is wrong. Making room for both keeps the pleasure in the relationship.",
+    text: "When your Venuses connect, your ways of loving, enjoying and valuing things meet. This shows whether you like the same pleasures, spend money in similar ways and express affection in a language the other understands. A good Venus link makes it easy to agree on what feels beautiful, what feels generous and how to enjoy life together.\n\nWhere the contact is hard, you may love each other genuinely yet disagree about what a good time, real beauty or a fair spend looks like. Neither taste is wrong. Making room for both keeps the pleasure in the relationship.",
     fusion: "You both love in a very similar way and enjoy the same things, which brings strong affection and easy companionship.",
     harmony: "Your tastes and values fit comfortably, and you enjoy sharing pleasures and beauty together.",
     tension: "You value different things or show love differently, which can lead to small resentments. Take turns choosing, and say what makes each of you feel appreciated."
@@ -301,7 +301,7 @@ window.AstroDeep.synastry.pairs = {
   },
   "venus-neptune": {
     theme: "Romantic dream",
-    text: "This is the most romantic contact in synastry. The Neptune person sees the Venus person as an ideal, and the Venus person feels enchanted and adored. There can be a deeply spiritual or creative love, with music, art or a shared sense of soulmate connection.\n\nThe shadow is illusion. It can be hard to see each other clearly, and disappointment follows when reality intrudes. When you balance the dream with honesty, this contact brings a lasting tenderness that gives the relationship a sense of magic.",
+    text: "This is the most romantic contact in synastry. The Neptune person sees the Venus person as an ideal, and the Venus person feels enchanted and adored. There can be a deeply spiritual or creative love, with a shared feeling for beauty and a sense of soulmate connection.\n\nThe shadow is illusion. It can be hard to see each other clearly, and disappointment follows when reality intrudes. When you balance the dream with honesty, this contact brings a lasting tenderness that gives the relationship a sense of magic.",
     fusion: "You idealise each other intensely, which is beautiful and needs a regular reality check.",
     harmony: "There is gentle, compassionate romance and a shared love of beauty and imagination.",
     tension: "Confusion, unrealistic expectations or disappointment can undermine trust. Keep speaking plainly about what you each want."
@@ -336,14 +336,14 @@ window.AstroDeep.synastry.pairs = {
   },
   "mars-mars": {
     theme: "Matching drives",
-    text: "When your Marses connect, your ways of acting, wanting and fighting meet. This shows how you handle conflict, pace, physical energy and desire as a pair. A good Mars link makes you a strong team: you move at a similar speed, go after goals together and can enjoy sport, adventure or physical intimacy with real vigour.\n\nWhere the link is hard, you may clash over timing, methods or who takes the lead, and anger can flare quickly. That friction is not always bad. Handled honestly, it keeps the relationship energised and stops resentment building up unspoken.",
+    text: "When your Marses connect, your ways of acting, wanting and fighting meet. This shows how you handle conflict, pace, physical energy and desire as a pair. A good Mars link makes you a strong team: you move at a similar speed, go after goals together and can enjoy adventure and physical closeness with real vigour.\n\nWhere the link is hard, you may clash over timing, methods or who takes the lead, and anger can flare quickly. That friction is not always bad. Handled honestly, it keeps the relationship energised and stops resentment building up unspoken.",
     fusion: "You both act and desire in a similar way, which brings strong chemistry and teamwork, along with the chance of explosive clashes.",
     harmony: "Your energies work well together, and you tackle goals and challenges as a united team.",
     tension: "You clash over timing and control, and arguments can escalate quickly. Channel the heat into shared physical activity and fair, direct disagreement."
   },
   "mars-jupiter": {
     theme: "Bold adventure",
-    text: "The Jupiter person encourages and expands the Mars person's drive, and the Mars person brings energy to the Jupiter person's plans. Together you tend to be bold, adventurous and enthusiastic, launching into travel, sport, business ventures or big projects with confidence.\n\nThe risk is overdoing it. You may take on too much, take risks together without enough caution, or egg each other on. Generally this contact brings optimism and courage to the relationship.",
+    text: "The Jupiter person encourages and expands the Mars person's drive, and the Mars person brings energy to the Jupiter person's plans. Together you tend to be bold, adventurous and enthusiastic, launching into new adventures and big undertakings with confidence.\n\nThe risk is overdoing it. You may take on too much, take risks together without enough caution, or egg each other on. Generally this contact brings optimism and courage to the relationship.",
     fusion: "The Jupiter person amplifies the Mars person's energy, creating a bold and adventurous partnership.",
     harmony: "You encourage each other's courage and ambition, and achieve a lot together.",
     tension: "You may overextend yourselves or disagree about which direction to charge in. Pick shared goals and pace yourselves."
