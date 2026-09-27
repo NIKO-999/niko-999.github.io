@@ -1587,19 +1587,27 @@
   function planetsInHouse(h) {
     return state.chart.points.filter((p) => p.house === h && CORE_POINTS.includes(p.key));
   }
+  /** A placement read through one life area (js/deep-areas.js), e.g. Mars by house on the love page. */
+  function areaReading(area, id, kind, val) {
+    const a = area && (D().areas || {})[`${area}:${id}`];
+    if (!a) return "";
+    return (kind ? (a[kind] || {})[val] : a[val]) || "";
+  }
   function placementBlock(key, opts) {
     opts = opts || {};
     const c = state.chart, p = c.get(key);
     if (!p) return "";
-    const dp = deepPlanetSign(key, p.sign);
-    const dh = p.house ? deepPlanetHouse(key, p.house) : null;
+    const lensSign = opts.full ? "" : areaReading(opts.area, key, "sign", p.sign);
+    const lensHouse = p.house ? areaReading(opts.area, key, "house", p.house) : "";
+    const dp = lensSign ? { text: lensSign } : deepPlanetSign(key, p.sign);
+    const dh = lensHouse ? { text: lensHouse } : p.house ? deepPlanetHouse(key, p.house) : null;
     const title = key === "asc" ? `${sName(p)} rising` : `${pName(key)} in ${sName(p)}${p.house && key !== "mc" ? ` · ${ord(p.house)} house` : ""}`;
     const body = [opts.full ? (dp ? dp.text : signText(p)) : firstPara(dp ? dp.text : signText(p))];
     if (opts.extra) body.push(opts.extra);
     if (opts.house !== false && dh) body.push(opts.full ? dh.text : firstPara(dh.text));
     return `<p class="minihead"><span class="sym" style="color:${PLANETS[key].color}">${pGlyph(key)}</span> ${esc(title)}</p>${paras(body)}`;
   }
-  function houseBlock(h, field, label) {
+  function houseBlock(h, field, label, area) {
     const c = state.chart;
     if (!c.timeKnown) return "";
     const cs = signOf(c.houses[h]);
@@ -1608,12 +1616,13 @@
     const inside = planetsInHouse(h);
     let out = `<p class="minihead">${esc(label || `${ord(h)} house`)} · ${signGlyph(cs)} ${esc(SIGNS[cs].name)}</p>`;
     out += paras([
-      field && ds ? ds[field] : `You approach ${HOUSES[h].areas} ${SIGNS[cs].how}.`,
+      field && ds ? ds[field] : ((area && (D().areaCusps || {})[`${area}:house${h}`]) || {})[cs] || `You approach ${HOUSES[h].areas} ${SIGNS[cs].how}.`,
       rp.house === h ? `Its ruler ${pName(ruler)} sits inside the house, concentrating these themes.` : `Its ruler ${pName(ruler)} sits in your ${ord(rp.house)} house, tying this area to ${HOUSES[rp.house].areas}.`,
       inside.length ? `Planets here: ${inside.map((p) => `${pName(p.key)} in ${sName(p)}`).join(", ")}.` : (deepHouse(h) || {}).empty,
     ]);
     for (const p of inside) {
-      const d = deepPlanetHouse(p.key, h);
+      const lens = areaReading(area, `house${h}`, null, p.key);
+      const d = lens ? { text: lens } : deepPlanetHouse(p.key, h);
       if (d) out += paras([firstPara(d.text)]);
     }
     return out;
@@ -1674,48 +1683,47 @@
         html += areaSection("How you think", placementBlock("mercury", { full: true }));
         html += aspectBetween("mercury", "moon") + aspectBetween("mercury", "saturn") + aspectBetween("mercury", "jupiter") + aspectBetween("mercury", "uranus") + aspectBetween("mercury", "neptune");
         if (c.get("mercury").retro) html += areaSection("Retrograde Mercury", paras([K.RETRO_KARMIC.mercury]));
-        html += areaSection("Everyday learning", houseBlock(3, null, "3rd house"));
-        html += areaSection("Higher learning", houseBlock(9, null, "9th house"));
+        html += areaSection("Everyday learning", houseBlock(3, null, "3rd house", "mind"));
+        html += areaSection("Higher learning", houseBlock(9, null, "9th house", "mind"));
         break;
       case "love": {
-        const v = c.get("venus");
-        html += areaSection("How you love", placementBlock("venus", { full: true, extra: (deepSign(v.sign) || {}).love }));
-        html += areaSection("Desire and pursuit", placementBlock("mars"));
+        html += areaSection("How you love", placementBlock("venus", { full: true, area: "love" }));
+        html += areaSection("Desire and pursuit", placementBlock("mars", { area: "love" }));
         html += aspectBetween("venus", "mars") + aspectBetween("moon", "venus") + aspectBetween("venus", "saturn") + aspectBetween("venus", "pluto");
-        html += areaSection("Partnership", houseBlock(7, "partner", "Descendant · 7th house"));
-        html += areaSection("Romance and play", houseBlock(5, null, "5th house"));
-        html += areaSection("Intimacy", houseBlock(8, null, "8th house"));
+        html += areaSection("Partnership", houseBlock(7, "partner", "Descendant · 7th house", "love"));
+        html += areaSection("Romance and play", houseBlock(5, null, "5th house", "love"));
+        html += areaSection("Intimacy", houseBlock(8, null, "8th house", "love"));
         break;
       }
       case "career":
-        if (known) html += areaSection("Vocation", houseBlock(10, "career", "Midheaven · 10th house"));
-        html += areaSection("Discipline and mastery", placementBlock("saturn"));
-        html += areaSection("Purpose", placementBlock("sun"));
-        if (known) html += areaSection("Daily work", houseBlock(6, null, "6th house"));
+        if (known) html += areaSection("Vocation", houseBlock(10, "career", "Midheaven · 10th house", "career"));
+        html += areaSection("Discipline and mastery", placementBlock("saturn", { area: "career" }));
+        html += areaSection("Purpose", placementBlock("sun", { area: "career" }));
+        if (known) html += areaSection("Daily work", houseBlock(6, null, "6th house", "career"));
         html += aspectBetween("sun", "saturn") + aspectBetween("saturn", "mc") + aspectBetween("jupiter", "mc");
         break;
       case "money":
-        if (known) html += areaSection("Earning and self-worth", houseBlock(2, "money", "2nd house"));
-        html += areaSection("What you value", placementBlock("venus"));
-        html += areaSection("Luck and expansion", placementBlock("jupiter"));
-        if (known) html += areaSection("Shared resources", houseBlock(8, null, "8th house"));
+        if (known) html += areaSection("Earning and self-worth", houseBlock(2, "money", "2nd house", "money"));
+        html += areaSection("What you value", placementBlock("venus", { area: "money" }));
+        html += areaSection("Luck and expansion", placementBlock("jupiter", { area: "money" }));
+        if (known) html += areaSection("Shared resources", houseBlock(8, null, "8th house", "money"));
         if (known && c.get("fortune")) {
           const f = c.get("fortune");
           html += areaSection("Part of Fortune", paras([`${sName(f)} · ${ord(f.house)} house. ${signText(f)} It points to ${HOUSES[f.house].areas} as a natural source of ease.`]));
         }
         break;
       case "home":
-        if (known) html += areaSection("Roots", houseBlock(4, "home", "IC · 4th house"));
-        html += areaSection("Emotional needs", placementBlock("moon"));
+        if (known) html += areaSection("Roots", houseBlock(4, "home", "IC · 4th house", "home"));
+        html += areaSection("Emotional needs", placementBlock("moon", { area: "home" }));
         html += aspectBetween("moon", "saturn") + aspectBetween("moon", "pluto") + aspectBetween("moon", "uranus");
         break;
       case "health":
         if (known) {
           const a = c.get("asc");
           html += areaSection("Body and vitality", paras([`With ${sName(a)} rising, the body areas traditionally linked to your chart are the ${SIGNS[a.sign].body.toLowerCase()}. ${firstPara((deepPlanetSign("asc", a.sign) || {}).text || SIGNS[a.sign].rising)}`]));
-          html += areaSection("Routines and habits", houseBlock(6, null, "6th house"));
+          html += areaSection("Routines and habits", houseBlock(6, null, "6th house", "health"));
         }
-        html += areaSection("Energy and drive", placementBlock("mars"));
+        html += areaSection("Energy and drive", placementBlock("mars", { area: "health" }));
         {
           const d = c.derived, B = deepBalance(d.domEl);
           if (B) html += areaSection(`Your ${d.domEl} emphasis`, paras([B.strong]));
@@ -1725,14 +1733,14 @@
       case "growth":
         html += areaSection("Where life opens up", placementBlock("jupiter", { full: true }));
         html += aspectBetween("sun", "jupiter") + aspectBetween("jupiter", "saturn");
-        html += areaSection("Belief and exploration", houseBlock(9, null, "9th house"));
+        html += areaSection("Belief and exploration", houseBlock(9, null, "9th house", "growth"));
         html += areaSection("Direction", paras([(deepAxis(c.get("northNode").sign) || {}).story || SIGNS[c.get("northNode").sign].nn]));
         break;
       case "spirit":
-        html += areaSection("The hidden house", houseBlock(12, null, "12th house"));
-        html += areaSection("Ideals and imagination", placementBlock("neptune"));
+        html += areaSection("The hidden house", houseBlock(12, null, "12th house", "spirit"));
+        html += areaSection("Ideals and imagination", placementBlock("neptune", { area: "spirit" }));
         html += areaSection("Moon phase at birth", paras([c.derived.phase.desc]));
-        html += areaSection("The wounded healer", placementBlock("chiron"));
+        html += areaSection("The wounded healer", placementBlock("chiron", { area: "spirit" }));
         break;
     }
     return html;
