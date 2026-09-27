@@ -1504,7 +1504,7 @@
         const illum = Math.round(((1 - Math.cos((ang * Math.PI) / 180)) / 2) * 100);
         html = sheetSimple("Moon phase at birth", d.phase.name, `${Math.round(ang)}° from Sun to Moon · ${illum}% lit · ${ang < 180 ? "waxing" : "waning"}`, [ph ? ph.text : d.phase.desc]);
         if (ph) html += chips("Gifts", ph.gifts, "green") + chips("Challenges", ph.challenges, "");
-        html += sec("How it's measured", `The phase is the angle the Moon has travelled ahead of the Sun: 0° is the New Moon, 180° the Full Moon. ${ang < 180 ? "A waxing Moon is building, and people born in this half of the cycle tend to be oriented toward creating and becoming." : "A waning Moon is releasing, and people born in this half of the cycle tend to be oriented toward meaning, sharing and completing."}`);
+        html += sec("How it's measured", `The phase is the angle the Moon has travelled ahead of the Sun: 0° is the New Moon, 180° the Full Moon. ${ang < 180 ? "You were born under a waxing Moon, the building half of the cycle, so you are oriented towards creating, starting and becoming." : "You were born under a waning Moon, the releasing half of the cycle, so you are oriented towards meaning, sharing and completing what others began."}`);
         break;
       }
       case "sect":
@@ -1550,7 +1550,7 @@
         const X = D().retro || {};
         const r = c.points.filter((p) => p.retro && (PLANET_KEYS.includes(p.key) || p.key === "chiron"));
         html = sheetSimple("Retrograde planets", `${r.filter((p) => p.key !== "chiron").length} retrograde`, r.length ? r.map((p) => pName(p.key)).join(" · ") : "all planets direct", []);
-        html += sec("What retrograde means", "A planet is retrograde when, seen from Earth, it appears to move backwards through the zodiac. Its energy tends to turn inward: more reflective, more personal, often slower to develop and deeper once it does.");
+        html += sec("What retrograde means", "A planet is retrograde when, seen from Earth, it appears to move backwards through the zodiac. In you, that part of your nature turns inwards: you work it out privately, it develops more slowly than it does in other people, and it runs deeper once it does.");
         if (!r.length) html += paras([X.none || "Every planet was direct at your birth."]);
         for (const p of r) html += sec(`${pName(p.key)} ℞ in ${SIGNS[p.sign].name}`, X[p.key] || K.RETRO_KARMIC[p.key]);
         if (d.stationary.length) {
