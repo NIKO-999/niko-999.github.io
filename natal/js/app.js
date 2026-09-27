@@ -347,6 +347,10 @@
   const AXIS_SWAP = { dsc: "asc", ic: "mc" };
   const AXIS_TYPE = { conjunction: "opposition", opposition: "conjunction", trine: "sextile", sextile: "trine" };
   function aspectReading(a, b, type) {
+    // the IC and Descendant have their own readings (home, partnership); fall back to the MC/ASC swap
+    const ang = AXIS_SWAP[a] ? a : AXIS_SWAP[b] ? b : null, other = ang === a ? b : a;
+    const own = ang && !AXIS_SWAP[other] && D().aspectsRich && D().aspectsRich[other + "|" + ang];
+    if (own) return { theme: own.theme, body: type === "conjunction" ? own.fusion : FLOW_TYPES.has(type) ? own.flow : own.tension };
     let t = type;
     for (const k of [a, b]) if (AXIS_SWAP[k]) t = AXIS_TYPE[t] || t;
     const d = deepAspect(AXIS_SWAP[a] || a, AXIS_SWAP[b] || b);
@@ -1275,10 +1279,10 @@
     const strength = a.orb < 1 && s >= 0.6 ? "At under 1°, this is one of the defining links in your chart, and you feel it almost constantly."
       : a.orb < 3 && s >= 0.4 ? "It is a close aspect, so you feel it often." : "It is a wider aspect, so it shows up in particular moments more than every day.";
     const motion = a.applying ? "It is applying, so it feels like something you are still growing into." : "It is separating, so by now it feels like second nature to you.";
-    // an aspect to the Descendant or IC is the matching aspect to the Ascendant or Midheaven, so its reading talks about that angle
+    // an aspect to the Descendant or IC is also the matching aspect to the Ascendant or Midheaven
     const axis = [a.a, a.b].find((k) => AXIS_SWAP[k]);
     const twin = axis ? (AXIS_TYPE[a.type] || a.type) : "";
-    const axisNote = axis ? ` Your ${pName(axis)} sits exactly opposite your ${pName(AXIS_SWAP[axis])}, so this ${ASPECTS[a.type].name.toLowerCase()} is also ${/^[aeiou]/.test(twin) ? "an" : "a"} ${ASPECTS[twin].name.toLowerCase()} to your ${pName(AXIS_SWAP[axis])}, and the reading below covers both.` : "";
+    const axisNote = axis ? ` Your ${pName(axis)} sits exactly opposite your ${pName(AXIS_SWAP[axis])}, so this ${ASPECTS[a.type].name.toLowerCase()} is also ${/^[aeiou]/.test(twin) ? "an" : "a"} ${ASPECTS[twin].name.toLowerCase()} to your ${pName(AXIS_SWAP[axis])}.` : "";
     return [`${out[0]} ${strength} ${motion}${axisNote}`];
   }
   function sheetAspect(i) {
