@@ -1328,7 +1328,7 @@
       title: "Saturn return", every: "about every 29.5 years",
       text: "Saturn takes about 29 and a half years to travel around the zodiac, so it comes back to the exact place it held when you were born at roughly 29, 58 and 88. Each return is a reckoning with time and maturity. The arrangements that no longer fit you strain or fall away, while what you built on honest foundations holds. It rarely feels light, yet it is one of the most constructive passages of your life, because you find out what you are actually committed to.",
       nth: {
-        1: "The first return, around 29 to 30, marks the real start of adulthood. Choices you made to please others or to meet expectations get tested, and it is often the time you change career, commit to a relationship or end one, move house, or take on serious responsibility for the first time. It sorts the commitments that are truly yours from the ones you took on to fit in.",
+        1: "The first return, around 29 to 30, marks the real start of adulthood. Choices you made to please others or to meet expectations get tested, and it is often the time you change career, commit to a relationship or end one, move house, or take on serious responsibility for the first time.",
         2: "The second return, in the late fifties, reviews what the first one built. It often brings a change of role at work, a new relationship to your body and time, and a clear sense of what you want the next decades to be for. Your authority and experience become assets you use deliberately.",
         3: "The third return, in the late eighties, is a harvest and a letting go. It asks what you want to pass on, and it often brings a quiet clarity about what mattered.",
       },
@@ -1484,7 +1484,7 @@
             : "These two do not aspect each other in your birth chart, so this is a theme particular to this year.",
         ]);
         html += sec("The points involved", [PLANETS[a.a].desc, PLANETS[a.b].desc]);
-        html += sec(`As ${/^[aeiou]/i.test(X.name) ? "an" : "a"} ${X.name.toLowerCase()}`, [dA ? dA.theme : aspectText(a), dA ? (a.type === "conjunction" ? dA.fusion : FLOW_TYPES.has(a.type) ? dA.flow : dA.tension) : "", natal && natal.type === a.type ? "" : "In your return chart this is a theme that colours your year, not a lifelong trait."]);
+        html += sec(`As ${/^[aeiou]/i.test(X.name) ? "an" : "a"} ${X.name.toLowerCase()}`, [dA ? dA.theme : aspectText(a), dA ? (a.type === "conjunction" ? dA.fusion : FLOW_TYPES.has(a.type) ? dA.flow : dA.tension) : ""]);
         break;
       }
       case "syn": html = sheetSyn(+arg); break;
@@ -1806,14 +1806,14 @@
           const a = c.get("asc");
           // the rising sign read for the body (js/deep-areas.js), not the first-impression reading from the self page
           const bodyLens = areaReading("health", "asc", "sign", a.sign);
-          html += areaSection("Body and vitality", paras([bodyLens || `With ${sName(a)} rising, the body areas traditionally linked to your chart are the ${SIGNS[a.sign].body.toLowerCase()}. ${firstPara((deepPlanetSign("asc", a.sign) || {}).text || SIGNS[a.sign].rising)}`]));
+          html += areaSection("Body and vitality", paras([bodyLens || `With ${sName(a)} rising, the body areas traditionally linked to your chart are the ${SIGNS[a.sign].body.toLowerCase()}.`]));
           html += areaSection("Routines and habits", houseBlock(6, null, "6th house", "health"));
         }
         html += areaSection("Energy and drive", placementBlock("mars", { area: "health", skip: [6] }));
         {
           const d = c.derived, B = deepBalance(d.domEl);
           const elLens = areaReading("health", "element", null, d.domEl);
-          if (elLens || B) html += areaSection(`Your ${d.domEl} emphasis`, paras([elLens || B.strong]));
+          if (elLens) html += areaSection(`Your ${d.domEl} emphasis`, paras([elLens]));
         }
         html += `<p class="note" style="text-align:left">Astrology describes tendencies, not medical conditions. Anything that concerns you about your health belongs with a health professional.</p>`;
         break;
@@ -2339,7 +2339,7 @@
       ["uranus", "neptune", "pluto"].includes(key) ? `${P.name} stays in ${SIGNS[p.sign].name} for years, so this sign colours the times everyone is living through. What is personal to you is ${state.chart.timeKnown ? "the house it crosses and " : ""}the points it touches.` : "",
       natalHere.length
       ? `${SIGNS[p.sign].name} holds your natal ${listJoin(natalHere.map((q) => pName(q.key)))}, so ${theP(key)}'s passage through this sign is personal for you: it crosses ${natalHere.length === 1 ? "that point" : "those points"} during its stay.`
-      : `None of your natal planets sits in ${SIGNS[p.sign].name}, so ${theP(key)} works through your chart mainly by the aspects it makes.`], elColor(p.sign));
+      : ["uranus", "neptune", "pluto"].includes(key) ? "" : `None of your natal planets sits in ${SIGNS[p.sign].name}, so ${theP(key)} works through your chart mainly by the aspects it makes.`], elColor(p.sign));
     const mine = T.list.map((tr, i) => [tr, i]).filter(([tr]) => tr.t === key);
     if (mine.length) html += `<h4>Aspects to your chart</h4><div class="list">${mine.map(([tr, i]) => transitRow(tr, i)).join("")}</div>`;
     else html += sec("Aspects to your chart", `${cap(theP(key))} is not making a close aspect to your birth chart ${state.transitDate ? "on this date" : "today"}.`);
@@ -2437,7 +2437,7 @@
     html += `<h4>Planets</h4><div class="bars">`;
     for (const p of X.planetPct) html += barRow(pShort(p.key), PLANETS[p.key].color, (p.pct / X.planetPct[0].pct) * 100, `point:${p.key}`, `${p.pct.toFixed(1)}%`);
     html += `</div>`;
-    html += sec(`${pName(top.key)} leads`, [DD.planets && DD.planets[top.key], PLANETS[top.key].desc], PLANETS[top.key].color);
+    html += sec(`${pName(top.key)} leads`, [DD.planets && DD.planets[top.key] || PLANETS[top.key].desc], PLANETS[top.key].color);
     for (const p of X.planetPct.slice(1, 3)) html += sec(`Then ${pName(p.key)}`, firstPara(DD.planets && DD.planets[p.key]) || PLANETS[p.key].desc, PLANETS[p.key].color);
     if (DD.weak && DD.weak[low.key]) html += sec(`Quietest: ${pName(low.key)}`, DD.weak[low.key], PLANETS[low.key].color);
     // how the scores are built
