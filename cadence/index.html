@@ -461,6 +461,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cd-grp h3 { margin: 20px 0 10px; font: 500 10.5px/1 var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--kc, var(--quiet)); }
 
 .cd-num { margin: 10px 0 2px; text-align: center; font: 200 60px/1 var(--sans); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.cd-numin { outline: none; caret-color: var(--ink); -webkit-user-select: text; user-select: text; }
 .cd-num small { margin-left: 8px; font: 500 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--quiet); }
 .cd-numcap { margin: 6px 0 10px; text-align: center; font: 500 10.5px/1 var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--quiet); }
 
@@ -2154,7 +2155,33 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       marks.appendChild(c);
     });
     if (marks.children.length) root.appendChild(marks);
-    function paint() { rg.value = v; big.innerHTML = cdFmtNum(v, h) + '<small>' + esc(h.unit) + '</small>'; }
+    /* The figure is typed into as well as dragged. It is the same text
+       in the same place, so nothing on the sheet looks any different:
+       press it and the keyboard comes up. A figure past the track's end
+       takes the track with it rather than being cut back to it. */
+    var fig = el('span', 'cd-numin'); fig.id = 'cdNumE';
+    fig.contentEditable = 'true'; fig.setAttribute('inputmode', 'decimal'); fig.setAttribute('enterkeyhint', 'done');
+    fig.setAttribute('role', 'textbox'); fig.setAttribute('aria-label', h.n + ', type a figure');
+    var unit = el('small', '', esc(h.unit));
+    big.appendChild(fig); big.appendChild(unit);
+    function paint() { rg.value = v; if (document.activeElement !== fig) fig.textContent = cdFmtNum(v, h); }
+    /* Arriving selects the whole figure, so what you type replaces it.
+       Selected on focus AND again on the press that focused it: the
+       press ends after the focus and would otherwise drop a caret into
+       the middle of the old figure. */
+    var fresh = false;
+    function selAll() { var r = document.createRange(); r.selectNodeContents(fig); var sl = getSelection(); sl.removeAllRanges(); sl.addRange(r); }
+    fig.addEventListener('focus', function () { fig.textContent = v ? String(+v.toFixed(2)) : ''; fresh = true; selAll(); });
+    fig.addEventListener('pointerup', function () { if (fresh) { fresh = false; setTimeout(selAll, 0); } });
+    fig.addEventListener('keydown', function () { fresh = false; });
+    fig.addEventListener('input', function () {
+      var t = fig.textContent.replace(/,/g, '.').replace(/[^0-9.]/g, '');
+      var x = parseFloat(t); v = isFinite(x) && x > 0 ? Math.min(+x.toFixed(2), 999999) : 0;
+      if (v > +rg.max) rg.max = Math.ceil(v * 1.5);
+      rg.value = v;
+    });
+    fig.addEventListener('blur', function () { fig.textContent = cdFmtNum(v, h); });
+    fig.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); set(v); } });
     rg.addEventListener('input', function () { v = +rg.value; paint(); });
     paint();
     var foot = el('div', 'cd-foot');

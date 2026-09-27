@@ -5486,6 +5486,30 @@ always one you can see pressed. Asserted at 07:40 on a 07:30 gym (10)
 and at 10:20 on one that ended at 08:30 (60); proved by dropping the
 default, which fails both and the filed-session check.
 
+### A habit's figure can be typed
+
+Asked for with the condition that nothing looks different. The number
+sheet's big figure IS the field now: a `contenteditable` span inside
+`.cd-num`, `inputmode="decimal"`, with no box, no ring and no ground, so
+the sheet draws exactly what it did and a press on the figure brings the
+keyboard up. The dial and its marks are untouched beside it.
+
+**The whole figure is selected on arrival**, on focus and again on the
+press that focused it, because the press ends after the focus and would
+otherwise drop a caret into the middle of the old number. Enter saves.
+
+**A typed figure is kept as typed.** The dial snaps to its own step, so
+1.8 L shows the thumb at 1.75 and saves 1.8; and a figure past the
+track's end takes the track with it rather than being cut back to it.
+
+Asserted as the figure being the field with the same font and no box,
+typing replacing it, an off-step figure saved exactly, the track
+following, and Clear taking it off again. Bite-proved by making the
+figure not editable and by leaving the track where it was. **A build
+where Enter does nothing leaves the sheet over the next row**, which
+hung the file rather than failing it, so the check puts a stray sheet
+away before it presses on.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

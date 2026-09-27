@@ -857,6 +857,53 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.click('#cdShB .cd-chip >> text="+0.5"');
     await page.click('#cdShB .cd-chip >> text="+0.25"');
     ok('the bumps add, without float drift', (await page.textContent('#cdNumV')).startsWith('0.75'));
+    /* The figure can be TYPED as well as dragged, and nothing about the
+       sheet looks different: the same text in the same place, no box,
+       no ring. Typed past the track's end, the track follows. */
+    const look = await page.evaluate(() => {
+      const f = document.getElementById('cdNumE'), p = document.getElementById('cdNumV');
+      const a = getComputedStyle(f), b = getComputedStyle(p);
+      return { inside: !!f && f.parentNode === p, edit: f && f.isContentEditable, mode: f && f.getAttribute('inputmode'),
+        font: a.fontSize === b.fontSize && a.fontWeight === b.fontWeight, bg: a.backgroundColor, border: a.borderTopWidth, text: f && f.textContent };
+    });
+    ok('the figure is the field, and it looks exactly as it did', look.inside && look.edit && look.mode === 'decimal' && look.font
+      && look.bg === 'rgba(0, 0, 0, 0)' && look.border === '0px' && look.text === '0.75', look);
+    await page.click('#cdNumE');
+    await page.keyboard.type('1.8');
+    /* The dial snaps to its own step; the figure keeps what was typed. */
+    const typed = { fig: await page.textContent('#cdNumE'), dial: await page.$eval('#cdNumR', (r) => r.value) };
+    ok('typing replaces the figure and moves the dial', typed.fig === '1.8' && typed.dial === '1.75', typed);
+    const ring = await page.$eval('#cdNumE', (f) => getComputedStyle(f).outlineStyle);
+    ok('and draws no focus box round it', ring === 'none', ring);
+    await page.keyboard.press('Control+A');
+    await page.keyboard.type('7.5');
+    const past = await page.$eval('#cdNumR', (r) => ({ v: r.value, max: +r.max }));
+    ok('a typed figure past the end takes the track with it', past.v === '7.5' && past.max >= 7.5, past);
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(320);
+    /* A build where Enter does nothing leaves the sheet up over the
+       row the next step presses, which hangs the file rather than
+       failing it: put a stray sheet away first. */
+    const stray = async () => { if (await page.$eval('#cdSheet', (e) => !e.hidden)) { await closeSheet(page); await page.waitForTimeout(320); } };
+    await stray();
+    ok('Enter saves what was typed', ((await store(page, 'cad.hab.v1'))['2026-09-25'] || {}).water === 7.5);
+    /* And off the dial's step, the typed figure is what is kept. */
+    await page.click('.cd-hr[data-h="water"] .cd-hr-b');
+    await sheetUp(page);
+    await page.click('#cdNumE');
+    await page.keyboard.type('1.8');
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(320);
+    await stray();
+    ok('a figure between the dial\'s steps is saved as typed', ((await store(page, 'cad.hab.v1'))['2026-09-25'] || {}).water === 1.8);
+    await page.click('.cd-hr[data-h="water"] .cd-hr-b');
+    await sheetUp(page);
+    ok('and it reads back formatted, as the dial draws it', (await page.textContent('#cdNumE')) === '1.8');
+    await page.click('#cdShB .cd-foot .cd-btn:not(.go)');
+    await page.waitForTimeout(320);
+    ok('and Clear takes it off again', !('water' in ((await store(page, 'cad.hab.v1'))['2026-09-25'] || {})));
+    await page.click('.cd-hr[data-h="water"] .cd-hr-b');
+    await sheetUp(page);
     await closeSheet(page);
     ok('the figure at the top counts today', (await page.textContent('#cdHabT')) === '3 of 6'
       && (await page.getAttribute('#cdHabDots', 'aria-label')) === '3 of 6 habits completed today');
