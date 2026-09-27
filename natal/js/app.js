@@ -259,11 +259,11 @@
     }
   }
 
-  function houseText(p) {
+  function houseText(p, withDesc) {
     if (!p.house || p.key === "asc" || p.key === "mc") return "";
     const H = HOUSES[p.house];
     const P = PLANETS[p.key];
-    return `With ${P.name} in the ${ord(p.house)} house, ${P.focus} ${isPlural(P.focus) ? "are" : "is"} channelled into ${H.areas}. ${H.desc}`;
+    return `With ${P.name} in the ${ord(p.house)} house, ${P.focus} ${isPlural(P.focus) ? "are" : "is"} channelled into ${H.areas}.${withDesc === false ? "" : " " + H.desc}`;
   }
 
   function aspectText(a) {
@@ -359,6 +359,7 @@
       if (TAB_THEME[state.tab]) view.style.setProperty("--theme", TAB_THEME[state.tab]);
       else view.style.removeProperty("--theme");
       view.innerHTML = fn();
+      dedupe(view);
       layoutForDesktop();
       bindView();
     }
@@ -905,10 +906,36 @@
      returns one step at a time. */
   const pageStack = [];
   let historyOK = false;
+  /** Removes any sentence already shown higher up the same page, and headings left with nothing under them. */
+  function dedupe(root) {
+    const seen = new Set();
+    for (const p of [...root.querySelectorAll("p")]) {
+      if (p.children.length || p.classList.contains("minihead")) continue;
+      const parts = p.textContent.match(/[^.!?]+(?:[.!?]+["”’)]*|$)\s*/g) || [];
+      const kept = parts.filter((t) => {
+        const k = t.trim().toLowerCase();
+        if (k.length < 30) return true;
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
+      if (kept.length !== parts.length) {
+        const text = kept.join("").trim();
+        if (text) p.textContent = text;
+        else p.remove();
+      }
+    }
+    for (const prose of [...root.querySelectorAll(".prose")]) if (!prose.textContent.trim()) prose.remove();
+    for (const h of [...root.querySelectorAll("h4")]) {
+      const next = h.nextElementSibling;
+      if (!next || next.tagName === "H4") h.remove();
+    }
+  }
   function setPage(html, theme) {
     if (theme) sheet.style.setProperty("--theme", theme);
     else sheet.style.removeProperty("--theme");
     sheetBody.innerHTML = html;
+    dedupe(sheetBody);
     sheetBody.scrollTop = 0;
     sheet.classList.remove("page-in");
     void sheet.offsetWidth;
@@ -1159,7 +1186,7 @@
       html += `<h4>Planets in this house</h4>`;
       for (const p of inside) {
         const d = deepPlanetHouse(p.key, h);
-        html += `<p class="minihead"><span class="sym" style="color:${PLANETS[p.key].color}">${pGlyph(p.key)}</span> ${esc(pName(p.key))} in ${esc(SIGNS[p.sign].name)}</p>` + paras([d ? d.text : houseText(p)]);
+        html += `<p class="minihead"><span class="sym" style="color:${PLANETS[p.key].color}">${pGlyph(p.key)}</span> ${esc(pName(p.key))} in ${esc(SIGNS[p.sign].name)}</p>` + paras([d ? d.text : houseText(p, false)]);
       }
       html += `<div class="list">${inside.map((p) => pointRow(p)).join("")}</div>`;
     } else if (dh) {
@@ -1279,11 +1306,12 @@
       case "tplanet": html = sheetTransitPlanet(arg); break;
       case "element": {
         const X = K.ELEMENTS[arg], list = d.elements[arg], B = deepBalance(arg);
-        html = sheetSimple("Element", X.name, `${list.length} placement${list.length === 1 ? "" : "s"}`, [
-          list.length ? `${list.map(pName).join(", ")}.` : "",
-          list.length >= 4 ? (B ? B.strong : X.strong) : list.length <= 1 ? (B ? B.weak : X.weak) : `${X.strong} With ${list.length} placements, this is a moderate influence.`,
-        ]);
-        if (B) html += sec(list.length >= 4 ? "When it runs strong" : "What it brings", B.strong) + (list.length <= 1 ? "" : sec("If it were missing", B.weak));
+        const lead = list.length >= 4 ? (B ? B.strong : X.strong) : list.length <= 1 ? (B ? B.weak : X.weak) : `${X.strong} With ${list.length} placements, this is a moderate influence.`;
+        html = sheetSimple("Element", X.name, `${list.length} placement${list.length === 1 ? "" : "s"}`, [list.length ? `${list.map(pName).join(", ")}.` : "", lead]);
+        // the other side of the element, without repeating the paragraph above
+        if (B && list.length >= 2 && list.length <= 3) html += sec("What it brings", B.strong);
+        if (B && list.length >= 2) html += sec("If it were missing", B.weak);
+        if (B && list.length <= 1) html += sec("When it runs strong", B.strong);
         break;
       }
       case "mode": {
@@ -1668,15 +1696,11 @@
     const X = D().transitAspects;
     const d = X && X[tr.t + "|" + tr.n];
     if (d) return d[field];
-    const TP = (D().transitPlanets || {})[tr.t];
-    const pair = deepAspect(tr.t, tr.n);
     return [
       `Transiting ${pName(tr.t)} ${T_VERB[tr.type]} your natal ${pName(tr.n)}, touching ${PLANETS[tr.n].core}.`,
       field === "conj" ? "A conjunction concentrates the transit's energy directly on this part of you." :
         field === "soft" ? "A flowing aspect: doors open more easily here if you take the initiative." :
           "A challenging aspect: pressure builds until something shifts, and effort now pays off later.",
-      TP ? TP.brings : "",
-      pair ? pair.theme : "",
     ].filter(Boolean).join(" ");
   }
 
@@ -1859,7 +1883,7 @@
       for (let d = new Date(start); d < end; d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1)) {
         const idx = byDay[dayKey(d)] || [];
         html += `<div class="section-label left">${esc(fmtDay(d))}</div>`;
-        html += idx.length ? `<div class="list">${idx.map((i) => eventRow(events[i], i)).join("")}</div>` : `<p class="note" style="text-align:left;margin:0">A quiet day: no exact transits, sign changes or lunar phases.</p>`;
+        html += idx.length ? `<div class="list">${idx.map((i) => eventRow(events[i], i)).join("")}</div>` : `<p class="note" style="text-align:left;margin:0">A quiet day, nothing exact.</p>`;
       }
     } else {
       const section = (label, filter) => {
