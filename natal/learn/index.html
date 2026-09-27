@@ -12,13 +12,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Symbols:wght@400;500&family=Noto+Sans+Symbols+2&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add("js");</script>
 <style>
 :root {
   color-scheme: dark;
-  /* Dawn: the app's night sky, pushed toward indigo and warmed by sunrise */
-  --bg: #0e1430; --bg-deep: #0a0f24; --planet: #1c1f3d; --panel: rgba(30, 38, 80, 0.5); --panel-2: rgba(40, 44, 92, 0.55);
-  --text: #f7f2ec; --text-2: rgba(247, 242, 236, 0.85); --muted: rgba(228, 222, 234, 0.64); --faint: rgba(228, 222, 234, 0.42);
-  --line: rgba(236, 228, 246, 0.13); --line-2: rgba(236, 228, 246, 0.24);
+  /* the app's night sky with a touch more warmth: sunrise apricot and dusk pink as accents */
+  --bg: #0f1e2c; --bg-deep: #0a1520; --planet: #2a3039; --panel: rgba(16, 34, 50, 0.55); --panel-2: rgba(22, 44, 64, 0.6);
+  --text: #f3f4f5; --text-2: rgba(238, 240, 243, 0.85); --muted: rgba(220, 228, 236, 0.64); --faint: rgba(220, 228, 236, 0.42);
+  --line: rgba(226, 236, 246, 0.13); --line-2: rgba(226, 236, 246, 0.24);
   --rose: #ffab76; --dusk: #ee93ad; --sunrise: #ff7a3d; --on-accent: #1d1430;
   --fire: #f28b6d; --earth: #a8d49a; --air: #f1d37e; --water: #7fb6f0;
   --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -26,11 +27,11 @@
   --sym: "Noto Sans Symbols", "Noto Sans Symbols 2", "Apple Symbols", "Segoe UI Symbol", "DejaVu Sans", sans-serif;
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 24px); background: var(--planet); -webkit-text-size-adjust: 100%; }
+html { scroll-behavior: auto; scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 24px); background: var(--planet); -webkit-text-size-adjust: 100%; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 /* one scrolling background (no fixed layers: iOS Safari mis-paints them on long pages) */
 body { margin: 0; color: var(--text); font-family: var(--sans); font-weight: 300; font-size: 17px; line-height: 1.65; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; overflow-x: hidden; overflow-x: clip;
-  background: radial-gradient(90% 1100px at 88% 0, rgba(255, 150, 100, 0.2), transparent 70%), radial-gradient(70% 900px at 0 300px, rgba(150, 120, 255, 0.14), transparent 70%), linear-gradient(180deg, var(--bg-deep) 0, var(--bg) 1400px, #151b3f 60%, #1b1d44 100%) var(--bg); }
+  background: radial-gradient(80% 700px at 92% 0, rgba(255, 160, 110, 0.13), transparent 70%), radial-gradient(60% 600px at 0 240px, rgba(238, 147, 173, 0.07), transparent 70%), linear-gradient(180deg, var(--bg-deep) 0, var(--bg) 22%, #16304a 72%, #1f4561 100%) var(--bg); }
 a { color: var(--rose); }
 a:focus-visible, button:focus-visible { outline: 2px solid var(--rose); outline-offset: 3px; border-radius: 4px; }
 .glyph { font-family: var(--sym); font-variant-emoji: text; font-weight: 400; }
@@ -42,7 +43,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--rose); outline-
 @media (min-width: 1040px) { .shell { grid-template-columns: 230px minmax(0, 1fr); gap: 64px; padding-inline: 40px; } }
 nav.rail { display: none; }
 @media (min-width: 1040px) {
-  nav.rail { display: flex; flex-direction: column; gap: 2px; position: sticky; top: 28px; align-self: start; padding-top: 36px; }
+  nav.rail { display: flex; flex-direction: column; gap: 2px; position: sticky; top: 0; align-self: start; padding-top: 44px; max-height: 100vh; overflow-y: auto; scrollbar-width: none; }
   nav.rail .brand { color: var(--rose); font-size: 26px; font-weight: 300; letter-spacing: -0.01em; margin: 0 0 6px 10px; text-decoration: none; }
   nav.rail .sub { margin: 0 0 22px 10px; }
   nav.rail a.ch { display: flex; gap: 12px; padding: 8px 10px; border-radius: 9px; color: var(--muted); text-decoration: none; font-size: 14.5px; line-height: 1.35; }
@@ -50,12 +51,38 @@ nav.rail { display: none; }
   nav.rail a.ch:hover, nav.rail a.ch.on { color: var(--text); background: rgba(255, 255, 255, 0.05); }
   nav.rail .open { margin: 22px 0 0 10px; }
 }
-.chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 4px 0 2px; margin-top: 26px; }
-.chips::-webkit-scrollbar { display: none; }
-.chips a { flex: 0 0 auto; font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-decoration: none; border: 1px solid var(--line-2); border-radius: 999px; padding: 7px 12px; }
-.chips a span { color: var(--rose); margin-right: 8px; }
-@media (min-width: 1040px) { .chips { display: none; } }
-main { min-width: 0; padding-bottom: 40px; }
+main { min-width: 0; padding-bottom: 24px; min-height: calc(100vh - 220px); }
+
+/* one section at a time once the script runs (without it, every section shows in turn) */
+.js .panel { display: none; }
+.js .panel.on { display: block; animation: panel-in 0.3s ease-out; }
+@keyframes panel-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .js .panel.on { animation: none; } }
+section.panel.chapter { border-top: 0; margin-top: 0; padding-top: calc(env(safe-area-inset-top, 0px) + 44px); }
+.chapter.first { padding-top: 40px; margin-top: 40px; border-top: 1px solid var(--line); }
+
+/* phone tab bar */
+.tabbar { position: sticky; top: 0; z-index: 20; margin-inline: calc(-1 * max(20px, env(safe-area-inset-left, 0px))); padding-top: env(safe-area-inset-top, 0px);
+  background: linear-gradient(180deg, rgba(10, 21, 32, 0.96), rgba(10, 21, 32, 0.86)); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.tabbar-inner { display: flex; gap: 22px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding: 14px 20px 12px; }
+.tabbar-inner::-webkit-scrollbar { display: none; }
+.tabbar a { position: relative; flex: 0 0 auto; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); text-decoration: none; padding: 6px 0; }
+.tabbar a.on { color: var(--text); }
+.tabbar a.on::after { content: ""; position: absolute; left: 50%; bottom: -3px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--rose); }
+@media (min-width: 1040px) { .tabbar { display: none; } }
+@media (min-width: 1040px) { nav.rail a.ch.on span { color: var(--rose); } }
+
+/* previous / next */
+.pager { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 56px; }
+.pg { display: flex; flex-direction: column; gap: 4px; padding: 16px 18px; border: 1px solid var(--line-2); border-radius: 14px; text-decoration: none; color: var(--text); background: var(--panel); font-size: 16px; line-height: 1.3; min-height: 44px; }
+.pg span { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--rose); }
+.pg.next { text-align: right; grid-column: 2; }
+.pg:hover { border-color: rgba(255, 171, 118, 0.5); }
+
+/* the sunrise horizon under every section, as in the app */
+.horizon { position: relative; height: 170px; overflow: hidden; margin-top: 40px; pointer-events: none; }
+.horizon::after { content: ""; position: absolute; left: 50%; top: 40px; width: 2400px; height: 2400px; transform: translateX(-50%); border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, var(--planet) 62%, #6a4028 64%, #e0567a 64.6%, #f06a27 65.1%, #f58d3c 65.8%, rgba(244, 169, 94, 0.55) 67.2%, rgba(238, 147, 173, 0.15) 69%, rgba(111, 147, 171, 0) 71.5%); }
 
 /* hero */
 .hero { padding-block: calc(env(safe-area-inset-top, 0px) + 44px) 10px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; align-items: center; }
@@ -169,35 +196,32 @@ td b { color: var(--text); font-weight: 500; }
 .urlbox code { font-family: var(--mono); font-size: 14px; color: var(--text); background: rgba(30, 38, 80, 0.6); border: 1px solid var(--line-2); border-radius: 10px; padding: 10px 14px; user-select: all; -webkit-user-select: all; overflow-wrap: anywhere; }
 .urlbox button { font: inherit; font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text); background: none; border: 1px solid var(--line-2); border-radius: 999px; padding: 10px 16px; cursor: pointer; min-height: 44px; }
 
-/* closing */
-.closing { position: relative; margin-top: 90px; padding: 80px 0 150px; text-align: center; overflow: hidden; }
-.closing::after { content: ""; position: absolute; left: 50%; bottom: -1260px; width: 1800px; height: 1400px; transform: translateX(-50%); border-radius: 50%; pointer-events: none;
-  background: radial-gradient(circle at 50% 50%, var(--planet) 62%, #4a2c4e 64.3%, #e0567a 65.1%, #ff8a4c 65.9%, rgba(255,184,120,0.6) 67.6%, rgba(238,147,173,0.18) 69.5%, rgba(238,147,173,0) 72%); }
-.closing h2 { max-width: 16em; margin: 0 auto 16px; }
-.closing p { color: var(--text-2); max-width: 32em; margin: 0 auto 28px; }
-.closing .actions { justify-content: center; position: relative; z-index: 1; }
 footer { text-align: center; padding: 0 20px calc(env(safe-area-inset-bottom, 0px) + 40px); font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--faint); text-transform: uppercase; background: var(--planet); margin-top: -1px; }
 footer .inner { padding-top: 6px; }
+.tabbar a.back-app { color: var(--text); }
+nav.rail .back-rail { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); text-decoration: none; margin: 0 0 18px 10px; }
+nav.rail .back-rail:hover { color: var(--text); }
 </style>
 
 </head>
 <body>
 <div class="shell">
   <nav class="rail" aria-label="Chapters">
-    <a class="brand" href="#top">Natal Chart</a>
+    <a class="back-rail" href="../">‹ Back to app</a>
+    <a class="brand" href="../">Natal Chart</a>
     <div class="label sub">Learn astrology</div>
-    <a class="ch" href="#chart"><span>01</span>What a birth chart is</a><a class="ch" href="#planets"><span>02</span>Planets and points</a><a class="ch" href="#signs"><span>03</span>Signs, elements and modes</a><a class="ch" href="#houses"><span>04</span>Houses</a><a class="ch" href="#aspects"><span>05</span>Aspects</a><a class="ch" href="#strength"><span>06</span>Reading strength</a><a class="ch" href="#karmic"><span>07</span>Karmic astrology</a><a class="ch" href="#timing"><span>08</span>Transits and timing</a><a class="ch" href="#relationships"><span>09</span>Relationships</a><a class="ch" href="#app"><span>10</span>Using the app</a><a class="ch" href="#accuracy"><span>11</span>How accurate the app is</a>
-    <a class="ch" href="#install"><span>↓</span>Get it on your iPhone</a>
+    <a class="ch" href="#start" data-tab="start"><span>01</span>What a birth chart is</a><a class="ch" href="#planets" data-tab="planets"><span>02</span>Planets and points</a><a class="ch" href="#signs" data-tab="signs"><span>03</span>Signs, elements and modes</a><a class="ch" href="#houses" data-tab="houses"><span>04</span>Houses</a><a class="ch" href="#aspects" data-tab="aspects"><span>05</span>Aspects</a><a class="ch" href="#strength" data-tab="strength"><span>06</span>Reading strength</a><a class="ch" href="#karmic" data-tab="karmic"><span>07</span>Karmic astrology</a><a class="ch" href="#timing" data-tab="timing"><span>08</span>Transits and timing</a><a class="ch" href="#relationships" data-tab="relationships"><span>09</span>Relationships</a><a class="ch" href="#app" data-tab="app"><span>10</span>Using the app</a><a class="ch" href="#accuracy" data-tab="accuracy"><span>11</span>How accurate the app is</a><a class="ch" href="#install" data-tab="install"><span>12</span>Get it on your iPhone</a>
   </nav>
+  <nav class="tabbar" aria-label="Sections"><div class="tabbar-inner"><a class="back-app" href="../">‹ Back to app</a><a href="#start" data-tab="start">Start</a><a href="#planets" data-tab="planets">Planets</a><a href="#signs" data-tab="signs">Signs</a><a href="#houses" data-tab="houses">Houses</a><a href="#aspects" data-tab="aspects">Aspects</a><a href="#strength" data-tab="strength">Strength</a><a href="#karmic" data-tab="karmic">Karmic</a><a href="#timing" data-tab="timing">Timing</a><a href="#relationships" data-tab="relationships">Relationships</a><a href="#app" data-tab="app">The app</a><a href="#accuracy" data-tab="accuracy">Accuracy</a><a href="#install" data-tab="install">Install</a></div></nav>
 
   <main>
-    <header class="hero" id="top">
+    <section class="panel" id="start">
+    <header class="hero">
       <div>
         <p class="wordmark">Natal Chart · Learn astrology</p>
         <h1>How to read the sky you were born under</h1>
         <p class="lede">A birth chart is a map of where the Sun, Moon and planets were at the moment you were born, seen from the place you were born. This guide explains every part of it in plain English, from the twelve signs to transits and relationship charts, so you can open your own chart and know what you are looking at.</p>
         <div class="actions"><a class="btn" href="#chart">Start reading <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
-        <nav class="chips" aria-label="Chapters"><a href="#chart"><span>01</span>What a birth chart is</a><a href="#planets"><span>02</span>Planets and points</a><a href="#signs"><span>03</span>Signs, elements and modes</a><a href="#houses"><span>04</span>Houses</a><a href="#aspects"><span>05</span>Aspects</a><a href="#strength"><span>06</span>Reading strength</a><a href="#karmic"><span>07</span>Karmic astrology</a><a href="#timing"><span>08</span>Transits and timing</a><a href="#relationships"><span>09</span>Relationships</a><a href="#app"><span>10</span>Using the app</a><a href="#accuracy"><span>11</span>How accurate the app is</a><a href="#install"><span>↓</span>Get it on your iPhone</a></nav>
       </div>
       <figure class="wheelfig">
         <svg class="wheel" viewBox="-34 -34 668 668" role="img" aria-label="Natal chart wheel"><defs>
@@ -217,7 +241,7 @@ footer .inner { padding-top: 6px; }
       </figure>
     </header>
 
-    <section class="chapter" id="chart"><div class="chapter-head"><span class="n">01</span><h2>What a birth chart is</h2></div>
+    <div class="chapter first" id="chart"><div class="chapter-head"><span class="n">01</span><h2>What a birth chart is</h2></div>
       <div class="prose">
         <p>Picture yourself standing where you were born, at the minute you were born, looking up. The Sun, the Moon and each planet sat somewhere against the background of the stars. A birth chart records those positions and turns them into a circle you can read.</p>
         <p>Every chart is built from three pieces of information: <b>the date</b>, which sets where the planets were; <b>the time</b>, which sets which part of the sky was rising and so fixes the houses; and <b>the place</b>, because the sky looks different from Whangārei than from Perth at the same moment.</p>
@@ -225,9 +249,9 @@ footer .inner { padding-top: 6px; }
         <p>Reading a chart comes down to four questions, and the next four chapters answer them in turn: <b>what</b> is acting (the planets), <b>how</b> it acts (the signs), <b>where</b> in life it acts (the houses), and <b>how the parts talk to each other</b> (the aspects).</p>
       </div>
       <div class="callout"><span class="label">A sentence to remember</span><p>A planet is a part of you, its sign is its style, its house is the stage it plays on, and its aspects are the conversations it has with the rest of you. "Venus in Gemini in the 10th house" reads as: your way of loving and valuing (Venus) is curious and talkative (Gemini) and shows up in your career and public life (10th house).</p></div>
-    </section>
+    </div><div class="pager"><span></span><a class="pg next" href="#planets" data-tab="planets"><span>Next</span>Planets and points</a></div></section>
 
-    <section class="chapter" id="planets"><div class="chapter-head"><span class="n">02</span><h2>Planets and points</h2></div>
+    <section class="panel chapter" id="planets"><div class="chapter-head"><span class="n">02</span><h2>Planets and points</h2></div>
       <div class="prose"><p>The planets are the actors in the chart. The Sun and Moon, called the luminaries, are the core of who you are. Mercury, Venus and Mars are the personal planets: fast-moving, and different even for people born a few weeks apart. Jupiter and Saturn are the social planets, shaping how you grow and where you meet your limits. Uranus, Neptune and Pluto move so slowly that a whole generation shares their signs, so their houses and aspects say more about you than their signs do.</p></div>
       <h4>The luminaries and planets</h4>
       <div class="grid"><article class="card"><header><span class="glyph" style="color:#f3c86b">☉︎</span><div><h3>Sun</h3>
@@ -256,9 +280,9 @@ footer .inner { padding-top: 6px; }
     <p class="meta">wisdom · strategy · pattern recognition · creative intelligence · cycle 4.6 years</p></div></header><p>Pallas Athena is the warrior of wisdom. She shows how you see patterns, solve problems and fight for what is fair with your mind rather than force.</p></article><article class="card"><header><span class="glyph" style="color:#eaa8c8">⚵︎</span><div><h3>Juno</h3>
     <p class="meta">commitment · partnership · loyalty · equality · cycle 4.4 years</p></div></header><p>Juno, the wife of Jupiter, rules committed partnership. She shows what you need to feel an equal in a long-term bond, and where issues of loyalty, jealousy and power arise.</p></article><article class="card"><header><span class="glyph" style="color:#f1b37c">⚶︎</span><div><h3>Vesta</h3>
     <p class="meta">devotion · focus · the sacred flame · dedication · cycle 3.6 years</p></div></header><p>Vesta, keeper of the hearth flame, shows what you give yourself to wholeheartedly, where you need solitude to stay focused, and how you keep your inner fire alight.</p></article></div>
-    </section>
+    <div class="pager"><a class="pg prev" href="#start" data-tab="start"><span>Previous</span>What a birth chart is</a><a class="pg next" href="#signs" data-tab="signs"><span>Next</span>Signs, elements and modes</a></div></section>
 
-    <section class="chapter" id="signs"><div class="chapter-head"><span class="n">03</span><h2>Signs, elements and modes</h2></div>
+    <section class="panel chapter" id="signs"><div class="chapter-head"><span class="n">03</span><h2>Signs, elements and modes</h2></div>
       <div class="prose"><p>The zodiac is a circle of twelve signs, each 30° wide, starting at the point where the Sun crosses the equator in March. A sign is a style: it colours how any planet in it behaves. Each sign combines an <b>element</b>, which describes its temperament, with a <b>mode</b>, which describes how it moves, and each has a ruling planet that acts as its caretaker.</p></div>
       <div class="duo">
         <div class="kv el" style="--c:var(--fire)"><h3>Fire</h3><p>Enthusiasm, courage and inspiration drive you. You act on faith and energise others. Aries, Leo, Sagittarius.</p></div><div class="kv el" style="--c:var(--earth)"><h3>Earth</h3><p>You are practical, grounded and reliable. You need results you can touch. Taurus, Virgo, Capricorn.</p></div><div class="kv el" style="--c:var(--air)"><h3>Air</h3><p>You live through ideas, words and connection. Objectivity is your gift. Gemini, Libra, Aquarius.</p></div><div class="kv el" style="--c:var(--water)"><h3>Water</h3><p>Emotion, intuition and empathy guide you. You understand what is unspoken. Cancer, Scorpio, Pisces.</p></div>
@@ -269,33 +293,33 @@ footer .inner { padding-top: 6px; }
       <h4>The twelve signs</h4>
       <div class="grid"><article class="card sign" style="--el:var(--fire)"><header><span class="glyph">♈︎</span><div><h3>Aries</h3>
     <p class="meta">21 Mar to 19 Apr · Fire · Cardinal · ruled by Mars</p></div></header>
-    <p>The first spark of the zodiac. Aries is the urge to begin, to act before thinking and to prove existence through movement.</p><p class="small"><b>At their best:</b> courage, initiative and a refreshing honesty. <b>Watch for:</b> impatience, anger that flares fast, and starting more than you finish.</p></article><article class="card sign" style="--el:var(--earth)"><header><span class="glyph">♉︎</span><div><h3>Taurus</h3>
+    <p>The first spark of the zodiac. Aries is the urge to begin, to act before thinking and to prove existence through movement.</p><p class="small"><b>At their best:</b> courage, initiative and a refreshing honesty. <b>The pitfall:</b> impatience, anger that flares fast, and starting more than you finish.</p></article><article class="card sign" style="--el:var(--earth)"><header><span class="glyph">♉︎</span><div><h3>Taurus</h3>
     <p class="meta">20 Apr to 20 May · Earth · Fixed · ruled by Venus</p></div></header>
-    <p>The builder of the zodiac. Taurus slows the spark of Aries into something tangible: a body, a home, a resource that lasts.</p><p class="small"><b>At their best:</b> patience, reliability and a gift for making things real. <b>Watch for:</b> stubbornness, possessiveness and resisting necessary change.</p></article><article class="card sign" style="--el:var(--air)"><header><span class="glyph">♊︎</span><div><h3>Gemini</h3>
+    <p>The builder of the zodiac. Taurus slows the spark of Aries into something tangible: a body, a home, a resource that lasts.</p><p class="small"><b>At their best:</b> patience, reliability and a gift for making things real. <b>The pitfall:</b> stubbornness, possessiveness and resisting necessary change.</p></article><article class="card sign" style="--el:var(--air)"><header><span class="glyph">♊︎</span><div><h3>Gemini</h3>
     <p class="meta">21 May to 20 Jun · Air · Mutable · ruled by Mercury</p></div></header>
-    <p>The messenger. Gemini names things, connects them and passes them on: it is the mind discovering that there is always another angle.</p><p class="small"><b>At their best:</b> wit, adaptability and a talent for connecting ideas and people. <b>Watch for:</b> scattered focus, restlessness and staying on the surface.</p></article><article class="card sign" style="--el:var(--water)"><header><span class="glyph">♋︎</span><div><h3>Cancer</h3>
+    <p>The messenger. Gemini names things, connects them and passes them on: it is the mind discovering that there is always another angle.</p><p class="small"><b>At their best:</b> wit, adaptability and a talent for connecting ideas and people. <b>The pitfall:</b> scattered focus, restlessness and staying on the surface.</p></article><article class="card sign" style="--el:var(--water)"><header><span class="glyph">♋︎</span><div><h3>Cancer</h3>
     <p class="meta">21 Jun to 22 Jul · Water · Cardinal · ruled by Moon</p></div></header>
-    <p>The protector. Cancer creates the shell in which life can grow safely: home, family, emotional memory and the instinct to care.</p><p class="small"><b>At their best:</b> empathy, loyalty and a powerful instinct to nurture. <b>Watch for:</b> moodiness, clinging to the past and defending through withdrawal.</p></article><article class="card sign" style="--el:var(--fire)"><header><span class="glyph">♌︎</span><div><h3>Leo</h3>
+    <p>The protector. Cancer creates the shell in which life can grow safely: home, family, emotional memory and the instinct to care.</p><p class="small"><b>At their best:</b> empathy, loyalty and a powerful instinct to nurture. <b>The pitfall:</b> moodiness, clinging to the past and defending through withdrawal.</p></article><article class="card sign" style="--el:var(--fire)"><header><span class="glyph">♌︎</span><div><h3>Leo</h3>
     <p class="meta">23 Jul to 22 Aug · Fire · Fixed · ruled by Sun</p></div></header>
-    <p>The performer and the heart. Leo is the self radiating outward, creating for the joy of it and asking to be seen.</p><p class="small"><b>At their best:</b> generosity, creativity and a contagious confidence. <b>Watch for:</b> pride, a need for applause and difficulty sharing the stage.</p></article><article class="card sign" style="--el:var(--earth)"><header><span class="glyph">♍︎</span><div><h3>Virgo</h3>
+    <p>The performer and the heart. Leo is the self radiating outward, creating for the joy of it and asking to be seen.</p><p class="small"><b>At their best:</b> generosity, creativity and a contagious confidence. <b>The pitfall:</b> pride, a need for applause and difficulty sharing the stage.</p></article><article class="card sign" style="--el:var(--earth)"><header><span class="glyph">♍︎</span><div><h3>Virgo</h3>
     <p class="meta">23 Aug to 22 Sep · Earth · Mutable · ruled by Mercury</p></div></header>
-    <p>The healer and craftsperson. Virgo refines, sorts and improves: it is devotion expressed through useful, careful work.</p><p class="small"><b>At their best:</b> analysis, skill and a quiet devotion to being useful. <b>Watch for:</b> perfectionism, worry and turning criticism inward.</p></article><article class="card sign" style="--el:var(--air)"><header><span class="glyph">♎︎</span><div><h3>Libra</h3>
+    <p>The healer and craftsperson. Virgo refines, sorts and improves: it is devotion expressed through useful, careful work.</p><p class="small"><b>At their best:</b> analysis, skill and a quiet devotion to being useful. <b>The pitfall:</b> perfectionism, worry and turning criticism inward.</p></article><article class="card sign" style="--el:var(--air)"><header><span class="glyph">♎︎</span><div><h3>Libra</h3>
     <p class="meta">23 Sep to 22 Oct · Air · Cardinal · ruled by Venus</p></div></header>
-    <p>The diplomat. Libra discovers the self through the other: it seeks balance, beauty and a fair exchange between people.</p><p class="small"><b>At their best:</b> charm, fairness and a fine aesthetic sense. <b>Watch for:</b> indecision, people-pleasing and avoiding conflict at your own cost.</p></article><article class="card sign" style="--el:var(--water)"><header><span class="glyph">♏︎</span><div><h3>Scorpio</h3>
+    <p>The diplomat. Libra discovers the self through the other: it seeks balance, beauty and a fair exchange between people.</p><p class="small"><b>At their best:</b> charm, fairness and a fine aesthetic sense. <b>The pitfall:</b> indecision, people-pleasing and avoiding conflict at your own cost.</p></article><article class="card sign" style="--el:var(--water)"><header><span class="glyph">♏︎</span><div><h3>Scorpio</h3>
     <p class="meta">23 Oct to 21 Nov · Water · Fixed · ruled by Pluto</p></div></header>
-    <p>The alchemist. Scorpio goes beneath the surface to what is hidden, taboo and powerful, and is transformed by what it finds.</p><p class="small"><b>At their best:</b> emotional depth, insight and extraordinary resilience. <b>Watch for:</b> jealousy, control and holding grudges.</p></article><article class="card sign" style="--el:var(--fire)"><header><span class="glyph">♐︎</span><div><h3>Sagittarius</h3>
+    <p>The alchemist. Scorpio goes beneath the surface to what is hidden, taboo and powerful, and is transformed by what it finds.</p><p class="small"><b>At their best:</b> emotional depth, insight and extraordinary resilience. <b>The pitfall:</b> jealousy, control and holding grudges.</p></article><article class="card sign" style="--el:var(--fire)"><header><span class="glyph">♐︎</span><div><h3>Sagittarius</h3>
     <p class="meta">22 Nov to 21 Dec · Fire · Mutable · ruled by Jupiter</p></div></header>
-    <p>The seeker. Sagittarius aims its arrow at the horizon: philosophy, travel, faith and the belief that life means something.</p><p class="small"><b>At their best:</b> optimism, vision and a generous love of truth. <b>Watch for:</b> restlessness, overpromising and preaching.</p></article><article class="card sign" style="--el:var(--earth)"><header><span class="glyph">♑︎</span><div><h3>Capricorn</h3>
+    <p>The seeker. Sagittarius aims its arrow at the horizon: philosophy, travel, faith and the belief that life means something.</p><p class="small"><b>At their best:</b> optimism, vision and a generous love of truth. <b>The pitfall:</b> restlessness, overpromising and preaching.</p></article><article class="card sign" style="--el:var(--earth)"><header><span class="glyph">♑︎</span><div><h3>Capricorn</h3>
     <p class="meta">22 Dec to 19 Jan · Earth · Cardinal · ruled by Saturn</p></div></header>
-    <p>The architect. Capricorn climbs: it builds structures that outlast a lifetime and earns authority through time and effort.</p><p class="small"><b>At their best:</b> discipline, integrity and the ability to achieve real mastery. <b>Watch for:</b> coldness, pessimism and measuring worth by achievement.</p></article><article class="card sign" style="--el:var(--air)"><header><span class="glyph">♒︎</span><div><h3>Aquarius</h3>
+    <p>The architect. Capricorn climbs: it builds structures that outlast a lifetime and earns authority through time and effort.</p><p class="small"><b>At their best:</b> discipline, integrity and the ability to achieve real mastery. <b>The pitfall:</b> coldness, pessimism and measuring worth by achievement.</p></article><article class="card sign" style="--el:var(--air)"><header><span class="glyph">♒︎</span><div><h3>Aquarius</h3>
     <p class="meta">20 Jan to 18 Feb · Air · Fixed · ruled by Uranus</p></div></header>
-    <p>The visionary. Aquarius steps back from the crowd to see the whole system, and imagines how it could work better for everyone.</p><p class="small"><b>At their best:</b> originality, humanitarian ideals and clear-eyed objectivity. <b>Watch for:</b> detachment, contrarianism and rigid ideals.</p></article><article class="card sign" style="--el:var(--water)"><header><span class="glyph">♓︎</span><div><h3>Pisces</h3>
+    <p>The visionary. Aquarius steps back from the crowd to see the whole system, and imagines how it could work better for everyone.</p><p class="small"><b>At their best:</b> originality, humanitarian ideals and clear-eyed objectivity. <b>The pitfall:</b> detachment, contrarianism and rigid ideals.</p></article><article class="card sign" style="--el:var(--water)"><header><span class="glyph">♓︎</span><div><h3>Pisces</h3>
     <p class="meta">19 Feb to 20 Mar · Water · Mutable · ruled by Neptune</p></div></header>
-    <p>The mystic. The last sign dissolves boundaries (between self and other, dream and reality) and remembers that everything is connected.</p><p class="small"><b>At their best:</b> empathy, artistry and a deep spiritual sensitivity. <b>Watch for:</b> escapism, confusion and losing yourself in others.</p></article></div>
+    <p>The mystic. The last sign dissolves boundaries (between self and other, dream and reality) and remembers that everything is connected.</p><p class="small"><b>At their best:</b> empathy, artistry and a deep spiritual sensitivity. <b>The pitfall:</b> escapism, confusion and losing yourself in others.</p></article></div>
       <div class="callout"><span class="label">Tropical or sidereal</span><p>Western astrology, and this app by default, uses the tropical zodiac, tied to the seasons. Vedic astrology uses the sidereal zodiac, tied to the stars, which currently sits about 24° behind. The app can show either in its settings.</p></div>
-    </section>
+    <div class="pager"><a class="pg prev" href="#planets" data-tab="planets"><span>Previous</span>Planets and points</a><a class="pg next" href="#houses" data-tab="houses"><span>Next</span>Houses</a></div></section>
 
-    <section class="chapter" id="houses"><div class="chapter-head"><span class="n">04</span><h2>Houses</h2></div>
+    <section class="panel chapter" id="houses"><div class="chapter-head"><span class="n">04</span><h2>Houses</h2></div>
       <div class="prose">
         <p>The houses divide the sky around your birthplace into twelve areas of life. They are counted anticlockwise from the <b>Ascendant</b>, the point rising on the eastern horizon when you were born. Four points matter most. The Ascendant (start of the 1st house) is how you meet the world. The <b>IC</b> (start of the 4th) is your roots and private life. The <b>Descendant</b> (start of the 7th) is what you meet in partners. The <b>Midheaven</b> (start of the 10th) is your public direction and calling.</p>
         <p>A house with planets in it is a busy area of life. An empty house is not an inactive one: it is read through the sign on its cusp and wherever that sign's ruling planet sits.</p>
@@ -316,9 +340,9 @@ footer .inner { padding-top: 6px; }
       <h4>House systems</h4>
       <div class="prose"><p>There are several ways to divide the sky into houses: by time, by space or into equal slices. The app defaults to <b>Placidus</b>, the most widely used system and the one Astro-Seek uses, and also offers Koch, Regiomontanus, Porphyry, Equal, Whole Sign, Topocentric, Campanus. Whole Sign gives each house one complete sign, as in Hellenistic astrology. Near the poles some systems break down, and the app switches to Porphyry.</p>
       <p>When a sign sits entirely inside a house without touching a cusp, it is <b>intercepted</b>. The app lists intercepted signs on the house page; their qualities are read as held back or slower to develop.</p></div>
-    </section>
+    <div class="pager"><a class="pg prev" href="#signs" data-tab="signs"><span>Previous</span>Signs, elements and modes</a><a class="pg next" href="#aspects" data-tab="aspects"><span>Next</span>Aspects</a></div></section>
 
-    <section class="chapter" id="aspects"><div class="chapter-head"><span class="n">05</span><h2>Aspects</h2></div>
+    <section class="panel chapter" id="aspects"><div class="chapter-head"><span class="n">05</span><h2>Aspects</h2></div>
       <div class="prose"><p>Aspects are the angles between planets, measured around the circle. When two planets sit at one of a few significant angles, they work together, whether smoothly or with friction. The <b>orb</b> is how far from exact an aspect can be and still count: the tighter the orb, the stronger the aspect. The app uses the same orbs as Astro-Seek, with wider allowances for the Sun and Moon.</p></div>
       <div class="table-wrap"><table class="aspects"><thead><tr><th></th><th>Aspect</th><th>Angle</th><th>Orb</th><th>What it means</th></tr></thead><tbody>
         <tr><td><span class="glyph" style="color:#f3c86b">☌︎</span></td><td><b>Conjunction</b></td>
@@ -346,9 +370,9 @@ footer .inner { padding-top: 6px; }
       <h4>Aspect patterns</h4>
       <div class="prose"><p>When several aspects lock together they form a pattern, a larger shape in the chart that works as a single unit.</p></div>
       <div class="grid"><article class="card"><h3>Grand Trine</h3><p>Three planets form an equilateral triangle of trines: a closed circuit of natural talent and ease. It is protective and gifted, but can breed complacency unless consciously put to work.</p><p class="small">A grand trine links three planets in the same element, each one supporting the other two, so energy flows round the circuit without friction. Living with it feels like having a room in yourself where things simply work. Talents arrive early, certain moods come easily, and they are easy to overlook as gifts because they have never cost you anything.</p></article><article class="card"><h3>T-Square</h3><p>Two planets in opposition both square a third, the apex. The apex planet is a pressure point and a source of tremendous drive: this is where you are pushed to act.</p><p class="small">A T-square forms when two planets oppose each other and both square a third, the apex. It is one of the most dynamic patterns in a chart, and living with it can feel like being permanently under construction. The opposition sets up a tug of war, and all that tension pours into the apex planet, which becomes the pressure point where you keep acting, pushing and reacting.</p></article><article class="card"><h3>Grand Cross</h3><p>Four planets locked in two oppositions and four squares. Strength and stamina are built through constant, many-sided challenge.</p><p class="small">A grand cross joins four planets in two oppositions and four squares, usually all in the same modality. It is a heavy, load-bearing pattern. It feels like being pulled in four directions at once, with every move in one area creating pressure somewhere else, and there is no easy exit because the cross has no open side to release through.</p></article><article class="card"><h3>Yod · Finger of God</h3><p>Two planets in sextile both quincunx a third, the apex. Traditionally a karmic, fated configuration: the apex planet points to a special mission that requires ongoing adjustment.</p><p class="small">A yod forms when two planets sextile each other and both make a quincunx to a third, creating a long narrow triangle sometimes called the finger of fate. It carries an awkward, restless quality. The quincunx links planets that share nothing natural, so the adjustments it asks for never feel quite finished.</p></article><article class="card"><h3>Stellium</h3><p>Three or more planets clustered in one sign or house concentrate life energy there: an area of intense focus and experience.</p><p class="small">A stellium is a cluster of three or more planets gathered in one sign or house. It concentrates a great deal of energy in one place, so that part of life becomes the centre of gravity for your whole personality. Others notice it quickly, even when you do not, because it colours everything you do.</p></article></div>
-    </section>
+    <div class="pager"><a class="pg prev" href="#houses" data-tab="houses"><span>Previous</span>Houses</a><a class="pg next" href="#strength" data-tab="strength"><span>Next</span>Reading strength</a></div></section>
 
-    <section class="chapter" id="strength"><div class="chapter-head"><span class="n">06</span><h2>Reading strength</h2></div>
+    <section class="panel chapter" id="strength"><div class="chapter-head"><span class="n">06</span><h2>Reading strength</h2></div>
       <div class="prose"><p>Not every planet speaks equally loudly. A few factors tell you which parts of a chart dominate and how comfortably each planet works.</p></div>
       <h4>Dignity</h4>
       <div class="duo"><div class="kv"><h3>Domicile</h3><p>The planet rules the sign, for example Mars in Aries or Venus in Libra. The planet is at home in this sign. Its qualities flow naturally and powerfully.</p></div><div class="kv"><h3>Exaltation</h3><p>A sign where the planet is especially well placed, for example the Sun in Aries or the Moon in Taurus. The planet is an honoured guest in this sign. It expresses at its most refined.</p></div><div class="kv"><h3>Detriment</h3><p>The sign opposite its home, for example Venus in Aries. The planet is in the sign opposite its home. It has to work harder and often develops unusual strength.</p></div><div class="kv"><h3>Fall</h3><p>The sign opposite its exaltation, for example the Moon in Scorpio. The planet is opposite its exaltation. Its expression can feel awkward until it is consciously developed.</p></div></div>
@@ -361,9 +385,9 @@ footer .inner { padding-top: 6px; }
       <h4>The Moon phase you were born in</h4>
       <div class="prose"><p>The angle between the Sun and Moon at your birth gives your Moon phase, one of eight stages in the monthly cycle from New Moon to Balsamic.</p></div>
       <div class="phases"><div class="phase"><h3>New Moon <span class="natural">from 0°</span></h3><p>Born at the new moon: instinctive, subjective and future-oriented. You are here to start something new and project yourself into life.</p></div><div class="phase"><h3>Crescent <span class="natural">from 45°</span></h3><p>Born in the crescent phase: you push forward against the pull of the past, building something with determination.</p></div><div class="phase"><h3>First Quarter <span class="natural">from 90°</span></h3><p>Born at the first quarter: a crisis-in-action personality. You thrive on challenge and on building strong structures.</p></div><div class="phase"><h3>Gibbous <span class="natural">from 135°</span></h3><p>Born in the gibbous phase: you are a refiner and analyst, driven to perfect and to find meaning.</p></div><div class="phase"><h3>Full Moon <span class="natural">from 180°</span></h3><p>Born at the full moon: relationship-oriented and highly aware. Life brings illumination through others and fulfilment of purpose.</p></div><div class="phase"><h3>Disseminating <span class="natural">from 225°</span></h3><p>Born in the disseminating phase: a teacher and communicator who shares what has been learned.</p></div><div class="phase"><h3>Last Quarter <span class="natural">from 270°</span></h3><p>Born at the last quarter: a crisis-in-consciousness personality: you reorient values and quietly lead change.</p></div><div class="phase"><h3>Balsamic <span class="natural">from 315°</span></h3><p>Born in the balsamic phase: a prophetic, old-soul energy. You complete cycles and prepare the seeds of the future. Often considered a karmic birth.</p></div></div>
-    </section>
+    <div class="pager"><a class="pg prev" href="#aspects" data-tab="aspects"><span>Previous</span>Aspects</a><a class="pg next" href="#karmic" data-tab="karmic"><span>Next</span>Karmic astrology</a></div></section>
 
-    <section class="chapter" id="karmic"><div class="chapter-head"><span class="n">07</span><h2>Karmic astrology</h2></div>
+    <section class="panel chapter" id="karmic"><div class="chapter-head"><span class="n">07</span><h2>Karmic astrology</h2></div>
       <div class="prose">
         <p>Karmic astrology reads the chart as a story that continues from before this life and points somewhere beyond it. In practice it describes two things: the habits you fall back on, and the direction of growth that feels unfamiliar but right.</p>
         <p><b>The lunar nodes</b> are its spine. The South Node shows gifts and patterns you arrive with, comfortable to the point of being a trap. The North Node, always opposite, shows the direction of growth. <b>Saturn</b> shows the lessons you meet through effort and time. <b>Chiron</b> marks a tender wound that becomes wisdom you can offer others. <b>Lilith</b> points to what was exiled or shamed and wants to be reclaimed. <b>Pluto</b> shows where you are asked to transform, and the 4th, 8th and 12th houses hold inherited, shared and hidden material.</p>
@@ -375,9 +399,9 @@ footer .inner { padding-top: 6px; }
         <div class="kv"><h3>Nodal reversal · about 9, 28, 46</h3><p>The nodes swap places over your natal nodes. Old patterns resurface so you can release what no longer fits.</p></div>
         <div class="kv"><h3>Chiron return · about 50</h3><p>Chiron completes its orbit. It is read as the point where an old hurt turns into wisdom you can share, and purpose shifts from proving to meaning.</p></div>
       </div>
-    </section>
+    <div class="pager"><a class="pg prev" href="#strength" data-tab="strength"><span>Previous</span>Reading strength</a><a class="pg next" href="#timing" data-tab="timing"><span>Next</span>Transits and timing</a></div></section>
 
-    <section class="chapter" id="timing"><div class="chapter-head"><span class="n">08</span><h2>Transits and timing</h2></div>
+    <section class="panel chapter" id="timing"><div class="chapter-head"><span class="n">08</span><h2>Transits and timing</h2></div>
       <div class="prose"><p>A birth chart is fixed. The sky is not. Astrology has several ways to see how the moving sky interacts with the chart you were born with.</p></div>
       <h4>Transits</h4>
       <div class="prose"><p>A <b>transit</b> is a planet in today's sky making an aspect to a planet in your birth chart. When transiting Saturn squares your natal Sun, for example, it is read as pressure around identity and direction for as long as Saturn is within orb. Fast planets bring passing moods; slow ones bring chapters. As a transiting planet moves through each of your houses, it also colours that area of life. The app shows transits for any day, week or month, with the dates they become exact, plus New and Full Moons, sign changes and retrograde stations.</p></div>
@@ -386,17 +410,17 @@ footer .inner { padding-top: 6px; }
       <div class="prose"><p>Secondary progressions are one of the oldest timing tools in astrology, built on a simple rule: each day after your birth stands for one year of your life. The sky on the day you turned ten days old describes the inner weather of your tenth year, the sky thirty days after birth describes your thirtieth, and so on. Because the planets move slowly by this measure, the progressed chart unfolds gently, like a photograph developing over decades.</p><p>The progressed Moon is the one to watch: it changes sign about every two and a half years and marks clear emotional chapters. The progressed Sun changes sign about every thirty years.</p></div>
       <h4>Solar returns</h4>
       <div class="prose"><p>A solar return chart is cast for the exact moment each year when the Sun comes back to the degree and minute it held when you were born. That moment falls on or within a day of your birthday, and the chart drawn for it works as a snapshot of the year ahead. It shows the mood, the main arenas of life and the kinds of experiences likely to stand out until your next birthday.</p><p>Where you spend your birthday changes the return's houses and Ascendant, which is why the app lets you choose the place.</p></div>
-    </section>
+    <div class="pager"><a class="pg prev" href="#karmic" data-tab="karmic"><span>Previous</span>Karmic astrology</a><a class="pg next" href="#relationships" data-tab="relationships"><span>Next</span>Relationships</a></div></section>
 
-    <section class="chapter" id="relationships"><div class="chapter-head"><span class="n">09</span><h2>Relationships</h2></div>
+    <section class="panel chapter" id="relationships"><div class="chapter-head"><span class="n">09</span><h2>Relationships</h2></div>
       <div class="prose"><p>Synastry compares two birth charts by laying one over the other and noticing where each person's planets touch the other's. A contact between your Venus and their Mars, or your Moon and their Saturn, describes a particular current running between you: where you light each other up, where you feel at home, and where you rub against each other. It does not describe either of you alone. It describes what happens in the space you share.</p>
       <p>Synastry looks at two things. <b>Inter-aspects</b> are the aspects between one person's planets and the other's: Venus meeting Mars speaks to attraction, the Moon meeting the Sun to emotional fit, Saturn contacts to commitment and weight. <b>House overlays</b> show where one person's planets land in the other's houses, describing which areas of life the relationship stirs.</p></div>
       <h4>What the compatibility scores measure</h4>
       <div class="duo"><div class="kv"><h3>Attraction</h3><p>This measures the pull between you: the chemistry, desire and fascination that draws you together and keeps you curious. It weighs Venus and Mars contacts most heavily, along with Sun and Moon links and the intensity of any Pluto contacts.</p></div><div class="kv"><h3>Emotional</h3><p>This measures how safe, understood and cared for you feel with each other. It draws mainly on Moon contacts, especially Moon with Venus and Moon with Sun, which show whether your instinctive needs fit together.</p></div><div class="kv"><h3>Mind</h3><p>This measures how easily you talk, think and solve problems together. It is built from Mercury contacts, which show whether your minds click, spark or talk past each other.</p></div><div class="kv"><h3>Stability</h3><p>This measures the capacity for commitment, loyalty and building something that lasts. It leans on Saturn contacts, the overall harmony between Sun and Moon, and Juno contacts where they are present.</p></div><div class="kv"><h3>Growth</h3><p>This measures how much you expand, heal and move toward your purpose through each other. It draws on Jupiter, North Node and Chiron contacts, which show where the relationship stretches both of you in meaningful directions.</p></div><div class="kv"><h3>Friction</h3><p>This measures the friction you are likely to meet: the squares and oppositions that create pressure, especially those involving Mars, Saturn, Pluto and Uranus. A high score is not a warning to leave, it shows where the relationship will ask the most of you.</p></div></div>
-    </section>
+    <div class="pager"><a class="pg prev" href="#timing" data-tab="timing"><span>Previous</span>Transits and timing</a><a class="pg next" href="#app" data-tab="app"><span>Next</span>Using the app</a></div></section>
 
-    <section class="chapter" id="app"><div class="chapter-head"><span class="n">10</span><h2>Using the app</h2></div>
-      <div class="prose"><p>Enter a date, time and place of birth and the app casts the chart. Everything is calculated on your device, and charts are saved on your device only. Across the top (or down the side on a computer) are nine tabs. Tap any row, card or planet in a tab to open its full reading; the Back arrow returns you.</p></div>
+    <section class="panel chapter" id="app"><div class="chapter-head"><span class="n">10</span><h2>Using the app</h2></div>
+      <div class="prose"><p>Enter a date, time and place of birth and the app casts the chart. Across the top (or down the side on a computer) are nine tabs. Tap any row, card or planet in a tab to open its full reading; the Back arrow returns you.</p></div>
       <div class="tabs-guide">
         <div class="tab-row"><h3>Chart</h3><p>The wheel, your Sun, Moon and Ascendant, the signs your planets occupy, the balance of elements and modes, life areas (love, career, home and so on), and your chart signature: chart ruler, dominant planet and sign, chart shape, Moon phase, sect, hemispheres, retrograde planets and aspect patterns. Tap a planet on the wheel to trace its aspects.</p></div><div class="tab-row"><h3>Transits</h3><p>Where the planets are today and the aspects they make to your chart. Switch between Day, Week and Month: week and month views show a calendar of exact transits, New and Full Moons, sign changes and retrograde stations, with the date each one happens.</p></div><div class="tab-row"><h3>Progressed</h3><p>Your secondary progressions for any date: a second wheel around your natal chart, the progressed Sun, Moon, Ascendant and Midheaven, progressed aspects with their exact dates, the progressed Moon's timeline and your progressed Sun's life chapters.</p></div><div class="tab-row"><h3>Return</h3><p>Your solar return for any year: the exact moment and a full chart for the year, with its themes (the rising sign, where the Sun and Moon fall, the ruler of the year) and every planet's placement. You can change the place to where you spend your birthday.</p></div><div class="tab-row"><h3>Synastry</h3><p>Compare two charts. Add a person or choose a saved chart to see both on one wheel, every aspect between you, where each person's planets fall in the other's houses, and compatibility scores for attraction, emotion, communication, stability, growth and friction.</p></div><div class="tab-row"><h3>Planets</h3><p>Every planet, point and asteroid with its sign, degree, house and dignity, the angles, and each planet's declination with out-of-bounds status and parallels. A breakdown shows which planets, signs, houses, elements and modes dominate.</p></div><div class="tab-row"><h3>Houses</h3><p>The four angles, where your planets gather, and all twelve houses with the sign on each cusp, where its ruling planet sits and which planets are inside.</p></div><div class="tab-row"><h3>Aspects</h3><p>A grid of every aspect in the chart and a full list with orbs and whether each is applying or separating, filterable by flowing, dynamic and conjunction, plus declination aspects.</p></div><div class="tab-row"><h3>Karmic</h3><p>The lunar nodes and their axis, planets touching the nodes, Saturn, Chiron, Pluto and Lilith, retrograde planets, the 4th, 8th and 12th houses, and a timeline of your Saturn returns, nodal returns and reversals and Chiron return.</p></div>
       </div>
@@ -409,9 +433,9 @@ footer .inner { padding-top: 6px; }
         <div class="kv"><h3>Asteroids</h3><p>Ceres, Pallas, Juno and Vesta are shown by default and can be hidden.</p></div>
         <div class="kv"><h3>Unknown birth time</h3><p>Tick Unknown and the chart is cast for noon. Planet signs and most aspects stay accurate; houses, the Ascendant and the Midheaven are not shown.</p></div>
       </div>
-    </section>
+    <div class="pager"><a class="pg prev" href="#relationships" data-tab="relationships"><span>Previous</span>Relationships</a><a class="pg next" href="#accuracy" data-tab="accuracy"><span>Next</span>How accurate the app is</a></div></section>
 
-    <section class="chapter" id="accuracy"><div class="chapter-head"><span class="n">11</span><h2>How accurate the app is</h2></div>
+    <section class="panel chapter" id="accuracy"><div class="chapter-head"><span class="n">11</span><h2>How accurate the app is</h2></div>
       <div class="prose">
         <p>The app calculates everything itself, in your browser, and has been checked against the Swiss Ephemeris, the reference engine behind professional astrology software and Astro-Seek. Over 400 test charts across Australia and New Zealand from 1900 to 2100, the largest differences were:</p>
       </div>
@@ -425,10 +449,10 @@ footer .inner { padding-top: 6px; }
         <tr><td>Ceres, Pallas, Juno, Vesta</td><td class="num">0.81′</td></tr>
       </tbody></table></div>
       <div class="prose"><p>One arc-minute (′) is a sixtieth of a degree, so these are fractions of a sixtieth. A reference chart checked against Astro-Seek matches it exactly: every position, house cusp, daily speed and aspect, including the orbs and whether each aspect is applying or separating. Time zones, including historical daylight saving, come from your device's official time-zone data.</p></div>
-    </section>
+    <div class="pager"><a class="pg prev" href="#app" data-tab="app"><span>Previous</span>Using the app</a><a class="pg next" href="#install" data-tab="install"><span>Next</span>Get it on your iPhone</a></div></section>
 
-    <section class="chapter" id="install">
-      <div class="chapter-head"><span class="n">App</span><h2>Get it on your iPhone</h2></div>
+    <section class="panel chapter" id="install">
+      <div class="chapter-head"><span class="n">12</span><h2>Get it on your iPhone</h2></div>
       <div class="prose"><p>Natal Chart runs in your browser, so there is nothing to download from an app store. Add it to your home screen and it opens full screen like any other app, works offline once it has loaded, and keeps your saved charts on your phone.</p></div>
       <div class="install">
         <article class="card ios"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>iPhone and iPad</h3><ol>
@@ -449,17 +473,13 @@ footer .inner { padding-top: 6px; }
         </ol></article>
       </div>
       <div class="urlbox"><code id="app-url">niko-999.github.io/natal</code><button type="button" id="copy-url">Copy link</button></div>
+      <div class="pager"><a class="pg prev" href="#accuracy" data-tab="accuracy"><span>Previous</span>How accurate the app is</a></div>
     </section>
 
-    <section class="closing">
-      <p class="label">That is the whole chart</p>
-      <h2>You can read a birth chart now</h2>
-      <p>Start with the Big Three: the Sun, the Moon and the Ascendant. Then work outward through the planets, houses and aspects, one chapter at a time.</p>
-      <div class="actions"><a class="btn ghost" href="#top">Back to the top</a></div>
-    </section>
   </main>
 </div>
-<footer><div class="inner">Natal Chart · Calculated in your browser · Nothing you enter leaves your device</div></footer>
+<div class="horizon" aria-hidden="true"></div>
+<footer><div class="inner">Natal Chart · Calculated in your browser</div></footer>
 <script>
   // copy the app's address (select it if the clipboard is not available)
   (function () {
@@ -471,20 +491,33 @@ footer .inner { padding-top: 6px; }
       try { navigator.clipboard.writeText("https://" + c.textContent).then(done, select); } catch (e) { select(); }
     });
   })();
-  // highlight the chapter being read in the side rail
+  // one section at a time: tabs, the side rail and the Previous/Next links all switch sections
   (function () {
-    var links = document.querySelectorAll("nav.rail a.ch");
-    if (!("IntersectionObserver" in window) || !links.length) return;
-    var map = {};
-    links.forEach(function (a) { map[a.getAttribute("href").slice(1)] = a; });
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (!e.isIntersecting) return;
-        links.forEach(function (a) { a.classList.remove("on"); });
-        var a = map[e.target.id]; if (a) a.classList.add("on");
+    var panels = document.querySelectorAll(".panel"), ids = [];
+    panels.forEach(function (p) { ids.push(p.id); });
+    function show(id, scroll) {
+      if (ids.indexOf(id) < 0) id = "start";
+      panels.forEach(function (p) { p.classList.toggle("on", p.id === id); });
+      document.querySelectorAll("[data-tab]").forEach(function (a) {
+        var on = a.getAttribute("data-tab") === id;
+        a.classList.toggle("on", on);
+        if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
       });
-    }, { rootMargin: "-30% 0px -60% 0px" });
-    document.querySelectorAll("section.chapter").forEach(function (s) { io.observe(s); });
+      var t = document.querySelector('.tabbar a[data-tab="' + id + '"]');
+      if (t && t.scrollIntoView) t.scrollIntoView({ inline: "center", block: "nearest" });
+      if (scroll) window.scrollTo(0, 0);
+    }
+    document.addEventListener("click", function (e) {
+      var a = e.target.closest && e.target.closest("[data-tab]");
+      if (!a) return;
+      e.preventDefault();
+      var id = a.getAttribute("data-tab");
+      try { history.replaceState(null, "", "#" + id); } catch (err) { /* ignore */ }
+      show(id, true);
+    });
+    window.addEventListener("hashchange", function () { var h = location.hash.slice(1); if (ids.indexOf(h) >= 0) show(h, true); });
+    var h = location.hash.slice(1);
+    show(ids.indexOf(h) >= 0 ? h : "start", false);
   })();
 </script>
 

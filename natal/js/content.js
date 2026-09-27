@@ -99,7 +99,7 @@
       name: "Scorpio", glyph: "♏" + VS, element: "water", mode: "fixed", ruler: "pluto", tradRuler: "mars", polarity: "yin", dates: "23 Oct to 21 Nov", body: "Reproductive organs",
       keywords: ["depth", "intensity", "transformation", "intimacy"],
       essence: "The alchemist. Scorpio goes beneath the surface to what is hidden, taboo and powerful, and is transformed by what it finds.",
-      how: "intensely, privately and all-or-nothing",
+      how: "intensely, privately and in an all-or-nothing way",
       gifts: "emotional depth, insight and extraordinary resilience",
       shadow: "jealousy, control and holding grudges",
       sun: "You are here to transform. Identity is forged in depth, intimacy and crisis, and you have an instinct for what others try to hide. Your growth lies in trusting enough to let go of control.",
@@ -396,7 +396,7 @@
     water: { name: "Water", color: "#7fb6f0", strong: "Emotion, intuition and empathy guide you. You understand what is unspoken.", weak: "Feelings may be hard to access or express; emotional literacy is a lifelong gift you can develop." },
   };
   const MODES = {
-    cardinal: { name: "Cardinal", strong: "You are an initiator: quick to start, lead and change direction.", weak: "Starting may be harder than sustaining; practise taking the first step." },
+    cardinal: { name: "Cardinal", strong: "You are an initiator: quick to start, lead and change direction.", weak: "Starting may be harder than sustaining, and the first step is where you tend to stall." },
     fixed: { name: "Fixed", strong: "You are a stabiliser: loyal, determined and able to see things through.", weak: "Commitment and follow-through may need conscious effort." },
     mutable: { name: "Mutable", strong: "You are an adapter: flexible, curious and good at transitions.", weak: "Change may feel threatening; flexibility is a muscle you can build." },
   };

@@ -6,49 +6,41 @@ window.AstroDeep.phases = {
     text: "At a New Moon birth the Sun and Moon sit together, so will and feeling fuse into one instinctive drive. You tend to act first and understand later, projecting yourself into life with a sense that something new is trying to begin through you. Other people's opinions matter less than your own inner push, which can make you a natural starter and a little oblivious to how you come across.\n\nThis phase carries the energy of a seed breaking open. Your life often has a quality of emergence: you keep arriving at fresh starts, sometimes before the last cycle is finished. The work is learning to see yourself from the outside, and to let experience shape the vision rather than insisting on it untested.",
     gifts: ["Instinctive courage", "Fresh vision", "Self-starting energy"],
     challenges: ["Subjective blind spots", "Impatience with process", "Starting over too often"],
-    advice: "Ask one trusted person for honest feedback before a big launch, then trust your instinct with that information in hand.",
   },
   Crescent: {
     text: "Born in the crescent phase, the Moon has just pulled away from the Sun and a thin sliver of light is fighting to grow. You carry a feeling of pushing forward against resistance, often against the weight of family expectation, old habits or the pull of what came before. There is real determination here, and an early sense that you have to earn your place.\n\nThe crescent personality often feels the tension between security and growth. You may be drawn back toward what is safe just as you need to move on. Your strength comes from persisting through that pull. When you stop apologising for wanting something different, the momentum builds quickly and your efforts start to compound.",
     gifts: ["Determination", "Resourcefulness", "Growing confidence"],
     challenges: ["Pull of the past", "Self-doubt early on", "Fear of outgrowing others"],
-    advice: "Name the old voice that tells you to stay small, and take one concrete step each week that it would disapprove of.",
   },
   "First Quarter": {
     text: "At the first quarter the Moon stands at a right angle to the Sun: a crisis-in-action phase. You tend to meet life by doing, building and breaking through. Obstacles energise you more than they discourage you, and you often feel most alive when something needs to be fixed, cleared or constructed from scratch.\n\nThis is a strong-willed, structure-building birth. You may clear away old forms, sometimes abruptly, to make room for what you believe in. The risk is living in permanent emergency, pushing when a pause would serve better. At your best you are a builder of lasting things, and people trust you to turn a plan into something that stands.",
     gifts: ["Decisive action", "Builder's stamina", "Thrives under pressure"],
     challenges: ["Manufacturing crises", "Forcefulness", "Burnout from constant effort"],
-    advice: "Before you push through, ask whether the obstacle is a wall to break or a signal to change direction.",
   },
   Gibbous: {
     text: "Born in the gibbous phase, the Moon is nearly full and working toward completion. You are a refiner: you analyse, question, improve and polish. There is a strong need to understand why things work and to perfect your craft, and you often feel that something is almost, but not quite, right yet.\n\nThis phase gives a seeker's mind and a devotion to growth through study and practice. You can be a gifted student, editor, researcher or helper. The shadow is perfectionism, and the sense that you cannot rest until everything is flawless. Your growth lies in letting the work be good enough to share, because its value comes alive in other people's hands.",
     gifts: ["Analytical depth", "Dedication to craft", "Continuous improvement"],
     challenges: ["Perfectionism", "Self-criticism", "Holding work back"],
-    advice: "Set a clear finish line for each project and release it when you reach it, even if you can still see flaws.",
   },
   "Full Moon": {
     text: "At a Full Moon birth the Sun and Moon face each other across the sky, so your life is shaped by awareness through contrast. You see things clearly by holding opposites side by side: your needs and someone else's, head and heart, private life and public role. Relationships are central, because other people act as mirrors that show you who you are.\n\nThis phase brings illumination and a sense of fulfilment when you find balance. It can also bring inner tension, as though two parts of you want different things. You are often highly perceptive about people and gifted at bringing hidden things into the open. The work is integration: letting both sides of the seesaw belong to you.",
     gifts: ["Perceptive awareness", "Relationship insight", "Ability to see both sides"],
     challenges: ["Inner division", "Projecting onto partners", "Emotional swings"],
-    advice: "When a relationship frustrates you, ask which part of yourself the other person is reflecting back to you.",
   },
   Disseminating: {
     text: "Born in the disseminating phase, the Moon is waning after fullness, and you carry the urge to share what has been learned. You are a natural teacher, communicator or populariser. Ideas and experiences feel incomplete to you until they have been passed on, explained or put to use for others.\n\nThis phase often shows as a strong belief system or message. You may feel you have something important to say and look for platforms to say it. The shadow is preaching, or clinging so tightly to a truth that you stop learning. At your best you translate wisdom into something practical that changes how people live.",
     gifts: ["Teaching ability", "Clear message", "Generous sharing"],
     challenges: ["Preachiness", "Rigid convictions", "Needing an audience"],
-    advice: "Pair every message you share with a genuine question, so teaching stays a two-way exchange.",
   },
   "Last Quarter": {
     text: "At the last quarter the Moon again stands at a right angle to the Sun, this time waning: a crisis-in-consciousness phase. You tend to question inherited beliefs and quietly reorient your values. Where the first quarter builds structures, you see through them, and you often find yourself turning away from what no longer rings true.\n\nThis phase gives an independent, reforming mind. You may lead change behind the scenes, living by principle before others are ready. It can also bring a sense of being out of step, or a habit of rejecting before you are rejected. Your gift is conscious change: letting go with purpose and pointing toward what should come next.",
     gifts: ["Independent thinking", "Principled change", "Seeing past appearances"],
     challenges: ["Detachment", "Restless dissatisfaction", "Burning bridges"],
-    advice: "When you feel the urge to walk away, write down what you want to keep before deciding what to release.",
   },
   Balsamic: {
     text: "Born in the balsamic phase, the last sliver of Moon is fading before the next New Moon. This is traditionally an old-soul birth: you carry a sense of completion, of wrapping up something bigger than this life. You may feel older than your years, drawn to solitude, spirituality or the future, and aware of patterns other people miss.\n\nThis phase is prophetic and transitional. You release what is finished so the next cycle can begin, and you often act as a bridge between one era and the next. The shadow is withdrawal, fatigue or feeling that you do not belong in the present. Your gift is wisdom distilled from experience, and a quiet sense of where things are heading.",
     gifts: ["Intuition and foresight", "Wisdom beyond years", "Capacity to let go"],
     challenges: ["Withdrawal", "Feeling out of time", "Low energy for the ordinary"],
-    advice: "Protect regular time alone, then bring what you receive there back into one practical daily commitment.",
   },
 };
 
@@ -93,10 +85,10 @@ window.AstroDeep.hemis = {
 };
 
 window.AstroDeep.quadrants = {
-  1: { name: "Quadrant I · houses 1–3", text: "Self-development. Planets here focus energy on identity, resources and learning. You build yourself first, often independently, and your early life shapes you strongly." },
-  2: { name: "Quadrant II · houses 4–6", text: "Self-expression. Planets here focus energy on home, creativity and daily craft. Emotional roots, creative play and useful work are where you grow." },
-  3: { name: "Quadrant III · houses 7–9", text: "Relationship and understanding. Planets here focus energy on partnership, intimacy and belief. You learn about yourself through others and through expanding your worldview." },
-  4: { name: "Quadrant IV · houses 10–12", text: "Contribution to the world. Planets here focus energy on career, community and the collective. Your development is tied to your public role and to what you give back." },
+  1: { name: "Quadrant I · houses 1 to 3", text: "Self-development. Planets here focus energy on identity, resources and learning. You build yourself first, often independently, and your early life shapes you strongly." },
+  2: { name: "Quadrant II · houses 4 to 6", text: "Self-expression. Planets here focus energy on home, creativity and daily craft. Emotional roots, creative play and useful work are where you grow." },
+  3: { name: "Quadrant III · houses 7 to 9", text: "Relationship and understanding. Planets here focus energy on partnership, intimacy and belief. You learn about yourself through others and through expanding your worldview." },
+  4: { name: "Quadrant IV · houses 10 to 12", text: "Contribution to the world. Planets here focus energy on career, community and the collective. Your development is tied to your public role and to what you give back." },
 };
 
 window.AstroDeep.retro = {
