@@ -5534,6 +5534,47 @@ with work or job, but not work out. Asserted on one queue: the shift
 has its start and no question, and Deep work still asks. Proved by
 breaking the name match and watching the check fail.
 
+### The plan is a week you block out, and only on a desktop
+
+Asked for off a screenshot of a gold-on-black week grid: a timeblock
+calendar that works like Google Calendar, in this app's own look, with
+trading and data collection and live trading in place of the reference's
+sales and client work, and starting empty.
+
+**ITS OWN RECORD, `cad.plan.v1`, AND IT STARTS EMPTY.** The Day screen's
+week is what you tick; this is the week you are designing, and seeding
+it from the other would hand you a grid somebody else already filled.
+It is in `K`, so backup and sync carry it, and the Day screen's week is
+asserted untouched by it.
+
+**A BLOCK IS ONE DAY, NOT A LIST OF DAYS.** Something you drag between
+columns has to be a single object; a new block may be dropped on several
+days at once and lands as one block each, so they can be moved apart.
+
+**THE CALENDAR'S GESTURES.** Drag down an empty column to make a block
+for exactly that span, press an empty slot for an hour, drag a block to
+move it to another time or day at the same length, drag its foot to
+change only the end, press it to name it and pick its kind. A quarter
+hour grain, overlapping blocks side by side in lanes, a line at the
+clock on today's column, and it opens scrolled to five in the morning.
+Moves, resizes and deletes each come with Undo. Driven with the real
+mouse in the suite, because the claim is how it feels.
+
+**EIGHT KINDS, IN THE APP'S OWN HUES**: Calibration + planning, Train,
+Growth block, Trading + data, Frequency raiser, Live trading, Meals and
+Life. A block is a tinted wash with the hue down its left edge, the
+same material as the rest of the app rather than the reference's gold.
+
+**DESKTOP ONLY, BY WIDTH.** Seven columns at 390px are 45px each, so the
+tab and the screen exist from 960 up. A phone left on it lands on the
+day, and two older checks that counted every tab in the markup now
+count the drawn ones.
+
+**AND IT FOUND A RACE IN THE TYPED FIGURE.** The number sheet re-selects
+its figure a tick after the press that focused it, and a key typed in
+that tick was selected and replaced: `1.8` came out `.8`. A keystroke
+cancels the re-select now.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

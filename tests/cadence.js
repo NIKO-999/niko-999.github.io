@@ -983,7 +983,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('and a day before the record draws none', M['10'].h.length === 0, M['10']);
     const legend = await page.$$eval('#cdMonL span', (ss) => ss.map((s) => s.textContent));
     ok('the legend names the habits, not the kinds of training', legend.join('|') === 'Note|Train|Mind|Steps|Fuel|Water|Sleep|Cold plunge', legend);
-    ok('there is no Training tab', !(await page.$('.cd-tab[data-v="lift"]')) && (await page.$$('.cd-tab')).length === 4);
+    ok('there is no Training tab', !(await page.$('.cd-tab[data-v="lift"]')) && (await page.$$eval('.cd-tab', (ts) => ts.filter((t) => t.getBoundingClientRect().width > 0).length)) === 4);
     ok('a day still to come draws no dot yet', !M['27'].k && M['27'].st === 'future', M['27']);
     const mc = await inkFloor(page, '.cd-mc[data-day] b');
     ok('every date holds 4.5:1 on what is behind it', mc.n === 30 && mc.worst.r >= 4.5, mc);
@@ -1037,7 +1037,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
 
     /* Notes: a line to a day, marked important to reach the calendar. */
     await page.click('.cd-tab[data-v="note"]');
-    ok('there are four tabs and Notes is one', (await page.$$('.cd-tab')).length === 4 && (await page.getAttribute('.cd-tab[data-v="note"]', 'aria-current')) === 'page');
+    ok('there are four tabs and Notes is one', (await page.$$eval('.cd-tab', (ts) => ts.filter((t) => t.getBoundingClientRect().width > 0).length)) === 4 && (await page.getAttribute('.cd-tab[data-v="note"]', 'aria-current')) === 'page');
     /* At rest the composer is one line with nothing under it; touched, it
        opens; left empty, it shuts; left holding words, it stays open. */
     const nw = () => page.evaluate(() => ({ h: document.getElementById('cdNoteIn').getBoundingClientRect().height,
@@ -1717,6 +1717,77 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const sh = await box('#cdSheet');
     ok('a sheet is a dialog in the middle of a desktop', Math.abs((sh.t + sh.b) / 2 - 450) <= 2 && sh.b < 900 - 20 && Math.abs((sh.l + sh.r) / 2 - 720) <= 1, sh);
     await closeSheet(page);
+
+    /* THE PLAN: a week of time you block out by hand, desktop only, its
+       own record, and it starts empty. Every gesture is driven with the
+       real mouse, because the claim is the calendar's own feel. */
+    {
+      await page.click('.cd-tab[data-v="plan"]');
+      await page.waitForTimeout(200);
+      const plStart = await page.evaluate(() => ({ stored: localStorage.getItem('cad.plan.v1'), blocks: document.querySelectorAll('#cdPlGrid .pl-b').length,
+        cols: document.querySelectorAll('#cdPlGrid .pl-col').length, hint: !!document.querySelector('.pl-empty'), legend: document.querySelectorAll('#cdPlLeg span').length,
+        heads: [...document.querySelectorAll('#cdPlHead b')].map((b) => b.textContent).join('|'), now: document.querySelector('#cdPlHead b.is-now') && document.querySelector('#cdPlHead b.is-now').textContent }));
+      ok('the plan starts empty, a column a day, Monday first, today marked', plStart.blocks === 0 && plStart.cols === 7 && plStart.hint && plStart.heads === 'Mon|Tue|Wed|Thu|Fri|Sat|Sun' && plStart.now === 'Fri' && (plStart.stored === null || plStart.stored === '[]'), plStart);
+      ok('its legend names the eight kinds, trading and live trading among them', plStart.legend === 8 && (await page.textContent('#cdPlLeg')).includes('Trading + data') && (await page.textContent('#cdPlLeg')).includes('Live trading'));
+      const plSc = await page.$eval('#cdPlScroll', (e) => e.scrollTop);
+      ok('it opens on the morning, not on midnight', plSc >= 5 * 44 - 20 && plSc <= 5 * 44 + 4, plSc);
+      const plCol = async (d) => (await page.$$('#cdPlGrid .pl-col'))[d].boundingBox();
+      const plY = (bx, m) => bx.y + m / 60 * 44;
+      async function plMake(d, a, z) {
+        const bx = await plCol(d);
+        await page.mouse.move(bx.x + 20, plY(bx, a) + 2); await page.mouse.down();
+        await page.mouse.move(bx.x + 20, plY(bx, z) - 2, { steps: 6 }); await page.mouse.up();
+        return sheetUp(page);
+      }
+      /* Drag down a day and the block is that span, to the quarter hour. */
+      const plUp = await plMake(0, 540, 660);
+      const plForm = plUp && await page.evaluate(() => ({ s: document.getElementById('cdPlS').value, e: document.getElementById('cdPlE').value, d: [...document.querySelectorAll('#cdPlD .cd-chip')].map((c) => c.getAttribute('aria-pressed')).indexOf('true') }));
+      ok('dragging down an empty day opens a block for exactly that span', !!plForm && plForm.s === '09:00' && plForm.e === '11:00' && plForm.d === 0, plForm);
+      if (plUp) { await page.fill('#cdPlN', 'Live trading'); await page.fill('#cdPlT', 'NY session'); await page.click('#cdPlC [data-c="live"]'); await page.click('#cdPlSave'); await page.waitForTimeout(320); }
+      let plRec = await store(page, 'cad.plan.v1');
+      ok('saving files it in its own record, with its kind', Array.isArray(plRec) && plRec.length === 1 && plRec[0].n === 'Live trading' && plRec[0].c === 'live' && plRec[0].d === 0 && plRec[0].s === 540 && plRec[0].e === 660, plRec);
+      ok('and it is drawn in its column at its time', await page.$eval('.pl-b', (b) => { const r = b.getBoundingClientRect(), c = b.parentNode.getBoundingClientRect(); return b.parentNode.dataset.d === '0' && Math.abs(r.top - (c.top + 9 * 44)) < 1.5 && Math.abs(r.height - (2 * 44 - 2)) < 1.5; }));
+      /* A click on an empty slot is an hour, the calendar's own default. */
+      const plUp2 = await plMake(1, 480, 480);
+      const plF2 = plUp2 && await page.evaluate(() => [document.getElementById('cdPlS').value, document.getElementById('cdPlE').value]);
+      ok('a press on an empty slot opens an hour there', !!plF2 && plF2.join() === '08:00,09:00', plF2);
+      if (plUp2) { await page.fill('#cdPlN', 'Trading data'); await page.click('#cdPlC [data-c="data"]'); await page.click('#cdPlSave'); await page.waitForTimeout(320); }
+      /* Drag a block to another day and time; it keeps its length. */
+      const plB = await (await page.$('.pl-b[aria-label^="Live trading"]')).boundingBox(), plWed = await plCol(2);
+      await page.mouse.move(plB.x + 10, plB.y + 10); await page.mouse.down();
+      await page.mouse.move(plWed.x + 20, plB.y + 10 + 44, { steps: 8 }); await page.mouse.up(); await page.waitForTimeout(300);
+      plRec = await store(page, 'cad.plan.v1');
+      const plLive = plRec.find((b) => b.n === 'Live trading');
+      ok('dragging a block moves it to another day and time, the same length', plLive.d === 2 && plLive.s === 600 && plLive.e === 720, plLive);
+      await page.click('#cdToastU'); await page.waitForTimeout(200);
+      const plBack = (await store(page, 'cad.plan.v1')).find((b) => b.n === 'Live trading');
+      ok('and Undo puts it back', plBack.d === 0 && plBack.s === 540, plBack);
+      /* Drag its foot and only the end moves. */
+      const plB2 = await (await page.$('.pl-b[aria-label^="Live trading"]')).boundingBox();
+      await page.mouse.move(plB2.x + 10, plB2.y + plB2.height - 2); await page.mouse.down();
+      await page.mouse.move(plB2.x + 10, plB2.y + plB2.height - 2 + 66, { steps: 6 }); await page.mouse.up(); await page.waitForTimeout(300);
+      const plRs = (await store(page, 'cad.plan.v1')).find((b) => b.n === 'Live trading');
+      ok('dragging its foot changes only when it ends', plRs.d === 0 && plRs.s === 540 && plRs.e === 750, plRs);
+      /* Two blocks on one span sit side by side rather than one over the other. */
+      if (await plMake(0, 780, 840)) { await page.fill('#cdPlN', 'Meal'); await page.click('#cdPlC [data-c="meal"]'); await page.click('#cdPlSave'); await page.waitForTimeout(320); }
+      const plMeal = await (await page.$('.pl-b[aria-label^="Meal"]')).boundingBox();
+      await page.mouse.move(plMeal.x + 10, plMeal.y + 10); await page.mouse.down();
+      await page.mouse.move(plMeal.x + 10, plMeal.y + 10 - 2 * 44, { steps: 6 }); await page.mouse.up(); await page.waitForTimeout(300);
+      const plSide = await page.evaluate(() => { const a = document.querySelector('.pl-b[aria-label^="Live"]').getBoundingClientRect(), b = document.querySelector('.pl-b[aria-label^="Meal"]').getBoundingClientRect(); return { overlapX: Math.min(a.right, b.right) - Math.max(a.left, b.left), sameTop: Math.abs(b.top - (a.top + 2 * 44)) < 1.5 }; });
+      ok('blocks that overlap sit side by side', plSide.overlapX <= 0 && plSide.sameTop, plSide);
+      /* A press opens it; Delete has a way back. */
+      await page.click('.pl-b[aria-label^="Meal"]');
+      const plEd = await sheetUp(page);
+      ok('pressing a block opens it', plEd && (await page.inputValue('#cdPlN')) === 'Meal');
+      if (plEd) { await page.click('#cdPlDel'); await page.waitForTimeout(320); }
+      const plN = (await store(page, 'cad.plan.v1')).length;
+      await page.click('#cdToastU'); await page.waitForTimeout(200);
+      ok('delete takes it off and Undo puts it back', plN === 2 && (await store(page, 'cad.plan.v1')).length === 3);
+      /* The plan is not the week: nothing on the Day screen came from it. */
+      ok('the plan is its own record, the week untouched by it', !(await store(page, 'cad.week.v1')).some((b) => b.n === 'Live trading' || b.n === 'Meal'));
+      const plWide = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+      ok('the plan runs off no side of the desktop', plWide <= 0, plWide);
+    }
     ok('no page errors on a desktop', errs.length === 0, errs);
     await c.close();
 
@@ -1726,6 +1797,12 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('on a phone the list still runs under the figure', l.top >= h.bottom, { h: h.bottom, l: l.top });
     const pg = await ph.page.$eval('#cdGo', (b) => { const r = b.getBoundingClientRect(), t = b.querySelector('.cd-go-t').getBoundingClientRect(); return { w: r.width, h: r.height, t: t.width, bot: innerHeight - r.bottom }; });
     ok('on a phone the check is still the round button at the thumb, with no word', Math.abs(pg.w - pg.h) < 1 && pg.t === 0 && pg.bot < 60, pg);
+    /* The plan is desktop only: no tab on a phone, and a phone left on it lands on the day. */
+    const phPl = await ph.page.$eval('.cd-tab[data-v="plan"]', (t) => t.getBoundingClientRect().width);
+    await ph.page.evaluate(() => sessionStorage.setItem('cad.view', 'plan'));
+    await ph.page.reload(); await ph.page.waitForTimeout(300);
+    const phV = await ph.page.evaluate(() => ({ day: !document.getElementById('cdVDay').hidden, plan: !document.getElementById('cdVPlan').hidden }));
+    ok('a phone has no plan tab, and a phone left on it lands on the day', phPl === 0 && phV.day && !phV.plan, { phPl, phV });
     await ph.c.close();
   }
 

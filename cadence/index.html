@@ -745,6 +745,52 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   .cd-mhead .cd-big { font-size: 38px; }
   .cd-doc-ks button { font-size: 11px; }
 }
+/* THE PLAN IS A WEEK OF TIME, DRAWN ONLY WHERE THERE IS ROOM FOR IT.
+   Seven columns of a day each at 44px an hour do not go across a phone:
+   at 390 a column is 45px wide and a block's name is two letters. So the
+   tab and the screen exist from 960 up and nowhere else, and a phone that
+   was left on it lands on the day. */
+.cd-tab-plan { display: none; }
+#cdVPlan { --ph: 44px; --pg: 54px; }
+.pl-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 14px 28px 20px; }
+.pl-head { flex: none; display: grid; grid-template-columns: var(--pg) repeat(7, minmax(0, 1fr)); gap: 0 8px; padding-bottom: 10px; box-shadow: 0 1px 0 var(--hair); }
+.pl-head b { font: 500 10.5px/1 var(--mono); letter-spacing: .24em; text-transform: uppercase; text-align: center; color: var(--quiet); padding: 6px 0; }
+.pl-head b.is-now { color: var(--c-work); }
+.pl-scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--hair) transparent; overscroll-behavior: contain; }
+.pl-grid { position: relative; display: grid; grid-template-columns: var(--pg) repeat(7, minmax(0, 1fr)); gap: 0 8px; height: calc(var(--ph) * 24); user-select: none; -webkit-user-select: none; }
+.pl-hours { position: relative; }
+.pl-hours span { position: absolute; left: 0; font: 500 10px/1 var(--mono); letter-spacing: .08em; color: var(--faint); transform: translateY(-50%); }
+.pl-col { position: relative; border-radius: 4px; background: repeating-linear-gradient(180deg, var(--hair) 0 1px, transparent 1px var(--ph)); cursor: crosshair; touch-action: none; }
+.pl-col.is-now { background-color: rgba(243, 245, 247, .025); }
+.pl-b {
+  position: absolute; overflow: hidden; padding: 5px 7px 4px 9px; border-radius: 5px;
+  background: color-mix(in srgb, var(--pc) 17%, rgba(3, 6, 10, .78));
+  box-shadow: inset 2px 0 0 var(--pc), 0 0 0 1px rgba(3, 6, 10, .55);
+  cursor: grab; touch-action: none; outline: none;
+}
+.pl-b:focus-visible { box-shadow: inset 2px 0 0 var(--pc), 0 0 0 2px var(--ink); }
+.pl-b.is-drag { cursor: grabbing; z-index: 3; opacity: .92; box-shadow: inset 2px 0 0 var(--pc), 0 10px 26px -10px rgba(0, 0, 0, .7); }
+.pl-b.is-ghost { z-index: 3; background: color-mix(in srgb, var(--pc) 26%, rgba(3, 6, 10, .6)); box-shadow: inset 0 0 0 1px var(--pc); pointer-events: none; }
+.pl-b b { display: block; font: 600 10.5px/1.25 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink); overflow-wrap: anywhere; }
+.pl-b i { display: block; margin-top: 2px; font: 500 9.5px/1.25 var(--mono); font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: var(--quiet); }
+.pl-b em { display: block; margin-top: 2px; font: 500 9.5px/1 var(--mono); font-style: normal; letter-spacing: .06em; color: var(--dim); }
+.pl-b.is-short b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pl-b.is-short i, .pl-b.is-short em, .pl-b.is-mid i { display: none; }
+.pl-rs { position: absolute; left: 0; right: 0; bottom: 0; height: 7px; cursor: ns-resize; }
+.pl-now { position: absolute; left: -4px; right: 0; height: 2px; margin-top: -1px; background: var(--ink); pointer-events: none; z-index: 4; }
+.pl-now::before { content: ""; position: absolute; left: -3px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--ink); }
+.pl-empty { position: absolute; left: 50%; top: calc(var(--ph) * 8); transform: translateX(-50%); pointer-events: none; font: 300 22px/1.3 var(--sans); color: var(--quiet); text-align: center; }
+.pl-legend { flex: none; display: flex; flex-wrap: wrap; gap: 10px 26px; padding-top: 14px; box-shadow: 0 -1px 0 var(--hair); font: 500 10px/1.3 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--quiet); }
+.pl-legend span { display: inline-flex; align-items: center; gap: 8px; }
+.pl-legend i { width: 10px; height: 10px; border-radius: 3px; background: var(--pc); }
+.pl-cats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.pl-cats .cd-chip { display: flex; align-items: center; gap: 10px; text-align: left; padding: 0 14px; border-radius: 14px; }
+.pl-cats .cd-chip::before { content: ""; flex: none; width: 10px; height: 10px; border-radius: 3px; background: var(--kc); }
+.pl-cats .cd-chip[aria-pressed="true"] { background: color-mix(in srgb, var(--kc) 22%, transparent); color: var(--ink); box-shadow: inset 0 0 0 1px var(--kc); }
+@media (min-width: 960px) {
+  .cd-tab-plan { display: inline-block; }
+  .cd-app.is-plan { max-width: 1440px; }
+}
 @media (prefers-reduced-motion: reduce) {
   .cd-stars .tw { animation: none; }
   .cd-sheet, .cd-scrim, .cd-toggle i, .cd-toggle i::after { transition: none; }
@@ -761,6 +807,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       <button class="cd-tab" data-v="hab" type="button">Habits</button>
       <button class="cd-tab" data-v="mon" type="button">Month</button>
       <button class="cd-tab" data-v="note" type="button">Notes</button>
+      <button class="cd-tab cd-tab-plan" data-v="plan" type="button">Plan</button>
     </nav>
     <button class="cd-plus" id="cdAdd" type="button" aria-label="Add a block"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
   </header>
@@ -830,6 +877,13 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
         <div id="cdNotes"></div>
       </div>
     </section>
+    <section id="cdVPlan" aria-label="Plan" hidden>
+      <div class="pl-wrap">
+        <div class="pl-head" id="cdPlHead"></div>
+        <div class="pl-scroll" id="cdPlScroll"><div class="pl-grid" id="cdPlGrid"></div></div>
+        <div class="pl-legend" id="cdPlLeg"></div>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -856,7 +910,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   var K = {
     week: 'cad.week.v1', log: 'cad.log.v1',
     hab: 'cad.hab.v1', train: 'cad.train.v1', defs: 'cad.defs.v1',
-    note: 'cad.note.v1', refl: 'cad.refl.v1', rfoff: 'cad.rfoff.v1', glyphoff: 'cad.glyphoff.v1'
+    note: 'cad.note.v1', plan: 'cad.plan.v1', refl: 'cad.refl.v1', rfoff: 'cad.rfoff.v1', glyphoff: 'cad.glyphoff.v1'
   };
   /* There is one face now, so the key that chose between two is swept
      rather than left: a preference for a control that no longer exists
@@ -1170,6 +1224,26 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     return out;
   }
   var ISO = /^\d{4}-\d{2}-\d{2}$/;
+  /* A PLAN BLOCK IS ONE DAY OF THE WEEK, not a list of days: a column of
+     a week you drag things round in is a column of single objects, and a
+     block on Monday and Thursday is two blocks you can move apart. */
+  var PLAN_CATS = [
+    ['cal', 'Calibration + planning', 'var(--c-work)'],
+    ['train', 'Train', 'var(--c-body)'],
+    ['grow', 'Growth block', 'var(--c-mind)'],
+    ['data', 'Trading + data', 'var(--h-water)'],
+    ['freq', 'Frequency raiser', 'var(--c-rest)'],
+    ['live', 'Live trading', 'var(--h-sleep)'],
+    ['meal', 'Meals', 'var(--k-rest)'],
+    ['life', 'Life', 'var(--faint)']
+  ];
+  var PLAN_C = {}; PLAN_CATS.forEach(function (c) { PLAN_C[c[0]] = c; });
+  function cdPlanClean(b) {
+    if (!isObj(b) || typeof b.id !== 'string' || !b.id) return null;
+    var d = Math.round(+b.d), s = Math.round(+b.s), e = Math.round(+b.e);
+    if (!(d >= 0 && d <= 6) || !(s >= 0 && s < 1440) || !(e > s && e <= 1440)) return null;
+    return { id: b.id, d: d, s: s, e: e, n: String(b.n || '').slice(0, 60), t: String(b.t || '').slice(0, 80), c: PLAN_C[b.c] ? b.c : 'life' };
+  }
   /* A note is a list of BLOCKS: a title, a heading, a sub-heading, a
      line of body, a quote, or a picture. A line of text is a list of
      runs, [words, highlight, underlined], so a colour can sit on three words of it
@@ -1225,6 +1299,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       return Array.isArray(r) ? r.filter(function (x) { return isObj(x) && x.id && x.n; }) : [];
     })(),
     note: cdLoadList(K.note, cdNoteClean),
+    plan: cdLoadList(K.plan, cdPlanClean),
     refl: cdLoadMap(K.refl),
     /* Off is the one stored state: anything that is not exactly true reads
        as on, so a damaged key keeps the thought rather than losing it. */
@@ -1359,6 +1434,8 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     $('cdVHab').hidden = v !== 'hab';
     $('cdVMon').hidden = v !== 'mon';
     $('cdVNote').hidden = v !== 'note';
+    $('cdVPlan').hidden = v !== 'plan';
+    document.querySelector('.cd-app').classList.toggle('is-plan', v === 'plan');
     document.querySelectorAll('.cd-tab').forEach(function (t) {
       if (t.dataset.v === v) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
     });
@@ -1370,6 +1447,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     if (view === 'day') cdPaintDay();
     else if (view === 'hab') cdPaintHab();
     else if (view === 'mon') cdPaintMon();
+    else if (view === 'plan') cdPaintPlan();
     else cdPaintNotes();
   }
   function cdLongDate(iso, withDay) {
@@ -2173,8 +2251,12 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var fresh = false;
     function selAll() { var r = document.createRange(); r.selectNodeContents(fig); var sl = getSelection(); sl.removeAllRanges(); sl.addRange(r); }
     fig.addEventListener('focus', function () { fig.textContent = v ? String(+v.toFixed(2)) : ''; fresh = true; selAll(); });
-    fig.addEventListener('pointerup', function () { if (fresh) { fresh = false; setTimeout(selAll, 0); } });
-    fig.addEventListener('keydown', function () { fresh = false; });
+    /* The re-select waits a tick for the press to finish placing its
+       caret, and a key typed in that tick cancels it: otherwise the first
+       character is selected again and replaced by the second. */
+    var selT = 0;
+    fig.addEventListener('pointerup', function () { if (fresh) { fresh = false; selT = setTimeout(selAll, 0); } });
+    fig.addEventListener('keydown', function () { fresh = false; clearTimeout(selT); });
     fig.addEventListener('input', function () {
       var t = fig.textContent.replace(/,/g, '.').replace(/[^0-9.]/g, '');
       var x = parseFloat(t); v = isFinite(x) && x > 0 ? Math.min(+x.toFixed(2), 999999) : 0;
@@ -3587,6 +3669,225 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   }
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && $('cdRf')) { ev.preventDefault(); ev.stopImmediatePropagation(); cdReflClose(); } }, true);
 
+  /* ═══ THE PLAN ═══
+     A week of time you block out by hand, the way a calendar does it: drag
+     down an empty column to make a block, drag a block to move it to
+     another time or day, drag its foot to change how long it runs, press
+     it to name it. Its own record, and it starts empty: this is the week
+     you are designing, which is a different thing from the week you are
+     ticking off on the Day screen. */
+  var PLAN_MQ = window.matchMedia('(min-width: 960px)');
+  var PLAN_SNAP = 15, planDrag = null, planScrolled = false, planLastC = 'cal';
+  function cdPlanH() { return parseFloat(getComputedStyle($('cdVPlan')).getPropertyValue('--ph')) || 44; }
+  function cdPlanSnap(m) { return Math.round(m / PLAN_SNAP) * PLAN_SNAP; }
+  /* Blocks that overlap sit side by side, each taking a lane of the
+     cluster it belongs to — the calendar's own answer, because one drawn
+     over another hides the one underneath. */
+  function cdPlanLanes(list) {
+    list = list.slice().sort(function (a, b) { return a.s - b.s || b.e - a.e; });
+    var out = {}, cluster = [], end = -1;
+    function flush() {
+      var lanes = [];
+      cluster.forEach(function (b) {
+        var i = 0; while (lanes[i] != null && lanes[i] > b.s) i++;
+        lanes[i] = b.e; out[b.id] = { l: i };
+      });
+      cluster.forEach(function (b) { out[b.id].n = lanes.length; });
+      cluster = [];
+    }
+    list.forEach(function (b) { if (b.s >= end) { flush(); end = b.e; } else end = Math.max(end, b.e); cluster.push(b); });
+    flush();
+    return out;
+  }
+  function cdPlanBlockEl(b, lane, H) {
+    var c = PLAN_C[b.c] || PLAN_C.life;
+    var e = el('div', 'pl-b');
+    e.dataset.id = b.id; e.tabIndex = 0; e.setAttribute('role', 'button');
+    e.setAttribute('aria-label', (b.n || 'Untitled') + ', ' + c[1] + ', ' + DOWL[b.d] + ' ' + cdHM(b.s) + ' to ' + cdHM(b.e));
+    e.style.setProperty('--pc', c[2]);
+    e.style.top = (b.s / 60 * H) + 'px';
+    e.style.height = Math.max(14, (b.e - b.s) / 60 * H - 2) + 'px';
+    var w = 100 / lane.n;
+    e.style.left = 'calc(' + (lane.l * w) + '% + 1px)';
+    e.style.width = 'calc(' + w + '% - 2px)';
+    /* What fits is decided by the length: a name alone under 45 minutes,
+       the name and the time under 75, and the detail only past that. */
+    if (b.e - b.s < 45) e.classList.add('is-short'); else if (b.e - b.s < 75) e.classList.add('is-mid');
+    e.innerHTML = '<b>' + esc(b.n || 'Untitled') + '</b>' + (b.t ? '<i>' + esc(b.t) + '</i>' : '') + '<em>' + cdHM(b.s) + '–' + cdHM(b.e) + '</em><span class="pl-rs" aria-hidden="true"></span>';
+    return e;
+  }
+  function cdPaintPlan() {
+    if (planDrag) return;
+    if (!PLAN_MQ.matches) { cdGo('day'); return; }
+    var H = cdPlanH(), today = cdDow(cdToday());
+    var head = $('cdPlHead');
+    head.innerHTML = '<span></span>' + DOW.map(function (d, i) { return '<b' + (i === today ? ' class="is-now"' : '') + '>' + d + '</b>'; }).join('');
+    var g = $('cdPlGrid');
+    g.innerHTML = '';
+    var hours = el('div', 'pl-hours');
+    for (var h = 1; h < 24; h++) hours.appendChild(el('span', '', String(h).padStart(2, '0') + ':00')).style.top = (h * H) + 'px';
+    g.appendChild(hours);
+    for (var d = 0; d < 7; d++) {
+      var col = el('div', 'pl-col' + (d === today ? ' is-now' : ''));
+      col.dataset.d = d;
+      col.setAttribute('aria-label', DOWL[d]);
+      var day = S.plan.filter(function (b) { return b.d === d; });
+      var lanes = cdPlanLanes(day);
+      day.forEach(function (b) { col.appendChild(cdPlanBlockEl(b, lanes[b.id], H)); });
+      if (d === today) { var now = el('div', 'pl-now'); now.id = 'cdPlNow'; now.style.top = (cdNowMin() / 60 * H) + 'px'; col.appendChild(now); }
+      g.appendChild(col);
+    }
+    if (!S.plan.length) g.appendChild(el('p', 'pl-empty', 'Drag down a day to block out time'));
+    $('cdPlLeg').innerHTML = PLAN_CATS.map(function (c) { return '<span style="--pc:' + c[2] + '"><i></i>' + esc(c[1]) + '</span>'; }).join('');
+    /* The first look opens on the morning, the way the calendar it copies
+       does: midnight to five is the part of a week nobody plans. */
+    if (!planScrolled) { planScrolled = true; $('cdPlScroll').scrollTop = 5 * H - 8; }
+  }
+  function cdPlanAt(ev) {
+    var cols = document.querySelectorAll('#cdPlGrid .pl-col'), d = -1;
+    cols.forEach(function (c, i) { var r = c.getBoundingClientRect(); if (ev.clientX >= r.left - 4 && ev.clientX < r.right + 4) d = i; });
+    if (d < 0) { var f = cols[0].getBoundingClientRect(), l = cols[6].getBoundingClientRect(); d = ev.clientX < f.left ? 0 : ev.clientX >= l.right ? 6 : -1; }
+    var top = cols[0].getBoundingClientRect().top;
+    return { d: d, m: (ev.clientY - top) / cdPlanH() * 60 };
+  }
+  $('cdPlGrid').addEventListener('pointerdown', function (ev) {
+    if (ev.button !== 0) return;
+    var col = ev.target.closest('.pl-col'); if (!col) return;
+    var be = ev.target.closest('.pl-b');
+    var at = cdPlanAt(ev);
+    if (be) {
+      var b = S.plan.filter(function (x) { return x.id === be.dataset.id; })[0]; if (!b) return;
+      planDrag = { mode: ev.target.closest('.pl-rs') ? 'size' : 'move', b: b, el: be, x: ev.clientX, y: ev.clientY, m0: at.m, s0: b.s, e0: b.e, d0: b.d, moved: false };
+    } else {
+      var m = Math.floor(at.m / PLAN_SNAP) * PLAN_SNAP;
+      planDrag = { mode: 'new', d0: +col.dataset.d, a: m, x: ev.clientX, y: ev.clientY, moved: false, col: col };
+    }
+    $('cdPlGrid').setPointerCapture(ev.pointerId);
+    ev.preventDefault();
+  });
+  $('cdPlGrid').addEventListener('pointermove', function (ev) {
+    var p = planDrag; if (!p) return;
+    if (!p.moved && Math.abs(ev.clientX - p.x) + Math.abs(ev.clientY - p.y) < 5) return;
+    var H = cdPlanH(), at = cdPlanAt(ev);
+    if (p.mode === 'new') {
+      if (!p.moved) { p.ghost = el('div', 'pl-b is-ghost'); p.ghost.style.setProperty('--pc', PLAN_C.life[2]); p.ghost.style.left = '1px'; p.ghost.style.width = 'calc(100% - 2px)'; p.col.appendChild(p.ghost); }
+      p.moved = true;
+      var m2 = Math.max(0, Math.min(1440, cdPlanSnap(at.m)));
+      p.s = Math.min(p.a, m2); p.e = Math.max(p.a + PLAN_SNAP, m2);
+      if (m2 < p.a) { p.s = m2; p.e = p.a + PLAN_SNAP; }
+      p.ghost.style.top = (p.s / 60 * H) + 'px'; p.ghost.style.height = ((p.e - p.s) / 60 * H - 2) + 'px';
+      p.ghost.innerHTML = '<em>' + cdHM(p.s) + '–' + cdHM(p.e) + '</em>';
+      return;
+    }
+    p.moved = true; p.el.classList.add('is-drag');
+    var len = p.e0 - p.s0, dm = cdPlanSnap(at.m - p.m0);
+    if (p.mode === 'size') {
+      p.s = p.s0; p.e = Math.max(p.s0 + PLAN_SNAP, Math.min(1440, cdPlanSnap(p.e0 + (at.m - p.m0)))); p.d = p.d0;
+    } else {
+      p.s = Math.max(0, Math.min(1440 - len, p.s0 + dm)); p.e = p.s + len;
+      p.d = at.d >= 0 ? at.d : p.d0;
+      var col = document.querySelectorAll('#cdPlGrid .pl-col')[p.d];
+      if (p.el.parentNode !== col) { col.appendChild(p.el); p.el.style.left = '1px'; p.el.style.width = 'calc(100% - 2px)'; }
+    }
+    p.el.style.top = (p.s / 60 * H) + 'px';
+    p.el.style.height = Math.max(14, (p.e - p.s) / 60 * H - 2) + 'px';
+    var t = p.el.querySelector('em'); if (t) t.textContent = cdHM(p.s) + '–' + cdHM(p.e);
+  });
+  function cdPlanUp() {
+    var p = planDrag; if (!p) return;
+    planDrag = null;
+    if (p.mode === 'new') {
+      if (p.ghost) p.ghost.remove();
+      var s = p.moved ? p.s : p.a, e = p.moved ? p.e : Math.min(1440, p.a + 60);
+      cdPlanEdit(null, { d: p.d0, s: s, e: e });
+      return;
+    }
+    if (!p.moved) { cdPaintPlan(); cdPlanEdit(p.b); return; }
+    var before = { d: p.b.d, s: p.b.s, e: p.b.e };
+    if (before.d === p.d && before.s === p.s && before.e === p.e) { cdPaintPlan(); return; }
+    p.b.d = p.d; p.b.s = p.s; p.b.e = p.e;
+    cdSave('plan'); cdPaintPlan();
+    cdToast((p.mode === 'size' ? 'Resized ' : 'Moved ') + (p.b.n || 'block'), function () { p.b.d = before.d; p.b.s = before.s; p.b.e = before.e; cdSave('plan'); cdPaintPlan(); });
+  }
+  $('cdPlGrid').addEventListener('pointerup', cdPlanUp);
+  $('cdPlGrid').addEventListener('pointercancel', function () { planDrag = null; cdPaintPlan(); });
+  $('cdPlGrid').addEventListener('keydown', function (ev) {
+    var be = ev.target.closest && ev.target.closest('.pl-b'); if (!be) return;
+    var b = S.plan.filter(function (x) { return x.id === be.dataset.id; })[0]; if (!b) return;
+    if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); cdPlanEdit(b); }
+    else if (ev.key === 'Delete' || ev.key === 'Backspace') { ev.preventDefault(); cdPlanDel(b); }
+  });
+  PLAN_MQ.addEventListener('change', function () { if (!PLAN_MQ.matches && view === 'plan') cdGo('day'); });
+  function cdPlanDel(b) {
+    var at = S.plan.indexOf(b); if (at < 0) return;
+    S.plan.splice(at, 1); cdSave('plan'); cdClose(); cdPaintPlan();
+    cdToast('Deleted ' + (b.n || 'block'), function () { S.plan.splice(at, 0, b); cdSave('plan'); cdPaintPlan(); });
+  }
+  function cdPlanEdit(b, draft) {
+    var f = b ? { n: b.n, t: b.t, c: b.c, d: [b.d], s: b.s, e: b.e } : { n: '', t: '', c: planLastC, d: [draft.d], s: draft.s, e: draft.e };
+    var root = el('div');
+    var rows = el('div', 'cd-rows');
+    var nm = el('input', 'cd-field'); nm.type = 'text'; nm.id = 'cdPlN'; nm.placeholder = 'Name'; nm.maxLength = 60; nm.value = f.n;
+    var tt = el('input', 'cd-field'); tt.type = 'text'; tt.id = 'cdPlT'; tt.placeholder = 'Optional'; tt.maxLength = 80; tt.value = f.t;
+    var st = el('input', 'cd-field'); st.type = 'time'; st.id = 'cdPlS'; st.step = 900; st.value = cdHM(f.s);
+    var en = el('input', 'cd-field'); en.type = 'time'; en.id = 'cdPlE'; en.step = 900; en.value = f.e >= 1440 ? '23:59' : cdHM(f.e);
+    function row(lbl, node) { var r = el('div', 'cd-row'); r.appendChild(el('span', '', lbl)); r.appendChild(node); rows.appendChild(r); }
+    row('What', nm); row('Detail', tt); row('Starts', st); row('Ends', en);
+    root.appendChild(rows);
+    root.appendChild(el('p', 'cd-lbl', 'Kind'));
+    var cats = el('div', 'cd-chips pl-cats'); cats.id = 'cdPlC';
+    PLAN_CATS.forEach(function (c) {
+      var ch = el('button', 'cd-chip', esc(c[1])); ch.type = 'button'; ch.dataset.c = c[0];
+      ch.style.setProperty('--kc', c[2]);
+      ch.addEventListener('click', function () { f.c = c[0]; sync(); });
+      cats.appendChild(ch);
+    });
+    root.appendChild(cats);
+    /* A new block may go on several days at once; each lands as its own
+       block, so they can be moved apart later. An existing one has the one
+       day it is on, because it is one object in one column. */
+    root.appendChild(el('p', 'cd-lbl', b ? 'Day' : 'Days'));
+    var days = el('div', 'cd-chips days'); days.id = 'cdPlD';
+    DOW.forEach(function (d, i) {
+      var c = el('button', 'cd-chip', d.slice(0, 2)); c.type = 'button'; c.dataset.i = i; c.setAttribute('aria-label', DOWL[i]);
+      c.addEventListener('click', function () {
+        if (b) f.d = [i];
+        else { var k = f.d.indexOf(i); if (k >= 0) { if (f.d.length > 1) f.d.splice(k, 1); } else f.d.push(i); }
+        sync();
+      });
+      days.appendChild(c);
+    });
+    root.appendChild(days);
+    function sync() {
+      cats.querySelectorAll('.cd-chip').forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.c === f.c); });
+      days.querySelectorAll('.cd-chip').forEach(function (c) { c.setAttribute('aria-pressed', f.d.indexOf(+c.dataset.i) >= 0); });
+    }
+    sync();
+    var foot = el('div', 'cd-foot');
+    if (b) {
+      var del = el('button', 'cd-btn warn', 'Delete'); del.type = 'button'; del.id = 'cdPlDel';
+      del.addEventListener('click', function () { cdPlanDel(b); });
+      foot.appendChild(del);
+    }
+    var save = el('button', 'cd-btn go', b ? 'Save' : 'Add'); save.type = 'button'; save.id = 'cdPlSave';
+    function tm(v) { var q = String(v).split(':'); return q.length === 2 ? +q[0] * 60 + +q[1] : NaN; }
+    save.addEventListener('click', function () {
+      var s = tm(st.value), e = tm(en.value);
+      if (e === 1439) e = 1440;
+      if (!(s >= 0) || !(e > s)) { cdToast('It has to end after it starts.'); return; }
+      var n = nm.value.trim(), t = tt.value.trim();
+      planLastC = f.c;
+      if (b) { b.n = n; b.t = t; b.c = f.c; b.d = f.d[0]; b.s = s; b.e = e; }
+      else f.d.forEach(function (d) { S.plan.push({ id: cdId(), d: d, s: s, e: e, n: n, t: t, c: f.c }); });
+      cdSave('plan'); cdClose(); cdPaintPlan();
+    });
+    nm.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') save.click(); });
+    foot.appendChild(save);
+    root.appendChild(foot);
+    cdSheet(b ? (b.n || 'Untitled') : 'New block', root);
+    setTimeout(function () { nm.focus(); }, 60);
+  }
+
   /* ═══ TOAST ═══ */
   var toastT = 0, toastUndo = null;
   function cdToast(msg, undo) {
@@ -3608,6 +3909,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      the start, and it is only kept once something is written on it. */
   $('cdAdd').addEventListener('click', function () {
     if (view === 'note') { cdNoteNew(); return; }
+    if (view === 'plan') { var hs = Math.min(1380, Math.ceil(cdNowMin() / 60) * 60); cdPlanEdit(null, { d: cdDow(cdToday()), s: hs, e: hs + 60 }); return; }
     cdEdit(null);
   });
 
@@ -3964,7 +4266,8 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 
   var sv = 'day';
   try { sv = sessionStorage.getItem('cad.view') || 'day'; } catch (e) {}
-  cdGo(['day', 'hab', 'mon', 'note'].indexOf(sv) >= 0 ? sv : 'day');
+  if (sv === 'plan' && !PLAN_MQ.matches) sv = 'day';
+  cdGo(['day', 'hab', 'mon', 'note', 'plan'].indexOf(sv) >= 0 ? sv : 'day');
   /* The first open of a date shows its thought, after the screen has
      painted so the card comes up over the day rather than over nothing. */
   var rt = cdToday();
