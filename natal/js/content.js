@@ -396,7 +396,7 @@
     water: { name: "Water", color: "#7fb6f0", strong: "Emotion, intuition and empathy guide you. You understand what is unspoken.", weak: "Feelings may be hard to access or express; emotional literacy is a lifelong gift you can develop." },
   };
   const MODES = {
-    cardinal: { name: "Cardinal", strong: "You are an initiator: quick to start, lead and change direction.", weak: "Starting may be harder than sustaining; practise taking the first step." },
+    cardinal: { name: "Cardinal", strong: "You are an initiator: quick to start, lead and change direction.", weak: "Starting may be harder than sustaining, and the first step is where you tend to stall." },
     fixed: { name: "Fixed", strong: "You are a stabiliser: loyal, determined and able to see things through.", weak: "Commitment and follow-through may need conscious effort." },
     mutable: { name: "Mutable", strong: "You are an adapter: flexible, curious and good at transitions.", weak: "Change may feel threatening; flexibility is a muscle you can build." },
   };

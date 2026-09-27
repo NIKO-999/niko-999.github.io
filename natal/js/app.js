@@ -245,7 +245,7 @@
       case "chiron": return S.chiron;
       case "southNode": {
         const opp = SIGNS[opposite(p.sign)];
-        return `Your comfort zone and past-life mastery lie in ${S.name} territory: ${S.gifts}. These come naturally, but leaning on them too hard (${S.shadow}) keeps you circling the familiar. Offer them in service of your North Node in ${opp.name}.`;
+        return `Your comfort zone and past-life mastery lie in ${S.name} territory: ${S.gifts}. These come naturally, but leaning on them too hard (${S.shadow}) keeps you circling the familiar. At their best, they serve your North Node in ${opp.name}.`;
       }
       case "lilith":
         return `The exiled, untamed part of you expresses ${S.how}. At some point, the ${S.name} themes of ${S.keywords[0]} and ${S.keywords[1]} may have been shamed or suppressed. Reclaiming them as raw, sovereign power, without apology, is the work. Denied, Lilith can surface as ${S.shadow}.`;
@@ -1575,7 +1575,7 @@
         const P = PLANETS[arg];
         const txt = {
           north: `${P.name} conjunct the North Node: ${P.core} is bound up with your destiny. Developing this planet consciously is part of what you came here to do, and people or events tied to it often feel fated.`,
-          south: `${P.name} conjunct the South Node: ${P.core} carries a strong past-life imprint. It is a gift you arrive with, but it can also be a habit that pulls you backward. Use it to serve your North Node.`,
+          south: `${P.name} conjunct the South Node: ${P.core} carries a strong past-life imprint. It is a gift you arrive with, but it can also be a habit that pulls you backwards. At its best, it serves your North Node.`,
           bend: `${P.name} square the nodes sits at the "bending" point of the nodal axis, traditionally a skipped step. Lessons around ${P.core} were left unfinished and must be integrated before the North Node path fully opens.`,
         }[arg2];
         html = sheetSimple("Nodal contact", P.name, "", [txt, P.desc]);
@@ -1764,7 +1764,7 @@
           const d = c.derived, B = deepBalance(d.domEl);
           if (B) html += areaSection(`Your ${d.domEl} emphasis`, paras([B.strong]));
         }
-        html += `<p class="note" style="text-align:left">Astrology describes tendencies, not medical conditions. See a health professional for anything that concerns you.</p>`;
+        html += `<p class="note" style="text-align:left">Astrology describes tendencies, not medical conditions. Anything that concerns you about your health belongs with a health professional.</p>`;
         break;
       case "growth":
         html += areaSection("Where life opens up", placementBlock("jupiter", { full: true }));
@@ -2988,7 +2988,7 @@
     const title = `${inMine ? theirName(rec) + "'s" : myName() === "You" ? "Your" : myName() + "'s"} ${pName(key)} in ${inMine ? (myName() === "You" ? "your" : myName() + "'s") : theirName(rec) + "'s"} ${ord(o.house)} house`;
     const txt = ((D().synOverlaysRich || {})[key] || {})[o.house] || (S.overlays && S.overlays[key] && S.overlays[key][o.house]);
     let html = `<section class="hero"><div class="eyebrow">House overlay · ${esc(HOUSES[o.house].title)}</div><h2 class="display sm">${esc(title)}</h2></section>`;
-    if (!inMine) html += `<p class="note" style="text-align:left">Written from ${esc(owner)}'s side: read "you" as ${esc(owner)} and "their" as ${esc(guest)}.</p>`;
+    if (!inMine) html += `<p class="note" style="text-align:left">Written from ${esc(owner)}'s side: "you" means ${esc(owner)} and "their" means ${esc(guest)}.</p>`;
     html += paras([txt || `${guest}'s ${pName(key)} brings ${PLANETS[key].focus} into ${owner}'s ${ord(o.house)} house of ${HOUSES[o.house].areas}.`]);
     html += sec(`The ${ord(o.house)} house`, HOUSES[o.house].desc);
     const guestChart = inMine ? Y.them : state.chart, gp = guestChart.get(key);
