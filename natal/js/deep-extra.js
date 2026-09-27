@@ -85,10 +85,10 @@ window.AstroDeep.hemis = {
 };
 
 window.AstroDeep.quadrants = {
-  1: { name: "Quadrant I · houses 1–3", text: "Self-development. Planets here focus energy on identity, resources and learning. You build yourself first, often independently, and your early life shapes you strongly." },
-  2: { name: "Quadrant II · houses 4–6", text: "Self-expression. Planets here focus energy on home, creativity and daily craft. Emotional roots, creative play and useful work are where you grow." },
-  3: { name: "Quadrant III · houses 7–9", text: "Relationship and understanding. Planets here focus energy on partnership, intimacy and belief. You learn about yourself through others and through expanding your worldview." },
-  4: { name: "Quadrant IV · houses 10–12", text: "Contribution to the world. Planets here focus energy on career, community and the collective. Your development is tied to your public role and to what you give back." },
+  1: { name: "Quadrant I · houses 1 to 3", text: "Self-development. Planets here focus energy on identity, resources and learning. You build yourself first, often independently, and your early life shapes you strongly." },
+  2: { name: "Quadrant II · houses 4 to 6", text: "Self-expression. Planets here focus energy on home, creativity and daily craft. Emotional roots, creative play and useful work are where you grow." },
+  3: { name: "Quadrant III · houses 7 to 9", text: "Relationship and understanding. Planets here focus energy on partnership, intimacy and belief. You learn about yourself through others and through expanding your worldview." },
+  4: { name: "Quadrant IV · houses 10 to 12", text: "Contribution to the world. Planets here focus energy on career, community and the collective. Your development is tied to your public role and to what you give back." },
 };
 
 window.AstroDeep.retro = {
