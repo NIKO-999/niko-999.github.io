@@ -832,8 +832,6 @@
       const texture = imgCanvas(L.tex, L.T, L.T);
       const stack = document.createElement("div");
       stack.className = "ringstack";
-      stack.style.setProperty("--ring-k", String(1 / s));
-      stack.style.setProperty("--ring-roll", `${-rollDeg}deg`);
       stack.style.visibility = "hidden";
       stack.append(wrap(false), layer(imgCanvas(L.planet, m.px, m.px)), wrap(true), layer(imgCanvas(L.shade, m.px, m.px)));
       host.appendChild(stack);

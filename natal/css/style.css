@@ -811,6 +811,7 @@ body.detail-open .sheet-backdrop { display: none; }
   background: radial-gradient(circle at 32% 70%, #d8c4b0, #8a7c70 55%, #3a3a44); }
 .rk.warm { background: radial-gradient(circle at 32% 70%, #f2b890, #9a6a4c 55%, #3a3236); }
 /* cancel the orbit's turn and the ring's tilt, so each rock stays round and lit from the same side */
-@keyframes rk-upright { from { transform: rotate(0deg) scaleY(var(--ring-k, 4.13)) rotate(var(--ring-roll, -16deg)); } to { transform: rotate(360deg) scaleY(var(--ring-k, 4.13)) rotate(var(--ring-roll, -16deg)); } }
+/* plain numbers (1 / sin 14deg, and the 16deg tilt): Safari only hands keyframes without variables to the compositor */
+@keyframes rk-upright { from { transform: rotate(0deg) scaleY(4.1336) rotate(-16deg); } to { transform: rotate(360deg) scaleY(4.1336) rotate(-16deg); } }
 .sky-paused .ringband, .sky-paused .rk-orbit, .sky-paused .rk { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) { .ringband, .rk-orbit, .rk { animation: none; } }
