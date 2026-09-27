@@ -813,7 +813,7 @@ body.detail-open .sheet-backdrop { display: none; }
 /* cancel the orbit's turn and the ring's tilt, so each rock stays round and lit from the same side */
 /* plain numbers (1 / sin 14deg, and the 16deg tilt): Safari only hands keyframes without variables to the compositor */
 @keyframes rk-upright { from { transform: rotate(0deg) scaleY(4.1336) rotate(-16deg); } to { transform: rotate(360deg) scaleY(4.1336) rotate(-16deg); } }
-/* the moon and small world turn through pre-rendered frames, blended by the compositor */
+/* the moon and small world step through pre-rendered frames, run by the compositor */
 .spinstack { position: absolute; inset: 0; }
 .spinclip { position: absolute; inset: 0; overflow: hidden; }
 .spinsheet { position: absolute; left: 0; top: 0; display: block; }

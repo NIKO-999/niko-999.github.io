@@ -834,63 +834,36 @@
   }
 
   let spinStyle = null;
-  /* Two layers only, so the phone never has to juggle dozens of them. Each holds half the frames
-     in a sheet and jumps between them with a moving window; the top layer fades in and out so
-     every step is a smooth blend from one frame to the next:
-       bottom: frame 2j from slot 2j-1 to 2j+1 (it changes only while the top is fully opaque)
-       top:    frame 2j+1 from slot 2j to 2j+2 (it changes only while it is invisible),
-               fully shown at odd slots and gone at even ones. */
+  /* One layer holding every frame of a full turn in a sheet, stepped through by a single
+     compositor animation. No blending, so nothing can double up, and with this many frames
+     each step moves the surface by about a pixel, which reads as a smooth turn. */
   function startSpin(m) {
     const w = getWorker();
     if (!m || !w || reduceMotion) return;
-    const N = m.kind === "moon" ? 240 : 96, M = N / 2; // enough frames that each blend moves under a pixel, so it stays sharp
+    const N = m.kind === "moon" ? 240 : 96;
     framesReady[m.kind] = ({ sheet, period }) => {
       framesReady[m.kind] = null;
-      const W = m.px, size = W * W * 4, cols = Math.ceil(Math.sqrt(M)), rows = Math.ceil(M / cols);
+      const W = m.px, size = W * W * 4, cols = Math.ceil(Math.sqrt(N)), rows = Math.ceil(N / cols);
       const pc = (slot) => ((slot / N) * 100).toFixed(4) + "%", eps = 0.004;
       const at = (j) => `transform:translate(${((-100 * (j % cols)) / cols).toFixed(4)}%,${((-100 * Math.floor(j / cols)) / rows).toFixed(4)}%)`;
-      const sheetOf = (odd) => {
-        const c = document.createElement("canvas");
-        c.width = cols * W; c.height = rows * W;
-        const g = c.getContext("2d");
-        for (let j = 0; j < M; j++) {
-          const f = 2 * j + odd;
-          g.putImageData(new ImageData(sheet.slice(f * size, (f + 1) * size), W, W), (j % cols) * W, Math.floor(j / cols) * W);
-        }
-        c.className = "spinsheet";
-        c.style.width = cols * 100 + "%";
-        c.style.height = rows * 100 + "%";
-        const clip = document.createElement("div");
-        clip.className = "spinclip";
-        clip.appendChild(c);
-        return clip;
-      };
-      // each index held for its window, then an (almost) instant jump to the next
-      const steps = (name, starts) => {
-        let k = `@keyframes ${name}{0%{${at(starts[0][1])}}`;
-        for (let n = 1; n < starts.length; n++) {
-          const [slot, j] = starts[n];
-          k += `${pc(slot - eps)}{${at(starts[n - 1][1])}}${pc(slot)}{${at(j)}}`;
-        }
-        return k + `100%{${at(starts[starts.length - 1][1])}}}`;
-      };
-      const bottom = [[0, 0]], top = [[0, 0]];
-      for (let j = 1; j < M; j++) bottom.push([2 * j - 1, j]);
-      bottom.push([N - 1, 0]);
-      for (let j = 1; j < M; j++) top.push([2 * j, j]);
-      let fade = `@keyframes sp-${m.kind}-fade{`;
-      for (let t = 0; t <= N; t++) fade += `${pc(t)}{opacity:${t % 2}}`;
-      fade += "}";
+      const c = document.createElement("canvas");
+      c.width = cols * W; c.height = rows * W;
+      const g = c.getContext("2d");
+      for (let f = 0; f < N; f++) g.putImageData(new ImageData(sheet.subarray(f * size, (f + 1) * size), W, W), (f % cols) * W, Math.floor(f / cols) * W);
+      c.className = "spinsheet";
+      c.style.width = cols * 100 + "%";
+      c.style.height = rows * 100 + "%";
+      // each frame held for its slot, then an (almost) instant jump to the next
+      let k = `@keyframes sp-${m.kind}{0%{${at(0)}}`;
+      for (let f = 1; f < N; f++) k += `${pc(f - eps)}{${at(f - 1)}}${pc(f)}{${at(f)}}`;
+      k += `100%{${at(N - 1)}}}`;
       if (!spinStyle) { spinStyle = document.createElement("style"); document.head.appendChild(spinStyle); }
-      spinStyle.textContent += steps(`sp-${m.kind}-a`, bottom) + steps(`sp-${m.kind}-b`, top) + fade;
+      spinStyle.textContent += k;
+      c.style.animation = `sp-${m.kind} ${period}s linear infinite`;
       const stack = document.createElement("div");
-      stack.className = "spinstack";
+      stack.className = "spinstack spinclip";
       stack.style.visibility = "hidden";
-      const A = sheetOf(0), B = sheetOf(1);
-      A.firstChild.style.animation = `sp-${m.kind}-a ${period}s linear infinite`;
-      B.firstChild.style.animation = `sp-${m.kind}-b ${period}s linear infinite`;
-      B.style.animation = `sp-${m.kind}-fade ${period}s linear infinite`;
-      stack.append(A, B);
+      stack.appendChild(c);
       m.host.appendChild(stack);
       requestAnimationFrame(() => requestAnimationFrame(() => {
         stack.style.visibility = "visible";
