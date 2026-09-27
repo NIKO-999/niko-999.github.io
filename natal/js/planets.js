@@ -14,7 +14,7 @@
  */
 (function () {
   "use strict";
-  const SKY_VERSION = "sky-10";
+  const SKY_VERSION = "sky-11";
 
   /* Everything the worker needs lives inside SKYLIB, so its source can be
      shipped to a Worker via toString(). No DOM access in here. */
@@ -247,7 +247,7 @@
       // the sunrise light's direction on the canvas, for lighting the rocks
       const lsx = LIGHT[0] * cr - LIGHT[1] * sr, lsy = -(LIGHT[0] * sr + LIGHT[1] * cr);
       const ll = Math.hypot(lsx, lsy) || 1;
-      return { R, pixel, albedo, ringMod, finish, RIN, ROUT, rocks, place, lightDir: [lsx / ll, lsy / ll] };
+      return { R, pixel, albedo, ringMod, finish, RIN, ROUT, rocks, place, lightDir: [lsx / ll, lsy / ll], ringDensity, ringTint, litOn: 0.5 + 0.5 * Math.abs(NL), open, roll };
     }
 
     /* ================= moon ================= */
@@ -579,97 +579,58 @@
       }
       return out;
     }
-    function spinRings(canvas, W, post) {
+    /**
+     * The gas giant's rings are animated by the browser's compositor (so they keep turning while
+     * the page scrolls, even on iPhone). The worker supplies three still layers: the planet, a flat
+     * top-down ring texture that the page rotates, and the planet's shadow across the rings.
+     */
+    function ringLayers(W) {
       const parts = giantParts();
-      const map = ringMap(parts);
-      const ctx = canvas.getContext("2d");
-      const img = new ImageData(W, W), d = img.data;
-      const live = [];
-      let x0 = W, y0 = W, x1 = 0, y1 = 0;
+      const RW = parts.R * W;
+      const planet = new Uint8ClampedArray(W * W * 4), shade = new Uint8ClampedArray(W * W * 4);
       for (let row = 0; row < W; row++) {
         for (let col = 0; col < W; col++) {
           const fx = (col + 0.5) / W, fy = (row + 0.5) / W;
           const px = parts.pixel(fx, fy, W);
           if (!px) continue;
           const i = (row * W + col) * 4;
-          px.fm = fadeMask(fx, fy);
-          px.pc = px.lat !== undefined ? parts.albedo(px.lat, px.lon) : null;
-          if (!px.ring) {
-            const c = parts.finish(px, px.pc, 0, 0);
-            d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = c[3] * px.fm;
-            continue;
+          if (px.lat !== undefined) {
+            const al = parts.albedo(px.lat, px.lon);
+            planet[i] = px.A * al[0] + px.B[0]; planet[i + 1] = px.A * al[1] + px.B[1]; planet[i + 2] = px.A * al[2] + px.B[2];
+            planet[i + 3] = px.a; // the page fades the whole stack towards its edges
           }
-          px.i = i;
-          px.w = Math.pow(1.6 / px.ring.r, 1.5); // relative angular speed
-          live.push(px);
-          if (col < x0) x0 = col; if (col > x1) x1 = col; if (row < y0) y0 = row; if (row > y1) y1 = row;
+          if (px.ring && px.ring.lit < 0.1) {
+            shade[i] = SKY[0]; shade[i + 1] = SKY[1]; shade[i + 2] = SKY[2]; shade[i + 3] = Math.min(1, px.ring.a0 * 0.95) * 255;
+          }
         }
       }
-      for (let a = 0; a < TAU; a += 0.02) {
-        const q = parts.place(2.45, a);
-        x0 = Math.min(x0, q.fx * W); x1 = Math.max(x1, q.fx * W); y0 = Math.min(y0, q.fy * W); y1 = Math.max(y1, q.fy * W);
+      const OUT = 2.47, T = 2 * Math.ceil(OUT * RW);
+      const tex = new Uint8ClampedArray(T * T * 4);
+      for (let y = 0; y < T; y++) {
+        for (let x = 0; x < T; x++) {
+          const u = (x + 0.5 - T / 2) / RW, v = (y + 0.5 - T / 2) / RW;
+          const r = Math.sqrt(u * u + v * v);
+          if (r < parts.RIN || r > parts.ROUT) continue;
+          const dens = parts.ringDensity(r);
+          if (!dens) continue;
+          const mo = parts.ringMod(r, Math.atan2(-v, u));
+          const c = parts.finish({ ring: { tint: parts.ringTint(r), lit: parts.litOn, a0: dens * 0.92 } }, null, mo[0], mo[1]);
+          const i = (y * T + x) * 4;
+          tex[i] = c[0]; tex[i + 1] = c[1]; tex[i + 2] = c[2]; tex[i + 3] = c[3];
+        }
       }
-      x0 = Math.max(0, Math.floor(x0 - 6)); y0 = Math.max(0, Math.floor(y0 - 6)); x1 = Math.min(W - 1, Math.ceil(x1 + 6)); y1 = Math.min(W - 1, Math.ceil(y1 + 6));
-      const ROCKS = parts.rocks();
-      const [ldx, ldy] = parts.lightDir;
-      const mo = [0, 0];
-      let turn = 0; // radians turned at the reference radius
-      const frame = (full) => {
-        for (let n = 0; n < live.length; n++) {
-          const px = live[n];
-          sampleRing(map, parts, px.ring.r, px.ring.th - turn * px.w, mo);
-          const c = parts.finish(px, px.pc, mo[0], mo[1]);
-          d[px.i] = c[0]; d[px.i + 1] = c[1]; d[px.i + 2] = c[2]; d[px.i + 3] = c[3] * px.fm;
-        }
-        if (full) ctx.putImageData(img, 0, 0);
-        else ctx.putImageData(img, 0, 0, x0, y0, x1 - x0 + 1, y1 - y0 + 1);
-        // little asteroids following the rings: jagged, tumbling, dim unless the sunrise catches them
-        for (const k of ROCKS) {
-          const q = parts.place(k.r, k.th + turn * k.w);
-          if (q.hidden) continue;
-          const cx = q.fx * W, cy = q.fy * W, rad = Math.max(0.9, k.size * W);
-          const fm = fadeMask(q.fx, q.fy) * (q.shadowed ? 0.45 : 0.95);
-          const rot = k.spin + turn * k.tumble * 3;
-          const n = k.shape.length;
-          ctx.beginPath();
-          for (let j = 0; j < n; j++) {
-            const a = rot + (j / n) * TAU, rr = rad * k.shape[j];
-            if (j) ctx.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); else ctx.moveTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr);
-          }
-          ctx.closePath();
-          ctx.fillStyle = q.shadowed ? "rgba(52,56,64," + fm + ")" : k.tone > 0.55 ? "rgba(168,120,86," + fm + ")" : "rgba(138,128,118," + fm + ")";
-          ctx.fill();
-          if (!q.shadowed && rad > 1.4) {
-            // a sliver of light on the sunward edge
-            ctx.beginPath();
-            ctx.arc(cx + ldx * rad * 0.35, cy + ldy * rad * 0.35, rad * 0.45, 0, TAU);
-            ctx.fillStyle = "rgba(236,190,150," + fm * 0.7 + ")";
-            ctx.fill();
-          }
-        }
-      };
-      frame(true);
-      post({ type: "spinReady", kind: "giant" });
-      let last = Date.now(), tick = 0;
-      setInterval(() => {
-        const now = Date.now();
-        if (!paused) {
-          turn += ((now - last) / 1000 / PERIOD.ring) * TAU;
-          if (!slow || (++tick & 1)) frame(false); // keep turning while scrolling, at half the frame rate
-        }
-        last = now;
-      }, 50);
+      const rocks = parts.rocks().filter((k, n) => n % 3 === 0).map((k) => ({ r: k.r, th: k.th, size: k.size, tone: k.tone }));
+      return { planet, shade, tex, T, RW, rocks, open: parts.open, roll: parts.roll };
     }
 
     async function spin(canvas, kind, W, key, post) {
-      if (kind === "giant") return spinRings(canvas, W, post);
       const parts = PARTS[kind]();
       let map = await loadMap(key);
       if (!map || map.MW * map.MH * 3 !== map.m.length) {
         map = buildMap(kind, parts, W);
         saveMap(key, map);
       }
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas ? canvas.getContext("2d") : null; // no canvas: send each frame to the page as a bitmap
       const img = new ImageData(W, W), d = img.data;
       const masked = kind === "giant" || kind === "moon";
       const live = [];
@@ -699,6 +660,7 @@
           const c = colourOf(parts, px, sample(map, px.lat, px.lon - phase, s));
           d[px.i] = c[0]; d[px.i + 1] = c[1]; d[px.i + 2] = c[2];
         }
+        if (!ctx) { createImageBitmap(img).then((bmp) => post({ type: "frame", kind, bmp }, [bmp]), () => {}); return; }
         if (full) ctx.putImageData(img, 0, 0);
         else ctx.putImageData(img, 0, 0, x0, y0, x1 - x0 + 1, y1 - y0 + 1);
       };
@@ -718,19 +680,21 @@
     const setPaused = (v) => { paused = !!v; };
     const setSlow = (v) => { slow = !!v; };
 
-    return { renderBuffer, spin, setPaused, setSlow };
+    return { renderBuffer, spin, setPaused, setSlow, ringLayers };
   }
 
   /* ---------- worker plumbing ---------- */
   let worker = null, jobId = 0;
-  const spinReady = {};
+  const spinReady = {}, frames = {};
+  let ringsReady = null;
   const pending = new Map();
   function getWorker() {
     if (worker !== null) return worker;
     try {
       const src = "const LIB = (" + SKYLIB.toString() + ")();" +
         "onmessage = (e) => { const m = e.data;" +
-        " if (m.type === 'spin') { LIB.spin(m.canvas, m.kind, m.W, m.key, (x) => postMessage(x)).catch(() => {}); return; }" +
+        " if (m.type === 'spin') { LIB.spin(m.canvas || null, m.kind, m.W, m.key, (x, t) => postMessage(x, t || [])).catch(() => {}); return; }" +
+        " if (m.type === 'rings') { const r = LIB.ringLayers(m.W); postMessage(Object.assign({ type: 'rings' }, r), [r.planet.buffer, r.shade.buffer, r.tex.buffer]); return; }" +
         " if (m.type === 'pause') { LIB.setPaused(m.value); return; }" +
         " if (m.type === 'slow') { LIB.setSlow(m.value); return; }" +
         " const { id, kind, geo, W, H } = m;" +
@@ -739,6 +703,8 @@
       worker = new Worker(URL.createObjectURL(new Blob([src], { type: "text/javascript" })));
       worker.onmessage = (e) => {
         if (e.data.type === "spinReady") { const f = spinReady[e.data.kind]; if (f) f(); return; }
+        if (e.data.type === "frame") { const old = frames[e.data.kind]; if (old) old.close(); frames[e.data.kind] = e.data.bmp; return; }
+        if (e.data.type === "rings") { if (ringsReady) ringsReady(e.data); return; }
         const job = pending.get(e.data.id);
         pending.delete(e.data.id);
         if (job) e.data.error ? job.reject(e.data.error) : job.resolve(e.data.buf);
@@ -818,27 +784,96 @@
 
   /* ---------- slow spin: the worker redraws the surface a few times a second ---------- */
   const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const imgCanvas = (buf, w, h) => { const c = document.createElement("canvas"); c.width = w; c.height = h; c.getContext("2d").putImageData(new ImageData(buf, w, h), 0, 0); return c; };
+  const layer = (el) => { el.style.cssText += ";position:absolute;left:0;top:0;width:100%;height:100%;display:block"; return el; };
+
+  function startRings(m) {
+    const w = getWorker();
+    if (!m || !w || reduceMotion) return;
+    ringsReady = (L) => {
+      ringsReady = null;
+      const host = m.host, s = Math.sin(L.open), rollDeg = (-L.roll * 180) / Math.PI;
+      const pct = (L.T / m.px) * 100, off = (100 - pct) / 2; // sizes in % so the layers follow the host's size
+      const unit = (L.RW / L.T) * 100; // one planet radius, in % of the ring layer
+      const wrap = (front) => {
+        const d = document.createElement("div");
+        d.className = "ringwrap";
+        d.style.cssText = `left:${off}%;top:${off}%;width:${pct}%;height:${pct}%;transform:rotate(${rollDeg}deg) scaleY(${s})`;
+        if (front) {
+          // in front of the planet only where the near half of the rings crosses the disk
+          const pts = [];
+          for (let a = 0; a <= 180; a += 3) pts.push(`${(50 + unit * Math.cos((a * Math.PI) / 180)).toFixed(2)}% ${(50 + (unit / s) * Math.sin((a * Math.PI) / 180)).toFixed(2)}%`);
+          d.style.clipPath = d.style.webkitClipPath = `polygon(${pts.join(",")})`;
+        }
+        // three bands turning at different speeds, inner fastest, as real rings do
+        for (const [r0, r1, secs] of [[0, 1.62, 32], [1.62, 2.0, 40], [2.0, 9, 52]]) {
+          const c = document.createElement("canvas");
+          c.width = c.height = L.T;
+          const g = c.getContext("2d");
+          g.beginPath(); g.arc(L.T / 2, L.T / 2, Math.min(L.T / 2, r1 * L.RW), 0, Math.PI * 2); g.arc(L.T / 2, L.T / 2, r0 * L.RW, 0, Math.PI * 2, true); g.clip();
+          g.drawImage(texture, 0, 0);
+          c.className = "ringband";
+          c.style.animationDuration = secs + "s";
+          d.appendChild(c);
+        }
+        // little asteroids, each on its own orbit, kept round by counter-rotating against the tilt
+        // (the front copy only shows where they pass in front of the planet)
+        for (const r of L.rocks) {
+          const secs = 40 * Math.pow(r.r / 1.6, 1.5), delay = -((r.th / (Math.PI * 2)) * secs);
+          const size = Math.max(0.42, (r.size / 0.205) * unit * 1.15);
+          const o = document.createElement("div");
+          o.className = "rk-orbit";
+          o.style.cssText = `animation-duration:${secs}s;animation-delay:${delay}s`;
+          o.innerHTML = `<div class="rk${r.tone > 0.55 ? " warm" : ""}" style="left:${50 + r.r * unit}%;width:${size}%;height:${size}%;margin:${-size / 2}% 0 0 ${-size / 2}%;animation-duration:${secs}s;animation-delay:${delay}s"></div>`;
+          d.appendChild(o);
+        }
+        return d;
+      };
+      const texture = imgCanvas(L.tex, L.T, L.T);
+      const stack = document.createElement("div");
+      stack.className = "ringstack";
+      stack.style.setProperty("--ring-k", String(1 / s));
+      stack.style.setProperty("--ring-roll", `${-rollDeg}deg`);
+      stack.style.visibility = "hidden";
+      stack.append(wrap(false), layer(imgCanvas(L.planet, m.px, m.px)), wrap(true), layer(imgCanvas(L.shade, m.px, m.px)));
+      host.appendChild(stack);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        stack.style.visibility = "visible";
+        m.canvas.style.visibility = "hidden";
+      }));
+    };
+    w.postMessage({ type: "rings", W: m.px });
+  }
+
   function startSpin(m) {
     const w = getWorker();
-    if (!m || !w || reduceMotion || typeof OffscreenCanvas === "undefined" || !m.canvas.transferControlToOffscreen) return;
-    const sc = document.createElement("canvas");
+    if (!m || !w || reduceMotion || typeof createImageBitmap === "undefined") return;
+    const sc = layer(document.createElement("canvas"));
     sc.width = sc.height = m.px;
-    sc.style.cssText = "position:absolute;left:0;top:0;width:100%;height:100%;display:block;visibility:hidden";
+    sc.style.visibility = "hidden";
     m.host.appendChild(sc);
-    let off;
-    try { off = sc.transferControlToOffscreen(); } catch (e) { sc.remove(); return; }
-    spinReady[m.kind] = () => {
-      // swap on a later frame so the first spinning frame has been committed
-      requestAnimationFrame(() => requestAnimationFrame(() => { sc.style.visibility = "visible"; m.canvas.style.visibility = "hidden"; }));
+    const ctx = sc.getContext("2d");
+    let shown = false;
+    const draw = () => {
+      const bmp = frames[m.kind];
+      if (bmp) {
+        frames[m.kind] = null;
+        ctx.clearRect(0, 0, m.px, m.px);
+        ctx.drawImage(bmp, 0, 0);
+        bmp.close();
+        if (!shown) { shown = true; sc.style.visibility = "visible"; m.canvas.style.visibility = "hidden"; }
+      }
+      requestAnimationFrame(draw);
     };
+    requestAnimationFrame(draw);
     const key = new URL(`./__sky/${SKY_VERSION}/map-${m.kind}-${m.px}.bin`, location.href).href;
-    w.postMessage({ type: "spin", canvas: off, kind: m.kind, W: m.px, key }, [off]);
+    w.postMessage({ type: "spin", kind: m.kind, W: m.px, key });
   }
   // pause in the background or behind a detail page; while scrolling, keep turning at half the frame rate
   let pausedNow = false, slowNow = false, scrollUntil = 0, scrollTimer = null;
   function updatePause() {
     const p = document.hidden || document.body.classList.contains("detail-open");
-    if (p !== pausedNow && worker) { pausedNow = p; worker.postMessage({ type: "pause", value: p }); }
+    if (p !== pausedNow && worker) { pausedNow = p; worker.postMessage({ type: "pause", value: p }); document.documentElement.classList.toggle("sky-paused", p); }
     const sl = Date.now() < scrollUntil;
     if (sl !== slowNow && worker) { slowNow = sl; worker.postMessage({ type: "slow", value: sl }); }
   }
@@ -858,7 +893,10 @@
     const jobs = [() => mountSquare(".planet-moon", "moon"), () => mountSquare(".planet-far", "far"), () => mountSquare(".planet-giant", "giant")];
     jobs.reduce((p, job) => p.then(() => job()).then((m) => { if (m) mounted.push(m); }).catch((e) => { if (window.console) console.warn("sky render failed", e); }), Promise.resolve())
       // once every planet is showing (and has faded in), start them turning
-      .then(() => setTimeout(() => ["giant", "moon", "far"].forEach((k) => startSpin(mounted.find((m) => m.kind === k))), 1200));
+      .then(() => setTimeout(() => {
+        startRings(mounted.find((m) => m.kind === "giant"));
+        ["moon", "far"].forEach((k) => startSpin(mounted.find((m) => m.kind === k)));
+      }, 1200));
   }
   // start after the page has painted
   const kick = () => setTimeout(start, 120);
