@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b1722">
+<meta name="theme-color" content="#0a0f24">
+<meta name="format-detection" content="telephone=no">
 <link rel="icon" href="../icons/icon-192.png">
+<link rel="apple-touch-icon" href="../icons/icon-180.png">
 <title>Learn Astrology · Natal Chart</title>
 <meta name="description" content="A plain-English guide to birth charts: planets, signs, houses, aspects, transits, progressions, solar returns and synastry.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,21 +15,22 @@
 <style>
 :root {
   color-scheme: dark;
-  --bg: #0b1722; --bg-2: #10202f; --panel: rgba(18, 36, 52, 0.62);
-  --text: #eef3f8; --text-2: rgba(230, 238, 246, 0.84); --muted: rgba(212, 226, 238, 0.62); --faint: rgba(212, 226, 238, 0.4);
-  --line: rgba(226, 236, 246, 0.13); --line-2: rgba(226, 236, 246, 0.24);
-  --rose: #f5b27e; --sunrise: #f06a27;
+  /* Dawn: the app's night sky, pushed toward indigo and warmed by sunrise */
+  --bg: #0e1430; --bg-deep: #0a0f24; --planet: #1c1f3d; --panel: rgba(30, 38, 80, 0.5); --panel-2: rgba(40, 44, 92, 0.55);
+  --text: #f7f2ec; --text-2: rgba(247, 242, 236, 0.85); --muted: rgba(228, 222, 234, 0.64); --faint: rgba(228, 222, 234, 0.42);
+  --line: rgba(236, 228, 246, 0.13); --line-2: rgba(236, 228, 246, 0.24);
+  --rose: #ffab76; --dusk: #ee93ad; --sunrise: #ff7a3d; --on-accent: #1d1430;
   --fire: #f28b6d; --earth: #a8d49a; --air: #f1d37e; --water: #7fb6f0;
   --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --sym: "Noto Sans Symbols", "Noto Sans Symbols 2", "Apple Symbols", "Segoe UI Symbol", "DejaVu Sans", sans-serif;
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 24px); background: var(--planet); -webkit-text-size-adjust: 100%; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-weight: 300; font-size: 17px; line-height: 1.65; -webkit-font-smoothing: antialiased; overflow-x: clip; }
-body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background: radial-gradient(120% 60% at 80% -10%, #1b3a55 0%, transparent 60%), linear-gradient(180deg, #0a141d 0%, #0f1e2c 40%, #0d1a27 100%); }
+/* one scrolling background (no fixed layers: iOS Safari mis-paints them on long pages) */
+body { margin: 0; color: var(--text); font-family: var(--sans); font-weight: 300; font-size: 17px; line-height: 1.65; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; overflow-x: hidden; overflow-x: clip;
+  background: radial-gradient(90% 1100px at 88% 0, rgba(255, 150, 100, 0.2), transparent 70%), radial-gradient(70% 900px at 0 300px, rgba(150, 120, 255, 0.14), transparent 70%), linear-gradient(180deg, var(--bg-deep) 0, var(--bg) 1400px, #151b3f 60%, #1b1d44 100%) var(--bg); }
 a { color: var(--rose); }
 a:focus-visible, button:focus-visible { outline: 2px solid var(--rose); outline-offset: 3px; border-radius: 4px; }
 .glyph { font-family: var(--sym); font-variant-emoji: text; font-weight: 400; }
@@ -35,7 +38,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--rose); outline-
 .label { font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); }
 
 /* layout: a chapter rail beside the reading column */
-.shell { display: grid; grid-template-columns: minmax(0, 1fr); padding-inline: 20px; max-width: 1240px; margin: 0 auto; }
+.shell { display: grid; grid-template-columns: minmax(0, 1fr); padding-inline: max(20px, env(safe-area-inset-left, 0px)) max(20px, env(safe-area-inset-right, 0px)); max-width: 1240px; margin: 0 auto; }
 @media (min-width: 1040px) { .shell { grid-template-columns: 230px minmax(0, 1fr); gap: 64px; padding-inline: 40px; } }
 nav.rail { display: none; }
 @media (min-width: 1040px) {
@@ -55,17 +58,21 @@ nav.rail { display: none; }
 main { min-width: 0; padding-bottom: 40px; }
 
 /* hero */
-.hero { padding-block: 44px 10px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; align-items: center; }
+.hero { padding-block: calc(env(safe-area-inset-top, 0px) + 44px) 10px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; align-items: center; }
 .hero > * { min-width: 0; }
 @media (min-width: 860px) { .hero { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; padding-top: 64px; } }
 .wordmark { color: var(--rose); font-size: 15px; font-family: var(--mono); letter-spacing: 0.24em; text-transform: uppercase; margin: 0 0 18px; }
 h1 { font-weight: 200; font-size: clamp(40px, 7vw, 68px); line-height: 1.02; letter-spacing: -0.025em; margin: 0 0 18px; text-wrap: balance; }
 .lede { font-size: 19px; color: var(--text-2); max-width: 34em; margin: 0 0 26px; }
-.btn { display: inline-flex; align-items: center; gap: 10px; background: var(--text); color: #0c1823; text-decoration: none; font-weight: 500; font-size: 15px; border-radius: 999px; padding: 12px 22px; }
+.btn { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #ffbd86, #ff8f5e); color: var(--on-accent); text-decoration: none; font-weight: 500; font-size: 15px; border-radius: 999px; padding: 13px 24px; box-shadow: 0 10px 30px -12px rgba(255, 130, 80, 0.7); min-height: 44px; }
+.btn:active { transform: translateY(1px); }
 .btn svg { width: 18px; height: 18px; }
-.btn.ghost { background: none; color: var(--text); border: 1px solid var(--line-2); }
+.btn.ghost { background: none; color: var(--text); border: 1px solid rgba(255, 171, 118, 0.45); box-shadow: none; }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 figure.wheelfig { margin: 0; position: relative; }
+figure.wheelfig::before { content: ""; position: absolute; left: 50%; top: 0; width: min(100%, 560px); aspect-ratio: 1; transform: translateX(-50%); border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 150, 100, 0.16), rgba(150, 120, 255, 0.08) 45%, transparent 70%); }
+figure.wheelfig .wheel { position: relative; }
 figure.wheelfig .wheel { width: 100%; max-width: 560px; height: auto; display: block; margin: 0 auto; overflow: visible; }
 figure.wheelfig figcaption { margin-top: 10px; text-align: center; font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--faint); text-transform: uppercase; }
 .legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; margin-top: 22px; }
@@ -139,18 +146,34 @@ td b { color: var(--text); font-weight: 500; }
 .phases { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px 24px; margin-top: 18px; }
 .phase p { margin: 6px 0 0; font-size: 14.5px; color: var(--text-2); line-height: 1.5; }
 
-.callout { margin-top: 26px; padding: 18px 20px; border-radius: 14px; border: 1px solid var(--line-2); background: linear-gradient(135deg, rgba(245, 178, 126, 0.09), rgba(18, 36, 52, 0.5)); max-width: 44em; }
+.callout { margin-top: 26px; padding: 18px 20px; border-radius: 14px; border: 1px solid var(--line-2); background: linear-gradient(135deg, rgba(238, 147, 173, 0.12), rgba(255, 171, 118, 0.06) 60%, rgba(30, 38, 80, 0.4)); max-width: 44em; }
 .callout p { margin: 0; color: var(--text-2); }
-.callout .label { color: var(--rose); display: block; margin-bottom: 6px; }
+.callout .label { color: var(--dusk); display: block; margin-bottom: 6px; }
+
+.facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 0; padding: 0; list-style: none; }
+.facts li { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-2); border: 1px solid var(--line-2); border-radius: 999px; padding: 6px 12px; background: rgba(30, 38, 80, 0.35); }
+
+/* install */
+.install { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 22px; }
+.install .card { background: var(--panel-2); }
+.install .card.ios { border-color: rgba(255, 171, 118, 0.45); box-shadow: 0 20px 50px -30px rgba(255, 130, 80, 0.6); }
+.install h3 { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.install h3 svg { width: 22px; height: 22px; color: var(--rose); flex: 0 0 auto; }
+.install ol { margin: 0; padding-left: 20px; display: grid; gap: 8px; color: var(--text-2); font-size: 15px; line-height: 1.5; }
+.install ol b { color: var(--text); font-weight: 500; }
+.install .share { display: inline-block; width: 15px; height: 15px; vertical-align: -2px; color: var(--rose); }
+.urlbox { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 18px; }
+.urlbox code { font-family: var(--mono); font-size: 14px; color: var(--text); background: rgba(30, 38, 80, 0.6); border: 1px solid var(--line-2); border-radius: 10px; padding: 10px 14px; user-select: all; -webkit-user-select: all; overflow-wrap: anywhere; }
+.urlbox button { font: inherit; font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text); background: none; border: 1px solid var(--line-2); border-radius: 999px; padding: 10px 16px; cursor: pointer; min-height: 44px; }
 
 /* closing */
 .closing { position: relative; margin-top: 90px; padding: 80px 0 150px; text-align: center; overflow: hidden; }
 .closing::after { content: ""; position: absolute; left: 50%; bottom: -1260px; width: 1800px; height: 1400px; transform: translateX(-50%); border-radius: 50%; pointer-events: none;
-  background: radial-gradient(circle at 50% 50%, #2a3039 62%, #6a4028 64.5%, #d84a1c 65.3%, #f58d3c 66.2%, rgba(244,169,94,0.55) 67.8%, rgba(111,147,171,0) 71%); }
+  background: radial-gradient(circle at 50% 50%, var(--planet) 62%, #4a2c4e 64.3%, #e0567a 65.1%, #ff8a4c 65.9%, rgba(255,184,120,0.6) 67.6%, rgba(238,147,173,0.18) 69.5%, rgba(238,147,173,0) 72%); }
 .closing h2 { max-width: 16em; margin: 0 auto 16px; }
 .closing p { color: var(--text-2); max-width: 32em; margin: 0 auto 28px; }
 .closing .actions { justify-content: center; position: relative; z-index: 1; }
-footer { text-align: center; padding: 0 20px 40px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--faint); text-transform: uppercase; background: #2a3039; margin-top: -1px; }
+footer { text-align: center; padding: 0 20px calc(env(safe-area-inset-bottom, 0px) + 40px); font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--faint); text-transform: uppercase; background: var(--planet); margin-top: -1px; }
 footer .inner { padding-top: 6px; }
 </style>
 
@@ -161,6 +184,7 @@ footer .inner { padding-top: 6px; }
     <a class="brand" href="../">Natal Chart</a>
     <div class="label sub">Learn astrology</div>
     <a class="ch" href="#chart"><span>01</span>What a birth chart is</a><a class="ch" href="#planets"><span>02</span>Planets and points</a><a class="ch" href="#signs"><span>03</span>Signs, elements and modes</a><a class="ch" href="#houses"><span>04</span>Houses</a><a class="ch" href="#aspects"><span>05</span>Aspects</a><a class="ch" href="#strength"><span>06</span>Reading strength</a><a class="ch" href="#karmic"><span>07</span>Karmic astrology</a><a class="ch" href="#timing"><span>08</span>Transits and timing</a><a class="ch" href="#relationships"><span>09</span>Relationships</a><a class="ch" href="#accuracy"><span>10</span>How accurate the app is</a>
+    <a class="ch" href="#install"><span>↓</span>Get it on your iPhone</a>
     <a class="btn open" href="../">Open the app <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
   </nav>
 
@@ -171,7 +195,8 @@ footer .inner { padding-top: 6px; }
         <h1>How to read the sky you were born under</h1>
         <p class="lede">A birth chart is a map of where the Sun, Moon and planets were at the moment you were born, seen from the place you were born. This guide explains every part of it in plain English, from the twelve signs to transits and relationship charts, so you can open your own chart and know what you are looking at.</p>
         <div class="actions"><a class="btn" href="../">Open the app <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="btn ghost" href="#chart">Start reading</a></div>
-        <nav class="chips" aria-label="Chapters"><a href="#chart"><span>01</span>What a birth chart is</a><a href="#planets"><span>02</span>Planets and points</a><a href="#signs"><span>03</span>Signs, elements and modes</a><a href="#houses"><span>04</span>Houses</a><a href="#aspects"><span>05</span>Aspects</a><a href="#strength"><span>06</span>Reading strength</a><a href="#karmic"><span>07</span>Karmic astrology</a><a href="#timing"><span>08</span>Transits and timing</a><a href="#relationships"><span>09</span>Relationships</a><a href="#accuracy"><span>10</span>How accurate the app is</a></nav>
+        <ul class="facts"><li>Free</li><li>No sign-up</li><li>iPhone, Android, computer</li><li>Matches Astro-Seek</li></ul>
+        <nav class="chips" aria-label="Chapters"><a href="#chart"><span>01</span>What a birth chart is</a><a href="#planets"><span>02</span>Planets and points</a><a href="#signs"><span>03</span>Signs, elements and modes</a><a href="#houses"><span>04</span>Houses</a><a href="#aspects"><span>05</span>Aspects</a><a href="#strength"><span>06</span>Reading strength</a><a href="#karmic"><span>07</span>Karmic astrology</a><a href="#timing"><span>08</span>Transits and timing</a><a href="#relationships"><span>09</span>Relationships</a><a href="#accuracy"><span>10</span>How accurate the app is</a><a href="#install"><span>↓</span>Get it on your iPhone</a></nav>
       </div>
       <figure class="wheelfig">
         <svg class="wheel" viewBox="-34 -34 668 668" role="img" aria-label="Natal chart wheel"><defs>
@@ -385,6 +410,30 @@ footer .inner { padding-top: 6px; }
       <div class="prose"><p>One arc-minute (′) is a sixtieth of a degree, so these are fractions of a sixtieth. A reference chart checked against Astro-Seek matches it exactly: every position, house cusp, daily speed and aspect, including the orbs and whether each aspect is applying or separating. Time zones, including historical daylight saving, come from your device's official time-zone data.</p></div>
     </section>
 
+    <section class="chapter" id="install">
+      <div class="chapter-head"><span class="n">App</span><h2>Get it on your iPhone</h2></div>
+      <div class="prose"><p>Natal Chart runs in your browser, so there is nothing to download from an app store. Add it to your home screen and it opens full screen like any other app, works offline once it has loaded, and keeps your saved charts on your phone.</p></div>
+      <div class="install">
+        <article class="card ios"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>iPhone and iPad</h3><ol>
+          <li>Open the link below in <b>Safari</b>.</li>
+          <li>Tap the <b>Share</b> button <svg class="share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-label="Share icon"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11v9h12v-9"/></svg> at the bottom of the screen.</li>
+          <li>Scroll down and tap <b>Add to Home Screen</b>.</li>
+          <li>Tap <b>Add</b>. The Natal Chart icon appears with your other apps.</li>
+        </ol></article>
+        <article class="card"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg>Android</h3><ol>
+          <li>Open the link below in <b>Chrome</b>.</li>
+          <li>Tap the <b>⋮</b> menu in the top corner.</li>
+          <li>Tap <b>Install app</b> or <b>Add to Home screen</b>.</li>
+        </ol></article>
+        <article class="card"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8.5 20h7M12 16v4"/></svg>Computer</h3><ol>
+          <li>Open the link below in <b>Chrome</b> or <b>Edge</b>.</li>
+          <li>Click the <b>install</b> icon at the right of the address bar.</li>
+          <li>Or simply bookmark it: everything works in the browser too.</li>
+        </ol></article>
+      </div>
+      <div class="urlbox"><code id="app-url">niko-999.github.io/natal</code><button type="button" id="copy-url">Copy link</button></div>
+    </section>
+
     <section class="closing">
       <p class="label">Ready</p>
       <h2>Open your own chart</h2>
@@ -395,6 +444,16 @@ footer .inner { padding-top: 6px; }
 </div>
 <footer><div class="inner">Natal Chart · Calculated in your browser · Nothing you enter leaves your device</div></footer>
 <script>
+  // copy the app's address (select it if the clipboard is not available)
+  (function () {
+    var b = document.getElementById("copy-url"), c = document.getElementById("app-url");
+    if (!b || !c) return;
+    b.addEventListener("click", function () {
+      var done = function () { b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy link"; }, 1800); };
+      var select = function () { var r = document.createRange(); r.selectNodeContents(c); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); };
+      try { navigator.clipboard.writeText("https://" + c.textContent).then(done, select); } catch (e) { select(); }
+    });
+  })();
   // highlight the chapter being read in the side rail
   (function () {
     var links = document.querySelectorAll("nav.rail a.ch");
