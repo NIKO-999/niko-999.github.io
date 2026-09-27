@@ -70,7 +70,7 @@ window.AstroDeep.progressions = {
     mc: "An aspect involving the progressed Midheaven often coincides with a change in career direction, public role or life goals. It marks a period when your vocation and reputation are being reshaped.",
   },
 
-  stations: "When a planet changes direction by progression, its theme shifts gear for decades rather than weeks. A planet turning retrograde tends to draw that energy inward for reflection and review, while a planet turning direct releases it outward into more confident expression.",
+  stations: "When one of your planets changes direction by progression, that part of you shifts gear for decades rather than weeks. A planet turning retrograde draws its energy inwards: you review, rethink and do things your own way, often quietly, for many years. A planet turning direct lets that energy out again, and what you worked through privately starts to show in how you act, speak or love. You usually notice it looking back, as the point when something in you changed pace.",
 };
 
 window.AstroDeep.solarReturn = {

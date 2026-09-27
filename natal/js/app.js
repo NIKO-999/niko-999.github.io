@@ -264,7 +264,15 @@
     if (!p.house || p.key === "asc" || p.key === "mc") return "";
     const H = HOUSES[p.house];
     const P = PLANETS[p.key];
-    return `With ${P.name} in the ${ord(p.house)} house, ${P.focus} ${isPlural(P.focus) ? "are" : "is"} channelled into ${H.areas}.${withDesc === false ? "" : " " + H.desc}`;
+    const d = D(), h = p.house;
+    const rich = (deepPlanetHouse(p.key, h) || {}).text
+      || ((d.asteroids || {})[p.key] && d.asteroids[p.key].houses && d.asteroids[p.key].houses[h])
+      || (p.key === "fortune" && d.fortune && d.fortune.houses && d.fortune.houses[h])
+      || (p.key === "vertex" && d.vertex && d.vertex.houses && d.vertex.houses[h])
+      || (p.key === "northNode" && (deepNodeHouse(h) || {}).story)
+      || (p.key === "southNode" && (deepNodeHouse(((h + 5) % 12) + 1) || {}).story);
+    if (rich) return firstPara(rich);
+    return `Your ${P.name} sits in your ${ord(h)} house, so ${P.focus} ${isPlural(P.focus) ? "flow" : "flows"} into ${H.areas}.${withDesc === false ? "" : " " + H.desc}`;
   }
 
   function aspectText(a) {
@@ -1177,7 +1185,7 @@
     if (inside.length) {
       html += `<h4>Your placements in ${S.name}</h4><div class="list">` + inside.map((p) => pointRow(p)).join("") + `</div>`;
     } else {
-      html += sec("Your placements", `No planets in ${S.name}. Its themes are still active through the house${c.timeKnown ? "s it rules" : ""} and through its ruler, ${pName(S.ruler)}, in ${SIGNS[c.get(S.ruler).sign].name}.`);
+      html += sec("Your placements", `You have no planets in ${S.name}, but its themes still run through your life: through the house${c.timeKnown ? "s it rules in your chart" : ""} and through its ruler, your ${pName(S.ruler)} in ${SIGNS[c.get(S.ruler).sign].name}.`);
     }
     return html;
   }
@@ -1206,11 +1214,12 @@
     ]);
     html += paras([dh ? dh.overview : H.desc]);
     const cf = CUSP_FIELD[h] && deepSign(cusp.sign);
-    html += sec(`${S.name} on the cusp`, [`You approach ${H.areas} ${S.how}.`, cf ? cf[CUSP_FIELD[h][0]] : ""], elColor(cusp.sign));
+    const hc = ((D().houseCusps || {})[h] || {})[cusp.sign];
+    html += sec(`${S.name} on the cusp`, hc ? [hc] : [`You approach ${H.areas} ${S.how}.`, cf ? cf[CUSP_FIELD[h][0]] : ""], elColor(cusp.sign));
     html += sec(`Its ruler, ${pName(ruler)}`, [
       rp.house === h
-        ? `${pName(ruler)} sits in this same house, making these themes self-contained and strongly emphasised.`
-        : `${pName(ruler)} sits in your ${ord(rp.house)} house in ${SIGNS[rp.sign].name}, linking ${H.areas} with ${HOUSES[rp.house].areas}.`,
+        ? `Your ${pName(ruler)}, the ruler of this house, sits inside it, so ${H.areas} are a concentrated, self-contained theme in your life.`
+        : `Your ${pName(ruler)}, the ruler of this house, sits in your ${ord(rp.house)} house in ${SIGNS[rp.sign].name}, so what happens in ${H.areas} is tied to ${HOUSES[rp.house].areas}.`,
       dh && dh.ruler,
     ], PLANETS[ruler].color);
     if (inter) html += sec("Intercepted signs", `${inter.map((s) => SIGNS[s].name).join(" and ")} ${inter.length > 1 ? "are" : "is"} intercepted here, held inside the house without touching a cusp. These qualities can feel hidden or slow to develop until later in life.`);
@@ -1364,7 +1373,7 @@
     else html += sec("In bounds", `Your ${P.name} sits comfortably within the Sun's range, so your ${listJoin(P.keywords)} are woven into the rest of your chart: they answer to your Sun and Moon and show up in step with the rest of you.`);
     const pars = (c.parallels || []).map((x, i) => [x, i]).filter(([x]) => x.a === key || x.b === key);
     if (pars.length) {
-      html += `<h4>Parallels</h4><p class="note" style="text-align:left;margin:0 0 8px">A parallel (same declination) works like a conjunction; a contra-parallel (mirror declination) works like an opposition.</p><div class="list">` + pars.map(([x, i]) => {
+      html += `<h4>Parallels</h4><p class="note" style="text-align:left;margin:0 0 8px">When two of your planets share a declination (a parallel) they work together like a conjunction in you; when they mirror each other (a contra-parallel) they pull like an opposition.</p><div class="list">` + pars.map(([x, i]) => {
         const X = ASPECTS[x.type], o = x.a === key ? x.b : x.a;
         return `<button class="row" data-open="parallel:${i}"><span class="dot" style="color:${X.color}"></span><span class="main"><div class="title"><span class="sym" style="color:${X.color}">${X.glyph}</span> ${esc(pName(o))}</div><div class="sub">${esc(X.name)}</div></span><span class="end"><div class="pos">${orbStr(x.orb)}</div></span></button>`;
       }).join("") + `</div>`;
@@ -1431,7 +1440,7 @@
         const a = state._srAspects[+arg], X = ASPECTS[a.type];
         const dA = deepAspect(a.a, a.b);
         html = sheetSimple(`Solar return ${computeSR().year} · ${X.name}`, `${esc(pShort(a.a))} <span class="sym" style="color:${X.color}">${X.glyph}</span> ${esc(pShort(a.b))}`, `orb ${orbStr(a.orb)}`,
-          [dA ? dA.theme : aspectText(a), dA ? (a.type === "conjunction" ? dA.fusion : FLOW_TYPES.has(a.type) ? dA.flow : dA.tension) : "", "In a solar return chart this describes a theme that colours the year rather than a lifelong trait."]);
+          [dA ? dA.theme : aspectText(a), dA ? (a.type === "conjunction" ? dA.fusion : FLOW_TYPES.has(a.type) ? dA.flow : dA.tension) : "", "In your return chart this is a theme that colours your year, not a lifelong trait."]);
         {
           const sr = computeSR().sr, pa = sr.get(a.a), pb = sr.get(a.b);
           const natal = c.aspects.find((x) => (x.a === a.a && x.b === a.b) || (x.a === a.b && x.b === a.a));
@@ -1471,10 +1480,9 @@
       case "tplanet": html = sheetTransitPlanet(arg); break;
       case "element": {
         const X = K.ELEMENTS[arg], list = d.elements[arg], B = deepBalance(arg);
-        const lead = list.length >= 4 ? (B ? B.strong : X.strong) : list.length <= 1 ? (B ? B.weak : X.weak) : `${X.strong} With ${list.length} placements, this is a moderate influence.`;
+        const lead = list.length >= 4 ? (B ? B.strong : X.strong) : list.length <= 1 ? (B ? B.weak : X.weak) : `${B ? B.strong : X.strong} With ${list.length} placements here, it is a steady, moderate influence in you rather than the loudest voice in your chart.`;
         html = sheetSimple("Element", X.name, `${list.length} placement${list.length === 1 ? "" : "s"}`, [list.length ? `${list.map(pName).join(", ")}.` : "", lead]);
         // the other side of the element, without repeating the paragraph above
-        if (B && list.length >= 2 && list.length <= 3) html += sec("What it brings", B.strong);
         if (B && list.length >= 2) html += sec("If it were missing", B.weak);
         if (B && list.length <= 1) html += sec("When it runs strong", B.strong);
         break;
@@ -1501,15 +1509,15 @@
       }
       case "sect":
         html = sheetSimple("Sect", c.isDay ? "Day chart" : "Night chart", "", [c.isDay
-          ? "The Sun was above the horizon at birth. In traditional astrology the Sun, Jupiter and Saturn are the sect planets: Jupiter is your most reliable benefic and Saturn is easier to work with. Mars tends to be the more difficult planet."
-          : "The Sun was below the horizon at birth. The Moon, Venus and Mars are the sect planets: Venus is your most reliable benefic and Mars is better contained. Saturn tends to be the more difficult planet.",
-          `Part of Fortune is calculated with the ${c.isDay ? "day" : "night"} formula.`]);
+          ? "You were born by day, with the Sun above the horizon. In traditional astrology that makes the Sun, Jupiter and Saturn your sect planets: Jupiter is your most reliable helper, Saturn is easier for you to work with, and Mars is the planet that tends to give you the most trouble."
+          : "You were born by night, with the Sun below the horizon. In traditional astrology that makes the Moon, Venus and Mars your sect planets: Venus is your most reliable helper, Mars is better contained in you, and Saturn is the planet that tends to give you the most trouble.",
+          `Your Part of Fortune is calculated with the ${c.isDay ? "day" : "night"} formula for this reason.`]);
         {
           const ben = c.isDay ? "jupiter" : "venus", mal = c.isDay ? "mars" : "saturn";
           const light = c.isDay ? "sun" : "moon";
           const line = (k) => { const q = c.get(k); return `${pName(k)} in ${SIGNS[q.sign].name}${q.house ? `, ${ord(q.house)} house` : ""}`; };
-          html += sec("Your most helpful planet", `${line(ben)}. As the benefic of your sect, it tends to deliver its gifts reliably. ${c.get(ben).house ? `Look to ${HOUSES[c.get(ben).house].areas} for the areas where life most readily supports you.` : ""}`);
-          html += sec("The planet that needs care", `${line(mal)}. As the malefic out of sect, it is the planet most likely to show its harder side. ${c.get(mal).house ? `Friction tends to gather around ${HOUSES[c.get(mal).house].areas}; conscious effort there turns difficulty into strength.` : ""}`);
+          html += sec("Your most helpful planet", `${line(ben)}. As the helpful planet of your sect, it delivers its gifts to you reliably. ${c.get(ben).house ? `Life most readily supports you through ${HOUSES[c.get(ben).house].areas}, where things tend to come right for you even when the rest is hard.` : ""}`);
+          html += sec("The planet that needs care", `${line(mal)}. As the difficult planet out of your sect, it is the one most likely to show you its harder side. ${c.get(mal).house ? `Friction tends to gather for you around ${HOUSES[c.get(mal).house].areas}, and the strength you build there is hard-won and lasting.` : ""}`);
           html += sec("Sect light", `${line(light)}. The ${c.isDay ? "Sun" : "Moon"} is the leader of your sect, so ${c.isDay ? "purpose, visibility and conscious will" : "feeling, instinct and emotional needs"} are the steering force of your life.`);
         }
         break;
@@ -2101,8 +2109,9 @@
     if (ev.kind === "phase") {
       title = `${ev.name} in ${SIGNS[ev.sign].name}`;
       const house = state.chart.timeKnown ? houseOfLon(E.lonAt("moon", d, { zodiac: state.settings.zodiac })) : null;
+      const lunation = ((D().lunations || {})[ev.name] || {})[ev.sign];
       body = [
-        { "New Moon": "A New Moon starts a fresh lunar cycle: a good moment to set intentions and begin things quietly.", "First Quarter": "The First Quarter is a moment of action and decision: obstacles show you what needs effort.", "Full Moon": "A Full Moon brings things to light and to a head: completion, clarity and heightened feelings.", "Last Quarter": "The Last Quarter is for review and release: let go of what did not work this cycle." }[ev.name],
+        lunation || { "New Moon": "A New Moon starts a fresh lunar cycle: a good moment to set intentions and begin things quietly.", "First Quarter": "The First Quarter is a moment of action and decision: obstacles show you what needs effort.", "Full Moon": "A Full Moon brings things to light and to a head: completion, clarity and heightened feelings.", "Last Quarter": "The Last Quarter is for review and release: let go of what did not work this cycle." }[ev.name],
         `It falls in ${SIGNS[ev.sign].name}${house ? `, in your ${ord(house)} house of ${HOUSES[house].areas}` : ""}, so ${SIGNS[ev.sign].name} themes${house ? " and that area of life" : ""} are highlighted.`,
       ];
       // the lunation's degree, and any birth planets it lands on or opposes
@@ -2810,7 +2819,7 @@
     const ang = R.angular.filter((a) => a.key === key);
     let html = `<section class="hero"><div class="eyebrow">Solar return ${R.year}</div><h2 class="display">${esc(P.name)} in the ${ord(p.house)} house</h2>
       <div class="subline"><span class="sym" style="color:${P.color}">${P.glyph}</span> ${degStr(p)} ${signGlyph(p.sign)} ${esc(S.name)}${p.retro ? ' <span class="retro">℞</span>' : ""}</div></section>`;
-    if (key === rulerOf(R.sr.get("asc").sign)) html += sec("Ruler of the year", `As ruler of the return Ascendant, ${P.name} steers the whole year. Its house (${HOUSES[p.house].areas}) and condition say a great deal about where the year's story unfolds.`);
+    if (key === rulerOf(R.sr.get("asc").sign)) html += sec("Ruler of the year", `As ruler of your return Ascendant, ${P.name} steers your whole year. Its house (${HOUSES[p.house].areas}) and condition say a great deal about where the year's story unfolds.`);
     if (ang.length && SRD.angular && SRD.angular[key]) html += sec(`On the ${ang[0].angle}`, SRD.angular[key]);
     if (key === "sun" && SRD.sunHouse) html += sec("This year's focus", SRD.sunHouse[p.house]);
     else if (key === "moon" && SRD.moonHouse) html += sec("This year's feelings", [SRD.moonHouse[p.house], SRD.moonSign && SRD.moonSign[p.sign]]);
@@ -2997,7 +3006,7 @@
     const S = D().synastry || {};
     const m = CAT_META[cat];
     let html = `<section class="hero"><div class="eyebrow">Synastry · compatibility</div><h2 class="display">${esc(m.name)}</h2><div class="subline"><strong>${Y.scores[cat]}%</strong></div></section>`;
-    html += paras([S.categories && S.categories[cat], cat === "challenge" ? "A higher score means more friction. Some friction keeps a relationship alive; a lot asks for conscious work." : "The score grows with the number and closeness of supportive contacts in this area. Tense contacts count for less, but they still count: they bind people together."]);
+    html += paras([S.categories && S.categories[cat], cat === "challenge" ? "A higher score means more friction between you. Some friction keeps a relationship alive; a lot asks both of you to work at it on purpose." : "Your score grows with the number and closeness of supportive contacts between your charts in this area. Tense contacts count for less, but they still count: they are part of what binds you together."]);
     const idx = Y.members[cat];
     if (idx.length) {
       html += `<h4>Contacts in this area</h4><div class="list">` + idx.map((i) => {
