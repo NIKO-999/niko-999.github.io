@@ -1250,8 +1250,7 @@
     const strength = a.orb < 1 ? "At under 1°, this is one of the defining links in your chart, and you feel it almost constantly."
       : a.orb < 3 ? "It is a close aspect, so you feel it often." : "It is a wider aspect, so it shows up in particular moments more than every day.";
     const motion = a.applying ? "It is applying, so it feels like something you are still growing into." : "It is separating, so by now it feels like second nature to you.";
-    out.push(`${strength} ${motion}`);
-    return out;
+    return [`${out[0]} ${strength} ${motion}`];
   }
   function sheetAspect(i) {
     const c = state.chart;
