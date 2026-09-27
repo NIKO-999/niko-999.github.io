@@ -32,3 +32,6 @@ When you change any file, bump `VERSION` in `sw.js` so installed copies pick up 
 
 ## Swiss Ephemeris comparison
 `test/swiss/` compares the engine with the Swiss Ephemeris (what Astro-Seek uses) over 400 random charts. Every point matches within half an arc-minute and every house cusp within 0.07′. See `test/swiss/README.md`.
+
+## Learn astrology guide
+`learn/index.html` is a plain-English guide to reading a chart, linked from the app's start screen. It is generated from the app's own content (`node learn/build.js`), so rebuild it after changing `js/content.js` or the `js/deep-*.js` readings.

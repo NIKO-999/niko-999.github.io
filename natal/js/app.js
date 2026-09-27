@@ -3054,6 +3054,7 @@
       <div class="error" id="form-error"></div>
     </form>`;
     if (state.partnerMode) return html + `<div class="chips"><button class="chip" data-act="cancelpartner">Cancel</button></div>`;
+    html += `<p class="learn-link"><a href="${window.NATAL_EMBED ? "https://niko-999.github.io/natal/learn/" : "learn/"}">New to astrology? Learn how to read a chart</a></p>`;
     // quick way back to the most recently entered chart
     const lastId = store.get("last", null);
     const last = saved.find((x) => x.id === lastId) || saved[0];
