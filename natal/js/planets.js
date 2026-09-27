@@ -7,8 +7,9 @@
  *    rings with gaps, ringlets, translucency and mutual shadows.
  *  - Moon: power-law craters, central peaks, a ray crater, lunar photometry.
  *  - A small cloudy world.
- * The moon and small world turn slowly and the gas giant's rings orbit it: the worker
- * keeps a map of each moving surface and redraws only what moves (at half rate while scrolling).
+ * The moon and small world turn slowly (the worker keeps a map of each surface and redraws
+ * only what moves, holding still while the page scrolls); the gas giant's rings orbit it as
+ * compositor animations, so they keep turning during a scroll.
  * Rendering runs in a Web Worker so scrolling never stalls, and finished
  * images are cached so later launches show them instantly.
  */
@@ -504,7 +505,7 @@
     /* ---------- slow axial spin (runs inside the worker) ---------- */
     // seconds per full turn
     const PERIOD = { ring: 40, moon: 40, far: 25 };
-    let paused = false, slow = false;
+    let paused = false;
     function buildMap(kind, parts, W) {
       const r = parts.R * W;
       // two texels per screen pixel, so sampling it stays as sharp as the still picture
@@ -624,65 +625,67 @@
       return { planet, shade, tex, T, RW, rocks, open: parts.open, roll: parts.roll };
     }
 
-    /**
-     * The moon and small world as globes the page turns in 3D (a compositor rotation, like the
-     * rings, so it carries on while the page scrolls). The worker supplies the unlit surface as
-     * a longitude/latitude map, and the fixed lighting as an overlay: the lit colour is
-     * SKY * (1 - L) + surface * L, which is the surface under SKY at alpha 1 - L.
-     */
-    function globeLayers(kind, W, haveMap) {
+    async function spin(canvas, kind, W, key, post) {
       const parts = PARTS[kind]();
-      const RW = parts.R * W;
-      const TW = Math.ceil((TAU * RW * 1.5) / 8) * 8, TH = TW / 2;
-      const tex = new Uint8ClampedArray(haveMap ? 0 : TW * TH * 4); // the page keeps the map from last time
-      const lx = LIGHT[0], ly = LIGHT[1], lz = LIGHT[2];
-      for (let j = 0; j < (haveMap ? 0 : TH); j++) {
-        const phi = Math.PI / 2 - ((j + 0.5) / TH) * Math.PI, sl = Math.sin(phi);
-        for (let i = 0; i < TW; i++) {
-          const lon = -Math.PI + ((i + 0.5) / TW) * TAU;
-          const s = parts.albedo(sl, lon);
-          let c;
-          if (kind === "moon") {
-            // relief shading baked in, as lit from the sun's side of the moon
-            const relief = clamp(1 + (0.7 * (s[1] * lx + s[2] * ly)) / lz, 0.35, 1.7);
-            c = [178 * s[0] * relief, 181 * s[0] * relief, 186 * s[0] * relief];
-          } else c = s;
-          const k = (j * TW + i) * 4;
-          tex[k] = c[0]; tex[k + 1] = c[1]; tex[k + 2] = c[2]; tex[k + 3] = 255;
-        }
+      let map = await loadMap(key);
+      if (!map || map.MW * map.MH * 3 !== map.m.length) {
+        map = buildMap(kind, parts, W);
+        saveMap(key, map);
       }
-      const light = new Uint8ClampedArray(W * W * 4);
+      const ctx = canvas.getContext("2d");
+      const img = new ImageData(W, W), d = img.data;
+      const masked = kind === "giant" || kind === "moon";
+      const live = [];
+      let x0 = W, y0 = W, x1 = 0, y1 = 0;
       for (let row = 0; row < W; row++) {
         for (let col = 0; col < W; col++) {
           const fx = (col + 0.5) / W, fy = (row + 0.5) / W;
           const px = parts.pixel(fx, fy, W);
           if (!px) continue;
           const i = (row * W + col) * 4;
-          if (px.rgba) { light[i] = px.rgba[0]; light[i + 1] = px.rgba[1]; light[i + 2] = px.rgba[2]; light[i + 3] = px.rgba[3]; continue; }
-          let L, extra = [0, 0, 0];
-          if (kind === "moon") {
-            const p = px.p, mu0 = p[0] * lx + p[1] * ly + p[2] * lz, mu = Math.max(p[2], 0.05);
-            const ls = mu0 > 0 ? (2 * mu0) / (mu0 + mu) : 0;
-            L = clamp((0.65 * ls + 0.35 * Math.max(mu0, 0)) * smooth(-0.03, 0.08, mu0) * 0.95, 0, 1);
-            const shine = (1 - smooth(-0.2, 0.05, mu0)) * 0.08 * 0.85, rim = Math.pow(1 - p[2], 4) * smooth(0, 0.6, mu0);
-            extra = [60 * shine + rim * 60, 76 * shine + rim * 30, 96 * shine + rim * 10];
-          } else L = clamp(px.A, 0, 1);
-          const al = Math.max(1 - L, 0.004);
-          light[i] = (SKY[0] * (1 - L) + extra[0]) / al; light[i + 1] = (SKY[1] * (1 - L) + extra[1]) / al; light[i + 2] = (SKY[2] * (1 - L) + extra[2]) / al;
-          light[i + 3] = (1 - L) * 255;
+          const fm = masked ? fadeMask(fx, fy) : 1;
+          if (px.rgba) {
+            d[i] = px.rgba[0]; d[i + 1] = px.rgba[1]; d[i + 2] = px.rgba[2]; d[i + 3] = px.rgba[3] * fm;
+            continue;
+          }
+          px.i = i;
+          d[i + 3] = px.a * fm;
+          live.push(px);
+          if (col < x0) x0 = col; if (col > x1) x1 = col; if (row < y0) y0 = row; if (row > y1) y1 = row;
         }
       }
-      return { tex, TW, TH, light, R: parts.R };
+      const s = [0, 0, 0];
+      let phase = 0;
+      const frame = (full) => {
+        for (let n = 0; n < live.length; n++) {
+          const px = live[n];
+          const c = colourOf(parts, px, sample(map, px.lat, px.lon - phase, s));
+          d[px.i] = c[0]; d[px.i + 1] = c[1]; d[px.i + 2] = c[2];
+        }
+        if (full) ctx.putImageData(img, 0, 0);
+        else ctx.putImageData(img, 0, 0, x0, y0, x1 - x0 + 1, y1 - y0 + 1);
+      };
+      frame(true);
+      post({ type: "spinReady", kind });
+      let last = Date.now();
+      const step = 1000 / (kind === "far" ? 12 : 20);
+      setInterval(() => {
+        const now = Date.now();
+        if (!paused) {
+          phase += ((now - last) / 1000 / PERIOD[kind]) * TAU;
+          frame(false);
+        }
+        last = now;
+      }, step);
     }
     const setPaused = (v) => { paused = !!v; };
-    const setSlow = (v) => { slow = !!v; };
 
-    return { renderBuffer, globeLayers, setPaused, setSlow, ringLayers, PERIOD };
+    return { renderBuffer, spin, setPaused, ringLayers };
   }
 
   /* ---------- worker plumbing ---------- */
   let worker = null, jobId = 0;
-  const spinReady = {}, framesReady = {};
+  const spinReady = {};
   let ringsReady = null;
   const pending = new Map();
   function getWorker() {
@@ -690,17 +693,15 @@
     try {
       const src = "const LIB = (" + SKYLIB.toString() + ")();" +
         "onmessage = (e) => { const m = e.data;" +
-        " if (m.type === 'globe') { const g = LIB.globeLayers(m.kind, m.W, m.haveMap); postMessage(Object.assign({ type: 'globe', kind: m.kind, period: LIB.PERIOD[m.kind] }, g), [g.tex.buffer, g.light.buffer]); return; }" +
+        " if (m.type === 'spin') { LIB.spin(m.canvas, m.kind, m.W, m.key, (x) => postMessage(x)).catch(() => {}); return; }" +
         " if (m.type === 'rings') { const r = LIB.ringLayers(m.W); postMessage(Object.assign({ type: 'rings' }, r), [r.planet.buffer, r.shade.buffer, r.tex.buffer]); return; }" +
         " if (m.type === 'pause') { LIB.setPaused(m.value); return; }" +
-        " if (m.type === 'slow') { LIB.setSlow(m.value); return; }" +
         " const { id, kind, geo, W, H } = m;" +
         " try { const buf = LIB.renderBuffer(kind, geo, W, H); postMessage({ id, buf }, [buf.buffer]); }" +
         " catch (err) { postMessage({ id, error: String(err) }); } };";
       worker = new Worker(URL.createObjectURL(new Blob([src], { type: "text/javascript" })));
       worker.onmessage = (e) => {
         if (e.data.type === "spinReady") { const f = spinReady[e.data.kind]; if (f) f(); return; }
-        if (e.data.type === "globe") { const f = framesReady[e.data.kind]; if (f) f(e.data); return; }
         if (e.data.type === "rings") { if (ringsReady) ringsReady(e.data); return; }
         const job = pending.get(e.data.id);
         pending.delete(e.data.id);
@@ -840,82 +841,36 @@
     w.postMessage({ type: "rings", W: m.px });
   }
 
-  /* A globe of small tiles, each tangent to the sphere and showing its patch of the surface
-     map, inside a round clip. One rotation turns the whole globe; tiles on the far side face
-     away and are hidden. The lighting stays put on top, so the day side stays where the sun is. */
   function startSpin(m) {
     const w = getWorker();
-    if (!m || !w || reduceMotion) return;
-    const mapKey = new URL(`./__sky/${SKY_VERSION}/globe-${m.kind}-${m.px}.png`, location.href).href;
-    let saved = null;
-    framesReady[m.kind] = (G) => {
-      framesReady[m.kind] = null;
-      const withMap = (blob) => {
-        if (!blob) return;
-        const url = URL.createObjectURL(blob);
-        const size = m.host.getBoundingClientRect().width, R = G.R * size; // CSS px
-        const K = m.kind === "moon" ? 12 : 8, NL = m.kind === "moon" ? 24 : 16;
-        const TAU = Math.PI * 2, dPhi = Math.PI / K, dLam = TAU / NL, over = m.kind === "moon" ? 0.7 : 0.5; // px of overlap hides seams
-        const globe = document.createElement("div");
-        globe.className = "globe" + (m.kind === "moon" ? " faded" : "");
-        const clip = document.createElement("div");
-        clip.className = "globe-clip";
-        clip.style.cssText = `width:${2 * R}px;height:${2 * R}px;margin:${-R}px 0 0 ${-R}px`;
-        const spin = document.createElement("div");
-        spin.className = "globe-spin";
-        spin.style.animationDuration = G.period + "s";
-        let html = "";
-        for (let k = 0; k < K; k++) {
-          const phi0 = Math.PI / 2 - (k + 1) * dPhi, phiC = phi0 + dPhi / 2;
-          const wide = Math.cos(Math.min(Math.abs(phi0), Math.abs(phi0 + dPhi)) * (phi0 < 0 && phi0 + dPhi > 0 ? 0 : 1));
-          const h = R * dPhi + over, wd = R * wide * dLam + over;
-          // the map drawn at the scale of this band's widest edge
-          const bw = (wd - over) / dLam * TAU, bh = (h - over) / dPhi * Math.PI;
-          for (let j = 0; j < NL; j++) {
-            const lam0 = -Math.PI + j * dLam, lamC = lam0 + dLam / 2;
-            const bx = -((lam0 + Math.PI) / TAU) * bw + over / 2, by = -(k * dPhi / Math.PI) * bh + over / 2;
-            html += `<i style="width:${wd.toFixed(2)}px;height:${h.toFixed(2)}px;margin:${(-h / 2).toFixed(2)}px 0 0 ${(-wd / 2).toFixed(2)}px;` +
-              `background-size:${bw.toFixed(2)}px ${bh.toFixed(2)}px;background-position:${bx.toFixed(2)}px ${by.toFixed(2)}px;` +
-              `transform:rotateY(${((lamC * 180) / Math.PI).toFixed(3)}deg) rotateX(${((phiC * 180) / Math.PI).toFixed(3)}deg) translateZ(${(R * Math.cos(dLam / 2) * Math.cos(Math.min(dPhi / 2, 0.3))).toFixed(2)}px)"></i>`;
-          }
-        }
-        spin.innerHTML = html;
-        spin.style.setProperty("--globe-map", `url(${url})`);
-        clip.appendChild(spin);
-        const light = layer(imgCanvas(G.light, m.px, m.px));
-        globe.append(clip, light);
-        globe.style.visibility = "hidden";
-        m.host.appendChild(globe);
-        const img = new Image();
-        img.onload = () => requestAnimationFrame(() => requestAnimationFrame(() => {
-          globe.style.visibility = "visible";
-          m.canvas.style.visibility = "hidden";
-        }));
-        img.src = url;
-      };
-      if (saved) return withMap(saved);
-      imgCanvas(G.tex, G.TW, G.TH).toBlob((blob) => {
-        withMap(blob);
-        if (blob && "caches" in window) caches.open("natal-sky").then((c) => c.put(mapKey, new Response(blob, { headers: { "Content-Type": "image/png" } }))).catch(() => {});
-      });
+    if (!m || !w || reduceMotion || typeof OffscreenCanvas === "undefined" || !m.canvas.transferControlToOffscreen) return;
+    const sc = document.createElement("canvas");
+    sc.width = sc.height = m.px;
+    sc.style.cssText = "position:absolute;left:0;top:0;width:100%;height:100%;display:block;visibility:hidden";
+    m.host.appendChild(sc);
+    let off;
+    try { off = sc.transferControlToOffscreen(); } catch (e) { sc.remove(); return; }
+    spinReady[m.kind] = () => {
+      // swap on a later frame so the first spinning frame has been committed
+      requestAnimationFrame(() => requestAnimationFrame(() => { sc.style.visibility = "visible"; m.canvas.style.visibility = "hidden"; }));
     };
-    const ask = () => w.postMessage({ type: "globe", kind: m.kind, W: m.px, haveMap: !!saved });
-    if (!("caches" in window)) return ask();
-    caches.open("natal-sky").then((c) => c.match(mapKey)).then((res) => (res ? res.blob() : null)).then((b) => { saved = b; }, () => {}).then(ask);
+    const key = new URL(`./__sky/${SKY_VERSION}/map-${m.kind}-${m.px}.bin`, location.href).href;
+    w.postMessage({ type: "spin", canvas: off, kind: m.kind, W: m.px, key }, [off]);
   }
-  // pause in the background or behind a detail page; while scrolling, keep turning at half the frame rate
-  let pausedNow = false, slowNow = false, scrollUntil = 0, scrollTimer = null;
+  // everything pauses in the background or behind a detail page; the moon and small world also
+  // hold still while the page scrolls and pick up where they left off once it stops
+  let pausedNow = false, workerPaused = false, scrollUntil = 0, scrollTimer = null;
   function updatePause() {
     const p = document.hidden || document.body.classList.contains("detail-open");
-    if (p !== pausedNow && worker) { pausedNow = p; worker.postMessage({ type: "pause", value: p }); document.documentElement.classList.toggle("sky-paused", p); }
-    const sl = Date.now() < scrollUntil;
-    if (sl !== slowNow && worker) { slowNow = sl; worker.postMessage({ type: "slow", value: sl }); }
+    if (p !== pausedNow) { pausedNow = p; document.documentElement.classList.toggle("sky-paused", p); }
+    const wp = p || Date.now() < scrollUntil;
+    if (wp !== workerPaused && worker) { workerPaused = wp; worker.postMessage({ type: "pause", value: wp }); }
   }
   window.addEventListener("scroll", () => {
-    scrollUntil = Date.now() + 250;
+    scrollUntil = Date.now() + 200;
     updatePause();
     clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(updatePause, 270);
+    scrollTimer = setTimeout(updatePause, 220);
   }, { passive: true });
   document.addEventListener("visibilitychange", updatePause);
   new MutationObserver(updatePause).observe(document.body, { attributes: true, attributeFilter: ["class"] });
