@@ -3767,6 +3767,13 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      ticking re-queues the fortnight without it, which is why the log is
      in the fingerprint. A tick made with no signal leaves the nudge
      standing, and a nudge for something you already did costs one tap. */
+  /* A SHIFT IS NOT ASKED ABOUT. It happens whether or not anybody
+     ticks it, so a question after it is noise. By NAME, not by kind:
+     the work kind also holds Deep work, and that one can be skipped. */
+  function cdIsShift(n) {
+    return /\bshifts?\b/i.test(n) || /^\s*(work|job)\b(?!\s*out)/i.test(n);
+  }
+
   function cdPushList() {
     var out = [], now = Date.now(), today = cdToday();
     for (var i = 0; i < PUSH_DAYS; i++) {
@@ -3779,7 +3786,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
         if (b.p) body += ' · ' + b.p;
         var m = { t: b.n, b: body, g: iso + '.' + b.id };
         if (t > now + 30e3 && !cdPushQuiet(t)) { out.push({ t: t, m: m }); if (!first) first = m; }
-        if (cdPushAsk() && !cdDone(iso, b.id)) {
+        if (cdPushAsk() && !cdDone(iso, b.id) && !cdIsShift(b.n)) {
           var at = new Date(p[0], p[1], p[2], 0, Math.max(b.e, b.s) + ASK_AFTER).getTime();
           if (at > now + 30e3 && !cdPushQuiet(at)) out.push({ t: at, m: { t: b.n, b: 'Did you do it? · ' + (b.e > b.s ? 'ended ' + cdHM(b.e) : 'at ' + cdHM(b.s)), g: iso + '.' + b.id + '.ask', u: '#tick=' + iso + '.' + b.id } });
         }

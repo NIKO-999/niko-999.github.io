@@ -2117,6 +2117,17 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.click(`.cd-it[data-id="${deep.id}"] .cd-dot`);
     await until(async () => (await openAll()).some((o) => o.g === '2026-09-25.' + deep.id + '.ask') || null, 8000);
 
+    /* A SHIFT IS NOT ASKED ABOUT: it gets its start and never the
+       question, while Deep work, the same kind, still asks. */
+    await page.click('#cdAdd'); await sheetUp(page);
+    await page.fill('.cd-say', 'work friday 14:00 to 16:00');
+    await page.click('#cdFSave'); await page.waitForTimeout(320);
+    const shift = (await store(page, 'cad.week.v1')).find((b) => b.n === 'Work');
+    const shiftQ = shift && await until(async () => { const q = (await openAll()).filter((o) => o.g.indexOf('2026-09-25.' + shift.id) === 0); return q.length ? q : null; }, 8000);
+    ok('a shift gets its start reminder and is never asked whether it happened',
+      !!shiftQ && shiftQ.length === 1 && !/\.ask$/.test(shiftQ[0].g) && (await openAll()).some((o) => o.g === '2026-09-25.' + deep.id + '.ask'), shiftQ);
+    if (shift) { await page.click(`.cd-it[data-id="${shift.id}"] .cd-rb`); await sheetUp(page); await page.click('#cdFDel'); await page.waitForTimeout(320); }
+
     /* The thought rides the first reminder of each day. Tomorrow's is
        worked out from tomorrow's date, so it is in the queue today. */
     const tomQ = await page.evaluate(() => window.cadence.reflect('2026-09-26'));

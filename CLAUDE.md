@@ -5520,6 +5520,20 @@ otherwise Complete or Not yet. Who kept it was never what the line was
 for. Asserted off each row's own fortnight of dots rather than a typed
 figure, and bite-proved by putting the keeper's branch back.
 
+### A shift is never asked whether it happened
+
+Reported in one line: a shift is fixed every time it goes on the week,
+so *Did you do it?* after it is a question with one answer. It still
+gets its start reminder and never the follow-up.
+
+**BY NAME, NOT BY KIND.** The keyword table puts Deep work in the same
+`work` kind as a shift, and Deep work is exactly the block you can skip,
+so skipping the kind would take away the one question worth asking.
+`cdIsShift` reads a name that says shift anywhere, or one that starts
+with work or job, but not work out. Asserted on one queue: the shift
+has its start and no question, and Deep work still asks. Proved by
+breaking the name match and watching the check fail.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
