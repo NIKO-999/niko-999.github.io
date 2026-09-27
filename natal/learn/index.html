@@ -198,17 +198,21 @@ td b { color: var(--text); font-weight: 500; }
 
 footer { text-align: center; padding: 0 20px calc(env(safe-area-inset-bottom, 0px) + 40px); font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--faint); text-transform: uppercase; background: var(--planet); margin-top: -1px; }
 footer .inner { padding-top: 6px; }
+.tabbar a.back-app { color: var(--text); }
+nav.rail .back-rail { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); text-decoration: none; margin: 0 0 18px 10px; }
+nav.rail .back-rail:hover { color: var(--text); }
 </style>
 
 </head>
 <body>
 <div class="shell">
   <nav class="rail" aria-label="Chapters">
-    <a class="brand" href="#start" data-tab="start">Natal Chart</a>
+    <a class="back-rail" href="../">‹ Back to app</a>
+    <a class="brand" href="../">Natal Chart</a>
     <div class="label sub">Learn astrology</div>
     <a class="ch" href="#start" data-tab="start"><span>01</span>What a birth chart is</a><a class="ch" href="#planets" data-tab="planets"><span>02</span>Planets and points</a><a class="ch" href="#signs" data-tab="signs"><span>03</span>Signs, elements and modes</a><a class="ch" href="#houses" data-tab="houses"><span>04</span>Houses</a><a class="ch" href="#aspects" data-tab="aspects"><span>05</span>Aspects</a><a class="ch" href="#strength" data-tab="strength"><span>06</span>Reading strength</a><a class="ch" href="#karmic" data-tab="karmic"><span>07</span>Karmic astrology</a><a class="ch" href="#timing" data-tab="timing"><span>08</span>Transits and timing</a><a class="ch" href="#relationships" data-tab="relationships"><span>09</span>Relationships</a><a class="ch" href="#app" data-tab="app"><span>10</span>Using the app</a><a class="ch" href="#accuracy" data-tab="accuracy"><span>11</span>How accurate the app is</a><a class="ch" href="#install" data-tab="install"><span>12</span>Get it on your iPhone</a>
   </nav>
-  <nav class="tabbar" aria-label="Sections"><div class="tabbar-inner"><a href="#start" data-tab="start">Start</a><a href="#planets" data-tab="planets">Planets</a><a href="#signs" data-tab="signs">Signs</a><a href="#houses" data-tab="houses">Houses</a><a href="#aspects" data-tab="aspects">Aspects</a><a href="#strength" data-tab="strength">Strength</a><a href="#karmic" data-tab="karmic">Karmic</a><a href="#timing" data-tab="timing">Timing</a><a href="#relationships" data-tab="relationships">Relationships</a><a href="#app" data-tab="app">The app</a><a href="#accuracy" data-tab="accuracy">Accuracy</a><a href="#install" data-tab="install">Install</a></div></nav>
+  <nav class="tabbar" aria-label="Sections"><div class="tabbar-inner"><a class="back-app" href="../">‹ Back to app</a><a href="#start" data-tab="start">Start</a><a href="#planets" data-tab="planets">Planets</a><a href="#signs" data-tab="signs">Signs</a><a href="#houses" data-tab="houses">Houses</a><a href="#aspects" data-tab="aspects">Aspects</a><a href="#strength" data-tab="strength">Strength</a><a href="#karmic" data-tab="karmic">Karmic</a><a href="#timing" data-tab="timing">Timing</a><a href="#relationships" data-tab="relationships">Relationships</a><a href="#app" data-tab="app">The app</a><a href="#accuracy" data-tab="accuracy">Accuracy</a><a href="#install" data-tab="install">Install</a></div></nav>
 
   <main>
     <section class="panel" id="start">
