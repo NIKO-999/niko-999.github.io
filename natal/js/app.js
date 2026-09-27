@@ -307,7 +307,7 @@
 
   /* deep interpretation library (js/deep-*.js), with graceful fallback */
   const D = () => window.AstroDeep || {};
-  const ASPECT_ORDER = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron", "northNode", "lilith", "asc", "mc"];
+  const ASPECT_ORDER = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto", "chiron", "northNode", "lilith", "asc", "mc", "fortune", "vertex"];
   function deepPlanetSign(key, sign) {
     const d = D();
     if (key === "sun" || key === "moon" || key === "asc") return d.bigThree && d.bigThree[key] && d.bigThree[key][sign];
@@ -323,7 +323,19 @@
     const d = D();
     const [x, y] = ASPECT_ORDER.indexOf(a) < ASPECT_ORDER.indexOf(b) ? [a, b] : [b, a];
     const k = x + "|" + y;
-    return (d.aspects1 && d.aspects1[k]) || (d.aspects2 && d.aspects2[k]) || null;
+    return (d.aspectsRich && d.aspectsRich[k]) || null;
+  }
+  /* The reading for an aspect of a given type. The Descendant and IC sit opposite the Ascendant
+     and Midheaven, so an aspect to one is the matching aspect to the other: a planet on your
+     Descendant is opposite your Ascendant, a trine to the IC is a sextile to the MC. */
+  const AXIS_SWAP = { dsc: "asc", ic: "mc" };
+  const AXIS_TYPE = { conjunction: "opposition", opposition: "conjunction", trine: "sextile", sextile: "trine" };
+  function aspectReading(a, b, type) {
+    let t = type;
+    for (const k of [a, b]) if (AXIS_SWAP[k]) t = AXIS_TYPE[t] || t;
+    const d = deepAspect(AXIS_SWAP[a] || a, AXIS_SWAP[b] || b);
+    if (!d || (AXIS_SWAP[a] && AXIS_SWAP[b])) return null;
+    return { theme: d.theme, body: t === "conjunction" ? d.fusion : FLOW_TYPES.has(t) ? d.flow : d.tension };
   }
   const deepAsteroid = (k) => (D().asteroids && D().asteroids[k]) || null;
   const deepSign = (k) => (D().signs && D().signs[k]) || null;
@@ -1217,12 +1229,36 @@
   }
 
   const FLOW_TYPES = new Set(["trine", "sextile", "semisextile", "quintile", "biquintile"]);
+  const listJoin = (a) => a.length < 2 ? a.join("") : a.slice(0, -1).join(", ") + " and " + a[a.length - 1];
+  /** Where an aspect lands in your life: the two houses, how the link behaves, how strongly you feel it. */
+  function aspectInChart(a, pa, pb) {
+    const nameA = pName(a.a), nameB = pName(a.b);
+    const kind = a.type === "conjunction" ? "fusion" : FLOW_TYPES.has(a.type) ? "flow" : "tension";
+    const out = [];
+    if (pa.house && pb.house) {
+      const place = pa.house === pb.house
+        ? `Your ${nameA} and your ${nameB} both sit in your ${ord(pa.house)} house, so this whole story plays out through ${HOUSES[pa.house].areas}.`
+        : `Your ${nameA} sits in your ${ord(pa.house)} house, the part of your life about ${HOUSES[pa.house].areas}, and your ${nameB} in your ${ord(pb.house)}, about ${HOUSES[pb.house].areas}.`;
+      const link = pa.house === pb.house ? ""
+        : kind === "fusion" ? " Because the two are joined, what happens in one of these areas spills straight into the other."
+        : kind === "flow" ? " Because they support each other, progress in one of these areas tends to open doors in the other."
+        : " Because they pull against each other, a gain in one of these areas can feel like a cost in the other, and learning to serve both is part of your story.";
+      out.push(place + link);
+    } else {
+      out.push(`Your ${nameA} in ${SIGNS[pa.sign].name} meets your ${nameB} in ${SIGNS[pb.sign].name}.`);
+    }
+    const strength = a.orb < 1 ? "At under 1°, this is one of the defining links in your chart, and you feel it almost constantly."
+      : a.orb < 3 ? "It is a close aspect, so you feel it often." : "It is a wider aspect, so it shows up in particular moments more than every day.";
+    const motion = a.applying ? "It is applying, so it feels like something you are still growing into." : "It is separating, so by now it feels like second nature to you.";
+    out.push(`${strength} ${motion}`);
+    return out;
+  }
   function sheetAspect(i) {
     const c = state.chart;
     const a = c.aspects[i];
     const X = ASPECTS[a.type];
     const pa = c.get(a.a), pb = c.get(a.b);
-    const dA = deepAspect(a.a, a.b);
+    const R = aspectReading(a.a, a.b, a.type);
     let html = `<section class="hero"><div class="eyebrow">${esc(X.name)} · ${a.angle}°</div>
       <h2 class="display">${esc(pShort(a.a))} <span class="sym" style="color:${X.color}">${X.glyph}</span> ${esc(pShort(a.b))}</h2>
       <div class="subline">orb ${orbStr(a.orb)} · ${a.applying ? "applying" : "separating"}</div></section>`;
@@ -1232,21 +1268,15 @@
       ["Nature", { harmony: "Harmonious", tension: "Challenging", fusion: "Blending", adjust: "Adjusting", creative: "Creative" }[a.nature]],
       ["Strength", `${Math.round(a.strength * 100)}%`],
     ]);
-    if (dA) {
-      const body = a.type === "conjunction" ? dA.fusion : FLOW_TYPES.has(a.type) ? dA.flow : dA.tension;
-      html += paras([dA.theme]);
-      html += sec(`As a ${X.name.toLowerCase()}`, [body, X.desc + (a.major ? "" : " As a minor aspect, it acts in the background and is felt more in specific moments than as a constant theme.")]);
+    if (R) {
+      html += paras([R.theme]);
+      html += sec(`As a ${X.name.toLowerCase()}`, [R.body, a.major ? "" : "This is a minor aspect, so you feel it in particular moments rather than as a constant theme."]);
     } else {
       const da = deepAsteroid(a.a) || deepAsteroid(a.b);
       html += paras([aspectText(a), da && da.aspects ? da.aspects[a.nature] : ""]);
     }
-    const strength = a.orb < 1 ? "At under 1° this aspect is very tight and a defining feature of your chart." : a.orb < 3 ? "This is a close, strongly felt aspect." : "This is a wider aspect: present, but more in the background.";
-    const motion = a.applying ? "It is applying, still building toward exact, which tends to feel urgent and forward-moving." : "It is separating, already past exact, which tends to feel familiar and integrated.";
-    const where = pa.house && pb.house
-      ? `In your chart it links ${pName(a.a)} in ${SIGNS[pa.sign].name} (${ord(pa.house)} house: ${HOUSES[pa.house].areas}) with ${pName(a.b)} in ${SIGNS[pb.sign].name} (${ord(pb.house)} house: ${HOUSES[pb.house].areas}).`
-      : `In your chart it links ${pName(a.a)} in ${SIGNS[pa.sign].name} with ${pName(a.b)} in ${SIGNS[pb.sign].name}.`;
-    html += sec("In your chart", [where, `${strength} ${motion}`]);
-    html += sec("The planets", [PLANETS[a.a].desc, PLANETS[a.b].desc]);
+    html += sec("In your chart", aspectInChart(a, pa, pb));
+    html += sec("The points involved", [PLANETS[a.a].desc, PLANETS[a.b].desc]);
     return html;
   }
 
@@ -1329,17 +1359,17 @@
       ["Longitude", `${degStr(p)} ${signGlyph(p.sign)} ${SIGNS[p.sign].name}`],
     ]);
     html += sec("What declination is", `Signs and degrees measure a planet's position along the zodiac. Declination measures something different: how far north or south of the celestial equator the planet sits. The Sun never goes beyond about ${c.eps.toFixed(1)}° either way, which sets the natural boundary for the rest of the chart. Declination adds a second layer to your chart: planets at the same declination are linked even when they do not aspect each other by sign.`);
-    if (p.oob) html += sec("Out of bounds", [OOB_TEXT[key], `An out-of-bounds planet works outside the Sun's reach, so it is less governed by the rest of the chart. ${P.name}'s themes (${P.keywords.join(", ")}) tend to be expressed in an original, extreme or independent way, for better and for worse.`], "#f6a58c");
-    else if (dec > c.eps - 1.5) html += sec("Near the edge", `${P.name} sits close to the Sun's limit without crossing it, so its themes (${P.keywords.join(", ")}) have a strong, emphatic quality while still working within the rest of the chart.`);
-    else if (dec < 5) html += sec("Near the equator", `${P.name} sits close to the celestial equator, a balanced, central position. Its themes tend to be moderate and easily integrated with the rest of the chart.`);
-    else html += sec("In bounds", `${P.name} sits comfortably within the Sun's range, so its themes (${P.keywords.join(", ")}) are expressed in a way that is integrated with the rest of your chart.`);
+    if (p.oob) html += sec("Out of bounds", ((D().oobRich || {})[key]) ? [D().oobRich[key]] : [OOB_TEXT[key], `An out-of-bounds planet works outside the Sun's reach, so it is less governed by the rest of the chart. ${P.name}'s themes (${P.keywords.join(", ")}) tend to be expressed in an original, extreme or independent way, for better and for worse.`], "#f6a58c");
+    else if (dec > c.eps - 1.5) html += sec("Near the edge", `Your ${P.name} sits close to the Sun's limit without crossing it. Your ${listJoin(P.keywords)} come through with extra force and emphasis, and people notice them in you, yet they still take their cue from the rest of your chart rather than running off on their own.`);
+    else if (dec < 5) html += sec("Near the equator", `Your ${P.name} sits close to the celestial equator, the calm middle of the sky. Your ${listJoin(P.keywords)} work in a steady, balanced way, blending easily with the rest of who you are rather than pulling you to extremes.`);
+    else html += sec("In bounds", `Your ${P.name} sits comfortably within the Sun's range, so your ${listJoin(P.keywords)} are woven into the rest of your chart: they answer to your Sun and Moon and show up in step with the rest of you.`);
     const pars = (c.parallels || []).map((x, i) => [x, i]).filter(([x]) => x.a === key || x.b === key);
     if (pars.length) {
       html += `<h4>Parallels</h4><p class="note" style="text-align:left;margin:0 0 8px">A parallel (same declination) works like a conjunction; a contra-parallel (mirror declination) works like an opposition.</p><div class="list">` + pars.map(([x, i]) => {
         const X = ASPECTS[x.type], o = x.a === key ? x.b : x.a;
         return `<button class="row" data-open="parallel:${i}"><span class="dot" style="color:${X.color}"></span><span class="main"><div class="title"><span class="sym" style="color:${X.color}">${X.glyph}</span> ${esc(pName(o))}</div><div class="sub">${esc(X.name)}</div></span><span class="end"><div class="pos">${orbStr(x.orb)}</div></span></button>`;
       }).join("") + `</div>`;
-    } else html += sec("Parallels", `${P.name} does not share a declination (within 1°) with another planet, so its declination works on its own.`);
+    } else html += sec("Parallels", `Your ${P.name} does not share a declination (within 1°) with any other planet, so this layer adds no hidden links for it: it works through its sign, house and aspects.`);
     return html + natalSnippet(key);
   }
 
@@ -1853,9 +1883,11 @@
     return parts.join(" · ");
   }
 
+  // what a transiting planet brings: the rich reading when there is one, the timescale from the reference set
+  const tPlanet = (k) => { const base = (D().transitPlanets || {})[k]; const rich = (D().transitPlanetsRich || {})[k]; return base || rich ? Object.assign({}, base, rich) : null; };
   function transitText(tr, field) {
-    const X = D().transitAspects;
-    const d = X && X[tr.t + "|" + tr.n];
+    const k = tr.t + "|" + tr.n;
+    const d = (D().transitAspectsRich || {})[k] || (D().transitAspects || {})[k];
     if (d) return d[field];
     return [
       `Transiting ${pName(tr.t)} ${T_VERB[tr.type]} your natal ${pName(tr.n)}, touching ${PLANETS[tr.n].core}.`,
@@ -2082,7 +2114,7 @@
         sec("In your chart", hits.length ? hits.map((x) => `It ${x.o <= 5 ? "lands on" : "opposes"} your natal ${pName(x.q.key)} (within ${orbStr(x.o <= 5 ? x.o : Math.abs(x.o - 180))}), so ${PLANETS[x.q.key].core} ${x.o <= 5 ? "is directly lit up" : "is pulled into the spotlight from the other side"} this time.`) : `It does not land close to any of your birth planets, so it works mainly through the ${house ? "house and " : ""}sign above.`);
     } else if (ev.kind === "ingress") {
       title = `${P.name} enters ${SIGNS[ev.sign].name}`;
-      const TP = (D().transitPlanets || {})[ev.key];
+      const TP = tPlanet(ev.key);
       body = [`${P.name} moves ${ev.retro ? "back " : ""}into ${SIGNS[ev.sign].name}${TP ? `, where it stays ${TP.timescale.replace(/^about /, "about ")}` : ""}. ${SIGNS[ev.sign].essence}`, TP ? TP.brings : ""];
       if (state.chart.timeKnown) { const h = houseOfLon(SIGN_KEYS.indexOf(ev.sign) * 30 + 15); extra = sec(`In your chart: ${SIGNS[ev.sign].name} is in your ${ord(h)} house`, [`So ${P.name} spends this stay in your ${ord(h)} house of ${HOUSES[h].areas}.`, houseVisit(ev.key, h)]); }
     } else {
@@ -2196,16 +2228,18 @@
       ["Orb", `${orbStr(tr.orb)} · ${tr.applying ? "applying" : "separating"}`],
       ["Exact", w.exacts.length ? w.exacts.map((e) => tr.t === "moon" ? `${pad(e.getHours())}:${pad(e.getMinutes())}` : fmtDayYear(e)).join(", ") : w.start && w.end ? `Doesn't reach exact: ${pName(tr.t)} changes direction first` : "Beyond the search window"],
       w.start || w.end ? ["In orb", `${w.start ? fmtDayYear(w.start) : "before"} to ${w.end ? fmtDayYear(w.end) : "later"}`] : null,
-      [`${pShort(tr.t)} timescale`, ((D().transitPlanets || {})[tr.t] || {}).timescale || "Varies"],
+      [`${pShort(tr.t)} timescale`, (tPlanet(tr.t) || {}).timescale || "Varies"],
     ]);
     html += paras([transitText(tr, field)]);
     if (w.exacts.length > 1) html += sec("Multiple passes", `Because ${pName(tr.t)} turns retrograde, this transit is exact ${w.exacts.length} times. The first pass tends to raise the theme, the middle pass reviews it, and the last pass settles it.`);
     if (c.timeKnown && tp.natalHouse && np.house) {
-      html += sec("Where it lands", `${pName(tr.t)} is moving through your ${ord(tp.natalHouse)} house (${HOUSES[tp.natalHouse].areas}), and your natal ${pName(tr.n)}${np.house ? ` sits in your ${ord(np.house)} house (${HOUSES[np.house].areas})` : ""}. Expect the theme to show up in these areas of life.`);
+      html += sec("Where it lands", np.house
+        ? `${pName(tr.t)} is moving through your ${ord(tp.natalHouse)} house, the part of your life about ${HOUSES[tp.natalHouse].areas}, and it is touching your ${pName(tr.n)}, which lives in your ${ord(np.house)}, about ${HOUSES[np.house].areas}. ${tp.natalHouse === np.house ? "Both are in the same area, so that is where you feel this most." : "This is where you are most likely to feel it: something happening in one of these areas stirs up the other."}`
+        : `${pName(tr.t)} is moving through your ${ord(tp.natalHouse)} house, the part of your life about ${HOUSES[tp.natalHouse].areas}, so that is where you are most likely to feel it.`);
     }
     const pair = deepAspect(tr.t, tr.n);
     if (pair) html += sec(`${pName(tr.t)} and ${pName(tr.n)}`, pair.theme);
-    const TP = (D().transitPlanets || {})[tr.t];
+    const TP = tPlanet(tr.t);
     if (TP) html += sec(`What ${pName(tr.t)} brings`, TP.brings);
     html += `<div class="list"><button class="row" data-open="point:${tr.n}"><span class="dot" style="color:${PLANETS[tr.n].color}"></span><span class="main"><div class="title">Your natal ${esc(pName(tr.n))}</div><div class="sub">Open the birth-chart reading</div></span></button></div>`;
     return html;
@@ -2215,8 +2249,8 @@
     const T = computeTransits();
     const p = T.tc.get(key);
     const P = PLANETS[key];
-    const TP = (D().transitPlanets || {})[key];
-    const TH = p.natalHouse ? ((D().transitHouses || {})[key] || {})[p.natalHouse] : null;
+    const TP = tPlanet(key);
+    const TH = p.natalHouse ? ((D().transitHousesRich || {})[key] || (D().transitHouses || {})[key] || {})[p.natalHouse] : null;
     let html = `<section class="hero"><div class="eyebrow">In the sky · ${esc(fmtDay(T.date))}</div>
       <h2 class="display">${esc(P.name)} in ${SIGNS[p.sign].name}</h2>
       <div class="subline"><span class="sym" style="color:${P.color}">${P.glyph}</span> ${degFull(p)} ${signGlyph(p.sign)}${p.retro ? ' <span class="retro">℞ retrograde</span>' : ""}</div></section>`;
@@ -2745,7 +2779,7 @@
       `<div class="list"><button class="row" data-open="point:${key}"><span class="dot" style="color:${P.color}"></span><span class="glyph" style="color:${P.color}">${P.glyph}</span><span class="main"><div class="title">${esc(P.name)} in ${esc(SIGNS[n.sign].name)}${n.house ? ` · ${ord(n.house)} house` : ""}</div><div class="sub">Open the birth-chart reading</div></span></button></div>`;
   }
   /** What a planet tends to bring while it moves through one of your houses (shared by solar returns and transits). */
-  const houseVisit = (key, h) => (((D().transitHouses || {})[key] || {})[h] || {}).text || "";
+  const houseVisit = (key, h) => (((D().transitHousesRich || {})[key] || (D().transitHouses || {})[key] || {})[h] || {}).text || "";
   /** How a planet in a solar return or progressed chart relates to the birth chart, with a way back to it. */
   function inYourChart(key, p, chart2, when) {
     const c = state.chart, n = c.get(key), P = PLANETS[key];
@@ -2781,11 +2815,15 @@
     if (ang.length && SRD.angular && SRD.angular[key]) html += sec(`On the ${ang[0].angle}`, SRD.angular[key]);
     if (key === "sun" && SRD.sunHouse) html += sec("This year's focus", SRD.sunHouse[p.house]);
     else if (key === "moon" && SRD.moonHouse) html += sec("This year's feelings", [SRD.moonHouse[p.house], SRD.moonSign && SRD.moonSign[p.sign]]);
-    else html += sec(`In the ${ord(p.house)} house · ${HOUSES[p.house].title}`, [`This year ${P.focus} ${isPlural(P.focus) ? "are" : "is"} drawn into ${HOUSES[p.house].areas}.`, houseVisit(key, p.house)]);
+    else {
+      const srH = (((D().srPlanets || {}).house || {})[key] || {})[p.house];
+      html += sec(`In the ${ord(p.house)} house · ${HOUSES[p.house].title}`, srH ? [srH] : [`This year ${P.focus} ${isPlural(P.focus) ? "are" : "is"} drawn into ${HOUSES[p.house].areas}.`, houseVisit(key, p.house)]);
+    }
     // the sign only says something about the year for the fast planets (the Sun always returns to its birth sign,
     // and the Moon's sign is covered above); slow planets stay in a sign for years
-    if (["mercury", "venus", "mars"].includes(key)) html += sec(`In ${S.name}`, [`${P.lead} ${S.how} this year.`, `The gifts to use: ${S.gifts}. The trap to avoid: ${S.shadow}.`], elColor(p.sign));
-    if (p.retro) html += sec("Retrograde this year", K.RETRO_KARMIC[key] || `${P.name} is retrograde in this year's chart, so its themes turn inward: review and revisit before pushing ahead.`);
+    const srS = (((D().srPlanets || {}).sign || {})[key] || {})[p.sign];
+    if (["mercury", "venus", "mars"].includes(key)) html += sec(`In ${S.name}`, srS ? [srS] : [`${P.lead} ${S.how} this year.`, `The gifts to use: ${S.gifts}. The trap to avoid: ${S.shadow}.`], elColor(p.sign));
+    if (p.retro) html += sec("Retrograde this year", ((D().srPlanets || {}).retro || {})[key] || K.RETRO_KARMIC[key] || `${P.name} is retrograde in this year's chart, so its themes turn inward: review and revisit before pushing ahead.`);
     html += inYourChart(key, p, R.sr, "this year");
     return html;
   }
@@ -2913,7 +2951,7 @@
     const Y = computeSyn(), x = Y.list[i], X = ASPECTS[x.type];
     const S = D().synastry || {};
     const pk = pairKey(x.a, x.b);
-    const d = S.pairs && S.pairs[pk];
+    const d = (D().synPairsRich || {})[pk] || (S.pairs && S.pairs[pk]);
     const body = d ? (x.type === "conjunction" ? d.fusion : x.nature === "harmony" ? d.harmony : d.tension) : "";
     const mine = state.chart.get(x.a), theirs = Y.them.get(x.b);
     const [first, second] = pk.split("-");
@@ -2928,12 +2966,12 @@
     ]);
     if (d) {
       html += paras([d.text]);
-      html += sec(`As a ${X.name.toLowerCase()}`, [body, X.desc]);
+      html += sec(`As a ${X.name.toLowerCase()}`, [body]);
       if (first !== second) html += `<p class="note" style="text-align:left">Here ${esc(roleOf(first))} is the ${esc(pName(first))} person and ${esc(roleOf(second))} is the ${esc(pName(second))} person.</p>`;
     } else {
       html += paras([`${myName()}'s ${pName(x.a)} (${PLANETS[x.a].core}) ${ASPECTS[x.type].verb} ${theirName(Y.rec)}'s ${pName(x.b)} (${PLANETS[x.b].core}). ${X.desc}`, K.NATURE[x.nature]]);
     }
-    html += sec("The planets", [PLANETS[x.a].desc, x.a !== x.b ? PLANETS[x.b].desc : ""]);
+    html += sec("The points involved", [PLANETS[x.a].desc, x.a !== x.b ? PLANETS[x.b].desc : ""]);
     return html;
   }
   function sheetOverlay(dir, key) {
@@ -2944,7 +2982,7 @@
     const o = (inMine ? Y.inMine : Y.inTheirs).find((z) => z.key === key);
     const owner = inMine ? myName() : theirName(rec), guest = inMine ? theirName(rec) : myName();
     const title = `${inMine ? theirName(rec) + "'s" : myName() === "You" ? "Your" : myName() + "'s"} ${pName(key)} in ${inMine ? (myName() === "You" ? "your" : myName() + "'s") : theirName(rec) + "'s"} ${ord(o.house)} house`;
-    const txt = S.overlays && S.overlays[key] && S.overlays[key][o.house];
+    const txt = ((D().synOverlaysRich || {})[key] || {})[o.house] || (S.overlays && S.overlays[key] && S.overlays[key][o.house]);
     let html = `<section class="hero"><div class="eyebrow">House overlay · ${esc(HOUSES[o.house].title)}</div><h2 class="display sm">${esc(title)}</h2></section>`;
     if (!inMine) html += `<p class="note" style="text-align:left">Written from ${esc(owner)}'s side: read "you" as ${esc(owner)} and "their" as ${esc(guest)}.</p>`;
     html += paras([txt || `${guest}'s ${pName(key)} brings ${PLANETS[key].focus} into ${owner}'s ${ord(o.house)} house of ${HOUSES[o.house].areas}.`]);
@@ -2970,7 +3008,7 @@
           <span class="end"><div class="pos">${orbStr(x.orb)}</div></span></button>`;
       }).join("") + `</div>`;
       const top = Y.list[idx.slice().sort((i, j) => Y.list[i].orb - Y.list[j].orb)[0]];
-      const pd = ((D().synastry || {}).pairs || {})[pairKey(top.a, top.b)];
+      const pd = (D().synPairsRich || {})[pairKey(top.a, top.b)] || ((D().synastry || {}).pairs || {})[pairKey(top.a, top.b)];
       if (pd) html += sec(`Strongest here: ${pName(top.a)} ${ASPECTS[top.type].name.toLowerCase()} ${pName(top.b)}`, [firstPara(pd.text), top.type === "conjunction" ? pd.fusion : top.nature === "harmony" ? pd.harmony : pd.tension]);
     } else html += `<p class="note" style="text-align:left">No close contacts in this area.</p>`;
     return html;
