@@ -8,7 +8,7 @@
  *  - Moon: power-law craters, central peaks, a ray crater, lunar photometry.
  *  - A small cloudy world.
  * The moon and small world turn slowly and the gas giant's rings orbit it: the worker
- * keeps a map of each moving surface and redraws only what moves (paused while scrolling).
+ * keeps a map of each moving surface and redraws only what moves (at half rate while scrolling).
  * Rendering runs in a Web Worker so scrolling never stalls, and finished
  * images are cached so later launches show them instantly.
  */
@@ -504,7 +504,7 @@
     /* ---------- slow axial spin (runs inside the worker) ---------- */
     // seconds per full turn
     const PERIOD = { ring: 40, moon: 40, far: 25 };
-    let paused = false;
+    let paused = false, slow = false;
     function buildMap(kind, parts, W) {
       const r = parts.R * W;
       const MW = Math.max(64, Math.ceil((TAU * r) / 8) * 8), MH = Math.max(32, Math.ceil(2 * r));
@@ -650,12 +650,12 @@
       };
       frame(true);
       post({ type: "spinReady", kind: "giant" });
-      let last = Date.now();
+      let last = Date.now(), tick = 0;
       setInterval(() => {
         const now = Date.now();
         if (!paused) {
           turn += ((now - last) / 1000 / PERIOD.ring) * TAU;
-          frame(false);
+          if (!slow || (++tick & 1)) frame(false); // keep turning while scrolling, at half the frame rate
         }
         last = now;
       }, 50);
@@ -704,20 +704,21 @@
       };
       frame(true);
       post({ type: "spinReady", kind });
-      let last = Date.now();
+      let last = Date.now(), tick = 0;
       const step = 1000 / (kind === "far" ? 12 : 20);
       setInterval(() => {
         const now = Date.now();
         if (!paused) {
           phase += ((now - last) / 1000 / PERIOD[kind]) * TAU;
-          frame(false);
+          if (!slow || (++tick & 1)) frame(false);
         }
         last = now;
       }, step);
     }
     const setPaused = (v) => { paused = !!v; };
+    const setSlow = (v) => { slow = !!v; };
 
-    return { renderBuffer, spin, setPaused };
+    return { renderBuffer, spin, setPaused, setSlow };
   }
 
   /* ---------- worker plumbing ---------- */
@@ -731,6 +732,7 @@
         "onmessage = (e) => { const m = e.data;" +
         " if (m.type === 'spin') { LIB.spin(m.canvas, m.kind, m.W, m.key, (x) => postMessage(x)).catch(() => {}); return; }" +
         " if (m.type === 'pause') { LIB.setPaused(m.value); return; }" +
+        " if (m.type === 'slow') { LIB.setSlow(m.value); return; }" +
         " const { id, kind, geo, W, H } = m;" +
         " try { const buf = LIB.renderBuffer(kind, geo, W, H); postMessage({ id, buf }, [buf.buffer]); }" +
         " catch (err) { postMessage({ id, error: String(err) }); } };";
@@ -832,11 +834,13 @@
     const key = new URL(`./__sky/${SKY_VERSION}/map-${m.kind}-${m.px}.bin`, location.href).href;
     w.postMessage({ type: "spin", canvas: off, kind: m.kind, W: m.px, key }, [off]);
   }
-  // pause while scrolling, in the background, or behind a detail page
-  let pausedNow = false, scrollUntil = 0, scrollTimer = null;
+  // pause in the background or behind a detail page; while scrolling, keep turning at half the frame rate
+  let pausedNow = false, slowNow = false, scrollUntil = 0, scrollTimer = null;
   function updatePause() {
-    const p = document.hidden || document.body.classList.contains("detail-open") || Date.now() < scrollUntil;
+    const p = document.hidden || document.body.classList.contains("detail-open");
     if (p !== pausedNow && worker) { pausedNow = p; worker.postMessage({ type: "pause", value: p }); }
+    const sl = Date.now() < scrollUntil;
+    if (sl !== slowNow && worker) { slowNow = sl; worker.postMessage({ type: "slow", value: sl }); }
   }
   window.addEventListener("scroll", () => {
     scrollUntil = Date.now() + 250;
