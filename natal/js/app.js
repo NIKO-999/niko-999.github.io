@@ -28,9 +28,15 @@
   const storedSettings = store.get("settings", {});
   // v2 made the mean node the default (matching Astro-Seek); drop the old default from earlier saves
   if (!storedSettings.v) delete storedSettings.nodeType;
+  // saved charts pick up corrected city coordinates (e.g. Whangārei now matches Astro-Seek's)
+  function refreshPlace(rec) {
+    const ct = (window.ASTRO_CITIES || []).find((c) => rec && rec.place && c[0] === rec.place.name && Math.abs(c[2] - rec.place.lat) < 0.03 && Math.abs(c[3] - rec.place.lon) < 0.03);
+    if (ct && (ct[2] !== rec.place.lat || ct[3] !== rec.place.lon)) rec.place = Object.assign({}, rec.place, { lat: ct[2], lon: ct[3] });
+    return rec;
+  }
   const state = {
     settings: Object.assign({}, DEFAULT_SETTINGS, storedSettings, { v: 2 }),
-    saved: store.get("saved", []),
+    saved: store.get("saved", []).map(refreshPlace),
     record: null,
     chart: null,
     tab: "chart",

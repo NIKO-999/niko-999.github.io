@@ -96,7 +96,7 @@ window.ASTRO_CITIES = [
   ["Cambridge", "Waikato, New Zealand", -37.8840, 175.4720, "Pacific/Auckland"],
   ["Te Awamutu", "Waikato, New Zealand", -38.0100, 175.3240, "Pacific/Auckland"],
   ["Thames", "Waikato, New Zealand", -37.1383, 175.5402, "Pacific/Auckland"],
-  ["Whangārei", "Northland, New Zealand", -35.7251, 174.3237, "Pacific/Auckland"],
+  ["Whangārei", "Northland, New Zealand", -35.7333, 174.3167, "Pacific/Auckland"],
   ["Kerikeri", "Northland, New Zealand", -35.2268, 173.9474, "Pacific/Auckland"],
   ["Gisborne", "Gisborne, New Zealand", -38.6623, 178.0176, "Pacific/Auckland"],
   ["Napier", "Hawke's Bay, New Zealand", -39.4928, 176.9120, "Pacific/Auckland"],

@@ -404,7 +404,8 @@
         }
         if (!best) continue;
         // applying if the separation is moving toward exactness
-        const dt = 0.1;
+        // a short look ahead: the Moon and the angles would overshoot exactness over hours
+        const dt = 0.0005;
         const sep2 = Math.abs(diff(p.lon + (p.speed || 0) * dt, q.lon + (q.speed || 0) * dt));
         const applying = Math.abs(sep2 - best.asp.angle) < best.orb;
         list.push({
@@ -500,9 +501,10 @@
       if ((key === "chiron" || ASTEROIDS.includes(key)) && !chironInRange(date)) continue;
       if (ASTEROIDS.includes(key) && (!opts.asteroids || !global.ASTEROID_TABLE)) continue;
       const now = rawLonLat(key, date, opts);
-      const before = rawLonLat(key, new Date(date.getTime() - 43200000), opts);
-      const after = rawLonLat(key, new Date(date.getTime() + 43200000), opts);
-      const speed = diff(before.lon, after.lon); // deg/day
+      // speed at the moment of birth (a 2-hour span, so the Moon's changing pace is not averaged out)
+      const before = rawLonLat(key, new Date(date.getTime() - 3600000), opts);
+      const after = rawLonLat(key, new Date(date.getTime() + 3600000), opts);
+      const speed = diff(before.lon, after.lon) * 12; // deg/day
       const lon = shift(now.lon);
       const dec = asind(sind(now.lat) * cosd(eps) + cosd(now.lat) * sind(eps) * sind(now.lon));
       points.push(Object.assign({ key, lon, lat: now.lat, speed, dec, retro: speed < 0 }, splitLon(lon)));
@@ -528,8 +530,9 @@
     const fortune = norm(isDay ? asc + moon.lon - sun.lon : asc + sun.lon - moon.lon);
 
     if (timeKnown) {
-      points.push(Object.assign({ key: "fortune", lon: fortune, speed: 0, retro: false }, splitLon(fortune)));
-      points.push(Object.assign({ key: "vertex", lon: vertex, speed: 0, retro: false }, splitLon(vertex)));
+      // the Part of Fortune and the Vertex turn with the angles, about 361° a day
+      points.push(Object.assign({ key: "fortune", lon: fortune, speed: 360.98, retro: false }, splitLon(fortune)));
+      points.push(Object.assign({ key: "vertex", lon: vertex, speed: 360.98, retro: false }, splitLon(vertex)));
       points.push(Object.assign({ key: "asc", lon: asc, speed: 360.98, retro: false }, splitLon(asc)));
       points.push(Object.assign({ key: "mc", lon: mc, speed: 360.98, retro: false }, splitLon(mc)));
     }
