@@ -346,12 +346,39 @@
       if (TAB_THEME[state.tab]) view.style.setProperty("--theme", TAB_THEME[state.tab]);
       else view.style.removeProperty("--theme");
       view.innerHTML = fn();
+      layoutForDesktop();
       bindView();
     }
     view.style.animation = "none";
     void view.offsetWidth;
     view.style.animation = "";
   }
+
+  /* Desktop: a sidebar for navigation, and on wheel screens the wheel stays pinned on the
+     left while the readings scroll on the right. */
+  const desktopMQ = window.matchMedia ? window.matchMedia("(min-width: 1100px)") : { matches: false };
+  function layoutForDesktop() {
+    const who = $("#side-who");
+    if (who) {
+      const r = state.record;
+      who.innerHTML = state.chart && r ? `${esc(r.name || "Your chart")}<span>${esc(fmtDate(r))} · ${esc(r.place.name)}</span>` : "";
+    }
+    view.classList.remove("split");
+    if (!desktopMQ.matches || !state.chart || state.partnerMode) return;
+    const wheel = view.querySelector(":scope > .wheel-wrap");
+    if (!wheel) return;
+    const stage = document.createElement("aside");
+    stage.className = "stage";
+    const flow = document.createElement("div");
+    flow.className = "flow";
+    for (const el of [...view.children]) {
+      if (el === wheel || el.classList.contains("wheel-hint") || el.classList.contains("wheel-key")) stage.appendChild(el);
+      else flow.appendChild(el);
+    }
+    view.append(stage, flow);
+    view.classList.add("split");
+  }
+  if (desktopMQ.addEventListener) desktopMQ.addEventListener("change", () => { if (state.chart) render(); });
 
   function pointRow(p, opts) {
     opts = opts || {};
@@ -880,6 +907,7 @@
     setPage(html, theme);
     if (opening) {
       sheet.hidden = false;
+      backdrop.hidden = false; // only shown on desktop, where the page stays visible beside the panel
       document.body.classList.add("detail-open");
     }
     try { history.pushState({ natalPage: pageStack.length + 1 }, ""); historyOK = true; } catch (e) { historyOK = false; }
@@ -913,6 +941,7 @@
   }
   window.addEventListener("popstate", () => popPage());
   $("#sheet-back").addEventListener("click", goBack);
+  backdrop.addEventListener("click", closeSheet);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !sheet.hidden) goBack(); });
   // swipe right from the left edge to go back, like a native app
   (function () {

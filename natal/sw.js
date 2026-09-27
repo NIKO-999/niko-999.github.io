@@ -1,5 +1,5 @@
 /* Natal service worker: offline app shell + cached fonts. Bump VERSION when files change. */
-const VERSION = "natal-v33";
+const VERSION = "natal-v34";
 const SHELL = [
   "./",
   "index.html",
