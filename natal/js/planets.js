@@ -623,18 +623,21 @@
       return { planet, shade, tex, T, RW, rocks, open: parts.open, roll: parts.roll };
     }
 
-    async function spin(canvas, kind, W, key, post) {
+    /**
+     * One full turn of the moon or small world, rendered once as N still frames stacked in a
+     * single sheet. The page cross-fades them with compositor animations, so the turning carries
+     * on while the page scrolls (iPhone holds back canvas redraws during a scroll).
+     */
+    async function spinFrames(kind, W, key, N) {
       const parts = PARTS[kind]();
       let map = await loadMap(key);
       if (!map || map.MW * map.MH * 3 !== map.m.length) {
         map = buildMap(kind, parts, W);
         saveMap(key, map);
       }
-      const ctx = canvas ? canvas.getContext("2d") : null; // no canvas: send each frame to the page as a bitmap
-      const img = new ImageData(W, W), d = img.data;
+      const size = W * W * 4, sheet = new Uint8ClampedArray(size * N), base = new Uint8ClampedArray(size);
       const masked = kind === "giant" || kind === "moon";
       const live = [];
-      let x0 = W, y0 = W, x1 = 0, y1 = 0;
       for (let row = 0; row < W; row++) {
         for (let col = 0; col < W; col++) {
           const fx = (col + 0.5) / W, fy = (row + 0.5) / W;
@@ -643,49 +646,35 @@
           const i = (row * W + col) * 4;
           const fm = masked ? fadeMask(fx, fy) : 1;
           if (px.rgba) {
-            d[i] = px.rgba[0]; d[i + 1] = px.rgba[1]; d[i + 2] = px.rgba[2]; d[i + 3] = px.rgba[3] * fm;
+            base[i] = px.rgba[0]; base[i + 1] = px.rgba[1]; base[i + 2] = px.rgba[2]; base[i + 3] = px.rgba[3] * fm;
             continue;
           }
           px.i = i;
-          d[i + 3] = px.a * fm;
+          base[i + 3] = px.a * fm;
           live.push(px);
-          if (col < x0) x0 = col; if (col > x1) x1 = col; if (row < y0) y0 = row; if (row > y1) y1 = row;
         }
       }
       const s = [0, 0, 0];
-      let phase = 0;
-      const frame = (full) => {
+      for (let f = 0; f < N; f++) {
+        const phase = (f / N) * TAU, d = sheet.subarray(f * size, (f + 1) * size);
+        d.set(base);
         for (let n = 0; n < live.length; n++) {
           const px = live[n];
           const c = colourOf(parts, px, sample(map, px.lat, px.lon - phase, s));
           d[px.i] = c[0]; d[px.i + 1] = c[1]; d[px.i + 2] = c[2];
         }
-        if (!ctx) { createImageBitmap(img).then((bmp) => post({ type: "frame", kind, bmp }, [bmp]), () => {}); return; }
-        if (full) ctx.putImageData(img, 0, 0);
-        else ctx.putImageData(img, 0, 0, x0, y0, x1 - x0 + 1, y1 - y0 + 1);
-      };
-      frame(true);
-      post({ type: "spinReady", kind });
-      let last = Date.now(), tick = 0;
-      const step = 1000 / (kind === "far" ? 12 : 20);
-      setInterval(() => {
-        const now = Date.now();
-        if (!paused) {
-          phase += ((now - last) / 1000 / PERIOD[kind]) * TAU;
-          if (!slow || (++tick & 1)) frame(false);
-        }
-        last = now;
-      }, step);
+      }
+      return sheet;
     }
     const setPaused = (v) => { paused = !!v; };
     const setSlow = (v) => { slow = !!v; };
 
-    return { renderBuffer, spin, setPaused, setSlow, ringLayers };
+    return { renderBuffer, spinFrames, setPaused, setSlow, ringLayers, PERIOD };
   }
 
   /* ---------- worker plumbing ---------- */
   let worker = null, jobId = 0;
-  const spinReady = {}, frames = {};
+  const spinReady = {}, framesReady = {};
   let ringsReady = null;
   const pending = new Map();
   function getWorker() {
@@ -693,7 +682,7 @@
     try {
       const src = "const LIB = (" + SKYLIB.toString() + ")();" +
         "onmessage = (e) => { const m = e.data;" +
-        " if (m.type === 'spin') { LIB.spin(m.canvas || null, m.kind, m.W, m.key, (x, t) => postMessage(x, t || [])).catch(() => {}); return; }" +
+        " if (m.type === 'frames') { LIB.spinFrames(m.kind, m.W, m.key, m.N).then((sheet) => postMessage({ type: 'frames', kind: m.kind, sheet, period: LIB.PERIOD[m.kind] }, [sheet.buffer])).catch(() => {}); return; }" +
         " if (m.type === 'rings') { const r = LIB.ringLayers(m.W); postMessage(Object.assign({ type: 'rings' }, r), [r.planet.buffer, r.shade.buffer, r.tex.buffer]); return; }" +
         " if (m.type === 'pause') { LIB.setPaused(m.value); return; }" +
         " if (m.type === 'slow') { LIB.setSlow(m.value); return; }" +
@@ -703,7 +692,7 @@
       worker = new Worker(URL.createObjectURL(new Blob([src], { type: "text/javascript" })));
       worker.onmessage = (e) => {
         if (e.data.type === "spinReady") { const f = spinReady[e.data.kind]; if (f) f(); return; }
-        if (e.data.type === "frame") { const old = frames[e.data.kind]; if (old) old.close(); frames[e.data.kind] = e.data.bmp; return; }
+        if (e.data.type === "frames") { const f = framesReady[e.data.kind]; if (f) f(e.data); return; }
         if (e.data.type === "rings") { if (ringsReady) ringsReady(e.data); return; }
         const job = pending.get(e.data.id);
         pending.delete(e.data.id);
@@ -782,7 +771,7 @@
     return paint(canvas, kind, null, px, px).then(() => { canvas.style.opacity = "1"; return { host, canvas, kind, px }; });
   }
 
-  /* ---------- slow spin: the worker redraws the surface a few times a second ---------- */
+  /* ---------- slow spin: turned by compositor animations so it carries on while the page scrolls ---------- */
   const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const imgCanvas = (buf, w, h) => { const c = document.createElement("canvas"); c.width = w; c.height = h; c.getContext("2d").putImageData(new ImageData(buf, w, h), 0, 0); return c; };
   const layer = (el) => { el.style.cssText += ";position:absolute;left:0;top:0;width:100%;height:100%;display:block"; return el; };
@@ -843,29 +832,43 @@
     w.postMessage({ type: "rings", W: m.px });
   }
 
+  let spinStyle = null;
+  /* Each frame fades in over its slot on top of the one before, holds while the next fades in
+     above it, then drops out: a steady cross-fade the compositor runs by itself. A copy of the
+     first frame on top closes the loop without a seam. */
   function startSpin(m) {
     const w = getWorker();
-    if (!m || !w || reduceMotion || typeof createImageBitmap === "undefined") return;
-    const sc = layer(document.createElement("canvas"));
-    sc.width = sc.height = m.px;
-    sc.style.visibility = "hidden";
-    m.host.appendChild(sc);
-    const ctx = sc.getContext("2d");
-    let shown = false;
-    const draw = () => {
-      const bmp = frames[m.kind];
-      if (bmp) {
-        frames[m.kind] = null;
-        ctx.clearRect(0, 0, m.px, m.px);
-        ctx.drawImage(bmp, 0, 0);
-        bmp.close();
-        if (!shown) { shown = true; sc.style.visibility = "visible"; m.canvas.style.visibility = "hidden"; }
+    if (!m || !w || reduceMotion) return;
+    const N = m.kind === "moon" ? 96 : 48;
+    framesReady[m.kind] = ({ sheet, period }) => {
+      framesReady[m.kind] = null;
+      const size = m.px * m.px * 4, pc = (x) => ((x / N) * 100).toFixed(4) + "%";
+      let css = "";
+      const stack = document.createElement("div");
+      stack.className = "spinstack";
+      stack.style.visibility = "hidden";
+      for (let e = 0; e <= N; e++) {
+        const f = e % N, name = `sp-${m.kind}-${e}`;
+        if (e === 0) css += `@keyframes ${name}{0%,${pc(1)}{opacity:1}${pc(1.02)},100%{opacity:0}}`;
+        else if (e === N) css += `@keyframes ${name}{0%,${pc(N - 1)}{opacity:0}100%{opacity:1}}`;
+        else if (e === N - 1) css += `@keyframes ${name}{0%,${pc(e - 1)}{opacity:0}${pc(e)},100%{opacity:1}}`;
+        else css += `@keyframes ${name}{0%,${pc(e - 1)}{opacity:0}${pc(e)},${pc(e + 1)}{opacity:1}${pc(e + 1.02)},100%{opacity:0}}`;
+        const c = layer(imgCanvas(sheet.subarray(f * size, (f + 1) * size), m.px, m.px));
+        c.className = "spinframe";
+        c.style.animationName = name;
+        c.style.animationDuration = period + "s";
+        stack.appendChild(c);
       }
-      requestAnimationFrame(draw);
+      if (!spinStyle) { spinStyle = document.createElement("style"); document.head.appendChild(spinStyle); }
+      spinStyle.textContent += css;
+      m.host.appendChild(stack);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        stack.style.visibility = "visible";
+        m.canvas.style.visibility = "hidden";
+      }));
     };
-    requestAnimationFrame(draw);
     const key = new URL(`./__sky/${SKY_VERSION}/map-${m.kind}-${m.px}.bin`, location.href).href;
-    w.postMessage({ type: "spin", kind: m.kind, W: m.px, key });
+    w.postMessage({ type: "frames", kind: m.kind, W: m.px, key, N });
   }
   // pause in the background or behind a detail page; while scrolling, keep turning at half the frame rate
   let pausedNow = false, slowNow = false, scrollUntil = 0, scrollTimer = null;
