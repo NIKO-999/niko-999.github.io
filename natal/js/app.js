@@ -1421,12 +1421,14 @@
     const el = (p) => SIGNS[p.sign].element;
     const link = (open, color, glyph, title, sub) => `<button class="row" data-open="${open}"><span class="dot" style="color:${color}"></span><span class="glyph" style="color:${color}">${glyph}</span><span class="main"><div class="title">${esc(title)}</div><div class="sub">${esc(sub)}</div></span></button>`;
     // tab-style section labels, like the other tabs
-    const sec = (title, list) => { const l = (Array.isArray(list) ? list : [list]).filter(Boolean); return l.length ? `<div class="section-label">${esc(title)}</div>${paras(l)}` : ""; };
-    let html = sheetSimple("Your story", "Your chart as one story", esc(`${SIGNS[sun.sign].name} Sun · ${SIGNS[moon.sign].name} Moon${asc ? ` · ${SIGNS[asc.sign].name} Rising` : ""}`), [ST.intro]);
+    // each section is a frosted card, like the Karmic tab
+    const card = (glyph, color, k, title, list, extra) => { const l = (Array.isArray(list) ? list : [list]).filter(Boolean); return l.length ? `<div class="card"><div class="card-head"><div class="glyph" style="color:${color}">${glyph}</div><div><div class="card-k">${esc(k)}</div><div class="card-title">${esc(title)}</div></div></div>${paras(l)}${extra || ""}</div>` : ""; };
+    let html = sheetSimple("Your story", "Your chart as one story", esc(`${SIGNS[sun.sign].name} Sun · ${SIGNS[moon.sign].name} Moon${asc ? ` · ${SIGNS[asc.sign].name} Rising` : ""}`), []);
+    html += card("✦", PLANETS.sun.color, "How to read it", "One person, in layers", [ST.intro]);
 
     // 1. the core: Sun, Moon and Rising as one paragraph, then how the layers combine
     const second = asc && el(moon) === el(asc) && el(sun) !== el(asc) ? `sunAsc:${el(sun)}-${el(asc)}` : asc ? `moonAsc:${el(moon)}-${el(asc)}` : "";
-    html += sec("Who you are at the core", [
+    html += card(PLANETS.sun.glyph, PLANETS.sun.color, "Who you are at the core", `${SIGNS[sun.sign].name} · ${SIGNS[moon.sign].name}${asc ? ` · ${SIGNS[asc.sign].name}` : ""}`, [
       [pick("sun", sun.sign), pick("moon", moon.sign), asc ? pick("asc", asc.sign) : ""].filter(Boolean).join(" "),
       [pick("blend", `sunMoon:${el(sun)}-${el(moon)}`), second ? pick("blend", second) : ""].filter(Boolean).join(" "),
     ]);
@@ -1443,7 +1445,7 @@
       const skew = [["above", d.above], ["below", d.below], ["east", d.east], ["west", d.west]].sort((a, b) => b[1] - a[1])[0];
       if (skew[1] >= 7) themes.push(pick("hemi", skew[0]));
     }
-    html += sec("Your strongest themes", themes);
+    html += card(PLANETS[d.domPlanet].glyph, PLANETS[d.domPlanet].color, "Your strongest themes", `${cap(d.domEl)} · ${cap(d.domMode)} · ${pName(d.domPlanet)}`, themes);
 
     // 3. the inner tensions: the tightest squares and oppositions between personal drives
     // at least one side is a personal planet: slow-planet pairs describe a generation, not a person
@@ -1457,9 +1459,9 @@
       const pool = bridges[a.type] || [];
       return `${pName(a.a)} and ${pName(a.b)}: part of you ${WANT[a.a]}, and part of you ${WANT[a.b]}. ${R && R.theme ? R.theme + " " : ""}${pool.length ? pool[(PLANET_KEYS.indexOf(tense[0].a) + i * 2) % pool.length] : ""}`.trim();
     });
-    html += sec("Where you pull two ways", tensionParas.length ? tensionParas
-      : ["Your chart holds few sharp inner conflicts, so the different parts of you tend to cooperate. Your growth comes less from settling a fight within and more from choosing a direction and committing to it."]);
-    if (tense.length) html += `<div class="list">${tense.map((a) => link(`aspect:${c.aspects.indexOf(a)}`, ASPECTS[a.type].color, ASPECTS[a.type].glyph, `${pName(a.a)} ${ASPECTS[a.type].name.toLowerCase()} ${pName(a.b)}`, "Read this contact in full")).join("")}</div>`;
+    html += card("☍", ASPECTS.opposition.color, "Where you pull two ways", tense.length ? tense.map((a) => `${pName(a.a)} and ${pName(a.b)}`).join(" · ") : "In step with yourself", tensionParas.length ? tensionParas
+      : ["Your chart holds few sharp inner conflicts, so the different parts of you tend to cooperate. Your growth comes less from settling a fight within and more from choosing a direction and committing to it."],
+      tense.map((a) => `<button class="more" data-open="aspect:${c.aspects.indexOf(a)}">${esc(`${pName(a.a)} ${ASPECTS[a.type].name.toLowerCase()} ${pName(a.b)}`)} →</button>`).join("<br>"));
 
     // 4. direction: the chart ruler's thread and the North Node
     const nn = c.get("northNode");
@@ -1470,7 +1472,7 @@
     }
     dir.push(firstSentences(SIGNS[nn.sign].nn, 1) + (nn.house ? ` In your chart it sits in the ${ord(nn.house)} house, so that growth comes through ${HOUSES[nn.house].areas}.` : ""));
     if (!c.timeKnown) dir.push("Without a birth time your chart ruler and houses stay hidden, so this direction is read from the sign of your North Node alone.");
-    html += sec("Where you are heading", dir);
+    html += card(PLANETS.northNode.glyph, PLANETS.northNode.color, "Where you are heading", `North Node in ${SIGNS[nn.sign].name}`, dir);
 
     // 5. where to read next
     const next = [link("point:sun", PLANETS.sun.color, PLANETS.sun.glyph, `Sun in ${SIGNS[sun.sign].name}`, "Your core"),
