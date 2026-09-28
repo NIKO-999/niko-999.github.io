@@ -481,3 +481,19 @@ Object.assign(window.AstroDeep.story, {
     purpose: "All of these threads lead somewhere, and together they point towards what you are here for."
   }
 });
+
+/* What it means for you when a sign holds none of your planets (sign pages). */
+window.AstroDeep.story.emptySign = {
+  aries: "With no planets in Aries, headlong impatience is not your default setting. You tend to weigh a move before you make it, and directness is something you grow into through experience rather than something you lead with.",
+  taurus: "With no planets in Taurus, you are not wedded to routine or comfort for their own sake. You adapt to change more easily than many, and steadiness is something you choose and build deliberately rather than rely on by instinct.",
+  gemini: "With no planets in Gemini, constant chatter and novelty do not drive you. You tend to go deep on fewer things, and quick, light exchange is a skill you pick up in particular settings rather than your natural rhythm.",
+  cancer: "With no planets in Cancer, you do not live by your moods or cling to the past. Care still matters to you, yet you show it through other channels, and emotional safety is something you create on purpose.",
+  leo: "With no planets in Leo, you do not crave the spotlight for its own sake. You can shine when a moment calls for it, and your confidence tends to grow through what you do rather than through being seen.",
+  virgo: "With no planets in Virgo, perfectionism and worry are not your native language. You see the big picture first, and precision and routine are tools you learn to use where they matter rather than habits you cannot switch off.",
+  libra: "With no planets in Libra, keeping the peace at any cost is not your instinct. You can take a stand without needing everyone to agree, and diplomacy is something you practise in close relationships rather than your default.",
+  scorpio: "With no planets in Scorpio, you do not live at emotional extremes or hold on to grudges. Depth still reaches you, yet intensity arrives through particular people and moments rather than colouring everything you feel.",
+  sagittarius: "With no planets in Sagittarius, restless searching for the next horizon is not what drives you. You find meaning close at hand, and faith and adventure come to you through particular chapters of life rather than as a constant hunger.",
+  capricorn: "With no planets in Capricorn, ambition and duty do not rule you by default. You are free to define success on your own terms, and discipline is something you build when a goal truly matters to you.",
+  aquarius: "With no planets in Aquarius, you do not need to stand apart to feel like yourself. You belong comfortably, and independence and fresh thinking show up in particular areas of life rather than in everything you do.",
+  pisces: "With no planets in Pisces, you are not easily swept away by moods, dreams or other people's feelings. Your boundaries come fairly naturally, and compassion and imagination grow through the experiences that open you rather than by default.",
+};

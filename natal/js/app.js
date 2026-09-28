@@ -1189,6 +1189,19 @@
       ["Polarity", S.polarity === "yang" ? "Yang · active" : "Yin · receptive"],
       ["Body", S.body], ["Keywords", S.keywords.join(", ")],
     ]);
+    // an empty sign is read around the reader: what its absence means, where it still shows up, and how it reaches them
+    if (!inside.length) {
+      const ST = D().story || {}, ru = S.ruler, rp = c.get(ru);
+      const spans = c.timeKnown ? [...new Set([1, 15, 29].map((x) => houseOfLon(SIGN_KEYS.indexOf(k) * 30 + x)))] : [];
+      const rulerDoes = rp && (((ST.wantSign || {})[ru] || {})[rp.sign] || (rp.house && ((ST.wantHouse || {})[ru] || {})[rp.house]));
+      html += sec(`${S.name} in your chart`, [
+        (ST.emptySign || {})[k],
+        spans.length ? `${S.name} runs through your ${listJoin(spans.map(ord))} house${spans.length > 1 ? "s" : ""}, so its qualities still show up for you in ${spans.map((h) => HOUSES[h].areas).join(", and in ")}.` : "",
+        rp ? `Its ruler is your ${pName(ru)}, in ${SIGNS[rp.sign].name}${rp.house ? ` in your ${ord(rp.house)} house` : ""}, and that is the channel through which ${S.name} reaches you.${rulerDoes ? ` Your ${pName(ru)} there ${rulerDoes}.` : ""}` : "",
+      ], elColor(k));
+      html += sec(`About ${S.name}`, [firstSentences(ds ? ds.overview : S.essence, 2)]);
+      return html;
+    }
     html += paras([ds ? ds.overview : S.essence]);
     if (ds) {
       html += chips("Strengths", ds.strengths, "green") + chips("Challenges", ds.challenges, "");
@@ -1233,9 +1246,22 @@
       inter ? ["Intercepted", inter.map((s) => SIGNS[s].name).join(", ")] : null,
       ["Planets", inside.length ? inside.map((p) => pShort(p.key)).join(", ") : "None"],
     ]);
-    html += paras([dh ? dh.overview : H.desc]);
     const cf = CUSP_FIELD[h] && deepSign(cusp.sign);
     const hc = ((D().houseCusps || {})[h] || {})[cusp.sign];
+    // an empty house is read around the reader: a quieter area, run through its ruler and the sign on its cusp
+    if (!inside.length) {
+      const ST = D().story || {};
+      const rulerDoes = ((ST.wantSign || {})[ruler] || {})[rp.sign] || ((ST.wantHouse || {})[ruler] || {})[rp.house];
+      html += sec("This house in your chart", [
+        dh && dh.empty,
+        rp.house === h ? "" : `Its ruler, your ${pName(ruler)}, sits in ${SIGNS[rp.sign].name} in your ${ord(rp.house)} house, so what happens in ${H.areas} runs through ${HOUSES[rp.house].areas}.${rulerDoes ? ` Your ${pName(ruler)} there ${rulerDoes}.` : ""}`,
+      ], PLANETS[ruler].color);
+      html += sec(`${S.name} on the cusp`, hc ? [hc] : cf && cf[CUSP_FIELD[h][0]] ? [cf[CUSP_FIELD[h][0]]] : [`You approach ${H.areas} ${S.how}.`], elColor(cusp.sign));
+      if (inter) html += sec("Intercepted signs", `${inter.map((s) => SIGNS[s].name).join(" and ")} ${inter.length > 1 ? "are" : "is"} intercepted here, held inside the house without touching a cusp, so ${inter.length > 1 ? "their" : "its"} qualities work more quietly in this part of your life.`);
+      html += sec(`About the ${ord(h)} house`, [firstSentences(dh ? dh.overview : H.desc, 2)]);
+      return html;
+    }
+    html += paras([dh ? dh.overview : H.desc]);
     html += sec(`${S.name} on the cusp`, hc ? [hc] : cf && cf[CUSP_FIELD[h][0]] ? [cf[CUSP_FIELD[h][0]]] : [`You approach ${H.areas} ${S.how}.`], elColor(cusp.sign));
     html += sec(`Its ruler, ${pName(ruler)}`, [
       rp.house === h
