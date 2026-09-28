@@ -1420,9 +1420,14 @@
     const sun = c.get("sun"), moon = c.get("moon"), asc = c.timeKnown ? c.get("asc") : null;
     const el = (p) => SIGNS[p.sign].element;
     const link = (open, color, glyph, title, sub) => `<button class="row" data-open="${open}"><span class="dot" style="color:${color}"></span><span class="glyph" style="color:${color}">${glyph}</span><span class="main"><div class="title">${esc(title)}</div><div class="sub">${esc(sub)}</div></span></button>`;
-    // tab-style section labels, like the other tabs
     // each section is a frosted card, like the Karmic tab
     const card = (glyph, color, k, title, list, extra) => { const l = (Array.isArray(list) ? list : [list]).filter(Boolean); return l.length ? `<div class="card"><div class="card-head"><div class="glyph" style="color:${color}">${glyph}</div><div><div class="card-k">${esc(k)}</div><div class="card-title">${esc(title)}</div></div></div>${paras(l)}${extra || ""}</div>` : ""; };
+    // at least one side is a personal planet: slow-planet pairs describe a generation, not a person
+    const WANT = ST.want || {}, PERSONAL = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"];
+    // each drive read through its sign (or, for the slow planets and Chiron, its house)
+    const SLOW = ["uranus", "neptune", "pluto", "chiron"];
+    const wantOf = (k) => { const p = c.get(k); return (SLOW.includes(k) && p.house && ((ST.wantHouse || {})[k] || {})[p.house]) || ((ST.wantSign || {})[k] || {})[p.sign] || WANT[k]; };
+    const placeOf = (k) => { const p = c.get(k); return SLOW.includes(k) && p.house ? `${pName(k)} in your ${ord(p.house)} house` : `${pName(k)} in ${SIGNS[p.sign].name}`; };
     let html = sheetSimple("Your story", "Your chart as one story", esc(`${SIGNS[sun.sign].name} Sun · ${SIGNS[moon.sign].name} Moon${asc ? ` · ${SIGNS[asc.sign].name} Rising` : ""}`), []);
     html += card("✦", PLANETS.sun.color, "How to read it", "One person, in layers", [ST.intro]);
 
@@ -1447,17 +1452,40 @@
     }
     html += card(PLANETS[d.domPlanet].glyph, PLANETS[d.domPlanet].color, "Your strongest themes", `${cap(d.domEl)} · ${cap(d.domMode)} · ${pName(d.domPlanet)}`, themes);
 
-    // 3. the inner tensions: the tightest squares and oppositions between personal drives
-    // at least one side is a personal planet: slow-planet pairs describe a generation, not a person
-    const WANT = ST.want || {}, PERSONAL = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"];
     const tense = c.aspects
       .filter((a) => a.major && (a.type === "square" || a.type === "opposition") && WANT[a.a] && WANT[a.b] && (PERSONAL.includes(a.a) || PERSONAL.includes(a.b)))
       .sort((a, b) => a.orb - b.orb).slice(0, 2);
+
+    // 3. each planet as one connected picture: sign, house, retrograde and its closest links
+    const used = new Set(tense);
+    const RETRO = D().retro || {};
+    const planetCard = (k, label) => {
+      const p = c.get(k); if (!p) return "";
+      const lines = [`Your ${pName(k)} in ${SIGNS[p.sign].name} ${((ST.wantSign || {})[k] || {})[p.sign] || WANT[k]}.`];
+      if (p.house) lines.push(`In your ${ord(p.house)} house, your ${pName(k)} works through ${HOUSES[p.house].areas}.`);
+      if (p.retro && RETRO[k]) lines.push(firstSentences(RETRO[k], 1));
+      const mine = c.aspects.filter((a) => a.major && (a.a === k || a.b === k) && !used.has(a) && a.orb <= 5).sort((x, y) => x.orb - y.orb).slice(0, 2);
+      for (const a of mine) {
+        used.add(a);
+        const o = a.a === k ? a.b : a.a, R = aspectReading(a.a, a.b, a.type);
+        if (R && R.theme) lines.push(`With your ${pName(o)} (${ASPECTS[a.type].name.toLowerCase()}): ${R.theme}`);
+      }
+      return card(PLANETS[k].glyph, PLANETS[k].color, label, `${pName(k)} in ${SIGNS[p.sign].name}${p.house ? ` · ${ord(p.house)} house` : ""}${p.retro ? " · retrograde" : ""}`, [lines.join(" ")]);
+    };
+    html += planetCard("sun", "Your core drive") + planetCard("moon", "Your inner life") + planetCard("mercury", "How you think and speak")
+      + planetCard("venus", "How you love") + planetCard("mars", "How you act") + planetCard("jupiter", "Where you grow") + planetCard("saturn", "Where you are tested");
+    // the slow planets through the houses they occupy, which is what makes them personal
+    const deep = [], deepKeys = [];
+    for (const k of ["uranus", "neptune", "pluto", "chiron"]) { const p = c.get(k), w = p && p.house && ((ST.wantHouse || {})[k] || {})[p.house]; if (w) { deep.push(`Your ${pName(k)} in the ${ord(p.house)} house ${w}.`); deepKeys.push(pName(k)); } }
+    const li = c.get("lilith"), lw = li && ((ST.wantSign || {}).lilith || {})[li.sign];
+    if (lw) { deep.push(`Your Black Moon Lilith in ${SIGNS[li.sign].name} ${lw}.`); deepKeys.push("Lilith"); }
+    html += card("♇", PLANETS.pluto.color, "The deeper forces", listJoin(deepKeys), [deep.join(" ")]);
+    // 3. the inner tensions: the tightest squares and oppositions between personal drives
     const bridges = (ST.bridge || {});
     const tensionParas = tense.map((a, i) => {
       const R = aspectReading(a.a, a.b, a.type);
       const pool = bridges[a.type] || [];
-      return `${pName(a.a)} and ${pName(a.b)}: part of you ${WANT[a.a]}, and part of you ${WANT[a.b]}. ${R && R.theme ? R.theme + " " : ""}${pool.length ? pool[(PLANET_KEYS.indexOf(tense[0].a) + i * 2) % pool.length] : ""}`.trim();
+      return `Your ${placeOf(a.a)} and your ${placeOf(a.b)} ${a.type === "opposition" ? "sit on opposite ends of a seesaw" : "grind against each other"}. ${R && R.theme ? R.theme + " " : ""}${pool.length ? pool[(PLANET_KEYS.indexOf(tense[0].a) + i * 2) % pool.length] : ""}`.trim();
     });
     html += card("☍", ASPECTS.opposition.color, "Where you pull two ways", tense.length ? tense.map((a) => `${pName(a.a)} and ${pName(a.b)}`).join(" · ") : "In step with yourself", tensionParas.length ? tensionParas
       : ["Your chart holds few sharp inner conflicts, so the different parts of you tend to cooperate. Your growth comes less from settling a fight within and more from choosing a direction and committing to it."],
