@@ -1201,7 +1201,8 @@
         spans.length ? `${S.name} runs through your ${listJoin(spans.map(ord))} house${spans.length > 1 ? "s" : ""}, so its qualities still show up for you in ${spans.map((h) => HOUSES[h].areas).join(", and in ")}.` : "",
         rp ? `Its ruler is your ${pName(ru)}, in ${SIGNS[rp.sign].name}${rp.house ? ` in your ${ord(rp.house)} house` : ""}, and that is the channel through which ${S.name} reaches you.${rulerDoes ? ` Your ${pName(ru)} there ${rulerDoes}.` : ""}` : "",
       ], elColor(k));
-      html += sec(`About ${S.name}`, [firstSentences(ds ? ds.overview : S.essence, 2)]);
+      html += `<details class="about"><summary>About ${esc(S.name)}</summary>${paras([ds ? ds.overview : S.essence])}`
+        + (ds ? chips("Strengths", ds.strengths, "green") + chips("Challenges", ds.challenges, "") + sec("In love", ds.love) + sec("Growth edge", ds.growth) : paras([`Gifts: ${S.gifts}.`, `Shadow: ${S.shadow}.`])) + `</details>`;
       return html;
     }
     // an occupied sign also leads with the reader: which parts of you live here and how the sign shapes them
@@ -1282,7 +1283,7 @@
       ], PLANETS[ruler].color);
       html += sec(`${S.name} on the cusp`, hc ? [hc] : cf && cf[CUSP_FIELD[h][0]] ? [cf[CUSP_FIELD[h][0]]] : [`You approach ${H.areas} ${S.how}.`], elColor(cusp.sign));
       if (inter) html += sec("Intercepted signs", `${inter.map((s) => SIGNS[s].name).join(" and ")} ${inter.length > 1 ? "are" : "is"} intercepted here, held inside the house without touching a cusp, so ${inter.length > 1 ? "their" : "its"} qualities work more quietly in this part of your life.`);
-      html += sec(`About the ${ord(h)} house`, [firstSentences(dh ? dh.overview : H.desc, 2)]);
+      html += `<details class="about"><summary>About the ${ord(h)} house</summary>${paras([dh ? dh.overview : H.desc])}${dh ? sec("When it flows", dh.gifts) + sec("When it struggles", dh.challenges) + sec("Soul level", dh.karmic) : ""}</details>`;
       return html;
     }
     {
