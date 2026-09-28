@@ -846,3 +846,9 @@ details.about > summary::-webkit-details-marker { display: none; }
 details.about > summary::after { content: "+"; font-size: 16px; letter-spacing: 0; opacity: 0.8; }
 details.about[open] > summary::after { content: "\2212"; }
 details.about[open] { padding-bottom: 8px; }
+
+/* birth sky (artifact trial): the Chart tab's sky as it looked at the birth minute */
+.sky-birth { position: absolute; inset: 0; opacity: 0; transition: opacity 1.8s ease; }
+.sky-birth.on { opacity: 1; }
+.birth-sky-note { margin-top: 6px; opacity: 0.85; }
+@media (prefers-reduced-motion: reduce) { .sky-birth { transition: none; } }

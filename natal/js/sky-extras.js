@@ -30,7 +30,25 @@
   const nebula = sky.querySelector(".nebula");
   sky.insertBefore(moods, nebula ? nebula.nextSibling : sky.firstChild);
   sky.insertBefore(wrap, moods.nextSibling);
-  let sign = null, mood = null;
+  // the birth sky (artifact trial): the Chart tab's sky tinted to how it looked at the birth minute
+  const birth = document.createElement("div");
+  birth.className = "sky-birth";
+  sky.insertBefore(birth, moods);
+  const birthTint = (b) => {
+    if (!b) return "";
+    const { alt, rising } = b;
+    if (alt < -18) return "linear-gradient(180deg, rgba(4, 8, 22, 0.62) 0%, rgba(8, 14, 34, 0.45) 60%, rgba(10, 16, 30, 0.2) 85%, transparent 100%)";
+    if (alt < -6) return "linear-gradient(180deg, rgba(20, 22, 60, 0.5) 0%, rgba(70, 60, 140, 0.28) 55%, " + (rising ? "rgba(150, 110, 170, 0.22)" : "rgba(120, 80, 150, 0.22)") + " 82%, transparent 100%)";
+    if (alt < 0) return rising
+      ? "linear-gradient(180deg, rgba(40, 40, 90, 0.3) 0%, rgba(150, 110, 170, 0.22) 45%, rgba(255, 150, 140, 0.34) 75%, rgba(255, 190, 140, 0.3) 86%, transparent 100%)"
+      : "linear-gradient(180deg, rgba(40, 30, 80, 0.32) 0%, rgba(160, 90, 140, 0.24) 45%, rgba(255, 120, 90, 0.36) 76%, rgba(255, 160, 100, 0.3) 86%, transparent 100%)";
+    if (alt < 15) return rising
+      ? "linear-gradient(180deg, rgba(120, 160, 220, 0.12) 0%, rgba(255, 210, 170, 0.18) 55%, rgba(255, 200, 140, 0.28) 84%, transparent 100%)"
+      : "linear-gradient(180deg, rgba(90, 120, 180, 0.12) 0%, rgba(255, 180, 120, 0.2) 55%, rgba(255, 150, 90, 0.32) 84%, transparent 100%)";
+    if (alt < 45) return "linear-gradient(180deg, rgba(120, 175, 235, 0.2) 0%, rgba(170, 210, 245, 0.16) 60%, rgba(255, 230, 190, 0.12) 85%, transparent 100%)";
+    return "linear-gradient(180deg, rgba(110, 175, 245, 0.3) 0%, rgba(160, 210, 250, 0.22) 60%, rgba(240, 240, 220, 0.12) 85%, transparent 100%)";
+  };
+  let sign = null, mood = null, birthKey = null;
   function draw(k) {
     const d = C[k];
     if (!d) { wrap.innerHTML = ""; return; }
@@ -41,7 +59,12 @@
     </svg>`;
   }
   window.AstroSkyExtras = {
-    update(tab, sunSign) {
+    update(tab, sunSign, b) {
+      if (withStars) {
+        const key = b ? Math.round(b.alt) + (b.rising ? "r" : "s") : "";
+        if (key !== birthKey) { birthKey = key; birth.style.background = birthTint(b); }
+        birth.classList.toggle("on", !!b && tab === "chart");
+      }
       if (withStars && sunSign !== sign) {
         sign = sunSign;
         wrap.classList.remove("on");

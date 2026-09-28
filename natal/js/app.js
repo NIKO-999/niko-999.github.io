@@ -393,7 +393,7 @@
       if (TAB_THEME[state.tab]) view.style.setProperty("--theme", TAB_THEME[state.tab]);
       else view.style.removeProperty("--theme");
       view.innerHTML = fn();
-      if (window.AstroSkyExtras) window.AstroSkyExtras.update(state.tab, state.chart.get("sun").sign);
+      if (window.AstroSkyExtras) window.AstroSkyExtras.update(state.tab, state.chart.get("sun").sign, birthSky(state.chart));
       dedupe(view);
       layoutForDesktop();
       bindView();
@@ -448,6 +448,22 @@
   /* ------------------------------------------------------------------ */
   /* CHART tab                                                          */
   /* ------------------------------------------------------------------ */
+  /** The sky at the birth minute: the Sun's altitude above the horizon and whether it was rising or setting. */
+  function birthSky(c) {
+    if (!c.timeKnown) return null;
+    const r = Math.PI / 180, eps = (c.eps || 23.44) * r, lat = c.record.place.lat * r;
+    const sunLon = c.get("sun").lon * r, mcLon = c.get("mc").lon * r;
+    const ra = Math.atan2(Math.sin(sunLon) * Math.cos(eps), Math.cos(sunLon));
+    const dec = Math.asin(Math.sin(eps) * Math.sin(sunLon));
+    const ramc = Math.atan2(Math.sin(mcLon) * Math.cos(eps), Math.cos(mcLon));
+    let H = ramc - ra; H = Math.atan2(Math.sin(H), Math.cos(H));
+    const alt = Math.asin(Math.sin(lat) * Math.sin(dec) + Math.cos(lat) * Math.cos(dec) * Math.cos(H)) / r;
+    const rising = H < 0;
+    const label = alt < -18 ? "deep night" : alt < -6 ? (rising ? "before dawn" : "late twilight") : alt < 0 ? (rising ? "dawn" : "dusk")
+      : alt < 15 ? (rising ? "early morning, the Sun just up" : "late afternoon, the Sun going down") : alt < 45 ? (rising ? "morning light" : "afternoon light") : "full daylight";
+    return { alt, rising, label };
+  }
+
   function renderChart() {
     const c = state.chart, r = c.record, d = c.derived;
     const sun = c.get("sun"), moon = c.get("moon"), asc = c.timeKnown ? c.get("asc") : null;
@@ -462,6 +478,7 @@
       <h1 class="display">${esc(r.name || "Your Chart")}</h1>
       <div class="subline">${parts.join(' <span style="opacity:.6">·</span> ')}</div>
       <div class="meta">${esc(r.place.name)} · ${fmtCoord(r.place.lat, r.place.lon)} · ${fmtOffset(c.offset)}<br>${esc(K.HOUSE_SYSTEMS[c.houseSystemUsed])} · ${state.settings.zodiac === "sidereal" ? "Sidereal (Lahiri)" : "Tropical"} · ${state.settings.nodeType === "true" ? "True" : "Mean"} node</div>
+      ${window.NATAL_EMBED && birthSky(c) ? `<div class="meta birth-sky-note">Your birth sky: ${esc(birthSky(c).label)}</div>` : ""}
       ${!c.timeKnown ? `<p class="note">Birth time unknown: the chart is cast for local noon. Houses, Ascendant and Midheaven are hidden and the Moon may be up to ±7° off.</p>` : ""}
       ${c.timeKnown && c.houseSystemUsed !== state.settings.houseSystem ? `<p class="note">${esc(K.HOUSE_SYSTEMS[state.settings.houseSystem])} houses are undefined at this latitude: Porphyry is used instead.</p>` : ""}
     </section>`;
@@ -1212,17 +1229,16 @@
       const lead = inside.length >= 3 ? `Your ${listJoin(names)} all sit in ${S.name}, so this is one of the loudest signs in your chart. ${(ST.cluster || {})[k] || ""}`
         : inside.length === 2 ? `Your ${names[0]} and ${names[1]} both sit in ${S.name}, so two parts of you share its style and colour each other.`
         : `${S.name} shapes one part of you: your ${names[0]}.`;
-      const lines = inside.map((p) => {
-        if (p.key === "asc") return (ST.asc || {})[k] || "";
-        const w = ((ST.wantSign || {})[p.key] || {})[k] || (p.house && ((ST.wantHouse || {})[p.key] || {})[p.house]);
-        return w ? `Your ${pName(p.key)} here ${w}.` : "";
-      }).filter(Boolean);
       const spans = c.timeKnown ? [...new Set([1, 15, 29].map((x) => houseOfLon(SIGN_KEYS.indexOf(k) * 30 + x)))] : [];
       html += sec(`${S.name} in your chart`, [
         lead.trim(),
-        lines.join(" "),
         spans.length ? `${S.name} runs through your ${listJoin(spans.map(ord))} house${spans.length > 1 ? "s" : ""}, so all of this plays out most through ${spans.map((h) => HOUSES[h].areas).join(", and through ")}.` : "",
       ], elColor(k));
+      // each of your planets here gets its full reading in this sign, like the planet pages
+      for (const p of inside) {
+        const dp = deepPlanetSign(p.key, k);
+        html += sec(`${pName(p.key)} in ${S.name}`, [dp && dp.text ? dp.text : signText(p)], PLANETS[p.key].color);
+      }
     }
     // the general reading stays, folded away under "About"
     html += `<details class="about"><summary>About ${esc(S.name)}</summary>`;
