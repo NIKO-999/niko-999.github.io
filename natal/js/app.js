@@ -1236,8 +1236,20 @@
       ], elColor(k));
       // each of your planets here gets its full reading in this sign, like the planet pages
       for (const p of inside) {
-        const dp = deepPlanetSign(p.key, k);
-        html += sec(`${pName(p.key)} in ${S.name}`, [dp && dp.text ? dp.text : signText(p)], PLANETS[p.key].color);
+        const dp = deepPlanetSign(p.key, k), da = !dp && deepAsteroid(p.key);
+        const name = pName(p.key), col = PLANETS[p.key].color;
+        if (da && da.signs && da.signs[k]) {
+          html += sec(`${name} in ${S.name}`, [da.signs[k]], col) + chips("Gifts", da.gifts, "green") + chips("Challenges", da.challenges, "");
+          continue;
+        }
+        const mcText = p.key === "mc" && ds && ds.career;
+        html += sec(`${name} in ${S.name}`, [dp && dp.text ? dp.text : mcText || signText(p)], col);
+        if (dp) {
+          if (dp.love) html += sec(`${name} in love`, dp.love, col);
+          if (dp.work) html += sec(`${name} at work`, dp.work, col);
+          if (dp.shadow) html += sec(`${name}'s shadow`, dp.shadow, col);
+          html += chips("Strengths", dp.strengths, "green") + chips("Challenges", dp.challenges, "");
+        }
       }
     }
     // the general reading stays, folded away under "About"
