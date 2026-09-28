@@ -388,7 +388,7 @@
       view.innerHTML = renderForm();
       bindForm();
     } else {
-      const fn = { chart: renderChart, today: renderToday, progressed: renderProgressed, "return": renderReturn, synastry: renderSynastry, planets: renderPlanets, houses: renderHouses, aspects: renderAspects, karmic: renderKarmic }[state.tab];
+      const fn = { chart: renderChart, story: sheetStory, today: renderToday, progressed: renderProgressed, "return": renderReturn, synastry: renderSynastry, planets: renderPlanets, houses: renderHouses, aspects: renderAspects, karmic: renderKarmic }[state.tab];
       if (TAB_THEME[state.tab]) view.style.setProperty("--theme", TAB_THEME[state.tab]);
       else view.style.removeProperty("--theme");
       view.innerHTML = fn();
@@ -943,6 +943,7 @@
         case "dominants": return PLANETS[dominants().planetPct[0].key].color;
         case "area": return LIFE_AREAS[arg].color;
         case "phase": return PLANETS.moon.color;
+        case "story": return PLANETS.sun.color;
         case "house": {
           if (state.tab === "karmic") return TAB_THEME.karmic;
           return null;
@@ -1411,6 +1412,75 @@
     return html + natalSnippet(key);
   }
 
+  /* "Your chart as one story": the whole chart read as one person. The pieces live in js/deep-story.js
+     and are chosen from what the chart emphasises most, so the page stays short and personal. */
+  function sheetStory() {
+    const c = state.chart, d = c.derived, ST = D().story || {};
+    const pick = (group, key) => (ST[group] || {})[key] || "";
+    const sun = c.get("sun"), moon = c.get("moon"), asc = c.timeKnown ? c.get("asc") : null;
+    const el = (p) => SIGNS[p.sign].element;
+    const link = (open, color, glyph, title, sub) => `<button class="row" data-open="${open}"><span class="dot" style="color:${color}"></span><span class="glyph" style="color:${color}">${glyph}</span><span class="main"><div class="title">${esc(title)}</div><div class="sub">${esc(sub)}</div></span></button>`;
+    // tab-style section labels, like the other tabs
+    const sec = (title, list) => { const l = (Array.isArray(list) ? list : [list]).filter(Boolean); return l.length ? `<div class="section-label">${esc(title)}</div>${paras(l)}` : ""; };
+    let html = sheetSimple("Your story", "Your chart as one story", esc(`${SIGNS[sun.sign].name} Sun · ${SIGNS[moon.sign].name} Moon${asc ? ` · ${SIGNS[asc.sign].name} Rising` : ""}`), [ST.intro]);
+
+    // 1. the core: Sun, Moon and Rising as one paragraph, then how the layers combine
+    const second = asc && el(moon) === el(asc) && el(sun) !== el(asc) ? `sunAsc:${el(sun)}-${el(asc)}` : asc ? `moonAsc:${el(moon)}-${el(asc)}` : "";
+    html += sec("Who you are at the core", [
+      [pick("sun", sun.sign), pick("moon", moon.sign), asc ? pick("asc", asc.sign) : ""].filter(Boolean).join(" "),
+      [pick("blend", `sunMoon:${el(sun)}-${el(moon)}`), second ? pick("blend", second) : ""].filter(Boolean).join(" "),
+    ]);
+
+    // 2. the loudest themes
+    const themes = [pick("element", d.domEl)];
+    if (d.lackEl.length) themes.push(pick("lack", d.lackEl[0]));
+    themes.push(pick("mode", d.domMode), pick("planet", d.domPlanet));
+    if (c.timeKnown) {
+      const byHouse = {};
+      for (const k of PLANET_KEYS) { const h = c.get(k).house; byHouse[h] = (byHouse[h] || 0) + 1; }
+      const [h, n] = Object.entries(byHouse).sort((a, b) => b[1] - a[1])[0];
+      if (n >= 3) themes.push(pick("house", h));
+      const skew = [["above", d.above], ["below", d.below], ["east", d.east], ["west", d.west]].sort((a, b) => b[1] - a[1])[0];
+      if (skew[1] >= 7) themes.push(pick("hemi", skew[0]));
+    }
+    html += sec("Your strongest themes", themes);
+
+    // 3. the inner tensions: the tightest squares and oppositions between personal drives
+    // at least one side is a personal planet: slow-planet pairs describe a generation, not a person
+    const WANT = ST.want || {}, PERSONAL = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"];
+    const tense = c.aspects
+      .filter((a) => a.major && (a.type === "square" || a.type === "opposition") && WANT[a.a] && WANT[a.b] && (PERSONAL.includes(a.a) || PERSONAL.includes(a.b)))
+      .sort((a, b) => a.orb - b.orb).slice(0, 2);
+    const bridges = (ST.bridge || {});
+    const tensionParas = tense.map((a, i) => {
+      const R = aspectReading(a.a, a.b, a.type);
+      const pool = bridges[a.type] || [];
+      return `${pName(a.a)} and ${pName(a.b)}: part of you ${WANT[a.a]}, and part of you ${WANT[a.b]}. ${R && R.theme ? R.theme + " " : ""}${pool.length ? pool[(PLANET_KEYS.indexOf(tense[0].a) + i * 2) % pool.length] : ""}`.trim();
+    });
+    html += sec("Where you pull two ways", tensionParas.length ? tensionParas
+      : ["Your chart holds few sharp inner conflicts, so the different parts of you tend to cooperate. Your growth comes less from settling a fight within and more from choosing a direction and committing to it."]);
+    if (tense.length) html += `<div class="list">${tense.map((a) => link(`aspect:${c.aspects.indexOf(a)}`, ASPECTS[a.type].color, ASPECTS[a.type].glyph, `${pName(a.a)} ${ASPECTS[a.type].name.toLowerCase()} ${pName(a.b)}`, "Read this contact in full")).join("")}</div>`;
+
+    // 4. direction: the chart ruler's thread and the North Node
+    const nn = c.get("northNode");
+    const dir = [];
+    if (d.chartRuler) {
+      const r = c.get(d.chartRuler);
+      dir.push(`${pick("ruler", d.chartRuler)} Your ${pName(d.chartRuler)} sits in ${SIGNS[r.sign].name} in your ${ord(r.house)} house, so that thread runs most clearly through ${HOUSES[r.house].areas}.`);
+    }
+    dir.push(firstSentences(SIGNS[nn.sign].nn, 1) + (nn.house ? ` In your chart it sits in the ${ord(nn.house)} house, so that growth comes through ${HOUSES[nn.house].areas}.` : ""));
+    if (!c.timeKnown) dir.push("Without a birth time your chart ruler and houses stay hidden, so this direction is read from the sign of your North Node alone.");
+    html += sec("Where you are heading", dir);
+
+    // 5. where to read next
+    const next = [link("point:sun", PLANETS.sun.color, PLANETS.sun.glyph, `Sun in ${SIGNS[sun.sign].name}`, "Your core"),
+      link("point:moon", PLANETS.moon.color, PLANETS.moon.glyph, `Moon in ${SIGNS[moon.sign].name}`, "Your inner life")];
+    if (asc) next.push(link("point:asc", PLANETS.asc.color, PLANETS.asc.glyph, `${SIGNS[asc.sign].name} Rising`, "How you come across"));
+    next.push(link("dominants", PLANETS[d.domPlanet].color, PLANETS[d.domPlanet].glyph, `${pName(d.domPlanet)} leads your chart`, "Your strongest planet"));
+    html += `<div class="section-label">Read next</div><div class="list">${next.join("")}</div>`;
+    return html;
+  }
+
   function sheetSimple(eyebrow, title, subline, body) {
     return `<section class="hero"><div class="eyebrow">${esc(eyebrow)}</div><h2 class="display">${title}</h2>${subline ? `<div class="subline">${subline}</div>` : ""}</section>${paras(body)}`;
   }
@@ -1428,6 +1498,7 @@
       case "transit": html = sheetTransit(+arg); break;
       case "tpevent": html = sheetPeriodEvent(+arg); break;
       case "dominants": html = sheetDominants(); break;
+      case "story": html = sheetStory(); break;
       case "prog": html = sheetProg(arg); break;
       case "paspect": html = sheetProgAspect(+arg); break;
       case "pphase": {
@@ -1631,7 +1702,7 @@
         }[arg2];
         html = sheetSimple("Nodal contact", P.name, "", [txt, P.desc]);
         html += natalSnippet(arg);
-        const nn = c.get("northNode"), ax = deepAxis(nn.sign);
+        const nn = c.get("northNode");
         html += sec(`Your nodal axis: ${SIGNS[nn.sign].name} and ${SIGNS[opposite(nn.sign)].name}`, SIGNS[nn.sign].nn || (ax && firstPara(ax.story)), PLANETS.northNode.color);
         break;
       }

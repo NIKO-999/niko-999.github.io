@@ -1,0 +1,194 @@
+/* Text for the Story tab: the whole chart read as one person. */
+/* Chart story, part A: intro, core sentences for Sun, Moon and Rising, and element blends between layers (see CLAUDE.md). */
+window.AstroDeep = window.AstroDeep || {};
+window.AstroDeep.story = window.AstroDeep.story || {};
+Object.assign(window.AstroDeep.story, {
+  intro: "Your chart describes one person in layers, which is why parts of it can seem to disagree. The Sun is your core, the Moon your inner life, and the Rising sign how you come across to others. The sign shows how each part of you works, and the house shows where in life it plays out. Aspects are parts of you in conversation, some agreeing and some arguing. So when two readings seem to contradict each other, they usually describe different layers of the same person.",
+  sun: {
+    aries: "At your core you are driven by the need to act first and prove to yourself that you can meet any challenge on your own nerve.",
+    taurus: "At your core you want a life that feels solid and worth keeping, and you build it slowly, trusting what lasts over what dazzles.",
+    gemini: "At your core you are fuelled by curiosity, the need to learn, connect ideas and keep your mind moving towards whatever you have not yet understood.",
+    cancer: "At your core you long to protect and belong, and your strength grows around the people and places you call your own.",
+    leo: "At your core you want to live generously and be seen for who you truly are, putting your whole heart into whatever you create.",
+    virgo: "At your core you are driven to make things work better, and you feel most yourself when your skill and care are genuinely useful.",
+    libra: "At your core you seek balance and fairness, and you come alive through the relationships that sharpen your sense of who you are.",
+    scorpio: "At your core you want depth and truth, and you would rather go all the way into something than stay safely on its surface.",
+    sagittarius: "At your core you are moved by the search for meaning, the pull towards wider horizons and a freedom that lets you keep growing.",
+    capricorn: "At your core you want to build something that stands, and you measure yourself by what you achieve through patience and steady effort.",
+    aquarius: "At your core you need to think for yourself and to change what no longer makes sense, even when it sets you apart.",
+    pisces: "At your core you live through feeling and imagination, and you want your life to touch something larger and more tender than the ordinary."
+  },
+  moon: {
+    aries: "Inside, you need room to react honestly and move on quickly, and you feel safest when nobody tries to slow or soften your feelings.",
+    taurus: "Underneath it all you need steadiness, comfort and time, and your feelings settle best when life around you stays calm and familiar.",
+    gemini: "Inside, you need to talk your feelings through and keep your mind engaged, and you settle once you can name what is happening.",
+    cancer: "Underneath everything you need to feel held and to hold others, and your moods closely follow the safety of the bonds around you.",
+    leo: "Inside, you need warmth, loyalty and appreciation, and you feel secure when the people closest to you show plainly that you matter.",
+    virgo: "Underneath the surface you need order and a sense of being useful, and you calm yourself by sorting out what can be fixed.",
+    libra: "Inside, you need harmony and a close companion for your inner world, and discord unsettles you long before you admit that it has.",
+    scorpio: "Underneath, you need emotional honesty and deep trust, and you feel safe only with people who have seen your intensity and stayed.",
+    sagittarius: "Inside, you need space, hope and room to roam, and your spirits lift whenever life opens out rather than closing in.",
+    capricorn: "Underneath a composed surface you need to feel capable and in control, and you steady your feelings by carrying responsibility well.",
+    aquarius: "Inside, you need freedom and a little distance to process what you feel, and too much closeness too fast makes you withdraw.",
+    pisces: "Underneath it all you absorb the moods around you, and you need quiet, gentleness and time alone to find your own feelings again."
+  },
+  asc: {
+    aries: "To others you come across as direct, quick and ready to act, and people sense your energy before you have said very much.",
+    taurus: "People meet someone calm, grounded and unhurried in you, and your presence tends to reassure them long before they know you well.",
+    gemini: "To others you seem lively, curious and quick with words, and people find you easy to talk to from the very first exchange.",
+    cancer: "People meet a warm, protective presence in you, someone who notices how they are feeling and quietly makes them welcome.",
+    leo: "To others you come across as warm, confident and bright, and people notice you even on the days you would rather go unseen.",
+    virgo: "People meet someone attentive, composed and quietly capable in you, and they often sense you have noticed more than you say.",
+    libra: "To others you seem gracious, fair and easy to like, and people feel at ease because you instinctively smooth the space between you.",
+    scorpio: "People meet an intense, private presence in you, and they sense depth and watchfulness behind your composure before you reveal anything.",
+    sagittarius: "To others you come across as open, frank and full of spirit, and people pick up on your optimism and your restless love of freedom.",
+    capricorn: "People meet someone serious, reliable and quietly in charge in you, and they tend to trust your judgement long before you have proved it.",
+    aquarius: "To others you seem friendly yet a little detached, and people notice an original, independent streak that does not bend to fit in.",
+    pisces: "People meet a soft, receptive presence in you, and they often feel understood by you without quite knowing why."
+  },
+  blend: {
+    "sunMoon:fire-fire": "What drives you and what you need inside burn in the same direction, so your feelings rarely hold your enthusiasm back. You act on instinct and recover quickly, though real rest comes hard to you.",
+    "sunMoon:fire-earth": "Your drive races ahead while your feelings want steadiness and proof, so they move at different speeds. You launch boldly in public, and privately you need time and comfort before the new thing feels safe.",
+    "sunMoon:fire-air": "Your drive to act and your emotional need for ideas and conversation feed each other well. Talking things through fuels your courage, and your courage gives your restless mind something worth thinking about.",
+    "sunMoon:fire-water": "Your ambition pushes outward while your feelings pull inward, so you can feel bold and tender at once. Confidence shows when you are chasing a goal, and sensitivity surfaces when you are tired or hurt.",
+    "sunMoon:earth-fire": "Your core wants to build patiently, yet emotionally you react fast and crave excitement. Outwardly you plan and persist, while a quick flare of feeling keeps pushing you to move sooner than your plans allow.",
+    "sunMoon:earth-earth": "Your purpose and your emotional needs both seek security, so you know what you want and how to feel safe getting it. This steadiness is your strength, and change reaches you slowly and on your own terms.",
+    "sunMoon:earth-air": "Your practical purpose and your habit of processing feelings through thought pull in opposite directions. You stay grounded when there is work to finish, and alone your feelings turn into questions and analysis instead.",
+    "sunMoon:earth-water": "Your practical drive gives your deep feelings a safe container, and those feelings give your work its meaning. You build what you care about, and caring for people makes your efforts feel worth it.",
+    "sunMoon:air-fire": "Your ideas and your emotional spark support each other, so thinking and feeling both lead you towards action. Inspiration comes quickly to you, and you need a lively inner life to keep your mind alight.",
+    "sunMoon:air-earth": "Your mind wants ideas and variety while your feelings crave routine and comfort, so the two pull in opposite directions. Curiosity leads when you are with others, and a need for the familiar takes over when you are alone.",
+    "sunMoon:air-air": "Your core and your inner life both run on thought, so you understand your feelings by naming and discussing them. You are rarely lost for words, though you can talk around a feeling rather than sit with it.",
+    "sunMoon:air-water": "Your mind moves quickly and lightly while your feelings need time to surface, so they work at different speeds. You can reason calmly about something for days before the emotion behind it finally reaches you.",
+    "sunMoon:water-fire": "Your core runs on quiet feeling while your emotional reactions are quick and fiery, so you pull in opposite directions. You seem gentle most of the time, yet a sudden heat shows how strongly you care when you are provoked.",
+    "sunMoon:water-earth": "Your sensitivity and your need for steady security support each other well. Your feelings run deep, and your instinct for practical comfort keeps them from flooding you, so you are tender without being fragile.",
+    "sunMoon:water-air": "Your core feels everything deeply while your inner life reaches for understanding, so they move at different paces. The feeling arrives first, and only later does your mind catch up enough to explain it.",
+    "sunMoon:water-water": "Your purpose and your emotional needs both run on feeling, so your intuition is strong and your empathy wide. You sense far more than you say, and you need calm spaces to let it all settle.",
+    "sunAsc:fire-fire": "The energy people see in you is exactly the energy that drives you, so first impressions of you are accurate. You come across as bold because you are bold, and your confidence never needs translating.",
+    "sunAsc:fire-earth": "People first see someone measured and careful while your core is impatient to act, so the two run at different speeds. Your caution shows at the start, and your fire appears once you feel sure of the ground.",
+    "sunAsc:fire-air": "The easy, sociable way you come across opens doors for the drive underneath. Conversation is your way in, and once people are listening, your conviction and nerve carry the rest.",
+    "sunAsc:fire-water": "People meet someone soft and receptive while your core burns with ambition, so your first impression and your true drive pull apart. Gentleness shows in new company, and your force emerges once you feel safe or challenged.",
+    "sunAsc:earth-fire": "You come across as quick and spirited while underneath you are patient and deliberate, so the two keep different tempos. People expect a sprint from you and are surprised by your staying power.",
+    "sunAsc:earth-earth": "Your steady manner and your practical core are one and the same, so people trust you on sight and rarely find you different up close. What you show is what you deliver.",
+    "sunAsc:earth-air": "People meet someone light, chatty and adaptable, yet your core is grounded and cautious, so the two pull against each other. Your easy manner is real in company, and your seriousness shows when something needs doing.",
+    "sunAsc:earth-water": "Your gentle, perceptive manner supports the practical purpose underneath. People open up to you readily, and your quiet reliability then shows them that their trust was well placed.",
+    "sunAsc:air-fire": "The spirited way you come across gives your ideas momentum. People catch your enthusiasm first, and your thoughtful, sociable core gives them something substantial once they stay.",
+    "sunAsc:air-earth": "People first see someone steady and reserved while underneath your mind is restless and curious, so they work at different speeds. You warm up slowly in new company, then reveal how much you have been thinking.",
+    "sunAsc:air-air": "Your sociable manner and your thinking core match closely, so people find you as engaging on the tenth meeting as on the first. You connect easily because connection is what you live for.",
+    "sunAsc:air-water": "People sense your sensitivity before your ideas while underneath you think things through with cool detachment, so the two move at different paces. You seem emotional at first, and later people discover how clearly you reason.",
+    "sunAsc:water-fire": "You come across as bold and forthright while your core is sensitive and private, so the two pull in opposite directions. Your confidence protects you in public, and your tenderness shows only to those who get past it.",
+    "sunAsc:water-earth": "Your composed, reliable manner gives your deep feelings a safe place to live. People see strength and steadiness first, and discover your emotional depth once they have earned your trust.",
+    "sunAsc:water-air": "Your friendly, articulate manner moves at a quicker pace than the deep feeling that drives you, so the two work at different speeds. People enjoy your ease first, and only later sense how much is going on underneath.",
+    "sunAsc:water-water": "Your receptive manner and your feeling core are the same current, so people sense your empathy immediately. You read a room without trying, and others often confide in you sooner than they expected.",
+    "moonAsc:fire-fire": "How you feel and how you come across are one and the same, so your reactions show on your face instantly. People always know where they stand with you, and you rarely hide a mood.",
+    "moonAsc:fire-earth": "You appear calm and composed while your emotions flare fast underneath, so they move at different speeds. Your steady surface buys you time, and your quick feelings emerge once the moment has passed.",
+    "moonAsc:fire-air": "Your lively manner gives your quick emotions an easy outlet. You process feelings by sharing them, and your warmth and wit let others feel close to you without effort.",
+    "moonAsc:fire-water": "People see someone gentle and receptive while inside your feelings run hot and fast, so the two pull in opposite directions. Softness shows at first, and your emotional fire appears when something truly matters to you.",
+    "moonAsc:earth-fire": "You come across as quick and bold while emotionally you need stability and time, so they keep different rhythms. People assume you thrive on change, yet you recharge through routine and comfort.",
+    "moonAsc:earth-earth": "Your calm manner reflects a genuinely steady inner life, so people find you reassuring through and through. You rarely show a mood you do not feel, and your composure goes all the way down.",
+    "moonAsc:earth-air": "People meet someone breezy and sociable while inside you need security and routine, so the two pull apart. You can be easy company for hours, then need solid quiet time to feel like yourself again.",
+    "moonAsc:earth-water": "Your gentle, perceptive manner and your need for emotional security support each other. People feel safe around you, and in turn you feel safest among those who answer your care with loyalty.",
+    "moonAsc:air-fire": "Your bold manner and your need to understand what you feel support each other well. You express reactions with energy, and your mind quickly turns emotion into something you can share.",
+    "moonAsc:air-earth": "People see someone steady and reserved while inside you need variety and conversation, so the two pull against each other. Your calm surface hides a busy inner life that is always processing and reflecting.",
+    "moonAsc:air-air": "Your easy, articulate manner matches an inner life that runs on thinking, so you share feelings as ideas. People find you open, though your deepest emotions can stay behind a layer of words.",
+    "moonAsc:air-water": "You come across as sensitive and emotionally open while inside you prefer to understand a feeling before sitting with it, so they move at different speeds. People expect you to feel quickly, while you think first.",
+    "moonAsc:water-fire": "People meet someone confident and outgoing while inside you are deeply sensitive, so they pull in opposite directions. Your outer brightness shields a soft centre that shows only when you feel truly safe.",
+    "moonAsc:water-earth": "Your composed, practical manner gives your deep feelings a steady shelter. People see someone dependable, and those closest to you discover how much you feel beneath that calm.",
+    "moonAsc:water-air": "People see someone light and sociable while inside your feelings run deep and slow, so they work at different speeds. Conversation comes easily to you, while emotional truth takes much longer to reach the surface.",
+    "moonAsc:water-water": "Your inner sensitivity and your receptive manner flow together, so people read your moods easily. You take in the feelings around you, and you need gentle company and quiet to recover from them."
+  }
+});
+
+Object.assign(window.AstroDeep.story, {
+  element: {
+    fire: "Your chart leans towards fire, so you run on enthusiasm, nerve and the feeling that something is about to begin. People feel your warmth quickly, and you are at your best when life asks you to act on faith before the proof arrives.",
+    earth: "With so much of your chart in earth, you trust what is solid, tested and real. You build slowly and well, people rely on your steadiness, and you feel most yourself when your effort turns into something that lasts.",
+    air: "Air carries most of your chart, which makes you a person of ideas, words and connections. You understand life by talking it through and seeing the pattern, and people value the clear, fair view you bring when feelings run high.",
+    water: "Much of your chart sits in water, so feeling is your first language. You read moods and undercurrents long before anyone names them, and your deepest strength is the care and loyalty you give once someone has earned your trust."
+  },
+  lack: {
+    fire: "With no planets in fire, confidence and spontaneity come through practice rather than instinct, and you often find your spark through people who carry it easily.",
+    earth: "With no planets in earth, the practical side of life asks for conscious effort, and you learn to ground your ideas and feelings in routines that hold.",
+    air: "With no planets in air, stepping back from a feeling to see it clearly takes work, and conversation becomes the place where your thoughts finally take shape.",
+    water: "With no planets in water, your feelings run deep but speak quietly, and you learn over time to trust what your body and your moods are telling you."
+  },
+  mode: {
+    cardinal: "You move through life by starting things. When something needs to change you are usually the first to act, and you feel most alive at the beginning of a new chapter.",
+    fixed: "You move through life with staying power. Once you commit, you hold your course through pressure and doubt, and what you build tends to last because you refuse to abandon it halfway.",
+    mutable: "You move through life by adapting. You read each situation as it shifts, change direction without losing yourself, and your gift lies in handling the moments when plans fall apart."
+  },
+  planet: {
+    sun: "The Sun speaks loudest in your chart, so your sense of purpose shapes everything. You need to feel that your life is your own, and people notice the warmth and presence you bring into a room.",
+    moon: "Your Moon is the strongest voice in your chart, which puts feeling at the centre of your life. Your moods guide your choices, and your instinct for what people need makes you a natural source of comfort.",
+    mercury: "Mercury carries the most weight in your chart, so your mind is always working. You name things, question things and connect ideas quickly, and people come to you when they need something explained or untangled.",
+    venus: "Venus is the loudest voice in your chart, making connection and harmony central to who you are. You notice beauty, soften hard moments and draw people in through warmth, taste and an easy charm.",
+    mars: "Mars dominates your chart, and it gives you drive, heat and a need to act. You go after what you want directly, you rarely back down from a challenge, and your energy moves people along.",
+    jupiter: "Jupiter sounds loudest in your chart, so you meet life with faith and appetite. You look for meaning and room to grow, and your optimism lifts other people when their own hope runs thin.",
+    saturn: "Saturn holds the strongest voice in your chart, which makes you serious, capable and built for the long haul. You earn everything the slow way, and the authority you gain over time is real and lasting.",
+    uranus: "Uranus speaks loudest in your chart, marking you as someone who needs to live on your own terms. You see what others overlook, resist anything that confines you and bring sudden, original change wherever you go.",
+    neptune: "Neptune is the strongest voice in your chart, so you live close to imagination, feeling and the unseen. You sense what others miss, dissolve easily into other people's moods and carry a quiet longing for something greater.",
+    pluto: "Pluto carries the most power in your chart, lending you intensity and depth. You see through surfaces, feel things all the way down and come back from every ending stronger and more fully yourself."
+  },
+  ruler: {
+    sun: "With the Sun ruling your chart, the thread through your life is becoming fully yourself, and you approach each new chapter wanting to shine in it.",
+    moon: "With the Moon ruling your chart, you approach life through feeling first, and your sense of safety and belonging steers every major turn you take.",
+    mercury: "Mercury rules your chart, so curiosity is your guiding thread: you approach life by learning, talking and working things out in your own mind.",
+    venus: "Venus rules your chart, which means you approach life looking for connection, balance and beauty, and your relationships shape the path you walk.",
+    mars: "As Mars rules your chart, you approach life head on, and the thread running through your story is courage, action and the will to win.",
+    jupiter: "Jupiter rules your chart, so you approach life as a search for growth and meaning, trusting that the next horizon holds something worth reaching.",
+    saturn: "Saturn rules your chart, which gives your life a thread of patience and duty: you approach everything carefully and build your place in the world slowly.",
+    uranus: "With Uranus ruling your chart, freedom is the thread through your life, and you approach each step as a chance to do things your own way.",
+    neptune: "With Neptune ruling your chart, you approach life by instinct and imagination, following a quiet inner pull more than any fixed plan.",
+    pluto: "Pluto rules your chart, so transformation runs through your whole story: you approach life at depth and remake yourself whenever something no longer fits."
+  },
+  hemi: {
+    above: "Most of your planets sit above the horizon, so much of your life is lived in the open, through your work, your reputation and your place in the world.",
+    below: "Most of your planets sit below the horizon, so your richest life happens privately, in your home, your inner world and the people closest to you.",
+    east: "Most of your planets gather in the eastern half of your chart, which puts your own choices at the centre: you shape your path through your own will.",
+    west: "Most of your planets gather in the western half of your chart, so your life takes shape through other people, and relationships open the doors that matter most."
+  },
+  house: {
+    "1": "Much of your life gathers around your own identity, how you present yourself and the ongoing work of becoming who you are.",
+    "2": "Your energy keeps returning to security, money and your own worth, and to building a life that feels solid underneath you.",
+    "3": "A great deal of your life centres on words, ideas and the people nearby, from siblings to neighbours to everyday exchanges.",
+    "4": "Home, family and your roots sit at the heart of your chart, and your private life carries much of your story.",
+    "5": "So much of your life flows towards creativity, pleasure, romance and the joy of expressing yourself fully.",
+    "6": "Your daily life holds much of your focus: your work, your health, your habits and the craft of doing things well.",
+    "7": "Partnership sits at the centre of your chart, and much of what you learn about yourself arrives through the people you pair with.",
+    "8": "Much of your life turns around intimacy, shared resources and deep change, the places where you merge with others and are transformed.",
+    "9": "Your life keeps reaching outward, towards travel, study, belief and the search for a bigger picture that makes sense of it all.",
+    "10": "Career, ambition and your public standing draw much of your energy, and the mark you leave on the world matters deeply to you.",
+    "11": "Friendship, community and your hopes for the future sit at the centre of your life, and the groups you belong to help shape you.",
+    "12": "Much of your life unfolds quietly, in solitude, dreams and the hidden inner world where you rest, heal and recover your sense of meaning."
+  },
+  want: {
+    sun: "wants to be seen and to live a life truly your own",
+    moon: "needs comfort, closeness and a safe place to rest",
+    mercury: "wants to understand everything and put it into words",
+    venus: "longs for love, harmony and beauty around you",
+    mars: "wants to act now and fight for what you want",
+    jupiter: "reaches for more room, more meaning and more experience",
+    saturn: "wants safety, rules and proof before you move",
+    uranus: "craves freedom and refuses to live by anyone else's script",
+    neptune: "longs to dissolve into something larger and more beautiful",
+    pluto: "wants depth, control and the whole truth, however hard",
+    chiron: "carries an old hurt and quietly works to heal it",
+    northNode: "is pulled towards unfamiliar ground where you grow",
+    lilith: "refuses to be tamed and wants your raw self accepted"
+  },
+  bridge: {
+    square: [
+      "The friction between these two sides keeps you moving, and each time they clash you grow a little more capable of holding both.",
+      "These drives rarely agree, yet their argument is what sharpens you, pushing you into growth that an easier chart would never demand.",
+      "The tension between them is not a fault in you but an engine, and learning to use both sides turns pressure into real strength.",
+      "When these two pull against each other you feel stuck, but the effort of reconciling them builds a resilience other people come to rely on.",
+      "Over time this inner clash becomes your greatest teacher, forcing you to act where you would rather wait and to pause where you would rather rush."
+    ],
+    opposition: [
+      "These two sides sit at opposite ends of a seesaw, and your life feels steadiest when neither is allowed to outweigh the other for long.",
+      "Both of these needs are real, and you move between them like a pendulum until you learn to give each its proper place and time.",
+      "You often meet one side of this pull through other people, and the balance comes once you recognise both ends as belonging to you.",
+      "Neither side is wrong: together they give you perspective, and the middle ground you find between them becomes a kind of wisdom.",
+      "Life keeps asking you to hold these two in balance, and each time you do, you feel more whole than either side could make you alone."
+    ]
+  }
+});
