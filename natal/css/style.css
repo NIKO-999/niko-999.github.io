@@ -808,3 +808,8 @@ body.detail-open .sheet-backdrop { display: none; }
 @keyframes rk-upright { from { transform: rotate(0deg) scaleY(4.1336) rotate(-16deg); } to { transform: rotate(360deg) scaleY(4.1336) rotate(-16deg); } }
 .sky-paused .ringband, .sky-paused .rk-orbit, .sky-paused .rk { animation-play-state: paused !important; }
 @media (prefers-reduced-motion: reduce) { .ringband, .rk-orbit, .rk { animation: none !important; } }
+
+/* Story tab: one reading, chapters inside a single frosted panel */
+.card.story { padding: 22px 20px 8px; }
+.card.story .story-ch { margin-top: 26px; }
+.card.story .story-ch .card-title { margin-bottom: 10px; }
