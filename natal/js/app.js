@@ -1204,6 +1204,27 @@
       html += sec(`About ${S.name}`, [firstSentences(ds ? ds.overview : S.essence, 2)]);
       return html;
     }
+    // an occupied sign also leads with the reader: which parts of you live here and how the sign shapes them
+    {
+      const ST = D().story || {};
+      const names = inside.map((p) => pName(p.key));
+      const lead = inside.length >= 3 ? `Your ${listJoin(names)} all sit in ${S.name}, so this is one of the loudest signs in your chart. ${(ST.cluster || {})[k] || ""}`
+        : inside.length === 2 ? `Your ${names[0]} and ${names[1]} both sit in ${S.name}, so two parts of you share its style and colour each other.`
+        : `${S.name} shapes one part of you: your ${names[0]}.`;
+      const lines = inside.map((p) => {
+        if (p.key === "asc") return (ST.asc || {})[k] || "";
+        const w = ((ST.wantSign || {})[p.key] || {})[k] || (p.house && ((ST.wantHouse || {})[p.key] || {})[p.house]);
+        return w ? `Your ${pName(p.key)} here ${w}.` : "";
+      }).filter(Boolean);
+      const spans = c.timeKnown ? [...new Set([1, 15, 29].map((x) => houseOfLon(SIGN_KEYS.indexOf(k) * 30 + x)))] : [];
+      html += sec(`${S.name} in your chart`, [
+        lead.trim(),
+        lines.join(" "),
+        spans.length ? `${S.name} runs through your ${listJoin(spans.map(ord))} house${spans.length > 1 ? "s" : ""}, so all of this plays out most through ${spans.map((h) => HOUSES[h].areas).join(", and through ")}.` : "",
+      ], elColor(k));
+    }
+    // the general reading stays, folded away under "About"
+    html += `<details class="about"><summary>About ${esc(S.name)}</summary>`;
     html += paras([ds ? ds.overview : S.essence]);
     if (ds) {
       html += chips("Strengths", ds.strengths, "green") + chips("Challenges", ds.challenges, "");
@@ -1211,6 +1232,7 @@
     } else {
       html += paras([`Gifts: ${S.gifts}.`, `Shadow: ${S.shadow}.`]);
     }
+    html += `</details>`;
     const hs = [];
     if (c.timeKnown) {
       for (let h = 1; h <= 12; h++) if (signOf(c.houses[h]) === k) hs.push(h);
@@ -1263,7 +1285,15 @@
       html += sec(`About the ${ord(h)} house`, [firstSentences(dh ? dh.overview : H.desc, 2)]);
       return html;
     }
-    html += paras([dh ? dh.overview : H.desc]);
+    {
+      const ST = D().story || {}, names = inside.map((p) => pName(p.key));
+      html += sec("This house in your chart", [
+        inside.length >= 3 ? `Your ${ord(h)} house holds your ${listJoin(names)}, so ${H.areas} are where much of your life plays out. ${(ST.house || {})[h] || ""}`.trim()
+          : inside.length === 2 ? `Your ${ord(h)} house holds your ${names[0]} and ${names[1]}, so ${H.areas} carry a double focus in your life.`
+          : `Your ${ord(h)} house holds your ${names[0]}, so ${H.areas} carry a clear focus in your life.`,
+      ], PLANETS[ruler].color);
+    }
+    html += `<details class="about"><summary>About the ${ord(h)} house</summary>${paras([dh ? dh.overview : H.desc])}</details>`;
     html += sec(`${S.name} on the cusp`, hc ? [hc] : cf && cf[CUSP_FIELD[h][0]] ? [cf[CUSP_FIELD[h][0]]] : [`You approach ${H.areas} ${S.how}.`], elColor(cusp.sign));
     html += sec(`Its ruler, ${pName(ruler)}`, [
       rp.house === h

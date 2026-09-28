@@ -838,3 +838,11 @@ body.detail-open .sheet-backdrop { display: none; }
 @keyframes cons-twinkle { 0%, 100% { opacity: 0.95; } 50% { opacity: 0.55; } }
 .sky-paused .sky-constellation circle { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) { .sky-constellation circle { animation: none; } .sky-moods i, .sky-constellation { transition: none; } }
+
+/* folded general reading on sign and house pages ("About Gemini") */
+details.about { margin: 22px 0 6px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+details.about > summary { list-style: none; cursor: pointer; padding: 14px 0; font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--theme, var(--accent)); display: flex; justify-content: space-between; align-items: center; }
+details.about > summary::-webkit-details-marker { display: none; }
+details.about > summary::after { content: "+"; font-size: 16px; letter-spacing: 0; opacity: 0.8; }
+details.about[open] > summary::after { content: "\2212"; }
+details.about[open] { padding-bottom: 8px; }
