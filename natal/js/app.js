@@ -386,12 +386,14 @@
     if (!state.chart || state.partnerMode) {
       for (const b of tabs.querySelectorAll("button")) b.setAttribute("aria-selected", "false");
       view.innerHTML = renderForm();
+      if (window.AstroSkyExtras) window.AstroSkyExtras.update(null, null);
       bindForm();
     } else {
       const fn = { chart: renderChart, story: sheetStory, today: renderToday, progressed: renderProgressed, "return": renderReturn, synastry: renderSynastry, planets: renderPlanets, houses: renderHouses, aspects: renderAspects, karmic: renderKarmic }[state.tab];
       if (TAB_THEME[state.tab]) view.style.setProperty("--theme", TAB_THEME[state.tab]);
       else view.style.removeProperty("--theme");
       view.innerHTML = fn();
+      if (window.AstroSkyExtras) window.AstroSkyExtras.update(state.tab, state.chart.get("sun").sign);
       dedupe(view);
       layoutForDesktop();
       bindView();
