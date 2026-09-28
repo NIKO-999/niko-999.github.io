@@ -1428,7 +1428,9 @@
     // name a placement the first time it matters, then just "your Venus"
     const named = new Set();
     const nm = (k) => (named.has(k) ? `your ${pName(k)}` : (named.add(k), `your ${placeOf(k)}`));
-    const chapter = (n, title, list) => { const l = list.filter(Boolean); return l.length ? `<div class="story-ch"><div class="card-k">Chapter ${n}</div><div class="card-title">${esc(title)}</div>${paras(l)}</div>` : ""; };
+    // one continuous reading: each part flows into the next, divided only by a small star
+    const chapter = (n, title, list) => { const l = list.filter(Boolean); return l.length ? `<div class="story-ch"${n > 1 ? "" : ' style="margin-top:14px"'}>${n > 1 ? '<div class="story-sep">✦</div>' : ""}${paras(l)}</div>` : ""; };
+    const EL_WORD = { fire: "bold", earth: "steady", air: "curious", water: "deeply feeling" };
     const aspectOf = (x, y) => c.aspects.find((a) => a.major && ((a.a === x && a.b === y) || (a.a === y && a.b === x)));
 
     // the inner tensions, chosen first so the chapters around them do not repeat them
@@ -1453,7 +1455,7 @@
       .map(([x, y]) => aspectOf(x, y)).filter((a) => a && !tense.includes(a)).sort((a, b) => a.orb - b.orb);
     const ll = loveLinks[0], llR = ll && aspectReading(ll.a, ll.b, ll.type);
     body += chapter(2, "How you think, love and act", [
-      [pick("open", "love"), `${cap1(nm("mercury"))} ${does("mercury")}.`, pick("weave", `mercuryMoon:${el("mercury")}-${el("moon")}`)].filter(Boolean).join(" "),
+      [el("sun") === el("moon") ? `That ${EL_WORD[el("sun")]} nature carries straight into how you think, love and act.` : `That ${EL_WORD[el("sun")]} core, with the ${EL_WORD[el("moon")]} inner life beneath it, carries straight into how you think, love and act.`, `${cap1(nm("mercury"))} ${does("mercury")}.`, pick("weave", `mercuryMoon:${el("mercury")}-${el("moon")}`)].filter(Boolean).join(" "),
       [`${cap1(nm("venus"))} ${does("venus")}, and ${nm("mars")} ${does("mars")}.`, pick("weave", `venusMars:${el("venus")}-${el("mars")}`),
         llR && llR.theme ? `Your ${pName(ll.a)} and ${pName(ll.b)} also meet directly. ${llR.theme}` : ""].filter(Boolean).join(" "),
     ]);
@@ -1462,7 +1464,7 @@
     const nRetro = PERSONAL.concat(["uranus", "neptune", "pluto"]).filter((k) => P(k).retro && !["uranus", "neptune", "pluto"].includes(k)).length;
     const ch = P("chiron");
     body += chapter(3, "Where you grow and where you are tested", [
-      [pick("open", "growth"), `${cap1(nm("jupiter"))} ${does("jupiter")}, while ${nm("saturn")} ${does("saturn")}.`, pick("weave", `jupiterSaturn:${el("jupiter")}-${el("saturn")}`),
+      [`Taken as a whole, your chart has a ${EL_WORD[d.domEl]} temperament, and it shapes where you grow and where life tests you.`, `${cap1(nm("jupiter"))} ${does("jupiter")}, while ${nm("saturn")} ${does("saturn")}.`, pick("weave", `jupiterSaturn:${el("jupiter")}-${el("saturn")}`),
        ch && ch.house && ((ST.wantHouse || {}).chiron || {})[ch.house] ? `Alongside this, ${nm("chiron")} ${((ST.wantHouse || {}).chiron || {})[ch.house]}.` : "", nRetro >= 4 ? pick("retro", "many") : nRetro >= 2 ? pick("retro", String(nRetro)) : ""].filter(Boolean).join(" "),
     ]);
 
@@ -1479,7 +1481,7 @@
     dir.push(firstSentences(SIGNS[nn.sign].nn, 1) + (nn.house ? ` With it in your ${ord(nn.house)} house, that growth comes through ${HOUSES[nn.house].areas}.` : ""));
     body += chapter(5, "What you are here for", [dir.filter(Boolean).join(" "), pick("signature", `${d.domMode}-${d.domEl}`)]);
 
-    let html = sheetSimple("Your story", "Your chart as one story", esc(`${sg("sun")} Sun · ${sg("moon")} Moon${asc ? ` · ${sg("asc")} Rising` : ""}`), []);
+    let html = sheetSimple("Your chart, connected", "Astro-Synthesis", esc(`${sg("sun")} Sun · ${sg("moon")} Moon${asc ? ` · ${sg("asc")} Rising` : ""}`), []);
     html += `<div class="card story">${paras([ST.intro])}${body}</div>`;
     const link = (open, color, glyph, title, sub) => `<button class="row" data-open="${open}"><span class="dot" style="color:${color}"></span><span class="glyph" style="color:${color}">${glyph}</span><span class="main"><div class="title">${esc(title)}</div><div class="sub">${esc(sub)}</div></span></button>`;
     const next = [link("point:sun", PLANETS.sun.color, PLANETS.sun.glyph, `Sun in ${sg("sun")}`, "Your core in full"), link("point:moon", PLANETS.moon.color, PLANETS.moon.glyph, `Moon in ${sg("moon")}`, "Your inner life in full")];
