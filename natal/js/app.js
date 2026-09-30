@@ -389,9 +389,10 @@
       if (window.AstroSkyExtras) window.AstroSkyExtras.update(null, null);
       bindForm();
     } else {
-      const fn = { chart: renderChart, story: sheetStory, today: renderToday, progressed: renderProgressed, "return": renderReturn, synastry: renderSynastry, planets: renderPlanets, houses: renderHouses, aspects: renderAspects, karmic: renderKarmic }[state.tab];
+      const fn = { chart: renderChart, today: renderToday, progressed: renderProgressed, "return": renderReturn, synastry: renderSynastry, planets: renderPlanets, houses: renderHouses, aspects: renderAspects, karmic: renderKarmic }[state.tab];
       if (TAB_THEME[state.tab]) view.style.setProperty("--theme", TAB_THEME[state.tab]);
       else view.style.removeProperty("--theme");
+      if (!fn) { state.tab = "chart"; return render(); }
       view.innerHTML = fn();
       if (window.AstroSkyExtras) window.AstroSkyExtras.update(state.tab, state.chart.get("sun").sign, birthSky(state.chart));
       dedupe(view);
