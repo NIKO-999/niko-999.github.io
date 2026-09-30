@@ -1094,9 +1094,11 @@
     const seen = new Set(), list = (items || []).filter(([s]) => s && !seen.has(s.toLowerCase()) && seen.add(s.toLowerCase()));
     return list.length ? `<h4>${esc(label)}</h4><ul class="dot-list">${list.map(([s, col]) => `<li><i style="background:${col};color:${col}"></i>${esc(s)}</li>`).join("")}</ul>` : "";
   }
-  function chips(label, list, cls) {
-    return list && list.length ? `<div class="chip-row"><span class="chip-label">${esc(label)}</span>${list.map((t) => `<span class="tag ${cls}">${esc(t)}</span>`).join("")}</div>` : "";
+  // strengths, gifts and challenges: a dotted list in the page's own colour (no pill tags)
+  function chips(label, list) {
+    return dotList(label, (list || []).map((s) => [s, "var(--theme, var(--accent))"]));
   }
+
   const firstPara = (t) => (t ? String(t).split(/\n\n+/)[0] : "");
   const firstSentences = (t, n) => (t ? String(t).split(/(?<=[.!])\s+(?=[A-Z])/).slice(0, n).join(" ") : "");
 
@@ -1252,12 +1254,12 @@
         for (const s of (dp ? dp.strengths : da ? da.gifts : []) || []) good.push([s, col]);
         for (const s of (dp ? dp.challenges : da ? da.challenges : []) || []) hard.push([s, col]);
       }
+      // the general reading, folded under "About", sits above your own strengths and challenges
+      html += `<details class="about"><summary>About ${esc(S.name)}</summary>${paras([ds ? ds.overview : S.essence])}`
+        + (ds ? dotList("Strengths", (ds.strengths || []).map((s) => [s, elColor(k)])) + dotList("Challenges", (ds.challenges || []).map((s) => [s, elColor(k)])) + sec("In love", ds.love) + sec("Growth edge", ds.growth)
+          : paras([`Gifts: ${S.gifts}.`, `Shadow: ${S.shadow}.`])) + `</details>`;
       html += dotList("Your strengths here", good) + dotList("Your challenges here", hard);
     }
-    // the general reading stays, folded away under "About"
-    html += `<details class="about"><summary>About ${esc(S.name)}</summary>${paras([ds ? ds.overview : S.essence])}`
-      + (ds ? dotList("Strengths", (ds.strengths || []).map((s) => [s, elColor(k)])) + dotList("Challenges", (ds.challenges || []).map((s) => [s, elColor(k)])) + sec("In love", ds.love) + sec("Growth edge", ds.growth)
-        : paras([`Gifts: ${S.gifts}.`, `Shadow: ${S.shadow}.`])) + `</details>`;
     return html;
   }
 
