@@ -1092,7 +1092,15 @@
   const elColor = (sign) => K.ELEMENTS[SIGNS[sign].element].color;
   /** A labelled list where each item has a small dot in its own colour (strengths, challenges). */
   function dotList(label, items) {
-    const seen = new Set(), list = (items || []).filter(([s]) => s && !seen.has(s.toLowerCase()) && seen.add(s.toLowerCase()));
+    // skip items that echo one already listed (same key word, e.g. "restless" or "scattered")
+    const roots = new Set(), root = (w) => w.toLowerCase().replace(/[^a-z]/g, "").replace(/(ness|ing|ed|s)$/, "").slice(0, 6);
+    const list = (items || []).filter(([s]) => {
+      if (!s) return false;
+      const keys = s.split(/[\s,]+/).filter((w) => w.replace(/[^a-z]/gi, "").length >= 6).map(root);
+      if (keys.some((k) => roots.has(k))) return false;
+      keys.forEach((k) => roots.add(k));
+      return true;
+    });
     return list.length ? `<h4>${esc(label)}</h4><ul class="dot-list">${list.map(([s, col]) => `<li><i style="background:${col};color:${col}"></i>${esc(s)}</li>`).join("")}</ul>` : "";
   }
   // strengths, gifts and challenges: a dotted list in the page's own colour (no pill tags)
