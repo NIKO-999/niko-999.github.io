@@ -1215,6 +1215,10 @@
       ["Polarity", S.polarity === "yang" ? "Yang · active" : "Yin · receptive"],
       ["Body", S.body], ["Keywords", S.keywords.join(", ")],
     ]);
+    // the general reading, folded under "About", sits at the top of every sign page
+    html += `<details class="about"><summary>About ${esc(S.name)}</summary>${paras([ds ? ds.overview : S.essence])}`
+      + (ds ? dotList("Strengths", (ds.strengths || []).map((x) => [x, elColor(k)])) + dotList("Challenges", (ds.challenges || []).map((x) => [x, elColor(k)])) + sec("In love", ds.love) + sec("Growth edge", ds.growth)
+        : paras([`Gifts: ${S.gifts}.`, `Shadow: ${S.shadow}.`])) + `</details>`;
     // an empty sign is read around the reader: what its absence means, where it still shows up, and how it reaches them
     if (!inside.length) {
       const ST = D().story || {}, ru = S.ruler, rp = c.get(ru);
@@ -1225,8 +1229,6 @@
         spans.length ? `${S.name} runs through your ${listJoin(spans.map(ord))} house${spans.length > 1 ? "s" : ""}, so its qualities still show up for you in ${spans.map((h) => HOUSES[h].areas).join(", and in ")}.` : "",
         rp ? `Its ruler is your ${pName(ru)}, in ${SIGNS[rp.sign].name}${rp.house ? ` in your ${ord(rp.house)} house` : ""}, and that is the channel through which ${S.name} reaches you.${rulerDoes ? ` Your ${pName(ru)} there ${rulerDoes}.` : ""}` : "",
       ], elColor(k));
-      html += `<details class="about"><summary>About ${esc(S.name)}</summary>${paras([ds ? ds.overview : S.essence])}`
-        + (ds ? dotList("Strengths", (ds.strengths || []).map((s) => [s, elColor(k)])) + dotList("Challenges", (ds.challenges || []).map((s) => [s, elColor(k)])) + sec("In love", ds.love) + sec("Growth edge", ds.growth) : paras([`Gifts: ${S.gifts}.`, `Shadow: ${S.shadow}.`])) + `</details>`;
       return html;
     }
     // an occupied sign also leads with the reader: which parts of you live here and how the sign shapes them
@@ -1254,10 +1256,6 @@
         for (const s of (dp ? dp.strengths : da ? da.gifts : []) || []) good.push([s, col]);
         for (const s of (dp ? dp.challenges : da ? da.challenges : []) || []) hard.push([s, col]);
       }
-      // the general reading, folded under "About", sits above your own strengths and challenges
-      html += `<details class="about"><summary>About ${esc(S.name)}</summary>${paras([ds ? ds.overview : S.essence])}`
-        + (ds ? dotList("Strengths", (ds.strengths || []).map((s) => [s, elColor(k)])) + dotList("Challenges", (ds.challenges || []).map((s) => [s, elColor(k)])) + sec("In love", ds.love) + sec("Growth edge", ds.growth)
-          : paras([`Gifts: ${S.gifts}.`, `Shadow: ${S.shadow}.`])) + `</details>`;
       html += dotList("Your strengths here", good) + dotList("Your challenges here", hard);
     }
     return html;
