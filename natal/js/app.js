@@ -1234,7 +1234,7 @@
       const spans = c.timeKnown ? [...new Set([1, 15, 29].map((x) => houseOfLon(SIGN_KEYS.indexOf(k) * 30 + x)))] : [];
       const rulerDoes = rp && (((ST.wantSign || {})[ru] || {})[rp.sign] || (rp.house && ((ST.wantHouse || {})[ru] || {})[rp.house]));
       html += sec(`${S.name} in your chart`, [
-        (ST.emptySign || {})[k],
+        [(ST.emptySign || {})[k], `When you do draw on ${S.name}, you move ${S.how}, and it tends to come through particular people and moments rather than as a constant part of who you are.`].join(" "),
         spans.length ? `${S.name} runs through your ${listJoin(spans.map(ord))} house${spans.length > 1 ? "s" : ""}, so its qualities still show up for you in ${spans.map((h) => HOUSES[h].areas).join(", and in ")}.` : "",
         rp ? `Its ruler is your ${pName(ru)}, in ${SIGNS[rp.sign].name}${rp.house ? ` in your ${ord(rp.house)} house` : ""}, and that is the channel through which ${S.name} reaches you.${rulerDoes ? ` Your ${pName(ru)} there ${rulerDoes}.` : ""}` : "",
       ], elColor(k));
@@ -1248,15 +1248,24 @@
         : inside.length === 2 ? `Your ${names[0]} and ${names[1]} both sit in ${S.name}, so two parts of you share its style and colour each other.`
         : `${S.name} shapes one part of you: your ${names[0]}.`;
       const spans = c.timeKnown ? [...new Set([1, 15, 29].map((x) => houseOfLon(SIGN_KEYS.indexOf(k) * 30 + x)))] : [];
+      // each planet here: the opening of its reading in this sign (shorter when many share the sign)
+      const n = inside.length <= 3 ? 3 : 2;
       const lines = inside.map((p) => {
+        const dp = deepPlanetSign(p.key, k), da = !dp && deepAsteroid(p.key);
+        const full = dp && dp.text ? dp.text : da && da.signs && da.signs[k] ? da.signs[k] : p.key === "mc" && ds && ds.career ? ds.career : "";
+        if (full) return firstSentences(firstPara(full), n);
         if (p.key === "asc") return (ST.asc || {})[k] || "";
         const w = ((ST.wantSign || {})[p.key] || {})[k] || (p.house && ((ST.wantHouse || {})[p.key] || {})[p.house]);
         return w ? `Your ${pName(p.key)} here ${w}.` : "";
       }).filter(Boolean);
+      // how the sign colours your chart, and how it reaches you through its ruler
+      const ru = S.ruler, rp = c.get(ru), rulerHere = inside.some((p) => p.key === ru);
+      const rulerDoes = rp && (((ST.wantSign || {})[ru] || {})[rp.sign] || (rp.house && ((ST.wantHouse || {})[ru] || {})[rp.house]));
       html += sec(`${S.name} in your chart`, [
         lead.trim(),
-        lines.join(" "),
-        spans.length ? `${S.name} runs through your ${listJoin(spans.map(ord))} house${spans.length > 1 ? "s" : ""}, so all of this plays out most through ${spans.map((h) => HOUSES[h].areas).join(", and through ")}.` : "",
+        ...lines,
+        [spans.length ? `${S.name} runs through your ${listJoin(spans.map(ord))} house${spans.length > 1 ? "s" : ""}, so all of this plays out most through ${spans.map((h) => HOUSES[h].areas).join(", and through ")}, where you tend to move ${S.how}.` : `Wherever ${S.name} touches your life, you tend to move ${S.how}.`,
+          rp && !rulerHere ? `Its ruler, your ${pName(ru)}, sits in ${SIGNS[rp.sign].name}${rp.house ? ` in your ${ord(rp.house)} house` : ""}, and it sets the tone for everything ${S.name} holds in your chart.${rulerDoes ? ` Your ${pName(ru)} there ${rulerDoes}.` : ""}` : rulerHere ? `${S.name}'s own ruler, your ${pName(ru)}, sits here too, which makes this sign especially strong and self-directed in you.` : ""].filter(Boolean).join(" "),
       ], elColor(k));
       // strengths and challenges from each of your planets here, each marked with that planet's colour
       const good = [], hard = [];
