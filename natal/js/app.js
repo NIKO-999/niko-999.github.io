@@ -1092,7 +1092,9 @@
   /** A labelled list where each item has a small dot in its own colour (strengths, challenges). */
   function dotList(label, items) {
     const seen = new Set(), list = (items || []).filter(([s]) => s && !seen.has(s.toLowerCase()) && seen.add(s.toLowerCase()));
-    return list.length ? `<h4>${esc(label)}</h4><ul class="dot-list">${list.map(([s, col]) => `<li><i style="background:${col};color:${col}"></i>${esc(s)}</li>`).join("")}</ul>` : "";
+    // challenges always take a soft red dot, so they read apart from strengths at a glance
+    const hard = /challenge/i.test(label);
+    return list.length ? `<h4>${esc(label)}</h4><ul class="dot-list">${list.map(([s, col]) => { const c = hard ? "#ef8c86" : col; return `<li><i style="background:${c};color:${c}"></i>${esc(s)}</li>`; }).join("")}</ul>` : "";
   }
   // strengths, gifts and challenges: a dotted list in the page's own colour (no pill tags)
   function chips(label, list) {
