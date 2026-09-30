@@ -854,6 +854,6 @@ details.about[open] { padding-bottom: 8px; }
 @media (prefers-reduced-motion: reduce) { .sky-birth { transition: none; } }
 
 /* strengths and challenges: a small coloured dot per line instead of pill tags */
-.dot-list { list-style: none; margin: 0 0 6px; padding: 0; display: grid; gap: 9px; }
-.dot-list li { display: flex; align-items: baseline; gap: 12px; font-size: 15.5px; line-height: 1.45; color: var(--text); }
-.dot-list li i { flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%; transform: translateY(-2px); box-shadow: 0 0 8px currentColor; opacity: 0.95; }
+.dot-list { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 20px; }
+.dot-list li { display: inline-flex; align-items: baseline; gap: 9px; font-size: 15px; line-height: 1.4; color: var(--text); }
+.dot-list li i { flex: 0 0 auto; width: 6px; height: 6px; border-radius: 50%; transform: translateY(-2px); box-shadow: 0 0 8px currentColor; opacity: 0.95; }
