@@ -1089,6 +1089,11 @@
     return b.length ? `<h4${headStyle(color)}>${esc(title)}</h4>${paras(b)}` : "";
   }
   const elColor = (sign) => K.ELEMENTS[SIGNS[sign].element].color;
+  /** A labelled list where each item has a small dot in its own colour (strengths, challenges). */
+  function dotList(label, items) {
+    const seen = new Set(), list = (items || []).filter(([s]) => s && !seen.has(s.toLowerCase()) && seen.add(s.toLowerCase()));
+    return list.length ? `<h4>${esc(label)}</h4><ul class="dot-list">${list.map(([s, col]) => `<li><i style="background:${col};color:${col}"></i>${esc(s)}</li>`).join("")}</ul>` : "";
+  }
   function chips(label, list, cls) {
     return list && list.length ? `<div class="chip-row"><span class="chip-label">${esc(label)}</span>${list.map((t) => `<span class="tag ${cls}">${esc(t)}</span>`).join("")}</div>` : "";
   }
@@ -1219,7 +1224,7 @@
         rp ? `Its ruler is your ${pName(ru)}, in ${SIGNS[rp.sign].name}${rp.house ? ` in your ${ord(rp.house)} house` : ""}, and that is the channel through which ${S.name} reaches you.${rulerDoes ? ` Your ${pName(ru)} there ${rulerDoes}.` : ""}` : "",
       ], elColor(k));
       html += `<details class="about"><summary>About ${esc(S.name)}</summary>${paras([ds ? ds.overview : S.essence])}`
-        + (ds ? chips("Strengths", ds.strengths, "green") + chips("Challenges", ds.challenges, "") + sec("In love", ds.love) + sec("Growth edge", ds.growth) : paras([`Gifts: ${S.gifts}.`, `Shadow: ${S.shadow}.`])) + `</details>`;
+        + (ds ? dotList("Strengths", (ds.strengths || []).map((s) => [s, elColor(k)])) + dotList("Challenges", (ds.challenges || []).map((s) => [s, elColor(k)])) + sec("In love", ds.love) + sec("Growth edge", ds.growth) : paras([`Gifts: ${S.gifts}.`, `Shadow: ${S.shadow}.`])) + `</details>`;
       return html;
     }
     // an occupied sign also leads with the reader: which parts of you live here and how the sign shapes them
@@ -1230,50 +1235,29 @@
         : inside.length === 2 ? `Your ${names[0]} and ${names[1]} both sit in ${S.name}, so two parts of you share its style and colour each other.`
         : `${S.name} shapes one part of you: your ${names[0]}.`;
       const spans = c.timeKnown ? [...new Set([1, 15, 29].map((x) => houseOfLon(SIGN_KEYS.indexOf(k) * 30 + x)))] : [];
+      const lines = inside.map((p) => {
+        if (p.key === "asc") return (ST.asc || {})[k] || "";
+        const w = ((ST.wantSign || {})[p.key] || {})[k] || (p.house && ((ST.wantHouse || {})[p.key] || {})[p.house]);
+        return w ? `Your ${pName(p.key)} here ${w}.` : "";
+      }).filter(Boolean);
       html += sec(`${S.name} in your chart`, [
         lead.trim(),
+        lines.join(" "),
         spans.length ? `${S.name} runs through your ${listJoin(spans.map(ord))} house${spans.length > 1 ? "s" : ""}, so all of this plays out most through ${spans.map((h) => HOUSES[h].areas).join(", and through ")}.` : "",
       ], elColor(k));
-      // each of your planets here gets its full reading in this sign, like the planet pages
+      // strengths and challenges from each of your planets here, each marked with that planet's colour
+      const good = [], hard = [];
       for (const p of inside) {
-        const dp = deepPlanetSign(p.key, k), da = !dp && deepAsteroid(p.key);
-        const name = pName(p.key), col = PLANETS[p.key].color;
-        if (da && da.signs && da.signs[k]) {
-          html += sec(`${name} in ${S.name}`, [da.signs[k]], col) + chips("Gifts", da.gifts, "green") + chips("Challenges", da.challenges, "");
-          continue;
-        }
-        const mcText = p.key === "mc" && ds && ds.career;
-        html += sec(`${name} in ${S.name}`, [dp && dp.text ? dp.text : mcText || signText(p)], col);
-        if (dp) {
-          if (dp.love) html += sec(`${name} in love`, dp.love, col);
-          if (dp.work) html += sec(`${name} at work`, dp.work, col);
-          if (dp.shadow) html += sec(`${name}'s shadow`, dp.shadow, col);
-          html += chips("Strengths", dp.strengths, "green") + chips("Challenges", dp.challenges, "");
-        }
+        const dp = deepPlanetSign(p.key, k), da = !dp && deepAsteroid(p.key), col = PLANETS[p.key].color;
+        for (const s of (dp ? dp.strengths : da ? da.gifts : []) || []) good.push([s, col]);
+        for (const s of (dp ? dp.challenges : da ? da.challenges : []) || []) hard.push([s, col]);
       }
+      html += dotList("Your strengths here", good) + dotList("Your challenges here", hard);
     }
     // the general reading stays, folded away under "About"
-    html += `<details class="about"><summary>About ${esc(S.name)}</summary>`;
-    html += paras([ds ? ds.overview : S.essence]);
-    if (ds) {
-      html += chips("Strengths", ds.strengths, "green") + chips("Challenges", ds.challenges, "");
-      html += sec("In love", ds.love) + sec("Growth edge", ds.growth);
-    } else {
-      html += paras([`Gifts: ${S.gifts}.`, `Shadow: ${S.shadow}.`]);
-    }
-    html += `</details>`;
-    const hs = [];
-    if (c.timeKnown) {
-      for (let h = 1; h <= 12; h++) if (signOf(c.houses[h]) === k) hs.push(h);
-      if (hs.length) html += sec("On your house cusps", hs.length > 1
-        ? `${S.name} is on the cusp of your ${listJoin(hs.map(ord))} houses. You approach ${HOUSES[hs[0]].areas} ${S.how}, and you bring the same manner to ${hs.slice(1).map((h) => HOUSES[h].areas).join(", and to ")}.`
-        : `${S.name} is on the cusp of your ${ord(hs[0])} house, so you approach ${HOUSES[hs[0]].areas} ${S.how}.`);
-    }
-    if (inside.length) {
-      html += `<h4>Your placements in ${S.name}</h4><div class="list">` + inside.map((p) => pointRow(p)).join("") + `</div>`;
-    } else {
-      html += sec("Your placements", `You have no planets in ${S.name}, but its themes still run through your life: ${hs.length ? `through the house${hs.length > 1 ? "s" : ""} it rules in your chart and ` : ""}through its ruler, your ${pName(S.ruler)} in ${SIGNS[c.get(S.ruler).sign].name}.`);
-    }
+    html += `<details class="about"><summary>About ${esc(S.name)}</summary>${paras([ds ? ds.overview : S.essence])}`
+      + (ds ? dotList("Strengths", (ds.strengths || []).map((s) => [s, elColor(k)])) + dotList("Challenges", (ds.challenges || []).map((s) => [s, elColor(k)])) + sec("In love", ds.love) + sec("Growth edge", ds.growth)
+        : paras([`Gifts: ${S.gifts}.`, `Shadow: ${S.shadow}.`])) + `</details>`;
     return html;
   }
 
