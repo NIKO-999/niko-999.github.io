@@ -1416,7 +1416,7 @@
     saturn: "An out-of-bounds Saturn builds its own rules. Your sense of duty and structure may not follow tradition, and you can end up creating the framework you could not find. The lessons are unusual but lasting.",
     uranus: "An out-of-bounds Uranus is rare, and doubles the planet's independence. Change and originality come through in unexpected ways.",
     neptune: "An out-of-bounds Neptune is rare, and heightens imagination and sensitivity beyond the usual range.",
-    pluto: "An out-of-bounds Pluto is uncommon and generational: it marks a period when collective power and transformation moved beyond familiar bounds, and it colours how intensely you feel those themes.",
+    pluto: "An out-of-bounds Pluto is uncommon, and it gives you an unusually intense relationship with power, loss and transformation: you feel these themes further and deeper than most people around you.",
   };
   // life cycles on the Karmic timeline
   const CYCLES = {
@@ -2512,7 +2512,7 @@
     if (p.natalHouse) html += sec(`Through your ${ord(p.natalHouse)} house`, TH ? TH.text : `While ${theP(key)} crosses your ${ord(p.natalHouse)} house, your moods and attention lean towards ${HOUSES[p.natalHouse].areas}.`);
     const natalHere = state.chart.points.filter((q) => q.sign === p.sign && PLANET_KEYS.concat(["northNode", "chiron", "asc", "mc"]).includes(q.key));
     html += sec(`In ${SIGNS[p.sign].name}`, [skySign(p.sign),
-      ["uranus", "neptune", "pluto"].includes(key) ? `${P.name} stays in ${SIGNS[p.sign].name} for years, so this sign colours the times everyone is living through. What is personal to you is ${state.chart.timeKnown ? "the house it crosses and " : ""}the points it touches.` : "",
+      ["uranus", "neptune", "pluto"].includes(key) ? `${P.name} stays in ${SIGNS[p.sign].name} for years, so its sign is a long backdrop to this stretch of your life. What is most personal to you is ${state.chart.timeKnown ? "the house it crosses and " : ""}the points it touches.` : "",
       natalHere.length
       ? `${SIGNS[p.sign].name} holds your natal ${listJoin(natalHere.map((q) => pName(q.key)))}, so ${theP(key)}'s passage through this sign is personal for you: it crosses ${natalHere.length === 1 ? "that point" : "those points"} during its stay.`
       : ["uranus", "neptune", "pluto"].includes(key) ? "" : `None of your natal planets sits in ${SIGNS[p.sign].name}, so ${theP(key)} works through your chart mainly by the aspects it makes.`], elColor(p.sign));
@@ -3227,7 +3227,7 @@
     "mars": "{N} Mars is their engine: how they go after what they want, how they compete and how their anger comes out. It shows the kind of action that leaves them energised rather than drained, and what makes them push back.",
     "jupiter": "{N} Jupiter is where life opens doors for them and where they grow by saying yes. It shows what gives them meaning and faith, where luck and generosity find them, and where they are inclined to overdo it.",
     "saturn": "{N} Saturn is where they meet limits, fear and responsibility, often early and often alone. Progress there is slow and hard won, but what they build through that effort lasts, and in time they become the authority on it.",
-    "uranus": "{N} Uranus is where they refuse to be ordinary and where life surprises them. Its sign is shared with their whole generation, while its house and aspects show where they break the rules, change suddenly and think like nobody else.",
+    "uranus": "{N} Uranus is where they refuse to be ordinary and where life surprises them. Its house and aspects show where they break the rules, change suddenly and think like nobody else.",
     "neptune": "{N} Neptune is where they dream, feel for everyone and long for something beyond the everyday. It shows where they idealise people or plans, and where a dream drifts into fog unless they see it with clear eyes.",
     "pluto": "{N} Pluto is where life asks them to let go of control and come back changed. It shows where they meet power, obsession and loss, and where each ending they survive leaves them stronger and more truthful than before.",
     "northNode": "{N} North Node points to the unfamiliar direction they are growing towards in this life: awkward at first, and more fulfilling with every step they take.",
