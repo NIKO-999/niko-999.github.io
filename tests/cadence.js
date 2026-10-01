@@ -1090,7 +1090,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const planted = [{ id: 'gw', t: 'week', w: 'g:weights', v: 2 }, { id: 'gt', t: 'task', n: 'Book the race', d: '2026-10-11', done: '' }];
     const init = `(() => { if (!sessionStorage.getItem('planted')) { sessionStorage.setItem('planted', 1);
       localStorage.setItem('cad.hab.v1', JSON.stringify({ '2026-09-24': { steps: 20500 }, '2026-09-22': { steps: 9000 } }));
-      localStorage.setItem('cad.train.v1', JSON.stringify({ '2026-09-23': { '~day': { k: ['weights.push'], e: 'Hard', m: 60 } }, '2026-09-22': { '~day': { k: ['weights.pull'], e: 'Moderate', m: 45 } } }));
+      localStorage.setItem('cad.train.v1', JSON.stringify({ '2026-09-23': { '~day': { k: ['weights.push'], e: 'Hard', m: 60 } }, '2026-09-22': { '~day': { k: ['weights.pull'], e: 'Moderate', m: 45 } }, '2026-09-21': { '~day': { k: ['rest.rest'], e: '', m: 0 } } }));
       localStorage.setItem('cad.goal.v1', JSON.stringify(${JSON.stringify(planted)}));
     } })();`;
     const { c, page, errs, off } = await ctx({ init });
@@ -1113,6 +1113,10 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       note: c.classList.contains('has-note'),
       w: c.querySelector('.cd-mw') && c.querySelector('.cd-mw').textContent, wc: c.querySelector('.cd-mw') && getComputedStyle(c.querySelector('.cd-mw')).color }])));
     ok('a workout rides its day by name, in its kind\'s colour', M['23'].w === 'Push' && M['22'].w === 'Pull' && M['23'].wc === 'rgb(242, 161, 132)' && !M['24'].w, { 22: M['22'], 23: M['23'] });
+    /* A rest day is a session you filed, so the cell says so: Rest, in
+       the rest kind's own grey, never blank and never a workout hue. */
+    const restGrey = await page.evaluate(() => { const i = document.createElement('i'); i.style.color = 'var(--k-rest)'; document.body.appendChild(i); const v = getComputedStyle(i).color; i.remove(); return v; });
+    ok('a rest day rides its day as Rest, in the rest grey', M['21'].w === 'Rest' && M['21'].wc === restGrey && M['21'].wc !== M['23'].wc, { 21: M['21'], restGrey });
     ok('the caption does not count goals', !/goal/i.test(await page.textContent('#cdMonCap')), await page.textContent('#cdMonCap'));
     await page.click('.cd-mc[data-day="2026-09-24"]');
     await sheetUp(page);

@@ -5666,6 +5666,19 @@ figure and the dial snaps to show it, which the typed figure already
 does. Asserted as the two labels and as 600 ml plus 1.5 L landing on
 2.1.
 
+### A rest day is on the month
+
+Reported off the phone: the day sheet said *Trained · Rest day* and the
+cell above it was blank. The month drew the first session that was not
+rest, on the reasoning that a rest day is not a workout. True, and a
+blank cell says you filed nothing, which is false: rest is an answer to
+what you trained. A real session still wins the cell, and a day that
+was only rest says **Rest** in the rest kind's own grey. That grey is
+the neutral the day sheet already draws it in, because rest is the one
+answer that is not a claim about doing anything and a hue would say it
+was. Asserted on a seeded rest day against the computed `--k-rest`, and
+proved by putting the filter back.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

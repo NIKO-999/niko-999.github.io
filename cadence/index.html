@@ -2464,9 +2464,15 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
          habits were kept, never whether the day was good. */
       var hit = inRec ? hs.filter(function (h) { return cdHabOn(iso, h); }) : [];
       /* The workout by name, in its kind's colour: the one thing a dot
-         cannot say. The first real session, never a rest day. */
-      var lift = cdSessions(iso).filter(function (x) { return !cdRestOnly(x.s); })[0];
-      var pill = lift ? '<span class="cd-mw" style="--kc:var(--k-' + LIFTN[lift.s.k[0]].g + ')">' + esc(LIFTN[lift.s.k[0]].n) + '</span>' : '';
+         cannot say. A real session wins the cell; a day that was only
+         rest says Rest, in the rest kind's own grey, because a rest
+         day is an answer you filed and a blank cell says you filed
+         nothing. Never a fifth colour: rest is not a claim about doing
+         anything. */
+      var sess = cdSessions(iso);
+      var lift = sess.filter(function (x) { return !cdRestOnly(x.s); })[0] || sess[0];
+      var rest = lift && cdRestOnly(lift.s);
+      var pill = lift ? '<span class="cd-mw' + (rest ? ' is-rest' : '') + '" style="--kc:var(--k-' + LIFTN[lift.s.k[0]].g + ')">' + (rest ? 'Rest' : esc(LIFTN[lift.s.k[0]].n)) + '</span>' : '';
       var dots = inRec ? '<span class="cd-md" aria-hidden="true"><i class="cd-mk"></i>'
         + hit.map(function (h) { return '<i class="cd-mh" style="--kc:var(' + h.hc + ')"></i>'; }).join('') + '</span>' : '';
       html += '<button type="button" class="cd-mc' + (fut ? ' is-future' : inRec ? '' : ' is-quiet') + (iso === today ? ' is-today' : '') + (noted[iso] ? ' has-note' : '') + '"'
