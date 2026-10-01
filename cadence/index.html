@@ -1394,7 +1394,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     { id: 'mind', n: 'Mind', k: 'tick', from: ['read', 'study', 'calm', 'write', 'listen'], hc: '--c-mind' },
     { id: 'steps', n: 'Steps', k: 'num', unit: 'steps', step: 500, max: 30000, marks: [5000, 8000, 10000, 15000], hc: '--c-rest' },
     { id: 'fuel', n: 'Fuel', k: 'num', unit: 'kcal', step: 50, max: 5000, marks: [1800, 2200, 2600, 3000], bump: [300, 600], hc: '--c-work' },
-    { id: 'water', n: 'Water', k: 'num', unit: 'L', step: 0.25, max: 6, marks: [1, 2, 3, 4], bump: [0.25, 0.5], hc: '--h-water' },
+    { id: 'water', n: 'Water', k: 'num', unit: 'L', step: 0.25, max: 6, marks: [1, 2, 3, 4], bump: [0.6, 1.5], hc: '--h-water' },
     { id: 'sleep', n: 'Sleep', k: 'num', unit: 'h', step: 0.25, max: 12, marks: [6, 7, 8, 9], hc: '--h-sleep' }
   ];
   function cdHabits() {
@@ -2276,7 +2276,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       marks.appendChild(c);
     });
     (h.bump || []).forEach(function (x) {
-      var c = el('button', 'cd-chip', '+' + cdFmtNum(x, h)); c.type = 'button';
+      /* Water's bumps are the two bottles you actually carry, so they
+         read the way the bottle says: 600 ml, and 1.5 L. */
+      var lbl = h.unit === 'L' ? (x < 1 ? Math.round(x * 1000) + ' ml' : x + ' L') : cdFmtNum(x, h);
+      var c = el('button', 'cd-chip', '+' + lbl); c.type = 'button';
       c.addEventListener('click', function () { v = Math.min(max, +(v + x).toFixed(2)); paint(); });
       marks.appendChild(c);
     });

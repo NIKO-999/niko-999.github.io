@@ -880,9 +880,11 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('and today, the last of its fortnight, is lit in the habit\'s colour', last.on && last.bg === 'rgb(125, 207, 216)', last);
     await page.click('.cd-hr[data-h="water"] .cd-hr-b');
     await sheetUp(page);
-    await page.click('#cdShB .cd-chip >> text="+0.5"');
-    await page.click('#cdShB .cd-chip >> text="+0.25"');
-    ok('the bumps add, without float drift', (await page.textContent('#cdNumV')).startsWith('0.75'));
+    const bumps = await page.$$eval('#cdShB .cd-chip', (cs) => cs.map((c) => c.textContent).filter((t) => t[0] === '+'));
+    ok('water adds by the two bottles: 600 ml and 1.5 L', bumps.join('|') === '+600 ml|+1.5 L', bumps);
+    await page.click('#cdShB .cd-chip >> text="+600 ml"');
+    await page.click('#cdShB .cd-chip >> text="+1.5 L"');
+    ok('the bumps add, without float drift', (await page.textContent('#cdNumV')).startsWith('2.1'));
     /* The figure can be TYPED as well as dragged, and nothing about the
        sheet looks different: the same text in the same place, no box,
        no ring. Typed past the track's end, the track follows. */
@@ -893,7 +895,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
         font: a.fontSize === b.fontSize && a.fontWeight === b.fontWeight, bg: a.backgroundColor, border: a.borderTopWidth, text: f && f.textContent };
     });
     ok('the figure is the field, and it looks exactly as it did', look.inside && look.edit && look.mode === 'decimal' && look.font
-      && look.bg === 'rgba(0, 0, 0, 0)' && look.border === '0px' && look.text === '0.75', look);
+      && look.bg === 'rgba(0, 0, 0, 0)' && look.border === '0px' && look.text === '2.1', look);
     await page.click('#cdNumE');
     await page.keyboard.type('1.8');
     /* The dial snaps to its own step; the figure keeps what was typed. */

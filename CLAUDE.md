@@ -5654,6 +5654,18 @@ on that day rather than today. Bite-proved by a panel that never opens
 and by the detail reading today: six fall. The action is pressed
 through the DOM, because the first proof hung on a hidden button.
 
+
+### Water adds by the bottle
+
+Asked for in one line: the two bottles actually carried are 600 ml and
+1.5 L, so those are the two bumps on the water sheet, where 0.25 and
+0.5 were. **They read the way the bottle says** — `+600 ml` and `+1.5
+L` — rather than `+0.6`, which is the same figure in a unit nobody
+reads off a bottle. The dial's step stays 0.25; a bump adds the exact
+figure and the dial snaps to show it, which the typed figure already
+does. Asserted as the two labels and as 600 ml plus 1.5 L landing on
+2.1.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
