@@ -208,19 +208,19 @@
     uranus: {
       name: "Uranus", glyph: "♅" + VS, color: "#7dcaf2", cycle: "84 years",
       keywords: ["freedom", "innovation", "awakening", "disruption"],
-      lead: "Your generation rebels and innovates", focus: "your need for freedom and change", core: "your need for freedom",
+      lead: "You rebel and innovate", focus: "your need for freedom and change", core: "your need for freedom",
       desc: "Uranus brings sudden awakenings and the urge to break free. By sign it describes a generation; by house and aspect it shows where you are uniquely original.",
     },
     neptune: {
       name: "Neptune", glyph: "♆" + VS, color: "#93a8f6", cycle: "165 years",
       keywords: ["dreams", "spirit", "imagination", "illusion"],
-      lead: "Your generation dreams and dissolves boundaries", focus: "your imagination, ideals and spiritual longing", core: "your ideals",
+      lead: "You dream and dissolve boundaries", focus: "your imagination, ideals and spiritual longing", core: "your ideals",
       desc: "Neptune is the dissolver: imagination, compassion, spirituality, and also illusion. By house it shows where you idealise, and where you must look clearly.",
     },
     pluto: {
       name: "Pluto", glyph: "♇" + VS, color: "#b695f2", cycle: "248 years",
       keywords: ["power", "transformation", "depth", "rebirth"],
-      lead: "Your generation transforms", focus: "your power and capacity for transformation", core: "your deepest power",
+      lead: "You transform", focus: "your power and capacity for transformation", core: "your deepest power",
       desc: "Pluto rules death and rebirth. It shows where life asks you to surrender control, face the shadow and emerge transformed: the soul's evolutionary engine.",
     },
     northNode: {

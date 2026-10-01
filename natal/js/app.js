@@ -386,12 +386,15 @@
     if (!state.chart || state.partnerMode) {
       for (const b of tabs.querySelectorAll("button")) b.setAttribute("aria-selected", "false");
       view.innerHTML = renderForm();
+      if (window.AstroSkyExtras) window.AstroSkyExtras.update(null, null);
       bindForm();
     } else {
       const fn = { chart: renderChart, today: renderToday, progressed: renderProgressed, "return": renderReturn, synastry: renderSynastry, planets: renderPlanets, houses: renderHouses, aspects: renderAspects, karmic: renderKarmic }[state.tab];
       if (TAB_THEME[state.tab]) view.style.setProperty("--theme", TAB_THEME[state.tab]);
       else view.style.removeProperty("--theme");
+      if (!fn) { state.tab = "chart"; return render(); }
       view.innerHTML = fn();
+      if (window.AstroSkyExtras) window.AstroSkyExtras.update(state.tab, state.chart.get("sun").sign, birthSky(state.chart));
       dedupe(view);
       layoutForDesktop();
       bindView();
@@ -446,6 +449,22 @@
   /* ------------------------------------------------------------------ */
   /* CHART tab                                                          */
   /* ------------------------------------------------------------------ */
+  /** The sky at the birth minute: the Sun's altitude above the horizon and whether it was rising or setting. */
+  function birthSky(c) {
+    if (!c.timeKnown) return null;
+    const r = Math.PI / 180, eps = (c.eps || 23.44) * r, lat = c.record.place.lat * r;
+    const sunLon = c.get("sun").lon * r, mcLon = c.get("mc").lon * r;
+    const ra = Math.atan2(Math.sin(sunLon) * Math.cos(eps), Math.cos(sunLon));
+    const dec = Math.asin(Math.sin(eps) * Math.sin(sunLon));
+    const ramc = Math.atan2(Math.sin(mcLon) * Math.cos(eps), Math.cos(mcLon));
+    let H = ramc - ra; H = Math.atan2(Math.sin(H), Math.cos(H));
+    const alt = Math.asin(Math.sin(lat) * Math.sin(dec) + Math.cos(lat) * Math.cos(dec) * Math.cos(H)) / r;
+    const rising = H < 0;
+    const label = alt < -18 ? "deep night" : alt < -6 ? (rising ? "before dawn" : "late twilight") : alt < 0 ? (rising ? "dawn" : "dusk")
+      : alt < 15 ? (rising ? "early morning, the Sun just up" : "late afternoon, the Sun going down") : alt < 45 ? (rising ? "morning light" : "afternoon light") : "full daylight";
+    return { alt, rising, label };
+  }
+
   function renderChart() {
     const c = state.chart, r = c.record, d = c.derived;
     const sun = c.get("sun"), moon = c.get("moon"), asc = c.timeKnown ? c.get("asc") : null;
@@ -460,6 +479,7 @@
       <h1 class="display">${esc(r.name || "Your Chart")}</h1>
       <div class="subline">${parts.join(' <span style="opacity:.6">·</span> ')}</div>
       <div class="meta">${esc(r.place.name)} · ${fmtCoord(r.place.lat, r.place.lon)} · ${fmtOffset(c.offset)}<br>${esc(K.HOUSE_SYSTEMS[c.houseSystemUsed])} · ${state.settings.zodiac === "sidereal" ? "Sidereal (Lahiri)" : "Tropical"} · ${state.settings.nodeType === "true" ? "True" : "Mean"} node</div>
+      ${window.NATAL_EMBED && birthSky(c) ? `<div class="meta birth-sky-note">Your birth sky: ${esc(birthSky(c).label)}</div>` : ""}
       ${!c.timeKnown ? `<p class="note">Birth time unknown: the chart is cast for local noon. Houses, Ascendant and Midheaven are hidden and the Moon may be up to ±7° off.</p>` : ""}
       ${c.timeKnown && c.houseSystemUsed !== state.settings.houseSystem ? `<p class="note">${esc(K.HOUSE_SYSTEMS[state.settings.houseSystem])} houses are undefined at this latitude: Porphyry is used instead.</p>` : ""}
     </section>`;
@@ -943,6 +963,7 @@
         case "dominants": return PLANETS[dominants().planetPct[0].key].color;
         case "area": return LIFE_AREAS[arg].color;
         case "phase": return PLANETS.moon.color;
+        case "story": return PLANETS.sun.color;
         case "house": {
           if (state.tab === "karmic") return TAB_THEME.karmic;
           return null;
@@ -1069,9 +1090,24 @@
     return b.length ? `<h4${headStyle(color)}>${esc(title)}</h4>${paras(b)}` : "";
   }
   const elColor = (sign) => K.ELEMENTS[SIGNS[sign].element].color;
-  function chips(label, list, cls) {
-    return list && list.length ? `<div class="chip-row"><span class="chip-label">${esc(label)}</span>${list.map((t) => `<span class="tag ${cls}">${esc(t)}</span>`).join("")}</div>` : "";
+  /** A labelled list where each item has a small dot in its own colour (strengths, challenges). */
+  function dotList(label, items) {
+    // skip items that echo one already listed (same key word, e.g. "restless" or "scattered")
+    const roots = new Set(), root = (w) => w.toLowerCase().replace(/[^a-z]/g, "").replace(/(ness|ing|ed|s)$/, "").slice(0, 6);
+    const list = (items || []).filter(([s]) => {
+      if (!s) return false;
+      const keys = s.split(/[\s,]+/).filter((w) => w.replace(/[^a-z]/gi, "").length >= 6).map(root);
+      if (keys.some((k) => roots.has(k))) return false;
+      keys.forEach((k) => roots.add(k));
+      return true;
+    });
+    return list.length ? `<h4>${esc(label)}</h4><ul class="dot-list">${list.map(([s, col]) => `<li><i style="background:${col};color:${col}"></i>${esc(s)}</li>`).join("")}</ul>` : "";
   }
+  // strengths, gifts and challenges: a dotted list in the page's own colour (no pill tags)
+  function chips(label, list) {
+    return dotList(label, (list || []).map((s) => [s, "var(--theme, var(--accent))"]));
+  }
+
   const firstPara = (t) => (t ? String(t).split(/\n\n+/)[0] : "");
   const firstSentences = (t, n) => (t ? String(t).split(/(?<=[.!])\s+(?=[A-Z])/).slice(0, n).join(" ") : "");
 
@@ -1188,24 +1224,57 @@
       ["Polarity", S.polarity === "yang" ? "Yang · active" : "Yin · receptive"],
       ["Body", S.body], ["Keywords", S.keywords.join(", ")],
     ]);
-    html += paras([ds ? ds.overview : S.essence]);
-    if (ds) {
-      html += chips("Strengths", ds.strengths, "green") + chips("Challenges", ds.challenges, "");
-      html += sec("In love", ds.love) + sec("Growth edge", ds.growth);
-    } else {
-      html += paras([`Gifts: ${S.gifts}.`, `Shadow: ${S.shadow}.`]);
+    // the general reading, folded under "About", sits at the top of every sign page
+    html += `<details class="about"><summary>About ${esc(S.name)}</summary>${paras([ds ? ds.overview : S.essence])}`
+      + (ds ? dotList("Strengths", (ds.strengths || []).map((x) => [x, elColor(k)])) + dotList("Challenges", (ds.challenges || []).map((x) => [x, elColor(k)])) + sec("In love", ds.love) + sec("Growth edge", ds.growth)
+        : paras([`Gifts: ${S.gifts}.`, `Shadow: ${S.shadow}.`])) + `</details>`;
+    // an empty sign is read around the reader: what its absence means, where it still shows up, and how it reaches them
+    if (!inside.length) {
+      const ST = D().story || {}, ru = S.ruler, rp = c.get(ru);
+      const spans = c.timeKnown ? [...new Set([1, 15, 29].map((x) => houseOfLon(SIGN_KEYS.indexOf(k) * 30 + x)))] : [];
+      const rulerDoes = rp && (((ST.wantSign || {})[ru] || {})[rp.sign] || (rp.house && ((ST.wantHouse || {})[ru] || {})[rp.house]));
+      html += sec(`${S.name} in your chart`, [
+        [(ST.emptySign || {})[k], `When you do draw on ${S.name}, you move ${S.how}, and it tends to come through particular people and moments rather than as a constant part of who you are.`].join(" "),
+        spans.length ? `${S.name} runs through your ${listJoin(spans.map(ord))} house${spans.length > 1 ? "s" : ""}, so its qualities still show up for you in ${spans.map((h) => HOUSES[h].areas).join(", and in ")}.` : "",
+        rp ? `Its ruler is your ${pName(ru)}, in ${SIGNS[rp.sign].name}${rp.house ? ` in your ${ord(rp.house)} house` : ""}, and that is the channel through which ${S.name} reaches you.${rulerDoes ? ` Your ${pName(ru)} there ${rulerDoes}.` : ""}` : "",
+      ], elColor(k));
+      return html;
     }
-    const hs = [];
-    if (c.timeKnown) {
-      for (let h = 1; h <= 12; h++) if (signOf(c.houses[h]) === k) hs.push(h);
-      if (hs.length) html += sec("On your house cusps", hs.length > 1
-        ? `${S.name} is on the cusp of your ${listJoin(hs.map(ord))} houses. You approach ${HOUSES[hs[0]].areas} ${S.how}, and you bring the same manner to ${hs.slice(1).map((h) => HOUSES[h].areas).join(", and to ")}.`
-        : `${S.name} is on the cusp of your ${ord(hs[0])} house, so you approach ${HOUSES[hs[0]].areas} ${S.how}.`);
-    }
-    if (inside.length) {
-      html += `<h4>Your placements in ${S.name}</h4><div class="list">` + inside.map((p) => pointRow(p)).join("") + `</div>`;
-    } else {
-      html += sec("Your placements", `You have no planets in ${S.name}, but its themes still run through your life: ${hs.length ? `through the house${hs.length > 1 ? "s" : ""} it rules in your chart and ` : ""}through its ruler, your ${pName(S.ruler)} in ${SIGNS[c.get(S.ruler).sign].name}.`);
+    // an occupied sign also leads with the reader: which parts of you live here and how the sign shapes them
+    {
+      const ST = D().story || {};
+      const names = inside.map((p) => pName(p.key));
+      const lead = inside.length >= 3 ? `Your ${listJoin(names)} all sit in ${S.name}, so this is one of the loudest signs in your chart. ${(ST.cluster || {})[k] || ""}`
+        : inside.length === 2 ? `Your ${names[0]} and ${names[1]} both sit in ${S.name}, so two parts of you share its style and colour each other.`
+        : `${S.name} shapes one part of you: your ${names[0]}.`;
+      const spans = c.timeKnown ? [...new Set([1, 15, 29].map((x) => houseOfLon(SIGN_KEYS.indexOf(k) * 30 + x)))] : [];
+      // each planet here: the opening of its reading in this sign (shorter when many share the sign)
+      const n = inside.length <= 3 ? 3 : 2;
+      const lines = inside.map((p) => {
+        const dp = deepPlanetSign(p.key, k), da = !dp && deepAsteroid(p.key);
+        const full = dp && dp.text ? dp.text : da && da.signs && da.signs[k] ? da.signs[k] : p.key === "mc" && ds && ds.career ? ds.career : "";
+        if (full) return firstSentences(firstPara(full), n);
+        if (p.key === "asc") return (ST.asc || {})[k] || "";
+        const w = ((ST.wantSign || {})[p.key] || {})[k] || (p.house && ((ST.wantHouse || {})[p.key] || {})[p.house]);
+        return w ? `Your ${pName(p.key)} here ${w}.` : "";
+      }).filter(Boolean);
+      // how the sign colours your chart, and how it reaches you through its ruler
+      const ru = S.ruler, rp = c.get(ru), rulerHere = inside.some((p) => p.key === ru);
+      const rulerDoes = rp && (((ST.wantSign || {})[ru] || {})[rp.sign] || (rp.house && ((ST.wantHouse || {})[ru] || {})[rp.house]));
+      html += sec(`${S.name} in your chart`, [
+        lead.trim(),
+        ...lines,
+        [spans.length ? `${S.name} runs through your ${listJoin(spans.map(ord))} house${spans.length > 1 ? "s" : ""}, so all of this plays out most through ${spans.map((h) => HOUSES[h].areas).join(", and through ")}, where you tend to move ${S.how}.` : `Wherever ${S.name} touches your life, you tend to move ${S.how}.`,
+          rp && !rulerHere ? `Its ruler, your ${pName(ru)}, sits in ${SIGNS[rp.sign].name}${rp.house ? ` in your ${ord(rp.house)} house` : ""}, and it sets the tone for everything ${S.name} holds in your chart.${rulerDoes ? ` Your ${pName(ru)} there ${rulerDoes}.` : ""}` : rulerHere ? `${S.name}'s own ruler, your ${pName(ru)}, sits here too, which makes this sign especially strong and self-directed in you.` : ""].filter(Boolean).join(" "),
+      ], elColor(k));
+      // strengths and challenges from each of your planets here, each marked with that planet's colour
+      const good = [], hard = [];
+      for (const p of inside) {
+        const dp = deepPlanetSign(p.key, k), da = !dp && deepAsteroid(p.key), col = PLANETS[p.key].color;
+        for (const s of (dp ? dp.strengths : da ? da.gifts : []) || []) good.push([s, col]);
+        for (const s of (dp ? dp.challenges : da ? da.challenges : []) || []) hard.push([s, col]);
+      }
+      html += dotList("Your strengths here", good) + dotList("Your challenges here", hard);
     }
     return html;
   }
@@ -1232,9 +1301,30 @@
       inter ? ["Intercepted", inter.map((s) => SIGNS[s].name).join(", ")] : null,
       ["Planets", inside.length ? inside.map((p) => pShort(p.key)).join(", ") : "None"],
     ]);
-    html += paras([dh ? dh.overview : H.desc]);
     const cf = CUSP_FIELD[h] && deepSign(cusp.sign);
     const hc = ((D().houseCusps || {})[h] || {})[cusp.sign];
+    // an empty house is read around the reader: a quieter area, run through its ruler and the sign on its cusp
+    if (!inside.length) {
+      const ST = D().story || {};
+      const rulerDoes = ((ST.wantSign || {})[ruler] || {})[rp.sign] || ((ST.wantHouse || {})[ruler] || {})[rp.house];
+      html += sec("This house in your chart", [
+        dh && dh.empty,
+        rp.house === h ? "" : `Its ruler, your ${pName(ruler)}, sits in ${SIGNS[rp.sign].name} in your ${ord(rp.house)} house, so what happens in ${H.areas} runs through ${HOUSES[rp.house].areas}.${rulerDoes ? ` Your ${pName(ruler)} there ${rulerDoes}.` : ""}`,
+      ], PLANETS[ruler].color);
+      html += sec(`${S.name} on the cusp`, hc ? [hc] : cf && cf[CUSP_FIELD[h][0]] ? [cf[CUSP_FIELD[h][0]]] : [`You approach ${H.areas} ${S.how}.`], elColor(cusp.sign));
+      if (inter) html += sec("Intercepted signs", `${inter.map((s) => SIGNS[s].name).join(" and ")} ${inter.length > 1 ? "are" : "is"} intercepted here, held inside the house without touching a cusp, so ${inter.length > 1 ? "their" : "its"} qualities work more quietly in this part of your life.`);
+      html += `<details class="about"><summary>About the ${ord(h)} house</summary>${paras([dh ? dh.overview : H.desc])}${dh ? sec("When it flows", dh.gifts) + sec("When it struggles", dh.challenges) + sec("Soul level", dh.karmic) : ""}</details>`;
+      return html;
+    }
+    {
+      const ST = D().story || {}, names = inside.map((p) => pName(p.key));
+      html += sec("This house in your chart", [
+        inside.length >= 3 ? `Your ${ord(h)} house holds your ${listJoin(names)}, so ${H.areas} are where much of your life plays out. ${(ST.house || {})[h] || ""}`.trim()
+          : inside.length === 2 ? `Your ${ord(h)} house holds your ${names[0]} and ${names[1]}, so ${H.areas} carry a double focus in your life.`
+          : `Your ${ord(h)} house holds your ${names[0]}, so ${H.areas} carry a clear focus in your life.`,
+      ], PLANETS[ruler].color);
+    }
+    html += `<details class="about"><summary>About the ${ord(h)} house</summary>${paras([dh ? dh.overview : H.desc])}</details>`;
     html += sec(`${S.name} on the cusp`, hc ? [hc] : cf && cf[CUSP_FIELD[h][0]] ? [cf[CUSP_FIELD[h][0]]] : [`You approach ${H.areas} ${S.how}.`], elColor(cusp.sign));
     html += sec(`Its ruler, ${pName(ruler)}`, [
       rp.house === h
@@ -1326,7 +1416,7 @@
     saturn: "An out-of-bounds Saturn builds its own rules. Your sense of duty and structure may not follow tradition, and you can end up creating the framework you could not find. The lessons are unusual but lasting.",
     uranus: "An out-of-bounds Uranus is rare, and doubles the planet's independence. Change and originality come through in unexpected ways.",
     neptune: "An out-of-bounds Neptune is rare, and heightens imagination and sensitivity beyond the usual range.",
-    pluto: "An out-of-bounds Pluto is uncommon and generational: it marks a period when collective power and transformation moved beyond familiar bounds, and it colours how intensely you feel those themes.",
+    pluto: "An out-of-bounds Pluto is uncommon, and it gives you an unusually intense relationship with power, loss and transformation: you feel these themes further and deeper than most people around you.",
   };
   // life cycles on the Karmic timeline
   const CYCLES = {
@@ -1411,6 +1501,85 @@
     return html + natalSnippet(key);
   }
 
+  /* "Your chart as one story": one flowing reading that connects the whole chart. The pieces live in
+     js/deep-story.js; placements are named once, lightly, and connecting passages explain how the parts
+     of the person work together. */
+  function sheetStory() {
+    const c = state.chart, d = c.derived, ST = D().story || {};
+    const pick = (group, key) => (ST[group] || {})[key] || "";
+    const P = (k) => c.get(k), sg = (k) => SIGNS[P(k).sign].name, el = (k) => SIGNS[P(k).sign].element;
+    const sun = P("sun"), moon = P("moon"), asc = c.timeKnown ? P("asc") : null;
+    const cap1 = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : "");
+    // what a planet does in its sign (or, for the slow planets and Chiron, in its house)
+    const SLOW = ["uranus", "neptune", "pluto", "chiron"];
+    const does = (k) => { const p = P(k); return (SLOW.includes(k) && p.house && ((ST.wantHouse || {})[k] || {})[p.house]) || ((ST.wantSign || {})[k] || {})[p.sign] || (ST.want || {})[k] || ""; };
+    const placeOf = (k) => { const p = P(k); return SLOW.includes(k) && p.house ? `${pName(k)} in your ${ord(p.house)} house` : `${pName(k)} in ${sg(k)}`; };
+    // name a placement the first time it matters, then just "your Venus"
+    const named = new Set();
+    const nm = (k) => (named.has(k) ? `your ${pName(k)}` : (named.add(k), `your ${placeOf(k)}`));
+    // one continuous reading: each part flows into the next, divided only by a small star
+    const chapter = (n, title, list) => { const l = list.filter(Boolean); return l.length ? `<div class="story-ch"${n > 1 ? "" : ' style="margin-top:14px"'}>${n > 1 ? '<div class="story-sep">✦</div>' : ""}${paras(l)}</div>` : ""; };
+    const EL_WORD = { fire: "bold", earth: "steady", air: "curious", water: "deeply feeling" };
+    const aspectOf = (x, y) => c.aspects.find((a) => a.major && ((a.a === x && a.b === y) || (a.a === y && a.b === x)));
+
+    // the inner tensions, chosen first so the chapters around them do not repeat them
+    const PERSONAL = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"];
+    const tense = c.aspects
+      .filter((a) => a.major && (a.type === "square" || a.type === "opposition") && (ST.want || {})[a.a] && (ST.want || {})[a.b] && (PERSONAL.includes(a.a) || PERSONAL.includes(a.b)))
+      .sort((a, b) => a.orb - b.orb).slice(0, 2);
+
+    let body = "";
+    // 1. who you are
+    const second = asc && el("moon") === el("asc") && el("sun") !== el("asc") ? `sunAsc:${el("sun")}-${el("asc")}` : asc ? `moonAsc:${el("moon")}-${el("asc")}` : "";
+    const cluster = d.stelliums.find((s) => s.kind === "sign");
+    const houseN = (() => { if (!c.timeKnown) return null; const n = {}; for (const k of PLANET_KEYS) n[P(k).house] = (n[P(k).house] || 0) + 1; const [h, v] = Object.entries(n).sort((x, y) => y[1] - x[1])[0]; return v >= 3 ? h : null; })();
+    body += chapter(1, "Who you are", [
+      [pick("open", "core"), (asc ? `With your Sun in ${sg("sun")}, your Moon in ${sg("moon")} and ${sg("asc")} rising, three layers of you are at work.` : `With your Sun in ${sg("sun")} and your Moon in ${sg("moon")}, two layers of you are at work.`), pick("sun", sun.sign), pick("moon", moon.sign), asc ? pick("asc", asc.sign) : ""].filter(Boolean).join(" "),
+      [pick("blend", `sunMoon:${el("sun")}-${el("moon")}`), second ? pick("blend", second) : ""].filter(Boolean).join(" "),
+      [cluster ? `Your ${listJoin(cluster.members.map((k) => pName(k)))} all sit in ${SIGNS[cluster.where].name}. ${pick("cluster", cluster.where)}` : "", cluster && SIGNS[cluster.where].element === d.domEl ? "" : pick("element", d.domEl), d.lackEl.length ? pick("lack", d.lackEl[0]) : "", houseN ? pick("house", houseN) : ""].filter(Boolean).join(" "),
+    ]);
+
+    // 2. how you think, love and act
+    const loveLinks = [["venus", "mars"], ["mercury", "venus"], ["mercury", "mars"], ["moon", "venus"], ["sun", "venus"]]
+      .map(([x, y]) => aspectOf(x, y)).filter((a) => a && !tense.includes(a)).sort((a, b) => a.orb - b.orb);
+    const ll = loveLinks[0], llR = ll && aspectReading(ll.a, ll.b, ll.type);
+    body += chapter(2, "How you think, love and act", [
+      [el("sun") === el("moon") ? `That ${EL_WORD[el("sun")]} nature carries straight into how you think, love and act.` : `That ${EL_WORD[el("sun")]} core, with the ${EL_WORD[el("moon")]} inner life beneath it, carries straight into how you think, love and act.`, `${cap1(nm("mercury"))} ${does("mercury")}.`, pick("weave", `mercuryMoon:${el("mercury")}-${el("moon")}`)].filter(Boolean).join(" "),
+      [`${cap1(nm("venus"))} ${does("venus")}, and ${nm("mars")} ${does("mars")}.`, pick("weave", `venusMars:${el("venus")}-${el("mars")}`),
+        llR && llR.theme ? `Your ${pName(ll.a)} and ${pName(ll.b)} also meet directly. ${llR.theme}` : ""].filter(Boolean).join(" "),
+    ]);
+
+    // 3. where you grow and where you are tested
+    const nRetro = PERSONAL.concat(["uranus", "neptune", "pluto"]).filter((k) => P(k).retro && !["uranus", "neptune", "pluto"].includes(k)).length;
+    const ch = P("chiron");
+    body += chapter(3, "Where you grow and where you are tested", [
+      [`Taken as a whole, your chart has a ${EL_WORD[d.domEl]} temperament, and it shapes where you grow and where life tests you.`, `${cap1(nm("jupiter"))} ${does("jupiter")}, while ${nm("saturn")} ${does("saturn")}.`, pick("weave", `jupiterSaturn:${el("jupiter")}-${el("saturn")}`),
+       ch && ch.house && ((ST.wantHouse || {}).chiron || {})[ch.house] ? `Alongside this, ${nm("chiron")} ${((ST.wantHouse || {}).chiron || {})[ch.house]}.` : "", nRetro >= 4 ? pick("retro", "many") : nRetro >= 2 ? pick("retro", String(nRetro)) : ""].filter(Boolean).join(" "),
+    ]);
+
+    // 4. the pull within
+    const bridges = ST.bridge || {};
+    body += chapter(4, "The pull within", tense.length ? tense.map((a, i) => {
+      const R = aspectReading(a.a, a.b, a.type), pool = bridges[a.type] || [];
+      return `${i === 0 ? pick("open", "pull") + " " : ""}Your ${placeOf(a.a)} and your ${placeOf(a.b)} ${a.type === "opposition" ? "sit on opposite ends of a seesaw" : "grind against each other"}. ${R && R.theme ? R.theme + " " : ""}${pool.length ? pool[(PLANET_KEYS.indexOf(tense[0].a) + i * 2) % pool.length] : ""}`.trim();
+    }) : [`${pick("open", "pull")} Your chart holds few sharp inner conflicts, so the different parts of you tend to cooperate, and your growth comes more from choosing a direction than from settling a fight within.`]);
+
+    // 5. what you are here for
+    const nn = P("northNode"), dir = [pick("open", "purpose")];
+    if (d.chartRuler) { const r = P(d.chartRuler); dir.push(`${pick("ruler", d.chartRuler)} Your ${pName(d.chartRuler)} sits in your ${ord(r.house)} house, so that thread runs most clearly through ${HOUSES[r.house].areas}.`); }
+    dir.push(firstSentences(SIGNS[nn.sign].nn, 1) + (nn.house ? ` With it in your ${ord(nn.house)} house, that growth comes through ${HOUSES[nn.house].areas}.` : ""));
+    body += chapter(5, "What you are here for", [dir.filter(Boolean).join(" "), pick("signature", `${d.domMode}-${d.domEl}`)]);
+
+    let html = sheetSimple("Your chart, connected", "Astro-Synthesis", esc(`${sg("sun")} Sun · ${sg("moon")} Moon${asc ? ` · ${sg("asc")} Rising` : ""}`), []);
+    html += `<div class="card story">${paras([ST.intro])}${body}</div>`;
+    const link = (open, color, glyph, title, sub) => `<button class="row" data-open="${open}"><span class="dot" style="color:${color}"></span><span class="glyph" style="color:${color}">${glyph}</span><span class="main"><div class="title">${esc(title)}</div><div class="sub">${esc(sub)}</div></span></button>`;
+    const next = [link("point:sun", PLANETS.sun.color, PLANETS.sun.glyph, `Sun in ${sg("sun")}`, "Your core in full"), link("point:moon", PLANETS.moon.color, PLANETS.moon.glyph, `Moon in ${sg("moon")}`, "Your inner life in full")];
+    for (const a of tense) next.push(link(`aspect:${c.aspects.indexOf(a)}`, ASPECTS[a.type].color, ASPECTS[a.type].glyph, `${pName(a.a)} ${ASPECTS[a.type].name.toLowerCase()} ${pName(a.b)}`, "The pull within, in full"));
+    html += `<div class="section-label">Read more</div><div class="list">${next.join("")}</div>`;
+    return html;
+  }
+
+
   function sheetSimple(eyebrow, title, subline, body) {
     return `<section class="hero"><div class="eyebrow">${esc(eyebrow)}</div><h2 class="display">${title}</h2>${subline ? `<div class="subline">${subline}</div>` : ""}</section>${paras(body)}`;
   }
@@ -1428,6 +1597,7 @@
       case "transit": html = sheetTransit(+arg); break;
       case "tpevent": html = sheetPeriodEvent(+arg); break;
       case "dominants": html = sheetDominants(); break;
+      case "story": html = sheetStory(); break;
       case "prog": html = sheetProg(arg); break;
       case "paspect": html = sheetProgAspect(+arg); break;
       case "pphase": {
@@ -1631,7 +1801,7 @@
         }[arg2];
         html = sheetSimple("Nodal contact", P.name, "", [txt, P.desc]);
         html += natalSnippet(arg);
-        const nn = c.get("northNode"), ax = deepAxis(nn.sign);
+        const nn = c.get("northNode");
         html += sec(`Your nodal axis: ${SIGNS[nn.sign].name} and ${SIGNS[opposite(nn.sign)].name}`, SIGNS[nn.sign].nn || (ax && firstPara(ax.story)), PLANETS.northNode.color);
         break;
       }
@@ -2342,7 +2512,7 @@
     if (p.natalHouse) html += sec(`Through your ${ord(p.natalHouse)} house`, TH ? TH.text : `While ${theP(key)} crosses your ${ord(p.natalHouse)} house, your moods and attention lean towards ${HOUSES[p.natalHouse].areas}.`);
     const natalHere = state.chart.points.filter((q) => q.sign === p.sign && PLANET_KEYS.concat(["northNode", "chiron", "asc", "mc"]).includes(q.key));
     html += sec(`In ${SIGNS[p.sign].name}`, [skySign(p.sign),
-      ["uranus", "neptune", "pluto"].includes(key) ? `${P.name} stays in ${SIGNS[p.sign].name} for years, so this sign colours the times everyone is living through. What is personal to you is ${state.chart.timeKnown ? "the house it crosses and " : ""}the points it touches.` : "",
+      ["uranus", "neptune", "pluto"].includes(key) ? `${P.name} stays in ${SIGNS[p.sign].name} for years, so its sign is a long backdrop to this stretch of your life. What is most personal to you is ${state.chart.timeKnown ? "the house it crosses and " : ""}the points it touches.` : "",
       natalHere.length
       ? `${SIGNS[p.sign].name} holds your natal ${listJoin(natalHere.map((q) => pName(q.key)))}, so ${theP(key)}'s passage through this sign is personal for you: it crosses ${natalHere.length === 1 ? "that point" : "those points"} during its stay.`
       : ["uranus", "neptune", "pluto"].includes(key) ? "" : `None of your natal planets sits in ${SIGNS[p.sign].name}, so ${theP(key)} works through your chart mainly by the aspects it makes.`], elColor(p.sign));
@@ -3057,7 +3227,7 @@
     "mars": "{N} Mars is their engine: how they go after what they want, how they compete and how their anger comes out. It shows the kind of action that leaves them energised rather than drained, and what makes them push back.",
     "jupiter": "{N} Jupiter is where life opens doors for them and where they grow by saying yes. It shows what gives them meaning and faith, where luck and generosity find them, and where they are inclined to overdo it.",
     "saturn": "{N} Saturn is where they meet limits, fear and responsibility, often early and often alone. Progress there is slow and hard won, but what they build through that effort lasts, and in time they become the authority on it.",
-    "uranus": "{N} Uranus is where they refuse to be ordinary and where life surprises them. Its sign is shared with their whole generation, while its house and aspects show where they break the rules, change suddenly and think like nobody else.",
+    "uranus": "{N} Uranus is where they refuse to be ordinary and where life surprises them. Its house and aspects show where they break the rules, change suddenly and think like nobody else.",
     "neptune": "{N} Neptune is where they dream, feel for everyone and long for something beyond the everyday. It shows where they idealise people or plans, and where a dream drifts into fog unless they see it with clear eyes.",
     "pluto": "{N} Pluto is where life asks them to let go of control and come back changed. It shows where they meet power, obsession and loss, and where each ending they survive leaves them stronger and more truthful than before.",
     "northNode": "{N} North Node points to the unfamiliar direction they are growing towards in this life: awkward at first, and more fulfilling with every step they take.",
