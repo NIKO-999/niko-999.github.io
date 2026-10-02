@@ -5679,6 +5679,16 @@ answer that is not a claim about doing anything and a hue would say it
 was. Asserted on a seeded rest day against the computed `--k-rest`, and
 proved by putting the filter back.
 
+### Quads and hamstrings are sessions of their own
+
+Asked for in one line. They sit under Weights straight after Legs, so
+a leg day can be filed as the whole thing or by the half of it you
+trained, the way Chest and Back already sit beside Push and Pull. Two
+entries in `LIFT` and nothing else: every reader of a session goes
+through `LIFTN`, so the picker, the month's pill, the day sheet and
+the habit history all name them the day they exist. The check reads
+the picker's own order, so a key that never reached the board fails.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
