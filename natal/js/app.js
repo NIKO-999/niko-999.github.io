@@ -3172,6 +3172,17 @@
   }
   const myName = () => state.record.name || "You";
   const theirName = (rec) => rec.name || "Them";
+  /** Synastry readings call each side "the Mercury person", "the Neptune person". Swap in the real names:
+      `mine` is the reader's planet, `theirs` the other person's. Left alone when both sides share a planet
+      (it would be ambiguous) or when a side has no name entered. */
+  function withNames(text, mine, theirs, rec) {
+    if (!text || mine === theirs) return text;
+    const who = { [pName(mine)]: state.record.name, [pName(theirs)]: rec.name };
+    if (mine === "northNode") who["Node"] = state.record.name;
+    if (theirs === "northNode") who["Node"] = rec.name;
+    return String(text).replace(/\b[Tt]he (North Node|Node|Ascendant|Midheaven|Sun|Moon|Mercury|Venus|Mars|Jupiter|Saturn|Uranus|Neptune|Pluto|Chiron|Lilith|Vertex|Part of Fortune|Juno|Ceres|Pallas|Vesta) person\b/g,
+      (m, planet) => who[planet] || m);
+  }
 
   function renderSynastry() {
     const others = state.saved.filter((s) => s.id !== state.record.id);
@@ -3267,12 +3278,13 @@
     const me = myName() === "You" ? "Your" : `${myName()}'s`, them = `${theirName(Y.rec)}'s`;
     html += sec("In your charts", [
       `${me} ${pName(x.a)} is in ${SIGNS[mine.sign].name}${mineH ? `, in the ${ord(mine.house)} house of ${HOUSES[mine.house].areas}` : ""}, and ${them} ${pName(x.b)} is in ${SIGNS[theirs.sign].name}${theirsH ? `, in the ${ord(theirs.house)} house of ${HOUSES[theirs.house].areas}` : ""}. ${x.orb < 1 ? "At under 1°, this is one of the strongest links between you." : x.orb < 3 ? "It is a close contact, so you both feel it often." : "It is a wider contact, felt in particular moments more than every day."}`,
-      d && first !== second ? `Here ${roleOf(first) === "You" ? "you are" : roleOf(first) + " is"} the ${pName(first)} person and ${roleOf(second) === "You" ? "you are" : roleOf(second) + " is"} the ${pName(second)} person.` : "",
+      // with no names entered, the readings keep "the Mercury person", so say who is who
+      d && first !== second && (!state.record.name || !Y.rec.name) ? `Here ${roleOf(first) === "You" ? "you are" : roleOf(first) + " is"} the ${pName(first)} person and ${roleOf(second) === "You" ? "you are" : roleOf(second) + " is"} the ${pName(second)} person.` : "",
     ]);
     const mineDesc = myName() === "You" ? PLANETS[x.a].desc : (THEIR_DESC[x.a] || PLANETS[x.a].desc).replace("{N}", `${myName()}'s`);
     const theirDesc = (THEIR_DESC[x.b] || PLANETS[x.b].desc).replace("{N}", them);
     html += sec("The points involved", [mineDesc, theirDesc]);
-    if (d) html += sec(`As ${/^[aeiou]/i.test(X.name) ? "an" : "a"} ${X.name.toLowerCase()}`, [d.text, body]);
+    if (d) html += sec(`As ${/^[aeiou]/i.test(X.name) ? "an" : "a"} ${X.name.toLowerCase()}`, [withNames(d.text, x.a, x.b, Y.rec), withNames(body, x.a, x.b, Y.rec)]);
     else html += sec(`As ${/^[aeiou]/i.test(X.name) ? "an" : "a"} ${X.name.toLowerCase()}`, [`${myName()}'s ${pName(x.a)} (${PLANETS[x.a].core}) ${ASPECTS[x.type].verb} ${theirName(Y.rec)}'s ${pName(x.b)} (${PLANETS[x.b].core}).`, K.NATURE[x.nature]]);
     return html;
   }
@@ -3311,7 +3323,7 @@
       }).join("") + `</div>`;
       const top = Y.list[idx.slice().sort((i, j) => Y.list[i].orb - Y.list[j].orb)[0]];
       const pd = (D().synPairsRich || {})[pairKey(top.a, top.b)] || ((D().synastry || {}).pairs || {})[pairKey(top.a, top.b)];
-      if (pd) html += sec(`Strongest here: ${pName(top.a)} ${ASPECTS[top.type].name.toLowerCase()} ${pName(top.b)}`, [firstPara(pd.text)]);
+      if (pd) html += sec(`Strongest here: ${pName(top.a)} ${ASPECTS[top.type].name.toLowerCase()} ${pName(top.b)}`, [withNames(firstPara(pd.text), top.a, top.b, Y.rec)]);
     } else html += `<p class="note" style="text-align:left">No close contacts in this area.</p>`;
     return html;
   }
