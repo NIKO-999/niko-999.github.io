@@ -3172,6 +3172,71 @@
   }
   const myName = () => state.record.name || "You";
   const theirName = (rec) => rec.name || "Them";
+  /** Synastry readings call each side "the Mercury person", "the Neptune person". Swap them for real
+      people: the reader's side becomes "you" (verbs and pronouns fixed), the other side their name.
+      Left alone when both sides share a planet (it would be ambiguous). */
+  const YOU_VERB = { is: "are", has: "have", does: "do", was: "were", goes: "go" };
+  const ADVERB = /^(often|also|usually|rarely|always|never|sometimes|still|soon|even|then|tends?|may|might|can|could|will|would|should|must|\w+ly)$/i;
+  // a verb that follows a subject "you": "finds" -> "find", "is" -> "are"
+  function youVerb(w) {
+    const l = w.toLowerCase();
+    if (YOU_VERB[l]) return YOU_VERB[l];
+    if (/[^aeiou]ies$/.test(w)) return w.slice(0, -3) + "y";
+    if (/(ch|sh|ss|x|z|o)es$/.test(w)) return w.slice(0, -2);
+    if (/[^su]s$/.test(w) && !/^(this|thus|always|perhaps|towards|across|less|unless|news|plus|yes|its|his|hers|ours|theirs|whose|as|us|was|is|has|does|sometimes)$/i.test(l)) return w.slice(0, -1);
+    return w;
+  }
+  function withNames(text, mine, theirs, rec) {
+    if (!text || mine === theirs) return text;
+    const other = rec.name || "they", PL = "(North Node|Node|Ascendant|Midheaven|Sun|Moon|Mercury|Venus|Mars|Jupiter|Saturn|Uranus|Neptune|Pluto|Chiron|Lilith|Vertex|Part of Fortune|Juno|Ceres|Pallas|Vesta)";
+    const side = (pl) => (pl === pName(mine) || (pl === "Node" && mine === "northNode") ? "you" : rec.name && (pl === pName(theirs) || (pl === "Node" && theirs === "northNode")) ? "them" : null);
+    // words after which a person is the subject of what follows (including "feels <person> wants")
+    const SUBJ = /(^|[,;:]|\b(and|while|then|so|but|when|as|because|that|if|where|until|once|whether|who|before|after|whilst|or|now|feels?|thinks?|believes?|senses?|knows?|assumes?|suspects?|fears?|hopes?|worries|says?|notices?))\s*$/i;
+    const YS = "\u0001", TS = "\u0002"; // markers: "you" / the other person as the subject of a clause
+    // after these, a person is an object ("to you", "telling you", "gives you")
+    const OBJ = /\b(to|for|with|of|at|on|by|from|about|around|towards?|into|onto|over|under|through|like|between|without|against|beside|behind|near|upon|\w+ing|\w+ed|lets?|makes?|helps?|gives?|offers?|tells?|shows?|teaches|leaves?|keeps?|brings?|draws?|pulls?|pushes?|asks?|needs?|wants?|calls?|treats?|meets?|sees?|finds?|reminds?|encourages?|invites?|introduces?|challenges?|supports?|protects?|steadies|tests?|grounds?)\s*$/i;
+    return String(text).split(/(?<=[.!?])\s+/).map((s) => {
+      s = s.replace(new RegExp(`\\b([Ww])hichever of you is the ${PL} person\\b`, "g"), (m, W, pl) => side(pl) === "you" ? (W === "W" ? "You" : "you") + YS : side(pl) ? other + TS : m);
+      s = s.replace(new RegExp(`\\b([Tt])he ${PL} person's`, "g"), (m, T, pl) => side(pl) === "you" ? (T === "T" ? "Your" : "your") : side(pl) ? `${other}'s` : m);
+      s = s.replace(new RegExp(`\\b([Tt])he ${PL} person\\b`, "g"), (m, T, pl, off, str) => {
+        const before = str.slice(0, off), subj = SUBJ.test(before) || !OBJ.test(before) || /\b(meeting|morning|evening|beginning|feeling|nothing|something|anything|everything)\s*$/i.test(before), who = side(pl);
+        if (who === "them") return other + (subj ? TS : "");
+        if (who !== "you") return m;
+        return (T === "T" ? "You" : "you") + (subj ? YS : "");
+      });
+      // a verb after a subject "you" loses its -s (skipping an aside like ", in turn," and one adverb)
+      const fix = (gap, w1, sp, w2) => ADVERB.test(w1)
+        ? `${gap}${/^tends$/i.test(w1) ? "tend" : w1}${sp || ""}${w2 ? (/^tends?$/i.test(w1) ? w2 : youVerb(w2)) : ""}`
+        : `${gap}${youVerb(w1)}${sp || ""}${w2 || ""}`;
+      s = s.replace(/([Yy]ou)\u0001((?:,[^,]{1,20},)?\s+)(\w+)(\s+)?(\w+)?/g, (m, you, gap, w1, sp, w2) => you + YS + fix(gap, w1, sp, w2));
+      // "you ... and brings" -> "and bring", when you are still the subject at that "and"
+      s = s.replace(/(\band|,\s*or|,)(\s+)(\w+)(\s+)?(\w+)?/g, (m, and, gap, w1, sp, w2, off, str) => {
+        const before = str.slice(0, off), y = before.lastIndexOf(YS), o = before.lastIndexOf(TS);
+        if (y < 0 || o > y || /[.;:]/.test(before.slice(y))) return m;
+        // after a comma this is only a continued list of your actions when an object follows ("proposes the plan")
+        const listy = /^,/.test(and) || /,\s*$/.test(before);
+        if (listy && !/^(the|a|an|up|out|your|their|its|it|on|in|off|to|with|through|into|over|back|away|down)$/i.test(ADVERB.test(w1) ? "" : w2 || "")) return m;
+        const v = ADVERB.test(w1) ? w2 : w1;
+        if (!v || !/[^su]s$|ies$|es$/.test(v) || youVerb(v) === v) return m;
+        return and + fix(gap, w1, sp, w2);
+      });
+      // "they", "their", "them" point back at whoever is the subject of the clause
+      let last = null;
+      s = s.split(/(\u0001|\u0002|\b)/).map((w) => {
+        if (w === YS) { last = "you"; return ""; }
+        if (w === TS) { last = "them"; return ""; }
+        if (last === "you") {
+          const sw = { their: "your", Their: "Your", them: "you", themselves: "yourself", theirs: "yours", they: "you", They: "You" }[w];
+          if (sw) return sw;
+        }
+        return w;
+      }).join("");
+      return s;
+    }).join(" ");
+  }
+
+
+
 
   function renderSynastry() {
     const others = state.saved.filter((s) => s.id !== state.record.id);
@@ -3267,12 +3332,13 @@
     const me = myName() === "You" ? "Your" : `${myName()}'s`, them = `${theirName(Y.rec)}'s`;
     html += sec("In your charts", [
       `${me} ${pName(x.a)} is in ${SIGNS[mine.sign].name}${mineH ? `, in the ${ord(mine.house)} house of ${HOUSES[mine.house].areas}` : ""}, and ${them} ${pName(x.b)} is in ${SIGNS[theirs.sign].name}${theirsH ? `, in the ${ord(theirs.house)} house of ${HOUSES[theirs.house].areas}` : ""}. ${x.orb < 1 ? "At under 1°, this is one of the strongest links between you." : x.orb < 3 ? "It is a close contact, so you both feel it often." : "It is a wider contact, felt in particular moments more than every day."}`,
-      d && first !== second ? `Here ${roleOf(first) === "You" ? "you are" : roleOf(first) + " is"} the ${pName(first)} person and ${roleOf(second) === "You" ? "you are" : roleOf(second) + " is"} the ${pName(second)} person.` : "",
+      // with no names entered, the readings keep "the Mercury person", so say who is who
+      d && first !== second && !Y.rec.name ? `Here ${roleOf(first) === "You" ? "you are" : roleOf(first) + " is"} the ${pName(first)} person and ${roleOf(second) === "You" ? "you are" : roleOf(second) + " is"} the ${pName(second)} person.` : "",
     ]);
     const mineDesc = myName() === "You" ? PLANETS[x.a].desc : (THEIR_DESC[x.a] || PLANETS[x.a].desc).replace("{N}", `${myName()}'s`);
     const theirDesc = (THEIR_DESC[x.b] || PLANETS[x.b].desc).replace("{N}", them);
     html += sec("The points involved", [mineDesc, theirDesc]);
-    if (d) html += sec(`As ${/^[aeiou]/i.test(X.name) ? "an" : "a"} ${X.name.toLowerCase()}`, [d.text, body]);
+    if (d) html += sec(`As ${/^[aeiou]/i.test(X.name) ? "an" : "a"} ${X.name.toLowerCase()}`, [withNames(d.text, x.a, x.b, Y.rec), withNames(body, x.a, x.b, Y.rec)]);
     else html += sec(`As ${/^[aeiou]/i.test(X.name) ? "an" : "a"} ${X.name.toLowerCase()}`, [`${myName()}'s ${pName(x.a)} (${PLANETS[x.a].core}) ${ASPECTS[x.type].verb} ${theirName(Y.rec)}'s ${pName(x.b)} (${PLANETS[x.b].core}).`, K.NATURE[x.nature]]);
     return html;
   }
@@ -3311,7 +3377,7 @@
       }).join("") + `</div>`;
       const top = Y.list[idx.slice().sort((i, j) => Y.list[i].orb - Y.list[j].orb)[0]];
       const pd = (D().synPairsRich || {})[pairKey(top.a, top.b)] || ((D().synastry || {}).pairs || {})[pairKey(top.a, top.b)];
-      if (pd) html += sec(`Strongest here: ${pName(top.a)} ${ASPECTS[top.type].name.toLowerCase()} ${pName(top.b)}`, [firstPara(pd.text)]);
+      if (pd) html += sec(`Strongest here: ${pName(top.a)} ${ASPECTS[top.type].name.toLowerCase()} ${pName(top.b)}`, [withNames(firstPara(pd.text), top.a, top.b, Y.rec)]);
     } else html += `<p class="note" style="text-align:left">No close contacts in this area.</p>`;
     return html;
   }
