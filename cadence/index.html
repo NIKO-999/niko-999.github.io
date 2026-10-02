@@ -810,7 +810,32 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .pl-cats .cd-chip { display: flex; align-items: center; gap: 10px; text-align: left; padding: 0 14px; border-radius: 14px; }
 .pl-cats .cd-chip::before { content: ""; flex: none; width: 10px; height: 10px; border-radius: 3px; background: var(--kc); }
 .pl-cats .cd-chip[aria-pressed="true"] { background: color-mix(in srgb, var(--kc) 22%, transparent); color: var(--ink); box-shadow: inset 0 0 0 1px var(--kc); }
+/* PLAN B IS WRITTEN BEFORE THE DAY THAT NEEDS IT. Desktop only, on
+   request: it is where you sit down and plan for the bad day, not
+   something you reach for on the phone in the middle of one. Three
+   parts on the list side: the habits a second miss would turn into a
+   pattern, the if-then plans with a record of whether each one worked,
+   and the smallest version of every habit for a day the full one will
+   not happen. */
+.cd-tab-pb { display: none; }
+.cf-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.cf-pr { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 10px 0; box-shadow: inset 0 1px 0 var(--hair); }
+.cf-pr b { display: flex; align-items: center; gap: 10px; font: 400 15px/1.2 var(--sans); }
+.cf-pr b::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--hc); }
+.cf-pr i { display: block; margin: 5px 0 0 17px; font: 400 12.5px/1.3 var(--sans); font-style: normal; color: var(--dim); }
+.cf-pr i.is-nil { color: var(--quiet); }
+.cf-p { border-radius: 16px; box-shadow: inset 0 0 0 1px var(--hair); }
+.cf-body { display: block; width: 100%; padding: 14px 16px 4px; text-align: left; color: var(--ink); }
+.cf-g { margin-bottom: 9px; font: 500 10px/1.3 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--c-work); }
+.cf-ln { display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 8px; font: 400 15px/1.35 var(--sans); overflow-wrap: anywhere; }
+.cf-ln + .cf-ln { margin-top: 6px; }
+.cf-ln span { font: 500 10px/2 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--quiet); }
+.cf-ft { display: flex; align-items: center; gap: 8px; padding: 6px 10px 10px 16px; }
+.cf-tl { flex: 1; min-width: 0; font: 400 12.5px/1.2 var(--sans); color: var(--quiet); }
+.cf-mins .cd-row { grid-template-columns: 120px 1fr; }
+.cf-mins .cd-row > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (min-width: 960px) {
+  .cd-tab-pb { display: inline-block; }
   .cd-tab-plan { display: inline-block; }
   .cd-app.is-plan { max-width: 1440px; }
 }
@@ -831,6 +856,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       <button class="cd-tab" data-v="mon" type="button">Month</button>
       <button class="cd-tab" data-v="note" type="button">Notes</button>
       <button class="cd-tab cd-tab-plan" data-v="plan" type="button">Plan</button>
+      <button class="cd-tab cd-tab-pb" data-v="cont" type="button">Plan B</button>
     </nav>
     <button class="cd-plus" id="cdAdd" type="button" aria-label="Add a block"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
   </header>
@@ -900,6 +926,22 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
         <div id="cdNotes"></div>
       </div>
     </section>
+    <section id="cdVCont" aria-label="Plan B" hidden>
+      <div class="cd-pane">
+        <div class="cd-hero is-sub">
+          <p class="cd-hcap">Plan B</p>
+          <p class="cd-big" id="cdCfT"></p>
+          <p class="cd-hs" id="cdCfCap"></p>
+        </div>
+        <p class="cd-lbl cd-sec" id="cdCfProtL">Protect today</p>
+        <ul class="cf-list" id="cdCfProt"></ul>
+        <p class="cd-lbl cd-sec">If, then</p>
+        <ul class="cf-list" id="cdCfPlans"></ul>
+        <button class="cd-link" id="cdCfAdd" type="button">+ A plan</button>
+        <p class="cd-lbl cd-sec">Bad-day versions</p>
+        <div class="cd-rows cf-mins" id="cdCfMin"></div>
+      </div>
+    </section>
     <section id="cdVPlan" aria-label="Plan" hidden>
       <div class="pl-wrap">
         <div class="pl-head" id="cdPlHead"></div>
@@ -933,7 +975,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   var K = {
     week: 'cad.week.v1', log: 'cad.log.v1',
     hab: 'cad.hab.v1', train: 'cad.train.v1', defs: 'cad.defs.v1',
-    note: 'cad.note.v1', plan: 'cad.plan.v1', refl: 'cad.refl.v1', rfoff: 'cad.rfoff.v1', glyphoff: 'cad.glyphoff.v1'
+    note: 'cad.note.v1', plan: 'cad.plan.v1', cont: 'cad.cont.v1', refl: 'cad.refl.v1', rfoff: 'cad.rfoff.v1', glyphoff: 'cad.glyphoff.v1'
   };
   /* There is one face now, so the key that chose between two is swept
      rather than left: a preference for a control that no longer exists
@@ -1270,6 +1312,33 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     if (!(d >= 0 && d <= 6) || !(s >= 0 && s < 1440) || !(e > s && e <= 1440)) return null;
     return { id: b.id, d: d, s: s, e: e, n: String(b.n || '').slice(0, 60), t: String(b.t || '').slice(0, 80), c: PLAN_C[b.c] ? b.c : 'life' };
   }
+  /* PLAN B is one object: the bad-day version of each habit, keyed by
+     the habit's id, and the if-then plans. A plan's record is one entry
+     a day, `ok` 1 or 0, because the question it answers is whether the
+     fallback rescued the day, not how many times you pressed it. A
+     damaged plan costs itself and a damaged entry costs itself; the
+     versions are free text with nothing to repair but their length. */
+  function cdContClean(raw) {
+    var o = isObj(raw) ? raw : {}, min = {}, plans = [], seen = {};
+    if (isObj(o.min)) Object.keys(o.min).forEach(function (k) {
+      var v = typeof o.min[k] === 'string' ? o.min[k].trim().slice(0, 80) : '';
+      if (v && k.length <= 40) min[k] = v;
+    });
+    (Array.isArray(o.plans) ? o.plans : []).forEach(function (p) {
+      if (!isObj(p) || typeof p.id !== 'string' || !p.id || seen[p.id]) return;
+      var i = String(p.i || '').trim().slice(0, 140), t = String(p.t || '').trim().slice(0, 140);
+      if (!i || !t) return;
+      seen[p.id] = 1;
+      var days = {}, u = [];
+      (Array.isArray(p.u) ? p.u : []).forEach(function (x) {
+        if (!isObj(x) || !ISO.test(x.d) || days[x.d]) return;
+        days[x.d] = 1; u.push({ d: x.d, ok: x.ok ? 1 : 0 });
+      });
+      u.sort(function (a, b) { return a.d < b.d ? -1 : 1; });
+      plans.push({ id: p.id, g: String(p.g || '').trim().slice(0, 60), i: i, t: t, u: u.slice(-200) });
+    });
+    return { min: min, plans: plans.slice(0, 60) };
+  }
   /* A note is a list of BLOCKS: a title, a heading, a sub-heading, a
      line of body, a quote, or a picture. A line of text is a list of
      runs, [words, highlight, underlined], so a colour can sit on three words of it
@@ -1326,6 +1395,11 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     })(),
     note: cdLoadList(K.note, cdNoteClean),
     plan: cdLoadList(K.plan, cdPlanClean),
+    cont: (function () {
+      var raw = cdRead(K.cont, null), o = cdContClean(raw);
+      if (raw !== null && JSON.stringify(o) !== JSON.stringify(raw)) cdWrite(K.cont, o);
+      return o;
+    })(),
     refl: cdLoadMap(K.refl),
     /* Off is the one stored state: anything that is not exactly true reads
        as on, so a damaged key keeps the thought rather than losing it. */
@@ -1481,12 +1555,13 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     $('cdVMon').hidden = v !== 'mon';
     $('cdVNote').hidden = v !== 'note';
     $('cdVPlan').hidden = v !== 'plan';
+    $('cdVCont').hidden = v !== 'cont';
     document.querySelector('.cd-app').classList.toggle('is-plan', v === 'plan');
     document.querySelectorAll('.cd-tab').forEach(function (t) {
       if (t.dataset.v === v) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
     });
     document.querySelectorAll('.cd-pane').forEach(function (p) { p.scrollTop = 0; });
-    $('cdAdd').setAttribute('aria-label', v === 'note' ? 'New note' : 'Add a block');
+    $('cdAdd').setAttribute('aria-label', v === 'note' ? 'New note' : v === 'cont' ? 'Add a plan' : 'Add a block');
     cdPaint();
   }
   function cdPaint() {
@@ -1494,6 +1569,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     else if (view === 'hab') cdPaintHab();
     else if (view === 'mon') cdPaintMon();
     else if (view === 'plan') cdPaintPlan();
+    else if (view === 'cont') cdPaintCont();
     else cdPaintNotes();
   }
   function cdLongDate(iso, withDay) {
@@ -3917,7 +3993,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); cdPlanEdit(b); }
     else if (ev.key === 'Delete' || ev.key === 'Backspace') { ev.preventDefault(); cdPlanDel(b); }
   });
-  PLAN_MQ.addEventListener('change', function () { if (!PLAN_MQ.matches && view === 'plan') cdGo('day'); });
+  PLAN_MQ.addEventListener('change', function () { if (!PLAN_MQ.matches && (view === 'plan' || view === 'cont')) cdGo('day'); });
   function cdPlanDel(b) {
     var at = S.plan.indexOf(b); if (at < 0) return;
     S.plan.splice(at, 1); cdSave('plan'); cdClose(); cdPaintPlan();
@@ -3988,6 +4064,146 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     setTimeout(function () { nm.focus(); }, 60);
   }
 
+  /* ═══ PLAN B ═══ */
+  /* NEVER MISS TWICE. A habit you were keeping, missed yesterday and not
+     yet kept today, is the one a second miss turns into a pattern, so it
+     leads the screen with its bad-day version beside it. "Were keeping"
+     is any day in the fortnight before yesterday: without it, a habit you
+     added this morning and every habit on a first open would all be
+     flagged, which is a list of everything rather than of what is at risk. */
+  function cdContAtRisk() {
+    var t = cdToday(), y = cdAddDays(t, -1);
+    return cdHabits().filter(function (h) {
+      if (cdHabOn(y, h) || cdHabOn(t, h)) return false;
+      for (var i = 2; i <= 15; i++) if (cdHabOn(cdAddDays(t, -i), h)) return true;
+      return false;
+    });
+  }
+  function cdContTally(p, from) {
+    var u = p.u.filter(function (x) { return !from || x.d >= from; });
+    return { n: u.length, ok: u.filter(function (x) { return x.ok; }).length };
+  }
+  function cdPaintCont() {
+    if (!PLAN_MQ.matches) { cdGo('day'); return; }
+    var C = S.cont, t = cdToday(), from = cdAddDays(t, -29);
+    var all = C.plans.reduce(function (a, p) { var x = cdContTally(p, from); a.n += x.n; a.ok += x.ok; return a; }, { n: 0, ok: 0 });
+    $('cdCfT').textContent = C.plans.length + (C.plans.length === 1 ? ' plan' : ' plans');
+    $('cdCfCap').innerHTML = all.n ? 'used <b>' + all.n + '</b> in 30 days · <b>' + all.ok + '</b> worked' : C.plans.length ? 'none used in 30 days' : 'nothing written yet';
+    var risk = cdContAtRisk(), pr = $('cdCfProt');
+    pr.innerHTML = '';
+    $('cdCfProtL').hidden = pr.hidden = !risk.length;
+    risk.forEach(function (h) {
+      var li = el('li', 'cf-pr'); li.dataset.h = h.id; li.style.setProperty('--hc', 'var(' + h.hc + ')');
+      var m = C.min[h.id];
+      li.innerHTML = '<div><b>' + esc(h.n) + '</b><i' + (m ? '>' + esc(m) : ' class="is-nil">Missed yesterday') + '</i></div>';
+      var go = el('button', 'cd-chip', 'Log it'); go.type = 'button'; go.dataset.act = 'log';
+      go.setAttribute('aria-label', 'Log ' + h.n + ' today');
+      li.appendChild(go);
+      pr.appendChild(li);
+    });
+    var ul = $('cdCfPlans');
+    ul.innerHTML = '';
+    C.plans.forEach(function (p) {
+      var li = el('li', 'cf-p'); li.dataset.id = p.id;
+      var body = el('button', 'cf-body'); body.type = 'button'; body.dataset.act = 'edit';
+      body.setAttribute('aria-label', 'Edit: if ' + p.i + ', then ' + p.t);
+      body.innerHTML = (p.g ? '<p class="cf-g">' + esc(p.g) + '</p>' : '')
+        + '<p class="cf-ln"><span>If</span>' + esc(p.i) + '</p><p class="cf-ln"><span>Then</span>' + esc(p.t) + '</p>';
+      li.appendChild(body);
+      var x = cdContTally(p), td = p.u.filter(function (e) { return e.d === t; })[0];
+      var ft = el('div', 'cf-ft');
+      ft.appendChild(el('span', 'cf-tl', x.n ? 'Used ' + x.n + ' · worked ' + x.ok : 'Not used yet'));
+      [['ok', 'It worked', 1], ['no', 'It didn’t', 0]].forEach(function (a) {
+        var b = el('button', 'cd-chip', a[1]); b.type = 'button'; b.dataset.act = a[0];
+        b.setAttribute('aria-pressed', td ? String(td.ok === a[2]) : 'false');
+        ft.appendChild(b);
+      });
+      li.appendChild(ft);
+      ul.appendChild(li);
+    });
+    var mins = $('cdCfMin');
+    if (!mins.contains(document.activeElement)) {
+      mins.innerHTML = '';
+      cdHabits().forEach(function (h) {
+        var r = el('div', 'cd-row'), f = el('input', 'cd-field');
+        r.appendChild(el('span', '', esc(h.n)));
+        f.type = 'text'; f.maxLength = 80; f.placeholder = 'The smallest version'; f.value = C.min[h.id] || '';
+        f.dataset.h = h.id; f.setAttribute('aria-label', 'Bad-day version of ' + h.n);
+        r.appendChild(f); mins.appendChild(r);
+      });
+    }
+  }
+  $('cdCfProt').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-act="log"]'); if (!b) return;
+    var h = cdHabits().filter(function (x) { return x.id === b.closest('.cf-pr').dataset.h; })[0]; if (!h) return;
+    var t = cdToday();
+    if (h.id === 'train') { cdTrainAt(t); return; }
+    if (h.k === 'num') { cdNumSheet(h, t); return; }
+    if (cdHabToggle(t, h)) { cdPaintCont(); cdToast('Kept ' + h.n, function () { cdHabToggle(t, h); cdPaintCont(); }); }
+  });
+  /* Pressing what you already said takes the day's entry back off, and
+     the other one replaces it: one answer a day, changed as often as you
+     like, because a fallback that worked at noon can fail by evening. */
+  $('cdCfPlans').addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-act]'); if (!b) return;
+    var p = S.cont.plans.filter(function (x) { return x.id === b.closest('.cf-p').dataset.id; })[0]; if (!p) return;
+    if (b.dataset.act === 'edit') { cdContEdit(p); return; }
+    var t = cdToday(), ok = b.dataset.act === 'ok' ? 1 : 0, at = -1;
+    p.u.forEach(function (e, i) { if (e.d === t) at = i; });
+    if (at >= 0 && p.u[at].ok === ok) p.u.splice(at, 1);
+    else if (at >= 0) p.u[at].ok = ok;
+    else p.u.push({ d: t, ok: ok });
+    cdSave('cont'); cdPaintCont();
+  });
+  $('cdCfMin').addEventListener('input', function (ev) {
+    var f = ev.target.closest('input[data-h]'); if (!f) return;
+    var v = f.value.trim().slice(0, 80);
+    if (v) S.cont.min[f.dataset.h] = v; else delete S.cont.min[f.dataset.h];
+    cdSave('cont');
+  });
+  $('cdCfMin').addEventListener('focusout', function () { setTimeout(function () { if (view === 'cont') cdPaintCont(); }, 0); });
+  $('cdCfAdd').addEventListener('click', function () { cdContEdit(null); });
+  function cdContDel(p) {
+    var at = S.cont.plans.indexOf(p); if (at < 0) return;
+    S.cont.plans.splice(at, 1); cdSave('cont'); cdClose(); cdPaintCont();
+    cdToast('Deleted the plan', function () { S.cont.plans.splice(at, 0, p); cdSave('cont'); cdPaintCont(); });
+  }
+  function cdContEdit(p) {
+    var root = el('div'), rows = el('div', 'cd-rows');
+    function fld(id, lbl, ph, max, v) {
+      var r = el('div', 'cd-row'), f = el('input', 'cd-field');
+      f.type = 'text'; f.id = id; f.placeholder = ph; f.maxLength = max; f.value = v || '';
+      r.appendChild(el('span', '', lbl)); r.appendChild(f); rows.appendChild(r);
+      return f;
+    }
+    var g = fld('cdCfG', 'Goal', 'Optional', 60, p && p.g);
+    var i = fld('cdCfI', 'If', 'What gets in the way', 140, p && p.i);
+    var t = fld('cdCfTh', 'Then', 'What you do instead', 140, p && p.t);
+    root.appendChild(rows);
+    var foot = el('div', 'cd-foot');
+    if (p) {
+      var del = el('button', 'cd-btn warn', 'Delete'); del.type = 'button'; del.id = 'cdCfDel';
+      del.addEventListener('click', function () { cdContDel(p); });
+      foot.appendChild(del);
+    }
+    var save = el('button', 'cd-btn go', p ? 'Save' : 'Add'); save.type = 'button'; save.id = 'cdCfSave';
+    function sync() { save.disabled = !i.value.trim() || !t.value.trim(); }
+    [i, t].forEach(function (f) { f.addEventListener('input', sync); });
+    sync();
+    save.addEventListener('click', function () {
+      if (save.disabled) return;
+      var o = { g: g.value.trim(), i: i.value.trim(), t: t.value.trim() };
+      if (p) { p.g = o.g; p.i = o.i; p.t = o.t; } else S.cont.plans.push({ id: cdId(), g: o.g, i: o.i, t: o.t, u: [] });
+      S.cont = cdContClean(S.cont);
+      cdSave('cont'); cdClose(); cdPaintCont();
+    });
+    [g, i, t].forEach(function (f) { f.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') save.click(); }); });
+    foot.appendChild(save);
+    root.appendChild(foot);
+    cdSheet(p ? 'Edit the plan' : 'A new plan', root);
+    setTimeout(function () { (p ? i : g).focus(); }, 60);
+  }
+
   /* ═══ TOAST ═══ */
   var toastT = 0, toastUndo = null;
   function cdToast(msg, undo) {
@@ -4009,6 +4225,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      the start, and it is only kept once something is written on it. */
   $('cdAdd').addEventListener('click', function () {
     if (view === 'note') { cdNoteNew(); return; }
+    if (view === 'cont') { cdContEdit(null); return; }
     if (view === 'plan') { var hs = Math.min(1380, Math.ceil(cdNowMin() / 60) * 60); cdPlanEdit(null, { d: cdDow(cdToday()), s: hs, e: hs + 60 }); return; }
     cdEdit(null);
   });
@@ -4366,8 +4583,8 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 
   var sv = 'day';
   try { sv = sessionStorage.getItem('cad.view') || 'day'; } catch (e) {}
-  if (sv === 'plan' && !PLAN_MQ.matches) sv = 'day';
-  cdGo(['day', 'hab', 'mon', 'note', 'plan'].indexOf(sv) >= 0 ? sv : 'day');
+  if ((sv === 'plan' || sv === 'cont') && !PLAN_MQ.matches) sv = 'day';
+  cdGo(['day', 'hab', 'mon', 'note', 'plan', 'cont'].indexOf(sv) >= 0 ? sv : 'day');
   /* The first open of a date shows its thought, after the screen has
      painted so the card comes up over the day rather than over nothing. */
   var rt = cdToday();

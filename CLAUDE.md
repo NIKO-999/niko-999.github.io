@@ -5689,6 +5689,38 @@ through `LIFTN`, so the picker, the month's pill, the day sheet and
 the habit history all name them the day they exist. The check reads
 the picker's own order, so a key that never reached the board fails.
 
+### Plan B is written before the day that needs it, and only on a desktop
+
+Asked for as a goal contingency plan tab, desktop only. **Desktop only
+because it is where you sit down and plan for a bad day**, not
+something reached for on a phone in the middle of one — and the phone's
+four tabs are already as many as fit at 320. It is the Plan tab's own
+gate: `PLAN_MQ`, no tab under 960, and a phone left on it lands on the
+day.
+
+**ONE KEY, `cad.cont.v1`, in `K`**, so the backup and sync carry it:
+`min`, the bad-day version of each habit keyed by its id, and `plans`,
+the if-then lines.
+
+**PROTECT TODAY IS "NEVER MISS TWICE".** A habit missed yesterday and
+not kept today leads the screen with its bad-day version beside it — but
+only one you WERE keeping, any day in the fortnight before yesterday.
+Without that, a first open and a habit added this morning would flag
+everything, which is a list of all of it rather than of what is at
+risk. Log it goes through the habits screen's own doors: a tick
+toggles with Undo, a number opens the dial, Train opens the session.
+
+**A PLAN'S RECORD IS ONE ANSWER A DAY.** It worked or it didn't, and
+the other press replaces the day's answer rather than adding a second;
+the same press takes it back off. The question is whether the fallback
+rescued the day, not how many times it was pressed. The card counts all
+of it and the figure counts thirty days.
+
+**A bad-day version does not count as keeping the habit.** It is
+written down so it is there when you need it; whether doing it keeps
+the streak was left alone, because that changes what every habit
+figure in the app means.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

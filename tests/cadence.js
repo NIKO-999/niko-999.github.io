@@ -1892,6 +1892,66 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('no page errors on a desktop', errs.length === 0, errs);
     await c.close();
 
+    /* PLAN B: desktop only. A habit you were keeping and missed
+       yesterday leads the screen with its bad-day version; plans are
+       if-then lines with one answer a day about whether they worked. */
+  {
+    const init = `(() => { if (localStorage.getItem('cad.cont.v1')) return;
+      localStorage.setItem('cad.defs.v1', JSON.stringify([{ id: 'mx', n: 'Stretch', k: 'tick' }]));
+      const h = JSON.parse(localStorage.getItem('cad.hab.v1') || '{}'); h['2026-09-20'] = Object.assign(h['2026-09-20'] || {}, { mx: 1 });
+      localStorage.setItem('cad.hab.v1', JSON.stringify(h));
+      localStorage.setItem('cad.cont.v1', JSON.stringify({ min: { mx: '  Two  ', zz: 5 }, plans: [{ id: 'p1', g: 'Run', i: 'It rains', t: 'Treadmill', u: [{ d: 'x' }, { d: '2026-09-24', ok: 1 }, { d: '2026-09-24', ok: 0 }] }, { id: 'p2', i: '' }, 'junk'] })); })();`;
+    const { c, page, errs } = await ctx({ desk: { width: 1440, height: 900 }, init });
+    const rep = await store(page, 'cad.cont.v1');
+    ok('a damaged plan B costs only what is damaged, and the repair is written back', JSON.stringify(rep) === JSON.stringify({ min: { mx: 'Two' }, plans: [{ id: 'p1', g: 'Run', i: 'It rains', t: 'Treadmill', u: [{ d: '2026-09-24', ok: 1 }] }] }), rep);
+    await page.click('.cd-tab[data-v="cont"]');
+    await page.waitForTimeout(150);
+    const v = await page.evaluate(() => ({ shown: !document.getElementById('cdVCont').hidden, others: ['cdVDay', 'cdVHab', 'cdVMon', 'cdVNote', 'cdVPlan'].filter((i) => !document.getElementById(i).hidden),
+      big: document.getElementById('cdCfT').textContent, prot: [...document.querySelectorAll('#cdCfProt .cf-pr')].map((r) => r.dataset.h + ':' + r.querySelector('i').textContent),
+      mins: document.querySelectorAll('#cdCfMin input').length }));
+    ok('plan B is its own screen on a desktop, headed by how many plans', v.shown && !v.others.length && v.big === '1 plan', v);
+    ok('a habit kept last week and missed yesterday is the one to protect, with its bad-day version', v.prot.includes('mx:Two'), v.prot);
+    const kept = await page.evaluate(() => { const h = JSON.parse(localStorage.getItem('cad.hab.v1') || '{}'); return Object.keys(h['2026-09-24'] || {}).concat(Object.keys(h['2026-09-25'] || {})); });
+    ok('nothing kept yesterday or today is asked to be protected', !v.prot.some((x) => kept.includes(x.split(':')[0])), { kept, prot: v.prot });
+    ok('every habit has a row for its bad-day version', v.mins >= 7, v.mins);
+    const cbx = await page.$eval('#cdVCont .cd-hero', (e) => e.getBoundingClientRect().right), lbx = await page.$eval('#cdCfPlans', (e) => e.getBoundingClientRect().left);
+    ok('plan B is two columns, the figure left of the plans', cbx <= lbx, { cbx, lbx });
+    await page.fill('#cdCfMin input[data-h="mx"]', 'Five minutes on the floor');
+    await page.click('#cdCfT'); await page.waitForTimeout(100);
+    ok('a bad-day version is kept as you type it, and the protect row reads it', (await store(page, 'cad.cont.v1')).min.mx === 'Five minutes on the floor' && (await page.textContent('#cdCfProt .cf-pr[data-h="mx"] i')) === 'Five minutes on the floor');
+    await page.click('#cdCfAdd');
+    const up = await sheetUp(page);
+    const dis = up && await page.$eval('#cdCfSave', (b) => b.disabled);
+    ok('a new plan needs both its if and its then', up && dis === true, { up, dis });
+    if (up) { await page.fill('#cdCfG', 'Ten k by December'); await page.fill('#cdCfI', 'I miss the morning run'); await page.fill('#cdCfTh', 'Twenty minutes at lunch'); await page.click('#cdCfSave'); await page.waitForTimeout(320); }
+    const pl = (await store(page, 'cad.cont.v1')).plans;
+    const card = await page.evaluate(() => { const c = [...document.querySelectorAll('#cdCfPlans .cf-p')].pop(); return c && { g: c.querySelector('.cf-g') && c.querySelector('.cf-g').textContent, ln: [...c.querySelectorAll('.cf-ln')].map((l) => l.textContent).join('|'), tl: c.querySelector('.cf-tl').textContent }; });
+    ok('a plan is a goal, an if and a then, and has not been used yet', pl.length === 2 && pl[1].i === 'I miss the morning run' && card && card.g === 'Ten k by December' && card.ln === 'IfI miss the morning run|ThenTwenty minutes at lunch' && card.tl === 'Not used yet', { pl, card });
+    const press = async (act) => { await page.evaluate((a) => [...document.querySelectorAll('#cdCfPlans .cf-p')].pop().querySelector('[data-act="' + a + '"]').click(), act); await page.waitForTimeout(60); };
+    const st = () => page.evaluate(() => { const c = [...document.querySelectorAll('#cdCfPlans .cf-p')].pop(); return { tl: c.querySelector('.cf-tl').textContent, ok: c.querySelector('[data-act="ok"]').getAttribute('aria-pressed'), no: c.querySelector('[data-act="no"]').getAttribute('aria-pressed'), cap: document.getElementById('cdCfCap').textContent }; });
+    await press('ok');
+    const s1 = await st(), u1 = (await store(page, 'cad.cont.v1')).plans[1].u;
+    ok('it worked is one entry today, and both the card and the figure count it', JSON.stringify(u1) === '[{"d":"2026-09-25","ok":1}]' && s1.tl === 'Used 1 · worked 1' && s1.ok === 'true' && s1.no === 'false' && s1.cap === 'used 2 in 30 days · 2 worked', { u1, s1 });
+    await press('no');
+    const u2 = (await store(page, 'cad.cont.v1')).plans[1].u;
+    ok('the other answer replaces the day\'s, never adds a second', JSON.stringify(u2) === '[{"d":"2026-09-25","ok":0}]' && (await st()).tl === 'Used 1 · worked 0', u2);
+    await press('no');
+    ok('pressing the same answer again takes the day back off', (await store(page, 'cad.cont.v1')).plans[1].u.length === 0 && (await st()).tl === 'Not used yet');
+    await page.click('#cdCfProt .cf-pr[data-h="mx"] [data-act="log"]');
+    await page.waitForTimeout(100);
+    const lg = await page.evaluate(() => ({ kept: !!(JSON.parse(localStorage.getItem('cad.hab.v1'))['2026-09-25'] || {}).mx, row: !!document.querySelector('#cdCfProt .cf-pr[data-h="mx"]') }));
+    ok('logging a protected habit keeps it today and takes it off the list', lg.kept && !lg.row, lg);
+    await page.evaluate(() => document.getElementById('cdToastU').click()); await page.waitForTimeout(100);
+    ok('...and Undo puts both back', !(await store(page, 'cad.hab.v1'))['2026-09-25']?.mx && !!(await page.$('#cdCfProt .cf-pr[data-h="mx"]')));
+    await page.evaluate(() => [...document.querySelectorAll('#cdCfPlans .cf-p')].pop().querySelector('.cf-body').click());
+    if (await sheetUp(page)) { await page.evaluate(() => document.getElementById('cdCfDel').click()); await page.waitForTimeout(320); }
+    const nDel = (await store(page, 'cad.cont.v1')).plans.length;
+    await page.evaluate(() => document.getElementById('cdToastU').click()); await page.waitForTimeout(100);
+    ok('delete takes a plan off and Undo puts it back', nDel === 1 && (await store(page, 'cad.cont.v1')).plans.length === 2, nDel);
+    ok('no page errors on plan B', errs.length === 0, errs);
+    await c.close();
+  }
+
     /* And the phone is untouched: the list still runs under the figure. */
     const ph = await ctx();
     const h = await ph.page.$eval('#cdHero', (e) => e.getBoundingClientRect()), l = await ph.page.$eval('#cdAgenda', (e) => e.getBoundingClientRect());
@@ -1904,6 +1964,11 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await ph.page.reload(); await ph.page.waitForTimeout(300);
     const phV = await ph.page.evaluate(() => ({ day: !document.getElementById('cdVDay').hidden, plan: !document.getElementById('cdVPlan').hidden }));
     ok('a phone has no plan tab, and a phone left on it lands on the day', phPl === 0 && phV.day && !phV.plan, { phPl, phV });
+    const phPb = await ph.page.$eval('.cd-tab[data-v="cont"]', (t) => t.getBoundingClientRect().width);
+    await ph.page.evaluate(() => sessionStorage.setItem('cad.view', 'cont'));
+    await ph.page.reload(); await ph.page.waitForTimeout(300);
+    const phV2 = await ph.page.evaluate(() => ({ day: !document.getElementById('cdVDay').hidden, cont: !document.getElementById('cdVCont').hidden }));
+    ok('a phone has no plan B tab, and a phone left on it lands on the day', phPb === 0 && phV2.day && !phV2.cont, { phPb, phV2 });
     await ph.c.close();
   }
 
