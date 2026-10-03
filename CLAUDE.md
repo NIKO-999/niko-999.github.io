@@ -5836,6 +5836,32 @@ self, the process and its days are reset to `SELF` and laid on the week.
 On an owned device the fields, the Edit links and the day chips are not
 drawn, the handlers refuse, and a `#self={...}` link cannot replace it.
 
+### A stacked line takes the thing it is for
+
+Reported off the Day list: three of the hard-coded steps drew the wrong
+glyph. **Each was the table's first-match rule reading a line made of
+several things**, and each is decided in the open rather than patched.
+
+**Wind down is the evening routine, not the camera.** *Wind down:
+mindset content + check the day* reached `film` on the word content,
+which sits far above `sleep`, where wind down was. It moved to
+`nightly`, the moon over a list, which is what a wind down is and is
+checked first.
+
+**Lights out is sleep, and it is read before calm.** It knew neither
+word and drew the square, and the same line primes an intention for
+tomorrow, which is now calm's word. So it is an early entry of its own.
+
+**Water comes after everything else on a line.** A glass beside a coffee
+and a book is the least of the three: *1L water + coffee + mindset book*
+is the book, *water + coffee* is the cup, and water still wins a line it
+is the whole of. **Grounding and setting an intention are calm**, which
+took *Ground + set intention* off the square.
+
+**What it costs is said:** read and calm both feed Mind, so those two
+steps now keep the Mind habit when ticked. That is the right answer for
+a mindset book and a grounding, and it is a change.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

@@ -1113,7 +1113,11 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      phrase is always listed before the word inside it. */
   var KW = [
     ['routine', /\b(morning routine|am routine|a\.m\. routine|morning ritual|morning checklist|morning habits|morning stack|miracle morning)\b/],
-    ['nightly', /\b(evening routine|night routine|nighttime routine|night-time routine|bedtime routine|pm routine|evening ritual|night ritual)\b/],
+    ['nightly', /\b(evening routine|night routine|nighttime routine|night-time routine|bedtime routine|pm routine|evening ritual|night ritual|wind down|wind-down|winding down)\b/],
+    /* LIGHTS OUT is going to sleep, and it has to be read before calm: the
+       line it sits on usually primes an intention for tomorrow, and that
+       word is calm's. */
+    ['sleep', /\b(lights out|lights off)\b/],
     /* Cardio is the machine half of a gym: a treadmill is not a run and a
        rowing machine is not a boat, so this sits above both. */
     ['cardio', /\b(cardio|treadmill|stairmaster|stair master|stair climber|stepmill|elliptical|cross trainer|rowing machine|rower|erg|ski erg|zone 2|zone two|conditioning|assault bike|air bike|jump rope|skipping rope|skipping)\b/],
@@ -1138,7 +1142,6 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     ['walk', /\b(walk the dog|walk|steps)\b/],
     ['pet', /\b(feed the dog|feed the cat|dog|dogs|cat|cats|pets?|vet|dog park|dog wash|groomer)\b/],
     ['plant', /\b(water plants|water the plants|plants|garden|gardening|mow|lawn|weeding)\b/],
-    ['water', /\b(drink water|water|hydrate|hydration)\b/],
     ['listen', /\b(podcast|podcasts|audiobook|audiobooks|listen)\b/],
     ['news', /\b(news|newspaper|headlines)\b/],
     ['read', /\b(read|reading|book|books|kindle|magazine)\b/],
@@ -1151,7 +1154,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     ['art', /\b(draw|drawing|paint|painting|sketch|sketching|art|design)\b/],
     ['photo', /\b(photo|photos|photography|camera|edit photos)\b/],
     ['film', /\b(filming|film content|record|recording|vlog|content|edit video|editing|reels|tiktok|instagram|socials|social media|post)\b/],
-    ['calm', /\b(meditate|meditation|breathe|breathwork|pray|prayer|church|mindfulness|mass|mosque|temple|synagogue)\b/],
+    ['calm', /\b(meditate|meditation|breathe|breathwork|pray|prayer|church|mindfulness|ground|grounding|set intention|set an intention|intention|intentions|mass|mosque|temple|synagogue)\b/],
     ['sun', /\b(sunlight|morning light|sunshine|sun|get outside|outside|fresh air)\b/],
     ['fly', /\b(flight|fly|flying|airport|plane)\b/],
     ['car', /\b(drive|driving|car|car wash|petrol|fuel up|oil change|service the car|rego|servo|car service|tyres|mechanic|supercheap|repco|bp|ampol|fill up)\b/],
@@ -1172,6 +1175,12 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     ['eat', /\b(eat|eat out|lunch|breakfast|brunch|dinner|supper|meal|snack|smoothie|protein shake|takeaway|restaurant|dessert|brekkie|maccas|hungry jacks|kfc|subway|uber eats|menulog|doordash|fish and chips|pie|servo pie|parma|pub feed|yum cha)\b/],
     ['drink', /\b(drinks|pub|bar|wine|beer|cocktails|happy hour|bottle-o|bottle o|bottle shop|bottlo|winery|wine tasting|brewery|rsl|bowlo|schooner)\b/],
     ['coffee', /\b(coffee|tea|matcha|cafe|café|coffee run|flat white|long black)\b/],
+    /* WATER COMES AFTER EVERYTHING ELSE ON A LINE. A glass beside a coffee
+       and a book is the least of the three, so a stacked line takes the
+       thing it is for: "1L water + coffee + mindset book" is the book, and
+       "water + coffee" is the cup. Water still wins a line it is the whole
+       of. */
+    ['water', /\b(drink water|water|hydrate|hydration)\b/],
     ['shop', /\b(shopping|shop|errands?)\b/],
     ['laundry', /\b(laundry|washing|ironing|fold clothes|laundromat|dry cleaning|dry cleaner)\b/],
     ['bin', /\b(tip run|dump run|bins|bin|trash|rubbish|recycling|garbage|tip run|the tip|dump run|hard rubbish|council cleanup)\b/],
@@ -1196,7 +1205,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     ['ticket', /\b(concert|gig|festival|theatre|theater|show|event|tickets|comedy|zoo|aquarium|museum|gallery|art gallery|theme park|dreamworld|movie world|luna park|the races|melbourne cup|footy game|trivia|pub trivia|comedy club)\b/],
     ['puzzle', /\b(puzzle|puzzles|jigsaw|crossword|sudoku|wordle|lego)\b/],
     ['game', /\b(game|games|gaming|video games|chess|xbox|playstation|ps5)\b/],
-    ['sleep', /\b(wind down|sleep|bed|bedtime|nap)\b/]
+    ['sleep', /\b(sleep|bed|bedtime|nap)\b/]
   ];
   var CAT = { cardio: 'body', train: 'body', run: 'body', stretch: 'body', walk: 'body', warm: 'body', swim: 'body', cycle: 'body', sport: 'body', dance: 'body', surf: 'body', ski: 'body',
     read: 'mind', study: 'mind', calm: 'mind', write: 'mind', listen: 'mind', music: 'mind',

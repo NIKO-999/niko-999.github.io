@@ -189,7 +189,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     }));
     ok('every row keeps its dot and draws a glyph of its own kind between the dot and the name',
       gl.length === 7 && gl.every((x) => x.dot && x.gw === 18 && x.order && !x.inName)
-      && gl.map((x) => x.k).join() === 'wake,train,work,eat,mail,read,sleep', gl);
+      && gl.map((x) => x.k).join() === 'wake,train,work,eat,mail,read,nightly', gl);
     const bySvg = {};
     gl.forEach((x) => { (bySvg[x.svg] = bySvg[x.svg] || new Set()).add(x.k); });
     ok('two kinds never share a glyph, and one kind is always the same glyph',
@@ -775,7 +775,9 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       'Centrelink': 'money', 'Medicare': 'health', 'Chemist': 'meds', 'Uni': 'study', 'Zoo': 'ticket', 'Bushwalk': 'hike', 'Ferry': 'move',
       'Bubble bath': 'bath', 'Massage': 'bath', 'Brush teeth': 'teeth', 'Wedding': 'party', 'Birthday party': 'party', 'Baby shower': 'party',
       'Knitting': 'craft', 'Crossword': 'puzzle', 'Client presentation': 'present', 'Rest day': 'relax', 'Vote': 'vote', 'Stargazing': 'star',
-      'Book club at Dave\'s': 'read', 'Morning routine': 'routine', 'AM routine': 'routine', 'Evening routine': 'nightly', 'Skincare routine': 'shower', 'Wake up': 'wake', 'Cardio': 'cardio', 'Treadmill': 'cardio', 'Rowing machine': 'cardio', 'Rowing': 'surf', 'Morning run': 'run', 'Qwerty': 'dot' };
+      'Book club at Dave\'s': 'read', 'Morning routine': 'routine', 'AM routine': 'routine', 'Evening routine': 'nightly', 'Skincare routine': 'shower', 'Wake up': 'wake', 'Cardio': 'cardio', 'Treadmill': 'cardio', 'Rowing machine': 'cardio', 'Rowing': 'surf', 'Morning run': 'run',
+      'Wind down: mindset content + check the day': 'nightly', 'Wind down': 'nightly', "Lights out, prime tomorrow's intention": 'sleep',
+      '1L water + coffee + mindset book for 15 mins': 'read', 'Water + coffee': 'coffee', 'Ground + set intention for 10 mins': 'calm', 'Bed': 'sleep', 'Qwerty': 'dot' };
     const got = {};
     for (const n of Object.keys(common)) got[n] = await K(n);
     ok('common task names reach their own kind, and the unplaceable stay plain', Object.keys(common).every((n) => got[n] === common[n]), got);
