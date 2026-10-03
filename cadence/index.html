@@ -874,6 +874,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
    the daily process beside it already works. */
 #cdHsWho.is-ed .hs-him, #cdHsWho.is-ed #cdHsEd, #cdHsWho:not(.is-ed) #cdHsHim { display: none; }
 #cdHsHim { min-height: 140px; overflow: hidden; resize: none; }
+/* Locked: what is written here is read, never changed, so the fields, the
+   Edit links and the day chips are not drawn at all. */
+#cdVSelf.is-locked .cf-proc, #cdVSelf.is-locked .cd-link, #cdVSelf.is-locked .cf-pd { display: none; }
 .hs-him { list-style: none; margin: 0; padding: 0; }
 .hs-him li { padding: 8px 2px; box-shadow: inset 0 1px 0 var(--hair); font: 300 17px/1.35 var(--sans); overflow-wrap: anywhere; }
 .hs-him li:first-child { box-shadow: none; }
@@ -1426,7 +1429,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var pd = (Array.isArray(o.pd) ? o.pd : [0, 1, 2, 3, 4, 5, 6]).map(Number).filter(function (x, i, a) { return x >= 0 && x <= 6 && x % 1 === 0 && a.indexOf(x) === i; }).sort();
     var pt = typeof o.pt === 'string' ? o.pt.slice(0, 3000) : '';
     return { min: min, plans: plans.slice(0, 60), pt: pt, pd: pd, him: typeof o.him === 'string' ? o.him.slice(0, 2000) : '',
-      ps: pt.trim() && typeof o.ps === 'string' && ISO.test(o.ps) ? o.ps : '' };
+      ps: pt.trim() && typeof o.ps === 'string' && ISO.test(o.ps) ? o.ps : '', own: o.own ? 1 : 0 };
   }
   /* A note is a list of BLOCKS: a title, a heading, a sub-heading, a
      line of body, a quote, or a picture. A line of text is a list of
@@ -4299,10 +4302,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   }
   function cdProcGrow() { var f = $('cdCfProc'); f.style.height = 'auto'; f.style.height = f.scrollHeight + 'px'; }
   function cdPaintProc() {
-    var C = S.cont, ul = $('cdCfSteps'), f = $('cdCfProc'), ed = document.activeElement === f;
+    var C = S.cont, ul = $('cdCfSteps'), f = $('cdCfProc'), ed = !C.own && document.activeElement === f;
     if (!ed && f.value !== C.pt) f.value = C.pt;
-    $('cdCfHi').classList.toggle('is-ed', ed || !C.pt.trim());
-    if (ed || !C.pt.trim()) cdProcGrow();
+    $('cdCfHi').classList.toggle('is-ed', !C.own && (ed || !C.pt.trim()));
+    if (ed || (!C.own && !C.pt.trim())) cdProcGrow();
     ul.innerHTML = '';
     cdProcSteps(f.value).forEach(function (x) {
       var li = el('li', x.bad ? 'is-bad' : '');
@@ -4386,10 +4389,11 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var f = $('cdCfProc'); $('cdCfHi').classList.add('is-ed'); cdProcGrow(); f.focus(); f.setSelectionRange(f.value.length, f.value.length);
   });
   $('cdCfProc').addEventListener('change', function () {
+    if (S.cont.own) return;
     S.cont.pt = this.value.slice(0, 3000); if (S.cont.pt.trim() && !S.cont.ps) S.cont.ps = cdToday(); S.cont = cdContClean(S.cont); cdSave('cont'); cdProcApply(); cdPaintProc();
   });
   $('cdCfPd').addEventListener('click', function (ev) {
-    var c = ev.target.closest('.cd-chip'); if (!c) return;
+    var c = ev.target.closest('.cd-chip'); if (!c || S.cont.own) return;
     var i = +c.dataset.i, pd = S.cont.pd, k = pd.indexOf(i);
     if (k >= 0) pd.splice(k, 1); else { pd.push(i); pd.sort(); }
     cdSave('cont'); cdProcApply(); cdPaintProc();
@@ -4424,9 +4428,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   function cdPaintSelf() {
     if (!PLAN_MQ.matches) { cdGo('day'); return; }
     var C = S.cont, t = cdToday(), ps = cdSelfStart();
-    var f = $('cdHsHim'), ed = document.activeElement === f;
+    var f = $('cdHsHim'), ed = !C.own && document.activeElement === f;
+    $('cdVSelf').classList.toggle('is-locked', !!C.own);
     if (!ed && f.value !== C.him) f.value = C.him;
-    $('cdHsWho').classList.toggle('is-ed', ed || !C.him.trim());
+    $('cdHsWho').classList.toggle('is-ed', !C.own && (ed || !C.him.trim()));
     if (ed || !C.him.trim()) { f.style.height = 'auto'; f.style.height = f.scrollHeight + 'px'; }
     $('cdHsList').innerHTML = C.him.split('\n').map(function (x) { return x.trim(); }).filter(Boolean)
       .map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('');
@@ -4457,7 +4462,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     cdPaintProc();
   }
   $('cdHsHim').addEventListener('input', function () { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; });
-  $('cdHsHim').addEventListener('change', function () { S.cont.him = this.value.slice(0, 2000); cdSave('cont'); });
+  $('cdHsHim').addEventListener('change', function () { if (S.cont.own) return; S.cont.him = this.value.slice(0, 2000); cdSave('cont'); });
   $('cdHsHim').addEventListener('blur', function () { setTimeout(function () { if (view === 'self') cdPaintSelf(); }, 0); });
   $('cdHsEd').addEventListener('click', function () {
     var f = $('cdHsHim'); $('cdHsWho').classList.add('is-ed'); f.style.height = 'auto'; f.style.height = f.scrollHeight + 'px';
@@ -4468,8 +4473,34 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      public, so they are never written into the code: they travel as the
      fragment of a link, which never leaves the browser, are read once
      and stripped from the bar. What it replaces comes back on Undo. */
+  /* HIS HIGHER SELF IS WRITTEN HERE, AND IT IS READ-ONLY. Asked for in so
+     many words: hard-coded, nothing to change, the steps already on the
+     week. It is drawn only on a device that has opened the unlock link,
+     #self=mine, so anybody else who opens the app still gets the empty,
+     editable tab. This repository is public, so these lines can be read
+     in the source by anyone who looks, and that was chosen knowingly. */
+  var SELF = {"h": "He wakes at 3:30 and buys his time back, so he is never in survival mode.\nBefore anything else he grounds himself, ten minutes at most: I am this, I am here, I am making it. He assumes it as done.\nNothing about business touches him until he is grounded, hydrated and trained.\nHe drinks a litre of water before the gym and 5 litres by the end of the day.\nHe trains every morning, trains abs every day, and walks the incline for 30 minutes with a podcast from men already where he is going.\nHe fasts until 1pm on coffee and water. His first meal comes after the deep work, and it is whole foods.\nHe eats whole foods every day and hits the blueprint his nutrition coach built for his body.\nHe is shredded and he stays that way.\nHe reads his mindset books and acts on them the same day.\nAfter training he goes deep: backtesting, yesterday's market, where he could have entered, then trading content.\nOn a day off he goes deep for two to three hours on the business, then walks to reset.\nHe invests in mentors. $5,000 in the right mind returns $20,000 a month in mindset alone.\nHe coaches men to do the same.\nHe buys the best: coconut water, the best water, free-range meat.\nHe never goes cheap on a coach or a mentor, so he never pays twice.\nHe wastes no time and he has cut every vice.\nAt night he winds down on mindset content and makes sure every high-leverage task is done.\nHe is in bed by 9 to 9:30, never later than 10, priming his mind to wake and set the intention again.\nHe judges a day by whether he did the work, never by where he is yet.", "p": "3:30am Wake up\n3:35am Ground + set intention for 10 mins\n3:45am 1L water + coffee + mindset book for 15 mins\n4am Train + abs\n5am Incline walk + vision podcast for 30 mins\n5:30am Deep work: backtest + yesterday's market for 90 mins\n7am Trading content for 30 mins\n1pm First meal, whole foods for 30 mins\n8:30pm Wind down: mindset content + check the day for 30 mins\n9pm Lights out, prime tomorrow's intention", "d": [0, 1, 2, 3, 4, 5, 6]};
+  /* On an owned device the record is put back to SELF on every boot, so
+     an edit made anywhere else, or carried in by sync, cannot stand. */
+  function cdSelfOwn() {
+    var C = S.cont;
+    if (!C.own) return;
+    var same = C.him === SELF.h && C.pt === SELF.p && C.pd.join() === SELF.d.join();
+    if (!same) {
+      C.him = SELF.h; C.pt = SELF.p; C.pd = SELF.d.slice();
+      if (!C.ps) C.ps = cdToday();
+      S.cont = cdContClean(C); cdSave('cont');
+    }
+    cdProcApply(true);
+  }
   function cdSelfLoad(o) {
-    if (!isObj(o)) return false;
+    if (o === 'mine') {
+      var first = !S.cont.own;
+      S.cont.own = 1; cdSave('cont'); cdSelfOwn();
+      if (first) cdToast('Your higher self is in');
+      return true;
+    }
+    if (!isObj(o) || S.cont.own) return false;
     var was = JSON.parse(JSON.stringify(S.cont));
     if (typeof o.h === 'string') S.cont.him = o.h;
     if (typeof o.p === 'string') { S.cont.pt = o.p; if (o.p.trim() && !S.cont.ps) S.cont.ps = cdToday(); }
@@ -4897,14 +4928,14 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   }
   var bootTick = /^#tick=(.+)$/.exec(location.hash), bootSelf = /^#self=(.+)$/.exec(location.hash), selfIn = null;
   if (bootTick || bootSelf) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} }
-  if (bootSelf) { try { selfIn = JSON.parse(decodeURIComponent(bootSelf[1])); } catch (e) {} }
+  if (bootSelf) { if (bootSelf[1] === 'mine') selfIn = 'mine'; else try { selfIn = JSON.parse(decodeURIComponent(bootSelf[1])); } catch (e) {} }
   /* A link opened into a tab the app is already up in changes only the
      hash and loads nothing, so the same fragment is heard there too. */
   window.addEventListener('hashchange', function () {
     var m = /^#self=(.+)$/.exec(location.hash), o = null;
     if (!m) return;
     try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
-    try { o = JSON.parse(decodeURIComponent(m[1])); } catch (e) {}
+    if (m[1] === 'mine') o = 'mine'; else try { o = JSON.parse(decodeURIComponent(m[1])); } catch (e) {}
     if (o && cdSelfLoad(o)) { if (PLAN_MQ.matches) cdGo('self'); else cdPaint(); }
   });
   if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', function (e) {
@@ -4914,6 +4945,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   var sv = 'day';
   try { sv = sessionStorage.getItem('cad.view') || 'day'; } catch (e) {}
   if ((sv === 'plan' || sv === 'cont' || sv === 'self') && !PLAN_MQ.matches) sv = 'day';
+  cdSelfOwn();
   if (selfIn && cdSelfLoad(selfIn) && PLAN_MQ.matches) sv = 'self';
   cdGo(['day', 'hab', 'mon', 'note', 'plan', 'cont', 'self'].indexOf(sv) >= 0 ? sv : 'day');
   /* The first open of a date shows its thought, after the screen has

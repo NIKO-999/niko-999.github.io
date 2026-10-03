@@ -1903,7 +1903,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       localStorage.setItem('cad.cont.v1', JSON.stringify({ min: { mx: '  Two  ', zz: 5 }, plans: [{ id: 'p1', g: 'Run', i: 'It rains', t: 'Treadmill', u: [{ d: 'x' }, { d: '2026-09-24', ok: 1 }, { d: '2026-09-24', ok: 0 }] }, { id: 'p2', i: '' }, 'junk'] })); })();`;
     const { c, page, errs } = await ctx({ desk: { width: 1440, height: 900 }, init });
     const rep = await store(page, 'cad.cont.v1');
-    ok('a damaged plan B costs only what is damaged, and the repair is written back', JSON.stringify(rep) === JSON.stringify({ min: { mx: 'Two' }, plans: [{ id: 'p1', g: 'Run', i: 'It rains', t: 'Treadmill', u: [{ d: '2026-09-24', ok: 1 }] }], pt: '', pd: [0, 1, 2, 3, 4, 5, 6], him: '', ps: '' }), rep);
+    ok('a damaged plan B costs only what is damaged, and the repair is written back', JSON.stringify(rep) === JSON.stringify({ min: { mx: 'Two' }, plans: [{ id: 'p1', g: 'Run', i: 'It rains', t: 'Treadmill', u: [{ d: '2026-09-24', ok: 1 }] }], pt: '', pd: [0, 1, 2, 3, 4, 5, 6], him: '', ps: '', own: 0 }), rep);
     await page.click('.cd-tab[data-v="cont"]');
     await page.waitForTimeout(150);
     const v = await page.evaluate(() => ({ shown: !document.getElementById('cdVCont').hidden, others: ['cdVDay', 'cdVHab', 'cdVMon', 'cdVNote', 'cdVPlan', 'cdVSelf'].filter((i) => !document.getElementById(i).hidden),
@@ -2074,6 +2074,30 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await p2.close();
     await page.goto(BASE + '/cadence/#self=%7Bnot-json'); await page.waitForTimeout(400);
     ok('a broken link changes nothing and throws nothing', ((await store(page, 'cad.cont.v1')) || {}).him === '' && errs.length === 0, errs);
+    await c.close();
+  }
+  /* HIS OWN IS HARD-CODED AND READ-ONLY. #self=mine marks the device his;
+     from then on the written self and process are put back on every
+     boot, laid on the week, and nothing on the tab can change them. A
+     device that never opened the link still gets the empty tab. */
+  {
+    const { c, page, errs } = await ctx({ desk: { width: 1440, height: 900 } });
+    ok('a device that never unlocked gets the empty, editable tab', ((await store(page, 'cad.cont.v1')) || {}).own !== 1);
+    await page.goto(BASE + '/cadence/#self=mine'); await page.waitForTimeout(500);
+    const cs = (await store(page, 'cad.cont.v1')) || {}, wk = (await store(page, 'cad.week.v1')).filter((b) => b.id.indexOf('pb_') === 0);
+    const ui = await page.evaluate(() => ({ hash: location.hash, view: !document.getElementById('cdVSelf').hidden, him: document.querySelectorAll('#cdHsList li').length, steps: document.querySelectorAll('#cdCfSteps li').length,
+      shown: ['cdHsHim', 'cdHsEd', 'cdCfProc', 'cdCfEd', 'cdCfPd'].filter((id) => getComputedStyle(document.getElementById(id)).display !== 'none') }));
+    ok('the unlock link fills his self and process, opens on it, and leaves the bar clean', cs.own === 1 && ui.hash === '' && ui.view && ui.him >= 19 && ui.steps === 10 && /^3:30am Wake up/.test(cs.pt), ui);
+    ok('...and every step is on every day of his week', wk.length === 10 && wk.every((b) => b.d.join() === '0,1,2,3,4,5,6'), wk.length);
+    ok('...and nothing on the tab can edit it: no field, no Edit, no day chips', ui.shown.length === 0, ui.shown);
+    /* An edit carried in from anywhere else does not stand past a reload. */
+    await page.evaluate(() => { const k = 'cad.cont.v1', o = JSON.parse(localStorage.getItem(k)); o.him = 'changed'; o.pt = '6am Sleep in'; localStorage.setItem(k, JSON.stringify(o)); });
+    await page.reload(); await page.waitForTimeout(400);
+    const back = (await store(page, 'cad.cont.v1')) || {};
+    ok('a changed record is put back on the next open', back.him === cs.him && back.pt === cs.pt, back.pt);
+    await page.goto(BASE + '/cadence/#self=' + encodeURIComponent(JSON.stringify({ h: 'Someone else' }))); await page.waitForTimeout(400);
+    ok('another higher self link cannot replace his', ((await store(page, 'cad.cont.v1')) || {}).him === cs.him);
+    ok('no page errors on the locked self', errs.length === 0, errs);
     await c.close();
   }
 

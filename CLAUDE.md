@@ -5816,6 +5816,26 @@ it was. A fragment never leaves the browser.
 the strip's four states on one fixture, the link filling, stripping and
 undoing, a broken link changing nothing, and no tab on a phone.
 
+### His own is hard-coded, and read-only
+
+Asked for in so many words: *hard code everything into my higher
+self, I don't want to be able to change anything.* **This reverses the
+line above about nothing personal in the code**, and it was put to the
+person who owns it first: this repository is public, so the lines are
+readable in the source. Chosen knowingly.
+
+**`SELF` IS DRAWN ONLY ON A DEVICE THAT OPENED `#self=mine`.** That sets
+`own` on `cad.cont.v1`, which is in `K`, so sync carries it to the
+desktop. A device that never opened it gets the empty, editable tab, so
+nobody else who uses the app is handed somebody else's day. It is not a
+lock against anyone who reads the source, and it does not claim to be.
+
+**PUT BACK ON EVERY BOOT.** An edit carried in by sync, made in the day
+editor, or typed into the store does not stand past the next open: the
+self, the process and its days are reset to `SELF` and laid on the week.
+On an owned device the fields, the Edit links and the day chips are not
+drawn, the handlers refuse, and a `#self={...}` link cannot replace it.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
