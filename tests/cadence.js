@@ -2089,8 +2089,8 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const cs = (await store(page, 'cad.cont.v1')) || {}, wk = (await store(page, 'cad.week.v1')).filter((b) => b.id.indexOf('pb_') === 0);
     const ui = await page.evaluate(() => ({ hash: location.hash, view: !document.getElementById('cdVSelf').hidden, him: document.querySelectorAll('#cdHsList li').length, steps: document.querySelectorAll('#cdCfSteps li').length,
       shown: ['cdHsHim', 'cdHsEd', 'cdCfProc', 'cdCfEd', 'cdCfPd'].filter((id) => getComputedStyle(document.getElementById(id)).display !== 'none') }));
-    ok('the unlock link fills his self and process, opens on it, and leaves the bar clean', cs.own === 1 && ui.hash === '' && ui.view && ui.him >= 19 && ui.steps === 10 && /^3:30am Wake up/.test(cs.pt), ui);
-    ok('...and every step is on every day of his week', wk.length === 10 && wk.every((b) => b.d.join() === '0,1,2,3,4,5,6'), wk.length);
+    ok('the unlock link fills his self and process, opens on it, and leaves the bar clean', cs.own === 1 && ui.hash === '' && ui.view && ui.him >= 19 && ui.steps === 11 && /^3:30am Wake up/.test(cs.pt), ui);
+    ok('...and every step is on every day of his week', wk.length === 11 && wk.every((b) => b.d.join() === '0,1,2,3,4,5,6'), wk.length);
     ok('...and nothing on the tab can edit it: no field, no Edit, no day chips', ui.shown.length === 0, ui.shown);
     /* An edit carried in from anywhere else does not stand past a reload. */
     await page.evaluate(() => { const k = 'cad.cont.v1', o = JSON.parse(localStorage.getItem(k)); o.him = 'changed'; o.pt = '6am Sleep in'; localStorage.setItem(k, JSON.stringify(o)); });

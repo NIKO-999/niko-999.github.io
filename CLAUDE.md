@@ -5862,6 +5862,12 @@ took *Ground + set intention* off the square.
 steps now keep the Mind habit when ticked. That is the right answer for
 a mindset book and a grounding, and it is a change.
 
+**Dinner is a step, around seven.** Asked for as *dinner around 7,
+7:30, 8pm latest, whole foods*. A step is one time, so it starts at 7
+and runs half an hour, which ends at 7:30; the "never later than 8" is
+a sentence in who he is rather than a second block. The checks count
+eleven steps on every day now.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
