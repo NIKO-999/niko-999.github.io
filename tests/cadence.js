@@ -1914,8 +1914,9 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const kept = await page.evaluate(() => { const h = JSON.parse(localStorage.getItem('cad.hab.v1') || '{}'); return Object.keys(h['2026-09-24'] || {}).concat(Object.keys(h['2026-09-25'] || {})); });
     ok('nothing kept yesterday or today is asked to be protected', !v.prot.some((x) => kept.includes(x.split(':')[0])), { kept, prot: v.prot });
     ok('every habit has a row for its bad-day version', v.mins >= 7, v.mins);
-    const cbx = await page.$eval('#cdVCont .cd-hero', (e) => e.getBoundingClientRect().right), lbx = await page.$eval('#cdCfPlans', (e) => e.getBoundingClientRect().left);
-    ok('plan B is two columns, the figure left of the plans', cbx <= lbx, { cbx, lbx });
+    const sides = await page.$$eval('#cdVCont .cf-two', (rows) => rows.map((r) => [...r.children].map((c) => { const x = c.getBoundingClientRect(); return { l: x.left, r: x.right, t: x.top, h: x.height, w: x.width }; })));
+    ok('both sides are on one page: the written day left of today, each row two boxes of one size', sides.length === 2 && sides.every((r) => r.length === 2 && r[0].r <= r[1].l && Math.abs(r[0].t - r[1].t) < 1 && Math.abs(r[0].h - r[1].h) < 1 && Math.abs(r[0].w - r[1].w) < 1), sides);
+    ok('the highest version is the first thing on the page', (await page.$eval('#cdCfHi .cd-hcap', (e) => e.textContent)) === 'Highest version' && (await page.$eval('#cdCfNow .cd-hcap', (e) => e.textContent)) === 'Today');
     await page.fill('#cdCfMin input[data-h="mx"]', 'Five minutes on the floor');
     await page.click('#cdCfT'); await page.waitForTimeout(100);
     ok('a bad-day version is kept as you type it, and the protect row reads it', (await store(page, 'cad.cont.v1')).min.mx === 'Five minutes on the floor' && (await page.textContent('#cdCfProt .cf-pr[data-h="mx"] i')) === 'Five minutes on the floor');
@@ -1923,7 +1924,12 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const up = await sheetUp(page);
     const dis = up && await page.$eval('#cdCfSave', (b) => b.disabled);
     ok('a new plan needs both its if and its then', up && dis === true, { up, dis });
-    if (up) { await page.fill('#cdCfG', 'Ten k by December'); await page.fill('#cdCfI', 'I miss the morning run'); await page.fill('#cdCfTh', 'Twenty minutes at lunch'); await page.click('#cdCfSave'); await page.waitForTimeout(320); }
+    if (up) { await page.fill('#cdCfG', 'Ten k by December'); await page.fill('#cdCfI', 'I miss the morning run'); await page.fill('#cdCfTh', 'Twenty minutes at lunch');
+      /* The sheet rises for 240ms and a fill landing inside it can arrive
+         before the field's own input handler has the value; asking twice
+         is cheaper than a click that waits thirty seconds on nothing. */
+      if (await page.$eval('#cdCfSave', (b) => b.disabled)) { await page.fill('#cdCfI', 'I miss the morning run'); await page.fill('#cdCfTh', 'Twenty minutes at lunch'); }
+      await page.$eval('#cdCfSave', (b) => b.click()); await page.waitForTimeout(320); }
     const pl = (await store(page, 'cad.cont.v1')).plans;
     const card = await page.evaluate(() => { const c = [...document.querySelectorAll('#cdCfPlans .cf-p')].pop(); return c && { g: c.querySelector('.cf-g') && c.querySelector('.cf-g').textContent, ln: [...c.querySelectorAll('.cf-ln')].map((l) => l.textContent).join('|'), tl: c.querySelector('.cf-tl').textContent }; });
     ok('a plan is a goal, an if and a then, and has not been used yet', pl.length === 2 && pl[1].i === 'I miss the morning run' && card && card.g === 'Ten k by December' && card.ln === 'IfI miss the morning run|ThenTwenty minutes at lunch' && card.tl === 'Not used yet', { pl, card });
@@ -1951,23 +1957,46 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     /* THE DAILY PROCESS: written as lines, laid on the week as blocks
        the process owns, and rewritten whole on every save. */
     {
+      const editProc = async (text) => {
+        if (!(await page.$eval('#cdCfHi', (h) => h.classList.contains('is-ed')))) await page.click('#cdCfEd');
+        await page.fill('#cdCfProc', text);
+      };
+      ok('with nothing written the field is up and Edit is not', await page.$eval('#cdCfHi', (h) => h.classList.contains('is-ed') && getComputedStyle(document.getElementById('cdCfEd')).display === 'none'));
       const STEPS = ['wake up', 'shower', 'read book + 1l water', 'train', 'incline walk'];
       const all0 = await store(page, 'cad.week.v1');
       const before = all0.filter((b) => STEPS.indexOf(b.n.toLowerCase()) < 0);
       const hadWake = all0.filter((b) => b.n === 'Wake up');
-      await page.fill('#cdCfProc', 'Wake up 5:10am\n5:15am Shower\n5:25am Read book + 1L water\n6am Train\n7am Incline walk for 30 mins\nno time here');
+      await editProc('Wake up 5:10am\n5:15am Shower\n5:25am Read book + 1L water\n6am Train\n7am Incline walk for 30 mins\nno time here');
       const prev = await page.$$eval('#cdCfSteps li', (ls) => ls.map((l) => l.textContent));
       ok('the process reads as you type it, time anywhere on the line, a line with none flagged', prev.length === 6 && prev[0] === '05:10Wake up5m' && prev[2].indexOf('Read book + 1L water') > 0 && prev[3] === '06:00Train1h' && prev[4] === '07:00Incline walk30m' && /no time/.test(prev[5]), prev);
       await page.$eval('#cdCfProc', (t) => t.blur());
       await page.waitForTimeout(150);
+      const shown = await page.evaluate(() => ({ ed: document.getElementById('cdCfHi').classList.contains('is-ed'), field: getComputedStyle(document.getElementById('cdCfProc')).display, list: getComputedStyle(document.getElementById('cdCfSteps')).display, edit: getComputedStyle(document.getElementById('cdCfEd')).display }));
+      ok('written, the day reads as its steps with Edit beside them, never the field and the list together', !shown.ed && shown.field === 'none' && shown.list !== 'none' && shown.edit !== 'none', shown);
       let wk = await store(page, 'cad.week.v1');
       const pb = wk.filter((b) => b.id.indexOf('pb_') === 0).sort((x, y) => x.s - y.s);
       ok('each step becomes a block on every day, running until the next', pb.map((b) => b.n + '@' + b.s + '-' + b.e).join('|') === 'Wake up@310-315|Shower@315-325|Read book + 1L water@325-360|Train@360-420|Incline walk@420-450' && pb.every((b) => b.d.join() === '0,1,2,3,4,5,6'), pb);
       ok('the rest of the week is untouched by it', JSON.stringify(wk.filter((b) => b.id.indexOf('pb_') !== 0)) === JSON.stringify(before));
       ok('a block you already had by a step\'s name is taken over, never drawn twice', hadWake.length === 1 && wk.filter((b) => b.n === 'Wake up').length === 1, { hadWake: hadWake.length });
+      /* 10:00 for 15 minutes has ended by 10:20 and is not missed until
+         10:45, 10:15 for an hour is running, and noon is ahead: the four
+         states a step can be in today, on one fixture. */
+      await editProc('Wake up 5:10am\n5:15am Shower\n5:25am Read book + 1L water\n6am Train\n7am Incline walk for 30 mins\n10am Stretch for 15 mins\n10:15am Deep focus for 1 hour\n12pm Review');
+      await page.$eval('#cdCfProc', (t) => t.blur()); await page.waitForTimeout(150);
+      const states = await page.$$eval('#cdCfToday li', (ls) => ls.slice(5).map((l) => l.querySelector('em').textContent).join('|'));
+      ok('a step reads Ended inside the half hour, Now while it runs, To come ahead', states === 'Ended|Now|To come', states);
+      const nameW = await page.$$eval('#cdCfToday li', (ls) => ls.map((l) => { const n = l.querySelector('span').getBoundingClientRect(); return { w: Math.round(n.width), h: Math.round(n.height) }; }));
+      ok('every step on today has its name on one line across the row', nameW.length === 8 && nameW.every((x) => x.w > 150 && x.h < 30), nameW);
+      await editProc('Wake up 5:10am\n5:15am Shower\n5:25am Read book + 1L water\n6am Train\n7am Incline walk for 30 mins\nno time here');
+      await page.$eval('#cdCfProc', (t) => t.blur()); await page.waitForTimeout(150);
+      const today1 = await page.$$eval('#cdCfToday li', (ls) => ls.map((l) => l.className + ':' + l.querySelector('em').textContent));
+      ok('today reads the process back, every step behind 10:20 and unkept struck as missed', today1.length === 5 && today1.every((x) => x === 'is-past:Missed') && (await page.textContent('#cdCfAl')) === '0 / 5', { today1, al: await page.textContent('#cdCfAl') });
+      await page.click('#cdCfToday button[data-id="pb_shower"]'); await page.waitForTimeout(120);
+      ok('a press on today ticks the step in the day\'s own record', !!((await store(page, 'cad.log.v1'))['2026-09-25'] || {}).pb_shower && (await page.textContent('#cdCfAl')) === '1 / 5' && (await page.$eval('#cdCfToday button[data-id="pb_shower"]', (b) => b.closest('li').className)) === 'is-done');
+      await page.click('#cdCfToday button[data-id="pb_shower"]'); await page.waitForTimeout(120);
       ok('a toast says so, with an Undo', (await page.textContent('#cdToastT')) === 'Daily process: 5 blocks on your week' && !(await page.$eval('#cdToastU', (b) => b.hidden)));
       /* Moving a step keeps its block's id, so today's tick stays on it. */
-      await page.fill('#cdCfProc', 'Wake up 5:00am\n5:15am Shower\n5:25am Read book + 1L water\n6am Train\n7am Incline walk for 30 mins');
+      await editProc('Wake up 5:00am\n5:15am Shower\n5:25am Read book + 1L water\n6am Train\n7am Incline walk for 30 mins');
       await page.$eval('#cdCfProc', (t) => t.blur()); await page.waitForTimeout(150);
       wk = await store(page, 'cad.week.v1');
       const wake = wk.filter((b) => b.n === 'Wake up');
@@ -1979,7 +2008,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       ok('...and Undo puts the week back', (await store(page, 'cad.week.v1')).filter((b) => b.id.indexOf('pb_') === 0).every((b) => b.d.length === 7));
       await page.click('#cdCfPd .cd-chip[data-i="6"]'); await page.waitForTimeout(100);
       await page.click('#cdCfPd .cd-chip[data-i="6"]'); await page.waitForTimeout(100);
-      await page.fill('#cdCfProc', ''); await page.$eval('#cdCfProc', (t) => t.blur()); await page.waitForTimeout(150);
+      await editProc(''); await page.$eval('#cdCfProc', (t) => t.blur()); await page.waitForTimeout(150);
       ok('clearing the process takes its blocks off and nothing else', JSON.stringify(await store(page, 'cad.week.v1')) === JSON.stringify(before));
       await page.evaluate(() => document.getElementById('cdToastU').click()); await page.waitForTimeout(100);
     }

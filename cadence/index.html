@@ -833,16 +833,45 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cf-ft { display: flex; align-items: center; gap: 8px; padding: 6px 10px 10px 16px; }
 .cf-tl { flex: 1; min-width: 0; font: 400 12.5px/1.2 var(--sans); color: var(--quiet); }
 .cf-mins .cd-row { grid-template-columns: 120px 1fr; }
-.cf-proc { min-height: 168px; font-variant-numeric: tabular-nums; }
+.cf-proc { min-height: 120px; font-variant-numeric: tabular-nums; }
 .cf-steps { list-style: none; margin: 10px 0 0; padding: 0; }
 .cf-steps li { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 10px; align-items: baseline; padding: 7px 2px; box-shadow: inset 0 1px 0 var(--hair); font: 400 15px/1.25 var(--sans); }
 .cf-steps li b { font: 500 13px/1.25 var(--mono); color: var(--dim); }
 .cf-steps li i { font-style: normal; font: 400 12.5px/1.25 var(--sans); color: var(--quiet); }
 .cf-steps li.is-bad { color: var(--quiet); }
 .cf-pd { margin-top: 12px; }
+/* BOTH SIDES ON ONE PAGE. The day as you wrote it on the left and the
+   day as it is going on the right, the same box at the same height, so
+   reading across a row is reading the gap between the two. */
+.cf-two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: stretch; margin-top: 22px; }
+.cf-side { min-width: 0; padding: 20px 22px 18px; border-radius: 18px; background: rgba(243, 245, 247, .035); box-shadow: inset 0 0 0 1px var(--hair); }
+.cf-side > .cd-hcap { margin: 0 0 12px; }
+.cf-side > .cd-lbl:first-child, .cf-side > [hidden] + [hidden] + .cd-lbl { margin-top: 0; }
+/* THE WRITTEN DAY IS READ AS STEPS AND WRITTEN AS LINES. The field and
+   the parsed list are the same day twice, so only one is up at a time:
+   the list, with Edit beside it, until you are typing, or the field
+   while there is nothing written yet. */
+#cdCfHi.is-ed .cf-steps, #cdCfHi.is-ed #cdCfEd, #cdCfHi:not(.is-ed) .cf-proc { display: none; }
+.cf-proc { overflow: hidden; resize: none; }
+.cf-side .cd-big { margin: 0; text-align: left; }
+.cf-side .cd-hs { text-align: left; }
+.cf-side > .cd-lbl { margin-bottom: 12px; }
+.cf-fig { margin: 0 0 14px; font: 400 13px/1.3 var(--sans); color: var(--quiet); }
+.cf-fig b { font-weight: 500; color: var(--ink); }
+.cf-today { margin-top: 16px; }
+.cf-today li { display: block; padding: 0; }
+.cf-today button { display: grid; grid-template-columns: 22px 52px minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; min-height: 44px; padding: 0 2px; text-align: left; color: var(--ink); font: 400 15px/1.25 var(--sans); }
+.cf-today button i { width: 9px; height: 9px; border-radius: 50%; justify-self: center; box-shadow: inset 0 0 0 1.5px var(--c); }
+.cf-today .is-done button i { background: var(--c); box-shadow: 0 0 8px var(--c); }
+.cf-today button b { font: 500 13px/1.25 var(--mono); color: var(--dim); }
+.cf-today button em { font-style: normal; font: 400 12.5px/1.25 var(--sans); color: var(--quiet); }
+.cf-today .is-now button em { color: var(--c); }
+.cf-today .is-past button span { text-decoration: line-through; color: var(--quiet); }
+.cf-today .is-done button em { color: var(--c); }
 .cf-mins .cd-row > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (min-width: 960px) {
   .cd-tab-pb { display: inline-block; }
+  #cdVCont > .cd-pane { display: block; padding: 0 40px 40px; }
   .cd-tab-plan { display: inline-block; }
   .cd-app.is-plan { max-width: 1440px; }
 }
@@ -935,22 +964,35 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     </section>
     <section id="cdVCont" aria-label="Plan B" hidden>
       <div class="cd-pane">
-        <div class="cd-hero is-sub">
-          <p class="cd-hcap">Plan B</p>
-          <p class="cd-big" id="cdCfT"></p>
-          <p class="cd-hs" id="cdCfCap"></p>
+        <div class="cf-two">
+          <div class="cf-side" id="cdCfHi">
+            <p class="cd-hcap">Highest version</p>
+            <textarea class="cd-field cf-proc" id="cdCfProc" aria-label="Daily process, one step a line" placeholder="3:30am Wake up&#10;3:35am Shower&#10;4am Train"></textarea>
+            <ul class="cf-steps" id="cdCfSteps"></ul>
+            <button class="cd-link" id="cdCfEd" type="button">Edit</button>
+            <div class="cd-chips days cf-pd" id="cdCfPd"></div>
+          </div>
+          <div class="cf-side" id="cdCfNow">
+            <p class="cd-hcap">Today</p>
+            <p class="cd-big" id="cdCfAl"></p>
+            <p class="cd-hs" id="cdCfAlCap"></p>
+            <ul class="cf-steps cf-today" id="cdCfToday"></ul>
+          </div>
         </div>
-        <p class="cd-lbl cd-sec" id="cdCfProtL">Protect today</p>
-        <ul class="cf-list" id="cdCfProt"></ul>
-        <p class="cd-lbl cd-sec">If, then</p>
-        <ul class="cf-list" id="cdCfPlans"></ul>
-        <button class="cd-link" id="cdCfAdd" type="button">+ A plan</button>
-        <p class="cd-lbl cd-sec">Daily process</p>
-        <textarea class="cd-field cf-proc" id="cdCfProc" aria-label="Daily process, one step a line" placeholder="3:30am Wake up&#10;3:35am Shower&#10;4am Train"></textarea>
-        <ul class="cf-steps" id="cdCfSteps"></ul>
-        <div class="cd-chips days cf-pd" id="cdCfPd"></div>
-        <p class="cd-lbl cd-sec">Bad-day versions</p>
-        <div class="cd-rows cf-mins" id="cdCfMin"></div>
+        <div class="cf-two">
+          <div class="cf-side">
+            <p class="cd-lbl cd-sec" id="cdCfProtL">Protect today</p>
+            <ul class="cf-list" id="cdCfProt"></ul>
+            <p class="cd-lbl cd-sec">Bad-day versions</p>
+            <div class="cd-rows cf-mins" id="cdCfMin"></div>
+          </div>
+          <div class="cf-side">
+            <p class="cd-lbl cd-sec">If, then</p>
+            <p class="cf-fig"><b id="cdCfT"></b> <span id="cdCfCap"></span></p>
+            <ul class="cf-list" id="cdCfPlans"></ul>
+            <button class="cd-link" id="cdCfAdd" type="button">+ A plan</button>
+          </div>
+        </div>
       </div>
     </section>
     <section id="cdVPlan" aria-label="Plan" hidden>
@@ -4219,9 +4261,12 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     });
     return out;
   }
+  function cdProcGrow() { var f = $('cdCfProc'); f.style.height = 'auto'; f.style.height = f.scrollHeight + 'px'; }
   function cdPaintProc() {
-    var C = S.cont, ul = $('cdCfSteps'), f = $('cdCfProc');
-    if (document.activeElement !== f && f.value !== C.pt) f.value = C.pt;
+    var C = S.cont, ul = $('cdCfSteps'), f = $('cdCfProc'), ed = document.activeElement === f;
+    if (!ed && f.value !== C.pt) f.value = C.pt;
+    $('cdCfHi').classList.toggle('is-ed', ed || !C.pt.trim());
+    if (ed || !C.pt.trim()) cdProcGrow();
     ul.innerHTML = '';
     cdProcSteps(f.value).forEach(function (x) {
       var li = el('li', x.bad ? 'is-bad' : '');
@@ -4229,6 +4274,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
         : '<b>' + cdHM(x.s) + '</b><span>' + esc(x.n) + '</span><i>' + (x.e > x.s ? cdLen(x.e - x.s) : 'a moment') + '</i>';
       ul.appendChild(li);
     });
+    cdPaintToday();
     var pd = $('cdCfPd');
     if (!pd.children.length) DOW.forEach(function (d, i) {
       var c = el('button', 'cd-chip', d.slice(0, 2)); c.type = 'button'; c.dataset.i = i; c.setAttribute('aria-label', DOWL[i]);
@@ -4236,6 +4282,42 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     });
     pd.querySelectorAll('.cd-chip').forEach(function (c) { c.setAttribute('aria-pressed', C.pd.indexOf(+c.dataset.i) >= 0); });
   }
+  /* TODAY, READ AGAINST THE PROCESS. The blocks the process owns that
+     are on today, each with what has become of it: kept, running, still
+     to come, or behind you unkept — struck in the quiet grey after the
+     same half hour the day's own list waits, never red. A press ticks it
+     through the same record the day's row writes. */
+  function cdProcToday() {
+    var t = cdToday();
+    return cdOn(t).filter(function (b) { return b.id.indexOf('pb_') === 0; });
+  }
+  function cdPaintToday() {
+    var t = cdToday(), now = cdNowMin(), list = cdProcToday(), ul = $('cdCfToday');
+    var kept = list.filter(function (b) { return cdDone(t, b.id); }).length;
+    var steps = cdProcSteps(S.cont.pt).filter(function (x) { return !x.bad; }).length;
+    $('cdCfAl').textContent = list.length ? kept + ' / ' + list.length : '—';
+    var left = list.filter(function (b) { return !cdDone(t, b.id) && now < Math.max(b.e, b.s) + MISS_AFTER; }).length;
+    $('cdCfAlCap').textContent = !steps ? 'no process yet' : !list.length ? 'the process is not on today'
+      : kept === list.length ? 'aligned · every step kept' : 'aligned' + (left ? ' · ' + left + ' to go' : '');
+    ul.innerHTML = list.map(function (b) {
+      var done = cdDone(t, b.id), past = !done && now >= Math.max(b.e, b.s) + MISS_AFTER, run = !done && !past && now >= b.s && now < Math.max(b.e, b.s + 1);
+      /* Between its end and the half hour the day waits before calling it
+         missed, a step has neither happened nor still to come: it ended. */
+      var st = done ? 'Kept' : run ? 'Now' : past ? 'Missed' : now >= b.s ? 'Ended' : 'To come';
+      return '<li class="' + (done ? 'is-done' : run ? 'is-now' : past ? 'is-past' : '') + '" style="--c:var(--c-' + CAT[cdKind(b.n)] + ')">'
+        + '<button type="button" data-id="' + b.id + '" aria-pressed="' + done + '" aria-label="' + esc(b.n) + ', ' + cdHM(b.s) + ', ' + st.toLowerCase() + '">'
+        + '<i></i><b>' + cdHM(b.s) + '</b><span>' + esc(b.n) + '</span><em>' + st + '</em></button></li>';
+    }).join('');
+  }
+  $('cdCfToday').addEventListener('click', function (ev) {
+    var btn = ev.target.closest('button[data-id]'); if (!btn) return;
+    var t = cdToday(), id = btn.dataset.id, b = S.week.filter(function (x) { return x.id === id; })[0]; if (!b) return;
+    var was = cdDone(t, id);
+    cdSetFlag('log', t, id, !was);
+    if (was && S.train[t] && S.train[t][id]) { delete S.train[t][id]; if (!Object.keys(S.train[t]).length) delete S.train[t]; cdSave('train'); }
+    cdPaintCont();
+    if (!was && TRAINING[cdKind(b.n)]) cdLiftSheet(t, id, b.n);
+  });
   /* Owned blocks are rewritten whole and everything else is left alone;
      the week from before is kept for Undo, because a process typed over
      in a hurry is six blocks gone from every day at once. */
@@ -4262,6 +4344,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     cdToast(steps.length && C.pd.length ? 'Daily process: ' + steps.length + ' blocks on your week' : 'Daily process taken off your week', function () { S.week = was; cdSave('week'); cdPaint(); });
   }
   $('cdCfProc').addEventListener('input', function () { cdPaintProc(); });
+  $('cdCfProc').addEventListener('blur', function () { setTimeout(cdPaintProc, 0); });
+  $('cdCfEd').addEventListener('click', function () {
+    var f = $('cdCfProc'); $('cdCfHi').classList.add('is-ed'); cdProcGrow(); f.focus(); f.setSelectionRange(f.value.length, f.value.length);
+  });
   $('cdCfProc').addEventListener('change', function () {
     S.cont.pt = this.value.slice(0, 3000); S.cont = cdContClean(S.cont); cdSave('cont'); cdProcApply(); cdPaintProc();
   });

@@ -5744,6 +5744,41 @@ apply comes with Undo, because a process typed over in a hurry is six
 blocks gone from every day at once. The days chips decide which days;
 `pt` and `pd` ride on `cad.cont.v1`.
 
+### Both sides on one page
+
+Asked for in so many words: the daily process inside Plan B, *to
+ensure my daily habits are aligning to my highest version of myself,
+and I can see both sides on one page.* So the process is no longer one
+section down a list. It leads the tab as a pair: **Highest version**
+on the left, the day as written, and **Today** on the right, the same
+steps read back against what has actually happened. Two boxes of one
+size on one row, which is this repo's own rule about side by side, and
+the gap between the two columns is the whole point of the screen.
+Protect today with the bad-day versions, and the if-then plans, are a
+second such row underneath. The sticky hero went: a figure for how
+many plans there are was the least important number on the page, and
+it rides the plans' own heading now.
+
+**TODAY IS THE DAY'S OWN RECORD, READ BACK.** Kept, Now, Ended, To
+come, Missed, worked out from the owned blocks on today and the same
+`MISS_AFTER` the day list waits before striking a block. Missed is
+struck in the quiet grey, never red. **Ended** is its own word because
+between a step's end and that half hour it has neither happened nor
+is still to come, and the first cut said To come there. A press ticks
+through `log`, the record the day's row writes, and a training step
+still asks what you trained.
+
+**THE WRITTEN DAY IS READ AS STEPS AND WRITTEN AS LINES**, one at a
+time. Field and list together were the same day twice, so the list is
+up with Edit beside it, and the field only while you type or while
+nothing is written yet. The field grows to its lines, because a
+scrolling box clipped the first step.
+
+**`.cf-steps li` is a grid, and the Today rows inherited it.** Each
+row's button landed in the 58px time column and every name came out a
+letter a line. Asserted as the names' own boxes, one line each and
+wider than 150px, and proved by putting the inherited grid back.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
