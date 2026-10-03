@@ -833,6 +833,13 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cf-ft { display: flex; align-items: center; gap: 8px; padding: 6px 10px 10px 16px; }
 .cf-tl { flex: 1; min-width: 0; font: 400 12.5px/1.2 var(--sans); color: var(--quiet); }
 .cf-mins .cd-row { grid-template-columns: 120px 1fr; }
+.cf-proc { min-height: 168px; font-variant-numeric: tabular-nums; }
+.cf-steps { list-style: none; margin: 10px 0 0; padding: 0; }
+.cf-steps li { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 10px; align-items: baseline; padding: 7px 2px; box-shadow: inset 0 1px 0 var(--hair); font: 400 15px/1.25 var(--sans); }
+.cf-steps li b { font: 500 13px/1.25 var(--mono); color: var(--dim); }
+.cf-steps li i { font-style: normal; font: 400 12.5px/1.25 var(--sans); color: var(--quiet); }
+.cf-steps li.is-bad { color: var(--quiet); }
+.cf-pd { margin-top: 12px; }
 .cf-mins .cd-row > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (min-width: 960px) {
   .cd-tab-pb { display: inline-block; }
@@ -938,6 +945,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
         <p class="cd-lbl cd-sec">If, then</p>
         <ul class="cf-list" id="cdCfPlans"></ul>
         <button class="cd-link" id="cdCfAdd" type="button">+ A plan</button>
+        <p class="cd-lbl cd-sec">Daily process</p>
+        <textarea class="cd-field cf-proc" id="cdCfProc" aria-label="Daily process, one step a line" placeholder="3:30am Wake up&#10;3:35am Shower&#10;4am Train"></textarea>
+        <ul class="cf-steps" id="cdCfSteps"></ul>
+        <div class="cd-chips days cf-pd" id="cdCfPd"></div>
         <p class="cd-lbl cd-sec">Bad-day versions</p>
         <div class="cd-rows cf-mins" id="cdCfMin"></div>
       </div>
@@ -1337,7 +1348,8 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       u.sort(function (a, b) { return a.d < b.d ? -1 : 1; });
       plans.push({ id: p.id, g: String(p.g || '').trim().slice(0, 60), i: i, t: t, u: u.slice(-200) });
     });
-    return { min: min, plans: plans.slice(0, 60) };
+    var pd = (Array.isArray(o.pd) ? o.pd : [0, 1, 2, 3, 4, 5, 6]).map(Number).filter(function (x, i, a) { return x >= 0 && x <= 6 && x % 1 === 0 && a.indexOf(x) === i; }).sort();
+    return { min: min, plans: plans.slice(0, 60), pt: typeof o.pt === 'string' ? o.pt.slice(0, 3000) : '', pd: pd };
   }
   /* A note is a list of BLOCKS: a title, a heading, a sub-heading, a
      line of body, a quote, or a picture. A line of text is a list of
@@ -4121,6 +4133,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       li.appendChild(ft);
       ul.appendChild(li);
     });
+    cdPaintProc();
     var mins = $('cdCfMin');
     if (!mins.contains(document.activeElement)) {
       mins.innerHTML = '';
@@ -4163,6 +4176,101 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   });
   $('cdCfMin').addEventListener('focusout', function () { setTimeout(function () { if (view === 'cont') cdPaintCont(); }, 0); });
   $('cdCfAdd').addEventListener('click', function () { cdContEdit(null); });
+
+  /* THE DAILY PROCESS IS WRITTEN HERE AND LIVES ON THE WEEK. One step a
+     line, the time anywhere in it, the way you would write it down. Each
+     step becomes a block on the days chosen, running until the next step
+     starts; the last runs an hour unless the line says how long. The
+     blocks are OWNED by the process — their ids start `pb_` and come off
+     the step's NAME, so moving a step's time keeps today's tick on it,
+     and a save rewrites every owned block and touches no other but one
+     of the same name, which it takes over. */
+  var PB_RE = /\b(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm)?\b/i;
+  function cdProcTime(m) {
+    var h = +m[1], mi = +(m[2] || 0), ap = (m[3] || '').toLowerCase();
+    if (!m[2] && !ap) return null;
+    if (h > 23 || mi > 59 || (ap && (h < 1 || h > 12))) return null;
+    if (ap === 'pm' && h < 12) h += 12;
+    if (ap === 'am' && h === 12) h = 0;
+    return h * 60 + mi;
+  }
+  function cdProcSteps(text) {
+    var out = [], seen = {};
+    String(text || '').split('\n').forEach(function (raw) {
+      var line = raw.trim(); if (!line) return;
+      var m = null, s = null, re = new RegExp(PB_RE.source, 'gi'), t;
+      while ((t = re.exec(line))) { var v = cdProcTime(t); if (v != null) { m = t; s = v; break; } }
+      if (s == null) { out.push({ bad: true, n: line }); return; }
+      var rest = (line.slice(0, m.index) + ' ' + line.slice(m.index + m[0].length));
+      var len = null, f = rest.match(/\bfor\s+(\d+(?:\.\d+)?)\s*(h|hr|hrs|hours?|m|min|mins|minutes?)\b/i);
+      if (f) { len = Math.round(+f[1] * (/^h/i.test(f[2]) ? 60 : 1)); rest = rest.replace(f[0], ' '); }
+      var n = rest.replace(/^\s*(?:at|[-–:·])\s*/i, '').replace(/\s+(?:at|[-–:·])\s*$/i, '').replace(/\s+/g, ' ').trim().slice(0, 60);
+      if (!n) { out.push({ bad: true, n: line }); return; }
+      var slug = n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30) || 'step', id = 'pb_' + slug, k = 2;
+      while (seen[id]) id = 'pb_' + slug + '-' + k++;
+      seen[id] = 1;
+      out.push({ id: id, n: n, s: s, len: len });
+    });
+    var good = out.filter(function (x) { return !x.bad; }).sort(function (a, b) { return a.s - b.s; });
+    good.forEach(function (x, i) {
+      var nx = good[i + 1];
+      var e = x.len != null ? x.s + x.len : nx && nx.s > x.s ? nx.s : x.s + 60;
+      x.e = Math.min(1440, Math.max(x.s, e));
+    });
+    return out;
+  }
+  function cdPaintProc() {
+    var C = S.cont, ul = $('cdCfSteps'), f = $('cdCfProc');
+    if (document.activeElement !== f && f.value !== C.pt) f.value = C.pt;
+    ul.innerHTML = '';
+    cdProcSteps(f.value).forEach(function (x) {
+      var li = el('li', x.bad ? 'is-bad' : '');
+      li.innerHTML = x.bad ? '<b>?</b><span>' + esc(x.n) + '</span><i>no time</i>'
+        : '<b>' + cdHM(x.s) + '</b><span>' + esc(x.n) + '</span><i>' + (x.e > x.s ? cdLen(x.e - x.s) : 'a moment') + '</i>';
+      ul.appendChild(li);
+    });
+    var pd = $('cdCfPd');
+    if (!pd.children.length) DOW.forEach(function (d, i) {
+      var c = el('button', 'cd-chip', d.slice(0, 2)); c.type = 'button'; c.dataset.i = i; c.setAttribute('aria-label', DOWL[i]);
+      pd.appendChild(c);
+    });
+    pd.querySelectorAll('.cd-chip').forEach(function (c) { c.setAttribute('aria-pressed', C.pd.indexOf(+c.dataset.i) >= 0); });
+  }
+  /* Owned blocks are rewritten whole and everything else is left alone;
+     the week from before is kept for Undo, because a process typed over
+     in a hurry is six blocks gone from every day at once. */
+  function cdProcApply() {
+    var C = S.cont, steps = cdProcSteps(C.pt).filter(function (x) { return !x.bad; });
+    var was = S.week.slice();
+    var mine = {}; was.forEach(function (b) { if (b.id.indexOf('pb_') === 0) mine[b.id] = b; });
+    /* A block you already had with a step's NAME is the same thing, so
+       the step takes it over rather than drawing it twice, keeping its
+       place and its reminder. Undo on the toast puts it back. */
+    var names = {}; steps.forEach(function (x) { names[x.n.toLowerCase()] = x.id; });
+    var next = was.filter(function (b) {
+      if (b.id.indexOf('pb_') === 0) return false;
+      var own = C.pd.length && names[b.n.toLowerCase()];
+      if (own) { if (!mine[own]) mine[own] = b; return false; }
+      return true;
+    });
+    if (C.pd.length) steps.forEach(function (x) {
+      var o = mine[x.id];
+      next.push(cdBlock({ id: x.id, n: x.n, d: C.pd, s: x.s, e: x.e, p: o ? o.p : '', r: o ? o.r : 0 }));
+    });
+    if (JSON.stringify(next) === JSON.stringify(was)) return;
+    S.week = next; cdSave('week');
+    cdToast(steps.length && C.pd.length ? 'Daily process: ' + steps.length + ' blocks on your week' : 'Daily process taken off your week', function () { S.week = was; cdSave('week'); cdPaint(); });
+  }
+  $('cdCfProc').addEventListener('input', function () { cdPaintProc(); });
+  $('cdCfProc').addEventListener('change', function () {
+    S.cont.pt = this.value.slice(0, 3000); S.cont = cdContClean(S.cont); cdSave('cont'); cdProcApply(); cdPaintProc();
+  });
+  $('cdCfPd').addEventListener('click', function (ev) {
+    var c = ev.target.closest('.cd-chip'); if (!c) return;
+    var i = +c.dataset.i, pd = S.cont.pd, k = pd.indexOf(i);
+    if (k >= 0) pd.splice(k, 1); else { pd.push(i); pd.sort(); }
+    cdSave('cont'); cdProcApply(); cdPaintProc();
+  });
   function cdContDel(p) {
     var at = S.cont.plans.indexOf(p); if (at < 0) return;
     S.cont.plans.splice(at, 1); cdSave('cont'); cdClose(); cdPaintCont();

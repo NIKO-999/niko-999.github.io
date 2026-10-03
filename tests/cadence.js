@@ -1903,7 +1903,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       localStorage.setItem('cad.cont.v1', JSON.stringify({ min: { mx: '  Two  ', zz: 5 }, plans: [{ id: 'p1', g: 'Run', i: 'It rains', t: 'Treadmill', u: [{ d: 'x' }, { d: '2026-09-24', ok: 1 }, { d: '2026-09-24', ok: 0 }] }, { id: 'p2', i: '' }, 'junk'] })); })();`;
     const { c, page, errs } = await ctx({ desk: { width: 1440, height: 900 }, init });
     const rep = await store(page, 'cad.cont.v1');
-    ok('a damaged plan B costs only what is damaged, and the repair is written back', JSON.stringify(rep) === JSON.stringify({ min: { mx: 'Two' }, plans: [{ id: 'p1', g: 'Run', i: 'It rains', t: 'Treadmill', u: [{ d: '2026-09-24', ok: 1 }] }] }), rep);
+    ok('a damaged plan B costs only what is damaged, and the repair is written back', JSON.stringify(rep) === JSON.stringify({ min: { mx: 'Two' }, plans: [{ id: 'p1', g: 'Run', i: 'It rains', t: 'Treadmill', u: [{ d: '2026-09-24', ok: 1 }] }], pt: '', pd: [0, 1, 2, 3, 4, 5, 6] }), rep);
     await page.click('.cd-tab[data-v="cont"]');
     await page.waitForTimeout(150);
     const v = await page.evaluate(() => ({ shown: !document.getElementById('cdVCont').hidden, others: ['cdVDay', 'cdVHab', 'cdVMon', 'cdVNote', 'cdVPlan'].filter((i) => !document.getElementById(i).hidden),
@@ -1948,6 +1948,41 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const nDel = (await store(page, 'cad.cont.v1')).plans.length;
     await page.evaluate(() => document.getElementById('cdToastU').click()); await page.waitForTimeout(100);
     ok('delete takes a plan off and Undo puts it back', nDel === 1 && (await store(page, 'cad.cont.v1')).plans.length === 2, nDel);
+    /* THE DAILY PROCESS: written as lines, laid on the week as blocks
+       the process owns, and rewritten whole on every save. */
+    {
+      const STEPS = ['wake up', 'shower', 'read book + 1l water', 'train', 'incline walk'];
+      const all0 = await store(page, 'cad.week.v1');
+      const before = all0.filter((b) => STEPS.indexOf(b.n.toLowerCase()) < 0);
+      const hadWake = all0.filter((b) => b.n === 'Wake up');
+      await page.fill('#cdCfProc', 'Wake up 5:10am\n5:15am Shower\n5:25am Read book + 1L water\n6am Train\n7am Incline walk for 30 mins\nno time here');
+      const prev = await page.$$eval('#cdCfSteps li', (ls) => ls.map((l) => l.textContent));
+      ok('the process reads as you type it, time anywhere on the line, a line with none flagged', prev.length === 6 && prev[0] === '05:10Wake up5m' && prev[2].indexOf('Read book + 1L water') > 0 && prev[3] === '06:00Train1h' && prev[4] === '07:00Incline walk30m' && /no time/.test(prev[5]), prev);
+      await page.$eval('#cdCfProc', (t) => t.blur());
+      await page.waitForTimeout(150);
+      let wk = await store(page, 'cad.week.v1');
+      const pb = wk.filter((b) => b.id.indexOf('pb_') === 0).sort((x, y) => x.s - y.s);
+      ok('each step becomes a block on every day, running until the next', pb.map((b) => b.n + '@' + b.s + '-' + b.e).join('|') === 'Wake up@310-315|Shower@315-325|Read book + 1L water@325-360|Train@360-420|Incline walk@420-450' && pb.every((b) => b.d.join() === '0,1,2,3,4,5,6'), pb);
+      ok('the rest of the week is untouched by it', JSON.stringify(wk.filter((b) => b.id.indexOf('pb_') !== 0)) === JSON.stringify(before));
+      ok('a block you already had by a step\'s name is taken over, never drawn twice', hadWake.length === 1 && wk.filter((b) => b.n === 'Wake up').length === 1, { hadWake: hadWake.length });
+      ok('a toast says so, with an Undo', (await page.textContent('#cdToastT')) === 'Daily process: 5 blocks on your week' && !(await page.$eval('#cdToastU', (b) => b.hidden)));
+      /* Moving a step keeps its block's id, so today's tick stays on it. */
+      await page.fill('#cdCfProc', 'Wake up 5:00am\n5:15am Shower\n5:25am Read book + 1L water\n6am Train\n7am Incline walk for 30 mins');
+      await page.$eval('#cdCfProc', (t) => t.blur()); await page.waitForTimeout(150);
+      wk = await store(page, 'cad.week.v1');
+      const wake = wk.filter((b) => b.n === 'Wake up');
+      ok('moving a step moves its block and keeps its id', wake.length === 1 && wake[0].s === 300 && wake[0].e === 315 && wake[0].id === pb[0].id, wake);
+      await page.click('#cdCfPd .cd-chip[data-i="6"]'); await page.waitForTimeout(100);
+      wk = await store(page, 'cad.week.v1');
+      ok('a day taken off the process comes off every one of its blocks', wk.filter((b) => b.id.indexOf('pb_') === 0).every((b) => b.d.join() === '0,1,2,3,4,5') && (await store(page, 'cad.cont.v1')).pd.join() === '0,1,2,3,4,5');
+      await page.evaluate(() => document.getElementById('cdToastU').click()); await page.waitForTimeout(100);
+      ok('...and Undo puts the week back', (await store(page, 'cad.week.v1')).filter((b) => b.id.indexOf('pb_') === 0).every((b) => b.d.length === 7));
+      await page.click('#cdCfPd .cd-chip[data-i="6"]'); await page.waitForTimeout(100);
+      await page.click('#cdCfPd .cd-chip[data-i="6"]'); await page.waitForTimeout(100);
+      await page.fill('#cdCfProc', ''); await page.$eval('#cdCfProc', (t) => t.blur()); await page.waitForTimeout(150);
+      ok('clearing the process takes its blocks off and nothing else', JSON.stringify(await store(page, 'cad.week.v1')) === JSON.stringify(before));
+      await page.evaluate(() => document.getElementById('cdToastU').click()); await page.waitForTimeout(100);
+    }
     ok('no page errors on plan B', errs.length === 0, errs);
     await c.close();
   }

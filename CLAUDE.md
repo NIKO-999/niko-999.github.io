@@ -5721,6 +5721,29 @@ written down so it is there when you need it; whether doing it keeps
 the streak was left alone, because that changes what every habit
 figure in the app means.
 
+### Plan B carries the daily process, and it lands on the week
+
+Asked for in one line: a daily process in Plan B that *translates over
+to my task, automatically*. **Lines, not a form**: one step a line with
+the time anywhere in it, the way it is written down — `3:30am Wake up`,
+`Read book + 1L water 3:45am`. A bare number is not a time (`1L` is
+water), so a time needs a colon or an am/pm, and the first one on the
+line that reads as a time is it. A line with no time is drawn as such
+and skipped.
+
+**A step runs until the next one starts**, and the last runs an hour
+unless the line says `for 30 mins`. The preview under the field shows
+exactly that before anything is saved.
+
+**THE BLOCKS ARE OWNED BY THE PROCESS.** Their ids start `pb_` and come
+off the step's NAME, never its position or time, so moving a step keeps
+today's tick on its block. Leaving the field rewrites every owned block
+and nothing else — except a block you already had with a step's name,
+which the step takes over rather than drawing the thing twice. Every
+apply comes with Undo, because a process typed over in a hurry is six
+blocks gone from every day at once. The days chips decide which days;
+`pt` and `pd` ride on `cad.cont.v1`.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
