@@ -869,9 +869,23 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cf-today .is-past button span { text-decoration: line-through; color: var(--quiet); }
 .cf-today .is-done button em { color: var(--c); }
 .cf-mins .cd-row > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* WHO HE IS reads as statements, written as lines; the field and the
+   list are the same words twice, so only one is up at a time, the way
+   the daily process beside it already works. */
+#cdHsWho.is-ed .hs-him, #cdHsWho.is-ed #cdHsEd, #cdHsWho:not(.is-ed) #cdHsHim { display: none; }
+#cdHsHim { min-height: 140px; overflow: hidden; resize: none; }
+.hs-him { list-style: none; margin: 0; padding: 0; }
+.hs-him li { padding: 8px 2px; box-shadow: inset 0 1px 0 var(--hair); font: 300 17px/1.35 var(--sans); overflow-wrap: anywhere; }
+.hs-him li:first-child { box-shadow: none; }
+.hs-strip { display: grid; grid-template-columns: repeat(15, minmax(0, 1fr)); gap: 14px 0; margin-top: 22px; justify-items: center; }
+.hs-strip i { width: 10px; height: 10px; border-radius: 50%; background: var(--nil); }
+.hs-strip i[data-state="part"] { background: var(--quiet); }
+.hs-strip i[data-state="whole"] { background: var(--ink); box-shadow: 0 0 8px rgba(243, 245, 247, .55); }
+.hs-strip i[data-state="none"] { background: none; box-shadow: inset 0 0 0 1.4px var(--miss); }
+.hs-strip i.is-today { outline: 3px solid rgba(243, 245, 247, .16); outline-offset: 2px; }
 @media (min-width: 960px) {
   .cd-tab-pb { display: inline-block; }
-  #cdVCont > .cd-pane { display: block; padding: 0 40px 40px; }
+  #cdVCont > .cd-pane, #cdVSelf > .cd-pane { display: block; padding: 0 40px 40px; }
   .cd-tab-plan { display: inline-block; }
   .cd-app.is-plan { max-width: 1440px; }
 }
@@ -892,6 +906,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       <button class="cd-tab" data-v="mon" type="button">Month</button>
       <button class="cd-tab" data-v="note" type="button">Notes</button>
       <button class="cd-tab cd-tab-plan" data-v="plan" type="button">Plan</button>
+      <button class="cd-tab cd-tab-pb" data-v="self" type="button">Higher self</button>
       <button class="cd-tab cd-tab-pb" data-v="cont" type="button">Plan B</button>
     </nav>
     <button class="cd-plus" id="cdAdd" type="button" aria-label="Add a block"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -962,8 +977,22 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
         <div id="cdNotes"></div>
       </div>
     </section>
-    <section id="cdVCont" aria-label="Plan B" hidden>
+    <section id="cdVSelf" aria-label="Higher self" hidden>
       <div class="cd-pane">
+        <div class="cf-two">
+          <div class="cf-side" id="cdHsWho">
+            <p class="cd-hcap">Who he is</p>
+            <textarea class="cd-field cf-proc" id="cdHsHim" aria-label="Who your higher self is, one line each" placeholder="He wakes at 3:30&#10;He trains every morning"></textarea>
+            <ul class="hs-him" id="cdHsList"></ul>
+            <button class="cd-link" id="cdHsEd" type="button">Edit</button>
+          </div>
+          <div class="cf-side" id="cdHsDays">
+            <p class="cd-hcap">Days lived as him</p>
+            <p class="cd-big" id="cdHsN"></p>
+            <p class="cd-hs" id="cdHsCap"></p>
+            <div class="hs-strip" id="cdHsStrip" role="img"></div>
+          </div>
+        </div>
         <div class="cf-two">
           <div class="cf-side" id="cdCfHi">
             <p class="cd-hcap">Highest version</p>
@@ -979,6 +1008,10 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
             <ul class="cf-steps cf-today" id="cdCfToday"></ul>
           </div>
         </div>
+      </div>
+    </section>
+    <section id="cdVCont" aria-label="Plan B" hidden>
+      <div class="cd-pane">
         <div class="cf-two">
           <div class="cf-side">
             <p class="cd-lbl cd-sec" id="cdCfProtL">Protect today</p>
@@ -1391,7 +1424,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       plans.push({ id: p.id, g: String(p.g || '').trim().slice(0, 60), i: i, t: t, u: u.slice(-200) });
     });
     var pd = (Array.isArray(o.pd) ? o.pd : [0, 1, 2, 3, 4, 5, 6]).map(Number).filter(function (x, i, a) { return x >= 0 && x <= 6 && x % 1 === 0 && a.indexOf(x) === i; }).sort();
-    return { min: min, plans: plans.slice(0, 60), pt: typeof o.pt === 'string' ? o.pt.slice(0, 3000) : '', pd: pd };
+    var pt = typeof o.pt === 'string' ? o.pt.slice(0, 3000) : '';
+    return { min: min, plans: plans.slice(0, 60), pt: pt, pd: pd, him: typeof o.him === 'string' ? o.him.slice(0, 2000) : '',
+      ps: pt.trim() && typeof o.ps === 'string' && ISO.test(o.ps) ? o.ps : '' };
   }
   /* A note is a list of BLOCKS: a title, a heading, a sub-heading, a
      line of body, a quote, or a picture. A line of text is a list of
@@ -1610,6 +1645,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     $('cdVNote').hidden = v !== 'note';
     $('cdVPlan').hidden = v !== 'plan';
     $('cdVCont').hidden = v !== 'cont';
+    $('cdVSelf').hidden = v !== 'self';
     document.querySelector('.cd-app').classList.toggle('is-plan', v === 'plan');
     document.querySelectorAll('.cd-tab').forEach(function (t) {
       if (t.dataset.v === v) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
@@ -1624,6 +1660,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     else if (view === 'mon') cdPaintMon();
     else if (view === 'plan') cdPaintPlan();
     else if (view === 'cont') cdPaintCont();
+    else if (view === 'self') cdPaintSelf();
     else cdPaintNotes();
   }
   function cdLongDate(iso, withDay) {
@@ -4047,7 +4084,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); cdPlanEdit(b); }
     else if (ev.key === 'Delete' || ev.key === 'Backspace') { ev.preventDefault(); cdPlanDel(b); }
   });
-  PLAN_MQ.addEventListener('change', function () { if (!PLAN_MQ.matches && (view === 'plan' || view === 'cont')) cdGo('day'); });
+  PLAN_MQ.addEventListener('change', function () { if (!PLAN_MQ.matches && (view === 'plan' || view === 'cont' || view === 'self')) cdGo('day'); });
   function cdPlanDel(b) {
     var at = S.plan.indexOf(b); if (at < 0) return;
     S.plan.splice(at, 1); cdSave('plan'); cdClose(); cdPaintPlan();
@@ -4175,7 +4212,6 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       li.appendChild(ft);
       ul.appendChild(li);
     });
-    cdPaintProc();
     var mins = $('cdCfMin');
     if (!mins.contains(document.activeElement)) {
       mins.innerHTML = '';
@@ -4315,13 +4351,13 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var was = cdDone(t, id);
     cdSetFlag('log', t, id, !was);
     if (was && S.train[t] && S.train[t][id]) { delete S.train[t][id]; if (!Object.keys(S.train[t]).length) delete S.train[t]; cdSave('train'); }
-    cdPaintCont();
+    cdPaintSelf();
     if (!was && TRAINING[cdKind(b.n)]) cdLiftSheet(t, id, b.n);
   });
   /* Owned blocks are rewritten whole and everything else is left alone;
      the week from before is kept for Undo, because a process typed over
      in a hurry is six blocks gone from every day at once. */
-  function cdProcApply() {
+  function cdProcApply(quiet) {
     var C = S.cont, steps = cdProcSteps(C.pt).filter(function (x) { return !x.bad; });
     var was = S.week.slice();
     var mine = {}; was.forEach(function (b) { if (b.id.indexOf('pb_') === 0) mine[b.id] = b; });
@@ -4339,8 +4375,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       var o = mine[x.id];
       next.push(cdBlock({ id: x.id, n: x.n, d: C.pd, s: x.s, e: x.e, p: o ? o.p : '', r: o ? o.r : 0 }));
     });
-    if (JSON.stringify(next) === JSON.stringify(was)) return;
+    if (JSON.stringify(next) === JSON.stringify(was)) return null;
     S.week = next; cdSave('week');
+    if (quiet) return was;
     cdToast(steps.length && C.pd.length ? 'Daily process: ' + steps.length + ' blocks on your week' : 'Daily process taken off your week', function () { S.week = was; cdSave('week'); cdPaint(); });
   }
   $('cdCfProc').addEventListener('input', function () { cdPaintProc(); });
@@ -4349,7 +4386,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     var f = $('cdCfProc'); $('cdCfHi').classList.add('is-ed'); cdProcGrow(); f.focus(); f.setSelectionRange(f.value.length, f.value.length);
   });
   $('cdCfProc').addEventListener('change', function () {
-    S.cont.pt = this.value.slice(0, 3000); S.cont = cdContClean(S.cont); cdSave('cont'); cdProcApply(); cdPaintProc();
+    S.cont.pt = this.value.slice(0, 3000); if (S.cont.pt.trim() && !S.cont.ps) S.cont.ps = cdToday(); S.cont = cdContClean(S.cont); cdSave('cont'); cdProcApply(); cdPaintProc();
   });
   $('cdCfPd').addEventListener('click', function (ev) {
     var c = ev.target.closest('.cd-chip'); if (!c) return;
@@ -4357,6 +4394,95 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     if (k >= 0) pd.splice(k, 1); else { pd.push(i); pd.sort(); }
     cdSave('cont'); cdProcApply(); cdPaintProc();
   });
+
+  /* WHO HE IS, AND WHETHER TODAY WAS HIM. The higher self is written as
+     who he is rather than where he is: a villa is an outcome and a date,
+     and a screen that measured you against it would grade every day you
+     are not there yet. What this counts instead is the one thing that
+     moves you towards it — days on which you did everything he does.
+     A day is lived as him when every step of the daily process on it is
+     kept; part of it is a quieter dot, none is a hollow one, and a day
+     before the process existed, or still ahead, makes no claim at all. */
+  function cdSelfDay(iso) {
+    var list = cdOn(iso).filter(function (b) { return b.id.indexOf('pb_') === 0; });
+    return { n: list.length, k: list.filter(function (b) { return cdDone(iso, b.id); }).length };
+  }
+  /* A process written before the start was recorded starts on the first
+     day anything it owns was ticked, or today: the record cannot invent
+     days you were never measured on. Written back, so it is decided once. */
+  function cdSelfStart() {
+    var C = S.cont, t = cdToday();
+    if (!C.pt.trim()) return '';
+    if (C.ps) return C.ps;
+    var first = t;
+    Object.keys(S.log || {}).forEach(function (d) {
+      if (ISO.test(d) && d < first && Object.keys(S.log[d] || {}).some(function (id) { return id.indexOf('pb_') === 0; })) first = d;
+    });
+    C.ps = first; cdSave('cont');
+    return first;
+  }
+  function cdPaintSelf() {
+    if (!PLAN_MQ.matches) { cdGo('day'); return; }
+    var C = S.cont, t = cdToday(), ps = cdSelfStart();
+    var f = $('cdHsHim'), ed = document.activeElement === f;
+    if (!ed && f.value !== C.him) f.value = C.him;
+    $('cdHsWho').classList.toggle('is-ed', ed || !C.him.trim());
+    if (ed || !C.him.trim()) { f.style.height = 'auto'; f.style.height = f.scrollHeight + 'px'; }
+    $('cdHsList').innerHTML = C.him.split('\n').map(function (x) { return x.trim(); }).filter(Boolean)
+      .map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('');
+    var strip = $('cdHsStrip'), lived = 0, counted = 0, run = 0, broke = false, html = '';
+    for (var i = 29; i >= 0; i--) {
+      var d = cdAddDays(t, -i), x = cdSelfDay(d), st;
+      if (!ps || d < ps || !x.n) st = 'nil';
+      else if (x.k === x.n) st = 'whole';
+      else if (d === t) st = x.k ? 'part' : 'nil';
+      else st = x.k ? 'part' : 'none';
+      if (st === 'whole') lived++;
+      if (st === 'whole' || st === 'part' || st === 'none' || (d === t && ps && d >= ps && x.n)) counted++;
+      html += '<i data-d="' + d + '" data-state="' + st + '"' + (d === t ? ' class="is-today"' : '') + '></i>';
+    }
+    for (var j = 0; j < 400; j++) {
+      var dd = cdAddDays(t, -j), y = cdSelfDay(dd);
+      if (!ps || dd < ps) break;
+      if (!y.n) continue;
+      if (y.k === y.n) run++;
+      else if (dd === t) continue;
+      else break;
+    }
+    strip.innerHTML = html;
+    $('cdHsN').textContent = ps ? lived + ' / ' + counted : '—';
+    $('cdHsCap').textContent = !ps ? 'write the day he lives to start counting'
+      : counted > 1 ? 'of the last ' + counted + ' days lived as him' + (run > 1 ? ' · ' + run + ' in a row' : '') : 'day one';
+    strip.setAttribute('aria-label', ps ? lived + ' of the last ' + counted + ' days lived as him' : 'no days counted yet');
+    cdPaintProc();
+  }
+  $('cdHsHim').addEventListener('input', function () { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; });
+  $('cdHsHim').addEventListener('change', function () { S.cont.him = this.value.slice(0, 2000); cdSave('cont'); });
+  $('cdHsHim').addEventListener('blur', function () { setTimeout(function () { if (view === 'self') cdPaintSelf(); }, 0); });
+  $('cdHsEd').addEventListener('click', function () {
+    var f = $('cdHsHim'); $('cdHsWho').classList.add('is-ed'); f.style.height = 'auto'; f.style.height = f.scrollHeight + 'px';
+    f.focus(); f.setSelectionRange(f.value.length, f.value.length);
+  });
+  /* A HIGHER SELF CAN ARRIVE AS A LINK. Who he is and the day he lives
+     are the most personal lines in this app, and this repository is
+     public, so they are never written into the code: they travel as the
+     fragment of a link, which never leaves the browser, are read once
+     and stripped from the bar. What it replaces comes back on Undo. */
+  function cdSelfLoad(o) {
+    if (!isObj(o)) return false;
+    var was = JSON.parse(JSON.stringify(S.cont));
+    if (typeof o.h === 'string') S.cont.him = o.h;
+    if (typeof o.p === 'string') { S.cont.pt = o.p; if (o.p.trim() && !S.cont.ps) S.cont.ps = cdToday(); }
+    if (Array.isArray(o.d)) S.cont.pd = o.d;
+    S.cont = cdContClean(S.cont); cdSave('cont');
+    var wk = cdProcApply(true);
+    cdToast('Your higher self is in', function () {
+      S.cont = was; cdSave('cont');
+      if (wk) { S.week = wk; cdSave('week'); }
+      cdPaint();
+    });
+    return true;
+  }
   function cdContDel(p) {
     var at = S.cont.plans.indexOf(p); if (at < 0) return;
     S.cont.plans.splice(at, 1); cdSave('cont'); cdClose(); cdPaintCont();
@@ -4769,16 +4895,27 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     sel = m[1]; cdGo('day');
     setTimeout(function () { cdAskDone(m[2], m[1]); }, 60);
   }
-  var bootTick = /^#tick=(.+)$/.exec(location.hash);
-  if (bootTick) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} }
+  var bootTick = /^#tick=(.+)$/.exec(location.hash), bootSelf = /^#self=(.+)$/.exec(location.hash), selfIn = null;
+  if (bootTick || bootSelf) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} }
+  if (bootSelf) { try { selfIn = JSON.parse(decodeURIComponent(bootSelf[1])); } catch (e) {} }
+  /* A link opened into a tab the app is already up in changes only the
+     hash and loads nothing, so the same fragment is heard there too. */
+  window.addEventListener('hashchange', function () {
+    var m = /^#self=(.+)$/.exec(location.hash), o = null;
+    if (!m) return;
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+    try { o = JSON.parse(decodeURIComponent(m[1])); } catch (e) {}
+    if (o && cdSelfLoad(o)) { if (PLAN_MQ.matches) cdGo('self'); else cdPaint(); }
+  });
   if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', function (e) {
     if (e.data && typeof e.data.tick === 'string') cdTickFrom(e.data.tick);
   });
 
   var sv = 'day';
   try { sv = sessionStorage.getItem('cad.view') || 'day'; } catch (e) {}
-  if ((sv === 'plan' || sv === 'cont') && !PLAN_MQ.matches) sv = 'day';
-  cdGo(['day', 'hab', 'mon', 'note', 'plan', 'cont'].indexOf(sv) >= 0 ? sv : 'day');
+  if ((sv === 'plan' || sv === 'cont' || sv === 'self') && !PLAN_MQ.matches) sv = 'day';
+  if (selfIn && cdSelfLoad(selfIn) && PLAN_MQ.matches) sv = 'self';
+  cdGo(['day', 'hab', 'mon', 'note', 'plan', 'cont', 'self'].indexOf(sv) >= 0 ? sv : 'day');
   /* The first open of a date shows its thought, after the screen has
      painted so the card comes up over the day rather than over nothing. */
   var rt = cdToday();

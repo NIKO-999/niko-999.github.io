@@ -5779,6 +5779,43 @@ row's button landed in the 58px time column and every name came out a
 letter a line. Asserted as the names' own boxes, one line each and
 wider than 150px, and proved by putting the inherited grid back.
 
+### Higher self is its own tab, and Plan B is the contingency alone
+
+Asked for as *what is my higher self doing, and am I aligning my daily
+process with it*, with the decision left here. **Its own desktop tab**,
+beside Plan B rather than inside it: Plan B answers what happens when a
+day goes wrong, mostly in business and trading, and this answers what
+an ordinary day looks like when it goes right. Two questions on one
+screen is the duplication this project keeps taking out. The daily
+process and Today moved with it, and Plan B kept Protect today and the
+if-then plans.
+
+**WHO HE IS, NEVER WHERE HE IS.** A villa in four months is an outcome
+and a date, and a screen measured against it grades every day you are
+not there yet. So the identity is statements in the present tense, and
+the figure beside them counts **days lived as him**: a day on which
+every step of the daily process was kept. Part of one is a quieter dot,
+none is a hollow one, and a day before the process existed makes no
+claim, which is the record's oldest rule. Today counts in the
+denominator from the first minute and in the figure only once it is
+whole, because today is not over.
+
+**THE RECORD STARTS WHEN THE PROCESS IS WRITTEN.** `ps` on
+`cad.cont.v1`, set the first time `pt` has words, and dropped when it is
+cleared. A process written before this shipped starts on the first day
+any of its blocks was ticked, written back once.
+
+**THE LINES ARE PERSONAL AND THIS REPOSITORY IS PUBLIC**, so nobody's
+higher self is written into the code. It arrives as a link: `#self=`
+and a URL-encoded `{ h, p, d }`, read once at boot or on a hash change
+(a link opened into a tab already on the app changes only the hash),
+stripped from the bar, and undone by the toast's Undo with the week as
+it was. A fragment never leaves the browser.
+
+**Asserted** as the tab's four headings, the two rows of equal boxes,
+the strip's four states on one fixture, the link filling, stripping and
+undoing, a broken link changing nothing, and no tab on a phone.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
