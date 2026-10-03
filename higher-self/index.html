@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Higher Self</title>
+<meta name="description" content="My non-negotiables, my vision, and the evidence that I am living as my higher self.">
+<!-- Installable app (PWA) -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#150f0b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Higher Self">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<!-- /PWA -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Inter:wght@300;400;500;600&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Night room — warm walls, amber LED, split-flap clock ---------- */
+  :root {
+    color-scheme: dark;
+    --bg: #140e0a;
+    --cream: #ece4d8;                  /* warm off-white */
+    --text: #d8cfc2;
+    --dim: #9a8c7c;
+    --faint: #66594c;
+    --hair: rgba(255,214,170,.12);
+    --amber: #f2b36b;                  /* LED strip */
+    --amber-glow: rgba(255,170,90,.45);
+    --flap: #c9c5bf;                   /* clock digits */
+    --red: #e5484d;
+    --display: "Inter Tight", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --clock: "Oswald", "DIN Condensed", "Bebas Neue", "Helvetica Neue", sans-serif;
+    --font: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  html { background: #150f0b; }
+  body {
+    background:
+      radial-gradient(70% 22% at 50% 37%, rgba(255,168,88,.16), transparent 70%),
+      radial-gradient(60% 40% at 50% -5%, rgba(255,214,170,.07), transparent 70%),
+      radial-gradient(120% 60% at 50% 120%, rgba(150,95,55,.22), transparent 60%),
+      linear-gradient(180deg, #2a2017 0%, #1e1610 38%, #150f0b 70%, #1a120c 100%);
+    background-attachment: fixed;
+    color: var(--text); font-family: var(--font); font-size: 12.5px; line-height: 1.55; font-weight: 400;
+    -webkit-font-smoothing: antialiased; min-height: 100vh;
+  }
+  button, textarea { font: inherit; color: inherit; }
+  textarea { background: transparent; border: 0; outline: none; resize: none; width: 100%; }
+  ::placeholder { color: var(--faint); }
+  [hidden] { display: none !important; }
+
+  .app { max-width: 1120px; margin: 0 auto; padding: 72px 40px 120px; }
+  .app > header, .app > main, .app > .hero { max-width: 820px; }
+
+  /* Header: title in the content column, like "Film Series" */
+  header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 44px; }
+  .head-left { display: flex; align-items: flex-end; gap: 28px; }
+  .meta-left { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--dim); line-height: 1.9; }
+  .meta-left b { color: var(--cream); font-weight: 600; }
+  .title { font-family: var(--display); font-weight: 600; font-size: 26px; letter-spacing: -.03em; color: var(--cream); line-height: 1; }
+  nav.links { display: flex; gap: 22px; }
+  nav.links button { border: 0; background: none; padding: 0 0 3px; cursor: pointer; color: var(--dim);
+    font-size: 9.5px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; border-bottom: 1px solid transparent; }
+  nav.links button:hover { color: var(--cream); }
+  nav.links button.on { color: var(--cream); border-bottom-color: var(--amber); box-shadow: 0 6px 12px -8px var(--amber-glow); }
+
+  /* Split-flap clock + LED strip */
+  .hero { position: relative; padding: 34px 0 0; margin-bottom: 40px; text-align: center; }
+  .clock { display: inline-flex; align-items: flex-end; gap: 22px; font-family: var(--clock); font-weight: 600; color: var(--flap); line-height: .82;
+    filter: drop-shadow(0 16px 22px rgba(0,0,0,.45)); }
+  .clock .ampm { font-family: var(--font); font-size: 11px; font-weight: 600; letter-spacing: .14em; color: var(--flap); opacity: .85; margin-right: -6px; padding-bottom: 6px; }
+  .clock .d { position: relative; font-size: 132px; letter-spacing: -.01em; line-height: 1.2; --seam: 53%; }
+  /* split-flap seam: a real gap cut through the digits, so the wall shows through */
+  .clock .d { -webkit-mask-image: linear-gradient(180deg, #000 calc(var(--seam) - 1.5px), transparent calc(var(--seam) - 1.5px), transparent calc(var(--seam) + 1.5px), #000 calc(var(--seam) + 1.5px));
+              mask-image: linear-gradient(180deg, #000 calc(var(--seam) - 1.5px), transparent calc(var(--seam) - 1.5px), transparent calc(var(--seam) + 1.5px), #000 calc(var(--seam) + 1.5px)); }
+  .clock .m { margin-left: 26px; }
+  .led { height: 2px; margin: 46px 0 0; background: linear-gradient(90deg, transparent, var(--amber) 12%, #ffd6a0 50%, var(--amber) 88%, transparent);
+    box-shadow: 0 0 18px 2px var(--amber-glow), 0 -10px 60px 10px rgba(255,160,80,.18); border-radius: 2px; }
+
+  /* Rows */
+  .row { border-top: 1px solid var(--hair); }
+  .row:last-child { border-bottom: 1px solid var(--hair); }
+  .body { padding: 16px 0 20px; min-width: 0; }
+  .cap { font-size: 9.5px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--amber); margin-bottom: 7px; display: flex; justify-content: space-between; gap: 6px 16px; flex-wrap: wrap; }
+  .cap em { font-style: normal; color: var(--dim); font-weight: 500; }
+  .lines { margin: 0; padding: 0; list-style: none; }
+  /* Each line is its own statement: an LED tick mark on the left, a hairline between */
+  .lines li, ol.rules li { position: relative; color: var(--text); padding: 9px 0 9px 22px; line-height: 1.5; }
+  .lines li + li, ol.rules li + li { border-top: 1px solid rgba(255,214,170,.07); }
+  .lines li::before, ol.rules li::before { content: ""; position: absolute; left: 0; top: 1.05em; width: 10px; height: 2px; border-radius: 2px;
+    background: var(--amber); box-shadow: 0 0 6px var(--amber-glow); opacity: .85; }
+  .lead { font-family: var(--display); color: var(--cream); font-size: 17px; letter-spacing: -.015em; line-height: 1.35; margin: 2px 0 10px; max-width: 560px; }
+  .muted { color: var(--dim); }
+  /* Alignment: starts white and fades into the LED amber, with the same glow */
+  .lead.glow { color: var(--amber); background: linear-gradient(100deg, #fbf6ee 0%, #f6dcb4 35%, var(--amber) 75%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px rgba(255,170,90,.35)) drop-shadow(0 0 26px rgba(255,160,80,.18)); }
+
+  /* Tasks */
+  .task { display: grid; grid-template-columns: 72px 1fr auto 30px; gap: 14px; align-items: center; padding: 3px 0; }
+  .task .t { white-space: nowrap; color: var(--faint); font-variant-numeric: tabular-nums; font-size: 11.5px; }
+  .task .n { color: var(--text); }
+  .task .s { font-size: 9px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--faint); }
+  .task.done .n { color: var(--dim); }
+  /* Tick = a short LED bar: unlit when open, glowing amber when done, red when missed */
+  .tick { width: 30px; height: 22px; border: 0; background: none; padding: 0; cursor: pointer; position: relative; display: grid; place-items: center; }
+  .tick::before { content: ""; width: 26px; height: 4px; border-radius: 4px; background: rgba(255,214,170,.14); box-shadow: inset 0 0 0 1px rgba(255,214,170,.12); transition: background .25s, box-shadow .25s; }
+  .tick:hover:not(:disabled)::before, .tick:focus-visible::before { background: rgba(242,179,107,.35); }
+  .tick:focus-visible { outline: none; }
+  .tick:disabled { cursor: default; }
+  .task.done .tick::before { background: linear-gradient(90deg, var(--amber), #ffd6a0 50%, var(--amber)); box-shadow: 0 0 10px 1px var(--amber-glow), 0 0 22px 2px rgba(255,160,80,.25); }
+  .task.missed .tick::before { background: rgba(229,72,77,.75); box-shadow: 0 0 8px rgba(229,72,77,.4); }
+  .task.missed .n { color: var(--dim); text-decoration: line-through; text-decoration-color: rgba(255,255,255,.3); }
+  .task.missed .s { color: var(--red); }
+
+  /* Underline fields + text-link buttons */
+  .account { display: grid; grid-template-columns: 1fr 1fr auto; gap: 18px; align-items: end; margin: 4px 0 10px 86px; }
+  .account.ro { grid-template-columns: 1fr 1fr; }
+  .field { border-bottom: 1px solid var(--hair); padding: 4px 0; }
+  .field:focus-within { border-color: var(--amber); }
+  .field .k { font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--dim); margin-bottom: 2px; }
+  .field textarea { min-height: 19px; line-height: 1.5; font-size: 12.5px; }
+  .field.ro { border-bottom-color: transparent; }
+  .link { border: 0; background: none; padding: 0 0 3px; cursor: pointer; color: var(--cream); border-bottom: 1px solid var(--amber);
+    font-size: 9.5px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; white-space: nowrap; }
+  .link:disabled { opacity: .3; cursor: default; }
+  .link.red { color: var(--red); border-bottom-color: var(--red); }
+  .seal-row { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; }
+  .hint { font-size: 12px; color: var(--faint); }
+  .close-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin: 6px 0 22px; max-width: 620px; }
+  .close-grid textarea { min-height: 40px; }
+
+  /* Evidence */
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  /* Reminder cards */
+  .toasts { position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 10px; z-index: 30; width: min(340px, calc(100vw - 32px)); }
+  .toast { background: rgba(30,22,16,.94); border: 1px solid rgba(242,179,107,.35); border-radius: 12px; padding: 14px 16px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 0 24px -6px var(--amber-glow), 0 18px 40px rgba(0,0,0,.5); animation: rise .3s ease; }
+  .toast-k { font-size: 9.5px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--amber); }
+  .toast-m { color: var(--cream); font-size: 14px; margin: 4px 0 12px; }
+  .toast-a { display: flex; gap: 18px; }
+  .muted-link { color: var(--dim); border-bottom-color: var(--hair); }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+  @media (max-width: 720px) { .toasts { left: 16px; right: 16px; width: auto; } }
+
+  /* Settings */
+  .set-label { font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
+  .day-pick { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .dp { border: 1px solid var(--hair); background: none; color: var(--dim); border-radius: 999px; padding: 6px 12px; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
+  .dp:hover, .dp:focus-visible { border-color: var(--amber); color: var(--cream); outline: none; }
+  .dp.on { background: rgba(242,179,107,.16); border-color: var(--amber); color: var(--amber); }
+  .set-times { display: grid; grid-template-columns: repeat(2, minmax(0, 160px)); gap: 22px; margin-bottom: 22px; }
+  .set-times input { background: transparent; border: 0; outline: none; color: var(--cream); font: inherit; font-size: 15px; padding: 2px 0; width: 100%; }
+  .set-times input::-webkit-calendar-picker-indicator { filter: invert(.75) sepia(.6); opacity: .7; }
+
+  /* Evidence calendar */
+  .cal { text-align: center; padding: 0 0 36px; }
+  .cal-top { margin-bottom: -14px; }
+  .cal-year { font-size: 15px; font-weight: 500; letter-spacing: .3em; color: var(--dim); }
+  .cal-head { display: grid; grid-template-columns: 64px minmax(0, 1fr) 64px; align-items: center; margin: 2px 0 6px; }
+  /* Month set like the clock: split-flap letters with the wall showing through the seam */
+  .cal-month { margin: 0; font-family: var(--clock); font-weight: 600; font-size: clamp(52px, 11vw, 112px); letter-spacing: .01em; line-height: 1.2;
+    text-transform: uppercase; color: var(--flap); --seam: 64%; filter: drop-shadow(0 16px 22px rgba(0,0,0,.45));
+    -webkit-mask-image: linear-gradient(180deg, #000 calc(var(--seam) - 1.5px), transparent calc(var(--seam) - 1.5px), transparent calc(var(--seam) + 1.5px), #000 calc(var(--seam) + 1.5px));
+            mask-image: linear-gradient(180deg, #000 calc(var(--seam) - 1.5px), transparent calc(var(--seam) - 1.5px), transparent calc(var(--seam) + 1.5px), #000 calc(var(--seam) + 1.5px)); }
+  .cal-nav { justify-self: center; width: 56px; height: 56px; border-radius: 50%; border: 1px solid transparent; background: none; color: var(--text); font-size: 30px; line-height: 1; cursor: pointer; padding: 0 0 4px; }
+  .cal-nav.ring-btn { border-color: var(--hair); }
+  .cal-nav:hover:not(:disabled), .cal-nav:focus-visible { color: var(--cream); border-color: var(--amber); box-shadow: 0 0 18px -6px var(--amber-glow); outline: none; }
+  .cal-nav:disabled { opacity: .35; cursor: default; }
+  .cal-sub { font-size: 12px; font-weight: 600; letter-spacing: .3em; text-transform: uppercase; color: var(--amber); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); row-gap: 12px; }
+  .cal-w { font-size: 13px; font-weight: 500; letter-spacing: .1em; color: var(--dim); padding-bottom: 12px; }
+  .cal-cell { min-height: 96px; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 6px 2px; border: 0; background: none; border-radius: 10px; font: inherit; color: inherit; }
+  .cal-cell.live { cursor: pointer; }
+  .cal-cell.live:hover, .cal-cell.live:focus-visible { background: rgba(255,214,170,.05); outline: none; }
+  .cal-cell.sel { background: rgba(255,214,170,.07); box-shadow: inset 0 0 0 1px var(--hair); }
+  .dn { font-family: var(--display); font-size: 30px; font-weight: 400; color: var(--dim); font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .cal-cell.live .dn { color: var(--cream); }
+  .cal-cell.mute .dn { color: var(--faint); }
+  .cal-cell.today .dn { color: var(--amber); text-shadow: 0 0 18px var(--amber-glow); }
+  .ring { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--dim); margin: 4px 0; }
+  .chip { font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--amber); background: rgba(242,179,107,.14); border-radius: 6px; padding: 3px 8px; }
+  .chip.drift { color: #ec8f84; background: rgba(229,72,77,.15); }
+  .dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; max-width: 100%; }
+  .dots i { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,214,170,.16); }
+  .dots i.on { background: var(--amber); box-shadow: 0 0 6px var(--amber-glow); }
+  ol.rules { margin: 0; padding: 0; list-style: none; counter-reset: r; }
+  /* Phone — must stay last so it overrides the desktop rules above */
+  @media (max-width: 720px) {
+    body { font-size: 12px; }
+    .app { padding-block: 28px 64px; padding-inline: 16px; }
+    header { flex-wrap: wrap; gap: 14px; margin-bottom: 18px; }
+    .title { font-size: 21px; }
+    nav.links { gap: 18px; }
+    .hero { padding-top: 10px; margin-bottom: 22px; }
+    .clock .d { font-size: 64px; }
+    .clock .m { margin-left: 10px; }
+    .clock { gap: 12px; }
+    .led { margin-top: 26px; }
+    .lead { font-size: 15px; }
+    .body { padding: 12px 0 16px; }
+    .account, .close-grid { grid-template-columns: 1fr; margin-left: 0; }
+    .task { grid-template-columns: 64px 1fr auto 30px; gap: 10px; }
+    .cal-top { margin-bottom: -6px; }
+    .cal-year { font-size: 12px; }
+    .cal-month { font-size: 52px; }
+    .cal-sub { font-size: 10px; letter-spacing: .26em; }
+    .cal-head { grid-template-columns: 40px minmax(0, 1fr) 40px; }
+    .cal-nav { width: 38px; height: 38px; font-size: 22px; }
+    .cal-grid { row-gap: 4px; }
+    .cal-w { font-size: 11px; padding-bottom: 6px; }
+    .cal-cell { min-height: 50px; gap: 5px; padding: 4px 0; border-radius: 8px; }
+    .dn { font-size: 16px; }
+    .chip { display: none; }
+    .ring { width: 6px; height: 6px; margin: 0; }
+    .dots { gap: 1.5px; max-width: 40px; }
+    .dots i { width: 3px; height: 3px; }
+    .set-times { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="head-left">
+      <div class="title">Higher Self</div>
+      <div class="meta-left"><div id="clockDate"></div><b id="dayN"></b></div>
+    </div>
+      <nav class="links" id="tabs">
+        <button data-tab="today" class="on">Today</button>
+        <button data-tab="vision">The Vision</button>
+        <button data-tab="evidence">Evidence</button>
+        <button data-tab="settings">Settings</button>
+      </nav>
+  </header>
+  <div class="hero" aria-label="Current time">
+    <div class="clock" id="clock"><span class="ampm" id="ampm"></span><span class="d" id="hh"></span><span class="d m" id="mm"></span></div>
+    <div class="cal-top" id="heroMonth" hidden></div>
+    <div class="led"></div>
+  </div>
+  <main>
+    <section data-view="today" id="vToday"></section>
+    <section data-view="vision" id="vVision" hidden></section>
+    <section data-view="evidence" id="vEvidence" hidden></section>
+    <section data-view="settings" id="vSettings" hidden></section>
+  </main>
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+</div>
+
+<script>
+/* =====================================================================
+   THE BLUEPRINT — written in from our conversations. Not editable in-app.
+   ---------------------------------------------------------------------
+   nonNegotiables: {
+     id:     unique, never reuse (history is keyed by it)
+     time:   shown next to the task, for reference only — nothing locks on it
+     part:   Morning / Midday / Evening — groups the process in order
+     days:   optional — only on these weekdays (0 = Sun … 6 = Sat); otherwise every day
+     title:  the action
+     pillar: which pillar it serves (must match a pillar name)
+   }
+   ===================================================================== */
+const BLUEPRINT = {
+  identity: {
+    name: 'him',
+    statement: 'This is me in complete alignment. This process will give me the reality I desire. Focus on the process, act boldly, have faith. It\'s already done.',
+    dayOne: '2026-10-06'   // Tuesday
+  },
+
+  // Work shift default. It can be changed in Settings, from the day it's saved onward.
+  workDefault: { days: [5, 6, 0], start: '10:00', end: '18:00' },
+
+  // The rules that hold it together.
+  rules: [
+    'I am already him. I act as him now, not once I arrive.',
+    'Every day, seven days a week. No days off.',
+    'Process, not deadlines. I do the work every day for long enough, and the results speak for themselves.',
+    'Complete signal, no noise.',
+    'If my environment isn\'t signal, I\'m building my way out of it, while giving 100% where I am now.',
+    'Nothing about business until I\'m grounded, hydrated and trained.',
+    'Fast until 1pm: only coffee and water before then.',
+    'Whole foods only, on my nutrition coach\'s blueprint.',
+    '1L of water before the gym, 5L by the end of the day.',
+    'Steps: 10k by 12pm, 15k by 3pm, 20k by the end of the day.',
+    'Body fat holds between 8 and 12%, all year round.',
+    'Every evening, check that every high-leverage task got done.',
+    'A day counts if I did the work. Where I am yet doesn\'t come into it.',
+  ],
+
+  // The daily process — every day, in this order. No clock, no deadlines: just the work.
+  // Anything unticked when the day is closed (or by midnight) is missed. Never reuse an id.
+  nonNegotiables: [
+    { id: 'wake',    time: '3:30am',   part: 'Morning', pillar: 'Mind & Spirit',      title: 'Wake up' },
+    { id: 'ground',  time: '3:35am',   part: 'Morning', pillar: 'Mind & Spirit',      title: 'Ground + set intention' },
+    { id: 'water1',  time: '3:45am',   part: 'Morning', pillar: 'Mind & Spirit',      title: '1L water + coffee + mindset book' },
+    { id: 'train',   time: '4:30am',   part: 'Morning', pillar: 'Body',               title: 'Train + abs' },
+    { id: 'incline', time: '5:30am',   part: 'Morning', pillar: 'Body',               title: 'Incline walk + vision podcast' },
+    { id: 'deep',    time: '6:00am',   part: 'Morning', pillar: 'Trading',            title: 'Deep work: strategy video + backtest 1 week + replay yesterday' },
+    { id: 'content', time: '7:30am',   part: 'Morning', pillar: 'Content & Coaching', title: 'Trading content' },
+    { id: 'walk',    time: '8:00am',   part: 'Morning', pillar: 'Body',               title: '1 hour walk' },
+    { id: 'shower',  time: '9:00am',   part: 'Morning', pillar: 'Environment & Standards', title: 'Shower + get ready' },
+    { id: 'leave',   shift: 'leave',   part: 'Morning', pillar: 'Environment & Standards', title: 'Leave for work' },   // 30 mins before the shift starts, on work days
+    { id: 'work',    shift: true,      part: 'Midday',  pillar: 'Environment & Standards', title: 'Work' },   // days and hours come from Settings
+    { id: 'steps10', time: '12:00pm',  part: 'Midday',  pillar: 'Body',               title: '10k steps' },
+    { id: 'meal1',   time: '1:30pm',   part: 'Midday',  pillar: 'Body',               title: 'Fast held · first meal, whole foods' },
+    { id: 'steps15', time: '3:00pm',   part: 'Midday',  pillar: 'Body',               title: '15k steps' },
+    { id: 'dinner',  time: '7:30pm',   part: 'Evening', pillar: 'Body',               title: 'Dinner, whole foods' },
+    { id: 'steps20', time: 'End of day', part: 'Evening', pillar: 'Body', sortMin: 1439, title: '20k steps' },   // sortMin 1439 = last thing in the day
+    { id: 'water5',  time: 'End of day', part: 'Evening', pillar: 'Body', sortMin: 1439, title: '5L of water' },
+    { id: 'wind',    time: '9:00pm',   part: 'Evening', pillar: 'Mind & Spirit',      title: 'Wind down: mindset content + every high-leverage task done' },
+    { id: 'bed',     time: '9:30pm',   part: 'Evening', pillar: 'Mind & Spirit',      title: 'Lights out, prime tomorrow\'s intention' },
+  ],
+
+  // Who I am — present tense, already true. Grouped by pillar.
+  pillars: [
+    { name: 'Body',
+      vision: 'I\'m shredded and I stay that way: 8 to 12% body fat, all year round.',
+      metric: { label: 'Body fat', current: 8, range: [8, 12], unit: '%' },
+      truths: [
+        'I train every morning and do abs every day.',
+        'I walk the incline for 30 minutes with a podcast from men who are already where I\'m going.',
+        'I hit 10k steps by midday, 15k by 3pm and 20k by the end of the day.',
+        'I fast until 1pm on coffee and water. My first meal comes after the deep work, and it\'s whole foods.',
+        'I eat dinner around 7 to 7:30, never later than 8, and it\'s whole foods too.',
+        'I eat whole foods every day and hit the blueprint my nutrition coach built for my body.',
+        'I drink a litre of water before the gym and 5 litres by the end of the day.',
+      ] },
+    { name: 'Mind & Spirit',
+      vision: 'I am already him. I\'m aligned spiritually, mentally and in my vision, and I act as him now.',
+      truths: [
+        'I don\'t wait to become him to start acting as him.',
+        'I wake at 3:30 and buy my time back, so I\'m never in survival mode.',
+        'Before anything else I ground myself: I am this, I am here, I am making it. I act as if it\'s already done.',
+        'I read my mindset books and act on them the same day.',
+        'I invest in mentors. $5,000 in the right mind returns $20,000 a month in mindset alone.',
+        'I waste no time and I\'ve cut every vice.',
+        'At night I wind down on mindset content and make sure every high-leverage task is done.',
+        'I\'m in bed by 9 to 9:30, never later than 10, priming my mind to wake and set the intention again.',
+        'I\'m not racing a date. I give 100% to the process, and I\'m rewarded for the work I put in.',
+        'I judge a day by whether I did the work, never by where I am yet.',
+        'I don\'t compare myself to the people around me in my current position. I only compare myself to who I\'m becoming and the people above me.',
+      ] },
+    { name: 'Trading',
+      vision: 'After training I go deep: backtesting, yesterday\'s market, where I could have entered.',
+      truths: [
+        'Nothing about business touches me until I\'m grounded, hydrated and trained.',
+        'I do deep work every morning, seven days a week.',
+        'I backtest every single day, at least one week\'s worth of data.',
+        'I watch my trading content daily: the same video, the same strategy, just bleeding it into my mental syntax.',
+        'I go through what happened the previous day at the time I trade, and take the trade as I would have taken it, even if I missed it.',
+        'I only take one trade a day.',
+        'I follow my risk management. I don\'t negotiate.',
+        'I don\'t get into a scarcity mindset.',
+        'I\'m high leverage and I\'m a fucking sniper.',
+      ] },
+    { name: 'Content & Coaching',
+      vision: 'I make trading content every day and coach men to do the same.',
+      truths: [
+        'I film content while I\'m travelling: my trading, my training, my lifestyle, my mindset and spirit.',
+        'I\'m coaching fucking men to get the results that I have.',
+      ] },
+    { name: 'Environment & Standards',
+      vision: 'Complete signal, no noise. Everything around me is optimised for my self-actualisation.',
+      truths: [
+        'I\'m in an environment with as much signal as I can possibly get.',
+        'Where it isn\'t signal, I\'m producing my way out, and still giving 100% in my current situation.',
+        'The effort I give here builds the environment that\'s coming.',
+        'Everything I do and everything around me is congruent with where I\'m going.',
+        'I buy the best: coconut water, the best water, free-range meat.',
+        'I never go cheap on a coach or a mentor, so I never pay twice.',
+        'I\'m fucking printing money around men who are higher than me, men with high standards.',
+      ] },
+  ],
+};
+
+(() => {
+  const KEY = 'higher-self.v2';
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const dkey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const fromKey = k => new Date(k + 'T00:00:00');
+  const addDays = (k, n) => { const d = fromKey(k); d.setDate(d.getDate() + n); return dkey(d); };
+  const nice = k => fromKey(k).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+
+  const NN = BLUEPRINT.nonNegotiables;
+
+  // ---------- Settings: the work shift (the only part of the blueprint that can change) ----------
+  // Each change is kept with the date it took effect, so past days keep the shift they had.
+  const SKEY = 'higher-self.settings';
+  let settings;
+  try { settings = JSON.parse(localStorage.getItem(SKEY)) || {}; } catch { settings = {}; }
+  settings.work ||= [{ from: '0000-00-00', ...BLUEPRINT.workDefault }];
+  settings.remind ??= 10;            // minutes before each task; 0 = off
+  const saveSettings = () => { try { localStorage.setItem(SKEY, JSON.stringify(settings)); } catch {} };
+  // Day 1 is the blueprint's start date, or a later reset date, whichever comes last.
+  const DAY1 = [BLUEPRINT.identity.dayOne, settings.dayOne].filter(Boolean).sort().pop() || dkey();
+  const workFor = k => settings.work.filter(w => w.from <= k).sort((a, b) => a.from.localeCompare(b.from)).pop() || settings.work[0];
+  const mins = hm => { const [a, b] = hm.split(':').map(Number); return a * 60 + b; };
+  const clock12 = (hm, short) => {
+    let [a, b] = hm.split(':').map(Number); const ap = a < 12 ? 'am' : 'pm'; a = a % 12 || 12;
+    return short && b === 0 ? `${a}${ap}` : `${a}:${String(b).padStart(2, '0')}${ap}`;
+  };
+  const WD = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const daysText = days => {
+    const order = [1,2,3,4,5,6,0].filter(d => days.includes(d));
+    if (!order.length) return '';
+    if (order.length === 7) return 'Every day';
+    const idx = order.map(d => [1,2,3,4,5,6,0].indexOf(d));
+    const run = idx.every((v, i) => i === 0 || v === idx[i - 1] + 1);
+    if (run && order.length > 2) return `${WD[order[0]]} to ${WD[order[order.length - 1]]}`;
+    return order.length === 1 ? WD[order[0]] : order.slice(0, -1).map(d => WD[d]).join(', ') + ' and ' + WD[order[order.length - 1]];
+  };
+  const shiftItem = (i, k) => {
+    const w = workFor(k);
+    if (i.shift === 'leave') {
+      const m = Math.max(0, mins(w.start) - 30), hm = `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+      return { ...i, days: w.days, time: clock12(hm), part: m < 600 ? 'Morning' : m < 1020 ? 'Midday' : 'Evening', sortMin: m - 0.5 };
+    }
+    const m = mins(w.start);
+    return { ...i, days: w.days, time: clock12(w.start), title: `Work, ${clock12(w.start, true)}–${clock12(w.end, true)}`,
+             part: m < 600 ? 'Morning' : m < 1020 ? 'Midday' : 'Evening', sortMin: m };
+  };
+  // A task's place in the day: its own time, or (for "All day") the task before it.
+  const withOrder = list => { let last = -1; return list.map((i, n) => {
+    const t = i.sortMin ?? (/\d/.test(i.time || '') ? (() => { const [, a, b, ap] = i.time.match(/(\d+):(\d+)(am|pm)/); return (+a % 12 + (ap === 'pm' ? 12 : 0)) * 60 + +b; })() : null);
+    last = t ?? last + 0.01; return { ...i, sortMin: last, n };
+  }).sort((a, b) => a.sortMin - b.sortMin || a.n - b.n); };
+  const NNfor = k => withOrder(NN.map(i => i.shift ? shiftItem(i, k) : i)).filter(i => !i.days || i.days.includes(fromKey(k).getDay()));
+
+  // ---------- Log (the only thing that's written at runtime) ----------
+  let log;
+  try { log = JSON.parse(localStorage.getItem(KEY)) || {}; } catch { log = {}; }
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(log)); } catch {} };
+  const day = k => (log[k] ||= { done: {}, missed: {}, close: null });
+
+  // Open all day. It only locks once the day is closed, or the day has passed.
+  function status(item, k) {
+    const d = log[k];
+    if (d && d.done[item.id]) return 'done';
+    if (k < DAY1) return 'open';
+    if (k < dkey() || d?.close) return 'missed';
+    return 'open';
+  }
+  const dayScore = k => {
+    const L = NNfor(k);
+    if (!L.length || k < DAY1) return null;
+    const done = L.filter(i => log[k]?.done[i.id]).length;
+    return done / L.length;
+  };
+
+  // ---------- Building blocks ----------
+  const pad = n => String(n).padStart(2, '0');
+  const row = (cap, body, capRight = '') => `
+    <div class="row">
+      <div class="body"><div class="cap"><span>${cap}</span>${capRight ? `<em>${capRight}</em>` : ''}</div>${body}</div>
+    </div>`;
+  const prologue = (right = '') => row('Alignment', `<div class="lead glow">${esc(BLUEPRINT.identity.statement)}</div>`, right);
+
+  // ---------- Today ----------
+  function missedFields(ids, k, whole) {
+    const m = log[k]?.missed[ids.split(',')[0]];
+    if (m) return `<div class="account ro">
+        <div class="field ro"><div class="k">Why I missed it</div>${esc(m.why)}</div>
+        <div class="field ro"><div class="k">What I do better tomorrow</div>${esc(m.better)}</div></div>`;
+    return `<div class="account" data-account="${ids}" data-day="${k}">
+      <div class="field"><div class="k">Why did I miss ${whole ? 'the day' : 'this'}?</div><textarea rows="1" data-f="why" placeholder="What happened?"></textarea></div>
+      <div class="field"><div class="k">What do I do better tomorrow?</div><textarea rows="1" data-f="better" placeholder="The one change"></textarea></div>
+      <button class="link red" data-seal disabled>Own it</button>
+    </div>`;
+  }
+  function task(item, k) {
+    const s = status(item, k);
+    return `<div class="task ${s}">
+        <div class="t">${esc(item.time || '')}</div>
+        <div class="n">${esc(item.title)}</div>
+        <div class="s">${s === 'done' ? 'Done' : s === 'missed' ? 'Missed' : ''}</div>
+        ${(() => { const live = k === dkey() && !log[k]?.close && s !== 'missed';   // today, not yet sealed: tick and untick freely
+          return `<button class="tick" data-tick="${item.id}" ${live ? '' : 'disabled'} aria-pressed="${s === 'done'}" title="${!live ? 'Locked' : s === 'done' ? 'Untick' : 'Done'}"></button>`; })()}
+      </div>${s === 'missed' ? missedFields(item.id, k) : ''}`;
+  }
+  const PARTS = ['Morning', 'Midday', 'Evening'];
+
+  function renderToday() {
+    const v = $('#vToday');
+    const k = dkey(), d = day(k), T = NNfor(k);
+    const doneN = T.filter(i => d.done[i.id]).length;
+
+    // Yesterday's unaccounted misses must be owned first. Older ones are simply logged as missed.
+    let owed = '';
+    const pk = addDays(k, -1);
+    if (pk >= DAY1) {
+      const items = NNfor(pk).filter(i => status(i, pk) === 'missed' && !log[pk]?.missed[i.id]);
+      if (items.length) owed = row(`Unfinished — ${nice(pk)}`,
+        items.length === NNfor(pk).length
+          ? `<div class="task missed"><div class="t">All day</div><div class="n">Nothing was ticked</div><div class="s">Missed</div><button class="tick" disabled></button></div>${missedFields(items.map(i => i.id).join(','), pk, true)}`
+          : items.map(i => task(i, pk)).join(''), 'Own what was missed');
+    }
+
+    const parts = PARTS.map((name, n) => {
+      const items = T.filter(i => i.part === name);
+      return items.length ? row(name, items.map(i => task(i, k)).join('')) : '';
+    }).join('');
+
+    const c = d.close, left = T.length - doneN;
+    const epilogue = c
+      ? row('Day closed', `<div class="close-grid">
+          <div class="field ro"><div class="k">What kept me aligned</div>${esc(c.aligned)}</div>
+          <div class="field ro"><div class="k">What took me out of alignment</div>${esc(c.misaligned)}</div></div>`)
+      : row('Close the day', `<div class="close-grid" id="closeCard">
+          <div class="field"><div class="k">What kept me aligned today?</div><textarea data-c="aligned" rows="2"></textarea></div>
+          <div class="field"><div class="k">What took me out of alignment today?</div><textarea data-c="misaligned" rows="2"></textarea></div></div>
+          <div class="seal-row"><button class="link" id="sealDay" disabled>Seal the day</button><span class="hint">${left ? 'Anything unticked locks as missed.' : 'Every one lived.'}</span></div>`);
+
+    v.innerHTML = prologue(k < DAY1 ? `Practice day · Day 1 is ${nice(DAY1)}` : '') + parts + epilogue + owed;
+    bindToday();
+  }
+
+  function bindToday() {
+    const v = $('#vToday');
+    v.querySelectorAll('[data-tick]:not([disabled])').forEach(b => b.onclick = () => {
+      const k = dkey(), d = day(k), id = b.dataset.tick;
+      if (d.close) return renderToday();               // a sealed day stays as it was
+      if (d.done[id]) delete d.done[id]; else d.done[id] = new Date().toISOString();
+      save(); renderToday();
+    });
+    v.querySelectorAll('[data-account]').forEach(box => {
+      const tas = box.querySelectorAll('textarea'), btn = box.querySelector('[data-seal]');
+      const check = () => btn.disabled = [...tas].some(t => t.value.trim().length < 3);
+      tas.forEach(t => t.oninput = () => { t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; check(); });
+      btn.onclick = () => {
+        const f = Object.fromEntries([...tas].map(t => [t.dataset.f, t.value.trim()]));
+        const at = new Date().toISOString();
+        box.dataset.account.split(',').forEach(id => day(box.dataset.day).missed[id] = { ...f, at });
+        save(); renderToday();
+      };
+    });
+    const card = $('#closeCard');
+    if (card) {
+      const tas = card.querySelectorAll('textarea'), btn = $('#sealDay');
+      tas.forEach(t => t.oninput = () => btn.disabled = [...tas].some(x => x.value.trim().length < 3));
+      btn.onclick = () => {
+        day(dkey()).close = { ...Object.fromEntries([...tas].map(t => [t.dataset.c, t.value.trim()])), at: new Date().toISOString() };
+        save(); renderToday();
+      };
+    }
+  }
+
+  // ---------- Vision ----------
+  function renderVision() {
+    const P = BLUEPRINT.pillars, rules = BLUEPRINT.rules || [];
+    const metric = m => {
+      if (!m?.range) return '';
+      const { current: c, range: [lo, hi], unit: u = '', label } = m;
+      return `${esc(label)} ${c}${esc(u)} · holds ${lo}–${hi}${esc(u)}`;
+    };
+    $('#vVision').innerHTML = prologue()
+      + P.map(p => { const truths = p.truths || [];
+          return row(p.name,
+          `<div class="lead glow">${esc(p.vision)}</div><ul class="lines">${truths.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`, metric(p.metric)); }).join('')
+      + row('The rules', `<ol class="rules">${rules.map(t => `<li>${esc(t)}</li>`).join('')}</ol>`)
+      + row('Epilogue', `<div class="lead glow">A day counts if I did the work. Where I am yet doesn't come into it.</div>`);
+  }
+
+  // ---------- Evidence: a month of days ----------
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  let evY, evM, evSel;
+  function renderEvidence() {
+    const today = dkey();
+    if (evY == null) { const t = fromKey(today); evY = t.getFullYear(); evM = t.getMonth(); evSel = today; }
+    const first = new Date(evY, evM, 1), daysIn = new Date(evY, evM + 1, 0).getDate();
+    const lead = (first.getDay() + 6) % 7;                       // Monday-first
+    let completed = 0, cells = '';
+    for (let i = 0; i < lead; i++) cells += `<div class="cal-cell"></div>`;
+    for (let dd = 1; dd <= daysIn; dd++) {
+      const k = dkey(new Date(evY, evM, dd)), L = NNfor(k), s = dayScore(k);
+      const live = k >= DAY1 && k <= today;
+      const settled = k < today || !!log[k]?.close;
+      if (live && settled && s === 1) completed++;
+      let mark = '';
+      if (live) {
+        const chip = !settled ? `<span class="ring"></span>`
+          : s === 1 ? `<span class="chip">Aligned</span>` : `<span class="chip drift">Drifted</span>`;
+        const dots = L.map(i => `<i class="${log[k]?.done[i.id] ? 'on' : ''}"></i>`).join('');
+        mark = `${chip}<span class="dots">${dots}</span>`;
+      }
+      cells += `<button class="cal-cell day ${live ? 'live' : 'mute'} ${k === today ? 'today' : ''} ${k === evSel ? 'sel' : ''}" data-k="${k}" ${live ? '' : 'disabled'}>
+        <span class="dn">${dd}</span>${mark}</button>`;
+    }
+    const d1 = fromKey(DAY1);
+    const canPrev = new Date(evY, evM, 1) > new Date(d1.getFullYear(), d1.getMonth(), 1);
+    const canNext = new Date(evY, evM + 1, 1) <= fromKey(today);
+
+    // The month takes the clock's place above the LED strip.
+    $('#heroMonth').innerHTML = `
+        <div class="cal-year">${evY}</div>
+        <div class="cal-head">
+          <button class="cal-nav" id="evPrev" ${canPrev ? '' : 'disabled'} aria-label="Previous month">‹</button>
+          <h2 class="cal-month">${MONTHS[evM]}</h2>
+          <button class="cal-nav ring-btn" id="evNext" ${canNext ? '' : 'disabled'} aria-label="Next month">›</button>
+        </div>
+        <div class="cal-sub">${completed} day${completed === 1 ? '' : 's'} completed</div>`;
+    $('#vEvidence').innerHTML = `
+      <div class="cal">
+        <div class="cal-grid">${['M','T','W','T','F','S','S'].map(w => `<div class="cal-w">${w}</div>`).join('')}${cells}</div>
+      </div>
+      ${evSel && evSel >= DAY1 ? dayDetail(evSel) : ''}`;
+    const v = $('#vEvidence');
+    v.querySelectorAll('.cal-cell.day.live').forEach(b => b.onclick = () => { evSel = b.dataset.k; renderEvidence(); });
+    $('#evPrev').onclick = () => { if (--evM < 0) { evM = 11; evY--; } renderEvidence(); };
+    $('#evNext').onclick = () => { if (++evM > 11) { evM = 0; evY++; } renderEvidence(); };
+  }
+
+  // One day, read back: what was lived, what was missed and why, and how it closed.
+  function dayDetail(k) {
+    const L = NNfor(k), d = log[k] || { done: {}, missed: {} };
+    const full = fromKey(k).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+    const items = L.map(i => {
+      const s = status(i, k), m = d.missed?.[i.id];
+      return `<div class="task ${s}"><div class="t">${esc(i.time || '')}</div><div class="n">${esc(i.title)}</div>
+        <div class="s">${s === 'done' ? 'Done' : s === 'missed' ? 'Missed' : ''}</div><span class="tick"></span></div>
+        ${m ? `<div class="account ro"><div class="field ro"><div class="k">Why I missed it</div>${esc(m.why)}</div><div class="field ro"><div class="k">What I do better tomorrow</div>${esc(m.better)}</div></div>` : ''}`;
+    }).join('');
+    const c = d.close;
+    return row(full, items) + (c ? row('Day closed', `<div class="close-grid">
+        <div class="field ro"><div class="k">What kept me aligned</div>${esc(c.aligned)}</div>
+        <div class="field ro"><div class="k">What took me out of alignment</div>${esc(c.misaligned)}</div></div>`) : '');
+  }
+
+  // ---------- Settings ----------
+  function renderSettings() {
+    const today = dkey(), w = workFor(today);
+    const order = [1,2,3,4,5,6,0];
+    $('#vSettings').innerHTML = row('Work shift', `
+        <div class="muted" style="margin-bottom:16px">For when shifts change. Everything else in the blueprint stays fixed.</div>
+        <div class="set-label">Days</div>
+        <div class="day-pick" role="group" aria-label="Work days">${order.map(d => `
+          <button type="button" class="dp ${w.days.includes(d) ? 'on' : ''}" data-d="${d}" aria-pressed="${w.days.includes(d)}">${WD[d].slice(0, 3)}</button>`).join('')}</div>
+        <div class="set-times">
+          <label class="field"><span class="k">Start</span><input type="time" id="wStart" value="${w.start}"></label>
+          <label class="field"><span class="k">Finish</span><input type="time" id="wEnd" value="${w.end}"></label>
+        </div>
+        <div class="seal-row"><button class="link" id="wSave">Save shift</button><span class="hint" id="wNote">Applies from today. Past days keep the shift they had.</span></div>`)
+      + row('Reminders', `
+        <div class="muted" style="margin-bottom:14px">A chime and a card before each task with a time. Keep this page open for them to arrive.</div>
+        <div class="day-pick" role="group" aria-label="Remind me">${[0, 5, 10, 15, 30].map(m => `
+          <button type="button" class="dp rm ${settings.remind === m ? 'on' : ''}" data-m="${m}" aria-pressed="${settings.remind === m}">${m ? m + ' min before' : 'Off'}</button>`).join('')}</div>
+        <div class="hint" id="rmNote">${notifyNote()}</div>`)
+      + row('Reset', `
+        <div class="muted" style="margin-bottom:14px">Start again from today. Every tick, miss, reason and closing thought is erased, the work shift goes back to the default, and today becomes Day 1. The blueprint itself stays the same.</div>
+        <div class="seal-row" id="resetAsk"><button class="link red" id="resetBtn">Reset everything</button></div>
+        <div class="seal-row" id="resetConfirm" hidden><span class="hint" style="color:var(--text)">This can't be undone.</span>
+          <button class="link red" id="resetYes">Yes, reset</button><button class="link" id="resetNo">Cancel</button></div>`);
+    const v = $('#vSettings');
+    v.querySelectorAll('.dp.rm').forEach(b => b.onclick = () => {
+      settings.remind = +b.dataset.m; saveSettings();
+      if (settings.remind && 'Notification' in window && Notification.permission === 'default') {
+        try { Notification.requestPermission().then(() => { const n = $('#rmNote'); if (n) n.textContent = notifyNote(); }); } catch {}
+      }
+      unlockSound(); renderSettings();
+    });
+    $('#resetBtn').onclick = () => { $('#resetAsk').hidden = true; $('#resetConfirm').hidden = false; };
+    $('#resetNo').onclick = () => { $('#resetAsk').hidden = false; $('#resetConfirm').hidden = true; };
+    $('#resetYes').onclick = () => {
+      try {
+        localStorage.removeItem(KEY);
+        localStorage.setItem(SKEY, JSON.stringify({ dayOne: dkey() }));
+      } catch {}
+      location.reload();
+    };
+    v.querySelectorAll('.dp:not(.rm)').forEach(b => b.onclick = () => { b.classList.toggle('on'); b.setAttribute('aria-pressed', b.classList.contains('on')); });
+    $('#wSave').onclick = () => {
+      const days = [...v.querySelectorAll('.dp.on:not(.rm)')].map(b => +b.dataset.d);
+      const start = $('#wStart').value, end = $('#wEnd').value;
+      if (!start || !end || mins(end) <= mins(start)) { $('#wNote').textContent = 'Finish needs to be after start.'; return; }
+      settings.work = settings.work.filter(x => x.from !== today).concat({ from: today, days, start, end });
+      saveSettings(); renderSettings();
+      $('#wNote').textContent = 'Saved. Today and every day after use this shift.';
+    };
+  }
+
+  // ---------- Tabs ----------
+  const views = { today: renderToday, vision: renderVision, evidence: renderEvidence, settings: renderSettings };
+  let tab = 'today';
+  function show(t) {
+    tab = t;
+    document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+    document.querySelectorAll('[data-view]').forEach(s => s.hidden = s.dataset.view !== t);
+    $('#clock').hidden = t === 'evidence';
+    $('.hero').hidden = t === 'settings';
+    $('#heroMonth').hidden = t !== 'evidence';
+    views[t]();
+  }
+  document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => show(b.dataset.tab));
+
+  // ---------- Clock (display only — nothing runs on it) ----------
+  function clock() {
+    const n = new Date(), h12 = n.getHours() % 12 || 12;
+    $('#hh').textContent = h12;
+    $('#mm').textContent = String(n.getMinutes()).padStart(2, '0');
+    $('#ampm').textContent = n.getHours() < 12 ? 'AM' : 'PM';
+  }
+
+  // ---------- Reminders: a heads-up before each timed task ----------
+  const canNotify = () => { try { return 'Notification' in window && Notification.permission === 'granted'; } catch { return false; } };
+  function notifyNote() {
+    if (!settings.remind) return 'Reminders are off.';
+    return canNotify() ? 'On. You\'ll also get a desktop notification.' : 'On. Reminders show here on the page with a chime.';
+  }
+  let audio;
+  const unlockSound = () => { try { audio ||= new (window.AudioContext || window.webkitAudioContext)(); audio.resume?.(); } catch {} };
+  document.addEventListener('pointerdown', unlockSound, { once: true });
+  function chime() {
+    try {
+      unlockSound(); if (!audio) return;
+      [660, 990].forEach((f, i) => {
+        const o = audio.createOscillator(), g = audio.createGain(), t = audio.currentTime + i * .16;
+        o.type = 'sine'; o.frequency.value = f;
+        g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.12, t + .02); g.gain.exponentialRampToValueAtTime(.001, t + .7);
+        o.connect(g).connect(audio.destination); o.start(t); o.stop(t + .8);
+      });
+    } catch {}
+  }
+  function toast(item, lead) {
+    const el = document.createElement('div');
+    el.className = 'toast'; el.setAttribute('role', 'status');
+    el.innerHTML = `<div class="toast-k">In ${lead} min · ${esc(item.time)}</div><div class="toast-m">${esc(item.title)}</div>
+      <div class="toast-a"><button class="link" data-done>Done</button><button class="link muted-link" data-x>Dismiss</button></div>`;
+    el.querySelector('[data-x]').onclick = () => el.remove();
+    el.querySelector('[data-done]').onclick = () => {
+      const d = day(dkey()); if (!d.close) { d.done[item.id] = new Date().toISOString(); save(); if (tab === 'today') renderToday(); }
+      el.remove();
+    };
+    $('#toasts').appendChild(el);
+    setTimeout(() => el.remove(), 15 * 60e3);
+  }
+  function checkReminders() {
+    const lead = settings.remind; if (!lead) return;
+    const k = dkey(); if (k < DAY1) return;
+    const d = day(k); if (d.close) return;
+    const now = new Date(), m = now.getHours() * 60 + now.getMinutes();
+    d.reminded ||= [];
+    NNfor(k).forEach(i => {
+      if (!/\d:\d\d/.test(i.time || '') || d.done[i.id] || d.reminded.includes(i.id)) return;
+      const at = Math.round(i.sortMin);
+      if (m >= at - lead && m < at) {
+        d.reminded.push(i.id); save();
+        chime(); toast(i, Math.max(1, at - m));
+        if (canNotify()) {
+          const title = `In ${at - m} min · ${i.time}`, opts = { body: i.title, icon: 'icon-192.png', tag: i.id, silent: true };
+          (navigator.serviceWorker?.ready || Promise.reject()).then(r => r.showNotification(title, opts))
+            .catch(() => { try { new Notification(title, opts); } catch {} });
+        }
+      }
+    });
+  }
+
+  // ---------- Day turn ----------
+  let lastDay = '';
+  function tick() {
+    clock();
+    checkReminders();
+    const k = dkey();
+    if (k === lastDay) return;
+    lastDay = k;
+    $('#clockDate').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+    const n = Math.floor((fromKey(k) - fromKey(DAY1)) / 864e5) + 1;
+    $('#dayN').textContent = n >= 1 ? `Day ${pad(n)}` : `Day 1 is ${nice(DAY1)}`;
+    if (!document.activeElement?.matches('textarea')) views[tab]();
+  }
+
+  // Installed app: offline support + notifications (only when served from a real web address)
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost') && document.querySelector('link[rel="manifest"]')) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+
+  show('today'); tick();
+  setInterval(tick, 10000);
+})();
+</script>
+</body>
+</html>
