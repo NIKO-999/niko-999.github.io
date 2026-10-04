@@ -175,6 +175,9 @@
   .ob-task input::-webkit-calendar-picker-indicator, .ob-field input::-webkit-calendar-picker-indicator { filter: invert(.75) sepia(.6); opacity: .7; }
   .ob-del { font-size: 18px; padding-bottom: 6px; }
   .ob-review .cap { margin-top: 18px; }
+  .ob-ideas .dp { font-size: 10px; padding: 6px 11px; letter-spacing: .08em; }
+  .lines.low li { color: var(--dim); }
+  .lines.low li::before { background: var(--faint); box-shadow: none; }
   .ob-code { white-space: pre-wrap; word-break: break-all; font: 12px/1.6 ui-monospace, Menlo, monospace; color: var(--cream); background: rgba(var(--tint-rgb),.06);
     border: 1px solid var(--hair); border-radius: 10px; padding: 14px; margin: 0 0 14px; max-height: 220px; overflow: auto; user-select: all; -webkit-user-select: all; }
 
@@ -372,13 +375,13 @@ if (!BLUEPRINT) (() => {
   look(settings.look === 'night' ? 'night' : 'salt');
 
   const AREAS = ['Body', 'Mind & Spirit', 'Wealth', 'Career', 'Relationships', 'Home & Environment', 'Creativity', 'Contribution'];
-  const A = { look: settings.look, statement: '', areas: [], area: {}, tasks: [], rules: '', dayOne: tomorrow() };
+  const A = { look: settings.look, statement: '', areas: [], area: {}, tasks: [], raises: '', lowers: '', rules: '', dayOne: tomorrow() };
   try { Object.assign(A, JSON.parse(sessionStorage.getItem('hs-start.draft')) || {}); } catch {}
   const keep = () => { try { sessionStorage.setItem('hs-start.draft', JSON.stringify(A)); } catch {} };
 
   // The order works backwards: who she is → each area of her life → what she does daily → the rules.
   let only = null;                   // show one step outside the numbered flow (restore, code)
-  const steps = () => only ? [only] : ['theme', 'alignment', 'areas', ...A.areas.map((_, i) => 'area:' + i), 'day', 'rules', 'start', 'review'];
+  const steps = () => only ? [only] : ['theme', 'alignment', 'areas', ...A.areas.map((_, i) => 'area:' + i), 'frequency', 'day', 'rules', 'start', 'review'];
   let at = 0;
 
   document.querySelector('.app').hidden = true;
@@ -426,6 +429,19 @@ if (!BLUEPRINT) (() => {
         <textarea id="obVision" rows="2" placeholder="I am strong, glowing and at home in my body.">${esc(a.vision)}</textarea></label>
       <label class="field ob-field"><span class="k">What must be true about her here? One per line</span>
         <textarea id="obTruths" rows="6" placeholder="I move my body every morning.&#10;I eat food that loves me back.&#10;I'm in bed by 10.">${esc(a.truths)}</textarea></label>`); }
+    if (st === 'frequency') {
+      const RAISE = ['A morning routine', 'Training every day', 'Going for walks', 'Reading books', 'Educational videos', 'Time with high-frequency people', 'Sunlight and fresh air', 'Journaling', 'Meditation or prayer', 'Cooking a nourishing meal'];
+      const LOWER = ['Netflix binges', 'Binge eating', 'Scrolling social media', 'Talking to low-frequency people', 'Gossip and complaining', 'Staying up late', 'Skipping my routine', 'Comparing myself to others'];
+      const chips = (list, f) => `<div class="day-pick ob-ideas">${list.map(x => `<button type="button" class="dp ob-idea" data-f="${f}" data-x="${esc(x)}">+ ${esc(x)}</button>`).join('')}</div>`;
+      html = frame('Frequency', 'What raises her frequency, and what lowers it?', `
+      <p class="muted ob-p">The goal is simple: do more of what raises you, and none of what pulls you down. Write your own, one per line. Tap an idea to add it if it's true for you.</p>
+      <label class="field ob-field"><span class="k">Raises my frequency</span>
+        <textarea id="obRaises" rows="5" placeholder="What leaves you lit up, clear and high?">${esc(A.raises)}</textarea></label>
+      <div class="set-label">Ideas</div>${chips(RAISE, 'obRaises')}
+      <label class="field ob-field" style="margin-top:22px"><span class="k">Lowers my frequency</span>
+        <textarea id="obLowers" rows="5" placeholder="What leaves you heavy, foggy or low?">${esc(A.lowers)}</textarea></label>
+      <div class="set-label">Ideas</div>${chips(LOWER, 'obLowers')}`, { hint: 'Next, you\'ll build your daily process. Fill it with what raises you.' });
+    }
     if (st === 'day') {
       if (!A.tasks.length) A.tasks = [{ time: '06:00', title: '' }, { time: '07:00', title: '' }, { time: '12:00', title: '' }, { time: '21:00', title: '' }];
       html = frame('Daily process', 'Now walk through her day. What does she do, and when?', `
@@ -454,6 +470,8 @@ if (!BLUEPRINT) (() => {
           <ul class="lines">${lines(A.area[a]?.truths).map(t => `<li>${esc(t)}</li>`).join('')}</ul>`).join('')}
         <div class="cap"><span>Daily process</span></div>
         ${tasks.map(t => `<div class="task"><div class="t">${to12(t.time)}</div><div class="n">${esc(t.title)}</div><div class="s"></div><span></span></div>`).join('')}
+        ${lines(A.raises).length ? `<div class="cap"><span>Raises my frequency</span></div><ul class="lines">${lines(A.raises).map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+        ${lines(A.lowers).length ? `<div class="cap"><span>Lowers my frequency</span></div><ul class="lines low">${lines(A.lowers).map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
         ${lines(A.rules).length ? `<div class="cap"><span>The rules</span></div><ul class="lines">${lines(A.rules).map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
       </div>
       <p class="muted ob-p">Once you lock it in, it can't be edited. The only way to change it is Reset in Settings.</p>`, { next: 'Lock it in' });
@@ -479,6 +497,7 @@ if (!BLUEPRINT) (() => {
     if (st.startsWith('area:')) { const a = area(+st.split(':')[1]); a.vision = $('#obVision').value.trim(); a.truths = $('#obTruths').value; }
     if (st === 'day') A.tasks = [...root.querySelectorAll('.ob-task')].map(r => ({ time: r.querySelector('[data-f=time]').value || '12:00', title: r.querySelector('[data-f=title]').value }));
     if (st === 'rules') A.rules = $('#obRules').value;
+    if (st === 'frequency') { A.raises = $('#obRaises').value; A.lowers = $('#obLowers').value; }
     if (st === 'start') A.dayOne = $('#obDay1').value || tomorrow();
     keep();
   }
@@ -496,6 +515,7 @@ if (!BLUEPRINT) (() => {
       v: 1,
       identity: { name: '', statement: A.statement, dayOne: A.dayOne },
       rules: lines(A.rules),
+      frequency: { raises: lines(A.raises), lowers: lines(A.lowers) },
       nonNegotiables: [
         ...tasks.map((t, n) => ({ id: 't' + n, time: to12(t.time), part: partOf(t.time), title: t.title.trim() })),
         { id: 'leave', shift: 'leave', part: 'Morning', title: 'Leave for work' },
@@ -510,6 +530,11 @@ if (!BLUEPRINT) (() => {
     $('#obBack') && ($('#obBack').onclick = () => { if (st !== 'restore') collect(st); at = Math.max(0, at - 1); render(); });
     root.querySelectorAll('.ob-look').forEach(b => b.onclick = () => { A.look = b.dataset.l; look(A.look); keep(); render(); });
     $('#obRestore') && ($('#obRestore').onclick = renderRestore);
+    root.querySelectorAll('.ob-idea').forEach(b => b.onclick = () => {
+      const ta = $('#' + b.dataset.f), cur = lines(ta.value);
+      if (!cur.includes(b.dataset.x)) ta.value = [...cur, b.dataset.x].join('\n');
+      b.classList.add('on'); b.disabled = true; collect(st);
+    });
     root.querySelectorAll('.ob-area').forEach(b => b.onclick = () => {
       const a = b.dataset.a; A.areas = A.areas.includes(a) ? A.areas.filter(x => x !== a) : [...A.areas, a]; keep(); render(); });
     $('#obAreaAdd') && ($('#obAreaAdd').onclick = () => { const v = $('#obAreaNew').value.trim(); if (v && !A.areas.includes(v)) { A.areas.push(v); keep(); } render(); });
@@ -736,6 +761,8 @@ if (!BLUEPRINT) (() => {
       + P.map(p => { const truths = p.truths || [];
           return row(p.name,
           `<div class="lead glow">${esc(p.vision)}</div><ul class="lines">${truths.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`, metric(p.metric)); }).join('')
+      + (BLUEPRINT.frequency?.raises?.length ? row('Raises my frequency', `<div class="lead glow">Do more of this.</div><ul class="lines">${BLUEPRINT.frequency.raises.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`) : '')
+      + (BLUEPRINT.frequency?.lowers?.length ? row('Lowers my frequency', `<div class="lead glow">None of this.</div><ul class="lines low">${BLUEPRINT.frequency.lowers.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`) : '')
       + row('The rules', `<ol class="rules">${rules.map(t => `<li>${esc(t)}</li>`).join('')}</ol>`)
       + row('Epilogue', `<div class="lead glow">A day counts if I did the work. Where I am yet doesn't come into it.</div>`);
   }
