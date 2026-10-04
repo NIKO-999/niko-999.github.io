@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mind of Niko</title>
-<meta name="description" content="The beliefs I live by, one card at a time.">
+<meta name="description" content="Advice for the journey, one card at a time.">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#e9e8e4">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -64,28 +64,30 @@
 </main>
 
 <script>
-// The beliefs, in order. Hard-coded on purpose.
+// Advice for the journey, in order. Hard-coded on purpose.
 const CARDS = [
-  ['Act like it’s already done', 'I don’t wait to become him to start acting as him. I perform as him daily, and the identity follows the action. The law of assumption isn’t a wish. It’s a way of moving through the day as if the result already arrived.'],
-  ['Trust the process', 'Not deadlines. Not where I am yet. I do the work every single day for long enough, and the results have no choice but to speak for themselves. A day counts if I did the work.'],
-  ['Buy your time back', 'I wake at 3:30. While the world sleeps, I’m already grounded, hydrated and moving. Owning the morning means I’m never living in survival mode.'],
-  ['Ground before anything', 'Nothing about business touches me until I’m grounded, hydrated and trained. I am this, I am here, I am making it. The day is built on that foundation, or not at all.'],
-  ['Signal, no noise', 'Everything around me is optimised for my self-actualisation. Where it isn’t signal, I’m building my way out of it, while still giving 100% where I am right now.'],
-  ['Train every day', 'The body is the first proof that I keep my word. Training and abs every morning, 20,000 steps, whole foods. 8 to 12% all year round isn’t a goal. It’s just how I live.'],
-  ['Hold the fast', 'Coffee and water until the deep work is done. Discipline in the small things builds the trust that carries the big ones. I eat to fuel the man I already am.'],
-  ['One trade a day', 'I follow my risk management. I don’t negotiate. I take one trade, the way I’d take it every time, and I walk away. I’m high leverage and I’m a fucking sniper.'],
-  ['Never trade from scarcity', 'Scarcity makes you force what isn’t there. Abundance lets you wait for what is. The market is always open to the man who can sit still.'],
-  ['Bleed it into your syntax', 'The same video, the same strategy, every day. I replay yesterday at the time I trade and take it as I would have. Repetition until it isn’t something I know, it’s something I am.'],
-  ['Compare upwards only', 'I don’t compare myself to the people around me in my current position. I only measure myself against who I’m becoming, and the men already standing where I’m going.'],
-  ['Invest in the right minds', 'Five thousand into the right mentor returns twenty thousand a month in mindset alone. I never go cheap on a coach, so I never pay twice.'],
-  ['Buy the best', 'Free-range meat, the best water, the best guidance. Standards aren’t a price tag. They’re a decision about what I allow into my body and my life.'],
-  ['Raise your frequency', 'Training, walking, reading, the right people. Do more of what lifts you and none of what pulls you down. Every choice either raises the room or lowers it.'],
-  ['Cut every vice', 'I waste no time. What used to fill the gaps now has no place in them. Every hour either moves me towards the vision or it doesn’t get spent.'],
-  ['Film the life you live', 'I capture it while I’m living it: the trading, the training, the lifestyle, the mindset. Not a performance. A record of a man who does what he says.'],
-  ['Coach men upwards', 'I’m coaching men to get the results that I have. What I’ve learned isn’t mine to keep. Value given freely comes back multiplied.'],
-  ['Stand among higher men', 'I’m printing money around men who are higher than me, men with high standards. Your room sets your ceiling, so I keep choosing a higher room.'],
-  ['Close the day honestly', 'Every night I look at what kept me aligned and what took me out of it. Honest, not harsh. Tomorrow I do one thing better.'],
-  ['Act boldly, have faith', 'This is me in complete alignment. This process will give me the reality I desire. Focus on the process, act boldly, have faith. It’s already done.'],
+  ['Act like it’s already done', 'Stop waiting to feel ready before you behave like the person you want to be. Make the decisions they would make today, at your current level. Identity doesn’t lead the action. It follows it.'],
+  ['Set clear goals, then let them go', 'Decide exactly where you’re going and write it down once. Then stop staring at it. The goal sets the direction, but it’s the daily process that actually moves you there.'],
+  ['Fall in love with the process', 'Results are slow, uneven and out of your control. The process is the one thing you own every single day. Judge each day by whether you did the work, and the outcome takes care of itself.'],
+  ['Protect the first hour', 'How you start the day sets the tone for everything after it. Before the noise reaches you, ground yourself, hydrate and move. A calm, intentional morning is a quiet act of self-respect.'],
+  ['Keep promises small and daily', 'Self-trust is built in tiny deposits. Make commitments you can keep every day, then keep them without negotiation. Confidence is just the evidence of promises kept.'],
+  ['Remove the options', 'Willpower runs out. Decisions made in advance don’t. Remove the temptations, set the rules before the moment comes, and let your environment make the right choice the easy one.'],
+  ['Signal over noise', 'Most of what competes for your attention doesn’t matter. Learn to tell what moves you forward from what only keeps you busy. Protect your focus like it’s your most valuable asset, because it is.'],
+  ['Change your environment', 'You become a product of what surrounds you. If your space, feed or circle doesn’t match where you’re going, start building your way out, while still giving full effort where you are.'],
+  ['Compare upwards, never sideways', 'Measuring yourself against the people around you keeps you exactly where you are. Look to the person you’re becoming and those already living it. Let them be the standard, not the room.'],
+  ['Invest in the right minds', 'The fastest way to grow is to learn from someone who’s already done it. Good guidance is never expensive when it saves you years of mistakes. Pay for wisdom so you don’t pay twice.'],
+  ['Raise your standards quietly', 'You don’t need to announce your new standards. Live them. What you eat, who you give your time to and what you tolerate all tell you who you really believe you are.'],
+  ['Mind your frequency', 'Notice what leaves you lit up and what leaves you heavy. Do more of the first and slowly remove the second. Your energy is a resource, so treat every input like it costs something.'],
+  ['Repetition builds mastery', 'Depth beats novelty. Go back to the same lesson, the same practice, the same fundamentals until they stop being something you know and become something you are.'],
+  ['Discipline over motivation', 'Motivation shows up when it wants to. Discipline shows up when it has to. Build a life that doesn’t depend on how you feel, and you’ll keep moving on the days you don’t want to.'],
+  ['Never act from scarcity', 'Scarcity makes you rush, force and chase. Abundance lets you wait for the right moment. When you trust there’s enough, you make better decisions with less pressure.'],
+  ['Follow your own rules', 'Your rules exist for the moments you’d rather break them. Set them when you’re calm, honour them when you’re not. The person who doesn’t negotiate with themselves is hard to stop.'],
+  ['Your body keeps the score', 'How you treat your body is how you treat your word. Train, fuel and rest like someone you respect. Physical discipline becomes proof that you can do hard things.'],
+  ['Give value freely', 'Share what you’ve learned without waiting to be an expert. Lifting others up the path behind you sharpens your own understanding. What you give out has a way of coming back multiplied.'],
+  ['Document, don’t perform', 'Capture your journey honestly while you’re living it. Not to impress anyone, but to keep a record of who you’re becoming. The proof will matter more to you than anyone else.'],
+  ['Close each day honestly', 'Before you sleep, ask what kept you aligned and what pulled you off course. Be honest, not harsh. One small correction each day compounds into a completely different life.'],
+  ['Solitude is a strength', 'Time alone isn’t lonely when you’re building something. It’s where you think clearly, hear yourself and do the work no one sees. Learn to be comfortable in your own company.'],
+  ['Act boldly, have faith', 'At some point, planning has to turn into doing. Take the step before you feel certain. Faith isn’t knowing how it works out. It’s acting like it already has.'],
 ];
 
 const $ = id => document.getElementById(id);

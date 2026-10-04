@@ -1,7 +1,7 @@
 {
   "name": "Mind of Niko",
   "short_name": "Mind of Niko",
-  "description": "The beliefs I live by, one card at a time.",
+  "description": "Advice for the journey, one card at a time.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
