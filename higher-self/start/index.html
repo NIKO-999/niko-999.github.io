@@ -7,7 +7,7 @@
 <meta name="description" content="My non-negotiables, my vision, and the evidence that I am living as my higher self.">
 <!-- Installable app (PWA) -->
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#160805">
+<meta name="theme-color" content="#f5ebe5">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -123,7 +123,7 @@
   .tick:disabled { cursor: default; }
   .task.done .tick::before { background: linear-gradient(90deg, var(--amber), var(--led-hot) 50%, var(--amber)); box-shadow: 0 0 10px 1px var(--amber-glow), 0 0 22px 2px rgba(var(--glow-rgb),.25); }
   .task.missed .tick::before { background: rgba(229,72,77,.75); box-shadow: 0 0 8px rgba(229,72,77,.4); }
-  .task.missed .n { color: var(--dim); text-decoration: line-through; text-decoration-color: rgba(255,255,255,.3); }
+  .task.missed .n { color: var(--dim); text-decoration: line-through; text-decoration-color: rgba(var(--tint-rgb),.4); }
   .task.missed .s { color: var(--red); }
 
   /* Underline fields + text-link buttons */
@@ -231,36 +231,38 @@
   .dots i.on { background: var(--amber); box-shadow: 0 0 6px var(--amber-glow); }
   ol.rules { margin: 0; padding: 0; list-style: none; counter-reset: r; }
 
-  /* ---------- Salt lamp — glowing pink-orange crystal, ember room, dusk at the window ---------- */
+  /* ---------- Salt lamp — light, neutral blush sand with a soft pink-orange glow ---------- */
   :root[data-look="salt"] {
-    --bg: #160805;
-    --cream: #ffe4d3;
-    --text: #f3d2c1;
-    --dim: #c58f78;
-    --faint: #8a5848;
-    --hair: rgba(255,160,120,.15);
-    --amber: #ff8a4a;
-    --amber-glow: rgba(255,110,50,.55);
-    --flap: #ffd8c2;
-    --tint-rgb: 255,175,140;
-    --glow-rgb: 255,115,55;
-    --accent-rgb: 255,138,74;
-    --floor-rgb: 190,80,40;
-    --led-hot: #ffd0a8;
-    --glow-a: #fff4ec; --glow-b: #ffbf9a;
-    --wall-1: #3a150a; --wall-2: #26100a; --wall-3: #1d0b07;
-    --toast-bg: rgba(42,16,10,.94);
+    color-scheme: light;
+    --bg: #f5ebe5;
+    --cream: #3a241d;                  /* strongest text */
+    --text: #57392f;
+    --dim: #8c6f64;
+    --faint: #b39a8f;
+    --hair: rgba(120,70,50,.14);
+    --amber: #e07650;                  /* salt-lamp pink-orange */
+    --amber-glow: rgba(240,128,88,.40);
+    --flap: #cf7d5d;                   /* clock + month */
+    --tint-rgb: 120,70,50;             /* surfaces are tinted darker on a light page */
+    --glow-rgb: 245,140,100;
+    --accent-rgb: 224,118,80;
+    --floor-rgb: 232,170,140;
+    --led-hot: #ffcfb5;
+    --glow-a: #3a241d; --glow-b: #a85a40;   /* glow text: deep warm brown into the accent */
+    --wall-1: #fbf4ef; --wall-2: #f7ede7; --wall-3: #f0e1d8;
+    --toast-bg: rgba(255,248,243,.96);
   }
   :root[data-look="salt"] body {
     background:
-      radial-gradient(55% 30% at 50% 34%, rgba(255,120,55,.30), transparent 72%),
-      radial-gradient(40% 22% at 50% 36%, rgba(255,180,120,.14), transparent 70%),
-      radial-gradient(45% 50% at 100% 0%, rgba(40,48,92,.35), transparent 70%),
-      radial-gradient(120% 60% at 50% 120%, rgba(190,80,40,.26), transparent 60%),
+      radial-gradient(55% 30% at 50% 34%, rgba(255,160,120,.28), transparent 72%),
+      radial-gradient(38% 20% at 50% 36%, rgba(255,205,180,.35), transparent 70%),
+      radial-gradient(45% 50% at 100% 0%, rgba(175,175,215,.20), transparent 70%),
+      radial-gradient(120% 60% at 50% 120%, rgba(232,170,140,.30), transparent 60%),
       linear-gradient(180deg, var(--wall-1) 0%, var(--wall-2) 38%, var(--bg) 70%, var(--wall-3) 100%);
     background-attachment: fixed;
   }
-  :root[data-look="salt"] .clock, :root[data-look="salt"] .cal-month { filter: drop-shadow(0 0 22px rgba(255,120,60,.35)) drop-shadow(0 14px 20px rgba(0,0,0,.45)); }
+  :root[data-look="salt"] .clock, :root[data-look="salt"] .cal-month { filter: drop-shadow(0 0 18px rgba(240,128,88,.30)) drop-shadow(0 8px 14px rgba(120,60,40,.12)); }
+  :root[data-look="salt"] .toast { box-shadow: 0 0 24px -8px var(--amber-glow), 0 14px 30px rgba(120,60,40,.18); }
 
   /* Phone — must stay last so it overrides the desktop rules above */
   @media (max-width: 720px) {
@@ -617,7 +619,7 @@ if (!BLUEPRINT) (() => {
   try { settings = JSON.parse(localStorage.getItem(SKEY)) || {}; } catch { settings = {}; }
   settings.shifts ||= {};            // { 'YYYY-MM-DD': { start, end } }: only the dates you actually work
   settings.remind ??= 10;            // minutes before each task; 0 = off
-  const LOOKS = { night: { name: 'Night room', meta: '#150f0b' }, salt: { name: 'Salt lamp', meta: '#160805' } };
+  const LOOKS = { night: { name: 'Night room', meta: '#150f0b' }, salt: { name: 'Salt lamp', meta: '#f5ebe5' } };
   const applyLook = () => {
     const look = LOOKS[settings.look] ? settings.look : (BLUEPRINT.look || 'salt');
     document.documentElement.dataset.look = look;
