@@ -1,5 +1,5 @@
 // Mind of Niko — offline support. Shares its origin with other apps, so it only touches caches named mon-*.
-const VERSION = 'mon-v6';
+const VERSION = 'mon-v7';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
