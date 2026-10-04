@@ -1,7 +1,7 @@
 // Higher Self — offline support. Shares its origin with the other apps on this site,
 // so it only ever touches caches named hs-*.
 // Higher Self — Bump VERSION whenever the page changes so phones pick up the new copy.
-const VERSION = 'hs-v3';
+const VERSION = 'hs-v4';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
@@ -16,8 +16,8 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const isPage = req.mode === 'navigate';
   e.respondWith(isPage
-    ? fetch(req).then(r => { const copy = r.clone(); caches.open(VERSION).then(c => c.put('./index.html', copy)); return r; })
-        .catch(() => caches.match('./index.html'))
+    ? fetch(req).then(r => { const copy = r.clone(); caches.open(VERSION).then(c => c.put(req, copy)); return r; })
+        .catch(() => caches.match(req).then(hit => hit || caches.match('./index.html')))
     : caches.match(req).then(hit => hit || fetch(req).then(r => {
         if (r.ok || r.type === 'opaque') { const copy = r.clone(); caches.open(VERSION).then(c => c.put(req, copy)); }
         return r;
