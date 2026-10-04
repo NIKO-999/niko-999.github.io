@@ -335,28 +335,50 @@ const BLUEPRINT = (() => { try { const b = JSON.parse(localStorage.getItem(BP_KE
 
 // ---------- Recovery code: blueprint → deflate → base64url, prefixed HS1. ----------
 const HSCode = {
+  // HS2 = compact: only her own words are kept (ids, sections and the work tasks are rebuilt on restore).
+  pack(bp) {
+    const f = bp.frequency || {};
+    return [2, bp.identity.statement, bp.identity.dayOne, bp.rules || [], f.raises || [], f.lowers || [],
+      bp.nonNegotiables.filter(t => !t.shift).map(t => [t.time, t.title]),
+      (bp.pillars || []).map(p => [p.name, p.vision, p.truths || []]), bp.look === 'night' ? 1 : 0];
+  },
+  unpack(a) {
+    const [, statement, dayOne, rules, raises, lowers, tasks, pillars, night] = a;
+    const partOf = t => { const m = String(t).match(/(\d+):(\d+)(am|pm)/); if (!m) return 'Evening';
+      const x = (+m[1] % 12 + (m[3] === 'pm' ? 12 : 0)) * 60 + +m[2]; return x < 720 ? 'Morning' : x < 1080 ? 'Midday' : 'Evening'; };
+    return { v: 1, identity: { name: '', statement, dayOne }, rules, frequency: { raises, lowers },
+      nonNegotiables: [...tasks.map(([time, title], n) => ({ id: 't' + n, time, part: partOf(time), title })),
+        { id: 'leave', shift: 'leave', part: 'Morning', title: 'Leave for work' }, { id: 'work', shift: true, part: 'Midday', title: 'Work' }],
+      pillars: pillars.map(([name, vision, truths]) => ({ name, vision, truths })), look: night ? 'night' : 'salt' };
+  },
   async encode(obj) {
-    const bytes = new TextEncoder().encode(JSON.stringify(obj));
-    let out = bytes, tag = 'HS0.';
+    const bytes = new TextEncoder().encode(JSON.stringify(this.pack(obj)));
+    let out = bytes, tag = 'HS3.';                       // HS3 = compact, uncompressed fallback
     try {
-      const cs = new CompressionStream('deflate-raw');
-      out = new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(cs)).arrayBuffer()); tag = 'HS1.';
+      out = new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer()); tag = 'HS2.';
     } catch {}
     let bin = ''; out.forEach(b => bin += String.fromCharCode(b));
-    const b64 = btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    return tag + b64.replace(/(.{48})/g, '$1 ').trim();
+    return tag + btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   },
-  async decode(code) {
-    const s = String(code || '').replace(/\s+/g, '');
-    const m = s.match(/^HS([01])\.([A-Za-z0-9_-]+)$/);
+  async decode(text) {
+    // Accepts the bare code or a whole pasted message containing it.
+    const s = String(text || ''), i = s.search(/HS[0-3]\./);
+    if (i < 0) throw new Error('shape');
+    const m = s.slice(i).replace(/\s+/g, '').match(/^HS([0-3])\.([A-Za-z0-9_-]+)/);
     if (!m) throw new Error('shape');
     const b64 = m[2].replace(/-/g, '+').replace(/_/g, '/');
-    const bin = atob(b64 + '==='.slice((b64.length + 3) % 4));
-    let bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
-    if (m[1] === '1') bytes = new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
-    const bp = JSON.parse(new TextDecoder().decode(bytes));
+    let bytes = Uint8Array.from(atob(b64 + '==='.slice((b64.length + 3) % 4)), c => c.charCodeAt(0));
+    if (m[1] === '1' || m[1] === '2') bytes = new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
+    let bp = JSON.parse(new TextDecoder().decode(bytes));
+    if (Array.isArray(bp)) bp = this.unpack(bp);
     if (!bp || !Array.isArray(bp.nonNegotiables) || !bp.identity) throw new Error('content');
     return bp;
+  },
+  // Share sheet → Notes, Messages, Mail. Falls back to copying.
+  async save(code, note) {
+    const text = `My Higher Self recovery code. Open the app, tap "I already have a recovery code" and paste this message:\n\n${code}`;
+    if (navigator.share) { try { await navigator.share({ title: 'Higher Self recovery code', text }); return note('Saved. Keep it somewhere you\'ll find it.'); } catch (e) { if (e?.name === 'AbortError') return; } }
+    try { await navigator.clipboard.writeText(text); note('Copied. Paste it into your Notes.'); } catch { note('Press and hold the code to copy it.'); }
   },
 };
 
@@ -412,7 +434,7 @@ if (!BLUEPRINT) (() => {
       </div>
       <button class="link muted-link ob-restore" id="obRestore">I already have a recovery code</button>`, { next: 'Begin' });
     if (st === 'restore') html = frame('Recovery', 'Paste your recovery code.', `
-      <label class="field ob-field"><span class="k">Code</span><textarea id="obCode" rows="6" placeholder="HS1.…" spellcheck="false" autocapitalize="off"></textarea></label>`,
+      <label class="field ob-field"><span class="k">Code</span><textarea id="obCode" rows="6" placeholder="Paste the whole message from your Notes, or just the code that starts with HS" spellcheck="false" autocapitalize="off"></textarea></label>`,
       { next: 'Restore my process' });
     if (st === 'alignment') html = frame('Alignment', 'Who is she? Write it as if it is already true.', `
       <p class="muted ob-p">This is what you'll read at the top of every day. Present tense. Not who you're trying to become, who you already are.</p>
@@ -481,9 +503,9 @@ if (!BLUEPRINT) (() => {
       <div class="row"><div class="body">
         <div class="cap"><span>Your recovery code</span></div>
         <h1 class="lead glow ob-q">Locked in. Save this code somewhere safe.</h1>
-        <p class="muted ob-p">If you ever delete the app, change phone or reset, paste this code on the first screen and your whole process comes straight back. Screenshot it or save it in your notes.</p>
+        <p class="muted ob-p">If you ever delete the app, change phone or reset, paste this code on the first screen and your whole process comes straight back. Tap Save to Notes and send it to your Notes, Messages or email.</p>
         <pre class="ob-code" id="obCodeOut">Making your code…</pre>
-        <div class="ob-nav"><button class="link muted-link" id="obCopy">Copy code</button><button class="link" id="obDone">I've saved it. Start.</button></div>
+        <div class="ob-nav"><button class="link" id="obCopy">Save to Notes</button><button class="link" id="obDone">I've saved it. Start.</button></div>
         <div class="hint ob-hint" id="obHint">You can find this code again any time in Settings.</div>
       </div></div>`;
     root.innerHTML = html;
@@ -544,7 +566,7 @@ if (!BLUEPRINT) (() => {
       const bp = build();
       HSCode.encode(bp).then(code => {
         $('#obCodeOut').textContent = code;
-        $('#obCopy').onclick = () => navigator.clipboard?.writeText(code).then(() => hint('Copied.'), () => { getSelection().selectAllChildren($('#obCodeOut')); hint('Selected. Copy it from here.'); });
+        $('#obCopy').onclick = () => HSCode.save(code, hint);
       });
       $('#obDone').onclick = () => { try { sessionStorage.removeItem('hs-start.draft'); } catch {} location.reload(); };
       return;
@@ -864,9 +886,9 @@ if (!BLUEPRINT) (() => {
           <button type="button" class="dp rm ${settings.remind === m ? 'on' : ''}" data-m="${m}" aria-pressed="${settings.remind === m}">${m ? m + ' min before' : 'Off'}</button>`).join('')}</div>
         <div class="hint" id="rmNote">${notifyNote()}</div>`)
       + row('Recovery code', `
-        <div class="muted" style="margin-bottom:12px">Paste this on the first screen to bring your process back after a delete or a new phone.</div>
+        <div class="muted" style="margin-bottom:12px">Paste this on the first screen to bring your process back after a delete or a new phone. Save to Notes sends it to your Notes, Messages or email.</div>
         <pre class="ob-code" id="setCode">…</pre>
-        <div class="seal-row"><button class="link" id="setCopy">Copy code</button><span class="hint" id="setCodeNote"></span></div>`)
+        <div class="seal-row"><button class="link" id="setCopy">Save to Notes</button><span class="hint" id="setCodeNote"></span></div>`)
       + row('Reset', `
         <div class="muted" style="margin-bottom:14px">Start again from the questions. Your blueprint, every tick, miss, reason, closing thought and shift is erased. Keep your recovery code if you want this process back.</div>
         <div class="seal-row" id="resetAsk"><button class="link red" id="resetBtn">Reset everything</button></div>
@@ -883,8 +905,7 @@ if (!BLUEPRINT) (() => {
     });
     HSCode.encode(BLUEPRINT).then(code => {
       const out = $('#setCode'); if (!out) return; out.textContent = code;
-      $('#setCopy').onclick = () => navigator.clipboard?.writeText(code).then(() => $('#setCodeNote').textContent = 'Copied.',
-        () => { getSelection().selectAllChildren(out); $('#setCodeNote').textContent = 'Selected. Copy it from here.'; });
+      $('#setCopy').onclick = () => HSCode.save(code, t => $('#setCodeNote').textContent = t);
     });
     $('#resetBtn').onclick = () => { $('#resetAsk').hidden = true; $('#resetConfirm').hidden = false; };
     $('#resetNo').onclick = () => { $('#resetAsk').hidden = false; $('#resetConfirm').hidden = true; };
