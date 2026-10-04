@@ -157,6 +157,13 @@
   @media (max-width: 720px) { .toasts { left: 16px; right: 16px; width: auto; } }
 
   /* Settings */
+  .shift-list { display: grid; gap: 4px; margin: 4px 0 20px; }
+  .shift-row { display: grid; grid-template-columns: 96px minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: end; padding: 4px 0; }
+  .shift-row .dp { justify-self: start; }
+  .shift-row:not(.on) .field { opacity: .3; }
+  .shift-row.past { opacity: .45; }
+  .shift-row input { background: transparent; border: 0; outline: none; color: var(--cream); font: inherit; font-size: 14px; padding: 2px 0; width: 100%; }
+  .shift-row input::-webkit-calendar-picker-indicator { filter: invert(.75) sepia(.6); opacity: .7; }
   .set-label { font-size: 9px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
   .day-pick { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
   .dp { border: 1px solid var(--hair); background: none; color: var(--dim); border-radius: 999px; padding: 6px 12px; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
@@ -312,8 +319,7 @@ const BLUEPRINT = {
     dayOne: '2026-10-06'   // Tuesday
   },
 
-  // Work shift default. It can be changed in Settings, from the day it's saved onward.
-  workDefault: { days: [5, 6, 0], start: '10:00', end: '18:00' },
+  // Work shifts are not part of the fixed blueprint. They're entered week by week in Settings.
 
   // The rules that hold it together.
   rules: [
@@ -434,7 +440,7 @@ const BLUEPRINT = {
   const SKEY = 'higher-self.settings';
   let settings;
   try { settings = JSON.parse(localStorage.getItem(SKEY)) || {}; } catch { settings = {}; }
-  settings.work ||= [{ from: '0000-00-00', ...BLUEPRINT.workDefault }];
+  settings.shifts ||= {};            // { 'YYYY-MM-DD': { start, end } }: only the dates you actually work
   settings.remind ??= 10;            // minutes before each task; 0 = off
   const LOOKS = { night: { name: 'Night room', meta: '#150f0b' }, salt: { name: 'Salt lamp', meta: '#160805' } };
   const applyLook = () => {
@@ -446,30 +452,23 @@ const BLUEPRINT = {
   const saveSettings = () => { try { localStorage.setItem(SKEY, JSON.stringify(settings)); } catch {} };
   // Day 1 is the blueprint's start date, or a later reset date, whichever comes last.
   const DAY1 = [BLUEPRINT.identity.dayOne, settings.dayOne].filter(Boolean).sort().pop() || dkey();
-  const workFor = k => settings.work.filter(w => w.from <= k).sort((a, b) => a.from.localeCompare(b.from)).pop() || settings.work[0];
+  const shiftOn = k => settings.shifts[k] || null;
   const mins = hm => { const [a, b] = hm.split(':').map(Number); return a * 60 + b; };
   const clock12 = (hm, short) => {
     let [a, b] = hm.split(':').map(Number); const ap = a < 12 ? 'am' : 'pm'; a = a % 12 || 12;
     return short && b === 0 ? `${a}${ap}` : `${a}:${String(b).padStart(2, '0')}${ap}`;
   };
   const WD = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const daysText = days => {
-    const order = [1,2,3,4,5,6,0].filter(d => days.includes(d));
-    if (!order.length) return '';
-    if (order.length === 7) return 'Every day';
-    const idx = order.map(d => [1,2,3,4,5,6,0].indexOf(d));
-    const run = idx.every((v, i) => i === 0 || v === idx[i - 1] + 1);
-    if (run && order.length > 2) return `${WD[order[0]]} to ${WD[order[order.length - 1]]}`;
-    return order.length === 1 ? WD[order[0]] : order.slice(0, -1).map(d => WD[d]).join(', ') + ' and ' + WD[order[order.length - 1]];
-  };
+  // Work and Leave for work exist only on dates with a shift entered for that week.
   const shiftItem = (i, k) => {
-    const w = workFor(k);
+    const w = shiftOn(k);
+    if (!w) return null;
     if (i.shift === 'leave') {
       const m = Math.max(0, mins(w.start) - 30), hm = `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
-      return { ...i, days: w.days, time: clock12(hm), part: m < 600 ? 'Morning' : m < 1020 ? 'Midday' : 'Evening', sortMin: m - 0.5 };
+      return { ...i, time: clock12(hm), part: m < 600 ? 'Morning' : m < 1020 ? 'Midday' : 'Evening', sortMin: m - 0.5 };
     }
     const m = mins(w.start);
-    return { ...i, days: w.days, time: clock12(w.start), title: `Work, ${clock12(w.start, true)}–${clock12(w.end, true)}`,
+    return { ...i, time: clock12(w.start), title: `Work, ${clock12(w.start, true)}–${clock12(w.end, true)}`,
              part: m < 600 ? 'Morning' : m < 1020 ? 'Midday' : 'Evening', sortMin: m };
   };
   // A task's place in the day: its own time, or (for "All day") the task before it.
@@ -477,7 +476,7 @@ const BLUEPRINT = {
     const t = i.sortMin ?? (/\d/.test(i.time || '') ? (() => { const [, a, b, ap] = i.time.match(/(\d+):(\d+)(am|pm)/); return (+a % 12 + (ap === 'pm' ? 12 : 0)) * 60 + +b; })() : null);
     last = t ?? last + 0.01; return { ...i, sortMin: last, n };
   }).sort((a, b) => a.sortMin - b.sortMin || a.n - b.n); };
-  const NNfor = k => withOrder(NN.map(i => i.shift ? shiftItem(i, k) : i)).filter(i => !i.days || i.days.includes(fromKey(k).getDay()));
+  const NNfor = k => withOrder(NN.map(i => i.shift ? shiftItem(i, k) : i).filter(Boolean)).filter(i => !i.days || i.days.includes(fromKey(k).getDay()));
 
   // ---------- Log (the only thing that's written at runtime) ----------
   let log;
@@ -679,19 +678,27 @@ const BLUEPRINT = {
   }
 
   // ---------- Settings ----------
+  let shiftWeek = 0;                 // 0 = this week, 1 = next week, …
+  const mondayOf = k => { const d = fromKey(k); return addDays(k, -((d.getDay() + 6) % 7)); };
   function renderSettings() {
-    const today = dkey(), w = workFor(today);
-    const order = [1,2,3,4,5,6,0];
-    $('#vSettings').innerHTML = row('Work shift', `
-        <div class="muted" style="margin-bottom:16px">For when shifts change. Everything else in the blueprint stays fixed.</div>
-        <div class="set-label">Days</div>
-        <div class="day-pick" role="group" aria-label="Work days">${order.map(d => `
-          <button type="button" class="dp ${w.days.includes(d) ? 'on' : ''}" data-d="${d}" aria-pressed="${w.days.includes(d)}">${WD[d].slice(0, 3)}</button>`).join('')}</div>
-        <div class="set-times">
-          <label class="field"><span class="k">Start</span><input type="time" id="wStart" value="${w.start}"></label>
-          <label class="field"><span class="k">Finish</span><input type="time" id="wEnd" value="${w.end}"></label>
-        </div>
-        <div class="seal-row"><button class="link" id="wSave">Save shift</button><span class="hint" id="wNote">Applies from today. Past days keep the shift they had.</span></div>`)
+    const today = dkey(), mon = addDays(mondayOf(today), shiftWeek * 7);
+    const days = [0,1,2,3,4,5,6].map(n => addDays(mon, n));
+    const short = k => fromKey(k).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+    const weekBtns = [0,1,2,3].map(n => { const m = addDays(mondayOf(today), n * 7);
+      return `<button type="button" class="dp wk ${shiftWeek === n ? 'on' : ''}" data-w="${n}" aria-pressed="${shiftWeek === n}">Week ${n + 1} · ${short(m)}</button>`; }).join('');
+    const dayRows = days.map(k => {
+      const s = shiftOn(k), past = k < today;
+      return `<div class="shift-row ${s ? 'on' : ''} ${past ? 'past' : ''}" data-k="${k}">
+        <button type="button" class="dp sd ${s ? 'on' : ''}" ${past ? 'disabled' : ''} aria-pressed="${!!s}">${WD[fromKey(k).getDay()].slice(0, 3)} ${fromKey(k).getDate()}</button>
+        <label class="field"><span class="k">Start</span><input type="time" data-f="start" value="${s?.start || '10:00'}" ${s && !past ? '' : 'disabled'}></label>
+        <label class="field"><span class="k">Finish</span><input type="time" data-f="end" value="${s?.end || '18:00'}" ${s && !past ? '' : 'disabled'}></label>
+      </div>`;
+    }).join('');
+    $('#vSettings').innerHTML = row('Work shifts', `
+        <div class="muted" style="margin-bottom:16px">Enter each week's shifts. A shift only goes on the days you pick in that week, and Leave for work is added 30 minutes before it.</div>
+        <div class="day-pick" role="group" aria-label="Week">${weekBtns}</div>
+        <div class="shift-list">${dayRows}</div>
+        <div class="seal-row"><button class="link" id="wSave">Save week</button><span class="hint" id="wNote">Tap a day to mark it as a work day.</span></div>`)
       + row('Theme', `
         <div class="muted" style="margin-bottom:14px">Same layout, different light.</div>
         <div class="day-pick" role="group" aria-label="Theme">${Object.entries(LOOKS).map(([id, l]) => `
@@ -702,7 +709,7 @@ const BLUEPRINT = {
           <button type="button" class="dp rm ${settings.remind === m ? 'on' : ''}" data-m="${m}" aria-pressed="${settings.remind === m}">${m ? m + ' min before' : 'Off'}</button>`).join('')}</div>
         <div class="hint" id="rmNote">${notifyNote()}</div>`)
       + row('Reset', `
-        <div class="muted" style="margin-bottom:14px">Start again from today. Every tick, miss, reason and closing thought is erased, the work shift goes back to the default, and today becomes Day 1. The blueprint itself stays the same.</div>
+        <div class="muted" style="margin-bottom:14px">Start again from today. Every tick, miss, reason and closing thought is erased, every entered shift is cleared, and today becomes Day 1. The blueprint itself stays the same.</div>
         <div class="seal-row" id="resetAsk"><button class="link red" id="resetBtn">Reset everything</button></div>
         <div class="seal-row" id="resetConfirm" hidden><span class="hint" style="color:var(--text)">This can't be undone.</span>
           <button class="link red" id="resetYes">Yes, reset</button><button class="link" id="resetNo">Cancel</button></div>`);
@@ -724,14 +731,31 @@ const BLUEPRINT = {
       } catch {}
       location.reload();
     };
-    v.querySelectorAll('.dp:not(.rm):not(.lk)').forEach(b => b.onclick = () => { b.classList.toggle('on'); b.setAttribute('aria-pressed', b.classList.contains('on')); });
+    v.querySelectorAll('.dp.wk').forEach(b => b.onclick = () => { shiftWeek = +b.dataset.w; renderSettings(); });
+    v.querySelectorAll('.shift-row').forEach(r => {
+      const b = r.querySelector('.dp.sd');
+      b.onclick = () => {
+        const on = !r.classList.contains('on');
+        r.classList.toggle('on', on); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
+        r.querySelectorAll('input').forEach(i => i.disabled = !on);
+        $('#wNote').textContent = 'Not saved yet.';
+      };
+      r.querySelectorAll('input').forEach(i => i.oninput = () => { $('#wNote').textContent = 'Not saved yet.'; });
+    });
     $('#wSave').onclick = () => {
-      const days = [...v.querySelectorAll('.dp.on:not(.rm):not(.lk)')].map(b => +b.dataset.d);
-      const start = $('#wStart').value, end = $('#wEnd').value;
-      if (!start || !end || mins(end) <= mins(start)) { $('#wNote').textContent = 'Finish needs to be after start.'; return; }
-      settings.work = settings.work.filter(x => x.from !== today).concat({ from: today, days, start, end });
+      const rows = [...v.querySelectorAll('.shift-row:not(.past)')];
+      for (const r of rows) {
+        if (!r.classList.contains('on')) continue;
+        const st = r.querySelector('[data-f=start]').value, en = r.querySelector('[data-f=end]').value;
+        if (!st || !en || mins(en) <= mins(st)) { $('#wNote').textContent = `${fromKey(r.dataset.k).toLocaleDateString(undefined, { weekday: 'long' })}: finish needs to be after start.`; return; }
+      }
+      rows.forEach(r => {
+        const k = r.dataset.k;
+        if (r.classList.contains('on')) settings.shifts[k] = { start: r.querySelector('[data-f=start]').value, end: r.querySelector('[data-f=end]').value };
+        else delete settings.shifts[k];
+      });
       saveSettings(); renderSettings();
-      $('#wNote').textContent = 'Saved. Today and every day after use this shift.';
+      $('#wNote').textContent = 'Saved. Only this week has changed.';
     };
   }
 
