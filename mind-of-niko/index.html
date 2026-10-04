@@ -21,8 +21,8 @@
   :root {
     color-scheme: light;
     --paper: #e9e8e4;
-    --ink: #0d0d0d;
-    --body: #2f2f2f;
+    --ink: #000;
+    --body: #141414;
     --mark: #4a5aa8;                 /* periwinkle: header, numbers, NEXT */
     --serif: "Instrument Serif", "Times New Roman", Times, serif;
     --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -46,11 +46,6 @@
           font: 700 clamp(18px, 2.4vw, 28px)/1 var(--sans); color: var(--mark); letter-spacing: -.01em; }
   .next:focus-visible { outline: 2px solid var(--mark); outline-offset: 6px; }
 
-  /* turn: the old card lifts away, the new one settles in */
-  .mid, .top .l { transition: opacity .28s ease, transform .28s ease; }
-  .turning .mid { opacity: 0; transform: translateY(10px); }
-  .turning .top .l { opacity: 0; }
-  @media (prefers-reduced-motion: reduce) { .mid, .top .l { transition: none; } }
 </style>
 </head>
 <body>
@@ -107,8 +102,8 @@ function paint() {
 let busy = false;
 function go(step) {
   if (busy) return; busy = true;
-  const card = $('card'); card.classList.add('turning');
-  setTimeout(() => { at = (at + step + CARDS.length) % CARDS.length; paint(); card.classList.remove('turning'); busy = false; }, 280);
+  at = (at + step + CARDS.length) % CARDS.length; paint();
+  setTimeout(() => { busy = false; }, 150);   // ignore a double tap
 }
 $('next').onclick = e => { e.stopPropagation(); go(1); };
 // Tap the right of the screen for next, the left for back. Swipe works too. Arrow keys on desktop.
