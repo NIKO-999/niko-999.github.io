@@ -443,7 +443,7 @@ if (!BLUEPRINT) (() => {
     if (st === 'areas') html = frame('Her life', 'Which areas of her life matter most?', `
       <p class="muted ob-p">Pick two to five. Each one becomes part of your vision, and you'll work backwards from it to what you do daily.</p>
       <div class="day-pick">${[...new Set([...AREAS, ...A.areas])].map(a => `<button type="button" class="dp ob-area ${A.areas.includes(a) ? 'on' : ''}" data-a="${esc(a)}">${esc(a)}</button>`).join('')}</div>
-      <label class="field ob-field"><span class="k">Add your own</span><input id="obAreaNew" placeholder="e.g. Motherhood, Travel, Faith"></label>
+      <label class="field ob-field"><span class="k">Add your own</span><input id="obAreaNew" placeholder="e.g. Travel, Faith, Family"></label>
       <button class="link muted-link" id="obAreaAdd">Add area</button>`);
     if (st.startsWith('area:')) { const i = +st.split(':')[1], a = area(i);
       html = frame(A.areas[i], `In ${esc(A.areas[i].toLowerCase())}, how does she live?`, `
