@@ -1,7 +1,7 @@
 // Higher Self — offline support. Shares its origin with the other apps on this site,
 // so it only ever touches caches named hs-*.
 // Higher Self — Bump VERSION whenever the page changes so phones pick up the new copy.
-const VERSION = 'hs-v9';
+const VERSION = 'hs-v10';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
