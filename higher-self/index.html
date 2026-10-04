@@ -207,7 +207,8 @@
   ol.rules { margin: 0; padding: 0; list-style: none; counter-reset: r; }
 
   /* THEME RULE: every theme is built like Night room — the same neutral near-black room and soft glow.
-     A theme changes only the colour of the light (accent, glow, tint). Never a white or light background. */
+     A theme changes the colour of the light (accent, glow, tint), and may add a surface treatment like
+     Jungle's liquid glass. Never a white or light background. */
   /* ---------- Salt lamp — Night room's neutral dark, lit in salt-lamp coral instead of amber ---------- */
   :root[data-look="salt"] {
     --bg: #150e0d;
@@ -228,6 +229,56 @@
     --wall-1: #2b201e; --wall-2: #1f1615; --wall-3: #1b1312;
     --toast-bg: rgba(32,22,20,.94);
   }
+
+  /* ---------- Jungle — dark stone room, lush green light through the glass. Liquid glass panels. ---------- */
+  :root[data-look="jungle"] {
+    --bg: #0c0f0d;
+    --cream: #e9efe6;
+    --text: #d3dbcf;
+    --dim: #8f9a8b;
+    --faint: #5c675a;
+    --hair: rgba(200,240,190,.11);
+    --amber: #8fd46a;                  /* leaf light */
+    --amber-glow: rgba(130,210,90,.40);
+    --flap: #c9d0c6;
+    --tint-rgb: 205,235,195;
+    --glow-rgb: 120,200,85;
+    --accent-rgb: 143,212,106;
+    --floor-rgb: 60,90,55;
+    --led-hot: #d4f5bd;
+    --glow-a: #f6fbf3; --glow-b: #cdeeb7;
+    --wall-1: #1d221e; --wall-2: #151916; --wall-3: #101311;
+    --toast-bg: rgba(22,28,24,.62);
+  }
+  /* the window: green daylight falling into the room from the right */
+  :root[data-look="jungle"] body {
+    background:
+      radial-gradient(60% 45% at 100% 55%, rgba(110,190,80,.22), transparent 70%),
+      radial-gradient(40% 30% at 85% 40%, rgba(170,230,130,.10), transparent 70%),
+      radial-gradient(70% 22% at 50% 37%, rgba(120,200,85,.10), transparent 70%),
+      radial-gradient(120% 60% at 30% 120%, rgba(60,90,55,.22), transparent 60%),
+      linear-gradient(180deg, var(--wall-1) 0%, var(--wall-2) 38%, var(--bg) 70%, var(--wall-3) 100%);
+    background-attachment: fixed;
+  }
+  /* liquid glass: each section is a frosted pane the green light glows through */
+  :root[data-look="jungle"] .row {
+    border: 1px solid rgba(220,255,210,.10); border-top-color: rgba(235,255,225,.22);
+    border-radius: 22px; margin-bottom: 14px; padding: 0 20px;
+    background: linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.02) 45%, rgba(140,210,110,.04));
+    backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.10), inset 0 -1px 0 rgba(0,0,0,.25), 0 18px 40px -18px rgba(0,0,0,.6);
+  }
+  :root[data-look="jungle"] .row:last-child { border-bottom: 1px solid rgba(220,255,210,.10); }
+  :root[data-look="jungle"] nav.links {
+    padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(220,255,210,.12);
+    background: rgba(255,255,255,.05); backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+  }
+  :root[data-look="jungle"] .toast { border-radius: 18px; border-color: rgba(220,255,210,.18);
+    backdrop-filter: blur(24px) saturate(170%); -webkit-backdrop-filter: blur(24px) saturate(170%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 18px 40px rgba(0,0,0,.5); }
+  :root[data-look="jungle"] .cal-cell.sel, :root[data-look="jungle"] .dp.on { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  :root[data-look="jungle"] .cal { padding-inline: 4px; }
 
   /* Phone — must stay last so it overrides the desktop rules above */
   @media (max-width: 720px) {
@@ -434,7 +485,7 @@ const BLUEPRINT = {
   try { settings = JSON.parse(localStorage.getItem(SKEY)) || {}; } catch { settings = {}; }
   settings.shifts ||= {};            // { 'YYYY-MM-DD': { start, end } }: only the dates you actually work
   settings.remind ??= 10;            // minutes before each task; 0 = off
-  const LOOKS = { night: { name: 'Night room', meta: '#150f0b' }, salt: { name: 'Salt lamp', meta: '#150e0d' } };
+  const LOOKS = { night: { name: 'Night room', meta: '#150f0b' }, salt: { name: 'Salt lamp', meta: '#150e0d' }, jungle: { name: 'Jungle', meta: '#0c0f0d' } };
   const applyLook = () => {
     const look = LOOKS[settings.look] ? settings.look : 'night';
     document.documentElement.dataset.look = look;
