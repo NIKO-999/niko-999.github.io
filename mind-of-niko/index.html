@@ -43,6 +43,7 @@
        font-size: clamp(46px, 9.5vw, 104px); line-height: 1.12; letter-spacing: -.01em; text-wrap: balance; }
   p { margin: 0 auto; max-width: 30em; font-size: clamp(17px, 2.5vw, 28px); line-height: 1.5; color: var(--body); text-wrap: pretty; }
 
+  .lesson { color: var(--mark); }
 </style>
 </head>
 <body>
@@ -57,28 +58,29 @@
 <script>
 // Advice for the journey, in order. Hard-coded on purpose.
 const CARDS = [
-  ['Act like it’s already done', 'Stop waiting to feel ready before you behave like the person you want to be. Make the decisions they would make today, at your current level. Identity doesn’t lead the action. It follows it.'],
-  ['Set clear goals, then let them go', 'Decide exactly where you’re going and write it down once. Then stop staring at it. The goal sets the direction, but it’s the daily process that actually moves you there.'],
-  ['Fall in love with the process', 'Results are slow, uneven and out of your control. The process is the one thing you own every single day. Judge each day by whether you did the work, and the outcome takes care of itself.'],
-  ['Protect the first hour', 'How you start the day sets the tone for everything after it. Before the noise reaches you, ground yourself, hydrate and move. A calm, intentional morning is a quiet act of self-respect.'],
-  ['Keep promises small and daily', 'Self-trust is built in tiny deposits. Make commitments you can keep every day, then keep them without negotiation. Confidence is just the evidence of promises kept.'],
-  ['Remove the options', 'Willpower runs out. Decisions made in advance don’t. Remove the temptations, set the rules before the moment comes, and let your environment make the right choice the easy one.'],
-  ['Signal over noise', 'Most of what competes for your attention doesn’t matter. Learn to tell what moves you forward from what only keeps you busy. Protect your focus like it’s your most valuable asset, because it is.'],
-  ['Change your environment', 'You become a product of what surrounds you. If your space, feed or circle doesn’t match where you’re going, start building your way out, while still giving full effort where you are.'],
-  ['Compare upwards, never sideways', 'Measuring yourself against the people around you keeps you exactly where you are. Look to the person you’re becoming and those already living it. Let them be the standard, not the room.'],
-  ['Invest in the right minds', 'The fastest way to grow is to learn from someone who’s already done it. Good guidance is never expensive when it saves you years of mistakes. Pay for wisdom so you don’t pay twice.'],
-  ['Raise your standards quietly', 'You don’t need to announce your new standards. Live them. What you eat, who you give your time to and what you tolerate all tell you who you really believe you are.'],
-  ['Mind your frequency', 'Notice what leaves you lit up and what leaves you heavy. Do more of the first and slowly remove the second. Your energy is a resource, so treat every input like it costs something.'],
-  ['Repetition builds mastery', 'Depth beats novelty. Go back to the same lesson, the same practice, the same fundamentals until they stop being something you know and become something you are.'],
-  ['Discipline over motivation', 'Motivation shows up when it wants to. Discipline shows up when it has to. Build a life that doesn’t depend on how you feel, and you’ll keep moving on the days you don’t want to.'],
-  ['Never act from scarcity', 'Scarcity makes you rush, force and chase. Abundance lets you wait for the right moment. When you trust there’s enough, you make better decisions with less pressure.'],
-  ['Follow your own rules', 'Your rules exist for the moments you’d rather break them. Set them when you’re calm, honour them when you’re not. The person who doesn’t negotiate with themselves is hard to stop.'],
-  ['Your body keeps the score', 'How you treat your body is how you treat your word. Train, fuel and rest like someone you respect. Physical discipline becomes proof that you can do hard things.'],
-  ['Give value freely', 'Share what you’ve learned without waiting to be an expert. Lifting others up the path behind you sharpens your own understanding. What you give out has a way of coming back multiplied.'],
-  ['Document, don’t perform', 'Capture your journey honestly while you’re living it. Not to impress anyone, but to keep a record of who you’re becoming. The proof will matter more to you than anyone else.'],
-  ['Close each day honestly', 'Before you sleep, ask what kept you aligned and what pulled you off course. Be honest, not harsh. One small correction each day compounds into a completely different life.'],
-  ['Solitude is a strength', 'Time alone isn’t lonely when you’re building something. It’s where you think clearly, hear yourself and do the work no one sees. Learn to be comfortable in your own company.'],
-  ['Act boldly, have faith', 'At some point, planning has to turn into doing. Take the step before you feel certain. Faith isn’t knowing how it works out. It’s acting like it already has.'],
+  // [title, lead-in, the lesson]
+  ['Act like it’s already done', 'Stop waiting to feel ready before you behave like the person you want to be.', 'Make the decisions they would make today, at your current level. Identity doesn’t lead the action. It follows it.'],
+  ['Set clear goals, then let them go', 'Decide exactly where you’re going and write it down once. Then stop staring at it.', 'The goal sets the direction, but it’s the daily process that actually moves you there.'],
+  ['Fall in love with the process', 'Results are slow, uneven and out of your control. The process is the one thing you own every single day.', 'Judge each day by whether you did the work, and the outcome takes care of itself.'],
+  ['Protect the first hour', 'How you start the day sets the tone for everything after it.', 'Before the noise reaches you, ground yourself, hydrate and move. A calm, intentional morning is a quiet act of self-respect.'],
+  ['Keep promises small and daily', 'Self-trust is built in tiny deposits.', 'Make commitments you can keep every day, then keep them without negotiation. Confidence is just the evidence of promises kept.'],
+  ['Remove the options', 'Willpower runs out. Decisions made in advance don’t.', 'Remove the temptations, set the rules before the moment comes, and let your environment make the right choice the easy one.'],
+  ['Signal over noise', 'Most of what competes for your attention doesn’t matter.', 'Learn to tell what moves you forward from what only keeps you busy. Protect your focus like it’s your most valuable asset, because it is.'],
+  ['Change your environment', 'You become a product of what surrounds you.', 'If your space, feed or circle doesn’t match where you’re going, start building your way out, while still giving full effort where you are.'],
+  ['Compare upwards, never sideways', 'Measuring yourself against the people around you keeps you exactly where you are.', 'Look to the person you’re becoming and those already living it. Let them be the standard, not the room.'],
+  ['Invest in the right minds', 'The fastest way to grow is to learn from someone who’s already done it.', 'Good guidance is never expensive when it saves you years of mistakes. Pay for wisdom so you don’t pay twice.'],
+  ['Raise your standards quietly', 'You don’t need to announce your new standards. Live them.', 'What you eat, who you give your time to and what you tolerate all tell you who you really believe you are.'],
+  ['Mind your frequency', 'Notice what leaves you lit up and what leaves you heavy.', 'Do more of the first and slowly remove the second. Your energy is a resource, so treat every input like it costs something.'],
+  ['Repetition builds mastery', 'Depth beats novelty.', 'Go back to the same lesson, the same practice, the same fundamentals until they stop being something you know and become something you are.'],
+  ['Discipline over motivation', 'Motivation shows up when it wants to. Discipline shows up when it has to.', 'Build a life that doesn’t depend on how you feel, and you’ll keep moving on the days you don’t want to.'],
+  ['Never act from scarcity', 'Scarcity makes you rush, force and chase. Abundance lets you wait for the right moment.', 'When you trust there’s enough, you make better decisions with less pressure.'],
+  ['Follow your own rules', 'Your rules exist for the moments you’d rather break them.', 'Set them when you’re calm, honour them when you’re not. The person who doesn’t negotiate with themselves is hard to stop.'],
+  ['Your body keeps the score', 'How you treat your body is how you treat your word.', 'Train, fuel and rest like someone you respect. Physical discipline becomes proof that you can do hard things.'],
+  ['Give value freely', 'Share what you’ve learned without waiting to be an expert.', 'Lifting others up the path behind you sharpens your own understanding. What you give out has a way of coming back multiplied.'],
+  ['Document, don’t perform', 'Capture your journey honestly while you’re living it. Not to impress anyone.', 'Keep a record of who you’re becoming. The proof will matter more to you than anyone else.'],
+  ['Close each day honestly', 'Before you sleep, ask what kept you aligned and what pulled you off course. Be honest, not harsh.', 'One small correction each day compounds into a completely different life.'],
+  ['Solitude is a strength', 'Time alone isn’t lonely when you’re building something.', 'It’s where you think clearly, hear yourself and do the work no one sees. Learn to be comfortable in your own company.'],
+  ['Act boldly, have faith', 'At some point, planning has to turn into doing. Take the step before you feel certain.', 'Faith isn’t knowing how it works out. It’s acting like it already has.'],
 ];
 
 const $ = id => document.getElementById(id);
@@ -87,11 +89,11 @@ let at = 0;
 try { at = Math.min(CARDS.length - 1, Math.max(0, +localStorage.getItem(KEY) || 0)); } catch {}
 
 function paint() {
-  const [t, x] = CARDS[at];
+  const [t, lead, lesson] = CARDS[at];
   $('num').textContent = `(${String(at + 1).padStart(2, '0')})`;
   $('year').textContent = `(${new Date().getFullYear()})`;
   $('title').textContent = t;
-  $('text').textContent = x;
+  $('text').replaceChildren(document.createTextNode(lead + ' '), Object.assign(document.createElement('span'), { className: 'lesson', textContent: lesson }));
   document.title = `${t} · Mind of Niko`;
   try { localStorage.setItem(KEY, at); } catch {}
 }
