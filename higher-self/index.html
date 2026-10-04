@@ -206,37 +206,26 @@
   .dots i.on { background: var(--amber); box-shadow: 0 0 6px var(--amber-glow); }
   ol.rules { margin: 0; padding: 0; list-style: none; counter-reset: r; }
 
-  /* ---------- Salt lamp — soft warm taupe, muted and neutral, with a gentle coral glow ---------- */
+  /* ---------- Salt lamp — Night room's neutral dark, lit in salt-lamp coral instead of amber ---------- */
   :root[data-look="salt"] {
-    color-scheme: dark;
-    --bg: #352a26;
-    --cream: #f7ebe4;
-    --text: #ead8ce;
-    --dim: #bfa79b;
-    --faint: #8d786e;
-    --hair: rgba(255,220,200,.13);
-    --amber: #f0936c;                  /* soft salt-lamp coral */
-    --amber-glow: rgba(240,140,105,.40);
-    --flap: #f3dccf;                   /* clock + month */
-    --tint-rgb: 255,222,204;
-    --glow-rgb: 240,140,105;
-    --accent-rgb: 240,147,108;
-    --floor-rgb: 175,120,100;
-    --led-hot: #ffd6c2;
-    --glow-a: #fff6f1; --glow-b: #f8c9b3;   /* glow text: white into coral */
-    --wall-1: #46372f; --wall-2: #3d302b; --wall-3: #2f2522;
-    --toast-bg: rgba(58,45,40,.96);
+    --bg: #150e0d;
+    --cream: #efe4df;
+    --text: #dccdc7;
+    --dim: #a08c86;
+    --faint: #6b5955;
+    --hair: rgba(255,205,190,.12);
+    --amber: #f39a7c;                  /* salt-lamp coral */
+    --amber-glow: rgba(255,140,110,.42);
+    --flap: #cdc6c3;
+    --tint-rgb: 255,205,190;
+    --glow-rgb: 255,140,110;
+    --accent-rgb: 243,154,124;
+    --floor-rgb: 150,90,75;
+    --led-hot: #ffd2c2;
+    --glow-a: #fbf5f2; --glow-b: #f7cfc0;
+    --wall-1: #2b201e; --wall-2: #1f1615; --wall-3: #1b1312;
+    --toast-bg: rgba(32,22,20,.94);
   }
-  :root[data-look="salt"] body {
-    background:
-      radial-gradient(55% 30% at 50% 34%, rgba(240,140,105,.20), transparent 72%),
-      radial-gradient(38% 20% at 50% 36%, rgba(255,200,175,.08), transparent 70%),
-      radial-gradient(45% 50% at 100% 0%, rgba(150,150,190,.10), transparent 70%),
-      radial-gradient(120% 60% at 50% 120%, rgba(175,120,100,.18), transparent 60%),
-      linear-gradient(180deg, var(--wall-1) 0%, var(--wall-2) 38%, var(--bg) 70%, var(--wall-3) 100%);
-    background-attachment: fixed;
-  }
-  :root[data-look="salt"] .clock, :root[data-look="salt"] .cal-month { filter: drop-shadow(0 0 18px rgba(240,140,105,.25)) drop-shadow(0 12px 18px rgba(0,0,0,.30)); }
 
   /* Phone — must stay last so it overrides the desktop rules above */
   @media (max-width: 720px) {
@@ -443,7 +432,7 @@ const BLUEPRINT = {
   try { settings = JSON.parse(localStorage.getItem(SKEY)) || {}; } catch { settings = {}; }
   settings.shifts ||= {};            // { 'YYYY-MM-DD': { start, end } }: only the dates you actually work
   settings.remind ??= 10;            // minutes before each task; 0 = off
-  const LOOKS = { night: { name: 'Night room', meta: '#150f0b' }, salt: { name: 'Salt lamp', meta: '#352a26' } };
+  const LOOKS = { night: { name: 'Night room', meta: '#150f0b' }, salt: { name: 'Salt lamp', meta: '#150e0d' } };
   const applyLook = () => {
     const look = LOOKS[settings.look] ? settings.look : 'night';
     document.documentElement.dataset.look = look;
