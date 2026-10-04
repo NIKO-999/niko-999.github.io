@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mind of Niko</title>
+<meta name="description" content="The beliefs I live by, one card at a time.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e9e8e4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mind of Niko">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<style>
+  /* Editorial card deck: one belief per screen. Paper grey, ink black, periwinkle mark. */
+  :root {
+    color-scheme: light;
+    --paper: #e9e8e4;
+    --ink: #0d0d0d;
+    --body: #2f2f2f;
+    --mark: #4a5aa8;                 /* periwinkle: header, numbers, NEXT */
+    --serif: "Instrument Serif", "Times New Roman", Times, serif;
+    --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--paper); }
+  body { color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; overflow: hidden;
+         -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+
+  .card { position: fixed; inset: 0; display: grid; grid-template-rows: auto 1fr auto;
+          padding: calc(env(safe-area-inset-top, 0px) + 44px) clamp(28px, 9vw, 104px) calc(env(safe-area-inset-bottom, 0px) + 44px);
+          max-width: 1080px; margin: 0 auto; }
+  .top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: baseline;
+         color: var(--mark); font-weight: 700; font-size: clamp(15px, 2.3vw, 26px); letter-spacing: -.01em; }
+  .top .r { text-align: right; }
+  .mid { display: flex; flex-direction: column; justify-content: center; gap: clamp(36px, 7vh, 80px); min-height: 0; }
+  h1 { margin: 0; text-align: center; font-family: var(--serif); font-style: italic; font-weight: 400;
+       font-size: clamp(46px, 9.5vw, 104px); line-height: 1.12; letter-spacing: -.01em; text-wrap: balance; }
+  p { margin: 0 auto; max-width: 30em; font-size: clamp(17px, 2.5vw, 28px); line-height: 1.5; color: var(--body); text-wrap: pretty; }
+  .next { justify-self: start; border: 0; background: none; padding: 8px 0; cursor: pointer;
+          font: 700 clamp(18px, 2.4vw, 28px)/1 var(--sans); color: var(--mark); letter-spacing: -.01em; }
+  .next:focus-visible { outline: 2px solid var(--mark); outline-offset: 6px; }
+
+  /* turn: the old card lifts away, the new one settles in */
+  .mid, .top .l { transition: opacity .28s ease, transform .28s ease; }
+  .turning .mid { opacity: 0; transform: translateY(10px); }
+  .turning .top .l { opacity: 0; }
+  @media (prefers-reduced-motion: reduce) { .mid, .top .l { transition: none; } }
+</style>
+</head>
+<body>
+<main class="card" id="card" aria-live="polite">
+  <div class="top"><span class="l" id="num">(01)</span><span>MIND OF NIKO</span><span class="r" id="year">(2026)</span></div>
+  <div class="mid">
+    <h1 id="title"></h1>
+    <p id="text"></p>
+  </div>
+  <button class="next" id="next">NEXT</button>
+</main>
+
+<script>
+// The beliefs, in order. Hard-coded on purpose.
+const CARDS = [
+  ['Act like it’s already done', 'I don’t wait to become him to start acting as him. I perform as him daily, and the identity follows the action. The law of assumption isn’t a wish. It’s a way of moving through the day as if the result already arrived.'],
+  ['Trust the process', 'Not deadlines. Not where I am yet. I do the work every single day for long enough, and the results have no choice but to speak for themselves. A day counts if I did the work.'],
+  ['Buy your time back', 'I wake at 3:30. While the world sleeps, I’m already grounded, hydrated and moving. Owning the morning means I’m never living in survival mode.'],
+  ['Ground before anything', 'Nothing about business touches me until I’m grounded, hydrated and trained. I am this, I am here, I am making it. The day is built on that foundation, or not at all.'],
+  ['Signal, no noise', 'Everything around me is optimised for my self-actualisation. Where it isn’t signal, I’m building my way out of it, while still giving 100% where I am right now.'],
+  ['Train every day', 'The body is the first proof that I keep my word. Training and abs every morning, 20,000 steps, whole foods. 8 to 12% all year round isn’t a goal. It’s just how I live.'],
+  ['Hold the fast', 'Coffee and water until the deep work is done. Discipline in the small things builds the trust that carries the big ones. I eat to fuel the man I already am.'],
+  ['One trade a day', 'I follow my risk management. I don’t negotiate. I take one trade, the way I’d take it every time, and I walk away. I’m high leverage and I’m a fucking sniper.'],
+  ['Never trade from scarcity', 'Scarcity makes you force what isn’t there. Abundance lets you wait for what is. The market is always open to the man who can sit still.'],
+  ['Bleed it into your syntax', 'The same video, the same strategy, every day. I replay yesterday at the time I trade and take it as I would have. Repetition until it isn’t something I know, it’s something I am.'],
+  ['Compare upwards only', 'I don’t compare myself to the people around me in my current position. I only measure myself against who I’m becoming, and the men already standing where I’m going.'],
+  ['Invest in the right minds', 'Five thousand into the right mentor returns twenty thousand a month in mindset alone. I never go cheap on a coach, so I never pay twice.'],
+  ['Buy the best', 'Free-range meat, the best water, the best guidance. Standards aren’t a price tag. They’re a decision about what I allow into my body and my life.'],
+  ['Raise your frequency', 'Training, walking, reading, the right people. Do more of what lifts you and none of what pulls you down. Every choice either raises the room or lowers it.'],
+  ['Cut every vice', 'I waste no time. What used to fill the gaps now has no place in them. Every hour either moves me towards the vision or it doesn’t get spent.'],
+  ['Film the life you live', 'I capture it while I’m living it: the trading, the training, the lifestyle, the mindset. Not a performance. A record of a man who does what he says.'],
+  ['Coach men upwards', 'I’m coaching men to get the results that I have. What I’ve learned isn’t mine to keep. Value given freely comes back multiplied.'],
+  ['Stand among higher men', 'I’m printing money around men who are higher than me, men with high standards. Your room sets your ceiling, so I keep choosing a higher room.'],
+  ['Close the day honestly', 'Every night I look at what kept me aligned and what took me out of it. Honest, not harsh. Tomorrow I do one thing better.'],
+  ['Act boldly, have faith', 'This is me in complete alignment. This process will give me the reality I desire. Focus on the process, act boldly, have faith. It’s already done.'],
+];
+
+const $ = id => document.getElementById(id);
+const KEY = 'mind-of-niko.at';
+let at = 0;
+try { at = Math.min(CARDS.length - 1, Math.max(0, +localStorage.getItem(KEY) || 0)); } catch {}
+
+function paint() {
+  const [t, x] = CARDS[at];
+  $('num').textContent = `(${String(at + 1).padStart(2, '0')})`;
+  $('year').textContent = `(${new Date().getFullYear()})`;
+  $('title').textContent = t;
+  $('text').textContent = x;
+  document.title = `${t} · Mind of Niko`;
+  try { localStorage.setItem(KEY, at); } catch {}
+}
+let busy = false;
+function go(step) {
+  if (busy) return; busy = true;
+  const card = $('card'); card.classList.add('turning');
+  setTimeout(() => { at = (at + step + CARDS.length) % CARDS.length; paint(); card.classList.remove('turning'); busy = false; }, 280);
+}
+$('next').onclick = e => { e.stopPropagation(); go(1); };
+// Tap the right of the screen for next, the left for back. Swipe works too. Arrow keys on desktop.
+document.addEventListener('click', e => { if (e.target.closest('.next')) return; go(e.clientX < innerWidth / 3 ? -1 : 1); });
+let sx = null;
+document.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend', e => {
+  if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; sx = null;
+  if (Math.abs(dx) > 50) { e.preventDefault(); go(dx < 0 ? 1 : -1); }
+});
+document.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === ' ') go(1); if (e.key === 'ArrowLeft') go(-1); });
+paint();
+
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
