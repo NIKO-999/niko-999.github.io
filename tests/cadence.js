@@ -48,8 +48,9 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
   const browser = await chromium.launch({ executablePath: chrome(), args: ['--no-sandbox'] });
 
   async function ctx(opts = {}) {
-    const c = await browser.newContext(opts.desk ? { ...PHONE, viewport: opts.desk, isMobile: false, hasTouch: false }
-      : opts.vp ? { ...PHONE, viewport: opts.vp } : PHONE);
+    const base = opts.desk ? { ...PHONE, viewport: opts.desk, isMobile: false, hasTouch: false }
+      : opts.vp ? { ...PHONE, viewport: opts.vp } : PHONE;
+    const c = await browser.newContext(opts.ua ? { ...base, userAgent: opts.ua } : base);
     await c.addInitScript(freeze(opts.at || '2026-09-25T10:20:00'));
     /* The day's reflection comes up over the app on the first open of a
        date, which is every fresh context — so every section but its own
@@ -713,6 +714,81 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.evaluate(() => localStorage.setItem('cad.refl.v1', '{}'));
     await page.reload({ waitUntil: 'load' });
     ok('turned back on, it comes back', await page.waitForSelector('#cdRf', { timeout: 2000 }).then(() => true, () => false));
+    await c.close();
+  }
+
+  console.log('\n── add to home screen ──');
+  {
+    /* Chromium defines no `navigator.standalone`, which is exactly why no
+       other section ever sees this card. Here it is planted the way iOS
+       Safari has it in a tab — false — with the PushManager a tab on iOS
+       does not get. */
+    const IOS = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1';
+    const tab = (v) => `Object.defineProperty(Navigator.prototype, 'standalone', { get: () => ${v}, configurable: true });`
+      + (v === 'false' ? ' delete window.PushManager;' : '');
+    const { c, page, errs } = await ctx({ reflect: true, ua: IOS, init: tab('false') });
+    const up = await page.waitForSelector('#cdA2', { timeout: 2000 }).then(() => true, () => false);
+    ok('the first open in Safari says how to add it to the Home Screen', up);
+    await page.waitForTimeout(600);
+    ok('and the thought waits rather than coming up over it', !(await page.$('#cdRf')));
+    const a = await page.evaluate(() => {
+      const c = document.querySelector('#cdA2 .cd-rf-c'); if (!c) return null;
+      const r = c.getBoundingClientRect();
+      return { mid: Math.abs((r.top + r.bottom) / 2 - innerHeight / 2), fit: r.top >= 0 && r.bottom <= innerHeight,
+        steps: [...document.querySelectorAll('#cdA2 .cd-a2-s li')].map((li) => (li.querySelector('b') || {}).textContent),
+        marks: [...document.querySelectorAll('#cdA2 .cd-a2-g')].every((g) => g.querySelector('svg, img')) };
+    });
+    /* Each step names the thing on the phone and leads with its mark,
+       because the mark is what somebody is hunting for in a share sheet. */
+    ok('three steps, Share, Add to Home Screen and Add, each led by the mark it names',
+      a && a.steps.join('|') === 'Share|Add to Home Screen|Add' && a.marks, a);
+    ok('a card in the middle that fits the phone', a && a.mid < 40 && a.fit, a);
+    ok('showing it marks this browser told', (await page.evaluate(() => localStorage.getItem('cad.a2hs.v1'))) === '1');
+    /* One tab on one phone: synced, a second phone would never be told. */
+    const kBlock = (require('fs').readFileSync(require('path').join(__dirname, '..', 'cadence', 'index.html'), 'utf8').match(/var K = \{[\s\S]*?\};/) || [''])[0];
+    ok('and that mark is not in the synced record', kBlock.length > 50 && !/a2hs/.test(kBlock));
+    await page.click('#cdA2Ok').catch(() => {});
+    ok('the arrow takes it out of the page', !(await page.$('#cdA2')));
+    await page.reload(); await page.waitForTimeout(900);
+    ok('it does not come back, and the thought it held back comes now', !(await page.$('#cdA2')) && !!(await page.$('#cdRf')));
+    if (await page.$('#cdRf')) { await page.click('#cdReflOk'); await page.waitForTimeout(100); }
+    if (await page.$('#cdA2')) { await page.click('#cdA2Ok'); await page.waitForTimeout(100); }
+    await page.click('#cdGear'); await sheetUp(page);
+    ok('Settings offers it again while this is a tab', !!(await page.$('#cdA2Open')));
+    if (await page.$('#cdA2Open')) { await page.click('#cdA2Open'); await page.waitForTimeout(350); }
+    ok('and pressing it shows the steps over a closed sheet', !!(await page.$('#cdA2')) && !(await page.evaluate(() => document.getElementById('cdSheet').classList.contains('is-open'))));
+    await page.keyboard.press('Escape'); await page.waitForTimeout(100);
+    ok('Escape puts it away', !(await page.$('#cdA2')));
+    /* A tab has no PushManager to ask, so the reminder switch hands over
+       the one answer that helps rather than a toast. */
+    await page.click('#cdGear'); await sheetUp(page);
+    await page.click('#cdPushOn'); await page.waitForTimeout(350);
+    ok('turning reminders on in a tab shows the steps', !!(await page.$('#cdA2')));
+    await page.keyboard.press('Escape'); await page.waitForTimeout(100);
+    ok('no page errors in the install card', errs.length === 0, errs);
+    await c.close();
+  }
+  {
+    /* An app's own browser cannot add to the Home Screen at all, so it is
+       sent to Safari first. Read off the user agent, never `standalone`. */
+    const IG = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 350.0.0.0';
+    const { c, page } = await ctx({ reflect: true, ua: IG });
+    const up = await page.waitForSelector('#cdA2', { timeout: 2000 }).then(() => true, () => false);
+    const steps = await page.evaluate(() => [...document.querySelectorAll('#cdA2 .cd-a2-s li b')].map((b) => b.textContent).join('|'));
+    ok('opened inside Instagram, it says to open Safari first', up && /Open in Safari/.test(steps) && /Add to Home Screen/.test(steps), steps);
+    await c.close();
+  }
+  for (const [label, init, ua] of [['on the Home Screen', 'Object.defineProperty(Navigator.prototype, \'standalone\', { get: () => true, configurable: true });', 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1'],
+                                   ['in a browser that is not iOS', '', '']]) {
+    /* Both halves of "only a tab on iOS": installed, and every other
+       browser, which defines no `standalone` at all. A card or a row there
+       is a way to install something that cannot be, or already is. */
+    const { c, page } = await ctx({ reflect: true, ua: ua || undefined, init: init || undefined });
+    await page.waitForTimeout(800);
+    const card = !!(await page.$('#cdA2'));
+    if (await page.$('#cdRf')) { await page.click('#cdReflOk'); await page.waitForTimeout(100); }
+    await page.click('#cdGear'); await sheetUp(page);
+    ok(`${label}, no install card and no Settings row`, !card && !(await page.$('#cdA2Open')), { card });
     await c.close();
   }
 

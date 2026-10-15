@@ -518,6 +518,24 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 @keyframes cdRfIn { from { opacity: 0; } }
 @keyframes cdRfCard { from { opacity: 0; transform: scale(.94); } }
 @media (prefers-reduced-motion: reduce) { .cd-rf, .cd-rf-c { animation: none; } }
+/* ADD TO HOME SCREEN is the thought's own surface, because it is the
+   same kind of thing: it arrived on its own and asks for a moment. It
+   is the one card here with STEPS, so the steps are a left-aligned list
+   inside a centred card — centred lines of instructions are read as a
+   poem rather than followed. Each step leads with the mark the person
+   will actually see on their phone, drawn the way iOS draws it, because
+   that is what they are looking for. */
+.cd-a2-ic { width: 64px; height: 64px; margin: 0 auto 18px; display: block; border-radius: 15px; box-shadow: 0 0 0 1px var(--hair); }
+.cd-a2 .cd-rq { margin: 14px 0 22px; font-size: 26px; text-wrap: balance; }
+.cd-a2-s { margin: 0 0 22px; padding: 0; list-style: none; text-align: left; display: grid; gap: 14px; }
+.cd-a2-s li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 14px; align-items: center; }
+.cd-a2-g { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 11px; box-shadow: inset 0 0 0 1px var(--hair); background: var(--lift); color: var(--ink); }
+.cd-a2-g svg { width: 21px; height: 21px; display: block; }
+.cd-a2-g img { width: 28px; height: 28px; border-radius: 7px; display: block; }
+.cd-a2-t { margin: 0; font: 400 15px/1.3 var(--sans); color: var(--ink); }
+.cd-a2-t b { font-weight: 600; }
+.cd-a2-u { display: block; margin-top: 2px; font: 400 13px/1.3 var(--sans); color: var(--quiet); }
+.cd-a2-w { margin: 0 0 24px; font: 400 13px/1.35 var(--sans); color: var(--quiet); text-wrap: balance; }
 /* Centred between the head's rule and the next one: equal padding and no
    margin, so whatever follows (a row's own hairline, or the foot's rule on
    an empty day) starts exactly as far below the words as the head ends
@@ -3312,7 +3330,16 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
        asks first and then offers Undo, because every block on every day
        goes at once. The record of what you kept is left alone: a tick is
        a fact about a day that happened, not about the template. */
-    root.appendChild(el('p', 'cd-lbl', 'Today'));
+    /* First in Settings while this is a tab, and not drawn once it is on
+       the Home Screen: a way to install something already installed is a
+       control with nothing to do. */
+    if (cdA2Where()) {
+      root.appendChild(el('p', 'cd-lbl', 'This phone'));
+      var ab = el('button', 'cd-btn', 'Add to Home Screen'); ab.type = 'button'; ab.id = 'cdA2Open';
+      ab.addEventListener('click', function () { cdClose(); cdA2Show(); });
+      root.appendChild(ab);
+      var tl = el('p', 'cd-lbl', 'Today'); tl.style.marginTop = '24px'; root.appendChild(tl);
+    } else root.appendChild(el('p', 'cd-lbl', 'Today'));
     var rb = el('button', 'cd-btn', 'Today\u2019s thought'); rb.type = 'button'; rb.id = 'cdReflOpen';
     rb.addEventListener('click', function () { cdClose(); cdReflect(cdToday()); });
     root.appendChild(rb);
@@ -3640,7 +3667,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   }
   function cdSyncIdle() {
     var a = document.activeElement;
-    return !cdSheetOpen() && !D && !$('cdRf') && !(a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.isContentEditable));
+    return !cdSheetOpen() && !D && !$('cdRf') && !$('cdA2') && !(a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.isContentEditable));
   }
   /* Maps are unioned two levels deep (a day, then what is in it), lists
      of things with ids by id; this device wins a clash, and a value that
@@ -3947,6 +3974,68 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
        card whose whole job is one line of words. Escape still closes it. */
   }
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && $('cdRf')) { ev.preventDefault(); ev.stopImmediatePropagation(); cdReflClose(); } }, true);
+
+  /* ═══ ADD TO HOME SCREEN ═══
+     Somebody sent a link opens Cadence in a browser tab, where it is a web
+     page: no reminders (iOS gives a page in Safari no PushManager), no icon
+     to come back to, and a record that does NOT follow it onto the Home
+     Screen, because iOS gives an installed web app its own storage. So the
+     first open in Safari says how to install it, before anything is typed.
+
+     `navigator.standalone` is the test, and only iOS WebKit defines it:
+     false is a tab, true is the Home Screen, and undefined is every other
+     browser, which this leaves alone. Touch rules out a Mac's Safari. An
+     app's own browser (Instagram, Messenger, TikTok) cannot add to the
+     Home Screen at all, so it is told to open Safari first — which is
+     where a shared link most often lands. Read off the user agent before
+     `standalone`, because a webview need not define it.
+
+     Its seen-flag is this browser's own and is NOT in K: it is a fact
+     about one tab on one phone, and syncing it would stop a second
+     phone ever being told. */
+  var A2_KEY = 'cad.a2hs.v1';
+  function cdA2Where() {
+    var ua = navigator.userAgent;
+    if (/iPhone|iPad|iPod/.test(ua) && /Instagram|FBAN|FBAV|FB_IAB|Messenger|Snapchat|TikTok|musical_ly|BytedanceWebview|LinkedInApp|Line\//.test(ua)) return 'app';
+    return navigator.standalone === false && navigator.maxTouchPoints > 0 ? 'ios' : '';
+  }
+  function cdA2Seen() { try { return localStorage.getItem(A2_KEY) === '1'; } catch (e) { return false; } }
+  var A2_SHARE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M8 10H7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1"/></svg>';
+  var A2_ADD = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8.5v7M8.5 12h7"/></svg>';
+  var A2_MORE = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="6" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18" cy="12" r="1.7"/></svg>';
+  var A2_SAFARI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>';
+  function cdA2Close() { var r = $('cdA2'); if (r) r.remove(); }
+  /* Built and removed, never hidden, and seen the moment it is shown: the
+     thought's two rules for the thought's two reasons. Settings shows it
+     again for as long as this is a tab. No press outside puts it away —
+     this one is read while you do something else, and a stray tap that
+     takes the steps with it is a card you have to go and find again. */
+  function cdA2Show() {
+    var w = cdA2Where(); if (!w) return;
+    try { localStorage.setItem(A2_KEY, '1'); } catch (e) {}
+    cdA2Close(); cdReflClose();
+    var step = function (g, t, u) { return '<li><span class="cd-a2-g">' + g + '</span><p class="cd-a2-t">' + t + '<span class="cd-a2-u">' + u + '</span></p></li>'; };
+    var ic = '<img src="icon-180.png" alt="">';
+    var q = function (t) { return '<p class="cd-rq" id="cdA2Q">' + t + '</p>'; };
+    var body = w === 'app'
+      ? '<p class="cd-rf-k">Open in Safari</p>' + q('Add it from Safari, not from here') + '<ol class="cd-a2-s">'
+        + step(A2_MORE, 'Tap <b>•••</b>', 'At the top or the foot of this screen')
+        + step(A2_SAFARI, 'Tap <b>Open in Safari</b>', 'It may say Open in browser')
+        + step(A2_ADD, 'Then <b>Add to Home Screen</b>', 'From the Share button in Safari')
+        + '</ol><p class="cd-a2-w">Do it before you start. What you enter here stays here.</p>'
+      : '<p class="cd-rf-k">Add Cadence</p>' + q('Keep it on your Home Screen') + '<ol class="cd-a2-s">'
+        + step(A2_SHARE, 'Tap <b>Share</b>', 'The square with the arrow. On newer iPhones it is under •••')
+        + step(A2_ADD, 'Tap <b>Add to Home Screen</b>', 'Scroll the list if you cannot see it')
+        + step(ic, 'Tap <b>Add</b>', 'Then open Cadence from your Home Screen')
+        + '</ol><p class="cd-a2-w">Do it before you start. What you enter in Safari stays in Safari.</p>';
+    var box = el('div');
+    box.innerHTML = '<div class="cd-rf cd-a2" id="cdA2" role="dialog" aria-modal="true" aria-labelledby="cdA2Q"><div class="cd-rf-c">'
+      + '<img class="cd-a2-ic" src="icon-180.png" alt="">' + body
+      + '<button type="button" class="cd-rf-go" id="cdA2Ok" aria-label="Continue to Cadence"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div></div>';
+    document.body.appendChild(box.firstChild);
+    $('cdA2Ok').addEventListener('click', cdA2Close);
+  }
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && $('cdA2')) { ev.preventDefault(); ev.stopImmediatePropagation(); cdA2Close(); } }, true);
 
   /* ═══ THE PLAN ═══
      A week of time you block out by hand, the way a calendar does it: drag
@@ -4817,6 +4906,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     t.setAttribute('aria-pressed', String(!!PU));
     t.addEventListener('click', function () {
       if (PU) { cdPushOff(); t.setAttribute('aria-pressed', 'false'); var mo = document.querySelector('.cd-pmore'); if (mo) mo.hidden = true; cdToast('Reminders off'); return; }
+      /* In a tab there is no PushManager to ask, and the one answer that
+         helps is how to stop being a tab — so it is the card, not a toast. */
+      if (!cdPushCan() && cdA2Where()) { cdClose(); cdA2Show(); return; }
       if (!cdPushCan()) {
         cdToast(/iPhone|iPad/.test(navigator.userAgent) && !navigator.standalone
           ? 'Add Cadence to your Home Screen, then turn reminders on there.' : 'This browser cannot show reminders.');
@@ -4961,6 +5053,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
      painted so the card comes up over the day rather than over nothing. */
   var rt = cdToday();
   if (bootTick) setTimeout(function () { cdTickFrom(decodeURIComponent(bootTick[1])); }, 300);
+  /* The install card goes first and the thought waits: it is not marked
+     seen, so it arrives on the first open from the Home Screen instead. */
+  else if (cdA2Where() && !cdA2Seen()) setTimeout(function () { if (!cdSheetOpen()) cdA2Show(); }, 450);
   else if (!S.rfoff && !(S.refl[rt] && S.refl[rt].s)) setTimeout(function () { if (!cdSheetOpen()) cdReflect(rt); }, 450);
 
   /* Exposed for the test suite only: the parser and the keyword table are

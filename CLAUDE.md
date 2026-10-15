@@ -5868,6 +5868,46 @@ and runs half an hour, which ends at 7:30; the "never later than 8" is
 a sentence in who he is rather than a second block. The checks count
 eleven steps on every day now.
 
+### Opened in Safari, it says how to get on the Home Screen
+
+Asked for so a link sent to somebody lands them on the app rather than
+on a web page. **A tab is not the app**: iOS gives a page in Safari no
+PushManager, so no reminders, and gives an installed web app its OWN
+storage, so whatever is typed in the tab does not follow it onto the
+Home Screen. That second fact is why it is the first thing shown, before
+the thought and before anything can be entered, and why the card says
+so in one line — it is the one loss nobody would think to expect.
+
+**`navigator.standalone` is the test and only iOS WebKit defines it**:
+false is a tab, true is the Home Screen, undefined is every other
+browser, which it leaves alone. Touch rules out a Mac. An app's own
+browser — Instagram, Messenger, TikTok — cannot add to the Home Screen
+at all, and a shared link lands there more often than anywhere, so
+that is a second set of steps sending it to Safari first, read off the
+user agent because a webview need not define `standalone`.
+
+**The thought's surface, because it is the same kind of thing**: it
+arrived on its own and asks for a moment. What it adds is a LIST, left-
+aligned inside the centred card, each step led by the mark the person
+is hunting for in a share sheet. No press outside puts it away, unlike
+the thought: this one is read while you go and do something else.
+
+**The thought waits and is not marked seen**, so it arrives on the
+first open from the Home Screen instead of over the steps. Settings
+offers the card again for as long as this is a tab and not at all once
+it is installed, and the reminder switch opens it rather than a toast,
+because in a tab the one answer that helps is how to stop being one.
+
+**Its seen-flag is `cad.a2hs.v1` and it is not in `K`.** It is a fact
+about one tab on one phone; synced, a second phone would never be told.
+
+Chromium defines no `standalone`, which is exactly why no other section
+of the suite ever sees the card; its own section plants it, and takes
+`PushManager` away the way an iOS tab has it. **Nothing here can prove
+the iOS share sheet says what the steps say** — iOS 26 moved Share under
+••• in Safari's compact bar, which is why the first step names both. If
+the wording on a phone disagrees, the phone is right.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
