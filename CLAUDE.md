@@ -5908,6 +5908,37 @@ the iOS share sheet says what the steps say** — iOS 26 moved Share under
 ••• in Safari's compact bar, which is why the first step names both. If
 the wording on a phone disagrees, the phone is right.
 
+### The first frame is the card, and a first open shows examples
+
+Reported as *it glitches, shows the task, and then it goes to that —
+it looks like a cheap app*. The thought and the install steps went up
+450ms after boot on a timer, over a 0.22s fade, so every first open
+painted the day and then swapped it out. **They go up in the boot's
+own pass now, with no fade**, and a script in the head works out
+before anything paints whether a card is due and holds the app back
+until it is up. The boot reaches the same answer itself and lets the
+app through either way; a 2.5s timer is only there so a failed script
+cannot leave a blank sky. Asserted off `requestAnimationFrame` from
+before the page runs: every frame recorded has the card in it.
+
+**A FIRST OPEN IS EXAMPLES, NOT A WEEK.** Asked for as *have no blocks,
+but show some example blocks, and once you add a block it removes
+them*. The starter blocks carry `x: 1`, a line over the list says they
+are examples, and the first block you add takes every one off with
+whatever was ticked on them. **The flag is written only when true**, so
+a week saved before this reads back byte for byte and is never
+touched. Editing an example makes it yours; laying the daily process
+on the week counts as adding; and the sync merge drops examples
+whenever either side has a real block, or a phone that has only seen
+the examples would union them into a real week.
+
+**The first open runs on what it SAVED**, read back from storage,
+rather than on the copy it built — so memory and the record cannot
+start out disagreeing. It is also what lets the suite keep the starter
+week as its fixture: every section but the examples one stores it
+unflagged through a `setItem` hook, so a check that adds a block still
+has the week it was written against.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

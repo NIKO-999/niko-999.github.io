@@ -2,6 +2,30 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
+<!-- THE FIRST FRAME IS THE CARD, NEVER THE DAY UNDER IT. A card that
+     comes up a moment after the page has painted shows the day, then
+     swaps it out, which reads as a glitch. This decides before anything
+     paints whether a card is due — the install steps in a Safari tab, or
+     the first open of a date's thought — and holds the app back until
+     the boot has put it up. The boot works the same answer out itself
+     and lets the app through either way; the timer is only there so a
+     script that failed cannot leave a blank sky. -->
+<script>(function () {
+  try {
+    var L = localStorage, ua = navigator.userAgent, due = false;
+    var app = /iPhone|iPad|iPod/.test(ua) && /Instagram|FBAN|FBAV|FB_IAB|Messenger|Snapchat|TikTok|musical_ly|BytedanceWebview|LinkedInApp|Line\//.test(ua);
+    if ((app || (navigator.standalone === false && navigator.maxTouchPoints > 0)) && L.getItem('cad.a2hs.v1') !== '1') due = true;
+    else if (!/#tick=/.test(location.hash) && L.getItem('cad.rfoff.v1') !== 'true') {
+      var d = new Date(), k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      var r = JSON.parse(L.getItem('cad.refl.v1') || '{}');
+      if (!(r && r[k] && r[k].s)) due = true;
+    }
+    if (due) {
+      document.documentElement.classList.add('cd-boot');
+      setTimeout(function () { document.documentElement.classList.remove('cd-boot'); }, 2500);
+    }
+  } catch (e) {}
+})();</script>
 <!-- maximum-scale=1: iOS zooms the page when a field under 16px takes
      focus. Every field here is 16px, and the cap covers the next one. -->
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
@@ -225,6 +249,10 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
 /* ── the rest of the day: a hairline a row, and the dot is the check ── */
 .cd-list { list-style: none; margin: 44px 0 0; padding: 0; }
+/* Said once, over the list, while the week is still the examples: the
+   one thing on the screen that is about to disappear says so. */
+.cd-ex { margin: 44px 0 0; font: 500 11px/1.3 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--quiet); }
+.cd-ex:not([hidden]) + .cd-list { margin-top: 10px; }
 .cd-it { position: relative; display: grid; grid-template-columns: 44px 1fr; align-items: center; margin-left: -18.5px; }
 .cd-it::before { content: ""; position: absolute; left: 18.5px; right: 0; top: 0; height: 1px; background: var(--hair); }
 .cd-it:last-child::after { content: ""; position: absolute; left: 18.5px; right: 0; bottom: 0; height: 1px; background: var(--hair); }
@@ -516,6 +544,12 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
 .cd-rf-go::before { content: ''; position: absolute; inset: 5px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--hair); }
 .cd-rf-go svg { position: relative; width: 18px; height: 18px; display: block; }
 @keyframes cdRfIn { from { opacity: 0; } }
+/* Held back until the boot card is up; the sky behind is the body's own. */
+html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
+/* A card that is the first frame does not fade in: there is nothing
+   under it to fade in over, and a fade from bare sky is the glitch
+   arriving a different way. Asked for from Settings it still does. */
+.cd-rf.is-boot, .cd-rf.is-boot .cd-rf-c { animation: none; }
 @keyframes cdRfCard { from { opacity: 0; transform: scale(.94); } }
 @media (prefers-reduced-motion: reduce) { .cd-rf, .cd-rf-c { animation: none; } }
 /* ADD TO HOME SCREEN is the thought's own surface, because it is the
@@ -717,6 +751,8 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   #cdVDay { position: relative; }
   #cdDayPane { padding-bottom: 60px; }
   #cdDayPane .cd-list { margin-top: 12vh; }
+  #cdDayPane .cd-ex { margin-top: 12vh; }
+  #cdDayPane .cd-ex:not([hidden]) + .cd-list { margin-top: 10px; }
   /* ON A DESKTOP THE CHECK IS A PILL UNDER THE BLOCK IT KEEPS. Parked at
      the foot of the column it sat half a screen below the name it acts
      on, so it read as a control for the page rather than for that
@@ -944,6 +980,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
           <div class="cd-bar" id="cdBar" aria-hidden="true"><i id="cdBarI"></i></div>
           <button class="cd-then" id="cdThen" type="button"><span class="cd-tcap">Then</span><b id="cdThenN"></b></button>
         </div>
+        <p class="cd-ex" id="cdEx" hidden>Examples · they go when you add a block</p>
         <ol class="cd-list" id="cdAgenda"></ol>
       </div>
       <button class="cd-go" id="cdGo" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="cd-go-t" aria-hidden="true">Complete</span></button>
@@ -1366,7 +1403,30 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     /* The caps here are the fields' own maxLength, said again. A cap only
        the save knew about took "by the window" to "by the wi" with nothing on
        screen to say it would. */
-    return { id: typeof o.id === 'string' && o.id ? o.id : cdId(), n: String(o.n || '').slice(0, 60) || 'Block', d: d.filter(function (x, i) { return d.indexOf(x) === i; }).sort(), s: s, e: e, p: String(o.p || '').slice(0, 80), r: REMIND.indexOf(+o.r) >= 0 ? +o.r : 0 };
+    var out = { id: typeof o.id === 'string' && o.id ? o.id : cdId(), n: String(o.n || '').slice(0, 60) || 'Block', d: d.filter(function (x, i) { return d.indexOf(x) === i; }).sort(), s: s, e: e, p: String(o.p || '').slice(0, 80), r: REMIND.indexOf(+o.r) >= 0 ? +o.r : 0 };
+    /* An EXAMPLE block, from the first open. Written only when true, so
+       every block anybody made reads back byte for byte. */
+    if (o.x === 1) out.x = 1;
+    return out;
+  }
+  /* A FIRST OPEN SHOWS EXAMPLES, NOT A WEEK. A blank day is an empty
+     frame, so the starter blocks are drawn to show what a day looks like
+     — and they are flagged, because they are not yours. The first block
+     you add takes every example off at once, with whatever was ticked on
+     them: a week half yours and half somebody's guess is neither. A
+     block that never carried the flag is never touched, so a week seeded
+     before this existed is left exactly as it is. */
+  function cdDropExamples() {
+    var ex = {}; S.week.forEach(function (b) { if (b.x) ex[b.id] = 1; });
+    if (!Object.keys(ex).length) return false;
+    S.week = S.week.filter(function (b) { return !b.x; });
+    var lg = false;
+    Object.keys(S.log).forEach(function (d) {
+      Object.keys(S.log[d]).forEach(function (id) { if (ex[id]) { delete S.log[d][id]; lg = true; } });
+      if (!Object.keys(S.log[d]).length) { delete S.log[d]; lg = true; }
+    });
+    if (lg) cdSave('log');
+    return true;
   }
   /* How long before a block starts its reminder comes, per block. 0 is
      at the start, which is what every block did before this existed, so
@@ -1377,9 +1437,12 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   function cdLoadWeek() {
     var raw = cdRead(K.week, null);
     if (!Array.isArray(raw)) {
-      var w = SEED.map(function (r, i) { return cdBlock({ id: 's' + i, n: r[0], d: r[1], s: r[2], e: r[3] }); });
+      var w = SEED.map(function (r, i) { return cdBlock({ id: 's' + i, n: r[0], d: r[1], s: r[2], e: r[3], x: 1 }); });
       cdWrite(K.week, w);
-      return w;
+      /* Run on what was SAVED, not on the copy built here, so memory and
+         the record cannot start out disagreeing. */
+      var back = cdRead(K.week, null);
+      return Array.isArray(back) ? back.filter(isObj).map(cdBlock) : w;
     }
     /* Repaired, not discarded, and the repair is written back so it is
        a fact about the record rather than about this page view. */
@@ -1799,6 +1862,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
     }
     cdGoPlace();
 
+    $('cdEx').hidden = !S.week.some(function (q) { return q.x; });
     var ag = $('cdAgenda');
     /* The list is the whole day, the block in the middle and the next one
        included. They were left out as said twice; the list is where you
@@ -2234,7 +2298,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       if (!f.d.length) { cdToast('Pick at least one day.'); return; }
       if (f.s + f.len > 1440) { cdToast('It has to finish by midnight.'); return; }
       var nb = cdBlock({ id: b ? b.id : null, n: f.n.trim(), d: f.d, s: f.s, e: f.s + f.len, p: f.p.trim(), r: f.r });
-      if (b) S.week[S.week.indexOf(b)] = nb; else S.week.push(nb);
+      if (b) S.week[S.week.indexOf(b)] = nb; else { cdDropExamples(); S.week.push(nb); }
       cdSave('week'); cdClose();
       if (!b && nb.d.indexOf(cdDow(sel)) < 0) {
         /* Land on the day it went on, or it looks like nothing happened. */
@@ -3691,6 +3755,9 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
         out[n] = x.concat(y.filter(function (q) { return !seen[q.id]; }));
       } else out[n] = x;
     });
+    /* A device that has only ever seen the examples joining one with a
+       real week must not union its examples into that week. */
+    if (Array.isArray(out.week) && out.week.some(function (q) { return isObj(q) && !q.x; })) out.week = out.week.filter(function (q) { return !(isObj(q) && q.x); });
     return out;
   }
   function cdSyncDiffers(o) {
@@ -4472,6 +4539,7 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
       if (own) { if (!mine[own]) mine[own] = b; return false; }
       return true;
     });
+    if (C.pd.length && steps.length) next = next.filter(function (b) { return !b.x; });
     if (C.pd.length) steps.forEach(function (x) {
       var o = mine[x.id];
       next.push(cdBlock({ id: x.id, n: x.n, d: C.pd, s: x.s, e: x.e, p: o ? o.p : '', r: o ? o.r : 0 }));
@@ -5049,14 +5117,19 @@ textarea.cd-field { min-height: 110px; resize: vertical; }
   cdSelfOwn();
   if (selfIn && cdSelfLoad(selfIn) && PLAN_MQ.matches) sv = 'self';
   cdGo(['day', 'hab', 'mon', 'note', 'plan', 'cont', 'self'].indexOf(sv) >= 0 ? sv : 'day');
-  /* The first open of a date shows its thought, after the screen has
-     painted so the card comes up over the day rather than over nothing. */
+  /* The first open of a date shows its thought, and a Safari tab its
+     install steps first. Both go up in this same pass rather than on a
+     timer: one put up after the day has painted shows the day and then
+     swaps it out, which reads as a glitch. */
   var rt = cdToday();
   if (bootTick) setTimeout(function () { cdTickFrom(decodeURIComponent(bootTick[1])); }, 300);
   /* The install card goes first and the thought waits: it is not marked
      seen, so it arrives on the first open from the Home Screen instead. */
-  else if (cdA2Where() && !cdA2Seen()) setTimeout(function () { if (!cdSheetOpen()) cdA2Show(); }, 450);
-  else if (!S.rfoff && !(S.refl[rt] && S.refl[rt].s)) setTimeout(function () { if (!cdSheetOpen()) cdReflect(rt); }, 450);
+  else if (cdA2Where() && !cdA2Seen()) { cdA2Show(); $('cdA2').classList.add('is-boot'); }
+  else if (!S.rfoff && !(S.refl[rt] && S.refl[rt].s)) { cdReflect(rt); $('cdRf').classList.add('is-boot'); }
+  /* The card is in the document now, so the app can come through
+     behind it: the card covers the whole screen. */
+  document.documentElement.classList.remove('cd-boot');
 
   /* Exposed for the test suite only: the parser and the keyword table are
      the pieces worth asserting as functions rather than through the page. */

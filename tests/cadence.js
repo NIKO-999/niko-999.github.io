@@ -59,6 +59,14 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     if (!opts.reflect) await c.addInitScript(`(() => { if (localStorage.getItem('cad.refl.v1')) return;
       const d = new Date(), k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
       localStorage.setItem('cad.refl.v1', JSON.stringify({ [k]: { s: 1 } })); })();`);
+    /* The starter week is this file's FIXTURE, and the app ships it as
+       EXAMPLES that the first added block takes away. Every section but
+       the one about examples stores it unflagged, so a check that adds a
+       block still has the week it was written against. */
+    if (!opts.examples) await c.addInitScript(`(() => { const set = Storage.prototype.setItem;
+      Storage.prototype.setItem = function (k, v) {
+        if (k === 'cad.week.v1' && typeof v === 'string' && v.indexOf('"x":1') >= 0) { try { v = JSON.stringify(JSON.parse(v).map((b) => { delete b.x; return b; })); } catch (e) {} }
+        return set.call(this, k, v); }; })();`);
     if (opts.init) await c.addInitScript(opts.init);
     const page = await c.newPage();
     const errs = [], off = [];
@@ -789,6 +797,63 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     if (await page.$('#cdRf')) { await page.click('#cdReflOk'); await page.waitForTimeout(100); }
     await page.click('#cdGear'); await sheetUp(page);
     ok(`${label}, no install card and no Settings row`, !card && !(await page.$('#cdA2Open')), { card });
+    await c.close();
+  }
+
+  console.log('\n── the first frame and the example week ──');
+  {
+    /* The card is the FIRST frame, never the day and then the card.
+       Recorded off requestAnimationFrame from before the page runs, so
+       a card put up on a timer after the day painted reads as frames
+       with no card in them. */
+    const rec = `window.__f = []; (function t(n) { requestAnimationFrame(function () {
+      var c = document.querySelector('#cdA2, #cdRf');
+      window.__f.push({ card: c ? c.id : null, fade: c ? getComputedStyle(c).animationName : null });
+      if (n < 3) t(n + 1); }); })(0);`;
+    const { c, page } = await ctx({ reflect: true, init: rec });
+    const f = await page.evaluate(() => window.__f);
+    ok('on the first open of a date the thought is there from the first frame, with no fade',
+      f.length > 0 && f.every((x) => x.card === 'cdRf' && x.fade === 'none'), f);
+    await c.close();
+    const IOS = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1';
+    const t2 = await ctx({ ua: IOS, init: `Object.defineProperty(Navigator.prototype, 'standalone', { get: () => false, configurable: true });` + rec });
+    const f2 = await t2.page.evaluate(() => window.__f);
+    ok('and so are the install steps in a Safari tab',
+      f2.length > 0 && f2.every((x) => x.card === 'cdA2' && x.fade === 'none'), f2);
+    /* Held back only until the card is up: the app is not left hidden. */
+    ok('the app is not left held back behind it',
+      await t2.page.evaluate(() => !document.documentElement.classList.contains('cd-boot') && getComputedStyle(document.querySelector('.cd-app')).visibility === 'visible'));
+    await t2.c.close();
+  }
+  {
+    /* A first open draws examples, flagged, and says so over the list.
+       The first block you add takes every one of them off, with what was
+       ticked on them; a week that was never flagged is never touched. */
+    const { c, page, errs } = await ctx({ examples: true });
+    const wk0 = await store(page, 'cad.week.v1');
+    ok('a first open is examples, every one flagged', wk0.length > 5 && wk0.every((b) => b.x === 1), wk0.length);
+    const lab = await page.$eval('#cdEx', (e) => ({ hid: e.hidden, h: e.getBoundingClientRect().height, t: e.textContent }));
+    ok('and the list says they are examples', !lab.hid && lab.h > 0 && /example/i.test(lab.t), lab);
+    await page.click('.cd-it[data-id="s0"] .cd-dot'); await page.waitForTimeout(150);
+    const ticked = Object.values(await store(page, 'cad.log.v1')).some((d) => d.s0);
+    await page.click('#cdAdd'); await sheetUp(page);
+    await page.fill('.cd-say', 'journal daily 21:00 for 20 mins');
+    await page.click('#cdFSave'); await page.waitForTimeout(320);
+    const wk1 = await store(page, 'cad.week.v1');
+    ok('adding a block takes every example off and keeps yours', wk1.length === 1 && wk1[0].n === 'Journal' && !('x' in wk1[0]), wk1.map((b) => b.n));
+    ok('with the tick that was on one', ticked && !Object.values(await store(page, 'cad.log.v1')).some((d) => d.s0));
+    ok('and the label goes with them', await page.$eval('#cdEx', (e) => e.hidden && e.getBoundingClientRect().height === 0));
+    ok('no page errors on the example week', errs.length === 0, errs);
+    await c.close();
+  }
+  {
+    const old = [{ id: 's0', n: 'Wake up', d: [0, 1, 2, 3, 4, 5, 6], s: 420, e: 420, p: '', r: 0 }];
+    const { c, page } = await ctx({ init: `if (!localStorage.getItem('cad.week.v1')) localStorage.setItem('cad.week.v1', ${JSON.stringify(JSON.stringify(old))});` });
+    ok('a week saved before examples existed draws no label', await page.$eval('#cdEx', (e) => e.hidden));
+    await page.click('#cdAdd'); await sheetUp(page);
+    await page.fill('.cd-say', 'journal daily 21:00 for 20 mins');
+    await page.click('#cdFSave'); await page.waitForTimeout(320);
+    ok('and adding to it keeps every block it had', (await store(page, 'cad.week.v1')).map((b) => b.n).join('|') === 'Wake up|Journal');
     await c.close();
   }
 
