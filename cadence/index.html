@@ -11,6 +11,24 @@
      and lets the app through either way; the timer is only there so a
      script that failed cannot leave a blank sky. -->
 <script>(function () {
+  /* #fresh opens the app as if it had never been used on this browser:
+     every key Cadence wrote and its picture store go before anything
+     reads them, and the fragment is spent. It is the one link that
+     CLEARS rather than fills, so it is only ever the exact fragment. */
+  function fresh() {
+    var K0 = []; for (var i = 0; i < localStorage.length; i++) { var k0 = localStorage.key(i); if (k0 && k0.indexOf('cad.') === 0) K0.push(k0); }
+    K0.forEach(function (k0) { localStorage.removeItem(k0); });
+    try { sessionStorage.clear(); } catch (e) {}
+    try { indexedDB.deleteDatabase('cad.pic'); } catch (e) {}
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+  try { if (location.hash === '#fresh') fresh(); } catch (e) {}
+  /* A link opened into a tab the app is already up in changes only the
+     hash and loads nothing, so there the wipe is followed by a reload:
+     the app's memory is the one thing that would otherwise put it back. */
+  window.addEventListener('hashchange', function () {
+    try { if (location.hash === '#fresh') { fresh(); location.reload(); } } catch (e) {}
+  });
   try {
     var L = localStorage, ua = navigator.userAgent, due = false;
     var app = /iPhone|iPad|iPod/.test(ua) && /Instagram|FBAN|FBAV|FB_IAB|Messenger|Snapchat|TikTok|musical_ly|BytedanceWebview|LinkedInApp|Line\//.test(ua);
@@ -864,29 +882,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
 .pl-cats .cd-chip { display: flex; align-items: center; gap: 10px; text-align: left; padding: 0 14px; border-radius: 14px; }
 .pl-cats .cd-chip::before { content: ""; flex: none; width: 10px; height: 10px; border-radius: 3px; background: var(--kc); }
 .pl-cats .cd-chip[aria-pressed="true"] { background: color-mix(in srgb, var(--kc) 22%, transparent); color: var(--ink); box-shadow: inset 0 0 0 1px var(--kc); }
-/* PLAN B IS WRITTEN BEFORE THE DAY THAT NEEDS IT. Desktop only, on
-   request: it is where you sit down and plan for the bad day, not
-   something you reach for on the phone in the middle of one. Three
-   parts on the list side: the habits a second miss would turn into a
-   pattern, the if-then plans with a record of whether each one worked,
-   and the smallest version of every habit for a day the full one will
-   not happen. */
 .cd-tab-pb { display: none; }
-.cf-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.cf-pr { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 10px 0; box-shadow: inset 0 1px 0 var(--hair); }
-.cf-pr b { display: flex; align-items: center; gap: 10px; font: 400 15px/1.2 var(--sans); }
-.cf-pr b::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--hc); }
-.cf-pr i { display: block; margin: 5px 0 0 17px; font: 400 12.5px/1.3 var(--sans); font-style: normal; color: var(--dim); }
-.cf-pr i.is-nil { color: var(--quiet); }
-.cf-p { border-radius: 16px; box-shadow: inset 0 0 0 1px var(--hair); }
-.cf-body { display: block; width: 100%; padding: 14px 16px 4px; text-align: left; color: var(--ink); }
-.cf-g { margin-bottom: 9px; font: 500 10px/1.3 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--c-work); }
-.cf-ln { display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 8px; font: 400 15px/1.35 var(--sans); overflow-wrap: anywhere; }
-.cf-ln + .cf-ln { margin-top: 6px; }
-.cf-ln span { font: 500 10px/2 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--quiet); }
-.cf-ft { display: flex; align-items: center; gap: 8px; padding: 6px 10px 10px 16px; }
-.cf-tl { flex: 1; min-width: 0; font: 400 12.5px/1.2 var(--sans); color: var(--quiet); }
-.cf-mins .cd-row { grid-template-columns: 120px 1fr; }
 .cf-proc { min-height: 120px; font-variant-numeric: tabular-nums; }
 .cf-steps { list-style: none; margin: 10px 0 0; padding: 0; }
 .cf-steps li { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 10px; align-items: baseline; padding: 7px 2px; box-shadow: inset 0 1px 0 var(--hair); font: 400 15px/1.25 var(--sans); }
@@ -910,8 +906,6 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
 .cf-side .cd-big { margin: 0; text-align: left; }
 .cf-side .cd-hs { text-align: left; }
 .cf-side > .cd-lbl { margin-bottom: 12px; }
-.cf-fig { margin: 0 0 14px; font: 400 13px/1.3 var(--sans); color: var(--quiet); }
-.cf-fig b { font-weight: 500; color: var(--ink); }
 .cf-today { margin-top: 16px; }
 .cf-today li { display: block; padding: 0; }
 .cf-today button { display: grid; grid-template-columns: 22px 52px minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; min-height: 44px; padding: 0 2px; text-align: left; color: var(--ink); font: 400 15px/1.25 var(--sans); }
@@ -922,8 +916,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
 .cf-today .is-now button em { color: var(--c); }
 .cf-today .is-past button span { text-decoration: line-through; color: var(--quiet); }
 .cf-today .is-done button em { color: var(--c); }
-.cf-mins .cd-row > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-/* WHO HE IS reads as statements, written as lines; the field and the
+/* WHO THEY ARE reads as statements, written as lines; the field and the
    list are the same words twice, so only one is up at a time, the way
    the daily process beside it already works. */
 #cdHsWho.is-ed .hs-him, #cdHsWho.is-ed #cdHsEd, #cdHsWho:not(.is-ed) #cdHsHim { display: none; }
@@ -942,7 +935,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
 .hs-strip i.is-today { outline: 3px solid rgba(243, 245, 247, .16); outline-offset: 2px; }
 @media (min-width: 960px) {
   .cd-tab-pb { display: inline-block; }
-  #cdVCont > .cd-pane, #cdVSelf > .cd-pane { display: block; padding: 0 40px 40px; }
+  #cdVSelf > .cd-pane { display: block; padding: 0 40px 40px; }
   .cd-tab-plan { display: inline-block; }
   .cd-app.is-plan { max-width: 1440px; }
 }
@@ -964,7 +957,6 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
       <button class="cd-tab" data-v="note" type="button">Notes</button>
       <button class="cd-tab cd-tab-plan" data-v="plan" type="button">Plan</button>
       <button class="cd-tab cd-tab-pb" data-v="self" type="button">Higher self</button>
-      <button class="cd-tab cd-tab-pb" data-v="cont" type="button">Plan B</button>
     </nav>
     <button class="cd-plus" id="cdAdd" type="button" aria-label="Add a block"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
   </header>
@@ -1039,13 +1031,13 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
       <div class="cd-pane">
         <div class="cf-two">
           <div class="cf-side" id="cdHsWho">
-            <p class="cd-hcap">Who he is</p>
-            <textarea class="cd-field cf-proc" id="cdHsHim" aria-label="Who your higher self is, one line each" placeholder="He wakes at 3:30&#10;He trains every morning"></textarea>
+            <p class="cd-hcap">Who they are</p>
+            <textarea class="cd-field cf-proc" id="cdHsHim" aria-label="Who your higher self is, one line each" placeholder="They wake at 3:30&#10;They train every morning"></textarea>
             <ul class="hs-him" id="cdHsList"></ul>
             <button class="cd-link" id="cdHsEd" type="button">Edit</button>
           </div>
           <div class="cf-side" id="cdHsDays">
-            <p class="cd-hcap">Days lived as him</p>
+            <p class="cd-hcap">Days lived as them</p>
             <p class="cd-big" id="cdHsN"></p>
             <p class="cd-hs" id="cdHsCap"></p>
             <div class="hs-strip" id="cdHsStrip" role="img"></div>
@@ -1064,24 +1056,6 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
             <p class="cd-big" id="cdCfAl"></p>
             <p class="cd-hs" id="cdCfAlCap"></p>
             <ul class="cf-steps cf-today" id="cdCfToday"></ul>
-          </div>
-        </div>
-      </div>
-    </section>
-    <section id="cdVCont" aria-label="Plan B" hidden>
-      <div class="cd-pane">
-        <div class="cf-two">
-          <div class="cf-side">
-            <p class="cd-lbl cd-sec" id="cdCfProtL">Protect today</p>
-            <ul class="cf-list" id="cdCfProt"></ul>
-            <p class="cd-lbl cd-sec">Bad-day versions</p>
-            <div class="cd-rows cf-mins" id="cdCfMin"></div>
-          </div>
-          <div class="cf-side">
-            <p class="cd-lbl cd-sec">If, then</p>
-            <p class="cf-fig"><b id="cdCfT"></b> <span id="cdCfCap"></span></p>
-            <ul class="cf-list" id="cdCfPlans"></ul>
-            <button class="cd-link" id="cdCfAdd" type="button">+ A plan</button>
           </div>
         </div>
       </div>
@@ -1491,34 +1465,16 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     if (!(d >= 0 && d <= 6) || !(s >= 0 && s < 1440) || !(e > s && e <= 1440)) return null;
     return { id: b.id, d: d, s: s, e: e, n: String(b.n || '').slice(0, 60), t: String(b.t || '').slice(0, 80), c: PLAN_C[b.c] ? b.c : 'life' };
   }
-  /* PLAN B is one object: the bad-day version of each habit, keyed by
-     the habit's id, and the if-then plans. A plan's record is one entry
-     a day, `ok` 1 or 0, because the question it answers is whether the
-     fallback rescued the day, not how many times you pressed it. A
-     damaged plan costs itself and a damaged entry costs itself; the
-     versions are free text with nothing to repair but their length. */
+  /* The higher self and its daily process are one object: who they are,
+     the process as written, the days it runs, when it began and whether
+     this device is the owner's. Plan B once lived here too, and a
+     stored `min` or `plans` is dropped on the way in and so off the disk
+     on the next write. */
   function cdContClean(raw) {
-    var o = isObj(raw) ? raw : {}, min = {}, plans = [], seen = {};
-    if (isObj(o.min)) Object.keys(o.min).forEach(function (k) {
-      var v = typeof o.min[k] === 'string' ? o.min[k].trim().slice(0, 80) : '';
-      if (v && k.length <= 40) min[k] = v;
-    });
-    (Array.isArray(o.plans) ? o.plans : []).forEach(function (p) {
-      if (!isObj(p) || typeof p.id !== 'string' || !p.id || seen[p.id]) return;
-      var i = String(p.i || '').trim().slice(0, 140), t = String(p.t || '').trim().slice(0, 140);
-      if (!i || !t) return;
-      seen[p.id] = 1;
-      var days = {}, u = [];
-      (Array.isArray(p.u) ? p.u : []).forEach(function (x) {
-        if (!isObj(x) || !ISO.test(x.d) || days[x.d]) return;
-        days[x.d] = 1; u.push({ d: x.d, ok: x.ok ? 1 : 0 });
-      });
-      u.sort(function (a, b) { return a.d < b.d ? -1 : 1; });
-      plans.push({ id: p.id, g: String(p.g || '').trim().slice(0, 60), i: i, t: t, u: u.slice(-200) });
-    });
+    var o = isObj(raw) ? raw : {};
     var pd = (Array.isArray(o.pd) ? o.pd : [0, 1, 2, 3, 4, 5, 6]).map(Number).filter(function (x, i, a) { return x >= 0 && x <= 6 && x % 1 === 0 && a.indexOf(x) === i; }).sort();
     var pt = typeof o.pt === 'string' ? o.pt.slice(0, 3000) : '';
-    return { min: min, plans: plans.slice(0, 60), pt: pt, pd: pd, him: typeof o.him === 'string' ? o.him.slice(0, 2000) : '',
+    return { pt: pt, pd: pd, him: typeof o.him === 'string' ? o.him.slice(0, 2000) : '',
       ps: pt.trim() && typeof o.ps === 'string' && ISO.test(o.ps) ? o.ps : '', own: o.own ? 1 : 0 };
   }
   /* A note is a list of BLOCKS: a title, a heading, a sub-heading, a
@@ -1737,14 +1693,13 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     $('cdVMon').hidden = v !== 'mon';
     $('cdVNote').hidden = v !== 'note';
     $('cdVPlan').hidden = v !== 'plan';
-    $('cdVCont').hidden = v !== 'cont';
     $('cdVSelf').hidden = v !== 'self';
     document.querySelector('.cd-app').classList.toggle('is-plan', v === 'plan');
     document.querySelectorAll('.cd-tab').forEach(function (t) {
       if (t.dataset.v === v) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current');
     });
     document.querySelectorAll('.cd-pane').forEach(function (p) { p.scrollTop = 0; });
-    $('cdAdd').setAttribute('aria-label', v === 'note' ? 'New note' : v === 'cont' ? 'Add a plan' : 'Add a block');
+    $('cdAdd').setAttribute('aria-label', v === 'note' ? 'New note' : 'Add a block');
     cdPaint();
   }
   function cdPaint() {
@@ -1752,7 +1707,6 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     else if (view === 'hab') cdPaintHab();
     else if (view === 'mon') cdPaintMon();
     else if (view === 'plan') cdPaintPlan();
-    else if (view === 'cont') cdPaintCont();
     else if (view === 'self') cdPaintSelf();
     else cdPaintNotes();
   }
@@ -4252,7 +4206,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); cdPlanEdit(b); }
     else if (ev.key === 'Delete' || ev.key === 'Backspace') { ev.preventDefault(); cdPlanDel(b); }
   });
-  PLAN_MQ.addEventListener('change', function () { if (!PLAN_MQ.matches && (view === 'plan' || view === 'cont' || view === 'self')) cdGo('day'); });
+  PLAN_MQ.addEventListener('change', function () { if (!PLAN_MQ.matches && (view === 'plan' || view === 'self')) cdGo('day'); });
   function cdPlanDel(b) {
     var at = S.plan.indexOf(b); if (at < 0) return;
     S.plan.splice(at, 1); cdSave('plan'); cdClose(); cdPaintPlan();
@@ -4322,106 +4276,6 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     cdSheet(b ? (b.n || 'Untitled') : 'New block', root);
     setTimeout(function () { nm.focus(); }, 60);
   }
-
-  /* ═══ PLAN B ═══ */
-  /* NEVER MISS TWICE. A habit you were keeping, missed yesterday and not
-     yet kept today, is the one a second miss turns into a pattern, so it
-     leads the screen with its bad-day version beside it. "Were keeping"
-     is any day in the fortnight before yesterday: without it, a habit you
-     added this morning and every habit on a first open would all be
-     flagged, which is a list of everything rather than of what is at risk. */
-  function cdContAtRisk() {
-    var t = cdToday(), y = cdAddDays(t, -1);
-    return cdHabits().filter(function (h) {
-      if (cdHabOn(y, h) || cdHabOn(t, h)) return false;
-      for (var i = 2; i <= 15; i++) if (cdHabOn(cdAddDays(t, -i), h)) return true;
-      return false;
-    });
-  }
-  function cdContTally(p, from) {
-    var u = p.u.filter(function (x) { return !from || x.d >= from; });
-    return { n: u.length, ok: u.filter(function (x) { return x.ok; }).length };
-  }
-  function cdPaintCont() {
-    if (!PLAN_MQ.matches) { cdGo('day'); return; }
-    var C = S.cont, t = cdToday(), from = cdAddDays(t, -29);
-    var all = C.plans.reduce(function (a, p) { var x = cdContTally(p, from); a.n += x.n; a.ok += x.ok; return a; }, { n: 0, ok: 0 });
-    $('cdCfT').textContent = C.plans.length + (C.plans.length === 1 ? ' plan' : ' plans');
-    $('cdCfCap').innerHTML = all.n ? 'used <b>' + all.n + '</b> in 30 days · <b>' + all.ok + '</b> worked' : C.plans.length ? 'none used in 30 days' : 'nothing written yet';
-    var risk = cdContAtRisk(), pr = $('cdCfProt');
-    pr.innerHTML = '';
-    $('cdCfProtL').hidden = pr.hidden = !risk.length;
-    risk.forEach(function (h) {
-      var li = el('li', 'cf-pr'); li.dataset.h = h.id; li.style.setProperty('--hc', 'var(' + h.hc + ')');
-      var m = C.min[h.id];
-      li.innerHTML = '<div><b>' + esc(h.n) + '</b><i' + (m ? '>' + esc(m) : ' class="is-nil">Missed yesterday') + '</i></div>';
-      var go = el('button', 'cd-chip', 'Log it'); go.type = 'button'; go.dataset.act = 'log';
-      go.setAttribute('aria-label', 'Log ' + h.n + ' today');
-      li.appendChild(go);
-      pr.appendChild(li);
-    });
-    var ul = $('cdCfPlans');
-    ul.innerHTML = '';
-    C.plans.forEach(function (p) {
-      var li = el('li', 'cf-p'); li.dataset.id = p.id;
-      var body = el('button', 'cf-body'); body.type = 'button'; body.dataset.act = 'edit';
-      body.setAttribute('aria-label', 'Edit: if ' + p.i + ', then ' + p.t);
-      body.innerHTML = (p.g ? '<p class="cf-g">' + esc(p.g) + '</p>' : '')
-        + '<p class="cf-ln"><span>If</span>' + esc(p.i) + '</p><p class="cf-ln"><span>Then</span>' + esc(p.t) + '</p>';
-      li.appendChild(body);
-      var x = cdContTally(p), td = p.u.filter(function (e) { return e.d === t; })[0];
-      var ft = el('div', 'cf-ft');
-      ft.appendChild(el('span', 'cf-tl', x.n ? 'Used ' + x.n + ' · worked ' + x.ok : 'Not used yet'));
-      [['ok', 'It worked', 1], ['no', 'It didn’t', 0]].forEach(function (a) {
-        var b = el('button', 'cd-chip', a[1]); b.type = 'button'; b.dataset.act = a[0];
-        b.setAttribute('aria-pressed', td ? String(td.ok === a[2]) : 'false');
-        ft.appendChild(b);
-      });
-      li.appendChild(ft);
-      ul.appendChild(li);
-    });
-    var mins = $('cdCfMin');
-    if (!mins.contains(document.activeElement)) {
-      mins.innerHTML = '';
-      cdHabits().forEach(function (h) {
-        var r = el('div', 'cd-row'), f = el('input', 'cd-field');
-        r.appendChild(el('span', '', esc(h.n)));
-        f.type = 'text'; f.maxLength = 80; f.placeholder = 'The smallest version'; f.value = C.min[h.id] || '';
-        f.dataset.h = h.id; f.setAttribute('aria-label', 'Bad-day version of ' + h.n);
-        r.appendChild(f); mins.appendChild(r);
-      });
-    }
-  }
-  $('cdCfProt').addEventListener('click', function (ev) {
-    var b = ev.target.closest('[data-act="log"]'); if (!b) return;
-    var h = cdHabits().filter(function (x) { return x.id === b.closest('.cf-pr').dataset.h; })[0]; if (!h) return;
-    var t = cdToday();
-    if (h.id === 'train') { cdTrainAt(t); return; }
-    if (h.k === 'num') { cdNumSheet(h, t); return; }
-    if (cdHabToggle(t, h)) { cdPaintCont(); cdToast('Kept ' + h.n, function () { cdHabToggle(t, h); cdPaintCont(); }); }
-  });
-  /* Pressing what you already said takes the day's entry back off, and
-     the other one replaces it: one answer a day, changed as often as you
-     like, because a fallback that worked at noon can fail by evening. */
-  $('cdCfPlans').addEventListener('click', function (ev) {
-    var b = ev.target.closest('[data-act]'); if (!b) return;
-    var p = S.cont.plans.filter(function (x) { return x.id === b.closest('.cf-p').dataset.id; })[0]; if (!p) return;
-    if (b.dataset.act === 'edit') { cdContEdit(p); return; }
-    var t = cdToday(), ok = b.dataset.act === 'ok' ? 1 : 0, at = -1;
-    p.u.forEach(function (e, i) { if (e.d === t) at = i; });
-    if (at >= 0 && p.u[at].ok === ok) p.u.splice(at, 1);
-    else if (at >= 0) p.u[at].ok = ok;
-    else p.u.push({ d: t, ok: ok });
-    cdSave('cont'); cdPaintCont();
-  });
-  $('cdCfMin').addEventListener('input', function (ev) {
-    var f = ev.target.closest('input[data-h]'); if (!f) return;
-    var v = f.value.trim().slice(0, 80);
-    if (v) S.cont.min[f.dataset.h] = v; else delete S.cont.min[f.dataset.h];
-    cdSave('cont');
-  });
-  $('cdCfMin').addEventListener('focusout', function () { setTimeout(function () { if (view === 'cont') cdPaintCont(); }, 0); });
-  $('cdCfAdd').addEventListener('click', function () { cdContEdit(null); });
 
   /* THE DAILY PROCESS IS WRITTEN HERE AND LIVES ON THE WEEK. One step a
      line, the time anywhere in it, the way you would write it down. Each
@@ -4565,12 +4419,12 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     cdSave('cont'); cdProcApply(); cdPaintProc();
   });
 
-  /* WHO HE IS, AND WHETHER TODAY WAS HIM. The higher self is written as
-     who he is rather than where he is: a villa is an outcome and a date,
+  /* WHO THEY ARE, AND WHETHER TODAY WAS THEM. The higher self is written as
+     who they are rather than where they are: a villa is an outcome and a date,
      and a screen that measured you against it would grade every day you
      are not there yet. What this counts instead is the one thing that
-     moves you towards it — days on which you did everything he does.
-     A day is lived as him when every step of the daily process on it is
+     moves you towards it — days on which you did everything they do.
+     A day is lived as them when every step of the daily process on it is
      kept; part of it is a quieter dot, none is a hollow one, and a day
      before the process existed, or still ahead, makes no claim at all. */
   function cdSelfDay(iso) {
@@ -4622,9 +4476,9 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     }
     strip.innerHTML = html;
     $('cdHsN').textContent = ps ? lived + ' / ' + counted : '—';
-    $('cdHsCap').textContent = !ps ? 'write the day he lives to start counting'
-      : counted > 1 ? 'of the last ' + counted + ' days lived as him' + (run > 1 ? ' · ' + run + ' in a row' : '') : 'day one';
-    strip.setAttribute('aria-label', ps ? lived + ' of the last ' + counted + ' days lived as him' : 'no days counted yet');
+    $('cdHsCap').textContent = !ps ? 'write the day they live to start counting'
+      : counted > 1 ? 'of the last ' + counted + ' days lived as them' + (run > 1 ? ' · ' + run + ' in a row' : '') : 'day one';
+    strip.setAttribute('aria-label', ps ? lived + ' of the last ' + counted + ' days lived as them' : 'no days counted yet');
     cdPaintProc();
   }
   $('cdHsHim').addEventListener('input', function () { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; });
@@ -4634,18 +4488,18 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     var f = $('cdHsHim'); $('cdHsWho').classList.add('is-ed'); f.style.height = 'auto'; f.style.height = f.scrollHeight + 'px';
     f.focus(); f.setSelectionRange(f.value.length, f.value.length);
   });
-  /* A HIGHER SELF CAN ARRIVE AS A LINK. Who he is and the day he lives
+  /* A HIGHER SELF CAN ARRIVE AS A LINK. Who they are and the day they live
      are the most personal lines in this app, and this repository is
      public, so they are never written into the code: they travel as the
      fragment of a link, which never leaves the browser, are read once
      and stripped from the bar. What it replaces comes back on Undo. */
-  /* HIS HIGHER SELF IS WRITTEN HERE, AND IT IS READ-ONLY. Asked for in so
+  /* THE OWNER'S HIGHER SELF IS WRITTEN HERE, AND IT IS READ-ONLY. Asked for in so
      many words: hard-coded, nothing to change, the steps already on the
      week. It is drawn only on a device that has opened the unlock link,
      #self=mine, so anybody else who opens the app still gets the empty,
      editable tab. This repository is public, so these lines can be read
      in the source by anyone who looks, and that was chosen knowingly. */
-  var SELF = {"h": "He wakes at 3:30 and buys his time back, so he is never in survival mode.\nBefore anything else he grounds himself, ten minutes at most: I am this, I am here, I am making it. He assumes it as done.\nNothing about business touches him until he is grounded, hydrated and trained.\nHe drinks a litre of water before the gym and 5 litres by the end of the day.\nHe trains every morning, trains abs every day, and walks the incline for 30 minutes with a podcast from men already where he is going.\nHe fasts until 1pm on coffee and water. His first meal comes after the deep work, and it is whole foods.\nHe eats dinner around 7 to 7:30, never later than 8, and it is whole foods too.\nHe eats whole foods every day and hits the blueprint his nutrition coach built for his body.\nHe is shredded and he stays that way.\nHe reads his mindset books and acts on them the same day.\nAfter training he goes deep: backtesting, yesterday's market, where he could have entered, then trading content.\nOn a day off he goes deep for two to three hours on the business, then walks to reset.\nHe invests in mentors. $5,000 in the right mind returns $20,000 a month in mindset alone.\nHe coaches men to do the same.\nHe buys the best: coconut water, the best water, free-range meat.\nHe never goes cheap on a coach or a mentor, so he never pays twice.\nHe wastes no time and he has cut every vice.\nAt night he winds down on mindset content and makes sure every high-leverage task is done.\nHe is in bed by 9 to 9:30, never later than 10, priming his mind to wake and set the intention again.\nHe judges a day by whether he did the work, never by where he is yet.", "p": "3:30am Wake up\n3:35am Ground + set intention for 10 mins\n3:45am 1L water + coffee + mindset book for 15 mins\n4am Train + abs\n5am Incline walk + vision podcast for 30 mins\n5:30am Deep work: backtest + yesterday's market for 90 mins\n7am Trading content for 30 mins\n1pm First meal, whole foods for 30 mins\n7pm Dinner, whole foods for 30 mins\n8:30pm Wind down: mindset content + check the day for 30 mins\n9pm Lights out, prime tomorrow's intention", "d": [0, 1, 2, 3, 4, 5, 6]};
+  var SELF = {"h": "They wake at 3:30 and buy their time back, so they are never in survival mode.\nBefore anything else they ground themselves, ten minutes at most: I am this, I am here, I am making it. They assume it as done.\nNothing about business touches them until they are grounded, hydrated and trained.\nThey drink a litre of water before the gym and 5 litres by the end of the day.\nThey train every morning, train abs every day, and walk the incline for 30 minutes with a podcast from people already where they are going.\nThey fast until 1pm on coffee and water. Their first meal comes after the deep work, and it is whole foods.\nThey eat dinner around 7 to 7:30, never later than 8, and it is whole foods too.\nThey eat whole foods every day and hit the blueprint their nutrition coach built for their body.\nThey are shredded and they stay that way.\nThey read their mindset books and act on them the same day.\nAfter training they go deep: backtesting, yesterday's market, where they could have entered, then trading content.\nOn a day off they go deep for two to three hours on the business, then walk to reset.\nThey invest in mentors. $5,000 in the right mind returns $20,000 a month in mindset alone.\nThey coach others to do the same.\nThey buy the best: coconut water, the best water, free-range meat.\nThey never go cheap on a coach or a mentor, so they never pay twice.\nThey waste no time and they have cut every vice.\nAt night they wind down on mindset content and make sure every high-leverage task is done.\nThey are in bed by 9 to 9:30, never later than 10, priming their mind to wake and set the intention again.\nThey judge a day by whether they did the work, never by where they are yet.", "p": "3:30am Wake up\n3:35am Ground + set intention for 10 mins\n3:45am 1L water + coffee + mindset book for 15 mins\n4am Train + abs\n5am Incline walk + vision podcast for 30 mins\n5:30am Deep work: backtest + yesterday's market for 90 mins\n7am Trading content for 30 mins\n1pm First meal, whole foods for 30 mins\n7pm Dinner, whole foods for 30 mins\n8:30pm Wind down: mindset content + check the day for 30 mins\n9pm Lights out, prime tomorrow's intention", "d": [0, 1, 2, 3, 4, 5, 6]};
   /* On an owned device the record is put back to SELF on every boot, so
      an edit made anywhere else, or carried in by sync, cannot stand. */
   function cdSelfOwn() {
@@ -4680,47 +4534,6 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     });
     return true;
   }
-  function cdContDel(p) {
-    var at = S.cont.plans.indexOf(p); if (at < 0) return;
-    S.cont.plans.splice(at, 1); cdSave('cont'); cdClose(); cdPaintCont();
-    cdToast('Deleted the plan', function () { S.cont.plans.splice(at, 0, p); cdSave('cont'); cdPaintCont(); });
-  }
-  function cdContEdit(p) {
-    var root = el('div'), rows = el('div', 'cd-rows');
-    function fld(id, lbl, ph, max, v) {
-      var r = el('div', 'cd-row'), f = el('input', 'cd-field');
-      f.type = 'text'; f.id = id; f.placeholder = ph; f.maxLength = max; f.value = v || '';
-      r.appendChild(el('span', '', lbl)); r.appendChild(f); rows.appendChild(r);
-      return f;
-    }
-    var g = fld('cdCfG', 'Goal', 'Optional', 60, p && p.g);
-    var i = fld('cdCfI', 'If', 'What gets in the way', 140, p && p.i);
-    var t = fld('cdCfTh', 'Then', 'What you do instead', 140, p && p.t);
-    root.appendChild(rows);
-    var foot = el('div', 'cd-foot');
-    if (p) {
-      var del = el('button', 'cd-btn warn', 'Delete'); del.type = 'button'; del.id = 'cdCfDel';
-      del.addEventListener('click', function () { cdContDel(p); });
-      foot.appendChild(del);
-    }
-    var save = el('button', 'cd-btn go', p ? 'Save' : 'Add'); save.type = 'button'; save.id = 'cdCfSave';
-    function sync() { save.disabled = !i.value.trim() || !t.value.trim(); }
-    [i, t].forEach(function (f) { f.addEventListener('input', sync); });
-    sync();
-    save.addEventListener('click', function () {
-      if (save.disabled) return;
-      var o = { g: g.value.trim(), i: i.value.trim(), t: t.value.trim() };
-      if (p) { p.g = o.g; p.i = o.i; p.t = o.t; } else S.cont.plans.push({ id: cdId(), g: o.g, i: o.i, t: o.t, u: [] });
-      S.cont = cdContClean(S.cont);
-      cdSave('cont'); cdClose(); cdPaintCont();
-    });
-    [g, i, t].forEach(function (f) { f.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') save.click(); }); });
-    foot.appendChild(save);
-    root.appendChild(foot);
-    cdSheet(p ? 'Edit the plan' : 'A new plan', root);
-    setTimeout(function () { (p ? i : g).focus(); }, 60);
-  }
-
   /* ═══ TOAST ═══ */
   var toastT = 0, toastUndo = null;
   function cdToast(msg, undo) {
@@ -4742,7 +4555,6 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
      the start, and it is only kept once something is written on it. */
   $('cdAdd').addEventListener('click', function () {
     if (view === 'note') { cdNoteNew(); return; }
-    if (view === 'cont') { cdContEdit(null); return; }
     if (view === 'plan') { var hs = Math.min(1380, Math.ceil(cdNowMin() / 60) * 60); cdPlanEdit(null, { d: cdDow(cdToday()), s: hs, e: hs + 60 }); return; }
     cdEdit(null);
   });
@@ -5113,10 +4925,10 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
 
   var sv = 'day';
   try { sv = sessionStorage.getItem('cad.view') || 'day'; } catch (e) {}
-  if ((sv === 'plan' || sv === 'cont' || sv === 'self') && !PLAN_MQ.matches) sv = 'day';
+  if ((sv === 'plan' || sv === 'self') && !PLAN_MQ.matches) sv = 'day';
   cdSelfOwn();
   if (selfIn && cdSelfLoad(selfIn) && PLAN_MQ.matches) sv = 'self';
-  cdGo(['day', 'hab', 'mon', 'note', 'plan', 'cont', 'self'].indexOf(sv) >= 0 ? sv : 'day');
+  cdGo(['day', 'hab', 'mon', 'note', 'plan', 'self'].indexOf(sv) >= 0 ? sv : 'day');
   /* The first open of a date shows its thought, and a Safari tab its
      install steps first. Both go up in this same pass rather than on a
      timer: one put up after the day has painted shows the day and then

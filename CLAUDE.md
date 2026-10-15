@@ -5939,6 +5939,31 @@ week as its fixture: every section but the examples one stores it
 unflagged through a `setItem` hook, so a check that adds a block still
 has the week it was written against.
 
+### Plan B is gone, they are who they are, and #fresh starts clean
+
+Plan B went on request: the tab, its screen, the bad-day versions and
+the if-then plans. `cad.cont.v1` stays because the higher self lives in
+it, and `cdContClean` drops a stored `min` or `plans` on the way in, so
+an old record is cleaned and written back off the disk. A stored view of
+`cont` falls through to the day. Asserted as the tab and the screen
+being absent and an old record losing them while keeping `him`.
+
+**THE HIGHER SELF IS WRITTEN AS THEY, NOT HE.** It could be anybody
+reading it, so the headings are *Who they are* and *Days lived as them*,
+the placeholder and the caption say they, and the owner's own hard-coded
+lines were rewritten in the plural, verbs and all.
+
+**`#fresh` CLEARS RATHER THAN FILLS.** Opened from an old link the app
+showed somebody's earlier week, because storage belongs to the browser,
+not the link. The exact fragment `#fresh` removes every `cad.` key, the
+session and the picture store before anything reads them, then spends
+itself. In a tab already open it changes only the hash, so the wipe is
+followed by a reload: the app's memory would otherwise write it all back.
+The head script owns it, so it runs before the card check reads a key.
+
+**And `pkill -f` killed its own shell again** while stopping the test
+server, which is the second time this file has had to say so.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

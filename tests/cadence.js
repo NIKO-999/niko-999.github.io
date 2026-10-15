@@ -2035,83 +2035,26 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('no page errors on a desktop', errs.length === 0, errs);
     await c.close();
 
-    /* PLAN B: desktop only. A habit you were keeping and missed
-       yesterday leads the screen with its bad-day version; plans are
-       if-then lines with one answer a day about whether they worked. */
+    /* THE HIGHER SELF TAB: desktop only. */
   {
-    const init = `(() => { if (localStorage.getItem('cad.cont.v1')) return;
-      localStorage.setItem('cad.defs.v1', JSON.stringify([{ id: 'mx', n: 'Stretch', k: 'tick' }]));
-      const h = JSON.parse(localStorage.getItem('cad.hab.v1') || '{}'); h['2026-09-20'] = Object.assign(h['2026-09-20'] || {}, { mx: 1 });
-      localStorage.setItem('cad.hab.v1', JSON.stringify(h));
-      localStorage.setItem('cad.cont.v1', JSON.stringify({ min: { mx: '  Two  ', zz: 5 }, plans: [{ id: 'p1', g: 'Run', i: 'It rains', t: 'Treadmill', u: [{ d: 'x' }, { d: '2026-09-24', ok: 1 }, { d: '2026-09-24', ok: 0 }] }, { id: 'p2', i: '' }, 'junk'] })); })();`;
-    const { c, page, errs } = await ctx({ desk: { width: 1440, height: 900 }, init });
-    const rep = await store(page, 'cad.cont.v1');
-    ok('a damaged plan B costs only what is damaged, and the repair is written back', JSON.stringify(rep) === JSON.stringify({ min: { mx: 'Two' }, plans: [{ id: 'p1', g: 'Run', i: 'It rains', t: 'Treadmill', u: [{ d: '2026-09-24', ok: 1 }] }], pt: '', pd: [0, 1, 2, 3, 4, 5, 6], him: '', ps: '', own: 0 }), rep);
-    await page.click('.cd-tab[data-v="cont"]');
-    await page.waitForTimeout(150);
-    const v = await page.evaluate(() => ({ shown: !document.getElementById('cdVCont').hidden, others: ['cdVDay', 'cdVHab', 'cdVMon', 'cdVNote', 'cdVPlan', 'cdVSelf'].filter((i) => !document.getElementById(i).hidden),
-      big: document.getElementById('cdCfT').textContent, prot: [...document.querySelectorAll('#cdCfProt .cf-pr')].map((r) => r.dataset.h + ':' + r.querySelector('i').textContent),
-      mins: document.querySelectorAll('#cdCfMin input').length }));
-    ok('plan B is its own screen on a desktop, headed by how many plans', v.shown && !v.others.length && v.big === '1 plan', v);
-    ok('a habit kept last week and missed yesterday is the one to protect, with its bad-day version', v.prot.includes('mx:Two'), v.prot);
-    const kept = await page.evaluate(() => { const h = JSON.parse(localStorage.getItem('cad.hab.v1') || '{}'); return Object.keys(h['2026-09-24'] || {}).concat(Object.keys(h['2026-09-25'] || {})); });
-    ok('nothing kept yesterday or today is asked to be protected', !v.prot.some((x) => kept.includes(x.split(':')[0])), { kept, prot: v.prot });
-    ok('every habit has a row for its bad-day version', v.mins >= 7, v.mins);
+    const { c, page, errs } = await ctx({ desk: { width: 1440, height: 900 } });
     const rowBoxes = (sel) => page.$$eval(sel + ' .cf-two', (rows) => rows.filter((r) => r.getBoundingClientRect().height).map((r) => [...r.children].map((c) => { const x = c.getBoundingClientRect(); return { l: x.left, r: x.right, t: x.top, h: x.height, w: x.width }; })));
     const pair = (r) => r.length === 2 && r[0].r <= r[1].l && Math.abs(r[0].t - r[1].t) < 1 && Math.abs(r[0].h - r[1].h) < 1 && Math.abs(r[0].w - r[1].w) < 1;
-    const sides = await rowBoxes('#cdVCont');
-    ok('plan B is the contingency alone now: one row of two boxes of one size, and no daily process on it', sides.length === 1 && pair(sides[0]) && !(await page.$('#cdVCont #cdCfHi')), sides);
-    await page.fill('#cdCfMin input[data-h="mx"]', 'Five minutes on the floor');
-    await page.click('#cdCfT'); await page.waitForTimeout(100);
-    ok('a bad-day version is kept as you type it, and the protect row reads it', (await store(page, 'cad.cont.v1')).min.mx === 'Five minutes on the floor' && (await page.textContent('#cdCfProt .cf-pr[data-h="mx"] i')) === 'Five minutes on the floor');
-    await page.click('#cdCfAdd');
-    const up = await sheetUp(page);
-    const dis = up && await page.$eval('#cdCfSave', (b) => b.disabled);
-    ok('a new plan needs both its if and its then', up && dis === true, { up, dis });
-    if (up) { await page.fill('#cdCfG', 'Ten k by December'); await page.fill('#cdCfI', 'I miss the morning run'); await page.fill('#cdCfTh', 'Twenty minutes at lunch');
-      /* The sheet rises for 240ms and a fill landing inside it can arrive
-         before the field's own input handler has the value; asking twice
-         is cheaper than a click that waits thirty seconds on nothing. */
-      if (await page.$eval('#cdCfSave', (b) => b.disabled)) { await page.fill('#cdCfI', 'I miss the morning run'); await page.fill('#cdCfTh', 'Twenty minutes at lunch'); }
-      await page.$eval('#cdCfSave', (b) => b.click()); await page.waitForTimeout(320); }
-    const pl = (await store(page, 'cad.cont.v1')).plans;
-    const card = await page.evaluate(() => { const c = [...document.querySelectorAll('#cdCfPlans .cf-p')].pop(); return c && { g: c.querySelector('.cf-g') && c.querySelector('.cf-g').textContent, ln: [...c.querySelectorAll('.cf-ln')].map((l) => l.textContent).join('|'), tl: c.querySelector('.cf-tl').textContent }; });
-    ok('a plan is a goal, an if and a then, and has not been used yet', pl.length === 2 && pl[1].i === 'I miss the morning run' && card && card.g === 'Ten k by December' && card.ln === 'IfI miss the morning run|ThenTwenty minutes at lunch' && card.tl === 'Not used yet', { pl, card });
-    const press = async (act) => { await page.evaluate((a) => [...document.querySelectorAll('#cdCfPlans .cf-p')].pop().querySelector('[data-act="' + a + '"]').click(), act); await page.waitForTimeout(60); };
-    const st = () => page.evaluate(() => { const c = [...document.querySelectorAll('#cdCfPlans .cf-p')].pop(); return { tl: c.querySelector('.cf-tl').textContent, ok: c.querySelector('[data-act="ok"]').getAttribute('aria-pressed'), no: c.querySelector('[data-act="no"]').getAttribute('aria-pressed'), cap: document.getElementById('cdCfCap').textContent }; });
-    await press('ok');
-    const s1 = await st(), u1 = (await store(page, 'cad.cont.v1')).plans[1].u;
-    ok('it worked is one entry today, and both the card and the figure count it', JSON.stringify(u1) === '[{"d":"2026-09-25","ok":1}]' && s1.tl === 'Used 1 · worked 1' && s1.ok === 'true' && s1.no === 'false' && s1.cap === 'used 2 in 30 days · 2 worked', { u1, s1 });
-    await press('no');
-    const u2 = (await store(page, 'cad.cont.v1')).plans[1].u;
-    ok('the other answer replaces the day\'s, never adds a second', JSON.stringify(u2) === '[{"d":"2026-09-25","ok":0}]' && (await st()).tl === 'Used 1 · worked 0', u2);
-    await press('no');
-    ok('pressing the same answer again takes the day back off', (await store(page, 'cad.cont.v1')).plans[1].u.length === 0 && (await st()).tl === 'Not used yet');
-    await page.click('#cdCfProt .cf-pr[data-h="mx"] [data-act="log"]');
-    await page.waitForTimeout(100);
-    const lg = await page.evaluate(() => ({ kept: !!(JSON.parse(localStorage.getItem('cad.hab.v1'))['2026-09-25'] || {}).mx, row: !!document.querySelector('#cdCfProt .cf-pr[data-h="mx"]') }));
-    ok('logging a protected habit keeps it today and takes it off the list', lg.kept && !lg.row, lg);
-    await page.evaluate(() => document.getElementById('cdToastU').click()); await page.waitForTimeout(100);
-    ok('...and Undo puts both back', !(await store(page, 'cad.hab.v1'))['2026-09-25']?.mx && !!(await page.$('#cdCfProt .cf-pr[data-h="mx"]')));
-    await page.evaluate(() => [...document.querySelectorAll('#cdCfPlans .cf-p')].pop().querySelector('.cf-body').click());
-    if (await sheetUp(page)) { await page.evaluate(() => document.getElementById('cdCfDel').click()); await page.waitForTimeout(320); }
-    const nDel = (await store(page, 'cad.cont.v1')).plans.length;
-    await page.evaluate(() => document.getElementById('cdToastU').click()); await page.waitForTimeout(100);
-    ok('delete takes a plan off and Undo puts it back', nDel === 1 && (await store(page, 'cad.cont.v1')).plans.length === 2, nDel);
-    /* HIGHER SELF: who he is beside the days you lived as him, and the
-       daily process beside today. Its own desktop tab, apart from the
-       contingency plans. */
+    /* PLAN B IS GONE: no tab, no screen, no key worth of it, and an old
+       record carrying its plans is cleaned on the way in. */
+    ok('there is no Plan B tab or screen', !(await page.$('.cd-tab[data-v="cont"]')) && !(await page.$('#cdVCont')));
+    /* HIGHER SELF: who they are beside the days you lived as them, and the
+       daily process beside today. */
     await page.click('.cd-tab[data-v="self"]'); await page.waitForTimeout(150);
-    const hs = await page.evaluate(() => ({ shown: !document.getElementById('cdVSelf').hidden, cont: !document.getElementById('cdVCont').hidden,
-      caps: [...document.querySelectorAll('#cdVSelf .cd-hcap')].map((e) => e.textContent), n: document.getElementById('cdHsN').textContent, dots: document.querySelectorAll('#cdHsStrip i').length,
+    const hs = await page.evaluate(() => ({ shown: !document.getElementById('cdVSelf').hidden,       caps: [...document.querySelectorAll('#cdVSelf .cd-hcap')].map((e) => e.textContent), n: document.getElementById('cdHsN').textContent, dots: document.querySelectorAll('#cdHsStrip i').length,
       ed: document.getElementById('cdHsWho').classList.contains('is-ed') }));
-    ok('higher self is its own tab: who he is, the days lived as him, the highest version and today', hs.shown && !hs.cont && hs.caps.join('|') === 'Who he is|Days lived as him|Highest version|Today' && hs.n === '—' && hs.dots === 30 && hs.ed, hs);
+    ok('higher self is its own tab: who they are, the days lived as them, the highest version and today', hs.shown && hs.caps.join('|') === 'Who they are|Days lived as them|Highest version|Today' && hs.n === '—' && hs.dots === 30 && hs.ed, hs);
     const selfRows = await rowBoxes('#cdVSelf');
     ok('both sides are on one page there: two rows, each two boxes of one size', selfRows.length === 2 && selfRows.every(pair), selfRows);
-    await page.fill('#cdHsHim', 'He wakes at 5\n\nHe trains every morning');
+    await page.fill('#cdHsHim', 'They wake at 5\n\nThey train every morning');
     await page.$eval('#cdHsHim', (t) => t.blur()); await page.waitForTimeout(150);
     const him = await page.evaluate(() => ({ li: [...document.querySelectorAll('#cdHsList li')].map((l) => l.textContent), field: getComputedStyle(document.getElementById('cdHsHim')).display }));
-    ok('who he is is kept as written and read back as statements, never the field and the list together', (await store(page, 'cad.cont.v1')).him === 'He wakes at 5\n\nHe trains every morning' && him.li.join('|') === 'He wakes at 5|He trains every morning' && him.field === 'none', him);
+    ok('who they are is kept as written and read back as statements, never the field and the list together', (await store(page, 'cad.cont.v1')).him === 'They wake at 5\n\nThey train every morning' && him.li.join('|') === 'They wake at 5|They train every morning' && him.field === 'none', him);
     /* THE DAILY PROCESS: written as lines, laid on the week as blocks
        the process owns, and rewritten whole on every save. */
     {
@@ -2181,14 +2124,41 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       await page.reload(); await page.waitForTimeout(400);
       if (await page.$eval('#cdVSelf', (e) => e.hidden)) { await page.click('.cd-tab[data-v="self"]'); await page.waitForTimeout(150); }
       const strip = await page.evaluate(() => ({ st: [...document.querySelectorAll('#cdHsStrip i')].slice(-4).map((i) => i.dataset.d.slice(8) + ':' + i.dataset.state).join('|'), n: document.getElementById('cdHsN').textContent, cap: document.getElementById('cdHsCap').textContent }));
-      ok('a day lived as him is a whole dot, part of it a quiet one, before the record nothing, and today makes no claim yet', strip.st === '22:nil|23:whole|24:part|25:nil' && strip.n === '1 / 3' && strip.cap === 'of the last 3 days lived as him', strip);
+      ok('a day lived as them is a whole dot, part of it a quiet one, before the record nothing, and today makes no claim yet', strip.st === '22:nil|23:whole|24:part|25:nil' && strip.n === '1 / 3' && strip.cap === 'of the last 3 days lived as them', strip);
       const dotC = await page.$$eval('#cdHsStrip i', (is) => ['whole', 'part', 'nil'].map((s) => { const i = is.find((x) => x.dataset.state === s); return i ? getComputedStyle(i).backgroundColor : 'missing ' + s; }));
       ok('the three states are three different marks', new Set(dotC).size === 3 && !dotC.some((x) => /missing/.test(x)), dotC);
       await editProc(''); await page.$eval('#cdCfProc', (t) => t.blur()); await page.waitForTimeout(150);
       ok('clearing the process takes its blocks off and nothing else', JSON.stringify(await store(page, 'cad.week.v1')) === JSON.stringify(before));
       await page.evaluate(() => document.getElementById('cdToastU').click()); await page.waitForTimeout(100);
     }
-    ok('no page errors on plan B', errs.length === 0, errs);
+    ok('no page errors on the higher self tab', errs.length === 0, errs);
+    await c.close();
+  }
+  /* An old record that still carries Plan B loses it on the way in and
+     keeps what is the higher self's, and the clean is written back. */
+  {
+    const init = `(() => { if (localStorage.getItem('cad.cont.v1')) return;
+      localStorage.setItem('cad.cont.v1', JSON.stringify({ min: { train: 'Ten' }, plans: [{ id: 'p1', i: 'Rain', t: 'Gym', u: [] }], him: 'They read', pt: '', pd: [0, 1] })); })();`;
+    const { c, page, errs } = await ctx({ desk: { width: 1440, height: 900 }, init });
+    const rec = await store(page, 'cad.cont.v1');
+    ok('a stored Plan B is dropped and written back off the disk, the rest kept', rec && !('min' in rec) && !('plans' in rec) && rec.him === 'They read' && rec.pd.join() === '0,1', rec);
+    ok('no page errors with an old record', errs.length === 0, errs);
+    await c.close();
+  }
+  /* #fresh OPENS THE APP AS IF IT HAD NEVER BEEN USED. The fragment clears
+     every Cadence key and the picture store before anything reads them,
+     and leaves the bar clean; a link without it clears nothing. */
+  {
+    const { c, page, errs } = await ctx({ examples: true });
+    await page.evaluate(() => { localStorage.setItem('cad.note.v1', JSON.stringify([{ id: 'n', t: 'keep me' }])); localStorage.setItem('other.key', 'x'); });
+    await page.goto(BASE + '/cadence/'); await page.waitForTimeout(300);
+    ok('an ordinary open clears nothing', !!(await store(page, 'cad.note.v1')));
+    await page.goto(BASE + '/cadence/#fresh'); await page.waitForTimeout(500);
+    const st = await page.evaluate(() => ({ hash: location.hash, keys: Object.keys(localStorage).filter((k) => k.indexOf('cad.') === 0 && k !== 'cad.week.v1' && k !== 'cad.log.v1' && k !== 'cad.refl.v1' && k !== 'cad.rfoff.v1'), note: localStorage.getItem('cad.note.v1'), other: localStorage.getItem('other.key'),
+      examples: document.querySelectorAll('.cd-it').length }));
+    ok('#fresh clears what Cadence kept, nothing else, and leaves the bar clean', st.hash === '' && st.note === null && st.other === 'x', st);
+    ok('...and the week is the first-open examples again', ((await store(page, 'cad.week.v1')) || []).every((b) => b.x === 1) && st.examples > 0, st);
+    ok('no page errors on #fresh', errs.length === 0, errs);
     await c.close();
   }
   /* A HIGHER SELF ARRIVES AS A LINK, because the lines are personal and
@@ -2196,23 +2166,23 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
      who he is and the process, lays the process on the week, and Undo
      puts back what was there. */
   {
-    const o = { h: 'He wakes at 3:30\nHe drinks 5 litres', p: '3:30am Wake up\n4am Train', d: [0, 1, 2, 3, 4] };
+    const o = { h: 'They wake at 3:30\nThey drink 5 litres', p: '3:30am Wake up\n4am Train', d: [0, 1, 2, 3, 4] };
     const { c, page, errs } = await ctx({ desk: { width: 1440, height: 900 } });
     const week0 = await store(page, 'cad.week.v1');
     await page.goto(BASE + '/cadence/#self=' + encodeURIComponent(JSON.stringify(o))); await page.waitForTimeout(500);
     const got = await page.evaluate(() => ({ hash: location.hash, view: !document.getElementById('cdVSelf').hidden, him: [...document.querySelectorAll('#cdHsList li')].map((l) => l.textContent).join('|'), steps: document.querySelectorAll('#cdCfSteps li').length, toast: document.getElementById('cdToastT').textContent }));
     const cs = (await store(page, 'cad.cont.v1')) || {}, wk = (await store(page, 'cad.week.v1')).filter((b) => b.id.indexOf('pb_') === 0);
-    ok('a higher self link fills who he is and the process, opens on it, and leaves the bar clean', got.hash === '' && got.view && got.him === 'He wakes at 3:30|He drinks 5 litres' && got.steps === 2 && got.toast === 'Your higher self is in' && (cs.pd || []).join() === '0,1,2,3,4' && cs.ps === '2026-09-25', got);
+    ok('a higher self link fills who they are and the process, opens on it, and leaves the bar clean', got.hash === '' && got.view && got.him === 'They wake at 3:30|They drink 5 litres' && got.steps === 2 && got.toast === 'Your higher self is in' && (cs.pd || []).join() === '0,1,2,3,4' && cs.ps === '2026-09-25', got);
     ok('...and lays the process on the days it names', wk.length === 2 && wk.every((b) => b.d.join() === '0,1,2,3,4'), wk);
     await page.evaluate(() => document.getElementById('cdToastU').click()); await page.waitForTimeout(150);
     const back = (await store(page, 'cad.cont.v1')) || {};
-    ok('Undo puts back who he was and the week as it was', back.him === '' && back.pt === '' && JSON.stringify(await store(page, 'cad.week.v1')) === JSON.stringify(week0), back);
+    ok('Undo puts back who they were and the week as it was', back.him === '' && back.pt === '' && JSON.stringify(await store(page, 'cad.week.v1')) === JSON.stringify(week0), back);
     /* A cold open is the other door: a link tapped from a message starts
        the app with the fragment already on it. */
     const p2 = await c.newPage();
-    await p2.goto(BASE + '/cadence/#self=' + encodeURIComponent(JSON.stringify({ h: 'He reads every morning' }))); await p2.waitForTimeout(600);
+    await p2.goto(BASE + '/cadence/#self=' + encodeURIComponent(JSON.stringify({ h: 'They read every morning' }))); await p2.waitForTimeout(600);
     const cold = await p2.evaluate(() => ({ hash: location.hash, him: [...document.querySelectorAll('#cdHsList li')].map((l) => l.textContent).join('|'), view: !document.getElementById('cdVSelf').hidden }));
-    ok('a cold open from the link fills him too, and the bar is clean', cold.hash === '' && cold.him === 'He reads every morning' && cold.view, cold);
+    ok('a cold open from the link fills them too, and the bar is clean', cold.hash === '' && cold.him === 'They read every morning' && cold.view, cold);
     await p2.evaluate(() => document.getElementById('cdToastU').click()); await p2.waitForTimeout(150);
     await p2.close();
     await page.goto(BASE + '/cadence/#self=%7Bnot-json'); await page.waitForTimeout(400);
@@ -2230,7 +2200,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const cs = (await store(page, 'cad.cont.v1')) || {}, wk = (await store(page, 'cad.week.v1')).filter((b) => b.id.indexOf('pb_') === 0);
     const ui = await page.evaluate(() => ({ hash: location.hash, view: !document.getElementById('cdVSelf').hidden, him: document.querySelectorAll('#cdHsList li').length, steps: document.querySelectorAll('#cdCfSteps li').length,
       shown: ['cdHsHim', 'cdHsEd', 'cdCfProc', 'cdCfEd', 'cdCfPd'].filter((id) => getComputedStyle(document.getElementById(id)).display !== 'none') }));
-    ok('the unlock link fills his self and process, opens on it, and leaves the bar clean', cs.own === 1 && ui.hash === '' && ui.view && ui.him >= 19 && ui.steps === 11 && /^3:30am Wake up/.test(cs.pt), ui);
+    ok('the unlock link fills their self and process, opens on it, and leaves the bar clean', cs.own === 1 && ui.hash === '' && ui.view && ui.him >= 19 && ui.steps === 11 && /^3:30am Wake up/.test(cs.pt), ui);
     ok('...and every step is on every day of his week', wk.length === 11 && wk.every((b) => b.d.join() === '0,1,2,3,4,5,6'), wk.length);
     ok('...and nothing on the tab can edit it: no field, no Edit, no day chips', ui.shown.length === 0, ui.shown);
     /* An edit carried in from anywhere else does not stand past a reload. */
@@ -2239,7 +2209,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const back = (await store(page, 'cad.cont.v1')) || {};
     ok('a changed record is put back on the next open', back.him === cs.him && back.pt === cs.pt, back.pt);
     await page.goto(BASE + '/cadence/#self=' + encodeURIComponent(JSON.stringify({ h: 'Someone else' }))); await page.waitForTimeout(400);
-    ok('another higher self link cannot replace his', ((await store(page, 'cad.cont.v1')) || {}).him === cs.him);
+    ok('another higher self link cannot replace theirs', ((await store(page, 'cad.cont.v1')) || {}).him === cs.him);
     ok('no page errors on the locked self', errs.length === 0, errs);
     await c.close();
   }
@@ -2256,11 +2226,6 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await ph.page.reload(); await ph.page.waitForTimeout(300);
     const phV = await ph.page.evaluate(() => ({ day: !document.getElementById('cdVDay').hidden, plan: !document.getElementById('cdVPlan').hidden }));
     ok('a phone has no plan tab, and a phone left on it lands on the day', phPl === 0 && phV.day && !phV.plan, { phPl, phV });
-    const phPb = await ph.page.$eval('.cd-tab[data-v="cont"]', (t) => t.getBoundingClientRect().width);
-    await ph.page.evaluate(() => sessionStorage.setItem('cad.view', 'cont'));
-    await ph.page.reload(); await ph.page.waitForTimeout(300);
-    const phV2 = await ph.page.evaluate(() => ({ day: !document.getElementById('cdVDay').hidden, cont: !document.getElementById('cdVCont').hidden }));
-    ok('a phone has no plan B tab, and a phone left on it lands on the day', phPb === 0 && phV2.day && !phV2.cont, { phPb, phV2 });
     const phHs = await ph.page.$eval('.cd-tab[data-v="self"]', (t) => t.getBoundingClientRect().width);
     await ph.page.evaluate(() => sessionStorage.setItem('cad.view', 'self'));
     await ph.page.reload(); await ph.page.waitForTimeout(300);
