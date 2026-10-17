@@ -621,6 +621,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
 /* 16px, or iOS zooms the page when the date is pressed. */
 .cd-ndate { flex: 0 1 150px; min-width: 44px; max-width: 150px; min-height: 44px; padding: 0 12px; border: 0; border-radius: 22px; font: 400 16px/1 var(--sans); color: var(--dim); background: none; box-shadow: inset 0 0 0 1px var(--hair); -webkit-appearance: none; appearance: none; }
 .cd-ndate::-webkit-calendar-picker-indicator { filter: invert(1); opacity: .6; }
+.cd-nq { display: block; width: 100%; min-height: 44px; height: 44px; margin-top: 14px; padding-top: 11px; padding-bottom: 11px; border-radius: 22px; }
 .cd-ng { margin-top: 28px; }
 .cd-ng > .cd-lbl { margin-bottom: 6px; }
 .cd-nl { list-style: none; margin: 0; padding: 0; }
@@ -795,6 +796,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
      drifting loose from the figure it belongs to reads as a fault. */
   #cdVNote .cd-pane > .cd-hero { grid-row: 1; position: static; }
   #cdVNote .cd-nw { grid-column: 1; grid-row: 2; align-self: start; }
+  #cdVNote .cd-nq { grid-column: 1; grid-row: 3; align-self: start; }
   #cdNotes { grid-row: 1 / span 4; margin-top: 12vh; }
   /* The month is one picture rather than a figure and a list, so it keeps
      one column and gains room: taller cells, so a day's workout name and
@@ -974,6 +976,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
         </div>
         <p class="cd-ex" id="cdEx" hidden>Examples · they go when you add a block</p>
         <ol class="cd-list" id="cdAgenda"></ol>
+        <button class="cd-link" id="cdCopy" type="button" hidden>Copy this day to…</button>
       </div>
       <button class="cd-go" id="cdGo" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="cd-go-t" aria-hidden="true">Complete</span></button>
       <label class="cd-buzz" id="cdBuzz" aria-hidden="true"><input type="checkbox" switch tabindex="-1" /></label>
@@ -1024,6 +1027,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
             <button class="cd-chip go" id="cdNoteGo" type="button" disabled>Add</button>
           </div>
         </div>
+        <input class="cd-field cd-nq" id="cdNoteQ" type="search" placeholder="Search notes" aria-label="Search notes" autocomplete="off" hidden>
         <div id="cdNotes"></div>
       </div>
     </section>
@@ -1702,7 +1706,21 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     $('cdAdd').setAttribute('aria-label', v === 'note' ? 'New note' : 'Add a block');
     cdPaint();
   }
+  /* The icon says how many blocks are still ahead today. Only the page
+     can set it, so it is only as fresh as the last time the app was open:
+     it is written on every paint and again as the app goes to the
+     background, and it needs the notification permission iOS ties it to. */
+  function cdBadge() {
+    try {
+      if (!navigator.setAppBadge || !('Notification' in window) || Notification.permission !== 'granted') return;
+      var t = cdToday(), now = cdNowMin();
+      var n = cdOn(t).filter(function (b) { return !b.x && !cdDone(t, b.id) && now < Math.max(b.e, b.s) + MISS_AFTER; }).length;
+      if (n) navigator.setAppBadge(n); else navigator.clearAppBadge();
+    } catch (e) {}
+  }
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') cdBadge(); });
   function cdPaint() {
+    cdBadge();
     if (view === 'day') cdPaintDay();
     else if (view === 'hab') cdPaintHab();
     else if (view === 'mon') cdPaintMon();
@@ -1818,6 +1836,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
 
     $('cdEx').hidden = !S.week.some(function (q) { return q.x; });
     var ag = $('cdAgenda');
+    $('cdCopy').hidden = !list.some(function (x) { return !x.x; });
     /* The list is the whole day, the block in the middle and the next one
        included. They were left out as said twice; the list is where you
        read the day top to bottom and tick things, and a day missing its
@@ -1829,6 +1848,51 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     }
     ag.classList.toggle('no-g', S.glyphoff);
     ag.innerHTML = rest.map(function (x) { return cdRow(x, isT, now, open); }).join('');
+  }
+
+  /* COPYING A DAY ADDS DAYS TO ITS BLOCKS, it does not make second ones.
+     A block already belongs to as many days as its chips say, so Monday
+     copied to Tuesday is Monday's blocks gaining Tuesday: one record,
+     which is what every other multi-day block is. The cost is that
+     editing one edits both, and the way out is the editor's own day
+     chips. Undo puts each block's days back exactly. */
+  function cdCopyDay() {
+    var from = cdDow(sel), src = cdOn(sel).filter(function (b) { return !b.x; });
+    if (!src.length) return;
+    var root = el('div'), pick = [];
+    var box = el('div', 'cd-chips days'); box.id = 'cdCpDays';
+    DOW.forEach(function (d, i) {
+      var c = el('button', 'cd-chip', d.slice(0, 2)); c.type = 'button'; c.dataset.i = i;
+      c.setAttribute('aria-label', DOWL[i]);
+      if (i === from) c.disabled = true;
+      c.addEventListener('click', function () {
+        var k = pick.indexOf(i); if (k >= 0) pick.splice(k, 1); else pick.push(i);
+        sync();
+      });
+      box.appendChild(c);
+    });
+    root.appendChild(box);
+    var foot = el('div', 'cd-foot is-only');
+    var go = el('button', 'cd-btn go', 'Copy'); go.type = 'button'; go.id = 'cdCpGo';
+    foot.appendChild(go); root.appendChild(foot);
+    function sync() {
+      box.querySelectorAll('.cd-chip').forEach(function (c) { c.setAttribute('aria-pressed', pick.indexOf(+c.dataset.i) >= 0); });
+      go.disabled = !pick.length;
+    }
+    sync();
+    go.addEventListener('click', function () {
+      var was = src.map(function (b) { return b.d.slice(); });
+      src.forEach(function (b) {
+        pick.forEach(function (i) { if (b.d.indexOf(i) < 0) b.d.push(i); });
+        b.d.sort();
+      });
+      cdSave('week'); cdClose(); cdPaint();
+      cdToast('Copied ' + src.length + (src.length === 1 ? ' block' : ' blocks'), function () {
+        src.forEach(function (b, k) { b.d = was[k]; });
+        cdSave('week'); cdPaint();
+      });
+    });
+    cdSheet('Copy ' + DOWL[from] + ' to', root);
   }
 
   /* A ROW is two press targets, and they are siblings: the dot ticks, the
@@ -1929,6 +1993,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
   /* Held still means held still: while a row is lifted the page does not
      scroll under the drag. Non-passive, or the browser ignores it. */
   document.addEventListener('touchmove', function (ev) { if (drg && drg.lift) ev.preventDefault(); }, { passive: false });
+  $('cdCopy').addEventListener('click', cdCopyDay);
   $('cdAgenda').addEventListener('contextmenu', function (ev) { if (ev.target.closest('.cd-rb')) ev.preventDefault(); });
 
   $('cdAgenda').addEventListener('click', function (ev) {
@@ -2782,6 +2847,8 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     if (d === 1) return 'Tomorrow';
     return d > 0 ? 'Coming up · ' + base : base;
   }
+  var NOTE_SEARCH_AT = 6;
+  $('cdNoteQ').addEventListener('input', function () { cdPaintNotes(); });
   function cdPaintNotes() {
     var today = cdToday(), m = today.slice(0, 7);
     var inMonth = S.note.filter(function (n) { return n.d.slice(0, 7) === m; });
@@ -2798,8 +2865,17 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     $('cdNoteStrip').setAttribute('aria-label', 'Notes on ' + lit + ' of the last fourteen days');
     if (!$('cdNoteD').value) $('cdNoteD').value = today;
     $('cdNoteImp').setAttribute('aria-pressed', noteImp);
+    /* A field only once there is enough to search: under six notes the
+       list is shorter than the field. A word is looked for in every
+       block of a note, not just the line the list shows. */
+    var qEl = $('cdNoteQ'), many = S.note.length >= NOTE_SEARCH_AT;
+    qEl.hidden = !many;
+    if (!many) qEl.value = '';
+    var q = qEl.value.trim().toLowerCase();
     var days = {};
-    S.note.forEach(function (n) { (days[n.d] = days[n.d] || []).push(n); });
+    S.note.filter(function (n) {
+      return !q || n.b.some(function (b) { return b.k !== 'i' && cdNbText(b).toLowerCase().indexOf(q) >= 0; });
+    }).forEach(function (n) { (days[n.d] = days[n.d] || []).push(n); });
     var html = Object.keys(days).sort().reverse().map(function (d) {
       var ns = days[d].sort(function (a, b) { return b.i - a.i || b.at - a.at; });
       return '<div class="cd-ng"><p class="cd-lbl">' + esc(cdNoteDay(d)) + '</p><ul class="cd-nl">' + ns.map(function (n) {
@@ -2808,7 +2884,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
           + '<button type="button" class="cd-nt" data-act="open">' + cdNotePrev(n) + '</button></li>';
       }).join('') + '</ul></div>';
     }).join('');
-    $('cdNotes').innerHTML = html || '<p class="cd-empty">Nothing written yet.</p>';
+    $('cdNotes').innerHTML = html || '<p class="cd-empty">' + (q ? 'No note says that.' : 'Nothing written yet.') + '</p>';
   }
   /* The list shows a note's first line as its name and the next few
      under it, smaller, and how many pictures it carries: the picture
@@ -4627,6 +4703,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     cdSky();
     var t = cdToday();
     if (t !== lastDay) { if (sel === lastDay) sel = t; lastDay = t; }
+    cdBadge();
     if (!cdSheetOpen()) cdPaint();
   }, 30000);
 

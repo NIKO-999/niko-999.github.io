@@ -2700,6 +2700,80 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await P.c.close();
   }
 
+  /* ── copy a day: Friday's blocks gain Saturday and Sunday ── */
+  {
+    const { c, page, errs } = await ctx();
+    const fri = (w) => w.filter((b) => b.d.indexOf(4) >= 0);
+    const before = fri(await store(page, 'cad.week.v1')).map((b) => b.id + ':' + b.d.join(''));
+    ok('the day offers to be copied', await page.$eval('#cdCopy', (e) => !e.hidden && e.getClientRects().length > 0));
+    await page.click('#cdCopy');
+    ok('a sheet names the day it copies from', await sheetUp(page) && /Copy Friday to/.test(await page.textContent('#cdShT')));
+    ok('the day itself cannot be picked and Copy waits for a day', await page.$eval('#cdCpDays .cd-chip[data-i="4"]', (b) => b.disabled) && await page.$eval('#cdCpGo', (b) => b.disabled));
+    await page.click('#cdCpDays .cd-chip[data-i="5"]'); await page.click('#cdCpDays .cd-chip[data-i="6"]');
+    await page.click('#cdCpGo'); await page.waitForTimeout(300);
+    const wk = await store(page, 'cad.week.v1');
+    const src = fri(wk);
+    ok('every block on Friday now carries Saturday and Sunday too, and nothing was duplicated', src.length === before.length && src.every((b) => b.d.indexOf(5) >= 0 && b.d.indexOf(6) >= 0) && new Set(wk.map((b) => b.id)).size === wk.length, src.map((b) => b.d));
+    ok('Saturday draws them', (await page.$$eval('#cdRibbon .cd-wd', (b) => b.length)) === 7 && (await (async () => { await page.click('#cdRibbon .cd-wd[data-d="2026-09-26"]'); return page.$$eval('#cdAgenda .cd-it', (l) => l.length); })()) >= src.length);
+    await page.click('#cdRibbon .cd-wd[data-d="2026-09-25"]');
+    await page.click('#cdToastU'); await page.waitForTimeout(150);
+    const back = fri(await store(page, 'cad.week.v1')).map((b) => b.id + ':' + b.d.join(''));
+    ok('Undo puts every block\'s days back exactly', back.join('|') === before.join('|'), back);
+    ok('no page errors', errs.length === 0, errs);
+    await c.close();
+  }
+  {
+    const { c, page } = await ctx({ examples: true });
+    ok('a day of nothing but examples offers no copy', await page.$eval('#cdCopy', (e) => e.hidden));
+    await c.close();
+  }
+
+  /* ── the icon badge counts what is still ahead today ── */
+  {
+    const init = `(() => { window.__badge = []; Object.defineProperty(Notification, 'permission', { get: () => window.__perm || 'granted', configurable: true });
+      navigator.setAppBadge = (n) => { window.__badge.push(n); return Promise.resolve(); };
+      navigator.clearAppBadge = () => { window.__badge.push(0); return Promise.resolve(); }; })();`;
+    const { c, page } = await ctx({ init });
+    const aheadFixture = await page.evaluate(() => { const w = JSON.parse(localStorage.getItem('cad.week.v1')), l = JSON.parse(localStorage.getItem('cad.log.v1') || '{}');
+      const d = new Date(), k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      const now = 10 * 60 + 20; return w.filter((b) => b.d.indexOf(4) >= 0 && !(l[k] && l[k][b.id]) && now < Math.max(b.e, b.s) + 30).length; });
+    const last = await page.evaluate(() => window.__badge[window.__badge.length - 1]);
+    ok('the badge is the number of blocks still ahead today', aheadFixture > 0 && last === aheadFixture, { last, aheadFixture });
+    await page.click('#cdHeroN'); await page.waitForTimeout(250);
+    await closeSheet(page);
+    const n0 = await page.evaluate(() => window.__badge.length);
+    await page.evaluate(() => { window.__perm = 'denied'; });
+    await page.click('.cd-tab[data-v="hab"]'); await page.waitForTimeout(120);
+    ok('without the notification permission nothing is set', (await page.evaluate(() => window.__badge.length)) === n0);
+    await c.close();
+  }
+
+  /* ── search the notes ── */
+  {
+    const notes = [['Race day, pack gels', 1], ['Legs felt heavy', 2], ['Call the dentist', 3], ['Bought new shoes', 4], ['Sleep was short', 5], ['Plan the week', 6]]
+      .map(([t, i]) => ({ id: 'n' + i, t, d: '2026-09-2' + i, i: 0, at: i }));
+    const init = `localStorage.setItem('cad.note.v1', JSON.stringify(${JSON.stringify(notes)}));`;
+    const few = await ctx({ init: `localStorage.setItem('cad.note.v1', JSON.stringify(${JSON.stringify(notes.slice(0, 5))}));` });
+    await few.page.click('.cd-tab[data-v="note"]');
+    ok('under six notes there is no search field', await few.page.$eval('#cdNoteQ', (e) => e.hidden));
+    await few.c.close();
+    const { c, page, errs } = await ctx({ init });
+    await page.click('.cd-tab[data-v="note"]'); await page.waitForTimeout(100);
+    ok('at six notes the field is there', await page.$eval('#cdNoteQ', (e) => !e.hidden && e.getBoundingClientRect().height >= 44));
+    const rows = () => page.$$eval('#cdNotes .cd-ni', (l) => l.map((x) => x.textContent));
+    ok('all six are listed with nothing typed', (await rows()).length === 6);
+    await page.type('#cdNoteQ', 'LEGS');
+    const hit = await rows();
+    ok('typing narrows the list, whatever the case', hit.length === 1 && /Legs felt heavy/.test(hit[0]), hit);
+    ok('the field kept focus through the repaint', await page.evaluate(() => document.activeElement === document.getElementById('cdNoteQ') && document.getElementById('cdNoteQ').value === 'LEGS'));
+    await page.fill('#cdNoteQ', 'zzzz');
+    ok('a word nothing says reads as such', /No note says that/.test(await page.textContent('#cdNotes')));
+    await page.fill('#cdNoteQ', '');
+    ok('clearing it brings the whole list back', (await rows()).length === 6);
+    ok('no page errors', errs.length === 0, errs);
+    await c.close();
+  }
+
   /* ── no signal: the last copy that loaded opens ──
      The worker is registered on every open. Online it goes to the network
      first, so a changed page is served at once rather than an open late;

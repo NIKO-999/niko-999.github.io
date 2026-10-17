@@ -5964,6 +5964,31 @@ The head script owns it, so it runs before the card check reads a key.
 **And `pkill -f` killed its own shell again** while stopping the test
 server, which is the second time this file has had to say so.
 
+### Copy a day, an icon badge, and a search
+
+Asked for as three of six ideas. **COPYING A DAY ADDS DAYS TO ITS BLOCKS
+and makes no second blocks.** A block already belongs to as many days as
+its chips say, so Monday copied to Tuesday is Monday's blocks gaining
+Tuesday: one record, like every other multi-day block. What it costs is
+that editing one edits both; the editor's day chips are the way out.
+Examples are never copied, and a day of nothing but examples offers no
+copy. Undo puts each block's days back exactly. The control is a link
+after the list, not a row in it, so the last row keeps its hairline.
+
+**THE BADGE IS ONLY AS FRESH AS THE LAST TIME THE APP WAS OPEN.** Only a
+page can set it, and it needs the notification permission iOS ties it
+to, so it is written on every paint, on the half-minute and as the app
+goes to the background: blocks still ahead today, not ticked, not yet
+half an hour past their end. A "3" can therefore sit on the icon
+overnight. That is said rather than hidden, and it is the reason to
+drop the feature rather than patch it if it reads as wrong. Asserted
+with a stand-in `setAppBadge`, because Chromium has none.
+
+**A SEARCH FIELD ONLY ONCE THERE IS ENOUGH TO SEARCH**: six notes. Under
+that the list is shorter than the field. It looks in every block of a
+note, not just the line the list shows, and it is static markup outside
+the list so a repaint cannot take the caret with it.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
