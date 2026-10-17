@@ -1342,6 +1342,27 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.click('#cdDocBack');
     await page.waitForTimeout(80);
     ok('a page left blank leaves nothing behind', (await store(page, 'cad.note.v1')).length === 1);
+    /* starting shapes: only on a blank page, gone once anything is typed */
+    await page.click('#cdAdd');
+    await page.waitForSelector('#cdDoc.is-open');
+    const tplVis = () => page.$eval('#cdDocTpl', (e) => !e.hidden && e.getClientRects().length > 0);
+    const tplNames = await page.$$eval('#cdDocTpl [data-t]', (b) => b.map((x) => x.textContent).join('|'));
+    ok('a blank page offers four starting shapes', (await tplVis()) && tplNames === 'Daily review|Plan|Goal|Meeting', tplNames);
+    await page.click('#cdDocTpl [data-t="goal"]'); await page.waitForTimeout(120);
+    const shape = await page.evaluate(() => { const ed = document.getElementById('cdDocEd'), s = getSelection(), bl = [...ed.querySelectorAll('.cd-nb')];
+      return { ks: bl.map((b) => b.dataset.k).join(''), head: bl.filter((b) => b.dataset.k === 'h').map((b) => b.textContent).join('|'),
+        caretAt: bl.findIndex((b) => b.contains(s.anchorNode)), focus: document.activeElement === ed }; });
+    ok('a shape writes its blocks and the caret waits in the first empty line', shape.ks === 'thphphphp' && shape.head === 'The outcome|Why it matters|The next step|By when' && shape.caretAt === 2 && shape.focus, shape);
+    ok('the shapes are gone once the page has words', !(await tplVis()));
+    await page.keyboard.type('Run a marathon'); await page.waitForTimeout(400);
+    const gn = (await store(page, 'cad.note.v1')).filter((n) => /Run a marathon/.test(n.t))[0];
+    ok('and it is kept as an ordinary note', !!gn && /The outcome/.test(gn.t) && gn.b[0].r[0][0] === 'Goal', gn && gn.t);
+    await page.click('#cdDocBack'); await page.waitForTimeout(80);
+    await page.click('#cdNotes .cd-ni .cd-nt'); await page.waitForSelector('#cdDoc.is-open');
+    ok('an existing note never offers them', !(await tplVis()));
+    await page.click('#cdDocBack'); await page.waitForTimeout(80);
+    await page.click('#cdNotes .cd-ni:has-text("Run a marathon") .cd-nt'); await page.waitForSelector('#cdDoc.is-open');
+    await page.click('#cdDocRm'); await page.click('#cdNERmYes'); await page.waitForTimeout(200);
     await page.click('#cdAdd');
     await page.waitForSelector('#cdDoc.is-open');
     await page.keyboard.type('Long run plan');

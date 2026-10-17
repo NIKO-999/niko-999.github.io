@@ -5989,6 +5989,18 @@ that the list is shorter than the field. It looks in every block of a
 note, not just the line the list shows, and it is static markup outside
 the list so a repaint cannot take the caret with it.
 
+### A new note can start from a shape
+
+Asked for as the fifth of six ideas. **THE SHAPES ARE OFFERED ONLY ON A
+PAGE THAT IS STILL BLANK**, as four chips above the title — Daily review,
+Plan, Goal, Meeting — and they are gone the moment anything is typed. A
+note written from nothing therefore costs no extra press, which is why
+this is not a picker the plus opens first. A chosen shape is plain
+blocks, the same as typed ones, and the caret waits in the first empty
+body line. They name no instrument and no person. Asserted as the chips
+appearing blank, the blocks and the caret position, the chips going on
+the first word, and an existing note never offering them.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

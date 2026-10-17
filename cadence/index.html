@@ -698,6 +698,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
 .cd-doc-pic input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 
 /* 16px and up everywhere a caret can go, or iOS zooms the page. */
+.cd-doc-tpl { max-width: 560px; margin: 0 auto; padding: 14px var(--gut) 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .cd-doc-ed { max-width: 560px; min-height: calc(100dvh - 180px); margin: 0 auto; padding: 18px var(--gut) 120px; outline: none; font: 400 16px/1.5 var(--sans); color: var(--ink); overflow-wrap: anywhere; caret-color: var(--ink); }
 .cd-nb { min-height: 1.5em; }
 .cd-nb.k-t { margin: 4px 0 10px; font: 700 28px/1.2 var(--sans); letter-spacing: -.01em; }
@@ -815,7 +816,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
   }
   .cd-sheet.is-open { opacity: 1; transform: translateY(-50%); }
   .cd-sh-hd::before { display: none; }
-  .cd-doc-top, .cd-doc-ed { max-width: 720px; }
+  .cd-doc-top, .cd-doc-ed, .cd-doc-tpl { max-width: 720px; }
 }
 @media (hover: hover) {
   .cd-tab:hover, .cd-gear:hover { color: var(--ink); }
@@ -2986,6 +2987,27 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
   /* Subhead, not Subheading: five across a phone is 66px a style, and the
      long word ran into its neighbour. */
   var NB_NAME = { t: 'Title', h: 'Heading', s: 'Subhead', p: 'Body', q: 'Quote' };
+  /* STARTING SHAPES, OFFERED ONLY ON A PAGE THAT IS STILL BLANK. A new note
+     opens on a title and a caret, and that stays the first press; the
+     shapes sit above it as chips and are gone the moment anything is
+     typed, so they cost a note you write from nothing no extra step.
+     They are plain blocks, the same as typed ones: pressing one writes
+     the blocks and puts the caret in the first empty body line. They name
+     no instrument and no person. */
+  var NB_TPL = (function () {
+    function t(k, x) { return { k: k, r: x ? [[x, '']] : [] }; }
+    return {
+      rev: { n: 'Daily review', b: [t('t', 'Daily review'), t('h', 'What went well'), t('p'), t('h', 'What did not'), t('p'), t('h', 'Tomorrow, first'), t('p')] },
+      plan: { n: 'Plan', b: [t('t', 'Plan'), t('h', 'The outcome'), t('p'), t('h', 'If this, then that'), t('p'), t('h', 'Rules I keep'), t('p')] },
+      goal: { n: 'Goal', b: [t('t', 'Goal'), t('h', 'The outcome'), t('p'), t('h', 'Why it matters'), t('p'), t('h', 'The next step'), t('p'), t('h', 'By when'), t('p')] },
+      meet: { n: 'Meeting', b: [t('t', 'Meeting'), t('s', 'With'), t('p'), t('h', 'Notes'), t('p'), t('h', 'Decisions'), t('p'), t('h', 'Actions'), t('p')] }
+    };
+  })();
+  function cdTplSync() {
+    var tp = $('cdDocTpl');
+    if (!tp || !D) return;
+    tp.hidden = !(D.bs.length === 1 && D.bs[0].k === 't' && !cdNbText(D.bs[0]).trim());
+  }
   var NB_HUE = { o: 'Orange', p: 'Pink', y: 'Yellow', b: 'Blue', v: 'Violet' };
   var D = null, picURL = {};
 
@@ -3178,6 +3200,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     cdEdSave(); cdEdTools();
   }
   function cdEdSave() {
+    cdTplSync();
     var rec = cdNoteClean({ id: D.n.id, b: D.bs, d: D.n.d, i: D.n.i, at: D.n.at });
     var had = S.note.some(function (x) { return x.id === D.n.id; });
     if (rec) S.note = had ? S.note.map(function (x) { return x.id === rec.id ? rec : x; }) : S.note.concat([rec]);
@@ -3296,7 +3319,8 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
       + '<button type="button" class="hl-x" data-c="" aria-label="No highlight"><i></i></button>'
       + '<button type="button" class="cd-doc-u" id="cdDocU" aria-pressed="false" aria-label="Underline">U</button>'
       + '<label class="cd-doc-pic" aria-label="Add a picture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><circle cx="9" cy="10.5" r="1.6"/><path d="M4.5 17l5-4.5 3.5 3 2.5-2 4 3.5"/></svg><input type="file" id="cdDocFile" accept="image/*" multiple></label></div>'
-      + '</div><div class="cd-doc-ed" id="cdDocEd" contenteditable="true" role="textbox" aria-multiline="true" aria-label="The note" spellcheck="true"></div></div>';
+      + '</div><div class="cd-doc-tpl" id="cdDocTpl" hidden>' + Object.keys(NB_TPL).map(function (k) { return '<button type="button" class="cd-chip" data-t="' + k + '">' + NB_TPL[k].n + '</button>'; }).join('') + '</div>'
+      + '<div class="cd-doc-ed" id="cdDocEd" contenteditable="true" role="textbox" aria-multiline="true" aria-label="The note" spellcheck="true"></div></div>';
     var dv = wrap.firstChild;
     document.body.appendChild(dv);
     var ed = $('cdDocEd');
@@ -3306,6 +3330,12 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     cdEdDraw();
 
     $('cdDocBack').addEventListener('click', function () { cdNoteClose(); });
+    $('cdDocTpl').addEventListener('click', function (ev) {
+      var b = ev.target.closest('[data-t]'); if (!b) return;
+      D.bs = JSON.parse(JSON.stringify(NB_TPL[b.dataset.t].b));
+      var at = 0; D.bs.forEach(function (x, i) { if (!at && x.k !== 't' && x.k !== 'h' && !x.r.length) at = i; });
+      cdEdDraw([at, 0], [at, 0]);
+    });
     $('cdDocD').addEventListener('input', function () { if (ISO.test($('cdDocD').value)) { D.n.d = $('cdDocD').value; $('cdDocDL').textContent = cdNoteDay(D.n.d).replace('Coming up · ', ''); cdEdSave(); } });
     /* Desktop Chromium opens the picker from the field's own icon only, so
        the press asks for it; a phone opens it from the tap on the field. */
