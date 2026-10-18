@@ -307,12 +307,20 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .al-mk::before { content: ''; position: absolute; inset: -6px 0; }
 .al-mk[aria-pressed="true"] { background: var(--ink); color: #0B0E13; }
 
+/* THE QUOTE IS THE BOOK, SO IT IS SET AS THE ONE THING ON THE PAGE THAT
+   IS NOT OURS: the ink rather than the dim, a step up from the reading
+   size, and a rule down its left edge in the section's hue. A rule and
+   not a box — a frame round a sentence is the card inside the page this
+   look has taken out everywhere else. */
+.al-q { margin: var(--v3) 2px var(--v2); padding: 2px 0 2px 14px; border-left: 2px solid var(--tg, var(--ink)); }
+.al-qt { font-size: 17px; line-height: 1.42; font-weight: 500; letter-spacing: -.008em; color: var(--ink); text-wrap: pretty; }
+
 .al-empty { padding: var(--v4) 2px; font-size: 15px; line-height: 1.5; color: var(--dim); }
 
-.al-th[data-x="mindset"],  .al-grp[data-x="mindset"]  { --tg: var(--ax-mindset); }
-.al-th[data-x="internal"], .al-grp[data-x="internal"] { --tg: var(--ax-internal); }
-.al-th[data-x="external"], .al-grp[data-x="external"] { --tg: var(--ax-external); }
-.al-th[data-x="karmic"],   .al-grp[data-x="karmic"]   { --tg: var(--ax-karmic); }
+.al-th[data-x="mindset"],  .al-grp[data-x="mindset"],  .al-q[data-x="mindset"]  { --tg: var(--ax-mindset); }
+.al-th[data-x="internal"], .al-grp[data-x="internal"], .al-q[data-x="internal"] { --tg: var(--ax-internal); }
+.al-th[data-x="external"], .al-grp[data-x="external"], .al-q[data-x="external"] { --tg: var(--ax-external); }
+.al-th[data-x="karmic"],   .al-grp[data-x="karmic"],   .al-q[data-x="karmic"]   { --tg: var(--ax-karmic); }
 
 /* ---- A SOURCE ---- */
 /* The right phone: a dusk card with the name on it, then the list. The
@@ -621,6 +629,25 @@ var CH = {
       t: "The closing practice is to decide, in advance and on purpose, that events are working out in your favour, including the ones that look like setbacks. Zeland's claim is that the interpretation you assign decides the next move, so assigning the favourable reading aligns your intention with the outcome rather than against it.",
       l: "You will assign some meaning to a setback either way. Pick the one that leaves you able to act, then act, which is the only part of the sequence that was ever yours." }
   ]
+};
+
+/* A BOOK'S OWN WORDS, ONE UNDER EACH SECTION HEADING. The themes are
+   this app's reading of a book; a quote is the book's, and it is the
+   only part of the page that is. So the rule is stricter than it is for
+   a theme and it is the one this file already keeps for everything
+   else: a quote is here only if its exact wording was found, the same,
+   in more than one independent place and attributed to THAT book. One
+   that could not be confirmed is left out and its section has none,
+   because a section without a quote is a gap and a misquote is a
+   fault. Never written from memory, never stitched from two sentences,
+   and not rewritten to fit — where an edition's wording differs, the
+   shorter wording both agree on is the one used.
+
+   Keyed by the source's id and then by axis, and only for books: a
+   figure's words are a different claim from a book's, and a quote
+   attributed to a person is a sourcing problem this table is not
+   built to carry. */
+var QT = {
 };
 
 var TH = [
@@ -2158,6 +2185,14 @@ function mark(m, k) {
      silently otherwise; and the numeral is unique within a book, since
      two chapters with one number is how a summary gets attached to the
      wrong one. */
+  for (var qk in QT) {
+    var qsrc = srcOf(qk);
+    if (!qsrc || qsrc.k !== 'book') throw new Error('quotes name something that is not a book: ' + qk);
+    for (var qa in QT[qk]) {
+      if (!AXIS[qa]) throw new Error(qk + ' has a quote under an axis that is not there: ' + qa);
+      if (QT[qk][qa].split(/\s+/).length > 45) throw new Error(qk + ' ' + qa + ' quote is too long to be a quote');
+    }
+  }
   for (var cs in CH) {
     if (!srcOf(cs)) throw new Error('chapters name a source that is not there: ' + cs);
     var seenC = {};
@@ -2378,6 +2413,7 @@ function paintSource(id) {
   lead.appendChild(el('p', 'al-sum', SUM[x.i]));
   p.appendChild(lead);
   var sh = el('div', 'al-sheet');
+  var qs = QT[id] || {};
   if (CH[id]) {
     sh.appendChild(el('div', 'al-chh al-caps', 'By chapter'));
     CH[id].forEach(function (q) { sh.appendChild(chapterRow(id, q)); });
@@ -2388,6 +2424,12 @@ function paintSource(id) {
     var h = el('div', 'al-grp al-caps', AXIS[a]);
     h.setAttribute('data-x', a);
     sh.appendChild(h);
+    if (qs[a]) {
+      var q = el('blockquote', 'al-q');
+      q.setAttribute('data-x', a);
+      q.appendChild(el('p', 'al-qt', '\u201C' + qs[a] + '\u201D'));
+      sh.appendChild(q);
+    }
     rows.forEach(function (t) { sh.appendChild(card(t, 'src', false)); });
   }
   p.appendChild(sh);
