@@ -171,6 +171,48 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   ok('and pressing it again shuts it', acc.again, acc);
   ok('the button is inside the heading and controls its own body', acc.valid && acc.owns, acc);
 
+  /* ── A BOOK CAN BE READ BY CHAPTER ───────────────────────────── */
+  /* Reality Transurfing carries a chapter-by-chapter reading above its
+     themes. Asserted as its own section because a chapter is NOT a
+     theme: the themes' count, their four headings and their three to
+     an axis must come out exactly as they do for a source with none,
+     which is what the shape test above checks on every source. Shut on
+     arrival, one press opens that one, the body is in the document
+     either way, and a source with no chapters draws no heading. */
+  const chap = await page.evaluate(() => {
+    window.alDrive.openSource('surf');
+    const p = document.querySelector('#alSourcePane');
+    const chs = [...p.querySelectorAll('.al-ch')];
+    const rows = chs.map(c => c.querySelector('.al-row'));
+    const bodyOf = c => c.querySelector('.al-chb');
+    const h = c => bodyOf(c).getBoundingClientRect().height;
+    const heads = [...p.querySelectorAll('.al-chh')].map(n => n.textContent);
+    const shut = chs.every(c => h(c) === 0) && rows.every(r => r.getAttribute('aria-expanded') === 'false');
+    const r = rows[3]; r.click();
+    const opened = r.getAttribute('aria-expanded') === 'true' && h(chs[3]) > 40;
+    const others = chs.filter((c, i) => i !== 3).every(c => h(c) === 0);
+    r.click();
+    const again = r.getAttribute('aria-expanded') === 'false' && h(chs[3]) === 0;
+    const valid = rows.every(x => x.parentElement.tagName === 'H3');
+    const owns = chs.every((c, i) => document.getElementById(rows[i].getAttribute('aria-controls')) === bodyOf(c));
+    const words = chs.map(c => [...c.querySelectorAll('.al-tb')].map(q => q.textContent.split(' ').length));
+    const thin = words.filter(w => w.length !== 2 || w[0] < 30 || w[1] < 20).length;
+    const nums = rows.map(x => x.textContent.match(/Chapter ([IVX]+)/)[1]);
+    const themes = p.querySelectorAll('.al-th').length;
+    const grps = [...p.querySelectorAll('.al-grp')].map(n => n.textContent).join('|');
+    const order = chs[0].compareDocumentPosition(p.querySelector('.al-grp')) & Node.DOCUMENT_POSITION_FOLLOWING ? 'before' : 'after';
+    window.alDrive.openSource('fifty');
+    const other = document.querySelectorAll('#alSourcePane .al-ch, #alSourcePane .al-chh').length;
+    return { n: chs.length, heads, shut, opened, others, again, valid, owns, thin, nums, themes, grps, order, other };
+  });
+  ok('Reality Transurfing carries a chapter reading of ten chapters', chap.n === 10 && chap.heads.join('|') === 'By chapter', chap);
+  ok('chapters are numbered once each, in book order', chap.nums.join(',') === 'I,II,III,IV,V,VII,VIII,IX,XII,XIII', chap.nums);
+  ok('every chapter is shut on arrival, and opens alone', chap.shut && chap.opened && chap.others && chap.again, chap);
+  ok('a chapter button sits in its heading and controls its own body', chap.valid && chap.owns, chap);
+  ok('both chapter paragraphs are real summaries', chap.thin === 0, chap);
+  ok('chapters sit above the themes and do not change them', chap.order === 'before' && chap.themes === 12 && chap.grps === 'Mindset|Internal|External|Karmic', chap);
+  ok('a book with no chapter reading draws none', chap.other === 0, chap);
+
   /* THE DESCRIPTION IS A COUNT OF THE DATA, so it is read off the data.
      It shipped saying 288 themes and sixteen figures on a build carrying
      305 and seventeen -- a caption that outlived the thing it described,

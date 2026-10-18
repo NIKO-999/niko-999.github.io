@@ -267,8 +267,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
    that had nothing else on it. The reference's list is rows on the
    ground with a line between them, and a line costs no height and says
    exactly one thing. The heading draws the line above the first row. */
-.al-grp { display: flex; justify-content: space-between; align-items: baseline;
+.al-grp, .al-chh { display: flex; justify-content: space-between; align-items: baseline;
   padding: var(--v5) 2px var(--v2); border-bottom: 1px solid var(--hair); }
+.al-chh { color: var(--dim); }
 .al-grp[data-x] { color: var(--tg); }
 .al-n { font-variant-numeric: tabular-nums; }
 
@@ -301,15 +302,16 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
    at, and one restored from last week opens on a theme you have moved
    past. Kept opens them all, because everything on it you chose to
    read again. */
-.al-th { border-bottom: 1px solid var(--hair); }
+.al-th, .al-ch { border-bottom: 1px solid var(--hair); }
 .al-th-h { font: inherit; }
 .al-row { display: flex; align-items: center; gap: 14px; width: 100%; padding: 16px 2px; }
 .al-row .al-rt { flex: 1; }
 .al-row[aria-expanded="true"] .al-chev { transform: rotate(180deg); color: var(--ink); }
 
-.al-body { padding: 2px 2px 24px; }
+.al-body, .al-chb { padding: 2px 2px 24px; }
+.al-ch { --tg: var(--dim); }
 .al-tl { margin: var(--v3) 0 var(--v1); color: var(--tg); }
-.al-body .al-tl:first-child { margin-top: 4px; }
+.al-body .al-tl:first-child, .al-chb .al-tl:first-child { margin-top: 4px; }
 .al-tb { font-size: 14.5px; line-height: 1.55; color: var(--dim); }
 /* THE LESSON IS THE MIDDLE PHONE'S SENTENCE: larger, thinner, the ink.
    The evidence above it stays at the reading size in the quieter step,
@@ -600,6 +602,51 @@ var SUM = {
   big: "David J. Schwartz's 1959 book on confidence, action and aiming higher, full of practical habits for thinking larger than your circumstances.",
   bab: "George S. Clason's 1926 parables set in ancient Babylon, teaching the basics of money: keep a part of all you earn, control your spending and make your savings work.",
   life: "Florence Scovel Shinn's 1925 book treating life as a game of giving and receiving, where your words, expectations and forgiveness shape what comes back.",
+};
+
+/* CHAPTERS ARE A SECOND READING OF ONE BOOK, NOT FOUR MORE THEMES. The
+   themes are what the book teaches, three to an axis, and the boot rule
+   that holds every source to exactly that is the reason this is its own
+   table: a chapter is where the idea sits in the book, and a book has
+   no business being three chapters long. Only a book that has a
+   chapter-by-chapter reading carries one, and only for chapters whose
+   content is documented well enough to state; the others are left out
+   rather than written to fit. Numbering follows the Steps I-V omnibus
+   in English; other editions split and number the same material
+   differently, so a chapter is named for what it is about as well. */
+var CH = {
+  surf: [
+    { c: "I", n: "The Space of Variations", b: "The Field Holds Every Version",
+      t: "Zeland opens with the model the rest rests on: reality is not one track but an information field containing every variant of every event, each a line of life you could move onto. What shows up as your circumstances is the sector of that field you are currently tuned to, and what tunes you is the thoughts and attitudes you hold steadily, not the ones you voice.",
+      l: "Stop treating the situation as the cause and your signal as the weather. If you keep thinking the same way you stay on the same line, and the move is to change what you broadcast rather than to argue with what arrives." },
+    { c: "II", n: "Pendulums", b: "Structures That Feed on Attention",
+      t: "People who think and feel alike about something generate an energy structure Zeland calls a pendulum. It is not conscious, it feeds on attention and strong emotion of any sign, love and hatred equally, and it competes with other pendulums for followers. Destructive pendulums feed on fear, anger and outrage, and pull you onto the line that serves them.",
+      l: "Fighting a pendulum feeds it, so the exit is neither loyalty nor opposition. Notice the pull, withhold the reaction it was designed to get, and choose the response you would have chosen without it." },
+    { c: "III", n: "The Wave of Fortune", b: "Good Variations Cluster",
+      t: "Favourable variations lie close together in the field, so one good event makes the next more likely. Zeland calls the resulting run the wave of fortune. It takes no extra effort from you to ride, and the same clustering works in the other direction, which is why bad days arrive in sequences.",
+      l: "A run is kept going by calm acceptance and ended by suspicion, commentary or dread of the catch. Treat the first small setback as noise rather than as the start of a pattern, because how you read it decides which cluster you join." },
+    { c: "IV", n: "Balancing Forces", b: "Excess Potential Gets Removed",
+      t: "When you load a thing, a person or an outcome with more importance than it can carry, you create what Zeland calls excess potential, a charge of overvaluation or contempt. Balancing forces act to remove it, often by delivering the opposite of what was wanted. He applies the idea to guilt, to money and to the demand for perfection.",
+      l: "Wherever you need something desperately, you are producing the conditions for losing it. Lower the importance, not the effort, and the thing you were gripping stops slipping." },
+    { c: "V", n: "The Induced Transition", b: "Being Pulled Onto a Line You Did Not Choose",
+      t: "A pendulum can move you onto a line you never picked by provoking a strong reaction at the right moment. Zeland describes it as a vortex: the more you react, the more of your attention it holds, and the further you drift from the line you were on.",
+      l: "The warning sign is feeling swept along by something you did not decide. Catch the moment you are hooked and return to the question of what you actually want, because that question is outside the vortex." },
+    { c: "VII", n: "Intention", b: "Inner and Outer",
+      t: "Zeland splits intention in two. Inner intention is the effort of doing, pushing against the world to make a result happen. Outer intention is the selection of an outcome from the field, where you decide the destination clearly and allow the route to arrive on its own. The mind's job is to choose, not to engineer every step.",
+      l: "Be firm about where you are going and loose about how you get there. Most strain goes into controlling the route, which is the part you were never going to be able to control from where you stand." },
+    { c: "VIII", n: "Slides", b: "The Goal Held as Already Yours",
+      t: "A slide is a vivid mental picture of the goal as a settled fact, seen from inside as a participant rather than as a spectator, rehearsed regularly and paired with the feeling that it is ordinary. Zeland presents slides as the way to tune yourself to the matching sector of the field, as opposed to wishing at it from outside.",
+      l: "Picture the ordinary day inside the thing you want, not the moment of winning it. A goal you can only imagine as a triumph is still a goal you are looking at from outside." },
+    { c: "IX", n: "Heart and Mind", b: "Both Have to Agree",
+      t: "Zeland separates two sources of knowing. The mind calculates and weighs, and most of its goals are inherited from what the people around it value. The heart, which he also calls the soul, answers in comfort or discomfort and does not argue. Intention is only whole when the two agree, and a goal the mind chose and the soul is silent about does not move.",
+      l: "Before you commit to a goal, ask which half chose it. If imagining the result produces no feeling, you probably took it from somewhere else, and discipline will not make it yours." },
+    { c: "XII", n: "Frailing", b: "Giving in Place of Demanding",
+      t: "Frailing, in Zeland's account, is the practice of moving your attention off what you want to receive and onto what you can give, particularly with another person. The wanting is itself a source of excess potential, and putting it down lets the blocked exchange move.",
+      l: "Notice what your presence is asking for in a conversation, then ask what the other person needs instead. The change is small to do and often large in effect." },
+    { c: "XIII", n: "Coordination of Intention", b: "Reading Events as Favourable",
+      t: "The closing practice is to decide, in advance and on purpose, that events are working out in your favour, including the ones that look like setbacks. Zeland's claim is that the interpretation you assign decides the next move, so assigning the favourable reading aligns your intention with the outcome rather than against it.",
+      l: "You will assign some meaning to a setback either way. Pick the one that leaves you able to act, then act, which is the only part of the sequence that was ever yours." }
+  ]
 };
 
 var TH = [
@@ -2132,6 +2179,20 @@ function mark(m, k) {
       if (n > 3) throw new Error(x.n + ' has ' + n + ' ' + a + ', which is one too many');
     }
   });
+  /* A CHAPTER TABLE NAMES A SOURCE THAT EXISTS AND SAYS SOMETHING.
+     Keyed by the source's id, so a renamed source strands its chapters
+     silently otherwise; and the numeral is unique within a book, since
+     two chapters with one number is how a summary gets attached to the
+     wrong one. */
+  for (var cs in CH) {
+    if (!srcOf(cs)) throw new Error('chapters name a source that is not there: ' + cs);
+    var seenC = {};
+    CH[cs].forEach(function (q) {
+      if (seenC[q.c]) throw new Error(cs + ' chapter ' + q.c + ' appears twice');
+      seenC[q.c] = 1;
+      if (q.t.split(/\s+/).length < 30 || q.l.split(/\s+/).length < 20) throw new Error(cs + ' chapter ' + q.c + ' is too thin to be a summary');
+    });
+  }
   /* A SOURCE'S OWN NAME, WRITTEN INTO ITS OWN PROSE, HAS TO MATCH THE
      ROW. One shipped with its name REVERSED in the row and again in the
      one theme that was about the name -- the worst place for it to be
@@ -2257,10 +2318,36 @@ function card(t, ctx, open) {
 function toggle(b) {
   var open = b.getAttribute('aria-expanded') !== 'true';
   b.setAttribute('aria-expanded', open ? 'true' : 'false');
-  var body = b.closest('.al-th').querySelector('.al-body');
+  var body = b.closest('.al-th, .al-ch').querySelector('.al-body, .al-chb');
   if (body) body.hidden = !open;
   var p = b.closest('.al-pane');
   if (p) mask(p);
+}
+
+/* A CHAPTER IS A ROW THAT OPENS, drawn like a theme and built apart from
+   one: it has no key, so there is nothing to pin or highlight, and no
+   axis, so it takes no hue. Its body class differs from a theme's so
+   the count of themes drawn stays a count of themes. */
+function chapterRow(source, q) {
+  var d = el('div', 'al-ch');
+  var id = 'al-ch-' + source + '-' + q.c;
+  var h = el('h3', 'al-th-h');
+  var b = el('button', 'al-row');
+  b.setAttribute('aria-expanded', 'false');
+  b.setAttribute('aria-controls', id);
+  b.appendChild(rowText(q.n, 'Chapter ' + q.c + ' \u00B7 ' + q.b));
+  b.appendChild(chev('down'));
+  h.appendChild(b);
+  d.appendChild(h);
+  var body = el('div', 'al-chb');
+  body.id = id;
+  body.hidden = true;
+  body.appendChild(el('div', 'al-caps al-tl', 'What it says'));
+  body.appendChild(el('p', 'al-tb', q.t));
+  body.appendChild(el('div', 'al-caps al-tl is-les', 'What to do with it'));
+  body.appendChild(el('p', 'al-tb is-les', q.l));
+  d.appendChild(body);
+  return d;
 }
 
 function mkBtn(m, label, k) {
@@ -2317,6 +2404,10 @@ function paintSource(id) {
   lead.appendChild(el('p', 'al-sum', SUM[x.i]));
   p.appendChild(lead);
   var sh = el('div', 'al-sheet');
+  if (CH[id]) {
+    sh.appendChild(el('div', 'al-chh al-caps', 'By chapter'));
+    CH[id].forEach(function (q) { sh.appendChild(chapterRow(id, q)); });
+  }
   for (var a in AXIS) {
     var rows = themesOf(id, a);
     if (!rows.length) continue;
