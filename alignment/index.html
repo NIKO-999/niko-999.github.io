@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#07080B">
+<meta name="theme-color" content="#000000">
 <title>Alignment</title>
 <!-- A PAGE ON THE WEB ANSWERS THE REQUEST THE BROWSER MAKES ANYWAY.
      Without these Chromium asks for /favicon.ico on every load and the
@@ -48,7 +48,7 @@
 */
 
 :root {
-  --paper: #07080B;
+  --paper: #000000;
   --ink: #F3F5F7;
   --dim: rgba(243,245,247,.72);
   /* The quietest thing that is still WORDS. The reference's sub-lines are
@@ -62,40 +62,23 @@
   --sans: 'Inter', -apple-system, system-ui, sans-serif;
   --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
-  /* TWO SKIES, AND WHERE THE WORDS SIT ON THEM IS PART OF THE DRAWING.
-     Dawn runs from night to silver, and the sentence sits in the teal
-     middle where white clears 9:1; the silver is under the button, which
-     carries its own ground. Dusk runs night to a peach GLOW that rises
-     through the lower third, and nothing is written in it — white on
-     that peach is about 2:1, so the padding under the title is the room
-     the light takes rather than slack. It went in as a radial glow and
-     drew a hard HORIZON along the foot; the reference's is a plain
-     vertical blend, which is what makes it read as sky rather than as a
-     planet. */
-  --dawn: radial-gradient(90% 55% at 50% 38%, rgba(64,110,132,.28), transparent 70%),
-          linear-gradient(180deg, #03060A 0%, #07131D 18%, #122736 40%, #28404F 58%,
-                                  #62737E 78%, #A9B2B8 94%, #C3C9CD 100%);
-  --dusk: linear-gradient(180deg, #0B1220 0%, #15233A 36%, #3A4459 64%, #87717A 86%, #D29A84 100%);
+  /* THERE IS NO SKY. The ground is black and nothing is drawn on it
+     except type, which is what the reference this was taken from is: one
+     heavy sentence on a flat black page and a line of small print at the
+     foot. The gradients, the dawn, the dusk and the light held to the
+     foot all existed to give a colourless page something to look at, and
+     the look is that it has nothing.
 
-  /* THE DAWN BEHIND EVERY SCREEN, WITH ITS LIGHT HELD TO THE FOOT. The
-     open screen's sky has room for words in its top half and nowhere
-     else: the quiet label is under 4.5:1 from about 58% down, where the
-     teal turns to slate, and a list scrolls through all of it. So this
-     is the same sky with the silver compressed into a band under the
-     lists, and the lists END above it, so nothing is ever written in the
-     light. #1E3544 is the lightest ground the quiet label clears 4.8:1
-     on, and it is where the pane stops. The glow in the middle is the
-     dawn's own, at .16, where .28 would lift the ground past that.
-
-     AND THE LIGHT IS SLIGHT. It ran to the dawn's own silver across the
-     last 118px and was reported as far too much: a white band under every
-     list. It lifts only as far as a slate now, over the last 64px, so the
-     foot of the screen is a hint of the dawn rather than a second one. */
-  --glow: 64px;
-  --sky: radial-gradient(90% 55% at 50% 38%, rgba(64,110,132,.16), transparent 70%),
-         linear-gradient(180deg, #03060A 0%, #07131D 16%, #122736 42%,
-                                 #1E3544 calc(100% - var(--glow)), #2B4150 calc(100% - 28px),
-                                 #3E5361 100%);
+     THE TOKENS STAY, FLAT. `--dawn` and `--sky` are read by name by the
+     canvas check, which parses the last stop out of each and compares it
+     with the root's own colour, so the seam under the home indicator is
+     still asserted rather than assumed — it just has one colour to be
+     asserted against. A gradient of one stop is the cheapest way to keep
+     a token that other things read. */
+  --dawn: linear-gradient(180deg, #000000, #000000);
+  --sky:  linear-gradient(180deg, #000000, #000000);
+  --dusk: linear-gradient(180deg, #000000, #000000);
+  --glow: 0px;
 
   --r-card: 22px;
   --r-pill: 999px;
@@ -127,34 +110,17 @@
    every view to know how tall it is; a flex child simply takes its room
    and hands the rest down, and a view that hides it gets the whole
    height without being told. */
-html, body { height: 100%; background: #3E5361; }
+html, body { height: 100%; background: #000000; }
 /* THE STRIP BEHIND THE HOME INDICATOR IS THE CANVAS, AND IT IS PAINTED
-   TO MATCH RATHER THAN COVERED. On a Home Screen icon the page's box
-   stops short of the physical floor, and what shows in the strip below
-   it is the root element's own background. It read as a hard-edged
-   slate band under the open screen, whose sky ends in silver.
-
-   Three ways of making the box reach were shipped and each measured
-   exactly the same band on the phone: `100%`, `100dvh`, and `position:
-   fixed; inset: 0`. Identical results from three different sizing
-   mechanisms mean the engine is not handing over the real floor to ANY
-   of them, so no sizing rule can close the gap. What CAN be decided is
-   the colour of the gap: the canvas takes the foot of whichever sky is
-   up. Every other view's sky already ends on this slate; the open
-   screen's dawn ends on silver, so on that view the canvas is silver,
-   and the seam has nothing on either side of it to show.
-
-   AND IT IS BODY'S COLOUR iOS READS, NOT THE ROOT'S. The band was the
-   same slate in every screenshot, before any of this and after the root
-   went silver — and in a Safari tab the toolbar was tinted that slate
-   too. iOS samples body's background-color and paints the strip with
-   it itself. Silvering only the root changed nothing on the phone. Body
-   is covered edge to edge by the open screen's own sky, so its colour
-   is never seen on the page; it only ever speaks through that strip. */
-html[data-view="open"], html[data-view="open"] body { background-color: #C3C9CD; }
+   TO MATCH. iOS samples body's own background-color for it and the root's
+   for the rest, and no sizing rule reaches the physical floor, so the
+   colour is what closes the seam. Both are the ground now, which is the
+   same black on every view: the seam has nothing on either side of it to
+   show, and the open screen no longer needs a silver of its own. */
+html[data-view="open"], html[data-view="open"] body { background-color: #000000; }
 body {
   position: fixed; inset: 0;
-  background-color: #3E5361;
+  background-color: #000000;
   background-image: var(--sky);
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -174,8 +140,17 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
    comes in three sizes is three labels. */
 .al-caps { font: 500 10.5px/1.35 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--quiet); }
 
-.al-disp   { font-size: 34px; font-weight: 300; line-height: 1.04; letter-spacing: -.03em; text-wrap: balance; }
-.al-disp-s { font-size: 30px; font-weight: 300; line-height: 1.04; letter-spacing: -.028em; }
+/* THE DISPLAY FACE IS HEAVY, CAPITALS AND SET TIGHT. The reference's
+   sentence is a condensed grotesque at the boldest it comes; the only
+   face shipped here is Inter, which has no width axis, so the condensed
+   look is made the way a printer would on a face that has none: the
+   heaviest weight, capitals, tracking pulled in until the letters touch
+   and a line-height under one. It was 300, on the argument that a large
+   thin face reads as confident where a large heavy one reads as loud —
+   and loud is what this asks for. */
+.al-disp, .al-disp-s, .al-open-t { font-weight: 800; text-transform: uppercase; line-height: .96; }
+.al-disp   { font-size: 38px; letter-spacing: -.045em; text-wrap: balance; }
+.al-disp-s { font-size: 34px; letter-spacing: -.045em; }
 
 .al-view { position: relative; z-index: 1; flex: 1; min-height: 0; display: none; flex-direction: column; }
 .al-view.is-on { display: flex; }
@@ -206,24 +181,27 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
    flat black with a pill under it, which is a form. What changed is
    what is FIRST — the figures are a line of type now, and what you read
    first is what the app is for. */
-#alOpen { background: var(--dawn); align-items: center; justify-content: center; text-align: center;
-  padding: calc(var(--v5) + env(safe-area-inset-top, 0px)) 30px calc(120px + env(safe-area-inset-bottom, 0px)); }
-.al-mark { position: absolute; top: calc(var(--v4) + env(safe-area-inset-top, 0px)); left: 0; right: 0;
-  display: flex; align-items: center; justify-content: center; gap: 9px; color: var(--ink); }
-.al-mark svg { width: 16px; height: 16px; display: block; }
-.al-mark b { font: 500 10.5px/1 var(--mono); letter-spacing: .32em; text-transform: uppercase; }
-.al-open-k { margin-bottom: var(--v3); color: var(--dim); }
-/* BALANCED, or the sentence ends on one word alone — it did, on "back." */
-.al-open-t { font-size: 23px; font-weight: 300; line-height: 1.34; letter-spacing: -.012em; max-width: 15.5em; text-wrap: balance; }
+#alOpen { background: var(--dawn); align-items: flex-start; justify-content: center; text-align: left;
+  padding: calc(var(--v5) + env(safe-area-inset-top, 0px)) var(--gut) calc(120px + env(safe-area-inset-bottom, 0px)); }
+/* THE NAME AND THE FIGURES ARE THE FOOT'S SMALL PRINT, two lines at the
+   left under everything, which is where the reference keeps its own. The
+   figures are still the element the description is read from — only
+   where it is drawn moved. */
+.al-mark { position: absolute; left: var(--gut); right: var(--gut);
+  bottom: calc(var(--v5) + 24px + env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; gap: 8px; color: var(--quiet); }
+.al-mark svg { width: 11px; height: 11px; display: block; }
+.al-mark b { font: 500 10.5px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.al-open-k { position: absolute; left: var(--gut); right: 96px;
+  bottom: calc(var(--v5) + env(safe-area-inset-bottom, 0px)); color: var(--quiet); }
+.al-open-t { font-size: 34px; letter-spacing: -.045em; max-width: 11em; text-wrap: balance; }
 
-/* THE BUTTON CARRIES ITS OWN GROUND, which is what lets it sit on the
-   silver. White on the lightest part of the sky, with a shadow to lift
-   it off — the reference's own control, and the one press on a screen
-   whose only job is to be pressed through. */
-.al-go { position: absolute; left: 50%; bottom: calc(var(--v5) + env(safe-area-inset-bottom, 0px));
-  width: 62px; height: 62px; margin-left: -31px; border-radius: var(--r-pill);
-  background: #FFFFFF; color: #0B0E13; display: grid; place-items: center;
-  box-shadow: 0 10px 28px rgba(8,14,22,.22), 0 1px 0 rgba(255,255,255,.9) inset; }
+/* THE BUTTON IS THE ONE WHITE OBJECT, at the foot on the right where the
+   small print is not. Flat: a shadow under a white disc on a black page
+   is a smudge, and there is nothing for it to be lifted off. */
+.al-go { position: absolute; right: var(--gut); bottom: calc(var(--v5) + env(safe-area-inset-bottom, 0px));
+  width: 62px; height: 62px; border-radius: var(--r-pill);
+  background: #FFFFFF; color: #000000; display: grid; place-items: center; }
 .al-go svg { width: 20px; height: 20px; display: block; }
 
 /* ---- A LIST'S HEAD ---- */
@@ -231,9 +209,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
    a list and nothing else coloured on the screen, and this is that card:
    what the list is, and the figures for it in the label register above
    the name. Outside the pane, so the list scrolls under nothing. */
-.al-head { flex: none; margin: var(--v1) 12px var(--v2); padding: 18px 20px 34px;
-  border-radius: var(--r-card); background: var(--dusk); }
-.al-kick { color: rgba(243,245,247,.74); }
+.al-head { flex: none; margin: var(--v3) var(--gut-list) var(--v2); padding: 0; background: var(--dusk); }
+.al-kick { color: var(--quiet); }
 .al-head .al-disp-s { margin-top: 9px; }
 .al-count { font-variant-numeric: tabular-nums; }
 
@@ -316,7 +293,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 /* THE LESSON IS THE MIDDLE PHONE'S SENTENCE: larger, thinner, the ink.
    The evidence above it stays at the reading size in the quieter step,
    so what separates the two halves is register rather than a box. */
-.al-tb.is-les { font-size: 18px; font-weight: 300; line-height: 1.46; letter-spacing: -.006em; color: var(--ink); }
+.al-tb.is-les { font-size: 18px; font-weight: 500; line-height: 1.46; letter-spacing: -.006em; color: var(--ink); }
 
 /* TWO MARKS, BECAUSE THEY ARE TWO CLAIMS. A highlight is liberal; a pin
    is the handful you are working from. The state is the GROUND — the ink
@@ -350,10 +327,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
    the card, the ground under the last line is at most #4E5268, where the
    summary clears 5.4:1, and the peach lives in the last 28px. White on
    that peach is about 2:1, so nothing is written there. */
-.al-lead { margin: 0 -6px var(--v1); padding: 20px 22px 28px; border-radius: var(--r-card);
-  background: linear-gradient(180deg, #0B1220 0%, #15233A 30%, #3A4459 calc(100% - 70px),
-                                      #4E5268 calc(100% - 28px), #87717A calc(100% - 12px), #D29A84 100%); }
-.al-sum { margin-top: 12px; font-size: 15px; line-height: 1.45; color: rgba(243,245,247,.82); text-wrap: pretty; }
+.al-lead { margin: 0 0 var(--v1); padding: 14px 2px 22px; }
+.al-sum { margin-top: 14px; font-size: 15px; line-height: 1.45; color: var(--dim); text-wrap: pretty; }
 .al-lead .al-kick { margin-bottom: 10px; }
 /* THE TITLE HAS TO CLEAR THE CLOSE BUTTON, which is fixed at the
    viewport's own right edge — so the room is a number of PIXELS and an
@@ -369,8 +344,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
    it. */
 .al-round {
   width: var(--round); height: var(--round); flex: none; border-radius: var(--r-pill);
-  background: #FFFFFF; color: #0B0E13;
-  box-shadow: 0 8px 22px rgba(8,14,22,.22), 0 1px 0 rgba(255,255,255,.9) inset;
+  background: #FFFFFF; color: #000000;
   display: grid; place-items: center; position: relative;
 }
 .al-round::before {

@@ -270,10 +270,13 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     root.setAttribute('data-view', was);
     return out;
   });
+  /* The two skies are the same flat black now, so the views no longer
+     differ from each other; what is asserted is that each canvas still
+     equals the foot of the token its own view paints. */
   ok('the canvas under the open screen is the foot of its own dawn',
      !!canvas.dawn && canvas.open === canvas.dawn, canvas);
   ok('and under every other view it is the foot of the sky',
-     !!canvas.sky && canvas.figures === canvas.sky && canvas.open !== canvas.figures, canvas);
+     !!canvas.sky && canvas.figures === canvas.sky, canvas);
   /* BODY TOO, because body's colour is the one iOS samples to paint the
      strip under the home indicator. Silvering the root alone changed
      nothing on the phone; the band stayed body's slate. */
