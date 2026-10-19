@@ -17,7 +17,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Alignment">
-<meta name="description" content="13 books, 36 laws and 156 themes.">
+<meta name="description" content="14 books, 36 laws and 168 themes.">
 <link rel="preload" href="../arc/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/GeistMono.woff2" as="font" type="font/woff2" crossorigin>
 <style>
@@ -476,6 +476,7 @@ var SRC = [
   { i: "big", n: "The Magic of Thinking Big", p: "David J. Schwartz", k: "book", g: "book" },
   { i: "bab", n: "The Richest Man in Babylon", p: "George S. Clason", k: "book", g: "book" },
   { i: "life", n: "The Game of Life and How to Play It", p: "Florence Scovel Shinn", k: "book", g: "book" },
+  { i: "cmyth", n: "The Charisma Myth", p: "Olivia Fox Cabane", k: "book", g: "book" },
 ];
 
 /* WHO THEY ARE, FOR SOMEBODY WHO DOES NOT KNOW. A sentence or two on the
@@ -496,6 +497,7 @@ var SUM = {
   big: "David J. Schwartz's 1959 book on confidence, action and aiming higher, full of practical habits for thinking larger than your circumstances.",
   bab: "George S. Clason's 1926 parables set in ancient Babylon, teaching the basics of money: keep a part of all you earn, control your spending and make your savings work.",
   life: "Florence Scovel Shinn's 1925 book treating life as a game of giving and receiving, where your words, expectations and forgiveness shape what comes back.",
+  cmyth: "Olivia Fox Cabane's 2012 book arguing that charisma is a set of learnable behaviours, built from presence, power and warmth, and not a trait some people are born with.",
 };
 
 /* THE LAWS ARE A READING OF THE LAW ITSELF AND NOTHING ELSE. Ten of
@@ -1253,6 +1255,40 @@ var BL = {
         ["How you can tell", "A person feels drawn toward certain work and finds it natural. Forcing a path that does not fit meets resistance. Envy lessens when a person trusts their own direction. A loss is followed by something that suits better. A person describes feeling that things worked out as they should."],
         ["What it is not", "It is not a proof that a plan exists, and it is a belief of the book. It is not a reason to avoid effort or planning. It is not a promise that everything a person wants is part of their design. And it does not explain suffering that has no apparent place in a plan."]
       ] }
+  ],
+  cmyth: [
+    { n: "Presence", b: "Being Fully Where You Are",
+      r: [
+        ["The law", "Presence, in the book, is being fully in the moment with the people you are with: your attention on what is actually happening and on them, and not on your own commentary, your phone or your next line. The book treats it as the foundation of charisma and the ingredient the other two depend on, since power and warmth reach people only when you are there to deliver them."],
+        ["How it works", "The law rests on how quickly people detect attention. They read it from your eyes, the timing of your replies and the stillness or restlessness of your body, and they register the difference between someone listening and someone waiting to speak. Full attention is rare, so receiving it is strongly felt: the person is made to feel that for the moment nothing else matters, and they remember that feeling. The main obstacle is mental chatter, the commentary of self-judgement, worry and planning that pulls attention inward. The book's approach is to return attention to something immediate, such as a physical sensation or the other person's words, so that the commentary loses the contest. The effect is not produced by looking attentive. It is produced by being attentive, which is why the book treats it as a state to be reached and not an act to be put on."],
+        ["Where it operates", "In conversations of every kind, where being listened to is the thing most people are short of. In first meetings, where the impression is formed fast. In meetings and negotiations, where a distracted participant misses what is happening. In presentations, where attention to the audience changes how it lands. In listening to someone in difficulty. And in anything where a phone, a plan or a worry competes with the person in front of you."],
+        ["How you can tell", "A person who has presence responds to what was actually said and not to what they expected. They are still. Silence does not hurry them. Their replies show they heard the detail. People talking to them tend to say more and to say it more carefully. Its absence shows in glances elsewhere, replies that miss the point and the sense of being one item among several."],
+        ["What it is not", "It is not staring or constant eye contact, which can feel like pressure. It is not silence or passivity, since a present person speaks and acts. It is not a permanent state that anyone holds all day, and the book treats it as something that comes and goes and can be returned to. And it is not a technique of appearing interested: the law is about where attention actually is."]
+      ] },
+    { n: "Power", b: "Being Seen as Able to Affect Things",
+      r: [
+        ["The law", "Power, in the book, is not what you have but what others perceive you able to do. It is their sense of your capacity to affect the world around you, through status, expertise, authority, resources or the confidence with which you carry yourself. It is one of the three ingredients, and the one that makes people expect something of you and defer to what you say."],
+        ["How it works", "The law is about perception, and so about cues. People form a quick judgement of how much someone can change what happens, and they take the cues from how the person is introduced, what they have done, how they speak and how they carry themselves. A person who is composed, who does not hurry or apologise for taking up space, and who speaks as someone whose words will be acted on, is read as powerful. The book treats the confidence that shows as largely the product of inner state, so it works on feeling secure and not on posing. It also separates power from warmth, since a person can be seen as very capable and still be felt as cold. Power alone gets respect. The law's value is in knowing which cues people read as capability and in letting them show."],
+        ["Where it operates", "In how a person is introduced and how they introduce themselves. In meetings, where authority is read within moments. In negotiation, where perceived ability to walk away or to deliver sets the terms. In leadership, where people follow those they expect to get things done. In performance, where how someone carries themselves changes how their work is received. And in any setting where being heard depends on being taken seriously."],
+        ["How you can tell", "People turn to a powerful person when a decision has to be made. Their statements are treated as settled. They are listened to without having to raise their voice. A person lacking it is interrupted, asked to justify and passed over, whatever their actual ability. The same words said by two people land differently according to who is seen as able to act on them."],
+        ["What it is not", "It is not dominance, aggression or volume, and a loud person can be read as weak. It is not a title alone, though status is one of the cues. It is not the same as actual capability, since the law concerns perception. And it is not meant to be used without warmth, which the book treats as the thing that keeps power from becoming intimidating."]
+      ] },
+    { n: "Warmth", b: "Goodwill That Shows",
+      r: [
+        ["The law", "Warmth, in the book, is goodwill toward other people: a real wish for them to do well, felt by you and noticed by them. It is the third ingredient, and the one that makes people feel safe with you, cared about and willing to follow you. It is not niceness as a manner but a feeling that shows in how you look, listen and respond."],
+        ["How it works", "The law starts from the claim that people can usually tell whether goodwill is genuine. Body language gives away what a person is actually feeling, so a warm manner over indifference or resentment looks false and can be worse than none. The book therefore treats warmth as something to be produced at the level of feeling, and it describes ways of doing so that work on the inner state, such as bringing to mind real goodwill for the person before meeting them. Once it is felt, the outward signs follow without effort: the softer expression, the open posture, the attentive reply. The effect on the other person is a sense that they are accepted and that you are on their side. Warmth is also what keeps power from reading as coldness."],
+        ["Where it operates", "In relationships of every kind, where goodwill is the basis of trust. In leadership, where people give more to someone who plainly wishes them well. In sales, service and negotiation, where the other side judges whether you are with them. In difficult conversations, where goodwill allows hard things to be heard. In first meetings. And in groups, where one warm person changes the temperature."],
+        ["How you can tell", "People relax with a warm person and say more. They feel safe disagreeing. They are inclined to help. A person lacking it, however capable, is respected from a distance. A false version is noticed as a mismatch between the smile and the rest of the face, and it produces suspicion and not trust."],
+        ["What it is not", "It is not constant agreement, flattery or niceness. It can sit alongside firmness and disagreement. It is not an act, and the book's emphasis is on feeling and not on performance. It is not a substitute for power, since warmth without power is liked and not heeded. And it is not owed equally to everyone at every moment: the law is about where goodwill is real."]
+      ] },
+    { n: "Inner State Drives Outer Behaviour", b: "Change the Feeling and the Body Follows",
+      r: [
+        ["The law", "The book's method rests on a law about cause: how you come across is produced by what you are feeling, so lasting change in behaviour comes from changing the inner state and not from adjusting the gestures. Charismatic behaviour is the visible form of presence, power and warmth that are actually felt, and it is difficult to sustain when they are not."],
+        ["How it works", "The law has two parts. The first is that body language is a readout of inner state. Posture, expression, tone and timing are driven largely by feeling, and most of it is not under conscious control. The second is that observers are sensitive to mismatch. When the gestures say one thing and the state another, people notice the incongruence, even if they cannot say what they noticed, and they trust the state over the gesture. The consequence is that copying the outward signs of charisma without the inner condition gives an imitation that is spotted. The book therefore directs effort at the state. It describes techniques for quieting the mental chatter that blocks presence, for raising the sense of security that supports power and for evoking real goodwill. The outward behaviour is then left to follow, and what follows is usually more natural than anything rehearsed."],
+        ["Where it operates", "In nerves before a speech, an interview or a meeting, where anxiety shows in the body whatever the words are. In first impressions, where state is read before content. In difficult people and conversations, where the inner response decides the outer one. In confidence, where a secure state produces composure. In warmth, where real goodwill shows. And in any attempt to change how you are seen, where the question is what you are feeling and not what you are doing."],
+        ["How you can tell", "A person who feels calm moves and speaks differently from one who has only decided to look calm. Nervousness leaks through rehearsed confidence. A change of mood changes posture and voice without any decision. Observers describe a person as seeming off without being able to say why, and this tends to track a gap between state and display."],
+        ["What it is not", "It is not positive thinking or the suppression of unwelcome feelings, since the book works with the state and not against it. It is not a promise that feelings can be changed instantly. It is not a reason to ignore physical habits, which can support the state. And it does not say that gestures are meaningless: it says they follow state, and so are an unreliable place to start."]
+      ] }
   ]
 };
 
@@ -1785,7 +1821,43 @@ var TH = [
     l: "Believing your life has a purpose makes you go looking for it. Search for the work that fits you rather than copying somebody else's." },
   { s: "life", x: "karmic", n: "Written in 1925", b: "An Illustrator's Teaching",
     t: "Shinn, an illustrator who became a metaphysical teacher, published the book in 1925, and it has stayed in print for a century.",
-    l: "A useful idea finds new readers in every generation. Put what you learned into something that can outlast you and keep on helping." }
+    l: "A useful idea finds new readers in every generation. Put what you learned into something that can outlast you and keep on helping." },
+  { s: "cmyth", x: "mindset", n: "Charisma Is Behaviour, Not Birth", b: "A Skill, Not a Gift",
+    t: "Olivia Fox Cabane's central claim is that charisma is not a fixed trait handed out at birth. She presents it as a set of specific behaviours that can be learned and practised, and says that people who seem to have it naturally are using behaviours others can pick up.",
+    l: "If you have been sorting people into those who have it and those who do not, you have put yourself in the second group by default. The useful question is which behaviour is missing, because a missing behaviour can be built and a missing gift cannot." },
+  { s: "cmyth", x: "mindset", n: "Three Ingredients", b: "Presence, Power, Warmth",
+    t: "The book breaks charisma into three ingredients. Presence is giving your full attention to the people in front of you, power is the perception that you can affect the world around you, and warmth is goodwill toward others. Different mixes of the three give different kinds of charisma.",
+    l: "Charisma is not one dial. When you come across badly, find out which of the three was missing, because the fix for a lack of presence is not the fix for a lack of warmth, and guessing wrong costs you the whole attempt." },
+  { s: "cmyth", x: "mindset", n: "It Is Not Extraversion", b: "Quiet People Are Not Excluded",
+    t: "Cabane argues against the idea that charisma belongs to the outgoing, and says it can be built by people who are quiet or shy, because it rests on attention, perceived power and warmth and not on volume or sociability.",
+    l: "You do not have to become louder to become magnetic. Being quiet and fully present with one person is a recognisable form of it, and it may be the one that suits you better than working a room." },
+  { s: "cmyth", x: "internal", n: "Mental Chatter", b: "The Noise That Costs You Presence",
+    t: "Cabane identifies mental chatter, the running commentary of self-judgement, worry and planning your next line, as the main thing that stops people being present. Someone half listening and half managing themselves is perceived as distracted, and she offers techniques for quieting it.",
+    l: "While you are rehearsing what to say or grading how you are doing, the person in front of you is getting a fraction of you, and they can tell. Whatever you are telling yourself mid-conversation is taking attention that was theirs." },
+  { s: "cmyth", x: "internal", n: "Presence Is the Foundation", b: "Being Fully Where You Are",
+    t: "In her model presence comes first. It means being fully in the moment with whoever you are with, not checking the room or a phone, and she argues that people notice very quickly whether you are actually there or only appearing to be.",
+    l: "Attention is the cheapest thing you can give and one of the rarest. Give one person the whole of it for a few minutes and you will have done more for how they see you than a prepared speech does." },
+  { s: "cmyth", x: "internal", n: "Change the State, Not the Gesture", b: "Behaviour Follows Feeling",
+    t: "Cabane's method works on the inner state and not on rehearsed gestures. She argues that body language comes out of how you feel, so producing confident or warm gestures over the opposite feeling looks false, and the lasting fix is to change the feeling first.",
+    l: "Standing differently over a nervous stomach does not hold for long. Work on what you are feeling and the way you stand and look will follow, which is why a gesture copied from somebody else never quite lands." },
+  { s: "cmyth", x: "external", n: "Power Is Perceived", b: "The Ability to Affect Things",
+    t: "She defines power as other people's perception of your ability to affect the world around you, through status, expertise, authority or confidence. It is about how you are seen and not about how much you have, and it shows in how you carry yourself.",
+    l: "People decide quickly whether you can change anything. If you want to be heard in a room, the question is what in how you stand, speak and are introduced tells them that you can." },
+  { s: "cmyth", x: "external", n: "Warmth Is Read", b: "Goodwill Shows",
+    t: "Warmth in her account is real goodwill toward the other person, and it is read from body language and manner. Because people can usually tell whether it is genuine, she says it has to be felt first and not performed.",
+    l: "A smile worn over indifference is spotted as quickly as a frown. If you want to come across as warm, the work is in actually wishing the person well, because that is the only version that cannot be seen through." },
+  { s: "cmyth", x: "external", n: "Four Styles", b: "Focus, Visionary, Kindness, Authority",
+    t: "Cabane describes four styles of charisma, made by weighting the three ingredients differently: focus charisma, visionary charisma, kindness charisma and authority charisma. None is the right one, and each suits different people and settings.",
+    l: "You are not trying to become the charismatic person you admire most. Find the style that fits what you already are, because the one you copy from somebody else will cost you effort and still look borrowed." },
+  { s: "cmyth", x: "karmic", n: "Without Presence, No Connection", b: "Distracted People Are Felt",
+    t: "As the book frames it, a person with power and warmth but without presence comes across as distracted, and the people they are with feel unheard even when nothing unkind is said. Being half there is noticed.",
+    l: "People forgive a great deal, but being half attended to is not one of the things they fail to notice. It is the quiet reason some people are respected and not warmly held, and a phone in the hand does it without a word." },
+  { s: "cmyth", x: "karmic", n: "Power Without Warmth", b: "Respected and Kept at a Distance",
+    t: "The book treats power without warmth as a trade-off. A person seen as capable but not as kind tends to be experienced as cold or intimidating, and people will respect them and defer to them while keeping their distance.",
+    l: "Being feared is not the same as being followed, and the gap shows when you need people to come to you freely. Capability earns respect at the point of use, and only warmth buys the willingness." },
+  { s: "cmyth", x: "karmic", n: "Warmth Without Power", b: "Liked and Not Heeded",
+    t: "The opposite failure in her model is warmth without power. A person seen as kind but not as able to affect anything is liked, and is not taken seriously when it matters.",
+    l: "Being easy to like is not the same as being easy to follow. If people are fond of you and still do not listen when the decision is hard, the missing ingredient is not more warmth." }
 ];
 
 var $ = function (s) { return document.querySelector(s); };
