@@ -172,12 +172,14 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   ok('the button is inside the heading and controls its own body', acc.valid && acc.owns, acc);
 
   /* ── THE LAWS ────────────────────────────────────────────────── */
-  /* Ten rows that open, each with the three paragraphs a law needs: what
-     it says, where it comes from and what to do with it. The origin is
-     the one this list could not do without — a popular rule with no
-     named source is just an assertion — so it is asserted as present and
-     as real length on every row, and the caution above the list is
-     asserted too. Shut on arrival and one at a time, like a theme. The
+  /* Ten rows that open, each a reading of five passages: what the law
+     says, where it comes from, how it is argued, where it breaks and a
+     reflection. There is no passage that tells you what to do, because
+     that was asked for and then taken out — so its absence is asserted
+     by name, since a build that put an exercise back would pass every
+     check that only counts paragraphs. The origin and the limits are the
+     two a popular rule cannot do without, so they are asserted as real
+     length on every row, and the caution above the list is asserted too. Shut on arrival and one at a time, like a theme. The
      eleventh law in the source was cut off at the edge of a screenshot
      and is deliberately absent, so the count is pinned: a build that
      padded it with a guess would pass any check that only asked for
@@ -198,7 +200,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     const again = h(cs[6]) === 0;
     const heads = cs.map(c => [...c.querySelectorAll('.al-tl')].map(n => n.textContent).join('|'));
     const words = cs.map(c => [...c.querySelectorAll('.al-tb')].map(q => q.textContent.split(' ').length));
-    const thin = words.filter(w => w.length !== 3 || w[0] < 30 || w[1] < 6 || w[2] < 20).length;
+    const thin = words.filter(w => w.length !== 5 || w.some(n => n < 25) || w.reduce((a, b) => a + b, 0) < 350).length;
     const note = pane.querySelector('.al-note');
     const valid = rows.every(x => x.parentElement.tagName === 'H3');
     const owns = cs.every((c, i) => document.getElementById(rows[i].getAttribute('aria-controls')) === bodyOf(c));
@@ -209,7 +211,8 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   ok('the laws are these ten, in the order they were given',
      laws.names.join('|') === ['Assumption','Detachment','Reflection','Becoming','Habit','Gratitude','Autosuggestion','Momentum','Clarity','Attention'].map(x => 'Law of ' + x).join('|'), laws.names);
   ok('every law is shut on arrival and opens alone', laws.shut && laws.opened && laws.others && laws.again, laws);
-  ok('every law says what it says, where it comes from and what to do', laws.heads.every(x => x === 'What it says|Where it comes from|What to do with it') && laws.thin === 0, laws);
+  ok('every law is five passages, none of them an exercise', laws.heads.every(x => x === 'The law|Where it comes from|How it is argued|Where it breaks|Reflection') && laws.thin === 0, laws);
+  ok('no law tells you what to do with it', laws.heads.every(x => !/what to do/i.test(x)), laws.heads);
   ok('the list says once that these are not laws of physics', /not laws of physics/.test(laws.note || ''), laws.note);
   ok('a law row sits in its heading and controls its own body', laws.valid && laws.owns, laws);
   ok('the pane is headed and counted', laws.head === 'The Laws' && /10\s*laws/i.test(laws.kick), laws);
