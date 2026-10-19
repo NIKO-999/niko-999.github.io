@@ -65,17 +65,17 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
 
   /* ── THE SHAPE ─────────────────────────────────────────────────── */
 
-  /* THREE TABS, ASSERTED AS THE EXACT LIST rather than a count: four
-     view names left this build in one pass and a count of three would
-     pass on any three. */
-  ok('three tabs, and they are these three',
+  /* FOUR TABS, ASSERTED AS THE EXACT LIST rather than a count: four
+     view names left this build in one pass and a count would pass on
+     any four. */
+  ok('four tabs, and they are these four',
      JSON.stringify(await page.evaluate(() =>
        [...document.querySelectorAll('.al-tab')].map(b => b.getAttribute('data-v'))))
-     === JSON.stringify(['figures', 'books', 'kept']));
+     === JSON.stringify(['figures', 'books', 'laws', 'kept']));
 
   const views = await page.evaluate(() => window.alDrive.views());
-  ok('the view list is the three plus the open screen and a source',
-     JSON.stringify(views) === JSON.stringify(['open', 'figures', 'books', 'kept', 'source']), views);
+  ok('the view list is the four plus the open screen and a source',
+     JSON.stringify(views) === JSON.stringify(['open', 'figures', 'books', 'laws', 'kept', 'source']), views);
 
   /* EXACTLY ONE VIEW HAS A REAL BOX. [hidden] and a class are proxies
      for what is drawn, and both have been wrong in this repo before —
@@ -170,6 +170,49 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   ok('pressing a theme opens that one and no other', acc.opened && acc.others, acc);
   ok('and pressing it again shuts it', acc.again, acc);
   ok('the button is inside the heading and controls its own body', acc.valid && acc.owns, acc);
+
+  /* ── THE LAWS ────────────────────────────────────────────────── */
+  /* Ten rows that open, each with the three paragraphs a law needs: what
+     it says, where it comes from and what to do with it. The origin is
+     the one this list could not do without — a popular rule with no
+     named source is just an assertion — so it is asserted as present and
+     as real length on every row, and the caution above the list is
+     asserted too. Shut on arrival and one at a time, like a theme. The
+     eleventh law in the source was cut off at the edge of a screenshot
+     and is deliberately absent, so the count is pinned: a build that
+     padded it with a guess would pass any check that only asked for
+     "some laws". */
+  const laws = await page.evaluate(() => {
+    window.alDrive.view('laws');
+    const pane = document.querySelector('#alLawsPane');
+    const cs = [...pane.querySelectorAll('.al-ch')];
+    const rows = cs.map(c => c.querySelector('.al-row'));
+    const bodyOf = c => c.querySelector('.al-chb');
+    const h = c => bodyOf(c).getBoundingClientRect().height;
+    const names = rows.map(r => r.querySelector('.al-tn').textContent);
+    const shut = cs.every(c => h(c) === 0);
+    const r = rows[6]; r.click();
+    const opened = r.getAttribute('aria-expanded') === 'true' && h(cs[6]) > 40;
+    const others = cs.filter((c, i) => i !== 6).every(c => h(c) === 0);
+    r.click();
+    const again = h(cs[6]) === 0;
+    const heads = cs.map(c => [...c.querySelectorAll('.al-tl')].map(n => n.textContent).join('|'));
+    const words = cs.map(c => [...c.querySelectorAll('.al-tb')].map(q => q.textContent.split(' ').length));
+    const thin = words.filter(w => w.length !== 3 || w[0] < 30 || w[1] < 6 || w[2] < 20).length;
+    const note = pane.querySelector('.al-note');
+    const valid = rows.every(x => x.parentElement.tagName === 'H3');
+    const owns = cs.every((c, i) => document.getElementById(rows[i].getAttribute('aria-controls')) === bodyOf(c));
+    const head = document.querySelector('#alLaws h1').textContent;
+    const kick = document.querySelector('#alLaws .al-head').textContent;
+    return { n: cs.length, names, shut, opened, others, again, heads, thin, note: note && note.textContent, valid, owns, head, kick };
+  });
+  ok('the laws are these ten, in the order they were given',
+     laws.names.join('|') === ['Assumption','Detachment','Reflection','Becoming','Habit','Gratitude','Autosuggestion','Momentum','Clarity','Attention'].map(x => 'Law of ' + x).join('|'), laws.names);
+  ok('every law is shut on arrival and opens alone', laws.shut && laws.opened && laws.others && laws.again, laws);
+  ok('every law says what it says, where it comes from and what to do', laws.heads.every(x => x === 'What it says|Where it comes from|What to do with it') && laws.thin === 0, laws);
+  ok('the list says once that these are not laws of physics', /not laws of physics/.test(laws.note || ''), laws.note);
+  ok('a law row sits in its heading and controls its own body', laws.valid && laws.owns, laws);
+  ok('the pane is headed and counted', laws.head === 'The Laws' && /10\s*laws/i.test(laws.kick), laws);
 
   /* ── A BOOK CAN BE READ BY CHAPTER ───────────────────────────── */
   /* Reality Transurfing carries a chapter-by-chapter reading above its
@@ -664,6 +707,13 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     await page.waitForTimeout(220);
     await sweep('src:' + id);
   }
+  /* THE LAWS TOO, OPENED. The view sweep above reads a pane as it
+     arrives, with every row shut, so the three paragraphs of each law
+     are unmeasured unless they are opened first. */
+  await page.evaluate(() => { window.alDrive.view('laws');
+    document.querySelectorAll('#alLawsPane .al-row[aria-expanded="false"]').forEach(b => b.click()); });
+  await page.waitForTimeout(250);
+  await sweep('laws-open');
   ok('every theme was open when its page was swept', bodiesDrawn === said.real[0], { bodiesDrawn, themes: said.real[0] });
 
   const under = shots.filter(x => !x.pass);

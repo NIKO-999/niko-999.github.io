@@ -315,6 +315,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .al-q { margin: var(--v3) 2px var(--v2); padding: 2px 0 2px 14px; border-left: 2px solid var(--tg, var(--ink)); }
 .al-qt { font-size: 17px; line-height: 1.42; font-weight: 500; letter-spacing: -.008em; color: var(--ink); text-wrap: pretty; }
 
+.al-note { margin: var(--v3) 2px var(--v2); font-size: 13px; line-height: 1.45; color: var(--quiet); text-wrap: pretty; }
+
 .al-empty { padding: var(--v4) 2px; font-size: 15px; line-height: 1.5; color: var(--dim); }
 
 .al-th[data-x="mindset"],  .al-grp[data-x="mindset"],  .al-q[data-x="mindset"]  { --tg: var(--ax-mindset); }
@@ -373,6 +375,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   <button class="al-tab" data-v="books" aria-label="The Books">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.2v13M12 7.2C10.6 5.6 8.4 4.8 5.2 4.8a1 1 0 0 0-1 1v11.6a1 1 0 0 0 1 1c3.2 0 5.4.8 6.8 2.4M12 7.2c1.4-1.6 3.6-2.4 6.8-2.4a1 1 0 0 1 1 1v11.6a1 1 0 0 1-1 1c-3.2 0-5.4.8-6.8 2.4"/></svg>
   </button>
+  <button class="al-tab" data-v="laws" aria-label="The Laws">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M8 20h8M5 7h14M7 7l-3 7a3 3 0 0 0 6 0L7 7zM17 7l-3 7a3 3 0 0 0 6 0l-3-7z"/></svg>
+  </button>
   <button class="al-tab" data-v="kept" aria-label="Kept">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.8 3.4h10.4a1.4 1.4 0 0 1 1.4 1.4v15.8L12 16.1l-6.6 4.5V4.8a1.4 1.4 0 0 1 1.4-1.4Z"/></svg>
   </button>
@@ -398,6 +403,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 <section class="al-view" id="alBooks">
   <div class="al-head"><p class="al-caps al-kick"><span class="al-count"></span> <span class="al-kick-r"></span></p><h1 class="al-disp-s">The Books</h1></div>
   <div class="al-pane" id="alBooksPane"></div>
+</section>
+
+<section class="al-view" id="alLaws">
+  <div class="al-head"><p class="al-caps al-kick"><span class="al-count"></span> <span class="al-kick-r"></span></p><h1 class="al-disp-s">The Laws</h1></div>
+  <div class="al-pane" id="alLawsPane"></div>
 </section>
 
 <section class="al-view" id="alKept">
@@ -585,6 +595,58 @@ var SUM = {
   bab: "George S. Clason's 1926 parables set in ancient Babylon, teaching the basics of money: keep a part of all you earn, control your spending and make your savings work.",
   life: "Florence Scovel Shinn's 1925 book treating life as a game of giving and receiving, where your words, expectations and forgiveness shape what comes back.",
 };
+
+/* THE LAWS ARE A POPULAR LIST, SO EACH ONE SAYS WHERE IT COMES FROM.
+   Eleven were given, from a short video; one of them was cut off at the
+   edge of the screenshot ("Law of Terminal") and its full name is not
+   known, so it is not here rather than guessed at. These are rules from
+   the self-help and New Thought tradition, not laws of physics, and the
+   pane says so once. Every entry names its origin — a person and a book
+   where there is one, and where the origin is an analogy or a loose
+   popular idea it says that instead of borrowing an authority. Nothing
+   from a book is quoted, because none could be confirmed word for word. */
+var LAWS = [
+  { n: "Law of Assumption", b: "Live From the End",
+    t: "Associated with Neville Goddard, who taught that you assume the feeling of your wish already fulfilled and stay in it until it feels natural, rather than asking for it. The law says the assumption you hold, more than the effort you make, is what shapes what arrives.",
+    f: "Neville Goddard, in this app as Feeling Is the Secret.",
+    l: "Pick one thing you want and decide what an ordinary day would feel like if it were already true. Act from that for a week and see what you stop doing and what you start." },
+  { n: "Law of Detachment", b: "Intend It, Then Let Go of How",
+    t: "The idea that you can hold a clear intention and still loosen your grip on the outcome and on the route to it. It does not mean not caring. Deepak Chopra lists it among his Seven Spiritual Laws of Success, and Zeland's excess potential is the same warning in other words: needing a result makes it slip.",
+    f: "Deepak Chopra, The Seven Spiritual Laws of Success (1994). Zeland, in this app as Reality Transurfing.",
+    l: "Notice what you are gripping. Decide what you want, take the next action and stop checking whether it is working. The aim is not needing it to happen today." },
+  { n: "Law of Reflection", b: "The Outside Mirrors the Inside",
+    t: "That what you meet in the world reflects what you carry in you, so the same kinds of people and problems keep arriving until the inner pattern changes. Older versions are the Hermetic principle of correspondence, as above so below, and the law of correspondence in Brian Tracy's Million Dollar Habits.",
+    f: "The Hermetic tradition, stated as correspondence in The Kybalion (1908). Brian Tracy, in this app as Million Dollar Habits.",
+    l: "When the same kind of situation keeps returning, ask what you do the same way each time. It is a harder question than who to blame and it is the only one you can change." },
+  { n: "Law of Becoming", b: "You Turn Into What You Repeat",
+    t: "That your character is built out of what you think and do repeatedly, so you become the person your habits and thoughts describe. James Allen argues it at length in As a Man Thinketh (1903), and the theme You Become What You Think About in Million Dollar Habits is the modern restatement.",
+    f: "James Allen, As a Man Thinketh. Brian Tracy, Million Dollar Habits. Both are in this app.",
+    l: "Stop asking who you want to be and look at what you did today. That is the person being made. Change one daily act and you have changed the direction." },
+  { n: "Law of Habit", b: "Most of Your Day Is Automatic",
+    t: "That most of what you do runs on habit, so results follow your habits rather than your intentions. Brian Tracy puts a figure on it in Million Dollar Habits, ninety-five per cent, which is his estimate and not a measurement. Maxwell Maltz's Psycho-Cybernetics gives the often-cited twenty-one days for a new pattern to settle.",
+    f: "Brian Tracy, Million Dollar Habits. Maxwell Maltz, Psycho-Cybernetics (1960). Both are in this app.",
+    l: "Change the habit and leave the goal alone. Pick one, make it small enough to happen on your worst day, and count the days you keep it." },
+  { n: "Law of Gratitude", b: "Thanks Is a Mechanism",
+    t: "Wallace Wattles, in The Science of Getting Rich (1910), makes gratitude part of the method rather than a courtesy: in his terms it keeps your mind on the good that is already there and in harmony with where more of it comes from. The popular version is the law of increase, that what you appreciate grows.",
+    f: "Wallace D. Wattles, in this app as The Science of Getting Rich.",
+    l: "Write three specific things from today you would have asked for a year ago. Accuracy is the point: vague thanks changes nothing, and a named thing changes what you notice." },
+  { n: "Law of Autosuggestion", b: "Repeat It Until It Is Believed",
+    t: "Napoleon Hill's term, in Think and Grow Rich (1937), for feeding the subconscious a statement of what you want by repeating it aloud and with feeling until it lands. The word was made famous by the French pharmacist Émile Coué, whose every day in every way I am getting better and better was repeated by thousands.",
+    f: "Napoleon Hill, in this app as Think and Grow Rich. The term was popularised by Émile Coué.",
+    l: "Write one sentence about who you are becoming and read it twice a day. Then notice what you say to yourself in between, because the second is the stronger of the two." },
+  { n: "Law of Momentum", b: "Motion Begets Motion",
+    t: "A popular idea borrowed from the physics of inertia, that a thing in motion tends to stay in motion, so starting is the hard part and a run is easier to keep than to restart. It is an analogy and not physics applied to people. Zeland's wave of fortune and Schwartz's Action Cures Fear describe the same effect.",
+    f: "An analogy to Newton's first law. Zeland, Reality Transurfing, and David Schwartz, The Magic of Thinking Big, are in this app.",
+    l: "Make the first move small and make it today. A started thing is easier to continue than a perfect plan is to begin, so protect the run before you improve it." },
+  { n: "Law of Clarity", b: "Know the Target Before You Move",
+    t: "That a vague want produces a vague result, and that writing down exactly what you want, by when and why, is the starting point. Brian Tracy opens Million Dollar Habits on it, and Napoleon Hill's definiteness of purpose and Bob Proctor's worthy ideal make the same demand.",
+    f: "Brian Tracy, Napoleon Hill and Bob Proctor, all in this app.",
+    l: "Write the goal as one sentence with a number and a date. If you cannot, the next task is not working harder. It is deciding." },
+  { n: "Law of Attention", b: "What You Watch Grows",
+    t: "That what you give your attention to expands in your life, because attention decides what you notice, remember and act on. Popular accounts point to the brain's reticular activating system as the filter, though tying that to manifestation is a popular explanation and not established science. Zeland's pendulums are the idea in reverse: structures that live on the attention you give them.",
+    f: "A popular use of attention research. Zeland, in this app as Reality Transurfing.",
+    l: "Audit one day of attention and look for where it went without you choosing. Then pick one thing to give more of and one to starve, and be stricter about the second." }
+];
 
 /* CHAPTERS ARE A SECOND READING OF ONE BOOK, NOT FOUR MORE THEMES. The
    themes are what the book teaches, three to an axis, and the boot rule
@@ -2193,6 +2255,15 @@ function mark(m, k) {
       if (QT[qk][qa].split(/\s+/).length > 45) throw new Error(qk + ' ' + qa + ' quote is too long to be a quote');
     }
   }
+  (function () {
+    var seenL = {};
+    LAWS.forEach(function (q) {
+      if (seenL[q.n]) throw new Error('law ' + q.n + ' appears twice');
+      seenL[q.n] = 1;
+      if (!q.f || q.t.split(/\s+/).length < 30 || q.l.split(/\s+/).length < 20)
+        throw new Error('law ' + q.n + ' is missing its origin or is too thin to be a summary');
+    });
+  }());
   for (var cs in CH) {
     if (!srcOf(cs)) throw new Error('chapters name a source that is not there: ' + cs);
     var seenC = {};
@@ -2337,26 +2408,39 @@ function toggle(b) {
    one: it has no key, so there is nothing to pin or highlight, and no
    axis, so it takes no hue. Its body class differs from a theme's so
    the count of themes drawn stays a count of themes. */
-function chapterRow(source, q) {
+function foldRow(id, name, sub, parts) {
   var d = el('div', 'al-ch');
-  var id = 'al-ch-' + source + '-' + q.c;
   var h = el('h3', 'al-th-h');
   var b = el('button', 'al-row');
   b.setAttribute('aria-expanded', 'false');
   b.setAttribute('aria-controls', id);
-  b.appendChild(rowText(q.n, 'Chapter ' + q.c + ' \u00B7 ' + q.b));
+  b.appendChild(rowText(name, sub));
   b.appendChild(chev('down'));
   h.appendChild(b);
   d.appendChild(h);
   var body = el('div', 'al-chb');
   body.id = id;
   body.hidden = true;
-  body.appendChild(el('div', 'al-caps al-tl', 'What it says'));
-  body.appendChild(el('p', 'al-tb', q.t));
-  body.appendChild(el('div', 'al-caps al-tl is-les', 'What to do with it'));
-  body.appendChild(el('p', 'al-tb is-les', q.l));
+  parts.forEach(function (q) {
+    body.appendChild(el('div', 'al-caps al-tl' + (q[2] ? ' is-les' : ''), q[0]));
+    body.appendChild(el('p', 'al-tb' + (q[2] ? ' is-les' : ''), q[1]));
+  });
   d.appendChild(body);
   return d;
+}
+
+function chapterRow(source, q) {
+  return foldRow('al-ch-' + source + '-' + q.c, q.n, 'Chapter ' + q.c + ' \u00B7 ' + q.b,
+    [['What it says', q.t], ['What to do with it', q.l, 1]]);
+}
+
+/* A LAW IS THE SAME ROW WITH ONE MORE PARAGRAPH: where it comes from.
+   It sits between what the law says and what to do about it, because a
+   rule from a popular list is only worth acting on once you know whose
+   it is. */
+function lawRow(q, i) {
+  return foldRow('al-law-' + i, q.n, q.b,
+    [['What it says', q.t], ['Where it comes from', q.f], ['What to do with it', q.l, 1]]);
 }
 
 function mkBtn(m, label, k) {
@@ -2436,6 +2520,18 @@ function paintSource(id) {
   p.scrollTop = 0; mask(p);
 }
 
+/* THE LAWS ARE ONE LIST, NO GROUPS. Eleven rows that open, in the order
+   the video gave them — which is not an order of importance, so none is
+   implied by sorting. The one sentence above them is the claim this
+   whole pane makes and the only caution it needs: these are rules from a
+   tradition and not laws of physics. */
+function paintLaws() {
+  var p = $('#alLawsPane'); p.textContent = '';
+  p.appendChild(el('p', 'al-note', 'Rules from the self-help tradition, not laws of physics. Each one says where it comes from.'));
+  LAWS.forEach(function (q, i) { p.appendChild(lawRow(q, i)); });
+  p.scrollTop = 0; mask(p);
+}
+
 /* ONE PAINTER FOR BOTH STOPS, grouped by source in the app's own order.
    The heading takes no hue: a pane that mixes four axes has no axis for
    a colour to be about. */
@@ -2466,7 +2562,7 @@ function paintKept() {
    the figures rather than on a bar with nothing above it — which is
    what view()'s own fall-through already does, and why the list is
    written out rather than derived. */
-var VIEWS = ['open', 'figures', 'books', 'kept', 'source'];
+var VIEWS = ['open', 'figures', 'books', 'laws', 'kept', 'source'];
 var COUNT = { figure: 0, book: 0, figureTh: 0, bookTh: 0 };
 SRC.forEach(function (x) { COUNT[x.k]++; COUNT[x.k + 'Th'] += themesOfSrc(x.i).length; });
 function view(v) {
@@ -2483,7 +2579,9 @@ function view(v) {
   });
   kick('#alFigures', COUNT.figure, 'people · ' + COUNT.figureTh + ' themes');
   kick('#alBooks', COUNT.book, 'books · ' + COUNT.bookTh + ' themes');
+  kick('#alLaws', LAWS.length, 'laws');
   if (v === 'figures' || v === 'books') paintIndex(v);
+  if (v === 'laws') paintLaws();
   if (v === 'kept') paintKept();
   if (v !== 'source') { st.last = v; save(); }
 }
