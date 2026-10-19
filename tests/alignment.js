@@ -178,7 +178,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
      name, since a build that put either back would pass every check that
      only counts paragraphs: instructions (what to do with it, a
      reflection) and provenance (where it comes from, how it is argued).
-     The caution above the list is asserted too. The eleventh law in the
+     There is no caution above the list, and that is asserted too. The eleventh law in the
      source was cut off at the edge of a screenshot and is deliberately
      absent, so the count is pinned rather than allowed to be padded. */
   const laws = await page.evaluate(() => {
@@ -204,7 +204,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     const owns = cs.every((c, i) => document.getElementById(rows[i].getAttribute('aria-controls')) === bodyOf(c));
     const head = document.querySelector('#alLaws h1').textContent;
     const kick = document.querySelector('#alLaws .al-head').textContent;
-    return { n: cs.length, names, shut, opened, others, again, heads, thin, text, note: note && note.textContent, valid, owns, head, kick };
+    return { n: cs.length, names, shut, opened, others, again, heads, thin, text, note: note ? note.textContent : null, valid, owns, head, kick };
   });
   ok('the laws are these twenty-two, the ten given first and then the twelve added',
      laws.names.join('|') === ['Assumption','Detachment','Reflection','Becoming','Habit','Gratitude','Autosuggestion','Momentum','Clarity','Attention',
@@ -219,7 +219,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
      laws.heads.every(x => !/what to do|reflection|comes from|argued/i.test(x)), laws.heads);
   ok('and none puts the reader in a scenario',
      !/\b(imagine|picture this|for example|for instance|suppose you)\b/i.test(laws.text), laws.text.slice(0, 80));
-  ok('the list says once that these are not laws of physics', /not laws of physics/.test(laws.note || ''), laws.note);
+  ok('nothing disclaims the list: no note above it', laws.note === null, laws.note);
   ok('a law row sits in its heading and controls its own body', laws.valid && laws.owns, laws);
   ok('the pane is headed and counted', laws.head === 'The Laws' && /22\s*laws/i.test(laws.kick), laws);
 

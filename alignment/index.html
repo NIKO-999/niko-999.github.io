@@ -315,8 +315,6 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .al-q { margin: var(--v3) 2px var(--v2); padding: 2px 0 2px 14px; border-left: 2px solid var(--tg, var(--ink)); }
 .al-qt { font-size: 17px; line-height: 1.42; font-weight: 500; letter-spacing: -.008em; color: var(--ink); text-wrap: pretty; }
 
-.al-note { margin: var(--v3) 2px var(--v2); font-size: 13px; line-height: 1.45; color: var(--quiet); text-wrap: pretty; }
-
 .al-empty { padding: var(--v4) 2px; font-size: 15px; line-height: 1.5; color: var(--dim); }
 
 .al-th[data-x="mindset"],  .al-grp[data-x="mindset"],  .al-q[data-x="mindset"]  { --tg: var(--ax-mindset); }
@@ -514,8 +512,9 @@ var SUM = {
    instruction in any entry, and no "imagine that you". Each law says
    what it is, how it works, where it operates in a life (described by
    area, never by example), how you can tell it is operating, and what
-   it is not, which is where its limits are stated. The pane says once
-   that these are rules from a tradition and not laws of physics. */
+   it is not, which is where its limits are stated. There is no
+   disclaimer above the list: one was there, saying these are rules from
+   a tradition and not laws of physics, and it was taken out on request. */
 var LAWS = [
   { n: "Law of Assumption", b: "Live From the End",
     r: [
@@ -2091,14 +2090,11 @@ function paintSource(id) {
   p.scrollTop = 0; mask(p);
 }
 
-/* THE LAWS ARE ONE LIST, NO GROUPS. Eleven rows that open, in the order
-   the video gave them — which is not an order of importance, so none is
-   implied by sorting. The one sentence above them is the claim this
-   whole pane makes and the only caution it needs: these are rules from a
-   tradition and not laws of physics. */
+/* THE LAWS ARE ONE LIST, NO GROUPS. Rows that open, in the order the
+   video gave them and then the ones added, which is not an order of
+   importance, so none is implied by sorting. Nothing sits above them. */
 function paintLaws() {
   var p = $('#alLawsPane'); p.textContent = '';
-  p.appendChild(el('p', 'al-note', 'Rules from the self-help tradition, not laws of physics.'));
   LAWS.forEach(function (q, i) { p.appendChild(lawRow(q, i)); });
   p.scrollTop = 0; mask(p);
 }
