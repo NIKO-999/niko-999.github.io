@@ -172,18 +172,15 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   ok('the button is inside the heading and controls its own body', acc.valid && acc.owns, acc);
 
   /* ── THE LAWS ────────────────────────────────────────────────── */
-  /* Ten rows that open, each a reading of five passages: what the law
-     says, where it comes from, how it is argued, where it breaks and a
-     reflection. There is no passage that tells you what to do, because
-     that was asked for and then taken out — so its absence is asserted
-     by name, since a build that put an exercise back would pass every
-     check that only counts paragraphs. The origin and the limits are the
-     two a popular rule cannot do without, so they are asserted as real
-     length on every row, and the caution above the list is asserted too. Shut on arrival and one at a time, like a theme. The
-     eleventh law in the source was cut off at the edge of a screenshot
-     and is deliberately absent, so the count is pinned: a build that
-     padded it with a guess would pass any check that only asked for
-     "some laws". */
+  /* Ten rows that open, each a reading of the law itself: what it is,
+     how it works, where it operates, how you can tell and what it is
+     not. Two things were taken out on request and are asserted ABSENT by
+     name, since a build that put either back would pass every check that
+     only counts paragraphs: instructions (what to do with it, a
+     reflection) and provenance (where it comes from, how it is argued).
+     The caution above the list is asserted too. The eleventh law in the
+     source was cut off at the edge of a screenshot and is deliberately
+     absent, so the count is pinned rather than allowed to be padded. */
   const laws = await page.evaluate(() => {
     window.alDrive.view('laws');
     const pane = document.querySelector('#alLawsPane');
@@ -200,19 +197,27 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     const again = h(cs[6]) === 0;
     const heads = cs.map(c => [...c.querySelectorAll('.al-tl')].map(n => n.textContent).join('|'));
     const words = cs.map(c => [...c.querySelectorAll('.al-tb')].map(q => q.textContent.split(' ').length));
-    const thin = words.filter(w => w.length !== 5 || w.some(n => n < 25) || w.reduce((a, b) => a + b, 0) < 350).length;
+    const thin = words.filter(w => w.length < 5 || w.some(n => n < 25) || w.reduce((a, b) => a + b, 0) < 400).length;
+    const text = cs.map(c => c.textContent).join(' ');
     const note = pane.querySelector('.al-note');
     const valid = rows.every(x => x.parentElement.tagName === 'H3');
     const owns = cs.every((c, i) => document.getElementById(rows[i].getAttribute('aria-controls')) === bodyOf(c));
     const head = document.querySelector('#alLaws h1').textContent;
     const kick = document.querySelector('#alLaws .al-head').textContent;
-    return { n: cs.length, names, shut, opened, others, again, heads, thin, note: note && note.textContent, valid, owns, head, kick };
+    return { n: cs.length, names, shut, opened, others, again, heads, thin, text, note: note && note.textContent, valid, owns, head, kick };
   });
   ok('the laws are these ten, in the order they were given',
      laws.names.join('|') === ['Assumption','Detachment','Reflection','Becoming','Habit','Gratitude','Autosuggestion','Momentum','Clarity','Attention'].map(x => 'Law of ' + x).join('|'), laws.names);
   ok('every law is shut on arrival and opens alone', laws.shut && laws.opened && laws.others && laws.again, laws);
-  ok('every law is five passages, none of them an exercise', laws.heads.every(x => x === 'The law|Where it comes from|How it is argued|Where it breaks|Reflection') && laws.thin === 0, laws);
-  ok('no law tells you what to do with it', laws.heads.every(x => !/what to do/i.test(x)), laws.heads);
+  ok('every law opens on the law, closes on what it is not, and is in depth',
+     laws.heads.every(x => { const h = x.split('|');
+       return h[0] === 'The law' && h[h.length - 1] === 'What it is not'
+         && ['How it works', 'Where it operates', 'How you can tell'].every(k => h.includes(k)); })
+     && laws.thin === 0, laws);
+  ok('no law gives an instruction, a reflection or an origin',
+     laws.heads.every(x => !/what to do|reflection|comes from|argued/i.test(x)), laws.heads);
+  ok('and none puts the reader in a scenario',
+     !/\b(imagine|picture this|for example|for instance|suppose you)\b/i.test(laws.text), laws.text.slice(0, 80));
   ok('the list says once that these are not laws of physics', /not laws of physics/.test(laws.note || ''), laws.note);
   ok('a law row sits in its heading and controls its own body', laws.valid && laws.owns, laws);
   ok('the pane is headed and counted', laws.head === 'The Laws' && /10\s*laws/i.test(laws.kick), laws);
