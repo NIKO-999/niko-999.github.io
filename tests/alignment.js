@@ -68,14 +68,14 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   /* FOUR TABS, ASSERTED AS THE EXACT LIST rather than a count: four
      view names left this build in one pass and a count would pass on
      any four. */
-  ok('four tabs, and they are these four',
+  ok('three tabs, and they are these three',
      JSON.stringify(await page.evaluate(() =>
        [...document.querySelectorAll('.al-tab')].map(b => b.getAttribute('data-v'))))
-     === JSON.stringify(['figures', 'books', 'laws', 'kept']));
+     === JSON.stringify(['books', 'laws', 'kept']));
 
   const views = await page.evaluate(() => window.alDrive.views());
-  ok('the view list is the four plus the open screen and a source',
-     JSON.stringify(views) === JSON.stringify(['open', 'figures', 'books', 'laws', 'kept', 'source']), views);
+  ok('the view list is the three plus the open screen and a source',
+     JSON.stringify(views) === JSON.stringify(['open', 'books', 'laws', 'kept', 'source']), views);
 
   /* EXACTLY ONE VIEW HAS A REAL BOX. [hidden] and a class are proxies
      for what is drawn, and both have been wrong in this repo before —
@@ -100,12 +100,12 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     /* SCOPED TO THE PANE. Both indexes stay painted once visited, so a
        document-wide selector counts the figures again while reading the
        books and reports 48 sources out of 24. */
-    ['figures', 'books'].forEach(v => { window.alDrive.view(v);
+    ['books'].forEach(v => { window.alDrive.view(v);
       const id = '#al' + v[0].toUpperCase() + v.slice(1) + 'Pane';
       out.push(...[...document.querySelectorAll(id + ' .al-f[data-src]')].map(n => n.getAttribute('data-src'))); });
     return out;
   });
-  ok('thirty-nine sources across the two indexes', srcs.length === 39, srcs.length);
+  ok('thirteen sources, all of them books', srcs.length === 13, srcs.length);
 
   /* Every source opens, names itself, and carries four sections of at
      least three, with both paragraphs of real length on every card. A
@@ -151,7 +151,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
      somebody sees. And the button is INSIDE the heading: a heading inside
      a button is invalid and loses the heading for a screen reader. */
   const acc = await page.evaluate(() => {
-    window.alDrive.openSource('fifty');
+    window.alDrive.openSource('tagr');
     const rows = [...document.querySelectorAll('#alSourcePane .al-row')];
     const bodyOf = r => r.closest('.al-th').querySelector('.al-body');
     const h = r => bodyOf(r).getBoundingClientRect().height;
@@ -252,7 +252,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     const themes = p.querySelectorAll('.al-th').length;
     const grps = [...p.querySelectorAll('.al-grp')].map(n => n.textContent).join('|');
     const order = chs[0].compareDocumentPosition(p.querySelector('.al-grp')) & Node.DOCUMENT_POSITION_FOLLOWING ? 'before' : 'after';
-    window.alDrive.openSource('fifty');
+    window.alDrive.openSource('tagr');
     const other = document.querySelectorAll('#alSourcePane .al-ch, #alSourcePane .al-chh').length;
     return { n: chs.length, heads, shut, opened, others, again, valid, owns, thin, nums, themes, grps, order, other };
   });
@@ -277,7 +277,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   const said = await page.evaluate((ids) => {
     const m = document.querySelector('meta[name="description"]');
     const n = (m ? m.getAttribute('content') : '').match(/\d+/g) || [];
-    window.alDrive.view('figures'); window.alDrive.view('books');
+    window.alDrive.view('books');
     let themes = 0;
     ids.forEach(id => {
       window.alDrive.openSource(id);
@@ -286,9 +286,9 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     return {
       said: n.map(Number),
       real: [
-        themes,
-        document.querySelectorAll('#alFiguresPane .al-f[data-src]').length,
-        document.querySelectorAll('#alBooksPane .al-f[data-src]').length
+        document.querySelectorAll('#alBooksPane .al-f[data-src]').length,
+        (window.alDrive.view('laws'), document.querySelectorAll('#alLawsPane .al-ch').length),
+        themes
       ]
     };
   }, srcs);
@@ -298,7 +298,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   const openSaid = await page.evaluate(() =>
     (document.querySelector('#alOpenK').textContent.match(/\d+/g) || []).map(Number));
   ok('the first screen counts what is actually there',
-     openSaid.join() === [said.real[1], said.real[2], said.real[0]].join(), { openSaid, real: said.real });
+     openSaid.join() === said.real.join(), { openSaid, real: said.real });
   ok('the description counts what is actually there',
      said.said.length === 3 && said.said.join() === said.real.join(), said);
 
@@ -316,7 +316,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     const foot = (tok) => { const all = getComputedStyle(root).getPropertyValue(tok).match(/#[0-9a-f]{6}/gi) || []; return all.length ? rgb(all[all.length - 1]) : null; };
     const at = (v) => { root.setAttribute('data-view', v); return getComputedStyle(root).backgroundColor; };
     const bodyAt = (v) => { root.setAttribute('data-view', v); return getComputedStyle(document.body).backgroundColor; };
-    const out = { open: at('open'), figures: at('figures'), bodyOpen: bodyAt('open'), bodyFigures: bodyAt('figures'),
+    const out = { open: at('open'), books: at('books'), bodyOpen: bodyAt('open'), bodyBooks: bodyAt('books'),
                   dawn: foot('--dawn'), sky: foot('--sky') };
     root.setAttribute('data-view', was);
     return out;
@@ -327,16 +327,16 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   ok('the canvas under the open screen is the foot of its own dawn',
      !!canvas.dawn && canvas.open === canvas.dawn, canvas);
   ok('and under every other view it is the foot of the sky',
-     !!canvas.sky && canvas.figures === canvas.sky, canvas);
+     !!canvas.sky && canvas.books === canvas.sky, canvas);
   /* BODY TOO, because body's colour is the one iOS samples to paint the
      strip under the home indicator. Silvering the root alone changed
      nothing on the phone; the band stayed body's slate. */
   ok("body's own colour is the same foot on both, since that is what iOS paints the strip with",
-     canvas.bodyOpen === canvas.dawn && canvas.bodyFigures === canvas.sky, canvas);
+     canvas.bodyOpen === canvas.dawn && canvas.bodyBooks === canvas.sky, canvas);
 
   /* ── THE FOUR HUES ─────────────────────────────────────────────── */
 
-  await page.evaluate(() => window.alDrive.openSource('fifty'));
+  await page.evaluate(() => window.alDrive.openSource('tagr'));
   await page.waitForTimeout(300);
   const hue = await page.evaluate(() => {
     const out = {};
@@ -461,7 +461,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
      the deletion back. Nothing threw and the session was correct
      throughout. That is what the reload above is really for. */
   await page.evaluate(k => localStorage.setItem('align.v1', JSON.stringify({
-    last: 'kept', stop: 'sideways', pin: [k, 'nope:mindset:0', 'fifty:nosuch:1'], hi: [k],
+    last: 'kept', stop: 'sideways', pin: [k, 'nope:mindset:0', 'tagr:nosuch:1'], hi: [k],
   })), first);
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
@@ -474,14 +474,14 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
 
   /* A STORED VIEW OUTLIVES THE CODE THAT WROTE IT, planted with a name
      that was REAL until this build rather than one invented for the
-     check: a phone last left on Karmic is the case that exists. */
-  await page.evaluate(() => localStorage.setItem('align.v1', JSON.stringify({ last: 'karmic' })));
+     check: a phone last left on Figures is the case that exists. */
+  await page.evaluate(() => localStorage.setItem('align.v1', JSON.stringify({ last: 'figures' })));
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(350);
   await page.click('#alOpenB');
   await page.waitForTimeout(250);
-  ok('a stored view this build no longer has opens on the figures',
-     await page.evaluate(() => document.documentElement.getAttribute('data-view')) === 'figures');
+  ok('a stored view this build no longer has opens on the books',
+     await page.evaluate(() => document.documentElement.getAttribute('data-view')) === 'books');
 
   /* ── WHAT A FINGER OWNS ────────────────────────────────────────── */
 
@@ -525,14 +525,14 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     await page.waitForTimeout(250);
     const r = await walk(); per[v] = r.seen; shapes.push(...r.out);
   }
-  await page.evaluate(() => { window.alDrive.openSource('gymsh');
+  await page.evaluate(() => { window.alDrive.openSource('tagr');
     document.querySelector('#alSourcePane .al-row').click(); });
   await page.waitForTimeout(300);
   { const r = await walk(); per.source = r.seen; shapes.push(...r.out); }
   /* Kept with something on it, or its two stops are the whole of what
      gets measured and the cards on them are never looked at. */
   await page.evaluate(() => {
-    window.alDrive.mark('pin', 'gymsh:mindset:0');
+    window.alDrive.mark('pin', 'tagr:mindset:0');
     window.alDrive.view('kept');
   });
   await page.waitForTimeout(300);
@@ -690,8 +690,8 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   /* Kept with something on it, both stops, so the cards and the chips'
      pressed ground are measured rather than only the sentence. */
   await page.evaluate(() => {
-    window.alDrive.mark('pin', 'gymsh:mindset:0');
-    window.alDrive.mark('hi', 'spanx:karmic:1');
+    window.alDrive.mark('pin', 'tagr:mindset:0');
+    window.alDrive.mark('hi', 'surf:karmic:1');
     window.alDrive.view('kept');
   });
   await page.waitForTimeout(300); await sweep('kept-pin');
@@ -722,7 +722,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     document.querySelectorAll('#alLawsPane .al-row[aria-expanded="false"]').forEach(b => b.click()); });
   await page.waitForTimeout(250);
   await sweep('laws-open');
-  ok('every theme was open when its page was swept', bodiesDrawn === said.real[0], { bodiesDrawn, themes: said.real[0] });
+  ok('every theme was open when its page was swept', bodiesDrawn === said.real[2], { bodiesDrawn, themes: said.real[2] });
 
   const under = shots.filter(x => !x.pass);
   const byView = {};
@@ -742,7 +742,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
      there is nothing here that should ever make one. */
   const off = [];
   page.on('request', r => { if (!r.url().startsWith(BASE) && !r.url().startsWith('data:')) off.push(r.url()); });
-  await page.evaluate(() => { window.alDrive.view('figures'); window.alDrive.openSource('hormo'); });
+  await page.evaluate(() => { window.alDrive.view('books'); window.alDrive.openSource('tagr'); });
   await page.waitForTimeout(400);
   ok('nothing leaves the origin', off.length === 0, off);
   ok('no page errors', errs.length === 0, errs);
