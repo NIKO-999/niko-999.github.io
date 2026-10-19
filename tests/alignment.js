@@ -172,7 +172,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   ok('the button is inside the heading and controls its own body', acc.valid && acc.owns, acc);
 
   /* ── THE LAWS ────────────────────────────────────────────────── */
-  /* Twenty-two rows that open, each a reading of the law itself: what it is,
+  /* Thirty-six rows that open, each a reading of the law itself: what it is,
      how it works, where it operates, how you can tell and what it is
      not. Two things were taken out on request and are asserted ABSENT by
      name, since a build that put either back would pass every check that
@@ -206,9 +206,10 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     const kick = document.querySelector('#alLaws .al-head').textContent;
     return { n: cs.length, names, shut, opened, others, again, heads, thin, text, note: note ? note.textContent : null, valid, owns, head, kick };
   });
-  ok('the laws are these twenty-two, the ten given first and then the twelve added',
+  ok('the laws are these thirty-six, the ten given first, then the twelve and the fourteen added',
      laws.names.join('|') === ['Assumption','Detachment','Reflection','Becoming','Habit','Gratitude','Autosuggestion','Momentum','Clarity','Attention',
-       'Mentalism','Vibration','Polarity','Rhythm','Cause and Effect','Gender','Divine Oneness','Attraction','Inspired Action','Perpetual Transmutation of Energy','Compensation','Relativity'].map(x => 'Law of ' + x).join('|'), laws.names);
+       'Mentalism','Vibration','Polarity','Rhythm','Cause and Effect','Gender','Divine Oneness','Attraction','Inspired Action','Perpetual Transmutation of Energy','Compensation','Relativity',
+       'Least Effort','Pure Potentiality','Giving and Receiving','Intention and Desire','Dharma','Gestation','Expectation','Allowing','Deliberate Creation','Reversed Effort','Synchronicity','Forgiveness','Abundance','Free Will'].map(x => 'Law of ' + x).join('|'), laws.names);
   ok('every law is shut on arrival and opens alone', laws.shut && laws.opened && laws.others && laws.again, laws);
   ok('every law opens on the law, closes on what it is not, and is in depth',
      laws.heads.every(x => { const h = x.split('|');
@@ -221,7 +222,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
      !/\b(imagine|picture this|for example|for instance|suppose you)\b/i.test(laws.text), laws.text.slice(0, 80));
   ok('nothing disclaims the list: no note above it', laws.note === null, laws.note);
   ok('a law row sits in its heading and controls its own body', laws.valid && laws.owns, laws);
-  ok('the pane is headed and counted', laws.head === 'The Laws' && /22\s*laws/i.test(laws.kick), laws);
+  ok('the pane is headed and counted', laws.head === 'The Laws' && /36\s*laws/i.test(laws.kick), laws);
 
   /* ── A BOOK CAN BE READ BY CHAPTER ───────────────────────────── */
   /* Reality Transurfing carries a chapter-by-chapter reading above its
