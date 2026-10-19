@@ -152,7 +152,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
      a button is invalid and loses the heading for a screen reader. */
   const acc = await page.evaluate(() => {
     window.alDrive.openSource('tagr');
-    const rows = [...document.querySelectorAll('#alSourcePane .al-row')];
+    const rows = [...document.querySelectorAll('#alSourcePane .al-th .al-row')];
     const bodyOf = r => r.closest('.al-th').querySelector('.al-body');
     const h = r => bodyOf(r).getBoundingClientRect().height;
     const shut = rows.every(r => r.getAttribute('aria-expanded') === 'false' && h(r) === 0);
@@ -234,11 +234,11 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   const chap = await page.evaluate(() => {
     window.alDrive.openSource('surf');
     const p = document.querySelector('#alSourcePane');
-    const chs = [...p.querySelectorAll('.al-ch')];
+    const chs = [...p.querySelectorAll('.al-ch:not(.al-bl)')];
     const rows = chs.map(c => c.querySelector('.al-row'));
     const bodyOf = c => c.querySelector('.al-chb');
     const h = c => bodyOf(c).getBoundingClientRect().height;
-    const heads = [...p.querySelectorAll('.al-chh')].map(n => n.textContent);
+    const heads = [...p.querySelectorAll('.al-chh:not(.al-lh)')].map(n => n.textContent);
     const shut = chs.every(c => h(c) === 0) && rows.every(r => r.getAttribute('aria-expanded') === 'false');
     const r = rows[3]; r.click();
     const opened = r.getAttribute('aria-expanded') === 'true' && h(chs[3]) > 40;
@@ -254,7 +254,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     const grps = [...p.querySelectorAll('.al-grp')].map(n => n.textContent).join('|');
     const order = chs[0].compareDocumentPosition(p.querySelector('.al-grp')) & Node.DOCUMENT_POSITION_FOLLOWING ? 'before' : 'after';
     window.alDrive.openSource('tagr');
-    const other = document.querySelectorAll('#alSourcePane .al-ch, #alSourcePane .al-chh').length;
+    const other = document.querySelectorAll('#alSourcePane .al-ch:not(.al-bl), #alSourcePane .al-chh:not(.al-lh)').length;
     return { n: chs.length, heads, shut, opened, others, again, valid, owns, thin, nums, themes, grps, order, other };
   });
   ok('Reality Transurfing carries a chapter reading of ten chapters', chap.n === 10 && chap.heads.join('|') === 'By chapter', chap);
@@ -264,6 +264,49 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   ok('both chapter paragraphs are real summaries', chap.thin === 0, chap);
   ok('chapters sit above the themes and do not change them', chap.order === 'before' && chap.themes === 12 && chap.grps === 'Mindset|Internal|External|Karmic', chap);
   ok('a book with no chapter reading draws none', chap.other === 0, chap);
+
+  /* ── EVERY BOOK HAS ITS LAWS ─────────────────────────────────── */
+  /* Each book page opens on the laws that book names, ahead of its
+     themes, each a five-passage reading with the same rules as the Laws
+     tab: no instruction, no origin, no reflection, no scenario. The
+     count per book is a floor and the total is pinned, so a book losing
+     its laws, or one being padded, is caught either way. Shut on
+     arrival and opening alone, like every other row. */
+  const bl = await page.evaluate((ids) => {
+    const out = [];
+    const re = /\b(imagine|picture this|for example|for instance|suppose you)\b/i;
+    ids.forEach(id => {
+      window.alDrive.openSource(id);
+      const p = document.querySelector('#alSourcePane');
+      const cs = [...p.querySelectorAll('.al-ch.al-bl')];
+      const rows = cs.map(c => c.querySelector('.al-row'));
+      const bodyOf = c => c.querySelector('.al-chb');
+      const h = c => bodyOf(c).getBoundingClientRect().height;
+      const heads = cs.map(c => [...c.querySelectorAll('.al-tl')].map(n => n.textContent).join('|'));
+      const words = cs.map(c => [...c.querySelectorAll('.al-tb')].map(q => q.textContent.split(' ').length).reduce((a, b) => a + b, 0));
+      const shut = cs.every(c => h(c) === 0);
+      if (cs.length) { rows[0].click(); }
+      const opened = cs.length ? h(cs[0]) > 40 && cs.slice(1).every(c => h(c) === 0) : false;
+      if (cs.length) rows[0].click();
+      const label = p.querySelector('.al-chh.al-lh');
+      const lh = label ? label.textContent : null;
+      const text = cs.map(c => c.textContent).join(' ');
+      const above = label && p.querySelector('.al-grp') ? !!(label.compareDocumentPosition(p.querySelector('.al-grp')) & Node.DOCUMENT_POSITION_FOLLOWING) : false;
+      out.push({ id, n: cs.length, shut, opened, lh, above,
+        headsOk: heads.every(x => x === 'The law|How it works|Where it operates|How you can tell|What it is not'),
+        thin: words.filter(w => w < 300).length, scenario: re.test(text),
+        banned: /what to do|reflection|comes from|argued/i.test(heads.join(' ')),
+        owns: cs.every((c, i) => document.getElementById(rows[i].getAttribute('aria-controls')) === bodyOf(c)),
+        themes: p.querySelectorAll('.al-th').length });
+    });
+    return out;
+  }, srcs);
+  ok('every book opens on its own laws, three at least', bl.every(x => x.n >= 3 && x.lh === 'Its laws' && x.above), bl.map(x => [x.id, x.n]));
+  ok('and there are forty-seven of them across the thirteen books', bl.reduce((a, x) => a + x.n, 0) === 47, bl.map(x => [x.id, x.n]));
+  ok('each is five passages in order and of real length', bl.every(x => x.headsOk && x.thin === 0), bl.filter(x => !x.headsOk || x.thin));
+  ok('none instructs, reflects, gives an origin or sets a scenario', bl.every(x => !x.banned && !x.scenario), bl.filter(x => x.banned || x.scenario));
+  ok('every book law is shut on arrival, opens alone and controls its own body', bl.every(x => x.shut && x.opened && x.owns), bl.filter(x => !(x.shut && x.opened && x.owns)));
+  ok('the laws sit above the themes and leave them at twelve', bl.every(x => x.themes === 12), bl.filter(x => x.themes !== 12));
 
   /* THE DESCRIPTION IS A COUNT OF THE DATA, so it is read off the data.
      It shipped saying 288 themes and sixteen figures on a build carrying
