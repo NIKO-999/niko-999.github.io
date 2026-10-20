@@ -65,17 +65,17 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
 
   /* ── THE SHAPE ─────────────────────────────────────────────────── */
 
-  /* THREE TABS, ASSERTED AS THE EXACT LIST rather than a count: four
-     view names left this build in one pass and a count of three would
-     pass on any three. */
+  /* FOUR TABS, ASSERTED AS THE EXACT LIST rather than a count: four
+     view names left this build in one pass and a count would pass on
+     any four. */
   ok('three tabs, and they are these three',
      JSON.stringify(await page.evaluate(() =>
        [...document.querySelectorAll('.al-tab')].map(b => b.getAttribute('data-v'))))
-     === JSON.stringify(['figures', 'books', 'kept']));
+     === JSON.stringify(['books', 'laws', 'kept']));
 
   const views = await page.evaluate(() => window.alDrive.views());
   ok('the view list is the three plus the open screen and a source',
-     JSON.stringify(views) === JSON.stringify(['open', 'figures', 'books', 'kept', 'source']), views);
+     JSON.stringify(views) === JSON.stringify(['open', 'books', 'laws', 'kept', 'source']), views);
 
   /* EXACTLY ONE VIEW HAS A REAL BOX. [hidden] and a class are proxies
      for what is drawn, and both have been wrong in this repo before —
@@ -100,12 +100,12 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     /* SCOPED TO THE PANE. Both indexes stay painted once visited, so a
        document-wide selector counts the figures again while reading the
        books and reports 48 sources out of 24. */
-    ['figures', 'books'].forEach(v => { window.alDrive.view(v);
+    ['books'].forEach(v => { window.alDrive.view(v);
       const id = '#al' + v[0].toUpperCase() + v.slice(1) + 'Pane';
       out.push(...[...document.querySelectorAll(id + ' .al-f[data-src]')].map(n => n.getAttribute('data-src'))); });
     return out;
   });
-  ok('thirty-nine sources across the two indexes', srcs.length === 39, srcs.length);
+  ok('fourteen sources, all of them books', srcs.length === 14, srcs.length);
 
   /* Every source opens, names itself, and carries four sections of at
      least three, with both paragraphs of real length on every card. A
@@ -151,8 +151,8 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
      somebody sees. And the button is INSIDE the heading: a heading inside
      a button is invalid and loses the heading for a screen reader. */
   const acc = await page.evaluate(() => {
-    window.alDrive.openSource('fifty');
-    const rows = [...document.querySelectorAll('#alSourcePane .al-row')];
+    window.alDrive.openSource('tagr');
+    const rows = [...document.querySelectorAll('#alSourcePane .al-th .al-row')];
     const bodyOf = r => r.closest('.al-th').querySelector('.al-body');
     const h = r => bodyOf(r).getBoundingClientRect().height;
     const shut = rows.every(r => r.getAttribute('aria-expanded') === 'false' && h(r) === 0);
@@ -171,6 +171,144 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   ok('and pressing it again shuts it', acc.again, acc);
   ok('the button is inside the heading and controls its own body', acc.valid && acc.owns, acc);
 
+  /* ── THE LAWS ────────────────────────────────────────────────── */
+  /* Thirty-six rows that open, each a reading of the law itself: what it is,
+     how it works, where it operates, how you can tell and what it is
+     not. Two things were taken out on request and are asserted ABSENT by
+     name, since a build that put either back would pass every check that
+     only counts paragraphs: instructions (what to do with it, a
+     reflection) and provenance (where it comes from, how it is argued).
+     There is no caution above the list, and that is asserted too. The eleventh law in the
+     source was cut off at the edge of a screenshot and is deliberately
+     absent, so the count is pinned rather than allowed to be padded. */
+  const laws = await page.evaluate(() => {
+    window.alDrive.view('laws');
+    const pane = document.querySelector('#alLawsPane');
+    const cs = [...pane.querySelectorAll('.al-ch')];
+    const rows = cs.map(c => c.querySelector('.al-row'));
+    const bodyOf = c => c.querySelector('.al-chb');
+    const h = c => bodyOf(c).getBoundingClientRect().height;
+    const names = rows.map(r => r.querySelector('.al-tn').textContent);
+    const shut = cs.every(c => h(c) === 0);
+    const r = rows[6]; r.click();
+    const opened = r.getAttribute('aria-expanded') === 'true' && h(cs[6]) > 40;
+    const others = cs.filter((c, i) => i !== 6).every(c => h(c) === 0);
+    r.click();
+    const again = h(cs[6]) === 0;
+    const heads = cs.map(c => [...c.querySelectorAll('.al-tl')].map(n => n.textContent).join('|'));
+    const words = cs.map(c => [...c.querySelectorAll('.al-tb')].map(q => q.textContent.split(' ').length));
+    const thin = words.filter(w => w.length < 5 || w.some(n => n < 25) || w.reduce((a, b) => a + b, 0) < 400).length;
+    const text = cs.map(c => c.textContent).join(' ');
+    const note = pane.querySelector('.al-note');
+    const valid = rows.every(x => x.parentElement.tagName === 'H3');
+    const owns = cs.every((c, i) => document.getElementById(rows[i].getAttribute('aria-controls')) === bodyOf(c));
+    const head = document.querySelector('#alLaws h1').textContent;
+    const kick = document.querySelector('#alLaws .al-head').textContent;
+    return { n: cs.length, names, shut, opened, others, again, heads, thin, text, note: note ? note.textContent : null, valid, owns, head, kick };
+  });
+  ok('the laws are these thirty-six, the ten given first, then the twelve and the fourteen added',
+     laws.names.join('|') === ['Assumption','Detachment','Reflection','Becoming','Habit','Gratitude','Autosuggestion','Momentum','Clarity','Attention',
+       'Mentalism','Vibration','Polarity','Rhythm','Cause and Effect','Gender','Divine Oneness','Attraction','Inspired Action','Perpetual Transmutation of Energy','Compensation','Relativity',
+       'Least Effort','Pure Potentiality','Giving and Receiving','Intention and Desire','Dharma','Gestation','Expectation','Allowing','Deliberate Creation','Reversed Effort','Synchronicity','Forgiveness','Abundance','Free Will'].map(x => 'Law of ' + x).join('|'), laws.names);
+  ok('every law is shut on arrival and opens alone', laws.shut && laws.opened && laws.others && laws.again, laws);
+  ok('every law opens on the law, closes on what it is not, and is in depth',
+     laws.heads.every(x => { const h = x.split('|');
+       return h[0] === 'The law' && h[h.length - 1] === 'What it is not'
+         && ['How it works', 'Where it operates', 'How you can tell'].every(k => h.includes(k)); })
+     && laws.thin === 0, laws);
+  ok('no law gives an instruction, a reflection or an origin',
+     laws.heads.every(x => !/what to do|reflection|comes from|argued/i.test(x)), laws.heads);
+  ok('and none puts the reader in a scenario',
+     !/\b(imagine|picture this|for example|for instance|suppose you)\b/i.test(laws.text), laws.text.slice(0, 80));
+  ok('nothing disclaims the list: no note above it', laws.note === null, laws.note);
+  ok('a law row sits in its heading and controls its own body', laws.valid && laws.owns, laws);
+  ok('the pane is headed and counted', laws.head === 'The Laws' && /36\s*laws/i.test(laws.kick), laws);
+
+  /* ── A BOOK CAN BE READ BY CHAPTER ───────────────────────────── */
+  /* Reality Transurfing carries a chapter-by-chapter reading above its
+     themes. Asserted as its own section because a chapter is NOT a
+     theme: the themes' count, their four headings and their three to
+     an axis must come out exactly as they do for a source with none,
+     which is what the shape test above checks on every source. Shut on
+     arrival, one press opens that one, the body is in the document
+     either way, and a source with no chapters draws no heading. */
+  const chap = await page.evaluate(() => {
+    window.alDrive.openSource('surf');
+    const p = document.querySelector('#alSourcePane');
+    const chs = [...p.querySelectorAll('.al-ch:not(.al-bl)')];
+    const rows = chs.map(c => c.querySelector('.al-row'));
+    const bodyOf = c => c.querySelector('.al-chb');
+    const h = c => bodyOf(c).getBoundingClientRect().height;
+    const heads = [...p.querySelectorAll('.al-chh:not(.al-lh)')].map(n => n.textContent);
+    const shut = chs.every(c => h(c) === 0) && rows.every(r => r.getAttribute('aria-expanded') === 'false');
+    const r = rows[3]; r.click();
+    const opened = r.getAttribute('aria-expanded') === 'true' && h(chs[3]) > 40;
+    const others = chs.filter((c, i) => i !== 3).every(c => h(c) === 0);
+    r.click();
+    const again = r.getAttribute('aria-expanded') === 'false' && h(chs[3]) === 0;
+    const valid = rows.every(x => x.parentElement.tagName === 'H3');
+    const owns = chs.every((c, i) => document.getElementById(rows[i].getAttribute('aria-controls')) === bodyOf(c));
+    const words = chs.map(c => [...c.querySelectorAll('.al-tb')].map(q => q.textContent.split(' ').length));
+    const thin = words.filter(w => w.length !== 2 || w[0] < 30 || w[1] < 20).length;
+    const nums = rows.map(x => x.textContent.match(/Chapter ([IVX]+)/)[1]);
+    const themes = p.querySelectorAll('.al-th').length;
+    const grps = [...p.querySelectorAll('.al-grp')].map(n => n.textContent).join('|');
+    const order = chs[0].compareDocumentPosition(p.querySelector('.al-grp')) & Node.DOCUMENT_POSITION_FOLLOWING ? 'before' : 'after';
+    window.alDrive.openSource('tagr');
+    const other = document.querySelectorAll('#alSourcePane .al-ch:not(.al-bl), #alSourcePane .al-chh:not(.al-lh)').length;
+    return { n: chs.length, heads, shut, opened, others, again, valid, owns, thin, nums, themes, grps, order, other };
+  });
+  ok('Reality Transurfing carries a chapter reading of ten chapters', chap.n === 10 && chap.heads.join('|') === 'By chapter', chap);
+  ok('chapters are numbered once each, in book order', chap.nums.join(',') === 'I,II,III,IV,V,VII,VIII,IX,XII,XIII', chap.nums);
+  ok('every chapter is shut on arrival, and opens alone', chap.shut && chap.opened && chap.others && chap.again, chap);
+  ok('a chapter button sits in its heading and controls its own body', chap.valid && chap.owns, chap);
+  ok('both chapter paragraphs are real summaries', chap.thin === 0, chap);
+  ok('chapters sit above the themes and do not change them', chap.order === 'before' && chap.themes === 12 && chap.grps === 'Mindset|Internal|External|Karmic', chap);
+  ok('a book with no chapter reading draws none', chap.other === 0, chap);
+
+  /* ── EVERY BOOK HAS ITS LAWS ─────────────────────────────────── */
+  /* Each book page opens on the laws that book names, ahead of its
+     themes, each a five-passage reading with the same rules as the Laws
+     tab: no instruction, no origin, no reflection, no scenario. The
+     count per book is a floor and the total is pinned, so a book losing
+     its laws, or one being padded, is caught either way. Shut on
+     arrival and opening alone, like every other row. */
+  const bl = await page.evaluate((ids) => {
+    const out = [];
+    const re = /\b(imagine|picture this|for example|for instance|suppose you)\b/i;
+    ids.forEach(id => {
+      window.alDrive.openSource(id);
+      const p = document.querySelector('#alSourcePane');
+      const cs = [...p.querySelectorAll('.al-ch.al-bl')];
+      const rows = cs.map(c => c.querySelector('.al-row'));
+      const bodyOf = c => c.querySelector('.al-chb');
+      const h = c => bodyOf(c).getBoundingClientRect().height;
+      const heads = cs.map(c => [...c.querySelectorAll('.al-tl')].map(n => n.textContent).join('|'));
+      const words = cs.map(c => [...c.querySelectorAll('.al-tb')].map(q => q.textContent.split(' ').length).reduce((a, b) => a + b, 0));
+      const shut = cs.every(c => h(c) === 0);
+      if (cs.length) { rows[0].click(); }
+      const opened = cs.length ? h(cs[0]) > 40 && cs.slice(1).every(c => h(c) === 0) : false;
+      if (cs.length) rows[0].click();
+      const label = p.querySelector('.al-chh.al-lh');
+      const lh = label ? label.textContent : null;
+      const text = cs.map(c => c.textContent).join(' ');
+      const above = label && p.querySelector('.al-grp') ? !!(label.compareDocumentPosition(p.querySelector('.al-grp')) & Node.DOCUMENT_POSITION_FOLLOWING) : false;
+      out.push({ id, n: cs.length, shut, opened, lh, above,
+        headsOk: heads.every(x => x === 'The law|How it works|Where it operates|How you can tell|What it is not'),
+        thin: words.filter(w => w < 300).length, scenario: re.test(text),
+        banned: /what to do|reflection|comes from|argued/i.test(heads.join(' ')),
+        owns: cs.every((c, i) => document.getElementById(rows[i].getAttribute('aria-controls')) === bodyOf(c)),
+        themes: p.querySelectorAll('.al-th').length });
+    });
+    return out;
+  }, srcs);
+  ok('every book opens on its own laws, three at least', bl.every(x => x.n >= 3 && x.lh === 'Its laws' && x.above), bl.map(x => [x.id, x.n]));
+  ok('and there are fifty-one of them across the fourteen books', bl.reduce((a, x) => a + x.n, 0) === 51, bl.map(x => [x.id, x.n]));
+  ok('each is five passages in order and of real length', bl.every(x => x.headsOk && x.thin === 0), bl.filter(x => !x.headsOk || x.thin));
+  ok('none instructs, reflects, gives an origin or sets a scenario', bl.every(x => !x.banned && !x.scenario), bl.filter(x => x.banned || x.scenario));
+  ok('every book law is shut on arrival, opens alone and controls its own body', bl.every(x => x.shut && x.opened && x.owns), bl.filter(x => !(x.shut && x.opened && x.owns)));
+  ok('the laws sit above the themes and leave them at twelve', bl.every(x => x.themes === 12), bl.filter(x => x.themes !== 12));
+
   /* THE DESCRIPTION IS A COUNT OF THE DATA, so it is read off the data.
      It shipped saying 288 themes and sixteen figures on a build carrying
      305 and seventeen -- a caption that outlived the thing it described,
@@ -184,7 +322,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   const said = await page.evaluate((ids) => {
     const m = document.querySelector('meta[name="description"]');
     const n = (m ? m.getAttribute('content') : '').match(/\d+/g) || [];
-    window.alDrive.view('figures'); window.alDrive.view('books');
+    window.alDrive.view('books');
     let themes = 0;
     ids.forEach(id => {
       window.alDrive.openSource(id);
@@ -193,9 +331,9 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     return {
       said: n.map(Number),
       real: [
-        themes,
-        document.querySelectorAll('#alFiguresPane .al-f[data-src]').length,
-        document.querySelectorAll('#alBooksPane .al-f[data-src]').length
+        document.querySelectorAll('#alBooksPane .al-f[data-src]').length,
+        (window.alDrive.view('laws'), document.querySelectorAll('#alLawsPane .al-ch').length),
+        themes
       ]
     };
   }, srcs);
@@ -205,7 +343,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   const openSaid = await page.evaluate(() =>
     (document.querySelector('#alOpenK').textContent.match(/\d+/g) || []).map(Number));
   ok('the first screen counts what is actually there',
-     openSaid.join() === [said.real[1], said.real[2], said.real[0]].join(), { openSaid, real: said.real });
+     openSaid.join() === said.real.join(), { openSaid, real: said.real });
   ok('the description counts what is actually there',
      said.said.length === 3 && said.said.join() === said.real.join(), said);
 
@@ -223,24 +361,27 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     const foot = (tok) => { const all = getComputedStyle(root).getPropertyValue(tok).match(/#[0-9a-f]{6}/gi) || []; return all.length ? rgb(all[all.length - 1]) : null; };
     const at = (v) => { root.setAttribute('data-view', v); return getComputedStyle(root).backgroundColor; };
     const bodyAt = (v) => { root.setAttribute('data-view', v); return getComputedStyle(document.body).backgroundColor; };
-    const out = { open: at('open'), figures: at('figures'), bodyOpen: bodyAt('open'), bodyFigures: bodyAt('figures'),
+    const out = { open: at('open'), books: at('books'), bodyOpen: bodyAt('open'), bodyBooks: bodyAt('books'),
                   dawn: foot('--dawn'), sky: foot('--sky') };
     root.setAttribute('data-view', was);
     return out;
   });
+  /* The two skies are the same flat black now, so the views no longer
+     differ from each other; what is asserted is that each canvas still
+     equals the foot of the token its own view paints. */
   ok('the canvas under the open screen is the foot of its own dawn',
      !!canvas.dawn && canvas.open === canvas.dawn, canvas);
   ok('and under every other view it is the foot of the sky',
-     !!canvas.sky && canvas.figures === canvas.sky && canvas.open !== canvas.figures, canvas);
+     !!canvas.sky && canvas.books === canvas.sky, canvas);
   /* BODY TOO, because body's colour is the one iOS samples to paint the
      strip under the home indicator. Silvering the root alone changed
      nothing on the phone; the band stayed body's slate. */
   ok("body's own colour is the same foot on both, since that is what iOS paints the strip with",
-     canvas.bodyOpen === canvas.dawn && canvas.bodyFigures === canvas.sky, canvas);
+     canvas.bodyOpen === canvas.dawn && canvas.bodyBooks === canvas.sky, canvas);
 
   /* ── THE FOUR HUES ─────────────────────────────────────────────── */
 
-  await page.evaluate(() => window.alDrive.openSource('fifty'));
+  await page.evaluate(() => window.alDrive.openSource('tagr'));
   await page.waitForTimeout(300);
   const hue = await page.evaluate(() => {
     const out = {};
@@ -365,7 +506,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
      the deletion back. Nothing threw and the session was correct
      throughout. That is what the reload above is really for. */
   await page.evaluate(k => localStorage.setItem('align.v1', JSON.stringify({
-    last: 'kept', stop: 'sideways', pin: [k, 'nope:mindset:0', 'fifty:nosuch:1'], hi: [k],
+    last: 'kept', stop: 'sideways', pin: [k, 'nope:mindset:0', 'tagr:nosuch:1'], hi: [k],
   })), first);
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(400);
@@ -378,14 +519,14 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
 
   /* A STORED VIEW OUTLIVES THE CODE THAT WROTE IT, planted with a name
      that was REAL until this build rather than one invented for the
-     check: a phone last left on Karmic is the case that exists. */
-  await page.evaluate(() => localStorage.setItem('align.v1', JSON.stringify({ last: 'karmic' })));
+     check: a phone last left on Figures is the case that exists. */
+  await page.evaluate(() => localStorage.setItem('align.v1', JSON.stringify({ last: 'figures' })));
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(350);
   await page.click('#alOpenB');
   await page.waitForTimeout(250);
-  ok('a stored view this build no longer has opens on the figures',
-     await page.evaluate(() => document.documentElement.getAttribute('data-view')) === 'figures');
+  ok('a stored view this build no longer has opens on the books',
+     await page.evaluate(() => document.documentElement.getAttribute('data-view')) === 'books');
 
   /* ── WHAT A FINGER OWNS ────────────────────────────────────────── */
 
@@ -429,14 +570,14 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     await page.waitForTimeout(250);
     const r = await walk(); per[v] = r.seen; shapes.push(...r.out);
   }
-  await page.evaluate(() => { window.alDrive.openSource('gymsh');
+  await page.evaluate(() => { window.alDrive.openSource('tagr');
     document.querySelector('#alSourcePane .al-row').click(); });
   await page.waitForTimeout(300);
   { const r = await walk(); per.source = r.seen; shapes.push(...r.out); }
   /* Kept with something on it, or its two stops are the whole of what
      gets measured and the cards on them are never looked at. */
   await page.evaluate(() => {
-    window.alDrive.mark('pin', 'gymsh:mindset:0');
+    window.alDrive.mark('pin', 'tagr:mindset:0');
     window.alDrive.view('kept');
   });
   await page.waitForTimeout(300);
@@ -594,8 +735,8 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   /* Kept with something on it, both stops, so the cards and the chips'
      pressed ground are measured rather than only the sentence. */
   await page.evaluate(() => {
-    window.alDrive.mark('pin', 'gymsh:mindset:0');
-    window.alDrive.mark('hi', 'spanx:karmic:1');
+    window.alDrive.mark('pin', 'tagr:mindset:0');
+    window.alDrive.mark('hi', 'surf:karmic:1');
     window.alDrive.view('kept');
   });
   await page.waitForTimeout(300); await sweep('kept-pin');
@@ -619,7 +760,14 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     await page.waitForTimeout(220);
     await sweep('src:' + id);
   }
-  ok('every theme was open when its page was swept', bodiesDrawn === said.real[0], { bodiesDrawn, themes: said.real[0] });
+  /* THE LAWS TOO, OPENED. The view sweep above reads a pane as it
+     arrives, with every row shut, so the three paragraphs of each law
+     are unmeasured unless they are opened first. */
+  await page.evaluate(() => { window.alDrive.view('laws');
+    document.querySelectorAll('#alLawsPane .al-row[aria-expanded="false"]').forEach(b => b.click()); });
+  await page.waitForTimeout(250);
+  await sweep('laws-open');
+  ok('every theme was open when its page was swept', bodiesDrawn === said.real[2], { bodiesDrawn, themes: said.real[2] });
 
   const under = shots.filter(x => !x.pass);
   const byView = {};
@@ -639,7 +787,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
      there is nothing here that should ever make one. */
   const off = [];
   page.on('request', r => { if (!r.url().startsWith(BASE) && !r.url().startsWith('data:')) off.push(r.url()); });
-  await page.evaluate(() => { window.alDrive.view('figures'); window.alDrive.openSource('hormo'); });
+  await page.evaluate(() => { window.alDrive.view('books'); window.alDrive.openSource('tagr'); });
   await page.waitForTimeout(400);
   ok('nothing leaves the origin', off.length === 0, off);
   ok('no page errors', errs.length === 0, errs);
