@@ -870,6 +870,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
 .pl-b i { display: block; margin-top: 2px; font: 500 9.5px/1.25 var(--mono); font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: color-mix(in srgb, var(--pc) 70%, var(--ink)); }
 .pl-b em { display: block; margin-top: 2px; font: 500 9.5px/1 var(--mono); font-style: normal; letter-spacing: .06em; color: color-mix(in srgb, var(--pc) 70%, var(--ink)); }
 .pl-b.is-ghost::before { display: none; }
+.pl-b.is-kept::after { content: ""; position: absolute; right: 8px; top: 8px; width: 9px; height: 5px; border-left: 1.6px solid var(--pc); border-bottom: 1.6px solid var(--pc); transform: rotate(-45deg); }
 .pl-b.is-short { padding-top: 2px; padding-bottom: 0; }
 .pl-b.is-short::before { top: 7px; }
 .pl-b.is-short b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1468,7 +1469,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     if (!isObj(b) || typeof b.id !== 'string' || !b.id) return null;
     var d = Math.round(+b.d), s = Math.round(+b.s), e = Math.round(+b.e);
     if (!(d >= 0 && d <= 6) || !(s >= 0 && s < 1440) || !(e > s && e <= 1440)) return null;
-    return { id: b.id, d: d, s: s, e: e, n: String(b.n || '').slice(0, 60), t: String(b.t || '').slice(0, 80), c: PLAN_C[b.c] ? b.c : 'life' };
+    return { id: b.id, d: d, s: s, e: e, n: String(b.n || '').slice(0, 60), t: String(b.t || '').slice(0, 80), c: PLAN_C[b.c] ? b.c : 'life', k: typeof b.k === 'string' ? b.k.slice(0, 40) : '' };
   }
   /* The higher self and its daily process are one object: who they are,
      the process as written, the days it runs, when it began and whether
@@ -4207,6 +4208,16 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     e.style.width = 'calc(' + w + '% - 2px)';
     /* What fits is decided by the length: a name alone under 45 minutes,
        the name and the time under 75, and the detail only past that. */
+    /* A linked task is one id, never a copy of it: a task removed from the
+       week costs the plan block its tick and nothing else. Kept is read for
+       THIS week's date of the block's weekday. */
+    var tk = b.k && S.week.filter(function (x) { return x.id === b.k; })[0];
+    if (tk) {
+      var td = cdToday(), on = cdAddDays(td, b.d - cdDow(td));
+      e.dataset.k = tk.id;
+      if (cdDone(on, tk.id)) e.classList.add('is-kept');
+      e.setAttribute('aria-label', e.getAttribute('aria-label') + ', task ' + tk.n + (cdDone(on, tk.id) ? ', kept' : ''));
+    }
     if (b.e - b.s < 45) e.classList.add('is-short'); else if (b.e - b.s < 75) e.classList.add('is-mid');
     e.innerHTML = '<b>' + esc(b.n || 'Untitled') + '</b>' + (b.t ? '<i>' + esc(b.t) + '</i>' : '') + '<em>' + cdHM(b.s) + '–' + cdHM(b.e) + '</em><span class="pl-rs" aria-hidden="true"></span>';
     return e;
@@ -4319,7 +4330,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     cdToast('Deleted ' + (b.n || 'block'), function () { S.plan.splice(at, 0, b); cdSave('plan'); cdPaintPlan(); });
   }
   function cdPlanEdit(b, draft) {
-    var f = b ? { n: b.n, t: b.t, c: b.c, d: [b.d], s: b.s, e: b.e } : { n: '', t: '', c: planLastC, d: [draft.d], s: draft.s, e: draft.e };
+    var f = b ? { n: b.n, t: b.t, c: b.c, d: [b.d], s: b.s, e: b.e, k: b.k || '' } : { n: '', t: '', c: planLastC, d: [draft.d], s: draft.s, e: draft.e, k: '' };
     var root = el('div');
     var rows = el('div', 'cd-rows');
     var nm = el('input', 'cd-field'); nm.type = 'text'; nm.id = 'cdPlN'; nm.placeholder = 'Name'; nm.maxLength = 60; nm.value = f.n;
@@ -4338,6 +4349,19 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
       cats.appendChild(ch);
     });
     root.appendChild(cats);
+    /* The Day screen's tasks, one press to link and the same press to
+       unlink. Only real blocks: the starter examples are not yours yet. */
+    var real = S.week.filter(function (x) { return !x.x; });
+    var tasks = el('div', 'cd-chips pl-tasks'); tasks.id = 'cdPlK';
+    if (real.length) {
+      root.appendChild(el('p', 'cd-lbl', 'Task'));
+      real.forEach(function (x) {
+        var ch = el('button', 'cd-chip', esc(x.n || 'Block')); ch.type = 'button'; ch.dataset.k = x.id;
+        ch.addEventListener('click', function () { f.k = f.k === x.id ? '' : x.id; sync(); });
+        tasks.appendChild(ch);
+      });
+      root.appendChild(tasks);
+    }
     /* A new block may go on several days at once; each lands as its own
        block, so they can be moved apart later. An existing one has the one
        day it is on, because it is one object in one column. */
@@ -4356,6 +4380,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     function sync() {
       cats.querySelectorAll('.cd-chip').forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.c === f.c); });
       days.querySelectorAll('.cd-chip').forEach(function (c) { c.setAttribute('aria-pressed', f.d.indexOf(+c.dataset.i) >= 0); });
+      tasks.querySelectorAll('.cd-chip').forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.k === f.k); });
     }
     sync();
     var foot = el('div', 'cd-foot');
@@ -4372,8 +4397,8 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
       if (!(s >= 0) || !(e > s)) { cdToast('It has to end after it starts.'); return; }
       var n = nm.value.trim(), t = tt.value.trim();
       planLastC = f.c;
-      if (b) { b.n = n; b.t = t; b.c = f.c; b.d = f.d[0]; b.s = s; b.e = e; }
-      else f.d.forEach(function (d) { S.plan.push({ id: cdId(), d: d, s: s, e: e, n: n, t: t, c: f.c }); });
+      if (b) { b.n = n; b.t = t; b.c = f.c; b.k = f.k; b.d = f.d[0]; b.s = s; b.e = e; }
+      else f.d.forEach(function (d) { S.plan.push({ id: cdId(), d: d, s: s, e: e, n: n, t: t, c: f.c, k: f.k }); });
       cdSave('plan'); cdClose(); cdPaintPlan();
     });
     nm.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') save.click(); });

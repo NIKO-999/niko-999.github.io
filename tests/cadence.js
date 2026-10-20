@@ -2046,6 +2046,21 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
           dot: dot.content !== 'none' && dot.width === dot.height && dot.backgroundColor === pc, caps: n.textTransform, w: n.fontWeight };
       }));
       ok('a block is a card with its kind as a dot, the name in light sentence case', plLook.length >= 4 && plLook.every((l) => l.dot && l.caps === 'none' && l.w === '300') && new Set(plLook.map((l) => l.wash)).size === 1, plLook);
+      /* A plan block links to a Day task by id. Thursday's Family block takes the
+         first task on the week; the tick is read for THIS week's Thursday. */
+      const wk = await store(page, 'cad.week.v1'); const tk = wk[0];
+      await page.evaluate((id) => { const l = JSON.parse(localStorage.getItem('cad.log.v1') || '{}'); l['2026-09-24'] = Object.assign(l['2026-09-24'] || {}, { [id]: 1 }); localStorage.setItem('cad.log.v1', JSON.stringify(l)); }, tk.id);
+      await page.reload(); await page.waitForTimeout(400);
+      await page.click('.cd-tab[data-v="plan"]'); await page.waitForTimeout(200);
+      await page.click('.pl-b[aria-label^="Family"]');
+      const plLk = await sheetUp(page);
+      if (plLk) { await page.click('#cdPlK [data-k="' + tk.id + '"]'); await page.click('#cdPlSave'); await page.waitForTimeout(320); }
+      const fam = (await store(page, 'cad.plan.v1')).find((b) => b.n === 'Family');
+      const famEl = await page.$eval('.pl-b[aria-label^="Family"]', (e) => ({ k: e.dataset.k, kept: e.classList.contains('is-kept'), tick: getComputedStyle(e, '::after').content !== 'none' }));
+      ok('a plan block links to a task by id and shows it kept', plLk && fam && fam.k === tk.id && famEl.k === tk.id && famEl.kept && famEl.tick, { fam, famEl });
+      await page.click('.pl-b[aria-label^="Family"]');
+      if (await sheetUp(page)) { await page.click('#cdPlK [data-k="' + tk.id + '"]'); await page.click('#cdPlSave'); await page.waitForTimeout(320); }
+      ok('pressing the task again unlinks it', !(await store(page, 'cad.plan.v1')).find((b) => b.n === 'Family').k && !(await page.$eval('.pl-b[aria-label^="Family"]', (e) => e.classList.contains('is-kept'))));
       const plInk = await inkFloor(page, '.pl-b b, .pl-b i, .pl-b em');
       ok('every word on a block reads at 4.5:1, the faintest kind included', plInk.n >= 8 && plInk.worst.r >= 4.5, plInk);
       /* The plan is not the week: nothing on the Day screen came from it. */

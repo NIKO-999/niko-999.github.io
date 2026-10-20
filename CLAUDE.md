@@ -6001,6 +6001,20 @@ body line. They name no instrument and no person. Asserted as the chips
 appearing blank, the blocks and the caret position, the chips going on
 the first word, and an existing note never offering them.
 
+### A plan block can point at a task
+
+Asked for as *link task and plan together*. **THE LINK IS ONE ID ON THE
+PLAN BLOCK, NEVER A COPY OF THE TASK.** `k` on a `cad.plan.v1` block names
+a Day block; the editor offers the week's real blocks as a row of chips
+under Kind, one press to link and the same press to unlink. Starter
+examples are not offered: they are not yours yet.
+
+**THE TICK IS READ, NOT STORED.** A linked block shows a small check when
+the task is kept on THIS week's date of the block's weekday, so the plan
+and the Day screen cannot disagree. A task removed from the week costs the
+plan block its check and nothing else. Asserted both ways: linking draws
+the check and unlinking takes it off.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
