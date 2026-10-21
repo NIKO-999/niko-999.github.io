@@ -105,7 +105,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
       out.push(...[...document.querySelectorAll(id + ' .al-f[data-src]')].map(n => n.getAttribute('data-src'))); });
     return out;
   });
-  ok('seventeen sources, all of them books', srcs.length === 17, srcs.length);
+  ok('nineteen sources, all of them books', srcs.length === 19, srcs.length);
 
   /* Every source opens, names itself, and carries four sections of at
      least three, with both paragraphs of real length on every card. A
@@ -303,7 +303,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     return out;
   }, srcs);
   ok('every book opens on its own laws, three at least', bl.every(x => x.n >= 3 && x.lh === 'Its laws' && x.above), bl.map(x => [x.id, x.n]));
-  ok('and there are sixty-three of them across the seventeen books', bl.reduce((a, x) => a + x.n, 0) === 63, bl.map(x => [x.id, x.n]));
+  ok('and there are seventy-one of them across the nineteen books', bl.reduce((a, x) => a + x.n, 0) === 71, bl.map(x => [x.id, x.n]));
   ok('each is five passages in order and of real length', bl.every(x => x.headsOk && x.thin === 0), bl.filter(x => !x.headsOk || x.thin));
   ok('none instructs, reflects, gives an origin or sets a scenario', bl.every(x => !x.banned && !x.scenario), bl.filter(x => x.banned || x.scenario));
   ok('every book law is shut on arrival, opens alone and controls its own body', bl.every(x => x.shut && x.opened && x.owns), bl.filter(x => !(x.shut && x.opened && x.owns)));
