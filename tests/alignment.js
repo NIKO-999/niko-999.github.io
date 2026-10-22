@@ -105,7 +105,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
       out.push(...[...document.querySelectorAll(id + ' .al-f[data-src]')].map(n => n.getAttribute('data-src'))); });
     return out;
   });
-  ok('fourteen sources, all of them books', srcs.length === 14, srcs.length);
+  ok('nineteen sources, all of them books', srcs.length === 19, srcs.length);
 
   /* Every source opens, names itself, and carries four sections of at
      least three, with both paragraphs of real length on every card. A
@@ -206,10 +206,12 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     const kick = document.querySelector('#alLaws .al-head').textContent;
     return { n: cs.length, names, shut, opened, others, again, heads, thin, text, note: note ? note.textContent : null, valid, owns, head, kick };
   });
-  ok('the laws are these thirty-six, the ten given first, then the twelve and the fourteen added',
+  ok('the laws are these fifty-three, the ten given first, then the twelve and the fourteen added, then the seven on dating and the ten after them',
      laws.names.join('|') === ['Assumption','Detachment','Reflection','Becoming','Habit','Gratitude','Autosuggestion','Momentum','Clarity','Attention',
        'Mentalism','Vibration','Polarity','Rhythm','Cause and Effect','Gender','Divine Oneness','Attraction','Inspired Action','Perpetual Transmutation of Energy','Compensation','Relativity',
-       'Least Effort','Pure Potentiality','Giving and Receiving','Intention and Desire','Dharma','Gestation','Expectation','Allowing','Deliberate Creation','Reversed Effort','Synchronicity','Forgiveness','Abundance','Free Will'].map(x => 'Law of ' + x).join('|'), laws.names);
+       'Least Effort','Pure Potentiality','Giving and Receiving','Intention and Desire','Dharma','Gestation','Expectation','Allowing','Deliberate Creation','Reversed Effort','Synchronicity','Forgiveness','Abundance','Free Will',
+       'Equal Standing','Choosing','Plain Interest','Independent Purpose','Self-Command','Consistent Action','Kept Standards',
+       'Frame','Plenty','Showing Interest','Matched Effort','Tension','Open Care','Difficulty and Value','Basic Respect','Rejection','Observed Behaviour'].map(x => 'Law of ' + x).join('|'), laws.names);
   ok('every law is shut on arrival and opens alone', laws.shut && laws.opened && laws.others && laws.again, laws);
   ok('every law opens on the law, closes on what it is not, and is in depth',
      laws.heads.every(x => { const h = x.split('|');
@@ -222,7 +224,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
      !/\b(imagine|picture this|for example|for instance|suppose you)\b/i.test(laws.text), laws.text.slice(0, 80));
   ok('nothing disclaims the list: no note above it', laws.note === null, laws.note);
   ok('a law row sits in its heading and controls its own body', laws.valid && laws.owns, laws);
-  ok('the pane is headed and counted', laws.head === 'The Laws' && /36\s*laws/i.test(laws.kick), laws);
+  ok('the pane is headed and counted', laws.head === 'The Laws' && /53\s*laws/i.test(laws.kick), laws);
 
   /* ── A BOOK CAN BE READ BY CHAPTER ───────────────────────────── */
   /* Reality Transurfing carries a chapter-by-chapter reading above its
@@ -303,7 +305,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
     return out;
   }, srcs);
   ok('every book opens on its own laws, three at least', bl.every(x => x.n >= 3 && x.lh === 'Its laws' && x.above), bl.map(x => [x.id, x.n]));
-  ok('and there are fifty-one of them across the fourteen books', bl.reduce((a, x) => a + x.n, 0) === 51, bl.map(x => [x.id, x.n]));
+  ok('and there are seventy-one of them across the nineteen books', bl.reduce((a, x) => a + x.n, 0) === 71, bl.map(x => [x.id, x.n]));
   ok('each is five passages in order and of real length', bl.every(x => x.headsOk && x.thin === 0), bl.filter(x => !x.headsOk || x.thin));
   ok('none instructs, reflects, gives an origin or sets a scenario', bl.every(x => !x.banned && !x.scenario), bl.filter(x => x.banned || x.scenario));
   ok('every book law is shut on arrival, opens alone and controls its own body', bl.every(x => x.shut && x.opened && x.owns), bl.filter(x => !(x.shut && x.opened && x.owns)));
