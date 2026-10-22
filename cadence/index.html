@@ -5057,7 +5057,10 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
 
   var sv = 'day';
   try { sv = sessionStorage.getItem('cad.view') || 'day'; } catch (e) {}
-  if ((sv === 'plan' || sv === 'self') && !PLAN_MQ.matches) sv = 'day';
+  /* Higher self is somewhere you go, not somewhere the app opens: a reload
+     or a reopened tab lands on the day, never on the last desktop-only
+     screen. Only the #self link below sends you there on arrival. */
+  if (sv === 'plan' || sv === 'self') sv = 'day';
   cdSelfOwn();
   if (selfIn && cdSelfLoad(selfIn) && PLAN_MQ.matches) sv = 'self';
   cdGo(['day', 'hab', 'mon', 'note', 'plan', 'self'].indexOf(sv) >= 0 ? sv : 'day');

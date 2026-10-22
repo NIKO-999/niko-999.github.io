@@ -6015,6 +6015,15 @@ and the Day screen cannot disagree. A task removed from the week costs the
 plan block its check and nothing else. Asserted both ways: linking draws
 the check and unlinking takes it off.
 
+### Higher self does not stick
+
+Reported as *make sure when I enter my higher self it doesn't stick*. The
+view was kept in `sessionStorage`, so a reload while on Higher self (or
+Plan) put you straight back on it. Both desktop-only screens are somewhere
+you go, not somewhere the app opens: a reload lands on the day. Only the
+`#self` link sends you there on arrival. Asserted on a desktop context:
+open the tab, reload, the day is up and the screen is not.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

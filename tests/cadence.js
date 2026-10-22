@@ -2250,6 +2250,16 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await c.close();
   }
 
+    /* Higher self does not stick: a reload while on it lands on the day. */
+    {
+      const dk = await ctx({ desk: { width: 1440, height: 900 } });
+      await dk.page.click('.cd-tab[data-v="self"]'); await dk.page.waitForTimeout(200);
+      const on = await dk.page.evaluate(() => !document.getElementById('cdVSelf').hidden);
+      await dk.page.reload(); await dk.page.waitForTimeout(400);
+      const after = await dk.page.evaluate(() => ({ day: !document.getElementById('cdVDay').hidden, self: !document.getElementById('cdVSelf').hidden }));
+      ok('higher self does not stick: a reload while on it lands on the day', on && after.day && !after.self, { on, after });
+      await dk.c.close();
+    }
     /* And the phone is untouched: the list still runs under the figure. */
     const ph = await ctx();
     const h = await ph.page.$eval('#cdHero', (e) => e.getBoundingClientRect()), l = await ph.page.$eval('#cdAgenda', (e) => e.getBoundingClientRect());
