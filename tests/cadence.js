@@ -2865,6 +2865,32 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await c.close();
   }
 
+  /* ── "Monday to Friday" is five days, and a session can be planned ahead ── */
+  {
+    const { c, page } = await ctx();
+    await page.click('#cdAdd'); await sheetUp(page);
+    await page.fill('.cd-say', 'gym monday to friday 6:30 for 60 mins');
+    await page.click('#cdFSave'); await page.waitForTimeout(320);
+    const g = (await store(page, 'cad.week.v1')).filter((b) => /gym/i.test(b.n));
+    ok('"monday to friday" is all five days, not Monday and Friday', g.length === 1 && g[0].d.join() === '0,1,2,3,4' && !g[0].on, g);
+    /* next Monday, which is a day still to come */
+    await page.click('.cd-wk[data-w="1"]'); await page.waitForTimeout(150);
+    await page.click('.cd-wd[data-d="2026-09-28"]'); await page.waitForTimeout(150);
+    await page.click('.cd-it:has-text("Gym") .cd-rb'); await sheetUp(page);
+    const link = await page.$('.cd-link');
+    ok('on a day ahead the editor offers to plan what you will train', !!link && /plan/i.test(await link.textContent()));
+    if (link) {
+      await link.click(); await page.waitForTimeout(300);
+      await page.click('[data-k="weights.push"]');
+      await page.click('#cdLiftGo'); await page.waitForTimeout(320);
+      const tr = await store(page, 'cad.train.v1'), lg = (await store(page, 'cad.log.v1')) || {};
+      ok('the plan is filed against that day', !!(tr && tr['2026-09-28'] && Object.keys(tr['2026-09-28']).length), tr);
+      ok('and planning it does not tick the block off', !lg['2026-09-28'] || !Object.keys(lg['2026-09-28']).length, lg);
+      ok('the row says what is planned', /Push/.test(await page.$eval('.cd-it:has-text("Gym")', (e) => e.textContent)));
+    }
+    await c.close();
+  }
+
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);

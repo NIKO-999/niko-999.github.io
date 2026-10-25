@@ -1592,7 +1592,8 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
      that is not a day you missed. */
   function cdFirst() {
     var ks = [].concat(Object.keys(S.log), Object.keys(S.hab), Object.keys(S.train)).sort();
-    return ks[0] || cdToday();
+    /* A session planned for a day still to come is not where the record began. */
+    return ks[0] && ks[0] < cdToday() ? ks[0] : cdToday();
   }
 
   /* ═══ TRAINING ═══ */
@@ -2104,6 +2105,20 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     if ((m = used.match(/\bweekends?\b/))) { out.days = out.days.concat([5, 6]); eat(m[0]); }
     if ((m = used.match(/\btoday\b/))) { out.days.push(cdDow(cdToday())); out.on = cdToday(); eat(m[0]); }
     if ((m = used.match(/\btomorrow\b/))) { out.days.push(cdDow(cdAddDays(cdToday(), 1))); out.on = cdAddDays(cdToday(), 1); eat(m[0]); }
+    /* "Monday to Friday" is five days, not two: a range of weekdays runs
+       from the first to the second, round the end of the week if it must.
+       Read before the single days so its two words are not taken as just
+       Monday and Friday. */
+    var dnames = [].concat.apply([], DAYW).sort(function (a, b) { return b.length - a.length; }).join('|');
+    var dre = new RegExp('\\b(?:on\\s+|every\\s+)?(' + dnames + ')s?\\s*(?:-|–|to|until|till|through|thru)\\s*(' + dnames + ')s?\\b');
+    if ((m = used.match(dre))) {
+      var di = function (w) { for (var q = 0; q < 7; q++) if (DAYW[q].indexOf(w) >= 0) return q; return -1; };
+      var d0 = di(m[1]), d1 = di(m[2]);
+      if (d0 >= 0 && d1 >= 0 && d0 !== d1) {
+        for (var dq = d0; ; dq = (dq + 1) % 7) { out.days.push(dq); if (dq === d1) break; }
+        eat(m[0]);
+      }
+    }
     DAYW.forEach(function (ws, i) {
       var re = new RegExp('\\b(?:on\\s+|every\\s+)?(' + ws.join('|') + ')s?\\b', 'g');
       var hit = used.match(re);
@@ -2252,8 +2267,8 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
       var tg = el('div', 'cd-rows');
       tg.appendChild(tDone);
       root.appendChild(tg);
-      if (TRAINING[cdKind(b.n)] && canDo) {
-        var lg = el('button', 'cd-link', 'Log what you trained →');
+      if (TRAINING[cdKind(b.n)] && (canDo || sel > cdToday())) {
+        var lg = el('button', 'cd-link', sel > cdToday() ? 'Plan what you will train →' : 'Log what you trained →');
         lg.type = 'button';
         lg.addEventListener('click', function () { cdLiftSheet(sel, b.id, b.n); });
         root.appendChild(lg);
@@ -2378,6 +2393,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
   }
   function cdLiftSheet(iso, key, label) {
     var cur = (S.train[iso] && cdSess(S.train[iso][key])) || { k: [], e: '', m: 0 };
+    var ahead = iso > cdToday();
     var pick = cur.k.slice(), eff = cur.e, min = cur.m || cdLiftLen(iso, key);
     /* The length it ran is spliced in over the nearest rung rather than
        added, so the ladder stays two rows of four and the figure it
@@ -2441,9 +2457,11 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
       var rest = pick.every(function (k) { return LIFTN[k].g === 'rest'; });
       (S.train[iso] = S.train[iso] || {})[key] = rest ? { k: pick } : { k: pick, e: eff, m: min };
       cdSave('train');
-      if (key !== DAYKEY && !cdDone(iso, key)) cdSetFlag('log', iso, key, true);
+      /* A session chosen for a day still to come is a PLAN: nothing has
+         happened, so the block is not ticked. */
+      if (key !== DAYKEY && !cdDone(iso, key) && !ahead) cdSetFlag('log', iso, key, true);
       cdClose(); cdPaint();
-      cdToast('Logged ' + pick.map(function (k) { return LIFTN[k].n; }).join(' + '));
+      cdToast((ahead ? 'Planned ' : 'Logged ') + pick.map(function (k) { return LIFTN[k].n; }).join(' + '));
     });
     foot.appendChild(skip); foot.appendChild(go);
     root.appendChild(foot);
@@ -2455,7 +2473,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
       /* A rest day is not asked how hard or how long: absent, not disabled. */
       more.hidden = !!rest;
       go.disabled = !pick.length;
-      go.textContent = pick.length ? 'Log ' + pick.map(function (k) { return LIFTN[k].n; }).join(' + ') : 'Pick a session';
+      go.textContent = pick.length ? (ahead ? 'Plan ' : 'Log ') + pick.map(function (k) { return LIFTN[k].n; }).join(' + ') : 'Pick a session';
     }
     draw();
     cdSheet('What did you train?', root);
@@ -4239,7 +4257,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
        THIS week's date of the block's weekday. */
     var tk = b.k && S.week.filter(function (x) { return x.id === b.k; })[0];
     if (tk) {
-      var td = cdToday(), on = cdAddDays(td, b.d - cdDow(td));
+      var td = cdToday(), on = tk.on || cdAddDays(td, b.d - cdDow(td));
       e.dataset.k = tk.id;
       if (cdDone(on, tk.id)) e.classList.add('is-kept');
       e.setAttribute('aria-label', e.getAttribute('aria-label') + ', task ' + tk.n + (cdDone(on, tk.id) ? ', kept' : ''));
