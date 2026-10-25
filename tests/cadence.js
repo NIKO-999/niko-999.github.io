@@ -2844,6 +2844,27 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await O.c.close();
   }
 
+  /* ── "tomorrow" is a date, and a note shows under the task ──
+     Sunday evening, "tomorrow" is a Monday in NEXT week. The week is a
+     template, so a weekday alone put the block on every Monday including
+     the one already gone. */
+  {
+    const { c, page } = await ctx({ at: '2026-09-27T20:00:00' });
+    await page.click('#cdAdd'); await sheetUp(page);
+    await page.fill('.cd-say', 'groceries tomorrow 10am for 30 mins');
+    await page.fill('#cdFNote', 'Tuna\nRice\nAvocado');
+    await page.click('#cdFSave'); await page.waitForTimeout(320);
+    const wk = (await store(page, 'cad.week.v1')).filter((b) => b.n === 'Groceries');
+    ok('a block said as tomorrow is kept for that date alone', wk.length === 1 && wk[0].on === '2026-09-28' && wk[0].nt === 'Tuna\nRice\nAvocado', wk);
+    const shown = await page.evaluate(() => ({ day: document.querySelector('.cd-wd[aria-pressed="true"]').dataset.d, rows: [...document.querySelectorAll('.cd-it')].filter((r) => /Groceries/.test(r.textContent)).length, note: (document.querySelector('.cd-rnote') || {}).textContent }));
+    ok('it lands on next Monday, not the Monday behind', shown.day === '2026-09-28' && shown.rows === 1, shown);
+    ok('and the note is drawn whole under the task', shown.note === 'Tuna\nRice\nAvocado', shown.note);
+    await page.click('.cd-wk[data-w="-1"]'); await page.waitForTimeout(150);
+    const back = await page.evaluate(() => ({ day: document.querySelector('.cd-wd[aria-pressed="true"]').dataset.d, rows: [...document.querySelectorAll('.cd-it')].filter((r) => /Groceries/.test(r.textContent)).length }));
+    ok('the Monday that has gone does not carry it', back.day === '2026-09-21' && back.rows === 0, back);
+    await c.close();
+  }
+
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);

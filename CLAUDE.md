@@ -6024,6 +6024,20 @@ you go, not somewhere the app opens: a reload lands on the day. Only the
 `#self` link sends you there on arrival. Asserted on a desktop context:
 open the tab, reload, the day is up and the screen is not.
 
+### "Tomorrow" is a date, and a block can carry a note
+
+Reported as *I add it for tomorrow and it lands on a Monday from a while
+back*. The week is a template, so a weekday with no date on it is every
+Monday there has been, the past ones included. "Today" and "tomorrow"
+now write `on`, one ISO date, and `cdOn` reads a block with `on` for
+that date alone; any weekday word, "every day" or a day chip lets go of
+it. Copy a day skips one-offs. The strip follows `sel`, with arrows to
+walk weeks, because tomorrow is next week on a Sunday.
+
+`nt` is a note up to 600 characters, drawn whole under the task with its
+line breaks. `p` stays the one-line place. Both fields are written only
+when set, so every saved block reads back byte for byte.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

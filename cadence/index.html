@@ -237,7 +237,7 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 #cdDayPane { padding-bottom: calc(118px + env(safe-area-inset-bottom)); }
 
 /* ── the week: a dot over a letter, seven of them ── */
-.cd-week { flex: none; display: grid; grid-template-columns: repeat(7, 44px); justify-content: center; margin: 8px 0 0; }
+.cd-week { position: relative; flex: none; display: grid; grid-template-columns: repeat(7, 44px); justify-content: center; margin: 8px 0 0; }
 .cd-wd { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; min-height: 48px; }
 .cd-wd i { width: 5px; height: 5px; border-radius: 50%; background: var(--nil); }
 .cd-wd[data-state="part"] i { background: var(--quiet); }
@@ -303,6 +303,12 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .cd-list.no-g .cd-rt { grid-column: 2; }
 .cd-rn { grid-column: 2; grid-row: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 15px/1.1 var(--sans); }
 .cd-rt { grid-column: 3; grid-row: 1; font: 500 11px/1 var(--mono); letter-spacing: .08em; color: var(--quiet); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cd-rnote { grid-column: 2 / -1; margin-top: 3px; white-space: pre-line; overflow-wrap: anywhere; font: 400 12.5px/1.35 var(--sans); color: var(--quiet); }
+.cd-list.no-g .cd-rnote { grid-column: 1 / -1; }
+.cd-bnote { min-height: 96px; resize: vertical; line-height: 1.35; font-family: var(--sans); }
+.cd-wk { position: absolute; top: 0; width: 40px; height: 48px; display: grid; place-items: center; background: none; border: 0; color: var(--quiet); font: 400 20px/1 var(--sans); }
+.cd-wk[data-w="-1"] { left: calc(50% - 154px - 40px); }
+.cd-wk[data-w="1"] { right: calc(50% - 154px - 40px); }
 .cd-rs { grid-column: 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 12.5px/1.3 var(--sans); color: var(--quiet); }
 /* What you trained rides the name's own line, in the session's colour. */
 .cd-rw { color: var(--kc); }
@@ -1387,6 +1393,16 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     /* An EXAMPLE block, from the first open. Written only when true, so
        every block anybody made reads back byte for byte. */
     if (o.x === 1) out.x = 1;
+    /* ONE DATE, NOT EVERY WEEK. A block written "tomorrow" is for that
+       date alone: the week is a template, so a weekday with no date on it
+       lands on every Monday there has been and will be, the past ones
+       included. Written only when set, so every block already saved reads
+       back byte for byte. */
+    if (typeof o.on === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(o.on)) out.on = o.on;
+    /* A NOTE, NOT A PLACE. `p` is eighty characters on one line and is where
+       a block is; a grocery list is several lines long. */
+    var nt = String(o.nt || '').slice(0, 600).replace(/\s+$/, '');
+    if (nt) out.nt = nt;
     return out;
   }
   /* A FIRST OPEN SHOWS EXAMPLES, NOT A WEEK. A blank day is an empty
@@ -1556,7 +1572,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
 
   function cdOn(iso) {
     var dw = cdDow(iso);
-    return S.week.filter(function (b) { return b.d.indexOf(dw) >= 0; })
+    return S.week.filter(function (b) { return b.on ? b.on === iso : b.d.indexOf(dw) >= 0; })
       .sort(function (a, b) { return a.s - b.s || a.e - b.e || (a.n < b.n ? -1 : 1); });
   }
   var cdDone = function (iso, id) { return !!(S.log[iso] && S.log[iso][id]); };
@@ -1776,8 +1792,8 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
   }
 
   function cdPaintDay() {
-    var today = cdToday(), ws = cdWeekStart(today);
-    var rb = '';
+    var today = cdToday(), ws = cdWeekStart(sel);
+    var rb = '<button type="button" class="cd-wk" data-w="-1" aria-label="Earlier week">‹</button><button type="button" class="cd-wk" data-w="1" aria-label="Later week">›</button>';
     for (var i = 0; i < 7; i++) {
       var d = cdAddDays(ws, i), t = cdTally(d), st = cdDayState(d);
       rb += '<button type="button" class="cd-wd' + (d === today ? ' is-today' : '') + '" data-d="' + d + '" data-state="' + st + '" aria-pressed="' + (d === sel) + '"'
@@ -1859,7 +1875,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
      editing one edits both, and the way out is the editor's own day
      chips. Undo puts each block's days back exactly. */
   function cdCopyDay() {
-    var from = cdDow(sel), src = cdOn(sel).filter(function (b) { return !b.x; });
+    var from = cdDow(sel), src = cdOn(sel).filter(function (b) { return !b.x && !b.on; });
     if (!src.length) return;
     var root = el('div'), pick = [];
     var box = el('div', 'cd-chips days'); box.id = 'cdCpDays';
@@ -1919,7 +1935,8 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
       + ' aria-label="' + (done ? 'Completed' : 'Mark completed') + ': ' + esc(b.n) + '"><i></i></button>'
       + '<button type="button" class="cd-rb" data-act="edit" aria-label="' + esc(b.n) + ', ' + cdHM(b.s) + (b.e > b.s ? ' to ' + cdHM(b.e) : '') + '. Open">'
       + (S.glyphoff ? '' : cdGlyph(kind)) + '<span class="cd-rn">' + esc(b.n) + rw + (done ? '<span class="cd-tk" aria-hidden="true"></span>' : '') + '</span><span class="cd-rt">' + time + '</span>'
-      + (b.p ? '<span class="cd-rs">' + esc(b.p) + '</span>' : '') + '</button></li>';
+      + (b.p ? '<span class="cd-rs">' + esc(b.p) + '</span>' : '')
+      + (b.nt ? '<span class="cd-rnote">' + esc(b.nt) + '</span>' : '') + '</button></li>';
   }
 
   function cdTick(id) {
@@ -2054,6 +2071,8 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
   $('cdHeroN').addEventListener('click', function () { if (heroId) cdEdit(heroId); });
   $('cdThen').addEventListener('click', function () { if (thenId) cdEdit(thenId); });
   $('cdRibbon').addEventListener('click', function (ev) {
+    var wk = ev.target.closest('.cd-wk');
+    if (wk) { sel = cdAddDays(sel, 7 * +wk.dataset.w); $('cdDayPane').scrollTop = 0; cdPaintDay(); return; }
     var b = ev.target.closest('.cd-wd');
     if (!b) return;
     sel = b.dataset.d;
@@ -2077,19 +2096,20 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     var src = ' ' + String(text || '').toLowerCase().replace(/[.,!]/g, ' ') + ' ';
     var used = src;
     var eat = function (m) { used = used.replace(m, function (x) { return ' '.repeat(x.length); }); };
-    var out = { days: [], s: null, e: null, len: null, after: null };
+    var out = { days: [], s: null, e: null, len: null, after: null, on: null };
     var m;
 
     if ((m = used.match(/\b(every ?day|daily)\b/))) { out.days = [0, 1, 2, 3, 4, 5, 6]; eat(m[0]); }
     if ((m = used.match(/\bweekdays?\b/))) { out.days = out.days.concat([0, 1, 2, 3, 4]); eat(m[0]); }
     if ((m = used.match(/\bweekends?\b/))) { out.days = out.days.concat([5, 6]); eat(m[0]); }
-    if ((m = used.match(/\btoday\b/))) { out.days.push(cdDow(cdToday())); eat(m[0]); }
-    if ((m = used.match(/\btomorrow\b/))) { out.days.push(cdDow(cdAddDays(cdToday(), 1))); eat(m[0]); }
+    if ((m = used.match(/\btoday\b/))) { out.days.push(cdDow(cdToday())); out.on = cdToday(); eat(m[0]); }
+    if ((m = used.match(/\btomorrow\b/))) { out.days.push(cdDow(cdAddDays(cdToday(), 1))); out.on = cdAddDays(cdToday(), 1); eat(m[0]); }
     DAYW.forEach(function (ws, i) {
       var re = new RegExp('\\b(?:on\\s+|every\\s+)?(' + ws.join('|') + ')s?\\b', 'g');
       var hit = used.match(re);
       if (hit) { out.days.push(i); hit.forEach(eat); }
     });
+    if (out.days.length > 1 || /\b(every|daily|weekdays?|weekends?)\b/.test(src) || DAYW.some(function (ws) { return new RegExp('\\b(' + ws.join('|') + ')s?\\b').test(src); })) out.on = null;
     used = used.replace(/\b(and|&)\b/g, function (x) { return ' '.repeat(x.length); });
 
     var range = used.match(/\b(?:from\s+|at\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*(?:-|–|to|until|till)\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/);
@@ -2194,8 +2214,8 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
   /* ═══ ADD AND EDIT ═══ one form. A new block also gets the sentence. */
   function cdEdit(id) {
     var b = id ? S.week.filter(function (x) { return x.id === id; })[0] : null;
-    var f = b ? { n: b.n, d: b.d.slice(), s: b.s, len: b.e - b.s, p: b.p, r: b.r || 0 }
-      : { n: '', d: [cdDow(sel)], s: Math.min(1380, Math.ceil(cdNowMin() / 15) * 15), len: 30, p: '', r: 0 };
+    var f = b ? { n: b.n, d: b.d.slice(), s: b.s, len: b.e - b.s, p: b.p, r: b.r || 0, on: b.on || '', nt: b.nt || '' }
+      : { n: '', d: [cdDow(sel)], s: Math.min(1380, Math.ceil(cdNowMin() / 15) * 15), len: 30, p: '', r: 0, on: '', nt: '' };
     var root = el('div');
 
     if (!b) {
@@ -2208,7 +2228,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
       say.addEventListener('input', function () {
         var r = cdParse(say.value);
         if (r.n) f.n = r.n;
-        if (r.days.length) f.d = r.days;
+        if (r.days.length) { f.d = r.days; f.on = r.on || ''; }
         if (r.s != null) { f.s = r.s; f.len = r.e - r.s; }
         sync();
         var miss = [];
@@ -2216,7 +2236,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
         if (r.s == null) miss.push('what time');
         prev.className = 'cd-prev' + (miss.length && say.value.trim() ? ' is-need' : '');
         prev.innerHTML = !say.value.trim() ? '' : miss.length ? 'Still needs ' + miss.join(' and ')
-          : '<b>' + esc(r.n) + '</b> · ' + (r.days.length === 7 ? 'every day' : r.days.map(function (x) { return DOW[x]; }).join(' ')) + ' · '
+          : '<b>' + esc(r.n) + '</b> · ' + (r.on ? (r.on === cdAddDays(cdToday(), 1) ? 'Tomorrow' : cdRelDay(r.on)) : r.days.length === 7 ? 'every day' : r.days.map(function (x) { return DOW[x]; }).join(' ')) + ' · '
             + cdHM(r.s) + (r.e > r.s ? '–' + cdHM(r.e) : '') + (r.after ? ' · after ' + esc(r.after) : '');
       });
       root.appendChild(el('p', 'cd-lbl', 'Or set it by hand'));
@@ -2238,7 +2258,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
         lg.addEventListener('click', function () { cdLiftSheet(sel, b.id, b.n); });
         root.appendChild(lg);
       }
-      root.appendChild(el('p', 'cd-lbl', 'Every week'));
+      root.appendChild(el('p', 'cd-lbl', b.on ? 'Just ' + cdRelDay(b.on) : 'Every week'));
     }
 
     var rows = el('div', 'cd-rows');
@@ -2254,6 +2274,8 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
       c.setAttribute('aria-label', DOWL[i]);
       c.addEventListener('click', function () {
         var k = f.d.indexOf(i);
+        /* Choosing days is choosing a week: it lets go of the one date. */
+        f.on = '';
         if (k >= 0) f.d.splice(k, 1); else f.d.push(i);
         sync();
       });
@@ -2263,7 +2285,12 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     row('What', nm); row('Starts', st);
     var lenWrap = el('div'); lenWrap.appendChild(rg); lenWrap.appendChild(lenOut); row('How long', lenWrap);
     row('Where', pl);
+    var nte = el('textarea', 'cd-field cd-bnote'); nte.id = 'cdFNote'; nte.placeholder = 'Notes, a list, anything to see under it'; nte.maxLength = 600;
+    nte.setAttribute('aria-label', 'Note');
+    nte.addEventListener('input', function () { f.nt = nte.value; });
     root.appendChild(rows);
+    root.appendChild(el('p', 'cd-lbl', 'Note'));
+    root.appendChild(nte);
     root.appendChild(el('p', 'cd-lbl', 'Days'));
     root.appendChild(dayBox);
     /* ONLY WHILE REMINDERS ARE ON. A choice of when a reminder comes on
@@ -2284,11 +2311,11 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     }
 
     function sync() {
-      nm.value = f.n; st.value = cdHM(f.s); pl.value = f.p;
+      nm.value = f.n; st.value = cdHM(f.s); pl.value = f.p; nte.value = f.nt;
       if (+rg.max < f.len) rg.max = Math.ceil(f.len / 60) * 60;
       rg.value = f.len;
       lenOut.textContent = f.len > 0 ? cdLen(f.len) + ' · ends ' + cdHM(Math.min(1440, f.s + f.len)) : 'A moment';
-      dayBox.querySelectorAll('.cd-chip').forEach(function (c) { c.setAttribute('aria-pressed', f.d.indexOf(+c.dataset.i) >= 0); });
+      dayBox.querySelectorAll('.cd-chip').forEach(function (c) { c.setAttribute('aria-pressed', !f.on && f.d.indexOf(+c.dataset.i) >= 0); });
       if (remBox) remBox.querySelectorAll('.cd-chip').forEach(function (c) { c.setAttribute('aria-pressed', +c.dataset.r === f.r); });
     }
     nm.addEventListener('input', function () { f.n = nm.value; });
@@ -2318,13 +2345,12 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
       if (!f.n.trim()) { cdToast('Give it a name.'); nm.focus(); return; }
       if (!f.d.length) { cdToast('Pick at least one day.'); return; }
       if (f.s + f.len > 1440) { cdToast('It has to finish by midnight.'); return; }
-      var nb = cdBlock({ id: b ? b.id : null, n: f.n.trim(), d: f.d, s: f.s, e: f.s + f.len, p: f.p.trim(), r: f.r });
+      var nb = cdBlock({ id: b ? b.id : null, n: f.n.trim(), d: f.d, s: f.s, e: f.s + f.len, p: f.p.trim(), r: f.r, on: f.on, nt: f.nt });
       if (b) S.week[S.week.indexOf(b)] = nb; else { cdDropExamples(); S.week.push(nb); }
       cdSave('week'); cdClose();
-      if (!b && nb.d.indexOf(cdDow(sel)) < 0) {
+      if (!b && (nb.on ? nb.on !== sel : nb.d.indexOf(cdDow(sel)) < 0)) {
         /* Land on the day it went on, or it looks like nothing happened. */
-        var t = cdToday(), ws = cdWeekStart(t);
-        sel = cdAddDays(ws, nb.d[0]);
+        sel = nb.on || cdAddDays(cdWeekStart(cdToday()), nb.d[0]);
       }
       if (view !== 'day') cdGo('day'); else cdPaint();
       cdToast((b ? 'Saved ' : 'Added ') + nb.n);
@@ -4892,7 +4918,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
      keeps the queue two weeks deep. `force` is the turn-on. */
   function cdPushSend(force) {
     if (!PU) return Promise.resolve(false);
-    var fp = cdToday() + JSON.stringify([S.week.map(function (b) { return [b.id, b.n, b.d, b.s, b.e, b.p, b.r]; }), S.log[cdToday()] || 0, cdPushAsk(), cdPushTh(), PU.qh || 0]);
+    var fp = cdToday() + JSON.stringify([S.week.map(function (b) { return [b.id, b.n, b.d, b.s, b.e, b.p, b.r, b.on || 0]; }), S.log[cdToday()] || 0, cdPushAsk(), cdPushTh(), PU.qh || 0]);
     if (!force && PU.fp === fp) return Promise.resolve(true);
     if (puBusy) return puBusy;
     var list = cdPushList();
