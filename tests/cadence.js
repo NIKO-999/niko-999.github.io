@@ -2891,6 +2891,35 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await c.close();
   }
 
+  /* ── a date can be said or picked ── */
+  {
+    const { c, page } = await ctx();
+    const said = async (txt) => {
+      await page.click('#cdAdd'); await sheetUp(page);
+      await page.fill('.cd-say', txt);
+      const pv = await page.$eval('#cdPrev', (e) => e.textContent);
+      await page.click('#cdFSave'); await page.waitForTimeout(320);
+      const wk = await store(page, 'cad.week.v1');
+      return { b: wk[wk.length - 1], pv };
+    };
+    const a1 = await said('dentist 28 oct 2pm for 30 mins');
+    ok('"28 oct" is that date alone', a1.b.n === 'Dentist' && a1.b.on === '2026-10-28' && a1.b.s === 840, a1.b);
+    ok('and the preview says the day', /28 Oct/.test(a1.pv), a1.pv);
+    const a2 = await said('vet the 3rd of november 9am');
+    ok('"the 3rd of november" is read', a2.b.on === '2026-11-03' && a2.b.s === 540, a2.b);
+    const a3 = await said('call oct 2 11:30');
+    ok('"oct 2" with no year is the next one, so next year', a3.b.on === '2027-10-02' && a3.b.s === 690, a3.b);
+    const a4 = await said('flight 3/11 8am');
+    ok('"3/11" is day then month', a4.b.on === '2026-11-03', a4.b);
+    /* by hand */
+    await page.click('#cdAdd'); await sheetUp(page);
+    await page.fill('#cdFN', 'Haircut'); await page.fill('#cdFDate', '2026-10-09');
+    await page.click('#cdFSave'); await page.waitForTimeout(320);
+    const wk = await store(page, 'cad.week.v1'), h = wk[wk.length - 1];
+    ok('a date picked by hand is one day too', h.n === 'Haircut' && h.on === '2026-10-09' && h.d.join() === '4', h);
+    await c.close();
+  }
+
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);

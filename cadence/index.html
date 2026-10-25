@@ -2104,7 +2104,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     var src = ' ' + String(text || '').toLowerCase().replace(/[.,!]/g, ' ') + ' ';
     var used = src;
     var eat = function (m) { used = used.replace(m, function (x) { return ' '.repeat(x.length); }); };
-    var out = { days: [], s: null, e: null, len: null, after: null, on: null };
+    var out = { days: [], s: null, e: null, len: null, after: null, on: null, dated: false };
     var m;
 
     if ((m = used.match(/\b(every ?day|daily)\b/))) { out.days = [0, 1, 2, 3, 4, 5, 6]; eat(m[0]); }
@@ -2112,6 +2112,23 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     if ((m = used.match(/\bweekends?\b/))) { out.days = out.days.concat([5, 6]); eat(m[0]); }
     if ((m = used.match(/\btoday\b/))) { out.days.push(cdDow(cdToday())); out.on = cdToday(); eat(m[0]); }
     if ((m = used.match(/\btomorrow\b/))) { out.days.push(cdDow(cdAddDays(cdToday(), 1))); out.on = cdAddDays(cdToday(), 1); eat(m[0]); }
+    /* A DATE, SAID: "28 oct", "oct 28th", "the 3rd of november", "28/10".
+       Day then month, the way it is said here. With no year it is the
+       next one on or after today. Read first, so its digits are not taken
+       for a clock. */
+    var mnames = MON.map(function (x) { return x.toLowerCase(); }).concat(MON.map(function (x) { return x.toLowerCase().slice(0, 3); }), ['sept']).sort(function (a, b) { return b.length - a.length; }).join('|');
+    var mi = function (w) { for (var q = 0; q < 12; q++) if (MON[q].toLowerCase().indexOf(w) === 0) return q; return -1; };
+    var setDate = function (dd, mo, yy, whole) {
+      var t = cdToday(), y = yy ? (+yy < 100 ? 2000 + +yy : +yy) : +t.slice(0, 4);
+      var c = new Date(y, mo, dd);
+      if (mo < 0 || mo > 11 || c.getMonth() !== mo || c.getDate() !== dd) return false;
+      var iso = cdISO(c);
+      if (!yy && iso < t) iso = cdISO(new Date(y + 1, mo, dd));
+      out.on = iso; out.dated = true; out.days.push(cdDow(iso)); eat(whole); return true;
+    };
+    if ((m = used.match(new RegExp('\\b(?:on\\s+)?(?:the\\s+)?(\\d{1,2})(?:st|nd|rd|th)?\\s*(?:of\\s+)?(' + mnames + ')\\b(?:\\s+(\\d{4}))?')))) setDate(+m[1], mi(m[2]), m[3], m[0]);
+    else if ((m = used.match(new RegExp('\\b(?:on\\s+)?(' + mnames + ')\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b(?:,?\\s+(\\d{4}))?')))) setDate(+m[2], mi(m[1]), m[3], m[0]);
+    else if ((m = used.match(/\b(?:on\s+)?(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\b/))) setDate(+m[1], +m[2] - 1, m[3], m[0]);
     /* "Monday to Friday" is five days, not two: a range of weekdays runs
        from the first to the second, round the end of the week if it must.
        Read before the single days so its two words are not taken as just
@@ -2131,7 +2148,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
       var hit = used.match(re);
       if (hit) { out.days.push(i); hit.forEach(eat); }
     });
-    if (out.days.length > 1 || /\b(every|daily|weekdays?|weekends?)\b/.test(src) || DAYW.some(function (ws) { return new RegExp('\\b(' + ws.join('|') + ')s?\\b').test(src); })) out.on = null;
+    if (!out.dated && (out.days.length > 1 || /\b(every|daily|weekdays?|weekends?)\b/.test(src) || DAYW.some(function (ws) { return new RegExp('\\b(' + ws.join('|') + ')s?\\b').test(src); }))) out.on = null;
     used = used.replace(/\b(and|&)\b/g, function (x) { return ' '.repeat(x.length); });
 
     var range = used.match(/\b(?:from\s+|at\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*(?:-|–|to|until|till)\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/);
@@ -2307,6 +2324,13 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     row('What', nm); row('Starts', st);
     var lenWrap = el('div'); lenWrap.appendChild(rg); lenWrap.appendChild(lenOut); row('How long', lenWrap);
     row('Where', pl);
+    var dt = el('input', 'cd-field'); dt.type = 'date'; dt.id = 'cdFDate'; dt.setAttribute('aria-label', 'Date, or leave empty for every week');
+    dt.addEventListener('input', function () {
+      /* A date makes it one day; clearing it hands it back to the week. */
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dt.value)) { f.on = dt.value; f.d = [cdDow(dt.value)]; } else { f.on = ''; }
+      sync();
+    });
+    row('Date', dt);
     var nte = el('textarea', 'cd-field cd-bnote'); nte.id = 'cdFNote'; nte.placeholder = 'Notes, a list, anything to see under it'; nte.maxLength = 600;
     nte.setAttribute('aria-label', 'Note');
     nte.addEventListener('input', function () { f.nt = nte.value; });
@@ -2333,7 +2357,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     }
 
     function sync() {
-      nm.value = f.n; st.value = cdHM(f.s); pl.value = f.p; nte.value = f.nt;
+      nm.value = f.n; st.value = cdHM(f.s); pl.value = f.p; nte.value = f.nt; dt.value = f.on || '';
       if (+rg.max < f.len) rg.max = Math.ceil(f.len / 60) * 60;
       rg.value = f.len;
       lenOut.textContent = f.len > 0 ? cdLen(f.len) + ' · ends ' + cdHM(Math.min(1440, f.s + f.len)) : 'A moment';
