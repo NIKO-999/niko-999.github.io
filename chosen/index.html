@@ -191,6 +191,8 @@ mark.flash { outline: 2px solid var(--ink); outline-offset: 2px; }
 .hlempty { color: var(--muted); padding: 4px 0 18px; line-height: 1.5; }
 
 /* The Game */
+.g-part { margin: 10px 4px -4px; font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.g-part:first-child { margin-top: 0; }
 details.gcard { background: var(--sheet); border-radius: 30px; }
 details.gcard summary { list-style: none; cursor: pointer; padding: 20px 22px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 details.gcard summary::-webkit-details-marker { display: none; }
@@ -318,7 +320,7 @@ body[data-view="mirror"][data-path="drop"] { --orb: color-mix(in srgb, var(--mut
   </section>
 
   <section id="game" hidden>
-    <div class="intro"><h2>The Game</h2><p class="lede">Every lesson from the talk, in order, in my own voice. This is my foundation. I read it through every day, and I press and hold on anything worth keeping to highlight it.</p></div>
+    <div class="intro"><h2>The Game</h2><p class="lede">Every lesson from the talk, and how I think, in my own voice. This is my foundation. I read it through every day, and I press and hold on anything worth keeping to highlight it.</p></div>
     <details class="gcard" id="hlCard"><summary><h3>My highlights <em class="tag" id="hlCount">0</em></h3><svg class="gchev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></summary><div class="lessons" id="hlList"></div></details>
     <div class="card dark" id="gameToday"></div>
     <div id="gameList" style="display:flex;flex-direction:column;gap:14px"></div>
@@ -640,7 +642,7 @@ const MIRROR = {
 
 // Every lesson from the talk, in order, in my own voice: [title, the game in depth, my line for the morning ritual].
 const GAME = [
-  { chapter: "Find myself first", lessons: [
+  { part: "The talk", chapter: "Find myself first", lessons: [
     ["Accept what was said about me", "Finding myself starts with identifying every great thing creation and God have said about me. Not hoping it's true: accepting it. I take my gifts, my talents and the good that people have seen in me, and I stop arguing with it. Then I flourish in it. I live like it's true, because it is. A man who can't accept the good in himself will always go looking for someone else to say it.", "I accept every good thing said about me, and I flourish in it."],
     ["Choose the highest self", "When I choose myself, I'm not choosing whatever version of me is easiest today. I'm choosing the highest self nature gave me: the innate gifts, talents and abilities I came here with. My comfortable self wants rest and approval. My highest self wants the mission. Every morning I pick the one I was built to be.", "I choose the highest self I was given."],
     ["I can't choose what I don't know", "If I don't know who I am, it's impossible for me to choose myself. And a man who can't choose himself goes out and chooses someone else, hoping they'll fill the space where he should be. So whenever I notice myself chasing, fixating or reaching for someone, I read it as a signal that I've lost touch with me. The fix isn't getting them. It's coming back to myself.", "I know who I am, so I choose me."],
@@ -726,6 +728,46 @@ const GAME = [
     ["A month to transform", "I treat a month as a transformational space. When I want to change, I commit to thirty days, not a weekend: in-depth work, several times a week, with support in between.", "I give my growth thirty days, not one."],
     ["Breakthroughs", "That's what I'm here for: breakthroughs. Not busyness, and not the look of progress. I measure my growth by the breakthroughs I actually make.", "I'm here for breakthroughs."],
   ] },
+  { part: "How I think", chapter: "Pragmatism", lessons: [
+    ["Judge it by what it does", "I judge an idea, a habit or a decision by what it actually does in my life, not by how it sounds or who approves of it. The question is never what is expected of me. It is whether this moves me forward or slows me down. A belief that produces nothing useful is a belief I can put down.", "I judge everything by what it actually does."],
+    ["Expectation is not a reason", "Society, family and people online all have a script for how my life should go, and a script is not evidence. Before I follow a rule I ask what it protects and whether that applies to me. If it serves the outcome I want, I keep it. If it only serves somebody's comfort, it is noise, and I let it go without arguing with it.", "Expectation is not a reason. Results are."],
+    ["Approval is not an input", "What people will think carries no weight in my decisions, because it produces nothing. Approval does not build the body, grow the business or deepen a relationship. I take advice that comes with a track record behind it, and I let go of opinion that does not.", "Approval is not an input. Results are."],
+    ["Pragmatic, not cold", "Pragmatism is not the absence of feeling. It is refusing to let a feeling make the decision on its own. I feel things fully, then I ask what the useful move is. Care is useful and earned loyalty is useful. What I drop is the performance of emotion, never the emotion.", "I feel it fully, then I choose what works."],
+  ] },
+  { chapter: "First principles", lessons: [
+    ["Reason from what is true", "Most people live by analogy: this is how it is usually done, so I will do it that way too. I break a situation down to what is actually true about it and reason up from there. Not what people normally do, but what the real facts are, what the real constraints are, and what outcome I actually want.", "I reason from what is true, not from what is usual."],
+    ["A timeline is not a reason", "A rule like wait a year before you date again, or you should be further along by now, is an average of other people's lives. It was never measured against mine. When a timeline tells me to close a door, I check whether there is a real reason behind it. If there is not, a number on a calendar does not get to decide for me.", "A timeline is not a reason."],
+    ["Find the question under the rule", "Every rule is an answer to a question. When I run into one, I find the question it was answering. Wait before you commit is really make sure you are not choosing from pain. Once I have the real question I can answer it directly, and usually faster and better than the rule would.", "I find the question under the rule and answer that."],
+    ["See an opportunity for what it is", "A rare, high-value connection, an opening, an idea that arrives early: each one is a potential net positive. Closing the door on it out of tradition is a blind spot I would be choosing. I do not chase it and I do not refuse it on principle. I look at it for what it actually is and test it.", "I see an opportunity for what it actually is."],
+  ] },
+  { chapter: "Removing drag", lessons: [
+    ["Scan for friction", "I keep scanning my life for friction: habits that cost more than they give, commitments kept out of guilt, systems that make simple things slow. Drag is anything that takes energy without moving me forward. When I find it, I name it, because what I cannot name I cannot remove.", "I find the drag and name it."],
+    ["Drop it without nostalgia", "When something is dead weight, I drop it cleanly. No drama and no long goodbye. How long I have had it is not a reason to keep it. A thing that served me once has already paid me, and it does not get to keep charging rent.", "If it is dead weight, I drop it cleanly."],
+    ["Delay is a cost", "Waiting has a price even when nobody sends me the bill. Months in indecision, a choice put off for a feeling of readiness that never arrives: that is time I do not get back. When the facts are in, I decide, and I adjust once I see what happens.", "When the facts are in, I decide."],
+    ["Optimise by removing", "I would rather run a simple system I actually keep than a perfect one I abandon. Fewer steps, fewer decisions, fewer places to fail. The best improvement is usually taking something away, not adding something new.", "I optimise by removing, not adding."],
+  ] },
+  { chapter: "Opportunity cost", lessons: [
+    ["Every yes costs a no", "Every hour, relationship and commitment I say yes to is something else I said no to. I do not pretend a choice is free. Before I commit, I ask what it costs in time, energy and attention, and what else those could be doing.", "Every yes costs me something, so I choose on purpose."],
+    ["Small downside, big upside", "I look for moves where the downside is small and the upside is large: a conversation, a test, a small experiment. I take those freely and often. A move with a large downside and a small upside gets my suspicion, however exciting it looks.", "I take small risks with big upside."],
+    ["Rigidity has a price too", "Holding onto a fixed plan has a cost: the rare alignment I miss because I had already decided it could not be the right time. Rigidity feels safe because its cost is invisible. I count it anyway, the same as any other cost.", "I count the cost of holding on, too."],
+  ] },
+  { chapter: "Control and the filter", lessons: [
+    ["I own my outcomes", "My outcomes are mostly mine: my inputs, my standards, my responses. I do not wait for the world to arrange itself around me. What I cannot control, I do not spend energy on. What I can control, I own completely.", "I own what is mine and release what is not."],
+    ["Open door, sharp filter", "I stay open to good inputs and I vet them hard. Chasing is wasted energy; closing the door out of tradition is an artificial limit. Openness without a filter is chaos, and a filter without openness is a closed life. I keep both at once.", "My door is open and my filter is sharp."],
+    ["Test before I trust", "Trust is earned with evidence over time. People, deals and ideas get tested: do their words match their actions, do they hold under pressure, do they add to my life or drain it? I give good faith, and I keep watching.", "I give good faith and keep watching."],
+    ["Protect the system", "My life is a system: body, mind, money, work and relationships. One destabilising variable let in carelessly can cost me months. So the bar to get in is high on purpose. Not out of fear, but because what I have built is worth protecting.", "What I have built is worth protecting."],
+  ] },
+  { chapter: "Where it makes me strong", lessons: [
+    ["Velocity", "I do not lose months or years to loops of indecision. I decide, act, measure and adjust. The speed does not come from rushing. It comes from clarity, because a clear mind does not have to argue with itself before it moves.", "I move with clarity, so I move fast."],
+    ["The crowd has no lever", "Social pressure has nothing to pull on, because what people think is not part of my equation. That frees the energy most people spend managing how they look, and I spend it on what I am building.", "The crowd has no lever on me."],
+    ["Calm when the data changes", "Because I am not attached to a script, I can adjust the moment new information arrives. I stay calm and objective, and I change course without needing to save face. Being wrong quickly is cheaper than being wrong for a long time.", "When the data changes, I change."],
+  ] },
+  { chapter: "What I guard against", lessons: [
+    ["Not everything can be optimised", "Some human processes are messy by nature: grief, healing, falling for someone, real emotional processing. They are not linear and they take the time they take. Rushing them does not remove them, it buries them. So I give them room on purpose.", "Some things take the time they take, and I let them."],
+    ["What I bury comes back", "What I push down without processing does not disappear. It comes back later as fatigue, irritability, or drag I cannot explain. So I check in honestly: is this resolved, or only shelved? Processing it fully is optimisation too, just on a longer timeline.", "I process it now so it does not run me later."],
+    ["Clear, not cold", "Most people run on emotional stories and social scripts, and when they meet someone running on clarity they can mistake efficiency for coldness. That is not mine to fix, but it is worth knowing. When it matters, I explain my reasoning and let them see the care behind it.", "I am clear, not cold, and I show it when it matters."],
+    ["Logic serves the life", "Utility is a tool, not the point. The point is a life that is good, full and mine. If an optimisation makes my life smaller, lonelier or harder than it needs to be, it has failed by its own standard.", "My logic serves my life, not the other way round."],
+  ] },
 ];
 
 // ---- storage (per-device; tolerant of blocked storage) ----
@@ -772,7 +814,7 @@ streak();
 
 // ---- menu sheet + views ----
 const VIEWS = [
-  { id: "game", title: "The Game", tag: () => `${GAME_ALL.length} lessons`, sub: "My foundation, read through every day", icon: "game" },
+  { id: "game", title: "The Game", tag: () => `${GAME_ALL.length} lessons`, sub: "The talk and how I think, read every day", icon: "game" },
   { id: "ritual", title: "Morning", tag: () => `${RITUAL_SIZE + 1} lines`, sub: "I say today's lines out loud", icon: "sun" },
   { id: "pathway", title: "Pathway", tag: () => `Stage ${currentStage() + 1}/${PATHWAY.length}`, sub: "The framework, one stage at a time", icon: "path" },
   { id: "pillars", title: "Pillars", tag: () => `${PILLARS.length}`, sub: "Every affirmation, by theme", icon: "cols" },
@@ -969,7 +1011,7 @@ const gameCard = g => ({ eyebrow: `Game · ${g.title}`, line: g.line, why: g.gam
     <p class="big">${g.title}</p>
     <p style="opacity:.85; line-height:1.6">${g.game}</p>`;
   let n = 0;
-  $("gameList").innerHTML = GAME.map((c, ci) => `
+  $("gameList").innerHTML = GAME.map((c, ci) => `${c.part ? `<p class="g-part">${c.part}</p>` : ""}
     <details class="gcard">
       <summary><h3>${c.chapter} <em class="tag">${c.lessons.length}</em></h3>${GCHEV}</summary>
       <div class="lessons">${c.lessons.map(([title, game], li) => `
