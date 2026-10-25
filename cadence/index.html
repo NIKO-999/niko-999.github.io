@@ -2089,7 +2089,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
   });
 
   /* ═══ THE SENTENCE ═══
-     "Gym mon wed fri 6:30 to 8", "walk weekdays 7:45 for 30 mins",
+     "Gym Monday to Friday 6:30 to 8", "walk weekdays 7:45 for 30 mins",
      "read now", "stretch after gym". What it cannot place, it leaves in
      the name — a sentence it does not understand costs nothing. */
   var DAYW = [['monday', 'mon'], ['tuesday', 'tues', 'tue'], ['wednesday', 'wed'], ['thursday', 'thurs', 'thu'], ['friday', 'fri'], ['saturday', 'sat'], ['sunday', 'sun']];
@@ -2143,12 +2143,33 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
         eat(m[0]);
       }
     }
+    var wd = { n: 0, rep: false, next: false };
     DAYW.forEach(function (ws, i) {
-      var re = new RegExp('\\b(?:on\\s+|every\\s+)?(' + ws.join('|') + ')s?\\b', 'g');
+      var re = new RegExp('\\b(?:on\\s+|every\\s+|next\\s+|this\\s+)?(' + ws.join('|') + ')(s?)\\b', 'g');
       var hit = used.match(re);
-      if (hit) { out.days.push(i); hit.forEach(eat); }
+      if (hit) {
+        out.days.push(i); wd.n += hit.length;
+        hit.forEach(function (h) {
+          var wdw = h.split(/\s+/).pop();
+          if (/^every\b/.test(h) || ws.indexOf(wdw) < 0) wd.rep = true;
+          if (/^next\b/.test(h)) wd.next = true;
+          eat(h);
+        });
+      }
     });
     if (!out.dated && (out.days.length > 1 || /\b(every|daily|weekdays?|weekends?)\b/.test(src) || DAYW.some(function (ws) { return new RegExp('\\b(' + ws.join('|') + ')s?\\b').test(src); }))) out.on = null;
+    /* ONE WEEKDAY, SAID PLAIN, IS ONE DAY. "Groceries monday" is the next
+       Monday: the week is a template, so a weekday alone put it on every
+       Monday there will ever be, and planning ahead is the usual case.
+       "Every monday", "mondays", a list or a range, and "daily" or
+       "weekdays" are what make a week. "Next monday" is the one in the
+       week after this. */
+    if (!out.on && !out.dated && wd.n === 1 && !wd.rep && out.days.length === 1 && !/\b(every|daily|weekdays?|weekends?)\b/.test(src)) {
+      var tdy = cdToday(), dt0 = cdAddDays(tdy, (out.days[0] - cdDow(tdy) + 7) % 7);
+      if (wd.next && dt0 < cdAddDays(cdWeekStart(tdy), 7)) dt0 = cdAddDays(dt0, 7);
+      out.on = dt0;
+    }
+    var hadDays = out.days.length;
     used = used.replace(/\b(and|&)\b/g, function (x) { return ' '.repeat(x.length); });
 
     var range = used.match(/\b(?:from\s+|at\s+)?(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*(?:-|–|to|until|till)\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/);
@@ -2208,6 +2229,9 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     }
     if (out.s != null && out.e == null) out.e = Math.min(1440, out.s + (out.len || 0));
     if (!out.days.length && out.s != null) out.days = [cdDow(cdToday())];
+    /* NO DAY SAID IS TODAY, AND TODAY IS A DATE: "wake at 7" is this
+       morning, not every one of this weekday. */
+    if (!hadDays && out.days.length === 1 && !out.on) out.on = cdToday();
 
     var name = used.replace(/\b(at|from|on|every|for|the|a|an|my)\b/g, ' ').replace(/\s+/g, ' ').trim();
     out.n = name ? name.charAt(0).toUpperCase() + name.slice(1) : '';
@@ -2260,7 +2284,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
     if (!b) {
       var say = el('input', 'cd-field cd-say');
       say.id = 'cdSay'; say.type = 'text'; say.autocomplete = 'off';
-      say.placeholder = 'Gym mon wed fri 6:30 to 8';
+      say.placeholder = 'Gym Monday to Friday 6:30 to 8';
       say.setAttribute('aria-label', 'Say it in a sentence');
       var prev = el('p', 'cd-prev'); prev.id = 'cdPrev';
       root.appendChild(say); root.appendChild(prev);
