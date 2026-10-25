@@ -2859,7 +2859,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     const shown = await page.evaluate(() => ({ day: document.querySelector('.cd-wd[aria-pressed="true"]').dataset.d, rows: [...document.querySelectorAll('.cd-it')].filter((r) => /Groceries/.test(r.textContent)).length, note: (document.querySelector('.cd-rnote') || {}).textContent }));
     ok('it lands on next Monday, not the Monday behind', shown.day === '2026-09-28' && shown.rows === 1, shown);
     ok('and the note is drawn whole under the task', shown.note === 'Tuna\nRice\nAvocado', shown.note);
-    await page.click('.cd-wk[data-w="-1"]'); await page.waitForTimeout(150);
+    await page.click('#cdWkB'); await page.waitForTimeout(150);
     const back = await page.evaluate(() => ({ day: document.querySelector('.cd-wd[aria-pressed="true"]').dataset.d, rows: [...document.querySelectorAll('.cd-it')].filter((r) => /Groceries/.test(r.textContent)).length }));
     ok('the Monday that has gone does not carry it', back.day === '2026-09-21' && back.rows === 0, back);
     await c.close();
@@ -2871,13 +2871,13 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     await page.click('#cdAdd'); await sheetUp(page);
     await page.fill('.cd-say', 'gym monday to friday 6:30 for 60 mins');
     await page.click('#cdFSave'); await page.waitForTimeout(320);
-    const g = (await store(page, 'cad.week.v1')).filter((b) => /gym/i.test(b.n));
+    const g = (await store(page, 'cad.week.v1')).filter((b) => /gym/i.test(b.n) && b.id !== 's1');
     ok('"monday to friday" is all five days, not Monday and Friday', g.length === 1 && g[0].d.join() === '0,1,2,3,4' && !g[0].on, g);
     /* next Monday, which is a day still to come */
-    await page.click('.cd-wk[data-w="1"]'); await page.waitForTimeout(150);
+    await page.click('#cdWkF'); await page.waitForTimeout(150);
     await page.click('.cd-wd[data-d="2026-09-28"]'); await page.waitForTimeout(150);
-    await page.click('.cd-it:has-text("Gym") .cd-rb'); await sheetUp(page);
-    const link = await page.$('.cd-link');
+    await page.click('.cd-it[data-id="' + g[0].id + '"] .cd-rb'); await sheetUp(page);
+    const link = await page.$('#cdSheet .cd-link');
     ok('on a day ahead the editor offers to plan what you will train', !!link && /plan/i.test(await link.textContent()));
     if (link) {
       await link.click(); await page.waitForTimeout(300);
@@ -2886,7 +2886,7 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
       const tr = await store(page, 'cad.train.v1'), lg = (await store(page, 'cad.log.v1')) || {};
       ok('the plan is filed against that day', !!(tr && tr['2026-09-28'] && Object.keys(tr['2026-09-28']).length), tr);
       ok('and planning it does not tick the block off', !lg['2026-09-28'] || !Object.keys(lg['2026-09-28']).length, lg);
-      ok('the row says what is planned', /Push/.test(await page.$eval('.cd-it:has-text("Gym")', (e) => e.textContent)));
+      ok('the row says what is planned', /Push/.test(await page.$eval('.cd-it[data-id="' + g[0].id + '"]', (e) => e.textContent)));
     }
     await c.close();
   }

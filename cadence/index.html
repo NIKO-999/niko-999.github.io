@@ -237,7 +237,7 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 #cdDayPane { padding-bottom: calc(118px + env(safe-area-inset-bottom)); }
 
 /* ── the week: a dot over a letter, seven of them ── */
-.cd-week { position: relative; flex: none; display: grid; grid-template-columns: repeat(7, 44px); justify-content: center; margin: 8px 0 0; }
+.cd-week { flex: none; display: grid; grid-template-columns: repeat(7, 44px); justify-content: center; margin: 8px 0 0; }
 .cd-wd { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; min-height: 48px; }
 .cd-wd i { width: 5px; height: 5px; border-radius: 50%; background: var(--nil); }
 .cd-wd[data-state="part"] i { background: var(--quiet); }
@@ -306,9 +306,13 @@ button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .cd-rnote { grid-column: 2 / -1; margin-top: 3px; white-space: pre-line; overflow-wrap: anywhere; font: 400 12.5px/1.35 var(--sans); color: var(--quiet); }
 .cd-list.no-g .cd-rnote { grid-column: 1 / -1; }
 .cd-bnote { min-height: 96px; resize: vertical; line-height: 1.35; font-family: var(--sans); }
-.cd-wk { position: absolute; top: 0; width: 40px; height: 48px; display: grid; place-items: center; background: none; border: 0; color: var(--quiet); font: 400 20px/1 var(--sans); }
-.cd-wk[data-w="-1"] { left: calc(50% - 154px - 40px); }
-.cd-wk[data-w="1"] { right: calc(50% - 154px - 40px); }
+.cd-hero { position: relative; }
+/* In the gap above the date, where the week strip's own padding is: the
+   strip is 308 of a 390 screen, so there is no room for a 44px arrow
+   either side of it. */
+.cd-wk { position: absolute; top: -50px; width: 44px; height: 44px; display: grid; place-items: center; background: none; border: 0; color: var(--quiet); font: 400 22px/1 var(--sans); }
+.cd-wk[data-w="-1"] { left: 0; }
+.cd-wk[data-w="1"] { right: 0; }
 .cd-rs { grid-column: 2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 12.5px/1.3 var(--sans); color: var(--quiet); }
 /* What you trained rides the name's own line, in the session's colour. */
 .cd-rw { color: var(--kc); }
@@ -976,6 +980,8 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
       <div class="cd-week" id="cdRibbon"></div>
       <div class="cd-pane" id="cdDayPane">
         <div class="cd-hero" id="cdHero">
+          <button type="button" class="cd-wk" id="cdWkB" data-w="-1" aria-label="Earlier week">‹</button>
+          <button type="button" class="cd-wk" id="cdWkF" data-w="1" aria-label="Later week">›</button>
           <p class="cd-hcap" id="cdHeroK"></p>
           <button class="cd-big cd-hn" id="cdHeroN" type="button"></button>
           <p class="cd-hs" id="cdHeroS"></p>
@@ -1794,7 +1800,7 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
 
   function cdPaintDay() {
     var today = cdToday(), ws = cdWeekStart(sel);
-    var rb = '<button type="button" class="cd-wk" data-w="-1" aria-label="Earlier week">‹</button><button type="button" class="cd-wk" data-w="1" aria-label="Later week">›</button>';
+    var rb = '';
     for (var i = 0; i < 7; i++) {
       var d = cdAddDays(ws, i), t = cdTally(d), st = cdDayState(d);
       rb += '<button type="button" class="cd-wd' + (d === today ? ' is-today' : '') + '" data-d="' + d + '" data-state="' + st + '" aria-pressed="' + (d === sel) + '"'
@@ -2071,9 +2077,10 @@ html.cd-boot body > :not(.cd-rf) { visibility: hidden; }
   }
   $('cdHeroN').addEventListener('click', function () { if (heroId) cdEdit(heroId); });
   $('cdThen').addEventListener('click', function () { if (thenId) cdEdit(thenId); });
+  [$('cdWkB'), $('cdWkF')].forEach(function (w) {
+    w.addEventListener('click', function () { sel = cdAddDays(sel, 7 * +w.dataset.w); $('cdDayPane').scrollTop = 0; cdPaintDay(); });
+  });
   $('cdRibbon').addEventListener('click', function (ev) {
-    var wk = ev.target.closest('.cd-wk');
-    if (wk) { sel = cdAddDays(sel, 7 * +wk.dataset.w); $('cdDayPane').scrollTop = 0; cdPaintDay(); return; }
     var b = ev.target.closest('.cd-wd');
     if (!b) return;
     sel = b.dataset.d;
