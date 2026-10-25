@@ -1,0 +1,14 @@
+{
+  "name": "Chosen",
+  "short_name": "Chosen",
+  "description": "Morning affirmations for choosing yourself.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#e6e1dd",
+  "theme_color": "#e6e1dd",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

@@ -1,0 +1,1179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#e6e1dd">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Chosen">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>Chosen</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: soft warm ground, a breathing peach orb behind one centered statement, dark square controls, bottom sheets for everything else. */
+:root {
+  --bg: #e6e1dd;          /* warm stone */
+  --sheet: #f2ede9;
+  --line: #e2dbd5;
+  --ink: #2b2623;
+  --muted: #6e655f;
+  --pill: #e4d9d1;
+  --orb: #e8b598;         /* peach glow */
+  --btn: #232020;         /* dark squares */
+  --btn-ink: #f7f2ee;
+  --rose: #b4553d;
+  --font: "Figtree", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --orb-scale: 1;
+  --hl: #f5df8c;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #161312; --sheet: #211d1b; --line: #2f2926; --ink: #f1ebe6; --muted: #a59b94; --pill: #352e2a;
+  --orb: #9a5a40; --btn: #f1ebe6; --btn-ink: #1b1817; --rose: #e48b72; --hl: rgba(222, 176, 64, .42); color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #161312; --sheet: #211d1b; --line: #2f2926; --ink: #f1ebe6; --muted: #a59b94; --pill: #352e2a;
+  --orb: #9a5a40; --btn: #f1ebe6; --btn-ink: #1b1817; --rose: #e48b72; --hl: rgba(222, 176, 64, .42); color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font: 17px/1.5 var(--font); overflow-x: hidden;
+  padding-left: max(18px, env(safe-area-inset-left, 0px));
+  padding-right: max(18px, env(safe-area-inset-right, 0px));
+  padding-block: 14px 120px;
+}
+button, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+p { margin: 0; }
+
+/* Ambient orb */
+.orb {
+  position: fixed; z-index: -1; pointer-events: none;
+  width: min(130vw, 760px); aspect-ratio: 1; max-width: none;
+  left: 58%; top: 52%; translate: -50% -50%;
+  background: radial-gradient(circle, var(--orb) 0%, color-mix(in srgb, var(--orb) 45%, transparent) 30%, transparent 66%);
+  filter: blur(26px); opacity: .9;
+  transform: scale(var(--orb-scale)); transition: transform .9s cubic-bezier(.2,.7,.2,1), opacity .6s;
+}
+body:not([data-view="ritual"]) .orb { opacity: .4; top: 18%; }
+@media (prefers-reduced-motion: no-preference) {
+  .orb { animation: breathe 9s ease-in-out infinite; }
+  @keyframes breathe { 0%,100% { filter: blur(26px) brightness(1); } 50% { filter: blur(34px) brightness(1.06); } }
+}
+
+.app { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+/* Header */
+.top { display: flex; justify-content: space-between; align-items: center; }
+.sq {
+  width: 56px; height: 56px; border-radius: 18px; border: 0; display: grid; place-items: center; flex: none;
+  background: var(--btn); color: var(--btn-ink);
+}
+.sq svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sq[disabled] { opacity: .25; cursor: default; }
+.sq.soft { background: color-mix(in srgb, var(--sheet) 80%, transparent); color: var(--ink); box-shadow: 0 1px 2px rgba(60,40,30,.08); }
+.streak {
+  background: color-mix(in srgb, var(--sheet) 85%, transparent); border-radius: 14px; padding: 10px 14px;
+  font-weight: 500; box-shadow: 0 1px 2px rgba(60,40,30,.08); font-variant-numeric: tabular-nums;
+}
+.streak b { font-weight: 700; }
+
+/* Morning */
+.ritual {
+  min-height: calc(100dvh - 230px); display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: 18px; padding-block: 12px;
+}
+.r-meta { font-size: .92rem; font-weight: 500; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+.r-meta i { font-style: normal; opacity: .5; }
+.statement {
+  margin: 0; font-weight: 600; font-size: clamp(2rem, 8.4vw, 3rem); line-height: 1.12; letter-spacing: -.022em;
+  text-wrap: balance; max-width: 15em; overflow-wrap: break-word;
+}
+.why { color: var(--muted); max-width: 34ch; font-size: 1rem; }
+.say {
+  margin-top: 10px; border: 0; background: color-mix(in srgb, var(--sheet) 88%, transparent); border-radius: 999px;
+  padding: 12px 18px 12px 20px; display: inline-flex; align-items: center; gap: 12px; font-weight: 600;
+  box-shadow: 0 1px 2px rgba(60,40,30,.1);
+}
+.dots { display: inline-flex; gap: 5px; }
+.dots span { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--ink); }
+.dots span.on { background: var(--ink); }
+.say:active { transform: scale(.97); }
+textarea {
+  width: 100%; max-width: 30em; min-height: 120px; resize: vertical; text-align: left;
+  background: var(--sheet); border: 0; border-radius: 22px; padding: 16px 18px; line-height: 1.5;
+  box-shadow: 0 1px 2px rgba(60,40,30,.08);
+}
+.toast { font-weight: 500; color: var(--muted); min-height: 1.5em; }
+
+.dock {
+  position: fixed; z-index: 4; left: 0; right: 0; bottom: 0;
+  padding: 14px max(18px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-left, 0px));
+  display: flex; justify-content: center;
+}
+.dock-in { width: 100%; max-width: 560px; display: flex; align-items: center; gap: 16px; }
+.prog { flex: 1; display: flex; gap: 4px; }
+.prog span { flex: 1; height: 4px; border-radius: 2px; background: color-mix(in srgb, var(--ink) 14%, transparent); }
+.prog span.done { background: var(--ink); }
+.prog span.now { background: color-mix(in srgb, var(--ink) 45%, transparent); }
+.pillbtn {
+  border: 0; border-radius: 18px; height: 56px; padding: 0 24px; background: var(--btn); color: var(--btn-ink); font-weight: 600;
+}
+
+/* Sheets and cards */
+.intro { display: flex; flex-direction: column; gap: 6px; padding: 6px 4px 0; }
+h2 { margin: 0; font-size: clamp(1.9rem, 7.4vw, 2.5rem); font-weight: 600; letter-spacing: -.022em; line-height: 1.1; text-wrap: balance; }
+.lede { color: var(--muted); max-width: 40ch; }
+section { display: flex; flex-direction: column; gap: 16px; }
+.card { background: var(--sheet); border-radius: 30px; padding: 6px 22px; }
+.card-head { padding: 20px 0 4px; display: flex; flex-direction: column; gap: 6px; }
+.card-head h3 { margin: 0; font-size: 1.3rem; font-weight: 600; letter-spacing: -.01em; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.card-head p { color: var(--muted); font-size: .98rem; }
+.card.dark { background: var(--btn); color: var(--btn-ink); padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+.card.dark .label { opacity: .65; }
+.card.dark .big { font-size: clamp(1.6rem, 6.6vw, 2.1rem); font-weight: 600; line-height: 1.15; letter-spacing: -.02em; text-wrap: balance; }
+.card.dark .pillbtn { background: var(--btn-ink); color: var(--btn); align-self: flex-start; }
+.label { font-size: .85rem; font-weight: 600; color: var(--muted); }
+
+.rows { display: flex; flex-direction: column; }
+.row {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 18px; align-items: center;
+  width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid var(--line); padding: 20px 0;
+}
+.rows > .row:first-child { border-top: 0; }
+.row.noicon { grid-template-columns: minmax(0, 1fr) auto; }
+.row.plain { grid-template-columns: minmax(0, 1fr); cursor: default; }
+.row-icon svg { width: 28px; height: 28px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; display: block; }
+.row-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.row-title { font-size: 1.14rem; font-weight: 500; line-height: 1.3; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.row-sub { color: var(--muted); line-height: 1.4; }
+.row-sub.small { font-size: .9rem; }
+.row-sub s { text-decoration-color: var(--rose); }
+.tag { font-size: .78rem; font-weight: 600; background: var(--pill); color: var(--ink); border-radius: 8px; padding: 3px 9px; white-space: nowrap; font-style: normal; }
+.num { font-size: .95rem; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; width: 1.6em; }
+.radio { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--ink); display: grid; place-items: center; }
+.row[aria-checked="true"] .radio::after { content: ""; width: 14px; height: 14px; border-radius: 50%; background: var(--ink); }
+.go { width: 34px; height: 34px; border-radius: 50%; background: var(--pill); display: grid; place-items: center; }
+.go svg { width: 14px; height: 14px; fill: var(--ink); }
+.row:not(.plain):hover .row-title { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.split .card { padding: 20px 22px; display: flex; flex-direction: column; gap: 8px; }
+.split .label.rose { color: var(--rose); }
+@media (max-width: 520px) { .split { grid-template-columns: 1fr; } }
+.note { font-size: .88rem; color: var(--muted); text-align: center; }
+
+/* Highlights */
+mark { background: var(--hl); color: inherit; border-radius: 3px; padding: 1px 0; -webkit-box-decoration-break: clone; box-decoration-break: clone; cursor: pointer; }
+mark.flash { outline: 2px solid var(--ink); outline-offset: 2px; }
+.hltool {
+  position: fixed; z-index: 12; display: flex; gap: 4px; padding: 4px; border-radius: 14px;
+  background: var(--btn); box-shadow: 0 8px 24px rgba(30, 20, 10, .25);
+}
+.hltool button { border: 0; background: none; color: var(--btn-ink); font-weight: 600; font-size: .92rem; padding: 9px 14px; border-radius: 10px; display: inline-flex; align-items: center; gap: 8px; }
+.hltool button::before { content: ""; width: 12px; height: 12px; border-radius: 4px; background: var(--hl); }
+.hltool button.remove::before { background: none; border: 1.5px solid var(--btn-ink); }
+.hlitem { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: start; border-top: 1px solid var(--line); padding: 16px 0; }
+.hlitem:first-child { border-top: 0; }
+.hljump { border: 0; background: none; padding: 0; text-align: left; display: flex; flex-direction: column; gap: 6px; }
+.hlq { line-height: 1.55; }
+.hlq mark { cursor: inherit; }
+.hlsrc { font-size: .85rem; color: var(--muted); }
+.hldel { border: 0; background: var(--pill); width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); font-size: 1.05rem; line-height: 1; }
+.hlempty { color: var(--muted); padding: 4px 0 18px; line-height: 1.5; }
+
+/* The Game */
+details.gcard { background: var(--sheet); border-radius: 30px; }
+details.gcard summary { list-style: none; cursor: pointer; padding: 20px 22px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+details.gcard summary::-webkit-details-marker { display: none; }
+details.gcard summary h3 { margin: 0; font-size: 1.25rem; font-weight: 600; letter-spacing: -.01em; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.gchev { width: 22px; height: 22px; stroke: var(--muted); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; transition: transform .25s; }
+details[open] > summary .gchev { transform: rotate(180deg); }
+.lessons { padding: 0 22px 8px; display: flex; flex-direction: column; }
+.lesson { border-top: 1px solid var(--line); padding: 18px 0; display: flex; flex-direction: column; gap: 8px; }
+.lhead { display: flex; gap: 12px; align-items: baseline; }
+.lhead .row-title { font-weight: 600; }
+.lgame { font-size: 1.06rem; line-height: 1.65; max-width: 62ch; }
+
+/* Pathway */
+.pathtop { display: flex; flex-direction: column; gap: 12px; }
+.pathtop .prog span { height: 6px; border-radius: 3px; }
+.path { display: flex; flex-direction: column; gap: 12px; }
+.phase { font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 10px 0 0 50px; }
+.phase { position: relative; }
+.phase::before { content: ""; position: absolute; left: 16px; top: -12px; bottom: -12px; width: 2px; background: color-mix(in srgb, var(--ink) 12%, transparent); }
+.path > .phase:first-child::before { display: none; }
+.stage { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 16px; position: relative; }
+.stage::before { content: ""; position: absolute; left: 16px; top: 0; bottom: -12px; width: 2px; background: color-mix(in srgb, var(--ink) 12%, transparent); }
+.stage.last::before { bottom: auto; height: 34px; }
+.stage.done::before { background: var(--ink); }
+.node {
+  position: relative; z-index: 1; margin-top: 15px; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--bg); border: 2px solid color-mix(in srgb, var(--ink) 18%, transparent); font-weight: 700; font-size: .88rem; color: var(--muted);
+}
+.node svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.stage.done .node { background: var(--ink); border-color: var(--ink); color: var(--sheet); }
+.stage.now .node { border-color: var(--ink); color: var(--ink); box-shadow: 0 0 0 7px color-mix(in srgb, var(--orb) 55%, transparent); }
+details.scard { background: var(--sheet); border-radius: 24px; min-width: 0; }
+.stage:not(.now):not(.done) details.scard { background: color-mix(in srgb, var(--sheet) 60%, transparent); }
+details.scard summary { list-style: none; cursor: pointer; padding: 18px 20px; display: flex; flex-direction: column; gap: 2px; }
+details.scard summary::-webkit-details-marker { display: none; }
+.stitle { font-size: 1.15rem; font-weight: 600; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.ssub { color: var(--muted); font-size: .95rem; }
+.sbody { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 16px; }
+.sbody .group { display: flex; flex-direction: column; gap: 8px; }
+.sline { font-size: 1.25rem; font-weight: 600; letter-spacing: -.015em; line-height: 1.25; text-wrap: balance; }
+.sbtns { display: flex; gap: 8px; flex-wrap: wrap; }
+.lightbtn { border: 1px solid color-mix(in srgb, var(--ink) 20%, transparent); background: transparent; border-radius: 14px; padding: 10px 16px; font-weight: 600; }
+
+/* Two paths */
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 18px; background: var(--sheet); }
+.seg button { border: 0; background: none; border-radius: 14px; padding: 11px 6px; font-weight: 600; font-size: .92rem; color: var(--muted); }
+.seg button[aria-selected="true"] { background: var(--btn); color: var(--btn-ink); }
+.row.mrow { grid-template-columns: 52px minmax(0, 1fr); align-items: start; }
+.time { font-weight: 600; font-size: .92rem; color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 3px; }
+.pos, .neg { display: flex; gap: 10px; align-items: baseline; line-height: 1.45; }
+.pos::before, .neg::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; transform: translateY(-1px); }
+.pos::before { background: var(--ink); }
+.neg { color: var(--muted); }
+.neg::before { border: 1.5px solid var(--rose); }
+#mirror[data-path="live"] .neg, #mirror[data-path="drop"] .pos { display: none; }
+#mirror[data-path="drop"] .neg { color: var(--ink); }
+.paths { display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px; }
+.card.dark .pos::before { background: var(--btn-ink); }
+.card.dark .neg, #mirror[data-path="drop"] .card.dark .neg { color: color-mix(in srgb, var(--btn-ink) 70%, transparent); }
+.card.dark .neg::before { border-color: var(--rose); }
+.legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: .88rem; color: var(--muted); padding-inline: 4px; }
+#mirror[data-path="live"] .legend { display: none; }
+.fix { display: flex; gap: 10px; align-items: baseline; font-weight: 600; line-height: 1.45; }
+.fix::before { content: "Fix"; flex: none; font-size: .7rem; font-weight: 700; letter-spacing: .02em; background: var(--pill); color: var(--ink); border-radius: 6px; padding: 2px 7px; transform: translateY(-1px); }
+.legend .fix { font-weight: 500; }
+#mirror[data-path="live"] .fix, #mirror[data-path="live"] .fixbtn { display: none; }
+.card.dark .fix::before { background: color-mix(in srgb, var(--btn-ink) 20%, transparent); color: var(--btn-ink); }
+.fixbtn { align-self: flex-start; border: 0; border-radius: 14px; padding: 10px 16px; background: var(--btn); color: var(--btn-ink); font-weight: 600; margin-top: 4px; }
+body[data-view="mirror"][data-path="drop"] { --orb: color-mix(in srgb, var(--muted) 55%, var(--bg)); }
+
+/* Menu sheet */
+.scrim { position: fixed; inset: 0; z-index: 8; background: rgba(20,14,10,.28); }
+.sheet {
+  position: fixed; z-index: 9; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 600px;
+  background: var(--sheet); border-radius: 34px 34px 0 0;
+  padding: 12px max(24px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(24px, env(safe-area-inset-left, 0px));
+  box-shadow: 0 -8px 40px rgba(40,25,15,.12); max-height: 88dvh; overflow-y: auto;
+}
+.handle { width: 44px; height: 5px; border-radius: 3px; background: color-mix(in srgb, var(--ink) 30%, transparent); margin: 0 auto 6px; }
+@media (prefers-reduced-motion: no-preference) {
+  .sheet:not([hidden]) { animation: up .32s cubic-bezier(.2,.8,.2,1); }
+  @keyframes up { from { transform: translateY(40%); opacity: .4; } to { transform: none; opacity: 1; } }
+  .statement { animation: fade .5s ease both; }
+  @keyframes fade { from { opacity: .2; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+}
+</style>
+</head>
+<body>
+
+
+<div class="orb" aria-hidden="true"></div>
+
+<div class="app">
+  <header class="top">
+    <button class="sq" id="menuBtn" aria-label="Open sections" aria-haspopup="dialog">
+      <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+    </button>
+    <div class="streak"><b id="streak">0</b> day streak</div>
+  </header>
+
+  <section id="ritual"></section>
+
+  <section id="pathway" hidden>
+    <div class="intro"><h2>My pathway</h2><p class="lede">The framework as a climb. I work one stage at a time, and I mark it passed when the signs are true for me.</p></div>
+    <div class="card pathtop" style="padding:20px 22px" id="pathTop"></div>
+    <div class="path" id="path"></div>
+  </section>
+
+  <section id="pillars" hidden>
+    <div class="intro"><h2>The pillars</h2><p class="lede">The pimp's mindset, pointed at my own growth. I tap a line to practise it on its own.</p></div>
+    <div id="pillarList" style="display:flex;flex-direction:column;gap:14px"></div>
+  </section>
+
+  <section id="code" hidden>
+    <div class="intro"><h2>The Code</h2><p class="lede">The language of the game, applied to me.</p></div>
+    <div class="card"><div class="card-head"><h3>Terms</h3></div><div class="rows" id="codeTerms"></div></div>
+    <div class="card"><div class="card-head"><h3>My rules</h3></div><div class="rows" id="codeRules"></div></div>
+  </section>
+
+  <section id="recenter" hidden>
+    <div class="intro"><h2>What's happening right now?</h2><p class="lede">Every slip is an indirect move. I name it, then I make the direct one.</p></div>
+    <div class="card"><div class="rows" id="chips" role="radiogroup" aria-label="Situation"></div></div>
+    <div id="turn" style="display:flex;flex-direction:column;gap:12px"></div>
+    <div class="card"><div class="card-head"><h3>Direct, not indirect</h3><p>I cross out the left. I live the right.</p></div><div class="rows" id="dvTable"></div></div>
+  </section>
+
+  <section id="game" hidden>
+    <div class="intro"><h2>The Game</h2><p class="lede">Every lesson from the talk, in order, in my own voice. This is my foundation. I read it through every day, and I press and hold on anything worth keeping to highlight it.</p></div>
+    <details class="gcard" id="hlCard"><summary><h3>My highlights <em class="tag" id="hlCount">0</em></h3><svg class="gchev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></summary><div class="lessons" id="hlList"></div></details>
+    <div class="card dark" id="gameToday"></div>
+    <div id="gameList" style="display:flex;flex-direction:column;gap:14px"></div>
+  </section>
+
+  <section id="mirror" hidden>
+    <div class="intro"><h2>Two paths</h2><p class="lede">What my life looks like when I live this, and what it looks like when I don't. I look at both, then I choose.</p></div>
+    <div class="seg" role="tablist" id="seg">
+      <button role="tab" data-path="both">Both</button>
+      <button role="tab" data-path="live">When I live it</button>
+      <button role="tab" data-path="drop">When I don't</button>
+    </div>
+    <div class="legend"><span class="pos">When I live it</span><span class="neg">When I don't</span><span class="fix">How I fix it</span></div>
+    <div class="card"><div class="card-head"><h3>A day in my life</h3></div><div class="rows" id="mirrorDay"></div></div>
+    <div class="card dark" id="mirrorYear"></div>
+    <div id="mirrorPillars" style="display:flex;flex-direction:column;gap:14px"></div>
+  </section>
+
+  <section id="journal" hidden>
+    <div class="intro"><h2>My evidence</h2><p class="lede">A man who has mastered himself has receipts. These are mine.</p></div>
+    <div class="card"><div class="rows" id="entries"></div></div>
+    <p class="note">Saved only on this device, in this browser.</p>
+  </section>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Sections" hidden>
+  <div class="handle"></div>
+  <div class="rows" id="menuRows" role="radiogroup"></div>
+</div>
+
+<script>
+const PILLARS = [
+  { key: "choose", name: "I choose myself", core: "Every second of every day. Not once, not when it's easy. What I choose from that place is safe; what I choose from lack becomes a possession.",
+    lines: [
+      "I choose myself every second of every day.",
+      "I accept everything good that was said about me, and I flourish in it.",
+      "I don't wait to be chosen. I already decided.",
+      "My gifts, talents and abilities were given to me. Using them is how I say yes to myself.",
+      "I only identify with what reflects the connection I've made with myself.",
+      "Nothing outside me completes me. I came here complete." ] },
+  { key: "prize", name: "I am the prize", core: "Nothing gets placed above me. I identify; I don't chase. If I'm reaching for something to prove I'm enough, I've already put it above myself.",
+    lines: [
+      "Nothing gets placed above me.",
+      "I identify. I don't chase.",
+      "I don't qualify myself for anyone. I'm the standard.",
+      "If it doesn't see me the way I see myself, it doesn't get access.",
+      "I don't need anything to enhance me. I'm here to enhance what's worthy.",
+      "Their attention is welcome. It isn't required." ] },
+  { key: "guidance", name: "I lead with guidance", core: "Gifts, offerings and over-giving are compensation for something I haven't built. I lead with what I actually am: clarity, direction, wisdom.",
+    lines: [
+      "I lead with guidance, not gifts.",
+      "I don't compensate. I contribute.",
+      "My clarity is worth more than anything I could buy.",
+      "I give my best to what chooses me, the same way I choose myself.",
+      "I don't over-deliver to be liked. I deliver what's real.",
+      "I don't send three messages to make up for one. One clear message is enough." ] },
+  { key: "freedom", name: "I give freedom", core: "I give everyone the space to choose. I hold nothing as a possession. If they leave, I let them; I never took my eyes off myself.",
+    lines: [
+      "I give everyone the freedom to choose, and I never beg.",
+      "People are experiences, not possessions.",
+      "If they leave, I let them. My gaze never left me.",
+      "I'm attached to my mission, not to outcomes with people.",
+      "I'm not connected to their choice. I'm connected to myself.",
+      "No reply is still an answer, and I'm fine with it." ] },
+  { key: "mastery", name: "I master myself", core: "I find what I'm here to do, stare the fear in the face, accept the work, and let myself be remolded. The path only introduces me to new facets of myself.",
+    lines: [
+      "I stare my purpose in the face and do the work.",
+      "I accept the remolding this season requires.",
+      "The path is just introducing me to the next version of myself.",
+      "I bypass fear and move on the mission.",
+      "Life doesn't happen to me. I happen to life.",
+      "I can predict my outcomes because I've mastered my inputs." ] },
+  { key: "presence", name: "My presence speaks", core: "Because I've said yes to myself, my presence does the work. People rise just by being near a man who refuses to shape-shift.",
+    lines: [
+      "My presence is the message.",
+      "People rise just by being near me.",
+      "I don't need many words. I need to be myself.",
+      "I radiate inspiration, guidance and breakthroughs.",
+      "Everything that leaves my space leaves it better.",
+      "I walk into the room already settled." ] },
+  { key: "direct", name: "I am direct", core: "I say what I mean. No shape-shifting, no manipulation, no hints, no hoping they read between the lines. Directness is my self-respect out loud.",
+    lines: [
+      "I say what I mean, plainly, once.",
+      "I don't shape-shift to be accepted.",
+      "I don't manipulate. I state.",
+      "I'd rather hear a clear no than chase a maybe.",
+      "I ask directly for what I want, and I'm at peace with any answer.",
+      "My word is clean, so my mind stays clean." ] },
+  { key: "evidence", name: "I have evidence", core: "My confidence is built on fruit: the results in my life and the impact I leave behind. I own my mistakes; they're how I decided who I'd become.",
+    lines: [
+      "My confidence is built on evidence.",
+      "I look at the fruit, and the fruit is good.",
+      "I own my mistakes. They're how I decided who I'd become.",
+      "I'm not beyond reproach, but I'm not compromised.",
+      "Every promise I keep to myself is another receipt.",
+      "Today I add evidence." ] },
+  { key: "gorgeous", name: "I am too gorgeous", core: "Gorgeous means nothing gets placed above me. It shows in how I carry myself, dress, speak and spend my time. My standards are my style.",
+    lines: [
+      "I'm too gorgeous to chase.",
+      "I carry myself like nothing gets placed above me.",
+      "I dress, move and speak like a man who already chose himself.",
+      "My standards are my style.",
+      "I don't shrink to fit a room. The room makes space.",
+      "I take care of this body and this mind like they're my first asset, because they are." ] },
+  { key: "mind", name: "I pimp my mind", core: "Pimping is a state of mind before it's anything else. I run my head the way a pimp runs his business: I decide who gets space in it, and nothing stays in it for free.",
+    lines: [
+      "Pimping is a state of mind, and my mind is mine.",
+      "Nothing lives in my head rent-free.",
+      "I run my thoughts. They don't run me.",
+      "I keep my mind on my mission and my mission on my mind.",
+      "I don't give my energy to anything that doesn't give back.",
+      "I'm the manager of my attention, and I manage it cold." ] },
+  { key: "game", name: "I study the game", core: "The game is to be sold, not told. Real game costs me something: study, reps, humility. Game recognizes game, so I stay around men who've mastered themselves and keep sharpening.",
+    lines: [
+      "I stay a student of the game.",
+      "Game recognizes game. I put myself around men who've mastered themselves.",
+      "The game is to be sold, not told. I invest in what sharpens me.",
+      "I don't give my best game to people who won't use it.",
+      "Every loss taught me game. I keep the lesson and drop the feeling.",
+      "I study myself as hard as I study the game." ] },
+  { key: "stay", name: "I stay down", core: "Pimping ain't easy. Discipline and patience come before every come-up. The game is cold but it's fair: I learn the rules, play them well, and never let them see me sweat.",
+    lines: [
+      "I stay down till I come up.",
+      "Pimping ain't easy, and I don't need it to be.",
+      "The game is cold but it's fair. I play it well.",
+      "I never let them see me sweat.",
+      "Discipline is the one that never leaves me.",
+      "I stack days the way I stack paper: quietly, every day." ] },
+  { key: "chooseup", name: "I choose up", core: "In the game, choosing up means leaving for someone better. I turn it on myself: every morning there's a higher version of me available, and I choose up to him.",
+    lines: [
+      "Every morning I choose up to the highest version of me.",
+      "If a better version of me is available, I go get him.",
+      "I'm not loyal to my old habits. I'm loyal to my growth.",
+      "Yesterday's me was the warm-up.",
+      "I outgrow my comfort on purpose.",
+      "The only one I'm competing with is the man I was." ] },
+];
+
+// The pimp's vocabulary, turned inward.
+const CODE_TERMS = [
+  ["Choosing", "She picks him; he never picks her.", "I pick myself first, every day. Everything else is just noticing who matches."],
+  ["Identify", "He recognizes who fits his world instead of chasing.", "I know myself well enough to see what matches me on sight, whether people, work or habits."],
+  ["Gorgeous", "Nothing is placed above him.", "My standards, presentation and self-respect are never up for trade."],
+  ["Choose up", "Leaving for someone better.", "I leave my old self for the better version that's available to me right now."],
+  ["Game", "Knowledge of how things really work.", "The skill, insight and self-knowledge I earn through study and reps."],
+  ["Sold, not told", "Real game has a price.", "What's free rarely changes me. I pay for growth with time, effort and humility."],
+  ["Square", "Someone who lives by rules he never chose.", "Running on autopilot and other people's expectations. I'm never square to myself."],
+  ["Mark", "Someone easy to work.", "Being run by impulses, flattery or the need for approval. I'm not a mark for my own weaknesses."],
+  ["Bottom", "The one who never leaves.", "My foundation habits: the ones that stay with me on my worst day."],
+  ["Paper", "The money, the proof.", "Results. I count what I actually produced, not what I meant to do."],
+  ["Cold", "No emotion in the decision.", "I decide from the mission, not the mood. I feel it fully, then act clean."],
+  ["Proximity", "His presence alone raises people.", "I'm becoming someone whose presence makes a room better without a speech."],
+];
+
+const CODE_RULES = [
+  "I choose myself before I choose anything else.",
+  "I never chase. I identify.",
+  "I lead with guidance, never with gifts.",
+  "I give everyone the freedom to choose, including the freedom to leave.",
+  "I never suspend the gaze I have on myself.",
+  "I say it once, and I say it straight.",
+  "I pay for game. I respect the price of growth.",
+  "I stay down till I come up.",
+  "I never let them see me sweat.",
+  "I stay gorgeous. Nothing goes above me.",
+  "I count the paper: results, not intentions.",
+  "I choose up to myself every morning.",
+];
+
+const RECENTER = [
+  { label: "I want to chase", indirect: "Double-texting, checking if they replied, finding reasons to reach out, putting their response above my peace.",
+    direct: "I send nothing new. I go do the next thing on my own mission. If I want something, I ask once and clearly.", key: "prize", line: "I identify. I don't chase." },
+  { label: "I'm over-explaining", indirect: "Long justifications, softening, apologizing for my own decisions, hoping the extra words earn approval.",
+    direct: "I cut it to one sentence. I state the decision and stop. A boundary needs no defence.", key: "direct", line: "I say what I mean, plainly, once." },
+  { label: "I feel not enough", indirect: "Reaching for gifts, status or favours to compensate; seeing someone as out of my league.",
+    direct: "I list three pieces of real evidence from my own life. Then I do one thing today that adds a fourth.", key: "evidence", line: "My confidence is built on evidence." },
+  { label: "Someone pulled away", indirect: "Bargaining, reopening the door, reading every sign, letting their choice set my mood.",
+    direct: "I give them the freedom they took and keep my eyes on myself. If they come back, they can see who I became; that doesn't mean I let them back in.", key: "freedom", line: "If they leave, I let them. My gaze never left me." },
+  { label: "I'm avoiding the work", indirect: "Scrolling, waiting to feel ready, playing around with the idea for another year.",
+    direct: "I stare it in the face and do the smallest real piece in the next 20 minutes.", key: "mastery", line: "I stare my purpose in the face and do the work." },
+  { label: "I'm performing for the room", indirect: "Adjusting my opinions, my voice and my jokes to whoever's watching.",
+    direct: "I say the true thing in my normal voice and let the room adjust to me.", key: "presence", line: "I walk into the room already settled." },
+  { label: "My mood is running me", indirect: "Letting a feeling, a text or someone's energy decide my whole day. Being a mark for my own emotions.",
+    direct: "I feel it and name it, then make the next decision cold, from the mission and not the mood.", key: "mind", line: "I run my thoughts. They don't run me." },
+  { label: "I'm on autopilot", indirect: "Running someone else's script: same habits, same excuses, living square to myself.",
+    direct: "I pick one thing the better version of me does today, and I do it before noon.", key: "chooseup", line: "Every morning I choose up to the highest version of me." },
+  { label: "I'm about to send a needy email", indirect: "A message written to be reassured: hedges, triple question marks, 'just following up' for the third time.",
+    direct: "One ask, one deadline, no apology. If nobody answers, I move on and act on what I have.", key: "guidance", line: "I don't send three messages to make up for one. One clear message is enough." },
+];
+
+const DV = [
+  ["Choosing them so I feel chosen", "I choose myself, then notice who matches me"],
+  ["Gifts and favours as compensation", "Guidance and clarity as contribution"],
+  ["Hints, tests, reading between lines", "One clear statement, then silence"],
+  ["Holding on to people as possessions", "I give people the freedom to choose"],
+  ["Waiting to feel ready", "I move on the mission through the fear"],
+  ["Confidence borrowed from approval", "Confidence earned from evidence"],
+  ["Shape-shifting for the room", "I'm the same man everywhere"],
+];
+
+const OPEN = { eyebrow: "Before I begin", line: "I breathe. Before anyone else gets a piece of today, I choose myself.", why: "" };
+const RITUAL_SIZE = 9;
+
+
+// The pathway: the framework as stages, climbed in order.
+const PATHWAY = [
+  { phase: "Foundation", title: "I see it", key: "evidence",
+    what: "Before I can change anything, I see it. I notice every indirect move: chasing, compensating, shape-shifting, waiting to be chosen.",
+    here: ["I only realise I chased or over-explained hours later.", "I blame them for how I feel."],
+    passed: ["I catch the indirect move while it's happening.", "I can name it without beating myself up."],
+    practice: "Every evening I write down three indirect moves I made today, without judging them.",
+    line: "I see my patterns clearly, and I'm not afraid of what I see." },
+  { phase: "Foundation", title: "I accept me", key: "choose",
+    what: "I accept everything good that was said about me, and I own my mistakes. That's how I find out who I am.",
+    here: ["I can't list my gifts without feeling awkward.", "My mistakes feel like proof I'm not enough."],
+    passed: ["I can name my gifts, talents and abilities out loud.", "I talk about my mistakes as the moments I decided who I'd become."],
+    practice: "I write down five gifts I was given and three mistakes that taught me who I am.",
+    line: "I accept everything good that was said about me, and I flourish in it." },
+  { phase: "Foundation", title: "I choose me", key: "chooseup",
+    what: "Every second of every day, I choose myself first. Not once, not when it's easy. Everything else is built on this.",
+    here: ["My mood depends on who chose me today.", "I start my day in someone else's messages."],
+    passed: ["I've done the morning ritual seven days in a row.", "My day starts with me, every day."],
+    practice: "I do the morning ritual seven days in a row before I look at my phone.",
+    line: "I choose myself every second of every day." },
+  { phase: "Conduct", title: "I stop chasing", key: "prize",
+    what: "I identify; I don't choose from lack. I stop qualifying myself and putting anyone above me.",
+    here: ["I double-text and check if they replied.", "One cold reply ruins my day."],
+    passed: ["A cold reply doesn't move me.", "I notice who matches me and let the rest pass."],
+    practice: "Fourteen days with no double texts, no chasing and no qualifying myself.",
+    line: "I identify. I don't chase." },
+  { phase: "Conduct", title: "I speak direct", key: "direct",
+    what: "I say what I mean, once, plainly. No hints, no tests, no hoping they read between the lines.",
+    here: ["I hint and hope they get it.", "I carry things I never said."],
+    passed: ["I say the real thing the first time.", "I'm at peace with a clear no."],
+    practice: "Every day I make one direct ask in a single sentence.",
+    line: "I say what I mean, plainly, once." },
+  { phase: "Conduct", title: "I lead with guidance", key: "guidance",
+    what: "I stop compensating with gifts and favours. I give what I actually am: clarity, direction, wisdom.",
+    here: ["I buy attention with favours, then feel used.", "I over-deliver to be liked."],
+    passed: ["People come to me for clarity.", "What I give is real, so I never keep score."],
+    practice: "When I want to give something to be liked, I give one honest, useful sentence instead.",
+    line: "I lead with guidance, not gifts." },
+  { phase: "Conduct", title: "I let them choose", key: "freedom",
+    what: "I give everyone the freedom to choose, including the freedom to leave. My gaze never leaves me.",
+    here: ["I hold on tight, monitor and bargain.", "When someone leaves, I lose myself with them."],
+    passed: ["People stay because they want to, and I'm at peace either way.", "Endings don't break me."],
+    practice: "When someone pulls away, I say \"they're free to choose\" and put my attention back on my mission.",
+    line: "If they leave, I let them. My gaze never left me." },
+  { phase: "Mastery", title: "I do the work", key: "mastery",
+    what: "I find what I'm here to do, bypass the fear and accept the remolding. Each season introduces me to a new part of myself.",
+    here: ["I'm still playing around with my purpose.", "Fear makes my decisions."],
+    passed: ["I'm doing the work I was put here for, even when it's hard.", "I can predict my outcomes because I've mastered my inputs."],
+    practice: "Twenty minutes a day on the work I've been avoiding, for thirty days.",
+    line: "I stare my purpose in the face and do the work." },
+  { phase: "Mastery", title: "My presence speaks", key: "presence",
+    what: "I've said yes to myself so fully that my presence does the work. People rise just by being near me.",
+    here: ["I perform and try to prove I belong.", "I need words to make an impact."],
+    passed: ["People leave my space better without a speech.", "I'm the same man in every room, and I have the evidence of my impact."],
+    practice: "In every conversation I talk less, listen fully and say only what's true.",
+    line: "My presence is the message." },
+];
+
+// Two paths: how it looks when I live it, and when I don't.
+const MIRROR_DAY = [
+  ["6:30", "Waking up", "I choose myself before I touch my phone. My first thoughts are mine.", "I grab my phone first. Someone else's message decides my mood before I'm out of bed."],
+  ["8:00", "Body and style", "I train, dress well and leave the house like nothing is placed above me.", "I skip it, throw something on and carry myself like I hope nobody notices me."],
+  ["10:00", "The work", "I stare the hard task in the face and do the smallest real piece first.", "I play around with it, wait to feel ready and fill the morning with busy work."],
+  ["12:30", "Messages", "I send one clear message and get back to my mission. No reply is still an answer.", "I double-text, re-read the thread and check my phone every ten minutes."],
+  ["15:00", "In the room", "I say the true thing in my normal voice. The room adjusts to me.", "I shape-shift, laugh at things that aren't funny and agree just to be liked."],
+  ["18:00", "Someone pulls away", "I give them their freedom and keep my eyes on myself. My evening stays mine.", "I bargain, over-explain and let their choice run my whole night."],
+  ["22:00", "Night", "I write down my evidence. I'm one day further into who I'm becoming.", "I scroll, replay what I should have said and promise tomorrow will be different."],
+];
+const MIRROR_YEAR = [
+  "I have receipts: real results, a body I respect, people who chose me freely, and a mind nobody rents.",
+  "Same habits, same excuses, chasing the same approval. A year older and still waiting to be chosen.",
+];
+// The fix: one concrete step that turns the "don't" back into "do".
+const MIRROR_DAY_FIX = [
+  "My phone stays out of the bedroom. I say my first line out loud before I look at a screen.",
+  "I lay my clothes out the night before and move for 20 minutes, no negotiation.",
+  "I set a 20-minute timer and do the smallest real piece. Starting is the whole job.",
+  "I send it once, then put my phone in another room for an hour.",
+  "Before I speak, I ask myself what I actually think. Then I say that.",
+  "I don't reply tonight. I write what I feel in my journal, then do one thing for my mission.",
+  "Phone off at 21:30. I write one line of evidence before bed.",
+];
+const MIRROR_YEAR_FIX = "I fix the year one morning at a time. I seal today and let the days stack.";
+const MIRROR_FIX = {
+  choose: "Before every decision today I ask: am I choosing this from fullness, or from lack?",
+  prize: "I delete the draft and go do something that makes me more of who I am.",
+  guidance: "When I want to give a gift to be liked, I give clarity instead: one honest, useful sentence.",
+  freedom: "I say it out loud: \"They're free to choose.\" Then I put my attention back on my own day.",
+  mastery: "I name the one thing I'm avoiding and do 20 minutes of it before noon.",
+  presence: "In my next conversation I talk less, listen fully and say only what's true.",
+  direct: "I write what I actually want in one sentence, and I send or say that sentence.",
+  evidence: "I write down three things I've done that prove who I am, and I add one more today.",
+  gorgeous: "I fix one thing today, like my haircut, clothes, posture or training, and carry myself like it matters.",
+  mind: "When they show up in my head, I name it, then give my attention one job for the next hour.",
+  game: "I pick one man who has mastered what I want and study him for 20 minutes today.",
+  stay: "I do the boring rep anyway and tick it off. Streaks beat motivation.",
+  chooseup: "I pick one habit of the man I'm becoming and do it today, before I feel like it.",
+};
+const MIRROR = {
+  choose: [["I make decisions from fullness, so what I pick fits me.", "I don't need anyone's yes to start my day."], ["I pick people and things to feel picked, then resent them for not filling the gap.", "My mood depends on who chose me today."]],
+  prize: [["I notice who matches me and let the rest pass.", "Attention feels nice, and I don't need it."], ["I chase, qualify myself and put them above me.", "One cold reply ruins my week."]],
+  guidance: [["I bring clarity and direction, and people value it.", "What I give is real, so I never keep score."], ["I buy attention with gifts and favours, then feel used.", "I over-deliver to be liked and still feel replaceable."]],
+  freedom: [["People stay because they want to, and I'm at peace either way.", "Endings don't break me. My gaze stays on myself."], ["I hold on tight, monitor and bargain.", "When someone leaves, I lose myself with them."]],
+  mastery: [["I'm doing the work I was put here for, even when it's hard.", "Each season reshapes me, and I let it."], ["I keep playing around with my purpose for another year.", "Fear makes my decisions for me."]],
+  presence: [["People leave my space better without a speech.", "I walk in settled, and the room calms down."], ["I perform, over-talk and try to prove I belong.", "People don't remember me, because I wasn't myself."]],
+  direct: [["I say it once, plainly, and my mind stays clean.", "I get clear answers because I ask clear questions."], ["I hint, test and hope they read between the lines.", "I carry everything I never said."]],
+  evidence: [["My confidence rests on what I've actually done.", "I own my mistakes, and they make me sharper."], ["My confidence is borrowed from approval, so it leaves when they do.", "I hide my mistakes and repeat them."]],
+  gorgeous: [["I carry myself like nothing goes above me, and people treat me that way.", "My standards show in how I look, speak and spend my time."], ["I let myself go and wonder why I feel small.", "I shrink to fit every room."]],
+  mind: [["I decide what gets space in my head.", "My attention goes to my mission."], ["Someone lives rent-free in my head all day.", "My thoughts run me in circles."]],
+  game: [["I keep learning from men who've mastered themselves.", "Every loss turns into game."], ["I think I know it all and keep making the same mistakes.", "I give my best insight to people who waste it."]],
+  stay: [["I stay disciplined when it's boring, and the results stack.", "Pressure doesn't show on me."], ["I quit as soon as it stops being exciting.", "Everyone can see me sweat."]],
+  chooseup: [["Every day I'm a little more the man I want to be.", "My old habits don't get a vote."], ["I stay loyal to habits that keep me small.", "I'm the same man I was last year."]],
+};
+
+// Every lesson from the talk, in order, in my own voice: [title, the game in depth, my line for the morning ritual].
+const GAME = [
+  { chapter: "Find myself first", lessons: [
+    ["Accept what was said about me", "Finding myself starts with identifying every great thing creation and God have said about me. Not hoping it's true: accepting it. I take my gifts, my talents and the good that people have seen in me, and I stop arguing with it. Then I flourish in it. I live like it's true, because it is. A man who can't accept the good in himself will always go looking for someone else to say it.", "I accept every good thing said about me, and I flourish in it."],
+    ["Choose the highest self", "When I choose myself, I'm not choosing whatever version of me is easiest today. I'm choosing the highest self nature gave me: the innate gifts, talents and abilities I came here with. My comfortable self wants rest and approval. My highest self wants the mission. Every morning I pick the one I was built to be.", "I choose the highest self I was given."],
+    ["I can't choose what I don't know", "If I don't know who I am, it's impossible for me to choose myself. And a man who can't choose himself goes out and chooses someone else, hoping they'll fill the space where he should be. So whenever I notice myself chasing, fixating or reaching for someone, I read it as a signal that I've lost touch with me. The fix isn't getting them. It's coming back to myself.", "I know who I am, so I choose me."],
+    ["Push the boundaries of self-discovery", "Feeling inadequate usually means I've stopped discovering myself. I haven't pushed the edges of what I'm capable of, and I haven't gone looking for everything God and creation have said about me. So I keep exploring: my faith, my gifts, what I can handle, what I'm drawn to. Self-discovery isn't a phase I finish. It's how I stay connected to who I am.", "I keep discovering who I am."],
+    ["Find myself to find anything", "'He who finds a wife finds a good thing.' The wording is careful: finding is hard, and I can only find something if I know what I'm looking for. I only know what I'm looking for once I've found myself. That goes for people, work, opportunities and places. When I know who I am, the right things become obvious and the wrong ones stop being tempting.", "I found myself first, so I know what I'm looking for."],
+    ["See myself in what I choose", "Eve came from Adam's rib. What a man truly finds is a reflection of himself. When I've found myself and accepted every good thing about me, I see myself in what belongs in my life. So I check: does this person, this habit, this place reflect who I am? If it doesn't, it doesn't belong, however much I want it.", "What's in my life reflects who I am."],
+  ] },
+  { chapter: "Identify, don't choose", lessons: [
+    ["I identify; they choose", "I never choose. I identify, and what's right for me chooses me. Choosing means reaching outward from need. Identifying means I'm so settled in myself that I recognise what matches me the moment I see it, and I let it come to me. I don't chase people, opportunities or approval. I become the man they choose, and I notice when they do.", "I identify. I let what's right for me choose me."],
+    ["My best is matched, not given away", "Whatever chooses me the way I choose myself, every second of every day, gets my best. That's the deal. My best isn't handed out to whoever asks loudest or wants it most this week. Commitment meets commitment, and half-hearted gets half. I keep it that way so I never pour myself into things that only half-choose me.", "My best goes to what chooses me the way I choose myself."],
+    ["Choosing from lack is dangerous", "It's dangerous for me to choose from lack. I'm meant to be so connected to myself that I only identify with what reflects the connection and acceptance I have with myself. When I'm disconnected, everything I pick is a guess shaped by need. When I'm connected, the choice almost makes itself.", "I only identify with what reflects the connection I've made with myself."],
+    ["Inadequacy picks badly", "When I choose instead of identify, I'm usually seeing the thing through a lens of not enough. Maybe it feels out of my league. Maybe I haven't yet become the man it would choose, so I try to choose it first. I want it right now, before I've grown into it. That feeling is information: the work is on me, not on getting it.", "I don't reach up. I rise up."],
+    ["Lack turns people into possessions", "Anything I chase from lack, I end up treating as a possession. I had to win it with gifts, offerings and compensation for an attraction that wasn't naturally there, so I grip it, guard it and fear losing it. What chooses me freely, I can hold lightly. That's the difference between owning something and enjoying it.", "People are experiences, not possessions."],
+    ["Compensation is a cycle", "Compensating turns into a cycle: gifts, effort, offerings, repeat, until the other person finally gives in. And when they do, I get them in whatever state they're in, because I wore them down instead of drawing them in. I don't win anything that way. What I have to grind someone into giving me was never really mine.", "I don't wear people down. I build myself up."],
+    ["Not knowing myself makes me a danger", "If I haven't found myself, accepted myself and started flourishing in myself, I'm a danger to myself and to anything I choose. At best I can be a companion. I can't lead, because I don't know where I'm going. So self-knowledge comes before relationships, before leadership, before anything I want to build.", "I know who I am, so I can lead."],
+  ] },
+  { chapter: "Guidance, not gifts", lessons: [
+    ["Too gorgeous for gifts", "I'm too gorgeous to come with gifts. Gorgeous means nothing will ever be placed above me. Leading with presents, favours or flattery puts the other person above me and tries to buy what should come naturally. So I come with guidance instead: who I am, what I know and where I'm going. That's my offer.", "I'm too gorgeous to come with gifts. I come with guidance."],
+    ["Guidance is the ultimate gift", "Guidance from a man who has mastered himself is the greatest gift and deposit anyone can receive. Not money, not things: clarity, direction and perspective earned through my own work. That means the best way to be valuable to the people around me is to keep mastering myself. The deeper I go, the more I have to give.", "My guidance is the greatest gift I give."],
+    ["What chooses me gets my best", "When something or someone chooses me the way I choose myself, I see it as an extension of me, because I identified it. Then I give it my best guidance, because I need it at its best. My friends, my team, my projects: once they're in my world, I invest in them fully, and they get access to everything I've built in myself.", "What chooses me gets my best, because I need it at its best."],
+    ["The exchange", "The exchange works because I've already identified myself as able to deliver. When someone sees me as the force that can bring them what they want, they're only seeing what I already saw in myself. Other people's belief in me follows my belief in me. So I settle that question first, privately, every day.", "I'm an adequate force to deliver what I promise."],
+    ["Nothing can enhance me", "When I'm truly connected to myself, nothing can enhance me. I'm not looking for a person, a title or a possession to complete me. I'm a pure offering, here to enhance whatever is worthy of being in my space. That turns the question from 'what can I get?' into 'what deserves what I bring?'", "Nothing enhances me. I enhance what's worthy."],
+    ["Possessions prop up the empty", "A man who knows he's inadequate, who hasn't pushed his self-discovery or sought out what was said about him, treats people as possessions because owning them props him up. If I ever need someone to make me feel like somebody, I'm not connected to myself yet. That's my signal to go back to the work.", "I don't need anyone to prop me up."],
+  ] },
+  { chapter: "Freedom", lessons: [
+    ["Freedom is the gift", "The greatest gift I can give anyone, every day, is the freedom and space to choose. I can only give it because I've already chosen myself. If I needed them to stay, I couldn't let them choose. Because I don't, I can. And whatever stays in that freedom is real.", "I give freedom because I've already chosen me."],
+    ["An experience, not a possession", "Even after twenty years, the people in my life are experiences, not possessions. I enjoy them, invest in them and lead them, but I never own them. A man who sees people as possessions does it because it props up something missing in him. I'm not missing anything, so I don't need to hold on.", "Everyone in my life is an experience I enjoy, not something I own."],
+    ["Connected only to myself", "I'm not connected to anyone the way I'm connected to myself, and that's exactly why I can always let someone go. My foundation is me: my mission, my standard, my relationship with God and with myself. People can come and go without moving it.", "I'm connected to myself, so I can let anyone go."],
+    ["Let them choose up", "If someone believes they can do better, I give them carte blanche: free rein and free space to go and choose up. I don't fight it, because I understand the size of what I deposit into the lives around me. Let them go and find out. Either they find something better, or they find out what they had.", "If they think they can do better, I let them go and find out."],
+    ["Freedom is the cornerstone", "Freedom is the cornerstone of how I move. I move freely, and I let others move freely. Needing control is a sign of fear, and fear means I've stopped trusting what I bring. When I'm secure, I don't need to manage anyone's choices. I just keep choosing myself.", "Freedom is how I move."],
+  ] },
+  { chapter: "When they leave", lessons: [
+    ["The atmosphere shifts", "When someone leaves something elevated and volunteers for something they believe is better, there's a shift in atmosphere they didn't anticipate. Often they come back, and quickly. So I don't need to argue my value on the way out. Time and contrast make the argument for me.", "I don't argue my value. Time shows it."],
+    ["Confessions are evidence", "I know I've led well when someone I gave freedom to comes back quickly, with confessions. Those confessions validate the impact I had on their life. I take them as evidence of who I am, not as an invitation back in. They only confirm what I already knew.", "My impact speaks after people leave."],
+    ["Go be free", "Some people push it a little too far. When my patience runs out, I say: go be free. No drama, no long speeches, no punishment. When something has run its course, I end it cleanly, and I mean it.", "When it's done, I say: go be free."],
+    ["I was the lesson", "'You were too good.' When someone says that, it means I represented a frequency they hadn't healed into yet. I was the experience meant to shape their next choice, so the next time a good man comes into their space, they know how to keep him. It isn't a loss for me. It's a lesson for them, and they were one for me.", "If they weren't ready for me, that's their lesson, not my loss."],
+    ["No re-entry", "When someone leaves and tries to come back, they're not welcomed back in. My gaze into myself, and the conclusions I've reached through the results in my life and the impact I've made in different spaces, tell me what I offer. They took their eyes off me. I never took my eyes off myself. My door doesn't reopen because someone knocked.", "My door doesn't reopen just because someone knocked."],
+    ["Never suspend my gaze", "They had a suspended gaze. I never suspend the gaze I have on myself. Whatever anyone else does, whoever comes or goes, my eyes stay on me: my mission, my growth, my standard. That's what keeps me steady when everything around me moves.", "I never suspend the gaze I have on myself."],
+    ["Compromised", "Once I understand the magnitude of the man I am and the impact I represent, I'm never compromised within myself. Anything that doesn't see me the way I see myself and tries to enter, or re-enter, my life is compromised. So it doesn't get in.", "If it doesn't see me as I see myself, it doesn't get in."],
+    ["Keep identifying with myself", "I identified them, but the minute they stopped choosing me, I stopped identifying with them, because I kept identifying with myself. I let them go from my space and from my mind. My identity was never in them. It was always in me.", "When they stop choosing me, I keep choosing me."],
+  ] },
+  { chapter: "Evidence", lessons: [
+    ["Not delusional", "I'm not delusional. My conclusions about myself come from evidence: the results in my life and the impact I've made in the spaces I've been in. I understand that I bring a level of guidance and leadership that enhances whatever enters my space, because I've watched it happen. When I want more confidence, I go and create more evidence.", "My confidence comes from my results."],
+    ["Results don't lie", "People convince themselves they're great while the results in their lives are dismal. I don't do that. I judge myself by my results, not by how I feel about myself. If my results are poor, I take accountability and change the inputs. Honesty about my results is where real confidence starts.", "I look at my results honestly and act on what they tell me."],
+    ["Unshakable", "The understanding I have of myself is unshakable, and it's the cornerstone of everything I have to offer. It doesn't rise and fall with someone's reaction, a rejection or a bad week. I built it on who I am and what I've done, and no one can take that from me.", "My understanding of myself is unshakable."],
+    ["Not beyond reproach", "I'm not beyond reproach. I can be wrong, and I can be criticised. But I have too much evidence of my impact to look at any situation and doubt who I am. Both are true at once: I stay humble about my flaws and certain about my worth.", "I'm not beyond reproach, and I'm not in doubt."],
+    ["Mistakes, then a decision", "I've made mistakes. Often a man only advances once he decides what type of man he's going to be, after making so many of them. That's the accountability and that's the humility. On the other side of it is the journey to myself, a breakthrough, and a real understanding of who I am.", "My mistakes made my decision. I know who I'm becoming."],
+    ["Impact myself first", "Everything people echo back to me about my impact on them, I've already had on myself first. So I'm never surprised when someone tells me I changed their life. The impact starts with me: before I elevate anyone, I elevate myself.", "I impact myself first."],
+  ] },
+  { chapter: "Mastery and seasons", lessons: [
+    ["Predict my outcomes", "I've mastered myself when I can predict my outcomes and my impact in anything I walk into. That isn't arrogance; it's knowing my inputs. When I know what I bring and I control how I show up, I can see where it leads. I keep working on myself until I'm there.", "I can predict my outcomes because I master my inputs."],
+    ["Find the mission", "There's only one way to master myself: find out what creation manifested me here to do. My mission, my purpose, the specific things I'm meant to deposit into this earth. I keep asking, I keep listening, and I act on what I find.", "I know what I'm here to do, and I do it."],
+    ["Bypass the fear", "I bypass any fear about my mission and purpose, and about any new thing I discover I'm meant to bring into the world. I stare it in the face. Fear tends to show up right next to what matters most, so when I feel it, I know I'm close.", "I stare my fear in the face and move anyway."],
+    ["Accept the work", "I accept the level of work that comes with my mission. I don't negotiate it down or wait for an easier version. If the mission is big, the work is big, and I say yes to both.", "I accept the work my mission requires."],
+    ["Withstand the remolding", "I withstand my remolding so I can occupy this divine season of my life. Sometimes growth feels like being broken down. It's actually being reshaped for what's next. I don't fight it; I let it make me.", "I let this season remold me."],
+    ["Seasons and new facets", "I'll have divine seasons in my life. As I reinvent myself into whoever I'm designed to be in each one, the path is simply introducing me to the new facets of myself I need to occupy the next stage. Every hard stretch is me meeting a part of myself I'll need later.", "The path is introducing me to the man I need to be next."],
+    ["Stay the path", "If I stay the path, a breakthrough of understanding emerges on the other side. That breakthrough is accepting everything my creator has said about me. It lives past the hard part, so I don't quit in the middle.", "I stay the path until the breakthrough."],
+    ["Say yes to my gifts", "I choose God, and I choose whatever season and path I'm meant to be on. When I'm given a gift, a talent, an idea or an offering, I say yes to it. My obedience to my gifts is where my impact on the world comes from.", "I say yes to my gifts."],
+    ["Happen to life", "When I reach mastery, I impact every space I enter. I happen to life, and life becomes incapable of happening to me, because I've accepted everything I'm supposed to do. I set the tone. I'm the cause, not the effect.", "I happen to life. Life doesn't happen to me."],
+    ["Accept the season", "Whatever amount of time I'm given and whatever season I'm in, I accept it. I don't waste energy wishing I were somewhere else or further along. I master the season I'm in, and that's what prepares me for the next one.", "I master the season I'm in."],
+  ] },
+  { chapter: "Presence and proximity", lessons: [
+    ["Proximity is the greatest impact", "When I master myself, my greatest impact isn't the knowledge or wisdom I share. It's proximity. People are changed just by being close to a man who has said yes to himself. Who I am does more than anything I say.", "My presence does more than my words."],
+    ["Presence is a luxury", "My presence is a luxury, because most people never get close to a man who has truly mastered himself. That rarity isn't given; it's earned by doing the work most men won't. I become rare by staying on the path.", "I'm rare because I do the work."],
+    ["Say yes to myself", "Most people never meet men who say yes to themselves, who want to be no one other than themselves, who refuse to shape-shift or manipulate. I am that man. I only want to be myself: everything creation has said about me.", "I want to be no one other than myself."],
+    ["Living proof", "Being near me shows people that you can be true to yourself and still prosper. My life is the evidence. I don't preach it; I live it, so anyone close to me can see that being myself works.", "I'm living proof that being myself works."],
+    ["People go all in", "I've watched people start the businesses they'd been playing around with for years within weeks of being around me. Not because I told them much, but because proximity gave them the inspiration to go all in. That energy starts with me going all in on my own life.", "Around me, people stop playing small, starting with me."],
+    ["Unspoken", "When I've mastered myself, much goes unspoken. Proximity elevates the quality of someone's life without me having to articulate anything. I don't need to explain myself constantly. How I live is the explanation.", "How I live is my explanation."],
+    ["Life is better near me", "No matter how much someone has accomplished or how far they've gone, near a man who has mastered himself there's a clear understanding that their life is better with him in it. That's the man I'm becoming: one whose presence improves any life, however successful it already is.", "Life is better near me."],
+    ["Everything leaves better", "I know I've mastered myself when everything adjusts to me and everything leaves my space greater than it came in. People, rooms, projects: I leave them better than I found them.", "Everything leaves my space better."],
+    ["Radiate", "Impact surrounds everything I do. It isn't only the wisdom and guidance I give, though they work. It's simply being near me. I radiate inspiration, guidance and breakthroughs as the natural side effect of how I live.", "I radiate inspiration, guidance and breakthroughs."],
+  ] },
+  { chapter: "Standards", lessons: [
+    ["Keep those who see me", "My life only gets better when I identify the people who see me in accordance with the man I've ascended into. Not the man I was: the man I am. I keep those people close. Anyone who insists on the old me doesn't get the new me's time.", "I keep the people who see who I've become."],
+    ["Don't shrink for anyone", "An awakened man is a threat to anyone who wants him weak and under their control. If my growth makes someone uncomfortable, that isn't mine to fix. I don't shrink to keep anyone comfortable, and I don't hand my direction to anyone else.", "I don't shrink to keep anyone comfortable."],
+    ["Order over chaos", "Without order, all I'll find is chaos. So I keep order in my life: my routines, my money, my space, my time and my word. Order is what lets everything else in my life work.", "I keep my life in order."],
+  ] },
+  { chapter: "How I run my business", lessons: [
+    ["Assess honestly", "Before I start anything, I do an honest assessment: exactly where I am and exactly where I want to be. No flattering myself, no vague goals. From there I build the plan, and it progresses as I progress.", "I know exactly where I am and where I'm going."],
+    ["Set the terms", "I give the terms, they accept the terms, and we move forward. That's how I do business and how I run my life. I'm clear about what I offer and what it takes, and people can say yes or no.", "I set the terms."],
+    ["Consistency", "Every week, for over a year, I show up. No skipping when I don't feel like it. Consistency is what builds an archive, a reputation and a body of work. I show up every time.", "I show up every time."],
+    ["Prepare, then deliver", "No notes, ever. Thirty minutes, long form, every time. Not because I wing it, but because I take my time putting the message together before I show up. I prepare so well that I can deliver without a script.", "I prepare so I can deliver without notes."],
+    ["A month to transform", "I treat a month as a transformational space. When I want to change, I commit to thirty days, not a weekend: in-depth work, several times a week, with support in between.", "I give my growth thirty days, not one."],
+    ["Breakthroughs", "That's what I'm here for: breakthroughs. Not busyness, and not the look of progress. I measure my growth by the breakthroughs I actually make.", "I'm here for breakthroughs."],
+  ] },
+];
+
+// ---- storage (per-device; tolerant of blocked storage) ----
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("chosen:" + k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("chosen:" + k, JSON.stringify(v)); } catch {} },
+};
+const dayKey = (d = new Date()) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+// Deterministic daily shuffle so the morning set is stable for the day.
+function seeded(seed) { let s = 0; for (const c of seed) s = (s * 31 + c.charCodeAt(0)) >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32); }
+function todaysSet() {
+  const r = seeded(dayKey());
+  const order = PILLARS.map((p, i) => [r(), i]).sort((a, b) => a[0] - b[0]).map(x => PILLARS[x[1]]);
+  return order.slice(0, RITUAL_SIZE).map(p => ({ eyebrow: p.name, line: p.lines[Math.floor(r() * p.lines.length)], why: p.core }));
+}
+function todaysRule() { const r = seeded("rule" + dayKey()); return CODE_RULES[Math.floor(r() * CODE_RULES.length)]; }
+
+const ICON = {
+  sun: '<circle cx="12" cy="14" r="4"/><path d="M12 4v3M4.9 7.9l2 2M19.1 7.9l-2 2M2 18h20"/>',
+  cols: '<path d="M4 20h16M6 17V9M10 17V9M14 17V9M18 17V9M3 9l9-5 9 5z"/>',
+  mark: '<path d="M7 3h10v18l-5-4-5 4z"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".6"/>',
+  book: '<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/>',
+  game: '<path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6-4.5-4.2 6.1-.7z"/>',
+  path: '<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h6a3.5 3.5 0 0 0 0-7h-4a3.5 3.5 0 0 1 0-7h6"/>',
+  mirror: '<circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/>',
+  voice: '<path d="M4 10v4h4l5 4V6L8 10z"/><path d="M16.5 9a4 4 0 0 1 0 6M19 6.5a7.5 7.5 0 0 1 0 11"/>',
+};
+const svg = (k, cls = "") => `<span class="row-icon ${cls}"><svg viewBox="0 0 24 24">${ICON[k]}</svg></span>`;
+const GO = '<span class="go"><svg viewBox="0 0 10 10"><path d="M2 1l7 4-7 4z"/></svg></span>';
+
+// ---- streak ----
+function streak() {
+  const done = new Set(store.get("done", []));
+  let n = 0, d = new Date();
+  if (!done.has(dayKey(d))) d.setDate(d.getDate() - 1);
+  while (done.has(dayKey(d))) { n++; d.setDate(d.getDate() - 1); }
+  $("streak").textContent = n;
+}
+streak();
+
+// ---- menu sheet + views ----
+const VIEWS = [
+  { id: "game", title: "The Game", tag: () => `${GAME_ALL.length} lessons`, sub: "My foundation, read through every day", icon: "game" },
+  { id: "ritual", title: "Morning", tag: () => `${RITUAL_SIZE + 1} lines`, sub: "I say today's lines out loud", icon: "sun" },
+  { id: "pathway", title: "Pathway", tag: () => `Stage ${currentStage() + 1}/${PATHWAY.length}`, sub: "The framework, one stage at a time", icon: "path" },
+  { id: "pillars", title: "Pillars", tag: () => `${PILLARS.length}`, sub: "Every affirmation, by theme", icon: "cols" },
+  { id: "code", title: "The Code", tag: () => `${CODE_RULES.length} rules`, sub: "The game's language, turned inward", icon: "mark" },
+  { id: "recenter", title: "Reset", tag: () => "1 min", sub: "When the pull hits mid-day", icon: "target" },
+  { id: "mirror", title: "Two paths", tag: () => "+ / −", sub: "How it looks when I live it, and when I don't", icon: "mirror" },
+  { id: "journal", title: "Journal", tag: () => { const n = store.get("journal", []).length; return n ? `${n}` : ""; }, sub: "My evidence, day by day", icon: "book" },
+];
+let current = "game";
+let speakOn = store.get("speak", false);
+
+function renderMenu() {
+  $("menuRows").innerHTML = VIEWS.map(v => `
+    <button class="row" role="radio" aria-checked="${v.id === current}" data-view="${v.id}">
+      ${svg(v.icon)}
+      <span class="row-text"><span class="row-title">${v.title}${v.tag() ? ` <em class="tag">${v.tag()}</em>` : ""}</span><span class="row-sub">${v.sub}</span></span>
+      <span class="radio"></span>
+    </button>`).join("") + `
+    <button class="row" role="switch" aria-checked="${speakOn}" id="voiceRow">
+      ${svg("voice")}
+      <span class="row-text"><span class="row-title">Read aloud <em class="tag">${speakOn ? "On" : "Off"}</em></span><span class="row-sub">My phone speaks each line to me first</span></span>
+      <span class="radio"></span>
+    </button>`;
+}
+function openSheet() { renderMenu(); $("sheet").hidden = false; $("scrim").hidden = false; $("menuRows").querySelector('[aria-checked="true"]')?.focus(); }
+function closeSheet() { $("sheet").hidden = true; $("scrim").hidden = true; }
+$("menuBtn").onclick = openSheet;
+$("scrim").onclick = closeSheet;
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
+$("menuRows").addEventListener("click", e => {
+  const b = e.target.closest(".row"); if (!b) return;
+  if (b.id === "voiceRow") { speakOn = !speakOn; store.set("speak", speakOn); renderMenu(); return; }
+  show(b.dataset.view); closeSheet();
+});
+
+function show(v) {
+  current = v;
+  VIEWS.forEach(({ id }) => { $(id).hidden = id !== v; });
+  document.body.dataset.view = v;
+  if (v === "journal") renderJournal();
+  if (v === "ritual") renderStage(); else document.documentElement.style.setProperty("--orb-scale", 1);
+  window.scrollTo(0, 0);
+}
+
+// ---- speech (optional) ----
+function speak(text) {
+  if (!speakOn || !("speechSynthesis" in window)) return;
+  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.rate = 0.9; speechSynthesis.speak(u); } catch {}
+}
+
+// ---- morning ----
+let deck = [], idx = 0, reps = 0;
+function startRitual(cards) { deck = [OPEN, ...cards, { close: true }]; idx = 0; reps = 0; show("ritual"); }
+
+const ARROW_L = '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>';
+const ARROW_R = '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
+
+function renderStage() {
+  const c = deck[idx];
+  const total = deck.length - 2;
+  const prog = deck.map((_, i) => `<span class="${i < idx ? "done" : i === idx ? "now" : ""}"></span>`).join("");
+  document.documentElement.style.setProperty("--orb-scale", 1 + reps * 0.14);
+
+  if (c.close) {
+    $("ritual").innerHTML = `
+      <div class="ritual">
+        <p class="r-meta">Close the loop</p>
+        <h1 class="statement">Today I choose myself by…</h1>
+        <textarea id="intent" aria-label="Today I choose myself by" placeholder="e.g. doing the hard call before noon, and not checking my phone for a reply."></textarea>
+        <p class="toast" id="toast"></p>
+      </div>
+      <div class="dock"><div class="dock-in">
+        <button class="sq soft" id="back" aria-label="Back">${ARROW_L}</button>
+        <div class="prog" aria-hidden="true">${prog}</div>
+        <button class="pillbtn" id="save">Seal the morning</button>
+      </div></div>`;
+    const ta = $("intent");
+    ta.value = store.get("draft:" + dayKey(), "");
+    ta.addEventListener("input", () => store.set("draft:" + dayKey(), ta.value));
+    $("back").onclick = () => { idx--; reps = 0; renderStage(); };
+    $("save").onclick = () => {
+      const text = ta.value.trim();
+      const done = new Set(store.get("done", [])); done.add(dayKey()); store.set("done", [...done]);
+      if (text) {
+        const j = store.get("journal", []).filter(e => e.d !== dayKey());
+        j.unshift({ d: dayKey(), t: text }); store.set("journal", j);
+      }
+      streak();
+      document.documentElement.style.setProperty("--orb-scale", 1.5);
+      $("toast").textContent = text ? "Sealed. It's in my journal." : "Sealed. Next time I'll add a line; that's my evidence.";
+    };
+    return;
+  }
+
+  const label = idx === 0 ? "" : `${idx} of ${total}`;
+  $("ritual").innerHTML = `
+    <div class="ritual">
+      <p class="r-meta"><span>${c.eyebrow}</span>${label ? `<i>·</i><span>${label}</span>` : ""}</p>
+      <h1 class="statement">${c.line}</h1>
+      <p class="why">${c.why}</p>
+      <button class="say" id="said" aria-label="I said it, ${reps} of 3">
+        <span>${reps === 0 ? "I said it" : reps === 1 ? "I said it again" : "I said it, and I mean it"}</span>
+        <span class="dots">${[0, 1, 2].map(i => `<span class="${i < reps ? "on" : ""}"></span>`).join("")}</span>
+      </button>
+    </div>
+    <div class="dock"><div class="dock-in">
+      <button class="sq soft" id="back" aria-label="Back" ${idx === 0 ? "disabled" : ""}>${ARROW_L}</button>
+      <div class="prog" aria-hidden="true">${prog}</div>
+      <button class="sq" id="next" aria-label="Next">${ARROW_R}</button>
+    </div></div>`;
+  speak(c.line);
+  $("back").onclick = back;
+  $("next").onclick = next;
+  $("said").onclick = () => { reps++; if (reps >= 3) next(); else renderStage(); };
+}
+function next() { if (idx < deck.length - 1) { idx++; reps = 0; renderStage(); } }
+function back() { if (idx > 0) { idx--; reps = 0; renderStage(); } }
+document.addEventListener("keydown", e => {
+  if (current !== "ritual" || !$("sheet").hidden || e.target.matches("textarea, input")) return;
+  if (e.key === "ArrowRight") { e.preventDefault(); next(); }
+  if (e.key === "ArrowLeft") back();
+});
+
+// ---- pillars ----
+$("pillarList").innerHTML = PILLARS.map((p, pi) => `
+  <div class="card">
+    <div class="card-head"><h3>${p.name} <em class="tag">${String(pi + 1).padStart(2, "0")}</em></h3><p>${p.core}</p></div>
+    <div class="rows">${p.lines.map((l, li) => `
+      <button class="row noicon" data-p="${pi}" data-l="${li}"><span class="row-text"><span class="row-title">${l}</span></span>${GO}</button>`).join("")}
+    </div>
+  </div>`).join("");
+$("pillarList").addEventListener("click", e => {
+  const b = e.target.closest("[data-p]"); if (!b) return;
+  const p = PILLARS[b.dataset.p];
+  startRitual([{ eyebrow: p.name, line: p.lines[b.dataset.l], why: p.core }]);
+});
+
+// ---- code ----
+$("codeTerms").innerHTML = CODE_TERMS.map(([t, game, you]) => `
+  <div class="row plain"><span class="row-text">
+    <span class="row-title">${t}</span>
+    <span class="row-sub">${you}</span>
+    <span class="row-sub small"><em class="tag">In the game</em> ${game}</span>
+  </span></div>`).join("");
+$("codeRules").innerHTML = CODE_RULES.map((r, i) => `
+  <div class="row plain" style="grid-template-columns:auto minmax(0,1fr)"><span class="num">${String(i + 1).padStart(2, "0")}</span><span class="row-title">${r}</span></div>`).join("");
+
+// ---- reset ----
+let picked = 0;
+function renderReset() {
+  $("chips").innerHTML = RECENTER.map((r, i) => `
+    <button class="row noicon" role="radio" aria-checked="${i === picked}" data-i="${i}">
+      <span class="row-text"><span class="row-title">${r.label}</span></span><span class="radio"></span>
+    </button>`).join("");
+  const r = RECENTER[picked];
+  $("turn").innerHTML = `
+    <div class="split">
+      <div class="card"><span class="label rose">The indirect move</span><p>${r.indirect}</p></div>
+      <div class="card"><span class="label">The direct move</span><p>${r.direct}</p></div>
+    </div>
+    <div class="card dark">
+      <span class="label">My line</span>
+      <p class="big">${r.line}</p>
+      <button class="pillbtn" id="drill">I'll say it three times</button>
+    </div>`;
+  $("drill").onclick = () => {
+    const p = PILLARS.find(x => x.key === r.key);
+    startRitual([{ eyebrow: p.name, line: r.line, why: r.direct }]);
+  };
+}
+$("chips").addEventListener("click", e => { const b = e.target.closest("[data-i]"); if (b) { picked = +b.dataset.i; renderReset(); } });
+renderReset();
+$("dvTable").innerHTML = DV.map(([a, b]) => `
+  <div class="row plain"><span class="row-text"><span class="row-title">${b}</span><span class="row-sub"><s>${a}</s></span></span></div>`).join("");
+
+// ---- journal ----
+function renderJournal() {
+  const j = store.get("journal", []);
+  const fmt = d => new Date(d + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  $("entries").innerHTML = j.length
+    ? j.map(e => `<div class="row plain"><span class="row-text"><span class="row-title">${esc(e.t)}</span><span class="row-sub">${fmt(e.d)}</span></span></div>`).join("")
+    : `<div class="row plain"><span class="row-text"><span class="row-title">Today I choose myself by finishing the proposal before I open anyone's messages. <em class="tag">Example</em></span><span class="row-sub">When I finish a morning, my closing line replaces this example.</span></span></div>`;
+}
+
+// ---- the game ----
+const GAME_ALL = GAME.flatMap((c, ci) => c.lessons.map((l, li) => ({ ci, li, chapter: c.chapter, title: l[0], game: l[1], line: l[2] })));
+function gameOfDay() { const r = seeded("game" + dayKey()); return GAME_ALL[Math.floor(r() * GAME_ALL.length)]; }
+const GCHEV = '<svg class="gchev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+const gameCard = g => ({ eyebrow: `Game · ${g.title}`, line: g.line, why: g.game });
+(function renderGame() {
+  const g = gameOfDay();
+  $("gameToday").innerHTML = `
+    <span class="label">Today's focus · ${g.chapter}</span>
+    <p class="big">${g.title}</p>
+    <p style="opacity:.85; line-height:1.6">${g.game}</p>`;
+  let n = 0;
+  $("gameList").innerHTML = GAME.map((c, ci) => `
+    <details class="gcard">
+      <summary><h3>${c.chapter} <em class="tag">${c.lessons.length}</em></h3>${GCHEV}</summary>
+      <div class="lessons">${c.lessons.map(([title, game], li) => `
+        <div class="lesson">
+          <div class="lhead"><span class="num">${String(++n).padStart(2, "0")}</span><span class="row-title">${title}</span></div>
+          <p class="lgame" data-k="${ci}-${li}">${game}</p>
+        </div>`).join("")}
+      </div>
+    </details>`).join("");
+})();
+
+// ---- highlights (Kindle-style; saved on this device) ----
+const getHL = () => store.get("highlights", []);
+const setHL = v => store.set("highlights", v);
+const lessonOf = k => { const [ci, li] = k.split("-").map(Number); return { chapter: GAME[ci].chapter, title: GAME[ci].lessons[li][0], text: GAME[ci].lessons[li][1] }; };
+function paintLesson(k) {
+  const el = document.querySelector(`.lgame[data-k="${k}"]`); if (!el) return;
+  const { text } = lessonOf(k);
+  let html = "", pos = 0;
+  getHL().filter(h => h.k === k).sort((a, b) => a.start - b.start).forEach(h => {
+    html += esc(text.slice(pos, h.start)) + `<mark data-id="${h.id}">${esc(text.slice(h.start, h.end))}</mark>`;
+    pos = h.end;
+  });
+  el.innerHTML = html + esc(text.slice(pos));
+}
+function addHL(k, start, end) {
+  const { text } = lessonOf(k);
+  while (start < end && /\s/.test(text[start])) start++;
+  while (end > start && /\s/.test(text[end - 1])) end--;
+  if (end - start < 2) return;
+  const all = getHL(), others = all.filter(h => h.k !== k), keep = [];
+  // Merge with any highlight it touches, like Kindle does.
+  all.filter(h => h.k === k).forEach(h => {
+    if (h.end < start || h.start > end) keep.push(h);
+    else { start = Math.min(start, h.start); end = Math.max(end, h.end); }
+  });
+  keep.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), k, start, end, at: Date.now() });
+  setHL([...others, ...keep]);
+  paintLesson(k); renderHLList();
+}
+function removeHL(id) {
+  const h = getHL().find(x => x.id === id); if (!h) return;
+  setHL(getHL().filter(x => x.id !== id));
+  paintLesson(h.k); renderHLList();
+}
+function renderHLList() {
+  const all = getHL().sort((a, b) => b.at - a.at);
+  $("hlCount").textContent = all.length;
+  $("hlList").innerHTML = all.length ? all.map(h => {
+    const l = lessonOf(h.k);
+    return `<div class="hlitem">
+      <button class="hljump" data-jump="${h.id}"><span class="hlq"><mark>${esc(l.text.slice(h.start, h.end))}</mark></span><span class="hlsrc">${esc(l.chapter)} · ${esc(l.title)}</span></button>
+      <button class="hldel" data-del="${h.id}" aria-label="Remove highlight">×</button>
+    </div>`;
+  }).join("") : `<p class="hlempty">Press and hold on any words in a lesson, then tap Highlight. Everything I highlight collects here.</p>`;
+}
+
+// Floating toolbar shown under a selection (Highlight) or a tapped highlight (Remove).
+const tool = document.createElement("div");
+tool.className = "hltool"; tool.hidden = true;
+document.body.appendChild(tool);
+let pending = null, selTimer = 0;
+function showTool(rect, label, remove) {
+  tool.innerHTML = `<button class="${remove ? "remove" : ""}">${label}</button>`;
+  tool.hidden = false;
+  const w = tool.offsetWidth, h = tool.offsetHeight, vw = window.innerWidth, vh = window.innerHeight;
+  let top = rect.bottom + 12;
+  if (top + h > vh - 90) top = Math.max(12, rect.top - h - 12);
+  tool.style.top = top + "px";
+  tool.style.left = Math.min(Math.max(12, rect.left + rect.width / 2 - w / 2), vw - w - 12) + "px";
+}
+function hideTool() { tool.hidden = true; pending = null; }
+function selectionInLesson() {
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
+  const r = sel.getRangeAt(0);
+  const node = r.commonAncestorContainer;
+  const el = (node.nodeType === 1 ? node : node.parentElement)?.closest(".lgame");
+  if (!el) return null;
+  const pre = document.createRange();
+  pre.selectNodeContents(el); pre.setEnd(r.startContainer, r.startOffset);
+  const start = pre.toString().length;
+  return { k: el.dataset.k, start, end: start + r.toString().length, rect: r.getBoundingClientRect() };
+}
+document.addEventListener("selectionchange", () => {
+  clearTimeout(selTimer);
+  selTimer = setTimeout(() => {
+    const s = selectionInLesson();
+    if (s && s.end - s.start > 1) { pending = { add: s }; showTool(s.rect, "Highlight"); }
+    else if (pending?.add) hideTool();
+  }, 180);
+});
+// Act on pointerdown so a tap on the toolbar doesn't clear the selection first.
+tool.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  if (pending?.add) { addHL(pending.add.k, pending.add.start, pending.add.end); window.getSelection()?.removeAllRanges(); }
+  else if (pending?.remove) removeHL(pending.remove);
+  hideTool();
+});
+$("gameList").addEventListener("click", e => {
+  const m = e.target.closest("mark[data-id]");
+  if (!m || !window.getSelection()?.isCollapsed) return;
+  pending = { remove: m.dataset.id };
+  showTool(m.getBoundingClientRect(), "Remove highlight", true);
+});
+document.addEventListener("pointerdown", e => { if (!tool.hidden && !tool.contains(e.target) && !e.target.closest("mark")) { if (!pending?.add) hideTool(); } });
+window.addEventListener("scroll", () => { if (!tool.hidden) hideTool(); }, { passive: true });
+$("hlList").addEventListener("click", e => {
+  const del = e.target.closest("[data-del]");
+  if (del) { removeHL(del.dataset.del); return; }
+  const j = e.target.closest("[data-jump]"); if (!j) return;
+  const h = getHL().find(x => x.id === j.dataset.jump); if (!h) return;
+  const el = document.querySelector(`.lgame[data-k="${h.k}"]`);
+  el.closest("details").open = true;
+  const m = el.querySelector(`mark[data-id="${h.id}"]`) || el;
+  m.scrollIntoView({ behavior: "smooth", block: "center" });
+  m.classList.add("flash"); setTimeout(() => m.classList.remove("flash"), 1600);
+});
+[...new Set(getHL().map(h => h.k))].forEach(paintLesson);
+renderHLList();
+
+// ---- pathway ----
+const pos = t => `<span class="pos">${t}</span>`;
+const neg = t => `<span class="neg">${t}</span>`;
+const fix = t => `<span class="fix">${t}</span>`;
+const passedStages = () => new Set(store.get("stages", []));
+function currentStage() { const p = passedStages(); const i = PATHWAY.findIndex((_, n) => !p.has(n)); return i === -1 ? PATHWAY.length - 1 : i; }
+const CHECK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>';
+function renderPath() {
+  const p = passedStages(), cur = currentStage(), all = p.size === PATHWAY.length;
+  const st = PATHWAY[cur];
+  $("pathTop").innerHTML = `
+    <span class="label">${all ? "Every stage passed" : `Stage ${cur + 1} of ${PATHWAY.length} · ${st.phase}`}</span>
+    <p class="sline">${all ? "I've walked the whole path. Now I keep choosing myself, every day." : `I'm working on: ${st.title}.`}</p>
+    <div class="prog" aria-hidden="true">${PATHWAY.map((_, i) => `<span class="${p.has(i) ? "done" : i === cur ? "now" : ""}"></span>`).join("")}</div>`;
+  let lastPhase = "";
+  $("path").innerHTML = PATHWAY.map((s, i) => {
+    const state = p.has(i) ? "done" : i === cur ? "now" : "";
+    const head = s.phase !== lastPhase ? `<div class="phase">${s.phase}</div>` : "";
+    lastPhase = s.phase;
+    return `${head}
+    <div class="stage ${state} ${i === PATHWAY.length - 1 ? "last" : ""}">
+      <span class="node">${p.has(i) ? CHECK : i + 1}</span>
+      <details class="scard">
+        <summary><span class="stitle">${s.title}${i === cur && !all ? ' <em class="tag">I\'m here</em>' : p.has(i) ? ' <em class="tag">Passed</em>' : ""}</span><span class="ssub">${s.what}</span></summary>
+        <div class="sbody">
+          <div class="group"><span class="label">Signs I'm still here</span>${s.here.map(neg).join("")}</div>
+          <div class="group"><span class="label">Signs I've passed it</span>${s.passed.map(pos).join("")}</div>
+          <div class="group"><span class="label">My practice</span>${fix(s.practice)}</div>
+          <div class="group"><span class="label">My line</span><p class="sline">${s.line}</p></div>
+          <div class="sbtns">
+            <button class="fixbtn" data-stage-practise="${i}">Practise this stage</button>
+            <button class="lightbtn" data-stage-toggle="${i}">${p.has(i) ? "Mark as not passed" : "I've passed this"}</button>
+          </div>
+        </div>
+      </details>
+    </div>`;
+  }).join("");
+}
+$("path").addEventListener("click", e => {
+  const t = e.target.closest("[data-stage-toggle]");
+  if (t) {
+    const p = passedStages(), i = +t.dataset.stageToggle;
+    p.has(i) ? p.delete(i) : p.add(i);
+    store.set("stages", [...p]); renderPath(); return;
+  }
+  const b = e.target.closest("[data-stage-practise]"); if (!b) return;
+  const s = PATHWAY[b.dataset.stagePractise], pil = PILLARS.find(x => x.key === s.key);
+  startRitual([{ eyebrow: s.title, line: s.line, why: s.practice }, ...pil.lines.slice(0, 2).map(l => ({ eyebrow: pil.name, line: l, why: pil.core }))]);
+});
+
+// ---- two paths ----
+let path = store.get("path", "both");
+$("mirrorDay").innerHTML = MIRROR_DAY.map(([time, title, good, bad], i) => `
+  <div class="row plain mrow"><span class="time">${time}</span><span class="row-text"><span class="row-title">${title}</span>${pos(good)}${neg(bad)}${fix(MIRROR_DAY_FIX[i])}</span></div>`).join("");
+$("mirrorYear").innerHTML = `<span class="label">A year from now</span>${pos(MIRROR_YEAR[0])}${neg(MIRROR_YEAR[1])}${fix(MIRROR_YEAR_FIX)}`;
+$("mirrorPillars").innerHTML = PILLARS.map((p, pi) => `
+  <div class="card"><div class="card-head"><h3>${p.name}</h3></div>
+    <div class="paths">${MIRROR[p.key][0].map(pos).join("")}${MIRROR[p.key][1].map(neg).join("")}${fix(MIRROR_FIX[p.key])}
+      <button class="fixbtn" data-fix="${pi}">Practise the fix</button>
+    </div>
+  </div>`).join("");
+$("mirrorPillars").addEventListener("click", e => {
+  const b = e.target.closest("[data-fix]"); if (!b) return;
+  const p = PILLARS[b.dataset.fix];
+  startRitual(p.lines.slice(0, 3).map(l => ({ eyebrow: p.name, line: l, why: MIRROR_FIX[p.key] })));
+});
+function setPath(v) {
+  path = v; store.set("path", v);
+  $("mirror").dataset.path = v; document.body.dataset.path = v;
+  $("seg").querySelectorAll("button").forEach(b => b.setAttribute("aria-selected", b.dataset.path === v));
+}
+$("seg").addEventListener("click", e => { const b = e.target.closest("[data-path]"); if (b) setPath(b.dataset.path); });
+setPath(path);
+
+// ---- boot ----
+renderPath();
+OPEN.why = "My rule today: " + todaysRule() + " I say each line out loud three times, and I mean it on the third.";
+deck = [OPEN, ...todaysSet(), gameCard(gameOfDay()), { close: true }];
+const startView = location.hash.slice(1);
+show(VIEWS.some(v => v.id === startView) ? startView : "game");
+setTimeout(() => window.scrollTo(0, 0));
+</script>
+
+<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});</script>
+</body>
+</html>
