@@ -2921,8 +2921,10 @@ const over = (fg, bg) => [0, 1, 2].map((i) => fg[i] * fg[3] + bg[i] * (1 - fg[3]
     ok('and the preview says the day', /28 Oct/.test(a1.pv), a1.pv);
     const a2 = await said('vet the 3rd of november 9am');
     ok('"the 3rd of november" is read', a2.b.on === '2026-11-03' && a2.b.s === 540, a2.b);
-    const a3 = await said('call oct 2 11:30');
-    ok('"oct 2" with no year is the next one, so next year', a3.b.on === '2027-10-02' && a3.b.s === 690, a3.b);
+    const a3 = await said('call sep 2 11:30');
+    ok('"sep 2" with no year, already gone this year, is next year', a3.b.on === '2027-09-02' && a3.b.s === 690, a3.b);
+    const a3b = await said('call oct 2 11:30');
+    ok('"oct 2" with no year, still ahead, is this year', a3b.b.on === '2026-10-02', a3b.b);
     const a4 = await said('flight 3/11 8am');
     ok('"3/11" is day then month', a4.b.on === '2026-11-03', a4.b);
     /* by hand */
