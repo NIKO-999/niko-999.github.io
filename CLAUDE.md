@@ -6038,6 +6038,32 @@ walk weeks, because tomorrow is next week on a Sunday.
 line breaks. `p` stays the one-line place. Both fields are written only
 when set, so every saved block reads back byte for byte.
 
+### A weekday you name is a date, and a session can be planned ahead
+
+Reported off the phone: *Monday to Friday gym* only marked the ends, a
+session logged for a later day ticked the block at once, and a task put
+on "Monday" landed on every Monday for ever.
+
+**A SINGLE PLAIN WEEKDAY IS THE NEXT SUCH DATE**, a one-off block like
+"tomorrow". Weekly takes a word that says so: *every*, a plural, a
+range (*Monday to Friday*), or several days. *Next Monday* is the one
+in the week after. **No day at all means today**, for a time said with
+nothing else, because the only other reading is one you would have
+said.
+
+**A DATE CAN BE SAID OR PICKED.** *28 oct*, *3rd of november*, *3/11*;
+no year means the next occurrence. The editor carries a Date row, and
+a day chip clears it. The placeholder reads *Gym Monday to Friday 6:30
+to 8*, the long form, not an abbreviation.
+
+**PLANNING AHEAD NEVER TICKS.** Choosing what you will train for a day
+still to come files the session and leaves the block unkept; the
+labels say *Plan* and *Planned*. Ticking stays today and two days back.
+
+**The first failure of the suite for this was a flake**, not the
+parser: the same section passed on the runs either side with no change
+to the code, and a probe showed the saved block and its note intact.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
