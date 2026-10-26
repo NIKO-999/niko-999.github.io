@@ -190,6 +190,18 @@ mark.flash { outline: 2px solid var(--ink); outline-offset: 2px; }
 .hldel { border: 0; background: var(--pill); width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); font-size: 1.05rem; line-height: 1; }
 .hlempty { color: var(--muted); padding: 4px 0 18px; line-height: 1.5; }
 
+/* The dating page */
+.dg-p { font-size: 1.06rem; line-height: 1.65; max-width: 62ch; }
+.dg-l { display: flex; gap: 10px; align-items: baseline; line-height: 1.5; }
+.dg-l b { flex: none; width: 66px; box-sizing: border-box; text-align: center; font-size: .68rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; background: var(--pill); color: var(--ink); border-radius: 6px; padding: 2px 6px; transform: translateY(-1px); }
+.dg-l b.lo { background: transparent; box-shadow: inset 0 0 0 1.5px var(--rose); }
+.dg-l b.why { background: transparent; box-shadow: inset 0 0 0 1.5px var(--line); color: var(--muted); }
+.dg-rule { font-weight: 600; }
+.dg-she, .dg-say { padding-left: 12px; line-height: 1.5; }
+.dg-she { font-style: italic; color: var(--muted); border-left: 2px solid var(--line); }
+.dg-she::before, .dg-she::after, .dg-say::before, .dg-say::after { content: '"'; }
+.dg-say { font-weight: 600; border-left: 2px solid var(--ink); }
+
 /* The Game */
 .g-part { margin: 10px 4px -4px; font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .g-part:first-child { margin-top: 0; }
@@ -324,6 +336,11 @@ body[data-view="mirror"][data-path="drop"] { --orb: color-mix(in srgb, var(--mut
     <details class="gcard" id="hlCard"><summary><h3>My highlights <em class="tag" id="hlCount">0</em></h3><svg class="gchev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></summary><div class="lessons" id="hlList"></div></details>
     <div class="card dark" id="gameToday"></div>
     <div id="gameList" style="display:flex;flex-direction:column;gap:14px"></div>
+  </section>
+
+  <section id="dating" hidden>
+    <div class="intro"><h2>Dating game</h2><p class="lede">Reading her interest, holding my frame, and passing her tests without being a dick about it.</p></div>
+    <div id="dgList" style="display:flex;flex-direction:column;gap:14px"></div>
   </section>
 
   <section id="mirror" hidden>
@@ -770,6 +787,68 @@ const GAME = [
   ] },
 ];
 
+// The dating page: reading interest, holding the frame, and her tests.
+// Written from memory and meant to be replaced by the transcript, so it is
+// data rather than markup: a section is a title and a list, nothing else.
+const DATING = {
+  text: {
+    rows: [
+      ["Reply time", "Replies at a steady pace, sometimes quickly. After a gap she comes back and acknowledges it.", "Hours or days every time, with no acknowledgement."],
+      ["Effort", "Matches or beats my length, adds detail, gives me something to work with.", "One word, haha, lol. I am carrying the whole thing."],
+      ["Questions", "Asks about me and keeps the thread going.", "Answers and stops. Every exchange starts with me."],
+      ["Who starts", "Messages first sometimes, sends things unprompted.", "Only ever replies."],
+      ["Plans", "Says yes to a specific time, or offers another one straight away.", "Maybe, we'll see, I'm so busy, with no alternative offered."],
+      ["Tone", "Playful, teases back, matches my energy.", "Flat, polite, formal. Customer service."],
+    ],
+    rule: "Text is for logistics and a little banter, and its job is to get to a date. I match, I never chase. When interest is low I invest less, not more: one clear invite, then I leave it with her and get on with my day.",
+  },
+  call: {
+    rows: [
+      ["Picking up", "Answers, or calls back soon after.", "Lets it ring out, or says she can't talk and never follows up."],
+      ["Flow", "Talks freely, laughs, stays on longer than she needs to.", "Short answers and long silences she leaves for me to fill."],
+      ["Curiosity", "Asks questions and wants to know about me.", "It is an interview, and only one of us is asking."],
+      ["Voice", "Warm and animated, her tone lifts.", "Flat or distracted, clearly doing something else."],
+      ["The ending", "Reluctant to go: I should go, but.", "Wraps up at the first pause with a reason ready."],
+    ],
+    rule: "I end the call while it is still good, with a plan set. I do not stay on to fill silence. If her energy is low I keep it short, set the plan once, and let her show up or not.",
+  },
+  frame: [
+    ["The frame is my reality, held calmly", "Frame is whose version of the situation stands. I hold mine by being settled, not by force. I do not argue her into it. I just do not leave it."],
+    ["Outcome independence", "I want it to go well, and I am fine if it does not. That is what lets me be direct, lead, and walk away when I need to. Needing the outcome is what hands the frame over."],
+    ["I lead with specifics", "I suggest a real plan, like Thursday at 7 at a bar I like, instead of asking what she wants to do sometime. A clear plan is easier to say yes to, and leading is part of what she is reading."],
+    ["Calm is the frame", "Reacting emotionally hands the frame over. When she is upset, I do not match it. I acknowledge it and stay level, and the conversation comes back to where I am."],
+    ["A boundary is said once", "I say what I do not accept, plainly and without heat, one time. After that my actions carry it. Repeating it turns a boundary into a complaint."],
+    ["Invest to match", "I give attention in proportion to what is given back. Over-investing early is choosing from lack, and it reads as exactly that."],
+    ["Humour beats defending", "Most frame grabs are playful. A light answer holds the frame better than a serious defence, because defending says it landed."],
+    ["Respect is part of the frame", "Holding frame is never being cruel or controlling. I respect her choices fully, including no. The frame is about me holding my ground, not about managing her."],
+  ],
+  takes: [
+    ["Upset I replied slowly", "You took ages to reply, you obviously don't care.", "Over-apologise and explain my whole day to prove I care.", "Own it without accepting the story, and move the conversation forward.", "Flat out at work today. I'm here now. How was yours?"],
+    ["The plan on her terms only", "Come to my side of town, I'm not travelling.", "Agree instantly, or dig in and make it a fight.", "Keep my plan with a light reason, and give her the next one.", "I've got somewhere good near me. Next one's your pick."],
+    ["Hot then cold", "Warm all week, then suddenly distant.", "Chase harder and keep asking if everything is OK.", "Match the drop, carry on with my life, and be warm when she comes back.", "Hey stranger, good to hear from you."],
+    ["Guilt as leverage", "If you really liked me you'd skip the gym for me.", "Drop my commitments to prove I am interested.", "Keep the commitment and offer a real alternative.", "I've got training at 6. I'm free from 7:30 though."],
+    ["Other guys", "This guy at work keeps asking me out.", "Jealousy, questions, or trying to outdo him.", "Stay unbothered and a little amused, then change the subject.", "Smart guy. Good taste."],
+    ["Knocking my plan", "Why would you want to go there? That place is boring.", "Defend it at length, or cancel and let her choose.", "Confident and playful, and the plan stands.", "Trust me. If it's boring, the next round's on me."],
+    ["Making me qualify", "What makes you different from other guys?", "List my good qualities like a job interview.", "Do not sell. Turn it around lightly.", "Not sure I am yet. You'll have to find out."],
+    ["Silence after a disagreement", "Nothing for a day after a small argument.", "Pile up messages until she replies.", "One calm message, then space.", "When you're ready to talk, I'm around."],
+  ],
+  tests: [
+    ["Running late", "Running 20 mins late, sorry!", "Whether my time matters to me.", "Say no worries at all and never mention it again, however late she is.", "Easy the first time if she let me know. If it is long or a pattern, I say so in person, calmly, once. Forty minutes with no warning and I have already left.", "All good. Just so you know, I'm big on time, so give me a heads up earlier next time."],
+    ["Rescheduling", "Can we do another day?", "Whether I will rearrange my life on demand.", "Sure, whenever suits you! and then wait around.", "Fine if she offers a real alternative. If she does not, I leave the next move with her and stop initiating. A second reschedule with no new day is low interest, and I move on.", "Sure. What works for you instead?"],
+    ["Cancelling last minute", "Something's come up, can't make it tonight.", "Whether I sulk, guilt-trip or chase.", "Guilt-trip her, or keep pushing for a new time.", "Brief and unbothered. She re-books, or she does not.", "All good. Let me know when you're free."],
+    ["Teasing me", "Your shoes are dirty.", "Whether I get defensive or rattled.", "Explain, apologise, or get offended.", "Agree and exaggerate it. Playful, not defensive.", "They've seen some things. I save the clean pair for second dates."],
+    ["Testing my sincerity", "You probably say that to all the girls.", "Whether I get flustered or over-explain.", "Insist that no, really, she is special.", "Light, and a little challenging.", "Only the ones who earn it."],
+    ["Why am I single", "So why are you single?", "Whether I bring baggage or bitterness.", "Tell the whole story of my ex.", "Short, honest and light, then back to her.", "I'm picky. You're doing alright so far."],
+    ["Calling me cocky", "You're so cocky.", "Whether my confidence is real or a mask.", "Back down and soften myself to be liked.", "Amused. Real confidence does not need to defend itself.", "I prefer well adjusted."],
+    ["Not her usual type", "I don't usually date guys like you.", "Whether I need her approval.", "Ask what is wrong with me and try to fix it.", "Unbothered and playful.", "Then this'll be educational."],
+    ["Left on read", "A day of nothing, then a dry reply.", "Whether I will chase or punish.", "Send three follow-ups, or go cold to teach her a lesson.", "Match the energy. Reply briefly when I get to it, with an invite or nothing at all.", "Ha, busy one. Drink Thursday?"],
+    ["Favours too early", "Can you shout me an Uber?", "Whether I am a provider on demand.", "Pay for anything to keep her happy.", "A kind no or a playful deflection. Generosity is for people who have earned it.", "Nice try. Get yourself here and the first drink's on me."],
+    ["Testing in public", "Flirting with someone else, or disappearing at the venue.", "Whether I get jealous or possessive.", "Police her, sulk, or make a scene.", "Stay unbothered and enjoy my night. If it turns disrespectful, I leave without a speech.", ""],
+    ["Convince me", "Why should I go out with you?", "Whether I will sell myself.", "Pitch myself like a product.", "Do not sell. State the plan and let her choose.", "I won't convince you. I'll be there Thursday at 7. Come if you're curious."],
+  ],
+  pattern: "A test is not always a test. People are genuinely late, genuinely busy, genuinely have things come up. I give good faith the first time and read the pattern, not the moment. Treating every message as a battle is its own kind of losing the frame.",
+};
+
 // ---- storage (per-device; tolerant of blocked storage) ----
 const store = {
   get(k, d) { try { const v = localStorage.getItem("chosen:" + k); return v ? JSON.parse(v) : d; } catch { return d; } },
@@ -794,6 +873,7 @@ const ICON = {
   mark: '<path d="M7 3h10v18l-5-4-5 4z"/>',
   target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".6"/>',
   book: '<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/>',
+  heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
   game: '<path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6-4.5-4.2 6.1-.7z"/>',
   path: '<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h6a3.5 3.5 0 0 0 0-7h-4a3.5 3.5 0 0 1 0-7h6"/>',
   mirror: '<circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/>',
@@ -815,6 +895,7 @@ streak();
 // ---- menu sheet + views ----
 const VIEWS = [
   { id: "game", title: "The Game", tag: () => `${GAME_ALL.length} lessons`, sub: "The talk and how I think, read every day", icon: "game" },
+  { id: "dating", title: "Dating game", tag: () => `${DATING.tests.length} tests`, sub: "Interest, frame, and her tests", icon: "heart" },
   { id: "ritual", title: "Morning", tag: () => `${RITUAL_SIZE + 1} lines`, sub: "I say today's lines out loud", icon: "sun" },
   { id: "pathway", title: "Pathway", tag: () => `Stage ${currentStage() + 1}/${PATHWAY.length}`, sub: "The framework, one stage at a time", icon: "path" },
   { id: "pillars", title: "Pillars", tag: () => `${PILLARS.length}`, sub: "Every affirmation, by theme", icon: "cols" },
@@ -1132,6 +1213,56 @@ $("hlList").addEventListener("click", e => {
 });
 [...new Set(getHL().map(h => h.k))].forEach(paintLesson);
 renderHLList();
+
+// ---- the dating page ----
+(function renderDating() {
+  const esc2 = t => String(t).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+  const card = (title, n, body) => `
+    <details class="gcard">
+      <summary><h3>${title} <em class="tag">${n}</em></h3>${GCHEV}</summary>
+      <div class="lessons">${body}</div>
+    </details>`;
+  const num = i => `<span class="num">${String(i + 1).padStart(2, "0")}</span>`;
+  const signals = ch => ch.rows.map(([t, hi, lo]) => `
+    <div class="lesson">
+      <div class="lhead"><span class="row-title">${t}</span></div>
+      <p class="dg-l"><b>High</b><span>${hi}</span></p>
+      <p class="dg-l"><b class="lo">Low</b><span>${lo}</span></p>
+    </div>`).join("") + `
+    <div class="lesson"><p class="dg-l"><b>I</b><span class="dg-rule">${ch.rule}</span></p></div>`;
+  const frame = DATING.frame.map(([t, p], i) => `
+    <div class="lesson">
+      <div class="lhead">${num(i)}<span class="row-title">${t}</span></div>
+      <p class="dg-p">${p}</p>
+    </div>`).join("");
+  const takes = DATING.takes.map(([t, she, weak, strong, say], i) => `
+    <div class="lesson">
+      <div class="lhead">${num(i)}<span class="row-title">${t}</span></div>
+      <p class="dg-she">${esc2(she)}</p>
+      <p class="dg-l"><b class="lo">Weak</b><span>${weak}</span></p>
+      <p class="dg-l"><b>Strong</b><span>${strong}</span></p>
+      <p class="dg-say">${esc2(say)}</p>
+    </div>`).join("");
+  const tests = DATING.tests.map(([t, she, why, weak, strong, say], i) => `
+    <div class="lesson">
+      <div class="lhead">${num(i)}<span class="row-title">${t}</span></div>
+      <p class="dg-she">${esc2(she)}</p>
+      <p class="dg-l"><b class="why">Testing</b><span>${why}</span></p>
+      <p class="dg-l"><b class="lo">Fail</b><span>${weak}</span></p>
+      <p class="dg-l"><b>Pass</b><span>${strong}</span></p>
+      ${say ? `<p class="dg-say">${esc2(say)}</p>` : ""}
+    </div>`).join("");
+  $("dgList").innerHTML =
+    `<p class="g-part">Reading interest</p>` +
+    card("Over text", DATING.text.rows.length, signals(DATING.text)) +
+    card("On a call", DATING.call.rows.length, signals(DATING.call)) +
+    `<p class="g-part">The frame</p>` +
+    card("Holding the frame", DATING.frame.length, frame) +
+    card("When she tries to take it", DATING.takes.length, takes) +
+    `<p class="g-part">Tests</p>` +
+    card("Her tests, and passing them", DATING.tests.length, tests) +
+    `<div class="card dark"><span class="label">Read the pattern</span><p style="line-height:1.6">${DATING.pattern}</p></div>`;
+})();
 
 // ---- pathway ----
 const pos = t => `<span class="pos">${t}</span>`;

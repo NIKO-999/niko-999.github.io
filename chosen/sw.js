@@ -1,7 +1,7 @@
 // Chosen — offline support. It may share its origin with other apps (e.g. on niko-999.github.io),
 // so it only ever touches caches named chosen-*.
 // Bump VERSION whenever the page changes so phones pick up the new copy.
-const VERSION = "chosen-v15";
+const VERSION = "chosen-v16";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", e => e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE)).then(() => self.skipWaiting())));
