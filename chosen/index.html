@@ -196,10 +196,10 @@ mark.flash { outline: 2px solid var(--ink); outline-offset: 2px; }
 .dg-l b { flex: none; width: 66px; box-sizing: border-box; text-align: center; font-size: .68rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; background: var(--pill); color: var(--ink); border-radius: 6px; padding: 2px 6px; transform: translateY(-1px); }
 .dg-l b.lo { background: transparent; box-shadow: inset 0 0 0 1.5px var(--rose); }
 .dg-l b.why { background: transparent; box-shadow: inset 0 0 0 1.5px var(--line); color: var(--muted); }
-.dg-rule { font-weight: 600; }
 .dg-she, .dg-say { padding-left: 12px; line-height: 1.5; }
 .dg-she { font-style: italic; color: var(--muted); border-left: 2px solid var(--line); }
 .dg-she::before, .dg-she::after, .dg-say::before, .dg-say::after { content: '"'; }
+.dg-she.is-sit::before, .dg-she.is-sit::after { content: none; }
 .dg-say { font-weight: 600; border-left: 2px solid var(--ink); }
 
 /* The Game */
@@ -339,7 +339,7 @@ body[data-view="mirror"][data-path="drop"] { --orb: color-mix(in srgb, var(--mut
   </section>
 
   <section id="dating" hidden>
-    <div class="intro"><h2>Dating game</h2><p class="lede">Reading her interest, holding my frame, and passing her tests without being a dick about it.</p></div>
+    <div class="intro"><h2>Dating game</h2><p class="lede">The mindset, reading her, and her tests from setting the date to after it. Hold the frame without being a dick about it.</p></div>
     <div id="dgList" style="display:flex;flex-direction:column;gap:14px"></div>
   </section>
 
@@ -787,66 +787,57 @@ const GAME = [
   ] },
 ];
 
-// The dating page: reading interest, holding the frame, and her tests.
-// Written from memory and meant to be replaced by the transcript, so it is
-// data rather than markup: a section is a title and a list, nothing else.
+// The dating page, rebuilt from the transcript and in its order: the mindset,
+// reading her, the tests from setting the date to after it, then patience.
+// Data rather than markup, so a section is a title and a list and nothing else.
+// A "she" in brackets is a situation rather than something she says.
 const DATING = {
-  text: {
-    rows: [
-      ["Reply time", "Replies at a steady pace, sometimes quickly. After a gap she comes back and acknowledges it.", "Hours or days every time, with no acknowledgement."],
-      ["Effort", "Matches or beats my length, adds detail, gives me something to work with.", "One word, haha, lol. I am carrying the whole thing."],
-      ["Questions", "Asks about me and keeps the thread going.", "Answers and stops. Every exchange starts with me."],
-      ["Who starts", "Messages first sometimes, sends things unprompted.", "Only ever replies."],
-      ["Plans", "Says yes to a specific time, or offers another one straight away.", "Maybe, we'll see, I'm so busy, with no alternative offered."],
-      ["Tone", "Playful, teases back, matches my energy.", "Flat, polite, formal. Customer service."],
-    ],
-    rule: "Text is for logistics and a little banter, and its job is to get to a date. I match, I never chase. When interest is low I invest less, not more: one clear invite, then I leave it with her and get on with my day.",
-  },
-  call: {
-    rows: [
-      ["Picking up", "Answers, or calls back soon after.", "Lets it ring out, or says she can't talk and never follows up."],
-      ["Flow", "Talks freely, laughs, stays on longer than she needs to.", "Short answers and long silences she leaves for me to fill."],
-      ["Curiosity", "Asks questions and wants to know about me.", "It is an interview, and only one of us is asking."],
-      ["Voice", "Warm and animated, her tone lifts.", "Flat or distracted, clearly doing something else."],
-      ["The ending", "Reluctant to go: I should go, but.", "Wraps up at the first pause with a reason ready."],
-    ],
-    rule: "I end the call while it is still good, with a plan set. I do not stay on to fill silence. If her energy is low I keep it short, set the plan once, and let her show up or not.",
-  },
-  frame: [
-    ["The frame is my reality, held calmly", "Frame is whose version of the situation stands. I hold mine by being settled, not by force. I do not argue her into it. I just do not leave it."],
-    ["Outcome independence", "I want it to go well, and I am fine if it does not. That is what lets me be direct, lead, and walk away when I need to. Needing the outcome is what hands the frame over."],
-    ["I lead with specifics", "I suggest a real plan, like Thursday at 7 at a bar I like, instead of asking what she wants to do sometime. A clear plan is easier to say yes to, and leading is part of what she is reading."],
-    ["Calm is the frame", "Reacting emotionally hands the frame over. When she is upset, I do not match it. I acknowledge it and stay level, and the conversation comes back to where I am."],
-    ["A boundary is said once", "I say what I do not accept, plainly and without heat, one time. After that my actions carry it. Repeating it turns a boundary into a complaint."],
-    ["Invest to match", "I give attention in proportion to what is given back. Over-investing early is choosing from lack, and it reads as exactly that."],
-    ["Humour beats defending", "Most frame grabs are playful. A light answer holds the frame better than a serious defence, because defending says it landed."],
-    ["Respect is part of the frame", "Holding frame is never being cruel or controlling. I respect her choices fully, including no. The frame is about me holding my ground, not about managing her."],
+  sections: [
+    { part: "First", title: "The mindset", kind: "lesson", items: [
+      ["Abundance first", "I cannot pass a test from scarcity. If I am scared of offending her or losing her, I will fold every time, and folding is exactly what the test is checking for. So the work starts before the date: I go in knowing she is one woman, not the last one."],
+      ["Do the groundwork", "Abundance is not something I can fake for long. It comes from the self-improvement: my body, my money, my purpose, my options. When I have done the work I do not feel I have to kiss anyone's ass, and standing my ground comes naturally."],
+      ["Her level, not above it", "None of this works on a woman I secretly believe is out of my league. If I am thinking I cannot believe I got her number, the work is on me, not on her. I date women I believe are on my level, and I keep raising my level."],
+      ["The tests are subconscious", "Most women do not know they are testing. It is hardwired: she is checking whether I am high value or whether I will go along with anything to keep her happy. So I do not take it personally and I do not resent it. I just do not fold."],
+      ["Compliance is what fails", "A man with few options lets her push him around because he does not want to rock the boat, and that is exactly what fails. Passing is never about being rude. It is having a backbone, calmly, every time."],
+      ["She might walk", "Holding my ground does not guarantee she stays. Sometimes she walks. That is the price of having standards, and it is cheaper than the alternative: a woman who stays and does not respect me."],
+    ] },
+    { title: "Reading her interest", kind: "lesson", items: [
+      ["We'll see is not a no", "When she says we'll see or I'll let you know, I am not at the top of her list yet, and that is fine. I just met her, and she is not dropping her life for me. It is a test of whether I will wait around, not a final answer."],
+      ["She probably has someone", "A woman worth dating usually has other men around, sometimes a main guy who has stopped acting like one. She will not drop him until she finds a better man. If I play it right I can take that spot, but not by rushing her."],
+      ["Waiting raises her interest", "When I withdraw and come back in two or three weeks, her interest goes up, because it tells her I have a life and other options. A man waiting by the phone looks like he has neither."],
+      ["Her goodnight text is her feeling me out", "When she texts that she had a great time after a date where I did not kiss her, she is checking where I am at. I do not feed it much. A short reply keeps her curious."],
+      ["Pulling back is not losing interest", "Women play the game too. Going quiet after a good date, or saying I don't know about a second one, often just means she is busy, has friends, works a lot, or is checking whether I will panic. A confident man assumes she is busy."],
+    ] },
+    { part: "The tests, in order", title: "Setting the date", kind: "test", items: [
+      ["We'll see", "We'll see. I'll let you know.", "Whether I will wait around for her.", "Wait by the phone, keep asking, chase an answer.", "No definite day means no date. I withdraw, live my life, keep dating, and try again in two or three weeks.", "No worries. I'll hit you up another time."],
+      ["Keeping it vague", "Maybe this weekend?", "Whether I will keep my weekend open on the chance.", "Hold the whole weekend free in case she gets back to me.", "A specific day and time now, or we try another time. I am not waiting for her to find a slot.", "Let's lock it in. Saturday at 7?"],
+    ] },
+    { title: "The day of the date", kind: "test", items: [
+      ["Changing the time", "Can we do 8 instead of 7?", "Whether I will rearrange around her.", "Move it. She will probably still turn up 30 or 45 minutes late, because now she knows she can.", "The time stands. She makes 7 or we do it another day. Having plans afterwards makes it easy to say. If she cannot make it, I wait about two weeks before trying again.", "I've got plans with friends after, so it's 7 or we'll do it another time."],
+      ["Showing up late", "(She arrives 10 or 20 minutes late.)", "Whether she can walk all over me.", "Let it go like nothing happened. Her respect drops, and her interest with it.", "I say something every time, without being a dick about it. At 15 or 20 minutes, she buys the first round.", "I don't like waiting on people. You're getting the first round."],
+    ] },
+    { title: "On the date", kind: "test", items: [
+      ["Disagreeing with me", "I loved that movie.", "Whether I will change my opinion to match hers.", "Actually, yeah, it was okay.", "I keep my opinion. Not arguing with everything she says, just not folding on what I think.", "Good for you. I hated it."],
+      ["Holding her purse", "Can you hold my purse?", "Whether I will do small things just because she asks.", "Carry it around all night.", "A light no.", "I'm good. It suits you better."],
+      ["Try it anyway", "Here, try this vodka.", "Whether I will go along with something I already said I do not like.", "Drink it to keep her happy.", "I already told her. I never go along with something I do not want to do.", "I told you, I don't like it. You enjoy it."],
+      ["What a man should do", "I like men who open car doors.", "Whether I will perform for her approval.", "Rush to do it now that she has said it.", "I do not do things on command to win approval. In the story it came from, he did not open it, and the night went fine.", "Your door works fine."],
+      ["Trolling my clothes", "Where'd you get that shirt? I don't like it.", "Whether she can move me off my centre.", "Get defensive, or explain the shirt.", "Do not get defensive. She is trolling me, so I troll her back.", "I wore it especially for you. I'll make sure I wear it on our second date."],
+      ["Calling me no gentleman", "I want a gentleman.", "Whether a little needling makes me emotional. This came after he asked her to get the second round.", "Go off on a tangent defending myself. He did, once, and it was their last date.", "Let it roll off and stay light. Needling only works if it lands.", "A gentleman who got the first round. Your turn."],
+      ["Going quiet", "(She goes quiet and seems less interested.)", "Whether I will start chasing her validation.", "Talk faster, crack jokes, turn into a dancing monkey to win her back.", "Feed silence with silence. Five quiet minutes means nothing, and she will come back around. If she is quiet and I am not worried, she starts chasing my approval.", ""],
+    ] },
+    { title: "After the date", kind: "test", items: [
+      ["The first-date kiss", "(The end of a first date.)", "Who holds the power at the end of the night.", "Go for the kiss and hand her the yes or no.", "A hug. I only go for a kiss on a first date if it is going so well that I have asked her back to mine. Holding back leaves her wondering, and often she pursues.", ""],
+      ["Her goodnight text", "I had a great time.", "Where I am at.", "Me too! When can I see you again?", "Short, and give her little.", "Okay, get some rest. We'll talk later."],
+      ["Pulling back after", "(The good-morning texts stop.)", "Whether I will panic.", "Blow up her phone, or decide she did not like me.", "Assume she is busy and get on with my life.", ""],
+      ["Second date: I don't know", "I don't know, I'll get back to you.", "Whether I will take it personally.", "Decide she is not interested and give up, or push for an answer.", "Patience. She has a life. I keep dating and try again in a couple of weeks.", "No stress. I'll hit you up."],
+    ] },
+    { part: "Last", title: "Patience", kind: "lesson", items: [
+      ["It can take months", "Sometimes it is three or four months from her number to anything happening. That does not mean dates every weekend for three months. It means she had a life before me. I pursue her slowly, maybe a call a month, and let it take what it takes."],
+      ["Patience is not waiting", "Patient does not mean sitting in my room crossing days off a calendar. I am still dating, still prospecting, still pursuing my purpose. I am not waiting on her. I am living, and she fits in or she does not."],
+      ["Nobody drops their life for me", "I do not expect anyone to drop everything to see me, because I do not either. When I meet someone I often cannot see her for two weeks. A woman with a full life is a good sign, not a rejection."],
+    ] },
   ],
-  takes: [
-    ["Upset I replied slowly", "You took ages to reply, you obviously don't care.", "Over-apologise and explain my whole day to prove I care.", "Own it without accepting the story, and move the conversation forward.", "Flat out at work today. I'm here now. How was yours?"],
-    ["The plan on her terms only", "Come to my side of town, I'm not travelling.", "Agree instantly, or dig in and make it a fight.", "Keep my plan with a light reason, and give her the next one.", "I've got somewhere good near me. Next one's your pick."],
-    ["Hot then cold", "Warm all week, then suddenly distant.", "Chase harder and keep asking if everything is OK.", "Match the drop, carry on with my life, and be warm when she comes back.", "Hey stranger, good to hear from you."],
-    ["Guilt as leverage", "If you really liked me you'd skip the gym for me.", "Drop my commitments to prove I am interested.", "Keep the commitment and offer a real alternative.", "I've got training at 6. I'm free from 7:30 though."],
-    ["Other guys", "This guy at work keeps asking me out.", "Jealousy, questions, or trying to outdo him.", "Stay unbothered and a little amused, then change the subject.", "Smart guy. Good taste."],
-    ["Knocking my plan", "Why would you want to go there? That place is boring.", "Defend it at length, or cancel and let her choose.", "Confident and playful, and the plan stands.", "Trust me. If it's boring, the next round's on me."],
-    ["Making me qualify", "What makes you different from other guys?", "List my good qualities like a job interview.", "Do not sell. Turn it around lightly.", "Not sure I am yet. You'll have to find out."],
-    ["Silence after a disagreement", "Nothing for a day after a small argument.", "Pile up messages until she replies.", "One calm message, then space.", "When you're ready to talk, I'm around."],
-  ],
-  tests: [
-    ["Running late", "Running 20 mins late, sorry!", "Whether my time matters to me.", "Say no worries at all and never mention it again, however late she is.", "Easy the first time if she let me know. If it is long or a pattern, I say so in person, calmly, once. Forty minutes with no warning and I have already left.", "All good. Just so you know, I'm big on time, so give me a heads up earlier next time."],
-    ["Rescheduling", "Can we do another day?", "Whether I will rearrange my life on demand.", "Sure, whenever suits you! and then wait around.", "Fine if she offers a real alternative. If she does not, I leave the next move with her and stop initiating. A second reschedule with no new day is low interest, and I move on.", "Sure. What works for you instead?"],
-    ["Cancelling last minute", "Something's come up, can't make it tonight.", "Whether I sulk, guilt-trip or chase.", "Guilt-trip her, or keep pushing for a new time.", "Brief and unbothered. She re-books, or she does not.", "All good. Let me know when you're free."],
-    ["Teasing me", "Your shoes are dirty.", "Whether I get defensive or rattled.", "Explain, apologise, or get offended.", "Agree and exaggerate it. Playful, not defensive.", "They've seen some things. I save the clean pair for second dates."],
-    ["Testing my sincerity", "You probably say that to all the girls.", "Whether I get flustered or over-explain.", "Insist that no, really, she is special.", "Light, and a little challenging.", "Only the ones who earn it."],
-    ["Why am I single", "So why are you single?", "Whether I bring baggage or bitterness.", "Tell the whole story of my ex.", "Short, honest and light, then back to her.", "I'm picky. You're doing alright so far."],
-    ["Calling me cocky", "You're so cocky.", "Whether my confidence is real or a mask.", "Back down and soften myself to be liked.", "Amused. Real confidence does not need to defend itself.", "I prefer well adjusted."],
-    ["Not her usual type", "I don't usually date guys like you.", "Whether I need her approval.", "Ask what is wrong with me and try to fix it.", "Unbothered and playful.", "Then this'll be educational."],
-    ["Left on read", "A day of nothing, then a dry reply.", "Whether I will chase or punish.", "Send three follow-ups, or go cold to teach her a lesson.", "Match the energy. Reply briefly when I get to it, with an invite or nothing at all.", "Ha, busy one. Drink Thursday?"],
-    ["Favours too early", "Can you shout me an Uber?", "Whether I am a provider on demand.", "Pay for anything to keep her happy.", "A kind no or a playful deflection. Generosity is for people who have earned it.", "Nice try. Get yourself here and the first drink's on me."],
-    ["Testing in public", "Flirting with someone else, or disappearing at the venue.", "Whether I get jealous or possessive.", "Police her, sulk, or make a scene.", "Stay unbothered and enjoy my night. If it turns disrespectful, I leave without a speech.", ""],
-    ["Convince me", "Why should I go out with you?", "Whether I will sell myself.", "Pitch myself like a product.", "Do not sell. State the plan and let her choose.", "I won't convince you. I'll be there Thursday at 7. Come if you're curious."],
-  ],
-  pattern: "A test is not always a test. People are genuinely late, genuinely busy, genuinely have things come up. I give good faith the first time and read the pattern, not the moment. Treating every message as a battle is its own kind of losing the frame.",
+  nutshell: "Either she gives me a specific day and time, or we try another time. Either she makes the time we agreed, or we try another time. If she is late, I say something. If she needles me, I troll her back. If she wants me to comply, I like what I like. If she goes quiet, I go quiet. If she pulls back after, she is probably busy. And the whole time, I am living my life.",
 };
 
 // ---- storage (per-device; tolerant of blocked storage) ----
@@ -895,7 +886,7 @@ streak();
 // ---- menu sheet + views ----
 const VIEWS = [
   { id: "game", title: "The Game", tag: () => `${GAME_ALL.length} lessons`, sub: "The talk and how I think, read every day", icon: "game" },
-  { id: "dating", title: "Dating game", tag: () => `${DATING.tests.length} tests`, sub: "Interest, frame, and her tests", icon: "heart" },
+  { id: "dating", title: "Dating game", tag: () => `${DATING.sections.filter(x => x.kind === "test").reduce((a, x) => a + x.items.length, 0)} tests`, sub: "Her tests, in order, and passing them", icon: "heart" },
   { id: "ritual", title: "Morning", tag: () => `${RITUAL_SIZE + 1} lines`, sub: "I say today's lines out loud", icon: "sun" },
   { id: "pathway", title: "Pathway", tag: () => `Stage ${currentStage() + 1}/${PATHWAY.length}`, sub: "The framework, one stage at a time", icon: "path" },
   { id: "pillars", title: "Pillars", tag: () => `${PILLARS.length}`, sub: "Every affirmation, by theme", icon: "cols" },
@@ -1217,51 +1208,31 @@ renderHLList();
 // ---- the dating page ----
 (function renderDating() {
   const esc2 = t => String(t).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
-  const card = (title, n, body) => `
-    <details class="gcard">
-      <summary><h3>${title} <em class="tag">${n}</em></h3>${GCHEV}</summary>
-      <div class="lessons">${body}</div>
-    </details>`;
-  const num = i => `<span class="num">${String(i + 1).padStart(2, "0")}</span>`;
-  const signals = ch => ch.rows.map(([t, hi, lo]) => `
+  // A line in brackets is a situation, drawn without quote marks.
+  const she = t => /^\(.*\)$/.test(t)
+    ? `<p class="dg-she is-sit">${esc2(t.slice(1, -1))}</p>`
+    : `<p class="dg-she">${esc2(t)}</p>`;
+  let n = 0;
+  const lesson = ([t, p]) => `
     <div class="lesson">
-      <div class="lhead"><span class="row-title">${t}</span></div>
-      <p class="dg-l"><b>High</b><span>${hi}</span></p>
-      <p class="dg-l"><b class="lo">Low</b><span>${lo}</span></p>
-    </div>`).join("") + `
-    <div class="lesson"><p class="dg-l"><b>I</b><span class="dg-rule">${ch.rule}</span></p></div>`;
-  const frame = DATING.frame.map(([t, p], i) => `
-    <div class="lesson">
-      <div class="lhead">${num(i)}<span class="row-title">${t}</span></div>
+      <div class="lhead"><span class="num">${String(++n).padStart(2, "0")}</span><span class="row-title">${t}</span></div>
       <p class="dg-p">${p}</p>
-    </div>`).join("");
-  const takes = DATING.takes.map(([t, she, weak, strong, say], i) => `
+    </div>`;
+  const test = ([t, line, why, weak, strong, say]) => `
     <div class="lesson">
-      <div class="lhead">${num(i)}<span class="row-title">${t}</span></div>
-      <p class="dg-she">${esc2(she)}</p>
-      <p class="dg-l"><b class="lo">Weak</b><span>${weak}</span></p>
-      <p class="dg-l"><b>Strong</b><span>${strong}</span></p>
-      <p class="dg-say">${esc2(say)}</p>
-    </div>`).join("");
-  const tests = DATING.tests.map(([t, she, why, weak, strong, say], i) => `
-    <div class="lesson">
-      <div class="lhead">${num(i)}<span class="row-title">${t}</span></div>
-      <p class="dg-she">${esc2(she)}</p>
+      <div class="lhead"><span class="num">${String(++n).padStart(2, "0")}</span><span class="row-title">${t}</span></div>
+      ${she(line)}
       <p class="dg-l"><b class="why">Testing</b><span>${why}</span></p>
       <p class="dg-l"><b class="lo">Fail</b><span>${weak}</span></p>
       <p class="dg-l"><b>Pass</b><span>${strong}</span></p>
       ${say ? `<p class="dg-say">${esc2(say)}</p>` : ""}
-    </div>`).join("");
-  $("dgList").innerHTML =
-    `<p class="g-part">Reading interest</p>` +
-    card("Over text", DATING.text.rows.length, signals(DATING.text)) +
-    card("On a call", DATING.call.rows.length, signals(DATING.call)) +
-    `<p class="g-part">The frame</p>` +
-    card("Holding the frame", DATING.frame.length, frame) +
-    card("When she tries to take it", DATING.takes.length, takes) +
-    `<p class="g-part">Tests</p>` +
-    card("Her tests, and passing them", DATING.tests.length, tests) +
-    `<div class="card dark"><span class="label">Read the pattern</span><p style="line-height:1.6">${DATING.pattern}</p></div>`;
+    </div>`;
+  $("dgList").innerHTML = DATING.sections.map(sec => `${sec.part ? `<p class="g-part">${sec.part}</p>` : ""}
+    <details class="gcard">
+      <summary><h3>${sec.title} <em class="tag">${sec.items.length}</em></h3>${GCHEV}</summary>
+      <div class="lessons">${sec.items.map(sec.kind === "test" ? test : lesson).join("")}</div>
+    </details>`).join("") +
+    `<div class="card dark"><span class="label">In a nutshell</span><p style="line-height:1.6">${DATING.nutshell}</p></div>`;
 })();
 
 // ---- pathway ----
