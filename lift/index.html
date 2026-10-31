@@ -135,8 +135,10 @@ svg { display: block; }
 
 /* ── weekly sets ── */
 .lf-vol { display: flex; flex-direction: column; gap: 9px; margin-top: 12px; }
-.lf-vr { display: grid; grid-template-columns: 82px minmax(0, 1fr) 64px; align-items: center; gap: 10px; font-size: 12.5px; }
+.lf-vr { display: grid; grid-template-columns: 86px minmax(0, 1fr) 64px; align-items: center; gap: 10px; font-size: 12.5px; }
 .lf-vr span { color: var(--dim); }
+.lf-vr:nth-child(-n+3) span { color: var(--ink); font-weight: 600; }
+.lf-vsep { height: 1px; background: var(--line); margin: 2px 0; }
 .lf-vr i { display: block; height: 6px; border-radius: 3px; background: var(--card3); overflow: hidden; }
 .lf-vr i b { display: block; height: 100%; background: #c9c9ce; border-radius: 3px; }
 .lf-vr.is-met i b { background: var(--good); }
@@ -366,7 +368,9 @@ var EXERCISES = [
   ['legpress', 'Leg press', 'Quads', 1],
   ['rdl', 'Romanian deadlift', 'Hamstrings', 1], ['seatcurl', 'Seated leg curls', 'Hamstrings'], ['lyingcurl', 'Lying leg curls', 'Hamstrings'],
   ['hipthrust', 'Hip thrusts', 'Glutes', 1], ['bss', 'Bulgarian split squats', 'Glutes', 1],
-  ['calfstand', 'Standing calf raises', 'Calves'], ['calfseat', 'Seated calf raises', 'Calves'], ['calf', 'Calf raises', 'Calves'],
+  ['calfstand', 'Standing calf raises', 'Calves'], ['calfseat', 'Seated calf raises', 'Calves'], ['calf', 'Leg press calf raises', 'Calves'],
+  ['backext', '45-degree back extensions', 'Lower back'], ['revhyper', 'Reverse hyperextensions', 'Lower back'],
+  ['cablecrunch', 'Cable crunches', 'Abs'], ['hlr', 'Hanging leg raises', 'Abs', 0, 'bw'], ['abwheel', 'Ab wheel rollouts', 'Abs', 0, 'bw'],
   ['incdb', 'Incline dumbbell press', 'Chest', 1], ['mchest', 'Machine chest press', 'Chest', 1], ['incmach', 'Incline machine press', 'Chest', 1],
   ['pecdeck', 'Pec deck', 'Chest'], ['cfly', 'Cable chest flyes', 'Chest'],
   ['pullup', 'Weighted pull-ups', 'Back', 1, 'bw'], ['latpd', 'Lat pulldowns', 'Back', 1], ['csrow', 'Chest-supported rows', 'Back', 1],
@@ -380,25 +384,43 @@ var EXERCISES = [
 ].map(function (a) { return { id: a[0], n: a[1], m: a[2], c: a[3] ? 1 : 0, t: a[4] || 'w' }; });
 /* Arms and Legs stay on the list so an exercise you made before the
    split arrived still reads; the program itself uses the finer groups. */
-var MUSCLES = ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Core', 'Arms', 'Legs', 'Cardio', 'Other'];
+var MUSCLES = ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Lower back', 'Abs', 'Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Core', 'Arms', 'Legs', 'Cardio', 'Other'];
 
 /* THE SPLIT. Seven days, each exercise as [id, sets, low reps, high
-   reps]. dow is the JavaScript weekday (Sunday 0), so today opens on
-   its own day without anything to choose. Code, like the list above:
-   only your logged days are data. */
+   reps, build]. dow is the JavaScript weekday (Sunday 0), so today
+   opens on its own day without anything to choose. Code, like the list
+   above: only your logged days are data.
+
+   Quads, calves and lower back are the specialisation. CALVES START AT
+   12 SETS, not 15, because 15–20k steps a day is calf work too: the
+   entry marked `build` is Sunday's block, and it joins the day only
+   once "Calves at 15 sets" is switched on under You. */
 var PROGRAM = [
-  { id: 'p-mon', dow: 1, n: 'Lower A', sp: 'Heavy quads', ex: [['hack', 3, 6, 10], ['squat', 3, 6, 10], ['legext', 3, 12, 15], ['calfstand', 3, 10, 15]] },
-  { id: 'p-tue', dow: 2, n: 'Upper A', sp: 'Push', ex: [['incdb', 3, 8, 12], ['mchest', 3, 8, 12], ['cablat', 4, 12, 20], ['pecdeck', 2, 12, 15], ['tripush', 3, 10, 15], ['triover', 2, 10, 15]] },
-  { id: 'p-wed', dow: 3, n: 'Lower B', sp: 'Hamstrings / glutes', ex: [['rdl', 3, 6, 10], ['seatcurl', 4, 10, 15], ['hipthrust', 3, 8, 12], ['bss', 2, 10, 12], ['calfseat', 3, 12, 20]] },
-  { id: 'p-thu', dow: 4, n: 'Upper B', sp: 'Pull', ex: [['pullup', 3, 8, 12], ['csrow', 3, 8, 12], ['seatrow', 2, 10, 12], ['rdfly', 3, 15, 20], ['incurl', 3, 10, 12], ['hammer', 2, 10, 15]] },
-  { id: 'p-fri', dow: 5, n: 'Lower C', sp: 'Leg hypertrophy', ex: [['legpress', 3, 10, 15], ['hack', 2, 10, 12], ['legext', 2, 12, 20], ['lyingcurl', 3, 10, 15], ['calf', 3, 12, 20]] },
-  { id: 'p-sat', dow: 6, n: 'Upper C', sp: 'Upper-body volume', ex: [['incmach', 3, 8, 12], ['latpd', 3, 8, 12], ['cfly', 2, 12, 15], ['sarow', 2, 10, 12], ['latraise', 3, 15, 20], ['curl', 2, 12, 15], ['triext', 2, 12, 15]] },
-  { id: 'p-sun', dow: 0, n: 'Shoulders + Arms', sp: 'Lower fatigue', ex: [['mshp', 2, 8, 12], ['cablat', 3, 15, 20], ['rdfly', 2, 15, 20], ['preacher', 3, 10, 15], ['ropeham', 2, 12, 15], ['ropepush', 3, 10, 15], ['ohcable', 2, 12, 15]] }
-].map(function (d) { return { id: d.id, dow: d.dow, n: d.n, sp: d.sp, fixed: 1, ex: d.ex.map(function (e) { return e[0]; }), tg: d.ex.reduce(function (o, e) { o[e[0]] = [e[1], e[2], e[3]]; return o; }, {}) }; });
+  { id: 'p-mon', dow: 1, n: 'Lower A', sp: 'Quads + calves + abs', ex: [['hack', 3, 6, 10], ['squat', 3, 6, 10], ['legext', 3, 12, 15], ['calfstand', 4, 8, 12], ['cablecrunch', 3, 10, 15]] },
+  { id: 'p-tue', dow: 2, n: 'Upper A', sp: 'Push + lower back', ex: [['incdb', 3, 8, 12], ['mchest', 3, 8, 12], ['cablat', 4, 12, 20], ['pecdeck', 2, 12, 15], ['tripush', 3, 10, 15], ['triover', 2, 10, 15], ['backext', 3, 10, 15]] },
+  { id: 'p-wed', dow: 3, n: 'Lower B', sp: 'Hamstrings + glutes + calves', ex: [['rdl', 3, 6, 10], ['seatcurl', 4, 10, 15], ['hipthrust', 3, 8, 12], ['bss', 2, 10, 12], ['calfseat', 4, 12, 20]] },
+  { id: 'p-thu', dow: 4, n: 'Upper B', sp: 'Pull + abs', ex: [['pullup', 3, 8, 12], ['csrow', 3, 8, 12], ['seatrow', 2, 10, 12], ['rdfly', 3, 15, 20], ['incurl', 3, 10, 12], ['hammer', 2, 10, 15], ['hlr', 3, 10, 15]] },
+  { id: 'p-fri', dow: 5, n: 'Lower C', sp: 'Quads + hamstrings + calves', ex: [['legpress', 3, 10, 15], ['hack', 2, 10, 12], ['legext', 2, 12, 20], ['lyingcurl', 3, 10, 15], ['calf', 4, 10, 15]] },
+  { id: 'p-sat', dow: 6, n: 'Upper C', sp: 'Upper body + lower back + abs', ex: [['incmach', 3, 8, 12], ['latpd', 3, 8, 12], ['cfly', 2, 12, 15], ['sarow', 2, 10, 12], ['latraise', 3, 15, 20], ['curl', 2, 12, 15], ['triext', 2, 12, 15], ['revhyper', 3, 12, 15], ['abwheel', 3, 8, 12]] },
+  { id: 'p-sun', dow: 0, n: 'Shoulders + Arms', sp: 'Shoulders + arms + calves', ex: [['mshp', 2, 8, 12], ['cablat', 3, 15, 20], ['rdfly', 2, 15, 20], ['preacher', 3, 10, 15], ['ropeham', 2, 12, 15], ['ropepush', 3, 10, 15], ['ohcable', 2, 12, 15], ['calfseat', 3, 15, 20, 'build']] }
+].map(function (d) {
+  var all = d.ex.map(function (e) { return e[0]; }), build = {};
+  d.ex.forEach(function (e) { if (e[4] === 'build') build[e[0]] = 1; });
+  /* `ex` is read, never stored, so the switch reaches every place that
+     lists a day — today's card, its time, the split, the workout. */
+  return { id: d.id, dow: d.dow, n: d.n, sp: d.sp, fixed: 1, build: build,
+    get ex() { return all.filter(function (id) { return !build[id] || S.calf15; }); },
+    tg: d.ex.reduce(function (o, e) { o[e[0]] = [e[1], e[2], e[3]]; return o; }, {}) };
+});
 var DOW_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 /* Direct working sets a week, Monday to Sunday, by primary muscle. */
-var WEEK_TARGETS = [['Quads', 13, 16], ['Hamstrings', 10, 10], ['Glutes', 5, 8], ['Calves', 9, 9]];
+/* Lower back counts its direct sets only; the RDL's share is real and
+   is credited to hamstrings, where the program put it. */
+function lfTargets() {
+  return [['Quads', 13, 16], ['Calves', S.calf15 ? 15 : 12, S.calf15 ? 15 : 12], ['Lower back', 6, 6],
+    ['Hamstrings', 10, 10], ['Glutes', 5, 8], ['Abs', 9, 9]];
+}
 /* Rest and effort by kind of movement. */
 function lfRestOf(id) { var e = exById(id); return e && e.c ? { lo: 120, hi: 180, rir: '1–2 RIR' } : { lo: 60, hi: 120, rir: '0–1 RIR last set' }; }
 
@@ -435,7 +457,7 @@ var DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 var MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 /* ═══════════ STORE ═══════════ */
-function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null }; }
+function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null, calf15: false }; }
 function num(v) { var n = +v; return isFinite(n) && n >= 0 ? n : null; }
 
 /* A damaged record is REPAIRED, never thrown away: a bad set costs the
@@ -446,6 +468,7 @@ function lfClean(o) {
   d.unit = o.unit === 'lb' ? 'lb' : 'kg';
   d.goal = Math.min(7, Math.max(1, Math.round(+o.goal) || 4));
   d.bwGoal = num(o.bwGoal);
+  d.calf15 = o.calf15 === true;
   if (Array.isArray(o.ex)) d.ex = o.ex.filter(function (e) { return e && typeof e.id === 'string' && typeof e.n === 'string' && e.n.trim(); })
     .map(function (e) { return { id: e.id, n: e.n.slice(0, 60), m: MUSCLES.indexOf(e.m) >= 0 ? e.m : 'Other', t: e.t === 'bw' ? 'bw' : 'w' }; });
   if (Array.isArray(o.rt)) d.rt = o.rt.filter(function (r) { return r && typeof r.id === 'string' && typeof r.n === 'string'; })
@@ -732,10 +755,12 @@ function lfMuscleSets(from, to) {
 }
 function lfLegCard() {
   var m = monday(today()), got = lfMuscleSets(m, addDays(m, 6));
-  var c = el('<div class="lf-card" id="lfLegs"><div class="lf-hd"><span class="lf-lab">Leg sets this week</span><span class="lf-lab">target</span></div><div class="lf-vol"></div></div>');
-  WEEK_TARGETS.forEach(function (t) {
+  var c = el('<div class="lf-card" id="lfLegs"><div class="lf-hd"><span class="lf-lab">Sets this week</span><span class="lf-lab">target</span></div><div class="lf-vol"></div></div>');
+  lfTargets().forEach(function (t, i) {
     var n = got[t[0]] || 0, row = el('<div class="lf-vr"><span></span><i><b></b></i><em class="lf-num"></em></div>');
     row.dataset.m = t[0];
+    /* The first three are the specialisation, the rest keep progressing. */
+    if (i === 3) $('.lf-vol', c).appendChild(el('<div class="lf-vsep" aria-hidden="true"></div>'));
     $('span', row).textContent = t[0];
     $('b', row).style.width = Math.min(100, n / t[2] * 100) + '%';
     if (n >= t[1]) row.classList.add('is-met');
@@ -1384,10 +1409,15 @@ function lfRenderYou() {
   root.appendChild(el('<h2 class="lf-h1">You</h2>'));
   root.appendChild(lfBwCard());
   var c = el('<div class="lf-card"><span class="lf-flab" style="margin-top:0">Units</span><div class="lf-seg" id="lfUnit"><button type="button" data-u="kg">kg</button><button type="button" data-u="lb">lb</button></div>'
-    + '<span class="lf-flab">Workouts a week</span><div class="lf-seg" id="lfGoal" style="--n:7"></div></div>');
+    + '<span class="lf-flab">Workouts a week</span><div class="lf-seg" id="lfGoal" style="--n:7"></div>'
+    + '<span class="lf-flab">Calves</span><div class="lf-seg" id="lfCalf"><button type="button" data-c="0">12 sets · building</button><button type="button" data-c="1">15 sets</button></div></div>');
   $$('#lfUnit button', c).forEach(function (b) {
     b.setAttribute('aria-pressed', b.dataset.u === S.unit ? 'true' : 'false');
     b.addEventListener('click', function () { S.unit = b.dataset.u; lfSave(); lfRender(); });
+  });
+  $$('#lfCalf button', c).forEach(function (b) {
+    b.setAttribute('aria-pressed', (b.dataset.c === '1') === S.calf15 ? 'true' : 'false');
+    b.addEventListener('click', function () { S.calf15 = b.dataset.c === '1'; lfSave(); lfRender(); });
   });
   for (var i = 1; i <= 7; i++) {
     var g = el('<button type="button"></button>'); g.textContent = i; g.dataset.g = i;

@@ -47,10 +47,10 @@ const freeze = (at) => `(() => {
   /* ── a first open ── */
   const { c, page } = await ctx();
   ok('the home screen draws', await page.locator('#lfHome .lf-today').count() === 1);
-  ok('a Friday opens on Lower C of the split', (await page.textContent('#lfPick')).trim() === 'Lower C' && /Leg hypertrophy/.test(await page.textContent('.lf-sub')));
+  ok('a Friday opens on Lower C of the split', (await page.textContent('#lfPick')).trim() === 'Lower C' && /Quads \+ hamstrings \+ calves/.test(await page.textContent('.lf-sub')));
   ok('with its five exercises', /5 exercises/.test(await page.textContent('.lf-chips')));
   const legs = await page.$$eval('#lfLegs .lf-vr', (r) => r.map((x) => x.dataset.m + ':' + x.querySelector('em').textContent));
-  ok('leg sets this week start at nought against the targets', legs.join() === 'Quads:0 / 13–16,Hamstrings:0 / 10,Glutes:0 / 5–8,Calves:0 / 9', legs);
+  ok('leg sets this week start at nought against the targets', legs.join() === 'Quads:0 / 13–16,Calves:0 / 12,Lower back:0 / 6,Hamstrings:0 / 10,Glutes:0 / 5–8,Abs:0 / 9', legs);
   ok('three stat tiles, each nought', (await page.$$eval('.lf-stat b', (b) => b.map((x) => x.textContent))).join() === '0,0,0');
   const days = await page.$$eval('.lf-day', (d) => ({ n: d.length, now: d.filter((x) => x.classList.contains('is-now')).length, last: d[d.length - 1].dataset.d }));
   ok('the last 30 days are thirty marks ending today', days.n === 30 && days.now === 1 && days.last === '2026-10-30', days);
@@ -66,6 +66,16 @@ const freeze = (at) => `(() => {
   const mon = await top(page).textContent();
   ok('a day of the split reads its sets × reps', mon.includes('Hack squat') && mon.includes('3 × 6–10') && mon.includes('1–2 RIR') && mon.includes('Standing calf raises'), mon.slice(0, 160));
   await page.keyboard.press('Escape'); await settle(page);
+  const sun = () => page.$$eval('#lfSplit .lf-li span', (x) => x[6].textContent);
+  ok('calves start at 12 sets: Sunday holds its calf block back', /7 exercises/.test(await sun()), await sun());
+  await page.click('.lf-bar [data-v="you"]');
+  await page.click('#lfCalf [data-c="1"]');
+  await page.click('.lf-bar [data-v="home"]');
+  ok('at 15 sets the target moves', (await page.textContent('#lfLegs [data-m="Calves"] em')) === '0 / 15');
+  await page.click('.lf-bar [data-v="lib"]');
+  ok('and Sunday gains its seated calf raises', /8 exercises/.test(await sun()));
+  await page.click('.lf-bar [data-v="you"]'); await page.click('#lfCalf [data-c="0"]');
+  await page.click('.lf-bar [data-v="lib"]');
   async function makeEx(name, muscle) {
     await page.click('#lfNewEx'); await settle(page);
     await page.fill('#lfExN', name);
@@ -204,6 +214,9 @@ const freeze = (at) => `(() => {
       await page.click('#lfGo'); await settle(page);
       const ex = page.locator('.lf-session .lf-ex').first();
       ok('the set count is the program\'s', await ex.locator('.lf-set:not(.is-hd)').count() === 3);
+      const monEx = await page.$$eval('.lf-session .lf-ex-n', (x) => x.map((e) => e.textContent));
+      ok('Monday carries its calves at 4 sets and its abs', monEx.join() === 'Hack squat,Barbell squat,Leg extensions,Standing calf raises,Cable crunches'
+        && await page.locator('.lf-session .lf-ex').nth(3).locator('.lf-set:not(.is-hd)').count() === 4, monEx);
       ok('the target is written under the name', (await ex.locator('.lf-tg').textContent()) === '3 × 6–10 · 1–2 RIR · rest 2–3 min');
       const ph = await ex.locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.placeholder));
       ok('under the top of the range, the aim is the same weight and one more rep', ph.join() === '80,9,80,9,80,8', ph);
