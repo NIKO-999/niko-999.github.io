@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<!-- maximum-scale=1: iOS zooms the page when a field under 16px takes
+     focus, and every field here is 16 — this covers the next one added. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#000000" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Lift" />
+<title>Lift</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="icon-180.png" />
+<link rel="preload" href="../arc/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin />
+<style>
+@font-face { font-family: 'Inter'; src: url('../arc/fonts/Inter.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+
+:root {
+  --bg: #000000;
+  --card: #141417;
+  --card2: #1e1e22;
+  --card3: #2a2a2f;
+  --line: rgba(255, 255, 255, .08);
+  --ink: #f5f5f7;
+  --dim: #a1a1a8;
+  --quiet: #8a8a92;
+  --mark-off: #3a3a40;
+  --good: #34c759;
+  --today: #3d86ff;
+  /* THE ONE COLOUR. Everything you press to put something on the record
+     — log a set, finish a workout — is red, and nothing else is. */
+  --log: #ff3b30;
+  --on-ink: #000000;
+  --r: 22px;
+  --r-s: 14px;
+  --bar-h: 64px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-t: env(safe-area-inset-top, 0px);
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  color-scheme: dark;
+}
+
+/* An app puts a view away with the hidden attribute, and any author
+   `display` outranks the browser's own rule for it. Said once, here,
+   so the bug other screens in this repo had eight times cannot happen. */
+[hidden] { display: none !important; }
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { background: var(--bg); }
+body {
+  margin: 0; min-height: 100dvh; background: var(--bg); color: var(--ink);
+  font: 400 15px/1.35 'Inter', -apple-system, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  padding: calc(var(--safe-t) + 14px) 16px calc(var(--bar-h) + var(--safe-b) + 40px);
+}
+body.lf-lock { overflow: hidden; }
+/* The resume bar sits over the foot of the page, so the page makes room for it. */
+body.lf-has-live { padding-bottom: calc(var(--bar-h) + var(--safe-b) + 104px); }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; touch-action: manipulation; }
+input { font: inherit; color: inherit; }
+svg { display: block; }
+.lf-ic { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* ── type ── */
+.lf-h1 { font-size: 30px; font-weight: 700; letter-spacing: -.02em; margin: 6px 4px 14px; }
+.lf-lab { font-size: 13px; color: var(--dim); font-weight: 500; }
+.lf-cap { font-size: 11px; color: var(--dim); letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
+.lf-num { font-variant-numeric: tabular-nums; }
+
+/* ── surfaces ── */
+.lf-card { background: var(--card); border-radius: var(--r); padding: 16px; position: relative; }
+/* A view is a column with one gap, so a card never carries a margin of
+   its own — which is what put the first tile in a row 12px below its
+   neighbours once, because an adjacency margin does not know it is in a row. */
+#lfMain > section { display: flex; flex-direction: column; gap: 12px; }
+#lfMain > section > .lf-h1, #lfMain > section > .lf-gh { margin-bottom: 0; }
+.lf-row { display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); gap: 12px; align-items: stretch; }
+.lf-tap { display: block; width: 100%; text-align: left; transition: transform .15s var(--ease); }
+.lf-tap:active { transform: scale(.985); }
+.lf-hd { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.lf-hd .lf-chev { color: var(--quiet); width: 16px; height: 16px; }
+
+/* ── today ── */
+.lf-today { padding: 18px; }
+.lf-title-box {
+  display: inline-block; margin: 8px 0 6px; padding: 4px 18px 6px; border: 2px dashed rgba(255,255,255,.28);
+  border-radius: 16px; font-size: 40px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 44px;
+}
+.lf-sub { color: var(--dim); font-size: 14px; margin: 2px 0 14px; }
+.lf-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.lf-chip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; background: var(--card2); color: var(--dim); font-size: 13px; font-weight: 500; }
+.lf-chip .lf-ic { width: 15px; height: 15px; }
+.lf-go {
+  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 52px; border-radius: 999px;
+  background: var(--ink); color: var(--on-ink); font-weight: 600; font-size: 16px; transition: transform .15s var(--ease);
+}
+.lf-go:active { transform: scale(.98); }
+.lf-go .lf-play { width: 22px; height: 22px; border-radius: 6px; background: var(--on-ink); display: grid; place-items: center; }
+.lf-go .lf-play svg { width: 10px; height: 10px; fill: var(--ink); stroke: none; }
+.lf-go.is-live { background: var(--log); color: #fff; }
+.lf-go.is-live .lf-play { background: #fff; }
+.lf-go.is-live .lf-play svg { fill: var(--log); }
+
+/* ── stat tiles ── */
+.lf-stat { text-align: center; padding: 14px 8px 16px; }
+.lf-stat .lf-ic { margin: 12px auto 6px; color: var(--dim); }
+.lf-stat b { display: block; font-size: 26px; font-weight: 700; letter-spacing: -.01em; }
+.lf-stat span { display: block; font-size: 13px; color: var(--dim); margin-top: 2px; }
+.lf-delta { position: absolute; top: 9px; right: 11px; font-size: 11px; font-weight: 600; color: var(--good); }
+.lf-delta.is-down { color: var(--dim); }
+
+/* ── 30-day grid ── */
+.lf-days { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 8px 6px; margin-top: 14px; }
+.lf-day { height: 22px; border-radius: 999px; border: 1.5px solid var(--mark-off); }
+.lf-day.is-on { background: #c9c9ce; border-color: #c9c9ce; }
+.lf-day.is-now { border-color: var(--today); border-width: 2.5px; }
+.lf-day.is-now.is-on { box-shadow: inset 0 0 0 2px var(--card); }
+
+/* ── charts ── */
+.lf-big { font-size: 22px; font-weight: 700; margin-top: 8px; }
+.lf-big small { font-size: 13px; color: var(--dim); font-weight: 500; margin-left: 2px; }
+.lf-area { margin: 12px -16px -16px; height: 74px; }
+.lf-area svg { width: 100%; height: 100%; }
+.lf-bars { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; align-items: end; height: 70px; margin-top: 10px; }
+.lf-bars > div { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 3px; min-width: 0; }
+.lf-bars i { display: block; width: 100%; max-width: 22px; border-radius: 6px; background: #4a4a50; min-height: 3px; }
+.lf-bars em { font-style: normal; font-size: 10px; color: var(--dim); }
+.lf-bars u { text-decoration: none; font-size: 10px; color: var(--quiet); }
+.lf-bars .is-now i { background: var(--ink); }
+.lf-pct { font-size: 12px; font-weight: 600; color: var(--good); }
+
+/* ── body weight ── */
+.lf-bw { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.lf-bw .lf-big { font-size: 26px; }
+.lf-spark { width: 120px; height: 40px; }
+
+/* ── empty ── */
+.lf-empty { text-align: center; color: var(--dim); padding: 28px 16px; font-size: 14px; }
+.lf-empty b { display: block; color: var(--ink); font-size: 16px; margin-bottom: 4px; }
+
+/* ── lists ── */
+.lf-list { display: flex; flex-direction: column; }
+.lf-li { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 10px 0; border-top: 1px solid var(--line); width: 100%; text-align: left; }
+.lf-li:first-child { border-top: 0; }
+.lf-li .lf-li-t { flex: 1; min-width: 0; }
+.lf-li .lf-li-t b { display: block; font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lf-li .lf-li-t span { display: block; font-size: 13px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lf-li .lf-li-r { font-size: 13px; color: var(--dim); text-align: right; flex: none; }
+.lf-gh { margin: 10px 4px -4px; }
+#lfLibList { display: flex; flex-direction: column; gap: 10px; }
+.lf-sec { margin-top: 12px; }
+.lf-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px;
+  border-radius: 999px; background: var(--card2); font-weight: 600; font-size: 15px;
+}
+.lf-btn.is-full { width: 100%; }
+.lf-btn.is-ink { background: var(--ink); color: var(--on-ink); }
+.lf-btn.is-log { background: var(--log); color: #fff; }
+.lf-btn.is-bad { color: var(--log); }
+.lf-btn:active { opacity: .8; }
+
+.lf-field {
+  width: 100%; height: 48px; border-radius: var(--r-s); background: var(--card2); border: 1px solid transparent;
+  padding: 0 14px; font-size: 16px; outline: none;
+}
+.lf-field:focus { border-color: rgba(255,255,255,.25); }
+.lf-flab { display: block; font-size: 13px; color: var(--dim); margin: 14px 2px 6px; }
+.lf-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.lf-pill { min-height: 36px; padding: 0 14px; border-radius: 999px; background: var(--card2); color: var(--dim); font-size: 14px; font-weight: 500; position: relative; }
+.lf-pill::before { content: ''; position: absolute; inset: -4px 0; }
+.lf-pill[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
+
+.lf-seg { display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); background: var(--card); border-radius: 999px; padding: 3px; }
+.lf-seg button { height: 38px; border-radius: 999px; color: var(--dim); font-weight: 600; font-size: 14px; position: relative; }
+.lf-seg button::before { content: ''; position: absolute; inset: -3px 0; }
+.lf-seg button[aria-pressed="true"] { background: var(--card3); color: var(--ink); }
+
+/* ── calendar ── */
+.lf-calnav { display: flex; align-items: center; justify-content: space-between; margin: 14px 0 10px; }
+.lf-calnav b { font-size: 17px; font-weight: 700; }
+.lf-round { width: 44px; height: 44px; border-radius: 999px; display: grid; place-items: center; color: var(--dim); }
+.lf-round:disabled { opacity: .3; cursor: default; }
+.lf-dows { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; font-size: 11px; color: var(--quiet); font-weight: 600; margin-bottom: 6px; }
+.lf-month { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.lf-cell { aspect-ratio: 1 / 1.08; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 14px; font-weight: 500; color: var(--dim); min-width: 0; position: relative; }
+.lf-cell.is-pad { visibility: hidden; }
+.lf-cell.is-on { background: var(--card2); color: var(--ink); font-weight: 700; }
+.lf-cell.is-now { box-shadow: inset 0 0 0 2px var(--today); color: var(--ink); }
+.lf-cell.is-ahead { color: #55555c; }
+.lf-dots { display: flex; gap: 3px; height: 5px; }
+.lf-dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--ink); }
+.lf-wk { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 60px; padding: 8px 0; border-top: 1px solid var(--line); width: 100%; text-align: left; }
+.lf-wk:first-child { border-top: 0; }
+.lf-wk .lf-wd { text-align: center; }
+.lf-wk .lf-wd em { display: block; font-style: normal; font-size: 11px; color: var(--quiet); font-weight: 600; }
+.lf-wk .lf-wd b { display: block; font-size: 20px; font-weight: 700; }
+.lf-wk.is-now .lf-wd b { color: var(--today); }
+.lf-wk .lf-wn { min-width: 0; }
+.lf-wk .lf-wn b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lf-wk .lf-wn span { font-size: 13px; color: var(--dim); }
+.lf-wk.is-rest .lf-wn b { color: var(--quiet); font-weight: 500; }
+
+/* ── the bar ── */
+.lf-bar {
+  position: fixed; left: 50%; bottom: calc(var(--safe-b) + 14px); transform: translateX(-50%); z-index: 20;
+  display: flex; gap: 2px; padding: 5px; border-radius: 999px; background: rgba(28, 28, 32, .86);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4);
+  box-shadow: 0 10px 30px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.06);
+}
+.lf-bar button { width: 58px; height: 46px; border-radius: 999px; display: grid; place-items: center; color: var(--quiet); }
+.lf-bar button .lf-ic { width: 22px; height: 22px; }
+.lf-bar button[aria-current="page"] { background: var(--card3); color: var(--ink); }
+
+.lf-live {
+  position: fixed; left: 16px; right: 16px; bottom: calc(var(--safe-b) + 76px); z-index: 19; max-width: 520px; margin: 0 auto;
+  display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 16px; border-radius: 18px;
+  background: #2a0e0c; box-shadow: inset 0 0 0 1px rgba(255,59,48,.35), 0 8px 24px rgba(0,0,0,.5);
+  font-weight: 600; text-align: left;
+}
+.lf-live span:not(.lf-rec) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lf-live em { font-style: normal; color: #ffb3ad; font-variant-numeric: tabular-nums; }
+.lf-rec { width: 9px; height: 9px; border-radius: 50%; background: var(--log); flex: none; animation: lf-pulse 1.6s ease-in-out infinite; }
+@keyframes lf-pulse { 50% { opacity: .35; } }
+
+/* ── sheets: built and removed, never hidden ── */
+.lf-scrim { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 40; opacity: 0; transition: opacity .28s var(--ease); }
+.lf-scrim.is-up { opacity: 1; }
+.lf-sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; max-width: 560px; margin: 0 auto;
+  max-height: calc(100dvh - var(--safe-t) - 40px); display: flex; flex-direction: column;
+  background: #18181b; border-radius: 28px 28px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06);
+  transform: translateY(100%); transition: transform .34s var(--ease); will-change: transform;
+}
+.lf-sheet.is-up { transform: translateY(0); }
+.lf-sheet.is-drag { transition: none; }
+.lf-sheet.is-full { height: calc(100dvh - var(--safe-t) - 10px); max-height: none; }
+.lf-grab { height: 26px; flex: none; display: grid; place-items: center; touch-action: none; cursor: grab; }
+.lf-grab::after { content: ''; width: 38px; height: 5px; border-radius: 3px; background: #4a4a50; }
+.lf-sh-hd { display: flex; align-items: center; gap: 10px; padding: 0 20px 10px; touch-action: none; }
+.lf-sh-hd h2 { margin: 0; font-size: 20px; font-weight: 700; flex: 1; min-width: 0; letter-spacing: -.01em; }
+.lf-sh-bd { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 4px 20px 20px; overscroll-behavior: contain; }
+.lf-sh-ft { flex: none; padding: 12px 20px calc(var(--safe-b) + 14px); border-top: 1px solid var(--line); display: flex; gap: 10px; }
+.lf-sh-ft > * { flex: 1; }
+.lf-x { width: 44px; height: 44px; border-radius: 999px; display: grid; place-items: center; color: var(--dim); flex: none; }
+
+/* ── the session ── */
+.lf-ss-hd { display: flex; align-items: center; gap: 10px; }
+.lf-ss-name { flex: 1; min-width: 0; background: none; border: 0; outline: none; font-size: 22px; font-weight: 700; letter-spacing: -.01em; padding: 0; height: 44px; }
+.lf-ss-time { font-variant-numeric: tabular-nums; color: var(--dim); font-size: 15px; font-weight: 600; }
+.lf-ss-rest { font-size: 13px; color: var(--dim); margin: 0 0 6px; min-height: 18px; font-variant-numeric: tabular-nums; }
+.lf-ex { background: var(--card); border-radius: var(--r); padding: 14px 14px 10px; margin-top: 12px; }
+.lf-ex-hd { display: flex; align-items: center; gap: 8px; }
+.lf-ex-hd button.lf-ex-n { flex: 1; min-width: 0; text-align: left; font-weight: 700; font-size: 17px; min-height: 44px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lf-set { display: grid; grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 44px; align-items: center; gap: 8px; min-height: 48px; }
+.lf-set.is-hd { min-height: 22px; font-size: 11px; color: var(--quiet); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.lf-set.is-hd span:not(:first-child) { text-align: center; }
+.lf-set .lf-sn { font-weight: 700; color: var(--dim); text-align: center; font-size: 14px; }
+.lf-set .lf-prev { font-size: 13px; color: var(--quiet); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lf-set input {
+  width: 100%; height: 40px; border-radius: 12px; background: var(--card2); border: 1px solid transparent;
+  text-align: center; font-size: 16px; font-weight: 600; outline: none; font-variant-numeric: tabular-nums; -moz-appearance: textfield;
+}
+.lf-set input::placeholder { color: #66666e; font-weight: 500; }
+.lf-set input:focus { border-color: rgba(255,255,255,.3); }
+.lf-set input::-webkit-inner-spin-button, .lf-set input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.lf-chk { width: 44px; height: 44px; display: grid; place-items: center; }
+.lf-chk span { width: 32px; height: 32px; border-radius: 10px; background: var(--card2); display: grid; place-items: center; color: #66666e; transition: background .15s, color .15s, transform .15s var(--ease); }
+.lf-chk span .lf-ic { width: 17px; height: 17px; stroke-width: 3; }
+.lf-set.is-done .lf-chk span { background: var(--log); color: #fff; }
+.lf-set.is-done input { background: rgba(255,59,48,.14); }
+.lf-set.is-done .lf-chk:active span { transform: scale(.9); }
+.lf-set .lf-sn.is-pr { color: #ffd60a; font-size: 11px; font-weight: 800; letter-spacing: .02em; }
+.lf-ex-ft { display: flex; gap: 8px; margin-top: 6px; }
+.lf-ex-ft button { flex: 1; min-height: 40px; border-radius: 12px; background: var(--card2); color: var(--dim); font-size: 14px; font-weight: 600; position: relative; }
+.lf-ex-ft button::before { content: ''; position: absolute; inset: -2px 0; }
+.lf-add { margin-top: 12px; width: 100%; min-height: 52px; border-radius: var(--r); border: 1.5px dashed rgba(255,255,255,.2); color: var(--dim); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+/* ── summary ── */
+.lf-sum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 6px 0 4px; }
+.lf-sum div { background: var(--card); border-radius: 16px; padding: 12px; text-align: center; }
+.lf-sum b { display: block; font-size: 20px; font-weight: 700; }
+.lf-sum span { font-size: 12px; color: var(--dim); }
+.lf-wo-ex { margin-top: 14px; }
+.lf-wo-ex b { font-weight: 600; }
+.lf-wo-ex div { font-size: 14px; color: var(--dim); margin-top: 4px; font-variant-numeric: tabular-nums; }
+.lf-hero { font-size: 56px; font-weight: 800; letter-spacing: -.03em; line-height: 1; margin-top: 4px; }
+.lf-hero + p { margin: 6px 0 0; font-size: 17px; font-weight: 600; }
+
+.lf-toast {
+  position: fixed; left: 50%; bottom: calc(var(--safe-b) + 84px); z-index: 60; transform: translate(-50%, 12px); opacity: 0;
+  display: flex; align-items: center; gap: 14px; padding: 0 6px 0 18px; min-height: 48px; border-radius: 16px; width: max-content; max-width: calc(100vw - 32px);
+  background: #2c2c30; box-shadow: 0 10px 30px rgba(0,0,0,.5); transition: opacity .2s, transform .2s var(--ease); font-size: 14px; font-weight: 500;
+}
+.lf-toast.is-up { opacity: 1; transform: translate(-50%, 0); }
+.lf-toast.is-bare { padding-right: 18px; }
+.lf-toast button { min-height: 44px; padding: 0 12px; font-weight: 700; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0s !important; animation: none !important; }
+}
+@media (min-width: 700px) {
+  body { max-width: 560px; margin: 0 auto; }
+}
+</style>
+</head>
+<body>
+<h1 class="lf-sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">Lift</h1>
+<main id="lfMain">
+  <section id="lfHome" aria-label="Home"></section>
+  <section id="lfCal" aria-label="Calendar" hidden></section>
+  <section id="lfLib" aria-label="Exercises" hidden></section>
+  <section id="lfYou" aria-label="You" hidden></section>
+</main>
+<button id="lfLive" class="lf-live" type="button" hidden></button>
+<nav class="lf-bar" aria-label="Sections">
+  <button type="button" data-v="home" aria-label="Home" aria-current="page"><svg class="lf-ic" viewBox="0 0 24 24"><path d="M5 20V12M10 20V6M15 20v-9M20 20V9"/></svg></button>
+  <button type="button" data-v="cal" aria-label="Calendar"><svg class="lf-ic" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></button>
+  <button type="button" data-v="lib" aria-label="Exercises"><svg class="lf-ic" viewBox="0 0 24 24"><path d="M3 9.5v5M6 7v10M18 7v10M21 9.5v5M6 12h12"/></svg></button>
+  <button type="button" data-v="you" aria-label="You"><svg class="lf-ic" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1-4 4-6 7.5-6s6.5 2 7.5 6"/></svg></button>
+</nav>
+<script>
+(function () {
+'use strict';
+
+/* ═══════════════════════════════════════════════════════════════
+   LIFT — a log of what you lifted, so you can see it going up.
+
+   No instructions, no form cues, no programme. The whole job is: what
+   did I put on the bar last time, and is today more.
+
+   Everything lives in this browser under three keys and is never sent
+   anywhere: lift.v1 (exercises, routines, workouts, body weight),
+   lift.active.v1 (the workout in progress, so a closed app does not
+   lose it) and lift.view.v1 (which tab you were on).
+   ═══════════════════════════════════════════════════════════════ */
+
+/* THE EXERCISE LIST. Empty on purpose: it is the one thing still to
+   come. Each entry is { id, n, m, t }: a stable id that never changes
+   once a workout names it, the name, the muscle group (one of MUSCLES)
+   and the type — 'w' for a weight and reps, 'bw' for bodyweight reps
+   with optional added weight. Ids are what history is keyed by, so a
+   name can be corrected later and every past session follows. */
+var EXERCISES = [];
+var MUSCLES = ['Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Core', 'Cardio', 'Other'];
+
+var KEY = 'lift.v1', ACTK = 'lift.active.v1', VIEWK = 'lift.view.v1';
+var LB = 0.45359237;
+var VIEWS = ['home', 'cal', 'lib', 'you'];
+
+var IC = {
+  clock: '<svg class="lf-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+  dumb: '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M3 9.5v5M6 7v10M18 7v10M21 9.5v5M6 12h12"/></svg>',
+  stack: '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M12 4l8 4-8 4-8-4 8-4z"/><path d="M4 12l8 4 8-4M4 16l8 4 8-4"/></svg>',
+  weight: '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M7 9h10l2 11H5L7 9z"/><circle cx="12" cy="6" r="2.5"/></svg>',
+  chev: '<svg class="lf-ic lf-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
+  left: '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>',
+  right: '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
+  x: '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  check: '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  plus: '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+  play: '<svg viewBox="0 0 10 10"><path d="M2 1l7 4-7 4z"/></svg>'
+};
+
+/* ── tiny helpers ── */
+function $(s, r) { return (r || document).querySelector(s); }
+function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function el(html) { var t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; }
+function lfId() { return 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function ymd(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function parseYmd(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+function addDays(d, n) { var x = new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); return x; }
+function today() { var n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
+function monday(d) { return addDays(d, -((d.getDay() + 6) % 7)); }
+var DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+var MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+/* ═══════════ STORE ═══════════ */
+function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, today: null }; }
+function num(v) { var n = +v; return isFinite(n) && n >= 0 ? n : null; }
+
+/* A damaged record is REPAIRED, never thrown away: a bad set costs the
+   set, a bad workout costs the workout, and nothing costs the year. */
+function lfClean(o) {
+  var d = lfDefault();
+  if (!o || typeof o !== 'object') return d;
+  d.unit = o.unit === 'lb' ? 'lb' : 'kg';
+  d.goal = Math.min(7, Math.max(1, Math.round(+o.goal) || 4));
+  d.bwGoal = num(o.bwGoal);
+  if (Array.isArray(o.ex)) d.ex = o.ex.filter(function (e) { return e && typeof e.id === 'string' && typeof e.n === 'string' && e.n.trim(); })
+    .map(function (e) { return { id: e.id, n: e.n.slice(0, 60), m: MUSCLES.indexOf(e.m) >= 0 ? e.m : 'Other', t: e.t === 'bw' ? 'bw' : 'w' }; });
+  if (Array.isArray(o.rt)) d.rt = o.rt.filter(function (r) { return r && typeof r.id === 'string' && typeof r.n === 'string'; })
+    .map(function (r) { return { id: r.id, n: r.n.slice(0, 40) || 'Routine', sp: typeof r.sp === 'string' ? r.sp.slice(0, 60) : '', ex: Array.isArray(r.ex) ? r.ex.filter(function (x) { return typeof x === 'string'; }) : [] }; });
+  if (Array.isArray(o.wo)) d.wo = o.wo.map(lfCleanWo).filter(Boolean);
+  if (Array.isArray(o.bw)) d.bw = o.bw.filter(function (b) { return b && /^\d{4}-\d\d-\d\d$/.test(b.d) && num(b.kg); })
+    .map(function (b) { return { d: b.d, kg: +b.kg }; }).sort(function (a, b) { return a.d < b.d ? -1 : 1; });
+  d.today = typeof o.today === 'string' ? o.today : null;
+  return d;
+}
+function lfCleanWo(w) {
+  if (!w || typeof w !== 'object' || !/^\d{4}-\d\d-\d\d$/.test(w.d)) return null;
+  var x = Array.isArray(w.x) ? w.x.filter(function (e) { return e && typeof e.id === 'string'; }).map(function (e) {
+    return { id: e.id, n: typeof e.n === 'string' ? e.n : '', sets: (Array.isArray(e.sets) ? e.sets : [])
+      .filter(function (s) { return s && num(s.r) !== null && num(s.w) !== null; }).map(function (s) { return { w: +s.w, r: Math.round(+s.r) }; }) };
+  }).filter(function (e) { return e.sets.length; }) : [];
+  return { id: typeof w.id === 'string' ? w.id : lfId(), d: w.d, s: +w.s || 0, e: +w.e || 0, n: typeof w.n === 'string' ? w.n.slice(0, 40) : 'Workout', rt: typeof w.rt === 'string' ? w.rt : null, x: x };
+}
+function lfLoad() {
+  var raw = null;
+  try { raw = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+  var s = lfClean(raw);
+  /* Written back, so a repair is a fact about the record rather than
+     something redone on every open and lost on the next write. */
+  if (raw) try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {}
+  return s;
+}
+function lfSave() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch (e) { lfToast('Could not save — this phone is out of room'); }
+}
+function lfLoadAct() {
+  try {
+    var a = JSON.parse(localStorage.getItem(ACTK));
+    if (!a || !Array.isArray(a.x) || !a.s) return null;
+    a.x = a.x.filter(function (e) { return e && typeof e.id === 'string' && Array.isArray(e.sets); });
+    return a;
+  } catch (e) { return null; }
+}
+function lfSaveAct() {
+  try { if (act) localStorage.setItem(ACTK, JSON.stringify(act)); else localStorage.removeItem(ACTK); } catch (e) {}
+}
+
+var S = lfLoad();
+var act = lfLoadAct();
+
+/* ═══════════ READING THE RECORD ═══════════ */
+function allEx() { return EXERCISES.concat(S.ex); }
+function exById(id) { var a = allEx(); for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
+function exName(id, fallback) { var e = exById(id); return e ? e.n : (fallback || 'Exercise'); }
+function rtById(id) { for (var i = 0; i < S.rt.length; i++) if (S.rt[i].id === id) return S.rt[i]; return null; }
+function woSorted() { return S.wo.slice().sort(function (a, b) { return a.d === b.d ? a.s - b.s : (a.d < b.d ? -1 : 1); }); }
+function woOn(d) { return S.wo.filter(function (w) { return w.d === d; }); }
+
+function toDisp(kg) { return S.unit === 'lb' ? kg / LB : kg; }
+function fromDisp(v) { return S.unit === 'lb' ? v * LB : v; }
+function fmtW(kg) { var v = Math.round(toDisp(kg) * 10) / 10; return String(v); }
+function fmtBig(n) {
+  n = Math.round(n);
+  if (n < 1000) return String(n);
+  if (n < 1e6) return (Math.round(n / 100) / 10).toFixed(1).replace(/\.0$/, '') + 'k';
+  return (Math.round(n / 1e5) / 10).toFixed(1) + 'M';
+}
+function e1rm(w, r) { return r <= 1 ? w : w * (1 + r / 30); }
+function woSets(w) { return w.x.reduce(function (a, e) { return a + e.sets.length; }, 0); }
+function woReps(w) { return w.x.reduce(function (a, e) { return a + e.sets.reduce(function (b, s) { return b + s.r; }, 0); }, 0); }
+function woVol(w) { return w.x.reduce(function (a, e) { return a + e.sets.reduce(function (b, s) { return b + s.w * s.r; }, 0); }, 0); }
+function fmtDur(ms) {
+  var m = Math.max(0, Math.round(ms / 60000));
+  return m < 60 ? m + ' min' : Math.floor(m / 60) + 'h ' + (m % 60) + 'm';
+}
+function fmtClock(ms) {
+  var s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), ss = s % 60;
+  return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(ss).padStart(2, '0');
+}
+function fmtDay(d) { var x = parseYmd(d); return DOW[(x.getDay() + 6) % 7] + ' ' + x.getDate() + ' ' + MON[x.getMonth()].slice(0, 3); }
+
+/* What you did on this exercise the last time — the number the whole
+   app exists to put in front of you. Excludes the session in progress. */
+function lastFor(id) {
+  var w = woSorted();
+  for (var i = w.length - 1; i >= 0; i--) for (var j = 0; j < w[i].x.length; j++) if (w[i].x[j].id === id) return w[i].x[j].sets;
+  return null;
+}
+function bestFor(id) {
+  var best = 0;
+  S.wo.forEach(function (w) { w.x.forEach(function (e) { if (e.id === id) e.sets.forEach(function (s) { best = Math.max(best, e1rm(s.w, s.r)); }); }); });
+  return best;
+}
+function historyFor(id) {
+  return woSorted().map(function (w) {
+    var e = null; for (var j = 0; j < w.x.length; j++) if (w.x[j].id === id) { e = w.x[j]; break; }
+    return e ? { w: w, sets: e.sets } : null;
+  }).filter(Boolean);
+}
+
+/* A window of days ending today, as stats. */
+function windowStats(from, to) {
+  var a = ymd(from), b = ymd(to), wo = 0, sets = 0, vol = 0, reps = 0;
+  S.wo.forEach(function (w) { if (w.d >= a && w.d <= b) { wo++; sets += woSets(w); vol += woVol(w); reps += woReps(w); } });
+  return { wo: wo, sets: sets, vol: vol, reps: reps };
+}
+
+/* ═══════════ SHEETS ═══════════
+   Every surface that comes up does so from the bottom, and goes back
+   down. They are BUILT on open and REMOVED on close, never hidden — a
+   full-screen surface put away with `hidden` goes on taking presses the
+   day something gives it a `display`. They stack: the exercise picker
+   comes up over the workout and goes back down onto it. */
+var stack = [];
+function lfSheet(o) {
+  var scrim = el('<div class="lf-scrim"></div>');
+  var sh = el('<div class="lf-sheet" role="dialog" aria-modal="true"><div class="lf-grab" aria-hidden="true"></div><div class="lf-sh-hd"><h2></h2></div><div class="lf-sh-bd"></div></div>');
+  if (o.full) sh.classList.add('is-full');
+  if (o.cls) sh.classList.add(o.cls);
+  $('h2', sh).textContent = o.title || '';
+  sh.setAttribute('aria-label', o.title || 'Sheet');
+  if (o.head) { var hd = $('.lf-sh-hd', sh); hd.textContent = ''; hd.appendChild(o.head); }
+  else if (o.x !== false) {
+    var x = el('<button type="button" class="lf-x" aria-label="Close">' + IC.x + '</button>');
+    x.addEventListener('click', function () { api.close(); });
+    $('.lf-sh-hd', sh).appendChild(x);
+  }
+  var bd = $('.lf-sh-bd', sh);
+  if (o.body) bd.appendChild(o.body);
+  var ft = null;
+  if (o.foot) { ft = el('<div class="lf-sh-ft"></div>'); o.foot.forEach(function (n) { ft.appendChild(n); }); sh.appendChild(ft); }
+  document.body.appendChild(scrim); document.body.appendChild(sh);
+  document.body.classList.add('lf-lock');
+  var gone = false;
+  var api = {
+    el: sh, body: bd, foot: ft,
+    close: function (quiet) {
+      if (gone) return; gone = true;
+      if (!quiet && o.onClose && o.onClose() === false) { gone = false; return; }
+      sh.classList.remove('is-up'); scrim.classList.remove('is-up');
+      var i = stack.indexOf(api); if (i >= 0) stack.splice(i, 1);
+      if (!stack.length) document.body.classList.remove('lf-lock');
+      setTimeout(function () { sh.remove(); scrim.remove(); }, 340);
+    }
+  };
+  stack.push(api);
+  scrim.addEventListener('click', function () { api.close(); });
+  /* Pull down to put it away, from the grab bar or the head. */
+  var y0 = null, dy = 0;
+  function down(e) { if (e.target.closest('input, button:not(.lf-grab)')) return; y0 = e.clientY; dy = 0; sh.classList.add('is-drag'); try { e.currentTarget.setPointerCapture(e.pointerId); } catch (er) {} }
+  function move(e) { if (y0 === null) return; dy = Math.max(0, e.clientY - y0); sh.style.transform = 'translateY(' + dy + 'px)'; }
+  function up() { if (y0 === null) return; y0 = null; sh.classList.remove('is-drag'); sh.style.transform = ''; if (dy > 90) api.close(); }
+  [$('.lf-grab', sh), $('.lf-sh-hd', sh)].forEach(function (h) {
+    h.addEventListener('pointerdown', down); h.addEventListener('pointermove', move);
+    h.addEventListener('pointerup', up); h.addEventListener('pointercancel', up);
+  });
+  requestAnimationFrame(function () { requestAnimationFrame(function () { scrim.classList.add('is-up'); sh.classList.add('is-up'); }); });
+  return api;
+}
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && stack.length) { e.preventDefault(); stack[stack.length - 1].close(); }
+});
+
+function lfAsk(title, text, yes, onYes) {
+  var b = el('<p style="margin:0 0 6px;color:var(--dim)"></p>'); b.textContent = text;
+  var no = el('<button type="button" class="lf-btn">Keep it</button>');
+  var go = el('<button type="button" class="lf-btn is-log"></button>'); go.textContent = yes;
+  var s = lfSheet({ title: title, body: b, foot: [no, go] });
+  no.addEventListener('click', function () { s.close(); });
+  go.addEventListener('click', function () { s.close(true); onYes(); });
+  return s;
+}
+
+var toastT = null;
+function lfToast(msg, undo) {
+  var old = $('.lf-toast'); if (old) old.remove();
+  clearTimeout(toastT);
+  var t = el('<div class="lf-toast" role="status"><span></span></div>');
+  $('span', t).textContent = msg;
+  if (undo) {
+    var u = el('<button type="button">Undo</button>');
+    u.addEventListener('click', function () { undo(); t.remove(); });
+    t.appendChild(u);
+  } else t.classList.add('is-bare');
+  document.body.appendChild(t);
+  requestAnimationFrame(function () { t.classList.add('is-up'); });
+  toastT = setTimeout(function () { t.classList.remove('is-up'); setTimeout(function () { t.remove(); }, 220); }, undo ? 5000 : 2400);
+}
+function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 12); } catch (e) {} }
+
+/* ═══════════ HOME ═══════════ */
+function lfToday() { return rtById(S.today) || S.rt[0] || null; }
+
+function lfRenderHome() {
+  var root = $('#lfHome'); root.textContent = '';
+  root.appendChild(lfTodayCard());
+  root.appendChild(lfStatRow());
+  root.appendChild(lfGridCard());
+  var r = el('<div class="lf-row"></div>'); r.appendChild(lfVolCard()); r.appendChild(lfWeekCard());
+  root.appendChild(r);
+  root.appendChild(lfBwCard());
+}
+
+function lfTodayCard() {
+  var rt = lfToday();
+  var c = el('<div class="lf-card lf-today"><div class="lf-lab">Today</div>'
+    + '<div><button type="button" class="lf-title-box" id="lfPick"></button></div>'
+    + '<div class="lf-sub"></div><div class="lf-chips"></div>'
+    + '<button type="button" class="lf-go" id="lfGo"><span class="lf-play">' + IC.play + '</span><span></span></button></div>');
+  var title = act ? act.n : (rt ? rt.n : 'Workout');
+  $('#lfPick', c).textContent = title;
+  $('#lfPick', c).setAttribute('aria-label', 'Today: ' + title + '. Choose a routine');
+  $('.lf-sub', c).textContent = rt && !act ? (rt.sp || rt.ex.map(function (id) { return exName(id); }).slice(0, 3).join(', ') || 'No exercises yet')
+    : act ? 'In progress' : 'An empty workout — add exercises as you go';
+  var n = act ? act.x.length : (rt ? rt.ex.length : 0);
+  var chips = $('.lf-chips', c);
+  var mins = lfEstMin(rt, n);
+  chips.appendChild(el('<span class="lf-chip">' + IC.clock + '<span>' + (act ? fmtDur(Date.now() - act.s) : '~' + mins + ' min') + '</span></span>'));
+  chips.appendChild(el('<span class="lf-chip">' + IC.dumb + '<span>' + n + ' exercise' + (n === 1 ? '' : 's') + '</span></span>'));
+  var go = $('#lfGo', c);
+  $('span:last-child', go).textContent = act ? 'Resume Workout' : 'Start Workout';
+  go.classList.toggle('is-live', !!act);
+  go.addEventListener('click', function () { if (act) lfOpenSession(); else lfStart(rt); });
+  $('#lfPick', c).addEventListener('click', function () { if (act) lfOpenSession(); else lfRoutinePicker(); });
+  return c;
+}
+/* The estimate is your own average for this routine once there is one,
+   and 13.5 minutes an exercise until then. */
+function lfEstMin(rt, n) {
+  if (rt) {
+    var w = S.wo.filter(function (x) { return x.rt === rt.id && x.e > x.s; });
+    if (w.length) return Math.round(w.reduce(function (a, x) { return a + (x.e - x.s); }, 0) / w.length / 60000);
+  }
+  return Math.round((n || 0) * 13.5);
+}
+
+function lfStatRow() {
+  var t = today(), cur = windowStats(addDays(t, -29), t), prev = windowStats(addDays(t, -59), addDays(t, -30));
+  var r = el('<div class="lf-row" style="--n:3"></div>');
+  [['wo', 'workouts', IC.dumb, cur.wo, prev.wo], ['sets', 'sets', IC.stack, cur.sets, prev.sets], ['vol', S.unit, IC.weight, toDisp(cur.vol), toDisp(prev.vol)]].forEach(function (k) {
+    var b = el('<button type="button" class="lf-card lf-stat lf-tap"></button>');
+    b.dataset.k = k[0];
+    var d = '';
+    if (k[4] > 0) {
+      var p = Math.round((k[3] - k[4]) / k[4] * 100);
+      d = '<span class="lf-delta' + (p < 0 ? ' is-down' : '') + '">' + (p >= 0 ? '+' : '') + p + '%</span>';
+    }
+    b.innerHTML = d + k[2] + '<b class="lf-num">' + fmtBig(k[3]) + '</b><span>' + k[1] + '</span>';
+    b.setAttribute('aria-label', fmtBig(k[3]) + ' ' + k[1] + ' in the last 30 days');
+    b.addEventListener('click', lfThirtySheet);
+    r.appendChild(b);
+  });
+  return r;
+}
+
+function lfThirtySheet() {
+  var t = today(), c = windowStats(addDays(t, -29), t);
+  var b = el('<div><div class="lf-cap">Last 30 days</div><div class="lf-hero lf-num"></div><p>reps logged</p><p class="lf-lab" style="margin:8px 0 18px;font-weight:400"></p></div>');
+  $('.lf-hero', b).textContent = fmtBig(c.reps);
+  $('p.lf-lab', b).textContent = c.sets ? c.sets + ' sets completed — about ' + (Math.round(c.reps / c.sets * 10) / 10) + ' reps per set on average.' : 'Nothing logged yet. Start a workout and it shows up here.';
+  b.appendChild(lfWeekCard(true));
+  var s = lfSum([[c.wo, 'workouts'], [c.sets, 'sets'], [fmtBig(toDisp(c.vol)), S.unit + ' moved']]);
+  s.style.marginTop = '12px'; b.appendChild(s);
+  lfSheet({ title: '', body: b });
+}
+
+function lfGridCard() {
+  var t = today(), n = 0, on = {};
+  S.wo.forEach(function (w) { on[w.d] = 1; });
+  var c = el('<button type="button" class="lf-card lf-tap" id="lfGrid"><div class="lf-hd"><span class="lf-lab">Last 30 days</span><span class="lf-lab" style="display:flex;align-items:center;gap:4px"><span class="lf-num"></span>' + IC.chev + '</span></div><div class="lf-days" aria-hidden="true"></div></button>');
+  var g = $('.lf-days', c);
+  for (var i = 29; i >= 0; i--) {
+    var d = ymd(addDays(t, -i)), x = el('<i class="lf-day"></i>');
+    if (on[d]) { x.classList.add('is-on'); n++; }
+    if (i === 0) x.classList.add('is-now');
+    x.dataset.d = d;
+    g.appendChild(x);
+  }
+  $('.lf-num', c).textContent = n + ' · goal ' + S.goal + '/wk';
+  c.setAttribute('aria-label', 'Trained ' + n + ' of the last 30 days. Open the calendar');
+  c.addEventListener('click', function () { lfGo('cal'); });
+  return c;
+}
+
+/* An 8-week volume trend, Monday-first weeks ending this one. */
+function lfVolCard() {
+  var wk = monday(today()), vals = [];
+  for (var i = 7; i >= 0; i--) { var a = addDays(wk, -7 * i); vals.push(toDisp(windowStats(a, addDays(a, 6)).vol)); }
+  var c = el('<div class="lf-card" id="lfVol"><div class="lf-lab" style="display:flex;gap:6px;align-items:center">' + IC.weight + 'Volume</div><div class="lf-big lf-num"></div><div class="lf-area"></div></div>');
+  $('.lf-big', c).innerHTML = esc(fmtBig(vals.reduce(function (a, b) { return a + b; }, 0))) + '<small>' + S.unit + ' · 8 wk</small>';
+  $('.lf-area', c).innerHTML = lfAreaSvg(vals);
+  return c;
+}
+function lfAreaSvg(vals) {
+  var W = 200, H = 74, max = Math.max.apply(null, vals.concat([1])), n = vals.length;
+  if (!vals.some(function (v) { return v > 0; })) return '<svg viewBox="0 0 200 74" preserveAspectRatio="none" aria-hidden="true"><path d="M0 64H200" stroke="#3a3a40" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
+  var pts = vals.map(function (v, i) { return [i / (n - 1) * W, H - 10 - v / max * (H - 26)]; });
+  var d = 'M' + pts[0][0] + ' ' + pts[0][1];
+  for (var i = 1; i < n; i++) { var p = pts[i - 1], q = pts[i], mx = (p[0] + q[0]) / 2; d += ' C' + mx + ' ' + p[1] + ' ' + mx + ' ' + q[1] + ' ' + q[0] + ' ' + q[1]; }
+  return '<svg viewBox="0 0 200 74" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="lfAg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e8e95" stop-opacity=".55"/><stop offset="1" stop-color="#8e8e95" stop-opacity=".05"/></linearGradient></defs>'
+    + '<path d="' + d + ' L200 74 L0 74Z" fill="url(#lfAg)"/><path d="' + d + '" fill="none" stroke="#c9c9ce" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
+}
+
+function lfWeekCard(inSheet) {
+  var m = monday(today()), t = ymd(today()), reps = [], tot = 0;
+  for (var i = 0; i < 7; i++) { var d = ymd(addDays(m, i)); var r = woOn(d).reduce(function (a, w) { return a + woReps(w); }, 0); reps.push({ d: d, r: r }); tot += r; }
+  var last = windowStats(addDays(m, -7), addDays(m, -1)).reps;
+  var c = el('<div class="lf-card"' + (inSheet ? '' : ' id="lfWeek"') + '><div class="lf-lab" style="display:flex;gap:6px;align-items:center">' + IC.dumb + 'This week</div><div class="lf-hd"><div class="lf-big lf-num"></div><span class="lf-pct"></span></div><div class="lf-bars" aria-hidden="true"></div></div>');
+  if (inSheet) c.style.background = 'var(--card)';
+  $('.lf-big', c).innerHTML = tot + '<small>reps</small>';
+  if (last > 0) { var p = Math.round((tot - last) / last * 100); $('.lf-pct', c).textContent = (p >= 0 ? '+' : '') + p + '%'; if (p < 0) $('.lf-pct', c).style.color = 'var(--dim)'; }
+  var max = Math.max.apply(null, reps.map(function (x) { return x.r; }).concat([1]));
+  var bars = $('.lf-bars', c);
+  reps.forEach(function (x, i) {
+    var col = el('<div><em></em><i></i><u></u></div>');
+    if (x.d === t) col.classList.add('is-now');
+    $('em', col).textContent = x.r || '';
+    $('i', col).style.height = (x.r ? Math.max(6, x.r / max * 100) : 4) + '%';
+    $('u', col).textContent = 'MTWTFSS'[i];
+    bars.appendChild(col);
+  });
+  return c;
+}
+
+function lfBwCard() {
+  var last = S.bw[S.bw.length - 1];
+  var c = el('<button type="button" class="lf-card lf-tap" id="lfBw"><div class="lf-hd"><span class="lf-lab">Body weight</span>' + IC.chev + '</div><div class="lf-bw"><div><div class="lf-big lf-num"></div><div class="lf-lab"></div></div><div class="lf-spark"></div></div></button>');
+  $('.lf-big', c).innerHTML = last ? esc(fmtW(last.kg)) + '<small>' + S.unit + '</small>' : '—';
+  $('.lf-bw .lf-lab', c).textContent = !last ? 'Tap to log your weight'
+    : S.bwGoal ? (Math.abs(last.kg - S.bwGoal) < .05 ? 'At your goal' : 'Goal · ' + fmtW(Math.abs(S.bwGoal - last.kg)) + ' ' + S.unit + ' to go') : 'Logged ' + fmtDay(last.d);
+  var pts = S.bw.slice(-30);
+  if (pts.length > 1) {
+    var mn = Math.min.apply(null, pts.map(function (p) { return p.kg; })), mx = Math.max.apply(null, pts.map(function (p) { return p.kg; })), rg = mx - mn || 1;
+    var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + (i / (pts.length - 1) * 120).toFixed(1) + ' ' + (36 - (p.kg - mn) / rg * 32).toFixed(1); }).join(' ');
+    $('.lf-spark', c).innerHTML = '<svg viewBox="0 0 120 40" aria-hidden="true"><path d="' + d + '" fill="none" stroke="#c9c9ce" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  }
+  c.addEventListener('click', lfBwSheet);
+  return c;
+}
+
+function lfBwSheet() {
+  var last = S.bw[S.bw.length - 1];
+  var b = el('<div><label class="lf-flab" for="lfBwIn">Today, in ' + S.unit + '</label><input class="lf-field lf-num" id="lfBwIn" inputmode="decimal" autocomplete="off" /><label class="lf-flab" for="lfBwGoal">Goal, in ' + S.unit + ' (optional)</label><input class="lf-field lf-num" id="lfBwGoal" inputmode="decimal" autocomplete="off" /><div class="lf-list lf-sec" id="lfBwList"></div></div>');
+  if (last) $('#lfBwIn', b).placeholder = fmtW(last.kg);
+  if (S.bwGoal) $('#lfBwGoal', b).value = fmtW(S.bwGoal);
+  S.bw.slice(-8).reverse().forEach(function (p) {
+    var li = el('<div class="lf-li"><div class="lf-li-t"><b></b></div><span class="lf-li-r lf-num"></span></div>');
+    $('b', li).textContent = fmtDay(p.d); $('.lf-li-r', li).textContent = fmtW(p.kg) + ' ' + S.unit; $('#lfBwList', b).appendChild(li);
+  });
+  var save = el('<button type="button" class="lf-btn is-log is-full">Log weight</button>');
+  var s = lfSheet({ title: 'Body weight', body: b, foot: [save] });
+  save.addEventListener('click', function () {
+    var v = num(parseFloat($('#lfBwIn', b).value)), g = $('#lfBwGoal', b).value.trim();
+    S.bwGoal = g ? (num(parseFloat(g)) ? fromDisp(parseFloat(g)) : S.bwGoal) : null;
+    if (v) {
+      var d = ymd(today()), kg = fromDisp(v);
+      S.bw = S.bw.filter(function (p) { return p.d !== d; }); S.bw.push({ d: d, kg: kg });
+      S.bw.sort(function (a, c) { return a.d < c.d ? -1 : 1; });
+    }
+    lfSave(); s.close(true); lfRender(); if (v) lfToast('Logged ' + v + ' ' + S.unit);
+  });
+}
+
+function lfSum(rows) {
+  var s = el('<div class="lf-sum"></div>');
+  rows.forEach(function (r) { var d = el('<div><b class="lf-num"></b><span></span></div>'); $('b', d).textContent = r[0]; $('span', d).textContent = r[1]; s.appendChild(d); });
+  return s;
+}
+
+/* ═══════════ THE SESSION ═══════════ */
+var sessSheet = null, tick = null;
+
+function lfStart(rt) {
+  act = { id: lfId(), s: Date.now(), n: rt ? rt.n : 'Workout', rt: rt ? rt.id : null, rest: 0, x: [] };
+  (rt ? rt.ex : []).forEach(function (id) { if (exById(id)) lfAddEx(id); });
+  lfSaveAct(); buzz(15);
+  lfRender(); lfOpenSession();
+}
+/* A new exercise comes in with as many sets as last time, empty, with
+   last time's numbers as the placeholders. Three if it is new to you. */
+function lfAddEx(id) {
+  var prev = lastFor(id), n = prev ? prev.length : 3, sets = [];
+  for (var i = 0; i < n; i++) sets.push({ w: '', r: '', ok: 0 });
+  act.x.push({ id: id, n: exName(id), sets: sets });
+}
+
+function lfOpenSession() {
+  if (!act) return;
+  if (sessSheet) return;
+  var head = el('<div class="lf-ss-hd" style="width:100%"><span class="lf-rec" aria-hidden="true"></span><input class="lf-ss-name" aria-label="Workout name" maxlength="40" /><span class="lf-ss-time" id="lfClock"></span><button type="button" class="lf-x" aria-label="Minimise">' + '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>' + '</button></div>');
+  $('input', head).value = act.n;
+  $('input', head).addEventListener('input', function (e) { act.n = e.target.value.slice(0, 40) || 'Workout'; lfSaveAct(); });
+  var body = el('<div><div class="lf-ss-rest" id="lfRest"></div><div id="lfExList"></div></div>');
+  var discard = el('<button type="button" class="lf-btn">Discard</button>');
+  var finish = el('<button type="button" class="lf-btn is-log" id="lfFinish">Finish</button>');
+  sessSheet = lfSheet({ full: true, head: head, body: body, foot: [discard, finish], cls: 'lf-session', title: 'Workout',
+    onClose: function () { sessSheet = null; clearInterval(tick); lfRender(); } });
+  $('.lf-x', head).addEventListener('click', function () { sessSheet && sessSheet.close(); });
+  discard.addEventListener('click', function () {
+    lfAsk('Discard this workout?', 'Every set logged in it goes, and there is no way back.', 'Discard', function () {
+      act = null; lfSaveAct(); if (sessSheet) sessSheet.close(true); sessSheet = null; clearInterval(tick); lfRender();
+    });
+  });
+  finish.addEventListener('click', lfFinish);
+  lfPaintSession();
+  clearInterval(tick);
+  tick = setInterval(lfTick, 1000); lfTick();
+}
+function lfTick() {
+  if (!act) return;
+  var c = $('#lfClock'); if (c) c.textContent = fmtClock(Date.now() - act.s);
+  var r = $('#lfRest'); if (r) r.textContent = act.rest ? 'Rest ' + fmtClock(Date.now() - act.rest) : '';
+  var l = $('#lfLive em'); if (l) l.textContent = fmtClock(Date.now() - act.s);
+}
+
+/* Rebuilt on a change of SHAPE — an exercise or a set added or taken
+   away — and never on a keystroke, which would take the caret with it. */
+function lfPaintSession() {
+  var list = $('#lfExList'); if (!list) return;
+  list.textContent = '';
+  act.x.forEach(function (e, ei) {
+    var prev = lastFor(e.id) || [];
+    var best = bestFor(e.id);
+    var card = el('<div class="lf-ex"><div class="lf-ex-hd"><button type="button" class="lf-ex-n"></button><button type="button" class="lf-x" aria-label="Remove exercise">' + IC.x + '</button></div>'
+      + '<div class="lf-set is-hd" aria-hidden="true"><span>Set</span><span>Last</span><span>' + S.unit + '</span><span>Reps</span><span></span></div></div>');
+    card.dataset.ex = e.id;
+    $('.lf-ex-n', card).textContent = e.n;
+    $('.lf-ex-n', card).addEventListener('click', function () { lfExSheet(e.id); });
+    $('.lf-x', card).addEventListener('click', function () {
+      var go = function () { act.x.splice(ei, 1); lfSaveAct(); lfPaintSession(); };
+      if (e.sets.some(function (s) { return s.ok; })) lfAsk('Remove ' + e.n + '?', 'The sets you logged for it in this workout go with it.', 'Remove', go); else go();
+    });
+    var runBest = best;
+    e.sets.forEach(function (s, si) {
+      var p = prev[si] || prev[prev.length - 1];
+      var row = el('<div class="lf-set"><span class="lf-sn"></span><span class="lf-prev lf-num"></span><input type="text" inputmode="decimal" autocomplete="off" /><input type="text" inputmode="numeric" autocomplete="off" /><button type="button" class="lf-chk"><span>' + IC.check + '</span></button></div>');
+      row.classList.toggle('is-done', !!s.ok);
+      $('.lf-sn', row).textContent = si + 1;
+      $('.lf-prev', row).textContent = p ? fmtW(p.w) + '×' + p.r : '—';
+      var wi = $$('input', row)[0], ri = $$('input', row)[1];
+      wi.setAttribute('aria-label', 'Set ' + (si + 1) + ' weight in ' + S.unit);
+      ri.setAttribute('aria-label', 'Set ' + (si + 1) + ' reps');
+      wi.placeholder = p ? fmtW(p.w) : S.unit; ri.placeholder = p ? String(p.r) : 'reps';
+      if (s.w !== '' && s.w != null) wi.value = fmtW(s.w);
+      if (s.r !== '' && s.r != null) ri.value = s.r;
+      wi.addEventListener('input', function () { var v = parseFloat(wi.value); s.w = isFinite(v) && v >= 0 ? fromDisp(v) : ''; lfSaveAct(); });
+      ri.addEventListener('input', function () { var v = parseInt(ri.value, 10); s.r = isFinite(v) && v >= 0 ? v : ''; lfSaveAct(); });
+      var chk = $('.lf-chk', row);
+      chk.setAttribute('aria-pressed', s.ok ? 'true' : 'false');
+      chk.setAttribute('aria-label', 'Log set ' + (si + 1));
+      if (s.ok && s.pr) { $('.lf-sn', row).textContent = 'PR'; $('.lf-sn', row).classList.add('is-pr'); }
+      chk.addEventListener('click', function () {
+        if (s.ok) { s.ok = 0; s.pr = 0; lfSaveAct(); lfPaintSession(); return; }
+        /* An empty field takes last time's figure: pressing the check on
+           a set you repeated exactly is the whole of logging it. */
+        if (s.w === '' || s.w == null) s.w = p ? p.w : (exById(e.id) && exById(e.id).t === 'bw' ? 0 : '');
+        if (s.r === '' || s.r == null) s.r = p ? p.r : '';
+        if (s.w === '' || s.r === '' || !(s.r > 0)) { lfToast('Put in the weight and reps first'); (s.w === '' ? wi : ri).focus(); return; }
+        s.ok = 1;
+        /* A PR is a set whose estimated one-rep max beats everything
+           before it, this session's earlier sets included. */
+        var est = e1rm(s.w, s.r);
+        s.pr = est > runBestBefore(e, si, best) + 1e-9 && best > 0 ? 1 : 0;
+        act.rest = Date.now();
+        lfSaveAct(); buzz(s.pr ? [20, 40, 20] : 14); lfPaintSession(); lfTick();
+      });
+      card.appendChild(row);
+    });
+    var ft = el('<div class="lf-ex-ft"><button type="button">+ Add set</button><button type="button">Remove set</button></div>');
+    var bs = $$('button', ft);
+    bs[0].addEventListener('click', function () { var l = e.sets[e.sets.length - 1]; e.sets.push({ w: l && l.w !== '' ? l.w : '', r: '', ok: 0 }); lfSaveAct(); lfPaintSession(); });
+    bs[1].disabled = e.sets.length <= 1;
+    bs[1].addEventListener('click', function () { if (e.sets.length > 1) { e.sets.pop(); lfSaveAct(); lfPaintSession(); } });
+    card.appendChild(ft);
+    list.appendChild(card);
+  });
+  var add = el('<button type="button" class="lf-add" id="lfAddEx">' + IC.plus + 'Add exercise</button>');
+  add.addEventListener('click', function () { lfPicker(function (id) { lfAddEx(id); lfSaveAct(); lfPaintSession(); }); });
+  list.appendChild(add);
+  if (!act.x.length) list.insertBefore(el('<div class="lf-empty"><b>Nothing in this workout yet</b>Add the first exercise and start logging sets.</div>'), add);
+}
+function runBestBefore(e, si, best) {
+  var b = best;
+  for (var i = 0; i < si; i++) { var s = e.sets[i]; if (s.ok) b = Math.max(b, e1rm(s.w, s.r)); }
+  return b;
+}
+
+function lfFinish() {
+  var x = act.x.map(function (e) {
+    return { id: e.id, n: e.n, sets: e.sets.filter(function (s) { return s.ok && s.r > 0; }).map(function (s) { return { w: +s.w || 0, r: +s.r }; }) };
+  }).filter(function (e) { return e.sets.length; });
+  if (!x.length) {
+    lfAsk('Nothing logged', 'No set in this workout is ticked off, so there is nothing to save. Discard it?', 'Discard', function () {
+      act = null; lfSaveAct(); if (sessSheet) sessSheet.close(true); sessSheet = null; clearInterval(tick); lfRender();
+    });
+    return;
+  }
+  var prs = [];
+  act.x.forEach(function (e) { if (e.sets.some(function (s) { return s.ok && s.pr; })) prs.push(e.n); });
+  var w = { id: act.id, d: ymd(new Date(act.s)), s: act.s, e: Date.now(), n: act.n || 'Workout', rt: act.rt, x: x };
+  S.wo.push(w); lfSave();
+  act = null; lfSaveAct();
+  clearInterval(tick);
+  if (sessSheet) sessSheet.close(true); sessSheet = null;
+  lfRender(); buzz([15, 50, 15]);
+  setTimeout(function () { lfSummary(w, prs); }, 260);
+}
+function lfSummary(w, prs) {
+  var b = el('<div><div class="lf-cap">Workout logged</div><div class="lf-hero" style="font-size:40px"></div><p class="lf-lab" style="font-size:14px;font-weight:400"></p></div>');
+  $('.lf-hero', b).textContent = w.n;
+  $('p', b).textContent = fmtDay(w.d) + (prs.length ? ' · new best on ' + prs.join(', ') : '');
+  b.appendChild(lfSum([[fmtDur(w.e - w.s), 'time'], [woSets(w), 'sets'], [fmtBig(toDisp(woVol(w))), S.unit]]));
+  var done = el('<button type="button" class="lf-btn is-ink is-full">Done</button>');
+  var s = lfSheet({ title: '', body: b, foot: [done] });
+  done.addEventListener('click', function () { s.close(); });
+}
+
+/* ═══════════ EXERCISES ═══════════ */
+function lfPicker(onPick) {
+  var b = el('<div><input class="lf-field" type="search" placeholder="Search exercises" aria-label="Search exercises" autocomplete="off" /><div class="lf-list lf-sec"></div></div>');
+  var mk = el('<button type="button" class="lf-btn is-full">' + IC.plus + 'Create exercise</button>');
+  var s = lfSheet({ title: 'Add exercise', body: b, foot: [mk] });
+  var q = $('input', b), list = $('.lf-list', b);
+  function paint() {
+    list.textContent = '';
+    var t = q.value.trim().toLowerCase();
+    var all = allEx().filter(function (e) { return !t || e.n.toLowerCase().indexOf(t) >= 0; });
+    if (!all.length) { list.appendChild(el('<div class="lf-empty"><b>' + (allEx().length ? 'No match' : 'No exercises yet') + '</b>' + (allEx().length ? 'Try another word, or create it.' : 'Create one and it is here every time.') + '</div>')); return; }
+    all.forEach(function (e) {
+      var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div>' + IC.plus + '</button>');
+      $('b', li).textContent = e.n; $('span', li).textContent = e.m;
+      li.addEventListener('click', function () { s.close(true); onPick(e.id); });
+      list.appendChild(li);
+    });
+  }
+  q.addEventListener('input', paint); paint();
+  mk.addEventListener('click', function () { lfExForm(null, function (id) { s.close(true); onPick(id); }, q.value.trim()); });
+}
+
+function lfExForm(ex, onDone, seed) {
+  var m = ex ? ex.m : 'Other', t = ex ? ex.t : 'w';
+  var b = el('<div><label class="lf-flab" for="lfExN">Name</label><input class="lf-field" id="lfExN" maxlength="60" autocomplete="off" /><span class="lf-flab">Muscle group</span><div class="lf-pills" id="lfExM"></div><span class="lf-flab">Logged as</span><div class="lf-pills" id="lfExT"></div></div>');
+  $('#lfExN', b).value = ex ? ex.n : (seed || '');
+  function pills(box, opts, cur, set) {
+    box.textContent = '';
+    opts.forEach(function (o) {
+      var p = el('<button type="button" class="lf-pill"></button>'); p.textContent = o[1]; p.setAttribute('aria-pressed', o[0] === cur ? 'true' : 'false');
+      p.addEventListener('click', function () { set(o[0]); pills(box, opts, o[0], set); });
+      box.appendChild(p);
+    });
+  }
+  pills($('#lfExM', b), MUSCLES.map(function (x) { return [x, x]; }), m, function (v) { m = v; });
+  pills($('#lfExT', b), [['w', 'Weight × reps'], ['bw', 'Bodyweight']], t, function (v) { t = v; });
+  var save = el('<button type="button" class="lf-btn is-ink is-full">Save</button>');
+  var foot = [save];
+  var del = null;
+  if (ex && S.ex.indexOf(ex) >= 0) { del = el('<button type="button" class="lf-btn is-bad">Delete</button>'); foot.unshift(del); }
+  var s = lfSheet({ title: ex ? 'Edit exercise' : 'New exercise', body: b, foot: foot });
+  save.addEventListener('click', function () {
+    var n = $('#lfExN', b).value.trim();
+    if (!n) { $('#lfExN', b).focus(); return; }
+    if (ex) { ex.n = n; ex.m = m; ex.t = t; S.wo.forEach(function (w) { w.x.forEach(function (x) { if (x.id === ex.id) x.n = n; }); }); }
+    else { ex = { id: lfId(), n: n.slice(0, 60), m: m, t: t }; S.ex.push(ex); }
+    lfSave(); s.close(true); lfRender(); if (onDone) onDone(ex.id);
+  });
+  if (del) del.addEventListener('click', function () {
+    lfAsk('Delete ' + ex.n + '?', 'It comes off every routine. Workouts you already logged keep it.', 'Delete', function () {
+      var snap = JSON.stringify(S);
+      S.ex = S.ex.filter(function (x) { return x !== ex; });
+      S.rt.forEach(function (r) { r.ex = r.ex.filter(function (id) { return id !== ex.id; }); });
+      lfSave(); s.close(true); stack.slice().forEach(function (x) { if (x.el.classList.contains('lf-exd')) x.close(true); }); lfRender();
+      lfToast('Deleted ' + ex.n, function () { S = lfClean(JSON.parse(snap)); lfSave(); lfRender(); });
+    });
+  });
+}
+
+/* Progressive overload, read back: the best set, the estimated one-rep
+   max, and the top set of every session as a line. */
+function lfExSheet(id) {
+  var ex = exById(id), h = historyFor(id);
+  var name = ex ? ex.n : 'Exercise';
+  if (!ex && h.length) h[h.length - 1].w.x.forEach(function (e) { if (e.id === id && e.n) name = e.n; });
+  var b = el('<div></div>');
+  var best = null, bestE = 0;
+  h.forEach(function (x) { x.sets.forEach(function (s) { var e = e1rm(s.w, s.r); if (e > bestE) { bestE = e; best = s; } }); });
+  b.appendChild(lfSum([[best ? fmtW(best.w) + '×' + best.r : '—', 'best set'], [bestE ? fmtW(bestE) : '—', 'est. 1RM ' + S.unit], [h.length, 'sessions']]));
+  if (h.length > 1) {
+    var tops = h.slice(-12).map(function (x) { return toDisp(Math.max.apply(null, x.sets.map(function (s) { return e1rm(s.w, s.r); }))); });
+    var c = el('<div class="lf-card lf-sec"><div class="lf-lab">Est. 1RM, last ' + tops.length + ' sessions</div><div class="lf-area" style="height:90px"></div></div>');
+    $('.lf-area', c).innerHTML = lfAreaSvg(tops);
+    b.appendChild(c);
+  }
+  var list = el('<div class="lf-list lf-sec"></div>');
+  if (!h.length) list.appendChild(el('<div class="lf-empty"><b>Not logged yet</b>Your sets show up here once you have done it.</div>'));
+  h.slice().reverse().forEach(function (x) {
+    var li = el('<div class="lf-li"><div class="lf-li-t"><b></b><span class="lf-num"></span></div></div>');
+    $('b', li).textContent = fmtDay(x.w.d);
+    $('span', li).textContent = x.sets.map(function (s) { return fmtW(s.w) + '×' + s.r; }).join('  ·  ');
+    list.appendChild(li);
+  });
+  b.appendChild(list);
+  var foot = null;
+  if (ex && S.ex.indexOf(ex) >= 0) {
+    var ed = el('<button type="button" class="lf-btn is-full">Edit</button>');
+    ed.addEventListener('click', function () { lfExForm(ex, function () { s.close(true); lfExSheet(id); }); });
+    foot = [ed];
+  }
+  var s = lfSheet({ title: name, body: b, foot: foot, cls: 'lf-exd' });
+}
+
+function lfRoutinePicker() {
+  var b = el('<div class="lf-list"></div>');
+  var s = lfSheet({ title: 'Today', body: b });
+  function item(t, sub, cur, fn) {
+    var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div></button>');
+    $('b', li).textContent = t; $('span', li).textContent = sub;
+    if (cur) li.insertAdjacentHTML('beforeend', IC.check);
+    li.addEventListener('click', fn); b.appendChild(li);
+  }
+  var cur = lfToday();
+  S.rt.forEach(function (r) {
+    item(r.n, r.sp || (r.ex.length + ' exercises'), cur && cur.id === r.id, function () { S.today = r.id; lfSave(); s.close(true); lfRender(); });
+  });
+  item('Empty workout', 'Add exercises as you go', false, function () { s.close(true); lfStart(null); });
+  item('New routine', 'A named list of exercises you repeat', false, function () { s.close(true); lfRoutineForm(null); });
+}
+
+function lfRoutineForm(rt) {
+  var draft = rt ? rt.ex.slice() : [];
+  var b = el('<div><label class="lf-flab" for="lfRtN">Name</label><input class="lf-field" id="lfRtN" maxlength="40" placeholder="Push" autocomplete="off" /><label class="lf-flab" for="lfRtS">Split (optional)</label><input class="lf-field" id="lfRtS" maxlength="60" placeholder="Push, Pull, Legs" autocomplete="off" /><span class="lf-flab">Exercises</span><div class="lf-list" id="lfRtX"></div><button type="button" class="lf-add">' + IC.plus + 'Add exercise</button></div>');
+  if (rt) { $('#lfRtN', b).value = rt.n; $('#lfRtS', b).value = rt.sp; }
+  function paint() {
+    var l = $('#lfRtX', b); l.textContent = '';
+    if (!draft.length) l.appendChild(el('<div class="lf-lab" style="padding:6px 2px">None yet.</div>'));
+    draft.forEach(function (id, i) {
+      var li = el('<div class="lf-li"><div class="lf-li-t"><b></b></div><button type="button" class="lf-x" aria-label="Move up">' + '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>' + '</button><button type="button" class="lf-x" aria-label="Remove">' + IC.x + '</button></div>');
+      $('b', li).textContent = exName(id);
+      var bs = $$('button', li);
+      bs[0].disabled = i === 0; bs[0].style.opacity = i === 0 ? .3 : 1;
+      bs[0].addEventListener('click', function () { if (i) { draft.splice(i - 1, 0, draft.splice(i, 1)[0]); paint(); } });
+      bs[1].addEventListener('click', function () { draft.splice(i, 1); paint(); });
+      l.appendChild(li);
+    });
+  }
+  paint();
+  $('.lf-add', b).addEventListener('click', function () { lfPicker(function (id) { draft.push(id); paint(); }); });
+  var save = el('<button type="button" class="lf-btn is-ink">Save</button>');
+  var foot = [save];
+  if (rt) { var del = el('<button type="button" class="lf-btn is-bad">Delete</button>'); foot.unshift(del); }
+  var s = lfSheet({ title: rt ? 'Edit routine' : 'New routine', body: b, foot: foot });
+  save.addEventListener('click', function () {
+    var n = $('#lfRtN', b).value.trim();
+    if (!n) { $('#lfRtN', b).focus(); return; }
+    if (!rt) { rt = { id: lfId() }; S.rt.push(rt); if (!S.today) S.today = rt.id; }
+    rt.n = n; rt.sp = $('#lfRtS', b).value.trim(); rt.ex = draft;
+    lfSave(); s.close(true); lfRender();
+  });
+  if (rt && del) del.addEventListener('click', function () {
+    var snap = JSON.stringify(S);
+    S.rt = S.rt.filter(function (r) { return r !== rt; }); if (S.today === rt.id) S.today = null;
+    lfSave(); s.close(true); lfRender();
+    lfToast('Deleted ' + rt.n, function () { S = lfClean(JSON.parse(snap)); lfSave(); lfRender(); });
+  });
+}
+
+var libQ = '';
+function lfRenderLib() {
+  var root = $('#lfLib'); root.textContent = '';
+  root.appendChild(el('<h2 class="lf-h1">Exercises</h2>'));
+  /* routines */
+  root.appendChild(el('<div class="lf-cap lf-gh">Routines</div>'));
+  var rc = el('<div class="lf-card" style="padding:4px 16px"><div class="lf-list"></div></div>');
+  S.rt.forEach(function (r) {
+    var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div>' + IC.chev + '</button>');
+    $('b', li).textContent = r.n; $('span', li).textContent = (r.sp ? r.sp + ' · ' : '') + r.ex.length + ' exercise' + (r.ex.length === 1 ? '' : 's');
+    li.addEventListener('click', function () { lfRoutineForm(r); });
+    $('.lf-list', rc).appendChild(li);
+  });
+  var nr = el('<button type="button" class="lf-li" id="lfNewRt"><div class="lf-li-t"><b>New routine</b></div>' + IC.plus + '</button>');
+  nr.addEventListener('click', function () { lfRoutineForm(null); });
+  $('.lf-list', rc).appendChild(nr);
+  root.appendChild(rc);
+  /* the library */
+  var hd = el('<div class="lf-hd lf-gh"><span class="lf-cap">All exercises</span></div>');
+  root.appendChild(hd);
+  var all = allEx();
+  if (all.length > 6) {
+    var q = el('<input class="lf-field" type="search" placeholder="Search" aria-label="Search exercises" autocomplete="off" />');
+    q.value = libQ;
+    q.addEventListener('input', function () { libQ = q.value; paintLib(); });
+    root.appendChild(q);
+  }
+  var box = el('<div id="lfLibList"></div>'); root.appendChild(box);
+  var mk = el('<button type="button" class="lf-add" id="lfNewEx">' + IC.plus + 'Create exercise</button>');
+  mk.addEventListener('click', function () { lfExForm(null); });
+  root.appendChild(mk);
+  function paintLib() {
+    box.textContent = '';
+    var t = libQ.trim().toLowerCase();
+    var shown = all.filter(function (e) { return !t || e.n.toLowerCase().indexOf(t) >= 0; });
+    if (!all.length) { box.appendChild(el('<div class="lf-card lf-empty"><b>No exercises yet</b>Create your own here, or they arrive with the full list.</div>')); return; }
+    MUSCLES.forEach(function (m) {
+      var g = shown.filter(function (e) { return e.m === m; });
+      if (!g.length) return;
+      var c = el('<div class="lf-card" style="padding:4px 16px"><div class="lf-cap" style="padding:12px 0 2px"></div><div class="lf-list"></div></div>');
+      $('.lf-cap', c).textContent = m;
+      g.forEach(function (e) {
+        var h = historyFor(e.id), last = h[h.length - 1];
+        var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div><span class="lf-li-r lf-num"></span></button>');
+        $('b', li).textContent = e.n;
+        $('span', li).textContent = last ? 'Last ' + fmtDay(last.w.d) : 'Not logged yet';
+        if (last) { var top = last.sets.reduce(function (a, s) { return e1rm(s.w, s.r) > e1rm(a.w, a.r) ? s : a; }); $('.lf-li-r', li).textContent = fmtW(top.w) + '×' + top.r; }
+        li.addEventListener('click', function () { lfExSheet(e.id); });
+        $('.lf-list', c).appendChild(li);
+      });
+      box.appendChild(c);
+    });
+  }
+  paintLib();
+}
+
+/* ═══════════ CALENDAR ═══════════ */
+var calMode = 'month', calAt = today();
+function lfRenderCal() {
+  var root = $('#lfCal'); root.textContent = '';
+  root.appendChild(el('<h2 class="lf-h1">Calendar</h2>'));
+  var seg = el('<div class="lf-seg"><button type="button" data-m="week">Week</button><button type="button" data-m="month">Month</button></div>');
+  $$('button', seg).forEach(function (b) {
+    b.setAttribute('aria-pressed', b.dataset.m === calMode ? 'true' : 'false');
+    b.addEventListener('click', function () { calMode = b.dataset.m; calAt = today(); lfRenderCal(); });
+  });
+  root.appendChild(seg);
+  var t = today();
+  var from, to, label;
+  if (calMode === 'month') { from = new Date(calAt.getFullYear(), calAt.getMonth(), 1); to = new Date(calAt.getFullYear(), calAt.getMonth() + 1, 0); label = MON[from.getMonth()] + ' ' + from.getFullYear(); }
+  else { from = monday(calAt); to = addDays(from, 6); label = from.getDate() + ' ' + MON[from.getMonth()].slice(0, 3) + ' – ' + to.getDate() + ' ' + MON[to.getMonth()].slice(0, 3); }
+  var nav = el('<div class="lf-calnav"><button type="button" class="lf-round" aria-label="Earlier">' + IC.left + '</button><b></b><button type="button" class="lf-round" aria-label="Later">' + IC.right + '</button></div>');
+  $('b', nav).textContent = label;
+  var bs = $$('button', nav);
+  bs[1].disabled = to >= t;
+  bs[0].addEventListener('click', function () { calAt = calMode === 'month' ? new Date(calAt.getFullYear(), calAt.getMonth() - 1, 1) : addDays(calAt, -7); lfRenderCal(); });
+  bs[1].addEventListener('click', function () { if (to < t) { calAt = calMode === 'month' ? new Date(calAt.getFullYear(), calAt.getMonth() + 1, 1) : addDays(calAt, 7); lfRenderCal(); } });
+  root.appendChild(nav);
+  var st = windowStats(from, to);
+  var sum = lfSum([[st.wo, 'workouts'], [st.sets, 'sets'], [fmtBig(toDisp(st.vol)), S.unit]]);
+  var tk = ymd(t);
+  if (calMode === 'month') {
+    var c = el('<div class="lf-card" style="padding:12px"><div class="lf-dows" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div><div class="lf-month" id="lfMonth"></div></div>');
+    var g = $('#lfMonth', c), pad = (from.getDay() + 6) % 7;
+    for (var p = 0; p < pad; p++) g.appendChild(el('<span class="lf-cell is-pad" aria-hidden="true"></span>'));
+    for (var d = 1; d <= to.getDate(); d++) {
+      var day = new Date(from.getFullYear(), from.getMonth(), d), k = ymd(day), ws = woOn(k);
+      var cell = el('<button type="button" class="lf-cell"><span class="lf-num"></span><span class="lf-dots" aria-hidden="true"></span></button>');
+      cell.dataset.d = k;
+      $('.lf-num', cell).textContent = d;
+      if (ws.length) { cell.classList.add('is-on'); ws.slice(0, 3).forEach(function () { $('.lf-dots', cell).appendChild(el('<i></i>')); }); }
+      if (k === tk) cell.classList.add('is-now');
+      if (k > tk) { cell.classList.add('is-ahead'); cell.disabled = true; }
+      cell.setAttribute('aria-label', fmtDay(k) + (ws.length ? ', ' + ws.map(function (w) { return w.n; }).join(', ') : ', rest'));
+      cell.addEventListener('click', (function (k) { return function () { lfDaySheet(k); }; })(k));
+      g.appendChild(cell);
+    }
+    root.appendChild(c);
+    root.appendChild(sum);
+  } else {
+    var wc = el('<div class="lf-card" style="padding:4px 16px" id="lfWeekList"></div>');
+    for (var i = 0; i < 7; i++) {
+      var dd = addDays(from, i), kk = ymd(dd), ww = woOn(kk);
+      var row = el('<button type="button" class="lf-wk"><div class="lf-wd"><em></em><b class="lf-num"></b></div><div class="lf-wn"><b></b><span></span></div><span class="lf-li-r lf-num"></span></button>');
+      row.dataset.d = kk;
+      $('em', row).textContent = DOW[i].toUpperCase(); $('.lf-wd b', row).textContent = dd.getDate();
+      if (kk === tk) row.classList.add('is-now');
+      if (ww.length) {
+        $('.lf-wn b', row).textContent = ww.map(function (w) { return w.n; }).join(' + ');
+        $('.lf-wn span', row).textContent = ww.reduce(function (a, w) { return a + woSets(w); }, 0) + ' sets · ' + ww.reduce(function (a, w) { return a + w.x.length; }, 0) + ' exercises';
+        $('.lf-li-r', row).textContent = fmtBig(toDisp(ww.reduce(function (a, w) { return a + woVol(w); }, 0))) + ' ' + S.unit;
+      } else { row.classList.add('is-rest'); $('.lf-wn b', row).textContent = kk > tk ? '' : 'Rest'; }
+      if (kk > tk) row.disabled = true;
+      row.addEventListener('click', (function (k) { return function () { lfDaySheet(k); }; })(kk));
+      wc.appendChild(row);
+    }
+    root.appendChild(wc);
+    var goal = el('<div class="lf-lab" style="margin:0 4px"></div>');
+    goal.textContent = st.wo + ' of ' + S.goal + ' this week';
+    root.appendChild(sum); root.appendChild(goal);
+  }
+  /* Every workout in the range, newest first. */
+  var ws2 = S.wo.filter(function (w) { return w.d >= ymd(from) && w.d <= ymd(to); }).sort(function (a, b) { return a.d === b.d ? b.s - a.s : (a.d < b.d ? 1 : -1); });
+  if (ws2.length && calMode === 'month') {
+    root.appendChild(el('<div class="lf-cap lf-gh">Workouts</div>'));
+    var lc = el('<div class="lf-card" style="padding:4px 16px"><div class="lf-list"></div></div>');
+    ws2.forEach(function (w) { $('.lf-list', lc).appendChild(lfWoRow(w)); });
+    root.appendChild(lc);
+  }
+}
+function lfWoRow(w) {
+  var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div><span class="lf-li-r lf-num"></span></button>');
+  $('b', li).textContent = w.n; $('span', li).textContent = fmtDay(w.d) + ' · ' + woSets(w) + ' sets';
+  $('.lf-li-r', li).textContent = fmtBig(toDisp(woVol(w))) + ' ' + S.unit;
+  li.addEventListener('click', function () { lfWoSheet(w); });
+  return li;
+}
+function lfDaySheet(k) {
+  var ws = woOn(k);
+  if (ws.length === 1) return lfWoSheet(ws[0]);
+  var b = el('<div class="lf-list"></div>');
+  if (!ws.length) b.appendChild(el('<div class="lf-empty"><b>Rest day</b>Nothing logged on this day.</div>'));
+  ws.forEach(function (w) { b.appendChild(lfWoRow(w)); });
+  lfSheet({ title: fmtDay(k), body: b });
+}
+function lfWoSheet(w) {
+  var b = el('<div><p class="lf-lab" style="margin:0 0 10px"></p></div>');
+  $('p', b).textContent = fmtDay(w.d) + (w.e > w.s ? ' · ' + fmtDur(w.e - w.s) : '');
+  b.appendChild(lfSum([[w.x.length, 'exercises'], [woSets(w), 'sets'], [fmtBig(toDisp(woVol(w))), S.unit]]));
+  w.x.forEach(function (e) {
+    var x = el('<button type="button" class="lf-wo-ex lf-tap"><b></b><div></div></button>');
+    $('b', x).textContent = exName(e.id, e.n);
+    $('div', x).textContent = e.sets.map(function (s) { return fmtW(s.w) + ' × ' + s.r; }).join('   ·   ');
+    x.addEventListener('click', function () { lfExSheet(e.id); });
+    b.appendChild(x);
+  });
+  var del = el('<button type="button" class="lf-btn is-bad">Delete workout</button>');
+  var s = lfSheet({ title: w.n, body: b, foot: [del] });
+  del.addEventListener('click', function () {
+    var i = S.wo.indexOf(w); if (i < 0) return;
+    S.wo.splice(i, 1); lfSave(); s.close(true); stack.slice().forEach(function (x) { x.close(true); }); lfRender();
+    lfToast('Deleted ' + w.n, function () { S.wo.push(w); lfSave(); lfRender(); });
+  });
+}
+
+/* ═══════════ YOU ═══════════ */
+function lfRenderYou() {
+  var root = $('#lfYou'); root.textContent = '';
+  root.appendChild(el('<h2 class="lf-h1">You</h2>'));
+  root.appendChild(lfBwCard());
+  var c = el('<div class="lf-card"><span class="lf-flab" style="margin-top:0">Units</span><div class="lf-seg" id="lfUnit"><button type="button" data-u="kg">kg</button><button type="button" data-u="lb">lb</button></div>'
+    + '<span class="lf-flab">Workouts a week</span><div class="lf-seg" id="lfGoal" style="--n:7"></div></div>');
+  $$('#lfUnit button', c).forEach(function (b) {
+    b.setAttribute('aria-pressed', b.dataset.u === S.unit ? 'true' : 'false');
+    b.addEventListener('click', function () { S.unit = b.dataset.u; lfSave(); lfRender(); });
+  });
+  for (var i = 1; i <= 7; i++) {
+    var g = el('<button type="button"></button>'); g.textContent = i; g.dataset.g = i;
+    g.setAttribute('aria-pressed', i === S.goal ? 'true' : 'false'); g.setAttribute('aria-label', i + ' a week');
+    g.addEventListener('click', function (e) { S.goal = +e.currentTarget.dataset.g; lfSave(); lfRender(); });
+    $('#lfGoal', c).appendChild(g);
+  }
+  root.appendChild(c);
+  var all = windowStats(new Date(2000, 0, 1), today());
+  var t = el('<div class="lf-card"><div class="lf-lab">All time</div></div>');
+  t.appendChild(lfSum([[all.wo, 'workouts'], [all.sets, 'sets'], [fmtBig(toDisp(all.vol)), S.unit]]));
+  root.appendChild(t);
+  var bk = el('<div class="lf-card"><div class="lf-lab" style="margin-bottom:10px">Backup</div><div style="display:flex;gap:10px"><button type="button" class="lf-btn" style="flex:1" id="lfCopy">Copy a backup</button><button type="button" class="lf-btn" style="flex:1" id="lfRestore">Restore</button></div></div>');
+  $('#lfCopy', bk).addEventListener('click', lfCopy);
+  $('#lfRestore', bk).addEventListener('click', lfRestore);
+  root.appendChild(bk);
+}
+function lfCopy() {
+  var txt = JSON.stringify(S);
+  var done = function () { lfToast('Backup copied'); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, function () { lfShowText(txt); });
+  else lfShowText(txt);
+}
+function lfShowText(txt) {
+  var b = el('<div><textarea class="lf-field" style="height:220px;padding:12px;font-size:12px" readonly></textarea></div>');
+  $('textarea', b).value = txt;
+  lfSheet({ title: 'Backup', body: b });
+  setTimeout(function () { $('textarea', b).select(); }, 400);
+}
+function lfRestore() {
+  var b = el('<div><p class="lf-lab" style="margin:0 0 10px">Paste a backup. It replaces everything on this phone.</p><textarea class="lf-field" style="height:200px;padding:12px;font-size:14px" aria-label="Backup"></textarea></div>');
+  var go = el('<button type="button" class="lf-btn is-log is-full">Restore</button>');
+  var s = lfSheet({ title: 'Restore', body: b, foot: [go] });
+  go.addEventListener('click', function () {
+    var o; try { o = JSON.parse($('textarea', b).value); } catch (e) { lfToast('That is not a backup'); return; }
+    if (!o || typeof o !== 'object' || !Array.isArray(o.wo)) { lfToast('That is not a backup'); return; }
+    var snap = JSON.stringify(S);
+    S = lfClean(o); lfSave(); s.close(true); lfRender();
+    lfToast('Restored', function () { S = lfClean(JSON.parse(snap)); lfSave(); lfRender(); });
+  });
+}
+
+/* ═══════════ NAVIGATION ═══════════ */
+var view = 'home';
+try { var sv = localStorage.getItem(VIEWK); if (VIEWS.indexOf(sv) >= 0) view = sv; } catch (e) {}
+var IDS = { home: 'lfHome', cal: 'lfCal', lib: 'lfLib', you: 'lfYou' };
+function lfGo(v) {
+  if (VIEWS.indexOf(v) < 0) v = 'home';
+  if (v === 'cal' && view !== 'cal') calAt = today();
+  view = v;
+  try { localStorage.setItem(VIEWK, v); } catch (e) {}
+  lfRender(); window.scrollTo(0, 0);
+}
+function lfRender() {
+  VIEWS.forEach(function (v) { $('#' + IDS[v]).hidden = v !== view; });
+  $$('.lf-bar button').forEach(function (b) { if (b.dataset.v === view) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+  if (view === 'home') lfRenderHome();
+  else if (view === 'cal') lfRenderCal();
+  else if (view === 'lib') lfRenderLib();
+  else lfRenderYou();
+  var live = $('#lfLive');
+  live.hidden = !act || !!sessSheet;
+  document.body.classList.toggle('lf-has-live', !live.hidden);
+  if (act) { live.innerHTML = '<span class="lf-rec" aria-hidden="true"></span><span></span><em></em>'; $('span:nth-child(2)', live).textContent = act.n || 'Workout'; live.setAttribute('aria-label', 'Resume ' + (act.n || 'workout')); lfTick(); }
+}
+$$('.lf-bar button').forEach(function (b) { b.addEventListener('click', function () { lfGo(b.dataset.v); }); });
+$('#lfLive').addEventListener('click', lfOpenSession);
+setInterval(function () { if (act && !sessSheet) lfTick(); }, 1000);
+
+lfRender();
+/* A workout left open when the app was closed comes back up where it was. */
+if (act) lfOpenSession();
+
+if ('serviceWorker' in navigator && /^(https:|http:\/\/(localhost|127\.0\.0\.1))/.test(location.href)) {
+  navigator.serviceWorker.register('sw.js').catch(function () {});
+}
+})();
+</script>
+</body>
+</html>

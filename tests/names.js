@@ -59,6 +59,8 @@ const APPS = [
   /* natal/ joined the day it shipped: the birth-chart PWA. Standalone,
      not a shell consumer; its tokens live in natal/css/style.css. */
   ['natal/index.html', 'natal/css/style.css', 'natal/js/app.js', 'natal/js/engine.js', 'natal/js/wheel.js', 'natal/js/sky.js'],
+  /* lift/ joined the day it shipped: the workout log, one file. */
+  ['lift/index.html'],
 ];
 const NAMED = (app) => app[0];
 const MARKUP = (app) => app.filter(f => f.endsWith('.html'));

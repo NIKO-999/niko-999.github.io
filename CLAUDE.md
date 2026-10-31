@@ -10,6 +10,11 @@ Single-file apps that share a design system:
   day drawn as the block you are in and every other screen as a figure
   and dots: its own build of `schedule/`'s mechanisms, not a skin over
   them
+- `lift/index.html` — the workout log: a set at a time, last time's
+  figures beside it, a calendar of what you trained. Standalone PWA,
+  not a shell consumer. `EXERCISES` at the top of its script is empty
+  on purpose — the list arrives later, keyed by ids that never change
+  once a workout names them.
 - `shell.css` + `shell.js` at the root — the shared shell they all
   consume. A rule that only two of them need belongs in the two, not
   in the file every one of them loads.
