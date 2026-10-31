@@ -48,6 +48,8 @@ const freeze = (at) => `(() => {
   const { c, page } = await ctx();
   ok('the home screen draws', await page.locator('#lfHome .lf-today').count() === 1);
   ok('a Friday opens on Lower C of the split', (await page.textContent('#lfPick')).trim() === 'Lower C' && /Quads \+ hamstrings \+ calves/.test(await page.textContent('.lf-sub')));
+  ok('the routine name has no border round it', await page.$eval('#lfPick', (e) => getComputedStyle(e).borderTopStyle === 'none' || parseFloat(getComputedStyle(e).borderTopWidth) === 0));
+  ok('and lines up with the label above it', await page.evaluate(() => Math.abs(document.querySelector('#lfPick').getBoundingClientRect().left - document.querySelector('.lf-today .lf-lab').getBoundingClientRect().left) < 1));
   ok('with its five exercises', /5 exercises/.test(await page.textContent('.lf-chips')));
   const legs = await page.$$eval('#lfLegs .lf-vr', (r) => r.map((x) => x.dataset.m + ':' + x.querySelector('em').textContent));
   ok('leg sets this week start at nought against the targets', legs.join() === 'Quads:0 / 13–16,Calves:0 / 12,Lower back:0 / 6,Hamstrings:0 / 10,Glutes:0 / 5–8,Abs:0 / 9', legs);
