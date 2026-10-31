@@ -52,7 +52,7 @@
 html { background: var(--bg); }
 body {
   margin: 0; min-height: 100dvh; background: var(--bg); color: var(--ink);
-  font: 400 15px/1.35 'Inter', -apple-system, system-ui, sans-serif;
+  font: 400 14px/1.35 'Inter', -apple-system, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased; overflow-x: hidden;
   padding: calc(var(--safe-t) + 14px) 16px calc(var(--bar-h) + var(--safe-b) + 40px);
 }
@@ -65,13 +65,13 @@ svg { display: block; }
 .lf-ic { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 
 /* ── type ── */
-.lf-h1 { font-size: 30px; font-weight: 700; letter-spacing: -.02em; margin: 6px 4px 14px; }
-.lf-lab { font-size: 13px; color: var(--dim); font-weight: 500; }
-.lf-cap { font-size: 11px; color: var(--dim); letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
+.lf-h1 { font-size: 24px; font-weight: 700; letter-spacing: -.02em; margin: 6px 4px 14px; }
+.lf-lab { font-size: 12px; color: var(--dim); font-weight: 500; }
+.lf-cap { font-size: 10px; color: var(--dim); letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
 .lf-num { font-variant-numeric: tabular-nums; }
 
 /* ── surfaces ── */
-.lf-card { background: var(--card); border-radius: var(--r); padding: 16px; position: relative; }
+.lf-card { background: var(--card); border-radius: var(--r); padding: 14px; position: relative; }
 /* A view is a column with one gap, so a card never carries a margin of
    its own — which is what put the first tile in a row 12px below its
    neighbours once, because an adjacency margin does not know it is in a row. */
@@ -84,46 +84,46 @@ svg { display: block; }
 .lf-hd .lf-chev { color: var(--quiet); width: 16px; height: 16px; }
 
 /* ── today ── */
-.lf-today { padding: 18px; }
+.lf-today { padding: 16px; }
 .lf-title-box {
-  display: inline-block; margin: 8px 0 6px; padding: 4px 18px 6px; border: 2px dashed rgba(255,255,255,.28);
-  border-radius: 16px; font-size: 40px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1;
-  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 44px;
+  display: inline-block; margin: 8px 0 6px; padding: 4px 14px 5px; border: 1.5px dashed rgba(255,255,255,.28);
+  border-radius: 14px; font-size: 28px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 40px;
 }
-.lf-sub { color: var(--dim); font-size: 14px; margin: 2px 0 14px; }
+.lf-sub { color: var(--dim); font-size: 12.5px; margin: 2px 0 12px; }
 .lf-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-.lf-chip { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; background: var(--card2); color: var(--dim); font-size: 13px; font-weight: 500; }
-.lf-chip .lf-ic { width: 15px; height: 15px; }
+.lf-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; background: var(--card2); color: var(--dim); font-size: 12px; font-weight: 500; }
+.lf-chip .lf-ic { width: 13px; height: 13px; }
 .lf-go {
-  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 52px; border-radius: 999px;
-  background: var(--ink); color: var(--on-ink); font-weight: 600; font-size: 16px; transition: transform .15s var(--ease);
+  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 46px; border-radius: 999px;
+  background: var(--ink); color: var(--on-ink); font-weight: 600; font-size: 14px; transition: transform .15s var(--ease);
 }
 .lf-go:active { transform: scale(.98); }
-.lf-go .lf-play { width: 22px; height: 22px; border-radius: 6px; background: var(--on-ink); display: grid; place-items: center; }
+.lf-go .lf-play { width: 18px; height: 18px; border-radius: 5px; background: var(--on-ink); display: grid; place-items: center; }
 .lf-go .lf-play svg { width: 10px; height: 10px; fill: var(--ink); stroke: none; }
 .lf-go.is-live { background: var(--log); color: #fff; }
 .lf-go.is-live .lf-play { background: #fff; }
 .lf-go.is-live .lf-play svg { fill: var(--log); }
 
 /* ── stat tiles ── */
-.lf-stat { text-align: center; padding: 14px 8px 16px; }
-.lf-stat .lf-ic { margin: 12px auto 6px; color: var(--dim); }
-.lf-stat b { display: block; font-size: 26px; font-weight: 700; letter-spacing: -.01em; }
-.lf-stat span { display: block; font-size: 13px; color: var(--dim); margin-top: 2px; }
-.lf-delta { position: absolute; top: 9px; right: 11px; font-size: 11px; font-weight: 600; color: var(--good); }
+.lf-stat { text-align: center; padding: 12px 8px 14px; }
+.lf-stat .lf-ic { width: 16px; height: 16px; margin: 12px auto 4px; color: var(--dim); }
+.lf-stat b { display: block; font-size: 19px; font-weight: 700; letter-spacing: -.01em; }
+.lf-stat span { display: block; font-size: 11.5px; color: var(--dim); margin-top: 2px; }
+.lf-delta { position: absolute; top: 9px; right: 11px; font-size: 10px; font-weight: 600; color: var(--good); }
 .lf-delta.is-down { color: var(--dim); }
 
 /* ── 30-day grid ── */
 .lf-days { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 8px 6px; margin-top: 14px; }
-.lf-day { height: 22px; border-radius: 999px; border: 1.5px solid var(--mark-off); }
+.lf-day { height: 18px; border-radius: 999px; border: 1.5px solid var(--mark-off); }
 .lf-day.is-on { background: #c9c9ce; border-color: #c9c9ce; }
 .lf-day.is-now { border-color: var(--today); border-width: 2.5px; }
 .lf-day.is-now.is-on { box-shadow: inset 0 0 0 2px var(--card); }
 
 /* ── charts ── */
-.lf-big { font-size: 22px; font-weight: 700; margin-top: 8px; }
-.lf-big small { font-size: 13px; color: var(--dim); font-weight: 500; margin-left: 2px; }
-.lf-area { margin: 12px -16px -16px; height: 74px; }
+.lf-big { font-size: 17px; font-weight: 700; margin-top: 6px; }
+.lf-big small { font-size: 11px; color: var(--dim); font-weight: 500; margin-left: 2px; }
+.lf-area { margin: 10px -14px -14px; height: 70px; border-radius: 0 0 var(--r) var(--r); overflow: hidden; }
 .lf-area svg { width: 100%; height: 100%; }
 .lf-bars { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; align-items: end; height: 70px; margin-top: 10px; }
 .lf-bars > div { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 3px; min-width: 0; }
@@ -131,31 +131,31 @@ svg { display: block; }
 .lf-bars em { font-style: normal; font-size: 10px; color: var(--dim); }
 .lf-bars u { text-decoration: none; font-size: 10px; color: var(--quiet); }
 .lf-bars .is-now i { background: var(--ink); }
-.lf-pct { font-size: 12px; font-weight: 600; color: var(--good); }
+.lf-pct { font-size: 11px; font-weight: 600; color: var(--good); }
 
 /* ── body weight ── */
 .lf-bw { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
-.lf-bw .lf-big { font-size: 26px; }
+.lf-bw .lf-big { font-size: 19px; }
 .lf-spark { width: 120px; height: 40px; }
 
 /* ── empty ── */
-.lf-empty { text-align: center; color: var(--dim); padding: 28px 16px; font-size: 14px; }
-.lf-empty b { display: block; color: var(--ink); font-size: 16px; margin-bottom: 4px; }
+.lf-empty { text-align: center; color: var(--dim); padding: 24px 16px; font-size: 13px; }
+.lf-empty b { display: block; color: var(--ink); font-size: 14px; margin-bottom: 4px; }
 
 /* ── lists ── */
 .lf-list { display: flex; flex-direction: column; }
 .lf-li { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 10px 0; border-top: 1px solid var(--line); width: 100%; text-align: left; }
 .lf-li:first-child { border-top: 0; }
 .lf-li .lf-li-t { flex: 1; min-width: 0; }
-.lf-li .lf-li-t b { display: block; font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lf-li .lf-li-t span { display: block; font-size: 13px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lf-li .lf-li-r { font-size: 13px; color: var(--dim); text-align: right; flex: none; }
+.lf-li .lf-li-t b { display: block; font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lf-li .lf-li-t span { display: block; font-size: 12px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lf-li .lf-li-r { font-size: 12px; color: var(--dim); text-align: right; flex: none; }
 .lf-gh { margin: 10px 4px -4px; }
 #lfLibList { display: flex; flex-direction: column; gap: 10px; }
 .lf-sec { margin-top: 12px; }
 .lf-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px;
-  border-radius: 999px; background: var(--card2); font-weight: 600; font-size: 15px;
+  border-radius: 999px; background: var(--card2); font-weight: 600; font-size: 14px;
 }
 .lf-btn.is-full { width: 100%; }
 .lf-btn.is-ink { background: var(--ink); color: var(--on-ink); }
@@ -164,29 +164,29 @@ svg { display: block; }
 .lf-btn:active { opacity: .8; }
 
 .lf-field {
-  width: 100%; height: 48px; border-radius: var(--r-s); background: var(--card2); border: 1px solid transparent;
+  width: 100%; height: 44px; border-radius: var(--r-s); background: var(--card2); border: 1px solid transparent;
   padding: 0 14px; font-size: 16px; outline: none;
 }
 .lf-field:focus { border-color: rgba(255,255,255,.25); }
-.lf-flab { display: block; font-size: 13px; color: var(--dim); margin: 14px 2px 6px; }
+.lf-flab { display: block; font-size: 12px; color: var(--dim); margin: 14px 2px 6px; }
 .lf-pills { display: flex; flex-wrap: wrap; gap: 8px; }
-.lf-pill { min-height: 36px; padding: 0 14px; border-radius: 999px; background: var(--card2); color: var(--dim); font-size: 14px; font-weight: 500; position: relative; }
+.lf-pill { min-height: 36px; padding: 0 14px; border-radius: 999px; background: var(--card2); color: var(--dim); font-size: 13px; font-weight: 500; position: relative; }
 .lf-pill::before { content: ''; position: absolute; inset: -4px 0; }
 .lf-pill[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
 
 .lf-seg { display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); background: var(--card); border-radius: 999px; padding: 3px; }
-.lf-seg button { height: 38px; border-radius: 999px; color: var(--dim); font-weight: 600; font-size: 14px; position: relative; }
+.lf-seg button { height: 38px; border-radius: 999px; color: var(--dim); font-weight: 600; font-size: 13px; position: relative; }
 .lf-seg button::before { content: ''; position: absolute; inset: -3px 0; }
 .lf-seg button[aria-pressed="true"] { background: var(--card3); color: var(--ink); }
 
 /* ── calendar ── */
 .lf-calnav { display: flex; align-items: center; justify-content: space-between; margin: 14px 0 10px; }
-.lf-calnav b { font-size: 17px; font-weight: 700; }
+.lf-calnav b { font-size: 15px; font-weight: 700; }
 .lf-round { width: 44px; height: 44px; border-radius: 999px; display: grid; place-items: center; color: var(--dim); }
 .lf-round:disabled { opacity: .3; cursor: default; }
 .lf-dows { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; font-size: 11px; color: var(--quiet); font-weight: 600; margin-bottom: 6px; }
 .lf-month { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
-.lf-cell { aspect-ratio: 1 / 1.08; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 14px; font-weight: 500; color: var(--dim); min-width: 0; position: relative; }
+.lf-cell { aspect-ratio: 1 / 1.08; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 13px; font-weight: 500; color: var(--dim); min-width: 0; position: relative; }
 .lf-cell.is-pad { visibility: hidden; }
 .lf-cell.is-on { background: var(--card2); color: var(--ink); font-weight: 700; }
 .lf-cell.is-now { box-shadow: inset 0 0 0 2px var(--today); color: var(--ink); }
@@ -197,11 +197,11 @@ svg { display: block; }
 .lf-wk:first-child { border-top: 0; }
 .lf-wk .lf-wd { text-align: center; }
 .lf-wk .lf-wd em { display: block; font-style: normal; font-size: 11px; color: var(--quiet); font-weight: 600; }
-.lf-wk .lf-wd b { display: block; font-size: 20px; font-weight: 700; }
+.lf-wk .lf-wd b { display: block; font-size: 16px; font-weight: 700; }
 .lf-wk.is-now .lf-wd b { color: var(--today); }
 .lf-wk .lf-wn { min-width: 0; }
 .lf-wk .lf-wn b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lf-wk .lf-wn span { font-size: 13px; color: var(--dim); }
+.lf-wk .lf-wn span { font-size: 12px; color: var(--dim); }
 .lf-wk.is-rest .lf-wn b { color: var(--quiet); font-weight: 500; }
 
 /* ── the bar ── */
@@ -212,12 +212,12 @@ svg { display: block; }
   box-shadow: 0 10px 30px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.06);
 }
 .lf-bar button { width: 58px; height: 46px; border-radius: 999px; display: grid; place-items: center; color: var(--quiet); }
-.lf-bar button .lf-ic { width: 22px; height: 22px; }
+.lf-bar button .lf-ic { width: 20px; height: 20px; }
 .lf-bar button[aria-current="page"] { background: var(--card3); color: var(--ink); }
 
 .lf-live {
   position: fixed; left: 16px; right: 16px; bottom: calc(var(--safe-b) + 76px); z-index: 19; max-width: 520px; margin: 0 auto;
-  display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 16px; border-radius: 18px;
+  display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 14px; border-radius: 16px; font-size: 13px;
   background: #2a0e0c; box-shadow: inset 0 0 0 1px rgba(255,59,48,.35), 0 8px 24px rgba(0,0,0,.5);
   font-weight: 600; text-align: left;
 }
@@ -241,7 +241,7 @@ svg { display: block; }
 .lf-grab { height: 26px; flex: none; display: grid; place-items: center; touch-action: none; cursor: grab; }
 .lf-grab::after { content: ''; width: 38px; height: 5px; border-radius: 3px; background: #4a4a50; }
 .lf-sh-hd { display: flex; align-items: center; gap: 10px; padding: 0 20px 10px; touch-action: none; }
-.lf-sh-hd h2 { margin: 0; font-size: 20px; font-weight: 700; flex: 1; min-width: 0; letter-spacing: -.01em; }
+.lf-sh-hd h2 { margin: 0; font-size: 17px; font-weight: 700; flex: 1; min-width: 0; letter-spacing: -.01em; }
 .lf-sh-bd { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 4px 20px 20px; overscroll-behavior: contain; }
 .lf-sh-ft { flex: none; padding: 12px 20px calc(var(--safe-b) + 14px); border-top: 1px solid var(--line); display: flex; gap: 10px; }
 .lf-sh-ft > * { flex: 1; }
@@ -249,46 +249,46 @@ svg { display: block; }
 
 /* ── the session ── */
 .lf-ss-hd { display: flex; align-items: center; gap: 10px; }
-.lf-ss-name { flex: 1; min-width: 0; background: none; border: 0; outline: none; font-size: 22px; font-weight: 700; letter-spacing: -.01em; padding: 0; height: 44px; }
-.lf-ss-time { font-variant-numeric: tabular-nums; color: var(--dim); font-size: 15px; font-weight: 600; }
-.lf-ss-rest { font-size: 13px; color: var(--dim); margin: 0 0 6px; min-height: 18px; font-variant-numeric: tabular-nums; }
+.lf-ss-name { flex: 1; min-width: 0; background: none; border: 0; outline: none; font-size: 18px; font-weight: 700; letter-spacing: -.01em; padding: 0; height: 44px; }
+.lf-ss-time { font-variant-numeric: tabular-nums; color: var(--dim); font-size: 13px; font-weight: 600; }
+.lf-ss-rest { font-size: 12px; color: var(--dim); margin: 0 0 6px; min-height: 18px; font-variant-numeric: tabular-nums; }
 .lf-ex { background: var(--card); border-radius: var(--r); padding: 14px 14px 10px; margin-top: 12px; }
 .lf-ex-hd { display: flex; align-items: center; gap: 8px; }
-.lf-ex-hd button.lf-ex-n { flex: 1; min-width: 0; text-align: left; font-weight: 700; font-size: 17px; min-height: 44px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lf-set { display: grid; grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 44px; align-items: center; gap: 8px; min-height: 48px; }
-.lf-set.is-hd { min-height: 22px; font-size: 11px; color: var(--quiet); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.lf-ex-hd button.lf-ex-n { flex: 1; min-width: 0; text-align: left; font-weight: 600; font-size: 15px; min-height: 40px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lf-set { display: grid; grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 44px; align-items: center; gap: 8px; min-height: 44px; }
+.lf-set.is-hd { min-height: 20px; font-size: 10px; color: var(--quiet); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
 .lf-set.is-hd span:not(:first-child) { text-align: center; }
-.lf-set .lf-sn { font-weight: 700; color: var(--dim); text-align: center; font-size: 14px; }
-.lf-set .lf-prev { font-size: 13px; color: var(--quiet); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lf-set .lf-sn { font-weight: 700; color: var(--dim); text-align: center; font-size: 12.5px; }
+.lf-set .lf-prev { font-size: 12px; color: var(--quiet); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lf-set input {
-  width: 100%; height: 40px; border-radius: 12px; background: var(--card2); border: 1px solid transparent;
-  text-align: center; font-size: 16px; font-weight: 600; outline: none; font-variant-numeric: tabular-nums; -moz-appearance: textfield;
+  width: 100%; height: 36px; border-radius: 10px; background: var(--card2); border: 1px solid transparent;
+  text-align: center; font-size: 16px; font-weight: 500; outline: none; font-variant-numeric: tabular-nums; -moz-appearance: textfield;
 }
 .lf-set input::placeholder { color: #66666e; font-weight: 500; }
 .lf-set input:focus { border-color: rgba(255,255,255,.3); }
 .lf-set input::-webkit-inner-spin-button, .lf-set input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .lf-chk { width: 44px; height: 44px; display: grid; place-items: center; }
-.lf-chk span { width: 32px; height: 32px; border-radius: 10px; background: var(--card2); display: grid; place-items: center; color: #66666e; transition: background .15s, color .15s, transform .15s var(--ease); }
-.lf-chk span .lf-ic { width: 17px; height: 17px; stroke-width: 3; }
+.lf-chk span { width: 28px; height: 28px; border-radius: 9px; background: var(--card2); display: grid; place-items: center; color: #66666e; transition: background .15s, color .15s, transform .15s var(--ease); }
+.lf-chk span .lf-ic { width: 15px; height: 15px; stroke-width: 3; }
 .lf-set.is-done .lf-chk span { background: var(--log); color: #fff; }
 .lf-set.is-done input { background: rgba(255,59,48,.14); }
 .lf-set.is-done .lf-chk:active span { transform: scale(.9); }
 .lf-set .lf-sn.is-pr { color: #ffd60a; font-size: 11px; font-weight: 800; letter-spacing: .02em; }
 .lf-ex-ft { display: flex; gap: 8px; margin-top: 6px; }
-.lf-ex-ft button { flex: 1; min-height: 40px; border-radius: 12px; background: var(--card2); color: var(--dim); font-size: 14px; font-weight: 600; position: relative; }
+.lf-ex-ft button { flex: 1; min-height: 36px; border-radius: 10px; background: var(--card2); color: var(--dim); font-size: 12.5px; font-weight: 600; position: relative; }
 .lf-ex-ft button::before { content: ''; position: absolute; inset: -2px 0; }
-.lf-add { margin-top: 12px; width: 100%; min-height: 52px; border-radius: var(--r); border: 1.5px dashed rgba(255,255,255,.2); color: var(--dim); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.lf-add { margin-top: 12px; width: 100%; min-height: 46px; border-radius: var(--r); border: 1.5px dashed rgba(255,255,255,.2); color: var(--dim); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
 /* ── summary ── */
 .lf-sum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 6px 0 4px; }
 .lf-sum div { background: var(--card); border-radius: 16px; padding: 12px; text-align: center; }
-.lf-sum b { display: block; font-size: 20px; font-weight: 700; }
-.lf-sum span { font-size: 12px; color: var(--dim); }
+.lf-sum b { display: block; font-size: 16px; font-weight: 700; }
+.lf-sum span { font-size: 11px; color: var(--dim); }
 .lf-wo-ex { margin-top: 14px; }
 .lf-wo-ex b { font-weight: 600; }
-.lf-wo-ex div { font-size: 14px; color: var(--dim); margin-top: 4px; font-variant-numeric: tabular-nums; }
-.lf-hero { font-size: 56px; font-weight: 800; letter-spacing: -.03em; line-height: 1; margin-top: 4px; }
-.lf-hero + p { margin: 6px 0 0; font-size: 17px; font-weight: 600; }
+.lf-wo-ex div { font-size: 12.5px; color: var(--dim); margin-top: 4px; font-variant-numeric: tabular-nums; }
+.lf-hero { font-size: 40px; font-weight: 800; letter-spacing: -.03em; line-height: 1; margin-top: 4px; }
+.lf-hero + p { margin: 6px 0 0; font-size: 15px; font-weight: 600; }
 
 .lf-toast {
   position: fixed; left: 50%; bottom: calc(var(--safe-b) + 84px); z-index: 60; transform: translate(-50%, 12px); opacity: 0;
@@ -895,7 +895,7 @@ function lfFinish() {
   setTimeout(function () { lfSummary(w, prs); }, 260);
 }
 function lfSummary(w, prs) {
-  var b = el('<div><div class="lf-cap">Workout logged</div><div class="lf-hero" style="font-size:40px"></div><p class="lf-lab" style="font-size:14px;font-weight:400"></p></div>');
+  var b = el('<div><div class="lf-cap">Workout logged</div><div class="lf-hero" style="font-size:30px"></div><p class="lf-lab" style="font-size:14px;font-weight:400"></p></div>');
   $('.lf-hero', b).textContent = w.n;
   $('p', b).textContent = fmtDay(w.d) + (prs.length ? ' · new best on ' + prs.join(', ') : '');
   b.appendChild(lfSum([[fmtDur(w.e - w.s), 'time'], [woSets(w), 'sets'], [fmtBig(toDisp(woVol(w))), S.unit]]));
