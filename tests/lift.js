@@ -29,9 +29,9 @@ const freeze = (at) => `(() => {
 (async () => {
   const browser = await chromium.launch({ executablePath: chrome(), args: ['--no-sandbox'] });
   const errors = [], offOrigin = [];
-  async function ctx(seed) {
+  async function ctx(seed, at) {
     const c = await browser.newContext(PHONE);
-    await c.addInitScript(freeze('2026-10-30T18:00:00'));
+    await c.addInitScript(freeze(at || '2026-10-30T18:00:00'));
     if (seed) await c.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify(seed))}); })();`);
     const page = await c.newPage();
     page.on('pageerror', (e) => errors.push(String(e)));
@@ -47,7 +47,10 @@ const freeze = (at) => `(() => {
   /* ── a first open ── */
   const { c, page } = await ctx();
   ok('the home screen draws', await page.locator('#lfHome .lf-today').count() === 1);
-  ok('a first open has nothing to start but an empty workout', (await page.textContent('#lfPick')).trim() === 'Workout');
+  ok('a Friday opens on Lower C of the split', (await page.textContent('#lfPick')).trim() === 'Lower C' && /Leg hypertrophy/.test(await page.textContent('.lf-sub')));
+  ok('with its five exercises', /5 exercises/.test(await page.textContent('.lf-chips')));
+  const legs = await page.$$eval('#lfLegs .lf-vr', (r) => r.map((x) => x.dataset.m + ':' + x.querySelector('em').textContent));
+  ok('leg sets this week start at nought against the targets', legs.join() === 'Quads:0 / 13–16,Hamstrings:0 / 10,Glutes:0 / 5–8,Calves:0 / 9', legs);
   ok('three stat tiles, each nought', (await page.$$eval('.lf-stat b', (b) => b.map((x) => x.textContent))).join() === '0,0,0');
   const days = await page.$$eval('.lf-day', (d) => ({ n: d.length, now: d.filter((x) => x.classList.contains('is-now')).length, last: d[d.length - 1].dataset.d }));
   ok('the last 30 days are thirty marks ending today', days.n === 30 && days.now === 1 && days.last === '2026-10-30', days);
@@ -57,7 +60,12 @@ const freeze = (at) => `(() => {
 
   /* ── an exercise and a routine, made on the screens ── */
   await page.click('.lf-bar [data-v="lib"]');
-  ok('an empty library says so', /No exercises yet/.test(await page.textContent('#lfLib')));
+  const split = await page.$$eval('#lfSplit .lf-li b', (b) => b.map((x) => x.textContent));
+  ok('the split is seven days, Monday first', split.length === 7 && split[0] === 'Mon · Lower A' && split[6] === 'Sun · Shoulders + Arms', split);
+  await page.click('#lfSplit .lf-li >> nth=0'); await settle(page);
+  const mon = await top(page).textContent();
+  ok('a day of the split reads its sets × reps', mon.includes('Hack squat') && mon.includes('3 × 6–10') && mon.includes('1–2 RIR') && mon.includes('Standing calf raises'), mon.slice(0, 160));
+  await page.keyboard.press('Escape'); await settle(page);
   async function makeEx(name, muscle) {
     await page.click('#lfNewEx'); await settle(page);
     await page.fill('#lfExN', name);
@@ -67,8 +75,8 @@ const freeze = (at) => `(() => {
   await makeEx('Bench press', 'Chest');
   await makeEx('Overhead press', 'Shoulders');
   let s = await store(page);
-  ok('two exercises are on the record', s.ex.length === 2 && s.ex[0].m === 'Chest' && s.ex[1].m === 'Shoulders', s.ex);
-  ok('and in the library under their groups', (await page.$$eval('#lfLibList .lf-cap', (x) => x.map((e) => e.textContent))).join() === 'Chest,Shoulders');
+  ok('two exercises of your own are on the record', s.ex.length === 2 && s.ex[0].m === 'Chest' && s.ex[1].m === 'Shoulders', s.ex);
+  ok('and in the library beside the split\'s', await page.locator('#lfLibList .lf-li', { hasText: 'Bench press' }).count() === 1 && await page.locator('#lfLibList .lf-li', { hasText: 'Romanian deadlift' }).count() === 1);
 
   await page.click('#lfNewRt'); await settle(page);
   await page.fill('#lfRtN', 'Push'); await page.fill('#lfRtS', 'Push, Pull, Legs');
@@ -79,10 +87,12 @@ const freeze = (at) => `(() => {
   await top(page).locator('button', { hasText: 'Save' }).click(); await settle(page);
   s = await store(page);
   ok('a routine holds its exercises in order', s.rt.length === 1 && s.rt[0].n === 'Push' && s.rt[0].ex.join() === s.ex.map((e) => e.id).join(), s.rt);
-  ok('and becomes today', s.today === s.rt[0].id);
 
   /* ── the workout comes up from the bottom ── */
   await page.click('.lf-bar [data-v="home"]');
+  await page.click('#lfPick'); await settle(page);
+  await top(page).locator('.lf-li', { hasText: 'Push, Pull, Legs' }).click(); await settle(page);
+  ok('picking a routine makes it today, for today', (await store(page)).pick.d === '2026-10-30');
   ok('today is the routine', (await page.textContent('#lfPick')).trim() === 'Push' && /Push, Pull, Legs/.test(await page.textContent('.lf-sub')));
   ok('and says two exercises', /2 exercises/.test(await page.textContent('.lf-chips')));
   await page.click('#lfGo');
@@ -101,7 +111,7 @@ const freeze = (at) => `(() => {
   await set(0, 0).locator('input').nth(0).fill('60'); await set(0, 0).locator('input').nth(1).fill('8');
   await set(0, 0).locator('.lf-chk').click();
   ok('logging a set turns its check red', await set(0, 0).locator('.lf-chk span').evaluate((e) => getComputedStyle(e).backgroundColor) === 'rgb(255, 59, 48)');
-  ok('and starts the rest clock', /^Rest 0:0\d$/.test((await page.textContent('#lfRest')).trim()));
+  ok('and starts the rest clock', /^Rest 0:0\d · target 60–120s$/.test((await page.textContent('#lfRest')).trim()));
   await set(0, 1).locator('input').nth(0).fill('60'); await set(0, 1).locator('input').nth(1).fill('7');
   await set(0, 1).locator('.lf-chk').click();
   await set(1, 0).locator('input').nth(0).fill('40'); await set(1, 0).locator('input').nth(1).fill('10');
@@ -181,6 +191,40 @@ const freeze = (at) => `(() => {
   ok('nothing leaves this phone', offOrigin.length === 0, offOrigin);
   ok('nothing threw', errors.length === 0, errors);
   await c.close();
+
+  /* ── the split: a Monday, with last Monday on the record ── */
+  {
+    const last = (reps) => ({ unit: 'kg', goal: 4, ex: [], rt: [], bw: [],
+      wo: [{ id: 'm1', d: '2026-10-26', s: 1, e: 2, n: 'Lower A', rt: 'p-mon', x: [
+        { id: 'hack', n: 'Hack squat', sets: reps.map((r) => ({ w: 80, r })) },
+        { id: 'squat', n: 'Barbell squat', sets: [{ w: 100, r: 6 }, { w: 100, r: 6 }, { w: 100, r: 6 }] }] }] });
+    {
+      const { c, page } = await ctx(last([8, 8, 7]), '2026-11-02T07:00:00');
+      ok('a Monday opens on Lower A', (await page.textContent('#lfPick')).trim() === 'Lower A');
+      await page.click('#lfGo'); await settle(page);
+      const ex = page.locator('.lf-session .lf-ex').first();
+      ok('the set count is the program\'s', await ex.locator('.lf-set:not(.is-hd)').count() === 3);
+      ok('the target is written under the name', (await ex.locator('.lf-tg').textContent()) === '3 × 6–10 · 1–2 RIR · rest 2–3 min');
+      const ph = await ex.locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.placeholder));
+      ok('under the top of the range, the aim is the same weight and one more rep', ph.join() === '80,9,80,9,80,8', ph);
+      ok('and it says so', (await ex.locator('.lf-aim').textContent()).includes('one more rep'));
+      await ex.locator('.lf-chk').first().click();
+      ok('ticking an empty set logs the aim', (await ex.locator('.lf-set:not(.is-hd) input').nth(1).inputValue()) === '9');
+      ok('the rest clock names its target', /target 2–3 min/.test(await page.textContent('#lfRest')));
+      await page.keyboard.press('Escape'); await settle(page);
+      ok('a ticked set counts toward the week\'s quads straight away', (await page.textContent('#lfLegs [data-m="Quads"] em')).startsWith('1 /'));
+      await c.close();
+    }
+    {
+      const { c, page } = await ctx(last([10, 10, 10]), '2026-11-02T07:00:00');
+      await page.click('#lfGo'); await settle(page);
+      const ex = page.locator('.lf-session .lf-ex').first();
+      const ph = await ex.locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.placeholder));
+      ok('ten on every set moves the weight up 2.5 and the reps back to six', ph.join() === '82.5,6,82.5,6,82.5,6', ph);
+      ok('and says go up', (await ex.locator('.lf-aim').textContent()).includes('go up to 82.5'));
+      await c.close();
+    }
+  }
 
   /* ── a damaged record is repaired, never thrown away ── */
   {

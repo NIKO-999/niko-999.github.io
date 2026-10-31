@@ -133,6 +133,19 @@ svg { display: block; }
 .lf-bars .is-now i { background: var(--ink); }
 .lf-pct { font-size: 11px; font-weight: 600; color: var(--good); }
 
+/* ── weekly sets ── */
+.lf-vol { display: flex; flex-direction: column; gap: 9px; margin-top: 12px; }
+.lf-vr { display: grid; grid-template-columns: 82px minmax(0, 1fr) 64px; align-items: center; gap: 10px; font-size: 12.5px; }
+.lf-vr span { color: var(--dim); }
+.lf-vr i { display: block; height: 6px; border-radius: 3px; background: var(--card3); overflow: hidden; }
+.lf-vr i b { display: block; height: 100%; background: #c9c9ce; border-radius: 3px; }
+.lf-vr.is-met i b { background: var(--good); }
+.lf-vr em { font-style: normal; text-align: right; color: var(--dim); }
+.lf-tg { font-size: 12px; color: var(--dim); margin: -6px 0 2px; }
+.lf-aim { font-size: 12px; color: var(--ink); margin: 2px 0 6px; }
+.lf-aim.is-up { color: var(--good); }
+.lf-ss-rest.is-ready { color: var(--good); }
+
 /* ── body weight ── */
 .lf-bw { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
 .lf-bw .lf-big { font-size: 19px; }
@@ -338,14 +351,56 @@ svg { display: block; }
    lose it) and lift.view.v1 (which tab you were on).
    ═══════════════════════════════════════════════════════════════ */
 
-/* THE EXERCISE LIST. Empty on purpose: it is the one thing still to
-   come. Each entry is { id, n, m, t }: a stable id that never changes
-   once a workout names it, the name, the muscle group (one of MUSCLES)
-   and the type — 'w' for a weight and reps, 'bw' for bodyweight reps
-   with optional added weight. Ids are what history is keyed by, so a
-   name can be corrected later and every past session follows. */
-var EXERCISES = [];
-var MUSCLES = ['Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Core', 'Cardio', 'Other'];
+/* THE EXERCISE LIST. Each entry is { id, n, m, t, c }: a stable id
+   that never changes once a workout names it, the name, the PRIMARY
+   muscle (one of MUSCLES — what the weekly set count is credited to),
+   the type ('w' weight × reps, 'bw' bodyweight with optional added
+   weight) and c: 1 for a compound. Ids are what history is keyed by,
+   so a name can be corrected later and every past session follows.
+
+   Bulgarian split squats count to GLUTES and the RDL to HAMSTRINGS,
+   which is the arithmetic the weekly targets were written against:
+   quads 16, hamstrings 10, glutes 5, calves 9 as programmed. */
+var EXERCISES = [
+  ['hack', 'Hack squat', 'Quads', 1], ['squat', 'Barbell squat', 'Quads', 1], ['legext', 'Leg extensions', 'Quads'],
+  ['legpress', 'Leg press', 'Quads', 1],
+  ['rdl', 'Romanian deadlift', 'Hamstrings', 1], ['seatcurl', 'Seated leg curls', 'Hamstrings'], ['lyingcurl', 'Lying leg curls', 'Hamstrings'],
+  ['hipthrust', 'Hip thrusts', 'Glutes', 1], ['bss', 'Bulgarian split squats', 'Glutes', 1],
+  ['calfstand', 'Standing calf raises', 'Calves'], ['calfseat', 'Seated calf raises', 'Calves'], ['calf', 'Calf raises', 'Calves'],
+  ['incdb', 'Incline dumbbell press', 'Chest', 1], ['mchest', 'Machine chest press', 'Chest', 1], ['incmach', 'Incline machine press', 'Chest', 1],
+  ['pecdeck', 'Pec deck', 'Chest'], ['cfly', 'Cable chest flyes', 'Chest'],
+  ['pullup', 'Weighted pull-ups', 'Back', 1, 'bw'], ['latpd', 'Lat pulldowns', 'Back', 1], ['csrow', 'Chest-supported rows', 'Back', 1],
+  ['seatrow', 'Seated cable rows', 'Back', 1], ['sarow', 'Single-arm cable rows', 'Back'],
+  ['mshp', 'Machine shoulder press', 'Shoulders', 1], ['cablat', 'Cable lateral raises', 'Shoulders'], ['latraise', 'Lateral raises', 'Shoulders'],
+  ['rdfly', 'Rear delt flyes', 'Shoulders'],
+  ['incurl', 'Incline dumbbell curls', 'Biceps'], ['hammer', 'Hammer curls', 'Biceps'], ['curl', 'Biceps curls', 'Biceps'],
+  ['preacher', 'Preacher curls', 'Biceps'], ['ropeham', 'Rope hammer curls', 'Biceps'],
+  ['tripush', 'Triceps pushdowns', 'Triceps'], ['ropepush', 'Rope triceps pushdowns', 'Triceps'], ['triover', 'Overhead triceps extensions', 'Triceps'],
+  ['ohcable', 'Overhead cable extensions', 'Triceps'], ['triext', 'Triceps extensions', 'Triceps']
+].map(function (a) { return { id: a[0], n: a[1], m: a[2], c: a[3] ? 1 : 0, t: a[4] || 'w' }; });
+/* Arms and Legs stay on the list so an exercise you made before the
+   split arrived still reads; the program itself uses the finer groups. */
+var MUSCLES = ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Core', 'Arms', 'Legs', 'Cardio', 'Other'];
+
+/* THE SPLIT. Seven days, each exercise as [id, sets, low reps, high
+   reps]. dow is the JavaScript weekday (Sunday 0), so today opens on
+   its own day without anything to choose. Code, like the list above:
+   only your logged days are data. */
+var PROGRAM = [
+  { id: 'p-mon', dow: 1, n: 'Lower A', sp: 'Heavy quads', ex: [['hack', 3, 6, 10], ['squat', 3, 6, 10], ['legext', 3, 12, 15], ['calfstand', 3, 10, 15]] },
+  { id: 'p-tue', dow: 2, n: 'Upper A', sp: 'Push', ex: [['incdb', 3, 8, 12], ['mchest', 3, 8, 12], ['cablat', 4, 12, 20], ['pecdeck', 2, 12, 15], ['tripush', 3, 10, 15], ['triover', 2, 10, 15]] },
+  { id: 'p-wed', dow: 3, n: 'Lower B', sp: 'Hamstrings / glutes', ex: [['rdl', 3, 6, 10], ['seatcurl', 4, 10, 15], ['hipthrust', 3, 8, 12], ['bss', 2, 10, 12], ['calfseat', 3, 12, 20]] },
+  { id: 'p-thu', dow: 4, n: 'Upper B', sp: 'Pull', ex: [['pullup', 3, 8, 12], ['csrow', 3, 8, 12], ['seatrow', 2, 10, 12], ['rdfly', 3, 15, 20], ['incurl', 3, 10, 12], ['hammer', 2, 10, 15]] },
+  { id: 'p-fri', dow: 5, n: 'Lower C', sp: 'Leg hypertrophy', ex: [['legpress', 3, 10, 15], ['hack', 2, 10, 12], ['legext', 2, 12, 20], ['lyingcurl', 3, 10, 15], ['calf', 3, 12, 20]] },
+  { id: 'p-sat', dow: 6, n: 'Upper C', sp: 'Upper-body volume', ex: [['incmach', 3, 8, 12], ['latpd', 3, 8, 12], ['cfly', 2, 12, 15], ['sarow', 2, 10, 12], ['latraise', 3, 15, 20], ['curl', 2, 12, 15], ['triext', 2, 12, 15]] },
+  { id: 'p-sun', dow: 0, n: 'Shoulders + Arms', sp: 'Lower fatigue', ex: [['mshp', 2, 8, 12], ['cablat', 3, 15, 20], ['rdfly', 2, 15, 20], ['preacher', 3, 10, 15], ['ropeham', 2, 12, 15], ['ropepush', 3, 10, 15], ['ohcable', 2, 12, 15]] }
+].map(function (d) { return { id: d.id, dow: d.dow, n: d.n, sp: d.sp, fixed: 1, ex: d.ex.map(function (e) { return e[0]; }), tg: d.ex.reduce(function (o, e) { o[e[0]] = [e[1], e[2], e[3]]; return o; }, {}) }; });
+var DOW_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+/* Direct working sets a week, Monday to Sunday, by primary muscle. */
+var WEEK_TARGETS = [['Quads', 13, 16], ['Hamstrings', 10, 10], ['Glutes', 5, 8], ['Calves', 9, 9]];
+/* Rest and effort by kind of movement. */
+function lfRestOf(id) { var e = exById(id); return e && e.c ? { lo: 120, hi: 180, rir: '1–2 RIR' } : { lo: 60, hi: 120, rir: '0–1 RIR last set' }; }
 
 var KEY = 'lift.v1', ACTK = 'lift.active.v1', VIEWK = 'lift.view.v1';
 var LB = 0.45359237;
@@ -380,7 +435,7 @@ var DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 var MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 /* ═══════════ STORE ═══════════ */
-function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, today: null }; }
+function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null }; }
 function num(v) { var n = +v; return isFinite(n) && n >= 0 ? n : null; }
 
 /* A damaged record is REPAIRED, never thrown away: a bad set costs the
@@ -398,7 +453,9 @@ function lfClean(o) {
   if (Array.isArray(o.wo)) d.wo = o.wo.map(lfCleanWo).filter(Boolean);
   if (Array.isArray(o.bw)) d.bw = o.bw.filter(function (b) { return b && /^\d{4}-\d\d-\d\d$/.test(b.d) && num(b.kg); })
     .map(function (b) { return { d: b.d, kg: +b.kg }; }).sort(function (a, b) { return a.d < b.d ? -1 : 1; });
-  d.today = typeof o.today === 'string' ? o.today : null;
+  /* Today's choice of routine is for TODAY: a pick from yesterday must
+     not keep yesterday's day open tomorrow. */
+  d.pick = o.pick && typeof o.pick.id === 'string' && /^\d{4}-\d\d-\d\d$/.test(o.pick.d) ? { d: o.pick.d, id: o.pick.id } : null;
   return d;
 }
 function lfCleanWo(w) {
@@ -441,7 +498,8 @@ var act = lfLoadAct();
 function allEx() { return EXERCISES.concat(S.ex); }
 function exById(id) { var a = allEx(); for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
 function exName(id, fallback) { var e = exById(id); return e ? e.n : (fallback || 'Exercise'); }
-function rtById(id) { for (var i = 0; i < S.rt.length; i++) if (S.rt[i].id === id) return S.rt[i]; return null; }
+function allRt() { return PROGRAM.concat(S.rt); }
+function rtById(id) { var a = allRt(); for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
 function woSorted() { return S.wo.slice().sort(function (a, b) { return a.d === b.d ? a.s - b.s : (a.d < b.d ? -1 : 1); }); }
 function woOn(d) { return S.wo.filter(function (w) { return w.d === d; }); }
 
@@ -578,13 +636,19 @@ function lfToast(msg, undo) {
 function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 12); } catch (e) {} }
 
 /* ═══════════ HOME ═══════════ */
-function lfToday() { return rtById(S.today) || S.rt[0] || null; }
+function lfToday() {
+  var t = today();
+  if (S.pick && S.pick.d === ymd(t) && rtById(S.pick.id)) return rtById(S.pick.id);
+  for (var i = 0; i < PROGRAM.length; i++) if (PROGRAM[i].dow === t.getDay()) return PROGRAM[i];
+  return null;
+}
 
 function lfRenderHome() {
   var root = $('#lfHome'); root.textContent = '';
   root.appendChild(lfTodayCard());
   root.appendChild(lfStatRow());
   root.appendChild(lfGridCard());
+  root.appendChild(lfLegCard());
   var r = el('<div class="lf-row"></div>'); r.appendChild(lfVolCard()); r.appendChild(lfWeekCard());
   root.appendChild(r);
   root.appendChild(lfBwCard());
@@ -616,8 +680,12 @@ function lfTodayCard() {
 /* The estimate is your own average for this routine once there is one,
    and 13.5 minutes an exercise until then. */
 function lfEstMin(rt, n) {
+  if (rt && rt.tg) {
+    var own = S.wo.filter(function (x) { return x.rt === rt.id && x.e - x.s >= 5 * 60000; });
+    if (!own.length) return Math.round(rt.ex.reduce(function (a, id) { var r = lfRestOf(id); return a + rt.tg[id][0] * ((r.lo + r.hi) / 2 + 40); }, 0) / 60);
+  }
   if (rt) {
-    var w = S.wo.filter(function (x) { return x.rt === rt.id && x.e > x.s; });
+    var w = S.wo.filter(function (x) { return x.rt === rt.id && x.e - x.s >= 5 * 60000; });
     if (w.length) return Math.round(w.reduce(function (a, x) { return a + (x.e - x.s); }, 0) / w.length / 60000);
   }
   return Math.round((n || 0) * 13.5);
@@ -651,6 +719,30 @@ function lfThirtySheet() {
   var s = lfSum([[c.wo, 'workouts'], [c.sets, 'sets'], [fmtBig(toDisp(c.vol)), S.unit + ' moved']]);
   s.style.marginTop = '12px'; b.appendChild(s);
   lfSheet({ title: '', body: b });
+}
+
+/* This week's direct working sets against the targets, by primary
+   muscle. The bar fills to the top of the range; past it is a fact,
+   never a warning — the advice is to EARN more volume, not to fear it. */
+function lfMuscleSets(from, to) {
+  var a = ymd(from), b = ymd(to), out = {};
+  S.wo.forEach(function (w) { if (w.d >= a && w.d <= b) w.x.forEach(function (e) { var x = exById(e.id); if (x) out[x.m] = (out[x.m] || 0) + e.sets.length; }); });
+  if (act) act.x.forEach(function (e) { var x = exById(e.id); if (x && ymd(new Date(act.s)) >= a) out[x.m] = (out[x.m] || 0) + e.sets.filter(function (s) { return s.ok; }).length; });
+  return out;
+}
+function lfLegCard() {
+  var m = monday(today()), got = lfMuscleSets(m, addDays(m, 6));
+  var c = el('<div class="lf-card" id="lfLegs"><div class="lf-hd"><span class="lf-lab">Leg sets this week</span><span class="lf-lab">target</span></div><div class="lf-vol"></div></div>');
+  WEEK_TARGETS.forEach(function (t) {
+    var n = got[t[0]] || 0, row = el('<div class="lf-vr"><span></span><i><b></b></i><em class="lf-num"></em></div>');
+    row.dataset.m = t[0];
+    $('span', row).textContent = t[0];
+    $('b', row).style.width = Math.min(100, n / t[2] * 100) + '%';
+    if (n >= t[1]) row.classList.add('is-met');
+    $('em', row).textContent = n + ' / ' + lfRange(t[1], t[2]);
+    $('.lf-vol', c).appendChild(row);
+  });
+  return c;
 }
 
 function lfGridCard() {
@@ -697,7 +789,7 @@ function lfWeekCard(inSheet) {
   var c = el('<div class="lf-card"' + (inSheet ? '' : ' id="lfWeek"') + '><div class="lf-lab" style="display:flex;gap:6px;align-items:center">' + IC.dumb + 'This week</div><div class="lf-hd"><div class="lf-big lf-num"></div><span class="lf-pct"></span></div><div class="lf-bars" aria-hidden="true"></div></div>');
   if (inSheet) c.style.background = 'var(--card)';
   $('.lf-big', c).innerHTML = tot + '<small>reps</small>';
-  if (last > 0) { var p = Math.round((tot - last) / last * 100); $('.lf-pct', c).textContent = (p >= 0 ? '+' : '') + p + '%'; if (p < 0) $('.lf-pct', c).style.color = 'var(--dim)'; }
+  if (last > 0 && tot > 0) { var p = Math.round((tot - last) / last * 100); $('.lf-pct', c).textContent = (p >= 0 ? '+' : '') + p + '%'; if (p < 0) $('.lf-pct', c).style.color = 'var(--dim)'; }
   var max = Math.max.apply(null, reps.map(function (x) { return x.r; }).concat([1]));
   var bars = $('.lf-bars', c);
   reps.forEach(function (x, i) {
@@ -761,17 +853,41 @@ var sessSheet = null, tick = null;
 
 function lfStart(rt) {
   act = { id: lfId(), s: Date.now(), n: rt ? rt.n : 'Workout', rt: rt ? rt.id : null, rest: 0, x: [] };
-  (rt ? rt.ex : []).forEach(function (id) { if (exById(id)) lfAddEx(id); });
+  (rt ? rt.ex : []).forEach(function (id) { if (exById(id)) lfAddEx(id, rt.tg && rt.tg[id]); });
   lfSaveAct(); buzz(15);
   lfRender(); lfOpenSession();
 }
-/* A new exercise comes in with as many sets as last time, empty, with
-   last time's numbers as the placeholders. Three if it is new to you. */
-function lfAddEx(id) {
-  var prev = lastFor(id), n = prev ? prev.length : 3, sets = [];
+/* A new exercise comes in with the program's set count, or as many as
+   last time, or three if it is new to you — empty, with the AIM as the
+   placeholders. */
+function lfAddEx(id, tg) {
+  var prev = lastFor(id), n = tg ? tg[0] : (prev ? prev.length : 3), sets = [];
   for (var i = 0; i < n; i++) sets.push({ w: '', r: '', ok: 0 });
-  act.x.push({ id: id, n: exName(id), sets: sets });
+  var e = { id: id, n: exName(id), sets: sets };
+  if (tg) e.tg = tg;
+  act.x.push(e);
 }
+
+/* DOUBLE PROGRESSION, worked out rather than remembered. Every set of
+   last time at the TOP of the range → the weight goes up a step and the
+   reps start again at the bottom. Otherwise the same weight, one more
+   rep, capped at the top. With no range it is simply last time again.
+   The step is 2.5 kg, or 5 lb, because that is the plate you have. */
+function lfAim(e) {
+  var last = lastFor(e.id);
+  if (!last || !last.length) return { sets: [], note: e.tg ? 'First time — find a weight you can do ' + e.tg[1] + '–' + e.tg[2] + ' with' : '' };
+  var top = last.reduce(function (a, s) { return s.w > a.w ? s : a; }, last[0]);
+  if (!e.tg) return { sets: last, note: '' };
+  var lo = e.tg[1], hi = e.tg[2];
+  if (last.every(function (s) { return s.r >= hi; })) {
+    var step = S.unit === 'lb' ? 5 * LB : 2.5, w = top.w + step;
+    return { up: 1, sets: last.map(function () { return { w: w, r: lo }; }), note: 'Hit ' + hi + ' on every set — go up to ' + fmtW(w) + ' ' + S.unit };
+  }
+  var sets = last.map(function (s) { return { w: s.w, r: Math.min(hi, Math.max(lo, s.r + 1)) }; });
+  return { sets: sets, note: 'Same weight, one more rep — aim ' + fmtW(sets[0].w) + ' × ' + sets[0].r };
+}
+function lfRange(a, b) { return a === b ? String(a) : a + '–' + b; }
+function lfRestTxt(r) { return r.hi <= 120 ? lfRange(r.lo, r.hi) + 's' : lfRange(r.lo / 60, r.hi / 60) + ' min'; }
 
 function lfOpenSession() {
   if (!act) return;
@@ -798,7 +914,12 @@ function lfOpenSession() {
 function lfTick() {
   if (!act) return;
   var c = $('#lfClock'); if (c) c.textContent = fmtClock(Date.now() - act.s);
-  var r = $('#lfRest'); if (r) r.textContent = act.rest ? 'Rest ' + fmtClock(Date.now() - act.rest) : '';
+  var r = $('#lfRest');
+  if (r) {
+    var gone = Date.now() - act.rest, rt = act.restEx ? lfRestOf(act.restEx) : null;
+    r.textContent = act.rest ? 'Rest ' + fmtClock(gone) + (rt ? ' · target ' + lfRestTxt(rt) : '') : '';
+    r.classList.toggle('is-ready', !!(act.rest && rt && gone >= rt.lo * 1000));
+  }
   var l = $('#lfLive em'); if (l) l.textContent = fmtClock(Date.now() - act.s);
 }
 
@@ -810,10 +931,18 @@ function lfPaintSession() {
   act.x.forEach(function (e, ei) {
     var prev = lastFor(e.id) || [];
     var best = bestFor(e.id);
+    var aim = lfAim(e);
     var card = el('<div class="lf-ex"><div class="lf-ex-hd"><button type="button" class="lf-ex-n"></button><button type="button" class="lf-x" aria-label="Remove exercise">' + IC.x + '</button></div>'
+      + '<div class="lf-tg"></div><div class="lf-aim"></div>'
       + '<div class="lf-set is-hd" aria-hidden="true"><span>Set</span><span>Last</span><span>' + S.unit + '</span><span>Reps</span><span></span></div></div>');
     card.dataset.ex = e.id;
     $('.lf-ex-n', card).textContent = e.n;
+    var rs = lfRestOf(e.id);
+    $('.lf-tg', card).textContent = e.tg ? e.tg[0] + ' × ' + lfRange(e.tg[1], e.tg[2]) + ' · ' + rs.rir + ' · rest ' + lfRestTxt(rs) : '';
+    $('.lf-aim', card).textContent = aim.note;
+    $('.lf-aim', card).classList.toggle('is-up', !!aim.up);
+    if (!e.tg) $('.lf-tg', card).remove();
+    if (!aim.note) $('.lf-aim', card).remove();
     $('.lf-ex-n', card).addEventListener('click', function () { lfExSheet(e.id); });
     $('.lf-x', card).addEventListener('click', function () {
       var go = function () { act.x.splice(ei, 1); lfSaveAct(); lfPaintSession(); };
@@ -822,6 +951,7 @@ function lfPaintSession() {
     var runBest = best;
     e.sets.forEach(function (s, si) {
       var p = prev[si] || prev[prev.length - 1];
+      var g = aim.sets[si] || aim.sets[aim.sets.length - 1];
       var row = el('<div class="lf-set"><span class="lf-sn"></span><span class="lf-prev lf-num"></span><input type="text" inputmode="decimal" autocomplete="off" /><input type="text" inputmode="numeric" autocomplete="off" /><button type="button" class="lf-chk"><span>' + IC.check + '</span></button></div>');
       row.classList.toggle('is-done', !!s.ok);
       $('.lf-sn', row).textContent = si + 1;
@@ -829,7 +959,7 @@ function lfPaintSession() {
       var wi = $$('input', row)[0], ri = $$('input', row)[1];
       wi.setAttribute('aria-label', 'Set ' + (si + 1) + ' weight in ' + S.unit);
       ri.setAttribute('aria-label', 'Set ' + (si + 1) + ' reps');
-      wi.placeholder = p ? fmtW(p.w) : S.unit; ri.placeholder = p ? String(p.r) : 'reps';
+      wi.placeholder = g ? fmtW(g.w) : S.unit; ri.placeholder = g ? String(g.r) : (e.tg ? lfRange(e.tg[1], e.tg[2]) : 'reps');
       if (s.w !== '' && s.w != null) wi.value = fmtW(s.w);
       if (s.r !== '' && s.r != null) ri.value = s.r;
       wi.addEventListener('input', function () { var v = parseFloat(wi.value); s.w = isFinite(v) && v >= 0 ? fromDisp(v) : ''; lfSaveAct(); });
@@ -840,17 +970,17 @@ function lfPaintSession() {
       if (s.ok && s.pr) { $('.lf-sn', row).textContent = 'PR'; $('.lf-sn', row).classList.add('is-pr'); }
       chk.addEventListener('click', function () {
         if (s.ok) { s.ok = 0; s.pr = 0; lfSaveAct(); lfPaintSession(); return; }
-        /* An empty field takes last time's figure: pressing the check on
-           a set you repeated exactly is the whole of logging it. */
-        if (s.w === '' || s.w == null) s.w = p ? p.w : (exById(e.id) && exById(e.id).t === 'bw' ? 0 : '');
-        if (s.r === '' || s.r == null) s.r = p ? p.r : '';
+        /* An empty field takes the AIM: pressing the check on a set you
+           hit exactly as planned is the whole of logging it. */
+        if (s.w === '' || s.w == null) s.w = g ? g.w : (exById(e.id) && exById(e.id).t === 'bw' ? 0 : '');
+        if (s.r === '' || s.r == null) s.r = g ? g.r : '';
         if (s.w === '' || s.r === '' || !(s.r > 0)) { lfToast('Put in the weight and reps first'); (s.w === '' ? wi : ri).focus(); return; }
         s.ok = 1;
         /* A PR is a set whose estimated one-rep max beats everything
            before it, this session's earlier sets included. */
         var est = e1rm(s.w, s.r);
         s.pr = est > runBestBefore(e, si, best) + 1e-9 && best > 0 ? 1 : 0;
-        act.rest = Date.now();
+        act.rest = Date.now(); act.restEx = e.id;
         lfSaveAct(); buzz(s.pr ? [20, 40, 20] : 14); lfPaintSession(); lfTick();
       });
       card.appendChild(row);
@@ -1007,8 +1137,8 @@ function lfRoutinePicker() {
     li.addEventListener('click', fn); b.appendChild(li);
   }
   var cur = lfToday();
-  S.rt.forEach(function (r) {
-    item(r.n, r.sp || (r.ex.length + ' exercises'), cur && cur.id === r.id, function () { S.today = r.id; lfSave(); s.close(true); lfRender(); });
+  allRt().forEach(function (r) {
+    item(r.n, (r.fixed ? DOW_LONG[r.dow] + ' · ' : '') + (r.sp || (r.ex.length + ' exercises')), cur && cur.id === r.id, function () { S.pick = { d: ymd(today()), id: r.id }; lfSave(); s.close(true); lfRender(); });
   });
   item('Empty workout', 'Add exercises as you go', false, function () { s.close(true); lfStart(null); });
   item('New routine', 'A named list of exercises you repeat', false, function () { s.close(true); lfRoutineForm(null); });
@@ -1040,24 +1170,55 @@ function lfRoutineForm(rt) {
   save.addEventListener('click', function () {
     var n = $('#lfRtN', b).value.trim();
     if (!n) { $('#lfRtN', b).focus(); return; }
-    if (!rt) { rt = { id: lfId() }; S.rt.push(rt); if (!S.today) S.today = rt.id; }
+    if (!rt) { rt = { id: lfId() }; S.rt.push(rt); }
     rt.n = n; rt.sp = $('#lfRtS', b).value.trim(); rt.ex = draft;
     lfSave(); s.close(true); lfRender();
   });
   if (rt && del) del.addEventListener('click', function () {
     var snap = JSON.stringify(S);
-    S.rt = S.rt.filter(function (r) { return r !== rt; }); if (S.today === rt.id) S.today = null;
+    S.rt = S.rt.filter(function (r) { return r !== rt; }); if (S.pick && S.pick.id === rt.id) S.pick = null;
     lfSave(); s.close(true); lfRender();
     lfToast('Deleted ' + rt.n, function () { S = lfClean(JSON.parse(snap)); lfSave(); lfRender(); });
   });
+}
+
+/* A day of the split, read before you start it. */
+function lfDaySpec(rt) {
+  var b = el('<div><p class="lf-lab" style="margin:0 0 6px"></p><div class="lf-list"></div></div>');
+  $('p', b).textContent = DOW_LONG[rt.dow] + ' · ' + rt.sp;
+  rt.ex.forEach(function (id) {
+    var t = rt.tg[id], rs = lfRestOf(id), last = lastFor(id);
+    var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div><span class="lf-li-r lf-num"></span></button>');
+    $('b', li).textContent = exName(id);
+    $('span', li).textContent = rs.rir + ' · rest ' + lfRestTxt(rs) + (last ? ' · last ' + fmtW(last[0].w) + '×' + last[0].r : '');
+    $('.lf-li-r', li).textContent = t[0] + ' × ' + lfRange(t[1], t[2]);
+    li.addEventListener('click', function () { lfExSheet(id); });
+    $('.lf-list', b).appendChild(li);
+  });
+  var go = el('<button type="button" class="lf-btn is-log is-full"></button>');
+  go.textContent = act ? 'A workout is already running' : 'Start ' + rt.n;
+  go.disabled = !!act;
+  var s = lfSheet({ title: rt.n, body: b, foot: [go] });
+  go.addEventListener('click', function () { s.close(true); lfStart(rt); });
 }
 
 var libQ = '';
 function lfRenderLib() {
   var root = $('#lfLib'); root.textContent = '';
   root.appendChild(el('<h2 class="lf-h1">Exercises</h2>'));
+  /* the split, Monday first */
+  root.appendChild(el('<div class="lf-cap lf-gh">Your split</div>'));
+  var pc = el('<div class="lf-card" style="padding:4px 16px" id="lfSplit"><div class="lf-list"></div></div>');
+  PROGRAM.slice().sort(function (a, b) { return ((a.dow + 6) % 7) - ((b.dow + 6) % 7); }).forEach(function (r) {
+    var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div>' + IC.chev + '</button>');
+    $('b', li).textContent = DOW_LONG[r.dow].slice(0, 3) + ' · ' + r.n;
+    $('span', li).textContent = r.sp + ' · ' + r.ex.length + ' exercises';
+    li.addEventListener('click', function () { lfDaySpec(r); });
+    $('.lf-list', pc).appendChild(li);
+  });
+  root.appendChild(pc);
   /* routines */
-  root.appendChild(el('<div class="lf-cap lf-gh">Routines</div>'));
+  root.appendChild(el('<div class="lf-cap lf-gh">Your routines</div>'));
   var rc = el('<div class="lf-card" style="padding:4px 16px"><div class="lf-list"></div></div>');
   S.rt.forEach(function (r) {
     var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div>' + IC.chev + '</button>');
