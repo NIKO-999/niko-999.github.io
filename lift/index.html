@@ -324,28 +324,11 @@ svg { display: block; }
 .lf-hero + p { margin: 6px 0 0; font-size: 15px; font-weight: 600; }
 
 /* ── how it's done ── */
-.lf-how-h { margin: -14px; }
-.lf-how-h button { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 48px; padding: 0 14px; text-align: left; font-size: 13px; font-weight: 600; }
-.lf-how-h span { flex: 1; }
-.lf-how-h em { font-style: normal; font-weight: 400; color: var(--dim); font-size: 12px; }
-.lf-how-h .lf-chev { transform: rotate(90deg); transition: transform .2s var(--ease); }
-.lf-how.is-open .lf-how-h .lf-chev { transform: rotate(270deg); }
-.lf-how.is-open .lf-how-h { margin-bottom: 0; }
-.lf-how-lk { margin-top: 10px; }
-.lf-how-row { display: flex; align-items: center; gap: 6px; }
-.lf-how-row .lf-btn { flex: 1; text-decoration: none; }
-.lf-how-g { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
-.lf-how-g:empty { display: none; }
-.lf-how-t { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: var(--card2); }
-.lf-how-t img, .lf-how-t video { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
-.lf-how-play { position: absolute; inset: 0; display: grid; place-items: center; }
-.lf-how-play svg { width: 26px; height: 26px; fill: #fff; filter: drop-shadow(0 1px 4px rgba(0,0,0,.6)); }
-.lf-how-add { margin-top: 10px; cursor: pointer; }
-.lf-view { position: fixed; inset: 0; z-index: 80; background: #000; display: flex; flex-direction: column; padding: calc(var(--safe-t) + 10px) 0 calc(var(--safe-b) + 12px); }
-.lf-view-m { flex: 1; min-height: 0; display: grid; place-items: center; }
-.lf-view-m img, .lf-view-m video { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
-.lf-view-b { display: flex; gap: 10px; padding: 12px 16px 0; }
-.lf-view-b .lf-btn { flex: 1; }
+.lf-how-go { gap: 8px; text-decoration: none; }
+.lf-how-go .lf-ic { width: 16px; height: 16px; }
+.lf-how-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 6px; }
+.lf-how-l { min-height: 44px; color: var(--dim); font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
+.lf-how-sub > .lf-how-l { display: block; margin: 2px auto 0; }
 
 .lf-toast {
   position: fixed; left: 50%; bottom: calc(var(--safe-b) + 84px); z-index: 60; transform: translate(-50%, 12px); opacity: 0;
@@ -1317,148 +1300,42 @@ function lfExForm(ex, onDone, seed) {
 
 /* Progressive overload, read back: the best set, the estimated one-rep
    max, and the top set of every session as a line. */
-/* ═══════════ HOW IT'S DONE: your own photos and videos ═══════════
-   Kept in IndexedDB, NEVER localStorage: one phone video is bigger than
-   the whole 5MB budget the workouts live in, and a write that blows that
-   budget does not fail on its own — it takes the log with it. Not in the
-   copy-paste backup either, for the same reason: a backup is text. */
-var MDB = null;
-function mdb() {
-  if (MDB) return MDB;
-  MDB = new Promise(function (res, rej) {
-    var q = indexedDB.open('lift-media', 1);
-    q.onupgradeneeded = function () { q.result.createObjectStore('m', { keyPath: 'id' }); };
-    q.onsuccess = function () { res(q.result); };
-    q.onerror = function () { MDB = null; rej(q.error); };
-  });
-  return MDB;
+/* ═══════════ HOW IT'S DONE: a video, one press away ═══════════
+   Every exercise opens YouTube searched on its own name, so all of them
+   have a demo from the day they exist without anybody pasting forty
+   links — and a search never goes dead the way one video can. Paste a
+   specific video and that one is used instead. */
+function lfHowUrl(id, name) {
+  return S.lk[id] || 'https://www.youtube.com/results?search_query=' + encodeURIComponent(name + ' exercise proper form');
 }
-function mTx(mode, fn) {
-  return mdb().then(function (db) { return new Promise(function (res, rej) {
-    var tx = db.transaction('m', mode), st = tx.objectStore('m'), out = fn(st);
-    tx.oncomplete = function () { res(out && out.result !== undefined ? out.result : out); };
-    tx.onerror = function () { rej(tx.error); };
-  }); });
-}
-function mList(ex) { return mTx('readonly', function (st) { return st.getAll(); }).then(function (a) { return (a || []).filter(function (m) { return m.ex === ex; }).sort(function (x, y) { return x.t - y.t || (x.o || 0) - (y.o || 0); }); }); }
-var mSeq = 0;
-function mPut(m) { return mTx('readwrite', function (st) { st.put(m); }); }
-function mDel(id) { return mTx('readwrite', function (st) { st['delete'](id); }); }
-var MAX_MB = 250;
-/* A photo is fitted to 1600 on its long edge, never cropped: a phone
-   camera's twelve megapixels kept whole is several megabytes to draw at
-   the width of a phone. A video is kept as it is — there is no honest
-   way to re-encode one in a page. */
-function mFit(file) {
-  return new Promise(function (res) {
-    if (!/^image\//.test(file.type) || /gif$/.test(file.type)) return res(file);
-    var url = URL.createObjectURL(file), img = new Image();
-    img.onload = function () {
-      var k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
-      if (k >= 1) { URL.revokeObjectURL(url); return res(file); }
-      var c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
-      c.toBlob(function (b) { res(b || file); }, 'image/jpeg', .86);
-    };
-    img.onerror = function () { URL.revokeObjectURL(url); res(file); };
-    img.src = url;
-  });
-}
-
-function lfMediaCard(id) {
-  /* A folding panel, shut by default and remembered: open, a photo grid
-     makes the sheet tall enough to cover the list it came from, and
-     tapping the next exercise in that list is the whole way you move
-     between them. */
-  var open = false; try { open = localStorage.getItem('lift.how.v1') === '1'; } catch (e) {}
-  var c = el('<div class="lf-card lf-sec lf-how" style="background:var(--card)"><h3 class="lf-how-h"><button type="button" aria-controls="lfHowB"><span>How it\'s done</span><em></em>' + IC.chev + '</button></h3>'
-    + '<div id="lfHowB"><div class="lf-how-lk"></div><div class="lf-how-g"></div>'
-    + '<label class="lf-add lf-how-add">' + IC.plus + '<span>Add photo or video</span><input type="file" accept="image/*,video/*" hidden /></label></div></div>');
-  var hb = $('.lf-how-h button', c);
-  function fold() { hb.setAttribute('aria-expanded', open ? 'true' : 'false'); $('#lfHowB', c).hidden = !open; c.classList.toggle('is-open', open); }
-  hb.addEventListener('click', function () { open = !open; try { localStorage.setItem('lift.how.v1', open ? '1' : '0'); } catch (e) {} fold(); });
-  fold();
-  var nMedia = 0;
-  function count() { var n = nMedia + (S.lk[id] ? 1 : 0); $('.lf-how-h em', c).textContent = n ? (nMedia ? nMedia + (nMedia === 1 ? ' clip' : ' clips') : '') + (nMedia && S.lk[id] ? ' · ' : '') + (S.lk[id] ? 'link' : '') : ''; }
-  var urls = [];
-  function paintLink() {
-    var box = $('.lf-how-lk', c), u = S.lk[id]; count();
-    box.textContent = '';
-    if (u) {
-      var a = el('<div class="lf-how-row"><a class="lf-btn is-ink" target="_blank" rel="noopener noreferrer">Watch the demo</a><button type="button" class="lf-x" aria-label="Remove link">' + IC.x + '</button></div>');
-      $('a', a).href = u;
-      $('button', a).addEventListener('click', function () { var old = S.lk[id]; delete S.lk[id]; lfSave(); paintLink(); lfToast('Link removed', function () { S.lk[id] = old; lfSave(); paintLink(); }); });
-      box.appendChild(a);
+function lfHowCard(id, name) {
+  var c = el('<div class="lf-sec lf-how"><a class="lf-btn is-ink is-full lf-how-go" target="_blank" rel="noopener noreferrer"><svg class="lf-ic" viewBox="0 0 24 24"><path d="M9 7l8 5-8 5z" fill="currentColor"/></svg><span>Watch how it\'s done</span></a><div class="lf-how-sub"></div></div>');
+  function paint() {
+    var a = $('.lf-how-go', c), sub = $('.lf-how-sub', c), own = !!S.lk[id];
+    a.href = lfHowUrl(id, name);
+    a.setAttribute('aria-label', own ? 'Watch your saved video for ' + name : 'Watch videos of ' + name + ' on YouTube');
+    sub.textContent = '';
+    if (own) {
+      var r = el('<div class="lf-how-row"><span class="lf-lab">Your saved video</span><button type="button" class="lf-how-l">Use YouTube search instead</button></div>');
+      $('button', r).addEventListener('click', function () { var old = S.lk[id]; delete S.lk[id]; lfSave(); paint(); lfToast('Back to YouTube search', function () { S.lk[id] = old; lfSave(); paint(); }); });
+      sub.appendChild(r);
     } else {
-      var f = el('<div class="lf-dl-f"><input class="lf-field" type="url" inputmode="url" placeholder="Paste a YouTube or Instagram link" aria-label="Demo video link" autocomplete="off" /><button type="button" class="lf-btn">Save</button></div>');
-      $('button', f).addEventListener('click', function () {
-        var v = $('input', f).value.trim();
-        if (v && !/^https?:\/\//i.test(v)) v = 'https://' + v;
-        if (!/^https?:\/\/[^\s]+\.[^\s]+/i.test(v)) { lfToast('That is not a link'); return; }
-        S.lk[id] = v.slice(0, 500); lfSave(); paintLink();
+      var b = el('<button type="button" class="lf-how-l">Use a specific video</button>');
+      b.addEventListener('click', function () {
+        var f = el('<div class="lf-dl-f" style="margin-top:8px"><input class="lf-field" type="url" inputmode="url" placeholder="Paste a YouTube or Instagram link" aria-label="Video link" autocomplete="off" /><button type="button" class="lf-btn">Save</button></div>');
+        $('button', f).addEventListener('click', function () {
+          var v = $('input', f).value.trim();
+          if (v && !/^https?:\/\//i.test(v)) v = 'https://' + v;
+          if (!/^https?:\/\/[^\s]+\.[^\s]+/i.test(v)) { lfToast('That is not a link'); return; }
+          S.lk[id] = v.slice(0, 500); lfSave(); paint();
+        });
+        sub.textContent = ''; sub.appendChild(f); $('input', f).focus();
       });
-      box.appendChild(f);
+      sub.appendChild(b);
     }
   }
-  function paintMedia() {
-    urls.forEach(function (u) { URL.revokeObjectURL(u); }); urls = [];
-    var g = $('.lf-how-g', c);
-    mList(id).then(function (ms) {
-      g.textContent = ''; nMedia = ms.length; count();
-      ms.forEach(function (m) {
-        var u = URL.createObjectURL(m.blob); urls.push(u);
-        var t = el('<button type="button" class="lf-how-t"></button>');
-        t.dataset.mid = m.id;
-        if (m.type === 'v') {
-          var v = document.createElement('video'); v.muted = true; v.playsInline = true; v.preload = 'metadata'; v.src = u + '#t=0.1';
-          t.appendChild(v); t.appendChild(el('<span class="lf-how-play" aria-hidden="true">' + IC.play + '</span>'));
-          t.setAttribute('aria-label', 'Play video');
-        } else {
-          var im = document.createElement('img'); im.alt = ''; im.src = u; t.appendChild(im);
-          t.setAttribute('aria-label', 'Open photo');
-        }
-        t.addEventListener('click', function () { lfViewer(m, u, function () { paintMedia(); }); });
-        g.appendChild(t);
-      });
-    }).catch(function () {});
-  }
-  var inp = $('input[type=file]', c);
-  inp.addEventListener('change', function () {
-    var file = inp.files && inp.files[0]; inp.value = '';
-    if (!file) return;
-    if (file.size > MAX_MB * 1048576) { lfToast('That file is over ' + MAX_MB + ' MB'); return; }
-    var isV = /^video\//.test(file.type);
-    lfToast(isV ? 'Saving video…' : 'Saving photo…');
-    mFit(file).then(function (blob) {
-      return mPut({ id: lfId(), ex: id, type: isV ? 'v' : 'p', blob: blob, t: Date.now(), o: ++mSeq });
-    }).then(function () { lfToast(isV ? 'Video added' : 'Photo added'); paintMedia(); })
-      .catch(function () { lfToast('Could not save — this phone is out of room'); });
-  });
-  paintLink(); paintMedia();
-  c.lfDone = function () { urls.forEach(function (u) { URL.revokeObjectURL(u); }); };
+  paint();
   return c;
-}
-
-/* Full screen, contain rather than crop, and built and removed — never
-   hidden — so it cannot sit over the app taking presses. */
-function lfViewer(m, url, onChange) {
-  var v = el('<div class="lf-view" role="dialog" aria-modal="true" aria-label="' + (m.type === 'v' ? 'Video' : 'Photo') + '"><div class="lf-view-m"></div>'
-    + '<div class="lf-view-b"><button type="button" class="lf-btn is-bad">Delete</button><button type="button" class="lf-btn is-ink">Done</button></div></div>');
-  var box = $('.lf-view-m', v);
-  if (m.type === 'v') { var vid = document.createElement('video'); vid.src = url; vid.controls = true; vid.playsInline = true; vid.autoplay = true; box.appendChild(vid); }
-  else { var im = document.createElement('img'); im.src = url; im.alt = ''; box.appendChild(im); }
-  function close() { document.removeEventListener('keydown', esc, true); v.remove(); }
-  function esc(e) { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); } }
-  document.addEventListener('keydown', esc, true);
-  $$('.lf-view-b button', v)[1].addEventListener('click', close);
-  $$('.lf-view-b button', v)[0].addEventListener('click', function () {
-    close();
-    mDel(m.id).then(function () {
-      onChange();
-      lfToast('Deleted', function () { mPut(m).then(onChange); });
-    });
-  });
-  document.body.appendChild(v);
 }
 
 function lfExSheet(id) {
@@ -1469,8 +1346,7 @@ function lfExSheet(id) {
   var best = null, bestE = 0;
   h.forEach(function (x) { x.sets.forEach(function (s) { var e = e1rm(s.w, s.r); if (e > bestE) { bestE = e; best = s; } }); });
   b.appendChild(lfSum([[best ? fmtW(best.w) + '×' + best.r : '—', 'best set'], [bestE ? fmtW(bestE) : '—', 'est. 1RM ' + S.unit], [h.length, 'sessions']]));
-  var how = lfMediaCard(id);
-  b.appendChild(how);
+  b.appendChild(lfHowCard(id, name));
   if (h.length > 1) {
     var tops = h.slice(-12).map(function (x) { return toDisp(Math.max.apply(null, x.sets.map(function (s) { return e1rm(s.w, s.r); }))); });
     var c = el('<div class="lf-card lf-sec"><div class="lf-lab">Est. 1RM, last ' + tops.length + ' sessions</div><div class="lf-area" style="height:90px"></div></div>');
@@ -1495,7 +1371,7 @@ function lfExSheet(id) {
   /* One exercise at a time: a second replaces the first rather than
      stacking on it. */
   stack.slice().forEach(function (x) { if (x.el.classList.contains('lf-exd')) x.close(true); });
-  var s = lfSheet({ title: name, body: b, foot: foot, cls: 'lf-exd', through: true, onClose: function () { how.lfDone(); } });
+  var s = lfSheet({ title: name, body: b, foot: foot, cls: 'lf-exd', through: true });
 }
 
 function lfRoutinePicker() {
