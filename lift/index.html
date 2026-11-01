@@ -642,7 +642,18 @@ function lfSheet(o) {
     }
   };
   stack.push(api);
-  scrim.addEventListener('click', function () { api.close(); });
+  scrim.addEventListener('click', function (e) {
+    api.close();
+    /* A sheet stacked on a list — an exercise over a day of the split —
+       passes the press through: tapping the next exercise in the list
+       closes this one AND opens that one, rather than spending the tap
+       on putting this one away. */
+    if (!o.through) return;
+    scrim.style.pointerEvents = 'none'; sh.style.pointerEvents = 'none';
+    var hit = document.elementFromPoint(e.clientX, e.clientY);
+    var btn = hit && hit.closest('.lf-sheet button');
+    if (btn) btn.click();
+  });
   /* Pull down to put it away, from the grab bar or the head. */
   var y0 = null, dy = 0;
   function down(e) { if (e.target.closest('input, button:not(.lf-grab)')) return; y0 = e.clientY; dy = 0; sh.classList.add('is-drag'); try { e.currentTarget.setPointerCapture(e.pointerId); } catch (er) {} }
@@ -1308,7 +1319,10 @@ function lfExSheet(id) {
     ed.addEventListener('click', function () { lfExForm(ex, function () { s.close(true); lfExSheet(id); }); });
     foot = [ed];
   }
-  var s = lfSheet({ title: name, body: b, foot: foot, cls: 'lf-exd' });
+  /* One exercise at a time: a second replaces the first rather than
+     stacking on it. */
+  stack.slice().forEach(function (x) { if (x.el.classList.contains('lf-exd')) x.close(true); });
+  var s = lfSheet({ title: name, body: b, foot: foot, cls: 'lf-exd', through: true });
 }
 
 function lfRoutinePicker() {

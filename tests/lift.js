@@ -67,6 +67,14 @@ const freeze = (at) => `(() => {
   await page.click('#lfSplit .lf-li >> nth=0'); await settle(page);
   const mon = await top(page).textContent();
   ok('a day of the split reads its sets × reps', mon.includes('Hack squat') && mon.includes('3 × 6–10') && mon.includes('1–2 RIR') && mon.includes('Standing calf raises'), mon.slice(0, 160));
+  await top(page).locator('.lf-li', { hasText: 'Hack squat' }).click(); await settle(page);
+  ok('an exercise opens over the day', (await top(page).locator('h2').textContent()) === 'Hack squat');
+  /* the next exercise in the list sits above the open sheet, on the scrim */
+  const nx = await page.locator('.lf-sheet').first().locator('.lf-li', { hasText: 'Barbell squat' }).boundingBox();
+  await page.mouse.click(nx.x + 40, nx.y + 10); await settle(page);
+  ok('tapping another closes the first and opens the one tapped', await page.locator('.lf-sheet').count() === 2
+    && (await top(page).locator('h2').textContent()) === 'Barbell squat', await page.$$eval('.lf-sheet h2', (h) => h.map((x) => x.textContent)));
+  await page.keyboard.press('Escape'); await settle(page);
   await page.keyboard.press('Escape'); await settle(page);
   const sun = () => page.$$eval('#lfSplit .lf-li span', (x) => x[6].textContent);
   ok('calves start at 12 sets: Sunday holds its calf block back', /7 exercises/.test(await sun()), await sun());
