@@ -456,13 +456,15 @@ var EXERCISES = [
 /* CARDIO is one entry on a workout — what, and for how long — because
    ten to fifteen minutes after the session is one thing you did, not a
    workout of its own. */
-var CARDIO = [['walk', 'Incline walk'], ['bike', 'Bike'], ['stairs', 'Stairs'], ['row', 'Rower'], ['ellip', 'Elliptical'], ['run', 'Run']];
-var CARDIO_N = CARDIO.reduce(function (o, c) { o[c[0]] = c[1]; return o; }, {});
+var CARDIO = [['walk', 'Incline treadmill'], ['stairs', 'Stairmaster']];
+/* Kinds no longer offered still READ, so nothing already logged under
+   one is thrown away. */
+var CARDIO_N = CARDIO.concat([['bike', 'Bike'], ['row', 'Rower'], ['ellip', 'Elliptical'], ['run', 'Run']]).reduce(function (o, c) { o[c[0]] = c[1]; return o; }, {});
 function lfCdTxt(c) { return c ? c.m + ' min ' + CARDIO_N[c.k].toLowerCase() : ''; }
 /* Kind and minutes as pills, a pressed minute pressed again clears it,
    and a field for anything that is not on the ladder. */
 function lfCardioPick(cd, onChange) {
-  var cur = cd ? { k: cd.k, m: cd.m } : { k: S.ck, m: 0 };
+  var cur = cd ? { k: cd.k, m: cd.m } : { k: CARDIO.some(function (c) { return c[0] === S.ck; }) ? S.ck : CARDIO[0][0], m: 0 };
   var b = el('<div class="lf-cd"><div class="lf-pills lf-cd-k"></div><div class="lf-pills lf-cd-m"></div></div>');
   function paint() {
     var kb = $('.lf-cd-k', b), mb = $('.lf-cd-m', b); kb.textContent = ''; mb.textContent = '';
@@ -593,7 +595,7 @@ function lfClean(o) {
   d.unit = o.unit === 'lb' ? 'lb' : 'kg';
   d.goal = Math.min(7, Math.max(1, Math.round(+o.goal) || 4));
   d.bwGoal = num(o.bwGoal);
-  if (CARDIO_N[o.ck]) d.ck = o.ck;
+  if (CARDIO.some(function (c) { return c[0] === o.ck; })) d.ck = o.ck;
   /* A record from before focus was editable carries calf15 instead. */
   if (Array.isArray(o.focus)) {
     var seen = {};
@@ -862,6 +864,14 @@ function lfTodayCard() {
   go.classList.toggle('is-live', !!act);
   go.addEventListener('click', function () { if (act) lfOpenSession(); else lfStart(rt); });
   $('#lfPick', c).addEventListener('click', function () { if (act) lfOpenSession(); else lfRoutinePicker(); });
+  /* A session already finished today can still take its cardio. */
+  var done = act ? null : woOn(ymd(today())).slice(-1)[0];
+  if (done) {
+    var ac = el('<button type="button" class="lf-btn is-full" id="lfAddCd" style="margin-top:10px"></button>');
+    ac.textContent = done.cd ? 'Cardio · ' + lfCdTxt(done.cd) : '+ Add cardio to ' + done.n;
+    ac.addEventListener('click', function () { lfWoSheet(done); });
+    c.appendChild(ac);
+  }
   return c;
 }
 /* The estimate is your own average for this routine once there is one,
