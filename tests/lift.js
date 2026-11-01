@@ -241,13 +241,69 @@ const freeze = (at) => `(() => {
     }
   }
 
+  /* ── steps, food and water ── */
+  {
+    const { c, page } = await ctx();
+    const tiles = await page.$$eval('#lfDaily .lf-dl-t', (t) => t.map((x) => x.dataset.f));
+    ok('home carries a card for steps, food and water', tiles.join() === 'st,fd,wa', tiles);
+    const tot = (f) => page.evaluate((f) => { const d = JSON.parse(localStorage.getItem('lift.v1')).dl['2026-10-30']; return d ? d[f] : null; }, f);
+    const sh = page.locator('.lf-sheet').last();
+
+    await page.click('#lfDaily [data-f="st"]'); await settle(page);
+    await sh.locator('.lf-pill', { hasText: '+1k' }).click(); await sh.locator('.lf-pill', { hasText: '+1k' }).click();
+    ok('steps add by the press', (await sh.locator('.lf-hero').textContent()) === '2,000');
+    await sh.locator('.lf-dl-f input').fill('8400'); await sh.locator('.lf-dl-f button').click();
+    ok('a total from the phone replaces the day rather than adding to it', (await sh.locator('.lf-hero').textContent()) === '8,400' && (await tot('st')).length === 1);
+    ok('and says how far from the goal', /6,600 to go of 15,000/.test(await sh.locator('p.lf-lab').first().textContent()));
+    await sh.locator('.lf-calnav .lf-round').first().click();
+    await sh.locator('.lf-pill', { hasText: '+5k' }).click();
+    ok('the day before can be filled in from the same sheet', (await sh.locator('.lf-calnav b').textContent()) === 'Thu 29 Oct'
+      && await page.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).dl['2026-10-29'].st[0].v) === 5000);
+    ok('and never a day still ahead', await sh.locator('.lf-calnav .lf-round').last().isEnabled() && !(await (async () => { await sh.locator('.lf-calnav .lf-round').last().click(); return sh.locator('.lf-calnav .lf-round').last().isEnabled(); })()));
+    await page.keyboard.press('Escape'); await settle(page);
+
+    await page.click('#lfDaily [data-f="wa"]'); await settle(page);
+    await sh.locator('.lf-pill', { hasText: '+600 ml' }).click(); await sh.locator('.lf-pill', { hasText: '+1.5 L' }).click();
+    ok('water adds by the bottle and reads in litres', (await sh.locator('.lf-hero').textContent()) === '2.1 L');
+    await sh.locator('.lf-dl-ents .lf-x').first().click();
+    ok('an entry comes off with its own cross', (await sh.locator('.lf-hero').textContent()) === '600 ml');
+    await page.click('.lf-toast button');
+    ok('and Undo puts it back', (await sh.locator('.lf-hero').textContent()) === '2.1 L' && (await tot('wa')).length === 2);
+    await page.keyboard.press('Escape'); await settle(page);
+
+    await page.click('#lfDaily [data-f="fd"]'); await settle(page);
+    const fi = sh.locator('.lf-dl-f input');
+    await fi.nth(0).fill('650'); await fi.nth(1).fill('42.5'); await sh.locator('.lf-dl-f button').click();
+    await fi.nth(0).fill('300'); await sh.locator('.lf-dl-f button').click();
+    ok('food adds calories and protein', (await sh.locator('.lf-hero').textContent()) === '950 kcal' && /43g protein/.test(await sh.locator('p.lf-lab').first().textContent()));
+    await page.keyboard.press('Escape'); await settle(page);
+
+    const card = await page.$$eval('#lfDaily .lf-dl-t', (t) => t.map((x) => x.querySelector('b').textContent));
+    ok('the home card says all three', card.join('|') === '8,400|950|2.1 L', card);
+    ok('a met goal goes green and an unmet one does not', !(await page.$eval('#lfDaily [data-f="wa"]', (e) => e.classList.contains('is-met'))));
+
+    await page.click('.lf-bar [data-v="you"]');
+    await page.fill('#lfGoals input[data-g="wa"]', '2000'); await page.press('#lfGoals input[data-g="wa"]', 'Tab');
+    await page.click('.lf-bar [data-v="home"]');
+    ok('a goal set under You moves the card', await page.$eval('#lfDaily [data-f="wa"]', (e) => e.classList.contains('is-met')));
+
+    await page.click('.lf-bar [data-v="cal"]');
+    await page.click('.lf-cell[data-d="2026-10-30"]'); await settle(page);
+    ok('the calendar\'s day says what you logged', /8,400 steps · 950 kcal · 43g protein · 2\.1 L water/.test(await sh.textContent()));
+    await page.keyboard.press('Escape'); await settle(page);
+    const tiles3 = await page.$$eval('#lfMain section:not([hidden])', (x) => x.length);
+    ok('three tiles fit across a phone without scrolling sideways', tiles3 === 1 && await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    await c.close();
+  }
+
   /* ── a damaged record is repaired, never thrown away ── */
   {
-    const bad = { unit: 'kg', goal: 99, ex: [{ id: 'a', n: 'Row', m: 'Back' }, { n: 'no id' }],
+    const bad = { unit: 'kg', goal: 99, dl: { '2026-10-28': { st: [{ t: 1, v: 9000 }, { v: 'x' }], fd: [null, { kc: 500, p: 30 }], wa: 'nope' }, junk: { st: [] } }, ex: [{ id: 'a', n: 'Row', m: 'Back' }, { n: 'no id' }],
       wo: [{ id: 'w1', d: '2026-10-20', s: 1, e: 2, n: 'Pull', x: [{ id: 'a', n: 'Row', sets: [{ w: 50, r: 10 }, { w: 'x', r: 2 }, null] }] }, { d: 'nope' }] };
     const { c, page } = await ctx(bad);
     const r = await store(page);
     ok('a bad set costs the set, a bad workout the workout', r.wo.length === 1 && r.wo[0].x[0].sets.length === 1 && r.ex.length === 1 && r.goal === 7, r);
+    ok('a bad day-log entry costs the entry, not the day', r.dl['2026-10-28'].st.length === 1 && r.dl['2026-10-28'].fd.length === 1 && r.dl['2026-10-28'].wa.length === 0 && !r.dl.junk, r.dl);
     ok('and the repair is written back', JSON.parse(await page.evaluate(() => localStorage.getItem('lift.v1'))).wo[0].x[0].sets.length === 1);
     await c.close();
   }

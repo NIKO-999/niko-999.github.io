@@ -148,6 +148,24 @@ svg { display: block; }
 .lf-aim.is-up { color: var(--good); }
 .lf-ss-rest.is-ready { color: var(--good); }
 
+/* ── the day: steps, food, water ── */
+.lf-dl-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 10px; align-items: stretch; }
+.lf-dl-t { background: var(--card2); border-radius: 16px; padding: 10px 10px 12px; display: flex; flex-direction: column; gap: 2px; min-height: 92px; }
+.lf-dl-n { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--dim); font-weight: 500; }
+.lf-dl-n .lf-ic { width: 14px; height: 14px; }
+.lf-dl-t b { font-size: 19px; font-weight: 700; margin-top: 4px; }
+.lf-dl-u { font-size: 11px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lf-dl-bar { display: block; height: 4px; border-radius: 2px; background: var(--card3); margin-top: auto; overflow: hidden; }
+.lf-dl-t > span:nth-last-child(2) { margin-bottom: 8px; }
+.lf-dl-bar i { display: block; height: 100%; background: #c9c9ce; border-radius: 2px; }
+.lf-dl-t.is-met .lf-dl-bar i { background: var(--good); }
+.lf-dl-q { justify-content: center; margin-bottom: 10px; }
+.lf-dl-f { display: flex; gap: 8px; }
+.lf-dl-f .lf-field { flex: 1; min-width: 0; }
+.lf-dl-f .lf-btn { flex: none; min-height: 44px; }
+.lf-gl { display: grid; grid-template-columns: 80px minmax(0, 1fr) 40px; align-items: center; gap: 10px; margin-top: 10px; font-size: 14px; }
+.lf-gl em { font-style: normal; color: var(--dim); font-size: 12px; }
+
 /* ── body weight ── */
 .lf-bw { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
 .lf-bw .lf-big { font-size: 19px; }
@@ -457,7 +475,7 @@ var DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 var MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 /* ═══════════ STORE ═══════════ */
-function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null, calf15: false }; }
+function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null, calf15: false, dl: {}, dg: { st: 15000, kc: 0, pr: 0, wa: 3000 } }; }
 function num(v) { var n = +v; return isFinite(n) && n >= 0 ? n : null; }
 
 /* A damaged record is REPAIRED, never thrown away: a bad set costs the
@@ -469,6 +487,16 @@ function lfClean(o) {
   d.goal = Math.min(7, Math.max(1, Math.round(+o.goal) || 4));
   d.bwGoal = num(o.bwGoal);
   d.calf15 = o.calf15 === true;
+  /* THE DAY'S LOG: steps, food and water, a list of entries a day so a
+     mis-press has a way back. A bad entry costs the entry, never the day. */
+  if (o.dl && typeof o.dl === 'object') Object.keys(o.dl).forEach(function (k) {
+    if (!/^\d{4}-\d\d-\d\d$/.test(k) || !o.dl[k] || typeof o.dl[k] !== 'object') return;
+    var src = o.dl[k], day = { st: [], fd: [], wa: [] };
+    ['st', 'wa'].forEach(function (f) { if (Array.isArray(src[f])) day[f] = src[f].filter(function (e) { return e && num(e.v) !== null; }).map(function (e) { return { t: +e.t || 0, v: Math.round(+e.v) }; }); });
+    if (Array.isArray(src.fd)) day.fd = src.fd.filter(function (e) { return e && (num(e.kc) !== null || num(e.p) !== null); }).map(function (e) { return { t: +e.t || 0, kc: Math.round(+e.kc || 0), p: Math.round((+e.p || 0) * 10) / 10 }; });
+    if (day.st.length || day.fd.length || day.wa.length) d.dl[k] = day;
+  });
+  if (o.dg && typeof o.dg === 'object') ['st', 'kc', 'pr', 'wa'].forEach(function (f) { var v = num(o.dg[f]); if (v !== null) d.dg[f] = Math.round(v); });
   if (Array.isArray(o.ex)) d.ex = o.ex.filter(function (e) { return e && typeof e.id === 'string' && typeof e.n === 'string' && e.n.trim(); })
     .map(function (e) { return { id: e.id, n: e.n.slice(0, 60), m: MUSCLES.indexOf(e.m) >= 0 ? e.m : 'Other', t: e.t === 'bw' ? 'bw' : 'w' }; });
   if (Array.isArray(o.rt)) d.rt = o.rt.filter(function (r) { return r && typeof r.id === 'string' && typeof r.n === 'string'; })
@@ -669,6 +697,7 @@ function lfToday() {
 function lfRenderHome() {
   var root = $('#lfHome'); root.textContent = '';
   root.appendChild(lfTodayCard());
+  root.appendChild(lfDayCard());
   root.appendChild(lfStatRow());
   root.appendChild(lfGridCard());
   root.appendChild(lfLegCard());
@@ -865,6 +894,136 @@ function lfBwSheet() {
     }
     lfSave(); s.close(true); lfRender(); if (v) lfToast('Logged ' + v + ' ' + S.unit);
   });
+}
+
+/* ═══════════ THE DAY: STEPS, FOOD, WATER ═══════════
+   Each is a list of entries per date and the figure is their sum, so a
+   wrong press is taken off by its own ×, never by retyping a total. */
+var DL = {
+  st: { n: 'Steps', u: 'steps', ic: '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M8 3.5c1.8 0 2.6 2 2.4 4.4-.2 2-1 3.1-2.6 3.1S5.4 9.6 5.5 7.6C5.7 5.2 6.5 3.5 8 3.5zM6 13.5h4.2l-.4 3.2c-.2 1.5-1.3 2.3-2.4 2.1-1.2-.2-1.7-1.4-1.5-2.7zM16 7c1.5 0 2.3 1.7 2.5 4.1.1 2-.9 3.4-2.4 3.4s-2.4-1.1-2.6-3.1C13.3 9 14.2 7 16 7zM13.8 17h4.2l.2 2.6c.1 1.3-.4 2.4-1.6 2.6-1.1.2-2.2-.6-2.4-2.1z"/></svg>' },
+  fd: { n: 'Food', u: 'kcal', ic: '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M16 21V3c-2 1-3 3.5-3 7 0 2 1 3 3 3"/></svg>' },
+  wa: { n: 'Water', u: 'ml', ic: '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M12 3.5s6 6.6 6 10.8a6 6 0 0 1-12 0C6 10.1 12 3.5 12 3.5z"/></svg>' }
+};
+function dlDay(k) { return S.dl[k] || { st: [], fd: [], wa: [] }; }
+function dlTot(k, f) {
+  var d = dlDay(k);
+  if (f === 'fd') return d.fd.reduce(function (a, e) { return a + e.kc; }, 0);
+  if (f === 'pr') return d.fd.reduce(function (a, e) { return a + e.p; }, 0);
+  return d[f].reduce(function (a, e) { return a + e.v; }, 0);
+}
+function dlFmt(f, v) {
+  if (f === 'wa') return v >= 1000 ? (Math.round(v / 100) / 10) + ' L' : v + ' ml';
+  return v.toLocaleString('en-GB') + (f === 'fd' ? ' kcal' : '');
+}
+function dlGoal(f) { return f === 'fd' ? S.dg.kc : S.dg[f]; }
+function dlPush(k, f, e) {
+  if (!S.dl[k]) S.dl[k] = { st: [], fd: [], wa: [] };
+  S.dl[k][f].push(e); lfSave();
+}
+
+function lfDayCard() {
+  var k = ymd(today());
+  var c = el('<div class="lf-card lf-dl" id="lfDaily"><div class="lf-hd"><span class="lf-lab">Daily log</span><span class="lf-lab">tap to add</span></div><div class="lf-dl-row"></div></div>');
+  ['st', 'fd', 'wa'].forEach(function (f) {
+    var v = dlTot(k, f), g = dlGoal(f);
+    var b = el('<button type="button" class="lf-dl-t lf-tap"><span class="lf-dl-n"></span><b class="lf-num"></b><span class="lf-dl-u"></span><i class="lf-dl-bar"><i></i></i></button>');
+    b.dataset.f = f;
+    $('.lf-dl-n', b).innerHTML = DL[f].ic + '<span></span>';
+    $('.lf-dl-n span', b).textContent = DL[f].n;
+    $('b', b).textContent = f === 'wa' ? dlFmt('wa', v) : v.toLocaleString('en-GB');
+    $('.lf-dl-u', b).textContent = g ? 'of ' + dlFmt(f, g).replace(' kcal', '') : (f === 'wa' ? (v >= 1000 ? 'L' : 'ml') : DL[f].u);
+    /* Protein gets its own line rather than a tail the tile cuts off. */
+    if (f === 'fd') { var pr = dlTot(k, 'pr'), pl = el('<span class="lf-dl-u lf-dl-p"></span>'); pl.textContent = 'Protein ' + Math.round(pr) + (S.dg.pr ? '/' + S.dg.pr : '') + 'g'; $('.lf-dl-u', b).after(pl); }
+    $('.lf-dl-bar i', b).style.width = (g ? Math.min(100, v / g * 100) : 0) + '%';
+    if (g && v >= g) b.classList.add('is-met');
+    b.setAttribute('aria-label', DL[f].n + ' today: ' + dlFmt(f, v) + (g ? ' of ' + dlFmt(f, g) : '') + '. Add');
+    b.addEventListener('click', function () { lfDlSheet(f, k); });
+    $('.lf-dl-row', c).appendChild(b);
+  });
+  return c;
+}
+
+function lfDlSheet(f, k) {
+  var b = el('<div><div class="lf-calnav" style="margin:0 0 6px"><button type="button" class="lf-round" aria-label="Day before">' + IC.left + '</button><b></b><button type="button" class="lf-round" aria-label="Day after">' + IC.right + '</button></div>'
+    + '<div class="lf-hero lf-num" style="font-size:40px;text-align:center"></div><p class="lf-lab" style="text-align:center;margin:4px 0 14px;font-weight:400"></p>'
+    + '<div class="lf-pills lf-dl-q"></div><div class="lf-dl-in"></div><div class="lf-list lf-sec lf-dl-ents"></div><div class="lf-card lf-sec lf-dl-wk" style="background:var(--card)"></div></div>');
+  var s = lfSheet({ title: DL[f].n, body: b, onClose: function () { lfRender(); } });
+  var oldest = ymd(addDays(today(), -30));
+  function paint() {
+    var t = ymd(today()), v = dlTot(k, f), g = dlGoal(f), nav = $$('.lf-calnav button', b);
+    $('.lf-calnav b', b).textContent = k === t ? 'Today' : fmtDay(k);
+    nav[0].disabled = k <= oldest; nav[1].disabled = k >= t;
+    $('.lf-hero', b).textContent = dlFmt(f, v);
+    var sub = g ? (v >= g ? 'Goal reached · ' + dlFmt(f, g) : dlFmt(f, g - v) + ' to go of ' + dlFmt(f, g)) : 'No goal set · set one under You';
+    if (f === 'fd') sub += ' · ' + Math.round(dlTot(k, 'pr')) + 'g protein' + (S.dg.pr ? ' of ' + S.dg.pr + 'g' : '');
+    $('p', b).textContent = sub;
+    /* entries, newest first, each with its own way back */
+    var list = $('.lf-dl-ents', b); list.textContent = '';
+    var es = dlDay(k)[f].map(function (e, i) { return { e: e, i: i }; }).reverse();
+    if (!es.length) list.appendChild(el('<div class="lf-lab" style="padding:6px 2px">Nothing logged on this day.</div>'));
+    es.forEach(function (x) {
+      var d = new Date(x.e.t);
+      var li = el('<div class="lf-li"><div class="lf-li-t"><b class="lf-num"></b><span></span></div><button type="button" class="lf-x" aria-label="Remove entry">' + IC.x + '</button></div>');
+      $('b', li).textContent = f === 'fd' ? x.e.kc + ' kcal' + (x.e.p ? ' · ' + x.e.p + 'g protein' : '') : (f === 'st' && x.e.v > 0 ? '+' : '') + dlFmt(f, x.e.v);
+      $('span', li).textContent = x.e.t ? String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') : '';
+      $('button', li).addEventListener('click', function () {
+        var arr = S.dl[k][f], gone = arr.splice(x.i, 1)[0]; lfSave(); paint();
+        lfToast('Removed', function () { arr.splice(x.i, 0, gone); lfSave(); paint(); });
+      });
+      list.appendChild(li);
+    });
+    /* the last seven days, today at the end */
+    var wk = $('.lf-dl-wk', b); wk.innerHTML = '<div class="lf-lab">Last 7 days</div><div class="lf-bars" aria-hidden="true"></div>';
+    var days = []; for (var i = 6; i >= 0; i--) days.push(ymd(addDays(today(), -i)));
+    var vals = days.map(function (d) { return dlTot(d, f); }), mx = Math.max.apply(null, vals.concat([g || 1, 1]));
+    days.forEach(function (d, i) {
+      var col = el('<div><em></em><i></i><u></u></div>'), vv = vals[i];
+      if (d === k) col.classList.add('is-now');
+      $('em', col).textContent = vv ? (f === 'wa' ? (Math.round(vv / 100) / 10) : vv >= 1000 ? (Math.round(vv / 100) / 10) + 'k' : vv) : '';
+      $('i', col).style.height = (vv ? Math.max(6, vv / mx * 100) : 4) + '%';
+      $('u', col).textContent = 'SMTWTFS'[parseYmd(d).getDay()];
+      $('.lf-bars', wk).appendChild(col);
+    });
+  }
+  /* quick adds and the field, built once so typing keeps its caret */
+  var q = $('.lf-dl-q', b), inb = $('.lf-dl-in', b);
+  function quick(label, fn) { var p = el('<button type="button" class="lf-pill"></button>'); p.textContent = label; p.addEventListener('click', function () { fn(); buzz(10); paint(); }); q.appendChild(p); }
+  function addV(v) { dlPush(k, f, { t: Date.now(), v: v }); }
+  if (f === 'st') {
+    [500, 1000, 2500, 5000].forEach(function (v) { quick('+' + (v >= 1000 ? v / 1000 + 'k' : v), function () { addV(v); }); });
+    inb.innerHTML = '<div class="lf-dl-f"><input class="lf-field lf-num" inputmode="numeric" placeholder="Today\'s total from your phone" aria-label="Total steps" autocomplete="off" /><button type="button" class="lf-btn is-log">Set</button></div>';
+    $('button', inb).addEventListener('click', function () {
+      var v = parseInt($('input', inb).value.replace(/[^\d]/g, ''), 10); if (!(v >= 0)) return;
+      /* A total from the phone replaces the day rather than adding to it:
+         the phone has already counted everything you added by hand. */
+      if (!S.dl[k]) S.dl[k] = { st: [], fd: [], wa: [] };
+      S.dl[k].st = [{ t: Date.now(), v: v }]; lfSave(); $('input', inb).value = ''; buzz(10); paint();
+    });
+  } else if (f === 'wa') {
+    [[250, '+250 ml'], [500, '+500 ml'], [600, '+600 ml'], [1500, '+1.5 L']].forEach(function (x) { quick(x[1], function () { addV(x[0]); }); });
+    inb.innerHTML = '<div class="lf-dl-f"><input class="lf-field lf-num" inputmode="numeric" placeholder="Amount in ml" aria-label="Water in ml" autocomplete="off" /><button type="button" class="lf-btn is-log">Add</button></div>';
+    $('button', inb).addEventListener('click', function () { var v = parseInt($('input', inb).value, 10); if (!(v > 0)) return; addV(v); $('input', inb).value = ''; buzz(10); paint(); });
+  } else {
+    inb.innerHTML = '<div class="lf-dl-f"><input class="lf-field lf-num" inputmode="numeric" placeholder="kcal" aria-label="Calories" autocomplete="off" /><input class="lf-field lf-num" inputmode="decimal" placeholder="Protein g" aria-label="Protein in grams" autocomplete="off" /><button type="button" class="lf-btn is-log">Add</button></div>';
+    var ins = $$('input', inb);
+    $('button', inb).addEventListener('click', function () {
+      var kc = parseInt(ins[0].value, 10) || 0, pr = parseFloat(ins[1].value) || 0;
+      if (!(kc > 0) && !(pr > 0)) { ins[0].focus(); return; }
+      dlPush(k, 'fd', { t: Date.now(), kc: kc, p: Math.round(pr * 10) / 10 }); ins[0].value = ''; ins[1].value = ''; buzz(10); paint();
+    });
+  }
+  var nav = $$('.lf-calnav button', b);
+  nav[0].addEventListener('click', function () { k = ymd(addDays(parseYmd(k), -1)); paint(); });
+  nav[1].addEventListener('click', function () { if (k < ymd(today())) { k = ymd(addDays(parseYmd(k), 1)); paint(); } });
+  paint();
+  return s;
+}
+function lfDlLine(k) {
+  var st = dlTot(k, 'st'), kc = dlTot(k, 'fd'), pr = dlTot(k, 'pr'), wa = dlTot(k, 'wa'), out = [];
+  if (st) out.push(st.toLocaleString('en-GB') + ' steps');
+  if (kc || pr) out.push(kc.toLocaleString('en-GB') + ' kcal' + (pr ? ' · ' + Math.round(pr) + 'g protein' : ''));
+  if (wa) out.push(dlFmt('wa', wa) + ' water');
+  return out.join(' · ');
 }
 
 function lfSum(rows) {
@@ -1379,13 +1538,17 @@ function lfDaySheet(k) {
   var ws = woOn(k);
   if (ws.length === 1) return lfWoSheet(ws[0]);
   var b = el('<div class="lf-list"></div>');
-  if (!ws.length) b.appendChild(el('<div class="lf-empty"><b>Rest day</b>Nothing logged on this day.</div>'));
+  var dl = lfDlLine(k);
+  if (dl) { var dp = el('<p class="lf-lab lf-dl-line" style="margin:0 0 8px"></p>'); dp.textContent = dl; b.appendChild(dp); }
+  if (!ws.length) b.appendChild(el('<div class="lf-empty"><b>Rest day</b>No workout on this day.</div>'));
   ws.forEach(function (w) { b.appendChild(lfWoRow(w)); });
   lfSheet({ title: fmtDay(k), body: b });
 }
 function lfWoSheet(w) {
   var b = el('<div><p class="lf-lab" style="margin:0 0 10px"></p></div>');
   $('p', b).textContent = fmtDay(w.d) + (w.e > w.s ? ' · ' + fmtDur(w.e - w.s) : '');
+  var dl = lfDlLine(w.d);
+  if (dl) { var dp = el('<p class="lf-lab lf-dl-line" style="margin:-6px 0 10px"></p>'); dp.textContent = dl; b.appendChild(dp); }
   b.appendChild(lfSum([[w.x.length, 'exercises'], [woSets(w), 'sets'], [fmtBig(toDisp(woVol(w))), S.unit]]));
   w.x.forEach(function (e) {
     var x = el('<button type="button" class="lf-wo-ex lf-tap"><b></b><div></div></button>');
@@ -1426,6 +1589,15 @@ function lfRenderYou() {
     $('#lfGoal', c).appendChild(g);
   }
   root.appendChild(c);
+  var gc = el('<div class="lf-card" id="lfGoals"><div class="lf-lab">Daily goals</div></div>');
+  [['st', 'Steps', 'steps'], ['kc', 'Calories', 'kcal'], ['pr', 'Protein', 'g'], ['wa', 'Water', 'ml']].forEach(function (g) {
+    var row = el('<label class="lf-gl"><span></span><input class="lf-field lf-num" inputmode="numeric" autocomplete="off" /><em></em></label>');
+    $('span', row).textContent = g[1]; $('em', row).textContent = g[2];
+    var inp = $('input', row); inp.dataset.g = g[0]; inp.value = S.dg[g[0]] || ''; inp.placeholder = 'none';
+    inp.addEventListener('change', function () { var v = parseInt(inp.value.replace(/[^\d]/g, ''), 10); S.dg[g[0]] = v > 0 ? v : 0; lfSave(); });
+    gc.appendChild(row);
+  });
+  root.appendChild(gc);
   var all = windowStats(new Date(2000, 0, 1), today());
   var t = el('<div class="lf-card"><div class="lf-lab">All time</div></div>');
   t.appendChild(lfSum([[all.wo, 'workouts'], [all.sets, 'sets'], [fmtBig(toDisp(all.vol)), S.unit]]));
