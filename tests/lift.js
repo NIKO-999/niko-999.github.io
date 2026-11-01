@@ -71,9 +71,9 @@ const freeze = (at) => `(() => {
   /* Tuesday, the screen this was reported on: a list long enough that
      the next exercise sits above the open one, on the scrim. */
   await page.click('#lfSplit .lf-li >> nth=1'); await settle(page);
-  await top(page).locator('.lf-li', { hasText: 'Incline dumbbell press' }).click(); await settle(page);
+  await top(page).locator('.lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Incline dumbbell press' + '$') }) }).click(); await settle(page);
   ok('an exercise opens over the day', (await top(page).locator('h2').textContent()) === 'Incline dumbbell press');
-  const nx = await page.locator('.lf-sheet').first().locator('.lf-li', { hasText: 'Machine chest press' }).boundingBox();
+  const nx = await page.locator('.lf-sheet').first().locator('.lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Machine chest press' + '$') }) }).boundingBox();
   await page.mouse.click(nx.x + 40, nx.y + 10); await settle(page);
   ok('tapping another closes the first and opens the one tapped', await page.locator('.lf-sheet').count() === 2
     && (await top(page).locator('h2').textContent()) === 'Machine chest press', await page.$$eval('.lf-sheet h2', (h) => h.map((x) => x.textContent)));
@@ -99,13 +99,31 @@ const freeze = (at) => `(() => {
   await makeEx('Overhead press', 'Shoulders');
   let s = await store(page);
   ok('two exercises of your own are on the record', s.ex.length === 2 && s.ex[0].m === 'Chest' && s.ex[1].m === 'Shoulders', s.ex);
-  ok('and in the library beside the split\'s', await page.locator('#lfLibList .lf-li', { hasText: 'Bench press' }).count() === 1 && await page.locator('#lfLibList .lf-li', { hasText: 'Romanian deadlift' }).count() === 1);
+  ok('and in the library beside the split\'s', await page.locator('#lfLibList .lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Bench press' + '$') }) }).count() === 1 && await page.locator('#lfLibList .lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Romanian deadlift' + '$') }) }).count() === 1);
+
+  const grp = await page.evaluate(() => [...document.querySelectorAll('#lfLibList .lf-card')].map(c => [c.dataset.g, c.querySelector('.lf-cap').textContent, [...c.querySelectorAll('.lf-li b')].map(b => b.textContent)]));
+  ok('the library is Push, Pull, Legs and Core, in that order', grp.map(g => g[0]).join() === 'push,pull,legs,core', grp.map(g => g[1]));
+  ok('pendulum squat is built in, under Legs', grp[2] && grp[2][2].includes('Pendulum squat'), grp[2] && grp[2][2].slice(0, 8));
+  ok('rear delts are a pull, not a push', grp[1] && grp[1][2].includes('Face pulls') && !grp[0][2].includes('Face pulls'));
+  ok('your own exercise lands in its group', grp[0] && grp[0][2].includes('Bench press'));
+  await page.locator('.lf-ppl button', { hasText: 'Legs' }).click();
+  const legsOnly = await page.evaluate(() => [...document.querySelectorAll('#lfLibList .lf-card')].map(c => c.dataset.g));
+  ok('the filter narrows to one group', legsOnly.join() === 'legs', legsOnly);
+  await page.locator('.lf-ppl button', { hasText: 'All' }).click();
 
   await page.click('#lfNewRt'); await settle(page);
   await page.fill('#lfRtN', 'Push'); await page.fill('#lfRtS', 'Push, Pull, Legs');
   for (const n of ['Bench press', 'Overhead press']) {
     await top(page).locator('.lf-add').click(); await settle(page);
-    await top(page).locator('.lf-li', { hasText: n }).click(); await settle(page);
+    if (n === 'Bench press') {
+      const caps = await top(page).locator('.lf-pick-h').allTextContents();
+      ok('the picker is grouped Push, Pull, Legs, Core', caps.join() === 'Push,Pull,Legs,Core', caps);
+      await top(page).locator('input[type=search]').fill('pendul');
+      const hit = await top(page).locator('.lf-li b').allTextContents();
+      ok('search still finds across the groups', hit.join() === 'Pendulum squat', hit);
+      await top(page).locator('input[type=search]').fill('');
+    }
+    await top(page).locator('.lf-li', { has: page.locator('b', { hasText: new RegExp('^' + n + '$') }) }).click(); await settle(page);
   }
   await top(page).locator('button', { hasText: 'Save' }).click(); await settle(page);
   s = await store(page);
@@ -177,7 +195,7 @@ const freeze = (at) => `(() => {
   await page.keyboard.press('Escape'); await settle(page);
 
   await page.click('.lf-bar [data-v="lib"]');
-  await page.locator('#lfLibList .lf-li', { hasText: 'Bench press' }).click(); await settle(page);
+  await page.locator('#lfLibList .lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Bench press' + '$') }) }).click(); await settle(page);
   const ex = await top(page).textContent();
   ok('an exercise reads back its best set and both sessions', ex.includes('65×8') && /2\s*sessions/.test(ex), ex.slice(0, 120));
   ok('with its trend drawn', await top(page).locator('.lf-area path').count() >= 1);
@@ -312,7 +330,7 @@ const freeze = (at) => `(() => {
     const { c, page } = await ctx();
     const sh = () => page.locator('.lf-sheet').last();
     await page.click('.lf-bar [data-v="lib"]');
-    await page.locator('#lfLibList .lf-li', { hasText: 'Romanian deadlift' }).click(); await settle(page);
+    await page.locator('#lfLibList .lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Romanian deadlift' + '$') }) }).click(); await settle(page);
     const a = await sh().locator('.lf-how-go').evaluate((x) => ({ href: x.href, t: x.target, rel: x.rel, txt: x.textContent }));
     ok('every exercise opens a YouTube search on its own name', a.href === 'https://www.youtube.com/results?search_query=' + encodeURIComponent('Romanian deadlift exercise proper form')
       && a.t === '_blank' && /noopener/.test(a.rel) && /Watch how it's done/.test(a.txt), a);
@@ -324,14 +342,14 @@ const freeze = (at) => `(() => {
     ok('a specific video replaces the search', await sh().locator('.lf-how-go').getAttribute('href') === 'https://youtu.be/abc123'
       && /Your saved video/.test(await sh().locator('.lf-how-sub').textContent()));
     await page.reload(); await page.waitForTimeout(400);
-    await page.locator('#lfLibList .lf-li', { hasText: 'Romanian deadlift' }).click(); await settle(page);
+    await page.locator('#lfLibList .lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Romanian deadlift' + '$') }) }).click(); await settle(page);
     ok('and is still there next time', await sh().locator('.lf-how-go').getAttribute('href') === 'https://youtu.be/abc123');
     ok('only on that exercise', await (async () => {
       await page.keyboard.press('Escape'); await settle(page);
-      await page.locator('#lfLibList .lf-li', { hasText: 'Hip thrusts' }).click(); await settle(page);
+      await page.locator('#lfLibList .lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Hip thrusts' + '$') }) }).click(); await settle(page);
       const h = await sh().locator('.lf-how-go').getAttribute('href');
       await page.keyboard.press('Escape'); await settle(page);
-      await page.locator('#lfLibList .lf-li', { hasText: 'Romanian deadlift' }).click(); await settle(page);
+      await page.locator('#lfLibList .lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Romanian deadlift' + '$') }) }).click(); await settle(page);
       return /search_query=Hip%20thrusts/.test(h);
     })());
     await sh().locator('.lf-how-l').click();

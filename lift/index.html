@@ -323,6 +323,9 @@ svg { display: block; }
 .lf-hero { font-size: 40px; font-weight: 800; letter-spacing: -.03em; line-height: 1; margin-top: 4px; }
 .lf-hero + p { margin: 6px 0 0; font-size: 15px; font-weight: 600; }
 
+.lf-pick-h { padding: 14px 2px 2px; }
+.lf-ppl button { font-size: 12.5px; }
+
 /* ── how it's done ── */
 .lf-how-go { gap: 8px; text-decoration: none; }
 .lf-how-go .lf-ic { width: 16px; height: 16px; }
@@ -405,8 +408,53 @@ var EXERCISES = [
   ['incurl', 'Incline dumbbell curls', 'Biceps'], ['hammer', 'Hammer curls', 'Biceps'], ['curl', 'Biceps curls', 'Biceps'],
   ['preacher', 'Preacher curls', 'Biceps'], ['ropeham', 'Rope hammer curls', 'Biceps'],
   ['tripush', 'Triceps pushdowns', 'Triceps'], ['ropepush', 'Rope triceps pushdowns', 'Triceps'], ['triover', 'Overhead triceps extensions', 'Triceps'],
-  ['ohcable', 'Overhead cable extensions', 'Triceps'], ['triext', 'Triceps extensions', 'Triceps']
+  ['ohcable', 'Overhead cable extensions', 'Triceps'], ['triext', 'Triceps extensions', 'Triceps'],
+  /* The wider library, beyond the split: what a push, pull or legs day
+     is usually built from, so anything you swap in is already here. */
+  ['pendulum', 'Pendulum squat', 'Quads', 1], ['frontsq', 'Front squat', 'Quads', 1], ['smithsq', 'Smith machine squat', 'Quads', 1],
+  ['beltsq', 'Belt squat', 'Quads', 1], ['gobletsq', 'Goblet squat', 'Quads', 1], ['vsquat', 'V-squat', 'Quads', 1],
+  ['lunge', 'Walking lunges', 'Quads', 1], ['revlunge', 'Reverse lunges', 'Glutes', 1], ['stepup', 'Step-ups', 'Quads', 1],
+  ['sissy', 'Sissy squat', 'Quads', 0, 'bw'], ['spanish', 'Spanish squat', 'Quads'],
+  ['deadlift', 'Deadlift', 'Hamstrings', 1], ['sldl', 'Stiff-leg deadlift', 'Hamstrings', 1], ['dbrdl', 'Dumbbell Romanian deadlift', 'Hamstrings', 1],
+  ['goodam', 'Good mornings', 'Hamstrings', 1], ['stdcurl', 'Standing leg curls', 'Hamstrings'], ['nordic', 'Nordic curls', 'Hamstrings', 0, 'bw'],
+  ['glutebr', 'Glute bridge', 'Glutes', 1], ['cablekb', 'Cable kickbacks', 'Glutes'], ['abduct', 'Hip abduction machine', 'Glutes'],
+  ['adduct', 'Hip adduction machine', 'Legs'], ['smithcalf', 'Smith machine calf raises', 'Calves'], ['donkey', 'Donkey calf raises', 'Calves'],
+  ['tibraise', 'Tibialis raises', 'Calves'],
+  ['bench', 'Barbell bench press', 'Chest', 1], ['inclbb', 'Incline barbell bench press', 'Chest', 1], ['dbbench', 'Dumbbell bench press', 'Chest', 1],
+  ['decline', 'Decline bench press', 'Chest', 1], ['smithinc', 'Smith machine incline press', 'Chest', 1], ['dips', 'Dips', 'Chest', 1, 'bw'],
+  ['pushup', 'Push-ups', 'Chest', 0, 'bw'], ['cablecross', 'Cable crossovers', 'Chest'], ['dbfly', 'Dumbbell flyes', 'Chest'], ['lowfly', 'Low-to-high cable flyes', 'Chest'],
+  ['ohp', 'Barbell overhead press', 'Shoulders', 1], ['dbshp', 'Seated dumbbell shoulder press', 'Shoulders', 1], ['arnold', 'Arnold press', 'Shoulders', 1],
+  ['mlat', 'Machine lateral raises', 'Shoulders'], ['frontr', 'Front raises', 'Shoulders'], ['uprow', 'Upright rows', 'Shoulders'],
+  ['skull', 'Skull crushers', 'Triceps'], ['cgbench', 'Close-grip bench press', 'Triceps', 1], ['kickback', 'Triceps kickbacks', 'Triceps'],
+  ['dipmach', 'Machine dips', 'Triceps'], ['ohdb', 'Overhead dumbbell extensions', 'Triceps'],
+  ['bbrow', 'Barbell rows', 'Back', 1], ['dbrow', 'One-arm dumbbell rows', 'Back', 1], ['tbar', 'T-bar rows', 'Back', 1],
+  ['sealrow', 'Seal rows', 'Back', 1], ['mrow', 'Machine rows', 'Back', 1], ['pullupbw', 'Pull-ups', 'Back', 1, 'bw'],
+  ['chinup', 'Chin-ups', 'Back', 1, 'bw'], ['cgpd', 'Close-grip lat pulldowns', 'Back', 1], ['sapd', 'Single-arm lat pulldowns', 'Back'],
+  ['straight', 'Straight-arm pulldowns', 'Back'], ['pullover', 'Dumbbell pullovers', 'Back'], ['rackpull', 'Rack pulls', 'Back', 1],
+  ['shrug', 'Shrugs', 'Back'], ['facepull', 'Face pulls', 'Shoulders'], ['revpec', 'Reverse pec deck', 'Shoulders'],
+  ['bbcurl', 'Barbell curls', 'Biceps'], ['ezcurl', 'EZ-bar curls', 'Biceps'], ['cablecurl', 'Cable curls', 'Biceps'],
+  ['bayesian', 'Bayesian cable curls', 'Biceps'], ['spider', 'Spider curls', 'Biceps'], ['conc', 'Concentration curls', 'Biceps'],
+  ['revcurl', 'Reverse curls', 'Biceps'], ['wristcurl', 'Wrist curls', 'Biceps'],
+  ['crunch', 'Crunches', 'Abs', 0, 'bw'], ['legraise', 'Lying leg raises', 'Abs', 0, 'bw'], ['capt', "Captain's chair knee raises", 'Abs', 0, 'bw'],
+  ['declsit', 'Decline sit-ups', 'Abs', 0, 'bw'], ['russian', 'Russian twists', 'Abs'], ['woodchop', 'Cable woodchops', 'Abs'],
+  ['pallof', 'Pallof press', 'Abs'], ['mcrunch', 'Machine crunches', 'Abs'],
+  ['superman', 'Superman holds', 'Lower back', 0, 'bw'], ['ghr', 'Glute-ham raises', 'Hamstrings', 0, 'bw']
 ].map(function (a) { return { id: a[0], n: a[1], m: a[2], c: a[3] ? 1 : 0, t: a[4] || 'w' }; });
+
+/* PUSH, PULL, LEGS — and Core for what is neither. Worked out from the
+   muscle, with the three rear-delt movements named: they are a
+   shoulder, and they are a pull. */
+var PPL = [['push', 'Push'], ['pull', 'Pull'], ['legs', 'Legs'], ['core', 'Core']];
+var PULL_DELTS = { rdfly: 1, facepull: 1, revpec: 1 };
+function lfPpl(e) {
+  if (PULL_DELTS[e.id]) return 'pull';
+  var m = e.m;
+  if (m === 'Chest' || m === 'Shoulders' || m === 'Triceps') return 'push';
+  if (m === 'Back' || m === 'Biceps') return 'pull';
+  if (m === 'Quads' || m === 'Hamstrings' || m === 'Glutes' || m === 'Calves' || m === 'Legs') return 'legs';
+  if (m === 'Abs' || m === 'Core' || m === 'Lower back') return 'core';
+  return m === 'Arms' ? 'pull' : 'core';
+}
 /* Arms and Legs stay on the list so an exercise you made before the
    split arrived still reads; the program itself uses the finer groups. */
 var MUSCLES = ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Lower back', 'Abs', 'Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Core', 'Arms', 'Legs', 'Cardio', 'Other'];
@@ -1240,21 +1288,50 @@ function lfSummary(w, prs) {
 }
 
 /* ═══════════ EXERCISES ═══════════ */
+/* A segmented filter over the library, never stored — it is a position
+   on a screen you are looking at. */
+function lfPplSeg(cur, onPick) {
+  var seg = el('<div class="lf-seg lf-ppl" style="--n:5" role="group" aria-label="Filter"></div>');
+  [['all', 'All']].concat(PPL).forEach(function (x) {
+    var b = el('<button type="button"></button>'); b.textContent = x[1]; b.dataset.g = x[0];
+    b.setAttribute('aria-pressed', x[0] === cur ? 'true' : 'false');
+    b.addEventListener('click', function () { $$('button', seg).forEach(function (y) { y.setAttribute('aria-pressed', y === b ? 'true' : 'false'); }); onPick(x[0]); });
+    seg.appendChild(b);
+  });
+  return seg;
+}
+/* Grouped by push, pull, legs and core, then by muscle inside each, in
+   the order MUSCLES lists them, so the same exercise is always in the
+   same place. */
+function lfGrouped(list) {
+  var out = [];
+  PPL.forEach(function (g) {
+    var es = list.filter(function (e) { return lfPpl(e) === g[0]; });
+    es.sort(function (a, b) { return MUSCLES.indexOf(a.m) - MUSCLES.indexOf(b.m) || a.n.localeCompare(b.n); });
+    if (es.length) out.push({ g: g[0], n: g[1], es: es });
+  });
+  return out;
+}
+
 function lfPicker(onPick) {
-  var b = el('<div><input class="lf-field" type="search" placeholder="Search exercises" aria-label="Search exercises" autocomplete="off" /><div class="lf-list lf-sec"></div></div>');
+  var b = el('<div><input class="lf-field" type="search" placeholder="Search exercises" aria-label="Search exercises" autocomplete="off" /><div class="lf-pplw"></div><div class="lf-list lf-sec"></div></div>');
   var mk = el('<button type="button" class="lf-btn is-full">' + IC.plus + 'Create exercise</button>');
   var s = lfSheet({ title: 'Add exercise', body: b, foot: [mk] });
-  var q = $('input', b), list = $('.lf-list', b);
+  var q = $('input', b), list = $('.lf-list', b), grp = 'all';
+  $('.lf-pplw', b).appendChild(lfPplSeg(grp, function (g) { grp = g; paint(); }));
   function paint() {
     list.textContent = '';
     var t = q.value.trim().toLowerCase();
-    var all = allEx().filter(function (e) { return !t || e.n.toLowerCase().indexOf(t) >= 0; });
+    var all = allEx().filter(function (e) { return (!t || e.n.toLowerCase().indexOf(t) >= 0) && (grp === 'all' || lfPpl(e) === grp); });
     if (!all.length) { list.appendChild(el('<div class="lf-empty"><b>' + (allEx().length ? 'No match' : 'No exercises yet') + '</b>' + (allEx().length ? 'Try another word, or create it.' : 'Create one and it is here every time.') + '</div>')); return; }
-    all.forEach(function (e) {
-      var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div>' + IC.plus + '</button>');
-      $('b', li).textContent = e.n; $('span', li).textContent = e.m;
-      li.addEventListener('click', function () { s.close(true); onPick(e.id); });
-      list.appendChild(li);
+    lfGrouped(all).forEach(function (G) {
+      var h = el('<div class="lf-cap lf-pick-h"></div>'); h.textContent = G.n; list.appendChild(h);
+      G.es.forEach(function (e) {
+        var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div>' + IC.plus + '</button>');
+        $('b', li).textContent = e.n; $('span', li).textContent = e.m;
+        li.addEventListener('click', function () { s.close(true); onPick(e.id); });
+        list.appendChild(li);
+      });
     });
   }
   q.addEventListener('input', paint); paint();
@@ -1449,7 +1526,7 @@ function lfDaySpec(rt) {
   go.addEventListener('click', function () { s.close(true); lfStart(rt); });
 }
 
-var libQ = '';
+var libQ = '', libG = 'all';
 function lfRenderLib() {
   var root = $('#lfLib'); root.textContent = '';
   root.appendChild(el('<h2 class="lf-h1">Exercises</h2>'));
@@ -1481,6 +1558,7 @@ function lfRenderLib() {
   var hd = el('<div class="lf-hd lf-gh"><span class="lf-cap">All exercises</span></div>');
   root.appendChild(hd);
   var all = allEx();
+  var fw = el('<div></div>'); fw.appendChild(lfPplSeg(libG, function (g) { libG = g; paintLib(); })); root.appendChild(fw);
   if (all.length > 6) {
     var q = el('<input class="lf-field" type="search" placeholder="Search" aria-label="Search exercises" autocomplete="off" />');
     q.value = libQ;
@@ -1494,18 +1572,18 @@ function lfRenderLib() {
   function paintLib() {
     box.textContent = '';
     var t = libQ.trim().toLowerCase();
-    var shown = all.filter(function (e) { return !t || e.n.toLowerCase().indexOf(t) >= 0; });
+    var shown = all.filter(function (e) { return (!t || e.n.toLowerCase().indexOf(t) >= 0) && (libG === 'all' || lfPpl(e) === libG); });
     if (!all.length) { box.appendChild(el('<div class="lf-card lf-empty"><b>No exercises yet</b>Create your own here, or they arrive with the full list.</div>')); return; }
-    MUSCLES.forEach(function (m) {
-      var g = shown.filter(function (e) { return e.m === m; });
-      if (!g.length) return;
+    if (!shown.length) { box.appendChild(el('<div class="lf-card lf-empty"><b>No match</b>Try another word, or create it.</div>')); return; }
+    lfGrouped(shown).forEach(function (G) {
       var c = el('<div class="lf-card" style="padding:4px 16px"><div class="lf-cap" style="padding:12px 0 2px"></div><div class="lf-list"></div></div>');
-      $('.lf-cap', c).textContent = m;
-      g.forEach(function (e) {
+      c.dataset.g = G.g;
+      $('.lf-cap', c).textContent = G.n + ' · ' + G.es.length;
+      G.es.forEach(function (e) {
         var h = historyFor(e.id), last = h[h.length - 1];
         var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div><span class="lf-li-r lf-num"></span></button>');
         $('b', li).textContent = e.n;
-        $('span', li).textContent = last ? 'Last ' + fmtDay(last.w.d) : 'Not logged yet';
+        $('span', li).textContent = e.m + (last ? ' · last ' + fmtDay(last.w.d) : '');
         if (last) { var top = last.sets.reduce(function (a, s) { return e1rm(s.w, s.r) > e1rm(a.w, a.r) ? s : a; }); $('.lf-li-r', li).textContent = fmtW(top.w) + '×' + top.r; }
         li.addEventListener('click', function () { lfExSheet(e.id); });
         $('.lf-list', c).appendChild(li);
