@@ -197,8 +197,19 @@ const freeze = (at) => `(() => {
   ok('its red dot is a dot', Math.abs(dot[0] - dot[1]) < 1 && dot[0] < 12, dot);
   ok('the start button says resume', (await page.textContent('#lfGo')).includes('Resume'));
   await page.click('#lfLive'); await settle(page);
+  /* CARDIO AFTER: a kind and the minutes, one press each. */
+  const cd = page.locator('#lfCardio');
+  ok('the session ends on an optional cardio card', (await cd.locator('.lf-cd-sum').textContent()) === 'optional');
+  await cd.locator('.lf-pill[data-k="bike"]').click(); await cd.locator('.lf-pill[data-m="15"]').click();
+  ok('picking it says what it is', (await cd.locator('.lf-cd-sum').textContent()) === '15 min bike');
+  await cd.locator('.lf-pill[data-m="15"]').click();
+  ok('the same minutes pressed again clears it', (await cd.locator('.lf-cd-sum').textContent()) === 'optional');
+  await cd.locator('.lf-cd-f').fill('12'); await cd.locator('.lf-cd-f').press('Tab');
+  ok('minutes off the ladder go in the field', (await page.locator('#lfCardio .lf-cd-sum').textContent()) === '12 min bike');
   await page.click('#lfFinish'); await page.waitForTimeout(800);
   s = await store(page);
+  ok('the workout carries its cardio', JSON.stringify(s.wo[0].cd) === '{"k":"bike","m":12}' && s.ck === 'bike', s.wo[0].cd);
+  ok('the summary says it', /\+ 12 min bike/.test(await top(page).textContent()));
   ok('finishing files only the ticked sets', s.wo.length === 1 && s.wo[0].x.map((e) => e.sets.length).join() === '2,1' && s.wo[0].d === '2026-10-30', s.wo);
   ok('weights are stored as entered', s.wo[0].x[0].sets[0].w === 60 && s.wo[0].x[0].sets[1].r === 7);
   ok('a summary comes up', (await top(page).textContent()).includes('Workout logged'));
@@ -208,6 +219,17 @@ const freeze = (at) => `(() => {
   ok('the tiles count it: 1 workout, 3 sets, 1,260 kg', stats.join() === '1,3,1.3k', stats);
   ok('today is lit in the 30 days', await page.$eval('.lf-day.is-now', (e) => e.classList.contains('is-on')));
   ok('this week\'s bars say 25 reps', (await page.textContent('#lfWeek .lf-big')).startsWith('25'));
+  ok('the week\'s card totals the cardio', (await page.textContent('#lfLegs .lf-cd-wk .lf-num')) === '12 min this week');
+  await page.click('#lfGrid'); await settle(page);
+  await page.locator('.lf-cell.is-now').click(); await settle(page);
+  ok('the workout sheet shows it', (await top(page).locator('#lfWoCd > div').first().textContent()) === '12 min bike');
+  await top(page).locator('#lfWoCd .lf-pill[data-m="20"]').click();
+  ok('and it can be changed after', (await store(page)).wo[0].cd.m === 20);
+  await top(page).locator('#lfWoCd .lf-pill[data-m="20"]').click();
+  ok('or taken off', (await store(page)).wo[0].cd === null);
+  await top(page).locator('#lfWoCd .lf-pill[data-m="10"]').click();
+  await page.keyboard.press('Escape'); await settle(page);
+  await page.click('.lf-bar [data-v="home"]'); await settle(page);
 
   /* ── progressive overload ── */
   await page.click('#lfGo'); await settle(page);
@@ -390,12 +412,13 @@ const freeze = (at) => `(() => {
   /* ── a damaged record is repaired, never thrown away ── */
   {
     const bad = { unit: 'kg', goal: 99, dl: { '2026-10-28': { st: [{ t: 1, v: 9000 }, { v: 'x' }], fd: [null, { kc: 500, p: 30 }], wa: 'nope' }, junk: { st: [] } }, ex: [{ id: 'a', n: 'Row', m: 'Back' }, { n: 'no id' }],
-      wo: [{ id: 'w1', d: '2026-10-20', s: 1, e: 2, n: 'Pull', x: [{ id: 'a', n: 'Row', sets: [{ w: 50, r: 10 }, { w: 'x', r: 2 }, null] }] }, { d: 'nope' }] };
+      wo: [{ id: 'w1', d: '2026-10-20', s: 1, e: 2, n: 'Pull', cd: { k: 'skate', m: 20 }, x: [{ id: 'a', n: 'Row', sets: [{ w: 50, r: 10 }, { w: 'x', r: 2 }, null] }] }, { d: 'nope' }] };
     const { c, page } = await ctx(bad);
     const r = await store(page);
     ok('a bad set costs the set, a bad workout the workout', r.wo.length === 1 && r.wo[0].x[0].sets.length === 1 && r.ex.length === 1 && r.goal === 7, r);
     ok('a bad day-log entry costs the entry, not the day', r.dl['2026-10-28'].st.length === 1 && r.dl['2026-10-28'].fd.length === 1 && r.dl['2026-10-28'].wa.length === 0 && !r.dl.junk, r.dl);
     ok('and the repair is written back', JSON.parse(await page.evaluate(() => localStorage.getItem('lift.v1'))).wo[0].x[0].sets.length === 1);
+    ok('a bad cardio entry costs the cardio, not the workout', r.wo[0].cd === null && r.wo.length === 1);
     ok('a record from before focus was editable gets the default focus', r.focus.length === 6 && r.focus[1].m === 'Calves' && r.focus[1].lo === 12, r.focus);
     await c.close();
   }

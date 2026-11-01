@@ -325,6 +325,13 @@ svg { display: block; }
 .lf-hero + p { margin: 6px 0 0; font-size: 15px; font-weight: 600; }
 
 .lf-pick-h { padding: 14px 2px 2px; }
+.lf-cdc { background: var(--card); border-radius: var(--r); padding: 14px; margin-top: 12px; }
+.lf-cdc .lf-ex-hd { justify-content: space-between; min-height: 24px; }
+.lf-cdc b { font-size: 15px; font-weight: 600; }
+.lf-cd { display: grid; gap: 8px; margin-top: 10px; }
+.lf-cd-f { width: 84px; height: 36px; min-height: 36px; padding: 0 12px; border-radius: 999px; font-size: 16px; }
+.lf-cd-wk { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+#lfWoCd > div:first-of-type { margin-bottom: 2px; }
 #lfFocus .lf-li em { font-style: normal; font-weight: 600; margin-left: auto; }
 .lf-ppl button { font-size: 12.5px; }
 
@@ -446,6 +453,40 @@ var EXERCISES = [
 /* PUSH, PULL, LEGS — and Core for what is neither. Worked out from the
    muscle, with the three rear-delt movements named: they are a
    shoulder, and they are a pull. */
+/* CARDIO is one entry on a workout — what, and for how long — because
+   ten to fifteen minutes after the session is one thing you did, not a
+   workout of its own. */
+var CARDIO = [['walk', 'Incline walk'], ['bike', 'Bike'], ['stairs', 'Stairs'], ['row', 'Rower'], ['ellip', 'Elliptical'], ['run', 'Run']];
+var CARDIO_N = CARDIO.reduce(function (o, c) { o[c[0]] = c[1]; return o; }, {});
+function lfCdTxt(c) { return c ? c.m + ' min ' + CARDIO_N[c.k].toLowerCase() : ''; }
+/* Kind and minutes as pills, a pressed minute pressed again clears it,
+   and a field for anything that is not on the ladder. */
+function lfCardioPick(cd, onChange) {
+  var cur = cd ? { k: cd.k, m: cd.m } : { k: S.ck, m: 0 };
+  var b = el('<div class="lf-cd"><div class="lf-pills lf-cd-k"></div><div class="lf-pills lf-cd-m"></div></div>');
+  function paint() {
+    var kb = $('.lf-cd-k', b), mb = $('.lf-cd-m', b); kb.textContent = ''; mb.textContent = '';
+    CARDIO.forEach(function (c) {
+      var p = el('<button type="button" class="lf-pill"></button>'); p.textContent = c[1]; p.dataset.k = c[0];
+      p.setAttribute('aria-pressed', c[0] === cur.k ? 'true' : 'false');
+      p.addEventListener('click', function () { cur.k = c[0]; S.ck = c[0]; lfSave(); paint(); onChange(cur.m > 0 ? { k: cur.k, m: cur.m } : null); });
+      kb.appendChild(p);
+    });
+    [10, 15, 20, 30].forEach(function (m) {
+      var p = el('<button type="button" class="lf-pill lf-num"></button>'); p.textContent = m + ' min'; p.dataset.m = m;
+      p.setAttribute('aria-pressed', m === cur.m ? 'true' : 'false');
+      p.addEventListener('click', function () { cur.m = cur.m === m ? 0 : m; paint(); onChange(cur.m > 0 ? { k: cur.k, m: cur.m } : null); });
+      mb.appendChild(p);
+    });
+    var f = el('<input class="lf-field lf-num lf-cd-f" inputmode="numeric" placeholder="other" aria-label="Minutes" autocomplete="off" />');
+    if (cur.m && [10, 15, 20, 30].indexOf(cur.m) < 0) f.value = cur.m;
+    f.addEventListener('change', function () { var v = parseInt(f.value, 10); cur.m = v > 0 ? Math.min(600, v) : 0; paint(); onChange(cur.m > 0 ? { k: cur.k, m: cur.m } : null); });
+    mb.appendChild(f);
+  }
+  paint();
+  return b;
+}
+
 var PPL = [['push', 'Push'], ['pull', 'Pull'], ['legs', 'Legs'], ['core', 'Core']];
 var PULL_DELTS = { rdfly: 1, facepull: 1, revpec: 1 };
 function lfPpl(e) {
@@ -541,7 +582,7 @@ var DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 var MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 /* ═══════════ STORE ═══════════ */
-function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null, focus: lfFocusDefault(), lk: {}, dl: {}, dg: { st: 15000, kc: 0, pr: 0, wa: 3000 } }; }
+function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null, focus: lfFocusDefault(), ck: 'walk', lk: {}, dl: {}, dg: { st: 15000, kc: 0, pr: 0, wa: 3000 } }; }
 function num(v) { var n = +v; return isFinite(n) && n >= 0 ? n : null; }
 
 /* A damaged record is REPAIRED, never thrown away: a bad set costs the
@@ -552,6 +593,7 @@ function lfClean(o) {
   d.unit = o.unit === 'lb' ? 'lb' : 'kg';
   d.goal = Math.min(7, Math.max(1, Math.round(+o.goal) || 4));
   d.bwGoal = num(o.bwGoal);
+  if (CARDIO_N[o.ck]) d.ck = o.ck;
   /* A record from before focus was editable carries calf15 instead. */
   if (Array.isArray(o.focus)) {
     var seen = {};
@@ -591,7 +633,12 @@ function lfCleanWo(w) {
     return { id: e.id, n: typeof e.n === 'string' ? e.n : '', sets: (Array.isArray(e.sets) ? e.sets : [])
       .filter(function (s) { return s && num(s.r) !== null && num(s.w) !== null; }).map(function (s) { return { w: +s.w, r: Math.round(+s.r) }; }) };
   }).filter(function (e) { return e.sets.length; }) : [];
-  return { id: typeof w.id === 'string' ? w.id : lfId(), d: w.d, s: +w.s || 0, e: +w.e || 0, n: typeof w.n === 'string' ? w.n.slice(0, 40) : 'Workout', rt: typeof w.rt === 'string' ? w.rt : null, x: x };
+  return { id: typeof w.id === 'string' ? w.id : lfId(), d: w.d, s: +w.s || 0, e: +w.e || 0, n: typeof w.n === 'string' ? w.n.slice(0, 40) : 'Workout', rt: typeof w.rt === 'string' ? w.rt : null, x: x, cd: lfCleanCd(w.cd) };
+}
+function lfCleanCd(c) {
+  if (!c || !CARDIO_N[c.k]) return null;
+  var m = Math.round(+c.m);
+  return m > 0 ? { k: c.k, m: Math.min(600, m) } : null;
 }
 function lfLoad() {
   var raw = null;
@@ -611,6 +658,7 @@ function lfLoadAct() {
     var a = JSON.parse(localStorage.getItem(ACTK));
     if (!a || !Array.isArray(a.x) || !a.s) return null;
     a.x = a.x.filter(function (e) { return e && typeof e.id === 'string' && Array.isArray(e.sets); });
+    a.cd = lfCleanCd(a.cd);
     return a;
   } catch (e) { return null; }
 }
@@ -872,7 +920,9 @@ function lfMuscleSets(from, to) {
 function lfLegCard() {
   var m = monday(today()), got = lfMuscleSets(m, addDays(m, 6));
   var c = el('<div class="lf-card" id="lfLegs"><div class="lf-hd"><span class="lf-lab">Sets this week</span><span class="lf-lab">target</span></div><div class="lf-vol"></div></div>');
-  var ts = lfTargets();
+  var ts = lfTargets(), cdm = 0, a0 = ymd(m), a1 = ymd(addDays(m, 6));
+  S.wo.forEach(function (w) { if (w.cd && w.d >= a0 && w.d <= a1) cdm += w.cd.m; });
+  if (act && act.cd && ymd(new Date(act.s)) >= a0) cdm += act.cd.m;
   if (!ts.length) $('.lf-vol', c).appendChild(el('<div class="lf-lab">Nothing in focus. Add a muscle under You.</div>'));
   ts.forEach(function (t, i) {
     var n = got[t[0]] || 0, row = el('<div class="lf-vr"><span></span><i><b></b></i><em class="lf-num"></em></div>');
@@ -885,6 +935,9 @@ function lfLegCard() {
     $('em', row).textContent = n + ' / ' + lfRange(t[1], t[2]);
     $('.lf-vol', c).appendChild(row);
   });
+  var cl = el('<div class="lf-hd lf-cd-wk"><span class="lf-lab">Cardio</span><span class="lf-lab lf-num"></span></div>');
+  $('.lf-num', cl).textContent = cdm ? cdm + ' min this week' : 'none this week';
+  c.appendChild(cl);
   return c;
 }
 
@@ -1269,6 +1322,10 @@ function lfPaintSession() {
   var add = el('<button type="button" class="lf-add" id="lfAddEx">' + IC.plus + 'Add exercise</button>');
   add.addEventListener('click', function () { lfPicker(function (id) { lfAddEx(id); lfSaveAct(); lfPaintSession(); }); });
   list.appendChild(add);
+  var cc = el('<div class="lf-cdc" id="lfCardio"><div class="lf-ex-hd"><b>Cardio after</b><span class="lf-lab lf-cd-sum"></span></div></div>');
+  var sum = function () { $('.lf-cd-sum', cc).textContent = act.cd ? lfCdTxt(act.cd) : 'optional'; };
+  cc.appendChild(lfCardioPick(act.cd, function (c) { act.cd = c; lfSaveAct(); sum(); }));
+  sum(); list.appendChild(cc);
   if (!act.x.length) list.insertBefore(el('<div class="lf-empty"><b>Nothing in this workout yet</b>Add the first exercise and start logging sets.</div>'), add);
 }
 function runBestBefore(e, si, best) {
@@ -1281,7 +1338,8 @@ function lfFinish() {
   var x = act.x.map(function (e) {
     return { id: e.id, n: e.n, sets: e.sets.filter(function (s) { return s.ok && s.r > 0; }).map(function (s) { return { w: +s.w || 0, r: +s.r }; }) };
   }).filter(function (e) { return e.sets.length; });
-  if (!x.length) {
+  var cd = lfCleanCd(act.cd);
+  if (!x.length && !cd) {
     lfAsk('Nothing logged', 'No set in this workout is ticked off, so there is nothing to save. Discard it?', 'Discard', function () {
       act = null; lfSaveAct(); if (sessSheet) sessSheet.close(true); sessSheet = null; clearInterval(tick); lfRender();
     });
@@ -1289,7 +1347,7 @@ function lfFinish() {
   }
   var prs = [];
   act.x.forEach(function (e) { if (e.sets.some(function (s) { return s.ok && s.pr; })) prs.push(e.n); });
-  var w = { id: act.id, d: ymd(new Date(act.s)), s: act.s, e: Date.now(), n: act.n || 'Workout', rt: act.rt, x: x };
+  var w = { id: act.id, d: ymd(new Date(act.s)), s: act.s, e: Date.now(), n: act.n || 'Workout', rt: act.rt, x: x, cd: cd };
   S.wo.push(w); lfSave();
   act = null; lfSaveAct();
   clearInterval(tick);
@@ -1300,7 +1358,7 @@ function lfFinish() {
 function lfSummary(w, prs) {
   var b = el('<div><div class="lf-cap">Workout logged</div><div class="lf-hero" style="font-size:30px"></div><p class="lf-lab" style="font-size:14px;font-weight:400"></p></div>');
   $('.lf-hero', b).textContent = w.n;
-  $('p', b).textContent = fmtDay(w.d) + (prs.length ? ' · new best on ' + prs.join(', ') : '');
+  $('p', b).textContent = fmtDay(w.d) + (w.cd ? ' · + ' + lfCdTxt(w.cd) : '') + (prs.length ? ' · new best on ' + prs.join(', ') : '');
   b.appendChild(lfSum([[fmtDur(w.e - w.s), 'time'], [woSets(w), 'sets'], [fmtBig(toDisp(woVol(w))), S.unit]]));
   var done = el('<button type="button" class="lf-btn is-ink is-full">Done</button>');
   var s = lfSheet({ title: '', body: b, foot: [done] });
@@ -1690,7 +1748,7 @@ function lfRenderCal() {
 }
 function lfWoRow(w) {
   var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div><span class="lf-li-r lf-num"></span></button>');
-  $('b', li).textContent = w.n; $('span', li).textContent = fmtDay(w.d) + ' · ' + woSets(w) + ' sets';
+  $('b', li).textContent = w.n; $('span', li).textContent = fmtDay(w.d) + ' · ' + woSets(w) + ' sets' + (w.cd ? ' · ' + w.cd.m + ' min cardio' : '');
   $('.lf-li-r', li).textContent = fmtBig(toDisp(woVol(w))) + ' ' + S.unit;
   li.addEventListener('click', function () { lfWoSheet(w); });
   return li;
@@ -1711,6 +1769,10 @@ function lfWoSheet(w) {
   var dl = lfDlLine(w.d);
   if (dl) { var dp = el('<p class="lf-lab lf-dl-line" style="margin:-6px 0 10px"></p>'); dp.textContent = dl; b.appendChild(dp); }
   b.appendChild(lfSum([[w.x.length, 'exercises'], [woSets(w), 'sets'], [fmtBig(toDisp(woVol(w))), S.unit]]));
+  var cw = el('<div class="lf-wo-ex" id="lfWoCd"><b>Cardio</b><div></div></div>');
+  var csum = function () { $('div', cw).textContent = w.cd ? lfCdTxt(w.cd) : 'None logged — add it here'; };
+  csum();
+  cw.appendChild(lfCardioPick(w.cd, function (c) { w.cd = c; lfSave(); csum(); lfRender(); }));
   w.x.forEach(function (e) {
     var x = el('<button type="button" class="lf-wo-ex lf-tap"><b></b><div></div></button>');
     $('b', x).textContent = exName(e.id, e.n);
@@ -1718,6 +1780,7 @@ function lfWoSheet(w) {
     x.addEventListener('click', function () { lfExSheet(e.id); });
     b.appendChild(x);
   });
+  b.appendChild(cw);
   var del = el('<button type="button" class="lf-btn is-bad">Delete workout</button>');
   var s = lfSheet({ title: w.n, body: b, foot: [del] });
   del.addEventListener('click', function () {
