@@ -67,13 +67,16 @@ const freeze = (at) => `(() => {
   await page.click('#lfSplit .lf-li >> nth=0'); await settle(page);
   const mon = await top(page).textContent();
   ok('a day of the split reads its sets × reps', mon.includes('Hack squat') && mon.includes('3 × 6–10') && mon.includes('1–2 RIR') && mon.includes('Standing calf raises'), mon.slice(0, 160));
-  await top(page).locator('.lf-li', { hasText: 'Hack squat' }).click(); await settle(page);
-  ok('an exercise opens over the day', (await top(page).locator('h2').textContent()) === 'Hack squat');
-  /* the next exercise in the list sits above the open sheet, on the scrim */
-  const nx = await page.locator('.lf-sheet').first().locator('.lf-li', { hasText: 'Barbell squat' }).boundingBox();
+  await page.keyboard.press('Escape'); await settle(page);
+  /* Tuesday, the screen this was reported on: a list long enough that
+     the next exercise sits above the open one, on the scrim. */
+  await page.click('#lfSplit .lf-li >> nth=1'); await settle(page);
+  await top(page).locator('.lf-li', { hasText: 'Incline dumbbell press' }).click(); await settle(page);
+  ok('an exercise opens over the day', (await top(page).locator('h2').textContent()) === 'Incline dumbbell press');
+  const nx = await page.locator('.lf-sheet').first().locator('.lf-li', { hasText: 'Machine chest press' }).boundingBox();
   await page.mouse.click(nx.x + 40, nx.y + 10); await settle(page);
   ok('tapping another closes the first and opens the one tapped', await page.locator('.lf-sheet').count() === 2
-    && (await top(page).locator('h2').textContent()) === 'Barbell squat', await page.$$eval('.lf-sheet h2', (h) => h.map((x) => x.textContent)));
+    && (await top(page).locator('h2').textContent()) === 'Machine chest press', await page.$$eval('.lf-sheet h2', (h) => h.map((x) => x.textContent)));
   await page.keyboard.press('Escape'); await settle(page);
   await page.keyboard.press('Escape'); await settle(page);
   const sun = () => page.$$eval('#lfSplit .lf-li span', (x) => x[6].textContent);
@@ -301,6 +304,64 @@ const freeze = (at) => `(() => {
     await page.keyboard.press('Escape'); await settle(page);
     const tiles3 = await page.$$eval('#lfMain section:not([hidden])', (x) => x.length);
     ok('three tiles fit across a phone without scrolling sideways', tiles3 === 1 && await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    await c.close();
+  }
+
+  /* ── how it's done: your own photos and videos, and a link ── */
+  {
+    const { c, page } = await ctx();
+    const sh = () => page.locator('.lf-sheet').last();
+    const openEx = async () => {
+      await page.click('.lf-bar [data-v="lib"]');
+      await page.locator('#lfLibList .lf-li', { hasText: 'Hack squat' }).click(); await settle(page);
+    };
+    await openEx();
+    ok('an exercise has a place for how it is done, shut until you open it', await sh().locator('.lf-how').count() === 1 && await sh().locator('.lf-how-h button').getAttribute('aria-expanded') === 'false' && await sh().locator('#lfHowB').isHidden());
+    await sh().locator('.lf-how-h button').click();
+    ok('one tap opens it', await sh().locator('.lf-how-h button').getAttribute('aria-expanded') === 'true' && await sh().locator('.lf-how-add').isVisible());
+    /* a real 2x2 PNG and a stand-in video file */
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVR42mP8z8DwnwEJMDKiCjAAAJ0vBP2y4jrzAAAAAElFTkSuQmCC', 'base64');
+    await sh().locator('.lf-how input[type=file]').setInputFiles({ name: 'setup.png', mimeType: 'image/png', buffer: png });
+    await page.waitForTimeout(500);
+    await sh().locator('.lf-how input[type=file]').setInputFiles({ name: 'set.mp4', mimeType: 'video/mp4', buffer: Buffer.from('not really a video but a blob all the same') });
+    await page.waitForTimeout(500);
+    const kinds = await sh().locator('.lf-how-t').evaluateAll((t) => t.map((x) => x.querySelector('video') ? 'v' : 'p'));
+    ok('a photo and a video are added, in the order they were', kinds.join() === 'p,v', kinds);
+    ok('and they are in IndexedDB, never in the workout record', !/blob|data:/.test(await page.evaluate(() => localStorage.getItem('lift.v1') || '')));
+    await page.reload(); await page.waitForTimeout(400); await openEx();
+    ok('they are still there after the app is closed, and the panel remembers it was open', await sh().locator('.lf-how-t').count() === 2 && await sh().locator('#lfHowB').isVisible());
+    ok('the panel says what it holds', (await sh().locator('.lf-how-h em').textContent()) === '2 clips');
+    ok('and they belong to their own exercise only', await (async () => {
+      await page.keyboard.press('Escape'); await settle(page);
+      await page.locator('#lfLibList .lf-li', { hasText: 'Barbell squat' }).click(); await settle(page);
+      const n = await sh().locator('.lf-how-t').count();
+      await page.keyboard.press('Escape'); await settle(page);
+      await page.locator('#lfLibList .lf-li', { hasText: 'Hack squat' }).click(); await settle(page);
+      return n === 0;
+    })());
+    await sh().locator('.lf-how-t').first().click();
+    ok('a photo opens full screen', await page.locator('.lf-view img').count() === 1);
+    await page.keyboard.press('Escape');
+    ok('Escape puts the viewer away and leaves the exercise open', await page.locator('.lf-view').count() === 0 && await page.locator('.lf-sheet').count() === 1);
+    await sh().locator('.lf-how-t').nth(1).click();
+    ok('a video opens full screen with controls', await page.$eval('.lf-view video', (v) => v.controls && v.playsInline));
+    await page.locator('.lf-view .lf-btn.is-bad').click(); await page.waitForTimeout(300);
+    ok('deleting takes it off and the viewer away', await page.locator('.lf-view').count() === 0 && await sh().locator('.lf-how-t').count() === 1);
+    await page.click('.lf-toast button'); await page.waitForTimeout(300);
+    ok('and Undo puts it back', await sh().locator('.lf-how-t').count() === 2);
+
+    await sh().locator('.lf-how-lk input').fill('javascript:alert(1)');
+    await sh().locator('.lf-how-lk button').click();
+    ok('a link that is not a web address is refused', await page.evaluate(() => !((JSON.parse(localStorage.getItem('lift.v1')) || {}).lk || {}).hack));
+    await sh().locator('.lf-how-lk input').fill('youtube.com/watch?v=abc123');
+    await sh().locator('.lf-how-lk button').click();
+    const a = await sh().locator('.lf-how-lk a').evaluate((x) => ({ href: x.href, t: x.target, rel: x.rel }));
+    ok('and counts the link too', (await sh().locator('.lf-how-h em').textContent()) === '2 clips · link');
+    await sh().locator('.lf-how-h button').click();
+    ok('and shuts again', await sh().locator('#lfHowB').isHidden());
+    await sh().locator('.lf-how-h button').click();
+    ok('a demo link becomes a Watch button that opens outside the app', a.href === 'https://youtube.com/watch?v=abc123' && a.t === '_blank' && /noopener/.test(a.rel), a);
+    ok('a file input that is not visible still has a label you can press', await sh().locator('.lf-how-add').isVisible());
     await c.close();
   }
 
