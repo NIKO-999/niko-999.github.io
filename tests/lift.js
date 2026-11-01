@@ -81,13 +81,41 @@ const freeze = (at) => `(() => {
   await page.keyboard.press('Escape'); await settle(page);
   const sun = () => page.$$eval('#lfSplit .lf-li span', (x) => x[6].textContent);
   ok('calves start at 12 sets: Sunday holds its calf block back', /7 exercises/.test(await sun()), await sun());
+  /* WHAT YOU WORK ON IS YOURS: calves are a row you edit, not a switch. */
+  async function setFocus(m, lo, hi) {
+    await page.click('#lfFocus .lf-li[data-m="' + m + '"]'); await settle(page);
+    await top(page).locator('#lfFoLo').fill(String(lo)); await top(page).locator('#lfFoHi').fill(String(hi));
+    await top(page).locator('button', { hasText: 'Save' }).click(); await settle(page);
+  }
   await page.click('.lf-bar [data-v="you"]');
-  await page.click('#lfCalf [data-c="1"]');
+  ok('there is no calves switch any more', await page.locator('#lfCalf').count() === 0);
+  const foc = await page.$$eval('#lfFocus .lf-li', (r) => r.map((x) => x.dataset.m + ':' + x.querySelector('em').textContent));
+  ok('focus lists every muscle and its weekly sets', foc.join() === 'Quads:13–16,Calves:12,Lower back:6,Hamstrings:10,Glutes:5–8,Abs:9', foc);
+  await setFocus('Calves', 15, 15);
   await page.click('.lf-bar [data-v="home"]');
   ok('at 15 sets the target moves', (await page.textContent('#lfLegs [data-m="Calves"] em')) === '0 / 15');
   await page.click('.lf-bar [data-v="lib"]');
   ok('and Sunday gains its seated calf raises', /8 exercises/.test(await sun()));
-  await page.click('.lf-bar [data-v="you"]'); await page.click('#lfCalf [data-c="0"]');
+  await page.click('.lf-bar [data-v="you"]'); await setFocus('Calves', 12, 12);
+  /* Add one, make it a priority, and it leads the week's card. */
+  await page.click('#lfFocusAdd'); await settle(page);
+  await top(page).locator('.lf-pill', { hasText: /^Chest$/ }).click();
+  await top(page).locator('#lfFoLo').fill('10'); await top(page).locator('#lfFoHi').fill('14');
+  await top(page).locator('#lfFoP [data-p="1"]').click();
+  await top(page).locator('button', { hasText: 'Save' }).click(); await settle(page);
+  await page.click('.lf-bar [data-v="home"]');
+  const legs2 = await page.$$eval('#lfLegs .lf-vr', (r) => r.map((x) => x.dataset.m));
+  ok('an added priority joins the week, among the priorities', legs2.join() === 'Quads,Calves,Lower back,Chest,Hamstrings,Glutes,Abs', legs2);
+  ok('a separator still splits priorities from the rest', await page.$$eval('#lfLegs .lf-vol > *', (k) => k[4].classList.contains('lf-vsep')));
+  /* Remove it, and Undo puts it back where it was. */
+  await page.click('.lf-bar [data-v="you"]');
+  await page.click('#lfFocus .lf-li[data-m="Chest"]'); await settle(page);
+  await top(page).locator('button', { hasText: 'Remove' }).click(); await settle(page);
+  ok('a muscle comes out of focus', (await store(page)).focus.every((f) => f.m !== 'Chest'));
+  await page.locator('.lf-toast button').click(); await settle(page);
+  ok('and Undo puts it back', (await store(page)).focus.some((f) => f.m === 'Chest'));
+  await page.click('#lfFocus .lf-li[data-m="Chest"]'); await settle(page);
+  await top(page).locator('button', { hasText: 'Remove' }).click(); await settle(page);
   await page.click('.lf-bar [data-v="lib"]');
   async function makeEx(name, muscle) {
     await page.click('#lfNewEx'); await settle(page);
@@ -368,6 +396,19 @@ const freeze = (at) => `(() => {
     ok('a bad set costs the set, a bad workout the workout', r.wo.length === 1 && r.wo[0].x[0].sets.length === 1 && r.ex.length === 1 && r.goal === 7, r);
     ok('a bad day-log entry costs the entry, not the day', r.dl['2026-10-28'].st.length === 1 && r.dl['2026-10-28'].fd.length === 1 && r.dl['2026-10-28'].wa.length === 0 && !r.dl.junk, r.dl);
     ok('and the repair is written back', JSON.parse(await page.evaluate(() => localStorage.getItem('lift.v1'))).wo[0].x[0].sets.length === 1);
+    ok('a record from before focus was editable gets the default focus', r.focus.length === 6 && r.focus[1].m === 'Calves' && r.focus[1].lo === 12, r.focus);
+    await c.close();
+  }
+  {
+    const { c, page } = await ctx({ unit: 'kg', calf15: true, focus: undefined });
+    const r = await store(page);
+    ok('the old calves-at-15 switch becomes calves at 15 in focus', r.focus.find((f) => f.m === 'Calves').lo === 15 && r.calf15 === undefined, r.focus);
+    await c.close();
+  }
+  {
+    const { c, page } = await ctx({ unit: 'kg', focus: [{ m: 'Quads', lo: 20, hi: 10, p: 1 }, { m: 'Quads', lo: 5 }, { m: 'Nope', lo: 3 }, null] });
+    const r = await store(page);
+    ok('a bad focus row costs the row: a duplicate, an unknown muscle, a range run backwards', JSON.stringify(r.focus) === '[{"m":"Quads","lo":20,"hi":20,"p":1}]', r.focus);
     await c.close();
   }
 

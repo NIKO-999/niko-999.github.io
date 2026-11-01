@@ -325,6 +325,7 @@ svg { display: block; }
 .lf-hero + p { margin: 6px 0 0; font-size: 15px; font-weight: 600; }
 
 .lf-pick-h { padding: 14px 2px 2px; }
+#lfFocus .lf-li em { font-style: normal; font-weight: 600; margin-left: auto; }
 .lf-ppl button { font-size: 12.5px; }
 
 /* ── how it's done ── */
@@ -468,7 +469,7 @@ var MUSCLES = ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Lower back', 'Abs', '
    Quads, calves and lower back are the specialisation. CALVES START AT
    12 SETS, not 15, because 15–20k steps a day is calf work too: the
    entry marked `build` is Sunday's block, and it joins the day only
-   once "Calves at 15 sets" is switched on under You. */
+   once calves are set to 15 sets a week under You · Focus. */
 var PROGRAM = [
   { id: 'p-mon', dow: 1, n: 'Lower A', sp: 'Quads + calves + abs', ex: [['hack', 3, 6, 10], ['squat', 3, 6, 10], ['legext', 3, 12, 15], ['calfstand', 4, 8, 12], ['cablecrunch', 3, 10, 15]] },
   { id: 'p-tue', dow: 2, n: 'Upper A', sp: 'Push + lower back', ex: [['incdb', 3, 8, 12], ['mchest', 3, 8, 12], ['cablat', 4, 12, 20], ['pecdeck', 2, 12, 15], ['tripush', 3, 10, 15], ['triover', 2, 10, 15], ['backext', 3, 10, 15]] },
@@ -483,7 +484,7 @@ var PROGRAM = [
   /* `ex` is read, never stored, so the switch reaches every place that
      lists a day — today's card, its time, the split, the workout. */
   return { id: d.id, dow: d.dow, n: d.n, sp: d.sp, fixed: 1, build: build,
-    get ex() { return all.filter(function (id) { return !build[id] || S.calf15; }); },
+    get ex() { return all.filter(function (id) { return !build[id] || lfCalfFull(); }); },
     tg: d.ex.reduce(function (o, e) { o[e[0]] = [e[1], e[2], e[3]]; return o; }, {}) };
 });
 var DOW_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -491,10 +492,19 @@ var DOW_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
 /* Direct working sets a week, Monday to Sunday, by primary muscle. */
 /* Lower back counts its direct sets only; the RDL's share is real and
    is credited to hamstrings, where the program put it. */
+/* WHAT YOU ARE WORKING ON is yours to set: a muscle, its weekly sets,
+   and whether it is a priority or just keeps progressing. The default is
+   the split's own, and nothing about it is fixed. */
+var FOCUS_DEFAULT = [['Quads', 13, 16, 1], ['Calves', 12, 12, 1], ['Lower back', 6, 6, 1],
+  ['Hamstrings', 10, 10, 0], ['Glutes', 5, 8, 0], ['Abs', 9, 9, 0]];
+function lfFocusDefault() { return FOCUS_DEFAULT.map(function (f) { return { m: f[0], lo: f[1], hi: f[2], p: f[3] }; }); }
+/* Priorities first, in the order you added them. */
 function lfTargets() {
-  return [['Quads', 13, 16], ['Calves', S.calf15 ? 15 : 12, S.calf15 ? 15 : 12], ['Lower back', 6, 6],
-    ['Hamstrings', 10, 10], ['Glutes', 5, 8], ['Abs', 9, 9]];
+  var pri = S.focus.filter(function (f) { return f.p; }), rest = S.focus.filter(function (f) { return !f.p; });
+  return pri.concat(rest).map(function (f) { return [f.m, f.lo, f.hi, f.p]; });
 }
+/* Sunday's seated calf block joins the split once calves are at 15. */
+function lfCalfFull() { return S.focus.some(function (f) { return f.m === 'Calves' && f.lo >= 15; }); }
 /* Rest and effort by kind of movement. */
 function lfRestOf(id) { var e = exById(id); return e && e.c ? { lo: 120, hi: 180, rir: '1–2 RIR' } : { lo: 60, hi: 120, rir: '0–1 RIR last set' }; }
 
@@ -531,7 +541,7 @@ var DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 var MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 /* ═══════════ STORE ═══════════ */
-function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null, calf15: false, lk: {}, dl: {}, dg: { st: 15000, kc: 0, pr: 0, wa: 3000 } }; }
+function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null, focus: lfFocusDefault(), lk: {}, dl: {}, dg: { st: 15000, kc: 0, pr: 0, wa: 3000 } }; }
 function num(v) { var n = +v; return isFinite(n) && n >= 0 ? n : null; }
 
 /* A damaged record is REPAIRED, never thrown away: a bad set costs the
@@ -542,7 +552,14 @@ function lfClean(o) {
   d.unit = o.unit === 'lb' ? 'lb' : 'kg';
   d.goal = Math.min(7, Math.max(1, Math.round(+o.goal) || 4));
   d.bwGoal = num(o.bwGoal);
-  d.calf15 = o.calf15 === true;
+  /* A record from before focus was editable carries calf15 instead. */
+  if (Array.isArray(o.focus)) {
+    var seen = {};
+    d.focus = o.focus.filter(function (f) { return f && MUSCLES.indexOf(f.m) >= 0 && !seen[f.m] && (seen[f.m] = 1); }).slice(0, 16).map(function (f) {
+      var lo = Math.min(60, Math.max(1, Math.round(+f.lo) || 1)), hi = Math.min(60, Math.max(lo, Math.round(+f.hi) || lo));
+      return { m: f.m, lo: lo, hi: hi, p: f.p ? 1 : 0 };
+    });
+  } else if (o.calf15 === true) d.focus.forEach(function (f) { if (f.m === 'Calves') { f.lo = 15; f.hi = 15; } });
   /* A demo link per exercise. Only http(s), so a pasted string can never
      be a javascript: URL on a button you press. */
   if (o.lk && typeof o.lk === 'object') Object.keys(o.lk).forEach(function (k) { var u = o.lk[k]; if (typeof u === 'string' && /^https?:\/\//i.test(u)) d.lk[k] = u.slice(0, 500); });
@@ -855,11 +872,13 @@ function lfMuscleSets(from, to) {
 function lfLegCard() {
   var m = monday(today()), got = lfMuscleSets(m, addDays(m, 6));
   var c = el('<div class="lf-card" id="lfLegs"><div class="lf-hd"><span class="lf-lab">Sets this week</span><span class="lf-lab">target</span></div><div class="lf-vol"></div></div>');
-  lfTargets().forEach(function (t, i) {
+  var ts = lfTargets();
+  if (!ts.length) $('.lf-vol', c).appendChild(el('<div class="lf-lab">Nothing in focus. Add a muscle under You.</div>'));
+  ts.forEach(function (t, i) {
     var n = got[t[0]] || 0, row = el('<div class="lf-vr"><span></span><i><b></b></i><em class="lf-num"></em></div>');
     row.dataset.m = t[0];
     /* The first three are the specialisation, the rest keep progressing. */
-    if (i === 3) $('.lf-vol', c).appendChild(el('<div class="lf-vsep" aria-hidden="true"></div>'));
+    if (i && !t[3] && ts[i - 1][3]) $('.lf-vol', c).appendChild(el('<div class="lf-vsep" aria-hidden="true"></div>'));
     $('span', row).textContent = t[0];
     $('b', row).style.width = Math.min(100, n / t[2] * 100) + '%';
     if (n >= t[1]) row.classList.add('is-met');
@@ -1715,14 +1734,10 @@ function lfRenderYou() {
   root.appendChild(lfBwCard());
   var c = el('<div class="lf-card"><span class="lf-flab" style="margin-top:0">Units</span><div class="lf-seg" id="lfUnit"><button type="button" data-u="kg">kg</button><button type="button" data-u="lb">lb</button></div>'
     + '<span class="lf-flab">Workouts a week</span><div class="lf-seg" id="lfGoal" style="--n:7"></div>'
-    + '<span class="lf-flab">Calves</span><div class="lf-seg" id="lfCalf"><button type="button" data-c="0">12 sets · building</button><button type="button" data-c="1">15 sets</button></div></div>');
+    + '</div>');
   $$('#lfUnit button', c).forEach(function (b) {
     b.setAttribute('aria-pressed', b.dataset.u === S.unit ? 'true' : 'false');
     b.addEventListener('click', function () { S.unit = b.dataset.u; lfSave(); lfRender(); });
-  });
-  $$('#lfCalf button', c).forEach(function (b) {
-    b.setAttribute('aria-pressed', (b.dataset.c === '1') === S.calf15 ? 'true' : 'false');
-    b.addEventListener('click', function () { S.calf15 = b.dataset.c === '1'; lfSave(); lfRender(); });
   });
   for (var i = 1; i <= 7; i++) {
     var g = el('<button type="button"></button>'); g.textContent = i; g.dataset.g = i;
@@ -1731,6 +1746,7 @@ function lfRenderYou() {
     $('#lfGoal', c).appendChild(g);
   }
   root.appendChild(c);
+  root.appendChild(lfFocusCard());
   var gc = el('<div class="lf-card" id="lfGoals"><div class="lf-lab">Daily goals</div></div>');
   [['st', 'Steps', 'steps'], ['kc', 'Calories', 'kcal'], ['pr', 'Protein', 'g'], ['wa', 'Water', 'ml']].forEach(function (g) {
     var row = el('<label class="lf-gl"><span></span><input class="lf-field lf-num" inputmode="numeric" autocomplete="off" /><em></em></label>');
@@ -1749,6 +1765,62 @@ function lfRenderYou() {
   $('#lfRestore', bk).addEventListener('click', lfRestore);
   root.appendChild(bk);
 }
+function lfFocusCard() {
+  var c = el('<div class="lf-card" id="lfFocus" style="padding:14px 16px 6px"><div class="lf-hd"><span class="lf-lab">Focus</span><span class="lf-lab">sets a week</span></div><div class="lf-list"></div></div>');
+  var list = $('.lf-list', c);
+  lfTargets().forEach(function (t) {
+    var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div><em class="lf-num"></em>' + IC.chev + '</button>');
+    li.dataset.m = t[0];
+    $('b', li).textContent = t[0]; $('span', li).textContent = t[3] ? 'Priority' : 'Keep progressing';
+    $('em', li).textContent = lfRange(t[1], t[2]);
+    li.addEventListener('click', function () { lfFocusSheet(t[0]); });
+    list.appendChild(li);
+  });
+  var add = el('<button type="button" class="lf-add" id="lfFocusAdd" style="margin:10px 0 8px">' + IC.plus + 'Add a muscle</button>');
+  if (S.focus.length >= MUSCLES.length) add.disabled = true;
+  add.addEventListener('click', function () { lfFocusSheet(null); });
+  c.appendChild(add);
+  return c;
+}
+function lfFocusSheet(m) {
+  var f = m ? S.focus.filter(function (x) { return x.m === m; })[0] : null;
+  var cur = f ? f.m : null, pri = f ? f.p : 0;
+  var b = el('<div><div id="lfFoM"><span class="lf-flab" style="margin-top:0">Muscle</span><div class="lf-pills"></div></div>'
+    + '<div class="lf-row" style="--n:2;gap:10px"><label><span class="lf-flab">Sets a week, from</span><input class="lf-field lf-num" id="lfFoLo" inputmode="numeric" autocomplete="off" /></label>'
+    + '<label><span class="lf-flab">to</span><input class="lf-field lf-num" id="lfFoHi" inputmode="numeric" autocomplete="off" /></label></div>'
+    + '<span class="lf-flab">How hard</span><div class="lf-seg" id="lfFoP"><button type="button" data-p="1">Priority</button><button type="button" data-p="0">Keep progressing</button></div></div>');
+  if (f) $('#lfFoM', b).remove();
+  else {
+    var taken = {}; S.focus.forEach(function (x) { taken[x.m] = 1; });
+    var box = $('#lfFoM .lf-pills', b);
+    MUSCLES.filter(function (x) { return !taken[x]; }).forEach(function (x) {
+      var p = el('<button type="button" class="lf-pill" aria-pressed="false"></button>'); p.textContent = x;
+      p.addEventListener('click', function () { cur = x; $$('.lf-pill', box).forEach(function (y) { y.setAttribute('aria-pressed', y === p ? 'true' : 'false'); }); });
+      box.appendChild(p);
+    });
+  }
+  $('#lfFoLo', b).value = f ? f.lo : 10; $('#lfFoHi', b).value = f ? f.hi : 12;
+  function paintP() { $$('#lfFoP button', b).forEach(function (x) { x.setAttribute('aria-pressed', +x.dataset.p === pri ? 'true' : 'false'); }); }
+  $$('#lfFoP button', b).forEach(function (x) { x.addEventListener('click', function () { pri = +x.dataset.p; paintP(); }); });
+  paintP();
+  var save = el('<button type="button" class="lf-btn is-ink is-full">Save</button>'), foot = [save], del = null;
+  if (f) { del = el('<button type="button" class="lf-btn is-bad">Remove</button>'); foot.unshift(del); }
+  var s = lfSheet({ title: f ? f.m : 'Add a muscle', body: b, foot: foot });
+  save.addEventListener('click', function () {
+    if (!cur) { lfToast('Pick a muscle'); return; }
+    var lo = parseInt($('#lfFoLo', b).value, 10), hi = parseInt($('#lfFoHi', b).value, 10);
+    if (!(lo > 0)) { $('#lfFoLo', b).focus(); return; }
+    lo = Math.min(60, lo); hi = Math.min(60, Math.max(lo, hi > 0 ? hi : lo));
+    if (f) { f.lo = lo; f.hi = hi; f.p = pri; } else S.focus.push({ m: cur, lo: lo, hi: hi, p: pri });
+    lfSave(); s.close(true); lfRender();
+  });
+  if (del) del.addEventListener('click', function () {
+    var i = S.focus.indexOf(f); if (i < 0) return;
+    S.focus.splice(i, 1); lfSave(); s.close(true); lfRender();
+    lfToast('Removed ' + f.m, function () { S.focus.splice(i, 0, f); lfSave(); lfRender(); });
+  });
+}
+
 function lfCopy() {
   var txt = JSON.stringify(S);
   var done = function () { lfToast('Backup copied'); };
