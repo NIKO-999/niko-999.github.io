@@ -14,6 +14,10 @@ Single-file apps that share a design system:
   figures beside it, a calendar of what you trained. Standalone PWA,
   not a shell consumer. `EXERCISES` and the seven-day `PROGRAM` are
   code, keyed by ids that never change once a workout names them.
+- `doors/index.html` — the door-to-door log: one press per door, the
+  press is the outcome, and the funnel (answer, pitch, close) falls out
+  of it. Standalone PWA modelled on `lift/`. The report is one screen
+  made to be screenshotted for a mentor; nothing is ever sent.
 - `shell.css` + `shell.js` at the root — the shared shell they all
   consume. A rule that only two of them need belongs in the two, not
   in the file every one of them loads.
