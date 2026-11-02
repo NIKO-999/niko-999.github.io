@@ -285,7 +285,15 @@ svg { display: block; }
 .lf-ss-hd { display: flex; align-items: center; gap: 10px; }
 .lf-ss-name { flex: 1; min-width: 0; background: none; border: 0; outline: none; font-size: 18px; font-weight: 700; letter-spacing: -.01em; padding: 0; height: 44px; }
 .lf-ss-time { font-variant-numeric: tabular-nums; color: var(--dim); font-size: 13px; font-weight: 600; }
-.lf-ss-rest { font-size: 12px; color: var(--dim); margin: 0 0 6px; min-height: 18px; font-variant-numeric: tabular-nums; }
+.lf-session .lf-sh-ft { flex-wrap: wrap; }
+.lf-session .lf-sh-ft > .lf-ss-rest { flex: 0 0 100%; }
+.lf-ss-rest { display: flex; align-items: baseline; gap: 0; position: relative; padding: 0 0 8px; font-size: 13px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.lf-rs-c { font-size: 22px; font-weight: 700; color: var(--ink); margin: 0 6px 0 6px; }
+.lf-ss-rest.is-idle .lf-rs-c { color: var(--quiet); }
+.lf-ss-rest.is-ready .lf-rs-c { color: var(--good); }
+.lf-rs-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; border-radius: 3px; background: var(--card3); overflow: hidden; }
+.lf-rs-bar i { display: block; height: 100%; width: 0; background: var(--ink); border-radius: 3px; }
+.lf-ss-rest.is-ready .lf-rs-bar i { background: var(--good); }
 .lf-ex { background: var(--card); border-radius: var(--r); padding: 14px 14px 10px; margin-top: 12px; }
 .lf-ex-hd { display: flex; align-items: center; gap: 8px; }
 .lf-ex-hd button.lf-ex-n { flex: 1; min-width: 0; text-align: left; font-weight: 600; font-size: 15px; min-height: 40px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1267,10 +1275,14 @@ function lfOpenSession() {
   var head = el('<div class="lf-ss-hd" style="width:100%"><span class="lf-rec" aria-hidden="true"></span><input class="lf-ss-name" aria-label="Workout name" maxlength="40" /><span class="lf-ss-time" id="lfClock"></span><button type="button" class="lf-x" aria-label="Minimise">' + '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>' + '</button></div>');
   $('input', head).value = act.n;
   $('input', head).addEventListener('input', function (e) { act.n = e.target.value.slice(0, 40) || 'Workout'; lfSaveAct(); });
-  var body = el('<div><div class="lf-ss-rest" id="lfRest"></div><div id="lfExList"></div></div>');
+  var body = el('<div><div id="lfExList"></div></div>');
+  /* THE REST TIMER LIVES IN THE FOOT, so it is on screen wherever you
+     have scrolled to in the workout — it was the first line of the list
+     and went off the top the moment you moved past the first exercise. */
+  var rest = el('<div class="lf-ss-rest" id="lfRest" role="timer" aria-live="off"><span class="lf-rs-l"></span><b class="lf-rs-c lf-num"></b><span class="lf-rs-t"></span><i class="lf-rs-bar" aria-hidden="true"><i></i></i></div>');
   var discard = el('<button type="button" class="lf-btn">Discard</button>');
   var finish = el('<button type="button" class="lf-btn is-log" id="lfFinish">Finish</button>');
-  sessSheet = lfSheet({ full: true, head: head, body: body, foot: [discard, finish], cls: 'lf-session', title: 'Workout',
+  sessSheet = lfSheet({ full: true, head: head, body: body, foot: [rest, discard, finish], cls: 'lf-session', title: 'Workout',
     onClose: function () { sessSheet = null; clearInterval(tick); lfRender(); } });
   $('.lf-x', head).addEventListener('click', function () { sessSheet && sessSheet.close(); });
   discard.addEventListener('click', function () {
@@ -1289,7 +1301,11 @@ function lfTick() {
   var r = $('#lfRest');
   if (r) {
     var gone = Date.now() - act.rest, rt = act.restEx ? lfRestOf(act.restEx) : null;
-    r.textContent = act.rest ? 'Rest ' + fmtClock(gone) + (rt ? ' · target ' + lfRestTxt(rt) : '') : '';
+    $('.lf-rs-l', r).textContent = 'Rest ';
+    $('.lf-rs-c', r).textContent = act.rest ? fmtClock(gone) : '0:00';
+    $('.lf-rs-t', r).textContent = act.rest ? (rt ? ' · target ' + lfRestTxt(rt) : '') : ' · starts when you tick a set';
+    $('.lf-rs-bar i', r).style.width = act.rest && rt ? Math.min(100, gone / (rt.lo * 1000) * 100) + '%' : '0';
+    r.classList.toggle('is-idle', !act.rest);
     r.classList.toggle('is-ready', !!(act.rest && rt && gone >= rt.lo * 1000));
   }
   var l = $('#lfLive em'); if (l) l.textContent = fmtClock(Date.now() - act.s);
