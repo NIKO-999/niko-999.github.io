@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════
-   DOORS — the door-to-door log. Every check drives the real app: starts
-   a shift, presses outcomes door by door, logs a sale, ends it, and
-   reads the funnel, the report and the record back off the screens.
+   ENCOUNTERS (doors/) — every check drives the real app: logs an
+   encounter through the sheet, corrects one, finds one, and reads what
+   went well and what to work on back off the screens and the report.
 
    The clock is frozen at Wednesday 4 November 2026, 16:00.
    ═══════════════════════════════════════════════════════════════ */
@@ -18,6 +18,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   isMobile: true, hasTouch: true, locale: 'en-GB', colorScheme: 'dark' };
 const URL = `${BASE}/doors/`;
 const AT = '2026-11-04T16:00:00';
+const KEY = 'encounters.v1';
 const freeze = (at) => `(() => {
   const F = new Date('${at}').getTime(); const R = Date;
   window.Date = class extends R {
@@ -25,21 +26,7 @@ const freeze = (at) => `(() => {
     static now() { return F; }
   };
 })();`;
-
-/* A shift of doors at one hour on one day: n of each outcome, in funnel
-   order, sales worth v cents each. */
-function shift(id, d, hour, a, per, v) {
-  const s = new Date(`${d}T${String(hour).padStart(2, '0')}:00:00`).getTime();
-  const k = [];
-  let t = s;
-  for (const o of ['na', 'ni', 'pi', 'cb', 'sa']) for (let i = 0; i < (per[o] || 0); i++) {
-    t += 30000; const door = { t, o };
-    if (o === 'sa') door.v = v || 0;
-    if (o === 'ni' && i % 2 === 0) door.r = 'price';
-    k.push(door);
-  }
-  return { id, d, a, s, e: t + 60000, k, m: null };
-}
+const t = (d, h, m) => new Date(`${d}T${String(h).padStart(2, '0')}:${String(m || 0).padStart(2, '0')}:00`).getTime();
 
 (async () => {
   const browser = await chromium.launch({ executablePath: chrome(), args: ['--no-sandbox'] });
@@ -47,10 +34,10 @@ function shift(id, d, hour, a, per, v) {
   async function ctx(seed) {
     const c = await browser.newContext(PHONE);
     await c.addInitScript(freeze(AT));
-    if (seed) await c.addInitScript(`(() => { if (!localStorage.getItem('doors.v1')) localStorage.setItem('doors.v1', ${JSON.stringify(JSON.stringify(seed))}); })();`);
+    if (seed) await c.addInitScript(`(() => { if (!localStorage.getItem('${KEY}')) localStorage.setItem('${KEY}', ${JSON.stringify(JSON.stringify(seed))}); })();`);
     await c.addInitScript(() => {
       window.__copied = null;
-      try { Object.defineProperty(navigator, 'clipboard', { value: { writeText: (t) => { window.__copied = t; return Promise.resolve(); } }, configurable: true }); } catch (e) {}
+      try { Object.defineProperty(navigator, 'clipboard', { value: { writeText: (x) => { window.__copied = x; return Promise.resolve(); } }, configurable: true }); } catch (e) {}
     });
     const page = await c.newPage();
     page.on('pageerror', (e) => errors.push(String(e)));
@@ -59,190 +46,162 @@ function shift(id, d, hour, a, per, v) {
     await page.goto(URL); await page.waitForTimeout(300);
     return { c, page };
   }
-  const store = (page) => page.evaluate(() => JSON.parse(localStorage.getItem('doors.v1') || 'null'));
+  const store = (page) => page.evaluate((k) => JSON.parse(localStorage.getItem(k) || 'null'), KEY);
   const settle = (page) => page.waitForTimeout(420);
   const top = (page) => page.locator('.dr-sheet').last();
   const sideways = (page) => page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+  const txt = async (page, sel) => ((await page.textContent(sel)) || '').trim();
 
   /* ── a first open ── */
   const { c, page } = await ctx();
-  ok('the home screen draws', await page.locator('#drHome .dr-card').count() > 0);
-  ok('a first open is ready to knock, with the goal under it', (await page.textContent('.dr-title')).trim() === 'Ready to knock' && /3 sales from 80 doors/.test(await page.textContent('.dr-sub')));
-  ok('the funnel says there is nothing yet rather than drawing zeroes', /No doors yet/.test(await page.textContent('#drFunnel')));
+  ok('the home screen draws', await page.locator('#drToday').count() === 1);
+  ok('a first open says nothing is logged, with the goal under it', await txt(page, '.dr-title') === 'No encounters yet' && /Goal: 5 a day · 5 to go/.test(await txt(page, '.dr-sub')));
+  ok('the summary says there is nothing yet rather than drawing a 0%', /Nothing logged yet/.test(await txt(page, '#drHow')));
   const bar = await page.$$eval('.dr-bar button', (b) => b.map((x) => { const r = x.getBoundingClientRect(); return [r.width, r.height]; }));
   ok('four tabs, every one a 44px target', bar.length === 4 && bar.every(([w, h]) => w >= 44 && h >= 44), bar);
-  ok('the report button is a 44px target', await page.$eval('#drRepBtn', (e) => { const r = e.getBoundingClientRect(); return r.width >= 44 && r.height >= 44; }));
+  ok('nothing about doors is left on the screen', !/door|knock|sale/i.test(await page.evaluate(() => document.body.innerText)));
 
-  /* ── a shift, door by door ── */
+  /* ── logging one ── */
   await page.click('#drGo'); await settle(page);
-  await page.fill('#drArea', 'Elm Street');
-  await top(page).locator('button', { hasText: 'Start knocking' }).click(); await settle(page);
-  ok('starting a shift opens it full screen', await page.locator('#drOuts').count() === 1);
-  ok('five outcomes, every one at least 44px', (await page.$$eval('.dr-out', (b) => b.map((x) => x.getBoundingClientRect().height))).every((h) => h >= 44) && await page.locator('.dr-out').count() === 5);
-  const press = async (o, n) => { for (let i = 0; i < n; i++) await page.click(`.dr-out[data-o="${o}"]`); };
-  await press('na', 6); await press('ni', 2); await press('pi', 1); await press('cb', 1);
-  ok('every press is a door', (await page.textContent('#drLiveSt div:first-child b')).trim() === '10');
-  ok('and its outcome is counted on its own button', (await page.textContent('.dr-out[data-o="na"] b')).trim() === '6');
-  ok('a callback asks why not', await page.locator('#drLast .dr-why .dr-pill').count() === 8);
-  await page.click('.dr-out[data-o="ni"]');
-  await page.click('#drLast .dr-pill[data-k="price"]');
+  ok('the log sheet opens on how it went', await page.locator('#drFeel button').count() === 2);
+  await page.click('#drEnGo'); await page.waitForTimeout(150);
+  ok('it will not log without positive or negative', ((await store(page)) || { en: [] }).en.length === 0 && /Positive or negative/.test(await txt(page, '.dr-toast')));
+  await page.click('#drFeel button[data-f="1"]');
+  await page.fill('#drEnN', 'Maya');
+  await page.click('#drAgePills .dr-pill[data-k="25"]');
+  ok('an age pill fills the age', await page.inputValue('#drEnA') === '25');
+  await page.click('#drActPills .dr-pill[data-k="Reading"]');
+  ok('an activity pill fills the activity', await page.inputValue('#drEnAct') === 'Reading');
+  await page.fill('#drEnNote', 'Opened with the book she was holding');
+  await page.click('#drEnGo'); await settle(page);
   let st = await store(page);
-  let live = st.sh[0];
-  ok('the reason lands on the last door', live.k[live.k.length - 1].r === 'price' && live.k[live.k.length - 1].o === 'ni', live.k.slice(-1));
-  /* How it felt: on the ni door still on top, both ways and back off. */
-  const feelOf = async () => { const x = await store(page); const k = x.sh[0].k; return k[k.length - 1].f; };
-  await page.click('#drLast .dr-feel button[data-f="-1"]');
-  ok('a conversation can be tagged negative', await feelOf() === -1);
-  await page.click('#drLast .dr-feel button[data-f="-1"]');
-  ok('and pressing it again takes the tag off', await feelOf() === undefined);
-  await page.click('#drLast .dr-feel button[data-f="1"]');
-  ok('or tagged positive', await feelOf() === 1 && await page.getAttribute('#drLast .dr-feel button[data-f="1"]', 'aria-pressed') === 'true');
-  ok('the tag is a 44px target', (await page.$$eval('#drLast .dr-feel button', (b) => b.map((x) => { const r = x.getBoundingClientRect(); return r.height + 10; }))).every((h) => h >= 44));
-  ok('a door that never opened is never asked why, or how it felt', await page.click('.dr-out[data-o="na"]').then(async () => (await page.locator('#drLast .dr-why').count()) + (await page.locator('#drLast .dr-feel').count())) === 0);
-  await page.click('#drLast .dr-hd button');
+  const m = st.en[0];
+  ok('an encounter is a name, an age, an activity, how it went and a note', st.en.length === 1 && m.n === 'Maya' && m.a === 25 && m.act === 'Reading' && m.f === 1 && /book/.test(m.note) && m.t === new Date(AT).getTime(), m);
+  ok('logging says so, with a way back', /Logged · positive/.test(await txt(page, '.dr-toast span')));
+  await page.click('.dr-toast button'); await page.waitForTimeout(150);
+  ok('Undo takes it back off', (await store(page)).en.length === 0);
+
+  /* again, then a second one with no name and a typed activity */
+  await page.click('#drGo'); await settle(page);
+  await page.click('#drFeel button[data-f="1"]'); await page.fill('#drEnN', 'Maya'); await page.fill('#drEnA', '25'); await page.fill('#drEnAct', 'reading');
+  ok('typing an activity presses its pill, whatever the case', await page.getAttribute('#drActPills .dr-pill[data-k="Reading"]', 'aria-pressed') === 'true');
+  ok('typing an age presses its pill', await page.getAttribute('#drAgePills .dr-pill[data-k="25"]', 'aria-pressed') === 'true');
+  await page.click('#drEnGo'); await settle(page);
+  await page.click('#drGo'); await settle(page);
+  ok('a pressed positive can be taken off again', await (async () => { await page.click('#drFeel button[data-f="1"]'); await page.click('#drFeel button[data-f="1"]'); return (await page.getAttribute('#drFeel button[data-f="1"]', 'aria-pressed')) === 'false'; })());
+  await page.click('#drFeel button[data-f="-1"]'); await page.fill('#drEnA', '41'); await page.fill('#drEnAct', 'Walking the dog');
+  await page.click('#drEnGo'); await settle(page);
   st = await store(page);
-  ok('Undo takes the last door back off', st.sh[0].k.length === 11, st.sh[0].k.length);
+  ok('a name is optional', st.en.length === 2 && !st.en[1].n && st.en[1].a === 41 && st.en[1].act === 'Walking the dog' && st.en[1].f === -1, st.en[1]);
+  ok('what they were doing is remembered for next time', st.acts[0] === 'Walking the dog');
 
-  /* the sale */
-  await page.click('.dr-out[data-o="sa"]'); await settle(page);
-  await page.fill('#drSaleV', '120');
-  await page.fill('#drSaleP', 'Solar plan');
-  await page.fill('#drSaleN', 'Opened with the neighbour who signed last week');
-  await page.click('#drSaleGo'); await settle(page);
+  /* ── read back on home ── */
+  ok('today counts them', await txt(page, '.dr-title') === '2 encounters' && /1 positive/.test(await txt(page, '#drToday .dr-chips')) && /1 negative/.test(await txt(page, '#drToday .dr-chips')));
+  ok('the summary is the share that went well', await txt(page, '#drHow .dr-fig b') === '50%' && /1 positive/.test(await txt(page, '#drHow .dr-key')));
+  const stats = await page.$$eval('#drStats .dr-stat b', (b) => b.map((x) => x.textContent));
+  ok('this week, positive and a day streak', stats.join('|') === '2|50%|1', stats);
+  ok('what they were doing is broken down', (await page.$$eval('#drActs .dr-br', (r) => r.map((x) => x.dataset.k))).sort().join() === 'Reading,Walking the dog');
+  ok('ages are read back in brackets', (await page.$$eval('#drAges .dr-br', (r) => r.map((x) => x.dataset.k))).join() === '25–29,40–49');
+  ok('with too few behind it, nothing is called best or worst', /Log a few more/.test(await txt(page, '#drFocus')));
+  ok('negative is never drawn red', await page.$eval('#drHome', (e) => ![...e.querySelectorAll('*')].some((x) => /255, 59, 48|255, 107, 96/.test(getComputedStyle(x).color + getComputedStyle(x).backgroundColor))));
+
+  /* ── the list ── */
+  await page.click('.dr-bar button[data-v="log"]'); await settle(page);
+  ok('the list has both, newest first, a missing name read as No name', (await page.$$eval('#drLogList .dr-li b', (b) => b.map((x) => x.textContent))).join('|') === 'No name|Maya');
+  ok('a positive one wears the filled dot and a negative one the hollow', await page.$$eval('#drLogList .dr-dot', (d) => d.map((x) => x.classList.contains('is-pos'))).then((a) => a.join() === 'false,true'));
+  await page.fill('#drSearch', 'maya'); await page.waitForTimeout(100);
+  ok('search finds a name', (await page.$$eval('#drLogList .dr-li b', (b) => b.map((x) => x.textContent))).join() === 'Maya');
+  ok('and typing keeps the caret in the box', await page.evaluate(() => document.activeElement && document.activeElement.id === 'drSearch'));
+  await page.fill('#drSearch', ''); await page.click('#drLogSeg button[data-p="neg"]'); await page.waitForTimeout(100);
+  ok('Negative shows only the negative', (await page.$$eval('#drLogList .dr-li b', (b) => b.map((x) => x.textContent))).join() === 'No name');
+  await page.click('#drLogList .dr-li'); await settle(page);
+  await page.click('#drFeel button[data-f="1"]'); await page.fill('#drEnN', 'Sam'); await page.fill('#drEnNote', 'Asked about the dog first'); await page.click('#drEnGo'); await settle(page);
   st = await store(page);
-  const sale = st.sh[0].k[st.sh[0].k.length - 1];
-  ok('a sale is a door with a value in cents, what was sold and a note', sale.o === 'sa' && sale.v === 12000 && sale.p === 'Solar plan' && /neighbour/.test(sale.n), sale);
-  ok('what you sold is remembered for next time', st.pr[0] === 'Solar plan');
-  const ls = await page.$$eval('#drLiveSt b', (b) => b.map((x) => x.textContent));
-  /* 12 doors: 6 na, 3 ni, 1 pi, 1 cb, 1 sa → answered 6/12, pitched 3, sold 1 */
-  ok('the live figures are the funnel of that shift', ls.join('|') === '12|50%|33%|$120', ls);
-  await page.click('#drLast .dr-feel button[data-f="-1"]');
-  ok('a sale can be tagged too, and keeps its value', (await store(page)).sh[0].k.slice(-1)[0].f === -1 && (await store(page)).sh[0].k.slice(-1)[0].v === 12000);
-  ok('the sale button is the one green thing', await page.$eval('.dr-out.is-sale', (e) => getComputedStyle(e).backgroundColor) === 'rgb(52, 199, 89)');
-
-  /* a closed app is not an ended shift */
-  await page.reload(); await page.waitForTimeout(500);
-  ok('a reload comes back to the shift in progress', await page.locator('#drOuts').count() === 1 && await page.inputValue('.dr-ss-area') === 'Elm Street');
-  await page.click('.dr-sh-hd .dr-round'); await settle(page);
-  ok('minimised, the live bar says where you are', !(await page.locator('#drLive').isHidden()) && /Elm Street · 12 doors/.test(await page.textContent('#drLive')));
-  ok('and the today card says go back to it', (await page.textContent('#drGo')).trim() === 'Back to the shift');
-  await page.click('#drLive'); await settle(page);
-  await page.click('#drEnd'); await settle(page);
-  ok('ending it shows what the shift came to', /1 sale/.test(await top(page).locator('.dr-hero').textContent()) && /\$120/.test(await top(page).textContent()));
-  st = await store(page);
-  ok('and stamps an end on the record', st.sh[0].e > st.sh[0].s);
-  await top(page).locator('button', { hasText: 'Done' }).click(); await settle(page);
-
-  const fun = await page.$$eval('#drFunnel .dr-fr', (r) => r.map((x) => x.dataset.k + ':' + x.querySelector('span b').textContent));
-  ok('the funnel reads doors, answered, pitched, sales', fun.join() === 'k:12,an:6,pi:3,sa:1', fun);
-  const steps = await page.$$eval('#drFunnel .dr-step b', (b) => b.map((x) => x.textContent));
-  ok('each step against the one before it', steps.join() === '50%,50%,33%', steps);
-  ok('with too little behind it, it does not pretend to know where to improve', /A few more shifts/.test(await page.textContent('#drFocus')));
-  ok('the week tile is measured against the same days of last week', (await page.textContent('#drStats .dr-delta')).trim() === '+1');
-  ok('how it felt is read back: one positive, one negative', (await page.textContent('#drFeel .dr-feel-fig b')).trim() === '50%' && /1 positive/.test(await page.textContent('#drFeel')) && /1 negative/.test(await page.textContent('#drFeel')) && /2 of 6 conversations tagged/.test(await page.textContent('#drFeel')));
-  ok('negative is never drawn red', await page.$eval('#drFeel', (e) => ![...e.querySelectorAll('*')].some((x) => /255, 59, 48|52, 199, 89/.test(getComputedStyle(x).color + getComputedStyle(x).backgroundColor))));
-  ok('this week counts the sale', (await page.textContent('#drStats .dr-card:first-child b')).trim() === '1');
-
-  /* ── the win, on its own screen ── */
-  await page.click('.dr-bar button[data-v="wins"]'); await settle(page);
-  ok('Wins lists the sale with what was sold', /Solar plan/.test(await page.textContent('#drWins')) && /\$120/.test(await page.textContent('#drWins')));
-  await page.click('#drWins .dr-li'); await settle(page);
-  await page.fill('#drSaleV', '150'); await page.click('#drSaleGo'); await settle(page);
-  ok('a win can be corrected', (await store(page)).sh[0].k.slice(-1)[0].v === 15000);
-  await page.click('#drWins .dr-li'); await settle(page);
+  ok('an encounter can be corrected', st.en[1].f === 1 && st.en[1].n === 'Sam' && st.en.length === 2);
+  await page.click('#drLogSeg button[data-p="all"]'); await page.waitForTimeout(100);
+  await page.click('#drLogList .dr-li >> nth=0'); await settle(page);
   await top(page).locator('button', { hasText: 'Remove' }).click(); await settle(page);
-  ok('removing a win takes it off the record', (await store(page)).sh[0].k.filter((k) => k.o === 'sa').length === 0);
-  await page.click('.dr-toast button'); await settle(page);
-  ok('and Undo puts it back where it was', (await store(page)).sh[0].k.slice(-1)[0].v === 15000);
+  ok('removing takes it off the record', (await store(page)).en.length === 1);
+  await page.click('.dr-toast button'); await page.waitForTimeout(150);
+  ok('and Undo puts it back', (await store(page)).en.length === 2);
 
-  /* ── a shift written up afterwards ── */
-  await page.click('.dr-bar button[data-v="home"]'); await settle(page);
-  await page.click('.dr-link'); await settle(page);
-  await page.fill('#drMD', '2026-11-03'); await page.fill('#drMA', 'Oak Road');
-  await page.fill('#drMK', '50'); await page.fill('#drMAn', '10'); await page.fill('#drMPi', '20');
-  await page.click('#drMGo'); await page.waitForTimeout(200);
-  ok('a pitched figure larger than answered is refused', (await store(page)).sh.length === 1 && /more than the one before/.test(await page.textContent('.dr-toast')));
-  await page.fill('#drMPi', '6'); await page.fill('#drMSa', '2'); await page.fill('#drMRv', '200'); await page.fill('#drMH', '2.5');
-  await page.click('#drMGo'); await settle(page);
-  st = await store(page);
-  const man = st.sh.find((s) => s.m);
-  ok('written up, a shift keeps totals rather than invented doors', man && man.k.length === 0 && man.m.k === 50 && man.m.sa === 2 && man.m.rv === 20000 && man.m.h === 2.5, man);
-  const fun2 = await page.$$eval('#drFunnel .dr-fr', (r) => r.map((x) => x.querySelector('span b').textContent));
-  ok('and counts in the funnel like any other', fun2.join() === '62,16,9,3', fun2);
-
-  /* ── the calendar ── */
+  /* ── logging one afterwards ── */
   await page.click('.dr-bar button[data-v="cal"]'); await settle(page);
-  ok('today on the calendar carries its sale', (await page.textContent('.dr-cell[data-d="2026-11-04"] small')).trim() === '1✓');
+  ok('today on the calendar says how many went well of how many', await txt(page, '.dr-cell[data-d="2026-11-04"] small') === '2/2');
   ok('a day still ahead cannot be pressed', await page.$eval('.dr-cell[data-d="2026-11-05"]', (e) => e.disabled));
-  await page.click('.dr-cell[data-d="2026-11-03"]'); await settle(page);
-  ok('a day opens on its shifts', /Oak Road/.test(await top(page).textContent()));
-  await page.keyboard.press('Escape'); await settle(page);
+  await page.click('.dr-cell[data-d="2026-11-02"]'); await settle(page);
+  await top(page).locator('button', { hasText: 'Log one for this day' }).click(); await settle(page);
+  ok('logging from a past day starts on that day', /^2026-11-02T12:00$/.test(await page.inputValue('#drEnT')));
+  await page.click('#drFeel button[data-f="-1"]'); await page.click('#drEnGo'); await settle(page);
+  st = await store(page);
+  ok('and lands on it', st.en.some((e) => new Date(e.t).getDate() === 2 && e.f === -1));
+  await page.click('.dr-bar button[data-v="home"]'); await settle(page);
+  ok('a day out yesterday or today keeps the streak; a gap breaks it', (await page.$$eval('#drStats .dr-stat b', (b) => b.map((x) => x.textContent)))[2] === '1');
 
   /* ── the report ── */
-  await page.click('.dr-bar button[data-v="home"]'); await settle(page);
   await page.click('#drRepBtn'); await settle(page);
-  ok('the report opens on this week', /This week/.test(await page.textContent('#drRep')) && /3 sales/.test(await page.textContent('#drRep .dr-rep-hero')));
-  ok('its wins name what was sold', /Solar plan/.test(await page.textContent('#drRep')));
-  const fits = await page.$eval('#drRep', (e) => e.getBoundingClientRect().bottom);
-  ok('and the whole of it is on one screen, made to be photographed', fits <= 844 - 70, fits);
+  ok('the report opens on this week', /This week/.test(await txt(page, '#drRep')) && /3 encounters/.test(await txt(page, '#drRep .dr-rep-hero')));
+  ok('it lists them by name', /Maya/.test(await txt(page, '#drRep')) && /Sam/.test(await txt(page, '#drRep')));
   await top(page).locator('.dr-seg button[data-p="today"]').click();
-  ok('Today narrows it to today', /1 sale/.test(await page.textContent('#drRep .dr-rep-hero')));
+  ok('Today narrows it to today', /2 encounters/.test(await txt(page, '#drRep .dr-rep-hero')) && /100% positive/.test(await txt(page, '#drRep .dr-rep-hero')));
   await page.click('#drRepCopy'); await page.waitForTimeout(200);
-  const txt = await page.evaluate(() => window.__copied);
-  ok('the report says how it felt', /Positive\s*50%/.test(await page.textContent('#drRep .dr-kv')));
-  ok('Copy as text carries the funnel and the win', /12 doors → 6 answered → 3 pitched → 1 sold/.test(txt) && /Solar plan · \$150/.test(txt) && /Felt positive: 50% \(1 positive, 1 negative\)/.test(txt), txt);
+  const copied = await page.evaluate(() => window.__copied);
+  ok('Copy as text carries every encounter and how it went', /2 encounters · 100% positive/.test(copied) && /\+ Maya · 25 · Reading/.test(copied) && /Sam · 41 · Walking the dog · Wed 4 Nov 4:00pm — Asked about the dog first/.test(copied), copied);
   ok('nothing scrolls sideways', await sideways(page) <= 0);
   await page.keyboard.press('Escape'); await settle(page);
 
-  /* ── your name and the currency ── */
+  /* ── you ── */
   await page.click('.dr-bar button[data-v="you"]'); await settle(page);
-  await page.fill('#drName', 'Sam'); await page.dispatchEvent('#drName', 'change');
-  await page.click('#drYou .dr-pill[data-k="£"]');
+  await page.fill('#drName', 'Niko'); await page.dispatchEvent('#drName', 'change');
+  await page.fill('#drGoal', '8'); await page.dispatchEvent('#drGoal', 'change');
   st = await store(page);
-  ok('your name and currency are kept', st.name === 'Sam' && st.cur === '£');
-  await page.click('.dr-bar button[data-v="home"]'); await settle(page);
-  ok('and money is drawn in it', /£/.test(await page.textContent('#drStats')));
+  ok('your name and goal are kept', st.name === 'Niko' && st.goal === 8);
   await c.close();
 
-  /* ── where to improve, against your own record ── */
-  /* Four weeks before this one closing three in ten pitches; this week
-     closing one in four, with answer and pitch rates holding up. */
-  const hist = [];
-  ['2026-10-06', '2026-10-13', '2026-10-20', '2026-10-27'].forEach((d, i) =>
-    hist.push(shift('h' + i, d, 15, i % 2 ? 'Hill Park' : 'River Side', { na: 40, ni: 10, pi: 7, cb: 0, sa: 3 }, 9900)));
-  hist.push(shift('w1', '2026-11-02', 11, 'River Side', { na: 40, ni: 10, pi: 9, sa: 3 }, 9900));
-  hist.push(shift('w2', '2026-11-03', 17, 'Hill Park', { na: 40, ni: 10, pi: 9, sa: 3 }, 9900));
-  const r = await ctx({ v: 1, name: '', cur: '$', goal: { sa: 3, dr: 80 }, sh: hist, pr: [] });
+  /* ── where you do well and what to work on ── */
+  /* This week: four readers in their late twenties all went well, four
+     dog-walkers in their forties none did, two coffees one each. Plus a
+     baseline of ten at 50% the fortnight before. */
+  const en = [];
+  let i = 0;
+  const add = (d, h, mm, f, n, a, act) => en.push({ id: 'x' + (i++), t: t(d, h, mm), f, n, a, act });
+  ['2026-11-02', '2026-11-03', '2026-11-03', '2026-11-04'].forEach((d, j) => add(d, 11, j * 5, 1, 'R' + j, 27, 'Reading'));
+  ['2026-11-02', '2026-11-02', '2026-11-03', '2026-11-04'].forEach((d, j) => add(d, 17, j * 5, -1, j % 2 ? '' : 'W' + j, 45, 'Walking'));
+  add('2026-11-03', 14, 0, 1, 'C1', 32, 'Coffee'); add('2026-11-03', 14, 20, -1, '', 33, 'Coffee');
+  for (let j = 0; j < 10; j++) add('2026-10-2' + (j % 9), 12, j, j % 2 ? 1 : -1, 'B' + j, 30, 'Shopping');
+  const r = await ctx({ v: 1, name: 'Niko', goal: 5, acts: [], en });
   const p2 = r.page;
-  const foc = await p2.$$eval('#drFunnel .dr-step', (s) => s.filter((x) => x.classList.contains('is-focus')).map((x) => x.dataset.s));
-  ok('a close rate down on the usual is the step to work on', foc.join() === 'sa', foc);
-  ok('and the line says so in words', /Work on: close/.test(await p2.textContent('#drFocus')));
-  ok('the step that held up says so', /same as usual|\+/.test(await p2.textContent('#drFunnel .dr-step[data-s="an"] small')));
-  ok('the focus is a ring, never a red', await p2.$eval('.dr-step.is-focus', (e) => !/255, 59, 48/.test(getComputedStyle(e).color + getComputedStyle(e).backgroundColor)));
-  ok('the most common no is named', /Most common no: price/.test(await p2.textContent('#drFocus')));
-  ok('why they said no is a card of its own', /Price/.test(await p2.textContent('#drWhy')));
+  ok('ten this week at 50%', await txt(p2, '#drHow .dr-fig b') === '50%' && /of 10/.test(await txt(p2, '#drHow .dr-fig span')));
+  ok('the same as the fortnight before, said in words', /same as your usual 50%/.test(await txt(p2, '#drVs')));
+  ok('it names where you do best', /Best with people reading: 4 of 4/.test(await txt(p2, '#drFocus')));
+  ok('and what to work on, against your own rate', /Work on people walking: 0 of 4, against 50% overall/.test(await txt(p2, '#drFocus')));
+  ok('the best activity row is the green one', (await p2.$$eval('#drActs .dr-br.is-best', (r) => r.map((x) => x.dataset.k))).join() === 'Reading');
+  ok('a group of two is never called best', !(await p2.$$eval('#drActs .dr-br.is-best', (r) => r.map((x) => x.dataset.k))).includes('Coffee'));
+  ok('ages run in order, the best one green', (await p2.$$eval('#drAges .dr-br', (r) => r.map((x) => x.dataset.k + (x.classList.contains('is-best') ? '*' : '')))).join() === '25–29*,30–34,40–49');
+  ok('time of day names the hour that goes best', /Goes best around 11am/.test(await txt(p2, '#drHours .dr-hd')));
+  const hb = await p2.$$eval('#drHours .dr-hrs > div', (d) => d.map((x) => x.dataset.h + ':' + Math.round(parseFloat(x.querySelector('i b').style.height))));
+  ok('each hour is drawn as how many, filled by how many went well', hb.join() === '11:100,14:50,17:0', hb);
   await p2.click('#drRepBtn'); await settle(p2);
-  await p2.click('.dr-sheet .dr-seg button[data-p="month"]');
-  const fit2 = await p2.$eval('#drRep', (e) => e.getBoundingClientRect().bottom);
-  ok('a month of wins still fits one screen: the list stops at four and says how many more', fit2 <= 844 && /\+ 2 more/.test(await p2.textContent('#drRep')), fit2);
+  ok('the report names the best activity, age and time', await p2.$$eval('#drRep .dr-kv b', (b) => b.map((x) => x.textContent).slice(0, 3).join()) === 'Reading,25–29,11am');
+  ok('it lists six and says how many more', /\+ 4 more/.test(await txt(p2, '#drRep')));
+  const fits = await p2.$eval('#drRep', (e) => e.getBoundingClientRect().bottom);
+  ok('and the whole of it is on one screen, made to be photographed', fits <= 844, fits);
+  await p2.click('#drRepCopy'); await p2.waitForTimeout(200);
+  ok('the text says what to work on', /Working on people walking: 0 of 4 vs 50% overall/.test(await p2.evaluate(() => window.__copied)));
   await p2.keyboard.press('Escape'); await settle(p2);
-  await p2.click('#drFunnel .dr-seg button[data-p="all"]'); await settle(p2);
-  const hrs = await p2.$$eval('#drHours .dr-hrs > div', (d) => d.map((x) => x.dataset.h + (x.classList.contains('is-best') ? '*' : '')));
-  ok('best hours over all time marks the hour that sells', hrs.join() === '11,15*,17', hrs);
-  ok('areas are ranked by sales per hundred doors', (await p2.$$eval('#drAreas .dr-br span', (s) => s.map((x) => x.textContent))).length === 2);
+  await p2.click('#drHow .dr-seg button[data-p="all"]'); await settle(p2);
+  ok('All counts everything', /of 20/.test(await txt(p2, '#drHow .dr-fig span')));
   ok('nothing scrolls sideways', await sideways(p2) <= 0);
   await r.c.close();
 
   /* ── a damaged record is repaired, not discarded ── */
-  const bad = { v: 1, cur: 'zz', goal: { sa: -4 }, sh: [shift('ok1', '2026-11-02', 10, 'A', { na: 2, sa: 1 }, 500), { id: 9, d: 'nope' }, { id: 'x', d: '2026-11-01', s: 1, e: 2, k: [{ o: 'zz' }, { o: 'na', t: 1 }] }], pr: [7, 'Plan'] };
+  const bad = { goal: -3, acts: [7, 'Reading'], en: [{ id: 'ok', t: t('2026-11-04', 9), f: 1, n: 'Ok', a: 300 }, { id: 'nof', t: t('2026-11-04', 10) }, { id: 9, t: 1, f: 1 }, { id: 'neg', t: t('2026-11-03', 10), f: -1, act: '  ' }] };
   const d = await ctx(bad);
+  ok('a damaged encounter costs itself: two of four survive', await txt(d.page, '#drToday .dr-title') === '1 encounter' && (await d.page.$$eval('#drStats .dr-stat b', (b) => b.map((x) => x.textContent)))[0] === '2');
   await d.page.click('.dr-bar button[data-v="you"]'); await settle(d.page);
-  const doorsAll = await d.page.$$eval('#drYou .dr-sum b', (b) => b.map((x) => x.textContent));
-  ok('a damaged shift and a damaged door cost themselves: two shifts, four doors survive', doorsAll[0] === '2' && doorsAll[1] === '4', doorsAll);
-  ok('an unknown currency falls back to dollars', await d.page.$eval('#drYou .dr-pill[data-k="$"]', (e) => e.getAttribute('aria-pressed')) === 'true');
   await d.page.fill('#drName', 'R'); await d.page.dispatchEvent('#drName', 'change');
   const fixed = await store(d.page);
-  ok('and the repaired shape is what gets written back', fixed.sh.length === 2 && fixed.cur === '$' && fixed.goal.sa === 3 && fixed.pr.join() === 'Plan', fixed);
+  ok('and the repaired shape is what gets written back', fixed.en.length === 2 && fixed.goal === 5 && fixed.acts.join() === 'Reading' && !fixed.en[0].a && !fixed.en[1].act, fixed);
   await d.c.close();
 
   ok('no request leaves the phone', offOrigin.length === 0, offOrigin);

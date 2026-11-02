@@ -61,7 +61,7 @@ const APPS = [
   ['natal/index.html', 'natal/css/style.css', 'natal/js/app.js', 'natal/js/engine.js', 'natal/js/wheel.js', 'natal/js/sky.js'],
   /* lift/ joined the day it shipped: the workout log, one file. */
   ['lift/index.html'],
-  /* doors/ joined the day it shipped: the door-to-door log, one file. */
+  /* doors/ joined the day it shipped: the encounters log, one file. */
   ['doors/index.html'],
   /* gxt/ joined the day it shipped: the backtest journal, one file. */
   ['gxt/index.html'],

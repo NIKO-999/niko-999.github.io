@@ -1,4 +1,4 @@
-/* Doors opens with no signal, and never runs a version behind.
+/* Encounters opens with no signal, and never runs a version behind.
 
    NETWORK FIRST, which is cadence/'s rule for cadence/'s reason:
    schedule/ served its document cache first and every deploy landed one
@@ -6,7 +6,7 @@
    answers when it cannot be reached — so with a signal this is the app
    with no service worker at all, and on a street with none it is
    the last copy that loaded. Same origin and GET only. */
-var CACHE = 'doors-v1';
+var CACHE = 'doors-v2';
 var SHELL = ['./', 'index.html', 'manifest.json', 'icon.svg', 'icon-180.png', 'icon-192.png', '../arc/fonts/Inter.woff2'];
 self.addEventListener('install', function (e) {
   self.skipWaiting();

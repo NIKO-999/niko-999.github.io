@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="Doors" />
-<title>Doors</title>
+<meta name="apple-mobile-web-app-title" content="Encounters" />
+<title>Encounters</title>
 <link rel="manifest" href="manifest.json" />
 <link rel="icon" href="icon.svg" type="image/svg+xml" />
 <link rel="apple-touch-icon" href="icon-180.png" />
@@ -28,11 +28,11 @@
   --dim: #a1a1a8;
   --quiet: #8a8a92;
   --mark-off: #3a3a40;
-  /* THE ONE COLOUR. A sale is green, and nothing else on the record is:
-     a win has to be findable on any screen without reading a word. */
-  --win: #34c759;
-  /* A shift in progress is red, the way a recording is. */
-  --live: #ff3b30;
+  /* THE ONE COLOUR. An encounter that went well is green, and nothing
+     else is. One that did not is the flat neutral, never red: a hard
+     conversation is a fact about the moment, not a mark against you. */
+  --pos: #34c759;
+  --bad: #ff6b60;
   --on-ink: #000000;
   --r: 22px;
   --r-s: 14px;
@@ -56,7 +56,6 @@ body {
   padding: calc(var(--safe-t) + 14px) 16px calc(var(--bar-h) + var(--safe-b) + 40px);
 }
 body.dr-lock { overflow: hidden; }
-body.dr-has-live { padding-bottom: calc(var(--bar-h) + var(--safe-b) + 104px); }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; touch-action: manipulation; }
 input, textarea { font: inherit; color: inherit; }
 svg { display: block; }
@@ -75,29 +74,25 @@ svg { display: block; }
 #drMain > section { display: flex; flex-direction: column; gap: 12px; }
 .dr-row { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: 12px; align-items: stretch; }
 .dr-hd { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 22px; }
-.dr-tap { display: block; width: 100%; text-align: left; transition: transform .15s var(--ease); }
-.dr-tap:active { transform: scale(.985); }
 
 /* ── today ── */
 .dr-title { display: block; margin: 4px 0; font-size: 28px; font-weight: 700; letter-spacing: -.02em; line-height: 1.15;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; text-align: left; }
-.dr-sub { color: var(--dim); font-size: 12.5px; margin: 2px 0 12px; }
+.dr-sub { color: var(--dim); font-size: 12.5px; margin: 2px 0 12px; min-height: 17px; }
 .dr-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 .dr-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; background: var(--card2); color: var(--dim); font-size: 12px; font-weight: 500; }
-.dr-chip.is-win { color: var(--win); }
+.dr-chip.is-pos { color: var(--pos); }
 .dr-go {
   display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 46px; border-radius: 999px;
   background: var(--ink); color: var(--on-ink); font-weight: 600; font-size: 14px; transition: transform .15s var(--ease);
 }
 .dr-go:active { transform: scale(.98); }
-.dr-go.is-live { background: var(--live); color: #fff; }
-.dr-link { display: block; margin: 8px auto 0; min-height: 44px; color: var(--dim); font-size: 13px; font-weight: 500; }
 
 /* ── stat tiles ── */
 .dr-stat { text-align: center; padding: 14px 8px; }
 .dr-stat b { display: block; font-size: 19px; font-weight: 700; letter-spacing: -.01em; margin-top: 8px; }
 .dr-stat span { display: block; font-size: 11.5px; color: var(--dim); margin-top: 2px; }
-.dr-delta { position: absolute; top: 9px; right: 11px; font-size: 10px; font-weight: 600; color: var(--win); }
+.dr-delta { position: absolute; top: 9px; right: 11px; font-size: 10px; font-weight: 600; color: var(--pos); }
 .dr-delta.is-down { color: var(--dim); }
 
 /* ── segmented control ── */
@@ -106,53 +101,49 @@ svg { display: block; }
 .dr-seg button::before { content: ''; position: absolute; inset: -5px 0; }
 .dr-seg button[aria-pressed="true"] { background: var(--card3); color: var(--ink); }
 .dr-card > .dr-seg { margin-bottom: 12px; }
+/* How it went, in the log: the two answers are the biggest controls on
+   the sheet, because they are the one thing every encounter has. */
+.dr-feel { background: var(--card); }
+.dr-feel button { height: 46px; font-size: 14px; }
+.dr-feel button[data-f="1"][aria-pressed="true"] { background: var(--pos); color: #002a0c; }
 
-/* ── the funnel ── */
-.dr-fun { display: flex; flex-direction: column; gap: 10px; }
-.dr-fr { display: grid; grid-template-columns: 92px minmax(0, 1fr); align-items: center; gap: 10px; font-size: 12.5px; }
-.dr-fr > span { color: var(--dim); }
-.dr-fr > span b { display: block; color: var(--ink); font-weight: 600; font-size: 14px; }
-.dr-fr i { display: block; height: 10px; border-radius: 5px; background: var(--card3); overflow: hidden; }
-.dr-fr i b { display: block; height: 100%; background: #c9c9ce; border-radius: 5px; }
-.dr-fr.is-sale i b { background: var(--win); }
-.dr-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
-.dr-step { background: var(--card2); border-radius: 16px; padding: 10px; position: relative; min-width: 0; }
-.dr-step span { display: block; font-size: 11px; color: var(--dim); font-weight: 500; }
-.dr-step b { display: block; font-size: 19px; font-weight: 700; margin-top: 4px; }
-.dr-step small { display: block; font-size: 10.5px; color: var(--dim); margin-top: 2px; min-height: 14px; }
-.dr-step small.is-up { color: var(--win); }
-/* The step to work on is ringed, never reddened: it is a place to
-   look, not a mark against you. */
-.dr-feel-fig { display: flex; align-items: baseline; gap: 6px; margin-top: 8px; }
-.dr-feel-fig b { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
-.dr-feel-fig span { font-size: 13px; color: var(--dim); }
-.dr-feel-bar { display: block; height: 10px; border-radius: 5px; background: var(--card3); overflow: hidden; margin-top: 10px; }
-.dr-feel-bar b { display: block; height: 100%; background: #c9c9ce; border-radius: 5px; }
-.dr-feel-key { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim); margin-top: 6px; }
-.dr-step.is-focus { box-shadow: inset 0 0 0 1.5px var(--ink); }
-.dr-focus { margin-top: 12px; font-size: 13px; line-height: 1.4; color: var(--dim); }
+/* ── how it went ── */
+.dr-fig { display: flex; align-items: baseline; gap: 8px; }
+.dr-fig b { font-size: 34px; font-weight: 800; letter-spacing: -.03em; color: var(--pos); line-height: 1; }
+.dr-fig span { font-size: 13px; color: var(--dim); }
+.dr-split { display: block; height: 10px; border-radius: 5px; background: var(--card3); overflow: hidden; margin-top: 12px; }
+.dr-split b { display: block; height: 100%; background: var(--pos); border-radius: 5px; }
+.dr-key { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim); margin-top: 6px; }
+.dr-vs { font-size: 12px; color: var(--dim); margin: 10px 0 0; }
+.dr-vs.is-up { color: var(--pos); }
+.dr-focus { margin: 12px 0 0; font-size: 13px; line-height: 1.4; color: var(--dim); }
 .dr-focus b { color: var(--ink); font-weight: 600; }
 
-/* ── bars: objections, areas, hours ── */
-.dr-bl { display: flex; flex-direction: column; gap: 9px; margin-top: 12px; }
-.dr-br { display: grid; grid-template-columns: 110px minmax(0, 1fr) 54px; align-items: center; gap: 10px; font-size: 12.5px; }
-.dr-br span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dr-br i { display: block; height: 6px; border-radius: 3px; background: var(--card3); overflow: hidden; }
-.dr-br i b { display: block; height: 100%; background: #c9c9ce; border-radius: 3px; }
-.dr-br.is-win i b { background: var(--win); }
-.dr-br em { font-style: normal; text-align: right; color: var(--dim); }
-.dr-hrs { display: grid; grid-template-columns: repeat(var(--n, 6), minmax(0, 1fr)); gap: 4px; align-items: end; height: 92px; margin-top: 12px; }
+/* ── breakdowns: activity and age ── */
+.dr-bl { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.dr-br { display: grid; grid-template-columns: 104px minmax(0, 1fr) 46px; align-items: center; gap: 10px; font-size: 12.5px; }
+.dr-br > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dr-br > span small { display: block; font-size: 10.5px; color: var(--quiet); }
+.dr-br i { display: block; height: 8px; border-radius: 4px; background: var(--card3); overflow: hidden; }
+.dr-br i b { display: block; height: 100%; background: #c9c9ce; border-radius: 4px; }
+.dr-br.is-best i b { background: var(--pos); }
+.dr-br em { font-style: normal; text-align: right; color: var(--dim); font-weight: 600; }
+.dr-br.is-best em { color: var(--pos); }
+
+/* ── hours: how many, and how many of those went well ── */
+.dr-hrs { display: grid; grid-template-columns: repeat(var(--n, 6), minmax(0, 1fr)); gap: 4px; align-items: end; height: 96px; margin-top: 12px; }
 .dr-hrs > div { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 3px; min-width: 0; }
-.dr-hrs i { display: block; width: 100%; max-width: 22px; border-radius: 6px; background: #4a4a50; min-height: 3px; }
-.dr-hrs .is-best i { background: var(--win); }
+.dr-hrs i { display: flex; flex-direction: column; justify-content: flex-end; width: 100%; max-width: 22px; border-radius: 6px; background: #4a4a50; min-height: 3px; overflow: hidden; }
+.dr-hrs i b { display: block; width: 100%; background: var(--pos); }
 .dr-hrs em { font-style: normal; font-size: 10px; color: var(--dim); }
 .dr-hrs u { text-decoration: none; font-size: 10px; color: var(--quiet); }
+.dr-hrs .is-best u { color: var(--pos); font-weight: 700; }
 
 /* ── 30-day grid ── */
 .dr-days { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 8px 6px; margin-top: 14px; }
 .dr-day { height: 18px; border-radius: 999px; border: 1.5px solid var(--mark-off); }
 .dr-day.is-on { background: #c9c9ce; border-color: #c9c9ce; }
-.dr-day.is-win { background: var(--win); border-color: var(--win); }
+.dr-day.is-good { background: var(--pos); border-color: var(--pos); }
 .dr-day.is-now { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--ink); }
 
 /* ── empty ── */
@@ -161,14 +152,16 @@ svg { display: block; }
 
 /* ── lists ── */
 .dr-list { display: flex; flex-direction: column; }
-.dr-li { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 10px 0; border-top: 1px solid var(--line); width: 100%; text-align: left; }
+.dr-li { display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 10px 0; border-top: 1px solid var(--line); width: 100%; text-align: left; }
 .dr-li:first-child { border-top: 0; }
 .dr-li-t { flex: 1; min-width: 0; }
 .dr-li-t b { display: block; font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dr-li-t span { display: block; font-size: 12px; color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dr-li-r { font-size: 13px; color: var(--dim); text-align: right; flex: none; font-weight: 600; }
-.dr-li-r.is-win { color: var(--win); }
-.dr-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--win); flex: none; }
+.dr-li-r { font-size: 12px; color: var(--dim); text-align: right; flex: none; font-variant-numeric: tabular-nums; }
+/* A filled dot went well, a hollow one did not — so the two read apart
+   without a colour having to say "bad". */
+.dr-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; border: 1.5px solid var(--quiet); }
+.dr-dot.is-pos { background: var(--pos); border-color: var(--pos); }
 
 .dr-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px;
@@ -176,8 +169,7 @@ svg { display: block; }
 }
 .dr-btn.is-full { width: 100%; }
 .dr-btn.is-ink { background: var(--ink); color: var(--on-ink); }
-.dr-btn.is-win { background: var(--win); color: #002a0c; }
-.dr-btn.is-bad { color: var(--live); }
+.dr-btn.is-bad { color: var(--bad); }
 .dr-btn:active { opacity: .8; }
 .dr-round { width: 44px; height: 44px; border-radius: 999px; display: grid; place-items: center; color: var(--dim); flex: none; }
 .dr-round:disabled { opacity: .3; cursor: default; }
@@ -185,17 +177,19 @@ svg { display: block; }
 
 .dr-field {
   width: 100%; height: 44px; border-radius: var(--r-s); background: var(--card2); border: 1px solid transparent;
-  padding: 0 14px; font-size: 16px; outline: none;
+  padding: 0 14px; font-size: 16px; outline: none; -webkit-appearance: none; appearance: none;
 }
 textarea.dr-field { height: 84px; padding: 11px 14px; resize: none; line-height: 1.35; }
 .dr-field:focus { border-color: rgba(255,255,255,.25); }
 .dr-flab { display: block; font-size: 12px; color: var(--dim); margin: 14px 2px 6px; }
-.dr-grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 10px; }
 .dr-pills { display: flex; flex-wrap: wrap; gap: 8px; }
 .dr-pills + .dr-field { margin-top: 8px; }
 .dr-pill { min-height: 36px; padding: 0 14px; border-radius: 999px; background: var(--card2); color: var(--dim); font-size: 13px; font-weight: 500; position: relative; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dr-pill::before { content: ''; position: absolute; inset: -4px 0; }
 .dr-pill[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
+.dr-age { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 10px; align-items: center; }
+.dr-age .dr-pills { gap: 6px; }
+.dr-age .dr-pill { padding: 0 10px; }
 
 /* ── calendar ── */
 .dr-calnav { display: flex; align-items: center; justify-content: space-between; }
@@ -207,12 +201,12 @@ textarea.dr-field { height: 84px; padding: 11px 14px; resize: none; line-height:
 .dr-cell.is-on { background: var(--card2); color: var(--ink); font-weight: 700; }
 .dr-cell.is-now { box-shadow: inset 0 0 0 2px var(--ink); color: var(--ink); }
 .dr-cell.is-ahead { color: #55555c; }
-.dr-cell small { font-size: 10px; font-weight: 700; color: var(--win); height: 12px; line-height: 12px; }
-.dr-sum { display: grid; grid-template-columns: repeat(var(--n, 4), minmax(0, 1fr)); gap: 10px; }
+.dr-cell small { font-size: 10px; font-weight: 700; color: var(--pos); height: 12px; line-height: 12px; }
+.dr-sum { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); gap: 10px; }
 .dr-sum div { background: var(--card); border-radius: 16px; padding: 12px 6px; text-align: center; min-width: 0; }
 .dr-sum b { display: block; font-size: 16px; font-weight: 700; }
 .dr-sum span { font-size: 11px; color: var(--dim); }
-.dr-sum .is-win b { color: var(--win); }
+.dr-sum .is-pos b { color: var(--pos); }
 
 /* ── the bar ── */
 .dr-bar {
@@ -224,16 +218,6 @@ textarea.dr-field { height: 84px; padding: 11px 14px; resize: none; line-height:
 .dr-bar button { width: 58px; height: 46px; border-radius: 999px; display: grid; place-items: center; color: var(--quiet); }
 .dr-bar button .dr-ic { width: 20px; height: 20px; }
 .dr-bar button[aria-current="page"] { background: var(--card3); color: var(--ink); }
-
-.dr-live {
-  position: fixed; left: 16px; right: 16px; bottom: calc(var(--safe-b) + 76px); z-index: 19; max-width: 520px; margin: 0 auto;
-  display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 14px; border-radius: 16px; font-size: 13px;
-  background: #2a0e0c; box-shadow: inset 0 0 0 1px rgba(255,59,48,.35), 0 8px 24px rgba(0,0,0,.5); font-weight: 600; text-align: left;
-}
-.dr-live span:not(.dr-rec) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dr-live em { font-style: normal; color: #ffb3ad; font-variant-numeric: tabular-nums; }
-.dr-rec { width: 9px; height: 9px; border-radius: 50%; background: var(--live); flex: none; animation: dr-pulse 1.6s ease-in-out infinite; }
-@keyframes dr-pulse { 50% { opacity: .35; } }
 
 /* ── sheets: built and removed, never hidden ── */
 .dr-scrim { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 40; opacity: 0; transition: opacity .28s var(--ease); }
@@ -255,64 +239,27 @@ textarea.dr-field { height: 84px; padding: 11px 14px; resize: none; line-height:
 .dr-sh-ft { flex: none; padding: 12px 20px calc(var(--safe-b) + 14px); border-top: 1px solid var(--line); display: flex; gap: 10px; }
 .dr-sh-ft > * { flex: 1; }
 
-/* ── the shift ── */
-.dr-ss-area { flex: 1; min-width: 0; background: none; border: 0; outline: none; font-size: 18px; font-weight: 700; letter-spacing: -.01em; padding: 0; height: 44px; }
-.dr-ss-area::placeholder { color: var(--quiet); }
-.dr-ss-time { font-variant-numeric: tabular-nums; color: var(--dim); font-size: 13px; font-weight: 600; }
-.dr-live-st { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-.dr-live-st div { background: var(--card); border-radius: 14px; padding: 9px 4px; text-align: center; min-width: 0; }
-.dr-live-st b { display: block; font-size: 17px; font-weight: 700; }
-.dr-live-st span { font-size: 10.5px; color: var(--dim); }
-.dr-live-st .is-win b { color: var(--win); }
-.dr-outs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
-.dr-out {
-  min-height: 74px; border-radius: 20px; background: var(--card); display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between;
-  padding: 12px 14px; text-align: left; transition: transform .12s var(--ease), background .12s;
-}
-.dr-out:active { transform: scale(.97); background: var(--card2); }
-.dr-out span { font-size: 14px; font-weight: 600; }
-.dr-out b { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--dim); }
-.dr-out.is-sale { grid-column: 1 / -1; min-height: 84px; background: var(--win); color: #002a0c; flex-direction: row; align-items: center; }
-.dr-out.is-sale b { color: #002a0c; font-size: 28px; }
-.dr-out.is-sale span { font-size: 17px; font-weight: 700; }
-.dr-last { margin-top: 12px; background: var(--card); border-radius: var(--r); padding: 12px 14px; }
-.dr-last .dr-hd b { font-size: 13px; font-weight: 600; }
-.dr-last .dr-hd button { min-height: 36px; padding: 0 12px; border-radius: 999px; background: var(--card2); font-size: 12.5px; font-weight: 600; color: var(--dim); position: relative; }
-.dr-last .dr-hd button::before { content: ''; position: absolute; inset: -4px 0; }
-.dr-last .dr-pills { margin-top: 10px; }
-.dr-goal { display: grid; grid-template-columns: 70px minmax(0, 1fr) 54px; align-items: center; gap: 10px; font-size: 12.5px; margin-top: 10px; }
-.dr-goal span { color: var(--dim); }
-.dr-goal i { display: block; height: 6px; border-radius: 3px; background: var(--card3); overflow: hidden; }
-.dr-goal i b { display: block; height: 100%; background: #c9c9ce; border-radius: 3px; }
-.dr-goal.is-met i b { background: var(--win); }
-.dr-goal em { font-style: normal; text-align: right; color: var(--dim); }
-
-/* ── summary and report ── */
-.dr-hero { font-size: 40px; font-weight: 800; letter-spacing: -.03em; line-height: 1; margin-top: 4px; }
-.dr-hero.is-win { color: var(--win); }
-.dr-hero + p { margin: 6px 0 12px; font-size: 15px; font-weight: 600; }
+/* ── report ── */
 .dr-rep { background: var(--card); border-radius: var(--r); padding: 16px; margin-top: 12px; }
 .dr-rep-hd { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
 .dr-rep-hd b { display: block; font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
 .dr-rep-hd span { font-size: 12px; color: var(--dim); }
-.dr-rep-hero { display: flex; align-items: baseline; gap: 10px; margin: 12px 0 2px; }
-.dr-rep-hero b { font-size: 36px; font-weight: 800; letter-spacing: -.03em; color: var(--win); line-height: 1; }
-.dr-rep-hero span { font-size: 15px; font-weight: 600; }
-.dr-rep .dr-sum { margin-top: 12px; }
-.dr-rep .dr-sum div { background: var(--card2); }
-.dr-rep .dr-fun { margin-top: 14px; }
+.dr-rep-hero { display: flex; align-items: baseline; gap: 10px; margin: 12px 0 2px; flex-wrap: wrap; }
+.dr-rep-hero b { font-size: 34px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
+.dr-rep-hero span { font-size: 15px; font-weight: 600; color: var(--pos); }
 .dr-kv { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
 .dr-kv div { min-width: 0; }
 .dr-kv span { display: block; font-size: 10.5px; color: var(--dim); }
 .dr-kv b { display: block; font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dr-rep-sec { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; }
 .dr-rep-sec .dr-cap { display: block; margin-bottom: 6px; }
-.dr-rep-sec ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
-.dr-rep-sec li { display: flex; justify-content: space-between; gap: 10px; }
-.dr-rep-sec li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dim); }
-.dr-rep-sec li b { font-weight: 600; flex: none; }
-.dr-rep-sec li b.is-win { color: var(--win); }
-.dr-rep-sec p { margin: 0; line-height: 1.4; }
+.dr-rep-sec ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.dr-rep-sec li { display: flex; align-items: center; gap: 10px; }
+.dr-rep-sec li > span:not(.dr-dot) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dim); }
+.dr-rep-sec li b { color: var(--ink); font-weight: 600; }
+.dr-rep-sec li em { font-style: normal; color: var(--quiet); flex: none; font-size: 12px; }
+.dr-rep-sec p { margin: 0; line-height: 1.4; color: var(--dim); }
+.dr-rep-sec p b { color: var(--ink); font-weight: 600; }
 
 .dr-toast {
   position: fixed; left: 50%; bottom: calc(var(--safe-b) + 84px); z-index: 60; transform: translate(-50%, 12px); opacity: 0;
@@ -332,18 +279,17 @@ textarea.dr-field { height: 84px; padding: 11px 14px; resize: none; line-height:
 </style>
 </head>
 <body>
-<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">Doors</h1>
+<h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">Encounters</h1>
 <main id="drMain">
   <section id="drHome" aria-label="Home"></section>
   <section id="drCal" aria-label="Calendar" hidden></section>
-  <section id="drWins" aria-label="Wins" hidden></section>
+  <section id="drLog" aria-label="Encounters" hidden></section>
   <section id="drYou" aria-label="You" hidden></section>
 </main>
-<button id="drLive" class="dr-live" type="button" hidden></button>
 <nav class="dr-bar" aria-label="Sections">
   <button type="button" data-v="home" aria-label="Home" aria-current="page"><svg class="dr-ic" viewBox="0 0 24 24"><path d="M5 20V12M10 20V6M15 20v-9M20 20V9"/></svg></button>
   <button type="button" data-v="cal" aria-label="Calendar"><svg class="dr-ic" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></button>
-  <button type="button" data-v="wins" aria-label="Wins"><svg class="dr-ic" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0V4zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20.5h7M10 17h4"/></svg></button>
+  <button type="button" data-v="log" aria-label="Encounters"><svg class="dr-ic" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.3-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.8a3.5 3.5 0 0 1 0 6.4M18.5 14.8c1.6.8 2.6 2.6 3 5.2"/></svg></button>
   <button type="button" data-v="you" aria-label="You"><svg class="dr-ic" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1-4 4-6 7.5-6s6.5 2 7.5 6"/></svg></button>
 </nav>
 <script>
@@ -351,43 +297,44 @@ textarea.dr-field { height: 84px; padding: 11px 14px; resize: none; line-height:
 'use strict';
 
 /* ═══════════════════════════════════════════════════════════════
-   DOORS — a log of every door you knock, so you can see where the
-   sale is being won and where it is being lost.
+   ENCOUNTERS — a log of the people you meet, so you can see where you
+   are doing well and where you can improve.
 
-   One press per door. The press is the OUTCOME, and the funnel falls
-   out of it: every door is a knock, every outcome but No answer is a
-   conversation, a pitch, a callback and a sale are all pitches, and a
-   sale is a sale. Four counters you would have to keep in step become
-   one tap you cannot get wrong.
+   ONE ENCOUNTER IS THE WHOLE RECORD: who (a name, if you got one), how
+   old they looked, what they were doing when you met, and whether it
+   went well. Everything on every screen is worked out from that one
+   list, so nothing can disagree with it.
 
-   Everything lives in this browser under doors.v1 and doors.view.v1
-   and is never sent anywhere. The mentor gets a screenshot of the
-   report, which is the whole of what leaves the phone, and you take it.
+   It began as a door-to-door counter — knocks, a funnel, sales — and
+   was rebuilt around the encounter on request: the door was never the
+   point, the person was.
+
+   Everything lives in this browser under encounters.v1 and
+   encounters.view.v1 and is never sent anywhere. A mentor gets a
+   screenshot of the report, and you take it.
    ═══════════════════════════════════════════════════════════════ */
 
-var KEY = 'doors.v1', VIEWK = 'doors.view.v1';
-var VIEWS = ['home', 'cal', 'wins', 'you'];
+var KEY = 'encounters.v1', VIEWK = 'encounters.view.v1';
+var VIEWS = ['home', 'cal', 'log', 'you'];
 var DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 var MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
-/* THE OUTCOMES, in funnel order. Ids are stored on every door, so they
-   never change once a door names one. */
-var OUT = [['na', 'No answer'], ['ni', 'Not interested'], ['pi', 'Pitched'], ['cb', 'Callback'], ['sa', 'Sale']];
-var OUT_N = OUT.reduce(function (o, x) { o[x[0]] = x[1]; return o; }, {});
-/* WHY NOT. Asked of a door that opened and did not buy, never of one
-   that did not open — there is nobody to have had a reason. Optional:
-   a tag on the last door, not a question in the way of the next one. */
-var WHY = [['price', 'Price'], ['time', 'No time'], ['have', 'Already has one'], ['owner', 'Not the owner'],
-  ['think', 'Wants to think'], ['partner', 'Ask partner'], ['trust', 'Didn’t trust it'], ['other', 'Other']];
-var WHY_N = WHY.reduce(function (o, x) { o[x[0]] = x[1]; return o; }, {});
-var CURS = ['$', '£', '€'];
+/* A starter set, offered until your own fill the row: what people are
+   doing is the same few things most days, and typing one in while the
+   moment is fresh is the slowest part of logging it. */
+var ACTS = ['Walking', 'Shopping', 'Coffee', 'Reading', 'Working', 'Exercising', 'Waiting'];
+/* Ages are a guess, so they are read back in brackets. A single figure
+   on a stranger is precise in a way the guess is not. */
+var AGES = [[0, 24, 'Under 25'], [25, 29, '25–29'], [30, 34, '30–34'], [35, 39, '35–39'], [40, 49, '40–49'], [50, 200, '50+']];
+var AGE_QUICK = [20, 25, 30, 35, 40, 50];
+/* A group needs three behind it before it is called best or worst: one
+   good afternoon with readers is not a pattern about readers. */
+var MIN_N = 3;
 
 var IC = {
   report: '<svg class="dr-ic" viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="3"/><path d="M9 15v-2M12 15v-5M15 15v-3"/></svg>',
+  plus: '<svg class="dr-ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
   left: '<svg class="dr-ic" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>',
   right: '<svg class="dr-ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
-  chev: '<svg class="dr-ic" viewBox="0 0 24 24" style="color:var(--quiet);width:16px;height:16px"><path d="M9 6l6 6-6 6"/></svg>',
-  down: '<svg class="dr-ic" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>',
   x: '<svg class="dr-ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>'
 };
 
@@ -395,7 +342,7 @@ var IC = {
 function $(s, r) { return (r || document).querySelector(s); }
 function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
 function el(html) { var t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; }
-function drId() { return 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function drId() { return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function ymd(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 function parseYmd(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
 function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
@@ -403,55 +350,38 @@ function today() { var n = new Date(); return new Date(n.getFullYear(), n.getMon
 function monday(d) { return addDays(d, -((d.getDay() + 6) % 7)); }
 function fmtDay(k) { var x = parseYmd(k); return DOW[(x.getDay() + 6) % 7] + ' ' + x.getDate() + ' ' + MON[x.getMonth()].slice(0, 3); }
 function fmtHour(h) { return (h % 12 || 12) + (h < 12 ? 'am' : 'pm'); }
-function fmtTime(t) { var d = new Date(t); var m = d.getMinutes(); return (d.getHours() % 12 || 12) + ':' + String(m).padStart(2, '0') + (d.getHours() < 12 ? 'am' : 'pm'); }
-function fmtClock(ms) { var s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h ? h + ':' + String(m).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0') : m + ':' + String(s % 60).padStart(2, '0'); }
-function fmtDur(ms) { var m = Math.round(ms / 60000); return m < 60 ? m + 'm' : Math.floor(m / 60) + 'h ' + (m % 60) + 'm'; }
-/* MONEY IS CENTS. A dollar figure in floating point is a cent out
-   somewhere eventually, and a total you cannot trust is one you stop
-   reading. */
-function money(c) {
-  var v = c / 100, cur = S.cur;
-  if (Math.abs(v) >= 10000) return cur + (Math.round(v / 100) / 10) + 'k';
-  if (v % 1) return cur + v.toFixed(2);
-  return cur + v.toLocaleString('en-US');
-}
+function fmtTime(t) { var d = new Date(t); return (d.getHours() % 12 || 12) + ':' + String(d.getMinutes()).padStart(2, '0') + (d.getHours() < 12 ? 'am' : 'pm'); }
+function dayOf(t) { return ymd(new Date(t)); }
 function pct(a, b) { return b > 0 ? Math.round(a / b * 100) : null; }
 function pctTxt(a, b) { var p = pct(a, b); return p === null ? '–' : p + '%'; }
-function toCents(s) { var v = parseFloat(String(s).replace(/[^0-9.]/g, '')); return isFinite(v) && v >= 0 ? Math.round(v * 100) : 0; }
 function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 12); } catch (e) {} }
+function ageBand(a) { if (!a) return null; for (var i = 0; i < AGES.length; i++) if (a >= AGES[i][0] && a <= AGES[i][1]) return AGES[i][2]; return null; }
+/* What an encounter is called in a list: the name, or "No name" —
+   never a blank row. "Someone coffee" was tried and reads as a typo;
+   the activity rides the line under it either way. */
+function enTitle(e) { return e.n || 'No name'; }
+function enSub(e) { return [e.a ? String(e.a) : '', e.act || ''].filter(Boolean).join(' · '); }
+function localDT(t) { var d = new Date(t); return ymd(d) + 'T' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
 
 /* ═══════════ STORE ═══════════ */
-/* A shift is { id, d, a, s, e, k, m }: its date, the area, when it
-   started and ended (e is 0 while it is live), the doors as
-   { t, o, r, f, v, p, n } — time, outcome, reason, how it felt (1
-   positive, -1 negative, absent untagged), value in cents, product,
-   note — and m, the totals of a shift written up afterwards.
-   A shift has doors OR totals, never both: one is the record and the
-   other is a summary of a record somebody did not keep, and adding them
-   would count the same afternoon twice. */
-function drDefault() { return { v: 1, name: '', cur: '$', goal: { sa: 3, dr: 80 }, sh: [], pr: [] }; }
-function num(v) { var n = +v; return isFinite(n) && n >= 0 ? n : null; }
+/* An encounter is { id, t, n, a, act, f, note }: when, the name, the
+   age you put on them, what they were doing, how it went (1 well, -1
+   not) and a note. Only `t` and `f` are required — a name you did not
+   get is still an encounter you had. */
+function drDefault() { return { v: 1, name: '', goal: 5, acts: [], en: [] }; }
 function drClean(o) {
   var d = drDefault();
   if (!o || typeof o !== 'object') return d;
   if (typeof o.name === 'string') d.name = o.name.slice(0, 40);
-  if (CURS.indexOf(o.cur) >= 0) d.cur = o.cur;
-  if (o.goal && typeof o.goal === 'object') ['sa', 'dr'].forEach(function (f) { var v = num(o.goal[f]); if (v !== null) d.goal[f] = Math.min(9999, Math.round(v)); });
-  if (Array.isArray(o.pr)) d.pr = o.pr.filter(function (p) { return typeof p === 'string' && p.trim(); }).map(function (p) { return p.slice(0, 40); }).slice(0, 12);
-  /* A damaged shift costs itself, and a damaged door costs itself —
-     never the rest of the record. */
-  if (Array.isArray(o.sh)) d.sh = o.sh.filter(function (s) { return s && typeof s.id === 'string' && /^\d{4}-\d\d-\d\d$/.test(s.d); }).map(function (s) {
-    var x = { id: s.id, d: s.d, a: typeof s.a === 'string' ? s.a.slice(0, 40) : '', s: +s.s || 0, e: +s.e || 0, k: [], m: null };
-    if (s.m && typeof s.m === 'object') {
-      var m = {}; ['k', 'an', 'pi', 'cb', 'sa', 'rv', 'h'].forEach(function (f) { m[f] = num(s.m[f]) || 0; });
-      x.m = m;
-    } else if (Array.isArray(s.k)) x.k = s.k.filter(function (k) { return k && OUT_N[k.o]; }).map(function (k) {
-      var y = { t: +k.t || 0, o: k.o };
-      if (k.r && WHY_N[k.r] && k.o !== 'na' && k.o !== 'sa') y.r = k.r;
-      if ((k.f === 1 || k.f === -1) && k.o !== 'na') y.f = k.f;
-      if (k.o === 'sa') { y.v = Math.round(num(k.v) || 0); if (typeof k.p === 'string' && k.p) y.p = k.p.slice(0, 40); if (typeof k.n === 'string' && k.n) y.n = k.n.slice(0, 280); }
-      return y;
-    });
+  var g = +o.goal; if (isFinite(g) && g >= 0) d.goal = Math.min(99, Math.round(g));
+  if (Array.isArray(o.acts)) d.acts = o.acts.filter(function (a) { return typeof a === 'string' && a.trim(); }).map(function (a) { return a.slice(0, 30); }).slice(0, 12);
+  /* A damaged encounter costs itself, never the rest of the record. */
+  if (Array.isArray(o.en)) d.en = o.en.filter(function (e) { return e && typeof e.id === 'string' && +e.t > 0 && (e.f === 1 || e.f === -1); }).map(function (e) {
+    var x = { id: e.id, t: +e.t, f: e.f };
+    if (typeof e.n === 'string' && e.n.trim()) x.n = e.n.trim().slice(0, 40);
+    var a = Math.round(+e.a); if (a > 0 && a < 120) x.a = a;
+    if (typeof e.act === 'string' && e.act.trim()) x.act = e.act.trim().slice(0, 30);
+    if (typeof e.note === 'string' && e.note.trim()) x.note = e.note.slice(0, 400);
     return x;
   });
   return d;
@@ -461,95 +391,68 @@ function drLoad() { try { S = drClean(JSON.parse(localStorage.getItem(KEY) || 'n
 function drSave() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { drToast('Could not save — storage is full'); } }
 drLoad();
 
-function drLiveShift() { for (var i = 0; i < S.sh.length; i++) if (!S.sh[i].m && !S.sh[i].e) return S.sh[i]; return null; }
-function drShById(id) { for (var i = 0; i < S.sh.length; i++) if (S.sh[i].id === id) return S.sh[i]; return null; }
-function drShOn(k) { return S.sh.filter(function (s) { return s.d === k; }).sort(function (a, b) { return a.s - b.s; }); }
-function drIn(from, to) { var a = ymd(from), b = ymd(to); return S.sh.filter(function (s) { return s.d >= a && s.d <= b; }); }
-function drAreas() {
-  var seen = {}, out = [];
-  S.sh.slice().sort(function (a, b) { return b.s - a.s; }).forEach(function (s) { if (s.a && !seen[s.a.toLowerCase()]) { seen[s.a.toLowerCase()] = 1; out.push(s.a); } });
-  return out;
+function drIn(from, to) { var a = ymd(from), b = ymd(to); return S.en.filter(function (e) { var k = dayOf(e.t); return k >= a && k <= b; }); }
+function drOn(k) { return S.en.filter(function (e) { return dayOf(e.t) === k; }).sort(function (a, b) { return a.t - b.t; }); }
+function drActs() {
+  var out = S.acts.slice();
+  ACTS.forEach(function (a) { if (!out.some(function (x) { return x.toLowerCase() === a.toLowerCase(); })) out.push(a); });
+  return out.slice(0, 8);
 }
 
 /* ═══════════ THE ARITHMETIC ═══════════ */
 function drCounts(list) {
-  var c = { k: 0, an: 0, pi: 0, cb: 0, sa: 0, rv: 0, ms: 0, sh: 0, pos: 0, neg: 0, why: {}, wins: [] };
-  list.forEach(function (s) {
-    c.sh++;
-    if (s.m) { c.k += s.m.k; c.an += s.m.an; c.pi += s.m.pi; c.cb += s.m.cb; c.sa += s.m.sa; c.rv += s.m.rv; c.ms += s.m.h * 3600000; return; }
-    var end = s.e || Date.now();
-    if (s.s && s.k.length) c.ms += Math.max(0, end - s.s);
-    s.k.forEach(function (k) {
-      c.k++;
-      if (k.o !== 'na') c.an++;
-      if (k.o === 'pi' || k.o === 'cb' || k.o === 'sa') c.pi++;
-      if (k.o === 'cb') c.cb++;
-      if (k.o === 'sa') { c.sa++; c.rv += k.v || 0; c.wins.push({ k: k, s: s }); }
-      if (k.r) c.why[k.r] = (c.why[k.r] || 0) + 1;
-      if (k.f === 1) c.pos++; else if (k.f === -1) c.neg++;
-    });
-  });
+  var c = { n: list.length, pos: 0, neg: 0, named: 0, days: {} };
+  list.forEach(function (e) { if (e.f === 1) c.pos++; else c.neg++; if (e.n) c.named++; c.days[dayOf(e.t)] = 1; });
+  c.dayN = Object.keys(c.days).length;
   return c;
 }
-/* THREE STEPS, each measured against the one before it, because that is
-   the only way a step is about YOU: an answer rate is the street and the
-   hour as much as anything you did, a close rate over doors knocked
-   mixes all three together, and "of the people I pitched, how many
-   bought" is the number a mentor actually asks for. */
-var STEPS = [
-  { id: 'an', n: 'Answer', of: 'k', is: 'an', tip: 'Doors opening. Try other hours or streets — see Best hours and Areas.' },
-  { id: 'pi', n: 'Pitch', of: 'an', is: 'pi', tip: 'Getting from the door opening to the pitch. Work on your opener.' },
-  { id: 'sa', n: 'Close', of: 'pi', is: 'sa', tip: 'Turning pitches into sales. Work on handling objections and asking for the sale.' }
-];
-var MIN_N = 10;
-/* WHERE TO IMPROVE is worked out against your own record, never against
-   a benchmark somebody else wrote: a figure that says 30% is low for
-   doors means nothing about your product, your patch or your season.
-   A step is only judged when both sides have ten people behind it —
-   fewer and one bad street is a finding. */
-function drFocus(cur, base) {
-  var worst = null;
-  STEPS.forEach(function (st) {
-    if (cur[st.of] < MIN_N || base[st.of] < MIN_N) return;
-    var a = cur[st.is] / cur[st.of], b = base[st.is] / base[st.of];
-    if (b <= 0) return;
-    var rel = a / b - 1;
-    if (rel < -0.05 && (!worst || rel < worst.rel)) worst = { st: st, rel: rel, a: a, b: b };
-  });
-  return worst;
+/* Grouped by a key — an activity, an age band, an hour — with how many
+   and how many of those went well. */
+function drBy(list, keyOf) {
+  var m = {};
+  list.forEach(function (e) { var k = keyOf(e); if (k === null || k === undefined || k === '') return; var r = m[k] || (m[k] = { k: k, n: 0, pos: 0 }); r.n++; if (e.f === 1) r.pos++; });
+  return Object.keys(m).map(function (k) { return m[k]; });
 }
-function drTopWhy(c, n) {
-  return Object.keys(c.why).map(function (r) { return [r, c.why[r]]; }).sort(function (a, b) { return b[1] - a[1]; }).slice(0, n || 3);
+/* "walking" and "Walking" are one activity, so they are one row. */
+function drActKey(e) { return e.act ? e.act.charAt(0).toUpperCase() + e.act.slice(1).toLowerCase() : null; }
+function drAgeKey(e) { return ageBand(e.a); }
+function drHourKey(e) { return new Date(e.t).getHours(); }
+/* WHERE YOU DO WELL AND WHERE TO IMPROVE, against your own record for
+   the same stretch rather than a benchmark nobody wrote for you: the
+   best and the worst group with three or more behind it, named only
+   when it really does sit apart from your overall rate. */
+function drFocus(list) {
+  var c = drCounts(list); if (c.n < MIN_N * 2) return null;
+  var base = c.pos / c.n;
+  var groups = drBy(list, drActKey).map(function (r) { r.what = 'act'; return r; })
+    .concat(drBy(list, drAgeKey).map(function (r) { r.what = 'age'; return r; }))
+    .filter(function (r) { return r.n >= MIN_N; });
+  groups.forEach(function (r) { r.rate = r.pos / r.n; });
+  var best = groups.slice().sort(function (a, b) { return b.rate - a.rate || b.n - a.n; })[0];
+  var worst = groups.slice().sort(function (a, b) { return a.rate - b.rate || b.n - a.n; })[0];
+  return { base: base, best: best && best.rate > base + 0.05 ? best : null, worst: worst && worst.rate < base - 0.05 ? worst : null };
 }
-/* A PERIOD and the stretch before it of the same length, so a week is
-   compared with the four before it rather than with a figure that
-   includes itself. */
+function drGroupName(r) { return r.what === 'act' ? r.k.toLowerCase() : 'aged ' + r.k; }
 function drPeriod(p) {
   var t = today(), from, to, label, bFrom, bTo;
-  if (p === 'today') { from = to = t; label = fmtDay(ymd(t)); bTo = addDays(t, -1); bFrom = addDays(t, -28); }
+  if (p === 'today') { from = to = t; label = 'Today'; bTo = addDays(t, -1); bFrom = addDays(t, -28); }
   else if (p === 'week') { from = monday(t); to = t; label = 'This week'; bTo = addDays(from, -1); bFrom = addDays(from, -28); }
   else if (p === 'last') { to = addDays(monday(t), -1); from = addDays(to, -6); label = 'Last week'; bTo = addDays(from, -1); bFrom = addDays(from, -28); }
   else if (p === 'month') { from = new Date(t.getFullYear(), t.getMonth(), 1); to = t; label = MON[t.getMonth()]; bTo = addDays(from, -1); bFrom = addDays(from, -90); }
   else if (p === '30') { from = addDays(t, -29); to = t; label = 'Last 30 days'; bTo = addDays(from, -1); bFrom = addDays(from, -90); }
   else { from = new Date(2000, 0, 1); to = t; label = 'All time'; bFrom = bTo = null; }
   var range = p === 'all' ? '' : (ymd(from) === ymd(to) ? fmtDay(ymd(from)) : fmtDay(ymd(from)) + ' – ' + fmtDay(ymd(to)));
-  return { from: from, to: to, label: label, range: range, cur: drCounts(drIn(from, to)), base: bFrom ? drCounts(drIn(bFrom, bTo)) : drCounts([]) };
+  var list = drIn(from, to);
+  return { from: from, to: to, label: label, range: range, list: list, cur: drCounts(list), base: bFrom ? drCounts(drIn(bFrom, bTo)) : drCounts([]) };
 }
-function drAreaRows(list) {
-  var m = {};
-  list.forEach(function (s) {
-    var a = s.a || 'No area', c = drCounts([s]);
-    var r = m[a.toLowerCase()] || (m[a.toLowerCase()] = { a: a, k: 0, sa: 0, rv: 0 });
-    r.k += c.k; r.sa += c.sa; r.rv += c.rv;
-  });
-  return Object.keys(m).map(function (k) { return m[k]; }).filter(function (r) { return r.k > 0; })
-    .sort(function (a, b) { var ra = a.k >= MIN_N ? a.sa / a.k : -1, rb = b.k >= MIN_N ? b.sa / b.k : -1; return rb - ra || b.k - a.k; });
+function drStreak() {
+  var d = today(), n = 0;
+  /* Today does not break a streak until it is over. */
+  if (!drOn(ymd(d)).length) d = addDays(d, -1);
+  while (drOn(ymd(d)).length) { n++; d = addDays(d, -1); }
+  return n;
 }
-function drHours(list) {
-  var h = {};
-  list.forEach(function (s) { if (!s.m) s.k.forEach(function (k) { var x = new Date(k.t).getHours(); var r = h[x] || (h[x] = { h: x, k: 0, an: 0, sa: 0 }); r.k++; if (k.o !== 'na') r.an++; if (k.o === 'sa') r.sa++; }); });
-  return Object.keys(h).map(function (k) { return h[k]; }).sort(function (a, b) { return a.h - b.h; });
-}
+function drBest(rows) { var b = null; rows.forEach(function (r) { if (r.n >= MIN_N && r.pos && (!b || r.pos / r.n > b.pos / b.n)) b = r; }); return b; }
 
 /* ═══════════ SHEETS ═══════════ */
 var stack = [];
@@ -557,28 +460,22 @@ function drSheet(o) {
   var scrim = el('<div class="dr-scrim"></div>');
   var sh = el('<div class="dr-sheet" role="dialog" aria-modal="true"><div class="dr-grab" aria-hidden="true"></div><div class="dr-sh-hd"><h2></h2></div><div class="dr-sh-bd"></div></div>');
   if (o.full) sh.classList.add('is-full');
-  if (o.cls) sh.classList.add(o.cls);
   $('h2', sh).textContent = o.title || '';
   sh.setAttribute('aria-label', o.title || 'Sheet');
-  if (o.head) { var hd = $('.dr-sh-hd', sh); hd.textContent = ''; hd.appendChild(o.head); }
-  else {
-    var x = el('<button type="button" class="dr-round" aria-label="Close">' + IC.x + '</button>');
-    x.addEventListener('click', function () { api.close(); });
-    if (o.extra) $('.dr-sh-hd', sh).appendChild(o.extra);
-    $('.dr-sh-hd', sh).appendChild(x);
-  }
+  var x = el('<button type="button" class="dr-round" aria-label="Close">' + IC.x + '</button>');
+  x.addEventListener('click', function () { api.close(); });
+  if (o.extra) $('.dr-sh-hd', sh).appendChild(o.extra);
+  $('.dr-sh-hd', sh).appendChild(x);
   var bd = $('.dr-sh-bd', sh);
   if (o.body) bd.appendChild(o.body);
-  var ft = null;
-  if (o.foot) { ft = el('<div class="dr-sh-ft"></div>'); o.foot.forEach(function (n) { ft.appendChild(n); }); sh.appendChild(ft); }
+  if (o.foot) { var ft = el('<div class="dr-sh-ft"></div>'); o.foot.forEach(function (n) { ft.appendChild(n); }); sh.appendChild(ft); }
   document.body.appendChild(scrim); document.body.appendChild(sh);
   document.body.classList.add('dr-lock');
   var gone = false;
   var api = {
-    el: sh, body: bd, foot: ft,
-    close: function (quiet) {
+    el: sh, body: bd,
+    close: function () {
       if (gone) return; gone = true;
-      if (!quiet && o.onClose && o.onClose() === false) { gone = false; return; }
       sh.classList.remove('is-up'); scrim.classList.remove('is-up');
       var i = stack.indexOf(api); if (i >= 0) stack.splice(i, 1);
       if (!stack.length) document.body.classList.remove('dr-lock');
@@ -588,7 +485,7 @@ function drSheet(o) {
   stack.push(api);
   scrim.addEventListener('click', function () { api.close(); });
   var y0 = null, dy = 0;
-  function down(e) { if (e.target.closest('input, button:not(.dr-grab)')) return; y0 = e.clientY; dy = 0; sh.classList.add('is-drag'); try { e.currentTarget.setPointerCapture(e.pointerId); } catch (er) {} }
+  function down(e) { if (e.target.closest('input, textarea, button:not(.dr-grab)')) return; y0 = e.clientY; dy = 0; sh.classList.add('is-drag'); try { e.currentTarget.setPointerCapture(e.pointerId); } catch (er) {} }
   function move(e) { if (y0 === null) return; dy = Math.max(0, e.clientY - y0); sh.style.transform = 'translateY(' + dy + 'px)'; }
   function up() { if (y0 === null) return; y0 = null; sh.classList.remove('is-drag'); sh.style.transform = ''; if (dy > 90) api.close(); }
   [$('.dr-grab', sh), $('.dr-sh-hd', sh)].forEach(function (h) {
@@ -599,15 +496,6 @@ function drSheet(o) {
   return api;
 }
 document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && stack.length) { e.preventDefault(); stack[stack.length - 1].close(); } });
-function drAsk(title, text, yes, onYes) {
-  var b = el('<p style="margin:0 0 6px;color:var(--dim)"></p>'); b.textContent = text;
-  var no = el('<button type="button" class="dr-btn">Keep it</button>');
-  var go = el('<button type="button" class="dr-btn is-bad"></button>'); go.textContent = yes;
-  var s = drSheet({ title: title, body: b, foot: [no, go] });
-  no.addEventListener('click', function () { s.close(); });
-  go.addEventListener('click', function () { s.close(true); onYes(); });
-  return s;
-}
 var toastT = null;
 function drToast(msg, undo) {
   var old = $('.dr-toast'); if (old) old.remove();
@@ -625,13 +513,11 @@ function drToast(msg, undo) {
 }
 /* A row of pills where one is pressed, or none; pressing the pressed
    one clears it. */
-function drPillRow(opts, cur, onPick, cls) {
+function drPillRow(opts, cur, onPick) {
   var box = el('<div class="dr-pills"></div>');
-  if (cls) box.classList.add(cls);
   opts.forEach(function (o) {
     var p = el('<button type="button" class="dr-pill"></button>');
     p.textContent = o[1]; p.dataset.k = o[0];
-    p.setAttribute('aria-pressed', o[0] === cur ? 'true' : 'false');
     p.addEventListener('click', function () {
       var on = p.getAttribute('aria-pressed') !== 'true';
       $$('.dr-pill', box).forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
@@ -640,10 +526,13 @@ function drPillRow(opts, cur, onPick, cls) {
     });
     box.appendChild(p);
   });
+  drPillSync(box, cur);
   return box;
 }
-function drSeg(opts, cur, onPick) {
+function drPillSync(box, val) { var v = String(val == null ? '' : val).toLowerCase(); $$('.dr-pill', box).forEach(function (x) { x.setAttribute('aria-pressed', v !== '' && String(x.dataset.k).toLowerCase() === v ? 'true' : 'false'); }); }
+function drSeg(opts, cur, onPick, cls) {
   var s = el('<div class="dr-seg"></div>');
+  if (cls) s.classList.add(cls);
   s.style.setProperty('--n', opts.length);
   opts.forEach(function (o) {
     var b = el('<button type="button"></button>'); b.textContent = o[1]; b.dataset.p = o[0];
@@ -654,53 +543,117 @@ function drSeg(opts, cur, onPick) {
   return s;
 }
 
+/* ═══════════ LOGGING ONE ═══════════ */
+/* The one thing every encounter has to have — how it went — is the
+   first and biggest control on the sheet. Everything else can be left
+   blank, because a log you skip when you are in a hurry is not a log. */
+function drLogSheet(edit, at) {
+  var cur = edit ? { n: edit.n || '', a: edit.a || '', act: edit.act || '', f: edit.f, note: edit.note || '', t: edit.t } : { n: '', a: '', act: '', f: 0, note: '', t: at || Date.now() };
+  var b = el('<div></div>');
+  b.appendChild(el('<label class="dr-flab" style="margin-top:4px">How did it go?</label>'));
+  var feel = drSeg([[1, 'Positive'], [-1, 'Negative']], cur.f, function (v) {
+    cur.f = cur.f === v ? 0 : v; buzz(8);
+    $$('button', feel).forEach(function (x) { x.setAttribute('aria-pressed', +x.dataset.p === cur.f ? 'true' : 'false'); });
+  }, 'dr-feel');
+  feel.id = 'drFeel'; feel.setAttribute('role', 'group'); feel.setAttribute('aria-label', 'How it went');
+  $$('button', feel).forEach(function (x) { x.dataset.f = x.dataset.p; });
+  b.appendChild(feel);
+
+  b.appendChild(el('<label class="dr-flab" for="drEnN">Name</label>'));
+  var nf = el('<input class="dr-field" id="drEnN" placeholder="If you got one" maxlength="40" autocomplete="off" autocapitalize="words" />');
+  nf.value = cur.n; b.appendChild(nf);
+
+  b.appendChild(el('<label class="dr-flab" for="drEnA">Age</label>'));
+  var ar = el('<div class="dr-age"></div>');
+  var af = el('<input class="dr-field dr-num" id="drEnA" inputmode="numeric" placeholder="Guess" maxlength="3" autocomplete="off" />');
+  af.value = cur.a;
+  var ap = drPillRow(AGE_QUICK.map(function (a) { return [a, a === 50 ? '50+' : String(a)]; }), cur.a, function (v) { af.value = v || ''; });
+  ap.id = 'drAgePills';
+  af.addEventListener('input', function () { drPillSync(ap, af.value); });
+  ar.appendChild(af); ar.appendChild(ap); b.appendChild(ar);
+
+  b.appendChild(el('<label class="dr-flab" for="drEnAct">What were they doing?</label>'));
+  var acf = el('<input class="dr-field" id="drEnAct" placeholder="Something else" maxlength="30" autocomplete="off" autocapitalize="sentences" />');
+  acf.value = cur.act;
+  var acp = drPillRow(drActs().map(function (a) { return [a, a]; }), cur.act, function (v) { acf.value = v || ''; });
+  acp.id = 'drActPills';
+  acf.addEventListener('input', function () { drPillSync(acp, acf.value.trim()); });
+  b.appendChild(acp); b.appendChild(acf);
+
+  b.appendChild(el('<label class="dr-flab" for="drEnNote">Note</label>'));
+  var tf = el('<textarea class="dr-field" id="drEnNote" placeholder="What happened, what you’d do differently" maxlength="400"></textarea>');
+  tf.value = cur.note; b.appendChild(tf);
+
+  b.appendChild(el('<label class="dr-flab" for="drEnT">When</label>'));
+  var wf = el('<input class="dr-field" id="drEnT" type="datetime-local" />');
+  wf.value = localDT(cur.t); b.appendChild(wf);
+
+  var foot = [], del = null;
+  if (edit) { del = el('<button type="button" class="dr-btn is-bad">Remove</button>'); foot.push(del); }
+  var go = el('<button type="button" class="dr-btn is-ink" id="drEnGo"></button>'); go.textContent = edit ? 'Save' : 'Log it';
+  foot.push(go);
+  var s = drSheet({ title: edit ? enTitle(edit) : 'An encounter', body: b, foot: foot });
+  go.addEventListener('click', function () {
+    if (cur.f !== 1 && cur.f !== -1) { drToast('Positive or negative?'); return; }
+    var t = wf.value ? new Date(wf.value).getTime() : cur.t;
+    if (!(t > 0)) t = Date.now();
+    if (t > Date.now() + 60000) { drToast('That hasn’t happened yet'); return; }
+    var e = edit || { id: drId() };
+    e.t = t; e.f = cur.f;
+    var n = nf.value.trim().slice(0, 40); if (n) e.n = n; else delete e.n;
+    var a = Math.round(+af.value); if (a > 0 && a < 120) e.a = a; else delete e.a;
+    /* "reading" typed where Reading is already a pill is that pill: one
+       activity, one row, one spelling. */
+    var act = acf.value.trim().slice(0, 30);
+    var known = drActs().concat(S.acts).filter(function (x) { return x.toLowerCase() === act.toLowerCase(); })[0];
+    if (known) act = known;
+    if (act) e.act = act; else delete e.act;
+    var note = tf.value.trim().slice(0, 400); if (note) e.note = note; else delete e.note;
+    if (act) S.acts = [act].concat(S.acts.filter(function (x) { return x.toLowerCase() !== act.toLowerCase(); })).slice(0, 12);
+    if (!edit) S.en.push(e);
+    drSave(); s.close(); drRender(); buzz(14);
+    if (edit) drToast('Saved');
+    else drToast('Logged · ' + (e.f === 1 ? 'positive' : 'negative'), function () { var i = S.en.indexOf(e); if (i >= 0) S.en.splice(i, 1); drSave(); drRender(); });
+  });
+  if (del) del.addEventListener('click', function () {
+    var i = S.en.indexOf(edit); if (i < 0) return;
+    S.en.splice(i, 1); drSave(); s.close(); drRender();
+    drToast('Removed', function () { S.en.splice(i, 0, edit); drSave(); drRender(); });
+  });
+  return s;
+}
+
 /* ═══════════ HOME ═══════════ */
-var funP = 'week';
+var homeP = 'week';
 function drRenderHome() {
   var root = $('#drHome'); root.textContent = '';
-  var top = el('<div class="dr-top"><h2 class="dr-h1">Doors</h2><button type="button" class="dr-round is-fill" id="drRepBtn" aria-label="Report for your mentor">' + IC.report + '</button></div>');
+  var top = el('<div class="dr-top"><h2 class="dr-h1">Encounters</h2><button type="button" class="dr-round is-fill" id="drRepBtn" aria-label="Report for your mentor">' + IC.report + '</button></div>');
   $('#drRepBtn', top).addEventListener('click', function () { drReport(); });
   root.appendChild(top);
   root.appendChild(drTodayCard());
   root.appendChild(drStatRow());
-  root.appendChild(drFunnelCard());
-  var p = drPeriod(funP);
-  var feel = drFeelCard(p.cur); if (feel) root.appendChild(feel);
-  var why = drWhyCard(p.cur); if (why) root.appendChild(why);
-  var hrs = drHoursCard(); if (hrs) root.appendChild(hrs);
-  var ar = drAreasCard(); if (ar) root.appendChild(ar);
+  var p = drPeriod(homeP);
+  root.appendChild(drHowCard(p));
+  var act = drBreakCard('drActs', 'What they were doing', drBy(p.list, drActKey)); if (act) root.appendChild(act);
+  var age = drBreakCard('drAges', 'Age', drBy(p.list, drAgeKey), AGES.map(function (a) { return a[2]; })); if (age) root.appendChild(age);
+  var hrs = drHoursCard(p.list); if (hrs) root.appendChild(hrs);
   root.appendChild(drGridCard());
 }
 function drTodayCard() {
-  var live = drLiveShift(), tk = ymd(today()), c = drCounts(drShOn(tk));
-  var card = el('<div class="dr-card" style="padding:16px"><div class="dr-lab"></div><div class="dr-title"></div><div class="dr-sub"></div><div class="dr-chips"></div><button type="button" class="dr-go" id="drGo"></button></div>');
+  var tk = ymd(today()), c = drCounts(drOn(tk));
+  var card = el('<div class="dr-card" style="padding:16px" id="drToday"><div class="dr-lab"></div><div class="dr-title"></div><div class="dr-sub"></div><div class="dr-chips"></div><button type="button" class="dr-go" id="drGo"></button></div>');
   $('.dr-lab', card).textContent = 'Today · ' + fmtDay(tk);
+  $('.dr-title', card).textContent = c.n ? c.n + (c.n === 1 ? ' encounter' : ' encounters') : 'No encounters yet';
+  $('.dr-sub', card).textContent = S.goal ? 'Goal: ' + S.goal + ' a day' + (c.n >= S.goal ? ' — done' : ' · ' + (S.goal - c.n) + ' to go') : '';
   var chips = $('.dr-chips', card);
-  function chip(t, win) { var x = el('<span class="dr-chip dr-num"></span>'); x.textContent = t; if (win) x.classList.add('is-win'); chips.appendChild(x); }
-  if (live) {
-    $('.dr-title', card).textContent = live.a || 'On the doors';
-    $('.dr-sub', card).textContent = 'Started ' + fmtTime(live.s);
-  } else if (c.sh) {
-    $('.dr-title', card).textContent = c.sa ? c.sa + (c.sa === 1 ? ' sale' : ' sales') + ' today' : 'Out today';
-    $('.dr-sub', card).textContent = c.sh + (c.sh === 1 ? ' shift' : ' shifts') + (c.ms ? ' · ' + fmtDur(c.ms) + ' on the doors' : '');
-  } else {
-    $('.dr-title', card).textContent = 'Ready to knock';
-    $('.dr-sub', card).textContent = 'Goal: ' + S.goal.sa + (S.goal.sa === 1 ? ' sale' : ' sales') + ' from ' + S.goal.dr + ' doors';
-  }
-  chip(c.k + ' doors'); chip(c.sa + (c.sa === 1 ? ' sale' : ' sales'), c.sa > 0); if (c.rv) chip(money(c.rv), true);
+  function chip(t, pos) { var x = el('<span class="dr-chip dr-num"></span>'); x.textContent = t; if (pos) x.classList.add('is-pos'); chips.appendChild(x); }
+  chip(c.pos + ' positive', c.pos > 0); chip(c.neg + ' negative');
   var go = $('#drGo', card);
-  if (live) { go.classList.add('is-live'); go.textContent = 'Back to the shift'; go.addEventListener('click', drOpenShift); }
-  else { go.textContent = 'Start a shift'; go.addEventListener('click', drStartSheet); }
-  if (!live) {
-    var add = el('<button type="button" class="dr-link">Log a shift afterwards</button>');
-    add.addEventListener('click', function () { drManualForm(null, tk); });
-    card.appendChild(add);
-  }
+  go.innerHTML = IC.plus + '<span>Log an encounter</span>';
+  go.addEventListener('click', function () { drLogSheet(null); });
   return card;
 }
 function drStatRow() {
-  /* Against the SAME days of last week: on a Wednesday, three days set
-     against seven is a drop every week until Sunday. */
   var t = today(), w0 = monday(t), wc = drCounts(drIn(w0, t)), wl = drCounts(drIn(addDays(w0, -7), addDays(t, -7)));
   var row = el('<div class="dr-row" id="drStats"></div>');
   function tile(v, lab, delta) {
@@ -709,428 +662,110 @@ function drStatRow() {
     if (delta) { var d = el('<span class="dr-delta"></span>'); d.textContent = delta[0]; if (delta[1]) d.classList.add('is-down'); x.appendChild(d); }
     row.appendChild(x);
   }
-  function dlt(a, b) { if (!b && !a) return null; var n = a - b; if (!n) return null; return [(n > 0 ? '+' : '−') + Math.abs(n), n < 0]; }
-  tile(wc.sa, 'Sales this week', dlt(wc.sa, wl.sa));
-  tile(pctTxt(wc.sa, wc.pi), 'Close rate', null);
-  tile(money(wc.rv), 'This week', null);
+  /* Against the SAME days of last week: on a Wednesday, three days set
+     against seven is a drop every week until Sunday. */
+  var n = wc.n - wl.n;
+  tile(wc.n, 'This week', n ? [(n > 0 ? '+' : '−') + Math.abs(n), n < 0] : null);
+  tile(pctTxt(wc.pos, wc.n), 'Positive');
+  tile(drStreak(), 'Day streak');
   return row;
 }
-function drFunnelCard() {
-  var p = drPeriod(funP), c = p.cur;
-  var card = el('<div class="dr-card" id="drFunnel"></div>');
-  card.appendChild(drSeg([['week', 'Week'], ['30', '30 days'], ['all', 'All']], funP, function (v) { funP = v; drRenderHome(); }));
-  if (!c.k) { card.appendChild(el('<div class="dr-empty"><b>No doors yet</b>Start a shift and every door you knock lands here.</div>')); return card; }
-  card.appendChild(drFunnel(c));
-  card.appendChild(drSteps(c, p.base));
-  card.appendChild(drFocusLine(c, p.base));
+function drHowCard(p) {
+  var c = p.cur, card = el('<div class="dr-card" id="drHow"></div>');
+  card.appendChild(drSeg([['week', 'Week'], ['30', '30 days'], ['all', 'All']], homeP, function (v) { homeP = v; drRenderHome(); }));
+  if (!c.n) { card.appendChild(el('<div class="dr-empty"><b>Nothing logged yet</b>Every encounter you log lands here.</div>')); return card; }
+  var f = el('<div class="dr-fig"><b class="dr-num"></b><span></span></div>');
+  $('b', f).textContent = pctTxt(c.pos, c.n); $('span', f).textContent = 'positive, of ' + c.n;
+  card.appendChild(f);
+  var bar = el('<i class="dr-split"><b></b></i>'); $('b', bar).style.width = (c.pos / c.n * 100) + '%'; card.appendChild(bar);
+  var k = el('<div class="dr-key"><span></span><span></span></div>');
+  $$('span', k)[0].textContent = c.pos + ' positive'; $$('span', k)[1].textContent = c.neg + ' negative';
+  card.appendChild(k);
+  if (c.n >= MIN_N && p.base.n >= MIN_N) {
+    var d = Math.round((c.pos / c.n - p.base.pos / p.base.n) * 100);
+    var vs = el('<p class="dr-vs" id="drVs"></p>');
+    vs.textContent = d === 0 ? 'The same as your usual ' + pctTxt(p.base.pos, p.base.n) : (d > 0 ? '+' : '−') + Math.abs(d) + ' points on your usual ' + pctTxt(p.base.pos, p.base.n);
+    if (d > 0) vs.classList.add('is-up');
+    card.appendChild(vs);
+  }
+  card.appendChild(drFocusLine(p.list));
   return card;
 }
-function drFunnel(c) {
-  var f = el('<div class="dr-fun"></div>');
-  [['Doors', c.k, 'k'], ['Answered', c.an, 'an'], ['Pitched', c.pi, 'pi'], ['Sales', c.sa, 'sa']].forEach(function (r) {
-    /* Counts only. The rates are the step tiles under it, each against
-       the step before; a second percentage here, against doors, is the
-       same step said with a different denominator. */
-    var x = el('<div class="dr-fr"><span><b class="dr-num"></b></span><i><b></b></i></div>');
-    x.dataset.k = r[2];
-    $('span b', x).textContent = r[1]; $('span', x).appendChild(document.createTextNode(r[0]));
-    $('i b', x).style.width = (c.k ? r[1] / c.k * 100 : 0) + '%';
-    if (r[2] === 'sa') x.classList.add('is-sale');
-    f.appendChild(x);
-  });
-  return f;
-}
-function drSteps(c, base) {
-  var foc = drFocus(c, base);
-  var box = el('<div class="dr-steps"></div>');
-  STEPS.forEach(function (st) {
-    var x = el('<div class="dr-step"><span></span><b class="dr-num"></b><small></small></div>');
-    x.dataset.s = st.id;
-    $('span', x).textContent = st.n + ' rate';
-    $('b', x).textContent = pctTxt(c[st.is], c[st.of]);
-    if (c[st.of] >= MIN_N && base[st.of] >= MIN_N) {
-      var d = Math.round((c[st.is] / c[st.of] - base[st.is] / base[st.of]) * 100);
-      var sm = $('small', x);
-      sm.textContent = d === 0 ? 'same as usual' : (d > 0 ? '+' : '−') + Math.abs(d) + ' vs usual';
-      if (d > 0) sm.classList.add('is-up');
-    }
-    if (foc && foc.st.id === st.id) x.classList.add('is-focus');
-    box.appendChild(x);
-  });
-  return box;
-}
-function drFocusLine(c, base) {
-  var foc = drFocus(c, base), p = el('<p class="dr-focus" id="drFocus"></p>');
-  if (foc) {
-    p.innerHTML = '<b>Work on: ' + foc.st.n.toLowerCase() + '.</b> ';
-    p.appendChild(document.createTextNode(foc.st.tip));
-  } else if (c.pi >= MIN_N && base.pi >= MIN_N) {
-    p.innerHTML = '<b>Every step is at or above your usual.</b>';
-  } else {
-    p.textContent = 'A few more shifts and this will say which step to work on, measured against your own record.';
-  }
-  var top = drTopWhy(c, 1)[0];
-  if (top && top[1] >= 3) { p.appendChild(document.createTextNode(' Most common no: ')); var b = document.createElement('b'); b.textContent = WHY_N[top[0]].toLowerCase(); p.appendChild(b); p.appendChild(document.createTextNode('.')); }
+function drFocusLine(list) {
+  var f = drFocus(list), p = el('<p class="dr-focus" id="drFocus"></p>');
+  if (!f) { p.textContent = 'Log a few more and this will say where you do best and what to work on.'; return p; }
+  if (!f.best && !f.worst) { p.textContent = 'Nothing stands out yet — it is even across what people were doing and their age.'; return p; }
+  if (f.best) { var b = document.createElement('b'); b.textContent = 'Best with people ' + drGroupName(f.best) + ': '; p.appendChild(b); p.appendChild(document.createTextNode(f.best.pos + ' of ' + f.best.n + ' went well. ')); }
+  if (f.worst) { var w = document.createElement('b'); w.textContent = 'Work on people ' + drGroupName(f.worst) + ': '; p.appendChild(w); p.appendChild(document.createTextNode(f.worst.pos + ' of ' + f.worst.n + ', against ' + Math.round(f.base * 100) + '% overall.')); }
   return p;
 }
-/* Positive against negative, of the conversations you tagged. NEGATIVE
-   IS THE FLAT NEUTRAL, NEVER RED: a hard door is a fact about the door,
-   and green is spent on the sale. */
-function drFeelCard(c) {
-  var n = c.pos + c.neg;
-  if (!n) return null;
-  var card = el('<div class="dr-card" id="drFeel"><div class="dr-hd"><b>How it felt</b><span class="dr-lab"></span></div><div class="dr-feel-fig"><b class="dr-num"></b><span>positive</span></div><i class="dr-feel-bar"><b></b></i><div class="dr-feel-key"><span></span><span></span></div></div>');
-  $('.dr-hd .dr-lab', card).textContent = n + ' of ' + c.an + ' conversations tagged';
-  $('.dr-feel-fig b', card).textContent = pctTxt(c.pos, n);
-  $('.dr-feel-bar b', card).style.width = (c.pos / n * 100) + '%';
-  var k = $$('.dr-feel-key span', card);
-  k[0].textContent = c.pos + ' positive'; k[1].textContent = c.neg + ' negative';
-  return card;
-}
-function drWhyCard(c) {
-  var rows = drTopWhy(c, 5), tot = Object.keys(c.why).reduce(function (a, k) { return a + c.why[k]; }, 0);
+/* One row per group, the share that went well as the bar. The best row
+   with enough behind it is green; nothing is ever red. */
+function drBreakCard(id, title, rows, order) {
   if (!rows.length) return null;
-  var card = el('<div class="dr-card" id="drWhy"><div class="dr-hd"><b>Why they said no</b><span class="dr-lab"></span></div><div class="dr-bl"></div></div>');
-  $('.dr-hd .dr-lab', card).textContent = tot + ' tagged';
+  if (order) rows.sort(function (a, b) { return order.indexOf(a.k) - order.indexOf(b.k); });
+  else rows.sort(function (a, b) { return b.n - a.n || (b.pos / b.n) - (a.pos / a.n); });
+  rows = rows.slice(0, 7);
+  var best = drBest(rows);
+  var card = el('<div class="dr-card"><div class="dr-hd"><b></b><span class="dr-lab">positive</span></div><div class="dr-bl"></div></div>');
+  card.id = id; $('.dr-hd b', card).textContent = title;
   rows.forEach(function (r) {
-    var x = el('<div class="dr-br"><span></span><i><b></b></i><em class="dr-num"></em></div>');
-    $('span', x).textContent = WHY_N[r[0]]; $('i b', x).style.width = (r[1] / rows[0][1] * 100) + '%'; $('em', x).textContent = r[1];
+    var x = el('<div class="dr-br"><span><small></small></span><i><b></b></i><em class="dr-num"></em></div>');
+    x.dataset.k = r.k;
+    $('span', x).insertBefore(document.createTextNode(r.k), $('small', x));
+    $('small', x).textContent = r.n + (r.n === 1 ? ' encounter' : ' encounters');
+    $('i b', x).style.width = (r.pos / r.n * 100) + '%';
+    $('em', x).textContent = pctTxt(r.pos, r.n);
+    if (r === best) x.classList.add('is-best');
     $('.dr-bl', card).appendChild(x);
   });
   return card;
 }
-function drHoursCard() {
-  var hs = drHours(drPeriodList(funP));
-  if (hs.reduce(function (a, h) { return a + h.k; }, 0) < MIN_N) return null;
-  var best = null;
-  hs.forEach(function (h) { if (h.k >= 5 && h.sa && (!best || h.sa / h.k > best.sa / best.k)) best = h; });
-  var max = Math.max.apply(null, hs.map(function (h) { return h.k; }));
-  var card = el('<div class="dr-card" id="drHours"><div class="dr-hd"><b>Best hours</b><span class="dr-lab"></span></div><div class="dr-hrs"></div></div>');
-  $('.dr-hd .dr-lab', card).textContent = best ? 'Most sales per door at ' + fmtHour(best.h) : 'Doors by hour';
+function drHoursCard(list) {
+  var hs = drBy(list, drHourKey).sort(function (a, b) { return a.k - b.k; });
+  if (list.length < MIN_N * 2 || hs.length < 2) return null;
+  var best = drBest(hs);
+  var max = Math.max.apply(null, hs.map(function (h) { return h.n; }));
+  var card = el('<div class="dr-card" id="drHours"><div class="dr-hd"><b>Time of day</b><span class="dr-lab"></span></div><div class="dr-hrs"></div></div>');
+  $('.dr-hd .dr-lab', card).textContent = best ? 'Goes best around ' + fmtHour(+best.k) : 'Green is what went well';
   var g = $('.dr-hrs', card); g.style.setProperty('--n', Math.max(6, hs.length));
   hs.forEach(function (h) {
-    var x = el('<div><em class="dr-num"></em><i></i><u></u></div>');
-    x.dataset.h = h.h;
-    $('em', x).textContent = h.sa ? h.sa + '✓' : '';
-    $('i', x).style.height = (h.k / max * 62) + 'px';
-    $('u', x).textContent = fmtHour(h.h);
-    x.setAttribute('aria-label', fmtHour(h.h) + ': ' + h.k + ' doors, ' + h.sa + ' sales');
-    if (best && h.h === best.h) x.classList.add('is-best');
+    var x = el('<div><em class="dr-num"></em><i><b></b></i><u></u></div>');
+    x.dataset.h = h.k;
+    $('em', x).textContent = h.n;
+    $('i', x).style.height = (h.n / max * 64) + 'px';
+    $('i b', x).style.height = (h.pos / h.n * 100) + '%';
+    $('u', x).textContent = fmtHour(+h.k);
+    x.setAttribute('aria-label', fmtHour(+h.k) + ': ' + h.n + ' encounters, ' + h.pos + ' positive');
+    if (best && h === best) x.classList.add('is-best');
     g.appendChild(x);
-  });
-  return card;
-}
-function drPeriodList(p) { var x = drPeriod(p); return drIn(x.from, x.to); }
-function drAreasCard() {
-  var rows = drAreaRows(drPeriodList(funP));
-  if (!rows.length || (rows.length === 1 && rows[0].a === 'No area')) return null;
-  var card = el('<div class="dr-card" id="drAreas"><div class="dr-hd"><b>Areas</b><span class="dr-lab">sales per 100 doors</span></div><div class="dr-bl"></div></div>');
-  var max = Math.max.apply(null, rows.map(function (r) { return r.sa / r.k; }).concat([0.0001]));
-  rows.slice(0, 6).forEach(function (r, i) {
-    var x = el('<div class="dr-br"><span></span><i><b></b></i><em class="dr-num"></em></div>');
-    $('span', x).textContent = r.a; $('i b', x).style.width = (r.sa / r.k / max * 100) + '%';
-    $('em', x).textContent = r.k >= MIN_N ? Math.round(r.sa / r.k * 100) : r.k + ' drs';
-    if (i === 0 && r.k >= MIN_N && r.sa) x.classList.add('is-win');
-    $('.dr-bl', card).appendChild(x);
   });
   return card;
 }
 function drGridCard() {
   var t = today(), card = el('<div class="dr-card" id="drGrid"><div class="dr-hd"><b>Last 30 days</b><span class="dr-lab"></span></div><div class="dr-days"></div></div>');
-  var on = 0, won = 0;
+  var on = 0;
   for (var i = 29; i >= 0; i--) {
-    var k = ymd(addDays(t, -i)), c = drCounts(drShOn(k));
+    var k = ymd(addDays(t, -i)), c = drCounts(drOn(k));
     var d = el('<span class="dr-day"></span>'); d.dataset.d = k;
-    if (c.sh) { d.classList.add('is-on'); on++; }
-    if (c.sa) { d.classList.add('is-win'); won++; }
+    if (c.n) { d.classList.add('is-on'); on++; }
+    if (c.n && c.pos * 2 >= c.n) d.classList.add('is-good');
     if (i === 0) d.classList.add('is-now');
-    d.setAttribute('aria-label', fmtDay(k) + (c.sh ? ': ' + c.k + ' doors, ' + c.sa + ' sales' : ': not out'));
+    d.setAttribute('aria-label', fmtDay(k) + (c.n ? ': ' + c.n + ' encounters, ' + c.pos + ' positive' : ': none'));
     $('.dr-days', card).appendChild(d);
   }
-  $('.dr-hd .dr-lab', card).textContent = on + ' days out · ' + won + ' with a sale';
+  $('.dr-hd .dr-lab', card).textContent = on + ' days out · green is mostly positive';
   return card;
 }
 
-/* ═══════════ THE SHIFT ═══════════ */
-var shiftSheet = null, tick = null;
-function drStartSheet() {
-  var areas = drAreas();
-  var b = el('<div><label class="dr-flab" for="drArea" style="margin-top:4px">Area</label></div>');
-  if (areas.length) b.appendChild(drPillRow(areas.slice(0, 8).map(function (a) { return [a, a]; }), null, function (a) { f.value = a || ''; }));
-  var f = el('<input class="dr-field" id="drArea" placeholder="Street or suburb" autocomplete="off" maxlength="40" />');
-  b.appendChild(f);
-  var go = el('<button type="button" class="dr-btn is-ink is-full">Start knocking</button>');
-  var s = drSheet({ title: 'Start a shift', body: b, foot: [go] });
-  go.addEventListener('click', function () {
-    var sh = { id: drId(), d: ymd(today()), a: f.value.trim().slice(0, 40), s: Date.now(), e: 0, k: [], m: null };
-    S.sh.push(sh); drSave(); s.close(true); drRender(); drOpenShift();
-  });
-}
-function drOpenShift() {
-  var sh = drLiveShift(); if (!sh || shiftSheet) return;
-  var head = el('<div style="display:flex;align-items:center;gap:10px;width:100%"><input class="dr-ss-area" placeholder="Area" maxlength="40" aria-label="Area" /><span class="dr-ss-time"></span><button type="button" class="dr-round" aria-label="Minimise">' + IC.down + '</button></div>');
-  var area = $('input', head);
-  area.value = sh.a;
-  area.addEventListener('input', function () { sh.a = area.value.slice(0, 40); drSave(); });
-  var body = el('<div id="drShiftBody"></div>');
-  var end = el('<button type="button" class="dr-btn is-ink is-full" id="drEnd">End shift</button>');
-  shiftSheet = drSheet({ title: 'Shift', head: head, body: body, foot: [end], full: true, onClose: function () { shiftSheet = null; drRender(); } });
-  $('.dr-round', head).addEventListener('click', function () { shiftSheet.close(); });
-  end.addEventListener('click', drEndShift);
-  drPaintShift();
-  drTick();
-}
-function drTick() {
-  var sh = drLiveShift(); if (!sh) return;
-  var t = fmtClock(Date.now() - sh.s);
-  var a = shiftSheet && $('.dr-ss-time', shiftSheet.el); if (a) a.textContent = t;
-  var b = $('#drLive em'); if (b) b.textContent = t;
-}
-function drPaintShift() {
-  var sh = drLiveShift(); if (!sh || !shiftSheet) return;
-  var body = $('#drShiftBody'), c = drCounts([sh]);
-  body.textContent = '';
-  var st = el('<div class="dr-live-st" id="drLiveSt"></div>');
-  [[c.k, 'Doors'], [pctTxt(c.an, c.k), 'Answered'], [pctTxt(c.sa, c.pi), 'Close'], [c.rv ? money(c.rv) : String(c.sa), c.rv ? 'Sold' : 'Sales', 1]].forEach(function (x) {
-    var d = el('<div><b class="dr-num"></b><span></span></div>'); $('b', d).textContent = x[0]; $('span', d).textContent = x[1]; if (x[2]) d.classList.add('is-win'); st.appendChild(d);
-  });
-  body.appendChild(st);
-  var outs = el('<div class="dr-outs" id="drOuts"></div>');
-  var per = { na: 0, ni: 0, pi: 0, cb: 0, sa: 0 }; sh.k.forEach(function (k) { per[k.o]++; });
-  OUT.forEach(function (o) {
-    var b = el('<button type="button" class="dr-out"><span></span><b></b></button>');
-    b.dataset.o = o[0];
-    $('span', b).textContent = o[1]; $('b', b).textContent = per[o[0]];
-    b.setAttribute('aria-label', o[1] + ', ' + per[o[0]] + ' so far');
-    if (o[0] === 'sa') b.classList.add('is-sale');
-    b.addEventListener('click', function () { if (o[0] === 'sa') drSaleSheet(null); else drDoor({ t: Date.now(), o: o[0] }); });
-    outs.appendChild(b);
-  });
-  body.appendChild(outs);
-  var last = sh.k[sh.k.length - 1];
-  if (last) {
-    var lp = el('<div class="dr-last" id="drLast"><div class="dr-hd"><b></b><button type="button">Undo</button></div></div>');
-    $('b', lp).textContent = 'Last door: ' + OUT_N[last.o] + (last.o === 'sa' && last.v ? ' · ' + money(last.v) : '') + ' · ' + fmtTime(last.t);
-    $('button', lp).addEventListener('click', function () { sh.k.pop(); drSave(); drPaintShift(); });
-    /* HOW IT FELT is a second question from WHAT HAPPENED. A no can be a
-       good conversation you learn from and a callback can be a door
-       somebody was glad to shut; the outcome cannot say which. Only on a
-       door that opened — there was no interaction at a door nobody
-       answered — and optional, the way the reason is. */
-    if (last.o !== 'na') lp.appendChild(drFeelRow(last));
-    if (last.o === 'ni' || last.o === 'pi' || last.o === 'cb') {
-      lp.appendChild(drPillRow(WHY, last.r || null, function (r) { if (r) last.r = r; else delete last.r; drSave(); }, 'dr-why'));
-    } else if (last.o === 'sa') {
-      var ed = el('<button type="button" class="dr-pill" style="margin-top:10px">Edit the sale</button>');
-      ed.addEventListener('click', function () { drSaleSheet(last); });
-      lp.appendChild(ed);
-    }
-    body.appendChild(lp);
-  }
-  var goals = el('<div class="dr-last"><div class="dr-hd"><b>Shift goal</b></div></div>');
-  [['Sales', c.sa, S.goal.sa], ['Doors', c.k, S.goal.dr]].forEach(function (g) {
-    if (!g[2]) return;
-    var x = el('<div class="dr-goal"><span></span><i><b></b></i><em class="dr-num"></em></div>');
-    $('span', x).textContent = g[0]; $('i b', x).style.width = Math.min(100, g[1] / g[2] * 100) + '%'; $('em', x).textContent = g[1] + ' / ' + g[2];
-    if (g[1] >= g[2]) x.classList.add('is-met');
-    goals.appendChild(x);
-  });
-  if (S.goal.sa || S.goal.dr) body.appendChild(goals);
-}
-function drFeelRow(k) {
-  var s = el('<div class="dr-seg dr-feel" style="--n:2;margin-top:10px" role="group" aria-label="How it felt"></div>');
-  [[1, 'Positive'], [-1, 'Negative']].forEach(function (o) {
-    var b = el('<button type="button"></button>'); b.textContent = o[1]; b.dataset.f = o[0];
-    b.setAttribute('aria-pressed', k.f === o[0] ? 'true' : 'false');
-    b.addEventListener('click', function () {
-      if (k.f === o[0]) delete k.f; else k.f = o[0];
-      drSave(); buzz(8);
-      $$('button', s).forEach(function (x) { x.setAttribute('aria-pressed', +x.dataset.f === k.f ? 'true' : 'false'); });
-    });
-    s.appendChild(b);
-  });
-  return s;
-}
-function drDoor(k) {
-  var sh = drLiveShift(); if (!sh) return;
-  sh.k.push(k); drSave(); buzz(k.o === 'sa' ? 30 : 10); drPaintShift();
-}
-function drSaleSheet(edit) {
-  var cur = { v: edit ? edit.v || 0 : 0, p: edit ? edit.p || '' : '', n: edit ? edit.n || '' : '' };
-  var b = el('<div></div>');
-  b.appendChild(el('<label class="dr-flab" for="drSaleV" style="margin-top:4px">Value</label>'));
-  /* The figures you actually sell at, newest first: most door sales are
-     one of three prices, and typing one in at a stranger's gate is the
-     slowest part of the whole app. */
-  var recent = [];
-  S.sh.slice().sort(function (x, y) { return y.s - x.s; }).forEach(function (s) { s.k.slice().reverse().forEach(function (k) { if (k.o === 'sa' && k.v && recent.indexOf(k.v) < 0) recent.push(k.v); }); });
-  var vf = el('<input class="dr-field dr-num" id="drSaleV" inputmode="decimal" autocomplete="off" />');
-  vf.placeholder = S.cur + '0';
-  if (cur.v) vf.value = (cur.v / 100).toString();
-  if (recent.length) b.appendChild(drPillRow(recent.slice(0, 5).map(function (v) { return [String(v), money(v)]; }), cur.v ? String(cur.v) : null, function (v) { vf.value = v ? (+v / 100).toString() : ''; }));
-  b.appendChild(vf);
-  b.appendChild(el('<label class="dr-flab" for="drSaleP">What you sold</label>'));
-  var pf = el('<input class="dr-field" id="drSaleP" placeholder="Product or plan" maxlength="40" autocomplete="off" />');
-  pf.value = cur.p;
-  if (S.pr.length) b.appendChild(drPillRow(S.pr.slice(0, 6).map(function (p) { return [p, p]; }), cur.p || null, function (p) { pf.value = p || ''; }));
-  b.appendChild(pf);
-  b.appendChild(el('<label class="dr-flab" for="drSaleN">Note</label>'));
-  var nf = el('<textarea class="dr-field" id="drSaleN" placeholder="What worked at this door" maxlength="280"></textarea>');
-  nf.value = cur.n;
-  b.appendChild(nf);
-  var foot = [];
-  var del = null;
-  if (edit) { del = el('<button type="button" class="dr-btn is-bad">Remove</button>'); foot.push(del); }
-  var go = el('<button type="button" class="dr-btn is-win" id="drSaleGo"></button>'); go.textContent = edit ? 'Save' : 'Log the sale';
-  foot.push(go);
-  var s = drSheet({ title: edit ? 'Sale' : 'A sale', body: b, foot: foot });
-  go.addEventListener('click', function () {
-    var v = toCents(vf.value), p = pf.value.trim().slice(0, 40), n = nf.value.trim().slice(0, 280);
-    if (p) { S.pr = [p].concat(S.pr.filter(function (x) { return x.toLowerCase() !== p.toLowerCase(); })).slice(0, 12); }
-    var k = edit || { t: Date.now(), o: 'sa' };
-    k.v = v; if (p) k.p = p; else delete k.p; if (n) k.n = n; else delete k.n;
-    s.close(true);
-    if (edit) { drSave(); drPaintShift(); drRender(); drToast('Sale saved'); }
-    else { drDoor(k); drToast('Sale logged' + (v ? ' · ' + money(v) : '')); }
-  });
-  if (del) del.addEventListener('click', function () { s.close(true); drRemoveDoor(edit); });
-  return s;
-}
-function drRemoveDoor(k) {
-  var sh = null, i = -1;
-  S.sh.some(function (x) { var j = x.k.indexOf(k); if (j >= 0) { sh = x; i = j; return true; } return false; });
-  if (!sh) return;
-  sh.k.splice(i, 1); drSave(); drPaintShift(); drRender();
-  drToast('Removed', function () { sh.k.splice(i, 0, k); drSave(); drPaintShift(); drRender(); });
-}
-function drEndShift() {
-  var sh = drLiveShift(); if (!sh) return;
-  if (!sh.k.length) {
-    var i = S.sh.indexOf(sh); S.sh.splice(i, 1); drSave();
-    shiftSheet.close(true); shiftSheet = null; drRender();
-    drToast('Shift discarded — no doors on it', function () { S.sh.splice(i, 0, sh); drSave(); drRender(); });
-    return;
-  }
-  sh.e = Math.max(Date.now(), sh.s + 1); drSave();
-  shiftSheet.close(true); shiftSheet = null; drRender();
-  drSummary(sh);
-}
-function drSummary(sh) {
-  var c = drCounts([sh]), b = el('<div></div>');
-  b.appendChild(el('<div class="dr-hero dr-num"></div>'));
-  $('.dr-hero', b).textContent = c.sa + (c.sa === 1 ? ' sale' : ' sales');
-  if (c.sa) $('.dr-hero', b).classList.add('is-win');
-  var p = el('<p></p>'); p.textContent = (c.rv ? money(c.rv) + ' · ' : '') + c.k + ' doors in ' + fmtDur(c.ms); b.appendChild(p);
-  b.appendChild(drSumTiles(c));
-  b.appendChild(el('<div style="height:12px"></div>'));
-  b.appendChild(drFunnel(c));
-  var rep = el('<button type="button" class="dr-btn is-full">Report for your mentor</button>');
-  var done = el('<button type="button" class="dr-btn is-ink is-full">Done</button>');
-  var s = drSheet({ title: (sh.a || 'Shift') + ' · done', body: b, foot: [rep, done] });
-  rep.addEventListener('click', function () { s.close(true); drReport('today'); });
-  done.addEventListener('click', function () { s.close(); });
-}
-function drSumTiles(c) {
-  var g = el('<div class="dr-sum"></div>');
-  [[c.k, 'Doors'], [pctTxt(c.an, c.k), 'Answered'], [pctTxt(c.pi, c.an), 'Pitched'], [pctTxt(c.sa, c.pi), 'Closed', 1]].forEach(function (x) {
-    var d = el('<div><b class="dr-num"></b><span></span></div>'); $('b', d).textContent = x[0]; $('span', d).textContent = x[1]; if (x[2]) d.classList.add('is-win'); g.appendChild(d);
-  });
-  return g;
-}
-
-/* ═══════════ A SHIFT WRITTEN UP AFTERWARDS ═══════════ */
-/* Not every shift gets tracked door by door — a phone dies, a day is
-   too busy. Totals are the honest record of that day, and they count
-   in every figure except Best hours, which needs a time on each door
-   and so leaves them out rather than inventing one. */
-function drManualForm(sh, day) {
-  var m = sh && sh.m ? sh.m : { k: 0, an: 0, pi: 0, cb: 0, sa: 0, rv: 0, h: 0 };
-  var b = el('<div></div>');
-  function field(id, lab, val, mode) {
-    var w = el('<div><label class="dr-flab"></label><input class="dr-field dr-num" autocomplete="off" /></div>');
-    $('label', w).textContent = lab; $('label', w).htmlFor = id;
-    var f = $('input', w); f.id = id; f.inputMode = mode || 'numeric'; if (val) f.value = val;
-    return w;
-  }
-  var dw = el('<div><label class="dr-flab" for="drMD" style="margin-top:4px">Date</label><input class="dr-field" id="drMD" type="date" /></div>');
-  $('input', dw).value = sh ? sh.d : day; $('input', dw).max = ymd(today());
-  b.appendChild(dw);
-  b.appendChild(field('drMA', 'Area', sh ? sh.a : '', 'text'));
-  $('#drMA', b).inputMode = 'text'; $('#drMA', b).maxLength = 40; $('#drMA', b).classList.remove('dr-num');
-  var g = el('<div class="dr-grid2"></div>');
-  g.appendChild(field('drMK', 'Doors', m.k)); g.appendChild(field('drMAn', 'Answered', m.an));
-  g.appendChild(field('drMPi', 'Pitched', m.pi)); g.appendChild(field('drMCb', 'Callbacks', m.cb));
-  g.appendChild(field('drMSa', 'Sales', m.sa)); g.appendChild(field('drMRv', 'Sold (' + S.cur + ')', m.rv ? m.rv / 100 : '', 'decimal'));
-  g.appendChild(field('drMH', 'Hours out', m.h || '', 'decimal'));
-  b.appendChild(g);
-  var foot = [], del = null;
-  if (sh) { del = el('<button type="button" class="dr-btn is-bad">Remove</button>'); foot.push(del); }
-  var go = el('<button type="button" class="dr-btn is-ink" id="drMGo">Save</button>'); foot.push(go);
-  var s = drSheet({ title: sh ? 'Shift' : 'Log a shift', body: b, foot: foot });
-  go.addEventListener('click', function () {
-    function n(id) { var v = parseInt($('#' + id, b).value, 10); return v > 0 ? Math.min(99999, v) : 0; }
-    var x = { k: n('drMK'), an: n('drMAn'), pi: n('drMPi'), cb: n('drMCb'), sa: n('drMSa'), rv: toCents($('#drMRv', b).value), h: Math.min(24, Math.round((parseFloat($('#drMH', b).value) || 0) * 4) / 4) };
-    var d = $('#drMD', b).value;
-    if (!/^\d{4}-\d\d-\d\d$/.test(d) || d > ymd(today())) { drToast('Pick a day that has happened'); return; }
-    if (!x.k) { drToast('How many doors?'); $('#drMK', b).focus(); return; }
-    if (x.an > x.k || x.pi > x.an) { drToast('Each step can’t be more than the one before'); return; }
-    if (x.sa + x.cb > x.pi) { drToast('Sales and callbacks are part of pitched'); return; }
-    var a = $('#drMA', b).value.trim().slice(0, 40);
-    if (sh) { sh.d = d; sh.a = a; sh.m = x; }
-    else S.sh.push({ id: drId(), d: d, a: a, s: parseYmd(d).getTime() + 12 * 3600000, e: 1, k: [], m: x });
-    drSave(); s.close(true); drRender(); drToast(sh ? 'Shift saved' : 'Shift logged');
-  });
-  if (del) del.addEventListener('click', function () { s.close(true); drRemoveShift(sh); });
-}
-function drRemoveShift(sh) {
-  var i = S.sh.indexOf(sh); if (i < 0) return;
-  S.sh.splice(i, 1); drSave(); drRender();
-  drToast('Shift removed', function () { S.sh.splice(i, 0, sh); drSave(); drRender(); });
-}
-function drShiftSheet(sh) {
-  if (sh.m) { drManualForm(sh); return; }
-  if (!sh.e) { drOpenShift(); return; }
-  var c = drCounts([sh]), b = el('<div></div>');
-  var p = el('<p style="margin:0 0 12px;color:var(--dim)"></p>');
-  p.textContent = fmtDay(sh.d) + ' · ' + fmtTime(sh.s) + '–' + fmtTime(sh.e) + ' · ' + fmtDur(c.ms);
-  b.appendChild(p);
-  b.appendChild(drSumTiles(c));
-  b.appendChild(el('<label class="dr-flab" for="drShA">Area</label>'));
-  var af = el('<input class="dr-field" id="drShA" maxlength="40" autocomplete="off" />'); af.value = sh.a; b.appendChild(af);
-  af.addEventListener('change', function () { sh.a = af.value.trim().slice(0, 40); drSave(); drRender(); });
-  if (c.wins.length) {
-    b.appendChild(el('<div class="dr-cap" style="margin:16px 2px 4px">Sales</div>'));
-    var l = el('<div class="dr-list"></div>');
-    c.wins.forEach(function (w) { l.appendChild(drWinRow(w)); });
-    b.appendChild(l);
-  }
-  var tg = drTopWhy(c, 3);
-  if (c.pos + c.neg) {
-    var fl = el('<p style="margin:14px 2px 0;color:var(--dim);font-size:13px"></p>');
-    fl.textContent = 'Felt: ' + c.pos + ' positive · ' + c.neg + ' negative';
-    b.appendChild(fl);
-  }
-  if (tg.length) {
-    var q = el('<p style="margin:14px 2px 0;color:var(--dim);font-size:13px"></p>');
-    q.textContent = 'Why not: ' + tg.map(function (r) { return WHY_N[r[0]] + ' ' + r[1]; }).join(' · ');
-    b.appendChild(q);
-  }
-  var del = el('<button type="button" class="dr-btn is-bad">Remove shift</button>');
-  var s = drSheet({ title: sh.a || 'Shift', body: b, foot: [del] });
-  del.addEventListener('click', function () { s.close(true); drRemoveShift(sh); });
-}
-
 /* ═══════════ THE REPORT ═══════════ */
-/* ONE SCREEN, MADE TO BE PHOTOGRAPHED. A mentor reads a screenshot
-   once, on another phone, with no way to scroll or tap, so everything
-   that matters is on it and nothing that needs explaining is. Copy as
-   text is beside it for the times a message is easier. */
+/* ONE SCREEN, MADE TO BE PHOTOGRAPHED. A mentor reads a screenshot once,
+   on another phone, with no way to scroll or tap, so everything that
+   matters is on it. Copy as text is there for when a message is easier. */
 var repP = 'week';
 function drReport(p) {
   if (p) repP = p;
   var b = el('<div id="drRepBody"></div>');
-  /* In the head rather than a foot: a foot is 90px of the one screen
-     the report has to fit, and the screenshot is the main way out. */
   var copy = el('<button type="button" class="dr-btn" id="drRepCopy">Copy as text</button>');
   var s = drSheet({ title: 'Report', body: b, extra: copy, full: true });
   function paint() {
@@ -1152,58 +787,59 @@ function drRepCard(p) {
   $('.dr-rep-hd b', card).textContent = p.label;
   $('.dr-rep-hd div span', card).textContent = p.range;
   $('.dr-rep-who', card).textContent = S.name || '';
-  if (!c.k) { card.appendChild(el('<div class="dr-empty"><b>Nothing logged</b>No doors in this stretch yet.</div>')); return card; }
+  if (!c.n) { card.appendChild(el('<div class="dr-empty"><b>Nothing logged</b>No encounters in this stretch yet.</div>')); return card; }
   var hero = el('<div class="dr-rep-hero"><b class="dr-num"></b><span></span></div>');
-  $('b', hero).textContent = c.sa + (c.sa === 1 ? ' sale' : ' sales');
-  $('span', hero).textContent = c.rv ? money(c.rv) : '';
+  $('b', hero).textContent = c.n + (c.n === 1 ? ' encounter' : ' encounters');
+  $('span', hero).textContent = pctTxt(c.pos, c.n) + ' positive';
   card.appendChild(hero);
   var sub = el('<div class="dr-lab"></div>');
-  sub.textContent = c.sh + (c.sh === 1 ? ' shift' : ' shifts') + (c.ms ? ' · ' + fmtDur(c.ms) + ' on the doors' : '') + (c.cb ? ' · ' + c.cb + (c.cb === 1 ? ' callback' : ' callbacks') : '');
+  var bits = [c.pos + ' positive · ' + c.neg + ' negative', c.dayN + (c.dayN === 1 ? ' day' : ' days')];
+  if (c.n >= MIN_N && p.base.n >= MIN_N) { var d = Math.round((c.pos / c.n - p.base.pos / p.base.n) * 100); bits.push(d === 0 ? 'same as usual' : (d > 0 ? '+' : '−') + Math.abs(d) + ' on usual'); }
+  sub.textContent = bits.join(' · ');
   card.appendChild(sub);
-  card.appendChild(drSteps(c, p.base));
+  var ba = drBest(drBy(p.list, drActKey)), bg = drBest(drBy(p.list, drAgeKey)), bh = drBest(drBy(p.list, drHourKey));
   var kv = el('<div class="dr-kv"></div>');
-  var hrs = c.ms / 3600000, areas = drAreaRows(drIn(p.from, p.to));
-  [['Doors', String(c.k)], ['Doors / hour', hrs >= 0.25 ? String(Math.round(c.k / hrs)) : '–'], ['Per door', c.rv ? money(Math.round(c.rv / c.k)) : '–'],
-   ['Positive', c.pos + c.neg ? pctTxt(c.pos, c.pos + c.neg) : '–'], ['Sales / 100', String(Math.round(c.sa / c.k * 100))], ['Best area', areas[0] && areas[0].sa ? areas[0].a : '–']].forEach(function (x) {
-    var d = el('<div><span></span><b class="dr-num"></b></div>'); $('span', d).textContent = x[0]; $('b', d).textContent = x[1]; kv.appendChild(d);
+  [['Best activity', ba ? ba.k : '–'], ['Best age', bg ? bg.k : '–'], ['Best time', bh ? fmtHour(+bh.k) : '–'],
+   ['Got a name', pctTxt(c.named, c.n)], ['A day', String(Math.round(c.n / Math.max(1, c.dayN) * 10) / 10)], ['Goal', S.goal ? S.goal + ' a day' : '–']].forEach(function (x) {
+    var dv = el('<div><span></span><b class="dr-num"></b></div>'); $('span', dv).textContent = x[0]; $('b', dv).textContent = x[1]; kv.appendChild(dv);
   });
   card.appendChild(kv);
-  if (c.wins.length) {
-    var ws = el('<div class="dr-rep-sec"><span class="dr-cap">Wins</span><ul></ul></div>');
-    c.wins.slice().sort(function (a, b) { return b.k.t - a.k.t; }).slice(0, 4).forEach(function (w) {
-      var li = el('<li><span></span><b class="dr-num is-win"></b></li>');
-      $('span', li).textContent = [w.k.p || 'Sale', w.s.a, fmtDay(w.s.d)].filter(Boolean).join(' · ');
-      $('b', li).textContent = w.k.v ? money(w.k.v) : '✓';
-      $('ul', ws).appendChild(li);
-    });
-    if (c.wins.length > 4) { var more = el('<li><span></span></li>'); $('span', more).textContent = '+ ' + (c.wins.length - 4) + ' more'; $('ul', ws).appendChild(more); }
-    card.appendChild(ws);
-  }
-  var tw = drTopWhy(c, 3);
-  if (tw.length) {
-    var wy = el('<div class="dr-rep-sec"><span class="dr-cap">Why they said no</span><ul></ul></div>');
-    tw.forEach(function (r) { var li = el('<li><span></span><b class="dr-num"></b></li>'); $('span', li).textContent = WHY_N[r[0]]; $('b', li).textContent = r[1]; $('ul', wy).appendChild(li); });
-    card.appendChild(wy);
-  }
-  var fs = el('<div class="dr-rep-sec"><span class="dr-cap">Working on</span></div>');
-  var fl = drFocusLine(c, p.base); fl.className = ''; fl.removeAttribute('id');
+  var ls = el('<div class="dr-rep-sec"><span class="dr-cap">Encounters</span><ul></ul></div>');
+  var sorted = p.list.slice().sort(function (a, b) { return b.t - a.t; });
+  var oneDay = ymd(p.from) === ymd(p.to);
+  sorted.slice(0, 6).forEach(function (e) {
+    var li = el('<li><span class="dr-dot"></span><span><b></b></span><em></em></li>');
+    if (e.f === 1) $('.dr-dot', li).classList.add('is-pos');
+    $('b', li).textContent = enTitle(e);
+    var sub2 = enSub(e); if (sub2) $$('span', li)[1].appendChild(document.createTextNode(' · ' + sub2));
+    $('em', li).textContent = oneDay ? fmtTime(e.t) : fmtDay(dayOf(e.t));
+    $('ul', ls).appendChild(li);
+  });
+  if (sorted.length > 6) { var more = el('<li><span></span></li>'); $('span', more).textContent = '+ ' + (sorted.length - 6) + ' more'; $('ul', ls).appendChild(more); }
+  card.appendChild(ls);
+  var fs = el('<div class="dr-rep-sec"><span class="dr-cap">Where I’m at</span></div>');
+  var fl = drFocusLine(p.list); fl.className = ''; fl.removeAttribute('id');
   fs.appendChild(fl);
   card.appendChild(fs);
   return card;
 }
 function drRepText(p) {
   var c = p.cur, L = [];
-  L.push('Door-to-door · ' + p.label + (p.range ? ' (' + p.range + ')' : '') + (S.name ? ' · ' + S.name : ''));
-  if (!c.k) { L.push('Nothing logged.'); return L.join('\n'); }
-  L.push(c.sa + (c.sa === 1 ? ' sale' : ' sales') + (c.rv ? ' · ' + money(c.rv) : '') + ' · ' + c.sh + (c.sh === 1 ? ' shift' : ' shifts') + (c.ms ? ' · ' + fmtDur(c.ms) : ''));
-  L.push(c.k + ' doors → ' + c.an + ' answered → ' + c.pi + ' pitched → ' + c.sa + ' sold');
-  L.push('Answer ' + pctTxt(c.an, c.k) + ' · Pitch ' + pctTxt(c.pi, c.an) + ' · Close ' + pctTxt(c.sa, c.pi));
-  if (c.wins.length) { L.push(''); L.push('Wins:'); c.wins.forEach(function (w) { L.push('• ' + [w.k.p || 'Sale', w.k.v ? money(w.k.v) : '', w.s.a, fmtDay(w.s.d)].filter(Boolean).join(' · ') + (w.k.n ? ' — ' + w.k.n : '')); }); }
-  var tw = drTopWhy(c, 3);
-  if (c.pos + c.neg) L.push('Felt positive: ' + pctTxt(c.pos, c.pos + c.neg) + ' (' + c.pos + ' positive, ' + c.neg + ' negative)');
-  if (tw.length) { L.push(''); L.push('Why not: ' + tw.map(function (r) { return WHY_N[r[0]] + ' ' + r[1]; }).join(', ')); }
-  var foc = drFocus(c, p.base);
-  if (foc) { L.push(''); L.push('Working on: ' + foc.st.n.toLowerCase() + ' (' + Math.round(foc.a * 100) + '% vs usual ' + Math.round(foc.b * 100) + '%)'); }
+  L.push('Encounters · ' + p.label + (p.range ? ' (' + p.range + ')' : '') + (S.name ? ' · ' + S.name : ''));
+  if (!c.n) { L.push('Nothing logged.'); return L.join('\n'); }
+  L.push(c.n + (c.n === 1 ? ' encounter' : ' encounters') + ' · ' + pctTxt(c.pos, c.n) + ' positive (' + c.pos + ' positive, ' + c.neg + ' negative)');
+  var ba = drBest(drBy(p.list, drActKey)), bg = drBest(drBy(p.list, drAgeKey));
+  if (ba || bg) L.push([ba ? 'Best activity: ' + ba.k + ' ' + pctTxt(ba.pos, ba.n) : '', bg ? 'Best age: ' + bg.k + ' ' + pctTxt(bg.pos, bg.n) : ''].filter(Boolean).join(' · '));
+  L.push('');
+  p.list.slice().sort(function (a, b) { return a.t - b.t; }).forEach(function (e) {
+    L.push((e.f === 1 ? '+ ' : '− ') + [enTitle(e), enSub(e), fmtDay(dayOf(e.t)) + ' ' + fmtTime(e.t)].filter(Boolean).join(' · ') + (e.note ? ' — ' + e.note : ''));
+  });
+  var f = drFocus(p.list);
+  if (f && (f.best || f.worst)) {
+    L.push('');
+    if (f.best) L.push('Best with people ' + drGroupName(f.best) + ': ' + f.best.pos + ' of ' + f.best.n);
+    if (f.worst) L.push('Working on people ' + drGroupName(f.worst) + ': ' + f.worst.pos + ' of ' + f.worst.n + ' vs ' + Math.round(f.base * 100) + '% overall');
+  }
   return L.join('\n');
 }
 function drShowText(txt) {
@@ -1211,6 +847,62 @@ function drShowText(txt) {
   $('textarea', b).value = txt;
   drSheet({ title: 'Copy this', body: b });
   setTimeout(function () { $('textarea', b).select(); }, 400);
+}
+
+/* ═══════════ THE LIST ═══════════ */
+function drEnRow(e, timeOnly) {
+  var r = el('<button type="button" class="dr-li"><span class="dr-dot" aria-hidden="true"></span><div class="dr-li-t"><b></b><span></span></div><span class="dr-li-r"></span></button>');
+  r.dataset.id = e.id;
+  if (e.f === 1) $('.dr-dot', r).classList.add('is-pos');
+  $('b', r).textContent = enTitle(e);
+  $('.dr-li-t span', r).textContent = [enSub(e), e.note].filter(Boolean).join(' · ') || (e.f === 1 ? 'Positive' : 'Negative');
+  $('.dr-li-r', r).textContent = timeOnly ? fmtTime(e.t) : fmtDay(dayOf(e.t)).slice(4) + ' · ' + fmtTime(e.t);
+  r.setAttribute('aria-label', enTitle(e) + ', ' + (e.f === 1 ? 'positive' : 'negative') + ', ' + fmtDay(dayOf(e.t)));
+  r.addEventListener('click', function () { drLogSheet(e); });
+  return r;
+}
+var logQ = '', logF = 'all';
+function drRenderLog() {
+  var root = $('#drLog'); root.textContent = '';
+  root.appendChild(el('<h2 class="dr-h1">Encounters</h2>'));
+  /* The search box is built once per paint of the tab and only the list
+     under it repaints, so typing never loses the caret. */
+  var q = el('<input class="dr-field" id="drSearch" type="search" placeholder="Search names, activities, notes" aria-label="Search" autocomplete="off" />');
+  q.value = logQ;
+  root.appendChild(q);
+  var seg = drSeg([['all', 'All'], ['pos', 'Positive'], ['neg', 'Negative']], logF, function (v) { logF = v; $$('button', seg).forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.p === v ? 'true' : 'false'); }); paint(); });
+  seg.id = 'drLogSeg';
+  root.appendChild(seg);
+  var box = el('<div id="drLogList" style="display:flex;flex-direction:column;gap:12px"></div>');
+  root.appendChild(box);
+  q.addEventListener('input', function () { logQ = q.value; paint(); });
+  function paint() {
+    box.textContent = '';
+    var s = logQ.trim().toLowerCase();
+    /* Reversed first so two logged in the same minute still come out
+       newest first: the sort is stable and only breaks ties by order. */
+    var list = S.en.slice().reverse().filter(function (e) {
+      if (logF === 'pos' && e.f !== 1) return false;
+      if (logF === 'neg' && e.f !== -1) return false;
+      if (!s) return true;
+      return [e.n, e.act, e.note, e.a ? String(e.a) : ''].some(function (v) { return v && String(v).toLowerCase().indexOf(s) >= 0; });
+    }).sort(function (a, b) { return b.t - a.t; });
+    if (!S.en.length) { box.appendChild(el('<div class="dr-card dr-empty"><b>Your encounters go here</b>Who, how old, what they were doing, and how it went.</div>')); return; }
+    if (!list.length) { box.appendChild(el('<div class="dr-card dr-empty"><b>Nothing matches</b></div>')); return; }
+    var day = '', lc = null;
+    list.forEach(function (e) {
+      var k = dayOf(e.t);
+      if (k !== day) {
+        day = k;
+        var dc = drCounts(drOn(k));
+        var h = el('<div class="dr-cap dr-gh"></div>'); h.textContent = fmtDay(k) + ' · ' + dc.n + ' · ' + pctTxt(dc.pos, dc.n) + ' positive';
+        box.appendChild(h);
+        lc = el('<div class="dr-card" style="padding:4px 16px"><div class="dr-list"></div></div>'); box.appendChild(lc);
+      }
+      $('.dr-list', lc).appendChild(drEnRow(e, true));
+    });
+  }
+  paint();
 }
 
 /* ═══════════ CALENDAR ═══════════ */
@@ -1230,101 +922,44 @@ function drRenderCal() {
   var g = $('#drMonth', card), pad = (from.getDay() + 6) % 7, tk = ymd(t);
   for (var p = 0; p < pad; p++) g.appendChild(el('<span class="dr-cell is-pad" aria-hidden="true"></span>'));
   for (var d = 1; d <= to.getDate(); d++) {
-    var k = ymd(new Date(from.getFullYear(), from.getMonth(), d)), c = drCounts(drShOn(k));
+    var k = ymd(new Date(from.getFullYear(), from.getMonth(), d)), c = drCounts(drOn(k));
     var cell = el('<button type="button" class="dr-cell"><span class="dr-num"></span><small class="dr-num"></small></button>');
     cell.dataset.d = k;
     $('span', cell).textContent = d;
-    if (c.sh) cell.classList.add('is-on');
-    if (c.sa) $('small', cell).textContent = c.sa + '✓';
+    if (c.n) { cell.classList.add('is-on'); $('small', cell).textContent = c.pos + '/' + c.n; }
     if (k === tk) cell.classList.add('is-now');
     if (k > tk) { cell.classList.add('is-ahead'); cell.disabled = true; }
-    cell.setAttribute('aria-label', fmtDay(k) + (c.sh ? ', ' + c.k + ' doors, ' + c.sa + ' sales' : ', not out'));
+    cell.setAttribute('aria-label', fmtDay(k) + (c.n ? ', ' + c.n + ' encounters, ' + c.pos + ' positive' : ', none'));
     cell.addEventListener('click', (function (k) { return function () { drDaySheet(k); }; })(k));
     g.appendChild(cell);
   }
   root.appendChild(card);
   var mc = drCounts(drIn(from, to));
   var sum = el('<div class="dr-sum" id="drCalSum"></div>');
-  [[mc.sh, 'Shifts'], [mc.k, 'Doors'], [mc.sa, 'Sales', 1], [mc.rv ? money(mc.rv) : '–', 'Sold', 1]].forEach(function (x) {
-    var dv = el('<div><b class="dr-num"></b><span></span></div>'); $('b', dv).textContent = x[0]; $('span', dv).textContent = x[1]; if (x[2]) dv.classList.add('is-win'); sum.appendChild(dv);
+  [[mc.n, 'Encounters'], [pctTxt(mc.pos, mc.n), 'Positive', 1], [mc.dayN, 'Days out']].forEach(function (x) {
+    var dv = el('<div><b class="dr-num"></b><span></span></div>'); $('b', dv).textContent = x[0]; $('span', dv).textContent = x[1]; if (x[2]) dv.classList.add('is-pos'); sum.appendChild(dv);
   });
   root.appendChild(sum);
-  var list = drIn(from, to).sort(function (a, b) { return b.d < a.d ? -1 : b.d > a.d ? 1 : b.s - a.s; });
-  if (list.length) {
-    root.appendChild(el('<div class="dr-cap dr-gh">Shifts</div>'));
-    var lc = el('<div class="dr-card" style="padding:4px 16px"><div class="dr-list"></div></div>');
-    list.forEach(function (s) { $('.dr-list', lc).appendChild(drShiftRow(s)); });
-    root.appendChild(lc);
-  }
-}
-function drShiftRow(s) {
-  var c = drCounts([s]);
-  var r = el('<button type="button" class="dr-li"><div class="dr-li-t"><b></b><span></span></div><span class="dr-li-r dr-num"></span></button>');
-  $('b', r).textContent = (s.a || 'Shift') + (s.e ? '' : ' · live');
-  $('.dr-li-t span', r).textContent = fmtDay(s.d) + ' · ' + c.k + ' doors · ' + pctTxt(c.sa, c.pi) + ' close' + (s.m ? ' · written up' : '');
-  $('.dr-li-r', r).textContent = c.sa ? c.sa + '✓' + (c.rv ? ' ' + money(c.rv) : '') : '0';
-  if (c.sa) $('.dr-li-r', r).classList.add('is-win');
-  r.addEventListener('click', function () { drShiftSheet(s); });
-  return r;
 }
 function drDaySheet(k) {
-  var list = drShOn(k), b = el('<div></div>');
+  var list = drOn(k), b = el('<div></div>');
   if (list.length) {
-    b.appendChild(drSumTiles(drCounts(list)));
-    var l = el('<div class="dr-list" style="margin-top:8px"></div>');
-    list.forEach(function (s) { l.appendChild(drShiftRow(s)); });
+    var c = drCounts(list);
+    var p = el('<p style="margin:0 0 6px;color:var(--dim)"></p>'); p.textContent = c.n + (c.n === 1 ? ' encounter' : ' encounters') + ' · ' + c.pos + ' positive · ' + c.neg + ' negative';
+    b.appendChild(p);
+    var l = el('<div class="dr-list"></div>');
+    list.forEach(function (e) { l.appendChild(drEnRow(e, true)); });
     b.appendChild(l);
-  } else b.appendChild(el('<div class="dr-empty"><b>Not out this day</b>Log a shift you did not track.</div>'));
-  var add = el('<button type="button" class="dr-btn is-full">Log a shift</button>');
+  } else b.appendChild(el('<div class="dr-empty"><b>Nothing on this day</b></div>'));
+  var add = el('<button type="button" class="dr-btn is-full">Log one for this day</button>');
   var s = drSheet({ title: fmtDay(k), body: b, foot: [add] });
-  add.addEventListener('click', function () { s.close(true); drManualForm(null, k); });
-  $$('.dr-li', b).forEach(function (x) { x.addEventListener('click', function () { s.close(true); }); });
-}
-
-/* ═══════════ WINS ═══════════ */
-function drWinRow(w) {
-  var r = el('<button type="button" class="dr-li"><span class="dr-dot" aria-hidden="true"></span><div class="dr-li-t"><b></b><span></span></div><span class="dr-li-r dr-num is-win"></span></button>');
-  $('b', r).textContent = w.k.p || 'Sale';
-  $('.dr-li-t span', r).textContent = [fmtDay(w.s.d), fmtTime(w.k.t), w.s.a, w.k.n].filter(Boolean).join(' · ');
-  $('.dr-li-r', r).textContent = w.k.v ? money(w.k.v) : '✓';
-  r.addEventListener('click', function () { drSaleSheet(w.k); });
-  return r;
-}
-function drRenderWins() {
-  var root = $('#drWins'); root.textContent = '';
-  root.appendChild(el('<h2 class="dr-h1">Wins</h2>'));
-  var all = drCounts(S.sh);
-  var best = null;
-  var byDay = {};
-  S.sh.forEach(function (s) { var c = drCounts([s]); byDay[s.d] = (byDay[s.d] || 0) + c.sa; });
-  Object.keys(byDay).forEach(function (d) { if (byDay[d] && (!best || byDay[d] > byDay[best])) best = d; });
-  var sum = el('<div class="dr-sum" id="drWinSum" style="--n:3"></div>');
-  [[all.sa, 'Sales', 1], [all.rv ? money(all.rv) : '–', 'Sold', 1], [best ? byDay[best] : '–', best ? 'Best day · ' + fmtDay(best).slice(4) : 'Best day']].forEach(function (x) {
-    var dv = el('<div><b class="dr-num"></b><span></span></div>'); $('b', dv).textContent = x[0]; $('span', dv).textContent = x[1]; if (x[2]) dv.classList.add('is-win'); sum.appendChild(dv);
+  add.addEventListener('click', function () {
+    s.close();
+    var at = parseYmd(k), n = new Date();
+    if (k === ymd(today())) at = n; else at.setHours(12, 0, 0, 0);
+    drLogSheet(null, at.getTime());
   });
-  root.appendChild(sum);
-  var items = all.wins.map(function (w) { return { t: w.k.t, w: w }; });
-  S.sh.forEach(function (s) { if (s.m && s.m.sa) items.push({ t: s.s, m: s }); });
-  items.sort(function (a, b) { return b.t - a.t; });
-  if (!items.length) { root.appendChild(el('<div class="dr-card dr-empty"><b>Your first win goes here</b>Every sale you log, with what you sold and what worked.</div>')); return; }
-  var month = '', lc = null;
-  items.forEach(function (it) {
-    var d = new Date(it.t), mk = MON[d.getMonth()] + ' ' + d.getFullYear();
-    if (mk !== month) {
-      month = mk;
-      var h = el('<div class="dr-cap dr-gh"></div>'); h.textContent = mk; root.appendChild(h);
-      lc = el('<div class="dr-card" style="padding:4px 16px"><div class="dr-list"></div></div>'); root.appendChild(lc);
-    }
-    if (it.w) $('.dr-list', lc).appendChild(drWinRow(it.w));
-    else {
-      var s = it.m, r = el('<button type="button" class="dr-li"><span class="dr-dot" aria-hidden="true"></span><div class="dr-li-t"><b></b><span></span></div><span class="dr-li-r dr-num is-win"></span></button>');
-      $('b', r).textContent = s.m.sa + (s.m.sa === 1 ? ' sale' : ' sales');
-      $('.dr-li-t span', r).textContent = [fmtDay(s.d), s.a, 'written up'].filter(Boolean).join(' · ');
-      $('.dr-li-r', r).textContent = s.m.rv ? money(s.m.rv) : '✓';
-      r.addEventListener('click', function () { drManualForm(s); });
-      $('.dr-list', lc).appendChild(r);
-    }
-  });
+  $$('.dr-li', b).forEach(function (x) { x.addEventListener('click', function () { s.close(); }); });
 }
 
 /* ═══════════ YOU ═══════════ */
@@ -1334,21 +969,15 @@ function drRenderYou() {
   var rep = el('<button type="button" class="dr-go">Report for your mentor</button>');
   rep.addEventListener('click', function () { drReport(); });
   root.appendChild(rep);
-  var card = el('<div class="dr-card"><label class="dr-flab" for="drName" style="margin-top:0">Your name, on the report</label><input class="dr-field" id="drName" maxlength="40" autocomplete="off" /></div>');
+  var card = el('<div class="dr-card"><label class="dr-flab" for="drName" style="margin-top:0">Your name, on the report</label><input class="dr-field" id="drName" maxlength="40" autocomplete="off" /><label class="dr-flab" for="drGoal">Encounters a day</label><input class="dr-field dr-num" id="drGoal" inputmode="numeric" autocomplete="off" /></div>');
   var nf = $('#drName', card); nf.value = S.name;
   nf.addEventListener('change', function () { S.name = nf.value.trim().slice(0, 40); drSave(); });
-  card.appendChild(el('<label class="dr-flab">Currency</label>'));
-  var cp = drPillRow(CURS.map(function (c) { return [c, c]; }), S.cur, function (c) { S.cur = c || '$'; drSave(); drRenderYou(); });
-  card.appendChild(cp);
-  var g = el('<div class="dr-grid2"><div><label class="dr-flab" for="drGSa">Sales a shift</label><input class="dr-field dr-num" id="drGSa" inputmode="numeric" autocomplete="off" /></div><div><label class="dr-flab" for="drGDr">Doors a shift</label><input class="dr-field dr-num" id="drGDr" inputmode="numeric" autocomplete="off" /></div></div>');
-  $('#drGSa', g).value = S.goal.sa; $('#drGDr', g).value = S.goal.dr;
-  $('#drGSa', g).addEventListener('change', function (e) { var v = parseInt(e.target.value, 10); S.goal.sa = v >= 0 ? Math.min(999, v) : 0; drSave(); });
-  $('#drGDr', g).addEventListener('change', function (e) { var v = parseInt(e.target.value, 10); S.goal.dr = v >= 0 ? Math.min(9999, v) : 0; drSave(); });
-  card.appendChild(g);
+  var gf = $('#drGoal', card); gf.value = S.goal;
+  gf.addEventListener('change', function () { var v = parseInt(gf.value, 10); S.goal = v >= 0 ? Math.min(99, v) : 0; drSave(); });
   root.appendChild(card);
-  var all = drCounts(S.sh);
-  var lt = el('<div class="dr-sum" style="--n:3"></div>');
-  [[all.sh, 'Shifts'], [all.k, 'Doors'], [pctTxt(all.sa, all.pi), 'Close rate']].forEach(function (x) { var d = el('<div><b class="dr-num"></b><span></span></div>'); $('b', d).textContent = x[0]; $('span', d).textContent = x[1]; lt.appendChild(d); });
+  var all = drCounts(S.en);
+  var lt = el('<div class="dr-sum" id="drAll"></div>');
+  [[all.n, 'Encounters'], [pctTxt(all.pos, all.n), 'Positive', 1], [all.dayN, 'Days out']].forEach(function (x) { var d = el('<div><b class="dr-num"></b><span></span></div>'); $('b', d).textContent = x[0]; $('span', d).textContent = x[1]; if (x[2]) d.classList.add('is-pos'); lt.appendChild(d); });
   root.appendChild(el('<div class="dr-cap dr-gh">All time</div>'));
   root.appendChild(lt);
   root.appendChild(el('<div class="dr-cap dr-gh">Backup</div>'));
@@ -1369,9 +998,9 @@ function drRestore() {
   var s = drSheet({ title: 'Restore', body: b, foot: [go] });
   go.addEventListener('click', function () {
     var o; try { o = JSON.parse($('textarea', b).value); } catch (e) { drToast('That is not a backup'); return; }
-    if (!o || typeof o !== 'object' || !Array.isArray(o.sh)) { drToast('That is not a backup'); return; }
+    if (!o || typeof o !== 'object' || !Array.isArray(o.en)) { drToast('That is not a backup'); return; }
     var snap = JSON.stringify(S);
-    S = drClean(o); drSave(); s.close(true); drRender();
+    S = drClean(o); drSave(); s.close(); drRender();
     drToast('Restored', function () { S = drClean(JSON.parse(snap)); drSave(); drRender(); });
   });
 }
@@ -1379,7 +1008,7 @@ function drRestore() {
 /* ═══════════ NAVIGATION ═══════════ */
 var view = 'home';
 try { var sv = localStorage.getItem(VIEWK); if (VIEWS.indexOf(sv) >= 0) view = sv; } catch (e) {}
-var IDS = { home: 'drHome', cal: 'drCal', wins: 'drWins', you: 'drYou' };
+var IDS = { home: 'drHome', cal: 'drCal', log: 'drLog', you: 'drYou' };
 function drGo(v) {
   if (VIEWS.indexOf(v) < 0) v = 'home';
   if (v === 'cal' && view !== 'cal') calAt = today();
@@ -1392,21 +1021,11 @@ function drRender() {
   $$('.dr-bar button').forEach(function (b) { if (b.dataset.v === view) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   if (view === 'home') drRenderHome();
   else if (view === 'cal') drRenderCal();
-  else if (view === 'wins') drRenderWins();
+  else if (view === 'log') drRenderLog();
   else drRenderYou();
-  var sh = drLiveShift(), live = $('#drLive');
-  live.hidden = !sh || !!shiftSheet;
-  document.body.classList.toggle('dr-has-live', !live.hidden);
-  if (sh) { live.innerHTML = '<span class="dr-rec" aria-hidden="true"></span><span></span><em></em>'; $('span:nth-child(2)', live).textContent = (sh.a || 'Shift') + ' · ' + drCounts([sh]).k + ' doors'; live.setAttribute('aria-label', 'Back to the shift'); drTick(); }
 }
 $$('.dr-bar button').forEach(function (b) { b.addEventListener('click', function () { drGo(b.dataset.v); }); });
-$('#drLive').addEventListener('click', drOpenShift);
-setInterval(function () { if (drLiveShift()) drTick(); }, 1000);
-
 drRender();
-/* A shift left running when the app was closed comes back up where it
-   was: closing the app at a gate is not ending the shift. */
-if (drLiveShift()) drOpenShift();
 
 if ('serviceWorker' in navigator && /^(https:|http:\/\/(localhost|127\.0\.0\.1))/.test(location.href)) {
   navigator.serviceWorker.register('sw.js').catch(function () {});
