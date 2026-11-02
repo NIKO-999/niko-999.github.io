@@ -326,7 +326,7 @@ svg { display: block; }
 
 .lf-pick-h { padding: 14px 2px 2px; }
 .lf-tip { background: var(--card2); border-radius: var(--r-s); padding: 12px 14px; margin: 6px 0 10px; }
-.lf-tip > b { display: block; font-size: 15px; font-weight: 600; margin: 4px 0 6px; color: var(--today); }
+.lf-tip > b { display: block; font-size: 14px; line-height: 1.35; font-weight: 600; margin: 4px 0 6px; color: var(--today); }
 .lf-tip ul { margin: 0; padding-left: 16px; display: grid; gap: 6px; }
 .lf-tip li { font-size: 13px; line-height: 1.4; color: var(--dim); }
 .lf-cdc { background: var(--card); border-radius: var(--r); padding: 14px; margin-top: 12px; }
@@ -436,15 +436,15 @@ var EXERCISES = [
   ['bench', 'Barbell bench press', 'Chest', 1], ['inclbb', 'Incline barbell bench press', 'Chest', 1], ['dbbench', 'Dumbbell bench press', 'Chest', 1],
   ['decline', 'Decline bench press', 'Chest', 1], ['smithinc', 'Smith machine incline press', 'Chest', 1], ['dips', 'Dips', 'Chest', 1, 'bw'],
   ['pushup', 'Push-ups', 'Chest', 0, 'bw'], ['cablecross', 'Cable crossovers', 'Chest'], ['dbfly', 'Dumbbell flyes', 'Chest'], ['lowfly', 'Low-to-high cable flyes', 'Chest'],
-  ['ohp', 'Barbell overhead press', 'Shoulders', 1], ['dbshp', 'Seated dumbbell shoulder press', 'Shoulders', 1], ['arnold', 'Arnold press', 'Shoulders', 1],
+  ['ohp', 'Barbell overhead press', 'Shoulders', 1], ['dbshp', 'Seated dumbbell shoulder press', 'Shoulders', 1], ['arnold', 'Arnold press', 'Shoulders', 1], ['seatshp', 'Seated shoulder press', 'Shoulders', 1],
   ['mlat', 'Machine lateral raises', 'Shoulders'], ['frontr', 'Front raises', 'Shoulders'], ['uprow', 'Upright rows', 'Shoulders'],
   ['skull', 'Skull crushers', 'Triceps'], ['cgbench', 'Close-grip bench press', 'Triceps', 1], ['kickback', 'Triceps kickbacks', 'Triceps'],
   ['dipmach', 'Machine dips', 'Triceps'], ['ohdb', 'Overhead dumbbell extensions', 'Triceps'],
   ['bbrow', 'Barbell rows', 'Back', 1], ['dbrow', 'One-arm dumbbell rows', 'Back', 1], ['tbar', 'T-bar rows', 'Back', 1],
   ['sealrow', 'Seal rows', 'Back', 1], ['mrow', 'Machine rows', 'Back', 1], ['pullupbw', 'Pull-ups', 'Back', 1, 'bw'],
-  ['chinup', 'Chin-ups', 'Back', 1, 'bw'], ['cgpd', 'Close-grip lat pulldowns', 'Back', 1], ['sapd', 'Single-arm lat pulldowns', 'Back'],
+  ['chinup', 'Chin-ups', 'Back', 1, 'bw'], ['cgpd', 'Close-grip lat pulldowns', 'Back', 1], ['sapd', 'Single-arm cable lat pulldowns', 'Back'],
   ['straight', 'Straight-arm pulldowns', 'Back'], ['pullover', 'Dumbbell pullovers', 'Back'], ['rackpull', 'Rack pulls', 'Back', 1],
-  ['shrug', 'Shrugs', 'Back'], ['facepull', 'Face pulls', 'Shoulders'], ['revpec', 'Reverse pec deck', 'Shoulders'],
+  ['ngpd', 'Neutral-grip lat pulldowns', 'Back', 1], ['wgpd', 'Wide-grip lat pulldowns', 'Back', 1], ['shrug', 'Shrugs', 'Back'], ['facepull', 'Face pulls', 'Shoulders'], ['revpec', 'Reverse pec deck', 'Shoulders'],
   ['bbcurl', 'Barbell curls', 'Biceps'], ['ezcurl', 'EZ-bar curls', 'Biceps'], ['cablecurl', 'Cable curls', 'Biceps'],
   ['bayesian', 'Bayesian cable curls', 'Biceps'], ['spider', 'Spider curls', 'Biceps'], ['conc', 'Concentration curls', 'Biceps'],
   ['revcurl', 'Reverse curls', 'Biceps'], ['wristcurl', 'Wrist curls', 'Biceps'],
@@ -509,66 +509,58 @@ function lfPpl(e) {
 var MUSCLES = ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Lower back', 'Abs', 'Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Core', 'Arms', 'Legs', 'Cardio', 'Other'];
 
 /* THE SPLIT. Seven days, each exercise as [id, sets, low reps, high
-   reps, build]. dow is the JavaScript weekday (Sunday 0), so today
-   opens on its own day without anything to choose. Code, like the list
-   above: only your logged days are data.
+   reps]. dow is the JavaScript weekday (Sunday 0), so today opens on its
+   own day without anything to choose. Code, like the list above: only
+   your logged days are data.
 
-   Quads, calves and lower back are the specialisation. CALVES START AT
-   12 SETS, not 15, because 15–20k steps a day is calf work too: the
-   entry marked `build` is Sunday's block, and it joins the day only
-   once calves are set to 15 sets a week under You · Focus. */
+   Upper/lower, built around quads and overall leg size, with extra
+   attention on calves, abs and lower back. Three lower days give the
+   quads frequent exposure; four upper days spread the upper-body volume
+   so no muscle is pushed to its limit daily. */
 var PROGRAM = [
-  { id: 'p-mon', dow: 1, n: 'Lower A', sp: 'Quads + calves + abs', ex: [['hack', 3, 6, 10], ['squat', 3, 6, 10], ['legext', 3, 12, 15], ['calfstand', 4, 8, 12], ['cablecrunch', 3, 10, 15]] },
-  { id: 'p-tue', dow: 2, n: 'Upper A', sp: 'Push + lower back', ex: [['incdb', 3, 8, 12], ['mchest', 3, 8, 12], ['cablat', 4, 12, 20], ['pecdeck', 2, 12, 15], ['tripush', 3, 10, 15], ['triover', 2, 10, 15], ['backext', 3, 10, 15]] },
-  { id: 'p-wed', dow: 3, n: 'Lower B', sp: 'Hamstrings + glutes + calves', ex: [['rdl', 3, 6, 10], ['seatcurl', 4, 10, 15], ['hipthrust', 3, 8, 12], ['bss', 2, 10, 12], ['calfseat', 4, 12, 20]] },
-  { id: 'p-thu', dow: 4, n: 'Upper B', sp: 'Pull + abs', ex: [['pullup', 3, 8, 12], ['csrow', 3, 8, 12], ['seatrow', 2, 10, 12], ['rdfly', 3, 15, 20], ['incurl', 3, 10, 12], ['hammer', 2, 10, 15], ['hlr', 3, 10, 15]] },
-  { id: 'p-fri', dow: 5, n: 'Lower C', sp: 'Quads + hamstrings + calves', ex: [['legpress', 3, 10, 15], ['hack', 2, 10, 12], ['legext', 2, 12, 20], ['lyingcurl', 3, 10, 15], ['calf', 4, 10, 15]] },
-  { id: 'p-sat', dow: 6, n: 'Upper C', sp: 'Upper body + lower back + abs', ex: [['incmach', 3, 8, 12], ['latpd', 3, 8, 12], ['cfly', 2, 12, 15], ['sarow', 2, 10, 12], ['latraise', 3, 15, 20], ['curl', 2, 12, 15], ['triext', 2, 12, 15], ['revhyper', 3, 12, 15], ['abwheel', 3, 8, 12]] },
-  { id: 'p-sun', dow: 0, n: 'Shoulders + Arms', sp: 'Shoulders + arms + calves', ex: [['mshp', 2, 8, 12], ['cablat', 3, 15, 20], ['rdfly', 2, 15, 20], ['preacher', 3, 10, 15], ['ropeham', 2, 12, 15], ['ropepush', 3, 10, 15], ['ohcable', 2, 12, 15], ['calfseat', 3, 15, 20, 'build']] }
+  { id: 'p-mon', dow: 1, n: 'Lower A', sp: 'Quad strength and size', ex: [['hack', 3, 6, 10], ['smithsq', 3, 8, 10], ['legext', 3, 10, 15], ['calfstand', 4, 8, 12], ['cablecrunch', 3, 10, 15]] },
+  { id: 'p-tue', dow: 2, n: 'Upper A', sp: 'Chest, shoulders, triceps', ex: [['smithinc', 3, 6, 10], ['mchest', 3, 8, 12], ['seatshp', 3, 8, 12], ['cablat', 4, 12, 20], ['ohcable', 3, 10, 15], ['tripush', 3, 10, 15], ['backext', 3, 10, 15]] },
+  { id: 'p-wed', dow: 3, n: 'Lower B', sp: 'Hamstrings, glutes, calves', ex: [['rdl', 3, 6, 10], ['seatcurl', 4, 10, 15], ['lyingcurl', 3, 10, 15], ['hipthrust', 3, 8, 12], ['calfseat', 4, 12, 20], ['hlr', 3, 10, 15]] },
+  { id: 'p-thu', dow: 4, n: 'Upper B', sp: 'Back, rear delts, abs', ex: [['ngpd', 3, 8, 12], ['csrow', 3, 8, 12], ['sapd', 3, 10, 15], ['revpec', 3, 12, 20], ['cablat', 3, 12, 20], ['ezcurl', 3, 8, 12], ['abwheel', 3, 8, 15]] },
+  { id: 'p-fri', dow: 5, n: 'Lower C', sp: 'Quad hypertrophy and leg volume', ex: [['legpress', 3, 10, 15], ['bss', 3, 8, 12], ['legext', 3, 12, 20], ['seatcurl', 3, 10, 15], ['calf', 4, 10, 15], ['cablecrunch', 3, 10, 15]] },
+  { id: 'p-sat', dow: 6, n: 'Upper C', sp: 'Upper-body balance, lower back, abs', ex: [['incdb', 3, 8, 12], ['mrow', 3, 8, 12], ['wgpd', 3, 10, 15], ['pecdeck', 3, 12, 15], ['backext', 3, 10, 15], ['revhyper', 3, 12, 15], ['hlr', 3, 10, 15]] },
+  { id: 'p-sun', dow: 0, n: 'Upper D', sp: 'Shoulders, arms, calves', ex: [['mshp', 3, 8, 12], ['cablat', 4, 12, 20], ['revpec', 3, 12, 20], ['preacher', 3, 10, 15], ['incurl', 3, 10, 15], ['tripush', 3, 10, 15], ['ohcable', 3, 10, 15], ['calfseat', 3, 15, 20]] }
 ].map(function (d) {
-  var all = d.ex.map(function (e) { return e[0]; }), build = {};
-  d.ex.forEach(function (e) { if (e[4] === 'build') build[e[0]] = 1; });
-  /* `ex` is read, never stored, so the switch reaches every place that
-     lists a day — today's card, its time, the split, the workout. */
-  return { id: d.id, dow: d.dow, n: d.n, sp: d.sp, fixed: 1, build: build,
-    get ex() { return all.filter(function (id) { return !build[id] || lfCalfFull(); }); },
+  return { id: d.id, dow: d.dow, n: d.n, sp: d.sp, fixed: 1, ex: d.ex.map(function (e) { return e[0]; }),
     tg: d.ex.reduce(function (o, e) { o[e[0]] = [e[1], e[2], e[3]]; return o; }, {}) };
 });
-/* WHAT EACH DAY IS FOR, from the plan the split came with: the
-   coach's own name for the session, then what to keep in mind while
-   you look it over. */
+/* WHAT EACH DAY IS FOR, from the plan the split came with: its focus,
+   then what to keep in mind while you look it over. */
 var DAY_TIPS = {
-  'p-mon': ['Heavy quads', [
-    'The priority is progressive overload on your main quad movements: hack squat and barbell squat.',
-    'Compounds at 1–2 reps in reserve, 2–3 minutes rest. Leg extensions to 0–1 in reserve on the last set.',
-    'Standing calf raises 4 × 8–12: straight-knee work, for the gastrocnemius.',
-    'Cable crunches 3 × 10–15 for abs.']],
-  'p-tue': ['Push', [
-    'Chest, shoulders and triceps. Keep it productive without taking anything from your leg days.',
-    'Isolation work to 0–1 reps in reserve on the final sets, 60–120 seconds rest.',
-    '45° back extensions 3 × 10–15: controlled, for spinal stability and hip extension rather than heavy load on the lower back.']],
-  'p-wed': ['Hamstrings / glutes', [
-    'The posterior-chain day, so the three leg days are not equally demanding.',
-    'Romanian deadlifts already give the lower back and posterior chain real work. No heavy conventional deadlifts on top.',
-    'Seated calf raises 4 × 12–20: bent-knee work, for the soleus.',
-    'Compounds at 1–2 reps in reserve, 2–3 minutes rest.']],
-  'p-thu': ['Pull', [
-    'Back, rear delts and biceps.',
-    'Weighted pull-ups or lat pulldowns 3 × 8–12. Rows at 1–2 reps in reserve.',
-    'Hanging leg raises 3 × 10–15 for abs.']],
-  'p-fri': ['Leg hypertrophy', [
-    'Your second quad-focused session, with slightly less intensity than Monday.',
-    'Work the higher rep ranges: leg press 10–15, leg extensions up to 20.',
-    'Leg press calf raises 4 × 10–15.',
-    'If performance, sleep or leg soreness starts slipping, cut volume here rather than forcing more work.']],
-  'p-sat': ['Upper-body volume', [
-    'Volume across chest, back, shoulders and arms.',
-    'Reverse hyperextensions 3 × 12–15: controlled, hip extension over load.',
-    'Ab wheel rollouts 3 × 8–12.']],
-  'p-sun': ['Lower fatigue', [
-    'Keep Sunday low fatigue. It is what makes seven gym days work alongside 15–20k daily steps.',
-    'Delts and arms. Nothing heavy on the legs.',
-    'Seated calf raises 3 × 15–20 join once you build calves to 15 sets. Start at 12 while your steps are high.']]
+  'p-mon': ['Heavy knee-dominant movements, progressive overload and quad development', [
+    'The main goal is to improve your hack squat and squat performance over time.',
+    'Keep the reps controlled: progress the load or the reps, never the range of motion.',
+    'Your legs are the priority. If Friday’s performance drops because your quads are still fatigued, cut this session’s volume before adding more work.']],
+  'p-tue': ['Upper-body pressing strength and chest development', [
+    'Lead with the incline Smith press while you are fresh: 3 × 6–10.',
+    'Cable lateral raises carry 4 sets here; shoulders get the most weekly volume of anything, about 20 sets.',
+    '45° back extensions finish the day: direct lower-back work, controlled.']],
+  'p-wed': ['Posterior-chain development and balanced leg size', [
+    'Romanian deadlifts lead: 3 × 6–10.',
+    'Two curl variations, seated then lying: hamstrings get about 13 sets a week.',
+    'Seated calf raises 4 × 12–20 and hanging leg raises 3 × 10–15 close it out.']],
+  'p-thu': ['Back thickness, lat width and building your V-taper', [
+    'Neutral-grip pulldowns and chest-supported rows: thickness and width.',
+    'Single-arm cable pulldowns, then reverse pec deck and cable laterals for the shoulders that make the taper.',
+    'Ab-wheel rollouts 3 × 8–15.']],
+  'p-fri': ['High-quality quad volume, unilateral work and a different stimulus from Monday', [
+    'Your second major quad-focused day.',
+    'Bulgarian split squats are 3 × 8–12 per leg.',
+    'Keep the reps controlled and progress either the load or the reps without sacrificing range of motion.',
+    'If your quads are still tired from Monday and performance is dropping here, reduce Monday’s volume.']],
+  'p-sat': ['Additional chest and back volume, with direct lower-back work', [
+    'Chest and back balance: incline dumbbell press, machine rows, wide-grip pulldowns, pec deck.',
+    'Back extensions and reverse hypers back to back: about 9 direct lower-back sets across the week.',
+    'Hanging leg raises 3 × 10–15.']],
+  'p-sun': ['Shoulder width, arm size and additional calf frequency', [
+    'Shoulders first: machine press, then cable laterals 4 × 12–20 and reverse pec deck.',
+    'Two biceps and two triceps movements: direct arm work for the week.',
+    'Seated calf raises 3 × 15–20 make calves four days and about 15 sets a week.']]
 };
 var DOW_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -578,18 +570,21 @@ var DOW_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
 /* WHAT YOU ARE WORKING ON is yours to set: a muscle, its weekly sets,
    and whether it is a priority or just keeps progressing. The default is
    the split's own, and nothing about it is fixed. */
-var FOCUS_DEFAULT = [['Quads', 13, 16, 1], ['Calves', 12, 12, 1], ['Lower back', 6, 6, 1],
-  ['Hamstrings', 10, 10, 0], ['Glutes', 5, 8, 0], ['Abs', 9, 9, 0]];
+var FOCUS_DEFAULT = [['Quads', 15, 15, 1], ['Calves', 15, 15, 1], ['Abs', 12, 12, 1], ['Lower back', 9, 9, 1],
+  ['Hamstrings', 13, 13, 0], ['Glutes', 9, 9, 0], ['Chest', 15, 15, 0], ['Back', 15, 15, 0], ['Shoulders', 20, 20, 0],
+  ['Biceps', 9, 9, 0], ['Triceps', 12, 12, 0]];
+/* The first split's targets, as they shipped. A focus still exactly
+   that one never chose anything, so it follows the new split; one you
+   changed is yours and is left alone. */
+var FOCUS_V1 = 'Quads:13:16:1,Calves:12:12:1,Lower back:6:6:1,Hamstrings:10:10:0,Glutes:5:8:0,Abs:9:9:0';
 function lfFocusDefault() { return FOCUS_DEFAULT.map(function (f) { return { m: f[0], lo: f[1], hi: f[2], p: f[3] }; }); }
 /* Priorities first, in the order you added them. */
 function lfTargets() {
   var pri = S.focus.filter(function (f) { return f.p; }), rest = S.focus.filter(function (f) { return !f.p; });
   return pri.concat(rest).map(function (f) { return [f.m, f.lo, f.hi, f.p]; });
 }
-/* Sunday's seated calf block joins the split once calves are at 15. */
-function lfCalfFull() { return S.focus.some(function (f) { return f.m === 'Calves' && f.lo >= 15; }); }
 /* Rest and effort by kind of movement. */
-function lfRestOf(id) { var e = exById(id); return e && e.c ? { lo: 120, hi: 180, rir: '1–2 RIR' } : { lo: 60, hi: 120, rir: '0–1 RIR last set' }; }
+function lfRestOf(id) { var e = exById(id); return e && e.c ? { lo: 120, hi: 180, rir: '1–2 RIR' } : { lo: 60, hi: 120, rir: '1–2 RIR' }; }
 
 var KEY = 'lift.v1', ACTK = 'lift.active.v1', VIEWK = 'lift.view.v1';
 var LB = 0.45359237;
@@ -636,14 +631,15 @@ function lfClean(o) {
   d.goal = Math.min(7, Math.max(1, Math.round(+o.goal) || 4));
   d.bwGoal = num(o.bwGoal);
   if (CARDIO.some(function (c) { return c[0] === o.ck; })) d.ck = o.ck;
-  /* A record from before focus was editable carries calf15 instead. */
   if (Array.isArray(o.focus)) {
     var seen = {};
     d.focus = o.focus.filter(function (f) { return f && MUSCLES.indexOf(f.m) >= 0 && !seen[f.m] && (seen[f.m] = 1); }).slice(0, 16).map(function (f) {
       var lo = Math.min(60, Math.max(1, Math.round(+f.lo) || 1)), hi = Math.min(60, Math.max(lo, Math.round(+f.hi) || lo));
       return { m: f.m, lo: lo, hi: hi, p: f.p ? 1 : 0 };
     });
-  } else if (o.calf15 === true) d.focus.forEach(function (f) { if (f.m === 'Calves') { f.lo = 15; f.hi = 15; } });
+    var sig = d.focus.map(function (f) { return f.m + ':' + f.lo + ':' + f.hi + ':' + f.p; }).join();
+    if (sig === FOCUS_V1 || sig === FOCUS_V1.replace('Calves:12:12', 'Calves:15:15')) d.focus = lfFocusDefault();
+  }
   /* A demo link per exercise. Only http(s), so a pasted string can never
      be a javascript: URL on a button you press. */
   if (o.lk && typeof o.lk === 'object') Object.keys(o.lk).forEach(function (k) { var u = o.lk[k]; if (typeof u === 'string' && /^https?:\/\//i.test(u)) d.lk[k] = u.slice(0, 500); });
