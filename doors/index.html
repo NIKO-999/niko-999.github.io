@@ -97,6 +97,10 @@ svg { display: block; }
 .dr-en-f { flex: none; height: 24px; line-height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--card2); color: var(--dim); }
 .dr-en-f.is-pos { background: var(--pos); color: #002a0c; }
 .dr-en-m { font-size: 13px; color: var(--dim); margin-top: 4px; }
+.dr-end { border: 1px solid var(--line); }
+.dr-end-s { margin-top: 12px; }
+.dr-end-s .dr-en-n { margin-top: 4px; }
+.dr-end-go { margin-top: 2px; }
 .dr-en-n { margin: 10px 0 0; font-size: 14.5px; line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; }
 
 /* ── stat tiles ── */
@@ -379,7 +383,17 @@ function localDT(t) { var d = new Date(t); return ymd(d) + 'T' + String(d.getHou
    age you put on them, what they were doing, how it went (1 well, -1
    not) and a note. Only `t` and `f` are required — a name you did not
    get is still an encounter you had. */
-function drDefault() { return { v: 1, name: '', goal: 5, acts: [], en: [] }; }
+function drDefault() { return { v: 1, name: '', goal: 5, acts: [], en: [], days: {} }; }
+/* The end of a day is { k, w, f }: the key takeaways, what went well and
+   what you'll do differently, keyed by the date it is about. A day with
+   none of the three written is not kept. */
+var DAY_F = [['k', 'Key takeaways', 'What you’re taking from today'], ['w', 'What went well', 'What worked, and why'], ['f', 'Tomorrow I’ll', 'The one thing to do differently']];
+function drDayClean(o) {
+  var x = {}, any = false;
+  if (!o || typeof o !== 'object') return null;
+  DAY_F.forEach(function (f) { var v = o[f[0]]; if (typeof v === 'string' && v.trim()) { x[f[0]] = v.trim().slice(0, 800); any = true; } });
+  return any ? x : null;
+}
 function drClean(o) {
   var d = drDefault();
   if (!o || typeof o !== 'object') return d;
@@ -394,6 +408,10 @@ function drClean(o) {
     if (typeof e.act === 'string' && e.act.trim()) x.act = e.act.trim().slice(0, 30);
     if (typeof e.note === 'string' && e.note.trim()) x.note = e.note.slice(0, 400);
     return x;
+  });
+  if (o.days && typeof o.days === 'object') Object.keys(o.days).forEach(function (k) {
+    if (!/^\d{4}-\d\d-\d\d$/.test(k)) return;
+    var x = drDayClean(o.days[k]); if (x) d.days[k] = x;
   });
   return d;
 }
@@ -666,7 +684,9 @@ function drTodayCard() {
   return card;
 }
 /* Every encounter in full — the same fields the sheet asks for, laid out
-   to be read off a screenshot. Today's, newest first; on a day with none
+   to be read off a screenshot. Today's, in the order they happened, so
+   the day reads first knock to last and ends on what you took from it;
+   on a day with none
    yet, the last day you logged, so the screen a mentor sees is never a
    blank. A tap opens it to correct. */
 function drFullCards() {
@@ -675,7 +695,7 @@ function drFullCards() {
   if (!list.length) return null;
   var wrap = el('<div id="drFull" class="dr-full"><div class="dr-cap dr-gh"></div></div>');
   $('.dr-cap', wrap).textContent = (k === ymd(today()) ? 'Today' : fmtDay(k)) + ' · ' + list.length + (list.length === 1 ? ' encounter' : ' encounters');
-  list.slice().reverse().forEach(function (e) {
+  list.forEach(function (e) {
     var c = el('<button type="button" class="dr-card dr-en"><div class="dr-en-h"><b></b><span class="dr-en-f"></span></div><div class="dr-en-m"></div><p class="dr-en-n"></p></button>');
     c.dataset.id = e.id;
     $('b', c).textContent = enTitle(e);
@@ -685,7 +705,50 @@ function drFullCards() {
     c.addEventListener('click', function () { drLogSheet(e); });
     wrap.appendChild(c);
   });
+  wrap.appendChild(drDayEnd(k));
   return wrap;
+}
+/* The day's last card. Not written yet, it is the one press that ends the
+   day; written, it is what you took from it, and a tap edits it. */
+function drDayEnd(k) {
+  var d = S.days[k];
+  if (!d) {
+    var b = el('<button type="button" class="dr-btn is-full dr-end-go" id="drEndGo"></button>');
+    b.textContent = k === ymd(today()) ? 'End the day' : 'Write this day’s takeaways';
+    b.addEventListener('click', function () { drDaySum(k); });
+    return b;
+  }
+  var c = el('<button type="button" class="dr-card dr-en dr-end" id="drEnd"><div class="dr-en-h"><b>End of day</b></div></button>');
+  DAY_F.forEach(function (f) {
+    if (!d[f[0]]) return;
+    var x = el('<div class="dr-end-s"><span class="dr-cap"></span><p class="dr-en-n"></p></div>');
+    $('.dr-cap', x).textContent = f[1]; $('p', x).textContent = d[f[0]];
+    c.appendChild(x);
+  });
+  c.addEventListener('click', function () { drDaySum(k); });
+  return c;
+}
+function drDaySum(k) {
+  var d = S.days[k] || {}, b = el('<div></div>'), fs = {};
+  var c = drCounts(drOn(k));
+  var p = el('<p class="dr-lab" style="margin:0 0 4px"></p>');
+  p.textContent = c.n ? c.n + (c.n === 1 ? ' encounter' : ' encounters') + ' · ' + c.pos + ' positive · ' + c.neg + ' negative' : 'No encounters logged';
+  b.appendChild(p);
+  DAY_F.forEach(function (f, i) {
+    var id = 'drDay' + f[0].toUpperCase();
+    var lab = el('<label class="dr-flab"></label>'); lab.htmlFor = id; lab.textContent = f[1]; b.appendChild(lab);
+    var t = el('<textarea class="dr-field" maxlength="800"></textarea>'); t.id = id; t.placeholder = f[2]; t.value = d[f[0]] || '';
+    if (i === 0) t.style.minHeight = '110px';
+    fs[f[0]] = t; b.appendChild(t);
+  });
+  var go = el('<button type="button" class="dr-btn is-ink is-full" id="drDayGo">Save</button>');
+  var s = drSheet({ title: k === ymd(today()) ? 'End the day' : fmtDay(k), body: b, foot: [go] });
+  go.addEventListener('click', function () {
+    var was = S.days[k], x = drDayClean({ k: fs.k.value, w: fs.w.value, f: fs.f.value });
+    if (x) S.days[k] = x; else delete S.days[k];
+    drSave(); s.close(); drRender();
+    drToast(x ? 'Day ended' : 'Takeaways cleared', function () { if (was) S.days[k] = was; else delete S.days[k]; drSave(); drRender(); });
+  });
 }
 function drStatRow() {
   var t = today(), w0 = monday(t), wc = drCounts(drIn(w0, t)), wl = drCounts(drIn(addDays(w0, -7), addDays(t, -7)));
@@ -839,8 +902,10 @@ function drRepCard(p) {
   });
   card.appendChild(kv);
   var ls = el('<div class="dr-rep-sec"><span class="dr-cap">Encounters</span><ul></ul></div>');
-  var sorted = p.list.slice().sort(function (a, b) { return b.t - a.t; });
+  /* One day reads first to last, the way it happened; a longer stretch
+     leads with the latest. */
   var oneDay = ymd(p.from) === ymd(p.to);
+  var sorted = p.list.slice().sort(function (a, b) { return oneDay ? a.t - b.t : b.t - a.t; });
   sorted.slice(0, 6).forEach(function (e) {
     var li = el('<li><span class="dr-dot"></span><span><b></b></span><em></em></li>');
     if (e.f === 1) $('.dr-dot', li).classList.add('is-pos');
@@ -851,6 +916,12 @@ function drRepCard(p) {
   });
   if (sorted.length > 6) { var more = el('<li><span></span></li>'); $('span', more).textContent = '+ ' + (sorted.length - 6) + ' more'; $('ul', ls).appendChild(more); }
   card.appendChild(ls);
+  var dd = oneDay && S.days[ymd(p.from)];
+  if (dd) {
+    var ts = el('<div class="dr-rep-sec" id="drRepDay"><span class="dr-cap">End of day</span></div>');
+    DAY_F.forEach(function (f) { if (!dd[f[0]]) return; var q = el('<p style="margin:6px 0 0"><b></b></p>'); $('b', q).textContent = f[1] + ': '; q.appendChild(document.createTextNode(dd[f[0]])); ts.appendChild(q); });
+    card.appendChild(ts);
+  }
   var fs = el('<div class="dr-rep-sec"><span class="dr-cap">Where I’m at</span></div>');
   var fl = drFocusLine(p.list); fl.className = ''; fl.removeAttribute('id');
   fs.appendChild(fl);
@@ -867,6 +938,11 @@ function drRepText(p) {
   L.push('');
   p.list.slice().sort(function (a, b) { return a.t - b.t; }).forEach(function (e) {
     L.push((e.f === 1 ? '+ ' : '− ') + [enTitle(e), enSub(e), fmtDay(dayOf(e.t)) + ' ' + fmtTime(e.t)].filter(Boolean).join(' · ') + (e.note ? ' — ' + e.note : ''));
+  });
+  var a0 = ymd(p.from), b0 = ymd(p.to);
+  Object.keys(S.days).filter(function (k) { return k >= a0 && k <= b0; }).sort().forEach(function (k) {
+    var dd = S.days[k]; L.push(''); L.push('End of day · ' + fmtDay(k));
+    DAY_F.forEach(function (f) { if (dd[f[0]]) L.push(f[1] + ': ' + dd[f[0]]); });
   });
   var f = drFocus(p.list);
   if (f && (f.best || f.worst)) {
@@ -985,8 +1061,12 @@ function drDaySheet(k) {
     list.forEach(function (e) { l.appendChild(drEnRow(e, true)); });
     b.appendChild(l);
   } else b.appendChild(el('<div class="dr-empty"><b>Nothing on this day</b></div>'));
+  var dd = S.days[k];
+  if (dd) DAY_F.forEach(function (f) { if (!dd[f[0]]) return; var x = el('<div class="dr-end-s"><span class="dr-cap"></span><p class="dr-en-n"></p></div>'); $('.dr-cap', x).textContent = f[1]; $('p', x).textContent = dd[f[0]]; b.appendChild(x); });
+  var end = el('<button type="button" class="dr-btn is-full"></button>'); end.textContent = dd ? 'Edit takeaways' : 'Takeaways';
   var add = el('<button type="button" class="dr-btn is-full">Log one for this day</button>');
-  var s = drSheet({ title: fmtDay(k), body: b, foot: [add] });
+  var s = drSheet({ title: fmtDay(k), body: b, foot: [end, add] });
+  end.addEventListener('click', function () { s.close(); drDaySum(k); });
   add.addEventListener('click', function () {
     s.close();
     var at = parseYmd(k), n = new Date();

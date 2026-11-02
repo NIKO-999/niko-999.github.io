@@ -104,7 +104,7 @@ const t = (d, h, m) => new Date(`${d}T${String(h).padStart(2, '0')}:${String(m |
   ok('ages are read back in brackets', (await page.$$eval('#drAges .dr-br', (r) => r.map((x) => x.dataset.k))).join() === '25–29,40–49');
   ok('with too few behind it, nothing is called best or worst', /Log a few more/.test(await txt(page, '#drFocus')));
   const full = await page.$$eval('#drFull .dr-en', (c) => c.map((x) => [x.querySelector('b').textContent, x.querySelector('.dr-en-f').textContent, x.querySelector('.dr-en-m').textContent, !!x.querySelector('.dr-en-n')].join('/')));
-  ok('home shows every encounter today in full, newest first', full.join('|') === 'No name/Negative/Age 41 · Walking the dog · 4:00pm/false|Maya/Positive/Age 25 · Reading · 4:00pm/false', full);
+  ok('home shows every encounter today in full, first to last', full.join('|') === 'Maya/Positive/Age 25 · Reading · 4:00pm/false|No name/Negative/Age 41 · Walking the dog · 4:00pm/false', full);
   ok('only a positive one is tagged green', await page.$eval('#drFull .dr-en-f.is-pos', (x) => getComputedStyle(x).backgroundColor) === 'rgb(52, 199, 89)' && await page.locator('#drFull .dr-en-f.is-pos').count() === 1);
   ok('negative is never drawn red', await page.$eval('#drHome', (e) => ![...e.querySelectorAll('*')].some((x) => /255, 59, 48|255, 107, 96/.test(getComputedStyle(x).color + getComputedStyle(x).backgroundColor))));
 
@@ -123,7 +123,7 @@ const t = (d, h, m) => new Date(`${d}T${String(h).padStart(2, '0')}:${String(m |
   ok('an encounter can be corrected', st.en[1].f === 1 && st.en[1].n === 'Sam' && st.en.length === 2);
   await page.click('.dr-bar button[data-v="home"]'); await settle(page);
   ok('the note reads in full on home', /Asked about the dog first/.test(await txt(page, '#drFull')));
-  await page.click('#drFull .dr-en'); await settle(page);
+  await page.click('#drFull .dr-en >> nth=1'); await settle(page);
   ok('a card on home opens its encounter', await page.inputValue('#drEnN') === 'Sam');
   await page.keyboard.press('Escape'); await settle(page);
   await page.click('.dr-bar button[data-v="log"]'); await settle(page);
@@ -147,6 +147,18 @@ const t = (d, h, m) => new Date(`${d}T${String(h).padStart(2, '0')}:${String(m |
   await page.click('.dr-bar button[data-v="home"]'); await settle(page);
   ok('a day out yesterday or today keeps the streak; a gap breaks it', (await page.$$eval('#drStats .dr-stat b', (b) => b.map((x) => x.textContent)))[2] === '1');
 
+  /* ── the end of the day ── */
+  ok('the day ends on a press under the last encounter', await page.$eval('#drFull', (w) => w.lastElementChild.id === 'drEndGo') && /End the day/.test(await txt(page, '#drEndGo')));
+  await page.click('#drEndGo'); await settle(page);
+  await page.fill('#drDayK', 'Lead with what they are doing'); await page.fill('#drDayW', 'Rapport with Maya'); await page.fill('#drDayF', '  ');
+  await page.click('#drDayGo'); await settle(page);
+  st = await store(page);
+  ok('takeaways are kept against the day, an empty field dropped', st.days['2026-11-04'] && st.days['2026-11-04'].k === 'Lead with what they are doing' && st.days['2026-11-04'].w === 'Rapport with Maya' && !('f' in st.days['2026-11-04']), st.days);
+  ok('and the day then ends on them instead of the press', await page.locator('#drEndGo').count() === 0 && await page.$eval('#drFull', (w) => w.lastElementChild.id === 'drEnd') && /Key takeaways\s*Lead with what they are doing/i.test(await txt(page, '#drEnd')) && !/Tomorrow/.test(await txt(page, '#drEnd')));
+  await page.click('#drEnd'); await settle(page);
+  ok('pressing them opens them to edit', await page.inputValue('#drDayK') === 'Lead with what they are doing');
+  await page.keyboard.press('Escape'); await settle(page);
+
   /* ── the report ── */
   await page.click('#drRepBtn'); await settle(page);
   ok('the report opens on this week', /This week/.test(await txt(page, '#drRep')) && /3 encounters/.test(await txt(page, '#drRep .dr-rep-hero')));
@@ -156,6 +168,7 @@ const t = (d, h, m) => new Date(`${d}T${String(h).padStart(2, '0')}:${String(m |
   await page.click('#drRepCopy'); await page.waitForTimeout(200);
   const copied = await page.evaluate(() => window.__copied);
   ok('Copy as text carries every encounter and how it went', /2 encounters · 100% positive/.test(copied) && /\+ Maya · 25 · Reading/.test(copied) && /Sam · 41 · Walking the dog · Wed 4 Nov 4:00pm — Asked about the dog first/.test(copied), copied);
+  ok('the takeaways go to the mentor too', /End of day · Wed 4 Nov\nKey takeaways: Lead with what they are doing\nWhat went well: Rapport with Maya/.test(copied) && /Lead with what they are doing/.test(await txt(page, '#drRepDay')), copied);
   ok('nothing scrolls sideways', await sideways(page) <= 0);
   await page.keyboard.press('Escape'); await settle(page);
 
@@ -204,13 +217,13 @@ const t = (d, h, m) => new Date(`${d}T${String(h).padStart(2, '0')}:${String(m |
   await r.c.close();
 
   /* ── a damaged record is repaired, not discarded ── */
-  const bad = { goal: -3, acts: [7, 'Reading'], en: [{ id: 'ok', t: t('2026-11-04', 9), f: 1, n: 'Ok', a: 300 }, { id: 'nof', t: t('2026-11-04', 10) }, { id: 9, t: 1, f: 1 }, { id: 'neg', t: t('2026-11-03', 10), f: -1, act: '  ' }] };
+  const bad = { days: { '2026-11-04': { k: ' keep ', w: 5 }, 'nope': { k: 'x' }, '2026-11-03': { k: '  ' } }, goal: -3, acts: [7, 'Reading'], en: [{ id: 'ok', t: t('2026-11-04', 9), f: 1, n: 'Ok', a: 300 }, { id: 'nof', t: t('2026-11-04', 10) }, { id: 9, t: 1, f: 1 }, { id: 'neg', t: t('2026-11-03', 10), f: -1, act: '  ' }] };
   const d = await ctx(bad);
   ok('a damaged encounter costs itself: two of four survive', await txt(d.page, '#drToday .dr-title') === '1 encounter' && (await d.page.$$eval('#drStats .dr-stat b', (b) => b.map((x) => x.textContent)))[0] === '2');
   await d.page.click('.dr-bar button[data-v="you"]'); await settle(d.page);
   await d.page.fill('#drName', 'R'); await d.page.dispatchEvent('#drName', 'change');
   const fixed = await store(d.page);
-  ok('and the repaired shape is what gets written back', fixed.en.length === 2 && fixed.goal === 5 && fixed.acts.join() === 'Reading' && !fixed.en[0].a && !fixed.en[1].act, fixed);
+  ok('and the repaired shape is what gets written back', fixed.en.length === 2 && fixed.goal === 5 && fixed.acts.join() === 'Reading' && !fixed.en[0].a && !fixed.en[1].act && JSON.stringify(fixed.days) === '{"2026-11-04":{"k":"keep"}}', fixed);
   await d.c.close();
 
   ok('no request leaves the phone', offOrigin.length === 0, offOrigin);
