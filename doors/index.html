@@ -123,6 +123,12 @@ svg { display: block; }
 .dr-step small.is-up { color: var(--win); }
 /* The step to work on is ringed, never reddened: it is a place to
    look, not a mark against you. */
+.dr-feel-fig { display: flex; align-items: baseline; gap: 6px; margin-top: 8px; }
+.dr-feel-fig b { font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
+.dr-feel-fig span { font-size: 13px; color: var(--dim); }
+.dr-feel-bar { display: block; height: 10px; border-radius: 5px; background: var(--card3); overflow: hidden; margin-top: 10px; }
+.dr-feel-bar b { display: block; height: 100%; background: #c9c9ce; border-radius: 5px; }
+.dr-feel-key { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim); margin-top: 6px; }
 .dr-step.is-focus { box-shadow: inset 0 0 0 1.5px var(--ink); }
 .dr-focus { margin-top: 12px; font-size: 13px; line-height: 1.4; color: var(--dim); }
 .dr-focus b { color: var(--ink); font-weight: 600; }
@@ -417,8 +423,9 @@ function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 12); } 
 /* ═══════════ STORE ═══════════ */
 /* A shift is { id, d, a, s, e, k, m }: its date, the area, when it
    started and ended (e is 0 while it is live), the doors as
-   { t, o, r, v, p, n } — time, outcome, reason, value in cents,
-   product, note — and m, the totals of a shift written up afterwards.
+   { t, o, r, f, v, p, n } — time, outcome, reason, how it felt (1
+   positive, -1 negative, absent untagged), value in cents, product,
+   note — and m, the totals of a shift written up afterwards.
    A shift has doors OR totals, never both: one is the record and the
    other is a summary of a record somebody did not keep, and adding them
    would count the same afternoon twice. */
@@ -441,6 +448,7 @@ function drClean(o) {
     } else if (Array.isArray(s.k)) x.k = s.k.filter(function (k) { return k && OUT_N[k.o]; }).map(function (k) {
       var y = { t: +k.t || 0, o: k.o };
       if (k.r && WHY_N[k.r] && k.o !== 'na' && k.o !== 'sa') y.r = k.r;
+      if ((k.f === 1 || k.f === -1) && k.o !== 'na') y.f = k.f;
       if (k.o === 'sa') { y.v = Math.round(num(k.v) || 0); if (typeof k.p === 'string' && k.p) y.p = k.p.slice(0, 40); if (typeof k.n === 'string' && k.n) y.n = k.n.slice(0, 280); }
       return y;
     });
@@ -465,7 +473,7 @@ function drAreas() {
 
 /* ═══════════ THE ARITHMETIC ═══════════ */
 function drCounts(list) {
-  var c = { k: 0, an: 0, pi: 0, cb: 0, sa: 0, rv: 0, ms: 0, sh: 0, why: {}, wins: [] };
+  var c = { k: 0, an: 0, pi: 0, cb: 0, sa: 0, rv: 0, ms: 0, sh: 0, pos: 0, neg: 0, why: {}, wins: [] };
   list.forEach(function (s) {
     c.sh++;
     if (s.m) { c.k += s.m.k; c.an += s.m.an; c.pi += s.m.pi; c.cb += s.m.cb; c.sa += s.m.sa; c.rv += s.m.rv; c.ms += s.m.h * 3600000; return; }
@@ -478,6 +486,7 @@ function drCounts(list) {
       if (k.o === 'cb') c.cb++;
       if (k.o === 'sa') { c.sa++; c.rv += k.v || 0; c.wins.push({ k: k, s: s }); }
       if (k.r) c.why[k.r] = (c.why[k.r] || 0) + 1;
+      if (k.f === 1) c.pos++; else if (k.f === -1) c.neg++;
     });
   });
   return c;
@@ -656,6 +665,7 @@ function drRenderHome() {
   root.appendChild(drStatRow());
   root.appendChild(drFunnelCard());
   var p = drPeriod(funP);
+  var feel = drFeelCard(p.cur); if (feel) root.appendChild(feel);
   var why = drWhyCard(p.cur); if (why) root.appendChild(why);
   var hrs = drHoursCard(); if (hrs) root.appendChild(hrs);
   var ar = drAreasCard(); if (ar) root.appendChild(ar);
@@ -762,6 +772,20 @@ function drFocusLine(c, base) {
   var top = drTopWhy(c, 1)[0];
   if (top && top[1] >= 3) { p.appendChild(document.createTextNode(' Most common no: ')); var b = document.createElement('b'); b.textContent = WHY_N[top[0]].toLowerCase(); p.appendChild(b); p.appendChild(document.createTextNode('.')); }
   return p;
+}
+/* Positive against negative, of the conversations you tagged. NEGATIVE
+   IS THE FLAT NEUTRAL, NEVER RED: a hard door is a fact about the door,
+   and green is spent on the sale. */
+function drFeelCard(c) {
+  var n = c.pos + c.neg;
+  if (!n) return null;
+  var card = el('<div class="dr-card" id="drFeel"><div class="dr-hd"><b>How it felt</b><span class="dr-lab"></span></div><div class="dr-feel-fig"><b class="dr-num"></b><span>positive</span></div><i class="dr-feel-bar"><b></b></i><div class="dr-feel-key"><span></span><span></span></div></div>');
+  $('.dr-hd .dr-lab', card).textContent = n + ' of ' + c.an + ' conversations tagged';
+  $('.dr-feel-fig b', card).textContent = pctTxt(c.pos, n);
+  $('.dr-feel-bar b', card).style.width = (c.pos / n * 100) + '%';
+  var k = $$('.dr-feel-key span', card);
+  k[0].textContent = c.pos + ' positive'; k[1].textContent = c.neg + ' negative';
+  return card;
 }
 function drWhyCard(c) {
   var rows = drTopWhy(c, 5), tot = Object.keys(c.why).reduce(function (a, k) { return a + c.why[k]; }, 0);
@@ -888,6 +912,12 @@ function drPaintShift() {
     var lp = el('<div class="dr-last" id="drLast"><div class="dr-hd"><b></b><button type="button">Undo</button></div></div>');
     $('b', lp).textContent = 'Last door: ' + OUT_N[last.o] + (last.o === 'sa' && last.v ? ' · ' + money(last.v) : '') + ' · ' + fmtTime(last.t);
     $('button', lp).addEventListener('click', function () { sh.k.pop(); drSave(); drPaintShift(); });
+    /* HOW IT FELT is a second question from WHAT HAPPENED. A no can be a
+       good conversation you learn from and a callback can be a door
+       somebody was glad to shut; the outcome cannot say which. Only on a
+       door that opened — there was no interaction at a door nobody
+       answered — and optional, the way the reason is. */
+    if (last.o !== 'na') lp.appendChild(drFeelRow(last));
     if (last.o === 'ni' || last.o === 'pi' || last.o === 'cb') {
       lp.appendChild(drPillRow(WHY, last.r || null, function (r) { if (r) last.r = r; else delete last.r; drSave(); }, 'dr-why'));
     } else if (last.o === 'sa') {
@@ -906,6 +936,20 @@ function drPaintShift() {
     goals.appendChild(x);
   });
   if (S.goal.sa || S.goal.dr) body.appendChild(goals);
+}
+function drFeelRow(k) {
+  var s = el('<div class="dr-seg dr-feel" style="--n:2;margin-top:10px" role="group" aria-label="How it felt"></div>');
+  [[1, 'Positive'], [-1, 'Negative']].forEach(function (o) {
+    var b = el('<button type="button"></button>'); b.textContent = o[1]; b.dataset.f = o[0];
+    b.setAttribute('aria-pressed', k.f === o[0] ? 'true' : 'false');
+    b.addEventListener('click', function () {
+      if (k.f === o[0]) delete k.f; else k.f = o[0];
+      drSave(); buzz(8);
+      $$('button', s).forEach(function (x) { x.setAttribute('aria-pressed', +x.dataset.f === k.f ? 'true' : 'false'); });
+    });
+    s.appendChild(b);
+  });
+  return s;
 }
 function drDoor(k) {
   var sh = drLiveShift(); if (!sh) return;
@@ -1061,6 +1105,11 @@ function drShiftSheet(sh) {
     b.appendChild(l);
   }
   var tg = drTopWhy(c, 3);
+  if (c.pos + c.neg) {
+    var fl = el('<p style="margin:14px 2px 0;color:var(--dim);font-size:13px"></p>');
+    fl.textContent = 'Felt: ' + c.pos + ' positive · ' + c.neg + ' negative';
+    b.appendChild(fl);
+  }
   if (tg.length) {
     var q = el('<p style="margin:14px 2px 0;color:var(--dim);font-size:13px"></p>');
     q.textContent = 'Why not: ' + tg.map(function (r) { return WHY_N[r[0]] + ' ' + r[1]; }).join(' · ');
@@ -1115,7 +1164,7 @@ function drRepCard(p) {
   var kv = el('<div class="dr-kv"></div>');
   var hrs = c.ms / 3600000, areas = drAreaRows(drIn(p.from, p.to));
   [['Doors', String(c.k)], ['Doors / hour', hrs >= 0.25 ? String(Math.round(c.k / hrs)) : '–'], ['Per door', c.rv ? money(Math.round(c.rv / c.k)) : '–'],
-   ['Answered', pctTxt(c.an, c.k)], ['Sales / 100', String(Math.round(c.sa / c.k * 100))], ['Best area', areas[0] && areas[0].sa ? areas[0].a : '–']].forEach(function (x) {
+   ['Positive', c.pos + c.neg ? pctTxt(c.pos, c.pos + c.neg) : '–'], ['Sales / 100', String(Math.round(c.sa / c.k * 100))], ['Best area', areas[0] && areas[0].sa ? areas[0].a : '–']].forEach(function (x) {
     var d = el('<div><span></span><b class="dr-num"></b></div>'); $('span', d).textContent = x[0]; $('b', d).textContent = x[1]; kv.appendChild(d);
   });
   card.appendChild(kv);
@@ -1151,6 +1200,7 @@ function drRepText(p) {
   L.push('Answer ' + pctTxt(c.an, c.k) + ' · Pitch ' + pctTxt(c.pi, c.an) + ' · Close ' + pctTxt(c.sa, c.pi));
   if (c.wins.length) { L.push(''); L.push('Wins:'); c.wins.forEach(function (w) { L.push('• ' + [w.k.p || 'Sale', w.k.v ? money(w.k.v) : '', w.s.a, fmtDay(w.s.d)].filter(Boolean).join(' · ') + (w.k.n ? ' — ' + w.k.n : '')); }); }
   var tw = drTopWhy(c, 3);
+  if (c.pos + c.neg) L.push('Felt positive: ' + pctTxt(c.pos, c.pos + c.neg) + ' (' + c.pos + ' positive, ' + c.neg + ' negative)');
   if (tw.length) { L.push(''); L.push('Why not: ' + tw.map(function (r) { return WHY_N[r[0]] + ' ' + r[1]; }).join(', ')); }
   var foc = drFocus(c, p.base);
   if (foc) { L.push(''); L.push('Working on: ' + foc.st.n.toLowerCase() + ' (' + Math.round(foc.a * 100) + '% vs usual ' + Math.round(foc.b * 100) + '%)'); }

@@ -89,7 +89,16 @@ function shift(id, d, hour, a, per, v) {
   let st = await store(page);
   let live = st.sh[0];
   ok('the reason lands on the last door', live.k[live.k.length - 1].r === 'price' && live.k[live.k.length - 1].o === 'ni', live.k.slice(-1));
-  ok('a door that never opened is never asked why', await page.click('.dr-out[data-o="na"]').then(() => page.locator('#drLast .dr-why').count()) === 0);
+  /* How it felt: on the ni door still on top, both ways and back off. */
+  const feelOf = async () => { const x = await store(page); const k = x.sh[0].k; return k[k.length - 1].f; };
+  await page.click('#drLast .dr-feel button[data-f="-1"]');
+  ok('a conversation can be tagged negative', await feelOf() === -1);
+  await page.click('#drLast .dr-feel button[data-f="-1"]');
+  ok('and pressing it again takes the tag off', await feelOf() === undefined);
+  await page.click('#drLast .dr-feel button[data-f="1"]');
+  ok('or tagged positive', await feelOf() === 1 && await page.getAttribute('#drLast .dr-feel button[data-f="1"]', 'aria-pressed') === 'true');
+  ok('the tag is a 44px target', (await page.$$eval('#drLast .dr-feel button', (b) => b.map((x) => { const r = x.getBoundingClientRect(); return r.height + 10; }))).every((h) => h >= 44));
+  ok('a door that never opened is never asked why, or how it felt', await page.click('.dr-out[data-o="na"]').then(async () => (await page.locator('#drLast .dr-why').count()) + (await page.locator('#drLast .dr-feel').count())) === 0);
   await page.click('#drLast .dr-hd button');
   st = await store(page);
   ok('Undo takes the last door back off', st.sh[0].k.length === 11, st.sh[0].k.length);
@@ -107,6 +116,8 @@ function shift(id, d, hour, a, per, v) {
   const ls = await page.$$eval('#drLiveSt b', (b) => b.map((x) => x.textContent));
   /* 12 doors: 6 na, 3 ni, 1 pi, 1 cb, 1 sa → answered 6/12, pitched 3, sold 1 */
   ok('the live figures are the funnel of that shift', ls.join('|') === '12|50%|33%|$120', ls);
+  await page.click('#drLast .dr-feel button[data-f="-1"]');
+  ok('a sale can be tagged too, and keeps its value', (await store(page)).sh[0].k.slice(-1)[0].f === -1 && (await store(page)).sh[0].k.slice(-1)[0].v === 12000);
   ok('the sale button is the one green thing', await page.$eval('.dr-out.is-sale', (e) => getComputedStyle(e).backgroundColor) === 'rgb(52, 199, 89)');
 
   /* a closed app is not an ended shift */
@@ -128,6 +139,8 @@ function shift(id, d, hour, a, per, v) {
   ok('each step against the one before it', steps.join() === '50%,50%,33%', steps);
   ok('with too little behind it, it does not pretend to know where to improve', /A few more shifts/.test(await page.textContent('#drFocus')));
   ok('the week tile is measured against the same days of last week', (await page.textContent('#drStats .dr-delta')).trim() === '+1');
+  ok('how it felt is read back: one positive, one negative', (await page.textContent('#drFeel .dr-feel-fig b')).trim() === '50%' && /1 positive/.test(await page.textContent('#drFeel')) && /1 negative/.test(await page.textContent('#drFeel')) && /2 of 6 conversations tagged/.test(await page.textContent('#drFeel')));
+  ok('negative is never drawn red', await page.$eval('#drFeel', (e) => ![...e.querySelectorAll('*')].some((x) => /255, 59, 48|52, 199, 89/.test(getComputedStyle(x).color + getComputedStyle(x).backgroundColor))));
   ok('this week counts the sale', (await page.textContent('#drStats .dr-card:first-child b')).trim() === '1');
 
   /* ── the win, on its own screen ── */
@@ -176,7 +189,8 @@ function shift(id, d, hour, a, per, v) {
   ok('Today narrows it to today', /1 sale/.test(await page.textContent('#drRep .dr-rep-hero')));
   await page.click('#drRepCopy'); await page.waitForTimeout(200);
   const txt = await page.evaluate(() => window.__copied);
-  ok('Copy as text carries the funnel and the win', /12 doors → 6 answered → 3 pitched → 1 sold/.test(txt) && /Solar plan · \$150/.test(txt), txt);
+  ok('the report says how it felt', /Positive\s*50%/.test(await page.textContent('#drRep .dr-kv')));
+  ok('Copy as text carries the funnel and the win', /12 doors → 6 answered → 3 pitched → 1 sold/.test(txt) && /Solar plan · \$150/.test(txt) && /Felt positive: 50% \(1 positive, 1 negative\)/.test(txt), txt);
   ok('nothing scrolls sideways', await sideways(page) <= 0);
   await page.keyboard.press('Escape'); await settle(page);
 
