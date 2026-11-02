@@ -34,7 +34,7 @@ const SUITE = [
   'logtest', 'journal', 'bintest', 'snaptest', 'daytest', 'intest',
   'lenstest', 'besttest', 'scratch', 'tiles',
   'checkin', 'habits', 'reminders', 'days', 'jade', 'schedule',
-  'alignment', 'cadence', 'lift',
+  'alignment', 'cadence', 'lift', 'gxt',
   'gauntlet',
 ];
 

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#000000" />
+<title>GXT</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="preload" href="../arc/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin />
+<style>
+@font-face { font-family: 'Inter'; src: url('../arc/fonts/Inter.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+
+/* Lift's palette, so the two read as one family. */
+:root {
+  --bg: #000000;
+  --card: #141417;
+  --card2: #1e1e22;
+  --card3: #2a2a2f;
+  --line: rgba(255, 255, 255, .08);
+  --ink: #f5f5f7;
+  --dim: #a1a1a8;
+  --quiet: #8a8a92;
+  --mark-off: #3a3a40;
+  --good: #34c759;
+  /* THE ONE COLOUR: what puts something on the record, and today. */
+  --log: #ff3b30;
+  --on-ink: #000000;
+  --r: 22px;
+  --r-s: 14px;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  color-scheme: dark;
+}
+
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body {
+  margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink);
+  font: 400 14px/1.35 'Inter', -apple-system, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased; padding: 28px 32px 48px;
+}
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+input, textarea { font: inherit; color: inherit; }
+svg { display: block; }
+.gx-ic { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.gx-num { font-variant-numeric: tabular-nums; }
+
+.gx-wrap { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+.gx-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 0 4px; }
+.gx-head h1 { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -.02em; }
+.gx-head span { color: var(--dim); font-size: 13px; }
+.gx-card { background: var(--card); border-radius: var(--r); padding: 18px; position: relative; min-width: 0; }
+.gx-cap { font-size: 10px; color: var(--dim); letter-spacing: .12em; text-transform: uppercase; font-weight: 600; }
+.gx-hd { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.gx-hd h2 { margin: 0; font-size: 15px; font-weight: 700; }
+
+/* ── the figures ── */
+.gx-stats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; align-items: stretch; }
+.gx-stat { padding: 14px 16px 16px; }
+.gx-stat b { display: block; font-size: 22px; font-weight: 700; letter-spacing: -.01em; margin-top: 8px; }
+.gx-stat span { display: block; font-size: 12px; color: var(--dim); margin-top: 2px; }
+.gx-stat .gx-up { color: var(--good); }
+
+/* ── twelve weeks ── */
+.gx-act { display: flex; align-items: center; gap: 20px; padding-top: 14px; padding-bottom: 14px; }
+.gx-act .gx-grid { display: grid; grid-template-rows: repeat(7, 12px); grid-auto-flow: column; grid-auto-columns: 12px; gap: 4px; }
+.gx-act i { width: 12px; height: 12px; border-radius: 3px; background: var(--card2); }
+.gx-act i.l1 { background: #5a5a62; }
+.gx-act i.l2 { background: #a1a1a8; }
+.gx-act i.l3 { background: var(--ink); }
+.gx-act i.is-now { box-shadow: 0 0 0 1.5px var(--log); }
+.gx-act i.is-ahead { background: transparent; }
+.gx-act-t { flex: 1; min-width: 0; }
+.gx-act-t b { display: block; font-size: 15px; font-weight: 700; margin-top: 4px; }
+.gx-act-t span { color: var(--dim); font-size: 12.5px; }
+
+/* Side by side is the same box: the two columns stretch to one height. */
+.gx-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: stretch; }
+/* The checklist sets the row's height and the log scrolls inside it:
+   a log that grew the page left the checklist on 600px of nothing.
+   height 0 with a 100% floor is what lets a grid item take its row's
+   height without contributing to it. */
+.gx-logcard { display: flex; flex-direction: column; height: 0; min-height: 100%; }
+.gx-logcard .gx-log { flex: 1; min-height: 0; overflow-y: auto; margin: 0 -8px -8px; padding: 0 8px 8px; }
+
+/* ── the checklist ── */
+.gx-seg { display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); background: var(--card2); border-radius: 999px; padding: 3px; }
+.gx-seg button { height: 34px; border-radius: 999px; color: var(--dim); font-weight: 600; font-size: 13px; }
+.gx-seg button[aria-pressed="true"] { background: var(--card3); color: var(--ink); }
+.gx-top { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-bottom: 6px; }
+.gx-field {
+  width: 100%; height: 40px; border-radius: 12px; background: var(--card2); border: 1px solid transparent;
+  padding: 0 12px; font-size: 14px; outline: none;
+}
+.gx-field:focus { border-color: rgba(255,255,255,.25); }
+.gx-steps { list-style: none; margin: 0; padding: 0; }
+.gx-step { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; padding: 13px 0; border-top: 1px solid var(--line); }
+.gx-step:first-child { border-top: 0; }
+.gx-n { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: var(--quiet); background: var(--card2); margin-top: 1px; }
+.gx-step.is-met .gx-n { background: var(--ink); color: var(--on-ink); }
+.gx-step b { display: block; font-size: 13.5px; font-weight: 600; }
+.gx-step small { display: block; color: var(--dim); font-size: 12px; margin: 2px 0 9px; }
+.gx-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.gx-pill { min-height: 32px; padding: 0 13px; border-radius: 999px; background: var(--card2); color: var(--dim); font-size: 12.5px; font-weight: 500; }
+.gx-pill:hover { color: var(--ink); }
+.gx-pill[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
+.gx-out { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 10px; padding-top: 14px; border-top: 1px solid var(--line); }
+.gx-note { width: 100%; min-height: 60px; height: 60px; resize: vertical; border-radius: 12px; background: var(--card2); border: 1px solid transparent; padding: 10px 12px; font-size: 13.5px; outline: none; margin-top: 10px; display: block; }
+.gx-note:focus { border-color: rgba(255,255,255,.25); }
+.gx-ft { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.gx-score { flex: 1; color: var(--dim); font-size: 12.5px; }
+.gx-score b { color: var(--ink); }
+.gx-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 18px; border-radius: 999px; background: var(--card2); font-weight: 600; font-size: 13.5px; }
+.gx-btn.is-log { background: var(--log); color: #fff; }
+.gx-btn.is-bad { color: var(--log); }
+.gx-btn:disabled { opacity: .35; cursor: default; }
+
+/* ── the log ── */
+.gx-log { display: flex; flex-direction: column; }
+.gx-li { display: grid; grid-template-columns: 62px 44px minmax(0, 1fr) 66px 56px; align-items: center; gap: 10px; min-height: 48px; padding: 6px 8px; border-radius: 12px; width: 100%; text-align: left; }
+.gx-li:hover { background: var(--card2); }
+.gx-li.is-on { background: var(--card2); box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); }
+.gx-li .gx-d { color: var(--dim); font-size: 12.5px; }
+.gx-tag { font-size: 10px; font-weight: 700; letter-spacing: .06em; color: var(--dim); background: var(--card3); border-radius: 6px; padding: 3px 0; text-align: center; }
+.gx-tag.is-live { color: var(--ink); background: #3a1613; }
+.gx-li .gx-w { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.gx-li .gx-w em { font-style: normal; color: var(--dim); }
+.gx-dots { display: flex; gap: 4px; }
+.gx-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--mark-off); }
+.gx-dots i.is-on { background: var(--ink); }
+.gx-li .gx-r { text-align: right; font-weight: 600; font-size: 13px; }
+.gx-r.is-win { color: var(--good); }
+.gx-r.is-be { color: var(--dim); }
+.gx-empty { color: var(--dim); text-align: center; padding: 40px 16px; font-size: 13px; }
+.gx-empty b { display: block; color: var(--ink); margin-bottom: 4px; }
+.gx-more { align-self: center; margin-top: 8px; color: var(--dim); font-size: 12.5px; min-height: 36px; padding: 0 14px; }
+
+.gx-toast {
+  position: fixed; left: 50%; bottom: 28px; z-index: 60; transform: translate(-50%, 12px); opacity: 0;
+  display: flex; align-items: center; gap: 14px; padding: 0 6px 0 18px; min-height: 46px; border-radius: 16px; width: max-content;
+  background: #2c2c30; box-shadow: 0 10px 30px rgba(0,0,0,.5); transition: opacity .2s, transform .2s var(--ease); font-size: 13.5px; font-weight: 500;
+}
+.gx-toast.is-up { opacity: 1; transform: translate(-50%, 0); }
+.gx-toast.is-bare { padding-right: 18px; }
+.gx-toast button { min-height: 40px; padding: 0 12px; font-weight: 700; }
+
+/* Desktop first; a narrow window stacks rather than squeezing. */
+@media (max-width: 980px) {
+  .gx-cols { grid-template-columns: minmax(0, 1fr); }
+  .gx-logcard { height: auto; min-height: 0; }
+  .gx-logcard .gx-log { max-height: 70vh; }
+  .gx-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0s !important; }
+}
+</style>
+</head>
+<body>
+<div class="gx-wrap">
+  <header class="gx-head"><h1>GXT</h1><span id="gxDate"></span></header>
+
+  <div class="gx-stats" id="gxStats"></div>
+
+  <section class="gx-card gx-act" aria-label="Last twelve weeks">
+    <div class="gx-act-t"><div class="gx-cap">Last 12 weeks</div><b id="gxActN"></b><span id="gxActS"></span></div>
+    <div class="gx-grid" id="gxGrid" aria-hidden="true"></div>
+  </section>
+
+  <div class="gx-cols">
+    <section class="gx-card" aria-labelledby="gxFormH">
+      <div class="gx-hd"><h2 id="gxFormH">New entry</h2><button type="button" class="gx-btn" id="gxCancel" hidden>Cancel</button></div>
+      <div class="gx-top">
+        <div class="gx-seg" id="gxType" role="group" aria-label="Kind"><button type="button" data-v="bt">Backtest</button><button type="button" data-v="live">Live trade</button></div>
+        <div class="gx-seg" id="gxSym" role="group" aria-label="Instrument"><button type="button" data-v="NQ">NQ</button><button type="button" data-v="MES">MES</button></div>
+        <input class="gx-field gx-num" id="gxD" type="date" aria-label="Date" />
+      </div>
+      <ol class="gx-steps" id="gxSteps"></ol>
+      <div class="gx-out">
+        <div class="gx-seg" id="gxRes" role="group" aria-label="Result" style="--n:3"><button type="button" data-v="w">Win</button><button type="button" data-v="l">Loss</button><button type="button" data-v="be">Breakeven</button></div>
+        <input class="gx-field gx-num" id="gxR" type="number" step="0.1" placeholder="R" aria-label="R multiple" />
+      </div>
+      <textarea class="gx-note" id="gxNote" placeholder="Notes" aria-label="Notes" maxlength="600"></textarea>
+      <div class="gx-ft">
+        <div class="gx-score" id="gxScore"></div>
+        <button type="button" class="gx-btn is-bad" id="gxDel" hidden>Delete</button>
+        <button type="button" class="gx-btn is-log" id="gxSave"></button>
+      </div>
+    </section>
+
+    <section class="gx-card gx-logcard" aria-labelledby="gxLogH">
+      <div class="gx-hd"><h2 id="gxLogH">Log</h2><div class="gx-seg" id="gxFilt" role="group" aria-label="Show" style="--n:3;min-width:270px"></div></div>
+      <div class="gx-log" id="gxLog"></div>
+    </section>
+  </div>
+</div>
+<div class="gx-toast" id="gxToast" role="status" aria-live="polite"><span></span><button type="button" hidden>Undo</button></div>
+
+<script>
+(function () {
+'use strict';
+
+/* ═══════════════════════════════════════════════════════════════
+   GXT — a backtest and trade journal for one model, and nothing else.
+
+   The checklist IS the model: daily bias, the 4H level it ran into,
+   an SMT on the 4H or higher, a second on the 1H or 30m, then a
+   V-shaped CISD away from it. Every entry records which of the five
+   held, so the figures can say whether the full checklist is what wins.
+
+   Everything lives in this browser under gxt.v1 and is never sent
+   anywhere. No network request, no account.
+   ═══════════════════════════════════════════════════════════════ */
+
+var KEY = 'gxt.v1';
+var BIN_DAYS = 30;
+
+/* The five, in order. `ok` decides whether a step counts as met off
+   the entry, so the score is worked out and never stored — it cannot
+   disagree with the answers it is a score of. */
+var STEPS = [
+  { k: 'bias', n: 'Daily bias', s: 'Which way the daily is drawing.', one: true,
+    o: [['long', 'Long'], ['short', 'Short']], ok: function (e) { return !!e.bias; } },
+  { k: 'lv', n: '4H key level', s: 'What price ran into before the turn.',
+    o: [['dh', 'Daily high'], ['dl', 'Daily low'], ['h4h', '4H high'], ['h4l', '4H low'], ['gap', '4H gap']],
+    ok: function (e) { return e.lv.length > 0; } },
+  { k: 's1', n: 'SMT · stage one', s: 'On the 4H or above.', one: true,
+    o: [['w', 'Weekly'], ['d', 'Daily'], ['4h', '4H']], ok: function (e) { return !!e.s1; } },
+  { k: 's2', n: 'SMT · stage two', s: 'On the 1H or 30m.', one: true,
+    o: [['1h', '1H'], ['30m', '30m']], ok: function (e) { return !!e.s2; } },
+  { k: 'cisd', n: 'V-shaped CISD', s: 'Away from the SMT.', one: true,
+    o: [['y', 'Confirmed']], ok: function (e) { return e.cisd === 'y'; } }
+];
+var OPT = {}; STEPS.forEach(function (s) { OPT[s.k] = s.o.map(function (o) { return o[0]; }); });
+var SYMS = ['NQ', 'MES'];
+
+function gxScore(e) { return STEPS.filter(function (s) { return s.ok(e); }).length; }
+function gxFull(e) { return gxScore(e) === STEPS.length; }
+
+/* ── dates, local, never UTC ── */
+function gxPad(n) { return (n < 10 ? '0' : '') + n; }
+function gxISO(d) { return d.getFullYear() + '-' + gxPad(d.getMonth() + 1) + '-' + gxPad(d.getDate()); }
+function gxToday() { return gxISO(new Date()); }
+function gxParse(iso) { var p = iso.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+function gxShort(iso) { return gxParse(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short' }); }
+
+/* ── the store ── */
+/* A damaged entry costs itself and never the record: the entries are
+   the half you cannot get back. The repair is written back on the way
+   in, or it is redone every open and lost the moment anything writes. */
+function gxClean(raw) {
+  var e = raw && typeof raw === 'object' ? raw : null;
+  if (!e || typeof e.id !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(e.d)) return null;
+  var one = function (k) { return OPT[k].indexOf(e[k]) >= 0 ? e[k] : ''; };
+  var r = parseFloat(e.r);
+  return {
+    id: e.id, t: e.t === 'live' ? 'live' : 'bt', d: e.d, at: +e.at || Date.now(),
+    sym: SYMS.indexOf(e.sym) >= 0 ? e.sym : '',
+    bias: one('bias'), s1: one('s1'), s2: one('s2'), cisd: one('cisd'),
+    lv: Array.isArray(e.lv) ? e.lv.filter(function (x, i, a) { return OPT.lv.indexOf(x) >= 0 && a.indexOf(x) === i; }) : [],
+    res: ['w', 'l', 'be'].indexOf(e.res) >= 0 ? e.res : '',
+    r: isFinite(r) ? Math.round(r * 100) / 100 : null,
+    note: typeof e.note === 'string' ? e.note.slice(0, 600) : '',
+    del: +e.del || 0
+  };
+}
+function gxLoad() {
+  var raw = null;
+  try { raw = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (_) { raw = null; }
+  var src = raw && Array.isArray(raw.e) ? raw.e : [];
+  var cut = Date.now() - BIN_DAYS * 864e5;
+  var out = src.map(gxClean).filter(function (e) { return e && !(e.del && e.del < cut); });
+  var st = { v: 1, e: out, last: { t: raw && raw.last && raw.last.t === 'live' ? 'live' : 'bt', sym: raw && raw.last && SYMS.indexOf(raw.last.sym) >= 0 ? raw.last.sym : 'NQ' } };
+  if (raw && JSON.stringify(raw) !== JSON.stringify(st)) gxWrite(st);
+  return st;
+}
+function gxWrite(st) { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (_) {} }
+
+var S = gxLoad();
+var live = function () { return S.e.filter(function (e) { return !e.del; }); };
+
+/* ── the form ── */
+var blank = function () {
+  return { id: '', t: S.last.t, sym: S.last.sym, d: gxToday(), bias: '', lv: [], s1: '', s2: '', cisd: '', res: '', r: null, note: '' };
+};
+var F = blank();
+var editing = false;
+var $ = function (id) { return document.getElementById(id); };
+
+function gxSeg(el, val) {
+  [].forEach.call(el.children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.v === val)); });
+}
+
+function gxPaintSteps() {
+  var ol = $('gxSteps'); ol.textContent = '';
+  STEPS.forEach(function (s, i) {
+    var li = document.createElement('li'); li.className = 'gx-step' + (s.ok(F) ? ' is-met' : ''); li.dataset.k = s.k;
+    li.innerHTML = '<span class="gx-n">' + (i + 1) + '</span><div><b></b><small></small><div class="gx-pills" role="group"></div></div>';
+    li.querySelector('b').textContent = s.n;
+    li.querySelector('small').textContent = s.s;
+    var row = li.querySelector('.gx-pills'); row.setAttribute('aria-label', s.n);
+    s.o.forEach(function (o) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'gx-pill'; b.dataset.v = o[0]; b.textContent = o[1];
+      var on = s.one ? F[s.k] === o[0] : F.lv.indexOf(o[0]) >= 0;
+      b.setAttribute('aria-pressed', String(on));
+      b.addEventListener('click', function () {
+        if (s.one) F[s.k] = F[s.k] === o[0] ? '' : o[0];
+        else { var at = F.lv.indexOf(o[0]); if (at >= 0) F.lv.splice(at, 1); else F.lv.push(o[0]); }
+        gxPaintForm();
+      });
+      row.appendChild(b);
+    });
+    ol.appendChild(li);
+  });
+}
+
+function gxPaintForm() {
+  gxSeg($('gxType'), F.t); gxSeg($('gxSym'), F.sym); gxSeg($('gxRes'), F.res);
+  $('gxD').value = F.d;
+  if (document.activeElement !== $('gxR')) $('gxR').value = F.r == null ? '' : F.r;
+  if (document.activeElement !== $('gxNote')) $('gxNote').value = F.note;
+  gxPaintSteps();
+  var n = gxScore(F);
+  $('gxScore').innerHTML = '<b class="gx-num">' + n + ' / ' + STEPS.length + '</b> ' + (n === STEPS.length ? '· full checklist' : 'met');
+  $('gxFormH').textContent = editing ? 'Editing ' + (F.t === 'live' ? 'trade' : 'backtest') : 'New entry';
+  $('gxSave').textContent = editing ? 'Save' : (F.t === 'live' ? 'Log trade' : 'Log backtest');
+  $('gxSave').disabled = !F.bias;
+  $('gxCancel').hidden = !editing;
+  $('gxDel').hidden = !editing;
+}
+
+function gxReset() { F = blank(); editing = false; gxPaintForm(); gxPaintLog(); }
+
+[['gxType', 't'], ['gxSym', 'sym'], ['gxRes', 'res']].forEach(function (p) {
+  $(p[0]).addEventListener('click', function (ev) {
+    var b = ev.target.closest('button'); if (!b) return;
+    F[p[1]] = p[1] === 'res' && F.res === b.dataset.v ? '' : b.dataset.v;
+    gxPaintForm();
+  });
+});
+$('gxD').addEventListener('change', function () { if (/^\d{4}-\d{2}-\d{2}$/.test(this.value)) F.d = this.value; });
+$('gxR').addEventListener('input', function () { var v = parseFloat(this.value); F.r = isFinite(v) ? v : null; });
+$('gxNote').addEventListener('input', function () { F.note = this.value; });
+$('gxCancel').addEventListener('click', gxReset);
+
+$('gxSave').addEventListener('click', function () {
+  if (!F.bias) return;
+  var e = gxClean({ id: F.id || 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), t: F.t, d: F.d, at: F.at,
+    sym: F.sym, bias: F.bias, lv: F.lv, s1: F.s1, s2: F.s2, cisd: F.cisd, res: F.res, r: F.r, note: F.note.trim() });
+  var at = S.e.findIndex(function (x) { return x.id === e.id; });
+  if (at >= 0) S.e[at] = e; else S.e.push(e);
+  S.last = { t: e.t, sym: e.sym || S.last.sym };
+  gxWrite(S);
+  var was = editing;
+  gxReset(); gxPaintAll();
+  gxToast(was ? 'Saved' : (e.t === 'live' ? 'Trade logged' : 'Backtest logged'));
+});
+
+/* Nothing deletes without a way back: a removal goes to the bin for
+   thirty days, and the toast is the one-press way back. */
+$('gxDel').addEventListener('click', function () {
+  var e = S.e.find(function (x) { return x.id === F.id; }); if (!e) return;
+  e.del = Date.now(); gxWrite(S); gxReset(); gxPaintAll();
+  gxToast('Moved to the bin', function () { e.del = 0; gxWrite(S); gxPaintAll(); });
+});
+
+/* ── the log ── */
+var filt = 'all';
+var shown = 40;
+function gxPaintLog() {
+  var binN = S.e.filter(function (e) { return e.del; }).length;
+  if (filt === 'bin' && !binN) filt = 'all';
+  var fl = $('gxFilt'); fl.textContent = '';
+  var opts = [['all', 'All'], ['bt', 'Backtests'], ['live', 'Live']];
+  if (binN) opts.push(['bin', 'Bin']);
+  fl.style.setProperty('--n', opts.length);
+  opts.forEach(function (o) {
+    var b = document.createElement('button'); b.type = 'button'; b.dataset.v = o[0]; b.textContent = o[1];
+    b.setAttribute('aria-pressed', String(filt === o[0]));
+    b.addEventListener('click', function () { filt = o[0]; shown = 40; gxPaintLog(); });
+    fl.appendChild(b);
+  });
+  var list = S.e.filter(function (e) { return filt === 'bin' ? e.del : !e.del && (filt === 'all' || e.t === filt); })
+    .sort(function (a, b) { return b.d < a.d ? -1 : b.d > a.d ? 1 : b.at - a.at; });
+  var box = $('gxLog'); box.textContent = '';
+  if (!list.length) {
+    box.innerHTML = filt === 'all' ? '<div class="gx-empty"><b>Nothing logged yet</b>Run the checklist on the left.</div>' : '<div class="gx-empty">Nothing here.</div>';
+    return;
+  }
+  list.slice(0, shown).forEach(function (e) {
+    var b = document.createElement('button'); b.type = 'button';
+    b.className = 'gx-li' + (editing && F.id === e.id ? ' is-on' : ''); b.dataset.id = e.id;
+    var r = e.r == null ? (e.res === 'w' ? 'Win' : e.res === 'l' ? 'Loss' : e.res === 'be' ? 'BE' : '—') : (e.r > 0 ? '+' : '') + e.r + 'R';
+    var dots = STEPS.map(function (s) { return '<i' + (s.ok(e) ? ' class="is-on"' : '') + '></i>'; }).join('');
+    b.innerHTML = '<span class="gx-d gx-num"></span><span class="gx-tag' + (e.t === 'live' ? ' is-live' : '') + '">' + (e.t === 'live' ? 'LIVE' : 'BT') + '</span>'
+      + '<span class="gx-w"></span><span class="gx-dots" aria-hidden="true">' + dots + '</span>'
+      + '<span class="gx-r gx-num' + (e.res === 'w' ? ' is-win' : e.res === 'be' ? ' is-be' : '') + '"></span>';
+    b.querySelector('.gx-d').textContent = gxShort(e.d);
+    var w = b.querySelector('.gx-w');
+    w.textContent = (e.sym ? e.sym + ' ' : '') + (e.bias === 'long' ? 'Long' : 'Short');
+    if (e.note) { var em = document.createElement('em'); em.textContent = ' · ' + e.note.split('\n')[0]; w.appendChild(em); }
+    b.querySelector('.gx-r').textContent = r;
+    b.setAttribute('aria-label', gxShort(e.d) + ', ' + (e.t === 'live' ? 'live trade' : 'backtest') + ', ' + w.textContent + ', ' + gxScore(e) + ' of 5, ' + r);
+    b.addEventListener('click', function () {
+      if (e.del) {
+        e.del = 0; gxWrite(S); gxPaintAll(); gxToast('Restored');
+        return;
+      }
+      F = JSON.parse(JSON.stringify(e)); editing = true; gxPaintForm(); gxPaintLog();
+    });
+    box.appendChild(b);
+  });
+  if (list.length > shown) {
+    var m = document.createElement('button'); m.type = 'button'; m.className = 'gx-more';
+    m.textContent = 'Show ' + Math.min(40, list.length - shown) + ' more';
+    m.addEventListener('click', function () { shown += 40; gxPaintLog(); });
+    box.appendChild(m);
+  }
+}
+
+/* ── the figures ── */
+function gxWeekStart(d) { var x = new Date(d); x.setHours(0, 0, 0, 0); x.setDate(x.getDate() - (x.getDay() + 6) % 7); return x; }
+function gxRate(list) {
+  var dec = list.filter(function (e) { return e.res === 'w' || e.res === 'l'; });
+  if (!dec.length) return null;
+  return Math.round(100 * dec.filter(function (e) { return e.res === 'w'; }).length / dec.length);
+}
+function gxPaintStats() {
+  var L = live();
+  var wk = gxISO(gxWeekStart(new Date()));
+  var bt = L.filter(function (e) { return e.t === 'bt'; });
+  var lv = L.filter(function (e) { return e.t === 'live'; });
+  var thisWk = L.filter(function (e) { return gxISO(new Date(e.at)) >= wk; });
+  var rs = L.filter(function (e) { return e.r != null; });
+  var avg = rs.length ? rs.reduce(function (a, e) { return a + e.r; }, 0) / rs.length : null;
+  var full = L.filter(gxFull);
+  var all = gxRate(L), fr = gxRate(full);
+  var tiles = [
+    ['bt', 'Backtests', bt.length, bt.filter(function (e) { return gxISO(new Date(e.at)) >= wk; }).length + ' this week'],
+    ['live', 'Trades journaled', lv.length, lv.filter(function (e) { return gxISO(new Date(e.at)) >= wk; }).length + ' this week'],
+    ['wk', 'This week', thisWk.length, 'entries since Monday'],
+    ['wr', 'Win rate', all == null ? '—' : all + '%', 'wins and losses only'],
+    ['r', 'Average R', avg == null ? '—' : (avg > 0 ? '+' : '') + avg.toFixed(2), rs.length + ' with an R'],
+    ['full', 'Full checklist', fr == null ? '—' : fr + '%', full.length + ' of ' + L.length + ' met all five']
+  ];
+  var box = $('gxStats'); box.textContent = '';
+  tiles.forEach(function (t) {
+    var d = document.createElement('div'); d.className = 'gx-card gx-stat'; d.dataset.s = t[0];
+    d.innerHTML = '<div class="gx-cap"></div><b class="gx-num"></b><span></span>';
+    d.querySelector('.gx-cap').textContent = t[1];
+    d.querySelector('b').textContent = t[2];
+    d.querySelector('span').textContent = t[3];
+    /* The one comparison worth a colour: the full checklist beating the
+       record as a whole is the claim the model is making. */
+    if (t[0] === 'full' && fr != null && all != null && fr > all) d.querySelector('b').classList.add('gx-up');
+    box.appendChild(d);
+  });
+}
+
+/* Twelve weeks, Monday-first columns, shaded by how many entries you
+   made that day — by when you did the work, not the chart's date, since
+   the question is how often you are sitting down to backtest. */
+function gxPaintAct() {
+  var per = {};
+  live().forEach(function (e) { var k = gxISO(new Date(e.at)); per[k] = (per[k] || 0) + 1; });
+  var today = gxToday();
+  var start = gxWeekStart(new Date()); start.setDate(start.getDate() - 77);
+  var g = $('gxGrid'); g.textContent = '';
+  var days = 0, n = 0;
+  for (var i = 0; i < 84; i++) {
+    var d = new Date(start); d.setDate(start.getDate() + i);
+    var k = gxISO(d), c = per[k] || 0;
+    var cell = document.createElement('i'); cell.dataset.d = k; cell.dataset.c = c;
+    if (k > today) cell.className = 'is-ahead';
+    else {
+      if (c) { days++; n += c; cell.className = c >= 4 ? 'l3' : c >= 2 ? 'l2' : 'l1'; }
+      if (k === today) cell.classList.add('is-now');
+    }
+    g.appendChild(cell);
+  }
+  $('gxActN').textContent = days + (days === 1 ? ' day' : ' days') + ' at the charts';
+  $('gxActS').textContent = n + (n === 1 ? ' entry' : ' entries') + ' in twelve weeks';
+}
+
+function gxPaintAll() {
+  $('gxDate').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+  gxPaintStats(); gxPaintAct(); gxPaintLog();
+}
+
+/* ── the toast ── */
+var toastT = null;
+function gxToast(msg, undo) {
+  var t = $('gxToast'), b = t.querySelector('button');
+  t.querySelector('span').textContent = msg;
+  b.hidden = !undo; t.classList.toggle('is-bare', !undo);
+  b.onclick = undo ? function () { undo(); t.classList.remove('is-up'); } : null;
+  t.classList.add('is-up'); clearTimeout(toastT);
+  toastT = setTimeout(function () { t.classList.remove('is-up'); }, undo ? 6000 : 2200);
+}
+
+document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && editing) gxReset(); });
+
+gxPaintForm();
+gxPaintAll();
+})();
+</script>
+</body>
+</html>
