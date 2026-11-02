@@ -148,13 +148,13 @@ const t = (d, h, m) => new Date(`${d}T${String(h).padStart(2, '0')}:${String(m |
   ok('a day out yesterday or today keeps the streak; a gap breaks it', (await page.$$eval('#drStats .dr-stat b', (b) => b.map((x) => x.textContent)))[2] === '1');
 
   /* ── the end of the day ── */
-  ok('the day ends on a press under the last encounter', await page.$eval('#drFull', (w) => w.lastElementChild.id === 'drEndGo') && /End the day/.test(await txt(page, '#drEndGo')));
+  ok('the day ends on a press under the last encounter', await page.$eval('#drFull', (w) => w.lastElementChild.previousElementSibling.id === 'drEndGo') && /End the day/.test(await txt(page, '#drEndGo')));
   await page.click('#drEndGo'); await settle(page);
   await page.fill('#drDayK', 'Lead with what they are doing'); await page.fill('#drDayW', 'Rapport with Maya'); await page.fill('#drDayF', '  ');
   await page.click('#drDayGo'); await settle(page);
   st = await store(page);
   ok('takeaways are kept against the day, an empty field dropped', st.days['2026-11-04'] && st.days['2026-11-04'].k === 'Lead with what they are doing' && st.days['2026-11-04'].w === 'Rapport with Maya' && !('f' in st.days['2026-11-04']), st.days);
-  ok('and the day then ends on them instead of the press', await page.locator('#drEndGo').count() === 0 && await page.$eval('#drFull', (w) => w.lastElementChild.id === 'drEnd') && /Key takeaways\s*Lead with what they are doing/i.test(await txt(page, '#drEnd')) && !/Tomorrow/.test(await txt(page, '#drEnd')));
+  ok('and the day then ends on them instead of the press', await page.locator('#drEndGo').count() === 0 && await page.$eval('#drFull', (w) => w.lastElementChild.previousElementSibling.id === 'drEnd') && /Key takeaways\s*Lead with what they are doing/i.test(await txt(page, '#drEnd')) && !/Tomorrow/.test(await txt(page, '#drEnd')));
   await page.click('#drEnd'); await settle(page);
   ok('pressing them opens them to edit', await page.inputValue('#drDayK') === 'Lead with what they are doing');
   await page.keyboard.press('Escape'); await settle(page);
@@ -167,8 +167,8 @@ const t = (d, h, m) => new Date(`${d}T${String(h).padStart(2, '0')}:${String(m |
   ok('Today narrows it to today', /2 encounters/.test(await txt(page, '#drRep .dr-rep-hero')) && /100% positive/.test(await txt(page, '#drRep .dr-rep-hero')));
   await page.click('#drRepCopy'); await page.waitForTimeout(200);
   const copied = await page.evaluate(() => window.__copied);
-  ok('Copy as text carries every encounter and how it went', /2 encounters · 100% positive/.test(copied) && /\+ Maya · 25 · Reading/.test(copied) && /Sam · 41 · Walking the dog · Wed 4 Nov 4:00pm — Asked about the dog first/.test(copied), copied);
-  ok('the takeaways go to the mentor too', /End of day · Wed 4 Nov\nKey takeaways: Lead with what they are doing\nWhat went well: Rapport with Maya/.test(copied) && /Lead with what they are doing/.test(await txt(page, '#drRepDay')), copied);
+  ok('Copy as text carries every encounter and how it went, first to last', /2 encounters · 2 positive · 0 negative \(100% positive\)/.test(copied) && /\n1\. .* · Maya, age 25, Reading · Positive/.test(copied) && /\n2\. 4:00pm · Sam, age 41, Walking the dog · Positive\n   Asked about the dog first/.test(copied), copied);
+  ok('the takeaways go to the mentor too', /END OF DAY\nKey takeaways: Lead with what they are doing\nWhat went well: Rapport with Maya/.test(copied) && /Lead with what they are doing/.test(await txt(page, '#drRepDay')), copied);
   ok('nothing scrolls sideways', await sideways(page) <= 0);
   await page.keyboard.press('Escape'); await settle(page);
 
@@ -207,8 +207,14 @@ const t = (d, h, m) => new Date(`${d}T${String(h).padStart(2, '0')}:${String(m |
   ok('the report counts closes, sales and the close rate', kv === '2|$1,550.50|50%', kv);
   await page.click('#drRepCopy'); await page.waitForTimeout(200);
   const copied2 = await page.evaluate(() => window.__copied);
-  ok('and so does the copied text', /2 closes · \$1,550\.50 in sales/.test(copied2) && /Lee · .*closed \$1,250\.50/.test(copied2), copied2);
+  ok('and so does the copied text', /2 closes · \$1,550\.50 in sales · 50% close rate/.test(copied2) && /Lee · Positive · Closed \$1,250\.50/.test(copied2), copied2);
+  ok('the copied day says how it went against each goal', /Goals: Encounters 4 \/ 8 · Closes 2 \/ 2 \(hit\) · Sales \$1,550\.50 \/ \$500 \(hit\)/.test(copied2), copied2);
   await page.keyboard.press('Escape'); await settle(page);
+  await page.evaluate(() => { window.__copied = null; });
+  ok('the day on Home ends on a press that copies it', await page.$eval('#drFull', (w) => w.lastElementChild.id === 'drDayCopy'));
+  await page.click('#drDayCopy'); await page.waitForTimeout(200);
+  const copied3 = await page.evaluate(() => window.__copied);
+  ok('and it copies the same day the report does, name and takeaways included', copied3 === copied2 && /^Niko · Today, Wed 4 Nov/.test(copied3) && /END OF DAY/.test(copied3), copied3);
   await c.close();
 
   /* ── where you do well and what to work on ── */

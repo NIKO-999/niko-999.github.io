@@ -110,6 +110,7 @@ svg { display: block; }
 .dr-end-s { margin-top: 12px; }
 .dr-end-s .dr-en-n { margin-top: 4px; }
 .dr-end-go { margin-top: 2px; }
+.dr-day-copy { margin-top: 10px; }
 .dr-en-n { margin: 10px 0 0; font-size: 14.5px; line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; }
 
 /* ── stat tiles ── */
@@ -773,6 +774,9 @@ function drFullCards() {
     wrap.appendChild(c);
   });
   wrap.appendChild(drDayEnd(k));
+  var cp = el('<button type="button" class="dr-btn is-full dr-day-copy" id="drDayCopy">Copy the day for your mentor</button>');
+  cp.addEventListener('click', function () { drCopyText(drDayText(k), 'Day copied, paste it in a message'); });
+  wrap.appendChild(cp);
   return wrap;
 }
 /* The day's last card. Not written yet, it is the one press that ends the
@@ -939,10 +943,7 @@ function drReport(p) {
   }
   paint();
   copy.addEventListener('click', function () {
-    var txt = drRepText(drPeriod(repP));
-    var done = function () { drToast('Report copied'); };
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, function () { drShowText(txt); });
-    else drShowText(txt);
+    drCopyText(repP === 'today' ? drDayText(ymd(today())) : drRepText(drPeriod(repP)), 'Report copied');
   });
   return s;
 }
@@ -1019,6 +1020,47 @@ function drRepText(p) {
     if (f.worst) L.push('Working on people ' + drGroupName(f.worst) + ': ' + f.worst.pos + ' of ' + f.worst.n + ' vs ' + Math.round(f.base * 100) + '% overall');
   }
   return L.join('\n');
+}
+/* ONE DAY AS A MESSAGE. Everything the screen shows, in the order it
+   happened, so it pastes into a text and reads without the app: the
+   figures against the goals, every encounter with its note, and the
+   takeaways last. Written for somebody reading it once, not for a
+   spreadsheet. */
+function drDayText(k) {
+  var list = drOn(k).slice().sort(function (a, b) { return a.t - b.t; }), c = drCounts(list), d = S.days[k], L = [];
+  L.push((S.name ? S.name + ' · ' : '') + (k === ymd(today()) ? 'Today, ' : '') + fmtDay(k));
+  L.push('');
+  if (!c.n) L.push('No encounters logged.');
+  else {
+    L.push(c.n + (c.n === 1 ? ' encounter' : ' encounters') + ' · ' + c.pos + ' positive · ' + c.neg + ' negative (' + pctTxt(c.pos, c.n) + ' positive)');
+    L.push(c.cl + (c.cl === 1 ? ' close' : ' closes') + ' · ' + money(c.amt) + ' in sales' + (c.cl ? ' · ' + pctTxt(c.cl, c.n) + ' close rate' : ''));
+  }
+  var g = [['Encounters', c.n, S.goal, String], ['Closes', c.cl, S.gc, String], ['Sales', c.amt, S.gs, money]]
+    .filter(function (x) { return x[2] > 0; })
+    .map(function (x) { return x[0] + ' ' + x[3](x[1]) + ' / ' + x[3](x[2]) + (x[1] >= x[2] ? ' (hit)' : ''); });
+  if (g.length) L.push('Goals: ' + g.join(' · '));
+  if (c.n) {
+    var ba = drBest(drBy(list, drActKey)), bg = drBest(drBy(list, drAgeKey));
+    if (ba || bg) L.push([ba ? 'Best activity: ' + ba.k + ' (' + ba.pos + ' of ' + ba.n + ')' : '', bg ? 'Best age: ' + bg.k + ' (' + bg.pos + ' of ' + bg.n + ')' : ''].filter(Boolean).join(' · '));
+    L.push('');
+    L.push('ENCOUNTERS');
+    list.forEach(function (e, i) {
+      L.push((i + 1) + '. ' + fmtTime(e.t) + ' · ' + [enTitle(e), e.a ? 'age ' + e.a : '', e.act || ''].filter(Boolean).join(', ') +
+        ' · ' + (e.f === 1 ? 'Positive' : 'Negative') + (e.cl ? ' · Closed' + (e.amt ? ' ' + money(e.amt) : '') : ''));
+      if (e.note) L.push('   ' + e.note);
+    });
+  }
+  if (d) {
+    L.push('');
+    L.push('END OF DAY');
+    DAY_F.forEach(function (f) { if (d[f[0]]) L.push(f[1] + ': ' + d[f[0]]); });
+  }
+  return L.join('\n');
+}
+function drCopyText(txt, msg) {
+  var done = function () { drToast(msg); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, function () { drShowText(txt); });
+  else drShowText(txt);
 }
 function drShowText(txt) {
   var b = el('<div><textarea class="dr-field" style="height:240px;font-size:13px" readonly></textarea></div>');
