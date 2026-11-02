@@ -6,7 +6,7 @@
    answers when it cannot be reached — so with a signal this is the app
    with no service worker at all, and on a street with none it is
    the last copy that loaded. Same origin and GET only. */
-var CACHE = 'doors-v2';
+var CACHE = 'doors-v3';
 var SHELL = ['./', 'index.html', 'manifest.json', 'icon.svg', 'icon-180.png', 'icon-192.png', '../arc/fonts/Inter.woff2'];
 self.addEventListener('install', function (e) {
   self.skipWaiting();

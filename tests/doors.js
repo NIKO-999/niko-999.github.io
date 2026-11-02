@@ -103,6 +103,9 @@ const t = (d, h, m) => new Date(`${d}T${String(h).padStart(2, '0')}:${String(m |
   ok('what they were doing is broken down', (await page.$$eval('#drActs .dr-br', (r) => r.map((x) => x.dataset.k))).sort().join() === 'Reading,Walking the dog');
   ok('ages are read back in brackets', (await page.$$eval('#drAges .dr-br', (r) => r.map((x) => x.dataset.k))).join() === '25–29,40–49');
   ok('with too few behind it, nothing is called best or worst', /Log a few more/.test(await txt(page, '#drFocus')));
+  const full = await page.$$eval('#drFull .dr-en', (c) => c.map((x) => [x.querySelector('b').textContent, x.querySelector('.dr-en-f').textContent, x.querySelector('.dr-en-m').textContent, !!x.querySelector('.dr-en-n')].join('/')));
+  ok('home shows every encounter today in full, newest first', full.join('|') === 'No name/Negative/Age 41 · Walking the dog · 4:00pm/false|Maya/Positive/Age 25 · Reading · 4:00pm/false', full);
+  ok('only a positive one is tagged green', await page.$eval('#drFull .dr-en-f.is-pos', (x) => getComputedStyle(x).backgroundColor) === 'rgb(52, 199, 89)' && await page.locator('#drFull .dr-en-f.is-pos').count() === 1);
   ok('negative is never drawn red', await page.$eval('#drHome', (e) => ![...e.querySelectorAll('*')].some((x) => /255, 59, 48|255, 107, 96/.test(getComputedStyle(x).color + getComputedStyle(x).backgroundColor))));
 
   /* ── the list ── */
@@ -118,6 +121,12 @@ const t = (d, h, m) => new Date(`${d}T${String(h).padStart(2, '0')}:${String(m |
   await page.click('#drFeel button[data-f="1"]'); await page.fill('#drEnN', 'Sam'); await page.fill('#drEnNote', 'Asked about the dog first'); await page.click('#drEnGo'); await settle(page);
   st = await store(page);
   ok('an encounter can be corrected', st.en[1].f === 1 && st.en[1].n === 'Sam' && st.en.length === 2);
+  await page.click('.dr-bar button[data-v="home"]'); await settle(page);
+  ok('the note reads in full on home', /Asked about the dog first/.test(await txt(page, '#drFull')));
+  await page.click('#drFull .dr-en'); await settle(page);
+  ok('a card on home opens its encounter', await page.inputValue('#drEnN') === 'Sam');
+  await page.keyboard.press('Escape'); await settle(page);
+  await page.click('.dr-bar button[data-v="log"]'); await settle(page);
   await page.click('#drLogSeg button[data-p="all"]'); await page.waitForTimeout(100);
   await page.click('#drLogList .dr-li >> nth=0'); await settle(page);
   await top(page).locator('button', { hasText: 'Remove' }).click(); await settle(page);

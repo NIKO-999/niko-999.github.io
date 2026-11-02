@@ -88,6 +88,17 @@ svg { display: block; }
 }
 .dr-go:active { transform: scale(.98); }
 
+/* ── an encounter in full ── */
+.dr-full { display: flex; flex-direction: column; gap: 8px; }
+.dr-full .dr-gh { margin: 4px 4px 0; }
+.dr-en { display: block; width: 100%; text-align: left; padding: 14px 16px; }
+.dr-en-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.dr-en-h b { font-size: 17px; font-weight: 700; min-width: 0; overflow-wrap: anywhere; }
+.dr-en-f { flex: none; height: 24px; line-height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--card2); color: var(--dim); }
+.dr-en-f.is-pos { background: var(--pos); color: #002a0c; }
+.dr-en-m { font-size: 13px; color: var(--dim); margin-top: 4px; }
+.dr-en-n { margin: 10px 0 0; font-size: 14.5px; line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; }
+
 /* ── stat tiles ── */
 .dr-stat { text-align: center; padding: 14px 8px; }
 .dr-stat b { display: block; font-size: 19px; font-weight: 700; letter-spacing: -.01em; margin-top: 8px; }
@@ -631,6 +642,7 @@ function drRenderHome() {
   $('#drRepBtn', top).addEventListener('click', function () { drReport(); });
   root.appendChild(top);
   root.appendChild(drTodayCard());
+  var full = drFullCards(); if (full) root.appendChild(full);
   root.appendChild(drStatRow());
   var p = drPeriod(homeP);
   root.appendChild(drHowCard(p));
@@ -652,6 +664,28 @@ function drTodayCard() {
   go.innerHTML = IC.plus + '<span>Log an encounter</span>';
   go.addEventListener('click', function () { drLogSheet(null); });
   return card;
+}
+/* Every encounter in full — the same fields the sheet asks for, laid out
+   to be read off a screenshot. Today's, newest first; on a day with none
+   yet, the last day you logged, so the screen a mentor sees is never a
+   blank. A tap opens it to correct. */
+function drFullCards() {
+  var k = ymd(today()), list = drOn(k);
+  if (!list.length && S.en.length) { k = S.en.reduce(function (m, e) { return e.t > m ? e.t : m; }, 0); k = dayOf(k); list = drOn(k); }
+  if (!list.length) return null;
+  var wrap = el('<div id="drFull" class="dr-full"><div class="dr-cap dr-gh"></div></div>');
+  $('.dr-cap', wrap).textContent = (k === ymd(today()) ? 'Today' : fmtDay(k)) + ' · ' + list.length + (list.length === 1 ? ' encounter' : ' encounters');
+  list.slice().reverse().forEach(function (e) {
+    var c = el('<button type="button" class="dr-card dr-en"><div class="dr-en-h"><b></b><span class="dr-en-f"></span></div><div class="dr-en-m"></div><p class="dr-en-n"></p></button>');
+    c.dataset.id = e.id;
+    $('b', c).textContent = enTitle(e);
+    var f = $('.dr-en-f', c); f.textContent = e.f === 1 ? 'Positive' : 'Negative'; if (e.f === 1) f.classList.add('is-pos');
+    $('.dr-en-m', c).textContent = [e.a ? 'Age ' + e.a : '', e.act || '', fmtTime(e.t)].filter(Boolean).join(' · ');
+    if (e.note) $('.dr-en-n', c).textContent = e.note; else $('.dr-en-n', c).remove();
+    c.addEventListener('click', function () { drLogSheet(e); });
+    wrap.appendChild(c);
+  });
+  return wrap;
 }
 function drStatRow() {
   var t = today(), w0 = monday(t), wc = drCounts(drIn(w0, t)), wl = drCounts(drIn(addDays(w0, -7), addDays(t, -7)));
