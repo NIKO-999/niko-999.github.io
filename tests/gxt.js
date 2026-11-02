@@ -35,7 +35,7 @@ const freeze = (at) => `(() => {
     const page = await c.newPage();
     page.on('pageerror', (e) => errors.push(String(e)));
     page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
-    page.on('request', (r) => { const u = r.url(); if (!u.startsWith(BASE) && !u.startsWith('data:')) offOrigin.push(u); });
+    page.on('request', (r) => { const u = r.url(); if (!u.startsWith(BASE) && !u.startsWith('data:') && !u.startsWith('blob:')) offOrigin.push(u); });
     await page.goto(URL); await page.waitForTimeout(250);
     return { c, page };
   }
@@ -167,6 +167,98 @@ const freeze = (at) => `(() => {
   await page.reload(); await page.waitForTimeout(200);
 
   ok('it survives a reload', await (async () => { await page.reload(); await page.waitForTimeout(200); return (await page.$$eval('.gx-li', (r) => r.length)) === 2; })());
+
+  /* ── charts ── */
+  /* A 2560x1440 PNG of one-pixel lines, made by the page: the kind of
+     fine detail a re-encode or a resize would smear. */
+  const big = await page.evaluate(() => new Promise((ok) => {
+    const c = document.createElement('canvas'); c.width = 2560; c.height = 1440; const x = c.getContext('2d');
+    x.fillStyle = '#0b0b0d'; x.fillRect(0, 0, c.width, c.height); x.fillStyle = '#e8e8e8';
+    for (let i = 0; i < c.width; i += 7) x.fillRect(i, (i * 13) % c.height, 1, 220);
+    c.toBlob((b) => { const r = new FileReader(); r.onload = () => ok(r.result.split(',')[1]); r.readAsDataURL(b); }, 'image/png');
+  }));
+  const bigBuf = Buffer.from(big, 'base64');
+  const idb = (page, fn) => page.evaluate(`new Promise((ok) => { const q = indexedDB.open('gxt', 1);
+    q.onsuccess = () => { const tx = q.result.transaction('pics', 'readonly'); const st = tx.objectStore('pics'); ${fn} }; })`);
+  const keys = (page) => idb(page, `const r = st.getAllKeys(); r.onsuccess = () => ok(r.result);`);
+
+  await pill(page, 'bias', 'long');
+  await page.setInputFiles('#gxFile', { name: 'chart.png', mimeType: 'image/png', buffer: bigBuf });
+  await page.waitForTimeout(300);
+  ok('a chart added through the button draws a thumb', (await page.$$eval('#gxPics .gx-pic', (p) => p.length)) === 1);
+  const k1 = await page.$eval('#gxPics .gx-pic', (p) => p.dataset.k);
+  const stored = await idb(page, `const r = st.get('${k1}'); r.onsuccess = () => { const b = r.result; b.arrayBuffer().then((a) => ok({ size: b.size, type: b.type, head: Array.from(new Uint8Array(a)).slice(0, 64).join(), sum: Array.from(new Uint8Array(a)).reduce((s, v, i) => (s + v * (i % 251 + 1)) % 1000000007, 0) })); };`);
+  const sum = Array.from(bigBuf).reduce((s, v, i) => (s + v * (i % 251 + 1)) % 1000000007, 0);
+  ok('and is stored as the original file, byte for byte', stored && stored.size === bigBuf.length && stored.type === 'image/png'
+    && stored.head === Array.from(bigBuf.slice(0, 64)).join() && stored.sum === sum, { stored: stored && stored.size, want: bigBuf.length });
+  ok('never in localStorage', await page.evaluate(() => { const v = localStorage.getItem('gxt.v1') || ''; return v.length < 20000 && v.indexOf('data:') < 0; }));
+
+  /* Paste, the desktop's own way in. */
+  await page.evaluate((b64) => {
+    const bin = atob(b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    const dt = new DataTransfer(); dt.items.add(new File([u], 'shot.png', { type: 'image/png' }));
+    document.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+  }, big);
+  await page.waitForTimeout(300);
+  ok('a pasted screenshot is a second chart', (await page.$$eval('#gxPics .gx-pic', (p) => p.length)) === 2);
+  const thumbs = await page.$$eval('#gxPics .gx-pic', (p) => p.map((x) => { const r = x.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height), Math.round(r.top)]; }));
+  ok('the thumbs are one even row', thumbs[0].join() === thumbs[1].join(), thumbs);
+  const img0 = await page.$('#gxPics .gx-pic img');
+  await pill(page, 'bias', 'short'); await pill(page, 'bias', 'long');
+  ok('pressing the checklist does not rebuild the thumbs', await img0.evaluate((i) => i.isConnected && i.naturalWidth === 2560));
+
+  /* The viewer draws the whole file at its own resolution. */
+  await page.click('#gxPics .gx-pic >> nth=0 >> button >> nth=0');
+  await page.waitForTimeout(300);
+  const vw = await page.$eval('.gx-view img', (i) => ({ w: i.naturalWidth, h: i.naturalHeight, cap: document.querySelector('.gx-vbar span').textContent }));
+  ok('pressing a thumb opens the chart at full resolution', vw.w === 2560 && vw.h === 1440 && /1 \/ 2 · 2560 × 1440/.test(vw.cap), vw);
+  ok('fitted to the screen first', await page.$eval('.gx-view img', (i) => i.getBoundingClientRect().width <= innerWidth));
+  await page.click('.gx-view img');
+  ok('and pressed again, drawn pixel for pixel', await page.$eval('.gx-view img', (i) => Math.round(i.getBoundingClientRect().width) === 2560));
+  await page.keyboard.press('ArrowRight');
+  ok('the arrows step between charts', /^2 \/ 2/.test(await page.textContent('.gx-vbar span')));
+  await page.keyboard.press('Escape');
+  ok('Escape takes the viewer out of the page, not just out of sight', !(await page.$('.gx-view')));
+  ok('and leaves the entry in progress alone', (await page.$$eval('#gxPics .gx-pic', (p) => p.length)) === 2);
+
+  await page.click('#gxSave'); await page.waitForTimeout(200);
+  st = await store(page);
+  const withPics = st.e.find((e) => e.pics && e.pics.length);
+  ok('saving files the charts on the entry', withPics && withPics.pics.length === 2 && withPics.pics[0] === k1, withPics && withPics.pics);
+  ok('the log row says it has two', /2/.test(await page.textContent(`.gx-li[data-id="${withPics.id}"] .gx-pn`)));
+
+  /* Remove, then Cancel: the chart comes back. Remove, then Save: it goes. */
+  await page.click(`.gx-li[data-id="${withPics.id}"]`);
+  await page.waitForTimeout(200);
+  await page.hover('#gxPics .gx-pic >> nth=1'); await page.click('#gxPics .gx-pic >> nth=1 >> .gx-px');
+  ok('the x takes a chart off the form', (await page.$$eval('#gxPics .gx-pic', (p) => p.length)) === 1);
+  await page.click('#gxCancel');
+  await page.click(`.gx-li[data-id="${withPics.id}"]`); await page.waitForTimeout(200);
+  ok('Cancel puts it back', (await page.$$eval('#gxPics .gx-pic', (p) => p.length)) === 2);
+  const k2 = withPics.pics[1];
+  await page.hover('#gxPics .gx-pic >> nth=1'); await page.click('#gxPics .gx-pic >> nth=1 >> .gx-px');
+  await page.click('#gxSave'); await page.waitForTimeout(300);
+  ok('Save takes it out of the database too', !(await keys(page)).includes(k2) && (await keys(page)).includes(k1));
+
+  /* A chart added to an entry that is then abandoned goes with it. */
+  await pill(page, 'bias', 'short');
+  await page.setInputFiles('#gxFile', { name: 'c.png', mimeType: 'image/png', buffer: bigBuf });
+  await page.waitForTimeout(300);
+  const k3 = await page.$eval('#gxPics .gx-pic', (p) => p.dataset.k);
+  ok('it is in the database while the entry is open', (await keys(page)).includes(k3));
+  await page.click(`.gx-li[data-id="${withPics.id}"]`); await page.click('#gxCancel'); await page.waitForTimeout(300);
+  ok('and gone once the entry is abandoned', !(await keys(page)).includes(k3));
+
+  /* The sweep: a key no entry names is removed; one that is named stays. */
+  await page.evaluate(() => new Promise((ok) => { const q = indexedDB.open('gxt', 1); q.onsuccess = () => { const tx = q.result.transaction('pics', 'readwrite'); tx.objectStore('pics').put(new Blob(['x']), 'porphan01'); tx.oncomplete = ok; }; }));
+  await page.reload(); await page.waitForTimeout(3600);
+  const after = await keys(page);
+  ok('an orphaned chart is swept on the next open, and a named one is not', !after.includes('porphan01') && after.includes(k1), after);
+  ok('and a saved chart still draws after a reload', await (async () => {
+    await page.click(`.gx-li[data-id="${withPics.id}"]`); await page.waitForTimeout(400);
+    return page.$eval('#gxPics .gx-pic img', (i) => i.naturalWidth === 2560);
+  })());
+  await page.click('#gxCancel');
   await c.close();
 
   /* ── a damaged store is repaired, not discarded ── */

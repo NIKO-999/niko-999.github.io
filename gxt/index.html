@@ -118,6 +118,47 @@ svg { display: block; }
 .gx-out { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 10px; padding-top: 14px; border-top: 1px solid var(--line); }
 .gx-note { width: 100%; min-height: 60px; height: 60px; resize: vertical; border-radius: 12px; background: var(--card2); border: 1px solid transparent; padding: 10px 12px; font-size: 13.5px; outline: none; margin-top: 10px; display: block; }
 .gx-note:focus { border-color: rgba(255,255,255,.25); }
+/* ── charts ── */
+/* A thumb is a fixed box with the picture cropped into it, so a strip
+   of charts of different sizes is one even row and nothing reflows when
+   a picture arrives a frame late out of the database. The crop is the
+   thumb's alone: what is STORED is the original file, and the viewer
+   draws all of it. */
+.gx-pics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+.gx-pic { position: relative; aspect-ratio: 16 / 10; border-radius: 12px; overflow: hidden; background: var(--card2); }
+.gx-pic > button:first-child { position: absolute; inset: 0; width: 100%; height: 100%; cursor: zoom-in; }
+.gx-pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gx-pic .gx-px {
+  position: absolute; top: 6px; right: 6px; width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center; background: rgba(0,0,0,.66); color: var(--ink); opacity: 0; transition: opacity .15s;
+}
+.gx-pic:hover .gx-px, .gx-pic .gx-px:focus-visible { opacity: 1; }
+.gx-pic .gx-px .gx-ic { width: 13px; height: 13px; stroke-width: 2.4; }
+.gx-addpic {
+  aspect-ratio: 16 / 10; border-radius: 12px; background: var(--card2); color: var(--dim);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-size: 12.5px; font-weight: 600;
+}
+.gx-addpic:hover { color: var(--ink); }
+.gx-addpic .gx-ic { width: 18px; height: 18px; }
+/* Dropping a file anywhere on the checklist is the same as the button. */
+.gx-card.is-drop { box-shadow: inset 0 0 0 2px rgba(255,255,255,.35); }
+.gx-li .gx-pn { display: flex; align-items: center; gap: 4px; color: var(--dim); font-size: 12px; }
+.gx-li .gx-pn .gx-ic { width: 14px; height: 14px; }
+
+/* ── the viewer: built and removed, never hidden ── */
+.gx-view { position: fixed; inset: 0; z-index: 80; background: #000; display: flex; flex-direction: column; }
+.gx-vbar { display: flex; align-items: center; gap: 12px; padding: 14px 18px; flex: none; color: var(--dim); font-size: 13px; }
+.gx-vbar span { flex: 1; min-width: 0; }
+.gx-vbar button { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); background: var(--card2); }
+.gx-vbar button:disabled { opacity: .3; cursor: default; }
+.gx-vbar a { color: var(--dim); font-size: 13px; padding: 0 8px; }
+/* FIT draws the whole chart on the screen; ACTUAL draws it pixel for
+   pixel and scrolls — the only way to read a wick on a 4K capture. */
+.gx-vbody { flex: 1; min-height: 0; overflow: auto; display: grid; place-items: center; padding: 0 18px 18px; }
+.gx-vbody img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: zoom-in; display: block; }
+.gx-view.is-actual .gx-vbody { place-items: start; }
+.gx-view.is-actual .gx-vbody img { max-width: none; max-height: none; cursor: zoom-out; margin: auto; }
+
 .gx-ft { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
 .gx-score { flex: 1; color: var(--dim); font-size: 12.5px; }
 .gx-score b { color: var(--ink); }
@@ -128,7 +169,7 @@ svg { display: block; }
 
 /* ── the log ── */
 .gx-log { display: flex; flex-direction: column; }
-.gx-li { display: grid; grid-template-columns: 62px 44px minmax(0, 1fr) 66px 56px; align-items: center; gap: 10px; min-height: 48px; padding: 6px 8px; border-radius: 12px; width: 100%; text-align: left; }
+.gx-li { display: grid; grid-template-columns: 62px 44px minmax(0, 1fr) 34px 66px 56px; align-items: center; gap: 10px; min-height: 48px; padding: 6px 8px; border-radius: 12px; width: 100%; text-align: left; }
 .gx-li:hover { background: var(--card2); }
 .gx-li.is-on { background: var(--card2); box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); }
 .gx-li .gx-d { color: var(--dim); font-size: 12.5px; }
@@ -179,7 +220,7 @@ svg { display: block; }
   </section>
 
   <div class="gx-cols">
-    <section class="gx-card" aria-labelledby="gxFormH">
+    <section class="gx-card" id="gxForm" aria-labelledby="gxFormH">
       <div class="gx-hd"><h2 id="gxFormH">New entry</h2><button type="button" class="gx-btn" id="gxCancel" hidden>Cancel</button></div>
       <div class="gx-top">
         <div class="gx-seg" id="gxType" role="group" aria-label="Kind"><button type="button" data-v="bt">Backtest</button><button type="button" data-v="live">Live trade</button></div>
@@ -192,6 +233,8 @@ svg { display: block; }
         <input class="gx-field gx-num" id="gxR" type="number" step="0.1" placeholder="R" aria-label="R multiple" />
       </div>
       <textarea class="gx-note" id="gxNote" placeholder="Notes" aria-label="Notes" maxlength="600"></textarea>
+      <div class="gx-pics" id="gxPics"></div>
+      <input type="file" id="gxFile" accept="image/*" multiple hidden />
       <div class="gx-ft">
         <div class="gx-score" id="gxScore"></div>
         <button type="button" class="gx-btn is-bad" id="gxDel" hidden>Delete</button>
@@ -221,12 +264,15 @@ svg { display: block; }
    records which of the six held, so the figures can say whether the
    full checklist is what wins.
 
-   Everything lives in this browser under gxt.v1 and is never sent
-   anywhere. No network request, no account.
+   Everything lives in this browser and is never sent anywhere: the
+   entries under gxt.v1 in localStorage, and the charts in IndexedDB
+   (database gxt, store pics), keyed from the entry. No network
+   request, no account.
    ═══════════════════════════════════════════════════════════════ */
 
 var KEY = 'gxt.v1';
 var BIN_DAYS = 30;
+var PIC_MAX = 8;
 
 /* The six, in order. A step is one or more groups of choices; `ok`
    decides whether it counts as met off the entry, so the score is
@@ -295,6 +341,7 @@ function gxClean(raw) {
     res: ['w', 'l', 'be'].indexOf(e.res) >= 0 ? e.res : '',
     r: isFinite(r) ? Math.round(r * 100) / 100 : null,
     note: typeof e.note === 'string' ? e.note.slice(0, 600) : '',
+    pics: Array.isArray(e.pics) ? e.pics.filter(function (k, i, a) { return typeof k === 'string' && /^p[a-z0-9]{6,24}$/.test(k) && a.indexOf(k) === i; }).slice(0, PIC_MAX) : [],
     del: +e.del || 0
   };
   ONE.forEach(function (k) { out[k] = OPT[k].indexOf(e[k]) >= 0 ? e[k] : ''; });
@@ -317,13 +364,161 @@ var live = function () { return S.e.filter(function (e) { return !e.del; }); };
 
 /* ── the form ── */
 var blank = function () {
-  var f = { id: '', t: S.last.t, sym: S.last.sym, d: gxToday(), lv: [], res: '', r: null, note: '' };
+  var f = { id: '', t: S.last.t, sym: S.last.sym, d: gxToday(), lv: [], res: '', r: null, note: '', pics: [] };
   ONE.forEach(function (k) { f[k] = ''; });
   return f;
 };
 var F = blank();
 var editing = false;
 var $ = function (id) { return document.getElementById(id); };
+
+/* ── charts ── */
+/* NEVER localStorage. A chart there shares a 5MB budget with the
+   entries, so the day it is too big it does not fail by itself — it
+   takes the journal with it. IndexedDB holds a Blob as a Blob.
+
+   AND THE FILE IS STORED AS IT CAME. No canvas, no re-encode, no
+   resize: a screenshot of a chart is fine detail on flat colour, which
+   is exactly what a JPEG pass smears, and the reason you attach one is
+   to read a wick off it later. What you pasted is what you get back,
+   byte for byte. */
+var dbP = null;
+function gxDB() {
+  if (!dbP) dbP = new Promise(function (ok, no) {
+    var rq = indexedDB.open('gxt', 1);
+    rq.onupgradeneeded = function () { rq.result.createObjectStore('pics'); };
+    rq.onsuccess = function () { ok(rq.result); };
+    rq.onerror = function () { dbP = null; no(rq.error); };
+  });
+  return dbP;
+}
+function gxTx(mode, fn) {
+  return gxDB().then(function (db) {
+    return new Promise(function (ok, no) {
+      var tx = db.transaction('pics', mode), st = tx.objectStore('pics'), out = fn(st);
+      tx.oncomplete = function () { ok(out && 'result' in out ? out.result : undefined); };
+      tx.onerror = tx.onabort = function () { no(tx.error); };
+    });
+  });
+}
+function gxPicPut(k, blob) { return gxTx('readwrite', function (st) { st.put(blob, k); }); }
+function gxPicGet(k) { return gxTx('readonly', function (st) { return st.get(k); }); }
+function gxPicDel(keys) { return keys.length ? gxTx('readwrite', function (st) { keys.forEach(function (k) { st.delete(k); }); }) : Promise.resolve(); }
+function gxPicKeys() { return gxTx('readonly', function (st) { return st.getAllKeys(); }); }
+
+/* One object URL a key for the life of the page, so the thumb, the
+   viewer and a repaint all draw from the same decoded image. */
+var URLS = {};
+function gxPicURL(k) {
+  if (URLS[k]) return Promise.resolve(URLS[k]);
+  return gxPicGet(k).then(function (b) { if (!b) return null; URLS[k] = URLS[k] || URL.createObjectURL(b); return URLS[k]; });
+}
+
+/* Keys written this sitting and not yet on a saved entry. Writing on
+   ADD rather than on save means a big paste is in the database before
+   you have finished the checklist; what this list buys is that a
+   cancelled edit takes its own pictures back out with it. */
+var added = [];
+function gxDropAdded(keep) {
+  var gone = added.filter(function (k) { return keep.indexOf(k) < 0; });
+  added = [];
+  gone.forEach(function (k) { if (URLS[k]) { URL.revokeObjectURL(URLS[k]); delete URLS[k]; } });
+  return gxPicDel(gone).catch(function () {});
+}
+
+function gxAddFiles(files) {
+  var imgs = [].filter.call(files || [], function (f) { return f && /^image\//.test(f.type); });
+  var room = PIC_MAX - F.pics.length;
+  if (!imgs.length) return;
+  if (room <= 0) { gxToast(PIC_MAX + ' charts is the most an entry holds'); return; }
+  imgs.slice(0, room).forEach(function (f) {
+    var k = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    F.pics.push(k); added.push(k);
+    URLS[k] = URL.createObjectURL(f);
+    gxPicPut(k, f).catch(function () {
+      F.pics = F.pics.filter(function (x) { return x !== k; }); gxPaintPics();
+      gxToast('That chart could not be saved');
+    });
+  });
+  if (imgs.length > room) gxToast('Kept ' + room + ' — ' + PIC_MAX + ' is the most an entry holds');
+  gxPaintPics();
+}
+
+/* Rebuilt only when the SET of charts changes. The form repaints on
+   every pill pressed, and a fresh <img> over a 4K capture has to be
+   decoded again — the thumbs went blank on every press until it was. */
+function gxPaintPics() {
+  var box = $('gxPics'), sig = F.pics.join();
+  if (box.dataset.sig === sig && box.childElementCount) return;
+  box.dataset.sig = sig; box.textContent = '';
+  F.pics.forEach(function (k, i) {
+    var d = document.createElement('div'); d.className = 'gx-pic'; d.dataset.k = k;
+    var open = document.createElement('button'); open.type = 'button'; open.setAttribute('aria-label', 'Open chart ' + (i + 1));
+    var img = document.createElement('img'); img.alt = ''; img.decoding = 'async';
+    open.appendChild(img);
+    open.addEventListener('click', function () { gxView(F.pics, i); });
+    /* A sibling of the open control, never inside it: a button inside
+       a button is invalid and collapses to one press. */
+    var x = document.createElement('button'); x.type = 'button'; x.className = 'gx-px'; x.setAttribute('aria-label', 'Remove chart ' + (i + 1));
+    x.innerHTML = '<svg class="gx-ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    x.addEventListener('click', function () { F.pics.splice(F.pics.indexOf(k), 1); gxPaintPics(); });
+    d.appendChild(open); d.appendChild(x); box.appendChild(d);
+    gxPicURL(k).then(function (u) { if (u) img.src = u; else open.disabled = true; });
+  });
+  if (F.pics.length < PIC_MAX) {
+    var a = document.createElement('button'); a.type = 'button'; a.className = 'gx-addpic'; a.id = 'gxAddPic';
+    a.innerHTML = '<svg class="gx-ic" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M7.5 15l3.2-3.4 2.6 2.4 3.2-3.6"/></svg><span>Add chart</span>';
+    a.addEventListener('click', function () { $('gxFile').click(); });
+    box.appendChild(a);
+  }
+}
+
+/* The viewer is BUILT AND REMOVED, never hidden: a full-screen surface
+   put away with an attribute goes on taking every press the day an
+   author `display` outranks the browser's own rule for it. */
+var view = null;
+function gxView(keys, at) {
+  gxViewClose();
+  var v = document.createElement('div'); v.className = 'gx-view'; v.setAttribute('role', 'dialog'); v.setAttribute('aria-modal', 'true'); v.setAttribute('aria-label', 'Chart');
+  v.innerHTML = '<div class="gx-vbar"><span class="gx-num"></span><a target="_blank" rel="noopener">Open original</a>'
+    + '<button type="button" data-a="prev" aria-label="Previous chart"><svg class="gx-ic" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>'
+    + '<button type="button" data-a="next" aria-label="Next chart"><svg class="gx-ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>'
+    + '<button type="button" data-a="x" aria-label="Close"><svg class="gx-ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'
+    + '<div class="gx-vbody"><img alt="" /></div>';
+  document.body.appendChild(v);
+  view = { el: v, keys: keys.slice(), at: at };
+  var img = v.querySelector('img');
+  img.addEventListener('click', function (ev) { ev.stopPropagation(); v.classList.toggle('is-actual'); gxViewSay(); });
+  img.addEventListener('load', gxViewSay);
+  v.querySelector('.gx-vbody').addEventListener('click', function (ev) { if (ev.target === ev.currentTarget) gxViewClose(); });
+  v.querySelector('.gx-vbar').addEventListener('click', function (ev) {
+    var b = ev.target.closest('button'); if (!b) return;
+    if (b.dataset.a === 'x') gxViewClose(); else gxViewStep(b.dataset.a === 'next' ? 1 : -1);
+  });
+  gxViewShow();
+  v.querySelector('[data-a="x"]').focus();
+}
+function gxViewSay() {
+  if (!view) return;
+  var img = view.el.querySelector('img');
+  view.el.querySelector('.gx-vbar span').textContent = (view.at + 1) + ' / ' + view.keys.length
+    + (img.naturalWidth ? ' · ' + img.naturalWidth + ' × ' + img.naturalHeight : '')
+    + (view.el.classList.contains('is-actual') ? ' · actual size' : '');
+}
+function gxViewShow() {
+  var k = view.keys[view.at], img = view.el.querySelector('img');
+  view.el.classList.remove('is-actual');
+  view.el.querySelector('[data-a="prev"]').disabled = view.at === 0;
+  view.el.querySelector('[data-a="next"]').disabled = view.at === view.keys.length - 1;
+  gxPicURL(k).then(function (u) { if (view && view.keys[view.at] === k && u) { img.src = u; view.el.querySelector('a').href = u; } });
+  gxViewSay();
+}
+function gxViewStep(d) {
+  if (!view) return;
+  var to = view.at + d; if (to < 0 || to >= view.keys.length) return;
+  view.at = to; gxViewShow();
+}
+function gxViewClose() { if (view) { view.el.remove(); view = null; } }
 
 function gxSeg(el, val) {
   [].forEach.call(el.children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.v === val)); });
@@ -384,9 +579,14 @@ function gxPaintForm() {
   $('gxSave').disabled = !F.bias;
   $('gxCancel').hidden = !editing;
   $('gxDel').hidden = !editing;
+  gxPaintPics();
 }
 
-function gxReset() { F = blank(); editing = false; gxPaintForm(); gxPaintLog(); }
+function gxReset(keep) {
+  if (!keep) { var was = S.e.find(function (x) { return x.id === F.id; }); keep = was ? was.pics : []; }
+  gxDropAdded(keep);
+  F = blank(); editing = false; gxPaintForm(); gxPaintLog();
+}
 
 [['gxType', 't'], ['gxSym', 'sym'], ['gxRes', 'res']].forEach(function (p) {
   $(p[0]).addEventListener('click', function (ev) {
@@ -398,19 +598,22 @@ function gxReset() { F = blank(); editing = false; gxPaintForm(); gxPaintLog(); 
 $('gxD').addEventListener('change', function () { if (/^\d{4}-\d{2}-\d{2}$/.test(this.value)) F.d = this.value; });
 $('gxR').addEventListener('input', function () { var v = parseFloat(this.value); F.r = isFinite(v) ? v : null; });
 $('gxNote').addEventListener('input', function () { F.note = this.value; });
-$('gxCancel').addEventListener('click', gxReset);
+$('gxCancel').addEventListener('click', function () { gxReset(); });
 
 $('gxSave').addEventListener('click', function () {
   if (!F.bias) return;
   var e = gxClean({ id: F.id || 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), t: F.t, d: F.d, at: F.at,
-    sym: F.sym, lv: F.lv, res: F.res, r: F.r, note: F.note.trim() });
+    sym: F.sym, lv: F.lv, res: F.res, r: F.r, note: F.note.trim(), pics: F.pics });
   ONE.forEach(function (k) { e[k] = OPT[k].indexOf(F[k]) >= 0 ? F[k] : ''; });
   var at = S.e.findIndex(function (x) { return x.id === e.id; });
+  /* A chart taken off an entry goes when the entry is SAVED, not when
+     the x is pressed — Cancel has to be able to put it back. */
+  if (at >= 0) gxPicDel(S.e[at].pics.filter(function (k) { return e.pics.indexOf(k) < 0; })).catch(function () {});
   if (at >= 0) S.e[at] = e; else S.e.push(e);
   S.last = { t: e.t, sym: e.sym || S.last.sym };
   gxWrite(S);
   var was = editing;
-  gxReset(); gxPaintAll();
+  gxReset(e.pics); gxPaintAll();
   gxToast(was ? 'Saved' : (e.t === 'live' ? 'Trade logged' : 'Backtest logged'));
 });
 
@@ -418,7 +621,7 @@ $('gxSave').addEventListener('click', function () {
    thirty days, and the toast is the one-press way back. */
 $('gxDel').addEventListener('click', function () {
   var e = S.e.find(function (x) { return x.id === F.id; }); if (!e) return;
-  e.del = Date.now(); gxWrite(S); gxReset(); gxPaintAll();
+  e.del = Date.now(); gxWrite(S); gxReset(e.pics); gxPaintAll();
   gxToast('Moved to the bin', function () { e.del = 0; gxWrite(S); gxPaintAll(); });
 });
 
@@ -451,19 +654,21 @@ function gxPaintLog() {
     var r = e.r == null ? (e.res === 'w' ? 'Win' : e.res === 'l' ? 'Loss' : e.res === 'be' ? 'BE' : '—') : (e.r > 0 ? '+' : '') + e.r + 'R';
     var dots = STEPS.map(function (s) { return '<i' + (s.ok(e) ? ' class="is-on"' : '') + '></i>'; }).join('');
     b.innerHTML = '<span class="gx-d gx-num"></span><span class="gx-tag' + (e.t === 'live' ? ' is-live' : '') + '">' + (e.t === 'live' ? 'LIVE' : 'BT') + '</span>'
-      + '<span class="gx-w"></span><span class="gx-dots" aria-hidden="true">' + dots + '</span>'
+      + '<span class="gx-w"></span><span class="gx-pn gx-num" aria-hidden="true">' + (e.pics.length ? '<svg class="gx-ic" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><path d="M7.5 15l3.2-3.4 2.6 2.4 3.2-3.6"/></svg>' + e.pics.length : '') + '</span>'
+      + '<span class="gx-dots" aria-hidden="true">' + dots + '</span>'
       + '<span class="gx-r gx-num' + (e.res === 'w' ? ' is-win' : e.res === 'be' ? ' is-be' : '') + '"></span>';
     b.querySelector('.gx-d').textContent = gxShort(e.d);
     var w = b.querySelector('.gx-w');
     w.textContent = (e.sym ? e.sym + ' ' : '') + (e.bias === 'long' ? 'Long' : 'Short');
     if (e.note) { var em = document.createElement('em'); em.textContent = ' · ' + e.note.split('\n')[0]; w.appendChild(em); }
     b.querySelector('.gx-r').textContent = r;
-    b.setAttribute('aria-label', gxShort(e.d) + ', ' + (e.t === 'live' ? 'live trade' : 'backtest') + ', ' + w.textContent + ', ' + gxScore(e) + ' of ' + STEPS.length + ', ' + r);
+    b.setAttribute('aria-label', gxShort(e.d) + ', ' + (e.t === 'live' ? 'live trade' : 'backtest') + ', ' + w.textContent + ', ' + gxScore(e) + ' of ' + STEPS.length + ', ' + r + (e.pics.length ? ', ' + e.pics.length + (e.pics.length === 1 ? ' chart' : ' charts') : ''));
     b.addEventListener('click', function () {
       if (e.del) {
         e.del = 0; gxWrite(S); gxPaintAll(); gxToast('Restored');
         return;
       }
+      if (editing || F.pics.length) gxDropAdded(editing ? (S.e.find(function (x) { return x.id === F.id; }) || { pics: [] }).pics : []);
       F = JSON.parse(JSON.stringify(e)); editing = true; gxPaintForm(); gxPaintLog();
     });
     box.appendChild(b);
@@ -556,7 +761,56 @@ function gxToast(msg, undo) {
   toastT = setTimeout(function () { t.classList.remove('is-up'); }, undo ? 6000 : 2200);
 }
 
-document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && editing) gxReset(); });
+/* The viewer takes Escape and the arrows first: it is the surface on top. */
+document.addEventListener('keydown', function (ev) {
+  if (view) {
+    if (ev.key === 'Escape') { ev.preventDefault(); gxViewClose(); }
+    else if (ev.key === 'ArrowLeft') gxViewStep(-1);
+    else if (ev.key === 'ArrowRight') gxViewStep(1);
+    return;
+  }
+  if (ev.key === 'Escape' && editing) gxReset();
+});
+
+$('gxFile').addEventListener('change', function () { gxAddFiles(this.files); this.value = ''; });
+
+/* A pasted screenshot is the desktop's way in: Cmd/Ctrl+Shift+4 to the
+   clipboard, then paste anywhere on the page. Only an IMAGE is taken —
+   pasting words into the notes goes on doing what it always did. */
+document.addEventListener('paste', function (ev) {
+  if (view) return;
+  var items = ev.clipboardData ? [].slice.call(ev.clipboardData.items || []) : [];
+  var files = items.filter(function (it) { return it.kind === 'file' && /^image\//.test(it.type); })
+    .map(function (it) { return it.getAsFile(); }).filter(Boolean);
+  if (!files.length) return;
+  ev.preventDefault(); gxAddFiles(files);
+});
+
+/* Dropping on the checklist adds; dropping anywhere else is refused,
+   or the browser navigates to the file and the unsaved entry goes. */
+var dropN = 0;
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(function (t) {
+  document.addEventListener(t, function (ev) {
+    if (!ev.dataTransfer || [].indexOf.call(ev.dataTransfer.types || [], 'Files') < 0) return;
+    ev.preventDefault();
+    var form = $('gxForm'), on = form.contains(ev.target);
+    if (t === 'dragenter') dropN++;
+    if (t === 'dragleave') dropN = Math.max(0, dropN - 1);
+    if (t === 'drop') { dropN = 0; if (on) gxAddFiles(ev.dataTransfer.files); }
+    form.classList.toggle('is-drop', dropN > 0 && t !== 'drop');
+  });
+});
+
+/* A chart no entry names is swept, deferred so it never competes with
+   the first paint. It covers an entry purged from the bin after thirty
+   days and a sitting the tab was closed in before Save. The bin's own
+   entries still name theirs, so a restore brings its charts back. */
+setTimeout(function () {
+  var named = {};
+  S.e.forEach(function (e) { e.pics.forEach(function (k) { named[k] = 1; }); });
+  F.pics.forEach(function (k) { named[k] = 1; });
+  gxPicKeys().then(function (keys) { return gxPicDel(keys.filter(function (k) { return !named[k]; })); }).catch(function () {});
+}, 3000);
 
 gxPaintForm();
 gxPaintAll();
