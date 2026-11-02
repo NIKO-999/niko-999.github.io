@@ -325,6 +325,10 @@ svg { display: block; }
 .lf-hero + p { margin: 6px 0 0; font-size: 15px; font-weight: 600; }
 
 .lf-pick-h { padding: 14px 2px 2px; }
+.lf-tip { background: var(--card2); border-radius: var(--r-s); padding: 12px 14px; margin: 6px 0 10px; }
+.lf-tip > b { display: block; font-size: 15px; font-weight: 600; margin: 4px 0 6px; color: var(--today); }
+.lf-tip ul { margin: 0; padding-left: 16px; display: grid; gap: 6px; }
+.lf-tip li { font-size: 13px; line-height: 1.4; color: var(--dim); }
 .lf-cdc { background: var(--card); border-radius: var(--r); padding: 14px; margin-top: 12px; }
 .lf-cdc .lf-ex-hd { justify-content: space-between; min-height: 24px; }
 .lf-cdc b { font-size: 15px; font-weight: 600; }
@@ -530,6 +534,42 @@ var PROGRAM = [
     get ex() { return all.filter(function (id) { return !build[id] || lfCalfFull(); }); },
     tg: d.ex.reduce(function (o, e) { o[e[0]] = [e[1], e[2], e[3]]; return o; }, {}) };
 });
+/* WHAT EACH DAY IS FOR, from the plan the split came with: the
+   coach's own name for the session, then what to keep in mind while
+   you look it over. */
+var DAY_TIPS = {
+  'p-mon': ['Heavy quads', [
+    'The priority is progressive overload on your main quad movements: hack squat and barbell squat.',
+    'Compounds at 1–2 reps in reserve, 2–3 minutes rest. Leg extensions to 0–1 in reserve on the last set.',
+    'Standing calf raises 4 × 8–12: straight-knee work, for the gastrocnemius.',
+    'Cable crunches 3 × 10–15 for abs.']],
+  'p-tue': ['Push', [
+    'Chest, shoulders and triceps. Keep it productive without taking anything from your leg days.',
+    'Isolation work to 0–1 reps in reserve on the final sets, 60–120 seconds rest.',
+    '45° back extensions 3 × 10–15: controlled, for spinal stability and hip extension rather than heavy load on the lower back.']],
+  'p-wed': ['Hamstrings / glutes', [
+    'The posterior-chain day, so the three leg days are not equally demanding.',
+    'Romanian deadlifts already give the lower back and posterior chain real work. No heavy conventional deadlifts on top.',
+    'Seated calf raises 4 × 12–20: bent-knee work, for the soleus.',
+    'Compounds at 1–2 reps in reserve, 2–3 minutes rest.']],
+  'p-thu': ['Pull', [
+    'Back, rear delts and biceps.',
+    'Weighted pull-ups or lat pulldowns 3 × 8–12. Rows at 1–2 reps in reserve.',
+    'Hanging leg raises 3 × 10–15 for abs.']],
+  'p-fri': ['Leg hypertrophy', [
+    'Your second quad-focused session, with slightly less intensity than Monday.',
+    'Work the higher rep ranges: leg press 10–15, leg extensions up to 20.',
+    'Leg press calf raises 4 × 10–15.',
+    'If performance, sleep or leg soreness starts slipping, cut volume here rather than forcing more work.']],
+  'p-sat': ['Upper-body volume', [
+    'Volume across chest, back, shoulders and arms.',
+    'Reverse hyperextensions 3 × 12–15: controlled, hip extension over load.',
+    'Ab wheel rollouts 3 × 8–12.']],
+  'p-sun': ['Lower fatigue', [
+    'Keep Sunday low fatigue. It is what makes seven gym days work alongside 15–20k daily steps.',
+    'Delts and arms. Nothing heavy on the legs.',
+    'Seated calf raises 3 × 15–20 join once you build calves to 15 sets. Start at 12 while your steps are high.']]
+};
 var DOW_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 /* Direct working sets a week, Monday to Sunday, by primary muscle. */
@@ -1598,6 +1638,13 @@ function lfRoutineForm(rt) {
 function lfDaySpec(rt) {
   var b = el('<div><p class="lf-lab" style="margin:0 0 6px"></p><div class="lf-list"></div></div>');
   $('p', b).textContent = DOW_LONG[rt.dow] + ' · ' + rt.sp;
+  var tip = DAY_TIPS[rt.id];
+  if (tip) {
+    var tc = el('<div class="lf-tip" id="lfTip"><div class="lf-cap">Focus</div><b></b><ul></ul></div>');
+    $('b', tc).textContent = tip[0];
+    tip[1].forEach(function (t) { var li = el('<li></li>'); li.textContent = t; $('ul', tc).appendChild(li); });
+    b.insertBefore(tc, $('.lf-list', b));
+  }
   rt.ex.forEach(function (id) {
     var t = rt.tg[id], rs = lfRestOf(id), last = lastFor(id);
     var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div><span class="lf-li-r lf-num"></span></button>');

@@ -67,6 +67,9 @@ const freeze = (at) => `(() => {
   await page.click('#lfSplit .lf-li >> nth=0'); await settle(page);
   const mon = await top(page).textContent();
   ok('a day of the split reads its sets × reps', mon.includes('Hack squat') && mon.includes('3 × 6–10') && mon.includes('1–2 RIR') && mon.includes('Standing calf raises'), mon.slice(0, 160));
+  ok('a day of the split says what it is for', (await top(page).locator('#lfTip b').textContent()) === 'Heavy quads'
+    && /progressive overload on your main quad movements/.test(await top(page).locator('#lfTip').textContent()));
+  ok('the focus comes before the exercises', await top(page).evaluate((s) => !!(s.querySelector('#lfTip').compareDocumentPosition(s.querySelector('.lf-list')) & 4)));
   await page.keyboard.press('Escape'); await settle(page);
   /* Tuesday, the screen this was reported on: a list long enough that
      the next exercise sits above the open one, on the scrim. */
