@@ -55,11 +55,11 @@ const t = (d, h, m) => new Date(`${d}T${String(h).padStart(2, '0')}:${String(m |
   /* ── a first open ── */
   const { c, page } = await ctx();
   ok('the home screen draws', await page.locator('#drToday').count() === 1);
-  ok('a first open says nothing is logged, with the goal under it', await txt(page, '.dr-title') === 'No encounters yet' && /Goal: 5 a day · 5 to go/.test(await txt(page, '.dr-sub')));
+  ok('a first open says nothing is logged, with the goals under it', await txt(page, '.dr-title') === 'No encounters yet' && /Encounters\s*0 \/ 5/.test(await txt(page, '#drGoals')) && /Closes\s*0 · no goal/.test(await txt(page, '#drGoals')) && /Sales\s*\$0 · no goal/.test(await txt(page, '#drGoals')));
   ok('the summary says there is nothing yet rather than drawing a 0%', /Nothing logged yet/.test(await txt(page, '#drHow')));
   const bar = await page.$$eval('.dr-bar button', (b) => b.map((x) => { const r = x.getBoundingClientRect(); return [r.width, r.height]; }));
   ok('four tabs, every one a 44px target', bar.length === 4 && bar.every(([w, h]) => w >= 44 && h >= 44), bar);
-  ok('nothing about doors is left on the screen', !/door|knock|sale/i.test(await page.evaluate(() => document.body.innerText)));
+  ok('nothing about doors is left on the screen', !/door|knock/i.test(await page.evaluate(() => document.body.innerText)));
 
   /* ── logging one ── */
   await page.click('#drGo'); await settle(page);
@@ -178,6 +178,37 @@ const t = (d, h, m) => new Date(`${d}T${String(h).padStart(2, '0')}:${String(m |
   await page.fill('#drGoal', '8'); await page.dispatchEvent('#drGoal', 'change');
   st = await store(page);
   ok('your name and goal are kept', st.name === 'Niko' && st.goal === 8);
+
+  /* ── closes and sales, and a goal for each ── */
+  await page.click('.dr-bar button[data-v="home"]'); await settle(page);
+  await page.click('#drGoals'); await settle(page);
+  ok('the goals open from the day', await page.inputValue('#drG_goal') === '8');
+  await page.fill('#drG_gc', '2'); await page.fill('#drG_gs', '$500');
+  await page.click('#drGoalGo'); await settle(page);
+  st = await store(page);
+  ok('closes and sales goals are kept', st.gc === 2 && st.gs === 500 && st.goal === 8, st);
+  await page.click('#drGo'); await settle(page);
+  await page.click('#drEnCl');
+  ok('pressing Closed on a blank sheet answers positive too', await page.getAttribute('#drFeel button[data-f="1"]', 'aria-pressed') === 'true');
+  await page.fill('#drEnN', 'Lee'); await page.fill('#drEnAmt', '$1,250.50');
+  await page.click('#drEnGo'); await settle(page);
+  await page.click('#drGo'); await settle(page);
+  await page.click('#drFeel button[data-f="1"]'); await page.fill('#drEnAmt', '300');
+  await page.click('#drEnGo'); await settle(page);
+  st = await store(page);
+  const sales = st.en.filter((e) => e.cl);
+  ok('a sale is kept on the encounter, and an amount alone counts as a close', sales.length === 2 && sales.some((e) => e.n === 'Lee' && e.amt === 1250.5) && sales.some((e) => e.amt === 300), sales);
+  const goals = await page.$$eval('#drGoals .dr-gl', (r) => r.map((x) => x.dataset.g + ':' + x.querySelector('b').textContent + ':' + x.classList.contains('is-met')));
+  ok('the day reads closes and sales against their goals, green once met', goals.join('|') === 'n:4 / 8:false|c:2 / 2:true|s:$1,550.50 / $500:true', goals);
+  ok('a close says so on its card', /Closed \$1,250\.50/.test(await txt(page, '#drFull')));
+  await page.click('#drRepBtn'); await settle(page);
+  await top(page).locator('.dr-seg button[data-p="today"]').click();
+  const kv = await page.$$eval('#drRep .dr-kv b', (b) => b.map((x) => x.textContent).slice(3).join('|'));
+  ok('the report counts closes, sales and the close rate', kv === '2|$1,550.50|50%', kv);
+  await page.click('#drRepCopy'); await page.waitForTimeout(200);
+  const copied2 = await page.evaluate(() => window.__copied);
+  ok('and so does the copied text', /2 closes · \$1,550\.50 in sales/.test(copied2) && /Lee · .*closed \$1,250\.50/.test(copied2), copied2);
+  await page.keyboard.press('Escape'); await settle(page);
   await c.close();
 
   /* ── where you do well and what to work on ── */
@@ -217,13 +248,13 @@ const t = (d, h, m) => new Date(`${d}T${String(h).padStart(2, '0')}:${String(m |
   await r.c.close();
 
   /* ── a damaged record is repaired, not discarded ── */
-  const bad = { days: { '2026-11-04': { k: ' keep ', w: 5 }, 'nope': { k: 'x' }, '2026-11-03': { k: '  ' } }, goal: -3, acts: [7, 'Reading'], en: [{ id: 'ok', t: t('2026-11-04', 9), f: 1, n: 'Ok', a: 300 }, { id: 'nof', t: t('2026-11-04', 10) }, { id: 9, t: 1, f: 1 }, { id: 'neg', t: t('2026-11-03', 10), f: -1, act: '  ' }] };
+  const bad = { gc: -2, gs: 'x', days: { '2026-11-04': { k: ' keep ', w: 5 }, 'nope': { k: 'x' }, '2026-11-03': { k: '  ' } }, goal: -3, acts: [7, 'Reading'], en: [{ id: 'ok', t: t('2026-11-04', 9), f: 1, n: 'Ok', a: 300 }, { id: 'nof', t: t('2026-11-04', 10) }, { id: 9, t: 1, f: 1 }, { id: 'neg', t: t('2026-11-03', 10), f: -1, act: '  ' }] };
   const d = await ctx(bad);
   ok('a damaged encounter costs itself: two of four survive', await txt(d.page, '#drToday .dr-title') === '1 encounter' && (await d.page.$$eval('#drStats .dr-stat b', (b) => b.map((x) => x.textContent)))[0] === '2');
   await d.page.click('.dr-bar button[data-v="you"]'); await settle(d.page);
   await d.page.fill('#drName', 'R'); await d.page.dispatchEvent('#drName', 'change');
   const fixed = await store(d.page);
-  ok('and the repaired shape is what gets written back', fixed.en.length === 2 && fixed.goal === 5 && fixed.acts.join() === 'Reading' && !fixed.en[0].a && !fixed.en[1].act && JSON.stringify(fixed.days) === '{"2026-11-04":{"k":"keep"}}', fixed);
+  ok('and the repaired shape is what gets written back', fixed.en.length === 2 && fixed.goal === 5 && fixed.acts.join() === 'Reading' && !fixed.en[0].a && !fixed.en[1].act && JSON.stringify(fixed.days) === '{"2026-11-04":{"k":"keep"}}' && fixed.gc === 0 && fixed.gs === 0, fixed);
   await d.c.close();
 
   ok('no request leaves the phone', offOrigin.length === 0, offOrigin);

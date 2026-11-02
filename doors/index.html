@@ -78,7 +78,16 @@ svg { display: block; }
 /* ── today ── */
 .dr-title { display: block; margin: 4px 0; font-size: 28px; font-weight: 700; letter-spacing: -.02em; line-height: 1.15;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; text-align: left; }
-.dr-sub { color: var(--dim); font-size: 12.5px; margin: 2px 0 12px; min-height: 17px; }
+.dr-goals { display: grid; gap: 9px; width: 100%; text-align: left; margin: 8px 0 14px; padding: 2px 0; }
+.dr-gl { display: grid; grid-template-columns: 86px minmax(0, 1fr); align-items: center; column-gap: 10px; row-gap: 5px; font-size: 12.5px; }
+.dr-gl span { color: var(--dim); }
+.dr-gl b { font-weight: 600; justify-self: end; }
+.dr-gl i { grid-column: 1 / -1; display: block; height: 4px; border-radius: 3px; background: var(--card2); overflow: hidden; }
+.dr-gl u { display: block; height: 100%; background: var(--ink); border-radius: 3px; }
+.dr-gl.is-met b { color: var(--pos); }
+.dr-gl.is-met u { background: var(--pos); }
+.dr-sale { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: center; }
+.dr-en-s { flex: none; margin-left: auto; height: 24px; line-height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--card2); color: var(--ink); }
 .dr-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 .dr-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; background: var(--card2); color: var(--dim); font-size: 12px; font-weight: 500; }
 .dr-chip.is-pos { color: var(--pos); }
@@ -368,6 +377,7 @@ function fmtHour(h) { return (h % 12 || 12) + (h < 12 ? 'am' : 'pm'); }
 function fmtTime(t) { var d = new Date(t); return (d.getHours() % 12 || 12) + ':' + String(d.getMinutes()).padStart(2, '0') + (d.getHours() < 12 ? 'am' : 'pm'); }
 function dayOf(t) { return ymd(new Date(t)); }
 function pct(a, b) { return b > 0 ? Math.round(a / b * 100) : null; }
+function money(v) { v = Math.round((+v || 0) * 100) / 100; var w = Math.floor(v), c = Math.round((v - w) * 100); return '$' + w.toLocaleString('en-AU') + (c ? '.' + String(c).padStart(2, '0') : ''); }
 function pctTxt(a, b) { var p = pct(a, b); return p === null ? '–' : p + '%'; }
 function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 12); } catch (e) {} }
 function ageBand(a) { if (!a) return null; for (var i = 0; i < AGES.length; i++) if (a >= AGES[i][0] && a <= AGES[i][1]) return AGES[i][2]; return null; }
@@ -383,7 +393,7 @@ function localDT(t) { var d = new Date(t); return ymd(d) + 'T' + String(d.getHou
    age you put on them, what they were doing, how it went (1 well, -1
    not) and a note. Only `t` and `f` are required — a name you did not
    get is still an encounter you had. */
-function drDefault() { return { v: 1, name: '', goal: 5, acts: [], en: [], days: {} }; }
+function drDefault() { return { v: 1, name: '', goal: 5, gc: 0, gs: 0, acts: [], en: [], days: {} }; }
 /* The end of a day is { k, w, f }: the key takeaways, what went well and
    what you'll do differently, keyed by the date it is about. A day with
    none of the three written is not kept. */
@@ -399,6 +409,10 @@ function drClean(o) {
   if (!o || typeof o !== 'object') return d;
   if (typeof o.name === 'string') d.name = o.name.slice(0, 40);
   var g = +o.goal; if (isFinite(g) && g >= 0) d.goal = Math.min(99, Math.round(g));
+  /* Two more daily goals, both off until set: closes a day, and sales a
+     day in dollars. Nought is "no goal", never a goal of nothing. */
+  var gc = +o.gc; if (isFinite(gc) && gc > 0) d.gc = Math.min(99, Math.round(gc));
+  var gs = +o.gs; if (isFinite(gs) && gs > 0) d.gs = Math.min(1e6, Math.round(gs));
   if (Array.isArray(o.acts)) d.acts = o.acts.filter(function (a) { return typeof a === 'string' && a.trim(); }).map(function (a) { return a.slice(0, 30); }).slice(0, 12);
   /* A damaged encounter costs itself, never the rest of the record. */
   if (Array.isArray(o.en)) d.en = o.en.filter(function (e) { return e && typeof e.id === 'string' && +e.t > 0 && (e.f === 1 || e.f === -1); }).map(function (e) {
@@ -407,6 +421,11 @@ function drClean(o) {
     var a = Math.round(+e.a); if (a > 0 && a < 120) x.a = a;
     if (typeof e.act === 'string' && e.act.trim()) x.act = e.act.trim().slice(0, 30);
     if (typeof e.note === 'string' && e.note.trim()) x.note = e.note.slice(0, 400);
+    /* A close is an encounter that ended in a sale; the amount is
+       optional, because a close you could not price is still a close. */
+    var amt = Math.round(+e.amt * 100) / 100;
+    if (e.cl === 1 || amt > 0) x.cl = 1;
+    if (amt > 0 && amt < 1e7) x.amt = amt;
     return x;
   });
   if (o.days && typeof o.days === 'object') Object.keys(o.days).forEach(function (k) {
@@ -430,8 +449,9 @@ function drActs() {
 
 /* ═══════════ THE ARITHMETIC ═══════════ */
 function drCounts(list) {
-  var c = { n: list.length, pos: 0, neg: 0, named: 0, days: {} };
-  list.forEach(function (e) { if (e.f === 1) c.pos++; else c.neg++; if (e.n) c.named++; c.days[dayOf(e.t)] = 1; });
+  var c = { n: list.length, pos: 0, neg: 0, named: 0, cl: 0, amt: 0, days: {} };
+  list.forEach(function (e) { if (e.f === 1) c.pos++; else c.neg++; if (e.n) c.named++; if (e.cl) { c.cl++; c.amt += e.amt || 0; } c.days[dayOf(e.t)] = 1; });
+  c.amt = Math.round(c.amt * 100) / 100;
   c.dayN = Object.keys(c.days).length;
   return c;
 }
@@ -588,6 +608,21 @@ function drLogSheet(edit, at) {
   $$('button', feel).forEach(function (x) { x.dataset.f = x.dataset.p; });
   b.appendChild(feel);
 
+  /* A sale is a fact about the encounter, so it is logged on it rather
+     than counted somewhere else. Pressing Closed on an unanswered sheet
+     answers Positive too: a sale is a conversation that went well. */
+  b.appendChild(el('<label class="dr-flab" for="drEnAmt">Sale</label>'));
+  var sr = el('<div class="dr-sale"><button type="button" class="dr-pill" id="drEnCl" aria-pressed="false">Closed</button><input class="dr-field dr-num" id="drEnAmt" inputmode="decimal" placeholder="$ amount" maxlength="10" autocomplete="off" /></div>');
+  var clb = $('#drEnCl', sr), amf = $('#drEnAmt', sr);
+  cur.cl = edit ? !!edit.cl : false;
+  amf.value = edit && edit.amt ? String(edit.amt) : '';
+  function syncCl() { clb.setAttribute('aria-pressed', cur.cl ? 'true' : 'false'); }
+  function setF(v) { cur.f = v; $$('button', feel).forEach(function (x) { x.setAttribute('aria-pressed', +x.dataset.p === cur.f ? 'true' : 'false'); }); }
+  clb.addEventListener('click', function () { cur.cl = !cur.cl; if (cur.cl && !cur.f) setF(1); syncCl(); buzz(8); });
+  amf.addEventListener('input', function () { if (parseFloat(amf.value.replace(/[$,\s]/g, '')) > 0 && !cur.cl) { cur.cl = true; if (!cur.f) setF(1); syncCl(); } });
+  syncCl();
+  b.appendChild(sr);
+
   b.appendChild(el('<label class="dr-flab" for="drEnN">Name</label>'));
   var nf = el('<input class="dr-field" id="drEnN" placeholder="If you got one" maxlength="40" autocomplete="off" autocapitalize="words" />');
   nf.value = cur.n; b.appendChild(nf);
@@ -638,11 +673,14 @@ function drLogSheet(edit, at) {
     if (known) act = known;
     if (act) e.act = act; else delete e.act;
     var note = tf.value.trim().slice(0, 400); if (note) e.note = note; else delete e.note;
+    var amt = Math.round(parseFloat(amf.value.replace(/[$,\s]/g, '')) * 100) / 100;
+    if (amt > 0 && amt < 1e7) { e.amt = amt; cur.cl = true; } else delete e.amt;
+    if (cur.cl) e.cl = 1; else { delete e.cl; delete e.amt; }
     if (act) S.acts = [act].concat(S.acts.filter(function (x) { return x.toLowerCase() !== act.toLowerCase(); })).slice(0, 12);
     if (!edit) S.en.push(e);
     drSave(); s.close(); drRender(); buzz(14);
     if (edit) drToast('Saved');
-    else drToast('Logged · ' + (e.f === 1 ? 'positive' : 'negative'), function () { var i = S.en.indexOf(e); if (i >= 0) S.en.splice(i, 1); drSave(); drRender(); });
+    else drToast('Logged · ' + (e.cl ? 'closed' + (e.amt ? ' ' + money(e.amt) : '') : e.f === 1 ? 'positive' : 'negative'), function () { var i = S.en.indexOf(e); if (i >= 0) S.en.splice(i, 1); drSave(); drRender(); });
   });
   if (del) del.addEventListener('click', function () {
     var i = S.en.indexOf(edit); if (i < 0) return;
@@ -671,10 +709,23 @@ function drRenderHome() {
 }
 function drTodayCard() {
   var tk = ymd(today()), c = drCounts(drOn(tk));
-  var card = el('<div class="dr-card" style="padding:16px" id="drToday"><div class="dr-lab"></div><div class="dr-title"></div><div class="dr-sub"></div><div class="dr-chips"></div><button type="button" class="dr-go" id="drGo"></button></div>');
+  var card = el('<div class="dr-card" style="padding:16px" id="drToday"><div class="dr-lab"></div><div class="dr-title"></div><button type="button" class="dr-goals" id="drGoals" aria-label="Today’s goals"></button><div class="dr-chips"></div><button type="button" class="dr-go" id="drGo"></button></div>');
   $('.dr-lab', card).textContent = 'Today · ' + fmtDay(tk);
   $('.dr-title', card).textContent = c.n ? c.n + (c.n === 1 ? ' encounter' : ' encounters') : 'No encounters yet';
-  $('.dr-sub', card).textContent = S.goal ? 'Goal: ' + S.goal + ' a day' + (c.n >= S.goal ? ' — done' : ' · ' + (S.goal - c.n) + ' to go') : '';
+  /* The day's three goals, each a figure against its target and a bar
+     that turns green once it is met. A goal not set says so rather than
+     drawing a bar against nothing; the whole block opens the goals. */
+  var gb = $('#drGoals', card);
+  [['n', 'Encounters', c.n, S.goal, String], ['c', 'Closes', c.cl, S.gc, String], ['s', 'Sales', c.amt, S.gs, money]].forEach(function (g) {
+    var r = el('<div class="dr-gl"><span></span><b class="dr-num"></b><i><u></u></i></div>');
+    r.dataset.g = g[0];
+    $('span', r).textContent = g[1];
+    $('b', r).textContent = g[3] ? g[4](g[2]) + ' / ' + g[4](g[3]) : g[4](g[2]) + ' · no goal';
+    if (g[3]) { $('u', r).style.width = Math.min(100, g[2] / g[3] * 100) + '%'; if (g[2] >= g[3]) r.classList.add('is-met'); }
+    else $('i', r).remove();
+    gb.appendChild(r);
+  });
+  gb.addEventListener('click', function () { drGoalSheet(); });
   var chips = $('.dr-chips', card);
   function chip(t, pos) { var x = el('<span class="dr-chip dr-num"></span>'); x.textContent = t; if (pos) x.classList.add('is-pos'); chips.appendChild(x); }
   chip(c.pos + ' positive', c.pos > 0); chip(c.neg + ' negative');
@@ -682,6 +733,21 @@ function drTodayCard() {
   go.innerHTML = IC.plus + '<span>Log an encounter</span>';
   go.addEventListener('click', function () { drLogSheet(null); });
   return card;
+}
+function drGoalSheet() {
+  var b = el('<div></div>'), fs = {};
+  [['goal', 'Encounters a day', 'numeric', '5'], ['gc', 'Closes a day', 'numeric', '2'], ['gs', 'Sales a day ($)', 'decimal', '500']].forEach(function (f, i) {
+    var lab = el('<label class="dr-flab"></label>'); lab.htmlFor = 'drG_' + f[0]; lab.textContent = f[1]; if (!i) lab.style.marginTop = '4px'; b.appendChild(lab);
+    var x = el('<input class="dr-field dr-num" autocomplete="off" />'); x.id = 'drG_' + f[0]; x.inputMode = f[2]; x.placeholder = f[3]; x.value = S[f[0]] || '';
+    fs[f[0]] = x; b.appendChild(x);
+  });
+  var go = el('<button type="button" class="dr-btn is-ink is-full" id="drGoalGo">Save</button>');
+  var s = drSheet({ title: 'Daily goals', body: b, foot: [go] });
+  go.addEventListener('click', function () {
+    function n(x, cap) { var v = Math.round(parseFloat(String(x.value).replace(/[$,\s]/g, ''))); return v > 0 ? Math.min(cap, v) : 0; }
+    S.goal = n(fs.goal, 99); S.gc = n(fs.gc, 99); S.gs = n(fs.gs, 1e6);
+    drSave(); s.close(); drRender(); drToast('Goals saved');
+  });
 }
 /* Every encounter in full — the same fields the sheet asks for, laid out
    to be read off a screenshot. Today's, in the order they happened, so
@@ -696,7 +762,8 @@ function drFullCards() {
   var wrap = el('<div id="drFull" class="dr-full"><div class="dr-cap dr-gh"></div></div>');
   $('.dr-cap', wrap).textContent = (k === ymd(today()) ? 'Today' : fmtDay(k)) + ' · ' + list.length + (list.length === 1 ? ' encounter' : ' encounters');
   list.forEach(function (e) {
-    var c = el('<button type="button" class="dr-card dr-en"><div class="dr-en-h"><b></b><span class="dr-en-f"></span></div><div class="dr-en-m"></div><p class="dr-en-n"></p></button>');
+    var c = el('<button type="button" class="dr-card dr-en"><div class="dr-en-h"><b></b><span class="dr-en-s"></span><span class="dr-en-f"></span></div><div class="dr-en-m"></div><p class="dr-en-n"></p></button>');
+    if (e.cl) $('.dr-en-s', c).textContent = e.amt ? 'Closed ' + money(e.amt) : 'Closed'; else $('.dr-en-s', c).remove();
     c.dataset.id = e.id;
     $('b', c).textContent = enTitle(e);
     var f = $('.dr-en-f', c); f.textContent = e.f === 1 ? 'Positive' : 'Negative'; if (e.f === 1) f.classList.add('is-pos');
@@ -897,7 +964,7 @@ function drRepCard(p) {
   var ba = drBest(drBy(p.list, drActKey)), bg = drBest(drBy(p.list, drAgeKey)), bh = drBest(drBy(p.list, drHourKey));
   var kv = el('<div class="dr-kv"></div>');
   [['Best activity', ba ? ba.k : '–'], ['Best age', bg ? bg.k : '–'], ['Best time', bh ? fmtHour(+bh.k) : '–'],
-   ['Got a name', pctTxt(c.named, c.n)], ['A day', String(Math.round(c.n / Math.max(1, c.dayN) * 10) / 10)], ['Goal', S.goal ? S.goal + ' a day' : '–']].forEach(function (x) {
+   ['Closes', String(c.cl)], ['Sales', money(c.amt)], ['Close rate', pctTxt(c.cl, c.n)]].forEach(function (x) {
     var dv = el('<div><span></span><b class="dr-num"></b></div>'); $('span', dv).textContent = x[0]; $('b', dv).textContent = x[1]; kv.appendChild(dv);
   });
   card.appendChild(kv);
@@ -910,7 +977,7 @@ function drRepCard(p) {
     var li = el('<li><span class="dr-dot"></span><span><b></b></span><em></em></li>');
     if (e.f === 1) $('.dr-dot', li).classList.add('is-pos');
     $('b', li).textContent = enTitle(e);
-    var sub2 = enSub(e); if (sub2) $$('span', li)[1].appendChild(document.createTextNode(' · ' + sub2));
+    var sub2 = [enSub(e), e.cl ? (e.amt ? money(e.amt) : 'closed') : ''].filter(Boolean).join(' · '); if (sub2) $$('span', li)[1].appendChild(document.createTextNode(' · ' + sub2));
     $('em', li).textContent = oneDay ? fmtTime(e.t) : fmtDay(dayOf(e.t));
     $('ul', ls).appendChild(li);
   });
@@ -933,11 +1000,12 @@ function drRepText(p) {
   L.push('Encounters · ' + p.label + (p.range ? ' (' + p.range + ')' : '') + (S.name ? ' · ' + S.name : ''));
   if (!c.n) { L.push('Nothing logged.'); return L.join('\n'); }
   L.push(c.n + (c.n === 1 ? ' encounter' : ' encounters') + ' · ' + pctTxt(c.pos, c.n) + ' positive (' + c.pos + ' positive, ' + c.neg + ' negative)');
+  L.push(c.cl + (c.cl === 1 ? ' close' : ' closes') + ' · ' + money(c.amt) + ' in sales');
   var ba = drBest(drBy(p.list, drActKey)), bg = drBest(drBy(p.list, drAgeKey));
   if (ba || bg) L.push([ba ? 'Best activity: ' + ba.k + ' ' + pctTxt(ba.pos, ba.n) : '', bg ? 'Best age: ' + bg.k + ' ' + pctTxt(bg.pos, bg.n) : ''].filter(Boolean).join(' · '));
   L.push('');
   p.list.slice().sort(function (a, b) { return a.t - b.t; }).forEach(function (e) {
-    L.push((e.f === 1 ? '+ ' : '− ') + [enTitle(e), enSub(e), fmtDay(dayOf(e.t)) + ' ' + fmtTime(e.t)].filter(Boolean).join(' · ') + (e.note ? ' — ' + e.note : ''));
+    L.push((e.f === 1 ? '+ ' : '− ') + [enTitle(e), enSub(e), fmtDay(dayOf(e.t)) + ' ' + fmtTime(e.t), e.cl ? 'closed' + (e.amt ? ' ' + money(e.amt) : '') : ''].filter(Boolean).join(' · ') + (e.note ? ' — ' + e.note : ''));
   });
   var a0 = ymd(p.from), b0 = ymd(p.to);
   Object.keys(S.days).filter(function (k) { return k >= a0 && k <= b0; }).sort().forEach(function (k) {
@@ -1083,7 +1151,8 @@ function drRenderYou() {
   var rep = el('<button type="button" class="dr-go">Report for your mentor</button>');
   rep.addEventListener('click', function () { drReport(); });
   root.appendChild(rep);
-  var card = el('<div class="dr-card"><label class="dr-flab" for="drName" style="margin-top:0">Your name, on the report</label><input class="dr-field" id="drName" maxlength="40" autocomplete="off" /><label class="dr-flab" for="drGoal">Encounters a day</label><input class="dr-field dr-num" id="drGoal" inputmode="numeric" autocomplete="off" /></div>');
+  var card = el('<div class="dr-card"><label class="dr-flab" for="drName" style="margin-top:0">Your name, on the report</label><input class="dr-field" id="drName" maxlength="40" autocomplete="off" /><label class="dr-flab" for="drGoal">Encounters a day</label><input class="dr-field dr-num" id="drGoal" inputmode="numeric" autocomplete="off" /><button type="button" class="dr-btn is-full" id="drYouGoals" style="margin-top:12px">Daily goals · closes and sales</button></div>');
+  $('#drYouGoals', card).addEventListener('click', function () { drGoalSheet(); });
   var nf = $('#drName', card); nf.value = S.name;
   nf.addEventListener('change', function () { S.name = nf.value.trim().slice(0, 40); drSave(); });
   var gf = $('#drGoal', card); gf.value = S.goal;

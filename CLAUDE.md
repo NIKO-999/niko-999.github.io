@@ -16,7 +16,9 @@ Single-file apps that share a design system:
   code, keyed by ids that never change once a workout names them.
 - `doors/index.html` — Encounters: a log of the people you meet. One
   encounter is a name, an age, what they were doing, positive or
-  negative, and a note; a day can end on its takeaways (`days`, keyed
+  negative, and a note, and it can be a close with a sale amount; daily
+  goals for encounters, closes and sales (`goal`, `gc`, `gs`) read on
+  the day card; a day can end on its takeaways (`days`, keyed
   by date), drawn last under the day's encounters; every figure (best activity, age, time of day,
   what to work on) is worked out from that one list. It began as a
   door-knock counter and was rebuilt around the encounter on request;
