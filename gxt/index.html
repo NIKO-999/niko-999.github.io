@@ -104,6 +104,17 @@ svg { display: block; }
 .gx-pill { min-height: 32px; padding: 0 13px; border-radius: 999px; background: var(--card2); color: var(--dim); font-size: 12.5px; font-weight: 500; }
 .gx-pill:hover { color: var(--ink); }
 .gx-pill[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
+/* A step with two questions puts them side by side with a wider gap
+   between them than within them, so Long/Short and Clear/Unclear read
+   as two answers rather than four. */
+.gx-gs { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+.gx-gs.is-al { display: grid; grid-template-columns: repeat(2, minmax(0, max-content)); gap: 8px 22px; }
+.gx-tf { display: inline-flex; align-items: center; width: 32px; font-size: 12px; font-weight: 600; color: var(--dim); }
+/* A timeframe set against the daily keeps its fill and gains the one
+   colour's ring, so the odd one out is findable at a glance. */
+.gx-pill.is-against { box-shadow: 0 0 0 2px var(--log); }
+.gx-al-say { grid-column: 1 / -1; margin: 2px 0 0; font-size: 12.5px; color: var(--dim); }
+.gx-al-say.is-wait { color: var(--ink); font-weight: 600; }
 .gx-out { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 10px; padding-top: 14px; border-top: 1px solid var(--line); }
 .gx-note { width: 100%; min-height: 60px; height: 60px; resize: vertical; border-radius: 12px; background: var(--card2); border: 1px solid transparent; padding: 10px 12px; font-size: 13.5px; outline: none; margin-top: 10px; display: block; }
 .gx-note:focus { border-color: rgba(255,255,255,.25); }
@@ -203,10 +214,12 @@ svg { display: block; }
 /* ═══════════════════════════════════════════════════════════════
    GXT — a backtest and trade journal for one model, and nothing else.
 
-   The checklist IS the model: daily bias, the 4H level it ran into,
-   an SMT on the 4H or higher, a second on the 1H or 30m, then a
-   V-shaped CISD away from it. Every entry records which of the five
-   held, so the figures can say whether the full checklist is what wins.
+   The checklist IS the model: a daily bias that is clear, a 4H that
+   is clear and has run into a level, the 4H, 1H, 30m and 3m all
+   pointing the daily's way, an SMT on the 4H or higher, a second on
+   the 1H or 30m, then a V-shaped CISD away from it. Every entry
+   records which of the six held, so the figures can say whether the
+   full checklist is what wins.
 
    Everything lives in this browser under gxt.v1 and is never sent
    anywhere. No network request, no account.
@@ -215,23 +228,46 @@ svg { display: block; }
 var KEY = 'gxt.v1';
 var BIN_DAYS = 30;
 
-/* The five, in order. `ok` decides whether a step counts as met off
-   the entry, so the score is worked out and never stored — it cannot
-   disagree with the answers it is a score of. */
+/* The six, in order. A step is one or more groups of choices; `ok`
+   decides whether it counts as met off the entry, so the score is
+   worked out and never stored — it cannot disagree with its answers.
+
+   CLEAR is part of the bias, not a note on it: an unclear daily or an
+   unclear 4H is a step not met, whichever way it leans. */
+var DIR = [['long', 'Long'], ['short', 'Short']];
+var CLR = [['clear', 'Clear'], ['unclear', 'Unclear']];
+/* The four that have to agree. Any one leaning the other way is the
+   wait — a 30m looking long under a short daily is not a setup yet. */
+var TFS = [['a4h', '4H'], ['a1h', '1H'], ['a30', '30m'], ['a3', '3m']];
 var STEPS = [
-  { k: 'bias', n: 'Daily bias', s: 'Which way the daily is drawing.', one: true,
-    o: [['long', 'Long'], ['short', 'Short']], ok: function (e) { return !!e.bias; } },
-  { k: 'lv', n: '4H key level', s: 'What price ran into before the turn.',
-    o: [['dh', 'Daily high'], ['dl', 'Daily low'], ['h4h', '4H high'], ['h4l', '4H low'], ['gap', '4H gap']],
-    ok: function (e) { return e.lv.length > 0; } },
-  { k: 's1', n: 'SMT · stage one', s: 'On the 4H or above.', one: true,
-    o: [['w', 'Weekly'], ['d', 'Daily'], ['4h', '4H']], ok: function (e) { return !!e.s1; } },
-  { k: 's2', n: 'SMT · stage two', s: 'On the 1H or 30m.', one: true,
-    o: [['1h', '1H'], ['30m', '30m']], ok: function (e) { return !!e.s2; } },
-  { k: 'cisd', n: 'V-shaped CISD', s: 'Away from the SMT.', one: true,
-    o: [['y', 'Confirmed']], ok: function (e) { return e.cisd === 'y'; } }
+  { k: 'bias', n: 'Daily bias', s: 'Which way the daily is drawing, and whether that is clear.',
+    g: [{ k: 'bias', one: true, o: DIR }, { k: 'dc', one: true, o: CLR }],
+    ok: function (e) { return !!e.bias && e.dc === 'clear'; } },
+  { k: 'lv', n: '4H', s: 'Is the 4H clear, and what has price run into.',
+    g: [{ k: 'hc', one: true, o: CLR },
+        { k: 'lv', o: [['dh', 'Daily high'], ['dl', 'Daily low'], ['h4h', '4H high'], ['h4l', '4H low'], ['gap', '4H gap']] }],
+    ok: function (e) { return e.hc === 'clear' && e.lv.length > 0; } },
+  { k: 'al', n: 'Alignment', s: 'Every timeframe the same way as the daily.',
+    g: TFS.map(function (t) { return { k: t[0], lab: t[1], one: true, o: DIR }; }),
+    ok: function (e) { return gxAlign(e).ok; } },
+  { k: 's1', n: 'SMT · stage one', s: 'On the 4H or above.',
+    g: [{ k: 's1', one: true, o: [['w', 'Weekly'], ['d', 'Daily'], ['4h', '4H']] }], ok: function (e) { return !!e.s1; } },
+  { k: 's2', n: 'SMT · stage two', s: 'On the 1H or 30m.',
+    g: [{ k: 's2', one: true, o: [['1h', '1H'], ['30m', '30m']] }], ok: function (e) { return !!e.s2; } },
+  { k: 'cisd', n: 'V-shaped CISD', s: 'Away from the SMT.',
+    g: [{ k: 'cisd', one: true, o: [['y', 'Confirmed']] }], ok: function (e) { return e.cisd === 'y'; } }
 ];
-var OPT = {}; STEPS.forEach(function (s) { OPT[s.k] = s.o.map(function (o) { return o[0]; }); });
+var OPT = {}, ONE = [];
+STEPS.forEach(function (s) { s.g.forEach(function (g) { OPT[g.k] = g.o.map(function (o) { return o[0]; }); if (g.one) ONE.push(g.k); }); });
+
+/* Aligned means all four set AND all the daily's way. Against means a
+   timeframe already set pointing the other way — that is the wait,
+   and it can be said before the other three are filled in. */
+function gxAlign(e) {
+  var set = TFS.filter(function (t) { return e[t[0]]; });
+  var against = e.bias ? set.filter(function (t) { return e[t[0]] !== e.bias; }) : [];
+  return { ok: !!e.bias && set.length === TFS.length && !against.length, against: against, set: set.length };
+}
 var SYMS = ['NQ', 'MES'];
 
 function gxScore(e) { return STEPS.filter(function (s) { return s.ok(e); }).length; }
@@ -251,18 +287,18 @@ function gxShort(iso) { return gxParse(iso).toLocaleDateString(undefined, { day:
 function gxClean(raw) {
   var e = raw && typeof raw === 'object' ? raw : null;
   if (!e || typeof e.id !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(e.d)) return null;
-  var one = function (k) { return OPT[k].indexOf(e[k]) >= 0 ? e[k] : ''; };
   var r = parseFloat(e.r);
-  return {
+  var out = {
     id: e.id, t: e.t === 'live' ? 'live' : 'bt', d: e.d, at: +e.at || Date.now(),
     sym: SYMS.indexOf(e.sym) >= 0 ? e.sym : '',
-    bias: one('bias'), s1: one('s1'), s2: one('s2'), cisd: one('cisd'),
     lv: Array.isArray(e.lv) ? e.lv.filter(function (x, i, a) { return OPT.lv.indexOf(x) >= 0 && a.indexOf(x) === i; }) : [],
     res: ['w', 'l', 'be'].indexOf(e.res) >= 0 ? e.res : '',
     r: isFinite(r) ? Math.round(r * 100) / 100 : null,
     note: typeof e.note === 'string' ? e.note.slice(0, 600) : '',
     del: +e.del || 0
   };
+  ONE.forEach(function (k) { out[k] = OPT[k].indexOf(e[k]) >= 0 ? e[k] : ''; });
+  return out;
 }
 function gxLoad() {
   var raw = null;
@@ -281,7 +317,9 @@ var live = function () { return S.e.filter(function (e) { return !e.del; }); };
 
 /* ── the form ── */
 var blank = function () {
-  return { id: '', t: S.last.t, sym: S.last.sym, d: gxToday(), bias: '', lv: [], s1: '', s2: '', cisd: '', res: '', r: null, note: '' };
+  var f = { id: '', t: S.last.t, sym: S.last.sym, d: gxToday(), lv: [], res: '', r: null, note: '' };
+  ONE.forEach(function (k) { f[k] = ''; });
+  return f;
 };
 var F = blank();
 var editing = false;
@@ -295,21 +333,40 @@ function gxPaintSteps() {
   var ol = $('gxSteps'); ol.textContent = '';
   STEPS.forEach(function (s, i) {
     var li = document.createElement('li'); li.className = 'gx-step' + (s.ok(F) ? ' is-met' : ''); li.dataset.k = s.k;
-    li.innerHTML = '<span class="gx-n">' + (i + 1) + '</span><div><b></b><small></small><div class="gx-pills" role="group"></div></div>';
+    li.innerHTML = '<span class="gx-n">' + (i + 1) + '</span><div><b></b><small></small><div class="gx-gs' + (s.k === 'al' ? ' is-al' : '') + '"></div></div>';
     li.querySelector('b').textContent = s.n;
     li.querySelector('small').textContent = s.s;
-    var row = li.querySelector('.gx-pills'); row.setAttribute('aria-label', s.n);
-    s.o.forEach(function (o) {
-      var b = document.createElement('button'); b.type = 'button'; b.className = 'gx-pill'; b.dataset.v = o[0]; b.textContent = o[1];
-      var on = s.one ? F[s.k] === o[0] : F.lv.indexOf(o[0]) >= 0;
-      b.setAttribute('aria-pressed', String(on));
-      b.addEventListener('click', function () {
-        if (s.one) F[s.k] = F[s.k] === o[0] ? '' : o[0];
-        else { var at = F.lv.indexOf(o[0]); if (at >= 0) F.lv.splice(at, 1); else F.lv.push(o[0]); }
-        gxPaintForm();
+    var gs = li.querySelector('.gx-gs');
+    s.g.forEach(function (g) {
+      var row = document.createElement('div'); row.className = 'gx-pills'; row.dataset.g = g.k;
+      row.setAttribute('role', 'group'); row.setAttribute('aria-label', g.lab ? g.lab : s.n);
+      if (g.lab) { var l = document.createElement('span'); l.className = 'gx-tf'; l.textContent = g.lab; row.appendChild(l); }
+      g.o.forEach(function (o) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'gx-pill'; b.dataset.v = o[0]; b.textContent = o[1];
+        var on = g.one ? F[g.k] === o[0] : F.lv.indexOf(o[0]) >= 0;
+        b.setAttribute('aria-pressed', String(on));
+        if (on && g.lab && F.bias && o[0] !== F.bias) b.classList.add('is-against');
+        b.addEventListener('click', function () {
+          if (g.one) F[g.k] = F[g.k] === o[0] ? '' : o[0];
+          else { var at = F.lv.indexOf(o[0]); if (at >= 0) F.lv.splice(at, 1); else F.lv.push(o[0]); }
+          gxPaintForm();
+        });
+        row.appendChild(b);
       });
-      row.appendChild(b);
+      gs.appendChild(row);
     });
+    if (s.k === 'al') {
+      var a = gxAlign(F), w = document.createElement('p'); w.className = 'gx-al-say'; w.id = 'gxAlSay';
+      if (a.against.length) {
+        w.classList.add('is-wait');
+        var other = F.bias === 'long' ? 'short' : 'long';
+        w.textContent = 'Wait. ' + a.against.map(function (t) { return t[1]; }).join(', ') + (a.against.length === 1 ? ' is' : ' are')
+          + ' looking ' + other + ' against a ' + F.bias + ' daily.';
+      } else if (a.ok) w.textContent = 'All four ' + F.bias + '. Aligned.';
+      else if (!F.bias) w.textContent = 'Set the daily bias first.';
+      else w.textContent = (TFS.length - a.set) + ' still to read.';
+      gs.appendChild(w);
+    }
     ol.appendChild(li);
   });
 }
@@ -346,7 +403,8 @@ $('gxCancel').addEventListener('click', gxReset);
 $('gxSave').addEventListener('click', function () {
   if (!F.bias) return;
   var e = gxClean({ id: F.id || 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), t: F.t, d: F.d, at: F.at,
-    sym: F.sym, bias: F.bias, lv: F.lv, s1: F.s1, s2: F.s2, cisd: F.cisd, res: F.res, r: F.r, note: F.note.trim() });
+    sym: F.sym, lv: F.lv, res: F.res, r: F.r, note: F.note.trim() });
+  ONE.forEach(function (k) { e[k] = OPT[k].indexOf(F[k]) >= 0 ? F[k] : ''; });
   var at = S.e.findIndex(function (x) { return x.id === e.id; });
   if (at >= 0) S.e[at] = e; else S.e.push(e);
   S.last = { t: e.t, sym: e.sym || S.last.sym };
@@ -400,7 +458,7 @@ function gxPaintLog() {
     w.textContent = (e.sym ? e.sym + ' ' : '') + (e.bias === 'long' ? 'Long' : 'Short');
     if (e.note) { var em = document.createElement('em'); em.textContent = ' · ' + e.note.split('\n')[0]; w.appendChild(em); }
     b.querySelector('.gx-r').textContent = r;
-    b.setAttribute('aria-label', gxShort(e.d) + ', ' + (e.t === 'live' ? 'live trade' : 'backtest') + ', ' + w.textContent + ', ' + gxScore(e) + ' of 5, ' + r);
+    b.setAttribute('aria-label', gxShort(e.d) + ', ' + (e.t === 'live' ? 'live trade' : 'backtest') + ', ' + w.textContent + ', ' + gxScore(e) + ' of ' + STEPS.length + ', ' + r);
     b.addEventListener('click', function () {
       if (e.del) {
         e.del = 0; gxWrite(S); gxPaintAll(); gxToast('Restored');
@@ -441,7 +499,7 @@ function gxPaintStats() {
     ['wk', 'This week', thisWk.length, 'entries since Monday'],
     ['wr', 'Win rate', all == null ? '—' : all + '%', 'wins and losses only'],
     ['r', 'Average R', avg == null ? '—' : (avg > 0 ? '+' : '') + avg.toFixed(2), rs.length + ' with an R'],
-    ['full', 'Full checklist', fr == null ? '—' : fr + '%', full.length + ' of ' + L.length + ' met all five']
+    ['full', 'Full checklist', fr == null ? '—' : fr + '%', full.length + ' of ' + L.length + ' met all ' + STEPS.length]
   ];
   var box = $('gxStats'); box.textContent = '';
   tiles.forEach(function (t) {

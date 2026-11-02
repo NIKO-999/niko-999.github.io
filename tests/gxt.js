@@ -41,14 +41,20 @@ const freeze = (at) => `(() => {
   }
   const store = (page) => page.evaluate(() => JSON.parse(localStorage.getItem('gxt.v1') || 'null'));
   const stat = (page, s) => page.textContent(`.gx-stat[data-s="${s}"] b`);
-  const pill = (page, k, v) => page.click(`.gx-step[data-k="${k}"] .gx-pill[data-v="${v}"]`);
+  const pill = (page, g, v) => page.click(`.gx-pills[data-g="${g}"] .gx-pill[data-v="${v}"]`);
+  const align = async (page, a4h, a1h, a30, a3) => { await pill(page, 'a4h', a4h); await pill(page, 'a1h', a1h); await pill(page, 'a30', a30); await pill(page, 'a3', a3); };
 
   const { c, page } = await ctx();
 
   /* ── a first open ── */
   ok('six figures, the counts at nought', (await page.$$eval('.gx-stat b', (b) => b.map((x) => x.textContent))).join() === '0,0,0,—,—,—');
-  ok('five checklist steps, in the order of the model',
-    (await page.$$eval('.gx-step', (s) => s.map((x) => x.dataset.k))).join() === 'bias,lv,s1,s2,cisd');
+  ok('six checklist steps, in the order of the model',
+    (await page.$$eval('.gx-step', (s) => s.map((x) => x.dataset.k))).join() === 'bias,lv,al,s1,s2,cisd');
+  ok('the daily and the 4H each ask clear or unclear',
+    (await page.$$eval('.gx-step[data-k="bias"] .gx-pills', (g) => g.map((x) => x.dataset.g))).join() === 'bias,dc'
+    && (await page.$$eval('.gx-step[data-k="lv"] .gx-pills', (g) => g.map((x) => x.dataset.g))).join() === 'hc,lv');
+  ok('alignment reads the 4H, 1H, 30m and 3m',
+    (await page.$$eval('.gx-step[data-k="al"] .gx-tf', (t) => t.map((x) => x.textContent))).join() === '4H,1H,30m,3m');
   ok('the log says it is empty', /Nothing logged yet/.test(await page.textContent('#gxLog')));
   const grid = await page.$$eval('#gxGrid i', (i) => ({ n: i.length, now: i.filter((x) => x.classList.contains('is-now')).map((x) => x.dataset.d) }));
   ok('twelve weeks of days, today marked', grid.n === 84 && grid.now.join() === '2026-11-02', grid);
@@ -59,12 +65,28 @@ const freeze = (at) => `(() => {
     cols.length === 2 && cols[0][0] === cols[1][0] && cols[0][1] === cols[1][1] && Math.abs(cols[0][2] - cols[1][2]) <= 1, cols);
   ok('nothing scrolls sideways at 1440', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
 
-  /* ── a full-checklist backtest ── */
-  await pill(page, 'bias', 'long');
-  await pill(page, 'lv', 'dl'); await pill(page, 'lv', 'gap');
+  /* ── unclear is not met, whichever way it leans ── */
+  await pill(page, 'bias', 'long'); await pill(page, 'dc', 'unclear');
+  ok('an unclear daily is a step not met', !(await page.$eval('.gx-step[data-k="bias"]', (s) => s.classList.contains('is-met'))));
+  await pill(page, 'dc', 'clear');
+  ok('a clear one is', await page.$eval('.gx-step[data-k="bias"]', (s) => s.classList.contains('is-met')));
+  await pill(page, 'lv', 'dl'); await pill(page, 'hc', 'unclear');
+  ok('a level hit on an unclear 4H is not met', !(await page.$eval('.gx-step[data-k="lv"]', (s) => s.classList.contains('is-met'))));
+  await pill(page, 'hc', 'clear'); await pill(page, 'lv', 'gap');
+
+  /* ── alignment: one timeframe the other way is the wait ── */
+  await align(page, 'long', 'long', 'short', 'long');
+  const say = await page.textContent('#gxAlSay');
+  ok('a 30m looking short under a long daily says wait, and names it', /^Wait\. 30m is looking short against a long daily\.$/.test(say), say);
+  ok('and rings the odd one out', await page.$$eval('.gx-pill.is-against', (p) => p.map((x) => x.closest('.gx-pills').dataset.g).join()) === 'a30');
+  ok('misaligned is a step not met', !(await page.$eval('.gx-step[data-k="al"]', (s) => s.classList.contains('is-met'))));
+  await pill(page, 'a30', 'long');
+  ok('all four the daily\'s way is aligned', /Aligned/.test(await page.textContent('#gxAlSay'))
+    && await page.$eval('.gx-step[data-k="al"]', (s) => s.classList.contains('is-met')));
+
   await pill(page, 's1', '4h'); await pill(page, 's2', '30m'); await pill(page, 'cisd', 'y');
-  ok('the score follows the ticks', /5 \/ 5/.test(await page.textContent('#gxScore')));
-  ok('every step is marked met', await page.$$eval('.gx-step.is-met', (s) => s.length) === 5);
+  ok('the score follows the ticks', /6 \/ 6/.test(await page.textContent('#gxScore')));
+  ok('every step is marked met', await page.$$eval('.gx-step.is-met', (s) => s.length) === 6);
   await page.click('#gxRes button[data-v="w"]');
   await page.fill('#gxR', '3');
   await page.fill('#gxNote', 'Clean V off the 30m SMT');
@@ -73,6 +95,7 @@ const freeze = (at) => `(() => {
   let st = await store(page);
   const e1 = st && st.e[0];
   ok('a backtest lands in the store with every answer', e1 && e1.t === 'bt' && e1.sym === 'NQ' && e1.bias === 'long'
+    && e1.dc === 'clear' && e1.hc === 'clear' && e1.a4h === 'long' && e1.a1h === 'long' && e1.a30 === 'long' && e1.a3 === 'long'
     && e1.lv.join() === 'dl,gap' && e1.s1 === '4h' && e1.s2 === '30m' && e1.cisd === 'y' && e1.res === 'w' && e1.r === 3
     && e1.d === '2026-11-02' && e1.note === 'Clean V off the 30m SMT', e1);
   ok('the form goes back to blank', !(await page.$$eval('.gx-pill[aria-pressed="true"]', (p) => p.length)) && (await page.inputValue('#gxNote')) === '');
@@ -82,7 +105,9 @@ const freeze = (at) => `(() => {
   await page.click('#gxType button[data-v="live"]');
   await page.click('#gxSym button[data-v="MES"]');
   ok('the button names a trade', (await page.textContent('#gxSave')) === 'Log trade');
-  await pill(page, 'bias', 'short'); await pill(page, 'lv', 'h4h'); await pill(page, 's1', 'd'); await pill(page, 'cisd', 'y');
+  await pill(page, 'bias', 'short'); await pill(page, 'dc', 'clear'); await pill(page, 'hc', 'clear'); await pill(page, 'lv', 'h4h');
+  await align(page, 'short', 'short', 'short', 'short');
+  await pill(page, 's1', 'd'); await pill(page, 'cisd', 'y');
   await page.click('#gxRes button[data-v="l"]'); await page.fill('#gxR', '-1');
   await page.click('#gxSave');
   ok('a live trade is journaled', (await stat(page, 'live')) === '1');
@@ -100,8 +125,8 @@ const freeze = (at) => `(() => {
 
   const rows = await page.$$eval('.gx-li', (r) => r.map((x) => ({ tag: x.querySelector('.gx-tag').textContent, w: x.querySelector('.gx-w').textContent, dots: x.querySelectorAll('.gx-dots .is-on').length, r: x.querySelector('.gx-r').textContent })));
   ok('the log shows both, with how many steps each met', rows.length === 2
-    && rows.some((r) => r.tag === 'BT' && r.dots === 5 && r.r === '+3R' && /NQ Long/.test(r.w) && /Clean V/.test(r.w))
-    && rows.some((r) => r.tag === 'LIVE' && r.dots === 4 && r.r === '-1R' && /MES Short/.test(r.w)), rows);
+    && rows.some((r) => r.tag === 'BT' && r.dots === 6 && r.r === '+3R' && /NQ Long/.test(r.w) && /Clean V/.test(r.w))
+    && rows.some((r) => r.tag === 'LIVE' && r.dots === 5 && r.r === '-1R' && /MES Short/.test(r.w)), rows);
   await page.click('#gxFilt button[data-v="bt"]');
   ok('the filter narrows to backtests', (await page.$$eval('.gx-li', (r) => r.length)) === 1);
   await page.click('#gxFilt button[data-v="all"]');
