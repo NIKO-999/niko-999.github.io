@@ -332,6 +332,59 @@ const freeze = (at) => `(() => {
     }
   }
 
+  /* ── a leg day asks how your legs are, and the answer changes the day ── */
+  {
+    const { c, page } = await ctx(null, '2026-11-02T07:00:00');
+    const opts = await page.locator('#lfRec .lf-rq-b b').allTextContents();
+    ok('a leg day asks how your legs are, in the plan\'s four answers', opts.join('|') === 'Mild soreness|Moderate soreness|Very sore or weaker|Sharp pain or swelling', opts);
+    await page.click('#lfRec [data-r="1"]'); await settle(page);
+    ok('moderate soreness says so and changes the start button', /cut by a third/.test(await page.textContent('#lfRec')) && /fewer leg sets/.test(await page.textContent('#lfGo')));
+    ok('and is kept for the day', (await store(page)).rc['2026-11-02'] === 1);
+    await page.click('#lfGo'); await settle(page);
+    const n = await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelector('.lf-ex-n').textContent + ':' + e.querySelectorAll('.lf-set:not(.is-hd)').length));
+    ok('leg sets come in a third lighter, abs untouched', n.join() === 'Hack squat:2,Smith machine squat:2,Leg extensions:2,Standing calf raises:3,Cable crunches:3', n);
+    /* THE REST ALERT, once, the moment the rest is up. */
+    const set0 = page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd)').first();
+    await set0.locator('input').nth(0).fill('100'); await set0.locator('input').nth(1).fill('8');
+    await set0.locator('.lf-chk').click();
+    ok('no alert while the rest is still running', !(await page.evaluate(() => window.lfBeeps || 0)));
+    await page.evaluate(() => { const a = JSON.parse(localStorage.getItem('lift.active.v1')); a.rest = Date.now() - 125000; localStorage.setItem('lift.active.v1', JSON.stringify(a)); });
+    await page.reload(); await page.waitForTimeout(400); if (!(await page.locator('.lf-session').count())) await page.click('#lfLive'); await page.waitForTimeout(2300);
+    ok('the rest alert sounds once when the rest is up', await page.evaluate(() => window.lfBeeps) === 1);
+    await page.click('#lfFinish'); await page.waitForTimeout(800); await page.keyboard.press('Escape'); await settle(page);
+    await c.close();
+  }
+  {
+    const { c, page } = await ctx({ unit: 'kg', ra: false }, '2026-11-02T07:00:00');
+    await page.click('#lfGo'); await settle(page);
+    const set0 = page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd)').first();
+    await set0.locator('input').nth(0).fill('100'); await set0.locator('input').nth(1).fill('8');
+    await set0.locator('.lf-chk').click();
+    await page.evaluate(() => { const a = JSON.parse(localStorage.getItem('lift.active.v1')); a.rest = Date.now() - 125000; localStorage.setItem('lift.active.v1', JSON.stringify(a)); });
+    await page.reload(); await page.waitForTimeout(400); if (!(await page.locator('.lf-session').count())) await page.click('#lfLive'); await page.waitForTimeout(2300);
+    ok('with the alert off, the rest stays silent', !(await page.evaluate(() => window.lfBeeps || 0)));
+    await c.close();
+  }
+  {
+    const sore = { '2026-10-23': 1, '2026-10-26': 2, '2026-10-28': 1 };
+    const { c, page } = await ctx({ unit: 'kg', rc: sore }, '2026-11-02T07:00:00');
+    await page.click('#lfRec [data-r="2"]'); await settle(page);
+    ok('very sore says skip the hard session and offers another', /Skip the hard leg session/.test(await page.textContent('#lfRec')) && await page.locator('#lfRecAlt').count() === 1 && /Start anyway/.test(await page.textContent('#lfGo')));
+    await page.click('#lfRec [data-r="2"]'); await settle(page);
+    ok('pressing it again clears the answer', (await store(page)).rc['2026-11-02'] === undefined && await page.locator('#lfRec .lf-rq-a').count() === 0);
+    ok('three sore days in a fortnight offer the plan\'s lighter volume', await page.locator('#lfRecSg').count() === 1);
+    await page.click('#lfRecSg button'); await settle(page);
+    const f = (await store(page)).focus.filter((x) => ['Quads', 'Hamstrings', 'Calves'].includes(x.m)).map((x) => x.m + ':' + x.lo + '-' + x.hi);
+    ok('which lowers quads, hamstrings and calves', f.join() === 'Quads:10-12,Calves:9-12,Hamstrings:8-8', f);
+    ok('and then stops offering', await page.locator('#lfRecSg').count() === 0);
+    await c.close();
+  }
+  {
+    const { c, page } = await ctx(null, '2026-11-01T07:00:00');
+    ok('an upper day does not ask about legs', await page.locator('#lfRec').count() === 0);
+    await c.close();
+  }
+
   /* ── steps, food and water ── */
   {
     const { c, page } = await ctx();

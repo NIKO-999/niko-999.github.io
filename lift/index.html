@@ -333,6 +333,19 @@ svg { display: block; }
 .lf-hero + p { margin: 6px 0 0; font-size: 15px; font-weight: 600; }
 
 .lf-pick-h { padding: 14px 2px 2px; }
+.lf-rq { margin: 12px 0 2px; }
+.lf-rq-o { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.lf-rq-b { background: var(--card2); border-radius: var(--r-s); padding: 10px 12px; text-align: left; display: grid; gap: 2px; min-height: 56px; }
+.lf-rq-b b { font-size: 13px; font-weight: 600; }
+.lf-rq-b span { font-size: 11px; color: var(--dim); line-height: 1.3; }
+.lf-rq-b[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
+.lf-rq-b[aria-pressed="true"] span { color: rgba(0,0,0,.6); }
+.lf-rq-b.is-bad[aria-pressed="true"] { background: var(--log); color: #fff; }
+.lf-rq-b.is-bad[aria-pressed="true"] span { color: rgba(255,255,255,.8); }
+.lf-rq-a { font-size: 13px; line-height: 1.4; color: var(--ink); margin: 10px 0 0; }
+#lfRecAlt { margin-top: 10px; }
+.lf-rq-sg { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.lf-rq-sg p { font-size: 13px; line-height: 1.4; color: var(--dim); margin: 0 0 10px; }
 .lf-tip { background: var(--card2); border-radius: var(--r-s); padding: 12px 14px; margin: 6px 0 10px; }
 .lf-tip > b { display: block; font-size: 14px; line-height: 1.35; font-weight: 600; margin: 4px 0 6px; color: var(--today); }
 .lf-tip ul { margin: 0; padding-left: 16px; display: grid; gap: 6px; }
@@ -591,6 +604,25 @@ function lfTargets() {
   var pri = S.focus.filter(function (f) { return f.p; }), rest = S.focus.filter(function (f) { return !f.p; });
   return pri.concat(rest).map(function (f) { return [f.m, f.lo, f.hi, f.p]; });
 }
+/* RECOVERY, from the plan: a leg day asks how your legs are before it
+   starts, and the answer changes the day rather than being a note on it.
+   The split adapts to recovery, never the other way round. */
+var LEG_M = { Quads: 1, Hamstrings: 1, Glutes: 1, Calves: 1, Legs: 1 };
+var RECOVERY = [
+  ['Mild soreness', 'Normal strength and movement', 'Train as planned.'],
+  ['Moderate soreness', 'Movement is normal', 'Leg sets are cut by a third today. Same weights, fewer sets.'],
+  ['Very sore or weaker', 'Reduced range or noticeably weaker', 'Skip the hard leg session. Push it back a day, or train upper today.'],
+  ['Sharp pain or swelling', 'Or unusual weakness', 'Stop training the affected area and get it checked before you load it again.']
+];
+function lfIsLegEx(id) { var e = exById(id); return !!(e && LEG_M[e.m]); }
+function lfIsLegDay(rt) { return !!rt && rt.ex.filter(function (id) { var e = exById(id); return e && (e.m === 'Quads' || e.m === 'Hamstrings' || e.m === 'Glutes'); }).length >= 2; }
+function lfRc(k) { var v = S.rc[k || ymd(today())]; return v === undefined ? -1 : v; }
+/* Moderate soreness cuts a third, rounded, never below one set. */
+function lfCut(n) { return Math.max(1, n - Math.max(1, Math.round(n / 3))); }
+/* The plan's lighter volume, offered once legs keep coming in sore. */
+var FOCUS_RECOVER = { Quads: [10, 12], Hamstrings: [8, 8], Calves: [9, 12] };
+function lfSoreDays() { var from = ymd(addDays(today(), -13)), n = 0; Object.keys(S.rc).forEach(function (k) { if (k >= from && S.rc[k] >= 1) n++; }); return n; }
+
 /* Rest and effort by kind of movement. */
 function lfRestOf(id) { var e = exById(id); return e && e.c ? { lo: 120, hi: 180, rir: '1–2 RIR' } : { lo: 60, hi: 120, rir: '1–2 RIR' }; }
 
@@ -627,7 +659,7 @@ var DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 var MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 /* ═══════════ STORE ═══════════ */
-function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null, focus: lfFocusDefault(), ck: 'walk', lk: {}, dl: {}, dg: { st: 15000, kc: 0, pr: 0, wa: 3000 } }; }
+function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null, focus: lfFocusDefault(), ck: 'walk', rc: {}, ra: true, lk: {}, dl: {}, dg: { st: 15000, kc: 0, pr: 0, wa: 3000 } }; }
 function num(v) { var n = +v; return isFinite(n) && n >= 0 ? n : null; }
 
 /* A damaged record is REPAIRED, never thrown away: a bad set costs the
@@ -639,6 +671,9 @@ function lfClean(o) {
   d.goal = Math.min(7, Math.max(1, Math.round(+o.goal) || 4));
   d.bwGoal = num(o.bwGoal);
   if (CARDIO.some(function (c) { return c[0] === o.ck; })) d.ck = o.ck;
+  d.ra = o.ra !== false;
+  /* How your legs felt, one answer a day, sixty days kept. */
+  if (o.rc && typeof o.rc === 'object') { var rcFrom = ymd(addDays(today(), -60)); Object.keys(o.rc).forEach(function (k) { var v = o.rc[k]; if (/^\d{4}-\d\d-\d\d$/.test(k) && k >= rcFrom && (v === 0 || v === 1 || v === 2 || v === 3)) d.rc[k] = v; }); }
   if (Array.isArray(o.focus)) {
     var seen = {};
     d.focus = o.focus.filter(function (f) { return f && MUSCLES.indexOf(f.m) >= 0 && !seen[f.m] && (seen[f.m] = 1); }).slice(0, 16).map(function (f) {
@@ -865,6 +900,23 @@ function lfToast(msg, undo) {
   requestAnimationFrame(function () { t.classList.add('is-up'); });
   toastT = setTimeout(function () { t.classList.remove('is-up'); setTimeout(function () { t.remove(); }, 220); }, undo ? 5000 : 2400);
 }
+/* iOS gives a page no vibration, so the alert is a sound — and a page
+   may only play one after a press, so the context is opened on the
+   press that starts the rest and kept for the beep that ends it. */
+var lfAc = null;
+function lfAudio() { if (!S.ra) return; try { lfAc = lfAc || new (window.AudioContext || window.webkitAudioContext)(); if (lfAc.state === 'suspended') lfAc.resume(); } catch (e) {} }
+function lfBeep() {
+  window.lfBeeps = (window.lfBeeps || 0) + 1;
+  if (!lfAc) return;
+  try {
+    [0, .22].forEach(function (t0) {
+      var o = lfAc.createOscillator(), g = lfAc.createGain(), t = lfAc.currentTime + t0;
+      o.frequency.value = 880; o.connect(g); g.connect(lfAc.destination);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.3, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + .16);
+      o.start(t); o.stop(t + .18);
+    });
+  } catch (e) {}
+}
 function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 12); } catch (e) {} }
 
 /* ═══════════ HOME ═══════════ */
@@ -908,6 +960,26 @@ function lfTodayCard() {
   go.classList.toggle('is-live', !!act);
   go.addEventListener('click', function () { if (act) lfOpenSession(); else lfStart(rt); });
   $('#lfPick', c).addEventListener('click', function () { if (act) lfOpenSession(); else lfRoutinePicker(); });
+  /* A LEG DAY ASKS FIRST. Pressed again, an answer clears. */
+  if (rt && !act && lfIsLegDay(rt)) {
+    var rv = lfRc(), rq = el('<div class="lf-rq" id="lfRec"><div class="lf-lab">How are your legs?</div><div class="lf-rq-o"></div><p class="lf-rq-a"></p></div>');
+    RECOVERY.forEach(function (o, i) {
+      var b = el('<button type="button" class="lf-rq-b"><b></b><span></span></button>');
+      $('b', b).textContent = o[0]; $('span', b).textContent = o[1]; b.dataset.r = i;
+      b.setAttribute('aria-pressed', rv === i ? 'true' : 'false');
+      b.classList.toggle('is-bad', i >= 2);
+      b.addEventListener('click', function () { var k = ymd(today()), nx = {}; Object.keys(S.rc).forEach(function (x) { if (x !== k) nx[x] = S.rc[x]; }); if (S.rc[k] !== i) nx[k] = i; S.rc = nx; lfSave(); lfRender(); });
+      $('.lf-rq-o', rq).appendChild(b);
+    });
+    if (rv >= 0) $('.lf-rq-a', rq).textContent = RECOVERY[rv][2]; else $('.lf-rq-a', rq).remove();
+    if (rv >= 2) {
+      var alt = el('<button type="button" class="lf-btn is-full" id="lfRecAlt">Pick another session</button>');
+      alt.addEventListener('click', lfRoutinePicker);
+      rq.appendChild(alt);
+      $('span:last-child', go).textContent = 'Start anyway';
+    } else if (rv === 1) $('span:last-child', go).textContent = 'Start · fewer leg sets';
+    c.insertBefore(rq, go);
+  }
   /* A session already finished today can still take its cardio. */
   var done = act ? null : woOn(ymd(today())).slice(-1)[0];
   if (done) {
@@ -989,6 +1061,17 @@ function lfLegCard() {
     $('em', row).textContent = n + ' / ' + lfRange(t[1], t[2]);
     $('.lf-vol', c).appendChild(row);
   });
+  var lowerNow = S.focus.some(function (f) { var g = FOCUS_RECOVER[f.m]; return g && f.lo > g[1]; });
+  if (lfSoreDays() >= 3 && lowerNow) {
+    var sg = el('<div class="lf-rq-sg" id="lfRecSg"><p>Your legs have come in sore three or more times in two weeks. The plan says ease the volume: quads 10–12, hamstrings 8, calves 9–12.</p><button type="button" class="lf-btn is-full">Use the recovery targets</button></div>');
+    $('button', sg).addEventListener('click', function () {
+      var was = JSON.stringify(S.focus);
+      S.focus.forEach(function (f) { var g = FOCUS_RECOVER[f.m]; if (g) { f.lo = g[0]; f.hi = g[1]; } });
+      lfSave(); lfRender();
+      lfToast('Recovery targets on', function () { S.focus = JSON.parse(was); lfSave(); lfRender(); });
+    });
+    c.appendChild(sg);
+  }
   var cl = el('<div class="lf-hd lf-cd-wk"><span class="lf-lab">Cardio</span><span class="lf-lab lf-num"></span></div>');
   $('.lf-num', cl).textContent = cdm ? cdm + ' min this week' : 'none this week';
   c.appendChild(cl);
@@ -1233,7 +1316,14 @@ var sessSheet = null, tick = null;
 
 function lfStart(rt) {
   act = { id: lfId(), s: Date.now(), n: rt ? rt.n : 'Workout', rt: rt ? rt.id : null, rest: 0, x: [] };
-  (rt ? rt.ex : []).forEach(function (id) { if (exById(id)) lfAddEx(id, rt.tg && rt.tg[id]); });
+  var cut = lfRc() === 1 && lfIsLegDay(rt);
+  (rt ? rt.ex : []).forEach(function (id) {
+    if (!exById(id)) return;
+    var tg = rt.tg && rt.tg[id];
+    if (cut && tg && lfIsLegEx(id)) tg = [lfCut(tg[0]), tg[1], tg[2]];
+    lfAddEx(id, tg);
+  });
+  if (cut) act.cut = 1;
   lfSaveAct(); buzz(15);
   lfRender(); lfOpenSession();
 }
@@ -1306,7 +1396,10 @@ function lfTick() {
     $('.lf-rs-t', r).textContent = act.rest ? (rt ? ' · target ' + lfRestTxt(rt) : '') : ' · starts when you tick a set';
     $('.lf-rs-bar i', r).style.width = act.rest && rt ? Math.min(100, gone / (rt.lo * 1000) * 100) + '%' : '0';
     r.classList.toggle('is-idle', !act.rest);
-    r.classList.toggle('is-ready', !!(act.rest && rt && gone >= rt.lo * 1000));
+    var ready = !!(act.rest && rt && gone >= rt.lo * 1000);
+    r.classList.toggle('is-ready', ready);
+    /* Once per rest, the moment it is up. */
+    if (ready && !act.rang) { act.rang = 1; lfSaveAct(); if (S.ra) { buzz([80, 60, 80]); lfBeep(); } }
   }
   var l = $('#lfLive em'); if (l) l.textContent = fmtClock(Date.now() - act.s);
 }
@@ -1368,7 +1461,7 @@ function lfPaintSession() {
            before it, this session's earlier sets included. */
         var est = e1rm(s.w, s.r);
         s.pr = est > runBestBefore(e, si, best) + 1e-9 && best > 0 ? 1 : 0;
-        act.rest = Date.now(); act.restEx = e.id;
+        act.rest = Date.now(); act.restEx = e.id; act.rang = 0; lfAudio();
         lfSaveAct(); buzz(s.pr ? [20, 40, 20] : 14); lfPaintSession(); lfTick();
       });
       card.appendChild(row);
@@ -1866,7 +1959,12 @@ function lfRenderYou() {
   root.appendChild(lfBwCard());
   var c = el('<div class="lf-card"><span class="lf-flab" style="margin-top:0">Units</span><div class="lf-seg" id="lfUnit"><button type="button" data-u="kg">kg</button><button type="button" data-u="lb">lb</button></div>'
     + '<span class="lf-flab">Workouts a week</span><div class="lf-seg" id="lfGoal" style="--n:7"></div>'
+    + '<span class="lf-flab">Rest alert</span><div class="lf-seg" id="lfRa"><button type="button" data-a="1">Sound + buzz</button><button type="button" data-a="0">Off</button></div>'
     + '</div>');
+  $$('#lfRa button', c).forEach(function (b) {
+    b.setAttribute('aria-pressed', (b.dataset.a === '1') === S.ra ? 'true' : 'false');
+    b.addEventListener('click', function () { S.ra = b.dataset.a === '1'; lfSave(); lfRender(); });
+  });
   $$('#lfUnit button', c).forEach(function (b) {
     b.setAttribute('aria-pressed', b.dataset.u === S.unit ? 'true' : 'false');
     b.addEventListener('click', function () { S.unit = b.dataset.u; lfSave(); lfRender(); });
