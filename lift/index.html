@@ -333,6 +333,11 @@ svg { display: block; }
 .lf-hero + p { margin: 6px 0 0; font-size: 15px; font-weight: 600; }
 
 .lf-pick-h { padding: 14px 2px 2px; }
+.lf-day.is-rest { border-style: dashed; }
+.lf-day.is-rest:not(.is-now) { border-color: var(--dim); }
+.lf-dots i.is-r { background: none; box-shadow: inset 0 0 0 1.5px var(--dim); }
+#lfRecRest { margin-top: 10px; }
+#lfRecRest + #lfRecAlt { margin-top: 8px; }
 .lf-rq { margin: 12px 0 2px; }
 .lf-rq-o { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
 .lf-rq-b { background: var(--card2); border-radius: var(--r-s); padding: 10px 12px; text-align: left; display: grid; gap: 2px; min-height: 56px; }
@@ -616,6 +621,13 @@ var RECOVERY = [
 ];
 function lfIsLegEx(id) { var e = exById(id); return !!(e && LEG_M[e.m]); }
 function lfIsLegDay(rt) { return !!rt && rt.ex.filter(function (id) { var e = exById(id); return e && (e.m === 'Quads' || e.m === 'Hamstrings' || e.m === 'Glutes'); }).length >= 2; }
+function lfIsRest(k) { return !!S.rd[k || ymd(today())]; }
+function lfSetRest(on) {
+  var k = ymd(today()), nx = {};
+  Object.keys(S.rd).forEach(function (x) { if (x !== k) nx[x] = 1; });
+  if (on) { nx[k] = 1; if (S.pick && S.pick.d === k) S.pick = null; }
+  S.rd = nx; lfSave(); lfRender();
+}
 function lfRc(k) { var v = S.rc[k || ymd(today())]; return v === undefined ? -1 : v; }
 /* Moderate soreness cuts a third, rounded, never below one set. */
 function lfCut(n) { return Math.max(1, n - Math.max(1, Math.round(n / 3))); }
@@ -659,7 +671,7 @@ var DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 var MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 /* ═══════════ STORE ═══════════ */
-function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null, focus: lfFocusDefault(), ck: 'walk', rc: {}, ra: true, lk: {}, dl: {}, dg: { st: 15000, kc: 0, pr: 0, wa: 3000 } }; }
+function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null, focus: lfFocusDefault(), ck: 'walk', rc: {}, rd: {}, ra: true, lk: {}, dl: {}, dg: { st: 15000, kc: 0, pr: 0, wa: 3000 } }; }
 function num(v) { var n = +v; return isFinite(n) && n >= 0 ? n : null; }
 
 /* A damaged record is REPAIRED, never thrown away: a bad set costs the
@@ -672,6 +684,8 @@ function lfClean(o) {
   d.bwGoal = num(o.bwGoal);
   if (CARDIO.some(function (c) { return c[0] === o.ck; })) d.ck = o.ck;
   d.ra = o.ra !== false;
+  /* A REST DAY taken on purpose, a date and nothing else. */
+  if (o.rd && typeof o.rd === 'object') Object.keys(o.rd).forEach(function (k) { if (/^\d{4}-\d\d-\d\d$/.test(k) && o.rd[k]) d.rd[k] = 1; });
   /* How your legs felt, one answer a day, sixty days kept. */
   if (o.rc && typeof o.rc === 'object') { var rcFrom = ymd(addDays(today(), -60)); Object.keys(o.rc).forEach(function (k) { var v = o.rc[k]; if (/^\d{4}-\d\d-\d\d$/.test(k) && k >= rcFrom && (v === 0 || v === 1 || v === 2 || v === 3)) d.rc[k] = v; }); }
   if (Array.isArray(o.focus)) {
@@ -945,6 +959,20 @@ function lfTodayCard() {
     + '<div><button type="button" class="lf-title-box" id="lfPick"></button></div>'
     + '<div class="lf-sub"></div><div class="lf-chips"></div>'
     + '<button type="button" class="lf-go" id="lfGo"><span class="lf-play">' + IC.play + '</span><span></span></button></div>');
+  /* A REST DAY IS THE DAY'S PLAN, not a gap in it: the card says so and
+     the one control is the way back to training. */
+  if (!act && lfIsRest()) {
+    c.classList.add('is-rest'); c.id = 'lfRestDay';
+    $('#lfPick', c).textContent = 'Rest day';
+    $('#lfPick', c).setAttribute('aria-label', 'Today: rest day. Choose a routine');
+    $('#lfPick', c).addEventListener('click', lfRoutinePicker);
+    $('.lf-sub', c).textContent = 'Recovery is part of the plan. Walk, stretch, eat and sleep well.';
+    $('.lf-chips', c).remove();
+    var gr = $('#lfGo', c);
+    $('span:last-child', gr).textContent = 'Train anyway';
+    gr.addEventListener('click', function () { lfSetRest(false); });
+    return c;
+  }
   var title = act ? act.n : (rt ? rt.n : 'Workout');
   $('#lfPick', c).textContent = title;
   $('#lfPick', c).setAttribute('aria-label', 'Today: ' + title + '. Choose a routine');
@@ -973,6 +1001,9 @@ function lfTodayCard() {
     });
     if (rv >= 0) $('.lf-rq-a', rq).textContent = RECOVERY[rv][2]; else $('.lf-rq-a', rq).remove();
     if (rv >= 2) {
+      var rst = el('<button type="button" class="lf-btn is-ink is-full" id="lfRecRest">Take a rest day</button>');
+      rst.addEventListener('click', function () { lfSetRest(true); });
+      rq.appendChild(rst);
       var alt = el('<button type="button" class="lf-btn is-full" id="lfRecAlt">Pick another session</button>');
       alt.addEventListener('click', lfRoutinePicker);
       rq.appendChild(alt);
@@ -1086,6 +1117,7 @@ function lfGridCard() {
   for (var i = 29; i >= 0; i--) {
     var d = ymd(addDays(t, -i)), x = el('<i class="lf-day"></i>');
     if (on[d]) { x.classList.add('is-on'); n++; }
+    else if (S.rd[d]) x.classList.add('is-rest');
     if (i === 0) x.classList.add('is-now');
     x.dataset.d = d;
     g.appendChild(x);
@@ -1693,9 +1725,10 @@ function lfRoutinePicker() {
     if (cur) li.insertAdjacentHTML('beforeend', IC.check);
     li.addEventListener('click', fn); b.appendChild(li);
   }
-  var cur = lfToday();
+  var cur = lfIsRest() ? null : lfToday();
+  item('Rest day', 'Take today off on purpose', lfIsRest(), function () { s.close(true); lfSetRest(!lfIsRest()); });
   allRt().forEach(function (r) {
-    item(r.n, (r.fixed ? DOW_LONG[r.dow] + ' · ' : '') + (r.sp || (r.ex.length + ' exercises')), cur && cur.id === r.id, function () { S.pick = { d: ymd(today()), id: r.id }; lfSave(); s.close(true); lfRender(); });
+    item(r.n, (r.fixed ? DOW_LONG[r.dow] + ' · ' : '') + (r.sp || (r.ex.length + ' exercises')), cur && cur.id === r.id, function () { S.pick = { d: ymd(today()), id: r.id }; lfSetRest(false); s.close(true); lfRender(); });
   });
   item('Empty workout', 'Add exercises as you go', false, function () { s.close(true); lfStart(null); });
   item('New routine', 'A named list of exercises you repeat', false, function () { s.close(true); lfRoutineForm(null); });
@@ -1869,9 +1902,10 @@ function lfRenderCal() {
       cell.dataset.d = k;
       $('.lf-num', cell).textContent = d;
       if (ws.length) { cell.classList.add('is-on'); ws.slice(0, 3).forEach(function () { $('.lf-dots', cell).appendChild(el('<i></i>')); }); }
+      else if (S.rd[k]) { cell.classList.add('is-rest'); $('.lf-dots', cell).appendChild(el('<i class="is-r"></i>')); }
       if (k === tk) cell.classList.add('is-now');
       if (k > tk) { cell.classList.add('is-ahead'); cell.disabled = true; }
-      cell.setAttribute('aria-label', fmtDay(k) + (ws.length ? ', ' + ws.map(function (w) { return w.n; }).join(', ') : ', rest'));
+      cell.setAttribute('aria-label', fmtDay(k) + (ws.length ? ', ' + ws.map(function (w) { return w.n; }).join(', ') : S.rd[k] ? ', rest day taken' : ', nothing logged'));
       cell.addEventListener('click', (function (k) { return function () { lfDaySheet(k); }; })(k));
       g.appendChild(cell);
     }
@@ -1921,7 +1955,7 @@ function lfDaySheet(k) {
   var b = el('<div class="lf-list"></div>');
   var dl = lfDlLine(k);
   if (dl) { var dp = el('<p class="lf-lab lf-dl-line" style="margin:0 0 8px"></p>'); dp.textContent = dl; b.appendChild(dp); }
-  if (!ws.length) b.appendChild(el('<div class="lf-empty"><b>Rest day</b>No workout on this day.</div>'));
+  if (!ws.length) b.appendChild(S.rd[k] ? el('<div class="lf-empty"><b>Rest day</b>Taken on purpose. Recovery counts.</div>') : el('<div class="lf-empty"><b>No workout</b>Nothing logged on this day.</div>'));
   ws.forEach(function (w) { b.appendChild(lfWoRow(w)); });
   lfSheet({ title: fmtDay(k), body: b });
 }

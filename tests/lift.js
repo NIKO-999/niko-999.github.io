@@ -380,6 +380,31 @@ const freeze = (at) => `(() => {
     await c.close();
   }
   {
+    /* A REST DAY, taken on purpose: from the recovery card, or the picker. */
+    const { c, page } = await ctx(null, '2026-11-02T07:00:00');
+    await page.click('#lfRec [data-r="2"]'); await settle(page);
+    ok('very sore offers a rest day', await page.locator('#lfRecRest').count() === 1);
+    await page.click('#lfRecRest'); await settle(page);
+    ok('taking one makes today a rest day', (await page.textContent('#lfPick')).trim() === 'Rest day' && /Train anyway/.test(await page.textContent('#lfGo')) && (await store(page)).rd['2026-11-02'] === 1);
+    ok('and asks nothing about legs', await page.locator('#lfRec').count() === 0);
+    ok('the 30 days mark it as rest, not as a miss', await page.$eval('.lf-day.is-now', (e) => e.classList.contains('is-rest') && !e.classList.contains('is-on')));
+    await page.click('#lfGo'); await settle(page);
+    ok('train anyway takes it back', (await page.textContent('#lfPick')).trim() === 'Lower A' && !(await store(page)).rd['2026-11-02']);
+    await page.click('#lfPick'); await settle(page);
+    await top(page).locator('.lf-li', { hasText: 'Rest day' }).click(); await settle(page);
+    ok('the picker takes a rest day too', (await page.textContent('#lfPick')).trim() === 'Rest day');
+    await page.click('.lf-bar [data-v="cal"]'); await settle(page);
+    ok('the month marks it', await page.$eval('.lf-cell[data-d="2026-11-02"]', (e) => e.classList.contains('is-rest') && !!e.querySelector('.is-r')));
+    await page.click('.lf-cell[data-d="2026-11-02"]'); await settle(page);
+    ok('and its day says it was taken on purpose', /Taken on purpose/.test(await top(page).textContent()));
+    await page.keyboard.press('Escape'); await settle(page);
+    await page.click('.lf-bar [data-v="home"]'); await settle(page);
+    await page.click('#lfPick'); await settle(page);
+    await top(page).locator('.lf-li', { hasText: 'Lower A' }).click(); await settle(page);
+    ok('picking a session ends the rest day', (await page.textContent('#lfPick')).trim() === 'Lower A' && !(await store(page)).rd['2026-11-02']);
+    await c.close();
+  }
+  {
     const { c, page } = await ctx(null, '2026-11-01T07:00:00');
     ok('an upper day does not ask about legs', await page.locator('#lfRec').count() === 0);
     await c.close();
