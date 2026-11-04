@@ -182,7 +182,7 @@ const freeze = (at) => `(() => {
   await set(0, 0).locator('input').nth(0).fill('60'); await set(0, 0).locator('input').nth(1).fill('8');
   await set(0, 0).locator('.lf-chk').click();
   ok('logging a set turns its check red', await set(0, 0).locator('.lf-chk span').evaluate((e) => getComputedStyle(e).backgroundColor) === 'rgb(255, 59, 48)');
-  ok('and starts the rest clock', /^Rest 0:0\d · target 60–120s$/.test((await page.textContent('#lfRest')).trim()));
+  ok('and starts the rest clock', /^Rest 0:0\d · target 2–3 min$/.test((await page.textContent('#lfRest')).trim()));
   ok('the rest clock is always on screen, even scrolled to the end of the workout', await page.evaluate(() => {
     const bd = document.querySelector('.lf-session .lf-sh-bd'); bd.scrollTop = bd.scrollHeight;
     const r = document.querySelector('#lfRest').getBoundingClientRect();
@@ -544,6 +544,44 @@ const freeze = (at) => `(() => {
     const { c, page } = await ctx({ unit: 'kg', focus: [{ m: 'Quads', lo: 20, hi: 10, p: 1 }, { m: 'Quads', lo: 5 }, { m: 'Nope', lo: 3 }, null] });
     const r = await store(page);
     ok('a bad focus row costs the row: a duplicate, an unknown muscle, a range run backwards', JSON.stringify(r.focus) === '[{"m":"Quads","lo":20,"hi":20,"p":1}]', r.focus);
+    await c.close();
+  }
+
+  /* ── EVERY EXERCISE CARRIES A RECOMMENDED DOSE, and the targets are yours ── */
+  {
+    const { c, page } = await ctx({ unit: 'kg' });
+    await page.click('.lf-bar [data-v="lib"]');
+    const sub = async (n) => page.locator('#lfLib .lf-li', { has: page.locator('b', { hasText: new RegExp('^' + n + '$') }) }).first().locator('span').first().textContent();
+    ok('a compound reads 3 × 6–10 at 1–2 RIR', /3 × 6–10 · 1–2 RIR/.test(await sub('Barbell bench press')), await sub('Barbell bench press'));
+    ok('an isolation reads its own reps at 0–1 RIR', /3 × 12–20 · 0–1 RIR/.test(await sub('Lateral raises')) && /3 × 8–12 · 0–1 RIR/.test(await sub('Barbell curls')), [await sub('Lateral raises'), await sub('Barbell curls')]);
+    await page.locator('#lfLib .lf-li', { has: page.locator('b', { hasText: /^Leg extensions$/ }) }).first().click(); await settle(page);
+    ok('an exercise opens on its recommendation and rest', (await top(page).locator('#lfRecd').textContent()) === 'Isolation · 3 × 12–15 · 0–1 RIR · rest 60–120s');
+    await page.keyboard.press('Escape'); await settle(page);
+    /* one you add guesses its type from the name, and you can change it */
+    await page.click('.lf-bar [data-v="home"]'); await page.click('#lfGo'); await settle(page);
+    const ses = top(page);
+    await ses.locator('.lf-add', { hasText: 'Add exercise' }).click(); await settle(page);
+    await top(page).locator('input[type="search"]').fill('Landmine press'); await settle(page);
+    await top(page).locator('button', { hasText: 'Create exercise' }).click(); await settle(page);
+    ok('a new exercise named as a press is guessed compound', (await top(page).locator('#lfExC [aria-pressed="true"]').textContent()).startsWith('Compound'));
+    await top(page).locator('#lfExN').fill('Landmine lateral'); 
+    ok('the guess follows the name until you choose', (await top(page).locator('#lfExC [aria-pressed="true"]').textContent()).startsWith('Isolation'));
+    await top(page).locator('#lfExC button', { hasText: 'Compound' }).click();
+    await top(page).locator('#lfExN').fill('Landmine thing');
+    ok('and stops once you have', (await top(page).locator('#lfExC [aria-pressed="true"]').textContent()).startsWith('Compound'));
+    await top(page).locator('button', { hasText: /^Save$/ }).click(); await settle(page);
+    const card = page.locator('.lf-ex', { hasText: 'Landmine thing' });
+    ok('it lands in the workout with a target written under it', (await card.locator('.lf-tg').textContent()) === '3 × 6–10 · 1–2 RIR · rest 2–3 min', await card.locator('.lf-tg').textContent());
+    ok('and it is stored as a compound', (await store(page)).ex.find((e) => e.n === 'Landmine thing').c === 1);
+    await page.keyboard.press('Escape'); await settle(page);
+    /* the weekly targets are edited from the home card itself */
+    await page.click('.lf-bar [data-v="home"]'); await settle(page);
+    await page.click('#lfLegs .lf-vr[data-m="Chest"]'); await settle(page);
+    await top(page).locator('#lfFoLo').fill('10'); await top(page).locator('#lfFoHi').fill('12');
+    await top(page).locator('button', { hasText: 'Save' }).click(); await settle(page);
+    ok('a row on Sets this week opens its target and saves it', (await page.textContent('#lfLegs .lf-vr[data-m="Chest"] em')).endsWith('/ 10–12'), await page.textContent('#lfLegs .lf-vr[data-m="Chest"] em'));
+    await page.click('#lfTgEdit'); await settle(page);
+    ok('Edit targets goes to the list under You', await page.locator('#lfYou:not([hidden]) #lfFocus').count() === 1);
     await c.close();
   }
 

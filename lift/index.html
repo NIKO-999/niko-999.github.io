@@ -333,6 +333,9 @@ svg { display: block; }
 .lf-hero + p { margin: 6px 0 0; font-size: 15px; font-weight: 600; }
 
 .lf-pick-h { padding: 14px 2px 2px; }
+.lf-recd { font-size: 13px; color: var(--dim); margin: 10px 2px 0; }
+button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
+.lf-vr-ed { font-size: 13px; font-weight: 600; color: var(--ink); min-height: 44px; margin: -12px -4px -12px 0; padding: 0 4px; }
 .fr-p { font-size: 13px; line-height: 1.45; color: var(--dim); margin: 10px 0 0; }
 .fr-pend { color: var(--ink); }
 .fr-row { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; text-align: left; padding: 12px 0; border-top: 1px solid var(--line); min-height: 44px; }
@@ -728,7 +731,25 @@ var FOCUS_RECOVER = { Quads: [10, 12], Hamstrings: [8, 8], Calves: [9, 12] };
 function lfSoreDays() { var from = ymd(addDays(today(), -13)), n = 0; Object.keys(S.rc).forEach(function (k) { if (k >= from && S.rc[k] >= 1) n++; }); return n; }
 
 /* Rest and effort by kind of movement. */
-function lfRestOf(id) { var e = exById(id); return e && e.c ? { lo: 120, hi: 180, rir: '1–2 RIR' } : { lo: 60, hi: 120, rir: '1–2 RIR' }; }
+/* THE RECOMMENDED DOSE for any exercise, worked out from what it is
+   rather than written per exercise, so one you add yourself gets it the
+   same day. A compound is heavy and stops short: 3 × 6–10, 1–2 reps in
+   reserve, 2–3 minutes. An isolation is lighter and can go closer:
+   0–1 in reserve, 1–2 minutes, with the reps the muscle grows on —
+   higher for delts and calves, which recover fast and load badly. */
+var ISO_REPS = { Shoulders: [12, 20], Calves: [10, 20], Abs: [10, 15], Core: [10, 15], 'Lower back': [12, 15],
+  Chest: [12, 15], Quads: [12, 15], Hamstrings: [10, 15], Glutes: [10, 15], Back: [10, 15], Biceps: [8, 12], Triceps: [10, 15] };
+function lfRec(id) {
+  var e = exById(id);
+  if (e && e.c) return { sets: 3, lo: 6, hi: 10, rir: '1–2 RIR', rlo: 120, rhi: 180, kind: 'Compound' };
+  var rr = (e && ISO_REPS[e.m]) || [10, 15];
+  return { sets: 3, lo: rr[0], hi: rr[1], rir: '0–1 RIR', rlo: 60, rhi: 120, kind: 'Isolation' };
+}
+function lfRestOf(id) { var c = lfRec(id); return { lo: c.rlo, hi: c.rhi, rir: c.rir }; }
+function lfRecTxt(id) { var c = lfRec(id); return c.sets + ' × ' + c.lo + '–' + c.hi + ' · ' + c.rir; }
+/* A name that says what the movement is: used only to guess the type of
+   an exercise you add, which you can change. */
+var COMPOUND_RE = /press|squat|row\b|rows|deadlift|pull-?ups?|chin-?ups?|dips?\b|lunge|thrust|clean|snatch|pulldown|step-?ups?|good ?morning/i;
 
 var KEY = 'lift.v1', ACTK = 'lift.active.v1', VIEWK = 'lift.view.v1';
 var LB = 0.45359237;
@@ -804,7 +825,7 @@ function lfClean(o) {
   });
   if (o.dg && typeof o.dg === 'object') ['st', 'kc', 'pr', 'wa'].forEach(function (f) { var v = num(o.dg[f]); if (v !== null) d.dg[f] = Math.round(v); });
   if (Array.isArray(o.ex)) d.ex = o.ex.filter(function (e) { return e && typeof e.id === 'string' && typeof e.n === 'string' && e.n.trim(); })
-    .map(function (e) { return { id: e.id, n: e.n.slice(0, 60), m: MUSCLES.indexOf(e.m) >= 0 ? e.m : 'Other', t: e.t === 'bw' ? 'bw' : 'w' }; });
+    .map(function (e) { return { id: e.id, n: e.n.slice(0, 60), m: MUSCLES.indexOf(e.m) >= 0 ? e.m : 'Other', t: e.t === 'bw' ? 'bw' : 'w', c: e.c ? 1 : 0 }; });
   if (Array.isArray(o.rt)) d.rt = o.rt.filter(function (r) { return r && typeof r.id === 'string' && typeof r.n === 'string'; })
     .map(function (r) { return { id: r.id, n: r.n.slice(0, 40) || 'Routine', sp: typeof r.sp === 'string' ? r.sp.slice(0, 60) : '', ex: Array.isArray(r.ex) ? r.ex.filter(function (x) { return typeof x === 'string'; }) : [] }; });
   if (Array.isArray(o.wo)) d.wo = o.wo.map(lfCleanWo).filter(Boolean);
@@ -1171,14 +1192,18 @@ function lfMuscleSets(from, to) {
 }
 function lfLegCard() {
   var m = monday(today()), got = lfMuscleSets(m, addDays(m, 6));
-  var c = el('<div class="lf-card" id="lfLegs"><div class="lf-hd"><span class="lf-lab">Sets this week</span><span class="lf-lab">target</span></div><div class="lf-vol"></div></div>');
+  var c = el('<div class="lf-card" id="lfLegs"><div class="lf-hd"><span class="lf-lab">Sets this week</span><button type="button" class="lf-vr-ed" id="lfTgEdit">Edit targets</button></div><div class="lf-vol"></div></div>');
+  /* THE TARGETS ARE YOURS: a row opens its own, the header the list. */
+  $('#lfTgEdit', c).addEventListener('click', function () { lfGo('you'); var f = $('#lfFocus'); if (f) f.scrollIntoView({ block: 'start' }); });
   var ts = lfTargets(), cdm = 0, a0 = ymd(m), a1 = ymd(addDays(m, 6));
   S.wo.forEach(function (w) { if (w.cd && w.d >= a0 && w.d <= a1) cdm += w.cd.m; });
   if (act && act.cd && ymd(new Date(act.s)) >= a0) cdm += act.cd.m;
   if (!ts.length) $('.lf-vol', c).appendChild(el('<div class="lf-lab">Nothing in focus. Add a muscle under You.</div>'));
   ts.forEach(function (t, i) {
-    var n = got[t[0]] || 0, row = el('<div class="lf-vr"><span></span><i><b></b></i><em class="lf-num"></em></div>');
+    var n = got[t[0]] || 0, row = el('<button type="button" class="lf-vr"><span></span><i><b></b></i><em class="lf-num"></em></button>');
     row.dataset.m = t[0];
+    row.setAttribute('aria-label', t[0] + ': ' + n + ' of ' + lfRange(t[1], t[2]) + ' sets. Change the target');
+    row.addEventListener('click', function () { lfFocusSheet(t[0]); });
     /* The first three are the specialisation, the rest keep progressing. */
     if (i && !t[3] && ts[i - 1][3]) $('.lf-vol', c).appendChild(el('<div class="lf-vsep" aria-hidden="true"></div>'));
     $('span', row).textContent = t[0];
@@ -1547,10 +1572,11 @@ function lfPaintSession() {
     card.dataset.ex = e.id;
     $('.lf-ex-n', card).textContent = e.n;
     var rs = lfRestOf(e.id);
-    $('.lf-tg', card).textContent = e.tg ? e.tg[0] + ' × ' + lfRange(e.tg[1], e.tg[2]) + ' · ' + rs.rir + ' · rest ' + lfRestTxt(rs) : '';
+    /* The plan's target where the day has one, the recommended dose
+       for what the exercise is everywhere else. */
+    $('.lf-tg', card).textContent = (e.tg ? e.tg[0] + ' × ' + lfRange(e.tg[1], e.tg[2]) + ' · ' + rs.rir : lfRecTxt(e.id)) + ' · rest ' + lfRestTxt(rs);
     $('.lf-aim', card).textContent = aim.note;
     $('.lf-aim', card).classList.toggle('is-up', !!aim.up);
-    if (!e.tg) $('.lf-tg', card).remove();
     if (!aim.note) $('.lf-aim', card).remove();
     $('.lf-ex-n', card).addEventListener('click', function () { lfExSheet(e.id); });
     $('.lf-x', card).addEventListener('click', function () {
@@ -1689,7 +1715,7 @@ function lfPicker(onPick) {
       var h = el('<div class="lf-cap lf-pick-h"></div>'); h.textContent = G.n; list.appendChild(h);
       G.es.forEach(function (e) {
         var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div>' + IC.plus + '</button>');
-        $('b', li).textContent = e.n; $('span', li).textContent = e.m;
+        $('b', li).textContent = e.n; $('span', li).textContent = e.m + ' · ' + lfRecTxt(e.id);
         li.addEventListener('click', function () { s.close(true); onPick(e.id); });
         list.appendChild(li);
       });
@@ -1701,8 +1727,9 @@ function lfPicker(onPick) {
 
 function lfExForm(ex, onDone, seed) {
   var m = ex ? ex.m : 'Other', t = ex ? ex.t : 'w';
-  var b = el('<div><label class="lf-flab" for="lfExN">Name</label><input class="lf-field" id="lfExN" maxlength="60" autocomplete="off" /><span class="lf-flab">Muscle group</span><div class="lf-pills" id="lfExM"></div><span class="lf-flab">Logged as</span><div class="lf-pills" id="lfExT"></div></div>');
+  var b = el('<div><label class="lf-flab" for="lfExN">Name</label><input class="lf-field" id="lfExN" maxlength="60" autocomplete="off" /><span class="lf-flab">Muscle group</span><div class="lf-pills" id="lfExM"></div><span class="lf-flab">Logged as</span><div class="lf-pills" id="lfExT"></div><span class="lf-flab">Type</span><div class="lf-pills" id="lfExC"></div></div>');
   $('#lfExN', b).value = ex ? ex.n : (seed || '');
+  var cp = ex ? (ex.c ? 1 : 0) : (COMPOUND_RE.test(seed || '') ? 1 : 0), cTouched = !!ex;
   function pills(box, opts, cur, set) {
     box.textContent = '';
     opts.forEach(function (o) {
@@ -1713,6 +1740,10 @@ function lfExForm(ex, onDone, seed) {
   }
   pills($('#lfExM', b), MUSCLES.map(function (x) { return [x, x]; }), m, function (v) { m = v; });
   pills($('#lfExT', b), [['w', 'Weight × reps'], ['bw', 'Bodyweight']], t, function (v) { t = v; });
+  var cOpts = [[1, 'Compound · 3 × 6–10'], [0, 'Isolation · higher reps']];
+  pills($('#lfExC', b), cOpts, cp, function (v) { cp = v; cTouched = true; });
+  /* The type follows the name until you choose it yourself. */
+  $('#lfExN', b).addEventListener('input', function () { if (cTouched) return; cp = COMPOUND_RE.test(this.value) ? 1 : 0; pills($('#lfExC', b), cOpts, cp, function (v) { cp = v; cTouched = true; }); });
   var save = el('<button type="button" class="lf-btn is-ink is-full">Save</button>');
   var foot = [save];
   var del = null;
@@ -1721,8 +1752,8 @@ function lfExForm(ex, onDone, seed) {
   save.addEventListener('click', function () {
     var n = $('#lfExN', b).value.trim();
     if (!n) { $('#lfExN', b).focus(); return; }
-    if (ex) { ex.n = n; ex.m = m; ex.t = t; S.wo.forEach(function (w) { w.x.forEach(function (x) { if (x.id === ex.id) x.n = n; }); }); }
-    else { ex = { id: lfId(), n: n.slice(0, 60), m: m, t: t }; S.ex.push(ex); }
+    if (ex) { ex.n = n; ex.m = m; ex.t = t; if (S.ex.indexOf(ex) >= 0) ex.c = cp; S.wo.forEach(function (w) { w.x.forEach(function (x) { if (x.id === ex.id) x.n = n; }); }); }
+    else { ex = { id: lfId(), n: n.slice(0, 60), m: m, t: t, c: cp }; S.ex.push(ex); }
     lfSave(); s.close(true); lfRender(); if (onDone) onDone(ex.id);
   });
   if (del) del.addEventListener('click', function () {
@@ -1784,6 +1815,10 @@ function lfExSheet(id) {
   var best = null, bestE = 0;
   h.forEach(function (x) { x.sets.forEach(function (s) { var e = e1rm(s.w, s.r); if (e > bestE) { bestE = e; best = s; } }); });
   b.appendChild(lfSum([[best ? fmtW(best.w) + '×' + best.r : '—', 'best set'], [bestE ? fmtW(bestE) : '—', 'est. 1RM ' + S.unit], [h.length, 'sessions']]));
+  var rc = lfRec(id);
+  var rl = el('<p class="lf-recd" id="lfRecd"></p>');
+  rl.textContent = rc.kind + ' · ' + rc.sets + ' × ' + rc.lo + '–' + rc.hi + ' · ' + rc.rir + ' · rest ' + lfRestTxt({ lo: rc.rlo, hi: rc.rhi });
+  b.appendChild(rl);
   b.appendChild(lfHowCard(id, name));
   if (h.length > 1) {
     var tops = h.slice(-12).map(function (x) { return toDisp(Math.max.apply(null, x.sets.map(function (s) { return e1rm(s.w, s.r); }))); });
@@ -1974,7 +2009,7 @@ function lfRenderLib() {
         var h = historyFor(e.id), last = h[h.length - 1];
         var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div><span class="lf-li-r lf-num"></span></button>');
         $('b', li).textContent = e.n;
-        $('span', li).textContent = e.m + (last ? ' · last ' + fmtDay(last.w.d) : '');
+        $('span', li).textContent = e.m + ' · ' + lfRecTxt(e.id) + (last ? ' · last ' + fmtDay(last.w.d) : '');
         if (last) { var top = last.sets.reduce(function (a, s) { return e1rm(s.w, s.r) > e1rm(a.w, a.r) ? s : a; }); $('.lf-li-r', li).textContent = fmtW(top.w) + '×' + top.r; }
         li.addEventListener('click', function () { lfExSheet(e.id); });
         $('.lf-list', c).appendChild(li);
