@@ -7,7 +7,6 @@
    The clock is frozen at Friday 30 October 2026, 18:00.
    ═══════════════════════════════════════════════════════════════ */
 const { chromium, chrome, BASE } = require('./lib.js');
-const path = require('path');
 
 let pass = 0, fail = 0;
 const ok = (name, cond, extra) => {
@@ -58,7 +57,7 @@ const freeze = (at) => `(() => {
   const days = await page.$$eval('.lf-day', (d) => ({ n: d.length, now: d.filter((x) => x.classList.contains('is-now')).length, last: d[d.length - 1].dataset.d }));
   ok('the last 30 days are thirty marks ending today', days.n === 30 && days.now === 1 && days.last === '2026-10-30', days);
   const bar = await page.$$eval('.lf-bar button', (b) => b.map((x) => { const r = x.getBoundingClientRect(); return [r.width, r.height]; }));
-  ok('five tabs, every one a 44px target', bar.length === 5 && bar.every(([w, h]) => w >= 44 && h >= 44), bar);
+  ok('four tabs, every one a 44px target', bar.length === 4 && bar.every(([w, h]) => w >= 44 && h >= 44), bar);
   ok('nothing scrolls sideways', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
 
   /* ── an exercise and a routine, made on the screens ── */
@@ -622,80 +621,21 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
-  /* ── FRIENDS: two phones on the real worker, run in this process ──
-     Every request to the worker host is answered by worker/index.js
-     against a Map, so the round trip is the shipped client against the
-     shipped server. Its own contexts: the main one still asserts that
-     nothing leaves the phone. */
+  /* ── FRIENDS IS OFF: a phone that had it on deletes its record once ── */
   {
-    const worker = (await import('file://' + path.resolve(__dirname, '..', 'worker', 'index.js'))).default;
-    const m = new Map();
-    const env = { SCHED: { m, async get(k) { return m.has(k) ? m.get(k) : null; }, async put(k, v) { m.set(k, v); }, async delete(k) { m.delete(k); } } };
-    const sent = [];
-    const W = 'https://sched.nikorapullin.workers.dev';
-    async function phone(seed, hash) {
-      const c = await browser.newContext(PHONE);
-      await c.addInitScript(freeze('2026-10-30T18:00:00'));
-      if (seed) await c.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify(seed))}); })();`);
-      await c.route(W + '/**', async (route) => {
-        const rq = route.request();
-        if (rq.method() !== 'GET' && rq.method() !== 'OPTIONS') sent.push(rq.postData() || '');
-        const h = Object.assign({}, rq.headers(), { origin: 'https://niko-999.github.io' });
-        const res = await worker.fetch(new Request(rq.url(), { method: rq.method(), headers: h, body: ['GET', 'HEAD'].includes(rq.method()) ? undefined : rq.postData() }), env);
-        await route.fulfill({ status: res.status, headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*' }, body: await res.text() });
-      });
-      const page = await c.newPage();
-      page.on('pageerror', (e) => errors.push(String(e)));
-      await page.goto(URL + (hash || '')); await page.waitForTimeout(300);
-      return { c, page };
-    }
-    const wo = (d, sets) => ({ id: 'w' + d, d, s: 1, e: 2, n: 'Lower A', x: [{ id: 'hack', n: 'Hack squat', sets: sets }] });
-    const A = await phone({ unit: 'kg', goal: 4, wo: [wo('2026-10-26', [{ w: 100, r: 8 }]), wo('2026-10-28', [{ w: 110, r: 8 }, { w: 110, r: 8 }]), wo('2026-10-30', [{ w: 120, r: 8 }])], rd: { '2026-10-29': 1 }, bw: [{ d: '2026-10-30', v: 87.4 }] });
-    await A.page.click('.lf-bar [data-v="fr"]'); await A.page.waitForTimeout(200);
-    ok('friends is off until you turn it on, and asks for nothing', await A.page.locator('#frOff').count() === 1 && m.size === 0 && sent.length === 0);
-    ok('the consent says what goes and what never does', /never your weights/i.test(await A.page.textContent('#frOff')));
-    await A.page.click('#frOn'); await A.page.waitForTimeout(150);
-    ok('a name is needed first', m.size === 0);
-    await A.page.fill('#frName', 'Niko'); await A.page.click('#frOn'); await A.page.waitForTimeout(500);
-    const codeA = (await A.page.textContent('.fr-code')).trim();
-    ok('turning on claims an eight-character code', /^[A-HJ-NP-Z2-9]{8}$/.test(codeA) && m.has('lift:' + codeA), codeA);
-    const recA = JSON.parse(m.get('lift:' + codeA));
-    ok('what the server holds is counts: 3 workouts, 4 sets, 1 rest, trained today', recA.n === 'Niko' && recA.s.wo30 === 3 && recA.s.sets30 === 4 && recA.s.rest30 === 1 && recA.s.last === '2026-10-30' && recA.s.d.slice(-5) === '0101r1'.slice(-5), recA.s);
-    ok('two PRs: each heavier hack squat after the first', recA.s.pr30 === 2, recA.s.pr30);
-    ok('the key is only a hash', /^[0-9a-f]{64}$/.test(recA.kh) && !JSON.stringify(recA).includes((await A.page.evaluate(() => JSON.parse(localStorage.getItem('lift.fr.v1')).key))));
-    const blob = sent.join('\n');
-    ok('no weight, exercise or body weight ever leaves', !/hack|Hack|120|110|87\.4|"kg"|Lower A/.test(blob), blob.slice(0, 300));
-    ok('your own row is on the board', await A.page.locator('#frBoard .fr-row.is-me').count() === 1);
-
-    const B = await phone({ unit: 'kg', goal: 3, wo: [wo('2026-10-12', [{ w: 60, r: 10 }])] }, '#add=' + codeA);
-    ok('a link opens on Friends and the code leaves the bar', await B.page.locator('#lfFr:not([hidden])').count() === 1 && !(await B.page.evaluate(() => location.hash)));
-    ok('and says who sent it before anything is turned on', await B.page.locator('.fr-pend').count() === 1 && m.size === 1);
-    await B.page.fill('#frName', 'Sam'); await B.page.click('#frOn'); await B.page.waitForTimeout(700);
-    const names = await B.page.$$eval('#frBoard .fr-row b', (b) => b.map((x) => x.textContent));
-    ok('turning on adds whoever sent the link, ranked by workouts', names.join() === 'Niko,You', names);
-    const codeB = (await B.page.textContent('.fr-code')).trim();
-
-    await A.page.click('#frAdd'); await A.page.waitForTimeout(400);
-    await A.page.fill('#frCode', 'ZZZZZZZZ'); await top(A.page).locator('button', { hasText: /^Add$/ }).click(); await A.page.waitForTimeout(250);
-    ok('a code nobody has says so', /Nobody has that code/.test(await top(A.page).textContent('.fr-err')));
-    await A.page.fill('#frCode', codeA.toLowerCase()); await top(A.page).locator('button', { hasText: /^Add$/ }).click(); await A.page.waitForTimeout(250);
-    ok('your own code is refused', /your own code/.test(await top(A.page).textContent('.fr-err')));
-    await A.page.fill('#frCode', codeB.toLowerCase()); await top(A.page).locator('button', { hasText: /^Add$/ }).click(); await settle(A.page);
-    ok('a typed code adds them, lower case and all', (await A.page.$$eval('#frBoard .fr-row b', (b) => b.map((x) => x.textContent))).join() === 'You,Sam');
-    await A.page.click('#frBoard .fr-row:not(.is-me)'); await settle(A.page);
-    const sh = await top(A.page).textContent('.lf-sh-bd');
-    ok('a friend opens on their stats and a thirty-day strip', /0\/3/.test(sh) && /18 days ago/.test(sh) && await top(A.page).locator('.fr-strip.is-big i').count() === 30, sh);
-    await top(A.page).locator('button', { hasText: 'Remove' }).click(); await settle(A.page);
-    ok('removing a friend comes with an Undo', await A.page.locator('#frNone').count() === 1);
-    await A.page.click('.lf-toast button'); await A.page.waitForTimeout(150);
-    ok('and Undo puts them back', await A.page.locator('#frBoard .fr-row').count() === 2);
-
-    await B.page.click('#frOffBtn'); await settle(B.page);
-    await top(B.page).locator('button', { hasText: 'Turn off' }).click(); await B.page.waitForTimeout(400);
-    ok('turning off deletes the record on the server', !m.has('lift:' + codeB) && await B.page.locator('#frOff').count() === 1);
-    await A.page.click('.lf-bar [data-v="home"]'); await A.page.click('.lf-bar [data-v="fr"]'); await A.page.waitForTimeout(400);
-    ok('and their friends see they have gone', /Turned friends off/.test(await A.page.textContent('#frBoard')));
-    await A.c.close(); await B.c.close();
+    const c = await browser.newContext(PHONE);
+    await c.addInitScript(freeze('2026-10-30T18:00:00'));
+    await c.addInitScript(`(() => { if (!sessionStorage.getItem('seeded')) { sessionStorage.setItem('seeded', 1); localStorage.setItem('lift.fr.v1', JSON.stringify({ on: true, code: 'K7PQ2M4X', key: '${'a'.repeat(32)}', name: 'N', list: [] })); localStorage.setItem('lift.view.v1', 'fr'); } })();`);
+    const hits = [];
+    await c.route('https://sched.nikorapullin.workers.dev/**', (rt) => { hits.push(rt.request().method() + ' ' + rt.request().url().replace('https://sched.nikorapullin.workers.dev', '')); rt.fulfill({ status: 200, body: '{}' }); });
+    const page = await c.newPage();
+    page.on('pageerror', (e) => errors.push(String(e)));
+    await page.goto(URL); await page.waitForTimeout(400);
+    ok('there is no friends tab, and a stored friends view opens on home', await page.locator('.lf-bar [data-v="fr"]').count() === 0 && await page.locator('#lfHome:not([hidden])').count() === 1);
+    ok('the old record is deleted once and the key is gone', hits.join() === 'DELETE /v1/lift/K7PQ2M4X' && !(await page.evaluate(() => localStorage.getItem('lift.fr.v1'))), hits);
+    await page.reload(); await page.waitForTimeout(400);
+    ok('and nothing is sent again', hits.length === 1, hits);
+    await c.close();
   }
 
   await browser.close();

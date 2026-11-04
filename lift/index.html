@@ -336,33 +336,6 @@ svg { display: block; }
 .lf-recd { font-size: 13px; color: var(--dim); margin: 10px 2px 0; }
 button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-vr-ed { font-size: 13px; font-weight: 600; color: var(--ink); min-height: 44px; margin: -12px -4px -12px 0; padding: 0 4px; }
-.fr-p { font-size: 13px; line-height: 1.45; color: var(--dim); margin: 10px 0 0; }
-.fr-pend { color: var(--ink); }
-.fr-row { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; text-align: left; padding: 12px 0; border-top: 1px solid var(--line); min-height: 44px; }
-.fr-row:first-of-type { border-top: 0; }
-.fr-row em { font-style: normal; font-size: 13px; color: var(--quiet); font-weight: 600; }
-.fr-t { display: grid; gap: 3px; min-width: 0; }
-.fr-t b { font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fr-t > span { font-size: 12px; color: var(--dim); }
-.fr-row.is-me .fr-t b { color: var(--today); }
-.fr-row.is-gone { opacity: .6; }
-.fr-wk { font-size: 15px; font-weight: 700; }
-.fr-strip { display: grid; grid-template-columns: repeat(30, minmax(0, 1fr)); gap: 2px; margin-top: 4px; }
-.fr-strip i { height: 6px; border-radius: 2px; background: var(--mark-off); }
-.fr-strip i.is-on { background: var(--ink); }
-.fr-strip i.is-rest { background: none; box-shadow: inset 0 0 0 1px var(--dim); }
-.fr-strip.is-big { gap: 3px; margin: 6px 0 4px; }
-.fr-strip.is-big i { height: 22px; border-radius: 4px; }
-.fr-key { display: flex; gap: 14px; font-size: 11px; color: var(--dim); margin: 4px 0 12px; }
-.fr-key span { display: inline-flex; align-items: center; gap: 5px; }
-.fr-key span:last-child { margin-left: auto; }
-.fr-key i { width: 8px; height: 8px; border-radius: 2px; }
-.fr-key i.is-on { background: var(--ink); }
-.fr-key i.is-rest { box-shadow: inset 0 0 0 1px var(--dim); }
-.fr-foot { margin: 12px 0 0; }
-.fr-code { font-size: 30px; font-weight: 700; letter-spacing: .12em; margin: 6px 0 14px; }
-.fr-err { color: var(--log); margin: 8px 0 0; }
-#lfFr .lf-sum { margin-top: 10px; }
 .lf-day.is-rest { border-style: dashed; }
 .lf-day.is-rest:not(.is-now) { border-color: var(--dim); }
 .lf-dots i.is-r { background: none; box-shadow: inset 0 0 0 1.5px var(--ink); }
@@ -436,14 +409,12 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
   <section id="lfCal" aria-label="Calendar" hidden></section>
   <section id="lfLib" aria-label="Exercises" hidden></section>
   <section id="lfYou" aria-label="You" hidden></section>
-  <section id="lfFr" aria-label="Friends" hidden></section>
 </main>
 <button id="lfLive" class="lf-live" type="button" hidden></button>
 <nav class="lf-bar" aria-label="Sections">
   <button type="button" data-v="home" aria-label="Home" aria-current="page"><svg class="lf-ic" viewBox="0 0 24 24"><path d="M5 20V12M10 20V6M15 20v-9M20 20V9"/></svg></button>
   <button type="button" data-v="cal" aria-label="Calendar"><svg class="lf-ic" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></button>
   <button type="button" data-v="lib" aria-label="Exercises"><svg class="lf-ic" viewBox="0 0 24 24"><path d="M3 9.5v5M6 7v10M18 7v10M21 9.5v5M6 12h12"/></svg></button>
-  <button type="button" data-v="fr" aria-label="Friends"><svg class="lf-ic" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.5"/><path d="M2.5 20c.8-3.4 3.4-5.4 6.5-5.4s5.7 2 6.5 5.4"/><path d="M15.5 5.2a3.5 3.5 0 0 1 0 6.6M18 14.9c1.8.8 3 2.5 3.5 5.1"/></svg></button>
   <button type="button" data-v="you" aria-label="You"><svg class="lf-ic" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1-4 4-6 7.5-6s6.5 2 7.5 6"/></svg></button>
 </nav>
 <script>
@@ -753,7 +724,7 @@ var COMPOUND_RE = /press|squat|row\b|rows|deadlift|pull-?ups?|chin-?ups?|dips?\b
 
 var KEY = 'lift.v1', ACTK = 'lift.active.v1', VIEWK = 'lift.view.v1';
 var LB = 0.45359237;
-var VIEWS = ['home', 'cal', 'lib', 'fr', 'you'];
+var VIEWS = ['home', 'cal', 'lib', 'you'];
 
 var IC = {
   clock: '<svg class="lf-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
@@ -861,7 +832,6 @@ function lfLoad() {
 function lfSave() {
   try { localStorage.setItem(KEY, JSON.stringify(S)); }
   catch (e) { lfToast('Could not save — this phone is out of room'); }
-  if (typeof frQueue === 'function') frQueue();
 }
 function lfLoadAct() {
   try {
@@ -2274,267 +2244,26 @@ function lfRestore() {
   });
 }
 
-/* ═══════════ FRIENDS ═══════════
-   THE ONE THING IN LIFT THAT LEAVES THE PHONE, and only once you turn
-   it on. What goes is COUNTS: a name, how often and how much you
-   trained, a thirty-day strip of which days, your goal, streak, PRs and
-   cardio minutes — never a weight, an exercise, a body weight, food or
-   anything you typed. `frStats` is the whole of it, and the worker
-   clamps the same shape on the way in rather than trusting this file.
-
-   IDENTITY IS TWO STRINGS THIS PHONE MAKES: a public code that reads,
-   and a secret key that writes, kept by the server only as its hash.
-   No account, no email. The FRIEND LIST lives here, on this phone, so
-   the server holds no graph of who follows whom.
-
-   Its own key, `lift.fr.v1`, and NOT in the backup: the code and key
-   are this phone's identity, and a restore onto a second phone should
-   not make two phones post as one. */
-var FR_URL = 'https://sched.nikorapullin.workers.dev';
-var FRK = 'lift.fr.v1';
-var FR_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-function frLoad() {
-  var d = { on: false, code: '', key: '', name: '', list: [], pend: '' };
-  try {
-    var o = JSON.parse(localStorage.getItem(FRK));
-    if (o && typeof o === 'object') {
-      d.on = o.on === true && /^[A-HJ-NP-Z2-9]{8}$/.test(o.code) && /^[0-9a-f]{32}$/.test(o.key);
-      if (d.on) { d.code = o.code; d.key = o.key; }
-      d.name = typeof o.name === 'string' ? o.name.slice(0, 24) : '';
-      d.pend = typeof o.pend === 'string' && /^[A-HJ-NP-Z2-9]{8}$/.test(o.pend) ? o.pend : '';
-      if (Array.isArray(o.list)) d.list = o.list.filter(function (f) { return f && /^[A-HJ-NP-Z2-9]{8}$/.test(f.c); }).slice(0, 50)
-        .map(function (f) { return { c: f.c, n: typeof f.n === 'string' ? f.n.slice(0, 24) : '', s: f.s && typeof f.s === 'object' ? f.s : null, at: +f.at || 0, gone: !!f.gone }; });
-    }
-  } catch (e) {}
-  return d;
-}
-var FRS = frLoad();
-function frSave() { try { localStorage.setItem(FRK, JSON.stringify(FRS)); } catch (e) {} }
-function frRand(n, abc) { var a = new Uint8Array(n), o = ''; crypto.getRandomValues(a); for (var i = 0; i < n; i++) o += abc ? abc[a[i] % abc.length] : ('0' + a[i].toString(16)).slice(-2); return o; }
-function frApi(method, path, body) {
-  var h = {};
-  if (body) h['Content-Type'] = 'application/json';
-  if (method !== 'GET') h.Authorization = 'Bearer ' + FRS.key;
-  return fetch(FR_URL + path, { method: method, headers: h, body: body ? JSON.stringify(body) : undefined })
-    .then(function (res) { return res.json().catch(function () { return {}; }).then(function (j) { return { st: res.status, j: j }; }); });
-}
-
-/* COUNTS, worked out from the record, never stored as a second copy. */
-function frStats() {
-  var t = today(), from30 = ymd(addDays(t, -29)), tk = ymd(t), d = '', rest30 = 0;
-  for (var i = 29; i >= 0; i--) {
-    var k = ymd(addDays(t, -i));
-    if (woOn(k).length) d += '1'; else if (S.rd[k]) { d += 'r'; rest30++; } else d += '0';
-  }
-  var in30 = S.wo.filter(function (w) { return w.d >= from30 && w.d <= tk; });
-  var best = {}, pr30 = 0;
-  S.wo.slice().sort(function (a, b) { return a.s - b.s; }).forEach(function (w) {
-    w.x.forEach(function (e) { e.sets.forEach(function (st) {
-      var v = e1rm(st.w, st.r), b0 = best[e.id] || 0;
-      if (v > b0 + 1e-9) { if (b0 > 0 && w.d >= from30) pr30++; best[e.id] = v; }
-    }); });
-  });
-  var mon = monday(t), wkFrom = ymd(mon);
-  function inWeek(m) { var a = ymd(m), b = ymd(addDays(m, 6)); return S.wo.filter(function (w) { return w.d >= a && w.d <= b; }).length; }
-  var wk = inWeek(mon), streak = wk >= S.goal ? 1 : 0;
-  for (var m = addDays(mon, -7), g = 0; g < 104 && inWeek(m) >= S.goal; m = addDays(m, -7), g++) streak++;
-  var cd7 = 0; S.wo.forEach(function (w) { if (w.cd && w.d >= wkFrom && w.d <= tk) cd7 += w.cd.m; });
-  var last = S.wo.reduce(function (a, w) { return w.d > a ? w.d : a; }, '');
-  return { wo30: in30.length, sets30: in30.reduce(function (a, w) { return a + woSets(w); }, 0), pr30: pr30, wk: wk, goal: S.goal,
-    streak: streak, cd7: cd7, rest30: rest30, tot: S.wo.length, d: d, last: last };
-}
-
-/* PUSHED A BEAT AFTER THE LAST SAVE, and only when the counts changed —
-   a save is every set ticked, and the server wants the day's shape, not
-   every keystroke of it. */
-var frT = 0, frSig = '';
-function frQueue() { if (!FRS.on) return; clearTimeout(frT); frT = setTimeout(frPush, 2500); }
-function frPush() {
-  if (!FRS.on) return;
-  var body = { n: FRS.name || 'Lifter', s: frStats() }, sig = JSON.stringify(body);
-  if (sig === frSig) return;
-  frApi('PUT', '/v1/lift/' + FRS.code, body).then(function (r) { if (r.st === 200) frSig = sig; }).catch(function () {});
-}
-function frPullAll(done) {
-  var left = FRS.list.length;
-  if (!left) { if (done) done(); return; }
-  FRS.list.forEach(function (f) {
-    frApi('GET', '/v1/lift/' + f.c).then(function (r) {
-      if (r.st === 200) { f.n = r.j.n; f.s = r.j.s; f.at = r.j.at; f.gone = false; }
-      else if (r.st === 404) f.gone = true;
-    }).catch(function () {}).then(function () { if (--left === 0) { frSave(); if (done) done(); } });
-  });
-}
-
-function frTurnOn(name, btn) {
-  btn.disabled = true;
-  var tries = 0;
-  (function claim() {
-    FRS.code = frRand(8, FR_ABC); FRS.key = frRand(16);
-    frApi('PUT', '/v1/lift/' + FRS.code, { n: name, s: frStats() }).then(function (r) {
-      if (r.st === 403 && ++tries < 4) return claim();
-      if (r.st !== 200) throw new Error(r.st);
-      FRS.on = true; FRS.name = name; frSave(); frSig = '';
-      lfToast('Friends is on'); lfRender();
-    }).catch(function () { FRS.code = ''; FRS.key = ''; btn.disabled = false; lfToast('Could not reach the server — try again'); });
-  })();
-}
-function frTurnOff() {
-  lfAsk('Turn off friends?', 'Your counts are deleted from the server and your code stops working. Your friend list on this phone goes too.', 'Turn off', function () {
-    frApi('DELETE', '/v1/lift/' + FRS.code).catch(function () {}).then(function () {
-      FRS = { on: false, code: '', key: '', name: FRS.name, list: [], pend: '' }; frSave(); lfRender();
-    });
-  });
-}
-function frAdd(code, done) {
-  code = (code || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-  if (!/^[A-HJ-NP-Z2-9]{8}$/.test(code)) return done('That is not a friend code — it is eight letters and numbers');
-  if (code === FRS.code) return done('That is your own code');
-  if (FRS.list.some(function (f) { return f.c === code; })) return done('They are already on your list');
-  frApi('GET', '/v1/lift/' + code).then(function (r) {
-    if (r.st === 404) return done('Nobody has that code');
-    if (r.st !== 200) throw new Error(r.st);
-    FRS.list.push({ c: code, n: r.j.n, s: r.j.s, at: r.j.at, gone: false }); frSave(); done(null, r.j.n);
-  }).catch(function () { done('Could not reach the server — try again'); });
-}
-function frLink() { return 'https://niko-999.github.io/lift/#add=' + FRS.code; }
-function frShare() {
-  var url = frLink(), txt = 'Add me on Lift — my friend code is ' + FRS.code;
-  if (navigator.share) navigator.share({ title: 'Lift', text: txt, url: url }).catch(function () {});
-  else if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(function () { lfToast('Link copied'); }, function () { lfToast(url); });
-  else lfToast(url);
-}
-
-/* A STRIP OF THIRTY DAYS, the same marks the home grid uses: trained,
-   rested on purpose, or nothing. */
-function frStrip(dstr, big) {
-  var g = el('<div class="fr-strip' + (big ? ' is-big' : '') + '" aria-hidden="true"></div>');
-  (dstr || '0'.repeat(30)).split('').forEach(function (ch) { g.appendChild(el('<i class="' + (ch === '1' ? 'is-on' : ch === 'r' ? 'is-rest' : '') + '"></i>')); });
-  return g;
-}
-function frAgo(d) {
-  if (!d) return 'nothing logged yet';
-  var n = Math.round((parseYmd(ymd(today())) - parseYmd(d)) / 864e5);
-  return n <= 0 ? 'trained today' : n === 1 ? 'trained yesterday' : 'trained ' + n + ' days ago';
-}
-function frSheet(f) {
-  var st = f.s || {}, b = el('<div><p class="lf-lab" style="margin:0 0 10px"></p></div>');
-  $('p', b).textContent = f.gone ? 'This code has gone — they turned friends off.' : frAgo(st.last);
-  b.appendChild(frStrip(st.d, 1));
-  b.appendChild(el('<div class="fr-key"><span><i class="is-on"></i>Trained</span><span><i class="is-rest"></i>Rest day</span><span>Last 30 days</span></div>'));
-  b.appendChild(lfSum([[(st.wk || 0) + '/' + (st.goal || 0), 'this week'], [st.streak || 0, st.streak === 1 ? 'week streak' : 'weeks streak'], [st.wo30 || 0, 'workouts · 30d']]));
-  b.appendChild(lfSum([[st.sets30 || 0, 'sets · 30d'], [st.pr30 || 0, 'PRs · 30d'], [st.cd7 || 0, 'cardio min']]));
-  var foot = el('<p class="lf-lab fr-foot"></p>');
-  foot.textContent = (st.rest30 || 0) + ' rest days in 30 · ' + (st.tot || 0) + ' workouts all time';
-  b.appendChild(foot);
-  var rm = el('<button type="button" class="lf-btn is-bad">Remove</button>');
-  var s = lfSheet({ title: f.n || 'Friend', body: b, foot: [rm] });
-  rm.addEventListener('click', function () {
-    var i = FRS.list.indexOf(f); if (i < 0) return;
-    FRS.list.splice(i, 1); frSave(); s.close(true); lfRender();
-    lfToast('Removed ' + (f.n || 'friend'), function () { FRS.list.splice(i, 0, f); frSave(); lfRender(); });
-  });
-}
-function frAddSheet() {
-  var b = el('<div><label class="lf-flab" for="frCode" style="margin-top:0">Their friend code</label><input class="lf-field lf-num" id="frCode" maxlength="9" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABCD2345" /><p class="lf-lab fr-err" hidden></p></div>');
-  var go = el('<button type="button" class="lf-btn is-ink is-full">Add</button>');
-  var s = lfSheet({ title: 'Add a friend', body: b, foot: [go] });
-  var inp = $('#frCode', b), err = $('.fr-err', b);
-  go.addEventListener('click', function () {
-    go.disabled = true;
-    frAdd(inp.value, function (msg, name) {
-      go.disabled = false;
-      if (msg) { err.hidden = false; err.textContent = msg; return; }
-      s.close(true); lfRender(); lfToast('Added ' + name);
-    });
-  });
-}
-
-var frArrive = 0;
-function lfRenderFr() {
-  var root = $('#lfFr'); root.textContent = '';
-  root.appendChild(el('<h2 class="lf-h1">Friends</h2>'));
-  if (!FRS.on) {
-    /* THE MOMENT OF CONSENT, said in full, once, here — this is the one
-       screen where something first leaves the phone. */
-    var c = el('<div class="lf-card" id="frOff"><div class="lf-hero" style="font-size:22px">See how your friends train</div>'
-      + '<p class="fr-p">Turn this on and Lift sends a small set of counts to this site\'s server under a friend code: your name, how many workouts and sets you did in the last 30 days, which of those days you trained or rested, your weekly goal and streak, your PRs and cardio minutes.</p>'
-      + '<p class="fr-p">Never your weights, your exercises, your body weight, your food or anything you type. Anyone you give your code to can read those counts, and nothing else. Turn it off and they are deleted.</p>'
-      + '<label class="lf-flab" for="frName">Your name, as friends see it</label><input class="lf-field" id="frName" maxlength="24" autocomplete="off" placeholder="Your name" /></div>');
-    if (FRS.pend) c.insertBefore(el('<p class="fr-p fr-pend">Someone sent you their code. Turn friends on and they are added.</p>'), $('.fr-p', c));
-    var on = el('<button type="button" class="lf-btn is-log is-full" id="frOn" style="margin-top:14px">Turn on friends</button>');
-    $('#frName', c).value = FRS.name;
-    on.addEventListener('click', function () {
-      var n = $('#frName', c).value.trim();
-      if (!n) { $('#frName', c).focus(); return; }
-      frTurnOn(n, on);
-    });
-    c.appendChild(on);
-    root.appendChild(c);
-    return;
-  }
-  if (FRS.pend) {
-    var pc = FRS.pend; FRS.pend = ''; frSave();
-    frAdd(pc, function (msg, name) { if (msg) lfToast(msg); else { lfToast('Added ' + name); lfRender(); } });
-  }
-  /* The board: you and everybody on your list, most workouts first. */
-  var me = { c: FRS.code, n: 'You', s: frStats(), me: 1 };
-  var rows = [me].concat(FRS.list).sort(function (a, b) { return ((b.s && b.s.wo30) || 0) - ((a.s && a.s.wo30) || 0); });
-  var bd = el('<div class="lf-card" style="padding:4px 16px" id="frBoard"><div class="lf-hd" style="padding:12px 0 4px"><span class="lf-lab">Last 30 days</span><span class="lf-lab">this week</span></div></div>');
-  rows.forEach(function (f, i) {
-    var st = f.s || {};
-    var row = el('<button type="button" class="fr-row"><em class="lf-num"></em><div class="fr-t"><b></b><span></span></div><span class="fr-wk lf-num"></span></button>');
-    row.dataset.c = f.c;
-    if (f.me) row.classList.add('is-me');
-    if (f.gone) row.classList.add('is-gone');
-    $('em', row).textContent = i + 1;
-    $('b', row).textContent = f.n || 'Friend';
-    $('.fr-t span', row).textContent = f.gone ? 'Turned friends off' : (st.wo30 || 0) + ' workouts · ' + frAgo(st.last);
-    $('.fr-wk', row).textContent = (st.wk || 0) + '/' + (st.goal || 0);
-    $('.fr-t', row).appendChild(frStrip(st.d));
-    row.addEventListener('click', function () { if (f.me) frSheet({ n: FRS.name || 'You', s: st, me: 1 }); else frSheet(f); });
-    bd.appendChild(row);
-  });
-  root.appendChild(bd);
-  if (!FRS.list.length) root.appendChild(el('<div class="lf-card lf-empty" id="frNone"><b>Nobody yet</b>Send your code to a friend, or add theirs.</div>'));
-  var add = el('<button type="button" class="lf-add" id="frAdd">' + IC.plus + 'Add a friend</button>');
-  add.addEventListener('click', frAddSheet);
-  root.appendChild(add);
-  var code = el('<div class="lf-card" id="frMe"><div class="lf-hd"><span class="lf-lab">Your friend code</span></div><div class="fr-code lf-num"></div><div style="display:flex;gap:10px"><button type="button" class="lf-btn is-ink" style="flex:1" id="frShare">Share your code</button><button type="button" class="lf-btn" style="flex:1" id="frRename">Change name</button></div><button type="button" class="lf-btn is-bad is-full" id="frOffBtn" style="margin-top:10px">Turn off friends</button></div>');
-  $('.fr-code', code).textContent = FRS.code;
-  $('#frShare', code).addEventListener('click', frShare);
-  $('#frRename', code).addEventListener('click', function () {
-    var b = el('<div><input class="lf-field" id="frNewName" maxlength="24" autocomplete="off" /></div>');
-    var sv = el('<button type="button" class="lf-btn is-ink is-full">Save</button>');
-    var s2 = lfSheet({ title: 'Your name', body: b, foot: [sv] });
-    $('#frNewName', b).value = FRS.name;
-    sv.addEventListener('click', function () { var n = $('#frNewName', b).value.trim(); if (!n) return; FRS.name = n; frSave(); frSig = ''; frPush(); s2.close(true); lfRender(); });
-  });
-  $('#frOffBtn', code).addEventListener('click', frTurnOff);
-  root.appendChild(code);
-  /* Arriving at the tab fetches; drawing it only draws. A paint that
-     fetched would repaint inside its own fetch, which is a loop. */
-  if (frArrive) { frArrive = 0; frPush(); frPullAll(function () { if (view === 'fr') lfRender(); }); }
-}
-/* A LINK CARRIES A CODE in the fragment, which never leaves the
-   browser; it is read once at boot and stripped from the bar. */
+/* FRIENDS IS OFF FOR NOW. A phone that turned it on while it shipped
+   still holds a code and a key; the record they wrote is deleted once,
+   here, and the key goes with it, so nothing is left on the server and
+   nothing more is ever sent. */
 (function () {
-  var m = /^#add=([A-HJ-NP-Z2-9]{8})$/i.exec(location.hash || '');
-  if (!m) return;
-  FRS.pend = m[1].toUpperCase(); frSave();
-  try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
-  try { localStorage.setItem(VIEWK, 'fr'); } catch (e) {}
+  try {
+    var o = JSON.parse(localStorage.getItem('lift.fr.v1'));
+    localStorage.removeItem('lift.fr.v1');
+    if (o && o.on && /^[A-HJ-NP-Z2-9]{8}$/.test(o.code) && /^[0-9a-f]{32}$/.test(o.key))
+      fetch('https://sched.nikorapullin.workers.dev/v1/lift/' + o.code, { method: 'DELETE', headers: { Authorization: 'Bearer ' + o.key } }).catch(function () {});
+  } catch (e) {}
 })();
 
 /* ═══════════ NAVIGATION ═══════════ */
 var view = 'home';
 try { var sv = localStorage.getItem(VIEWK); if (VIEWS.indexOf(sv) >= 0) view = sv; } catch (e) {}
-if (view === 'fr') frArrive = 1;
-var IDS = { home: 'lfHome', cal: 'lfCal', lib: 'lfLib', fr: 'lfFr', you: 'lfYou' };
+var IDS = { home: 'lfHome', cal: 'lfCal', lib: 'lfLib', you: 'lfYou' };
 function lfGo(v) {
   if (VIEWS.indexOf(v) < 0) v = 'home';
   if (v === 'cal' && view !== 'cal') calAt = today();
-  if (v === 'fr' && view !== 'fr') frArrive = 1;
   view = v;
   try { localStorage.setItem(VIEWK, v); } catch (e) {}
   lfRender(); window.scrollTo(0, 0);
@@ -2545,7 +2274,6 @@ function lfRender() {
   if (view === 'home') lfRenderHome();
   else if (view === 'cal') lfRenderCal();
   else if (view === 'lib') lfRenderLib();
-  else if (view === 'fr') lfRenderFr();
   else lfRenderYou();
   var live = $('#lfLive');
   live.hidden = !act || !!sessSheet;
@@ -2557,8 +2285,6 @@ $('#lfLive').addEventListener('click', lfOpenSession);
 setInterval(function () { if (act && !sessSheet) lfTick(); }, 1000);
 
 lfRender();
-/* An open counts for the board, a beat after the first paint. */
-if (FRS.on) setTimeout(frPush, 1500);
 /* A workout left open when the app was closed comes back up where it was. */
 if (act) lfOpenSession();
 
