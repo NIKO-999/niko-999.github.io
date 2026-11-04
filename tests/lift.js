@@ -554,7 +554,7 @@ const freeze = (at) => `(() => {
     ok('upper / lower runs until you switch', (await page.getAttribute('#lfProg [data-p="ul"]', 'aria-pressed')) === 'true');
     await page.click('#lfProg [data-p="ppl"]'); await settle(page);
     const split = await page.$$eval('#lfSplit .lf-li b', (b) => b.map((x) => x.textContent));
-    ok('push / pull / legs is six days and a Sunday rest', split.join() === 'Mon · Push A,Tue · Pull A,Wed · Legs A,Thu · Push B,Fri · Pull B,Sat · Legs B,Sun · Rest', split);
+    ok('push / pull / legs is six days, with no planned rest', split.join() === 'Mon · Push A,Tue · Pull A,Wed · Legs A,Thu · Push B,Fri · Pull B,Sat · Legs B', split);
     await page.click('#lfSplit .lf-li >> nth=5'); await settle(page);
     const sat = await top(page).textContent();
     ok('Legs B reads its sets: split squats, two curls, calves 4 × 10–20', sat.includes('Bulgarian split squats') && sat.includes('Lying leg curls') && sat.includes('4 × 10–20') && /quad day/.test(sat), sat.slice(0, 200));
@@ -565,10 +565,11 @@ const freeze = (at) => `(() => {
     const r = await store(page);
     ok('the weekly targets move to the plan’s own', r.prog === 'ppl' && r.focus.length === 10 && r.focus.find((f) => f.m === 'Chest').lo === 16 && r.focus.find((f) => f.m === 'Calves').lo === 8, r.focus);
     await page.click('.lf-bar [data-v="home"]');
-    ok('a Sunday on this plan is a planned rest', (await page.textContent('#lfPick')).trim() === 'Rest day' && /plan rests today/.test(await page.textContent('#lfRestDay')));
-    await page.click('#lfGo'); await settle(page);
+    ok('a Sunday on this plan is not a rest day unless you take one', await page.locator('#lfRestDay').count() === 0 && (await page.textContent('#lfPick')).trim() !== 'Rest day' && !(await store(page)).rd['2026-11-01']);
+    await page.click('#lfPick'); await settle(page);
+    ok('and the picker does not mark it as rest', await top(page).locator('.lf-li', { has: page.locator('b', { hasText: /^Rest day$/ }) }).locator('svg').count() === 0);
     await top(page).locator('.lf-li', { has: page.locator('b', { hasText: /^Pull A$/ }) }).click(); await settle(page);
-    ok('and Train anyway picks a session from it', (await page.textContent('#lfPick')).trim() === 'Pull A');
+    ok('a session can be picked for it', (await page.textContent('#lfPick')).trim() === 'Pull A');
     await page.click('.lf-bar [data-v="lib"]'); await page.click('#lfProg [data-p="ul"]'); await settle(page);
     const r2 = await store(page);
     ok('switching back puts the first plan and its targets back', r2.prog === 'ul' && r2.focus.length === 11 && (await page.$$eval('#lfSplit .lf-li b', (b) => b[0].textContent)) === 'Mon · Lower A');
