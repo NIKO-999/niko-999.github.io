@@ -495,6 +495,35 @@ const kv = () => {
     globalThis.fetch = real;
   }
 
+  /* ── LIFT FRIENDS: a code reads, a key writes, counts only ── */
+  {
+    env = { SCHED: kv() };
+    const C = 'ABCD2345', K2 = 'b'.repeat(32);
+    let q = await hit('GET', '/v1/lift/' + C);
+    ok('a code nobody has claimed is a 404', q.status === 404, q.status);
+    q = await hit('PUT', '/v1/lift/' + C, { body: { n: 'Niko', s: { wo30: 12, d: '1'.repeat(30) } } });
+    ok('a write needs a key', q.status === 401, q.status);
+    q = await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: '  Niko\u0007  ', s: { wo30: 12, sets30: 'x', streak: -4, d: '10r'.repeat(10), last: '2026-11-03', kg: 9000, ex: ['hack'] } } });
+    ok('the first write claims the code', q.status === 200, q.status);
+    q = await (await hit('GET', '/v1/lift/' + C)).json();
+    ok('a read returns the counts, clamped', q.n === 'Niko' && q.s.wo30 === 12 && q.s.sets30 === 0 && q.s.streak === 0 && q.s.d === '10r'.repeat(10) && q.s.last === '2026-11-03', JSON.stringify(q));
+    ok('and never a field this build does not know — no weights, no exercises', !('kg' in q.s) && !('ex' in q.s) && !('kh' in q), JSON.stringify(q));
+    const raw = env.SCHED.m.get('lift:' + C);
+    ok('the key is stored only as its hash', raw.indexOf(KEY) < 0 && JSON.parse(raw).kh.length === 64);
+    q = await hit('PUT', '/v1/lift/' + C, { key: K2, body: { n: 'Imposter', s: {} } });
+    ok('somebody else\'s key cannot write to a claimed code', q.status === 403, q.status);
+    q = await hit('DELETE', '/v1/lift/' + C, { key: K2 });
+    ok('nor delete it', q.status === 403 && env.SCHED.m.has('lift:' + C), q.status);
+    q = await hit('PUT', '/v1/lift/abcd2345', { key: KEY, body: { n: 'x', s: {} } });
+    ok('a code that is not the alphabet names nothing', q.status === 404, q.status);
+    q = await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: 'x' } });
+    ok('a write with no stats is refused', q.status === 400, q.status);
+    q = await hit('GET', '/v1/lift/' + C, { origin: 'https://evil.example' });
+    ok('a friend record is not readable from an origin this worker does not know', q.headers.get('Access-Control-Allow-Origin') === ORIGIN);
+    q = await hit('DELETE', '/v1/lift/' + C, { key: KEY });
+    ok('the owner can leave, and the record goes', q.status === 200 && !env.SCHED.m.has('lift:' + C));
+  }
+
   console.log('\n  ' + pass + ' passed, ' + fail + ' failed\n');
   process.exit(fail ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });

@@ -325,6 +325,25 @@ async function episodes(id) {
   return head;
 }
 
+/* ── LIFT FRIENDS ──
+   COUNTS AND NOTHING ELSE. A name, how often you trained and how much,
+   and a thirty-day strip of which days — never a weight, an exercise,
+   a body weight or a note. Clamped rather than trusted, because the
+   client is the one part of this anybody can replace; a field this
+   build does not know is dropped. Sixty days without a write and the
+   record ages out on its own, so an abandoned phone leaves nothing. */
+const LIFT_TTL = 60 * 86400;
+const LIFT_NUM = ['wo30', 'sets30', 'pr30', 'wk', 'goal', 'streak', 'cd7', 'rest30', 'tot'];
+function liftClean(b) {
+  if (!b || typeof b !== 'object' || !b.s || typeof b.s !== 'object') return null;
+  const n = typeof b.n === 'string' ? b.n.replace(/[\u0000-\u001f]/g, '').trim().slice(0, 24) : '';
+  const s = {};
+  for (const k of LIFT_NUM) { const v = Math.round(+b.s[k]); s[k] = isFinite(v) ? Math.max(0, Math.min(100000, v)) : 0; }
+  s.d = typeof b.s.d === 'string' && /^[01r]{30}$/.test(b.s.d) ? b.s.d : '0'.repeat(30);
+  s.last = typeof b.s.last === 'string' && /^\d{4}-\d\d-\d\d$/.test(b.s.last) ? b.s.last : '';
+  return { n: n || 'Lifter', s };
+}
+
 export default {
   async fetch(req, env) {
     if (req.method === 'OPTIONS') return new Response(null, { headers: cors(req) });
@@ -543,6 +562,40 @@ export default {
         if (q.length) ix[push[1]] = q[0].t; else delete ix[push[1]];
         await env.SCHED.put('push:ix', JSON.stringify(ix));
         return json(req, { ok: true, n: q.length });
+      }
+    }
+
+    /* ══════════════════════════════════════════════════════
+       LIFT FRIENDS — see liftClean for the whole of what one can hold.
+       A code reads; a key writes, kept only as its hash, so a dump of
+       the store cannot post as anybody. The friend LIST lives on each
+       phone: there is no route that says who follows whom. */
+    const lf = p.match(/^\/v1\/lift\/([A-HJ-NP-Z2-9]{8})$/);
+    if (lf) {
+      const lk = 'lift:' + lf[1];
+      const cur = await env.SCHED.get(lk);
+      const rec = cur ? JSON.parse(cur) : null;
+      if (req.method === 'GET') {
+        if (!rec) return json(req, { error: 'nobody has that code' }, 404);
+        return json(req, { n: rec.n, s: rec.s, at: rec.at });
+      }
+      const auth = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/, '');
+      if (!/^[0-9a-f]{32}$/.test(auth)) return json(req, { error: 'no key' }, 401);
+      const kh = await sha256hex(auth);
+      if (rec && rec.kh !== kh) return json(req, { error: 'wrong key' }, 403);
+      if (req.method === 'DELETE') {
+        if (rec) await env.SCHED.delete(lk);
+        return json(req, { ok: true });
+      }
+      if (req.method === 'PUT') {
+        let body;
+        try { body = JSON.parse(await readCapped({ body: req.body, text: () => req.text() }, 4096)); }
+        catch (e) { return json(req, { error: 'not json' }, 400); }
+        const clean = liftClean(body);
+        if (!clean) return json(req, { error: 'bad shape' }, 400);
+        const at = Date.now();
+        await env.SCHED.put(lk, JSON.stringify({ kh, n: clean.n, s: clean.s, at }), { expirationTtl: LIFT_TTL });
+        return json(req, { ok: true, at });
       }
     }
 
