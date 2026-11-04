@@ -333,6 +333,7 @@ svg { display: block; }
 .lf-hero + p { margin: 6px 0 0; font-size: 15px; font-weight: 600; }
 
 .lf-pick-h { padding: 14px 2px 2px; }
+.lf-li.is-plan-rest b { color: var(--dim); }
 .fr-p { font-size: 13px; line-height: 1.45; color: var(--dim); margin: 10px 0 0; }
 .fr-pend { color: var(--ink); }
 .fr-row { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; text-align: left; padding: 12px 0; border-top: 1px solid var(--line); min-height: 44px; }
@@ -505,6 +506,7 @@ var EXERCISES = [
   ['mlat', 'Machine lateral raises', 'Shoulders'], ['frontr', 'Front raises', 'Shoulders'], ['uprow', 'Upright rows', 'Shoulders'],
   ['skull', 'Skull crushers', 'Triceps'], ['cgbench', 'Close-grip bench press', 'Triceps', 1], ['kickback', 'Triceps kickbacks', 'Triceps'],
   ['dipmach', 'Machine dips', 'Triceps'], ['ohdb', 'Overhead dumbbell extensions', 'Triceps'],
+  ['ezskull', 'EZ-bar skull crushers', 'Triceps'], ['sapush', 'Single-arm cable pushdowns', 'Triceps'], ['cabham', 'Cable hammer curls', 'Biceps'],
   ['bbrow', 'Barbell rows', 'Back', 1], ['dbrow', 'One-arm dumbbell rows', 'Back', 1], ['tbar', 'T-bar rows', 'Back', 1],
   ['sealrow', 'Seal rows', 'Back', 1], ['mrow', 'Machine rows', 'Back', 1], ['pullupbw', 'Pull-ups', 'Back', 1, 'bw'],
   ['chinup', 'Chin-ups', 'Back', 1, 'bw'], ['cgpd', 'Close-grip lat pulldowns', 'Back', 1], ['sapd', 'Single-arm cable lat pulldowns', 'Back'],
@@ -582,7 +584,7 @@ var MUSCLES = ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Lower back', 'Abs', '
    attention on calves, abs and lower back. Three lower days give the
    quads frequent exposure; four upper days spread the upper-body volume
    so no muscle is pushed to its limit daily. */
-var PROGRAM = [
+var PROGRAM_UL = [
   { id: 'p-mon', dow: 1, n: 'Lower A', sp: 'Quad strength and size', ex: [['hack', 3, 6, 10], ['smithsq', 3, 8, 10], ['legext', 3, 10, 15], ['calfstand', 4, 8, 12], ['cablecrunch', 3, 10, 15]] },
   { id: 'p-tue', dow: 2, n: 'Upper A', sp: 'Chest, shoulders, triceps', ex: [['smithinc', 3, 6, 10], ['mchest', 3, 8, 12], ['seatshp', 3, 8, 12], ['cablat', 4, 12, 20], ['ohcable', 3, 10, 15], ['tripush', 3, 10, 15], ['backext', 3, 10, 15]] },
   { id: 'p-wed', dow: 3, n: 'Lower B', sp: 'Hamstrings, glutes, calves', ex: [['rdl', 3, 6, 10], ['seatcurl', 4, 10, 15], ['lyingcurl', 3, 10, 15], ['hipthrust', 3, 8, 12], ['calfseat', 4, 12, 20], ['hlr', 3, 10, 15]] },
@@ -590,13 +592,60 @@ var PROGRAM = [
   { id: 'p-fri', dow: 5, n: 'Lower C', sp: 'Quad hypertrophy and leg volume', ex: [['legpress', 3, 10, 15], ['bss', 3, 8, 12], ['legext', 3, 12, 20], ['seatcurl', 3, 10, 15], ['calf', 4, 10, 15], ['cablecrunch', 3, 10, 15]] },
   { id: 'p-sat', dow: 6, n: 'Upper C', sp: 'Upper-body balance, lower back, abs', ex: [['incdb', 3, 8, 12], ['mrow', 3, 8, 12], ['wgpd', 3, 10, 15], ['pecdeck', 3, 12, 15], ['backext', 3, 10, 15], ['revhyper', 3, 12, 15], ['hlr', 3, 10, 15]] },
   { id: 'p-sun', dow: 0, n: 'Upper D', sp: 'Shoulders, arms, calves', ex: [['mshp', 3, 8, 12], ['cablat', 4, 12, 20], ['revpec', 3, 12, 20], ['preacher', 3, 10, 15], ['incurl', 3, 10, 15], ['tripush', 3, 10, 15], ['ohcable', 3, 10, 15], ['calfseat', 3, 15, 20]] }
-].map(function (d) {
+];
+/* THE SECOND PROGRAM: push / pull / legs, six days on and Sunday off.
+   Two leg days, the second carrying extra quad volume because quads are
+   the weaker area. Same shape as the first, so everything that reads a
+   day reads this one. */
+var PROGRAM_PPL = [
+  { id: 'q-mon', dow: 1, n: 'Push A', sp: 'Chest, front and side delts, triceps', ex: [['smithinc', 3, 6, 10], ['dbbench', 3, 8, 12], ['cfly', 2, 12, 15], ['seatshp', 2, 8, 12], ['cablat', 3, 12, 20], ['ohcable', 3, 10, 15], ['ropepush', 2, 12, 15]] },
+  { id: 'q-tue', dow: 2, n: 'Pull A', sp: 'Back width, rear delts, biceps', ex: [['pullup', 3, 6, 10], ['csrow', 3, 8, 12], ['ngpd', 2, 10, 15], ['revpec', 3, 12, 20], ['incurl', 3, 8, 12], ['cabham', 2, 10, 15]] },
+  { id: 'q-wed', dow: 3, n: 'Legs A', sp: 'Quads, calves, abs', ex: [['hack', 3, 6, 10], ['legpress', 3, 10, 15], ['legext', 3, 12, 15], ['rdl', 3, 8, 12], ['seatcurl', 2, 10, 15], ['calfstand', 4, 8, 15], ['cablecrunch', 3, 10, 15]] },
+  { id: 'q-thu', dow: 4, n: 'Push B', sp: 'Shoulders, upper chest, triceps', ex: [['incdb', 3, 8, 12], ['mchest', 3, 8, 12], ['cablat', 4, 12, 20], ['mshp', 2, 8, 12], ['pecdeck', 2, 12, 15], ['ezskull', 3, 8, 12], ['sapush', 2, 12, 15]] },
+  { id: 'q-fri', dow: 5, n: 'Pull B', sp: 'Back thickness, rear delts, biceps, lower back', ex: [['bbrow', 3, 6, 10], ['wgpd', 3, 8, 12], ['sarow', 2, 10, 15], ['revpec', 3, 12, 20], ['preacher', 3, 8, 12], ['cablecurl', 2, 12, 15], ['backext', 2, 12, 15]] },
+  { id: 'q-sat', dow: 6, n: 'Legs B', sp: 'Hamstrings, glutes, quad volume, calves, abs', ex: [['smithsq', 3, 8, 12], ['bss', 3, 8, 12], ['seatcurl', 3, 10, 15], ['lyingcurl', 2, 10, 15], ['hipthrust', 2, 8, 12], ['calfseat', 4, 10, 20], ['hlr', 3, 10, 15], ['backext', 2, 12, 15]] }
+];
+function lfMkProg(list) { return list.map(function (d) {
   return { id: d.id, dow: d.dow, n: d.n, sp: d.sp, fixed: 1, ex: d.ex.map(function (e) { return e[0]; }),
     tg: d.ex.reduce(function (o, e) { o[e[0]] = [e[1], e[2], e[3]]; return o; }, {}) };
-});
+}); }
+/* WHICH PROGRAM RUNS is a setting, `S.prog`. The other one stays whole:
+   switching back finds it as it was, and a day of either still opens by
+   id. A weekday a program has no day for is a planned rest. */
+var PROGRAMS = {
+  ul: { n: 'Upper / lower', days: lfMkProg(PROGRAM_UL) },
+  ppl: { n: 'Push / pull / legs', days: lfMkProg(PROGRAM_PPL) }
+};
+var PROG_IDS = ['ul', 'ppl'];
+function lfProg() { return PROGRAMS[S.prog] || PROGRAMS.ul; }
+function lfPlanRest(d) { var w = (d || today()).getDay(); return !lfProg().days.some(function (x) { return x.dow === w; }); }
 /* WHAT EACH DAY IS FOR, from the plan the split came with: its focus,
    then what to keep in mind while you look it over. */
 var DAY_TIPS = {
+  'q-mon': ['Chest first, then front and side delts and triceps', [
+    'Incline Smith press while you are fresh: 3 × 6–10.',
+    'Finish most working sets with 1–2 reps in reserve; isolation work can go to 0–1.',
+    'When every set reaches the top of its range with good technique, add a little weight.']],
+  'q-tue': ['Back width, rear delts and biceps', [
+    'Weighted pull-ups lead: 3 × 6–10, 2–3 minutes between sets.',
+    'Reverse pec deck 3 × 12–20 for the rear delts.',
+    'Two curl variations: incline dumbbell, then cable hammer.']],
+  'q-wed': ['Quad emphasis, with calves and abs', [
+    'Hack squat 3 × 6–10, then leg press and leg extensions: the quads are the weaker area.',
+    'Romanian deadlift and seated curls keep the hamstrings growing.',
+    'If your legs have not recovered, cut the next session’s volume rather than forcing it.']],
+  'q-thu': ['Shoulder emphasis, upper chest and triceps', [
+    'Cable lateral raises carry 4 sets today.',
+    'Incline dumbbell press leads the chest work.',
+    'EZ-bar skull crushers, then single-arm pushdowns.']],
+  'q-fri': ['Back thickness, rear delts, biceps and lower back', [
+    'Barbell rows lead: 3 × 6–10.',
+    'Wide-grip pulldowns and single-arm cable rows for width and thickness.',
+    '45° back extensions finish it: direct lower-back work.']],
+  'q-sat': ['Hamstrings, glutes, more quad volume, calves and abs', [
+    'Smith squats and Bulgarian split squats (per leg) are the second quad day.',
+    'Two curls, seated then lying, then hip thrusts.',
+    'This is a high-volume week. If recovery suffers, cut 20–30% of the sets.']],
   'p-mon': ['Heavy knee-dominant movements, progressive overload and quad development', [
     'The main goal is to improve your hack squat and squat performance over time.',
     'Keep the reps controlled: progress the load or the reps, never the range of motion.',
@@ -641,6 +690,10 @@ var FOCUS_DEFAULT = [['Quads', 15, 15, 1], ['Calves', 15, 15, 1], ['Abs', 12, 12
 /* The first split's targets, as they shipped. A focus still exactly
    that one never chose anything, so it follows the new split; one you
    changed is yours and is left alone. */
+/* THE PPL PLAN'S OWN WEEKLY SETS, offered when you switch to it. */
+var FOCUS_PPL = [['Quads', 15, 15, 1], ['Calves', 8, 8, 1], ['Abs', 6, 6, 1], ['Lower back', 4, 4, 1],
+  ['Hamstrings', 10, 10, 0], ['Chest', 16, 16, 0], ['Back', 16, 16, 0], ['Shoulders', 14, 14, 0], ['Biceps', 10, 10, 0], ['Triceps', 10, 10, 0]];
+function lfFocusOf(list) { return list.map(function (f) { return { m: f[0], lo: f[1], hi: f[2], p: f[3] }; }); }
 var FOCUS_V1 = 'Quads:13:16:1,Calves:12:12:1,Lower back:6:6:1,Hamstrings:10:10:0,Glutes:5:8:0,Abs:9:9:0';
 function lfFocusDefault() { return FOCUS_DEFAULT.map(function (f) { return { m: f[0], lo: f[1], hi: f[2], p: f[3] }; }); }
 /* Priorities first, in the order you added them. */
@@ -710,7 +763,7 @@ var DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 var MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 /* ═══════════ STORE ═══════════ */
-function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null, focus: lfFocusDefault(), ck: 'walk', rc: {}, rd: {}, ra: true, lk: {}, dl: {}, dg: { st: 15000, kc: 0, pr: 0, wa: 3000 } }; }
+function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null, prog: 'ul', focus: lfFocusDefault(), ck: 'walk', rc: {}, rd: {}, ra: true, lk: {}, dl: {}, dg: { st: 15000, kc: 0, pr: 0, wa: 3000 } }; }
 function num(v) { var n = +v; return isFinite(n) && n >= 0 ? n : null; }
 
 /* A damaged record is REPAIRED, never thrown away: a bad set costs the
@@ -723,6 +776,7 @@ function lfClean(o) {
   d.bwGoal = num(o.bwGoal);
   if (CARDIO.some(function (c) { return c[0] === o.ck; })) d.ck = o.ck;
   d.ra = o.ra !== false;
+  if (PROG_IDS.indexOf(o.prog) >= 0) d.prog = o.prog;
   /* A REST DAY taken on purpose, a date and nothing else. */
   if (o.rd && typeof o.rd === 'object') Object.keys(o.rd).forEach(function (k) { if (/^\d{4}-\d\d-\d\d$/.test(k) && o.rd[k]) d.rd[k] = 1; });
   /* How your legs felt, one answer a day, sixty days kept. */
@@ -808,8 +862,8 @@ var act = lfLoadAct();
 function allEx() { return EXERCISES.concat(S.ex); }
 function exById(id) { var a = allEx(); for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
 function exName(id, fallback) { var e = exById(id); return e ? e.n : (fallback || 'Exercise'); }
-function allRt() { return PROGRAM.concat(S.rt); }
-function rtById(id) { var a = allRt(); for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
+function allRt() { return lfProg().days.concat(S.rt); }
+function rtById(id) { var a = PROGRAMS.ul.days.concat(PROGRAMS.ppl.days, S.rt); for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
 function woSorted() { return S.wo.slice().sort(function (a, b) { return a.d === b.d ? a.s - b.s : (a.d < b.d ? -1 : 1); }); }
 function woOn(d) { return S.wo.filter(function (w) { return w.d === d; }); }
 
@@ -977,7 +1031,8 @@ function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 12); } 
 function lfToday() {
   var t = today();
   if (S.pick && S.pick.d === ymd(t) && rtById(S.pick.id)) return rtById(S.pick.id);
-  for (var i = 0; i < PROGRAM.length; i++) if (PROGRAM[i].dow === t.getDay()) return PROGRAM[i];
+  var P = lfProg().days;
+  for (var i = 0; i < P.length; i++) if (P[i].dow === t.getDay()) return P[i];
   return null;
 }
 
@@ -1001,7 +1056,8 @@ function lfTodayCard() {
     + '<button type="button" class="lf-go" id="lfGo"><span class="lf-play">' + IC.play + '</span><span></span></button></div>');
   /* A REST DAY IS THE DAY'S PLAN, not a gap in it: the card says so and
      the one control is the way back to training. */
-  if (!act && lfIsRest()) {
+  var planRest = !lfIsRest() && !lfToday() && lfPlanRest();
+  if (!act && (lfIsRest() || planRest)) {
     c.classList.add('is-rest'); c.id = 'lfRestDay';
     $('#lfPick', c).textContent = 'Rest day';
     $('#lfPick', c).setAttribute('aria-label', 'Today: rest day. Choose a routine');
@@ -1010,7 +1066,8 @@ function lfTodayCard() {
     $('.lf-chips', c).remove();
     var gr = $('#lfGo', c);
     $('span:last-child', gr).textContent = 'Train anyway';
-    gr.addEventListener('click', function () { lfSetRest(false); });
+    gr.addEventListener('click', function () { if (planRest) lfRoutinePicker(); else lfSetRest(false); });
+    if (planRest) $('.lf-sub', c).textContent = 'The plan rests today. Walking and light mobility are fine; avoid another hard session.';
     return c;
   }
   var title = act ? act.n : (rt ? rt.n : 'Workout');
@@ -1767,7 +1824,7 @@ function lfRoutinePicker() {
     li.addEventListener('click', fn); b.appendChild(li);
   }
   var cur = lfIsRest() ? null : lfToday();
-  item('Rest day', 'Take today off on purpose', lfIsRest(), function () { s.close(true); lfSetRest(!lfIsRest()); });
+  item('Rest day', 'Take today off on purpose', lfIsRest() || (!lfToday() && lfPlanRest()), function () { s.close(true); lfSetRest(!lfIsRest()); });
   allRt().forEach(function (r) {
     item(r.n, (r.fixed ? DOW_LONG[r.dow] + ' · ' : '') + (r.sp || (r.ex.length + ' exercises')), cur && cur.id === r.id, function () { S.pick = { d: ymd(today()), id: r.id }; lfSetRest(false); s.close(true); lfRender(); });
   });
@@ -1846,8 +1903,30 @@ function lfRenderLib() {
   root.appendChild(el('<h2 class="lf-h1">Exercises</h2>'));
   /* the split, Monday first */
   root.appendChild(el('<div class="lf-cap lf-gh">Your split</div>'));
+  /* TWO PROGRAMS, one running. Switching also moves the weekly targets
+     to the new plan's — but only when they are still the old plan's own,
+     so targets you set yourself are never overwritten. */
+  var pg = el('<div class="lf-seg" id="lfProg" style="--n:2;margin-bottom:10px"></div>');
+  PROG_IDS.forEach(function (k) {
+    var bt = el('<button type="button"></button>'); bt.textContent = PROGRAMS[k].n; bt.dataset.p = k;
+    bt.setAttribute('aria-pressed', S.prog === k ? 'true' : 'false');
+    bt.addEventListener('click', function () {
+      if (S.prog === k) return;
+      var was = { prog: S.prog, focus: JSON.stringify(S.focus), pick: S.pick };
+      var sig = function (l) { return JSON.stringify(lfFocusOf(l)); };
+      var oldDef = S.prog === 'ppl' ? FOCUS_PPL : FOCUS_DEFAULT, newDef = k === 'ppl' ? FOCUS_PPL : FOCUS_DEFAULT;
+      if (JSON.stringify(S.focus) === sig(oldDef)) S.focus = lfFocusOf(newDef);
+      S.prog = k; if (S.pick && S.pick.d === ymd(today()) && !lfProg().days.concat(S.rt).some(function (x) { return x.id === S.pick.id; })) S.pick = null;
+      lfSave(); lfRender();
+      lfToast(PROGRAMS[k].n + ' is on', function () { S.prog = was.prog; S.focus = JSON.parse(was.focus); S.pick = was.pick; lfSave(); lfRender(); });
+    });
+    pg.appendChild(bt);
+  });
+  root.appendChild(pg);
   var pc = el('<div class="lf-card" style="padding:4px 16px" id="lfSplit"><div class="lf-list"></div></div>');
-  PROGRAM.slice().sort(function (a, b) { return ((a.dow + 6) % 7) - ((b.dow + 6) % 7); }).forEach(function (r) {
+  [1, 2, 3, 4, 5, 6, 0].forEach(function (w) {
+    var r = lfProg().days.filter(function (x) { return x.dow === w; })[0];
+    if (!r) { var ri = el('<div class="lf-li is-plan-rest"><div class="lf-li-t"><b></b><span>Walking and light mobility only</span></div></div>'); $('b', ri).textContent = DOW_LONG[w].slice(0, 3) + ' · Rest'; $('.lf-list', pc).appendChild(ri); return; }
     var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div>' + IC.chev + '</button>');
     $('b', li).textContent = DOW_LONG[r.dow].slice(0, 3) + ' · ' + r.n;
     $('span', li).textContent = r.sp + ' · ' + r.ex.length + ' exercises';

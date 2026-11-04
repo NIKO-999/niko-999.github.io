@@ -547,6 +547,42 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── THE SECOND PROGRAM: push / pull / legs ── */
+  {
+    const { c, page } = await ctx({ unit: 'kg' }, '2026-11-01T09:00:00');
+    await page.click('.lf-bar [data-v="lib"]');
+    ok('upper / lower runs until you switch', (await page.getAttribute('#lfProg [data-p="ul"]', 'aria-pressed')) === 'true');
+    await page.click('#lfProg [data-p="ppl"]'); await settle(page);
+    const split = await page.$$eval('#lfSplit .lf-li b', (b) => b.map((x) => x.textContent));
+    ok('push / pull / legs is six days and a Sunday rest', split.join() === 'Mon · Push A,Tue · Pull A,Wed · Legs A,Thu · Push B,Fri · Pull B,Sat · Legs B,Sun · Rest', split);
+    await page.click('#lfSplit .lf-li >> nth=5'); await settle(page);
+    const sat = await top(page).textContent();
+    ok('Legs B reads its sets: split squats, two curls, calves 4 × 10–20', sat.includes('Bulgarian split squats') && sat.includes('Lying leg curls') && sat.includes('4 × 10–20') && /quad day/.test(sat), sat.slice(0, 200));
+    await page.keyboard.press('Escape'); await settle(page);
+    await page.click('#lfSplit .lf-li >> nth=3'); await settle(page);
+    ok('Push B carries the new triceps work', /EZ-bar skull crushers/.test(await top(page).textContent()) && /Single-arm cable pushdowns/.test(await top(page).textContent()));
+    await page.keyboard.press('Escape'); await settle(page);
+    const r = await store(page);
+    ok('the weekly targets move to the plan’s own', r.prog === 'ppl' && r.focus.length === 10 && r.focus.find((f) => f.m === 'Chest').lo === 16 && r.focus.find((f) => f.m === 'Calves').lo === 8, r.focus);
+    await page.click('.lf-bar [data-v="home"]');
+    ok('a Sunday on this plan is a planned rest', (await page.textContent('#lfPick')).trim() === 'Rest day' && /plan rests today/.test(await page.textContent('#lfRestDay')));
+    await page.click('#lfGo'); await settle(page);
+    await top(page).locator('.lf-li', { has: page.locator('b', { hasText: /^Pull A$/ }) }).click(); await settle(page);
+    ok('and Train anyway picks a session from it', (await page.textContent('#lfPick')).trim() === 'Pull A');
+    await page.click('.lf-bar [data-v="lib"]'); await page.click('#lfProg [data-p="ul"]'); await settle(page);
+    const r2 = await store(page);
+    ok('switching back puts the first plan and its targets back', r2.prog === 'ul' && r2.focus.length === 11 && (await page.$$eval('#lfSplit .lf-li b', (b) => b[0].textContent)) === 'Mon · Lower A');
+    await c.close();
+  }
+  {
+    const mine = [{ m: 'Quads', lo: 18, hi: 18, p: 1 }];
+    const { c, page } = await ctx({ unit: 'kg', focus: mine, prog: 'nope' });
+    ok('an unknown program reads as the first', (await store(page)).prog === 'ul');
+    await page.click('.lf-bar [data-v="lib"]'); await page.click('#lfProg [data-p="ppl"]'); await settle(page);
+    ok('targets you set yourself are not overwritten by a switch', JSON.stringify((await store(page)).focus) === JSON.stringify(mine));
+    await c.close();
+  }
+
   /* ── FRIENDS: two phones on the real worker, run in this process ──
      Every request to the worker host is answered by worker/index.js
      against a Map, so the round trip is the shipped client against the
