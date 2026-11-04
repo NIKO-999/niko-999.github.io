@@ -558,13 +558,13 @@ var MUSCLES = ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Lower back', 'Abs', '
    quads frequent exposure; four upper days spread the upper-body volume
    so no muscle is pushed to its limit daily. */
 var PROGRAM_UL = [
-  { id: 'p-mon', dow: 1, n: 'Lower A', sp: 'Quad strength and size', ex: [['hack', 3, 6, 10], ['smithsq', 3, 8, 10], ['legext', 3, 10, 15], ['calfstand', 4, 8, 12], ['cablecrunch', 3, 10, 15]] },
-  { id: 'p-tue', dow: 2, n: 'Upper A', sp: 'Chest, shoulders, triceps', ex: [['smithinc', 3, 6, 10], ['mchest', 3, 8, 12], ['seatshp', 3, 8, 12], ['cablat', 4, 12, 20], ['ohcable', 3, 10, 15], ['tripush', 3, 10, 15], ['backext', 3, 10, 15]] },
-  { id: 'p-wed', dow: 3, n: 'Lower B', sp: 'Hamstrings, glutes, calves', ex: [['rdl', 3, 6, 10], ['seatcurl', 4, 10, 15], ['lyingcurl', 3, 10, 15], ['hipthrust', 3, 8, 12], ['calfseat', 4, 12, 20], ['hlr', 3, 10, 15]] },
-  { id: 'p-thu', dow: 4, n: 'Upper B', sp: 'Back, rear delts, abs', ex: [['ngpd', 3, 8, 12], ['csrow', 3, 8, 12], ['sapd', 3, 10, 15], ['revpec', 3, 12, 20], ['cablat', 3, 12, 20], ['ezcurl', 3, 8, 12], ['abwheel', 3, 8, 15]] },
-  { id: 'p-fri', dow: 5, n: 'Lower C', sp: 'Quad hypertrophy and leg volume', ex: [['legpress', 3, 10, 15], ['bss', 3, 8, 12], ['legext', 3, 12, 20], ['seatcurl', 3, 10, 15], ['calf', 4, 10, 15], ['cablecrunch', 3, 10, 15]] },
-  { id: 'p-sat', dow: 6, n: 'Upper C', sp: 'Upper-body balance, lower back, abs', ex: [['incdb', 3, 8, 12], ['mrow', 3, 8, 12], ['wgpd', 3, 10, 15], ['pecdeck', 3, 12, 15], ['backext', 3, 10, 15], ['revhyper', 3, 12, 15], ['hlr', 3, 10, 15]] },
-  { id: 'p-sun', dow: 0, n: 'Upper D', sp: 'Shoulders, arms, calves', ex: [['mshp', 3, 8, 12], ['cablat', 4, 12, 20], ['revpec', 3, 12, 20], ['preacher', 3, 10, 15], ['incurl', 3, 10, 15], ['tripush', 3, 10, 15], ['ohcable', 3, 10, 15], ['calfseat', 3, 15, 20]] }
+  { id: 'p-mon', dow: 1, n: 'Quad strength', sp: 'Heavy squats, calves, abs', ex: [['hack', 3, 6, 10], ['smithsq', 3, 8, 10], ['legext', 3, 10, 15], ['calfstand', 4, 8, 12], ['cablecrunch', 3, 10, 15]] },
+  { id: 'p-tue', dow: 2, n: 'Chest & shoulders', sp: 'Chest, shoulders, triceps', ex: [['smithinc', 3, 6, 10], ['mchest', 3, 8, 12], ['seatshp', 3, 8, 12], ['cablat', 4, 12, 20], ['ohcable', 3, 10, 15], ['tripush', 3, 10, 15], ['backext', 3, 10, 15]] },
+  { id: 'p-wed', dow: 3, n: 'Hamstrings & glutes', sp: 'Hamstrings, glutes, calves', ex: [['rdl', 3, 6, 10], ['seatcurl', 4, 10, 15], ['lyingcurl', 3, 10, 15], ['hipthrust', 3, 8, 12], ['calfseat', 4, 12, 20], ['hlr', 3, 10, 15]] },
+  { id: 'p-thu', dow: 4, n: 'Back & V-taper', sp: 'Back, rear delts, abs', ex: [['ngpd', 3, 8, 12], ['csrow', 3, 8, 12], ['sapd', 3, 10, 15], ['revpec', 3, 12, 20], ['cablat', 3, 12, 20], ['ezcurl', 3, 8, 12], ['abwheel', 3, 8, 15]] },
+  { id: 'p-fri', dow: 5, n: 'Quad volume', sp: 'Quad hypertrophy and leg volume', ex: [['legpress', 3, 10, 15], ['bss', 3, 8, 12], ['legext', 3, 12, 20], ['seatcurl', 3, 10, 15], ['calf', 4, 10, 15], ['cablecrunch', 3, 10, 15]] },
+  { id: 'p-sat', dow: 6, n: 'Chest & back', sp: 'Upper-body balance, lower back, abs', ex: [['incdb', 3, 8, 12], ['mrow', 3, 8, 12], ['wgpd', 3, 10, 15], ['pecdeck', 3, 12, 15], ['backext', 3, 10, 15], ['revhyper', 3, 12, 15], ['hlr', 3, 10, 15]] },
+  { id: 'p-sun', dow: 0, n: 'Shoulders & arms', sp: 'Shoulders, arms, calves', ex: [['mshp', 3, 8, 12], ['cablat', 4, 12, 20], ['revpec', 3, 12, 20], ['preacher', 3, 10, 15], ['incurl', 3, 10, 15], ['tripush', 3, 10, 15], ['ohcable', 3, 10, 15], ['calfseat', 3, 15, 20]] }
 ];
 /* THE SECOND PROGRAM: push / pull / legs, six days with Sunday open.
    Two leg days, the second carrying extra quad volume because quads are
@@ -800,6 +800,11 @@ function lfClean(o) {
   if (Array.isArray(o.rt)) d.rt = o.rt.filter(function (r) { return r && typeof r.id === 'string' && typeof r.n === 'string'; })
     .map(function (r) { return { id: r.id, n: r.n.slice(0, 40) || 'Routine', sp: typeof r.sp === 'string' ? r.sp.slice(0, 60) : '', ex: Array.isArray(r.ex) ? r.ex.filter(function (x) { return typeof x === 'string'; }) : [] }; });
   if (Array.isArray(o.wo)) d.wo = o.wo.map(lfCleanWo).filter(Boolean);
+  /* The split's days were renamed for what they train; a session logged
+     under the old name takes the new one, so the calendar reads one way. */
+  var RENAMED = { 'p-mon': ['Lower A', 'Quad strength'], 'p-tue': ['Upper A', 'Chest & shoulders'], 'p-wed': ['Lower B', 'Hamstrings & glutes'],
+    'p-thu': ['Upper B', 'Back & V-taper'], 'p-fri': ['Lower C', 'Quad volume'], 'p-sat': ['Upper C', 'Chest & back'], 'p-sun': ['Upper D', 'Shoulders & arms'] };
+  d.wo.forEach(function (w) { var rn = RENAMED[w.rt]; if (rn && w.n === rn[0]) w.n = rn[1]; });
   if (Array.isArray(o.bw)) d.bw = o.bw.filter(function (b) { return b && /^\d{4}-\d\d-\d\d$/.test(b.d) && num(b.kg); })
     .map(function (b) { return { d: b.d, kg: +b.kg }; }).sort(function (a, b) { return a.d < b.d ? -1 : 1; });
   /* Today's choice of routine is for TODAY: a pick from yesterday must
