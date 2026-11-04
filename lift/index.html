@@ -335,7 +335,17 @@ svg { display: block; }
 .lf-pick-h { padding: 14px 2px 2px; }
 .lf-day.is-rest { border-style: dashed; }
 .lf-day.is-rest:not(.is-now) { border-color: var(--dim); }
-.lf-dots i.is-r { background: none; box-shadow: inset 0 0 0 1.5px var(--dim); }
+.lf-dots i.is-r { background: none; box-shadow: inset 0 0 0 1.5px var(--ink); }
+/* A rest day reads at a glance: a dashed ring inside the cell, which
+   stacks with today's red one rather than replacing it. */
+.lf-cell.is-rest { outline: 1.5px dashed var(--dim); outline-offset: -4px; color: var(--ink); }
+.lf-rd-l { display: flex; align-items: center; gap: 14px; padding: 2px 6px; font-size: 12px; color: var(--dim); }
+.lf-rd-l b { margin-left: auto; color: var(--ink); font-weight: 600; }
+.lf-rd-key { display: inline-flex; align-items: center; gap: 6px; }
+.lf-rd-key i { width: 7px; height: 7px; border-radius: 50%; background: var(--ink); }
+.lf-rd-key i.is-r { background: none; box-shadow: inset 0 0 0 1.5px var(--ink); }
+.lf-rd-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--ink); }
+.lf-wk.is-rd .lf-wn b { color: var(--ink); }
 #lfRecRest { margin-top: 10px; }
 #lfRecRest + #lfRecAlt { margin-top: 8px; }
 .lf-rq { margin: 12px 0 2px; }
@@ -1122,7 +1132,8 @@ function lfGridCard() {
     x.dataset.d = d;
     g.appendChild(x);
   }
-  $('.lf-num', c).textContent = n + ' · goal ' + S.goal + '/wk';
+  var rn = 0; for (var j = 0; j < 30; j++) { var dj = ymd(addDays(t, -j)); if (S.rd[dj] && !on[dj]) rn++; }
+  $('.lf-num', c).textContent = n + (rn ? ' · ' + rn + ' rest' : '') + ' · goal ' + S.goal + '/wk';
   c.setAttribute('aria-label', 'Trained ' + n + ' of the last 30 days. Open the calendar');
   c.addEventListener('click', function () { lfGo('cal'); });
   return c;
@@ -1891,6 +1902,11 @@ function lfRenderCal() {
   root.appendChild(nav);
   var st = windowStats(from, to);
   var sum = lfSum([[st.wo, 'workouts'], [st.sets, 'sets'], [fmtBig(toDisp(st.vol)), S.unit]]);
+  /* HOW MANY REST DAYS YOU TOOK, beside what you trained, so a light
+     week reads as recovery chosen rather than days gone missing. */
+  var rdN = Object.keys(S.rd).filter(function (k) { return k >= ymd(from) && k <= ymd(to) && !woOn(k).length; }).length;
+  var rdl = el('<div class="lf-rd-l" id="lfRdCount"><span class="lf-rd-key"><i></i>Workout</span><span class="lf-rd-key"><i class="is-r"></i>Rest day</span><b class="lf-num"></b></div>');
+  $('b', rdl).textContent = rdN === 1 ? '1 rest day' : rdN + ' rest days';
   var tk = ymd(t);
   if (calMode === 'month') {
     var c = el('<div class="lf-card" style="padding:12px"><div class="lf-dows" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div><div class="lf-month" id="lfMonth"></div></div>');
@@ -1910,6 +1926,7 @@ function lfRenderCal() {
       g.appendChild(cell);
     }
     root.appendChild(c);
+    root.appendChild(rdl);
     root.appendChild(sum);
   } else {
     var wc = el('<div class="lf-card" style="padding:4px 16px" id="lfWeekList"></div>');
@@ -1923,7 +1940,12 @@ function lfRenderCal() {
         $('.lf-wn b', row).textContent = ww.map(function (w) { return w.n; }).join(' + ');
         $('.lf-wn span', row).textContent = ww.reduce(function (a, w) { return a + woSets(w); }, 0) + ' sets · ' + ww.reduce(function (a, w) { return a + w.x.length; }, 0) + ' exercises';
         $('.lf-li-r', row).textContent = fmtBig(toDisp(ww.reduce(function (a, w) { return a + woVol(w); }, 0))) + ' ' + S.unit;
-      } else { row.classList.add('is-rest'); $('.lf-wn b', row).textContent = kk > tk ? '' : 'Rest'; }
+      } else if (S.rd[kk]) {
+        row.classList.add('is-rest', 'is-rd');
+        $('.lf-wn b', row).textContent = 'Rest day';
+        $('.lf-wn span', row).textContent = 'Taken on purpose';
+        $('.lf-li-r', row).innerHTML = '<i class="lf-rd-dot" aria-hidden="true"></i>';
+      } else { row.classList.add('is-rest'); $('.lf-wn b', row).textContent = kk >= tk ? '' : 'Nothing logged'; }
       if (kk > tk) row.disabled = true;
       row.addEventListener('click', (function (k) { return function () { lfDaySheet(k); }; })(kk));
       wc.appendChild(row);
@@ -1931,7 +1953,7 @@ function lfRenderCal() {
     root.appendChild(wc);
     var goal = el('<div class="lf-lab" style="margin:0 4px"></div>');
     goal.textContent = st.wo + ' of ' + S.goal + ' this week';
-    root.appendChild(sum); root.appendChild(goal);
+    root.appendChild(rdl); root.appendChild(sum); root.appendChild(goal);
   }
   /* Every workout in the range, newest first. */
   var ws2 = S.wo.filter(function (w) { return w.d >= ymd(from) && w.d <= ymd(to); }).sort(function (a, b) { return a.d === b.d ? b.s - a.s : (a.d < b.d ? 1 : -1); });

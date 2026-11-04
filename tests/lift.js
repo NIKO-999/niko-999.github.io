@@ -275,7 +275,7 @@ const freeze = (at) => `(() => {
   await page.click('.lf-seg [data-m="week"]');
   ok('the week is Monday to Sunday around today', (await page.textContent('.lf-calnav b')) === '26 Oct – 1 Nov');
   const wk = await page.$$eval('#lfWeekList .lf-wk', (r) => r.map((x) => x.querySelector('.lf-wn b').textContent));
-  ok('Friday carries both workouts and a past day says Rest', wk[4] === 'Push + Push' && wk[0] === 'Rest' && wk[6] === '', wk);
+  ok('Friday carries both workouts and an empty past day says nothing was logged', wk[4] === 'Push + Push' && wk[0] === 'Nothing logged' && wk[6] === '', wk);
   await page.click('.lf-seg [data-m="month"]');
   await page.click('.lf-cell[data-d="2026-10-30"]'); await settle(page);
   ok('a day with two workouts lists them', await top(page).locator('.lf-li').count() === 2);
@@ -398,6 +398,14 @@ const freeze = (at) => `(() => {
     await page.click('.lf-cell[data-d="2026-11-02"]'); await settle(page);
     ok('and its day says it was taken on purpose', /Taken on purpose/.test(await top(page).textContent()));
     await page.keyboard.press('Escape'); await settle(page);
+    ok('the month counts it beside the key', (await page.textContent('#lfRdCount b')) === '1 rest day' && /Rest day/.test(await page.textContent('#lfRdCount')));
+    await page.click('#lfCal .lf-seg [data-m="week"]'); await settle(page);
+    const wr = await page.$eval('.lf-wk[data-d="2026-11-02"]', (e) => [e.classList.contains('is-rd'), e.querySelector('.lf-wn b').textContent, !!e.querySelector('.lf-rd-dot')]);
+    ok('the week names it a rest day', wr[0] && wr[1] === 'Rest day' && wr[2], wr);
+    await page.click('#lfCal .lf-seg [data-m="month"]'); await settle(page);
+    await page.click('.lf-bar [data-v="home"]'); await settle(page);
+    ok('the 30 days count it', /1 rest/.test(await page.textContent('#lfGrid .lf-num')));
+    await page.click('.lf-bar [data-v="cal"]'); await settle(page);
     await page.click('.lf-bar [data-v="home"]'); await settle(page);
     await page.click('#lfPick'); await settle(page);
     await top(page).locator('.lf-li', { hasText: 'Lower A' }).click(); await settle(page);
