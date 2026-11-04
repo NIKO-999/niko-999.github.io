@@ -613,6 +613,27 @@ const freeze = (at) => `(() => {
     ok('switching back puts the first plan and its targets back', r2.prog === 'ul' && r2.focus.length === 11 && (await page.$$eval('#lfSplit .lf-li b', (b) => b[0].textContent)) === 'Mon · Quad strength');
     await c.close();
   }
+  /* ── THE THIRD PROGRAM: the glute focus from the notebook ── */
+  {
+    const { c, page } = await ctx({ unit: 'kg' }, '2026-11-07T09:00:00');
+    await page.click('.lf-bar [data-v="lib"]');
+    await page.click('#lfProg [data-p="gl"]'); await settle(page);
+    const split = await page.$$eval('#lfSplit .lf-li b', (b) => b.map((x) => x.textContent));
+    ok('the glute split is Monday to Saturday', split.join() === 'Mon · Glutes · heavy,Tue · Back & biceps,Wed · Quads & calves,Thu · Chest, shoulders & triceps,Fri · Glutes · top shelf,Sat · Conditioning & core', split);
+    const segW = await page.$$eval('#lfProg button', (b) => b.map((x) => x.scrollWidth <= x.clientWidth + 1));
+    ok('three programs fit on one switch', segW.length === 3 && segW.every(Boolean));
+    await page.click('#lfSplit .lf-li >> nth=5'); await settle(page);
+    const sat = await top(page).textContent();
+    ok('Saturday reads its rounds, carries and plank as written', sat.includes('4 rounds') && sat.includes('3 × 30–40 m each side') && sat.includes('3 × 20–30 s each side') && sat.includes('3 × 8–10 each side') && /rower/.test(sat), sat.slice(0, 300));
+    await page.keyboard.press('Escape'); await settle(page);
+    const r = await store(page);
+    ok('its targets are the sets the week holds, glutes first', r.prog === 'gl' && r.focus[0].m === 'Glutes' && r.focus[0].lo === 24 && r.focus[0].p === 1, r.focus.slice(0, 3));
+    await page.click('.lf-bar [data-v="home"]');
+    ok('a Saturday opens on conditioning and core', (await page.textContent('#lfPick')).trim() === 'Conditioning & core');
+    await page.click('#lfGo'); await settle(page);
+    ok('a session written in rounds says so', (await page.locator('.lf-ex', { hasText: 'Sled push' }).locator('.lf-tg').textContent()).startsWith('4 rounds · '));
+    await c.close();
+  }
   {
     const mine = [{ m: 'Quads', lo: 18, hi: 18, p: 1 }];
     const { c, page } = await ctx({ unit: 'kg', focus: mine, prog: 'nope' });
