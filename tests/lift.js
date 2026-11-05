@@ -304,7 +304,33 @@ const freeze = (at) => `(() => {
   ok('a day with two workouts lists them', await top(page).locator('.lf-li').count() === 2);
   await top(page).locator('.lf-li').first().click(); await settle(page);
   ok('a finished workout opens to be read, with no delete button', /Push/.test(await top(page).textContent()) && await top(page).locator('button', { hasText: 'Delete workout' }).count() === 0);
+  /* EDIT LIVES IN THE RECORD: a pencil on a workout opened from a day */
+  ok('a workout opened from a day carries an edit button', await top(page).locator('#lfWoEdit').count() === 1);
+  {
+    const n0 = (await store(page)).wo.length;
+    await top(page).locator('#lfWoEdit').click(); await settle(page);
+    const E = top(page);
+    ok('edit opens on its name, day and sets', await E.locator('#lfEdN').inputValue() === 'Push' && await E.locator('#lfEdD').inputValue() === '2026-10-30' && await E.locator('.lf-set.is-ed:not(.is-hd)').count() > 0);
+    await E.locator('#lfEdN').fill('Push edited');
+    await E.locator('.lf-set.is-ed:not(.is-hd) input').nth(1).fill('11');
+    await E.locator('#lfEdSave').click(); await settle(page);
+    const ed = (await store(page)).wo.filter((w) => w.n === 'Push edited');
+    ok('save writes the name and the reps', ed.length === 1 && ed[0].x[0].sets[0].r === 11, ed);
+    ok('and goes back to the workout, still editable', /Push edited/.test(await top(page).textContent()) && await top(page).locator('#lfWoEdit').count() === 1);
+    await top(page).locator('#lfWoEdit').click(); await settle(page);
+    await top(page).locator('#lfEdDel').click(); await settle(page);
+    await top(page).locator('button', { hasText: /^Delete$/ }).click(); await settle(page);
+    ok('delete asks, then takes it out', (await store(page)).wo.length === n0 - 1);
+    await page.click('.lf-toast button'); await settle(page);
+    ok('and Undo puts it back', (await store(page)).wo.length === n0 && (await store(page)).wo.some((w) => w.n === 'Push edited'));
+  }
   await page.keyboard.press('Escape'); await settle(page);
+  await page.keyboard.press('Escape'); await settle(page);
+
+  /* and Today on home opens it to be read, with no pencil */
+  await page.click('.lf-bar [data-v="home"]'); await settle(page);
+  await page.click('#lfPick'); await settle(page);
+  ok('a workout opened from home has no edit button', await page.locator('.lf-sheet').count() > 0 && await page.locator('#lfWoEdit').count() === 0);
   await page.keyboard.press('Escape'); await settle(page);
 
   /* ── units ── */
@@ -1000,6 +1026,14 @@ const freeze = (at) => `(() => {
     ok('their week, reps by day against goal', await T.locator('#frWeek .lf-bars > div').count() === 7 && /0\/3/.test(await T.locator('#frWeek').textContent()));
     ok('their volume over eight weeks', await T.locator('#frVol .lf-area svg').count() === 1 && /8 wk/.test(await T.locator('#frVol').textContent()));
     ok('and their sets by muscle', await T.locator('#frMus .lf-vr').count() > 0);
+    /* their figures open the same trend sheets as yours */
+    ok('their tiles open trends', await T.locator('[data-tr]').count() === 5);
+    await T.locator('.lf-stat[data-tr="wo"]').click(); await settle(A.page);
+    ok('their workouts over eight weeks', await top(A.page).locator('#lfWoTrend .lf-vs-dot').count() === 8 && /workouts/.test(await top(A.page).textContent()));
+    await A.page.keyboard.press('Escape'); await settle(A.page);
+    await T.locator('#frVol').click(); await settle(A.page);
+    ok('and their volume', await top(A.page).locator('#lfVolTrend').count() === 1 && /600/.test(await top(A.page).textContent()));
+    await A.page.keyboard.press('Escape'); await settle(A.page);
     ok('and their workouts', (await T.locator('#frWo .lf-li b').allTextContents()).join() === 'Lower A' && /1 sets · 600 kg/.test(await T.locator('#frWo .lf-li span').first().textContent()));
     await T.locator('#frWo .lf-li').first().click(); await settle(A.page);
     ok('a workout opens on its sets', /Hack squat/.test(await top(A.page).textContent()) && /60×10/.test(await top(A.page).textContent()), await top(A.page).textContent());

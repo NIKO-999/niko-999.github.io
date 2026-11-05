@@ -378,6 +378,15 @@ function liftClean(b) {
   /* the three latest badges: an id the app knows the shape of, and a date */
   s.bg = Array.isArray(b.s.bg) ? b.s.bg.filter((x) => Array.isArray(x) && /^[a-z0-9]{2,8}$/.test(x[0]) && /^\d{4}-\d\d-\d\d$/.test(x[1])).slice(0, 3).map((x) => [x[0], x[1]]) : [];
   s.mu = Array.isArray(b.s.mu) ? b.s.mu.filter((m) => Array.isArray(m) && LIFT_MUS.includes(m[0])).slice(0, 16).map((m) => [m[0], num(m[1]), num(m[2])]) : [];
+  /* THE TREND SHEETS: eight weeks and four windows, each [workouts, sets,
+     reps, kg], the Monday they count from, and the heaviest set of the
+     month. Totals and one weight — nothing that names a lift. */
+  const q4 = (a) => Array.isArray(a) && a.length === 4 ? [num(a[0]), Math.min(100000, Math.max(0, Math.round(+a[1]) || 0)), Math.min(1000000, Math.max(0, Math.round(+a[2]) || 0)), big(a[3])] : [0, 0, 0, 0];
+  const tr = b.s.tr;
+  if (tr && typeof tr === 'object' && Array.isArray(tr.w8) && tr.w8.length === 8) {
+    const hv = Math.round(+tr.hv * 10) / 10;
+    s.tr = { m: typeof tr.m === 'string' && /^\d{4}-\d\d-\d\d$/.test(tr.m) ? tr.m : '', w8: tr.w8.map(q4), c30: q4(tr.c30), p30: q4(tr.p30), cw: q4(tr.cw), pw: q4(tr.pw), hv: isFinite(hv) ? Math.max(0, Math.min(2000, hv)) : 0 };
+  }
   s.last = typeof b.s.last === 'string' && /^\d{4}-\d\d-\d\d$/.test(b.s.last) ? b.s.last : '';
   /* THE WORKOUTS THEMSELVES, asked for so friends can see the sets: at
      most twenty, each a date, a name and up to fifteen exercises of up

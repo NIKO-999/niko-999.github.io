@@ -403,6 +403,11 @@ svg { display: block; }
 .lf-ex-hd { display: flex; align-items: center; gap: 8px; }
 .lf-ex-hd button.lf-ex-n { flex: 1; min-width: 0; text-align: left; font-weight: 600; font-size: 15px; min-height: 40px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lf-set { display: grid; grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 44px; align-items: center; gap: 8px; min-height: 44px; }
+.lf-set.is-ed { grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1fr) 44px; }
+.lf-ed-ex { margin: 14px 0 0; padding: 4px 12px 10px; }
+.lf-ed-ex .lf-hd { margin: 0; min-height: 44px; }
+.lf-ed-ex .lf-hd b { flex: 1; min-width: 0; font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lf-sh-hd .lf-ed-open { color: var(--ink); }
 .lf-set.is-hd { min-height: 20px; font-size: 10px; color: var(--quiet); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
 .lf-set.is-hd span:not(:first-child) { text-align: center; }
 .lf-set .lf-sn { font-weight: 700; color: var(--dim); text-align: center; font-size: 12.5px; }
@@ -1043,6 +1048,7 @@ var IC = {
   stack: '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M12 4l8 4-8 4-8-4 8-4z"/><path d="M4 12l8 4 8-4M4 16l8 4 8-4"/></svg>',
   weight: '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M7 9h10l2 11H5L7 9z"/><circle cx="12" cy="6" r="2.5"/></svg>',
   chev: '<svg class="lf-ic lf-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
+  pen: '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>',
   left: '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>',
   right: '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
   x: '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
@@ -1551,9 +1557,29 @@ var TREND = {
   reps: { id: 'lfRepsTrend', n: 'Reps', ic: 'dumb', t: 'reps this week', v: function (st) { return st.reps; } }
 };
 function lfVolSheet() { lfTrendSheet('vol'); }
-function lfTrendSheet(k) {
+/* WHAT A TREND SHEET IS DRAWN FROM: your own record, or the summary a
+   friend's phone sent. One drawing, two sources, so a friend's sheet is
+   your sheet with their figures in it. */
+function lfTrendSrc(k) {
+  var t = today(), wkA = monday(t), weeks = [];
+  for (var i = 7; i >= 0; i--) { var a = addDays(wkA, -7 * i); var st = windowStats(a, addDays(a, 6)); st.d = a; weeks.push(st); }
+  var heavy = 0, a0 = ymd(addDays(t, -29));
+  S.wo.forEach(function (w) { if (w.d >= a0) w.x.forEach(function (e) { e.sets.forEach(function (q) { if (q.w > heavy) heavy = q.w; }); }); });
+  return { cur: k === 'reps' ? windowStats(wkA, t) : windowStats(addDays(t, -29), t), prev: k === 'reps' ? windowStats(addDays(wkA, -7), addDays(wkA, -1)) : windowStats(addDays(t, -59), addDays(t, -30)),
+    weeks: weeks, heavy: heavy, goal: S.goal, mine: 1 };
+}
+/* a friend's: four figures a window, [workouts, sets, reps, kg] */
+function frTrendSrc(st, k) {
+  var tr = st.tr; if (!tr || !Array.isArray(tr.w8) || tr.w8.length !== 8) return null;
+  var ob = function (a) { a = Array.isArray(a) ? a : []; return { wo: +a[0] || 0, sets: +a[1] || 0, reps: +a[2] || 0, vol: +a[3] || 0 }; };
+  var m0 = /^\d{4}-\d\d-\d\d$/.test(tr.m || '') ? new Date(tr.m + 'T12:00:00') : monday(today());
+  return { cur: ob(k === 'reps' ? tr.cw : tr.c30), prev: ob(k === 'reps' ? tr.pw : tr.p30),
+    weeks: tr.w8.map(function (a, i) { var o = ob(a); o.d = addDays(m0, -7 * (7 - i)); return o; }), heavy: +tr.hv || 0, goal: st.goal || 0 };
+}
+function lfTrendSheet(k, src) {
   /* THIS WEEK is the one that counts by the week, Monday on, against the whole of last week */
-  var K = TREND[k], t = today(), wkA = monday(t), cur = k === 'reps' ? windowStats(wkA, t) : windowStats(addDays(t, -29), t), prev = k === 'reps' ? windowStats(addDays(wkA, -7), addDays(wkA, -1)) : windowStats(addDays(t, -59), addDays(t, -30));
+  src = src || lfTrendSrc(k);
+  var K = TREND[k], cur = src.cur, prev = src.prev;
   var b = el('<div class="lf-vs"><div class="lf-cap">Last 30 days</div><div class="lf-vs-h"><div class="lf-hero lf-num"></div><span class="lf-delta" hidden></span></div><p class="lf-vs-t"></p><p class="lf-lab lf-vs-s"></p></div>');
   $('.lf-hero', b).textContent = fmtBig(K.v(cur)); $('.lf-vs-t', b).textContent = K.t;
   if (K.v(prev) > 0) {
@@ -1562,19 +1588,16 @@ function lfTrendSheet(k) {
   }
   var line = 'Nothing logged in the last 30 days yet.';
   if (cur.wo && k === 'vol') {
-    var heavy = 0, a0 = ymd(addDays(t, -29));
-    S.wo.forEach(function (w) { if (w.d >= a0) w.x.forEach(function (e) { e.sets.forEach(function (q) { if (q.w > heavy) heavy = q.w; }); }); });
-    line = 'Roughly ' + fmtBig(toDisp(cur.vol / cur.wo)) + ' per session. Heaviest single set: ' + fmtW(heavy) + ' ' + S.unit + '.';
+    line = 'Roughly ' + fmtBig(toDisp(cur.vol / cur.wo)) + ' per session. Heaviest single set: ' + fmtW(src.heavy) + ' ' + S.unit + '.';
   } else if (cur.wo && k === 'sets') line = 'About ' + (Math.round(cur.sets / cur.wo * 10) / 10) + ' a session, ' + (Math.round(cur.reps / Math.max(1, cur.sets) * 10) / 10) + ' reps a set, ' + fmtBig(cur.reps) + ' reps in all.';
   else if (cur.wo && k === 'reps') line = 'Across ' + cur.wo + (cur.wo === 1 ? ' workout' : ' workouts') + ' and ' + cur.sets + ' sets, about ' + (Math.round(cur.reps / Math.max(1, cur.sets) * 10) / 10) + ' reps a set.';
-  else if (cur.wo) line = 'About ' + (Math.round(cur.wo / 30 * 7 * 10) / 10) + ' a week, against a goal of ' + S.goal + '.';
+  else if (cur.wo) line = 'About ' + (Math.round(cur.wo / 30 * 7 * 10) / 10) + ' a week, against a goal of ' + src.goal + '.';
   if (k === 'reps') { $('.lf-cap', b).textContent = 'This week'; if (!cur.wo) line = 'Nothing logged this week yet.'; }
   $('.lf-vs-s', b).textContent = line;
   /* the card you pressed, day by day, sits above the eight weeks */
-  if (k === 'reps') { var wc = lfWeekCard(true); wc.style.marginBottom = '12px'; b.appendChild(wc); }
+  if (k === 'reps' && src.mine) { var wc = lfWeekCard(true); wc.style.marginBottom = '12px'; b.appendChild(wc); }
   /* the eight weeks, Monday first */
-  var wk = monday(t), weeks = [];
-  for (var i = 7; i >= 0; i--) { var a = addDays(wk, -7 * i); weeks.push({ d: a, v: K.v(windowStats(a, addDays(a, 6))) }); }
+  var weeks = src.weeks.map(function (st) { return { d: st.d, v: K.v(st) }; });
   var ch = el('<div class="lf-card lf-vs-c"><div class="lf-lab" style="display:flex;gap:6px;align-items:center">' + IC[K.ic] + '<span></span></div><div class="lf-vs-plot"></div><div class="lf-vs-x"></div></div>');
   ch.id = K.id; $('.lf-lab span', ch).textContent = K.n;
   var plot = $('.lf-vs-plot', ch), max = Math.max.apply(null, weeks.map(function (w) { return w.v; }).concat([1]));
@@ -2445,12 +2468,12 @@ function lfWoRow(w) {
   var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div><span class="lf-li-r lf-num"></span></button>');
   $('b', li).textContent = w.n; $('span', li).textContent = fmtDay(w.d) + ' · ' + woSets(w) + ' sets' + (w.cd ? ' · ' + w.cd.m + ' min cardio' : '');
   $('.lf-li-r', li).textContent = fmtBig(toDisp(woVol(w))) + ' ' + S.unit;
-  li.addEventListener('click', function () { lfWoSheet(w); });
+  li.addEventListener('click', function () { lfWoSheet(w, true); });
   return li;
 }
 function lfDaySheet(k) {
   var ws = woOn(k);
-  if (ws.length === 1) return lfWoSheet(ws[0]);
+  if (ws.length === 1) return lfWoSheet(ws[0], true);
   var b = el('<div class="lf-list"></div>');
   var dl = lfDlLine(k);
   if (dl) { var dp = el('<p class="lf-lab lf-dl-line" style="margin:0 0 8px"></p>'); dp.textContent = dl; b.appendChild(dp); }
@@ -2458,7 +2481,10 @@ function lfDaySheet(k) {
   ws.forEach(function (w) { b.appendChild(lfWoRow(w)); });
   lfSheet({ title: fmtDay(k), body: b });
 }
-function lfWoSheet(w) {
+/* EDIT IS A LOGBOOK THING. The pencil is drawn only where a workout is
+   opened from the record itself - the Workouts list and a calendar day -
+   never from Today on home, which opens it to be read. */
+function lfWoSheet(w, editable) {
   var b = el('<div><p class="lf-lab" style="margin:0 0 10px"></p></div>');
   /* the day and the time it started */
   $('p', b).textContent = fmtDay(w.d) + (w.s > 1e11 ? ' · ' + fmtAt(new Date(w.s)) : '');
@@ -2478,8 +2504,79 @@ function lfWoSheet(w) {
   });
   b.appendChild(cw);
   /* no delete here: a finished workout is opened to be read, and the red
-     button at its foot was the one thing on the sheet you never wanted */
-  lfSheet({ title: w.n, body: b });
+     button at its foot was the one thing on the sheet you never wanted.
+     It lives behind the pencil now, which only the record draws. */
+  var sh = lfSheet({ title: w.n, body: b });
+  if (editable) {
+    var pen = el('<button type="button" class="lf-x lf-ed-open" id="lfWoEdit" aria-label="Edit workout">' + IC.pen + '</button>');
+    pen.addEventListener('click', function () { sh.close(true); lfWoEdit(w); });
+    var hd = $('.lf-sh-hd', sh.el); hd.insertBefore(pen, $('.lf-x', hd));
+  }
+  return sh;
+}
+/* THE WORKOUT, EDITABLE: its name, its day, and every set - a figure
+   changed, a set or an exercise taken out, one added. It works on a copy,
+   so nothing moves until Save; and Delete asks, then offers Undo. */
+function lfWoEdit(w) {
+  var c = JSON.parse(JSON.stringify(w));
+  var b = el('<div><label class="lf-flab" for="lfEdN">Name</label><input class="lf-field" id="lfEdN" maxlength="60" autocomplete="off" />'
+    + '<label class="lf-flab" for="lfEdD">Day</label><input class="lf-field" id="lfEdD" type="date" /><div id="lfEdX"></div></div>');
+  $('#lfEdN', b).value = c.n; $('#lfEdD', b).value = c.d; $('#lfEdD', b).max = ymd(today());
+  function paint() {
+    var box = $('#lfEdX', b); box.textContent = '';
+    c.x.forEach(function (e, ei) {
+      var card = el('<div class="lf-card lf-ed-ex"><div class="lf-hd"><b></b><button type="button" class="lf-x">' + IC.x + '</button></div>'
+        + '<div class="lf-set is-hd is-ed"><span>Set</span><span>' + esc(S.unit) + '</span><span>Reps</span><span></span></div></div>');
+      var nm = exName(e.id, e.n);
+      $('b', card).textContent = nm;
+      $('.lf-hd .lf-x', card).setAttribute('aria-label', 'Remove ' + nm);
+      $('.lf-hd .lf-x', card).addEventListener('click', function () { c.x.splice(ei, 1); paint(); });
+      e.sets.forEach(function (q, si) {
+        var row = el('<div class="lf-set is-ed"><span class="lf-sn"></span><input type="text" inputmode="decimal" autocomplete="off" /><input type="text" inputmode="numeric" autocomplete="off" /><button type="button" class="lf-x">' + IC.x + '</button></div>');
+        $('.lf-sn', row).textContent = si + 1;
+        var wi = $$('input', row)[0], ri = $$('input', row)[1];
+        wi.setAttribute('aria-label', nm + ' set ' + (si + 1) + ' weight'); ri.setAttribute('aria-label', nm + ' set ' + (si + 1) + ' reps');
+        wi.value = fmtWS(q.w); ri.value = q.r;
+        wi.addEventListener('focus', function () { if (wi.value === 'BW') wi.select(); });
+        wi.addEventListener('input', function () { var v = parseFloat(wi.value); q.w = isFinite(v) && v >= 0 ? fromDisp(v) : 0; });
+        ri.addEventListener('input', function () { var v = parseInt(ri.value, 10); q.r = isFinite(v) && v >= 0 ? v : 0; });
+        $('.lf-x', row).setAttribute('aria-label', 'Remove set ' + (si + 1));
+        $('.lf-x', row).addEventListener('click', function () { e.sets.splice(si, 1); paint(); });
+        card.appendChild(row);
+      });
+      var add = el('<button type="button" class="lf-btn is-full" style="margin-top:6px">+ Add set</button>');
+      add.addEventListener('click', function () { var l = e.sets[e.sets.length - 1]; e.sets.push({ w: l ? l.w : 0, r: l ? l.r : 0 }); paint(); });
+      card.appendChild(add);
+      box.appendChild(card);
+    });
+    if (!c.x.length) box.appendChild(el('<div class="lf-empty" style="margin-top:14px"><b>No exercises left</b>Delete the workout instead, or close without saving.</div>'));
+  }
+  paint();
+  var del = el('<button type="button" class="lf-btn is-bad" id="lfEdDel">Delete</button>');
+  var save = el('<button type="button" class="lf-btn is-log" id="lfEdSave">Save</button>');
+  var sh = lfSheet({ title: 'Edit workout', body: b, foot: [del, save], full: true });
+  del.addEventListener('click', function () {
+    lfAsk('Delete this workout?', 'Every set in it goes. You can undo straight after.', 'Delete', function () {
+      var i = S.wo.indexOf(w); if (i < 0) return;
+      S.wo.splice(i, 1); sh.close(true); lfSave(); lfRender();
+      lfToast('Workout deleted', function () { S.wo.splice(Math.min(i, S.wo.length), 0, w); lfSave(); lfRender(); });
+    });
+  });
+  save.addEventListener('click', function () {
+    c.x.forEach(function (e) { e.sets = e.sets.filter(function (q) { return q.r > 0; }).map(function (q) { return { w: q.w, r: q.r }; }); });
+    c.x = c.x.filter(function (e) { return e.sets.length; });
+    if (!c.x.length) { lfToast('A workout needs at least one set'); return; }
+    var nd = $('#lfEdD', b).value;
+    if (/^\d{4}-\d\d-\d\d$/.test(nd) && nd !== w.d && nd <= ymd(today())) {
+      /* a new day keeps its hour: the start and end move by whole days */
+      var shift = Math.round((new Date(nd + 'T12:00:00') - new Date(w.d + 'T12:00:00')) / 864e5) * 864e5;
+      if (w.s > 1e11) w.s += shift; if (w.e > 1e11) w.e += shift; w.d = nd;
+    }
+    w.n = $('#lfEdN', b).value.trim().slice(0, 60) || w.n;
+    w.x = c.x;
+    sh.close(true); lfSave(); lfRender(); lfToast('Workout saved');
+    lfWoSheet(w, true);
+  });
 }
 
 /* ═══════════ YOU ═══════════ */
@@ -2714,7 +2811,14 @@ function frStats() {
       /* the time it started, as minutes into the day */
       var st0 = w.s > 1e11 ? new Date(w.s) : null;
       return { id: w.id, d: w.d, n: w.n, t: st0 ? st0.getHours() * 60 + st0.getMinutes() : undefined, x: w.x.map(function (e) { return { n: e.n || exName(e.id), s: e.sets.map(function (st) { return [st.w, st.r]; }) }; }) };
-    }), vol30: Math.round(windowStats(addDays(t, -29), t).vol) };
+    }), vol30: Math.round(windowStats(addDays(t, -29), t).vol),
+    /* THE TREND SHEETS, for friends: the same windows yours are drawn from,
+       each as [workouts, sets, reps, kg]. Totals only, never a single lift
+       — bar the heaviest set of the month, which your own sheet names. */
+    tr: (function () {
+      var q = function (x) { return [x.wo, x.sets, x.reps, Math.round(x.vol)]; }, src = lfTrendSrc('vol'), rp = lfTrendSrc('reps');
+      return { m: ymd(mon), w8: src.weeks.map(q), c30: q(src.cur), p30: q(src.prev), cw: q(rp.cur), pw: q(rp.prev), hv: Math.round(src.heavy * 10) / 10 };
+    })() };
 }
 
 /* PUSHED A BEAT AFTER THE LAST SAVE, and only when the counts changed —
@@ -2809,9 +2913,17 @@ function frSheet(f) {
   var st = f.s || {}, b = el('<div class="fr-dash"><p class="lf-lab fr-ago"></p></div>');
   $('.fr-ago', b).textContent = f.gone ? 'This code has gone — they turned friends off.' : frAgo(st.last) + ' · ' + (st.pr30 || 0) + (st.pr30 === 1 ? ' PR' : ' PRs') + ' in 30 days';
   var row = el('<div class="lf-row" style="--n:3"></div>');
-  [[IC.dumb, st.wo30 || 0, 'workouts'], [IC.stack, st.sets30 || 0, 'sets'], [IC.weight, toDisp(st.vol30 || 0), S.unit]].forEach(function (k) {
+  /* EACH FIGURE OPENS ITS TREND, as yours do on home — once their phone
+     has sent the weeks to draw it from */
+  var frTap = function (node, k) {
+    var src = frTrendSrc(st, k); if (!src) return;
+    node.classList.add('lf-tap'); node.setAttribute('role', 'button'); node.tabIndex = 0; node.dataset.tr = k;
+    var go = function () { lfTrendSheet(k, frTrendSrc(st, k)); };
+    node.addEventListener('click', go); node.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  };
+  [[IC.dumb, st.wo30 || 0, 'workouts', 'wo'], [IC.stack, st.sets30 || 0, 'sets', 'sets'], [IC.weight, toDisp(st.vol30 || 0), S.unit, 'vol']].forEach(function (k) {
     var t = el('<div class="lf-card lf-stat"></div>'); t.innerHTML = k[0] + '<b class="lf-num"></b><span></span>';
-    $('b', t).textContent = fmtBig(k[1]); $('span', t).textContent = k[2]; row.appendChild(t);
+    $('b', t).textContent = fmtBig(k[1]); $('span', t).textContent = k[2]; frTap(t, k[3]); row.appendChild(t);
   });
   b.appendChild(row);
   var fbg = frBadges(st);
@@ -2847,7 +2959,7 @@ function frSheet(f) {
   var vc = el('<div class="lf-card" id="frVol"><div class="lf-lab" style="display:flex;gap:6px;align-items:center">' + IC.weight + 'Volume</div><div class="lf-big lf-num"></div><div class="lf-area"></div></div>');
   $('.lf-big', vc).innerHTML = esc(fmtBig(v8.reduce(function (a, x) { return a + x; }, 0))) + '<small>' + S.unit + ' · 8 wk</small>';
   $('.lf-area', vc).innerHTML = lfAreaSvg(v8);
-  pr.appendChild(vc);
+  frTap(vc, 'vol'); pr.appendChild(vc);
   var r7 = Array.isArray(st.r7) && st.r7.length === 7 ? st.r7 : [0, 0, 0, 0, 0, 0, 0], rmax = Math.max.apply(null, r7.concat([1])), dow = (today().getDay() + 6) % 7;
   var wk = el('<div class="lf-card" id="frWeek"><div class="lf-lab" style="display:flex;gap:6px;align-items:center">' + IC.dumb + 'This week</div><div class="lf-hd"><div class="lf-big lf-num"></div><span class="lf-pct lf-num"></span></div><div class="lf-bars" aria-hidden="true"></div></div>');
   $('.lf-big', wk).innerHTML = r7.reduce(function (a, x) { return a + x; }, 0) + '<small>reps</small>';
@@ -2860,7 +2972,7 @@ function frSheet(f) {
     $('u', col).textContent = 'MTWTFSS'[i];
     $('.lf-bars', wk).appendChild(col);
   });
-  pr.appendChild(wk);
+  frTap(wk, 'reps'); pr.appendChild(wk);
   b.appendChild(pr);
   /* THEIR WORKOUTS, newest first; one opens on its sets. */
   var wl = Array.isArray(st.wl) ? st.wl : [];
