@@ -778,10 +778,7 @@ const freeze = (at) => `(() => {
     const med = await page.$$eval('#lfMedals .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
     ok('every week of a month on goal wins its medal, on the day the last week gets there', med.join() === 'October 2026:Perfect month,September 2026:Perfect month', med);
     ok('a record that already had its month counts it as seen, not news', (await store(page)).bseen.m202609 === 1);
-    const rec = await page.$$eval('#lfRecords .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
-    ok('the trophy case holds a trophy for each exercise\'s best set', rec.join() === 'Hack squat:124 kg \u00d7 8,Romanian deadlift:120 kg \u00d7 10', rec);
-    await page.click('#lfRecords .lf-coin >> nth=0'); await page.waitForTimeout(500);
-    ok('a trophy opens as a personal best, dated the day it was set', /Personal best/.test(await page.textContent('.lf-cv')) && /Set Fri 30 Oct/.test(await page.textContent('.lf-cv')));
+    ok('the trophy case is put away for now', await page.locator('#lfRecords').count() === 0);
     await c.close();
   }
   /* cardio, body weight and abs badges */

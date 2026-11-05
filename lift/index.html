@@ -2561,7 +2561,7 @@ function lfRenderYou() {
   root.appendChild(lfFold('lfSet', 'set', 'Settings', '', function (bd) { bd.appendChild(c); }));
   root.appendChild(lfBadgeCard());
   root.appendChild(lfMedalCard());
-  root.appendChild(lfRecordCard());
+  if (TROPHY_CASE) root.appendChild(lfRecordCard());
   root.appendChild(lfFocusCard());
   var all = windowStats(new Date(2000, 0, 1), today());
   var t = el('<div class="lf-card"><div class="lf-lab">All time</div></div>');
@@ -3838,6 +3838,9 @@ function lfRecords() {
       bk: [nm, wt + ' ' + S.unit + ' \u00d7 ' + o.r, fmtDay(o.d).replace(/^\w+ /, '') + ' ' + o.d.slice(0, 4)] }, d: o.d, p: null, r: o };
   }).sort(function (a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : b.r.v - a.r.v; });
 }
+/* PUT AWAY FOR NOW, not deleted: the trophies, their shapes and their
+   colours are all still here. Turning this on brings the case back. */
+var TROPHY_CASE = false;
 function lfRecordCard() {
   var all = lfRecords();
   return lfFold('lfRecords', 'rec', 'Trophy case', all.length ? all.length + (all.length === 1 ? ' record' : ' records') : '', function (bd) {
