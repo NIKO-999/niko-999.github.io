@@ -3677,6 +3677,43 @@ function bdMake(b, m, n) {
 }
 
 /* what the drawing needs to know about one badge, earned or not */
+/* ── A TROPHY, for a personal best ──
+   A real cup rather than a flat award: turned on a lathe, two handles, a
+   red enamel band for a PR, on a black stepped base whose gold plate is
+   engraved with the lift and the set. Everything is built here and given
+   back with the rest when it is done with. */
+function bdTrophy(x, n) {
+  var T = BD3, g = new T.Group(), rec = x.r, big = n > 600;
+  var gold = new T.MeshPhysicalMaterial({ color: '#ffc94a', metalness: 1, roughness: .16, clearcoat: .4, clearcoatRoughness: .1, envMapIntensity: 1.2 });
+  var base = new T.MeshPhysicalMaterial({ color: '#111114', metalness: .2, roughness: .28, clearcoat: 1, clearcoatRoughness: .06, envMapIntensity: 1 });
+  var red = new T.MeshPhysicalMaterial({ color: '#c81e14', metalness: .1, roughness: .25, clearcoat: 1, clearcoatRoughness: .04, envMapIntensity: 1 });
+  var seg = big ? 96 : 48;
+  /* the base: two steps */
+  var b1 = new T.Mesh(new T.BoxGeometry(1.2, .2, .78), base); b1.position.y = -.9; g.add(b1);
+  var b2 = new T.Mesh(new T.BoxGeometry(.98, .22, .62), base); b2.position.y = -.69; g.add(b2);
+  /* the nameplate, engraved */
+  var pc = document.createElement('canvas'); pc.width = big ? 1024 : 512; pc.height = pc.width / 4; var px = pc.getContext('2d'), W = pc.width, H = pc.height;
+  var gr = px.createLinearGradient(0, 0, W, H); gr.addColorStop(0, '#f7dc8f'); gr.addColorStop(.5, '#d9ac45'); gr.addColorStop(1, '#f2cf72');
+  px.fillStyle = gr; px.fillRect(0, 0, W, H);
+  px.strokeStyle = 'rgba(90,60,10,.6)'; px.lineWidth = W / 220; px.strokeRect(W * .02, H * .08, W * .96, H * .84);
+  px.fillStyle = '#4a3408'; px.textAlign = 'center'; px.textBaseline = 'middle';
+  var nm = (x.b.n || '').toUpperCase(); px.font = '700 ' + Math.round(H * (nm.length > 22 ? .2 : .26)) + 'px Inter, Arial, sans-serif'; px.fillText(nm, W / 2, H * .34);
+  px.font = '600 ' + Math.round(H * .3) + 'px Inter, Arial, sans-serif'; px.fillText(fmtW(rec.w) + ' ' + S.unit.toUpperCase() + ' \u00d7 ' + rec.r, W / 2, H * .7);
+  var pt = new T.CanvasTexture(pc); pt.encoding = T.sRGBEncoding; pt.anisotropy = 16;
+  var plate = new T.Mesh(new T.PlaneGeometry(.86, .2), new T.MeshPhysicalMaterial({ map: pt, metalness: 1, roughness: .3, envMapIntensity: 1.1 }));
+  plate.position.set(0, -.69, .312); g.add(plate);
+  /* the cup: foot, stem, knot, bowl and lip, turned in one profile */
+  var prof = [[0, -.58], [.26, -.58], [.27, -.55], [.16, -.5], [.08, -.42], [.06, -.2], [.11, -.13], [.11, -.08], [.06, -.03], [.1, .02], [.24, .08], [.38, .2], [.47, .38], [.51, .6], [.52, .8], [.56, .86], [.58, .9], [.55, .9], [.49, .82], [.47, .6], [.42, .38], [.3, .2], [0, .14]];
+  var cup = new T.Mesh(new T.LatheGeometry(prof.map(function (p) { return new T.Vector2(p[0], p[1]); }), seg), gold); g.add(cup);
+  /* a red band for a personal best */
+  var band = new T.Mesh(new T.TorusGeometry(.505, .032, 16, seg), red); band.rotation.x = Math.PI / 2; band.position.y = .56; g.add(band);
+  /* two handles */
+  [-1, 1].forEach(function (sd) {
+    var h = new T.Mesh(new T.TorusGeometry(.2, .045, 16, 40, Math.PI), gold);
+    h.rotation.z = -sd * Math.PI / 2; h.position.set(sd * .5, .5, 0); g.add(h);
+  });
+  return g;
+}
 function bdSpec(x) {
   var b = x.b;
   return { id: b.id, k: b.k, c: b.c, bk: b.bk, pt: b.pt || BD_PT[b.id], sh: b.sh || BD_SHI[b.id] || BD_SHK[b.k], gl: b.gl || BD_GL[b.id] || 'i:check', lock: !x.d,
@@ -3705,7 +3742,7 @@ function bdPump() {
     (function next() {
       var j = bdQ.shift(); if (!j) { bdBusy = false; return; }
       if (!bdStills[j[2]]) {
-        var aw = bdMake(bdSpec(j[0]), 'silver', 512); aw.rotation.set(.32, -.5, .04); bd3.s.add(aw); bd3.r.render(bd3.s, bd3.c);
+        var aw = j[0].r ? bdTrophy(j[0], 512) : bdMake(bdSpec(j[0]), 'silver', 512); if (j[0].r) aw.rotation.set(.18, -.55, 0); else aw.rotation.set(.32, -.5, .04); bd3.s.add(aw); bd3.r.render(bd3.s, bd3.c);
         bdStills[j[2]] = bd3.r.domElement.toDataURL('image/png'); bd3.s.remove(aw); bdDrop(aw); bd3.r.renderLists.dispose();
       }
       j[1].src = bdStills[j[2]];
@@ -3753,7 +3790,7 @@ function lfCoinView(x, earnedNow) {
     var half = Math.tan(14 * Math.PI / 180), fitH = 2 / .75 / 2 / half, fitW = 2 / .75 / 2 / (half * (w / h));
     cam.position.set(0, 0, Math.max(fitH, fitW));
     /* sharper than the shelf: 1536, so a 3x phone is never upscaling the face */
-    aw = bdMake(bdSpec(x), 'silver', 1536); sc.add(aw);
+    aw = x.r ? bdTrophy(x, 1536) : bdMake(bdSpec(x), 'silver', 1536); sc.add(aw);
     /* it arrives turning and settles face up */
     var ry = -Math.PI * 2 - .8, rx = .3, vy = 0, vx = 0, drag = null, t0 = performance.now();
     var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
