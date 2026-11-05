@@ -685,6 +685,27 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── GREEN TAGS: only the good news, worked out from the record ── */
+  {
+    const w = (id, d, n, kg) => ({ id, d, s: 1, e: 2, n, x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: kg, r: 8 }, { w: kg, r: 8 }] }] });
+    const { c, page } = await ctx({ unit: 'kg', goal: 2, wo: [w('a', '2026-10-20', 'Back', 60), w('b', '2026-10-23', 'Quad volume', 100), w('c', '2026-10-27', 'Back', 60), w('d', '2026-10-30', 'Quad volume', 110)] });
+    const tags = await page.locator('#lfTags .lf-tag').allTextContents();
+    ok('a PR, volume up on last time, and the week goal, as green tags', tags.join('|') === 'New PR|Volume +10%|Week goal hit', tags);
+    await c.close();
+  }
+  {
+    const w = (id, d, kg) => ({ id, d, s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: kg, r: 8 }] }] });
+    const { c, page } = await ctx({ unit: 'kg', goal: 1, wo: [w('a', '2026-10-14', 100), w('b', '2026-10-21', 100), w('c', '2026-10-28', 90)] });
+    const tags = await page.locator('#lfTags .lf-tag').allTextContents();
+    ok('weeks in a row on goal is a streak tag; a lighter day earns no PR', tags.join('|') === 'Week goal hit|3-week streak', tags);
+    await c.close();
+  }
+  {
+    const { c, page } = await ctx({ unit: 'kg' });
+    ok('with nothing to say, there are no tags', await page.locator('#lfTags').count() === 0);
+    await c.close();
+  }
+
   /* ── A DAY WITH NOTHING LOGGED IS A REST DAY ── */
   {
     const { c, page } = await ctx({ unit: 'kg', since: '2026-10-25', rd: { '2026-10-27': 1 }, wo: [{ id: 'a1', d: '2026-10-26', s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 100, r: 8 }] }] }] });
