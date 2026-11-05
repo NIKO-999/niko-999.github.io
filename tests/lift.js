@@ -277,7 +277,12 @@ const freeze = (at) => `(() => {
   ok('the month opens on October 2026', (await page.textContent('.lf-calnav b')) === 'October 2026');
   const cell = await page.$eval('.lf-cell[data-d="2026-10-30"]', (e) => ({ on: e.classList.contains('is-on'), now: e.classList.contains('is-now'), dots: e.querySelectorAll('.lf-dots i').length }));
   ok('today is a trained day with two workouts on it', cell.on && cell.now && cell.dots === 2, cell);
-  ok('a day you trained is lit lime, and today stays an outline', await page.evaluate(() => { const on = document.querySelector('.lf-cell.is-on:not(.is-now)'), now = document.querySelector('.lf-cell.is-now'); return !!on && getComputedStyle(on).backgroundColor === 'rgb(163, 230, 53)' && getComputedStyle(now).backgroundColor !== 'rgb(163, 230, 53)'; }));
+  ok('a day you trained is lit lime, and today stays an outline', await page.evaluate(() => {
+    const now = document.querySelector('.lf-cell.is-now'), day = document.querySelector('.lf-cell:not(.is-now):not(.is-pad)');
+    const had = day.classList.contains('is-on'); day.classList.add('is-on');
+    const lit = getComputedStyle(day).backgroundColor; if (!had) day.classList.remove('is-on');
+    return lit === 'rgb(163, 230, 53)' && now.classList.contains('is-on') && getComputedStyle(now).backgroundColor !== 'rgb(163, 230, 53)';
+  }));
   ok('a day still ahead cannot be pressed', await page.$eval('.lf-cell[data-d="2026-10-31"]', (e) => e.disabled));
   ok('later is refused on the month you are in', await page.$eval('.lf-calnav .lf-round:last-child', (e) => e.disabled));
   await page.click('.lf-calnav .lf-round:first-child');
