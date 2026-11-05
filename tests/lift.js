@@ -766,6 +766,25 @@ const freeze = (at) => `(() => {
     ok('Edit targets on Home opens the focus list it goes to', await page.getAttribute('#lfFocus h3 > button', 'aria-expanded') === 'true');
     await c.close();
   }
+  /* the trophy case and the monthly medals */
+  {
+    const wo = []; let n = 0;
+    for (let d = new Date('2026-09-07T12:00:00'); d <= new Date('2026-10-30T12:00:00'); d.setDate(d.getDate() + 1)) {
+      if ([1, 3, 5].indexOf(d.getDay()) < 0) continue; n++;
+      wo.push({ id: 'm' + n, d: d.toISOString().slice(0, 10), s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 100 + n, r: 8 }] }, { id: 'rdl', n: 'Romanian deadlift', sets: [{ w: 120, r: 10 }] }] });
+    }
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-30T18:00:00', true);
+    await page.evaluate(() => localStorage.setItem('lift.fold.v1', '{"med":1,"rec":1}')); await page.reload(); await page.waitForTimeout(300);
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    const med = await page.$$eval('#lfMedals .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
+    ok('every week of a month on goal wins its medal, on the day the last week gets there', med.join() === 'October 2026:Perfect month,September 2026:Perfect month', med);
+    ok('a record that already had its month counts it as seen, not news', (await store(page)).bseen.m202609 === 1);
+    const rec = await page.$$eval('#lfRecords .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
+    ok('the trophy case holds a plaque for each exercise\'s best set', rec.join() === 'Hack squat:124 kg \u00d7 8,Romanian deadlift:120 kg \u00d7 10', rec);
+    await page.click('#lfRecords .lf-coin >> nth=0'); await page.waitForTimeout(500);
+    ok('a plaque opens as a personal best, dated the day it was set', /Personal best/.test(await page.textContent('.lf-cv')) && /Set Fri 30 Oct/.test(await page.textContent('.lf-cv')));
+    await c.close();
+  }
   /* cardio, body weight and abs badges */
   {
     const wo = [];
