@@ -617,6 +617,20 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── A DAY WITH NOTHING LOGGED IS A REST DAY ── */
+  {
+    const { c, page } = await ctx({ unit: 'kg', since: '2026-10-25', rd: { '2026-10-27': 1 }, wo: [{ id: 'a1', d: '2026-10-26', s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 100, r: 8 }] }] }] });
+    const r = await store(page);
+    ok('every finished day with no workout is filled in as rest', JSON.stringify(Object.keys(r.rd).sort().map((k) => k + ':' + r.rd[k])) === JSON.stringify(['2026-10-25:2', '2026-10-27:1', '2026-10-28:2', '2026-10-29:2']), r.rd);
+    ok('a rest you took stays yours, and today is left alone', r.rd['2026-10-27'] === 1 && !r.rd['2026-10-30'] && !r.rd['2026-10-26']);
+    ok('nothing before the record starts', !r.rd['2026-10-24']);
+    await page.click('.lf-bar [data-v="cal"]'); await settle(page);
+    await page.click('#lfCal .lf-seg [data-m="week"]'); await settle(page);
+    const wk = await page.locator('.lf-wk.is-rd').allTextContents();
+    ok('the week reads them as rest days, and says why', wk.some((t) => /Rest day.*No workout logged/.test(t)) && wk.some((t) => /Taken on purpose/.test(t)), wk);
+    await c.close();
+  }
+
   /* ── THE SECOND PROGRAM: push / pull / legs ── */
   {
     const { c, page } = await ctx({ unit: 'kg' }, '2026-11-01T09:00:00');
@@ -713,7 +727,7 @@ const freeze = (at) => `(() => {
     const codeA = (await A.page.textContent('.fr-code')).trim();
     ok('turning on claims an eight-character code', /^[A-HJ-NP-Z2-9]{8}$/.test(codeA) && m.has('lift:' + codeA), codeA);
     const recA = JSON.parse(m.get('lift:' + codeA));
-    ok('what the server holds is counts: 3 workouts, 4 sets, 1 rest, trained today', recA.n === 'Niko' && recA.s.wo30 === 3 && recA.s.sets30 === 4 && recA.s.last === '2026-10-30' && recA.s.d.slice(-5) === '0101r1'.slice(-5), recA.s);
+    ok('what the server holds is counts: 3 workouts, 4 sets, the empty days as rest, trained today', recA.n === 'Niko' && recA.s.wo30 === 3 && recA.s.sets30 === 4 && recA.s.last === '2026-10-30' && recA.s.d.slice(-6) === '01r1r1', recA.s);
     ok('this week goes by day, and by muscle against your targets', JSON.stringify(recA.s.w7) === '[1,0,2,0,1,0,0]' && JSON.stringify(recA.s.mu[0]) === '["Quads",4,17]', [recA.s.w7, recA.s.mu[0]]);
     ok('volume goes as totals: 30 days, eight weeks, and reps by day', recA.s.vol30 === 3520 && recA.s.v8[7] === 3520 && recA.s.v8.length === 8 && JSON.stringify(recA.s.r7) === '[8,0,16,0,8,0,0]', [recA.s.vol30, recA.s.v8, recA.s.r7]);
     ok('and nothing it no longer needs: no cardio, no totals', !('cd7' in recA.s) || recA.s.cd7 === 0);

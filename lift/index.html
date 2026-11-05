@@ -770,10 +770,22 @@ var RECOVERY = [
 ];
 function lfIsLegEx(id) { var e = exById(id); return !!(e && LEG_M[e.m]); }
 function lfIsLegDay(rt) { return !!rt && rt.ex.filter(function (id) { var e = exById(id); return e && (e.m === 'Quads' || e.m === 'Hamstrings' || e.m === 'Glutes'); }).length >= 2; }
+/* A DAY WITH NOTHING LOGGED IS A REST DAY. Once a day is over and no
+   workout is on it, it is filled in as rest — from the day the record
+   starts, never before it, and never today, which is not over. A
+   workout logged on that day later still wins wherever a day is drawn. */
+function lfFillRest() {
+  var tk = ymd(today()), on = {}, first = '';
+  S.wo.forEach(function (w) { on[w.d] = 1; if (!first || w.d < first) first = w.d; });
+  if (!S.since) S.since = first && first < tk ? first : tk;
+  var d = parseYmd(S.since > ymd(addDays(today(), -730)) ? S.since : ymd(addDays(today(), -730))), changed = false;
+  for (var k = ymd(d); k < tk; d = addDays(d, 1), k = ymd(d)) if (!on[k] && !S.rd[k]) { S.rd[k] = 2; changed = true; }
+  if (changed) lfSave();
+}
 function lfIsRest(k) { return !!S.rd[k || ymd(today())]; }
 function lfSetRest(on) {
   var k = ymd(today()), nx = {};
-  Object.keys(S.rd).forEach(function (x) { if (x !== k) nx[x] = 1; });
+  Object.keys(S.rd).forEach(function (x) { if (x !== k) nx[x] = S.rd[x]; });
   if (on) { nx[k] = 1; if (S.pick && S.pick.d === k) S.pick = null; }
   S.rd = nx; lfSave(); lfRender();
 }
@@ -853,7 +865,9 @@ function lfClean(o) {
   d.ra = o.ra !== false;
   if (PROG_IDS.indexOf(o.prog) >= 0) d.prog = o.prog;
   /* A REST DAY taken on purpose, a date and nothing else. */
-  if (o.rd && typeof o.rd === 'object') Object.keys(o.rd).forEach(function (k) { if (/^\d{4}-\d\d-\d\d$/.test(k) && o.rd[k]) d.rd[k] = 1; });
+  /* 1 is a rest day you took; 2 is one filled in because nothing was logged. */
+  if (o.rd && typeof o.rd === 'object') Object.keys(o.rd).forEach(function (k) { if (/^\d{4}-\d\d-\d\d$/.test(k) && o.rd[k]) d.rd[k] = o.rd[k] === 2 ? 2 : 1; });
+  if (typeof o.since === 'string' && /^\d{4}-\d\d-\d\d$/.test(o.since)) d.since = o.since;
   /* How your legs felt, one answer a day, sixty days kept. */
   if (o.rc && typeof o.rc === 'object') { var rcFrom = ymd(addDays(today(), -60)); Object.keys(o.rc).forEach(function (k) { var v = o.rc[k]; if (/^\d{4}-\d\d-\d\d$/.test(k) && k >= rcFrom && (v === 0 || v === 1 || v === 2 || v === 3)) d.rc[k] = v; }); }
   if (Array.isArray(o.focus)) {
@@ -2221,7 +2235,7 @@ function lfRenderCal() {
       } else if (S.rd[kk]) {
         row.classList.add('is-rest', 'is-rd');
         $('.lf-wn b', row).textContent = 'Rest day';
-        $('.lf-wn span', row).textContent = 'Taken on purpose';
+        $('.lf-wn span', row).textContent = S.rd[kk] === 2 ? 'No workout logged' : 'Taken on purpose';
         $('.lf-li-r', row).innerHTML = '<i class="lf-rd-dot" aria-hidden="true"></i>';
       } else { row.classList.add('is-rest'); $('.lf-wn b', row).textContent = kk >= tk ? '' : 'Nothing logged'; }
       if (kk > tk) row.disabled = true;
@@ -2255,7 +2269,7 @@ function lfDaySheet(k) {
   var b = el('<div class="lf-list"></div>');
   var dl = lfDlLine(k);
   if (dl) { var dp = el('<p class="lf-lab lf-dl-line" style="margin:0 0 8px"></p>'); dp.textContent = dl; b.appendChild(dp); }
-  if (!ws.length) b.appendChild(S.rd[k] ? el('<div class="lf-empty"><b>Rest day</b>Taken on purpose. Recovery counts.</div>') : el('<div class="lf-empty"><b>No workout</b>Nothing logged on this day.</div>'));
+  if (!ws.length) b.appendChild(S.rd[k] ? el('<div class="lf-empty"><b>Rest day</b>' + (S.rd[k] === 2 ? 'No workout was logged, so it counts as rest.' : 'Taken on purpose. Recovery counts.') + '</div>') : el('<div class="lf-empty"><b>No workout</b>Nothing logged on this day.</div>'));
   ws.forEach(function (w) { b.appendChild(lfWoRow(w)); });
   lfSheet({ title: fmtDay(k), body: b });
 }
@@ -2770,6 +2784,7 @@ function lfGo(v) {
   lfRender(); window.scrollTo(0, 0);
 }
 function lfRender() {
+  lfFillRest();
   VIEWS.forEach(function (v) { $('#' + IDS[v]).hidden = v !== view; });
   $$('.lf-bar button').forEach(function (b) { if (b.dataset.v === view) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   if (view === 'home') lfRenderHome();
