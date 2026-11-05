@@ -364,6 +364,15 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-code { font-size: 16px; font-weight: 700; letter-spacing: .1em; }
 .fr-err { color: var(--log); margin: 8px 0 0; }
 .fr-dash { display: grid; gap: 12px; }
+.fr-rx { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 8px; }
+.fr-rx-b { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; min-width: 64px; padding: 0 14px; border-radius: 999px; background: var(--card2); font-size: 20px; justify-content: center; }
+.fr-rx-b b { font-size: 14px; font-weight: 600; color: var(--dim); }
+.fr-rx-b[aria-pressed="true"] { background: var(--ink); }
+.fr-rx-b[aria-pressed="true"] b { color: var(--on-ink); }
+.fr-rx-b:disabled { opacity: 1; }
+.fr-rx-who { width: 100%; margin: 2px 0 0; }
+.fr-rxs { font-size: 13px; margin-left: auto; padding-left: 8px; white-space: nowrap; }
+.fr-rx-e { font-size: 22px; width: 32px; flex: none; }
 .fr-ago { margin: 0; }
 .fr-dash .lf-stat .lf-ic { margin-top: 4px; }
 .lf-day.is-rest { border-style: dashed; }
@@ -947,6 +956,8 @@ function lfLoadAct() {
 }
 function lfSaveAct() {
   try { if (act) localStorage.setItem(ACTK, JSON.stringify(act)); else localStorage.removeItem(ACTK); } catch (e) {}
+  /* a workout that ends takes its pending lock-screen alert with it */
+  if (!act && typeof lfRestPushClear === 'function') lfRestPushClear();
 }
 
 var S = lfLoad();
@@ -1760,7 +1771,7 @@ function lfPaintSession() {
            before it, this session's earlier sets included. */
         var est = e1rm(s.w, s.r);
         s.pr = est > runBestBefore(e, si, best) + 1e-9 && best > 0 ? 1 : 0;
-        act.rest = Date.now(); act.restEx = e.id; act.rang = 0; lfAudio();
+        act.rest = Date.now(); act.restEx = e.id; act.rang = 0; lfAudio(); lfRestPush();
         lfSaveAct(); buzz(s.pr ? [20, 40, 20] : 14); lfPaintSession(); lfTick();
       });
       card.appendChild(row);
@@ -2309,8 +2320,13 @@ function lfRenderYou() {
     + '<span class="lf-flab">Workouts a week</span><div class="lf-seg" id="lfGoal" style="--n:7"></div>'
     + '<span class="lf-flab">Rest alert</span><div class="lf-seg" id="lfRa"><button type="button" data-a="1">Sound + buzz</button><button type="button" data-a="0">Off</button></div>'
     + '<button type="button" class="lf-btn is-full" id="lfRaTest" style="margin-top:10px">Test sound</button>'
+    + '<span class="lf-flab">Lock-screen alert</span><button type="button" class="lf-btn is-full" id="lfPush"></button>'
     + '</div>');
   $('#lfRaTest', c).disabled = !S.ra;
+  /* ON SHOWS AS ON, and the same press turns it off. */
+  $('#lfPush', c).textContent = LPU ? 'On · turn off' : 'Turn on';
+  $('#lfPush', c).classList.toggle('is-ink', !LPU);
+  $('#lfPush', c).addEventListener('click', function () { if (LPU) lfPushOff(); else lfPushOn(this); });
   $('#lfRaTest', c).addEventListener('click', function () { lfAudio(); setTimeout(function () { lfBeep(); buzz([80, 60, 80]); }, 120); });
   $$('#lfRa button', c).forEach(function (b) {
     b.setAttribute('aria-pressed', (b.dataset.a === '1') === S.ra ? 'true' : 'false');
@@ -2447,7 +2463,7 @@ var FR_URL = 'https://sched.nikorapullin.workers.dev';
 var FRK = 'lift.fr.v1';
 var FR_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 function frLoad() {
-  var d = { on: false, code: '', key: '', name: '', list: [], pend: '' };
+  var d = { on: false, code: '', key: '', name: '', list: [], pend: '', rx: [] };
   try {
     var o = JSON.parse(localStorage.getItem(FRK));
     if (o && typeof o === 'object') {
@@ -2456,7 +2472,8 @@ function frLoad() {
       d.name = typeof o.name === 'string' ? o.name.slice(0, 24) : '';
       d.pend = typeof o.pend === 'string' && /^[A-HJ-NP-Z2-9]{8}$/.test(o.pend) ? o.pend : '';
       if (Array.isArray(o.list)) d.list = o.list.filter(function (f) { return f && /^[A-HJ-NP-Z2-9]{8}$/.test(f.c); }).slice(0, 50)
-        .map(function (f) { return { c: f.c, n: typeof f.n === 'string' ? f.n.slice(0, 24) : '', s: f.s && typeof f.s === 'object' ? f.s : null, at: +f.at || 0, gone: !!f.gone }; });
+        .map(function (f) { return { c: f.c, n: typeof f.n === 'string' ? f.n.slice(0, 24) : '', s: f.s && typeof f.s === 'object' ? f.s : null, at: +f.at || 0, gone: !!f.gone, rx: Array.isArray(f.rx) ? f.rx : [] }; });
+      d.rx = Array.isArray(o.rx) ? o.rx : [];
     }
   } catch (e) {}
   return d;
@@ -2507,7 +2524,7 @@ function frStats() {
     streak: streak, d: d, last: last, w7: w7, mu: mu, r7: r7, v8: v8,
     /* the workouts themselves, newest first: what friends open to see your sets */
     wl: woSorted().reverse().filter(function (w) { return w.d >= from30 && w.x.length; }).slice(0, 20).map(function (w) {
-      return { d: w.d, n: w.n, x: w.x.map(function (e) { return { n: e.n || exName(e.id), s: e.sets.map(function (st) { return [st.w, st.r]; }) }; }) };
+      return { id: w.id, d: w.d, n: w.n, x: w.x.map(function (e) { return { n: e.n || exName(e.id), s: e.sets.map(function (st) { return [st.w, st.r]; }) }; }) };
     }), vol30: Math.round(windowStats(addDays(t, -29), t).vol) };
 }
 
@@ -2523,11 +2540,13 @@ function frPush() {
   frApi('PUT', '/v1/lift/' + FRS.code, body).then(function (r) { if (r.st === 200) frSig = sig; }).catch(function () {});
 }
 function frPullAll(done) {
-  var left = FRS.list.length;
-  if (!left) { if (done) done(); return; }
+  /* everybody on the list, and your own record for the reactions on it */
+  var left = FRS.list.length + 1;
+  frApi('GET', '/v1/lift/' + FRS.code).then(function (r) { if (r.st === 200) FRS.rx = Array.isArray(r.j.rx) ? r.j.rx : []; })
+    .catch(function () {}).then(function () { if (--left === 0) { frSave(); if (done) done(); } });
   FRS.list.forEach(function (f) {
     frApi('GET', '/v1/lift/' + f.c).then(function (r) {
-      if (r.st === 200) { f.n = r.j.n; f.s = r.j.s; f.at = r.j.at; f.gone = false; }
+      if (r.st === 200) { f.n = r.j.n; f.s = r.j.s; f.at = r.j.at; f.rx = Array.isArray(r.j.rx) ? r.j.rx : []; f.gone = false; }
       else if (r.st === 404) f.gone = true;
     }).catch(function () {}).then(function () { if (--left === 0) { frSave(); if (done) done(); } });
   });
@@ -2561,7 +2580,7 @@ function frAdd(code, done) {
   frApi('GET', '/v1/lift/' + code).then(function (r) {
     if (r.st === 404) return done('Nobody has that code');
     if (r.st !== 200) throw new Error(r.st);
-    FRS.list.push({ c: code, n: r.j.n, s: r.j.s, at: r.j.at, gone: false }); frSave(); done(null, r.j.n);
+    FRS.list.push({ c: code, n: r.j.n, s: r.j.s, at: r.j.at, gone: false, rx: Array.isArray(r.j.rx) ? r.j.rx : [] }); frSave(); done(null, r.j.n);
   }).catch(function () { done('Could not reach the server — try again'); });
 }
 function frLink() { return 'https://niko-999.github.io/lift/#add=' + FRS.code; }
@@ -2578,6 +2597,10 @@ function frStrip(dstr, big) {
   var g = el('<div class="fr-strip' + (big ? ' is-big' : '') + '" aria-hidden="true"></div>');
   (dstr || '0'.repeat(30)).split('').forEach(function (ch) { g.appendChild(el('<i class="' + (ch === '1' ? 'is-on' : ch === 'r' ? 'is-rest' : '') + '"></i>')); });
   return g;
+}
+function frAgoT(t) {
+  var m = Math.round((Date.now() - t) / 60000);
+  return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' d ago';
 }
 function frAgo(d) {
   if (!d) return 'nothing logged yet';
@@ -2649,7 +2672,9 @@ function frSheet(f) {
     var sets = 0, vol = 0; w.x.forEach(function (e) { e.s.forEach(function (q) { sets++; vol += q[0] * q[1]; }); });
     var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div>' + IC.chev + '</button>');
     $('b', li).textContent = w.n; $('span', li).textContent = fmtDay(w.d) + ' · ' + sets + ' sets · ' + fmtBig(toDisp(vol)) + ' ' + S.unit;
-    li.addEventListener('click', function () { frWoSheet(w); });
+    var rc = frRxSum(f.me ? FRS.rx : f.rx, w.id);
+    if (rc) li.insertBefore(el('<span class="fr-rxs"></span>'), li.lastChild).textContent = rc;
+    li.addEventListener('click', function () { frWoSheet(w, f); });
     $('.lf-list', lc).appendChild(li);
   });
   b.appendChild(lc);
@@ -2662,7 +2687,48 @@ function frSheet(f) {
     lfToast('Removed ' + (f.n || 'friend'), function () { FRS.list.splice(i, 0, f); frSave(); lfRender(); });
   });
 }
-function frWoSheet(w) {
+/* REACTIONS. Three marks, one press each, the same press takes it back.
+   A friend's workout is where you give one; your own is where you see
+   who gave them. */
+var FR_RX = ['🔥', '💪', '👏'];
+function frRxOn(rx, wid) { return (rx || []).filter(function (x) { return x.w === wid; }); }
+function frRxSum(rx, wid) {
+  var on = frRxOn(rx, wid); if (!wid || !on.length) return '';
+  return FR_RX.map(function (e) { var n = on.filter(function (x) { return x.e === e; }).length; return n ? e + n : ''; }).filter(Boolean).join(' ');
+}
+function frRxBar(w, f) {
+  if (!f.me && !Array.isArray(f.rx)) f.rx = [];
+  var bar = el('<div class="fr-rx" id="frRx"></div>');
+  function paint() {
+    bar.textContent = '';
+    var on = frRxOn(f.me ? FRS.rx : f.rx, w.id);
+    FR_RX.forEach(function (e) {
+      var mine = on.some(function (x) { return x.e === e && x.f === FRS.code; }), n = on.filter(function (x) { return x.e === e; }).length;
+      var b = el('<button type="button" class="fr-rx-b"><span></span><b class="lf-num"></b></button>');
+      $('span', b).textContent = e; $('b', b).textContent = n || '';
+      b.setAttribute('aria-pressed', mine ? 'true' : 'false');
+      b.setAttribute('aria-label', e + ' ' + n);
+      if (f.me || !w.id) b.disabled = true;
+      else b.addEventListener('click', function () {
+        /* drawn at once, then told to the server; a refusal puts it back */
+        var was = f.rx.slice();
+        if (mine) f.rx = f.rx.filter(function (x) { return !(x.w === w.id && x.e === e && x.f === FRS.code); });
+        else f.rx = [{ f: FRS.code, n: FRS.name, w: w.id, e: e, at: Date.now() }].concat(f.rx);
+        frSave(); paint();
+        frApi('PUT', '/v1/lift/' + f.c + '/react', { f: FRS.code, w: w.id, e: e }).then(function (r) { if (r.st !== 200) throw 0; })
+          .catch(function () { f.rx = was; frSave(); paint(); lfToast('Could not send that — try again'); });
+      });
+      bar.appendChild(b);
+    });
+    if (f.me) {
+      var who = on.map(function (x) { return (x.n || 'Friend') + ' ' + x.e; });
+      if (who.length) bar.appendChild(el('<p class="lf-lab fr-rx-who"></p>')).textContent = who.join(' · ');
+    }
+  }
+  paint();
+  return bar;
+}
+function frWoSheet(w, f) {
   var b = el('<div><p class="lf-lab" style="margin:0 0 6px"></p><div class="lf-list"></div></div>');
   $('p', b).textContent = fmtDay(w.d);
   w.x.forEach(function (e) {
@@ -2671,6 +2737,7 @@ function frWoSheet(w) {
     $('span', li).textContent = e.s.length ? e.s.map(function (q) { return (q[0] ? fmtW(q[0]) + '×' : '') + q[1]; }).join('  ·  ') : 'No sets';
     $('.lf-list', b).appendChild(li);
   });
+  if (f && FRS.on) b.insertBefore(frRxBar(w, f), $('.lf-list', b));
   lfSheet({ title: w.n, body: b });
 }
 function frAddSheet() {
@@ -2738,6 +2805,20 @@ function lfRenderFr() {
     bd.appendChild(row);
   });
   root.appendChild(bd);
+  /* WHAT FRIENDS GAVE YOUR WORKOUTS in the last week, newest first. */
+  var wk0 = Date.now() - 7 * 864e5, mine = (FRS.rx || []).filter(function (x) { return x.at >= wk0; }).slice(0, 5);
+  if (mine.length) {
+    var rcd = el('<div class="lf-card" style="padding:4px 16px" id="frRxIn"><div class="lf-list"></div></div>');
+    mine.forEach(function (x) {
+      var w = S.wo.filter(function (q) { return q.id === x.w; })[0];
+      var li = el('<div class="lf-li"><span class="fr-rx-e"></span><div class="lf-li-t"><b></b><span></span></div></div>');
+      $('.fr-rx-e', li).textContent = x.e;
+      $('b', li).textContent = (x.n || 'A friend') + ' on your ' + (w ? w.n : 'workout');
+      $('.lf-li-t span', li).textContent = frAgoT(x.at);
+      $('.lf-list', rcd).appendChild(li);
+    });
+    root.appendChild(rcd);
+  }
   if (!FRS.list.length) root.appendChild(el('<div class="lf-card lf-empty" id="frNone"><b>Nobody yet</b>Send your code to a friend, or add theirs.</div>'));
   /* YOUR CODE IS ONE QUIET LINE: the code, share, and the rest behind a
      settings press — you set the name and turn it off once, not daily. */
@@ -2769,6 +2850,89 @@ function lfRenderFr() {
   try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
   try { localStorage.setItem(VIEWK, 'fr'); } catch (e) {}
 })();
+
+
+/* ═══════════ LOCK-SCREEN REST ALERTS ═══════════
+   A page whose phone is locked runs no timers, so the alert has to come
+   from outside it. When a rest starts, Lift queues ONE message on the
+   sync server for the moment the rest is up — the same push queue
+   cadence/ uses — and the server sends it then. The message is sealed
+   on this phone with its own push keys (RFC 8291), so the server holds
+   a time and bytes it cannot read. The next rest replaces it; finishing
+   the workout clears it.
+
+   This phone's own, `lift.push.v1`, never in the backup: a subscription
+   is an address for one device. iOS only offers push to an app added to
+   the Home Screen. */
+var PUSHK = 'lift.push.v1';
+var LPU = (function () { var o; try { o = JSON.parse(localStorage.getItem(PUSHK)); } catch (e) { o = null; } return o && /^[0-9a-f]{32}$/.test(o.id || '') && o.ep ? o : null; })();
+function lfPushStore() { try { if (LPU) localStorage.setItem(PUSHK, JSON.stringify(LPU)); else localStorage.removeItem(PUSHK); } catch (e) {} }
+function lfPushCan() { return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+function lfB64u(u8) { var b = ''; for (var i = 0; i < u8.length; i++) b += String.fromCharCode(u8[i]); return btoa(b).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+function lfUnB64u(t) { t = t.replace(/-/g, '+').replace(/_/g, '/'); while (t.length % 4) t += '='; var b = atob(t), o = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) o[i] = b.charCodeAt(i); return o; }
+function lfCat() { var n = 0, i; for (i = 0; i < arguments.length; i++) n += arguments[i].length; var o = new Uint8Array(n), at = 0; for (i = 0; i < arguments.length; i++) { o.set(arguments[i], at); at += arguments[i].length; } return o; }
+function lfHkdf(salt, ikm, info, len) {
+  return crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits'])
+    .then(function (k) { return crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt: salt, info: info }, k, len * 8); })
+    .then(function (b) { return new Uint8Array(b); });
+}
+function lfPushSeal(obj) {
+  var te = new TextEncoder(), ua = lfUnB64u(LPU.pk), auth = lfUnB64u(LPU.au), salt = crypto.getRandomValues(new Uint8Array(16)), asPub;
+  return crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']).then(function (kp) {
+    return crypto.subtle.exportKey('raw', kp.publicKey).then(function (raw) {
+      asPub = new Uint8Array(raw);
+      return crypto.subtle.importKey('raw', ua, { name: 'ECDH', namedCurve: 'P-256' }, false, []);
+    }).then(function (uaKey) { return crypto.subtle.deriveBits({ name: 'ECDH', public: uaKey }, kp.privateKey, 256); });
+  }).then(function (ecdh) {
+    return lfHkdf(auth, new Uint8Array(ecdh), lfCat(te.encode('WebPush: info\x00'), ua, asPub), 32);
+  }).then(function (ikm) {
+    return Promise.all([lfHkdf(salt, ikm, te.encode('Content-Encoding: aes128gcm\x00'), 16), lfHkdf(salt, ikm, te.encode('Content-Encoding: nonce\x00'), 12)]);
+  }).then(function (kn) {
+    return crypto.subtle.importKey('raw', kn[0], 'AES-GCM', false, ['encrypt']).then(function (k) {
+      return crypto.subtle.encrypt({ name: 'AES-GCM', iv: kn[1] }, k, lfCat(te.encode(JSON.stringify(obj)), new Uint8Array([2])));
+    });
+  }).then(function (ct) { return lfB64u(lfCat(salt, new Uint8Array([0, 0, 16, 0, 65]), asPub, new Uint8Array(ct))); });
+}
+function lfPushPut(q) {
+  return fetch(FR_URL + '/v1/push/' + LPU.id, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + LPU.tok }, body: JSON.stringify({ ep: LPU.ep, q: q }) });
+}
+function lfRestPush() {
+  if (!LPU || !S.ra || !act || !act.rest) return;
+  var rs = lfRestOf(act.restEx), at = act.rest + rs.lo * 1000, nx = act.x.filter(function (e) { return e.sets.some(function (q) { return !q.ok; }); })[0];
+  var msg = { t: 'Rest is up', b: nx ? 'Next: ' + nx.n : 'Back to it', g: 'lift-rest' };
+  lfPushSeal(msg).then(function (b) { LPU.out = 1; lfPushStore(); return lfPushPut([{ t: at, b: b }]); }).catch(function () {});
+}
+function lfRestPushClear() {
+  if (!LPU || !LPU.out) return;
+  LPU.out = 0; lfPushStore();
+  lfPushPut([]).catch(function () {});
+}
+function lfPushOn(btn) {
+  if (!lfPushCan()) { lfToast('Add Lift to your Home Screen, open it from there, then turn this on'); return; }
+  btn.disabled = true;
+  /* Permission is asked FIRST inside the press: iOS answers a request for
+     it only from a real gesture. */
+  Promise.resolve(Notification.requestPermission()).then(function (perm) {
+    if (perm !== 'granted') { btn.disabled = false; lfToast('Notifications are off for Lift in Settings'); return; }
+    return navigator.serviceWorker.register('sw.js').then(function () { return navigator.serviceWorker.ready; }).then(function (reg) {
+      return fetch(FR_URL + '/v1/push/key').then(function (r) { return r.json(); }).then(function (k) {
+        return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: lfUnB64u(k.key) });
+      });
+    }).then(function (sub) {
+      var hex = function () { return Array.from(crypto.getRandomValues(new Uint8Array(16)), function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); };
+      LPU = { id: hex(), tok: hex(), ep: sub.endpoint, pk: lfB64u(new Uint8Array(sub.getKey('p256dh'))), au: lfB64u(new Uint8Array(sub.getKey('auth'))) };
+      lfPushStore(); lfRender(); lfToast('Lock-screen alerts on');
+    });
+  }).catch(function () { btn.disabled = false; lfToast('Lock-screen alerts could not be turned on'); });
+}
+function lfPushOff() {
+  var was = LPU; LPU = null; lfPushStore();
+  if (was) fetch(FR_URL + '/v1/push/' + was.id, { method: 'DELETE', headers: { Authorization: 'Bearer ' + was.tok } }).catch(function () {});
+  if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(function (reg) {
+    return reg && reg.pushManager.getSubscription().then(function (x) { return x && x.unsubscribe(); });
+  }).catch(function () {});
+  lfRender();
+}
 
 /* ═══════════ NAVIGATION ═══════════ */
 var view = 'home';

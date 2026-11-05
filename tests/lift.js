@@ -617,6 +617,34 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── LOCK-SCREEN REST ALERT: a rest queues one sealed message ── */
+  {
+    const c = await browser.newContext(PHONE);
+    await c.addInitScript(freeze('2026-11-02T07:00:00'));
+    const kp = await require('crypto').webcrypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
+    const pk = Buffer.from(await require('crypto').webcrypto.subtle.exportKey('raw', kp.publicKey)).toString('base64url');
+    const au = Buffer.from(require('crypto').randomBytes(16)).toString('base64url');
+    await c.addInitScript(`(() => { if (!sessionStorage.getItem('s')) { sessionStorage.setItem('s', 1); localStorage.setItem('lift.v1', JSON.stringify({ unit: 'kg' })); localStorage.setItem('lift.push.v1', JSON.stringify({ id: '${'c'.repeat(32)}', tok: '${'d'.repeat(32)}', ep: 'https://web.push.apple.com/x', pk: '${pk}', au: '${au}' })); } })();`);
+    const puts = [];
+    await c.route('https://sched.nikorapullin.workers.dev/**', async (rt) => { puts.push({ u: rt.request().url(), b: JSON.parse(rt.request().postData() || 'null') }); rt.fulfill({ status: 200, body: '{}' }); });
+    const page = await c.newPage();
+    await page.goto(URL); await page.waitForTimeout(300);
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    ok('lock-screen alerts read as on, and turn off from the same button', /On/.test(await page.textContent('#lfPush')));
+    await page.click('.lf-bar [data-v="home"]'); await page.click('#lfGo'); await settle(page);
+    const set0 = page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd)').first();
+    await set0.locator('input').nth(0).fill('100'); await set0.locator('input').nth(1).fill('8');
+    await set0.locator('.lf-chk').click(); await page.waitForTimeout(600);
+    const q = puts.filter((x) => /\/v1\/push\//.test(x.u));
+    const due = q.length && q[0].b.q[0].t - new Date('2026-11-02T07:00:00').getTime();
+    ok('a rest queues one alert for the moment it is up', q.length === 1 && q[0].b.q.length === 1 && due === 120000 && q[0].b.ep === 'https://web.push.apple.com/x', [q.length, due]);
+    ok('sealed: the server gets bytes, not the words', !/Rest is up|Next/.test(JSON.stringify(q[0].b)));
+    await page.click('#lfFinish'); await page.waitForTimeout(800);
+    const q2 = puts.filter((x) => /\/v1\/push\//.test(x.u));
+    ok('finishing the workout clears it', q2.length === 2 && q2[1].b.q.length === 0, q2.length);
+    await c.close();
+  }
+
   /* ── A DAY WITH NOTHING LOGGED IS A REST DAY ── */
   {
     const { c, page } = await ctx({ unit: 'kg', since: '2026-10-25', rd: { '2026-10-27': 1 }, wo: [{ id: 'a1', d: '2026-10-26', s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 100, r: 8 }] }] }] });
@@ -764,6 +792,12 @@ const freeze = (at) => `(() => {
     ok('and their workouts', (await T.locator('#frWo .lf-li b').allTextContents()).join() === 'Lower A' && /1 sets · 600 kg/.test(await T.locator('#frWo .lf-li span').first().textContent()));
     await T.locator('#frWo .lf-li').first().click(); await settle(A.page);
     ok('a workout opens on its sets', /Hack squat/.test(await top(A.page).textContent()) && /60×10/.test(await top(A.page).textContent()), await top(A.page).textContent());
+    await top(A.page).locator('.fr-rx-b').first().click(); await A.page.waitForTimeout(400);
+    ok('a 🔥 on a friend\'s workout reaches their record', m.has('liftr:' + codeB) && await top(A.page).locator('.fr-rx-b[aria-pressed="true"]').count() === 1, [await top(A.page).locator('.fr-rx').count(), await top(A.page).locator('.fr-rx-b').first().isDisabled().catch(() => 'none'), sent.slice(-2)]);
+    const rxB = await (await worker.fetch(new Request(W + '/v1/lift/' + codeB, { headers: { origin: 'https://niko-999.github.io' } }), env)).json();
+    ok('signed as you, on that workout', rxB.rx.length === 1 && rxB.rx[0].n === 'Niko' && rxB.rx[0].e === '🔥', rxB.rx);
+    await B.page.click('.lf-bar [data-v="home"]'); await B.page.click('.lf-bar [data-v="fr"]'); await B.page.waitForTimeout(500);
+    ok('they see it on their friends tab', /Niko on your/.test(await B.page.textContent('#frRxIn')), await B.page.textContent('#lfFr'));
     await A.page.keyboard.press('Escape'); await settle(A.page);
     ok('it fills the screen', await top(A.page).evaluate((e) => e.classList.contains('is-full')));
     await A.page.keyboard.press('Escape'); await settle(A.page);

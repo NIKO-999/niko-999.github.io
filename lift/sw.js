@@ -36,3 +36,19 @@ self.addEventListener('fetch', function (e) {
     });
   }));
 });
+
+/* A REST ALERT FROM THE SERVER, for when the phone is locked: it was
+   sealed on the phone and opened here. Tagged, so a second rest replaces
+   the first instead of stacking. */
+self.addEventListener('push', function (e) {
+  var d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (err) { d = {}; }
+  e.waitUntil(self.registration.showNotification(d.t || 'Lift', { body: d.b || '', tag: d.g || 'lift', renotify: true, icon: 'icon-192.png' }));
+});
+self.addEventListener('notificationclick', function (e) {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (ws) {
+    for (var i = 0; i < ws.length; i++) if ('focus' in ws[i]) return ws[i].focus();
+    return self.clients.openWindow ? self.clients.openWindow('./') : null;
+  }));
+});

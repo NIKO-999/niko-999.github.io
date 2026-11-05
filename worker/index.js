@@ -333,6 +333,7 @@ async function episodes(id) {
    build does not know is dropped. Sixty days without a write and the
    record ages out on its own, so an abandoned phone leaves nothing. */
 const LIFT_TTL = 60 * 86400;
+const LIFT_RX = ['🔥', '💪', '👏'];
 const LIFT_MUS = ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Lower back', 'Abs', 'Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Core', 'Arms', 'Legs', 'Cardio', 'Other'];
 const LIFT_NUM = ['wo30', 'sets30', 'pr30', 'wk', 'goal', 'streak', 'cd7', 'rest30', 'tot'];
 function liftClean(b) {
@@ -360,7 +361,7 @@ function liftClean(b) {
      nothing else on a workout survives. Never body weight. */
   const txt = (v, n) => typeof v === 'string' ? v.replace(/[\u0000-\u001f]/g, '').trim().slice(0, n) : '';
   s.wl = Array.isArray(b.s.wl) ? b.s.wl.filter((w) => w && typeof w.d === 'string' && /^\d{4}-\d\d-\d\d$/.test(w.d) && Array.isArray(w.x)).slice(0, 20).map((w) => ({
-    d: w.d, n: txt(w.n, 40) || 'Workout',
+    d: w.d, n: txt(w.n, 40) || 'Workout', id: typeof w.id === 'string' && /^[A-Za-z0-9_-]{1,24}$/.test(w.id) ? w.id : '',
     x: w.x.filter((e) => e && Array.isArray(e.s)).slice(0, 15).map((e) => ({
       n: txt(e.n, 60) || 'Exercise',
       s: e.s.filter(Array.isArray).slice(0, 20).map((st) => { const kg = Math.round(+st[0] * 10) / 10, rp = Math.round(+st[1]); return [isFinite(kg) ? Math.max(0, Math.min(2000, kg)) : 0, isFinite(rp) ? Math.max(0, Math.min(1000, rp)) : 0]; })
@@ -595,6 +596,31 @@ export default {
        A code reads; a key writes, kept only as its hash, so a dump of
        the store cannot post as anybody. The friend LIST lives on each
        phone: there is no route that says who follows whom. */
+    /* REACTIONS: a friend's 🔥, 💪 or 👏 on one of your workouts. The
+       one who reacts proves who they are with THEIR OWN key, so nobody
+       can react as somebody else; pressing the same one again takes it
+       back. Kept beside the record, newest 200, for thirty days. */
+    const lr = p.match(/^\/v1\/lift\/([A-HJ-NP-Z2-9]{8})\/react$/);
+    if (lr && req.method === 'PUT') {
+      const auth = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/, '');
+      if (!/^[0-9a-f]{32}$/.test(auth)) return json(req, { error: 'no key' }, 401);
+      let body;
+      try { body = JSON.parse(await readCapped({ body: req.body, text: () => req.text() }, 1024)); }
+      catch (e) { return json(req, { error: 'not json' }, 400); }
+      if (!body || !/^[A-HJ-NP-Z2-9]{8}$/.test(body.f || '') || !/^[A-Za-z0-9_-]{1,24}$/.test(body.w || '') || LIFT_RX.indexOf(body.e) < 0) return json(req, { error: 'bad shape' }, 400);
+      const me = JSON.parse((await env.SCHED.get('lift:' + body.f)) || 'null');
+      if (!me || me.kh !== await sha256hex(auth)) return json(req, { error: 'wrong key' }, 403);
+      if (!(await env.SCHED.get('lift:' + lr[1]))) return json(req, { error: 'nobody has that code' }, 404);
+      const rk = 'liftr:' + lr[1];
+      let rx = JSON.parse((await env.SCHED.get(rk)) || '[]');
+      const had = rx.some((x) => x.f === body.f && x.w === body.w && x.e === body.e);
+      rx = rx.filter((x) => !(x.f === body.f && x.w === body.w && x.e === body.e));
+      if (!had) rx.unshift({ f: body.f, n: me.n, w: body.w, e: body.e, at: Date.now() });
+      rx = rx.slice(0, 200);
+      await env.SCHED.put(rk, JSON.stringify(rx), { expirationTtl: 30 * 86400 });
+      return json(req, { ok: true, on: !had });
+    }
+
     const lf = p.match(/^\/v1\/lift\/([A-HJ-NP-Z2-9]{8})$/);
     if (lf) {
       const lk = 'lift:' + lf[1];
@@ -602,14 +628,15 @@ export default {
       const rec = cur ? JSON.parse(cur) : null;
       if (req.method === 'GET') {
         if (!rec) return json(req, { error: 'nobody has that code' }, 404);
-        return json(req, { n: rec.n, s: rec.s, at: rec.at });
+        const rx = JSON.parse((await env.SCHED.get('liftr:' + lf[1])) || '[]');
+        return json(req, { n: rec.n, s: rec.s, at: rec.at, rx });
       }
       const auth = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/, '');
       if (!/^[0-9a-f]{32}$/.test(auth)) return json(req, { error: 'no key' }, 401);
       const kh = await sha256hex(auth);
       if (rec && rec.kh !== kh) return json(req, { error: 'wrong key' }, 403);
       if (req.method === 'DELETE') {
-        if (rec) await env.SCHED.delete(lk);
+        if (rec) { await env.SCHED.delete(lk); await env.SCHED.delete('liftr:' + lf[1]); }
         return json(req, { ok: true });
       }
       if (req.method === 'PUT') {
@@ -630,7 +657,20 @@ export default {
   /* The minute timer. `scheduledTime` rather than Date.now(), so the
      suite can hand it a moment. */
   async scheduled(ev, env, ctx) {
-    const run = pushTick(env, (ev && ev.scheduledTime) || Date.now());
+    const t0 = (ev && ev.scheduledTime) || Date.now();
+    /* FOUR TIMES A MINUTE, from a real cron only. A gym rest is two
+       minutes, so a once-a-minute timer is up to half a rest late; the
+       handler waits out the minute and ticks at :15, :30 and :45 too.
+       Waiting is wall time, not CPU, and costs one KV read a tick. */
+    const run = (async () => {
+      await pushTick(env, t0);
+      if (!(ev && ev.cron)) return;
+      for (const sec of [15, 30, 45]) {
+        const wait = t0 + sec * 1000 - Date.now();
+        if (wait > 0) await new Promise((res) => setTimeout(res, wait));
+        await pushTick(env, Date.now());
+      }
+    })();
     if (ctx && ctx.waitUntil) ctx.waitUntil(run);
     await run;
   },

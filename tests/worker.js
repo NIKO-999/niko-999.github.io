@@ -509,7 +509,7 @@ const kv = () => {
     ok('a read returns the counts, clamped', q.n === 'Niko' && q.s.wo30 === 12 && q.s.sets30 === 0 && q.s.streak === 0 && q.s.d === '10r'.repeat(10) && q.s.last === '2026-11-03', JSON.stringify(q));
     ok('this week by day and by muscle, clamped, with only muscles the app knows', JSON.stringify(q.s.w7) === '[3,0,0,5,0,0,0]' && JSON.stringify(q.s.mu) === '[["Quads",8,15],["Chest",0,12]]', JSON.stringify(q.s));
     ok('volume and reps come through as totals, clamped', q.s.vol30 === 250000 && JSON.stringify(q.s.v8) === '[1,2,3,4,5,6,7,0]' && JSON.stringify(q.s.r7) === '[10,0,0,0,0,0,0]', JSON.stringify(q.s));
-    ok('workouts come through cleaned: a date, a name, exercises and clamped sets', JSON.stringify(q.s.wl) === '[{"d":"2026-11-02","n":"Legs","x":[{"n":"Hack squat","s":[[100,8],[0,0]]}]}]', JSON.stringify(q.s.wl));
+    ok('workouts come through cleaned: a date, a name, exercises and clamped sets', JSON.stringify(q.s.wl) === '[{"d":"2026-11-02","n":"Legs","id":"","x":[{"n":"Hack squat","s":[[100,8],[0,0]]}]}]', JSON.stringify(q.s.wl));
     ok('and never a field this build does not know — no weights, no exercises', !('kg' in q.s) && !('ex' in q.s) && !('kh' in q), JSON.stringify(q));
     const raw = env.SCHED.m.get('lift:' + C);
     ok('the key is stored only as its hash', raw.indexOf(KEY) < 0 && JSON.parse(raw).kh.length === 64);
@@ -523,8 +523,23 @@ const kv = () => {
     ok('a write with no stats is refused', q.status === 400, q.status);
     q = await hit('GET', '/v1/lift/' + C, { origin: 'https://evil.example' });
     ok('a friend record is not readable from an origin this worker does not know', q.headers.get('Access-Control-Allow-Origin') === ORIGIN);
+    /* reactions: a friend reacts with their own key, toggles, and the
+       owner's record carries them */
+    const C2 = 'ZZZZ2222', KR = 'b'.repeat(32);
+    await hit('PUT', '/v1/lift/' + C2, { key: KR, body: { n: 'Sam', s: { wo30: 1 } } });
+    q = await hit('PUT', '/v1/lift/' + C + '/react', { key: KEY, body: { f: C2, w: 'w1', e: '🔥' } });
+    ok('a reaction is signed with the reactor\'s own key', q.status === 403, q.status);
+    q = await hit('PUT', '/v1/lift/' + C + '/react', { key: KR, body: { f: C2, w: 'w1', e: '🍕' } });
+    ok('only the three marks', q.status === 400, q.status);
+    q = await (await hit('PUT', '/v1/lift/' + C + '/react', { key: KR, body: { f: C2, w: 'w1', e: '🔥' } })).json();
+    let g = await (await hit('GET', '/v1/lift/' + C)).json();
+    ok('a reaction lands on the record, with who gave it', q.on === true && g.rx.length === 1 && g.rx[0].n === 'Sam' && g.rx[0].w === 'w1' && g.rx[0].e === '🔥', g.rx);
+    await hit('PUT', '/v1/lift/' + C + '/react', { key: KR, body: { f: C2, w: 'w1', e: '🔥' } });
+    g = await (await hit('GET', '/v1/lift/' + C)).json();
+    ok('and the same press takes it back', g.rx.length === 0, g.rx);
+    await hit('PUT', '/v1/lift/' + C + '/react', { key: KR, body: { f: C2, w: 'w1', e: '💪' } });
     q = await hit('DELETE', '/v1/lift/' + C, { key: KEY });
-    ok('the owner can leave, and the record goes', q.status === 200 && !env.SCHED.m.has('lift:' + C));
+    ok('the owner can leave, and the record goes, reactions and all', q.status === 200 && !env.SCHED.m.has('lift:' + C) && !env.SCHED.m.has('liftr:' + C));
   }
 
   console.log('\n  ' + pass + ' passed, ' + fail + ' failed\n');
