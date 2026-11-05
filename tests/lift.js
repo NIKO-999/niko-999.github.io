@@ -180,14 +180,14 @@ const freeze = (at) => `(() => {
   ok('the session rises from the foot of the screen', mid > end && end < 60, { mid, end });
   ok('carrying the routine\'s two exercises', (await page.$$eval('.lf-session .lf-ex-n', (x) => x.map((e) => e.textContent))).join() === 'Bench press,Overhead press');
   ok('with three sets each when they are new', (await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelectorAll('.lf-set:not(.is-hd)').length))).join() === '3,3');
-  ok('its finish button is the red one', await page.$eval('#lfFinish', (b) => getComputedStyle(b).backgroundColor) === 'rgb(255, 59, 48)');
+  ok('its finish button is the lime one', await page.$eval('#lfFinish', (b) => getComputedStyle(b).backgroundColor) === 'rgb(163, 230, 53)');
 
   const set = (ex, i) => page.locator('.lf-session .lf-ex').nth(ex).locator('.lf-set:not(.is-hd)').nth(i);
   await set(0, 0).locator('.lf-chk').click();
   ok('a set with nothing in it cannot be logged', !(await set(0, 0).getAttribute('class')).includes('is-done') && /weight and reps/.test(await page.textContent('.lf-toast')));
   await set(0, 0).locator('input').nth(0).fill('60'); await set(0, 0).locator('input').nth(1).fill('8');
   await set(0, 0).locator('.lf-chk').click();
-  ok('logging a set turns its check red', await set(0, 0).locator('.lf-chk span').evaluate((e) => getComputedStyle(e).backgroundColor) === 'rgb(255, 59, 48)');
+  ok('logging a set turns its check lime', await set(0, 0).locator('.lf-chk span').evaluate((e) => getComputedStyle(e).backgroundColor) === 'rgb(163, 230, 53)');
   ok('and starts the rest clock', /^Rest 0:0\d · target 2–3 min$/.test((await page.textContent('#lfRest')).trim()));
   ok('the rest clock is always on screen, even scrolled to the end of the workout', await page.evaluate(() => {
     const bd = document.querySelector('.lf-session .lf-sh-bd'); bd.scrollTop = bd.scrollHeight;
