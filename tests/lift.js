@@ -689,20 +689,21 @@ const freeze = (at) => `(() => {
   {
     const w = (id, d, n, kg) => ({ id, d, s: 1, e: 2, n, x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: kg, r: 8 }, { w: kg, r: 8 }] }] });
     const { c, page } = await ctx({ unit: 'kg', goal: 2, wo: [w('a', '2026-10-20', 'Back', 60), w('b', '2026-10-23', 'Quad volume', 100), w('c', '2026-10-27', 'Back', 60), w('d', '2026-10-30', 'Quad volume', 110)] });
-    const tags = await page.locator('#lfTags .lf-tag').allTextContents();
-    ok('a PR, volume up on last time, and the week goal, as green tags', tags.join('|') === 'New PR|Volume +10%|Week goal hit', tags);
+    const where = await page.$$eval('.lf-tag', (t) => t.map((x) => (x.closest('.lf-stat') ? x.closest('.lf-stat').dataset.k : x.closest('#lfGrid') ? 'grid' : '?') + ':' + x.textContent));
+    ok('each tag sits on its own tile: the PR on workouts, the volume on kg, goal and streak on the 30 days', where.join('|') === 'wo:New PR|vol:+10% today|grid:Week goal hit|grid:2-week streak', where);
+    ok('and none on the Today card', await page.locator('.lf-today .lf-tag').count() === 0);
     await c.close();
   }
   {
     const w = (id, d, kg) => ({ id, d, s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: kg, r: 8 }] }] });
     const { c, page } = await ctx({ unit: 'kg', goal: 1, wo: [w('a', '2026-10-14', 100), w('b', '2026-10-21', 100), w('c', '2026-10-28', 90)] });
-    const tags = await page.locator('#lfTags .lf-tag').allTextContents();
+    const tags = await page.locator('.lf-tag').allTextContents();
     ok('weeks in a row on goal is a streak tag; a lighter day earns no PR', tags.join('|') === 'Week goal hit|3-week streak', tags);
     await c.close();
   }
   {
     const { c, page } = await ctx({ unit: 'kg' });
-    ok('with nothing to say, there are no tags', await page.locator('#lfTags').count() === 0);
+    ok('with nothing to say, there are no tags', await page.locator('.lf-tag').count() === 0);
     await c.close();
   }
 
