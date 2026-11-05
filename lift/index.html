@@ -309,6 +309,9 @@ svg { display: block; }
 .lf-cell.is-pad { visibility: hidden; }
 .lf-cell.is-on { background: var(--card2); color: var(--ink); font-weight: 700; }
 .lf-cell.is-now { box-shadow: inset 0 0 0 2px var(--today); color: var(--ink); }
+/* a day you trained is lit in the accent; today keeps its outline instead, so the two never read as one */
+.lf-cell.is-on:not(.is-now) { background: var(--log); color: var(--on-log); }
+.lf-cell.is-on:not(.is-now) .lf-dots i { background: var(--on-log); }
 .lf-cell.is-ahead { color: var(--ahead); }
 .lf-dots { display: flex; gap: 3px; height: 5px; }
 .lf-dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--ink); }
