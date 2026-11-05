@@ -1410,17 +1410,20 @@ function lfTodayCard() {
     c.appendChild(lfChoiceGrid());
     return c;
   }
-  var title = act ? act.n : (rt ? rt.n : 'Workout');
+  /* DONE FOR TODAY: the card is the workout you DID — whichever day of
+     the plan it was — until tomorrow, when the plan's own day comes back.
+     It says so, counts what you did, and the button offers another. */
+  var doneWs = act ? [] : woOn(ymd(today())), last = doneWs[doneWs.length - 1];
+  if (last) rt = rtById(last.rt) || null;
+  var title = act ? act.n : last ? last.n : (rt ? rt.n : 'Workout');
   $('#lfPick', c).textContent = title;
-  /* DONE FOR TODAY: the card says so, counts what you did instead of
-     what is planned, and the button offers another. */
-  var doneWs = act ? [] : woOn(ymd(today()));
   if (doneWs.length) {
     c.classList.add('is-done');
     c.insertBefore(el('<span class="lf-done" id="lfDone">' + IC.check + 'Completed</span>'), c.firstChild);
   }
   $('#lfPick', c).setAttribute('aria-label', 'Today: ' + title + '. Choose a routine');
-  $('.lf-sub', c).textContent = rt && !act ? (rt.sp || rt.ex.map(function (id) { return exName(id); }).slice(0, 3).join(', ') || 'No exercises yet')
+  if (last && !rt) $('.lf-sub', c).textContent = last.x.slice(0, 3).map(function (e) { return e.n; }).join(', ');
+  else $('.lf-sub', c).textContent = rt && !act ? (rt.sp || rt.ex.map(function (id) { return exName(id); }).slice(0, 3).join(', ') || 'No exercises yet')
     : act ? 'In progress' : 'An empty workout — add exercises as you go';
   var n = act ? act.x.length : (rt ? rt.ex.length : 0);
   var chips = $('.lf-chips', c);
@@ -1439,7 +1442,7 @@ function lfTodayCard() {
   go.addEventListener('click', function () { if (act) lfOpenSession(); else lfStart(rt); });
   $('#lfPick', c).addEventListener('click', function () { if (act) lfOpenSession(); else lfRoutinePicker(); });
   /* A LEG DAY ASKS FIRST. Pressed again, an answer clears. */
-  if (rt && !act && lfIsLegDay(rt)) {
+  if (rt && !act && !last && lfIsLegDay(rt)) {
     var rv = lfRc(), rq = el('<div class="lf-rq" id="lfRec"><div class="lf-lab">How are your legs?</div><div class="lf-rq-o"></div><p class="lf-rq-a"></p></div>');
     RECOVERY.forEach(function (o, i) {
       var b = el('<button type="button" class="lf-rq-b"><b></b><span></span></button>');
@@ -1461,14 +1464,8 @@ function lfTodayCard() {
     } else if (rv === 1) $('span:last-child', go).textContent = 'Start · fewer leg sets';
     c.insertBefore(rq, go);
   }
-  /* A session already finished today can still take its cardio. */
-  var done = act ? null : woOn(ymd(today())).slice(-1)[0];
-  if (done) {
-    var ac = el('<button type="button" class="lf-btn is-full" id="lfAddCd" style="margin-top:10px"></button>');
-    ac.textContent = done.cd ? 'Cardio · ' + lfCdTxt(done.cd) : '+ Add cardio to ' + done.n;
-    ac.addEventListener('click', function () { lfWoSheet(done); });
-    c.appendChild(ac);
-  }
+  /* Cardio goes in at the end of the session; a finished one can still
+     take it from its day on the calendar. */
   return c;
 }
 /* The estimate is your own average for this routine once there is one,

@@ -243,12 +243,7 @@ const freeze = (at) => `(() => {
   ok('or taken off', (await store(page)).wo[0].cd === null);
   await page.keyboard.press('Escape'); await settle(page); await page.keyboard.press('Escape'); await settle(page);
   await page.click('.lf-bar [data-v="home"]'); await settle(page);
-  /* FINISHED ALREADY: home offers the cardio for today's session. */
-  ok('home offers cardio for a session already finished', (await page.textContent('#lfAddCd')).includes('Add cardio to'));
-  await page.click('#lfAddCd'); await settle(page);
-  await top(page).locator('#lfWoCd .lf-pill[data-m="10"]').click();
-  await page.keyboard.press('Escape'); await settle(page);
-  ok('and then says what was logged', (await page.textContent('#lfAddCd')) === 'Cardio · 10 min stairmaster');
+  ok('home does not offer cardio once the session is done', await page.locator('#lfAddCd').count() === 0);
 
   /* ── progressive overload ── */
   await page.click('#lfGo'); await settle(page);
@@ -716,6 +711,19 @@ const freeze = (at) => `(() => {
     await top(page).locator('button', { hasText: 'Done' }).click(); await page.waitForTimeout(1000);
     ok('the tenth workout earns its badge, announced when the summary is put away', await page.locator('.lf-cv').count() === 1 && /Badge earned/.test(await page.textContent('.lf-cv')) && /10 workouts/.test(await page.textContent('.lf-cv')));
     ok('and is marked seen, so it comes up once', (await store(page)).bseen.wo10 === 1);
+    await c.close();
+  }
+
+  /* ── TODAY IS WHAT YOU TRAINED: a different day of the plan done today ── */
+  {
+    const { c, page } = await ctx({ unit: 'kg', wo: [{ id: 't1', d: '2026-10-29', s: 1, e: 2, n: 'Hamstrings & glutes', rt: 'p-wed', x: [{ id: 'rdl', n: 'Romanian deadlift', sets: [{ w: 100, r: 8 }] }] }] }, '2026-10-29T18:00:00');
+    ok('a Thursday you trained Wednesday\'s session shows that session, done', (await page.textContent('#lfPick')).trim() === 'Hamstrings & glutes' && /Hinge, curls/.test(await page.textContent('.lf-today .lf-sub')) && await page.locator('#lfDone').count() === 1);
+    ok('and does not ask about legs after the fact', await page.locator('#lfRec').count() === 0);
+    await c.close();
+  }
+  {
+    const { c, page } = await ctx({ unit: 'kg', wo: [{ id: 't1', d: '2026-10-29', s: 1, e: 2, n: 'Hamstrings & glutes', rt: 'p-wed', x: [{ id: 'rdl', n: 'Romanian deadlift', sets: [{ w: 100, r: 8 }] }] }] }, '2026-10-30T09:00:00');
+    ok('the next day the plan\'s own day comes back', (await page.textContent('#lfPick')).trim() === 'Quad volume' && await page.locator('#lfDone').count() === 0);
     await c.close();
   }
 
