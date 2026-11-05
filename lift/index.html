@@ -329,6 +329,12 @@ svg { display: block; }
 
 /* ── sheets: built and removed, never hidden ── */
 .lf-scrim { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 40; opacity: 0; transition: opacity .28s var(--ease); }
+/* THE SHEET IS FROSTED GLASS: what is behind it shows through the card
+   as colour and shape, never as words you could read. The dim above it
+   stays plain — no blur on the page itself. */
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .lf-sheet { background: color-mix(in srgb, var(--sheet) 72%, transparent) !important; -webkit-backdrop-filter: blur(30px) saturate(1.6); backdrop-filter: blur(30px) saturate(1.6); }
+}
 .lf-scrim.is-up { opacity: 1; }
 .lf-sheet {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; max-width: 560px; margin: 0 auto;
@@ -1421,7 +1427,7 @@ function lfTodayCard() {
     c.classList.add('is-done');
     c.insertBefore(el('<span class="lf-done" id="lfDone">' + IC.check + 'Completed</span>'), c.firstChild);
   }
-  $('#lfPick', c).setAttribute('aria-label', 'Today: ' + title + '. Choose a routine');
+  $('#lfPick', c).setAttribute('aria-label', 'Today: ' + title + (last ? '. Open the workout' : '. Choose a routine'));
   if (last && !rt) $('.lf-sub', c).textContent = last.x.slice(0, 3).map(function (e) { return e.n; }).join(', ');
   else $('.lf-sub', c).textContent = rt && !act ? (rt.sp || rt.ex.map(function (id) { return exName(id); }).slice(0, 3).join(', ') || 'No exercises yet')
     : act ? 'In progress' : 'An empty workout — add exercises as you go';
@@ -1440,7 +1446,8 @@ function lfTodayCard() {
   $('span:last-child', go).textContent = act ? 'Resume Workout' : doneWs.length ? 'Start another workout' : 'Start Workout';
   go.classList.toggle('is-live', !!act);
   go.addEventListener('click', function () { if (act) lfOpenSession(); else lfStart(rt); });
-  $('#lfPick', c).addEventListener('click', function () { if (act) lfOpenSession(); else lfRoutinePicker(); });
+  /* DONE, the name opens what you did; the plan is chosen from "Start another". */
+  $('#lfPick', c).addEventListener('click', function () { if (act) lfOpenSession(); else if (last) lfWoSheet(last); else lfRoutinePicker(); });
   /* A LEG DAY ASKS FIRST. Pressed again, an answer clears. */
   if (rt && !act && !last && lfIsLegDay(rt)) {
     var rv = lfRc(), rq = el('<div class="lf-rq" id="lfRec"><div class="lf-lab">How are your legs?</div><div class="lf-rq-o"></div><p class="lf-rq-a"></p></div>');
@@ -1495,32 +1502,44 @@ function lfStatRow() {
     }
     b.innerHTML = d + k[2] + '<b class="lf-num">' + fmtBig(k[3]) + '</b><span>' + k[1] + '</span>';
     b.setAttribute('aria-label', fmtBig(k[3]) + ' ' + k[1] + ' in the last 30 days');
-    b.addEventListener('click', k[0] === 'vol' ? lfVolSheet : lfThirtySheet);
+    b.addEventListener('click', function () { lfTrendSheet(k[0]); });
     lfTagsOf(k[0] === 'wo' ? ['pr'] : k[0] === 'vol' ? ['up'] : []).forEach(function (x) { b.appendChild(lfTag(x)).classList.add('is-mini'); });
     r.appendChild(b);
   });
   return r;
 }
 
-/* VOLUME, OPENED. The figure, how it moved against the thirty days
-   before, what that is a session and your heaviest single set, then the
-   eight weeks drawn with a mark on each — the first, the best and the
-   last named, because those are the three you read. */
-function lfVolSheet() {
-  var t = today(), cur = windowStats(addDays(t, -29), t), prev = windowStats(addDays(t, -59), addDays(t, -30));
-  var b = el('<div class="lf-vs"><div class="lf-cap">Last 30 days</div><div class="lf-vs-h"><div class="lf-hero lf-num"></div><span class="lf-delta" hidden></span></div><p class="lf-vs-t">total volume</p><p class="lf-lab lf-vs-s"></p></div>');
-  $('.lf-hero', b).textContent = fmtBig(toDisp(cur.vol));
-  if (prev.vol > 0) {
-    var p = Math.round((cur.vol - prev.vol) / prev.vol * 100), dl = $('.lf-delta', b);
+/* VOLUME, SETS AND WORKOUTS, OPENED, all one way: the figure, how it
+   moved against the thirty days before, a line on what it means, then
+   the eight weeks drawn with a mark on each — the first, the best and
+   the last named, because those are the three you read. */
+var TREND = {
+  vol: { id: 'lfVolTrend', n: 'Volume', ic: 'weight', t: 'total volume', v: function (st) { return toDisp(st.vol); } },
+  sets: { id: 'lfSetsTrend', n: 'Sets', ic: 'stack', t: 'sets completed', v: function (st) { return st.sets; } },
+  wo: { id: 'lfWoTrend', n: 'Workouts', ic: 'dumb', t: 'workouts', v: function (st) { return st.wo; } }
+};
+function lfVolSheet() { lfTrendSheet('vol'); }
+function lfTrendSheet(k) {
+  var K = TREND[k], t = today(), cur = windowStats(addDays(t, -29), t), prev = windowStats(addDays(t, -59), addDays(t, -30));
+  var b = el('<div class="lf-vs"><div class="lf-cap">Last 30 days</div><div class="lf-vs-h"><div class="lf-hero lf-num"></div><span class="lf-delta" hidden></span></div><p class="lf-vs-t"></p><p class="lf-lab lf-vs-s"></p></div>');
+  $('.lf-hero', b).textContent = fmtBig(K.v(cur)); $('.lf-vs-t', b).textContent = K.t;
+  if (K.v(prev) > 0) {
+    var p = Math.round((K.v(cur) - K.v(prev)) / K.v(prev) * 100), dl = $('.lf-delta', b);
     dl.hidden = false; dl.textContent = (p >= 0 ? '+' : '') + p + '%'; dl.classList.toggle('is-down', p < 0);
   }
-  var heavy = 0, a0 = ymd(addDays(t, -29));
-  S.wo.forEach(function (w) { if (w.d >= a0) w.x.forEach(function (e) { e.sets.forEach(function (q) { if (q.w > heavy) heavy = q.w; }); }); });
-  $('.lf-vs-s', b).textContent = cur.wo ? 'Roughly ' + fmtBig(toDisp(cur.vol / cur.wo)) + ' per session. Heaviest single set: ' + fmtW(heavy) + ' ' + S.unit + '.' : 'Nothing logged in the last 30 days yet.';
+  var line = 'Nothing logged in the last 30 days yet.';
+  if (cur.wo && k === 'vol') {
+    var heavy = 0, a0 = ymd(addDays(t, -29));
+    S.wo.forEach(function (w) { if (w.d >= a0) w.x.forEach(function (e) { e.sets.forEach(function (q) { if (q.w > heavy) heavy = q.w; }); }); });
+    line = 'Roughly ' + fmtBig(toDisp(cur.vol / cur.wo)) + ' per session. Heaviest single set: ' + fmtW(heavy) + ' ' + S.unit + '.';
+  } else if (cur.wo && k === 'sets') line = 'About ' + (Math.round(cur.sets / cur.wo * 10) / 10) + ' a session, ' + (Math.round(cur.reps / Math.max(1, cur.sets) * 10) / 10) + ' reps a set, ' + fmtBig(cur.reps) + ' reps in all.';
+  else if (cur.wo) line = 'About ' + (Math.round(cur.wo / 30 * 7 * 10) / 10) + ' a week, against a goal of ' + S.goal + '.';
+  $('.lf-vs-s', b).textContent = line;
   /* the eight weeks, Monday first */
   var wk = monday(t), weeks = [];
-  for (var i = 7; i >= 0; i--) { var a = addDays(wk, -7 * i); weeks.push({ d: a, v: toDisp(windowStats(a, addDays(a, 6)).vol) }); }
-  var ch = el('<div class="lf-card lf-vs-c" id="lfVolTrend"><div class="lf-lab" style="display:flex;gap:6px;align-items:center">' + IC.weight + 'Volume</div><div class="lf-vs-sub">8-week trend</div><div class="lf-vs-plot"></div><div class="lf-vs-x"></div></div>');
+  for (var i = 7; i >= 0; i--) { var a = addDays(wk, -7 * i); weeks.push({ d: a, v: K.v(windowStats(a, addDays(a, 6))) }); }
+  var ch = el('<div class="lf-card lf-vs-c"><div class="lf-lab" style="display:flex;gap:6px;align-items:center">' + IC[K.ic] + '<span></span></div><div class="lf-vs-sub">8-week trend</div><div class="lf-vs-plot"></div><div class="lf-vs-x"></div></div>');
+  ch.id = K.id; $('.lf-lab span', ch).textContent = K.n;
   var plot = $('.lf-vs-plot', ch), max = Math.max.apply(null, weeks.map(function (w) { return w.v; }).concat([1]));
   var pts = weeks.map(function (w, i) { return [i / 7 * 100, 88 - w.v / max * 68]; });
   var d = 'M' + pts[0][0] + ' ' + pts[0][1];
@@ -1539,20 +1558,11 @@ function lfVolSheet() {
     var x = el('<span></span>'); x.textContent = i % 2 ? '' : MON[w.d.getMonth()].slice(0, 3) + ' ' + w.d.getDate(); $('.lf-vs-x', ch).appendChild(x);
   });
   b.appendChild(ch);
-  var tot = weeks.reduce(function (a, w) { return a + w.v; }, 0);
+  var tot = weeks.reduce(function (a, w) { return a + w.v; }, 0), avg = tot / 8;
   b.appendChild(el('<div class="lf-cap" style="margin:16px 2px 8px">At a glance</div>'));
-  b.appendChild(lfSum([[fmtBig(weeks[best].v), 'best week'], [fmtBig(tot / 8), 'a week, avg'], [cur.wo, 'workouts']]));
+  b.appendChild(lfSum([[fmtBig(weeks[best].v), 'best week'], [k === 'wo' ? Math.round(avg * 10) / 10 : fmtBig(avg), 'a week, avg'],
+    k === 'vol' ? [cur.wo, 'workouts'] : k === 'sets' ? [fmtBig(cur.reps), 'reps'] : [cur.sets, 'sets']]));
   lfSheet({ title: '', body: b, cls: 'lf-vsh' });
-}
-function lfThirtySheet() {
-  var t = today(), c = windowStats(addDays(t, -29), t);
-  var b = el('<div><div class="lf-cap">Last 30 days</div><div class="lf-hero lf-num"></div><p>reps logged</p><p class="lf-lab" style="margin:8px 0 18px;font-weight:400"></p></div>');
-  $('.lf-hero', b).textContent = fmtBig(c.reps);
-  $('p.lf-lab', b).textContent = c.sets ? c.sets + ' sets completed — about ' + (Math.round(c.reps / c.sets * 10) / 10) + ' reps per set on average.' : 'Nothing logged yet. Start a workout and it shows up here.';
-  b.appendChild(lfWeekCard(true));
-  var s = lfSum([[c.wo, 'workouts'], [c.sets, 'sets'], [fmtBig(toDisp(c.vol)), S.unit + ' moved']]);
-  s.style.marginTop = '12px'; b.appendChild(s);
-  lfSheet({ title: '', body: b });
 }
 
 /* This week's direct working sets against the targets, by primary

@@ -614,6 +614,25 @@ const freeze = (at) => `(() => {
     ok('and so does the volume card', await top(page).locator('#lfVolTrend').count() === 1);
     await c.close();
   }
+  /* ── SETS AND WORKOUTS OPEN THE SAME WAY, and a sheet is frosted glass ── */
+  {
+    const wo = (id, d, n) => ({ id, d, s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: Array(n).fill({ w: 100, r: 8 }) }] });
+    const { c, page } = await ctx({ unit: 'kg', wo: [wo('s1', '2026-09-20', 4), wo('s2', '2026-10-20', 3), wo('s3', '2026-10-28', 5)] });
+    await page.click('.lf-stat[data-k="sets"]'); await settle(page);
+    const t = await top(page).textContent();
+    ok('the sets tile opens its own sheet, drawn like volume', (await top(page).locator('.lf-hero').textContent()) === '8' && /sets completed/.test(t) && /\+100%/.test(t) && await top(page).locator('#lfSetsTrend .lf-vs-dot').count() === 8, t.slice(0, 160));
+    ok('the sheet card is frosted glass, and the page behind it is not blurred', await page.evaluate(() => { const sh = getComputedStyle(document.querySelector('.lf-sheet')), sc = getComputedStyle(document.querySelector('.lf-scrim')); return /blur/.test(sh.backdropFilter || sh.webkitBackdropFilter) && !/blur/.test(sc.backdropFilter || sc.webkitBackdropFilter || ''); }));
+    await page.keyboard.press('Escape'); await settle(page);
+    await page.click('.lf-stat[data-k="wo"]'); await settle(page);
+    ok('and so does the workouts tile', await top(page).locator('#lfWoTrend').count() === 1 && /workouts/.test(await top(page).textContent()));
+    await c.close();
+  }
+  {
+    const { c, page } = await ctx({ unit: 'kg', wo: [{ id: 'dn', d: '2026-10-30', s: 1, e: 2, n: 'Hamstrings & glutes', x: [{ id: 'rdl', n: 'Romanian deadlift', sets: [{ w: 90, r: 10 }] }] }] }, '2026-10-30T18:00:00');
+    await page.click('#lfPick'); await settle(page);
+    ok('once today is done, its name opens the workout you did, not the list of routines', /Romanian deadlift/.test(await top(page).textContent()) && !/Empty workout/.test(await top(page).textContent()));
+    await c.close();
+  }
 
   /* ── THE LIGHT FACE, and today marked done ── */
   {
