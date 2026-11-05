@@ -346,6 +346,12 @@ function liftClean(b) {
      muscle is one the app knows. */
   const num = (v) => { v = Math.round(+v); return isFinite(v) ? Math.max(0, Math.min(1000, v)) : 0; };
   s.w7 = Array.isArray(b.s.w7) && b.s.w7.length === 7 ? b.s.w7.map(num) : [0, 0, 0, 0, 0, 0, 0];
+  /* Volume is a TOTAL in kg — thirty days, and eight weekly figures —
+     never a single lift, so a larger ceiling. */
+  const big = (v) => { v = Math.round(+v); return isFinite(v) ? Math.max(0, Math.min(10000000, v)) : 0; };
+  s.vol30 = big(b.s.vol30);
+  s.v8 = Array.isArray(b.s.v8) && b.s.v8.length === 8 ? b.s.v8.map(big) : [0, 0, 0, 0, 0, 0, 0, 0];
+  s.r7 = Array.isArray(b.s.r7) && b.s.r7.length === 7 ? b.s.r7.map((v) => { v = Math.round(+v); return isFinite(v) ? Math.max(0, Math.min(100000, v)) : 0; }) : [0, 0, 0, 0, 0, 0, 0];
   s.mu = Array.isArray(b.s.mu) ? b.s.mu.filter((m) => Array.isArray(m) && LIFT_MUS.includes(m[0])).slice(0, 16).map((m) => [m[0], num(m[1]), num(m[2])]) : [];
   s.last = typeof b.s.last === 'string' && /^\d{4}-\d\d-\d\d$/.test(b.s.last) ? b.s.last : '';
   return { n: n || 'Lifter', s };

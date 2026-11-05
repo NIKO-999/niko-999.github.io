@@ -2421,11 +2421,16 @@ function frStats() {
   /* This week as a friend's dashboard draws it: sets by day, and sets by
      muscle against the targets they set. Counts, never a weight. */
   var w7 = [];
-  for (var j = 0; j < 7; j++) w7.push(woOn(ymd(addDays(mon, j))).reduce(function (a, w) { return a + woSets(w); }, 0));
+  var r7 = [];
+  for (var j = 0; j < 7; j++) { var dw = woOn(ymd(addDays(mon, j))); w7.push(dw.reduce(function (a, w) { return a + woSets(w); }, 0)); r7.push(dw.reduce(function (a, w) { return a + woReps(w); }, 0)); }
+  /* VOLUME, as totals in kg: thirty days and eight weeks. A total says
+     how much work; it never says what any one lift was. */
+  var v8 = [];
+  for (var q = 7; q >= 0; q--) { var wa = addDays(mon, -7 * q); v8.push(Math.round(windowStats(wa, addDays(wa, 6)).vol)); }
   var got = lfMuscleSets(mon, addDays(mon, 6));
   var mu = lfTargets().slice(0, 16).map(function (x) { return [x[0], got[x[0]] || 0, x[1]]; });
   return { wo30: in30.length, sets30: in30.reduce(function (a, w) { return a + woSets(w); }, 0), pr30: pr30, wk: wk, goal: S.goal,
-    streak: streak, d: d, last: last, w7: w7, mu: mu };
+    streak: streak, d: d, last: last, w7: w7, mu: mu, r7: r7, v8: v8, vol30: Math.round(windowStats(addDays(t, -29), t).vol) };
 }
 
 /* PUSHED A BEAT AFTER THE LAST SAVE, and only when the counts changed —
@@ -2505,9 +2510,9 @@ function frAgo(d) {
    tiles, the same thirty marks, the same bars — only what they send. */
 function frSheet(f) {
   var st = f.s || {}, b = el('<div class="fr-dash"><p class="lf-lab fr-ago"></p></div>');
-  $('.fr-ago', b).textContent = f.gone ? 'This code has gone — they turned friends off.' : frAgo(st.last);
+  $('.fr-ago', b).textContent = f.gone ? 'This code has gone — they turned friends off.' : frAgo(st.last) + ' · ' + (st.pr30 || 0) + (st.pr30 === 1 ? ' PR' : ' PRs') + ' in 30 days';
   var row = el('<div class="lf-row" style="--n:3"></div>');
-  [[IC.dumb, st.wo30 || 0, 'workouts · 30d'], [IC.stack, st.sets30 || 0, 'sets · 30d'], [IC.check, st.pr30 || 0, 'PRs · 30d']].forEach(function (k) {
+  [[IC.dumb, st.wo30 || 0, 'workouts'], [IC.stack, st.sets30 || 0, 'sets'], [IC.weight, toDisp(st.vol30 || 0), S.unit]].forEach(function (k) {
     var t = el('<div class="lf-card lf-stat"></div>'); t.innerHTML = k[0] + '<b class="lf-num"></b><span></span>';
     $('b', t).textContent = fmtBig(k[1]); $('span', t).textContent = k[2]; row.appendChild(t);
   });
@@ -2523,19 +2528,6 @@ function frSheet(f) {
   });
   $('.lf-hd .lf-num', g).textContent = on + ' · ' + (st.streak || 0) + (st.streak === 1 ? ' week' : ' weeks') + ' on goal';
   b.appendChild(g);
-  /* this week, by day */
-  var wk = el('<div class="lf-card" id="frWeek"><div class="lf-hd"><span class="lf-lab">This week</span><span class="lf-lab lf-num"></span></div><div class="lf-bars" aria-hidden="true"></div></div>');
-  $('.lf-hd .lf-num', wk).textContent = (st.wk || 0) + ' / ' + (st.goal || 0) + ' workouts';
-  var w7 = Array.isArray(st.w7) && st.w7.length === 7 ? st.w7 : [0, 0, 0, 0, 0, 0, 0], max = Math.max.apply(null, w7.concat([1])), dow = (today().getDay() + 6) % 7;
-  w7.forEach(function (n, i) {
-    var col = el('<div><em></em><i></i><u></u></div>');
-    if (i === dow) col.classList.add('is-now');
-    $('em', col).textContent = n || '';
-    $('i', col).style.height = (n ? Math.max(6, n / max * 100) : 4) + '%';
-    $('u', col).textContent = 'MTWTFSS'[i];
-    $('.lf-bars', wk).appendChild(col);
-  });
-  b.appendChild(wk);
   /* sets this week against their own targets */
   var mu = Array.isArray(st.mu) ? st.mu : [];
   if (mu.length) {
@@ -2550,6 +2542,27 @@ function frSheet(f) {
     });
     b.appendChild(mc);
   }
+  /* volume over eight weeks and reps this week, side by side as home has them */
+  var pr = el('<div class="lf-row"></div>');
+  var v8 = (Array.isArray(st.v8) && st.v8.length === 8 ? st.v8 : [0, 0, 0, 0, 0, 0, 0, 0]).map(toDisp);
+  var vc = el('<div class="lf-card" id="frVol"><div class="lf-lab" style="display:flex;gap:6px;align-items:center">' + IC.weight + 'Volume</div><div class="lf-big lf-num"></div><div class="lf-area"></div></div>');
+  $('.lf-big', vc).innerHTML = esc(fmtBig(v8.reduce(function (a, x) { return a + x; }, 0))) + '<small>' + S.unit + ' · 8 wk</small>';
+  $('.lf-area', vc).innerHTML = lfAreaSvg(v8);
+  pr.appendChild(vc);
+  var r7 = Array.isArray(st.r7) && st.r7.length === 7 ? st.r7 : [0, 0, 0, 0, 0, 0, 0], rmax = Math.max.apply(null, r7.concat([1])), dow = (today().getDay() + 6) % 7;
+  var wk = el('<div class="lf-card" id="frWeek"><div class="lf-lab" style="display:flex;gap:6px;align-items:center">' + IC.dumb + 'This week</div><div class="lf-hd"><div class="lf-big lf-num"></div><span class="lf-pct lf-num"></span></div><div class="lf-bars" aria-hidden="true"></div></div>');
+  $('.lf-big', wk).innerHTML = r7.reduce(function (a, x) { return a + x; }, 0) + '<small>reps</small>';
+  $('.lf-pct', wk).textContent = (st.wk || 0) + '/' + (st.goal || 0);
+  r7.forEach(function (n, i) {
+    var col = el('<div><em></em><i></i><u></u></div>');
+    if (i === dow) col.classList.add('is-now');
+    $('em', col).textContent = n || '';
+    $('i', col).style.height = (n ? Math.max(6, n / rmax * 100) : 4) + '%';
+    $('u', col).textContent = 'MTWTFSS'[i];
+    $('.lf-bars', wk).appendChild(col);
+  });
+  pr.appendChild(wk);
+  b.appendChild(pr);
   var foot = null, rm = null;
   if (!f.me) { rm = el('<button type="button" class="lf-btn is-bad">Remove</button>'); foot = [rm]; }
   var s = lfSheet({ title: f.n || 'Friend', body: b, foot: foot, full: true });
@@ -2582,8 +2595,8 @@ function lfRenderFr() {
     /* THE MOMENT OF CONSENT, said in full, once, here — this is the one
        screen where something first leaves the phone. */
     var c = el('<div class="lf-card" id="frOff"><div class="lf-hero" style="font-size:22px">See how your friends train</div>'
-      + '<p class="fr-p">Turn this on and Lift sends a small set of counts to this site\'s server under a friend code: your name, how many workouts and sets you did in the last 30 days, which of those days you trained or rested, your weekly goal and streak, your PRs, and this week’s sets by day and by muscle against your targets.</p>'
-      + '<p class="fr-p">Never your weights, your exercises, your body weight, your food or anything you type. Anyone you give your code to can read those counts, and nothing else. Turn it off and they are deleted.</p>'
+      + '<p class="fr-p">Turn this on and Lift sends a small set of counts to this site\'s server under a friend code: your name, how many workouts and sets you did in the last 30 days, which of those days you trained or rested, your weekly goal and streak, your PRs, your total volume, and this week’s sets and reps by day and by muscle against your targets.</p>'
+      + '<p class="fr-p">Never a weight you lifted, your exercises, your body weight, your food or anything you type. Anyone you give your code to can read those counts, and nothing else. Turn it off and they are deleted.</p>'
       + '<label class="lf-flab" for="frName">Your name, as friends see it</label><input class="lf-field" id="frName" maxlength="24" autocomplete="off" placeholder="Your name" /></div>');
     if (FRS.pend) c.insertBefore(el('<p class="fr-p fr-pend">Someone sent you their code. Turn friends on and they are added.</p>'), $('.fr-p', c));
     var on = el('<button type="button" class="lf-btn is-log is-full" id="frOn" style="margin-top:14px">Turn on friends</button>');

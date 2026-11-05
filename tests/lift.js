@@ -700,7 +700,7 @@ const freeze = (at) => `(() => {
     const A = await phone({ unit: 'kg', goal: 4, wo: [wo('2026-10-26', [{ w: 100, r: 8 }]), wo('2026-10-28', [{ w: 110, r: 8 }, { w: 110, r: 8 }]), wo('2026-10-30', [{ w: 120, r: 8 }])], rd: { '2026-10-29': 1 }, bw: [{ d: '2026-10-30', v: 87.4 }] });
     await A.page.click('.lf-bar [data-v="fr"]'); await A.page.waitForTimeout(200);
     ok('friends is off until you turn it on, and asks for nothing', await A.page.locator('#frOff').count() === 1 && m.size === 0 && sent.length === 0);
-    ok('the consent says what goes and what never does', /never your weights/i.test(await A.page.textContent('#frOff')));
+    ok('the consent says what goes and what never does', /never a weight you lifted/i.test(await A.page.textContent('#frOff')));
     await A.page.click('#frOn'); await A.page.waitForTimeout(150);
     ok('a name is needed first', m.size === 0);
     await A.page.fill('#frName', 'Niko'); await A.page.click('#frOn'); await A.page.waitForTimeout(500);
@@ -709,6 +709,7 @@ const freeze = (at) => `(() => {
     const recA = JSON.parse(m.get('lift:' + codeA));
     ok('what the server holds is counts: 3 workouts, 4 sets, 1 rest, trained today', recA.n === 'Niko' && recA.s.wo30 === 3 && recA.s.sets30 === 4 && recA.s.last === '2026-10-30' && recA.s.d.slice(-5) === '0101r1'.slice(-5), recA.s);
     ok('this week goes by day, and by muscle against your targets', JSON.stringify(recA.s.w7) === '[1,0,2,0,1,0,0]' && JSON.stringify(recA.s.mu[0]) === '["Quads",4,17]', [recA.s.w7, recA.s.mu[0]]);
+    ok('volume goes as totals: 30 days, eight weeks, and reps by day', recA.s.vol30 === 3520 && recA.s.v8[7] === 3520 && recA.s.v8.length === 8 && JSON.stringify(recA.s.r7) === '[8,0,16,0,8,0,0]', [recA.s.vol30, recA.s.v8, recA.s.r7]);
     ok('and nothing it no longer needs: no cardio, no totals', !('cd7' in recA.s) || recA.s.cd7 === 0);
     ok('two PRs: each heavier hack squat after the first', recA.s.pr30 === 2, recA.s.pr30);
     ok('the key is only a hash', /^[0-9a-f]{64}$/.test(recA.kh) && !JSON.stringify(recA).includes((await A.page.evaluate(() => JSON.parse(localStorage.getItem('lift.fr.v1')).key))));
@@ -733,9 +734,12 @@ const freeze = (at) => `(() => {
     ok('a typed code adds them, lower case and all', (await A.page.$$eval('#frBoard .fr-row b', (b) => b.map((x) => x.textContent))).join() === 'You,Sam');
     await A.page.click('#frBoard .fr-row:not(.is-me)'); await settle(A.page);
     const sh = await top(A.page).textContent('.lf-sh-bd');
-    ok('a friend opens on a whole dashboard: tiles, thirty days, the week, sets by muscle', /18 days ago/.test(sh) && await top(A.page).locator('.lf-stat').count() === 3
-      && await top(A.page).locator('#frGrid .lf-day').count() === 30 && await top(A.page).locator('#frWeek .lf-bars > div').count() === 7 && /0 \/ 3 workouts/.test(sh)
-      && await top(A.page).locator('#frMus .lf-vr').count() > 0, sh.slice(0, 300));
+    const T = top(A.page);
+    ok('a friend opens on a whole dashboard: when, and the three tiles', /18 days ago/.test(sh) && await T.locator('.lf-stat').count() === 3, sh.slice(0, 120));
+    ok('their thirty days', await T.locator('#frGrid .lf-day').count() === 30);
+    ok('their week, reps by day against goal', await T.locator('#frWeek .lf-bars > div').count() === 7 && /0\/3/.test(await T.locator('#frWeek').textContent()));
+    ok('their volume over eight weeks', await T.locator('#frVol .lf-area svg').count() === 1 && /8 wk/.test(await T.locator('#frVol').textContent()));
+    ok('and their sets by muscle', await T.locator('#frMus .lf-vr').count() > 0);
     ok('it fills the screen', await top(A.page).evaluate((e) => e.classList.contains('is-full')));
     await A.page.keyboard.press('Escape'); await settle(A.page);
     await A.page.click('#frBoard .fr-row.is-me'); await settle(A.page);
