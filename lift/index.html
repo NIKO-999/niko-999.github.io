@@ -794,6 +794,15 @@ var PROGRAM_GL = [
   { id: 'g-fri', dow: 5, n: 'Glutes · top shelf', sp: 'Glutes and core', ex: [['hipthrust', 3, 8, 12], ['cablekb', 3, 12, 15, 'each side'], ['cablestep', 3, 8, 12, 'each side'], ['cableabd', 3, 12, 20], ['hkr', 3, 10, 15], ['cablecrunch', 3, 10, 15]] },
   { id: 'g-sat', dow: 6, n: 'Conditioning & core', sp: 'Athletic conditioning and core', ex: [['sled', 4, 1, 1, 'rounds'], ['slrdl', 3, 8, 12, 'each side'], ['deadbug', 3, 8, 10, 'each side'], ['farmer', 3, 30, 40, 'm each side'], ['copen', 3, 20, 30, 's each side']] }
 ];
+/* QUAD & CALF: twelve weeks of quads and calves twice a week, four days
+   of 75–90 minutes, rest on the days between. Every working set ends
+   0–2 reps short of failure. */
+var PROGRAM_QC = [
+  { id: 'k-mon', dow: 1, n: 'Quad & calf power', sp: 'Pendulum, extensions, split squats', ex: [['calfstand', 4, 8, 10], ['pendulum', 3, 6, 8], ['legext', 3, 10, 12], ['bss', 3, 8, 10, 'each side'], ['calfseat', 3, 12, 15], ['declsit', 3, 12, 15]] },
+  { id: 'k-tue', dow: 2, n: 'Press & pull', sp: 'Incline press, rows, shoulders', ex: [['incdb', 3, 6, 8], ['tbar', 3, 8, 10], ['seatshp', 3, 8, 10], ['ngpd', 3, 10, 12], ['cablat', 3, 12, 15], ['curl', 3, 12, 12], ['tripush', 3, 12, 12]] },
+  { id: 'k-thu', dow: 4, n: 'Quad pump & hamstrings', sp: 'Leg press, curls, single-leg extensions', ex: [['calfseat', 4, 10, 12], ['legpress', 3, 8, 10], ['stdcurl', 3, 10, 12], ['legext', 3, 12, 15, 'each side'], ['calfstand', 3, 15, 20], ['hlr', 3, 12, 15]] },
+  { id: 'k-fri', dow: 5, n: 'Width & strength', sp: 'Pull-ups, bench, delts', ex: [['pullup', 3, 6, 8], ['bench', 3, 6, 8], ['dbrow', 3, 8, 10, 'each side'], ['latraise', 4, 12, 15], ['rdfly', 3, 15, 15], ['hammer', 3, 12, 12], ['triover', 3, 12, 12]] }
+];
 function lfMkProg(list) { return list.map(function (d) {
   return { id: d.id, dow: d.dow, n: d.n, sp: d.sp, fixed: 1, choice: d.choice ? 1 : 0, ex: d.ex.map(function (e) { return e[0]; }),
     tg: d.ex.reduce(function (o, e) { o[e[0]] = e[4] ? [e[1], e[2], e[3], e[4]] : [e[1], e[2], e[3]]; return o; }, {}) };
@@ -805,10 +814,11 @@ function lfMkProg(list) { return list.map(function (d) {
 var PROGRAMS = {
   ul: { n: 'Upper / lower', days: lfMkProg(PROGRAM_UL) },
   ppl: { n: 'Push / pull / legs', s: 'PPL', days: lfMkProg(PROGRAM_PPL) },
-  gl: { n: 'Glute builder', s: 'Glute builder', days: lfMkProg(PROGRAM_GL) }
+  gl: { n: 'Glute builder', s: 'Glute builder', days: lfMkProg(PROGRAM_GL) },
+  qc: { n: 'Quad & calf', s: 'Quad & calf', days: lfMkProg(PROGRAM_QC) }
 };
 PROGRAMS.ul.s = 'Upper / lower';
-var PROG_IDS = ['ul', 'ppl', 'gl'];
+var PROG_IDS = ['ul', 'ppl', 'gl', 'qc'];
 var CHOICES = lfMkProg(CHOICE_RT);
 /* A set × rep target as written: '3 × 8–12', '3 × 30–40 m each side',
    or '4 rounds'. */
@@ -819,6 +829,24 @@ function lfProg() { return PROGRAMS[S.prog] || PROGRAMS.ul; }
    then what to keep in mind while you look it over. */
 var GL_WEEKS = 'The 8 weeks: weeks 1–2 set a baseline and record every set, rep and RIR; 3–4 add reps at the same weight; 5–6 add 2.5–5% once every set tops its range; 7 push performance with compounds shy of failure; 8 deload 30–50% if fatigue has built up.';
 var DAY_TIPS = {
+  'k-mon': ['Quads and calves: heavy tension and the deep stretch', [
+    'Standing calf raises: 3 seconds down, a 2-second hold in the stretch, drive up. Never bounce — the tendon takes the force instead of the calf.',
+    'Pendulum squat with feet a little low on the platform: 3 seconds down, pause where the hamstrings meet the calves. 3 minutes between sets.',
+    'Leg extensions: a 1-second squeeze at the top, and a 30% drop set on the last one.',
+    'Seated calf raises finish with a myo-rep set: 12–15, rack it 15 seconds, then mini-sets of 4–5 with the same weight.']],
+  'k-tue': ['Upper body, kept quick so the legs recover', [
+    'Incline dumbbell press for the upper chest: a deep stretch without losing the shoulders.',
+    'Superset to save time: T-bar rows with the incline press, pulldowns with the shoulder press.',
+    'Cable lateral raises with a 1-second pause at shoulder height, then curls and pushdowns as a superset.']],
+  'k-thu': ['Quad volume and the back of the leg', [
+    'Seated calf raises: change the toe angle each set — straight, in, out.',
+    'Leg press low and narrow to bias the outer quad, full depth. 3 minutes between sets.',
+    'Leg curls keep the knees healthy against this much quad work: control the lowering.',
+    'Single-leg extensions iron out a left–right difference; finish with partials out of the bottom.']],
+  'k-fri': ['Back width and pressing strength', [
+    'Weighted pull-ups from a dead hang, chest to the bar. 2.5 minutes between sets.',
+    'Bench: control it down to the sternum, press hard.',
+    'Lateral raises carry 4 sets for shoulder width; hammer curls and overhead extensions as a superset to finish.']],
   'g-mon': ['Glutes, heavy strength', ['Romanian deadlifts and hip thrusts are the heavy work: keep them shy of technical failure.', 'Elevated lunges reach deeper into the glute; go each side.', GL_WEEKS]],
   'g-tue': ['Back, biceps and core', ['Neutral-grip pulldowns and chest-supported rows lead.', 'Reverse pec deck and seated face pulls for the rear delts.', 'Rope hammer curls and preacher curls finish it.']],
   'g-wed': ['Quads and calves', ['Leg press and hack squat carry the load.', 'Leg extensions single and double leg.', 'Bulgarian split squats each side, then seated calf raises.']],
@@ -909,6 +937,7 @@ var FOCUS_PPL = [['Quads', 15, 15, 1], ['Calves', 8, 8, 1], ['Abs', 6, 6, 1], ['
 /* The glute plan writes no weekly sets, so its targets are the sets the
    week actually holds, with glutes, hamstrings and abs the priority. */
 var FOCUS_GL = lfFocusFrom(PROGRAM_GL, { Glutes: 1, Hamstrings: 1, Abs: 1 });
+var FOCUS_QC = lfFocusFrom(PROGRAM_QC, { Quads: 1, Calves: 1 });
 function lfFocusOf(list) { return list.map(function (f) { return { m: f[0], lo: f[1], hi: f[2], p: f[3] }; }); }
 var FOCUS_V1 = 'Quads:13:16:1,Calves:12:12:1,Lower back:6:6:1,Hamstrings:10:10:0,Glutes:5:8:0,Abs:9:9:0';
 function lfFocusDefault() { return FOCUS_DEFAULT.map(function (f) { return { m: f[0], lo: f[1], hi: f[2], p: f[3] }; }); }
@@ -2258,7 +2287,7 @@ function lfRenderLib() {
   /* TWO PROGRAMS, one running. Switching also moves the weekly targets
      to the new plan's — but only when they are still the old plan's own,
      so targets you set yourself are never overwritten. */
-  var pg = el('<div class="lf-seg" id="lfProg" style="--n:3;margin-bottom:10px"></div>');
+  var pg = el('<div class="lf-seg" id="lfProg" style="--n:4;margin-bottom:10px"></div>');
   PROG_IDS.forEach(function (k) {
     var bt = el('<button type="button"></button>'); bt.textContent = PROGRAMS[k].s; bt.dataset.p = k;
     bt.setAttribute('aria-pressed', S.prog === k ? 'true' : 'false');
@@ -2266,7 +2295,7 @@ function lfRenderLib() {
       if (S.prog === k) return;
       var was = { prog: S.prog, focus: JSON.stringify(S.focus), pick: S.pick };
       var sig = function (l) { return JSON.stringify(lfFocusOf(l)); };
-      var DEF = { ul: FOCUS_DEFAULT, ppl: FOCUS_PPL, gl: FOCUS_GL }, oldDef = DEF[S.prog] || FOCUS_DEFAULT, newDef = DEF[k];
+      var DEF = { ul: FOCUS_DEFAULT, ppl: FOCUS_PPL, gl: FOCUS_GL, qc: FOCUS_QC }, oldDef = DEF[S.prog] || FOCUS_DEFAULT, newDef = DEF[k];
       if (JSON.stringify(S.focus) === sig(oldDef)) S.focus = lfFocusOf(newDef);
       S.prog = k; if (S.pick && S.pick.d === ymd(today()) && !lfProg().days.concat(S.rt).some(function (x) { return x.id === S.pick.id; })) S.pick = null;
       lfSave(); lfRender();

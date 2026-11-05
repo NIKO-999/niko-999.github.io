@@ -722,6 +722,21 @@ const freeze = (at) => `(() => {
     ok('each kind of badge wears its own colour, never a metal for a tier', await page.getAttribute('#lfBadges .lf-coin[data-b="wo10"]', 'data-m') === 'start' && await page.getAttribute('#lfBadges .lf-coin[data-b="wo50"]', 'data-m') === 'lock');
     await c.close();
   }
+  /* the quad & calf plan: four days, legs twice, rest between */
+  {
+    const { c, page } = await ctx({ unit: 'kg' }, '2026-11-02T09:00:00');
+    await page.click('.lf-bar [data-v="lib"]'); await page.click('#lfProg [data-p="qc"]'); await settle(page);
+    const split = await page.$$eval('#lfSplit .lf-li b', (b) => b.map((x) => x.textContent));
+    ok('the quad & calf plan is four named days, legs Monday and Thursday', split.join() === 'Mon · Quad & calf power,Tue · Press & pull,Thu · Quad pump & hamstrings,Fri · Width & strength', split);
+    await page.click('#lfSplit .lf-li >> nth=0'); await settle(page);
+    const mon = await top(page).textContent();
+    ok('Monday opens with calves, then the pendulum, as written', /Standing calf raises[\s\S]*4 × 8–10/.test(mon) && /Pendulum squat[\s\S]*3 × 6–8/.test(mon) && /myo-rep/.test(mon), mon.slice(0, 200));
+    await page.keyboard.press('Escape'); await settle(page);
+    await page.click('.lf-bar [data-v="home"]'); await settle(page);
+    ok('and a Monday on it is Quad & calf power', (await page.textContent('#lfPick')).trim() === 'Quad & calf power');
+    ok('its weekly targets put quads and calves first', (await store(page)).focus.slice(0, 2).map((f) => f.m).sort().join() === 'Calves,Quads');
+    await c.close();
+  }
   /* cardio, body weight and abs badges */
   {
     const wo = [];
@@ -836,7 +851,7 @@ const freeze = (at) => `(() => {
     const split = await page.$$eval('#lfSplit .lf-li b', (b) => b.map((x) => x.textContent));
     ok('the glute split is Monday to Saturday', split.join() === 'Mon · Glutes · heavy,Tue · Back & biceps,Wed · Quads & calves,Thu · Chest, shoulders & triceps,Fri · Glutes · top shelf,Sat · Conditioning & core', split);
     const segW = await page.$$eval('#lfProg button', (b) => b.map((x) => x.scrollWidth <= x.clientWidth + 1));
-    ok('three programs fit on one switch', segW.length === 3 && segW.every(Boolean));
+    ok('four programs fit on one switch', segW.length === 4 && segW.every(Boolean));
     await page.click('#lfSplit .lf-li >> nth=5'); await settle(page);
     const sat = await top(page).textContent();
     ok('Saturday reads its rounds, carries and plank as written', sat.includes('4 rounds') && sat.includes('3 × 30–40 m each side') && sat.includes('3 × 20–30 s each side') && sat.includes('3 × 8–10 each side') && /rower/.test(sat), sat.slice(0, 300));
