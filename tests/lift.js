@@ -645,6 +645,21 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── VOLUME OPENS ON ITS OWN SHEET ── */
+  {
+    const wo = (id, d, w, r) => ({ id, d, s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w, r }, { w, r }] }] });
+    const { c, page } = await ctx({ unit: 'kg', wo: [wo('v1', '2026-09-20', 100, 10), wo('v2', '2026-10-20', 120, 10), wo('v3', '2026-10-28', 140, 8)] });
+    await page.click('.lf-stat[data-k="vol"]'); await settle(page);
+    const t = await top(page).textContent();
+    ok('the volume tile opens its own sheet: the figure, how it moved, per session and the heaviest set',
+      (await top(page).locator('.lf-hero').textContent()) === '4.6k' && /\+132%/.test(t) && /Roughly 2.3k per session/.test(t) && /Heaviest single set: 140 kg/.test(t), t.slice(0, 200));
+    ok('with eight weeks drawn, a mark on each, and the first, best and last named', await top(page).locator('.lf-vs-dot').count() === 8 && await top(page).locator('.lf-vs-v').count() >= 1 && /At a glance/.test(t));
+    await page.keyboard.press('Escape'); await settle(page);
+    await page.click('#lfVol'); await settle(page);
+    ok('and so does the volume card', await top(page).locator('#lfVolTrend').count() === 1);
+    await c.close();
+  }
+
   /* ── A DAY WITH NOTHING LOGGED IS A REST DAY ── */
   {
     const { c, page } = await ctx({ unit: 'kg', since: '2026-10-25', rd: { '2026-10-27': 1 }, wo: [{ id: 'a1', d: '2026-10-26', s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 100, r: 8 }] }] }] });
