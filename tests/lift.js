@@ -689,14 +689,35 @@ const freeze = (at) => `(() => {
     ok('and counts what it had already won as seen', seen && seen.first === 1 && seen.wo10 === 1 && seen.pr === 1 && !seen.st4, seen);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const shelf = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
-    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 12 && shelf.includes('First workout:5 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
-    ok('and counts them', /3 of 12/.test(await page.textContent('#lfBadges .lf-hd')));
+    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 17 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
+    ok('and counts them', /4 of 17/.test(await page.textContent('#lfBadges .lf-hd')));
     ok('a badge not yet won carries its progress ring', await page.locator('#lfBadges .lf-coin[data-b="wo50"] .lf-bdr').count() === 1 && await page.locator('#lfBadges .lf-coin[data-b="first"] .lf-bdr').count() === 0);
     await page.click('#lfBadges .lf-coin[data-b="wo10"]'); await page.waitForTimeout(500);
     ok('a coin opens on its own screen, to spin', await page.locator('.lf-cv').count() === 1 && /10 workouts/.test(await page.textContent('.lf-cv')) && /Earned Mon 26 Oct/.test(await page.textContent('.lf-cv'))
       && await page.locator('.lf-cv-stage canvas, .lf-cv-stage.is-flat').count() >= 1);
-    await page.keyboard.press('Escape'); await page.waitForTimeout(400);
+    await page.keyboard.press('Escape'); await page.waitForSelector('.lf-cv', { state: 'detached', timeout: 5000 }).catch(() => {});
     ok('and is gone when it closes, not hidden', await page.locator('.lf-cv').count() === 0);
+    ok('each kind of badge wears its own colour, never a metal for a tier', await page.getAttribute('#lfBadges .lf-coin[data-b="wo10"]', 'data-m') === 'start' && await page.getAttribute('#lfBadges .lf-coin[data-b="wo50"]', 'data-m') === 'lock');
+    await c.close();
+  }
+  /* the target badges read the sets you log against your own weekly targets */
+  {
+    const w = (id, d, ex) => ({ id, d, s: 1, e: 2, n: 'Legs', x: ex });
+    const hk = { id: 'hack', n: 'Hack squat', sets: [{ w: 100, r: 8 }, { w: 100, r: 8 }] }, cf = { id: 'calfstand', n: 'Standing calf raises', sets: [{ w: 40, r: 12 }, { w: 40, r: 12 }, { w: 40, r: 12 }] };
+    const wo = [];
+    ['2026-10-05', '2026-10-12', '2026-10-19', '2026-10-26'].forEach((mon, k) => {
+      const d = (n) => { const t = new Date(mon + 'T12:00:00'); t.setDate(t.getDate() + n); return t.toISOString().slice(0, 10); };
+      wo.push(w('t' + k + 'a', d(0), [hk]), w('t' + k + 'b', d(2), [hk, cf]), w('t' + k + 'c', d(4), [hk]));
+    });
+    const focus = [{ m: 'Quads', lo: 6, hi: 8, p: 1 }, { m: 'Calves', lo: 3, hi: 4, p: 0 }];
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo, focus }, '2026-10-30T18:00:00', true);
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    const shelf = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
+    ok('a priority muscle on its weekly target earns On target, on the day the sets got there', shelf.includes('On target:9 Oct'), shelf);
+    ok('every muscle in focus on target earns Every target', shelf.includes('Every target:9 Oct'), shelf);
+    ok('four weeks running on target earns its badge', shelf.includes('4 weeks on target:30 Oct'), shelf);
+    ok('and the quad count shows how far along it is', shelf.includes('Quad target \u00d7 8:4 / 8'), shelf);
+    ok('the target badges are green', await page.getAttribute('#lfBadges .lf-coin[data-b="tgt1"]', 'data-m') === 'target');
     await c.close();
   }
   {
@@ -711,6 +732,7 @@ const freeze = (at) => `(() => {
     await top(page).locator('button', { hasText: 'Done' }).click(); await page.waitForTimeout(1000);
     ok('the tenth workout earns its badge, announced when the summary is put away', await page.locator('.lf-cv').count() === 1 && /Badge earned/.test(await page.textContent('.lf-cv')) && /10 workouts/.test(await page.textContent('.lf-cv')));
     ok('and is marked seen, so it comes up once', (await store(page)).bseen.wo10 === 1);
+    ok('a badge a later build added, already won before it arrived, is counted as seen rather than announced', (await store(page)).bseen.goal === 1);
     await c.close();
   }
 
