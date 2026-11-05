@@ -47,12 +47,12 @@ const freeze = (at) => `(() => {
   /* ── a first open ── */
   const { c, page } = await ctx();
   ok('the home screen draws', await page.locator('#lfHome .lf-today').count() === 1);
-  ok('a Friday opens on Quad volume of the split', (await page.textContent('#lfPick')).trim() === 'Quad volume' && /Quad hypertrophy and leg volume/.test(await page.textContent('.lf-sub')));
+  ok('a Friday opens on Quad hypertrophy of the split', (await page.textContent('#lfPick')).trim() === 'Quad hypertrophy' && /Pendulum squat/.test(await page.textContent('.lf-sub')));
   ok('the routine name has no border round it', await page.$eval('#lfPick', (e) => getComputedStyle(e).borderTopStyle === 'none' || parseFloat(getComputedStyle(e).borderTopWidth) === 0));
   ok('and lines up with the label above it', await page.evaluate(() => Math.abs(document.querySelector('#lfPick').getBoundingClientRect().left - document.querySelector('.lf-today .lf-lab').getBoundingClientRect().left) < 1));
   ok('with its six exercises', /6 exercises/.test(await page.textContent('.lf-chips')));
   const legs = await page.$$eval('#lfLegs .lf-vr', (r) => r.map((x) => x.dataset.m + ':' + x.querySelector('em').textContent));
-  ok('leg sets this week start at nought against the targets', legs.join() === 'Quads:0 / 15,Calves:0 / 15,Abs:0 / 12,Lower back:0 / 9,Hamstrings:0 / 13,Glutes:0 / 9,Chest:0 / 15,Back:0 / 15,Shoulders:0 / 20,Biceps:0 / 9,Triceps:0 / 12', legs);
+  ok('leg sets this week start at nought against the targets', legs.join() === 'Quads:0 / 17,Calves:0 / 12,Hamstrings:0 / 12,Glutes:0 / 5,Shoulders:0 / 16,Back:0 / 12,Chest:0 / 9,Triceps:0 / 8,Biceps:0 / 8,Abs:0 / 6,Lower back:0 / 2', legs);
   ok('three stat tiles, each nought', (await page.$$eval('.lf-stat b', (b) => b.map((x) => x.textContent))).join() === '0,0,0');
   const days = await page.$$eval('.lf-day', (d) => ({ n: d.length, now: d.filter((x) => x.classList.contains('is-now')).length, last: d[d.length - 1].dataset.d }));
   ok('the last 30 days are thirty marks ending today', days.n === 30 && days.now === 1 && days.last === '2026-10-30', days);
@@ -63,19 +63,19 @@ const freeze = (at) => `(() => {
   /* ── an exercise and a routine, made on the screens ── */
   await page.click('.lf-bar [data-v="lib"]');
   const split = await page.$$eval('#lfSplit .lf-li b', (b) => b.map((x) => x.textContent));
-  ok('the split is seven days, Monday first', split.length === 7 && split[0] === 'Mon · Quad strength' && split[6] === 'Sun · Shoulders & arms', split);
+  ok('the split is seven days, Monday first', split.length === 7 && split[0] === 'Mon · Quad dominance' && split[6] === 'Sun · Choice day', split);
   await page.click('#lfSplit .lf-li >> nth=0'); await settle(page);
   const mon = await top(page).textContent();
-  ok('a day of the split reads its sets × reps', mon.includes('Hack squat') && mon.includes('3 × 6–10') && mon.includes('1–2 RIR') && mon.includes('Smith machine squat') && mon.includes('Standing calf raises'), mon.slice(0, 160));
-  ok('a day of the split says what it is for', /^Heavy knee-dominant movements/.test(await top(page).locator('#lfTip b').textContent())
-    && /improve your hack squat and squat performance/.test(await top(page).locator('#lfTip').textContent()));
+  ok('a day of the split reads its sets × reps', mon.includes('Hack squat') && mon.includes('3 × 6–10') && mon.includes('1–2 RIR') && mon.includes('2 × 10–12 each side') && mon.includes('Standing calf raises'), mon.slice(0, 160));
+  ok('a day of the split says what it is for', /^Quad dominance/.test(await top(page).locator('#lfTip b').textContent())
+    && /75–90 minutes/.test(await top(page).locator('#lfTip').textContent()) && /Double progression/.test(await top(page).locator('#lfTip').textContent()));
   ok('the focus comes before the exercises', await top(page).evaluate((s) => !!(s.querySelector('#lfTip').compareDocumentPosition(s.querySelector('.lf-list')) & 4)));
   await page.keyboard.press('Escape'); await settle(page);
   /* Tuesday, the screen this was reported on: a list long enough that
      the next exercise sits above the open one, on the scrim. */
   await page.click('#lfSplit .lf-li >> nth=1'); await settle(page);
-  await top(page).locator('.lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Smith machine incline press' + '$') }) }).click(); await settle(page);
-  ok('an exercise opens over the day', (await top(page).locator('h2').textContent()) === 'Smith machine incline press');
+  await top(page).locator('.lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Incline dumbbell press' + '$') }) }).click(); await settle(page);
+  ok('an exercise opens over the day', (await top(page).locator('h2').textContent()) === 'Incline dumbbell press');
   const nx = await page.locator('.lf-sheet').first().locator('.lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Machine chest press' + '$') }) }).boundingBox();
   await page.mouse.click(nx.x + 40, nx.y + 10); await settle(page);
   ok('tapping another closes the first and opens the one tapped', await page.locator('.lf-sheet').count() === 2
@@ -83,7 +83,10 @@ const freeze = (at) => `(() => {
   await page.keyboard.press('Escape'); await settle(page);
   await page.keyboard.press('Escape'); await settle(page);
   const sun = () => page.$$eval('#lfSplit .lf-li span', (x) => x[6].textContent);
-  ok('Sunday carries its seated calf raises', /8 exercises/.test(await sun()), await sun());
+  ok('Sunday is a choice, not a list of exercises', /Weak points, technique, recovery/.test(await sun()), await sun());
+  await page.click('#lfSplit .lf-li >> nth=6'); await settle(page);
+  ok('and opens on its four choices', (await top(page).locator('.lf-ch-o b').allTextContents()).join() === 'Weak points,Leg technique,Recovery,More volume' && /never another heavy quad session/.test(await top(page).textContent()));
+  await page.keyboard.press('Escape'); await settle(page);
   /* WHAT YOU WORK ON IS YOURS: calves are a row you edit, not a switch. */
   async function setFocus(m, lo, hi) {
     await page.click('#lfFocus .lf-li[data-m="' + m + '"]'); await settle(page);
@@ -93,7 +96,7 @@ const freeze = (at) => `(() => {
   await page.click('.lf-bar [data-v="you"]');
   ok('there is no calves switch any more', await page.locator('#lfCalf').count() === 0);
   const foc = await page.$$eval('#lfFocus .lf-li', (r) => r.map((x) => x.dataset.m + ':' + x.querySelector('em').textContent));
-  ok('focus lists every muscle and its weekly sets', foc.join() === 'Quads:15,Calves:15,Abs:12,Lower back:9,Hamstrings:13,Glutes:9,Chest:15,Back:15,Shoulders:20,Biceps:9,Triceps:12', foc);
+  ok('focus lists every muscle and its weekly sets', foc.join() === 'Quads:17,Calves:12,Hamstrings:12,Glutes:5,Shoulders:16,Back:12,Chest:9,Triceps:8,Biceps:8,Abs:6,Lower back:2', foc);
   await setFocus('Calves', 12, 14);
   await page.click('.lf-bar [data-v="home"]');
   ok('a target edited under You moves the week', (await page.textContent('#lfLegs [data-m="Calves"] em')) === '0 / 12–14');
@@ -106,7 +109,7 @@ const freeze = (at) => `(() => {
   await top(page).locator('button', { hasText: 'Save' }).click(); await settle(page);
   await page.click('.lf-bar [data-v="home"]');
   const legs2 = await page.$$eval('#lfLegs .lf-vr', (r) => r.map((x) => x.dataset.m));
-  ok('an added priority joins the week, among the priorities', legs2.join() === 'Quads,Calves,Abs,Lower back,Core,Hamstrings,Glutes,Chest,Back,Shoulders,Biceps,Triceps', legs2);
+  ok('an added priority joins the week, among the priorities', legs2.join() === 'Quads,Calves,Hamstrings,Glutes,Core,Shoulders,Back,Chest,Triceps,Biceps,Abs,Lower back', legs2);
   ok('a separator still splits priorities from the rest', await page.$$eval('#lfLegs .lf-vol > *', (k) => k[5].classList.contains('lf-vsep')));
   /* Remove it, and Undo puts it back where it was. */
   await page.click('.lf-bar [data-v="you"]');
@@ -303,14 +306,14 @@ const freeze = (at) => `(() => {
         { id: 'squat', n: 'Barbell squat', sets: [{ w: 100, r: 6 }, { w: 100, r: 6 }, { w: 100, r: 6 }] }] }] });
     {
       const { c, page } = await ctx(last([8, 8, 7]), '2026-11-02T07:00:00');
-      ok('a session logged under the old day name takes the new one', (await store(page)).wo.find((w) => w.id === 'm1').n === 'Quad strength');
-      ok('a Monday opens on Quad strength', (await page.textContent('#lfPick')).trim() === 'Quad strength');
+      ok('a session logged under the old day name takes the new one', (await store(page)).wo.find((w) => w.id === 'm1').n === 'Quad dominance');
+      ok('a Monday opens on Quad strength', (await page.textContent('#lfPick')).trim() === 'Quad dominance');
       await page.click('#lfGo'); await settle(page);
       const ex = page.locator('.lf-session .lf-ex').first();
       ok('the set count is the program\'s', await ex.locator('.lf-set:not(.is-hd)').count() === 3);
       const monEx = await page.$$eval('.lf-session .lf-ex-n', (x) => x.map((e) => e.textContent));
-      ok('Monday carries its calves at 4 sets and its abs', monEx.join() === 'Hack squat,Smith machine squat,Leg extensions,Standing calf raises,Cable crunches'
-        && await page.locator('.lf-session .lf-ex').nth(3).locator('.lf-set:not(.is-hd)').count() === 4, monEx);
+      ok('Monday carries its calves at 4 sets and its abs', monEx.join() === 'Hack squat,Leg press,Leg extensions,Bulgarian split squats,Standing calf raises,Cable crunches'
+        && await page.locator('.lf-session .lf-ex').nth(4).locator('.lf-set:not(.is-hd)').count() === 4, monEx);
       ok('the target is written under the name', (await ex.locator('.lf-tg').textContent()) === '3 × 6–10 · 1–2 RIR · rest 2–3 min');
       const ph = await ex.locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.placeholder));
       ok('under the top of the range, the aim is the same weight and one more rep', ph.join() === '80,9,80,9,80,8', ph);
@@ -343,7 +346,7 @@ const freeze = (at) => `(() => {
     ok('and is kept for the day', (await store(page)).rc['2026-11-02'] === 1);
     await page.click('#lfGo'); await settle(page);
     const n = await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelector('.lf-ex-n').textContent + ':' + e.querySelectorAll('.lf-set:not(.is-hd)').length));
-    ok('leg sets come in a third lighter, abs untouched', n.join() === 'Hack squat:2,Smith machine squat:2,Leg extensions:2,Standing calf raises:3,Cable crunches:3', n);
+    ok('leg sets come in a third lighter, abs untouched', n.join() === 'Hack squat:2,Leg press:2,Leg extensions:2,Bulgarian split squats:1,Standing calf raises:3,Cable crunches:3', n);
     /* THE REST ALERT, once, the moment the rest is up. */
     const set0 = page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd)').first();
     await set0.locator('input').nth(0).fill('100'); await set0.locator('input').nth(1).fill('8');
@@ -390,7 +393,7 @@ const freeze = (at) => `(() => {
     ok('and asks nothing about legs', await page.locator('#lfRec').count() === 0);
     ok('the 30 days mark it as rest, not as a miss', await page.$eval('.lf-day.is-now', (e) => e.classList.contains('is-rest') && !e.classList.contains('is-on')));
     await page.click('#lfGo'); await settle(page);
-    ok('train anyway takes it back', (await page.textContent('#lfPick')).trim() === 'Quad strength' && !(await store(page)).rd['2026-11-02']);
+    ok('train anyway takes it back', (await page.textContent('#lfPick')).trim() === 'Quad dominance' && !(await store(page)).rd['2026-11-02']);
     await page.click('#lfPick'); await settle(page);
     await top(page).locator('.lf-li', { hasText: 'Rest day' }).click(); await settle(page);
     ok('the picker takes a rest day too', (await page.textContent('#lfPick')).trim() === 'Rest day');
@@ -409,8 +412,8 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="cal"]'); await settle(page);
     await page.click('.lf-bar [data-v="home"]'); await settle(page);
     await page.click('#lfPick'); await settle(page);
-    await top(page).locator('.lf-li', { hasText: 'Quad strength' }).click(); await settle(page);
-    ok('picking a session ends the rest day', (await page.textContent('#lfPick')).trim() === 'Quad strength' && !(await store(page)).rd['2026-11-02']);
+    await top(page).locator('.lf-li', { hasText: 'Quad dominance' }).click(); await settle(page);
+    ok('picking a session ends the rest day', (await page.textContent('#lfPick')).trim() === 'Quad dominance' && !(await store(page)).rd['2026-11-02']);
     await c.close();
   }
   {
@@ -518,7 +521,7 @@ const freeze = (at) => `(() => {
     ok('a bad day-log entry costs the entry, not the day', r.dl['2026-10-28'].st.length === 1 && r.dl['2026-10-28'].fd.length === 1 && r.dl['2026-10-28'].wa.length === 0 && !r.dl.junk, r.dl);
     ok('and the repair is written back', JSON.parse(await page.evaluate(() => localStorage.getItem('lift.v1'))).wo[0].x[0].sets.length === 1);
     ok('a bad cardio entry costs the cardio, not the workout', r.wo[0].cd === null && r.wo.length === 1);
-    ok('a record from before focus was editable gets the default focus', r.focus.length === 11 && r.focus[1].m === 'Calves' && r.focus[1].lo === 15, r.focus);
+    ok('a record from before focus was editable gets the default focus', r.focus.length === 11 && r.focus[1].m === 'Calves' && r.focus[1].lo === 12, r.focus);
     await c.close();
   }
   {
@@ -531,7 +534,29 @@ const freeze = (at) => `(() => {
     const old = [['Quads', 13, 16, 1], ['Calves', 12, 12, 1], ['Lower back', 6, 6, 1], ['Hamstrings', 10, 10, 0], ['Glutes', 5, 8, 0], ['Abs', 9, 9, 0]].map(([m, lo, hi, p]) => ({ m, lo, hi, p }));
     const { c, page } = await ctx({ unit: 'kg', focus: old });
     const r = await store(page);
-    ok('a focus never changed from the first split follows the new one', r.focus.length === 11 && r.focus.find((f) => f.m === 'Shoulders').lo === 20, r.focus);
+    ok('a focus never changed from the first split follows the new one', r.focus.length === 11 && r.focus.find((f) => f.m === 'Shoulders').lo === 16, r.focus);
+    await c.close();
+  }
+  {
+    const v2 = [['Quads', 15, 15, 1], ['Calves', 15, 15, 1], ['Abs', 12, 12, 1], ['Lower back', 9, 9, 1], ['Hamstrings', 13, 13, 0], ['Glutes', 9, 9, 0], ['Chest', 15, 15, 0], ['Back', 15, 15, 0], ['Shoulders', 20, 20, 0], ['Biceps', 9, 9, 0], ['Triceps', 12, 12, 0]].map(([m, lo, hi, p]) => ({ m, lo, hi, p }));
+    const { c, page } = await ctx({ unit: 'kg', focus: v2, wo: [{ id: 'o1', d: '2026-10-20', s: 1, e: 2, n: 'Quad strength', rt: 'p-mon', x: [] }] });
+    const r = await store(page);
+    ok('the second split\'s untouched targets follow the new one', r.focus[0].lo === 17 && r.focus.find((f) => f.m === 'Shoulders').lo === 16, r.focus);
+    ok('and a session logged under the last name takes the new one', r.wo[0].n === 'Quad dominance', r.wo[0].n);
+    await c.close();
+  }
+  /* SUNDAY IS A CHOICE DAY: four presses on the card, no Start button */
+  {
+    const { c, page } = await ctx({ unit: 'kg' }, '2026-11-08T09:00:00');
+    ok('a Sunday offers its four choices and no start button', (await page.textContent('#lfPick')).trim() === 'Choice day' && await page.locator('#lfChoice .lf-ch-o button').count() === 4 && await page.locator('#lfChoice #lfGo').count() === 0);
+    await page.click('#lfChoice [data-ch="0"]'); await settle(page);
+    ok('weak points starts calves, abs, delts and arms', (await page.$$eval('.lf-session .lf-ex-n', (x) => x.map((e) => e.textContent))).join() === 'Seated calf raises,Cable crunches,Cable lateral raises,Cable curls,Triceps pushdowns');
+    await c.close();
+  }
+  {
+    const { c, page } = await ctx({ unit: 'kg' }, '2026-11-08T09:00:00');
+    await page.click('#lfChoice [data-ch="2"]'); await settle(page);
+    ok('recovery makes it a rest day', (await store(page)).rd['2026-11-08'] === 1 && await page.locator('#lfRestDay').count() === 1);
     await c.close();
   }
   {
@@ -610,7 +635,7 @@ const freeze = (at) => `(() => {
     ok('a session can be picked for it', (await page.textContent('#lfPick')).trim() === 'Pull A');
     await page.click('.lf-bar [data-v="lib"]'); await page.click('#lfProg [data-p="ul"]'); await settle(page);
     const r2 = await store(page);
-    ok('switching back puts the first plan and its targets back', r2.prog === 'ul' && r2.focus.length === 11 && (await page.$$eval('#lfSplit .lf-li b', (b) => b[0].textContent)) === 'Mon · Quad strength');
+    ok('switching back puts the first plan and its targets back', r2.prog === 'ul' && r2.focus.length === 11 && (await page.$$eval('#lfSplit .lf-li b', (b) => b[0].textContent)) === 'Mon · Quad dominance');
     await c.close();
   }
   /* ── THE THIRD PROGRAM: the glute focus from the notebook ── */
