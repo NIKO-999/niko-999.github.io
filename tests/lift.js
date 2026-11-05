@@ -700,7 +700,7 @@ const freeze = (at) => `(() => {
     const A = await phone({ unit: 'kg', goal: 4, wo: [wo('2026-10-26', [{ w: 100, r: 8 }]), wo('2026-10-28', [{ w: 110, r: 8 }, { w: 110, r: 8 }]), wo('2026-10-30', [{ w: 120, r: 8 }])], rd: { '2026-10-29': 1 }, bw: [{ d: '2026-10-30', v: 87.4 }] });
     await A.page.click('.lf-bar [data-v="fr"]'); await A.page.waitForTimeout(200);
     ok('friends is off until you turn it on, and asks for nothing', await A.page.locator('#frOff').count() === 1 && m.size === 0 && sent.length === 0);
-    ok('the consent says what goes and what never does', /never a weight you lifted/i.test(await A.page.textContent('#frOff')));
+    ok('the off screen is just a name and a button', await A.page.locator('#frOff .fr-p').count() === 0 && await A.page.locator('#frName').count() === 1);
     await A.page.click('#frOn'); await A.page.waitForTimeout(150);
     ok('a name is needed first', m.size === 0);
     await A.page.fill('#frName', 'Niko'); await A.page.click('#frOn'); await A.page.waitForTimeout(500);

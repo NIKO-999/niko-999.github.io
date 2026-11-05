@@ -2602,13 +2602,11 @@ function lfRenderFr() {
   var hd = el('<div class="fr-hd"><h2 class="lf-h1">Friends</h2></div>');
   root.appendChild(hd);
   if (!FRS.on) {
-    /* THE MOMENT OF CONSENT, said in full, once, here — this is the one
-       screen where something first leaves the phone. */
+    /* For you and your friends, so no explainer: a name and a button.
+       What is sent is still only frStats — counts, never a weight. */
     var c = el('<div class="lf-card" id="frOff"><div class="lf-hero" style="font-size:22px">See how your friends train</div>'
-      + '<p class="fr-p">Turn this on and Lift sends a small set of counts to this site\'s server under a friend code: your name, how many workouts and sets you did in the last 30 days, which of those days you trained or rested, your weekly goal and streak, your PRs, your total volume, and this week’s sets and reps by day and by muscle against your targets.</p>'
-      + '<p class="fr-p">Never a weight you lifted, your exercises, your body weight, your food or anything you type. Anyone you give your code to can read those counts, and nothing else. Turn it off and they are deleted.</p>'
-      + '<label class="lf-flab" for="frName">Your name, as friends see it</label><input class="lf-field" id="frName" maxlength="24" autocomplete="off" placeholder="Your name" /></div>');
-    if (FRS.pend) c.insertBefore(el('<p class="fr-p fr-pend">Someone sent you their code. Turn friends on and they are added.</p>'), $('.fr-p', c));
+      + '<label class="lf-flab" for="frName">Your name</label><input class="lf-field" id="frName" maxlength="24" autocomplete="off" placeholder="Your name" /></div>');
+    if (FRS.pend) c.insertBefore(el('<p class="fr-p fr-pend">A friend sent you their code — turn on to add them.</p>'), $('.lf-flab', c));
     var on = el('<button type="button" class="lf-btn is-log is-full" id="frOn" style="margin-top:14px">Turn on friends</button>');
     $('#frName', c).value = FRS.name;
     on.addEventListener('click', function () {
