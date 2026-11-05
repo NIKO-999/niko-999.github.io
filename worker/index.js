@@ -386,8 +386,8 @@ function liftClean(b) {
   const txt = (v, n) => typeof v === 'string' ? v.replace(/[\u0000-\u001f]/g, '').trim().slice(0, n) : '';
   s.wl = Array.isArray(b.s.wl) ? b.s.wl.filter((w) => w && typeof w.d === 'string' && /^\d{4}-\d\d-\d\d$/.test(w.d) && Array.isArray(w.x)).slice(0, 20).map((w) => ({
     d: w.d, n: txt(w.n, 40) || 'Workout', id: typeof w.id === 'string' && /^[A-Za-z0-9_-]{1,24}$/.test(w.id) ? w.id : '',
-    /* how long the session took, in minutes, when the phone knew */
-    ...(+w.m > 0 && isFinite(+w.m) ? { m: Math.min(600, Math.round(+w.m)) } : {}),
+    /* the time it started, as minutes into the day, when the phone knew */
+    ...(Number.isInteger(w.t) && w.t >= 0 && w.t < 1440 ? { t: w.t } : {}),
     x: w.x.filter((e) => e && Array.isArray(e.s)).slice(0, 15).map((e) => ({
       n: txt(e.n, 60) || 'Exercise',
       s: e.s.filter(Array.isArray).slice(0, 20).map((st) => { const kg = Math.round(+st[0] * 10) / 10, rp = Math.round(+st[1]); return [isFinite(kg) ? Math.max(0, Math.min(2000, kg)) : 0, isFinite(rp) ? Math.max(0, Math.min(1000, rp)) : 0]; })

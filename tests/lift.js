@@ -640,9 +640,10 @@ const freeze = (at) => `(() => {
     await c.close();
   }
   {
-    const { c, page } = await ctx({ unit: 'kg', wo: [{ id: 'dn', d: '2026-10-30', s: 1, e: 2, n: 'Hamstrings & glutes', x: [{ id: 'rdl', n: 'Romanian deadlift', sets: [{ w: 90, r: 10 }] }] }] }, '2026-10-30T18:00:00');
+    const { c, page } = await ctx({ unit: 'kg', wo: [{ id: 'dn', d: '2026-10-30', s: new Date('2026-10-30T07:15:00').getTime(), e: new Date('2026-10-30T08:05:00').getTime(), n: 'Hamstrings & glutes', x: [{ id: 'rdl', n: 'Romanian deadlift', sets: [{ w: 90, r: 10 }] }] }] }, '2026-10-30T18:00:00');
     await page.click('#lfPick'); await settle(page);
     ok('once today is done, its name opens the workout you did, not the list of routines', /Romanian deadlift/.test(await top(page).textContent()) && !/Empty workout/.test(await top(page).textContent()));
+    ok('and it says the time the session started, not how long it took', /Fri 30 Oct · 7:15 am/.test(await top(page).textContent()) && !/50 min/.test(await top(page).textContent()), (await top(page).textContent()).slice(0, 120));
     await c.close();
   }
 

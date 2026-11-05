@@ -1193,6 +1193,9 @@ function e1rm(w, r) { return r <= 1 ? w : w * (1 + r / 30); }
 function woSets(w) { return w.x.reduce(function (a, e) { return a + e.sets.length; }, 0); }
 function woReps(w) { return w.x.reduce(function (a, e) { return a + e.sets.reduce(function (b, s) { return b + s.r; }, 0); }, 0); }
 function woVol(w) { return w.x.reduce(function (a, e) { return a + e.sets.reduce(function (b, s) { return b + s.w * s.r; }, 0); }, 0); }
+/* the time of day, written out: 6:42 pm */
+function fmtMinOfDay(t) { var h = Math.floor(t / 60), m = t % 60; return (h % 12 || 12) + ':' + (m < 10 ? '0' : '') + m + (h < 12 ? ' am' : ' pm'); }
+function fmtAt(d) { return fmtMinOfDay(d.getHours() * 60 + d.getMinutes()); }
 function fmtDur(ms) {
   var m = Math.max(0, Math.round(ms / 60000));
   return m < 60 ? m + ' min' : Math.floor(m / 60) + 'h ' + (m % 60) + 'm';
@@ -2501,12 +2504,11 @@ function lfDaySheet(k) {
 }
 function lfWoSheet(w) {
   var b = el('<div><p class="lf-lab" style="margin:0 0 10px"></p></div>');
-  $('p', b).textContent = fmtDay(w.d);
+  /* the day and the time it started */
+  $('p', b).textContent = fmtDay(w.d) + (w.s > 1e11 ? ' · ' + fmtAt(new Date(w.s)) : '');
   var dl = lfDlLine(w.d);
   if (dl) { var dp = el('<p class="lf-lab lf-dl-line" style="margin:-6px 0 10px"></p>'); dp.textContent = dl; b.appendChild(dp); }
-  /* how long it took leads, when the session was timed */
-  var tm = w.e > w.s ? Math.round((w.e - w.s) / 60000) : 0;
-  b.appendChild(tm > 0 ? lfSum([[fmtDur(tm * 60000), 'time'], [w.x.length, 'exercises'], [woSets(w), 'sets'], [fmtBig(toDisp(woVol(w))), S.unit]]) : lfSum([[w.x.length, 'exercises'], [woSets(w), 'sets'], [fmtBig(toDisp(woVol(w))), S.unit]]));
+  b.appendChild(lfSum([[w.x.length, 'exercises'], [woSets(w), 'sets'], [fmtBig(toDisp(woVol(w))), S.unit]]));
   var cw = el('<div class="lf-wo-ex" id="lfWoCd"><b>Cardio</b><div></div></div>');
   var csum = function () { $('div', cw).textContent = w.cd ? lfCdTxt(w.cd) : 'None logged — add it here'; };
   csum();
@@ -2756,8 +2758,9 @@ function frStats() {
     bg: lfBadges().filter(function (x) { return x.d; }).sort(function (a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : 0; }).slice(0, 3).map(function (x) { return [x.b.id, x.d]; }),
     /* the workouts themselves, newest first: what friends open to see your sets */
     wl: woSorted().reverse().filter(function (w) { return w.d >= from30 && w.x.length; }).slice(0, 20).map(function (w) {
-      var mins = w.e > w.s ? Math.round((w.e - w.s) / 60000) : 0;
-      return { id: w.id, d: w.d, n: w.n, m: mins > 0 && mins <= 600 ? mins : undefined, x: w.x.map(function (e) { return { n: e.n || exName(e.id), s: e.sets.map(function (st) { return [st.w, st.r]; }) }; }) };
+      /* the time it started, as minutes into the day */
+      var st0 = w.s > 1e11 ? new Date(w.s) : null;
+      return { id: w.id, d: w.d, n: w.n, t: st0 ? st0.getHours() * 60 + st0.getMinutes() : undefined, x: w.x.map(function (e) { return { n: e.n || exName(e.id), s: e.sets.map(function (st) { return [st.w, st.r]; }) }; }) };
     }), vol30: Math.round(windowStats(addDays(t, -29), t).vol) };
 }
 
@@ -2913,7 +2916,7 @@ function frSheet(f) {
   wl.forEach(function (w) {
     var sets = 0, vol = 0; w.x.forEach(function (e) { e.s.forEach(function (q) { sets++; vol += q[0] * q[1]; }); });
     var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div>' + IC.chev + '</button>');
-    $('b', li).textContent = w.n; $('span', li).textContent = fmtDay(w.d) + (w.m > 0 ? ' · ' + fmtDur(w.m * 60000) : '') + ' · ' + sets + ' sets · ' + fmtBig(toDisp(vol)) + ' ' + S.unit;
+    $('b', li).textContent = w.n; $('span', li).textContent = fmtDay(w.d) + (w.t >= 0 ? ' · ' + fmtMinOfDay(w.t) : '') + ' · ' + sets + ' sets · ' + fmtBig(toDisp(vol)) + ' ' + S.unit;
     var rc = frRxSum(f.me ? FRS.rx : f.rx, w.id);
     if (rc) li.insertBefore(el('<span class="fr-rxs"></span>'), li.lastChild).textContent = rc;
     li.addEventListener('click', function () { frWoSheet(w, f); });
@@ -2972,7 +2975,7 @@ function frRxBar(w, f) {
 }
 function frWoSheet(w, f) {
   var b = el('<div><p class="lf-lab" style="margin:0 0 6px"></p><div class="lf-list"></div></div>');
-  $('p', b).textContent = fmtDay(w.d) + (w.m > 0 ? ' · ' + fmtDur(w.m * 60000) : '');
+  $('p', b).textContent = fmtDay(w.d) + (w.t >= 0 ? ' · ' + fmtMinOfDay(w.t) : '');
   w.x.forEach(function (e) {
     var li = el('<div class="lf-li fr-wx"><div class="lf-li-t"><b></b><span class="lf-num"></span></div></div>');
     $('b', li).textContent = e.n;
