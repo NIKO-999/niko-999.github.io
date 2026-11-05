@@ -346,6 +346,10 @@ svg { display: block; }
    stays plain — no blur on the page itself. */
 @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
   .lf-sheet { background: color-mix(in srgb, var(--sheet) 60%, transparent) !important; -webkit-backdrop-filter: blur(30px) saturate(1.6); backdrop-filter: blur(30px) saturate(1.6); }
+  /* and everything drawn on it is glass too, or a full sheet of solid cards hides the glass it sits on */
+  .lf-sheet .lf-card, .lf-sheet .lf-sum div, .lf-sheet .lf-vs-c { background: color-mix(in srgb, var(--card) 62%, transparent) !important; }
+  /* the badge viewer: the page faintly behind it, never readable */
+  .lf-cv { background: color-mix(in srgb, var(--bg) 72%, transparent); -webkit-backdrop-filter: blur(30px) saturate(1.4); backdrop-filter: blur(30px) saturate(1.4); }
 }
 .lf-scrim.is-up { opacity: 1; }
 .lf-sheet {
