@@ -233,6 +233,9 @@ const freeze = (at) => `(() => {
   ok('the tiles count it: 1 workout, 3 sets, 1,260 kg', stats.join() === '1,3,1.3k', stats);
   ok('today is lit in the 30 days', await page.$eval('.lf-day.is-now', (e) => e.classList.contains('is-on')));
   ok('this week\'s bars say 25 reps', (await page.textContent('#lfWeek .lf-big')).startsWith('25'));
+  await page.click('#lfWeek'); await settle(page);
+  ok('this week opens its own sheet: the reps, the week day by day, and eight weeks drawn', (await top(page).locator('.lf-hero').textContent()) === '25' && /reps this week/.test(await top(page).textContent()) && await top(page).locator('.lf-bars').count() === 1 && await top(page).locator('#lfRepsTrend .lf-vs-dot').count() === 8);
+  await page.keyboard.press('Escape'); await settle(page);
   ok('the week\'s card totals the cardio', (await page.textContent('#lfLegs .lf-cd-wk .lf-num')) === '12 min this week');
   await page.click('#lfGrid'); await settle(page);
   await page.locator('.lf-cell.is-now').click(); await settle(page);

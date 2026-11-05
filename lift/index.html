@@ -1516,11 +1516,13 @@ function lfStatRow() {
 var TREND = {
   vol: { id: 'lfVolTrend', n: 'Volume', ic: 'weight', t: 'total volume', v: function (st) { return toDisp(st.vol); } },
   sets: { id: 'lfSetsTrend', n: 'Sets', ic: 'stack', t: 'sets completed', v: function (st) { return st.sets; } },
-  wo: { id: 'lfWoTrend', n: 'Workouts', ic: 'dumb', t: 'workouts', v: function (st) { return st.wo; } }
+  wo: { id: 'lfWoTrend', n: 'Workouts', ic: 'dumb', t: 'workouts', v: function (st) { return st.wo; } },
+  reps: { id: 'lfRepsTrend', n: 'Reps', ic: 'dumb', t: 'reps this week', v: function (st) { return st.reps; } }
 };
 function lfVolSheet() { lfTrendSheet('vol'); }
 function lfTrendSheet(k) {
-  var K = TREND[k], t = today(), cur = windowStats(addDays(t, -29), t), prev = windowStats(addDays(t, -59), addDays(t, -30));
+  /* THIS WEEK is the one that counts by the week, Monday on, against the whole of last week */
+  var K = TREND[k], t = today(), wkA = monday(t), cur = k === 'reps' ? windowStats(wkA, t) : windowStats(addDays(t, -29), t), prev = k === 'reps' ? windowStats(addDays(wkA, -7), addDays(wkA, -1)) : windowStats(addDays(t, -59), addDays(t, -30));
   var b = el('<div class="lf-vs"><div class="lf-cap">Last 30 days</div><div class="lf-vs-h"><div class="lf-hero lf-num"></div><span class="lf-delta" hidden></span></div><p class="lf-vs-t"></p><p class="lf-lab lf-vs-s"></p></div>');
   $('.lf-hero', b).textContent = fmtBig(K.v(cur)); $('.lf-vs-t', b).textContent = K.t;
   if (K.v(prev) > 0) {
@@ -1533,8 +1535,12 @@ function lfTrendSheet(k) {
     S.wo.forEach(function (w) { if (w.d >= a0) w.x.forEach(function (e) { e.sets.forEach(function (q) { if (q.w > heavy) heavy = q.w; }); }); });
     line = 'Roughly ' + fmtBig(toDisp(cur.vol / cur.wo)) + ' per session. Heaviest single set: ' + fmtW(heavy) + ' ' + S.unit + '.';
   } else if (cur.wo && k === 'sets') line = 'About ' + (Math.round(cur.sets / cur.wo * 10) / 10) + ' a session, ' + (Math.round(cur.reps / Math.max(1, cur.sets) * 10) / 10) + ' reps a set, ' + fmtBig(cur.reps) + ' reps in all.';
+  else if (cur.wo && k === 'reps') line = 'Across ' + cur.wo + (cur.wo === 1 ? ' workout' : ' workouts') + ' and ' + cur.sets + ' sets, about ' + (Math.round(cur.reps / Math.max(1, cur.sets) * 10) / 10) + ' reps a set.';
   else if (cur.wo) line = 'About ' + (Math.round(cur.wo / 30 * 7 * 10) / 10) + ' a week, against a goal of ' + S.goal + '.';
+  if (k === 'reps') { $('.lf-cap', b).textContent = 'This week'; if (!cur.wo) line = 'Nothing logged this week yet.'; }
   $('.lf-vs-s', b).textContent = line;
+  /* the card you pressed, day by day, sits above the eight weeks */
+  if (k === 'reps') { var wc = lfWeekCard(true); wc.style.marginBottom = '12px'; b.appendChild(wc); }
   /* the eight weeks, Monday first */
   var wk = monday(t), weeks = [];
   for (var i = 7; i >= 0; i--) { var a = addDays(wk, -7 * i); weeks.push({ d: a, v: K.v(windowStats(a, addDays(a, 6))) }); }
@@ -1561,7 +1567,7 @@ function lfTrendSheet(k) {
   var tot = weeks.reduce(function (a, w) { return a + w.v; }, 0), avg = tot / 8;
   b.appendChild(el('<div class="lf-cap" style="margin:16px 2px 8px">At a glance</div>'));
   b.appendChild(lfSum([[fmtBig(weeks[best].v), 'best week'], [k === 'wo' ? Math.round(avg * 10) / 10 : fmtBig(avg), 'a week, avg'],
-    k === 'vol' ? [cur.wo, 'workouts'] : k === 'sets' ? [fmtBig(cur.reps), 'reps'] : [cur.sets, 'sets']]));
+    k === 'vol' ? [cur.wo, 'workouts'] : k === 'sets' ? [fmtBig(cur.reps), 'reps'] : k === 'reps' ? [cur.sets, 'sets this week'] : [cur.sets, 'sets']]));
   lfSheet({ title: '', body: b, cls: 'lf-vsh' });
 }
 
@@ -1659,8 +1665,11 @@ function lfWeekCard(inSheet) {
   var m = monday(today()), t = ymd(today()), reps = [], tot = 0;
   for (var i = 0; i < 7; i++) { var d = ymd(addDays(m, i)); var r = woOn(d).reduce(function (a, w) { return a + woReps(w); }, 0); reps.push({ d: d, r: r }); tot += r; }
   var last = windowStats(addDays(m, -7), addDays(m, -1)).reps;
-  var c = el('<div class="lf-card"' + (inSheet ? '' : ' id="lfWeek"') + '><div class="lf-lab" style="display:flex;gap:6px;align-items:center">' + IC.dumb + 'This week</div><div class="lf-hd"><div class="lf-big lf-num"></div><span class="lf-pct"></span></div><div class="lf-bars" aria-hidden="true"></div></div>');
+  var inner = '<div class="lf-lab" style="display:flex;gap:6px;align-items:center">' + IC.dumb + 'This week</div><div class="lf-hd"><div class="lf-big lf-num"></div><span class="lf-pct"></span></div><div class="lf-bars" aria-hidden="true"></div>';
+  /* on Home it is a button, and opens the week's reps the way volume opens */
+  var c = inSheet ? el('<div class="lf-card">' + inner + '</div>') : el('<button type="button" class="lf-card lf-tap" id="lfWeek">' + inner + '</button>');
   if (inSheet) c.style.background = 'var(--card)';
+  else c.addEventListener('click', function () { lfTrendSheet('reps'); });
   $('.lf-big', c).innerHTML = tot + '<small>reps</small>';
   if (last > 0 && tot > 0) { var p = Math.round((tot - last) / last * 100); $('.lf-pct', c).textContent = (p >= 0 ? '+' : '') + p + '%'; if (p < 0) $('.lf-pct', c).style.color = 'var(--dim)'; }
   var max = Math.max.apply(null, reps.map(function (x) { return x.r; }).concat([1]));
