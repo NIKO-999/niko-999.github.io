@@ -354,10 +354,10 @@ svg { display: block; }
    as colour and shape, never as words you could read. The dim above it
    stays plain — no blur on the page itself. */
 @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-  .lf-sheet { background: color-mix(in srgb, var(--sheet) 60%, transparent) !important; -webkit-backdrop-filter: blur(30px) saturate(1.6); backdrop-filter: blur(30px) saturate(1.6); }
+  .lf-sheet { background: color-mix(in srgb, var(--sheet) 40%, transparent) !important; -webkit-backdrop-filter: blur(24px) saturate(1.8); backdrop-filter: blur(24px) saturate(1.8); box-shadow: 0 -10px 40px var(--shade), inset 0 1px 0 rgba(255,255,255,.12) !important; }
   /* and everything drawn on it is glass too, or a full sheet of solid cards hides the glass it sits on */
   /* a step lighter than the sheet under them, so a card on a sheet still reads as a card */
-  .lf-sheet .lf-card, .lf-sheet .lf-sum div, .lf-sheet .lf-vs-c, .lf-sheet .lf-ex { background: color-mix(in srgb, var(--card3) 70%, transparent) !important; }
+  .lf-sheet .lf-card, .lf-sheet .lf-sum div, .lf-sheet .lf-vs-c, .lf-sheet .lf-ex { background: color-mix(in srgb, var(--card3) 48%, transparent) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
   /* and what sits inside those cards goes the other way, down toward the page, so a field still reads as a field */
   .lf-sheet .lf-ex .lf-set:not(.is-done) input, .lf-sheet .lf-ex-ft button { background: color-mix(in srgb, var(--bg) 40%, transparent); }
   /* the badge viewer: the page faintly behind it, never readable */
@@ -437,8 +437,9 @@ svg { display: block; }
 .lf-ch-o { margin-top: 12px; }
 .lf-vs-h { display: flex; align-items: flex-end; gap: 10px; }
 .lf-vs-h .lf-hero { font-size: 52px; line-height: 1; }
-.lf-vs-h .lf-delta { position: static; margin-bottom: 6px; font-size: 13px; padding: 3px 9px; border-radius: 999px; background: rgba(52, 199, 89, .16); }
-.lf-vs-h .lf-delta.is-down { background: var(--card3); }
+/* the change is a frosted green pill: glass tinted green, a lighter rim, the figure in a brighter green */
+.lf-vs-h .lf-delta { position: static; margin-bottom: 6px; font-size: 13px; padding: 3px 10px; border-radius: 999px; background: rgba(52, 199, 89, .2); box-shadow: inset 0 0 0 1px rgba(52, 199, 89, .32), inset 0 1px 0 rgba(255,255,255,.1); -webkit-backdrop-filter: blur(10px) saturate(1.6); backdrop-filter: blur(10px) saturate(1.6); }
+.lf-vs-h .lf-delta.is-down { background: color-mix(in srgb, var(--card3) 60%, transparent); box-shadow: inset 0 0 0 1px var(--line); }
 .lf-vs-t { font-size: 17px; font-weight: 600; margin: 8px 0 4px; }
 .lf-vs-s { margin: 0 0 14px; font-weight: 400; line-height: 1.4; }
 .lf-vs-c { background: var(--plot); box-shadow: none; }
