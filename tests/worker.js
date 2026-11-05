@@ -503,13 +503,14 @@ const kv = () => {
     ok('a code nobody has claimed is a 404', q.status === 404, q.status);
     q = await hit('PUT', '/v1/lift/' + C, { body: { n: 'Niko', s: { wo30: 12, d: '1'.repeat(30) } } });
     ok('a write needs a key', q.status === 401, q.status);
-    q = await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: '  Niko\u0007  ', s: { wo30: 12, sets30: 'x', streak: -4, d: '10r'.repeat(10), last: '2026-11-03', kg: 9000, ex: ['hack'], w7: [3, -1, 'x', 4.6, 0, 0, 0], vol30: 250000, v8: [1, 2, 3, 4, 5, 6, 7, -8], r7: [10, 0, 0, 0, 0, 0, 'x'], wl: [{ d: '2026-11-02', n: 'Legs\u0007', bw: 80, x: [{ n: 'Hack squat', s: [[100.04, 8.4], [-5, 'x']] }] }, { d: 'nope', x: [] }], mu: [['Quads', 8, 15], ['Hack squat', 100, 1], ['Chest', 'x', 12]] } } });
+    q = await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: '  Niko\u0007  ', s: { wo30: 12, sets30: 'x', streak: -4, d: '10r'.repeat(10), last: '2026-11-03', kg: 9000, ex: ['hack'], w7: [3, -1, 'x', 4.6, 0, 0, 0], vol30: 250000, v8: [1, 2, 3, 4, 5, 6, 7, -8], r7: [10, 0, 0, 0, 0, 0, 'x'], bg: [['wo10', '2026-10-26'], ['BAD!', '2026-10-01'], ['pr', 'nope'], ['st4', '2026-10-19'], ['first', '2026-10-05'], ['week', '2026-10-25']], wl: [{ d: '2026-11-02', n: 'Legs\u0007', bw: 80, x: [{ n: 'Hack squat', s: [[100.04, 8.4], [-5, 'x']] }] }, { d: 'nope', x: [] }], mu: [['Quads', 8, 15], ['Hack squat', 100, 1], ['Chest', 'x', 12]] } } });
     ok('the first write claims the code', q.status === 200, q.status);
     q = await (await hit('GET', '/v1/lift/' + C)).json();
     ok('a read returns the counts, clamped', q.n === 'Niko' && q.s.wo30 === 12 && q.s.sets30 === 0 && q.s.streak === 0 && q.s.d === '10r'.repeat(10) && q.s.last === '2026-11-03', JSON.stringify(q));
     ok('this week by day and by muscle, clamped, with only muscles the app knows', JSON.stringify(q.s.w7) === '[3,0,0,5,0,0,0]' && JSON.stringify(q.s.mu) === '[["Quads",8,15],["Chest",0,12]]', JSON.stringify(q.s));
     ok('volume and reps come through as totals, clamped', q.s.vol30 === 250000 && JSON.stringify(q.s.v8) === '[1,2,3,4,5,6,7,0]' && JSON.stringify(q.s.r7) === '[10,0,0,0,0,0,0]', JSON.stringify(q.s));
     ok('workouts come through cleaned: a date, a name, exercises and clamped sets', JSON.stringify(q.s.wl) === '[{"d":"2026-11-02","n":"Legs","id":"","x":[{"n":"Hack squat","s":[[100,8],[0,0]]}]}]', JSON.stringify(q.s.wl));
+    ok('badges come through as ids and dates, three at most', JSON.stringify(q.s.bg) === '[["wo10","2026-10-26"],["st4","2026-10-19"],["first","2026-10-05"]]', JSON.stringify(q.s.bg));
     ok('and never a field this build does not know — no weights, no exercises', !('kg' in q.s) && !('ex' in q.s) && !('kh' in q), JSON.stringify(q));
     const raw = env.SCHED.m.get('lift:' + C);
     ok('the key is stored only as its hash', raw.indexOf(KEY) < 0 && JSON.parse(raw).kh.length === 64);

@@ -7,7 +7,7 @@
    with no service worker at all, and in a gym basement with none it is
    the last copy that loaded. Same origin and GET only. */
 var CACHE = 'lift-v1';
-var SHELL = ['./', 'index.html', 'manifest.json', 'icon.svg', 'icon-180.png', 'icon-192.png', '../arc/fonts/Inter.woff2'];
+var SHELL = ['./', 'index.html', 'manifest.json', 'icon.svg', 'icon-180.png', 'icon-192.png', '../arc/fonts/Inter.woff2', 'three.min.js'];
 self.addEventListener('install', function (e) {
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE).then(function (c) {

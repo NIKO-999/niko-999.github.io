@@ -30,9 +30,12 @@ const freeze = (at) => `(() => {
 (async () => {
   const browser = await chromium.launch({ executablePath: chrome(), args: ['--no-sandbox'] });
   const errors = [], offOrigin = [];
-  async function ctx(seed, at) {
+  async function ctx(seed, at, keepBadges) {
     const c = await browser.newContext(PHONE);
     await c.addInitScript(freeze(at || '2026-10-30T18:00:00'));
+    /* a badge earned along the way comes up over the screen; checks that
+       are not about badges put it away the moment it appears */
+    if (!keepBadges) await c.addInitScript(`new MutationObserver(() => { const v = document.querySelector('.lf-cv'); if (v) v.querySelector('.lf-cv-x').click(); }).observe(document, { childList: true, subtree: true });`);
     if (seed) await c.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify(seed))}); })();`);
     const page = await c.newPage();
     page.on('pageerror', (e) => errors.push(String(e)));
@@ -680,6 +683,42 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── BADGES: worked out from the record, announced once ── */
+  {
+    const w = (i, d, kg) => ({ id: 'b' + i, d, s: i, e: i + 1, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: kg, r: 8 }, { w: kg, r: 8 }] }] });
+    const days = ['2026-10-05', '2026-10-07', '2026-10-09', '2026-10-12', '2026-10-14', '2026-10-16', '2026-10-19', '2026-10-21', '2026-10-23', '2026-10-26'];
+    const wo = days.map((d, i) => w(i + 1, d, i === 9 ? 120 : 100));
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-30T18:00:00', true);
+    ok('a record that already has history announces nothing on its first open', await page.locator('.lf-cv').count() === 0);
+    const seen = (await store(page)).bseen;
+    ok('and counts what it had already won as seen', seen && seen.first === 1 && seen.wo10 === 1 && seen.pr === 1 && !seen.st4, seen);
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    const shelf = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
+    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 12 && shelf.includes('First workout:5 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
+    ok('and counts them', /3 of 12/.test(await page.textContent('#lfBadges .lf-hd')));
+    ok('a badge not yet won carries its progress ring', await page.locator('#lfBadges .lf-coin[data-b="wo50"] .lf-bdr').count() === 1 && await page.locator('#lfBadges .lf-coin[data-b="first"] .lf-bdr').count() === 0);
+    await page.click('#lfBadges .lf-coin[data-b="wo10"]'); await page.waitForTimeout(500);
+    ok('a coin opens on its own screen, to spin', await page.locator('.lf-cv').count() === 1 && /10 workouts/.test(await page.textContent('.lf-cv')) && /Earned Mon 26 Oct/.test(await page.textContent('.lf-cv'))
+      && await page.locator('.lf-cv-stage canvas, .lf-cv-stage.is-flat').count() >= 1);
+    await page.keyboard.press('Escape'); await page.waitForTimeout(400);
+    ok('and is gone when it closes, not hidden', await page.locator('.lf-cv').count() === 0);
+    await c.close();
+  }
+  {
+    const w = (i, d) => ({ id: 'n' + i, d, s: i, e: i + 1, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 100, r: 8 }] }] });
+    const wo = ['2026-10-12', '2026-10-13', '2026-10-14', '2026-10-15', '2026-10-16', '2026-10-19', '2026-10-20', '2026-10-21', '2026-10-22'].map((d, i) => w(i + 1, d));
+    const { c, page } = await ctx({ unit: 'kg', wo, bseen: { first: 1 } }, '2026-10-30T18:00:00', true);
+    await page.click('#lfGo'); await settle(page);
+    const set0 = page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd)').first();
+    await set0.locator('input').nth(0).fill('80'); await set0.locator('input').nth(1).fill('8');
+    await set0.locator('.lf-chk').click();
+    await page.click('#lfFinish'); await page.waitForTimeout(800);
+    await top(page).locator('button', { hasText: 'Done' }).click(); await page.waitForTimeout(1000);
+    ok('the tenth workout earns its badge, announced when the summary is put away', await page.locator('.lf-cv').count() === 1 && /Badge earned/.test(await page.textContent('.lf-cv')) && /10 workouts/.test(await page.textContent('.lf-cv')));
+    ok('and is marked seen, so it comes up once', (await store(page)).bseen.wo10 === 1);
+    await c.close();
+  }
+
   /* ── A DAY WITH NOTHING LOGGED IS A REST DAY ── */
   {
     const { c, page } = await ctx({ unit: 'kg', since: '2026-10-25', rd: { '2026-10-27': 1 }, wo: [{ id: 'a1', d: '2026-10-26', s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 100, r: 8 }] }] }] });
@@ -794,6 +833,7 @@ const freeze = (at) => `(() => {
     ok('this week goes by day, and by muscle against your targets', JSON.stringify(recA.s.w7) === '[1,0,2,0,1,0,0]' && JSON.stringify(recA.s.mu[0]) === '["Quads",4,17]', [recA.s.w7, recA.s.mu[0]]);
     ok('volume goes as totals: 30 days, eight weeks, and reps by day', recA.s.vol30 === 3520 && recA.s.v8[7] === 3520 && recA.s.v8.length === 8 && JSON.stringify(recA.s.r7) === '[8,0,16,0,8,0,0]', [recA.s.vol30, recA.s.v8, recA.s.r7]);
     ok('and nothing it no longer needs: no cardio, no totals', !('cd7' in recA.s) || recA.s.cd7 === 0);
+    ok('your three latest badges go with the counts, newest first', JSON.stringify(recA.s.bg) === '[["pr","2026-10-28"],["first","2026-10-26"]]', recA.s.bg);
     ok('two PRs: each heavier hack squat after the first', recA.s.pr30 === 2, recA.s.pr30);
     ok('the key is only a hash', /^[0-9a-f]{64}$/.test(recA.kh) && !JSON.stringify(recA).includes((await A.page.evaluate(() => JSON.parse(localStorage.getItem('lift.fr.v1')).key))));
     const blob = sent.join('\n');
