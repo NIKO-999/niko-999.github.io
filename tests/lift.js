@@ -1031,6 +1031,26 @@ const freeze = (at) => `(() => {
     await A.c.close(); await B.c.close();
   }
 
+  /* ── a new version is picked up when the app comes back to the front ── */
+  {
+    const { c, page } = await ctx();
+    let ver = 'v1';
+    await page.route('**/lift/**', (r) => r.request().method() === 'HEAD' ? r.fulfill({ status: 200, headers: { etag: ver } }) : r.continue());
+    await page.reload(); await page.waitForTimeout(600);
+    await page.evaluate(() => { window.__same = 1; });
+    const show = () => page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+    await show(); await page.waitForTimeout(500);
+    ok('the same version does not reload', await page.evaluate(() => window.__same === 1));
+    ver = 'v2';
+    await page.evaluate(() => { const i = document.createElement('input'); i.id = 'vtest'; document.body.appendChild(i); i.focus(); });
+    await show(); await page.waitForTimeout(500);
+    ok('a new version waits while you are typing', await page.evaluate(() => window.__same === 1));
+    await page.evaluate(() => document.activeElement.blur());
+    await show(); await page.waitForTimeout(1200);
+    ok('and reloads by itself once you are not', await page.evaluate(() => window.__same !== 1));
+    await c.close();
+  }
+
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);

@@ -3932,6 +3932,31 @@ if (act) lfOpenSession();
 if ('serviceWorker' in navigator && /^(https:|http:\/\/(localhost|127\.0\.0\.1))/.test(location.href)) {
   navigator.serviceWorker.register('sw.js').catch(function () {});
 }
+/* A NEW VERSION ARRIVES BY ITSELF. iOS brings a Home Screen app back
+   from memory rather than loading it again, so a phone could run a build
+   for days: a fix sat unseen, and a friend's record went on missing what
+   the new build sends. The page's own headers are read at open and again
+   whenever it comes back to the front; when they have moved it reloads,
+   but only while you are not typing — a workout in progress is saved on
+   every keystroke and comes straight back up after the reload. */
+var lfVer = null;
+function lfVerOf() {
+  return fetch(location.pathname, { method: 'HEAD', cache: 'no-store' }).then(function (r) {
+    return r.ok ? (r.headers.get('etag') || r.headers.get('last-modified') || '') : '';
+  }).catch(function () { return ''; });
+}
+function lfVerCheck() {
+  lfVerOf().then(function (v) {
+    if (!v) return;
+    if (lfVer === null) { lfVer = v; return; }
+    if (v === lfVer) return;
+    var a = document.activeElement;
+    if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;
+    location.reload();
+  });
+}
+lfVerCheck();
+document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') lfVerCheck(); });
 })();
 </script>
 </body>
