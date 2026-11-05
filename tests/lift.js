@@ -60,7 +60,7 @@ const freeze = (at) => `(() => {
   ok('and lines up with the label above it', await page.evaluate(() => Math.abs(document.querySelector('#lfPick').getBoundingClientRect().left - document.querySelector('.lf-today .lf-lab').getBoundingClientRect().left) < 1));
   ok('with its six exercises', /6 exercises/.test(await page.textContent('.lf-chips')));
   const legs = await page.$$eval('#lfLegs .lf-vr', (r) => r.map((x) => x.dataset.m + ':' + x.querySelector('em').textContent));
-  ok('leg sets this week start at nought against the targets', legs.join() === 'Quads:0 / 17,Calves:0 / 12,Hamstrings:0 / 12,Glutes:0 / 5,Shoulders:0 / 16,Back:0 / 12,Chest:0 / 9,Triceps:0 / 8,Biceps:0 / 8,Abs:0 / 6,Lower back:0 / 2', legs);
+  ok('leg sets this week start at nought against the targets', legs.join() === 'Quads:0 / 17,Calves:0 / 12,Hamstrings:0 / 12,Glutes:0 / 5,Shoulders:0 / 16,Back:0 / 15,Chest:0 / 9,Triceps:0 / 8,Biceps:0 / 8,Abs:0 / 6,Lower back:0 / 2', legs);
   ok('three stat tiles, each nought', (await page.$$eval('.lf-stat b', (b) => b.map((x) => x.textContent))).join() === '0,0,0');
   const days = await page.$$eval('.lf-day', (d) => ({ n: d.length, now: d.filter((x) => x.classList.contains('is-now')).length, last: d[d.length - 1].dataset.d }));
   ok('the last 30 days are thirty marks ending today', days.n === 30 && days.now === 1 && days.last === '2026-10-30', days);
@@ -104,7 +104,7 @@ const freeze = (at) => `(() => {
   await page.click('.lf-bar [data-v="you"]');
   ok('there is no calves switch any more', await page.locator('#lfCalf').count() === 0);
   const foc = await page.$$eval('#lfFocus .lf-li', (r) => r.map((x) => x.dataset.m + ':' + x.querySelector('em').textContent));
-  ok('focus lists every muscle and its weekly sets', foc.join() === 'Quads:17,Calves:12,Hamstrings:12,Glutes:5,Shoulders:16,Back:12,Chest:9,Triceps:8,Biceps:8,Abs:6,Lower back:2', foc);
+  ok('focus lists every muscle and its weekly sets', foc.join() === 'Quads:17,Calves:12,Hamstrings:12,Glutes:5,Shoulders:16,Back:15,Chest:9,Triceps:8,Biceps:8,Abs:6,Lower back:2', foc);
   await setFocus('Calves', 12, 14);
   await page.click('.lf-bar [data-v="home"]');
   ok('a target edited under You moves the week', (await page.textContent('#lfLegs [data-m="Calves"] em')) === '0 / 12–14');
@@ -362,10 +362,10 @@ const freeze = (at) => `(() => {
     const set0 = page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd)').first();
     await set0.locator('input').nth(0).fill('100'); await set0.locator('input').nth(1).fill('8');
     await set0.locator('.lf-chk').click();
-    ok('no alert while the rest is still running', !(await page.evaluate(() => window.lfBeeps || 0)));
+    ok('no alert while the rest is still running', !(await page.evaluate(() => window.lfRests || 0)));
     await page.evaluate(() => { const a = JSON.parse(localStorage.getItem('lift.active.v1')); a.rest = Date.now() - 125000; localStorage.setItem('lift.active.v1', JSON.stringify(a)); });
     await page.reload(); await page.waitForTimeout(400); if (!(await page.locator('.lf-session').count())) await page.click('#lfLive'); await page.waitForTimeout(2300);
-    ok('the rest alert sounds once when the rest is up', await page.evaluate(() => window.lfBeeps) === 1);
+    ok('the rest alert fires once when the rest is up', await page.evaluate(() => window.lfRests) === 1);
     await page.click('#lfFinish'); await page.waitForTimeout(800); await page.keyboard.press('Escape'); await settle(page);
     await c.close();
   }
@@ -377,13 +377,14 @@ const freeze = (at) => `(() => {
     await set0.locator('.lf-chk').click();
     await page.evaluate(() => { const a = JSON.parse(localStorage.getItem('lift.active.v1')); a.rest = Date.now() - 125000; localStorage.setItem('lift.active.v1', JSON.stringify(a)); });
     await page.reload(); await page.waitForTimeout(400); if (!(await page.locator('.lf-session').count())) await page.click('#lfLive'); await page.waitForTimeout(2300);
-    ok('with the alert off, the rest stays silent', !(await page.evaluate(() => window.lfBeeps || 0)));
+    ok('with the alert off, the rest stays silent', !(await page.evaluate(() => window.lfRests || 0)));
     await page.click('#lfFinish'); await page.waitForTimeout(800); await page.keyboard.press('Escape'); await settle(page);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    ok('with the alert off there is no sound to test', await page.locator('#lfRaTest').isDisabled());
-    await page.click('#lfRa [data-a="1"]'); await settle(page);
-    await page.click('#lfRaTest'); await page.waitForTimeout(400);
-    ok('Test sound plays the alert', await page.evaluate(() => window.lfBeeps) === 1);
+    /* THE PAGE NEVER TAKES THE AUDIO SESSION: a sound here stopped the
+       music you train to. No Test sound, no media element, no 'playback'. */
+    ok('there is no sound to test', !(await page.locator('#lfRaTest').count()));
+    ok('the rest alert is On or Off, never a sound', (await page.locator('#lfRa button').allTextContents()).join('|') === 'On|Off');
+    ok('nothing in the page claims the audio session or plays a sound', !/audioSession|new Audio\(|AudioContext|\.play\(\)/.test(await page.content()));
     await c.close();
   }
   {

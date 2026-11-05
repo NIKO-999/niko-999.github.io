@@ -694,7 +694,7 @@ var EXERCISES = [
   ['bbrow', 'Barbell rows', 'Back', 1], ['dbrow', 'One-arm dumbbell rows', 'Back', 1], ['tbar', 'T-bar rows', 'Back', 1],
   ['sealrow', 'Seal rows', 'Back', 1], ['mrow', 'Machine rows', 'Back', 1], ['pullupbw', 'Pull-ups', 'Back', 1, 'bw'],
   ['chinup', 'Chin-ups', 'Back', 1, 'bw'], ['cgpd', 'Close-grip lat pulldowns', 'Back', 1], ['sapd', 'Single-arm cable lat pulldowns', 'Back'],
-  ['straight', 'Straight-arm pulldowns', 'Back'], ['pullover', 'Dumbbell pullovers', 'Back'], ['rackpull', 'Rack pulls', 'Back', 1],
+  ['straight', 'Straight-arm pulldowns', 'Back'], ['pullover', 'Dumbbell pullovers', 'Back'], ['cpullover', 'Cable pullovers', 'Back'], ['rackpull', 'Rack pulls', 'Back', 1],
   ['ngpd', 'Neutral-grip lat pulldowns', 'Back', 1], ['wgpd', 'Wide-grip lat pulldowns', 'Back', 1], ['shrug', 'Shrugs', 'Back'], ['facepull', 'Face pulls', 'Shoulders'], ['revpec', 'Reverse pec deck', 'Shoulders'],
   ['bbcurl', 'Barbell curls', 'Biceps'], ['ezcurl', 'EZ-bar curls', 'Biceps'], ['cablecurl', 'Cable curls', 'Biceps'],
   ['bayesian', 'Bayesian cable curls', 'Biceps'], ['spider', 'Spider curls', 'Biceps'], ['conc', 'Concentration curls', 'Biceps'],
@@ -772,7 +772,7 @@ var PROGRAM_UL = [
   { id: 'p-mon', dow: 1, n: 'Quad strength', sp: 'Hack squat, leg press, extensions', ex: [['hack', 3, 6, 10], ['legpress', 3, 10, 12], ['legext', 3, 12, 15], ['bss', 2, 10, 12, 'each side'], ['calfstand', 4, 10, 15], ['cablecrunch', 3, 12, 15]] },
   { id: 'p-tue', dow: 2, n: 'Chest & shoulders', sp: 'Pressing, delts, triceps', ex: [['incdb', 3, 8, 12], ['mchest', 3, 8, 12], ['cablat', 4, 12, 20], ['seatshp', 2, 8, 12], ['tripush', 3, 10, 15], ['triover', 2, 12, 15]] },
   { id: 'p-wed', dow: 3, n: 'Hamstrings & glutes', sp: 'Hinge, curls, hip thrust', ex: [['rdl', 3, 8, 10], ['seatcurl', 4, 10, 15], ['hipthrust', 3, 8, 12], ['lyingcurl', 2, 12, 15], ['calfseat', 4, 12, 20], ['backext', 2, 12, 15]] },
-  { id: 'p-thu', dow: 4, n: 'Back & V-taper', sp: 'Pull-ups, rows, curls', ex: [['pullup', 3, 6, 10], ['csrow', 3, 8, 12], ['latpd', 3, 10, 12], ['rdfly', 3, 12, 20], ['ezcurl', 3, 8, 12], ['incurl', 2, 10, 15]] },
+  { id: 'p-thu', dow: 4, n: 'Back & V-taper', sp: 'Pull-ups, rows, curls', ex: [['pullup', 3, 6, 10], ['csrow', 3, 8, 12], ['latpd', 3, 10, 12], ['cpullover', 3, 12, 15], ['rdfly', 3, 12, 20], ['ezcurl', 3, 8, 12], ['incurl', 2, 10, 15]] },
   { id: 'p-fri', dow: 5, n: 'Quad volume', sp: 'Pendulum squat, extensions, heels-elevated squats', ex: [['pendulum', 3, 8, 12], ['legext', 3, 12, 15], ['heelsmith', 2, 10, 12], ['seatcurl', 3, 12, 15], ['calfstand', 4, 10, 15], ['hlr', 3, 12, 15]] },
   { id: 'p-sat', dow: 6, n: 'Chest & back', sp: 'Chest, back, delts, arms', ex: [['dbbench', 3, 8, 12], ['seatrow', 3, 8, 12], ['mshp', 2, 10, 12], ['cablat', 3, 15, 20], ['revpec', 2, 15, 20], ['preacher', 3, 10, 15], ['ropeext', 3, 10, 15]] },
   /* SUNDAY IS A CHOICE, not a session and not a rest day: the card offers
@@ -919,6 +919,7 @@ var DAY_TIPS = {
   'p-thu': ['Back and biceps', [
     'Weighted pull-ups lead: 3 × 6–10.',
     'Chest-supported rows and lat pulldowns for thickness and width.',
+    'Cable pullovers after the pulldowns: arms long, a stretch at the top, squeeze the lats down to the thighs.',
     'Rear delt flyes, then EZ-bar and incline dumbbell curls.']],
   'p-fri': ['Quad hypertrophy: the second quad day, a different stimulus', [
     'Pendulum squat leads, then extensions and heels-elevated Smith squats.',
@@ -1325,71 +1326,15 @@ function lfToast(msg, undo) {
   requestAnimationFrame(function () { t.classList.add('is-up'); });
   toastT = setTimeout(function () { t.classList.remove('is-up'); setTimeout(function () { t.remove(); }, 220); }, undo ? 5000 : 2400);
 }
-/* THE REST ALERT. iOS gives a page no vibration, so it is a sound, and
-   getting a sound out of a page on a phone takes three things the first
-   version did not do:
-   - an <audio> element, not Web Audio alone: Web Audio is muted by the
-     ringer switch, a media element plays as media;
-   - `audioSession.type = 'playback'` where Safari has it (17+), which
-     takes Web Audio out from under the switch too;
-   - both UNLOCKED inside a press, and again on any press later, because
-     a reload loses the unlock and the rest it was waiting for does not.
-   The tone is generated, three short beeps, so nothing is fetched. */
-var lfAc = null, lfBell = null;
-function lfBellUrl() {
-  var rate = 22050, n = Math.round(rate * .78), d = new Uint8Array(44 + n * 2), v = new DataView(d.buffer);
-  function str(o, t) { for (var k = 0; k < t.length; k++) d[o + k] = t.charCodeAt(k); }
-  str(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); str(8, 'WAVEfmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
-  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); str(36, 'data'); v.setUint32(40, n * 2, true);
-  for (var i = 0; i < n; i++) {
-    var t = i / rate, ph = t % .26, on = ph < .16, env = on ? Math.min(1, ph / .01, (.16 - ph) / .02) : 0;
-    v.setInt16(44 + i * 2, Math.round(Math.sin(2 * Math.PI * 1046 * t) * env * 26000), true);
-  }
-  var b = ''; for (var q = 0; q < d.length; q++) b += String.fromCharCode(d[q]);
-  return 'data:audio/wav;base64,' + btoa(b);
-}
-function lfAudio() {
-  if (!S.ra) return;
-  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
-  try {
-    lfAc = lfAc || new (window.AudioContext || window.webkitAudioContext)();
-    if (lfAc.state !== 'running') lfAc.resume();
-    var sb = lfAc.createBufferSource(); sb.buffer = lfAc.createBuffer(1, 1, 22050); sb.connect(lfAc.destination); sb.start(0);
-  } catch (e) {}
-  try {
-    if (!lfBell) { lfBell = new Audio(lfBellUrl()); lfBell.preload = 'auto'; lfBell.setAttribute('playsinline', ''); }
-    if (!lfBell.dataset.ok) {
-      lfBell.muted = true;
-      var pr = lfBell.play();
-      var done = function () { lfBell.pause(); lfBell.currentTime = 0; lfBell.muted = false; lfBell.dataset.ok = 1; };
-      if (pr && pr.then) pr.then(done, function () { lfBell.muted = false; }); else done();
-    }
-  } catch (e) {}
-}
-/* Any press during a workout re-arms the sound: the cheapest way to make
-   sure it is unlocked by the time a rest ends, whatever happened before. */
-document.addEventListener('touchend', function () { if (act && S.ra) lfAudio(); }, true);
-document.addEventListener('click', function () { if (act && S.ra) lfAudio(); }, true);
-function lfTone() {
-  if (!lfAc) return;
-  try {
-    if (lfAc.state !== 'running') lfAc.resume();
-    [0, .26, .52].forEach(function (t0) {
-      var o = lfAc.createOscillator(), g = lfAc.createGain(), t = lfAc.currentTime + t0;
-      o.frequency.value = 1046; o.connect(g); g.connect(lfAc.destination);
-      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.8, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + .16);
-      o.start(t); o.stop(t + .18);
-    });
-  } catch (e) {}
-}
-function lfBeep() {
-  window.lfBeeps = (window.lfBeeps || 0) + 1;
-  /* The media element first; Web Audio only if it will not play. */
-  if (lfBell && lfBell.dataset.ok) {
-    try { lfBell.currentTime = 0; var p = lfBell.play(); if (p && p.catch) p.catch(lfTone); return; } catch (e) {}
-  }
-  lfTone();
-}
+/* THE REST ALERT IS SILENT IN THE PAGE. It was a generated beep, and
+   getting a page to make a sound on a phone meant claiming the audio
+   session as 'playback' and unlocking a media element on every press —
+   which is exactly what stops your music. A rest timer that pauses the
+   playlist you train to is worse than one that says nothing, so the page
+   makes no sound at all: the alert is a vibration where the phone allows
+   one, and the lock-screen notification (Settings, below) where it does
+   not. `lfRests` counts alerts so the suite can see one fire. */
+function lfRing() { window.lfRests = (window.lfRests || 0) + 1; buzz([80, 60, 80]); }
 function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 12); } catch (e) {} }
 
 /* ═══════════ HOME ═══════════ */
@@ -1926,7 +1871,7 @@ function lfTick() {
     var ready = !!(act.rest && rt && gone >= rt.lo * 1000);
     r.classList.toggle('is-ready', ready);
     /* Once per rest, the moment it is up. */
-    if (ready && !act.rang) { act.rang = 1; lfSaveAct(); if (S.ra) { buzz([80, 60, 80]); lfBeep(); } }
+    if (ready && !act.rang) { act.rang = 1; lfSaveAct(); if (S.ra) lfRing(); }
   }
   var l = $('#lfLive em'); if (l) l.textContent = fmtClock(Date.now() - act.s);
 }
@@ -1989,7 +1934,7 @@ function lfPaintSession() {
            before it, this session's earlier sets included. */
         var est = e1rm(s.w, s.r);
         s.pr = est > runBestBefore(e, si, best) + 1e-9 && best > 0 ? 1 : 0;
-        act.rest = Date.now(); act.restEx = e.id; act.rang = 0; lfAudio(); lfRestPush();
+        act.rest = Date.now(); act.restEx = e.id; act.rang = 0; lfRestPush();
         lfSaveAct(); buzz(s.pr ? [20, 40, 20] : 14); lfPaintSession(); lfTick();
       });
       card.appendChild(row);
@@ -2534,20 +2479,17 @@ function lfRenderYou() {
   var c = el('<div><span class="lf-flab">Units</span><div class="lf-seg" id="lfUnit"><button type="button" data-u="kg">kg</button><button type="button" data-u="lb">lb</button></div>'
     + '<span class="lf-flab">Workouts a week</span><div class="lf-seg" id="lfGoal" style="--n:7"></div>'
     + '<span class="lf-flab">Appearance</span><div class="lf-seg" id="lfMode" style="--n:3"><button type="button" data-m="auto">Auto</button><button type="button" data-m="light">Light</button><button type="button" data-m="dark">Dark</button></div>'
-    + '<span class="lf-flab">Rest alert</span><div class="lf-seg" id="lfRa"><button type="button" data-a="1">Sound + buzz</button><button type="button" data-a="0">Off</button></div>'
-    + '<button type="button" class="lf-btn is-full" id="lfRaTest" style="margin-top:10px">Test sound</button>'
+    + '<span class="lf-flab">Rest alert</span><div class="lf-seg" id="lfRa"><button type="button" data-a="1">On</button><button type="button" data-a="0">Off</button></div>'
     + '<span class="lf-flab">Rest and reaction alerts</span><button type="button" class="lf-btn is-full" id="lfPush"></button>'
     + '</div>');
   $$('#lfMode button', c).forEach(function (b) {
     b.setAttribute('aria-pressed', b.dataset.m === lfMode() ? 'true' : 'false');
     b.addEventListener('click', function () { try { localStorage.setItem('lift.mode.v1', b.dataset.m); } catch (e) {} lfApplyMode(); lfRender(); });
   });
-  $('#lfRaTest', c).disabled = !S.ra;
   /* ON SHOWS AS ON, and the same press turns it off. */
   $('#lfPush', c).textContent = LPU ? 'On · turn off' : 'Turn on';
   $('#lfPush', c).classList.toggle('is-ink', !LPU);
   $('#lfPush', c).addEventListener('click', function () { if (LPU) lfPushOff(); else lfPushOn(this); });
-  $('#lfRaTest', c).addEventListener('click', function () { lfAudio(); setTimeout(function () { lfBeep(); buzz([80, 60, 80]); }, 120); });
   $$('#lfRa button', c).forEach(function (b) {
     b.setAttribute('aria-pressed', (b.dataset.a === '1') === S.ra ? 'true' : 'false');
     b.addEventListener('click', function () { S.ra = b.dataset.a === '1'; lfSave(); lfRender(); });
