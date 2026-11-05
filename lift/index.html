@@ -44,6 +44,8 @@
      — log a set, finish a workout — is lime, and nothing else is. */
   --log: #a3e635;
   --on-log: #0b1400;
+  /* the accent as WORDS: the same lime, until a white page needs it a shade deeper */
+  --today-ink: #a3e635;
   /* Red is kept for one thing: something going away or going wrong. */
   --bad: #ff453a;
   --on-ink: #000000;
@@ -98,10 +100,12 @@
   --shade: rgba(0,0,0,.12);
   --live-bg: #eef7dc;
   --live-ink: #3f6212;
-  /* lime on white is unreadable as text, so the light face takes it darker */
-  --today: #4d7c0f;
-  --log: #4d7c0f;
-  --on-log: #ffffff;
+  /* the same lime on both faces; only accent WORDS go a shade deeper,
+     because bright lime type on white cannot be read */
+  --today: #a3e635;
+  --log: #a3e635;
+  --on-log: #0b1400;
+  --today-ink: #65a30d;
   --bad: #d70015;
   --toast: #1c1c1e;
   --card-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05);
@@ -307,7 +311,7 @@ svg { display: block; }
 .lf-wk .lf-wd { text-align: center; }
 .lf-wk .lf-wd em { display: block; font-style: normal; font-size: 11px; color: var(--quiet); font-weight: 600; }
 .lf-wk .lf-wd b { display: block; font-size: 16px; font-weight: 700; }
-.lf-wk.is-now .lf-wd b { color: var(--today); }
+.lf-wk.is-now .lf-wd b { color: var(--today-ink); }
 .lf-wk .lf-wn { min-width: 0; }
 .lf-wk .lf-wn b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lf-wk .lf-wn span { font-size: 12px; color: var(--dim); }
@@ -396,7 +400,7 @@ svg { display: block; }
 .lf-set.is-done .lf-chk span { background: var(--log); color: var(--on-log); }
 .lf-set.is-done input { background: rgba(163,230,53,.14); }
 .lf-set.is-done .lf-chk:active span { transform: scale(.9); }
-.lf-set .lf-sn.is-pr { color: var(--today); font-size: 11px; font-weight: 800; letter-spacing: .02em; }
+.lf-set .lf-sn.is-pr { color: var(--today-ink); font-size: 11px; font-weight: 800; letter-spacing: .02em; }
 .lf-ex-ft { display: flex; gap: 8px; margin-top: 6px; }
 .lf-ex-ft button { flex: 1; min-height: 36px; border-radius: 10px; background: var(--card2); color: var(--dim); font-size: 12.5px; font-weight: 600; position: relative; }
 .lf-ex-ft button::before { content: ''; position: absolute; inset: -2px 0; }
@@ -486,7 +490,7 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-t { display: grid; gap: 3px; min-width: 0; }
 .fr-t b { font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fr-t > span { font-size: 12px; color: var(--dim); }
-.fr-row.is-me .fr-t b { color: var(--today); }
+.fr-row.is-me .fr-t b { color: var(--today-ink); }
 .fr-row.is-gone { opacity: .6; }
 .fr-wk { display: grid; justify-items: end; gap: 1px; }
 .fr-wk b { font-size: 17px; font-weight: 700; }
@@ -546,7 +550,7 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-rq-sg { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
 .lf-rq-sg p { font-size: 13px; line-height: 1.4; color: var(--dim); margin: 0 0 10px; }
 .lf-tip { background: var(--card2); border-radius: var(--r-s); padding: 12px 14px; margin: 6px 0 10px; }
-.lf-tip > b { display: block; font-size: 14px; line-height: 1.35; font-weight: 600; margin: 4px 0 6px; color: var(--today); }
+.lf-tip > b { display: block; font-size: 14px; line-height: 1.35; font-weight: 600; margin: 4px 0 6px; color: var(--today-ink); }
 .lf-tip ul { margin: 0; padding-left: 16px; display: grid; gap: 6px; }
 .lf-tip li { font-size: 13px; line-height: 1.4; color: var(--dim); }
 .lf-cdc { background: var(--card); border-radius: var(--r); padding: 14px; margin-top: 12px; }
