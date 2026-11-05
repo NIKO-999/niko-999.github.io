@@ -439,7 +439,6 @@ svg { display: block; }
 .lf-vs-t { font-size: 17px; font-weight: 600; margin: 8px 0 4px; }
 .lf-vs-s { margin: 0 0 14px; font-weight: 400; line-height: 1.4; }
 .lf-vs-c { background: var(--plot); box-shadow: none; }
-.lf-vs-sub { font-size: 12px; color: var(--quiet); margin-top: 2px; }
 .lf-vs-plot { position: relative; height: 150px; margin: 22px 0 6px; }
 .lf-vs-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .lf-vs-dot { position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--ink); }
@@ -1612,7 +1611,7 @@ function lfTrendSheet(k) {
   /* the eight weeks, Monday first */
   var wk = monday(t), weeks = [];
   for (var i = 7; i >= 0; i--) { var a = addDays(wk, -7 * i); weeks.push({ d: a, v: K.v(windowStats(a, addDays(a, 6))) }); }
-  var ch = el('<div class="lf-card lf-vs-c"><div class="lf-lab" style="display:flex;gap:6px;align-items:center">' + IC[K.ic] + '<span></span></div><div class="lf-vs-sub">8-week trend</div><div class="lf-vs-plot"></div><div class="lf-vs-x"></div></div>');
+  var ch = el('<div class="lf-card lf-vs-c"><div class="lf-lab" style="display:flex;gap:6px;align-items:center">' + IC[K.ic] + '<span></span></div><div class="lf-vs-plot"></div><div class="lf-vs-x"></div></div>');
   ch.id = K.id; $('.lf-lab span', ch).textContent = K.n;
   var plot = $('.lf-vs-plot', ch), max = Math.max.apply(null, weeks.map(function (w) { return w.v; }).concat([1]));
   var pts = weeks.map(function (w, i) { return [i / 7 * 100, 88 - w.v / max * 68]; });
