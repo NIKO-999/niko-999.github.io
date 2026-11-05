@@ -339,20 +339,29 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-vr-ed { font-size: 13px; font-weight: 600; color: var(--ink); min-height: 44px; margin: -12px -4px -12px 0; padding: 0 4px; }
 .fr-p { font-size: 13px; line-height: 1.45; color: var(--dim); margin: 10px 0 0; }
 .fr-pend { color: var(--ink); }
-.fr-row { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; text-align: left; padding: 12px 0; border-top: 1px solid var(--line); min-height: 44px; }
+.fr-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; text-align: left; padding: 12px 0; border-top: 1px solid var(--line); min-height: 44px; }
 .fr-row:first-of-type { border-top: 0; }
-.fr-row em { font-style: normal; font-size: 13px; color: var(--quiet); font-weight: 600; }
 .fr-t { display: grid; gap: 3px; min-width: 0; }
 .fr-t b { font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fr-t > span { font-size: 12px; color: var(--dim); }
 .fr-row.is-me .fr-t b { color: var(--today); }
 .fr-row.is-gone { opacity: .6; }
-.fr-wk { font-size: 15px; font-weight: 700; }
+.fr-wk { display: grid; justify-items: end; gap: 1px; }
+.fr-wk b { font-size: 17px; font-weight: 700; }
+.fr-wk small { font-size: 10.5px; color: var(--quiet); }
+.fr-hd { display: flex; align-items: center; justify-content: space-between; }
+.fr-plus { width: 44px; height: 44px; border-radius: 50%; background: var(--card); display: grid; place-items: center; }
+.fr-plus .lf-ic { width: 20px; height: 20px; }
+.fr-me { display: flex; align-items: center; gap: 4px; padding: 4px 4px 4px 16px; background: var(--card); border-radius: var(--r); }
+.fr-me-t { flex: 1; display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.fr-me-t span { font-size: 13px; color: var(--dim); }
+.fr-ib { width: 44px; height: 44px; display: grid; place-items: center; color: var(--dim); }
+.fr-ib .lf-ic { width: 20px; height: 20px; }
 .fr-strip { display: grid; grid-template-columns: repeat(30, minmax(0, 1fr)); gap: 2px; margin-top: 4px; }
 .fr-strip i { height: 6px; border-radius: 2px; background: var(--mark-off); }
 .fr-strip i.is-on { background: var(--ink); }
 .fr-strip i.is-rest { background: none; box-shadow: inset 0 0 0 1px var(--dim); }
-.fr-code { font-size: 30px; font-weight: 700; letter-spacing: .12em; margin: 6px 0 14px; }
+.fr-code { font-size: 16px; font-weight: 700; letter-spacing: .1em; }
 .fr-err { color: var(--log); margin: 8px 0 0; }
 .fr-dash { display: grid; gap: 12px; }
 .fr-ago { margin: 0; }
@@ -2590,7 +2599,8 @@ function frAddSheet() {
 var frArrive = 0;
 function lfRenderFr() {
   var root = $('#lfFr'); root.textContent = '';
-  root.appendChild(el('<h2 class="lf-h1">Friends</h2>'));
+  var hd = el('<div class="fr-hd"><h2 class="lf-h1">Friends</h2></div>');
+  root.appendChild(hd);
   if (!FRS.on) {
     /* THE MOMENT OF CONSENT, said in full, once, here — this is the one
        screen where something first leaves the phone. */
@@ -2617,17 +2627,21 @@ function lfRenderFr() {
   /* The board: you and everybody on your list, most workouts first. */
   var me = { c: FRS.code, n: 'You', s: frStats(), me: 1 };
   var rows = [me].concat(FRS.list).sort(function (a, b) { return ((b.s && b.s.wo30) || 0) - ((a.s && a.s.wo30) || 0); });
-  var bd = el('<div class="lf-card" style="padding:4px 16px" id="frBoard"><div class="lf-hd" style="padding:12px 0 4px"><span class="lf-lab">Workouts · last 30 days</span><span class="lf-lab">this week</span></div></div>');
+  /* ADDING IS A PLUS BESIDE THE TITLE, the one control the screen needs
+     most often after reading it. */
+  var add = el('<button type="button" class="fr-plus" id="frAdd" aria-label="Add a friend">' + IC.plus + '</button>');
+  add.addEventListener('click', frAddSheet);
+  hd.appendChild(add);
+  var bd = el('<div class="lf-card" style="padding:2px 16px" id="frBoard"></div>');
   rows.forEach(function (f, i) {
     var st = f.s || {};
-    var row = el('<button type="button" class="fr-row"><em class="lf-num"></em><div class="fr-t"><b></b><span></span></div><span class="fr-wk lf-num"></span></button>');
+    var row = el('<button type="button" class="fr-row"><div class="fr-t"><b></b><span></span></div><span class="fr-wk"><b class="lf-num"></b><small>this week</small></span></button>');
     row.dataset.c = f.c;
     if (f.me) row.classList.add('is-me');
     if (f.gone) row.classList.add('is-gone');
-    $('em', row).textContent = i + 1;
     $('b', row).textContent = f.n || 'Friend';
-    $('.fr-t span', row).textContent = f.gone ? 'Turned friends off' : (st.wo30 || 0) + ' workouts in 30 days';
-    $('.fr-wk', row).textContent = (st.wk || 0) + '/' + (st.goal || 0);
+    $('.fr-t span', row).textContent = f.gone ? 'Turned friends off' : (st.wo30 || 0) + ' workouts · 30 days';
+    $('.fr-wk b', row).textContent = (st.wk || 0) + '/' + (st.goal || 0);
     $('.fr-t', row).appendChild(frStrip(st.d));
     row.setAttribute('aria-label', (f.n || 'Friend') + ', ' + (st.wk || 0) + ' of ' + (st.goal || 0) + ' this week. Open their dashboard');
     row.addEventListener('click', function () { if (f.me) frSheet({ n: FRS.name || 'You', s: st, me: 1 }); else frSheet(f); });
@@ -2635,20 +2649,22 @@ function lfRenderFr() {
   });
   root.appendChild(bd);
   if (!FRS.list.length) root.appendChild(el('<div class="lf-card lf-empty" id="frNone"><b>Nobody yet</b>Send your code to a friend, or add theirs.</div>'));
-  var add = el('<button type="button" class="lf-add" id="frAdd">' + IC.plus + 'Add a friend</button>');
-  add.addEventListener('click', frAddSheet);
-  root.appendChild(add);
-  var code = el('<div class="lf-card" id="frMe"><div class="lf-hd"><span class="lf-lab">Your friend code</span></div><div class="fr-code lf-num"></div><div style="display:flex;gap:10px"><button type="button" class="lf-btn is-ink" style="flex:1" id="frShare">Share your code</button><button type="button" class="lf-btn" style="flex:1" id="frRename">Change name</button></div><button type="button" class="lf-btn is-bad is-full" id="frOffBtn" style="margin-top:10px">Turn off friends</button></div>');
+  /* YOUR CODE IS ONE QUIET LINE: the code, share, and the rest behind a
+     settings press — you set the name and turn it off once, not daily. */
+  var code = el('<div class="fr-me" id="frMe"><div class="fr-me-t"><span>Your code</span><b class="fr-code lf-num"></b></div>'
+    + '<button type="button" class="fr-ib" id="frShare" aria-label="Share your code"><svg class="lf-ic" viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M6 12v7h12v-7"/></svg></button>'
+    + '<button type="button" class="fr-ib" id="frMore" aria-label="Friends settings"><svg class="lf-ic" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/></svg></button></div>');
   $('.fr-code', code).textContent = FRS.code;
   $('#frShare', code).addEventListener('click', frShare);
-  $('#frRename', code).addEventListener('click', function () {
-    var b = el('<div><input class="lf-field" id="frNewName" maxlength="24" autocomplete="off" /></div>');
-    var sv = el('<button type="button" class="lf-btn is-ink is-full">Save</button>');
-    var s2 = lfSheet({ title: 'Your name', body: b, foot: [sv] });
+  $('#frMore', code).addEventListener('click', function () {
+    var b = el('<div><label class="lf-flab" for="frNewName" style="margin-top:0">Your name, as friends see it</label><input class="lf-field" id="frNewName" maxlength="24" autocomplete="off" /></div>');
+    var sv = el('<button type="button" class="lf-btn is-ink" id="frRename">Save name</button>');
+    var off = el('<button type="button" class="lf-btn is-bad" id="frOffBtn">Turn off friends</button>');
+    var s2 = lfSheet({ title: 'Friends', body: b, foot: [off, sv] });
     $('#frNewName', b).value = FRS.name;
     sv.addEventListener('click', function () { var n = $('#frNewName', b).value.trim(); if (!n) return; FRS.name = n; frSave(); frSig = ''; frPush(); s2.close(true); lfRender(); });
+    off.addEventListener('click', function () { s2.close(true); frTurnOff(); });
   });
-  $('#frOffBtn', code).addEventListener('click', frTurnOff);
   root.appendChild(code);
   /* Arriving at the tab fetches; drawing it only draws. A paint that
      fetched would repaint inside its own fetch, which is a loop. */

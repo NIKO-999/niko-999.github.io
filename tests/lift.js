@@ -721,7 +721,7 @@ const freeze = (at) => `(() => {
     ok('a link opens on Friends and the code leaves the bar', await B.page.locator('#lfFr:not([hidden])').count() === 1 && !(await B.page.evaluate(() => location.hash)));
     ok('and says who sent it before anything is turned on', await B.page.locator('.fr-pend').count() === 1 && m.size === 1);
     await B.page.fill('#frName', 'Sam'); await B.page.click('#frOn'); await B.page.waitForTimeout(700);
-    const names = await B.page.$$eval('#frBoard .fr-row b', (b) => b.map((x) => x.textContent));
+    const names = await B.page.$$eval('#frBoard .fr-row .fr-t b', (b) => b.map((x) => x.textContent));
     ok('turning on adds whoever sent the link, ranked by workouts', names.join() === 'Niko,You', names);
     const codeB = (await B.page.textContent('.fr-code')).trim();
 
@@ -731,7 +731,7 @@ const freeze = (at) => `(() => {
     await A.page.fill('#frCode', codeA.toLowerCase()); await top(A.page).locator('button', { hasText: /^Add$/ }).click(); await A.page.waitForTimeout(250);
     ok('your own code is refused', /your own code/.test(await top(A.page).textContent('.fr-err')));
     await A.page.fill('#frCode', codeB.toLowerCase()); await top(A.page).locator('button', { hasText: /^Add$/ }).click(); await settle(A.page);
-    ok('a typed code adds them, lower case and all', (await A.page.$$eval('#frBoard .fr-row b', (b) => b.map((x) => x.textContent))).join() === 'You,Sam');
+    ok('a typed code adds them, lower case and all', (await A.page.$$eval('#frBoard .fr-row .fr-t b', (b) => b.map((x) => x.textContent))).join() === 'You,Sam');
     await A.page.click('#frBoard .fr-row:not(.is-me)'); await settle(A.page);
     const sh = await top(A.page).textContent('.lf-sh-bd');
     const T = top(A.page);
@@ -751,7 +751,9 @@ const freeze = (at) => `(() => {
     await A.page.click('.lf-toast button'); await A.page.waitForTimeout(150);
     ok('and Undo puts them back', await A.page.locator('#frBoard .fr-row').count() === 2);
 
-    await B.page.click('#frOffBtn'); await settle(B.page);
+    await B.page.click('#frMore'); await settle(B.page);
+    ok('name and turning off live behind settings', await top(B.page).locator('#frNewName').count() === 1);
+    await top(B.page).locator('#frOffBtn').click(); await settle(B.page);
     await top(B.page).locator('button', { hasText: 'Turn off' }).click(); await B.page.waitForTimeout(400);
     ok('turning off deletes the record on the server', !m.has('lift:' + codeB) && await B.page.locator('#frOff').count() === 1);
     await A.page.click('.lf-bar [data-v="home"]'); await A.page.click('.lf-bar [data-v="fr"]'); await A.page.waitForTimeout(400);
