@@ -2439,7 +2439,11 @@ function frStats() {
   var got = lfMuscleSets(mon, addDays(mon, 6));
   var mu = lfTargets().slice(0, 16).map(function (x) { return [x[0], got[x[0]] || 0, x[1]]; });
   return { wo30: in30.length, sets30: in30.reduce(function (a, w) { return a + woSets(w); }, 0), pr30: pr30, wk: wk, goal: S.goal,
-    streak: streak, d: d, last: last, w7: w7, mu: mu, r7: r7, v8: v8, vol30: Math.round(windowStats(addDays(t, -29), t).vol) };
+    streak: streak, d: d, last: last, w7: w7, mu: mu, r7: r7, v8: v8,
+    /* the workouts themselves, newest first: what friends open to see your sets */
+    wl: woSorted().reverse().filter(function (w) { return w.d >= from30 && w.x.length; }).slice(0, 20).map(function (w) {
+      return { d: w.d, n: w.n, x: w.x.map(function (e) { return { n: e.n || exName(e.id), s: e.sets.map(function (st) { return [st.w, st.r]; }) }; }) };
+    }), vol30: Math.round(windowStats(addDays(t, -29), t).vol) };
 }
 
 /* PUSHED A BEAT AFTER THE LAST SAVE, and only when the counts changed —
@@ -2572,6 +2576,18 @@ function frSheet(f) {
   });
   pr.appendChild(wk);
   b.appendChild(pr);
+  /* THEIR WORKOUTS, newest first; one opens on its sets. */
+  var wl = Array.isArray(st.wl) ? st.wl : [];
+  var lc = el('<div class="lf-card" style="padding:4px 16px" id="frWo"><div class="lf-hd" style="padding:12px 0 2px"><span class="lf-lab">Workouts · last 30 days</span></div><div class="lf-list"></div></div>');
+  if (!wl.length) $('.lf-list', lc).appendChild(el('<div class="lf-lab" style="padding:8px 0 12px">Nothing logged yet.</div>'));
+  wl.forEach(function (w) {
+    var sets = 0, vol = 0; w.x.forEach(function (e) { e.s.forEach(function (q) { sets++; vol += q[0] * q[1]; }); });
+    var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div>' + IC.chev + '</button>');
+    $('b', li).textContent = w.n; $('span', li).textContent = fmtDay(w.d) + ' · ' + sets + ' sets · ' + fmtBig(toDisp(vol)) + ' ' + S.unit;
+    li.addEventListener('click', function () { frWoSheet(w); });
+    $('.lf-list', lc).appendChild(li);
+  });
+  b.appendChild(lc);
   var foot = null, rm = null;
   if (!f.me) { rm = el('<button type="button" class="lf-btn is-bad">Remove</button>'); foot = [rm]; }
   var s = lfSheet({ title: f.n || 'Friend', body: b, foot: foot, full: true });
@@ -2580,6 +2596,17 @@ function frSheet(f) {
     FRS.list.splice(i, 1); frSave(); s.close(true); lfRender();
     lfToast('Removed ' + (f.n || 'friend'), function () { FRS.list.splice(i, 0, f); frSave(); lfRender(); });
   });
+}
+function frWoSheet(w) {
+  var b = el('<div><p class="lf-lab" style="margin:0 0 6px"></p><div class="lf-list"></div></div>');
+  $('p', b).textContent = fmtDay(w.d);
+  w.x.forEach(function (e) {
+    var li = el('<div class="lf-li fr-wx"><div class="lf-li-t"><b></b><span class="lf-num"></span></div></div>');
+    $('b', li).textContent = e.n;
+    $('span', li).textContent = e.s.length ? e.s.map(function (q) { return (q[0] ? fmtW(q[0]) + '×' : '') + q[1]; }).join('  ·  ') : 'No sets';
+    $('.lf-list', b).appendChild(li);
+  });
+  lfSheet({ title: w.n, body: b });
 }
 function frAddSheet() {
   var b = el('<div><label class="lf-flab" for="frCode" style="margin-top:0">Their friend code</label><input class="lf-field lf-num" id="frCode" maxlength="9" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABCD2345" /><p class="lf-lab fr-err" hidden></p></div>');

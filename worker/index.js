@@ -354,6 +354,18 @@ function liftClean(b) {
   s.r7 = Array.isArray(b.s.r7) && b.s.r7.length === 7 ? b.s.r7.map((v) => { v = Math.round(+v); return isFinite(v) ? Math.max(0, Math.min(100000, v)) : 0; }) : [0, 0, 0, 0, 0, 0, 0];
   s.mu = Array.isArray(b.s.mu) ? b.s.mu.filter((m) => Array.isArray(m) && LIFT_MUS.includes(m[0])).slice(0, 16).map((m) => [m[0], num(m[1]), num(m[2])]) : [];
   s.last = typeof b.s.last === 'string' && /^\d{4}-\d\d-\d\d$/.test(b.s.last) ? b.s.last : '';
+  /* THE WORKOUTS THEMSELVES, asked for so friends can see the sets: at
+     most twenty, each a date, a name and up to fifteen exercises of up
+     to twenty [kg, reps] sets. Names are cut, numbers clamped, and
+     nothing else on a workout survives. Never body weight. */
+  const txt = (v, n) => typeof v === 'string' ? v.replace(/[\u0000-\u001f]/g, '').trim().slice(0, n) : '';
+  s.wl = Array.isArray(b.s.wl) ? b.s.wl.filter((w) => w && typeof w.d === 'string' && /^\d{4}-\d\d-\d\d$/.test(w.d) && Array.isArray(w.x)).slice(0, 20).map((w) => ({
+    d: w.d, n: txt(w.n, 40) || 'Workout',
+    x: w.x.filter((e) => e && Array.isArray(e.s)).slice(0, 15).map((e) => ({
+      n: txt(e.n, 60) || 'Exercise',
+      s: e.s.filter(Array.isArray).slice(0, 20).map((st) => { const kg = Math.round(+st[0] * 10) / 10, rp = Math.round(+st[1]); return [isFinite(kg) ? Math.max(0, Math.min(2000, kg)) : 0, isFinite(rp) ? Math.max(0, Math.min(1000, rp)) : 0]; })
+    }))
+  })) : [];
   return { n: n || 'Lifter', s };
 }
 
@@ -602,7 +614,7 @@ export default {
       }
       if (req.method === 'PUT') {
         let body;
-        try { body = JSON.parse(await readCapped({ body: req.body, text: () => req.text() }, 4096)); }
+        try { body = JSON.parse(await readCapped({ body: req.body, text: () => req.text() }, 65536)); }
         catch (e) { return json(req, { error: 'not json' }, 400); }
         const clean = liftClean(body);
         if (!clean) return json(req, { error: 'bad shape' }, 400);

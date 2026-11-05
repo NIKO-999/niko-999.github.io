@@ -714,7 +714,8 @@ const freeze = (at) => `(() => {
     ok('two PRs: each heavier hack squat after the first', recA.s.pr30 === 2, recA.s.pr30);
     ok('the key is only a hash', /^[0-9a-f]{64}$/.test(recA.kh) && !JSON.stringify(recA).includes((await A.page.evaluate(() => JSON.parse(localStorage.getItem('lift.fr.v1')).key))));
     const blob = sent.join('\n');
-    ok('no weight, exercise or body weight ever leaves', !/hack|Hack|120|110|87\.4|"kg"|Lower A/.test(blob), blob.slice(0, 300));
+    ok('body weight never leaves', !/87\.4/.test(blob), blob.slice(0, 300));
+    ok('the workouts go, newest first, with their sets', recA.s.wl.length === 3 && recA.s.wl[0].d === '2026-10-30' && recA.s.wl[0].x[0].n === 'Hack squat' && JSON.stringify(recA.s.wl[1].x[0].s) === '[[110,8],[110,8]]', recA.s.wl);
     ok('your own row is on the board', await A.page.locator('#frBoard .fr-row.is-me').count() === 1);
 
     const B = await phone({ unit: 'kg', goal: 3, wo: [wo('2026-10-12', [{ w: 60, r: 10 }])] }, '#add=' + codeA);
@@ -740,6 +741,10 @@ const freeze = (at) => `(() => {
     ok('their week, reps by day against goal', await T.locator('#frWeek .lf-bars > div').count() === 7 && /0\/3/.test(await T.locator('#frWeek').textContent()));
     ok('their volume over eight weeks', await T.locator('#frVol .lf-area svg').count() === 1 && /8 wk/.test(await T.locator('#frVol').textContent()));
     ok('and their sets by muscle', await T.locator('#frMus .lf-vr').count() > 0);
+    ok('and their workouts', (await T.locator('#frWo .lf-li b').allTextContents()).join() === 'Lower A' && /1 sets · 600 kg/.test(await T.locator('#frWo .lf-li span').first().textContent()));
+    await T.locator('#frWo .lf-li').first().click(); await settle(A.page);
+    ok('a workout opens on its sets', /Hack squat/.test(await top(A.page).textContent()) && /60×10/.test(await top(A.page).textContent()), await top(A.page).textContent());
+    await A.page.keyboard.press('Escape'); await settle(A.page);
     ok('it fills the screen', await top(A.page).evaluate((e) => e.classList.contains('is-full')));
     await A.page.keyboard.press('Escape'); await settle(A.page);
     await A.page.click('#frBoard .fr-row.is-me'); await settle(A.page);
