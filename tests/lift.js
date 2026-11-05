@@ -429,60 +429,17 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
-  /* ── steps, food and water ── */
+  /* ── steps, food and water: no card any more, old entries still read back ── */
   {
-    const { c, page } = await ctx();
-    const tiles = await page.$$eval('#lfDaily .lf-dl-t', (t) => t.map((x) => x.dataset.f));
-    ok('home carries a card for steps, food and water', tiles.join() === 'st,fd,wa', tiles);
-    const tot = (f) => page.evaluate((f) => { const d = JSON.parse(localStorage.getItem('lift.v1')).dl['2026-10-30']; return d ? d[f] : null; }, f);
+    const { c, page } = await ctx({ unit: 'kg', dl: { '2026-10-30': { st: [{ t: 1, v: 8400 }], fd: [{ t: 1, kc: 950, p: 42.5 }], wa: [{ t: 1, v: 600 }, { t: 2, v: 1500 }] } } });
+    ok('home has no daily log card, and You no daily goals', await page.locator('#lfDaily').count() === 0 && await (async () => { await page.click('.lf-bar [data-v="you"]'); return page.locator('#lfGoals').count(); })() === 0);
     const sh = page.locator('.lf-sheet').last();
-
-    await page.click('#lfDaily [data-f="st"]'); await settle(page);
-    await sh.locator('.lf-pill', { hasText: '+1k' }).click(); await sh.locator('.lf-pill', { hasText: '+1k' }).click();
-    ok('steps add by the press', (await sh.locator('.lf-hero').textContent()) === '2,000');
-    await sh.locator('.lf-dl-f input').fill('8400'); await sh.locator('.lf-dl-f button').click();
-    ok('a total from the phone replaces the day rather than adding to it', (await sh.locator('.lf-hero').textContent()) === '8,400' && (await tot('st')).length === 1);
-    ok('and says how far from the goal', /6,600 to go of 15,000/.test(await sh.locator('p.lf-lab').first().textContent()));
-    await sh.locator('.lf-calnav .lf-round').first().click();
-    await sh.locator('.lf-pill', { hasText: '+5k' }).click();
-    ok('the day before can be filled in from the same sheet', (await sh.locator('.lf-calnav b').textContent()) === 'Thu 29 Oct'
-      && await page.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).dl['2026-10-29'].st[0].v) === 5000);
-    ok('and never a day still ahead', await sh.locator('.lf-calnav .lf-round').last().isEnabled() && !(await (async () => { await sh.locator('.lf-calnav .lf-round').last().click(); return sh.locator('.lf-calnav .lf-round').last().isEnabled(); })()));
-    await page.keyboard.press('Escape'); await settle(page);
-
-    await page.click('#lfDaily [data-f="wa"]'); await settle(page);
-    await sh.locator('.lf-pill', { hasText: '+600 ml' }).click(); await sh.locator('.lf-pill', { hasText: '+1.5 L' }).click();
-    ok('water adds by the bottle and reads in litres', (await sh.locator('.lf-hero').textContent()) === '2.1 L');
-    await sh.locator('.lf-dl-ents .lf-x').first().click();
-    ok('an entry comes off with its own cross', (await sh.locator('.lf-hero').textContent()) === '600 ml');
-    await page.click('.lf-toast button');
-    ok('and Undo puts it back', (await sh.locator('.lf-hero').textContent()) === '2.1 L' && (await tot('wa')).length === 2);
-    await page.keyboard.press('Escape'); await settle(page);
-
-    await page.click('#lfDaily [data-f="fd"]'); await settle(page);
-    const fi = sh.locator('.lf-dl-f input');
-    await fi.nth(0).fill('650'); await fi.nth(1).fill('42.5'); await sh.locator('.lf-dl-f button').click();
-    await fi.nth(0).fill('300'); await sh.locator('.lf-dl-f button').click();
-    ok('food adds calories and protein', (await sh.locator('.lf-hero').textContent()) === '950 kcal' && /43g protein/.test(await sh.locator('p.lf-lab').first().textContent()));
-    await page.keyboard.press('Escape'); await settle(page);
-
-    const card = await page.$$eval('#lfDaily .lf-dl-t', (t) => t.map((x) => x.querySelector('b').textContent));
-    ok('the home card says all three', card.join('|') === '8,400|950|2.1 L', card);
-    ok('a met goal goes green and an unmet one does not', !(await page.$eval('#lfDaily [data-f="wa"]', (e) => e.classList.contains('is-met'))));
-
-    await page.click('.lf-bar [data-v="you"]');
-    await page.fill('#lfGoals input[data-g="wa"]', '2000'); await page.press('#lfGoals input[data-g="wa"]', 'Tab');
-    await page.click('.lf-bar [data-v="home"]');
-    ok('a goal set under You moves the card', await page.$eval('#lfDaily [data-f="wa"]', (e) => e.classList.contains('is-met')));
-
     await page.click('.lf-bar [data-v="cal"]');
     await page.click('.lf-cell[data-d="2026-10-30"]'); await settle(page);
-    ok('the calendar\'s day says what you logged', /8,400 steps · 950 kcal · 43g protein · 2\.1 L water/.test(await sh.textContent()));
-    await page.keyboard.press('Escape'); await settle(page);
-    const tiles3 = await page.$$eval('#lfMain section:not([hidden])', (x) => x.length);
-    ok('three tiles fit across a phone without scrolling sideways', tiles3 === 1 && await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    ok('what was logged before still reads back on the calendar\'s day', /8,400 steps · 950 kcal · 43g protein · 2\.1 L water/.test(await sh.textContent()));
     await c.close();
   }
+
 
   /* ── how it's done: a video one press away ── */
   {

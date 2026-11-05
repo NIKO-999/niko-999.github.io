@@ -1275,7 +1275,6 @@ function lfToday() {
 function lfRenderHome() {
   var root = $('#lfHome'); root.textContent = '';
   root.appendChild(lfTodayCard());
-  root.appendChild(lfDayCard());
   root.appendChild(lfStatRow());
   root.appendChild(lfGridCard());
   root.appendChild(lfLegCard());
@@ -1684,109 +1683,8 @@ function dlFmt(f, v) {
   if (f === 'wa') return v >= 1000 ? (Math.round(v / 100) / 10) + ' L' : v + ' ml';
   return v.toLocaleString('en-GB') + (f === 'fd' ? ' kcal' : '');
 }
-function dlGoal(f) { return f === 'fd' ? S.dg.kc : S.dg[f]; }
-function dlPush(k, f, e) {
-  if (!S.dl[k]) S.dl[k] = { st: [], fd: [], wa: [] };
-  S.dl[k][f].push(e); lfSave();
-}
-
-function lfDayCard() {
-  var k = ymd(today());
-  var c = el('<div class="lf-card lf-dl" id="lfDaily"><div class="lf-hd"><span class="lf-lab">Daily log</span><span class="lf-lab">tap to add</span></div><div class="lf-dl-row"></div></div>');
-  ['st', 'fd', 'wa'].forEach(function (f) {
-    var v = dlTot(k, f), g = dlGoal(f);
-    var b = el('<button type="button" class="lf-dl-t lf-tap"><span class="lf-dl-n"></span><b class="lf-num"></b><span class="lf-dl-u"></span><i class="lf-dl-bar"><i></i></i></button>');
-    b.dataset.f = f;
-    $('.lf-dl-n', b).innerHTML = DL[f].ic + '<span></span>';
-    $('.lf-dl-n span', b).textContent = DL[f].n;
-    $('b', b).textContent = f === 'wa' ? dlFmt('wa', v) : v.toLocaleString('en-GB');
-    $('.lf-dl-u', b).textContent = g ? 'of ' + dlFmt(f, g).replace(' kcal', '') : (f === 'wa' ? (v >= 1000 ? 'L' : 'ml') : DL[f].u);
-    /* Protein gets its own line rather than a tail the tile cuts off. */
-    if (f === 'fd') { var pr = dlTot(k, 'pr'), pl = el('<span class="lf-dl-u lf-dl-p"></span>'); pl.textContent = 'Protein ' + Math.round(pr) + (S.dg.pr ? '/' + S.dg.pr : '') + 'g'; $('.lf-dl-u', b).after(pl); }
-    $('.lf-dl-bar i', b).style.width = (g ? Math.min(100, v / g * 100) : 0) + '%';
-    if (g && v >= g) b.classList.add('is-met');
-    b.setAttribute('aria-label', DL[f].n + ' today: ' + dlFmt(f, v) + (g ? ' of ' + dlFmt(f, g) : '') + '. Add');
-    b.addEventListener('click', function () { lfDlSheet(f, k); });
-    $('.lf-dl-row', c).appendChild(b);
-  });
-  return c;
-}
-
-function lfDlSheet(f, k) {
-  var b = el('<div><div class="lf-calnav" style="margin:0 0 6px"><button type="button" class="lf-round" aria-label="Day before">' + IC.left + '</button><b></b><button type="button" class="lf-round" aria-label="Day after">' + IC.right + '</button></div>'
-    + '<div class="lf-hero lf-num" style="font-size:40px;text-align:center"></div><p class="lf-lab" style="text-align:center;margin:4px 0 14px;font-weight:400"></p>'
-    + '<div class="lf-pills lf-dl-q"></div><div class="lf-dl-in"></div><div class="lf-list lf-sec lf-dl-ents"></div><div class="lf-card lf-sec lf-dl-wk" style="background:var(--card)"></div></div>');
-  var s = lfSheet({ title: DL[f].n, body: b, onClose: function () { lfRender(); } });
-  var oldest = ymd(addDays(today(), -30));
-  function paint() {
-    var t = ymd(today()), v = dlTot(k, f), g = dlGoal(f), nav = $$('.lf-calnav button', b);
-    $('.lf-calnav b', b).textContent = k === t ? 'Today' : fmtDay(k);
-    nav[0].disabled = k <= oldest; nav[1].disabled = k >= t;
-    $('.lf-hero', b).textContent = dlFmt(f, v);
-    var sub = g ? (v >= g ? 'Goal reached · ' + dlFmt(f, g) : dlFmt(f, g - v) + ' to go of ' + dlFmt(f, g)) : 'No goal set · set one under You';
-    if (f === 'fd') sub += ' · ' + Math.round(dlTot(k, 'pr')) + 'g protein' + (S.dg.pr ? ' of ' + S.dg.pr + 'g' : '');
-    $('p', b).textContent = sub;
-    /* entries, newest first, each with its own way back */
-    var list = $('.lf-dl-ents', b); list.textContent = '';
-    var es = dlDay(k)[f].map(function (e, i) { return { e: e, i: i }; }).reverse();
-    if (!es.length) list.appendChild(el('<div class="lf-lab" style="padding:6px 2px">Nothing logged on this day.</div>'));
-    es.forEach(function (x) {
-      var d = new Date(x.e.t);
-      var li = el('<div class="lf-li"><div class="lf-li-t"><b class="lf-num"></b><span></span></div><button type="button" class="lf-x" aria-label="Remove entry">' + IC.x + '</button></div>');
-      $('b', li).textContent = f === 'fd' ? x.e.kc + ' kcal' + (x.e.p ? ' · ' + x.e.p + 'g protein' : '') : (f === 'st' && x.e.v > 0 ? '+' : '') + dlFmt(f, x.e.v);
-      $('span', li).textContent = x.e.t ? String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') : '';
-      $('button', li).addEventListener('click', function () {
-        var arr = S.dl[k][f], gone = arr.splice(x.i, 1)[0]; lfSave(); paint();
-        lfToast('Removed', function () { arr.splice(x.i, 0, gone); lfSave(); paint(); });
-      });
-      list.appendChild(li);
-    });
-    /* the last seven days, today at the end */
-    var wk = $('.lf-dl-wk', b); wk.innerHTML = '<div class="lf-lab">Last 7 days</div><div class="lf-bars" aria-hidden="true"></div>';
-    var days = []; for (var i = 6; i >= 0; i--) days.push(ymd(addDays(today(), -i)));
-    var vals = days.map(function (d) { return dlTot(d, f); }), mx = Math.max.apply(null, vals.concat([g || 1, 1]));
-    days.forEach(function (d, i) {
-      var col = el('<div><em></em><i></i><u></u></div>'), vv = vals[i];
-      if (d === k) col.classList.add('is-now');
-      $('em', col).textContent = vv ? (f === 'wa' ? (Math.round(vv / 100) / 10) : vv >= 1000 ? (Math.round(vv / 100) / 10) + 'k' : vv) : '';
-      $('i', col).style.height = (vv ? Math.max(6, vv / mx * 100) : 4) + '%';
-      $('u', col).textContent = 'SMTWTFS'[parseYmd(d).getDay()];
-      $('.lf-bars', wk).appendChild(col);
-    });
-  }
-  /* quick adds and the field, built once so typing keeps its caret */
-  var q = $('.lf-dl-q', b), inb = $('.lf-dl-in', b);
-  function quick(label, fn) { var p = el('<button type="button" class="lf-pill"></button>'); p.textContent = label; p.addEventListener('click', function () { fn(); buzz(10); paint(); }); q.appendChild(p); }
-  function addV(v) { dlPush(k, f, { t: Date.now(), v: v }); }
-  if (f === 'st') {
-    [500, 1000, 2500, 5000].forEach(function (v) { quick('+' + (v >= 1000 ? v / 1000 + 'k' : v), function () { addV(v); }); });
-    inb.innerHTML = '<div class="lf-dl-f"><input class="lf-field lf-num" inputmode="numeric" placeholder="Today\'s total from your phone" aria-label="Total steps" autocomplete="off" /><button type="button" class="lf-btn is-log">Set</button></div>';
-    $('button', inb).addEventListener('click', function () {
-      var v = parseInt($('input', inb).value.replace(/[^\d]/g, ''), 10); if (!(v >= 0)) return;
-      /* A total from the phone replaces the day rather than adding to it:
-         the phone has already counted everything you added by hand. */
-      if (!S.dl[k]) S.dl[k] = { st: [], fd: [], wa: [] };
-      S.dl[k].st = [{ t: Date.now(), v: v }]; lfSave(); $('input', inb).value = ''; buzz(10); paint();
-    });
-  } else if (f === 'wa') {
-    [[250, '+250 ml'], [500, '+500 ml'], [600, '+600 ml'], [1500, '+1.5 L']].forEach(function (x) { quick(x[1], function () { addV(x[0]); }); });
-    inb.innerHTML = '<div class="lf-dl-f"><input class="lf-field lf-num" inputmode="numeric" placeholder="Amount in ml" aria-label="Water in ml" autocomplete="off" /><button type="button" class="lf-btn is-log">Add</button></div>';
-    $('button', inb).addEventListener('click', function () { var v = parseInt($('input', inb).value, 10); if (!(v > 0)) return; addV(v); $('input', inb).value = ''; buzz(10); paint(); });
-  } else {
-    inb.innerHTML = '<div class="lf-dl-f"><input class="lf-field lf-num" inputmode="numeric" placeholder="kcal" aria-label="Calories" autocomplete="off" /><input class="lf-field lf-num" inputmode="decimal" placeholder="Protein g" aria-label="Protein in grams" autocomplete="off" /><button type="button" class="lf-btn is-log">Add</button></div>';
-    var ins = $$('input', inb);
-    $('button', inb).addEventListener('click', function () {
-      var kc = parseInt(ins[0].value, 10) || 0, pr = parseFloat(ins[1].value) || 0;
-      if (!(kc > 0) && !(pr > 0)) { ins[0].focus(); return; }
-      dlPush(k, 'fd', { t: Date.now(), kc: kc, p: Math.round(pr * 10) / 10 }); ins[0].value = ''; ins[1].value = ''; buzz(10); paint();
-    });
-  }
-  var nav = $$('.lf-calnav button', b);
-  nav[0].addEventListener('click', function () { k = ymd(addDays(parseYmd(k), -1)); paint(); });
-  nav[1].addEventListener('click', function () { if (k < ymd(today())) { k = ymd(addDays(parseYmd(k), 1)); paint(); } });
-  paint();
-  return s;
-}
+/* Steps, food and water are no longer logged in the app; what was
+   logged before is still read back on the calendar's day. */
 function lfDlLine(k) {
   var st = dlTot(k, 'st'), kc = dlTot(k, 'fd'), pr = dlTot(k, 'pr'), wa = dlTot(k, 'wa'), out = [];
   if (st) out.push(st.toLocaleString('en-GB') + ' steps');
@@ -2530,15 +2428,6 @@ function lfRenderYou() {
   }
   root.appendChild(c);
   root.appendChild(lfFocusCard());
-  var gc = el('<div class="lf-card" id="lfGoals"><div class="lf-lab">Daily goals</div></div>');
-  [['st', 'Steps', 'steps'], ['kc', 'Calories', 'kcal'], ['pr', 'Protein', 'g'], ['wa', 'Water', 'ml']].forEach(function (g) {
-    var row = el('<label class="lf-gl"><span></span><input class="lf-field lf-num" inputmode="numeric" autocomplete="off" /><em></em></label>');
-    $('span', row).textContent = g[1]; $('em', row).textContent = g[2];
-    var inp = $('input', row); inp.dataset.g = g[0]; inp.value = S.dg[g[0]] || ''; inp.placeholder = 'none';
-    inp.addEventListener('change', function () { var v = parseInt(inp.value.replace(/[^\d]/g, ''), 10); S.dg[g[0]] = v > 0 ? v : 0; lfSave(); });
-    gc.appendChild(row);
-  });
-  root.appendChild(gc);
   var all = windowStats(new Date(2000, 0, 1), today());
   var t = el('<div class="lf-card"><div class="lf-lab">All time</div></div>');
   t.appendChild(lfSum([[all.wo, 'workouts'], [all.sets, 'sets'], [fmtBig(toDisp(all.vol)), S.unit]]));
