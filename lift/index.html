@@ -350,8 +350,8 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-wk b { font-size: 17px; font-weight: 700; }
 .fr-wk small { font-size: 10.5px; color: var(--quiet); }
 .fr-hd { display: flex; align-items: center; justify-content: space-between; }
-.fr-plus { width: 44px; height: 44px; border-radius: 50%; background: var(--card); display: grid; place-items: center; }
-.fr-plus .lf-ic { width: 20px; height: 20px; }
+.fr-plus { width: 44px; height: 44px; display: grid; place-items: center; margin: -8px -10px 0 0; color: var(--ink); }
+.fr-plus .lf-ic { width: 24px; height: 24px; }
 .fr-me { display: flex; align-items: center; gap: 4px; padding: 4px 4px 4px 16px; background: var(--card); border-radius: var(--r); }
 .fr-me-t { flex: 1; display: flex; align-items: baseline; gap: 10px; min-width: 0; }
 .fr-me-t span { font-size: 13px; color: var(--dim); }
@@ -2629,7 +2629,7 @@ function lfRenderFr() {
   var rows = [me].concat(FRS.list).sort(function (a, b) { return ((b.s && b.s.wo30) || 0) - ((a.s && a.s.wo30) || 0); });
   /* ADDING IS A PLUS BESIDE THE TITLE, the one control the screen needs
      most often after reading it. */
-  var add = el('<button type="button" class="fr-plus" id="frAdd" aria-label="Add a friend">' + IC.plus + '</button>');
+  var add = el('<button type="button" class="fr-plus" id="frAdd" aria-label="Add a friend"><svg class="lf-ic" viewBox="0 0 24 24"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.8-3.6 3.4-5.6 6.5-5.6s5.7 2 6.5 5.6"/><path d="M19 8v6M16 11h6"/></svg></button>');
   add.addEventListener('click', frAddSheet);
   hd.appendChild(add);
   var bd = el('<div class="lf-card" style="padding:2px 16px" id="frBoard"></div>');
