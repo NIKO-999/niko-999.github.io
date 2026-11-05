@@ -29,6 +29,10 @@ const freeze = (at) => `(() => {
 
 (async () => {
   const browser = await chromium.launch({ executablePath: chrome(), args: ['--no-sandbox'] });
+  /* the folding cards on You start open in every test phone, so the checks inside them can press;
+     the one check about folding starts them shut itself */
+  const newCtx = browser.newContext.bind(browser);
+  browser.newContext = async (o) => { const c = await newCtx(o); await c.addInitScript(`(() => { if (!localStorage.getItem('lift.fold.v1')) localStorage.setItem('lift.fold.v1', '{"set":1,"bdg":1}'); })();`); return c; };
   const errors = [], offOrigin = [];
   async function ctx(seed, at, keepBadges) {
     const c = await browser.newContext(PHONE);
@@ -736,6 +740,21 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="home"]'); await settle(page);
     ok('and a Monday on it is Heavy legs', (await page.textContent('#lfPick')).trim() === 'Heavy legs');
     ok('its weekly targets put quads and calves first', (await store(page)).focus.slice(0, 2).map((f) => f.m).sort().join() === 'Calves,Quads');
+    await c.close();
+  }
+  /* You folds: settings and badges are shut until opened, and remember */
+  {
+    const c = await newCtx(PHONE);
+    await c.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', '{"unit":"kg","wo":[]}'); })();`);
+    const page = await c.newPage(); await page.goto(URL); await page.waitForTimeout(300);
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    const st = async () => page.evaluate(() => ['lfSet', 'lfBadges'].map((id) => { const b = document.querySelector('#' + id + ' h3 > button'); return b && b.getAttribute('aria-expanded') + ':' + document.getElementById(b.getAttribute('aria-controls')).hidden; }).join());
+    ok('settings and badges are shut by default, each a button inside its heading', await st() === 'false:true,false:true');
+    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 24/.test(await page.textContent('#lfBadges h3')));
+    await page.click('#lfSet h3 > button'); await page.click('#lfBadges h3 > button'); await settle(page);
+    ok('pressing the heading opens it', await st() === 'true:false,true:false' && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 24);
+    await page.reload(); await page.waitForTimeout(300); await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    ok('and it stays open after a reload', await st() === 'true:false,true:false');
     await c.close();
   }
   /* cardio, body weight and abs badges */

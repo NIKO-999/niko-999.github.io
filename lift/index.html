@@ -281,6 +281,12 @@ svg { display: block; }
   padding: 0 14px; font-size: 16px; outline: none;
 }
 .lf-field:focus { border-color: var(--focus); }
+.lf-fh { margin: 0; font: inherit; }
+.lf-fh button { width: 100%; display: flex; align-items: center; gap: 8px; padding: 0; text-align: left; min-height: 30px; }
+.lf-fh button .lf-lab:first-child { flex: 1; }
+.lf-fh .lf-chev { transform: rotate(90deg); transition: transform .22s var(--ease); color: var(--dim); }
+.lf-fh button[aria-expanded="true"] .lf-chev { transform: rotate(270deg); }
+.lf-fold:not(.is-open) { padding-bottom: 14px; }
 .lf-flab { display: block; font-size: 12px; color: var(--dim); margin: 14px 2px 6px; }
 .lf-pills { display: flex; flex-wrap: wrap; gap: 8px; }
 .lf-pill { min-height: 36px; padding: 0 14px; border-radius: 999px; background: var(--card2); color: var(--dim); font-size: 13px; font-weight: 500; position: relative; }
@@ -2514,7 +2520,7 @@ function lfRenderYou() {
   var root = $('#lfYou'); root.textContent = '';
   root.appendChild(el('<h2 class="lf-h1">You</h2>'));
   root.appendChild(lfBwCard());
-  var c = el('<div class="lf-card"><span class="lf-flab" style="margin-top:0">Units</span><div class="lf-seg" id="lfUnit"><button type="button" data-u="kg">kg</button><button type="button" data-u="lb">lb</button></div>'
+  var c = el('<div><span class="lf-flab">Units</span><div class="lf-seg" id="lfUnit"><button type="button" data-u="kg">kg</button><button type="button" data-u="lb">lb</button></div>'
     + '<span class="lf-flab">Workouts a week</span><div class="lf-seg" id="lfGoal" style="--n:7"></div>'
     + '<span class="lf-flab">Appearance</span><div class="lf-seg" id="lfMode" style="--n:3"><button type="button" data-m="auto">Auto</button><button type="button" data-m="light">Light</button><button type="button" data-m="dark">Dark</button></div>'
     + '<span class="lf-flab">Rest alert</span><div class="lf-seg" id="lfRa"><button type="button" data-a="1">Sound + buzz</button><button type="button" data-a="0">Off</button></div>'
@@ -2545,7 +2551,7 @@ function lfRenderYou() {
     g.addEventListener('click', function (e) { S.goal = +e.currentTarget.dataset.g; lfSave(); lfRender(); });
     $('#lfGoal', c).appendChild(g);
   }
-  root.appendChild(c);
+  root.appendChild(lfFold('lfSet', 'set', 'Settings', '', function (bd) { bd.appendChild(c); }));
   root.appendChild(lfBadgeCard());
   root.appendChild(lfFocusCard());
   var all = windowStats(new Date(2000, 0, 1), today());
@@ -2556,6 +2562,25 @@ function lfRenderYou() {
   $('#lfCopy', bk).addEventListener('click', lfCopy);
   $('#lfRestore', bk).addEventListener('click', lfRestore);
   root.appendChild(bk);
+}
+/* A CARD THAT FOLDS: its title is a button inside the heading, it says
+   whether it is open, and it remembers per card. Shut until opened — a
+   panel of settings you cannot put away is furniture. The body is only
+   built the first time it opens, so a shut shelf of badges costs nothing. */
+function lfFoldOpen(k) { try { return !!(JSON.parse(localStorage.getItem('lift.fold.v1') || '{}')[k]); } catch (e) { return false; } }
+function lfFoldSet(k, v) { try { var o = JSON.parse(localStorage.getItem('lift.fold.v1') || '{}'); if (v) o[k] = 1; else delete o[k]; localStorage.setItem('lift.fold.v1', JSON.stringify(o)); } catch (e) {} }
+function lfFold(id, key, title, side, fill) {
+  var c = el('<div class="lf-card lf-fold"><h3 class="lf-fh"><button type="button" class="lf-hd"><span class="lf-lab"></span><span class="lf-lab lf-num"></span>' + IC.chev + '</button></h3><div class="lf-fb"></div></div>');
+  c.id = id; var bt = $('.lf-fh button', c), bd = $('.lf-fb', c), built = false;
+  bd.id = id + 'Body'; bt.setAttribute('aria-controls', bd.id);
+  $('.lf-lab', bt).textContent = title; $('.lf-num', bt).textContent = side || '';
+  function set(open) {
+    bt.setAttribute('aria-expanded', open ? 'true' : 'false'); bd.hidden = !open; c.classList.toggle('is-open', open);
+    if (open && !built) { built = true; fill(bd); }
+  }
+  bt.addEventListener('click', function () { var o = bt.getAttribute('aria-expanded') !== 'true'; lfFoldSet(key, o); set(o); });
+  set(lfFoldOpen(key));
+  return c;
 }
 function lfFocusCard() {
   var c = el('<div class="lf-card" id="lfFocus" style="padding:14px 16px 6px"><div class="lf-hd"><span class="lf-lab">Focus</span><span class="lf-lab">sets a week</span></div><div class="lf-list"></div></div>');
@@ -3713,19 +3738,19 @@ function lfBadgeNew() {
 /* the shelf on You */
 function lfBadgeCard() {
   var all = lfBadges(), got = all.filter(function (x) { return x.d; }).length;
-  var c = el('<div class="lf-card" id="lfBadges"><div class="lf-hd"><span class="lf-lab">Badges</span><span class="lf-lab lf-num"></span></div><div class="lf-bdg"></div></div>');
-  $('.lf-hd .lf-num', c).textContent = got + ' of ' + all.length;
-  all.forEach(function (x) {
-    var it = el('<div class="lf-bdi"><b></b><span></span></div>'), btn = lfCoinBtn(x, 76);
-    if (!x.d && x.p && x.p[1] > 1) {
-      var f = Math.min(1, x.p[0] / x.p[1]), C = 2 * Math.PI * 45;
-      btn.insertAdjacentHTML('beforeend', '<svg class="lf-bdr" viewBox="0 0 94 94" aria-hidden="true"><circle class="bg" cx="47" cy="47" r="45"/><circle class="fg" cx="47" cy="47" r="45" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - f)) + '"/></svg>');
-    }
-    it.insertBefore(btn, it.firstChild);
-    $('b', it).textContent = x.b.n; $('span', it).textContent = x.d ? fmtDay(x.d).replace(/^\w+ /, '') : lfBadgeProg(x);
-    $('.lf-bdg', c).appendChild(it);
+  return lfFold('lfBadges', 'bdg', 'Badges', got + ' of ' + all.length, function (bd) {
+    var g = el('<div class="lf-bdg"></div>'); bd.appendChild(g);
+    all.forEach(function (x) {
+      var it = el('<div class="lf-bdi"><b></b><span></span></div>'), btn = lfCoinBtn(x, 76);
+      if (!x.d && x.p && x.p[1] > 1) {
+        var f = Math.min(1, x.p[0] / x.p[1]), C = 2 * Math.PI * 45;
+        btn.insertAdjacentHTML('beforeend', '<svg class="lf-bdr" viewBox="0 0 94 94" aria-hidden="true"><circle class="bg" cx="47" cy="47" r="45"/><circle class="fg" cx="47" cy="47" r="45" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - f)) + '"/></svg>');
+      }
+      it.insertBefore(btn, it.firstChild);
+      $('b', it).textContent = x.b.n; $('span', it).textContent = x.d ? fmtDay(x.d).replace(/^\w+ /, '') : lfBadgeProg(x);
+      g.appendChild(it);
+    });
   });
-  return c;
 }
 
 /* ═══════════ APPEARANCE ═══════════ */
