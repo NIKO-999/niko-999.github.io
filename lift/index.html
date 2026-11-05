@@ -380,6 +380,10 @@ svg { display: block; }
 .lf-sh-bd { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 4px 20px 20px; overscroll-behavior: contain; }
 .lf-sh-ft { flex: none; padding: 12px 20px calc(var(--safe-b) + 14px); border-top: 1px solid var(--line); display: flex; gap: 10px; }
 .lf-sh-ft > * { flex: 1; }
+/* A SHEET WITH NO TITLE has nothing for the head row to say: the close
+   button floats in the corner and the content starts under the grab. */
+.lf-sheet.no-title .lf-sh-hd { position: absolute; top: 12px; right: 8px; padding: 0; z-index: 2; }
+.lf-sheet.no-title .lf-sh-hd h2 { display: none; }
 .lf-x { width: 44px; height: 44px; border-radius: 999px; display: grid; place-items: center; color: var(--dim); flex: none; }
 
 /* ── the session ── */
@@ -1237,6 +1241,7 @@ function lfSheet(o) {
   var sh = el('<div class="lf-sheet" role="dialog" aria-modal="true"><div class="lf-grab" aria-hidden="true"></div><div class="lf-sh-hd"><h2></h2></div><div class="lf-sh-bd"></div></div>');
   if (o.full) sh.classList.add('is-full');
   if (o.cls) sh.classList.add(o.cls);
+  if (!o.title && !o.head) sh.classList.add('no-title');
   $('h2', sh).textContent = o.title || '';
   sh.setAttribute('aria-label', o.title || 'Sheet');
   if (o.head) { var hd = $('.lf-sh-hd', sh); hd.textContent = ''; hd.appendChild(o.head); }
