@@ -3402,6 +3402,7 @@ function bdOutline(c, k, sc) {
   else if (k === 'ramp') bdPoly(c, M([[-.92, -.78], [.5, -.78], [.92, .78], [-.5, .78]]), S(.14));
   else if (k === 'diamond') bdPoly(c, M([[0, .99], [.92, 0], [0, -.99], [-.92, 0]]), S(.16));
   else if (k === 'tall') bdPoly(c, M([[-.68, .96], [.68, .96], [.68, -.96], [-.68, -.96]]), S(.34));
+  else if (BD_TRO[k]) bdPoly(c, M(bdMirror(BD_TRO[k].pts)), S(.04));
   else if (k === 'plaque') bdPoly(c, M([[-.96, .64], [.96, .64], [.96, -.64], [-.96, -.64]]), S(.16));
   else if (k === 'arch') {
     c.moveTo(S(-.8), S(-.82)); c.quadraticCurveTo(S(-.8), S(-.96), S(-.66), S(-.96)); c.lineTo(S(.66), S(-.96)); c.quadraticCurveTo(S(.8), S(-.96), S(.8), S(-.82)); c.lineTo(S(.8), S(.14));
@@ -3484,7 +3485,37 @@ var BD_PAT = {
     field: function (x, y) { if (bdIn(x, y, -.75, -.75, .5)) return 'd'; var t = Math.atan2(y + .75, x + .75) / (Math.PI / 2) * 5; return Math.floor(t) % 2 ? 'b' : 'a'; }
   }
 };
-function bdPat(c, k) { var u = BD_DF / 2; c.save(); c.translate(u, u); c.scale(u, -u); c.lineWidth = 15 / u; c.lineJoin = c.lineCap = 'round'; c.beginPath(); BD_PAT[k].lines(c); c.stroke(); c.restore(); }
+function bdPat(c, k) { var u = BD_DF / 2, P = typeof k === 'string' ? BD_PAT[k] : k; c.save(); c.translate(u, u); c.scale(u, -u); c.lineWidth = 15 / u; c.lineJoin = c.lineCap = 'round'; c.beginPath(); P.lines(c); c.stroke(); c.restore(); }
+/* ── TROPHIES: a silhouette each, in the badges' silver and enamel ──
+   Each is drawn as its right half, top to bottom, and mirrored. The weight
+   sits in a cream medallion at (0, gy), radius gr, with the enamel cut
+   into rays around it — the one pattern every trophy shares, so seven
+   different shapes still read as one set. */
+function bdArc(cx, cy, r, a0, a1, n) { var o = []; for (var i = 0; i <= n; i++) { var a = (a0 + (a1 - a0) * i / n) * Math.PI / 180; o.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); } return o; }
+function bdMirror(right) {
+  var left = right.slice().reverse().map(function (p) { return [-p[0], p[1]]; }), all = right.concat(left), out = [];
+  all.forEach(function (p) { var q = out[out.length - 1]; if (!q || Math.abs(q[0] - p[0]) > 1e-6 || Math.abs(q[1] - p[1]) > 1e-6) out.push(p); });
+  if (out.length > 1 && Math.abs(out[0][0] - out[out.length - 1][0]) < 1e-6 && Math.abs(out[0][1] - out[out.length - 1][1]) < 1e-6) out.pop();
+  return out;
+}
+var BD_TRO = {
+  cup: { gy: .5, gr: .36, pts: [[.6, .96], [.64, .88], [.94, .82], [1, .54], [.86, .32], [.56, .26], [.42, .04], [.2, -.16], [.1, -.3], [.1, -.58], [.32, -.7], [.32, -.78], [.62, -.78], [.62, -.98], [0, -.98]] },
+  goblet: { gy: .56, gr: .32, pts: [[.5, .98], [.52, .9], [.48, .56], [.36, .26], [.12, .08], [.07, -.2], [.07, -.62], [.4, -.76], [.42, -.98], [0, -.98]] },
+  star: { gy: .28, gr: .29, pts: (function () { var o = [[0, .98]]; for (var i = 1; i <= 4; i++) { var a = (90 - i * 36) * Math.PI / 180, rr = i % 2 ? .32 : .72; o.push([rr * Math.cos(a), .26 + rr * Math.sin(a)]); } return o.concat([[.14, -.14], [.14, -.56], [.42, -.7], [.42, -.98], [0, -.98]]); })() },
+  crown: { gy: -.16, gr: .34, pts: [[0, .98], [.2, .42], [.62, .92], [.7, .28], [.7, -.58], [.8, -.64], [.8, -.98], [0, -.98]] },
+  obelisk: { gy: 0, gr: .3, pts: [[0, .98], [.32, .64], [.42, -.56], [.66, -.7], [.66, -.98], [0, -.98]] },
+  globe: { gy: .32, gr: .38, pts: bdArc(0, .32, .64, 90, -79, 24).concat([[.12, -.44], [.12, -.6], [.44, -.72], [.44, -.98], [0, -.98]]) },
+  torch: { gy: .02, gr: .26, pts: [[0, .98], [.16, .78], [.28, .58], [.3, .4], [.54, .34], [.5, .2], [.38, -.12], [.13, -.84], [.18, -.98], [0, -.98]] }
+};
+var TRO_KEYS = Object.keys(BD_TRO);
+/* the colour says which muscle the lift is for */
+var MUSCLE_C = { Quads: '#ef4444', Hamstrings: '#f97316', Glutes: '#ec4899', Calves: '#14b8a6', Chest: '#3b82f6', Back: '#8b5cf6', Shoulders: '#06b6d4', Biceps: '#22c55e', Triceps: '#eab308', Abs: '#84cc16', Core: '#84cc16', 'Lower back': '#f59e0b', Legs: '#ef4444' };
+function bdTroPat(t) {
+  return {
+    lines: function (c) { c.moveTo(t.gr, t.gy); c.arc(0, t.gy, t.gr, 0, Math.PI * 2); for (var i = 0; i < 12; i++) { var a = i / 12 * Math.PI * 2; c.moveTo(Math.cos(a) * t.gr, t.gy + Math.sin(a) * t.gr); c.lineTo(Math.cos(a) * 3, t.gy + Math.sin(a) * 3); } },
+    field: function (x, y) { var dx = x, dy = y - t.gy; if (dx * dx + dy * dy < t.gr * t.gr) return 'd'; var a = Math.atan2(dy, dx); return Math.floor((a + Math.PI) / (Math.PI / 6)) % 2 ? 'b' : 'a'; }
+  };
+}
 function bdHex(h) { var c = new BD3.Color(h); return [c.r * 255, c.g * 255, c.b * 255]; }
 function bdMix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
 function bdAlpha(c) { return c.getContext('2d').getImageData(0, 0, BD_FACE, BD_FACE).data; }
@@ -3494,7 +3525,8 @@ function bdFront(b, trim) {
   var lock = !!b.lock;
   var shp = bdCv(), sc = bdCtx(shp); sc.fillStyle = '#fff'; bdOutC(sc, b.sh, 1); sc.fill();
   var inn = bdCv(), ic = bdCtx(inn); ic.fillStyle = '#fff'; bdOutC(ic, b.sh, .9); ic.fill();
-  var pk = b.pt || b.k, gs = BD_GS[b.sh] || [1, 0];
+  var pk = b.pt || b.k, tro = BD_TRO[b.sh], gs = tro ? [tro.gr * 1.18, -tro.gy * BD_DF / 2] : BD_GS[b.sh] || [1, 0];
+  if (tro) pk = bdTroPat(tro);
   var dv = bdCv(), dc = bdCtx(dv); dc.strokeStyle = '#fff'; bdPat(dc, pk);
   /* the glyph: a number is a single thin metal line; an bdIcon is a metal bdOutline with enamel inside */
   var gm = bdCv(), gc = bdCtx(gm), gf = bdCv();
@@ -3510,7 +3542,7 @@ function bdFront(b, trim) {
   /* the pattern stops short of the glyph, so the number or bdIcon sits clear on the enamel */
   var ko = bdCv(); bdBlur(ko, gm, 14); bdBlur(ko, gf, 14); bdBlur(ko, gm, 14);
   var S = bdAlpha(shp), I = bdAlpha(inn), D = bdAlpha(dv), G = bdAlpha(gm), F = bdAlpha(gf), KO = bdAlpha(ko);
-  var A = bdHex(lock ? '#3b3c42' : b.c || BD_KIND[b.k].c), Bc = bdHex(lock ? '#26272c' : BD_CREAM), A2 = bdMix(A, [255, 255, 255], lock ? .05 : .14), Ai = bdMix(A, [255, 255, 255], lock ? .12 : .55), Ad = bdMix(A, [0, 0, 0], lock ? .25 : .3), pf = BD_PAT[pk].field;
+  var A = bdHex(lock ? '#3b3c42' : b.c || BD_KIND[b.k].c), Bc = bdHex(lock ? '#26272c' : BD_CREAM), A2 = bdMix(A, [255, 255, 255], lock ? .05 : .14), Ai = bdMix(A, [255, 255, 255], lock ? .12 : .55), Ad = bdMix(A, [0, 0, 0], lock ? .25 : .3), pf = (typeof pk === 'string' ? BD_PAT[pk] : pk).field;
   var T = bdHex(lock ? '#7d8087' : trim), u = BD_FACE / 2, N = BD_FACE * BD_FACE;
   /* pass one: how much of each pixel is metal, antialiased, so a wall's edge is a curve rather than a staircase */
   var MF = new Float32Array(N), GV = new Float32Array(N), mfc = bdCv(), mx = mfc.getContext('2d'), MI = mx.createImageData(BD_FACE, BD_FACE);
@@ -3551,10 +3583,11 @@ function bdBack(b, trim) {
   var lock = !!b.lock, e = bdCv(), x = bdCtx(e);
   x.fillStyle = '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle';
   x.font = '500 66px Inter, Arial, sans-serif';
-  if (b.bk) { var bl0 = BD_DF / 2 - (b.bk.length - 1) * 40 - 20; b.bk.forEach(function (t, bi) { x.font = (bi ? '500 ' : '700 ') + (t.length > 18 ? 52 : 66) + 'px Inter, Arial, sans-serif'; x.fillText(t.toUpperCase(), BD_DF / 2, bl0 + bi * 80); }); x.font = '500 66px Inter, Arial, sans-serif'; }
+  var tb = BD_TRO[b.sh], cy = tb ? BD_DF / 2 - tb.gy * BD_DF / 2 : BD_DF / 2, fs = tb ? Math.min(1, tb.gr / .36) : 1;
+  if (b.bk) { var bl0 = cy - (b.bk.length - 1) * 40 * fs - 20 * fs; b.bk.forEach(function (t, bi) { x.font = (bi ? '500 ' : '700 ') + Math.round((t.length > 18 ? 46 : 60) * fs) + 'px Inter, Arial, sans-serif'; x.fillText(t.toUpperCase(), BD_DF / 2, bl0 + bi * 80 * fs); }); x.font = '500 66px Inter, Arial, sans-serif'; }
   else if (lock) { x.fillText('NOT YET', BD_DF / 2, BD_DF / 2 - 60); x.fillText('EARNED', BD_DF / 2, BD_DF / 2 + 20); }
   else { x.fillText('EARNED ON', BD_DF / 2, BD_DF / 2 - 60); x.fillText(b.at.toUpperCase(), BD_DF / 2, BD_DF / 2 + 20); }
-  x.font = '800 44px Inter, Arial, sans-serif'; x.fillText('LIFT', BD_DF / 2, BD_DF / 2 + 150);
+  x.font = '800 ' + Math.round(44 * fs) + 'px Inter, Arial, sans-serif'; x.fillText('LIFT', BD_DF / 2, cy + 150 * fs);
   var E = bdAlpha(e), col = bdCv(), orm = bdCv(), hgt = bdCv();
   var cc = col.getContext('2d'), oc = orm.getContext('2d'), hc = hgt.getContext('2d');
   var CI = cc.createImageData(BD_FACE, BD_FACE), OI = oc.createImageData(BD_FACE, BD_FACE), HI = hc.createImageData(BD_FACE, BD_FACE), C = CI.data, O = OI.data, H = HI.data;
@@ -3671,49 +3704,16 @@ function bdMake(b, m, n) {
     if (set.glaze) { o.clearcoat = lock ? .3 : 1; o.clearcoatRoughness = .06; o.clearcoatMap = set.glaze; }
     return new BD3.MeshPhysicalMaterial(o);
   }
-  var f = new BD3.Mesh(bdPolar(shp, 0), face(mp.f)); f.position.z = zf; g.add(f);
-  var bk = new BD3.Mesh(bdPolar(shp, .07, true), face(mp.b)); bk.rotation.y = Math.PI; bk.position.z = -zf; g.add(bk);
+  /* a trophy's outline has stems and handles a ray from the middle cannot
+     reach, so its faces are triangulated flat; every other shape dishes */
+  var flat = function () { var gg = new BD3.ShapeGeometry(shp, 48), pa = gg.attributes.position, uv = gg.attributes.uv; for (var i = 0; i < pa.count; i++) uv.setXY(i, pa.getX(i) / (2 * BD_RF) + .5, pa.getY(i) / (2 * BD_RF) + .5); return gg; };
+  var tro = !!BD_TRO[b.sh];
+  var f = new BD3.Mesh(tro ? flat() : bdPolar(shp, 0), face(mp.f)); f.position.z = zf + (tro ? .001 : 0); g.add(f);
+  var bk = new BD3.Mesh(tro ? flat() : bdPolar(shp, .07, true), face(mp.b)); bk.rotation.y = Math.PI; bk.position.z = -zf - (tro ? .001 : 0); g.add(bk);
   return g;
 }
 
 /* what the drawing needs to know about one badge, earned or not */
-/* ── A TROPHY, for a personal best ──
-   A real cup rather than a flat award: turned on a lathe, two handles, a
-   red enamel band for a PR, on a black stepped base whose gold plate is
-   engraved with the lift and the set. Everything is built here and given
-   back with the rest when it is done with. */
-function bdTrophy(x, n) {
-  var T = BD3, g = new T.Group(), rec = x.r, big = n > 600;
-  var gold = new T.MeshPhysicalMaterial({ color: '#ffc94a', metalness: 1, roughness: .16, clearcoat: .4, clearcoatRoughness: .1, envMapIntensity: 1.2 });
-  var base = new T.MeshPhysicalMaterial({ color: '#111114', metalness: .2, roughness: .28, clearcoat: 1, clearcoatRoughness: .06, envMapIntensity: 1 });
-  var red = new T.MeshPhysicalMaterial({ color: '#c81e14', metalness: .1, roughness: .25, clearcoat: 1, clearcoatRoughness: .04, envMapIntensity: 1 });
-  var seg = big ? 96 : 48;
-  /* the base: two steps */
-  var b1 = new T.Mesh(new T.BoxGeometry(1.2, .2, .78), base); b1.position.y = -.9; g.add(b1);
-  var b2 = new T.Mesh(new T.BoxGeometry(.98, .22, .62), base); b2.position.y = -.69; g.add(b2);
-  /* the nameplate, engraved */
-  var pc = document.createElement('canvas'); pc.width = big ? 1024 : 512; pc.height = pc.width / 4; var px = pc.getContext('2d'), W = pc.width, H = pc.height;
-  var gr = px.createLinearGradient(0, 0, W, H); gr.addColorStop(0, '#f7dc8f'); gr.addColorStop(.5, '#d9ac45'); gr.addColorStop(1, '#f2cf72');
-  px.fillStyle = gr; px.fillRect(0, 0, W, H);
-  px.strokeStyle = 'rgba(90,60,10,.6)'; px.lineWidth = W / 220; px.strokeRect(W * .02, H * .08, W * .96, H * .84);
-  px.fillStyle = '#4a3408'; px.textAlign = 'center'; px.textBaseline = 'middle';
-  var nm = (x.b.n || '').toUpperCase(); px.font = '700 ' + Math.round(H * (nm.length > 22 ? .2 : .26)) + 'px Inter, Arial, sans-serif'; px.fillText(nm, W / 2, H * .34);
-  px.font = '600 ' + Math.round(H * .3) + 'px Inter, Arial, sans-serif'; px.fillText(fmtW(rec.w) + ' ' + S.unit.toUpperCase() + ' \u00d7 ' + rec.r, W / 2, H * .7);
-  var pt = new T.CanvasTexture(pc); pt.encoding = T.sRGBEncoding; pt.anisotropy = 16;
-  var plate = new T.Mesh(new T.PlaneGeometry(.86, .2), new T.MeshPhysicalMaterial({ map: pt, metalness: 1, roughness: .3, envMapIntensity: 1.1 }));
-  plate.position.set(0, -.69, .312); g.add(plate);
-  /* the cup: foot, stem, knot, bowl and lip, turned in one profile */
-  var prof = [[0, -.58], [.26, -.58], [.27, -.55], [.16, -.5], [.08, -.42], [.06, -.2], [.11, -.13], [.11, -.08], [.06, -.03], [.1, .02], [.24, .08], [.38, .2], [.47, .38], [.51, .6], [.52, .8], [.56, .86], [.58, .9], [.55, .9], [.49, .82], [.47, .6], [.42, .38], [.3, .2], [0, .14]];
-  var cup = new T.Mesh(new T.LatheGeometry(prof.map(function (p) { return new T.Vector2(p[0], p[1]); }), seg), gold); g.add(cup);
-  /* a red band for a personal best */
-  var band = new T.Mesh(new T.TorusGeometry(.505, .032, 16, seg), red); band.rotation.x = Math.PI / 2; band.position.y = .56; g.add(band);
-  /* two handles */
-  [-1, 1].forEach(function (sd) {
-    var h = new T.Mesh(new T.TorusGeometry(.2, .045, 16, 40, Math.PI), gold);
-    h.rotation.z = -sd * Math.PI / 2; h.position.set(sd * .5, .5, 0); g.add(h);
-  });
-  return g;
-}
 function bdSpec(x) {
   var b = x.b;
   return { id: b.id, k: b.k, c: b.c, bk: b.bk, pt: b.pt || BD_PT[b.id], sh: b.sh || BD_SHI[b.id] || BD_SHK[b.k], gl: b.gl || BD_GL[b.id] || 'i:check', lock: !x.d,
@@ -3742,7 +3742,7 @@ function bdPump() {
     (function next() {
       var j = bdQ.shift(); if (!j) { bdBusy = false; return; }
       if (!bdStills[j[2]]) {
-        var aw = j[0].r ? bdTrophy(j[0], 512) : bdMake(bdSpec(j[0]), 'silver', 512); if (j[0].r) aw.rotation.set(.18, -.55, 0); else aw.rotation.set(.32, -.5, .04); bd3.s.add(aw); bd3.r.render(bd3.s, bd3.c);
+        var aw = bdMake(bdSpec(j[0]), 'silver', 512); aw.rotation.set(.32, -.5, .04); bd3.s.add(aw); bd3.r.render(bd3.s, bd3.c);
         bdStills[j[2]] = bd3.r.domElement.toDataURL('image/png'); bd3.s.remove(aw); bdDrop(aw); bd3.r.renderLists.dispose();
       }
       j[1].src = bdStills[j[2]];
@@ -3790,7 +3790,7 @@ function lfCoinView(x, earnedNow) {
     var half = Math.tan(14 * Math.PI / 180), fitH = 2 / .75 / 2 / half, fitW = 2 / .75 / 2 / (half * (w / h));
     cam.position.set(0, 0, Math.max(fitH, fitW));
     /* sharper than the shelf: 1536, so a 3x phone is never upscaling the face */
-    aw = x.r ? bdTrophy(x, 1536) : bdMake(bdSpec(x), 'silver', 1536); sc.add(aw);
+    aw = bdMake(bdSpec(x), 'silver', 1536); sc.add(aw);
     /* it arrives turning and settles face up */
     var ry = -Math.PI * 2 - .8, rx = .3, vy = 0, vx = 0, drag = null, t0 = performance.now();
     var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -3831,7 +3831,8 @@ function lfRecords() {
   woSorted().forEach(function (w) { w.x.forEach(function (e) { e.sets.forEach(function (q) { if (!(q.w > 0) || !(q.r > 0)) return; var v = e1rm(q.w, q.r); if (!best[e.id] || v > best[e.id].v + 1e-9) best[e.id] = { v: v, w: q.w, r: q.r, d: w.d, n: e.n }; }); }); });
   return Object.keys(best).map(function (id) {
     var o = best[id], nm = exName(id, o.n), wt = fmtW(o.w);
-    return { b: { id: 'rec' + id, n: nm, k: 'pr', sh: 'plaque', gl: wt, d: 'Your best set: ' + wt + ' ' + S.unit + ' \u00d7 ' + o.r + '.',
+    var ex = exById(id), h = 0; for (var hi = 0; hi < id.length; hi++) h = (h * 31 + id.charCodeAt(hi)) >>> 0;
+    return { b: { id: 'rec' + id, n: nm, k: 'pr', sh: TRO_KEYS[h % TRO_KEYS.length], c: ex && MUSCLE_C[ex.m] || '#f43f5e', gl: wt, d: 'Your best set: ' + wt + ' ' + S.unit + ' \u00d7 ' + o.r + '.',
       bk: [nm, wt + ' ' + S.unit + ' \u00d7 ' + o.r, fmtDay(o.d).replace(/^\w+ /, '') + ' ' + o.d.slice(0, 4)] }, d: o.d, p: null, r: o };
   }).sort(function (a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : b.r.v - a.r.v; });
 }
