@@ -525,6 +525,16 @@ const kv = () => {
     ok('a friend record is not readable from an origin this worker does not know', q.headers.get('Access-Control-Allow-Origin') === ORIGIN);
     /* reactions: a friend reacts with their own key, toggles, and the
        owner's record carries them */
+    /* the owner's phone gives a push address; a friend's reaction is
+       sealed to it here and sent at once, and a read never shows it */
+    const ua = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
+    const uaPub = new Uint8Array(await crypto.subtle.exportKey('raw', ua.publicKey)), auth = crypto.getRandomValues(new Uint8Array(16));
+    const b64 = (u) => Buffer.from(u).toString('base64url');
+    await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: 'Niko', s: { wo30: 1, wl: [{ id: 'w1', d: '2026-11-02', n: 'Quad volume', x: [] }] }, pu: { ep: 'https://web.push.apple.com/RX', pk: b64(uaPub), au: b64(auth) } } });
+    let gp = await (await hit('GET', '/v1/lift/' + C)).json();
+    ok('a push address is kept on the record and never read back', JSON.parse(env.SCHED.m.get('lift:' + C)).pu.ep === 'https://web.push.apple.com/RX' && !('pu' in gp), Object.keys(gp));
+    const realF = globalThis.fetch, pushed = [];
+    globalThis.fetch = async (u, o) => { pushed.push({ u: String(u), o }); return new Response('', { status: 201 }); };
     const C2 = 'ZZZZ2222', KR = 'b'.repeat(32);
     await hit('PUT', '/v1/lift/' + C2, { key: KR, body: { n: 'Sam', s: { wo30: 1 } } });
     q = await hit('PUT', '/v1/lift/' + C + '/react', { key: KEY, body: { f: C2, w: 'w1', e: '🔥' } });
@@ -532,11 +542,25 @@ const kv = () => {
     q = await hit('PUT', '/v1/lift/' + C + '/react', { key: KR, body: { f: C2, w: 'w1', e: '🍕' } });
     ok('only the three marks', q.status === 400, q.status);
     q = await (await hit('PUT', '/v1/lift/' + C + '/react', { key: KR, body: { f: C2, w: 'w1', e: '🔥' } })).json();
+    const hk2 = async (salt, ikm, info, len) => new Uint8Array(await crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt, info }, await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']), len * 8));
+    const open2 = async (b) => {
+      b = new Uint8Array(b); const salt = b.slice(0, 16), idlen = b[20], asPub = b.slice(21, 21 + idlen), ct = b.slice(21 + idlen);
+      const ecdh = new Uint8Array(await crypto.subtle.deriveBits({ name: 'ECDH', public: await crypto.subtle.importKey('raw', asPub, { name: 'ECDH', namedCurve: 'P-256' }, false, []) }, ua.privateKey, 256));
+      const te = new TextEncoder(), cat = (...a) => { const o = new Uint8Array(a.reduce((n, x) => n + x.length, 0)); let at = 0; a.forEach((x) => { o.set(x, at); at += x.length; }); return o; };
+      const ikm = await hk2(auth, ecdh, cat(te.encode('WebPush: info\0'), uaPub, asPub), 32);
+      const cek = await hk2(salt, ikm, te.encode('Content-Encoding: aes128gcm\0'), 16), nonce = await hk2(salt, ikm, te.encode('Content-Encoding: nonce\0'), 12);
+      const pt = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce }, await crypto.subtle.importKey('raw', cek, 'AES-GCM', false, ['decrypt']), ct));
+      return JSON.parse(Buffer.from(pt.slice(0, pt.length - 1)).toString());
+    };
+    const msg = pushed.length === 1 ? await open2(pushed[0].o.body) : null;
+    ok('the owner is told at once, sealed to their phone: who, which mark, which workout', pushed.length === 1 && pushed[0].u === 'https://web.push.apple.com/RX' && pushed[0].o.headers['Content-Encoding'] === 'aes128gcm' && msg && msg.t === 'Sam 🔥 your workout' && msg.b === 'Quad volume', [pushed.length, msg]);
     let g = await (await hit('GET', '/v1/lift/' + C)).json();
     ok('a reaction lands on the record, with who gave it', q.on === true && g.rx.length === 1 && g.rx[0].n === 'Sam' && g.rx[0].w === 'w1' && g.rx[0].e === '🔥', g.rx);
     await hit('PUT', '/v1/lift/' + C + '/react', { key: KR, body: { f: C2, w: 'w1', e: '🔥' } });
     g = await (await hit('GET', '/v1/lift/' + C)).json();
     ok('and the same press takes it back', g.rx.length === 0, g.rx);
+    ok('taking it back tells nobody', pushed.length === 1, pushed.length);
+    globalThis.fetch = realF;
     await hit('PUT', '/v1/lift/' + C + '/react', { key: KR, body: { f: C2, w: 'w1', e: '💪' } });
     q = await hit('DELETE', '/v1/lift/' + C, { key: KEY });
     ok('the owner can leave, and the record goes, reactions and all', q.status === 200 && !env.SCHED.m.has('lift:' + C) && !env.SCHED.m.has('liftr:' + C));

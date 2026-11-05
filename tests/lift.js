@@ -664,6 +664,22 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── reactions reach you: the friends record carries the push address ── */
+  {
+    const c = await browser.newContext(PHONE);
+    await c.addInitScript(freeze('2026-11-02T07:00:00'));
+    await c.addInitScript(`(() => { if (!sessionStorage.getItem('s')) { sessionStorage.setItem('s', 1); localStorage.setItem('lift.v1', JSON.stringify({ unit: 'kg' }));
+      localStorage.setItem('lift.fr.v1', JSON.stringify({ on: true, code: 'K7PQ2M4X', key: '${'a'.repeat(32)}', name: 'Niko', list: [] }));
+      localStorage.setItem('lift.push.v1', JSON.stringify({ id: '${'c'.repeat(32)}', tok: '${'d'.repeat(32)}', ep: 'https://web.push.apple.com/x', pk: 'BPk', au: 'AUu' })); } })();`);
+    const puts = [];
+    await c.route('https://sched.nikorapullin.workers.dev/**', (rt) => { if (rt.request().method() === 'PUT') puts.push(JSON.parse(rt.request().postData() || 'null')); rt.fulfill({ status: 200, body: '{"rx":[]}' }); });
+    const page = await c.newPage();
+    await page.goto(URL); await page.waitForTimeout(2200);
+    const rec = puts.filter((x) => x && x.s)[0];
+    ok('with notifications on, your friends record says where to reach you', rec && rec.pu && rec.pu.ep === 'https://web.push.apple.com/x' && rec.pu.pk === 'BPk', rec && rec.pu);
+    await c.close();
+  }
+
   /* ── A DAY WITH NOTHING LOGGED IS A REST DAY ── */
   {
     const { c, page } = await ctx({ unit: 'kg', since: '2026-10-25', rd: { '2026-10-27': 1 }, wo: [{ id: 'a1', d: '2026-10-26', s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 100, r: 8 }] }] }] });

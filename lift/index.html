@@ -2400,7 +2400,7 @@ function lfRenderYou() {
     + '<span class="lf-flab">Appearance</span><div class="lf-seg" id="lfMode" style="--n:3"><button type="button" data-m="auto">Auto</button><button type="button" data-m="light">Light</button><button type="button" data-m="dark">Dark</button></div>'
     + '<span class="lf-flab">Rest alert</span><div class="lf-seg" id="lfRa"><button type="button" data-a="1">Sound + buzz</button><button type="button" data-a="0">Off</button></div>'
     + '<button type="button" class="lf-btn is-full" id="lfRaTest" style="margin-top:10px">Test sound</button>'
-    + '<span class="lf-flab">Lock-screen alert</span><button type="button" class="lf-btn is-full" id="lfPush"></button>'
+    + '<span class="lf-flab">Rest and reaction alerts</span><button type="button" class="lf-btn is-full" id="lfPush"></button>'
     + '</div>');
   $$('#lfMode button', c).forEach(function (b) {
     b.setAttribute('aria-pressed', b.dataset.m === lfMode() ? 'true' : 'false');
@@ -2610,7 +2610,11 @@ var frT = 0, frSig = '';
 function frQueue() { if (!FRS.on) return; clearTimeout(frT); frT = setTimeout(frPush, 2500); }
 function frPush() {
   if (!FRS.on) return;
-  var body = { n: FRS.name || 'Lifter', s: frStats() }, sig = JSON.stringify(body);
+  var body = { n: FRS.name || 'Lifter', s: frStats() };
+  /* with notifications on, the server is told where to reach this phone
+     when a friend reacts — the address and its public keys, nothing else */
+  if (LPU && LPU.rx !== false) body.pu = { ep: LPU.ep, pk: LPU.pk, au: LPU.au };
+  var sig = JSON.stringify(body);
   if (sig === frSig) return;
   frApi('PUT', '/v1/lift/' + FRS.code, body).then(function (r) { if (r.st === 200) frSig = sig; }).catch(function () {});
 }
@@ -2996,12 +3000,12 @@ function lfPushOn(btn) {
     }).then(function (sub) {
       var hex = function () { return Array.from(crypto.getRandomValues(new Uint8Array(16)), function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); };
       LPU = { id: hex(), tok: hex(), ep: sub.endpoint, pk: lfB64u(new Uint8Array(sub.getKey('p256dh'))), au: lfB64u(new Uint8Array(sub.getKey('auth'))) };
-      lfPushStore(); lfRender(); lfToast('Lock-screen alerts on');
+      lfPushStore(); frSig = ''; if (FRS.on) frPush(); lfRender(); lfToast('Notifications on');
     });
   }).catch(function () { btn.disabled = false; lfToast('Lock-screen alerts could not be turned on'); });
 }
 function lfPushOff() {
-  var was = LPU; LPU = null; lfPushStore();
+  var was = LPU; LPU = null; lfPushStore(); frSig = ''; if (FRS.on) frPush();
   if (was) fetch(FR_URL + '/v1/push/' + was.id, { method: 'DELETE', headers: { Authorization: 'Bearer ' + was.tok } }).catch(function () {});
   if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(function (reg) {
     return reg && reg.pushManager.getSubscription().then(function (x) { return x && x.unsubscribe(); });

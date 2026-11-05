@@ -113,6 +113,28 @@ function unb64(t) {
   return u;
 }
 
+/* SEALING HERE, for the one push this worker writes itself: a friend's
+   reaction, which only exists on the server, so there is nothing for a
+   phone to seal in advance. RFC 8291, aes128gcm — the same envelope the
+   phones use for their own queues. */
+async function hkdf(salt, ikm, info, len) {
+  const k = await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']);
+  return new Uint8Array(await crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt, info }, k, len * 8));
+}
+function cat(...a) { const n = a.reduce((x, y) => x + y.length, 0), o = new Uint8Array(n); let at = 0; for (const x of a) { o.set(x, at); at += x.length; } return o; }
+async function pushSeal(pk, au, obj) {
+  const te = new TextEncoder(), ua = unb64(pk), auth = unb64(au), salt = crypto.getRandomValues(new Uint8Array(16));
+  const kp = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
+  const asPub = new Uint8Array(await crypto.subtle.exportKey('raw', kp.publicKey));
+  const uaKey = await crypto.subtle.importKey('raw', ua, { name: 'ECDH', namedCurve: 'P-256' }, false, []);
+  const ecdh = new Uint8Array(await crypto.subtle.deriveBits({ name: 'ECDH', public: uaKey }, kp.privateKey, 256));
+  const ikm = await hkdf(auth, ecdh, cat(te.encode('WebPush: info\x00'), ua, asPub), 32);
+  const cek = await hkdf(salt, ikm, te.encode('Content-Encoding: aes128gcm\x00'), 16), nonce = await hkdf(salt, ikm, te.encode('Content-Encoding: nonce\x00'), 12);
+  const k = await crypto.subtle.importKey('raw', cek, 'AES-GCM', false, ['encrypt']);
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: nonce }, k, cat(te.encode(JSON.stringify(obj)), new Uint8Array([2]))));
+  return cat(salt, new Uint8Array([0, 0, 16, 0, 65]), asPub, ct);
+}
+
 /* THE SIGNING KEY IS MADE HERE AND NEVER LEAVES KV. A VAPID key the
    push services check a sender against has to be a secret somewhere,
    and the repository is public — so rather than a key somebody has to
@@ -610,7 +632,8 @@ export default {
       if (!body || !/^[A-HJ-NP-Z2-9]{8}$/.test(body.f || '') || !/^[A-Za-z0-9_-]{1,24}$/.test(body.w || '') || LIFT_RX.indexOf(body.e) < 0) return json(req, { error: 'bad shape' }, 400);
       const me = JSON.parse((await env.SCHED.get('lift:' + body.f)) || 'null');
       if (!me || me.kh !== await sha256hex(auth)) return json(req, { error: 'wrong key' }, 403);
-      if (!(await env.SCHED.get('lift:' + lr[1]))) return json(req, { error: 'nobody has that code' }, 404);
+      const them = JSON.parse((await env.SCHED.get('lift:' + lr[1])) || 'null');
+      if (!them) return json(req, { error: 'nobody has that code' }, 404);
       const rk = 'liftr:' + lr[1];
       let rx = JSON.parse((await env.SCHED.get(rk)) || '[]');
       const had = rx.some((x) => x.f === body.f && x.w === body.w && x.e === body.e);
@@ -618,6 +641,17 @@ export default {
       if (!had) rx.unshift({ f: body.f, n: me.n, w: body.w, e: body.e, at: Date.now() });
       rx = rx.slice(0, 200);
       await env.SCHED.put(rk, JSON.stringify(rx), { expirationTtl: 30 * 86400 });
+      /* A NEW reaction tells its owner, once, if their phone asked to be
+         told. Taking one back is silent. A push service saying the
+         address is gone takes it off the record. */
+      if (!had && them.pu) {
+        const wo = ((them.s && them.s.wl) || []).filter((x) => x.id === body.w)[0];
+        try {
+          const bytes = await pushSeal(them.pu.pk, them.pu.au, { t: me.n + ' ' + body.e + ' your workout', b: wo ? wo.n : 'Open Lift to see it', g: 'lift-rx-' + body.w });
+          const res = await fetch(them.pu.ep, { method: 'POST', headers: { TTL: '86400', Urgency: 'normal', 'Content-Encoding': 'aes128gcm', 'Content-Type': 'application/octet-stream', Authorization: await vapidAuth(env, them.pu.ep, Date.now()) }, body: bytes });
+          if (res.status === 404 || res.status === 410) { delete them.pu; await env.SCHED.put('lift:' + lr[1], JSON.stringify(them), { expirationTtl: LIFT_TTL }); }
+        } catch (e) {}
+      }
       return json(req, { ok: true, on: !had });
     }
 
@@ -646,7 +680,11 @@ export default {
         const clean = liftClean(body);
         if (!clean) return json(req, { error: 'bad shape' }, 400);
         const at = Date.now();
-        await env.SCHED.put(lk, JSON.stringify({ kh, n: clean.n, s: clean.s, at }), { expirationTtl: LIFT_TTL });
+        /* WHERE TO TELL YOU a friend reacted: your phone's push address,
+           kept on your record and never in what a read returns. */
+        const pu = body.pu && typeof body.pu === 'object' && pushOk(body.pu.ep) && /^[A-Za-z0-9_-]{80,100}$/.test(body.pu.pk || '') && /^[A-Za-z0-9_-]{16,32}$/.test(body.pu.au || '')
+          ? { ep: body.pu.ep, pk: body.pu.pk, au: body.pu.au } : null;
+        await env.SCHED.put(lk, JSON.stringify(pu ? { kh, n: clean.n, s: clean.s, at, pu } : { kh, n: clean.n, s: clean.s, at }), { expirationTtl: LIFT_TTL });
         return json(req, { ok: true, at });
       }
     }
