@@ -1334,6 +1334,10 @@ function lfToast(msg, undo) {
    makes no sound at all: the alert is a vibration where the phone allows
    one, and the lock-screen notification (Settings, below) where it does
    not. `lfRests` counts alerts so the suite can see one fire. */
+/* And it says so to the phone: 'ambient' is the session that mixes with
+   whatever else is playing, so even an older copy's 'playback' claim
+   left in a phone's memory is put back the moment this one runs. */
+try { if (navigator.audioSession) navigator.audioSession.type = 'ambient'; } catch (e) {}
 function lfRing() { window.lfRests = (window.lfRests || 0) + 1; buzz([80, 60, 80]); }
 function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 12); } catch (e) {} }
 

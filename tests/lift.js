@@ -384,7 +384,7 @@ const freeze = (at) => `(() => {
        music you train to. No Test sound, no media element, no 'playback'. */
     ok('there is no sound to test', !(await page.locator('#lfRaTest').count()));
     ok('the rest alert is On or Off, never a sound', (await page.locator('#lfRa button').allTextContents()).join('|') === 'On|Off');
-    ok('nothing in the page claims the audio session or plays a sound', !/audioSession|new Audio\(|AudioContext|\.play\(\)/.test(await page.content()));
+    ok('nothing in the page claims the audio session or plays a sound', !/type = 'playback'|new Audio\(|AudioContext|\.play\(\)/.test(await page.content()));
     await c.close();
   }
   {
