@@ -353,7 +353,10 @@ svg { display: block; }
 @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
   .lf-sheet { background: color-mix(in srgb, var(--sheet) 60%, transparent) !important; -webkit-backdrop-filter: blur(30px) saturate(1.6); backdrop-filter: blur(30px) saturate(1.6); }
   /* and everything drawn on it is glass too, or a full sheet of solid cards hides the glass it sits on */
-  .lf-sheet .lf-card, .lf-sheet .lf-sum div, .lf-sheet .lf-vs-c { background: color-mix(in srgb, var(--card) 62%, transparent) !important; }
+  /* a step lighter than the sheet under them, so a card on a sheet still reads as a card */
+  .lf-sheet .lf-card, .lf-sheet .lf-sum div, .lf-sheet .lf-vs-c, .lf-sheet .lf-ex { background: color-mix(in srgb, var(--card3) 70%, transparent) !important; }
+  /* and what sits inside those cards goes the other way, down toward the page, so a field still reads as a field */
+  .lf-sheet .lf-ex .lf-set:not(.is-done) input, .lf-sheet .lf-ex-ft button { background: color-mix(in srgb, var(--bg) 40%, transparent); }
   /* the badge viewer: the page faintly behind it, never readable */
   .lf-cv { background: color-mix(in srgb, var(--bg) 72%, transparent); -webkit-backdrop-filter: blur(30px) saturate(1.4); backdrop-filter: blur(30px) saturate(1.4); }
 }
@@ -1649,7 +1652,7 @@ function lfLegCard() {
   var m = monday(today()), got = lfMuscleSets(m, addDays(m, 6));
   var c = el('<div class="lf-card" id="lfLegs"><div class="lf-hd"><span class="lf-lab">Sets this week</span><button type="button" class="lf-vr-ed" id="lfTgEdit">Edit targets</button></div><div class="lf-vol"></div></div>');
   /* THE TARGETS ARE YOURS: a row opens its own, the header the list. */
-  $('#lfTgEdit', c).addEventListener('click', function () { lfGo('you'); var f = $('#lfFocus'); if (f) f.scrollIntoView({ block: 'start' }); });
+  $('#lfTgEdit', c).addEventListener('click', function () { lfFoldSet('foc', 1); lfGo('you'); var f = $('#lfFocus'); if (f) f.scrollIntoView({ block: 'start' }); });
   var ts = lfTargets(), cdm = 0, a0 = ymd(m), a1 = ymd(addDays(m, 6));
   S.wo.forEach(function (w) { if (w.cd && w.d >= a0 && w.d <= a1) cdm += w.cd.m; });
   if (act && act.cd && ymd(new Date(act.s)) >= a0) cdm += act.cd.m;
@@ -2583,21 +2586,21 @@ function lfFold(id, key, title, side, fill) {
   return c;
 }
 function lfFocusCard() {
-  var c = el('<div class="lf-card" id="lfFocus" style="padding:14px 16px 6px"><div class="lf-hd"><span class="lf-lab">Focus</span><span class="lf-lab">sets a week</span></div><div class="lf-list"></div></div>');
-  var list = $('.lf-list', c);
-  lfTargets().forEach(function (t) {
-    var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div><em class="lf-num"></em>' + IC.chev + '</button>');
-    li.dataset.m = t[0];
-    $('b', li).textContent = t[0]; $('span', li).textContent = t[3] ? 'Priority' : 'Keep progressing';
-    $('em', li).textContent = lfRange(t[1], t[2]);
-    li.addEventListener('click', function () { lfFocusSheet(t[0]); });
-    list.appendChild(li);
+  return lfFold('lfFocus', 'foc', 'Focus', 'sets a week', function (bd) {
+    var list = el('<div class="lf-list"></div>'); bd.appendChild(list);
+    lfTargets().forEach(function (t) {
+      var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div><em class="lf-num"></em>' + IC.chev + '</button>');
+      li.dataset.m = t[0];
+      $('b', li).textContent = t[0]; $('span', li).textContent = t[3] ? 'Priority' : 'Keep progressing';
+      $('em', li).textContent = lfRange(t[1], t[2]);
+      li.addEventListener('click', function () { lfFocusSheet(t[0]); });
+      list.appendChild(li);
+    });
+    var add = el('<button type="button" class="lf-add" id="lfFocusAdd" style="margin:10px 0 8px">' + IC.plus + 'Add a muscle</button>');
+    if (S.focus.length >= MUSCLES.length) add.disabled = true;
+    add.addEventListener('click', function () { lfFocusSheet(null); });
+    bd.appendChild(add);
   });
-  var add = el('<button type="button" class="lf-add" id="lfFocusAdd" style="margin:10px 0 8px">' + IC.plus + 'Add a muscle</button>');
-  if (S.focus.length >= MUSCLES.length) add.disabled = true;
-  add.addEventListener('click', function () { lfFocusSheet(null); });
-  c.appendChild(add);
-  return c;
 }
 function lfFocusSheet(m) {
   var f = m ? S.focus.filter(function (x) { return x.m === m; })[0] : null;
