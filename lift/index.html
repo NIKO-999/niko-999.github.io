@@ -15,6 +15,15 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml" />
 <link rel="apple-touch-icon" href="icon-180.png" />
 <link rel="preload" href="../arc/fonts/Inter.woff2" as="font" type="font/woff2" crossorigin />
+<script>
+/* The face is chosen before anything paints: stored as auto, light or
+   dark, and auto follows the phone. */
+(function () {
+  var m = 'auto'; try { m = localStorage.getItem('lift.mode.v1') || 'auto'; } catch (e) {}
+  var dark = m === 'dark' || (m !== 'light' && !(window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches));
+  document.documentElement.setAttribute('data-mode', dark ? 'dark' : 'light');
+})();
+</script>
 <style>
 @font-face { font-family: 'Inter'; src: url('../arc/fonts/Inter.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
 
@@ -35,6 +44,22 @@
      — log a set, finish a workout — is red, and nothing else is. */
   --log: #ff3b30;
   --on-ink: #000000;
+  --mark-on: #c9c9ce;
+  --bar: #4a4a50;
+  --sheet: #18181b;
+  --pill: rgba(28, 28, 32, .86);
+  --edge: rgba(255,255,255,.06);
+  --focus: rgba(255,255,255,.25);
+  --ph: #66666e;
+  --ahead: #55555c;
+  --dash: rgba(255,255,255,.2);
+  --plot: #0e0e10;
+  --shade: rgba(0,0,0,.6);
+  --live-bg: #2a0e0c;
+  --live-ink: #ffb3ad;
+  --toast: #2c2c30;
+  --card-shadow: none;
+  --done-bg: rgba(52, 199, 89, .16);
   --r: 22px;
   --r-s: 14px;
   --bar-h: 64px;
@@ -43,6 +68,38 @@
   --ease: cubic-bezier(.2, .8, .2, 1);
   color-scheme: dark;
 }
+/* THE LIGHT FACE: the same tokens, answered for a white page. Chosen by
+   the phone unless You says otherwise; the attribute is set before the
+   first paint by the script in the head, so nothing flashes. */
+:root[data-mode="light"] {
+  --bg: #f2f2f7;
+  --card: #ffffff;
+  --card2: #ececf0;
+  --card3: #e3e3e8;
+  --line: rgba(0, 0, 0, .08);
+  --ink: #000000;
+  --dim: #6c6c70;
+  --quiet: #8a8a8e;
+  --mark-off: #e5e5ea;
+  --on-ink: #ffffff;
+  --mark-on: #1c1c1e;
+  --bar: #d1d1d6;
+  --sheet: #ffffff;
+  --pill: rgba(255, 255, 255, .92);
+  --edge: rgba(0,0,0,.06);
+  --focus: rgba(0,0,0,.25);
+  --ph: #aeaeb2;
+  --ahead: #c7c7cc;
+  --dash: rgba(0,0,0,.2);
+  --plot: #f5f5f7;
+  --shade: rgba(0,0,0,.12);
+  --live-bg: #ffe9e7;
+  --live-ink: #c4271c;
+  --toast: #1c1c1e;
+  --card-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05);
+  --done-bg: rgba(52, 199, 89, .14);
+  --good: #248a3d;
+  color-scheme: light;}
 
 /* An app puts a view away with the hidden attribute, and any author
    `display` outranks the browser's own rule for it. Said once, here,
@@ -72,7 +129,7 @@ svg { display: block; }
 .lf-num { font-variant-numeric: tabular-nums; }
 
 /* ── surfaces ── */
-.lf-card { background: var(--card); border-radius: var(--r); padding: 14px; position: relative; }
+.lf-card { background: var(--card); border-radius: var(--r); padding: 14px; position: relative; box-shadow: var(--card-shadow); }
 /* A view is a column with one gap, so a card never carries a margin of
    its own — which is what put the first tile in a row 12px below its
    neighbours once, because an adjacency margin does not know it is in a row. */
@@ -86,6 +143,8 @@ svg { display: block; }
 
 /* ── today ── */
 .lf-today { padding: 16px; }
+.lf-done { position: absolute; top: 14px; right: 14px; display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px; background: var(--done-bg); color: var(--good); font-size: 13px; font-weight: 600; }
+.lf-done .lf-ic { width: 15px; height: 15px; stroke-width: 2.6; }
 .lf-title-box {
   display: inline-block; margin: 4px 0 4px; padding: 2px 0; border: 0; text-align: left;
   border-radius: 6px; font-size: 28px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1;
@@ -117,7 +176,7 @@ svg { display: block; }
 /* ── 30-day grid ── */
 .lf-days { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 8px 6px; margin-top: 14px; }
 .lf-day { height: 18px; border-radius: 999px; border: 1.5px solid var(--mark-off); }
-.lf-day.is-on { background: #c9c9ce; border-color: #c9c9ce; }
+.lf-day.is-on { background: var(--mark-on); border-color: var(--mark-on); }
 .lf-day.is-now { border-color: var(--today); border-width: 2.5px; }
 .lf-day.is-now.is-on { box-shadow: inset 0 0 0 2px var(--card); }
 
@@ -128,7 +187,7 @@ svg { display: block; }
 .lf-area svg { width: 100%; height: 100%; }
 .lf-bars { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; align-items: end; height: 70px; margin-top: 10px; }
 .lf-bars > div { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 3px; min-width: 0; }
-.lf-bars i { display: block; width: 100%; max-width: 22px; border-radius: 6px; background: #4a4a50; min-height: 3px; }
+.lf-bars i { display: block; width: 100%; max-width: 22px; border-radius: 6px; background: var(--bar); min-height: 3px; }
 .lf-bars em { font-style: normal; font-size: 10px; color: var(--dim); }
 .lf-bars u { text-decoration: none; font-size: 10px; color: var(--quiet); }
 .lf-bars .is-now i { background: var(--ink); }
@@ -141,7 +200,7 @@ svg { display: block; }
 .lf-vr:nth-child(-n+3) span { color: var(--ink); font-weight: 600; }
 .lf-vsep { height: 1px; background: var(--line); margin: 2px 0; }
 .lf-vr i { display: block; height: 6px; border-radius: 3px; background: var(--card3); overflow: hidden; }
-.lf-vr i b { display: block; height: 100%; background: #c9c9ce; border-radius: 3px; }
+.lf-vr i b { display: block; height: 100%; background: var(--mark-on); border-radius: 3px; }
 .lf-vr.is-met i b { background: var(--good); }
 .lf-vr em { font-style: normal; text-align: right; color: var(--dim); }
 .lf-tg { font-size: 12px; color: var(--dim); margin: -6px 0 2px; }
@@ -158,7 +217,7 @@ svg { display: block; }
 .lf-dl-u { font-size: 11px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lf-dl-bar { display: block; height: 4px; border-radius: 2px; background: var(--card3); margin-top: auto; overflow: hidden; }
 .lf-dl-t > span:nth-last-child(2) { margin-bottom: 8px; }
-.lf-dl-bar i { display: block; height: 100%; background: #c9c9ce; border-radius: 2px; }
+.lf-dl-bar i { display: block; height: 100%; background: var(--mark-on); border-radius: 2px; }
 .lf-dl-t.is-met .lf-dl-bar i { background: var(--good); }
 .lf-dl-q { justify-content: center; margin-bottom: 10px; }
 .lf-dl-f { display: flex; gap: 8px; }
@@ -201,7 +260,7 @@ svg { display: block; }
   width: 100%; height: 44px; border-radius: var(--r-s); background: var(--card2); border: 1px solid transparent;
   padding: 0 14px; font-size: 16px; outline: none;
 }
-.lf-field:focus { border-color: rgba(255,255,255,.25); }
+.lf-field:focus { border-color: var(--focus); }
 .lf-flab { display: block; font-size: 12px; color: var(--dim); margin: 14px 2px 6px; }
 .lf-pills { display: flex; flex-wrap: wrap; gap: 8px; }
 .lf-pill { min-height: 36px; padding: 0 14px; border-radius: 999px; background: var(--card2); color: var(--dim); font-size: 13px; font-weight: 500; position: relative; }
@@ -224,7 +283,7 @@ svg { display: block; }
 .lf-cell.is-pad { visibility: hidden; }
 .lf-cell.is-on { background: var(--card2); color: var(--ink); font-weight: 700; }
 .lf-cell.is-now { box-shadow: inset 0 0 0 2px var(--today); color: var(--ink); }
-.lf-cell.is-ahead { color: #55555c; }
+.lf-cell.is-ahead { color: var(--ahead); }
 .lf-dots { display: flex; gap: 3px; height: 5px; }
 .lf-dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--ink); }
 .lf-wk { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 60px; padding: 8px 0; border-top: 1px solid var(--line); width: 100%; text-align: left; }
@@ -241,9 +300,9 @@ svg { display: block; }
 /* ── the bar ── */
 .lf-bar {
   position: fixed; left: 50%; bottom: calc(var(--safe-b) + 14px); transform: translateX(-50%); z-index: 20;
-  display: flex; gap: 2px; padding: 5px; border-radius: 999px; background: rgba(28, 28, 32, .86);
+  display: flex; gap: 2px; padding: 5px; border-radius: 999px; background: var(--pill);
   -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4);
-  box-shadow: 0 10px 30px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.06);
+  box-shadow: 0 10px 30px var(--shade), inset 0 0 0 1px var(--edge);
 }
 .lf-bar button { width: 58px; height: 46px; border-radius: 999px; display: grid; place-items: center; color: var(--quiet); }
 .lf-bar button .lf-ic { width: 20px; height: 20px; }
@@ -252,11 +311,11 @@ svg { display: block; }
 .lf-live {
   position: fixed; left: 16px; right: 16px; bottom: calc(var(--safe-b) + 76px); z-index: 19; max-width: 520px; margin: 0 auto;
   display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 14px; border-radius: 16px; font-size: 13px;
-  background: #2a0e0c; box-shadow: inset 0 0 0 1px rgba(255,59,48,.35), 0 8px 24px rgba(0,0,0,.5);
+  background: var(--live-bg); box-shadow: inset 0 0 0 1px rgba(255,59,48,.35), 0 8px 24px var(--shade);
   font-weight: 600; text-align: left;
 }
 .lf-live span:not(.lf-rec) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lf-live em { font-style: normal; color: #ffb3ad; font-variant-numeric: tabular-nums; }
+.lf-live em { font-style: normal; color: var(--live-ink); font-variant-numeric: tabular-nums; }
 .lf-rec { width: 9px; height: 9px; border-radius: 50%; background: var(--log); flex: none; animation: lf-pulse 1.6s ease-in-out infinite; }
 @keyframes lf-pulse { 50% { opacity: .35; } }
 
@@ -266,14 +325,14 @@ svg { display: block; }
 .lf-sheet {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; max-width: 560px; margin: 0 auto;
   max-height: calc(100dvh - var(--safe-t) - 40px); display: flex; flex-direction: column;
-  background: #18181b; border-radius: 28px 28px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.06);
+  background: var(--sheet); border-radius: 28px 28px 0 0; box-shadow: 0 -10px 40px var(--shade), inset 0 1px 0 var(--edge);
   transform: translateY(100%); transition: transform .34s var(--ease); will-change: transform;
 }
 .lf-sheet.is-up { transform: translateY(0); }
 .lf-sheet.is-drag { transition: none; }
 .lf-sheet.is-full { height: calc(100dvh - var(--safe-t) - 10px); max-height: none; }
 .lf-grab { height: 26px; flex: none; display: grid; place-items: center; touch-action: none; cursor: grab; }
-.lf-grab::after { content: ''; width: 38px; height: 5px; border-radius: 3px; background: #4a4a50; }
+.lf-grab::after { content: ''; width: 38px; height: 5px; border-radius: 3px; background: var(--bar); }
 .lf-sh-hd { display: flex; align-items: center; gap: 10px; padding: 0 20px 10px; touch-action: none; }
 .lf-sh-hd h2 { margin: 0; font-size: 17px; font-weight: 700; flex: 1; min-width: 0; letter-spacing: -.01em; }
 .lf-sh-bd { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 4px 20px 20px; overscroll-behavior: contain; }
@@ -306,11 +365,11 @@ svg { display: block; }
   width: 100%; height: 36px; border-radius: 10px; background: var(--card2); border: 1px solid transparent;
   text-align: center; font-size: 16px; font-weight: 500; outline: none; font-variant-numeric: tabular-nums; -moz-appearance: textfield;
 }
-.lf-set input::placeholder { color: #66666e; font-weight: 500; }
-.lf-set input:focus { border-color: rgba(255,255,255,.3); }
+.lf-set input::placeholder { color: var(--ph); font-weight: 500; }
+.lf-set input:focus { border-color: var(--focus); }
 .lf-set input::-webkit-inner-spin-button, .lf-set input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .lf-chk { width: 44px; height: 44px; display: grid; place-items: center; }
-.lf-chk span { width: 28px; height: 28px; border-radius: 9px; background: var(--card2); display: grid; place-items: center; color: #66666e; transition: background .15s, color .15s, transform .15s var(--ease); }
+.lf-chk span { width: 28px; height: 28px; border-radius: 9px; background: var(--card2); display: grid; place-items: center; color: var(--ph); transition: background .15s, color .15s, transform .15s var(--ease); }
 .lf-chk span .lf-ic { width: 15px; height: 15px; stroke-width: 3; }
 .lf-set.is-done .lf-chk span { background: var(--log); color: #fff; }
 .lf-set.is-done input { background: rgba(255,59,48,.14); }
@@ -319,7 +378,7 @@ svg { display: block; }
 .lf-ex-ft { display: flex; gap: 8px; margin-top: 6px; }
 .lf-ex-ft button { flex: 1; min-height: 36px; border-radius: 10px; background: var(--card2); color: var(--dim); font-size: 12.5px; font-weight: 600; position: relative; }
 .lf-ex-ft button::before { content: ''; position: absolute; inset: -2px 0; }
-.lf-add { margin-top: 12px; width: 100%; min-height: 46px; border-radius: var(--r); border: 1.5px dashed rgba(255,255,255,.2); color: var(--dim); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.lf-add { margin-top: 12px; width: 100%; min-height: 46px; border-radius: var(--r); border: 1.5px dashed var(--dash); color: var(--dim); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
 /* ── summary ── */
 .lf-sum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 6px 0 4px; }
@@ -340,7 +399,7 @@ svg { display: block; }
 .lf-vs-h .lf-delta.is-down { background: var(--card3); }
 .lf-vs-t { font-size: 17px; font-weight: 600; margin: 8px 0 4px; }
 .lf-vs-s { margin: 0 0 14px; font-weight: 400; line-height: 1.4; }
-.lf-vs-c { background: #0e0e10; }
+.lf-vs-c { background: var(--plot); box-shadow: none; }
 .lf-vs-sub { font-size: 12px; color: var(--quiet); margin-top: 2px; }
 .lf-vs-plot { position: relative; height: 150px; margin: 22px 0 6px; }
 .lf-vs-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
@@ -412,7 +471,7 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-rq-b b { font-size: 13px; font-weight: 600; }
 .lf-rq-b span { font-size: 11px; color: var(--dim); line-height: 1.3; }
 .lf-rq-b[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
-.lf-rq-b[aria-pressed="true"] span { color: rgba(0,0,0,.6); }
+.lf-rq-b[aria-pressed="true"] span { color: var(--on-ink); opacity: .65; }
 .lf-rq-b.is-bad[aria-pressed="true"] { background: var(--log); color: #fff; }
 .lf-rq-b.is-bad[aria-pressed="true"] span { color: rgba(255,255,255,.8); }
 .lf-rq-a { font-size: 13px; line-height: 1.4; color: var(--ink); margin: 10px 0 0; }
@@ -443,7 +502,7 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-toast {
   position: fixed; left: 50%; bottom: calc(var(--safe-b) + 84px); z-index: 60; transform: translate(-50%, 12px); opacity: 0;
   display: flex; align-items: center; gap: 14px; padding: 0 6px 0 18px; min-height: 48px; border-radius: 16px; width: max-content; max-width: calc(100vw - 32px);
-  background: #2c2c30; box-shadow: 0 10px 30px rgba(0,0,0,.5); transition: opacity .2s, transform .2s var(--ease); font-size: 14px; font-weight: 500;
+  background: var(--toast); color: #fff; box-shadow: 0 10px 30px var(--shade); transition: opacity .2s, transform .2s var(--ease); font-size: 14px; font-weight: 500;
 }
 .lf-toast.is-up { opacity: 1; transform: translate(-50%, 0); }
 .lf-toast.is-bare { padding-right: 18px; }
@@ -1263,16 +1322,29 @@ function lfTodayCard() {
   }
   var title = act ? act.n : (rt ? rt.n : 'Workout');
   $('#lfPick', c).textContent = title;
+  /* DONE FOR TODAY: the card says so, counts what you did instead of
+     what is planned, and the button offers another. */
+  var doneWs = act ? [] : woOn(ymd(today()));
+  if (doneWs.length) {
+    c.classList.add('is-done');
+    c.insertBefore(el('<span class="lf-done" id="lfDone">' + IC.check + 'Completed</span>'), c.firstChild);
+  }
   $('#lfPick', c).setAttribute('aria-label', 'Today: ' + title + '. Choose a routine');
   $('.lf-sub', c).textContent = rt && !act ? (rt.sp || rt.ex.map(function (id) { return exName(id); }).slice(0, 3).join(', ') || 'No exercises yet')
     : act ? 'In progress' : 'An empty workout — add exercises as you go';
   var n = act ? act.x.length : (rt ? rt.ex.length : 0);
   var chips = $('.lf-chips', c);
-  var mins = lfEstMin(rt, n);
-  chips.appendChild(el('<span class="lf-chip">' + IC.clock + '<span>' + (act ? fmtDur(Date.now() - act.s) : '~' + mins + ' min') + '</span></span>'));
-  chips.appendChild(el('<span class="lf-chip">' + IC.dumb + '<span>' + n + ' exercise' + (n === 1 ? '' : 's') + '</span></span>'));
+  if (doneWs.length) {
+    var dSets = doneWs.reduce(function (a, w) { return a + woSets(w); }, 0), dVol = doneWs.reduce(function (a, w) { return a + woVol(w); }, 0);
+    chips.appendChild(el('<span class="lf-chip">' + IC.stack + '<span>' + dSets + ' sets</span></span>'));
+    chips.appendChild(el('<span class="lf-chip">' + IC.weight + '<span>' + fmtBig(toDisp(dVol)) + ' ' + S.unit + '</span></span>'));
+  } else {
+    var mins = lfEstMin(rt, n);
+    chips.appendChild(el('<span class="lf-chip">' + IC.clock + '<span>' + (act ? fmtDur(Date.now() - act.s) : '~' + mins + ' min') + '</span></span>'));
+    chips.appendChild(el('<span class="lf-chip">' + IC.dumb + '<span>' + n + ' exercise' + (n === 1 ? '' : 's') + '</span></span>'));
+  }
   var go = $('#lfGo', c);
-  $('span:last-child', go).textContent = act ? 'Resume Workout' : 'Start Workout';
+  $('span:last-child', go).textContent = act ? 'Resume Workout' : doneWs.length ? 'Start another workout' : 'Start Workout';
   go.classList.toggle('is-live', !!act);
   go.addEventListener('click', function () { if (act) lfOpenSession(); else lfStart(rt); });
   $('#lfPick', c).addEventListener('click', function () { if (act) lfOpenSession(); else lfRoutinePicker(); });
@@ -1366,7 +1438,7 @@ function lfVolSheet() {
   var d = 'M' + pts[0][0] + ' ' + pts[0][1];
   for (var j = 1; j < 8; j++) { var p0 = pts[j - 1], p1 = pts[j], mx = (p0[0] + p1[0]) / 2; d += ' C' + mx + ' ' + p0[1] + ' ' + mx + ' ' + p1[1] + ' ' + p1[0] + ' ' + p1[1]; }
   plot.innerHTML = '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="lfVsG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e8e95" stop-opacity=".5"/><stop offset="1" stop-color="#8e8e95" stop-opacity=".04"/></linearGradient></defs>'
-    + '<path d="' + d + ' L100 100 L0 100Z" fill="url(#lfVsG)"/><path d="' + d + '" fill="none" stroke="#e5e5ea" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
+    + '<path d="' + d + ' L100 100 L0 100Z" fill="url(#lfVsG)"/><path d="' + d + '" fill="none" style="stroke:var(--ink)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
   var best = 0; weeks.forEach(function (w, i) { if (w.v > weeks[best].v) best = i; });
   weeks.forEach(function (w, i) {
     var dot = el('<i class="lf-vs-dot"></i>'); dot.style.left = pts[i][0] + '%'; dot.style.top = pts[i][1] + '%'; plot.appendChild(dot);
@@ -1475,12 +1547,12 @@ function lfVolCard() {
 }
 function lfAreaSvg(vals) {
   var W = 200, H = 74, max = Math.max.apply(null, vals.concat([1])), n = vals.length;
-  if (!vals.some(function (v) { return v > 0; })) return '<svg viewBox="0 0 200 74" preserveAspectRatio="none" aria-hidden="true"><path d="M0 64H200" stroke="#3a3a40" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
+  if (!vals.some(function (v) { return v > 0; })) return '<svg viewBox="0 0 200 74" preserveAspectRatio="none" aria-hidden="true"><path d="M0 64H200" style="stroke:var(--mark-off)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
   var pts = vals.map(function (v, i) { return [i / (n - 1) * W, H - 10 - v / max * (H - 26)]; });
   var d = 'M' + pts[0][0] + ' ' + pts[0][1];
   for (var i = 1; i < n; i++) { var p = pts[i - 1], q = pts[i], mx = (p[0] + q[0]) / 2; d += ' C' + mx + ' ' + p[1] + ' ' + mx + ' ' + q[1] + ' ' + q[0] + ' ' + q[1]; }
   return '<svg viewBox="0 0 200 74" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="lfAg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e8e95" stop-opacity=".55"/><stop offset="1" stop-color="#8e8e95" stop-opacity=".05"/></linearGradient></defs>'
-    + '<path d="' + d + ' L200 74 L0 74Z" fill="url(#lfAg)"/><path d="' + d + '" fill="none" stroke="#c9c9ce" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
+    + '<path d="' + d + ' L200 74 L0 74Z" fill="url(#lfAg)"/><path d="' + d + '" fill="none" style="stroke:var(--mark-on)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
 }
 
 function lfWeekCard(inSheet) {
@@ -1514,7 +1586,7 @@ function lfBwCard() {
   if (pts.length > 1) {
     var mn = Math.min.apply(null, pts.map(function (p) { return p.kg; })), mx = Math.max.apply(null, pts.map(function (p) { return p.kg; })), rg = mx - mn || 1;
     var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + (i / (pts.length - 1) * 120).toFixed(1) + ' ' + (36 - (p.kg - mn) / rg * 32).toFixed(1); }).join(' ');
-    $('.lf-spark', c).innerHTML = '<svg viewBox="0 0 120 40" aria-hidden="true"><path d="' + d + '" fill="none" stroke="#c9c9ce" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    $('.lf-spark', c).innerHTML = '<svg viewBox="0 0 120 40" aria-hidden="true"><path d="' + d + '" fill="none" style="stroke:var(--mark-on)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   }
   c.addEventListener('click', lfBwSheet);
   return c;
@@ -2377,10 +2449,15 @@ function lfRenderYou() {
   root.appendChild(lfBwCard());
   var c = el('<div class="lf-card"><span class="lf-flab" style="margin-top:0">Units</span><div class="lf-seg" id="lfUnit"><button type="button" data-u="kg">kg</button><button type="button" data-u="lb">lb</button></div>'
     + '<span class="lf-flab">Workouts a week</span><div class="lf-seg" id="lfGoal" style="--n:7"></div>'
+    + '<span class="lf-flab">Appearance</span><div class="lf-seg" id="lfMode" style="--n:3"><button type="button" data-m="auto">Auto</button><button type="button" data-m="light">Light</button><button type="button" data-m="dark">Dark</button></div>'
     + '<span class="lf-flab">Rest alert</span><div class="lf-seg" id="lfRa"><button type="button" data-a="1">Sound + buzz</button><button type="button" data-a="0">Off</button></div>'
     + '<button type="button" class="lf-btn is-full" id="lfRaTest" style="margin-top:10px">Test sound</button>'
     + '<span class="lf-flab">Lock-screen alert</span><button type="button" class="lf-btn is-full" id="lfPush"></button>'
     + '</div>');
+  $$('#lfMode button', c).forEach(function (b) {
+    b.setAttribute('aria-pressed', b.dataset.m === lfMode() ? 'true' : 'false');
+    b.addEventListener('click', function () { try { localStorage.setItem('lift.mode.v1', b.dataset.m); } catch (e) {} lfApplyMode(); lfRender(); });
+  });
   $('#lfRaTest', c).disabled = !S.ra;
   /* ON SHOWS AS ON, and the same press turns it off. */
   $('#lfPush', c).textContent = LPU ? 'On · turn off' : 'Turn on';
@@ -2992,6 +3069,16 @@ function lfPushOff() {
   }).catch(function () {});
   lfRender();
 }
+
+/* ═══════════ APPEARANCE ═══════════ */
+function lfMode() { var m = 'auto'; try { m = localStorage.getItem('lift.mode.v1') || 'auto'; } catch (e) {} return ['auto', 'light', 'dark'].indexOf(m) >= 0 ? m : 'auto'; }
+function lfApplyMode() {
+  var m = lfMode(), dark = m === 'dark' || (m === 'auto' && !(window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches));
+  document.documentElement.setAttribute('data-mode', dark ? 'dark' : 'light');
+  var tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.setAttribute('content', dark ? '#000000' : '#f2f2f7');
+}
+lfApplyMode();
+if (window.matchMedia) { var lfMq = matchMedia('(prefers-color-scheme: light)'); if (lfMq.addEventListener) lfMq.addEventListener('change', function () { if (lfMode() === 'auto') lfApplyMode(); }); }
 
 /* ═══════════ NAVIGATION ═══════════ */
 var view = 'home';

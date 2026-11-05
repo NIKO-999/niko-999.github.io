@@ -660,6 +660,31 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── THE LIGHT FACE, and today marked done ── */
+  {
+    const c = await browser.newContext(Object.assign({}, PHONE, { colorScheme: 'light' }));
+    await c.addInitScript(freeze('2026-10-30T18:00:00'));
+    await c.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', JSON.stringify({ unit: 'kg', wo: [{ id: 't1', d: '2026-10-30', s: 1, e: 2, n: 'Quad volume', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 100, r: 8 }, { w: 100, r: 8 }] }] }] })); })();`);
+    const page = await c.newPage();
+    page.on('pageerror', (e) => errors.push(String(e)));
+    await page.goto(URL); await page.waitForTimeout(300);
+    const look = await page.evaluate(() => ({ m: document.documentElement.dataset.mode, bg: getComputedStyle(document.body).backgroundColor, card: getComputedStyle(document.querySelector('.lf-today')).backgroundColor, ink: getComputedStyle(document.body).color }));
+    ok('a light phone gets the light face', look.m === 'light' && look.bg === 'rgb(242, 242, 247)' && look.card === 'rgb(255, 255, 255)' && look.ink === 'rgb(0, 0, 0)', look);
+    ok('a day with a workout in says Completed', await page.locator('#lfDone').count() === 1 && /Completed/.test(await page.textContent('#lfDone')));
+    ok('and counts what was done, and offers another', /2 sets/.test(await page.textContent('.lf-today .lf-chips')) && /1\.6k kg/.test(await page.textContent('.lf-today .lf-chips')) && /Start another workout/.test(await page.textContent('#lfGo')));
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    await page.click('#lfMode [data-m="dark"]'); await settle(page);
+    ok('You can choose dark on a light phone, and it is kept', await page.evaluate(() => document.documentElement.dataset.mode) === 'dark' && await page.evaluate(() => localStorage.getItem('lift.mode.v1')) === 'dark');
+    await page.reload(); await page.waitForTimeout(300);
+    ok('from the first paint', await page.evaluate(() => document.documentElement.dataset.mode) === 'dark');
+    await c.close();
+  }
+  {
+    const { c, page } = await ctx({ unit: 'kg' });
+    ok('a day with nothing in yet is not marked done', await page.locator('#lfDone').count() === 0 && /Start Workout/.test(await page.textContent('#lfGo')));
+    await c.close();
+  }
+
   /* ── A DAY WITH NOTHING LOGGED IS A REST DAY ── */
   {
     const { c, page } = await ctx({ unit: 'kg', since: '2026-10-25', rd: { '2026-10-27': 1 }, wo: [{ id: 'a1', d: '2026-10-26', s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 100, r: 8 }] }] }] });
