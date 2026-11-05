@@ -368,6 +368,12 @@ const freeze = (at) => `(() => {
     await page.evaluate(() => { const a = JSON.parse(localStorage.getItem('lift.active.v1')); a.rest = Date.now() - 125000; localStorage.setItem('lift.active.v1', JSON.stringify(a)); });
     await page.reload(); await page.waitForTimeout(400); if (!(await page.locator('.lf-session').count())) await page.click('#lfLive'); await page.waitForTimeout(2300);
     ok('with the alert off, the rest stays silent', !(await page.evaluate(() => window.lfBeeps || 0)));
+    await page.click('#lfFinish'); await page.waitForTimeout(800); await page.keyboard.press('Escape'); await settle(page);
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    ok('with the alert off there is no sound to test', await page.locator('#lfRaTest').isDisabled());
+    await page.click('#lfRa [data-a="1"]'); await settle(page);
+    await page.click('#lfRaTest'); await page.waitForTimeout(400);
+    ok('Test sound plays the alert', await page.evaluate(() => window.lfBeeps) === 1);
     await c.close();
   }
   {

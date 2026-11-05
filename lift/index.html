@@ -1088,22 +1088,70 @@ function lfToast(msg, undo) {
   requestAnimationFrame(function () { t.classList.add('is-up'); });
   toastT = setTimeout(function () { t.classList.remove('is-up'); setTimeout(function () { t.remove(); }, 220); }, undo ? 5000 : 2400);
 }
-/* iOS gives a page no vibration, so the alert is a sound — and a page
-   may only play one after a press, so the context is opened on the
-   press that starts the rest and kept for the beep that ends it. */
-var lfAc = null;
-function lfAudio() { if (!S.ra) return; try { lfAc = lfAc || new (window.AudioContext || window.webkitAudioContext)(); if (lfAc.state === 'suspended') lfAc.resume(); } catch (e) {} }
-function lfBeep() {
-  window.lfBeeps = (window.lfBeeps || 0) + 1;
+/* THE REST ALERT. iOS gives a page no vibration, so it is a sound, and
+   getting a sound out of a page on a phone takes three things the first
+   version did not do:
+   - an <audio> element, not Web Audio alone: Web Audio is muted by the
+     ringer switch, a media element plays as media;
+   - `audioSession.type = 'playback'` where Safari has it (17+), which
+     takes Web Audio out from under the switch too;
+   - both UNLOCKED inside a press, and again on any press later, because
+     a reload loses the unlock and the rest it was waiting for does not.
+   The tone is generated, three short beeps, so nothing is fetched. */
+var lfAc = null, lfBell = null;
+function lfBellUrl() {
+  var rate = 22050, n = Math.round(rate * .78), d = new Uint8Array(44 + n * 2), v = new DataView(d.buffer);
+  function str(o, t) { for (var k = 0; k < t.length; k++) d[o + k] = t.charCodeAt(k); }
+  str(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); str(8, 'WAVEfmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); str(36, 'data'); v.setUint32(40, n * 2, true);
+  for (var i = 0; i < n; i++) {
+    var t = i / rate, ph = t % .26, on = ph < .16, env = on ? Math.min(1, ph / .01, (.16 - ph) / .02) : 0;
+    v.setInt16(44 + i * 2, Math.round(Math.sin(2 * Math.PI * 1046 * t) * env * 26000), true);
+  }
+  var b = ''; for (var q = 0; q < d.length; q++) b += String.fromCharCode(d[q]);
+  return 'data:audio/wav;base64,' + btoa(b);
+}
+function lfAudio() {
+  if (!S.ra) return;
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+  try {
+    lfAc = lfAc || new (window.AudioContext || window.webkitAudioContext)();
+    if (lfAc.state !== 'running') lfAc.resume();
+    var sb = lfAc.createBufferSource(); sb.buffer = lfAc.createBuffer(1, 1, 22050); sb.connect(lfAc.destination); sb.start(0);
+  } catch (e) {}
+  try {
+    if (!lfBell) { lfBell = new Audio(lfBellUrl()); lfBell.preload = 'auto'; lfBell.setAttribute('playsinline', ''); }
+    if (!lfBell.dataset.ok) {
+      lfBell.muted = true;
+      var pr = lfBell.play();
+      var done = function () { lfBell.pause(); lfBell.currentTime = 0; lfBell.muted = false; lfBell.dataset.ok = 1; };
+      if (pr && pr.then) pr.then(done, function () { lfBell.muted = false; }); else done();
+    }
+  } catch (e) {}
+}
+/* Any press during a workout re-arms the sound: the cheapest way to make
+   sure it is unlocked by the time a rest ends, whatever happened before. */
+document.addEventListener('touchend', function () { if (act && S.ra) lfAudio(); }, true);
+document.addEventListener('click', function () { if (act && S.ra) lfAudio(); }, true);
+function lfTone() {
   if (!lfAc) return;
   try {
-    [0, .22].forEach(function (t0) {
+    if (lfAc.state !== 'running') lfAc.resume();
+    [0, .26, .52].forEach(function (t0) {
       var o = lfAc.createOscillator(), g = lfAc.createGain(), t = lfAc.currentTime + t0;
-      o.frequency.value = 880; o.connect(g); g.connect(lfAc.destination);
-      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.3, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + .16);
+      o.frequency.value = 1046; o.connect(g); g.connect(lfAc.destination);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.8, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + .16);
       o.start(t); o.stop(t + .18);
     });
   } catch (e) {}
+}
+function lfBeep() {
+  window.lfBeeps = (window.lfBeeps || 0) + 1;
+  /* The media element first; Web Audio only if it will not play. */
+  if (lfBell && lfBell.dataset.ok) {
+    try { lfBell.currentTime = 0; var p = lfBell.play(); if (p && p.catch) p.catch(lfTone); return; } catch (e) {}
+  }
+  lfTone();
 }
 function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 12); } catch (e) {} }
 
@@ -2246,7 +2294,10 @@ function lfRenderYou() {
   var c = el('<div class="lf-card"><span class="lf-flab" style="margin-top:0">Units</span><div class="lf-seg" id="lfUnit"><button type="button" data-u="kg">kg</button><button type="button" data-u="lb">lb</button></div>'
     + '<span class="lf-flab">Workouts a week</span><div class="lf-seg" id="lfGoal" style="--n:7"></div>'
     + '<span class="lf-flab">Rest alert</span><div class="lf-seg" id="lfRa"><button type="button" data-a="1">Sound + buzz</button><button type="button" data-a="0">Off</button></div>'
+    + '<button type="button" class="lf-btn is-full" id="lfRaTest" style="margin-top:10px">Test sound</button>'
     + '</div>');
+  $('#lfRaTest', c).disabled = !S.ra;
+  $('#lfRaTest', c).addEventListener('click', function () { lfAudio(); setTimeout(function () { lfBeep(); buzz([80, 60, 80]); }, 120); });
   $$('#lfRa button', c).forEach(function (b) {
     b.setAttribute('aria-pressed', (b.dataset.a === '1') === S.ra ? 'true' : 'false');
     b.addEventListener('click', function () { S.ra = b.dataset.a === '1'; lfSave(); lfRender(); });
