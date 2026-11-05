@@ -2517,13 +2517,9 @@ function lfWoSheet(w) {
     b.appendChild(x);
   });
   b.appendChild(cw);
-  var del = el('<button type="button" class="lf-btn is-bad">Delete workout</button>');
-  var s = lfSheet({ title: w.n, body: b, foot: [del] });
-  del.addEventListener('click', function () {
-    var i = S.wo.indexOf(w); if (i < 0) return;
-    S.wo.splice(i, 1); lfSave(); s.close(true); stack.slice().forEach(function (x) { x.close(true); }); lfRender();
-    lfToast('Deleted ' + w.n, function () { S.wo.push(w); lfSave(); lfRender(); });
-  });
+  /* no delete here: a finished workout is opened to be read, and the red
+     button at its foot was the one thing on the sheet you never wanted */
+  lfSheet({ title: w.n, body: b });
 }
 
 /* ═══════════ YOU ═══════════ */

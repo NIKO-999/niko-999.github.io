@@ -295,10 +295,9 @@ const freeze = (at) => `(() => {
   await page.click('.lf-cell[data-d="2026-10-30"]'); await settle(page);
   ok('a day with two workouts lists them', await top(page).locator('.lf-li').count() === 2);
   await top(page).locator('.lf-li').first().click(); await settle(page);
-  await top(page).locator('button', { hasText: 'Delete workout' }).click(); await settle(page);
-  ok('deleting a workout takes it off the record', (await store(page)).wo.length === 1);
-  await page.click('.lf-toast button'); await settle(page);
-  ok('and Undo puts it back', (await store(page)).wo.length === 2);
+  ok('a finished workout opens to be read, with no delete button', /Push/.test(await top(page).textContent()) && await top(page).locator('button', { hasText: 'Delete workout' }).count() === 0);
+  await page.keyboard.press('Escape'); await settle(page);
+  await page.keyboard.press('Escape'); await settle(page);
 
   /* ── units ── */
   await page.click('.lf-bar [data-v="you"]');
