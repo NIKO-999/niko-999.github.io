@@ -711,8 +711,8 @@ const freeze = (at) => `(() => {
     ok('and counts what it had already won as seen', seen && seen.first === 1 && seen.wo10 === 1 && seen.pr === 1 && !seen.st4, seen);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const shelf = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
-    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 17 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
-    ok('and counts them', /4 of 17/.test(await page.textContent('#lfBadges .lf-hd')));
+    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 24 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
+    ok('and counts them', /4 of 24/.test(await page.textContent('#lfBadges .lf-hd')));
     ok('a badge not yet won carries its progress ring', await page.locator('#lfBadges .lf-coin[data-b="wo50"] .lf-bdr').count() === 1 && await page.locator('#lfBadges .lf-coin[data-b="first"] .lf-bdr').count() === 0);
     await page.click('#lfBadges .lf-coin[data-b="wo10"]'); await page.waitForTimeout(500);
     ok('a coin opens on its own screen, to spin', await page.locator('.lf-cv').count() === 1 && /10 workouts/.test(await page.textContent('.lf-cv')) && /Earned Mon 26 Oct/.test(await page.textContent('.lf-cv'))
@@ -720,6 +720,21 @@ const freeze = (at) => `(() => {
     await page.keyboard.press('Escape'); await page.waitForSelector('.lf-cv', { state: 'detached', timeout: 5000 }).catch(() => {});
     ok('and is gone when it closes, not hidden', await page.locator('.lf-cv').count() === 0);
     ok('each kind of badge wears its own colour, never a metal for a tier', await page.getAttribute('#lfBadges .lf-coin[data-b="wo10"]', 'data-m') === 'start' && await page.getAttribute('#lfBadges .lf-coin[data-b="wo50"]', 'data-m') === 'lock');
+    await c.close();
+  }
+  /* cardio, body weight and abs badges */
+  {
+    const wo = [];
+    for (let i = 0; i < 20; i++) { const t = new Date('2026-10-30T12:00:00'); t.setDate(t.getDate() - i * 2); wo.push({ id: 'c' + i, d: t.toISOString().slice(0, 10), s: 1, e: 2, n: 'Legs', cd: { k: i % 2 ? 'stairs' : 'walk', m: 30 }, x: [{ id: 'cablecrunch', n: 'Cable crunches', sets: [{ w: 30, r: 15 }] }] }); }
+    const bw = [{ d: '2026-09-01', kg: 84 }, { d: '2026-10-01', kg: 80 }, { d: '2026-10-20', kg: 78 }];
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo, bw, bwGoal: 78 }, '2026-10-30T18:00:00', true);
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    const shelf = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
+    ok('ten Stairmaster sessions earn Step Up, and its hours count toward Summit', shelf.includes('Step Up:28 Oct') && shelf.includes('Summit:5 / 10 h'), shelf);
+    ok('ten on the incline treadmill earn Uphill', shelf.includes('Uphill:30 Oct') && shelf.includes('Mountain Goat:5 / 10 h'), shelf);
+    ok('reaching the goal weight earns Dialled In, on the day it was logged', shelf.includes('Dialled In:20 Oct'), shelf);
+    ok('abs in ten workouts earn Core Ready, counting toward the Six-Pack Club', shelf.includes('Core Ready:10 Oct') && shelf.includes('Six-Pack Club:20 / 50'), shelf);
+    ok('each has its own colour', ['stair10', 'bwgoal', 'abs10'].every(Boolean) && await page.getAttribute('#lfBadges .lf-coin[data-b="stair10"]', 'data-m') === 'cardio' && await page.getAttribute('#lfBadges .lf-coin[data-b="bwgoal"]', 'data-m') === 'body' && await page.getAttribute('#lfBadges .lf-coin[data-b="abs10"]', 'data-m') === 'core');
     await c.close();
   }
   /* the target badges read the sets you log against your own weekly targets */

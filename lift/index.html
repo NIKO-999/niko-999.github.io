@@ -432,6 +432,9 @@ svg { display: block; }
 .lf-coin[data-m="pr"], .lf-cv-stage[data-m="pr"] { --ca: #ff8a80; --cb: #a8180f; }
 .lf-coin[data-m="volume"], .lf-cv-stage[data-m="volume"] { --ca: #ffc06e; --cb: #b65a05; }
 .lf-coin[data-m="feat"], .lf-cv-stage[data-m="feat"] { --ca: #ff9fd0; --cb: #b0236e; }
+.lf-coin[data-m="cardio"], .lf-cv-stage[data-m="cardio"] { --ca: #6fe3f2; --cb: #087c8f; }
+.lf-coin[data-m="body"], .lf-cv-stage[data-m="body"] { --ca: #ffe27a; --cb: #9c7406; }
+.lf-coin[data-m="core"], .lf-cv-stage[data-m="core"] { --ca: #c8f27a; --cb: #4d7c0f; }
 .lf-coin[data-m="lock"], .lf-cv-stage[data-m="lock"] { --ca: #5a5c63; --cb: #2c2d31; }
 .lf-coin img { position: absolute; inset: -6%; width: 112%; height: 112%; display: block; filter: drop-shadow(0 2px 4px rgba(0,0,0,.4)); transition: transform .2s var(--ease); }
 .lf-coin img:not([src]) { display: none; }
@@ -3118,7 +3121,14 @@ var BADGES = [
   ['v100k', '100k moved', 'volume', 'A hundred thousand, all time.'],
   ['v1m', '1M moved', 'volume', 'A million, all time.'],
   ['week', 'Full week', 'feat', 'Every planned day of a week, done.'],
-  ['plate3', '3-plate club', 'feat', 'A barbell lift with three plates a side.']
+  ['plate3', '3-plate club', 'feat', 'A barbell lift with three plates a side.'],
+  ['stair10', 'Step Up', 'cardio', 'Ten sessions on the Stairmaster.'],
+  ['stairhr', 'Summit', 'cardio', 'Ten hours on the Stairmaster, all told.'],
+  ['incl10', 'Uphill', 'cardio', 'Ten sessions on the incline treadmill.'],
+  ['inclhr', 'Mountain Goat', 'cardio', 'Ten hours on the incline treadmill, all told.'],
+  ['bwgoal', 'Dialled In', 'body', 'Your goal body weight, reached.'],
+  ['abs10', 'Core Ready', 'core', 'Abs trained in ten workouts.'],
+  ['abs50', 'Six-Pack Club', 'core', 'Abs trained in fifty workouts.']
 ].map(function (a) { return { id: a[0], n: a[1], k: a[2], d: a[3] }; });
 var BADGE = {}; BADGES.forEach(function (b) { BADGE[b.id] = b; });
 var BARBELL = { squat: 1, bench: 1, deadlift: 1, rdl: 1, frontsq: 1, inclbb: 1, bbrow: 1, hipthrust: 1, sldl: 1, rackpull: 1, ohp: 1 };
@@ -3172,15 +3182,33 @@ function lfBadges() {
       if (a === thisMon) curMet = fo.filter(met).length;
     }
   }
+  /* cardio: sessions and minutes on each machine, the day each mark is passed */
+  var cdn = { walk: 0, stairs: 0 }, cdm = { walk: 0, stairs: 0 }, absN = 0;
+  ws.forEach(function (w) {
+    if (w.cd && cdn[w.cd.k] !== undefined) {
+      var k0 = w.cd.k, m0 = cdm[k0]; cdn[k0]++; cdm[k0] += +w.cd.m || 0;
+      if (cdn[k0] === 10) won(k0 === 'stairs' ? 'stair10' : 'incl10', w.d);
+      if (m0 < 600 && cdm[k0] >= 600) won(k0 === 'stairs' ? 'stairhr' : 'inclhr', w.d);
+    }
+    /* abs: a workout counts once, however many ab exercises were in it */
+    if (w.x.some(function (e) { var x = exById(e.id); return x && (x.m === 'Abs' || x.m === 'Core') && e.sets.length; })) { absN++; if (absN === 10) won('abs10', w.d); if (absN === 50) won('abs50', w.d); }
+  });
+  /* the goal weight, reached from whichever side you started on */
+  if (S.bwGoal && S.bw.length) {
+    var down = S.bw[0].kg > S.bwGoal;
+    for (var q = 0; q < S.bw.length; q++) { var kg = S.bw[q].kg; if (down ? kg <= S.bwGoal + .05 : kg >= S.bwGoal - .05) { won('bwgoal', S.bw[q].d); break; } }
+  }
   var prs30 = prDays.filter(function (d) { return d >= ymd(addDays(today(), -29)); }).length;
   var prog = { wo10: [ws.length, 10], wo50: [ws.length, 50], wo100: [ws.length, 100], st4: [Math.min(streak, 4), 4], st12: [Math.min(streak, 12), 12],
     pr10: [prs30, 10], v100k: [Math.round(vol / uk), 1e5], v1m: [Math.round(vol / uk), 1e6], first: [ws.length, 1], pr: [0, 1], week: [0, 1], plate3: [0, 1], goal: [0, 1],
+    stair10: [cdn.stairs, 10], stairhr: [Math.round(cdm.stairs / 60), 10], incl10: [cdn.walk, 10], inclhr: [Math.round(cdm.walk / 60), 10], bwgoal: [0, 1], abs10: [absN, 10], abs50: [absN, 50],
     tgt1: [0, 1], tgtall: fo.length > 1 ? [curMet, fo.length] : [0, 1], tgt4: [Math.min(tStreak, 4), 4], quad: [Math.min(qn, 8), 8] };
   return BADGES.map(function (b) { return { b: b, d: out[b.id] ? out[b.id].d : '', p: prog[b.id] }; });
 }
 function lfBadgeProg(x) {
   var p = x.p; if (!p || p[1] === 1) return 'Locked';
   if (x.b.id === 'v100k' || x.b.id === 'v1m') return fmtBig(p[0]) + ' / ' + fmtBig(p[1]);
+  if (x.b.id === 'stairhr' || x.b.id === 'inclhr') return Math.min(p[0], p[1]) + ' / ' + p[1] + ' h';
   return Math.min(p[0], p[1]) + ' / ' + p[1];
 }
 
@@ -3204,7 +3232,10 @@ var BD_KIND = {
   target: { n: 'Targets', c: '#10b981' },
   pr: { n: 'Personal bests', c: '#ef3b2d' },
   volume: { n: 'Volume', c: '#ff8a1c' },
-  feat: { n: 'Feats', c: '#ec4899' }
+  feat: { n: 'Feats', c: '#ec4899' },
+  cardio: { n: 'Cardio', c: '#06b6d4' },
+  body: { n: 'Body weight', c: '#eab308' },
+  core: { n: 'Abs', c: '#84cc16' }
 };
 /* ── the award: polished metal walls, enamel between them, a dished mirror back ── */
 var BD_FACE = 1024, BD_RF = 1;   /* a face maps its texture across ±BD_RF */
@@ -3225,9 +3256,13 @@ function bdBlur(dst, src, r) {
 var BD_TRIM = { silver: '#eceef2', gold: '#ffd76e' };
 var BD_CREAM = '#eee8dc';
 /* every kind has its own bdOutline; the target badges each have their own */
-var BD_SHK = { start: 'circle', streak: 'hexp', volume: 'squircle', pr: 'banner', feat: 'oct' };
-var BD_SHI = { tgt1: 'hex', tgtall: 'shield', tgt4: 'rosette', quad: 'pent' };
-var BD_GL = { first: 'i:check', wo10: '10', wo50: '50', goal: 'i:ring', st4: '4', st12: '12', tgt1: '1', tgtall: 'i:bars', tgt4: '4', quad: 'i:leg', pr: 'i:trophy', pr10: '10', v100k: 'i:weight', v1m: '1M', week: 'i:cal', plate3: '3' };
+var BD_SHK = { start: 'circle', streak: 'hexp', volume: 'squircle', pr: 'banner', feat: 'oct', body: 'diamond', core: 'tall' };
+var BD_SHI = { tgt1: 'hex', tgtall: 'shield', tgt4: 'rosette', quad: 'pent', stair10: 'tri', stairhr: 'tri', incl10: 'ramp', inclhr: 'ramp' };
+/* the two machines share a colour and each has its own pattern: treads for the stairs, a gradient for the incline */
+var BD_PT = { stair10: 'stairs', stairhr: 'stairs', incl10: 'incline', inclhr: 'incline' };
+/* a glyph a smaller face has to make room for: how big, and how far down */
+var BD_GS = { tri: [.52, 150], diamond: [.72, 0], ramp: [.8, 0], tall: [.82, 0] };
+var BD_GL = { first: 'i:check', wo10: '10', wo50: '50', goal: 'i:ring', st4: '4', st12: '12', tgt1: '1', tgtall: 'i:bars', tgt4: '4', quad: 'i:leg', pr: 'i:trophy', pr10: '10', v100k: 'i:weight', v1m: '1M', week: 'i:cal', plate3: '3', stair10: '10', stairhr: 'i:stairs', incl10: '10', inclhr: 'i:ramp', bwgoal: 'i:scale', abs10: '10', abs50: '50' };
 function bdPoly(c, pts, rr) {
   var n = pts.length;
   for (var i = 0; i < n; i++) {
@@ -3247,6 +3282,10 @@ function bdOutline(c, k, sc) {
   else if (k === 'hex') bdPoly(c, M(bdNgon(6, .97, 0)), S(.14));
   else if (k === 'hexp') bdPoly(c, M(bdNgon(6, .98, Math.PI / 2)), S(.15));
   else if (k === 'oct') bdPoly(c, M(bdNgon(8, .97, Math.PI / 8)), S(.1));
+  else if (k === 'tri') bdPoly(c, M([[0, .98], [.96, -.72], [-.96, -.72]]), S(.18));
+  else if (k === 'ramp') bdPoly(c, M([[-.92, -.78], [.5, -.78], [.92, .78], [-.5, .78]]), S(.14));
+  else if (k === 'diamond') bdPoly(c, M([[0, .99], [.92, 0], [0, -.99], [-.92, 0]]), S(.16));
+  else if (k === 'tall') bdPoly(c, M([[-.68, .96], [.68, .96], [.68, -.96], [-.68, -.96]]), S(.34));
   else if (k === 'squircle') bdPoly(c, M([[-.84, .84], [.84, .84], [.84, -.84], [-.84, -.84]]), S(.3));
   else if (k === 'banner') bdPoly(c, M([[-.84, .9], [.84, .9], [.84, -.96], [0, -.56], [-.84, -.96]]), S(.1));
   else if (k === 'pent') bdPoly(c, M([[-.86, .86], [.86, .86], [.86, -.18], [0, -.98], [-.86, -.18]]), S(.13));
@@ -3292,6 +3331,26 @@ var BD_PAT = {
     lines: function (c) { [.32, -.08, -.48].forEach(function (k, j) { for (var i = 0; i <= 60; i++) { var x = -1 + i / 30, y = k + .07 * Math.sin(x * 4 + j); if (i === 0) c.moveTo(x, y); else c.lineTo(x, y); } }); },
     field: function (x, y) { var w = function (k, j) { return k + .07 * Math.sin(x * 4 + j); }; return y > w(.32, 0) ? 'a' : y > w(-.08, 1) ? 'd' : y > w(-.48, 2) ? 'a' : 'b'; }
   },
+  /* the Stairmaster: treads, each one a step further across */
+  stairs: {
+    lines: function (c) { [-.55, -.15, .25, .65].forEach(function (y, i) { c.moveTo(-1, y); c.lineTo(-.6 + i * .4, y); c.lineTo(-.6 + i * .4, y + .4); }); },
+    field: function (x, y) { var i = Math.floor((y + .55) / .4); if (y < -.55) return 'b'; var edge = -.6 + Math.min(3, i) * .4; return x < edge ? (i % 2 ? 'd' : 'a') : 'b'; }
+  },
+  /* the incline: the gradient, in parallel lines */
+  incline: {
+    lines: function (c) { [-.9, -.3, .3].forEach(function (k) { c.moveTo(-1, k - .3); c.lineTo(1, k + .3); }); },
+    field: function (x, y) { var v = y - .3 * x; return v < -.9 ? 'b' : v < -.3 ? 'd' : v < .3 ? 'a' : 'b'; }
+  },
+  /* body weight: a dial, the needle on the mark */
+  body: {
+    lines: function (c) { [.75, 1.25].forEach(function (r) { c.moveTo(r, -.85); c.arc(0, -.85, r, 0, Math.PI); }); c.moveTo(0, -.85); c.lineTo(.42, .3); },
+    field: function (x, y) { var r = Math.hypot(x, y + .85); return r < .75 ? 'b' : r < 1.25 ? 'a' : 'd'; }
+  },
+  /* abs: six blocks, of course */
+  core: {
+    lines: function (c) { c.moveTo(0, -1); c.lineTo(0, 1); [-.33, .33].forEach(function (y) { c.moveTo(-1, y); c.lineTo(1, y); }); },
+    field: function (x, y) { var r = y > .33 ? 0 : y > -.33 ? 1 : 2, q = x > 0 ? 1 : 0; return (r + q) % 2 ? 'd' : 'a'; }
+  },
   /* feats: a burst from one corner */
   feat: {
     lines: function (c) { for (var i = 0; i <= 5; i++) { var t = i / 5 * Math.PI / 2; c.moveTo(-.75, -.75); c.lineTo(-.75 + Math.cos(t) * 3, -.75 + Math.sin(t) * 3); } c.moveTo(-.75 + .5, -.75); c.arc(-.75, -.75, .5, 0, Math.PI * 2); },
@@ -3308,22 +3367,23 @@ function bdFront(b, trim) {
   var lock = !!b.lock;
   var shp = bdCv(), sc = bdCtx(shp); sc.fillStyle = '#fff'; bdOutC(sc, b.sh, 1); sc.fill();
   var inn = bdCv(), ic = bdCtx(inn); ic.fillStyle = '#fff'; bdOutC(ic, b.sh, .9); ic.fill();
-  var dv = bdCv(), dc = bdCtx(dv); dc.strokeStyle = '#fff'; bdPat(dc, b.k);
+  var pk = b.pt || b.k, gs = BD_GS[b.sh] || [1, 0];
+  var dv = bdCv(), dc = bdCtx(dv); dc.strokeStyle = '#fff'; bdPat(dc, pk);
   /* the glyph: a number is a single thin metal line; an bdIcon is a metal bdOutline with enamel inside */
   var gm = bdCv(), gc = bdCtx(gm), gf = bdCv();
   if (b.gl.indexOf('i:') === 0) {
     var g = bdCv(), x = bdCtx(g);
-    x.save(); x.translate(BD_DF / 2, BD_DF / 2); x.scale(1.22, 1.22); x.translate(-BD_DF / 2, -BD_DF / 2); bdIcon(x, b.gl.slice(2)); x.restore();
+    x.save(); x.translate(BD_DF / 2, BD_DF / 2 + gs[1]); x.scale(1.22 * gs[0], 1.22 * gs[0]); x.translate(-BD_DF / 2, -BD_DF / 2); bdIcon(x, b.gl.slice(2)); x.restore();
     bdBlur(gf, g, 7);
   } else {
-    var px = 640; gc.font = '400 ' + px + 'px Inter, Arial, sans-serif';
-    var w = gc.measureText(b.gl).width; if (w > BD_DF * .62) { px = px * BD_DF * .62 / w; gc.font = '400 ' + px + 'px Inter, Arial, sans-serif'; }
-    gc.fillStyle = gc.strokeStyle = '#fff'; gc.lineWidth = 7; gc.lineJoin = 'round'; gc.textAlign = 'center'; gc.textBaseline = 'middle'; gc.fillText(b.gl, BD_DF / 2, BD_DF / 2 + px * .04); gc.strokeText(b.gl, BD_DF / 2, BD_DF / 2 + px * .04);
+    var px = 640 * gs[0]; gc.font = '400 ' + px + 'px Inter, Arial, sans-serif';
+    var w = gc.measureText(b.gl).width; if (w > BD_DF * .62 * gs[0]) { px = px * BD_DF * .62 * gs[0] / w; gc.font = '400 ' + px + 'px Inter, Arial, sans-serif'; }
+    gc.fillStyle = gc.strokeStyle = '#fff'; gc.lineWidth = 7; gc.lineJoin = 'round'; gc.textAlign = 'center'; gc.textBaseline = 'middle'; gc.fillText(b.gl, BD_DF / 2, BD_DF / 2 + gs[1] + px * .04); gc.strokeText(b.gl, BD_DF / 2, BD_DF / 2 + gs[1] + px * .04);
   }
   /* the pattern stops short of the glyph, so the number or bdIcon sits clear on the enamel */
   var ko = bdCv(); bdBlur(ko, gm, 14); bdBlur(ko, gf, 14); bdBlur(ko, gm, 14);
   var S = bdAlpha(shp), I = bdAlpha(inn), D = bdAlpha(dv), G = bdAlpha(gm), F = bdAlpha(gf), KO = bdAlpha(ko);
-  var A = bdHex(lock ? '#3b3c42' : BD_KIND[b.k].c), Bc = bdHex(lock ? '#26272c' : BD_CREAM), A2 = bdMix(A, [255, 255, 255], lock ? .05 : .14), Ai = bdMix(A, [255, 255, 255], lock ? .12 : .55), Ad = bdMix(A, [0, 0, 0], lock ? .25 : .3), pf = BD_PAT[b.k].field;
+  var A = bdHex(lock ? '#3b3c42' : BD_KIND[b.k].c), Bc = bdHex(lock ? '#26272c' : BD_CREAM), A2 = bdMix(A, [255, 255, 255], lock ? .05 : .14), Ai = bdMix(A, [255, 255, 255], lock ? .12 : .55), Ad = bdMix(A, [0, 0, 0], lock ? .25 : .3), pf = BD_PAT[pk].field;
   var T = bdHex(lock ? '#7d8087' : trim), u = BD_FACE / 2, N = BD_FACE * BD_FACE;
   /* pass one: how much of each pixel is metal, antialiased, so a wall's edge is a curve rather than a staircase */
   var MF = new Float32Array(N), GV = new Float32Array(N), mfc = bdCv(), mx = mfc.getContext('2d'), MI = mx.createImageData(BD_FACE, BD_FACE);
@@ -3402,6 +3462,13 @@ function bdIcon(c, k) {
     r(-180, -150, 360, 90, 30); r(-110, -215, 40, 110, 14); r(70, -215, 40, 110, 14);
     for (var i = 0; i < 3; i++) for (var j = 0; j < 2; j++) r(-120 + i * 95, -5 + j * 90, 50, 50, 10);
   } else if (k === 'star') { c.beginPath(); for (var s = 0; s < 10; s++) { var a = -Math.PI / 2 + s * Math.PI / 5, rr = s % 2 ? 95 : 220; c.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } c.closePath(); c.fill(); }
+  else if (k === 'stairs') { c.beginPath(); c.moveTo(-230, 200); c.lineTo(-230, 100); c.lineTo(-115, 100); c.lineTo(-115, 0); c.lineTo(0, 0); c.lineTo(0, -100); c.lineTo(115, -100); c.lineTo(115, -200); c.lineTo(230, -200); c.lineTo(230, 200); c.closePath(); c.fill(); }
+  else if (k === 'ramp') { c.beginPath(); c.moveTo(-240, 190); c.lineTo(240, 190); c.lineTo(240, -150); c.closePath(); c.fill(); c.beginPath(); c.arc(-40, -120, 52, 0, Math.PI * 2); c.fill(); }
+  else if (k === 'scale') {
+    c.lineWidth = 38; c.beginPath(); if (c.roundRect) c.roundRect(-200, -200, 400, 400, 70); else c.rect(-200, -200, 400, 400); c.stroke();
+    c.lineWidth = 30; c.beginPath(); c.arc(0, -40, 110, Math.PI * 1.15, Math.PI * 1.85); c.stroke();
+    c.beginPath(); c.moveTo(0, -40); c.lineTo(55, -125); c.stroke();
+  }
   else if (k === 'plate') { c.lineWidth = 60; c.beginPath(); c.arc(0, 0, 190, 0, Math.PI * 2); c.stroke(); c.lineWidth = 24; c.beginPath(); c.arc(0, 0, 110, 0, Math.PI * 2); c.stroke(); c.beginPath(); c.arc(0, 0, 40, 0, Math.PI * 2); c.fill(); }
   else if (k === 'ring') { c.lineWidth = 50; c.beginPath(); c.arc(0, 0, 180, -Math.PI / 2, Math.PI * 1.25); c.stroke(); c.beginPath(); c.moveTo(-60, 5); c.lineTo(-10, 60); c.lineTo(80, -50); c.lineWidth = 46; c.stroke(); }
   else if (k === 'target' || k === 'target2') {
@@ -3478,7 +3545,7 @@ function bdMake(b, m, n) {
 /* what the drawing needs to know about one badge, earned or not */
 function bdSpec(x) {
   var b = x.b;
-  return { id: b.id, k: b.k, sh: BD_SHI[b.id] || BD_SHK[b.k], gl: BD_GL[b.id] || 'i:check', lock: !x.d,
+  return { id: b.id, k: b.k, pt: BD_PT[b.id], sh: BD_SHI[b.id] || BD_SHK[b.k], gl: BD_GL[b.id] || 'i:check', lock: !x.d,
     at: x.d ? fmtDay(x.d).replace(/^\w+ /, '') + ' ' + x.d.slice(0, 4) : '' };
 }
 function bdRenderer(w, h, keep) {
