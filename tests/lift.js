@@ -259,6 +259,14 @@ const freeze = (at) => `(() => {
   await set(0, 0).locator('.lf-chk').click();
   ok('ticking an empty set repeats last time', await set(0, 0).locator('input').nth(1).inputValue() === '8');
   ok('a repeat is not a record', (await set(0, 0).locator('.lf-sn').textContent()) === '1');
+  /* NOUGHT IS BODY WEIGHT, and the field says so once you leave it. */
+  {
+    const wi = set(0, 1).locator('input').nth(0);
+    await wi.fill('0'); await wi.blur();
+    ok('a weight of 0 reads as BW', await wi.inputValue() === 'BW', await wi.inputValue());
+    ok('and is still stored as 0', await page.evaluate(() => JSON.parse(localStorage.getItem('lift.active.v1')).x[0].sets[1].w) === 0);
+    await wi.fill('');
+  }
   await set(0, 1).locator('input').nth(0).fill('65'); await set(0, 1).locator('input').nth(1).fill('8');
   await set(0, 1).locator('.lf-chk').click();
   ok('more weight for the same reps is marked PR', (await set(0, 1).locator('.lf-sn').textContent()) === 'PR');

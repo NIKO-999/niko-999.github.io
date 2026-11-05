@@ -1184,6 +1184,9 @@ function woOn(d) { return S.wo.filter(function (w) { return w.d === d; }); }
 function toDisp(kg) { return S.unit === 'lb' ? kg / LB : kg; }
 function fromDisp(v) { return S.unit === 'lb' ? v * LB : v; }
 function fmtW(kg) { var v = Math.round(toDisp(kg) * 10) / 10; return String(v); }
+/* A SET'S weight: nought is your body weight, and says so. "0 × 12" on a
+   sit-up reads as a set that lifted nothing; "BW × 12" is what it was. */
+function fmtWS(kg) { return kg > 0 ? fmtW(kg) : 'BW'; }
 function fmtBig(n) {
   n = Math.round(n);
   if (n < 1000) return String(n);
@@ -1830,7 +1833,7 @@ function lfAim(e) {
     return { up: 1, sets: last.map(function () { return { w: w, r: lo }; }), note: 'Hit ' + hi + ' on every set — go up to ' + fmtW(w) + ' ' + S.unit };
   }
   var sets = last.map(function (s) { return { w: s.w, r: Math.min(hi, Math.max(lo, s.r + 1)) }; });
-  return { sets: sets, note: 'Same weight, one more rep — aim ' + fmtW(sets[0].w) + ' × ' + sets[0].r };
+  return { sets: sets, note: 'Same weight, one more rep — aim ' + fmtWS(sets[0].w) + ' × ' + sets[0].r };
 }
 function lfRange(a, b) { return a === b ? String(a) : a + '–' + b; }
 function lfRestTxt(r) { return r.hi <= 120 ? lfRange(r.lo, r.hi) + 's' : lfRange(r.lo / 60, r.hi / 60) + ' min'; }
@@ -1913,12 +1916,16 @@ function lfPaintSession() {
       var row = el('<div class="lf-set"><span class="lf-sn"></span><span class="lf-prev lf-num"></span><input type="text" inputmode="decimal" autocomplete="off" /><input type="text" inputmode="numeric" autocomplete="off" /><button type="button" class="lf-chk"><span>' + IC.check + '</span></button></div>');
       row.classList.toggle('is-done', !!s.ok);
       $('.lf-sn', row).textContent = si + 1;
-      $('.lf-prev', row).textContent = p ? fmtW(p.w) + '×' + p.r : '—';
+      $('.lf-prev', row).textContent = p ? fmtWS(p.w) + '×' + p.r : '—';
       var wi = $$('input', row)[0], ri = $$('input', row)[1];
       wi.setAttribute('aria-label', 'Set ' + (si + 1) + ' weight in ' + S.unit);
       ri.setAttribute('aria-label', 'Set ' + (si + 1) + ' reps');
-      wi.placeholder = g ? fmtW(g.w) : S.unit; ri.placeholder = g ? String(g.r) : (e.tg ? lfRange(e.tg[1], e.tg[2]) : 'reps');
-      if (s.w !== '' && s.w != null) wi.value = fmtW(s.w);
+      var isBw = exById(e.id) && exById(e.id).t === 'bw';
+      wi.placeholder = g ? fmtWS(g.w) : isBw ? 'BW' : S.unit; ri.placeholder = g ? String(g.r) : (e.tg ? lfRange(e.tg[1], e.tg[2]) : 'reps');
+      if (s.w !== '' && s.w != null) wi.value = fmtWS(s.w);
+      /* BW in the field is a 0; tapping it selects it, so typing replaces it. */
+      wi.addEventListener('focus', function () { if (wi.value === 'BW') wi.select(); });
+      wi.addEventListener('blur', function () { if (s.w === 0) wi.value = 'BW'; });
       if (s.r !== '' && s.r != null) ri.value = s.r;
       wi.addEventListener('input', function () { var v = parseFloat(wi.value); s.w = isFinite(v) && v >= 0 ? fromDisp(v) : ''; lfSaveAct(); });
       ri.addEventListener('input', function () { var v = parseInt(ri.value, 10); s.r = isFinite(v) && v >= 0 ? v : ''; lfSaveAct(); });
@@ -2137,7 +2144,7 @@ function lfExSheet(id) {
   var b = el('<div></div>');
   var best = null, bestE = 0;
   h.forEach(function (x) { x.sets.forEach(function (s) { var e = e1rm(s.w, s.r); if (e > bestE) { bestE = e; best = s; } }); });
-  b.appendChild(lfSum([[best ? fmtW(best.w) + '×' + best.r : '—', 'best set'], [bestE ? fmtW(bestE) : '—', 'est. 1RM ' + S.unit], [h.length, 'sessions']]));
+  b.appendChild(lfSum([[best ? fmtWS(best.w) + '×' + best.r : '—', 'best set'], [bestE ? fmtW(bestE) : '—', 'est. 1RM ' + S.unit], [h.length, 'sessions']]));
   var rc = lfRec(id);
   var rl = el('<p class="lf-recd" id="lfRecd"></p>');
   rl.textContent = rc.kind + ' · ' + rc.sets + ' × ' + rc.lo + '–' + rc.hi + ' · ' + rc.rir + ' · rest ' + lfRestTxt({ lo: rc.rlo, hi: rc.rhi });
@@ -2154,7 +2161,7 @@ function lfExSheet(id) {
   h.slice().reverse().forEach(function (x) {
     var li = el('<div class="lf-li"><div class="lf-li-t"><b></b><span class="lf-num"></span></div></div>');
     $('b', li).textContent = fmtDay(x.w.d);
-    $('span', li).textContent = x.sets.map(function (s) { return fmtW(s.w) + '×' + s.r; }).join('  ·  ');
+    $('span', li).textContent = x.sets.map(function (s) { return fmtWS(s.w) + '×' + s.r; }).join('  ·  ');
     list.appendChild(li);
   });
   b.appendChild(list);
@@ -2246,7 +2253,7 @@ function lfDaySpec(rt) {
     var t = rt.tg[id], rs = lfRestOf(id), last = lastFor(id);
     var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div><span class="lf-li-r lf-num"></span></button>');
     $('b', li).textContent = exName(id);
-    $('span', li).textContent = rs.rir + ' · rest ' + lfRestTxt(rs) + (last ? ' · last ' + fmtW(last[0].w) + '×' + last[0].r : '');
+    $('span', li).textContent = rs.rir + ' · rest ' + lfRestTxt(rs) + (last ? ' · last ' + fmtWS(last[0].w) + '×' + last[0].r : '');
     $('.lf-li-r', li).textContent = lfTgTxt(t);
     li.addEventListener('click', function () { lfExSheet(id); });
     $('.lf-list', b).appendChild(li);
@@ -2338,7 +2345,7 @@ function lfRenderLib() {
         var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div><span class="lf-li-r lf-num"></span></button>');
         $('b', li).textContent = e.n;
         $('span', li).textContent = e.m + ' · ' + lfRecTxt(e.id) + (last ? ' · last ' + fmtDay(last.w.d) : '');
-        if (last) { var top = last.sets.reduce(function (a, s) { return e1rm(s.w, s.r) > e1rm(a.w, a.r) ? s : a; }); $('.lf-li-r', li).textContent = fmtW(top.w) + '×' + top.r; }
+        if (last) { var top = last.sets.reduce(function (a, s) { return e1rm(s.w, s.r) > e1rm(a.w, a.r) ? s : a; }); $('.lf-li-r', li).textContent = fmtWS(top.w) + '×' + top.r; }
         li.addEventListener('click', function () { lfExSheet(e.id); });
         $('.lf-list', c).appendChild(li);
       });
@@ -2465,7 +2472,7 @@ function lfWoSheet(w) {
   w.x.forEach(function (e) {
     var x = el('<button type="button" class="lf-wo-ex lf-tap"><b></b><div></div></button>');
     $('b', x).textContent = exName(e.id, e.n);
-    $('div', x).textContent = e.sets.map(function (s) { return fmtW(s.w) + ' × ' + s.r; }).join('   ·   ');
+    $('div', x).textContent = e.sets.map(function (s) { return fmtWS(s.w) + ' × ' + s.r; }).join('   ·   ');
     x.addEventListener('click', function () { lfExSheet(e.id); });
     b.appendChild(x);
   });
@@ -2925,7 +2932,7 @@ function frWoSheet(w, f) {
   w.x.forEach(function (e) {
     var li = el('<div class="lf-li fr-wx"><div class="lf-li-t"><b></b><span class="lf-num"></span></div></div>');
     $('b', li).textContent = e.n;
-    $('span', li).textContent = e.s.length ? e.s.map(function (q) { return (q[0] ? fmtW(q[0]) + '×' : '') + q[1]; }).join('  ·  ') : 'No sets';
+    $('span', li).textContent = e.s.length ? e.s.map(function (q) { return (q[0] ? fmtW(q[0]) + '×' : 'BW×') + q[1]; }).join('  ·  ') : 'No sets';
     $('.lf-list', b).appendChild(li);
   });
   if (f && FRS.on) b.insertBefore(frRxBar(w, f), $('.lf-list', b));
