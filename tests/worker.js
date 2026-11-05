@@ -503,10 +503,11 @@ const kv = () => {
     ok('a code nobody has claimed is a 404', q.status === 404, q.status);
     q = await hit('PUT', '/v1/lift/' + C, { body: { n: 'Niko', s: { wo30: 12, d: '1'.repeat(30) } } });
     ok('a write needs a key', q.status === 401, q.status);
-    q = await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: '  Niko\u0007  ', s: { wo30: 12, sets30: 'x', streak: -4, d: '10r'.repeat(10), last: '2026-11-03', kg: 9000, ex: ['hack'] } } });
+    q = await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: '  Niko\u0007  ', s: { wo30: 12, sets30: 'x', streak: -4, d: '10r'.repeat(10), last: '2026-11-03', kg: 9000, ex: ['hack'], w7: [3, -1, 'x', 4.6, 0, 0, 0], mu: [['Quads', 8, 15], ['Hack squat', 100, 1], ['Chest', 'x', 12]] } } });
     ok('the first write claims the code', q.status === 200, q.status);
     q = await (await hit('GET', '/v1/lift/' + C)).json();
     ok('a read returns the counts, clamped', q.n === 'Niko' && q.s.wo30 === 12 && q.s.sets30 === 0 && q.s.streak === 0 && q.s.d === '10r'.repeat(10) && q.s.last === '2026-11-03', JSON.stringify(q));
+    ok('this week by day and by muscle, clamped, with only muscles the app knows', JSON.stringify(q.s.w7) === '[3,0,0,5,0,0,0]' && JSON.stringify(q.s.mu) === '[["Quads",8,15],["Chest",0,12]]', JSON.stringify(q.s));
     ok('and never a field this build does not know — no weights, no exercises', !('kg' in q.s) && !('ex' in q.s) && !('kh' in q), JSON.stringify(q));
     const raw = env.SCHED.m.get('lift:' + C);
     ok('the key is stored only as its hash', raw.indexOf(KEY) < 0 && JSON.parse(raw).kh.length === 64);

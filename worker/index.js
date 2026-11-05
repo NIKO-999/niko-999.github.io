@@ -333,6 +333,7 @@ async function episodes(id) {
    build does not know is dropped. Sixty days without a write and the
    record ages out on its own, so an abandoned phone leaves nothing. */
 const LIFT_TTL = 60 * 86400;
+const LIFT_MUS = ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Lower back', 'Abs', 'Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Core', 'Arms', 'Legs', 'Cardio', 'Other'];
 const LIFT_NUM = ['wo30', 'sets30', 'pr30', 'wk', 'goal', 'streak', 'cd7', 'rest30', 'tot'];
 function liftClean(b) {
   if (!b || typeof b !== 'object' || !b.s || typeof b.s !== 'object') return null;
@@ -340,6 +341,12 @@ function liftClean(b) {
   const s = {};
   for (const k of LIFT_NUM) { const v = Math.round(+b.s[k]); s[k] = isFinite(v) ? Math.max(0, Math.min(100000, v)) : 0; }
   s.d = typeof b.s.d === 'string' && /^[01r]{30}$/.test(b.s.d) ? b.s.d : '0'.repeat(30);
+  /* This week, by day, and by muscle against the sender's own targets:
+     seven counts, and at most sixteen [muscle, sets, target] rows whose
+     muscle is one the app knows. */
+  const num = (v) => { v = Math.round(+v); return isFinite(v) ? Math.max(0, Math.min(1000, v)) : 0; };
+  s.w7 = Array.isArray(b.s.w7) && b.s.w7.length === 7 ? b.s.w7.map(num) : [0, 0, 0, 0, 0, 0, 0];
+  s.mu = Array.isArray(b.s.mu) ? b.s.mu.filter((m) => Array.isArray(m) && LIFT_MUS.includes(m[0])).slice(0, 16).map((m) => [m[0], num(m[1]), num(m[2])]) : [];
   s.last = typeof b.s.last === 'string' && /^\d{4}-\d\d-\d\d$/.test(b.s.last) ? b.s.last : '';
   return { n: n || 'Lifter', s };
 }
