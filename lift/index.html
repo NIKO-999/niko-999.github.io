@@ -794,14 +794,17 @@ var PROGRAM_GL = [
   { id: 'g-fri', dow: 5, n: 'Glutes · top shelf', sp: 'Glutes and core', ex: [['hipthrust', 3, 8, 12], ['cablekb', 3, 12, 15, 'each side'], ['cablestep', 3, 8, 12, 'each side'], ['cableabd', 3, 12, 20], ['hkr', 3, 10, 15], ['cablecrunch', 3, 10, 15]] },
   { id: 'g-sat', dow: 6, n: 'Conditioning & core', sp: 'Athletic conditioning and core', ex: [['sled', 4, 1, 1, 'rounds'], ['slrdl', 3, 8, 12, 'each side'], ['deadbug', 3, 8, 10, 'each side'], ['farmer', 3, 30, 40, 'm each side'], ['copen', 3, 20, 30, 's each side']] }
 ];
-/* QUAD & CALF: twelve weeks of quads and calves twice a week, four days
-   of 75–90 minutes, rest on the days between. Every working set ends
-   0–2 reps short of failure. */
+/* THE LEG FOCUSED SPLIT: the whole body over six days, legs three times —
+   heavy, sweep, then a calf and isolation day — with the upper body kept
+   short between them, and Sunday off. Three working sets an exercise at
+   most, because the frequency is where the volume comes from. */
 var PROGRAM_QC = [
-  { id: 'k-mon', dow: 1, n: 'Quad & calf power', sp: 'Pendulum, extensions, split squats', ex: [['calfstand', 4, 8, 10], ['pendulum', 3, 6, 8], ['legext', 3, 10, 12], ['bss', 3, 8, 10, 'each side'], ['calfseat', 3, 12, 15], ['declsit', 3, 12, 15]] },
-  { id: 'k-tue', dow: 2, n: 'Press & pull', sp: 'Incline press, rows, shoulders', ex: [['incdb', 3, 6, 8], ['tbar', 3, 8, 10], ['seatshp', 3, 8, 10], ['ngpd', 3, 10, 12], ['cablat', 3, 12, 15], ['curl', 3, 12, 12], ['tripush', 3, 12, 12]] },
-  { id: 'k-thu', dow: 4, n: 'Quad pump & hamstrings', sp: 'Leg press, curls, single-leg extensions', ex: [['calfseat', 4, 10, 12], ['legpress', 3, 8, 10], ['stdcurl', 3, 10, 12], ['legext', 3, 12, 15, 'each side'], ['calfstand', 3, 15, 20], ['hlr', 3, 12, 15]] },
-  { id: 'k-fri', dow: 5, n: 'Width & strength', sp: 'Pull-ups, bench, delts', ex: [['pullup', 3, 6, 8], ['bench', 3, 6, 8], ['dbrow', 3, 8, 10, 'each side'], ['latraise', 4, 12, 15], ['rdfly', 3, 15, 15], ['hammer', 3, 12, 12], ['triover', 3, 12, 12]] }
+  { id: 'k-mon', dow: 1, n: 'Heavy legs', sp: 'Pendulum, extensions, split squats', ex: [['calfstand', 4, 8, 10], ['pendulum', 3, 6, 8], ['legext', 3, 10, 12], ['bss', 3, 8, 10, 'each side'], ['seatcurl', 3, 10, 12]] },
+  { id: 'k-tue', dow: 2, n: 'Chest & delts', sp: 'Incline press, shoulders, triceps', ex: [['incdb', 3, 6, 8], ['dbshp', 3, 8, 10], ['cfly', 3, 10, 12], ['cablat', 4, 12, 15], ['ohcable', 3, 12, 15]] },
+  { id: 'k-wed', dow: 3, n: 'Back & biceps', sp: 'Rows, pulldowns, curls', ex: [['tbar', 3, 8, 10], ['ngpd', 3, 10, 12], ['rdfly', 3, 12, 15], ['incurl', 3, 10, 12], ['hlr', 3, 12, 15]] },
+  { id: 'k-thu', dow: 4, n: 'Quad sweep', sp: 'Leg press, lunges, seated calves', ex: [['calfseat', 4, 12, 15], ['legpress', 3, 8, 10], ['lyingcurl', 3, 10, 12], ['lunge', 3, 10, 10, 'steps each side'], ['tibraise', 3, 15, 20]] },
+  { id: 'k-fri', dow: 5, n: 'Upper power', sp: 'Pull-ups, bench, arms', ex: [['pullup', 3, 6, 8], ['bench', 3, 6, 8], ['latraise', 4, 12, 15], ['hammer', 3, 10, 12], ['tripush', 3, 10, 12]] },
+  { id: 'k-sat', dow: 6, n: 'Calf burnout', sp: 'Calves, sissy squats, Romanian deadlifts', ex: [['calf', 4, 15, 20], ['legext', 3, 12, 15, 'each side'], ['sissy', 3, 10, 12], ['rdl', 3, 8, 10], ['calfstand', 3, 20, 20]] }
 ];
 function lfMkProg(list) { return list.map(function (d) {
   return { id: d.id, dow: d.dow, n: d.n, sp: d.sp, fixed: 1, choice: d.choice ? 1 : 0, ex: d.ex.map(function (e) { return e[0]; }),
@@ -815,7 +818,7 @@ var PROGRAMS = {
   ul: { n: 'Upper / lower', days: lfMkProg(PROGRAM_UL) },
   ppl: { n: 'Push / pull / legs', s: 'PPL', days: lfMkProg(PROGRAM_PPL) },
   gl: { n: 'Glute builder', s: 'Glute builder', days: lfMkProg(PROGRAM_GL) },
-  qc: { n: 'Quad & calf', s: 'Quad & calf', days: lfMkProg(PROGRAM_QC) }
+  qc: { n: 'Leg focused split', s: 'Leg focused', days: lfMkProg(PROGRAM_QC) }
 };
 PROGRAMS.ul.s = 'Upper / lower';
 var PROG_IDS = ['ul', 'ppl', 'gl', 'qc'];
@@ -829,24 +832,32 @@ function lfProg() { return PROGRAMS[S.prog] || PROGRAMS.ul; }
    then what to keep in mind while you look it over. */
 var GL_WEEKS = 'The 8 weeks: weeks 1–2 set a baseline and record every set, rep and RIR; 3–4 add reps at the same weight; 5–6 add 2.5–5% once every set tops its range; 7 push performance with compounds shy of failure; 8 deload 30–50% if fatigue has built up.';
 var DAY_TIPS = {
-  'k-mon': ['Quads and calves: heavy tension and the deep stretch', [
-    'Standing calf raises: 3 seconds down, a 2-second hold in the stretch, drive up. Never bounce — the tendon takes the force instead of the calf.',
-    'Pendulum squat with feet a little low on the platform: 3 seconds down, pause where the hamstrings meet the calves. 3 minutes between sets.',
-    'Leg extensions: a 1-second squeeze at the top, and a 30% drop set on the last one.',
-    'Seated calf raises finish with a myo-rep set: 12–15, rack it 15 seconds, then mini-sets of 4–5 with the same weight.']],
-  'k-tue': ['Upper body, kept quick so the legs recover', [
-    'Incline dumbbell press for the upper chest: a deep stretch without losing the shoulders.',
-    'Superset to save time: T-bar rows with the incline press, pulldowns with the shoulder press.',
-    'Cable lateral raises with a 1-second pause at shoulder height, then curls and pushdowns as a superset.']],
-  'k-thu': ['Quad volume and the back of the leg', [
-    'Seated calf raises: change the toe angle each set — straight, in, out.',
-    'Leg press low and narrow to bias the outer quad, full depth. 3 minutes between sets.',
-    'Leg curls keep the knees healthy against this much quad work: control the lowering.',
-    'Single-leg extensions iron out a left–right difference; finish with partials out of the bottom.']],
-  'k-fri': ['Back width and pressing strength', [
+  'k-mon': ['Heavy quads and standing calves', [
+    'Calves: a full 2-second pause in the stretch on every rep, all three leg days — the tendon bounces the weight otherwise. Last set a 3-step drop set.',
+    'Pendulum or deep hack squat, low stance, 3 seconds down. 3 minutes between sets.',
+    'Leg extensions: pause at the top; the last set is 4 myo-rep mini-sets.',
+    'Seated curls keep the knees balanced against the quad work.']],
+  'k-tue': ['Chest, delts and triceps, under 75 minutes', [
+    'Incline dumbbell press: the full stretch without flaring the elbows.',
+    'Superset the chest flyes with the lateral raises to save time.',
+    'Overhead rope extensions stretch the long head of the triceps.']],
+  'k-wed': ['Lat width and the back of the upper body', [
+    'T-bar rows to the lower ribs, a full lat squeeze.',
+    'Pulldowns: drive the elbows straight down.',
+    'Incline curls for the deep biceps stretch, hanging leg raises to finish.']],
+  'k-thu': ['Quad sweep and the soleus', [
+    'Seated calf raises with a 1-second pause at the full stretch.',
+    'Leg press narrow and low: the load goes into the outer quad. Deep range, 3 minutes between sets.',
+    'Walking lunges upright for the quads; tibialis raises balance all the calf work.']],
+  'k-fri': ['Pull-ups, bench and arms', [
     'Weighted pull-ups from a dead hang, chest to the bar. 2.5 minutes between sets.',
-    'Bench: control it down to the sternum, press hard.',
-    'Lateral raises carry 4 sets for shoulder width; hammer curls and overhead extensions as a superset to finish.']],
+    'Bench: a strict, controlled descent to the sternum.',
+    'Superset the hammer curls with the pushdowns.']],
+  'k-sat': ['Calf density and a quad finisher', [
+    'Leg press calf raises high-rep: squeeze at the top.',
+    'Single-leg extensions even out left and right; stretched partials at failure.',
+    'Sissy squats for the deepest quad stretch, then Romanian deadlifts keep the hinge strong.',
+    'Standing calf raises off a block, 3 × 20 non-stop to burn them out. Sunday is rest.']],
   'g-mon': ['Glutes, heavy strength', ['Romanian deadlifts and hip thrusts are the heavy work: keep them shy of technical failure.', 'Elevated lunges reach deeper into the glute; go each side.', GL_WEEKS]],
   'g-tue': ['Back, biceps and core', ['Neutral-grip pulldowns and chest-supported rows lead.', 'Reverse pec deck and seated face pulls for the rear delts.', 'Rope hammer curls and preacher curls finish it.']],
   'g-wed': ['Quads and calves', ['Leg press and hack squat carry the load.', 'Leg extensions single and double leg.', 'Bulgarian split squats each side, then seated calf raises.']],

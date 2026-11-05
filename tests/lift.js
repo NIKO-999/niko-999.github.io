@@ -722,18 +722,19 @@ const freeze = (at) => `(() => {
     ok('each kind of badge wears its own colour, never a metal for a tier', await page.getAttribute('#lfBadges .lf-coin[data-b="wo10"]', 'data-m') === 'start' && await page.getAttribute('#lfBadges .lf-coin[data-b="wo50"]', 'data-m') === 'lock');
     await c.close();
   }
-  /* the quad & calf plan: four days, legs twice, rest between */
+  /* The leg focused split: six days, the whole body, legs three times */
   {
     const { c, page } = await ctx({ unit: 'kg' }, '2026-11-02T09:00:00');
     await page.click('.lf-bar [data-v="lib"]'); await page.click('#lfProg [data-p="qc"]'); await settle(page);
+    ok('the switch names it Leg focused', (await page.textContent('#lfProg [data-p="qc"]')).trim() === 'Leg focused');
     const split = await page.$$eval('#lfSplit .lf-li b', (b) => b.map((x) => x.textContent));
-    ok('the quad & calf plan is four named days, legs Monday and Thursday', split.join() === 'Mon · Quad & calf power,Tue · Press & pull,Thu · Quad pump & hamstrings,Fri · Width & strength', split);
-    await page.click('#lfSplit .lf-li >> nth=0'); await settle(page);
-    const mon = await top(page).textContent();
-    ok('Monday opens with calves, then the pendulum, as written', /Standing calf raises[\s\S]*4 × 8–10/.test(mon) && /Pendulum squat[\s\S]*3 × 6–8/.test(mon) && /myo-rep/.test(mon), mon.slice(0, 200));
+    ok('it is six named days, legs Monday, Thursday and Saturday', split.join() === 'Mon · Heavy legs,Tue · Chest & delts,Wed · Back & biceps,Thu · Quad sweep,Fri · Upper power,Sat · Calf burnout', split);
+    await page.click('#lfSplit .lf-li >> nth=3'); await settle(page);
+    const thu = await top(page).textContent();
+    ok('Thursday reads its lunges in steps each side, as written', /Walking lunges[\s\S]*3 × 10 steps each side/.test(thu) && /Tibialis raises/.test(thu), thu.slice(0, 200));
     await page.keyboard.press('Escape'); await settle(page);
     await page.click('.lf-bar [data-v="home"]'); await settle(page);
-    ok('and a Monday on it is Quad & calf power', (await page.textContent('#lfPick')).trim() === 'Quad & calf power');
+    ok('and a Monday on it is Heavy legs', (await page.textContent('#lfPick')).trim() === 'Heavy legs');
     ok('its weekly targets put quads and calves first', (await store(page)).focus.slice(0, 2).map((f) => f.m).sort().join() === 'Calves,Quads');
     await c.close();
   }
