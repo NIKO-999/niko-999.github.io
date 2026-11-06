@@ -998,6 +998,12 @@ function lfIsLegDay(rt) { return !!rt && rt.ex.filter(function (id) { var e = ex
 function lfFillRest() {
   var tk = ymd(today()), on = {}, first = '';
   S.wo.forEach(function (w) { on[w.d] = 1; if (!first || w.d < first) first = w.d; });
+  /* A DAY YOU TRAINED IS NOT A REST DAY, whatever was pressed after. A rest
+     marked on a day with a workout in it is the accident this repairs. */
+  var fixed = false, nrd = {};
+  Object.keys(S.rd).forEach(function (k) { if (on[k]) fixed = true; else nrd[k] = S.rd[k]; });
+  if (fixed) S.rd = nrd;
+  if (fixed) lfSave();
   if (!S.since) S.since = first && first < tk ? first : tk;
   var d = parseYmd(S.since > ymd(addDays(today(), -730)) ? S.since : ymd(addDays(today(), -730))), changed = false;
   for (var k = ymd(d); k < tk; d = addDays(d, 1), k = ymd(d)) if (!on[k] && !S.rd[k]) { S.rd[k] = 2; changed = true; }
@@ -1006,6 +1012,7 @@ function lfFillRest() {
 function lfIsRest(k) { return !!S.rd[k || ymd(today())]; }
 function lfSetRest(on) {
   var k = ymd(today()), nx = {};
+  if (on && woOn(k).length) { lfToast('You trained today. Delete that workout first'); return; }
   Object.keys(S.rd).forEach(function (x) { if (x !== k) nx[x] = S.rd[x]; });
   if (on) { nx[k] = 1; if (S.pick && S.pick.d === k) S.pick = null; }
   S.rd = nx; lfSave(); lfRender();
@@ -1425,13 +1432,17 @@ function lfTag(x) { var g = el('<span class="lf-tag">' + TAG_IC[x[0]] + '<span><
 function lfTagsOf(kinds) { return lfTags().filter(function (x) { return kinds.indexOf(x[0]) >= 0; }); }
 function lfTodayCard() {
   var rt = lfToday();
+  /* TRAINED TODAY, the card is that workout and nothing replaces it: not
+     a rest day, not a choice, not another session. To change it, delete
+     the workout from its day on the calendar first. */
+  var trained = !act && woOn(ymd(today())).length > 0;
   var c = el('<div class="lf-card lf-today"><div class="lf-lab">Today</div>'
     + '<div><button type="button" class="lf-title-box" id="lfPick"></button></div>'
     + '<div class="lf-sub"></div><div class="lf-chips"></div>'
     + '<button type="button" class="lf-go" id="lfGo"><span class="lf-play">' + IC.play + '</span><span></span></button></div>');
   /* A REST DAY IS THE DAY'S PLAN, not a gap in it: the card says so and
      the one control is the way back to training. */
-  if (!act && lfIsRest()) {
+  if (!act && !trained && lfIsRest()) {
     c.classList.add('is-rest'); c.id = 'lfRestDay';
     $('#lfPick', c).textContent = 'Rest day';
     $('#lfPick', c).setAttribute('aria-label', 'Today: rest day. Choose a routine');
@@ -1443,7 +1454,7 @@ function lfTodayCard() {
     gr.addEventListener('click', function () { lfSetRest(false); });
     return c;
   }
-  if (!act && rt && rt.choice) {
+  if (!act && !trained && rt && rt.choice) {
     c.id = 'lfChoice';
     $('#lfPick', c).textContent = rt.n;
     $('#lfPick', c).setAttribute('aria-label', 'Today: ' + rt.n + '. Choose a routine');
@@ -1480,7 +1491,8 @@ function lfTodayCard() {
     chips.appendChild(el('<span class="lf-chip">' + IC.dumb + '<span>' + n + ' exercise' + (n === 1 ? '' : 's') + '</span></span>'));
   }
   var go = $('#lfGo', c);
-  $('span:last-child', go).textContent = act ? 'Resume Workout' : doneWs.length ? 'Start another workout' : 'Start Workout';
+  $('span:last-child', go).textContent = act ? 'Resume Workout' : 'Start Workout';
+  if (doneWs.length) go.remove();
   go.classList.toggle('is-live', !!act);
   go.addEventListener('click', function () { if (act) lfOpenSession(); else lfStart(rt); });
   /* DONE, the name opens what you did; the plan is chosen from "Start another". */
@@ -1817,6 +1829,9 @@ function lfSum(rows) {
 var sessSheet = null, tick = null;
 
 function lfStart(rt) {
+  /* ONE WORKOUT A DAY: a press on another session after you have trained
+     must not stack a second one over it. Delete today's first. */
+  if (!act && woOn(ymd(today())).length) { lfToast('You trained today. Delete that workout first'); return; }
   act = { id: lfId(), s: Date.now(), n: rt ? rt.n : 'Workout', rt: rt ? rt.id : null, rest: 0, x: [] };
   var cut = lfRc() === 1 && lfIsLegDay(rt);
   (rt ? rt.ex : []).forEach(function (id) {

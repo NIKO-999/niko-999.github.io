@@ -252,7 +252,20 @@ const freeze = (at) => `(() => {
   await page.click('.lf-bar [data-v="home"]'); await settle(page);
   ok('home does not offer cardio once the session is done', await page.locator('#lfAddCd').count() === 0);
 
-  /* ── progressive overload ── */
+  /* ONE WORKOUT A DAY: with today trained there is nothing to start */
+  ok('a trained day offers no second workout', await page.locator('#lfGo').count() === 0);
+  await page.click('.lf-bar [data-v="lib"]'); await settle(page);
+  await page.click('#lfSplit .lf-li >> nth=0'); await settle(page);
+  const stBtn = top(page).locator('button', { hasText: /^Start/ });
+  if (await stBtn.count()) { await stBtn.first().click(); await settle(page); }
+  ok('nor can one be started from the library', await page.locator('.lf-session').count() === 0 && !(await page.evaluate(() => localStorage.getItem('lift.active.v1'))));
+  await page.keyboard.press('Escape'); await settle(page); await page.keyboard.press('Escape'); await settle(page);
+  await page.click('.lf-bar [data-v="home"]'); await settle(page);
+
+  /* ── progressive overload ── a second session needs today free, so the
+     first is moved back a day for it and put back after */
+  await page.evaluate(() => { const s = JSON.parse(localStorage.getItem('lift.v1')); s.wo[0].d = '2026-10-29'; localStorage.setItem('lift.v1', JSON.stringify(s)); });
+  await page.reload(); await page.waitForTimeout(400);
   await page.click('#lfGo'); await settle(page);
   ok('a second time, an exercise comes in with last time\'s set count', (await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelectorAll('.lf-set:not(.is-hd)').length))).join() === '2,1');
   ok('and last time\'s figures beside it', (await set(0, 0).locator('.lf-prev').textContent()) === '60×8' && await set(0, 0).locator('input').nth(0).getAttribute('placeholder') === '60');
@@ -272,6 +285,8 @@ const freeze = (at) => `(() => {
   ok('more weight for the same reps is marked PR', (await set(0, 1).locator('.lf-sn').textContent()) === 'PR');
   await page.click('#lfFinish'); await page.waitForTimeout(800);
   await page.keyboard.press('Escape'); await settle(page);
+  await page.evaluate(() => { const s = JSON.parse(localStorage.getItem('lift.v1')); s.wo.forEach((w) => { if (w.d === '2026-10-29') w.d = '2026-10-30'; }); delete s.rd['2026-10-29']; localStorage.setItem('lift.v1', JSON.stringify(s)); });
+  await page.reload(); await page.waitForTimeout(400);
 
   await page.click('.lf-bar [data-v="lib"]');
   await page.locator('#lfLibList .lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Bench press' + '$') }) }).click(); await settle(page);
@@ -693,7 +708,10 @@ const freeze = (at) => `(() => {
     const look = await page.evaluate(() => ({ m: document.documentElement.dataset.mode, bg: getComputedStyle(document.body).backgroundColor, card: getComputedStyle(document.querySelector('.lf-today')).backgroundColor, ink: getComputedStyle(document.body).color }));
     ok('a light phone gets the light face', look.m === 'light' && look.bg === 'rgb(242, 242, 247)' && look.card === 'rgb(255, 255, 255)' && look.ink === 'rgb(0, 0, 0)', look);
     ok('a day with a workout in says Completed', await page.locator('#lfDone').count() === 1 && /Completed/.test(await page.textContent('#lfDone')));
-    ok('and counts what was done, and offers another', /2 sets/.test(await page.textContent('.lf-today .lf-chips')) && /1\.6k kg/.test(await page.textContent('.lf-today .lf-chips')) && /Start another workout/.test(await page.textContent('#lfGo')));
+    ok('and counts what was done, with nothing to start over it', /2 sets/.test(await page.textContent('.lf-today .lf-chips')) && /1\.6k kg/.test(await page.textContent('.lf-today .lf-chips')) && await page.locator('#lfGo').count() === 0);
+    await page.click('#lfPick'); await settle(page);
+    ok('its name opens what you did, not a list to replace it', /Hack squat/.test(await top(page).textContent()) && !/Take today off/.test(await top(page).textContent()));
+    await page.keyboard.press('Escape'); await settle(page);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     await page.click('#lfMode [data-m="dark"]'); await settle(page);
     ok('You can choose dark on a light phone, and it is kept', await page.evaluate(() => document.documentElement.dataset.mode) === 'dark' && await page.evaluate(() => localStorage.getItem('lift.mode.v1')) === 'dark');
@@ -878,6 +896,15 @@ const freeze = (at) => `(() => {
   {
     const { c, page } = await ctx({ unit: 'kg', wo: [{ id: 't1', d: '2026-10-29', s: 1, e: 2, n: 'Hamstrings & glutes', rt: 'p-wed', x: [{ id: 'rdl', n: 'Romanian deadlift', sets: [{ w: 100, r: 8 }] }] }] }, '2026-10-30T09:00:00');
     ok('the next day the plan\'s own day comes back', (await page.textContent('#lfPick')).trim() === 'Quad volume' && await page.locator('#lfDone').count() === 0);
+    await c.close();
+  }
+
+  /* ── A DAY YOU TRAINED STAYS TRAINED: a rest or a pick pressed after is repaired ── */
+  {
+    const { c, page } = await ctx({ unit: 'kg', rd: { '2026-10-30': 1, '2026-10-27': 1 }, pick: { d: '2026-10-30', id: 'p-sat' }, wo: [{ id: 't1', d: '2026-10-30', s: 1, e: 2, n: 'Quad volume', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 100, r: 8 }] }] }] });
+    const r = await store(page);
+    ok('a rest marked on a trained day is taken off', !r.rd['2026-10-30'] && r.rd['2026-10-27'] === 1, r.rd);
+    ok('and the card is the workout you did', (await page.textContent('#lfPick')).trim() === 'Quad volume' && await page.locator('#lfDone').count() === 1 && await page.locator('#lfRestDay').count() === 0);
     await c.close();
   }
 
