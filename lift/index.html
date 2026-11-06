@@ -340,7 +340,7 @@ svg { display: block; }
 .lf-live {
   position: fixed; left: 16px; right: 16px; bottom: calc(var(--safe-b) + 76px); z-index: 19; max-width: 520px; margin: 0 auto;
   display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 14px; border-radius: 16px; font-size: 13px;
-  background: var(--live-bg); box-shadow: inset 0 0 0 1px rgba(163,230,53,.35), 0 8px 24px var(--shade);
+  background: var(--live-bg); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--log) 35%, transparent), 0 8px 24px var(--shade);
   font-weight: 600; text-align: left;
 }
 .lf-live span:not(.lf-rec) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -403,6 +403,13 @@ svg { display: block; }
 .lf-ex-hd { display: flex; align-items: center; gap: 8px; }
 .lf-ex-hd button.lf-ex-n { flex: 1; min-width: 0; text-align: left; font-weight: 600; font-size: 15px; min-height: 40px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lf-set { display: grid; grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 44px; align-items: center; gap: 8px; min-height: 44px; }
+.lf-wheel { position: relative; width: 200px; height: 200px; margin: 6px auto 0; border-radius: 50%; touch-action: none; cursor: pointer;
+  background: conic-gradient(hsl(0,80%,56%), hsl(30,80%,56%), hsl(60,80%,56%), hsl(90,80%,56%), hsl(120,80%,56%), hsl(150,80%,56%), hsl(180,80%,56%), hsl(210,80%,64%), hsl(240,80%,64%), hsl(270,80%,64%), hsl(300,80%,56%), hsl(330,80%,56%), hsl(360,80%,56%)); }
+.lf-wheel:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
+.lf-wh-m { position: absolute; inset: 36px; border-radius: 50%; background: var(--card); box-shadow: inset 0 0 0 1px var(--line); display: grid; place-items: center; }
+.lf-wh-m::after { content: ''; width: 56px; height: 56px; border-radius: 50%; background: var(--log); }
+.lf-wh-k { position: absolute; left: 50%; top: 0; width: 0; height: 50%; transform-origin: 50% 100%; pointer-events: none; }
+.lf-wh-k::before { content: ''; position: absolute; left: -13px; top: 5px; width: 26px; height: 26px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.5); background: var(--log); }
 .lf-set.is-ed { grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1fr) 44px; }
 .lf-ed-ex { margin: 14px 0 0; padding: 4px 12px 10px; }
 .lf-ed-ex .lf-hd { margin: 0; min-height: 44px; }
@@ -423,7 +430,7 @@ svg { display: block; }
 .lf-chk span { width: 28px; height: 28px; border-radius: 9px; background: var(--card2); display: grid; place-items: center; color: var(--ph); transition: background .15s, color .15s, transform .15s var(--ease); }
 .lf-chk span .lf-ic { width: 15px; height: 15px; stroke-width: 3; }
 .lf-set.is-done .lf-chk span { background: var(--log); color: var(--on-log); }
-.lf-set.is-done input { background: rgba(163,230,53,.14); }
+.lf-set.is-done input { background: color-mix(in srgb, var(--log) 14%, transparent); }
 .lf-set.is-done .lf-chk:active span { transform: scale(.9); }
 .lf-set .lf-sn.is-pr { color: var(--today-ink); font-size: 11px; font-weight: 800; letter-spacing: .02em; }
 .lf-ex-ft { display: flex; gap: 8px; margin-top: 6px; }
@@ -1650,7 +1657,7 @@ function lfLegCard() {
   var m = monday(today()), got = lfMuscleSets(m, addDays(m, 6));
   var c = el('<div class="lf-card" id="lfLegs"><div class="lf-hd"><span class="lf-lab">Sets this week</span><button type="button" class="lf-vr-ed" id="lfTgEdit">Edit targets</button></div><div class="lf-vol"></div></div>');
   /* THE TARGETS ARE YOURS: a row opens its own, the header the list. */
-  $('#lfTgEdit', c).addEventListener('click', function () { lfFoldSet('foc', 1); lfGo('you'); var f = $('#lfFocus'); if (f) f.scrollIntoView({ block: 'start' }); });
+  $('#lfTgEdit', c).addEventListener('click', function () { lfGo('you'); lfFoldSet('foc', 1); lfRender(); var f = $('#lfFocus'); if (f) f.scrollIntoView({ block: 'start' }); });
   var ts = lfTargets(), cdm = 0, a0 = ymd(m), a1 = ymd(addDays(m, 6));
   S.wo.forEach(function (w) { if (w.cd && w.d >= a0 && w.d <= a1) cdm += w.cd.m; });
   if (act && act.cd && ymd(new Date(act.s)) >= a0) cdm += act.cd.m;
@@ -2601,14 +2608,9 @@ function lfRenderYou() {
   root.appendChild(lfBwCard());
   var c = el('<div><span class="lf-flab">Units</span><div class="lf-seg" id="lfUnit"><button type="button" data-u="kg">kg</button><button type="button" data-u="lb">lb</button></div>'
     + '<span class="lf-flab">Workouts a week</span><div class="lf-seg" id="lfGoal" style="--n:7"></div>'
-    + '<span class="lf-flab">Appearance</span><div class="lf-seg" id="lfMode" style="--n:3"><button type="button" data-m="auto">Auto</button><button type="button" data-m="light">Light</button><button type="button" data-m="dark">Dark</button></div>'
     + '<span class="lf-flab">Rest alert</span><div class="lf-seg" id="lfRa"><button type="button" data-a="1">On</button><button type="button" data-a="0">Off</button></div>'
     + '<span class="lf-flab">Rest and reaction alerts</span><button type="button" class="lf-btn is-full" id="lfPush"></button>'
     + '</div>');
-  $$('#lfMode button', c).forEach(function (b) {
-    b.setAttribute('aria-pressed', b.dataset.m === lfMode() ? 'true' : 'false');
-    b.addEventListener('click', function () { try { localStorage.setItem('lift.mode.v1', b.dataset.m); } catch (e) {} lfApplyMode(); lfRender(); });
-  });
   /* ON SHOWS AS ON, and the same press turns it off. */
   $('#lfPush', c).textContent = LPU ? 'On · turn off' : 'Turn on';
   $('#lfPush', c).classList.toggle('is-ink', !LPU);
@@ -2628,6 +2630,7 @@ function lfRenderYou() {
     $('#lfGoal', c).appendChild(g);
   }
   root.appendChild(lfFold('lfSet', 'set', 'Settings', '', function (bd) { bd.appendChild(c); }));
+  root.appendChild(lfThemeCard());
   root.appendChild(lfBadgeCard());
   root.appendChild(lfMedalCard());
   if (TROPHY_CASE) root.appendChild(lfRecordCard());
@@ -2645,8 +2648,51 @@ function lfRenderYou() {
    whether it is open, and it remembers per card. Shut until opened — a
    panel of settings you cannot put away is furniture. The body is only
    built the first time it opens, so a shut shelf of badges costs nothing. */
-function lfFoldOpen(k) { try { return !!(JSON.parse(localStorage.getItem('lift.fold.v1') || '{}')[k]); } catch (e) { return false; } }
-function lfFoldSet(k, v) { try { var o = JSON.parse(localStorage.getItem('lift.fold.v1') || '{}'); if (v) o[k] = 1; else delete o[k]; localStorage.setItem('lift.fold.v1', JSON.stringify(o)); } catch (e) {} }
+/* A FOLD IS OPEN FOR THE VISIT, NOT FOR EVER. It stays open while you
+   are on its tab - a save redraws the page and must not shut what you
+   just opened - and shuts the moment you leave for another tab or close
+   the app. It was remembered in storage once, and a page you came back
+   to opened on whatever you last looked at, which is furniture. */
+var lfFolds = {};
+try { localStorage.removeItem('lift.fold.v1'); } catch (e) {}
+function lfFoldOpen(k) { return !!lfFolds[k]; }
+function lfFoldSet(k, v) { if (v) lfFolds[k] = 1; else delete lfFolds[k]; }
+/* THEME: light or dark, and the accent. The accent is a HUE on a wheel;
+   the app owns its strength, so every point on the ring is a colour the
+   check marks, the lit days and the buttons can carry on both faces. */
+function lfThemeCard() {
+  var h = lfAccent();
+  return lfFold('lfTheme', 'thm', 'Theme', h === null ? 'Lime' : lfHueName(h), function (bd) {
+    var c = el('<div><span class="lf-flab" style="margin-top:0">Appearance</span><div class="lf-seg" id="lfMode" style="--n:3"><button type="button" data-m="auto">Auto</button><button type="button" data-m="light">Light</button><button type="button" data-m="dark">Dark</button></div>'
+      + '<span class="lf-flab">Accent</span><div class="lf-wheel" id="lfWheel" role="slider" tabindex="0" aria-label="Accent colour" aria-valuemin="0" aria-valuemax="359"><i class="lf-wh-k"></i><span class="lf-wh-m"></span></div>'
+      + '<button type="button" class="lf-btn is-full" id="lfAccReset" style="margin-top:12px">Back to lime</button></div>');
+    $$('#lfMode button', c).forEach(function (b) {
+      b.setAttribute('aria-pressed', b.dataset.m === lfMode() ? 'true' : 'false');
+      b.addEventListener('click', function () { try { localStorage.setItem('lift.mode.v1', b.dataset.m); } catch (e) {} lfApplyMode(); lfRender(); });
+    });
+    var wh = $('#lfWheel', c), knob = $('.lf-wh-k', wh), rs = $('#lfAccReset', c);
+    function show(hu) {
+      var a = hu === null ? LIME_H : hu;
+      knob.style.transform = 'rotate(' + a + 'deg)';
+      wh.setAttribute('aria-valuenow', Math.round(a)); wh.setAttribute('aria-valuetext', hu === null ? 'Lime' : lfHueName(a));
+      rs.disabled = hu === null;
+    }
+    function pick(hu, keep) { lfAccentSet(hu, keep); show(hu); }
+    function at(e) { var b = wh.getBoundingClientRect(), x = e.clientX - b.left - b.width / 2, y = e.clientY - b.top - b.height / 2; return (Math.atan2(x, -y) * 180 / Math.PI + 360) % 360; }
+    var drag = false;
+    wh.addEventListener('pointerdown', function (e) { drag = true; try { wh.setPointerCapture(e.pointerId); } catch (x) {} pick(at(e)); e.preventDefault(); });
+    wh.addEventListener('pointermove', function (e) { if (drag) pick(at(e)); });
+    var end = function () { if (!drag) return; drag = false; lfAccentSet(lfAccTmp === undefined ? lfAccent() : lfAccTmp, true); lfRender(); };
+    wh.addEventListener('pointerup', end); wh.addEventListener('pointercancel', end);
+    wh.addEventListener('keydown', function (e) {
+      var d = e.key === 'ArrowRight' || e.key === 'ArrowUp' ? 5 : e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -5 : 0;
+      if (!d) return; e.preventDefault(); var a = lfAccent(); pick(((a === null ? LIME_H : a) + d + 360) % 360, true);
+    });
+    rs.addEventListener('click', function () { lfAccentSet(null, true); lfRender(); });
+    show(lfAccent());
+    bd.appendChild(c);
+  });
+}
 function lfFold(id, key, title, side, fill) {
   var c = el('<div class="lf-card lf-fold"><h3 class="lf-fh"><button type="button" class="lf-hd"><span class="lf-lab"></span><span class="lf-lab lf-num"></span>' + IC.chev + '</button></h3><div class="lf-fb"></div></div>');
   c.id = id; var bt = $('.lf-fh button', c), bd = $('.lf-fb', c), built = false;
@@ -4001,9 +4047,41 @@ function lfBadgeCard() {
 
 /* ═══════════ APPEARANCE ═══════════ */
 function lfMode() { var m = 'auto'; try { m = localStorage.getItem('lift.mode.v1') || 'auto'; } catch (e) {} return ['auto', 'light', 'dark'].indexOf(m) >= 0 ? m : 'auto'; }
+/* THE ACCENT, as a hue. Absent is lime, the app's own, and then nothing
+   is written over the stylesheet at all. A hue is turned into the five
+   tokens the accent is spent through, per face: the fill, the ink on it
+   (dark on a light fill, white on a deep one, worked out rather than
+   chosen), the accent as type, and the tint behind a live workout. */
+var LIME_H = 83;
+function lfAccent() { try { var v = localStorage.getItem('lift.accent.v1'); if (v === null || v === '') return null; v = +v; return isFinite(v) ? ((v % 360) + 360) % 360 : null; } catch (e) { return null; } }
+function lfAccentSet(h, keep) {
+  lfAccTmp = h;
+  if (keep) { try { if (h === null) localStorage.removeItem('lift.accent.v1'); else localStorage.setItem('lift.accent.v1', String(Math.round(h))); } catch (e) {} }
+  lfApplyAccent();
+}
+var lfAccTmp;
+function lfHueName(h) { return ['Red', 'Orange', 'Yellow', 'Lime', 'Green', 'Teal', 'Cyan', 'Blue', 'Indigo', 'Violet', 'Pink', 'Rose'][Math.round(h / 30) % 12]; }
+function lfHsl(h, s, l) { s /= 100; l /= 100; var k = function (n) { return (n + h / 30) % 12; }, a = s * Math.min(l, 1 - l), f = function (n) { return l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1)); }; return [f(0), f(8), f(4)].map(function (x) { return Math.round(x * 255); }); }
+function lfHex(c) { return '#' + c.map(function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
+function lfLum(c) { var v = c.map(function (x) { x /= 255; return x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4); }); return .2126 * v[0] + .7152 * v[1] + .0722 * v[2]; }
+function lfApplyAccent() {
+  var st = document.documentElement.style, h = lfAccTmp !== undefined ? lfAccTmp : lfAccent();
+  var keys = ['--today', '--log', '--on-log', '--today-ink', '--live-bg'];
+  if (h === null) { keys.forEach(function (k) { st.removeProperty(k); }); return; }
+  var dark = document.documentElement.getAttribute('data-mode') !== 'light';
+  /* yellow-greens are bright at any lightness and blues are dim, so the
+     fill is lifted where the hue is dark, to keep it reading as a light */
+  var fill = lfHsl(h, 80, h > 200 && h < 300 ? 64 : 56), lum = lfLum(fill);
+  var ink = dark ? lfHex(fill) : lfHex(lfHsl(h, 80, 36));
+  st.setProperty('--today', lfHex(fill)); st.setProperty('--log', lfHex(fill));
+  st.setProperty('--on-log', lum > .3 ? lfHex(lfHsl(h, 90, 6)) : '#ffffff');
+  st.setProperty('--today-ink', ink);
+  st.setProperty('--live-bg', dark ? lfHex(lfHsl(h, 50, 9)) : lfHex(lfHsl(h, 70, 93)));
+}
 function lfApplyMode() {
   var m = lfMode(), dark = m === 'dark' || (m === 'auto' && !(window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches));
   document.documentElement.setAttribute('data-mode', dark ? 'dark' : 'light');
+  lfApplyAccent();
   var tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.setAttribute('content', dark ? '#000000' : '#f2f2f7');
 }
 lfApplyMode();
@@ -4018,6 +4096,7 @@ function lfGo(v) {
   if (VIEWS.indexOf(v) < 0) v = 'home';
   if (v === 'cal' && view !== 'cal') calAt = today();
   if (v === 'fr' && view !== 'fr') frArrive = 1;
+  if (v !== view) lfFolds = {};
   view = v;
   try { localStorage.setItem(VIEWK, v); } catch (e) {}
   lfRender(); window.scrollTo(0, 0);

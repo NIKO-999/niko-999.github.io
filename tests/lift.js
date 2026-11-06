@@ -29,10 +29,12 @@ const freeze = (at) => `(() => {
 
 (async () => {
   const browser = await chromium.launch({ executablePath: chrome(), args: ['--no-sandbox'] });
-  /* the folding cards on You start open in every test phone, so the checks inside them can press;
-     the one check about folding starts them shut itself */
+  /* the folding cards on You are opened in every test phone as they are
+     drawn, so the checks inside them can press; a fold is held for the
+     visit only, so this does it each time one appears. The one check
+     about folding uses newCtx and starts them shut. */
   const newCtx = browser.newContext.bind(browser);
-  browser.newContext = async (o) => { const c = await newCtx(o); await c.addInitScript(`(() => { if (!localStorage.getItem('lift.fold.v1')) localStorage.setItem('lift.fold.v1', '{"set":1,"bdg":1,"foc":1}'); })();`); return c; };
+  browser.newContext = async (o) => { const c = await newCtx(o); await c.addInitScript(`(() => { const ids = ['lfSet', 'lfBadges', 'lfFocus', 'lfTheme']; new MutationObserver(() => { ids.forEach((id) => { const b = document.querySelector('#' + id + ' h3 > button[aria-expanded="false"]'); if (b && !b.dataset.auto) { b.dataset.auto = 1; b.click(); } }); }).observe(document, { childList: true, subtree: true }); })();`); return c; };
   const errors = [], offOrigin = [];
   async function ctx(seed, at, keepBadges) {
     const c = await browser.newContext(PHONE);
@@ -812,9 +814,15 @@ const freeze = (at) => `(() => {
     ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 24/.test(await page.textContent('#lfBadges h3')));
     await page.click('#lfSet h3 > button'); await page.click('#lfBadges h3 > button'); await page.click('#lfFocus h3 > button'); await settle(page);
     ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 24);
+    await page.click('#lfUnit [data-u="lb"]'); await settle(page);
+    ok('a save redraws the page and keeps what you opened', await st() === 'true:false,true:false,true:false');
+    await page.click('#lfUnit [data-u="kg"]'); await settle(page);
+    await page.click('.lf-bar [data-v="home"]'); await settle(page); await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    ok('leaving the tab shuts them again', await st() === 'false:true,false:true,false:true');
+    await page.click('#lfSet h3 > button'); await settle(page);
     await page.reload(); await page.waitForTimeout(300); await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    ok('and it stays open after a reload', await st() === 'true:false,true:false,true:false');
-    await page.click('#lfFocus h3 > button'); await page.click('.lf-bar [data-v="home"]'); await settle(page);
+    ok('and so does closing the app', await st() === 'false:true,false:true,false:true' && !(await page.evaluate(() => localStorage.getItem('lift.fold.v1'))));
+    await page.click('.lf-bar [data-v="home"]'); await settle(page);
     await page.click('#lfTgEdit'); await settle(page);
     ok('Edit targets on Home opens the focus list it goes to', await page.getAttribute('#lfFocus h3 > button', 'aria-expanded') === 'true');
     await c.close();
@@ -827,8 +835,8 @@ const freeze = (at) => `(() => {
       wo.push({ id: 'm' + n, d: d.toISOString().slice(0, 10), s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 100 + n, r: 8 }] }, { id: 'rdl', n: 'Romanian deadlift', sets: [{ w: 120, r: 10 }] }] });
     }
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-30T18:00:00', true);
-    await page.evaluate(() => localStorage.setItem('lift.fold.v1', '{"med":1,"rec":1}')); await page.reload(); await page.waitForTimeout(300);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    await page.click('#lfMedals h3 > button'); await settle(page);
     const med = await page.$$eval('#lfMedals .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
     ok('every week of a month on goal wins its medal, on the day the last week gets there', med.join() === 'October 2026:Perfect month,September 2026:Perfect month', med);
     ok('a record that already had its month counts it as seen, not news', (await store(page)).bseen.m202609 === 1);
@@ -1090,6 +1098,39 @@ const freeze = (at) => `(() => {
     await A.page.click('.lf-bar [data-v="home"]'); await A.page.click('.lf-bar [data-v="fr"]'); await A.page.waitForTimeout(400);
     ok('and their friends see they have gone', /Turned friends off/.test(await A.page.textContent('#frBoard')));
     await A.c.close(); await B.c.close();
+  }
+
+  /* ── THEME: light and dark, and the accent on a wheel ── */
+  {
+    const c = await newCtx(PHONE);
+    await c.addInitScript(freeze('2026-10-30T18:00:00'));
+    await c.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', '{"unit":"kg","wo":[],"bseen":{"v2":1,"v3":1}}'); })();`);
+    const page = await c.newPage(); await page.goto(URL); await page.waitForTimeout(300);
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    ok('theme is its own fold, shut, saying lime', await page.getAttribute('#lfTheme h3 > button', 'aria-expanded') === 'false' && /Lime/.test(await page.textContent('#lfTheme h3')));
+    ok('and appearance is not in settings any more', await page.locator('#lfSet #lfMode').count() === 0);
+    await page.click('#lfTheme h3 > button'); await settle(page);
+    ok('it holds appearance and the wheel', await page.locator('#lfTheme #lfMode').isVisible() && await page.locator('#lfWheel').isVisible());
+    const tok = () => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--log').trim());
+    ok('lime to begin with', (await tok()).toLowerCase() === '#a3e635', await tok());
+    const b = await page.locator('#lfWheel').boundingBox();
+    /* the bottom of the ring is 180 degrees: a cyan */
+    await page.mouse.move(b.x + b.width / 2, b.y + b.height - 12); await page.mouse.down(); await page.mouse.up(); await settle(page);
+    const cy = await tok();
+    ok('a press on the ring sets the accent from that hue', cy !== '#a3e635' && await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '180', [cy, await page.evaluate(() => localStorage.getItem('lift.accent.v1'))]);
+    ok('and the fold names it', /Cyan/.test(await page.textContent('#lfTheme h3')));
+    ok('the ink on a fill is worked out to read on it', await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--on-log').trim()) !== '');
+    await page.focus('#lfWheel'); await page.keyboard.press('ArrowRight');
+    ok('arrows turn it too', await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '185');
+    await page.reload(); await page.waitForTimeout(300);
+    ok('it is kept across a reload', (await tok()) === (await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--today').trim())) && (await tok()) !== '#a3e635');
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    await page.click('#lfTheme h3 > button'); await settle(page);
+    await page.click('#lfTheme #lfMode [data-m="light"]'); await settle(page);
+    ok('light and dark live here now', await page.evaluate(() => document.documentElement.dataset.mode) === 'light');
+    await page.click('#lfAccReset'); await settle(page);
+    ok('back to lime clears it', (await tok()).toLowerCase() === '#a3e635' && await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === null);
+    await c.close();
   }
 
   /* ── a new version is picked up when the app comes back to the front ── */
