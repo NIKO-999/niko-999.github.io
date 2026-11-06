@@ -555,7 +555,13 @@ svg { display: block; }
 .lf-cv-tier.is-t2 { color: #2b1d00; background: linear-gradient(135deg, #ffe08a, #e0a922); }
 .lf-cv-tier.is-t3 { color: #1a1026; background: linear-gradient(120deg, #ffb3e1, #b8c8ff, #a8ffd8, #ffe2a8); }
 .lf-cv-sc { margin-top: 14px; }
-@media (prefers-reduced-motion: reduce) { .lf-coin.is-t3::before { animation: none; } }
+/* a rare one glows in its own colour, a slow breath rather than a spin */
+.lf-coin.is-fx::before { background: radial-gradient(closest-side, color-mix(in srgb, var(--gl) 60%, transparent), transparent); animation: lf-breathe 3.6s ease-in-out infinite; filter: blur(6px); }
+.lf-coin.is-fx img { filter: drop-shadow(0 0 8px color-mix(in srgb, var(--gl) 70%, transparent)) drop-shadow(0 2px 4px rgba(0,0,0,.4)); }
+@keyframes lf-breathe { 0%, 100% { opacity: .5; transform: scale(.94); } 50% { opacity: .95; transform: scale(1.04); } }
+.lf-cv-stage.is-fx { background: radial-gradient(closest-side, color-mix(in srgb, var(--gl) 40%, transparent), transparent 75%); }
+.lf-cv-tier.is-fx { color: #0d0a14; background: var(--gl); }
+@media (prefers-reduced-motion: reduce) { .lf-coin.is-t3::before, .lf-coin.is-fx::before { animation: none; } }
 .lf-coin:has(img[src]) { background: none; box-shadow: none; }
 .lf-coin:active img { transform: scale(.94); }
 .lf-bdg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 8px; margin-top: 14px; }
@@ -3593,6 +3599,8 @@ function lfPushOff() {
    enamel over obsidian in a champagne rim, with a glow about it. */
 var BD_TIER = { wo50: 2, wo100: 3, st12: 2, st26: 3, v1m: 2, v5m: 3, pr10: 2, pr100: 3, abs50: 2, abs100: 3, duo10: 2, duo50: 3, lead3: 2, lead10: 3,
   ton15: 2, ton20: 3, rep1k: 2, rep2k: 3, leg100: 2, leg200: 3 };
+/* each rare badge's finish */
+var BD_FX = { night: 'galaxy', dawn: 'sunrise', onfire: 'lava', winter: 'ice', lungs: 'aurora', fullbody: 'neon' };
 var BADGES = [
   ['first', 'First workout', 'start', 'Your first logged session.'],
   ['wo10', '10 workouts', 'start', 'Ten sessions in the book.'],
@@ -3652,8 +3660,15 @@ var BADGES = [
   ['cardio25', 'Cardio Heart', 'mile', 'Cardio logged in twenty-five workouts.', '#fb7185'],
   ['leg50', 'Leg Legend', 'mile', 'Fifty workouts that trained legs.', '#ea580c'],
   ['leg100', 'Leg Hero', 'mile', 'A hundred workouts that trained legs.', '#ea580c'],
-  ['leg200', 'Leg Immortal', 'mile', 'Two hundred workouts that trained legs.', '#ea580c']
-].map(function (a) { var o = { id: a[0], n: a[1], k: a[2], d: a[3] }; if (a[4]) o.c = a[4]; if (BD_TIER[a[0]]) o.t = BD_TIER[a[0]]; return o; });
+  ['leg200', 'Leg Immortal', 'mile', 'Two hundred workouts that trained legs.', '#ea580c'],
+  /* RARE: quick to win and struck in a finish of their own, never a level */
+  ['night', 'Midnight Session', 'rare', 'A workout started between 11 pm and 4 am.', '#8b7cff'],
+  ['dawn', 'First Light', 'rare', 'A workout started before 5:30 am.', '#ffb347'],
+  ['onfire', 'On Fire', 'rare', 'New bests in three workouts in a row.', '#ff5a1f'],
+  ['winter', 'Winter Arc', 'rare', 'Twelve workouts in one December.', '#8fd8ff'],
+  ['lungs', 'Iron Lungs', 'rare', 'An hour of cardio in one workout.', '#3dffb0'],
+  ['fullbody', 'Full Body', 'rare', 'Six different muscles trained in one workout.', '#ff3df2']
+].map(function (a) { var o = { id: a[0], n: a[1], k: a[2], d: a[3] }; if (a[4]) o.c = a[4]; if (BD_TIER[a[0]]) o.t = BD_TIER[a[0]]; if (BD_FX[a[0]]) { o.t = 3; o.fx = BD_FX[a[0]]; } return o; });
 var BADGE = {}; BADGES.forEach(function (b) { BADGE[b.id] = b; });
 var BARBELL = { squat: 1, bench: 1, deadlift: 1, rdl: 1, frontsq: 1, inclbb: 1, bbrow: 1, hipthrust: 1, sldl: 1, rackpull: 1, ohp: 1 };
 /* every badge, with the day it was won or how far along it is */
@@ -3746,6 +3761,17 @@ function lfBadges() {
     prevD = w.d;
     w.x.forEach(function (e) { if (e.sets.length && !seen[e.id]) { seen[e.id] = 1; if (++exN === 40) won('explore', w.d); } });
   });
+  /* RARE */
+  var prRun = 0, decN = {};
+  ws.forEach(function (w) {
+    if (w.s > 1e11) { var hh = new Date(w.s), mm = hh.getHours() * 60 + hh.getMinutes(); if (mm >= 23 * 60 || mm < 4 * 60) won('night', w.d); if (mm >= 4 * 60 && mm < 5 * 60 + 30) won('dawn', w.d); }
+    if (w.d.slice(5, 7) === '12') { var yk = w.d.slice(0, 4); decN[yk] = (decN[yk] || 0) + 1; if (decN[yk] === 12) won('winter', w.d); }
+    if (w.cd && +w.cd.m >= 60) won('lungs', w.d);
+    var mus = {}; w.x.forEach(function (e) { var x = exById(e.id); if (x && e.sets.length) mus[x.m] = 1; }); if (Object.keys(mus).length >= 6) won('fullbody', w.d);
+  });
+  /* new bests in three workouts running */
+  var prOn = {}; prDays.forEach(function (d) { prOn[d] = 1; });
+  ws.forEach(function (w) { if (prOn[w.d]) { if (++prRun === 3) won('onfire', w.d); } else prRun = 0; });
   /* and more: a big session, weekends, a big month, a year in, the scale, cardio, legs */
   var wkendN = 0, satOf = {}, monN = {}, cdN = 0, legN = 0, first = ws.length ? ws[0].d : '';
   ws.forEach(function (w) {
@@ -3818,6 +3844,7 @@ var BD_KIND = {
   core: { n: 'Abs', c: '#84cc16' },
   friends: { n: 'Versus friends', c: '#6366f1' },
   mile: { n: 'Milestones', c: '#64748b' },
+  rare: { n: 'Rare', c: '#c084fc' },
   month: { n: 'Monthly medal', c: '#84cc16' }
 };
 /* A MONTH WEARS ITS OWN COLOUR, so a year of medals is twelve different things */
@@ -3864,6 +3891,7 @@ function bdBlur(dst, src, r, red) {
   x.drawImage(t, 0, 0);
 }
 var BD_TRIM = { silver: '#eceef2', gold: '#ffd76e', ex: '#f6dcc8' };
+var BD_FXTRIM = { galaxy: '#cdd3ff', sunrise: '#ffd27a', lava: '#8a8f98', ice: '#eaf7ff', aurora: '#d2fff0', neon: '#f2f2f6' };
 var BD_CREAM = '#eee8dc';
 /* every kind has its own bdOutline; the target badges each have their own */
 var BD_SHK = { start: 'circle', streak: 'hexp', volume: 'squircle', pr: 'banner', feat: 'oct', body: 'diamond', core: 'tall' };
@@ -3871,16 +3899,19 @@ var BD_SHI = { tgt1: 'hex', tgtall: 'shield', tgt4: 'rosette', quad: 'pent', sta
   duo1: 'twin', duo10: 'capsule', lead1: 'crownb', lead3: 'star5', squad: 'crest',
   early: 'sun', owl: 'gem', long: 'hourglass', ton10: 'trap', rep300: 'cross', back: 'drop', seven: 'hept', explore: 'compass',
   ton15: 'trap', ton20: 'trap', rep1k: 'cross', rep2k: 'cross', leg100: 'hextall', leg200: 'hextall', duo50: 'twin', lead10: 'crownb',
+  night: 'scallop', dawn: 'dome', onfire: 'flare', winter: 'shard', lungs: 'ellt', fullbody: 'trid',
   pr3: 'burst', sets30: 'gear', wkend: 'flag', mon20: 'tag', year: 'coin24', weigh: 'egg', cardio25: 'heart', leg50: 'hextall' };
 /* the two machines share a colour and each has its own pattern: treads for the stairs, a gradient for the incline */
 var BD_PT = { stair10: 'stairs', stairhr: 'stairs', incl10: 'incline', inclhr: 'incline' };
 /* a glyph a smaller face has to make room for: how big, and how far down */
 var BD_GS = { plaque: [.72, 0], arch: [.62, 90], tri: [.52, 150], diamond: [.72, 0], ramp: [.8, 0], tall: [.82, 0], twin: [.5, 0], capsule: [.6, 0], crownb: [.5, 70], star5: [.42, 18], crest: [.55, -20],
   sun: [.56, 0], gem: [.55, 60], hourglass: [.42, 0], trap: [.62, 40], cross: [.5, 0], drop: [.56, 90], hept: [.7, 0], compass: [.42, 0],
+  scallop: [.66, 0], dome: [.56, 60], flare: [.5, 0], shard: [.46, 0], ellt: [.6, 0], trid: [.46, -110],
   burst: [.44, 0], gear: [.56, 0], flag: [.56, 0], tag: [.56, 0], coin24: [.76, 0], egg: [.62, 0], heart: [.5, 40], hextall: [.62, 0] };
 var BD_GL = { first: 'i:check', wo10: '10', wo50: '50', goal: 'i:ring', st4: '4', st12: '12', tgt1: '1', tgtall: 'i:bars', tgt4: '4', quad: 'i:leg', pr: 'i:trophy', pr10: '10', v100k: 'i:weight', v1m: '1M', week: 'i:cal', plate3: '3', stair10: '10', stairhr: 'i:stairs', incl10: '10', inclhr: 'i:ramp', bwgoal: 'i:scale', abs10: '10', abs50: '50', duo1: 'i:pair', duo10: '10', lead1: '1', lead3: '3', squad: 'i:ring',
   early: 'i:sun', owl: 'i:moon', long: '90', ton10: '10k', rep300: '300', back: 'i:flame', seven: '7', explore: '40',
   st26: '26', v5m: '5M', pr100: '100', abs100: '100', duo50: '50', lead10: '10', ton15: '15k', ton20: '20k', rep1k: '1k', rep2k: '2k', leg100: '100', leg200: '200',
+  night: 'i:moon', dawn: 'i:sun', onfire: 'i:flame', winter: 'i:star', lungs: 'i:ring', fullbody: 'i:dumb',
   pr3: '3', sets30: '30', wkend: 'i:cal', mon20: '20', year: 'i:star', weigh: 'i:scale', cardio25: '25', leg50: '50' };
 function bdPoly(c, pts, rr) {
   var n = pts.length;
@@ -3953,6 +3984,13 @@ function bdOutline(c, k, sc) {
     c.closePath();
   }
   else if (k === 'hextall') bdPoly(c, M([[0, .99], [.66, .52], [.66, -.52], [0, -.99], [-.66, -.52], [-.66, .52]]), S(.12));
+  /* the rare ones */
+  else if (k === 'scallop') { for (var sc1 = 0; sc1 <= 320; sc1++) { var us = sc1 / 320 * Math.PI * 2, rs = .87 + .1 * Math.cos(8 * us); if (sc1 === 0) c.moveTo(S(rs), 0); else c.lineTo(S(rs * Math.cos(us)), S(rs * Math.sin(us))); } c.closePath(); }
+  else if (k === 'dome') { c.moveTo(S(-.96), S(-.62)); c.lineTo(S(.96), S(-.62)); for (var dm = 0; dm <= 80; dm++) { var ud = dm / 80 * Math.PI; c.lineTo(S(.96 * Math.cos(ud)), S(-.62 + 1.58 * Math.sin(ud))); } c.closePath(); }
+  else if (k === 'flare') bdPoly(c, M((function () { var o = []; for (var i = 0; i < 16; i++) { var a = Math.PI / 2 + i * Math.PI / 8, rr = i % 2 ? .7 : .99; o.push([rr * Math.cos(a), rr * Math.sin(a)]); } return o; })()), S(.16));
+  else if (k === 'shard') bdPoly(c, M([[0, .99], [.52, .46], [.44, -.58], [0, -.99], [-.44, -.58], [-.52, .46]]), S(.06));
+  else if (k === 'ellt') { for (var el1 = 0; el1 <= 200; el1++) { var ue2 = el1 / 200 * Math.PI * 2; if (el1 === 0) c.moveTo(S(.7), 0); else c.lineTo(S(.7 * Math.cos(ue2)), S(.98 * Math.sin(ue2))); } c.closePath(); }
+  else if (k === 'trid') bdPoly(c, M([[-.97, .74], [.97, .74], [0, -.98]]), S(.2));
   else if (k === 'squircle') bdPoly(c, M([[-.84, .84], [.84, .84], [.84, -.84], [-.84, -.84]]), S(.3));
   else if (k === 'banner') bdPoly(c, M([[-.84, .9], [.84, .9], [.84, -.96], [0, -.56], [-.84, -.96]]), S(.1));
   else if (k === 'pent') bdPoly(c, M([[-.86, .86], [.86, .86], [.86, -.18], [0, -.98], [-.86, -.18]]), S(.13));
@@ -4023,6 +4061,11 @@ var BD_PAT = {
     lines: function (c) { [-.32, .32].forEach(function (x) { c.moveTo(x + .62, 0); c.arc(x, 0, .62, 0, Math.PI * 2); }); },
     field: function (x, y) { var a = bdIn(x, y, -.32, 0, .62), b = bdIn(x, y, .32, 0, .62); return a && b ? 'd' : a || b ? 'a' : 'b'; }
   },
+  /* rare: cut facets, a gem's table seen from above */
+  rare: {
+    lines: function (c) { [.42, .84].forEach(function (k) { c.moveTo(0, k); c.lineTo(k, 0); c.lineTo(0, -k); c.lineTo(-k, 0); c.closePath(); }); c.moveTo(-1, 0); c.lineTo(1, 0); c.moveTo(0, -1); c.lineTo(0, 1); },
+    field: function (x, y) { var v = Math.abs(x) + Math.abs(y), side = (x > 0) === (y > 0); return v < .42 ? 'd' : v < .84 ? (side ? 'a' : 'b') : (side ? 'b' : 'a'); }
+  },
   /* milestones: diagonal bands, a road marked off */
   mile: {
     lines: function (c) { [-.8, 0, .8].forEach(function (k) { c.moveTo(-1, k + 1); c.lineTo(1, k - 1); }); },
@@ -4070,6 +4113,46 @@ function bdTroPat(t) {
     field: function (x, y) { var dx = x, dy = y - t.gy; if (dx * dx + dy * dy < t.gr * t.gr) return 'd'; var a = Math.atan2(dy, dx); return Math.floor((a + Math.PI) / (Math.PI / 6)) % 2 ? 'b' : 'a'; }
   };
 }
+/* THE RARE FINISHES, a pixel at a time: field k ('a' the kind's own, 'd' the
+   deep one, 'b' the light one) at (x, y), with q to seed the specks */
+function bdFx(fx, k, x, y, q) {
+  var n = bdNoise(q * 5.31), mix = bdMix, c3 = function (t, a, b, c) { return [128 + 127 * Math.cos(6.283 * (t + a)), 128 + 127 * Math.cos(6.283 * (t + b)), 128 + 127 * Math.cos(6.283 * (t + c))]; };
+  if (fx === 'galaxy') {
+    var neb = .5 + .5 * Math.sin(x * 3.1 + Math.sin(y * 4.3) * 1.6) * Math.cos(y * 2.2 - x * 1.4);
+    var base = k === 'b' ? [18, 20, 52] : k === 'd' ? [10, 8, 26] : mix([46, 24, 110], [190, 70, 200], neb);
+    return n > .99 ? [255, 255, 255] : n > .975 ? mix(base, [200, 210, 255], .6) : base;
+  }
+  if (fx === 'sunrise') {
+    var t = (y + 1) / 2;
+    if (k === 'b') return mix([255, 214, 170], [255, 240, 205], t);
+    if (k === 'd') return mix([150, 22, 48], [214, 60, 40], t);
+    return mix([236, 72, 46], [255, 196, 64], t);
+  }
+  if (fx === 'lava') {
+    var cr = Math.abs(Math.sin(x * 9 + Math.sin(y * 7) * 1.6) * Math.cos(y * 6 - x * 2));
+    if (k === 'd') return cr < .09 ? mix([255, 170, 40], [255, 90, 20], cr / .09) : mix([30, 22, 22], [52, 34, 30], n);
+    if (k === 'b') return mix([255, 214, 90], [255, 240, 160], (y + 1) / 2);
+    return mix([200, 30, 10], [255, 120, 20], .5 + .5 * Math.sin(x * 2.4 + y * 3.1));
+  }
+  if (fx === 'ice') {
+    var fr = n > .985 ? 1 : 0;
+    if (k === 'b') return mix([232, 246, 255], [255, 255, 255], fr);
+    if (k === 'd') return mix([24, 92, 160], [90, 170, 230], (y + 1) / 2);
+    return mix(mix([120, 205, 255], [200, 240, 255], (x + y + 2) / 4), [255, 255, 255], fr * .8);
+  }
+  if (fx === 'aurora') {
+    var bnd = .5 + .5 * Math.sin(x * 3 + y * 5 + Math.sin(x * 2) * 1.5);
+    if (k === 'b') return mix([10, 30, 44], [16, 46, 60], (y + 1) / 2);
+    if (k === 'd') return n > .99 ? [230, 255, 245] : [8, 20, 34];
+    return mix(mix([40, 255, 160], [60, 200, 255], bnd), [170, 90, 255], Math.max(0, y) * .55);
+  }
+  if (fx === 'neon') {
+    if (k === 'd') return [14, 10, 22];
+    if (k === 'b') return mix([60, 240, 255], [150, 255, 255], (y + 1) / 2);
+    return mix([255, 40, 200], [255, 120, 230], (x + 1) / 2);
+  }
+  return [200, 200, 200];
+}
 function bdHex(h) { var c = new BD3.Color(h); return [c.r * 255, c.g * 255, c.b * 255]; }
 function bdMix(a, b, t) { return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
 function bdAlpha(c) { return c.getContext('2d').getImageData(0, 0, BD_FACE, BD_FACE).data; }
@@ -4096,7 +4179,7 @@ function bdFront(b, trim) {
   /* the pattern stops short of the glyph, so the number or bdIcon sits clear on the enamel */
   var ko = bdCv(); bdBlur(ko, gm, 14); bdBlur(ko, gf, 14); bdBlur(ko, gm, 14);
   var S = bdAlpha(shp), I = bdAlpha(inn), D = bdAlpha(dv), G = bdAlpha(gm), F = bdAlpha(gf), KO = bdAlpha(ko);
-  var tier = lock ? 1 : b.t || 1;
+  var tier = lock ? 1 : b.t || 1, fx = lock ? '' : b.fx || '';
   /* gold: the kind's colour runs deeper, and gold leaf takes the cream's place, flecked */
   var A = bdHex(lock ? '#3b3c42' : b.c || BD_KIND[b.k].c), Bc = bdHex(lock ? '#26272c' : tier === 2 ? '#e7c15a' : BD_CREAM);
   if (tier === 2) A = bdMix(A, [0, 0, 0], .12);
@@ -4122,6 +4205,7 @@ function bdFront(b, trim) {
     if (S[i + 3] < 128) { C[i + 3] = 0; O[i + 1] = 30; O[i + 2] = 255; O[i + 3] = 255; H[i] = H[i + 1] = H[i + 2] = 255; H[i + 3] = 255; Z[i + 3] = 255; continue; }
     var mf = MF[q], gv = GV[q], en;
     if (gv >= .82) en = Ai;
+    else if (fx) en = bdFx(fx, pf(ux, uy), ux, uy, q);
     else if (tier === 3) {
       /* EXOTIC: the enamel is a film of colour that turns with where it is,
          over obsidian flecked with light, and a pearl in place of cream */
@@ -4260,7 +4344,7 @@ function bdPolar(shp, dish, mirror) {
   var g = new BD3.BufferGeometry(); g.setAttribute('position', new BD3.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new BD3.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals(); return g;
 }
 function bdMake(b, m, n) {
-  var g = new BD3.Group(), trim = b.t === 3 ? BD_TRIM.ex : b.t === 2 ? BD_TRIM.gold : BD_TRIM[m], mp = bdMaps(b, trim, n), lock = !!b.lock;
+  var g = new BD3.Group(), trim = b.fx ? BD_FXTRIM[b.fx] : b.t === 3 ? BD_TRIM.ex : b.t === 2 ? BD_TRIM.gold : BD_TRIM[m], mp = bdMaps(b, trim, n), lock = !!b.lock;
   var shp = new BD3.Shape(); bdOutline(shp, b.sh);
   var body = new BD3.ExtrudeGeometry(shp, { depth: .1, bevelEnabled: true, bevelThickness: .05, bevelSize: .045, bevelSegments: n > 600 ? 8 : 4, curveSegments: n > 600 ? 48 : 24 });
   body.computeBoundingBox(); body.translate(0, 0, -(body.boundingBox.max.z + body.boundingBox.min.z) / 2); body.computeBoundingBox();
@@ -4285,7 +4369,7 @@ function bdMake(b, m, n) {
 /* what the drawing needs to know about one badge, earned or not */
 function bdSpec(x) {
   var b = x.b;
-  return { id: b.id, k: b.k, c: b.c, bk: b.bk, t: b.t || 1, pt: b.pt || BD_PT[b.id], sh: b.sh || BD_SHI[b.id] || BD_SHK[b.k], gl: b.gl || BD_GL[b.id] || 'i:check', lock: !x.d,
+  return { id: b.id, k: b.k, c: b.c, bk: b.bk, t: b.t || 1, fx: b.fx || '', pt: b.pt || BD_PT[b.id], sh: b.sh || BD_SHI[b.id] || BD_SHK[b.k], gl: b.gl || BD_GL[b.id] || 'i:check', lock: !x.d,
     at: x.d ? fmtDay(x.d).replace(/^\w+ /, '') + ' ' + x.d.slice(0, 4) : '' };
 }
 function bdRenderer(w, h, keep) {
@@ -4324,6 +4408,7 @@ function lfCoinBtn(x, size) {
   var b = el('<button type="button" class="lf-coin"><img alt="" /></button>');
   b.style.setProperty('--cs', size + 'px'); b.dataset.b = x.b.id; b.dataset.m = x.d ? x.b.k : 'lock';
   if (x.d && x.b.t > 1) b.classList.add('is-t' + x.b.t);
+  if (x.d && x.b.fx) { b.classList.add('is-fx'); b.style.setProperty('--gl', x.b.c); }
   if (x.d && !x.fr && lfShow().indexOf(x.b.id) >= 0) b.classList.add('is-sc');
   b.setAttribute('aria-label', x.b.n + (x.b.t === 3 ? ', level 3' : x.b.t === 2 ? ', level 2' : '') + (x.d ? ', earned ' + fmtDay(x.d) : ', not yet earned') + '. Open');
   bdStill(x, $('img', b));
@@ -4339,7 +4424,8 @@ function lfCoinView(x, earnedNow) {
   var kd = $('.lf-cv-k', v); kd.textContent = earnedNow ? (x.b.k === 'month' ? 'Medal won' : 'Badge earned') : x.r ? 'Personal best' : x.d ? BD_KIND[x.b.k].n : x.b.k === 'month' ? 'This month' : 'Not yet earned';
   if (x.d) kd.style.color = x.b.c || BD_KIND[x.b.k].c;
   $('.lf-cv-n', v).textContent = x.b.n;
-  if (x.b.t > 1) { var tl = el('<span class="lf-cv-tier"></span>'); tl.classList.add('is-t' + x.b.t); tl.textContent = x.b.t === 3 ? 'Level 3 · Exotic' : 'Level 2 · Gold'; $('.lf-cv-cap', v).insertBefore(tl, $('.lf-cv-k', v)); }
+  if (x.b.t > 1) { var tl = el('<span class="lf-cv-tier"></span>'); tl.classList.add('is-t' + x.b.t); tl.textContent = x.b.fx ? x.b.fx.charAt(0).toUpperCase() + x.b.fx.slice(1) + ' finish' : x.b.t === 3 ? 'Level 3 · Exotic' : 'Level 2 · Gold';
+    if (x.b.fx) { tl.classList.add('is-fx'); tl.style.setProperty('--gl', x.b.c); } $('.lf-cv-cap', v).insertBefore(tl, $('.lf-cv-k', v)); }
   /* THE SHOWCASE: three of yours, chosen here, are what friends see */
   if (x.d && !x.fr && BADGE[x.b.id]) {
     var scb = el('<button type="button" class="lf-btn lf-cv-sc" id="lfShowBtn"></button>');
@@ -4356,6 +4442,7 @@ function lfCoinView(x, earnedNow) {
   requestAnimationFrame(function () { v.classList.add('is-up'); });
   var stage = $('.lf-cv-stage', v), raf = 0, r = null, aw = null, done = false;
   if (x.d && x.b.t > 1) stage.classList.add('is-t' + x.b.t);
+  if (x.d && x.b.fx) { stage.classList.add('is-fx'); stage.style.setProperty('--gl', x.b.c); }
   function close() {
     if (done) return; done = true; cancelAnimationFrame(raf); document.removeEventListener('keydown', esc); v.classList.remove('is-up');
     setTimeout(function () { if (aw) bdDrop(aw); if (r) { r.dispose(); if (r.forceContextLoss) r.forceContextLoss(); } v.remove(); if (!stack.length) document.body.classList.remove('lf-lock'); }, 240);
@@ -4589,7 +4676,7 @@ setInterval(function () { if (act && !sessSheet) lfTick(); }, 1000);
 
 /* BADGES ARRIVING ON A RECORD THAT ALREADY HAS HISTORY are not a dozen
    announcements: whatever was won before is counted as seen, quietly. */
-if (!S.bseen) { S.bseen = { v2: 1, v3: 1, v4: 1, v5: 1, v6: 1 }; var bsN = 0; lfBadges().concat(lfMedals()).forEach(function (x) { if (x.d) { S.bseen[x.b.id] = 1; bsN++; } }); if (bsN) lfSave(); }
+if (!S.bseen) { S.bseen = { v2: 1, v3: 1, v4: 1, v5: 1, v6: 1, v7: 1 }; var bsN = 0; lfBadges().concat(lfMedals()).forEach(function (x) { if (x.d) { S.bseen[x.b.id] = 1; bsN++; } }); if (bsN) lfSave(); }
 /* AND THE SAME FOR BADGES A LATER BUILD ADDED: the week goal and the four
    target badges arrived after people had already earned them, and a goal
    you hit in August is not news in November. `v2` marks the record as
@@ -4597,6 +4684,7 @@ if (!S.bseen) { S.bseen = { v2: 1, v3: 1, v4: 1, v5: 1, v6: 1 }; var bsN = 0; lf
 else if (!S.bseen.v2) { var BS2 = { goal: 1, tgt1: 1, tgtall: 1, tgt4: 1, quad: 1 }; lfBadges().forEach(function (x) { if (x.d && BS2[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v2 = 1; lfSave(); }
 /* the monthly medals arrived the same way, and a month won in August is not news either */
 /* and the milestones, which a long record may already hold */
+if (S.bseen && !S.bseen.v7) { var BS7 = { night: 1, dawn: 1, onfire: 1, winter: 1, lungs: 1, fullbody: 1 }; lfBadges().forEach(function (x) { if (x.d && BS7[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v7 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v6) { var BS6 = { st26: 1, v5m: 1, pr100: 1, abs100: 1, duo50: 1, lead10: 1, ton15: 1, ton20: 1, rep1k: 1, rep2k: 1, leg100: 1, leg200: 1 }; lfBadges().forEach(function (x) { if (x.d && BS6[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v6 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v5) { var BS5 = { pr3: 1, sets30: 1, wkend: 1, mon20: 1, year: 1, weigh: 1, cardio25: 1, leg50: 1 }; lfBadges().forEach(function (x) { if (x.d && BS5[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v5 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v4) { var BS4 = { early: 1, owl: 1, long: 1, ton10: 1, rep300: 1, back: 1, seven: 1, explore: 1 }; lfBadges().forEach(function (x) { if (x.d && BS4[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v4 = 1; lfSave(); }

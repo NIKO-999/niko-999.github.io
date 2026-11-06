@@ -796,8 +796,8 @@ const freeze = (at) => `(() => {
     ok('and counts what it had already won as seen', seen && seen.first === 1 && seen.wo10 === 1 && seen.pr === 1 && !seen.st4, seen);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const shelf = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
-    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 57 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
-    ok('and counts them', /4 of 57/.test(await page.textContent('#lfBadges .lf-hd')));
+    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 63 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
+    ok('and counts them', /4 of 63/.test(await page.textContent('#lfBadges .lf-hd')));
     ok('a badge not yet won carries its progress ring', await page.locator('#lfBadges .lf-coin[data-b="wo50"] .lf-bdr').count() === 1 && await page.locator('#lfBadges .lf-coin[data-b="first"] .lf-bdr').count() === 0);
     await page.click('#lfBadges .lf-coin[data-b="wo10"]'); await page.waitForTimeout(500);
     ok('a coin opens on its own screen, to spin', await page.locator('.lf-cv').count() === 1 && /10 workouts/.test(await page.textContent('.lf-cv')) && /Earned Mon 26 Oct/.test(await page.textContent('.lf-cv'))
@@ -832,9 +832,9 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const st = async () => page.evaluate(() => ['lfSet', 'lfBadges', 'lfFocus'].map((id) => { const b = document.querySelector('#' + id + ' h3 > button'); return b && b.getAttribute('aria-expanded') + ':' + document.getElementById(b.getAttribute('aria-controls')).hidden; }).join());
     ok('settings, badges and focus are shut by default, each a button inside its heading', await st() === 'false:true,false:true,false:true');
-    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 57/.test(await page.textContent('#lfBadges h3')));
+    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 63/.test(await page.textContent('#lfBadges h3')));
     await page.click('#lfSet h3 > button'); await page.click('#lfBadges h3 > button'); await page.click('#lfFocus h3 > button'); await settle(page);
-    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 57);
+    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 63);
     await page.click('#lfUnit [data-u="lb"]'); await settle(page);
     ok('a save redraws the page and keeps what you opened', await st() === 'true:false,true:false,true:false');
     await page.click('#lfUnit [data-u="kg"]'); await settle(page);
@@ -1206,6 +1206,23 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── RARE: quick wins in a finish of their own ── */
+  {
+    const at = (d, h, m) => new Date(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8), h, m).getTime();
+    const w = (id, d, h, m, x, cd) => ({ id, d, s: at(d, h, m), e: at(d, h, m) + 3600000, n: 'W', x, cd });
+    const one = (id, kg) => ({ id, n: id, sets: [{ w: kg, r: 8 }] });
+    const wo = [w('z', '2026-10-18', 9, 0, [one('hack', 95)]), w('a', '2026-10-20', 23, 30, [one('hack', 100)]), w('b', '2026-10-22', 5, 0, [one('hack', 105)]), w('c', '2026-10-24', 9, 0, [one('hack', 110)]),
+      w('f', '2026-10-27', 9, 0, ['hack', 'bench', 'latpd', 'cablat', 'ezcurl', 'tripush'].map((id) => one(id, 50)), { k: 'walk', m: 60 })];
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-30T18:00:00');
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    const m = Object.fromEntries(await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => [e.querySelector('b').textContent, e.querySelector('span').textContent])));
+    ok('after 11 pm is a midnight session, before half five first light', m['Midnight Session'] === '20 Oct' && m['First Light'] === '22 Oct', [m['Midnight Session'], m['First Light']]);
+    ok('bests three workouts running are on fire, an hour of cardio iron lungs, six muscles full body', m['On Fire'] === '24 Oct' && m['Iron Lungs'] === '27 Oct' && m['Full Body'] === '27 Oct', [m['On Fire'], m['Iron Lungs'], m['Full Body']]);
+    ok('and winter waits for December', m['Winter Arc'] === 'Locked');
+    ok('a rare one wears its own finish and glow', /is-fx/.test(await page.getAttribute('#lfBadges .lf-coin[data-b="night"]', 'class')) && /is-t3/.test(await page.getAttribute('#lfBadges .lf-coin[data-b="night"]', 'class')));
+    await c.close();
+  }
+
   /* ── LEVELS AND THE SHOWCASE ── */
   {
     const t = new Date('2026-10-28T07:00:00').getTime();
@@ -1221,6 +1238,8 @@ const freeze = (at) => `(() => {
     await page.click('.lf-cv-x'); await page.waitForTimeout(400);
     ok('a showcased badge is marked on the shelf', /is-sc/.test(await page.getAttribute('#lfBadges .lf-coin[data-b="ton20"]', 'class')));
     for (const id of ['ton15', 'ton10', 'first']) { await page.click('#lfBadges .lf-coin[data-b="' + id + '"]'); await page.waitForTimeout(400); await page.click('#lfShowBtn'); await page.waitForTimeout(200); await page.click('.lf-cv-x'); await page.waitForTimeout(400); }
+    const night = await page.getAttribute('#lfBadges .lf-coin[data-b="night"]', 'class');
+    ok('a rare badge stays dark until it is won', !/is-fx/.test(night));
     ok('three at a time, never a fourth', JSON.stringify((await store(page)).show) === '["ton20","ton15","ton10"]');
     await c.close();
   }
