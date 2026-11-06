@@ -220,7 +220,7 @@ svg { display: block; }
 .lf-vr:nth-child(-n+3) span { color: var(--ink); font-weight: 600; }
 .lf-vsep { height: 1px; background: var(--line); margin: 2px 0; }
 .lf-vr i { display: block; height: 6px; border-radius: 3px; background: var(--card3); overflow: hidden; }
-.lf-vr i b { display: block; height: 100%; background: var(--acc-bar, var(--mark-on)); border-radius: 3px; }
+.lf-vr i b { display: block; height: 100%; background: var(--mark-on); border-radius: 3px; }
 .lf-vr.is-met i b { background: var(--good); }
 .lf-vr em { font-style: normal; text-align: right; color: var(--dim); }
 .lf-tg { font-size: 12px; color: var(--dim); margin: -6px 0 2px; }
@@ -237,7 +237,7 @@ svg { display: block; }
 .lf-dl-u { font-size: 11px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lf-dl-bar { display: block; height: 4px; border-radius: 2px; background: var(--card3); margin-top: auto; overflow: hidden; }
 .lf-dl-t > span:nth-last-child(2) { margin-bottom: 8px; }
-.lf-dl-bar i { display: block; height: 100%; background: var(--acc-bar, var(--mark-on)); border-radius: 2px; }
+.lf-dl-bar i { display: block; height: 100%; background: var(--mark-on); border-radius: 2px; }
 .lf-dl-t.is-met .lf-dl-bar i { background: var(--good); }
 .lf-dl-q { justify-content: center; margin-bottom: 10px; }
 .lf-dl-f { display: flex; gap: 8px; }
@@ -4069,7 +4069,7 @@ function lfHueName(h) { return ['Red', 'Orange', 'Yellow', 'Lime', 'Green', 'Tea
 function lfHsl(h, s, l) { s /= 100; l /= 100; var k = function (n) { return (n + h / 30) % 12; }, a = s * Math.min(l, 1 - l), f = function (n) { return l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1)); }; return [f(0), f(8), f(4)].map(function (x) { return Math.round(x * 255); }); }
 function lfHex(c) { return '#' + c.map(function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
 function lfLum(c) { var v = c.map(function (x) { x /= 255; return x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4); }); return .2126 * v[0] + .7152 * v[1] + .0722 * v[2]; }
-var ACC_KEYS = ['--today', '--log', '--on-log', '--today-ink', '--live-bg', '--good', '--done-bg', '--acc-bar'];
+var ACC_KEYS = ['--today', '--log', '--on-log', '--today-ink', '--live-bg', '--good', '--done-bg'];
 /* A FRIEND'S PAGE WEARS THEIR COLOUR: the same tokens, written on their
    sheet rather than the page, so it is their accent inside and yours
    everywhere else. Lime is written out in full there, because the page
@@ -4078,7 +4078,7 @@ function lfAccOn(node, h) {
   var dark = document.documentElement.getAttribute('data-mode') !== 'light', st = node.style;
   if (h === null || h === undefined) {
     var lime = { '--today': '#a3e635', '--log': '#a3e635', '--on-log': '#0b1400', '--today-ink': dark ? '#a3e635' : '#65a30d', '--live-bg': dark ? '#16210a' : '#eef7dc',
-      '--good': dark ? '#34c759' : '#248a3d', '--done-bg': dark ? 'rgba(52, 199, 89, .16)' : 'rgba(52, 199, 89, .14)', '--acc-bar': 'var(--mark-on)' };
+      '--good': dark ? '#34c759' : '#248a3d', '--done-bg': dark ? 'rgba(52, 199, 89, .16)' : 'rgba(52, 199, 89, .14)' };
     ACC_KEYS.forEach(function (k) { st.setProperty(k, lime[k]); });
     return;
   }
@@ -4100,7 +4100,6 @@ function lfAccTok(h, dark, st) {
   st.setProperty('--live-bg', dark ? lfHex(lfHsl(h, 50, 9)) : lfHex(lfHsl(h, 70, 93)));
   st.setProperty('--good', ink);
   st.setProperty('--done-bg', 'color-mix(in srgb, ' + lfHex(fill) + ' ' + (dark ? 18 : 22) + '%, transparent)');
-  st.setProperty('--acc-bar', ink);
 }
 function lfApplyMode() {
   var m = lfMode(), dark = m === 'dark' || (m === 'auto' && !(window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches));
