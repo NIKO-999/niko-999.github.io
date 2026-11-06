@@ -1077,7 +1077,7 @@ const freeze = (at) => `(() => {
     ok('the week is rings, one each, toward their own goal, and the names under them are the board', await A.page.locator('#frRings svg circle').count() >= 2 && await A.page.locator('#frRings #frBoard .fr-row').count() === 2 && (await A.page.$$eval('#frRings .fr-row', (r) => r.map((x) => x.style.getPropertyValue('--rc')))).every((c) => c));
     ok('their ring says it too: a glow, a light at its tip, and their name in the middle', await A.page.locator('#frRings .fr-rg-h').count() === 1 && /Sam\s*training now/.test(await A.page.textContent('#frRgLive')), await A.page.textContent('#frRings'));
     ok('and a ring is drawn in the colour they chose', await A.page.$$eval('#frRings .fr-rg-a', (r) => r.map((x) => x.getAttribute('stroke'))).then((c) => c.length >= 1));
-    ok('there is no leaderboard card and no 30-day strip', await A.page.locator('#frLb').count() === 0 && await A.page.locator('.fr-strip').count() === 0);
+    ok('there is no leaderboard card, and each name carries its thirty days', await A.page.locator('#frLb').count() === 0 && await A.page.locator('#frRings .fr-row .fr-strip').count() === 2);
     ok('a typed code adds them, lower case and all', (await A.page.$$eval('#frBoard .fr-row .fr-t b', (b) => b.map((x) => x.textContent))).join() === 'You,Sam');
     await A.page.click('#frBoard .fr-row:not(.is-me)'); await settle(A.page);
     const sh = await top(A.page).textContent('.lf-sh-bd');
