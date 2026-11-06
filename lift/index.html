@@ -589,14 +589,18 @@ svg { display: block; }
 svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 @keyframes lf-reveal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
 .lf-a-dot, .lf-vs-dot.is-now { position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--ink); animation: lf-dotpulse 2.6s ease-in-out infinite; }
-.is-draw ~ .lf-a-dot, .is-draw ~ .lf-vs-dot { animation: lf-fadein .3s .85s backwards, lf-dotpulse 2.6s 1.2s ease-in-out infinite; }
+.is-draw ~ .lf-a-dot, .is-draw ~ .lf-vs-dot.is-now { animation: lf-fadein .3s .85s backwards, lf-dotpulse 2.6s 1.2s ease-in-out infinite; }
 @keyframes lf-dotpulse { 0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink) 16%, transparent), 0 0 8px 1px color-mix(in srgb, var(--ink) 40%, transparent); } 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--ink) 8%, transparent), 0 0 14px 3px color-mix(in srgb, var(--ink) 55%, transparent); } }
 .lf-scrub { touch-action: pan-y; cursor: crosshair; }
 .lf-guide { position: absolute; top: 0; bottom: 0; width: 1px; background: color-mix(in srgb, var(--ink) 35%, transparent); pointer-events: none; }
 .lf-sdot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 3px var(--card), 0 0 12px color-mix(in srgb, var(--ink) 60%, transparent); pointer-events: none; }
-.lf-tip { position: absolute; top: 2px; transform: translateX(-50%); padding: 5px 9px; border-radius: 10px; background: var(--ink); color: var(--bg); font-size: 11px; line-height: 1.25; text-align: center; white-space: nowrap; pointer-events: none; box-shadow: 0 6px 18px var(--shade); z-index: 2; }
-.lf-tip b { display: block; font-size: 13px; }
-@media (prefers-reduced-motion: reduce) { svg.is-draw, .lf-a-dot, .lf-vs-dot.is-now, .is-draw ~ .lf-a-dot, .is-draw ~ .lf-vs-dot { animation: none; } }
+.lf-scr-t { position: absolute; top: 0; padding: 6px 10px; border-radius: 12px; background: rgba(28, 28, 32, .94); color: #fff; font-size: 11px; line-height: 1.3; text-align: left; white-space: nowrap; pointer-events: none;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .45), inset 0 0 0 1px rgba(255, 255, 255, .08); z-index: 2; }
+.lf-scr-t b { display: block; font-size: 15px; font-weight: 700; color: #fff; }
+.lf-scr-t span { color: rgba(255, 255, 255, .7); }
+/* a label under the finger would fight the readout, so they step aside */
+.lf-scrub.is-on .lf-vs-v { opacity: 0; transition: opacity .15s; }
+@media (prefers-reduced-motion: reduce) { svg.is-draw, .lf-a-dot, .lf-vs-dot.is-now, .is-draw ~ .lf-a-dot, .is-draw ~ .lf-vs-dot.is-now { animation: none; } }
 .lf-vs-v { position: absolute; transform: translate(-50%, -150%); font-style: normal; font-size: 11px; font-weight: 600; color: var(--ink); white-space: nowrap; }
 .lf-vs-v.is-l { transform: translate(0, -150%); }
 .lf-vs-v.is-r { transform: translate(-100%, -150%); }
@@ -1938,19 +1942,20 @@ function lfAreaSvg(vals) {
 /* PRESS AND HOLD, or run a finger along: the nearest point is read out */
 function lfScrub(box, pts, lab) {
   box.classList.add('lf-scrub');
-  var ln = el('<i class="lf-guide" hidden></i>'), dot = el('<i class="lf-sdot" hidden></i>'), tip = el('<div class="lf-tip" hidden><b class="lf-num"></b><span></span></div>'), on = false, was = -1;
+  var ln = el('<i class="lf-guide" hidden></i>'), dot = el('<i class="lf-sdot" hidden></i>'), tip = el('<div class="lf-scr-t" hidden><b class="lf-num"></b><span></span></div>'), on = false, was = -1;
   box.appendChild(ln); box.appendChild(dot); box.appendChild(tip);
   function at(e) {
     var r = box.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 100, k = 0;
     pts.forEach(function (p, i) { if (Math.abs(p[0] - x) < Math.abs(pts[k][0] - x)) k = i; });
     var p = pts[k], l = lab(k);
     ln.style.left = dot.style.left = p[0] + '%'; dot.style.top = p[1] + '%';
-    tip.style.left = Math.max(14, Math.min(86, p[0])) + '%';
+    var right = p[0] < 55; tip.style.left = right ? 'calc(' + p[0] + '% + 12px)' : 'auto'; tip.style.right = right ? 'auto' : 'calc(' + (100 - p[0]) + '% + 12px)';
+    box.classList.add('is-on');
     $('b', tip).textContent = l[0]; $('span', tip).textContent = l[1];
     ln.hidden = dot.hidden = tip.hidden = false;
     if (k !== was) { buzz(6); was = k; }
   }
-  function off() { on = false; was = -1; ln.hidden = dot.hidden = tip.hidden = true; }
+  function off() { on = false; was = -1; ln.hidden = dot.hidden = tip.hidden = true; box.classList.remove('is-on'); }
   box.addEventListener('pointerdown', function (e) { on = true; try { box.setPointerCapture(e.pointerId); } catch (x) {} at(e); });
   box.addEventListener('pointermove', function (e) { if (on) at(e); });
   ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (t) { box.addEventListener(t, off); });
@@ -3479,19 +3484,21 @@ function frRings(rows) {
   /* TRAINING NOW IS ON THE RING: theirs glows, a light rides its tip
      where the next workout will land, and the middle says who it is. */
   var live = [];
-  /* THE RINGS SWEEP IN when you arrive, from nothing to where each stands.
-     A ring that has grown since you last looked has a light run along the
-     new part of it, and one that has just closed its goal flashes. */
-  var arrive = frRgIn, grew = []; frRgIn = 0;
+  /* THE RINGS SWEEP IN when you arrive. A ring that has grown since you
+     last looked has a light run along the new part, and one that has just
+     closed its goal flashes. The tab repaints while they move, as the
+     friends' records come in, so each new arc starts from where the old
+     one is ON SCREEN at that moment: the move carries on, never jumps. */
+  var arrive = frRgIn, grew = [], cur = frRgCur; frRgIn = 0; frRgCur = {};
   drawn.forEach(function (x, i) {
     var rr = r0 - i * step, len = 2 * Math.PI * rr, col = frColOf(x.f.s), lv = frLive(x.f.s);
     if (rr < 8) return;
     if (lv) live.push(x);
-    var key = x.f.me ? 'me' : String(x.f.c), was = key in frRgMem ? frRgMem[key] : (+frRgSeen[key] || 0), from = arrive ? 0 : was;
+    var key = x.f.me ? 'me' : String(x.f.c), was = key in frRgMem ? frRgMem[key] : (+frRgSeen[key] || 0), from = arrive ? 0 : key in cur ? cur[key] / len : was;
     frRgMem[key] = x.k; frRgSeen[key] = x.k;
     var up = x.k > was + 1e-6, shut = x.k >= 1 && was < 1, seg = Math.min(18, len * (x.k - was));
     g.insertAdjacentHTML('beforeend', '<circle cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="var(--card3)" stroke-width="' + sw + '"/>'
-      + (x.k > 0 ? '<circle class="fr-rg-a' + (lv ? ' is-live' : '') + (shut ? ' is-shut' : '') + '" data-to="' + (len * x.k).toFixed(1) + '" cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="' + col + '" stroke-width="' + sw + '" stroke-dasharray="' + (len * from).toFixed(1) + ' ' + len.toFixed(1) + '" style="--rc:' + col + '"/>' : '')
+      + (x.k > 0 ? '<circle class="fr-rg-a' + (lv ? ' is-live' : '') + (shut ? ' is-shut' : '') + '" data-k="' + esc(key) + '" data-to="' + (len * x.k).toFixed(1) + '" cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="' + col + '" stroke-width="' + sw + '" stroke-dasharray="' + (len * from).toFixed(1) + ' ' + len.toFixed(1) + '" style="--rc:' + col + '"/>' : '')
       + (up && x.k > 0 ? '<circle class="fr-rg-cm" cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="#fff" stroke-width="' + (sw * .55).toFixed(1) + '" stroke-dasharray="' + seg.toFixed(1) + ' ' + len.toFixed(1) + '" style="--o0:' + (-len * was).toFixed(1) + 'px;--o1:' + (-(len * x.k - seg)).toFixed(1) + 'px;--rc:' + col + '"/>' : ''));
     if (up) grew.push(key);
     if (lv) {
@@ -3592,7 +3599,11 @@ function frCodeRow() {
 }
 var frArrive = 0, frRgIn = 1, frRgMem = {}, frRgSeen = {};
 try { frRgSeen = JSON.parse(localStorage.getItem('lift.rg.v1') || '{}') || {}; } catch (e) {}
+/* where each ring's arc is on screen right now, read before the tab is cleared */
+var frRgCur = {};
+function frRgSnap() { frRgCur = {}; $$('#frRings .fr-rg-a').forEach(function (a) { var v = parseFloat(getComputedStyle(a).strokeDasharray); if (isFinite(v)) frRgCur[a.dataset.k] = v; }); }
 function lfRenderFr() {
+  frRgSnap();
   var root = $('#lfFr'); root.textContent = '';
   var hd = el('<div class="fr-hd"><h2 class="lf-h1">Friends</h2></div>');
   root.appendChild(hd);
@@ -4625,7 +4636,6 @@ function lfCoinBtn(x, size) {
 
 /* ── the live award: drag to spin with momentum, tap to flip, it settles face-on.
    It is the one badge built at full size, and it is given back when it closes. */
-var lfTiltAsked = 0;
 function lfCoinView(x, earnedNow) {
   var v = el('<div class="lf-cv" role="dialog" aria-modal="true"><button type="button" class="lf-cv-x" aria-label="Close">' + IC.x + '</button><div class="lf-cv-stage"></div>'
     + '<div class="lf-cv-cap"><div class="lf-cv-k"></div><div class="lf-cv-n"></div><p></p><div class="lf-cv-h">Drag to spin · tap to flip</div></div></div>');
@@ -4651,13 +4661,11 @@ function lfCoinView(x, earnedNow) {
   $('p', v).textContent = x.b.d + (x.d ? (x.r ? ' Set ' : ' Earned ') + fmtDay(x.d) + '.' : x.b.k === 'month' && x.p ? ' ' + x.p[0] + ' of ' + x.p[1] + ' weeks so far.' : x.p && x.p[1] > 1 ? ' ' + lfBadgeProg(x) + ' so far.' : '');
   document.body.appendChild(v); document.body.classList.add('lf-lock');
   requestAnimationFrame(function () { v.classList.add('is-up'); });
-  var stage = $('.lf-cv-stage', v), raf = 0, r = null, aw = null, done = false, tiltFn = null;
-  /* iOS asks once for the motion sensor, and only from a press, which opening a badge is */
-  if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function' && !lfTiltAsked && !earnedNow) { lfTiltAsked = 1; try { DeviceOrientationEvent.requestPermission().catch(function () {}); } catch (e) {} }
+  var stage = $('.lf-cv-stage', v), raf = 0, r = null, aw = null, done = false;
   if (x.d && x.b.t > 1) stage.classList.add('is-t' + x.b.t);
   if (x.d && x.b.fx) { stage.classList.add('is-fx'); stage.style.setProperty('--gl', BD_FXGL[x.b.fx]); }
   function close() {
-    if (done) return; done = true; cancelAnimationFrame(raf); document.removeEventListener('keydown', esc); if (tiltFn) window.removeEventListener('deviceorientation', tiltFn); v.classList.remove('is-up');
+    if (done) return; done = true; cancelAnimationFrame(raf); document.removeEventListener('keydown', esc); v.classList.remove('is-up');
     setTimeout(function () { if (aw) bdDrop(aw); if (r) { r.dispose(); if (r.forceContextLoss) r.forceContextLoss(); } v.remove(); if (!stack.length) document.body.classList.remove('lf-lock'); }, 240);
   }
   function esc(e) { if (e.key === 'Escape') { e.stopPropagation(); close(); } }
@@ -4679,18 +4687,12 @@ function lfCoinView(x, earnedNow) {
     var ry = -Math.PI * 2 - .8, rx = .3, vy = 0, vx = 0, drag = null, t0 = performance.now();
     var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (calm) ry = 0;
-    /* TILT THE PHONE and the award tips with it under the same lights, so
-       the finish catches and loses the light the way a real one would */
-    var tg = 0, tb = 0, tx = 0, ty = 0;
-    tiltFn = function (e) { if (e.gamma == null) return; tg = Math.max(-1, Math.min(1, e.gamma / 35)); tb = Math.max(-1, Math.min(1, ((e.beta || 0) - 45) / 35)); };
-    if (!calm) window.addEventListener('deviceorientation', tiltFn);
     (function loop() {
       raf = requestAnimationFrame(loop);
-      tx += (tg * .38 - tx) * .12; ty += (tb * .3 - ty) * .12;
       /* it settles a little off square, the way a held award does, so the light is on the metal at rest too */
       if (!drag) { vy *= .955; vx *= .9; if (Math.abs(vy) < .02) ry += (Math.round(ry / Math.PI) * Math.PI + .26 - ry) * .08; ry += vy; rx += vx; rx += (.12 - rx) * .06; }
       var sw = calm || drag ? 0 : Math.sin((performance.now() - t0) / 1000 * .9) * .05;
-      aw.rotation.set(rx + sw * .4 + (drag ? 0 : ty), ry + sw + (drag ? 0 : tx), 0); r.render(sc, cam);
+      aw.rotation.set(rx + sw * .4, ry + sw, 0); r.render(sc, cam);
     })();
     stage.addEventListener('pointerdown', function (e) { drag = { x: e.clientX, y: e.clientY, m: 0 }; vy = vx = 0; stage.setPointerCapture(e.pointerId); });
     stage.addEventListener('pointermove', function (e) {
