@@ -796,8 +796,8 @@ const freeze = (at) => `(() => {
     ok('and counts what it had already won as seen', seen && seen.first === 1 && seen.wo10 === 1 && seen.pr === 1 && !seen.st4, seen);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const shelf = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
-    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 37 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
-    ok('and counts them', /4 of 37/.test(await page.textContent('#lfBadges .lf-hd')));
+    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 45 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
+    ok('and counts them', /4 of 45/.test(await page.textContent('#lfBadges .lf-hd')));
     ok('a badge not yet won carries its progress ring', await page.locator('#lfBadges .lf-coin[data-b="wo50"] .lf-bdr').count() === 1 && await page.locator('#lfBadges .lf-coin[data-b="first"] .lf-bdr').count() === 0);
     await page.click('#lfBadges .lf-coin[data-b="wo10"]'); await page.waitForTimeout(500);
     ok('a coin opens on its own screen, to spin', await page.locator('.lf-cv').count() === 1 && /10 workouts/.test(await page.textContent('.lf-cv')) && /Earned Mon 26 Oct/.test(await page.textContent('.lf-cv'))
@@ -832,9 +832,9 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const st = async () => page.evaluate(() => ['lfSet', 'lfBadges', 'lfFocus'].map((id) => { const b = document.querySelector('#' + id + ' h3 > button'); return b && b.getAttribute('aria-expanded') + ':' + document.getElementById(b.getAttribute('aria-controls')).hidden; }).join());
     ok('settings, badges and focus are shut by default, each a button inside its heading', await st() === 'false:true,false:true,false:true');
-    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 37/.test(await page.textContent('#lfBadges h3')));
+    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 45/.test(await page.textContent('#lfBadges h3')));
     await page.click('#lfSet h3 > button'); await page.click('#lfBadges h3 > button'); await page.click('#lfFocus h3 > button'); await settle(page);
-    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 37);
+    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 45);
     await page.click('#lfUnit [data-u="lb"]'); await settle(page);
     ok('a save redraws the page and keeps what you opened', await st() === 'true:false,true:false,true:false');
     await page.click('#lfUnit [data-u="kg"]'); await settle(page);
@@ -1188,6 +1188,7 @@ const freeze = (at) => `(() => {
     ok('ten starts before seven are an early bird', m['Early Bird'] === '10 Oct' && m['Night Owl'] === '1 / 10', [m['Early Bird'], m['Night Owl']]);
     ok('ninety minutes is a long haul, 10,000 kg and three hundred reps in one go are theirs', m['Long Haul'] === '1 Oct' && m['10,000 kg Day'] === '1 Oct' && m['Rep Storm'] === '1 Oct', [m['Long Haul'], m['10,000 kg Day'], m['Rep Storm']]);
     ok('seven days running, forty exercises, and back after a fortnight off', m['Seven Straight'] === '7 Oct' && m['Explorer'] === '10 Oct' && m['Comeback'] === '28 Oct', [m['Seven Straight'], m['Explorer'], m['Comeback']]);
+    ok('thirty sets in one go is a set machine, and a month counts up to twenty', m['Set Machine'] === '1 Oct' && m['Month Mover'] === '11 / 20' && m['PR Party'] === 'Locked', [m['Set Machine'], m['Month Mover'], m['PR Party']]);
     const seenM = (await store(page)).bseen || {};
     ok('a record that already held them is not a flood of announcements', ['early', 'long', 'ton10', 'rep300', 'seven', 'explore', 'back'].every((k) => seenM[k] === 1) && seenM.v4 === 1, seenM);
     await c.close();
