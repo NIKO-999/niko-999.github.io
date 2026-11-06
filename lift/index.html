@@ -61,7 +61,7 @@
   --plot: #0e0e10;
   --shade: rgba(0,0,0,.6);
   --live-bg: #16210a;
-  --live-ink: #cdf28c;
+  --live-ink: color-mix(in srgb, var(--log) 72%, #fff);
   --toast: #2c2c30;
   --card-shadow: none;
   --done-bg: rgba(52, 199, 89, .16);
@@ -99,7 +99,7 @@
   --plot: #f5f5f7;
   --shade: rgba(0,0,0,.12);
   --live-bg: #eef7dc;
-  --live-ink: #3f6212;
+  --live-ink: color-mix(in srgb, var(--log) 55%, #000);
   /* the same lime on both faces; only accent WORDS go a shade deeper,
      because bright lime type on white cannot be read */
   --today: #a3e635;
@@ -566,6 +566,11 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-ex-pb i { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--log); transition: width .5s cubic-bezier(.3, 1.2, .5, 1); }
 @media (prefers-reduced-motion: reduce) { .lf-set.is-pop, .lf-set.is-pop .lf-chk span, .lf-set.is-pop .lf-chk path { animation: none; stroke-dashoffset: 0; } .lf-ex-pb i { transition: none; } }
 .lf-set .lf-sn.is-pr { color: var(--today-ink); font-size: 11px; font-weight: 800; letter-spacing: .02em; }
+/* a rep record's mark: smaller than a PR, in a pill of its own */
+.lf-set .lf-sn.is-rp { justify-self: center; padding: 2px 5px; border-radius: 6px; font-size: 9.5px; font-weight: 800; letter-spacing: .04em; color: var(--today-ink); background: color-mix(in srgb, var(--log) 16%, transparent); }
+.lf-rpb .lf-wave { animation-duration: .55s; }
+.lf-rpb b { font-size: 12px; padding: 2px 9px; top: -30px; }
+.lf-rpb i { width: 6px; height: 6px; left: -3px; top: -3px; }
 .lf-ex-ft { display: flex; gap: 8px; margin-top: 6px; }
 .lf-ex-ft button { flex: 1; min-height: 36px; border-radius: 10px; background: var(--card2); color: var(--dim); font-size: 12.5px; font-weight: 600; position: relative; }
 .lf-ex-ft button::before { content: ''; position: absolute; inset: -2px 0; }
@@ -2310,26 +2315,35 @@ function lfPaintSession() {
       if (s.r !== '' && s.r != null) ri.value = s.r;
       wi.addEventListener('input', function () { var v = parseFloat(wi.value); s.w = isFinite(v) && v >= 0 ? fromDisp(v) : ''; lfSaveAct(); });
       ri.addEventListener('input', function () { var v = parseInt(ri.value, 10); s.r = isFinite(v) && v >= 0 ? v : ''; lfSaveAct(); });
+      /* A TICKED SET EDITED AFTER THE FACT is judged again when you are done
+         with the field: the extra rep you typed in after the tick counts */
+      var rejudge = function () {
+        if (!s.ok || s.w === '' || s.r === '') return;
+        var wasP = s.pr, wasR = s.rp, sn = $('.lf-sn', row); lfJudge(e, si, s, best); lfSaveAct(); lfSnMark(sn, s, si);
+        if ((s.pr && !wasP) || (s.rp && !wasR && !wasP)) {
+          var at = sn.getBoundingClientRect(); lfCheer(s, at);
+          row.classList.remove('is-pop'); void row.offsetWidth; row.classList.add('is-pop');
+        }
+      };
+      wi.addEventListener('change', rejudge); ri.addEventListener('change', rejudge);
       var chk = $('.lf-chk', row);
       chk.setAttribute('aria-pressed', s.ok ? 'true' : 'false');
       chk.setAttribute('aria-label', 'Log set ' + (si + 1));
-      if (s.ok && s.pr) { $('.lf-sn', row).textContent = 'PR'; $('.lf-sn', row).classList.add('is-pr'); }
+      lfSnMark($('.lf-sn', row), s, si);
       chk.addEventListener('click', function () {
-        if (s.ok) { s.ok = 0; s.pr = 0; lfSaveAct(); lfPaintSession(); return; }
+        if (s.ok) { s.ok = 0; s.pr = 0; s.rp = 0; lfSaveAct(); lfPaintSession(); return; }
         /* An empty field takes the AIM: pressing the check on a set you
            hit exactly as planned is the whole of logging it. */
         if (s.w === '' || s.w == null) s.w = g ? g.w : (exById(e.id) && exById(e.id).t === 'bw' ? 0 : '');
         if (s.r === '' || s.r == null) s.r = g ? g.r : '';
         if (s.w === '' || s.r === '' || !(s.r > 0)) { lfToast('Put in the weight and reps first'); (s.w === '' ? wi : ri).focus(); return; }
         s.ok = 1;
-        /* A PR is a set whose estimated one-rep max beats everything
-           before it, this session's earlier sets included. */
-        var est = e1rm(s.w, s.r);
-        s.pr = est > runBestBefore(e, si, best) + 1e-9 && best > 0 ? 1 : 0;
+        /* a record by either of lfIsPr's two measures, this session's earlier sets included */
+        lfJudge(e, si, s, best);
         act.rest = Date.now(); act.restEx = e.id; act.rang = 0; lfRestPush();
-        var at = s.pr ? $('.lf-sn', row).getBoundingClientRect() : null;
-        lfPopAt = ei + ':' + si; lfSaveAct(); buzz(s.pr ? [35, 45, 35, 45, 70] : 14); lfPaintSession(); lfTick();
-        if (at) lfBurst(at.left + at.width / 2, at.top + at.height / 2);
+        var at = s.pr || s.rp ? $('.lf-sn', row).getBoundingClientRect() : null;
+        lfPopAt = ei + ':' + si; lfSaveAct(); if (!at) buzz(14); lfPaintSession(); lfTick();
+        if (at) lfCheer(s, at);
       });
       card.appendChild(row);
     });
@@ -2377,6 +2391,48 @@ function lfBurst(x, y) {
   document.body.appendChild(bu);
   window.lfBursts = (window.lfBursts || 0) + 1;
   setTimeout(function () { bu.remove(); }, 1700);
+}
+/* TWO RECORDS, two celebrations. A PR is the strongest set you have done
+   on the exercise, by estimated one-rep max: it gets the confetti, and it
+   is the one the badges count. A REP RECORD is more reps than you have
+   ever done at a weight you have used before — an extra rep on last
+   time — and gets a smaller mark of its own. A set that is both is a PR. */
+function lfIsPr(e, si, s, best) {
+  var w = +s.w || 0, r = +s.r || 0; if (!(r > 0)) return false;
+  return best > 0 && e1rm(w, r) > runBestBefore(e, si, best) + 1e-9;
+}
+function lfIsRep(e, si, s) {
+  var w = +s.w || 0, r = +s.r || 0; if (!(r > 0)) return false;
+  var seen = false, beat = true;
+  function look(q) { if (Math.abs((+q.w || 0) - w) < 1e-6) { seen = true; if ((+q.r || 0) >= r) beat = false; } }
+  historyFor(e.id).forEach(function (h) { h.sets.forEach(look); });
+  for (var i = 0; i < si; i++) if (e.sets[i].ok) look(e.sets[i]);
+  return seen && beat;
+}
+function lfJudge(e, si, s, best) { s.pr = lfIsPr(e, si, s, best) ? 1 : 0; s.rp = !s.pr && lfIsRep(e, si, s) ? 1 : 0; }
+function lfSnMark(sn, s, si) {
+  var on = s.ok && (s.pr || s.rp);
+  sn.textContent = !on ? si + 1 : s.pr ? 'PR' : 'REP';
+  sn.classList.toggle('is-pr', !!(s.ok && s.pr)); sn.classList.toggle('is-rp', !!(s.ok && !s.pr && s.rp));
+}
+/* the celebration for whichever record it is: confetti for a PR, a spark for a rep */
+function lfCheer(s, at) {
+  var x = at.left + at.width / 2, y = at.top + at.height / 2;
+  if (s.pr) { buzz([35, 45, 35, 45, 70]); lfBurst(x, y); } else { buzz([18, 40, 18]); lfRepBurst(x, y); }
+}
+/* A REP RECORD: a pill reading +1 rep, a ring and a handful of sparks —
+   the same family as the PR's burst, a size down */
+function lfRepBurst(x, y) {
+  var bu = el('<div class="lf-burst lf-rpb" aria-hidden="true"><s class="lf-wave"></s><b>Rep record</b></div>');
+  bu.style.left = x + 'px'; bu.style.top = y + 'px';
+  for (var i = 0; i < 10; i++) {
+    var a = i / 10 * Math.PI * 2 + Math.random() * .4, d = 20 + Math.random() * 22, p = el('<i></i>');
+    p.style.setProperty('--dx', (Math.cos(a) * d).toFixed(1) + 'px'); p.style.setProperty('--dy', (Math.sin(a) * d).toFixed(1) + 'px');
+    bu.appendChild(p);
+  }
+  document.body.appendChild(bu);
+  window.lfReps = (window.lfReps || 0) + 1;
+  setTimeout(function () { bu.remove(); }, 1100);
 }
 function runBestBefore(e, si, best) {
   var b = best;
@@ -4056,7 +4112,8 @@ function lfBadges() {
   var ws = woSorted(), out = {}, uk = S.unit === 'lb' ? LB : 1;
   function won(id, d) { if (!out[id]) out[id] = { d: d }; }
   ws.forEach(function (w, i) { var n = i + 1; if (n === 1) won('first', w.d); if (n === 10) won('wo10', w.d); if (n === 50) won('wo50', w.d); if (n === 100) won('wo100', w.d); });
-  /* PRs: a set beating every earlier one on the same exercise */
+  /* PRs: a set beating every earlier one on the same exercise. A rep
+     record is celebrated in the workout but is not a PR here. */
   var best = {}, prDays = [], vol = 0, heavy = false;
   ws.forEach(function (w) {
     var hit = 0;

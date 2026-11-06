@@ -292,6 +292,16 @@ const freeze = (at) => `(() => {
   ok('and a PR bursts from the set', await page.evaluate(() => window.lfBursts) === 1 && await page.locator('.lf-burst b').textContent() === 'PR');
   await page.waitForTimeout(1800);
   ok('then is gone, out of the way', await page.locator('.lf-burst').count() === 0);
+  /* AN EXTRA REP AT THE SAME WEIGHT IS A REP RECORD, its own smaller
+     celebration, and never a PR or a badge's count — typed in after the tick */
+  await page.locator('.lf-session .lf-ex').first().locator('.lf-ex-ft button', { hasText: 'Add set' }).click(); await settle(page);
+  await set(0, 2).locator('input').nth(0).fill('60'); await set(0, 2).locator('input').nth(1).fill('8');
+  await set(0, 2).locator('.lf-chk').click(); await settle(page);
+  ok('the same weight for the same reps again is not a record', (await set(0, 2).locator('.lf-sn').textContent()) === '3');
+  await set(0, 2).locator('input').nth(1).fill('9'); await set(0, 2).locator('input').nth(1).blur(); await page.waitForTimeout(200);
+  ok('one more rep, typed in after the tick, is a rep record with its own smaller burst', (await set(0, 2).locator('.lf-sn').textContent()) === 'REP' && await page.evaluate(() => window.lfReps) === 1 && await page.evaluate(() => window.lfBursts) === 1);
+  ok('and is kept as a rep record, not a PR', await page.evaluate(() => { const q = JSON.parse(localStorage.getItem('lift.active.v1')).x[0].sets[2]; return q.rp === 1 && !q.pr; }));
+  await page.waitForTimeout(1800);
   await page.click('#lfFinish'); await page.waitForTimeout(800);
   await page.keyboard.press('Escape'); await settle(page);
   await page.evaluate(() => { const s = JSON.parse(localStorage.getItem('lift.v1')); s.wo.forEach((w) => { if (w.d === '2026-10-29') w.d = '2026-10-30'; }); delete s.rd['2026-10-29']; localStorage.setItem('lift.v1', JSON.stringify(s)); });
