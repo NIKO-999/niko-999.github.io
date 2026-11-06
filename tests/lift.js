@@ -290,7 +290,7 @@ const freeze = (at) => `(() => {
   await set(0, 1).locator('.lf-chk').click();
   ok('more weight for the same reps is marked PR', (await set(0, 1).locator('.lf-sn').textContent()) === 'PR');
   ok('and a PR bursts from the set', await page.evaluate(() => window.lfBursts) === 1 && await page.locator('.lf-burst b').textContent() === 'PR');
-  await page.waitForTimeout(1100);
+  await page.waitForTimeout(1800);
   ok('then is gone, out of the way', await page.locator('.lf-burst').count() === 0);
   await page.click('#lfFinish'); await page.waitForTimeout(800);
   await page.keyboard.press('Escape'); await settle(page);
@@ -309,6 +309,7 @@ const freeze = (at) => `(() => {
   ok('the month opens on October 2026', (await page.textContent('.lf-calnav b')) === 'October 2026');
   const cell = await page.$eval('.lf-cell[data-d="2026-10-30"]', (e) => ({ on: e.classList.contains('is-on'), now: e.classList.contains('is-now'), dots: e.querySelectorAll('.lf-dots i').length }));
   ok('today is a trained day with two workouts on it', cell.on && cell.now && cell.dots === 2, cell);
+  await page.waitForTimeout(1600); /* the month lights up in turn when it opens */
   ok('a day you trained is lit lime, and today stays an outline', await page.evaluate(() => {
     const now = document.querySelector('.lf-cell.is-now'), day = document.querySelector('.lf-cell:not(.is-now):not(.is-pad)');
     const had = day.classList.contains('is-on'); day.classList.add('is-on');

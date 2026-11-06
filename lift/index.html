@@ -203,7 +203,7 @@ svg { display: block; }
 /* ── charts ── */
 .lf-big { font-size: 17px; font-weight: 700; margin-top: 6px; }
 .lf-big small { font-size: 11px; color: var(--dim); font-weight: 500; margin-left: 2px; }
-.lf-area { margin: 10px -14px -14px; height: 70px; border-radius: 0 0 var(--r) var(--r); overflow: hidden; }
+.lf-area { margin: 10px -14px -14px; height: 70px; border-radius: 0 0 var(--r) var(--r); overflow: hidden; position: relative; }
 .lf-area svg { width: 100%; height: 100%; }
 .lf-bars { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; align-items: end; height: 70px; margin-top: 10px; }
 .lf-bars > div { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 3px; min-width: 0; }
@@ -211,6 +211,25 @@ svg { display: block; }
 .lf-bars em { font-style: normal; font-size: 10px; color: var(--dim); }
 .lf-bars u { text-decoration: none; font-size: 10px; color: var(--quiet); }
 .lf-bars .is-now i { background: var(--ink); }
+/* the week's bars light in your colour one after the other, then settle */
+.is-wkdone .lf-bars > div i { animation: lf-wkbar 1.4s var(--ease) backwards; }
+.is-wkdone .lf-bars > div:nth-child(2) i { animation-delay: .07s; } .is-wkdone .lf-bars > div:nth-child(3) i { animation-delay: .14s; } .is-wkdone .lf-bars > div:nth-child(4) i { animation-delay: .21s; }
+.is-wkdone .lf-bars > div:nth-child(5) i { animation-delay: .28s; } .is-wkdone .lf-bars > div:nth-child(6) i { animation-delay: .35s; } .is-wkdone .lf-bars > div:nth-child(7) i { animation-delay: .42s; }
+@keyframes lf-wkbar { 0% { transform: scaleY(.2); transform-origin: bottom; } 30% { transform: scaleY(1.08); background: var(--log); box-shadow: 0 0 14px color-mix(in srgb, var(--log) 70%, transparent); } 70% { background: var(--log); } 100% { transform: none; } }
+.is-wkdone { position: relative; overflow: hidden; }
+.is-wkdone::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(105deg, transparent 30%, color-mix(in srgb, var(--log) 35%, transparent) 48%, rgba(255,255,255,.25) 50%, color-mix(in srgb, var(--log) 35%, transparent) 52%, transparent 70%); transform: translateX(-100%); animation: lf-sweep 1.3s .35s var(--ease) forwards; }
+@keyframes lf-sweep { to { transform: translateX(100%); } }
+.lf-wkdone { position: fixed; left: 50%; top: calc(var(--safe-t) + 12px); z-index: 62; transform: translate(-50%, -20px) scale(.92); opacity: 0; pointer-events: none;
+  display: flex; align-items: center; gap: 12px; padding: 10px 18px 10px 10px; border-radius: 20px; background: var(--card); color: var(--ink); overflow: hidden;
+  box-shadow: 0 14px 40px var(--shade), 0 0 0 1px color-mix(in srgb, var(--log) 40%, transparent), 0 0 30px color-mix(in srgb, var(--log) 30%, transparent); transition: opacity .3s, transform .45s cubic-bezier(.3, 1.4, .5, 1); }
+.lf-wkdone.is-up { opacity: 1; transform: translate(-50%, 0) scale(1); }
+.lf-wkdone::after { content: ''; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.22) 50%, transparent 65%); transform: translateX(-100%); }
+.lf-wkdone.is-up::after { animation: lf-sweep 1.2s .3s var(--ease) forwards; }
+.lf-wkd-ic { width: 36px; height: 36px; border-radius: 50%; background: var(--log); color: var(--on-log); display: grid; place-items: center; flex: none; }
+.lf-wkd-ic .lf-ic { width: 18px; height: 18px; stroke-width: 3; }
+.lf-wkdone b { display: block; font-size: 15px; font-weight: 800; letter-spacing: -.01em; }
+.lf-wkd-s { font-size: 12px; color: var(--dim); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .is-wkdone .lf-bars > div i, .is-wkdone::after, .lf-wkdone.is-up::after { animation: none; } .is-wkdone::after { display: none; } }
 .lf-pct { font-size: 11px; font-weight: 600; color: var(--good); }
 
 /* ── weekly sets ── */
@@ -313,6 +332,15 @@ svg { display: block; }
 .lf-cell.is-on:not(.is-now) { background: var(--log); color: var(--on-log); }
 .lf-cell.is-on:not(.is-now) .lf-dots i { background: var(--on-log); }
 .lf-cell.is-ahead { color: var(--ahead); }
+/* ARRIVING AT A MONTH the days you trained light up in turn, so it reads
+   as the streak being built; once per month shown, never on a repaint */
+.lf-month.is-play .lf-cell.is-on:not(.is-now) { animation: lf-light .55s cubic-bezier(.3, 1.4, .5, 1) backwards; animation-delay: calc(var(--i) * 55ms + 80ms); }
+.lf-month.is-play .lf-cell.is-rest { animation: lf-fadein .4s ease-out backwards; animation-delay: calc(var(--i) * 55ms + 80ms); }
+.lf-wkl.is-play .lf-wk { animation: lf-rise .4s var(--ease) backwards; animation-delay: calc(var(--i) * 45ms); }
+@keyframes lf-light { 0% { background: var(--card2); color: var(--dim); transform: scale(.82); } 55% { transform: scale(1.07); box-shadow: 0 0 16px 2px color-mix(in srgb, var(--log) 55%, transparent); } 100% { box-shadow: 0 0 0 0 transparent; } }
+@keyframes lf-fadein { from { opacity: 0; transform: scale(.85); } }
+@keyframes lf-rise { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { .lf-month.is-play .lf-cell, .lf-wkl.is-play .lf-wk { animation: none !important; } }
 .lf-dots { display: flex; gap: 3px; height: 5px; }
 .lf-dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--ink); }
 .lf-wk { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 60px; padding: 8px 0; border-top: 1px solid var(--line); width: 100%; text-align: left; }
@@ -370,7 +398,16 @@ svg { display: block; }
   background: var(--sheet); border-radius: 28px 28px 0 0; box-shadow: 0 -10px 40px var(--shade), inset 0 1px 0 var(--edge);
   transform: translateY(100%); transition: transform .34s var(--ease); will-change: transform;
 }
-.lf-sheet.is-up { transform: translateY(0); }
+.lf-sheet.is-up { transform: translateY(0); transition: transform .5s cubic-bezier(.26, 1.16, .44, 1); }
+/* the spring carries a sheet a few pixels past its rest, so it runs on
+   below the screen's edge and the overshoot never shows a gap */
+.lf-sheet::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 60px; background: inherit; pointer-events: none; }
+/* A TAB ARRIVES from the side it sits on in the bar, a short slide and a fade */
+#lfMain > section.lf-in-r { animation: lf-in-r .32s var(--ease); }
+#lfMain > section.lf-in-l { animation: lf-in-l .32s var(--ease); }
+@keyframes lf-in-r { from { opacity: 0; transform: translateX(22px); } }
+@keyframes lf-in-l { from { opacity: 0; transform: translateX(-22px); } }
+@media (prefers-reduced-motion: reduce) { #lfMain > section.lf-in-r, #lfMain > section.lf-in-l { animation: none; } .lf-sheet.is-up { transition-timing-function: var(--ease); } }
 .lf-sheet.is-drag { transition: none; }
 .lf-sheet.is-full { height: calc(100dvh - var(--safe-t) - 10px); max-height: none; }
 .lf-grab { height: 26px; flex: none; display: grid; place-items: center; touch-action: none; cursor: grab; }
@@ -406,6 +443,17 @@ svg { display: block; }
 .lf-burst { position: fixed; width: 0; height: 0; z-index: 90; pointer-events: none; }
 .lf-burst i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--log); animation: lf-burst .75s cubic-bezier(.2,.7,.3,1) forwards; }
 .lf-burst i:nth-child(3n) { width: 5px; height: 5px; left: -2.5px; top: -2.5px; background: var(--ink); }
+.lf-burst s { position: absolute; left: 0; top: 0; width: 0; height: 0; border-radius: 50%; pointer-events: none; }
+.lf-wave { box-shadow: 0 0 0 2px var(--log); animation: lf-wave .7s cubic-bezier(.15, .7, .3, 1) forwards; }
+.lf-wave.is-2 { animation-delay: .14s; opacity: 0; }
+.lf-flash { background: radial-gradient(closest-side, color-mix(in srgb, var(--log) 55%, transparent), transparent); animation: lf-flash .6s ease-out forwards; }
+@keyframes lf-wave { 0% { width: 0; height: 0; margin: 0; opacity: 1; box-shadow: 0 0 0 4px var(--log); } 100% { width: 180px; height: 180px; margin: -90px 0 0 -90px; opacity: 0; box-shadow: 0 0 0 1px var(--log); } }
+@keyframes lf-flash { 0% { width: 20px; height: 20px; margin: -10px 0 0 -10px; opacity: 1; } 100% { width: 240px; height: 240px; margin: -120px 0 0 -120px; opacity: 0; } }
+.lf-burst u { position: absolute; left: -3px; top: -5px; width: 6px; height: 10px; border-radius: 2px; background: var(--log); opacity: 0; animation: lf-conf 1.45s cubic-bezier(.25, .6, .4, 1) forwards; }
+.lf-burst u.is-ink { background: var(--ink); }
+.lf-burst u.is-lt { background: color-mix(in srgb, var(--log) 55%, #fff); }
+.lf-burst u.is-sq { width: 7px; height: 7px; border-radius: 50%; }
+@keyframes lf-conf { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 30% { opacity: 1; transform: translate(calc(var(--dx) * .6), var(--up)) rotate(calc(var(--rot) * .3)); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--fall)) rotate(var(--rot)); } }
 .lf-burst b { position: absolute; left: 0; top: -34px; transform: translateX(-50%); font-size: 15px; font-weight: 800; letter-spacing: .04em; color: var(--on-log); background: var(--log); padding: 3px 10px; border-radius: 999px; animation: lf-prpop .9s cubic-bezier(.2,.9,.3,1.3) forwards; white-space: nowrap; }
 @keyframes lf-burst { from { transform: translate(0, 0) scale(1); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) scale(.3); opacity: 0; } }
 @keyframes lf-prpop { 0% { transform: translateX(-50%) scale(.4); opacity: 0; } 25% { transform: translateX(-50%) scale(1.15); opacity: 1; } 70% { transform: translateX(-50%) translateY(-6px) scale(1); opacity: 1; } 100% { transform: translateX(-50%) translateY(-14px) scale(1); opacity: 0; } }
@@ -427,11 +475,16 @@ svg { display: block; }
 .fr-live { display: inline-flex; align-items: center; gap: 6px; color: var(--good); font-weight: 600; }
 .fr-live::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--log); box-shadow: 0 0 0 0 color-mix(in srgb, var(--log) 60%, transparent); animation: fr-live 1.6s ease-out infinite; }
 @keyframes fr-live { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--log) 60%, transparent); } 100% { box-shadow: 0 0 0 8px transparent; } }
-@media (prefers-reduced-motion: reduce) { .lf-burst i, .fr-live::before, .lf-fin-ok { animation: none; } .lf-burst i { display: none; } }
+@media (prefers-reduced-motion: reduce) { .lf-burst i, .fr-live::before, .lf-fin-ok { animation: none; } .lf-burst i, .lf-burst u, .lf-burst s { display: none; } }
 .fr-rg { padding: 14px 16px 6px; }
 .fr-rg-w { display: grid; place-items: center; margin: 2px 0 8px; }
 .fr-rg-w > svg { width: 180px; height: 180px; display: block; overflow: visible; }
-.fr-rg-a { transition: stroke-dasharray .8s cubic-bezier(.2,.8,.2,1); }
+.fr-rg-a { transition: stroke-dasharray 1.1s cubic-bezier(.2,.8,.2,1); }
+.fr-rg-cm { opacity: 0; filter: drop-shadow(0 0 4px var(--rc)); animation: fr-comet 1.1s .15s cubic-bezier(.2,.8,.2,1) forwards; }
+@keyframes fr-comet { 0% { stroke-dashoffset: var(--o0); opacity: 0; } 15% { opacity: .95; } 80% { opacity: .95; } 100% { stroke-dashoffset: var(--o1); opacity: 0; } }
+.fr-rg-a.is-shut { animation: fr-rg-shut 1s 1.05s ease-out; }
+@keyframes fr-rg-shut { 0% { filter: none; } 35% { filter: drop-shadow(0 0 10px var(--rc)) brightness(1.35); } 100% { filter: none; } }
+@media (prefers-reduced-motion: reduce) { .fr-rg-a { transition: none; } .fr-rg-cm { display: none; } .fr-rg-a.is-shut { animation: none; } }
 .fr-rg-w { position: relative; }
 .fr-rg-a.is-live { animation: fr-rg-glow 1.8s ease-in-out infinite; }
 @keyframes fr-rg-glow { 0%, 100% { filter: drop-shadow(0 0 2px var(--rc)); } 50% { filter: drop-shadow(0 0 7px var(--rc)); } }
@@ -489,6 +542,18 @@ svg { display: block; }
 .lf-set.is-done .lf-chk span { background: var(--log); color: var(--on-log); }
 .lf-set.is-done input { background: color-mix(in srgb, var(--log) 14%, transparent); }
 .lf-set.is-done .lf-chk:active span { transform: scale(.9); }
+/* THE TICK: the box springs, the mark draws itself, and the row it is on
+   glows once in your colour, so the press is felt rather than read */
+.lf-set.is-pop { border-radius: 12px; animation: lf-rowglow .8s ease-out; }
+.lf-set.is-pop .lf-chk span { animation: lf-pop .46s cubic-bezier(.3, 1.7, .5, 1); }
+.lf-set.is-pop .lf-chk path { stroke-dasharray: 22; stroke-dashoffset: 22; animation: lf-draw .32s .1s ease-out forwards; }
+@keyframes lf-pop { 0% { transform: scale(.6); } 60% { transform: scale(1.14); } 100% { transform: scale(1); } }
+@keyframes lf-draw { to { stroke-dashoffset: 0; } }
+@keyframes lf-rowglow { 0% { background: color-mix(in srgb, var(--log) 26%, transparent); box-shadow: 0 0 0 6px color-mix(in srgb, var(--log) 10%, transparent); } 100% { background: transparent; box-shadow: 0 0 0 6px transparent; } }
+/* each exercise's sets done, a bar that slides from where it was */
+.lf-ex-pb { display: block; height: 3px; border-radius: 3px; background: var(--card2); margin: 2px 0 8px; overflow: hidden; }
+.lf-ex-pb i { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--log); transition: width .5s cubic-bezier(.3, 1.2, .5, 1); }
+@media (prefers-reduced-motion: reduce) { .lf-set.is-pop, .lf-set.is-pop .lf-chk span, .lf-set.is-pop .lf-chk path { animation: none; stroke-dashoffset: 0; } .lf-ex-pb i { transition: none; } }
 .lf-set .lf-sn.is-pr { color: var(--today-ink); font-size: 11px; font-weight: 800; letter-spacing: .02em; }
 .lf-ex-ft { display: flex; gap: 8px; margin-top: 6px; }
 .lf-ex-ft button { flex: 1; min-height: 36px; border-radius: 10px; background: var(--card2); color: var(--dim); font-size: 12.5px; font-weight: 600; position: relative; }
@@ -519,6 +584,19 @@ svg { display: block; }
 .lf-vs-plot { position: relative; height: 150px; margin: 22px 0 6px; }
 .lf-vs-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .lf-vs-dot { position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--ink); }
+/* THE CHARTS: a line drawn in from the left the first time it is shown,
+   a glowing dot on where you are now, and a finger along it reads it out */
+svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
+@keyframes lf-reveal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+.lf-a-dot, .lf-vs-dot.is-now { position: absolute; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--ink); animation: lf-dotpulse 2.6s ease-in-out infinite; }
+.is-draw ~ .lf-a-dot, .is-draw ~ .lf-vs-dot { animation: lf-fadein .3s .85s backwards, lf-dotpulse 2.6s 1.2s ease-in-out infinite; }
+@keyframes lf-dotpulse { 0%, 100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink) 16%, transparent), 0 0 8px 1px color-mix(in srgb, var(--ink) 40%, transparent); } 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--ink) 8%, transparent), 0 0 14px 3px color-mix(in srgb, var(--ink) 55%, transparent); } }
+.lf-scrub { touch-action: pan-y; cursor: crosshair; }
+.lf-guide { position: absolute; top: 0; bottom: 0; width: 1px; background: color-mix(in srgb, var(--ink) 35%, transparent); pointer-events: none; }
+.lf-sdot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 3px var(--card), 0 0 12px color-mix(in srgb, var(--ink) 60%, transparent); pointer-events: none; }
+.lf-tip { position: absolute; top: 2px; transform: translateX(-50%); padding: 5px 9px; border-radius: 10px; background: var(--ink); color: var(--bg); font-size: 11px; line-height: 1.25; text-align: center; white-space: nowrap; pointer-events: none; box-shadow: 0 6px 18px var(--shade); z-index: 2; }
+.lf-tip b { display: block; font-size: 13px; }
+@media (prefers-reduced-motion: reduce) { svg.is-draw, .lf-a-dot, .lf-vs-dot.is-now, .is-draw ~ .lf-a-dot, .is-draw ~ .lf-vs-dot { animation: none; } }
 .lf-vs-v { position: absolute; transform: translate(-50%, -150%); font-style: normal; font-size: 11px; font-weight: 600; color: var(--ink); white-space: nowrap; }
 .lf-vs-v.is-l { transform: translate(0, -150%); }
 .lf-vs-v.is-r { transform: translate(-100%, -150%); }
@@ -1206,6 +1284,7 @@ function lfClean(o) {
     if (o.fx.sy && typeof o.fx.sy === 'object') Object.keys(o.fx.sy).slice(-500).forEach(function (k) { if (/^[A-Za-z0-9_-]{1,24}\|[A-Z2-9]{8}$/.test(k) && isD(o.fx.sy[k])) d.fx.sy[k] = o.fx.sy[k]; });
     if (o.fx.wk && typeof o.fx.wk === 'object') Object.keys(o.fx.wk).sort().slice(-200).forEach(function (k) { var v = o.fx.wk[k]; if (isD(k) && Array.isArray(v)) d.fx.wk[k] = [Math.max(0, Math.min(1000, Math.round(+v[0]) || 0)), Math.max(0, Math.min(1000, Math.round(+v[1]) || 0)), Math.max(0, Math.min(50, Math.round(+v[2]) || 0)), v[3] ? 1 : 0, isD(v[4]) ? v[4] : '']; });
   }
+  if (typeof o.wkDone === 'string' && /^\d{4}-\d\d-\d\d$/.test(o.wkDone)) d.wkDone = o.wkDone;
   if (Array.isArray(o.show)) d.show = o.show.filter(function (k, i, a) { return typeof k === 'string' && /^[a-z0-9]{2,8}$/.test(k) && a.indexOf(k) === i; }).slice(0, 3);
   if (o.bseen && typeof o.bseen === 'object') { d.bseen = {}; Object.keys(o.bseen).forEach(function (k) { if (/^[a-z0-9]{2,8}$/.test(k)) d.bseen[k] = 1; }); }
   /* A REST DAY taken on purpose, a date and nothing else. */
@@ -1493,7 +1572,7 @@ function lfRenderHome() {
   root.appendChild(lfStatRow());
   root.appendChild(lfGridCard());
   root.appendChild(lfLegCard());
-  var r = el('<div class="lf-row"></div>'); r.appendChild(lfVolCard()); r.appendChild(lfWeekCard());
+  var r = el('<div class="lf-row"></div>'); r.appendChild(lfVolCard()); r.appendChild(lfWeekCard()); setTimeout(lfWeekDone, 0);
   root.appendChild(r);
   root.appendChild(lfBwCard());
 }
@@ -1737,11 +1816,11 @@ function lfTrendSheet(k, src) {
   var pts = weeks.map(function (w, i) { return [i / 7 * 100, 88 - w.v / max * 68]; });
   var d = 'M' + pts[0][0] + ' ' + pts[0][1];
   for (var j = 1; j < 8; j++) { var p0 = pts[j - 1], p1 = pts[j], mx = (p0[0] + p1[0]) / 2; d += ' C' + mx + ' ' + p0[1] + ' ' + mx + ' ' + p1[1] + ' ' + p1[0] + ' ' + p1[1]; }
-  plot.innerHTML = '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="lfVsG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e8e95" stop-opacity=".5"/><stop offset="1" stop-color="#8e8e95" stop-opacity=".04"/></linearGradient></defs>'
+  plot.innerHTML = '<svg class="is-draw" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="lfVsG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e8e95" stop-opacity=".55"/><stop offset=".75" stop-color="#8e8e95" stop-opacity=".1"/><stop offset="1" stop-color="#8e8e95" stop-opacity="0"/></linearGradient></defs>'
     + '<path d="' + d + ' L100 100 L0 100Z" fill="url(#lfVsG)"/><path d="' + d + '" fill="none" style="stroke:var(--ink)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
   var best = 0; weeks.forEach(function (w, i) { if (w.v > weeks[best].v) best = i; });
   weeks.forEach(function (w, i) {
-    var dot = el('<i class="lf-vs-dot"></i>'); dot.style.left = pts[i][0] + '%'; dot.style.top = pts[i][1] + '%'; plot.appendChild(dot);
+    var dot = el('<i class="lf-vs-dot"></i>'); dot.style.left = pts[i][0] + '%'; dot.style.top = pts[i][1] + '%'; if (i === 7) dot.classList.add('is-now'); plot.appendChild(dot);
     if ((i === 0 || i === best || i === 7) && w.v > 0) {
       var lb = el('<em class="lf-vs-v lf-num"></em>'); lb.textContent = fmtBig(w.v);
       lb.style.left = pts[i][0] + '%'; lb.style.top = pts[i][1] + '%';
@@ -1750,6 +1829,7 @@ function lfTrendSheet(k, src) {
     }
     var x = el('<span></span>'); x.textContent = i % 2 ? '' : MON[w.d.getMonth()].slice(0, 3) + ' ' + w.d.getDate(); $('.lf-vs-x', ch).appendChild(x);
   });
+  lfScrub(plot, pts, function (i) { return [fmtBig(weeks[i].v) + (k === 'vol' ? ' ' + S.unit : ''), i === 7 ? 'This week' : 'Week of ' + MON[weeks[i].d.getMonth()].slice(0, 3) + ' ' + weeks[i].d.getDate()]; });
   b.appendChild(ch);
   var tot = weeks.reduce(function (a, w) { return a + w.v; }, 0), avg = tot / 8;
   b.appendChild(el('<div class="lf-cap" style="margin:16px 2px 8px">At a glance</div>'));
@@ -1838,16 +1918,62 @@ function lfVolCard() {
   $('.lf-area', c).innerHTML = lfAreaSvg(vals);
   return c;
 }
+/* where each value sits, in per cent of the box: the line stops short of
+   the right edge so the dot on the last of them is not cut in half */
+function lfAreaPts(vals) {
+  var max = Math.max.apply(null, vals.concat([1])), n = vals.length;
+  return vals.map(function (v, i) { return [n > 1 ? i / (n - 1) * 95 : 95, (64 - v / max * 48) / 74 * 100]; });
+}
+var lfAreaSeen = {};
 function lfAreaSvg(vals) {
-  var W = 200, H = 74, max = Math.max.apply(null, vals.concat([1])), n = vals.length;
   if (!vals.some(function (v) { return v > 0; })) return '<svg viewBox="0 0 200 74" preserveAspectRatio="none" aria-hidden="true"><path d="M0 64H200" style="stroke:var(--mark-off)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
-  var pts = vals.map(function (v, i) { return [i / (n - 1) * W, H - 10 - v / max * (H - 26)]; });
+  var pts = lfAreaPts(vals).map(function (p) { return [p[0] * 2, p[1] * .74]; }), n = pts.length;
   var d = 'M' + pts[0][0] + ' ' + pts[0][1];
   for (var i = 1; i < n; i++) { var p = pts[i - 1], q = pts[i], mx = (p[0] + q[0]) / 2; d += ' C' + mx + ' ' + p[1] + ' ' + mx + ' ' + q[1] + ' ' + q[0] + ' ' + q[1]; }
-  return '<svg viewBox="0 0 200 74" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="lfAg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e8e95" stop-opacity=".55"/><stop offset="1" stop-color="#8e8e95" stop-opacity=".05"/></linearGradient></defs>'
-    + '<path d="' + d + ' L200 74 L0 74Z" fill="url(#lfAg)"/><path d="' + d + '" fill="none" style="stroke:var(--mark-on)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
+  var end = pts[n - 1], sig = vals.join(','), draw = !lfAreaSeen[sig]; lfAreaSeen[sig] = 1;
+  return '<svg viewBox="0 0 200 74" preserveAspectRatio="none" aria-hidden="true"' + (draw ? ' class="is-draw"' : '') + '><defs><linearGradient id="lfAg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e8e95" stop-opacity=".6"/><stop offset=".7" stop-color="#8e8e95" stop-opacity=".12"/><stop offset="1" stop-color="#8e8e95" stop-opacity="0"/></linearGradient></defs>'
+    + '<path d="' + d + ' H200 V74 H0Z" fill="url(#lfAg)"/><path d="' + d + ' H200" fill="none" style="stroke:var(--mark-on)" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>'
+    + '<i class="lf-a-dot" aria-hidden="true" style="left:' + (end[0] / 2).toFixed(2) + '%;top:' + (end[1] / .74).toFixed(2) + '%"></i>';
+}
+/* PRESS AND HOLD, or run a finger along: the nearest point is read out */
+function lfScrub(box, pts, lab) {
+  box.classList.add('lf-scrub');
+  var ln = el('<i class="lf-guide" hidden></i>'), dot = el('<i class="lf-sdot" hidden></i>'), tip = el('<div class="lf-tip" hidden><b class="lf-num"></b><span></span></div>'), on = false, was = -1;
+  box.appendChild(ln); box.appendChild(dot); box.appendChild(tip);
+  function at(e) {
+    var r = box.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 100, k = 0;
+    pts.forEach(function (p, i) { if (Math.abs(p[0] - x) < Math.abs(pts[k][0] - x)) k = i; });
+    var p = pts[k], l = lab(k);
+    ln.style.left = dot.style.left = p[0] + '%'; dot.style.top = p[1] + '%';
+    tip.style.left = Math.max(14, Math.min(86, p[0])) + '%';
+    $('b', tip).textContent = l[0]; $('span', tip).textContent = l[1];
+    ln.hidden = dot.hidden = tip.hidden = false;
+    if (k !== was) { buzz(6); was = k; }
+  }
+  function off() { on = false; was = -1; ln.hidden = dot.hidden = tip.hidden = true; }
+  box.addEventListener('pointerdown', function (e) { on = true; try { box.setPointerCapture(e.pointerId); } catch (x) {} at(e); });
+  box.addEventListener('pointermove', function (e) { if (on) at(e); });
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (t) { box.addEventListener(t, off); });
 }
 
+/* WEEK DONE: the workout that reaches your weekly goal lights the week up
+   and says so, once a week, after the finish screen and any badge have had
+   their moment */
+var lfWkHold = 0;
+function lfWeekDone() {
+  var m = monday(today()), k = ymd(m);
+  if (S.wkDone === k || !(S.goal > 0) || windowStats(m, addDays(m, 6)).wo < S.goal) return true;
+  if (lfWkHold || stack.length || $('.lf-cv') || view !== 'home') return false;
+  S.wkDone = k; lfSave();
+  var wk = $('#lfWeek'); if (wk) { wk.classList.remove('is-wkdone'); void wk.offsetWidth; wk.classList.add('is-wkdone'); }
+  var bn = el('<div class="lf-wkdone" role="status"><span class="lf-wkd-ic">' + IC.check + '</span><div><b>Week done</b><span class="lf-wkd-s"></span></div></div>');
+  $('.lf-wkd-s', bn).textContent = S.goal + ' of ' + S.goal + (S.goal === 1 ? ' workout' : ' workouts') + ' · goal hit';
+  document.body.appendChild(bn); buzz([16, 60, 16, 60, 30]);
+  requestAnimationFrame(function () { requestAnimationFrame(function () { bn.classList.add('is-up'); }); });
+  setTimeout(function () { bn.classList.remove('is-up'); setTimeout(function () { bn.remove(); }, 450); }, 3200);
+  return true;
+}
+function lfWeekDoneSoon() { var n = 0; (function go() { if (!lfWeekDone() && ++n < 24) setTimeout(go, 500); })(); }
 function lfWeekCard(inSheet) {
   var m = monday(today()), t = ymd(today()), reps = [], tot = 0;
   for (var i = 0; i < 7; i++) { var d = ymd(addDays(m, i)); var r = woOn(d).reduce(function (a, w) { return a + woReps(w); }, 0); reps.push({ d: d, r: r }); tot += r; }
@@ -1947,7 +2073,7 @@ function lfSum(rows) {
 }
 
 /* ═══════════ THE SESSION ═══════════ */
-var sessSheet = null, tick = null;
+var sessSheet = null, tick = null, lfPopAt = '', lfPbWas = {};
 
 function lfStart(rt) {
   /* ONE WORKOUT A DAY: a press on another session after you have trained
@@ -2000,6 +2126,7 @@ function lfRestTxt(r) { return r.hi <= 120 ? lfRange(r.lo, r.hi) + 's' : lfRange
 function lfOpenSession() {
   if (!act) return;
   if (sessSheet) return;
+  lfPbWas = {};
   var head = el('<div class="lf-ss-hd" style="width:100%"><span class="lf-rec" aria-hidden="true"></span><input class="lf-ss-name" aria-label="Workout name" maxlength="40" /><span class="lf-ss-time" id="lfClock"></span><button type="button" class="lf-x" aria-label="Minimise">' + '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>' + '</button></div>');
   $('input', head).value = act.n;
   $('input', head).addEventListener('input', function (e) { act.n = e.target.value.slice(0, 40) || 'Workout'; lfSaveAct(); });
@@ -2052,10 +2179,14 @@ function lfPaintSession() {
     var best = bestFor(e.id);
     var aim = lfAim(e);
     var card = el('<div class="lf-ex"><div class="lf-ex-hd"><button type="button" class="lf-ex-n"></button><button type="button" class="lf-x" aria-label="Remove exercise">' + IC.x + '</button></div>'
-      + '<div class="lf-tg"></div><div class="lf-aim"></div>'
+      + '<i class="lf-ex-pb" aria-hidden="true"><i></i></i><div class="lf-tg"></div><div class="lf-aim"></div>'
       + '<div class="lf-set is-hd" aria-hidden="true"><span>Set</span><span>Last</span><span>' + S.unit + '</span><span>Reps</span><span></span></div></div>');
     card.dataset.ex = e.id;
     $('.lf-ex-n', card).textContent = e.n;
+    /* the bar starts where it was before this repaint and slides to now */
+    var pbK = ei + ':' + e.id, pbNow = e.sets.length ? e.sets.filter(function (q) { return q.ok; }).length / e.sets.length * 100 : 0, pbI = $('.lf-ex-pb i', card);
+    pbI.style.width = (pbK in lfPbWas ? lfPbWas[pbK] : pbNow) + '%'; lfPbWas[pbK] = pbNow;
+    requestAnimationFrame(function () { requestAnimationFrame(function () { pbI.style.width = pbNow + '%'; }); });
     var rs = lfRestOf(e.id);
     /* The plan's target where the day has one, the recommended dose
        for what the exercise is everywhere else. */
@@ -2074,6 +2205,7 @@ function lfPaintSession() {
       var g = aim.sets[si] || aim.sets[aim.sets.length - 1];
       var row = el('<div class="lf-set"><span class="lf-sn"></span><span class="lf-prev lf-num"></span><input type="text" inputmode="decimal" autocomplete="off" /><input type="text" inputmode="numeric" autocomplete="off" /><button type="button" class="lf-chk"><span>' + IC.check + '</span></button></div>');
       row.classList.toggle('is-done', !!s.ok);
+      if (s.ok && lfPopAt === ei + ':' + si) { row.classList.add('is-pop'); lfPopAt = ''; }
       $('.lf-sn', row).textContent = si + 1;
       $('.lf-prev', row).textContent = p ? fmtWS(p.w) + '×' + p.r : '—';
       var wi = $$('input', row)[0], ri = $$('input', row)[1];
@@ -2106,7 +2238,7 @@ function lfPaintSession() {
         s.pr = est > runBestBefore(e, si, best) + 1e-9 && best > 0 ? 1 : 0;
         act.rest = Date.now(); act.restEx = e.id; act.rang = 0; lfRestPush();
         var at = s.pr ? $('.lf-sn', row).getBoundingClientRect() : null;
-        lfSaveAct(); buzz(s.pr ? [20, 40, 20] : 14); lfPaintSession(); lfTick();
+        lfPopAt = ei + ':' + si; lfSaveAct(); buzz(s.pr ? [35, 45, 35, 45, 70] : 14); lfPaintSession(); lfTick();
         if (at) lfBurst(at.left + at.width / 2, at.top + at.height / 2);
       });
       card.appendChild(row);
@@ -2134,15 +2266,27 @@ function lfPaintSession() {
 function lfBurst(x, y) {
   var bu = el('<div class="lf-burst" aria-hidden="true"><b>PR</b></div>');
   bu.style.left = x + 'px'; bu.style.top = y + 'px';
+  /* two rings go out from the set, then confetti is thrown up and falls */
+  bu.insertBefore(el('<s class="lf-wave"></s>'), bu.firstChild); bu.insertBefore(el('<s class="lf-wave is-2"></s>'), bu.firstChild);
+  bu.insertBefore(el('<s class="lf-flash"></s>'), bu.firstChild);
   for (var i = 0; i < 14; i++) {
     var a = i / 14 * Math.PI * 2 + Math.random() * .4, d = 26 + Math.random() * 30, p = el('<i></i>');
     p.style.setProperty('--dx', (Math.cos(a) * d).toFixed(1) + 'px'); p.style.setProperty('--dy', (Math.sin(a) * d).toFixed(1) + 'px');
     p.style.animationDelay = (Math.random() * 60).toFixed(0) + 'ms';
     bu.appendChild(p);
   }
+  for (var j = 0; j < 30; j++) {
+    var cf = el('<u></u>'), sx = (Math.random() - .5) * 2;
+    cf.style.setProperty('--dx', (sx * 150).toFixed(0) + 'px'); cf.style.setProperty('--up', (-70 - Math.random() * 110).toFixed(0) + 'px');
+    cf.style.setProperty('--fall', (120 + Math.random() * 220).toFixed(0) + 'px'); cf.style.setProperty('--rot', ((Math.random() - .5) * 1440).toFixed(0) + 'deg');
+    cf.style.animationDelay = (Math.random() * 90).toFixed(0) + 'ms';
+    if (j % 3 === 1) cf.classList.add('is-ink'); else if (j % 3 === 2) cf.classList.add('is-lt');
+    if (j % 4 === 0) cf.classList.add('is-sq');
+    bu.appendChild(cf);
+  }
   document.body.appendChild(bu);
   window.lfBursts = (window.lfBursts || 0) + 1;
-  setTimeout(function () { bu.remove(); }, 1000);
+  setTimeout(function () { bu.remove(); }, 1700);
 }
 function runBestBefore(e, si, best) {
   var b = best;
@@ -2168,7 +2312,7 @@ function lfFinish() {
   act = null; lfSaveAct();
   clearInterval(tick);
   if (sessSheet) sessSheet.close(true); sessSheet = null;
-  lfRender(); buzz([15, 50, 15]);
+  lfWkHold = 1; lfRender(); buzz([15, 50, 15]);
   setTimeout(function () { lfSummary(w, prs); }, 260);
 }
 /* THE FINISH SCREEN: the one screen made to be looked at. A check in the
@@ -2203,7 +2347,7 @@ function lfSummary(w, prs) {
     b.appendChild(bl);
   }
   var done = el('<button type="button" class="lf-btn is-log is-full" id="lfFinDone">Done</button>');
-  var s = lfSheet({ title: '', body: b, foot: [done], full: true, onClose: function () { setTimeout(lfBadgeNew, 380); } });
+  var s = lfSheet({ title: '', body: b, foot: [done], full: true, onClose: function () { setTimeout(lfBadgeNew, 380); lfWkHold = 0; setTimeout(lfWeekDoneSoon, 900); } });
   done.addEventListener('click', function () { s.close(); });
   /* the count, eased so it lands rather than stops */
   var n = $('.lf-fin-vol span', b), t0 = 0, calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2364,7 +2508,9 @@ function lfExSheet(id) {
   if (h.length > 1) {
     var tops = h.slice(-12).map(function (x) { return toDisp(Math.max.apply(null, x.sets.map(function (s) { return e1rm(s.w, s.r); }))); });
     var c = el('<div class="lf-card lf-sec"><div class="lf-lab">Est. 1RM, last ' + tops.length + ' sessions</div><div class="lf-area" style="height:90px"></div></div>');
+    var hs = h.slice(-12);
     $('.lf-area', c).innerHTML = lfAreaSvg(tops);
+    lfScrub($('.lf-area', c), lfAreaPts(tops), function (i) { return [fmtW(tops[i]) + ' ' + S.unit, fmtDay(hs[i].w.d)]; });
     b.appendChild(c);
   }
   var list = el('<div class="lf-list lf-sec"></div>');
@@ -2567,7 +2713,7 @@ function lfRenderLib() {
 }
 
 /* ═══════════ CALENDAR ═══════════ */
-var calMode = 'month', calAt = today();
+var calMode = 'month', calAt = today(), calPlayed = '';
 function lfRenderCal() {
   var root = $('#lfCal'); root.textContent = '';
   root.appendChild(el('<h2 class="lf-h1">Calendar</h2>'));
@@ -2595,7 +2741,8 @@ function lfRenderCal() {
   var rdN = Object.keys(S.rd).filter(function (k) { return k >= ymd(from) && k <= ymd(to) && !woOn(k).length; }).length;
   var rdl = el('<div class="lf-rd-l" id="lfRdCount"><span class="lf-rd-key"><i></i>Workout</span><span class="lf-rd-key"><i class="is-r"></i>Rest day</span><b class="lf-num"></b></div>');
   $('b', rdl).textContent = rdN === 1 ? '1 rest day' : rdN + ' rest days';
-  var tk = ymd(t);
+  var tk = ymd(t), playK = calMode + ymd(from), play = calPlayed !== playK, lit = 0;
+  calPlayed = playK;
   if (calMode === 'month') {
     var c = el('<div class="lf-card" style="padding:12px"><div class="lf-dows" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div><div class="lf-month" id="lfMonth"></div></div>');
     var g = $('#lfMonth', c), pad = (from.getDay() + 6) % 7;
@@ -2605,6 +2752,7 @@ function lfRenderCal() {
       var cell = el('<button type="button" class="lf-cell"><span class="lf-num"></span><span class="lf-dots" aria-hidden="true"></span></button>');
       cell.dataset.d = k;
       $('.lf-num', cell).textContent = d;
+      if (ws.length || S.rd[k]) cell.style.setProperty('--i', lit++);
       if (ws.length) { cell.classList.add('is-on'); ws.slice(0, 3).forEach(function () { $('.lf-dots', cell).appendChild(el('<i></i>')); }); }
       else if (S.rd[k]) { cell.classList.add('is-rest'); $('.lf-dots', cell).appendChild(el('<i class="is-r"></i>')); }
       if (k === tk) cell.classList.add('is-now');
@@ -2613,15 +2761,17 @@ function lfRenderCal() {
       cell.addEventListener('click', (function (k) { return function () { lfDaySheet(k); }; })(k));
       g.appendChild(cell);
     }
+    if (play) { g.classList.add('is-play'); setTimeout(function () { g.classList.remove('is-play'); }, lit * 55 + 760); }
     root.appendChild(c);
     root.appendChild(rdl);
     root.appendChild(sum);
   } else {
-    var wc = el('<div class="lf-card" style="padding:4px 16px" id="lfWeekList"></div>');
+    var wc = el('<div class="lf-card lf-wkl" style="padding:4px 16px" id="lfWeekList"></div>');
+    if (play) { wc.classList.add('is-play'); setTimeout(function () { wc.classList.remove('is-play'); }, 7 * 45 + 500); }
     for (var i = 0; i < 7; i++) {
       var dd = addDays(from, i), kk = ymd(dd), ww = woOn(kk);
       var row = el('<button type="button" class="lf-wk"><div class="lf-wd"><em></em><b class="lf-num"></b></div><div class="lf-wn"><b></b><span></span></div><span class="lf-li-r lf-num"></span></button>');
-      row.dataset.d = kk;
+      row.dataset.d = kk; row.style.setProperty('--i', i);
       $('em', row).textContent = DOW[i].toUpperCase(); $('.lf-wd b', row).textContent = dd.getDate();
       if (kk === tk) row.classList.add('is-now');
       if (ww.length) {
@@ -3329,12 +3479,21 @@ function frRings(rows) {
   /* TRAINING NOW IS ON THE RING: theirs glows, a light rides its tip
      where the next workout will land, and the middle says who it is. */
   var live = [];
+  /* THE RINGS SWEEP IN when you arrive, from nothing to where each stands.
+     A ring that has grown since you last looked has a light run along the
+     new part of it, and one that has just closed its goal flashes. */
+  var arrive = frRgIn, grew = []; frRgIn = 0;
   drawn.forEach(function (x, i) {
     var rr = r0 - i * step, len = 2 * Math.PI * rr, col = frColOf(x.f.s), lv = frLive(x.f.s);
     if (rr < 8) return;
     if (lv) live.push(x);
+    var key = x.f.me ? 'me' : String(x.f.c), was = key in frRgMem ? frRgMem[key] : (+frRgSeen[key] || 0), from = arrive ? 0 : was;
+    frRgMem[key] = x.k; frRgSeen[key] = x.k;
+    var up = x.k > was + 1e-6, shut = x.k >= 1 && was < 1, seg = Math.min(18, len * (x.k - was));
     g.insertAdjacentHTML('beforeend', '<circle cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="var(--card3)" stroke-width="' + sw + '"/>'
-      + (x.k > 0 ? '<circle class="fr-rg-a' + (lv ? ' is-live' : '') + '" cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="' + col + '" stroke-width="' + sw + '" stroke-dasharray="' + (len * x.k).toFixed(1) + ' ' + len.toFixed(1) + '" style="--rc:' + col + '"/>' : ''));
+      + (x.k > 0 ? '<circle class="fr-rg-a' + (lv ? ' is-live' : '') + (shut ? ' is-shut' : '') + '" data-to="' + (len * x.k).toFixed(1) + '" cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="' + col + '" stroke-width="' + sw + '" stroke-dasharray="' + (len * from).toFixed(1) + ' ' + len.toFixed(1) + '" style="--rc:' + col + '"/>' : '')
+      + (up && x.k > 0 ? '<circle class="fr-rg-cm" cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="#fff" stroke-width="' + (sw * .55).toFixed(1) + '" stroke-dasharray="' + seg.toFixed(1) + ' ' + len.toFixed(1) + '" style="--o0:' + (-len * was).toFixed(1) + 'px;--o1:' + (-(len * x.k - seg)).toFixed(1) + 'px;--rc:' + col + '"/>' : ''));
+    if (up) grew.push(key);
     if (lv) {
       var th = Math.min(x.k, .999) * 2 * Math.PI, hx = 75 + rr * Math.cos(th), hy = 75 + rr * Math.sin(th);
       g.insertAdjacentHTML('beforeend', '<circle class="fr-rg-p" cx="' + hx.toFixed(1) + '" cy="' + hy.toFixed(1) + '" r="' + (sw / 2).toFixed(1) + '" fill="' + col + '" style="--rc:' + col + '"/>'
@@ -3353,6 +3512,10 @@ function frRings(rows) {
     mid.setAttribute('aria-label', (tie ? 'Tied' : $('b', mid).textContent) + ' in front this week');
     mid.style.setProperty('--rc', tie ? 'var(--ink)' : frColOf(top.f.s));
   }
+  try { localStorage.setItem('lift.rg.v1', JSON.stringify(frRgSeen)); } catch (e) {}
+  /* the arcs move to where they stand on the next frame, so the move is drawn */
+  requestAnimationFrame(function () { requestAnimationFrame(function () { $$('.fr-rg-a', c).forEach(function (a) { a.setAttribute('stroke-dasharray', a.dataset.to + ' 999'); }); }); });
+  if (grew.length && !arrive) buzz(10);
   var bd = $('#frBoard', c);
   ls.forEach(function (x) {
     var f = x.f, st = f.s || {};
@@ -3427,7 +3590,8 @@ function frCodeRow() {
   });
   return code;
 }
-var frArrive = 0;
+var frArrive = 0, frRgIn = 1, frRgMem = {}, frRgSeen = {};
+try { frRgSeen = JSON.parse(localStorage.getItem('lift.rg.v1') || '{}') || {}; } catch (e) {}
 function lfRenderFr() {
   var root = $('#lfFr'); root.textContent = '';
   var hd = el('<div class="fr-hd"><h2 class="lf-h1">Friends</h2></div>');
@@ -4461,6 +4625,7 @@ function lfCoinBtn(x, size) {
 
 /* ── the live award: drag to spin with momentum, tap to flip, it settles face-on.
    It is the one badge built at full size, and it is given back when it closes. */
+var lfTiltAsked = 0;
 function lfCoinView(x, earnedNow) {
   var v = el('<div class="lf-cv" role="dialog" aria-modal="true"><button type="button" class="lf-cv-x" aria-label="Close">' + IC.x + '</button><div class="lf-cv-stage"></div>'
     + '<div class="lf-cv-cap"><div class="lf-cv-k"></div><div class="lf-cv-n"></div><p></p><div class="lf-cv-h">Drag to spin · tap to flip</div></div></div>');
@@ -4486,11 +4651,13 @@ function lfCoinView(x, earnedNow) {
   $('p', v).textContent = x.b.d + (x.d ? (x.r ? ' Set ' : ' Earned ') + fmtDay(x.d) + '.' : x.b.k === 'month' && x.p ? ' ' + x.p[0] + ' of ' + x.p[1] + ' weeks so far.' : x.p && x.p[1] > 1 ? ' ' + lfBadgeProg(x) + ' so far.' : '');
   document.body.appendChild(v); document.body.classList.add('lf-lock');
   requestAnimationFrame(function () { v.classList.add('is-up'); });
-  var stage = $('.lf-cv-stage', v), raf = 0, r = null, aw = null, done = false;
+  var stage = $('.lf-cv-stage', v), raf = 0, r = null, aw = null, done = false, tiltFn = null;
+  /* iOS asks once for the motion sensor, and only from a press, which opening a badge is */
+  if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function' && !lfTiltAsked && !earnedNow) { lfTiltAsked = 1; try { DeviceOrientationEvent.requestPermission().catch(function () {}); } catch (e) {} }
   if (x.d && x.b.t > 1) stage.classList.add('is-t' + x.b.t);
   if (x.d && x.b.fx) { stage.classList.add('is-fx'); stage.style.setProperty('--gl', BD_FXGL[x.b.fx]); }
   function close() {
-    if (done) return; done = true; cancelAnimationFrame(raf); document.removeEventListener('keydown', esc); v.classList.remove('is-up');
+    if (done) return; done = true; cancelAnimationFrame(raf); document.removeEventListener('keydown', esc); if (tiltFn) window.removeEventListener('deviceorientation', tiltFn); v.classList.remove('is-up');
     setTimeout(function () { if (aw) bdDrop(aw); if (r) { r.dispose(); if (r.forceContextLoss) r.forceContextLoss(); } v.remove(); if (!stack.length) document.body.classList.remove('lf-lock'); }, 240);
   }
   function esc(e) { if (e.key === 'Escape') { e.stopPropagation(); close(); } }
@@ -4512,12 +4679,18 @@ function lfCoinView(x, earnedNow) {
     var ry = -Math.PI * 2 - .8, rx = .3, vy = 0, vx = 0, drag = null, t0 = performance.now();
     var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (calm) ry = 0;
+    /* TILT THE PHONE and the award tips with it under the same lights, so
+       the finish catches and loses the light the way a real one would */
+    var tg = 0, tb = 0, tx = 0, ty = 0;
+    tiltFn = function (e) { if (e.gamma == null) return; tg = Math.max(-1, Math.min(1, e.gamma / 35)); tb = Math.max(-1, Math.min(1, ((e.beta || 0) - 45) / 35)); };
+    if (!calm) window.addEventListener('deviceorientation', tiltFn);
     (function loop() {
       raf = requestAnimationFrame(loop);
+      tx += (tg * .38 - tx) * .12; ty += (tb * .3 - ty) * .12;
       /* it settles a little off square, the way a held award does, so the light is on the metal at rest too */
       if (!drag) { vy *= .955; vx *= .9; if (Math.abs(vy) < .02) ry += (Math.round(ry / Math.PI) * Math.PI + .26 - ry) * .08; ry += vy; rx += vx; rx += (.12 - rx) * .06; }
       var sw = calm || drag ? 0 : Math.sin((performance.now() - t0) / 1000 * .9) * .05;
-      aw.rotation.set(rx + sw * .4, ry + sw, 0); r.render(sc, cam);
+      aw.rotation.set(rx + sw * .4 + (drag ? 0 : ty), ry + sw + (drag ? 0 : tx), 0); r.render(sc, cam);
     })();
     stage.addEventListener('pointerdown', function (e) { drag = { x: e.clientX, y: e.clientY, m: 0 }; vy = vx = 0; stage.setPointerCapture(e.pointerId); });
     stage.addEventListener('pointermove', function (e) {
@@ -4695,12 +4868,18 @@ if (view === 'fr') frArrive = 1;
 var IDS = { home: 'lfHome', cal: 'lfCal', lib: 'lfLib', fr: 'lfFr', you: 'lfYou' };
 function lfGo(v) {
   if (VIEWS.indexOf(v) < 0) v = 'home';
-  if (v === 'cal' && view !== 'cal') calAt = today();
-  if (v === 'fr' && view !== 'fr') frArrive = 1;
+  if (v === 'cal' && view !== 'cal') { calAt = today(); calPlayed = ''; }
+  if (v === 'fr' && view !== 'fr') { frArrive = 1; frRgIn = 1; }
+  var was = view;
   if (v !== view) lfFolds = {};
   view = v;
   try { localStorage.setItem(VIEWK, v); } catch (e) {}
   lfRender(); window.scrollTo(0, 0);
+  if (was !== v) {
+    var sec = $('#' + IDS[v]); sec.classList.remove('lf-in-l', 'lf-in-r'); void sec.offsetWidth;
+    sec.classList.add(VIEWS.indexOf(v) > VIEWS.indexOf(was) ? 'lf-in-r' : 'lf-in-l');
+    sec.addEventListener('animationend', function f(e) { if (e.target !== sec) return; sec.classList.remove('lf-in-l', 'lf-in-r'); sec.removeEventListener('animationend', f); });
+  }
 }
 function lfRender() {
   lfFillRest();
