@@ -1211,12 +1211,16 @@ const freeze = (at) => `(() => {
     const at = (d, h, m) => new Date(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8), h, m).getTime();
     const w = (id, d, h, m, x, cd) => ({ id, d, s: at(d, h, m), e: at(d, h, m) + 3600000, n: 'W', x, cd });
     const one = (id, kg) => ({ id, n: id, sets: [{ w: kg, r: 8 }] });
-    const wo = [w('z', '2026-10-18', 9, 0, [one('hack', 95)]), w('a', '2026-10-20', 23, 30, [one('hack', 100)]), w('b', '2026-10-22', 5, 0, [one('hack', 105)]), w('c', '2026-10-24', 9, 0, [one('hack', 110)]),
+    /* seven late nights running from the 1st, and six dawns with a break, then seven */
+    const late = [1, 2, 3, 4, 5, 6, 7].map((n) => w('n' + n, '2026-10-0' + n, 23, 15, [one('bench', 40)]));
+    const dawn = [9, 10, 11, 12, 13, 14, 16].map((n) => w('d' + n, '2026-10-' + String(n).padStart(2, '0'), 5, 0, [one('bench', 40)]));
+    const wo = [...late, ...dawn, w('z', '2026-10-18', 9, 0, [one('hack', 95)]), w('a', '2026-10-20', 23, 30, [one('hack', 100)]), w('b', '2026-10-22', 5, 0, [one('hack', 105)]), w('c', '2026-10-24', 9, 0, [one('hack', 110)]),
       w('f', '2026-10-27', 9, 0, ['hack', 'bench', 'latpd', 'cablat', 'ezcurl', 'tripush'].map((id) => one(id, 50)), { k: 'walk', m: 60 })];
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-30T18:00:00');
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const m = Object.fromEntries(await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => [e.querySelector('b').textContent, e.querySelector('span').textContent])));
-    ok('after 11 pm is a midnight session, before half five first light', m['Midnight Session'] === '20 Oct' && m['First Light'] === '22 Oct', [m['Midnight Session'], m['First Light']]);
+    ok('seven nights running after 11 pm is a midnight session', m['Midnight Session'] === '7 Oct', m['Midnight Session']);
+    ok('and a broken run of dawns is not first light yet', m['First Light'] === '6 / 7', m['First Light']);
     ok('bests three workouts running are on fire, an hour of cardio iron lungs, six muscles full body', m['On Fire'] === '24 Oct' && m['Iron Lungs'] === '27 Oct' && m['Full Body'] === '27 Oct', [m['On Fire'], m['Iron Lungs'], m['Full Body']]);
     ok('and winter waits for December', m['Winter Arc'] === 'Locked');
     ok('a rare one wears its own finish and glow', /is-fx/.test(await page.getAttribute('#lfBadges .lf-coin[data-b="night"]', 'class')) && /is-t3/.test(await page.getAttribute('#lfBadges .lf-coin[data-b="night"]', 'class')));

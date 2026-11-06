@@ -3662,8 +3662,8 @@ var BADGES = [
   ['leg100', 'Leg Hero', 'mile', 'A hundred workouts that trained legs.', '#ea580c'],
   ['leg200', 'Leg Immortal', 'mile', 'Two hundred workouts that trained legs.', '#ea580c'],
   /* RARE: quick to win and struck in a finish of their own, never a level */
-  ['night', 'Midnight Session', 'rare', 'A workout started between 11 pm and 4 am.', '#8b7cff'],
-  ['dawn', 'First Light', 'rare', 'A workout started before 5:30 am.', '#ffb347'],
+  ['night', 'Midnight Session', 'rare', 'Seven days in a row, each started between 11 pm and 4 am.', '#8b7cff'],
+  ['dawn', 'First Light', 'rare', 'Seven days in a row, each started between 4 and 5:30 am.', '#ffb347'],
   ['onfire', 'On Fire', 'rare', 'New bests in three workouts in a row.', '#ff5a1f'],
   ['winter', 'Winter Arc', 'rare', 'Twelve workouts in one December.', '#8fd8ff'],
   ['lungs', 'Iron Lungs', 'rare', 'An hour of cardio in one workout.', '#3dffb0'],
@@ -3762,9 +3762,18 @@ function lfBadges() {
     w.x.forEach(function (e) { if (e.sets.length && !seen[e.id]) { seen[e.id] = 1; if (++exN === 40) won('explore', w.d); } });
   });
   /* RARE */
-  var prRun = 0, decN = {};
+  /* MIDNIGHT and FIRST LIGHT are seven days running in that window: one
+     early start is luck, a week of them is a habit. A day counts once. */
+  var prRun = 0, decN = {}, hrRun = { night: 0, dawn: 0 }, hrLast = { night: '', dawn: '' }, hrBest = { night: 0, dawn: 0 };
   ws.forEach(function (w) {
-    if (w.s > 1e11) { var hh = new Date(w.s), mm = hh.getHours() * 60 + hh.getMinutes(); if (mm >= 23 * 60 || mm < 4 * 60) won('night', w.d); if (mm >= 4 * 60 && mm < 5 * 60 + 30) won('dawn', w.d); }
+    if (w.s > 1e11) { var hh = new Date(w.s), mm = hh.getHours() * 60 + hh.getMinutes();
+      var slot = mm >= 23 * 60 || mm < 4 * 60 ? 'night' : mm >= 4 * 60 && mm < 5 * 60 + 30 ? 'dawn' : '';
+      if (slot && hrLast[slot] !== w.d) {
+        var gp = hrLast[slot] ? Math.round((parseYmd(w.d) - parseYmd(hrLast[slot])) / 864e5) : 0;
+        hrRun[slot] = gp === 1 ? hrRun[slot] + 1 : 1; hrLast[slot] = w.d;
+        if (hrRun[slot] > hrBest[slot]) hrBest[slot] = hrRun[slot];
+        if (hrRun[slot] === 7) won(slot, w.d);
+      } }
     if (w.d.slice(5, 7) === '12') { var yk = w.d.slice(0, 4); decN[yk] = (decN[yk] || 0) + 1; if (decN[yk] === 12) won('winter', w.d); }
     if (w.cd && +w.cd.m >= 60) won('lungs', w.d);
     var mus = {}; w.x.forEach(function (e) { var x = exById(e.id); if (x && e.sets.length) mus[x.m] = 1; }); if (Object.keys(mus).length >= 6) won('fullbody', w.d);
@@ -3805,7 +3814,7 @@ function lfBadges() {
     stair10: [cdn.stairs, 10], stairhr: [Math.round(cdm.stairs / 60), 10], incl10: [cdn.walk, 10], inclhr: [Math.round(cdm.walk / 60), 10], bwgoal: [0, 1], abs10: [absN, 10], abs50: [absN, 50],
     tgt1: [0, 1], tgtall: fo.length > 1 ? [curMet, fo.length] : [0, 1], tgt4: [Math.min(tStreak, 4), 4], quad: [Math.min(qn, 8), 8],
     duo1: [0, 1], duo10: [Math.min(syN, 10), 10], lead1: [0, 1], lead3: [Math.min(curRun, 3), 3], squad: [0, 1],
-    early: [Math.min(earlyN, 10), 10], owl: [Math.min(owlN, 10), 10], long: [0, 1], ton10: [0, 1], rep300: [0, 1], back: [0, 1], seven: [Math.min(bestRun, 7), 7], explore: [Math.min(exN, 40), 40],
+    early: [Math.min(earlyN, 10), 10], owl: [Math.min(owlN, 10), 10], long: [0, 1], ton10: [0, 1], rep300: [0, 1], back: [0, 1], night: [Math.min(hrBest.night, 7), 7], dawn: [Math.min(hrBest.dawn, 7), 7], seven: [Math.min(bestRun, 7), 7], explore: [Math.min(exN, 40), 40],
     pr3: [0, 1], sets30: [0, 1], wkend: [Math.min(wkendN, 4), 4], mon20: [Math.min(monBest, 20), 20], year: [0, 1], weigh: [Math.min((S.bw || []).length, 30), 30], cardio25: [Math.min(cdN, 25), 25], leg50: [Math.min(legN, 50), 50],
     st26: [Math.min(streak, 26), 26], v5m: [Math.round(vol / uk), 5e6], pr100: [Math.min(prDays.length, 100), 100], abs100: [Math.min(absN, 100), 100], duo50: [Math.min(syN, 50), 50], lead10: [Math.min(winN, 10), 10],
     ton15: [0, 1], ton20: [0, 1], rep1k: [Math.min(wkRepBest, 1000), 1000], rep2k: [Math.min(wkRepBest, 2000), 2000], leg100: [Math.min(legN, 100), 100], leg200: [Math.min(legN, 200), 200] };
