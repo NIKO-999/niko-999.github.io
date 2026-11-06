@@ -1186,7 +1186,7 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const m = Object.fromEntries(await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => [e.querySelector('b').textContent, e.querySelector('span').textContent])));
     ok('ten starts before seven are an early bird', m['Early Bird'] === '10 Oct' && m['Night Owl'] === '1 / 10', [m['Early Bird'], m['Night Owl']]);
-    ok('ninety minutes is a long haul, ten tonnes and three hundred reps in one go are theirs', m['Long Haul'] === '1 Oct' && m['Ten Tonne'] === '1 Oct' && m['Rep Storm'] === '1 Oct', [m['Long Haul'], m['Ten Tonne'], m['Rep Storm']]);
+    ok('ninety minutes is a long haul, 10,000 kg and three hundred reps in one go are theirs', m['Long Haul'] === '1 Oct' && m['10,000 kg Day'] === '1 Oct' && m['Rep Storm'] === '1 Oct', [m['Long Haul'], m['10,000 kg Day'], m['Rep Storm']]);
     ok('seven days running, forty exercises, and back after a fortnight off', m['Seven Straight'] === '7 Oct' && m['Explorer'] === '10 Oct' && m['Comeback'] === '28 Oct', [m['Seven Straight'], m['Explorer'], m['Comeback']]);
     const seenM = (await store(page)).bseen || {};
     ok('a record that already held them is not a flood of announcements', ['early', 'long', 'ton10', 'rep300', 'seven', 'explore', 'back'].every((k) => seenM[k] === 1) && seenM.v4 === 1, seenM);
