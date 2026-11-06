@@ -664,9 +664,14 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 @keyframes fr-sync { 50% { transform: scale(1.18); box-shadow: 0 0 0 2px var(--card2), 0 0 10px var(--rc); } }
 .fr-rg.is-sync .fr-rg-a.is-live { animation-duration: 1.6s; }
 /* THE PROFILE BANNER */
-.fr-prof .lf-sh-bd { padding-top: 0; }
-.fr-ban { position: relative; margin: 0 -20px 14px; padding: 26px 20px 18px; overflow: hidden;
-  background: radial-gradient(120% 90% at 15% 0%, color-mix(in srgb, var(--rc) 46%, transparent), transparent 62%), radial-gradient(90% 80% at 100% 10%, color-mix(in srgb, var(--rc) 22%, transparent), transparent 60%); }
+.fr-prof .lf-sh-bd { padding-top: 0; position: relative; z-index: 1; }
+/* THE GLOW IS THE SHEET'S, not the banner's: drawn behind the scroller, it
+   stays put while the content moves, so a pull down slides the name and
+   badges over it instead of opening a bare gap above a lit band */
+.lf-sheet.fr-prof::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 380px; border-radius: inherit; pointer-events: none; z-index: 0;
+  background: radial-gradient(120% 260px at 15% 0%, color-mix(in srgb, var(--rc) 46%, transparent), transparent 70%), radial-gradient(90% 220px at 100% 8%, color-mix(in srgb, var(--rc) 22%, transparent), transparent 65%); }
+.lf-sheet.fr-prof .lf-sh-hd { z-index: 2; }
+.fr-ban { position: relative; margin: 0 -20px 14px; padding: 26px 20px 18px; }
 .fr-ban::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--rc) 45%, transparent), transparent); }
 .fr-ban-h { display: flex; align-items: center; gap: 14px; }
 .fr-ban-av { width: 58px; height: 58px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 26px; font-weight: 800; color: #0b0b0d; background: var(--rc);
@@ -3466,7 +3471,7 @@ function frSheet(f) {
   var foot = null, rm = null;
   if (!f.me) { rm = el('<button type="button" class="lf-btn is-bad">Remove</button>'); foot = [rm]; }
   var s = lfSheet({ title: '', body: b, foot: foot, full: true, cls: 'fr-prof' });
-  s.el.setAttribute('aria-label', nm);
+  s.el.setAttribute('aria-label', nm); s.el.style.setProperty('--rc', col);
   lfAccOn(s.el, frHue(st));
   if (rm) rm.addEventListener('click', function () {
     var i = FRS.list.indexOf(f); if (i < 0) return;
