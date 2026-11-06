@@ -789,8 +789,8 @@ const freeze = (at) => `(() => {
     ok('and counts what it had already won as seen', seen && seen.first === 1 && seen.wo10 === 1 && seen.pr === 1 && !seen.st4, seen);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const shelf = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
-    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 24 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
-    ok('and counts them', /4 of 24/.test(await page.textContent('#lfBadges .lf-hd')));
+    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 29 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
+    ok('and counts them', /4 of 29/.test(await page.textContent('#lfBadges .lf-hd')));
     ok('a badge not yet won carries its progress ring', await page.locator('#lfBadges .lf-coin[data-b="wo50"] .lf-bdr').count() === 1 && await page.locator('#lfBadges .lf-coin[data-b="first"] .lf-bdr').count() === 0);
     await page.click('#lfBadges .lf-coin[data-b="wo10"]'); await page.waitForTimeout(500);
     ok('a coin opens on its own screen, to spin', await page.locator('.lf-cv').count() === 1 && /10 workouts/.test(await page.textContent('.lf-cv')) && /Earned Mon 26 Oct/.test(await page.textContent('.lf-cv'))
@@ -825,9 +825,9 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const st = async () => page.evaluate(() => ['lfSet', 'lfBadges', 'lfFocus'].map((id) => { const b = document.querySelector('#' + id + ' h3 > button'); return b && b.getAttribute('aria-expanded') + ':' + document.getElementById(b.getAttribute('aria-controls')).hidden; }).join());
     ok('settings, badges and focus are shut by default, each a button inside its heading', await st() === 'false:true,false:true,false:true');
-    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 24/.test(await page.textContent('#lfBadges h3')));
+    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 29/.test(await page.textContent('#lfBadges h3')));
     await page.click('#lfSet h3 > button'); await page.click('#lfBadges h3 > button'); await page.click('#lfFocus h3 > button'); await settle(page);
-    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 24);
+    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 29);
     await page.click('#lfUnit [data-u="lb"]'); await settle(page);
     ok('a save redraws the page and keeps what you opened', await st() === 'true:false,true:false,true:false');
     await page.click('#lfUnit [data-u="kg"]'); await settle(page);
@@ -1134,6 +1134,38 @@ const freeze = (at) => `(() => {
     await A.page.click('.lf-bar [data-v="home"]'); await A.page.click('.lf-bar [data-v="fr"]'); await A.page.waitForTimeout(400);
     ok('and their friends see they have gone', /Turned friends off/.test(await A.page.textContent('#frBoard')));
     await A.c.close(); await B.c.close();
+  }
+
+  /* ── VERSUS FRIENDS: badges from training together and the weekly rings ── */
+  {
+    const t0 = new Date('2026-10-28T07:00:00').getTime();
+    const frs = { on: true, code: 'ABCD2345', key: 'a'.repeat(32), name: 'Niko', rx: [], list: [
+      { c: 'SAMSAMSA', n: 'Sam', s: { goal: 3, wk: 1, d: '0'.repeat(30), tr: { m: '2026-10-26', w8: [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0],[1,5,50,500]] },
+        wl: [{ id: 'x1', d: '2026-10-28', n: 'Legs', t: 7 * 60 + 20, x: [] }] } }] };
+    const c = await browser.newContext(PHONE);
+    await c.addInitScript(freeze('2026-10-30T18:00:00'));
+    await c.route(/workers\.dev/, (r) => r.abort());
+    await c.addInitScript(`new MutationObserver(() => { const v = document.querySelector('.lf-cv'); if (v) v.querySelector('.lf-cv-x').click(); }).observe(document, { childList: true, subtree: true });`);
+    await c.addInitScript(`(() => { if (localStorage.getItem('lift.v1')) return;
+      localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 3, bseen: { v2: 1, v3: 1, first: 1, goal: 1 },
+        fx: { sy: { 'old|ZZZZZZZZ': '2026-09-01', 'bad key': 'x' }, wk: { '2026-10-05': [800, 300, 1, 0, ''], '2026-10-12': [700, 600, 2, 1, '2026-10-17'], '2026-10-19': [900, 400, 1, 0, ''], 'nope': [1] } },
+        wo: [{ id: 'm1', d: '2026-10-28', s: t0, e: t0 + 3600000, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 100, r: 8 }] }] }] }))});
+      localStorage.setItem('lift.fr.v1', ${JSON.stringify(JSON.stringify(frs))}); })();`);
+    const page = await c.newPage(); page.on('pageerror', (e) => errors.push(String(e)));
+    await page.goto(URL); await page.waitForTimeout(400);
+    const r0 = await store(page);
+    ok('the friends record is kept, and a damaged entry is dropped', r0.fx.sy['old|ZZZZZZZZ'] === '2026-09-01' && !r0.fx.sy['bad key'] && !r0.fx.wk.nope && r0.fx.wk['2026-10-12'][3] === 1, r0.fx);
+    await page.click('.lf-bar [data-v="fr"]'); await page.waitForTimeout(500);
+    const r1 = await store(page);
+    ok('a friend who started inside your workout puts it in sync', r1.fx.sy['m1|SAMSAMSA'] === '2026-10-28', r1.fx.sy);
+    ok('and the week on the rings is written down', JSON.stringify(r1.fx.wk['2026-10-26'].slice(0, 3)) === '[333,333,1]', r1.fx.wk['2026-10-26']);
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    const got = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent).filter((t) => /In Sync|Gym Buddies|Crowned|Three-Peat|Squad Goals/.test(t)));
+    ok('in sync, and gym buddies counting up to ten', got[0] === 'In Sync:1 Sep' && got[1] === 'Gym Buddies:2 / 10', got);
+    ok('a week won is crowned on its Sunday, three running is a three-peat', got[2] === 'Crowned:11 Oct' && got[3] === 'Three-Peat:25 Oct', got);
+    ok('and squad goals on the day everybody closed theirs', got[4] === 'Squad Goals:17 Oct', got);
+    ok('each wears its own shape', await page.$$eval('#lfBadges .lf-coin', (b) => ['duo1', 'duo10', 'lead1', 'lead3', 'squad'].every((id) => b.some((x) => x.dataset.b === id))));
+    await c.close();
   }
 
   /* ── THEME: light and dark, and the accent on a wheel ── */
