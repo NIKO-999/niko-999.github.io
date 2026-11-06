@@ -1107,7 +1107,10 @@ const freeze = (at) => `(() => {
     const rxB = await (await worker.fetch(new Request(W + '/v1/lift/' + codeB, { headers: { origin: 'https://niko-999.github.io' } }), env)).json();
     ok('signed as you, on that workout', rxB.rx.length === 1 && rxB.rx[0].n === 'Niko' && rxB.rx[0].e === '🔥', rxB.rx);
     await B.page.click('.lf-bar [data-v="home"]'); await B.page.click('.lf-bar [data-v="fr"]'); await B.page.waitForTimeout(500);
-    ok('they see it on their friends tab', /Niko on your/.test(await B.page.textContent('#frRxIn')), await B.page.textContent('#lfFr'));
+    ok('the tab carries no card of reactions', await B.page.locator('#frRxIn').count() === 0 && !/Niko on your/.test(await B.page.textContent('#lfFr')));
+    await B.page.click('#frBoard .fr-row.is-me .fr-open'); await settle(B.page);
+    ok('they see it beside that workout on their own page', /🔥1/.test(await top(B.page).locator('#frWo').textContent()), await top(B.page).locator('#frWo').textContent());
+    await B.page.keyboard.press('Escape'); await settle(B.page);
     await A.page.keyboard.press('Escape'); await settle(A.page);
     ok('it fills the screen', await top(A.page).evaluate((e) => e.classList.contains('is-full')));
     await A.page.keyboard.press('Escape'); await settle(A.page);

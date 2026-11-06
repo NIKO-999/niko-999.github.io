@@ -758,7 +758,6 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-rx-b:disabled { opacity: 1; }
 .fr-rx-who { width: 100%; margin: 2px 0 0; }
 .fr-rxs { font-size: 13px; margin-left: auto; padding-left: 8px; white-space: nowrap; }
-.fr-rx-e { font-size: 22px; width: 32px; flex: none; }
 .fr-ago { margin: 0; }
 .fr-dash .lf-stat .lf-ic { margin-top: 4px; }
 .lf-day.is-rest { border-style: dashed; }
@@ -3835,20 +3834,8 @@ function lfRenderFr() {
   add.addEventListener('click', frAddSheet);
   hd.appendChild(add);
   root.appendChild(frRings(rows));
-  /* WHAT FRIENDS GAVE YOUR WORKOUTS in the last week, newest first. */
-  var wk0 = Date.now() - 7 * 864e5, mine = (FRS.rx || []).filter(function (x) { return x.at >= wk0; }).slice(0, 5);
-  if (mine.length) {
-    var rcd = el('<div class="lf-card" style="padding:4px 16px" id="frRxIn"><div class="lf-list"></div></div>');
-    mine.forEach(function (x) {
-      var w = S.wo.filter(function (q) { return q.id === x.w; })[0];
-      var li = el('<div class="lf-li"><span class="fr-rx-e"></span><div class="lf-li-t"><b></b><span></span></div></div>');
-      $('.fr-rx-e', li).textContent = x.e;
-      $('b', li).textContent = (x.n || 'A friend') + ' on your ' + (w ? w.n : 'workout');
-      $('.lf-li-t span', li).textContent = frAgoT(x.at);
-      $('.lf-list', rcd).appendChild(li);
-    });
-    root.appendChild(rcd);
-  }
+  /* NO REACTIONS CARD on the tab: a friend's 🔥 is told by notification
+     and sits beside the workout on your own page, where it belongs. */
   if (!FRS.list.length) root.appendChild(el('<div class="lf-card lf-empty" id="frNone"><b>Nobody yet</b>Add a friend with the plus, or share your code from Settings.</div>'));
   /* Arriving at the tab fetches; drawing it only draws. A paint that
      fetched would repaint inside its own fetch, which is a loop. */
