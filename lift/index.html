@@ -3783,12 +3783,12 @@ var BD_CREAM = '#eee8dc';
 /* every kind has its own bdOutline; the target badges each have their own */
 var BD_SHK = { start: 'circle', streak: 'hexp', volume: 'squircle', pr: 'banner', feat: 'oct', body: 'diamond', core: 'tall' };
 var BD_SHI = { tgt1: 'hex', tgtall: 'shield', tgt4: 'rosette', quad: 'pent', stair10: 'tri', stairhr: 'tri', incl10: 'ramp', inclhr: 'ramp',
-  duo1: 'twin', duo10: 'capsule', lead1: 'crownb', lead3: 'star5', squad: 'trefoil',
+  duo1: 'twin', duo10: 'capsule', lead1: 'crownb', lead3: 'star5', squad: 'crest',
   early: 'sun', owl: 'gem', long: 'hourglass', ton10: 'trap', rep300: 'cross', back: 'drop', seven: 'hept', explore: 'compass' };
 /* the two machines share a colour and each has its own pattern: treads for the stairs, a gradient for the incline */
 var BD_PT = { stair10: 'stairs', stairhr: 'stairs', incl10: 'incline', inclhr: 'incline' };
 /* a glyph a smaller face has to make room for: how big, and how far down */
-var BD_GS = { plaque: [.72, 0], arch: [.62, 90], tri: [.52, 150], diamond: [.72, 0], ramp: [.8, 0], tall: [.82, 0], twin: [.5, 0], capsule: [.6, 0], crownb: [.5, 70], star5: [.42, 18], trefoil: [.56, 10],
+var BD_GS = { plaque: [.72, 0], arch: [.62, 90], tri: [.52, 150], diamond: [.72, 0], ramp: [.8, 0], tall: [.82, 0], twin: [.5, 0], capsule: [.6, 0], crownb: [.5, 70], star5: [.42, 18], crest: [.55, -20],
   sun: [.56, 0], gem: [.55, 60], hourglass: [.42, 0], trap: [.62, 40], cross: [.5, 0], drop: [.56, 90], hept: [.7, 0], compass: [.42, 0] };
 var BD_GL = { first: 'i:check', wo10: '10', wo50: '50', goal: 'i:ring', st4: '4', st12: '12', tgt1: '1', tgtall: 'i:bars', tgt4: '4', quad: 'i:leg', pr: 'i:trophy', pr10: '10', v100k: 'i:weight', v1m: '1M', week: 'i:cal', plate3: '3', stair10: '10', stairhr: 'i:stairs', incl10: '10', inclhr: 'i:ramp', bwgoal: 'i:scale', abs10: '10', abs50: '50', duo1: 'i:pair', duo10: '10', lead1: '1', lead3: '3', squad: 'i:ring',
   early: 'i:sun', owl: 'i:moon', long: '90', ton10: '10t', rep300: '300', back: 'i:flame', seven: '7', explore: '40' };
@@ -3822,7 +3822,7 @@ function bdOutline(c, k, sc) {
     for (var ai = 1; ai < 64; ai++) { var aa = ai / 64 * Math.PI; c.lineTo(S(.8 * Math.cos(aa)), S(.14 + .8 * Math.sin(aa))); }
     c.lineTo(S(-.8), S(.14)); c.closePath();
   }
-  /* the friends badges: two rings joined, a capsule, a crown, a star, a clover */
+  /* the friends badges: two rings joined, a capsule, a crown, a star, a crest */
   else if (k === 'twin') {
     var tc = .38, tr = .6, ti = Math.acos(tc / tr), tp = [];
     for (var t1 = 0; t1 <= 60; t1++) { var a1 = -(Math.PI - ti) + t1 / 60 * 2 * (Math.PI - ti); tp.push([tc + tr * Math.cos(a1), tr * Math.sin(a1)]); }
@@ -3834,7 +3834,6 @@ function bdOutline(c, k, sc) {
   /* every face is built outward from the centre, so each edge has to be
      seen from it: the crown's notches sit high enough that they are */
   else if (k === 'star5') bdPoly(c, M((function () { var o = []; for (var i = 0; i < 10; i++) { var a = Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? .46 : .99; o.push([rr * Math.cos(a), rr * Math.sin(a) - .04]); } return o; })()), S(.07));
-  else if (k === 'trefoil') { for (var f3 = 0; f3 <= 240; f3++) { var u3 = f3 / 240 * Math.PI * 2, r3 = .7 + .27 * Math.cos(3 * (u3 - Math.PI / 2)); if (f3 === 0) c.moveTo(S(r3 * Math.cos(u3)), S(r3 * Math.sin(u3))); else c.lineTo(S(r3 * Math.cos(u3)), S(r3 * Math.sin(u3))); } c.closePath(); }
   /* milestones */
   else if (k === 'sun') { for (var s1 = 0; s1 <= 288; s1++) { var u1 = s1 / 288 * Math.PI * 2, r1 = .83 + .14 * Math.cos(12 * u1); if (s1 === 0) c.moveTo(S(r1), 0); else c.lineTo(S(r1 * Math.cos(u1)), S(r1 * Math.sin(u1))); } c.closePath(); }
   else if (k === 'gem') bdPoly(c, M([[-.6, .8], [.6, .8], [.98, .26], [0, -.98], [-.98, .26]]), S(.08));
@@ -3849,6 +3848,7 @@ function bdOutline(c, k, sc) {
   }
   else if (k === 'hept') bdPoly(c, M(bdNgon(7, .97, Math.PI / 2)), S(.12));
   else if (k === 'compass') bdPoly(c, M((function () { var o = []; for (var i = 0; i < 8; i++) { var a = Math.PI / 2 + i * Math.PI / 4, rr = i % 2 ? .42 : .98; o.push([rr * Math.cos(a), rr * Math.sin(a)]); } return o; })()), S(.06));
+  else if (k === 'crest') bdPoly(c, M([[-.9, .92], [-.3, .78], [0, .96], [.3, .78], [.9, .92], [.9, -.2], [0, -.98], [-.9, -.2]]), S(.1));
   else if (k === 'squircle') bdPoly(c, M([[-.84, .84], [.84, .84], [.84, -.84], [-.84, -.84]]), S(.3));
   else if (k === 'banner') bdPoly(c, M([[-.84, .9], [.84, .9], [.84, -.96], [0, -.56], [-.84, -.96]]), S(.1));
   else if (k === 'pent') bdPoly(c, M([[-.86, .86], [.86, .86], [.86, -.18], [0, -.98], [-.86, -.18]]), S(.13));
