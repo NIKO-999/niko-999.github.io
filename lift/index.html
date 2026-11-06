@@ -403,6 +403,41 @@ svg { display: block; }
 .lf-ex-hd { display: flex; align-items: center; gap: 8px; }
 .lf-ex-hd button.lf-ex-n { flex: 1; min-width: 0; text-align: left; font-weight: 600; font-size: 15px; min-height: 40px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lf-set { display: grid; grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 44px; align-items: center; gap: 8px; min-height: 44px; }
+.lf-burst { position: fixed; width: 0; height: 0; z-index: 90; pointer-events: none; }
+.lf-burst i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--log); animation: lf-burst .75s cubic-bezier(.2,.7,.3,1) forwards; }
+.lf-burst i:nth-child(3n) { width: 5px; height: 5px; left: -2.5px; top: -2.5px; background: var(--ink); }
+.lf-burst b { position: absolute; left: 0; top: -34px; transform: translateX(-50%); font-size: 15px; font-weight: 800; letter-spacing: .04em; color: var(--on-log); background: var(--log); padding: 3px 10px; border-radius: 999px; animation: lf-prpop .9s cubic-bezier(.2,.9,.3,1.3) forwards; white-space: nowrap; }
+@keyframes lf-burst { from { transform: translate(0, 0) scale(1); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) scale(.3); opacity: 0; } }
+@keyframes lf-prpop { 0% { transform: translateX(-50%) scale(.4); opacity: 0; } 25% { transform: translateX(-50%) scale(1.15); opacity: 1; } 70% { transform: translateX(-50%) translateY(-6px) scale(1); opacity: 1; } 100% { transform: translateX(-50%) translateY(-14px) scale(1); opacity: 0; } }
+.lf-fin { text-align: center; padding-top: 8px; }
+.lf-fin-ok { width: 84px; height: 84px; margin: 4px auto 14px; border-radius: 50%; background: var(--log); color: var(--on-log); display: grid; place-items: center; box-shadow: 0 0 0 10px color-mix(in srgb, var(--log) 18%, transparent), 0 0 46px color-mix(in srgb, var(--log) 45%, transparent); animation: lf-finok .6s cubic-bezier(.2,.9,.3,1.25) both; }
+.lf-fin-ok .lf-ic { width: 40px; height: 40px; stroke-width: 2.8; }
+@keyframes lf-finok { from { transform: scale(.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.lf-fin .lf-cap { margin: 0 0 4px; }
+.lf-fin h3 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
+.lf-fin-d { color: var(--dim); font-size: 14px; margin: 4px 0 18px; }
+.lf-fin-vol { font-size: 54px; font-weight: 800; letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+.lf-fin-vol small { font-size: 18px; font-weight: 600; color: var(--dim); margin-left: 4px; letter-spacing: 0; }
+.lf-fin-u { color: var(--dim); font-size: 13px; margin: 6px 0 18px; }
+.lf-fin-u.is-up { color: var(--good); font-weight: 600; }
+.lf-fin .lf-sum { text-align: left; }
+.lf-fin-l { text-align: left; margin-top: 18px; }
+.lf-fin-l .lf-cap { margin: 0 2px 8px; }
+.lf-fin-l .lf-tags { margin: 0; }
+.fr-live { display: inline-flex; align-items: center; gap: 6px; color: var(--good); font-weight: 600; }
+.fr-live::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--log); box-shadow: 0 0 0 0 color-mix(in srgb, var(--log) 60%, transparent); animation: fr-live 1.6s ease-out infinite; }
+@keyframes fr-live { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--log) 60%, transparent); } 100% { box-shadow: 0 0 0 8px transparent; } }
+.fr-lb { padding: 14px 16px 10px; }
+.fr-lb .lf-hd { margin-bottom: 8px; }
+.fr-lb-r { display: grid; grid-template-columns: 22px minmax(0, 92px) minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 40px; }
+.fr-lb-r > em { font-style: normal; font-weight: 800; color: var(--quiet); text-align: center; font-size: 14px; }
+.fr-lb-r:first-of-type > em { color: var(--lb-c); }
+.fr-lb-r > b { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fr-lb-r > i { display: block; height: 8px; border-radius: 4px; background: var(--card3); overflow: hidden; }
+.fr-lb-r > i > u { display: block; height: 100%; border-radius: 4px; background: var(--lb-c); }
+.fr-lb-r > span { font-size: 13px; color: var(--dim); text-align: right; min-width: 52px; }
+.fr-lb .lf-seg { margin: 0 0 8px; }
+@media (prefers-reduced-motion: reduce) { .lf-burst i, .fr-live::before, .lf-fin-ok { animation: none; } .lf-burst i { display: none; } }
 .lf-wheel { position: relative; width: 200px; height: 200px; margin: 6px auto 0; border-radius: 50%; touch-action: none; cursor: pointer;
   background: conic-gradient(hsl(0,80%,56%), hsl(30,80%,56%), hsl(60,80%,56%), hsl(90,80%,56%), hsl(120,80%,56%), hsl(150,80%,56%), hsl(180,80%,56%), hsl(210,80%,64%), hsl(240,80%,64%), hsl(270,80%,64%), hsl(300,80%,56%), hsl(330,80%,56%), hsl(360,80%,56%)); }
 .lf-wheel:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
@@ -1183,8 +1218,12 @@ function lfLoadAct() {
     return a;
   } catch (e) { return null; }
 }
+var lfLvSent = -1;
 function lfSaveAct() {
   try { if (act) localStorage.setItem(ACTK, JSON.stringify(act)); else localStorage.removeItem(ACTK); } catch (e) {}
+  /* starting and ending a workout tell friends; a set ticked does not */
+  var lv = act ? act.s : 0;
+  if (lv !== lfLvSent) { lfLvSent = lv; if (typeof frQueue === 'function') frQueue(); }
   /* a workout that ends takes its pending lock-screen alert with it */
   if (!act && typeof lfRestPushClear === 'function') lfRestPushClear();
 }
@@ -1991,7 +2030,9 @@ function lfPaintSession() {
         var est = e1rm(s.w, s.r);
         s.pr = est > runBestBefore(e, si, best) + 1e-9 && best > 0 ? 1 : 0;
         act.rest = Date.now(); act.restEx = e.id; act.rang = 0; lfRestPush();
+        var at = s.pr ? $('.lf-sn', row).getBoundingClientRect() : null;
         lfSaveAct(); buzz(s.pr ? [20, 40, 20] : 14); lfPaintSession(); lfTick();
+        if (at) lfBurst(at.left + at.width / 2, at.top + at.height / 2);
       });
       card.appendChild(row);
     });
@@ -2011,6 +2052,22 @@ function lfPaintSession() {
   cc.appendChild(lfCardioPick(act.cd, function (c) { act.cd = c; lfSaveAct(); sum(); }));
   sum(); list.appendChild(cc);
   if (!act.x.length) list.insertBefore(el('<div class="lf-empty"><b>Nothing in this workout yet</b>Add the first exercise and start logging sets.</div>'), add);
+}
+/* A PR IS A MOMENT: a burst in the accent from the set's number, and the
+   word itself lifting off it. Drawn over everything, gone in a second,
+   and never in the way of the next press. */
+function lfBurst(x, y) {
+  var bu = el('<div class="lf-burst" aria-hidden="true"><b>PR</b></div>');
+  bu.style.left = x + 'px'; bu.style.top = y + 'px';
+  for (var i = 0; i < 14; i++) {
+    var a = i / 14 * Math.PI * 2 + Math.random() * .4, d = 26 + Math.random() * 30, p = el('<i></i>');
+    p.style.setProperty('--dx', (Math.cos(a) * d).toFixed(1) + 'px'); p.style.setProperty('--dy', (Math.sin(a) * d).toFixed(1) + 'px');
+    p.style.animationDelay = (Math.random() * 60).toFixed(0) + 'ms';
+    bu.appendChild(p);
+  }
+  document.body.appendChild(bu);
+  window.lfBursts = (window.lfBursts || 0) + 1;
+  setTimeout(function () { bu.remove(); }, 1000);
 }
 function runBestBefore(e, si, best) {
   var b = best;
@@ -2039,14 +2096,48 @@ function lfFinish() {
   lfRender(); buzz([15, 50, 15]);
   setTimeout(function () { lfSummary(w, prs); }, 260);
 }
+/* THE FINISH SCREEN: the one screen made to be looked at. A check in the
+   accent, the volume counting up to what you moved, set against the last
+   time you did this session, then the records and the badges it earned.
+   The badges are still struck afterwards, one at a time, as before. */
 function lfSummary(w, prs) {
-  var b = el('<div><div class="lf-cap">Workout logged</div><div class="lf-hero" style="font-size:30px"></div><p class="lf-lab" style="font-size:14px;font-weight:400"></p></div>');
-  $('.lf-hero', b).textContent = w.n;
-  $('p', b).textContent = fmtDay(w.d) + (w.cd ? ' · + ' + lfCdTxt(w.cd) : '') + (prs.length ? ' · new best on ' + prs.join(', ') : '');
-  b.appendChild(lfSum([[fmtDur(w.e - w.s), 'time'], [woSets(w), 'sets'], [fmtBig(toDisp(woVol(w))), S.unit]]));
-  var done = el('<button type="button" class="lf-btn is-ink is-full">Done</button>');
-  var s = lfSheet({ title: '', body: b, foot: [done], onClose: function () { setTimeout(lfBadgeNew, 380); } });
+  var vol = toDisp(woVol(w));
+  var b = el('<div class="lf-fin" id="lfFin"><div class="lf-fin-ok">' + IC.check + '</div><div class="lf-cap">Workout logged</div><h3></h3><p class="lf-fin-d"></p>'
+    + '<div class="lf-fin-vol lf-num"><span>0</span><small></small></div><p class="lf-fin-u"></p></div>');
+  $('h3', b).textContent = w.n;
+  $('.lf-fin-d', b).textContent = fmtDay(w.d) + (w.s > 1e11 ? ' · ' + fmtAt(new Date(w.s)) : '') + (w.cd ? ' · + ' + lfCdTxt(w.cd) : '');
+  $('.lf-fin-vol small', b).textContent = S.unit + ' moved';
+  /* against the last time you did this session, or the last workout at all */
+  var prev = S.wo.filter(function (q) { return q !== w && q.d <= w.d && (w.rt ? q.rt === w.rt : q.n === w.n); }).sort(function (a, c) { return a.s - c.s; }).pop();
+  var u = $('.lf-fin-u', b);
+  if (prev && woVol(prev) > 0) {
+    var pc = Math.round((woVol(w) - woVol(prev)) / woVol(prev) * 100);
+    u.textContent = (pc >= 0 ? '+' + pc + '%' : pc + '%') + ' on last time';
+    u.classList.toggle('is-up', pc > 0);
+  } else u.textContent = 'The first ' + w.n + ' on record';
+  b.appendChild(lfSum([[fmtDur(w.e - w.s), 'time'], [woSets(w), 'sets'], [fmtBig(woReps(w)), 'reps']]));
+  if (prs.length) {
+    var pl = el('<div class="lf-fin-l" id="lfFinPr"><div class="lf-cap">New records</div><div class="lf-tags"></div></div>');
+    prs.forEach(function (n) { $('.lf-tags', pl).appendChild(lfTag(['pr', n])); });
+    b.appendChild(pl);
+  }
+  var fresh = lfBadges().concat(lfMedals()).filter(function (x) { return x.d && !S.bseen[x.b.id]; });
+  if (fresh.length) {
+    var bl = el('<div class="lf-fin-l" id="lfFinBg"><div class="lf-cap">Badges earned</div><div class="lf-tags"></div></div>');
+    fresh.forEach(function (x) { var g = el('<span class="lf-tag"><span></span></span>'); $('span', g).textContent = x.b.n; $('.lf-tags', bl).appendChild(g); });
+    b.appendChild(bl);
+  }
+  var done = el('<button type="button" class="lf-btn is-log is-full" id="lfFinDone">Done</button>');
+  var s = lfSheet({ title: '', body: b, foot: [done], full: true, onClose: function () { setTimeout(lfBadgeNew, 380); } });
   done.addEventListener('click', function () { s.close(); });
+  /* the count, eased so it lands rather than stops */
+  var n = $('.lf-fin-vol span', b), t0 = 0, calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (calm) { n.textContent = Math.round(vol).toLocaleString(); return; }
+  (function step(ts) {
+    if (!t0) t0 = ts; var k = Math.min(1, (ts - t0) / 1100), e = 1 - Math.pow(1 - k, 3);
+    n.textContent = Math.round(vol * e).toLocaleString();
+    if (k < 1 && document.body.contains(n)) requestAnimationFrame(step);
+  })(0); requestAnimationFrame(function (ts) { t0 = ts; });
 }
 
 /* ═══════════ EXERCISES ═══════════ */
@@ -2875,6 +2966,8 @@ function frStats() {
     }), vol30: Math.round(windowStats(addDays(t, -29), t).vol),
     /* the accent you chose, as a hue, so your page is your colour to friends */
     ac: lfAccent(),
+    /* TRAINING NOW: when the workout in progress started, or nothing */
+    lv: act ? act.s : 0,
     /* THE TREND SHEETS, for friends: the same windows yours are drawn from,
        each as [workouts, sets, reps, kg]. Totals only, never a single lift
        — bar the heaviest set of the month, which your own sheet names. */
@@ -3102,6 +3195,38 @@ function frRxBar(w, f) {
   paint();
   return bar;
 }
+/* TRAINING NOW: a workout started and not finished, within three hours —
+   past that it is a phone that died mid-session, not a session. */
+function frLive(st) { var lv = st && st.lv; return typeof lv === 'number' && lv > 0 && Date.now() - lv < 3 * 3600e3 && Date.now() - lv > -6e5; }
+/* THIS WEEK'S LEADERBOARD: everybody, ranked, each bar in the colour they
+   chose. A week is theirs only if it is THIS week — a record last sent on
+   Sunday counts nothing toward Monday. */
+var frLbBy = 'vol';
+function frBoardWeek(rows) {
+  var mon = ymd(monday(today()));
+  var wk = function (st) { var tr = st && st.tr; if (!tr || tr.m !== mon || !Array.isArray(tr.w8) || !Array.isArray(tr.w8[7])) return [0, 0, 0, 0]; return tr.w8[7]; };
+  var c = el('<div class="lf-card fr-lb" id="frLb"><div class="lf-hd"><span class="lf-lab">This week</span><span class="lf-lab">ranked</span></div>'
+    + '<div class="lf-seg" style="--n:2"><button type="button" data-k="vol">Volume</button><button type="button" data-k="wo">Workouts</button></div><div class="fr-lb-l"></div></div>');
+  $$('.lf-seg button', c).forEach(function (b) {
+    b.setAttribute('aria-pressed', b.dataset.k === frLbBy ? 'true' : 'false');
+    b.addEventListener('click', function () { frLbBy = b.dataset.k; c.replaceWith(frBoardWeek(rows)); });
+  });
+  var ix = frLbBy === 'vol' ? 3 : 0;
+  var ls = rows.filter(function (f) { return !f.gone; }).map(function (f) { var w = wk(f.s); return { f: f, v: w[ix], w: w }; })
+    .sort(function (a, b) { return b.v - a.v || b.w[1] - a.w[1]; });
+  var top = Math.max.apply(null, ls.map(function (x) { return x.v; }).concat([1]));
+  ls.forEach(function (x, i) {
+    var rw = el('<div class="fr-lb-r"><em class="lf-num"></em><b></b><i><u></u></i><span class="lf-num"></span></div>');
+    var h = frHue(x.f.s), col = h === null ? '#a3e635' : lfHex(lfHsl(h, 80, h > 200 && h < 300 ? 64 : 56));
+    rw.style.setProperty('--lb-c', col);
+    $('em', rw).textContent = x.v ? i + 1 : '–';
+    $('b', rw).textContent = x.f.me ? 'You' : (x.f.n || 'Friend');
+    $('u', rw).style.width = (x.v / top * 100) + '%';
+    $('span', rw).textContent = ix === 3 ? fmtBig(toDisp(x.v)) + ' ' + S.unit : x.v + (x.v === 1 ? ' workout' : ' workouts');
+    $('.fr-lb-l', c).appendChild(rw);
+  });
+  return c;
+}
 function frHue(st) { var h = st && st.ac; return typeof h === 'number' && isFinite(h) && h >= 0 && h < 360 ? h : null; }
 function frWoSheet(w, f) {
   var b = el('<div><p class="lf-lab" style="margin:0 0 6px"></p><div class="lf-list"></div></div>');
@@ -3177,6 +3302,7 @@ function lfRenderFr() {
     if (f.gone) row.classList.add('is-gone');
     $('b', row).textContent = f.n || 'Friend';
     $('.fr-t span', row).textContent = f.gone ? 'Turned friends off' : (st.wo30 || 0) + ' workouts · 30 days';
+    if (!f.gone && frLive(st)) { var lvs = $('.fr-t span', row); lvs.textContent = 'Training now · since ' + fmtAt(new Date(st.lv)); lvs.className = 'fr-live'; row.classList.add('is-live'); }
     $('.fr-wk b', row).textContent = (st.wk || 0) + '/' + (st.goal || 0);
     var bg = frBadges(st);
     if (bg.length) { var ch = el('<div class="fr-bg"></div>'); bg.forEach(function (x) { ch.appendChild(lfCoinBtn(x, 30)); }); row.insertBefore(ch, $('.fr-wk', row)); }
@@ -3186,6 +3312,7 @@ function lfRenderFr() {
     bd.appendChild(row);
   });
   root.appendChild(bd);
+  if (rows.length > 1) root.appendChild(frBoardWeek(rows));
   /* WHAT FRIENDS GAVE YOUR WORKOUTS in the last week, newest first. */
   var wk0 = Date.now() - 7 * 864e5, mine = (FRS.rx || []).filter(function (x) { return x.at >= wk0; }).slice(0, 5);
   if (mine.length) {

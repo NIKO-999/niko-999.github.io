@@ -233,6 +233,10 @@ const freeze = (at) => `(() => {
   ok('finishing files only the ticked sets', s.wo.length === 1 && s.wo[0].x.map((e) => e.sets.length).join() === '2,1' && s.wo[0].d === '2026-10-30', s.wo);
   ok('weights are stored as entered', s.wo[0].x[0].sets[0].w === 60 && s.wo[0].x[0].sets[1].r === 7);
   ok('a summary comes up', (await top(page).textContent()).includes('Workout logged'));
+  await page.waitForTimeout(1300);
+  const vMoved = (await store(page)).wo[0].x.reduce((a, e) => a + e.sets.reduce((b, q) => b + q.w * q.r, 0), 0).toLocaleString('en-US');
+  ok('the finish screen counts up to the volume moved, and fills the screen', (await top(page).locator('.lf-fin-vol span').textContent()) === vMoved && await top(page).evaluate((e) => e.classList.contains('is-full')), await top(page).locator('.lf-fin-vol span').textContent());
+  ok('with the time, sets and reps, and that it is the first of its kind', /The first .* on record/.test(await top(page).locator('.lf-fin-u').textContent()) && /reps/.test(await top(page).locator('.lf-sum').textContent()));
   await page.keyboard.press('Escape'); await settle(page);
   ok('the bar is gone with the workout', await page.isHidden('#lfLive') && await page.evaluate(() => !localStorage.getItem('lift.active.v1')));
   const stats = await page.$$eval('.lf-stat b', (b) => b.map((x) => x.textContent));
@@ -285,6 +289,9 @@ const freeze = (at) => `(() => {
   await set(0, 1).locator('input').nth(0).fill('65'); await set(0, 1).locator('input').nth(1).fill('8');
   await set(0, 1).locator('.lf-chk').click();
   ok('more weight for the same reps is marked PR', (await set(0, 1).locator('.lf-sn').textContent()) === 'PR');
+  ok('and a PR bursts from the set', await page.evaluate(() => window.lfBursts) === 1 && await page.locator('.lf-burst b').textContent() === 'PR');
+  await page.waitForTimeout(1100);
+  ok('then is gone, out of the way', await page.locator('.lf-burst').count() === 0);
   await page.click('#lfFinish'); await page.waitForTimeout(800);
   await page.keyboard.press('Escape'); await settle(page);
   await page.evaluate(() => { const s = JSON.parse(localStorage.getItem('lift.v1')); s.wo.forEach((w) => { if (w.d === '2026-10-29') w.d = '2026-10-30'; }); delete s.rd['2026-10-29']; localStorage.setItem('lift.v1', JSON.stringify(s)); });
@@ -1042,6 +1049,7 @@ const freeze = (at) => `(() => {
     ok('a link opens on Friends and the code leaves the bar', await B.page.locator('#lfFr:not([hidden])').count() === 1 && !(await B.page.evaluate(() => location.hash)));
     ok('and says who sent it before anything is turned on', await B.page.locator('.fr-pend').count() === 1 && m.size === 1);
     await B.page.fill('#frName', 'Sam'); await B.page.click('#frOn'); await B.page.waitForTimeout(700);
+    await B.page.waitForFunction(() => document.querySelectorAll('#frBoard .fr-row').length === 2, null, { timeout: 4000 }).catch(() => {});
     const names = await B.page.$$eval('#frBoard .fr-row .fr-t b', (b) => b.map((x) => x.textContent));
     ok('turning on adds whoever sent the link, ranked by workouts', names.join() === 'Niko,You', names);
     const codeB = (await B.page.textContent('.fr-code')).trim();
@@ -1052,8 +1060,13 @@ const freeze = (at) => `(() => {
     await A.page.fill('#frCode', codeA.toLowerCase()); await top(A.page).locator('button', { hasText: /^Add$/ }).click(); await A.page.waitForTimeout(250);
     ok('your own code is refused', /your own code/.test(await top(A.page).textContent('.fr-err')));
     /* Sam picked a colour on their wheel */
-    { const rec = JSON.parse(m.get('lift:' + codeB)); rec.s.ac = 215; m.set('lift:' + codeB, JSON.stringify(rec)); }
+    { const rec = JSON.parse(m.get('lift:' + codeB)); rec.s.ac = 215; rec.s.lv = (await A.page.evaluate(() => Date.now())) - 20 * 60e3; m.set('lift:' + codeB, JSON.stringify(rec)); }
     await A.page.fill('#frCode', codeB.toLowerCase()); await top(A.page).locator('button', { hasText: /^Add$/ }).click(); await settle(A.page);
+    ok('a friend mid-workout shows as training now', /Training now · since/.test(await A.page.textContent('#frBoard .fr-row:not(.is-me)')), await A.page.textContent('#frBoard'));
+    ok('and you are not', !/Training now/.test(await A.page.textContent('#frBoard .fr-row.is-me')));
+    ok('the week is ranked on a leaderboard, each in their colour', await A.page.locator('#frLb .fr-lb-r').count() === 2 && (await A.page.$$eval('#frLb .fr-lb-r', (r) => r.map((x) => x.style.getPropertyValue('--lb-c')))).every((c) => c));
+    await A.page.click('#frLb [data-k="wo"]');
+    ok('by volume or by workouts', await A.page.getAttribute('#frLb [data-k="wo"]', 'aria-pressed') === 'true' && /workout/.test(await A.page.textContent('#frLb')));
     ok('a typed code adds them, lower case and all', (await A.page.$$eval('#frBoard .fr-row .fr-t b', (b) => b.map((x) => x.textContent))).join() === 'You,Sam');
     await A.page.click('#frBoard .fr-row:not(.is-me)'); await settle(A.page);
     const sh = await top(A.page).textContent('.lf-sh-bd');

@@ -389,6 +389,8 @@ function liftClean(b) {
   }
   /* the accent they chose, a hue on the wheel, or none for lime */
   if (Number.isInteger(b.s.ac) && b.s.ac >= 0 && b.s.ac < 360) s.ac = b.s.ac;
+  /* training now: when the workout in progress started, a time in ms */
+  if (Number.isInteger(b.s.lv) && b.s.lv > 1e12 && b.s.lv < 1e14) s.lv = b.s.lv;
   s.last = typeof b.s.last === 'string' && /^\d{4}-\d\d-\d\d$/.test(b.s.last) ? b.s.last : '';
   /* THE WORKOUTS THEMSELVES, asked for so friends can see the sets: at
      most twenty, each a date, a name and up to fifteen exercises of up
