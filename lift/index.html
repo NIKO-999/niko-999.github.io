@@ -1938,12 +1938,35 @@ function lfTrendSheet(k, src) {
 /* This week's direct working sets against the targets, by primary
    muscle. The bar fills to the top of the range; past it is a fact,
    never a warning — the advice is to EARN more volume, not to fear it. */
+/* HALF CREDIT. A lift counts in full to the muscle it is for, and half a
+   set to the one it works hard on the way: a squat is a quad set and half
+   a glute set, a row half a biceps set. Never the hamstrings for a squat —
+   they barely change length in one, so counting them would show a
+   hamstring target met that is not. The plan's targets stay as written;
+   this is what the week has actually given each muscle. */
+var EX_HALF = (function () {
+  var o = {}, by = {
+    Glutes: ['squat', 'hack', 'legpress', 'smithsq', 'beltsq', 'gobletsq', 'vsquat', 'frontsq', 'pendulum', 'heelsmith', 'lunge', 'stepup', 'sllp',
+      'rdl', 'sldl', 'dbrdl', 'smithrdl', 'mrdl', 'deadlift', 'goodam', 'slrdl', 'backext', 'revhyper'],
+    Quads: ['bss', 'elevlunge', 'revlunge', 'cablestep'],
+    Hamstrings: ['hipthrust', 'smithhip', 'glutebr', 'bstbr', 'gdrive', 'hipext'],
+    Biceps: ['latpd', 'csrow', 'seatrow', 'sarow', 'pullup', 'pullupbw', 'chinup', 'cgpd', 'sapd', 'ngpd', 'wgpd', 'bbrow', 'dbrow', 'tbar', 'sealrow', 'mrow',
+      'csdbrow', 'smithrow', 'apullup', 'hirow', 'wgrow'],
+    Triceps: ['bench', 'inclbb', 'dbbench', 'decline', 'smithinc', 'smithbench', 'incdb', 'mchest', 'incmach', 'pushup', 'dips', 'ohp', 'dbshp', 'arnold', 'seatshp', 'mshp'],
+    Chest: ['cgbench', 'dipmach', 'adips']
+  };
+  Object.keys(by).forEach(function (m) { by[m].forEach(function (id) { o[id] = m; }); });
+  return o;
+})();
 function lfMuscleSets(from, to) {
   var a = ymd(from), b = ymd(to), out = {};
-  S.wo.forEach(function (w) { if (w.d >= a && w.d <= b) w.x.forEach(function (e) { var x = exById(e.id); if (x) out[x.m] = (out[x.m] || 0) + e.sets.length; }); });
-  if (act) act.x.forEach(function (e) { var x = exById(e.id); if (x && ymd(new Date(act.s)) >= a) out[x.m] = (out[x.m] || 0) + e.sets.filter(function (s) { return s.ok; }).length; });
+  function add(id, n) { var x = exById(id); if (!x || !n) return; out[x.m] = (out[x.m] || 0) + n; var h = EX_HALF[id]; if (h && h !== x.m) out[h] = (out[h] || 0) + n / 2; }
+  S.wo.forEach(function (w) { if (w.d >= a && w.d <= b) w.x.forEach(function (e) { add(e.id, e.sets.length); }); });
+  if (act && ymd(new Date(act.s)) >= a) act.x.forEach(function (e) { add(e.id, e.sets.filter(function (s) { return s.ok; }).length); });
   return out;
 }
+/* a count of sets with a half in it, written the way you would say it */
+function lfSetsN(n) { n = Math.round(n * 2) / 2; return n % 1 ? (Math.floor(n) ? Math.floor(n) : '') + '½' : String(n); }
 function lfLegCard() {
   var m = monday(today()), got = lfMuscleSets(m, addDays(m, 6));
   var c = el('<div class="lf-card" id="lfLegs"><div class="lf-hd"><span class="lf-lab">Sets this week</span><button type="button" class="lf-vr-ed" id="lfTgEdit">Edit targets</button></div><div class="lf-vol"></div></div>');
@@ -1956,14 +1979,14 @@ function lfLegCard() {
   ts.forEach(function (t, i) {
     var n = got[t[0]] || 0, row = el('<button type="button" class="lf-vr"><span></span><i><b></b></i><em class="lf-num"></em></button>');
     row.dataset.m = t[0];
-    row.setAttribute('aria-label', t[0] + ': ' + n + ' of ' + lfRange(t[1], t[2]) + ' sets. Change the target');
+    row.setAttribute('aria-label', t[0] + ': ' + lfSetsN(n) + ' of ' + lfRange(t[1], t[2]) + ' sets. Change the target');
     row.addEventListener('click', function () { lfFocusSheet(t[0]); });
     /* The first three are the specialisation, the rest keep progressing. */
     if (i && !t[3] && ts[i - 1][3]) $('.lf-vol', c).appendChild(el('<div class="lf-vsep" aria-hidden="true"></div>'));
     $('span', row).textContent = t[0];
     $('b', row).style.width = Math.min(100, n / t[2] * 100) + '%';
     if (n >= t[1]) row.classList.add('is-met');
-    $('em', row).textContent = n + ' / ' + lfRange(t[1], t[2]);
+    $('em', row).textContent = lfSetsN(n) + ' / ' + lfRange(t[1], t[2]);
     $('.lf-vol', c).appendChild(row);
   });
   var lowerNow = S.focus.some(function (f) { var g = FOCUS_RECOVER[f.m]; return g && f.lo > g[1]; });
@@ -3535,7 +3558,7 @@ function frSheet(f) {
       $('span', rw).textContent = m[0];
       $('b', rw).style.width = (m[2] ? Math.min(100, m[1] / m[2] * 100) : 0) + '%';
       if (m[2] && m[1] >= m[2]) rw.classList.add('is-met');
-      $('em', rw).textContent = m[1] + ' / ' + m[2];
+      $('em', rw).textContent = lfSetsN(m[1]) + ' / ' + m[2];
       $('.lf-vol', mc).appendChild(rw);
     });
     b.appendChild(mc);
@@ -4148,7 +4171,7 @@ function lfBadges() {
       var cum = {}, dAny = '', dPri = '', dAll = '', dQ = '';
       var met = function (f) { return (cum[f.m] || 0) >= f.lo; };
       wk.forEach(function (w) {
-        w.x.forEach(function (e) { var x = exById(e.id); if (x) cum[x.m] = (cum[x.m] || 0) + e.sets.length; });
+        w.x.forEach(function (e) { var x = exById(e.id); if (!x) return; cum[x.m] = (cum[x.m] || 0) + e.sets.length; var h = EX_HALF[e.id]; if (h && h !== x.m) cum[h] = (cum[h] || 0) + e.sets.length / 2; });
         if (!dAny && pri.some(met)) dAny = w.d;
         if (!dPri && pri.length && pri.every(met)) dPri = w.d;
         if (!dAll && fo.length && fo.every(met)) dAll = w.d;

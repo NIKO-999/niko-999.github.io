@@ -1197,6 +1197,19 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── HALF CREDIT: a lift counts half a set to the muscle it works on the way ── */
+  {
+    const sets = (n) => Array(n).fill({ w: 100, r: 5 });
+    const wo = [{ id: 'h1', d: '2026-11-02', s: 1, e: 2, n: 'Legs', x: [{ id: 'squat', n: 'Barbell squat', sets: sets(4) }, { id: 'rdl', n: 'Romanian deadlift', sets: sets(3) }, { id: 'csrow', n: 'Chest-supported rows', sets: sets(3) }] }];
+    const { c, page } = await ctx({ unit: 'kg', wo }, '2026-11-03T18:00:00');
+    const em = async (m) => (await page.textContent('#lfLegs [data-m="' + m + '"] em')).trim();
+    ok('a squat is a quad set in full', await em('Quads') === '4 / 16', await em('Quads'));
+    ok('and half a glute set, as an RDL is: 2 and 1½', await em('Glutes') === '3½ / 6', await em('Glutes'));
+    ok('but never a hamstring set: only the RDL counts there', await em('Hamstrings') === '3 / 14', await em('Hamstrings'));
+    ok('a row is half a biceps set', await em('Biceps') === '1½ / 10', await em('Biceps'));
+    await c.close();
+  }
+
   /* ── the library carries the dumbbell and Smith staples ── */
   {
     const { c, page } = await ctx();
