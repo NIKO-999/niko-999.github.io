@@ -430,7 +430,7 @@ svg { display: block; }
 @media (prefers-reduced-motion: reduce) { .lf-burst i, .fr-live::before, .lf-fin-ok { animation: none; } .lf-burst i { display: none; } }
 .fr-rg { padding: 14px 16px 6px; }
 .fr-rg-w { display: grid; place-items: center; margin: 2px 0 8px; }
-.fr-rg-w svg { width: 180px; height: 180px; display: block; overflow: visible; }
+.fr-rg-w > svg { width: 180px; height: 180px; display: block; overflow: visible; }
 .fr-rg-a { transition: stroke-dasharray .8s cubic-bezier(.2,.8,.2,1); }
 .fr-rg-w { position: relative; }
 .fr-rg-a.is-live { animation: fr-rg-glow 1.8s ease-in-out infinite; }
@@ -440,6 +440,7 @@ svg { display: block; }
 .fr-rg-c { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; }
 .fr-rg-c b { display: block; font-size: 15px; font-weight: 800; color: var(--rc); max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fr-rg-c span { font-size: 11px; color: var(--dim); }
+.fr-rg-cr { width: 20px; height: 20px; margin: 0 auto 2px; color: var(--rc); fill: var(--rc); stroke: var(--rc); stroke-width: 1.5; stroke-linejoin: round; }
 @media (prefers-reduced-motion: reduce) { .fr-rg-a.is-live, .fr-rg-p { animation: none; } .fr-rg-p { opacity: 0; } .fr-rg-a.is-live { filter: drop-shadow(0 0 5px var(--rc)); } }
 #frRings .fr-row { padding: 12px 0; }
 #frRings .fr-live { color: var(--rc); }
@@ -3262,11 +3263,17 @@ function frRings(rows) {
         + '<circle class="fr-rg-h" cx="' + hx.toFixed(1) + '" cy="' + hy.toFixed(1) + '" r="' + (sw / 2 - 2).toFixed(1) + '" fill="#fff"/>');
     }
   });
-  if (live.length) {
-    var mid = $('#frRgLive', c); mid.hidden = false;
-    var who = live.length === 1 ? (live[0].f.me ? 'You' : (live[0].f.n || 'A friend')) : live.length + ' friends';
-    mid.innerHTML = '<b></b><span>training now</span>'; $('b', mid).textContent = who;
-    mid.style.setProperty('--rc', frColOf(live[0].f.s));
+  /* THE MIDDLE IS WHO IS IN FRONT: closest to their own goal, crowned,
+     in their colour. Two level at the top is a tie, and a week nobody has
+     started yet says nothing. Training now stays on the ring itself. */
+  var lead = ls.filter(function (x) { return !x.f.gone && x.k > 0; });
+  if (lead.length) {
+    var mid = $('#frRgLive', c), top = lead[0], tie = lead[1] && lead[1].k === top.k && lead[1].w.n === top.w.n;
+    mid.hidden = false; mid.id = 'frRgLead';
+    mid.innerHTML = '<svg class="lf-ic fr-rg-cr" viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5L3 8z"/></svg><b></b><span></span>';
+    $('b', mid).textContent = tie ? 'Tied' : (top.f.me ? 'You' : (top.f.n || 'Friend'));
+    $('span', mid).textContent = tie ? 'for first' : top.w.n >= top.w.g ? 'goal closed' : 'in front · ' + top.w.n + '/' + top.w.g;
+    mid.style.setProperty('--rc', tie ? 'var(--ink)' : frColOf(top.f.s));
   }
   var bd = $('#frBoard', c);
   ls.forEach(function (x) {
