@@ -820,12 +820,17 @@ var MUSCLES = ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Lower back', 'Abs', '
    quads frequent exposure; four upper days spread the upper-body volume
    so no muscle is pushed to its limit daily. */
 var PROGRAM_UL = [
-  { id: 'p-mon', dow: 1, n: 'Quad strength', sp: 'Hack squat, leg press, extensions', ex: [['hack', 3, 6, 10], ['legpress', 3, 10, 12], ['legext', 3, 12, 15], ['bss', 2, 10, 12, 'each side'], ['calfstand', 4, 10, 15], ['cablecrunch', 3, 12, 15]] },
-  { id: 'p-tue', dow: 2, n: 'Chest & shoulders', sp: 'Pressing, delts, triceps', ex: [['incdb', 3, 8, 12], ['mchest', 3, 8, 12], ['cablat', 4, 12, 20], ['seatshp', 2, 8, 12], ['tripush', 3, 10, 15], ['triover', 2, 12, 15]] },
-  { id: 'p-wed', dow: 3, n: 'Hamstrings & glutes', sp: 'Hinge, curls, hip thrust', ex: [['rdl', 3, 8, 10], ['seatcurl', 4, 10, 15], ['hipthrust', 3, 8, 12], ['lyingcurl', 2, 12, 15], ['calfseat', 4, 12, 20], ['backext', 2, 12, 15]] },
-  { id: 'p-thu', dow: 4, n: 'Back & V-taper', sp: 'Pull-ups, rows, curls', ex: [['pullup', 3, 6, 10], ['csrow', 3, 8, 12], ['latpd', 3, 10, 12], ['cpullover', 3, 12, 15], ['rdfly', 3, 12, 20], ['ezcurl', 3, 8, 12], ['incurl', 2, 10, 15]] },
-  { id: 'p-fri', dow: 5, n: 'Quad volume', sp: 'Pendulum squat, extensions, heels-elevated squats', ex: [['pendulum', 3, 8, 12], ['legext', 3, 12, 15], ['heelsmith', 2, 10, 12], ['seatcurl', 3, 12, 15], ['calfstand', 4, 10, 15], ['hlr', 3, 12, 15]] },
-  { id: 'p-sat', dow: 6, n: 'Chest & back', sp: 'Chest, back, delts, arms', ex: [['dbbench', 3, 8, 12], ['seatrow', 3, 8, 12], ['mshp', 2, 10, 12], ['cablat', 3, 15, 20], ['revpec', 2, 15, 20], ['preacher', 3, 10, 15], ['ropeext', 3, 10, 15]] },
+  /* THE WEEK, BUILT TO THE RANGES: quads 19, hamstrings 14, calves 15,
+     glutes 6 - legs the priority - then chest 16, back 18, side and rear
+     delts 16 over three days, triceps and biceps 9 direct, abs 11. Every
+     muscle lands inside its range with room above it, and no session
+     runs past about 24 working sets. */
+  { id: 'p-mon', dow: 1, n: 'Quad strength', sp: 'Hack squat, leg press, extensions', ex: [['hack', 4, 6, 10], ['legpress', 3, 10, 12], ['legext', 3, 12, 15], ['bss', 2, 10, 12, 'each side'], ['calfstand', 5, 8, 12], ['cablecrunch', 4, 12, 15]] },
+  { id: 'p-tue', dow: 2, n: 'Chest & shoulders', sp: 'Incline press, flyes, delts, triceps', ex: [['incdb', 4, 8, 12], ['mchest', 3, 8, 12], ['cfly', 2, 12, 15], ['cablat', 4, 12, 20], ['rdfly', 3, 12, 20], ['tripush', 3, 10, 15], ['triover', 3, 12, 15]] },
+  { id: 'p-wed', dow: 3, n: 'Hamstrings & glutes', sp: 'Hinge, curls, hip thrust', ex: [['rdl', 3, 8, 10], ['seatcurl', 4, 10, 15], ['hipthrust', 4, 8, 12], ['lyingcurl', 3, 12, 15], ['calfseat', 5, 12, 20], ['cablecrunch', 3, 12, 15]] },
+  { id: 'p-thu', dow: 4, n: 'Back & V-taper', sp: 'Pull-ups, rows, pullovers, curls', ex: [['pullup', 3, 6, 10], ['csrow', 4, 8, 12], ['latpd', 3, 10, 12], ['cpullover', 3, 12, 15], ['rdfly', 3, 12, 20], ['ezcurl', 3, 8, 12], ['incurl', 2, 10, 15], ['cablecurl', 2, 12, 15]] },
+  { id: 'p-fri', dow: 5, n: 'Quad volume', sp: 'Pendulum squat, extensions, heels-elevated squats', ex: [['pendulum', 4, 8, 12], ['legext', 3, 12, 15], ['heelsmith', 2, 10, 12], ['seatcurl', 4, 12, 15], ['calfstand', 5, 10, 15], ['hlr', 4, 12, 15]] },
+  { id: 'p-sat', dow: 6, n: 'Chest & back', sp: 'Chest, back, delts, arms', ex: [['dbbench', 4, 8, 12], ['pecdeck', 3, 12, 15], ['seatrow', 3, 8, 12], ['wgpd', 2, 10, 12], ['cablat', 3, 15, 20], ['revpec', 3, 15, 20], ['preacher', 2, 10, 15], ['ropeext', 3, 10, 15]] },
   /* SUNDAY IS A CHOICE, not a session and not a rest day: the card offers
      four ways to spend it and you pick the one your body needs. */
   { id: 'p-sun', dow: 0, n: 'Choice day', sp: 'Weak points, technique, recovery or more volume', choice: 1, ex: [] }
@@ -961,24 +966,27 @@ var DAY_TIPS = {
     'Record every working set. If your quads are still sore from Friday, take sets off rather than forcing them.']],
   'p-tue': ['Chest and shoulders', [
     'Incline dumbbell press leads while you are fresh.',
-    'Cable lateral raises carry 4 sets: the side delts recover fast and take the volume.',
+    'Then machine chest press and convergent cable flyes, each taken into a deep stretch.',
+    'Cable lateral raises and rear delt flyes: side and rear delts, the first of three days this week.',
     'Two triceps movements finish it: pushdowns, then overhead extensions.']],
   'p-wed': ['Hamstrings and glutes', [
     'Romanian deadlift 3 × 8–10: a slow lowering, a stretch at the bottom.',
     'Seated leg curls carry 4 sets, then hip thrusts and lying curls.',
-    'Seated calf raises 4 × 12–20 and back extensions close it out.']],
+    'Seated calf raises 5 × 12–20, heavy, with a full pause in the stretch.',
+    'Cable crunches close it: abs three times a week, full spinal flexion.']],
   'p-thu': ['Back and biceps', [
     'Weighted pull-ups lead: 3 × 6–10.',
     'Chest-supported rows and lat pulldowns for thickness and width.',
     'Cable pullovers after the pulldowns: arms long, a stretch at the top, squeeze the lats down to the thighs.',
-    'Rear delt flyes, then EZ-bar and incline dumbbell curls.']],
+    'Rear delt flyes, then curls from three angles: EZ-bar, incline dumbbell and cable.']],
   'p-fri': ['Quad hypertrophy: the second quad day, a different stimulus', [
     'Pendulum squat leads, then extensions and heels-elevated Smith squats.',
     'If Monday’s quads have not recovered and performance drops here, cut sets rather than push through.',
     'This is a starting programme, not a requirement to finish every listed set regardless of fatigue.']],
   'p-sat': ['Upper-body development', [
     'Flat dumbbell press and seated cable rows balance the week.',
-    'Machine shoulder press, cable laterals and reverse pec deck for the delts.',
+    'Pec deck for a stretch-loaded chest finish, and wide-grip pulldowns for the lats.',
+    'Cable laterals and reverse pec deck: the third delt day of the week.',
     'Preacher curls and rope triceps extensions for the arms.']],
   'p-sun': ['Your choice day: six structured days, one flexible', [
     'Weak points: extra calves, abs, arms or delts.',
@@ -1003,7 +1011,14 @@ function lfFocusFrom(list, pri) {
   }); });
   return order.sort(function (a, b) { return ((pri[b] || 0) - (pri[a] || 0)) || (by[b] - by[a]); }).map(function (m) { return [m, by[m], by[m], pri[m] || 0]; });
 }
-var FOCUS_DEFAULT = lfFocusFrom(PROGRAM_UL, { Quads: 1, Hamstrings: 1, Calves: 1, Glutes: 1 });
+/* THE WEEKLY RANGES, from the plan: legs first, then the upper body. The
+   week above lands inside every one of them. */
+var FOCUS_DEFAULT = [['Quads', 18, 20, 1], ['Hamstrings', 12, 16, 1], ['Calves', 14, 18, 1], ['Glutes', 6, 8, 1],
+  ['Chest', 14, 18, 0], ['Back', 16, 20, 0], ['Shoulders', 14, 18, 0], ['Triceps', 8, 10, 0], ['Biceps', 8, 10, 0], ['Abs', 10, 12, 0]];
+/* the targets this split shipped with before, as a focus nobody changed:
+   one still exactly that follows the new ranges */
+var FOCUS_V3 = ['Quads:17:17:1,Calves:12:12:1,Hamstrings:12:12:1,Glutes:5:5:1,Shoulders:16:16:0,Back:12:12:0,Chest:9:9:0,Triceps:8:8:0,Biceps:8:8:0,Abs:6:6:0,Lower back:2:2:0',
+  'Quads:17:17:1,Calves:12:12:1,Hamstrings:12:12:1,Glutes:5:5:1,Shoulders:16:16:0,Back:15:15:0,Chest:9:9:0,Triceps:8:8:0,Biceps:8:8:0,Abs:6:6:0,Lower back:2:2:0'];
 /* The second split's targets, as they shipped: a focus still exactly
    that follows the new split too. */
 var FOCUS_V2 = 'Quads:15:15:1,Calves:15:15:1,Abs:12:12:1,Lower back:9:9:1,Hamstrings:13:13:0,Glutes:9:9:0,Chest:15:15:0,Back:15:15:0,Shoulders:20:20:0,Biceps:9:9:0,Triceps:12:12:0';
@@ -1154,7 +1169,7 @@ function lfClean(o) {
       return { m: f.m, lo: lo, hi: hi, p: f.p ? 1 : 0 };
     });
     var sig = d.focus.map(function (f) { return f.m + ':' + f.lo + ':' + f.hi + ':' + f.p; }).join();
-    if (sig === FOCUS_V1 || sig === FOCUS_V1.replace('Calves:12:12', 'Calves:15:15') || sig === FOCUS_V2) d.focus = lfFocusDefault();
+    if (sig === FOCUS_V1 || sig === FOCUS_V1.replace('Calves:12:12', 'Calves:15:15') || sig === FOCUS_V2 || FOCUS_V3.indexOf(sig) >= 0) d.focus = lfFocusDefault();
   }
   /* A demo link per exercise. Only http(s), so a pasted string can never
      be a javascript: URL on a button you press. */
