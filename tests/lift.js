@@ -1223,7 +1223,7 @@ const freeze = (at) => `(() => {
     ok('and a broken run of dawns is not first light yet', m['First Light'] === '6 / 7', m['First Light']);
     ok('bests three workouts running are on fire, an hour of cardio iron lungs, six muscles full body', m['On Fire'] === '24 Oct' && m['Iron Lungs'] === '27 Oct' && m['Full Body'] === '27 Oct', [m['On Fire'], m['Iron Lungs'], m['Full Body']]);
     ok('and winter waits for December', m['Winter Arc'] === 'Locked');
-    ok('a rare one wears its own finish and glow', /is-fx/.test(await page.getAttribute('#lfBadges .lf-coin[data-b="night"]', 'class')) && /is-t3/.test(await page.getAttribute('#lfBadges .lf-coin[data-b="night"]', 'class')));
+    ok('a rare one wears its own finish and glow, but no halo: it was quick to win', /is-fx/.test(await page.getAttribute('#lfBadges .lf-coin[data-b="night"]', 'class')) && !/is-t3/.test(await page.getAttribute('#lfBadges .lf-coin[data-b="night"]', 'class')));
     await c.close();
   }
 
@@ -1234,9 +1234,13 @@ const freeze = (at) => `(() => {
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo: [big], bseen: { v2: 1, v3: 1, v4: 1, v5: 1, v6: 1, first: 1, ton10: 1, ton15: 1, ton20: 1, rep300: 1, sets30: 1 } }, '2026-10-30T18:00:00', true);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const cls = await page.$$eval('#lfBadges .lf-coin', (b) => Object.fromEntries(b.filter((x) => /^ton/.test(x.dataset.b)).map((x) => [x.dataset.b, x.className])));
-    ok('level 2 is gold and level 3 exotic, each marked on the shelf', !/is-t/.test(cls.ton10) && /is-t2/.test(cls.ton15) && /is-t3/.test(cls.ton20), cls);
+    ok('the harder the finer: a sheen, then a finish, then a finish with a halo', /is-sn/.test(cls.ton10) && !/is-fx/.test(cls.ton10) && /is-fx/.test(cls.ton15) && !/is-t3/.test(cls.ton15) && /is-fx/.test(cls.ton20) && /is-t3/.test(cls.ton20), cls);
+    const first = await page.getAttribute('#lfBadges .lf-coin[data-b="first"]', 'class');
+    ok('and the first of anything stays plain', !/is-sn|is-fx|is-t/.test(first), first);
+    const locked = await page.getAttribute('#lfBadges .lf-coin[data-b="wo100"]', 'class');
+    ok('a badge not yet won wears none of it', !/is-sn|is-fx|is-t/.test(locked), locked);
     await page.click('#lfBadges .lf-coin[data-b="ton20"]'); await page.waitForTimeout(500);
-    ok('its viewer names its level', /Level 3 · Exotic/.test(await page.textContent('.lf-cv')));
+    ok('its viewer names its level', /Level 3 · Carbon finish/.test(await page.textContent('.lf-cv')));
     await page.click('#lfShowBtn'); await page.waitForTimeout(200);
     ok('and a badge can be put in the showcase', JSON.stringify((await store(page)).show) === '["ton20"]' && /remove/.test(await page.textContent('#lfShowBtn')));
     await page.click('.lf-cv-x'); await page.waitForTimeout(400);

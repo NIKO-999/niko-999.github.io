@@ -539,29 +539,25 @@ svg { display: block; }
 .lf-coin[data-m="lock"], .lf-cv-stage[data-m="lock"] { --ca: #5a5c63; --cb: #2c2d31; }
 .lf-coin img { position: absolute; inset: -6%; width: 112%; height: 112%; display: block; filter: drop-shadow(0 2px 4px rgba(0,0,0,.4)); transition: transform .2s var(--ease); }
 .lf-coin img:not([src]) { display: none; }
-/* LEVEL 2 is gold and wears a warm light; LEVEL 3 a slow iridescent halo.
-   Only once it is earned: a locked badge has nothing to shine about. */
-.lf-coin.is-t2 img { filter: drop-shadow(0 0 6px rgba(255, 200, 80, .45)) drop-shadow(0 2px 4px rgba(0,0,0,.4)); }
-.lf-coin.is-t3::before { content: ''; position: absolute; inset: -14%; border-radius: 50%; pointer-events: none;
-  background: conic-gradient(from 0deg, rgba(255,120,200,.0), rgba(255,120,200,.38), rgba(120,190,255,.38), rgba(140,255,200,.34), rgba(255,220,140,.36), rgba(255,120,200,.0));
-  filter: blur(10px); opacity: .85; animation: lf-halo 9s linear infinite; }
-.lf-coin.is-t3 img { filter: drop-shadow(0 0 8px rgba(214, 170, 255, .55)) drop-shadow(0 2px 4px rgba(0,0,0,.4)); }
 @keyframes lf-halo { to { transform: rotate(1turn); } }
 .lf-coin.is-sc::after { content: ''; position: absolute; right: -2%; bottom: 2%; width: 22%; height: 22%; border-radius: 50%; background: var(--log); box-shadow: 0 0 0 2px var(--card);
   -webkit-mask: none; }
-.lf-cv-stage.is-t2 { background: radial-gradient(closest-side, rgba(255, 196, 80, .22), transparent 70%); }
-.lf-cv-stage.is-t3 { background: radial-gradient(closest-side, rgba(220, 150, 255, .42), rgba(120, 200, 255, .16) 50%, rgba(255, 200, 140, .06) 65%, transparent 78%); }
 .lf-cv-tier { display: inline-block; margin: 0 0 6px; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
-.lf-cv-tier.is-t2 { color: #2b1d00; background: linear-gradient(135deg, #ffe08a, #e0a922); }
-.lf-cv-tier.is-t3 { color: #1a1026; background: linear-gradient(120deg, #ffb3e1, #b8c8ff, #a8ffd8, #ffe2a8); }
 .lf-cv-sc { margin-top: 14px; }
-/* a rare one glows in its own colour, a slow breath rather than a spin */
-.lf-coin.is-fx::before { background: radial-gradient(closest-side, color-mix(in srgb, var(--gl) 60%, transparent), transparent); animation: lf-breathe 3.6s ease-in-out infinite; filter: blur(6px); }
+/* a finish glows in its own colour, a slow breath; the longest-won add a
+   light turning round it, and a sheen keeps a still glow */
+.lf-coin.is-fx::before { content: ''; position: absolute; inset: -14%; border-radius: 50%; pointer-events: none; background: radial-gradient(closest-side, color-mix(in srgb, var(--gl) 60%, transparent), transparent); animation: lf-breathe 3.6s ease-in-out infinite; filter: blur(6px); }
 .lf-coin.is-fx img { filter: drop-shadow(0 0 8px color-mix(in srgb, var(--gl) 70%, transparent)) drop-shadow(0 2px 4px rgba(0,0,0,.4)); }
 @keyframes lf-breathe { 0%, 100% { opacity: .5; transform: scale(.94); } 50% { opacity: .95; transform: scale(1.04); } }
 .lf-cv-stage.is-fx { background: radial-gradient(closest-side, color-mix(in srgb, var(--gl) 40%, transparent), transparent 75%); }
 .lf-cv-tier.is-fx { color: #0d0a14; background: var(--gl); }
-@media (prefers-reduced-motion: reduce) { .lf-coin.is-t3::before, .lf-coin.is-fx::before { animation: none; } }
+.lf-coin.is-fx.is-t3::before { inset: -18%; background: conic-gradient(from 0deg, transparent 0 8%, color-mix(in srgb, var(--gl) 70%, transparent) 20%, rgba(255,255,255,.5) 26%, color-mix(in srgb, var(--gl) 70%, transparent) 32%, transparent 46% 58%, color-mix(in srgb, var(--gl) 60%, transparent) 72%, rgba(255,255,255,.4) 77%, color-mix(in srgb, var(--gl) 60%, transparent) 82%, transparent 94%);
+  -webkit-mask: radial-gradient(closest-side, transparent 58%, #000 70%, #000 88%, transparent 100%); mask: radial-gradient(closest-side, transparent 58%, #000 70%, #000 88%, transparent 100%);
+  filter: blur(3px); opacity: 1; animation: lf-halo 7s linear infinite; }
+.lf-coin.is-fx.is-t3 img { filter: drop-shadow(0 0 12px color-mix(in srgb, var(--gl) 85%, transparent)) drop-shadow(0 2px 4px rgba(0,0,0,.4)); }
+.lf-cv-stage.is-fx.is-t3 { background: radial-gradient(closest-side, color-mix(in srgb, var(--gl) 58%, transparent), color-mix(in srgb, var(--gl) 18%, transparent) 55%, transparent 80%); }
+.lf-coin.is-sn img { filter: drop-shadow(0 0 5px color-mix(in srgb, var(--gl) 45%, transparent)) drop-shadow(0 2px 4px rgba(0,0,0,.4)); }
+@media (prefers-reduced-motion: reduce) { .lf-coin.is-fx::before, .lf-coin.is-fx.is-t3::before { animation: none; } }
 .lf-coin:has(img[src]) { background: none; box-shadow: none; }
 .lf-coin:active img { transform: scale(.94); }
 .lf-bdg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 8px; margin-top: 14px; }
@@ -3594,13 +3590,26 @@ function lfPushOff() {
    THE TARGET BADGES read the sets you log against your weekly targets
    as they stand now: the record keeps workouts, not the targets you had
    in March, so a week is judged by today's targets. */
-/* LEVELS: a run of badges is three of one kind, and the higher two are made
-   of better stuff. Level 2 is gold, level 3 the rare one: an iridescent
-   enamel over obsidian in a champagne rim, with a glow about it. */
+/* LEVELS: a run of badges is three of one kind. The level is a label; how
+   the badge looks is the ladder below, so the higher two wear a finish. */
 var BD_TIER = { wo50: 2, wo100: 3, st12: 2, st26: 3, v1m: 2, v5m: 3, pr10: 2, pr100: 3, abs50: 2, abs100: 3, duo10: 2, duo50: 3, lead3: 2, lead10: 3,
   ton15: 2, ton20: 3, rep1k: 2, rep2k: 3, leg100: 2, leg200: 3 };
-/* each rare badge's finish */
-var BD_FX = { night: 'galaxy', dawn: 'sunrise', onfire: 'lava', winter: 'ice', lungs: 'aurora', fullbody: 'neon' };
+/* THE HARDER, THE FINER. A badge's look climbs with how long it takes to
+   win, and the level label stays only on the runs of three:
+     plain    the first of anything
+     sheen    a candy-metal enamel and a still glow: weeks of work
+     finish   an exotic enamel that breathes in its own light: months
+     halo     a finish, and a light turning round it: the longest of all
+   The rare ones are quick to win, so they wear a finish and no halo. */
+var BD_FX = { night: 'galaxy', dawn: 'sunrise', onfire: 'lava', winter: 'ice', lungs: 'aurora', fullbody: 'neon',
+  wo50: 'ice', st12: 'lava', v1m: 'carbon', pr10: 'galaxy', abs50: 'aurora', duo10: 'ice', lead3: 'molten', ton15: 'neon', rep1k: 'sunrise', leg100: 'emerald',
+  mon20: 'neon', stairhr: 'sunrise', inclhr: 'emerald',
+  wo100: 'galaxy', st26: 'opal', v5m: 'molten', pr100: 'neon', abs100: 'emerald', duo50: 'aurora', lead10: 'sunrise', ton20: 'carbon', rep2k: 'lava', leg200: 'ice', year: 'opal' };
+var BD_HALO = { wo100: 1, st26: 1, v5m: 1, pr100: 1, abs100: 1, duo50: 1, lead10: 1, ton20: 1, rep2k: 1, leg200: 1, year: 1 };
+var BD_SHEEN = { wo10: 1, st4: 1, tgtall: 1, tgt4: 1, quad: 1, v100k: 1, stair10: 1, incl10: 1, abs10: 1, early: 1, owl: 1, ton10: 1, rep300: 1, seven: 1,
+  explore: 1, wkend: 1, weigh: 1, cardio25: 1, leg50: 1, sets30: 1, plate3: 1, week: 1, squad: 1, long: 1, pr3: 1 };
+/* the light each finish gives off */
+var BD_FXGL = { galaxy: '#8b7cff', sunrise: '#ffb347', lava: '#ff5a1f', ice: '#8fd8ff', aurora: '#3dffb0', neon: '#ff3df2', molten: '#ffc94a', opal: '#d9c8ff', carbon: '#7aa2ff', emerald: '#2ee68a' };
 var BADGES = [
   ['first', 'First workout', 'start', 'Your first logged session.'],
   ['wo10', '10 workouts', 'start', 'Ten sessions in the book.'],
@@ -3668,7 +3677,8 @@ var BADGES = [
   ['winter', 'Winter Arc', 'rare', 'Twelve workouts in one December.', '#8fd8ff'],
   ['lungs', 'Iron Lungs', 'rare', 'An hour of cardio in one workout.', '#3dffb0'],
   ['fullbody', 'Full Body', 'rare', 'Six different muscles trained in one workout.', '#ff3df2']
-].map(function (a) { var o = { id: a[0], n: a[1], k: a[2], d: a[3] }; if (a[4]) o.c = a[4]; if (BD_TIER[a[0]]) o.t = BD_TIER[a[0]]; if (BD_FX[a[0]]) { o.t = 3; o.fx = BD_FX[a[0]]; } return o; });
+].map(function (a) { var o = { id: a[0], n: a[1], k: a[2], d: a[3] }; if (a[4]) o.c = a[4]; if (BD_TIER[a[0]]) o.lv = BD_TIER[a[0]];
+  if (BD_FX[a[0]]) { o.fx = BD_FX[a[0]]; o.t = BD_HALO[a[0]] ? 3 : 2; } else if (BD_SHEEN[a[0]]) o.sn = 1; return o; });
 var BADGE = {}; BADGES.forEach(function (b) { BADGE[b.id] = b; });
 var BARBELL = { squat: 1, bench: 1, deadlift: 1, rdl: 1, frontsq: 1, inclbb: 1, bbrow: 1, hipthrust: 1, sldl: 1, rackpull: 1, ohp: 1 };
 /* every badge, with the day it was won or how far along it is */
@@ -3899,8 +3909,8 @@ function bdBlur(dst, src, r, red) {
   var t = document.createElement('canvas'); t.width = t.height = w; t.getContext('2d').putImageData(sd, 0, 0);
   x.drawImage(t, 0, 0);
 }
-var BD_TRIM = { silver: '#eceef2', gold: '#ffd76e', ex: '#f6dcc8' };
-var BD_FXTRIM = { galaxy: '#cdd3ff', sunrise: '#ffd27a', lava: '#8a8f98', ice: '#eaf7ff', aurora: '#d2fff0', neon: '#f2f2f6' };
+var BD_TRIM = { silver: '#eceef2' };
+var BD_FXTRIM = { galaxy: '#cdd3ff', sunrise: '#ffd27a', lava: '#8a8f98', ice: '#eaf7ff', aurora: '#d2fff0', neon: '#f2f2f6', molten: '#ffd56b', opal: '#f4f0ff', carbon: '#c9ced6', emerald: '#d8ffe9' };
 var BD_CREAM = '#eee8dc';
 /* every kind has its own bdOutline; the target badges each have their own */
 var BD_SHK = { start: 'circle', streak: 'hexp', volume: 'squircle', pr: 'banner', feat: 'oct', body: 'diamond', core: 'tall' };
@@ -4145,7 +4155,7 @@ function bdFx(fx, k, x, y, q) {
   }
   if (fx === 'ice') {
     var fr = n > .985 ? 1 : 0;
-    if (k === 'b') return mix([232, 246, 255], [255, 255, 255], fr);
+    if (k === 'b') return mix(mix([170, 218, 250], [222, 242, 255], (y + 1) / 2), [255, 255, 255], fr);
     if (k === 'd') return mix([24, 92, 160], [90, 170, 230], (y + 1) / 2);
     return mix(mix([120, 205, 255], [200, 240, 255], (x + y + 2) / 4), [255, 255, 255], fr * .8);
   }
@@ -4154,6 +4164,31 @@ function bdFx(fx, k, x, y, q) {
     if (k === 'b') return mix([10, 30, 44], [16, 46, 60], (y + 1) / 2);
     if (k === 'd') return n > .99 ? [230, 255, 245] : [8, 20, 34];
     return mix(mix([40, 255, 160], [60, 200, 255], bnd), [170, 90, 255], Math.max(0, y) * .55);
+  }
+  if (fx === 'molten') {
+    var fl = .5 + .5 * Math.sin(x * 3.2 + Math.sin(y * 4.1) * 1.7) * Math.cos(y * 1.8 + x);
+    if (k === 'b') return mix([255, 232, 160], [255, 248, 214], (y + 1) / 2);
+    if (k === 'd') return fl > .82 ? mix([230, 160, 40], [255, 214, 100], (fl - .82) / .18) : mix([62, 36, 10], [96, 58, 18], n);
+    return mix([196, 120, 18], [255, 222, 108], fl);
+  }
+  if (fx === 'opal') {
+    var op = c3((Math.atan2(y, x) / 6.283) * .8 + x * .35 - y * .45 + n * .05, 0, .33, .67);
+    if (k === 'b') return mix([240, 242, 252], op, .18);
+    if (k === 'd') return n > .985 ? mix(op, [255, 255, 255], .3) : mix([20, 26, 52], op, .12);
+    return mix([232, 236, 250], op, .55);
+  }
+  if (fx === 'carbon') {
+    var wv = ((Math.floor((x + y) * 9) + Math.floor((x - y) * 9)) % 2 + 2) % 2, gl = Math.max(0, 1 - Math.abs(x - y - .2) * 1.4);
+    var base2 = mix(wv ? [26, 28, 33] : [44, 47, 54], [92, 98, 110], gl * .45);
+    if (k === 'b') return mix([196, 202, 214], [244, 247, 252], gl);
+    if (k === 'd') return base2;
+    return mix(base2, [52, 116, 255], .6);
+  }
+  if (fx === 'emerald') {
+    var fa = Math.floor((Math.atan2(y, x) + Math.PI) / (Math.PI / 6)), ft = .5 + .5 * Math.cos(fa * 1.9 + Math.hypot(x, y) * 3);
+    if (k === 'b') return mix([206, 255, 226], [240, 255, 246], ft);
+    if (k === 'd') return n > .99 ? [210, 255, 230] : mix([4, 36, 22], [10, 70, 42], ft);
+    return mix([8, 120, 66], [90, 240, 160], ft);
   }
   if (fx === 'neon') {
     if (k === 'd') return [14, 10, 22];
@@ -4188,10 +4223,8 @@ function bdFront(b, trim) {
   /* the pattern stops short of the glyph, so the number or bdIcon sits clear on the enamel */
   var ko = bdCv(); bdBlur(ko, gm, 14); bdBlur(ko, gf, 14); bdBlur(ko, gm, 14);
   var S = bdAlpha(shp), I = bdAlpha(inn), D = bdAlpha(dv), G = bdAlpha(gm), F = bdAlpha(gf), KO = bdAlpha(ko);
-  var tier = lock ? 1 : b.t || 1, fx = lock ? '' : b.fx || '';
-  /* gold: the kind's colour runs deeper, and gold leaf takes the cream's place, flecked */
-  var A = bdHex(lock ? '#3b3c42' : b.c || BD_KIND[b.k].c), Bc = bdHex(lock ? '#26272c' : tier === 2 ? '#e7c15a' : BD_CREAM);
-  if (tier === 2) A = bdMix(A, [0, 0, 0], .12);
+  var fx = lock ? '' : b.fx || '', sn = !lock && !!b.sn;
+  var A = bdHex(lock ? '#3b3c42' : b.c || BD_KIND[b.k].c), Bc = bdHex(lock ? '#26272c' : BD_CREAM);
   var A2 = bdMix(A, [255, 255, 255], lock ? .05 : .14), Ai = bdMix(A, [255, 255, 255], lock ? .12 : .55), Ad = bdMix(A, [0, 0, 0], lock ? .25 : .3), pf = (typeof pk === 'string' ? BD_PAT[pk] : pk).field;
   var T = bdHex(lock ? '#7d8087' : trim), u = BD_FACE / 2, N = BD_FACE * BD_FACE;
   /* pass one: how much of each pixel is metal, antialiased, so a wall's edge is a curve rather than a staircase */
@@ -4215,15 +4248,15 @@ function bdFront(b, trim) {
     var mf = MF[q], gv = GV[q], en;
     if (gv >= .82) en = Ai;
     else if (fx) en = bdFx(fx, pf(ux, uy), ux, uy, q);
-    else if (tier === 3) {
-      /* EXOTIC: the enamel is a film of colour that turns with where it is,
-         over obsidian flecked with light, and a pearl in place of cream */
-      var fk3 = pf(ux, uy), ph = (Math.atan2(uy, ux) / (2 * Math.PI)) * .55 + ux * .22 - uy * .3, ir = [128 + 112 * Math.cos(6.283 * ph), 128 + 112 * Math.cos(6.283 * (ph + .33)), 128 + 112 * Math.cos(6.283 * (ph + .67))];
-      if (fk3 === 'd') { var sp = bdNoise(q * 7.13); en = sp > .993 ? [255, 246, 236] : bdMix([22, 19, 32], ir, .16); }
-      else if (fk3 === 'b') en = bdMix([238, 233, 246], ir, .22);
-      else en = bdMix(ir, [255, 255, 255], .12);
+    else if (sn) {
+      /* SHEEN: the kind's colour as candy metal, a band of light across it
+         and a fleck or two, the cream gone to pearl */
+      var fks = pf(ux, uy), sw = Math.exp(-Math.pow(ux * .72 + uy * .72 - .18, 2) / .035), tl = Math.max(0, Math.min(1, (ux + uy + 1.2) / 2.6)), fls = bdNoise(q * 4.7) > .993 ? 1 : 0;
+      if (fks === 'b') en = bdMix(bdMix([246, 244, 251], A, .16), [255, 255, 255], sw * .5);
+      else if (fks === 'd') en = bdMix(bdMix(Ad, A, .4), [255, 255, 255], sw * .18);
+      else en = bdMix(bdMix(bdMix(A, [0, 0, 0], .1), A2, tl), [255, 255, 255], Math.max(sw * .42, fls * .8));
     }
-    else { var fk = pf(ux, uy), t = Math.max(0, Math.min(1, (ux + uy + 1.2) / 2.6)); en = fk === 'b' ? (tier === 2 ? bdMix(Bc, [255, 236, 170], bdNoise(q * 3.7) > .985 ? 1 : 0) : Bc) : bdMix(fk === 'd' ? Ad : A, fk === 'd' ? A : A2, t * (fk === 'd' ? .3 : 1)); }
+    else { var fk = pf(ux, uy), t = Math.max(0, Math.min(1, (ux + uy + 1.2) / 2.6)); en = fk === 'b' ? Bc : bdMix(fk === 'd' ? Ad : A, fk === 'd' ? A : A2, t * (fk === 'd' ? .3 : 1)); }
     var sh = 1 - .42 * (AO[i + 3] / 255) * (1 - mf), nz = 1 + (bdNoise(q) - .5) * .02;
     en = [en[0] * sh * nz, en[1] * sh * nz, en[2] * sh * nz];
     var rgb = bdMix(en, T, mf), ro = 70 * (1 - mf) + (lock ? 95 : 22) * mf;
@@ -4353,7 +4386,7 @@ function bdPolar(shp, dish, mirror) {
   var g = new BD3.BufferGeometry(); g.setAttribute('position', new BD3.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new BD3.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals(); return g;
 }
 function bdMake(b, m, n) {
-  var g = new BD3.Group(), trim = b.fx ? BD_FXTRIM[b.fx] : b.t === 3 ? BD_TRIM.ex : b.t === 2 ? BD_TRIM.gold : BD_TRIM[m], mp = bdMaps(b, trim, n), lock = !!b.lock;
+  var g = new BD3.Group(), trim = b.fx ? BD_FXTRIM[b.fx] : BD_TRIM[m], mp = bdMaps(b, trim, n), lock = !!b.lock;
   var shp = new BD3.Shape(); bdOutline(shp, b.sh);
   var body = new BD3.ExtrudeGeometry(shp, { depth: .1, bevelEnabled: true, bevelThickness: .05, bevelSize: .045, bevelSegments: n > 600 ? 8 : 4, curveSegments: n > 600 ? 48 : 24 });
   body.computeBoundingBox(); body.translate(0, 0, -(body.boundingBox.max.z + body.boundingBox.min.z) / 2); body.computeBoundingBox();
@@ -4378,7 +4411,7 @@ function bdMake(b, m, n) {
 /* what the drawing needs to know about one badge, earned or not */
 function bdSpec(x) {
   var b = x.b;
-  return { id: b.id, k: b.k, c: b.c, bk: b.bk, t: b.t || 1, fx: b.fx || '', pt: b.pt || BD_PT[b.id], sh: b.sh || BD_SHI[b.id] || BD_SHK[b.k], gl: b.gl || BD_GL[b.id] || 'i:check', lock: !x.d,
+  return { id: b.id, k: b.k, c: b.c, bk: b.bk, t: b.t || 1, fx: b.fx || '', sn: b.sn ? 1 : 0, pt: b.pt || BD_PT[b.id], sh: b.sh || BD_SHI[b.id] || BD_SHK[b.k], gl: b.gl || BD_GL[b.id] || 'i:check', lock: !x.d,
     at: x.d ? fmtDay(x.d).replace(/^\w+ /, '') + ' ' + x.d.slice(0, 4) : '' };
 }
 function bdRenderer(w, h, keep) {
@@ -4417,9 +4450,10 @@ function lfCoinBtn(x, size) {
   var b = el('<button type="button" class="lf-coin"><img alt="" /></button>');
   b.style.setProperty('--cs', size + 'px'); b.dataset.b = x.b.id; b.dataset.m = x.d ? x.b.k : 'lock';
   if (x.d && x.b.t > 1) b.classList.add('is-t' + x.b.t);
-  if (x.d && x.b.fx) { b.classList.add('is-fx'); b.style.setProperty('--gl', x.b.c); }
+  if (x.d && x.b.fx) { b.classList.add('is-fx'); b.style.setProperty('--gl', BD_FXGL[x.b.fx]); }
+  else if (x.d && x.b.sn) { b.classList.add('is-sn'); b.style.setProperty('--gl', x.b.c || BD_KIND[x.b.k].c); }
   if (x.d && !x.fr && lfShow().indexOf(x.b.id) >= 0) b.classList.add('is-sc');
-  b.setAttribute('aria-label', x.b.n + (x.b.t === 3 ? ', level 3' : x.b.t === 2 ? ', level 2' : '') + (x.d ? ', earned ' + fmtDay(x.d) : ', not yet earned') + '. Open');
+  b.setAttribute('aria-label', x.b.n + (x.b.lv ? ', level ' + x.b.lv : '') + (x.d ? ', earned ' + fmtDay(x.d) : ', not yet earned') + '. Open');
   bdStill(x, $('img', b));
   b.addEventListener('click', function (e) { e.stopPropagation(); lfCoinView(x); });
   return b;
@@ -4433,8 +4467,11 @@ function lfCoinView(x, earnedNow) {
   var kd = $('.lf-cv-k', v); kd.textContent = earnedNow ? (x.b.k === 'month' ? 'Medal won' : 'Badge earned') : x.r ? 'Personal best' : x.d ? BD_KIND[x.b.k].n : x.b.k === 'month' ? 'This month' : 'Not yet earned';
   if (x.d) kd.style.color = x.b.c || BD_KIND[x.b.k].c;
   $('.lf-cv-n', v).textContent = x.b.n;
-  if (x.b.t > 1) { var tl = el('<span class="lf-cv-tier"></span>'); tl.classList.add('is-t' + x.b.t); tl.textContent = x.b.fx ? x.b.fx.charAt(0).toUpperCase() + x.b.fx.slice(1) + ' finish' : x.b.t === 3 ? 'Level 3 · Exotic' : 'Level 2 · Gold';
-    if (x.b.fx) { tl.classList.add('is-fx'); tl.style.setProperty('--gl', x.b.c); } $('.lf-cv-cap', v).insertBefore(tl, $('.lf-cv-k', v)); }
+  /* the pill names the level, if it is one of a run, and the finish */
+  if (x.b.fx || x.b.lv) { var tl = el('<span class="lf-cv-tier"></span>');
+    tl.textContent = [x.b.lv ? 'Level ' + x.b.lv : '', x.b.fx ? x.b.fx.charAt(0).toUpperCase() + x.b.fx.slice(1) + ' finish' : ''].filter(Boolean).join(' · ');
+    if (x.b.fx) { tl.classList.add('is-fx'); tl.style.setProperty('--gl', BD_FXGL[x.b.fx]); }
+    $('.lf-cv-cap', v).insertBefore(tl, $('.lf-cv-k', v)); }
   /* THE SHOWCASE: three of yours, chosen here, are what friends see */
   if (x.d && !x.fr && BADGE[x.b.id]) {
     var scb = el('<button type="button" class="lf-btn lf-cv-sc" id="lfShowBtn"></button>');
@@ -4451,7 +4488,7 @@ function lfCoinView(x, earnedNow) {
   requestAnimationFrame(function () { v.classList.add('is-up'); });
   var stage = $('.lf-cv-stage', v), raf = 0, r = null, aw = null, done = false;
   if (x.d && x.b.t > 1) stage.classList.add('is-t' + x.b.t);
-  if (x.d && x.b.fx) { stage.classList.add('is-fx'); stage.style.setProperty('--gl', x.b.c); }
+  if (x.d && x.b.fx) { stage.classList.add('is-fx'); stage.style.setProperty('--gl', BD_FXGL[x.b.fx]); }
   function close() {
     if (done) return; done = true; cancelAnimationFrame(raf); document.removeEventListener('keydown', esc); v.classList.remove('is-up');
     setTimeout(function () { if (aw) bdDrop(aw); if (r) { r.dispose(); if (r.forceContextLoss) r.forceContextLoss(); } v.remove(); if (!stack.length) document.body.classList.remove('lf-lock'); }, 240);
