@@ -3577,12 +3577,13 @@ var BADGES = [
   ['bwgoal', 'Dialled In', 'body', 'Your goal body weight, reached.'],
   ['abs10', 'Core Ready', 'core', 'Abs trained in ten workouts.'],
   ['abs50', 'Six-Pack Club', 'core', 'Abs trained in fifty workouts.'],
-  ['duo1', 'In Sync', 'friends', 'You and a friend, training at the same time.'],
-  ['duo10', 'Gym Buddies', 'friends', 'Ten sessions in sync with a friend.'],
-  ['lead1', 'Crowned', 'friends', 'A week finished in front on the friends rings.'],
-  ['lead3', 'Three-Peat', 'friends', 'In front three weeks running.'],
-  ['squad', 'Squad Goals', 'friends', 'You and every friend closed your weekly goal in the same week.']
-].map(function (a) { return { id: a[0], n: a[1], k: a[2], d: a[3] }; });
+  /* the versus-friends badges each wear their own colour, the crown gold */
+  ['duo1', 'In Sync', 'friends', 'You and a friend, training at the same time.', '#6366f1'],
+  ['duo10', 'Gym Buddies', 'friends', 'Ten sessions in sync with a friend.', '#0ea5e9'],
+  ['lead1', 'Crowned', 'friends', 'A week finished in front on the friends rings.', '#f59e0b'],
+  ['lead3', 'Three-Peat', 'friends', 'In front three weeks running.', '#e11d48'],
+  ['squad', 'Squad Goals', 'friends', 'You and every friend closed your weekly goal in the same week.', '#22c55e']
+].map(function (a) { var o = { id: a[0], n: a[1], k: a[2], d: a[3] }; if (a[4]) o.c = a[4]; return o; });
 var BADGE = {}; BADGES.forEach(function (b) { BADGE[b.id] = b; });
 var BARBELL = { squat: 1, bench: 1, deadlift: 1, rdl: 1, frontsq: 1, inclbb: 1, bbrow: 1, hipthrust: 1, sldl: 1, rackpull: 1, ohp: 1 };
 /* every badge, with the day it was won or how far along it is */
