@@ -387,6 +387,8 @@ function liftClean(b) {
     const hv = Math.round(+tr.hv * 10) / 10;
     s.tr = { m: typeof tr.m === 'string' && /^\d{4}-\d\d-\d\d$/.test(tr.m) ? tr.m : '', w8: tr.w8.map(q4), c30: q4(tr.c30), p30: q4(tr.p30), cw: q4(tr.cw), pw: q4(tr.pw), hv: isFinite(hv) ? Math.max(0, Math.min(2000, hv)) : 0 };
   }
+  /* the accent they chose, a hue on the wheel, or none for lime */
+  if (Number.isInteger(b.s.ac) && b.s.ac >= 0 && b.s.ac < 360) s.ac = b.s.ac;
   s.last = typeof b.s.last === 'string' && /^\d{4}-\d\d-\d\d$/.test(b.s.last) ? b.s.last : '';
   /* THE WORKOUTS THEMSELVES, asked for so friends can see the sets: at
      most twenty, each a date, a name and up to fifteen exercises of up

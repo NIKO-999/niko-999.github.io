@@ -1641,7 +1641,7 @@ function lfTrendSheet(k, src) {
   b.appendChild(el('<div class="lf-cap" style="margin:16px 2px 8px">At a glance</div>'));
   b.appendChild(lfSum([[fmtBig(weeks[best].v), 'best week'], [k === 'wo' ? Math.round(avg * 10) / 10 : fmtBig(avg), 'a week, avg'],
     k === 'vol' ? [cur.wo, 'workouts'] : k === 'sets' ? [fmtBig(cur.reps), 'reps'] : k === 'reps' ? [cur.sets, 'sets this week'] : [cur.sets, 'sets']]));
-  lfSheet({ title: '', body: b, cls: 'lf-vsh' });
+  return lfSheet({ title: '', body: b, cls: 'lf-vsh' });
 }
 
 /* This week's direct working sets against the targets, by primary
@@ -2873,6 +2873,8 @@ function frStats() {
       var st0 = w.s > 1e11 ? new Date(w.s) : null;
       return { id: w.id, d: w.d, n: w.n, t: st0 ? st0.getHours() * 60 + st0.getMinutes() : undefined, x: w.x.map(function (e) { return { n: e.n || exName(e.id), s: e.sets.map(function (st) { return [st.w, st.r]; }) }; }) };
     }), vol30: Math.round(windowStats(addDays(t, -29), t).vol),
+    /* the accent you chose, as a hue, so your page is your colour to friends */
+    ac: lfAccent(),
     /* THE TREND SHEETS, for friends: the same windows yours are drawn from,
        each as [workouts, sets, reps, kg]. Totals only, never a single lift
        — bar the heaviest set of the month, which your own sheet names. */
@@ -2979,7 +2981,7 @@ function frSheet(f) {
   var frTap = function (node, k) {
     var src = frTrendSrc(st, k); if (!src) return;
     node.classList.add('lf-tap'); node.setAttribute('role', 'button'); node.tabIndex = 0; node.dataset.tr = k;
-    var go = function () { lfTrendSheet(k, frTrendSrc(st, k)); };
+    var go = function () { var ts = lfTrendSheet(k, frTrendSrc(st, k)); if (ts) lfAccOn(ts.el, frHue(st)); };
     node.addEventListener('click', go); node.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
   };
   [[IC.dumb, st.wo30 || 0, 'workouts', 'wo'], [IC.stack, st.sets30 || 0, 'sets', 'sets'], [IC.weight, toDisp(st.vol30 || 0), S.unit, 'vol']].forEach(function (k) {
@@ -3052,6 +3054,7 @@ function frSheet(f) {
   var foot = null, rm = null;
   if (!f.me) { rm = el('<button type="button" class="lf-btn is-bad">Remove</button>'); foot = [rm]; }
   var s = lfSheet({ title: f.n || 'Friend', body: b, foot: foot, full: true });
+  lfAccOn(s.el, frHue(st));
   if (rm) rm.addEventListener('click', function () {
     var i = FRS.list.indexOf(f); if (i < 0) return;
     FRS.list.splice(i, 1); frSave(); s.close(true); lfRender();
@@ -3099,6 +3102,7 @@ function frRxBar(w, f) {
   paint();
   return bar;
 }
+function frHue(st) { var h = st && st.ac; return typeof h === 'number' && isFinite(h) && h >= 0 && h < 360 ? h : null; }
 function frWoSheet(w, f) {
   var b = el('<div><p class="lf-lab" style="margin:0 0 6px"></p><div class="lf-list"></div></div>');
   $('p', b).textContent = fmtDay(w.d) + (w.t >= 0 ? ' · ' + fmtMinOfDay(w.t) : '');
@@ -3109,7 +3113,8 @@ function frWoSheet(w, f) {
     $('.lf-list', b).appendChild(li);
   });
   if (f && FRS.on) b.insertBefore(frRxBar(w, f), $('.lf-list', b));
-  lfSheet({ title: w.n, body: b });
+  var ws = lfSheet({ title: w.n, body: b });
+  lfAccOn(ws.el, frHue(f && f.s));
 }
 function frAddSheet() {
   var b = el('<div><label class="lf-flab" for="frCode" style="margin-top:0">Their friend code</label><input class="lf-field lf-num" id="frCode" maxlength="9" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABCD2345" /><p class="lf-lab fr-err" hidden></p></div>');
@@ -4056,7 +4061,7 @@ var LIME_H = 83;
 function lfAccent() { try { var v = localStorage.getItem('lift.accent.v1'); if (v === null || v === '') return null; v = +v; return isFinite(v) ? ((v % 360) + 360) % 360 : null; } catch (e) { return null; } }
 function lfAccentSet(h, keep) {
   lfAccTmp = h;
-  if (keep) { try { if (h === null) localStorage.removeItem('lift.accent.v1'); else localStorage.setItem('lift.accent.v1', String(Math.round(h))); } catch (e) {} }
+  if (keep) { try { if (h === null) localStorage.removeItem('lift.accent.v1'); else localStorage.setItem('lift.accent.v1', String(Math.round(h))); } catch (e) {} if (typeof frQueue === 'function') frQueue(); }
   lfApplyAccent();
 }
 var lfAccTmp;
@@ -4064,14 +4069,27 @@ function lfHueName(h) { return ['Red', 'Orange', 'Yellow', 'Lime', 'Green', 'Tea
 function lfHsl(h, s, l) { s /= 100; l /= 100; var k = function (n) { return (n + h / 30) % 12; }, a = s * Math.min(l, 1 - l), f = function (n) { return l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1)); }; return [f(0), f(8), f(4)].map(function (x) { return Math.round(x * 255); }); }
 function lfHex(c) { return '#' + c.map(function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
 function lfLum(c) { var v = c.map(function (x) { x /= 255; return x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4); }); return .2126 * v[0] + .7152 * v[1] + .0722 * v[2]; }
+var ACC_KEYS = ['--today', '--log', '--on-log', '--today-ink', '--live-bg', '--good', '--done-bg', '--acc-bar'];
+/* A FRIEND'S PAGE WEARS THEIR COLOUR: the same tokens, written on their
+   sheet rather than the page, so it is their accent inside and yours
+   everywhere else. Lime is written out in full there, because the page
+   around it may be some other colour. */
+function lfAccOn(node, h) {
+  var dark = document.documentElement.getAttribute('data-mode') !== 'light', st = node.style;
+  if (h === null || h === undefined) {
+    var lime = { '--today': '#a3e635', '--log': '#a3e635', '--on-log': '#0b1400', '--today-ink': dark ? '#a3e635' : '#65a30d', '--live-bg': dark ? '#16210a' : '#eef7dc',
+      '--good': dark ? '#34c759' : '#248a3d', '--done-bg': dark ? 'rgba(52, 199, 89, .16)' : 'rgba(52, 199, 89, .14)', '--acc-bar': 'var(--mark-on)' };
+    ACC_KEYS.forEach(function (k) { st.setProperty(k, lime[k]); });
+    return;
+  }
+  lfAccTok(h, dark, st);
+}
 function lfApplyAccent() {
   var st = document.documentElement.style, h = lfAccTmp !== undefined ? lfAccTmp : lfAccent();
-  /* and the greens that say DONE - Completed, a target met, a rest that
-     is up, a week up on the last - follow it too, with the set bars. On
-     lime none of this is written, so the default is exactly as it was. */
-  var keys = ['--today', '--log', '--on-log', '--today-ink', '--live-bg', '--good', '--done-bg', '--acc-bar'];
-  if (h === null) { keys.forEach(function (k) { st.removeProperty(k); }); return; }
-  var dark = document.documentElement.getAttribute('data-mode') !== 'light';
+  if (h === null) { ACC_KEYS.forEach(function (k) { st.removeProperty(k); }); return; }
+  lfAccTok(h, document.documentElement.getAttribute('data-mode') !== 'light', st);
+}
+function lfAccTok(h, dark, st) {
   /* yellow-greens are bright at any lightness and blues are dim, so the
      fill is lifted where the hue is dark, to keep it reading as a light */
   var fill = lfHsl(h, 80, h > 200 && h < 300 ? 64 : 56), lum = lfLum(fill);

@@ -1051,11 +1051,15 @@ const freeze = (at) => `(() => {
     ok('a code nobody has says so', /Nobody has that code/.test(await top(A.page).textContent('.fr-err')));
     await A.page.fill('#frCode', codeA.toLowerCase()); await top(A.page).locator('button', { hasText: /^Add$/ }).click(); await A.page.waitForTimeout(250);
     ok('your own code is refused', /your own code/.test(await top(A.page).textContent('.fr-err')));
+    /* Sam picked a colour on their wheel */
+    { const rec = JSON.parse(m.get('lift:' + codeB)); rec.s.ac = 215; m.set('lift:' + codeB, JSON.stringify(rec)); }
     await A.page.fill('#frCode', codeB.toLowerCase()); await top(A.page).locator('button', { hasText: /^Add$/ }).click(); await settle(A.page);
     ok('a typed code adds them, lower case and all', (await A.page.$$eval('#frBoard .fr-row .fr-t b', (b) => b.map((x) => x.textContent))).join() === 'You,Sam');
     await A.page.click('#frBoard .fr-row:not(.is-me)'); await settle(A.page);
     const sh = await top(A.page).textContent('.lf-sh-bd');
     const T = top(A.page);
+    const acc = await T.evaluate((e) => [e.style.getPropertyValue('--log'), getComputedStyle(document.documentElement).getPropertyValue('--log').trim()]);
+    ok('a friend\'s page wears the colour they chose, and yours stays yours', acc[0] && acc[0] !== '#a3e635' && acc[1].toLowerCase() === '#a3e635', acc);
     ok('a friend opens on a whole dashboard: when, and the three tiles', /18 days ago/.test(sh) && await T.locator('.lf-stat').count() === 3, sh.slice(0, 120));
     ok('their thirty days', await T.locator('#frGrid .lf-day').count() === 30);
     ok('their week, reps by day against goal', await T.locator('#frWeek .lf-bars > div').count() === 7 && /0\/3/.test(await T.locator('#frWeek').textContent()));
