@@ -406,17 +406,13 @@ const freeze = (at) => `(() => {
     }
   }
 
-  /* ── a leg day asks how your legs are, and the answer changes the day ── */
+  /* ── the leg check is put away for now: a leg day asks nothing ── */
   {
     const { c, page } = await ctx(null, '2026-11-02T07:00:00');
-    const opts = await page.locator('#lfRec .lf-rq-b b').allTextContents();
-    ok('a leg day asks how your legs are, in the plan\'s four answers', opts.join('|') === 'Mild soreness|Moderate soreness|Very sore or weaker|Sharp pain or swelling', opts);
-    await page.click('#lfRec [data-r="1"]'); await settle(page);
-    ok('moderate soreness says so and changes the start button', /cut by a third/.test(await page.textContent('#lfRec')) && /fewer leg sets/.test(await page.textContent('#lfGo')));
-    ok('and is kept for the day', (await store(page)).rc['2026-11-02'] === 1);
+    ok('a leg day no longer asks how your legs are', await page.locator('#lfRec').count() === 0 && !/soreness/i.test(await page.textContent('#lfHome')));
     await page.click('#lfGo'); await settle(page);
     const n = await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelector('.lf-ex-n').textContent + ':' + e.querySelectorAll('.lf-set:not(.is-hd)').length));
-    ok('leg sets come in a third lighter, abs untouched', n.join() === 'Hack squat:3,Leg extensions:3,Bulgarian split squats:1,Standing calf raises:3,Cable crunches:4', n);
+    ok('and the day starts at full volume', n.join() === 'Hack squat:4,Leg extensions:4,Bulgarian split squats:2,Standing calf raises:5,Cable crunches:4', n);
     /* THE REST ALERT, once, the moment the rest is up. */
     const set0 = page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd)').first();
     await set0.locator('input').nth(0).fill('100'); await set0.locator('input').nth(1).fill('8');
@@ -449,23 +445,14 @@ const freeze = (at) => `(() => {
   {
     const sore = { '2026-10-23': 1, '2026-10-26': 2, '2026-10-28': 1 };
     const { c, page } = await ctx({ unit: 'kg', rc: sore }, '2026-11-02T07:00:00');
-    await page.click('#lfRec [data-r="2"]'); await settle(page);
-    ok('very sore says skip the hard session and offers another', /Skip the hard leg session/.test(await page.textContent('#lfRec')) && await page.locator('#lfRecAlt').count() === 1 && /Start anyway/.test(await page.textContent('#lfGo')));
-    await page.click('#lfRec [data-r="2"]'); await settle(page);
-    ok('pressing it again clears the answer', (await store(page)).rc['2026-11-02'] === undefined && await page.locator('#lfRec .lf-rq-a').count() === 0);
-    ok('three sore days in a fortnight offer the plan\'s lighter volume', await page.locator('#lfRecSg').count() === 1);
-    await page.click('#lfRecSg button'); await settle(page);
-    const f = (await store(page)).focus.filter((x) => ['Quads', 'Hamstrings', 'Calves'].includes(x.m)).map((x) => x.m + ':' + x.lo + '-' + x.hi);
-    ok('which lowers quads, hamstrings and calves', f.join() === 'Quads:10-12,Hamstrings:8-8,Calves:9-12', f);
-    ok('and then stops offering', await page.locator('#lfRecSg').count() === 0);
+    ok('old answers are kept, but offer no lighter targets while it is away', await page.locator('#lfRecSg').count() === 0 && Object.keys((await store(page)).rc).length === 3);
     await c.close();
   }
   {
-    /* A REST DAY, taken on purpose: from the recovery card, or the picker. */
+    /* A REST DAY, taken on purpose, from the picker. */
     const { c, page } = await ctx(null, '2026-11-02T07:00:00');
-    await page.click('#lfRec [data-r="2"]'); await settle(page);
-    ok('very sore offers a rest day', await page.locator('#lfRecRest').count() === 1);
-    await page.click('#lfRecRest'); await settle(page);
+    await page.click('#lfPick'); await settle(page);
+    await top(page).locator('.lf-li', { hasText: 'Rest day' }).click(); await settle(page);
     ok('taking one makes today a rest day', (await page.textContent('#lfPick')).trim() === 'Rest day' && /Train anyway/.test(await page.textContent('#lfGo')) && (await store(page)).rd['2026-11-02'] === 1);
     ok('and asks nothing about legs', await page.locator('#lfRec').count() === 0);
     ok('the 30 days mark it as rest, not as a miss', await page.$eval('.lf-day.is-now', (e) => e.classList.contains('is-rest') && !e.classList.contains('is-on')));
@@ -988,7 +975,7 @@ const freeze = (at) => `(() => {
     const split = await page.$$eval('#lfSplit .lf-li b', (b) => b.map((x) => x.textContent));
     ok('the glute split is Monday to Saturday', split.join() === 'Mon · Glutes · heavy,Tue · Back & biceps,Wed · Quads & calves,Thu · Chest, shoulders & triceps,Fri · Glutes · top shelf,Sat · Conditioning & core', split);
     const segW = await page.$$eval('#lfProg button', (b) => b.map((x) => x.scrollWidth <= x.clientWidth + 1));
-    ok('four programs fit on one switch', segW.length === 4 && segW.every(Boolean));
+    ok('five programs fit on the switch, none cut off', segW.length === 5 && segW.every(Boolean));
     await page.click('#lfSplit .lf-li >> nth=5'); await settle(page);
     const sat = await top(page).textContent();
     ok('Saturday reads its rounds, carries and plank as written', sat.includes('4 rounds') && sat.includes('3 × 30–40 m each side') && sat.includes('3 × 20–30 s each side') && sat.includes('3 × 8–10 each side') && /rower/.test(sat), sat.slice(0, 300));
@@ -1073,6 +1060,7 @@ const freeze = (at) => `(() => {
     ok('it is in settings, with share', codeB.length === 8 && await B.page.locator('#lfSet #frShare').count() === 1);
     await B.page.click('.lf-bar [data-v="fr"]'); await settle(B.page);
 
+    ok('adding someone puts you on their list too: the server holds your code for their phone', JSON.parse(m.get('liftf:' + codeA) || '[]').some((x) => x.f === codeB && x.n === 'Sam'));
     await A.page.click('#frAdd'); await A.page.waitForTimeout(400);
     await A.page.fill('#frCode', 'ZZZZZZZZ'); await top(A.page).locator('button', { hasText: /^Add$/ }).click(); await A.page.waitForTimeout(250);
     ok('a code nobody has says so', /Nobody has that code/.test(await top(A.page).textContent('.fr-err')));

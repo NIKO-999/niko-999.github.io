@@ -565,8 +565,20 @@ const kv = () => {
     ok('taking it back tells nobody', pushed.length === 1, pushed.length);
     globalThis.fetch = realF;
     await hit('PUT', '/v1/lift/' + C + '/react', { key: KR, body: { f: C2, w: 'w1', e: '💪' } });
+    /* adding somebody adds you to them: signed with your own key, kept
+       beside their record until their phone collects it */
+    q = await hit('PUT', '/v1/lift/' + C + '/follow', { key: KEY, body: { f: C2 } });
+    ok('an add is signed with the adder\'s own key', q.status === 403, q.status);
+    q = await hit('PUT', '/v1/lift/' + C + '/follow', { key: KR, body: { f: C } });
+    ok('nobody follows themselves', q.status === 400, q.status);
+    q = await hit('PUT', '/v1/lift/QQQQ2222/follow', { key: KR, body: { f: C2 } });
+    ok('an add to a code nobody has is refused', q.status === 404, q.status);
+    await hit('PUT', '/v1/lift/' + C + '/follow', { key: KR, body: { f: C2 } });
+    await hit('PUT', '/v1/lift/' + C + '/follow', { key: KR, body: { f: C2 } });
+    g = await (await hit('GET', '/v1/lift/' + C)).json();
+    ok('the add lands on their record, once, with who you are', Array.isArray(g.fo) && g.fo.length === 1 && g.fo[0].f === C2 && g.fo[0].n === 'Sam', g.fo);
     q = await hit('DELETE', '/v1/lift/' + C, { key: KEY });
-    ok('the owner can leave, and the record goes, reactions and all', q.status === 200 && !env.SCHED.m.has('lift:' + C) && !env.SCHED.m.has('liftr:' + C));
+    ok('the owner can leave, and the record goes, reactions, adds and all', q.status === 200 && !env.SCHED.m.has('lift:' + C) && !env.SCHED.m.has('liftr:' + C) && !env.SCHED.m.has('liftf:' + C));
   }
 
   console.log('\n  ' + pass + ' passed, ' + fail + ' failed\n');

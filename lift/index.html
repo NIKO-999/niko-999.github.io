@@ -316,6 +316,8 @@ svg { display: block; }
 .lf-seg button { height: 38px; border-radius: 999px; color: var(--dim); font-weight: 600; font-size: 13px; position: relative; }
 .lf-seg button::before { content: ''; position: absolute; inset: -3px 0; }
 .lf-seg button[aria-pressed="true"] { background: var(--card3); color: var(--ink); }
+/* the programs are five, so the switch is two rows: a rounded block, not a pill */
+#lfProg { border-radius: 22px; row-gap: 3px; }
 
 /* ── calendar ── */
 .lf-calnav { display: flex; align-items: center; justify-content: space-between; margin: 14px 0 10px; }
@@ -925,7 +927,11 @@ var EXERCISES = [
   ['incdbfly', 'Incline dumbbell flyes', 'Chest'], ['smithbench', 'Smith machine bench press', 'Chest', 1],
   ['csdbrow', 'Chest-supported dumbbell rows', 'Back', 1], ['dbshrug', 'Dumbbell shrugs', 'Back'], ['smithrow', 'Smith machine bent-over rows', 'Back', 1], ['smithshrug', 'Smith machine shrugs', 'Back'],
   ['smithdrag', 'Smith machine drag curls', 'Biceps'],
-  ['dbcalf', 'Dumbbell standing calf raises', 'Calves'], ['smithrdl', 'Smith machine Romanian deadlift', 'Hamstrings', 1], ['smithhip', 'Smith machine hip thrusts', 'Glutes', 1]
+  ['dbcalf', 'Dumbbell standing calf raises', 'Calves'], ['smithrdl', 'Smith machine Romanian deadlift', 'Hamstrings', 1], ['smithhip', 'Smith machine hip thrusts', 'Glutes', 1],
+  ['bstbr', 'B-stance glute bridges', 'Glutes'], ['sllp', 'Single-leg press', 'Quads', 1], ['gdrive', 'Glute drive machine', 'Glutes', 1],
+  ['hipext', 'Hip extensions', 'Glutes'], ['mrdl', 'Machine Romanian deadlift', 'Hamstrings', 1], ['kbmach', 'Glute kickback machine', 'Glutes'],
+  ['apullup', 'Assisted pull-ups', 'Back', 1], ['hirow', 'High row machine', 'Back', 1], ['wgrow', 'Seated wide-grip rows', 'Back', 1],
+  ['crdpull', 'Cable rear delt pulls', 'Shoulders'], ['adips', 'Assisted dips', 'Triceps', 1], ['smskull', 'Smith machine skull crushers', 'Triceps']
 ].map(function (a) { return { id: a[0], n: a[1], m: a[2], c: a[3] ? 1 : 0, t: a[4] || 'w' }; });
 
 /* PUSH, PULL, LEGS — and Core for what is neither. Worked out from the
@@ -1038,6 +1044,18 @@ var PROGRAM_GL = [
   { id: 'g-fri', dow: 5, n: 'Glutes · top shelf', sp: 'Glutes and core', ex: [['hipthrust', 3, 8, 12], ['cablekb', 3, 12, 15, 'each side'], ['cablestep', 3, 8, 12, 'each side'], ['cableabd', 3, 12, 20], ['hkr', 3, 10, 15], ['cablecrunch', 3, 10, 15]] },
   { id: 'g-sat', dow: 6, n: 'Conditioning & core', sp: 'Athletic conditioning and core', ex: [['sled', 4, 1, 1, 'rounds'], ['slrdl', 3, 8, 12, 'each side'], ['deadbug', 3, 8, 10, 'each side'], ['farmer', 3, 30, 40, 'm each side'], ['copen', 3, 20, 30, 's each side']] }
 ];
+/* THE GLUTE FOCUS: glutes three times — one leg at a time on Monday, with
+   the quads on Wednesday, with the hamstrings on Friday — around a back
+   and a chest day, and the weekend open. From a handwritten split: where
+   it gives no sets × reps, the dose is the recommended one, and straight-
+   leg calves on the leg press close both two-legged days. */
+var PROGRAM_GF = [
+  { id: 'f-mon', dow: 1, n: 'Glutes · one leg', sp: 'Unilateral glutes', ex: [['bstbr', 3, 10, 12, 'each side'], ['bss', 3, 8, 12, 'each side'], ['sllp', 3, 10, 12, 'each side'], ['abduct', 3, 12, 20]] },
+  { id: 'f-tue', dow: 2, n: 'Back & biceps', sp: 'Back, rear delts and biceps', ex: [['apullup', 3, 6, 10], ['hirow', 3, 8, 12], ['wgrow', 3, 8, 12], ['revpec', 3, 12, 15], ['crdpull', 3, 12, 15], ['preacher', 3, 8, 12]] },
+  { id: 'f-wed', dow: 3, n: 'Quads & glutes', sp: 'Quads and glutes', ex: [['gdrive', 3, 8, 12], ['sllp', 3, 10, 12, 'each side'], ['legext', 3, 12, 15], ['pendulum', 3, 8, 12], ['hipext', 3, 12, 15], ['calf', 3, 12, 15]] },
+  { id: 'f-thu', dow: 4, n: 'Chest & shoulders', sp: 'Chest, shoulders and triceps', ex: [['mshp', 3, 8, 12], ['mlat', 3, 12, 15], ['pecdeck', 3, 12, 15], ['adips', 3, 8, 12], ['mchest', 3, 8, 12], ['smskull', 3, 10, 12]] },
+  { id: 'f-fri', dow: 5, n: 'Glutes & hamstrings', sp: 'Glutes and hamstrings', ex: [['gdrive', 3, 8, 12], ['mrdl', 3, 8, 12], ['hipext', 3, 12, 15], ['seatcurl', 3, 10, 12], ['kbmach', 3, 12, 15, 'each side'], ['calf', 3, 12, 15]] }
+];
 /* THE LEG FOCUSED SPLIT: the whole body over six days, legs three times —
    heavy, sweep, then a calf and isolation day — with the upper body kept
    short between them, and Sunday off. Three working sets an exercise at
@@ -1061,11 +1079,12 @@ function lfMkProg(list) { return list.map(function (d) {
 var PROGRAMS = {
   ul: { n: 'Upper / lower', days: lfMkProg(PROGRAM_UL) },
   ppl: { n: 'Push / pull / legs', s: 'PPL', days: lfMkProg(PROGRAM_PPL) },
-  gl: { n: 'Glute builder', s: 'Glute builder', days: lfMkProg(PROGRAM_GL) },
-  qc: { n: 'Leg focused split', s: 'Leg focused', days: lfMkProg(PROGRAM_QC) }
+  gl: { n: 'Conditioning', s: 'Conditioning', days: lfMkProg(PROGRAM_GL) },
+  qc: { n: 'Leg focused split', s: 'Leg focused', days: lfMkProg(PROGRAM_QC) },
+  gf: { n: 'Glute focus', s: 'Glute focus', days: lfMkProg(PROGRAM_GF) }
 };
 PROGRAMS.ul.s = 'Upper / lower';
-var PROG_IDS = ['ul', 'ppl', 'gl', 'qc'];
+var PROG_IDS = ['ul', 'ppl', 'gl', 'qc', 'gf'];
 var CHOICES = lfMkProg(CHOICE_RT);
 /* A set × rep target as written: '3 × 8–12', '3 × 30–40 m each side',
    or '4 rounds'. */
@@ -1208,6 +1227,7 @@ var FOCUS_PPL = [['Quads', 15, 15, 1], ['Calves', 8, 8, 1], ['Abs', 6, 6, 1], ['
    week actually holds, with glutes, hamstrings and abs the priority. */
 var FOCUS_GL = lfFocusFrom(PROGRAM_GL, { Glutes: 1, Hamstrings: 1, Abs: 1 });
 var FOCUS_QC = lfFocusFrom(PROGRAM_QC, { Quads: 1, Calves: 1 });
+var FOCUS_GF = lfFocusFrom(PROGRAM_GF, { Glutes: 1, Hamstrings: 1, Quads: 1 });
 function lfFocusOf(list) { return list.map(function (f) { return { m: f[0], lo: f[1], hi: f[2], p: f[3] }; }); }
 var FOCUS_V1 = 'Quads:13:16:1,Calves:12:12:1,Lower back:6:6:1,Hamstrings:10:10:0,Glutes:5:8:0,Abs:9:9:0';
 function lfFocusDefault() { return FOCUS_DEFAULT.map(function (f) { return { m: f[0], lo: f[1], hi: f[2], p: f[3] }; }); }
@@ -1259,6 +1279,10 @@ function lfRc(k) { var v = S.rc[k || ymd(today())]; return v === undefined ? -1 
 function lfCut(n) { return Math.max(1, n - Math.max(1, Math.round(n / 3))); }
 /* The plan's lighter volume, offered once legs keep coming in sore. */
 var FOCUS_RECOVER = { Quads: [10, 12], Hamstrings: [8, 8], Calves: [9, 12] };
+/* PUT AWAY FOR NOW, not deleted: the leg check, its four answers, the
+   lighter day they made and the recovery targets it offered. Answers
+   already given are kept; nothing asks for a new one. True brings it back. */
+var LEG_CHECK = false;
 function lfSoreDays() { var from = ymd(addDays(today(), -13)), n = 0; Object.keys(S.rc).forEach(function (k) { if (k >= from && S.rc[k] >= 1) n++; }); return n; }
 
 /* Rest and effort by kind of movement. */
@@ -1448,7 +1472,8 @@ function allEx() { return EXERCISES.concat(S.ex); }
 function exById(id) { var a = allEx(); for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
 function exName(id, fallback) { var e = exById(id); return e ? e.n : (fallback || 'Exercise'); }
 function allRt() { return lfProg().days.concat(S.rt); }
-function rtById(id) { var a = PROGRAMS.ul.days.concat(PROGRAMS.ppl.days, PROGRAMS.gl.days, CHOICES, S.rt); for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
+/* every program's days, so a day of the split you are not running still opens */
+function rtById(id) { var a = PROG_IDS.reduce(function (o, k) { return o.concat(PROGRAMS[k].days); }, []).concat(CHOICES, S.rt); for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
 function woSorted() { return S.wo.slice().sort(function (a, b) { return a.d === b.d ? a.s - b.s : (a.d < b.d ? -1 : 1); }); }
 function woOn(d) { return S.wo.filter(function (w) { return w.d === d; }); }
 
@@ -1756,7 +1781,7 @@ function lfTodayCard() {
   /* DONE, the name opens what you did; the plan is chosen from "Start another". */
   $('#lfPick', c).addEventListener('click', function () { if (act) lfOpenSession(); else if (last) lfWoSheet(last); else lfRoutinePicker(); });
   /* A LEG DAY ASKS FIRST. Pressed again, an answer clears. */
-  if (rt && !act && !last && lfIsLegDay(rt)) {
+  if (LEG_CHECK && rt && !act && !last && lfIsLegDay(rt)) {
     var rv = lfRc(), rq = el('<div class="lf-rq" id="lfRec"><div class="lf-lab">How are your legs?</div><div class="lf-rq-o"></div><p class="lf-rq-a"></p></div>');
     RECOVERY.forEach(function (o, i) {
       var b = el('<button type="button" class="lf-rq-b"><b></b><span></span></button>');
@@ -1928,7 +1953,7 @@ function lfLegCard() {
     $('.lf-vol', c).appendChild(row);
   });
   var lowerNow = S.focus.some(function (f) { var g = FOCUS_RECOVER[f.m]; return g && f.lo > g[1]; });
-  if (lfSoreDays() >= 3 && lowerNow) {
+  if (LEG_CHECK && lfSoreDays() >= 3 && lowerNow) {
     var sg = el('<div class="lf-rq-sg" id="lfRecSg"><p>Your legs have come in sore three or more times in two weeks. The plan says ease the volume: quads 10–12, hamstrings 8, calves 9–12.</p><button type="button" class="lf-btn is-full">Use the recovery targets</button></div>');
     $('button', sg).addEventListener('click', function () {
       var was = JSON.stringify(S.focus);
@@ -2136,7 +2161,7 @@ function lfStart(rt) {
      must not stack a second one over it. Delete today's first. */
   if (!act && woOn(ymd(today())).length) { lfToast('You trained today. Delete that workout first'); return; }
   act = { id: lfId(), s: Date.now(), n: rt ? rt.n : 'Workout', rt: rt ? rt.id : null, rest: 0, x: [] };
-  var cut = lfRc() === 1 && lfIsLegDay(rt);
+  var cut = LEG_CHECK && lfRc() === 1 && lfIsLegDay(rt);
   (rt ? rt.ex : []).forEach(function (id) {
     if (!exById(id)) return;
     var tg = rt.tg && rt.tg[id];
@@ -2687,7 +2712,7 @@ function lfRenderLib() {
   /* TWO PROGRAMS, one running. Switching also moves the weekly targets
      to the new plan's — but only when they are still the old plan's own,
      so targets you set yourself are never overwritten. */
-  var pg = el('<div class="lf-seg" id="lfProg" style="--n:4;margin-bottom:10px"></div>');
+  var pg = el('<div class="lf-seg" id="lfProg" style="--n:3;margin-bottom:10px"></div>');
   PROG_IDS.forEach(function (k) {
     var bt = el('<button type="button"></button>'); bt.textContent = PROGRAMS[k].s; bt.dataset.p = k;
     bt.setAttribute('aria-pressed', S.prog === k ? 'true' : 'false');
@@ -2695,7 +2720,7 @@ function lfRenderLib() {
       if (S.prog === k) return;
       var was = { prog: S.prog, focus: JSON.stringify(S.focus), pick: S.pick };
       var sig = function (l) { return JSON.stringify(lfFocusOf(l)); };
-      var DEF = { ul: FOCUS_DEFAULT, ppl: FOCUS_PPL, gl: FOCUS_GL, qc: FOCUS_QC }, oldDef = DEF[S.prog] || FOCUS_DEFAULT, newDef = DEF[k];
+      var DEF = { ul: FOCUS_DEFAULT, ppl: FOCUS_PPL, gl: FOCUS_GL, qc: FOCUS_QC, gf: FOCUS_GF }, oldDef = DEF[S.prog] || FOCUS_DEFAULT, newDef = DEF[k];
       if (JSON.stringify(S.focus) === sig(oldDef)) S.focus = lfFocusOf(newDef);
       S.prog = k; if (S.pick && S.pick.d === ymd(today()) && !lfProg().days.concat(S.rt).some(function (x) { return x.id === S.pick.id; })) S.pick = null;
       lfSave(); lfRender();
@@ -3180,7 +3205,7 @@ var FR_URL = 'https://sched.nikorapullin.workers.dev';
 var FRK = 'lift.fr.v1';
 var FR_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 function frLoad() {
-  var d = { on: false, code: '', key: '', name: '', list: [], pend: '', rx: [] };
+  var d = { on: false, code: '', key: '', name: '', list: [], pend: '', rx: [], no: [] };
   try {
     var o = JSON.parse(localStorage.getItem(FRK));
     if (o && typeof o === 'object') {
@@ -3191,6 +3216,8 @@ function frLoad() {
       if (Array.isArray(o.list)) d.list = o.list.filter(function (f) { return f && /^[A-HJ-NP-Z2-9]{8}$/.test(f.c); }).slice(0, 50)
         .map(function (f) { return { c: f.c, n: typeof f.n === 'string' ? f.n.slice(0, 24) : '', s: f.s && typeof f.s === 'object' ? f.s : null, at: +f.at || 0, gone: !!f.gone, rx: Array.isArray(f.rx) ? f.rx : [] }; });
       d.rx = Array.isArray(o.rx) ? o.rx : [];
+      /* codes you removed, so their add does not put them straight back */
+      d.no = Array.isArray(o.no) ? o.no.filter(function (c) { return /^[A-HJ-NP-Z2-9]{8}$/.test(c); }).slice(-200) : [];
     }
   } catch (e) {}
   return d;
@@ -3280,14 +3307,26 @@ function frPush() {
 function frPullAll(done) {
   /* everybody on the list, and your own record for the reactions on it */
   var left = FRS.list.length + 1;
-  frApi('GET', '/v1/lift/' + FRS.code).then(function (r) { if (r.st === 200) FRS.rx = Array.isArray(r.j.rx) ? r.j.rx : []; })
-    .catch(function () {}).then(function () { if (--left === 0) { frSave(); if (done) done(); } });
-  FRS.list.forEach(function (f) {
+  function one() { if (--left === 0) { frSave(); if (done) done(); } }
+  function pull(f) {
     frApi('GET', '/v1/lift/' + f.c).then(function (r) {
       if (r.st === 200) { f.n = r.j.n; f.s = r.j.s; f.at = r.j.at; f.rx = Array.isArray(r.j.rx) ? r.j.rx : []; f.gone = false; }
       else if (r.st === 404) f.gone = true;
-    }).catch(function () {}).then(function () { if (--left === 0) { frSave(); if (done) done(); } });
-  });
+    }).catch(function () {}).then(one);
+  }
+  frApi('GET', '/v1/lift/' + FRS.code).then(function (r) {
+    if (r.st !== 200) return;
+    FRS.rx = Array.isArray(r.j.rx) ? r.j.rx : [];
+    /* SOMEBODY ADDED YOU: they join your list too, unless you took them
+       off it yourself — a removal is yours to keep */
+    (Array.isArray(r.j.fo) ? r.j.fo : []).forEach(function (x) {
+      if (!x || !/^[A-HJ-NP-Z2-9]{8}$/.test(x.f) || x.f === FRS.code || FRS.no.indexOf(x.f) >= 0 || FRS.list.some(function (f) { return f.c === x.f; })) return;
+      var nf = { c: x.f, n: typeof x.n === 'string' ? x.n.slice(0, 24) : '', s: null, at: 0, gone: false, rx: [] };
+      FRS.list.push(nf); left++; pull(nf);
+      lfToast((nf.n || 'A friend') + ' added you');
+    });
+  }).catch(function () {}).then(one);
+  FRS.list.slice().forEach(pull);
 }
 
 function frTurnOn(name, btn) {
@@ -3306,7 +3345,7 @@ function frTurnOn(name, btn) {
 function frTurnOff() {
   lfAsk('Turn off friends?', 'Your counts are deleted from the server and your code stops working. Your friend list on this phone goes too.', 'Turn off', function () {
     frApi('DELETE', '/v1/lift/' + FRS.code).catch(function () {}).then(function () {
-      FRS = { on: false, code: '', key: '', name: FRS.name, list: [], pend: '' }; frSave(); lfRender();
+      FRS = { on: false, code: '', key: '', name: FRS.name, list: [], pend: '', rx: [], no: [] }; frSave(); lfRender();
     });
   });
 }
@@ -3318,7 +3357,10 @@ function frAdd(code, done) {
   frApi('GET', '/v1/lift/' + code).then(function (r) {
     if (r.st === 404) return done('Nobody has that code');
     if (r.st !== 200) throw new Error(r.st);
-    FRS.list.push({ c: code, n: r.j.n, s: r.j.s, at: r.j.at, gone: false, rx: Array.isArray(r.j.rx) ? r.j.rx : [] }); frSave(); done(null, r.j.n);
+    FRS.list.push({ c: code, n: r.j.n, s: r.j.s, at: r.j.at, gone: false, rx: Array.isArray(r.j.rx) ? r.j.rx : [] });
+    FRS.no = FRS.no.filter(function (c) { return c !== code; }); frSave(); done(null, r.j.n);
+    /* and you on theirs: their phone collects you the next time it looks */
+    frApi('PUT', '/v1/lift/' + code + '/follow', { f: FRS.code }).catch(function () {});
   }).catch(function () { done('Could not reach the server — try again'); });
 }
 function frLink() { return 'https://niko-999.github.io/lift/#add=' + FRS.code; }
@@ -3475,8 +3517,8 @@ function frSheet(f) {
   lfAccOn(s.el, frHue(st));
   if (rm) rm.addEventListener('click', function () {
     var i = FRS.list.indexOf(f); if (i < 0) return;
-    FRS.list.splice(i, 1); frSave(); s.close(true); lfRender();
-    lfToast('Removed ' + (f.n || 'friend'), function () { FRS.list.splice(i, 0, f); frSave(); lfRender(); });
+    FRS.list.splice(i, 1); if (FRS.no.indexOf(f.c) < 0) FRS.no.push(f.c); frSave(); s.close(true); lfRender();
+    lfToast('Removed ' + (f.n || 'friend'), function () { FRS.list.splice(i, 0, f); FRS.no = FRS.no.filter(function (c) { return c !== f.c; }); frSave(); lfRender(); });
   });
 }
 /* REACTIONS. Three marks, one press each, the same press takes it back.

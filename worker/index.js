@@ -672,6 +672,38 @@ export default {
       return json(req, { ok: true, on: !had });
     }
 
+    /* ADDING SOMEBODY ADDS YOU TO THEM: the code you added is told who you
+       are, signed with YOUR key so nobody can add themselves as somebody
+       else. It waits beside their record until their phone collects it —
+       the list itself still lives only on each phone. Newest 200. */
+    const lfo = p.match(/^\/v1\/lift\/([A-HJ-NP-Z2-9]{8})\/follow$/);
+    if (lfo && req.method === 'PUT') {
+      const auth = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/, '');
+      if (!/^[0-9a-f]{32}$/.test(auth)) return json(req, { error: 'no key' }, 401);
+      let body;
+      try { body = JSON.parse(await readCapped({ body: req.body, text: () => req.text() }, 512)); }
+      catch (e) { return json(req, { error: 'not json' }, 400); }
+      if (!body || !/^[A-HJ-NP-Z2-9]{8}$/.test(body.f || '') || body.f === lfo[1]) return json(req, { error: 'bad shape' }, 400);
+      const me = JSON.parse((await env.SCHED.get('lift:' + body.f)) || 'null');
+      if (!me || me.kh !== await sha256hex(auth)) return json(req, { error: 'wrong key' }, 403);
+      const them = JSON.parse((await env.SCHED.get('lift:' + lfo[1])) || 'null');
+      if (!them) return json(req, { error: 'nobody has that code' }, 404);
+      const fk = 'liftf:' + lfo[1];
+      let fo = JSON.parse((await env.SCHED.get(fk)) || '[]');
+      const had = fo.some((x) => x.f === body.f);
+      fo = [{ f: body.f, n: me.n, at: Date.now() }].concat(fo.filter((x) => x.f !== body.f)).slice(0, 200);
+      await env.SCHED.put(fk, JSON.stringify(fo), { expirationTtl: LIFT_TTL });
+      /* and their phone is told, once, if it asked to be */
+      if (!had && them.pu) {
+        try {
+          const bytes = await pushSeal(them.pu.pk, them.pu.au, { t: me.n + ' added you on Lift', b: 'You are on each other\'s friends now', g: 'lift-fo-' + body.f });
+          const res = await fetch(them.pu.ep, { method: 'POST', headers: { TTL: '86400', Urgency: 'normal', 'Content-Encoding': 'aes128gcm', 'Content-Type': 'application/octet-stream', Authorization: await vapidAuth(env, them.pu.ep, Date.now()) }, body: bytes });
+          if (res.status === 404 || res.status === 410) { delete them.pu; await env.SCHED.put('lift:' + lfo[1], JSON.stringify(them), { expirationTtl: LIFT_TTL }); }
+        } catch (e) {}
+      }
+      return json(req, { ok: true });
+    }
+
     const lf = p.match(/^\/v1\/lift\/([A-HJ-NP-Z2-9]{8})$/);
     if (lf) {
       const lk = 'lift:' + lf[1];
@@ -680,14 +712,15 @@ export default {
       if (req.method === 'GET') {
         if (!rec) return json(req, { error: 'nobody has that code' }, 404);
         const rx = JSON.parse((await env.SCHED.get('liftr:' + lf[1])) || '[]');
-        return json(req, { n: rec.n, s: rec.s, at: rec.at, rx });
+        const fo = JSON.parse((await env.SCHED.get('liftf:' + lf[1])) || '[]');
+        return json(req, { n: rec.n, s: rec.s, at: rec.at, rx, fo });
       }
       const auth = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/, '');
       if (!/^[0-9a-f]{32}$/.test(auth)) return json(req, { error: 'no key' }, 401);
       const kh = await sha256hex(auth);
       if (rec && rec.kh !== kh) return json(req, { error: 'wrong key' }, 403);
       if (req.method === 'DELETE') {
-        if (rec) { await env.SCHED.delete(lk); await env.SCHED.delete('liftr:' + lf[1]); }
+        if (rec) { await env.SCHED.delete(lk); await env.SCHED.delete('liftr:' + lf[1]); await env.SCHED.delete('liftf:' + lf[1]); }
         return json(req, { ok: true });
       }
       if (req.method === 'PUT') {
