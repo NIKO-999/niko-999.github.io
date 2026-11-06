@@ -3582,7 +3582,16 @@ var BADGES = [
   ['duo10', 'Gym Buddies', 'friends', 'Ten sessions in sync with a friend.', '#0ea5e9'],
   ['lead1', 'Crowned', 'friends', 'A week finished in front on the friends rings.', '#f59e0b'],
   ['lead3', 'Three-Peat', 'friends', 'In front three weeks running.', '#e11d48'],
-  ['squad', 'Squad Goals', 'friends', 'You and every friend closed your weekly goal in the same week.', '#22c55e']
+  ['squad', 'Squad Goals', 'friends', 'You and every friend closed your weekly goal in the same week.', '#22c55e'],
+  /* milestones: how and when you train, each its own shape and colour */
+  ['early', 'Early Bird', 'mile', 'Ten workouts started before 7 am.', '#fb923c'],
+  ['owl', 'Night Owl', 'mile', 'Ten workouts started after 8 pm.', '#4f46e5'],
+  ['long', 'Long Haul', 'mile', 'A single session of ninety minutes or more.', '#14b8a6'],
+  ['ton10', 'Ten Tonne', 'mile', 'Ten tonnes moved in one workout.', '#64748b'],
+  ['rep300', 'Rep Storm', 'mile', 'Three hundred reps in one workout.', '#ec4899'],
+  ['back', 'Comeback', 'mile', 'Back training after two weeks off.', '#10b981'],
+  ['seven', 'Seven Straight', 'mile', 'A workout on seven days in a row.', '#8b5cf6'],
+  ['explore', 'Explorer', 'mile', 'Forty different exercises logged.', '#eab308']
 ].map(function (a) { var o = { id: a[0], n: a[1], k: a[2], d: a[3] }; if (a[4]) o.c = a[4]; return o; });
 var BADGE = {}; BADGES.forEach(function (b) { BADGE[b.id] = b; });
 var BARBELL = { squat: 1, bench: 1, deadlift: 1, rdl: 1, frontsq: 1, inclbb: 1, bbrow: 1, hipthrust: 1, sldl: 1, rackpull: 1, ohp: 1 };
@@ -3652,6 +3661,24 @@ function lfBadges() {
     var down = S.bw[0].kg > S.bwGoal;
     for (var q = 0; q < S.bw.length; q++) { var kg = S.bw[q].kg; if (down ? kg <= S.bwGoal + .05 : kg >= S.bwGoal - .05) { won('bwgoal', S.bw[q].d); break; } }
   }
+  /* MILESTONES: when you train, how long, how much in one go, and how widely */
+  var earlyN = 0, owlN = 0, seen = {}, exN = 0, prevD = '', runD = 0, bestRun = 0;
+  ws.forEach(function (w) {
+    if (w.s > 1e11) {
+      var h = new Date(w.s).getHours();
+      if (h < 7 && ++earlyN === 10) won('early', w.d);
+      if (h >= 20 && ++owlN === 10) won('owl', w.d);
+      if (w.e > w.s && w.e - w.s >= 90 * 60000 && w.e - w.s < 6 * 3600000) won('long', w.d);
+    }
+    if (woVol(w) >= 1e4 * uk) won('ton10', w.d);
+    if (woReps(w) >= 300) won('rep300', w.d);
+    if (prevD) { var gap = Math.round((parseYmd(w.d) - parseYmd(prevD)) / 864e5); if (gap >= 15) won('back', w.d); if (gap === 1) runD++; else if (gap > 1) runD = 1; }
+    else runD = 1;
+    if (runD > bestRun) bestRun = runD;
+    if (runD === 7) won('seven', w.d);
+    prevD = w.d;
+    w.x.forEach(function (e) { if (e.sets.length && !seen[e.id]) { seen[e.id] = 1; if (++exN === 40) won('explore', w.d); } });
+  });
   /* VERSUS FRIENDS: from what the friends tab has seen and kept, since a
      friend's own record only carries thirty days */
   var fx = S.fx || { sy: {}, wk: {} }, syN = 0;
@@ -3669,7 +3696,8 @@ function lfBadges() {
     pr10: [prs30, 10], v100k: [Math.round(vol / uk), 1e5], v1m: [Math.round(vol / uk), 1e6], first: [ws.length, 1], pr: [0, 1], week: [0, 1], plate3: [0, 1], goal: [0, 1],
     stair10: [cdn.stairs, 10], stairhr: [Math.round(cdm.stairs / 60), 10], incl10: [cdn.walk, 10], inclhr: [Math.round(cdm.walk / 60), 10], bwgoal: [0, 1], abs10: [absN, 10], abs50: [absN, 50],
     tgt1: [0, 1], tgtall: fo.length > 1 ? [curMet, fo.length] : [0, 1], tgt4: [Math.min(tStreak, 4), 4], quad: [Math.min(qn, 8), 8],
-    duo1: [0, 1], duo10: [Math.min(syN, 10), 10], lead1: [0, 1], lead3: [Math.min(curRun, 3), 3], squad: [0, 1] };
+    duo1: [0, 1], duo10: [Math.min(syN, 10), 10], lead1: [0, 1], lead3: [Math.min(curRun, 3), 3], squad: [0, 1],
+    early: [Math.min(earlyN, 10), 10], owl: [Math.min(owlN, 10), 10], long: [0, 1], ton10: [0, 1], rep300: [0, 1], back: [0, 1], seven: [Math.min(bestRun, 7), 7], explore: [Math.min(exN, 40), 40] };
   return BADGES.map(function (b) { return { b: b, d: out[b.id] ? out[b.id].d : '', p: prog[b.id] }; });
 }
 function lfBadgeProg(x) {
@@ -3704,6 +3732,7 @@ var BD_KIND = {
   body: { n: 'Body weight', c: '#eab308' },
   core: { n: 'Abs', c: '#84cc16' },
   friends: { n: 'Versus friends', c: '#6366f1' },
+  mile: { n: 'Milestones', c: '#64748b' },
   month: { n: 'Monthly medal', c: '#84cc16' }
 };
 /* A MONTH WEARS ITS OWN COLOUR, so a year of medals is twelve different things */
@@ -3754,12 +3783,15 @@ var BD_CREAM = '#eee8dc';
 /* every kind has its own bdOutline; the target badges each have their own */
 var BD_SHK = { start: 'circle', streak: 'hexp', volume: 'squircle', pr: 'banner', feat: 'oct', body: 'diamond', core: 'tall' };
 var BD_SHI = { tgt1: 'hex', tgtall: 'shield', tgt4: 'rosette', quad: 'pent', stair10: 'tri', stairhr: 'tri', incl10: 'ramp', inclhr: 'ramp',
-  duo1: 'twin', duo10: 'capsule', lead1: 'crownb', lead3: 'star5', squad: 'trefoil' };
+  duo1: 'twin', duo10: 'capsule', lead1: 'crownb', lead3: 'star5', squad: 'trefoil',
+  early: 'sun', owl: 'gem', long: 'hourglass', ton10: 'trap', rep300: 'cross', back: 'drop', seven: 'hept', explore: 'compass' };
 /* the two machines share a colour and each has its own pattern: treads for the stairs, a gradient for the incline */
 var BD_PT = { stair10: 'stairs', stairhr: 'stairs', incl10: 'incline', inclhr: 'incline' };
 /* a glyph a smaller face has to make room for: how big, and how far down */
-var BD_GS = { plaque: [.72, 0], arch: [.62, 90], tri: [.52, 150], diamond: [.72, 0], ramp: [.8, 0], tall: [.82, 0], twin: [.5, 0], capsule: [.6, 0], crownb: [.5, 70], star5: [.42, 18], trefoil: [.56, 10] };
-var BD_GL = { first: 'i:check', wo10: '10', wo50: '50', goal: 'i:ring', st4: '4', st12: '12', tgt1: '1', tgtall: 'i:bars', tgt4: '4', quad: 'i:leg', pr: 'i:trophy', pr10: '10', v100k: 'i:weight', v1m: '1M', week: 'i:cal', plate3: '3', stair10: '10', stairhr: 'i:stairs', incl10: '10', inclhr: 'i:ramp', bwgoal: 'i:scale', abs10: '10', abs50: '50', duo1: 'i:pair', duo10: '10', lead1: '1', lead3: '3', squad: 'i:ring' };
+var BD_GS = { plaque: [.72, 0], arch: [.62, 90], tri: [.52, 150], diamond: [.72, 0], ramp: [.8, 0], tall: [.82, 0], twin: [.5, 0], capsule: [.6, 0], crownb: [.5, 70], star5: [.42, 18], trefoil: [.56, 10],
+  sun: [.56, 0], gem: [.55, 60], hourglass: [.42, 0], trap: [.62, 40], cross: [.5, 0], drop: [.56, 90], hept: [.7, 0], compass: [.42, 0] };
+var BD_GL = { first: 'i:check', wo10: '10', wo50: '50', goal: 'i:ring', st4: '4', st12: '12', tgt1: '1', tgtall: 'i:bars', tgt4: '4', quad: 'i:leg', pr: 'i:trophy', pr10: '10', v100k: 'i:weight', v1m: '1M', week: 'i:cal', plate3: '3', stair10: '10', stairhr: 'i:stairs', incl10: '10', inclhr: 'i:ramp', bwgoal: 'i:scale', abs10: '10', abs50: '50', duo1: 'i:pair', duo10: '10', lead1: '1', lead3: '3', squad: 'i:ring',
+  early: 'i:sun', owl: 'i:moon', long: '90', ton10: '10t', rep300: '300', back: 'i:flame', seven: '7', explore: '40' };
 function bdPoly(c, pts, rr) {
   var n = pts.length;
   for (var i = 0; i < n; i++) {
@@ -3803,6 +3835,20 @@ function bdOutline(c, k, sc) {
      seen from it: the crown's notches sit high enough that they are */
   else if (k === 'star5') bdPoly(c, M((function () { var o = []; for (var i = 0; i < 10; i++) { var a = Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? .46 : .99; o.push([rr * Math.cos(a), rr * Math.sin(a) - .04]); } return o; })()), S(.07));
   else if (k === 'trefoil') { for (var f3 = 0; f3 <= 240; f3++) { var u3 = f3 / 240 * Math.PI * 2, r3 = .7 + .27 * Math.cos(3 * (u3 - Math.PI / 2)); if (f3 === 0) c.moveTo(S(r3 * Math.cos(u3)), S(r3 * Math.sin(u3))); else c.lineTo(S(r3 * Math.cos(u3)), S(r3 * Math.sin(u3))); } c.closePath(); }
+  /* milestones */
+  else if (k === 'sun') { for (var s1 = 0; s1 <= 288; s1++) { var u1 = s1 / 288 * Math.PI * 2, r1 = .83 + .14 * Math.cos(12 * u1); if (s1 === 0) c.moveTo(S(r1), 0); else c.lineTo(S(r1 * Math.cos(u1)), S(r1 * Math.sin(u1))); } c.closePath(); }
+  else if (k === 'gem') bdPoly(c, M([[-.6, .8], [.6, .8], [.98, .26], [0, -.98], [-.98, .26]]), S(.08));
+  else if (k === 'hourglass') bdPoly(c, M([[-.8, .96], [.8, .96], [.26, 0], [.8, -.96], [-.8, -.96], [-.26, 0]]), S(.12));
+  else if (k === 'trap') bdPoly(c, M([[-.6, .72], [.6, .72], [.97, -.86], [-.97, -.86]]), S(.14));
+  else if (k === 'cross') bdPoly(c, M([[-.36, .96], [.36, .96], [.36, .36], [.96, .36], [.96, -.36], [.36, -.36], [.36, -.96], [-.36, -.96], [-.36, -.36], [-.96, -.36], [-.96, .36], [-.36, .36]]), S(.13));
+  else if (k === 'drop') {
+    var dcy = -.28, dr = .68, dtip = .98, db = Math.acos(dr / (dtip - dcy));
+    c.moveTo(0, S(dtip)); c.lineTo(S(dr * Math.sin(db)), S(dcy + dr * Math.cos(db)));
+    for (var d1 = 0; d1 <= 60; d1++) { var ua = (Math.PI / 2 - db) - d1 / 60 * (2 * Math.PI - 2 * db); c.lineTo(S(dr * Math.cos(ua)), S(dcy + dr * Math.sin(ua))); }
+    c.closePath();
+  }
+  else if (k === 'hept') bdPoly(c, M(bdNgon(7, .97, Math.PI / 2)), S(.12));
+  else if (k === 'compass') bdPoly(c, M((function () { var o = []; for (var i = 0; i < 8; i++) { var a = Math.PI / 2 + i * Math.PI / 4, rr = i % 2 ? .42 : .98; o.push([rr * Math.cos(a), rr * Math.sin(a)]); } return o; })()), S(.06));
   else if (k === 'squircle') bdPoly(c, M([[-.84, .84], [.84, .84], [.84, -.84], [-.84, -.84]]), S(.3));
   else if (k === 'banner') bdPoly(c, M([[-.84, .9], [.84, .9], [.84, -.96], [0, -.56], [-.84, -.96]]), S(.1));
   else if (k === 'pent') bdPoly(c, M([[-.86, .86], [.86, .86], [.86, -.18], [0, -.98], [-.86, -.18]]), S(.13));
@@ -3872,6 +3918,11 @@ var BD_PAT = {
   friends: {
     lines: function (c) { [-.32, .32].forEach(function (x) { c.moveTo(x + .62, 0); c.arc(x, 0, .62, 0, Math.PI * 2); }); },
     field: function (x, y) { var a = bdIn(x, y, -.32, 0, .62), b = bdIn(x, y, .32, 0, .62); return a && b ? 'd' : a || b ? 'a' : 'b'; }
+  },
+  /* milestones: diagonal bands, a road marked off */
+  mile: {
+    lines: function (c) { [-.8, 0, .8].forEach(function (k) { c.moveTo(-1, k + 1); c.lineTo(1, k - 1); }); },
+    field: function (x, y) { var v = x + y; return v < -.8 ? 'b' : v < 0 ? 'a' : v < .8 ? 'd' : 'b'; }
   },
   /* abs: six blocks, of course */
   core: {
@@ -4015,7 +4066,9 @@ function bdIcon(c, k) {
     c.beginPath(); c.moveTo(-130, -190); c.lineTo(130, -190); c.lineTo(120, -40); c.bezierCurveTo(110, 40, 50, 70, 0, 70); c.bezierCurveTo(-50, 70, -110, 40, -120, -40); c.closePath(); c.fill();
     c.lineWidth = 34; c.beginPath(); c.arc(-140, -110, 60, Math.PI * .5, Math.PI * 1.5); c.stroke(); c.beginPath(); c.arc(140, -110, 60, -Math.PI * .5, Math.PI * .5); c.stroke();
     r(-24, 60, 48, 90, 8); r(-110, 150, 220, 50, 14);
-  } else if (k === 'pair') { c.lineWidth = 46; c.beginPath(); c.arc(-85, 0, 140, 0, Math.PI * 2); c.stroke(); c.beginPath(); c.arc(85, 0, 140, 0, Math.PI * 2); c.stroke(); }
+  } else if (k === 'sun') { c.beginPath(); c.arc(0, 0, 100, 0, Math.PI * 2); c.fill(); c.lineWidth = 40; for (var sr = 0; sr < 8; sr++) { var sa = sr * Math.PI / 4; c.beginPath(); c.moveTo(Math.cos(sa) * 150, Math.sin(sa) * 150); c.lineTo(Math.cos(sa) * 220, Math.sin(sa) * 220); c.stroke(); } }
+  else if (k === 'moon') { c.beginPath(); c.arc(0, 0, 200, 0, Math.PI * 2); c.fill(); c.globalCompositeOperation = 'destination-out'; c.beginPath(); c.arc(95, -80, 170, 0, Math.PI * 2); c.fill(); c.globalCompositeOperation = 'source-over'; }
+  else if (k === 'pair') { c.lineWidth = 46; c.beginPath(); c.arc(-85, 0, 140, 0, Math.PI * 2); c.stroke(); c.beginPath(); c.arc(85, 0, 140, 0, Math.PI * 2); c.stroke(); }
   else if (k === 'check') { c.lineWidth = 70; c.beginPath(); c.moveTo(-170, 10); c.lineTo(-50, 130); c.lineTo(180, -120); c.stroke(); }
   else if (k === 'weight') { c.beginPath(); c.moveTo(-150, -60); c.lineTo(150, -60); c.lineTo(190, 200); c.lineTo(-190, 200); c.closePath(); c.fill(); c.lineWidth = 40; c.beginPath(); c.arc(0, -125, 70, 0, Math.PI * 2); c.stroke(); }
   else if (k === 'cal') {
@@ -4405,13 +4458,15 @@ setInterval(function () { if (act && !sessSheet) lfTick(); }, 1000);
 
 /* BADGES ARRIVING ON A RECORD THAT ALREADY HAS HISTORY are not a dozen
    announcements: whatever was won before is counted as seen, quietly. */
-if (!S.bseen) { S.bseen = { v2: 1, v3: 1 }; var bsN = 0; lfBadges().concat(lfMedals()).forEach(function (x) { if (x.d) { S.bseen[x.b.id] = 1; bsN++; } }); if (bsN) lfSave(); }
+if (!S.bseen) { S.bseen = { v2: 1, v3: 1, v4: 1 }; var bsN = 0; lfBadges().concat(lfMedals()).forEach(function (x) { if (x.d) { S.bseen[x.b.id] = 1; bsN++; } }); if (bsN) lfSave(); }
 /* AND THE SAME FOR BADGES A LATER BUILD ADDED: the week goal and the four
    target badges arrived after people had already earned them, and a goal
    you hit in August is not news in November. `v2` marks the record as
    having been through this once, so one won from here on is announced. */
 else if (!S.bseen.v2) { var BS2 = { goal: 1, tgt1: 1, tgtall: 1, tgt4: 1, quad: 1 }; lfBadges().forEach(function (x) { if (x.d && BS2[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v2 = 1; lfSave(); }
 /* the monthly medals arrived the same way, and a month won in August is not news either */
+/* and the milestones, which a long record may already hold */
+if (S.bseen && !S.bseen.v4) { var BS4 = { early: 1, owl: 1, long: 1, ton10: 1, rep300: 1, back: 1, seven: 1, explore: 1 }; lfBadges().forEach(function (x) { if (x.d && BS4[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v4 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v3) { lfMedals().forEach(function (x) { if (x.d) S.bseen[x.b.id] = 1; }); S.bseen.v3 = 1; lfSave(); }
 lfRender();
 /* An open counts for the board, a beat after the first paint. */
