@@ -76,7 +76,7 @@ const freeze = (at) => `(() => {
   ok('the split is seven days, Monday first', split.length === 7 && split[0] === 'Mon · Quad strength' && split[6] === 'Sun · Choice day', split);
   await page.click('#lfSplit .lf-li >> nth=0'); await settle(page);
   const mon = await top(page).textContent();
-  ok('a day of the split reads its sets × reps', mon.includes('Hack squat') && mon.includes('4 × 6–10') && mon.includes('1 RIR') && mon.includes('2 × 10–12 each side') && mon.includes('Standing calf raises'), mon.slice(0, 160));
+  ok('a day of the split reads its sets × reps', mon.includes('Hack squat') && mon.includes('4 × 6–10') && mon.includes('1 RIR') && mon.includes('2 × 10–12 each side') && mon.includes('Linear hack calf raises'), mon.slice(0, 160));
   ok('a day of the split says what it is for', /^Quad strength/.test(await top(page).locator('#lfTip b').textContent())
     && /75–90 minutes/.test(await top(page).locator('#lfTip').textContent()) && /Double progression/.test(await top(page).locator('#lfTip').textContent()));
   ok('the focus comes before the exercises', await top(page).evaluate((s) => !!(s.querySelector('#lfTip').compareDocumentPosition(s.querySelector('.lf-list')) & 4)));
@@ -392,7 +392,7 @@ const freeze = (at) => `(() => {
       const ex = page.locator('.lf-session .lf-ex').first();
       ok('the set count is the program\'s', await ex.locator('.lf-set:not(.is-hd)').count() === 4);
       const monEx = await page.$$eval('.lf-session .lf-ex-n', (x) => x.map((e) => e.textContent));
-      ok('Monday carries its calves at 5 sets and its abs', monEx.join() === 'Hack squat,Leg extensions,Bulgarian split squats,Standing calf raises,Cable crunches'
+      ok('Monday carries its calves at 5 sets and its abs', monEx.join() === 'Hack squat,Leg extensions,Bulgarian split squats,Linear hack calf raises,Cable crunches'
         && await page.locator('.lf-session .lf-ex').nth(3).locator('.lf-set:not(.is-hd)').count() === 5, monEx);
       ok('the target is written under the name', (await ex.locator('.lf-tg').textContent()) === '4 × 6–10 · 1 RIR · rest 2–3 min');
       const ph = await ex.locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.placeholder));
@@ -422,7 +422,7 @@ const freeze = (at) => `(() => {
     ok('a leg day no longer asks how your legs are', await page.locator('#lfRec').count() === 0 && !/soreness/i.test(await page.textContent('#lfHome')));
     await page.click('#lfGo'); await settle(page);
     const n = await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelector('.lf-ex-n').textContent + ':' + e.querySelectorAll('.lf-set:not(.is-hd)').length));
-    ok('and the day starts at full volume', n.join() === 'Hack squat:4,Leg extensions:4,Bulgarian split squats:2,Standing calf raises:5,Cable crunches:4', n);
+    ok('and the day starts at full volume', n.join() === 'Hack squat:4,Leg extensions:4,Bulgarian split squats:2,Linear hack calf raises:5,Cable crunches:4', n);
     /* THE REST ALERT, once, the moment the rest is up. */
     const set0 = page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd)').first();
     await set0.locator('input').nth(0).fill('100'); await set0.locator('input').nth(1).fill('8');
@@ -1207,6 +1207,25 @@ const freeze = (at) => `(() => {
     ok('and half a glute set, as an RDL is: 2 and 1½', await em('Glutes') === '3½ / 6', await em('Glutes'));
     ok('but never a hamstring set: only the RDL counts there', await em('Hamstrings') === '3 / 14', await em('Hamstrings'));
     ok('a row is half a biceps set', await em('Biceps') === '1½ / 10', await em('Biceps'));
+    await c.close();
+  }
+
+  /* ── MOVE HISTORY: sets logged under the wrong exercise move, records and all ── */
+  {
+    const st = (w, r) => ({ w, r });
+    const wo = [{ id: 'm1', d: '2026-10-27', s: 1, e: 2, n: 'Legs', x: [{ id: 'calfstand', n: 'Standing calf raises', sets: [st(80, 12), st(80, 12)] }] },
+      { id: 'm2', d: '2026-10-29', s: 3, e: 4, n: 'Legs', x: [{ id: 'calfstand', n: 'Standing calf raises', sets: [st(100, 9)] }, { id: 'hackcalf', n: 'Linear hack calf raises', sets: [st(60, 15)] }] }];
+    const { c, page } = await ctx({ unit: 'kg', wo }, '2026-10-30T18:00:00');
+    await page.click('.lf-bar [data-v="lib"]'); await settle(page);
+    await page.locator('#lfLibList .lf-li', { has: page.locator('b', { hasText: /^Standing calf raises$/ }) }).click(); await settle(page);
+    await top(page).locator('#lfMoveHist').click(); await settle(page);
+    await top(page).locator('input[type="search"]').fill('linear hack'); await settle(page);
+    await top(page).locator('.lf-li', { hasText: 'Linear hack calf raises' }).first().click(); await settle(page);
+    await top(page).locator('button', { hasText: /^Move$/ }).click(); await settle(page);
+    const moved = (await store(page)).wo.map((w) => w.x.map((e) => e.id + ':' + e.n + ':' + e.sets.length).join('|'));
+    ok('every set moves to the exercise picked, joining one already in the same workout', moved.join() === 'hackcalf:Linear hack calf raises:2,hackcalf:Linear hack calf raises:2', moved);
+    await page.click('.lf-toast button'); await settle(page);
+    ok('and Undo puts it back', (await store(page)).wo[1].x.map((e) => e.id).join() === 'calfstand,hackcalf');
     await c.close();
   }
 

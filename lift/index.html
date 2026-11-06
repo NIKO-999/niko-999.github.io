@@ -945,7 +945,8 @@ var EXERCISES = [
   ['bstbr', 'B-stance glute bridges', 'Glutes'], ['sllp', 'Single-leg press', 'Quads', 1], ['gdrive', 'Glute drive machine', 'Glutes', 1],
   ['hipext', 'Hip extensions', 'Glutes'], ['mrdl', 'Machine Romanian deadlift', 'Hamstrings', 1], ['kbmach', 'Glute kickback machine', 'Glutes'],
   ['apullup', 'Assisted pull-ups', 'Back', 1], ['hirow', 'High row machine', 'Back', 1], ['wgrow', 'Seated wide-grip rows', 'Back', 1],
-  ['crdpull', 'Cable rear delt pulls', 'Shoulders'], ['adips', 'Assisted dips', 'Triceps', 1], ['smskull', 'Smith machine skull crushers', 'Triceps']
+  ['crdpull', 'Cable rear delt pulls', 'Shoulders'], ['adips', 'Assisted dips', 'Triceps', 1], ['smskull', 'Smith machine skull crushers', 'Triceps'],
+  ['hackcalf', 'Linear hack calf raises', 'Calves']
 ].map(function (a) { return { id: a[0], n: a[1], m: a[2], c: a[3] ? 1 : 0, t: a[4] || 'w' }; });
 
 /* PUSH, PULL, LEGS — and Core for what is neither. Worked out from the
@@ -1017,11 +1018,11 @@ var PROGRAM_UL = [
      days of 4 heavy plus 4 extensions; back is 8 for the lats and 8 for
      the upper back; chest 8 pressing and 8 flyes; delts are side and rear
      over three days. Hamstrings 14, calves 15, glutes 6, abs 11. */
-  { id: 'p-mon', dow: 1, n: 'Quad strength', sp: 'Hack squat, extensions, split squats', ex: [['hack', 4, 6, 10], ['legext', 4, 12, 15], ['bss', 2, 10, 12, 'each side'], ['calfstand', 5, 8, 12], ['cablecrunch', 4, 12, 15]] },
+  { id: 'p-mon', dow: 1, n: 'Quad strength', sp: 'Hack squat, extensions, split squats', ex: [['hack', 4, 6, 10], ['legext', 4, 12, 15], ['bss', 2, 10, 12, 'each side'], ['hackcalf', 5, 8, 12], ['cablecrunch', 4, 12, 15]] },
   { id: 'p-tue', dow: 2, n: 'Chest & shoulders', sp: 'Incline press, flyes, delts, triceps', ex: [['incdb', 4, 8, 12], ['cfly', 4, 12, 15], ['cablat', 4, 12, 20], ['rdfly', 3, 12, 20], ['tripush', 3, 10, 15], ['triover', 3, 12, 15]] },
   { id: 'p-wed', dow: 3, n: 'Hamstrings & glutes', sp: 'Hinge, curls, hip thrust', ex: [['rdl', 3, 8, 10], ['seatcurl', 4, 10, 15], ['hipthrust', 4, 8, 12], ['lyingcurl', 3, 12, 15], ['calfseat', 5, 12, 20], ['cablecrunch', 3, 12, 15]] },
   { id: 'p-thu', dow: 4, n: 'Back & V-taper', sp: 'Pull-ups, rows, pullovers, curls', ex: [['pullup', 3, 6, 10], ['latpd', 3, 10, 12], ['cpullover', 2, 12, 15], ['csrow', 4, 8, 12], ['rdfly', 3, 12, 20], ['ezcurl', 3, 8, 12], ['incurl', 2, 10, 15], ['cablecurl', 2, 12, 15]] },
-  { id: 'p-fri', dow: 5, n: 'Quad volume', sp: 'Pendulum squat, extensions, curls', ex: [['pendulum', 4, 8, 12], ['legext', 4, 12, 15], ['seatcurl', 4, 12, 15], ['calfstand', 5, 10, 15], ['hlr', 4, 12, 15]] },
+  { id: 'p-fri', dow: 5, n: 'Quad volume', sp: 'Pendulum squat, extensions, curls', ex: [['pendulum', 4, 8, 12], ['legext', 4, 12, 15], ['seatcurl', 4, 12, 15], ['hackcalf', 5, 10, 15], ['hlr', 4, 12, 15]] },
   { id: 'p-sat', dow: 6, n: 'Chest & back', sp: 'Chest, back, delts, arms', ex: [['dbbench', 4, 8, 12], ['pecdeck', 4, 12, 15], ['seatrow', 4, 8, 12], ['cablat', 3, 15, 20], ['revpec', 3, 15, 20], ['preacher', 3, 10, 15], ['ropeext', 4, 10, 15]] },
   /* SUNDAY IS A CHOICE, not a session and not a rest day: the card offers
      four ways to spend it and you pick the one your body needs. */
@@ -1040,7 +1041,7 @@ var CHOICE_RT = [
 var PROGRAM_PPL = [
   { id: 'q-mon', dow: 1, n: 'Push A', sp: 'Chest, front and side delts, triceps', ex: [['smithinc', 3, 6, 10], ['dbbench', 3, 8, 12], ['cfly', 2, 12, 15], ['seatshp', 2, 8, 12], ['cablat', 3, 12, 20], ['ohcable', 3, 10, 15], ['ropepush', 2, 12, 15]] },
   { id: 'q-tue', dow: 2, n: 'Pull A', sp: 'Back width, rear delts, biceps', ex: [['pullup', 3, 6, 10], ['csrow', 3, 8, 12], ['ngpd', 2, 10, 15], ['revpec', 3, 12, 20], ['incurl', 3, 8, 12], ['cabham', 2, 10, 15]] },
-  { id: 'q-wed', dow: 3, n: 'Legs A', sp: 'Quads, calves, abs', ex: [['hack', 3, 6, 10], ['legpress', 3, 10, 15], ['legext', 3, 12, 15], ['rdl', 3, 8, 12], ['seatcurl', 2, 10, 15], ['calfstand', 4, 8, 15], ['cablecrunch', 3, 10, 15]] },
+  { id: 'q-wed', dow: 3, n: 'Legs A', sp: 'Quads, calves, abs', ex: [['hack', 3, 6, 10], ['legpress', 3, 10, 15], ['legext', 3, 12, 15], ['rdl', 3, 8, 12], ['seatcurl', 2, 10, 15], ['hackcalf', 4, 8, 15], ['cablecrunch', 3, 10, 15]] },
   { id: 'q-thu', dow: 4, n: 'Push B', sp: 'Shoulders, upper chest, triceps', ex: [['incdb', 3, 8, 12], ['mchest', 3, 8, 12], ['cablat', 4, 12, 20], ['mshp', 2, 8, 12], ['pecdeck', 2, 12, 15], ['ezskull', 3, 8, 12], ['sapush', 2, 12, 15]] },
   { id: 'q-fri', dow: 5, n: 'Pull B', sp: 'Back thickness, rear delts, biceps, lower back', ex: [['bbrow', 3, 6, 10], ['wgpd', 3, 8, 12], ['sarow', 2, 10, 15], ['revpec', 3, 12, 20], ['preacher', 3, 8, 12], ['cablecurl', 2, 12, 15], ['backext', 2, 12, 15]] },
   { id: 'q-sat', dow: 6, n: 'Legs B', sp: 'Hamstrings, glutes, quad volume, calves, abs', ex: [['smithsq', 3, 8, 12], ['bss', 3, 8, 12], ['seatcurl', 3, 10, 15], ['lyingcurl', 2, 10, 15], ['hipthrust', 2, 8, 12], ['calfseat', 4, 10, 20], ['hlr', 3, 10, 15], ['backext', 2, 12, 15]] }
@@ -1075,12 +1076,12 @@ var PROGRAM_GF = [
    short between them, and Sunday off. Three working sets an exercise at
    most, because the frequency is where the volume comes from. */
 var PROGRAM_QC = [
-  { id: 'k-mon', dow: 1, n: 'Heavy legs', sp: 'Pendulum, extensions, split squats', ex: [['calfstand', 4, 8, 10], ['pendulum', 3, 6, 8], ['legext', 3, 10, 12], ['bss', 3, 8, 10, 'each side'], ['seatcurl', 3, 10, 12]] },
+  { id: 'k-mon', dow: 1, n: 'Heavy legs', sp: 'Pendulum, extensions, split squats', ex: [['hackcalf', 4, 8, 10], ['pendulum', 3, 6, 8], ['legext', 3, 10, 12], ['bss', 3, 8, 10, 'each side'], ['seatcurl', 3, 10, 12]] },
   { id: 'k-tue', dow: 2, n: 'Chest & delts', sp: 'Incline press, shoulders, triceps', ex: [['incdb', 3, 6, 8], ['dbshp', 3, 8, 10], ['cfly', 3, 10, 12], ['cablat', 4, 12, 15], ['ohcable', 3, 12, 15]] },
   { id: 'k-wed', dow: 3, n: 'Back & biceps', sp: 'Rows, pulldowns, curls', ex: [['tbar', 3, 8, 10], ['ngpd', 3, 10, 12], ['rdfly', 3, 12, 15], ['incurl', 3, 10, 12], ['hlr', 3, 12, 15]] },
   { id: 'k-thu', dow: 4, n: 'Quad sweep', sp: 'Leg press, lunges, seated calves', ex: [['calfseat', 4, 12, 15], ['legpress', 3, 8, 10], ['lyingcurl', 3, 10, 12], ['lunge', 3, 10, 10, 'steps each side'], ['tibraise', 3, 15, 20]] },
   { id: 'k-fri', dow: 5, n: 'Upper power', sp: 'Pull-ups, bench, arms', ex: [['pullup', 3, 6, 8], ['bench', 3, 6, 8], ['latraise', 4, 12, 15], ['hammer', 3, 10, 12], ['tripush', 3, 10, 12]] },
-  { id: 'k-sat', dow: 6, n: 'Calf burnout', sp: 'Calves, sissy squats, Romanian deadlifts', ex: [['calf', 4, 15, 20], ['legext', 3, 12, 15, 'each side'], ['sissy', 3, 10, 12], ['rdl', 3, 8, 10], ['calfstand', 3, 20, 20]] }
+  { id: 'k-sat', dow: 6, n: 'Calf burnout', sp: 'Calves, sissy squats, Romanian deadlifts', ex: [['calf', 4, 15, 20], ['legext', 3, 12, 15, 'each side'], ['sissy', 3, 10, 12], ['rdl', 3, 8, 10], ['hackcalf', 3, 20, 20]] }
 ];
 function lfMkProg(list) { return list.map(function (d) {
   return { id: d.id, dow: d.dow, n: d.n, sp: d.sp, fixed: 1, choice: d.choice ? 1 : 0, ex: d.ex.map(function (e) { return e[0]; }),
@@ -1527,11 +1528,6 @@ function lastFor(id) {
   for (var i = w.length - 1; i >= 0; i--) for (var j = 0; j < w[i].x.length; j++) if (w[i].x[j].id === id) return w[i].x[j].sets;
   return null;
 }
-function bestFor(id) {
-  var best = 0;
-  S.wo.forEach(function (w) { w.x.forEach(function (e) { if (e.id === id) e.sets.forEach(function (s) { best = Math.max(best, e1rm(s.w, s.r)); }); }); });
-  return best;
-}
 function historyFor(id) {
   return woSorted().map(function (w) {
     var e = null; for (var j = 0; j < w.x.length; j++) if (w.x[j].id === id) { e = w.x[j]; break; }
@@ -1702,10 +1698,11 @@ function lfWeekStreak() {
 function lfTags() {
   var tk = ymd(today()), out = [], ws = woOn(tk);
   if (ws.length) {
+    /* a PR is a heavier weight than ever on the exercise, as in a workout */
     var best = {};
-    S.wo.forEach(function (w) { if (w.d < tk) w.x.forEach(function (e) { e.sets.forEach(function (q) { var v = e1rm(q.w, q.r); if (v > (best[e.id] || 0)) best[e.id] = v; }); }); });
+    S.wo.forEach(function (w) { if (w.d < tk) w.x.forEach(function (e) { e.sets.forEach(function (q) { if (q.r > 0 && (best[e.id] === undefined || (+q.w || 0) > best[e.id])) best[e.id] = +q.w || 0; }); }); });
     var prs = 0;
-    ws.forEach(function (w) { w.x.forEach(function (e) { if (best[e.id] > 0 && e.sets.some(function (q) { return e1rm(q.w, q.r) > best[e.id] + 1e-9; })) prs++; }); });
+    ws.forEach(function (w) { w.x.forEach(function (e) { if (best[e.id] !== undefined && e.sets.some(function (q) { return q.r > 0 && (+q.w || 0) > 0 && (+q.w || 0) > best[e.id] + 1e-9; })) prs++; }); });
     if (prs) out.push(['pr', prs === 1 ? 'New PR' : prs + ' new PRs']);
     var w0 = ws[ws.length - 1], prev = woSorted().filter(function (w) { return w.d < tk && w.n === w0.n; }).pop();
     if (prev && woVol(prev) > 0) { var p = Math.round((woVol(w0) - woVol(prev)) / woVol(prev) * 100); if (p > 0) out.push(['up', '+' + p + '% today']); }
@@ -2294,7 +2291,6 @@ function lfPaintSession() {
   list.textContent = '';
   act.x.forEach(function (e, ei) {
     var prev = lastFor(e.id) || [];
-    var best = bestFor(e.id);
     var aim = lfAim(e);
     var card = el('<div class="lf-ex"><div class="lf-ex-hd"><button type="button" class="lf-ex-n"></button><button type="button" class="lf-x" aria-label="Remove exercise">' + IC.x + '</button></div>'
       + '<i class="lf-ex-pb" aria-hidden="true"><i></i></i><div class="lf-tg"></div><div class="lf-aim"></div>'
@@ -2317,7 +2313,6 @@ function lfPaintSession() {
       var go = function () { act.x.splice(ei, 1); lfSaveAct(); lfPaintSession(); };
       if (e.sets.some(function (s) { return s.ok; })) lfAsk('Remove ' + e.n + '?', 'The sets you logged for it in this workout go with it.', 'Remove', go); else go();
     });
-    var runBest = best;
     e.sets.forEach(function (s, si) {
       var p = prev[si] || prev[prev.length - 1];
       var g = aim.sets[si] || aim.sets[aim.sets.length - 1];
@@ -2342,7 +2337,7 @@ function lfPaintSession() {
          with the field: the extra rep you typed in after the tick counts */
       var rejudge = function () {
         if (!s.ok || s.w === '' || s.r === '') return;
-        var wasP = s.pr, wasR = s.rp, sn = $('.lf-sn', row); lfJudge(e, si, s, best); lfSaveAct(); lfSnMark(sn, s, si);
+        var wasP = s.pr, wasR = s.rp, sn = $('.lf-sn', row); lfJudge(e, si, s); lfSaveAct(); lfSnMark(sn, s, si);
         if ((s.pr && !wasP) || (s.rp && !wasR && !wasP)) {
           var at = sn.getBoundingClientRect(); lfCheer(s, at);
           row.classList.remove('is-pop'); void row.offsetWidth; row.classList.add('is-pop');
@@ -2362,7 +2357,7 @@ function lfPaintSession() {
         if (s.w === '' || s.r === '' || !(s.r > 0)) { lfToast('Put in the weight and reps first'); (s.w === '' ? wi : ri).focus(); return; }
         s.ok = 1;
         /* a record by either of lfIsPr's two measures, this session's earlier sets included */
-        lfJudge(e, si, s, best);
+        lfJudge(e, si, s);
         act.rest = Date.now(); act.restEx = e.id; act.rang = 0; lfRestPush();
         var at = s.pr || s.rp ? $('.lf-sn', row).getBoundingClientRect() : null;
         lfPopAt = ei + ':' + si; lfSaveAct(); if (!at) buzz(14); lfPaintSession(); lfTick();
@@ -2415,14 +2410,19 @@ function lfBurst(x, y) {
   window.lfBursts = (window.lfBursts || 0) + 1;
   setTimeout(function () { bu.remove(); }, 1700);
 }
-/* TWO RECORDS, two celebrations. A PR is the strongest set you have done
-   on the exercise, by estimated one-rep max: it gets the confetti, and it
-   is the one the badges count. A REP RECORD is more reps than you have
-   ever done at a weight you have used before — an extra rep on last
-   time — and gets a smaller mark of its own. A set that is both is a PR. */
-function lfIsPr(e, si, s, best) {
-  var w = +s.w || 0, r = +s.r || 0; if (!(r > 0)) return false;
-  return best > 0 && e1rm(w, r) > runBestBefore(e, si, best) + 1e-9;
+/* TWO RECORDS, two celebrations. A PR is a heavier weight than you have
+   ever lifted on the exercise: it gets the confetti, and it is the one the
+   badges count. A REP RECORD is more reps than ever at a weight you have
+   lifted before, and gets a smaller mark of its own. It used to be the
+   estimated one-rep max that made a PR, which called 100 × 15 after
+   100 × 12 a PR — it is the same weight for more reps, a rep record. */
+function lfIsPr(e, si, s) {
+  var w = +s.w || 0, r = +s.r || 0; if (!(r > 0) || !(w > 0)) return false;
+  var top = -1;
+  function look(q) { if ((+q.r || 0) > 0 && (+q.w || 0) > top) top = +q.w || 0; }
+  historyFor(e.id).forEach(function (h) { h.sets.forEach(look); });
+  for (var i = 0; i < si; i++) if (e.sets[i].ok) look(e.sets[i]);
+  return top >= 0 && w > top + 1e-9;
 }
 function lfIsRep(e, si, s) {
   var w = +s.w || 0, r = +s.r || 0; if (!(r > 0)) return false;
@@ -2432,7 +2432,7 @@ function lfIsRep(e, si, s) {
   for (var i = 0; i < si; i++) if (e.sets[i].ok) look(e.sets[i]);
   return seen && beat;
 }
-function lfJudge(e, si, s, best) { s.pr = lfIsPr(e, si, s, best) ? 1 : 0; s.rp = !s.pr && lfIsRep(e, si, s) ? 1 : 0; }
+function lfJudge(e, si, s) { s.pr = lfIsPr(e, si, s) ? 1 : 0; s.rp = !s.pr && lfIsRep(e, si, s) ? 1 : 0; }
 function lfSnMark(sn, s, si) {
   var on = s.ok && (s.pr || s.rp);
   sn.textContent = !on ? si + 1 : s.pr ? 'PR' : 'REP';
@@ -2456,11 +2456,6 @@ function lfRepBurst(x, y) {
   document.body.appendChild(bu);
   window.lfReps = (window.lfReps || 0) + 1;
   setTimeout(function () { bu.remove(); }, 1100);
-}
-function runBestBefore(e, si, best) {
-  var b = best;
-  for (var i = 0; i < si; i++) { var s = e.sets[i]; if (s.ok) b = Math.max(b, e1rm(s.w, s.r)); }
-  return b;
 }
 
 function lfFinish() {
@@ -2554,10 +2549,10 @@ function lfGrouped(list) {
   return out;
 }
 
-function lfPicker(onPick) {
+function lfPicker(onPick, title) {
   var b = el('<div><input class="lf-field" type="search" placeholder="Search exercises" aria-label="Search exercises" autocomplete="off" /><div class="lf-pplw"></div><div class="lf-list lf-sec"></div></div>');
   var mk = el('<button type="button" class="lf-btn is-full">' + IC.plus + 'Create exercise</button>');
-  var s = lfSheet({ title: 'Add exercise', body: b, foot: [mk] });
+  var s = lfSheet({ title: title || 'Add exercise', body: b, foot: [mk] });
   var q = $('input', b), list = $('.lf-list', b), grp = 'all';
   $('.lf-pplw', b).appendChild(lfPplSeg(grp, function (g) { grp = g; paint(); }));
   function paint() {
@@ -2697,12 +2692,44 @@ function lfExSheet(id) {
     ed.addEventListener('click', function () { lfExForm(ex, function () { s.close(true); lfExSheet(id); }); });
     foot = [ed];
   }
+  /* LOGGED UNDER THE WRONG ONE: every set of this exercise, from every
+     workout and the one in progress, moves to the one you pick. */
+  var inAct = act && act.x.some(function (e) { return e.id === id; });
+  if (h.length || inAct) {
+    var mv = el('<button type="button" class="lf-btn is-full" id="lfMoveHist">Move history</button>');
+    mv.addEventListener('click', function () {
+      lfPicker(function (to) {
+        if (to === id) return;
+        var n = h.length + (inAct ? 1 : 0);
+        lfAsk('Move to ' + exName(to) + '?', 'All ' + n + (n === 1 ? ' session' : ' sessions') + ' of ' + name + ' become ' + exName(to) + ', with every set and record.', 'Move', function () { s.close(true); lfMoveHistory(id, to, name); });
+      }, 'Move history to');
+    });
+    foot = (foot || []).concat([mv]);
+  }
   /* One exercise at a time: a second replaces the first rather than
      stacking on it. */
   stack.slice().forEach(function (x) { if (x.el.classList.contains('lf-exd')) x.close(true); });
   var s = lfSheet({ title: name, body: b, foot: foot, cls: 'lf-exd', through: true });
 }
 
+function lfMoveHistory(from, to, fromN) {
+  var toN = exName(to), was = JSON.stringify(S.wo), wasAct = act ? JSON.stringify(act) : null;
+  function move(x) {
+    var dst = null; x.forEach(function (e) { if (e.id === to) dst = e; });
+    x.slice().forEach(function (e) {
+      if (e.id !== from) return;
+      if (dst) { dst.sets = dst.sets.concat(e.sets); x.splice(x.indexOf(e), 1); }
+      else { e.id = to; e.n = toN; dst = e; }
+    });
+  }
+  S.wo.forEach(function (w) { move(w.x); });
+  if (act) move(act.x);
+  lfSave(); lfSaveAct(); lfRender(); if (sessSheet) lfPaintSession();
+  lfToast(fromN + ' moved to ' + toN, function () {
+    S.wo = JSON.parse(was); if (wasAct && act) act = JSON.parse(wasAct);
+    lfSave(); lfSaveAct(); lfRender(); if (sessSheet) lfPaintSession();
+  });
+}
 function lfRoutinePicker() {
   var b = el('<div class="lf-list"></div>');
   var s = lfSheet({ title: 'Today', body: b });
@@ -3329,11 +3356,13 @@ function frStats() {
     if (woOn(k).length) d += '1'; else if (S.rd[k]) { d += 'r'; rest30++; } else d += '0';
   }
   var in30 = S.wo.filter(function (w) { return w.d >= from30 && w.d <= tk; });
+  /* a PR is a heavier weight than ever on the exercise, as in a workout */
   var best = {}, pr30 = 0;
   S.wo.slice().sort(function (a, b) { return a.s - b.s; }).forEach(function (w) {
     w.x.forEach(function (e) { e.sets.forEach(function (st) {
-      var v = e1rm(st.w, st.r), b0 = best[e.id] || 0;
-      if (v > b0 + 1e-9) { if (b0 > 0 && w.d >= from30) pr30++; best[e.id] = v; }
+      if (!(st.r > 0)) return;
+      var v = +st.w || 0, b0 = best[e.id];
+      if (b0 === undefined || v > b0 + 1e-9) { if (b0 !== undefined && v > 0 && w.d >= from30) pr30++; best[e.id] = v; }
     }); });
   });
   var mon = monday(t), wkFrom = ymd(mon);
@@ -4135,15 +4164,16 @@ function lfBadges() {
   var ws = woSorted(), out = {}, uk = S.unit === 'lb' ? LB : 1;
   function won(id, d) { if (!out[id]) out[id] = { d: d }; }
   ws.forEach(function (w, i) { var n = i + 1; if (n === 1) won('first', w.d); if (n === 10) won('wo10', w.d); if (n === 50) won('wo50', w.d); if (n === 100) won('wo100', w.d); });
-  /* PRs: a set beating every earlier one on the same exercise. A rep
-     record is celebrated in the workout but is not a PR here. */
+  /* PRs: an exercise lifted heavier than ever before. A rep record is
+     celebrated in the workout but is not a PR here. */
   var best = {}, prDays = [], vol = 0, heavy = false;
   ws.forEach(function (w) {
     var hit = 0;
     w.x.forEach(function (e) {
-      var top = 0; e.sets.forEach(function (q) { var v = e1rm(q.w, q.r); if (v > top) top = v; if (BARBELL[e.id] && q.w >= 140) heavy = true; });
-      if (best[e.id] > 0 && top > best[e.id] + 1e-9) hit++;
-      if (top > (best[e.id] || 0)) best[e.id] = top;
+      var top = -1; e.sets.forEach(function (q) { if (q.r > 0 && (+q.w || 0) > top) top = +q.w || 0; if (BARBELL[e.id] && q.w >= 140) heavy = true; });
+      if (top < 0) return;
+      if (best[e.id] !== undefined && top > 0 && top > best[e.id] + 1e-9) hit++;
+      if (best[e.id] === undefined || top > best[e.id]) best[e.id] = top;
     });
     if (hit) { won('pr', w.d); for (var h = 0; h < hit; h++) prDays.push(w.d); }
     if (hit >= 3) won('pr3', w.d);
