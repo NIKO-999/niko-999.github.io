@@ -651,6 +651,55 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 .lf-bdr .bg { stroke: var(--mark-off); }
 .lf-bdr .fg { stroke: var(--good); stroke-linecap: round; }
 #frBoard .fr-row { position: relative; }
+/* the weeks on goal together, a small link in their colour */
+.fr-duo { display: inline-flex; align-items: center; gap: 3px; margin-left: 8px; padding: 1px 7px 1px 5px; border-radius: 999px; font-style: normal; font-size: 11px; font-weight: 700; color: var(--rc); background: color-mix(in srgb, var(--rc) 16%, transparent); vertical-align: 1px; }
+.fr-duo .lf-ic { width: 12px; height: 12px; stroke-width: 2.4; }
+/* IN SYNC: a pill over the rings, your dot and theirs, the live rings breathing as one */
+.fr-sync { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 2px auto 6px; padding: 5px 12px 5px 8px; width: max-content; max-width: 100%; border-radius: 999px; font-size: 12px; font-weight: 600;
+  background: color-mix(in srgb, var(--log) 12%, var(--card2)); box-shadow: 0 0 18px color-mix(in srgb, var(--log) 22%, transparent); }
+.fr-sync > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fr-sync-d { display: flex; }
+.fr-sync-d i { width: 12px; height: 12px; border-radius: 50%; background: var(--rc); box-shadow: 0 0 0 2px var(--card2); animation: fr-sync 1.6s ease-in-out infinite; }
+.fr-sync-d i + i { margin-left: -4px; }
+@keyframes fr-sync { 50% { transform: scale(1.18); box-shadow: 0 0 0 2px var(--card2), 0 0 10px var(--rc); } }
+.fr-rg.is-sync .fr-rg-a.is-live { animation-duration: 1.6s; }
+/* THE PROFILE BANNER */
+.fr-prof .lf-sh-bd { padding-top: 0; }
+.fr-ban { position: relative; margin: 0 -20px 14px; padding: 26px 20px 18px; overflow: hidden;
+  background: radial-gradient(120% 90% at 15% 0%, color-mix(in srgb, var(--rc) 46%, transparent), transparent 62%), radial-gradient(90% 80% at 100% 10%, color-mix(in srgb, var(--rc) 22%, transparent), transparent 60%); }
+.fr-ban::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--rc) 45%, transparent), transparent); }
+.fr-ban-h { display: flex; align-items: center; gap: 14px; }
+.fr-ban-av { width: 58px; height: 58px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 26px; font-weight: 800; color: #0b0b0d; background: var(--rc);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--rc) 22%, transparent), 0 8px 26px color-mix(in srgb, var(--rc) 40%, transparent); }
+.fr-ban.is-live .fr-ban-av { animation: fr-av-live 1.8s ease-in-out infinite; }
+@keyframes fr-av-live { 50% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--rc) 14%, transparent), 0 8px 30px color-mix(in srgb, var(--rc) 60%, transparent); } }
+.fr-ban-t { min-width: 0; }
+.fr-ban-t b { display: block; font-size: 24px; font-weight: 800; letter-spacing: -.02em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fr-ban-t .fr-ago { margin: 2px 0 0; }
+.fr-ban-sc { display: flex; justify-content: center; gap: 18px; margin-top: 18px; perspective: 600px; }
+.fr-ban-c { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 82px; text-align: center; }
+.fr-ban-c > .lf-coin { animation: fr-turn 6s ease-in-out infinite; animation-delay: calc(var(--i) * -2s); transform-style: preserve-3d; }
+.fr-ban-c b { font-size: 11px; font-weight: 600; color: var(--dim); line-height: 1.25; }
+@keyframes fr-turn { 0%, 100% { transform: rotateY(-24deg) translateY(0); } 50% { transform: rotateY(24deg) translateY(-4px); } }
+/* HEAD TO HEAD */
+.fr-vs-h { display: flex; align-items: center; gap: 6px; }
+.fr-vs-h i { width: 9px; height: 9px; border-radius: 50%; background: var(--rc); }
+.fr-vs-h i.is-me { background: var(--me-c, #a3e635); }
+.fr-vs-h em { font-style: normal; color: var(--quiet); margin: 0 2px; }
+.fr-vs-b { display: grid; gap: 12px; margin: 12px 0 4px; }
+.fr-vs-r { display: grid; grid-template-columns: 52px minmax(0, 1fr) 52px; align-items: center; gap: 8px; }
+.fr-vs-r > b { font-size: 14px; font-weight: 600; color: var(--dim); }
+.fr-vs-r > b:first-child { text-align: left; } .fr-vs-r > b:last-child { text-align: right; }
+.fr-vs-r > b.is-win { color: var(--ink); font-weight: 800; }
+.fr-vs-m > span { display: block; text-align: center; font-size: 11px; color: var(--quiet); margin-bottom: 4px; }
+.fr-vs-t { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+.fr-vs-t i { display: flex; height: 6px; border-radius: 6px; background: var(--card2); overflow: hidden; }
+.fr-vs-t i.is-me { justify-content: flex-end; }
+.fr-vs-t u { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--rc); transition: width .9s cubic-bezier(.2, .9, .3, 1.1); }
+.fr-vs-t i.is-me u { background: var(--me-c, #a3e635); }
+.fr-vs-duo { display: flex; align-items: center; gap: 8px; margin: 14px 0 4px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--dim); }
+.fr-vs-duo .lf-ic { width: 16px; height: 16px; color: var(--rc); flex: none; }
+@media (prefers-reduced-motion: reduce) { .fr-ban-c > .lf-coin, .fr-ban.is-live .fr-ban-av, .fr-sync-d i { animation: none; } .fr-vs-t u { transition: none; } }
 .fr-open { position: absolute; inset: 0; z-index: 0; border-radius: 12px; }
 .fr-row > :not(.fr-open) { position: relative; pointer-events: none; }
 .fr-bgr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
@@ -1971,11 +2020,8 @@ function lfWeekDone() {
   if (lfWkHold || stack.length || $('.lf-cv') || view !== 'home') return false;
   S.wkDone = k; lfSave();
   var wk = $('#lfWeek'); if (wk) { wk.classList.remove('is-wkdone'); void wk.offsetWidth; wk.classList.add('is-wkdone'); }
-  var bn = el('<div class="lf-wkdone" role="status"><span class="lf-wkd-ic">' + IC.check + '</span><div><b>Week done</b><span class="lf-wkd-s"></span></div></div>');
-  $('.lf-wkd-s', bn).textContent = S.goal + ' of ' + S.goal + (S.goal === 1 ? ' workout' : ' workouts') + ' · goal hit';
-  document.body.appendChild(bn); buzz([16, 60, 16, 60, 30]);
-  requestAnimationFrame(function () { requestAnimationFrame(function () { bn.classList.add('is-up'); }); });
-  setTimeout(function () { bn.classList.remove('is-up'); setTimeout(function () { bn.remove(); }, 450); }, 3200);
+  lfBanner(IC.check, 'Week done', S.goal + ' of ' + S.goal + (S.goal === 1 ? ' workout' : ' workouts') + ' · goal hit');
+  buzz([16, 60, 16, 60, 30]);
   return true;
 }
 function lfWeekDoneSoon() { var n = 0; (function go() { if (!lfWeekDone() && ++n < 24) setTimeout(go, 500); })(); }
@@ -3307,7 +3353,13 @@ function frBadges(st) {
   return (Array.isArray(st && st.bg) ? st.bg : []).filter(function (x) { return Array.isArray(x) && BADGE[x[0]]; }).slice(0, 3).map(function (x) { return { b: BADGE[x[0]], d: x[1], p: null, fr: 1 }; });
 }
 function frSheet(f) {
-  var st = f.s || {}, b = el('<div class="fr-dash"><p class="lf-lab fr-ago"></p></div>');
+  var st = f.s || {}, col = frColOf(st), nm = f.me ? (FRS.name || 'You') : (f.n || 'Friend');
+  /* THE BANNER: their colour, their initial, their name, and the three
+     badges they chose to show turning slowly in the light */
+  var b = el('<div class="fr-dash"><div class="fr-ban"><div class="fr-ban-h"><span class="fr-ban-av"></span><div class="fr-ban-t"><b></b><p class="lf-lab fr-ago"></p></div></div></div></div>');
+  b.style.setProperty('--rc', col);
+  $('.fr-ban-av', b).textContent = (nm.trim()[0] || '?').toUpperCase(); $('.fr-ban-t b', b).textContent = nm;
+  if (frLive(st)) $('.fr-ban', b).classList.add('is-live');
   $('.fr-ago', b).textContent = f.gone ? 'This code has gone — they turned friends off.' : frAgo(st.last) + ' · ' + (st.pr30 || 0) + (st.pr30 === 1 ? ' PR' : ' PRs') + ' in 30 days';
   var row = el('<div class="lf-row" style="--n:3"></div>');
   /* EACH FIGURE OPENS ITS TREND, as yours do on home — once their phone
@@ -3324,7 +3376,33 @@ function frSheet(f) {
   });
   b.appendChild(row);
   var fbg = frBadges(st);
-  if (fbg.length) { var bc = el('<div class="lf-card fr-bgc" id="frBadges"><div class="lf-lab">Showcase</div><div class="fr-bgr"></div></div>'); fbg.forEach(function (x) { var it = el('<div class="lf-bdi"><b></b><span></span></div>'); it.insertBefore(lfCoinBtn(x, 64), it.firstChild); $('b', it).textContent = x.b.n; $('span', it).textContent = fmtDay(x.d).replace(/^\w+ /, ''); $('.fr-bgr', bc).appendChild(it); }); b.appendChild(bc); }
+  if (fbg.length) {
+    var bc = el('<div class="fr-ban-sc" id="frBadges"></div>');
+    fbg.forEach(function (x, i) { var it = el('<div class="fr-ban-c"><b></b></div>'); it.style.setProperty('--i', i); it.insertBefore(lfCoinBtn(x, 62), it.firstChild); $('b', it).textContent = x.b.n; bc.appendChild(it); });
+    $('.fr-ban', b).appendChild(bc);
+  }
+  /* HEAD TO HEAD: you and them on the same five figures, a bar each way
+     from the middle, the one in front lit */
+  if (!f.me && !f.gone) {
+    var me = frStats(), duo = frDuo(st, me), vs = el('<div class="lf-card fr-vs" id="frVs"><div class="lf-hd"><span class="lf-lab fr-vs-h"><i class="is-me"></i>You<em>vs</em><i></i><span></span></span></div><div class="fr-vs-b"></div></div>');
+    $('.fr-vs-h > span', vs).textContent = nm;
+    vs.style.setProperty('--me-c', frColOf({ ac: lfAccent() }));
+    var rows = [['This week', me.goal ? me.wk / me.goal : 0, st.goal ? (st.wk || 0) / st.goal : 0, me.wk + '/' + me.goal, (st.wk || 0) + '/' + (st.goal || 0)],
+      ['Workouts · 30 days', me.wo30, st.wo30 || 0], ['Sets · 30 days', me.sets30, st.sets30 || 0],
+      ['Volume · 30 days', toDisp(me.vol30), toDisp(st.vol30 || 0), fmtBig(toDisp(me.vol30)), fmtBig(toDisp(st.vol30 || 0))], ['Week streak', me.streak, st.streak || 0]];
+    rows.forEach(function (q) {
+      var a = +q[1] || 0, t = +q[2] || 0, mx = Math.max(a, t) || 1;
+      var rw = el('<div class="fr-vs-r"><b class="lf-num"></b><div class="fr-vs-m"><span></span><div class="fr-vs-t"><i class="is-me"><u></u></i><i><u></u></i></div></div><b class="lf-num"></b></div>');
+      var bs = $$('b', rw); bs[0].textContent = q[3] != null ? q[3] : fmtBig(a); bs[1].textContent = q[4] != null ? q[4] : fmtBig(t);
+      if (a > t) bs[0].classList.add('is-win'); else if (t > a) bs[1].classList.add('is-win');
+      $('.fr-vs-m > span', rw).textContent = q[0];
+      var us = $$('u', rw); us[0].dataset.w = (a / mx * 100).toFixed(1); us[1].dataset.w = (t / mx * 100).toFixed(1);
+      $('.fr-vs-b', vs).appendChild(rw);
+    });
+    if (duo > 0) { var dl = el('<div class="fr-vs-duo"></div>'); dl.innerHTML = IC_LINK + '<span></span>'; $('span', dl).textContent = duo + (duo === 1 ? ' week' : ' weeks') + ' in a row you have both closed your goal'; vs.appendChild(dl); }
+    b.appendChild(vs);
+    setTimeout(function () { $$('.fr-vs u', vs).forEach(function (u) { u.style.width = u.dataset.w + '%'; }); }, 260);
+  }
   /* the last thirty days, as the home grid draws them */
   var g = el('<div class="lf-card" id="frGrid"><div class="lf-hd"><span class="lf-lab">Last 30 days</span><span class="lf-lab lf-num"></span></div><div class="lf-days" aria-hidden="true"></div></div>');
   var dstr = st.d || '0'.repeat(30), on = 0;
@@ -3387,7 +3465,8 @@ function frSheet(f) {
   b.appendChild(lc);
   var foot = null, rm = null;
   if (!f.me) { rm = el('<button type="button" class="lf-btn is-bad">Remove</button>'); foot = [rm]; }
-  var s = lfSheet({ title: f.n || 'Friend', body: b, foot: foot, full: true });
+  var s = lfSheet({ title: '', body: b, foot: foot, full: true, cls: 'fr-prof' });
+  s.el.setAttribute('aria-label', nm);
   lfAccOn(s.el, frHue(st));
   if (rm) rm.addEventListener('click', function () {
     var i = FRS.list.indexOf(f); if (i < 0) return;
@@ -3435,6 +3514,50 @@ function frRxBar(w, f) {
   }
   paint();
   return bar;
+}
+/* YOUR WEEKS, light: this week's workouts against your goal, and the run
+   of weeks on it, counted the way frStats counts them for friends */
+function frMyRun() {
+  var mon = monday(today());
+  function inWeek(m) { var a = ymd(m), b = ymd(addDays(m, 6)); return S.wo.filter(function (w) { return w.d >= a && w.d <= b; }).length; }
+  var wk = inWeek(mon), streak = wk >= S.goal ? 1 : 0;
+  for (var m = addDays(mon, -7), g = 0; g < 104 && inWeek(m) >= S.goal; m = addDays(m, -7), g++) streak++;
+  return { wk: wk, goal: S.goal, streak: streak };
+}
+/* A SHARED STREAK: the weeks running that you and they both closed the
+   goal. Each run counts back from last week, plus this one if both have
+   closed it already: a week still open has not broken anything. */
+function frDuo(st, mine) {
+  if (!st || !(st.goal > 0) || !(mine.goal > 0)) return 0;
+  var meNow = mine.wk >= mine.goal, themNow = (st.wk || 0) >= st.goal;
+  var a = mine.streak - (meNow ? 1 : 0), b = (st.streak || 0) - (themNow ? 1 : 0);
+  return Math.max(0, Math.min(a, b)) + (meNow && themNow ? 1 : 0);
+}
+var IC_LINK = '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M10 13.5a4 4 0 0 0 5.7.3l2.8-2.8a4 4 0 0 0-5.7-5.7l-1.3 1.3"/><path d="M14 10.5a4 4 0 0 0-5.7-.3l-2.8 2.8a4 4 0 0 0 5.7 5.7l1.3-1.3"/></svg>';
+/* confetti in someone's colour, thrown up from a point and falling */
+function lfConfetti(x, y, col) {
+  var bu = el('<div class="lf-burst" aria-hidden="true"><s class="lf-wave"></s><s class="lf-wave is-2"></s></div>');
+  bu.style.left = x + 'px'; bu.style.top = y + 'px'; bu.style.setProperty('--log', col);
+  for (var j = 0; j < 26; j++) {
+    var cf = el('<u></u>');
+    cf.style.setProperty('--dx', ((Math.random() - .5) * 240).toFixed(0) + 'px'); cf.style.setProperty('--up', (-50 - Math.random() * 90).toFixed(0) + 'px');
+    cf.style.setProperty('--fall', (90 + Math.random() * 180).toFixed(0) + 'px'); cf.style.setProperty('--rot', ((Math.random() - .5) * 1440).toFixed(0) + 'deg');
+    cf.style.animationDelay = (Math.random() * 90).toFixed(0) + 'ms';
+    if (j % 3 === 1) cf.classList.add('is-lt'); if (j % 4 === 0) cf.classList.add('is-sq');
+    bu.appendChild(cf);
+  }
+  document.body.appendChild(bu);
+  setTimeout(function () { bu.remove(); }, 1700);
+}
+/* a banner from the top, once: the week done, two of you in sync */
+function lfBanner(icon, title, sub, col) {
+  var bn = el('<div class="lf-wkdone" role="status"><span class="lf-wkd-ic"></span><div><b></b><span class="lf-wkd-s"></span></div></div>');
+  $('.lf-wkd-ic', bn).innerHTML = icon; $('b', bn).textContent = title; $('.lf-wkd-s', bn).textContent = sub;
+  if (col) bn.style.setProperty('--log', col);
+  document.body.appendChild(bn);
+  requestAnimationFrame(function () { requestAnimationFrame(function () { bn.classList.add('is-up'); }); });
+  setTimeout(function () { bn.classList.remove('is-up'); setTimeout(function () { bn.remove(); }, 450); }, 3200);
+  return bn;
 }
 /* TRAINING NOW: a workout started and not finished, within three hours —
    past that it is a phone that died mid-session, not a session. */
@@ -3489,7 +3612,7 @@ function frRings(rows) {
      closed its goal flashes. The tab repaints while they move, as the
      friends' records come in, so each new arc starts from where the old
      one is ON SCREEN at that moment: the move carries on, never jumps. */
-  var arrive = frRgIn, grew = [], cur = frRgCur; frRgIn = 0; frRgCur = {};
+  var arrive = frRgIn, grew = [], cur = frRgCur, done = [], mine = frMyRun(); frRgIn = 0; frRgCur = {};
   drawn.forEach(function (x, i) {
     var rr = r0 - i * step, len = 2 * Math.PI * rr, col = frColOf(x.f.s), lv = frLive(x.f.s);
     if (rr < 8) return;
@@ -3501,6 +3624,9 @@ function frRings(rows) {
       + (x.k > 0 ? '<circle class="fr-rg-a' + (lv ? ' is-live' : '') + (shut ? ' is-shut' : '') + '" data-k="' + esc(key) + '" data-to="' + (len * x.k).toFixed(1) + '" cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="' + col + '" stroke-width="' + sw + '" stroke-dasharray="' + (len * from).toFixed(1) + ' ' + len.toFixed(1) + '" style="--rc:' + col + '"/>' : '')
       + (up && x.k > 0 ? '<circle class="fr-rg-cm" cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="#fff" stroke-width="' + (sw * .55).toFixed(1) + '" stroke-dasharray="' + seg.toFixed(1) + ' ' + len.toFixed(1) + '" style="--o0:' + (-len * was).toFixed(1) + 'px;--o1:' + (-(len * x.k - seg)).toFixed(1) + 'px;--rc:' + col + '"/>' : ''));
     if (up) grew.push(key);
+    /* THEY FINISHED one since you last looked: confetti off the tip of their ring */
+    var wl0 = x.f.me ? '' : (Array.isArray(x.f.s && x.f.s.wl) && x.f.s.wl[0] && x.f.s.wl[0].id) || '';
+    if (wl0) { var sw0 = frWoSeen[key]; if (sw0 && sw0 !== wl0 && x.k > 0) done.push({ th: Math.min(x.k, .999) * 2 * Math.PI, rr: rr, col: col }); frWoSeen[key] = wl0; }
     if (lv) {
       var th = Math.min(x.k, .999) * 2 * Math.PI, hx = 75 + rr * Math.cos(th), hy = 75 + rr * Math.sin(th);
       g.insertAdjacentHTML('beforeend', '<circle class="fr-rg-p" cx="' + hx.toFixed(1) + '" cy="' + hy.toFixed(1) + '" r="' + (sw / 2).toFixed(1) + '" fill="' + col + '" style="--rc:' + col + '"/>'
@@ -3519,7 +3645,28 @@ function frRings(rows) {
     mid.setAttribute('aria-label', (tie ? 'Tied' : $('b', mid).textContent) + ' in front this week');
     mid.style.setProperty('--rc', tie ? 'var(--ink)' : frColOf(top.f.s));
   }
-  try { localStorage.setItem('lift.rg.v1', JSON.stringify(frRgSeen)); } catch (e) {}
+  try { localStorage.setItem('lift.rg.v1', JSON.stringify(frRgSeen)); localStorage.setItem('lift.frwo.v1', JSON.stringify(frWoSeen)); } catch (e) {}
+  if (done.length) setTimeout(function () {
+    /* the tab may have been drawn again since: aim at the rings that are there now */
+    var sv = $('#frRings .fr-rg-w > svg'); if (view !== 'fr' || !sv) return;
+    var rc = sv.getBoundingClientRect(), k = rc.width / 150;
+    done.forEach(function (d, i) { setTimeout(function () { lfConfetti(rc.left + (75 + d.rr * Math.cos(d.th - Math.PI / 2)) * k, rc.top + (75 + d.rr * Math.sin(d.th - Math.PI / 2)) * k, d.col); }, i * 260); });
+    buzz([12, 40, 12]);
+  }, 1150);
+  /* IN SYNC: you and a friend training at once. The ring card says so, and
+     the first time in a workout a banner does too, in their colour. */
+  var sync = act ? drawn.filter(function (x) { return !x.f.me && frLive(x.f.s); }) : [];
+  if (sync.length) {
+    c.classList.add('is-sync');
+    var nm = sync.map(function (x) { return x.f.n || 'Friend'; }), who = nm.length === 1 ? nm[0] : nm.slice(0, -1).join(', ') + ' and ' + nm[nm.length - 1];
+    var pill = el('<div class="fr-sync" id="frSync"><span class="fr-sync-d"></span><span></span></div>');
+    $('span:last-child', pill).textContent = 'In sync with ' + who;
+    var dots = $('.fr-sync-d', pill); var md = el('<i></i>'); md.style.setProperty('--rc', frColOf({ ac: lfAccent() })); dots.appendChild(md);
+    sync.slice(0, 3).forEach(function (x) { var d = el('<i></i>'); d.style.setProperty('--rc', frColOf(x.f.s)); dots.appendChild(d); });
+    c.insertBefore(pill, $('.fr-rg-w', c));
+    var sk = act.id + ':' + sync.map(function (x) { return x.f.c; }).sort().join(',');
+    if (frSyncSaid !== sk) { frSyncSaid = sk; setTimeout(function () { if (view === 'fr') { lfBanner(IC_LINK, 'In sync', 'Training with ' + who + ' right now', frColOf(sync[0].f.s)); buzz([10, 50, 10]); } }, 500); }
+  }
   /* the arcs move to where they stand on the next frame, so the move is drawn */
   requestAnimationFrame(function () { requestAnimationFrame(function () { $$('.fr-rg-a', c).forEach(function (a) { a.setAttribute('stroke-dasharray', a.dataset.to + ' 999'); }); }); });
   if (grew.length && !arrive) buzz(10);
@@ -3535,6 +3682,9 @@ function frRings(rows) {
     if (f.gone) sub.textContent = 'Turned friends off';
     else if (frLive(st)) { sub.textContent = 'Training now · since ' + fmtAt(new Date(st.lv)); sub.className = 'fr-live'; row.classList.add('is-live'); }
     else sub.textContent = x.w.n >= x.w.g ? 'Goal closed' : (x.w.g - x.w.n) + ' to go';
+    /* the weeks you have both kept the goal, beside their name */
+    var duo = f.me || f.gone ? 0 : frDuo(st, mine);
+    if (duo > 0) { var dp = el('<em class="fr-duo"></em>'); dp.innerHTML = IC_LINK + '<b class="lf-num"></b>'; $('b', dp).textContent = duo; dp.setAttribute('aria-label', duo + (duo === 1 ? ' week' : ' weeks') + ' on goal together'); sub.appendChild(dp); }
     $('.fr-wk', row).textContent = f.gone ? '' : x.w.n + '/' + x.w.g;
     /* their days and their latest badges, beside the name */
     if (!f.gone) {
@@ -3597,7 +3747,8 @@ function frCodeRow() {
   });
   return code;
 }
-var frArrive = 0, frRgIn = 1, frRgMem = {}, frRgSeen = {};
+var frArrive = 0, frRgIn = 1, frRgMem = {}, frRgSeen = {}, frWoSeen = {}, frSyncSaid = '';
+try { frWoSeen = JSON.parse(localStorage.getItem('lift.frwo.v1') || '{}') || {}; } catch (e) {}
 try { frRgSeen = JSON.parse(localStorage.getItem('lift.rg.v1') || '{}') || {}; } catch (e) {}
 /* where each ring's arc is on screen right now, read before the tab is cleared */
 var frRgCur = {};
