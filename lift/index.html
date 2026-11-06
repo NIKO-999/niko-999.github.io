@@ -146,6 +146,13 @@ svg { display: block; }
    its own — which is what put the first tile in a row 12px below its
    neighbours once, because an adjacency margin does not know it is in a row. */
 #lfMain > section { display: flex; flex-direction: column; gap: 12px; }
+/* HOME OPENS IN YOUR COLOUR: a glow from the top of the screen, the same
+   one a friend's page wears in theirs. It is fixed behind the page, so
+   the cards scroll over it and a pull down never opens a gap above it. */
+#lfMain { position: relative; z-index: 1; }
+.lf-glow { position: fixed; left: 0; right: 0; top: 0; height: 300px; pointer-events: none; z-index: 0; opacity: 0; transition: opacity .45s var(--ease);
+  background: radial-gradient(130% 230px at 18% 0%, color-mix(in srgb, var(--log) 50%, transparent), transparent 75%), radial-gradient(90% 200px at 100% 0%, color-mix(in srgb, var(--log) 22%, transparent), transparent 70%), linear-gradient(to bottom, color-mix(in srgb, var(--log) 12%, transparent), transparent 260px); }
+body.lf-v-home .lf-glow { opacity: 1; }
 #lfMain > section > .lf-h1, #lfMain > section > .lf-gh { margin-bottom: 0; }
 .lf-row { display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); gap: 12px; align-items: stretch; }
 .lf-tap { display: block; width: 100%; text-align: left; transition: transform .15s var(--ease); }
@@ -155,6 +162,8 @@ svg { display: block; }
 
 /* ── today ── */
 .lf-today { padding: 16px; }
+/* the first card lets the home glow through it, so the colour reads from the top of the screen down */
+#lfHome .lf-today { background: color-mix(in srgb, var(--card) 45%, transparent); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06); }
 .lf-done { position: absolute; top: 14px; right: 14px; display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px; background: var(--done-bg); color: var(--good); font-size: 13px; font-weight: 600; }
 .lf-done .lf-ic { width: 15px; height: 15px; stroke-width: 2.6; }
 .lf-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 -2px; }
@@ -828,6 +837,7 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 </head>
 <body>
 <h1 class="lf-sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">Lift</h1>
+<div class="lf-glow" aria-hidden="true"></div>
 <main id="lfMain">
   <section id="lfHome" aria-label="Home"></section>
   <section id="lfCal" aria-label="Calendar" hidden></section>
@@ -5071,6 +5081,7 @@ function lfGo(v) {
 function lfRender() {
   lfFillRest();
   VIEWS.forEach(function (v) { $('#' + IDS[v]).hidden = v !== view; });
+  document.body.classList.toggle('lf-v-home', view === 'home');
   $$('.lf-bar button').forEach(function (b) { if (b.dataset.v === view) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   if (view === 'home') lfRenderHome();
   else if (view === 'cal') lfRenderCal();

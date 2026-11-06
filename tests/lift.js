@@ -715,7 +715,7 @@ const freeze = (at) => `(() => {
     const page = await c.newPage();
     page.on('pageerror', (e) => errors.push(String(e)));
     await page.goto(URL); await page.waitForTimeout(300);
-    const look = await page.evaluate(() => ({ m: document.documentElement.dataset.mode, bg: getComputedStyle(document.body).backgroundColor, card: getComputedStyle(document.querySelector('.lf-today')).backgroundColor, ink: getComputedStyle(document.body).color }));
+    const look = await page.evaluate(() => ({ m: document.documentElement.dataset.mode, bg: getComputedStyle(document.body).backgroundColor, card: getComputedStyle(document.querySelector('#lfGrid')).backgroundColor, ink: getComputedStyle(document.body).color }));
     ok('a light phone gets the light face', look.m === 'light' && look.bg === 'rgb(242, 242, 247)' && look.card === 'rgb(255, 255, 255)' && look.ink === 'rgb(0, 0, 0)', look);
     ok('a day with a workout in says Completed', await page.locator('#lfDone').count() === 1 && /Completed/.test(await page.textContent('#lfDone')));
     ok('and counts what was done, with nothing to start over it', /2 sets/.test(await page.textContent('.lf-today .lf-chips')) && /1\.6k kg/.test(await page.textContent('.lf-today .lf-chips')) && await page.locator('#lfGo').count() === 0);
