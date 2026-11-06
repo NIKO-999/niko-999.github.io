@@ -1036,6 +1036,7 @@ var FOCUS_DEFAULT = [['Quads', 16, 16, 1], ['Hamstrings', 14, 14, 1], ['Calves',
   ['Chest', 16, 16, 0], ['Back', 16, 16, 0], ['Shoulders', 16, 16, 0], ['Triceps', 10, 10, 0], ['Biceps', 10, 10, 0], ['Abs', 11, 11, 0]];
 /* the targets this split shipped with before, as a focus nobody changed:
    one still exactly that follows the new ranges */
+var FOCUS_RANGE = { Quads: [18, 20], Hamstrings: [12, 16], Calves: [14, 18], Glutes: [6, 8], Chest: [14, 18], Back: [16, 20], Shoulders: [14, 18], Triceps: [8, 10], Biceps: [8, 10], Abs: [10, 12] };
 var FOCUS_V3 = ['Quads:17:17:1,Calves:12:12:1,Hamstrings:12:12:1,Glutes:5:5:1,Shoulders:16:16:0,Back:12:12:0,Chest:9:9:0,Triceps:8:8:0,Biceps:8:8:0,Abs:6:6:0,Lower back:2:2:0',
   'Quads:17:17:1,Calves:12:12:1,Hamstrings:12:12:1,Glutes:5:5:1,Shoulders:16:16:0,Back:15:15:0,Chest:9:9:0,Triceps:8:8:0,Biceps:8:8:0,Abs:6:6:0,Lower back:2:2:0',
   'Quads:18:20:1,Hamstrings:12:16:1,Calves:14:18:1,Glutes:6:8:1,Chest:14:18:0,Back:16:20:0,Shoulders:14:18:0,Triceps:8:10:0,Biceps:8:10:0,Abs:10:12:0'];
@@ -1201,6 +1202,10 @@ function lfClean(o) {
     });
     var sig = d.focus.map(function (f) { return f.m + ':' + f.lo + ':' + f.hi + ':' + f.p; }).join();
     if (sig === FOCUS_V1 || sig === FOCUS_V1.replace('Calves:12:12', 'Calves:15:15') || sig === FOCUS_V2 || FOCUS_V3.indexOf(sig) >= 0) d.focus = lfFocusDefault();
+    /* A TARGET STILL ON THE RANGE IT SHIPPED WITH takes the single number,
+       muscle by muscle, so one you changed keeps your figure and the rest
+       stop reading 12-16. */
+    else d.focus.forEach(function (f) { var o = FOCUS_RANGE[f.m]; if (o && f.lo === o[0] && f.hi === o[1]) { var n = FOCUS_DEFAULT.filter(function (q) { return q[0] === f.m; })[0]; if (n) { f.lo = n[1]; f.hi = n[2]; } } });
   }
   /* A demo link per exercise. Only http(s), so a pasted string can never
      be a javascript: URL on a button you press. */

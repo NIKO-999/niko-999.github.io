@@ -580,6 +580,13 @@ const freeze = (at) => `(() => {
       ok('the split\'s last shipped targets, never changed, take the new ranges', r3.focus[0].m === 'Quads' && r3.focus[0].lo === 16 && r3.focus[0].hi === 16 && r3.focus.length === 10, r3.focus);
       await c3.close();
     }
+    {
+      const rng = 'Quads:18:18:1,Hamstrings:12:16:1,Calves:14:18:1,Glutes:6:8:1,Chest:14:18:0,Back:16:20:0,Shoulders:14:18:0,Triceps:8:10:0,Biceps:8:10:0,Abs:10:12:0';
+      const { c: c4, page: p4 } = await ctx({ unit: 'kg', focus: rng.split(',').map((x) => { const q = x.split(':'); return { m: q[0], lo: +q[1], hi: +q[2], p: +q[3] }; }) });
+      const f4 = (await store(p4)).focus.map((f) => f.m + ':' + f.lo + '-' + f.hi).join();
+      ok('a target still on its shipped range takes the single number, and one you set keeps yours', f4 === 'Quads:18-18,Hamstrings:14-14,Calves:15-15,Glutes:6-6,Chest:16-16,Back:16-16,Shoulders:16-16,Triceps:10-10,Biceps:10-10,Abs:11-11', f4);
+      await c4.close();
+    }
     ok('the second split\'s untouched targets follow the new one', r.focus[0].lo === 16 && r.focus.find((f) => f.m === 'Shoulders').lo === 16, r.focus);
     ok('and a session logged under the last name takes the new one', r.wo[0].n === 'Quad strength', r.wo[0].n);
     await c.close();
