@@ -5089,14 +5089,27 @@ function lfVerOf() {
     return r.ok ? (r.headers.get('etag') || r.headers.get('last-modified') || '') : '';
   }).catch(function () { return ''; });
 }
+/* AND THE FIRST LOOK IS AT THE PAGE ITSELF, not its headers: a copy kept
+   by the phone would otherwise take the new version's headers as its own
+   and never move. This script is in the page it was loaded from, so if
+   the page on the server no longer contains it, this one is old. Once a
+   minute at most, so a slow server cannot loop it. */
+var lfSelf = document.currentScript ? document.currentScript.textContent : '';
+function lfReload(why) {
+  var a = document.activeElement;
+  if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;
+  try { var t = +sessionStorage.getItem('lift.rl') || 0; if (Date.now() - t < 60000) return; sessionStorage.setItem('lift.rl', Date.now()); } catch (e) {}
+  location.reload();
+}
 function lfVerCheck() {
   lfVerOf().then(function (v) {
     if (!v) return;
-    if (lfVer === null) { lfVer = v; return; }
-    if (v === lfVer) return;
-    var a = document.activeElement;
-    if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;
-    location.reload();
+    if (lfVer === null) {
+      lfVer = v;
+      if (lfSelf) fetch(location.pathname, { cache: 'no-store' }).then(function (r) { return r.ok ? r.text() : ''; }).then(function (t) { if (t && t.indexOf(lfSelf) < 0) lfReload('stale'); }).catch(function () {});
+      return;
+    }
+    if (v !== lfVer) lfReload('new');
   });
 }
 lfVerCheck();
