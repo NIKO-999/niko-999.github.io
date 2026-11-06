@@ -220,7 +220,7 @@ svg { display: block; }
 .lf-vr:nth-child(-n+3) span { color: var(--ink); font-weight: 600; }
 .lf-vsep { height: 1px; background: var(--line); margin: 2px 0; }
 .lf-vr i { display: block; height: 6px; border-radius: 3px; background: var(--card3); overflow: hidden; }
-.lf-vr i b { display: block; height: 100%; background: var(--mark-on); border-radius: 3px; }
+.lf-vr i b { display: block; height: 100%; background: var(--acc-bar, var(--mark-on)); border-radius: 3px; }
 .lf-vr.is-met i b { background: var(--good); }
 .lf-vr em { font-style: normal; text-align: right; color: var(--dim); }
 .lf-tg { font-size: 12px; color: var(--dim); margin: -6px 0 2px; }
@@ -237,7 +237,7 @@ svg { display: block; }
 .lf-dl-u { font-size: 11px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lf-dl-bar { display: block; height: 4px; border-radius: 2px; background: var(--card3); margin-top: auto; overflow: hidden; }
 .lf-dl-t > span:nth-last-child(2) { margin-bottom: 8px; }
-.lf-dl-bar i { display: block; height: 100%; background: var(--mark-on); border-radius: 2px; }
+.lf-dl-bar i { display: block; height: 100%; background: var(--acc-bar, var(--mark-on)); border-radius: 2px; }
 .lf-dl-t.is-met .lf-dl-bar i { background: var(--good); }
 .lf-dl-q { justify-content: center; margin-bottom: 10px; }
 .lf-dl-f { display: flex; gap: 8px; }
@@ -454,7 +454,7 @@ svg { display: block; }
 .lf-vs-h { display: flex; align-items: flex-end; gap: 10px; }
 .lf-vs-h .lf-hero { font-size: 52px; line-height: 1; }
 /* the change is a frosted green pill: glass tinted green, a lighter rim, the figure in a brighter green */
-.lf-vs-h .lf-delta { position: static; margin-bottom: 6px; font-size: 13px; padding: 3px 10px; border-radius: 999px; background: rgba(52, 199, 89, .2); box-shadow: inset 0 0 0 1px rgba(52, 199, 89, .32), inset 0 1px 0 rgba(255,255,255,.1); -webkit-backdrop-filter: blur(10px) saturate(1.6); backdrop-filter: blur(10px) saturate(1.6); }
+.lf-vs-h .lf-delta { position: static; margin-bottom: 6px; font-size: 13px; padding: 3px 10px; border-radius: 999px; background: color-mix(in srgb, var(--good) 20%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--good) 32%, transparent), inset 0 1px 0 rgba(255,255,255,.1); -webkit-backdrop-filter: blur(10px) saturate(1.6); backdrop-filter: blur(10px) saturate(1.6); }
 .lf-vs-h .lf-delta.is-down { background: color-mix(in srgb, var(--card3) 60%, transparent); box-shadow: inset 0 0 0 1px var(--line); }
 .lf-vs-t { font-size: 17px; font-weight: 600; margin: 8px 0 4px; }
 .lf-vs-s { margin: 0 0 14px; font-weight: 400; line-height: 1.4; }
@@ -4066,7 +4066,10 @@ function lfHex(c) { return '#' + c.map(function (x) { return ('0' + x.toString(1
 function lfLum(c) { var v = c.map(function (x) { x /= 255; return x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4); }); return .2126 * v[0] + .7152 * v[1] + .0722 * v[2]; }
 function lfApplyAccent() {
   var st = document.documentElement.style, h = lfAccTmp !== undefined ? lfAccTmp : lfAccent();
-  var keys = ['--today', '--log', '--on-log', '--today-ink', '--live-bg'];
+  /* and the greens that say DONE - Completed, a target met, a rest that
+     is up, a week up on the last - follow it too, with the set bars. On
+     lime none of this is written, so the default is exactly as it was. */
+  var keys = ['--today', '--log', '--on-log', '--today-ink', '--live-bg', '--good', '--done-bg', '--acc-bar'];
   if (h === null) { keys.forEach(function (k) { st.removeProperty(k); }); return; }
   var dark = document.documentElement.getAttribute('data-mode') !== 'light';
   /* yellow-greens are bright at any lightness and blues are dim, so the
@@ -4077,6 +4080,9 @@ function lfApplyAccent() {
   st.setProperty('--on-log', lum > .3 ? lfHex(lfHsl(h, 90, 6)) : '#ffffff');
   st.setProperty('--today-ink', ink);
   st.setProperty('--live-bg', dark ? lfHex(lfHsl(h, 50, 9)) : lfHex(lfHsl(h, 70, 93)));
+  st.setProperty('--good', ink);
+  st.setProperty('--done-bg', 'color-mix(in srgb, ' + lfHex(fill) + ' ' + (dark ? 18 : 22) + '%, transparent)');
+  st.setProperty('--acc-bar', ink);
 }
 function lfApplyMode() {
   var m = lfMode(), dark = m === 'dark' || (m === 'auto' && !(window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches));

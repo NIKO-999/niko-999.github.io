@@ -1119,6 +1119,7 @@ const freeze = (at) => `(() => {
     const cy = await tok();
     ok('a press on the ring sets the accent from that hue', cy !== '#a3e635' && await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '180', [cy, await page.evaluate(() => localStorage.getItem('lift.accent.v1'))]);
     ok('and the fold names it', /Cyan/.test(await page.textContent('#lfTheme h3')));
+    ok('the greens that say done and the set bars follow it', await page.evaluate(() => { const r = getComputedStyle(document.documentElement); return r.getPropertyValue('--good').trim() === r.getPropertyValue('--today-ink').trim() && r.getPropertyValue('--acc-bar').trim() !== ''; }));
     ok('the ink on a fill is worked out to read on it', await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--on-log').trim()) !== '');
     await page.focus('#lfWheel'); await page.keyboard.press('ArrowRight');
     ok('arrows turn it too', await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '185');
@@ -1130,6 +1131,8 @@ const freeze = (at) => `(() => {
     ok('light and dark live here now', await page.evaluate(() => document.documentElement.dataset.mode) === 'light');
     await page.click('#lfAccReset'); await settle(page);
     ok('back to lime clears it', (await tok()).toLowerCase() === '#a3e635' && await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === null);
+    const gg = await page.evaluate(() => { const r = getComputedStyle(document.documentElement); return [r.getPropertyValue('--good').trim().toLowerCase(), r.getPropertyValue('--acc-bar').trim(), document.documentElement.dataset.mode]; });
+    ok('and the greens are green again', gg[0] === '#248a3d' && gg[1] === '', gg);
     await c.close();
   }
 
