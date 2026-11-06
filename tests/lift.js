@@ -1030,7 +1030,7 @@ const freeze = (at) => `(() => {
     await A.page.click('#frOn'); await A.page.waitForTimeout(150);
     ok('a name is needed first', m.size === 0);
     await A.page.fill('#frName', 'Niko'); await A.page.click('#frOn'); await A.page.waitForTimeout(500);
-    const codeA = (await A.page.textContent('.fr-code')).trim();
+    const codeA = await A.page.evaluate(() => JSON.parse(localStorage.getItem('lift.fr.v1')).code);
     ok('turning on claims an eight-character code', /^[A-HJ-NP-Z2-9]{8}$/.test(codeA) && m.has('lift:' + codeA), codeA);
     const recA = JSON.parse(m.get('lift:' + codeA));
     ok('what the server holds is counts: 3 workouts, 4 sets, the empty days as rest, trained today', recA.n === 'Niko' && recA.s.wo30 === 3 && recA.s.sets30 === 4 && recA.s.last === '2026-10-30' && recA.s.d.slice(-6) === '01r1r1', recA.s);
@@ -1052,7 +1052,11 @@ const freeze = (at) => `(() => {
     await B.page.waitForFunction(() => document.querySelectorAll('#frBoard .fr-row').length === 2, null, { timeout: 4000 }).catch(() => {});
     const names = await B.page.$$eval('#frBoard .fr-row .fr-t b', (b) => b.map((x) => x.textContent));
     ok('turning on adds whoever sent the link, ranked by workouts', names.join() === 'Niko,You', names);
-    const codeB = (await B.page.textContent('.fr-code')).trim();
+    ok('your code is not on the tab any more', await B.page.locator('#lfFr .fr-code').count() === 0);
+    await B.page.click('.lf-bar [data-v="you"]'); await settle(B.page);
+    const codeB = (await B.page.textContent('#lfSet .fr-code')).trim();
+    ok('it is in settings, with share', codeB.length === 8 && await B.page.locator('#lfSet #frShare').count() === 1);
+    await B.page.click('.lf-bar [data-v="fr"]'); await settle(B.page);
 
     await A.page.click('#frAdd'); await A.page.waitForTimeout(400);
     await A.page.fill('#frCode', 'ZZZZZZZZ'); await top(A.page).locator('button', { hasText: /^Add$/ }).click(); await A.page.waitForTimeout(250);
@@ -1064,9 +1068,9 @@ const freeze = (at) => `(() => {
     await A.page.fill('#frCode', codeB.toLowerCase()); await top(A.page).locator('button', { hasText: /^Add$/ }).click(); await settle(A.page);
     ok('a friend mid-workout shows as training now', /Training now · since/.test(await A.page.textContent('#frBoard .fr-row:not(.is-me)')), await A.page.textContent('#frBoard'));
     ok('and you are not', !/Training now/.test(await A.page.textContent('#frBoard .fr-row.is-me')));
-    ok('the week is ranked on a leaderboard, each in their colour', await A.page.locator('#frLb .fr-lb-r').count() === 2 && (await A.page.$$eval('#frLb .fr-lb-r', (r) => r.map((x) => x.style.getPropertyValue('--lb-c')))).every((c) => c));
-    await A.page.click('#frLb [data-k="wo"]');
-    ok('by volume or by workouts', await A.page.getAttribute('#frLb [data-k="wo"]', 'aria-pressed') === 'true' && /workout/.test(await A.page.textContent('#frLb')));
+    ok('the week is rings, one each, toward their own goal, and the names under them are the board', await A.page.locator('#frRings svg circle').count() >= 2 && await A.page.locator('#frRings #frBoard .fr-row').count() === 2 && (await A.page.$$eval('#frRings .fr-row', (r) => r.map((x) => x.style.getPropertyValue('--rc')))).every((c) => c));
+    ok('and a ring is drawn in the colour they chose', await A.page.$$eval('#frRings .fr-rg-a', (r) => r.map((x) => x.getAttribute('stroke'))).then((c) => c.length >= 1));
+    ok('there is no leaderboard card and no 30-day strip', await A.page.locator('#frLb').count() === 0 && await A.page.locator('.fr-strip').count() === 0);
     ok('a typed code adds them, lower case and all', (await A.page.$$eval('#frBoard .fr-row .fr-t b', (b) => b.map((x) => x.textContent))).join() === 'You,Sam');
     await A.page.click('#frBoard .fr-row:not(.is-me)'); await settle(A.page);
     const sh = await top(A.page).textContent('.lf-sh-bd');
@@ -1107,10 +1111,12 @@ const freeze = (at) => `(() => {
     await A.page.click('.lf-toast button'); await A.page.waitForTimeout(150);
     ok('and Undo puts them back', await A.page.locator('#frBoard .fr-row').count() === 2);
 
+    await B.page.click('.lf-bar [data-v="you"]'); await settle(B.page);
     await B.page.click('#frMore'); await settle(B.page);
     ok('name and turning off live behind settings', await top(B.page).locator('#frNewName').count() === 1);
     await top(B.page).locator('#frOffBtn').click(); await settle(B.page);
     await top(B.page).locator('button', { hasText: 'Turn off' }).click(); await B.page.waitForTimeout(400);
+    await B.page.click('.lf-bar [data-v="fr"]'); await settle(B.page);
     ok('turning off deletes the record on the server', !m.has('lift:' + codeB) && await B.page.locator('#frOff').count() === 1);
     await A.page.click('.lf-bar [data-v="home"]'); await A.page.click('.lf-bar [data-v="fr"]'); await A.page.waitForTimeout(400);
     ok('and their friends see they have gone', /Turned friends off/.test(await A.page.textContent('#frBoard')));

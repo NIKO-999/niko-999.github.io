@@ -427,17 +427,18 @@ svg { display: block; }
 .fr-live { display: inline-flex; align-items: center; gap: 6px; color: var(--good); font-weight: 600; }
 .fr-live::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--log); box-shadow: 0 0 0 0 color-mix(in srgb, var(--log) 60%, transparent); animation: fr-live 1.6s ease-out infinite; }
 @keyframes fr-live { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--log) 60%, transparent); } 100% { box-shadow: 0 0 0 8px transparent; } }
-.fr-lb { padding: 14px 16px 10px; }
-.fr-lb .lf-hd { margin-bottom: 8px; }
-.fr-lb-r { display: grid; grid-template-columns: 22px minmax(0, 92px) minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 40px; }
-.fr-lb-r > em { font-style: normal; font-weight: 800; color: var(--quiet); text-align: center; font-size: 14px; }
-.fr-lb-r:first-of-type > em { color: var(--lb-c); }
-.fr-lb-r > b { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fr-lb-r > i { display: block; height: 8px; border-radius: 4px; background: var(--card3); overflow: hidden; }
-.fr-lb-r > i > u { display: block; height: 100%; border-radius: 4px; background: var(--lb-c); }
-.fr-lb-r > span { font-size: 13px; color: var(--dim); text-align: right; min-width: 52px; }
-.fr-lb .lf-seg { margin: 0 0 8px; }
 @media (prefers-reduced-motion: reduce) { .lf-burst i, .fr-live::before, .lf-fin-ok { animation: none; } .lf-burst i { display: none; } }
+.fr-rg { padding: 14px 16px 6px; }
+.fr-rg-w { display: grid; place-items: center; margin: 2px 0 8px; }
+.fr-rg-w svg { width: 180px; height: 180px; display: block; }
+.fr-rg-a { transition: stroke-dasharray .8s cubic-bezier(.2,.8,.2,1); }
+#frRings .fr-row { grid-template-columns: 12px minmax(0, 1fr) auto; padding: 10px 0; }
+#frRings .fr-live { color: var(--rc); }
+#frRings .fr-live::before { background: var(--rc); animation-name: fr-live-c; }
+@keyframes fr-live-c { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--rc) 60%, transparent); } 100% { box-shadow: 0 0 0 8px transparent; } }
+.fr-rg-k { width: 12px; height: 12px; border-radius: 50%; background: var(--rc); }
+#frRings .fr-row.is-me .fr-t b { color: var(--ink); }
+#frRings .fr-wk { font-weight: 700; font-size: 15px; }
 .lf-wheel { position: relative; width: 200px; height: 200px; margin: 6px auto 0; border-radius: 50%; touch-action: none; cursor: pointer;
   background: conic-gradient(hsl(0,80%,56%), hsl(30,80%,56%), hsl(60,80%,56%), hsl(90,80%,56%), hsl(120,80%,56%), hsl(150,80%,56%), hsl(180,80%,56%), hsl(210,80%,64%), hsl(240,80%,64%), hsl(270,80%,64%), hsl(300,80%,56%), hsl(330,80%,56%), hsl(360,80%,56%)); }
 .lf-wheel:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
@@ -527,11 +528,9 @@ svg { display: block; }
 .lf-bdr circle { fill: none; stroke-width: 3; }
 .lf-bdr .bg { stroke: var(--mark-off); }
 .lf-bdr .fg { stroke: var(--good); stroke-linecap: round; }
-.fr-bg { display: flex; gap: 2px; }
-#frBoard .fr-row { grid-template-columns: minmax(0, 1fr) auto auto; position: relative; }
+#frBoard .fr-row { position: relative; }
 .fr-open { position: absolute; inset: 0; z-index: 0; border-radius: 12px; }
 .fr-row > :not(.fr-open) { position: relative; pointer-events: none; }
-.fr-row .fr-bg { pointer-events: auto; z-index: 1; }
 .fr-bgr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
 .lf-cv { position: fixed; inset: 0; z-index: 70; display: grid; grid-template-rows: auto 1fr auto; background: var(--bg); opacity: 0; transition: opacity .22s;
   padding: calc(var(--safe-t) + 12px) 16px calc(var(--safe-b) + 24px); }
@@ -570,10 +569,6 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-me-t span { font-size: 13px; color: var(--dim); }
 .fr-ib { width: 44px; height: 44px; display: grid; place-items: center; color: var(--dim); }
 .fr-ib .lf-ic { width: 20px; height: 20px; }
-.fr-strip { display: grid; grid-template-columns: repeat(30, minmax(0, 1fr)); gap: 2px; margin-top: 4px; }
-.fr-strip i { height: 6px; border-radius: 2px; background: var(--mark-off); }
-.fr-strip i.is-on { background: var(--ink); }
-.fr-strip i.is-rest { background: none; box-shadow: inset 0 0 0 1px var(--dim); }
 .fr-code { font-size: 16px; font-weight: 700; letter-spacing: .1em; }
 .fr-err { color: var(--bad); margin: 8px 0 0; }
 .fr-dash { display: grid; gap: 12px; }
@@ -2720,6 +2715,7 @@ function lfRenderYou() {
     g.addEventListener('click', function (e) { S.goal = +e.currentTarget.dataset.g; lfSave(); lfRender(); });
     $('#lfGoal', c).appendChild(g);
   }
+  if (FRS.on) { c.appendChild(el('<span class="lf-flab">Friends</span>')); c.appendChild(frCodeRow()); }
   root.appendChild(lfFold('lfSet', 'set', 'Settings', '', function (bd) { bd.appendChild(c); }));
   root.appendChild(lfThemeCard());
   root.appendChild(lfBadgeCard());
@@ -3046,11 +3042,6 @@ function frShare() {
 
 /* A STRIP OF THIRTY DAYS, the same marks the home grid uses: trained,
    rested on purpose, or nothing. */
-function frStrip(dstr, big) {
-  var g = el('<div class="fr-strip' + (big ? ' is-big' : '') + '" aria-hidden="true"></div>');
-  (dstr || '0'.repeat(30)).split('').forEach(function (ch) { g.appendChild(el('<i class="' + (ch === '1' ? 'is-on' : ch === 'r' ? 'is-rest' : '') + '"></i>')); });
-  return g;
-}
 function frAgoT(t) {
   var m = Math.round((Date.now() - t) / 60000);
   return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' d ago';
@@ -3061,7 +3052,7 @@ function frAgo(d) {
   return n <= 0 ? 'trained today' : n === 1 ? 'trained yesterday' : 'trained ' + n + ' days ago';
 }
 /* A FRIEND'S DASHBOARD, drawn the way your own home is: the same
-   tiles, the same thirty marks, the same bars — only what they send. */
+   tiles, the same thirty marks, the same bars - only what they send. */
 function frBadges(st) {
   return (Array.isArray(st && st.bg) ? st.bg : []).filter(function (x) { return Array.isArray(x) && BADGE[x[0]]; }).slice(0, 3).map(function (x) { return { b: BADGE[x[0]], d: x[1], p: null }; });
 }
@@ -3198,32 +3189,45 @@ function frRxBar(w, f) {
 /* TRAINING NOW: a workout started and not finished, within three hours —
    past that it is a phone that died mid-session, not a session. */
 function frLive(st) { var lv = st && st.lv; return typeof lv === 'number' && lv > 0 && Date.now() - lv < 3 * 3600e3 && Date.now() - lv > -6e5; }
-/* THIS WEEK'S LEADERBOARD: everybody, ranked, each bar in the colour they
-   chose. A week is theirs only if it is THIS week — a record last sent on
-   Sunday counts nothing toward Monday. */
-var frLbBy = 'vol';
-function frBoardWeek(rows) {
-  var mon = ymd(monday(today()));
-  var wk = function (st) { var tr = st && st.tr; if (!tr || tr.m !== mon || !Array.isArray(tr.w8) || !Array.isArray(tr.w8[7])) return [0, 0, 0, 0]; return tr.w8[7]; };
-  var c = el('<div class="lf-card fr-lb" id="frLb"><div class="lf-hd"><span class="lf-lab">This week</span><span class="lf-lab">ranked</span></div>'
-    + '<div class="lf-seg" style="--n:2"><button type="button" data-k="vol">Volume</button><button type="button" data-k="wo">Workouts</button></div><div class="fr-lb-l"></div></div>');
-  $$('.lf-seg button', c).forEach(function (b) {
-    b.setAttribute('aria-pressed', b.dataset.k === frLbBy ? 'true' : 'false');
-    b.addEventListener('click', function () { frLbBy = b.dataset.k; c.replaceWith(frBoardWeek(rows)); });
+/* THE WEEK AS RINGS: one per person, filling toward their OWN weekly goal,
+   so three a week and six a week race fairly - closing yours is the win.
+   Each ring is in the colour that person chose. The names under it are
+   the way into each dashboard; there is no second list. */
+function frWeekOf(st) {
+  var mon = ymd(monday(today())), tr = st && st.tr;
+  /* a week is theirs only if it is THIS week: a record last sent on Sunday counts nothing toward Monday */
+  var wk = tr && tr.m ? (tr.m === mon && Array.isArray(tr.w8) && Array.isArray(tr.w8[7]) ? +tr.w8[7][0] || 0 : 0) : (+(st && st.wk) || 0);
+  return { n: wk, g: Math.max(1, +(st && st.goal) || 0) };
+}
+function frColOf(st) { var h = frHue(st); return h === null ? '#a3e635' : lfHex(lfHsl(h, 80, h > 200 && h < 300 ? 64 : 56)); }
+function frRings(rows) {
+  var ls = rows.map(function (f) { var w = frWeekOf(f.s); return { f: f, w: w, k: f.gone ? -1 : Math.min(1, w.n / w.g) }; })
+    .sort(function (a, b) { return b.k - a.k || b.w.n - a.w.n; });
+  var c = el('<div class="lf-card fr-rg" id="frRings"><div class="lf-hd"><span class="lf-lab">This week</span><span class="lf-lab">weekly goal</span></div><div class="fr-rg-w"><svg viewBox="0 0 150 150" aria-hidden="true"><g fill="none" stroke-linecap="round" transform="rotate(-90 75 75)"></g></svg></div><div id="frBoard"></div></div>');
+  var g = $('g', c), drawn = ls.filter(function (x) { return !x.f.gone; }).slice(0, 6), n = drawn.length;
+  var sw = n > 4 ? 8 : 11, step = sw + 3, r0 = 69 - sw / 2;
+  drawn.forEach(function (x, i) {
+    var rr = r0 - i * step, len = 2 * Math.PI * rr, col = frColOf(x.f.s);
+    if (rr < 8) return;
+    g.insertAdjacentHTML('beforeend', '<circle cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="var(--card3)" stroke-width="' + sw + '"/>'
+      + (x.k > 0 ? '<circle class="fr-rg-a" cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="' + col + '" stroke-width="' + sw + '" stroke-dasharray="' + (len * x.k).toFixed(1) + ' ' + len.toFixed(1) + '"/>' : ''));
   });
-  var ix = frLbBy === 'vol' ? 3 : 0;
-  var ls = rows.filter(function (f) { return !f.gone; }).map(function (f) { var w = wk(f.s); return { f: f, v: w[ix], w: w }; })
-    .sort(function (a, b) { return b.v - a.v || b.w[1] - a.w[1]; });
-  var top = Math.max.apply(null, ls.map(function (x) { return x.v; }).concat([1]));
-  ls.forEach(function (x, i) {
-    var rw = el('<div class="fr-lb-r"><em class="lf-num"></em><b></b><i><u></u></i><span class="lf-num"></span></div>');
-    var h = frHue(x.f.s), col = h === null ? '#a3e635' : lfHex(lfHsl(h, 80, h > 200 && h < 300 ? 64 : 56));
-    rw.style.setProperty('--lb-c', col);
-    $('em', rw).textContent = x.v ? i + 1 : '–';
-    $('b', rw).textContent = x.f.me ? 'You' : (x.f.n || 'Friend');
-    $('u', rw).style.width = (x.v / top * 100) + '%';
-    $('span', rw).textContent = ix === 3 ? fmtBig(toDisp(x.v)) + ' ' + S.unit : x.v + (x.v === 1 ? ' workout' : ' workouts');
-    $('.fr-lb-l', c).appendChild(rw);
+  var bd = $('#frBoard', c);
+  ls.forEach(function (x) {
+    var f = x.f, st = f.s || {};
+    var row = el('<div class="fr-row"><button type="button" class="fr-open"></button><i class="fr-rg-k"></i><div class="fr-t"><b></b><span></span></div><span class="fr-wk lf-num"></span></div>');
+    row.dataset.c = f.c; row.style.setProperty('--rc', frColOf(st));
+    if (f.me) row.classList.add('is-me');
+    if (f.gone) row.classList.add('is-gone');
+    $('.fr-t b', row).textContent = f.me ? 'You' : (f.n || 'Friend');
+    var sub = $('.fr-t span', row);
+    if (f.gone) sub.textContent = 'Turned friends off';
+    else if (frLive(st)) { sub.textContent = 'Training now · since ' + fmtAt(new Date(st.lv)); sub.className = 'fr-live'; row.classList.add('is-live'); }
+    else sub.textContent = x.w.n >= x.w.g ? 'Goal closed' : (x.w.g - x.w.n) + ' to go';
+    $('.fr-wk', row).textContent = f.gone ? '' : x.w.n + '/' + x.w.g;
+    $('.fr-open', row).setAttribute('aria-label', (f.me ? 'You' : (f.n || 'Friend')) + ', ' + x.w.n + ' of ' + x.w.g + ' this week. Open their dashboard');
+    $('.fr-open', row).addEventListener('click', function () { if (f.me) frSheet({ n: FRS.name || 'You', s: st, me: 1 }); else frSheet(f); });
+    bd.appendChild(row);
   });
   return c;
 }
@@ -3256,6 +3260,25 @@ function frAddSheet() {
   });
 }
 
+/* YOUR CODE LIVES IN SETTINGS: the code, share, and your name and turning
+   off behind a press. You set those once, so they are not on the tab. */
+function frCodeRow() {
+  var code = el('<div class="fr-me" id="frMe"><div class="fr-me-t"><span>Your code</span><b class="fr-code lf-num"></b></div>'
+    + '<button type="button" class="fr-ib" id="frShare" aria-label="Share your code"><svg class="lf-ic" viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M6 12v7h12v-7"/></svg></button>'
+    + '<button type="button" class="fr-ib" id="frMore" aria-label="Friends settings"><svg class="lf-ic" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/></svg></button></div>');
+  $('.fr-code', code).textContent = FRS.code;
+  $('#frShare', code).addEventListener('click', frShare);
+  $('#frMore', code).addEventListener('click', function () {
+    var b = el('<div><label class="lf-flab" for="frNewName" style="margin-top:0">Your name, as friends see it</label><input class="lf-field" id="frNewName" maxlength="24" autocomplete="off" /></div>');
+    var sv = el('<button type="button" class="lf-btn is-ink" id="frRename">Save name</button>');
+    var off = el('<button type="button" class="lf-btn is-bad" id="frOffBtn">Turn off friends</button>');
+    var s2 = lfSheet({ title: 'Friends', body: b, foot: [off, sv] });
+    $('#frNewName', b).value = FRS.name;
+    sv.addEventListener('click', function () { var n = $('#frNewName', b).value.trim(); if (!n) return; FRS.name = n; frSave(); frSig = ''; frPush(); s2.close(true); lfRender(); });
+    off.addEventListener('click', function () { s2.close(true); frTurnOff(); });
+  });
+  return code;
+}
 var frArrive = 0;
 function lfRenderFr() {
   var root = $('#lfFr'); root.textContent = '';
@@ -3290,29 +3313,7 @@ function lfRenderFr() {
   var add = el('<button type="button" class="fr-plus" id="frAdd" aria-label="Add a friend"><svg class="lf-ic" viewBox="0 0 24 24"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.8-3.6 3.4-5.6 6.5-5.6s5.7 2 6.5 5.6"/><path d="M19 8v6M16 11h6"/></svg></button>');
   add.addEventListener('click', frAddSheet);
   hd.appendChild(add);
-  var bd = el('<div class="lf-card" style="padding:2px 16px" id="frBoard"></div>');
-  rows.forEach(function (f, i) {
-    var st = f.s || {};
-    /* THE ROW IS NOT A BUTTON, because the coins on it are: a button
-       inside a button collapses to one press. An open control lies
-       under the whole row and the coins sit above it. */
-    var row = el('<div class="fr-row"><button type="button" class="fr-open"></button><div class="fr-t"><b></b><span></span></div><span class="fr-wk"><b class="lf-num"></b><small>this week</small></span></div>');
-    row.dataset.c = f.c;
-    if (f.me) row.classList.add('is-me');
-    if (f.gone) row.classList.add('is-gone');
-    $('b', row).textContent = f.n || 'Friend';
-    $('.fr-t span', row).textContent = f.gone ? 'Turned friends off' : (st.wo30 || 0) + ' workouts · 30 days';
-    if (!f.gone && frLive(st)) { var lvs = $('.fr-t span', row); lvs.textContent = 'Training now · since ' + fmtAt(new Date(st.lv)); lvs.className = 'fr-live'; row.classList.add('is-live'); }
-    $('.fr-wk b', row).textContent = (st.wk || 0) + '/' + (st.goal || 0);
-    var bg = frBadges(st);
-    if (bg.length) { var ch = el('<div class="fr-bg"></div>'); bg.forEach(function (x) { ch.appendChild(lfCoinBtn(x, 30)); }); row.insertBefore(ch, $('.fr-wk', row)); }
-    $('.fr-t', row).appendChild(frStrip(st.d));
-    $('.fr-open', row).setAttribute('aria-label', (f.n || 'Friend') + ', ' + (st.wk || 0) + ' of ' + (st.goal || 0) + ' this week. Open their dashboard');
-    $('.fr-open', row).addEventListener('click', function () { if (f.me) frSheet({ n: FRS.name || 'You', s: st, me: 1 }); else frSheet(f); });
-    bd.appendChild(row);
-  });
-  root.appendChild(bd);
-  if (rows.length > 1) root.appendChild(frBoardWeek(rows));
+  root.appendChild(frRings(rows));
   /* WHAT FRIENDS GAVE YOUR WORKOUTS in the last week, newest first. */
   var wk0 = Date.now() - 7 * 864e5, mine = (FRS.rx || []).filter(function (x) { return x.at >= wk0; }).slice(0, 5);
   if (mine.length) {
@@ -3327,24 +3328,7 @@ function lfRenderFr() {
     });
     root.appendChild(rcd);
   }
-  if (!FRS.list.length) root.appendChild(el('<div class="lf-card lf-empty" id="frNone"><b>Nobody yet</b>Send your code to a friend, or add theirs.</div>'));
-  /* YOUR CODE IS ONE QUIET LINE: the code, share, and the rest behind a
-     settings press — you set the name and turn it off once, not daily. */
-  var code = el('<div class="fr-me" id="frMe"><div class="fr-me-t"><span>Your code</span><b class="fr-code lf-num"></b></div>'
-    + '<button type="button" class="fr-ib" id="frShare" aria-label="Share your code"><svg class="lf-ic" viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M6 12v7h12v-7"/></svg></button>'
-    + '<button type="button" class="fr-ib" id="frMore" aria-label="Friends settings"><svg class="lf-ic" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/></svg></button></div>');
-  $('.fr-code', code).textContent = FRS.code;
-  $('#frShare', code).addEventListener('click', frShare);
-  $('#frMore', code).addEventListener('click', function () {
-    var b = el('<div><label class="lf-flab" for="frNewName" style="margin-top:0">Your name, as friends see it</label><input class="lf-field" id="frNewName" maxlength="24" autocomplete="off" /></div>');
-    var sv = el('<button type="button" class="lf-btn is-ink" id="frRename">Save name</button>');
-    var off = el('<button type="button" class="lf-btn is-bad" id="frOffBtn">Turn off friends</button>');
-    var s2 = lfSheet({ title: 'Friends', body: b, foot: [off, sv] });
-    $('#frNewName', b).value = FRS.name;
-    sv.addEventListener('click', function () { var n = $('#frNewName', b).value.trim(); if (!n) return; FRS.name = n; frSave(); frSig = ''; frPush(); s2.close(true); lfRender(); });
-    off.addEventListener('click', function () { s2.close(true); frTurnOff(); });
-  });
-  root.appendChild(code);
+  if (!FRS.list.length) root.appendChild(el('<div class="lf-card lf-empty" id="frNone"><b>Nobody yet</b>Add a friend with the plus, or share your code from Settings.</div>'));
   /* Arriving at the tab fetches; drawing it only draws. A paint that
      fetched would repaint inside its own fetch, which is a loop. */
   if (frArrive) { frArrive = 0; frPush(); frPullAll(function () { if (view === 'fr') lfRender(); }); }
