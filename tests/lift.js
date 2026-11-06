@@ -1080,6 +1080,10 @@ const freeze = (at) => `(() => {
     ok('and the middle crowns who is in front', (await A.page.textContent('#frRgLead')).trim() === 'You' && await A.page.locator('#frRgLead .fr-rg-cr').count() === 1, await A.page.textContent('#frRings'));
     ok('and a ring is drawn in the colour they chose', await A.page.$$eval('#frRings .fr-rg-a', (r) => r.map((x) => x.getAttribute('stroke'))).then((c) => c.length >= 1));
     ok('there is no leaderboard card, and each name carries its thirty days', await A.page.locator('#frLb').count() === 0 && await A.page.locator('#frRings .fr-row .fr-strip').count() === 2);
+    await A.page.evaluate(() => { window.__cv = 0; new MutationObserver(() => { if (document.querySelector('.lf-cv')) window.__cv = 1; }).observe(document, { childList: true, subtree: true }); });
+    await A.page.click('#frRings .fr-row.is-me .fr-bg button >> nth=0'); await A.page.waitForTimeout(400);
+    ok('a badge on the rings opens the badge, not the dashboard', await A.page.evaluate(() => window.__cv) === 1 && await A.page.locator('.lf-sheet').count() === 0);
+    const cvx = await A.page.$('.lf-cv-x'); if (cvx) { await cvx.click(); await A.page.waitForTimeout(400); }
     ok('a typed code adds them, lower case and all', (await A.page.$$eval('#frBoard .fr-row .fr-t b', (b) => b.map((x) => x.textContent))).join() === 'You,Sam');
     await A.page.click('#frBoard .fr-row:not(.is-me)'); await settle(A.page);
     const sh = await top(A.page).textContent('.lf-sh-bd');
