@@ -60,9 +60,9 @@ const freeze = (at) => `(() => {
   ok('a Friday opens on Quad volume of the split', (await page.textContent('#lfPick')).trim() === 'Quad volume' && /Pendulum squat/.test(await page.textContent('.lf-sub')));
   ok('the routine name has no border round it', await page.$eval('#lfPick', (e) => getComputedStyle(e).borderTopStyle === 'none' || parseFloat(getComputedStyle(e).borderTopWidth) === 0));
   ok('and lines up with the label above it', await page.evaluate(() => Math.abs(document.querySelector('#lfPick').getBoundingClientRect().left - document.querySelector('.lf-today .lf-lab').getBoundingClientRect().left) < 1));
-  ok('with its six exercises', /6 exercises/.test(await page.textContent('.lf-chips')));
+  ok('with its five exercises', /5 exercises/.test(await page.textContent('.lf-chips')));
   const legs = await page.$$eval('#lfLegs .lf-vr', (r) => r.map((x) => x.dataset.m + ':' + x.querySelector('em').textContent));
-  ok('leg sets this week start at nought against the targets', legs.join() === 'Quads:0 / 18–20,Hamstrings:0 / 12–16,Calves:0 / 14–18,Glutes:0 / 6–8,Chest:0 / 14–18,Back:0 / 16–20,Shoulders:0 / 14–18,Triceps:0 / 8–10,Biceps:0 / 8–10,Abs:0 / 10–12', legs);
+  ok('leg sets this week start at nought against the targets', legs.join() === 'Quads:0 / 16,Hamstrings:0 / 14,Calves:0 / 15,Glutes:0 / 6,Chest:0 / 16,Back:0 / 16,Shoulders:0 / 16,Triceps:0 / 10,Biceps:0 / 10,Abs:0 / 11', legs);
   ok('three stat tiles, each nought', (await page.$$eval('.lf-stat b', (b) => b.map((x) => x.textContent))).join() === '0,0,0');
   const days = await page.$$eval('.lf-day', (d) => ({ n: d.length, now: d.filter((x) => x.classList.contains('is-now')).length, last: d[d.length - 1].dataset.d }));
   ok('the last 30 days are thirty marks ending today', days.n === 30 && days.now === 1 && days.last === '2026-10-30', days);
@@ -76,7 +76,7 @@ const freeze = (at) => `(() => {
   ok('the split is seven days, Monday first', split.length === 7 && split[0] === 'Mon · Quad strength' && split[6] === 'Sun · Choice day', split);
   await page.click('#lfSplit .lf-li >> nth=0'); await settle(page);
   const mon = await top(page).textContent();
-  ok('a day of the split reads its sets × reps', mon.includes('Hack squat') && mon.includes('4 × 6–10') && mon.includes('1–2 RIR') && mon.includes('2 × 10–12 each side') && mon.includes('Standing calf raises'), mon.slice(0, 160));
+  ok('a day of the split reads its sets × reps', mon.includes('Hack squat') && mon.includes('4 × 6–10') && mon.includes('1 RIR') && mon.includes('2 × 10–12 each side') && mon.includes('Standing calf raises'), mon.slice(0, 160));
   ok('a day of the split says what it is for', /^Quad strength/.test(await top(page).locator('#lfTip b').textContent())
     && /75–90 minutes/.test(await top(page).locator('#lfTip').textContent()) && /Double progression/.test(await top(page).locator('#lfTip').textContent()));
   ok('the focus comes before the exercises', await top(page).evaluate((s) => !!(s.querySelector('#lfTip').compareDocumentPosition(s.querySelector('.lf-list')) & 4)));
@@ -86,10 +86,10 @@ const freeze = (at) => `(() => {
   await page.click('#lfSplit .lf-li >> nth=1'); await settle(page);
   await top(page).locator('.lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Incline dumbbell press' + '$') }) }).click(); await settle(page);
   ok('an exercise opens over the day', (await top(page).locator('h2').textContent()) === 'Incline dumbbell press');
-  const nx = await page.locator('.lf-sheet').first().locator('.lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Machine chest press' + '$') }) }).boundingBox();
+  const nx = await page.locator('.lf-sheet').first().locator('.lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Cable chest flyes' + '$') }) }).boundingBox();
   await page.mouse.click(nx.x + 40, nx.y + 10); await settle(page);
   ok('tapping another closes the first and opens the one tapped', await page.locator('.lf-sheet').count() === 2
-    && (await top(page).locator('h2').textContent()) === 'Machine chest press', await page.$$eval('.lf-sheet h2', (h) => h.map((x) => x.textContent)));
+    && (await top(page).locator('h2').textContent()) === 'Cable chest flyes', await page.$$eval('.lf-sheet h2', (h) => h.map((x) => x.textContent)));
   await page.keyboard.press('Escape'); await settle(page);
   await page.keyboard.press('Escape'); await settle(page);
   const sun = () => page.$$eval('#lfSplit .lf-li span', (x) => x[6].textContent);
@@ -106,7 +106,7 @@ const freeze = (at) => `(() => {
   await page.click('.lf-bar [data-v="you"]');
   ok('there is no calves switch any more', await page.locator('#lfCalf').count() === 0);
   const foc = await page.$$eval('#lfFocus .lf-li', (r) => r.map((x) => x.dataset.m + ':' + x.querySelector('em').textContent));
-  ok('focus lists every muscle and its weekly sets', foc.join() === 'Quads:18–20,Hamstrings:12–16,Calves:14–18,Glutes:6–8,Chest:14–18,Back:16–20,Shoulders:14–18,Triceps:8–10,Biceps:8–10,Abs:10–12', foc);
+  ok('focus lists every muscle and its weekly sets', foc.join() === 'Quads:16,Hamstrings:14,Calves:15,Glutes:6,Chest:16,Back:16,Shoulders:16,Triceps:10,Biceps:10,Abs:11', foc);
   await setFocus('Calves', 12, 14);
   await page.click('.lf-bar [data-v="home"]');
   ok('a target edited under You moves the week', (await page.textContent('#lfLegs [data-m="Calves"] em')) === '0 / 12–14');
@@ -381,9 +381,9 @@ const freeze = (at) => `(() => {
       const ex = page.locator('.lf-session .lf-ex').first();
       ok('the set count is the program\'s', await ex.locator('.lf-set:not(.is-hd)').count() === 4);
       const monEx = await page.$$eval('.lf-session .lf-ex-n', (x) => x.map((e) => e.textContent));
-      ok('Monday carries its calves at 5 sets and its abs', monEx.join() === 'Hack squat,Leg press,Leg extensions,Bulgarian split squats,Standing calf raises,Cable crunches'
-        && await page.locator('.lf-session .lf-ex').nth(4).locator('.lf-set:not(.is-hd)').count() === 5, monEx);
-      ok('the target is written under the name', (await ex.locator('.lf-tg').textContent()) === '4 × 6–10 · 1–2 RIR · rest 2–3 min');
+      ok('Monday carries its calves at 5 sets and its abs', monEx.join() === 'Hack squat,Leg extensions,Bulgarian split squats,Standing calf raises,Cable crunches'
+        && await page.locator('.lf-session .lf-ex').nth(3).locator('.lf-set:not(.is-hd)').count() === 5, monEx);
+      ok('the target is written under the name', (await ex.locator('.lf-tg').textContent()) === '4 × 6–10 · 1 RIR · rest 2–3 min');
       const ph = await ex.locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.placeholder));
       ok('under the top of the range, the aim is the same weight and one more rep', ph.join() === '80,9,80,9,80,8,80,8', ph);
       ok('and it says so', (await ex.locator('.lf-aim').textContent()).includes('one more rep'));
@@ -415,7 +415,7 @@ const freeze = (at) => `(() => {
     ok('and is kept for the day', (await store(page)).rc['2026-11-02'] === 1);
     await page.click('#lfGo'); await settle(page);
     const n = await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelector('.lf-ex-n').textContent + ':' + e.querySelectorAll('.lf-set:not(.is-hd)').length));
-    ok('leg sets come in a third lighter, abs untouched', n.join() === 'Hack squat:3,Leg press:2,Leg extensions:2,Bulgarian split squats:1,Standing calf raises:3,Cable crunches:4', n);
+    ok('leg sets come in a third lighter, abs untouched', n.join() === 'Hack squat:3,Leg extensions:3,Bulgarian split squats:1,Standing calf raises:3,Cable crunches:4', n);
     /* THE REST ALERT, once, the moment the rest is up. */
     const set0 = page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd)').first();
     await set0.locator('input').nth(0).fill('100'); await set0.locator('input').nth(1).fill('8');
@@ -554,7 +554,7 @@ const freeze = (at) => `(() => {
     ok('a bad day-log entry costs the entry, not the day', r.dl['2026-10-28'].st.length === 1 && r.dl['2026-10-28'].fd.length === 1 && r.dl['2026-10-28'].wa.length === 0 && !r.dl.junk, r.dl);
     ok('and the repair is written back', JSON.parse(await page.evaluate(() => localStorage.getItem('lift.v1'))).wo[0].x[0].sets.length === 1);
     ok('a bad cardio entry costs the cardio, not the workout', r.wo[0].cd === null && r.wo.length === 1);
-    ok('a record from before focus was editable gets the default focus', r.focus.length === 10 && r.focus[2].m === 'Calves' && r.focus[2].lo === 14, r.focus);
+    ok('a record from before focus was editable gets the default focus', r.focus.length === 10 && r.focus[2].m === 'Calves' && r.focus[2].lo === 15, r.focus);
     await c.close();
   }
   {
@@ -567,7 +567,7 @@ const freeze = (at) => `(() => {
     const old = [['Quads', 13, 16, 1], ['Calves', 12, 12, 1], ['Lower back', 6, 6, 1], ['Hamstrings', 10, 10, 0], ['Glutes', 5, 8, 0], ['Abs', 9, 9, 0]].map(([m, lo, hi, p]) => ({ m, lo, hi, p }));
     const { c, page } = await ctx({ unit: 'kg', focus: old });
     const r = await store(page);
-    ok('a focus never changed from the first split follows the new one', r.focus.length === 10 && r.focus.find((f) => f.m === 'Shoulders').lo === 14, r.focus);
+    ok('a focus never changed from the first split follows the new one', r.focus.length === 10 && r.focus.find((f) => f.m === 'Shoulders').lo === 16, r.focus);
     await c.close();
   }
   {
@@ -577,10 +577,10 @@ const freeze = (at) => `(() => {
     {
       const { c: c3, page: p3 } = await ctx({ unit: 'kg', focus: 'Quads:17:17:1,Calves:12:12:1,Hamstrings:12:12:1,Glutes:5:5:1,Shoulders:16:16:0,Back:15:15:0,Chest:9:9:0,Triceps:8:8:0,Biceps:8:8:0,Abs:6:6:0,Lower back:2:2:0'.split(',').map((x) => { const q = x.split(':'); return { m: q[0], lo: +q[1], hi: +q[2], p: +q[3] }; }) });
       const r3 = await store(p3);
-      ok('the split\'s last shipped targets, never changed, take the new ranges', r3.focus[0].m === 'Quads' && r3.focus[0].lo === 18 && r3.focus[0].hi === 20 && r3.focus.length === 10, r3.focus);
+      ok('the split\'s last shipped targets, never changed, take the new ranges', r3.focus[0].m === 'Quads' && r3.focus[0].lo === 16 && r3.focus[0].hi === 16 && r3.focus.length === 10, r3.focus);
       await c3.close();
     }
-    ok('the second split\'s untouched targets follow the new one', r.focus[0].lo === 18 && r.focus.find((f) => f.m === 'Shoulders').lo === 14, r.focus);
+    ok('the second split\'s untouched targets follow the new one', r.focus[0].lo === 16 && r.focus.find((f) => f.m === 'Shoulders').lo === 16, r.focus);
     ok('and a session logged under the last name takes the new one', r.wo[0].n === 'Quad strength', r.wo[0].n);
     await c.close();
   }
@@ -616,10 +616,10 @@ const freeze = (at) => `(() => {
     const { c, page } = await ctx({ unit: 'kg' });
     await page.click('.lf-bar [data-v="lib"]');
     const sub = async (n) => page.locator('#lfLib .lf-li', { has: page.locator('b', { hasText: new RegExp('^' + n + '$') }) }).first().locator('span').first().textContent();
-    ok('a compound reads 3 × 6–10 at 1–2 RIR', /3 × 6–10 · 1–2 RIR/.test(await sub('Barbell bench press')), await sub('Barbell bench press'));
-    ok('an isolation reads its own reps at 0–1 RIR', /3 × 12–20 · 0–1 RIR/.test(await sub('Lateral raises')) && /3 × 8–12 · 0–1 RIR/.test(await sub('Barbell curls')), [await sub('Lateral raises'), await sub('Barbell curls')]);
+    ok('on this split a compound reads 3 × 6–10 at 1 RIR', /3 × 6–10 · 1 RIR/.test(await sub('Barbell bench press')), await sub('Barbell bench press'));
+    ok('and an isolation reads its own reps, to failure', /3 × 12–20 · 0 RIR/.test(await sub('Lateral raises')) && /3 × 8–12 · 0 RIR/.test(await sub('Barbell curls')), [await sub('Lateral raises'), await sub('Barbell curls')]);
     await page.locator('#lfLib .lf-li', { has: page.locator('b', { hasText: /^Leg extensions$/ }) }).first().click(); await settle(page);
-    ok('an exercise opens on its recommendation and rest', (await top(page).locator('#lfRecd').textContent()) === 'Isolation · 3 × 12–15 · 0–1 RIR · rest 60–120s');
+    ok('an exercise opens on its recommendation and rest', (await top(page).locator('#lfRecd').textContent()) === 'Isolation · 3 × 12–15 · 0 RIR · rest 2–3 min');
     await page.keyboard.press('Escape'); await settle(page);
     /* one you add guesses its type from the name, and you can change it */
     await page.click('.lf-bar [data-v="home"]'); await page.click('#lfGo'); await settle(page);
@@ -635,7 +635,7 @@ const freeze = (at) => `(() => {
     ok('and stops once you have', (await top(page).locator('#lfExC [aria-pressed="true"]').textContent()).startsWith('Compound'));
     await top(page).locator('button', { hasText: /^Save$/ }).click(); await settle(page);
     const card = page.locator('.lf-ex', { hasText: 'Landmine thing' });
-    ok('it lands in the workout with a target written under it', (await card.locator('.lf-tg').textContent()) === '3 × 6–10 · 1–2 RIR · rest 2–3 min', await card.locator('.lf-tg').textContent());
+    ok('it lands in the workout with a target written under it', (await card.locator('.lf-tg').textContent()) === '3 × 6–10 · 1 RIR · rest 2–3 min', await card.locator('.lf-tg').textContent());
     ok('and it is stored as a compound', (await store(page)).ex.find((e) => e.n === 'Landmine thing').c === 1);
     await page.keyboard.press('Escape'); await settle(page);
     /* the weekly targets are edited from the home card itself */
@@ -810,6 +810,7 @@ const freeze = (at) => `(() => {
     await page.click('#lfSplit .lf-li >> nth=3'); await settle(page);
     const thu = await top(page).textContent();
     ok('Thursday reads its lunges in steps each side, as written', /Walking lunges[\s\S]*3 × 10 steps each side/.test(thu) && /Tibialis raises/.test(thu), thu.slice(0, 200));
+    ok('and another split keeps its own effort and rest', /1–2 RIR/.test(thu) && !/· 1 RIR/.test(thu));
     await page.keyboard.press('Escape'); await settle(page);
     await page.click('.lf-bar [data-v="home"]'); await settle(page);
     ok('and a Monday on it is Heavy legs', (await page.textContent('#lfPick')).trim() === 'Heavy legs');
@@ -1040,7 +1041,7 @@ const freeze = (at) => `(() => {
     ok('turning on claims an eight-character code', /^[A-HJ-NP-Z2-9]{8}$/.test(codeA) && m.has('lift:' + codeA), codeA);
     const recA = JSON.parse(m.get('lift:' + codeA));
     ok('what the server holds is counts: 3 workouts, 4 sets, the empty days as rest, trained today', recA.n === 'Niko' && recA.s.wo30 === 3 && recA.s.sets30 === 4 && recA.s.last === '2026-10-30' && recA.s.d.slice(-6) === '01r1r1', recA.s);
-    ok('this week goes by day, and by muscle against your targets', JSON.stringify(recA.s.w7) === '[1,0,2,0,1,0,0]' && JSON.stringify(recA.s.mu[0]) === '["Quads",4,18]', [recA.s.w7, recA.s.mu[0]]);
+    ok('this week goes by day, and by muscle against your targets', JSON.stringify(recA.s.w7) === '[1,0,2,0,1,0,0]' && JSON.stringify(recA.s.mu[0]) === '["Quads",4,16]', [recA.s.w7, recA.s.mu[0]]);
     ok('volume goes as totals: 30 days, eight weeks, and reps by day', recA.s.vol30 === 3520 && recA.s.v8[7] === 3520 && recA.s.v8.length === 8 && JSON.stringify(recA.s.r7) === '[8,0,16,0,8,0,0]', [recA.s.vol30, recA.s.v8, recA.s.r7]);
     ok('and nothing it no longer needs: no cardio, no totals', !('cd7' in recA.s) || recA.s.cd7 === 0);
     ok('your three latest badges go with the counts, newest first', JSON.stringify(recA.s.bg) === '[["pr","2026-10-28"],["first","2026-10-26"]]', recA.s.bg);
@@ -1076,7 +1077,7 @@ const freeze = (at) => `(() => {
     ok('and you are not', !/Training now/.test(await A.page.textContent('#frBoard .fr-row.is-me')));
     ok('the week is rings, one each, toward their own goal, and the names under them are the board', await A.page.locator('#frRings svg circle').count() >= 2 && await A.page.locator('#frRings #frBoard .fr-row').count() === 2 && (await A.page.$$eval('#frRings .fr-row', (r) => r.map((x) => x.style.getPropertyValue('--rc')))).every((c) => c));
     ok('their ring says it too: a glow and a light at its tip', await A.page.locator('#frRings .fr-rg-h').count() === 1 && await A.page.locator('#frRings .fr-rg-a.is-live, #frRings .fr-rg-p').count() >= 1);
-    ok('and the middle crowns who is in front', /^You\s*in front · 3\//.test((await A.page.textContent('#frRgLead')).trim()) && await A.page.locator('#frRgLead .fr-rg-cr').count() === 1, await A.page.textContent('#frRings'));
+    ok('and the middle crowns who is in front', (await A.page.textContent('#frRgLead')).trim() === 'You' && await A.page.locator('#frRgLead .fr-rg-cr').count() === 1, await A.page.textContent('#frRings'));
     ok('and a ring is drawn in the colour they chose', await A.page.$$eval('#frRings .fr-rg-a', (r) => r.map((x) => x.getAttribute('stroke'))).then((c) => c.length >= 1));
     ok('there is no leaderboard card, and each name carries its thirty days', await A.page.locator('#frLb').count() === 0 && await A.page.locator('#frRings .fr-row .fr-strip').count() === 2);
     ok('a typed code adds them, lower case and all', (await A.page.$$eval('#frBoard .fr-row .fr-t b', (b) => b.map((x) => x.textContent))).join() === 'You,Sam');

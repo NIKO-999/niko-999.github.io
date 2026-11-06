@@ -831,17 +831,17 @@ var MUSCLES = ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Lower back', 'Abs', '
    quads frequent exposure; four upper days spread the upper-body volume
    so no muscle is pushed to its limit daily. */
 var PROGRAM_UL = [
-  /* THE WEEK, BUILT TO THE RANGES: quads 19, hamstrings 14, calves 15,
-     glutes 6 - legs the priority - then chest 16, back 18, side and rear
-     delts 16 over three days, triceps and biceps 9 direct, abs 11. Every
-     muscle lands inside its range with room above it, and no session
-     runs past about 24 working sets. */
-  { id: 'p-mon', dow: 1, n: 'Quad strength', sp: 'Hack squat, leg press, extensions', ex: [['hack', 4, 6, 10], ['legpress', 3, 10, 12], ['legext', 3, 12, 15], ['bss', 2, 10, 12, 'each side'], ['calfstand', 5, 8, 12], ['cablecrunch', 4, 12, 15]] },
-  { id: 'p-tue', dow: 2, n: 'Chest & shoulders', sp: 'Incline press, flyes, delts, triceps', ex: [['incdb', 4, 8, 12], ['mchest', 3, 8, 12], ['cfly', 2, 12, 15], ['cablat', 4, 12, 20], ['rdfly', 3, 12, 20], ['tripush', 3, 10, 15], ['triover', 3, 12, 15]] },
+  /* THE WEEK, ONE NUMBER A MUSCLE: 16 hard sets for quads, back, chest
+     and shoulders, 10 direct for biceps and triceps. Quads are two 8-set
+     days of 4 heavy plus 4 extensions; back is 8 for the lats and 8 for
+     the upper back; chest 8 pressing and 8 flyes; delts are side and rear
+     over three days. Hamstrings 14, calves 15, glutes 6, abs 11. */
+  { id: 'p-mon', dow: 1, n: 'Quad strength', sp: 'Hack squat, extensions, split squats', ex: [['hack', 4, 6, 10], ['legext', 4, 12, 15], ['bss', 2, 10, 12, 'each side'], ['calfstand', 5, 8, 12], ['cablecrunch', 4, 12, 15]] },
+  { id: 'p-tue', dow: 2, n: 'Chest & shoulders', sp: 'Incline press, flyes, delts, triceps', ex: [['incdb', 4, 8, 12], ['cfly', 4, 12, 15], ['cablat', 4, 12, 20], ['rdfly', 3, 12, 20], ['tripush', 3, 10, 15], ['triover', 3, 12, 15]] },
   { id: 'p-wed', dow: 3, n: 'Hamstrings & glutes', sp: 'Hinge, curls, hip thrust', ex: [['rdl', 3, 8, 10], ['seatcurl', 4, 10, 15], ['hipthrust', 4, 8, 12], ['lyingcurl', 3, 12, 15], ['calfseat', 5, 12, 20], ['cablecrunch', 3, 12, 15]] },
-  { id: 'p-thu', dow: 4, n: 'Back & V-taper', sp: 'Pull-ups, rows, pullovers, curls', ex: [['pullup', 3, 6, 10], ['csrow', 4, 8, 12], ['latpd', 3, 10, 12], ['cpullover', 3, 12, 15], ['rdfly', 3, 12, 20], ['ezcurl', 3, 8, 12], ['incurl', 2, 10, 15], ['cablecurl', 2, 12, 15]] },
-  { id: 'p-fri', dow: 5, n: 'Quad volume', sp: 'Pendulum squat, extensions, heels-elevated squats', ex: [['pendulum', 4, 8, 12], ['legext', 3, 12, 15], ['heelsmith', 2, 10, 12], ['seatcurl', 4, 12, 15], ['calfstand', 5, 10, 15], ['hlr', 4, 12, 15]] },
-  { id: 'p-sat', dow: 6, n: 'Chest & back', sp: 'Chest, back, delts, arms', ex: [['dbbench', 4, 8, 12], ['pecdeck', 3, 12, 15], ['seatrow', 3, 8, 12], ['wgpd', 2, 10, 12], ['cablat', 3, 15, 20], ['revpec', 3, 15, 20], ['preacher', 2, 10, 15], ['ropeext', 3, 10, 15]] },
+  { id: 'p-thu', dow: 4, n: 'Back & V-taper', sp: 'Pull-ups, rows, pullovers, curls', ex: [['pullup', 3, 6, 10], ['latpd', 3, 10, 12], ['cpullover', 2, 12, 15], ['csrow', 4, 8, 12], ['rdfly', 3, 12, 20], ['ezcurl', 3, 8, 12], ['incurl', 2, 10, 15], ['cablecurl', 2, 12, 15]] },
+  { id: 'p-fri', dow: 5, n: 'Quad volume', sp: 'Pendulum squat, extensions, curls', ex: [['pendulum', 4, 8, 12], ['legext', 4, 12, 15], ['seatcurl', 4, 12, 15], ['calfstand', 5, 10, 15], ['hlr', 4, 12, 15]] },
+  { id: 'p-sat', dow: 6, n: 'Chest & back', sp: 'Chest, back, delts, arms', ex: [['dbbench', 4, 8, 12], ['pecdeck', 4, 12, 15], ['seatrow', 4, 8, 12], ['cablat', 3, 15, 20], ['revpec', 3, 15, 20], ['preacher', 3, 10, 15], ['ropeext', 4, 10, 15]] },
   /* SUNDAY IS A CHOICE, not a session and not a rest day: the card offers
      four ways to spend it and you pick the one your body needs. */
   { id: 'p-sun', dow: 0, n: 'Choice day', sp: 'Weak points, technique, recovery or more volume', choice: 1, ex: [] }
@@ -973,11 +973,12 @@ var DAY_TIPS = {
     'This is a high-volume week. If recovery suffers, cut 20–30% of the sets.']],
   'p-mon': ['Quad strength: heavy, controlled knee-dominant work', [
     'Aim for 75–90 minutes. Legs get the most attention in this programme.',
+    'Eight quad sets: four heavy hack squats, then four leg extensions into a deep stretch.',
     'Double progression: start at the bottom of each range, add reps, and only once every set reaches the top do you add weight.',
     'Record every working set. If your quads are still sore from Friday, take sets off rather than forcing them.']],
   'p-tue': ['Chest and shoulders', [
     'Incline dumbbell press leads while you are fresh.',
-    'Then machine chest press and convergent cable flyes, each taken into a deep stretch.',
+    'Then four sets of convergent cable flyes, each taken into a deep stretch: four pressing, four flyes.',
     'Cable lateral raises and rear delt flyes: side and rear delts, the first of three days this week.',
     'Two triceps movements finish it: pushdowns, then overhead extensions.']],
   'p-wed': ['Hamstrings and glutes', [
@@ -987,16 +988,16 @@ var DAY_TIPS = {
     'Cable crunches close it: abs three times a week, full spinal flexion.']],
   'p-thu': ['Back and biceps', [
     'Weighted pull-ups lead: 3 × 6–10.',
-    'Chest-supported rows and lat pulldowns for thickness and width.',
-    'Cable pullovers after the pulldowns: arms long, a stretch at the top, squeeze the lats down to the thighs.',
+    'Eight for the lats (pull-ups, pulldowns, pullovers), then chest-supported rows for the upper back.',
+    'Cable pullovers: arms long, a stretch at the top, squeeze the lats down to the thighs.',
     'Rear delt flyes, then curls from three angles: EZ-bar, incline dumbbell and cable.']],
   'p-fri': ['Quad hypertrophy: the second quad day, a different stimulus', [
-    'Pendulum squat leads, then extensions and heels-elevated Smith squats.',
+    'The second eight quad sets: four pendulum squats, four leg extensions.',
     'If Monday’s quads have not recovered and performance drops here, cut sets rather than push through.',
     'This is a starting programme, not a requirement to finish every listed set regardless of fatigue.']],
   'p-sat': ['Upper-body development', [
     'Flat dumbbell press and seated cable rows balance the week.',
-    'Pec deck for a stretch-loaded chest finish, and wide-grip pulldowns for the lats.',
+    'Four pressing and four pec deck sets close the chest week; seated rows close the back.',
     'Cable laterals and reverse pec deck: the third delt day of the week.',
     'Preacher curls and rope triceps extensions for the arms.']],
   'p-sun': ['Your choice day: six structured days, one flexible', [
@@ -1022,14 +1023,16 @@ function lfFocusFrom(list, pri) {
   }); });
   return order.sort(function (a, b) { return ((pri[b] || 0) - (pri[a] || 0)) || (by[b] - by[a]); }).map(function (m) { return [m, by[m], by[m], pri[m] || 0]; });
 }
-/* THE WEEKLY RANGES, from the plan: legs first, then the upper body. The
-   week above lands inside every one of them. */
-var FOCUS_DEFAULT = [['Quads', 18, 20, 1], ['Hamstrings', 12, 16, 1], ['Calves', 14, 18, 1], ['Glutes', 6, 8, 1],
-  ['Chest', 14, 18, 0], ['Back', 16, 20, 0], ['Shoulders', 14, 18, 0], ['Triceps', 8, 10, 0], ['Biceps', 8, 10, 0], ['Abs', 10, 12, 0]];
+/* ONE NUMBER A MUSCLE, from the plan, never a range: a target you can
+   read at a glance and close. Legs first, then the upper body; the week
+   above holds exactly these. */
+var FOCUS_DEFAULT = [['Quads', 16, 16, 1], ['Hamstrings', 14, 14, 1], ['Calves', 15, 15, 1], ['Glutes', 6, 6, 1],
+  ['Chest', 16, 16, 0], ['Back', 16, 16, 0], ['Shoulders', 16, 16, 0], ['Triceps', 10, 10, 0], ['Biceps', 10, 10, 0], ['Abs', 11, 11, 0]];
 /* the targets this split shipped with before, as a focus nobody changed:
    one still exactly that follows the new ranges */
 var FOCUS_V3 = ['Quads:17:17:1,Calves:12:12:1,Hamstrings:12:12:1,Glutes:5:5:1,Shoulders:16:16:0,Back:12:12:0,Chest:9:9:0,Triceps:8:8:0,Biceps:8:8:0,Abs:6:6:0,Lower back:2:2:0',
-  'Quads:17:17:1,Calves:12:12:1,Hamstrings:12:12:1,Glutes:5:5:1,Shoulders:16:16:0,Back:15:15:0,Chest:9:9:0,Triceps:8:8:0,Biceps:8:8:0,Abs:6:6:0,Lower back:2:2:0'];
+  'Quads:17:17:1,Calves:12:12:1,Hamstrings:12:12:1,Glutes:5:5:1,Shoulders:16:16:0,Back:15:15:0,Chest:9:9:0,Triceps:8:8:0,Biceps:8:8:0,Abs:6:6:0,Lower back:2:2:0',
+  'Quads:18:20:1,Hamstrings:12:16:1,Calves:14:18:1,Glutes:6:8:1,Chest:14:18:0,Back:16:20:0,Shoulders:14:18:0,Triceps:8:10:0,Biceps:8:10:0,Abs:10:12:0'];
 /* The second split's targets, as they shipped: a focus still exactly
    that follows the new split too. */
 var FOCUS_V2 = 'Quads:15:15:1,Calves:15:15:1,Abs:12:12:1,Lower back:9:9:1,Hamstrings:13:13:0,Glutes:9:9:0,Chest:15:15:0,Back:15:15:0,Shoulders:20:20:0,Biceps:9:9:0,Triceps:12:12:0';
@@ -1105,11 +1108,14 @@ function lfSoreDays() { var from = ymd(addDays(today(), -13)), n = 0; Object.key
    higher for delts and calves, which recover fast and load badly. */
 var ISO_REPS = { Shoulders: [12, 20], Calves: [10, 20], Abs: [10, 15], Core: [10, 15], 'Lower back': [12, 15],
   Chest: [12, 15], Quads: [12, 15], Hamstrings: [10, 15], Glutes: [10, 15], Back: [10, 15], Biceps: [8, 12], Triceps: [10, 15] };
+/* ON THE UPPER / LOWER SPLIT every set is a hard one: 1 in reserve on a
+   compound, to failure on an isolation, and 2 to 3 minutes between sets
+   so fatigue does not cut into the next one. */
 function lfRec(id) {
-  var e = exById(id);
-  if (e && e.c) return { sets: 3, lo: 6, hi: 10, rir: '1–2 RIR', rlo: 120, rhi: 180, kind: 'Compound' };
+  var e = exById(id), hard = typeof S !== 'undefined' && S && S.prog === 'ul';
+  if (e && e.c) return { sets: 3, lo: 6, hi: 10, rir: hard ? '1 RIR' : '1–2 RIR', rlo: 120, rhi: 180, kind: 'Compound' };
   var rr = (e && ISO_REPS[e.m]) || [10, 15];
-  return { sets: 3, lo: rr[0], hi: rr[1], rir: '0–1 RIR', rlo: 60, rhi: 120, kind: 'Isolation' };
+  return { sets: 3, lo: rr[0], hi: rr[1], rir: hard ? '0 RIR' : '0–1 RIR', rlo: hard ? 120 : 60, rhi: hard ? 180 : 120, kind: 'Isolation' };
 }
 function lfRestOf(id) { var c = lfRec(id); return { lo: c.rlo, hi: c.rhi, rir: c.rir }; }
 function lfRecTxt(id) { var c = lfRec(id); return c.sets + ' × ' + c.lo + '–' + c.hi + ' · ' + c.rir; }
@@ -3270,9 +3276,9 @@ function frRings(rows) {
   if (lead.length) {
     var mid = $('#frRgLive', c), top = lead[0], tie = lead[1] && lead[1].k === top.k && lead[1].w.n === top.w.n;
     mid.hidden = false; mid.id = 'frRgLead';
-    mid.innerHTML = '<svg class="lf-ic fr-rg-cr" viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5L3 8z"/></svg><b></b><span></span>';
+    mid.innerHTML = '<svg class="lf-ic fr-rg-cr" viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5L3 8z"/></svg><b></b>';
     $('b', mid).textContent = tie ? 'Tied' : (top.f.me ? 'You' : (top.f.n || 'Friend'));
-    $('span', mid).textContent = tie ? 'for first' : top.w.n >= top.w.g ? 'goal closed' : 'in front · ' + top.w.n + '/' + top.w.g;
+    mid.setAttribute('aria-label', (tie ? 'Tied' : $('b', mid).textContent) + ' in front this week');
     mid.style.setProperty('--rc', tie ? 'var(--ink)' : frColOf(top.f.s));
   }
   var bd = $('#frBoard', c);
