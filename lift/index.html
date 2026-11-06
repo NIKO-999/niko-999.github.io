@@ -765,7 +765,12 @@ var EXERCISES = [
   ['crunch', 'Crunches', 'Abs', 0, 'bw'], ['legraise', 'Lying leg raises', 'Abs', 0, 'bw'], ['capt', "Captain's chair knee raises", 'Abs', 0, 'bw'],
   ['declsit', 'Decline sit-ups', 'Abs', 0, 'bw'], ['russian', 'Russian twists', 'Abs'], ['woodchop', 'Cable woodchops', 'Abs'],
   ['pallof', 'Pallof press', 'Abs'], ['mcrunch', 'Machine crunches', 'Abs'],
-  ['superman', 'Superman holds', 'Lower back', 0, 'bw'], ['ghr', 'Glute-ham raises', 'Hamstrings', 0, 'bw']
+  ['superman', 'Superman holds', 'Lower back', 0, 'bw'], ['ghr', 'Glute-ham raises', 'Hamstrings', 0, 'bw'],
+  /* the dumbbell and Smith machine staples the list was missing */
+  ['incdbfly', 'Incline dumbbell flyes', 'Chest'], ['smithbench', 'Smith machine bench press', 'Chest', 1],
+  ['csdbrow', 'Chest-supported dumbbell rows', 'Back', 1], ['dbshrug', 'Dumbbell shrugs', 'Back'], ['smithrow', 'Smith machine bent-over rows', 'Back', 1], ['smithshrug', 'Smith machine shrugs', 'Back'],
+  ['smithdrag', 'Smith machine drag curls', 'Biceps'],
+  ['dbcalf', 'Dumbbell standing calf raises', 'Calves'], ['smithrdl', 'Smith machine Romanian deadlift', 'Hamstrings', 1], ['smithhip', 'Smith machine hip thrusts', 'Glutes', 1]
 ].map(function (a) { return { id: a[0], n: a[1], m: a[2], c: a[3] ? 1 : 0, t: a[4] || 'w' }; });
 
 /* PUSH, PULL, LEGS — and Core for what is neither. Worked out from the

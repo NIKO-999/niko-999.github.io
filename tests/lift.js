@@ -1186,6 +1186,17 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── the library carries the dumbbell and Smith staples ── */
+  {
+    const { c, page } = await ctx();
+    await page.click('.lf-bar [data-v="lib"]'); await settle(page);
+    const names = await page.$$eval('#lfLibList .lf-li b', (b) => b.map((x) => x.textContent));
+    const want = ['Incline dumbbell flyes', 'Smith machine bench press', 'Chest-supported dumbbell rows', 'Dumbbell shrugs', 'Smith machine bent-over rows', 'Smith machine shrugs', 'Smith machine drag curls', 'Dumbbell standing calf raises', 'Smith machine Romanian deadlift', 'Smith machine hip thrusts'];
+    ok('every new staple is in the library', want.every((n) => names.includes(n)), want.filter((n) => !names.includes(n)));
+    ok('and nothing is listed twice', names.length === new Set(names).size);
+    await c.close();
+  }
+
   /* ── THEME: light and dark, and the accent on a wheel ── */
   {
     const c = await newCtx(PHONE);
