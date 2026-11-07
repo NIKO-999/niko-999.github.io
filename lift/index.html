@@ -432,7 +432,8 @@ body.lf-v-home .lf-glow { opacity: 1; }
   /* a step lighter than the sheet under them, so a card on a sheet still reads as a card */
   .lf-sheet .lf-card, .lf-sheet .lf-sum div, .lf-sheet .lf-vs-c, .lf-sheet .lf-ex { background: color-mix(in srgb, var(--card3) 48%, transparent) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
   /* the trend sheet's cards are the same glass, washed with your colour from the top corner */
-  .lf-sheet.lf-vsh .lf-vs-c, .lf-sheet.lf-vsh .lf-sum div { background: linear-gradient(160deg, color-mix(in srgb, var(--log) 24%, transparent), color-mix(in srgb, var(--card3) 40%, transparent) 70%) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--log) 22%, transparent), inset 0 1px 0 rgba(255,255,255,.08); }
+  .lf-sheet.lf-vsh .lf-vs-c { background: linear-gradient(160deg, color-mix(in srgb, var(--log) 11%, transparent), color-mix(in srgb, var(--card3) 44%, transparent) 65%) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--log) 10%, transparent), inset 0 1px 0 rgba(255,255,255,.06); }
+.lf-sheet.lf-vsh .lf-sum div { background: linear-gradient(160deg, color-mix(in srgb, var(--log) 5%, transparent), color-mix(in srgb, var(--card3) 46%, transparent) 70%) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
   /* and what sits inside those cards goes the other way, down toward the page, so a field still reads as a field */
   .lf-sheet .lf-ex .lf-set:not(.is-done) input, .lf-sheet .lf-ex-ft button { background: color-mix(in srgb, var(--bg) 40%, transparent); }
   /* the badge viewer: the page faintly behind it, never readable */
@@ -669,6 +670,8 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-vs-plot { position: relative; height: 150px; margin: 22px 0 6px; }
 .lf-vs-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .lf-vs-dot { position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--ink); }
+/* the line itself glows faintly in your colour */
+.lf-vsh .lf-vs-ln { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--log) 75%, transparent)) drop-shadow(0 0 8px color-mix(in srgb, var(--log) 35%, transparent)); }
 .lf-vs-pr { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: var(--log); box-shadow: 0 0 0 3px color-mix(in srgb, var(--log) 22%, transparent); pointer-events: none; z-index: 1; animation: lf-pin .45s cubic-bezier(.3, 1.6, .5, 1) backwards; animation-delay: var(--d, 900ms); }
 /* the trend sheet's cards carry a wash of your colour */
 .lf-vsh .lf-vs-c { background: linear-gradient(160deg, color-mix(in srgb, var(--log) 26%, var(--plot)), color-mix(in srgb, var(--log) 6%, var(--plot)) 70%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--log) 22%, transparent); }
@@ -2000,7 +2003,7 @@ function lfTrendSheet(k, src) {
   var d = 'M' + pts[0][0] + ' ' + pts[0][1];
   for (var j = 1; j < 8; j++) { var p0 = pts[j - 1], p1 = pts[j], mx = (p0[0] + p1[0]) / 2; d += ' C' + mx + ' ' + p0[1] + ' ' + mx + ' ' + p1[1] + ' ' + p1[0] + ' ' + p1[1]; }
   plot.innerHTML = '<svg class="is-draw" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="lfVsG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e8e95" stop-opacity=".55"/><stop offset=".75" stop-color="#8e8e95" stop-opacity=".1"/><stop offset="1" stop-color="#8e8e95" stop-opacity="0"/></linearGradient></defs>'
-    + '<path d="' + d + ' L100 100 L0 100Z" fill="url(#lfVsG)"/><path d="' + d + '" fill="none" style="stroke:var(--ink)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
+    + '<path d="' + d + ' L100 100 L0 100Z" fill="url(#lfVsG)"/><path d="' + d + '" fill="none" class="lf-vs-ln" style="stroke:var(--ink)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
   var best = 0; weeks.forEach(function (w, i) { if (w.v > weeks[best].v) best = i; });
   weeks.forEach(function (w, i) {
     var dot = el('<i class="lf-vs-dot"></i>'); dot.style.left = pts[i][0] + '%'; dot.style.top = pts[i][1] + '%'; if (i === 7) dot.classList.add('is-now'); plot.appendChild(dot);
