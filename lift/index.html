@@ -569,8 +569,12 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .fr-rg-p { transform-box: fill-box; transform-origin: center; animation: fr-rg-ping 1.8s ease-out infinite; opacity: .7; }
 @keyframes fr-rg-ping { 0% { transform: scale(1); opacity: .75; } 100% { transform: scale(2.6); opacity: 0; } }
 .fr-rg-c { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; }
-.fr-rg-c b { display: block; font-size: 15px; font-weight: 800; color: var(--rc); max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fr-rg-c b { display: block; font-size: 15px; font-weight: 800; color: var(--rc); max-width: 96px; padding: 8px 10px; margin: -8px -10px; box-sizing: content-box; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fr-rg-c span { font-size: 11px; color: var(--dim); }
+.fr-rg-c::before { content: ''; position: absolute; inset: 22%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--rc) 26%, transparent), transparent 68%); filter: blur(6px); }
+.fr-rg-c > * { position: relative; }
+.fr-rg-c b { text-shadow: 0 0 10px color-mix(in srgb, var(--rc) 70%, transparent), 0 0 22px color-mix(in srgb, var(--rc) 35%, transparent); }
+.fr-rg-cr { filter: drop-shadow(0 0 5px color-mix(in srgb, var(--rc) 85%, transparent)); }
 .fr-rg-cr { width: 20px; height: 20px; margin: 0 auto 2px; color: var(--rc); fill: var(--rc); stroke: var(--rc); stroke-width: 1.5; stroke-linejoin: round; }
 @media (prefers-reduced-motion: reduce) { .fr-rg-a.is-live, .fr-rg-p { animation: none; } .fr-rg-p { opacity: 0; } .fr-rg-a.is-live { filter: drop-shadow(0 0 5px var(--rc)); } }
 #frRings .fr-row { padding: 12px 0; }
@@ -4075,7 +4079,7 @@ function frRings(rows) {
     var mid = $('#frRgLive', c), top = lead[0], tie = lead[1] && lead[1].k === top.k && lead[1].w.n === top.w.n;
     mid.hidden = false; mid.id = 'frRgLead';
     mid.innerHTML = '<svg class="lf-ic fr-rg-cr" viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5L3 8z"/></svg><b></b>';
-    $('b', mid).textContent = tie ? 'Tied' : (top.f.me ? 'You' : (top.f.n || 'Friend'));
+    $('b', mid).textContent = tie ? 'Tied' : (top.f.me ? (FRS.name || 'You') : (top.f.n || 'Friend'));
     mid.setAttribute('aria-label', (tie ? 'Tied' : $('b', mid).textContent) + ' in front this week');
     mid.style.setProperty('--rc', tie ? 'var(--ink)' : frColOf(top.f.s));
   }
@@ -4111,7 +4115,7 @@ function frRings(rows) {
     row.dataset.c = f.c; row.style.setProperty('--rc', frColOf(st));
     if (f.me) row.classList.add('is-me');
     if (f.gone) row.classList.add('is-gone');
-    $('.fr-t b', row).textContent = f.me ? 'You' : (f.n || 'Friend');
+    $('.fr-t b', row).textContent = f.me ? (FRS.name || 'You') : (f.n || 'Friend');
     var sub = $('.fr-t span', row);
     if (f.gone) sub.textContent = 'Turned friends off';
     else if (frLive(st)) { sub.textContent = 'Training now · since ' + fmtAt(new Date(st.lv)); sub.className = 'fr-live'; row.classList.add('is-live'); }
@@ -4127,7 +4131,7 @@ function frRings(rows) {
       bg.forEach(function (b) { ch.appendChild(lfCoinBtn(b, 30)); }); row.insertBefore(ch, $('.fr-wk', row));
       row.appendChild(frStrip(st.d));
     }
-    $('.fr-open', row).setAttribute('aria-label', (f.me ? 'You' : (f.n || 'Friend')) + ', ' + x.w.n + ' of ' + x.w.g + ' this week. Open their dashboard');
+    $('.fr-open', row).setAttribute('aria-label', (f.me ? (FRS.name || 'You') : (f.n || 'Friend')) + ', ' + x.w.n + ' of ' + x.w.g + ' this week. Open their dashboard');
     $('.fr-open', row).addEventListener('click', function () { if (f.me) frSheet({ n: FRS.name || 'You', s: st, me: 1 }); else frSheet(f); });
     bd.appendChild(row);
   });
@@ -4186,6 +4190,7 @@ try { frWoSeen = JSON.parse(localStorage.getItem('lift.frwo.v1') || '{}') || {};
 try { frRgSeen = JSON.parse(localStorage.getItem('lift.rg.v1') || '{}') || {}; } catch (e) {}
 /* where each ring's arc is on screen right now, read before the tab is cleared */
 var frRgCur = {};
+function frListSig() { return JSON.stringify([FRS.name, FRS.list.map(function (f) { return [f.c, f.n, f.s, f.gone]; })]); }
 function frRgSnap() { frRgCur = {}; $$('#frRings .fr-rg-a').forEach(function (a) { var v = parseFloat(getComputedStyle(a).strokeDasharray); if (isFinite(v)) frRgCur[a.dataset.k] = v; }); }
 function lfRenderFr() {
   frRgSnap();
@@ -4227,7 +4232,17 @@ function lfRenderFr() {
   if (!FRS.list.length) root.appendChild(el('<div class="lf-card lf-empty" id="frNone"><b>Nobody yet</b>Add a friend with the plus, or share your code from Settings.</div>'));
   /* Arriving at the tab fetches; drawing it only draws. A paint that
      fetched would repaint inside its own fetch, which is a loop. */
-  if (frArrive) { frArrive = 0; frPush(); frPullAll(function () { if (view === 'fr') lfRender(); }); }
+  if (frArrive) {
+    frArrive = 0; frPush();
+    /* the pull repaints only if it brought something new, and not until the
+       rings have finished sweeping in: a redraw mid-sweep restarts every
+       arc's easing, which is what read as a glitch going tab to tab */
+    var sig0 = frListSig(), t0 = Date.now();
+    frPullAll(function () {
+      if (view !== 'fr' || frListSig() === sig0) return;
+      setTimeout(function () { if (view === 'fr') lfRender(); }, Math.max(0, 1300 - (Date.now() - t0)));
+    });
+  }
 }
 /* A LINK CARRIES A CODE in the fragment, which never leaves the
    browser; it is read once at boot and stripped from the bar. */

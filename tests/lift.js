@@ -1067,7 +1067,7 @@ const freeze = (at) => `(() => {
     await B.page.fill('#frName', 'Sam'); await B.page.click('#frOn'); await B.page.waitForTimeout(700);
     await B.page.waitForFunction(() => document.querySelectorAll('#frBoard .fr-row').length === 2, null, { timeout: 4000 }).catch(() => {});
     const names = await B.page.$$eval('#frBoard .fr-row .fr-t b', (b) => b.map((x) => x.textContent));
-    ok('turning on adds whoever sent the link, ranked by workouts', names.join() === 'Niko,You', names);
+    ok('turning on adds whoever sent the link, ranked by workouts', names.join() === 'Niko,Sam', names);
     ok('your code is not on the tab any more', await B.page.locator('#lfFr .fr-code').count() === 0);
     await B.page.click('.lf-bar [data-v="you"]'); await settle(B.page);
     const codeB = (await B.page.textContent('#lfSet .fr-code')).trim();
@@ -1087,14 +1087,14 @@ const freeze = (at) => `(() => {
     ok('and you are not', !/Training now/.test(await A.page.textContent('#frBoard .fr-row.is-me')));
     ok('the week is rings, one each, toward their own goal, and the names under them are the board', await A.page.locator('#frRings svg circle').count() >= 2 && await A.page.locator('#frRings #frBoard .fr-row').count() === 2 && (await A.page.$$eval('#frRings .fr-row', (r) => r.map((x) => x.style.getPropertyValue('--rc')))).every((c) => c));
     ok('their ring says it too: a glow and a light at its tip', await A.page.locator('#frRings .fr-rg-h').count() === 1 && await A.page.locator('#frRings .fr-rg-a.is-live, #frRings .fr-rg-p').count() >= 1);
-    ok('and the middle crowns who is in front', (await A.page.textContent('#frRgLead')).trim() === 'You' && await A.page.locator('#frRgLead .fr-rg-cr').count() === 1, await A.page.textContent('#frRings'));
+    ok('and the middle crowns who is in front, by your own name', (await A.page.textContent('#frRgLead')).trim() === 'Niko' && await A.page.locator('#frRgLead .fr-rg-cr').count() === 1, await A.page.textContent('#frRings'));
     ok('and a ring is drawn in the colour they chose', await A.page.$$eval('#frRings .fr-rg-a', (r) => r.map((x) => x.getAttribute('stroke'))).then((c) => c.length >= 1));
     ok('there is no leaderboard card, and each name carries its thirty days', await A.page.locator('#frLb').count() === 0 && await A.page.locator('#frRings .fr-row .fr-strip').count() === 2);
     await A.page.evaluate(() => { window.__cv = 0; new MutationObserver(() => { if (document.querySelector('.lf-cv')) window.__cv = 1; }).observe(document, { childList: true, subtree: true }); });
     await A.page.click('#frRings .fr-row.is-me .fr-bg button >> nth=0'); await A.page.waitForTimeout(400);
     ok('a badge on the rings opens the badge, not the dashboard', await A.page.evaluate(() => window.__cv) === 1 && await A.page.locator('.lf-sheet').count() === 0);
     const cvx = await A.page.$('.lf-cv-x'); if (cvx) { await cvx.click(); await A.page.waitForTimeout(400); }
-    ok('a typed code adds them, lower case and all', (await A.page.$$eval('#frBoard .fr-row .fr-t b', (b) => b.map((x) => x.textContent))).join() === 'You,Sam');
+    ok('a typed code adds them, lower case and all', (await A.page.$$eval('#frBoard .fr-row .fr-t b', (b) => b.map((x) => x.textContent))).join() === 'Niko,Sam');
     await A.page.click('#frBoard .fr-row:not(.is-me)'); await settle(A.page);
     const sh = await top(A.page).textContent('.lf-sh-bd');
     const T = top(A.page);
@@ -1144,7 +1144,7 @@ const freeze = (at) => `(() => {
     await top(B.page).locator('button', { hasText: 'Turn off' }).click(); await B.page.waitForTimeout(400);
     await B.page.click('.lf-bar [data-v="fr"]'); await settle(B.page);
     ok('turning off deletes the record on the server', !m.has('lift:' + codeB) && await B.page.locator('#frOff').count() === 1);
-    await A.page.click('.lf-bar [data-v="home"]'); await A.page.click('.lf-bar [data-v="fr"]'); await A.page.waitForTimeout(400);
+    await A.page.click('.lf-bar [data-v="home"]'); await A.page.click('.lf-bar [data-v="fr"]'); await A.page.waitForTimeout(1900); /* the board repaints once the rings have swept in */
     ok('and their friends see they have gone', /Turned friends off/.test(await A.page.textContent('#frBoard')));
     await A.c.close(); await B.c.close();
   }
