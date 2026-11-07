@@ -813,7 +813,9 @@ const freeze = (at) => `(() => {
     ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 63 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
     ok('and counts them', /4 of 63/.test(await page.textContent('#lfBadges .lf-hd')));
     ok('a badge not yet won carries its progress ring', await page.locator('#lfBadges .lf-coin[data-b="wo50"] .lf-bdr').count() === 1 && await page.locator('#lfBadges .lf-coin[data-b="first"] .lf-bdr').count() === 0);
-    await page.click('#lfBadges .lf-coin[data-b="wo10"]'); await page.waitForTimeout(500);
+    await page.click('#lfBadges .lf-coin[data-b="wo10"]'); await page.waitForTimeout(60);
+    ok('it opens at once, its picture holding the stage while the live award is built', await page.locator('.lf-cv .lf-cv-ph').count() === 1);
+    await page.waitForTimeout(1500);
     ok('a coin opens on its own screen, to spin', await page.locator('.lf-cv').count() === 1 && /10 workouts/.test(await page.textContent('.lf-cv')) && /Earned Mon 26 Oct/.test(await page.textContent('.lf-cv'))
       && await page.locator('.lf-cv-stage canvas, .lf-cv-stage.is-flat').count() >= 1);
     await page.keyboard.press('Escape'); await page.waitForSelector('.lf-cv', { state: 'detached', timeout: 5000 }).catch(() => {});

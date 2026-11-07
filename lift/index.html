@@ -822,6 +822,9 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 .lf-cv-stage.is-flat::after { content: ''; position: absolute; left: 50%; top: 50%; width: min(70vw, 280px); aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%;
   background: radial-gradient(120% 120% at 30% 22%, var(--ca, #ececf0) 0%, var(--cb, #8d919c) 72%); }
 .lf-cv-flat { display: none; }
+/* the shelf picture holds the stage while the live award is built, then the award fades in over it */
+.lf-cv-ph { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+.lf-cv-stage canvas.lf-cv-gl { opacity: 0; transition: opacity .25s; } .lf-cv-stage canvas.lf-cv-gl.is-on { opacity: 1; }
 .lf-cv-cap { text-align: center; max-width: 360px; margin: 0 auto; }
 .lf-cv-k { font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--good); }
 .lf-cv-n { font-size: 26px; font-weight: 800; letter-spacing: -.02em; margin: 6px 0 4px; }
@@ -5258,23 +5261,46 @@ function bdRenderer(w, h, keep) {
    between them. Each is built at half size, photographed, and given back:
    nothing of it stays on the GPU, which is what used to close the app. */
 var bdQ = [], bdBusy = false, bd3 = null;
+/* THE SHELF IS DRAWN ONCE, NOT EVERY OPEN. Each still is a whole 3D build,
+   so a shelf of eighty took seconds to fill on every visit. They are kept
+   in IndexedDB, keyed by what they show and by BD_VER — change the coin
+   art and bump BD_VER, or every phone keeps the old pictures. */
+var BD_VER = 'c1', bdDbP = null;
+function bdDb() {
+  if (bdDbP) return bdDbP;
+  bdDbP = new Promise(function (res) {
+    try { var q = indexedDB.open('lift.bd', 1); q.onupgradeneeded = function () { q.result.createObjectStore('s'); }; q.onsuccess = function () { res(q.result); }; q.onerror = function () { res(null); }; }
+    catch (e) { res(null); }
+  });
+  return bdDbP;
+}
+function bdDbGet(k) { return bdDb().then(function (db) { return db ? new Promise(function (res) { try { var q = db.transaction('s').objectStore('s').get(BD_VER + ':' + k); q.onsuccess = function () { res(q.result || null); }; q.onerror = function () { res(null); }; } catch (e) { res(null); } }) : null; }); }
+function bdDbPut(k, v) { bdDb().then(function (db) { if (db) try { db.transaction('s', 'readwrite').objectStore('s').put(v, BD_VER + ':' + k); } catch (e) {} }); }
+function bdKey(x) { return x.b.id + (x.d ? ':' + x.d : ':lock') + (x.b.gl ? ':' + x.b.gl : '') + (x.p && x.b.k === 'month' ? ':' + x.p.join('/') : ''); }
 function bdStill(x, img) {
-  var key = x.b.id + (x.d ? ':' + x.d : ':lock') + (x.b.gl ? ':' + x.b.gl : '') + (x.p && x.b.k === 'month' ? ':' + x.p.join('/') : '');
+  var key = bdKey(x);
   if (bdStills[key]) { img.src = bdStills[key]; return; }
-  bdQ.push([x, img, key]); bdPump();
+  bdDbGet(key).then(function (v) {
+    if (v) { bdStills[key] = v; img.src = v; return; }
+    bdQ.push([x, img, key]); bdPump();
+  });
 }
 function bdPump() {
   if (bdBusy || !bdQ.length) return; bdBusy = true;
   bdThree().then(function (T) {
     if (!T) { bdBusy = false; bdQ = []; return; }
-    if (!bd3) { var r = bdRenderer(480, 480, true), sc = new T.Scene(); sc.environment = bdEnv(r); bdLights(sc); var cam = new T.PerspectiveCamera(22, 1, .1, 50); cam.position.set(0, 0, 6.1); bd3 = { r: r, s: sc, c: cam }; }
+    if (!bd3) { var r = bdRenderer(360, 360, true), sc = new T.Scene(); sc.environment = bdEnv(r); bdLights(sc); var cam = new T.PerspectiveCamera(22, 1, .1, 50); cam.position.set(0, 0, 6.1); bd3 = { r: r, s: sc, c: cam }; }
     (function next() {
       var j = bdQ.shift(); if (!j) { bdBusy = false; return; }
       if (!bdStills[j[2]]) {
-        var aw = bdMake(bdSpec(j[0]), 'silver', 512); aw.rotation.set(.32, -.5, .04); bd3.s.add(aw); bd3.r.render(bd3.s, bd3.c);
-        bdStills[j[2]] = bd3.r.domElement.toDataURL('image/png'); bd3.s.remove(aw); bdDrop(aw); bd3.r.renderLists.dispose();
+        var aw = bdMake(bdSpec(j[0]), 'silver', 384); aw.rotation.set(.32, -.5, .04); bd3.s.add(aw); bd3.r.render(bd3.s, bd3.c);
+        var du = bd3.r.domElement.toDataURL('image/webp', .9); if (du.indexOf('data:image/webp') !== 0) du = bd3.r.domElement.toDataURL('image/png');
+        bdStills[j[2]] = du; bdDbPut(j[2], du); bd3.s.remove(aw); bdDrop(aw); bd3.r.renderLists.dispose();
       }
       j[1].src = bdStills[j[2]];
+      /* the same picture may be waiting in more than one place */
+      bdQ.forEach(function (q) { if (q[2] === j[2]) q[1].src = bdStills[j[2]]; });
+      bdQ = bdQ.filter(function (q) { return q[2] !== j[2]; });
       setTimeout(next, 16);
     })();
   });
@@ -5330,18 +5356,24 @@ function lfCoinView(x, earnedNow) {
   function esc(e) { if (e.key === 'Escape') { e.stopPropagation(); close(); } }
   document.addEventListener('keydown', esc);
   $('.lf-cv-x', v).addEventListener('click', close);
-  bdThree().then(function (T) {
+  /* IT OPENS AT ONCE: the shelf's own picture of it fills the stage while
+     the live award is built, which only starts once the screen is up — a
+     build that ran first held the whole screen back until it was done */
+  var ph = el('<img class="lf-cv-ph" alt="" />'); stage.appendChild(ph); bdStill(x, ph);
+  /* the still frames the award a touch larger than the live view does, so it is drawn to match */
+  requestAnimationFrame(function () { var z = Math.min(stage.clientWidth || 300, stage.clientHeight || 300) * .89; ph.style.width = ph.style.height = z + 'px'; });
+  setTimeout(function () { bdThree().then(function (T) {
     if (done) return;
-    if (!T) { var fb = el('<img class="lf-cv-flat" alt="" />'); stage.appendChild(fb); stage.classList.add('is-flat'); stage.dataset.m = x.d ? x.b.k : 'lock'; return; }
+    if (!T) { ph.remove(); var fb = el('<img class="lf-cv-flat" alt="" />'); stage.appendChild(fb); stage.classList.add('is-flat'); stage.dataset.m = x.d ? x.b.k : 'lock'; return; }
     var w = stage.clientWidth || 300, h = stage.clientHeight || 300;
-    r = bdRenderer(w, h); stage.appendChild(r.domElement);
+    r = bdRenderer(w, h); r.domElement.classList.add('lf-cv-gl'); stage.appendChild(r.domElement);
     var sc = new T.Scene(); sc.environment = bdEnv(r); bdLights(sc);
     var cam = new T.PerspectiveCamera(28, w / h, .1, 50);
     /* the award, 2 across, takes three quarters of whichever side is shorter */
     var half = Math.tan(14 * Math.PI / 180), fitH = 2 / .75 / 2 / half, fitW = 2 / .75 / 2 / (half * (w / h));
     cam.position.set(0, 0, Math.max(fitH, fitW));
-    /* sharper than the shelf: 1536, so a 3x phone is never upscaling the face */
-    aw = bdMake(bdSpec(x), 'silver', 1536); sc.add(aw);
+    /* sharper than the shelf, and enough for the size it is drawn at */
+    aw = bdMake(bdSpec(x), 'silver', 1024); sc.add(aw);
     /* it arrives turning and settles face up */
     var ry = -Math.PI * 2 - .8, rx = .3, vy = 0, vx = 0, drag = null, t0 = performance.now();
     var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -5352,6 +5384,7 @@ function lfCoinView(x, earnedNow) {
       if (!drag) { vy *= .955; vx *= .9; if (Math.abs(vy) < .02) ry += (Math.round(ry / Math.PI) * Math.PI + .26 - ry) * .08; ry += vy; rx += vx; rx += (.12 - rx) * .06; }
       var sw = calm || drag ? 0 : Math.sin((performance.now() - t0) / 1000 * .9) * .05;
       aw.rotation.set(rx + sw * .4, ry + sw, 0); r.render(sc, cam);
+      if (ph.parentNode) { r.domElement.classList.add('is-on'); setTimeout(function () { ph.remove(); }, 220); }
     })();
     stage.addEventListener('pointerdown', function (e) { drag = { x: e.clientX, y: e.clientY, m: 0 }; vy = vx = 0; stage.setPointerCapture(e.pointerId); });
     stage.addEventListener('pointermove', function (e) {
@@ -5360,7 +5393,7 @@ function lfCoinView(x, earnedNow) {
     });
     stage.addEventListener('pointerup', function () { if (drag && drag.m < 6) vy = .21 * (Math.cos(ry) > 0 ? 1 : -1); drag = null; });
     stage.addEventListener('pointercancel', function () { drag = null; });
-  });
+  }); }, 260);
   return { close: close };
 }
 
@@ -5625,6 +5658,9 @@ function lfVerCheck() {
 }
 lfVerCheck();
 document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') lfVerCheck(); });
+/* the 3D engine is fetched while the phone is idle after opening, so the
+   first badge pressed does not wait on a download */
+setTimeout(function () { (window.requestIdleCallback || setTimeout)(function () { bdThree(); }); }, 2000);
 })();
 </script>
 </body>
