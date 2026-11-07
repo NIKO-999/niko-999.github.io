@@ -436,8 +436,12 @@ body.lf-v-home .lf-glow { opacity: 1; }
   .lf-sheet .lf-card, .lf-sheet .lf-sum div, .lf-sheet .lf-vs-c, .lf-sheet .lf-ex { background: color-mix(in srgb, var(--card3) 48%, transparent) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
   /* and what sits inside those cards goes the other way, down toward the page, so a field still reads as a field */
   .lf-sheet .lf-ex .lf-set:not(.is-done) input, .lf-sheet .lf-ex-ft button { background: color-mix(in srgb, var(--bg) 40%, transparent); }
-  /* the badge viewer: the page faintly behind it, never readable */
-  .lf-cv { background: color-mix(in srgb, var(--bg) 72%, transparent); -webkit-backdrop-filter: blur(30px) saturate(1.4); backdrop-filter: blur(30px) saturate(1.4); }
+  /* the badge viewer: the page faintly behind it, never readable. The blur
+     is its OWN layer under the viewer, never on the viewer: a backdrop pass
+     is redone whenever the filtered element's own contents repaint, and the
+     award repaints every frame it turns — that was the stutter on iPhone */
+  .lf-cv { background: transparent; }
+  .lf-cvb { background: color-mix(in srgb, var(--bg) 72%, transparent); -webkit-backdrop-filter: blur(30px) saturate(1.4); backdrop-filter: blur(30px) saturate(1.4); }
 }
 .lf-scrim.is-up { opacity: 1; }
 .lf-sheet {
@@ -582,6 +586,9 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .fr-rg-c { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; }
 .fr-rg-c b { display: block; font-size: 15px; font-weight: 800; color: var(--rc); max-width: 96px; padding: 8px 10px; margin: -8px -10px; box-sizing: content-box; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fr-rg-c span { font-size: 11px; color: var(--dim); }
+.fr-rg-c.is-tap { pointer-events: auto; cursor: pointer; inset: 22%; border-radius: 50%; -webkit-tap-highlight-color: transparent; transition: transform .15s; }
+.fr-rg-c.is-tap:active { transform: scale(.94); }
+.fr-rg-c.is-tap::before { inset: 0; }
 .fr-rg-c::before { content: ''; position: absolute; inset: 22%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--rc) 26%, transparent), transparent 68%); filter: blur(6px); }
 .fr-rg-c > * { position: relative; }
 .fr-rg-c b { text-shadow: 0 0 10px color-mix(in srgb, var(--rc) 70%, transparent), 0 0 22px color-mix(in srgb, var(--rc) 35%, transparent); }
@@ -816,6 +823,8 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 .lf-cv { position: fixed; inset: 0; z-index: 70; display: grid; grid-template-rows: auto 1fr auto; background: var(--bg); opacity: 0; transition: opacity .22s;
   padding: calc(var(--safe-t) + 12px) 16px calc(var(--safe-b) + 24px); }
 .lf-cv.is-up { opacity: 1; }
+.lf-cvb { position: fixed; inset: 0; z-index: 69; background: var(--bg); opacity: 0; transition: opacity .22s; pointer-events: none; }
+.lf-cvb.is-up { opacity: 1; }
 .lf-cv-x { justify-self: end; width: 44px; height: 44px; border-radius: 50%; background: var(--card2); display: grid; place-items: center; }
 .lf-cv-stage { position: relative; min-height: 0; touch-action: none; cursor: grab; }
 .lf-cv-stage canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; display: block; }
@@ -4154,6 +4163,15 @@ function frRings(rows) {
     $('b', mid).textContent = tie ? 'Tied' : (top.f.me ? (FRS.name || 'You') : (top.f.n || 'Friend'));
     mid.setAttribute('aria-label', (tie ? 'Tied' : $('b', mid).textContent) + ' in front this week');
     mid.style.setProperty('--rc', tie ? 'var(--ink)' : frColOf(top.f.s));
+    /* THE CROWN OPENS WHOEVER IS WEARING IT: press the middle and their
+       profile comes up, the same one their name on the board opens */
+    if (!tie) {
+      mid.classList.add('is-tap'); mid.setAttribute('role', 'button'); mid.tabIndex = 0;
+      mid.setAttribute('aria-label', $('b', mid).textContent + ' in front this week. Open their profile');
+      var openTop = function () { buzz(8); if (top.f.me) frSheet({ n: FRS.name || 'You', s: top.f.s || {}, me: 1 }); else frSheet(top.f); };
+      mid.addEventListener('click', openTop);
+      mid.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTop(); } });
+    }
   }
   try { localStorage.setItem('lift.rg.v1', JSON.stringify(frRgSeen)); localStorage.setItem('lift.frwo.v1', JSON.stringify(frWoSeen)); } catch (e) {}
   if (done.length) setTimeout(function () {
@@ -5222,8 +5240,8 @@ function bdPolar(shp, dish, mirror) {
   for (var r = 1; r < K; r++) for (var m = 0; m < N; m++) { var a = 1 + (r - 1) * N + m, b2 = 1 + (r - 1) * N + (m + 1) % N, c = a + N, d = b2 + N; idx.push(a, c, d, a, d, b2); }
   var g = new BD3.BufferGeometry(); g.setAttribute('position', new BD3.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new BD3.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals(); return g;
 }
-function bdMake(b, m, n) {
-  var g = new BD3.Group(), trim = b.fx ? BD_FXTRIM[b.fx] : BD_TRIM[m], mp = bdMaps(b, trim, n), lock = !!b.lock;
+function bdMake(b, m, n, pre) {
+  var g = new BD3.Group(), trim = b.fx ? BD_FXTRIM[b.fx] : BD_TRIM[m], mp = pre || bdMaps(b, trim, n), lock = !!b.lock;
   var shp = new BD3.Shape(); bdOutline(shp, b.sh);
   var body = new BD3.ExtrudeGeometry(shp, { depth: .1, bevelEnabled: true, bevelThickness: .05, bevelSize: .045, bevelSegments: n > 600 ? 8 : 4, curveSegments: n > 600 ? 48 : 24 });
   body.computeBoundingBox(); body.translate(0, 0, -(body.boundingBox.max.z + body.boundingBox.min.z) / 2); body.computeBoundingBox();
@@ -5263,6 +5281,32 @@ function bdViewKit() {
   var sc = new BD3.Scene(); sc.environment = bdEnv(r); bdLights(sc);
   bdV = { r: r, sc: sc, cam: new BD3.PerspectiveCamera(28, 1, .1, 50) };
   return bdV;
+}
+/* THE LIVE AWARD IS BUILT IN STEPS, a frame between each — the front, the
+   back, then the body — so no one piece of work holds the screen. It
+   starts the moment a finger touches a badge, before the press is even a
+   tap, so most of it is done by the time the viewer is up. */
+var bdPre = {};
+function bdFrame() { return new Promise(function (res) { requestAnimationFrame(function () { setTimeout(res, 0); }); }); }
+function bdBuildLive(x) {
+  var k = bdKey(x);
+  if (bdPre[k]) return bdPre[k];
+  for (var i = 0; i < bdKept.length; i++) if (bdKept[i].userData.k === k) return Promise.resolve(null);
+  var b = bdSpec(x), trim = b.fx ? BD_FXTRIM[b.fx] : BD_TRIM.silver, f, bk;
+  bdPre[k] = bdThree().then(function (T) {
+    if (!T) return null;
+    return bdFrame().then(function () { bdSetFace(BD_LIVE); f = bdFront(b, trim); return bdFrame(); })
+      .then(function () { bdSetFace(BD_LIVE); bk = bdBack(b, trim); return bdFrame(); })
+      .then(function () { var g = bdMake(b, 'silver', BD_LIVE, { f: f, b: bk }); g.userData.k = k; return g; });
+  });
+  bdPre[k].then(function () { setTimeout(function () { delete bdPre[k]; }, 0); });
+  return bdPre[k];
+}
+/* every texture the award uses is sent to the GPU, and its shaders made,
+   before it is shown — the first frame on screen is then an ordinary one */
+function bdUpload(K, g) {
+  g.traverse(function (o) { [].concat(o.material || []).forEach(function (m) { ['map', 'metalnessMap', 'roughnessMap', 'bdNorm', 'clearcoatMap'].forEach(function (t) { if (m[t] && K.r.initTexture) K.r.initTexture(m[t]); }); }); });
+  try { K.r.compile(K.sc, K.cam); } catch (e) {}
 }
 function bdViewKeep(aw) { if (bdV) bdV.sc.remove(aw); bdKept = bdKept.filter(function (g) { return g !== aw; }); bdKept.unshift(aw); while (bdKept.length > 2) bdDrop(bdKept.pop()); }
 function bdViewTake(k) { for (var i = 0; i < bdKept.length; i++) if (bdKept[i].userData.k === k) return bdKept.splice(i, 1)[0]; return null; }
@@ -5344,6 +5388,7 @@ function lfCoinBtn(x, size) {
   if (x.d && !x.fr && lfShow().indexOf(x.b.id) >= 0) b.classList.add('is-sc');
   b.setAttribute('aria-label', x.b.n + (x.b.lv ? ', level ' + x.b.lv : '') + (x.d ? ', earned ' + fmtDay(x.d) : ', not yet earned') + '. Open');
   bdStill(x, $('img', b));
+  b.addEventListener('pointerdown', function () { bdBuildLive(x); }, { passive: true });
   b.addEventListener('click', function (e) { e.stopPropagation(); lfCoinView(x); });
   return b;
 }
@@ -5373,14 +5418,15 @@ function lfCoinView(x, earnedNow) {
     paintShow(); $('.lf-cv-cap', v).insertBefore(scb, $('.lf-cv-h', v));
   }
   $('p', v).textContent = x.b.d + (x.d ? (x.r ? ' Set ' : ' Earned ') + fmtDay(x.d) + '.' : x.b.k === 'month' && x.p ? ' ' + x.p[0] + ' of ' + x.p[1] + ' weeks so far.' : x.p && x.p[1] > 1 ? ' ' + lfBadgeProg(x) + ' so far.' : '');
+  var vb = el('<div class="lf-cvb" aria-hidden="true"></div>'); document.body.appendChild(vb);
   document.body.appendChild(v); document.body.classList.add('lf-lock');
-  requestAnimationFrame(function () { v.classList.add('is-up'); });
+  requestAnimationFrame(function () { v.classList.add('is-up'); vb.classList.add('is-up'); });
   var stage = $('.lf-cv-stage', v), raf = 0, r = null, aw = null, done = false;
   if (x.d && x.b.t > 1) stage.classList.add('is-t' + x.b.t);
   if (x.d && x.b.fx) { stage.classList.add('is-fx'); stage.style.setProperty('--gl', BD_FXGL[x.b.fx]); }
   function close() {
-    if (done) return; done = true; cancelAnimationFrame(raf); document.removeEventListener('keydown', esc); v.classList.remove('is-up');
-    setTimeout(function () { if (aw) bdViewKeep(aw); if (r) { r.domElement.classList.remove('is-on'); if (r.domElement.parentNode) r.domElement.parentNode.removeChild(r.domElement); } bdViewOn = false; v.remove(); if (!stack.length) document.body.classList.remove('lf-lock'); bdPump(); }, 240);
+    if (done) return; done = true; cancelAnimationFrame(raf); document.removeEventListener('keydown', esc); v.classList.remove('is-up'); vb.classList.remove('is-up');
+    setTimeout(function () { if (aw) bdViewKeep(aw); if (r) { r.domElement.classList.remove('is-on'); if (r.domElement.parentNode) r.domElement.parentNode.removeChild(r.domElement); } bdViewOn = false; v.remove(); vb.remove(); if (!stack.length) document.body.classList.remove('lf-lock'); bdPump(); }, 240);
   }
   function esc(e) { if (e.key === 'Escape') { e.stopPropagation(); close(); } }
   document.addEventListener('keydown', esc);
@@ -5391,7 +5437,8 @@ function lfCoinView(x, earnedNow) {
   var ph = el('<img class="lf-cv-ph" alt="" />'); stage.appendChild(ph); bdStill(x, ph);
   /* the still frames the award a touch larger than the live view does, so it is drawn to match */
   requestAnimationFrame(function () { var z = Math.min(stage.clientWidth || 300, stage.clientHeight || 300) * .89; ph.style.width = ph.style.height = z + 'px'; });
-  setTimeout(function () { bdThree().then(function (T) {
+  var built = bdBuildLive(x);
+  bdThree().then(function (T) {
     if (done) return;
     if (!T) { ph.remove(); var fb = el('<img class="lf-cv-flat" alt="" />'); stage.appendChild(fb); stage.classList.add('is-flat'); stage.dataset.m = x.d ? x.b.k : 'lock'; return; }
     var w = stage.clientWidth || 300, h = stage.clientHeight || 300;
@@ -5404,7 +5451,10 @@ function lfCoinView(x, earnedNow) {
     var half = Math.tan(14 * Math.PI / 180), fitH = 2 / .75 / 2 / half, fitW = 2 / .75 / 2 / (half * (w / h));
     cam.position.set(0, 0, Math.max(fitH, fitW));
     /* sharper than the shelf, and enough for the size it is drawn at */
-    aw = bdViewTake(bdKey(x)) || bdMake(bdSpec(x), 'silver', BD_LIVE); aw.userData.k = bdKey(x); sc.add(aw);
+    var kept = bdViewTake(bdKey(x));
+    (kept ? Promise.resolve(kept) : built.then(function (g) { return g || bdViewTake(bdKey(x)) || bdMake(bdSpec(x), 'silver', BD_LIVE); })).then(function (g) {
+    if (done) { if (g) bdViewKeep(g); return; }
+    aw = g; aw.userData.k = bdKey(x); sc.add(aw); bdUpload(K, aw);
     /* it arrives turning and settles face up */
     var ry = -Math.PI * 2 - .8, rx = .3, vy = 0, vx = 0, drag = null, t0 = performance.now();
     var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -5424,7 +5474,8 @@ function lfCoinView(x, earnedNow) {
     });
     stage.addEventListener('pointerup', function () { if (drag && drag.m < 6) vy = .21 * (Math.cos(ry) > 0 ? 1 : -1); drag = null; });
     stage.addEventListener('pointercancel', function () { drag = null; });
-  }); }, 260);
+    });
+  });
   return { close: close };
 }
 
