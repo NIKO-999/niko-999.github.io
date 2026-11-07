@@ -615,6 +615,12 @@ body.lf-v-home .lf-glow { opacity: 1; }
 #frRings .fr-wk { font-weight: 700; font-size: 15px; }
 .lf-wheel { position: relative; width: 200px; height: 200px; margin: 6px auto 0; border-radius: 50%; touch-action: none; cursor: pointer;
   background: conic-gradient(hsl(0,80%,56%), hsl(30,80%,56%), hsl(60,80%,56%), hsl(90,80%,56%), hsl(120,80%,56%), hsl(150,80%,56%), hsl(180,80%,56%), hsl(210,80%,64%), hsl(240,80%,64%), hsl(270,80%,64%), hsl(300,80%,56%), hsl(330,80%,56%), hsl(360,80%,56%)); }
+.lf-wheel.is-neu .lf-wh-k { opacity: 0; }
+/* the neutrals: a row of chips, each in the shade it takes on this face */
+.lf-neu { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.lf-neu-b { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 4px 8px; border-radius: 14px; background: var(--card2); font-size: 11px; font-weight: 600; color: var(--dim); }
+.lf-neu-b i { width: 28px; height: 28px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(127,127,127,.35); }
+.lf-neu-b[aria-pressed="true"] { color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
 .lf-wheel:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
 .lf-wh-m { position: absolute; inset: 36px; border-radius: 50%; background: var(--card); box-shadow: inset 0 0 0 1px var(--line); display: grid; place-items: center; }
 .lf-wh-m::after { content: ''; width: 56px; height: 56px; border-radius: 50%; background: var(--log); }
@@ -3530,19 +3536,29 @@ function lfFoldSet(k, v) { if (v) lfFolds[k] = 1; else delete lfFolds[k]; }
    check marks, the lit days and the buttons can carry on both faces. */
 function lfThemeCard() {
   var h = lfAccent();
-  return lfFold('lfTheme', 'thm', 'Theme', h === null ? 'Lime' : lfHueName(h), function (bd) {
+  return lfFold('lfTheme', 'thm', 'Theme', lfAccName(h), function (bd) {
     var c = el('<div><span class="lf-flab" style="margin-top:0">Appearance</span><div class="lf-seg" id="lfMode" style="--n:3"><button type="button" data-m="auto">Auto</button><button type="button" data-m="light">Light</button><button type="button" data-m="dark">Dark</button></div>'
       + '<span class="lf-flab">Accent</span><div class="lf-wheel" id="lfWheel" role="slider" tabindex="0" aria-label="Accent colour" aria-valuemin="0" aria-valuemax="359"><i class="lf-wh-k"></i><span class="lf-wh-m"></span></div>'
+      + '<span class="lf-flab">Neutrals</span><div class="lf-neu" id="lfNeu"></div>'
       + '<button type="button" class="lf-btn is-full" id="lfAccReset" style="margin-top:12px">Back to lime</button></div>');
     $$('#lfMode button', c).forEach(function (b) {
       b.setAttribute('aria-pressed', b.dataset.m === lfMode() ? 'true' : 'false');
       b.addEventListener('click', function () { try { localStorage.setItem('lift.mode.v1', b.dataset.m); } catch (e) {} lfApplyMode(); lfRender(); });
     });
     var wh = $('#lfWheel', c), knob = $('.lf-wh-k', wh), rs = $('#lfAccReset', c);
+    var neu = $('#lfNeu', c), dk = document.documentElement.getAttribute('data-mode') !== 'light';
+    NEUTRALS.forEach(function (n, i) {
+      var nb = el('<button type="button" class="lf-neu-b"><i></i><span></span></button>');
+      nb.dataset.h = 1000 + i; $('i', nb).style.background = dk ? n.d : n.l; $('span', nb).textContent = n.n;
+      nb.setAttribute('aria-label', n.n + ' accent');
+      nb.addEventListener('click', function () { buzz(8); lfAccentSet(1000 + i, true); lfRender(); });
+      neu.appendChild(nb);
+    });
     function show(hu) {
-      var a = hu === null ? LIME_H : hu;
-      knob.style.transform = 'rotate(' + a + 'deg)';
-      wh.setAttribute('aria-valuenow', Math.round(a)); wh.setAttribute('aria-valuetext', hu === null ? 'Lime' : lfHueName(a));
+      var nu = lfNeu(hu), a = hu === null || nu ? LIME_H : hu;
+      knob.style.transform = 'rotate(' + a + 'deg)'; wh.classList.toggle('is-neu', !!nu);
+      wh.setAttribute('aria-valuenow', Math.round(a)); wh.setAttribute('aria-valuetext', lfAccName(hu));
+      $$('.lf-neu-b', neu).forEach(function (b) { b.setAttribute('aria-pressed', +b.dataset.h === hu ? 'true' : 'false'); });
       rs.disabled = hu === null;
     }
     function pick(hu, keep) { lfAccentSet(hu, keep); show(hu); }
@@ -3554,7 +3570,7 @@ function lfThemeCard() {
     wh.addEventListener('pointerup', end); wh.addEventListener('pointercancel', end);
     wh.addEventListener('keydown', function (e) {
       var d = e.key === 'ArrowRight' || e.key === 'ArrowUp' ? 5 : e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -5 : 0;
-      if (!d) return; e.preventDefault(); var a = lfAccent(); pick(((a === null ? LIME_H : a) + d + 360) % 360, true);
+      if (!d) return; e.preventDefault(); var a = lfAccent(); pick(((a === null || lfNeu(a) ? LIME_H : a) + d + 360) % 360, true);
     });
     rs.addEventListener('click', function () { lfAccentSet(null, true); lfRender(); });
     show(lfAccent());
@@ -4091,7 +4107,7 @@ function frWeekOf(st) {
   var wk = tr && tr.m ? (tr.m === mon && Array.isArray(tr.w8) && Array.isArray(tr.w8[7]) ? +tr.w8[7][0] || 0 : 0) : (+(st && st.wk) || 0);
   return { n: wk, g: Math.max(1, +(st && st.goal) || 0) };
 }
-function frColOf(st) { var h = frHue(st); return h === null ? '#a3e635' : lfHex(lfHsl(h, 80, h > 200 && h < 300 ? 64 : 56)); }
+function frColOf(st) { var h = frHue(st), nu = lfNeu(h); if (nu) return document.documentElement.getAttribute('data-mode') === 'light' ? nu.l : nu.d; return h === null ? '#a3e635' : lfHex(lfHsl(h, 80, h > 200 && h < 300 ? 64 : 56)); }
 /* WHAT THE FRIENDS TAB SEES, kept for the badges. In sync is a workout of
    yours with a friend's started inside it (from 45 minutes before yours
    began to when it ended), or them live while you were. The week's standing
@@ -4227,7 +4243,7 @@ function frRings(rows) {
   });
   return c;
 }
-function frHue(st) { var h = st && st.ac; return typeof h === 'number' && isFinite(h) && h >= 0 && h < 360 ? h : null; }
+function frHue(st) { var h = st && st.ac; return lfNeu(h) ? h : typeof h === 'number' && isFinite(h) && h >= 0 && h < 360 ? h : null; }
 function frWoSheet(w, f) {
   var b = el('<div><p class="lf-lab" style="margin:0 0 6px"></p><div class="lf-list"></div></div>');
   $('p', b).textContent = fmtDay(w.d) + (w.t >= 0 ? ' · ' + fmtMinOfDay(w.t) : '');
@@ -5585,7 +5601,25 @@ function lfMode() { var m = 'auto'; try { m = localStorage.getItem('lift.mode.v1
    (dark on a light fill, white on a deep one, worked out rather than
    chosen), the accent as type, and the tint behind a live workout. */
 var LIME_H = 83;
-function lfAccent() { try { var v = localStorage.getItem('lift.accent.v1'); if (v === null || v === '') return null; v = +v; return isFinite(v) ? ((v % 360) + 360) % 360 : null; } catch (e) { return null; } }
+function lfAccent() { try { var v = localStorage.getItem('lift.accent.v1'); if (v === null || v === '') return null; v = +v; if (lfNeu(v)) return v; return isFinite(v) ? ((v % 360) + 360) % 360 : null; } catch (e) { return null; } }
+/* THE NEUTRALS: no hue at all. Each has a colour per face, because a
+   near-black is lost on the dark page and a near-white on the light one:
+   on dark it is the light end of its family, on light the deep end, so it
+   always reads. Stored as 1000 and up so a hue (0-359) and a neutral never
+   share a number. d / l are the fill on dark / light, di / li the colour
+   it takes as type, where the fill alone would be too faint to read. */
+var NEUTRALS = [
+  { n: 'Mono', d: '#f2f2f7', l: '#1c1c1e', di: '#f2f2f7', li: '#1c1c1e' },
+  { n: 'Silver', d: '#c7c7cc', l: '#8e8e93', di: '#c7c7cc', li: '#636366' },
+  { n: 'Grey', d: '#98989d', l: '#636366', di: '#aeaeb2', li: '#48484a' },
+  { n: 'Graphite', d: '#636366', l: '#2c2c2e', di: '#98989d', li: '#2c2c2e' },
+  { n: 'Slate', d: '#94a3b8', l: '#475569', di: '#a7b4c6', li: '#3b4757' },
+  { n: 'Stone', d: '#b5aca5', l: '#78716c', di: '#c2bab4', li: '#57534e' },
+  { n: 'Sand', d: '#d6c3a0', l: '#8a7552', di: '#d6c3a0', li: '#6b5a3e' }
+];
+function lfNeu(h) { return typeof h === 'number' && h >= 1000 && h < 1000 + NEUTRALS.length && h % 1 === 0 ? NEUTRALS[h - 1000] : null; }
+function lfAccName(h) { var n = lfNeu(h); return h === null || h === undefined ? 'Lime' : n ? n.n : lfHueName(h); }
+function lfRgb(hex) { return [1, 3, 5].map(function (i) { return parseInt(hex.slice(i, i + 2), 16); }); }
 function lfAccentSet(h, keep) {
   lfAccTmp = h;
   if (keep) { try { if (h === null) localStorage.removeItem('lift.accent.v1'); else localStorage.setItem('lift.accent.v1', String(Math.round(h))); } catch (e) {} if (typeof frQueue === 'function') frQueue(); }
@@ -5617,6 +5651,16 @@ function lfApplyAccent() {
   lfAccTok(h, document.documentElement.getAttribute('data-mode') !== 'light', st);
 }
 function lfAccTok(h, dark, st) {
+  var nu = lfNeu(h);
+  if (nu) {
+    var nf = dark ? nu.d : nu.l, ni = dark ? nu.di : nu.li;
+    st.setProperty('--today', nf); st.setProperty('--log', nf);
+    st.setProperty('--on-log', lfLum(lfRgb(nf)) > .3 ? '#111114' : '#ffffff');
+    st.setProperty('--today-ink', ni); st.setProperty('--good', ni);
+    st.setProperty('--live-bg', 'color-mix(in srgb, ' + nf + ' ' + (dark ? 14 : 12) + '%, ' + (dark ? '#000' : '#fff') + ')');
+    st.setProperty('--done-bg', 'color-mix(in srgb, ' + nf + ' ' + (dark ? 18 : 22) + '%, transparent)');
+    return;
+  }
   /* yellow-greens are bright at any lightness and blues are dim, so the
      fill is lifted where the hue is dark, to keep it reading as a light */
   var fill = lfHsl(h, 80, h > 200 && h < 300 ? 64 : 56), lum = lfLum(fill);

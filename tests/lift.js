@@ -1251,6 +1251,22 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── NEUTRAL ACCENTS: no hue, a shade per face so it always reads ── */
+  {
+    const { c, page } = await ctx({ unit: 'kg', goal: 3 }, '2026-10-30T18:00:00');
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    if (await page.getAttribute('#lfTheme .lf-fh button', 'aria-expanded') !== 'true') await page.click('#lfTheme .lf-fh button');
+    await settle(page);
+    ok('the theme offers neutrals beside the wheel', await page.locator('#lfNeu .lf-neu-b').count() === 7);
+    await page.evaluate(() => document.querySelector('#lfNeu .lf-neu-b[data-h="1003"]').click()); await settle(page);
+    const dark = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--log').trim());
+    ok('a neutral is kept and named', await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '1003' && /Graphite/.test(await page.textContent('#lfTheme .lf-fh')));
+    await page.evaluate(() => document.querySelector('#lfMode [data-m="light"]').click()); await settle(page);
+    const light = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--log').trim());
+    ok('and it is a lighter shade on the dark page, a deeper one on the light page', dark === '#636366' && light === '#2c2c2e', [dark, light]);
+    await c.close();
+  }
+
   /* ── GOAL HIT: a celebration of its own, once a week ── */
   {
     const st = (w, r) => ({ w, r });
