@@ -239,6 +239,9 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-wkdone b { display: block; font-size: 15px; font-weight: 800; letter-spacing: -.01em; }
 .lf-wkd-s { font-size: 12px; color: var(--dim); white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .is-wkdone .lf-bars > div i, .is-wkdone::after, .lf-wkdone.is-up::after { animation: none; } .is-wkdone::after { display: none; } }
+/* a number typed past what a set can be stops at the limit, with a nudge */
+.lf-set input.is-cap { animation: lf-capn .35s; }
+@keyframes lf-capn { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
 .lf-pct { font-size: 11px; font-weight: 600; color: var(--good); }
 /* goal hit: the screen goes dark, the ring closes, the sky lights up */
 .lf-gol { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; overflow: hidden; cursor: pointer;
@@ -1404,6 +1407,8 @@ var COMPOUND_RE = /press|squat|row\b|rows|deadlift|pull-?ups?|chin-?ups?|dips?\b
 
 var KEY = 'lift.v1', ACTK = 'lift.active.v1', VIEWK = 'lift.view.v1';
 var LB = 0.45359237;
+/* the most a set can be — see capW / capR. Up here because the load cleans stored sets before the rest of the script runs */
+var REP_MAX = 50, W_MAX = 500;
 var VIEWS = ['home', 'cal', 'lib', 'fr', 'you'];
 
 var IC = {
@@ -1516,7 +1521,7 @@ function lfCleanWo(w) {
   if (!w || typeof w !== 'object' || !/^\d{4}-\d\d-\d\d$/.test(w.d)) return null;
   var x = Array.isArray(w.x) ? w.x.filter(function (e) { return e && typeof e.id === 'string'; }).map(function (e) {
     return { id: e.id, n: typeof e.n === 'string' ? e.n : '', sets: (Array.isArray(e.sets) ? e.sets : [])
-      .filter(function (s) { return s && num(s.r) !== null && num(s.w) !== null; }).map(function (s) { return { w: +s.w, r: Math.round(+s.r) }; }) };
+      .filter(function (s) { return s && num(s.r) !== null && num(s.w) !== null; }).map(function (s) { return { w: capW(+s.w), r: capR(Math.round(+s.r)) }; }) };
   }).filter(function (e) { return e.sets.length; }) : [];
   return { id: typeof w.id === 'string' ? w.id : lfId(), d: w.d, s: +w.s || 0, e: +w.e || 0, n: typeof w.n === 'string' ? w.n.slice(0, 40) : 'Workout', rt: typeof w.rt === 'string' ? w.rt : null, x: x, cd: lfCleanCd(w.cd) };
 }
@@ -1573,6 +1578,24 @@ function woOn(d) { return S.wo.filter(function (w) { return w.d === d; }); }
 
 function toDisp(kg) { return S.unit === 'lb' ? kg / LB : kg; }
 function fromDisp(v) { return S.unit === 'lb' ? v * LB : v; }
+/* WHAT A SET CAN BE. A set is reps you did at a weight you lifted, so it
+   has to look like one: no more than REP_MAX reps, no more than W_MAX kg.
+   Typed past either it stops at the limit, and a stored set past them is
+   brought back to it — the badges count sets, and a set nobody could do
+   would hand them out for nothing. */
+function capW(kg) { return Math.min(W_MAX, Math.max(0, kg)); }
+function capR(r) { return Math.min(REP_MAX, Math.max(0, r)); }
+function lfCapIn(inp, max) { var v = parseFloat(inp.value); if (isFinite(v) && v > max) { inp.value = String(max); inp.classList.remove('is-cap'); void inp.offsetWidth; inp.classList.add('is-cap'); buzz(8); } }
+/* PRs START AFTER TWO WEEKS. Everything is a PR the first time you log
+   it, so for the first fourteen days from your first workout you are
+   building the numbers a PR is measured against, and nothing counts. And
+   a jump past half again your best and 10 kg more is a typo, not a PR. */
+function lfPrFrom() {
+  var f = ''; S.wo.forEach(function (w) { if (!f || w.d < f) f = w.d; });
+  if (!f) f = ymd(today());
+  var p = f.split('-'); return ymd(addDays(new Date(+p[0], +p[1] - 1, +p[2]), 14));
+}
+function lfPrOk(d, w, best, from) { return d >= (from || lfPrFrom()) && w <= best * 1.5 + 10 + 1e-9; }
 function fmtW(kg) { var v = Math.round(toDisp(kg) * 10) / 10; return String(v); }
 /* A SET'S weight: nought is your body weight, and says so. "0 × 12" on a
    sit-up reads as a set that lifted nothing; "BW × 12" is what it was. */
@@ -1791,8 +1814,8 @@ function lfTags() {
     /* a PR is a heavier weight than ever on the exercise, as in a workout */
     var best = {};
     S.wo.forEach(function (w) { if (w.d < tk) w.x.forEach(function (e) { e.sets.forEach(function (q) { if (q.r > 0 && (best[e.id] === undefined || (+q.w || 0) > best[e.id])) best[e.id] = +q.w || 0; }); }); });
-    var prs = 0;
-    ws.forEach(function (w) { w.x.forEach(function (e) { if (best[e.id] !== undefined && e.sets.some(function (q) { return q.r > 0 && (+q.w || 0) > 0 && (+q.w || 0) > best[e.id] + 1e-9; })) prs++; }); });
+    var prs = 0, pf = lfPrFrom();
+    ws.forEach(function (w) { w.x.forEach(function (e) { if (best[e.id] !== undefined && e.sets.some(function (q) { var v = +q.w || 0; return q.r > 0 && v > 0 && v > best[e.id] + 1e-9 && lfPrOk(w.d, v, best[e.id], pf); })) prs++; }); });
     if (prs) out.push(['pr', prs === 1 ? 'New PR' : prs + ' new PRs']);
     var w0 = ws[ws.length - 1], prev = woSorted().filter(function (w) { return w.d < tk && w.n === w0.n; }).pop();
     if (prev && woVol(prev) > 0) { var p = Math.round((woVol(w0) - woVol(prev)) / woVol(prev) * 100); if (p > 0) out.push(['up', '+' + p + '% today']); }
@@ -2019,14 +2042,14 @@ function lfTrendSheet(k, src) {
      friend's record does not carry them */
   var prN = null, prJ = null;
   if (src.mine) {
-    var bestW = {}, w0 = ymd(weeks[0].d); prN = [0, 0, 0, 0, 0, 0, 0, 0]; prJ = [0, 0, 0, 0, 0, 0, 0, 0];
+    var bestW = {}, w0 = ymd(weeks[0].d), pf = lfPrFrom(); prN = [0, 0, 0, 0, 0, 0, 0, 0]; prJ = [0, 0, 0, 0, 0, 0, 0, 0];
     woSorted().forEach(function (w) {
       var ix = -1; if (w.d >= w0) for (var q = 7; q >= 0; q--) if (w.d >= ymd(weeks[q].d)) { ix = q; break; }
       var hitW = 0;
       w.x.forEach(function (e) {
         var top = -1; e.sets.forEach(function (st) { if (st.r > 0 && (+st.w || 0) > top) top = +st.w || 0; });
         if (top < 0) return;
-        if (bestW[e.id] !== undefined && top > 0 && top > bestW[e.id] + 1e-9) { hitW++; if (ix >= 0) prJ[ix] = Math.max(prJ[ix], top - bestW[e.id]); }
+        if (bestW[e.id] !== undefined && top > 0 && top > bestW[e.id] + 1e-9 && lfPrOk(w.d, top, bestW[e.id], pf)) { hitW++; if (ix >= 0) prJ[ix] = Math.max(prJ[ix], top - bestW[e.id]); }
         if (bestW[e.id] === undefined || top > bestW[e.id]) bestW[e.id] = top;
       });
       if (ix >= 0) prN[ix] += hitW;
@@ -2505,8 +2528,8 @@ function lfPaintSession() {
       wi.addEventListener('focus', function () { if (wi.value === 'BW') wi.select(); });
       wi.addEventListener('blur', function () { if (s.w === 0) wi.value = 'BW'; });
       if (s.r !== '' && s.r != null) ri.value = s.r;
-      wi.addEventListener('input', function () { var v = parseFloat(wi.value); s.w = isFinite(v) && v >= 0 ? fromDisp(v) : ''; lfSaveAct(); });
-      ri.addEventListener('input', function () { var v = parseInt(ri.value, 10); s.r = isFinite(v) && v >= 0 ? v : ''; lfSaveAct(); });
+      wi.addEventListener('input', function () { lfCapIn(wi, Math.floor(toDisp(W_MAX))); var v = parseFloat(wi.value); s.w = isFinite(v) && v >= 0 ? capW(fromDisp(v)) : ''; lfSaveAct(); });
+      ri.addEventListener('input', function () { lfCapIn(ri, REP_MAX); var v = parseInt(ri.value, 10); s.r = isFinite(v) && v >= 0 ? capR(v) : ''; lfSaveAct(); });
       /* A TICKED SET EDITED AFTER THE FACT is judged again when you are done
          with the field: the extra rep you typed in after the tick counts */
       var rejudge = function () {
@@ -2596,7 +2619,7 @@ function lfIsPr(e, si, s) {
   function look(q) { if ((+q.r || 0) > 0 && (+q.w || 0) > top) top = +q.w || 0; }
   historyFor(e.id).forEach(function (h) { h.sets.forEach(look); });
   for (var i = 0; i < si; i++) if (e.sets[i].ok) look(e.sets[i]);
-  return top >= 0 && w > top + 1e-9;
+  return top >= 0 && w > top + 1e-9 && lfPrOk(ymd(today()), w, top);
 }
 function lfIsRep(e, si, s) {
   var w = +s.w || 0, r = +s.r || 0; if (!(r > 0)) return false;
@@ -2775,7 +2798,7 @@ function lfWeekSheet(m) {
   Object.keys(exIds).forEach(function (id) {
     var before = -1, inW = -1;
     S.wo.forEach(function (w) { w.x.forEach(function (x) { if (x.id !== id) return; x.sets.forEach(function (q) { if (!(q.r > 0)) return; var v = +q.w || 0; if (w.d < a) before = Math.max(before, v); else if (w.d <= z) inW = Math.max(inW, v); }); }); });
-    if (before >= 0 && inW > 0 && inW > before + 1e-9) prs.push(exName(id, exIds[id]));
+    if (before >= 0 && inW > 0 && inW > before + 1e-9 && lfPrOk(z, inW, before)) prs.push(exName(id, exIds[id]));
   });
   if (prs.length) { var pl = el('<div class="lf-fin-l" id="lfWsPr"><div class="lf-cap">Records this week</div><div class="lf-tags"></div></div>'); prs.forEach(function (n) { $('.lf-tags', pl).appendChild(lfTag(['pr', n])); }); b.appendChild(pl); }
   var got = lfBadges().concat(lfMedals()).filter(function (x) { return x.d && x.d >= a && x.d <= z; });
@@ -3346,8 +3369,8 @@ function lfWoEdit(w) {
         wi.setAttribute('aria-label', nm + ' set ' + (si + 1) + ' weight'); ri.setAttribute('aria-label', nm + ' set ' + (si + 1) + ' reps');
         wi.value = fmtWS(q.w); ri.value = q.r;
         wi.addEventListener('focus', function () { if (wi.value === 'BW') wi.select(); });
-        wi.addEventListener('input', function () { var v = parseFloat(wi.value); q.w = isFinite(v) && v >= 0 ? fromDisp(v) : 0; });
-        ri.addEventListener('input', function () { var v = parseInt(ri.value, 10); q.r = isFinite(v) && v >= 0 ? v : 0; });
+        wi.addEventListener('input', function () { lfCapIn(wi, Math.floor(toDisp(W_MAX))); var v = parseFloat(wi.value); q.w = isFinite(v) && v >= 0 ? capW(fromDisp(v)) : 0; });
+        ri.addEventListener('input', function () { lfCapIn(ri, REP_MAX); var v = parseInt(ri.value, 10); q.r = isFinite(v) && v >= 0 ? capR(v) : 0; });
         $('.lf-x', row).setAttribute('aria-label', 'Remove set ' + (si + 1));
         $('.lf-x', row).addEventListener('click', function () { e.sets.splice(si, 1); paint(); });
         card.appendChild(row);
@@ -3631,12 +3654,12 @@ function frStats() {
   }
   var in30 = S.wo.filter(function (w) { return w.d >= from30 && w.d <= tk; });
   /* a PR is a heavier weight than ever on the exercise, as in a workout */
-  var best = {}, pr30 = 0;
+  var best = {}, pr30 = 0, pf = lfPrFrom();
   S.wo.slice().sort(function (a, b) { return a.s - b.s; }).forEach(function (w) {
     w.x.forEach(function (e) { e.sets.forEach(function (st) {
       if (!(st.r > 0)) return;
       var v = +st.w || 0, b0 = best[e.id];
-      if (b0 === undefined || v > b0 + 1e-9) { if (b0 !== undefined && v > 0 && w.d >= from30) pr30++; best[e.id] = v; }
+      if (b0 === undefined || v > b0 + 1e-9) { if (b0 !== undefined && v > 0 && w.d >= from30 && lfPrOk(w.d, v, b0, pf)) pr30++; best[e.id] = v; }
     }); });
   });
   var mon = monday(t), wkFrom = ymd(mon);
@@ -4451,13 +4474,13 @@ function lfBadges() {
   ws.forEach(function (w, i) { var n = i + 1; if (n === 1) won('first', w.d); if (n === 10) won('wo10', w.d); if (n === 50) won('wo50', w.d); if (n === 100) won('wo100', w.d); });
   /* PRs: an exercise lifted heavier than ever before. A rep record is
      celebrated in the workout but is not a PR here. */
-  var best = {}, prDays = [], vol = 0, heavy = false;
+  var best = {}, prDays = [], vol = 0, heavy = false, pf = lfPrFrom();
   ws.forEach(function (w) {
     var hit = 0;
     w.x.forEach(function (e) {
       var top = -1; e.sets.forEach(function (q) { if (q.r > 0 && (+q.w || 0) > top) top = +q.w || 0; if (BARBELL[e.id] && q.w >= 140) heavy = true; });
       if (top < 0) return;
-      if (best[e.id] !== undefined && top > 0 && top > best[e.id] + 1e-9) hit++;
+      if (best[e.id] !== undefined && top > 0 && top > best[e.id] + 1e-9 && lfPrOk(w.d, top, best[e.id], pf)) hit++;
       if (best[e.id] === undefined || top > best[e.id]) best[e.id] = top;
     });
     if (hit) { won('pr', w.d); for (var h = 0; h < hit; h++) prDays.push(w.d); }

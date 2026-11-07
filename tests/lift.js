@@ -274,7 +274,7 @@ const freeze = (at) => `(() => {
 
   /* ── progressive overload ── a second session needs today free, so the
      first is moved back a day for it and put back after */
-  await page.evaluate(() => { const s = JSON.parse(localStorage.getItem('lift.v1')); s.wo[0].d = '2026-10-29'; localStorage.setItem('lift.v1', JSON.stringify(s)); });
+  await page.evaluate(() => { const s = JSON.parse(localStorage.getItem('lift.v1')); s.wo[0].d = '2026-10-29'; /* PRs count from two weeks after the first workout: an old one makes these real */ s.wo.unshift({ id: 'old', d: '2026-10-01', s: 1, e: 2, n: 'Upper', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 40, r: 8 }] }] }); localStorage.setItem('lift.v1', JSON.stringify(s)); });
   await page.reload(); await page.waitForTimeout(400);
   await page.click('#lfGo'); await settle(page);
   ok('a second time, an exercise comes in with last time\'s set count', (await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelectorAll('.lf-set:not(.is-hd)').length))).join() === '2,1');
@@ -376,7 +376,7 @@ const freeze = (at) => `(() => {
   await page.click('.lf-bar [data-v="you"]');
   await page.click('#lfUnit [data-u="lb"]');
   await page.click('.lf-bar [data-v="home"]');
-  ok('pounds is a display, the record stays in kilos', (await page.$$eval('.lf-stat span', (x) => x.map((e) => e.textContent)))[2] === 'lb' && (await store(page)).wo[0].x[0].sets[0].w === 60);
+  ok('pounds is a display, the record stays in kilos', (await page.$$eval('.lf-stat span', (x) => x.map((e) => e.textContent)))[2] === 'lb' && (await store(page)).wo.find((w) => w.id !== 'old').x[0].sets[0].w === 60);
 
   ok('nothing leaves this phone', offOrigin.length === 0, offOrigin);
   ok('nothing threw', errors.length === 0, errors);
@@ -752,7 +752,7 @@ const freeze = (at) => `(() => {
   /* ── GREEN TAGS: only the good news, worked out from the record ── */
   {
     const w = (id, d, n, kg) => ({ id, d, s: 1, e: 2, n, x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: kg, r: 8 }, { w: kg, r: 8 }] }] });
-    const { c, page } = await ctx({ unit: 'kg', goal: 2, wo: [w('a', '2026-10-20', 'Back', 60), w('b', '2026-10-23', 'Quad volume', 100), w('c', '2026-10-27', 'Back', 60), w('d', '2026-10-30', 'Quad volume', 110)] });
+    const { c, page } = await ctx({ unit: 'kg', goal: 2, wo: [{ id: 'old', d: '2026-10-05', s: 1, e: 2, n: 'Upper', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 40, r: 8 }] }] }, w('a', '2026-10-20', 'Back', 60), w('b', '2026-10-23', 'Quad volume', 100), w('c', '2026-10-27', 'Back', 60), w('d', '2026-10-30', 'Quad volume', 110)] });
     const where = await page.$$eval('.lf-tag', (t) => t.map((x) => (x.closest('.lf-stat') ? x.closest('.lf-stat').dataset.k : x.closest('#lfGrid') ? 'grid' : '?') + ':' + x.textContent));
     ok('each tag sits on its own tile: the PR on workouts, the volume on kg, goal and streak on the 30 days', where.join('|') === 'wo:New PR|vol:+10% today|grid:Week goal hit|grid:2-week streak', where);
     ok('and none on the Today card', await page.locator('.lf-today .lf-tag').count() === 0);
@@ -1039,7 +1039,7 @@ const freeze = (at) => `(() => {
       return { c, page };
     }
     const wo = (d, sets) => ({ id: 'w' + d, d, s: 1, e: 2, n: 'Lower A', x: [{ id: 'hack', n: 'Hack squat', sets: sets }] });
-    const A = await phone({ unit: 'kg', goal: 4, wo: [wo('2026-10-26', [{ w: 100, r: 8 }]), wo('2026-10-28', [{ w: 110, r: 8 }, { w: 110, r: 8 }]), wo('2026-10-30', [{ w: 120, r: 8 }])], rd: { '2026-10-29': 1 }, bw: [{ d: '2026-10-30', v: 87.4 }] });
+    const A = await phone({ unit: 'kg', goal: 4, wo: [{ id: 'old', d: '2026-09-28', s: 1, e: 2, n: 'Upper', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 40, r: 8 }] }] }, wo('2026-10-26', [{ w: 100, r: 8 }]), wo('2026-10-28', [{ w: 110, r: 8 }, { w: 110, r: 8 }]), wo('2026-10-30', [{ w: 120, r: 8 }])], rd: { '2026-10-29': 1 }, bw: [{ d: '2026-10-30', v: 87.4 }] });
     await A.page.click('.lf-bar [data-v="fr"]'); await A.page.waitForTimeout(200);
     ok('friends is off until you turn it on, and asks for nothing', await A.page.locator('#frOff').count() === 1 && m.size === 0 && sent.length === 0);
     ok('the off screen is just a name and a button', await A.page.locator('#frOff .fr-p').count() === 0 && await A.page.locator('#frName').count() === 1);
@@ -1049,11 +1049,11 @@ const freeze = (at) => `(() => {
     const codeA = await A.page.evaluate(() => JSON.parse(localStorage.getItem('lift.fr.v1')).code);
     ok('turning on claims an eight-character code', /^[A-HJ-NP-Z2-9]{8}$/.test(codeA) && m.has('lift:' + codeA), codeA);
     const recA = JSON.parse(m.get('lift:' + codeA));
-    ok('what the server holds is counts: 3 workouts, 4 sets, the empty days as rest, trained today', recA.n === 'Niko' && recA.s.wo30 === 3 && recA.s.sets30 === 4 && recA.s.last === '2026-10-30' && recA.s.d.slice(-6) === '01r1r1', recA.s);
+    ok('what the server holds is counts: 3 workouts, 4 sets, the empty days as rest, trained today', recA.n === 'Niko' && recA.s.wo30 === 3 && recA.s.sets30 === 4 && recA.s.last === '2026-10-30' && recA.s.d.slice(-6) === 'r1r1r1', recA.s);
     ok('this week goes by day, and by muscle against your targets', JSON.stringify(recA.s.w7) === '[1,0,2,0,1,0,0]' && JSON.stringify(recA.s.mu[0]) === '["Quads",4,16]', [recA.s.w7, recA.s.mu[0]]);
     ok('volume goes as totals: 30 days, eight weeks, and reps by day', recA.s.vol30 === 3520 && recA.s.v8[7] === 3520 && recA.s.v8.length === 8 && JSON.stringify(recA.s.r7) === '[8,0,16,0,8,0,0]', [recA.s.vol30, recA.s.v8, recA.s.r7]);
     ok('and nothing it no longer needs: no cardio, no totals', !('cd7' in recA.s) || recA.s.cd7 === 0);
-    ok('your three latest badges go with the counts, newest first', JSON.stringify(recA.s.bg) === '[["pr","2026-10-28"],["first","2026-10-26"]]', recA.s.bg);
+    ok('your three latest badges go with the counts, newest first', JSON.stringify(recA.s.bg) === '[["pr","2026-10-28"],["back","2026-10-26"],["first","2026-09-28"]]', recA.s.bg);
     ok('two PRs: each heavier hack squat after the first', recA.s.pr30 === 2, recA.s.pr30);
     ok('the key is only a hash', /^[0-9a-f]{64}$/.test(recA.kh) && !JSON.stringify(recA).includes((await A.page.evaluate(() => JSON.parse(localStorage.getItem('lift.fr.v1')).key))));
     const blob = sent.join('\n');
@@ -1214,6 +1214,26 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── REAL SETS, REAL PRs: limits on a set, and two weeks before a PR counts ── */
+  {
+    const st = (w, r) => ({ w, r });
+    const wo = [{ id: 'r0', d: '2026-10-20', s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(100, 8), st(900, 400)] }] },
+      { id: 'r1', d: '2026-10-27', s: 3, e: 4, n: 'Legs', x: [{ id: 'legext', n: 'Leg extensions', sets: [st(50, 10)] }] },
+      { id: 'r2', d: '2026-10-29', s: 5, e: 6, n: 'Legs', x: [{ id: 'legext', n: 'Leg extensions', sets: [st(60, 10)] }] }];
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-30T18:00:00');
+    const s = await store(page);
+    ok('a stored set past what a set can be is brought back to the limit', JSON.stringify(s.wo.find((w) => w.id === 'r0').x[0].sets[1]) === '{"w":500,"r":50}');
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    const bm = Object.fromEntries(await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => [e.querySelector('b').textContent, e.querySelector('span').textContent])));
+    ok('heavier inside the first two weeks is not a PR yet', bm['First PR'] === 'Locked', bm['First PR']);
+    await page.click('.lf-bar [data-v="home"]'); await settle(page);
+    await page.click('#lfGo'); await settle(page);
+    const w0 = page.locator('.lf-session .lf-set:not(.is-hd)').first().locator('input');
+    await w0.nth(0).fill('2000'); await w0.nth(1).fill('300');
+    ok('typing past the limit stops at it', await w0.nth(0).inputValue() === '500' && await w0.nth(1).inputValue() === '50', [await w0.nth(0).inputValue(), await w0.nth(1).inputValue()]);
+    await c.close();
+  }
+
   /* ── GOAL HIT: a celebration of its own, once a week ── */
   {
     const st = (w, r) => ({ w, r });
@@ -1239,7 +1259,8 @@ const freeze = (at) => `(() => {
   {
     const st = (w, r) => ({ w, r });
     const at = (d, h) => new Date(d + 'T' + h).getTime();
-    const wo = [{ id: 'y0', d: '2026-10-26', s: at('2026-10-26', '07:00:00'), e: at('2026-10-26', '08:00:00'), n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(100, 8)] }] },
+    const wo = [{ id: 'yA', d: '2026-10-12', s: at('2026-10-12', '07:00:00'), e: at('2026-10-12', '08:00:00'), n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(100, 8)] }] },
+      { id: 'y0', d: '2026-10-26', s: at('2026-10-26', '07:00:00'), e: at('2026-10-26', '08:00:00'), n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(100, 8)] }] },
       { id: 'y1', d: '2026-11-02', s: at('2026-11-02', '07:00:00'), e: at('2026-11-02', '08:00:00'), n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(110, 8), st(110, 8)] }] },
       { id: 'y2', d: '2026-11-04', s: at('2026-11-04', '07:00:00'), e: at('2026-11-04', '08:10:00'), n: 'Upper', x: [{ id: 'bench', n: 'Barbell bench press', sets: [st(60, 8)] }] },
       { id: 'y3', d: '2026-11-06', s: at('2026-11-06', '07:00:00'), e: at('2026-11-06', '07:50:00'), n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(110, 9)] }] }];
@@ -1260,7 +1281,7 @@ const freeze = (at) => `(() => {
   /* ── THE TREND SHEETS: one at a time, and the weeks you set a PR pinned ── */
   {
     const st = (w, r) => ({ w, r });
-    const wo = [{ id: 'p1', d: '2026-10-12', s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(100, 8)] }] },
+    const wo = [{ id: 'p1', d: '2026-10-05', s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(100, 8)] }] },
       { id: 'p2', d: '2026-10-20', s: 3, e: 4, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(110, 8)] }] },
       { id: 'p3', d: '2026-10-28', s: 5, e: 6, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(112.5, 9)] }] }];
     const { c, page } = await ctx({ unit: 'kg', wo }, '2026-10-30T18:00:00');
