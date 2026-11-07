@@ -40,6 +40,8 @@ const freeze = (at) => `(() => {
     const c = await browser.newContext(PHONE);
     /* the week in review comes up over the app on a Sunday night and the two days after: checks that are not about it have seen it */
     if (seed && !('wkSum' in seed)) seed = Object.assign({ wkSum: '9999-12-31' }, seed);
+    /* and so does the goal-hit screen, which goes over everything the moment a week reaches its goal */
+    if (seed && !('wkDone' in seed)) seed = Object.assign({ wkDone: '9999-12-31' }, seed);
     await c.addInitScript(freeze(at || '2026-10-30T18:00:00'));
     /* a badge earned along the way comes up over the screen; checks that
        are not about badges put it away the moment it appears */
@@ -1212,6 +1214,27 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── GOAL HIT: a celebration of its own, once a week ── */
+  {
+    const st = (w, r) => ({ w, r });
+    const wo = [{ id: 'g0', d: '2026-10-28', s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(100, 8)] }] },
+      { id: 'g1', d: '2026-10-29', s: 3, e: 4, n: 'Upper', x: [{ id: 'bench', n: 'Barbell bench press', sets: [st(60, 8)] }] },
+      { id: 'g2', d: '2026-11-03', s: 5, e: 6, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(100, 8)] }] },
+      { id: 'g3', d: '2026-11-05', s: 7, e: 8, n: 'Upper', x: [{ id: 'bench', n: 'Barbell bench press', sets: [st(60, 8)] }] }];
+    const { c, page } = await ctx({ unit: 'kg', goal: 2, wo, wkDone: '' }, '2026-11-05T18:00:00');
+    await page.waitForTimeout(1200);
+    ok('reaching the weekly goal goes over the whole screen, not a banner', await page.locator('.lf-gol').count() === 1 && await page.locator('.lf-wkdone').count() === 0);
+    ok('its ring closes in one piece per workout of the goal', await page.locator('.lf-gol .lf-gol-seg').count() === 2);
+    ok('and it counts the weeks in a row the goal has been hit', /2 of 2 workouts · 2 weeks in a row/.test(await page.textContent('.lf-gol')));
+    ok('the sky lights up with fireworks', await page.locator('.lf-gol .lf-fw i').count() > 40);
+    ok('it is kept as seen', (await store(page)).wkDone === '2026-11-02');
+    await page.click('.lf-gol'); await page.waitForTimeout(600);
+    ok('a tap puts it away', await page.locator('.lf-gol').count() === 0);
+    await page.reload(); await page.waitForTimeout(1200);
+    ok('and it comes once a week', await page.locator('.lf-gol').count() === 0);
+    await c.close();
+  }
+
   /* ── THE WEEK IN REVIEW: Sunday from eight, once ── */
   {
     const st = (w, r) => ({ w, r });
@@ -1239,7 +1262,7 @@ const freeze = (at) => `(() => {
     const st = (w, r) => ({ w, r });
     const wo = [{ id: 'p1', d: '2026-10-12', s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(100, 8)] }] },
       { id: 'p2', d: '2026-10-20', s: 3, e: 4, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(110, 8)] }] },
-      { id: 'p3', d: '2026-10-28', s: 5, e: 6, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(110, 9)] }] }];
+      { id: 'p3', d: '2026-10-28', s: 5, e: 6, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(112.5, 9)] }] }];
     const { c, page } = await ctx({ unit: 'kg', wo }, '2026-10-30T18:00:00');
     await page.click('#lfVol'); await settle(page);
     await page.evaluate(() => document.querySelector('#lfWeek').click()); await page.waitForTimeout(600);
@@ -1249,8 +1272,9 @@ const freeze = (at) => `(() => {
     ok('a sheet opened from the page puts away the one before it, whatever it was', await page.locator('.lf-sheet').count() === 1 && await page.locator('.lf-vsh').count() === 0);
     await page.keyboard.press('Escape'); await settle(page);
     await page.click('#lfVol'); await page.waitForTimeout(1600);
-    const pins = await page.$$eval('.lf-vsh .lf-vs-pr b', (b) => b.map((x) => x.textContent));
-    ok('the week a heavier weight was lifted carries a PR pin, and only that week', pins.join() === 'PR', pins);
+    const pins = await page.$$eval('.lf-vsh .lf-vs-pr', (b) => b.map((x) => x.textContent));
+    ok('each PR week says what it did, not just PR: the jump, and a run of PR weeks counted', pins.join('|') === '+10 kg|+2.5 kg×2', pins);
+    ok('and a run of PR weeks burns hotter than a lone one', await page.locator('.lf-vsh .lf-vs-pr.is-run').count() === 1);
     await c.close();
   }
 
