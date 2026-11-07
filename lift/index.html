@@ -5623,7 +5623,16 @@ var NEUTRALS = [
   { n: 'Sage', d: '#a3b8a0', l: '#5f7a5c', di: '#b5c7b2', li: '#4b6249' },
   { n: 'Olive', d: '#b5b07a', l: '#6b6a3a', di: '#c4c08e', li: '#55542d' },
   { n: 'Tan', d: '#d2b48c', l: '#9a7652', di: '#dcc29f', li: '#7a5c3e' },
-  { n: 'Clay', d: '#c99a86', l: '#8f5e4b', di: '#d6ae9c', li: '#74493a' }
+  { n: 'Clay', d: '#c99a86', l: '#8f5e4b', di: '#d6ae9c', li: '#74493a' },
+  /* crimson velvet (#6B1E23 into #2C0F12) and a coffee run from espresso to
+     cream. Each is its given colour on the face it shows on; on the face it
+     would vanish against, the next step of its own family stands in */
+  { n: 'Crimson', d: '#a3333b', l: '#6b1e23', di: '#d0646b', li: '#6b1e23' },
+  { n: 'Espresso', d: '#8b6a52', l: '#291c0e', di: '#a8876e', li: '#291c0e' },
+  { n: 'Mocha', d: '#a3735f', l: '#6e473b', di: '#bf8f7b', li: '#6e473b' },
+  { n: 'Latte', d: '#a78d78', l: '#8a7260', di: '#bba390', li: '#6b5646' },
+  { n: 'Greige', d: '#beb5a9', l: '#8f867a', di: '#beb5a9', li: '#6a6258' },
+  { n: 'Cream', d: '#e1d4c2', l: '#b5a084', di: '#e1d4c2', li: '#6e5b45' }
 ];
 function lfNeu(h) { return typeof h === 'number' && h >= 1000 && h < 1000 + NEUTRALS.length && h % 1 === 0 ? NEUTRALS[h - 1000] : null; }
 function lfAccName(h) { var n = lfNeu(h); return h === null || h === undefined ? 'Lime' : n ? n.n : lfHueName(h); }
