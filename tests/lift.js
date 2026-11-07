@@ -1272,9 +1272,7 @@ const freeze = (at) => `(() => {
     ok('a sheet opened from the page puts away the one before it, whatever it was', await page.locator('.lf-sheet').count() === 1 && await page.locator('.lf-vsh').count() === 0);
     await page.keyboard.press('Escape'); await settle(page);
     await page.click('#lfVol'); await page.waitForTimeout(1600);
-    const pins = await page.$$eval('.lf-vsh .lf-vs-pr', (b) => b.map((x) => x.textContent));
-    ok('each PR week says what it did, not just PR: the jump, and a run of PR weeks counted', pins.join('|') === '+10 kg|+2.5 kg×2', pins);
-    ok('and a run of PR weeks burns hotter than a lone one', await page.locator('.lf-vsh .lf-vs-pr.is-run').count() === 1);
+    ok('a PR week is marked by its point alone, in your colour, two weeks of three', await page.locator('.lf-vsh .lf-vs-pr').count() === 2 && await page.locator('.lf-vsh .lf-vs-pr b').count() === 0);
     await c.close();
   }
 

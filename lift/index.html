@@ -431,6 +431,8 @@ body.lf-v-home .lf-glow { opacity: 1; }
   /* and everything drawn on it is glass too, or a full sheet of solid cards hides the glass it sits on */
   /* a step lighter than the sheet under them, so a card on a sheet still reads as a card */
   .lf-sheet .lf-card, .lf-sheet .lf-sum div, .lf-sheet .lf-vs-c, .lf-sheet .lf-ex { background: color-mix(in srgb, var(--card3) 48%, transparent) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.06); }
+  /* the trend sheet's cards are the same glass, washed with your colour from the top corner */
+  .lf-sheet.lf-vsh .lf-vs-c, .lf-sheet.lf-vsh .lf-sum div { background: linear-gradient(160deg, color-mix(in srgb, var(--log) 24%, transparent), color-mix(in srgb, var(--card3) 40%, transparent) 70%) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--log) 22%, transparent), inset 0 1px 0 rgba(255,255,255,.08); }
   /* and what sits inside those cards goes the other way, down toward the page, so a field still reads as a field */
   .lf-sheet .lf-ex .lf-set:not(.is-done) input, .lf-sheet .lf-ex-ft button { background: color-mix(in srgb, var(--bg) 40%, transparent); }
   /* the badge viewer: the page faintly behind it, never readable */
@@ -667,24 +669,14 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-vs-plot { position: relative; height: 150px; margin: 22px 0 6px; }
 .lf-vs-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .lf-vs-dot { position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--ink); }
-/* a PR week: a ring in your colour on its point, and a flag under it */
-.lf-vs-pr { position: absolute; width: 0; height: 0; pointer-events: none; z-index: 1; animation: lf-pin .5s cubic-bezier(.3, 1.6, .5, 1) backwards; animation-delay: var(--d, 900ms); }
-.lf-vs-pr::before { content: ''; position: absolute; left: -9px; top: -9px; width: 18px; height: 18px; border-radius: 50%; box-shadow: 0 0 0 2px var(--log), 0 0 12px color-mix(in srgb, var(--log) 70%, transparent); background: color-mix(in srgb, var(--log) 18%, transparent); }
-.lf-vs-pr::after { content: ''; position: absolute; left: -1px; top: 9px; width: 2px; height: 9px; background: var(--log); border-radius: 2px; }
-.lf-vs-pr b { position: absolute; left: 0; top: 18px; transform: translateX(-50%); padding: 2px 7px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: .04em; color: var(--on-log); background: var(--log); white-space: nowrap; box-shadow: 0 4px 12px color-mix(in srgb, var(--log) 40%, transparent); }
-.lf-vs-pr.is-r b { transform: translateX(-85%); } .lf-vs-pr.is-l b { transform: translateX(-15%); }
-.lf-vs-pr.is-lo::after { height: 25px; } .lf-vs-pr.is-lo b { top: 34px; }
-.lf-vs-run { position: absolute; left: 4px; top: -21px; padding: 1px 5px; border-radius: 999px; font-size: 9px; font-weight: 900; font-style: normal; color: var(--on-log); background: var(--log); box-shadow: 0 0 0 2px var(--card); white-space: nowrap; }
-/* a run of PR weeks: a second ring, and past two a flame-hot glow that breathes */
-.lf-vs-pr.is-run::before, .lf-vs-pr.is-hot::before { box-shadow: 0 0 0 2px var(--log), 0 0 0 5px color-mix(in srgb, var(--log) 30%, transparent), 0 0 16px color-mix(in srgb, var(--log) 80%, transparent); }
-.lf-vs-pr.is-hot b { background: linear-gradient(100deg, var(--log), color-mix(in srgb, var(--log) 55%, #fff), var(--log)); background-size: 200% 100%; animation: lf-pinhot 2.4s linear infinite; }
-.lf-vs-pr.is-hot::before { animation: lf-pinglow 1.6s ease-in-out infinite alternate; }
-@keyframes lf-pinhot { to { background-position: -200% 0; } }
-@keyframes lf-pinglow { to { box-shadow: 0 0 0 2px var(--log), 0 0 0 7px color-mix(in srgb, var(--log) 22%, transparent), 0 0 26px var(--log); } }
+.lf-vs-pr { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: var(--log); box-shadow: 0 0 0 3px color-mix(in srgb, var(--log) 22%, transparent); pointer-events: none; z-index: 1; animation: lf-pin .45s cubic-bezier(.3, 1.6, .5, 1) backwards; animation-delay: var(--d, 900ms); }
+/* the trend sheet's cards carry a wash of your colour */
+.lf-vsh .lf-vs-c { background: linear-gradient(160deg, color-mix(in srgb, var(--log) 26%, var(--plot)), color-mix(in srgb, var(--log) 6%, var(--plot)) 70%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--log) 22%, transparent); }
+.lf-vsh .lf-sum div { background: linear-gradient(160deg, color-mix(in srgb, var(--log) 20%, var(--card)), color-mix(in srgb, var(--log) 5%, var(--card)) 80%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--log) 20%, transparent); }
 @keyframes lf-pin { from { transform: scale(0); opacity: 0; } }
 /* where you are now glows in your colour */
 .lf-vs-plot .lf-vs-dot.is-now { background: var(--log); --ink: var(--log); }
-@media (prefers-reduced-motion: reduce) { .lf-vs-pr, .lf-vs-pr.is-hot b, .lf-vs-pr.is-hot::before { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .lf-vs-pr { animation: none; } }
 /* THE CHARTS: a line drawn in from the left the first time it is shown,
    a glowing dot on where you are now, and a finger along it reads it out */
 svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
@@ -2023,8 +2015,9 @@ function lfTrendSheet(k, src) {
   /* THE WEEKS YOU SET A PR, pinned on the line in your colour: a ring on
      the week's point and a flag reading PR, or 2 PR — yours only, since a
      friend's record does not carry them */
+  var prN = null, prJ = null;
   if (src.mine) {
-    var bestW = {}, prN = [0, 0, 0, 0, 0, 0, 0, 0], prJ = [0, 0, 0, 0, 0, 0, 0, 0], w0 = ymd(weeks[0].d);
+    var bestW = {}, w0 = ymd(weeks[0].d); prN = [0, 0, 0, 0, 0, 0, 0, 0]; prJ = [0, 0, 0, 0, 0, 0, 0, 0];
     woSorted().forEach(function (w) {
       var ix = -1; if (w.d >= w0) for (var q = 7; q >= 0; q--) if (w.d >= ymd(weeks[q].d)) { ix = q; break; }
       var hitW = 0;
@@ -2036,25 +2029,20 @@ function lfTrendSheet(k, src) {
       });
       if (ix >= 0) prN[ix] += hitW;
     });
-    /* each pin says what that week did, not the same word again: how much
-       heavier you went, and when the weeks before it were PR weeks too,
-       how many in a row — the run burns brighter the longer it goes */
-    var run = 0;
+    /* a PR week is just its point, filled in your colour — no flag, no
+       count. What it did is in the readout when you press along the line. */
     prN.forEach(function (n, i) {
-      run = n ? run + 1 : 0;
       if (!n) return;
-      var pin = el('<i class="lf-vs-pr"><b></b></i>'); pin.style.left = pts[i][0] + '%'; pin.style.top = pts[i][1] + '%'; pin.style.setProperty('--d', (900 + i * 70) + 'ms');
-      var fl = $('b', pin);
-      /* the run rides the ring as a small count; flags next to each other drop to two depths so they never sit on one another */
-      if (run > 1) { var rn = el('<span class="lf-vs-run"></span>'); rn.textContent = '×' + run; rn.setAttribute('aria-label', run + ' in a row'); pin.appendChild(rn); pin.classList.add(run > 2 ? 'is-hot' : 'is-run'); }
-      if (i % 2) pin.classList.add('is-lo');
-      fl.textContent = '+' + fmtW(prJ[i]) + ' ' + S.unit + (n > 1 ? ' · ' + n : '');
-      pin.title = n + (n > 1 ? ' records' : ' record') + ', heaviest jump +' + fmtW(prJ[i]) + ' ' + S.unit;
-      if (i === 7) pin.classList.add('is-r'); if (i === 0) pin.classList.add('is-l');
+      var pin = el('<i class="lf-vs-pr"></i>'); pin.style.left = pts[i][0] + '%'; pin.style.top = pts[i][1] + '%'; pin.style.setProperty('--d', (900 + i * 70) + 'ms');
+      pin.title = (n > 1 ? n + ' PRs' : 'PR') + ', +' + fmtW(prJ[i]) + ' ' + S.unit;
       plot.appendChild(pin);
     });
   }
-  lfScrub(plot, pts, function (i) { return [fmtBig(weeks[i].v) + (k === 'vol' ? ' ' + S.unit : ''), i === 7 ? 'This week' : 'Week of ' + MON[weeks[i].d.getMonth()].slice(0, 3) + ' ' + weeks[i].d.getDate()]; });
+  lfScrub(plot, pts, function (i) {
+    var wk = i === 7 ? 'This week' : 'Week of ' + MON[weeks[i].d.getMonth()].slice(0, 3) + ' ' + weeks[i].d.getDate();
+    if (prN && prN[i]) wk += ' · ' + (prN[i] > 1 ? prN[i] + ' PRs' : 'PR') + ' +' + fmtW(prJ[i]) + ' ' + S.unit;
+    return [fmtBig(weeks[i].v) + (k === 'vol' ? ' ' + S.unit : ''), wk];
+  });
   b.appendChild(ch);
   var tot = weeks.reduce(function (a, w) { return a + w.v; }, 0), avg = tot / 8;
   b.appendChild(el('<div class="lf-cap" style="margin:16px 2px 8px">At a glance</div>'));
