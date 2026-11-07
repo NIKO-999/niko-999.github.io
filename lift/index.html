@@ -616,6 +616,13 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-wheel { position: relative; width: 200px; height: 200px; margin: 6px auto 0; border-radius: 50%; touch-action: none; cursor: pointer;
   background: conic-gradient(hsl(0,80%,56%), hsl(30,80%,56%), hsl(60,80%,56%), hsl(90,80%,56%), hsl(120,80%,56%), hsl(150,80%,56%), hsl(180,80%,56%), hsl(210,80%,64%), hsl(240,80%,64%), hsl(270,80%,64%), hsl(300,80%,56%), hsl(330,80%,56%), hsl(360,80%,56%)); }
 .lf-wheel.is-neu .lf-wh-k { opacity: 0; }
+/* the neutrals' fold: a row like a settings row, the chevron turning half round when open */
+.lf-neu-h { margin: 16px 0 0; font: inherit; }
+.lf-neu-h button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px 2px; color: var(--ink); font-size: 15px; font-weight: 600; text-align: left; }
+.lf-neu-h span { flex: 1; } .lf-neu-h em { font-style: normal; color: var(--dim); font-weight: 500; font-size: 14px; }
+.lf-neu-h .lf-chev { color: var(--dim); transform: rotate(90deg); transition: transform .22s var(--ease); }
+.lf-neu-h button[aria-expanded="true"] .lf-chev { transform: rotate(270deg); }
+.lf-neu:not([hidden]) { margin-top: 4px; }
 /* the neutrals: a row of chips, each in the shade it takes on this face */
 .lf-neu { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .lf-neu-b { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 4px 8px; border-radius: 14px; background: var(--card2); font-size: 11px; font-weight: 600; color: var(--dim); }
@@ -3539,14 +3546,20 @@ function lfThemeCard() {
   return lfFold('lfTheme', 'thm', 'Theme', lfAccName(h), function (bd) {
     var c = el('<div><span class="lf-flab" style="margin-top:0">Appearance</span><div class="lf-seg" id="lfMode" style="--n:3"><button type="button" data-m="auto">Auto</button><button type="button" data-m="light">Light</button><button type="button" data-m="dark">Dark</button></div>'
       + '<span class="lf-flab">Accent</span><div class="lf-wheel" id="lfWheel" role="slider" tabindex="0" aria-label="Accent colour" aria-valuemin="0" aria-valuemax="359"><i class="lf-wh-k"></i><span class="lf-wh-m"></span></div>'
-      + '<span class="lf-flab">Neutrals</span><div class="lf-neu" id="lfNeu"></div>'
+      + '<h4 class="lf-neu-h"><button type="button" id="lfNeuT" aria-controls="lfNeu" aria-expanded="false"><span>Neutral colours</span><em></em>' + IC.chev + '</button></h4><div class="lf-neu" id="lfNeu" hidden></div>'
       + '<button type="button" class="lf-btn is-full" id="lfAccReset" style="margin-top:12px">Back to lime</button></div>');
     $$('#lfMode button', c).forEach(function (b) {
       b.setAttribute('aria-pressed', b.dataset.m === lfMode() ? 'true' : 'false');
       b.addEventListener('click', function () { try { localStorage.setItem('lift.mode.v1', b.dataset.m); } catch (e) {} lfApplyMode(); lfRender(); });
     });
     var wh = $('#lfWheel', c), knob = $('.lf-wh-k', wh), rs = $('#lfAccReset', c);
-    var neu = $('#lfNeu', c), dk = document.documentElement.getAttribute('data-mode') !== 'light';
+    var neu = $('#lfNeu', c), dk = document.documentElement.getAttribute('data-mode') !== 'light', nt = $('#lfNeuT', c);
+    /* THE NEUTRALS FOLD AWAY: eighteen chips under the wheel were a second
+       screen of colour to scroll past. Shut, the row still says which one
+       you are on; it stays open while you are on this tab */
+    function neuSet(o) { nt.setAttribute('aria-expanded', o ? 'true' : 'false'); neu.hidden = !o; }
+    nt.addEventListener('click', function () { var o = nt.getAttribute('aria-expanded') !== 'true'; lfFoldSet('neu', o); neuSet(o); });
+    neuSet(lfFoldOpen('neu'));
     NEUTRALS.forEach(function (n, i) {
       var nb = el('<button type="button" class="lf-neu-b"><i></i><span></span></button>');
       nb.dataset.h = 1000 + i; $('i', nb).style.background = dk ? n.d : n.l; $('span', nb).textContent = n.n;
@@ -3559,6 +3572,7 @@ function lfThemeCard() {
       knob.style.transform = 'rotate(' + a + 'deg)'; wh.classList.toggle('is-neu', !!nu);
       wh.setAttribute('aria-valuenow', Math.round(a)); wh.setAttribute('aria-valuetext', lfAccName(hu));
       $$('.lf-neu-b', neu).forEach(function (b) { b.setAttribute('aria-pressed', +b.dataset.h === hu ? 'true' : 'false'); });
+      $('em', nt).textContent = nu ? nu.n : '';
       rs.disabled = hu === null;
     }
     function pick(hu, keep) { lfAccentSet(hu, keep); show(hu); }
