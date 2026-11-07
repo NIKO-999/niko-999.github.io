@@ -38,6 +38,8 @@ const freeze = (at) => `(() => {
   const errors = [], offOrigin = [];
   async function ctx(seed, at, keepBadges) {
     const c = await browser.newContext(PHONE);
+    /* the week in review comes up over the app on a Sunday night and the two days after: checks that are not about it have seen it */
+    if (seed && !('wkSum' in seed)) seed = Object.assign({ wkSum: '9999-12-31' }, seed);
     await c.addInitScript(freeze(at || '2026-10-30T18:00:00'));
     /* a badge earned along the way comes up over the screen; checks that
        are not about badges put it away the moment it appears */
@@ -1207,6 +1209,48 @@ const freeze = (at) => `(() => {
     ok('and half a glute set, as an RDL is: 2 and 1½', await em('Glutes') === '3½ / 6', await em('Glutes'));
     ok('but never a hamstring set: only the RDL counts there', await em('Hamstrings') === '3 / 14', await em('Hamstrings'));
     ok('a row is half a biceps set', await em('Biceps') === '1½ / 10', await em('Biceps'));
+    await c.close();
+  }
+
+  /* ── THE WEEK IN REVIEW: Sunday from eight, once ── */
+  {
+    const st = (w, r) => ({ w, r });
+    const at = (d, h) => new Date(d + 'T' + h).getTime();
+    const wo = [{ id: 'y0', d: '2026-10-26', s: at('2026-10-26', '07:00:00'), e: at('2026-10-26', '08:00:00'), n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(100, 8)] }] },
+      { id: 'y1', d: '2026-11-02', s: at('2026-11-02', '07:00:00'), e: at('2026-11-02', '08:00:00'), n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(110, 8), st(110, 8)] }] },
+      { id: 'y2', d: '2026-11-04', s: at('2026-11-04', '07:00:00'), e: at('2026-11-04', '08:10:00'), n: 'Upper', x: [{ id: 'bench', n: 'Barbell bench press', sets: [st(60, 8)] }] },
+      { id: 'y3', d: '2026-11-06', s: at('2026-11-06', '07:00:00'), e: at('2026-11-06', '07:50:00'), n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(110, 9)] }] }];
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo, wkSum: '' }, '2026-11-08T20:30:00');
+    await page.waitForTimeout(1800);
+    ok('on Sunday night the week in review comes up by itself', await top(page).locator('#lfWeekSum').count() === 1);
+    const t = await top(page).locator('#lfWeekSum').textContent();
+    ok('it names the week and closes the goal ring at 3 of 3', /2–8 Nov/.test(t) && /3\/3/.test(t) && /goal hit/.test(t), t.slice(0, 120));
+    ok('the days you trained are lit, three of seven', await top(page).locator('.lf-ws-days .is-on').count() === 3);
+    ok('a heavier weight this week is the week\'s record', /Hack squat/.test(await top(page).locator('#lfWsPr').textContent()));
+    ok('and it is kept as seen', (await store(page)).wkSum === '2026-11-02');
+    await top(page).locator('#lfWsDone').click(); await settle(page);
+    await page.reload(); await page.waitForTimeout(1800);
+    ok('so it comes once a week, not every open', await page.locator('#lfWeekSum').count() === 0);
+    await c.close();
+  }
+
+  /* ── THE TREND SHEETS: one at a time, and the weeks you set a PR pinned ── */
+  {
+    const st = (w, r) => ({ w, r });
+    const wo = [{ id: 'p1', d: '2026-10-12', s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(100, 8)] }] },
+      { id: 'p2', d: '2026-10-20', s: 3, e: 4, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(110, 8)] }] },
+      { id: 'p3', d: '2026-10-28', s: 5, e: 6, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(110, 9)] }] }];
+    const { c, page } = await ctx({ unit: 'kg', wo }, '2026-10-30T18:00:00');
+    await page.click('#lfVol'); await settle(page);
+    await page.evaluate(() => document.querySelector('#lfWeek').click()); await page.waitForTimeout(600);
+    ok('opening a second trend puts the first away', await page.locator('.lf-vsh').count() === 1);
+    /* and across the app: a press on the page puts away whatever sheet is up */
+    await page.evaluate(() => { const b = document.querySelector('#lfBw'); b.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); b.click(); }); await page.waitForTimeout(600);
+    ok('a sheet opened from the page puts away the one before it, whatever it was', await page.locator('.lf-sheet').count() === 1 && await page.locator('.lf-vsh').count() === 0);
+    await page.keyboard.press('Escape'); await settle(page);
+    await page.click('#lfVol'); await page.waitForTimeout(1600);
+    const pins = await page.$$eval('.lf-vsh .lf-vs-pr b', (b) => b.map((x) => x.textContent));
+    ok('the week a heavier weight was lifted carries a PR pin, and only that week', pins.join() === 'PR', pins);
     await c.close();
   }
 
