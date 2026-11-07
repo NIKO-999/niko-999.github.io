@@ -672,7 +672,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-vs-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .lf-vs-dot { position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--ink); }
 /* the line gathers a glow in your colour as it nears where you are now */
-.lf-vsh .lf-vs-gl { filter: blur(4px); }
+/* the blur is the SVG's own filter, not CSS: iOS Safari does not blur an SVG path with a CSS filter, and drew the glow as a hard second line */
 .lf-vs-pr { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: var(--log); box-shadow: 0 0 0 3px color-mix(in srgb, var(--log) 22%, transparent); pointer-events: none; z-index: 1; animation: lf-pin .45s cubic-bezier(.3, 1.6, .5, 1) backwards; animation-delay: var(--d, 900ms); }
 @keyframes lf-pin { from { transform: scale(0); opacity: 0; } }
 /* where you are now glows in your colour */
@@ -2000,8 +2000,8 @@ function lfTrendSheet(k, src) {
   var pts = weeks.map(function (w, i) { return [i / 7 * 100, 88 - w.v / max * 68]; });
   var d = 'M' + pts[0][0] + ' ' + pts[0][1];
   for (var j = 1; j < 8; j++) { var p0 = pts[j - 1], p1 = pts[j], mx = (p0[0] + p1[0]) / 2; d += ' C' + mx + ' ' + p0[1] + ' ' + mx + ' ' + p1[1] + ' ' + p1[0] + ' ' + p1[1]; }
-  plot.innerHTML = '<svg class="is-draw" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="lfVsG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e8e95" stop-opacity=".55"/><stop offset=".75" stop-color="#8e8e95" stop-opacity=".1"/><stop offset="1" stop-color="#8e8e95" stop-opacity="0"/></linearGradient><linearGradient id="lfVsL" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="0"><stop offset="0.35" style="stop-color:var(--log)" stop-opacity="0"/><stop offset="0.8" style="stop-color:var(--log)" stop-opacity=".35"/><stop offset="1" style="stop-color:var(--log)" stop-opacity=".95"/></linearGradient></defs>'
-    + '<path d="' + d + ' L100 100 L0 100Z" fill="url(#lfVsG)"/><path d="' + d + '" fill="none" class="lf-vs-gl" stroke="url(#lfVsL)" stroke-width="7" stroke-linecap="round" vector-effect="non-scaling-stroke"/>'
+  plot.innerHTML = '<svg class="is-draw" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="lfVsG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e8e95" stop-opacity=".55"/><stop offset=".75" stop-color="#8e8e95" stop-opacity=".1"/><stop offset="1" stop-color="#8e8e95" stop-opacity="0"/></linearGradient><filter id="lfVsB" filterUnits="userSpaceOnUse" x="-10" y="-20" width="120" height="140"><feGaussianBlur stdDeviation="1.7 3.4"/></filter><linearGradient id="lfVsL" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="0"><stop offset="0.35" style="stop-color:var(--log)" stop-opacity="0"/><stop offset="0.8" style="stop-color:var(--log)" stop-opacity=".35"/><stop offset="1" style="stop-color:var(--log)" stop-opacity=".95"/></linearGradient></defs>'
+    + '<path d="' + d + ' L100 100 L0 100Z" fill="url(#lfVsG)"/><path d="' + d + '" fill="none" class="lf-vs-gl" filter="url(#lfVsB)" stroke="url(#lfVsL)" stroke-width="7" stroke-linecap="round" vector-effect="non-scaling-stroke"/>'
     + '<path d="' + d + '" fill="none" class="lf-vs-ln" style="stroke:var(--ink)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>';
   var best = 0; weeks.forEach(function (w, i) { if (w.v > weeks[best].v) best = i; });
   weeks.forEach(function (w, i) {
