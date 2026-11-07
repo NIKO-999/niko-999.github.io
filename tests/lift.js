@@ -253,12 +253,21 @@ const freeze = (at) => `(() => {
   ok('the week\'s card totals the cardio', (await page.textContent('#lfLegs .lf-cd-wk .lf-num')) === '12 min this week');
   await page.click('#lfGrid'); await settle(page);
   await page.locator('.lf-cell.is-now').click(); await settle(page);
-  ok('the workout sheet shows it', (await top(page).locator('#lfWoCd > div').first().textContent()) === '12 min stairmaster');
-  await top(page).locator('#lfWoCd .lf-pill[data-m="20"]').click();
-  ok('and it can be changed after', (await store(page)).wo[0].cd.m === 20);
-  await top(page).locator('#lfWoCd .lf-pill[data-m="20"]').click();
+  ok('the workout sheet shows it, to read', (await top(page).locator('#lfWoCd > div').first().textContent()) === '12 min stairmaster' && await top(page).locator('#lfWoCd .lf-pill').count() === 0);
+  /* it is changed in the editor, behind the pencil */
+  await top(page).locator('#lfWoEdit').click(); await settle(page);
+  await top(page).locator('#lfEdCd .lf-pill[data-m="20"]').click(); await top(page).locator('#lfEdSave').click(); await settle(page);
+  ok('and it can be changed after, in the editor', (await store(page)).wo[0].cd.m === 20);
+  await top(page).locator('#lfWoEdit').click(); await settle(page);
+  await top(page).locator('#lfEdCd .lf-pill[data-m="20"]').click(); await top(page).locator('#lfEdSave').click(); await settle(page);
   ok('or taken off', (await store(page)).wo[0].cd === null);
+  ok('and a workout with none says nothing about it', await top(page).locator('#lfWoCd').count() === 0);
   await page.keyboard.press('Escape'); await settle(page); await page.keyboard.press('Escape'); await settle(page);
+  /* today's card on Home opens the finish screen again, with the sets under it */
+  await page.click('.lf-bar [data-v="home"]'); await settle(page);
+  await page.click('#lfPick'); await settle(page);
+  ok('today\'s finished card opens the finish screen, with every set under it', await top(page).locator('#lfFin').count() === 1 && await top(page).locator('#lfFinSets .lf-wo-ex').count() >= 2 && await top(page).locator('.lf-pill').count() === 0);
+  await page.keyboard.press('Escape'); await settle(page);
   await page.click('.lf-bar [data-v="home"]'); await settle(page);
   ok('home does not offer cardio once the session is done', await page.locator('#lfAddCd').count() === 0);
 
@@ -717,7 +726,7 @@ const freeze = (at) => `(() => {
     const { c, page } = await ctx({ unit: 'kg', wo: [{ id: 'dn', d: '2026-10-30', s: new Date('2026-10-30T07:15:00').getTime(), e: new Date('2026-10-30T08:05:00').getTime(), n: 'Hamstrings & glutes', x: [{ id: 'rdl', n: 'Romanian deadlift', sets: [{ w: 90, r: 10 }] }] }] }, '2026-10-30T18:00:00');
     await page.click('#lfPick'); await settle(page);
     ok('once today is done, its name opens the workout you did, not the list of routines', /Romanian deadlift/.test(await top(page).textContent()) && !/Empty workout/.test(await top(page).textContent()));
-    ok('and it says the time the session started, not how long it took', /Fri 30 Oct · 7:15 am/.test(await top(page).textContent()) && !/50 min/.test(await top(page).textContent()), (await top(page).textContent()).slice(0, 120));
+    ok('and it is the finish screen again: the time it started, and how long it took', /Fri 30 Oct · 7:15 am/.test(await top(page).textContent()) && /50 min/.test(await top(page).textContent()) && await top(page).locator('#lfFin').count() === 1, (await top(page).textContent()).slice(0, 120));
     await c.close();
   }
 

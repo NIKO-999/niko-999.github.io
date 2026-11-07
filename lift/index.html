@@ -1903,7 +1903,7 @@ function lfTodayCard() {
   go.classList.toggle('is-live', !!act);
   go.addEventListener('click', function () { if (act) lfOpenSession(); else lfStart(rt); });
   /* DONE, the name opens what you did; the plan is chosen from "Start another". */
-  $('#lfPick', c).addEventListener('click', function () { if (act) lfOpenSession(); else if (last) lfWoSheet(last); else lfRoutinePicker(); });
+  $('#lfPick', c).addEventListener('click', function () { if (act) lfOpenSession(); else if (last) lfSummary(last, lfWoPrs(last), true); else lfRoutinePicker(); });
   /* A LEG DAY ASKS FIRST. Pressed again, an answer clears. */
   if (LEG_CHECK && rt && !act && !last && lfIsLegDay(rt)) {
     var rv = lfRc(), rq = el('<div class="lf-rq" id="lfRec"><div class="lf-lab">How are your legs?</div><div class="lf-rq-o"></div><p class="lf-rq-a"></p></div>');
@@ -2680,7 +2680,22 @@ function lfFinish() {
    accent, the volume counting up to what you moved, set against the last
    time you did this session, then the records and the badges it earned.
    The badges are still struck afterwards, one at a time, as before. */
-function lfSummary(w, prs) {
+/* the records a stored workout set: a heavier top weight on an exercise
+   than any before it, by the same rules as everywhere else */
+function lfWoPrs(w) {
+  var pf = lfPrFrom(), out = [];
+  w.x.forEach(function (e) {
+    var top = -1, before = -1;
+    e.sets.forEach(function (q) { if (q.r > 0) top = Math.max(top, +q.w || 0); });
+    S.wo.forEach(function (o) { if (o === w || !(o.d < w.d || (o.d === w.d && o.s < w.s))) return; o.x.forEach(function (x) { if (x.id === e.id) x.sets.forEach(function (q) { if (q.r > 0) before = Math.max(before, +q.w || 0); }); }); });
+    if (before >= 0 && top > 0 && top > before + 1e-9 && lfPrOk(w.d, top, before, pf)) out.push(exName(e.id, e.n));
+  });
+  return out;
+}
+/* THE FINISH SCREEN. Straight after Finish it says what is new; opened
+   again from today's card on Home (review) it is the same screen for that
+   workout, with its sets under it and the badges that day earned. */
+function lfSummary(w, prs, review) {
   var vol = toDisp(woVol(w));
   var b = el('<div class="lf-fin" id="lfFin"><div class="lf-fin-ok">' + IC.check + '</div><div class="lf-cap">Workout logged</div><h3></h3><p class="lf-fin-d"></p>'
     + '<div class="lf-fin-vol lf-num"><span>0</span><small></small></div><p class="lf-fin-u"></p></div>');
@@ -2701,14 +2716,26 @@ function lfSummary(w, prs) {
     prs.forEach(function (n) { $('.lf-tags', pl).appendChild(lfTag(['pr', n])); });
     b.appendChild(pl);
   }
-  var fresh = lfBadges().concat(lfMedals()).filter(function (x) { return x.d && !S.bseen[x.b.id]; });
+  var fresh = lfBadges().concat(lfMedals()).filter(function (x) { return x.d && (review ? x.d === w.d : !S.bseen[x.b.id]); });
   if (fresh.length) {
     var bl = el('<div class="lf-fin-l" id="lfFinBg"><div class="lf-cap">Badges earned</div><div class="lf-tags"></div></div>');
     fresh.forEach(function (x) { var g = el('<span class="lf-tag"><span></span></span>'); $('span', g).textContent = x.b.n; $('.lf-tags', bl).appendChild(g); });
     b.appendChild(bl);
   }
+  if (review) {
+    var sl = el('<div class="lf-fin-l lf-fin-sets" id="lfFinSets"><div class="lf-cap">Sets</div></div>');
+    w.x.forEach(function (e) {
+      var x = el('<button type="button" class="lf-wo-ex lf-tap"><b></b><div></div></button>');
+      $('b', x).textContent = exName(e.id, e.n);
+      $('div', x).textContent = e.sets.map(function (q) { return fmtWS(q.w) + ' × ' + q.r; }).join('   ·   ');
+      x.addEventListener('click', function () { lfExSheet(e.id); });
+      sl.appendChild(x);
+    });
+    if (w.cd) { var cl = el('<div class="lf-wo-ex"><b>Cardio</b><div></div></div>'); $('div', cl).textContent = lfCdTxt(w.cd); sl.appendChild(cl); }
+    b.appendChild(sl);
+  }
   var done = el('<button type="button" class="lf-btn is-log is-full" id="lfFinDone">Done</button>');
-  var s = lfSheet({ title: '', body: b, foot: [done], full: true, onClose: function () { setTimeout(lfBadgeNew, 380); lfWkHold = 0; setTimeout(lfWeekDoneSoon, 900); if (today().getDay() === 0) setTimeout(function () { lfWeekSumSoon(ymd(monday(today()))); }, 1400); } });
+  var s = lfSheet({ title: '', body: b, foot: [done], full: true, onClose: review ? null : function () { setTimeout(lfBadgeNew, 380); lfWkHold = 0; setTimeout(lfWeekDoneSoon, 900); if (today().getDay() === 0) setTimeout(function () { lfWeekSumSoon(ymd(monday(today()))); }, 1400); } });
   done.addEventListener('click', function () { s.close(); });
   /* the count, eased so it lands rather than stops */
   var n = $('.lf-fin-vol span', b), t0 = 0, calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -3322,10 +3349,9 @@ function lfWoSheet(w, editable) {
   var dl = lfDlLine(w.d);
   if (dl) { var dp = el('<p class="lf-lab lf-dl-line" style="margin:-6px 0 10px"></p>'); dp.textContent = dl; b.appendChild(dp); }
   b.appendChild(lfSum([[w.x.length, 'exercises'], [woSets(w), 'sets'], [fmtBig(toDisp(woVol(w))), S.unit]]));
+  /* cardio is read here; it is added or changed in the editor, behind the pencil */
   var cw = el('<div class="lf-wo-ex" id="lfWoCd"><b>Cardio</b><div></div></div>');
-  var csum = function () { $('div', cw).textContent = w.cd ? lfCdTxt(w.cd) : 'None logged — add it here'; };
-  csum();
-  cw.appendChild(lfCardioPick(w.cd, function (c) { w.cd = c; lfSave(); csum(); lfRender(); }));
+  $('div', cw).textContent = w.cd ? lfCdTxt(w.cd) : '';
   w.x.forEach(function (e) {
     var x = el('<button type="button" class="lf-wo-ex lf-tap"><b></b><div></div></button>');
     $('b', x).textContent = exName(e.id, e.n);
@@ -3333,7 +3359,7 @@ function lfWoSheet(w, editable) {
     x.addEventListener('click', function () { lfExSheet(e.id); });
     b.appendChild(x);
   });
-  b.appendChild(cw);
+  if (w.cd) b.appendChild(cw);
   /* no delete here: a finished workout is opened to be read, and the red
      button at its foot was the one thing on the sheet you never wanted.
      It lives behind the pencil now, which only the record draws. */
@@ -3383,6 +3409,10 @@ function lfWoEdit(w) {
     if (!c.x.length) box.appendChild(el('<div class="lf-empty" style="margin-top:14px"><b>No exercises left</b>Delete the workout instead, or close without saving.</div>'));
   }
   paint();
+  var cw = el('<div class="lf-wo-ex" id="lfEdCd"><b>Cardio</b><div></div></div>');
+  var csum = function () { $('div', cw).textContent = c.cd ? lfCdTxt(c.cd) : 'None'; };
+  csum(); cw.appendChild(lfCardioPick(c.cd, function (v) { c.cd = v; csum(); }));
+  b.appendChild(cw);
   var del = el('<button type="button" class="lf-btn is-bad" id="lfEdDel">Delete</button>');
   var save = el('<button type="button" class="lf-btn is-log" id="lfEdSave">Save</button>');
   var sh = lfSheet({ title: 'Edit workout', body: b, foot: [del, save], full: true });
@@ -3404,7 +3434,7 @@ function lfWoEdit(w) {
       if (w.s > 1e11) w.s += shift; if (w.e > 1e11) w.e += shift; w.d = nd;
     }
     w.n = $('#lfEdN', b).value.trim().slice(0, 60) || w.n;
-    w.x = c.x;
+    w.x = c.x; w.cd = c.cd || null;
     sh.close(true); lfSave(); lfRender(); lfToast('Workout saved');
     lfWoSheet(w, true);
   });
