@@ -306,7 +306,7 @@ const freeze = (at) => `(() => {
   await set(0, 1).locator('.lf-chk').click();
   ok('more weight for the same reps is marked PR', (await set(0, 1).locator('.lf-sn').textContent()) === 'PR');
   ok('and a PR bursts from the set', await page.evaluate(() => window.lfBursts) === 1 && await page.locator('.lf-burst b').textContent() === 'PR');
-  await page.waitForTimeout(1800);
+  await page.waitForTimeout(2600); /* the badge renderer warms up in the background around now, which can hold a timer a moment */
   ok('then is gone, out of the way', await page.locator('.lf-burst').count() === 0);
   /* AN EXTRA REP AT THE SAME WEIGHT IS A REP RECORD, its own smaller
      celebration, and never a PR or a badge's count — typed in after the tick */

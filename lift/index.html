@@ -5251,6 +5251,33 @@ function bdSpec(x) {
   return { id: b.id, k: b.k, c: b.c, bk: b.bk, t: b.t || 1, fx: b.fx || '', sn: b.sn ? 1 : 0, pt: b.pt || BD_PT[b.id], sh: b.sh || BD_SHI[b.id] || BD_SHK[b.k], gl: b.gl || BD_GL[b.id] || 'i:check', lock: !x.d,
     at: x.d ? fmtDay(x.d).replace(/^\w+ /, '') + ' ' + x.d.slice(0, 4) : '' };
 }
+/* THE LIVE AWARD'S RENDERER, scene and camera, made once and kept. The
+   last couple of awards opened are kept built too, so opening one again
+   is instant; anything older is given back to the GPU. */
+var BD_LIVE = 768, bdV = null, bdViewOn = false, bdKept = [];
+function bdViewKit() {
+  if (bdV) return bdV;
+  /* two device pixels a CSS pixel, not three: it is drawn every frame it
+     turns, and a third of a million fewer pixels a frame is the smoothness */
+  var r = bdRenderer(300, 300); r.setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); r.domElement.classList.add('lf-cv-gl');
+  var sc = new BD3.Scene(); sc.environment = bdEnv(r); bdLights(sc);
+  bdV = { r: r, sc: sc, cam: new BD3.PerspectiveCamera(28, 1, .1, 50) };
+  return bdV;
+}
+function bdViewKeep(aw) { if (bdV) bdV.sc.remove(aw); bdKept = bdKept.filter(function (g) { return g !== aw; }); bdKept.unshift(aw); while (bdKept.length > 2) bdDrop(bdKept.pop()); }
+function bdViewTake(k) { for (var i = 0; i < bdKept.length; i++) if (bdKept[i].userData.k === k) return bdKept.splice(i, 1)[0]; return null; }
+/* warmed while the phone is idle: the renderer, its lighting, and the
+   shaders an award uses, compiled on a small one that is then given back */
+function bdWarm() {
+  bdThree().then(function (T) {
+    if (!T || bdV) return;
+    var K = bdViewKit(), all = lfBadges(), x = all.filter(function (y) { return y.d; })[0] || all[0];
+    if (!x) return;
+    var g = bdMake(bdSpec(x), 'silver', 128); K.sc.add(g); K.cam.position.set(0, 0, 6);
+    try { K.r.compile(K.sc, K.cam); K.r.render(K.sc, K.cam); } catch (e) {}
+    K.sc.remove(g); bdDrop(g);
+  });
+}
 function bdRenderer(w, h, keep) {
   var r = new BD3.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: !!keep });
   r.setPixelRatio(keep ? 1 : Math.min(3, window.devicePixelRatio || 1)); r.setSize(w, h, false);
@@ -5286,11 +5313,12 @@ function bdStill(x, img) {
   });
 }
 function bdPump() {
-  if (bdBusy || !bdQ.length) return; bdBusy = true;
+  if (bdBusy || !bdQ.length || bdViewOn) return; bdBusy = true;
   bdThree().then(function (T) {
     if (!T) { bdBusy = false; bdQ = []; return; }
     if (!bd3) { var r = bdRenderer(360, 360, true), sc = new T.Scene(); sc.environment = bdEnv(r); bdLights(sc); var cam = new T.PerspectiveCamera(22, 1, .1, 50); cam.position.set(0, 0, 6.1); bd3 = { r: r, s: sc, c: cam }; }
     (function next() {
+      if (bdViewOn) { bdBusy = false; return; }
       var j = bdQ.shift(); if (!j) { bdBusy = false; return; }
       if (!bdStills[j[2]]) {
         var aw = bdMake(bdSpec(j[0]), 'silver', 384); aw.rotation.set(.32, -.5, .04); bd3.s.add(aw); bd3.r.render(bd3.s, bd3.c);
@@ -5301,7 +5329,8 @@ function bdPump() {
       /* the same picture may be waiting in more than one place */
       bdQ.forEach(function (q) { if (q[2] === j[2]) q[1].src = bdStills[j[2]]; });
       bdQ = bdQ.filter(function (q) { return q[2] !== j[2]; });
-      setTimeout(next, 16);
+      /* the next one waits for the page to be idle, so scrolling the shelf is never held up by one */
+      (window.requestIdleCallback || function (f) { return setTimeout(f, 16); })(next, { timeout: 400 });
     })();
   });
 }
@@ -5351,7 +5380,7 @@ function lfCoinView(x, earnedNow) {
   if (x.d && x.b.fx) { stage.classList.add('is-fx'); stage.style.setProperty('--gl', BD_FXGL[x.b.fx]); }
   function close() {
     if (done) return; done = true; cancelAnimationFrame(raf); document.removeEventListener('keydown', esc); v.classList.remove('is-up');
-    setTimeout(function () { if (aw) bdDrop(aw); if (r) { r.dispose(); if (r.forceContextLoss) r.forceContextLoss(); } v.remove(); if (!stack.length) document.body.classList.remove('lf-lock'); }, 240);
+    setTimeout(function () { if (aw) bdViewKeep(aw); if (r) { r.domElement.classList.remove('is-on'); if (r.domElement.parentNode) r.domElement.parentNode.removeChild(r.domElement); } bdViewOn = false; v.remove(); if (!stack.length) document.body.classList.remove('lf-lock'); bdPump(); }, 240);
   }
   function esc(e) { if (e.key === 'Escape') { e.stopPropagation(); close(); } }
   document.addEventListener('keydown', esc);
@@ -5366,14 +5395,16 @@ function lfCoinView(x, earnedNow) {
     if (done) return;
     if (!T) { ph.remove(); var fb = el('<img class="lf-cv-flat" alt="" />'); stage.appendChild(fb); stage.classList.add('is-flat'); stage.dataset.m = x.d ? x.b.k : 'lock'; return; }
     var w = stage.clientWidth || 300, h = stage.clientHeight || 300;
-    r = bdRenderer(w, h); r.domElement.classList.add('lf-cv-gl'); stage.appendChild(r.domElement);
-    var sc = new T.Scene(); sc.environment = bdEnv(r); bdLights(sc);
-    var cam = new T.PerspectiveCamera(28, w / h, .1, 50);
+    /* ONE RENDERER FOR EVERY OPEN. Making a new one each time also made new
+       lighting and compiled every shader again, which was most of the
+       pause; this one is kept, and warmed up while the app sits idle. */
+    var K = bdViewKit(); bdViewOn = true; r = K.r; r.setSize(w, h, false); stage.appendChild(r.domElement);
+    var sc = K.sc, cam = K.cam; cam.aspect = w / h; cam.updateProjectionMatrix();
     /* the award, 2 across, takes three quarters of whichever side is shorter */
     var half = Math.tan(14 * Math.PI / 180), fitH = 2 / .75 / 2 / half, fitW = 2 / .75 / 2 / (half * (w / h));
     cam.position.set(0, 0, Math.max(fitH, fitW));
     /* sharper than the shelf, and enough for the size it is drawn at */
-    aw = bdMake(bdSpec(x), 'silver', 1024); sc.add(aw);
+    aw = bdViewTake(bdKey(x)) || bdMake(bdSpec(x), 'silver', BD_LIVE); aw.userData.k = bdKey(x); sc.add(aw);
     /* it arrives turning and settles face up */
     var ry = -Math.PI * 2 - .8, rx = .3, vy = 0, vx = 0, drag = null, t0 = performance.now();
     var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -5660,7 +5691,7 @@ lfVerCheck();
 document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') lfVerCheck(); });
 /* the 3D engine is fetched while the phone is idle after opening, so the
    first badge pressed does not wait on a download */
-setTimeout(function () { (window.requestIdleCallback || setTimeout)(function () { bdThree(); }); }, 2000);
+setTimeout(function () { (window.requestIdleCallback || setTimeout)(function () { bdWarm(); }, { timeout: 4000 }); }, 2500);
 })();
 </script>
 </body>
