@@ -144,8 +144,9 @@ const alive = (url) => new Promise((res) => {
          a real 880ms flight settle. A file that trips this reports as
          "no summary", which reads exactly like a crash and is not one,
          so the number wants headroom rather than to sit on the edge of
-         the longest file's real runtime. */
-      timeout: 600000,
+         the longest file's real runtime. Lift reached 570s and then went
+         past 600 on a slow machine, so it is 900 now. */
+      timeout: 900000,
     });
     const out = (r.stdout || '') + (r.stderr || '');
     const secs = ((Date.now() - t0) / 1000).toFixed(1);

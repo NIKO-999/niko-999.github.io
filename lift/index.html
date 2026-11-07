@@ -481,13 +481,19 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-ss-time { font-variant-numeric: tabular-nums; color: var(--dim); font-size: 13px; font-weight: 600; }
 .lf-session .lf-sh-ft { flex-wrap: wrap; }
 .lf-session .lf-sh-ft > .lf-ss-rest { flex: 0 0 100%; }
-.lf-ss-rest { display: flex; align-items: baseline; gap: 0; position: relative; padding: 0 0 8px; font-size: 13px; color: var(--dim); font-variant-numeric: tabular-nums; }
-.lf-rs-c { font-size: 22px; font-weight: 700; color: var(--ink); margin: 0 6px 0 6px; }
-.lf-ss-rest.is-idle .lf-rs-c { color: var(--quiet); }
-.lf-ss-rest.is-ready .lf-rs-c { color: var(--good); }
-.lf-rs-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; border-radius: 3px; background: var(--card3); overflow: hidden; }
-.lf-rs-bar i { display: block; height: 100%; width: 0; background: var(--ink); border-radius: 3px; }
-.lf-ss-rest.is-ready .lf-rs-bar i { background: var(--good); }
+.lf-ss-rest { display: flex; align-items: center; gap: 16px; position: relative; padding: 2px 0 12px; font-size: 13px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.lf-rs-ring { position: relative; width: 84px; height: 84px; flex: none; }
+.lf-rs-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); display: block; }
+.lf-rs-ring circle { fill: none; stroke-width: 8; }
+.lf-rs-bg { stroke: var(--card3); }
+.lf-rs-fg { stroke: var(--ink); stroke-linecap: round; stroke-dasharray: 276.5; stroke-dashoffset: 276.5; transition: stroke-dashoffset 1s linear, stroke .3s; }
+.lf-rs-c { position: absolute; inset: 0; display: grid; place-items: center; font-size: 23px; font-weight: 800; letter-spacing: -.02em; color: var(--ink); }
+.lf-rs-side { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.lf-rs-l { font-size: 17px; font-weight: 700; color: var(--ink); }
+.lf-ss-rest.is-idle .lf-rs-c, .lf-ss-rest.is-idle .lf-rs-l { color: var(--quiet); }
+.lf-ss-rest.is-ready .lf-rs-c, .lf-ss-rest.is-ready .lf-rs-l { color: var(--good); }
+.lf-ss-rest.is-ready .lf-rs-fg { stroke: var(--log); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--log) 60%, transparent)); }
+@media (prefers-reduced-motion: reduce) { .lf-rs-fg { transition: none; } }
 .lf-ex { background: var(--card); border-radius: var(--r); padding: 14px 14px 10px; margin-top: 12px; }
 .lf-ex-hd { display: flex; align-items: center; gap: 8px; }
 .lf-ex-hd button.lf-ex-n { flex: 1; min-width: 0; text-align: left; font-weight: 600; font-size: 15px; min-height: 40px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -2479,7 +2485,11 @@ function lfOpenSession() {
   /* THE REST TIMER LIVES IN THE FOOT, so it is on screen wherever you
      have scrolled to in the workout — it was the first line of the list
      and went off the top the moment you moved past the first exercise. */
-  var rest = el('<div class="lf-ss-rest" id="lfRest" role="timer" aria-live="off"><span class="lf-rs-l"></span><b class="lf-rs-c lf-num"></b><span class="lf-rs-t"></span><i class="lf-rs-bar" aria-hidden="true"><i></i></i></div>');
+  /* THE REST CLOCK IS A RING: the time big in the middle, the ring filling
+     toward the start of the target, and beside it how long is left. It
+     lights in the accent the moment the rest is done. */
+  var rest = el('<div class="lf-ss-rest" id="lfRest" role="timer" aria-live="off"><div class="lf-rs-ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="lf-rs-bg" cx="50" cy="50" r="44"/><circle class="lf-rs-fg" cx="50" cy="50" r="44"/></svg><b class="lf-rs-c lf-num"></b></div>'
+    + '<div class="lf-rs-side"><span class="lf-rs-l"></span><span class="lf-rs-t"></span></div></div>');
   var discard = el('<button type="button" class="lf-btn">Discard</button>');
   var finish = el('<button type="button" class="lf-btn is-log" id="lfFinish">Finish</button>');
   sessSheet = lfSheet({ full: true, head: head, body: body, foot: [rest, discard, finish], cls: 'lf-session', title: 'Workout',
@@ -2501,17 +2511,21 @@ function lfTick() {
   var r = $('#lfRest');
   if (r) {
     var gone = Date.now() - act.rest, rt = act.restEx ? lfRestOf(act.restEx) : null;
-    $('.lf-rs-l', r).textContent = 'Rest ';
+    var ready = !!(act.rest && rt && gone >= rt.lo * 1000), left = rt ? rt.lo * 1000 - gone : 0;
     $('.lf-rs-c', r).textContent = act.rest ? fmtClock(gone) : '0:00';
-    $('.lf-rs-t', r).textContent = act.rest ? (rt ? ' · target ' + lfRestTxt(rt) : '') : ' · starts when you tick a set';
-    $('.lf-rs-bar i', r).style.width = act.rest && rt ? Math.min(100, gone / (rt.lo * 1000) * 100) + '%' : '0';
+    $('.lf-rs-l', r).textContent = !act.rest ? 'Rest' : ready ? 'Ready' : 'Resting';
+    $('.lf-rs-t', r).textContent = !act.rest ? 'Starts when you tick a set' : rt ? (ready ? '' : fmtClock(Math.max(0, left) + 999) + ' to go · ') + 'target ' + lfRestTxt(rt) : '';
+    /* the ring's circumference is 2π·44 ≈ 276.5; full when the rest reaches the start of its target */
+    $('.lf-rs-fg', r).style.strokeDashoffset = (276.5 * (1 - (act.rest && rt ? Math.min(1, gone / (rt.lo * 1000)) : 0))).toFixed(1);
     r.classList.toggle('is-idle', !act.rest);
-    var ready = !!(act.rest && rt && gone >= rt.lo * 1000);
     r.classList.toggle('is-ready', ready);
     /* Once per rest, the moment it is up. */
     if (ready && !act.rang) { act.rang = 1; lfSaveAct(); if (S.ra) lfRing(); }
   }
   var l = $('#lfLive em'); if (l) l.textContent = fmtClock(Date.now() - act.s);
+  /* the bar for getting back into the workout has no business under the
+     workout itself: the session sheet is glass, so it showed through it */
+  var lv = $('#lfLive'); if (lv && sessSheet && !lv.hidden) { lv.hidden = true; document.body.classList.remove('lf-has-live'); }
 }
 
 /* Rebuilt on a change of SHAPE — an exercise or a set added or taken

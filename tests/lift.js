@@ -198,7 +198,7 @@ const freeze = (at) => `(() => {
   await set(0, 0).locator('input').nth(0).fill('60'); await set(0, 0).locator('input').nth(1).fill('8');
   await set(0, 0).locator('.lf-chk').click();
   ok('logging a set turns its check lime', await set(0, 0).locator('.lf-chk span').evaluate((e) => getComputedStyle(e).backgroundColor) === 'rgb(163, 230, 53)');
-  ok('and starts the rest clock', /^Rest 0:0\d · target 2–3 min$/.test((await page.textContent('#lfRest')).trim()));
+  ok('and starts the rest clock: a ring, the time in it, how long is left beside it', /^0:0\d$/.test((await page.textContent('#lfRest .lf-rs-c')).trim()) && /Resting/.test(await page.textContent('#lfRest')) && /to go · target 2–3 min/.test(await page.textContent('#lfRest')) && await page.locator('#lfRest .lf-rs-ring svg').count() === 1);
   ok('the rest clock is always on screen, even scrolled to the end of the workout', await page.evaluate(() => {
     const bd = document.querySelector('.lf-session .lf-sh-bd'); bd.scrollTop = bd.scrollHeight;
     const r = document.querySelector('#lfRest').getBoundingClientRect();
