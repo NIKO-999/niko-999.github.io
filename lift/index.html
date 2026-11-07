@@ -629,11 +629,23 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-neu-h .lf-chev { color: var(--dim); transform: rotate(90deg); transition: transform .22s var(--ease); }
 .lf-neu-h button[aria-expanded="true"] .lf-chev { transform: rotate(270deg); }
 .lf-neu:not([hidden]) { margin-top: 4px; }
+/* the luxury swatches: a polished stone, lit from the top left, with a
+   glint crossing it now and then */
+.lf-lux-b i { position: relative; overflow: hidden; background: radial-gradient(circle at 30% 28%, var(--g) 0, var(--f) 42%, color-mix(in srgb, var(--f) 55%, #000) 100%);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--f) 55%, transparent), inset 0 0 0 1px rgba(255,255,255,.25); }
+.lf-lux-b i::after { content: ''; position: absolute; inset: -40%; background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.75) 50%, transparent 60%); transform: translateX(-120%); animation: lf-glint 3.2s ease-in-out infinite; animation-delay: inherit; }
+@keyframes lf-glint { 0%, 55% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
+/* while a luxury colour is the accent, the main buttons carry a slow sweep of its light */
+:root.lf-lux .lf-btn.is-log { position: relative; overflow: hidden; box-shadow: 0 6px 22px color-mix(in srgb, var(--log) 38%, transparent); }
+:root.lf-lux .lf-btn.is-log::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 35%, color-mix(in srgb, var(--lux-hi) 70%, transparent) 50%, transparent 65%); transform: translateX(-110%); animation: lf-luxsw 4.5s ease-in-out infinite; }
+@keyframes lf-luxsw { 0%, 60% { transform: translateX(-110%); } 90%, 100% { transform: translateX(110%); } }
+@media (prefers-reduced-motion: reduce) { .lf-lux-b i::after, :root.lf-lux .lf-btn.is-log::after { animation: none; display: none; } }
 /* the neutrals: a row of chips, each in the shade it takes on this face */
 .lf-neu { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .lf-neu-b { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 4px 8px; border-radius: 14px; background: var(--card2); font-size: 11px; font-weight: 600; color: var(--dim); }
 .lf-neu-b i { width: 28px; height: 28px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(127,127,127,.35); }
 .lf-neu-b[aria-pressed="true"] { color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
+.lf-luxg { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .lf-wheel:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
 .lf-wh-m { position: absolute; inset: 36px; border-radius: 50%; background: var(--card); box-shadow: inset 0 0 0 1px var(--line); display: grid; place-items: center; }
 .lf-wh-m::after { content: ''; width: 56px; height: 56px; border-radius: 50%; background: var(--log); }
@@ -3561,6 +3573,7 @@ function lfThemeCard() {
     var c = el('<div><span class="lf-flab" style="margin-top:0">Appearance</span><div class="lf-seg" id="lfMode" style="--n:3"><button type="button" data-m="auto">Auto</button><button type="button" data-m="light">Light</button><button type="button" data-m="dark">Dark</button></div>'
       + '<span class="lf-flab">Accent</span><div class="lf-wheel" id="lfWheel" role="slider" tabindex="0" aria-label="Accent colour" aria-valuemin="0" aria-valuemax="359"><i class="lf-wh-k"></i><span class="lf-wh-m"></span></div>'
       + '<h4 class="lf-neu-h"><button type="button" id="lfNeuT" aria-controls="lfNeu" aria-expanded="false"><span>Neutral colours</span><em></em>' + IC.chev + '</button></h4><div class="lf-neu" id="lfNeu" hidden></div>'
+      + '<h4 class="lf-neu-h"><button type="button" id="lfLuxT" aria-controls="lfLux" aria-expanded="false"><span>Luxury colours</span><em></em>' + IC.chev + '</button></h4><div class="lf-neu lf-luxg" id="lfLux" hidden></div>'
       + '<button type="button" class="lf-btn is-full" id="lfAccReset" style="margin-top:12px">Back to lime</button></div>');
     $$('#lfMode button', c).forEach(function (b) {
       b.setAttribute('aria-pressed', b.dataset.m === lfMode() ? 'true' : 'false');
@@ -3574,6 +3587,17 @@ function lfThemeCard() {
     function neuSet(o) { nt.setAttribute('aria-expanded', o ? 'true' : 'false'); neu.hidden = !o; }
     nt.addEventListener('click', function () { var o = nt.getAttribute('aria-expanded') !== 'true'; lfFoldSet('neu', o); neuSet(o); });
     neuSet(lfFoldOpen('neu'));
+    var lux = $('#lfLux', c), lt = $('#lfLuxT', c);
+    function luxSet(o) { lt.setAttribute('aria-expanded', o ? 'true' : 'false'); lux.hidden = !o; }
+    lt.addEventListener('click', function () { var o = lt.getAttribute('aria-expanded') !== 'true'; lfFoldSet('lux', o); luxSet(o); });
+    luxSet(lfFoldOpen('lux'));
+    LUXE.forEach(function (n, i) {
+      var nb = el('<button type="button" class="lf-neu-b lf-lux-b"><i></i><span></span></button>'), f = dk ? n.d : n.l;
+      nb.dataset.h = 1100 + i; $('span', nb).textContent = n.n; nb.setAttribute('aria-label', n.n + ' accent');
+      $('i', nb).style.setProperty('--f', f); $('i', nb).style.setProperty('--g', n.g); nb.style.animationDelay = (i * -.37) + 's'; $('i', nb).style.animationDelay = (i * -.37) + 's';
+      nb.addEventListener('click', function () { buzz([8, 30, 8]); lfAccentSet(1100 + i, true); lfRender(); });
+      lux.appendChild(nb);
+    });
     NEUTRALS.forEach(function (n, i) {
       var nb = el('<button type="button" class="lf-neu-b"><i></i><span></span></button>');
       nb.dataset.h = 1000 + i; $('i', nb).style.background = dk ? n.d : n.l; $('span', nb).textContent = n.n;
@@ -3585,8 +3609,8 @@ function lfThemeCard() {
       var nu = lfNeu(hu), a = hu === null || nu ? LIME_H : hu;
       knob.style.transform = 'rotate(' + a + 'deg)'; wh.classList.toggle('is-neu', !!nu);
       wh.setAttribute('aria-valuenow', Math.round(a)); wh.setAttribute('aria-valuetext', lfAccName(hu));
-      $$('.lf-neu-b', neu).forEach(function (b) { b.setAttribute('aria-pressed', +b.dataset.h === hu ? 'true' : 'false'); });
-      $('em', nt).textContent = nu ? nu.n : '';
+      $$('.lf-neu-b', c).forEach(function (b) { b.setAttribute('aria-pressed', +b.dataset.h === hu ? 'true' : 'false'); });
+      $('em', nt).textContent = nu && !nu.g ? nu.n : ''; $('em', lt).textContent = nu && nu.g ? nu.n : '';
       rs.disabled = hu === null;
     }
     function pick(hu, keep) { lfAccentSet(hu, keep); show(hu); }
@@ -5662,7 +5686,27 @@ var NEUTRALS = [
   { n: 'Greige', d: '#beb5a9', l: '#8f867a', di: '#beb5a9', li: '#6a6258' },
   { n: 'Cream', d: '#e1d4c2', l: '#b5a084', di: '#e1d4c2', li: '#6e5b45' }
 ];
-function lfNeu(h) { return typeof h === 'number' && h >= 1000 && h < 1000 + NEUTRALS.length && h % 1 === 0 ? NEUTRALS[h - 1000] : null; }
+/* THE LUXURY COLOURS: jewels and precious metals, stored from 1100 so
+   they never share a number with a hue or a neutral. g is the light that
+   catches the swatch, and while one is the accent the main buttons carry
+   a slow sweep of it — the one place the app is allowed to shimmer. */
+var LUXE = [
+  { n: 'Emerald', d: '#3ccf8e', l: '#0b6e4f', di: '#5fdca3', li: '#0b6e4f', g: '#b8ffd9' },
+  { n: 'Sapphire', d: '#5b86ff', l: '#0f3fa8', di: '#86a6ff', li: '#0f3fa8', g: '#cfdcff' },
+  { n: 'Ruby', d: '#e5425f', l: '#9b111e', di: '#f06d84', li: '#9b111e', g: '#ffc9d3' },
+  { n: 'Amethyst', d: '#ae78ff', l: '#5b2a91', di: '#c6a0ff', li: '#5b2a91', g: '#ead9ff' },
+  { n: 'Gold', d: '#d9b443', l: '#9c7a17', di: '#e6c763', li: '#7d6112', g: '#fff1b8' },
+  { n: 'Champagne', d: '#e8d3a8', l: '#a68a54', di: '#eddcb9', li: '#7f6a40', g: '#fffaf0' },
+  { n: 'Rose gold', d: '#e8ab9c', l: '#a8655a', di: '#f0bfb3', li: '#8a4f45', g: '#fff0ea' },
+  { n: 'Platinum', d: '#dfe3e8', l: '#7c8590', di: '#e8ebef', li: '#5d6570', g: '#ffffff' },
+  { n: 'Black pearl', d: '#7e8fa3', l: '#1f2a36', di: '#9aa9ba', li: '#1f2a36', g: '#dfe9f5' }
+];
+function lfNeu(h) {
+  if (typeof h !== 'number' || h % 1 !== 0) return null;
+  if (h >= 1000 && h < 1000 + NEUTRALS.length) return NEUTRALS[h - 1000];
+  if (h >= 1100 && h < 1100 + LUXE.length) return LUXE[h - 1100];
+  return null;
+}
 function lfAccName(h) { var n = lfNeu(h); return h === null || h === undefined ? 'Lime' : n ? n.n : lfHueName(h); }
 function lfRgb(hex) { return [1, 3, 5].map(function (i) { return parseInt(hex.slice(i, i + 2), 16); }); }
 function lfAccentSet(h, keep) {
@@ -5691,7 +5735,9 @@ function lfAccOn(node, h) {
   lfAccTok(h, dark, st);
 }
 function lfApplyAccent() {
-  var st = document.documentElement.style, h = lfAccTmp !== undefined ? lfAccTmp : lfAccent();
+  var st = document.documentElement.style, h = lfAccTmp !== undefined ? lfAccTmp : lfAccent(), lx = lfNeu(h);
+  document.documentElement.classList.toggle('lf-lux', !!(lx && lx.g));
+  if (lx && lx.g) st.setProperty('--lux-hi', lx.g); else st.removeProperty('--lux-hi');
   if (h === null) { ACC_KEYS.forEach(function (k) { st.removeProperty(k); }); return; }
   lfAccTok(h, document.documentElement.getAttribute('data-mode') !== 'light', st);
 }

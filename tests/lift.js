@@ -1267,6 +1267,10 @@ const freeze = (at) => `(() => {
     await page.evaluate(() => document.querySelector('#lfMode [data-m="light"]').click()); await settle(page);
     const light = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--log').trim());
     ok('and it is a lighter shade on the dark page, a deeper one on the light page', dark === '#636366' && light === '#2c2c2e', [dark, light]);
+    await page.click('#lfLuxT'); await settle(page);
+    ok('a second fold holds the luxury colours, emerald among them', await page.locator('#lfLux .lf-lux-b').count() === 9 && /Emerald/.test(await page.textContent('#lfLux')));
+    await page.evaluate(() => document.querySelector('#lfLux .lf-lux-b[data-h="1100"]').click()); await settle(page);
+    ok('picking one makes it the accent and gives the main buttons its shimmer', await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '1100' && await page.evaluate(() => document.documentElement.classList.contains('lf-lux')) && (await page.textContent('#lfLuxT em')) === 'Emerald');
     await c.close();
   }
 
