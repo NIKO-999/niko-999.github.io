@@ -518,6 +518,14 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-fin-u.is-up { color: var(--good); font-weight: 600; }
 .lf-fin .lf-sum { text-align: left; }
 .lf-fin-l { text-align: left; margin-top: 18px; }
+/* opened again from Home it is the same screen, a size down, so it sits in a sheet rather than taking the phone */
+.lf-fin.is-rev { padding-top: 0; text-align: left; }
+.lf-fin.is-rev .lf-fin-ok { display: none; }
+.lf-fin.is-rev .lf-fin-d { margin: 0 0 12px; }
+.lf-fin.is-rev .lf-fin-vol { font-size: 40px; }
+.lf-fin.is-rev .lf-fin-vol small { font-size: 15px; }
+.lf-fin.is-rev .lf-fin-u { margin: 4px 0 14px; }
+.lf-fin.is-rev .lf-fin-l { margin-top: 14px; }
 .lf-fin-l .lf-cap { margin: 0 2px 8px; }
 .lf-fin-l .lf-tags { margin: 0; }
 /* THE WEEK IN REVIEW: the finish screen a size up, in a glow of your colour */
@@ -2700,6 +2708,7 @@ function lfSummary(w, prs, review) {
   var b = el('<div class="lf-fin" id="lfFin"><div class="lf-fin-ok">' + IC.check + '</div><div class="lf-cap">Workout logged</div><h3></h3><p class="lf-fin-d"></p>'
     + '<div class="lf-fin-vol lf-num"><span>0</span><small></small></div><p class="lf-fin-u"></p></div>');
   $('h3', b).textContent = w.n;
+  if (review) { b.classList.add('is-rev'); $('.lf-cap', b).remove(); $('h3', b).remove(); }
   $('.lf-fin-d', b).textContent = fmtDay(w.d) + (w.s > 1e11 ? ' · ' + fmtAt(new Date(w.s)) : '') + (w.cd ? ' · + ' + lfCdTxt(w.cd) : '');
   $('.lf-fin-vol small', b).textContent = S.unit + ' moved';
   /* against the last time you did this session, or the last workout at all */
@@ -2735,7 +2744,7 @@ function lfSummary(w, prs, review) {
     b.appendChild(sl);
   }
   var done = el('<button type="button" class="lf-btn is-log is-full" id="lfFinDone">Done</button>');
-  var s = lfSheet({ title: '', body: b, foot: [done], full: true, onClose: review ? null : function () { setTimeout(lfBadgeNew, 380); lfWkHold = 0; setTimeout(lfWeekDoneSoon, 900); if (today().getDay() === 0) setTimeout(function () { lfWeekSumSoon(ymd(monday(today()))); }, 1400); } });
+  var s = lfSheet({ title: review ? w.n : '', body: b, foot: review ? null : [done], full: !review, onClose: review ? null : function () { setTimeout(lfBadgeNew, 380); lfWkHold = 0; setTimeout(lfWeekDoneSoon, 900); if (today().getDay() === 0) setTimeout(function () { lfWeekSumSoon(ymd(monday(today()))); }, 1400); } });
   done.addEventListener('click', function () { s.close(); });
   /* the count, eased so it lands rather than stops */
   var n = $('.lf-fin-vol span', b), t0 = 0, calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -3409,10 +3418,17 @@ function lfWoEdit(w) {
     if (!c.x.length) box.appendChild(el('<div class="lf-empty" style="margin-top:14px"><b>No exercises left</b>Delete the workout instead, or close without saving.</div>'));
   }
   paint();
+  /* cardio takes no room until there is some: a workout without it shows
+     one small button, and its choices only come out when pressed */
   var cw = el('<div class="lf-wo-ex" id="lfEdCd"><b>Cardio</b><div></div></div>');
-  var csum = function () { $('div', cw).textContent = c.cd ? lfCdTxt(c.cd) : 'None'; };
-  csum(); cw.appendChild(lfCardioPick(c.cd, function (v) { c.cd = v; csum(); }));
-  b.appendChild(cw);
+  var csum = function () { $('div', cw).textContent = c.cd ? lfCdTxt(c.cd) : ''; };
+  function cdOpen() { csum(); cw.appendChild(lfCardioPick(c.cd, function (v) { c.cd = v; csum(); })); }
+  if (c.cd) { cdOpen(); b.appendChild(cw); }
+  else {
+    var ca = el('<button type="button" class="lf-btn is-full" id="lfEdCdAdd" style="margin-top:12px">+ Add cardio</button>');
+    ca.addEventListener('click', function () { ca.replaceWith(cw); cdOpen(); });
+    b.appendChild(ca);
+  }
   var del = el('<button type="button" class="lf-btn is-bad" id="lfEdDel">Delete</button>');
   var save = el('<button type="button" class="lf-btn is-log" id="lfEdSave">Save</button>');
   var sh = lfSheet({ title: 'Edit workout', body: b, foot: [del, save], full: true });

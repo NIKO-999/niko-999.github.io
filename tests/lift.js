@@ -260,6 +260,9 @@ const freeze = (at) => `(() => {
   ok('and it can be changed after, in the editor', (await store(page)).wo[0].cd.m === 20);
   await top(page).locator('#lfWoEdit').click(); await settle(page);
   await top(page).locator('#lfEdCd .lf-pill[data-m="20"]').click(); await top(page).locator('#lfEdSave').click(); await settle(page);
+  await top(page).locator('#lfWoEdit').click(); await settle(page);
+  ok('a workout without cardio shows just a button for it, not the choices', await top(page).locator('#lfEdCdAdd').count() === 1 && await top(page).locator('#lfEdCd').count() === 0);
+  await top(page).locator('#lfEdSave').click(); await settle(page);
   ok('or taken off', (await store(page)).wo[0].cd === null);
   ok('and a workout with none says nothing about it', await top(page).locator('#lfWoCd').count() === 0);
   await page.keyboard.press('Escape'); await settle(page); await page.keyboard.press('Escape'); await settle(page);
