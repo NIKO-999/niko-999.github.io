@@ -1257,7 +1257,7 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     if (await page.getAttribute('#lfTheme .lf-fh button', 'aria-expanded') !== 'true') await page.click('#lfTheme .lf-fh button');
     await settle(page);
-    ok('the theme offers neutrals beside the wheel', await page.locator('#lfNeu .lf-neu-b').count() === 7);
+    ok('the theme offers neutrals beside the wheel', await page.locator('#lfNeu .lf-neu-b').count() === 12);
     await page.evaluate(() => document.querySelector('#lfNeu .lf-neu-b[data-h="1003"]').click()); await settle(page);
     const dark = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--log').trim());
     ok('a neutral is kept and named', await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '1003' && /Graphite/.test(await page.textContent('#lfTheme .lf-fh')));

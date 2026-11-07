@@ -5615,7 +5615,15 @@ var NEUTRALS = [
   { n: 'Graphite', d: '#636366', l: '#2c2c2e', di: '#98989d', li: '#2c2c2e' },
   { n: 'Slate', d: '#94a3b8', l: '#475569', di: '#a7b4c6', li: '#3b4757' },
   { n: 'Stone', d: '#b5aca5', l: '#78716c', di: '#c2bab4', li: '#57534e' },
-  { n: 'Sand', d: '#d6c3a0', l: '#8a7552', di: '#d6c3a0', li: '#6b5a3e' }
+  { n: 'Sand', d: '#d6c3a0', l: '#8a7552', di: '#d6c3a0', li: '#6b5a3e' },
+  /* the earthy ones: a little colour, held back. Added at the END, since a
+     neutral is stored as its place in this list and moving one would turn
+     somebody's Slate into something else */
+  { n: 'Jade', d: '#6fbf9f', l: '#2f7d63', di: '#8fd0b5', li: '#24634e' },
+  { n: 'Sage', d: '#a3b8a0', l: '#5f7a5c', di: '#b5c7b2', li: '#4b6249' },
+  { n: 'Olive', d: '#b5b07a', l: '#6b6a3a', di: '#c4c08e', li: '#55542d' },
+  { n: 'Tan', d: '#d2b48c', l: '#9a7652', di: '#dcc29f', li: '#7a5c3e' },
+  { n: 'Clay', d: '#c99a86', l: '#8f5e4b', di: '#d6ae9c', li: '#74493a' }
 ];
 function lfNeu(h) { return typeof h === 'number' && h >= 1000 && h < 1000 + NEUTRALS.length && h % 1 === 0 ? NEUTRALS[h - 1000] : null; }
 function lfAccName(h) { var n = lfNeu(h); return h === null || h === undefined ? 'Lime' : n ? n.n : lfHueName(h); }
