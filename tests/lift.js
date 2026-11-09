@@ -1270,6 +1270,7 @@ const freeze = (at) => `(() => {
     await page.click('#lfLuxT'); await settle(page);
     ok('a second fold holds the luxury colours, emerald among them', await page.locator('#lfLux .lf-lux-b').count() === 9 && /Emerald/.test(await page.textContent('#lfLux')));
     await page.evaluate(() => document.querySelector('#lfLux .lf-lux-b[data-h="1100"]').click()); await settle(page);
+    ok('each jewel has its own effect: emerald is a cut gem', await page.evaluate(() => document.documentElement.getAttribute('data-lux-fx')) === 'gem' && await page.locator('#lfLux i.fx-gem').count() === 2 && await page.locator('#lfLux i.fx-iris').count() === 2);
     ok('picking one makes it the accent and gives the main buttons its shimmer', await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '1100' && await page.evaluate(() => document.documentElement.classList.contains('lf-lux')) && (await page.textContent('#lfLuxT em')) === 'Emerald');
     await c.close();
   }

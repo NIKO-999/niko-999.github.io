@@ -635,6 +635,53 @@ body.lf-v-home .lf-glow { opacity: 1; }
   box-shadow: 0 0 12px color-mix(in srgb, var(--f) 55%, transparent), inset 0 0 0 1px rgba(255,255,255,.25); }
 .lf-lux-b i::after { content: ''; position: absolute; inset: -40%; background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.75) 50%, transparent 60%); transform: translateX(-120%); animation: lf-glint 3.2s ease-in-out infinite; animation-delay: inherit; }
 @keyframes lf-glint { 0%, 55% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
+/* EACH JEWEL HAS ITS OWN EFFECT, and it is worn wherever the accent is a
+   FILL — the main buttons, a ticked set, a lit day on the calendar, an
+   exercise's progress bar, the finish tick — as well as by its swatch:
+     gem    facets cut into the colour, sparkles twinkling on the buttons
+     pulse  the facets, and a slow warm glow breathing out (ruby)
+     metal  a brushed sheen drifting across, the light moving on metal
+     chrome mirror bands, bright and dark, sliding by (platinum)
+     fizz   the sheen with fine bubbles rising through it (champagne)
+     iris   colour shifting through the stone, like nacre (amethyst, pearl)
+   The look is a custom property, set where the colours are known — on the
+   page for the accent, on each swatch for its own — so one rule draws both. */
+:root[data-lux-fx="gem"], :root[data-lux-fx="pulse"], .lf-lux-b i.fx-gem, .lf-lux-b i.fx-pulse {
+  --lux-bg: linear-gradient(135deg, color-mix(in srgb, var(--log) 72%, #000) 0 18%, var(--log) 18% 42%, color-mix(in srgb, var(--log) 74%, var(--lux-hi)) 42% 50%, var(--log) 50% 74%, color-mix(in srgb, var(--log) 80%, #000) 74%);
+  --lux-bs: 100% 100%; --lux-an: none; }
+:root[data-lux-fx="metal"], :root[data-lux-fx="fizz"], .lf-lux-b i.fx-metal, .lf-lux-b i.fx-fizz {
+  --lux-bg: linear-gradient(115deg, color-mix(in srgb, var(--log) 70%, #000) 0%, var(--log) 28%, var(--lux-hi) 48%, var(--log) 68%, color-mix(in srgb, var(--log) 72%, #000) 100%);
+  --lux-bs: 260% 100%; --lux-an: lf-drift 6s ease-in-out infinite alternate; }
+:root[data-lux-fx="chrome"], .lf-lux-b i.fx-chrome {
+  --lux-bg: linear-gradient(100deg, var(--log) 0%, #fff 14%, var(--log) 26%, color-mix(in srgb, var(--log) 60%, #000) 40%, var(--log) 52%, #fff 66%, var(--log) 78%, color-mix(in srgb, var(--log) 65%, #000) 90%, var(--log) 100%);
+  --lux-bs: 300% 100%; --lux-an: lf-drift 7s linear infinite alternate; }
+:root[data-lux-fx="iris"], .lf-lux-b i.fx-iris {
+  --lux-bg: linear-gradient(120deg, var(--log) 0%, var(--lux-2) 25%, var(--lux-hi) 45%, var(--log) 62%, var(--lux-2) 82%, var(--log) 100%);
+  --lux-bs: 300% 100%; --lux-an: lf-drift 5s ease-in-out infinite alternate; }
+@keyframes lf-drift { from { background-position: 0% 0; } to { background-position: 100% 0; } }
+/* moving: the things you look at and press */
+:root[data-lux-fx] .lf-btn.is-log, :root[data-lux-fx] .lf-go.is-live, :root[data-lux-fx] .lf-cell.is-on:not(.is-now), :root[data-lux-fx] .lf-set.is-done .lf-chk span, .lf-lux-b i[class*="fx-"] {
+  background: var(--lux-bg); background-size: var(--lux-bs); animation: var(--lux-an); }
+/* still: small marks that already have motion of their own */
+:root[data-lux-fx] .lf-ex-pb i, :root[data-lux-fx] .lf-fin-ok, :root[data-lux-fx] .lf-wh-m::after { background: var(--lux-bg); background-size: var(--lux-bs); }
+:root[data-lux-fx] .lf-btn.is-log, :root[data-lux-fx] .lf-go.is-live { isolation: isolate; }
+.lf-lux-b i[class*="fx-"] { overflow: hidden; isolation: isolate; }
+/* the sparkle, on the buttons and the swatch */
+:root[data-lux-fx="gem"] .lf-btn.is-log::before, :root[data-lux-fx="pulse"] .lf-btn.is-log::before, .lf-lux-b i.fx-gem::before, .lf-lux-b i.fx-pulse::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(circle at 18% 30%, #fff 0 1.2px, transparent 2.5px), radial-gradient(circle at 62% 70%, #fff 0 1px, transparent 2.2px), radial-gradient(circle at 84% 24%, #fff 0 1.4px, transparent 2.8px), radial-gradient(circle at 40% 82%, #fff 0 1px, transparent 2px);
+  animation: lf-twinkle 2.6s ease-in-out infinite; }
+@keyframes lf-twinkle { 0%, 100% { opacity: .15; } 30% { opacity: 1; } 55% { opacity: .35; } 75% { opacity: .9; } }
+/* ruby breathes */
+:root[data-lux-fx="pulse"] .lf-btn.is-log, .lf-lux-b i.fx-pulse { animation: lf-pulse 2.8s ease-in-out infinite; }
+@keyframes lf-pulse { 0%, 100% { box-shadow: 0 4px 16px color-mix(in srgb, var(--log) 30%, transparent); } 50% { box-shadow: 0 6px 30px color-mix(in srgb, var(--log) 70%, transparent), 0 0 0 1px color-mix(in srgb, var(--lux-hi) 40%, transparent); } }
+/* champagne's bubbles */
+:root[data-lux-fx="fizz"] .lf-btn.is-log::before, .lf-lux-b i.fx-fizz::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .75;
+  background: radial-gradient(circle, rgba(255,255,255,.85) 0 1.2px, transparent 1.8px) 0 0 / 22px 26px, radial-gradient(circle, rgba(255,255,255,.6) 0 .9px, transparent 1.5px) 9px 13px / 17px 21px;
+  animation: lf-fizz 3.5s linear infinite; }
+@keyframes lf-fizz { from { background-position: 0 0, 9px 13px; } to { background-position: 0 -52px, 9px -29px; } }
+@media (prefers-reduced-motion: reduce) { :root[data-lux-fx] .lf-btn.is-log, :root[data-lux-fx] .lf-btn.is-log::before, :root[data-lux-fx] .lf-go.is-live, :root[data-lux-fx] .lf-cell.is-on, :root[data-lux-fx] .lf-set.is-done .lf-chk span, .lf-lux-b i[class*="fx-"], .lf-lux-b i[class*="fx-"]::before { animation: none !important; } }
 /* while a luxury colour is the accent, the main buttons carry a slow sweep of its light */
 :root.lf-lux .lf-btn.is-log { position: relative; overflow: hidden; box-shadow: 0 6px 22px color-mix(in srgb, var(--log) 38%, transparent); }
 :root.lf-lux .lf-btn.is-log::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 35%, color-mix(in srgb, var(--lux-hi) 70%, transparent) 50%, transparent 65%); transform: translateX(-110%); animation: lf-luxsw 4.5s ease-in-out infinite; }
@@ -3594,7 +3641,9 @@ function lfThemeCard() {
     LUXE.forEach(function (n, i) {
       var nb = el('<button type="button" class="lf-neu-b lf-lux-b"><i></i><span></span></button>'), f = dk ? n.d : n.l;
       nb.dataset.h = 1100 + i; $('span', nb).textContent = n.n; nb.setAttribute('aria-label', n.n + ' accent');
-      $('i', nb).style.setProperty('--f', f); $('i', nb).style.setProperty('--g', n.g); nb.style.animationDelay = (i * -.37) + 's'; $('i', nb).style.animationDelay = (i * -.37) + 's';
+      $('i', nb).style.setProperty('--f', f); $('i', nb).style.setProperty('--g', n.g);
+      /* the swatch wears its own effect, on its own colours */
+      var si = $('i', nb).style; si.setProperty('--log', f); si.setProperty('--lux-hi', n.g); si.setProperty('--lux-2', n.a2 || n.g); $('i', nb).classList.add('fx-' + n.fx); nb.style.animationDelay = (i * -.37) + 's'; $('i', nb).style.animationDelay = (i * -.37) + 's';
       nb.addEventListener('click', function () { buzz([8, 30, 8]); lfAccentSet(1100 + i, true); lfRender(); });
       lux.appendChild(nb);
     });
@@ -5691,15 +5740,15 @@ var NEUTRALS = [
    catches the swatch, and while one is the accent the main buttons carry
    a slow sweep of it — the one place the app is allowed to shimmer. */
 var LUXE = [
-  { n: 'Emerald', d: '#3ccf8e', l: '#0b6e4f', di: '#5fdca3', li: '#0b6e4f', g: '#b8ffd9' },
-  { n: 'Sapphire', d: '#5b86ff', l: '#0f3fa8', di: '#86a6ff', li: '#0f3fa8', g: '#cfdcff' },
-  { n: 'Ruby', d: '#e5425f', l: '#9b111e', di: '#f06d84', li: '#9b111e', g: '#ffc9d3' },
-  { n: 'Amethyst', d: '#ae78ff', l: '#5b2a91', di: '#c6a0ff', li: '#5b2a91', g: '#ead9ff' },
-  { n: 'Gold', d: '#d9b443', l: '#9c7a17', di: '#e6c763', li: '#7d6112', g: '#fff1b8' },
-  { n: 'Champagne', d: '#e8d3a8', l: '#a68a54', di: '#eddcb9', li: '#7f6a40', g: '#fffaf0' },
-  { n: 'Rose gold', d: '#e8ab9c', l: '#a8655a', di: '#f0bfb3', li: '#8a4f45', g: '#fff0ea' },
-  { n: 'Platinum', d: '#dfe3e8', l: '#7c8590', di: '#e8ebef', li: '#5d6570', g: '#ffffff' },
-  { n: 'Black pearl', d: '#7e8fa3', l: '#1f2a36', di: '#9aa9ba', li: '#1f2a36', g: '#dfe9f5' }
+  { n: 'Emerald', d: '#3ccf8e', l: '#0b6e4f', di: '#5fdca3', li: '#0b6e4f', g: '#b8ffd9', fx: 'gem' },
+  { n: 'Sapphire', d: '#5b86ff', l: '#0f3fa8', di: '#86a6ff', li: '#0f3fa8', g: '#cfdcff', fx: 'gem' },
+  { n: 'Ruby', d: '#e5425f', l: '#9b111e', di: '#f06d84', li: '#9b111e', g: '#ffc9d3', fx: 'pulse' },
+  { n: 'Amethyst', d: '#ae78ff', l: '#5b2a91', di: '#c6a0ff', li: '#5b2a91', g: '#ead9ff', fx: 'iris', a2: '#ff7ad9' },
+  { n: 'Gold', d: '#d9b443', l: '#9c7a17', di: '#e6c763', li: '#7d6112', g: '#fff1b8', fx: 'metal' },
+  { n: 'Champagne', d: '#e8d3a8', l: '#a68a54', di: '#eddcb9', li: '#7f6a40', g: '#fffaf0', fx: 'fizz' },
+  { n: 'Rose gold', d: '#e8ab9c', l: '#a8655a', di: '#f0bfb3', li: '#8a4f45', g: '#fff0ea', fx: 'metal' },
+  { n: 'Platinum', d: '#dfe3e8', l: '#7c8590', di: '#e8ebef', li: '#5d6570', g: '#ffffff', fx: 'chrome' },
+  { n: 'Black pearl', d: '#7e8fa3', l: '#1f2a36', di: '#9aa9ba', li: '#1f2a36', g: '#dfe9f5', fx: 'iris', a2: '#6fe0cf' }
 ];
 function lfNeu(h) {
   if (typeof h !== 'number' || h % 1 !== 0) return null;
@@ -5737,7 +5786,8 @@ function lfAccOn(node, h) {
 function lfApplyAccent() {
   var st = document.documentElement.style, h = lfAccTmp !== undefined ? lfAccTmp : lfAccent(), lx = lfNeu(h);
   document.documentElement.classList.toggle('lf-lux', !!(lx && lx.g));
-  if (lx && lx.g) st.setProperty('--lux-hi', lx.g); else st.removeProperty('--lux-hi');
+  if (lx && lx.g) { st.setProperty('--lux-hi', lx.g); st.setProperty('--lux-2', lx.a2 || lx.g); document.documentElement.setAttribute('data-lux-fx', lx.fx || 'metal'); }
+  else { st.removeProperty('--lux-hi'); st.removeProperty('--lux-2'); document.documentElement.removeAttribute('data-lux-fx'); }
   if (h === null) { ACC_KEYS.forEach(function (k) { st.removeProperty(k); }); return; }
   lfAccTok(h, document.documentElement.getAttribute('data-mode') !== 'light', st);
 }
