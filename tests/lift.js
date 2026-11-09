@@ -819,8 +819,8 @@ const freeze = (at) => `(() => {
     ok('and counts what it had already won as seen', seen && seen.first === 1 && seen.wo10 === 1 && seen.pr === 1 && !seen.st4, seen);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const shelf = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
-    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 85 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
-    ok('and counts them', /4 of 85/.test(await page.textContent('#lfBadges .lf-hd')));
+    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 106 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
+    ok('and counts them', /4 of 106/.test(await page.textContent('#lfBadges .lf-hd')));
     ok('a badge not yet won carries its progress ring', await page.locator('#lfBadges .lf-coin[data-b="wo50"] .lf-bdr').count() === 1 && await page.locator('#lfBadges .lf-coin[data-b="first"] .lf-bdr').count() === 0);
     await page.click('#lfBadges .lf-coin[data-b="wo10"]'); await page.waitForTimeout(60);
     ok('it opens at once, its picture holding the stage while the live award is built', await page.locator('.lf-cv .lf-cv-ph').count() === 1);
@@ -857,9 +857,9 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const st = async () => page.evaluate(() => ['lfSet', 'lfBadges', 'lfFocus'].map((id) => { const b = document.querySelector('#' + id + ' h3 > button'); return b && b.getAttribute('aria-expanded') + ':' + document.getElementById(b.getAttribute('aria-controls')).hidden; }).join());
     ok('settings, badges and focus are shut by default, each a button inside its heading', await st() === 'false:true,false:true,false:true');
-    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 85/.test(await page.textContent('#lfBadges h3')));
+    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 106/.test(await page.textContent('#lfBadges h3')));
     await page.click('#lfSet h3 > button'); await page.click('#lfBadges h3 > button'); await page.click('#lfFocus h3 > button'); await settle(page);
-    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 85);
+    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 106);
     await page.click('#lfUnit [data-u="lb"]'); await settle(page);
     ok('a save redraws the page and keeps what you opened', await st() === 'true:false,true:false,true:false');
     await page.click('#lfUnit [data-u="kg"]'); await settle(page);
@@ -1301,6 +1301,18 @@ const freeze = (at) => `(() => {
     ok('ten workouts glow softly in their own colour, fifty wear a finish', await page.evaluate(() => {
       const w10 = document.querySelector('#lfBadges .lf-coin[data-b="wo10"]'), w50 = document.querySelector('#lfBadges .lf-coin[data-b="wo50"]');
       return w10.classList.contains('is-sn') && getComputedStyle(w10, '::before').content !== 'none' && w50.classList.contains('is-fx'); }));
+    await c.close();
+  }
+
+  /* ── MYTHIC: the longest counts, struck past the halo ── */
+  {
+    const wo = []; for (let i = 0; i < 366; i++) { const d = new Date(2025, 9, 1 + i, 7); wo.push({ id: 'y' + i, d: d.toISOString().slice(0, 10), s: d.getTime(), e: d.getTime() + 3600e3, n: 'Legs', x: [{ id: 'squat', n: 'Squat', sets: [{ w: 100, r: 10 }] }] }); }
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-30T18:00:00');
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    const m = Object.fromEntries(await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => [e.querySelector('b').textContent, e.querySelector('span').textContent])));
+    ok('365 workouts is mythic, and its date stays under it', m['365 Club'] === '30 Sep', m['365 Club']);
+    ok('a mythic badge wears the prism ring and sparks in orbit', await page.locator('#lfBadges .lf-coin.is-t4[data-b="wo365"] .lf-myth s').count() === 2);
+    ok('the long counts come in runs of three', 'Set Collector' in m && 'Lifer' in m && 'Hundred Thousand Reps' in m && 'Year of Iron' in m);
     await c.close();
   }
 
