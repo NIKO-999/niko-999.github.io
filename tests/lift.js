@@ -1263,7 +1263,7 @@ const freeze = (at) => `(() => {
     await settle(page);
     ok('the neutrals fold away, shut until opened', await page.getAttribute('#lfNeuT', 'aria-expanded') === 'false' && await page.locator('#lfNeu').isHidden());
     await page.click('#lfNeuT'); await settle(page);
-    ok('the theme offers neutrals beside the wheel', await page.locator('#lfNeu .lf-neu-b').count() === 18 && await page.locator('#lfNeu').isVisible());
+    ok('the theme offers neutrals beside the wheel', await page.locator('#lfNeu .lf-neu-b').count() === 19 && /Black/.test(await page.textContent('#lfNeu')) && await page.locator('#lfNeu').isVisible());
     await page.evaluate(() => document.querySelector('#lfNeu .lf-neu-b[data-h="1003"]').click()); await settle(page);
     const dark = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--log').trim());
     ok('a neutral is kept and named', await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '1003' && /Graphite/.test(await page.textContent('#lfTheme .lf-fh')) && (await page.textContent('#lfNeuT em')) === 'Graphite');
