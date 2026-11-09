@@ -570,7 +570,25 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-ws-coins { display: flex; flex-wrap: wrap; gap: 14px; }
 .lf-ws-coins .lf-bdi { width: 76px; text-align: center; }
 .lf-ws-coins .lf-bdi b { font-size: 11px; }
-@media (prefers-reduced-motion: reduce) { .lf-ws-k, .lf-ws-ring, .lf-ws-ring.is-hit::after, .lf-ws-days .is-on i { animation: none; } .lf-ws-arc { transition: none; } }
+.lf-ws-verdict { margin: 4px 0 0; font-size: 14px; font-weight: 700; }
+/* EVERY TARGET HIT: the verdict is a lit pill, and the ring wears a turning halo of light */
+.lf-wsh.is-met .lf-ws-verdict { display: inline-block; padding: 5px 14px; border-radius: 999px; color: var(--on-log); background: var(--log); box-shadow: 0 0 22px color-mix(in srgb, var(--log) 60%, transparent); }
+.lf-wsh.is-met .lf-ws-ring::before { content: ''; position: absolute; inset: -18px; border-radius: 50%; pointer-events: none; z-index: -1;
+  background: conic-gradient(from 0deg, transparent 0 20%, color-mix(in srgb, var(--log) 70%, transparent) 30%, transparent 45% 70%, color-mix(in srgb, var(--log) 55%, transparent) 82%, transparent 92%);
+  -webkit-mask: radial-gradient(closest-side, transparent 78%, #000 80%, #000 96%, transparent 100%); mask: radial-gradient(closest-side, transparent 78%, #000 80%, #000 96%, transparent 100%);
+  filter: blur(3px); animation: lf-halo 5s linear infinite; }
+@keyframes lf-halo { to { transform: rotate(360deg); } }
+.lf-sheet.lf-wsh.is-met::before { animation: lf-wsglow 4s ease-in-out infinite alternate; }
+@keyframes lf-wsglow { from { opacity: .75; } to { opacity: 1; } }
+/* TARGETS WEREN'T MET: the same review in red, saying only what fell short */
+.lf-sheet.lf-wsh.is-miss { --log: #ff453a; --on-log: #ffffff; --today-ink: #ff6961; }
+.lf-wsh.is-miss .lf-ws-verdict { color: #ff6961; }
+.lf-wsh.is-miss .lf-ws-k { background: none; color: #ff6961 !important; animation: none; }
+.lf-ws-miss .lf-ws-mr { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 10px; padding: 12px 14px; border-radius: 14px; background: color-mix(in srgb, #ff453a 10%, var(--card)); margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+.lf-ws-mr b { color: #ff6961; font-size: 14px; }
+.lf-ws-mr > i { grid-column: 1 / -1; height: 5px; border-radius: 5px; background: var(--card3); overflow: hidden; }
+.lf-ws-mr > i i { display: block; height: 100%; border-radius: inherit; background: #ff453a; }
+@media (prefers-reduced-motion: reduce) { .lf-ws-k, .lf-ws-ring, .lf-ws-ring.is-hit::after, .lf-ws-days .is-on i, .lf-wsh.is-met .lf-ws-ring::before, .lf-sheet.lf-wsh.is-met::before { animation: none; } .lf-ws-arc { transition: none; } }
 .fr-live { display: inline-flex; align-items: center; gap: 6px; color: var(--good); font-weight: 600; }
 .fr-live::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--log); box-shadow: 0 0 0 0 color-mix(in srgb, var(--log) 60%, transparent); animation: fr-live 1.6s ease-out infinite; }
 @keyframes fr-live { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--log) 60%, transparent); } 100% { box-shadow: 0 0 0 8px transparent; } }
@@ -2882,17 +2900,26 @@ function lfWeekSheet(m) {
   function inWeek(mm) { var x = ymd(mm), y = ymd(addDays(mm, 6)); return S.wo.filter(function (w) { return w.d >= x && w.d <= y; }).length; }
   var streak = 0; for (var q = m, g = 0; g < 104 && S.goal > 0 && inWeek(q) >= S.goal; q = addDays(q, -7), g++) streak++;
   var hit = S.goal > 0 && st.wo >= S.goal;
+  /* THE WEEK'S TARGETS: the workouts a week, and the sets each muscle in
+     focus asked for (the priority ones, or all of them if none is). Met, the
+     whole review glows; missed, it goes red and says only what fell short */
+  var mu = lfMuscleSets(m, e), fpri = S.focus.filter(function (f) { return f.p; }); if (!fpri.length) fpri = S.focus;
+  var miss = [];
+  if (S.goal > 0 && st.wo < S.goal) miss.push(['Workouts', st.wo, S.goal]);
+  fpri.forEach(function (f) { if ((mu[f.m] || 0) < f.lo) miss.push([f.m + ' sets', mu[f.m] || 0, f.lo]); });
+  var met = !miss.length;
   var range = m.getDate() + (m.getMonth() !== e.getMonth() ? ' ' + MON[m.getMonth()].slice(0, 3) : '') + '–' + e.getDate() + ' ' + MON[e.getMonth()].slice(0, 3);
-  var b = el('<div class="lf-fin lf-wk-sum" id="lfWeekSum"><div class="lf-cap lf-ws-k">Week in review</div><h3></h3>'
+  var b = el('<div class="lf-fin lf-wk-sum" id="lfWeekSum"><div class="lf-cap lf-ws-k">Week in review</div><h3></h3><p class="lf-ws-verdict"></p>'
     + '<div class="lf-ws-ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="lf-ws-tr"/><circle cx="60" cy="60" r="52" class="lf-ws-arc"/></svg><div class="lf-ws-in"><b class="lf-num"></b><span></span></div></div>'
     + '<div class="lf-fin-vol lf-num"><span>0</span><small></small></div><p class="lf-fin-u"></p>'
     + '<div class="lf-ws-days" aria-hidden="true"></div></div>');
   $('h3', b).textContent = range;
+  $('.lf-ws-verdict', b).textContent = met ? 'Every target hit' : 'Targets weren\'t met';
   /* the goal as a ring, filled to how much of it the week closed */
   var k = S.goal > 0 ? Math.min(1, st.wo / S.goal) : 1, len = 2 * Math.PI * 52, arc = $('.lf-ws-arc', b);
   arc.style.strokeDasharray = '0 ' + len; arc.dataset.to = (len * k).toFixed(1) + ' ' + len;
   $('.lf-ws-in b', b).textContent = st.wo + (S.goal > 0 ? '/' + S.goal : '');
-  $('.lf-ws-in span', b).textContent = hit ? 'goal hit' : (st.wo === 1 ? 'workout' : 'workouts');
+  $('.lf-ws-in span', b).textContent = hit && met ? 'goal hit' : (st.wo === 1 ? 'workout' : 'workouts');
   if (hit) $('.lf-ws-ring', b).classList.add('is-hit');
   $('.lf-fin-vol small', b).textContent = S.unit + ' this week';
   var u = $('.lf-fin-u', b);
@@ -2911,7 +2938,7 @@ function lfWeekSheet(m) {
   var ln = el('<div class="lf-ws-lines"></div>');
   function line(ic, txt, cls) { var x = el('<div class="lf-ws-l"><span class="lf-ws-ic"></span><span></span></div>'); $('.lf-ws-ic', x).innerHTML = ic; $('span:last-child', x).textContent = txt; if (cls) x.classList.add(cls); ln.appendChild(x); }
   if (streak > 0) line(TAG_IC.streak, streak + (streak === 1 ? ' week' : ' weeks') + ' in a row on goal', 'is-fire');
-  var mu = lfMuscleSets(m, e), top = Object.keys(mu).filter(function (x) { return x !== 'Cardio' && x !== 'Other'; }).sort(function (x, y) { return mu[y] - mu[x]; })[0];
+  var top = Object.keys(mu).filter(function (x) { return x !== 'Cardio' && x !== 'Other'; }).sort(function (x, y) { return mu[y] - mu[x]; })[0];
   if (top) line(IC.dumb, 'Most trained: ' + top + ' · ' + lfSetsN(mu[top]) + ' sets');
   if (FRS.on && FRS.list.length) {
     var thisMon = ymd(monday(today()));
@@ -2925,7 +2952,18 @@ function lfWeekSheet(m) {
     var place = all.filter(function (x) { return x > mine + 1e-9; }).length + 1;
     line(TAG_IC.goal, (place === 1 ? 'First' : place === 2 ? 'Second' : place === 3 ? 'Third' : place + 'th') + ' of ' + all.length + ' on the friends rings', place === 1 ? 'is-crown' : '');
   }
-  b.appendChild(ln);
+  if (met) b.appendChild(ln);
+  else {
+    $('.lf-fin-u', b).remove();
+    var ml = el('<div class="lf-fin-l lf-ws-miss" id="lfWsMiss"><div class="lf-cap">What fell short</div></div>');
+    miss.forEach(function (x) {
+      var row = el('<div class="lf-ws-mr"><span></span><b class="lf-num"></b><i><i></i></i></div>');
+      $('span', row).textContent = x[0]; $('b', row).textContent = lfSetsN(x[1]) + ' / ' + x[2];
+      $('i i', row).style.width = Math.min(100, x[1] / x[2] * 100) + '%';
+      ml.appendChild(row);
+    });
+    b.appendChild(ml);
+  }
   /* the week's records: a heavier weight than any before the week */
   var prs = [];
   var exIds = {}; ws.forEach(function (w) { w.x.forEach(function (x) { exIds[x.id] = x.n; }); });
@@ -2934,17 +2972,17 @@ function lfWeekSheet(m) {
     S.wo.forEach(function (w) { w.x.forEach(function (x) { if (x.id !== id) return; x.sets.forEach(function (q) { if (!(q.r > 0)) return; var v = +q.w || 0; if (w.d < a) before = Math.max(before, v); else if (w.d <= z) inW = Math.max(inW, v); }); }); });
     if (before >= 0 && inW > 0 && inW > before + 1e-9 && lfPrOk(z, inW, before)) prs.push(exName(id, exIds[id]));
   });
-  if (prs.length) { var pl = el('<div class="lf-fin-l" id="lfWsPr"><div class="lf-cap">Records this week</div><div class="lf-tags"></div></div>'); prs.forEach(function (n) { $('.lf-tags', pl).appendChild(lfTag(['pr', n])); }); b.appendChild(pl); }
+  if (met && prs.length) { var pl = el('<div class="lf-fin-l" id="lfWsPr"><div class="lf-cap">Records this week</div><div class="lf-tags"></div></div>'); prs.forEach(function (n) { $('.lf-tags', pl).appendChild(lfTag(['pr', n])); }); b.appendChild(pl); }
   var got = lfBadges().concat(lfMedals()).filter(function (x) { return x.d && x.d >= a && x.d <= z; });
-  if (got.length) { var bl = el('<div class="lf-fin-l" id="lfWsBg"><div class="lf-cap">Badges this week</div><div class="lf-ws-coins"></div></div>'); got.forEach(function (x) { var it = el('<div class="lf-bdi"><b></b></div>'); it.insertBefore(lfCoinBtn(x, 56), it.firstChild); $('b', it).textContent = x.b.n; $('.lf-ws-coins', bl).appendChild(it); }); b.appendChild(bl); }
-  var done = el('<button type="button" class="lf-btn is-log is-full" id="lfWsDone">' + (hit ? 'On to next week' : 'Done') + '</button>');
-  var s = lfSheet({ title: '', body: b, foot: [done], full: true, cls: 'lf-wsh' });
+  if (met && got.length) { var bl = el('<div class="lf-fin-l" id="lfWsBg"><div class="lf-cap">Badges this week</div><div class="lf-ws-coins"></div></div>'); got.forEach(function (x) { var it = el('<div class="lf-bdi"><b></b></div>'); it.insertBefore(lfCoinBtn(x, 56), it.firstChild); $('b', it).textContent = x.b.n; $('.lf-ws-coins', bl).appendChild(it); }); b.appendChild(bl); }
+  var done = el('<button type="button" class="lf-btn is-log is-full" id="lfWsDone">' + (met ? 'On to next week' : 'Done') + '</button>');
+  var s = lfSheet({ title: '', body: b, foot: [done], full: true, cls: 'lf-wsh' }); s.el.classList.add(met ? 'is-met' : 'is-miss');
   s.el.setAttribute('aria-label', 'Week in review, ' + range);
   done.addEventListener('click', function () { s.close(); });
   var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches, n = $('.lf-fin-vol span', b), vol = toDisp(st.vol);
-  buzz([20, 60, 20, 60, 40]);
+  buzz(met ? [20, 60, 20, 60, 40] : 12);
   setTimeout(function () { arc.style.strokeDasharray = arc.dataset.to; }, 120);
-  if (!calm) setTimeout(function () { var r0 = $('.lf-ws-ring', b).getBoundingClientRect(); if (r0.width) lfConfetti(r0.left + r0.width / 2, r0.top + r0.height / 2, getComputedStyle(document.documentElement).getPropertyValue('--log').trim() || '#a3e635'); }, 650);
+  if (!calm && met) setTimeout(function () { var r0 = $('.lf-ws-ring', b).getBoundingClientRect(); if (r0.width) lfConfetti(r0.left + r0.width / 2, r0.top + r0.height / 2, getComputedStyle(document.documentElement).getPropertyValue('--log').trim() || '#a3e635'); }, 650);
   if (calm) { n.textContent = Math.round(vol).toLocaleString(); return; }
   var t0 = 0;
   (function step(ts) {
@@ -3484,8 +3522,16 @@ function lfWoSheet(w, editable) {
 function lfWoEdit(w) {
   var c = JSON.parse(JSON.stringify(w));
   var b = el('<div><label class="lf-flab" for="lfEdN">Name</label><input class="lf-field" id="lfEdN" maxlength="60" autocomplete="off" />'
-    + '<label class="lf-flab" for="lfEdD">Day</label><input class="lf-field" id="lfEdD" type="date" /><div id="lfEdX"></div></div>');
+    + '<label class="lf-flab" for="lfEdD">Day</label><input class="lf-field" id="lfEdD" type="date" />'
+    + '<div class="lf-row" id="lfEdT" style="--n:2;gap:10px"><label><span class="lf-flab">Started</span><input class="lf-field" id="lfEdS" type="time" /></label><label><span class="lf-flab">Minutes</span><input class="lf-field lf-num" id="lfEdM" inputmode="numeric" maxlength="3" autocomplete="off" /></label></div>'
+    + '<div id="lfEdX"></div></div>');
   $('#lfEdN', b).value = c.n; $('#lfEdD', b).value = c.d; $('#lfEdD', b).max = ymd(today());
+  /* HOW LONG IT WAS, mendable: an app left running after the last set
+     files a four-hour session, so the start and the length can be put right */
+  if (w.s > 1e11) {
+    var sd = new Date(w.s); $('#lfEdS', b).value = ('0' + sd.getHours()).slice(-2) + ':' + ('0' + sd.getMinutes()).slice(-2);
+    $('#lfEdM', b).value = Math.max(1, Math.round((w.e - w.s) / 60000));
+  } else $('#lfEdT', b).hidden = true;
   function paint() {
     var box = $('#lfEdX', b); box.textContent = '';
     c.x.forEach(function (e, ei) {
@@ -3546,6 +3592,11 @@ function lfWoEdit(w) {
       /* a new day keeps its hour: the start and end move by whole days */
       var shift = Math.round((new Date(nd + 'T12:00:00') - new Date(w.d + 'T12:00:00')) / 864e5) * 864e5;
       if (w.s > 1e11) w.s += shift; if (w.e > 1e11) w.e += shift; w.d = nd;
+    }
+    if (w.s > 1e11) {
+      var tm = $('#lfEdS', b).value, mn = parseInt($('#lfEdM', b).value, 10);
+      if (/^\d\d:\d\d$/.test(tm)) { var hm = tm.split(':'), d0 = new Date(w.d + 'T00:00:00'), dur = w.e - w.s; d0.setHours(+hm[0], +hm[1], 0, 0); w.s = d0.getTime(); w.e = w.s + dur; }
+      if (mn > 0) w.e = w.s + Math.min(600, mn) * 60000;
     }
     w.n = $('#lfEdN', b).value.trim().slice(0, 60) || w.n;
     w.x = c.x; w.cd = c.cd || null;
@@ -4882,6 +4933,17 @@ function bdBlur(dst, src, r, red) {
   x.drawImage(t, 0, 0);
 }
 var BD_TRIM = { silver: '#eceef2' };
+/* THE METAL TAKES THE BADGE'S COLOUR. Every award was silver round the
+   edge whatever it was — a gold crown in a silver frame, a lava finish in
+   grey — so the rim and the sides are now the badge's own colour as
+   polished metal: its finish's glow if it has one, else its colour.
+   Unearned stays plain silver. */
+function bdTrimOf(b) {
+  if (b.lock) return BD_TRIM.silver;
+  var base = b.fx ? BD_FXGL[b.fx] : (b.c || (BD_KIND[b.k] || {}).c);
+  if (!base || base.charAt(0) !== '#' || base.length !== 7) return b.fx ? BD_FXTRIM[b.fx] : BD_TRIM.silver;
+  var c = lfRgb(base); return lfHex(c.map(function (v) { return Math.round(v * .62 + 255 * .38); }));
+}
 var BD_FXTRIM = { galaxy: '#cdd3ff', sunrise: '#ffd27a', lava: '#8a8f98', ice: '#eaf7ff', aurora: '#d2fff0', neon: '#f2f2f6', molten: '#ffd56b', opal: '#f4f0ff', carbon: '#c9ced6', emerald: '#d8ffe9' };
 var BD_CREAM = '#eee8dc';
 /* every kind has its own bdOutline; the target badges each have their own */
@@ -5358,7 +5420,7 @@ function bdPolar(shp, dish, mirror) {
   var g = new BD3.BufferGeometry(); g.setAttribute('position', new BD3.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new BD3.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals(); return g;
 }
 function bdMake(b, m, n, pre) {
-  var g = new BD3.Group(), trim = b.fx ? BD_FXTRIM[b.fx] : BD_TRIM[m], mp = pre || bdMaps(b, trim, n), lock = !!b.lock;
+  var g = new BD3.Group(), trim = bdTrimOf(b), mp = pre || bdMaps(b, trim, n), lock = !!b.lock;
   var shp = new BD3.Shape(); bdOutline(shp, b.sh);
   var body = new BD3.ExtrudeGeometry(shp, { depth: .1, bevelEnabled: true, bevelThickness: .05, bevelSize: .045, bevelSegments: n > 600 ? 8 : 4, curveSegments: n > 600 ? 48 : 24 });
   body.computeBoundingBox(); body.translate(0, 0, -(body.boundingBox.max.z + body.boundingBox.min.z) / 2); body.computeBoundingBox();
@@ -5409,7 +5471,7 @@ function bdBuildLive(x) {
   var k = bdKey(x);
   if (bdPre[k]) return bdPre[k];
   for (var i = 0; i < bdKept.length; i++) if (bdKept[i].userData.k === k) return Promise.resolve(null);
-  var b = bdSpec(x), trim = b.fx ? BD_FXTRIM[b.fx] : BD_TRIM.silver, f, bk;
+  var b = bdSpec(x), trim = bdTrimOf(b), f, bk;
   bdPre[k] = bdThree().then(function (T) {
     if (!T) return null;
     return bdFrame().then(function () { bdSetFace(BD_LIVE); f = bdFront(b, trim); return bdFrame(); })
@@ -5453,7 +5515,7 @@ var bdQ = [], bdBusy = false, bd3 = null;
    so a shelf of eighty took seconds to fill on every visit. They are kept
    in IndexedDB, keyed by what they show and by BD_VER — change the coin
    art and bump BD_VER, or every phone keeps the old pictures. */
-var BD_VER = 'c1', bdDbP = null;
+var BD_VER = 'c2', bdDbP = null;
 function bdDb() {
   if (bdDbP) return bdDbP;
   bdDbP = new Promise(function (res) {

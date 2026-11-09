@@ -262,7 +262,11 @@ const freeze = (at) => `(() => {
   await top(page).locator('#lfEdCd .lf-pill[data-m="20"]').click(); await top(page).locator('#lfEdSave').click(); await settle(page);
   await top(page).locator('#lfWoEdit').click(); await settle(page);
   ok('a workout without cardio shows just a button for it, not the choices', await top(page).locator('#lfEdCdAdd').count() === 1 && await top(page).locator('#lfEdCd').count() === 0);
+  /* a session left running: its start and its length can be put right */
+  await top(page).locator('#lfEdS').fill('09:15'); await top(page).locator('#lfEdM').fill('45');
   await top(page).locator('#lfEdSave').click(); await settle(page);
+  { const w0 = (await store(page)).wo[0], sd = new Date(w0.s);
+    ok('a session\'s start and length can be mended in the editor', sd.getHours() === 9 && sd.getMinutes() === 15 && w0.e - w0.s === 45 * 60000 && w0.d === '2026-10-30', [sd.toString(), (w0.e - w0.s) / 60000]); }
   ok('or taken off', (await store(page)).wo[0].cd === null);
   ok('and a workout with none says nothing about it', await top(page).locator('#lfWoCd').count() === 0);
   await page.keyboard.press('Escape'); await settle(page); await page.keyboard.press('Escape'); await settle(page);
@@ -1305,7 +1309,7 @@ const freeze = (at) => `(() => {
       { id: 'y1', d: '2026-11-02', s: at('2026-11-02', '07:00:00'), e: at('2026-11-02', '08:00:00'), n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(110, 8), st(110, 8)] }] },
       { id: 'y2', d: '2026-11-04', s: at('2026-11-04', '07:00:00'), e: at('2026-11-04', '08:10:00'), n: 'Upper', x: [{ id: 'bench', n: 'Barbell bench press', sets: [st(60, 8)] }] },
       { id: 'y3', d: '2026-11-06', s: at('2026-11-06', '07:00:00'), e: at('2026-11-06', '07:50:00'), n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(110, 9)] }] }];
-    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo, wkSum: '' }, '2026-11-08T20:30:00');
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo, wkSum: '', focus: [{ m: 'Quads', lo: 2, hi: 4, p: 1 }] }, '2026-11-08T20:30:00');
     await page.waitForTimeout(1800);
     ok('on Sunday night the week in review comes up by itself', await top(page).locator('#lfWeekSum').count() === 1);
     const t = await top(page).locator('#lfWeekSum').textContent();
@@ -1316,6 +1320,20 @@ const freeze = (at) => `(() => {
     await top(page).locator('#lfWsDone').click(); await settle(page);
     await page.reload(); await page.waitForTimeout(1800);
     ok('so it comes once a week, not every open', await page.locator('#lfWeekSum').count() === 0);
+    await c.close();
+  }
+  /* a week that fell short: red, one line, and what was missed */
+  {
+    const st = (w, r) => ({ w, r });
+    const wo = [{ id: 'm0', d: '2026-10-12', s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(100, 8)] }] },
+      { id: 'm1', d: '2026-11-03', s: 3, e: 4, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [st(110, 8), st(110, 8)] }] }];
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo, wkSum: '', focus: [{ m: 'Quads', lo: 10, hi: 12, p: 1 }] }, '2026-11-08T20:30:00');
+    await page.waitForTimeout(1800);
+    const sh = top(page);
+    ok('a week that missed its targets goes red and says so in one line', await sh.locator('#lfWeekSum').count() === 1 && await page.evaluate(() => document.querySelector('.lf-wsh').classList.contains('is-miss')) && /Targets weren.t met/.test(await sh.textContent('.lf-ws-verdict')));
+    const rows = await sh.locator('#lfWsMiss .lf-ws-mr').allTextContents();
+    ok('and lists only what fell short: the workouts and the sets', rows.length === 2 && /Workouts1 \/ 3/.test(rows[0]) && /Quads sets2 \/ 10/.test(rows[1]), rows);
+    ok('with none of the cheer: no streak lines, no records', await sh.locator('.lf-ws-lines').count() === 0 && await sh.locator('#lfWsPr').count() === 0);
     await c.close();
   }
 
