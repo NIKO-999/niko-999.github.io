@@ -263,6 +263,11 @@ const freeze = (at) => `(() => {
   await top(page).locator('#lfWoEdit').click(); await settle(page);
   ok('a workout without cardio shows just a button for it, not the choices', await top(page).locator('#lfEdCdAdd').count() === 1 && await top(page).locator('#lfEdCd').count() === 0);
   /* a session left running: its start and its length can be put right */
+  ok('the editor\'s day and start fields keep to their boxes, as on an iPhone', await top(page).evaluate((sh) => {
+    const d = sh.querySelector('#lfEdD'), s = sh.querySelector('#lfEdS'), m = sh.querySelector('#lfEdM'), bd = d.parentElement.getBoundingClientRect();
+    const cs = getComputedStyle(d), ct = getComputedStyle(s);
+    return cs.appearance === 'none' && ct.appearance === 'none' && cs.boxSizing === 'border-box' && d.getBoundingClientRect().right <= bd.right + 1 && s.getBoundingClientRect().right <= m.getBoundingClientRect().left + 1;
+  }));
   await top(page).locator('#lfEdS').fill('09:15'); await top(page).locator('#lfEdM').fill('45');
   await top(page).locator('#lfEdSave').click(); await settle(page);
   { const w0 = (await store(page)).wo[0], sd = new Date(w0.s);

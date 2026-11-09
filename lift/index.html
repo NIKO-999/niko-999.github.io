@@ -346,6 +346,13 @@ body.lf-v-home .lf-glow { opacity: 1; }
   padding: 0 14px; font-size: 16px; outline: none;
 }
 .lf-field:focus { border-color: var(--focus); }
+/* iPHONE'S DATE AND TIME FIELDS keep their own size and ignore the box
+   they are given, so the day ran off the side of the editor and the start
+   time ran into the minutes beside it. Without the native look they take
+   the width they are told, and the value sits at the left like any field. */
+.lf-field[type="date"], .lf-field[type="time"] { -webkit-appearance: none; appearance: none; box-sizing: border-box; display: block; width: 100%; min-width: 0; max-width: 100%; text-align: left; }
+.lf-field[type="date"]::-webkit-date-and-time-value, .lf-field[type="time"]::-webkit-date-and-time-value { text-align: left; margin: 0; }
+.lf-row > label { min-width: 0; }
 .lf-fh { margin: 0; font: inherit; }
 .lf-fh button { width: 100%; display: flex; align-items: center; gap: 8px; padding: 0; text-align: left; min-height: 30px; }
 .lf-fh button .lf-lab:first-child { flex: 1; }
