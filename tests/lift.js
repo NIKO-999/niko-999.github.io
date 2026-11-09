@@ -1316,6 +1316,19 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── OWNER: one of one, unlocked by its own link, absent without it ── */
+  {
+    const wo = [{ id: 'o0', d: '2026-10-05', s: 1, e: 2, n: 'Legs', x: [{ id: 'squat', n: 'Squat', sets: [{ w: 100, r: 10 }] }] }];
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo });
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    ok('without the link there is no owner badge on the shelf', await page.locator('#lfBadges .lf-coin[data-b="owner"]').count() === 0 && await page.locator('#lfBadges .lf-coin').count() === 106);
+    await page.goto(URL + '#owner-k7q4x9lz'); await page.waitForTimeout(1500);
+    ok('the link is spent: the hash leaves the address bar', await page.evaluate(() => location.hash === '' && /^\d{4}-\d\d-\d\d$/.test(localStorage.getItem('lift.owner.v1') || '')));
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    ok('and the owner badge is on the shelf, its own tier, with lava running through it', await page.locator('#lfBadges .lf-coin.is-t5[data-b="owner"] .lf-lava').count() === 1 && /owner: 'dumbbell'/.test(require('fs').readFileSync(require('path').join(__dirname, '../lift/index.html'), 'utf8')) && await page.locator('#lfBadges .lf-coin[data-b="owner"] .lf-embers s').count() === 6);
+    await c.close();
+  }
+
   /* ── GOAL HIT: a celebration of its own, once a week ── */
   {
     const st = (w, r) => ({ w, r });
