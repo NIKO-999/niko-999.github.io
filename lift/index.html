@@ -542,6 +542,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-sheet.lf-wsh::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 460px; border-radius: inherit; pointer-events: none; z-index: 0;
   background: radial-gradient(120% 300px at 50% 0%, color-mix(in srgb, var(--log) 42%, transparent), transparent 72%), radial-gradient(60% 200px at 0% 30%, color-mix(in srgb, var(--log) 16%, transparent), transparent 70%), radial-gradient(60% 200px at 100% 30%, color-mix(in srgb, var(--log) 16%, transparent), transparent 70%); }
 .lf-sheet.lf-wsh .lf-sh-bd { position: relative; z-index: 1; }
+.lf-sheet.lf-wsh .lf-ws-fx { inset: 0 0 auto 0; height: 460px; border-radius: inherit; z-index: 0; }
 .lf-sheet.lf-wsh .lf-sh-hd { z-index: 2; }
 .lf-ws-k { letter-spacing: .22em !important; background: linear-gradient(90deg, var(--ink), var(--log), var(--ink)); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent !important; animation: lf-ws-shine 3s linear infinite; }
 @keyframes lf-ws-shine { to { background-position: -200% 0; } }
@@ -653,58 +654,60 @@ body.lf-v-home .lf-glow { opacity: 1; }
   box-shadow: 0 0 12px color-mix(in srgb, var(--f) 55%, transparent), inset 0 0 0 1px rgba(255,255,255,.25); }
 .lf-lux-b i::after { content: ''; position: absolute; inset: -40%; background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.75) 50%, transparent 60%); transform: translateX(-120%); animation: lf-glint 3.2s ease-in-out infinite; animation-delay: inherit; }
 @keyframes lf-glint { 0%, 55% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
-/* EACH JEWEL HAS ITS OWN EFFECT, and it is worn wherever the accent is a
-   FILL — the main buttons, a ticked set, a lit day on the calendar, an
-   exercise's progress bar, the finish tick — as well as by its swatch:
-     gem    facets cut into the colour, sparkles twinkling on the buttons
-     pulse  the facets, and a slow warm glow breathing out (ruby)
-     metal  a brushed sheen drifting across, the light moving on metal
-     chrome mirror bands, bright and dark, sliding by (platinum)
-     fizz   the sheen with fine bubbles rising through it (champagne)
-     iris   colour shifting through the stone, like nacre (amethyst, pearl)
-   The look is a custom property, set where the colours are known — on the
-   page for the accent, on each swatch for its own — so one rule draws both. */
-:root[data-lux-fx="gem"], :root[data-lux-fx="pulse"], .lf-lux-b i.fx-gem, .lf-lux-b i.fx-pulse {
-  --lux-bg: linear-gradient(135deg, color-mix(in srgb, var(--log) 72%, #000) 0 18%, var(--log) 18% 42%, color-mix(in srgb, var(--log) 74%, var(--lux-hi)) 42% 50%, var(--log) 50% 74%, color-mix(in srgb, var(--log) 80%, #000) 74%);
-  --lux-bs: 100% 100%; --lux-an: none; }
-:root[data-lux-fx="metal"], :root[data-lux-fx="fizz"], .lf-lux-b i.fx-metal, .lf-lux-b i.fx-fizz {
-  --lux-bg: linear-gradient(115deg, color-mix(in srgb, var(--log) 70%, #000) 0%, var(--log) 28%, var(--lux-hi) 48%, var(--log) 68%, color-mix(in srgb, var(--log) 72%, #000) 100%);
-  --lux-bs: 260% 100%; --lux-an: lf-drift 6s ease-in-out infinite alternate; }
-:root[data-lux-fx="chrome"], .lf-lux-b i.fx-chrome {
-  --lux-bg: linear-gradient(100deg, var(--log) 0%, #fff 14%, var(--log) 26%, color-mix(in srgb, var(--log) 60%, #000) 40%, var(--log) 52%, #fff 66%, var(--log) 78%, color-mix(in srgb, var(--log) 65%, #000) 90%, var(--log) 100%);
-  --lux-bs: 300% 100%; --lux-an: lf-drift 7s linear infinite alternate; }
-:root[data-lux-fx="iris"], .lf-lux-b i.fx-iris {
-  --lux-bg: linear-gradient(120deg, var(--log) 0%, var(--lux-2) 25%, var(--lux-hi) 45%, var(--log) 62%, var(--lux-2) 82%, var(--log) 100%);
-  --lux-bs: 300% 100%; --lux-an: lf-drift 5s ease-in-out infinite alternate; }
+/* EACH JEWEL HAS ITS OWN EFFECT, and it lives in the GLOW — the light of
+   your colour behind Home and behind the week in review — never on the
+   buttons, ticks or bars, which stay the flat colour. Its swatch in the
+   picker wears it too, so you can see it before choosing:
+     gem    sparkles twinkling through the light (emerald, sapphire)
+     pulse  the sparkle, and the light breathing (ruby)
+     metal  a band of sheen sliding slowly across it (gold, rose gold)
+     chrome brighter, harder bands of mirror light (platinum)
+     fizz   the sheen, with fine bubbles rising (champagne)
+     iris   a second colour drifting through it, like nacre (amethyst, pearl) */
+.lf-lux-b i.fx-gem, .lf-lux-b i.fx-pulse { background: linear-gradient(135deg, color-mix(in srgb, var(--log) 72%, #000) 0 18%, var(--log) 18% 42%, color-mix(in srgb, var(--log) 74%, var(--lux-hi)) 42% 50%, var(--log) 50% 74%, color-mix(in srgb, var(--log) 80%, #000) 74%); }
+.lf-lux-b i.fx-metal, .lf-lux-b i.fx-fizz { background: linear-gradient(115deg, color-mix(in srgb, var(--log) 70%, #000) 0%, var(--log) 28%, var(--lux-hi) 48%, var(--log) 68%, color-mix(in srgb, var(--log) 72%, #000) 100%); background-size: 260% 100%; animation: lf-drift 6s ease-in-out infinite alternate; }
+.lf-lux-b i.fx-chrome { background: linear-gradient(100deg, var(--log) 0%, #fff 14%, var(--log) 26%, color-mix(in srgb, var(--log) 60%, #000) 40%, var(--log) 52%, #fff 66%, var(--log) 78%, color-mix(in srgb, var(--log) 65%, #000) 90%, var(--log) 100%); background-size: 300% 100%; animation: lf-drift 7s linear infinite alternate; }
+.lf-lux-b i.fx-iris { background: linear-gradient(120deg, var(--log) 0%, var(--lux-2) 25%, var(--lux-hi) 45%, var(--log) 62%, var(--lux-2) 82%, var(--log) 100%); background-size: 300% 100%; animation: lf-drift 5s ease-in-out infinite alternate; }
 @keyframes lf-drift { from { background-position: 0% 0; } to { background-position: 100% 0; } }
-/* moving: the things you look at and press */
-:root[data-lux-fx] .lf-btn.is-log, :root[data-lux-fx] .lf-go.is-live, :root[data-lux-fx] .lf-cell.is-on:not(.is-now), :root[data-lux-fx] .lf-set.is-done .lf-chk span, .lf-lux-b i[class*="fx-"] {
-  background: var(--lux-bg); background-size: var(--lux-bs); animation: var(--lux-an); }
-/* still: small marks that already have motion of their own */
-:root[data-lux-fx] .lf-ex-pb i, :root[data-lux-fx] .lf-fin-ok, :root[data-lux-fx] .lf-wh-m::after { background: var(--lux-bg); background-size: var(--lux-bs); }
-:root[data-lux-fx] .lf-btn.is-log, :root[data-lux-fx] .lf-go.is-live { isolation: isolate; }
 .lf-lux-b i[class*="fx-"] { overflow: hidden; isolation: isolate; }
-/* the sparkle, on the buttons and the swatch */
-:root[data-lux-fx="gem"] .lf-btn.is-log::before, :root[data-lux-fx="pulse"] .lf-btn.is-log::before, .lf-lux-b i.fx-gem::before, .lf-lux-b i.fx-pulse::before {
-  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background: radial-gradient(circle at 18% 30%, #fff 0 1.2px, transparent 2.5px), radial-gradient(circle at 62% 70%, #fff 0 1px, transparent 2.2px), radial-gradient(circle at 84% 24%, #fff 0 1.4px, transparent 2.8px), radial-gradient(circle at 40% 82%, #fff 0 1px, transparent 2px);
+.lf-lux-b i.fx-gem::before, .lf-lux-b i.fx-pulse::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(circle at 25% 30%, #fff 0 1px, transparent 2px), radial-gradient(circle at 65% 70%, #fff 0 1px, transparent 2px), radial-gradient(circle at 78% 30%, #fff 0 1.2px, transparent 2.2px);
   animation: lf-twinkle 2.6s ease-in-out infinite; }
+.lf-lux-b i.fx-pulse { animation: lf-pulse 2.8s ease-in-out infinite; }
+.lf-lux-b i.fx-fizz::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle, rgba(255,255,255,.85) 0 1px, transparent 1.6px) 0 0 / 9px 11px; animation: lf-fizzs 3s linear infinite; }
+@keyframes lf-fizzs { to { background-position: 0 -22px; } }
 @keyframes lf-twinkle { 0%, 100% { opacity: .15; } 30% { opacity: 1; } 55% { opacity: .35; } 75% { opacity: .9; } }
-/* ruby breathes */
-:root[data-lux-fx="pulse"] .lf-btn.is-log, .lf-lux-b i.fx-pulse { animation: lf-pulse 2.8s ease-in-out infinite; }
-@keyframes lf-pulse { 0%, 100% { box-shadow: 0 4px 16px color-mix(in srgb, var(--log) 30%, transparent); } 50% { box-shadow: 0 6px 30px color-mix(in srgb, var(--log) 70%, transparent), 0 0 0 1px color-mix(in srgb, var(--lux-hi) 40%, transparent); } }
-/* champagne's bubbles */
-:root[data-lux-fx="fizz"] .lf-btn.is-log::before, .lf-lux-b i.fx-fizz::before {
-  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .75;
-  background: radial-gradient(circle, rgba(255,255,255,.85) 0 1.2px, transparent 1.8px) 0 0 / 22px 26px, radial-gradient(circle, rgba(255,255,255,.6) 0 .9px, transparent 1.5px) 9px 13px / 17px 21px;
-  animation: lf-fizz 3.5s linear infinite; }
-@keyframes lf-fizz { from { background-position: 0 0, 9px 13px; } to { background-position: 0 -52px, 9px -29px; } }
-@media (prefers-reduced-motion: reduce) { :root[data-lux-fx] .lf-btn.is-log, :root[data-lux-fx] .lf-btn.is-log::before, :root[data-lux-fx] .lf-go.is-live, :root[data-lux-fx] .lf-cell.is-on, :root[data-lux-fx] .lf-set.is-done .lf-chk span, .lf-lux-b i[class*="fx-"], .lf-lux-b i[class*="fx-"]::before { animation: none !important; } }
-/* while a luxury colour is the accent, the main buttons carry a slow sweep of its light */
-:root.lf-lux .lf-btn.is-log { position: relative; overflow: hidden; box-shadow: 0 6px 22px color-mix(in srgb, var(--log) 38%, transparent); }
-:root.lf-lux .lf-btn.is-log::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(110deg, transparent 35%, color-mix(in srgb, var(--lux-hi) 70%, transparent) 50%, transparent 65%); transform: translateX(-110%); animation: lf-luxsw 4.5s ease-in-out infinite; }
-@keyframes lf-luxsw { 0%, 60% { transform: translateX(-110%); } 90%, 100% { transform: translateX(110%); } }
-@media (prefers-reduced-motion: reduce) { .lf-lux-b i::after, :root.lf-lux .lf-btn.is-log::after { animation: none; display: none; } }
+@keyframes lf-pulse { 0%, 100% { box-shadow: 0 0 8px color-mix(in srgb, var(--log) 30%, transparent); } 50% { box-shadow: 0 0 18px color-mix(in srgb, var(--log) 75%, transparent); } }
+/* THE GLOW'S EFFECT: a layer inside the glow, faded out toward the bottom
+   with the glow itself, drawn only while a luxury colour is the accent */
+.lf-luxfx { position: absolute; inset: 0; pointer-events: none; display: none; overflow: hidden;
+  -webkit-mask: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.6) 55%, transparent 100%); mask: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.6) 55%, transparent 100%); }
+:root[data-lux-fx] .lf-luxfx { display: block; }
+.lf-luxfx::before, .lf-luxfx::after { content: ''; position: absolute; inset: 0; }
+/* gem: stars of light scattered through it, twinkling out of step */
+:root[data-lux-fx="gem"] .lf-luxfx::before, :root[data-lux-fx="pulse"] .lf-luxfx::before, :root[data-lux-fx="gem"] .lf-luxfx::after, :root[data-lux-fx="pulse"] .lf-luxfx::after {
+  background: radial-gradient(circle at 8% 22%, var(--lux-hi) 0 1.3px, transparent 3px), radial-gradient(circle at 23% 58%, #fff 0 1px, transparent 2.4px), radial-gradient(circle at 37% 14%, var(--lux-hi) 0 1.6px, transparent 3.4px),
+    radial-gradient(circle at 52% 44%, #fff 0 1px, transparent 2.2px), radial-gradient(circle at 66% 20%, var(--lux-hi) 0 1.2px, transparent 3px), radial-gradient(circle at 81% 52%, #fff 0 1.4px, transparent 3px), radial-gradient(circle at 93% 16%, var(--lux-hi) 0 1px, transparent 2.4px);
+  animation: lf-twinkle 3.2s ease-in-out infinite; }
+:root[data-lux-fx="gem"] .lf-luxfx::after, :root[data-lux-fx="pulse"] .lf-luxfx::after { transform: translate(6%, 18%) scaleX(-1); animation-delay: -1.6s; animation-duration: 2.7s; }
+/* ruby: the whole light breathes */
+:root[data-lux-fx="pulse"] .lf-glow, :root[data-lux-fx="pulse"] .lf-sheet.lf-wsh::before { animation: lf-breath 3.4s ease-in-out infinite; }
+@keyframes lf-breath { 0%, 100% { filter: brightness(.85); } 50% { filter: brightness(1.25) saturate(1.2); } }
+/* metal: a broad band of its light sliding across, slowly */
+:root[data-lux-fx="metal"] .lf-luxfx::before, :root[data-lux-fx="fizz"] .lf-luxfx::before, :root[data-lux-fx="chrome"] .lf-luxfx::before {
+  inset: 0 -60%; background: linear-gradient(105deg, transparent 30%, color-mix(in srgb, var(--lux-hi) 38%, transparent) 46%, color-mix(in srgb, var(--lux-hi) 60%, transparent) 50%, color-mix(in srgb, var(--lux-hi) 38%, transparent) 54%, transparent 70%);
+  animation: lf-sheen 7s ease-in-out infinite alternate; }
+@keyframes lf-sheen { from { transform: translateX(-28%); } to { transform: translateX(28%); } }
+/* chrome: harder bands, two of them, the mirror's stripes */
+:root[data-lux-fx="chrome"] .lf-luxfx::before { background: linear-gradient(105deg, transparent 22%, rgba(255,255,255,.45) 30%, transparent 34%, transparent 52%, rgba(255,255,255,.55) 58%, transparent 62%); animation-duration: 6s; }
+/* champagne: the sheen, and fine bubbles rising through it */
+:root[data-lux-fx="fizz"] .lf-luxfx::after { opacity: .35; background: radial-gradient(circle, var(--lux-hi) 0 1.3px, transparent 2.2px) 0 0 / 71px 83px, radial-gradient(circle, #fff 0 1px, transparent 1.8px) 29px 41px / 53px 67px, radial-gradient(circle, var(--lux-hi) 0 .8px, transparent 1.5px) 47px 12px / 97px 59px; animation: lf-fizzg 9s linear infinite; }
+@keyframes lf-fizzg { to { background-position: 0 -249px, 29px -160px, 47px -165px; } }
+/* iris: a second colour drifting through the light, like the inside of a shell */
+:root[data-lux-fx="iris"] .lf-luxfx::before { background: radial-gradient(60% 70% at 30% 10%, color-mix(in srgb, var(--lux-2) 55%, transparent), transparent 70%); animation: lf-iris 8s ease-in-out infinite alternate; }
+:root[data-lux-fx="iris"] .lf-luxfx::after { background: radial-gradient(50% 60% at 75% 15%, color-mix(in srgb, var(--lux-hi) 35%, transparent), transparent 70%); animation: lf-iris 6s ease-in-out infinite alternate-reverse; }
+@keyframes lf-iris { from { transform: translateX(-18%); } to { transform: translateX(22%); } }
+@media (prefers-reduced-motion: reduce) { .lf-lux-b i[class*="fx-"], .lf-lux-b i[class*="fx-"]::before, .lf-luxfx::before, .lf-luxfx::after, :root[data-lux-fx] .lf-glow, :root[data-lux-fx] .lf-sheet.lf-wsh::before { animation: none !important; } }
 /* the neutrals: a row of chips, each in the shade it takes on this face */
 .lf-neu { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .lf-neu-b { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 4px 8px; border-radius: 14px; background: var(--card2); font-size: 11px; font-weight: 600; color: var(--dim); }
@@ -1039,7 +1042,7 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 </head>
 <body>
 <h1 class="lf-sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">Lift</h1>
-<div class="lf-glow" aria-hidden="true"></div>
+<div class="lf-glow" aria-hidden="true"><div class="lf-luxfx"></div></div>
 <main id="lfMain">
   <section id="lfHome" aria-label="Home"></section>
   <section id="lfCal" aria-label="Calendar" hidden></section>
@@ -2977,6 +2980,8 @@ function lfWeekSheet(m) {
   if (met && got.length) { var bl = el('<div class="lf-fin-l" id="lfWsBg"><div class="lf-cap">Badges this week</div><div class="lf-ws-coins"></div></div>'); got.forEach(function (x) { var it = el('<div class="lf-bdi"><b></b></div>'); it.insertBefore(lfCoinBtn(x, 56), it.firstChild); $('b', it).textContent = x.b.n; $('.lf-ws-coins', bl).appendChild(it); }); b.appendChild(bl); }
   var done = el('<button type="button" class="lf-btn is-log is-full" id="lfWsDone">' + (met ? 'On to next week' : 'Done') + '</button>');
   var s = lfSheet({ title: '', body: b, foot: [done], full: true, cls: 'lf-wsh' }); s.el.classList.add(met ? 'is-met' : 'is-miss');
+  /* the week's glow wears a luxury colour's effect too, when the week was met */
+  if (met) { var lfx = el('<div class="lf-luxfx lf-ws-fx" aria-hidden="true"></div>'); s.el.insertBefore(lfx, s.el.firstChild); }
   s.el.setAttribute('aria-label', 'Week in review, ' + range);
   done.addEventListener('click', function () { s.close(); });
   var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches, n = $('.lf-fin-vol span', b), vol = toDisp(st.vol);
