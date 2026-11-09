@@ -760,6 +760,14 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-ex-pb { display: block; height: 3px; border-radius: 3px; background: var(--card2); margin: 2px 0 8px; overflow: hidden; }
 .lf-ex-pb i { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--log); transition: width .5s cubic-bezier(.3, 1.2, .5, 1); }
 @media (prefers-reduced-motion: reduce) { .lf-set.is-pop, .lf-set.is-pop .lf-chk span, .lf-set.is-pop .lf-chk path { animation: none; stroke-dashoffset: 0; } .lf-ex-pb i { transition: none; } }
+.lf-set.is-wu .lf-wu-n { appearance: none; border: 0; padding: 0; width: 26px; height: 26px; border-radius: 8px; font: inherit; font-size: 11px; font-weight: 800; color: #ffb35c; background: rgba(255,150,40,.14); cursor: pointer; }
+.lf-set.is-wu .lf-prev { font-size: 11px; color: #d99a52; }
+.lf-set.is-wu input { border-style: dashed; }
+.lf-set.is-wu.is-done .lf-chk span { background: #ff9a2e; color: #1a0d00; }
+.lf-set.is-wu.is-done input { background: rgba(255,150,40,.12); }
+.lf-ex-ft button.lf-wu-add { color: #ffb35c; }
+.lf-wu-l { margin: 2px 0 2px; display: flex; gap: 8px; align-items: center; font-size: 12.5px; color: var(--quiet); }
+.lf-wu-l i { font-style: normal; font-size: 10px; font-weight: 800; color: #ffb35c; background: rgba(255,150,40,.14); border-radius: 5px; padding: 1px 5px; }
 .lf-set .lf-sn.is-pr { color: var(--today-ink); font-size: 11px; font-weight: 800; letter-spacing: .02em; }
 /* a rep record's mark: smaller than a PR, in a pill of its own */
 .lf-set .lf-sn.is-rp { justify-self: center; padding: 2px 5px; border-radius: 6px; font-size: 9.5px; font-weight: 800; letter-spacing: .04em; color: var(--today-ink); background: color-mix(in srgb, var(--log) 16%, transparent); }
@@ -1724,8 +1732,13 @@ function lfClean(o) {
 function lfCleanWo(w) {
   if (!w || typeof w !== 'object' || !/^\d{4}-\d\d-\d\d$/.test(w.d)) return null;
   var x = Array.isArray(w.x) ? w.x.filter(function (e) { return e && typeof e.id === 'string'; }).map(function (e) {
-    return { id: e.id, n: typeof e.n === 'string' ? e.n : '', sets: (Array.isArray(e.sets) ? e.sets : [])
+    var o = { id: e.id, n: typeof e.n === 'string' ? e.n : '', sets: (Array.isArray(e.sets) ? e.sets : [])
       .filter(function (s) { return s && num(s.r) !== null && num(s.w) !== null; }).map(function (s) { return { w: capW(+s.w), r: capR(Math.round(+s.r)) }; }) };
+    /* WARM-UPS are kept beside the sets, never among them: they are there to
+       be seen, and nothing that counts sets, volume or records reads this */
+    var wu = (Array.isArray(e.wu) ? e.wu : []).filter(function (s) { return s && num(s.r) !== null && num(s.w) !== null && +s.r > 0; }).slice(0, 10).map(function (s) { return { w: capW(+s.w), r: capR(Math.round(+s.r)) }; });
+    if (wu.length) o.wu = wu;
+    return o;
   }).filter(function (e) { return e.sets.length; }) : [];
   return { id: typeof w.id === 'string' ? w.id : lfId(), d: w.d, s: +w.s || 0, e: +w.e || 0, n: typeof w.n === 'string' ? w.n.slice(0, 40) : 'Workout', rt: typeof w.rt === 'string' ? w.rt : null, x: x, cd: lfCleanCd(w.cd) };
 }
@@ -1753,6 +1766,7 @@ function lfLoadAct() {
     var a = JSON.parse(localStorage.getItem(ACTK));
     if (!a || !Array.isArray(a.x) || !a.s) return null;
     a.x = a.x.filter(function (e) { return e && typeof e.id === 'string' && Array.isArray(e.sets); });
+    a.x.forEach(function (e) { if (e.wu && !Array.isArray(e.wu)) delete e.wu; });
     a.cd = lfCleanCd(a.cd);
     return a;
   } catch (e) { return null; }
@@ -2722,6 +2736,29 @@ function lfPaintSession() {
       var go = function () { act.x.splice(ei, 1); lfSaveAct(); lfPaintSession(); };
       if (e.sets.some(function (s) { return s.ok; })) lfAsk('Remove ' + e.n + '?', 'The sets you logged for it in this workout go with it.', 'Remove', go); else go();
     });
+    /* WARM-UP ROWS, marked W: the same row, ticked the same way, but no
+       record is judged on one, no rest timer starts, and it is not a set */
+    (e.wu || []).forEach(function (s, wi0) {
+      var row = el('<div class="lf-set is-wu"><button type="button" class="lf-sn lf-wu-n">W</button><span class="lf-prev">Warm-up</span><input type="text" inputmode="decimal" autocomplete="off" /><input type="text" inputmode="numeric" autocomplete="off" /><button type="button" class="lf-chk"><span>' + IC.check + '</span></button></div>');
+      row.classList.toggle('is-done', !!s.ok);
+      var wi = $$('input', row)[0], ri = $$('input', row)[1], chk = $('.lf-chk', row), wn = $('.lf-wu-n', row);
+      wi.setAttribute('aria-label', 'Warm-up ' + (wi0 + 1) + ' weight in ' + S.unit); ri.setAttribute('aria-label', 'Warm-up ' + (wi0 + 1) + ' reps');
+      wi.placeholder = S.unit; ri.placeholder = 'reps';
+      if (s.w !== '' && s.w != null) wi.value = fmtWS(s.w);
+      if (s.r !== '' && s.r != null) ri.value = s.r;
+      wi.addEventListener('input', function () { lfCapIn(wi, Math.floor(toDisp(W_MAX))); var v = parseFloat(wi.value); s.w = isFinite(v) && v >= 0 ? capW(fromDisp(v)) : ''; lfSaveAct(); });
+      ri.addEventListener('input', function () { lfCapIn(ri, REP_MAX); var v = parseInt(ri.value, 10); s.r = isFinite(v) && v >= 0 ? capR(v) : ''; lfSaveAct(); });
+      wn.setAttribute('aria-label', 'Remove warm-up ' + (wi0 + 1));
+      wn.addEventListener('click', function () { e.wu.splice(wi0, 1); lfSaveAct(); lfPaintSession(); });
+      chk.setAttribute('aria-pressed', s.ok ? 'true' : 'false'); chk.setAttribute('aria-label', 'Log warm-up ' + (wi0 + 1));
+      chk.addEventListener('click', function () {
+        if (s.ok) { s.ok = 0; lfSaveAct(); lfPaintSession(); return; }
+        if (s.w === '' || s.w == null) s.w = exById(e.id) && exById(e.id).t === 'bw' ? 0 : '';
+        if (s.w === '' || s.r === '' || s.r == null || !(s.r > 0)) { lfToast('Put in the weight and reps first'); (s.w === '' ? wi : ri).focus(); return; }
+        s.ok = 1; buzz(10); lfSaveAct(); lfPaintSession();
+      });
+      card.appendChild(row);
+    });
     e.sets.forEach(function (s, si) {
       var p = prev[si] || prev[prev.length - 1];
       var g = aim.sets[si] || aim.sets[aim.sets.length - 1];
@@ -2774,8 +2811,11 @@ function lfPaintSession() {
       });
       card.appendChild(row);
     });
-    var ft = el('<div class="lf-ex-ft"><button type="button">+ Add set</button><button type="button">Remove set</button></div>');
+    var ft = el('<div class="lf-ex-ft"><button type="button">+ Add set</button><button type="button">Remove set</button><button type="button" class="lf-wu-add">+ Warm-up</button></div>');
     var bs = $$('button', ft);
+    /* a warm-up goes in above the first set, starting from the last one's weight */
+    bs[2].disabled = (e.wu || []).length >= 10;
+    bs[2].addEventListener('click', function () { e.wu = e.wu || []; var l = e.wu[e.wu.length - 1]; e.wu.push({ w: l && l.w !== '' ? l.w : '', r: '', ok: 0 }); lfSaveAct(); lfPaintSession(); });
     bs[0].addEventListener('click', function () { var l = e.sets[e.sets.length - 1]; e.sets.push({ w: l && l.w !== '' ? l.w : '', r: '', ok: 0 }); lfSaveAct(); lfPaintSession(); });
     bs[1].disabled = e.sets.length <= 1;
     bs[1].addEventListener('click', function () { if (e.sets.length > 1) { e.sets.pop(); lfSaveAct(); lfPaintSession(); } });
@@ -2867,9 +2907,18 @@ function lfRepBurst(x, y) {
   setTimeout(function () { bu.remove(); }, 1100);
 }
 
+function lfWuLine(x, e) {
+  if (!e.wu || !e.wu.length) return;
+  var p = el('<p class="lf-wu-l"><i>W</i><span></span></p>');
+  $('span', p).textContent = e.wu.map(function (q) { return fmtWS(q.w) + ' × ' + q.r; }).join('   ·   ');
+  x.insertBefore(p, $('div', x));
+}
 function lfFinish() {
   var x = act.x.map(function (e) {
-    return { id: e.id, n: e.n, sets: e.sets.filter(function (s) { return s.ok && s.r > 0; }).map(function (s) { return { w: +s.w || 0, r: +s.r }; }) };
+    var o = { id: e.id, n: e.n, sets: e.sets.filter(function (s) { return s.ok && s.r > 0; }).map(function (s) { return { w: +s.w || 0, r: +s.r }; }) };
+    var wu = (e.wu || []).filter(function (s) { return s.ok && s.r > 0; }).map(function (s) { return { w: +s.w || 0, r: +s.r }; });
+    if (wu.length) o.wu = wu;
+    return o;
   }).filter(function (e) { return e.sets.length; });
   var cd = lfCleanCd(act.cd);
   if (!x.length && !cd) {
@@ -2941,6 +2990,7 @@ function lfSummary(w, prs, review) {
       var x = el('<button type="button" class="lf-wo-ex lf-tap"><b></b><div></div></button>');
       $('b', x).textContent = exName(e.id, e.n);
       $('div', x).textContent = e.sets.map(function (q) { return fmtWS(q.w) + ' × ' + q.r; }).join('   ·   ');
+      lfWuLine(x, e);
       x.addEventListener('click', function () { lfExSheet(e.id); });
       sl.appendChild(x);
     });
@@ -3591,6 +3641,7 @@ function lfWoSheet(w, editable) {
     var x = el('<button type="button" class="lf-wo-ex lf-tap"><b></b><div></div></button>');
     $('b', x).textContent = exName(e.id, e.n);
     $('div', x).textContent = e.sets.map(function (s) { return fmtWS(s.w) + ' × ' + s.r; }).join('   ·   ');
+    lfWuLine(x, e);
     x.addEventListener('click', function () { lfExSheet(e.id); });
     b.appendChild(x);
   });
@@ -6017,8 +6068,8 @@ function lfCoinView(x, earnedNow) {
       if (!drag) { vy *= .955; vx *= .9; if (Math.abs(vy) < .02) ry += (Math.round(ry / Math.PI) * Math.PI + .26 - ry) * .08; ry += vy; rx += vx; rx += (.12 - rx) * .06; }
       var sw = calm || drag ? 0 : Math.sin((performance.now() - t0) / 1000 * .9) * .05;
       aw.rotation.set(rx + sw * .4, ry + sw, 0);
-      if (aw.userData.flow) { var tt = performance.now() / 1000; aw.userData.flow.offset.set(Math.sin(tt * .21) * .12, -tt * .045); aw.userData.flow2.offset.set(tt * .03, Math.cos(tt * .17) * .1); aw.userData.haze.opacity = .17 + Math.sin(tt * 1.9) * .05; var ph = tt % 3.6, gp = ph / 1.1, g2 = (ph - .45) / 1.1; aw.userData.glint.forEach(function (t, i) { var q = i ? g2 : gp; t.offset.x = q > 0 && q < 1 ? (i ? -.8 + q * 1.6 : .8 - q * 1.6) : 2; });
-        /* the lava surges as the light crosses it, then settles */ var sg = 1 + 1.6 * Math.exp(-Math.pow((ph - .5) / .35, 2)) + Math.sin(tt * 3.3) * .15; aw.userData.lavaM.forEach(function (m) { m.color.setScalar(sg); }); }
+      if (aw.userData.flow) { var tt = performance.now() / 1000; aw.userData.flow.offset.set(Math.sin(tt * .21) * .12, -tt * .045); aw.userData.flow2.offset.set(tt * .03, Math.cos(tt * .17) * .1); aw.userData.haze.opacity = .17 + Math.sin(tt * 1.9) * .05; var phs = tt % 3.6, gp = phs / 1.1, g2 = (phs - .45) / 1.1; aw.userData.glint.forEach(function (t, i) { var q = i ? g2 : gp; t.offset.x = q > 0 && q < 1 ? (i ? -.8 + q * 1.6 : .8 - q * 1.6) : 2; });
+        /* the lava surges as the light crosses it, then settles */ var sg = 1 + 1.6 * Math.exp(-Math.pow((phs - .5) / .35, 2)) + Math.sin(tt * 3.3) * .15; aw.userData.lavaM.forEach(function (m) { m.color.setScalar(sg); }); }
       r.render(sc, cam);
       if (ph.parentNode) { r.domElement.classList.add('is-on'); setTimeout(function () { ph.remove(); }, 220); }
     })();

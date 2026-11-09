@@ -326,9 +326,20 @@ const freeze = (at) => `(() => {
   await set(0, 2).locator('input').nth(1).fill('9'); await set(0, 2).locator('input').nth(1).blur(); await page.waitForTimeout(200);
   ok('one more rep, typed in after the tick, is a rep record with its own smaller burst', (await set(0, 2).locator('.lf-sn').textContent()) === 'REP' && await page.evaluate(() => window.lfReps) === 1 && await page.evaluate(() => window.lfBursts) === 1);
   ok('and is kept as a rep record, not a PR', await page.evaluate(() => { const q = JSON.parse(localStorage.getItem('lift.active.v1')).x[0].sets[2]; return q.rp === 1 && !q.pr; }));
+  /* WARM-UPS: a row marked W above the sets, ticked like one, kept beside them and never counted as one */
+  await page.locator('.lf-session .lf-ex').first().locator('.lf-ex-ft .lf-wu-add').click(); await settle(page);
+  const wu = page.locator('.lf-session .lf-ex').first().locator('.lf-set.is-wu');
+  ok('+ Warm-up puts a W row in above the first set', await wu.count() === 1 && (await wu.locator('.lf-wu-n').textContent()) === 'W' && await page.evaluate(() => { const r = document.querySelector('.lf-session .lf-ex .lf-set.is-wu'); return r.nextElementSibling && !r.nextElementSibling.classList.contains('is-wu'); }));
+  await wu.locator('input').nth(0).fill('40'); await wu.locator('input').nth(1).fill('10'); await wu.locator('.lf-chk').click(); await settle(page);
+  ok('ticking it logs it, with no record judged and no rest timer', await page.locator('.lf-session .lf-ex').first().locator('.lf-set.is-wu.is-done').count() === 1 && (await page.evaluate(() => JSON.parse(localStorage.getItem('lift.active.v1')).x[0].wu[0])).ok === 1 && await page.evaluate(() => window.lfBursts) === 1);
   await page.waitForTimeout(1800);
   await page.click('#lfFinish'); await page.waitForTimeout(800);
   await page.keyboard.press('Escape'); await settle(page);
+  await page.click('.lf-bar [data-v="home"]'); await settle(page);
+  await page.click('#lfPick'); await settle(page);
+  ok('today\'s sets show the warm-up, marked W, before them', /40 × 10/.test(await top(page).locator('#lfFinSets .lf-wu-l').first().textContent()));
+  await page.keyboard.press('Escape'); await settle(page);
+  ok('it is saved beside the sets, never as one of them', await page.evaluate(() => { const w = JSON.parse(localStorage.getItem('lift.v1')).wo.find((o) => o.d === '2026-10-30'); const e = w.x[0]; return e.wu.length === 1 && e.wu[0].w === 40 && e.wu[0].r === 10 && e.sets.length === 3 && !e.sets.some((q) => q.w === 40 && q.r === 10); }));
   await page.evaluate(() => { const s = JSON.parse(localStorage.getItem('lift.v1')); s.wo.forEach((w) => { if (w.d === '2026-10-29') w.d = '2026-10-30'; }); delete s.rd['2026-10-29']; localStorage.setItem('lift.v1', JSON.stringify(s)); });
   await page.reload(); await page.waitForTimeout(400);
 
