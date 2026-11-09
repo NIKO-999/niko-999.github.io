@@ -1326,6 +1326,13 @@ const freeze = (at) => `(() => {
     ok('the link is spent: the hash leaves the address bar', await page.evaluate(() => location.hash === '' && /^\d{4}-\d\d-\d\d$/.test(localStorage.getItem('lift.owner.v1') || '')));
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     ok('and the owner badge is on the shelf, its own tier, with lava running through it', await page.locator('#lfBadges .lf-coin.is-t5[data-b="owner"] .lf-lava').count() === 1 && /owner: 'dumbbell'/.test(require('fs').readFileSync(require('path').join(__dirname, '../lift/index.html'), 'utf8')) && await page.locator('#lfBadges .lf-coin[data-b="owner"] .lf-embers s').count() === 6);
+    /* on the Home Screen the link never arrives: the code pasted into Restore does the same */
+    const h = await ctx({ unit: 'kg', goal: 3, wo });
+    await h.page.click('.lf-bar [data-v="you"]'); await settle(h.page);
+    await h.page.click('#lfRestore'); await settle(h.page);
+    await h.page.fill('.lf-sheet textarea', 'owner-k7q4x9lz'); await h.page.click('.lf-sheet .lf-btn.is-log'); await h.page.waitForTimeout(700);
+    ok('pasting the code into Restore unlocks it, and restores nothing', await h.page.evaluate(() => !!localStorage.getItem('lift.owner.v1')) && await h.page.locator('#lfBadges .lf-coin[data-b="owner"]').count() === 1 && (await store(h.page)).wo.length === 1);
+    await h.c.close();
     await c.close();
   }
 

@@ -3905,6 +3905,13 @@ function lfRestore() {
   var go = el('<button type="button" class="lf-btn is-log is-full">Restore</button>');
   var s = lfSheet({ title: 'Restore', body: b, foot: [go] });
   go.addEventListener('click', function () {
+    /* THE OWNER'S CODE goes in here too. A Home Screen app keeps its own
+       storage and has no address bar, so the unlock link opened in Safari
+       never reaches it: pasting the code or the link here does */
+    if (/owner-k7q4x9lz/.test($('textarea', b).value)) {
+      try { if (!lfOwner()) localStorage.setItem('lift.owner.v1', ymd(today())); } catch (e) {}
+      s.close(true); lfRender(); lfToast('Owner badge unlocked'); buzz([20, 60, 20, 60, 40]); return;
+    }
     var o; try { o = JSON.parse($('textarea', b).value); } catch (e) { lfToast('That is not a backup'); return; }
     if (!o || typeof o !== 'object' || !Array.isArray(o.wo)) { lfToast('That is not a backup'); return; }
     var snap = JSON.stringify(S);
