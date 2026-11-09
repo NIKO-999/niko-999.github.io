@@ -849,7 +849,10 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
   filter: blur(3px); opacity: 1; animation: lf-halo 7s linear infinite; }
 .lf-coin.is-fx.is-t3 img { filter: drop-shadow(0 0 12px color-mix(in srgb, var(--gl) 85%, transparent)) drop-shadow(0 2px 4px rgba(0,0,0,.4)); }
 .lf-cv-stage.is-fx.is-t3 { background: radial-gradient(closest-side, color-mix(in srgb, var(--gl) 58%, transparent), color-mix(in srgb, var(--gl) 18%, transparent) 55%, transparent 80%); }
-.lf-coin.is-sn img { filter: drop-shadow(0 0 5px color-mix(in srgb, var(--gl) 45%, transparent)) drop-shadow(0 2px 4px rgba(0,0,0,.4)); }
+.lf-coin.is-sn img { filter: drop-shadow(0 0 9px color-mix(in srgb, var(--gl) 60%, transparent)) drop-shadow(0 2px 4px rgba(0,0,0,.4)); }
+/* A WON BADGE THAT TOOK SOME DOING GLOWS in its own colour: a soft, still
+   light, quieter than a finish's breathing one, which stays for the rare */
+.lf-coin.is-sn::before { content: ''; position: absolute; inset: -10%; border-radius: 50%; pointer-events: none; background: radial-gradient(closest-side, color-mix(in srgb, var(--gl) 38%, transparent), transparent); }
 @media (prefers-reduced-motion: reduce) { .lf-coin.is-fx::before, .lf-coin.is-fx.is-t3::before { animation: none; } }
 .lf-coin:has(img[src]) { background: none; box-shadow: none; }
 .lf-coin:active img { transform: scale(.94); }
@@ -4636,12 +4639,13 @@ var BD_FX = { night: 'galaxy', dawn: 'sunrise', onfire: 'lava', winter: 'ice', l
   wo100: 'galaxy', st26: 'opal', v5m: 'molten', pr100: 'neon', abs100: 'emerald', duo50: 'aurora', lead10: 'sunrise', ton20: 'carbon', rep2k: 'lava', leg200: 'ice', year: 'opal',
   chest100: 'lava', chest200: 'molten', bk100: 'ice', bk200: 'galaxy', sh100: 'sunrise', sh200: 'opal', arm100: 'neon', arm200: 'carbon',
   /* versus friends, won once: always rare, always lit */
-  duo1: 'aurora', lead1: 'molten', squad: 'emerald', wave: 'aurora', trio: 'opal', landslide: 'lava', photo: 'ice', pack: 'sunrise',
+  lead1: 'molten', squad: 'emerald', wave: 'aurora', trio: 'opal', landslide: 'lava', photo: 'ice', pack: 'sunrise',
   /* the new rare ones */
   zero: 'neon', newyear: 'galaxy', century: 'carbon', heavy2: 'molten', twice: 'emerald' };
 var BD_HALO = { wo100: 1, st26: 1, v5m: 1, pr100: 1, abs100: 1, duo50: 1, lead10: 1, ton20: 1, rep2k: 1, leg200: 1, year: 1, chest200: 1, bk200: 1, sh200: 1, arm200: 1 };
 var BD_SHEEN = { wo10: 1, st4: 1, tgtall: 1, tgt4: 1, quad: 1, v100k: 1, stair10: 1, incl10: 1, abs10: 1, early: 1, owl: 1, ton10: 1, rep300: 1, seven: 1,
-  explore: 1, wkend: 1, weigh: 1, cardio25: 1, leg50: 1, sets30: 1, plate3: 1, week: 1, squad: 1, long: 1, pr3: 1 };
+  explore: 1, wkend: 1, weigh: 1, cardio25: 1, leg50: 1, sets30: 1, plate3: 1, week: 1, squad: 1, long: 1, pr3: 1,
+  chest50: 1, bk50: 1, sh50: 1, arm50: 1 };
 /* the light each finish gives off */
 var BD_FXGL = { galaxy: '#8b7cff', sunrise: '#ffb347', lava: '#ff5a1f', ice: '#8fd8ff', aurora: '#3dffb0', neon: '#ff3df2', molten: '#ffc94a', opal: '#d9c8ff', carbon: '#7aa2ff', emerald: '#2ee68a' };
 var BADGES = [

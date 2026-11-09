@@ -1293,7 +1293,9 @@ const freeze = (at) => `(() => {
     ok('back, shoulders and arms have theirs too', 'Back Legend' in m && 'Shoulder Immortal' in m && 'Arm Hero' in m);
     ok('two workouts in one day is a rare one', m['Two-a-Day'] === '1 Jun', m['Two-a-Day']);
     ok('the rare versus-friends badges are there, five of them', ['Same Wavelength', "Three's Company", 'Landslide', 'Photo Finish', 'Pack Leader'].every((n) => n in m));
-    ok('and a friends badge won once wears a rare finish, In Sync among them', await page.evaluate(() => { const c = document.querySelector('#lfBadges .lf-coin[data-b="duo1"]'); return !!c; }));
+    ok('ten workouts glow softly in their own colour, fifty wear a finish', await page.evaluate(() => {
+      const w10 = document.querySelector('#lfBadges .lf-coin[data-b="wo10"]'), w50 = document.querySelector('#lfBadges .lf-coin[data-b="wo50"]');
+      return w10.classList.contains('is-sn') && getComputedStyle(w10, '::before').content !== 'none' && w50.classList.contains('is-fx'); }));
     await c.close();
   }
 
