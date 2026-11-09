@@ -768,6 +768,27 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-ex-ft button.lf-wu-add { color: #ffb35c; }
 .lf-wu-l { margin: 2px 0 2px; display: flex; gap: 8px; align-items: center; font-size: 12.5px; color: var(--quiet); }
 .lf-wu-l i { font-style: normal; font-size: 10px; font-weight: 800; color: #ffb35c; background: rgba(255,150,40,.14); border-radius: 5px; padding: 1px 5px; }
+.lf-ex { overflow: clip; }
+.lf-set.is-sw { position: relative; touch-action: pan-y; }
+.lf-set.is-sw::after { content: 'Remove'; position: absolute; top: 2px; bottom: 2px; left: calc(100% + 10px); width: 120px; border-radius: 12px; display: flex; align-items: center; padding-left: 16px;
+  font-size: 13px; font-weight: 700; color: #fff; background: linear-gradient(90deg, #ff453a, #ff2d55); opacity: var(--sw, 0); box-shadow: 0 0 calc(var(--sw, 0) * 22px) rgba(255,69,58,.6); pointer-events: none; }
+.lf-set.is-drag { transition: none; }
+.lf-set.is-back { transition: transform .26s cubic-bezier(.3, 1.5, .5, 1); }
+.lf-set.is-gone { pointer-events: none; overflow: hidden; animation: lf-swgone .42s cubic-bezier(.5, 0, .75, 0) forwards; }
+.lf-set.is-gone::after { opacity: 0; }
+@keyframes lf-swgone {
+  0% { transform: translateX(-30%); opacity: 1; filter: none; max-height: var(--h); }
+  45% { transform: translateX(-75%) scale(.94); opacity: .45; filter: blur(3px) saturate(1.6); max-height: var(--h); }
+  70% { transform: translateX(-110%) scale(.85); opacity: 0; filter: blur(8px); max-height: var(--h); min-height: 0; }
+  100% { transform: translateX(-110%) scale(.8); opacity: 0; max-height: 0; min-height: 0; margin: 0; padding: 0; } }
+@media (prefers-reduced-motion: reduce) { .lf-set.is-gone { animation-duration: .01s; } .lf-set.is-back { transition: none; } }
+.lf-set.is-drop { min-height: 40px; }
+.lf-set.is-drop .lf-dr-n { appearance: none; border: 0; padding: 0; width: 26px; height: 26px; border-radius: 8px; font: inherit; font-size: 14px; font-weight: 800; color: #c4b0ff; background: rgba(150,120,255,.15); cursor: pointer; }
+.lf-set.is-drop .lf-prev { font-size: 11px; color: #a995f0; }
+.lf-set.is-drop input { border-style: dashed; }
+.lf-set.is-drop.is-done .lf-chk span { background: #9b7dff; color: #fff; }
+.lf-set.is-drop.is-done input { background: rgba(150,120,255,.12); }
+.lf-ex-ft button.lf-drop-add { color: #c4b0ff; }
 .lf-set .lf-sn.is-pr { color: var(--today-ink); font-size: 11px; font-weight: 800; letter-spacing: .02em; }
 /* a rep record's mark: smaller than a PR, in a pill of its own */
 .lf-set .lf-sn.is-rp { justify-self: center; padding: 2px 5px; border-radius: 6px; font-size: 9.5px; font-weight: 800; letter-spacing: .04em; color: var(--today-ink); background: color-mix(in srgb, var(--log) 16%, transparent); }
@@ -1733,7 +1754,12 @@ function lfCleanWo(w) {
   if (!w || typeof w !== 'object' || !/^\d{4}-\d\d-\d\d$/.test(w.d)) return null;
   var x = Array.isArray(w.x) ? w.x.filter(function (e) { return e && typeof e.id === 'string'; }).map(function (e) {
     var o = { id: e.id, n: typeof e.n === 'string' ? e.n : '', sets: (Array.isArray(e.sets) ? e.sets : [])
-      .filter(function (s) { return s && num(s.r) !== null && num(s.w) !== null; }).map(function (s) { return { w: capW(+s.w), r: capR(Math.round(+s.r)) }; }) };
+      .filter(function (s) { return s && num(s.r) !== null && num(s.w) !== null; }).map(function (s) {
+        var q = { w: capW(+s.w), r: capR(Math.round(+s.r)) };
+        /* A DROP SET belongs to the set it follows: kept on it, never counted as a set of its own */
+        var ds = (Array.isArray(s.ds) ? s.ds : []).filter(function (d) { return d && num(d.r) !== null && num(d.w) !== null && +d.r > 0; }).slice(0, 6).map(function (d) { return { w: capW(+d.w), r: capR(Math.round(+d.r)) }; });
+        if (ds.length) q.ds = ds;
+        return q; }) };
     /* WARM-UPS are kept beside the sets, never among them: they are there to
        be seen, and nothing that counts sets, volume or records reads this */
     var wu = (Array.isArray(e.wu) ? e.wu : []).filter(function (s) { return s && num(s.r) !== null && num(s.w) !== null && +s.r > 0; }).slice(0, 10).map(function (s) { return { w: capW(+s.w), r: capR(Math.round(+s.r)) }; });
@@ -2717,7 +2743,7 @@ var lfCurGo = 0;
 function lfScrollCur(smooth) {
   var list = $('#lfExList'), bd = list && list.closest('.lf-sh-bd'); if (!bd) return;
   var cards = $$('.lf-ex', list), cur = null;
-  for (var i = 0; i < cards.length; i++) if ($('.lf-set:not(.is-hd):not(.is-wu):not(.is-done)', cards[i])) { cur = cards[i]; break; }
+  for (var i = 0; i < cards.length; i++) if ($('.lf-set:not(.is-hd):not(.is-wu):not(.is-drop):not(.is-done)', cards[i])) { cur = cards[i]; break; }
   if (!cur) return;
   var to = Math.max(0, bd.scrollTop + cur.getBoundingClientRect().top - bd.getBoundingClientRect().top - 8);
   if (Math.abs(to - bd.scrollTop) < 4) return;
@@ -2725,7 +2751,9 @@ function lfScrollCur(smooth) {
 }
 function lfPaintSession() {
   var list = $('#lfExList'); if (!list) return;
-  if (lfCurGo) { var cg = lfCurGo; lfCurGo = 0; requestAnimationFrame(function () { lfScrollCur(cg === 1 && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)); }); }
+  if (lfCurGo) { var cg = lfCurGo; lfCurGo = 0; requestAnimationFrame(function () { lfScrollCur(cg === 1 && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)); });
+    /* on opening, the sheet is still sliding up a frame later: placed again once it has arrived */
+    if (cg === 2) [180, 420].forEach(function (t) { setTimeout(function () { lfScrollCur(false); }, t); }); }
   list.textContent = '';
   act.x.forEach(function (e, ei) {
     var prev = lastFor(e.id) || [];
@@ -2754,7 +2782,7 @@ function lfPaintSession() {
     /* WARM-UP ROWS, marked W: the same row, ticked the same way, but no
        record is judged on one, no rest timer starts, and it is not a set */
     (e.wu || []).forEach(function (s, wi0) {
-      var row = el('<div class="lf-set is-wu"><button type="button" class="lf-sn lf-wu-n">W</button><span class="lf-prev">Warm-up</span><input type="text" inputmode="decimal" autocomplete="off" /><input type="text" inputmode="numeric" autocomplete="off" /><button type="button" class="lf-chk"><span>' + IC.check + '</span></button></div>');
+      var row = el('<div class="lf-set is-wu"><span class="lf-sn lf-wu-n">W</span><span class="lf-prev">Warm-up</span><input type="text" inputmode="decimal" autocomplete="off" /><input type="text" inputmode="numeric" autocomplete="off" /><button type="button" class="lf-chk"><span>' + IC.check + '</span></button></div>');
       row.classList.toggle('is-done', !!s.ok);
       var wi = $$('input', row)[0], ri = $$('input', row)[1], chk = $('.lf-chk', row), wn = $('.lf-wu-n', row);
       wi.setAttribute('aria-label', 'Warm-up ' + (wi0 + 1) + ' weight in ' + S.unit); ri.setAttribute('aria-label', 'Warm-up ' + (wi0 + 1) + ' reps');
@@ -2763,8 +2791,7 @@ function lfPaintSession() {
       if (s.r !== '' && s.r != null) ri.value = s.r;
       wi.addEventListener('input', function () { lfCapIn(wi, Math.floor(toDisp(W_MAX))); var v = parseFloat(wi.value); s.w = isFinite(v) && v >= 0 ? capW(fromDisp(v)) : ''; lfSaveAct(); });
       ri.addEventListener('input', function () { lfCapIn(ri, REP_MAX); var v = parseInt(ri.value, 10); s.r = isFinite(v) && v >= 0 ? capR(v) : ''; lfSaveAct(); });
-      wn.setAttribute('aria-label', 'Remove warm-up ' + (wi0 + 1));
-      wn.addEventListener('click', function () { e.wu.splice(wi0, 1); lfSaveAct(); lfPaintSession(); });
+      lfSwipe(row, function () { e.wu.splice(wi0, 1); }, 'Warm-up removed');
       chk.setAttribute('aria-pressed', s.ok ? 'true' : 'false'); chk.setAttribute('aria-label', 'Log warm-up ' + (wi0 + 1));
       chk.addEventListener('click', function () {
         if (s.ok) { s.ok = 0; lfSaveAct(); lfPaintSession(); return; }
@@ -2824,16 +2851,46 @@ function lfPaintSession() {
         lfPopAt = ei + ':' + si; lfSaveAct(); if (!at) buzz(14); lfCurGo = 1; lfPaintSession(); lfTick();
         if (at) lfCheer(s, at);
       });
+      lfSwipe(row, function () { e.sets.splice(si, 1); }, 'Set removed');
       card.appendChild(row);
+      /* DROP SETS hang off this set, marked ↳: ticked the same way, and the
+         rest starts again from the last of them, but none is a set */
+      (s.ds || []).forEach(function (d, di) {
+        var dr = el('<div class="lf-set is-drop"><span class="lf-sn lf-dr-n">↳</span><span class="lf-prev">Drop ' + (di + 1) + '</span><input type="text" inputmode="decimal" autocomplete="off" /><input type="text" inputmode="numeric" autocomplete="off" /><button type="button" class="lf-chk"><span>' + IC.check + '</span></button></div>');
+        dr.classList.toggle('is-done', !!d.ok);
+        var dw = $$('input', dr)[0], drp = $$('input', dr)[1], dk = $('.lf-chk', dr), dn = $('.lf-dr-n', dr);
+        dw.setAttribute('aria-label', 'Set ' + (si + 1) + ' drop ' + (di + 1) + ' weight in ' + S.unit); drp.setAttribute('aria-label', 'Set ' + (si + 1) + ' drop ' + (di + 1) + ' reps');
+        dw.placeholder = S.unit; drp.placeholder = 'reps';
+        if (d.w !== '' && d.w != null) dw.value = fmtWS(d.w);
+        if (d.r !== '' && d.r != null) drp.value = d.r;
+        dw.addEventListener('input', function () { lfCapIn(dw, Math.floor(toDisp(W_MAX))); var v = parseFloat(dw.value); d.w = isFinite(v) && v >= 0 ? capW(fromDisp(v)) : ''; lfSaveAct(); });
+        drp.addEventListener('input', function () { lfCapIn(drp, REP_MAX); var v = parseInt(drp.value, 10); d.r = isFinite(v) && v >= 0 ? capR(v) : ''; lfSaveAct(); });
+        lfSwipe(dr, function () { s.ds.splice(di, 1); }, 'Drop set removed');
+        dk.setAttribute('aria-pressed', d.ok ? 'true' : 'false'); dk.setAttribute('aria-label', 'Log drop ' + (di + 1) + ' of set ' + (si + 1));
+        dk.addEventListener('click', function () {
+          if (d.ok) { d.ok = 0; lfSaveAct(); lfPaintSession(); return; }
+          if (d.w === '' || d.w == null || d.r === '' || d.r == null || !(d.r > 0)) { lfToast('Put in the weight and reps first'); (d.w === '' || d.w == null ? dw : drp).focus(); return; }
+          d.ok = 1; buzz(12); act.rest = Date.now(); act.restEx = e.id; act.rang = 0; lfRestPush(); lfSaveAct(); lfPaintSession(); lfTick();
+        });
+        card.appendChild(dr);
+      });
     });
-    var ft = el('<div class="lf-ex-ft"><button type="button">+ Add set</button><button type="button">Remove set</button><button type="button" class="lf-wu-add">+ Warm-up</button></div>');
+    var ft = el('<div class="lf-ex-ft"><button type="button">+ Add set</button><button type="button" class="lf-drop-add">+ Drop set</button><button type="button" class="lf-wu-add">+ Warm-up</button></div>');
     var bs = $$('button', ft);
+    /* A DROP SET hangs off the set ticked last, starting a fifth lighter
+       than it (or than the drop before it); a row is taken away by a swipe */
+    bs[1].addEventListener('click', function () {
+      var li = -1; e.sets.forEach(function (q, qi) { if (q.ok) li = qi; });
+      if (li < 0) { lfToast('Tick a set first, then drop from it'); return; }
+      var q = e.sets[li]; q.ds = q.ds || [];
+      if (q.ds.length >= 6) return;
+      var base = q.ds.length ? q.ds[q.ds.length - 1].w : q.w, bw = +base > 0 ? capW(Math.round(+base * .8 / 2.5) * 2.5) : '';
+      q.ds.push({ w: bw, r: '', ok: 0 }); lfSaveAct(); lfPaintSession();
+    });
     /* a warm-up goes in above the first set, starting from the last one's weight */
     bs[2].disabled = (e.wu || []).length >= 10;
     bs[2].addEventListener('click', function () { e.wu = e.wu || []; var l = e.wu[e.wu.length - 1]; e.wu.push({ w: l && l.w !== '' ? l.w : '', r: '', ok: 0 }); lfSaveAct(); lfPaintSession(); });
     bs[0].addEventListener('click', function () { var l = e.sets[e.sets.length - 1]; e.sets.push({ w: l && l.w !== '' ? l.w : '', r: '', ok: 0 }); lfSaveAct(); lfPaintSession(); });
-    bs[1].disabled = e.sets.length <= 1;
-    bs[1].addEventListener('click', function () { if (e.sets.length > 1) { e.sets.pop(); lfSaveAct(); lfPaintSession(); } });
     card.appendChild(ft);
     list.appendChild(card);
   });
@@ -2922,15 +2979,49 @@ function lfRepBurst(x, y) {
   setTimeout(function () { bu.remove(); }, 1100);
 }
 
+function lfSetTxt(q) { return fmtWS(q.w) + ' × ' + q.r + (q.ds && q.ds.length ? q.ds.map(function (d) { return ' ↳ ' + fmtWS(d.w) + ' × ' + d.r; }).join('') : ''); }
 function lfWuLine(x, e) {
   if (!e.wu || !e.wu.length) return;
   var p = el('<p class="lf-wu-l"><i>W</i><span></span></p>');
   $('span', p).textContent = e.wu.map(function (q) { return fmtWS(q.w) + ' × ' + q.r; }).join('   ·   ');
   x.insertBefore(p, $('div', x));
 }
+/* SWIPE A ROW LEFT TO TAKE IT AWAY. It follows the finger with a red
+   strip coming in behind it; let go past the line and it flies off,
+   dissolves and the rows close up over it, with Undo on the toast in
+   place of a question. Short of the line it springs back */
+function lfSwipe(row, take, said) {
+  var x0 = 0, y0 = 0, dx = 0, on = false, dead = false, pid = null;
+  row.classList.add('is-sw');
+  row.addEventListener('pointerdown', function (ev) { if (ev.button > 0) return; x0 = ev.clientX; y0 = ev.clientY; dx = 0; on = false; dead = false; pid = ev.pointerId; });
+  row.addEventListener('pointermove', function (ev) {
+    if (pid !== ev.pointerId || dead) return;
+    var mx = ev.clientX - x0, my = ev.clientY - y0;
+    if (!on) { if (Math.abs(my) > 10 && Math.abs(my) > Math.abs(mx)) { dead = true; return; } if (mx < -12 && Math.abs(mx) > Math.abs(my) * 1.4) { on = true; row.classList.add('is-drag'); try { row.setPointerCapture(ev.pointerId); } catch (e) {} if (document.activeElement && row.contains(document.activeElement)) document.activeElement.blur(); } else return; }
+    dx = Math.min(0, mx); row.style.transform = 'translateX(' + dx + 'px)';
+    row.style.setProperty('--sw', Math.min(1, -dx / 110).toFixed(3));
+  });
+  function end(ev) {
+    if (pid !== ev.pointerId) return; pid = null;
+    if (!on) return; on = false; row.classList.remove('is-drag');
+    if (dx < -Math.min(110, row.offsetWidth * .32)) {
+      var snap = JSON.stringify(act.x);
+      row.style.transform = ''; row.style.setProperty('--h', row.offsetHeight + 'px'); row.classList.add('is-gone'); buzz(14);
+      setTimeout(function () {
+        take(); lfSaveAct(); lfPaintSession();
+        lfToast(said, function () { act.x = JSON.parse(snap); lfSaveAct(); lfPaintSession(); });
+      }, 420);
+    } else { row.classList.add('is-back'); row.style.transform = ''; row.style.removeProperty('--sw'); setTimeout(function () { row.classList.remove('is-back'); }, 260); }
+  }
+  row.addEventListener('pointerup', end); row.addEventListener('pointercancel', end);
+  /* a tap that was really the end of a swipe must not tick the set */
+  row.addEventListener('click', function (ev) { if (Math.abs(dx) > 8) { ev.stopPropagation(); ev.preventDefault(); dx = 0; } }, true);
+}
 function lfFinish() {
   var x = act.x.map(function (e) {
-    var o = { id: e.id, n: e.n, sets: e.sets.filter(function (s) { return s.ok && s.r > 0; }).map(function (s) { return { w: +s.w || 0, r: +s.r }; }) };
+    var o = { id: e.id, n: e.n, sets: e.sets.filter(function (s) { return s.ok && s.r > 0; }).map(function (s) {
+      var q = { w: +s.w || 0, r: +s.r }, ds = (s.ds || []).filter(function (d) { return d.ok && d.r > 0; }).map(function (d) { return { w: +d.w || 0, r: +d.r }; });
+      if (ds.length) q.ds = ds; return q; }) };
     var wu = (e.wu || []).filter(function (s) { return s.ok && s.r > 0; }).map(function (s) { return { w: +s.w || 0, r: +s.r }; });
     if (wu.length) o.wu = wu;
     return o;
@@ -3004,7 +3095,7 @@ function lfSummary(w, prs, review) {
     w.x.forEach(function (e) {
       var x = el('<button type="button" class="lf-wo-ex lf-tap"><b></b><div></div></button>');
       $('b', x).textContent = exName(e.id, e.n);
-      $('div', x).textContent = e.sets.map(function (q) { return fmtWS(q.w) + ' × ' + q.r; }).join('   ·   ');
+      $('div', x).textContent = e.sets.map(lfSetTxt).join('   ·   ');
       lfWuLine(x, e);
       x.addEventListener('click', function () { lfExSheet(e.id); });
       sl.appendChild(x);
@@ -3655,7 +3746,7 @@ function lfWoSheet(w, editable) {
   w.x.forEach(function (e) {
     var x = el('<button type="button" class="lf-wo-ex lf-tap"><b></b><div></div></button>');
     $('b', x).textContent = exName(e.id, e.n);
-    $('div', x).textContent = e.sets.map(function (s) { return fmtWS(s.w) + ' × ' + s.r; }).join('   ·   ');
+    $('div', x).textContent = e.sets.map(lfSetTxt).join('   ·   ');
     lfWuLine(x, e);
     x.addEventListener('click', function () { lfExSheet(e.id); });
     b.appendChild(x);
@@ -3740,7 +3831,7 @@ function lfWoEdit(w) {
     });
   });
   save.addEventListener('click', function () {
-    c.x.forEach(function (e) { e.sets = e.sets.filter(function (q) { return q.r > 0; }).map(function (q) { return { w: q.w, r: q.r }; }); });
+    c.x.forEach(function (e) { e.sets = e.sets.filter(function (q) { return q.r > 0; }).map(function (q) { var o = { w: q.w, r: q.r }; if (q.ds && q.ds.length) o.ds = q.ds; return o; }); });
     c.x = c.x.filter(function (e) { return e.sets.length; });
     if (!c.x.length) { lfToast('A workout needs at least one set'); return; }
     var nd = $('#lfEdD', b).value;

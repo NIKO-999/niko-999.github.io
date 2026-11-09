@@ -326,6 +326,12 @@ const freeze = (at) => `(() => {
   await set(0, 2).locator('input').nth(1).fill('9'); await set(0, 2).locator('input').nth(1).blur(); await page.waitForTimeout(200);
   ok('one more rep, typed in after the tick, is a rep record with its own smaller burst', (await set(0, 2).locator('.lf-sn').textContent()) === 'REP' && await page.evaluate(() => window.lfReps) === 1 && await page.evaluate(() => window.lfBursts) === 1);
   ok('and is kept as a rep record, not a PR', await page.evaluate(() => { const q = JSON.parse(localStorage.getItem('lift.active.v1')).x[0].sets[2]; return q.rp === 1 && !q.pr; }));
+  /* DROP SETS hang off the set they follow: one press under the set ticked last, a fifth lighter, never a set of their own */
+  await page.locator('.lf-session .lf-ex').first().locator('.lf-drop-add').click(); await settle(page);
+  const dr = page.locator('.lf-session .lf-ex').first().locator('.lf-set.is-drop');
+  ok('+ Drop set puts a drop row straight under the set ticked last, a fifth lighter', await dr.count() === 1 && await dr.locator('input').nth(0).inputValue() === '47.5' && await page.evaluate(() => { const d = document.querySelector('.lf-session .lf-ex .lf-set.is-drop'), p = d.previousElementSibling; return p && p.querySelector('.lf-sn') && p.querySelector('.lf-sn').textContent === 'REP'; }));
+  await dr.locator('input').nth(1).fill('10'); await dr.locator('.lf-chk').click(); await settle(page);
+  ok('ticked, it starts the rest again and is kept on its set', await page.locator('.lf-session .lf-ex').first().locator('.lf-set.is-drop.is-done').count() === 1 && (await page.evaluate(() => JSON.parse(localStorage.getItem('lift.active.v1')).x[0].sets[2].ds[0])).ok === 1);
   /* WARM-UPS: a row marked W above the sets, ticked like one, kept beside them and never counted as one */
   await page.locator('.lf-session .lf-ex').first().locator('.lf-ex-ft .lf-wu-add').click(); await settle(page);
   const wu = page.locator('.lf-session .lf-ex').first().locator('.lf-set.is-wu');
@@ -338,8 +344,9 @@ const freeze = (at) => `(() => {
   await page.click('.lf-bar [data-v="home"]'); await settle(page);
   await page.click('#lfPick'); await settle(page);
   ok('today\'s sets show the warm-up, marked W, before them', /40 × 10/.test(await top(page).locator('#lfFinSets .lf-wu-l').first().textContent()));
+  ok('and the drop after the set it hangs off', /× 9 ↳ 47\.5 × 10/.test(await top(page).locator('#lfFinSets .lf-wo-ex div').first().textContent()));
   await page.keyboard.press('Escape'); await settle(page);
-  ok('it is saved beside the sets, never as one of them', await page.evaluate(() => { const w = JSON.parse(localStorage.getItem('lift.v1')).wo.find((o) => o.d === '2026-10-30'); const e = w.x[0]; return e.wu.length === 1 && e.wu[0].w === 40 && e.wu[0].r === 10 && e.sets.length === 3 && !e.sets.some((q) => q.w === 40 && q.r === 10); }));
+  ok('it is saved beside the sets, never as one of them', await page.evaluate(() => { const w = JSON.parse(localStorage.getItem('lift.v1')).wo.find((o) => o.d === '2026-10-30'); const e = w.x[0]; return e.wu.length === 1 && e.wu[0].w === 40 && e.wu[0].r === 10 && e.sets.length === 3 && e.sets[2].ds.length === 1 && e.sets[2].ds[0].w === 47.5 && e.sets[2].ds[0].r === 10 && !e.sets.some((q) => q.w === 40 && q.r === 10); }));
   await page.evaluate(() => { const s = JSON.parse(localStorage.getItem('lift.v1')); s.wo.forEach((w) => { if (w.d === '2026-10-29') w.d = '2026-10-30'; }); delete s.rd['2026-10-29']; localStorage.setItem('lift.v1', JSON.stringify(s)); });
   await page.reload(); await page.waitForTimeout(400);
 
@@ -1341,6 +1348,20 @@ const freeze = (at) => `(() => {
     for (let k = 0; k < 3; k++) { await rows.nth(k).click(); await page.waitForTimeout(250); }
     await page.waitForTimeout(900);
     ok('ticked off, the next exercise comes up to take its place', Math.abs(await topOf(2)) <= 12, await topOf(2));
+    /* SWIPE LEFT TO REMOVE: no Remove set button, the footer is add set, drop set and warm-up */
+    const ft = await page.locator('.lf-session .lf-ex').nth(3).locator('.lf-ex-ft button').allTextContents();
+    ok('the footer is + Add set, + Drop set and + Warm-up, with no Remove set', ft.join('|') === '+ Add set|+ Drop set|+ Warm-up', ft.join('|'));
+    const swipe = async (ex, i, d) => { const b = await page.locator('.lf-session .lf-ex').nth(ex).locator('.lf-set:not(.is-hd)').nth(i).boundingBox(); await page.mouse.move(b.x + b.width - 30, b.y + b.height / 2); await page.mouse.down(); await page.mouse.move(b.x + b.width - 30 - d, b.y + b.height / 2 + 3, { steps: 10 }); await page.mouse.up(); };
+    const n3 = () => page.evaluate(() => JSON.parse(localStorage.getItem('lift.active.v1')).x[3].sets.length);
+    await page.locator('.lf-session .lf-ex').nth(3).scrollIntoViewIfNeeded();
+    await swipe(3, 1, 40); await page.waitForTimeout(600);
+    ok('a short swipe springs back and takes nothing', await n3() === 3 && await page.locator('.lf-session .lf-ex').nth(3).locator('.lf-set:not(.is-hd)').count() === 3);
+    await swipe(3, 1, 200); await page.waitForTimeout(150);
+    ok('a long one sends the row off, dissolving', await page.locator('.lf-set.is-gone').count() === 1);
+    await page.waitForTimeout(700);
+    ok('and it is gone, with Undo on the toast in place of a question', await n3() === 2 && (await page.textContent('.lf-toast')).includes('Set removed') && await page.locator('.lf-sheet .lf-btn', { hasText: 'Keep it' }).count() === 0);
+    await page.click('.lf-toast button'); await page.waitForTimeout(300);
+    ok('Undo puts it back', await n3() === 3);
     await c.close();
   }
 
