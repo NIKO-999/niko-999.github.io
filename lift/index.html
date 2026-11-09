@@ -2680,7 +2680,7 @@ function lfOpenSession() {
     });
   });
   finish.addEventListener('click', lfFinish);
-  lfPaintSession();
+  lfCurGo = 2; lfPaintSession();
   clearInterval(tick);
   tick = setInterval(lfTick, 1000); lfTick();
 }
@@ -2709,8 +2709,23 @@ function lfTick() {
 
 /* Rebuilt on a change of SHAPE — an exercise or a set added or taken
    away — and never on a keystroke, which would take the caret with it. */
+/* THE EXERCISE YOU ARE ON GOES TO THE TOP. Opened, the workout lands on
+   it rather than on the first card; ticked off, the next one comes up to
+   take its place, so the set you are about to do is never down by the
+   rest timer at the foot */
+var lfCurGo = 0;
+function lfScrollCur(smooth) {
+  var list = $('#lfExList'), bd = list && list.closest('.lf-sh-bd'); if (!bd) return;
+  var cards = $$('.lf-ex', list), cur = null;
+  for (var i = 0; i < cards.length; i++) if ($('.lf-set:not(.is-hd):not(.is-wu):not(.is-done)', cards[i])) { cur = cards[i]; break; }
+  if (!cur) return;
+  var to = Math.max(0, bd.scrollTop + cur.getBoundingClientRect().top - bd.getBoundingClientRect().top - 8);
+  if (Math.abs(to - bd.scrollTop) < 4) return;
+  try { bd.scrollTo({ top: to, behavior: smooth ? 'smooth' : 'auto' }); } catch (e) { bd.scrollTop = to; }
+}
 function lfPaintSession() {
   var list = $('#lfExList'); if (!list) return;
+  if (lfCurGo) { var cg = lfCurGo; lfCurGo = 0; requestAnimationFrame(function () { lfScrollCur(cg === 1 && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)); }); }
   list.textContent = '';
   act.x.forEach(function (e, ei) {
     var prev = lastFor(e.id) || [];
@@ -2806,7 +2821,7 @@ function lfPaintSession() {
         lfJudge(e, si, s);
         act.rest = Date.now(); act.restEx = e.id; act.rang = 0; lfRestPush();
         var at = s.pr || s.rp ? $('.lf-sn', row).getBoundingClientRect() : null;
-        lfPopAt = ei + ':' + si; lfSaveAct(); if (!at) buzz(14); lfPaintSession(); lfTick();
+        lfPopAt = ei + ':' + si; lfSaveAct(); if (!at) buzz(14); lfCurGo = 1; lfPaintSession(); lfTick();
         if (at) lfCheer(s, at);
       });
       card.appendChild(row);

@@ -1327,6 +1327,23 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── THE EXERCISE YOU ARE ON comes to the top: on opening, and when the one before it is ticked off ── */
+  {
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo: [] });
+    const mk = (id, n, done) => ({ id, n, sets: [0, 1, 2].map(() => done ? { w: 60, r: 8, ok: 1 } : { w: 60, r: 8, ok: 0 }) });
+    await page.evaluate((x) => localStorage.setItem('lift.active.v1', JSON.stringify({ s: Date.now() - 6e5, n: 'Push', rest: 0, x })), [mk('bench', 'Barbell bench press', 1), mk('ohp', 'Barbell overhead press', 0), mk('dipmach', 'Machine dips', 0), mk('ohdb', 'Overhead dumbbell extensions', 0)]);
+    await page.reload(); await page.waitForTimeout(400);
+    if (!(await page.locator('.lf-session').count())) await page.click('#lfLive');
+    await page.waitForTimeout(700);
+    const topOf = (i) => page.evaluate((i) => { const bd = document.querySelector('.lf-session .lf-sh-bd'), c = document.querySelectorAll('.lf-session .lf-ex')[i]; return Math.round(c.getBoundingClientRect().top - bd.getBoundingClientRect().top); }, i);
+    ok('opened, the workout lands on the exercise you are on, at the top', Math.abs(await topOf(1)) <= 12 && await page.evaluate(() => document.querySelector('.lf-session .lf-sh-bd').scrollTop) > 0, await topOf(1));
+    const rows = page.locator('.lf-session .lf-ex').nth(1).locator('.lf-set:not(.is-hd) .lf-chk');
+    for (let k = 0; k < 3; k++) { await rows.nth(k).click(); await page.waitForTimeout(250); }
+    await page.waitForTimeout(900);
+    ok('ticked off, the next exercise comes up to take its place', Math.abs(await topOf(2)) <= 12, await topOf(2));
+    await c.close();
+  }
+
   /* ── OWNER: one of one, unlocked by its own link, absent without it ── */
   {
     const wo = [{ id: 'o0', d: '2026-10-05', s: 1, e: 2, n: 'Legs', x: [{ id: 'squat', n: 'Squat', sets: [{ w: 100, r: 10 }] }] }];
