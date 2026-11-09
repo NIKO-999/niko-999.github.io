@@ -2739,7 +2739,19 @@ function lfTick() {
    it rather than on the first card; ticked off, the next one comes up to
    take its place, so the set you are about to do is never down by the
    rest timer at the foot */
-var lfCurGo = 0;
+var lfCurGo = 0, lfOrd = null;
+/* THE ORDER CARDS ARE DRAWN IN. Set when the workout opens: what is not
+   finished first, in its order, so the exercise you are on leads, and
+   what is done after it. It holds still while you work, so a card never
+   jumps out from under a tick; an exercise added goes to the top, being
+   the one you are about to do. The workout itself keeps its own order */
+function lfSessOrder(fresh) {
+  var done = function (e) { return e.sets.length && e.sets.every(function (q) { return q.ok; }); };
+  if (fresh || !lfOrd) { lfOrd = act.x.filter(function (e) { return !done(e); }).concat(act.x.filter(done)); return lfOrd; }
+  lfOrd = lfOrd.filter(function (e) { return act.x.indexOf(e) >= 0; });
+  act.x.forEach(function (e) { if (lfOrd.indexOf(e) < 0) lfOrd.unshift(e); });
+  return lfOrd;
+}
 function lfScrollCur(smooth) {
   var list = $('#lfExList'), bd = list && list.closest('.lf-sh-bd'); if (!bd) return;
   var cards = $$('.lf-ex', list), cur = null;
@@ -2751,11 +2763,13 @@ function lfScrollCur(smooth) {
 }
 function lfPaintSession() {
   var list = $('#lfExList'); if (!list) return;
-  if (lfCurGo) { var cg = lfCurGo; lfCurGo = 0; requestAnimationFrame(function () { lfScrollCur(cg === 1 && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)); });
+  var ord = lfSessOrder(lfCurGo === 2);
+  if (lfCurGo) { var cg = lfCurGo; lfCurGo = 0; requestAnimationFrame(function () { if (cg === 3) { var bd0 = list.closest('.lf-sh-bd'); if (bd0) try { bd0.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { bd0.scrollTop = 0; } return; } lfScrollCur(cg === 1 && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)); });
     /* on opening, the sheet is still sliding up a frame later: placed again once it has arrived */
     if (cg === 2) [180, 420].forEach(function (t) { setTimeout(function () { lfScrollCur(false); }, t); }); }
   list.textContent = '';
-  act.x.forEach(function (e, ei) {
+  ord.forEach(function (e) {
+    var ei = act.x.indexOf(e);
     var prev = lastFor(e.id) || [];
     var aim = lfAim(e);
     var card = el('<div class="lf-ex"><div class="lf-ex-hd"><button type="button" class="lf-ex-n"></button><button type="button" class="lf-x" aria-label="Remove exercise">' + IC.x + '</button></div>'
@@ -2895,7 +2909,7 @@ function lfPaintSession() {
     list.appendChild(card);
   });
   var add = el('<button type="button" class="lf-add" id="lfAddEx">' + IC.plus + 'Add exercise</button>');
-  add.addEventListener('click', function () { lfPicker(function (id) { lfAddEx(id); lfSaveAct(); lfPaintSession(); }); });
+  add.addEventListener('click', function () { lfPicker(function (id) { lfAddEx(id); lfSaveAct(); lfCurGo = 3; lfPaintSession(); }); });
   list.appendChild(add);
   var cc = el('<div class="lf-cdc" id="lfCardio"><div class="lf-ex-hd"><b>Cardio after</b><span class="lf-lab lf-cd-sum"></span></div></div>');
   var sum = function () { $('.lf-cd-sum', cc).textContent = act.cd ? lfCdTxt(act.cd) : 'optional'; };
@@ -6481,6 +6495,13 @@ lfRender();
 if (FRS.on) setTimeout(frPush, 1500);
 /* A workout left open when the app was closed comes back up where it was. */
 if (act) lfOpenSession();
+document.addEventListener('visibilitychange', function () {
+  if (document.hidden || !act) return;
+  if (!sessSheet) { lfOpenSession(); return; }
+  /* not while a figure is being typed: a repaint would take the caret */
+  var f = document.activeElement; if (f && /INPUT|TEXTAREA/.test(f.tagName)) return;
+  lfCurGo = 2; lfPaintSession();
+});
 setTimeout(function () { lfWeekSumSoon(); }, 1200);
 document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') setTimeout(function () { lfWeekSumSoon(); }, 800); });
 

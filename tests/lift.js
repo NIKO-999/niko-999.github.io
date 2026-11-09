@@ -1343,16 +1343,18 @@ const freeze = (at) => `(() => {
     if (!(await page.locator('.lf-session').count())) await page.click('#lfLive');
     await page.waitForTimeout(700);
     const topOf = (i) => page.evaluate((i) => { const bd = document.querySelector('.lf-session .lf-sh-bd'), c = document.querySelectorAll('.lf-session .lf-ex')[i]; return Math.round(c.getBoundingClientRect().top - bd.getBoundingClientRect().top); }, i);
-    ok('opened, the workout lands on the exercise you are on, at the top', Math.abs(await topOf(1)) <= 12 && await page.evaluate(() => document.querySelector('.lf-session .lf-sh-bd').scrollTop) > 0, await topOf(1));
-    const rows = page.locator('.lf-session .lf-ex').nth(1).locator('.lf-set:not(.is-hd) .lf-chk');
+    const order = await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.dataset.ex).join());
+    ok('opened, the exercise you are on comes first, the rest still to do after it, and what is done last', order === 'ohp,dipmach,ohdb,bench', order);
+    ok('and it is at the top of the screen', Math.abs(await topOf(0)) <= 12, await topOf(0));
+    const rows = page.locator('.lf-session .lf-ex').nth(0).locator('.lf-set:not(.is-hd) .lf-chk');
     for (let k = 0; k < 3; k++) { await rows.nth(k).click(); await page.waitForTimeout(250); }
     await page.waitForTimeout(900);
-    ok('ticked off, the next exercise comes up to take its place', Math.abs(await topOf(2)) <= 12, await topOf(2));
+    ok('ticked off, the cards hold still and the next one comes up to take its place', Math.abs(await topOf(1)) <= 12 && (await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.dataset.ex).join())) === 'ohp,dipmach,ohdb,bench', await topOf(1));
     /* SWIPE LEFT TO REMOVE: no Remove set button, the footer is add set, drop set and warm-up */
     const ft = await page.locator('.lf-session .lf-ex').nth(3).locator('.lf-ex-ft button').allTextContents();
     ok('the footer is + Add set, + Drop set and + Warm-up, with no Remove set', ft.join('|') === '+ Add set|+ Drop set|+ Warm-up', ft.join('|'));
     const swipe = async (ex, i, d) => { const b = await page.locator('.lf-session .lf-ex').nth(ex).locator('.lf-set:not(.is-hd)').nth(i).boundingBox(); await page.mouse.move(b.x + b.width - 30, b.y + b.height / 2); await page.mouse.down(); await page.mouse.move(b.x + b.width - 30 - d, b.y + b.height / 2 + 3, { steps: 10 }); await page.mouse.up(); };
-    const n3 = () => page.evaluate(() => JSON.parse(localStorage.getItem('lift.active.v1')).x[3].sets.length);
+    const n3 = () => page.evaluate(() => JSON.parse(localStorage.getItem('lift.active.v1')).x[0].sets.length);
     await page.locator('.lf-session .lf-ex').nth(3).scrollIntoViewIfNeeded();
     await swipe(3, 1, 40); await page.waitForTimeout(600);
     ok('a short swipe springs back and takes nothing', await n3() === 3 && await page.locator('.lf-session .lf-ex').nth(3).locator('.lf-set:not(.is-hd)').count() === 3);
