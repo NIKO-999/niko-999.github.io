@@ -814,8 +814,8 @@ const freeze = (at) => `(() => {
     ok('and counts what it had already won as seen', seen && seen.first === 1 && seen.wo10 === 1 && seen.pr === 1 && !seen.st4, seen);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const shelf = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
-    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 63 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
-    ok('and counts them', /4 of 63/.test(await page.textContent('#lfBadges .lf-hd')));
+    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 85 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
+    ok('and counts them', /4 of 85/.test(await page.textContent('#lfBadges .lf-hd')));
     ok('a badge not yet won carries its progress ring', await page.locator('#lfBadges .lf-coin[data-b="wo50"] .lf-bdr').count() === 1 && await page.locator('#lfBadges .lf-coin[data-b="first"] .lf-bdr').count() === 0);
     await page.click('#lfBadges .lf-coin[data-b="wo10"]'); await page.waitForTimeout(60);
     ok('it opens at once, its picture holding the stage while the live award is built', await page.locator('.lf-cv .lf-cv-ph').count() === 1);
@@ -852,9 +852,9 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const st = async () => page.evaluate(() => ['lfSet', 'lfBadges', 'lfFocus'].map((id) => { const b = document.querySelector('#' + id + ' h3 > button'); return b && b.getAttribute('aria-expanded') + ':' + document.getElementById(b.getAttribute('aria-controls')).hidden; }).join());
     ok('settings, badges and focus are shut by default, each a button inside its heading', await st() === 'false:true,false:true,false:true');
-    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 63/.test(await page.textContent('#lfBadges h3')));
+    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 85/.test(await page.textContent('#lfBadges h3')));
     await page.click('#lfSet h3 > button'); await page.click('#lfBadges h3 > button'); await page.click('#lfFocus h3 > button'); await settle(page);
-    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 63);
+    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 85);
     await page.click('#lfUnit [data-u="lb"]'); await settle(page);
     ok('a save redraws the page and keeps what you opened', await st() === 'true:false,true:false,true:false');
     await page.click('#lfUnit [data-u="kg"]'); await settle(page);
@@ -1281,6 +1281,22 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── MORE BADGES: a run of three for every part of you, and new rare ones ── */
+  {
+    const wo = [];
+    for (let i = 0; i < 50; i++) { const d = new Date(2026, 5, 1 + i, 9, 0); wo.push({ id: 'b' + i, d: d.toISOString().slice(0, 10), s: d.getTime(), e: d.getTime() + 3600e3, n: 'Push', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 60, r: 8 }] }] }); }
+    const d2 = new Date(2026, 5, 1, 18, 0); wo.push({ id: 'b2x', d: '2026-06-01', s: d2.getTime(), e: d2.getTime() + 3600e3, n: 'Pull', x: [{ id: 'latpd', n: 'Lat pulldowns', sets: [{ w: 50, r: 10 }] }] });
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-30T18:00:00');
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    const m = Object.fromEntries(await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => [e.querySelector('b').textContent, e.querySelector('span').textContent])));
+    ok('chest has its own run of three, and fifty chest workouts win the first', /Jul|Jun/.test(m['Chest Legend']) && m['Chest Hero'] === '50 / 100' && m['Chest Immortal'] === '50 / 200', [m['Chest Legend'], m['Chest Hero']]);
+    ok('back, shoulders and arms have theirs too', 'Back Legend' in m && 'Shoulder Immortal' in m && 'Arm Hero' in m);
+    ok('two workouts in one day is a rare one', m['Two-a-Day'] === '1 Jun', m['Two-a-Day']);
+    ok('the rare versus-friends badges are there, five of them', ['Same Wavelength', "Three's Company", 'Landslide', 'Photo Finish', 'Pack Leader'].every((n) => n in m));
+    ok('and a friends badge won once wears a rare finish, In Sync among them', await page.evaluate(() => { const c = document.querySelector('#lfBadges .lf-coin[data-b="duo1"]'); return !!c; }));
+    await c.close();
+  }
+
   /* ── GOAL HIT: a celebration of its own, once a week ── */
   {
     const st = (w, r) => ({ w, r });
@@ -1295,7 +1311,7 @@ const freeze = (at) => `(() => {
     ok('and it counts the weeks in a row the goal has been hit', /2 of 2 workouts · 2 weeks in a row/.test(await page.textContent('.lf-gol')));
     ok('the sky lights up with fireworks', await page.locator('.lf-gol .lf-fw i').count() > 40);
     ok('it is kept as seen', (await store(page)).wkDone === '2026-11-02');
-    await page.click('.lf-gol'); await page.waitForTimeout(600);
+    await page.click('.lf-gol'); await page.waitForTimeout(1000);
     ok('a tap puts it away', await page.locator('.lf-gol').count() === 0);
     await page.reload(); await page.waitForTimeout(1200);
     ok('and it comes once a week', await page.locator('.lf-gol').count() === 0);
