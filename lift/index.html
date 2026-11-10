@@ -664,24 +664,30 @@ body.lf-v-home .lf-glow { opacity: 1; }
    what earning it buys: a wheel colour is one flat colour, an earned one
    runs through the glow over Home, the days you trained, the bars, the
    rings and the accent type. Nothing about it moves; it is the colour */
-:root[data-acc-g] .lf-glow { background: var(--log-g);
+[data-acc-g][data-acc-g] .lf-glow { background: var(--log-g);
   -webkit-mask: radial-gradient(140% 260px at 25% 0%, rgba(0,0,0,.62), rgba(0,0,0,.18) 55%, transparent 80%); mask: radial-gradient(140% 260px at 25% 0%, rgba(0,0,0,.62), rgba(0,0,0,.18) 55%, transparent 80%); }
-:root[data-acc-g] .lf-day.is-on, :root[data-acc-g] .lf-vr i b, :root[data-acc-g] .lf-dl-bar i, :root[data-acc-g] .lf-vr.is-met i b, :root[data-acc-g] .lf-dl-t.is-met .lf-dl-bar i { background: var(--log-g); border-color: transparent; }
-:root[data-acc-g] .lf-day.is-now { border-color: transparent; background: linear-gradient(var(--card), var(--card)) padding-box, var(--log-g) border-box; }
-:root[data-acc-g] .lf-day.is-now.is-on { background: var(--log-g); box-shadow: inset 0 0 0 2px var(--card); }
-:root[data-acc-g] .lf-cell.is-now { box-shadow: none; border: 2px solid transparent; background: linear-gradient(var(--card), var(--card)) padding-box, var(--log-g) border-box; }
-:root[data-acc-g] .lf-bdr .fg { stroke: url(#lfAccG); }
-:root[data-acc-g] :is(.lf-wk.is-now .lf-wd b, .lf-ws-ring.is-hit .lf-ws-in span, .lf-set .lf-sn.is-pr, .fr-row.is-me .fr-t b, .lf-tip > b, .lf-pct, .lf-aim.is-up, .lf-ss-rest.is-ready .lf-rs-c, .lf-ss-rest.is-ready .lf-rs-l, .lf-fin-u.is-up, .fr-live, .lf-cv-k, .lf-wh-cap, .lf-stat .lf-tag.is-mini, #lfTheme .lf-fh .lf-num) {
-  background: var(--log-g); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-:root[data-acc-g] .lf-wh-cap { font-size: 16px; font-weight: 800; }
+/* THE GRADIENT GOES WHERE THE ACCENT GOES AND NOWHERE ELSE: a lit day in the thirty days and a bar
+   that has not reached its target are the white of the page, as with any accent, and a bar turns
+   to the colour when its target is met */
+[data-acc-g][data-acc-g] .lf-vr.is-met i b, [data-acc-g][data-acc-g] .lf-dl-t.is-met .lf-dl-bar i { background: var(--log-g); }
+[data-acc-g][data-acc-g] .lf-day.is-now { border-color: transparent; background: linear-gradient(var(--card), var(--card)) padding-box, var(--log-g) border-box; }
+[data-acc-g][data-acc-g] .lf-cell.is-now { box-shadow: none; border: 2px solid transparent; background: linear-gradient(var(--card), var(--card)) padding-box, var(--log-g) border-box; }
+[data-acc-g][data-acc-g] .lf-bdr .fg { stroke: var(--log-s, var(--good)); }
+[data-acc-g][data-acc-g] :is(.lf-wk.is-now .lf-wd b, .lf-ws-ring.is-hit .lf-ws-in span, .lf-set .lf-sn.is-pr, .lf-tip > b, .lf-pct, .lf-aim.is-up, .lf-ss-rest.is-ready .lf-rs-c, .lf-ss-rest.is-ready .lf-rs-l, .lf-fin-u.is-up, .fr-live, .lf-cv-k, .lf-wh-cap, .lf-stat .lf-tag.is-mini, #lfTheme .lf-fh .lf-num) {
+  background: var(--log-t, var(--log-g)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+[data-acc-g][data-acc-g] .lf-wh-cap { font-size: 16px; font-weight: 800; }
+/* A NAME IN AN EARNED COLOUR: the colour itself with a light band that passes slowly along it.
+   Only an earned colour does this, never a wheel colour, and it is the same wherever that name is drawn */
+.lf-ng { background: var(--ng); background-size: 320% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: lf-thsh 11s ease-in-out infinite alternate; }
+@media (prefers-reduced-motion: reduce) { .lf-ng { animation: none; } }
 /* AND IT SHINES, SLOWLY: the light band in the gradient drifts across and
    back, slowly and only a little, twelve seconds each way. Not a thing laid over it, the colour itself */
-:root[data-acc-g] :where(.lf-btn.is-log, .lf-glow, .lf-day.is-on, .lf-cell.is-on, .lf-vr i b, .lf-dl-bar i, .lf-wk.is-now .lf-wd b, .lf-ws-ring.is-hit .lf-ws-in span, .lf-set .lf-sn.is-pr, .fr-row.is-me .fr-t b, .lf-tip > b, .lf-pct, .lf-aim.is-up, .lf-ss-rest.is-ready .lf-rs-c, .lf-ss-rest.is-ready .lf-rs-l, .lf-fin-u.is-up, .fr-live, .lf-cv-k, .lf-wh-cap, .lf-stat .lf-tag.is-mini, #lfTheme .lf-fh .lf-num, .lf-set.is-done .lf-chk span),
-:root[data-acc-g] .lf-wh-m::after, .lf-th:not(.is-lock) i { background-size: 150% 150% !important; animation: lf-thsh 12s ease-in-out infinite alternate; }
-.lf-th:not(.is-lock) i { animation-duration: 9s; }
-:root[data-acc-g] .lf-month.is-play .lf-cell.is-on:not(.is-now) { animation: lf-light .55s cubic-bezier(.3, 1.4, .5, 1) backwards, lf-thsh 12s ease-in-out infinite alternate; animation-delay: calc(var(--i) * 55ms + 80ms), 0s; }
-@keyframes lf-thsh { from { background-position: 15% 40%; } to { background-position: 85% 60%; } }
-@media (prefers-reduced-motion: reduce) { :root[data-acc-g] *, :root[data-acc-g] .lf-wh-m::after, .lf-th i { animation-name: none !important; } }
+[data-acc-g][data-acc-g] :where(.lf-btn.is-log, .lf-glow, .lf-cell.is-on, .lf-vr.is-met i b, .lf-dl-t.is-met .lf-dl-bar i, .lf-wk.is-now .lf-wd b, .lf-ws-ring.is-hit .lf-ws-in span, .lf-set .lf-sn.is-pr, .lf-tip > b, .lf-pct, .lf-aim.is-up, .lf-ss-rest.is-ready .lf-rs-c, .lf-ss-rest.is-ready .lf-rs-l, .lf-fin-u.is-up, .fr-live, .lf-cv-k, .lf-wh-cap, .lf-stat .lf-tag.is-mini, #lfTheme .lf-fh .lf-num, .lf-set.is-done .lf-chk span),
+[data-acc-g][data-acc-g] .lf-wh-m::after, .lf-th:not(.is-lock) i { background-size: 320% 100% !important; animation: lf-thsh 11s ease-in-out infinite alternate; }
+.lf-th:not(.is-lock) i { animation-duration: 8s; }
+[data-acc-g][data-acc-g] .lf-month.is-play .lf-cell.is-on:not(.is-now) { animation: lf-light .55s cubic-bezier(.3, 1.4, .5, 1) backwards, lf-thsh 11s ease-in-out infinite alternate; animation-delay: calc(var(--i) * 55ms + 80ms), calc(var(--i, 0) * -280ms); }
+@keyframes lf-thsh { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+@media (prefers-reduced-motion: reduce) { [data-acc-g][data-acc-g] *, [data-acc-g][data-acc-g] .lf-wh-m::after, .lf-th i { animation-name: none !important; } }
 .lf-wh-cap { margin: 10px 0 0; text-align: center; font-size: 14px; font-weight: 700; color: var(--dim); }
 .lf-thg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .lf-th { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 4px 10px; border-radius: 16px; background: var(--card2); color: var(--ink); font: inherit; position: relative; }
@@ -1040,7 +1046,25 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-t { display: grid; gap: 3px; min-width: 0; }
 .fr-t b { font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fr-t > span { font-size: 12px; color: var(--dim); }
-.fr-row.is-me .fr-t b { color: var(--today-ink); }
+.fr-row > .fr-t .fr-live-b { pointer-events: auto; position: relative; z-index: 2; font: inherit; font-size: 12px; font-weight: 600; padding: 0; text-align: left; }
+.fr-live-b::after { content: ''; position: absolute; inset: -14px -10px -14px -4px; }
+.fr-live-b .lf-ic { width: 12px; height: 12px; margin-left: -2px; opacity: .8; }
+.fr-lv-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.fr-lv-h b { font-size: 19px; font-weight: 700; }
+.fr-lv-h em { font-style: normal; font-size: 19px; font-weight: 600; color: var(--good); }
+.fr-lv-p { margin: 4px 0 8px; font-size: 13px; color: var(--dim); min-height: 18px; }
+.fr-lv-p:empty { min-height: 0; margin: 0; }
+.fr-lv-x { padding: 12px 14px; border-radius: 14px; background: var(--card2); margin-top: 8px; }
+.fr-lv-x.is-cur { box-shadow: inset 0 0 0 1.5px var(--log); }
+.fr-lv-n { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.fr-lv-n b { font-size: 15px; font-weight: 600; }
+.fr-lv-n span { font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--today-ink); }
+.fr-lv-n span:empty { display: none; }
+.fr-lv-s { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.fr-lv-q { font-style: normal; font-size: 13px; font-weight: 600; padding: 4px 9px; border-radius: 9px; background: color-mix(in srgb, var(--log) 16%, transparent); }
+.fr-lv-q.is-drop { background: rgba(150,120,255,.16); }
+.fr-lv-q.is-left { width: 30px; height: 26px; padding: 0; background: none; box-shadow: inset 0 0 0 1.5px var(--line); }
+@media (prefers-reduced-motion: reduce) { .fr-lv * { transition: none; animation: none; } }
 .fr-row.is-gone { opacity: .6; }
 .fr-wk { display: grid; justify-items: end; gap: 1px; }
 .fr-wk b { font-size: 17px; font-weight: 700; }
@@ -1135,7 +1159,7 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 <body>
 <h1 class="lf-sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">Lift</h1>
 <div class="lf-glow" aria-hidden="true"></div>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><linearGradient id="lfAccG" x1="0" y1="0" x2="1" y2="1"></linearGradient></defs></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><linearGradient id="lfAccG" x1="0" y1="0" x2="1" y2="1"></linearGradient><linearGradient id="lfAccGF" x1="0" y1="0" x2="1" y2="1"></linearGradient></defs></svg>
 <main id="lfMain">
   <section id="lfHome" aria-label="Home"></section>
   <section id="lfCal" aria-label="Calendar" hidden></section>
@@ -1783,6 +1807,7 @@ function lfSaveAct() {
   try { if (act) localStorage.setItem(ACTK, JSON.stringify(act)); else localStorage.removeItem(ACTK); } catch (e) {}
   /* starting and ending a workout tell friends; a set ticked does not */
   var lv = act ? act.s : 0;
+  if (typeof frLiveQueue === 'function') frLiveQueue(lv !== lfLvSent);
   if (lv !== lfLvSent) { lfLvSent = lv; if (typeof frPushNow === 'function') frPushNow(); if (typeof frLiveSoon === 'function') frLiveSoon(); if (typeof frSyncNow === 'function') setTimeout(frSyncNow, 400); }
   /* a workout that ends takes its pending lock-screen alert with it */
   if (!act && typeof lfRestPushClear === 'function') lfRestPushClear();
@@ -4098,6 +4123,8 @@ function frLoad() {
       if (Array.isArray(o.list)) d.list = o.list.filter(function (f) { return f && /^[A-HJ-NP-Z2-9]{8}$/.test(f.c); }).slice(0, 50)
         .map(function (f) { return { c: f.c, n: typeof f.n === 'string' ? f.n.slice(0, 24) : '', s: f.s && typeof f.s === 'object' ? f.s : null, at: +f.at || 0, gone: !!f.gone, rx: Array.isArray(f.rx) ? f.rx : [] }; });
       d.rx = Array.isArray(o.rx) ? o.rx : [];
+      /* showing your sets while you train is on until you turn it off */
+      if (o.live === false) d.live = false;
       /* codes you removed, so their add does not put them straight back */
       d.no = Array.isArray(o.no) ? o.no.filter(function (c) { return /^[A-HJ-NP-Z2-9]{8}$/.test(c); }).slice(-200) : [];
     }
@@ -4202,12 +4229,39 @@ function frPush() {
     .catch(function () { clearTimeout(frRetryT); frRetryT = setTimeout(frPush, Math.min(15000, 1000 * Math.pow(2, frRetryN++))); });
 }
 var frBeatDue = false;
+/* THE LIVE CHANNEL: a small body, sent on its own the moment a set is
+   ticked or a workout starts or ends — who is training, until when, and
+   the sets done so far. Never the whole record. With sharing off in the
+   friends settings it carries the start and the expiry and no sets */
+var frLvT = 0, frLvSig = '', frLvRetryN = 0, frLvRetryT = 0;
+function frCurSets() {
+  if (!act || FRS.live === false) return null;
+  var curEx = null;
+  act.x.forEach(function (e) { if (!curEx && e.sets.some(function (q) { return !q.ok; })) curEx = e; });
+  var x = act.x.filter(function (e) { return e === curEx || e.sets.some(function (q) { return q.ok; }); }).slice(0, 24).map(function (e) {
+    var d = [];
+    e.sets.forEach(function (q) { if (q.ok) { d.push([+q.w || 0, +q.r || 0, 0]); (q.ds || []).forEach(function (z) { if (z.ok) d.push([+z.w || 0, +z.r || 0, 1]); }); } });
+    return { n: exName(e.id, e.n), d: d, l: e.sets.filter(function (q) { return !q.ok; }).length, c: e === curEx ? 1 : 0 };
+  });
+  return { n: act.n || 'Workout', x: x };
+}
+function frLiveBody() { return { lv: act ? act.s : 0, lx: act ? Date.now() + (document.hidden ? 15 * 60000 : 90000) : 0, cur: frCurSets() }; }
+function frLivePush(force) {
+  if (!FRS.on) return;
+  clearTimeout(frLvT);
+  var body = frLiveBody(), sig = JSON.stringify(body, function (k, v) { return k === 'lx' ? !!v : v; });
+  if (sig === frLvSig && !force) return;
+  frApi('PUT', '/v1/live/' + FRS.code, body).then(function (r) { if (r.st === 200) { frLvSig = sig; frLvRetryN = 0; } else if (r.st !== 404) throw 0; })
+    .catch(function () { clearTimeout(frLvRetryT); frLvRetryT = setTimeout(function () { frLivePush(true); }, Math.min(15000, 1000 * Math.pow(2, frLvRetryN++))); });
+}
+/* ticking a set goes out a beat later so two ticks in a row are one message */
+function frLiveQueue(now) { if (!FRS.on) return; clearTimeout(frLvT); frLvT = setTimeout(frLivePush, now ? 0 : 350); }
 /* WHILE TRAINING THE PHONE BEATS EVERY 30 SECONDS, and tells the server the
    moment it goes to the background or comes back */
-setInterval(function () { if (act && FRS.on && !document.hidden) { frBeatDue = true; frPush(); } }, 30000);
-document.addEventListener('visibilitychange', function () { if (FRS.on) { frBeatDue = !!act; frPush(); if (!document.hidden) frLiveSoon(); } });
-addEventListener('pagehide', function () { if (FRS.on && act) { frBeatDue = true; frPush(); } });
-addEventListener('online', function () { if (FRS.on) { frSig = ''; frPush(); frLiveSoon(); } });
+setInterval(function () { if (act && FRS.on && !document.hidden) { frBeatDue = true; frPush(); frLivePush(true); } }, 30000);
+document.addEventListener('visibilitychange', function () { if (FRS.on) { frBeatDue = !!act; frPush(); if (act) frLivePush(true); if (!document.hidden) frLiveSoon(); } });
+addEventListener('pagehide', function () { if (FRS.on && act) { frBeatDue = true; frPush(); frLivePush(true); } });
+addEventListener('online', function () { if (FRS.on) { frSig = ''; frPush(); frLivePush(true); frLiveSoon(); } });
 /* WHO IS TRAINING, ASKED OFTEN AND ASKED SMALL. Every few seconds while the
    Friends tab is up or a workout of yours is going, a list of codes goes
    to the server and only the starts and expiries come back; a change
@@ -4231,6 +4285,40 @@ function frLivePoll() {
     var sig = FRS.list.map(function (f) { return f.c + ':' + (frLive(f.s) ? 1 : 0); }).join('|');
     if (sig !== frLiveSeen) { frLiveSeen = sig; if (view === 'fr') lfRender(); frSyncNow(); }
   }).catch(function () { frLiveBusy = false; });
+}
+/* WHAT THEY ARE DOING RIGHT NOW: press "Training now" on a friend and see
+   the exercise they are on and the sets done so far, kept up to date every
+   couple of seconds while it is open */
+function frLiveSheet(f) {
+  var b = el('<div class="fr-lv"><div class="fr-lv-h"><b></b><em class="lf-num"></em></div><p class="fr-lv-p"></p><div class="fr-lv-list"></div></div>');
+  var t = 0, clock = 0, closed = false, last = null;
+  var s = lfSheet({ title: (f.n || 'Friend') + ' is training', body: b, onClose: function () { closed = true; clearTimeout(t); clearInterval(clock); } });
+  lfAccOn(s.el, frHue(f.s));
+  function tick() { var lv = last && last.lv; $('em', b).textContent = last && frLive(last) ? fmtClock(Date.now() - lv) : ''; }
+  function paint(j) {
+    last = j; var live = !!(j && frLive({ lv: j.lv, lx: j.lx })), list = $('.fr-lv-list', b), cur = j && j.cur;
+    $('b', b).textContent = live ? (cur && cur.n ? cur.n : 'Training now') : 'Finished';
+    $('.fr-lv-h', b).classList.toggle('is-live', live);
+    $('.fr-lv-p', b).textContent = live ? (cur ? '' : 'Not sharing the sets') : 'Their workout has ended.';
+    list.textContent = '';
+    if (live && cur) cur.x.forEach(function (e) {
+      var row = el('<div class="fr-lv-x"><div class="fr-lv-n"><b></b><span></span></div><div class="fr-lv-s"></div></div>');
+      $('b', row).textContent = e.n; row.classList.toggle('is-cur', !!e.c);
+      $('.fr-lv-n span', row).textContent = e.c ? 'Now' : '';
+      var ss = $('.fr-lv-s', row);
+      e.d.forEach(function (q) { var p = el('<i class="fr-lv-q"></i>'); p.textContent = (q[2] ? '↳ ' : '') + (q[0] ? fmtW(q[0]) + ' × ' : 'BW × ') + q[1]; if (q[2]) p.classList.add('is-drop'); ss.appendChild(p); });
+      for (var k = 0; k < e.l && k < 12; k++) ss.appendChild(el('<i class="fr-lv-q is-left" aria-hidden="true"></i>'));
+      row.setAttribute('aria-label', e.n + ', ' + e.d.length + ' sets done' + (e.l ? ', ' + e.l + ' to go' : ''));
+      list.appendChild(row);
+    });
+    tick();
+  }
+  function poll() {
+    fetch(FR_URL + '/v1/live/' + f.c).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) { if (!closed && j) paint(j); }).catch(function () {})
+      .then(function () { if (!closed) t = setTimeout(poll, 1800); });
+  }
+  paint({ lv: f.s && f.s.lv, lx: f.s && f.s.lx, cur: null }); $('.fr-lv-p', b).textContent = 'Loading…';
+  poll(); clock = setInterval(tick, 1000);
 }
 /* BOTH TRAINING NOW: said the moment it is true, wherever you are in the app */
 var frSyncWas = '';
@@ -4341,7 +4429,7 @@ function frSheet(f) {
      badges they chose to show turning slowly in the light */
   var b = el('<div class="fr-dash"><div class="fr-ban"><div class="fr-ban-h"><span class="fr-ban-av"></span><div class="fr-ban-t"><b></b><p class="lf-lab fr-ago"></p></div></div></div></div>');
   b.style.setProperty('--rc', col);
-  $('.fr-ban-av', b).textContent = (nm.trim()[0] || '?').toUpperCase(); $('.fr-ban-t b', b).textContent = nm;
+  $('.fr-ban-av', b).textContent = (nm.trim()[0] || '?').toUpperCase(); $('.fr-ban-t b', b).textContent = nm; lfNameOn($('.fr-ban-t b', b), st);
   if (frLive(st)) $('.fr-ban', b).classList.add('is-live');
   $('.fr-ago', b).textContent = f.gone ? 'This code has gone — they turned friends off.' : frAgo(st.last) + ' · ' + (st.pr30 || 0) + (st.pr30 === 1 ? ' PR' : ' PRs') + ' in 30 days';
   var row = el('<div class="lf-row" style="--n:3"></div>');
@@ -4604,7 +4692,7 @@ function frRings(rows) {
   drawn.forEach(function (x, i) {
     var rr = r0 - i * step, len = 2 * Math.PI * rr, col = frColOf(x.f.s), lv = frLive(x.f.s), thR = lfTheme(frHue(x.f.s)), paint = col;
     /* a ring in an earned colour is drawn in its gradient */
-    if (thR) { paint = 'url(#frRgG' + i + ')'; g.insertAdjacentHTML('beforeend', '<defs><linearGradient id="frRgG' + i + '" gradientUnits="userSpaceOnUse" x1="' + (75 - rr) + '" y1="' + (75 - rr) + '" x2="' + (75 + rr) + '" y2="' + (75 + rr) + '">' + thR.s.map(function (q) { q = q.split(' '); return '<stop offset="' + q[1] + '" stop-color="' + q[0] + '"/>'; }).join('') + (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches ? '' : '<animateTransform attributeName="gradientTransform" type="rotate" values="-18 75 75;18 75 75;-18 75 75" dur="14s" repeatCount="indefinite"/>') + '</linearGradient></defs>'); }
+    if (thR) { paint = 'url(#frRgG' + i + ')'; g.insertAdjacentHTML('beforeend', '<defs><linearGradient id="frRgG' + i + '" gradientUnits="userSpaceOnUse" x1="' + (75 - rr) + '" y1="' + (75 - rr) + '" x2="' + (75 + rr) + '" y2="' + (75 + rr) + '">' + lfThStops(thR, 75) + '</linearGradient></defs>'); }
     if (rr < 8) return;
     if (lv) live.push(x);
     var key = x.f.me ? 'me' : String(x.f.c), was = key in frRgMem ? frRgMem[key] : (+frRgSeen[key] || 0), from = arrive ? 0 : key in cur ? cur[key] / len : was;
@@ -4676,10 +4764,21 @@ function frRings(rows) {
     row.dataset.c = f.c; row.style.setProperty('--rc', frColOf(st));
     if (f.me) row.classList.add('is-me');
     if (f.gone) row.classList.add('is-gone');
-    $('.fr-t b', row).textContent = f.me ? (FRS.name || 'You') : (f.n || 'Friend');
+    $('.fr-t b', row).textContent = f.me ? (FRS.name || 'You') : (f.n || 'Friend'); lfNameOn($('.fr-t b', row), st);
     var sub = $('.fr-t span', row);
     if (f.gone) sub.textContent = 'Turned friends off';
-    else if (frLive(st)) { sub.textContent = 'Training now · since ' + fmtAt(new Date(st.lv)); sub.className = 'fr-live'; row.classList.add('is-live'); }
+    else if (frLive(st)) {
+      row.classList.add('is-live');
+      if (f.me) { sub.textContent = 'Training now · since ' + fmtAt(new Date(st.lv)); sub.className = 'fr-live'; }
+      else {
+        /* a button of its own, over the row's: pressing it shows what they are doing */
+        var lb = el('<button type="button" class="fr-live fr-live-b"></button>'); lb.textContent = 'Training now · since ' + fmtAt(new Date(st.lv));
+        lb.insertAdjacentHTML('beforeend', '<svg class="lf-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>');
+        lb.setAttribute('aria-label', (f.n || 'Friend') + ' is training now. See their sets');
+        lb.addEventListener('click', function (ev) { ev.stopPropagation(); frLiveSheet(f); });
+        sub.textContent = ''; sub.appendChild(lb);
+      }
+    }
     else sub.textContent = x.w.n >= x.w.g ? 'Goal closed' : (x.w.g - x.w.n) + ' to go';
     /* the weeks you have both kept the goal, beside their name */
     var duo = f.me || f.gone ? 0 : frDuo(st, mine);
@@ -4736,7 +4835,12 @@ function frCodeRow() {
   $('.fr-code', code).textContent = FRS.code;
   $('#frShare', code).addEventListener('click', frShare);
   $('#frMore', code).addEventListener('click', function () {
-    var b = el('<div><label class="lf-flab" for="frNewName" style="margin-top:0">Your name, as friends see it</label><input class="lf-field" id="frNewName" maxlength="24" autocomplete="off" /></div>');
+    var b = el('<div><label class="lf-flab" for="frNewName" style="margin-top:0">Your name, as friends see it</label><input class="lf-field" id="frNewName" maxlength="24" autocomplete="off" />'
+      + '<span class="lf-flab">While you train</span><div class="lf-seg" id="frLvSw" style="--n:2"><button type="button" data-v="1">Show my sets</button><button type="button" data-v="0">Just that I am</button></div></div>');
+    $$('#frLvSw button', b).forEach(function (q) {
+      q.setAttribute('aria-pressed', (q.dataset.v === '1') === (FRS.live !== false) ? 'true' : 'false');
+      q.addEventListener('click', function () { FRS.live = q.dataset.v === '1'; frSave(); $$('#frLvSw button', b).forEach(function (z) { z.setAttribute('aria-pressed', z === q ? 'true' : 'false'); }); frLivePush(true); });
+    });
     var sv = el('<button type="button" class="lf-btn is-ink" id="frRename">Save name</button>');
     var off = el('<button type="button" class="lf-btn is-bad" id="frOffBtn">Turn off friends</button>');
     var s2 = lfSheet({ title: 'Friends', body: b, foot: [off, sv] });
@@ -6502,7 +6606,18 @@ var THEMES = [
 /* THE OWNER'S: the owner badge's own ring, a dark orange swept through with a light one */
 var OWNER_TH = { n: 'Molten', r: 'One of one', c: '#ff6a1a', di: '#ff8a3c', li: '#b33a00', s: ['#2a0700 0%', '#7a1d00 22%', '#d24600 40%', '#ffb35c 50%', '#ff8a2a 56%', '#b33300 72%', '#3d0b00 100%'] };
 function lfTheme(h) { if (h === 1299) return OWNER_TH; return typeof h === 'number' && h >= 1200 && h < 1200 + THEMES.length && h % 1 === 0 ? THEMES[h - 1200] : null; }
-function lfThGrad(t, a) { return 'linear-gradient(' + (a || 120) + 'deg, ' + t.s.join(', ') + ')'; }
+/* A GRADIENT THAT IS DRAWN AS A FILL IS HELD TO A RANGE OF LIGHTNESS: the
+   swatch keeps the whole thing, black to white, but a lit day, a bar or a
+   ring in it must still read on the card behind and carry its label, so
+   each stop is moved into a band and keeps its hue */
+function lfClampL(hex, lo, hi) {
+  var c = lfRgb(hex), r = c[0] / 255, g = c[1] / 255, b = c[2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn, h = 0, sa = 0;
+  if (d > 1e-6) { sa = l > .5 ? d / (2 - mx - mn) : d / (mx + mn); h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; }
+  return lfHex(lfHsl(h, Math.min(100, sa * 100 * 1.05), Math.max(lo, Math.min(hi, l)) * 100));
+}
+function lfThGrad(t, a, lr) {
+  return 'linear-gradient(' + (a || 120) + 'deg, ' + t.s.map(function (x) { var q = x.split(' '); return lr ? lfClampL(q[0], lr[0], lr[1]) + ' ' + q[1] : x; }).join(', ') + ')';
+}
 /* earned: the badge it is for has been won, or, for the owner's, this is the owner's phone */
 function lfThemeOk(h) {
   if (h === 1299) return !!lfOwner();
@@ -6530,7 +6645,7 @@ function lfHueName(h) { return ['Red', 'Orange', 'Yellow', 'Lime', 'Green', 'Tea
 function lfHsl(h, s, l) { s /= 100; l /= 100; var k = function (n) { return (n + h / 30) % 12; }, a = s * Math.min(l, 1 - l), f = function (n) { return l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1)); }; return [f(0), f(8), f(4)].map(function (x) { return Math.round(x * 255); }); }
 function lfHex(c) { return '#' + c.map(function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
 function lfLum(c) { var v = c.map(function (x) { x /= 255; return x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4); }); return .2126 * v[0] + .7152 * v[1] + .0722 * v[2]; }
-var ACC_KEYS = ['--today', '--log', '--on-log', '--today-ink', '--live-bg', '--good', '--done-bg', '--log-g', '--log-s'];
+var ACC_KEYS = ['--today', '--log', '--on-log', '--today-ink', '--live-bg', '--good', '--done-bg', '--log-g', '--log-s', '--log-t'];
 /* A FRIEND'S PAGE WEARS THEIR COLOUR: the same tokens, written on their
    sheet rather than the page, so it is their accent inside and yours
    everywhere else. Lime is written out in full there, because the page
@@ -6540,30 +6655,51 @@ function lfAccOn(node, h) {
   if (h === null || h === undefined) {
     var lime = { '--today': '#a3e635', '--log': '#a3e635', '--on-log': '#0b1400', '--today-ink': dark ? '#a3e635' : '#65a30d', '--live-bg': dark ? '#16210a' : '#eef7dc',
       '--good': dark ? '#34c759' : '#248a3d', '--done-bg': dark ? 'rgba(52, 199, 89, .16)' : 'rgba(52, 199, 89, .14)' };
-    ACC_KEYS.forEach(function (k) { if (lime[k]) st.setProperty(k, lime[k]); else st.removeProperty(k); });
+    ACC_KEYS.forEach(function (k) { if (lime[k]) st.setProperty(k, lime[k]); });
+    st.setProperty('--log-g', '#a3e635'); st.setProperty('--log-s', '#a3e635'); st.setProperty('--log-t', '#a3e635');
+    node.removeAttribute('data-acc-g');
     return;
   }
-  lfAccTok(h, dark, st);
+  var th = lfTheme(h);
+  /* a friend's earned colour is drawn in its own gradient, beside yours in the page */
+  if (th) { var gf = document.getElementById('lfAccGF'); if (gf) gf.innerHTML = lfThStops(th, .5); }
+  if (th) node.setAttribute('data-acc-g', ''); else node.removeAttribute('data-acc-g');
+  lfAccTok(h, dark, st, 'lfAccGF');
 }
 function lfApplyAccent() {
   var st = document.documentElement.style, h = lfAccTmp !== undefined ? lfAccTmp : lfAccent(), th = lfTheme(h);
   /* a theme's strokes are drawn in one shared gradient, kept in the page */
   var gd = document.getElementById('lfAccG');
   var calmA = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (th && gd) gd.innerHTML = th.s.map(function (x) { var q = x.split(' '); return '<stop offset="' + q[1] + '" stop-color="' + q[0] + '"/>'; }).join('')
-    + (calmA ? '' : '<animateTransform attributeName="gradientTransform" type="rotate" values="-18 .5 .5;18 .5 .5;-18 .5 .5" dur="14s" repeatCount="indefinite"/>');
+  if (th && gd) gd.innerHTML = lfThStops(th, .5);
   document.documentElement.toggleAttribute('data-acc-g', !!th);
   if (h === null) { ACC_KEYS.forEach(function (k) { st.removeProperty(k); }); return; }
   lfAccTok(h, document.documentElement.getAttribute('data-mode') !== 'light', st);
 }
-function lfAccTok(h, dark, st) {
-  var nu = lfNeu(h), th = lfTheme(h);
-  st.removeProperty('--log-g'); st.removeProperty('--log-s');
+/* the page's own accent is the root's; a friend's sheet is a node under it, and
+   a custom property inherits, so a sheet that does not SAY its gradient
+   would wear the page's. Every sheet writes both, flat when it is flat */
+function lfNameOn(node, st) {
+  var th = lfTheme(frHue(st));
+  node.classList.toggle('lf-ng', !!th);
+  if (!th) { node.style.removeProperty('--ng'); return; }
+  var dark = document.documentElement.getAttribute('data-mode') !== 'light', c = dark ? th.di : th.li;
+  node.style.setProperty('--ng', 'linear-gradient(100deg, ' + c + ' 0%, ' + c + ' 30%, color-mix(in srgb, ' + c + ' 38%, ' + (dark ? '#fff' : th.c) + ') 50%, ' + c + ' 70%, ' + c + ' 100%)');
+}
+function lfThStops(t, cx) {
+  var lr = document.documentElement.getAttribute('data-mode') !== 'light' ? [.3, .56] : [.34, .54];
+  return t.s.map(function (x) { var q = x.split(' '); return '<stop offset="' + q[1] + '" stop-color="' + lfClampL(q[0], lr[0], lr[1]) + '"/>'; }).join('')
+    + (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches ? '' : '<animateTransform attributeName="gradientTransform" type="rotate" values="-40 ' + cx + ' ' + cx + ';40 ' + cx + ' ' + cx + ';-40 ' + cx + ' ' + cx + '" dur="12s" repeatCount="indefinite"/>');
+}
+function lfAccTok(h, dark, st, gid) {
+  var nu = lfNeu(h), th = lfTheme(h), own = st === document.documentElement.style;
+  if (own) { st.removeProperty('--log-g'); st.removeProperty('--log-s'); st.removeProperty('--log-t'); }
   if (th) {
     var tc = th.c, ti = dark ? th.di : th.li;
     st.setProperty('--today', tc); st.setProperty('--log', tc); st.setProperty('--on-log', '#ffffff');
     st.setProperty('--today-ink', ti); st.setProperty('--good', ti);
-    st.setProperty('--log-g', lfThGrad(th)); st.setProperty('--log-s', 'url(#lfAccG)');
+    st.setProperty('--log-g', lfThGrad(th, 120, dark ? [.3, .52] : [.34, .52])); st.setProperty('--log-t', lfThGrad(th, 100, dark ? [.62, .82] : [.24, .4]));
+    st.setProperty('--log-s', 'url(#' + (gid || 'lfAccG') + ')');
     st.setProperty('--live-bg', 'color-mix(in srgb, ' + tc + ' ' + (dark ? 14 : 12) + '%, ' + (dark ? '#000' : '#fff') + ')');
     st.setProperty('--done-bg', 'color-mix(in srgb, ' + tc + ' ' + (dark ? 18 : 22) + '%, transparent)');
     return;
@@ -6575,6 +6711,7 @@ function lfAccTok(h, dark, st) {
     st.setProperty('--today-ink', ni); st.setProperty('--good', ni);
     st.setProperty('--live-bg', 'color-mix(in srgb, ' + nf + ' ' + (dark ? 14 : 12) + '%, ' + (dark ? '#000' : '#fff') + ')');
     st.setProperty('--done-bg', 'color-mix(in srgb, ' + nf + ' ' + (dark ? 18 : 22) + '%, transparent)');
+    if (!own) { st.setProperty('--log-g', nf); st.setProperty('--log-s', nf); st.setProperty('--log-t', nf); }
     return;
   }
   /* yellow-greens are bright at any lightness and blues are dim, so the
@@ -6587,6 +6724,7 @@ function lfAccTok(h, dark, st) {
   st.setProperty('--live-bg', dark ? lfHex(lfHsl(h, 50, 9)) : lfHex(lfHsl(h, 70, 93)));
   st.setProperty('--good', ink);
   st.setProperty('--done-bg', 'color-mix(in srgb, ' + lfHex(fill) + ' ' + (dark ? 18 : 22) + '%, transparent)');
+  if (!own) { st.setProperty('--log-g', lfHex(fill)); st.setProperty('--log-s', lfHex(fill)); st.setProperty('--log-t', lfHex(fill)); }
 }
 function lfApplyMode() {
   var m = lfMode(), dark = m === 'dark' || (m === 'auto' && !(window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches));

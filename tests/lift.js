@@ -1137,6 +1137,20 @@ const freeze = (at) => `(() => {
     ok('and a phone that stopped answering does not read as training for ever: its expiry has passed', await A.page.waitForFunction(() => !/Training now/.test(document.querySelector('#frBoard .fr-row:not(.is-me)').textContent), null, { timeout: 9000 }).then(() => true, () => false));
     { const rec = JSON.parse(m.get('lift:' + codeB)), now = await A.page.evaluate(() => Date.now()); rec.s.lv = now - 20 * 60e3; delete rec.s.lx; m.set('lift:' + codeB, JSON.stringify(rec)); }
     await A.page.waitForFunction(() => /Training now/.test(document.querySelector('#frBoard .fr-row:not(.is-me)').textContent), null, { timeout: 9000 }).catch(() => {});
+    /* WHAT THEY ARE DOING NOW: press Training now and see the sets so far, kept up to date */
+    ok('Training now is a button of its own on a friend, and not on your own row', await A.page.locator('#frBoard .fr-row:not(.is-me) button.fr-live-b').count() === 1 && await A.page.locator('#frBoard .fr-row.is-me button.fr-live-b').count() === 0);
+    { const now = await A.page.evaluate(() => Date.now()); m.set('liftl:' + codeB, JSON.stringify({ lv: now - 600e3, lx: now + 80e3, at: now, cur: { n: 'Push day', x: [{ n: 'Bench press', d: [[60, 8, 0], [60, 8, 0], [50, 6, 1]], l: 1, c: 0 }, { n: 'Incline press', d: [[40, 10, 0]], l: 2, c: 1 }] } })); }
+    await A.page.click('#frBoard .fr-row:not(.is-me) button.fr-live-b'); await A.page.waitForTimeout(700);
+    ok('it opens what they are doing: the workout, each exercise and its sets so far', /Push day/.test(await top(A.page).locator('.fr-lv-h b').textContent()) && await top(A.page).locator('.fr-lv-x').count() === 2 && /60 × 8/.test(await top(A.page).locator('.fr-lv-x').first().textContent()) && /↳ 50 × 6/.test(await top(A.page).locator('.fr-lv-x').first().textContent()));
+    ok('the one they are on is marked, and what is left shows as empty slots', await top(A.page).locator('.fr-lv-x.is-cur').count() === 1 && /Now/.test(await top(A.page).locator('.fr-lv-x.is-cur').textContent()) && await top(A.page).locator('.fr-lv-x.is-cur .fr-lv-q.is-left').count() === 2);
+    ok('and a clock runs from when they started', /^\d+:\d\d/.test(await top(A.page).locator('.fr-lv-h em').textContent()));
+    { const now = await A.page.evaluate(() => Date.now()); m.set('liftl:' + codeB, JSON.stringify({ lv: now - 600e3, lx: now + 80e3, at: now, cur: { n: 'Push day', x: [{ n: 'Incline press', d: [[40, 10, 0], [40, 9, 0]], l: 1, c: 1 }] } })); }
+    ok('a set they tick shows up within seconds, with the sheet open', await A.page.waitForFunction(() => /40 × 9/.test(document.querySelector('.fr-lv') && document.querySelector('.fr-lv').textContent), null, { timeout: 8000 }).then(() => true, () => false));
+    { const now = await A.page.evaluate(() => Date.now()); m.set('liftl:' + codeB, JSON.stringify({ lv: 0, lx: 0, at: now, cur: null })); const rec = JSON.parse(m.get('lift:' + codeB)); rec.s.lv = 0; rec.s.lx = 0; m.set('lift:' + codeB, JSON.stringify(rec)); }
+    ok('and when they finish it says so, with no sets left on it', await A.page.waitForFunction(() => /Finished/.test(document.querySelector('.fr-lv-h b').textContent) && !document.querySelector('.fr-lv-x'), null, { timeout: 8000 }).then(() => true, () => false));
+    await A.page.keyboard.press('Escape'); await A.page.waitForTimeout(500);
+    { const now = await A.page.evaluate(() => Date.now()); m.delete('liftl:' + codeB); const rec = JSON.parse(m.get('lift:' + codeB)); rec.s.lv = now - 20 * 60e3; delete rec.s.lx; m.set('lift:' + codeB, JSON.stringify(rec)); }
+    await A.page.waitForFunction(() => /Training now/.test(document.querySelector('#frBoard .fr-row:not(.is-me)').textContent), null, { timeout: 9000 }).catch(() => {});
     ok('the week is rings, one each, toward their own goal, and the names under them are the board', await A.page.locator('#frRings svg circle').count() >= 2 && await A.page.locator('#frRings #frBoard .fr-row').count() === 2 && (await A.page.$$eval('#frRings .fr-row', (r) => r.map((x) => x.style.getPropertyValue('--rc')))).every((c) => c));
     ok('their ring says it too: a glow and a light at its tip', await A.page.locator('#frRings .fr-rg-h').count() === 1 && await A.page.locator('#frRings .fr-rg-a.is-live, #frRings .fr-rg-p').count() >= 1);
     ok('and the middle crowns who is in front, by your own name', (await A.page.textContent('#frRgLead')).trim() === 'Niko' && await A.page.locator('#frRgLead .fr-rg-cr').count() === 1, await A.page.textContent('#frRings'));
@@ -1150,7 +1164,8 @@ const freeze = (at) => `(() => {
     ok('a badge on the rings opens the badge, not the dashboard', await A.page.evaluate(() => window.__cv) === 1 && await A.page.locator('.lf-sheet').count() === 0);
     const cvx = await A.page.$('.lf-cv-x'); if (cvx) { await cvx.click(); await A.page.waitForTimeout(400); }
     ok('a typed code adds them, lower case and all', (await A.page.$$eval('#frBoard .fr-row .fr-t b', (b) => b.map((x) => x.textContent))).join() === 'Niko,Sam');
-    await A.page.click('#frBoard .fr-row:not(.is-me)'); await settle(A.page);
+    /* the row's top left: its middle can be the Training now button, which opens something else */
+    await A.page.locator('#frBoard .fr-row:not(.is-me) .fr-open').click({ position: { x: 14, y: 6 } }); await settle(A.page);
     const sh = await top(A.page).textContent('.lf-sh-bd');
     const T = top(A.page);
     const acc = await T.evaluate((e) => [e.style.getPropertyValue('--log'), getComputedStyle(document.documentElement).getPropertyValue('--log').trim()]);
@@ -1186,7 +1201,7 @@ const freeze = (at) => `(() => {
     await A.page.click('#frBoard .fr-row.is-me'); await settle(A.page);
     ok('your own row opens your dashboard, with nothing to remove', await top(A.page).locator('#frGrid .lf-day.is-on').count() === 3 && await top(A.page).locator('button', { hasText: 'Remove' }).count() === 0);
     await A.page.keyboard.press('Escape'); await settle(A.page);
-    await A.page.click('#frBoard .fr-row:not(.is-me)'); await settle(A.page);
+    await A.page.locator('#frBoard .fr-row:not(.is-me) .fr-open').click({ position: { x: 14, y: 6 } }); await settle(A.page);
     await top(A.page).locator('button', { hasText: 'Remove' }).click(); await settle(A.page);
     ok('removing a friend comes with an Undo', await A.page.locator('#frNone').count() === 1);
     await A.page.click('.lf-toast button'); await A.page.waitForTimeout(150);
@@ -1332,7 +1347,38 @@ const freeze = (at) => `(() => {
     await settle(page);
     ok('the owner\'s phone has Molten, one of one, first', await page.locator('#lfThemes .lf-th').first().getAttribute('data-h') === '1299' && /Molten/.test(await page.textContent('#lfThemes .lf-th.is-own')));
     await page.evaluate(() => document.querySelector('#lfThemes .lf-th[data-h="1299"]').click()); await settle(page);
-    ok('and wearing it puts its gradient on the accent', await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '1299' && /#ffb35c/i.test(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--log-g'))));
+    ok('and wearing it puts its gradient on the accent', await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '1299' && /linear-gradient/.test(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--log-g'))));
+    await c.close();
+  }
+
+  /* ── A FRIEND'S PAGE IS THEIR COLOUR, never yours; and only an earned colour colours a name ── */
+  {
+    const wo = []; for (let i = 0; i < 3; i++) { const d = new Date(2026, 9, 20 + i, 9, 0); wo.push({ id: 'p' + i, d: d.toISOString().slice(0, 10), s: d.getTime(), e: d.getTime() + 3600e3, n: 'Push', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 60, r: 8 }] }] }); }
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-30T18:00:00');
+    const now = Date.now();
+    const mk = (o) => Object.assign({ lv: 0, wo30: 8, goal: 4, wk: 2, d: 'r1'.repeat(15), w7: [1, 0, 2, 0, 1, 0, 0], mu: [['Quads', 9, 18]], bg: [] }, o);
+    const recs = { KLMN2345: { n: 'Sam', at: now, rx: [], fo: [], s: mk({ ac: 215 }) }, PQRS2345: { n: 'Ally', at: now, rx: [], fo: [], s: mk({ ac: 1201 }) }, ABCD2345: { n: 'Niko', at: now, rx: [], fo: [], s: {} } };
+    await page.route(/\/v1\/lift\/([A-Z0-9]{8})$/, (r) => r.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(recs[r.request().url().split('/').pop()] || {}) }));
+    await page.route(/\/v1\/live\?/, (r) => r.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{}' }));
+    await page.evaluate((d) => { localStorage.setItem('lift.owner.v1', '2026-10-01'); localStorage.setItem('lift.accent.v1', '1299');
+      localStorage.setItem('lift.fr.v1', JSON.stringify({ on: true, code: 'ABCD2345', key: 'a'.repeat(32), name: 'Niko', rx: [], no: [], list: [{ c: 'KLMN2345', n: 'Sam', s: d[0], at: 1, gone: false, rx: [] }, { c: 'PQRS2345', n: 'Ally', s: d[1], at: 1, gone: false, rx: [] }] })); }, [mk({ ac: 215 }), mk({ ac: 1201 })]);
+    await page.reload(); await page.waitForTimeout(500);
+    await page.click('.lf-bar [data-v="fr"]'); await page.waitForTimeout(1800);
+    const nm = await page.$$eval('#frBoard .fr-row', (rs) => Object.fromEntries(rs.map((r) => [r.querySelector('.fr-t b').textContent, r.querySelector('.fr-t b').classList.contains('lf-ng')])));
+    ok('only an earned colour colours a name: yours and Ally\'s, not Sam\'s wheel blue', nm.Niko === true && nm.Ally === true && nm.Sam === false, JSON.stringify(nm));
+    const open = async (who) => { const i = await page.locator('#frBoard .fr-row').evaluateAll((els, n) => els.findIndex((e) => e.querySelector('.fr-t b').textContent === n), who); await page.locator('#frBoard .fr-row').nth(i).locator('.fr-open').click({ force: true }); await page.waitForTimeout(900); };
+    const sheet = () => page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(), cs = getComputedStyle(s); return { g: cs.getPropertyValue('--log-g').trim(), t: cs.getPropertyValue('--log-t').trim(), attr: s.hasAttribute('data-acc-g'), nameG: s.querySelector('.fr-ban-t b').classList.contains('lf-ng') }; });
+    await open('Sam'); const sam = await sheet(); await page.keyboard.press('Escape'); await page.waitForTimeout(600);
+    ok('Sam\'s page is Sam\'s blue while you wear Molten: a flat colour, no gradient, not yours', !/gradient/.test(sam.g) && !/gradient/.test(sam.t) && !sam.attr && !sam.nameG && sam.g !== await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--log-g').trim()), JSON.stringify(sam));
+    await open('Ally'); const ally = await sheet(); await page.keyboard.press('Escape'); await page.waitForTimeout(600);
+    ok('Ally\'s page is Ally\'s own earned gradient, and her name wears it', /linear-gradient/.test(ally.g) && ally.attr && ally.nameG && ally.g !== await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--log-g').trim()), JSON.stringify(ally));
+    await open('Niko'); const me = await sheet(); await page.keyboard.press('Escape'); await page.waitForTimeout(600);
+    ok('and your own profile, as a friend sees it, is Molten with your name in it', /linear-gradient/.test(me.g) && me.nameG, JSON.stringify(me));
+    /* the light moves: a wide gradient, and the band travels the length of it */
+    const sh = await page.evaluate(() => { const e = document.createElement('button'); e.className = 'lf-btn is-log'; document.body.appendChild(e); const cs = getComputedStyle(e), o = { size: cs.backgroundSize, an: cs.animationName }; e.remove(); return o; });
+    const white = await page.evaluate(() => { const mk = (cls) => { const e = document.createElement('i'); e.className = cls; document.body.appendChild(e); const cs = getComputedStyle(e), o = cs.backgroundImage; e.remove(); return o; }; return { day: mk('lf-day is-on'), bar: mk('lf-dl-bar'), }; });
+    ok('what is white with any accent stays white: a lit day in the thirty days has no gradient', white.day === 'none', JSON.stringify(white));
+    ok('the shine travels: a gradient wider than what it fills, slid slowly along it', /^3\d\d(\.\d+)?% /.test(sh.size) && /lf-thsh/.test(sh.an), JSON.stringify(sh));
     await c.close();
   }
 

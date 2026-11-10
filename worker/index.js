@@ -355,6 +355,55 @@ async function episodes(id) {
    build does not know is dropped. Sixty days without a write and the
    record ages out on its own, so an abandoned phone leaves nothing. */
 const LIFT_TTL = 60 * 86400;
+
+/* LIVE STATE, strongly consistent. KV is eventually consistent: a write in
+   one place can take most of a minute to be read in another, which is the
+   wrong shape for "she just finished". One Durable Object per friend code
+   holds who is training now and what they have done so far, and every
+   read goes to it, so there is one copy and it is the same copy for
+   everybody. It is the whole of what the object holds, and it is thrown
+   away when the workout ends. */
+export class LiveHub {
+  constructor(state) { this.state = state; }
+  async fetch(req) {
+    if (req.method === 'PUT') { await this.state.storage.put('l', await req.json()); return new Response('ok'); }
+    return new Response(JSON.stringify((await this.state.storage.get('l')) || null), { headers: { 'Content-Type': 'application/json' } });
+  }
+}
+/* with no object bound (a copy deployed without one, or the tests), the
+   same state lives in KV for a quarter of an hour, which is slower to
+   propagate and nothing else */
+async function liveGet(env, code) {
+  if (env.LIVE) {
+    const r = await env.LIVE.get(env.LIVE.idFromName(code)).fetch('https://live/get');
+    return await r.json();
+  }
+  const raw = await env.SCHED.get('liftl:' + code, { cacheTtl: 30 });
+  return raw ? JSON.parse(raw) : null;
+}
+async function livePut(env, code, v) {
+  if (env.LIVE) { await env.LIVE.get(env.LIVE.idFromName(code)).fetch('https://live/put', { method: 'PUT', body: JSON.stringify(v) }); return; }
+  await env.SCHED.put('liftl:' + code, JSON.stringify(v), { expirationTtl: 900 });
+}
+/* what a friend can see of a workout in progress: its name, and for each
+   exercise the sets done so far, with how many are left. Clamped like
+   everything else that comes from a phone */
+function liveClean(b) {
+  const lv = Number.isInteger(b.lv) && b.lv > 1e12 && b.lv < 1e14 ? b.lv : 0;
+  const lx = lv && Number.isInteger(b.lx) && b.lx > 1e12 && b.lx < 1e14 ? b.lx : 0;
+  const str = (v, n) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, n) : '');
+  const num = (v, mx) => { v = Math.round(+v * 10) / 10; return isFinite(v) ? Math.max(0, Math.min(mx, v)) : 0; };
+  let cur = null;
+  if (lv && b.cur && typeof b.cur === 'object') {
+    const x = (Array.isArray(b.cur.x) ? b.cur.x : []).slice(0, 24).map((e) => ({
+      n: str(e && e.n, 40),
+      d: (Array.isArray(e && e.d) ? e.d : []).slice(0, 24).map((q) => [num(q && q[0], 2000), Math.round(num(q && q[1], 1000)), q && q[2] === 1 ? 1 : 0]),
+      l: Math.round(num(e && e.l, 50)), c: e && e.c ? 1 : 0,
+    })).filter((e) => e.n);
+    cur = { n: str(b.cur.n, 40), x };
+  }
+  return { lv, lx, cur };
+}
 const LIFT_RX = ['🔥', '💪', '👏'];
 const LIFT_MUS = ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Lower back', 'Abs', 'Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Core', 'Arms', 'Legs', 'Cardio', 'Other'];
 const LIFT_NUM = ['wo30', 'sets30', 'pr30', 'wk', 'goal', 'streak', 'cd7', 'rest30', 'tot'];
@@ -715,11 +764,39 @@ export default {
       const codes = (new URL(req.url).searchParams.get('c') || '').split(',').filter((c) => /^[A-HJ-NP-Z2-9]{8}$/.test(c)).slice(0, 24);
       const out = {};
       await Promise.all(codes.map(async (c) => {
+        const lv = await liveGet(env, c);
+        if (lv) { out[c] = { lv: lv.lv || 0, lx: lv.lx || 0, at: lv.at || 0 }; return; }
+        /* a phone from before there was a live channel only ever wrote its record */
         const raw = await env.SCHED.get('lift:' + c, { cacheTtl: 30 });
         const rec = raw ? JSON.parse(raw) : null;
         out[c] = rec && rec.s ? { lv: rec.s.lv || 0, lx: rec.s.lx || 0, at: rec.at || 0 } : null;
       }));
       return json(req, out);
+    }
+    /* ONE FRIEND, IN FULL: the start, the expiry and the sets so far */
+    const lvr = p.match(/^\/v1\/live\/([A-HJ-NP-Z2-9]{8})$/);
+    if (lvr) {
+      const raw = await env.SCHED.get('lift:' + lvr[1], { cacheTtl: 60 });
+      const rec = raw ? JSON.parse(raw) : null;
+      if (req.method === 'GET') {
+        if (!rec) return json(req, { error: 'nobody has that code' }, 404);
+        const lv = await liveGet(env, lvr[1]);
+        const live = lv && lv.lv ? lv : { lv: rec.s && rec.s.lv || 0, lx: rec.s && rec.s.lx || 0, at: rec.at || 0, cur: null };
+        /* what is no longer live carries no sets */
+        return json(req, { n: rec.n, lv: live.lv || 0, lx: live.lx || 0, at: live.at || 0, cur: live.lv ? live.cur || null : null });
+      }
+      if (req.method === 'PUT') {
+        if (!rec) return json(req, { error: 'nobody has that code' }, 404);
+        const auth = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/, '');
+        if (!/^[0-9a-f]{32}$/.test(auth)) return json(req, { error: 'no key' }, 401);
+        if (rec.kh !== await sha256hex(auth)) return json(req, { error: 'wrong key' }, 403);
+        let body;
+        try { body = JSON.parse(await readCapped({ body: req.body, text: () => req.text() }, 16384)); }
+        catch (e) { return json(req, { error: 'not json' }, 400); }
+        const at = Date.now();
+        await livePut(env, lvr[1], { ...liveClean(body), at });
+        return json(req, { ok: true, at });
+      }
     }
     const lf = p.match(/^\/v1\/lift\/([A-HJ-NP-Z2-9]{8})$/);
     if (lf) {

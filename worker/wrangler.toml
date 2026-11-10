@@ -43,5 +43,17 @@ id = "e924044bdaf14d5b96c8c27da74e1503"
 [triggers]
 crons = ["* * * * *"]
 
+# THE LIVE STATE: one small object per friend code, strongly consistent,
+# so "training now" is the same for everybody at once. SQLite-backed,
+# which is the kind the free plan has. The worker still runs, a little
+# slower to agree with itself, if this binding is ever removed.
+[[durable_objects.bindings]]
+name = "LIVE"
+class_name = "LiveHub"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["LiveHub"]
+
 [observability]
 enabled = true

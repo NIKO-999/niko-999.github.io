@@ -524,6 +524,36 @@ const kv = () => {
     q = await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: 'Niko', s: { lx: 1800000090000 } } });
     lq = await (await hit('GET', '/v1/live?c=' + C)).json();
     ok('an expiry with no start is dropped', lq[C].lx === 0, JSON.stringify(lq));
+    /* THE LIVE OBJECT: the real class, behind a stand-in namespace, one instance a code */
+    {
+      const { LiveHub } = await import('file://' + path.resolve(__dirname, '..', 'worker', 'index.js'));
+      const hubs = new Map();
+      const ns = { idFromName: (n) => n, get: (id) => { if (!hubs.has(id)) { const m = new Map(); hubs.set(id, new LiveHub({ storage: { get: async (k) => m.get(k), put: async (k, v) => { m.set(k, v); } } })); } const h = hubs.get(id); return { fetch: (u, init) => h.fetch(new Request(u, init)) }; } };
+      const saved = env; env = { SCHED: kv(), LIVE: ns };
+      const C3 = 'KLMN2345';
+      await hit('PUT', '/v1/lift/' + C3, { key: KEY, body: { n: 'Sam', s: { wo30: 1 } } });
+      const body = { lv: 1800000000000, lx: 1800000090000, cur: { n: 'Push\u0007 day', x: [{ n: 'Bench', d: [[60, 8, 0], [50, 6, 1], [9999, 5000, 0]], l: 2, c: 1 }, { n: 'x'.repeat(90), d: [], l: 0, c: 0 }] } };
+      q = await hit('PUT', '/v1/live/' + C3, { key: KEY, body });
+      ok('a live push is accepted with the right key', q.status === 200);
+      let gl = await (await hit('GET', '/v1/live/' + C3)).json();
+      ok('and read back with the sets so far, cleaned: no control characters, weights and reps capped, names cut', gl.cur.n === 'Push day' && gl.cur.x[0].d.length === 3 && gl.cur.x[0].d[2][0] === 2000 && gl.cur.x[0].d[2][1] === 1000 && gl.cur.x[1].n.length === 40 && gl.cur.x[0].l === 2 && gl.cur.x[0].c === 1 && gl.cur.x[0].d[1][2] === 1, JSON.stringify(gl));
+      ok('it lives in the object, and the object alone', hubs.has(C3) && !env.SCHED.m.has('liftl:' + C3), [...env.SCHED.m.keys()].join());
+      lq = await (await hit('GET', '/v1/live?c=' + C3)).json();
+      ok('the short list reads it from the object', lq[C3].lv === 1800000000000 && lq[C3].lx === 1800000090000, JSON.stringify(lq));
+      q = await hit('PUT', '/v1/live/' + C3, { key: K2, body });
+      ok('nobody else\'s key can write somebody\'s live state', q.status === 403, q.status);
+      q = await hit('PUT', '/v1/live/' + C3, { body });
+      ok('nor no key at all', q.status === 401, q.status);
+      q = await hit('PUT', '/v1/live/ZZZZZZZZ', { key: KEY, body });
+      ok('nor a code nobody has', q.status === 404, q.status);
+      await hit('PUT', '/v1/live/' + C3, { key: KEY, body: { lv: 0, lx: 0, cur: null } });
+      gl = await (await hit('GET', '/v1/live/' + C3)).json();
+      ok('ending a workout takes the sets with it: no start, no expiry, nothing to show', gl.lv === 0 && gl.lx === 0 && gl.cur === null, JSON.stringify(gl));
+      await hit('PUT', '/v1/live/' + C3, { key: KEY, body: { lv: 1800000000000, lx: 1800000090000, cur: null } });
+      gl = await (await hit('GET', '/v1/live/' + C3)).json();
+      ok('sharing sets off sends the start and no sets', gl.lv === 1800000000000 && gl.cur === null);
+      env = saved;
+    }
     const raw = env.SCHED.m.get('lift:' + C);
     ok('the key is stored only as its hash', raw.indexOf(KEY) < 0 && JSON.parse(raw).kh.length === 64);
     q = await hit('PUT', '/v1/lift/' + C, { key: K2, body: { n: 'Imposter', s: {} } });
