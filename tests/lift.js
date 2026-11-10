@@ -48,6 +48,8 @@ const freeze = (at) => `(() => {
     /* and so do the milestones: a full-screen moment over a check that is not about it is a check that cannot press */
     seed = Object.assign({ mseen: RK_SEEN }, seed || {});
     await c.addInitScript(freeze(at || '2026-10-30T18:00:00'));
+    /* frames are put away in the app for now; the suite keeps them on so everything about them is still walked */
+    await c.addInitScript(`try { localStorage.setItem('lift.frames.v1', '1'); } catch (e) {}`);
     /* a badge earned along the way comes up over the screen; checks that
        are not about badges put it away the moment it appears */
     if (!keepBadges) await c.addInitScript(`new MutationObserver(() => { const v = document.querySelector('.lf-cv'); if (v) v.querySelector('.lf-cv-x').click(); }).observe(document, { childList: true, subtree: true });`);
@@ -1745,6 +1747,7 @@ const freeze = (at) => `(() => {
     ok('every frame has its painting on disk and an entry that draws it', artIds.every((id) => require('fs').statSync(require('path').join(__dirname, '..', 'lift', 'fm', id + '.webp')).size > 20000 && new RegExp('\\b' + id + ": \\['#").test(artSrc)), artIds);
     const worn = await page.evaluate(() => { const e = document.querySelector('#lfYou .fm-em.is-art') || [...document.querySelectorAll('.fm-em.is-art')].pop(); return e ? { art: e.style.getPropertyValue('--art'), n: e.querySelectorAll('i').length, fx: /is-fx-f/.test(e.className) } : null; });
     ok('the one worn is drawn from its picture, with its effect', worn && /fm\/ring\.webp/.test(worn.art) && worn.n >= 9 && worn.fx, worn);
+    ok('frames are put away unless switched on: no row in Settings and nothing drawn, with the code kept', /if \(k === 'fm' && !LF_FM_ON\) return;/.test(artSrc) && /if \(!LF_FM_ON\) \{ st = Object\.assign\(\{\}, st\); st\.fm = ''; \}/.test(artSrc) && /localStorage\.getItem\('lift\.frames\.v1'\) === '1'/.test(artSrc));
     ok('the effect goes with the colour: flames, venom, lightning or glints', /ring: \['#ff7a1a', 'f'\]/.test(artSrc) && /neon: \['#3dff5a', 'v'\]/.test(artSrc) && /orbit: \['#2f8bff', 'l'\]/.test(artSrc) && /function lfArtFx/.test(artSrc) && /fm-fx-zap/.test(artSrc) && /fm-fx-drip/.test(artSrc) && /fm-fx-burn/.test(artSrc));
     ok('there are animated titles anybody can earn, and The Eye and its line are the owner\'s alone', /\['an', 'Animated', '#22d3ee', \['hitter', 'blaze', 'lockedin', 'nodaysoff', 'ironheart'\]\]/.test(artSrc) && (artSrc.match(/tt-creator'/g) || []).length === 1 && /\['one', 'One of one', '#ff5a1f', \['creator', 'eye'\], 1\]/.test(artSrc) && /<em>always watching you<\/em>/.test(artSrc) && /\['eye', 'The Eye', 'One of one', function \(c\) \{ return c\.own; \}\]/.test(artSrc));
     ok('out-lifting the creator for a week is kept, and pays a badge, a title and a flair', /function lfSlayCheck/.test(artSrc) && /if \(S\.slay\) won\('slayer', S\.slay\)/.test(artSrc) && /\['slayer', 'Giant Slayer', 'Beat the creator'/.test(artSrc) && /\['slayer', 'Slayer', 'Beat the creator'/.test(artSrc) && /slayer: 1, wo365/.test(artSrc) && /slayer: 'nebula'/.test(artSrc) && /function bdSpace/.test(artSrc) && /function bdSword/.test(artSrc) && /'Beat the creator\.'/.test(artSrc) && /o\.bk = \['Always', 'watching you'\]/.test(artSrc));

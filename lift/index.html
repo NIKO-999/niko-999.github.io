@@ -4669,6 +4669,10 @@ function lfRkCtx() {
   var has = {}; got.forEach(function (x) { has[x.b.id] = 1; });
   return { has: has, wo: S.wo.length, run: lfGoalRun(), bd: got.length, myth: got.some(function (x) { return x.b.t === 4; }), own: !!lfOwner(), slay: !!S.slay };
 }
+/* FRAMES ARE PUT AWAY FOR NOW. Everything that draws one is still here, and
+   what anybody chose is still kept; nothing offers one and nothing draws
+   one until this is on again. The key is how the suite still walks them. */
+var LF_FM_ON = (function () { try { return localStorage.getItem('lift.frames.v1') === '1'; } catch (e) { return false; } })();
 var RK = {
   ti: [['rookie', 'Rookie', 'Where it starts', function () { return 1; }], ['regular', 'Regular', '10 workouts', function (c) { return c.wo >= 10; }],
     ['adept', 'Adept', '25 workouts', function (c) { return c.wo >= 25; }], ['steady', 'Steady', '4 weeks on goal', function (c) { return c.run >= 4; }],
@@ -5138,6 +5142,7 @@ function lfFlairEl(id) {
 }
 /* a profile banner, dressed: frame and title; the banner itself is always the accent */
 function frDress(b, st) {
+  if (!LF_FM_ON) { st = Object.assign({}, st); st.fm = ''; }
   var av = $('.fr-ban-av', b), ti = $('.fr-ti', b);
   av.className = av.className.replace(/ ?is-fm-[a-z0-9]+/g, '');
   var h = $('.fr-ban-h', b), old = $('.fm-em', h); if (old) old.remove(); $('.fr-ban', b).classList.remove('has-emblem'); $('.fr-ban', b).classList.remove('has-art'); av.classList.remove('em-fall'); av.classList.remove('em-on');
@@ -5197,6 +5202,7 @@ function lfRkPick(kind, onPick) {
 function lfRkRows() {
   var w = el('<div class="rk-rows"></div>');
   ['ti', 'fl', 'fm'].forEach(function (k) {
+    if (k === 'fm' && !LF_FM_ON) return;
     var c = lfRkCtx(), id = k === 'ti' ? lfRkTitle(c) : lfRkWorn(k, c);
     var b = el('<button type="button" class="lf-btn is-full rk-set"><span></span><b></b></button>'); b.dataset.k = k;
     $('span', b).textContent = RK_HEAD[k]; $('b', b).textContent = id ? lfRkName(k, id) : 'None';
@@ -5230,7 +5236,7 @@ function lfMsNow() {
 }
 function lfMsList() {
   var now = lfMsNow(), was = S.mseen || { wo: 0, vol: 0, pr: 0, u: [] }, out = [];
-  var fresh = now.u.filter(function (x) { return was.u.indexOf(x) < 0; }).map(function (x) { var q = x.split(':'); return { k: q[0], id: q[1], n: lfRkName(q[0], q[1]) }; });
+  var fresh = now.u.filter(function (x) { return was.u.indexOf(x) < 0 && (LF_FM_ON || x.indexOf('fm:') !== 0); }).map(function (x) { var q = x.split(':'); return { k: q[0], id: q[1], n: lfRkName(q[0], q[1]) }; });
   var kindN = { ti: 'title', fl: 'flair', fm: 'frame' };
   if (now.wo > (was.wo || 0)) out.push({ g: 1, num: now.wo, k: 'Milestone', h: now.wo === 1 ? 'First workout' : now.wo + ' workouts', s: now.wo === 1 ? 'It starts here' : 'Logged, every one' });
   if (now.pr > (was.pr || 0)) out.push({ g: 1, num: now.pr, k: 'Milestone', h: now.pr === 1 ? 'First record' : now.pr + ' personal records', s: 'Heavier than ever' });
@@ -6031,7 +6037,7 @@ var BADGES = [
   /* THE OWNER: one of a kind, on one phone, and the only badge that moves */
   ['owner', 'Owner', 'rare', 'The one who built this.', '#ff5a1f'],
   /* THE CREATOR: orange glass and chrome, an eye with a star in it. One of one. */
-  ['creator', 'The Eye', 'rare', 'Always watching you.', '#ff6a00']
+  ['creator', 'The Eye', 'rare', '', '#ff6a00']
 ].map(function (a) { var o = { id: a[0], n: a[1], k: a[2], d: a[3] }; if (a[4]) o.c = a[4]; if (a[0] === 'creator') o.bk = ['Always', 'watching you']; if (BD_TIER[a[0]]) o.lv = BD_TIER[a[0]];
   if (BD_FX[a[0]]) { o.fx = BD_FX[a[0]]; o.t = a[0] === 'owner' || a[0] === 'creator' ? 5 : BD_MYTH[a[0]] ? 4 : BD_HALO[a[0]] ? 3 : 2; } else if (BD_SHEEN[a[0]]) o.sn = 1; return o; });
 var BADGE = {}; BADGES.forEach(function (b) { BADGE[b.id] = b; });
@@ -7344,7 +7350,7 @@ function lfCoinView(x, earnedNow) {
     });
     paintShow(); $('.lf-cv-cap', v).insertBefore(scb, $('.lf-cv-h', v));
   }
-  $('p', v).textContent = x.b.id === 'creator' && x.d ? 'Always watching you' : x.b.d + (x.d ? (x.r ? ' Set ' : ' Earned ') + fmtDay(x.d) + '.' : x.b.k === 'month' && x.p ? ' ' + x.p[0] + ' of ' + x.p[1] + ' weeks so far.' : x.p && x.p[1] > 1 ? ' ' + lfBadgeProg(x) + ' so far.' : '');
+  $('p', v).textContent = x.b.id === 'creator' && x.d ? '' : x.b.d + (x.d ? (x.r ? ' Set ' : ' Earned ') + fmtDay(x.d) + '.' : x.b.k === 'month' && x.p ? ' ' + x.p[0] + ' of ' + x.p[1] + ' weeks so far.' : x.p && x.p[1] > 1 ? ' ' + lfBadgeProg(x) + ' so far.' : '');
   var vb = el('<div class="lf-cvb" aria-hidden="true"></div>'); document.body.appendChild(vb);
   document.body.appendChild(v); document.body.classList.add('lf-lock');
   requestAnimationFrame(function () { v.classList.add('is-up'); vb.classList.add('is-up'); });
