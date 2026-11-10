@@ -1851,6 +1851,7 @@ function lfClean(o) {
     });
     if (Object.keys(swo).length) d.sw = swo;
   }
+  if (o.shn === true) d.shn = true;
   if (Array.isArray(o.show)) d.show = o.show.filter(function (k, i, a) { return typeof k === 'string' && /^[a-z0-9]{2,8}$/.test(k) && a.indexOf(k) === i; }).slice(0, 3);
   if (o.bseen && typeof o.bseen === 'object') { d.bseen = {}; Object.keys(o.bseen).forEach(function (k) { if (/^[a-z0-9]{2,8}$/.test(k)) d.bseen[k] = 1; }); }
   /* A REST DAY taken on purpose, a date and nothing else. */
@@ -4402,7 +4403,8 @@ function frStats() {
   return { wo30: in30.length, sets30: in30.reduce(function (a, w) { return a + woSets(w); }, 0), pr30: pr30, wk: wk, goal: S.goal,
     streak: streak, ow: lfOwner() ? 1 : 0, d: d, last: last, w7: w7, mu: mu, r7: r7, v8: v8,
     /* what friends see of your badges: the three you showcase, or your latest three */
-    bg: (function () { var all = lfBadges().filter(function (x) { return x.d && x.b.id !== 'creator'; }), sh = lfShow();
+    bg: (function () { var all = lfBadges().filter(function (x) { return x.d; }), sh = lfShow();
+      if (S.shn) return [];
       var pick = sh.length ? sh.map(function (id) { return all.filter(function (x) { return x.b.id === id; })[0]; }).filter(Boolean) : all.sort(function (a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : 0; }).slice(0, 3);
       return pick.map(function (x) { return [x.b.id, x.d]; }); })(),
     /* the workouts themselves, newest first: what friends open to see your sets */
@@ -4655,7 +4657,7 @@ function frStrip(dstr) {
 }
 /* YOUR SHOWCASE: up to three badges you have earned, the only ones friends
    see. Empty, it falls back to your three latest, as before. */
-function lfShow() { var got = {}; lfBadgesCache().forEach(function (x) { if (x.d) got[x.b.id] = x.d; }); return (S.show || []).filter(function (id) { return got[id] && id !== 'creator'; }).slice(0, 3); }
+function lfShow() { var got = {}; lfBadgesCache().forEach(function (x) { if (x.d) got[x.b.id] = x.d; }); return (S.show || []).filter(function (id) { return got[id]; }).slice(0, 3); }
 var lfBC = null, lfBCk = '';
 function lfBadgesCache() { var k = S.wo.length + ':' + (S.wo.length ? S.wo[S.wo.length - 1].id : '') + ':' + JSON.stringify(S.fx || '').length + ':' + (S.bw || []).length; if (k !== lfBCk) { lfBC = lfBadges(); lfBCk = k; } return lfBC; }
 /* ── WHAT YOU WEAR ──────────────────────────────────────────────────────
@@ -4679,7 +4681,7 @@ var RK = {
     ['hitter', 'Heavy Hitter', '15 workouts', function (c) { return c.wo >= 15; }], ['blaze', 'On Fire', '4 weeks on goal', function (c) { return c.run >= 4; }],
     ['lockedin', 'Locked In', '40 workouts', function (c) { return c.wo >= 40; }], ['nodaysoff', 'No Days Off', '8 weeks on goal', function (c) { return c.run >= 8; }],
     ['ironheart', 'Iron Heart', '120 workouts', function (c) { return c.wo >= 120; }],
-    ['slayer', 'Giant Slayer', 'Out-lift the creator in a week', function (c) { return c.slay; }],
+    ['slayer', 'Giant Slayer', 'Beat the creator', function (c) { return c.slay; }],
     ['creator', 'Creator', 'One of one', function (c) { return c.own; }], ['eye', 'The Eye', 'One of one', function (c) { return c.own; }]],
   fl: [['spark', 'Spark', '5 workouts', function (c) { return c.wo >= 5; }, 'M12 2.5l2 6.5 6.5 2-6.5 2-2 6.5-2-6.5-6.5-2 6.5-2z', '#facc15'],
     ['heart', 'Heart', '15 workouts', function (c) { return c.wo >= 15; }, 'M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z', '#f43f5e'],
@@ -4701,7 +4703,7 @@ var RK = {
     ['duo', 'Duo', 'Earn Gym Buddies', function (c) { return !!c.has.duo10; }, 'M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20c0-3.5 2.800-6 6.500-6s6.500 2.500 6.500 6M17 10a3 3 0 1 0 0-6M18.500 14.200c2 .6 3.500 2.600 3.500 5.800', '#38bdf8', 1],
     ['flag', 'Flag', 'Earn Squad Goals', function (c) { return !!c.has.squad; }, 'M5 21V4M5 4h11l-2 4 2 4H5', '#22c55e', 1],
     ['medal', 'Medal', 'Earn Crowned', function (c) { return !!c.has.lead1; }, 'M12 14a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM8.500 13.500L7 21l5-2.500 5 2.500-1.500-7.500', '#f59e0b', 1],
-    ['slayer', 'Slayer', 'Out-lift the creator in a week', function (c) { return c.slay; }, 'M12 2l2.2 3.2V14H17v2.2h-3.6V21h-2.800v-4.800H7V14h2.800V5.200z', '#e11d48'],
+    ['slayer', 'Slayer', 'Beat the creator', function (c) { return c.slay; }, 'M12 2l2.2 3.2V14H17v2.2h-3.6V21h-2.800v-4.800H7V14h2.800V5.200z', '#e11d48'],
     ['pack', 'Paw', 'Earn Pack Leader', function (c) { return !!c.has.pack; }, 'M12 21c-3.300 0-5.500-1.800-5.500-4 0-2.700 3.200-5 5.500-5s5.500 2.300 5.500 5c0 2.200-2.200 4-5.500 4zM5 11.500a1.700 2.300 0 1 0 .01 0zM9 6.500a1.700 2.300 0 1 0 .01 0zM15 6.500a1.700 2.300 0 1 0 .01 0zM19 11.500a1.700 2.300 0 1 0 .01 0z', '#fb923c'],
     ['pulse', 'Pulse', 'Earn Cardio Heart', function (c) { return !!c.has.cardio25; }, 'M2 12h4l2.5-6 4 12 2.5-6H22', '#f43f5e', 1],
     ['stairs', 'Stairs', 'Earn Step Up', function (c) { return !!c.has.stair10; }, 'M3 20h5v-4h4v-4h4V8h5', '#06b6d4', 1],
@@ -5202,6 +5204,12 @@ function lfRkRows() {
     b.addEventListener('click', function () { lfRkPick(k, function () { var y = $('#lfYou'); if (!y) return; var nw = lfRkRows(); w.replaceWith(nw); }); });
     w.appendChild(b);
   });
+  /* THE SHOWCASE CAN BE EMPTY. With nothing picked, friends were shown your
+     latest three whether you wanted that or not; None is a choice too. */
+  var sb = el('<button type="button" class="lf-btn is-full rk-set rk-show"><span>Badges shown</span><b></b></button>');
+  var say = function () { $('b', sb).textContent = S.shn ? 'None' : lfShow().length ? 'Your picks' : 'Latest three'; sb.setAttribute('aria-pressed', S.shn ? 'true' : 'false'); };
+  sb.dataset.k = 'sh'; say(); sb.addEventListener('click', function () { if (S.shn) delete S.shn; else S.shn = true; lfSave(); say(); frPushNow(); lfRender(); });
+  w.appendChild(sb);
   return w;
 }
 
@@ -5862,7 +5870,7 @@ var BD_TIER = { wo50: 2, wo100: 3, st12: 2, st26: 3, v1m: 2, v5m: 3, pr10: 2, pr
      finish   an exotic enamel that breathes in its own light: months
      halo     a finish, and a light turning round it: the longest of all
    The rare ones are quick to win, so they wear a finish and no halo. */
-var BD_FX = { slayer: 'inferno', night: 'galaxy', dawn: 'sunrise', onfire: 'lava', winter: 'ice', lungs: 'aurora', fullbody: 'neon',
+var BD_FX = { slayer: 'nebula', night: 'galaxy', dawn: 'sunrise', onfire: 'lava', winter: 'ice', lungs: 'aurora', fullbody: 'neon',
   wo50: 'ice', st12: 'lava', v1m: 'obsidian', pr10: 'galaxy', abs50: 'aurora', duo10: 'ice', lead3: 'molten', ton15: 'neon', rep1k: 'sunrise', leg100: 'emerald',
   mon20: 'neon', stairhr: 'sunrise', inclhr: 'emerald',
   wo100: 'galaxy', st26: 'opal', v5m: 'holo', pr100: 'neon', abs100: 'emerald', duo50: 'aurora', lead10: 'sunrise', ton20: 'carbon', rep2k: 'lava', leg200: 'ice', year: 'opal',
@@ -5930,7 +5938,7 @@ var BADGES = [
   ['landslide', 'Landslide', 'friends', 'A week finished in front, at twice the next best on the rings.', '#ff5a1f'],
   ['photo', 'Photo Finish', 'friends', 'You and a friend both closed your goal in the same week, level at the top.', '#8fd8ff'],
   ['pack', 'Pack Leader', 'friends', 'A week finished in front of three or more friends.', '#ffb347'],
-  ['slayer', 'Giant Slayer', 'friends', 'A whole week out-lifting the creator.', '#e11d48'],
+  ['slayer', 'Giant Slayer', 'friends', 'Beat the creator.', '#7c5cff'],
   /* milestones: how and when you train, each its own shape and colour */
   ['early', 'Early Bird', 'mile', 'Ten workouts started before 7 am.', '#fb923c'],
   ['owl', 'Night Owl', 'mile', 'Ten workouts started after 8 pm.', '#4f46e5'],
@@ -6024,7 +6032,7 @@ var BADGES = [
   ['owner', 'Owner', 'rare', 'The one who built this.', '#ff5a1f'],
   /* THE CREATOR: orange glass and chrome, an eye with a star in it. One of one. */
   ['creator', 'The Eye', 'rare', 'Always watching you.', '#ff6a00']
-].map(function (a) { var o = { id: a[0], n: a[1], k: a[2], d: a[3] }; if (a[4]) o.c = a[4]; if (BD_TIER[a[0]]) o.lv = BD_TIER[a[0]];
+].map(function (a) { var o = { id: a[0], n: a[1], k: a[2], d: a[3] }; if (a[4]) o.c = a[4]; if (a[0] === 'creator') o.bk = ['Always', 'watching you']; if (BD_TIER[a[0]]) o.lv = BD_TIER[a[0]];
   if (BD_FX[a[0]]) { o.fx = BD_FX[a[0]]; o.t = a[0] === 'owner' || a[0] === 'creator' ? 5 : BD_MYTH[a[0]] ? 4 : BD_HALO[a[0]] ? 3 : 2; } else if (BD_SHEEN[a[0]]) o.sn = 1; return o; });
 var BADGE = {}; BADGES.forEach(function (b) { BADGE[b.id] = b; });
 var BARBELL = { squat: 1, bench: 1, deadlift: 1, rdl: 1, frontsq: 1, inclbb: 1, bbrow: 1, hipthrust: 1, sldl: 1, rackpull: 1, ohp: 1 };
@@ -6362,7 +6370,7 @@ var BD_SHI = { tgt1: 'hex', tgtall: 'shield', tgt4: 'rosette', quad: 'pent', sta
   night: 'scallop', dawn: 'dome', onfire: 'flare', winter: 'shard', lungs: 'ellt', fullbody: 'trid',
   pr3: 'burst', sets30: 'gear', wkend: 'flag', mon20: 'tag', year: 'coin24', cardio25: 'heart', leg50: 'hextall',
   chest50: 'shield', chest100: 'shield', chest200: 'shield', bk50: 'gem', bk100: 'gem', bk200: 'gem', sh50: 'dome', sh100: 'dome', sh200: 'dome', arm50: 'tall', arm100: 'tall', arm200: 'tall',
-  wave: 'capsule', trio: 'trid', landslide: 'flare', photo: 'crest', pack: 'crownb', slayer: 'crownb', zero: 'hept', newyear: 'star5', century: 'coin24', twice: 'twin',
+  wave: 'capsule', trio: 'trid', landslide: 'flare', photo: 'crest', pack: 'crownb', slayer: 'coin24', zero: 'hept', newyear: 'star5', century: 'coin24', twice: 'twin',
   sets500: 'gear', sets2k: 'gear', sets5k: 'gear', hr25: 'hourglass', hr100: 'hourglass', hr250: 'hourglass', rp10k: 'cross', rp50k: 'cross', rp100k: 'cross', mo3: 'tag', mo6: 'tag', mo12: 'tag', allmus: 'trid', dec31: 'scallop', friday13: 'shard', leap: 'egg', ironwk: 'flare', plate4: 'oct', wo365: 'sun', st52: 'star5', v10m: 'coin24', owner: 'dumbbell',
   wo250: 'coin24', wo500: 'sun', ton25: 'trap', wkvol: 'trap', setwk100: 'gear', sets40: 'gear', ex15: 'compass', ex80: 'compass', sig50: 'burst', sig100: 'burst',
   tgt12: 'rosette', allmus4: 'trid', post50: 'hextall', cdwk: 'heart', cardio100: 'heart', cdh50: 'ellt' };
@@ -6379,7 +6387,7 @@ var BD_GL = { first: 'i:check', wo10: '10', wo50: '50', goal: 'i:ring', st4: '4'
   night: 'i:moon', dawn: 'i:sun', onfire: 'i:flame', winter: 'i:star', lungs: 'i:ring', fullbody: 'i:dumb',
   pr3: '3', sets30: '30', wkend: 'i:cal', mon20: '20', year: 'i:star', weigh: 'i:scale', cardio25: '25', leg50: '50',
   chest50: '50', chest100: '100', chest200: '200', bk50: '50', bk100: '100', bk200: '200', sh50: '50', sh100: '100', sh200: '200', arm50: '50', arm100: '100', arm200: '200',
-  wave: '3', trio: 'i:pair', landslide: '2×', photo: 'i:ring', pack: 'i:trophy', slayer: 'i:trophy', zero: '14', newyear: 'i:star', century: '100', heavy2: '2×', twice: '2',
+  wave: '3', trio: 'i:pair', landslide: '2×', photo: 'i:ring', pack: 'i:trophy', slayer: 'i:star', zero: '14', newyear: 'i:star', century: '100', heavy2: '2×', twice: '2',
   sets500: '500', sets2k: '2k', sets5k: '5k', hr25: '25h', hr100: '100h', hr250: '250h', rp10k: '10k', rp50k: '50k', rp100k: '100k', mo3: '3', mo6: '6', mo12: '12', allmus: 'i:dumb', dec31: 'i:star', friday13: '13', leap: '29', ironwk: '10h', plate4: '4', wo365: '365', st52: '52', v10m: '10M', owner: 'i:flame',
   wo250: '250', wo500: '500', v500k: '500k', ton25: '25k', wkvol: 'i:weight', setwk100: '100', sets40: '40', pr25: '25', pr50: '50', ex15: '15', ex80: '80',
   sig50: '50', sig100: '100', tgt12: '12', allmus4: '4×', post50: '50', cdwk: '5', cardio100: '100', cdh50: '50h' };
@@ -6933,18 +6941,23 @@ function bdPolar(shp, dish, mirror) {
 }
 /* THE CREATOR, built whole: a hexagon of orange glass in a chrome rim, chrome bands sweeping round an eye, an orange iris, a four-point star for a pupil.
    Nothing here is a picture. The glass has a candy gloss, the chrome reflects, and four things move: a light sweeping across, light crawling through the glass, the star breathing, and sparks circling the rim. */
-function bdCreator(n) {
+function bdCreator(b, n, pre) {
   var T = BD3, g = new T.Group(), hi = n > 600, D = Math.PI / 180;
   var hex = function (R) { var sh = new T.Shape(); for (var i = 0; i < 6; i++) { var a = (90 + i * 60) * D; if (i) sh.lineTo(R * Math.cos(a), R * Math.sin(a)); else sh.moveTo(R * Math.cos(a), R * Math.sin(a)); } sh.closePath(); return sh; };
   var ext = function (sh, depth, bv, seg) { return new T.ExtrudeGeometry(sh, { depth: depth, bevelEnabled: true, bevelThickness: bv, bevelSize: bv, bevelSegments: hi ? 6 : 3, curveSegments: seg || (hi ? 40 : 20) }); };
   var chrome = new T.MeshPhysicalMaterial({ color: 0xaeb4c2, metalness: 1, roughness: .16, envMapIntensity: 1.05 });
   var gc = document.createElement('canvas'); gc.width = 4; gc.height = 256; var gx = gc.getContext('2d'), gr = gx.createLinearGradient(0, 0, 0, 256);
   gr.addColorStop(0, '#ff8c00'); gr.addColorStop(.45, '#ff5a00'); gr.addColorStop(1, '#e02a00'); gx.fillStyle = gr; gx.fillRect(0, 0, 4, 256);
-  var gtx = new T.CanvasTexture(gc); gtx.encoding = T.sRGBEncoding; gtx.repeat.set(.5, .5); gtx.offset.set(.5, .5);
+  var gtx = new T.CanvasTexture(gc); gtx.encoding = T.sRGBEncoding;
   var glass = new T.MeshPhysicalMaterial({ color: 0xc8560e, map: gtx, metalness: 0, roughness: .16, clearcoat: .8, clearcoatRoughness: .04, emissive: 0xd42400, emissiveIntensity: .3, envMapIntensity: .38 });
   var rimS = hex(1); rimS.holes.push(new T.Path(hex(.9).getPoints().reverse()));
   var rim = new T.Mesh(ext(rimS, .1, .04), chrome); rim.position.z = -.05; g.add(rim);
-  var plate = new T.Mesh(ext(hex(.91), .05, .035), glass); plate.position.z = -.03; g.add(plate);
+  /* THE FACE DISHES, as every badge's does: the glass sinks toward the middle and the eye stands proud of it.
+     AND THE BACK IS ENGRAVED like the rest, in the rim's own chrome: the day it was earned. */
+  var plate = new T.Mesh(bdPolar(hex(.92), .06), glass); plate.position.z = .05; g.add(plate);
+  var bm = (pre && pre.b) || (bdSetFace(n), bdBack(b, '#c4c9d4'));
+  var back = new T.Mesh(bdPolar(hex(.92), .06, true), new T.MeshPhysicalMaterial({ color: 0xffffff, map: bm.col, metalness: 1, roughness: 1, metalnessMap: bm.orm, roughnessMap: bm.orm, bdNorm: bm.n, envMapIntensity: 1.15, reflectivity: .2 }));
+  back.rotation.y = Math.PI; back.position.z = -.05; g.add(back);
   /* a ribbon along a curve, for the bands */
   var ribbon = function (pts, w0, w1) {
     var cu = new T.CatmullRomCurve3(pts.map(function (q) { return new T.Vector3(q[0], q[1], 0); })), N = 70, L = [], R = [];
@@ -6969,11 +6982,11 @@ function bdCreator(n) {
   /* a haze of orange light behind it, which is the glow */
   var hc = document.createElement('canvas'); hc.width = hc.height = 256; var hx = hc.getContext('2d'), hg = hx.createRadialGradient(128, 128, 20, 128, 128, 128);
   hg.addColorStop(0, 'rgba(255,120,20,.9)'); hg.addColorStop(.5, 'rgba(255,70,0,.35)'); hg.addColorStop(1, 'rgba(255,60,0,0)'); hx.fillStyle = hg; hx.fillRect(0, 0, 256, 256);
-  var haze = new T.Mesh(new T.PlaneGeometry(3.6, 3.6), new T.MeshBasicMaterial({ map: new T.CanvasTexture(hc), transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false })); haze.position.z = -.25; haze.renderOrder = 1; g.add(haze);
+  var haze = new T.Mesh(new T.PlaneGeometry(3, 3), new T.MeshBasicMaterial({ map: new T.CanvasTexture(hc), transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false })); haze.position.z = -.25; haze.renderOrder = 1; g.add(haze);
   /* rays turning slowly behind it: the mark of the rarest thing on the shelf */
   var rc = document.createElement('canvas'); rc.width = rc.height = 512; var rx = rc.getContext('2d'); rx.translate(256, 256);
   for (var ri = 0; ri < 16; ri++) { rx.rotate(Math.PI / 8); var rg = rx.createLinearGradient(0, 0, 0, -256); rg.addColorStop(0, 'rgba(255,150,40,.55)'); rg.addColorStop(1, 'rgba(255,90,0,0)'); rx.fillStyle = rg; rx.beginPath(); rx.moveTo(0, 0); rx.lineTo(ri % 2 ? -14 : -26, -256); rx.lineTo(ri % 2 ? 14 : 26, -256); rx.closePath(); rx.fill(); }
-  var rays = new T.Mesh(new T.PlaneGeometry(4.4, 4.4), new T.MeshBasicMaterial({ map: new T.CanvasTexture(rc), transparent: true, opacity: .5, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false })); rays.position.z = -.3; rays.renderOrder = 0; g.add(rays);
+  var rays = new T.Mesh(new T.PlaneGeometry(3.1, 3.1), new T.MeshBasicMaterial({ map: new T.CanvasTexture(rc), transparent: true, opacity: .5, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false })); rays.position.z = -.3; rays.renderOrder = 0; g.add(rays);
   /* light crawling through the glass */
   var flow = bdFlowTex(); flow.repeat.set(1.1, 1.1);
   var crawl = new T.Mesh(new T.ShapeGeometry(hex(.89)), new T.MeshBasicMaterial({ map: flow, color: 0xff6a10, transparent: true, opacity: .15, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false })); crawl.position.z = .0865; crawl.renderOrder = 2; g.add(crawl);
@@ -6983,6 +6996,7 @@ function bdCreator(n) {
   var NS = 18, sp = new Float32Array(NS * 3), spg = new T.BufferGeometry(); spg.setAttribute('position', new T.BufferAttribute(sp, 3));
   var spk = new T.Points(spg, new T.PointsMaterial({ size: .06, color: 0xffb060, transparent: true, opacity: .9, blending: T.AdditiveBlending, depthWrite: false })); g.add(spk);
   var pl = new T.PointLight(0xff6a1a, 1.4, 4); pl.position.set(0, 0, 1.3); g.add(pl);
+  var wq = new T.Quaternion(), rz = new T.Quaternion(), zAx = new T.Vector3(0, 0, 1), bh = new T.Vector3();
   g.userData.cr = function (t) {
     flow.offset.set(Math.sin(t * .23) * .14, -t * .05);
     var ph = (t % 4.6) / 4.6; gl.offset.set(2 - ph * 3.6, 0);
@@ -6990,7 +7004,12 @@ function bdCreator(n) {
     /* IT WATCHES: the iris drifts, holds, and comes back, as an eye does */
     var lk = t % 9, lx = lk < 2 ? 0 : lk < 2.6 ? -(lk - 2) / .6 : lk < 4.4 ? -1 : lk < 5.4 ? -1 + (lk - 4.4) * 2 : lk < 7.2 ? 1 : lk < 7.8 ? 1 - (lk - 7.2) / .6 : 0;
     lx = lx * .11; iris.position.x = ring.position.x = sm.position.x = lx;
-    rays.rotation.z = t * .12; rays.material.opacity = .42 + Math.sin(t * 1.3) * .14;
+    /* THE GLOW STAYS BEHIND IT WHICHEVER WAY IT IS TURNED. As children of the
+       badge the two planes spun with it, so a flip put the haze in front of
+       the back and an edge-on turn showed them as slivers. */
+    g.getWorldQuaternion(wq); wq.invert(); bh.set(0, 0, -.3).applyQuaternion(wq);
+    haze.quaternion.copy(wq); haze.position.copy(bh); rays.quaternion.copy(wq).multiply(rz.setFromAxisAngle(zAx, t * .12)); rays.position.copy(bh);
+    rays.material.opacity = .42 + Math.sin(t * 1.3) * .14;
     irisM.emissiveIntensity = .5 + Math.sin(t * 1.6) * .2; glass.emissiveIntensity = .32 + Math.sin(t * .9 + 1) * .08;
     haze.material.opacity = .75 + Math.sin(t * 1.4) * .22; pl.intensity = 1.4 + Math.sin(t * 1.9) * .3;
     for (var k = 0; k < NS; k++) { var a = t * .35 + k * (Math.PI * 2 / NS), r0 = 1.06 + Math.sin(t * 1.1 + k * 2.3) * .05; sp[k * 3] = r0 * Math.cos(a); sp[k * 3 + 1] = r0 * Math.sin(a) * 1.04; sp[k * 3 + 2] = .1 + Math.sin(t * 2 + k) * .04; }
@@ -7001,7 +7020,8 @@ function bdCreator(n) {
   return g;
 }
 function bdMake(b, m, n, pre) {
-  if (b.id === 'creator' && !b.lock) return bdCreator(n);
+  if (b.id === 'creator' && !b.lock) return bdCreator(b, n, pre);
+  if (b.id === 'slayer' && !b.lock) return bdSword(b, n, pre);
   var g = new BD3.Group(), trim = bdTrimOf(b), mp = pre || bdMaps(b, trim, n), lock = !!b.lock;
   var shp = new BD3.Shape(); bdOutline(shp, b.sh);
   var body = new BD3.ExtrudeGeometry(shp, { depth: .1, bevelEnabled: true, bevelThickness: .05, bevelSize: .045, bevelSegments: n > 600 ? 8 : 4, curveSegments: n > 600 ? 48 : 24 });
@@ -7044,6 +7064,104 @@ function bdMake(b, m, n, pre) {
     g.userData.flow = flow; g.userData.flow2 = flow2; g.userData.haze = haze; g.userData.glint = gl; g.userData.lavaM = [lm1, lm2];
   }
   return g;
+}
+/* GIANT SLAYER IS A SWORD OVER A GALAXY. A medal of dark glass with a
+   spiral galaxy turning in it, set in lavender chrome ticked like a dial,
+   and standing proud of it a blade: bevelled steel, a fuller that glows, a
+   winged guard with a gem in it, a bound grip and a pommel. Round all of it
+   the sky bdSpace gives, and meteorites: rough rocks on three tilted orbits,
+   each tumbling, each dragging a tail of light. The back is engraved. */
+function bdSword(b, n, pre) {
+  var T = BD3, g = new T.Group(), hi = n > 600, N = hi ? 1024 : 384, R = N / 2, i, sd = 11;
+  function rnd() { sd = (sd * 16807) % 2147483647; return sd / 2147483647; }
+  var cc = document.createElement('canvas'); cc.width = cc.height = N; var x = cc.getContext('2d');
+  var bg = x.createRadialGradient(R, R, 0, R, R, R); bg.addColorStop(0, '#2a1a5e'); bg.addColorStop(.55, '#120a30'); bg.addColorStop(1, '#05030f'); x.fillStyle = bg; x.fillRect(0, 0, N, N);
+  x.globalCompositeOperation = 'lighter';
+  for (i = 0; i < (hi ? 5200 : 1500); i++) {
+    var arm = i % 2, u = Math.pow(rnd(), .7), th = u * 9.5 + arm * Math.PI + (rnd() - .5) * (.5 + u * .7), rr = (u * .46 + (rnd() - .5) * .05) * N, px = R + rr * Math.cos(th), py = R + rr * Math.sin(th) * .92, pr = (.0015 + rnd() * rnd() * .012) * N;
+    var gd = x.createRadialGradient(px, py, 0, px, py, pr), cl = u < .25 ? '255,236,210' : rnd() < .5 ? '140,170,255' : rnd() < .6 ? '190,120,255' : '255,120,210';
+    gd.addColorStop(0, 'rgba(' + cl + ',' + (.5 + rnd() * .4) + ')'); gd.addColorStop(1, 'rgba(' + cl + ',0)'); x.fillStyle = gd; x.fillRect(px - pr, py - pr, pr * 2, pr * 2);
+  }
+  var core = x.createRadialGradient(R, R, 0, R, R, N * .16); core.addColorStop(0, 'rgba(255,244,225,.95)'); core.addColorStop(.4, 'rgba(210,170,255,.4)'); core.addColorStop(1, 'rgba(120,90,255,0)'); x.fillStyle = core; x.fillRect(0, 0, N, N);
+  for (i = 0; i < (hi ? 500 : 160); i++) { x.fillStyle = 'rgba(255,255,255,' + (.3 + rnd() * .7) + ')'; var ss = rnd() < .08 ? 2.2 : 1; x.fillRect(rnd() * N, rnd() * N, ss, ss); }
+  var ct = new T.CanvasTexture(cc); ct.encoding = T.sRGBEncoding; ct.center.set(.5, .5);
+  var circ = function (r0) { var sh = new T.Shape(); sh.absarc(0, 0, r0, 0, Math.PI * 2, false); return sh; };
+  var face = new T.Mesh(bdPolar(circ(.9), .06), new T.MeshPhysicalMaterial({ color: 0xffffff, map: ct, emissive: 0xffffff, emissiveMap: ct, emissiveIntensity: .75, roughness: .12, metalness: 0, clearcoat: 1, clearcoatRoughness: .03, envMapIntensity: .5 })); face.position.z = .05; g.add(face);
+  var chrome = new T.MeshPhysicalMaterial({ color: 0xb9b0ee, metalness: 1, roughness: .18, envMapIntensity: 1.15 }), bright = new T.MeshPhysicalMaterial({ color: 0xf2e6ff, metalness: 1, roughness: .1, envMapIntensity: 1.3 });
+  var rs = circ(1); rs.holes.push(new T.Path(circ(.89).getPoints(hi ? 96 : 48).reverse()));
+  var rim = new T.Mesh(new T.ExtrudeGeometry(rs, { depth: .1, bevelEnabled: true, bevelThickness: .04, bevelSize: .035, bevelSegments: hi ? 6 : 3, curveSegments: hi ? 96 : 48 }), chrome); rim.position.z = -.05; g.add(rim);
+  var inner = new T.Mesh(new T.TorusGeometry(.895, .014, 10, hi ? 160 : 80), bright); inner.position.z = .09; g.add(inner);
+  var stud = new T.SphereGeometry(.017, 10, 8), tick = new T.BoxGeometry(.008, .05, .012);
+  for (i = 0; i < 60; i++) { var a = i / 60 * Math.PI * 2, mk = new T.Mesh(i % 5 ? tick : stud, i % 5 ? chrome : bright); mk.position.set(.955 * Math.cos(a), .955 * Math.sin(a), .092); mk.rotation.z = a + Math.PI / 2; g.add(mk); }
+  var bm = (pre && pre.b) || (bdSetFace(n), bdBack(b, '#cfc8f2'));
+  var back = new T.Mesh(bdPolar(circ(.9), .06, true), new T.MeshPhysicalMaterial({ color: 0xffffff, map: bm.col, metalness: 1, roughness: 1, metalnessMap: bm.orm, roughnessMap: bm.orm, bdNorm: bm.n, envMapIntensity: 1.15, reflectivity: .2 }));
+  back.rotation.y = Math.PI; back.position.z = -.05; g.add(back);
+  /* THE SWORD */
+  var sw = new T.Group(); sw.position.z = .12; g.add(sw);
+  var steel = new T.MeshPhysicalMaterial({ color: 0xe6ebff, metalness: 1, roughness: .07, envMapIntensity: 1.5 }), dark = new T.MeshPhysicalMaterial({ color: 0x241c44, metalness: .6, roughness: .45 });
+  var glowM = new T.MeshBasicMaterial({ color: 0xa48bff, toneMapped: false }), gemM = new T.MeshPhysicalMaterial({ color: 0x7c5cff, emissive: 0x7c5cff, emissiveIntensity: 1.1, roughness: .05, metalness: 0, clearcoat: 1 });
+  var bl = new T.Shape(); bl.moveTo(0, 1.22); bl.lineTo(.105, .98); bl.lineTo(.092, -.26); bl.lineTo(-.092, -.26); bl.lineTo(-.105, .98); bl.closePath();
+  var blade = new T.Mesh(new T.ExtrudeGeometry(bl, { depth: .012, bevelEnabled: true, bevelThickness: .03, bevelSize: .05, bevelSegments: 1 }), steel); blade.position.z = -.006; sw.add(blade);
+  [-1, 1].forEach(function (sg) { var fu = new T.Mesh(new T.BoxGeometry(.026, 1.02, .006), glowM); fu.position.set(0, .3, sg * .037); sw.add(fu); });
+  var gd0 = new T.Shape(); gd0.moveTo(-.5, -.16); gd0.quadraticCurveTo(-.3, -.3, -.12, -.25); gd0.lineTo(.12, -.25); gd0.quadraticCurveTo(.3, -.3, .5, -.16); gd0.quadraticCurveTo(.3, -.4, .1, -.37); gd0.lineTo(-.1, -.37); gd0.quadraticCurveTo(-.3, -.4, -.5, -.16);
+  var guard = new T.Mesh(new T.ExtrudeGeometry(gd0, { depth: .06, bevelEnabled: true, bevelThickness: .02, bevelSize: .02, bevelSegments: hi ? 3 : 2, curveSegments: 16 }), chrome); guard.position.z = -.03; sw.add(guard);
+  [-1, 1].forEach(function (sg) { var gm = new T.Mesh(new T.OctahedronGeometry(.055, 0), gemM); gm.scale.set(1, 1.25, .6); gm.position.set(0, -.31, sg * .055); sw.add(gm); });
+  var grip = new T.Mesh(new T.CylinderGeometry(.043, .038, .4, 16), dark); grip.position.y = -.58; sw.add(grip);
+  for (i = 0; i < 6; i++) { var wr = new T.Mesh(new T.TorusGeometry(.044, .008, 6, 20), bright); wr.rotation.x = Math.PI / 2; wr.position.y = -.42 - i * .064; sw.add(wr); }
+  var pom = new T.Mesh(new T.OctahedronGeometry(.085, 1), chrome); pom.position.y = -.84; sw.add(pom);
+  var pg = new T.Mesh(new T.SphereGeometry(.03, 12, 10), gemM); pg.position.set(0, -.84, 0); pg.scale.set(1, 1, 3.2); sw.add(pg);
+  var bladeGlow = new T.PointLight(0x9a7dff, 1.3, 3); bladeGlow.position.set(0, .4, .5); sw.add(bladeGlow);
+  /* THE METEORITES */
+  var rockM = new T.MeshStandardMaterial({ color: 0x5a4f7c, roughness: .95, metalness: .1, flatShading: true });
+  var tc = document.createElement('canvas'); tc.width = 64; tc.height = 8; var tx = tc.getContext('2d'), tg = tx.createLinearGradient(0, 0, 64, 0); tg.addColorStop(0, 'rgba(120,90,255,0)'); tg.addColorStop(.7, 'rgba(190,150,255,.55)'); tg.addColorStop(1, 'rgba(255,240,220,1)'); tx.fillStyle = tg; tx.fillRect(0, 0, 64, 8);
+  var trailT = new T.CanvasTexture(tc), rocks = [];
+  [[62, 20, 1.36, 4], [74, -28, 1.5, 3], [52, 64, 1.44, 3]].forEach(function (o, oi) {
+    var orb = new T.Group(); orb.rotation.set(o[0] * Math.PI / 180, 0, o[1] * Math.PI / 180); g.add(orb);
+    for (var k = 0; k < o[3]; k++) {
+      var rg = new T.IcosahedronGeometry(.035 + rnd() * .04, 0), pa = rg.attributes.position; for (var v = 0; v < pa.count; v++) pa.setXYZ(v, pa.getX(v) * (.7 + rnd() * .6), pa.getY(v) * (.7 + rnd() * .6), pa.getZ(v) * (.7 + rnd() * .6)); rg.computeVertexNormals();
+      var rk = new T.Mesh(rg, rockM), tr = new T.Mesh(new T.PlaneGeometry(.34, .035), new T.MeshBasicMaterial({ map: trailT, transparent: true, blending: T.AdditiveBlending, depthWrite: false, side: T.DoubleSide, toneMapped: false }));
+      orb.add(rk); orb.add(tr); rocks.push({ m: rk, t: tr, r: o[2] + (rnd() - .5) * .08, p: k / o[3] * Math.PI * 2 + rnd(), w: (.32 + rnd() * .2) * (oi % 2 ? -1 : 1), sx: rnd() * 2, sy: rnd() * 2 });
+    }
+  });
+  bdSpace(g);
+  var sky = g.userData.cr;
+  g.userData.cr = function (t) {
+    sky(t); ct.rotation = t * .05; gemM.emissiveIntensity = 1 + Math.sin(t * 2.1) * .35; bladeGlow.intensity = 1.2 + Math.sin(t * 1.7) * .35;
+    rocks.forEach(function (q) { var a = q.p + t * q.w, d = q.w > 0 ? 1 : -1; q.m.position.set(q.r * Math.cos(a), q.r * Math.sin(a), 0); q.m.rotation.set(t * q.sx, t * q.sy, 0);
+      var ab = a - d * .125; q.t.position.set(q.r * Math.cos(ab), q.r * Math.sin(ab), 0); q.t.rotation.z = ab + d * Math.PI / 2; });
+  };
+  g.userData.cr(2);
+  return g;
+}
+/* GIANT SLAYER HANGS IN SPACE: a nebula behind it, a field of stars turning
+   slowly round it, and a ring like a planet's with a moon riding it. The
+   badge itself is the nebula finish; this is the sky it sits in. */
+function bdSpace(g) {
+  var T = BD3, c = document.createElement('canvas'); c.width = c.height = 256; var x = c.getContext('2d');
+  [[128, 128, 128, 'rgba(124,92,255,.75)'], [86, 104, 84, 'rgba(60,160,255,.5)'], [170, 150, 80, 'rgba(255,90,220,.42)']].forEach(function (q) {
+    var gd = x.createRadialGradient(q[0], q[1], 4, q[0], q[1], q[2]); gd.addColorStop(0, q[3]); gd.addColorStop(1, 'rgba(0,0,0,0)'); x.globalCompositeOperation = 'lighter'; x.fillStyle = gd; x.fillRect(0, 0, 256, 256); });
+  var neb = new T.Mesh(new T.PlaneGeometry(3.1, 3.1), new T.MeshBasicMaterial({ map: new T.CanvasTexture(c), transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false })); neb.renderOrder = 0; g.add(neb);
+  var NS = 70, sp = new Float32Array(NS * 3), seed = []; for (var i = 0; i < NS; i++) seed.push([Math.random() * Math.PI * 2, 1.12 + Math.random() * .38, (Math.random() - .5) * .9, .5 + Math.random()]);
+  var sg = new T.BufferGeometry(); sg.setAttribute('position', new T.BufferAttribute(sp, 3));
+  var stars = new T.Points(sg, new T.PointsMaterial({ size: .035, color: 0xe6e0ff, transparent: true, opacity: .95, blending: T.AdditiveBlending, depthWrite: false })); g.add(stars);
+  var orbit = new T.Group(); orbit.rotation.set(72 * Math.PI / 180, 0, -18 * Math.PI / 180); g.add(orbit);
+  var ringM = new T.MeshBasicMaterial({ color: 0xb9a6ff, transparent: true, opacity: .7, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false });
+  orbit.add(new T.Mesh(new T.TorusGeometry(1.24, .009, 6, 120), ringM)); var r2 = new T.Mesh(new T.TorusGeometry(1.31, .004, 6, 120), ringM); orbit.add(r2);
+  /* three bright stars ride the ring, each a four-point glint */
+  var sc = document.createElement('canvas'); sc.width = sc.height = 64; var sx = sc.getContext('2d'), sgd = sx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  sgd.addColorStop(0, '#fff'); sgd.addColorStop(.18, 'rgba(220,210,255,.9)'); sgd.addColorStop(.5, 'rgba(150,120,255,.25)'); sgd.addColorStop(1, 'rgba(0,0,0,0)'); sx.fillStyle = sgd; sx.fillRect(0, 0, 64, 64);
+  sx.fillStyle = '#fff'; sx.beginPath(); sx.moveTo(32, 0); sx.lineTo(35, 29); sx.lineTo(64, 32); sx.lineTo(35, 35); sx.lineTo(32, 64); sx.lineTo(29, 35); sx.lineTo(0, 32); sx.lineTo(29, 29); sx.closePath(); sx.fill();
+  var stx = new T.CanvasTexture(sc), riders = [0, 1, 2].map(function (k) { var sp2 = new T.Sprite(new T.SpriteMaterial({ map: stx, transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false })); sp2.scale.set(k ? .2 : .3, k ? .2 : .3, 1); orbit.add(sp2); return sp2; });
+  var ml = new T.PointLight(0x9a7dff, 1.1, 3); riders[0].add(ml);
+  var wq = new T.Quaternion(), bh = new T.Vector3();
+  g.userData.cr = function (t) {
+    g.getWorldQuaternion(wq); wq.invert(); bh.set(0, 0, -.32).applyQuaternion(wq); neb.quaternion.copy(wq); neb.position.copy(bh);
+    neb.material.opacity = .8 + Math.sin(t * .9) * .18; neb.rotation.z += 0;
+    for (var k = 0; k < NS; k++) { var q = seed[k], a = q[0] + t * .06 * q[3]; sp[k * 3] = q[1] * Math.cos(a); sp[k * 3 + 1] = q[1] * Math.sin(a); sp[k * 3 + 2] = q[2] + Math.sin(t * q[3] + k) * .03; }
+    sg.attributes.position.needsUpdate = true; stars.material.opacity = .8 + Math.sin(t * 2.3) * .15;
+    riders.forEach(function (r, k) { var ma = t * (.6 - k * .13) + k * 2.2, rr = k === 1 ? 1.31 : 1.24, pu = 1 + Math.sin(t * 3 + k * 2) * .18, s0 = (k ? .2 : .3) * pu; r.position.set(rr * Math.cos(ma), rr * Math.sin(ma), 0); r.scale.set(s0, s0, 1); }); ringM.opacity = .6 + Math.sin(t * 1.1) * .12;
+  };
+  g.userData.cr(2);
 }
 var bdGlintC = null;
 function bdGlintTex() {
@@ -7224,17 +7342,17 @@ function lfCoinView(x, earnedNow) {
     if (x.b.fx) { tl.classList.add('is-fx'); tl.style.setProperty('--gl', BD_FXGL[x.b.fx]); }
     $('.lf-cv-cap', v).insertBefore(tl, $('.lf-cv-k', v)); }
   /* THE SHOWCASE: three of yours, chosen here, are what friends see */
-  if (x.d && !x.fr && BADGE[x.b.id] && x.b.id !== 'creator') {
+  if (x.d && !x.fr && BADGE[x.b.id]) {
     var scb = el('<button type="button" class="lf-btn lf-cv-sc" id="lfShowBtn"></button>');
     var paintShow = function () { var on = lfShow().indexOf(x.b.id) >= 0; scb.textContent = on ? 'In your showcase · remove' : 'Showcase to friends'; scb.classList.toggle('is-ink', !on); scb.setAttribute('aria-pressed', on ? 'true' : 'false'); };
     scb.addEventListener('click', function () {
       var sh = lfShow().slice(), i = sh.indexOf(x.b.id);
       if (i >= 0) sh.splice(i, 1); else { if (sh.length >= 3) { lfToast('Three at a time — take one off first'); return; } sh.push(x.b.id); }
-      S.show = sh; lfSave(); paintShow(); lfRender();
+      S.show = sh; delete S.shn; lfSave(); paintShow(); lfRender();
     });
     paintShow(); $('.lf-cv-cap', v).insertBefore(scb, $('.lf-cv-h', v));
   }
-  $('p', v).textContent = x.b.d + (x.d ? (x.r ? ' Set ' : ' Earned ') + fmtDay(x.d) + '.' : x.b.k === 'month' && x.p ? ' ' + x.p[0] + ' of ' + x.p[1] + ' weeks so far.' : x.p && x.p[1] > 1 ? ' ' + lfBadgeProg(x) + ' so far.' : '');
+  $('p', v).textContent = x.b.id === 'creator' && x.d ? 'Always watching you' : x.b.d + (x.d ? (x.r ? ' Set ' : ' Earned ') + fmtDay(x.d) + '.' : x.b.k === 'month' && x.p ? ' ' + x.p[0] + ' of ' + x.p[1] + ' weeks so far.' : x.p && x.p[1] > 1 ? ' ' + lfBadgeProg(x) + ' so far.' : '');
   var vb = el('<div class="lf-cvb" aria-hidden="true"></div>'); document.body.appendChild(vb);
   document.body.appendChild(v); document.body.classList.add('lf-lock');
   requestAnimationFrame(function () { v.classList.add('is-up'); vb.classList.add('is-up'); });

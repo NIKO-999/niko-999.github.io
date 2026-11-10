@@ -1716,7 +1716,11 @@ const freeze = (at) => `(() => {
     await page.keyboard.press('Escape'); await settle(page);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const rows = await page.$$eval('#lfYou .rk-set', (x) => x.map((e) => e.dataset.k + ':' + e.querySelector('span').textContent));
-    ok('Settings has a row each for title, flair and frame', rows.join() === 'ti:Title,fl:Flair,fm:Frame', rows);
+    ok('Settings has a row each for title, flair and frame', rows.join() === 'ti:Title,fl:Flair,fm:Frame,sh:Badges shown', rows);
+    await page.click('#lfYou .rk-show'); await settle(page);
+    ok('the showcase can be nothing at all: one press and no badge is shown to friends', (await store(page)).shn === true && await page.textContent('#lfYou .rk-show b') === 'None' && /if \(S\.shn\) return \[\];/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')));
+    await page.click('#lfYou .rk-show'); await settle(page);
+    ok('and a second press puts it back', !(await store(page)).shn && await page.textContent('#lfYou .rk-show b') !== 'None');
     ok('and there is no rank sheet, level or duel anywhere', await page.locator('#frRankBtn, #frDu, .rk-lv').count() === 0);
     const openRow = async (k) => { await page.click('#lfYou .rk-set[data-k="' + k + '"]'); await page.waitForTimeout(600); };
     const pick = async (k, id) => { await openRow(k); await page.evaluate(([k, id]) => [...document.querySelectorAll('.lf-sheet')].pop().querySelector('.rk-o[data-k="' + k + '"][data-id="' + id + '"]').click(), [k, id]); await page.waitForTimeout(350); await page.keyboard.press('Escape'); await settle(page); };
@@ -1743,7 +1747,7 @@ const freeze = (at) => `(() => {
     ok('the one worn is drawn from its picture, with its effect', worn && /fm\/ring\.webp/.test(worn.art) && worn.n >= 9 && worn.fx, worn);
     ok('the effect goes with the colour: flames, venom, lightning or glints', /ring: \['#ff7a1a', 'f'\]/.test(artSrc) && /neon: \['#3dff5a', 'v'\]/.test(artSrc) && /orbit: \['#2f8bff', 'l'\]/.test(artSrc) && /function lfArtFx/.test(artSrc) && /fm-fx-zap/.test(artSrc) && /fm-fx-drip/.test(artSrc) && /fm-fx-burn/.test(artSrc));
     ok('there are animated titles anybody can earn, and The Eye and its line are the owner\'s alone', /\['an', 'Animated', '#22d3ee', \['hitter', 'blaze', 'lockedin', 'nodaysoff', 'ironheart'\]\]/.test(artSrc) && (artSrc.match(/tt-creator'/g) || []).length === 1 && /\['one', 'One of one', '#ff5a1f', \['creator', 'eye'\], 1\]/.test(artSrc) && /<em>always watching you<\/em>/.test(artSrc) && /\['eye', 'The Eye', 'One of one', function \(c\) \{ return c\.own; \}\]/.test(artSrc));
-    ok('out-lifting the creator for a week is kept, and pays a badge, a title and a flair', /function lfSlayCheck/.test(artSrc) && /if \(S\.slay\) won\('slayer', S\.slay\)/.test(artSrc) && /\['slayer', 'Giant Slayer', 'Out-lift the creator in a week'/.test(artSrc) && /\['slayer', 'Slayer', 'Out-lift the creator in a week'/.test(artSrc) && /slayer: 1, wo365/.test(artSrc));
+    ok('out-lifting the creator for a week is kept, and pays a badge, a title and a flair', /function lfSlayCheck/.test(artSrc) && /if \(S\.slay\) won\('slayer', S\.slay\)/.test(artSrc) && /\['slayer', 'Giant Slayer', 'Beat the creator'/.test(artSrc) && /\['slayer', 'Slayer', 'Beat the creator'/.test(artSrc) && /slayer: 1, wo365/.test(artSrc) && /slayer: 'nebula'/.test(artSrc) && /function bdSpace/.test(artSrc) && /function bdSword/.test(artSrc) && /'Beat the creator\.'/.test(artSrc) && /o\.bk = \['Always', 'watching you'\]/.test(artSrc));
     ok('and none of them carries any text: they are made of metal, gems and light', !/<text/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8').slice(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8').indexOf('var RK_ORN'), require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8').indexOf('function lfEmStop'))));
     await page.keyboard.press('Escape'); await settle(page);
     await pick('fm', 'blossom'); st = await store(page);
@@ -1798,7 +1802,7 @@ const freeze = (at) => `(() => {
   /* ── THE CREATOR BADGE is the owner's alone: not on anyone else's shelf, and never sent to friends ── */
   {
     const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
-    ok('the Creator badge cannot be showcased, and never goes into what friends are sent', /id !== 'creator'; \}\)\.slice\(0, 3\)/.test(src) && /x\.d && x\.b\.id !== 'creator'/.test(src) && /BADGE\[x\.b\.id\] && x\.b\.id !== 'creator'/.test(src));
+    ok('The Eye can be showcased like any other, has an engraved back and a dished face, and its glow stays behind it', !/id !== 'creator'; \}\)\.slice\(0, 3\)/.test(src) && /function bdCreator\(b, n, pre\)/.test(src) && /bdBack\(b, '#c4c9d4'\)/.test(src) && /bdPolar\(hex\(\.92\), \.06\), glass/.test(src) && /haze\.quaternion\.copy\(wq\)/.test(src));
     const { c, page } = await ctx({ unit: 'kg', goal: 3 });
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     ok('and without the owner link it is not on the shelf, not even locked', await page.locator('#lfBadges .lf-coin[data-b="creator"]').count() === 0);
