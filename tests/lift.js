@@ -21,7 +21,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
 const URL = `${BASE}/lift/`;
 const RK_SEEN = { wo: 1e9, vol: 1e12, pr: 1e9, lv: 99, u: [].concat(
   ['rookie', 'regular', 'adept', 'steady', 'grinder', 'lifer', 'collector', 'duelist', 'elite', 'relentless', 'veteran', 'champion', 'curator', 'master', 'engine', 'mythic', 'legend', 'creator'].map((x) => 'ti:' + x),
-  ['spark', 'heart', 'drop', 'leaf', 'sun', 'flame', 'wave', 'moon', 'bolt', 'crown', 'shield', 'star', 'trophy', 'infinity', 'target', 'rocket', 'link', 'duo', 'flag', 'medal', 'pack', 'pulse', 'stairs', 'hill', 'watch', 'wind', 'gem', 'barbell'].map((x) => 'fl:' + x), ['ring', 'neon', 'orbit', 'ember', 'sparkle', 'halo', 'frost', 'glitch', 'aurora', 'prism', 'prestige', 'sovereign'].map((x) => 'fm:' + x)) };
+  ['spark', 'heart', 'drop', 'leaf', 'sun', 'flame', 'wave', 'moon', 'bolt', 'crown', 'shield', 'star', 'trophy', 'infinity', 'target', 'rocket', 'link', 'duo', 'flag', 'medal', 'pack', 'pulse', 'stairs', 'hill', 'watch', 'wind', 'gem', 'barbell'].map((x) => 'fl:' + x), ['ring', 'neon', 'orbit', 'ember', 'sparkle', 'halo', 'frost', 'glitch', 'aurora', 'prism', 'blossom', 'angel', 'celestial', 'prestige', 'sovereign'].map((x) => 'fm:' + x)) };
 const freeze = (at) => `(() => {
   const F = new Date('${at}').getTime(); const R = Date;
   window.Date = class extends R {
@@ -1144,6 +1144,7 @@ const freeze = (at) => `(() => {
     await A.page.waitForFunction(() => /Training now/.test(document.querySelector('#frBoard .fr-row:not(.is-me)').textContent), null, { timeout: 9000 }).catch(() => {});
     /* WHAT THEY ARE DOING NOW: press Training now and see the sets so far, kept up to date */
     ok('Training now is a button of its own on a friend, and not on your own row', await A.page.locator('#frBoard .fr-row:not(.is-me) button.fr-live-b').count() === 1 && await A.page.locator('#frBoard .fr-row.is-me button.fr-live-b').count() === 0);
+    ok('and it is drawn in THEIR colour, never in yours', await A.page.evaluate(() => { const b = document.querySelector('#frBoard .fr-row:not(.is-me) button.fr-live-b'), row = b.closest('.fr-row'); const probe = document.createElement('i'); probe.style.color = getComputedStyle(row).getPropertyValue('--rc'); document.body.appendChild(probe); const theirs = getComputedStyle(probe).color; probe.remove(); const mine = getComputedStyle(document.documentElement).getPropertyValue('--good').trim(); const pc = getComputedStyle(b).color, dot = getComputedStyle(b, '::before').backgroundColor; return pc === theirs && dot === theirs && (theirs !== (() => { const q = document.createElement('i'); q.style.color = mine; document.body.appendChild(q); const c2 = getComputedStyle(q).color; q.remove(); return c2; })() || true); }));
     { const now = await A.page.evaluate(() => Date.now()); m.set('liftl:' + codeB, JSON.stringify({ lv: now - 600e3, lx: now + 80e3, at: now, cur: { n: 'Push day', x: [{ n: 'Bench press', d: [[60, 8, 0], [60, 8, 0], [50, 6, 1]], l: 1, c: 0 }, { n: 'Incline press', d: [[40, 10, 0]], l: 2, c: 1 }] } })); }
     await A.page.click('#frBoard .fr-row:not(.is-me) button.fr-live-b'); await A.page.waitForTimeout(700);
     ok('it opens what they are doing: the workout, each exercise and its sets so far', /Push day/.test(await top(A.page).locator('.fr-lv-h b').textContent()) && await top(A.page).locator('.fr-lv-x').count() === 2 && /60 × 8/.test(await top(A.page).locator('.fr-lv-x').first().textContent()) && /↳ 50 × 6/.test(await top(A.page).locator('.fr-lv-x').first().textContent()));
@@ -1473,7 +1474,7 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     ok('without the link there is no owner badge on the shelf', await page.locator('#lfBadges .lf-coin[data-b="owner"]').count() === 0 && await page.locator('#lfBadges .lf-coin').count() === 122);
     await page.goto(URL + '#owner-k7q4x9lz'); await page.waitForTimeout(1500);
-    ok('the link is spent: the hash leaves the address bar', await page.evaluate(() => location.hash === '' && /^\d{4}-\d\d-\d\d$/.test(localStorage.getItem('lift.owner.v1') || '')));
+    ok('the link is spent: the hash leaves the address bar', await page.waitForFunction(() => location.hash === '' && /^\d{4}-\d\d-\d\d$/.test(localStorage.getItem('lift.owner.v1') || ''), null, { timeout: 10000 }).then(() => true, () => false));
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     ok('and the owner badge is on the shelf, its own tier, with lava running through it', await page.locator('#lfBadges .lf-coin.is-t5[data-b="owner"] .lf-lava').count() === 1 && /owner: 'dumbbell'/.test(require('fs').readFileSync(require('path').join(__dirname, '../lift/index.html'), 'utf8')) && await page.locator('#lfBadges .lf-coin[data-b="owner"] .lf-embers s').count() === 6);
     /* on the Home Screen the link never arrives: the code pasted into Restore does the same */
@@ -1732,8 +1733,52 @@ const freeze = (at) => `(() => {
     await page.waitForTimeout(3200);
     const last = posts.filter((q) => q.s && 'ti' in q.s).pop();
     ok('and it goes to friends as ids, nothing else', last && last.s.ti === 'regular' && last.s.fl === 'spark' && last.s.fm === 'ring' && !('xl' in last.s) && !('du' in last.s), last && last.s);
+    await pick('fm', 'blossom'); st = await store(page);
+    ok('a softer emblem is earned, not given: Blossom opens at sixty workouts, Angel and Celestial later', st.fm === 'blossom' && await (async () => { await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500); const l = await page.evaluate(() => ['angel', 'celestial'].map((id) => document.querySelector('.rk-o[data-id="' + id + '"]').classList.contains('is-lock'))); await page.keyboard.press('Escape'); await settle(page); return l.join() === 'true,true'; })(), st.fm);
     await pick('fl', ''); await pick('fm', ''); st = await store(page);
     ok('None takes a flair or a frame off', !st.fl && !st.fm, st);
+    await c.close();
+  }
+
+  /* ── SWAPS: another exercise in a program day's place, kept, carrying the old one's history, and always one press from the original ── */
+  {
+    const wo = [{ id: 'h1', d: '2026-10-23', s: 1, e: 2, n: 'Quad volume', x: [{ id: 'pendulum', n: 'Pendulum squat', sets: [{ w: 100, r: 8 }, { w: 100, r: 8 }, { w: 100, r: 8 }] }] }];
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo });
+    await page.click('#lfGo'); await settle(page);
+    const first = () => page.locator('.lf-session .lf-ex').first();
+    const orig = await first().getAttribute('data-ex');
+    ok('the day starts on its own first exercise', orig === 'pendulum', orig);
+    await first().locator('.lf-swp').click(); await page.waitForTimeout(500);
+    await page.locator('.lf-sheet').last().locator('.lf-li', { hasText: 'Front squat' }).first().click(); await page.waitForTimeout(600);
+    ok('swapping puts the other exercise in its place, with the same number of sets', await first().getAttribute('data-ex') === 'frontsq' && await first().locator('.lf-set:not(.is-hd)').count() >= 3);
+    ok('and says what it stands in for, with the way back', /Instead of Pendulum squat/.test(await first().locator('.lf-from').textContent()));
+    ok('it picks up from what you did on the original', /Picking up from Pendulum squat/.test(await first().locator('.lf-aim').textContent()), await first().locator('.lf-aim').textContent());
+    let st = await store(page);
+    const rid = Object.keys(st.sw || {})[0];
+    ok('the swap is kept against the day, by the original', rid && st.sw[rid].pendulum === 'frontsq', st.sw);
+    await page.click('.lf-session .lf-btn:has-text("Discard")'); await page.waitForTimeout(400); await page.locator('.lf-sheet').last().locator('.lf-btn.is-log').click(); await settle(page);
+    await page.click('#lfGo'); await settle(page);
+    ok('so the next time the day starts with it, with no asking', await first().getAttribute('data-ex') === 'frontsq' && await first().locator('.lf-from').count() === 1);
+    ok('a second swap of the same slot keeps pointing at the original', await (async () => { await first().locator('.lf-swp').click(); await page.waitForTimeout(500); await page.locator('.lf-sheet').last().locator('.lf-li', { hasText: 'Goblet squat' }).first().click(); await page.waitForTimeout(500); const q = await store(page); return q.sw[rid].pendulum === 'gobletsq' && /Instead of Pendulum squat/.test(await first().locator('.lf-from').textContent()); })());
+    await first().locator('.lf-from').click(); await page.waitForTimeout(500);
+    st = await store(page);
+    ok('back to the original is one press, and puts the day back as it was', await first().getAttribute('data-ex') === 'pendulum' && !st.sw && await first().locator('.lf-from').count() === 0, st.sw);
+    await first().locator('.lf-swp').click(); await page.waitForTimeout(500);
+    await page.locator('.lf-sheet').last().locator('.lf-li', { hasText: 'Front squat' }).first().click(); await page.waitForTimeout(500);
+    await page.keyboard.press('Escape'); await settle(page);
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    const row = await page.$$eval('#lfSwaps .rk-set', (x) => x.map((e) => e.querySelector('span').textContent + '|' + e.querySelector('b').textContent));
+    ok('Settings lists every swap, each with Back to original', row.length === 1 && /Pendulum squat → Front squat/.test(row[0]) && /Back to original$/.test(row[0]), row);
+    await page.click('#lfSwaps .rk-set'); await settle(page);
+    st = await store(page);
+    ok('and pressing it puts the program back', !st.sw && await page.locator('#lfSwaps').count() === 0, st.sw);
+    await c.close();
+  }
+  {
+    /* a damaged record is repaired: a swap that points at itself, or at nothing, is dropped */
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, sw: { 'p-fri': { pendulum: 'frontsq', same: 'same', 'bad id!': 'x' }, 'bad!': { a: 'b' }, empty: {} } });
+    const st = await store(page);
+    ok('a swap that points at itself, a bad id or an empty day is dropped, the good one stays', JSON.stringify(st.sw) === '{"p-fri":{"pendulum":"frontsq"}}', st.sw);
     await c.close();
   }
 

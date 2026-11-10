@@ -503,6 +503,9 @@ body.lf-v-home .lf-glow { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .lf-rs-fg { transition: none; } }
 .lf-ex { background: var(--card); border-radius: var(--r); padding: 14px 14px 10px; margin-top: 12px; }
 .lf-ex-hd { display: flex; align-items: center; gap: 8px; }
+.lf-swp { width: 44px; height: 44px; border-radius: 999px; display: grid; place-items: center; color: var(--dim); flex: none; margin-right: -8px; }
+.lf-swp svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.lf-from { display: block; margin: 0 0 6px; min-height: 32px; text-align: left; font-size: 12px; font-weight: 600; color: var(--today-ink); }
 .lf-ex-hd button.lf-ex-n { flex: 1; min-width: 0; text-align: left; font-weight: 600; font-size: 15px; min-height: 40px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lf-set { display: grid; grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 44px; align-items: center; gap: 8px; min-height: 44px; }
 .lf-burst { position: fixed; width: 0; height: 0; z-index: 90; pointer-events: none; }
@@ -630,6 +633,9 @@ body.lf-v-home .lf-glow { opacity: 1; }
 #frRings .fr-row { padding: 12px 0; }
 #frRings .fr-live { color: var(--rc); }
 #frRings .fr-live::before { background: var(--rc); animation-name: fr-live-c; }
+/* on a friend's row it is THEIR colour: --good is the page's, which is yours */
+.fr-row .fr-live, .fr-row .fr-live-b { color: var(--rc); }
+.fr-row .fr-live::before { background: var(--rc); animation-name: fr-live-c; }
 @keyframes fr-live-c { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--rc) 60%, transparent); } 100% { box-shadow: 0 0 0 8px transparent; } }
 .fr-bg { display: flex; gap: 2px; }
 /* the coins take their own press, over the row's open control */
@@ -1104,8 +1110,8 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-ban-av.is-fm-glitch { --fm: conic-gradient(#00e5ff, #ff2e93, #00e5ff, #ff2e93, #00e5ff); }
 .fr-ban-av.is-fm-glitch::before { animation: fm-gl 3.4s steps(1) infinite; }
 @keyframes fm-gl { 0%, 90%, 100% { transform: none; opacity: 1; } 91% { transform: translate(-3px, 1px); opacity: .7; } 93% { transform: translate(3px, -1px) skewX(8deg); } 95% { transform: translate(-1px, 2px); opacity: .85; } }
-.fr-ban-av.is-fm-prestige, .fr-ban-av.is-fm-sovereign { --fm: none; z-index: 1; }
-.fr-ban-av.is-fm-prestige::before, .fr-ban-av.is-fm-sovereign::before { display: none; }
+.fr-ban-av.is-fm-prestige, .fr-ban-av.is-fm-sovereign, .fr-ban-av.is-fm-blossom, .fr-ban-av.is-fm-angel, .fr-ban-av.is-fm-celestial { --fm: none; z-index: 1; }
+.fr-ban-av.is-fm-prestige::before, .fr-ban-av.is-fm-sovereign::before, .fr-ban-av.is-fm-blossom::before, .fr-ban-av.is-fm-angel::before, .fr-ban-av.is-fm-celestial::before { display: none; }
 .fr-ban-h { position: relative; }
 .fr-ban.has-emblem { padding-top: 76px; }
 .fm-em { position: absolute; left: 50%; top: -63.5px; width: 190px; height: 190px; margin-left: -95px; pointer-events: none; animation: fm-in .9s var(--ease) backwards; filter: drop-shadow(0 8px 14px rgba(0,0,0,.6)); }
@@ -1775,6 +1781,16 @@ function lfClean(o) {
     var ms = { u: [] }; ['wo', 'vol', 'pr'].forEach(function (k) { ms[k] = Math.max(0, Math.round(+o.mseen[k]) || 0); });
     if (Array.isArray(o.mseen.u)) ms.u = o.mseen.u.filter(function (x) { return typeof x === 'string' && /^[a-z]{2}:[a-z0-9]{2,10}$/.test(x); }).slice(0, 120);
     d.mseen = ms;
+  }
+  /* SWAPS: in a program day, one exercise stands in for another until you go back. { day: { original: instead } } */
+  if (o.sw && typeof o.sw === 'object') {
+    var swo = {}, idOk = function (v) { return typeof v === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(v); };
+    Object.keys(o.sw).slice(0, 60).forEach(function (rid) {
+      if (!idOk(rid) || !o.sw[rid] || typeof o.sw[rid] !== 'object') return;
+      var m = {}; Object.keys(o.sw[rid]).slice(0, 30).forEach(function (a) { var b2 = o.sw[rid][a]; if (idOk(a) && idOk(b2) && a !== b2) m[a] = b2; });
+      if (Object.keys(m).length) swo[rid] = m;
+    });
+    if (Object.keys(swo).length) d.sw = swo;
   }
   if (Array.isArray(o.show)) d.show = o.show.filter(function (k, i, a) { return typeof k === 'string' && /^[a-z0-9]{2,8}$/.test(k) && a.indexOf(k) === i; }).slice(0, 3);
   if (o.bseen && typeof o.bseen === 'object') { d.bseen = {}; Object.keys(o.bseen).forEach(function (k) { if (/^[a-z0-9]{2,8}$/.test(k)) d.bseen[k] = 1; }); }
@@ -2725,11 +2741,15 @@ function lfStart(rt) {
   if (!act && woOn(ymd(today())).length) { lfToast('You trained today. Delete that workout first'); return; }
   act = { id: lfId(), s: Date.now(), n: rt ? rt.n : 'Workout', rt: rt ? rt.id : null, rest: 0, x: [] };
   var cut = LEG_CHECK && lfRc() === 1 && lfIsLegDay(rt);
-  (rt ? rt.ex : []).forEach(function (id) {
+  var swm = rt && S.sw && S.sw[rt.id] || {};
+  (rt ? rt.ex : []).forEach(function (id0) {
+    /* the program's slot keeps its target; whatever stands in for it is what you do */
+    var id = swm[id0] && exById(swm[id0]) ? swm[id0] : id0;
     if (!exById(id)) return;
-    var tg = rt.tg && rt.tg[id];
+    var tg = rt.tg && rt.tg[id0];
     if (cut && tg && lfIsLegEx(id)) tg = [lfCut(tg[0]), tg[1], tg[2]].concat(tg[3] ? [tg[3]] : []);
     lfAddEx(id, tg);
+    if (id !== id0) act.x[act.x.length - 1].from = id0;
   });
   if (cut) act.cut = 1;
   lfSaveAct(); buzz(15);
@@ -2739,7 +2759,7 @@ function lfStart(rt) {
    last time, or three if it is new to you — empty, with the AIM as the
    placeholders. */
 function lfAddEx(id, tg) {
-  var prev = lastFor(id), n = tg ? tg[0] : (prev ? prev.length : 3), sets = [];
+  var prev = lastFor(id) || (lfCarry(id) || {}).sets, n = tg ? tg[0] : (prev ? prev.length : 3), sets = [];
   for (var i = 0; i < n; i++) sets.push({ w: '', r: '', ok: 0 });
   var e = { id: id, n: exName(id), sets: sets };
   if (tg) e.tg = tg;
@@ -2751,8 +2771,19 @@ function lfAddEx(id, tg) {
    reps start again at the bottom. Otherwise the same weight, one more
    rep, capped at the top. With no range it is simply last time again.
    The step is 2.5 kg, or 5 lb, because that is the plate you have. */
+/* A SWAP CARRIES THE ORIGINAL'S HISTORY: the exercise that stands in has no past of its own, so what you did on the one it replaced is what it starts from. */
+function lfCarry(id) {
+  var sw = S.sw || {};
+  for (var rid in sw) for (var a in sw[rid]) if (sw[rid][a] === id) { var p = lastFor(a); if (p && p.length) return { from: a, sets: p }; }
+  return null;
+}
 function lfAim(e) {
-  var last = lastFor(e.id);
+  var own = lastFor(e.id), car = own ? null : lfCarry(e.id);
+  var r = lfAim0(e, own || (car && car.sets));
+  if (car) r.note = 'Picking up from ' + exName(car.from) + (r.note ? ' · ' + r.note : '');
+  return r;
+}
+function lfAim0(e, last) {
   if (!last || !last.length) return { sets: [], note: e.tg && e.tg[3] !== 'rounds' ? 'First time — find a weight you can do ' + lfRange(e.tg[1], e.tg[2]) + (e.tg[3] ? ' ' + e.tg[3] : '') + ' with' : '' };
   var top = last.reduce(function (a, s) { return s.w > a.w ? s : a; }, last[0]);
   if (!e.tg) return { sets: last, note: '' };
@@ -2849,6 +2880,48 @@ function lfScrollCur(smooth) {
   if (Math.abs(to - bd.scrollTop) < 4) return;
   try { bd.scrollTo({ top: to, behavior: smooth ? 'smooth' : 'auto' }); } catch (e) { bd.scrollTop = to; }
 }
+/* SWAP: put another exercise in this one's place. Said once, kept: next time the day starts with it, and the original is one press away. */
+function lfSwapTo(e, id, quiet) {
+  var orig = e.from || e.id, was = e.id, wasN = e.n, n = e.sets.length;
+  var go = function () {
+    e.id = id; e.n = exName(id); e.sets = []; delete e.wu;
+    for (var i = 0; i < n; i++) e.sets.push({ w: '', r: '', ok: 0 });
+    if (id === orig) delete e.from; else e.from = orig;
+    if (act.rt) {
+      S.sw = S.sw || {}; var m = (S.sw[act.rt] = S.sw[act.rt] || {});
+      if (id === orig) delete m[orig]; else m[orig] = id;
+      if (!Object.keys(m).length) delete S.sw[act.rt]; if (!Object.keys(S.sw).length) delete S.sw;
+      lfSave();
+    }
+    lfSaveAct(); lfPaintSession();
+    if (!quiet) lfToast(id === orig ? 'Back to ' + exName(id) : exName(id) + ' instead of ' + exName(orig) + (act.rt ? ', from now on' : ''));
+  };
+  if (e.sets.some(function (q) { return q.ok; }) || (e.wu || []).some(function (q) { return q.ok; })) lfAsk('Swap ' + wasN + '?', 'The sets you logged for it in this workout go with it.', 'Swap', go); else go();
+}
+function lfSwap(e) {
+  lfPicker(function (id) {
+    if (id === e.id) return;
+    if (act.x.some(function (q) { return q !== e && q.id === id; })) { lfToast('That one is already in this workout'); return; }
+    lfSwapTo(e, id);
+  }, 'Swap ' + e.n);
+}
+/* in Settings: every swap there is, each with the way back */
+function lfSwapRows() {
+  var sw = S.sw || {}, rows = [];
+  Object.keys(sw).forEach(function (rid) { var rt = rtById(rid); Object.keys(sw[rid]).forEach(function (a) { rows.push([rid, a, sw[rid][a], rt ? rt.n : 'Workout']); }); });
+  if (!rows.length) return null;
+  var w = el('<div class="rk-rows" id="lfSwaps"></div>');
+  rows.forEach(function (q) {
+    var b = el('<button type="button" class="lf-btn is-full rk-set"><span></span><b></b></button>'); b.dataset.rt = q[0]; b.dataset.ex = q[1];
+    $('span', b).textContent = q[3] + ': ' + exName(q[1]) + ' → ' + exName(q[2]); $('b', b).textContent = 'Back to original';
+    b.addEventListener('click', function () {
+      if (S.sw && S.sw[q[0]]) { delete S.sw[q[0]][q[1]]; if (!Object.keys(S.sw[q[0]]).length) delete S.sw[q[0]]; if (!Object.keys(S.sw).length) delete S.sw; }
+      lfSave(); lfRender(); lfToast('Back to ' + exName(q[1]));
+    });
+    w.appendChild(b);
+  });
+  return w;
+}
 function lfPaintSession() {
   var list = $('#lfExList'); if (!list) return;
   var ord = lfSessOrder(lfCurGo === 2);
@@ -2858,9 +2931,9 @@ function lfPaintSession() {
   list.textContent = '';
   ord.forEach(function (e) {
     var ei = act.x.indexOf(e);
-    var prev = lastFor(e.id) || [];
+    var prev = lastFor(e.id) || (lfCarry(e.id) || {}).sets || [];
     var aim = lfAim(e);
-    var card = el('<div class="lf-ex"><div class="lf-ex-hd"><button type="button" class="lf-ex-n"></button><button type="button" class="lf-x" aria-label="Remove exercise">' + IC.x + '</button></div>'
+    var card = el('<div class="lf-ex"><div class="lf-ex-hd"><button type="button" class="lf-ex-n"></button><button type="button" class="lf-swp" aria-label="Swap exercise"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg></button><button type="button" class="lf-x" aria-label="Remove exercise">' + IC.x + '</button></div>'
       + '<i class="lf-ex-pb" aria-hidden="true"><i></i></i><div class="lf-tg"></div><div class="lf-aim"></div>'
       + '<div class="lf-set is-hd" aria-hidden="true"><span>Set</span><span>Last</span><span>' + S.unit + '</span><span>Reps</span><span></span></div></div>');
     card.dataset.ex = e.id;
@@ -2876,6 +2949,12 @@ function lfPaintSession() {
     $('.lf-aim', card).textContent = aim.note;
     $('.lf-aim', card).classList.toggle('is-up', !!aim.up);
     if (!aim.note) $('.lf-aim', card).remove();
+    $('.lf-swp', card).addEventListener('click', function () { lfSwap(e); });
+    if (e.from) {
+      var fb = el('<button type="button" class="lf-from"></button>'); fb.textContent = 'Instead of ' + exName(e.from) + ' · back to original';
+      fb.addEventListener('click', function () { lfSwapTo(e, e.from); });
+      card.insertBefore(fb, $('.lf-set.is-hd', card));
+    }
     $('.lf-ex-n', card).addEventListener('click', function () { lfExSheet(e.id); });
     $('.lf-x', card).addEventListener('click', function () {
       var go = function () { act.x.splice(ei, 1); lfSaveAct(); lfPaintSession(); };
@@ -3983,6 +4062,7 @@ function lfRenderYou() {
     $('#lfGoal', c).appendChild(g);
   }
   c.appendChild(el('<span class="lf-flab">Name and profile</span>')); c.appendChild(lfRkRows());
+  { var swr = lfSwapRows(); if (swr) { c.appendChild(el('<span class="lf-flab">Swapped exercises</span>')); c.appendChild(swr); } }
   if (FRS.on) { c.appendChild(el('<span class="lf-flab">Friends</span>')); c.appendChild(frCodeRow()); }
   root.appendChild(lfFold('lfSet', 'set', 'Settings', '', function (bd) { bd.appendChild(c); }));
   root.appendChild(lfThemeCard());
@@ -4559,6 +4639,8 @@ var RK = {
     ['sparkle', 'Sparkle', '50 workouts', function (c) { return c.wo >= 50; }], ['halo', 'Halo', '75 workouts', function (c) { return c.wo >= 75; }],
     ['frost', 'Frost', '12 weeks on goal', function (c) { return c.run >= 12; }], ['glitch', 'Glitch', '100 workouts', function (c) { return c.wo >= 100; }],
     ['aurora', 'Aurora', '150 workouts', function (c) { return c.wo >= 150; }], ['prism', 'Prism', '250 workouts', function (c) { return c.wo >= 250; }],
+    ['blossom', 'Blossom', '60 workouts', function (c) { return c.wo >= 60; }], ['angel', 'Angel', '100 workouts', function (c) { return c.wo >= 100; }],
+    ['celestial', 'Celestial', '200 workouts', function (c) { return c.wo >= 200; }],
     ['prestige', 'Prestige', 'One of one', function (c) { return c.own; }], ['sovereign', 'Sovereign', 'One of one', function (c) { return c.own; }]]
 };
 /* titles live in collections, as badges do. The last is not offered to anyone it is not theirs: it is not a locked row, it is not there. */
@@ -4573,6 +4655,7 @@ function lfTitleEl(id) {
 }
 /* THE EMBLEMS: real 3D, built here with the same renderer and reflections as the badges. Forged iron with a raised bevelled frame and a brushed grain, a recessed pool of lava that moves, a lava channel round the ring, hot plates on crossed barbells. The lava is your accent. No text, no banner; the middle is your picture. They belong to one person. */
 var lfEmLive = null;
+var RK_EMB = ['prestige', 'sovereign', 'blossom', 'angel', 'celestial'];
 function lfEmStop() { if (lfEmLive) { var q = lfEmLive; lfEmLive = null; q(); } }
 var LF_LAVA_V = 'varying vec3 vP; void main() { vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }';
 var LF_LAVA_F = 'precision highp float; uniform float t; uniform vec3 c; uniform float k; varying vec3 vP;'
@@ -4583,6 +4666,11 @@ var LF_LAVA_F = 'precision highp float; uniform float t; uniform vec3 c; uniform
   + 'float ridge = pow(1.0 - abs(w * 2.0 - 1.0), 5.0); float core = smoothstep(0.7, 0.98, ridge); float crust = smoothstep(0.35, 0.6, q);'
   + 'vec3 hot = c * 1.25 + vec3(1.0, 0.85, 0.6) * core * 0.7; vec3 col = mix(c * 0.03, hot, smoothstep(0.15, 0.85, ridge)) * (0.5 + 0.8 * (1.0 - crust)) + core * vec3(1.0, 0.92, 0.75) * 0.45;'
   + 'gl_FragColor = vec4(col, 1.0); }';
+var LF_SOFT_F = 'precision highp float; uniform float t; uniform vec3 c; uniform float k; varying vec3 vP;'
+  + 'float h(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }'
+  + 'float n(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(h(i), h(i + vec2(1.0, 0.0)), f.x), mix(h(i + vec2(0.0, 1.0)), h(i + vec2(1.0, 1.0)), f.x), f.y); }'
+  + 'void main() { vec2 p = vP.xy * k; float a = n(p + vec2(t * 0.12, t * 0.07)) * 0.6 + n(p * 2.1 - vec2(t * 0.09, 0.0)) * 0.4; float sh = smoothstep(0.3, 0.85, a);'
+  + 'vec3 col = mix(vec3(1.0, 0.97, 0.93), c * 1.1 + vec3(0.25), sh * 0.8); gl_FragColor = vec4(col, 1.0); }';
 function lfEmblem3(kind, colStr) {
   return bdThree().then(function (T) {
     if (!T) return null;
@@ -4598,6 +4686,7 @@ function lfEmblem3(kind, colStr) {
     var ac = new T.Color(); try { ac.set(colStr || '#ff5a1f'); } catch (e) { ac.set('#ff5a1f'); }
     var hsl = {}; ac.getHSL(hsl); if (hsl.l < .42) ac.setHSL(hsl.h, Math.max(hsl.s, .7), .5);
     var uni = { t: { value: 0 }, c: { value: new T.Vector3(ac.r, ac.g, ac.b) } };
+    var soft = function (k) { return new T.ShaderMaterial({ uniforms: { t: uni.t, c: uni.c, k: { value: k } }, vertexShader: LF_LAVA_V, fragmentShader: LF_SOFT_F, side: T.DoubleSide }); };
     var lava = function (k) { return new T.ShaderMaterial({ uniforms: { t: uni.t, c: uni.c, k: { value: k } }, vertexShader: LF_LAVA_V, fragmentShader: LF_LAVA_F, side: T.DoubleSide }); };
     /* the brushed grain: fine streaks in the roughness, so the light drags across the iron instead of sitting on it */
     var gc = document.createElement('canvas'); gc.width = gc.height = 256; var gx = gc.getContext('2d'); gx.fillStyle = '#9a9a9a'; gx.fillRect(0, 0, 256, 256);
@@ -4622,8 +4711,52 @@ function lfEmblem3(kind, colStr) {
       });
       grp.add(g);
     }
-    var plateFront = .08;
-    if (kind === 'prestige') {
+    var plateFront = .08, anim = [], pearl, gold, rose;
+    var SOFT = kind === 'angel' || kind === 'blossom' || kind === 'celestial';
+    if (SOFT) {
+      pearl = new T.MeshPhysicalMaterial({ color: 0xf4eee6, metalness: .3, roughness: .26, clearcoat: 1, clearcoatRoughness: .08, envMapIntensity: 1.1 });
+      gold = new T.MeshPhysicalMaterial({ color: 0xe9c875, metalness: 1, roughness: .22, envMapIntensity: 1.2 });
+      rose = new T.MeshPhysicalMaterial({ color: 0xdfa08f, metalness: 1, roughness: .24, envMapIntensity: 1.2 });
+    }
+    var leaf = function (L, w) { var sh = new T.Shape(); sh.moveTo(0, 0); sh.quadraticCurveTo(L * .5, w, L, 0); sh.quadraticCurveTo(L * .5, -w * .55, 0, 0); return sh; };
+    var starS = function (R, q) { var sh = new T.Shape(); for (var i = 0; i < 10; i++) { var a = (-90 + i * 36) * D, rr = i % 2 ? q : R; if (i) sh.lineTo(rr * Math.cos(a), -rr * Math.sin(a)); else sh.moveTo(rr * Math.cos(a), -rr * Math.sin(a)); } sh.closePath(); return sh; };
+    if (kind === 'angel') {
+      [-1, 1].forEach(function (sd) {
+        var wg = new T.Group(); wg.position.set(sd * .5, .04, -.03); wg.scale.x = sd;
+        for (var f = 0; f < 7; f++) { var L = .95 - f * .08, ang = (52 - f * 13) * D, g = ext(leaf(L, .16 - f * .006), .02, .008); var m = new T.Mesh(g, f % 2 ? pearl : pearl); m.rotation.z = ang; m.position.z = f * .004; wg.add(m);
+          var edge = new T.Mesh(ext(leaf(L * .98, .02), .01, .004), gold); edge.rotation.z = ang; edge.position.z = f * .004 + .018; wg.add(edge); }
+        grp.add(wg);
+        anim.push(function (t) { wg.rotation.z = sd * Math.sin(t * 1.3) * .035; });
+      });
+      var hl = new T.Mesh(new T.TorusGeometry(.3, .022, 14, 72), gold); hl.position.set(0, .86, .06); hl.rotation.x = 1.0; grp.add(hl);
+      var hg = new T.Mesh(new T.TorusGeometry(.3, .01, 8, 72), soft(4)); hg.position.set(0, .86, .062); hg.rotation.x = 1.0; grp.add(hg);
+      anim.push(function (t) { hl.position.y = hg.position.y = .86 + Math.sin(t * 1.1) * .018; });
+    } else if (kind === 'blossom') {
+      for (var layer = 0; layer < 2; layer++) for (var k0 = 0; k0 < 10; k0++) {
+        var a0 = (k0 * 36 + layer * 18) * D, pt0 = new T.Mesh(ext(leaf(layer ? .42 : .56, layer ? .14 : .19), .02, .008), layer ? pearl : rose);
+        pt0.position.set(.54 * Math.cos(a0), .54 * Math.sin(a0), layer ? -.01 : -.03); pt0.rotation.z = a0; grp.add(pt0);
+        if (!layer) { var vein = new T.Mesh(ext(leaf(.5, .012), .01, .004), soft(5)); vein.position.set(.56 * Math.cos(a0), .56 * Math.sin(a0), -.008); vein.rotation.z = a0; grp.add(vein); }
+      }
+      for (var b0 = 0; b0 < 5; b0++) { var ba = (b0 * 72 + 36) * D, bud = new T.Mesh(new T.SphereGeometry(.035, 14, 14), gold); bud.position.set(.66 * Math.cos(ba), .66 * Math.sin(ba), .09); grp.add(bud); }
+    } else if (kind === 'celestial') {
+      var pts = [], i2;
+      for (i2 = 0; i2 <= 40; i2++) { var th = (90 + i2 * 4.5) * D; pts.push(new T.Vector2(.98 * Math.cos(th), .98 * Math.sin(th))); }
+      for (i2 = 0; i2 <= 40; i2++) { var ph = (247 - i2 * 3.35) * D; pts.push(new T.Vector2(.42 + 1.066 * Math.cos(ph), 1.066 * Math.sin(ph))); }
+      var cr = new T.Shape(pts); var cg = ext(cr, .08, .025); cg.translate(0, 0, -.04); var cm = new T.Mesh(cg, pearl); cm.position.set(-.02, 0, -.02); grp.add(cm);
+      var cge = new T.Mesh(new T.ShapeGeometry(new T.Shape(pts.map(function (q) { return new T.Vector2(q.x * .93 - .01, q.y * .93); }))), soft(2.2)); cge.position.set(-.02, 0, .066); grp.add(cge);
+      [[.62, .62, .13], [.78, -.1, .09], [.5, -.7, .1], [-.18, .88, .08], [.86, .42, .06]].forEach(function (q, ix) {
+        var stm = new T.Mesh(ext(starS(q[2], q[2] * .45), .03, .01), gold); stm.position.set(q[0], q[1], .02); grp.add(stm);
+        anim.push(function (t) { var sc = 1 + Math.sin(t * 2.1 + ix * 1.7) * .16; stm.scale.setScalar(sc); stm.rotation.z = t * .25 + ix; });
+      });
+      var orb = new T.Mesh(new T.TorusGeometry(.78, .008, 8, 90), soft(3)); orb.rotation.x = 1.25; orb.rotation.y = .3; grp.add(orb);
+      anim.push(function (t) { orb.rotation.z = t * .22; });
+    }
+    if (SOFT) { /* the ring: pearl, with a channel of soft light in your accent */
+      var ringM = new T.Mesh(new T.TorusGeometry(.52, .07, 28, 120), kind === 'blossom' ? rose : kind === 'celestial' ? pearl : pearl); ringM.position.z = .06; grp.add(ringM);
+      var chM = new T.Mesh(new T.TorusGeometry(.52, .026, 14, 120), soft(5)); chM.position.z = .118; grp.add(chM);
+    }
+    if (SOFT) {}
+    else if (kind === 'prestige') {
       barbell(60); barbell(-60);
       var pl = ext(star(1, .58), .1, .03); pl.translate(0, 0, -.05); add(pl, iron);
       add(new T.ShapeGeometry(star(.84, .49)), lava(3.4), 0, 0, plateFront + .002);
@@ -4644,15 +4777,17 @@ function lfEmblem3(kind, colStr) {
       add(new T.CircleGeometry(.2, 40), lava(7), .66, -.52, .215);
     }
     /* the ring that holds the picture, with a channel of lava and a ring of spikes */
-    var ring = new T.Mesh(new T.TorusGeometry(.52, .085, 28, 120), iron2); ring.position.z = .06; grp.add(ring);
-    var chan = new T.Mesh(new T.TorusGeometry(.52, .034, 14, 120), lava(5)); chan.position.z = .125; grp.add(chan);
-    if (kind === 'prestige') for (var k2 = 0; k2 < 12; k2++) { var a2 = k2 * 30 * D, sp = new T.Mesh(new T.ConeGeometry(.04, .14, 10), iron2); sp.position.set(.64 * Math.cos(a2), .64 * Math.sin(a2), .07); sp.rotation.z = a2 - Math.PI / 2; grp.add(sp); }
+    if (!SOFT) { var ring = new T.Mesh(new T.TorusGeometry(.52, .085, 28, 120), iron2); ring.position.z = .06; grp.add(ring);
+    var chan = new T.Mesh(new T.TorusGeometry(.52, .034, 14, 120), lava(5)); chan.position.z = .125; grp.add(chan); }
+    if (SOFT) {}
+    else if (kind === 'prestige') for (var k2 = 0; k2 < 12; k2++) { var a2 = k2 * 30 * D, sp = new T.Mesh(new T.ConeGeometry(.04, .14, 10), iron2); sp.position.set(.64 * Math.cos(a2), .64 * Math.sin(a2), .07); sp.rotation.z = a2 - Math.PI / 2; grp.add(sp); }
     else for (var k3 = 0; k3 < 20; k3++) { var a3 = k3 * 18 * D, lk = new T.Mesh(new T.TorusGeometry(.06, .015, 8, 18), chrome); lk.scale.y = .62; lk.position.set(.63 * Math.cos(a3), .63 * Math.sin(a3), .07); lk.rotation.z = a3 + Math.PI / 2; lk.rotation.x = k3 % 2 ? Math.PI / 2 : 0; grp.add(lk); }
     var glow = new T.PointLight(ac, 1.5, 3.2); glow.position.set(0, 0, .8); sc.add(glow);
     /* sparks lifting off it */
     var N = 46, pos = new Float32Array(N * 3), sd = []; for (var e = 0; e < N; e++) { sd.push(.25 + Math.random() * .5); pos[e * 3] = (Math.random() - .5) * 1.6; pos[e * 3 + 1] = -1 + Math.random() * 2; pos[e * 3 + 2] = .3 + Math.random() * .3; }
     var pg = new T.BufferGeometry(); pg.setAttribute('position', new T.BufferAttribute(pos, 3));
-    var sparks = new T.Points(pg, new T.PointsMaterial({ size: .045, color: ac, transparent: true, opacity: .85, blending: T.AdditiveBlending, depthWrite: false })); sc.add(sparks);
+    var sparks = new T.Points(pg, new T.PointsMaterial({ size: SOFT ? .035 : .045, color: kind === 'blossom' ? 0xffc6d6 : SOFT ? 0xfff3d0 : ac, transparent: true, opacity: SOFT ? .7 : .85, blending: T.AdditiveBlending, depthWrite: false })); sc.add(sparks);
+    var fall = kind === 'blossom';
     grp.scale.setScalar(.98); sc.add(grp);
     var dead = false, raf = 0, t0 = performance.now(), last = t0;
     function stop() { if (dead) return; dead = true; cancelAnimationFrame(raf); try { bdDrop(grp); sparks.geometry.dispose(); sparks.material.dispose(); grain.dispose(); rd.dispose(); rd.forceContextLoss(); } catch (e) {} }
@@ -4664,7 +4799,8 @@ function lfEmblem3(kind, colStr) {
       var t = (now - t0) / 1000, dt = Math.min(.05, (now - last) / 1000); last = now;
       uni.t.value = calm ? 3 : t;
       grp.rotation.y = calm ? .0 : Math.sin(t * .6) * .24; grp.rotation.x = calm ? 0 : Math.sin(t * .43 + 1) * .12 - .03;
-      if (!calm) { for (var e = 0; e < N; e++) { pos[e * 3 + 1] += sd[e] * dt; if (pos[e * 3 + 1] > 1.1) { pos[e * 3 + 1] = -1; pos[e * 3] = (Math.random() - .5) * 1.6; } } pg.attributes.position.needsUpdate = true; }
+      if (!calm) { for (var e = 0; e < N; e++) { var dy = sd[e] * dt * (SOFT ? .5 : 1) * (fall ? -1 : 1); pos[e * 3 + 1] += dy; if (fall) pos[e * 3] += Math.sin(t * 1.5 + e) * dt * .12; if (pos[e * 3 + 1] > 1.1 || pos[e * 3 + 1] < -1.1) { pos[e * 3 + 1] = fall ? 1.05 : -1; pos[e * 3] = (Math.random() - .5) * 1.6; } } pg.attributes.position.needsUpdate = true; }
+      for (var ai = 0; ai < anim.length; ai++) anim[ai](calm ? 3 : t);
       rd.render(sc, cam);
     }
     lfEmLive = stop;
@@ -4701,7 +4837,7 @@ function frDress(b, st) {
   av.className = av.className.replace(/ ?is-fm-[a-z0-9]+/g, '');
   var h = $('.fr-ban-h', b), old = $('.fm-em', h); if (old) old.remove(); $('.fr-ban', b).classList.remove('has-emblem'); av.classList.remove('em-fall');
   if (st.fm && lfRkHas('fm', st.fm)) av.classList.add('is-fm-' + st.fm);
-  if ((st.fm === 'prestige' || st.fm === 'sovereign') && lfRkHas('fm', st.fm)) {
+  if (RK_EMB.indexOf(st.fm) >= 0 && lfRkHas('fm', st.fm)) {
     var ban2 = $('.fr-ban', b); ban2.classList.add('has-emblem');
     var rcol = getComputedStyle(ban2).getPropertyValue('--rc').trim();
     lfEmblem3(st.fm, rcol).then(function (cv) { if (!cv || !h.isConnected) { if (cv) lfEmStop(); if (!cv) { ban2.classList.remove('has-emblem'); av.classList.add('em-fall'); } return; } h.insertBefore(cv, h.firstChild); });
