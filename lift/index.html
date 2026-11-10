@@ -1088,17 +1088,17 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 /* THE ANIMATED TITLES: one idea each, and each a loop slow enough to sit under a name. */
 .fr-ti .tt-blaze em { background: linear-gradient(0deg, #ff3d00, #ffb020 45%, #fff3b0 60%, #ffb020 75%, #ff3d00) 0 0 / 100% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: tt-blaze 2.6s linear infinite; filter: drop-shadow(0 0 6px rgba(255,106,0,.55)); }
 @keyframes tt-blaze { to { background-position: 0 -300%; } }
-.fr-ti .tt-wip { flex-direction: column; gap: 4px; --tc: var(--rc, #22d3ee); }
-.tt-wip i { width: 100%; height: 3px; border-radius: 2px; background: color-mix(in srgb, var(--tc) 22%, transparent); overflow: hidden; position: relative; }
-.tt-wip i::after { content: ''; position: absolute; inset: 0; background: var(--tc); box-shadow: 0 0 6px var(--tc); transform-origin: 0 50%; animation: tt-wip 3.2s cubic-bezier(.3, 0, .2, 1) infinite; }
-@keyframes tt-wip { 0% { transform: scaleX(0); opacity: 1; } 70% { transform: scaleX(.92); opacity: 1; } 85% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(1); opacity: 0; } }
 .fr-ti .tt-shine em { background: linear-gradient(100deg, var(--dim) 40%, #fff 50%, var(--dim) 60%) 120% 0 / 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: tt-shine 3.4s ease-in-out infinite; }
 @keyframes tt-shine { 0%, 30% { background-position: 120% 0; } 100% { background-position: -40% 0; } }
-.fr-ti .tt-beast { --tc: var(--rc, #ff3d71); }
-.tt-beast i { width: 24px; height: 13px; border-radius: 7px; background: color-mix(in srgb, var(--tc) 25%, transparent); position: relative; animation: tt-beast-t 4s ease-in-out infinite; }
-.tt-beast i::after { content: ''; position: absolute; top: 2px; left: 2px; width: 9px; height: 9px; border-radius: 50%; background: #fff; animation: tt-beast-k 4s ease-in-out infinite; }
-@keyframes tt-beast-k { 0%, 20% { transform: none; } 32%, 100% { transform: translateX(11px); } }
-@keyframes tt-beast-t { 0%, 20% { background: color-mix(in srgb, var(--tc) 25%, transparent); box-shadow: none; } 32%, 100% { background: var(--tc); box-shadow: 0 0 9px var(--tc); } }
+.tt-wave { gap: 0 !important; } .tt-wave span { display: inline-block; animation: tt-wave 2.8s ease-in-out calc(var(--i, 0) * .07s) infinite; }
+@keyframes tt-wave { 0%, 40%, 100% { transform: none; color: inherit; } 18% { transform: translateY(-4px); color: #fff; } }
+.fr-ti .tt-lock { --tc: var(--rc, #facc15); } .tt-lock svg { width: 11px; height: 14px; overflow: visible; }
+.tt-lock rect { fill: var(--tc); animation: tt-lock-g 4s ease-in-out infinite; } .tt-lock .l-s { fill: none; stroke: var(--tc); stroke-width: 2; stroke-linecap: round; animation: tt-lock-s 4s cubic-bezier(.6, 0, .3, 1.4) infinite; }
+@keyframes tt-lock-s { 0%, 22% { transform: translateY(-3.5px); } 34%, 100% { transform: none; } }
+@keyframes tt-lock-g { 0%, 30%, 60%, 100% { filter: none; } 40% { filter: drop-shadow(0 0 5px var(--tc)); } }
+.fr-ti .tt-pulse { --tc: var(--rc, #ff3d71); } .tt-pulse svg { width: 38px; height: 14px; overflow: visible; }
+.tt-pulse path { fill: none; stroke: var(--tc); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 34 100; filter: drop-shadow(0 0 3px var(--tc)); animation: tt-pulse 2.4s linear infinite; }
+@keyframes tt-pulse { from { stroke-dashoffset: 34; } to { stroke-dashoffset: -100; } }
 .fr-ti .tt-slay em { position: relative; color: #ffd9df; text-shadow: 0 0 8px rgba(225,29,72,.7); }
 .tt-slay em::after { content: ''; position: absolute; left: -6%; right: -6%; top: 50%; height: 2px; background: linear-gradient(90deg, transparent, #fff, #e11d48, transparent); transform: rotate(-9deg) scaleX(0); transform-origin: 0 50%; animation: tt-slay 3.6s cubic-bezier(.7, 0, .2, 1) infinite; }
 @keyframes tt-slay { 0%, 55% { transform: rotate(-9deg) scaleX(0); opacity: 1; } 68% { transform: rotate(-9deg) scaleX(1); opacity: 1; } 100% { transform: rotate(-9deg) scaleX(1); opacity: 0; } }
@@ -4676,9 +4676,9 @@ var RK = {
     ['curator', 'Curator', '60 badges', function (c) { return c.bd >= 60; }], ['master', 'Master', '400 workouts', function (c) { return c.wo >= 400; }],
     ['engine', 'Engine', 'Earn Engine', function (c) { return !!c.has.cardio100; }],
     ['mythic', 'Mythic', 'Earn a mythic badge', function (c) { return c.myth; }], ['legend', 'Living Legend', '500 workouts', function (c) { return c.wo >= 500; }],
-    ['sudo', 'Sudo', '15 workouts', function (c) { return c.wo >= 15; }], ['blaze', 'On Fire', '4 weeks on goal', function (c) { return c.run >= 4; }],
-    ['wip', 'Loading Gains', '40 workouts', function (c) { return c.wo >= 40; }], ['nodaysoff', 'No Days Off', '8 weeks on goal', function (c) { return c.run >= 8; }],
-    ['beast', 'Beast Mode', '120 workouts', function (c) { return c.wo >= 120; }],
+    ['hitter', 'Heavy Hitter', '15 workouts', function (c) { return c.wo >= 15; }], ['blaze', 'On Fire', '4 weeks on goal', function (c) { return c.run >= 4; }],
+    ['lockedin', 'Locked In', '40 workouts', function (c) { return c.wo >= 40; }], ['nodaysoff', 'No Days Off', '8 weeks on goal', function (c) { return c.run >= 8; }],
+    ['ironheart', 'Iron Heart', '120 workouts', function (c) { return c.wo >= 120; }],
     ['slayer', 'Giant Slayer', 'Out-lift the creator in a week', function (c) { return c.slay; }],
     ['creator', 'Creator', 'One of one', function (c) { return c.own; }], ['eye', 'The Eye', 'One of one', function (c) { return c.own; }]],
   fl: [['spark', 'Spark', '5 workouts', function (c) { return c.wo >= 5; }, 'M12 2.5l2 6.5 6.5 2-6.5 2-2 6.5-2-6.5-6.5-2 6.5-2z', '#facc15'],
@@ -4722,17 +4722,18 @@ var RK = {
 /* titles live in collections, as badges do. The last is not offered to anyone it is not theirs: it is not a locked row, it is not there. */
 var RK_TC = [['ms', 'Milestones', '#2f7bff', ['rookie', 'regular', 'adept', 'grinder', 'lifer', 'elite', 'veteran', 'master', 'legend']],
   ['con', 'Consistency', '#8b5cf6', ['steady', 'relentless']], ['bd', 'Badges', '#eab308', ['collector', 'curator', 'engine', 'mythic']],
-  ['an', 'Animated', '#22d3ee', ['sudo', 'blaze', 'wip', 'nodaysoff', 'beast']], ['gs', 'Against the creator', '#e11d48', ['slayer']],
+  ['an', 'Animated', '#22d3ee', ['hitter', 'blaze', 'lockedin', 'nodaysoff', 'ironheart']], ['gs', 'Against the creator', '#e11d48', ['slayer']],
   ['one', 'One of one', '#ff5a1f', ['creator', 'eye'], 1]];
 /* ONE TITLE IS NOT TEXT: Creator is a terminal that types itself, in your accent, and only on a profile. */
 function lfTitleEl(id) {
   var sp = el('<span class="tt"></span>');
   if (id === 'creator') { sp.className = 'tt tt-creator'; sp.innerHTML = '<em>&lt;creator/&gt;</em>'; return sp; }
-  if (id === 'sudo') { sp.className = 'tt tt-creator'; sp.innerHTML = '<em>$ sudo lift</em>'; return sp; }
+  /* each letter lifts in turn, like a bar going up */
+  if (id === 'hitter') { sp.className = 'tt tt-wave'; sp.innerHTML = 'Heavy Hitter'.split('').map(function (ch, i) { return ch === ' ' ? '<span>&nbsp;</span>' : '<span style="--i:' + i + '">' + ch + '</span>'; }).join(''); return sp; }
   if (id === 'blaze') { sp.className = 'tt tt-blaze'; sp.innerHTML = '<em>On fire</em>'; return sp; }
-  if (id === 'wip') { sp.className = 'tt tt-wip'; sp.innerHTML = '<em>Loading gains</em><i aria-hidden="true"></i>'; return sp; }
+  if (id === 'lockedin') { sp.className = 'tt tt-lock'; sp.innerHTML = '<svg viewBox="0 0 16 20" aria-hidden="true"><path class="l-s" d="M4 9V6a4 4 0 0 1 8 0v3"/><rect x="1.500" y="9" width="13" height="9.500" rx="2.500"/></svg><em>Locked in</em>'; return sp; }
   if (id === 'nodaysoff') { sp.className = 'tt tt-shine'; sp.innerHTML = '<em>No days off</em>'; return sp; }
-  if (id === 'beast') { sp.className = 'tt tt-beast'; sp.innerHTML = '<em>Beast mode</em><i aria-hidden="true"></i>'; return sp; }
+  if (id === 'ironheart') { sp.className = 'tt tt-pulse'; sp.innerHTML = '<em>Iron heart</em><svg viewBox="0 0 44 16" aria-hidden="true"><path pathLength="100" d="M0 8h11l3-6 5 12 4-9 2 3h19"/></svg>'; return sp; }
   if (id === 'slayer') { sp.className = 'tt tt-slay'; sp.innerHTML = '<em>Giant slayer</em>'; return sp; }
   /* THE EYE: it looks about, it blinks, and it says what it is doing. The owner's alone. */
   if (id === 'eye') {
